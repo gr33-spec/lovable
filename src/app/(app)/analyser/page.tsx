@@ -33,6 +33,16 @@ export default function AnalyserPage() {
     return ["Lecture du devis…", "Lecture de la facture…", "Vérification en cours…"];
   }, [mode, devisFiles]);
 
+  // Pré-sélectionne l'onglet demandé depuis l'accueil (/analyser?mode=facture).
+  // window.location n'existe pas côté serveur : on ne peut lire le paramètre qu'après le montage.
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("mode");
+    if (requested === "devis" || requested === "facture") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- valeur dérivée de l'URL, indisponible avant le montage
+      setMode(requested);
+    }
+  }, []);
+
   // Avance dans les messages de chargement pour rassurer l'artisan (§2.6).
   useEffect(() => {
     if (status !== "loading") return;

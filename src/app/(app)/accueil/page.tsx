@@ -1,20 +1,74 @@
+import { AlertTriangle } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { LinkButton } from "@/components/ui/button";
 import { Verdict } from "@/components/ui/verdict";
+import { AnalysisListItem } from "@/components/analysis-list-item";
+import { getDashboardData } from "@/lib/analysis";
+import { getCurrentUserId } from "@/lib/current-user";
+import { formatEuros } from "@/lib/utils";
 
-export default function AccueilPage() {
+// Données propres à l'utilisateur : jamais de cache statique.
+export const dynamic = "force-dynamic";
+
+/** Écran Accueil : le chiffre d'abord, puis les actions et l'historique (§6.2). */
+export default async function AccueilPage() {
+  const userId = await getCurrentUserId();
+  const { totalEconomise, economieDuMois, alertes, historique } = await getDashboardData(userId);
+
   return (
     <div className="flex flex-col gap-4">
       <Verdict
         tone="amber"
         label="Tu as économisé"
-        amount="0 €"
-        description="Dépose ton premier devis pour voir tes économies ici."
+        amount={formatEuros(totalEconomise)}
+        description={
+          economieDuMois > 0
+            ? `Dont ${formatEuros(economieDuMois)} ce mois-ci.`
+            : "Compare des devis pour commencer à économiser."
+        }
       />
-      <Card>
-        <p className="font-sans text-sm text-muted">
-          Ton historique d&apos;analyses et tes alertes s&apos;afficheront ici.
-        </p>
-      </Card>
+
+      <div className="grid grid-cols-2 gap-3">
+        <LinkButton href="/analyser?mode=devis" fullWidth>
+          Comparer des devis
+        </LinkButton>
+        <LinkButton href="/analyser?mode=facture" variant="secondary" fullWidth>
+          Vérifier une facture
+        </LinkButton>
+      </div>
+
+      {alertes.length > 0 ? (
+        <Card className="bg-red/10">
+          <p className="mb-2 flex items-center gap-2 font-display text-sm font-bold">
+            <AlertTriangle className="h-5 w-5 text-red" aria-hidden="true" />
+            À surveiller
+          </p>
+          <ul className="flex flex-col gap-2">
+            {alertes.map((alerte) => (
+              <li key={alerte.id} className="font-sans text-sm">
+                {alerte.resume || `Trop-payé de ${formatEuros(alerte.montant)} détecté.`}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      ) : null}
+
+      <div>
+        <p className="mb-2 font-display text-sm font-bold">Tes dernières analyses</p>
+        {historique.length > 0 ? (
+          <div className="flex flex-col gap-2">
+            {historique.map((analysis) => (
+              <AnalysisListItem key={analysis.id} analysis={analysis} />
+            ))}
+          </div>
+        ) : (
+          <Card>
+            <p className="font-sans text-sm text-muted">
+              Dépose ton premier devis pour voir tes analyses ici.
+            </p>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

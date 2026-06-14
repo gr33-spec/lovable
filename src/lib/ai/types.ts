@@ -77,5 +77,5 @@ export type AnalysisType = "devis" | "facture";
 
 /** Réponse de POST /api/analyze : un type discriminé selon l'analyse demandée. */
 export type AnalyzeResponse =
-  | { type: "devis"; extracted: ExtractedDocument[]; result: ComparisonResult }
-  | { type: "facture"; extracted: ExtractedDocument[]; result: VerificationResult };
+  | { type: "devis"; extracted: ExtractedDocument[]; result: ComparisonResult; analysisId: string }
+  | { type: "facture"; extracted: ExtractedDocument[]; result: VerificationResult; analysisId: string };

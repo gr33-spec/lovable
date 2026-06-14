@@ -1,0 +1,186 @@
+// Schéma de données BatiClair (cahier des charges §7).
+// Génère un client Prisma typé dans src/generated/prisma, importé via "@/generated/prisma".
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Plan {
+  free
+  pro
+}
+
+enum AnalysisType {
+  devis
+  facture
+}
+
+/// Un artisan. L'authentification se fait par magic link (Auth.js, étape 5).
+model User {
+  id                   String    @id @default(cuid())
+  email                String    @unique
+  emailVerified        DateTime?
+  name                 String?
+  createdAt            DateTime  @default(now())
+  plan                 Plan      @default(free)
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?
+
+  accounts  Account[]
+  sessions  Session[]
+  analyses  Analysis[]
+  suppliers Supplier[]
+  demandes  DemandeDevis[]
+}
+
+/// Compte lié (requis par l'adaptateur Prisma d'Auth.js).
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+/// Session active (requise par l'adaptateur Prisma d'Auth.js).
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// Jeton de connexion par magic link (requis par Auth.js).
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+/// Une analyse réalisée par l'artisan : comparaison de devis ou vérification de facture.
+model Analysis {
+  id           String       @id @default(cuid())
+  userId       String
+  type         AnalysisType
+  createdAt    DateTime     @default(now())
+  /// Résultat brut renvoyé par l'IA (verdict, comparaison/anomalies, résumé).
+  resultJson   Json
+  /// Économie réalisée (devis) ou trop-payé détecté (facture), en euros.
+  montant      Float        @default(0)
+  /// Noms des fournisseurs concernés par l'analyse.
+  fournisseurs String[]
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  extractedDocs ExtractedDoc[]
+
+  @@index([userId, createdAt])
+}
+
+/// Un document (devis ou facture) tel que lu par l'IA, rattaché à une analyse.
+model ExtractedDoc {
+  id          String @id @default(cuid())
+  analysisId  String
+  fournisseur String
+  date        String
+  /// Lignes d'articles extraites (désignation, quantité, prix unitaire...).
+  lignesJson  Json
+  totalHT     Float
+  totalTTC    Float
+
+  analysis Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+}
+
+/// Le carnet d'adresses fournisseurs de l'artisan.
+model Supplier {
+  id        String   @id @default(cuid())
+  userId    String
+  nom       String
+  email     String
+  telephone String?
+  metier    String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/// Une demande de devis envoyée par e-mail à plusieurs fournisseurs.
+model DemandeDevis {
+  id           String   @id @default(cuid())
+  userId       String
+  objet        String
+  produitsText String
+  createdAt    DateTime @default(now())
+  /// "envoyee" | "relancee" | "recue" | "comparee"
+  status       String   @default("envoyee")
+  relances     Int      @default(0)
+
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  destinataires DemandeDestinataire[]
+  reponses      SupplierReply[]
+
+  @@index([userId])
+}
+
+/// Un destinataire (fournisseur) d'une demande de devis.
+model DemandeDestinataire {
+  id        String    @id @default(cuid())
+  demandeId String
+  email     String
+  repondu   Boolean   @default(false)
+  reponduAt DateTime?
+
+  demande DemandeDevis @relation(fields: [demandeId], references: [id], onDelete: Cascade)
+
+  @@index([demandeId])
+}
+
+/// La réponse d'un fournisseur, reçue par e-mail entrant (webhook).
+model SupplierReply {
+  id          String   @id @default(cuid())
+  demandeId   String
+  fromEmail   String
+  subject     String
+  receivedAt  DateTime @default(now())
+  /// Chemins des pièces jointes stockées (Supabase Storage).
+  attachments String[]
+
+  demande DemandeDevis @relation(fields: [demandeId], references: [id], onDelete: Cascade)
+
+  @@index([demandeId])
+}
+
+/// Base de prix anonymisée : aucun lien nominatif avec un artisan (cf. §11).
+model PriceRecord {
+  id                     String   @id @default(cuid())
+  designationNormalisee  String
+  metier                 String?
+  region                 String?
+  fournisseur            String
+  pu                     Float
+  source                 String
+  createdAt              DateTime @default(now())
+
+  @@index([designationNormalisee])
+}

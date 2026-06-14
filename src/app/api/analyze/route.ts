@@ -6,6 +6,8 @@ import {
   AiParseError,
   type SupportedMediaType,
 } from "@/lib/ai";
+import { saveAnalysis } from "@/lib/analysis";
+import { getCurrentUserId } from "@/lib/current-user";
 
 // L'analyse peut enchaîner plusieurs appels IA : on laisse un peu de marge.
 export const maxDuration = 60;
@@ -83,7 +85,10 @@ export async function POST(request: Request) {
       );
       const result = await compareDevis(extracted);
 
-      return NextResponse.json({ type, extracted, result });
+      const userId = await getCurrentUserId();
+      const analysisId = await saveAnalysis({ userId, type, extracted, result });
+
+      return NextResponse.json({ type, extracted, result, analysisId });
     }
 
     // type === "facture" : un devis + sa facture correspondante.
@@ -105,12 +110,12 @@ export async function POST(request: Request) {
       extractDocument(facturePayload, "facture"),
     ]);
     const result = await verifyFacture(devisExtrait, factureExtraite);
+    const extracted = [devisExtrait, factureExtraite];
 
-    return NextResponse.json({
-      type,
-      extracted: [devisExtrait, factureExtraite],
-      result,
-    });
+    const userId = await getCurrentUserId();
+    const analysisId = await saveAnalysis({ userId, type, extracted, result });
+
+    return NextResponse.json({ type, extracted, result, analysisId });
   } catch (error) {
     console.error("Erreur /api/analyze :", error);
 

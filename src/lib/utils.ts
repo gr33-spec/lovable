@@ -12,3 +12,12 @@ export function formatEuros(value: number) {
     maximumFractionDigits: 2,
   }).format(rounded) + " €";
 }
+
+/** Formate une date au format court français (ex: "14 juin 2026"). */
+export function formatDate(date: Date) {
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
