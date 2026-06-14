@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+/*
+ * Design system BatiClair (cf. cahier des charges §5).
+ * Palette "fiche de chantier" : papier chaud, encre, bleu chantier,
+ * ambre haute-visibilité, vert/rouge pour les verdicts.
+ */
+@theme inline {
+  --color-paper: #f1eadb;
+  --color-card: #fbf7ee;
+  --color-ink: #23292c;
+  --color-blue: #1b5a7a;
+  --color-amber: #dd8407;
+  --color-green: #3e7a52;
+  --color-red: #b23a3a;
+  --color-line: #d8cdb8;
+  --color-muted: #857e6c;
+
+  --font-display: var(--font-archivo);
+  --font-mono: var(--font-space-mono);
+  --font-sans: var(--font-inter);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  /* Texte lisible en plein soleil : taille de base généreuse. */
+  font-size: 16px;
+}
+
+/* Utilitaires "fiche de chantier" réutilisés sur les cartes et CTA. */
+@layer utilities {
+  .shadow-stamp {
+    box-shadow: 4px 5px 0 rgba(35, 41, 44, 0.13);
+  }
+
+  .shadow-stamp-lg {
+    box-shadow: 6px 7px 0 rgba(35, 41, 44, 0.13);
+  }
+
+  .tap-target {
+    min-height: 48px;
+  }
+}
