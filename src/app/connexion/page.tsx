@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { signIn } from "@/lib/auth";
 
 export default function ConnexionPage() {
   return (
@@ -12,18 +13,31 @@ export default function ConnexionPage() {
           Le juste prix de tes matériaux.
         </p>
         <Card className="flex flex-col gap-3">
-          <label htmlFor="email" className="font-sans text-sm font-semibold">
-            Ton e-mail
-          </label>
-          <input
-            id="email"
-            type="email"
-            placeholder="toi@exemple.fr"
-            className="tap-target w-full rounded-xl border-2 border-ink bg-paper px-4 text-base"
-          />
-          <Button type="submit" fullWidth>
-            Recevoir mon lien
-          </Button>
+          <form
+            action={async (formData) => {
+              "use server";
+              await signIn("magic-link", {
+                email: formData.get("email"),
+                redirectTo: "/accueil",
+              });
+            }}
+            className="flex flex-col gap-3"
+          >
+            <label htmlFor="email" className="font-sans text-sm font-semibold">
+              Ton e-mail
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              placeholder="toi@exemple.fr"
+              className="tap-target w-full rounded-xl border-2 border-ink bg-paper px-4 text-base"
+            />
+            <Button type="submit" fullWidth>
+              Recevoir mon lien
+            </Button>
+          </form>
           <p className="text-center font-sans text-xs text-muted">
             Pas de mot de passe. On t&apos;envoie un lien de connexion par
             e-mail.
