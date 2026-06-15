@@ -13,7 +13,7 @@ export function SegmentedToggle({ value, onChange }: SegmentedToggleProps) {
   return (
     <div
       role="tablist"
-      className="grid grid-cols-2 gap-1 rounded-xl border-2 border-ink bg-card p-1"
+      className="grid grid-cols-2 gap-1 rounded-2xl border border-line bg-card p-1"
     >
       <button
         type="button"
@@ -21,8 +21,8 @@ export function SegmentedToggle({ value, onChange }: SegmentedToggleProps) {
         aria-selected={value === "devis"}
         onClick={() => onChange("devis")}
         className={cn(
-          "tap-target rounded-lg font-display text-sm font-bold transition-colors",
-          value === "devis" ? "bg-blue text-white" : "text-ink"
+          "tap-target rounded-xl font-display text-sm font-bold transition-colors",
+          value === "devis" ? "bg-accent text-white shadow-soft" : "text-ink hover:bg-paper"
         )}
       >
         Comparer des devis
@@ -33,8 +33,8 @@ export function SegmentedToggle({ value, onChange }: SegmentedToggleProps) {
         aria-selected={value === "facture"}
         onClick={() => onChange("facture")}
         className={cn(
-          "tap-target rounded-lg font-display text-sm font-bold transition-colors",
-          value === "facture" ? "bg-blue text-white" : "text-ink"
+          "tap-target rounded-xl font-display text-sm font-bold transition-colors",
+          value === "facture" ? "bg-accent text-white shadow-soft" : "text-ink hover:bg-paper"
         )}
       >
         Vérifier une facture

@@ -6,7 +6,7 @@ export default function VerificationPage() {
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <h1 className="mb-6 text-center font-display text-3xl font-black">
-          Bati<span className="text-blue">Clair</span>
+          Bati<span className="text-accent">Clair</span>
         </h1>
         <Card className="flex flex-col items-center gap-3 text-center">
           <MailCheck className="h-10 w-10 text-blue" aria-hidden="true" />

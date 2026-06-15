@@ -19,12 +19,13 @@ export function AnalysisListItem({ analysis }: AnalysisListItemProps) {
       ? "Équivalent"
       : "Conforme";
 
-  const montantTone = hasMontant ? (isDevis ? "text-green" : "text-red") : "text-muted";
+  // Une économie réalisée (devis) est un montant d'argent : couleur or, comme le hero des économies.
+  const montantTone = hasMontant ? (isDevis ? "text-amber" : "text-red") : "text-muted";
 
   return (
     <Link href={`/analyse/${analysis.id}`} className="block">
-      <Card className="flex items-center gap-3 transition-transform active:scale-[0.98]">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-paper">
+      <Card className="flex items-center gap-3 motion-safe:transition-transform motion-safe:active:scale-[0.98]">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent">
           {isDevis ? (
             <ScanSearch className="h-5 w-5" aria-hidden="true" />
           ) : (

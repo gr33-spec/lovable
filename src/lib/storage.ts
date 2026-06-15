@@ -37,3 +37,32 @@ export async function storeAttachment(demandeId: string, attachment: AttachmentI
 
   return path;
 }
+
+export interface FetchedAttachment {
+  data: Buffer;
+  contentType: string;
+}
+
+/**
+ * Récupère une pièce jointe stockée par `storeAttachment`, pour la relire
+ * (étape : analyse IA des devis reçus directement dans un chantier). Renvoie
+ * `null` sans SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY, ou si le fichier est
+ * introuvable.
+ */
+export async function fetchAttachment(path: string): Promise<FetchedAttachment | null> {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    return null;
+  }
+
+  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${SUPABASE_STORAGE_BUCKET}/${path}`, {
+    headers: { Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}` },
+  });
+
+  if (!res.ok) {
+    return null;
+  }
+
+  const contentType = res.headers.get("content-type") ?? "application/octet-stream";
+  const data = Buffer.from(await res.arrayBuffer());
+  return { data, contentType };
+}

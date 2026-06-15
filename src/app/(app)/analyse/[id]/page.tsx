@@ -5,6 +5,7 @@ import { ComparisonResultView } from "@/components/analyser/comparison-result";
 import { VerificationResultView } from "@/components/analyser/verification-result";
 import { prisma } from "@/lib/db";
 import { getCurrentUserId } from "@/lib/current-user";
+import { getSuppliers } from "@/lib/suppliers";
 import type { ComparisonResult, ExtractedDocument, LigneArticle, VerificationResult } from "@/lib/ai/types";
 
 // Données propres à l'utilisateur : jamais de cache statique.
@@ -19,13 +20,21 @@ export default async function AnalyseDetailPage({ params }: AnalyseDetailPagePro
   const { id } = await params;
   const userId = await getCurrentUserId();
 
-  const analysis = await prisma.analysis.findFirst({
-    where: { id, userId },
-    include: { extractedDocs: true },
-  });
+  const [analysis, suppliers] = await Promise.all([
+    prisma.analysis.findFirst({
+      where: { id, userId },
+      include: { extractedDocs: true },
+    }),
+    getSuppliers(userId),
+  ]);
 
   if (!analysis) {
     notFound();
+  }
+
+  const supplierEmails: Record<string, string> = {};
+  for (const supplier of suppliers) {
+    supplierEmails[supplier.nom.toLowerCase()] = supplier.email;
   }
 
   const extracted: ExtractedDocument[] = analysis.extractedDocs.map((doc) => ({
@@ -50,6 +59,7 @@ export default async function AnalyseDetailPage({ params }: AnalyseDetailPagePro
         <ComparisonResultView
           result={analysis.resultJson as unknown as ComparisonResult}
           extracted={extracted}
+          supplierEmails={supplierEmails}
         />
       ) : (
         <VerificationResultView

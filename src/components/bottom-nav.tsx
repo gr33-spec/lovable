@@ -21,10 +21,10 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-20 border-t-2 border-ink bg-card pb-[env(safe-area-inset-bottom)]"
+      className="fixed bottom-0 left-1/2 z-20 w-full max-w-[480px] -translate-x-1/2 border-t border-line bg-card/80 backdrop-blur-md pb-[env(safe-area-inset-bottom)] md:max-w-[520px]"
       aria-label="Navigation principale"
     >
-      <ul className="mx-auto flex max-w-md items-stretch justify-between">
+      <ul className="flex items-stretch justify-between gap-1 px-2 py-1">
         {TABS.map(({ href, label, icon: Icon }) => {
           const active = pathname?.startsWith(href);
           return (
@@ -32,8 +32,8 @@ export function BottomNav() {
               <Link
                 href={href}
                 className={cn(
-                  "tap-target flex flex-col items-center justify-center gap-1 py-2 text-xs font-semibold transition-colors",
-                  active ? "text-blue" : "text-muted"
+                  "tap-target flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-xs font-semibold transition-colors",
+                  active ? "bg-accent/10 text-accent" : "text-muted hover:text-ink"
                 )}
                 aria-current={active ? "page" : undefined}
               >
