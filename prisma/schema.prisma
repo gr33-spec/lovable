@@ -89,8 +89,11 @@ model Analysis {
   montant      Float        @default(0)
   /// Noms des fournisseurs concernés par l'analyse.
   fournisseurs String[]
+  /// Chantier d'origine, si l'analyse a été lancée depuis sa fiche.
+  demandeId    String?
 
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  demande       DemandeDevis?  @relation(fields: [demandeId], references: [id], onDelete: SetNull)
   extractedDocs ExtractedDoc[]
 
   @@index([userId, createdAt])
@@ -125,20 +128,29 @@ model Supplier {
   @@index([userId])
 }
 
-/// Une demande de devis envoyée par e-mail à plusieurs fournisseurs.
+/// Un chantier de l'artisan : une demande de devis envoyée par e-mail à
+/// plusieurs fournisseurs, le suivi des réponses reçues et leur comparaison.
+/// Toute l'app (écran Demande) s'organise autour de cette fiche.
 model DemandeDevis {
   id           String   @id @default(cuid())
   userId       String
+  /// Nom du chantier choisi par l'artisan (ex. "Dupont").
+  nom          String
   objet        String
   produitsText String
   createdAt    DateTime @default(now())
   /// "envoyee" | "relancee" | "recue" | "comparee"
   status       String   @default("envoyee")
+  /// Nombre de relances automatiques (cron) déjà envoyées pour ce chantier.
   relances     Int      @default(0)
+  /// Nombre de réponses prises en compte lors de la dernière comparaison IA,
+  /// pour détecter l'arrivée d'un nouveau devis après coup.
+  lastAnalysisReponses Int @default(0)
 
   user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   destinataires DemandeDestinataire[]
   reponses      SupplierReply[]
+  analyses      Analysis[]
 
   @@index([userId])
 }
@@ -150,6 +162,8 @@ model DemandeDestinataire {
   email     String
   repondu   Boolean   @default(false)
   reponduAt DateTime?
+  /// Nombre de relances (manuelles ou automatiques) envoyées à ce fournisseur (max 2).
+  relances  Int       @default(0)
 
   demande DemandeDevis @relation(fields: [demandeId], references: [id], onDelete: Cascade)
 
@@ -162,6 +176,8 @@ model SupplierReply {
   demandeId   String
   fromEmail   String
   subject     String
+  /// Corps du mail : le prix y est parfois indiqué directement, sans pièce jointe.
+  bodyText    String   @default("")
   receivedAt  DateTime @default(now())
   /// Chemins des pièces jointes stockées (Supabase Storage).
   attachments String[]

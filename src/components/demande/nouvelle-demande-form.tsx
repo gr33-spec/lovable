@@ -15,6 +15,7 @@ interface NouvelleDemandeFormProps {
 /** Formulaire d'envoi d'une demande de devis à plusieurs fournisseurs (étape 7). */
 export function NouvelleDemandeForm({ suppliers }: NouvelleDemandeFormProps) {
   const router = useRouter();
+  const [nom, setNom] = useState("");
   const [objet, setObjet] = useState("");
   const [produitsText, setProduitsText] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
@@ -26,7 +27,7 @@ export function NouvelleDemandeForm({ suppliers }: NouvelleDemandeFormProps) {
     setSelected((prev) => (prev.includes(email) ? prev.filter((e) => e !== email) : [...prev, email]));
   }
 
-  const canSubmit = objet.trim() !== "" && produitsText.trim() !== "" && !submitting;
+  const canSubmit = nom.trim() !== "" && objet.trim() !== "" && produitsText.trim() !== "" && !submitting;
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -49,7 +50,7 @@ export function NouvelleDemandeForm({ suppliers }: NouvelleDemandeFormProps) {
       const response = await fetch("/api/demande", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ objet, produitsText, emails }),
+        body: JSON.stringify({ nom, objet, produitsText, emails }),
       });
       const data = await response.json();
 
@@ -68,6 +69,19 @@ export function NouvelleDemandeForm({ suppliers }: NouvelleDemandeFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <label htmlFor="nom" className="font-sans text-sm font-semibold">
+          Nom du chantier
+        </label>
+        <Input
+          id="nom"
+          value={nom}
+          onChange={(e) => setNom(e.target.value)}
+          required
+          placeholder="Ex : Dupont"
+        />
+      </div>
+
       <div className="flex flex-col gap-2">
         <label htmlFor="objet" className="font-sans text-sm font-semibold">
           Objet de la demande

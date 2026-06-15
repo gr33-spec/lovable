@@ -21,3 +21,29 @@ export function formatDate(date: Date) {
     year: "numeric",
   }).format(date);
 }
+
+interface NegotiationMailtoInput {
+  fournisseur: string;
+  produit: string;
+  prixActuel: number;
+  prixCible: number;
+  email?: string;
+}
+
+/**
+ * Construit un lien `mailto:` pré-rempli pour demander à un fournisseur de
+ * s'aligner sur le meilleur prix trouvé lors d'une comparaison (bonus §8).
+ */
+export function buildNegotiationMailto({ fournisseur, produit, prixActuel, prixCible, email }: NegotiationMailtoInput) {
+  const subject = `Alignement de prix — ${produit}`;
+  const body = [
+    `Bonjour${fournisseur ? ` ${fournisseur}` : ""},`,
+    "",
+    `J'ai reçu une offre à ${formatEuros(prixCible)} pour "${produit}", contre ${formatEuros(prixActuel)} dans votre devis.`,
+    "Seriez-vous en mesure de vous aligner sur ce prix ?",
+    "",
+    "Merci d'avance,",
+  ].join("\n");
+
+  return `mailto:${email ?? ""}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}

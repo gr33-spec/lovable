@@ -7,7 +7,7 @@ import { getCurrentUserId } from "@/lib/current-user";
 // Données propres à l'utilisateur : jamais de cache statique.
 export const dynamic = "force-dynamic";
 
-/** Formulaire d'envoi d'une nouvelle demande de devis (étape 7). */
+/** Formulaire de création d'un chantier : demande de devis envoyée aux fournisseurs (étape 7). */
 export default async function NouvelleDemandePage() {
   const userId = await getCurrentUserId();
   const suppliers = await getSuppliers(userId);
@@ -18,7 +18,7 @@ export default async function NouvelleDemandePage() {
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Retour
       </Link>
-      <h1 className="font-display text-2xl font-black">Nouvelle demande</h1>
+      <h1 className="font-display text-2xl font-black">Nouveau chantier</h1>
       <NouvelleDemandeForm suppliers={suppliers} />
     </div>
   );

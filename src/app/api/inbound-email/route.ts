@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Requête invalide." }, { status: 400 });
   }
 
-  const { to, from, subject, attachments } = body as Record<string, unknown>;
+  const { to, from, subject, text, attachments } = body as Record<string, unknown>;
 
   if (typeof to !== "string" || typeof from !== "string") {
     return NextResponse.json({ error: "Champs 'to' et 'from' requis." }, { status: 400 });
@@ -49,6 +49,7 @@ export async function POST(request: Request) {
     to,
     from,
     subject: typeof subject === "string" ? subject : "",
+    bodyText: typeof text === "string" ? text : "",
     attachments: Array.isArray(attachments) ? attachments.filter(isInboundAttachment) : [],
   });
 

@@ -19,8 +19,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Requête invalide." }, { status: 400 });
   }
 
-  const { objet, produitsText, emails } = body as Record<string, unknown>;
+  const { nom, objet, produitsText, emails } = body as Record<string, unknown>;
 
+  if (typeof nom !== "string" || !nom.trim()) {
+    return NextResponse.json({ error: "Indique le nom du chantier." }, { status: 400 });
+  }
   if (typeof objet !== "string" || !objet.trim()) {
     return NextResponse.json({ error: "Indique l'objet de la demande." }, { status: 400 });
   }
@@ -52,6 +55,7 @@ export async function POST(request: Request) {
 
   const demandeId = await createDemande({
     userId,
+    nom: nom.trim(),
     objet: objet.trim(),
     produitsText: produitsText.trim(),
     emails: uniqueEmails,

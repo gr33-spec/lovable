@@ -13,18 +13,30 @@ interface SaveAnalysisInput {
   type: AnalysisType;
   extracted: ExtractedDocument[];
   result: ComparisonResult | VerificationResult;
+  /** Chantier d'origine, si l'analyse a été lancée depuis sa fiche. */
+  demandeId?: string;
 }
 
-/** Normalise une désignation pour regrouper le même produit dans la base de prix. */
+/**
+ * Normalise une désignation pour regrouper le même produit dans la base de
+ * prix : minuscules, ponctuation (tirets, points...) retirée, espaces
+ * multiples réduits. Permet de fusionner par ex. "OSB 3 18mm" et
+ * "OSB 3 - 18mm".
+ */
 function normalizeDesignation(designation: string): string {
-  return designation.trim().toLowerCase().replace(/\s+/g, " ");
+  return designation
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9àâäçéèêëîïôöùûüÿñæœ]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
 }
 
 /**
  * Enregistre une analyse (devis ou facture) et alimente la base de prix
  * anonymisée (cf. cahier des charges §7 et §11).
  */
-export async function saveAnalysis({ userId, type, extracted, result }: SaveAnalysisInput) {
+export async function saveAnalysis({ userId, type, extracted, result, demandeId }: SaveAnalysisInput) {
   const montant =
     type === "devis"
       ? (result as ComparisonResult).economie
@@ -34,6 +46,7 @@ export async function saveAnalysis({ userId, type, extracted, result }: SaveAnal
     data: {
       userId,
       type,
+      demandeId,
       resultJson: JSON.parse(JSON.stringify(result)),
       montant,
       fournisseurs: extracted.map((doc) => doc.fournisseur).filter(Boolean),
