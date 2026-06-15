@@ -67,7 +67,7 @@ export async function saveAnalysis({ userId, type, extracted, result }: SaveAnal
   return analysis.id;
 }
 
-function startOfMonth(): Date {
+export function startOfMonth(): Date {
   const now = new Date();
   return new Date(now.getFullYear(), now.getMonth(), 1);
 }

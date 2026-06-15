@@ -1,10 +1,11 @@
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Crown } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
 import { Verdict } from "@/components/ui/verdict";
 import { AnalysisListItem } from "@/components/analysis-list-item";
 import { getDashboardData } from "@/lib/analysis";
 import { getCurrentUserId } from "@/lib/current-user";
+import { getUsage, FREE_MONTHLY_LIMIT } from "@/lib/plan";
 import { formatEuros } from "@/lib/utils";
 
 // Données propres à l'utilisateur : jamais de cache statique.
@@ -13,7 +14,10 @@ export const dynamic = "force-dynamic";
 /** Écran Accueil : le chiffre d'abord, puis les actions et l'historique (§6.2). */
 export default async function AccueilPage() {
   const userId = await getCurrentUserId();
-  const { totalEconomise, economieDuMois, alertes, historique } = await getDashboardData(userId);
+  const [{ totalEconomise, economieDuMois, alertes, historique }, usage] = await Promise.all([
+    getDashboardData(userId),
+    getUsage(userId),
+  ]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -36,6 +40,20 @@ export default async function AccueilPage() {
           Vérifier une facture
         </LinkButton>
       </div>
+
+      {usage.plan === "free" ? (
+        <Card className="flex items-center justify-between gap-3">
+          <p className="font-sans text-sm text-muted">
+            {usage.used}/{FREE_MONTHLY_LIMIT} analyses gratuites ce mois-ci
+          </p>
+          {usage.atteinte ? (
+            <LinkButton href="/compte" variant="ghost" className="px-3 py-2 text-sm">
+              <Crown className="h-4 w-4" aria-hidden="true" />
+              Pro
+            </LinkButton>
+          ) : null}
+        </Card>
+      ) : null}
 
       {alertes.length > 0 ? (
         <Card className="bg-red/10">

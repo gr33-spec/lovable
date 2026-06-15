@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { AlertCircle, Crown } from "lucide-react";
+import { Button, LinkButton } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SegmentedToggle } from "@/components/analyser/segmented-toggle";
 import { FileUploadZone } from "@/components/analyser/file-upload-zone";
@@ -20,6 +20,7 @@ export default function AnalyserPage() {
   const [factureFile, setFactureFile] = useState<File[]>([]);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [limitReached, setLimitReached] = useState(false);
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
   const [loadingStep, setLoadingStep] = useState(0);
 
@@ -56,12 +57,14 @@ export default function AnalyserPage() {
     setMode(next);
     setStatus("idle");
     setError(null);
+    setLimitReached(false);
     setResult(null);
   }
 
   function reset() {
     setStatus("idle");
     setError(null);
+    setLimitReached(false);
     setResult(null);
     setDevisFiles([]);
     setDevisFacture([]);
@@ -77,6 +80,7 @@ export default function AnalyserPage() {
     setStatus("loading");
     setLoadingStep(0);
     setError(null);
+    setLimitReached(false);
 
     const formData = new FormData();
     formData.append("type", mode);
@@ -93,6 +97,7 @@ export default function AnalyserPage() {
 
       if (!response.ok) {
         setError(data.error ?? "Une erreur est survenue. Réessaie.");
+        setLimitReached(Boolean(data.limitReached));
         setStatus("error");
         return;
       }
@@ -164,9 +169,16 @@ export default function AnalyserPage() {
         </Card>
       ) : null}
 
-      <Button fullWidth disabled={!canSubmit} onClick={handleSubmit}>
-        Lancer l&apos;analyse
-      </Button>
+      {limitReached ? (
+        <LinkButton href="/compte" fullWidth>
+          <Crown className="h-5 w-5" aria-hidden="true" />
+          Passer au plan Pro
+        </LinkButton>
+      ) : (
+        <Button fullWidth disabled={!canSubmit} onClick={handleSubmit}>
+          Lancer l&apos;analyse
+        </Button>
+      )}
 
       {mode === "devis" && devisFiles.length === 1 ? (
         <p className="text-center font-sans text-xs text-muted">

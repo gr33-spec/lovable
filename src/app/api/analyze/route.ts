@@ -8,6 +8,7 @@ import {
 } from "@/lib/ai";
 import { saveAnalysis } from "@/lib/analysis";
 import { getCurrentUserId } from "@/lib/current-user";
+import { getUsage } from "@/lib/plan";
 
 // L'analyse peut enchaîner plusieurs appels IA : on laisse un peu de marge.
 export const maxDuration = 60;
@@ -61,6 +62,20 @@ export async function POST(request: Request) {
   }
 
   try {
+    const userId = await getCurrentUserId();
+    const usage = await getUsage(userId);
+
+    if (usage.atteinte) {
+      return NextResponse.json(
+        {
+          error:
+            "Tu as atteint la limite de 3 analyses gratuites ce mois-ci. Passe au plan Pro pour continuer.",
+          limitReached: true,
+        },
+        { status: 403 }
+      );
+    }
+
     if (type === "devis") {
       const files = formData
         .getAll("files")
@@ -85,7 +100,6 @@ export async function POST(request: Request) {
       );
       const result = await compareDevis(extracted);
 
-      const userId = await getCurrentUserId();
       const analysisId = await saveAnalysis({ userId, type, extracted, result });
 
       return NextResponse.json({ type, extracted, result, analysisId });
@@ -112,7 +126,6 @@ export async function POST(request: Request) {
     const result = await verifyFacture(devisExtrait, factureExtraite);
     const extracted = [devisExtrait, factureExtraite];
 
-    const userId = await getCurrentUserId();
     const analysisId = await saveAnalysis({ userId, type, extracted, result });
 
     return NextResponse.json({ type, extracted, result, analysisId });
