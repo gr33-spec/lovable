@@ -106,10 +106,11 @@ envoyés.
    npx prisma migrate deploy
    ```
 
-4. **Relances automatiques** : configure un [Vercel Cron](https://vercel.com/docs/cron-jobs)
-   (ou tout autre déclencheur planifié) pour appeler `GET /api/relancer`
-   une fois par jour. Si `CRON_SECRET` est défini, l'appel doit inclure
-   l'en-tête `Authorization: Bearer <CRON_SECRET>`.
+4. **Relances automatiques** : `vercel.json` déclare déjà un
+   [Vercel Cron](https://vercel.com/docs/cron-jobs) qui appelle
+   `GET /api/relancer` chaque jour à 6h UTC — rien à faire de plus après le
+   déploiement. Si tu définis `CRON_SECRET`, Vercel ajoute automatiquement
+   l'en-tête `Authorization: Bearer <CRON_SECRET>` à cet appel.
 5. **Webhooks** :
    - Stripe : configure le webhook vers `/api/stripe/webhook` (événements
      `checkout.session.completed`, `customer.subscription.updated`,
