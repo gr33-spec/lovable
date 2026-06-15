@@ -22,7 +22,7 @@ export default async function AccueilPage() {
   return (
     <div className="flex flex-col gap-4">
       <Verdict
-        tone="amber"
+        tone="accent"
         label="Tu as économisé"
         amount={formatEuros(totalEconomise)}
         description={

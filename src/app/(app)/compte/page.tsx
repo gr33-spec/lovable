@@ -56,7 +56,7 @@ export default async function ComptePage({ searchParams }: ComptePageProps) {
       ) : null}
 
       <Card className="flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-paper">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent">
           <CircleUserRound className="h-6 w-6" aria-hidden="true" />
         </div>
         <div className="min-w-0">

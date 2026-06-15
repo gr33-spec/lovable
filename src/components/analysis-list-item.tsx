@@ -24,7 +24,7 @@ export function AnalysisListItem({ analysis }: AnalysisListItemProps) {
   return (
     <Link href={`/analyse/${analysis.id}`} className="block">
       <Card className="flex items-center gap-3 transition-transform active:scale-[0.98]">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-paper">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent">
           {isDevis ? (
             <ScanSearch className="h-5 w-5" aria-hidden="true" />
           ) : (

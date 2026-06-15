@@ -47,7 +47,7 @@ export function FileUploadZone({ label, hint, files, onChange, maxFiles }: FileU
           {files.map((file, index) => (
             <li
               key={`${file.name}-${index}`}
-              className="flex items-center gap-2 rounded-xl border-2 border-ink bg-card px-3 py-2"
+              className="flex items-center gap-2 rounded-2xl border border-line bg-card px-3 py-2 shadow-soft"
             >
               <FileText className="h-5 w-5 shrink-0 text-blue" aria-hidden="true" />
               <span className="flex-1 truncate font-sans text-sm">{file.name}</span>
@@ -68,7 +68,7 @@ export function FileUploadZone({ label, hint, files, onChange, maxFiles }: FileU
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="tap-target flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-line bg-paper px-4 py-5 font-display text-sm font-bold text-blue"
+          className="tap-target flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-line bg-paper/50 px-4 py-5 font-display text-sm font-bold text-accent transition-colors hover:border-accent/50 hover:bg-accent/5"
         >
           {files.length === 0 ? (
             <Camera className="h-5 w-5" aria-hidden="true" />

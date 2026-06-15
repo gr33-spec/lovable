@@ -3,13 +3,12 @@ import { revalidatePath } from "next/cache";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { createSupplier, deleteSupplier, getSuppliers } from "@/lib/suppliers";
 import { getCurrentUserId } from "@/lib/current-user";
 
 // Données propres à l'utilisateur : jamais de cache statique.
 export const dynamic = "force-dynamic";
-
-const inputClass = "tap-target w-full rounded-xl border-2 border-ink bg-paper px-4 text-base";
 
 async function addSupplier(formData: FormData) {
   "use server";
@@ -93,32 +92,31 @@ export default async function FournisseursPage() {
             <label htmlFor="nom" className="font-sans text-sm font-semibold">
               Nom
             </label>
-            <input id="nom" name="nom" required placeholder="Ex : Sanitaire Plus" className={inputClass} />
+            <Input id="nom" name="nom" required placeholder="Ex : Sanitaire Plus" />
           </div>
           <div className="flex flex-col gap-2">
             <label htmlFor="email" className="font-sans text-sm font-semibold">
               E-mail
             </label>
-            <input
+            <Input
               id="email"
               name="email"
               type="email"
               required
               placeholder="contact@fournisseur.fr"
-              className={inputClass}
             />
           </div>
           <div className="flex flex-col gap-2">
             <label htmlFor="metier" className="font-sans text-sm font-semibold">
               Métier (facultatif)
             </label>
-            <input id="metier" name="metier" placeholder="Ex : Plomberie" className={inputClass} />
+            <Input id="metier" name="metier" placeholder="Ex : Plomberie" />
           </div>
           <div className="flex flex-col gap-2">
             <label htmlFor="telephone" className="font-sans text-sm font-semibold">
               Téléphone (facultatif)
             </label>
-            <input id="telephone" name="telephone" type="tel" placeholder="06 12 34 56 78" className={inputClass} />
+            <Input id="telephone" name="telephone" type="tel" placeholder="06 12 34 56 78" />
           </div>
           <Button type="submit" fullWidth>
             <Plus className="h-5 w-5" aria-hidden="true" />

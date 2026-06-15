@@ -8,7 +8,7 @@ const LABELS: Record<string, string> = {
 };
 
 const TONES: Record<string, string> = {
-  envoyee: "border-ink text-ink",
+  envoyee: "border-line text-muted",
   relancee: "border-amber text-amber",
   recue: "border-green text-green",
   comparee: "border-blue text-blue",
@@ -24,7 +24,7 @@ export function DemandeStatusBadge({ status, className }: DemandeStatusBadgeProp
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center rounded-full border-2 bg-card px-2.5 py-0.5 font-sans text-xs font-semibold",
+        "inline-flex shrink-0 items-center rounded-full border bg-card px-2.5 py-0.5 font-sans text-xs font-semibold",
         TONES[status] ?? TONES.envoyee,
         className
       )}

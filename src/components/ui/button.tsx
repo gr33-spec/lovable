@@ -5,12 +5,12 @@ import { cn } from "@/lib/utils";
 type Variant = "primary" | "secondary" | "ghost";
 
 const base =
-  "tap-target inline-flex items-center justify-center gap-2 rounded-xl font-display font-extrabold text-base leading-tight transition-transform active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none px-5 py-3";
+  "tap-target inline-flex items-center justify-center gap-2 rounded-2xl font-display font-extrabold text-base leading-tight transition active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none px-5 py-3";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-amber text-white shadow-stamp border-2 border-ink",
-  secondary: "bg-transparent text-ink border-2 border-ink",
-  ghost: "bg-transparent text-blue border-2 border-transparent",
+  primary: "bg-accent text-white shadow-soft hover:brightness-110",
+  secondary: "bg-card text-ink border border-line shadow-soft hover:bg-paper",
+  ghost: "bg-transparent text-amber hover:bg-amber/10",
 };
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

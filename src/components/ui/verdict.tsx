@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-type Tone = "green" | "red" | "amber" | "neutral";
+type Tone = "green" | "red" | "accent" | "neutral";
 
 const tones: Record<Tone, string> = {
   green: "bg-green text-white",
   red: "bg-red text-white",
-  amber: "bg-amber text-white",
-  neutral: "bg-card text-ink",
+  accent: "bg-accent text-white",
+  neutral: "bg-card text-ink border border-line",
 };
 
 interface VerdictProps {
@@ -26,7 +26,7 @@ export function Verdict({ tone, label, amount, description, className }: Verdict
   return (
     <div
       className={cn(
-        "rounded-xl border-2 border-ink p-5 shadow-stamp-lg text-center",
+        "rounded-3xl p-5 shadow-soft-lg text-center",
         tones[tone],
         className
       )}

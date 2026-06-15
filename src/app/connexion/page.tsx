@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { signIn } from "@/lib/auth";
 
 export default function ConnexionPage() {
@@ -7,7 +8,7 @@ export default function ConnexionPage() {
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <h1 className="mb-2 text-center font-display text-3xl font-black">
-          Bati<span className="text-blue">Clair</span>
+          Bati<span className="text-accent">Clair</span>
         </h1>
         <p className="mb-6 text-center font-sans text-base text-muted">
           Le juste prix de tes matériaux.
@@ -26,13 +27,12 @@ export default function ConnexionPage() {
             <label htmlFor="email" className="font-sans text-sm font-semibold">
               Ton e-mail
             </label>
-            <input
+            <Input
               id="email"
               name="email"
               type="email"
               required
               placeholder="toi@exemple.fr"
-              className="tap-target w-full rounded-xl border-2 border-ink bg-paper px-4 text-base"
             />
             <Button type="submit" fullWidth>
               Recevoir mon lien
