@@ -1,36 +1,43 @@
 @import "tailwindcss";
 
 /*
- * Design system BatiClair — palette moderne, mode jour/nuit.
- * Accent énergique (style "rapide/efficace") pour les actions principales,
- * bleu pour les liens/infos, vert/rouge/ambre pour les verdicts et le statut Pro.
+ * Design system BatiClair v2 — identité "Rappidos" : violet → bleu électrique,
+ * dégradés sobres, mode jour/nuit. L'ambre/or est réservé à l'ARGENT (les
+ * montants économisés) ; le vert et le rouge restent dédiés aux verdicts
+ * (bon plan / anomalie).
  */
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --paper: #f6f5f2;
+  --paper: #f6f5fb;
   --card: #ffffff;
-  --ink: #1a1c23;
-  --muted: #6b7280;
-  --line: #e7e4df;
-  --blue: #2f6fe0;
-  --accent: #ff5a3c;
-  --amber: #d97706;
+  --ink: #1a1b25;
+  --muted: #6e6e85;
+  --line: #e7e3f3;
+  --blue: #3b82f6;
+  --accent: #7b3fe4;
+  --amber: #e8a23c;
   --green: #1f9d58;
   --red: #e0483e;
+  /* Fond du "canvas" derrière la colonne centrée sur grand écran. */
+  --desktop-bg: #ece9f7;
+  /* Dégradé signature, défini une seule fois : reprend --accent/--blue,
+     donc s'adapte automatiquement au mode sombre via la cascade. */
+  --gradient-primary: linear-gradient(135deg, var(--accent), var(--blue));
 }
 
 .dark {
-  --paper: #11131a;
-  --card: #1b1e26;
-  --ink: #f3f4f6;
-  --muted: #99a1ad;
-  --line: #2d313c;
-  --blue: #6ea0ff;
-  --accent: #ff7a5c;
+  --paper: #0e0f1a;
+  --card: #15172a;
+  --ink: #f4f3fb;
+  --muted: #9a9ab8;
+  --line: #2a2c42;
+  --blue: #5ea1ff;
+  --accent: #9d7bff;
   --amber: #fbbf24;
-  --green: #3ddc84;
+  --green: #34d399;
   --red: #ff6b6b;
+  --desktop-bg: #05060b;
 }
 
 @theme inline {
@@ -44,10 +51,25 @@
   --color-amber: var(--amber);
   --color-green: var(--green);
   --color-red: var(--red);
+  --color-desktop-bg: var(--desktop-bg);
 
   --font-display: var(--font-archivo);
   --font-mono: var(--font-space-mono);
   --font-sans: var(--font-inter);
+
+  /* Entrée discrète des cartes (respecte prefers-reduced-motion via motion-safe:). */
+  --animate-card-in: card-in 0.35s ease-out;
+
+  @keyframes card-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 html {
@@ -81,6 +103,11 @@ body {
   .tap-target {
     min-height: 48px;
   }
+
+  /* Dégradé signature violet → bleu pour les CTA et le hero des économies. */
+  .bg-gradient-primary {
+    background-image: var(--gradient-primary);
+  }
 }
 
 .dark .shadow-soft {
@@ -90,7 +117,9 @@ body {
 }
 
 .dark .shadow-soft-lg {
+  /* Légère lueur violette : le hero des économies ressort sur fond sombre. */
   box-shadow:
     0 2px 6px rgba(0, 0, 0, 0.4),
-    0 18px 40px -14px rgba(0, 0, 0, 0.65);
+    0 18px 40px -14px rgba(0, 0, 0, 0.65),
+    0 0 32px -8px rgba(157, 123, 255, 0.35);
 }

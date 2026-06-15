@@ -17,7 +17,7 @@ export default async function BilanPage() {
       <h1 className="font-display text-2xl font-black">Bilan</h1>
 
       <Verdict
-        tone="green"
+        tone="accent"
         label="Économies cette année"
         amount={formatEuros(economieAnnee)}
         description={`${totalAnalyses} analyse${totalAnalyses === 1 ? "" : "s"} au total.`}

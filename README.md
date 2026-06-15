@@ -31,6 +31,29 @@ envoyer des demandes de devis par e-mail, le tout depuis son téléphone.
   désignations sont normalisées pour fusionner les variantes d'écriture d'un
   même produit, ex. « OSB 3 18mm » et « OSB 3 - 18mm »).
 
+## Interface
+
+BatiClair a l'apparence d'une application mobile native — mode jour/nuit,
+coins arrondis généreux, ombres douces, barre de navigation basse fixe avec
+les 4 onglets (Accueil · Analyser · Demande · Bilan) — et reste confortable
+sur grand écran : sur PC, le contenu garde une largeur « téléphone » centrée
+au milieu de l'écran plutôt que de s'étirer.
+
+- **Thèmes clair/sombre** : sélecteur dans le bandeau du haut, respecte le
+  thème système par défaut et persiste sans flash au rechargement. Toute la
+  charte (couleurs, dégradés, ombres) est définie via des variables CSS dans
+  `src/app/globals.css` (`:root` pour le clair, `.dark` pour le sombre) —
+  un seul endroit à modifier pour ajuster les couleurs partout.
+- **Couleurs** : dégradé signature violet `#7B3FE4` → bleu `#3B82F6` pour les
+  actions principales et le « hero » des économies ; or `#E8A23C` réservé aux
+  montants d'argent (économies, trop-payé) ; vert/rouge conservés pour les
+  verdicts bon plan / anomalie.
+- **Animations discrètes** : entrée des cartes, appui sur les boutons,
+  remplissage de la barre de progression. Toutes passent par les variantes
+  `motion-safe:` de Tailwind et sont donc désactivées automatiquement si
+  l'utilisateur a activé « Réduire les animations » (`prefers-reduced-motion:
+  reduce`).
+
 ## Stack technique
 
 - [Next.js 16](https://nextjs.org) (App Router, Turbopack) + React 19, TypeScript

@@ -9,7 +9,7 @@ const LABELS: Record<string, string> = {
 
 const TONES: Record<string, string> = {
   envoyee: "border-line text-muted",
-  relancee: "border-amber text-amber",
+  relancee: "border-accent text-accent",
   recue: "border-green text-green",
   comparee: "border-blue text-blue",
 };

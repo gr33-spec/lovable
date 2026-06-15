@@ -19,7 +19,7 @@ export function ComparisonResultView({ result, extracted, supplierEmails }: Comp
   return (
     <div className="flex flex-col gap-4">
       <Verdict
-        tone={hasEconomie ? "green" : "neutral"}
+        tone={hasEconomie ? "accent" : "neutral"}
         label={
           hasEconomie && result.mieuxDisant
             ? `${result.mieuxDisant} est le moins cher`
@@ -81,9 +81,9 @@ export function ComparisonResultView({ result, extracted, supplierEmails }: Comp
       ) : null}
 
       {result.alertes.length > 0 ? (
-        <Card className="bg-amber/10">
+        <Card className="bg-blue/10">
           <p className="mb-2 flex items-center gap-2 font-display text-sm font-bold">
-            <AlertTriangle className="h-5 w-5 text-amber" aria-hidden="true" />
+            <AlertTriangle className="h-5 w-5 text-blue" aria-hidden="true" />
             À vérifier avant de choisir
           </p>
           <ul className="flex flex-col gap-1">

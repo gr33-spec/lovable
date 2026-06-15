@@ -31,8 +31,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f6f5f2" },
-    { media: "(prefers-color-scheme: dark)", color: "#11131a" },
+    { media: "(prefers-color-scheme: light)", color: "#f6f5fb" },
+    { media: "(prefers-color-scheme: dark)", color: "#0e0f1a" },
   ],
 };
 
@@ -48,8 +48,11 @@ export default function RootLayout({
     <html
       lang="fr"
       className={`${archivo.variable} ${spaceMono.variable} ${inter.variable} h-full`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full bg-paper text-ink antialiased">
+      {/* Le script de thème ajoute/enlève .dark avant l'hydratation : un
+          écart HTML serveur/client est attendu sur <html>, d'où ce flag. */}
+      <body className="min-h-full bg-paper text-ink antialiased md:bg-desktop-bg">
         <Script id="theme-init" strategy="beforeInteractive">
           {THEME_INIT_SCRIPT}
         </Script>

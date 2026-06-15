@@ -40,7 +40,7 @@ export default async function DemandePage() {
 
             return (
               <Link key={demande.id} href={`/demande/${demande.id}`} className="block">
-                <Card className="flex flex-col gap-3 transition-transform active:scale-[0.98]">
+                <Card className="flex flex-col gap-3 motion-safe:transition-transform motion-safe:active:scale-[0.98]">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate font-display text-base font-bold">{demande.nom}</p>
