@@ -69,9 +69,9 @@ export function LoginForm({ configured }: { configured: boolean }) {
       const res = await fetch("/api/passkey/login/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ response }),
+        body: JSON.stringify({ response, space }),
       });
-      if (res.ok) return go("/");
+      if (res.ok) return go(space === "gestion" ? "/gestion" : "/");
       const json = await res.json().catch(() => ({}));
       setError(json.error ?? "Face ID refusé.");
     } catch {

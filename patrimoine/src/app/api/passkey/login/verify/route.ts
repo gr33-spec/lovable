@@ -3,6 +3,7 @@ import { verifyAuthenticationResponse } from "@simplewebauthn/server";
 import { clearLoginFailures } from "@/lib/server/db";
 import { findPasskey, touchPasskey } from "@/lib/server/passkeys";
 import { accessState } from "@/lib/server/access";
+import { VIEW_COOKIE, viewCookieOptions } from "@/lib/view";
 import { SESSION_COOKIE, createSessionToken, sessionCookieOptions } from "@/lib/server/session";
 import { CHALLENGE_COOKIE, readChallenge, relyingParty } from "@/lib/server/webauthn";
 
@@ -47,6 +48,8 @@ export async function POST(request: Request) {
   await clearLoginFailures(ip);
   const res = NextResponse.json({ ok: true });
   res.cookies.set(SESSION_COOKIE, createSessionToken({ role: key.role, av: key.av }), sessionCookieOptions);
+  // Propriétaire : version choisie à l'écran de connexion.
+  if (key.role === "owner") res.cookies.set(VIEW_COOKIE, body?.space === "gestion" ? "gestion" : "patrimoine", viewCookieOptions);
   res.cookies.set(CHALLENGE_COOKIE, "", { path: "/api/passkey", maxAge: 0 });
   return res;
 }
