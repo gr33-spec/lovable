@@ -7,7 +7,7 @@ import { SESSION_COOKIE, readSessionToken } from "./lib/server/session";
 const PUBLIC_PATHS = ["/connexion", "/api/login", "/api/passkey/login", "/partage"];
 
 const GESTION_PAGES = ["/gestion", "/patrimoine/logement", "/plus/securite"];
-const GESTION_API = ["/api/data", "/api/ops", "/api/documents", "/api/files", "/api/passkey", "/api/logout"];
+const GESTION_API = ["/api/data", "/api/ops", "/api/documents", "/api/files", "/api/passkey", "/api/logout", "/api/irl"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

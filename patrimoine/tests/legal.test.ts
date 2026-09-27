@@ -180,3 +180,37 @@ test("espace gestion : lecture filtrée et modifications restreintes", async () 
   assert.equal(next.settings.valueGrowthPct, undefined);
   assert.deepEqual(next.settings.dismissedReminders, ["a"]);
 });
+
+test("IRL : indice publié à une date, libellés, révision au même trimestre", async () => {
+  const { irlAt, irlLabel, nextYearSameQuarter, parseIrlLabel } = await import("../src/lib/irl");
+  const series = [
+    { year: 2025, quarter: 2 as const, value: 146.68 },
+    { year: 2025, quarter: 3 as const, value: 145.77 },
+    { year: 2026, quarter: 1 as const, value: 146.9 },
+    { year: 2026, quarter: 2 as const, value: 147.5 },
+  ];
+  assert.equal(irlAt(series, "2026-07-10")?.quarter, 1);
+  assert.equal(irlAt(series, "2026-07-20")?.quarter, 2);
+  assert.equal(irlLabel({ year: 2026, quarter: 2 }), "IRL du 2e trimestre 2026");
+  assert.deepEqual(parseIrlLabel("IRL T2 2025"), { year: 2025, quarter: 2 });
+  assert.deepEqual(parseIrlLabel("IRL du 1er trimestre 2024"), { year: 2024, quarter: 1 });
+  assert.equal(nextYearSameQuarter(series, "IRL du 2e trimestre 2025")?.value, 147.5);
+});
+
+test("caution : un loyer charges comprises par mois, toute la durée du bail", async () => {
+  const { guaranteeTerms } = await import("../src/lib/legal/lease");
+  const g = guaranteeTerms({ rent: 500, charges: 30, durationYears: 3, startDate: "2026-11-01" }, { wholeLease: true });
+  assert.equal(g.monthly, 530);
+  assert.equal(g.months, 36);
+  assert.equal(g.max, 19080);
+  assert.equal(g.end, "2029-11-01");
+});
+
+test("IRL : lecture de la réponse INSEE (SDMX)", async () => {
+  const { parseSdmx } = await import("../src/lib/irl");
+  const xml = `<message:StructureSpecificData><Series IDBANK="001515333"><Obs TIME_PERIOD="2026-Q1" OBS_VALUE="146.9" OBS_STATUS="A"/><Obs OBS_STATUS="A" OBS_VALUE="147.5" TIME_PERIOD="2026-Q2"/></Series></message:StructureSpecificData>`;
+  assert.deepEqual(parseSdmx(xml), [
+    { year: 2026, quarter: 1, value: 146.9 },
+    { year: 2026, quarter: 2, value: 147.5 },
+  ]);
+});

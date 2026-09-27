@@ -310,8 +310,13 @@ function InspectionRow({ tenancyId, kind, onStart, unitId }: { tenancyId: string
 
 /** Bail signé hors application : seules les informations utiles aux quittances et au départ. */
 function ImportedLeaseForm({ tenancy }: { tenancy: Tenancy }) {
-  const { upsert } = useStore();
-  const set = (patch: Partial<Tenancy>) => upsert("tenancies", { ...tenancy, ...patch });
+  const { upsert, data } = useStore();
+  const set = (patch: Partial<Tenancy>) => {
+    upsert("tenancies", { ...tenancy, ...patch });
+    // Loyer et charges : le logement suit (pointage, projections, prochains baux).
+    const unit = data.units.find((u) => u.id === tenancy.unitId);
+    if (unit && ("rent" in patch || "charges" in patch)) upsert("units", { ...unit, ...("rent" in patch ? { rent: patch.rent } : {}), ...("charges" in patch ? { charges: patch.charges } : {}) });
+  };
   const p = tenancy.tenants[0] ?? {};
   const setP = (patch: Partial<typeof p>) => set({ tenants: [{ ...p, ...patch }, ...tenancy.tenants.slice(1)] });
   return (

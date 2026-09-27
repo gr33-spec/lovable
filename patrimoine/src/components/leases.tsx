@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { BellRing, Check, ChevronRight, FileSignature, Landmark, TrendingUp, TriangleAlert } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { useIrlSeries } from "@/lib/use-irl";
+import { irlLabel, nextYearSameQuarter } from "@/lib/irl";
 import type { RentPayment, Unit } from "@/lib/types";
 import { LEASE_TYPES, REVISIONS } from "@/lib/labels";
 import { dateFr, eur, eurCompact, pct } from "@/lib/format";
@@ -105,10 +107,19 @@ export function LeaseSection({ unit }: { unit: Unit }) {
 }
 
 function RevisionTool({ unit, nextRevision }: { unit: Unit; nextRevision?: string }) {
-  const { upsert } = useStore();
+  const { upsert, data } = useStore();
   const [open, setOpen] = useState(false);
   const [newLabel, setNewLabel] = useState<string | undefined>();
   const [newValue, setNewValue] = useState<number | undefined>();
+  const irl = useIrlSeries();
+  // Indice de révision proposé automatiquement : même trimestre, un an après l'indice de référence.
+  const suggested = irl ? nextYearSameQuarter(irl, unit.indexLabel) : undefined;
+  if (open && suggested && newLabel === undefined && newValue === undefined) {
+    queueMicrotask(() => {
+      setNewLabel(irlLabel(suggested));
+      setNewValue(suggested.value);
+    });
+  }
   const today = todayIso();
   const proposal = revisedRent(unit.rent, unit.indexValue, newValue);
   const date = nextRevision && nextRevision <= today ? nextRevision : today;
@@ -126,6 +137,9 @@ function RevisionTool({ unit, nextRevision }: { unit: Unit; nextRevision?: strin
       lastRevisionDate: date,
       rentHistory: history,
     });
+    // Le bail en cours suit le nouveau loyer et le nouvel indice de référence.
+    const active = data.tenancies.find((t) => t.unitId === unit.id && t.status === "actif");
+    if (active && rent !== undefined) upsert("tenancies", { ...active, rent, indexLabel: newLabel ?? active.indexLabel, indexValue: newValue ?? active.indexValue });
     setOpen(false);
     setNewLabel(undefined);
     setNewValue(undefined);
@@ -162,6 +176,7 @@ function RevisionTool({ unit, nextRevision }: { unit: Unit; nextRevision?: strin
           <span className="text-muted">Données insuffisantes : loyer, indice de référence et nouvel indice nécessaires.</span>
         )}
       </div>
+      {suggested && newLabel === irlLabel(suggested) && <p className="text-[12px] text-pos">Nouvel indice repris automatiquement de l&apos;INSEE (même trimestre, un an après).</p>}
       <p className="text-[12px] text-muted">
         Calcul : loyer × nouvel indice ÷ indice de référence. Vérifiez la clause du bail et les éventuels plafonnements en vigueur : aucune règle n&apos;est appliquée automatiquement.
       </p>

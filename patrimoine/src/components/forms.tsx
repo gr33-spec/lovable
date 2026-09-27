@@ -140,8 +140,15 @@ export function BuildingForm({ building }: { building: Building }) {
 }
 
 export function UnitForm({ unit }: { unit: Unit }) {
-  const { upsert, role } = useStore();
-  const set = (patch: Partial<Unit>) => upsert("units", { ...unit, ...patch });
+  const { upsert, role, data } = useStore();
+  const set = (patch: Partial<Unit>) => {
+    upsert("units", { ...unit, ...patch });
+    // Loyer et charges modifiés : le bail en cours suit (quittances, pointage, prochains baux).
+    const active = data.tenancies.find((t) => t.unitId === unit.id && t.status === "actif");
+    if (active && ("rent" in patch || "charges" in patch)) {
+      upsert("tenancies", { ...active, ...("rent" in patch ? { rent: patch.rent } : {}), ...("charges" in patch ? { charges: patch.charges } : {}) });
+    }
+  };
   return (
     <Stack>
       <Grid2>

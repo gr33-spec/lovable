@@ -195,8 +195,12 @@ export interface Guarantor extends Person {
   kind: "personne" | "visale" | "autre";
   /** Montant maximal garanti (principal et accessoires), en euros. */
   maxAmount?: number;
-  /** Durée de l'engagement en années (vide = durée du bail et renouvellements, voir acte). */
+  /** Durée de l'engagement en années (si différente de la durée du bail). */
   durationYears?: number;
+  /** Engagement pour toute la durée du bail (tant que le bail court). */
+  wholeLease?: boolean;
+  /** Montant mensuel garanti (loyer + charges). */
+  monthlyAmount?: number;
   visaNumber?: string;
 }
 
@@ -235,6 +239,8 @@ export interface Tenancy {
   // Révision
   indexLabel?: string;
   indexValue?: number;
+  /** Indice repris automatiquement de l'INSEE (mis à jour avec la date de signature). */
+  indexAuto?: boolean;
   // Zone tendue
   referenceRent?: number;
   referenceRentMax?: number;

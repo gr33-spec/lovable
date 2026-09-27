@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { Check, ChevronLeft, ChevronRight, ClipboardCheck, Plus, Sparkles, Trash2, UserMinus, UserPlus } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { useIrlSeries } from "@/lib/use-irl";
+import { irlAt, irlLabel } from "@/lib/irl";
 import type { Building, Company, Deduction, Guarantor, Person, Tenancy, Unit } from "@/lib/types";
 import { dateFr, eur } from "@/lib/format";
 import { todayIso } from "@/lib/engine/leases";
@@ -27,7 +29,7 @@ import {
   unpaidDuring,
 } from "@/lib/tenancy";
 import { compareInspections, newEntryInspection, newExitInspection, stateLabel } from "@/lib/legal/inspection";
-import { ANNEXES, CONSTRUCTION_PERIODS } from "@/lib/legal/lease";
+import { ANNEXES, CONSTRUCTION_PERIODS, guaranteeTerms } from "@/lib/legal/lease";
 import { depositSettlement, lateDepositPenalty, leaseYears, maxDeposit, minDurationYears } from "@/lib/legal/rules";
 import { leaseVersionFor } from "@/lib/legal/versions";
 import { Button, Card, DateField, Grid2, NumberField, Page, PageHeader, Segmented, SelectField, Stack, TextField, cx } from "../ui";
@@ -486,9 +488,15 @@ function TenantsStep({ tenancy, ensure }: { tenancy?: Tenancy; ensure: () => Ten
 }
 
 function ConditionsStep({ tenancy, ensure, building, company, unit }: { tenancy?: Tenancy; ensure: () => Tenancy; building?: Building; company?: Company; unit: Unit }) {
-  const { upsert } = useStore();
+  const { upsert, data } = useStore();
   const t = tenancy ?? undefined;
   const set = (patch: Partial<Tenancy>) => upsert("tenancies", { ...(t ?? ensure()), ...patch });
+  const irl = useIrlSeries();
+  // Indice INSEE repris automatiquement : dernier publié à la date de signature.
+  const auto = irl && t && (t.indexAuto || !t.indexLabel) ? irlAt(irl, t.signDate || todayIso()) : undefined;
+  if (auto && t && (t.indexLabel !== irlLabel(auto) || t.indexValue !== auto.value)) {
+    queueMicrotask(() => set({ indexLabel: irlLabel(auto), indexValue: auto.value, indexAuto: true }));
+  }
   const min = minDurationYears(company);
   const max = maxDeposit(t?.rent);
   const version = leaseVersionFor(t?.signDate || t?.startDate);
@@ -500,13 +508,10 @@ function ConditionsStep({ tenancy, ensure, building, company, unit }: { tenancy?
             <DateField label="Date d'entrée" value={t?.startDate} onChange={(v) => set({ startDate: v })} />
             <NumberField label="Durée" suffix="ans" integer value={t?.durationYears} onChange={(v) => set({ durationYears: v })} />
           </Grid2>
-          {t?.durationYears && t.durationYears < min ? (
-            <p className="-mt-2 rounded-xl bg-warn/10 px-3 py-2 text-[12px] text-warn">
-              Bail de {t.durationYears} ans : la loi impose {min} ans à une société bailleresse, sauf SCI familiale (associés parents ou alliés jusqu&apos;au 4e degré). Si {company?.name ?? "la société"} en est une, indiquez-le dans Plus → Informations des sociétés ; sinon le locataire pourra se prévaloir d&apos;un bail de {min} ans.
-            </p>
-          ) : (
-            <p className="-mt-2 text-[12px] text-muted">Durée réglée dans Plus → Informations des sociétés.</p>
-          )}
+          <p className="-mt-2 text-[12px] text-muted">
+            Durée par défaut : {leaseYears(data.settings)} ans (modifiable ici ou dans Plus → Informations des sociétés).
+            {t?.durationYears && t.durationYears < min ? ` Minimum légal pour une société bailleresse non familiale : ${min} ans.` : ""}
+          </p>
           <Grid2>
             <NumberField label="Loyer hors charges" value={t?.rent} onChange={(v) => set({ rent: v })} />
             <NumberField label="Charges" value={t?.charges} onChange={(v) => set({ charges: v })} />
@@ -529,25 +534,18 @@ function ConditionsStep({ tenancy, ensure, building, company, unit }: { tenancy?
       <Card>
         <Stack>
           <Grid2>
-            <TextField label="Indice de référence (IRL)" value={t?.indexLabel} placeholder="Ex. IRL T2 2026" onChange={(v) => set({ indexLabel: v })} />
-            <NumberField label="Valeur" suffix="" value={t?.indexValue} onChange={(v) => set({ indexValue: v })} />
+            <TextField label="Indice de référence (IRL)" value={t?.indexLabel} placeholder="Ex. IRL T2 2026" onChange={(v) => set({ indexLabel: v, indexAuto: false })} />
+            <NumberField label="Valeur" suffix="" value={t?.indexValue} onChange={(v) => set({ indexValue: v, indexAuto: false })} />
           </Grid2>
-          <p className="-mt-2 text-[12px] text-muted">Dernier indice publié par l&apos;INSEE à la date de signature. Il servira aux révisions annuelles (rappel automatique).</p>
-          {!building ? null : building.zoneTendue === undefined ? (
-            <div>
-              <div className="mb-1 px-1 text-[13px] font-medium text-ink-2">La commune est-elle en zone tendue ?</div>
-              <Segmented
-                value={"?" as string}
-                onChange={(v) => building && v !== "?" && upsert("buildings", { ...building, zoneTendue: v === "oui" })}
-                options={[
-                  { value: "oui", label: "Oui" },
-                  { value: "non", label: "Non" },
-                  { value: "?", label: "Je ne sais pas" },
-                ]}
-              />
-              <p className="mt-1 px-1 text-[12px] text-muted">Question posée une seule fois pour l&apos;immeuble. Vérifiable sur service-public.fr (simulateur « zone tendue »).</p>
-            </div>
-          ) : building.zoneTendue ? (
+          <p className="-mt-2 text-[12px] text-muted">
+            {t?.indexAuto
+              ? "Repris automatiquement de l'INSEE : dernier indice publié à la date de signature (modifiable)."
+              : irl
+                ? "Indice saisi manuellement."
+                : "Indice INSEE indisponible pour le moment : saisissez le dernier IRL publié à la date de signature."}{" "}
+            Il servira aux révisions annuelles (rappel automatique).
+          </p>
+          {building?.zoneTendue ? (
             <>
               <p className="text-[13px] text-ink-2">Zone tendue : l&apos;évolution du loyer à la relocation est encadrée. Loyer du précédent locataire repris automatiquement : <b>{eur(t?.previousTenantRent)}</b>.</p>
               <Grid2>
@@ -590,7 +588,7 @@ function GuarantorStep({ tenancy, ensure }: { tenancy?: Tenancy; ensure: () => T
     <Stack>
       <Segmented
         value={kind ?? ("?" as string)}
-        onChange={(v) => set(v === "aucun" ? [] : [{ durationYears: t?.durationYears, ...(g ?? {}), kind: v as Guarantor["kind"] }])}
+        onChange={(v) => set(v === "aucun" ? [] : [{ wholeLease: true, ...(g ?? {}), kind: v as Guarantor["kind"] }])}
         options={[
           { value: "aucun", label: "Aucune" },
           { value: "personne", label: "Caution" },
@@ -609,12 +607,23 @@ function GuarantorStep({ tenancy, ensure }: { tenancy?: Tenancy; ensure: () => T
               <DateField label="Date de naissance" value={g.birthDate} onChange={(v) => set([{ ...g, birthDate: v }])} />
               <TextField label="Lieu de naissance" value={g.birthPlace} onChange={(v) => set([{ ...g, birthPlace: v }])} />
             </Grid2>
-            <Grid2>
-              <NumberField label="Montant maximal garanti" value={g.maxAmount} onChange={(v) => set([{ ...g, maxAmount: v }])} />
-              <NumberField label="Durée" suffix="ans" integer value={g.durationYears} onChange={(v) => set([{ ...g, durationYears: v }])} />
-            </Grid2>
+            <NumberField
+              label="Montant garanti par mois"
+              value={g.monthlyAmount ?? guaranteeTerms(t ?? ({} as Tenancy), g).monthly}
+              onChange={(v) => set([{ ...g, monthlyAmount: v }])}
+              hint="Par défaut : un loyer, charges comprises (suit automatiquement le loyer du bail)."
+            />
+            <Segmented
+              value={g.wholeLease === false ? "annees" : "bail"}
+              onChange={(v) => set([{ ...g, wholeLease: v === "bail" }])}
+              options={[
+                { value: "bail", label: "Toute la durée du bail" },
+                { value: "annees", label: "Nombre d'années" },
+              ]}
+            />
+            {g.wholeLease === false && <NumberField label="Durée" suffix="ans" integer value={g.durationYears} onChange={(v) => set([{ ...g, durationYears: v }])} />}
             <p className="text-[12px] text-muted">
-              Suggestion : {t?.rent ? eur(((t.rent ?? 0) + (t.charges ?? 0)) * 12 * (t.durationYears ?? 3)) : "—"} (loyer + charges sur la durée du bail). L&apos;acte de cautionnement est généré et annexé au bail ; la caution y écrit elle-même la mention prévue par l&apos;article 2297 du code civil.
+              Plafond de l&apos;engagement : {eur(guaranteeTerms(t ?? ({} as Tenancy), g).max)} ({eur(guaranteeTerms(t ?? ({} as Tenancy), g).monthly)} × {`${guaranteeTerms(t ?? ({} as Tenancy), g).months} mois`}). L&apos;acte de cautionnement est généré et annexé au bail ; la caution y écrit elle-même la mention prévue par l&apos;article 2297 du code civil.
             </p>
           </Stack>
         </Card>
@@ -662,17 +671,6 @@ function UnitInfoStep({ unit, building }: { unit: Unit; building?: Building }) {
             />
           )}
           {building && show("constructionPeriod", mb) && <SelectField label="Période de construction" value={building.constructionPeriod} options={[...CONSTRUCTION_PERIODS]} onChange={(v) => setB({ constructionPeriod: v })} />}
-          {building && show("zoneTendue", mb) && (
-            <SelectField
-              label="Commune en zone tendue"
-              value={building.zoneTendue === undefined ? undefined : building.zoneTendue ? "oui" : "non"}
-              options={[
-                { value: "non", label: "Non" },
-                { value: "oui", label: "Oui" },
-              ]}
-              onChange={(v) => setB({ zoneTendue: v === undefined ? undefined : v === "oui" })}
-            />
-          )}
           {show("surface", mu) && <NumberField label="Surface habitable" suffix="m²" value={unit.surface} onChange={(v) => setU({ surface: v })} />}
           {show("mainRooms", mu) && <NumberField label="Nombre de pièces principales" suffix="" integer value={unit.mainRooms} onChange={(v) => setU({ mainRooms: v })} />}
           {show("habitatType", mu) && (
