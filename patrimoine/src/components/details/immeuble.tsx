@@ -14,6 +14,7 @@ import { BuildingForm, UnitForm, WorkForm } from "../forms";
 import { QuickLoan, QuickWork } from "../quick-add";
 import { Button, Card, ConfirmDelete, Divided, Empty, Kpi, Page, PageHeader, Pill, Row, SectionTitle, Sheet } from "../ui";
 import { AddLink } from "./societe";
+import { BuildingValueHistory } from "../value-history";
 
 export function BuildingDetail({ id }: { id: string }) {
   return (
@@ -168,6 +169,8 @@ function BuildingDetailInner({ id }: { id: string }) {
             </Divided>
           )}
         </Card>
+
+        <BuildingValueHistory building={building} />
 
         <SectionTitle>Informations</SectionTitle>
         <Card className="space-y-1.5 text-[15px]">

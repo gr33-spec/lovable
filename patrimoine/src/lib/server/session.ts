@@ -47,6 +47,37 @@ export function verifySessionToken(token: string | undefined, now = Date.now()):
   }
 }
 
+/** Empreinte courte du secret : change quand le mot de passe change. */
+export function secretTag(): string | undefined {
+  const key = secret();
+  return key ? createHash("sha256").update(`tag|${key}`).digest("hex").slice(0, 24) : undefined;
+}
+
+/** Valeur signée à durée de vie courte (défi Face ID). */
+export function signShortLived(value: string, ttlMs: number, now = Date.now()): string {
+  const key = secret();
+  if (!key) throw new Error("APP_PASSWORD manquant");
+  const payload = Buffer.from(JSON.stringify({ v: value, exp: now + ttlMs })).toString("base64url");
+  return `${payload}.${sign(payload, `${key}|short-lived`)}`;
+}
+
+export function readShortLived(token: string | undefined, now = Date.now()): string | undefined {
+  const key = secret();
+  if (!key || !token) return undefined;
+  const [payload, signature] = token.split(".");
+  if (!payload || !signature) return undefined;
+  // Clé distincte de celle des sessions : un défi ne peut jamais servir de session.
+  const expected = Buffer.from(sign(payload, `${key}|short-lived`));
+  const given = Buffer.from(signature);
+  if (expected.length !== given.length || !timingSafeEqual(expected, given)) return undefined;
+  try {
+    const { v, exp } = JSON.parse(Buffer.from(payload, "base64url").toString());
+    return typeof v === "string" && typeof exp === "number" && exp > now ? v : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 /** Comparaison à temps constant du mot de passe saisi. */
 export function checkPassword(input: string): boolean {
   const expected = process.env.APP_PASSWORD;

@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { FileSpreadsheet, Gauge, CalendarClock, CircleAlert, FileText, Flag, Hammer, HandCoins, History, LogOut, Percent, Smartphone, Sparkles, Trash2, Wand2 } from "lucide-react";
+import { BellRing, Coins, ScanFace, Share2, LineChart as LineIcon, FileSpreadsheet, Gauge, CalendarClock, CircleAlert, FileText, Flag, Hammer, HandCoins, History, LogOut, Percent, Smartphone, Sparkles, Trash2, Wand2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { demoData, hasDemo, withoutDemo } from "@/lib/demo";
 import { qualityIssues } from "@/lib/engine/quality";
+import { reminders, todayIso } from "@/lib/engine/leases";
 import { Button, Card, Divided, Page, PageHeader, Row, SectionTitle, Sheet } from "@/components/ui";
 
 export default function PlusPage() {
@@ -15,6 +16,7 @@ export default function PlusPage() {
   const [busy, setBusy] = useState(false);
   const issues = qualityIssues(data, projection.snapshot);
   const demo = hasDemo(data);
+  const alerts = reminders(data, todayIso(), projection.snapshot.resolvedLoans);
   const worksPlanned = data.works.filter((w) => w.status !== "termine").length;
 
   const logout = async () => {
@@ -49,6 +51,9 @@ export default function PlusPage() {
         <SectionTitle>Pilotage</SectionTitle>
         <Card className="py-1">
           <Divided>
+            <Row href="/plus/rappels" icon={<BellRing size={18} />} title="Rappels" subtitle={alerts.length ? `${alerts.length} à traiter` : "Fins de bail, révisions, crédits"} />
+            <Row href="/plus/loyers" icon={<Coins size={18} />} title="Loyers et encaissements" subtitle="Pointage mensuel, impayés" />
+            <Row href="/plus/historique" icon={<LineIcon size={18} />} title="Historique et plus-values" subtitle="Valeurs passées, plus-values latentes" />
             <Row href="/plus/bilans" icon={<FileSpreadsheet size={18} />} title="Bilans et comptes annuels" subtitle={`${data.statements.length} bilan(s) · import PDF intelligent`} />
             <Row href="/plus/indicateurs" icon={<Gauge size={18} />} title="Indicateurs financiers" subtitle="DSCR, rendement, LTV, CAF…" />
             <Row href="/plus/travaux" icon={<Hammer size={18} />} title="Travaux" subtitle={`${worksPlanned} à venir`} />
@@ -68,6 +73,8 @@ export default function PlusPage() {
         <Card className="py-1">
           <Divided>
             <Row href="/plus/sauvegardes" icon={<History size={18} />} title="Sauvegardes" subtitle="Exporter, importer, restaurer" />
+            <Row href="/plus/partage" icon={<Share2 size={18} />} title="Partager en lecture seule" subtitle="Banquier, comptable, associé · avec expiration" />
+            <Row href="/api/export-excel" icon={<FileSpreadsheet size={18} />} title="Exporter en Excel" subtitle="Toutes les données, un onglet par thème" />
             <Row href="/bienvenue?etape=1" icon={<Wand2 size={18} />} title="Assistant de démarrage" subtitle="Structure, immeubles, crédits, revenus" />
             {demo ? (
               <Row onClick={() => setDemoSheet(true)} icon={<Trash2 size={18} />} title="Supprimer la démonstration" subtitle="Effacer les données d'exemple" />
@@ -88,6 +95,7 @@ export default function PlusPage() {
         <Card className="py-1">
           <Divided>
             <Row onClick={() => setHomeSheet(true)} icon={<Smartphone size={18} />} title="Ajouter à l'écran d'accueil" subtitle="Comme une application iPhone" />
+            <Row href="/plus/securite" icon={<ScanFace size={18} />} title="Connexion Face ID" subtitle="Se connecter sans mot de passe" />
             <Row onClick={logout} icon={<LogOut size={18} />} title="Se déconnecter" />
           </Divided>
         </Card>

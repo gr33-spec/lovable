@@ -1,8 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, verifySessionToken } from "./lib/server/session";
 
-// Aucune page ni donnée n'est accessible sans session valide.
-const PUBLIC_PATHS = ["/connexion", "/api/login"];
+// Aucune page ni donnée n'est accessible sans session valide, sauf les
+// liens de partage : /partage/<jeton> vérifie lui-même son jeton (expiration,
+// révocation) et n'offre qu'une lecture seule.
+const PUBLIC_PATHS = ["/connexion", "/api/login", "/api/passkey/login", "/partage"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

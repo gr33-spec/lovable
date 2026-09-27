@@ -57,7 +57,15 @@ export interface Building {
   recentWorks?: string;
   plannedWorks?: string;
   notes?: string;
+  /** Valeurs estimées passées, une par année (historique). */
+  valueHistory?: ValuePoint[];
   demo?: boolean;
+}
+
+export interface ValuePoint {
+  year: number;
+  value: number;
+  note?: string;
 }
 
 export type UnitType = "studio" | "T1" | "T2" | "T3" | "T4" | "T5+" | "commerce" | "bureau" | "parking" | "autre";
@@ -79,7 +87,45 @@ export interface Unit {
   condition?: Condition;
   plannedWorks?: string;
   value?: number;
+  // ——— Bail ———
+  leaseType?: LeaseType;
+  /** Date de prise d'effet du bail (AAAA-MM-JJ). */
+  leaseStart?: string;
+  /** Durée du bail en années (renouvellement tacite pour la même durée). */
+  leaseDurationYears?: number;
+  /** Date de fin saisie directement (prioritaire sur début + durée). */
+  leaseEnd?: string;
+  /** Révision du loyer : annuelle (par défaut), triennale ou aucune. */
+  revision?: "annuelle" | "triennale" | "aucune";
+  /** Indice de référence du loyer actuel, saisi manuellement (ex. « IRL T2 2025 »). */
+  indexLabel?: string;
+  indexValue?: number;
+  /** Date de la dernière révision appliquée (ou ignorée). */
+  lastRevisionDate?: string;
+  rentHistory?: RentChange[];
+  /** Pointage des encaissements, clé « AAAA-MM ». */
+  payments?: Record<string, RentPayment>;
   demo?: boolean;
+}
+
+export type LeaseType = "nue" | "meuble" | "commercial" | "professionnel" | "autre";
+
+export interface RentChange {
+  date: string;
+  rent: number;
+  previousRent?: number;
+  indexLabel?: string;
+  indexValue?: number;
+  note?: string;
+}
+
+export interface RentPayment {
+  status: "paye" | "impaye" | "partiel";
+  /** Montant attendu (loyer + charges) au moment du pointage. */
+  due?: number;
+  /** Montant réellement encaissé (paiement partiel). */
+  paid?: number;
+  note?: string;
 }
 
 export interface Loan {
@@ -281,6 +327,8 @@ export interface Settings {
   rentGrowthPct?: number;
   chargesGrowthPct?: number;
   ownerName?: string;
+  /** Rappels marqués comme traités (identifiant incluant l'échéance). */
+  dismissedReminders?: string[];
 }
 
 export interface AppData {
