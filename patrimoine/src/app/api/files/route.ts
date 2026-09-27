@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { guardApi } from "@/lib/server/guard";
+import { BOTH, guardApi } from "@/lib/server/guard";
 import { CHUNK_BYTES, MAX_FILE_BYTES, createFile } from "@/lib/server/files";
 
 /** Déclare un fichier à envoyer par morceaux. */
 export async function POST(request: Request) {
-  const denied = await guardApi(request);
+  const denied = await guardApi(request, BOTH);
   if (denied) return denied;
   const body = await request.json().catch(() => ({}));
   const name = typeof body.name === "string" ? body.name : "document.pdf";

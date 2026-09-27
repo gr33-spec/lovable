@@ -2,7 +2,8 @@
 
 import { Suspense, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CheckCircle2 } from "lucide-react";
+import Link from "next/link";
+import { CheckCircle2, UserRound } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { eur } from "@/lib/format";
 import { todayIso, unpaidByUnit } from "@/lib/engine/leases";
@@ -24,7 +25,8 @@ export default function GestionPage() {
 }
 
 function Gestion() {
-  const { data, projection, setSettings } = useStore();
+  const { data, projection, setSettings, role } = useStore();
+  const gestion = role === "gestion";
   const router = useRouter();
   const params = useSearchParams();
   const view = (["loyers", "locataires", "afaire"].includes(params.get("vue") ?? "") ? params.get("vue") : "loyers") as View;
@@ -52,7 +54,17 @@ function Gestion() {
 
   return (
     <>
-      <PageHeader title="Gestion" subtitle="Loyers, locataires et démarches" />
+      <PageHeader
+        title={gestion ? { loyers: "Loyers", locataires: "Locataires", afaire: "À faire" }[view] : "Gestion"}
+        subtitle={gestion ? data.settings.groupName || "Gestion locative" : "Loyers, locataires et démarches"}
+        action={
+          gestion ? (
+            <Link href="/plus/securite" aria-label="Mon compte" className="flex h-10 w-10 items-center justify-center rounded-full bg-soft text-navy">
+              <UserRound size={19} />
+            </Link>
+          ) : undefined
+        }
+      />
       <Page>
         <div className="grid grid-cols-3 gap-2">
           <button onClick={() => setView("locataires")} className="soft-card rounded-[20px] px-3 py-3 text-left">
@@ -71,7 +83,7 @@ function Gestion() {
           </button>
         </div>
 
-        <div className="mt-4 flex rounded-2xl bg-black/5 p-1">
+        <div className={cx("mt-4 flex rounded-2xl bg-black/5 p-1", gestion && "hidden")}>
           {TABS.map((t) => (
             <button
               key={t.value}

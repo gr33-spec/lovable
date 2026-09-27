@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { Building2, CloudOff, Ellipsis, KeyRound, House, Check, LoaderCircle } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect } from "react";
+import { Building2, CloudOff, Coins, Ellipsis, KeyRound, House, Check, ListChecks, LoaderCircle, Users } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { unpaidByUnit } from "@/lib/engine/leases";
 import { cx } from "./ui";
@@ -18,8 +18,8 @@ const TABS = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { data } = useStore();
-  const onboarding = pathname.startsWith("/bienvenue");
+  const { data, role } = useStore();
+  const onboarding = pathname.startsWith("/bienvenue") && role === "owner";
   // Les sauvegardes restent toujours accessibles (restauration après un incident).
   const rescue = pathname.startsWith("/plus/sauvegardes");
   const isEmpty = data.companies.length === 0 && data.buildings.length === 0;
@@ -27,8 +27,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const unpaid = unpaidByUnit(data.units).length;
 
   useEffect(() => {
-    if (!onboarding && !rescue && !data.settings.onboardingDone && isEmpty) router.replace("/bienvenue");
-  }, [onboarding, rescue, data.settings.onboardingDone, isEmpty, router]);
+    if (role === "owner" && !onboarding && !rescue && !data.settings.onboardingDone && isEmpty) router.replace("/bienvenue");
+  }, [role, onboarding, rescue, data.settings.onboardingDone, isEmpty, router]);
+
+  if (role === "gestion") {
+    return (
+      <>
+        <SaveIndicator />
+        {children}
+        <Suspense>
+          <GestionNav unpaid={unpaid} />
+        </Suspense>
+      </>
+    );
+  }
 
   return (
     <>
@@ -68,6 +80,40 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
       )}
     </>
+  );
+}
+
+/** Barre d'onglets de l'espace gestion locative. */
+function GestionNav({ unpaid }: { unpaid: number }) {
+  const pathname = usePathname();
+  const vue = useSearchParams().get("vue") ?? "loyers";
+  const tabs = [
+    { vue: "loyers", label: "Loyers", icon: Coins, badge: unpaid },
+    { vue: "locataires", label: "Locataires", icon: Users },
+    { vue: "afaire", label: "À faire", icon: ListChecks },
+  ];
+  return (
+    <nav className="safe-bottom pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-2">
+      <div className="pointer-events-auto mx-auto flex max-w-md rounded-[28px] border border-white/60 bg-white/92 p-1.5 shadow-[0_10px_30px_-6px_rgba(11,37,69,0.25)] backdrop-blur-2xl">
+        {tabs.map((t) => {
+          const active = pathname.startsWith("/patrimoine/logement") ? t.vue === "locataires" : pathname === "/gestion" && vue === t.vue;
+          const Icon = t.icon;
+          return (
+            <Link
+              key={t.vue}
+              href={`/gestion?vue=${t.vue}`}
+              className={cx("relative flex flex-1 flex-col items-center gap-0.5 rounded-[22px] py-1.5 text-[10.5px] font-semibold transition-colors", active ? "bg-navy text-white shadow-sm" : "text-muted active:bg-black/5")}
+            >
+              <Icon size={22} strokeWidth={active ? 2.2 : 1.8} />
+              {t.label}
+              {t.badge ? (
+                <span className="absolute right-[18%] top-0 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-neg px-1 text-[10px] font-bold text-white ring-2 ring-white">{t.badge}</span>
+              ) : null}
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
   );
 }
 

@@ -13,6 +13,8 @@ import { project, type Projection } from "./engine/projection";
 export type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 interface StoreValue {
+  /** Espace connecté : propriétaire (tout) ou gestion locative (périmètre réduit). */
+  role: "owner" | "gestion";
   data: AppData;
   version: number;
   status: SaveStatus;
@@ -33,10 +35,12 @@ const DEBOUNCE_MS = 500;
 export function StoreProvider({
   initialData,
   initialVersion,
+  role = "owner",
   children,
 }: {
   initialData: AppData;
   initialVersion: number;
+  role?: "owner" | "gestion";
   children: React.ReactNode;
 }) {
   const [data, setData] = useState(initialData);
@@ -207,8 +211,8 @@ export function StoreProvider({
   const projection = useMemo(() => project(data, nowMonth), [data, nowMonth]);
 
   const value = useMemo<StoreValue>(
-    () => ({ data, version, status, nowMonth, projection, upsert, remove, removeMany, setSettings, replaceAll, reload }),
-    [data, version, status, nowMonth, projection, upsert, remove, removeMany, setSettings, replaceAll, reload],
+    () => ({ role, data, version, status, nowMonth, projection, upsert, remove, removeMany, setSettings, replaceAll, reload }),
+    [role, data, version, status, nowMonth, projection, upsert, remove, removeMany, setSettings, replaceAll, reload],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { clearLoginFailures, isLoginBlocked, recordLoginFailure } from "@/lib/server/db";
+import { checkAccessPassword } from "@/lib/server/access";
 import {
   SESSION_COOKIE,
   checkPassword,
@@ -25,6 +26,19 @@ export async function POST(request: Request) {
   }
   const body = await request.json().catch(() => ({}));
   const password = typeof body?.password === "string" ? body.password : "";
+  // Espace gestion locative : mot de passe défini par le propriétaire.
+  if (body?.space === "gestion") {
+    const av = await checkAccessPassword(password);
+    if (av === null) {
+      await recordLoginFailure(ip);
+      await new Promise((r) => setTimeout(r, 400));
+      return NextResponse.json({ error: "Mot de passe incorrect ou accès non activé." }, { status: 401 });
+    }
+    await clearLoginFailures(ip);
+    const response = NextResponse.json({ ok: true, home: "/gestion" });
+    response.cookies.set(SESSION_COOKIE, createSessionToken({ role: "gestion", av }), sessionCookieOptions);
+    return response;
+  }
   if (!checkPassword(password)) {
     await recordLoginFailure(ip);
     await new Promise((r) => setTimeout(r, 400));

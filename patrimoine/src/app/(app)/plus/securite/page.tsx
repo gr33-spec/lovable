@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { KeyRound, ScanFace, Trash2 } from "lucide-react";
 import { browserSupportsWebAuthn, startRegistration } from "@simplewebauthn/browser";
+import { LogOut } from "lucide-react";
+import { useStore } from "@/lib/store";
 import { Button, Card, Page, PageHeader, SectionTitle, TextField } from "@/components/ui";
 
 interface Passkey {
@@ -15,6 +17,7 @@ interface Passkey {
 const dateFr = (iso: string) => new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
 
 export default function SecuritePage() {
+  const { role } = useStore();
   const [keys, setKeys] = useState<Passkey[] | null>(null);
   const [name, setName] = useState<string | undefined>("iPhone");
   const [busy, setBusy] = useState(false);
@@ -46,7 +49,7 @@ export default function SecuritePage() {
       });
       if (!res.ok) throw new Error("verify");
       try {
-        localStorage.setItem("patrimoine-passkey", "1");
+        localStorage.setItem(role === "gestion" ? "patrimoine-passkey-gestion" : "patrimoine-passkey", "1");
       } catch {
         /* stockage indisponible : le bouton Face ID ne sera pas proposé automatiquement */
       }
@@ -65,7 +68,7 @@ export default function SecuritePage() {
 
   return (
     <>
-      <PageHeader title="Sécurité" back="/plus" subtitle="Connexion Face ID" />
+      <PageHeader title={role === "gestion" ? "Mon compte" : "Sécurité"} back={role === "gestion" ? "/gestion" : "/plus"} subtitle={role === "gestion" ? "Accès gestion locative" : "Connexion Face ID"} />
       <Page>
         {message && <div className={`mb-4 rounded-2xl px-4 py-3 text-sm ${message.ok ? "bg-pos/10 text-pos" : "bg-neg/10 text-neg"}`}>{message.text}</div>}
         <Card>
@@ -117,8 +120,25 @@ export default function SecuritePage() {
           )}
         </Card>
         <p className="mt-4 px-1 text-[13px] text-muted">
-          Le mot de passe fonctionne toujours. Changer le mot de passe (variable APP_PASSWORD) désactive toutes les clés Face ID et toutes les sessions.
+          {role === "gestion"
+            ? "Le mot de passe fonctionne toujours. S'il est changé, Face ID devra être réactivé."
+            : "Le mot de passe fonctionne toujours. Changer le mot de passe (variable APP_PASSWORD) désactive toutes les clés Face ID et toutes les sessions."}
         </p>
+              {role === "gestion" && (
+          <div className="mt-6">
+            <Button
+              full
+              variant="secondary"
+              icon={<LogOut size={18} />}
+              onClick={async () => {
+                await fetch("/api/logout", { method: "POST" });
+                window.location.href = "/connexion";
+              }}
+            >
+              Se déconnecter
+            </Button>
+          </div>
+        )}
       </Page>
     </>
   );

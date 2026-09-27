@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { guardApi } from "@/lib/server/guard";
+import { BOTH, currentSession, guardApi } from "@/lib/server/guard";
 import { CHUNK_BYTES, deleteFile, putChunk, readFile } from "@/lib/server/files";
 
 type Ctx = { params: Promise<{ id: string }> };
 
 /** Envoi d'un morceau : PUT /api/files/:id?i=N (corps binaire). */
 export async function PUT(request: Request, ctx: Ctx) {
-  const denied = await guardApi(request);
+  const denied = await guardApi(request, BOTH);
   if (denied) return denied;
   const { id } = await ctx.params;
   const idx = Number(new URL(request.url).searchParams.get("i"));
@@ -22,11 +22,13 @@ export async function PUT(request: Request, ctx: Ctx) {
 
 /** Consultation du PDF (ouvre dans le navigateur). */
 export async function GET(request: Request, ctx: Ctx) {
-  const denied = await guardApi(request);
+  const denied = await guardApi(request, BOTH);
   if (denied) return denied;
   const { id } = await ctx.params;
   const file = await readFile(id).catch(() => undefined);
   if (!file) return NextResponse.json({ error: "Fichier introuvable" }, { status: 404 });
+  // L'espace gestion ne consulte que des photos (états des lieux).
+  if ((await currentSession())?.role === "gestion" && !file.mime.startsWith("image/")) return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
   return new NextResponse(new Uint8Array(file.data), {
     headers: {
       "Content-Type": file.mime,

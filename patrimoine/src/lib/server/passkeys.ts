@@ -31,7 +31,9 @@ async function ready(): Promise<void> {
            rp_id text NOT NULL,
            created_at timestamptz NOT NULL DEFAULT now(),
            last_used_at timestamptz
-         );`,
+         );
+         ALTER TABLE passkey ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'owner';
+         ALTER TABLE passkey ADD COLUMN IF NOT EXISTS av integer;`,
       )
       .then(() => undefined)
       .catch((err) => {
@@ -50,6 +52,8 @@ export interface StoredPasskey {
   name: string;
   createdAt: string;
   lastUsedAt?: string;
+  role: "owner" | "gestion";
+  av?: number;
 }
 
 function toPasskey(r: Record<string, unknown>): StoredPasskey {
@@ -61,13 +65,15 @@ function toPasskey(r: Record<string, unknown>): StoredPasskey {
     name: r.name as string,
     createdAt: new Date(r.created_at as string).toISOString(),
     lastUsedAt: r.last_used_at ? new Date(r.last_used_at as string).toISOString() : undefined,
+    role: r.role === "gestion" ? "gestion" : "owner",
+    av: typeof r.av === "number" ? r.av : undefined,
   };
 }
 
 /** Clés valides pour le mot de passe actuel et ce domaine. */
-export async function listPasskeys(rpId: string): Promise<StoredPasskey[]> {
+export async function listPasskeys(rpId: string, role: "owner" | "gestion" = "owner"): Promise<StoredPasskey[]> {
   await ready();
-  const res = await pool().query("SELECT * FROM passkey WHERE secret_tag = $1 AND rp_id = $2 ORDER BY created_at", [secretTag(), rpId]);
+  const res = await pool().query("SELECT * FROM passkey WHERE secret_tag = $1 AND rp_id = $2 AND role = $3 ORDER BY created_at", [secretTag(), rpId, role]);
   return res.rows.map(toPasskey);
 }
 
@@ -77,12 +83,12 @@ export async function findPasskey(id: string, rpId: string): Promise<StoredPassk
   return res.rowCount ? toPasskey(res.rows[0]) : undefined;
 }
 
-export async function savePasskey(p: { id: string; publicKey: Uint8Array; counter: number; transports?: string[]; name: string; rpId: string }): Promise<void> {
+export async function savePasskey(p: { id: string; publicKey: Uint8Array; counter: number; transports?: string[]; name: string; rpId: string; role: "owner" | "gestion"; av?: number }): Promise<void> {
   await ready();
   await pool().query(
-    `INSERT INTO passkey (id, public_key, counter, transports, name, secret_tag, rp_id) VALUES ($1, $2, $3, $4, $5, $6, $7)
-     ON CONFLICT (id) DO UPDATE SET public_key = EXCLUDED.public_key, counter = EXCLUDED.counter, name = EXCLUDED.name, secret_tag = EXCLUDED.secret_tag, rp_id = EXCLUDED.rp_id`,
-    [p.id, Buffer.from(p.publicKey), p.counter, (p.transports ?? []).join(","), p.name, secretTag(), p.rpId],
+    `INSERT INTO passkey (id, public_key, counter, transports, name, secret_tag, rp_id, role, av) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+     ON CONFLICT (id) DO UPDATE SET public_key = EXCLUDED.public_key, counter = EXCLUDED.counter, name = EXCLUDED.name, secret_tag = EXCLUDED.secret_tag, rp_id = EXCLUDED.rp_id, role = EXCLUDED.role, av = EXCLUDED.av`,
+    [p.id, Buffer.from(p.publicKey), p.counter, (p.transports ?? []).join(","), p.name, secretTag(), p.rpId, p.role, p.av ?? null],
   );
 }
 
@@ -91,7 +97,13 @@ export async function touchPasskey(id: string, counter: number): Promise<void> {
   await pool().query("UPDATE passkey SET counter = $2, last_used_at = now() WHERE id = $1", [id, counter]);
 }
 
-export async function deletePasskey(id: string): Promise<void> {
+export async function deletePasskey(id: string, role?: "owner" | "gestion"): Promise<void> {
   await ready();
-  await pool().query("DELETE FROM passkey WHERE id = $1", [id]);
+  if (role) await pool().query("DELETE FROM passkey WHERE id = $1 AND role = $2", [id, role]);
+  else await pool().query("DELETE FROM passkey WHERE id = $1", [id]);
+}
+
+export async function deleteRolePasskeys(role: "owner" | "gestion"): Promise<void> {
+  await ready();
+  await pool().query("DELETE FROM passkey WHERE role = $1", [role]);
 }
