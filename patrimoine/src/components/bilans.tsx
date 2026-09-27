@@ -105,20 +105,29 @@ function countFigures(f: StatementFigures): number {
 type Step = "choose" | "upload" | "analyze" | "review" | "manual";
 
 /** Parcours complet : choix de la société → PDF → analyse → vérification → enregistrement. */
-export function BilanImport({ companyId: initialCompany, onDone }: { companyId?: string; onDone: (statementId?: string) => void }) {
+export function BilanImport({
+  companyId: initialCompany,
+  existing,
+  onDone,
+}: {
+  companyId?: string;
+  /** Bilan déjà enregistré avec son PDF : on relance seulement l'analyse. */
+  existing?: Statement;
+  onDone: (statementId?: string) => void;
+}) {
   const { data, upsert } = useStore();
   const router = useRouter();
   const companies = useCompanyOptions();
-  const [companyId, setCompanyId] = useState<string | undefined>(initialCompany);
-  const [step, setStep] = useState<Step>("choose");
+  const [companyId, setCompanyId] = useState<string | undefined>(existing?.companyId ?? initialCompany);
+  const [step, setStep] = useState<Step>(existing ? "analyze" : "choose");
   const [aiOn, setAiOn] = useState<boolean | null>(null);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [fileId, setFileId] = useState<string>();
-  const [fileName, setFileName] = useState<string>();
+  const [fileId, setFileId] = useState<string | undefined>(existing?.fileId);
+  const [fileName, setFileName] = useState<string | undefined>(existing?.fileName);
   const [extraction, setExtraction] = useState<Extraction | null>(null);
-  const [year, setYear] = useState<number | undefined>(new Date().getFullYear() - 1);
-  const [figures, setFigures] = useState<StatementFigures>({});
+  const [year, setYear] = useState<number | undefined>(existing?.year ?? new Date().getFullYear() - 1);
+  const [figures, setFigures] = useState<StatementFigures>(existing?.figures ?? {});
   const [prevFigures, setPrevFigures] = useState<StatementFigures>({});
   const [savePrev, setSavePrev] = useState(true);
   const [applyCash, setApplyCash] = useState(true);
@@ -137,6 +146,46 @@ export function BilanImport({ companyId: initialCompany, onDone }: { companyId?:
     };
   }, []);
 
+  const analyze = async (id: string) => {
+    setStep("analyze");
+    const res = await fetch("/api/bilans/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fileId: id, companyName: company?.name }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json.error ?? "Analyse impossible");
+    const ex = json.extraction as Extraction;
+    setExtraction(ex);
+    setFigures(toFigures(ex.currentYear));
+    setPrevFigures(toFigures(ex.previousYear));
+    const y = ex.closingDate ? Number(ex.closingDate.slice(0, 4)) : undefined;
+    if (y) setYear(y);
+    setStep("review");
+  };
+
+  // Relance de l'analyse sur un PDF déjà déposé.
+  const started = useRef(false);
+  useEffect(() => {
+    if (!existing?.fileId || aiOn === null || started.current) return;
+    started.current = true;
+    if (!aiOn) {
+      queueMicrotask(() => {
+        setError("La lecture automatique n'est pas encore activée (clé ANTHROPIC_API_KEY).");
+        setStep("manual");
+      });
+      return;
+    }
+    const id = existing.fileId;
+    queueMicrotask(() => {
+      analyze(id).catch((err) => {
+        setError((err as Error).message);
+        setStep("manual");
+      });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aiOn, existing]);
+
   const start = async (file: File) => {
     setError(null);
     if (file.type && file.type !== "application/pdf") {
@@ -154,21 +203,7 @@ export function BilanImport({ companyId: initialCompany, onDone }: { companyId?:
         setStep("manual");
         return;
       }
-      setStep("analyze");
-      const res = await fetch("/api/bilans/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileId: id, companyName: company?.name }),
-      });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.error ?? "Analyse impossible");
-      const ex = json.extraction as Extraction;
-      setExtraction(ex);
-      setFigures(toFigures(ex.currentYear));
-      setPrevFigures(toFigures(ex.previousYear));
-      const y = ex.closingDate ? Number(ex.closingDate.slice(0, 4)) : undefined;
-      if (y) setYear(y);
-      setStep("review");
+      await analyze(id);
     } catch (err) {
       setError((err as Error).message);
       setStep(uploaded ? "manual" : "choose");
@@ -177,9 +212,9 @@ export function BilanImport({ companyId: initialCompany, onDone }: { companyId?:
 
   const save = () => {
     if (!companyId || !year) return;
-    const existing = data.statements.find((s) => s.companyId === companyId && s.year === year);
+    const sameYear = data.statements.find((s) => s.companyId === companyId && s.year === year);
     const st: Statement = {
-      id: existing?.id ?? newId(),
+      id: existing?.id ?? sameYear?.id ?? newId(),
       companyId,
       year,
       closingDate: extraction?.closingDate ?? undefined,
