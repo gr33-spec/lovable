@@ -10,13 +10,14 @@ import { monthLabel } from "@/lib/engine/dates";
 import { eurCompact, eurSigned } from "@/lib/format";
 import { labelOf, UNIT_TYPES } from "@/lib/labels";
 import { AddMenu } from "@/components/quick-add";
+import { OrgChart } from "@/components/org-chart";
 import { Card, Empty, Page, PageHeader, Pill, RoundButton, Segmented, cx, Button } from "@/components/ui";
 
 export default function PatrimoinePage() {
   const { data, projection } = useStore();
   const snap = projection.snapshot;
   const [adding, setAdding] = useState(false);
-  const [view, setView] = useState<"structure" | "credits">("structure");
+  const [view, setView] = useState<"structure" | "organigramme" | "credits">("structure");
   const [open, setOpen] = useState<Record<string, boolean>>(() => {
     const o: Record<string, boolean> = {};
     for (const c of data.companies) if (c.kind === "holding" || !c.parentId) o[c.id] = true;
@@ -110,10 +111,13 @@ export default function PatrimoinePage() {
           onChange={setView}
           options={[
             { value: "structure", label: "Structure" },
+            { value: "organigramme", label: "Organigramme" },
             { value: "credits", label: `Crédits (${data.loans.length})` },
           ]}
         />
-        {view === "structure" ? (
+        {view === "organigramme" ? (
+          <OrgChart />
+        ) : view === "structure" ? (
           data.companies.length === 0 && data.buildings.length === 0 ? (
             <Empty
               icon={<Building2 size={26} />}
