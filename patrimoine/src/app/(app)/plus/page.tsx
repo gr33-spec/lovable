@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { BellRing, Coins, ScanFace, Share2, LineChart as LineIcon, FileSpreadsheet, Gauge, CalendarClock, CircleAlert, FileText, Flag, Hammer, HandCoins, History, LogOut, Percent, Smartphone, Sparkles, Trash2, Wand2 } from "lucide-react";
+import { BellRing, FlaskConical, ScanFace, Share2, LineChart as LineIcon, FileSpreadsheet, Gauge, CalendarClock, CircleAlert, FileText, Flag, Hammer, HandCoins, History, LogOut, Percent, Smartphone, Sparkles, Trash2, Wand2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { demoData, hasDemo, withoutDemo } from "@/lib/demo";
 import { qualityIssues } from "@/lib/engine/quality";
@@ -52,7 +52,7 @@ export default function PlusPage() {
         <Card className="py-1">
           <Divided>
             <Row href="/plus/rappels" icon={<BellRing size={18} />} title="Rappels" subtitle={alerts.length ? `${alerts.length} à traiter` : "Fins de bail, révisions, crédits"} />
-            <Row href="/plus/loyers" icon={<Coins size={18} />} title="Loyers et encaissements" subtitle="Pointage mensuel, impayés" />
+            <Row href="/simulations" icon={<FlaskConical size={18} />} title="Simulations" subtitle={`${data.scenarios.length} scénario(s) · vente, achat, refinancement…`} />
             <Row href="/plus/historique" icon={<LineIcon size={18} />} title="Historique et plus-values" subtitle="Valeurs passées, plus-values latentes" />
             <Row href="/plus/bilans" icon={<FileSpreadsheet size={18} />} title="Bilans et comptes annuels" subtitle={`${data.statements.length} bilan(s) · import PDF intelligent`} />
             <Row href="/plus/indicateurs" icon={<Gauge size={18} />} title="Indicateurs financiers" subtitle="DSCR, rendement, LTV, CAF…" />

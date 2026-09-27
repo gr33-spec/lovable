@@ -38,7 +38,7 @@ export default function SimulationsPage() {
 
   return (
     <>
-      <PageHeader title="Simulations" subtitle="Sans toucher à vos données réelles" action={<RoundButton label="Nouveau scénario" onClick={() => setCreating(true)}><Plus size={22} /></RoundButton>} />
+      <PageHeader title="Simulations" back="/plus" subtitle="Sans toucher à vos données réelles" action={<RoundButton label="Nouveau scénario" onClick={() => setCreating(true)}><Plus size={22} /></RoundButton>} />
       <Page>
         {data.scenarios.length === 0 ? (
           <Empty
