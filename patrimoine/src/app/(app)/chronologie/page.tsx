@@ -90,7 +90,7 @@ export default function ChronologiePage() {
 
   return (
     <>
-      <PageHeader title="Chronologie" subtitle={`${y0} → ${y0 + 30}`} />
+      <PageHeader title="Chronologie" back="/plus" subtitle={`${y0} → ${y0 + 30}`} />
       <Page>
         {insights.length > 0 && (
           <div className="hero-card space-y-2.5 rounded-[26px] p-5 text-white">

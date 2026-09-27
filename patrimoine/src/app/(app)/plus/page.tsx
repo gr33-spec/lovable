@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { BellRing, FlaskConical, Scale, ScanFace, Share2, LineChart as LineIcon, FileSpreadsheet, Gauge, CalendarClock, CircleAlert, FileText, Flag, Hammer, HandCoins, History, LogOut, Percent, Smartphone, Sparkles, Trash2, Wand2 } from "lucide-react";
+import { BellRing, CalendarRange, FlaskConical, Scale, ScanFace, Share2, LineChart as LineIcon, FileSpreadsheet, Gauge, CalendarClock, CircleAlert, FileText, Flag, Hammer, HandCoins, History, LogOut, Percent, Smartphone, Sparkles, Trash2, Wand2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { demoData, hasDemo, withoutDemo } from "@/lib/demo";
 import { qualityIssues } from "@/lib/engine/quality";
@@ -53,6 +53,7 @@ export default function PlusPage() {
         <Card className="py-1">
           <Divided>
             <Row href="/plus/rappels" icon={<BellRing size={18} />} title="Rappels" subtitle={alerts.length ? `${alerts.length} à traiter` : "Fins de bail, révisions, crédits"} />
+            <Row href="/chronologie" icon={<CalendarRange size={18} />} title="Chronologie" subtitle="30 ans d'échéances, année par année" />
             <Row href="/simulations" icon={<FlaskConical size={18} />} title="Simulations" subtitle={`${data.scenarios.length} scénario(s) · vente, achat, refinancement…`} />
             <Row href="/plus/cadre-juridique" icon={<Scale size={18} />} title="Cadre juridique des baux" subtitle="Modèles 2015 / 2026, états des lieux, quittances" />
             <Row href="/plus/historique" icon={<LineIcon size={18} />} title="Historique et plus-values" subtitle="Valeurs passées, plus-values latentes" />
