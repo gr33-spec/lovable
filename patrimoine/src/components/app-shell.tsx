@@ -18,8 +18,8 @@ const TABS = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { data, role } = useStore();
-  const onboarding = pathname.startsWith("/bienvenue") && role === "owner";
+  const { data, role, view } = useStore();
+  const onboarding = pathname.startsWith("/bienvenue") && view === "patrimoine";
   // Les sauvegardes restent toujours accessibles (restauration après un incident).
   const rescue = pathname.startsWith("/plus/sauvegardes");
   const isEmpty = data.companies.length === 0 && data.buildings.length === 0;
@@ -27,10 +27,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const unpaid = unpaidByUnit(data.units).length;
 
   useEffect(() => {
-    if (role === "owner" && !onboarding && !rescue && !data.settings.onboardingDone && isEmpty) router.replace("/bienvenue");
+    if (role === "owner" && view === "patrimoine" && !onboarding && !rescue && !data.settings.onboardingDone && isEmpty) router.replace("/bienvenue");
   }, [role, onboarding, rescue, data.settings.onboardingDone, isEmpty, router]);
 
-  if (role === "gestion") {
+  if (view === "gestion") {
     return (
       <>
         <SaveIndicator />

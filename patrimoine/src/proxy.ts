@@ -15,7 +15,15 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
   const session = readSessionToken(request.cookies.get(SESSION_COOKIE)?.value);
-  if (session?.role === "owner") return NextResponse.next();
+  if (session?.role === "owner") {
+    // Propriétaire en vue « gestion locative » : mêmes écrans que l'espace gestion
+    // (simple préférence d'affichage, il peut revenir à tout moment).
+    const gestionView = request.cookies.get("patrimoine_vue")?.value === "gestion";
+    if (gestionView && !pathname.startsWith("/api/") && !GESTION_PAGES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
+      return NextResponse.redirect(new URL("/gestion", request.url));
+    }
+    return NextResponse.next();
+  }
   if (session?.role === "gestion") {
     // Espace gestion locative : uniquement ses écrans et ses API (la révocation
     // est vérifiée ensuite par chaque page et chaque route).
