@@ -1,18 +1,34 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { SESSION_COOKIE, verifySessionToken } from "./session";
+import { SESSION_COOKIE, readSessionToken, type Role, type SessionInfo } from "./session";
+import { accessState } from "./access";
 
-export async function isAuthenticated(): Promise<boolean> {
+/** Session en cours, révocation de l'accès gestion comprise. */
+export async function currentSession(): Promise<SessionInfo | null> {
   const store = await cookies();
-  return verifySessionToken(store.get(SESSION_COOKIE)?.value);
+  const info = readSessionToken(store.get(SESSION_COOKIE)?.value);
+  if (!info) return null;
+  if (info.role === "gestion") {
+    const state = await accessState().catch(() => null);
+    if (!state?.enabled || state.version !== info.av) return null;
+  }
+  return info;
 }
 
-/** Vérifie la session et l'origine (protection CSRF) d'une requête d'API. */
-export async function guardApi(request: Request): Promise<NextResponse | null> {
-  if (!(await isAuthenticated())) {
-    return NextResponse.json({ error: "Non connecté" }, { status: 401 });
-  }
+export async function isAuthenticated(): Promise<boolean> {
+  return (await currentSession()) !== null;
+}
+
+/**
+ * Vérifie la session, le rôle autorisé (propriétaire par défaut : l'espace
+ * gestion n'a accès qu'aux routes qui l'autorisent explicitement) et
+ * l'origine (protection CSRF) d'une requête d'API.
+ */
+export async function guardApi(request: Request, roles: Role[] = ["owner"]): Promise<NextResponse | null> {
+  const session = await currentSession();
+  if (!session) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
+  if (!roles.includes(session.role)) return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
   if (request.method !== "GET" && request.method !== "HEAD") {
     const origin = request.headers.get("origin");
     const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
@@ -22,3 +38,5 @@ export async function guardApi(request: Request): Promise<NextResponse | null> {
   }
   return null;
 }
+
+export const BOTH: Role[] = ["owner", "gestion"];

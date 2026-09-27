@@ -1,7 +1,7 @@
 import { renderToBuffer } from "@react-pdf/renderer";
 import { NextResponse } from "next/server";
 import { loadDocument } from "@/lib/server/db";
-import { guardApi } from "@/lib/server/guard";
+import { BOTH, guardApi } from "@/lib/server/guard";
 import { readFile } from "@/lib/server/files";
 import { docContext, type LegalDoc } from "@/lib/legal/doc";
 import { guaranteeDocument, leaseDocument } from "@/lib/legal/lease";
@@ -20,7 +20,7 @@ const DAY = /^\d{4}-\d{2}-\d{2}$/;
 // seulement si la période est intégralement payée, etc.) sont vérifiées
 // ici côté serveur, quelle que soit l'interface.
 export async function GET(request: Request) {
-  const denied = await guardApi(request);
+  const denied = await guardApi(request, BOTH);
   if (denied) return denied;
   const url = new URL(request.url);
   const type = url.searchParams.get("type");

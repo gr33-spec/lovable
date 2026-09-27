@@ -27,7 +27,7 @@ export function LogementDetail({ id }: { id: string }) {
 }
 
 function Detail({ id }: { id: string }) {
-  const { data, upsert, remove } = useStore();
+  const { data, upsert, remove, role } = useStore();
   const router = useRouter();
   const params = useSearchParams();
   const [sheet, setSheet] = useState<null | "edit" | "quittance" | "import" | "sign">(null);
@@ -80,7 +80,7 @@ function Detail({ id }: { id: string }) {
       <PageHeader
         title={unit.name}
         subtitle={[building?.name, company?.name].filter(Boolean).join(" · ")}
-        back={fromGestion || params.get("depuis") === "gestion" ? "/gestion?vue=locataires" : building ? `/patrimoine/immeuble/${building.id}` : "/patrimoine"}
+        back={role === "gestion" || fromGestion || params.get("depuis") === "gestion" ? "/gestion?vue=locataires" : building ? `/patrimoine/immeuble/${building.id}` : "/patrimoine"}
         action={
           <button onClick={() => setSheet("edit")} className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-navy">
             <Pencil size={15} /> Modifier
@@ -237,14 +237,14 @@ function Detail({ id }: { id: string }) {
         footer={
           <div className="space-y-2">
             <Button full onClick={() => setSheet(null)}>Terminé</Button>
-            <ConfirmDelete
+            {role === "owner" && <ConfirmDelete
               label="Supprimer le logement"
               message="Supprimer ce logement ? Une sauvegarde automatique permet de revenir en arrière."
               onConfirm={() => {
                 remove("units", unit.id);
                 router.push(building ? `/patrimoine/immeuble/${building.id}` : "/patrimoine");
               }}
-            />
+            />}
           </div>
         }
       >

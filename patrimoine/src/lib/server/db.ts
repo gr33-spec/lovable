@@ -127,11 +127,12 @@ async function write(client: PoolClient, data: AppData, version: number): Promis
   return next;
 }
 
-export async function applyDocumentOps(ops: Op[]): Promise<{ version: number; data: AppData }> {
+export async function applyDocumentOps(ops: Op[], transform?: (current: AppData, ops: Op[]) => Op[]): Promise<{ version: number; data: AppData }> {
   return withTransaction(async (client) => {
     const current = await lockCurrent(client);
     await dailySnapshot(client, current.data, current.version);
-    const data = applyOps(current.data, ops);
+    // Filtrage éventuel (espace gestion) sur l'état verrouillé, pour fusionner sans rien écraser.
+    const data = applyOps(current.data, transform ? transform(current.data, ops) : ops);
     const version = await write(client, data, current.version);
     return { version, data };
   });

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Camera, Eraser, FileText, Loader2, Share, ShieldAlert, X } from "lucide-react";
 import Link from "next/link";
 import { leaseVersionFor, type LegalVersion } from "@/lib/legal/versions";
+import { useStore } from "@/lib/store";
 import { cx } from "../ui";
 
 // ——— Signature manuscrite à l'écran ———
@@ -268,8 +269,9 @@ export function DocRow({
 /** Rappel du modèle juridique appliqué et de son état de vérification. */
 export function LegalBadge({ refDate }: { refDate?: string }) {
   const v: LegalVersion = leaseVersionFor(refDate);
+  const { role } = useStore();
   return (
-    <Link href="/plus/cadre-juridique" className={cx("flex items-start gap-2 rounded-2xl px-3.5 py-2.5 text-[12px]", v.verified ? "bg-pos/10 text-pos" : "bg-warn/10 text-warn")}>
+    <Link href={role === "gestion" ? "#" : "/plus/cadre-juridique"} className={cx("flex items-start gap-2 rounded-2xl px-3.5 py-2.5 text-[12px]", v.verified ? "bg-pos/10 text-pos" : "bg-warn/10 text-warn")}>
       <ShieldAlert size={15} className="mt-0.5 shrink-0" />
       <span>
         <b>{v.id === "nue-2026" ? "Bail modèle 2026" : "Bail modèle 2015"}</b> — {v.label}.{" "}

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { verifyAuthenticationResponse } from "@simplewebauthn/server";
 import { clearLoginFailures, isLoginBlocked, recordLoginFailure } from "@/lib/server/db";
 import { findPasskey, touchPasskey } from "@/lib/server/passkeys";
+import { accessState } from "@/lib/server/access";
 import { SESSION_COOKIE, createSessionToken, sessionCookieOptions } from "@/lib/server/session";
 import { CHALLENGE_COOKIE, readChallenge, relyingParty } from "@/lib/server/webauthn";
 
@@ -34,6 +35,11 @@ export async function POST(request: Request) {
       credential: { id: key.id, publicKey: key.publicKey, counter: key.counter, transports: key.transports as AuthenticatorTransport[] | undefined },
     });
     if (!result.verified) throw new Error("non vérifié");
+    // Clé de l'espace gestion : valable seulement si l'accès n'a pas été modifié ou coupé depuis.
+    if (key.role === "gestion") {
+      const state = await accessState();
+      if (!state.enabled || state.version !== key.av) throw new Error("accès révoqué");
+    }
     await touchPasskey(key.id, result.authenticationInfo.newCounter);
   } catch {
     await recordLoginFailure(ip);
@@ -41,7 +47,7 @@ export async function POST(request: Request) {
   }
   await clearLoginFailures(ip);
   const res = NextResponse.json({ ok: true });
-  res.cookies.set(SESSION_COOKIE, createSessionToken(), sessionCookieOptions);
+  res.cookies.set(SESSION_COOKIE, createSessionToken({ role: key.role, av: key.av }), sessionCookieOptions);
   res.cookies.set(CHALLENGE_COOKIE, "", { path: "/api/passkey", maxAge: 0 });
   return res;
 }

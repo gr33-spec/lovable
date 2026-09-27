@@ -22,29 +22,44 @@ function sign(payload: string, key: string): string {
   return createHmac("sha256", key).update(payload).digest("base64url");
 }
 
-export function createSessionToken(now = Date.now()): string {
+export type Role = "owner" | "gestion";
+
+export interface SessionInfo {
+  role: Role;
+  /** Version de l'accès gestion au moment de la connexion (révocation). */
+  av?: number;
+}
+
+export function createSessionToken(info: SessionInfo = { role: "owner" }, now = Date.now()): string {
   const key = secret();
   if (!key) throw new Error("APP_PASSWORD manquant");
   const payload = Buffer.from(
-    JSON.stringify({ iat: now, exp: now + SESSION_DAYS * 24 * 3600 * 1000 }),
+    JSON.stringify({ iat: now, exp: now + SESSION_DAYS * 24 * 3600 * 1000, role: info.role, av: info.av }),
   ).toString("base64url");
   return `${payload}.${sign(payload, key)}`;
 }
 
-export function verifySessionToken(token: string | undefined, now = Date.now()): boolean {
+/** Session valide (signature et expiration), sans contrôle de révocation. */
+export function readSessionToken(token: string | undefined, now = Date.now()): SessionInfo | null {
   const key = secret();
-  if (!key || !token) return false;
+  if (!key || !token) return null;
   const [payload, signature] = token.split(".");
-  if (!payload || !signature) return false;
+  if (!payload || !signature) return null;
   const expected = Buffer.from(sign(payload, key));
   const given = Buffer.from(signature);
-  if (expected.length !== given.length || !timingSafeEqual(expected, given)) return false;
+  if (expected.length !== given.length || !timingSafeEqual(expected, given)) return null;
   try {
-    const { exp } = JSON.parse(Buffer.from(payload, "base64url").toString());
-    return typeof exp === "number" && exp > now;
+    const { exp, role, av } = JSON.parse(Buffer.from(payload, "base64url").toString());
+    if (typeof exp !== "number" || exp <= now) return null;
+    // Anciennes sessions (sans rôle) : propriétaire.
+    return role === "gestion" ? { role: "gestion", av: typeof av === "number" ? av : -1 } : { role: "owner" };
   } catch {
-    return false;
+    return null;
   }
+}
+
+export function verifySessionToken(token: string | undefined, now = Date.now()): boolean {
+  return readSessionToken(token, now) !== null;
 }
 
 /** Empreinte courte du secret : change quand le mot de passe change. */

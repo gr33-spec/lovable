@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { verifyRegistrationResponse } from "@simplewebauthn/server";
-import { guardApi } from "@/lib/server/guard";
+import { BOTH, currentSession, guardApi } from "@/lib/server/guard";
 import { savePasskey } from "@/lib/server/passkeys";
 import { CHALLENGE_COOKIE, readChallenge, relyingParty } from "@/lib/server/webauthn";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  const denied = await guardApi(request);
+  const denied = await guardApi(request, BOTH);
   if (denied) return denied;
   const rp = relyingParty(request);
   const expectedChallenge = readChallenge(request, "register");
@@ -24,7 +24,8 @@ export async function POST(request: Request) {
     });
     if (!result.verified || !result.registrationInfo) throw new Error("non vérifié");
     const { credential } = result.registrationInfo;
-    await savePasskey({ id: credential.id, publicKey: credential.publicKey, counter: credential.counter, transports: credential.transports, name, rpId: rp.rpID });
+    const session = (await currentSession())!;
+    await savePasskey({ id: credential.id, publicKey: credential.publicKey, counter: credential.counter, transports: credential.transports, name, rpId: rp.rpID, role: session.role, av: session.av });
   } catch {
     return NextResponse.json({ error: "Enregistrement refusé." }, { status: 400 });
   }

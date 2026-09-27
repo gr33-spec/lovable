@@ -140,7 +140,7 @@ export function BuildingForm({ building }: { building: Building }) {
 }
 
 export function UnitForm({ unit }: { unit: Unit }) {
-  const { upsert } = useStore();
+  const { upsert, role } = useStore();
   const set = (patch: Partial<Unit>) => upsert("units", { ...unit, ...patch });
   return (
     <Stack>
@@ -175,7 +175,7 @@ export function UnitForm({ unit }: { unit: Unit }) {
       <Details title="État, travaux, valeur">
         <SelectField label="État du logement" value={unit.condition} options={CONDITIONS} onChange={(v) => set({ condition: v })} />
         <TextField label="Travaux à prévoir" value={unit.plannedWorks} multiline onChange={(v) => set({ plannedWorks: v })} />
-        <NumberField label="Estimation de valeur" value={unit.value} onChange={(v) => set({ value: v })} hint="Facultatif." />
+        {role === "owner" && <NumberField label="Estimation de valeur" value={unit.value} onChange={(v) => set({ value: v })} hint="Facultatif." />}
       </Details>
     </Stack>
   );

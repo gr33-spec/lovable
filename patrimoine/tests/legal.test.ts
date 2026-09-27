@@ -145,3 +145,38 @@ test("sauvegarde : un fichier de compléments ou sans identifiants est refusé",
   assert.equal(isValidBackup({ companies: [{ name: "X" }], buildings: [] }), false);
   assert.equal(isValidBackup({ app: "patrimoine", data: { companies: [{ id: "c", name: "X" }], buildings: [] } }), true);
 });
+
+test("espace gestion : lecture filtrée et modifications restreintes", async () => {
+  const { scopeForGestion, sanitizeGestionOps } = await import("../src/lib/scope");
+  const { applyOps } = await import("../src/lib/ops");
+  const data = {
+    ...(await import("../src/lib/types")).emptyData(),
+    companies: [{ id: "c", name: "SCI", kind: "SCI" as const, cash: 50000, partnerAccounts: 1000, address: "1 rue" }],
+    buildings: [{ id: "b", name: "Imm", companyId: "c", value: 800000, propertyTax: 3000, address: "2 rue" }],
+    units: [{ id: "u", buildingId: "b", name: "Lot", rent: 500, value: 90000 }],
+    loans: [{ id: "l", remaining: 100000 }],
+  };
+  const s = scopeForGestion(data);
+  assert.equal(s.loans.length, 0);
+  assert.equal((s.companies[0] as { cash?: number }).cash, undefined);
+  assert.equal(s.buildings[0].value, undefined);
+  assert.equal(s.units[0].value, undefined);
+  assert.equal(s.buildings[0].address, "2 rue");
+  const ops = sanitizeGestionOps(data, [
+    { op: "upsert", coll: "units", item: { id: "u", buildingId: "b", name: "Lot", rent: 520, payments: { "2026-09": { status: "paye", due: 520 } } } },
+    { op: "upsert", coll: "units", item: { id: "new", buildingId: "b", name: "Créé" } },
+    { op: "upsert", coll: "companies", item: { id: "c", name: "SCI", kind: "SCI", cash: 0, email: "x@y.fr" } },
+    { op: "upsert", coll: "loans", item: { id: "l", remaining: 0 } },
+    { op: "delete", coll: "units", id: "u" },
+    { op: "settings", patch: { valueGrowthPct: 50, dismissedReminders: ["a"] } },
+  ]);
+  const next = applyOps(data, ops);
+  assert.equal(next.units.length, 1);
+  assert.equal(next.units[0].rent, 520);
+  assert.equal(next.units[0].value, 90000);
+  assert.equal(next.companies[0].cash, 50000);
+  assert.equal(next.companies[0].email, "x@y.fr");
+  assert.equal(next.loans[0].remaining, 100000);
+  assert.equal(next.settings.valueGrowthPct, undefined);
+  assert.deepEqual(next.settings.dismissedReminders, ["a"]);
+});
