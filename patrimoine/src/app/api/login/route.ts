@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { clearLoginFailures, isLoginBlocked, recordLoginFailure } from "@/lib/server/db";
 import { checkAccessPassword } from "@/lib/server/access";
+import { VIEW_COOKIE, viewCookieOptions } from "@/lib/view";
 import {
   SESSION_COOKIE,
   checkPassword,
@@ -42,7 +43,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: body?.space === "gestion" ? "Mot de passe incorrect ou accès gestion non activé." : "Mot de passe incorrect." }, { status: 401 });
   }
   await clearLoginFailures(ip);
-  const response = NextResponse.json({ ok: true, home: "/" });
+  // Le propriétaire entre dans la version choisie à l'écran de connexion.
+  const view = body?.space === "gestion" ? "gestion" : "patrimoine";
+  const response = NextResponse.json({ ok: true, home: view === "gestion" ? "/gestion" : "/" });
   response.cookies.set(SESSION_COOKIE, createSessionToken(), sessionCookieOptions);
+  response.cookies.set(VIEW_COOKIE, view, viewCookieOptions);
   return response;
 }

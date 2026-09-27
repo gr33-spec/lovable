@@ -11,3 +11,6 @@ export function switchView(view: View) {
   document.cookie = `${VIEW_COOKIE}=${view}; path=/; max-age=31536000; samesite=lax${secure}`;
   window.location.href = view === "gestion" ? "/gestion" : "/";
 }
+
+/** Cookie de préférence (lisible par la page pour pouvoir basculer). */
+export const viewCookieOptions = { httpOnly: false, secure: process.env.NODE_ENV === "production", sameSite: "lax" as const, path: "/", maxAge: 31536000 };
