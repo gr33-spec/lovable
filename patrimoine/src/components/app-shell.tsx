@@ -31,8 +31,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <SaveIndicator />
       {children}
       {!onboarding && (
-        <nav className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-line/80 bg-card/90 backdrop-blur-xl">
-          <div className="mx-auto flex max-w-2xl">
+        <nav className="safe-bottom pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-2">
+          <div className="pointer-events-auto mx-auto flex max-w-md rounded-[28px] border border-white/60 bg-white/92 p-1.5 shadow-[0_10px_30px_-6px_rgba(11,37,69,0.25)] backdrop-blur-2xl">
             {TABS.map((t) => {
               const active = t.href === "/" ? pathname === "/" : pathname.startsWith(t.href);
               const Icon = t.icon;
@@ -41,11 +41,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   key={t.href}
                   href={t.href}
                   className={cx(
-                    "flex flex-1 flex-col items-center gap-0.5 pb-1.5 pt-2 text-[10.5px] font-medium",
-                    active ? "text-navy" : "text-muted",
+                    "flex flex-1 flex-col items-center gap-0.5 rounded-[22px] py-1.5 text-[10.5px] font-semibold transition-colors",
+                    active ? "bg-navy text-white shadow-sm" : "text-muted active:bg-black/5",
                   )}
                 >
-                  <Icon size={24} strokeWidth={active ? 2.2 : 1.8} />
+                  <Icon size={22} strokeWidth={active ? 2.2 : 1.8} />
                   {t.label}
                 </Link>
               );

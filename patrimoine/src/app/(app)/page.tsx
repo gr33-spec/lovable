@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { CalendarClock, ChevronRight, CircleAlert, Flag, Hammer, Landmark, ShoppingCart, BadgeEuro, RefreshCw, TrendingUp } from "lucide-react";
+import { BadgeEuro, Briefcase, Building2, CalendarClock, ChevronRight, CircleAlert, DoorOpen, Flag, Hammer, Landmark, Receipt, RefreshCw, ShoppingCart, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { cashflowMonthly, ltv, netWorth } from "@/lib/engine/snapshot";
 import { milestones, type Milestone } from "@/lib/engine/milestones";
 import { qualityIssues } from "@/lib/engine/quality";
 import { eur, eurCompact, eurSigned, pct } from "@/lib/format";
-import { Card, Kpi, Page, SectionTitle, Segmented, cx, Insufficient } from "@/components/ui";
+import { Card, IconChip, Kpi, Page, SectionTitle, Segmented, cx, Insufficient, type ChipTone } from "@/components/ui";
 import { BarChart, LineChart } from "@/components/charts";
 import { yearOf } from "@/lib/engine/dates";
 
@@ -34,38 +34,56 @@ export default function Accueil() {
 
   return (
     <>
-      <header className="safe-top px-5 pb-2 pt-5">
+      <header className="safe-top px-5 pb-2 pt-6">
         <div className="mx-auto max-w-2xl">
-          <div className="text-sm text-muted">{data.settings.groupName || "Mon patrimoine"}</div>
-          <h1 className="text-[28px] font-bold tracking-tight text-navy">Vue d&apos;ensemble</h1>
+          <div>
+            <div className="flex items-center justify-between text-[12px] font-semibold uppercase tracking-[0.12em] text-gold">
+              <span className="truncate">{data.settings.groupName || "Mon patrimoine"}</span>
+              <span className="shrink-0 font-medium normal-case tracking-normal text-muted">{new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</span>
+            </div>
+            <h1 className="mt-1 text-[26px] font-extrabold leading-tight tracking-[-0.02em] text-navy">
+              {data.settings.ownerName ? (
+                <>
+                  <span className="font-semibold text-ink-2">Bonjour</span> {data.settings.ownerName}
+                </>
+              ) : (
+                "Vue d'ensemble"
+              )}
+            </h1>
+          </div>
         </div>
       </header>
       <Page>
         {/* Carte principale */}
-        <div className="mt-2 rounded-[28px] bg-gradient-to-br from-navy to-navy-2 p-6 text-white shadow-[0_12px_32px_rgba(11,37,69,0.25)]">
-          <div className="text-[13px] text-white/60">Patrimoine net</div>
-          <div className="tabular mt-0.5 text-[40px] font-bold leading-tight tracking-tight">
-            {netWorth(t) !== undefined && (t.value > 0 || t.debt > 0) ? eur(netWorth(t)) : <span className="text-2xl text-white/70">Données insuffisantes</span>}
+        <div className="hero-card mt-3 rounded-[30px] p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div className="text-[13px] font-medium text-white/65">Patrimoine net</div>
+            {loanToValue !== undefined && (
+              <span className="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white/85 ring-1 ring-white/15">LTV {pct(loanToValue)}</span>
+            )}
           </div>
-          <div className="mt-5 grid grid-cols-2 gap-4">
-            <div>
-              <div className="text-[13px] text-white/60">Valeur des biens</div>
-              <div className="tabular text-[19px] font-semibold">{t.unvalued > 0 ? "—" : eurCompact(t.value)}</div>
+          <div className="tabular mt-1 text-[42px] font-extrabold leading-tight tracking-[-0.03em]">
+            {netWorth(t) !== undefined && (t.value > 0 || t.debt > 0) ? eur(netWorth(t)) : <span className="text-2xl font-bold text-white/75">Données insuffisantes</span>}
+          </div>
+          <HeroSpark
+            values={(t.unvalued > 0 ? projection.years.map((r) => r.debt) : projection.years.map((r) => r.net)).slice(0, 21)}
+            label={t.unvalued > 0 ? "Dette restante, 20 prochaines années" : "Patrimoine net, 20 prochaines années"}
+          />
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="rounded-2xl bg-white/[0.07] px-3.5 py-3 ring-1 ring-white/10">
+              <div className="text-[12px] text-white/60">Valeur des biens</div>
+              <div className="tabular text-[19px] font-bold">{t.unvalued > 0 ? "—" : eurCompact(t.value)}</div>
             </div>
-            <div>
-              <div className="text-[13px] text-white/60">Capital restant dû</div>
-              <div className="tabular text-[19px] font-semibold">{eurCompact(t.debt)}</div>
+            <div className="rounded-2xl bg-white/[0.07] px-3.5 py-3 ring-1 ring-white/10">
+              <div className="text-[12px] text-white/60">Capital restant dû</div>
+              <div className="tabular text-[19px] font-bold">{eurCompact(t.debt)}</div>
             </div>
           </div>
-          <div className="mt-5">
-            <div className="mb-1.5 flex justify-between text-[13px] text-white/60">
-              <span>LTV globale</span>
-              <span className="tabular font-semibold text-white">{loanToValue === undefined ? "—" : pct(loanToValue)}</span>
+          {loanToValue !== undefined && (
+            <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/10">
+              <div className="h-full rounded-full bg-gradient-to-r from-[#d4b483] to-[#b08d57]" style={{ width: `${Math.min(100, loanToValue)}%` }} />
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-white/15">
-              <div className="h-full rounded-full bg-gold" style={{ width: `${Math.min(100, loanToValue ?? 0)}%` }} />
-            </div>
-          </div>
+          )}
           {(t.unvalued > 0 || t.unknownDebt > 0) && (
             <div className="mt-3 text-xs text-white/60">
               {t.unvalued > 0 && `${t.unvalued} immeuble(s) sans valeur`}
@@ -77,35 +95,42 @@ export default function Accueil() {
 
         {/* Flux */}
         <Card className="mt-4">
-          <div className="flex items-end justify-between">
-            <Kpi label="Cash-flow mensuel" value={hasData ? eurSigned(cf) : "—"} tone={cf >= 0 ? "pos" : "neg"} big />
+          <div className="flex items-center gap-3">
+            <IconChip tone={cf >= 0 ? "green" : "rose"} size={46}>
+              {cf >= 0 ? <TrendingUp size={22} /> : <TrendingDown size={22} />}
+            </IconChip>
+            <div className="min-w-0 flex-1">
+              <div className="text-[13px] text-muted">Cash-flow mensuel</div>
+              <div className={cx("tabular text-[30px] font-extrabold leading-tight tracking-[-0.02em]", cf >= 0 ? "text-pos" : "text-neg")}>{hasData ? eurSigned(cf) : "—"}</div>
+            </div>
             <div className="text-right">
-              <div className="text-[13px] text-muted">Par an</div>
-              <div className={cx("tabular text-[17px] font-semibold", cf >= 0 ? "text-pos" : "text-neg")}>{hasData ? eurSigned(cf * 12) : "—"}</div>
+              <div className="text-[12px] text-muted">Par an</div>
+              <div className={cx("tabular text-[16px] font-bold", cf >= 0 ? "text-pos" : "text-neg")}>{hasData ? eurSigned(cf * 12) : "—"}</div>
             </div>
           </div>
-          <div className="mt-4 grid grid-cols-3 gap-3 border-t border-line pt-4">
-            <Kpi label="Loyers" value={eurCompact(t.rentMonthly)} hint="par mois" />
-            <Kpi label="Mensualités" value={eurCompact(t.paymentsMonthly)} hint={t.unknownPayment ? "incomplet" : "par mois"} />
-            <Kpi label="Charges" value={eurCompact(t.chargesAnnual / 12)} hint="par mois" />
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            <FlowTile icon={<Wallet size={17} />} tone="green" label="Loyers" value={eurCompact(t.rentMonthly)} hint="/ mois" />
+            <FlowTile icon={<Landmark size={17} />} tone="blue" label="Crédits" value={eurCompact(t.paymentsMonthly)} hint={t.unknownPayment ? "incomplet" : "/ mois"} />
+            <FlowTile icon={<Receipt size={17} />} tone="gold" label="Charges" value={eurCompact(t.chargesAnnual / 12)} hint="/ mois" />
           </div>
           {t.unknownPayment > 0 && (
-            <Link href="/plus/a-completer" className="mt-3 block rounded-xl bg-warn/10 px-3 py-2 text-xs text-warn">
-              Cash-flow incomplet : {t.unknownPayment} crédit(s) sans mensualité connue.
+            <Link href="/plus/a-completer" className="mt-3 flex items-center gap-2 rounded-xl bg-warn/10 px-3 py-2 text-xs font-medium text-warn">
+              <CircleAlert size={14} /> Cash-flow incomplet : {t.unknownPayment} crédit(s) sans mensualité connue.
             </Link>
           )}
         </Card>
 
         <div className="mt-4 grid grid-cols-4 gap-2">
           {[
-            { n: sciCount, l: "Sociétés" },
-            { n: t.buildings, l: "Immeubles" },
-            { n: t.units, l: "Logements" },
-            { n: t.loans, l: "Crédits" },
+            { n: sciCount, l: "Sociétés", icon: <Briefcase size={16} />, tone: "violet" as const },
+            { n: t.buildings, l: "Immeubles", icon: <Building2 size={16} />, tone: "blue" as const },
+            { n: t.units, l: "Lots", icon: <DoorOpen size={16} />, tone: "green" as const },
+            { n: t.loans, l: "Crédits", icon: <Landmark size={16} />, tone: "gold" as const },
           ].map((x) => (
-            <Link key={x.l} href="/patrimoine" className="rounded-2xl bg-card px-2 py-3 text-center shadow-[0_1px_2px_rgba(15,27,45,0.04)]">
-              <div className="tabular text-[22px] font-bold text-navy">{x.n}</div>
-              <div className="text-[11px] text-muted">{x.l}</div>
+            <Link key={x.l} href="/patrimoine" className="soft-card flex flex-col items-center rounded-[20px] px-1 py-3 active:scale-[0.98]">
+              <IconChip tone={x.tone} size={30}>{x.icon}</IconChip>
+              <div className="tabular mt-1.5 text-[20px] font-extrabold leading-none text-navy">{x.n}</div>
+              <div className="mt-1 text-[11px] font-medium text-muted">{x.l}</div>
             </Link>
           ))}
         </div>
@@ -137,9 +162,9 @@ export default function Accueil() {
           {steps.length === 0 ? (
             <div className="py-4 text-center text-sm text-muted">Aucune échéance à venir. Ajoutez vos crédits et travaux.</div>
           ) : (
-            <div className="divide-y divide-line">
+            <div className="pt-2">
               {steps.map((m, i) => (
-                <MilestoneRow key={i} m={m} />
+                <MilestoneRow key={i} m={m} last={i === steps.length - 1} />
               ))}
             </div>
           )}
@@ -253,20 +278,63 @@ const KIND_ICON: Record<string, React.ReactNode> = {
   acquisition: <ShoppingCart size={18} />,
 };
 
-function MilestoneRow({ m }: { m: Milestone }) {
+function MilestoneRow({ m, last }: { m: Milestone; last?: boolean }) {
+  const tone = m.kind === "loan_end" ? "green" : m.kind === "works" ? "gold" : m.kind === "balloon" ? "rose" : m.kind === "event" ? "violet" : "blue";
   return (
-    <div className="flex items-center gap-3 py-3">
-      <div className="tabular w-12 shrink-0 text-[17px] font-bold text-navy">{m.year}</div>
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-soft text-navy">{KIND_ICON[m.kind] ?? <CalendarClock size={18} />}</div>
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-[15px] font-medium text-ink">{m.label}</div>
-        {m.detail && <div className="truncate text-xs text-muted">{m.detail}</div>}
+    <div className="flex gap-3">
+      <div className="flex flex-col items-center">
+        <IconChip tone={tone} size={38}>{KIND_ICON[m.kind] ?? <CalendarClock size={18} />}</IconChip>
+        {!last && <div className="my-1 w-0.5 flex-1 rounded-full bg-line" />}
       </div>
-      {m.monthlyFreed ? (
-        <div className="tabular shrink-0 text-right text-sm font-semibold text-pos">+{eurCompact(m.monthlyFreed)}<span className="block text-[11px] font-normal text-muted">par mois</span></div>
-      ) : m.amount ? (
-        <div className="tabular shrink-0 text-sm font-semibold text-ink">{eurCompact(m.amount)}</div>
-      ) : null}
+      <div className={cx("flex min-w-0 flex-1 items-start gap-2", last ? "pb-1" : "pb-4")}>
+        <div className="min-w-0 flex-1">
+          <div className="tabular text-[12px] font-bold tracking-wide text-gold">{m.year}</div>
+          <div className="text-[15px] font-semibold leading-snug text-ink">{m.label}</div>
+          {m.detail && <div className="truncate text-xs text-muted">{m.detail}</div>}
+        </div>
+        {m.monthlyFreed ? (
+          <span className="tabular mt-3 shrink-0 rounded-full bg-pos/10 px-2.5 py-1 text-[12px] font-bold text-pos">+{eurCompact(m.monthlyFreed)}/m</span>
+        ) : m.amount ? (
+          <span className="tabular mt-3 shrink-0 rounded-full bg-soft px-2.5 py-1 text-[12px] font-bold text-ink">{eurCompact(m.amount)}</span>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function FlowTile({ icon, tone, label, value, hint }: { icon: React.ReactNode; tone: ChipTone; label: string; value: string; hint: string }) {
+  return (
+    <div className="rounded-2xl bg-soft/70 px-3 py-3">
+      <IconChip tone={tone} size={28}>{icon}</IconChip>
+      <div className="mt-2 text-[12px] text-muted">{label}</div>
+      <div className="tabular text-[17px] font-bold text-ink">{value}</div>
+      <div className="text-[11px] text-muted">{hint}</div>
+    </div>
+  );
+}
+
+/** Mini-courbe blanche dans la carte principale. */
+function HeroSpark({ values, label }: { values: number[]; label: string }) {
+  if (values.length < 2 || values.every((v) => v === values[0])) return null;
+  const w = 300;
+  const h = 56;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const pts = values.map((v, i) => [(i / (values.length - 1)) * w, h - 4 - ((v - min) / (max - min || 1)) * (h - 8)]);
+  const d = pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  return (
+    <div className="mt-3">
+      <svg viewBox={`0 0 ${w} ${h}`} className="h-14 w-full" preserveAspectRatio="none" aria-label={label}>
+        <defs>
+          <linearGradient id="spark-fill" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="#d4b483" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="#d4b483" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path d={`${d} L${w},${h} L0,${h} Z`} fill="url(#spark-fill)" />
+        <path d={d} fill="none" stroke="#e8d3ad" strokeWidth={2} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+      </svg>
+      <div className="text-[11px] text-white/50">{label}</div>
     </div>
   );
 }

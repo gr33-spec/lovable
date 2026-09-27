@@ -93,14 +93,14 @@ export default function ChronologiePage() {
       <PageHeader title="Chronologie" subtitle={`${y0} → ${y0 + 30}`} />
       <Page>
         {insights.length > 0 && (
-          <Card className="space-y-2 bg-navy text-white">
+          <div className="hero-card space-y-2.5 rounded-[26px] p-5 text-white">
             {insights.map((t) => (
               <div key={t} className="flex gap-2 text-[15px] leading-snug">
                 <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gold" />
                 <span>{t}</span>
               </div>
             ))}
-          </Card>
+          </div>
         )}
 
         <div className="mt-4 flex items-center gap-3">

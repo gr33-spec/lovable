@@ -35,7 +35,7 @@ export default function PlusPage() {
       <Page>
         <Link
           href="/plus/dossier-banque"
-          className="flex items-center gap-4 rounded-3xl bg-gradient-to-br from-navy to-navy-2 p-5 text-white shadow-[0_12px_32px_rgba(11,37,69,0.25)]"
+          className="hero-card flex items-center gap-4 rounded-[28px] p-5 text-white"
         >
           <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-gold">
             <FileText size={24} />
