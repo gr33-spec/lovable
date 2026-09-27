@@ -208,9 +208,9 @@ function figuresKpis(f: Figures) {
   return (
     <>
       <View style={s.kpiRow}>
-        <Kpi label="Valeur du patrimoine" value={E(f.value)} />
+        <Kpi label="Valeur du patrimoine" value={f.unvalued ? "n.c." : E(f.value)} />
         <Kpi label="Capital restant dû" value={E(f.debt)} />
-        <Kpi label="Patrimoine net" value={E(netWorth(f))} color={NAVY} />
+        <Kpi label="Patrimoine net" value={netWorth(f) === undefined ? "n.c." : E(netWorth(f))} color={NAVY} />
       </View>
       <View style={s.kpiRow}>
         <Kpi label="Loyers mensuels" value={E(f.rentMonthly)} />
@@ -255,6 +255,7 @@ export function DossierDocument({ data, projection, nowMonth, sections, scenario
   );
   const hyp = `Hypothèses : revalorisation des biens ${P(data.settings.valueGrowthPct ?? 0)} / an, indexation des loyers ${P(data.settings.rentGrowthPct ?? 0)} / an, charges ${P(data.settings.chargesGrowthPct ?? 0)} / an. Opérations datées au 1er janvier. Calculs déterministes réalisés à partir des données déclarées.`;
   const cf = cashflowMonthly(t);
+  const unvalued = t.unvalued > 0;
 
   return (
     <Document title={`Dossier patrimonial — ${groupName}`} author={data.settings.ownerName ?? groupName} language="fr">
@@ -273,7 +274,7 @@ export function DossierDocument({ data, projection, nowMonth, sections, scenario
             </Text>
             <View style={{ flexDirection: "row", marginTop: 36, gap: 12 }}>
               {[
-                ["Patrimoine", K(t.value)],
+                ["Patrimoine", unvalued ? "n.c." : K(t.value)],
                 ["Dette", K(t.debt)],
                 ["Patrimoine net", K(netWorth(t))],
                 ["Cash-flow / an", K(cf * 12)],
@@ -309,7 +310,7 @@ export function DossierDocument({ data, projection, nowMonth, sections, scenario
               loanEnds[0] && `Prochaine fin de crédit : ${loanEnds[0].year} (${loanEnds[0].label.replace(/^Fin — /, "")}).`,
               half && `La dette est divisée par deux en ${half} par l'amortissement des crédits en cours.`,
               free && `Désendettement complet projeté en ${free}.`,
-              projection.years[10] && `Patrimoine net projeté à 10 ans (${projection.years[10].year}) : ${K(projection.years[10].net)}.`,
+              !unvalued && projection.years[10] && `Patrimoine net projeté à 10 ans (${projection.years[10].year}) : ${K(projection.years[10].net)}.`,
               t.vacantUnits > 0 && `${t.vacantUnits} logement(s) vacant(s) à ce jour.`,
             ]
               .filter(Boolean)
@@ -454,9 +455,9 @@ export function DossierDocument({ data, projection, nowMonth, sections, scenario
             <Table
               cols={[
                 { label: "Année", width: 10, get: (r: YearRow) => String(r.year), bold: () => true },
-                { label: "Valeur", width: 15, right: true, get: (r) => K(r.value) },
+                { label: "Valeur", width: 15, right: true, get: (r) => (unvalued ? "n.c." : K(r.value)) },
                 { label: "Dette", width: 15, right: true, get: (r) => K(r.debt) },
-                { label: "Net", width: 15, right: true, get: (r) => K(r.net) },
+                { label: "Net", width: 15, right: true, get: (r) => (unvalued ? "n.c." : K(r.net)) },
                 { label: "Loyers/an", width: 15, right: true, get: (r) => K(r.rent) },
                 { label: "Crédits/an", width: 15, right: true, get: (r) => K(r.payments) },
                 { label: "Cash-flow/an", width: 15, right: true, get: (r) => K(r.cashflow) },
@@ -464,7 +465,11 @@ export function DossierDocument({ data, projection, nowMonth, sections, scenario
               rows={horizons}
             />
             <View style={{ marginTop: 14 }}>
-              <Chart title="Patrimoine net" years={years} series={[{ label: "Patrimoine net", values: projection.years.map((r) => r.net), color: BLUE }]} />
+              {unvalued ? (
+                <Chart title="Capital restant dû" years={years} series={[{ label: "Dette", values: projection.years.map((r) => r.debt), color: BLUE }]} />
+              ) : (
+                <Chart title="Patrimoine net" years={years} series={[{ label: "Patrimoine net", values: projection.years.map((r) => r.net), color: BLUE }]} />
+              )}
               <Chart title="Cash-flow annuel" years={years} bars series={[{ label: "Cash-flow", values: projection.years.map((r) => r.cashflow), color: BLUE }]} />
             </View>
             <Text style={s.note}>{T(hyp)}</Text>
@@ -605,8 +610,8 @@ export function DossierDocument({ data, projection, nowMonth, sections, scenario
               <Table
                 cols={[
                   { label: "Année", width: 10, get: (p: (typeof cmp.points)[number]) => String(p.year), bold: () => true },
-                  { label: "Patrimoine avant", width: 15, right: true, get: (p) => K(totalWealth(p.before)) },
-                  { label: "Patrimoine après", width: 15, right: true, get: (p) => K(totalWealth(p.after)) },
+                  { label: "Patrimoine avant", width: 15, right: true, get: (p) => (unvalued ? "n.c." : K(totalWealth(p.before))) },
+                  { label: "Patrimoine après", width: 15, right: true, get: (p) => (unvalued ? "n.c." : K(totalWealth(p.after))) },
                   { label: "Dette avant", width: 15, right: true, get: (p) => K(p.before.debt) },
                   { label: "Dette après", width: 15, right: true, get: (p) => K(p.after.debt) },
                   { label: "CF/an avant", width: 15, right: true, get: (p) => K(p.before.cashflow) },
@@ -616,11 +621,11 @@ export function DossierDocument({ data, projection, nowMonth, sections, scenario
               />
               <View style={{ marginTop: 14 }}>
                 <Chart
-                  title="Patrimoine net + trésorerie cumulée"
+                  title={unvalued ? "Trésorerie cumulée" : "Patrimoine net + trésorerie cumulée"}
                   years={years}
                   series={[
-                    { label: "Trajectoire actuelle", values: cmp.base.years.map(totalWealth), color: BLUE },
-                    { label: "Avec le scénario", values: cmp.sim.years.map(totalWealth), color: ORANGE, dashed: true },
+                    { label: "Trajectoire actuelle", values: cmp.base.years.map((r) => (unvalued ? r.treasury : totalWealth(r))), color: BLUE },
+                    { label: "Avec le scénario", values: cmp.sim.years.map((r) => (unvalued ? r.treasury : totalWealth(r))), color: ORANGE, dashed: true },
                   ]}
                 />
               </View>

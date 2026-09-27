@@ -57,7 +57,9 @@ export function addFigures(a: Figures, b: Figures): Figures {
   return out;
 }
 
-export function netWorth(f: Figures): number {
+/** Patrimoine net : indisponible tant qu'un bien n'a pas de valeur (on n'invente rien). */
+export function netWorth(f: Figures): number | undefined {
+  if (f.unvalued > 0) return undefined;
   return f.value - f.debt;
 }
 
@@ -67,7 +69,7 @@ export function cashflowMonthly(f: Figures): number {
 
 /** LTV en %, undefined si aucune valeur connue. */
 export function ltv(f: Figures): number | undefined {
-  if (f.value <= 0) return undefined;
+  if (f.value <= 0 || f.unvalued > 0) return undefined;
   return (f.debt / f.value) * 100;
 }
 
@@ -169,7 +171,9 @@ export function computeSnapshot(data: AppData, nowMonth: MonthIndex): Snapshot {
     if (now.balance === undefined) f.unknownDebt = 1;
     else f.debt = now.balance;
     f.paymentsMonthly = now.paymentMonthly;
-    if (!r.finished && r.payment === undefined) f.unknownPayment = 1;
+    // Mensualité inconnue, ou seulement estimée (ni saisie, ni taux connu).
+    const exactPayment = loan.monthlyPayment !== undefined || loan.ratePct !== undefined || r.impliedRatePct !== undefined;
+    if (!r.finished && (r.payment === undefined || !exactPayment)) f.unknownPayment = 1;
     f.loans = r.finished ? 0 : 1;
     loanFigs.set(loan.id, f);
     if (loan.buildingId && byBuilding.has(loan.buildingId)) {

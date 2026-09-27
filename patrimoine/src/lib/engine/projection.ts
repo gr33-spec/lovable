@@ -527,7 +527,7 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
       addTreasury(l.companyKey, -(p.regular + p.balloon));
       if (p.ended) {
         events.push(loanEndEvent(l, m, l.payment + l.insurance));
-        if (p.balloon > 1) {
+        if (p.balloon > 50) {
           events.push({
             id: `balloon-${l.id}`,
             kind: "balloon",

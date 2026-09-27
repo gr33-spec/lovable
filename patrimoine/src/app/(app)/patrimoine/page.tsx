@@ -219,7 +219,7 @@ function TreeRow({
         </div>
         {figures && (
           <div className="shrink-0 text-right">
-            <div className="tabular text-[14px] font-semibold text-ink">{figures.unvalued && !figures.value ? "—" : eurCompact(netWorth(figures))}</div>
+            <div className="tabular text-[14px] font-semibold text-ink">{eurCompact(netWorth(figures))}</div>
             <div className={cx("tabular text-[11px]", cf >= 0 ? "text-pos" : "text-neg")}>{eurSigned(Math.round(cf))}/m</div>
           </div>
         )}
