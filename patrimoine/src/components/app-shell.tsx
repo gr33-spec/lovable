@@ -20,13 +20,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { data } = useStore();
   const onboarding = pathname.startsWith("/bienvenue");
+  // Les sauvegardes restent toujours accessibles (restauration après un incident).
+  const rescue = pathname.startsWith("/plus/sauvegardes");
   const isEmpty = data.companies.length === 0 && data.buildings.length === 0;
   // Pastille : logements avec un loyer impayé (ou partiellement payé) non régularisé.
   const unpaid = unpaidByUnit(data.units).length;
 
   useEffect(() => {
-    if (!onboarding && !data.settings.onboardingDone && isEmpty) router.replace("/bienvenue");
-  }, [onboarding, data.settings.onboardingDone, isEmpty, router]);
+    if (!onboarding && !rescue && !data.settings.onboardingDone && isEmpty) router.replace("/bienvenue");
+  }, [onboarding, rescue, data.settings.onboardingDone, isEmpty, router]);
 
   return (
     <>

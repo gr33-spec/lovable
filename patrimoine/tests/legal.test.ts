@@ -138,3 +138,10 @@ test("compléments : fusion par nom, rien d'autre modifié", async () => {
   assert.equal(plan.lines.filter((l) => !l.ok).length, 1);
   assert.deepEqual(metersFor(plan.data.units[0]), ["Électricité", "Eau froide"]);
 });
+
+test("sauvegarde : un fichier de compléments ou sans identifiants est refusé", async () => {
+  const { isValidBackup } = await import("../src/lib/ops");
+  assert.equal(isValidBackup({ type: "patrimoine-complements", companies: [{ name: "X", set: {} }], buildings: [] }), false);
+  assert.equal(isValidBackup({ companies: [{ name: "X" }], buildings: [] }), false);
+  assert.equal(isValidBackup({ app: "patrimoine", data: { companies: [{ id: "c", name: "X" }], buildings: [] } }), true);
+});

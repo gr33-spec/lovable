@@ -52,8 +52,15 @@ export function normalizeData(raw: unknown): AppData {
 export function isValidBackup(raw: unknown): boolean {
   if (!raw || typeof raw !== "object") return false;
   const obj = raw as Record<string, unknown>;
+  // Un fichier de compléments (ou tout autre format) n'est jamais une sauvegarde.
+  if (typeof obj.type === "string" && obj.type !== "backup") return false;
   const data = (obj.data ?? obj) as Record<string, unknown>;
-  return COLLECTIONS.some((c) => Array.isArray(data[c])) && Array.isArray(data.companies);
+  if (!(COLLECTIONS.some((c) => Array.isArray(data[c])) && Array.isArray(data.companies))) return false;
+  // Chaque élément d'une sauvegarde porte un identifiant : sinon l'import viderait les données.
+  return COLLECTIONS.every((c) => {
+    const list = data[c];
+    return !Array.isArray(list) || list.every((x) => x && typeof x === "object" && typeof (x as { id?: unknown }).id === "string");
+  });
 }
 
 export function newId(): string {
