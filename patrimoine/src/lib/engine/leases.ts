@@ -241,14 +241,14 @@ export function reminders(
     }
   }
   for (const line of unpaidByUnit(data.units)) {
-    const { building, label } = unitPlace(data, line.unit);
+    const { label } = unitPlace(data, line.unit);
     out.push({
       id: `unpaid:${line.unit.id}:${line.months.join(",")}:${Math.round(line.amount)}`,
       kind: "unpaid",
       date: `${line.months[0]}-01`,
       title: "Loyer impayé",
       detail: `${label} — ${line.months.length} mois (${line.months.map(monthKeyLabel).join(", ")})`,
-      href: building ? "/plus/loyers" : "/plus/loyers",
+      href: "/loyers",
       late: true,
       amount: line.amount,
     });
