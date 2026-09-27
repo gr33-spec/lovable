@@ -119,6 +119,11 @@ export function ScenarioDetail({ id }: { id: string }) {
             })}
 
             <SectionTitle>Avant / après</SectionTitle>
+            {projection.snapshot.total.unvalued > 0 && (
+              <div className="mb-3 rounded-2xl bg-warn/10 px-4 py-3 text-sm text-warn">
+                {projection.snapshot.total.unvalued} immeuble(s) sans valeur estimée : les lignes « Patrimoine » et « Valeur » sont incomplètes. Dette, loyers, cash-flow et trésorerie restent fiables.
+              </div>
+            )}
             <Card className="p-0">
               <div className="grid grid-cols-[1fr_auto_auto] gap-x-3 px-5 pb-2 pt-4 text-xs font-semibold uppercase tracking-wider text-muted">
                 <span />

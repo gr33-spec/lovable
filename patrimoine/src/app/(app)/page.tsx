@@ -45,12 +45,12 @@ export default function Accueil() {
         <div className="mt-2 rounded-[28px] bg-gradient-to-br from-navy to-navy-2 p-6 text-white shadow-[0_12px_32px_rgba(11,37,69,0.25)]">
           <div className="text-[13px] text-white/60">Patrimoine net</div>
           <div className="tabular mt-0.5 text-[40px] font-bold leading-tight tracking-tight">
-            {t.value > 0 || t.debt > 0 ? eur(netWorth(t)) : <span className="text-2xl text-white/70">Données insuffisantes</span>}
+            {netWorth(t) !== undefined && (t.value > 0 || t.debt > 0) ? eur(netWorth(t)) : <span className="text-2xl text-white/70">Données insuffisantes</span>}
           </div>
           <div className="mt-5 grid grid-cols-2 gap-4">
             <div>
               <div className="text-[13px] text-white/60">Valeur des biens</div>
-              <div className="tabular text-[19px] font-semibold">{eurCompact(t.value)}</div>
+              <div className="tabular text-[19px] font-semibold">{t.unvalued > 0 ? "—" : eurCompact(t.value)}</div>
             </div>
             <div>
               <div className="text-[13px] text-white/60">Capital restant dû</div>
@@ -158,7 +158,10 @@ export default function Accueil() {
             ]}
           />
           <div className="mt-4">
-            {chart === "net" && (
+            {chart === "net" && t.unvalued > 0 && (
+              <div className="py-8 text-center text-sm text-muted">Données insuffisantes : valeur estimée manquante pour {t.unvalued} immeuble(s).</div>
+            )}
+            {chart === "net" && t.unvalued === 0 && (
               <LineChart years={years} series={[{ label: "Patrimoine net", values: projection.years.map((r) => r.net), color: "var(--series-1)" }]} />
             )}
             {chart === "debt" && (
@@ -196,7 +199,7 @@ export default function Accueil() {
             <div className="mt-4">
               <div className="text-sm text-muted">En {future.year}</div>
               <div className="mt-2 grid grid-cols-2 gap-4">
-                <Kpi label="Patrimoine net" value={eurCompact(future.net)} />
+                <Kpi label="Patrimoine net" value={t.unvalued > 0 ? "—" : eurCompact(future.net)} />
                 <Kpi label="Dette restante" value={eurCompact(future.debt)} />
                 <Kpi label="Cash-flow / mois" value={eurSigned(future.cashflow / 12)} tone={future.cashflow >= 0 ? "pos" : "neg"} />
                 <Kpi label="Crédits en cours" value={String(future.activeLoans)} />

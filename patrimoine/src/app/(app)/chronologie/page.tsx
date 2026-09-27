@@ -201,9 +201,9 @@ export default function ChronologiePage() {
         {row && (
           <Card className="mt-3">
             <div className="grid grid-cols-2 gap-4">
-              <Kpi label="Valeur patrimoniale" value={eurCompact(row.value)} />
+              <Kpi label="Valeur patrimoniale" value={projection.snapshot.total.unvalued > 0 ? "—" : eurCompact(row.value)} />
               <Kpi label="Dette restante" value={eurCompact(row.debt)} />
-              <Kpi label="Patrimoine net" value={eurCompact(row.net)} />
+              <Kpi label="Patrimoine net" value={projection.snapshot.total.unvalued > 0 ? "—" : eurCompact(row.net)} />
               <Kpi label="Trésorerie cumulée" value={eurCompact(row.treasury)} />
               <Kpi label="Loyers / mois" value={eurCompact(row.rent / 12)} />
               <Kpi label="Mensualités / mois" value={eurCompact(row.payments / 12)} />
@@ -253,10 +253,12 @@ export default function ChronologiePage() {
           <div className="mb-1 text-sm font-semibold text-ink">Cash-flow annuel</div>
           <BarChart years={years} values={projection.years.map((r) => r.cashflow)} selectedYear={selected} onSelectYear={setSelected} label="Cash-flow" height={150} />
         </Card>
+        {projection.snapshot.total.unvalued === 0 && (
         <Card className="mt-3">
           <div className="mb-1 text-sm font-semibold text-ink">Patrimoine net</div>
           <LineChart years={years} series={[{ label: "Patrimoine net", values: projection.years.map((r) => r.net), color: "var(--series-1)" }]} selectedYear={selected} onSelectYear={setSelected} height={160} />
         </Card>
+        )}
         <p className="mt-4 px-2 text-center text-xs text-muted">
           Opérations datées au 1er janvier de l&apos;année. L&apos;année en cours est annualisée.
         </p>

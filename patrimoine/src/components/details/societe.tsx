@@ -67,9 +67,9 @@ export function CompanyDetail({ id }: { id: string }) {
       />
       <Page>
         <Card>
-          <Kpi label={hasChildren ? "Patrimoine net consolidé" : "Patrimoine net"} value={f.value || f.debt ? eur(netWorth(f)) : "Données insuffisantes"} big />
+          <Kpi label={hasChildren ? "Patrimoine net consolidé" : "Patrimoine net"} value={netWorth(f) !== undefined && (f.value || f.debt) ? eur(netWorth(f)) : "Données insuffisantes"} big />
           <div className="mt-4 grid grid-cols-2 gap-4">
-            <Kpi label="Valeur immobilière" value={eurCompact(f.value)} hint={f.unvalued ? `${f.unvalued} bien(s) sans valeur` : undefined} />
+            <Kpi label="Valeur immobilière" value={f.unvalued ? "—" : eurCompact(f.value)} hint={f.unvalued ? `${f.unvalued} bien(s) sans valeur` : undefined} />
             <Kpi label="Dette totale" value={eurCompact(f.debt)} hint={ratio !== undefined ? `LTV ${pct(ratio)}` : undefined} />
             <Kpi label="Loyers / mois" value={eurCompact(f.rentMonthly)} />
             <Kpi label="Mensualités / mois" value={eurCompact(f.paymentsMonthly)} />
