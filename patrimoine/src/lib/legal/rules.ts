@@ -15,6 +15,13 @@ export function minDurationYears(landlord: Company | undefined): 3 | 6 {
   return 6;
 }
 
+/** Durée proposée pour les nouveaux baux (réglage du propriétaire). */
+export const DEFAULT_LEASE_YEARS = 3;
+
+export function leaseYears(settings: { leaseYears?: number } | undefined): number {
+  return settings?.leaseYears && settings.leaseYears > 0 ? settings.leaseYears : DEFAULT_LEASE_YEARS;
+}
+
 /** Dépôt de garantie maximal (art. 22) : un mois de loyer hors charges. */
 export function maxDeposit(rent: number | undefined): number | undefined {
   return rent && rent > 0 ? Math.round(rent * 100) / 100 : undefined;

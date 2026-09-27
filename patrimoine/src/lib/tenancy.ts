@@ -1,6 +1,6 @@
 import type { AppData, Building, Company, Inspection, Tenancy, Unit } from "./types";
 import { addMonthsIso, isValidIso, monthKey, outstanding, todayIso } from "./engine/leases";
-import { depositDeadline, minDurationYears } from "./legal/rules";
+import { depositDeadline, leaseYears } from "./legal/rules";
 import { compareInspections } from "./legal/inspection";
 
 // Dossiers de location : lecture de l'état d'un logement et reprise
@@ -43,7 +43,7 @@ export function landlordCompany(data: AppData, unit: Unit): Company | undefined 
 const uid = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : Math.random().toString(36).slice(2));
 
 /** Dossier d'un bail existant, reconstitué à partir des informations du logement. */
-export function tenancyFromUnit(unit: Unit, landlord?: Company): Tenancy {
+export function tenancyFromUnit(unit: Unit, _landlord?: Company, years?: number): Tenancy {
   const start = unit.leaseStart ?? unit.entryDate;
   return {
     id: uid(),
@@ -53,7 +53,7 @@ export function tenancyFromUnit(unit: Unit, landlord?: Company): Tenancy {
     tenants: [{ firstName: unit.tenantFirstName, lastName: unit.tenantLastName }],
     startDate: start,
     signDate: start,
-    durationYears: unit.leaseDurationYears ?? minDurationYears(landlord),
+    durationYears: unit.leaseDurationYears ?? years ?? leaseYears(undefined),
     rent: unit.rent,
     charges: unit.charges,
     chargesMode: "provision",
@@ -65,8 +65,8 @@ export function tenancyFromUnit(unit: Unit, landlord?: Company): Tenancy {
   };
 }
 
-/** Nouveau bail pré-rempli : conditions du bail précédent, durée légale selon le bailleur. */
-export function newTenancyDraft(unit: Unit, previous: Tenancy | undefined, landlord: Company | undefined, building: Building | undefined): Tenancy {
+/** Nouveau bail pré-rempli : conditions du bail précédent, durée choisie dans les réglages (3 ans par défaut). */
+export function newTenancyDraft(unit: Unit, previous: Tenancy | undefined, _landlord: Company | undefined, building: Building | undefined, years?: number): Tenancy {
   const start = previous?.endDate && isValidIso(previous.endDate) ? addMonthsIso(previous.endDate, 0) : todayIso();
   const lastPaid = previous ? lastPaidMonth(unit, previous) : undefined;
   return {
@@ -77,7 +77,7 @@ export function newTenancyDraft(unit: Unit, previous: Tenancy | undefined, landl
     startDate: nextDay(start),
     signDate: todayIso(),
     signPlace: building?.city?.replace(/^\d{5}\s*/, ""),
-    durationYears: minDurationYears(landlord),
+    durationYears: years ?? leaseYears(undefined),
     rent: previous?.rent ?? unit.rent,
     charges: previous?.charges ?? unit.charges,
     chargesMode: previous?.chargesMode ?? "provision",

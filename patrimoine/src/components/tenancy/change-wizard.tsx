@@ -28,7 +28,7 @@ import {
 } from "@/lib/tenancy";
 import { compareInspections, newEntryInspection, newExitInspection, stateLabel } from "@/lib/legal/inspection";
 import { ANNEXES, CONSTRUCTION_PERIODS } from "@/lib/legal/lease";
-import { depositSettlement, lateDepositPenalty, maxDeposit, minDurationYears } from "@/lib/legal/rules";
+import { depositSettlement, lateDepositPenalty, leaseYears, maxDeposit, minDurationYears } from "@/lib/legal/rules";
 import { leaseVersionFor } from "@/lib/legal/versions";
 import { Button, Card, DateField, Grid2, NumberField, Page, PageHeader, Segmented, SelectField, Stack, TextField, cx } from "../ui";
 import { DocRow, LegalBadge, documentUrl } from "./common";
@@ -125,14 +125,14 @@ function Wizard({ unitId }: { unitId: string }) {
   /** Crée le dossier du locataire sortant si le bail avait été signé hors application. */
   const ensureOutgoing = (): Tenancy => {
     if (outgoing) return outgoing;
-    const t = tenancyFromUnit(unit, company);
+    const t = tenancyFromUnit(unit, company, leaseYears(data.settings));
     upsert("tenancies", t);
     setOutgoingId(t.id);
     return t;
   };
   const ensureDraft = (): Tenancy => {
     if (draft) return draft;
-    const t = newTenancyDraft(unit, outgoing, company, building);
+    const t = newTenancyDraft(unit, outgoing, company, building, leaseYears(data.settings));
     upsert("tenancies", t);
     return t;
   };
@@ -500,10 +500,13 @@ function ConditionsStep({ tenancy, ensure, building, company, unit }: { tenancy?
             <DateField label="Date d'entrée" value={t?.startDate} onChange={(v) => set({ startDate: v })} />
             <NumberField label="Durée" suffix="ans" integer value={t?.durationYears} onChange={(v) => set({ durationYears: v })} />
           </Grid2>
-          <p className="-mt-2 text-[12px] text-muted">
-            Durée minimale : {min} ans ({company ? (company.familySci ? "SCI familiale" : "bailleur personne morale") : "bailleur personne physique"}).
-            {t?.durationYears && t.durationYears < min ? <span className="font-semibold text-neg"> La durée saisie est inférieure au minimum légal.</span> : null}
-          </p>
+          {t?.durationYears && t.durationYears < min ? (
+            <p className="-mt-2 rounded-xl bg-warn/10 px-3 py-2 text-[12px] text-warn">
+              Bail de {t.durationYears} ans : la loi impose {min} ans à une société bailleresse, sauf SCI familiale (associés parents ou alliés jusqu&apos;au 4e degré). Si {company?.name ?? "la société"} en est une, indiquez-le dans Plus → Informations des sociétés ; sinon le locataire pourra se prévaloir d&apos;un bail de {min} ans.
+            </p>
+          ) : (
+            <p className="-mt-2 text-[12px] text-muted">Durée réglée dans Plus → Informations des sociétés.</p>
+          )}
           <Grid2>
             <NumberField label="Loyer hors charges" value={t?.rent} onChange={(v) => set({ rent: v })} />
             <NumberField label="Charges" value={t?.charges} onChange={(v) => set({ charges: v })} />
