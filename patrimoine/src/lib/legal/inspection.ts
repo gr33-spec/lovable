@@ -50,6 +50,17 @@ export function newRoom(name: string): InspectionRoom {
 }
 
 export const DEFAULT_METERS = ["Électricité", "Eau froide", "Eau chaude", "Gaz"];
+/** Compteurs proposés selon les équipements connus du logement. */
+export function metersFor(unit: Pick<Unit, "heating" | "heatingEnergy" | "hotWater" | "hotWaterEnergy">): string[] {
+  const energies = `${unit.heatingEnergy ?? ""} ${unit.hotWaterEnergy ?? ""}`;
+  const known = !!(unit.heatingEnergy || unit.hotWaterEnergy);
+  return DEFAULT_METERS.filter((m) => {
+    if (m === "Gaz") return !known || /gaz/i.test(energies);
+    if (m === "Eau chaude") return unit.hotWater !== "individuel";
+    return true;
+  });
+}
+
 export const DEFAULT_KEYS = ["Clés de la porte d'entrée", "Badge / télécommande", "Clé de boîte aux lettres", "Clé de cave / local"];
 
 function copyRooms(rooms: InspectionRoom[], keepStates: boolean): InspectionRoom[] {
@@ -65,7 +76,7 @@ export function newEntryInspection(unit: Unit, tenancy: Tenancy, previous?: Insp
   const rooms = previous ? copyRooms(previous.rooms, true) : (unit.rooms?.length ? unit.rooms : defaultRoomNames(unit)).map(newRoom);
   const meters: MeterReading[] = previous?.meters.length
     ? previous.meters.map((m) => ({ id: uid(), kind: m.kind, number: m.number, value: m.value }))
-    : DEFAULT_METERS.map((k) => ({ id: uid(), kind: k }));
+    : metersFor(unit).map((k) => ({ id: uid(), kind: k }));
   const keys: KeyItem[] = previous?.keys.length ? previous.keys.map((k) => ({ id: uid(), kind: k.kind, count: k.count })) : DEFAULT_KEYS.map((k) => ({ id: uid(), kind: k }));
   return {
     id: uid(),

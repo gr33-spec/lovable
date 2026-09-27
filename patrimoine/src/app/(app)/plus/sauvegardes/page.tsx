@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Download, History, RotateCcw, Upload, Save, FileSpreadsheet } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { isValidBackup } from "@/lib/ops";
+import { complementsSchema, planComplements, type ComplementsPlan } from "@/lib/complements";
 import type { AppData } from "@/lib/types";
 import { Button, Card, Divided, Page, PageHeader, SectionTitle, Sheet } from "@/components/ui";
 
@@ -21,10 +22,12 @@ const REASONS: Record<string, string> = {
   "avant restauration": "Avant restauration",
   "avant suppression démo": "Avant suppression de la démo",
   "chargement démo": "Avant chargement de la démo",
+  "avant compléments": "Avant ajout de compléments",
 };
 
 export default function SauvegardesPage() {
-  const { replaceAll, reload } = useStore();
+  const { data, replaceAll, reload } = useStore();
+  const [complements, setComplements] = useState<ComplementsPlan | null>(null);
   const [snapshots, setSnapshots] = useState<SnapshotInfo[] | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<SnapshotInfo | null>(null);
@@ -72,11 +75,28 @@ export default function SauvegardesPage() {
   const onFile = async (file: File) => {
     try {
       const json = JSON.parse(await file.text());
+      // Fichier de compléments : fusion par nom, avec aperçu.
+      if (json?.type === "patrimoine-complements") {
+        const parsed = complementsSchema.safeParse(json);
+        if (!parsed.success) throw new Error();
+        setComplements(planComplements(data, parsed.data));
+        return;
+      }
       if (!isValidBackup(json)) throw new Error();
       setPendingImport((json.data ?? json) as AppData);
     } catch {
       setMessage("Ce fichier n'est pas une sauvegarde valide.");
     }
+  };
+
+  const applyComplements = async () => {
+    if (!complements) return;
+    setBusy(true);
+    const ok = await replaceAll(complements.data, "avant compléments");
+    setBusy(false);
+    setComplements(null);
+    await load();
+    setMessage(ok ? "Informations complétées. L'état précédent a été sauvegardé." : "L'import a échoué.");
   };
 
   const doImport = async () => {
@@ -102,7 +122,7 @@ export default function SauvegardesPage() {
             Exporter en Excel
           </Button>
           <Button variant="secondary" onClick={() => fileRef.current?.click()} icon={<Upload size={18} />} full>
-            Importer une sauvegarde
+            Importer une sauvegarde ou des compléments
           </Button>
           <input
             ref={fileRef}
@@ -168,6 +188,25 @@ export default function SauvegardesPage() {
         <div className="mt-4 grid grid-cols-2 gap-2 pb-2">
           <Button variant="secondary" onClick={() => setPendingImport(null)}>Annuler</Button>
           <Button disabled={busy} onClick={doImport}>Importer</Button>
+        </div>
+      </Sheet>
+      <Sheet
+        open={!!complements}
+        onClose={() => setComplements(null)}
+        title="Compléments à intégrer"
+        footer={
+          <Button full disabled={busy || !complements?.lines.some((l) => l.ok)} onClick={applyComplements}>
+            Intégrer ({complements?.lines.filter((l) => l.ok).length ?? 0})
+          </Button>
+        }
+      >
+        <div className="space-y-2 pb-2">
+          <p className="text-[13px] text-muted">Seules les informations listées sont ajoutées aux éléments existants ; rien n&apos;est supprimé. Une sauvegarde est faite avant.</p>
+          {complements?.lines.map((l, i) => (
+            <div key={i} className={`rounded-2xl px-4 py-2.5 text-[14px] ${l.ok ? "bg-pos/10 text-pos" : "bg-warn/10 text-warn"}`}>
+              <b>{l.label}</b> — {l.detail}
+            </div>
+          ))}
         </div>
       </Sheet>
     </>

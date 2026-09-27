@@ -135,7 +135,7 @@ export function landlordFor(data: AppData, unit: Unit): Landlord {
     address: company.address,
     siren: company.siren,
     representative: company.representative,
-    representativeRole: company.representativeRole || "gérant",
+    representativeRole: company.representativeRole || undefined,
     email: company.email,
     phone: company.phone,
     company,

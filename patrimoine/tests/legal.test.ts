@@ -113,3 +113,28 @@ test("durée des nouveaux baux : 3 ans par défaut, réglable", async () => {
   const d = newTenancyDraft({ id: "u", buildingId: "b", name: "Lot", rent: 500 }, undefined, { id: "c", name: "SCI", kind: "SCI" }, undefined, leaseYears({}));
   assert.equal(d.durationYears, 3);
 });
+
+test("compléments : fusion par nom, rien d'autre modifié", async () => {
+  const { planComplements, complementsSchema } = await import("../src/lib/complements");
+  const { metersFor } = await import("../src/lib/legal/inspection");
+  const data = {
+    ...(await import("../src/lib/types")).emptyData(),
+    companies: [{ id: "c", name: "DU LEFF", kind: "SCI" as const, cash: 1000 }],
+    buildings: [{ id: "b", name: "Immeuble du Leff", companyId: "c", value: 300000 }],
+    units: [{ id: "u", buildingId: "b", name: "Lot 1", rent: 400 }],
+  };
+  const patch = complementsSchema.parse({
+    type: "patrimoine-complements",
+    companies: [{ name: "SCI du Leff", set: { email: "a@b.fr", familySci: false } }, { name: "Inconnue", set: { phone: "1" } }],
+    buildings: [{ name: "IMMEUBLE DU LEFF", set: { address: "8 rue Pasteur", city: "22170 Châtelaudren" }, units: { heating: "individuel", heatingEnergy: "Électricité", hotWater: "individuel", hotWaterEnergy: "Électricité" } }],
+  });
+  const plan = planComplements(data, patch);
+  assert.equal(plan.data.companies[0].email, "a@b.fr");
+  assert.equal(plan.data.companies[0].cash, 1000);
+  assert.equal(plan.data.buildings[0].value, 300000);
+  assert.equal(plan.data.buildings[0].address, "8 rue Pasteur");
+  assert.equal(plan.data.units[0].rent, 400);
+  assert.equal(plan.data.units[0].heating, "individuel");
+  assert.equal(plan.lines.filter((l) => !l.ok).length, 1);
+  assert.deepEqual(metersFor(plan.data.units[0]), ["Électricité", "Eau froide"]);
+});
