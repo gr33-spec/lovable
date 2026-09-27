@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import { ArrowRightLeft, ClipboardCheck, DoorOpen, FileSignature, Pencil, ReceiptText, UserPlus } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { Tenancy } from "@/lib/types";
@@ -19,9 +19,20 @@ import { DocRow, LegalBadge, SignaturePad, documentUrl } from "./common";
 import { ReceiptPicker } from "./receipts";
 
 export function LogementDetail({ id }: { id: string }) {
+  return (
+    <Suspense>
+      <Detail id={id} />
+    </Suspense>
+  );
+}
+
+function Detail({ id }: { id: string }) {
   const { data, upsert, remove } = useStore();
   const router = useRouter();
+  const params = useSearchParams();
   const [sheet, setSheet] = useState<null | "edit" | "quittance" | "import" | "sign">(null);
+  const fromGestion = params.get("action") === "quittance";
+  const [autoOpened, setAutoOpened] = useState(false);
   const unit = data.units.find((u) => u.id === id);
   if (!unit) {
     return (
@@ -47,6 +58,15 @@ export function LogementDetail({ id }: { id: string }) {
     return t;
   };
 
+  // Ouverture directe de « Obtenir une quittance » depuis l'onglet Gestion.
+  if (fromGestion && !autoOpened && (active || knownTenant)) {
+    queueMicrotask(() => {
+      setAutoOpened(true);
+      ensureTenancy();
+      setSheet("quittance");
+    });
+  }
+
   const startEntry = (t: Tenancy) => {
     const existing = inspectionsOf(data, t.id).entry;
     if (existing) return router.push(`/patrimoine/logement/${id}/edl/${existing.id}`);
@@ -60,7 +80,7 @@ export function LogementDetail({ id }: { id: string }) {
       <PageHeader
         title={unit.name}
         subtitle={[building?.name, company?.name].filter(Boolean).join(" · ")}
-        back={building ? `/patrimoine/immeuble/${building.id}` : "/patrimoine"}
+        back={fromGestion || params.get("depuis") === "gestion" ? "/gestion?vue=locataires" : building ? `/patrimoine/immeuble/${building.id}` : "/patrimoine"}
         action={
           <button onClick={() => setSheet("edit")} className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-navy">
             <Pencil size={15} /> Modifier

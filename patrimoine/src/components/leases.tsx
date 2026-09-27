@@ -190,7 +190,7 @@ export function PaymentStrip({ unit }: { unit: Unit }) {
     <div>
       <div className="mb-1.5 flex items-center justify-between px-1 text-[13px] font-medium text-ink-2">
         <span>Encaissements (12 mois)</span>
-        <Link href={`/loyers?mois=${current}`} className="font-semibold text-series-1">
+        <Link href={`/gestion?mois=${current}`} className="font-semibold text-series-1">
           Pointer
         </Link>
       </div>
