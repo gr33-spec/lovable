@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Check, ChevronLeft, ChevronRight, CircleDashed, Coins, X } from "lucide-react";
+import { Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleDashed, Coins, X } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { RentPayment, Unit } from "@/lib/types";
 import { eur, eurCompact } from "@/lib/format";
@@ -46,6 +46,7 @@ function Loyers() {
   const param = params.get("mois");
   const month = param && /^\d{4}-\d{2}$/.test(param) ? param : current;
   const [editId, setEditId] = useState<string | null>(null);
+  const [open, setOpen] = useState<Set<string>>(() => new Set());
 
   const go = (delta: number) => router.replace(`/loyers?mois=${shiftMonthKey(month, delta)}`, { scroll: false });
 
@@ -80,6 +81,11 @@ function Loyers() {
     const p = unit.payments?.[month];
     if (p?.status === status) setPayment(unit, undefined);
     else setPayment(unit, { ...dueFor(data, unit, month), ...p, status });
+  };
+
+  // Annule les « payé » du mois pour un immeuble (les impayés et paiements partiels sont conservés).
+  const unpayAll = (list: Unit[]) => {
+    for (const u of list) if (u.payments?.[month]?.status === "paye") setPayment(u, undefined);
   };
 
   const allPaid = (list: Unit[]) => {
@@ -154,36 +160,62 @@ function Loyers() {
         {buildings.length === 0 ? (
           <Empty icon={<Coins size={26} />} title="Aucun logement loué" text="Détaillez les logements de vos immeubles pour pointer les loyers chaque mois." />
         ) : (
-          buildings.map(({ building, units: list }) => {
-            const left = list.filter((u) => !u.payments?.[month]).length;
-            return (
-              <div key={building.id}>
-                <SectionTitle
-                  action={
-                    left > 0 ? (
-                      <button onClick={() => allPaid(list)} className="text-sm font-semibold text-series-1">
-                        Tout payé ({left})
-                      </button>
-                    ) : (
-                      <span className="text-sm font-medium text-pos">Pointé</span>
-                    )
-                  }
-                >
-                  {building.name}
-                </SectionTitle>
-                <Card className="py-1">
-                  <div className="divide-y divide-line">
-                    {list.map((u) => (
-                      <PaymentRow key={u.id} unit={u} expected={dueFor(data, u, month).due ?? 0} payment={u.payments?.[month]} onToggle={(s) => toggle(u, s)} onOpen={() => setEditId(u.id)} />
-                    ))}
+          <div className="mt-5 space-y-3">
+            {buildings.map(({ building, units: list }) => {
+              const paidCount = list.filter((u) => u.payments?.[month]?.status === "paye").length;
+              const pointed = list.filter((u) => u.payments?.[month]).length;
+              const issues = list.filter((u) => ["impaye", "partiel"].includes(u.payments?.[month]?.status ?? "")).length;
+              const allDone = paidCount === list.length;
+              const exp = list.reduce((a, u) => a + (u.payments?.[month]?.due ?? dueFor(data, u, month).due ?? 0), 0);
+              const got = list.reduce((a, u) => a + paidAmount(u.payments?.[month]), 0);
+              const isOpen = open.has(building.id);
+              return (
+                <div key={building.id} className="soft-card overflow-hidden rounded-[24px]">
+                  <div className="flex items-center gap-3 px-4 py-3.5">
+                    <button
+                      onClick={() => setOpen((cur) => { const next = new Set(cur); if (next.has(building.id)) next.delete(building.id); else next.add(building.id); return next; })}
+                      className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                      aria-expanded={isOpen}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-[16px] font-bold text-navy">{building.name}</div>
+                        <div className="text-[12.5px] text-muted">
+                          <span className={cx("font-semibold", allDone ? "text-pos" : "text-ink-2")}>{paidCount}/{list.length} payés</span>
+                          {issues > 0 && <span className="font-semibold text-neg"> · {issues} impayé{issues > 1 ? "s" : ""}</span>}
+                          {pointed < list.length && <span> · {list.length - pointed} à pointer</span>}
+                        </div>
+                        <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-soft">
+                          <div className={cx("h-full rounded-full", allDone ? "bg-pos" : "bg-series-1")} style={{ width: `${exp > 0 ? Math.min(100, (got / exp) * 100) : 0}%` }} />
+                        </div>
+                        <div className="tabular mt-1 text-[11.5px] text-muted">{eur(got)} / {eur(exp)}</div>
+                      </div>
+                      <ChevronDown size={18} className={cx("shrink-0 text-muted transition", isOpen && "rotate-180")} />
+                    </button>
+                    <button
+                      onClick={() => (allDone ? unpayAll(list) : allPaid(list))}
+                      aria-label={allDone ? `Annuler « payé » pour ${building.name}` : `Tout marquer payé pour ${building.name}`}
+                      className={cx(
+                        "flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition active:scale-95",
+                        allDone ? "bg-pos text-white shadow-sm" : "border-2 border-pos/40 text-pos",
+                      )}
+                    >
+                      <CheckCheck size={20} />
+                    </button>
                   </div>
-                </Card>
-              </div>
-            );
-          })
+                  {isOpen && (
+                    <div className="divide-y divide-line border-t border-line px-5">
+                      {list.map((u) => (
+                        <PaymentRow key={u.id} unit={u} expected={dueFor(data, u, month).due ?? 0} payment={u.payments?.[month]} onToggle={(st) => toggle(u, st)} onOpen={() => setEditId(u.id)} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         )}
         <p className="mt-6 px-2 text-center text-xs text-muted">
-          Touchez ✓ ou ✗ pour pointer, touchez à nouveau pour annuler. Touchez le logement pour un paiement partiel.
+          ✓✓ à droite d&apos;un immeuble : tout marquer payé (touchez à nouveau pour annuler). Ouvrez l&apos;immeuble pour pointer logement par logement ou saisir un paiement partiel.
         </p>
       </Page>
 
