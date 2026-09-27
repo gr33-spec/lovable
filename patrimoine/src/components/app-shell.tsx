@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
-import { Building2, CloudOff, Coins, Ellipsis, KeyRound, House, Check, ListChecks, LoaderCircle, Users } from "lucide-react";
+import { Building2, ChartColumn, CloudOff, Coins, Ellipsis, KeyRound, House, Check, ListChecks, LoaderCircle, Users } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { unpaidByUnit } from "@/lib/engine/leases";
 import { cx } from "./ui";
@@ -91,6 +91,7 @@ function GestionNav({ unpaid }: { unpaid: number }) {
     { vue: "loyers", label: "Loyers", icon: Coins, badge: unpaid },
     { vue: "locataires", label: "Locataires", icon: Users },
     { vue: "afaire", label: "À faire", icon: ListChecks },
+    { vue: "annee", label: "Bilan", icon: ChartColumn },
   ];
   return (
     <nav className="safe-bottom pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-2">

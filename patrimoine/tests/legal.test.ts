@@ -6,6 +6,7 @@ import { monthDue, monthReceipt, rentStatement } from "../src/lib/legal/receipts
 import { compareInspections, newEntryInspection, newExitInspection } from "../src/lib/legal/inspection";
 import { leaseDocument } from "../src/lib/legal/lease";
 import { euroWords, numberToWords } from "../src/lib/legal/doc";
+const close = (a: number, b: number, tol: number) => assert.ok(Math.abs(a - b) <= tol, `${a} ≠ ${b}`);
 import type { Tenancy, Unit } from "../src/lib/types";
 
 test("version du bail selon la date de conclusion", () => {
@@ -213,4 +214,34 @@ test("IRL : lecture de la réponse INSEE (SDMX)", async () => {
     { year: 2026, quarter: 1, value: 146.9 },
     { year: 2026, quarter: 2, value: 147.5 },
   ]);
+});
+
+test("bilan de l'année : vacance, rotation, calendrier, révisions", async () => {
+  const { yearStats } = await import("../src/lib/engine/annual");
+  const data = {
+    ...(await import("../src/lib/types")).emptyData(),
+    buildings: [{ id: "b", name: "Imm" }],
+    units: [
+      { id: "u1", buildingId: "b", name: "A", rent: 600, status: "occupe" as const, payments: { "2026-01": { status: "paye" as const, due: 600 }, "2026-02": { status: "impaye" as const, due: 600 } }, rentHistory: [{ date: "2026-03-01", rent: 615, previousRent: 600 }] },
+      { id: "u2", buildingId: "b", name: "B", rent: 500, status: "occupe" as const },
+    ],
+    tenancies: [
+      { id: "t1", unitId: "u2", status: "clos" as const, tenants: [], startDate: "2023-01-01", endDate: "2026-01-31" },
+      { id: "t2", unitId: "u2", status: "actif" as const, tenants: [], startDate: "2026-04-01" },
+    ],
+  };
+  const s = yearStats(data, 2026, "2026-06-15");
+  assert.equal(s.monthsCount, 6);
+  const b = s.buildings[0];
+  assert.deepEqual(b.units[0].months.slice(0, 7), ["paye", "impaye", "non_pointe", "non_pointe", "non_pointe", "non_pointe", "futur"]);
+  assert.deepEqual(b.units[1].months.slice(0, 5), ["non_pointe", "vacant", "vacant", "non_pointe", "non_pointe"]);
+  assert.equal(s.vacantMonths, 2);
+  assert.equal(s.lostRent, 1000);
+  close(s.occupancyPct!, (10 / 12) * 100, 1e-9);
+  assert.equal(s.departures.length, 1);
+  assert.equal(s.arrivals.length, 1);
+  assert.equal(s.avgRelocationDays, 59); // 1er février → 31 mars
+  close(s.avgStayYears!, 3.08, 0.01);
+  assert.equal(s.revisionGain, 15);
+  assert.equal(s.estimatedUnits, 1);
 });
