@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { verifyAuthenticationResponse } from "@simplewebauthn/server";
-import { clearLoginFailures, isLoginBlocked, recordLoginFailure } from "@/lib/server/db";
+import { clearLoginFailures } from "@/lib/server/db";
 import { findPasskey, touchPasskey } from "@/lib/server/passkeys";
 import { accessState } from "@/lib/server/access";
 import { SESSION_COOKIE, createSessionToken, sessionCookieOptions } from "@/lib/server/session";
@@ -14,15 +14,15 @@ function clientIp(request: Request): string {
 
 export async function POST(request: Request) {
   const ip = clientIp(request);
-  if (await isLoginBlocked(ip)) return NextResponse.json({ error: "Trop de tentatives. Réessayez dans 15 minutes." }, { status: 429 });
   const rp = relyingParty(request);
   const expectedChallenge = readChallenge(request, "login");
   if (!rp || !expectedChallenge) return NextResponse.json({ error: "Demande expirée, recommencez." }, { status: 400 });
   const body = await request.json().catch(() => null);
   const response = body?.response;
   const key = typeof response?.id === "string" ? await findPasskey(response.id, rp.rpID) : undefined;
+  // Un échec Face ID n'est pas une tentative de mot de passe : il ne compte pas
+  // dans le blocage anti-essais (la clé est protégée cryptographiquement).
   if (!key) {
-    await recordLoginFailure(ip);
     return NextResponse.json({ error: "Face ID non reconnu : connectez-vous avec le mot de passe puis réactivez Face ID." }, { status: 401 });
   }
   try {
@@ -42,8 +42,7 @@ export async function POST(request: Request) {
     }
     await touchPasskey(key.id, result.authenticationInfo.newCounter);
   } catch {
-    await recordLoginFailure(ip);
-    return NextResponse.json({ error: "Face ID refusé." }, { status: 401 });
+    return NextResponse.json({ error: "Face ID refusé : connectez-vous avec le mot de passe puis réactivez Face ID (icône compte ou Plus → Connexion Face ID)." }, { status: 401 });
   }
   await clearLoginFailures(ip);
   const res = NextResponse.json({ ok: true });

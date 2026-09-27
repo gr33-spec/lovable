@@ -134,7 +134,7 @@ export function LoginForm({ configured }: { configured: boolean }) {
               ))}
             </div>
             <form onSubmit={submit} className="space-y-3">
-              {faceId[space] && (
+              {(faceId.patrimoine || faceId.gestion) && (
                 <>
                   <button
                     type="button"
@@ -147,8 +147,11 @@ export function LoginForm({ configured }: { configured: boolean }) {
                   <div className="py-1 text-center text-xs text-white/40">ou</div>
                 </>
               )}
+              {/* Identifiant invisible : permet au trousseau iCloud de proposer le mot de passe avec Face ID. */}
+              <input type="text" name="username" autoComplete="username" value={space === "gestion" ? "gestion-locative" : "patrimoine"} readOnly hidden />
               <input
                 type="password"
+                name="password"
                 autoComplete="current-password"
                 placeholder={space === "gestion" ? "Mot de passe gestion locative" : "Mot de passe"}
                 value={password}
