@@ -11,7 +11,7 @@ import { eurCompact, eurSigned } from "@/lib/format";
 import { labelOf, UNIT_TYPES } from "@/lib/labels";
 import { AddMenu } from "@/components/quick-add";
 import { OrgChart } from "@/components/org-chart";
-import { Card, Empty, Page, PageHeader, Pill, RoundButton, Segmented, cx, Button } from "@/components/ui";
+import { Avatar, Card, Empty, Page, PageHeader, Pill, RoundButton, Segmented, cx, Button } from "@/components/ui";
 
 export default function PatrimoinePage() {
   const { data, projection } = useStore();
@@ -43,6 +43,7 @@ export default function PatrimoinePage() {
           depth={depth}
           href={`/patrimoine/societe/${c.id}`}
           icon={<Briefcase size={18} />}
+          avatar={c.kind === "holding" ? undefined : <Avatar id={c.id} name={c.name} size={36} square index={data.companies.filter((x) => x.kind !== "holding").findIndex((x) => x.id === c.id)} />}
           title={c.name}
           badge={c.kind === "holding" ? "Holding" : c.kind}
           figures={f}
@@ -189,6 +190,7 @@ function TreeRow({
   open,
   onToggle,
   emphasis,
+  avatar,
 }: {
   depth: number;
   href: string;
@@ -200,6 +202,7 @@ function TreeRow({
   open: boolean;
   onToggle?: () => void;
   emphasis?: boolean;
+  avatar?: React.ReactNode;
 }) {
   const cf = figures ? cashflowMonthly(figures) : 0;
   return (
@@ -213,7 +216,13 @@ function TreeRow({
         <ChevronDown size={18} className={cx("transition-transform", !open && "-rotate-90")} />
       </button>
       <Link href={href} className="flex min-w-0 flex-1 items-center gap-3 py-2 active:opacity-60">
-        <div className={cx("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl", emphasis ? "bg-navy text-white" : "bg-soft text-navy")}>{icon}</div>
+        {emphasis ? (
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-navy text-[#e8d3ad]">{icon}</div>
+        ) : avatar ? (
+          avatar
+        ) : (
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#2a78d6]/10 text-[#2a78d6]">{icon}</div>
+        )}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <span className={cx("truncate text-[15px] text-ink", emphasis ? "font-semibold" : "font-medium")}>{title}</span>

@@ -37,7 +37,7 @@ export function PageHeader({
           </button>
         )}
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-[26px] font-bold tracking-tight text-navy">{title}</h1>
+          <h1 className="truncate text-[30px] font-extrabold tracking-[-0.02em] text-navy">{title}</h1>
           {subtitle && <div className="truncate text-sm text-muted">{subtitle}</div>}
         </div>
         {action}
@@ -55,7 +55,7 @@ export function Card({ children, className, onClick }: { children: ReactNode; cl
     <div
       onClick={onClick}
       className={cx(
-        "rounded-3xl bg-card p-5 shadow-[0_1px_2px_rgba(15,27,45,0.04),0_8px_24px_rgba(15,27,45,0.05)]",
+        "soft-card rounded-[26px] p-5",
         onClick && "cursor-pointer active:scale-[0.99] transition-transform",
         className,
       )}
@@ -67,8 +67,8 @@ export function Card({ children, className, onClick }: { children: ReactNode; cl
 
 export function SectionTitle({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
-    <div className="mb-2 mt-7 flex items-center justify-between px-1">
-      <h2 className="text-[13px] font-semibold uppercase tracking-wider text-muted">{children}</h2>
+    <div className="mb-3 mt-8 flex items-center justify-between px-1">
+      <h2 className="text-[19px] font-bold tracking-[-0.01em] text-navy">{children}</h2>
       {action}
     </div>
   );
@@ -92,8 +92,8 @@ export function Kpi({
       <div className="text-[13px] text-muted">{label}</div>
       <div
         className={cx(
-          "tabular truncate font-semibold tracking-tight",
-          big ? "text-[28px]" : "text-[19px]",
+          "tabular truncate font-bold tracking-[-0.02em]",
+          big ? "text-[30px]" : "text-[19px]",
           tone === "pos" && "text-pos",
           tone === "neg" && "text-neg",
           (!tone || tone === "neutral") && "text-ink",
@@ -564,5 +564,58 @@ export function Details({ title, children, defaultOpen }: { title: string; child
       </button>
       {open && <div className="space-y-4 px-4 pb-4">{children}</div>}
     </div>
+  );
+}
+
+// ——— Pastilles d'icônes colorées ———
+
+const CHIP_TONES = {
+  blue: "bg-[#2a78d6]/12 text-[#2a78d6]",
+  green: "bg-[#0f8a5f]/12 text-[#0f8a5f]",
+  gold: "bg-[#b08d57]/15 text-[#8a6a3a]",
+  violet: "bg-[#7c5cc4]/12 text-[#6a4bb3]",
+  rose: "bg-[#d0667a]/12 text-[#c24d63]",
+  slate: "bg-[#4b5d7a]/12 text-[#3d4f6c]",
+  navy: "bg-navy text-white",
+} as const;
+
+export type ChipTone = keyof typeof CHIP_TONES;
+
+export function IconChip({ children, tone = "slate", size = 40 }: { children: ReactNode; tone?: ChipTone; size?: number }) {
+  return (
+    <span className={cx("flex shrink-0 items-center justify-center rounded-[14px]", CHIP_TONES[tone])} style={{ width: size, height: size }}>
+      {children}
+    </span>
+  );
+}
+
+const AVATAR_COLORS = ["#2a78d6", "#0f8a5f", "#b08d57", "#7c5cc4", "#d0667a", "#1b9aaa", "#e08a2e", "#4b5d7a"];
+
+/** Couleur stable dérivée d'un identifiant (une société garde toujours sa couleur). */
+export function colorFor(id: string): string {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return AVATAR_COLORS[h % AVATAR_COLORS.length];
+}
+
+export function Avatar({ id, name, size = 36, square, index }: { id: string; name: string; size?: number; square?: boolean; index?: number }) {
+  // L'index (ordre des sociétés) garantit des couleurs toutes différentes.
+  const color = index !== undefined ? AVATAR_COLORS[index % AVATAR_COLORS.length] : colorFor(id);
+  const letters = name
+    .replace(/^(SCI|SC|SARL|SAS)\s+/i, "")
+    .replace(/^(DU|DE LA|DE|LA|LE|LES)\s+/i, "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+  return (
+    <span
+      className={cx("flex shrink-0 items-center justify-center font-bold text-white", square ? "rounded-[12px]" : "rounded-full")}
+      style={{ width: size, height: size, fontSize: size * 0.38, background: `linear-gradient(145deg, ${color}, ${color}cc)` }}
+    >
+      {letters || "•"}
+    </span>
   );
 }

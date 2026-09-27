@@ -4,7 +4,7 @@
    bleu pour les données, or discret pour les accents, vert/rouge réservés
    aux variations positives/négatives. */
 :root {
-  --bg: #f4f5f7;
+  --bg: #f2f4f8;
   --card: #ffffff;
   --ink: #0f1b2d;
   --ink-2: #4b5567;
@@ -46,7 +46,11 @@ html {
 }
 
 body {
-  background: var(--bg);
+  background:
+    radial-gradient(1200px 520px at 85% -120px, rgba(42, 120, 214, 0.10), transparent 60%),
+    radial-gradient(900px 480px at -10% -80px, rgba(176, 141, 87, 0.10), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
   color: var(--ink);
   font-family: var(--font-sans);
 }
@@ -104,4 +108,49 @@ textarea {
   .animate-fade {
     animation: none;
   }
+}
+
+/* Carte « premium » sombre avec halos lumineux. */
+.hero-card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(145deg, #0b2545 0%, #102f57 55%, #173d6e 100%);
+  box-shadow: 0 20px 40px -12px rgba(11, 37, 69, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.hero-card::before,
+.hero-card::after {
+  content: "";
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(40px);
+  pointer-events: none;
+}
+.hero-card::before {
+  width: 220px;
+  height: 220px;
+  right: -60px;
+  top: -80px;
+  background: rgba(96, 165, 250, 0.28);
+}
+.hero-card::after {
+  width: 260px;
+  height: 260px;
+  left: -90px;
+  bottom: -140px;
+  background: rgba(42, 120, 214, 0.35);
+}
+.hero-card > * {
+  position: relative;
+  z-index: 1;
+}
+.soft-card {
+  background: var(--card);
+  box-shadow: 0 1px 2px rgba(15, 27, 45, 0.04), 0 10px 30px -8px rgba(15, 27, 45, 0.10);
+  border: 1px solid rgba(15, 27, 45, 0.04);
+}
+.gold-text {
+  background: linear-gradient(90deg, #d4b483, #b08d57);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }

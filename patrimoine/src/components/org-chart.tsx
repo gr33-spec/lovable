@@ -7,7 +7,7 @@ import type { Company, Partner } from "@/lib/types";
 import { NO_COMPANY, type Figures } from "@/lib/engine/snapshot";
 import { eurCompact, pct } from "@/lib/format";
 import { COMPANY_KINDS, labelOf } from "@/lib/labels";
-import { cx } from "./ui";
+import { Avatar, cx } from "./ui";
 
 // Organigramme : associés (personnes) → holding → sociétés, avec les
 // pourcentages de détention saisis dans les fiches sociétés (« Associés »).
@@ -45,6 +45,7 @@ export function OrgChart() {
   const otherRoots = roots.filter((c) => c.id !== holding.id);
   const direct = snap.ownByCompany.get(NO_COMPANY);
   const hf = snap.byCompany.get(holding.id);
+  const colorIndex = (id: string) => data.companies.filter((x) => x.kind !== "holding").findIndex((x) => x.id === id);
 
   return (
     <div className="mt-5">
@@ -85,7 +86,7 @@ export function OrgChart() {
       {/* Holding */}
       <Link
         href={`/patrimoine/societe/${holding.id}`}
-        className="block rounded-3xl bg-gradient-to-br from-navy to-navy-2 p-5 text-white shadow-[0_12px_32px_rgba(11,37,69,0.25)] active:scale-[0.99]"
+        className="hero-card block rounded-[28px] p-5 text-white active:scale-[0.99]"
       >
         <div className="flex items-center gap-3">
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-gold">
@@ -112,7 +113,7 @@ export function OrgChart() {
             <div key={c.id} className={cx("relative pl-5", i < children.length - 1 ? "pb-3" : "")}>
               <div className="absolute left-0 top-7 h-0.5 w-5 bg-[#c9d3e3]" />
               {i === children.length - 1 && <div className="absolute -left-0.5 top-7 bottom-0 w-1 bg-bg" />}
-              <CompanyCard company={c} holding={holding} figures={snap.byCompany.get(c.id)} />
+              <CompanyCard company={c} holding={holding} figures={snap.byCompany.get(c.id)} index={colorIndex(c.id)} />
             </div>
           ))}
         </div>
@@ -124,7 +125,7 @@ export function OrgChart() {
           <div className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wider text-muted">Autres sociétés</div>
           <div className="space-y-3">
             {otherRoots.map((c) => (
-              <CompanyCard key={c.id} company={c} holding={holding} figures={snap.byCompany.get(c.id)} />
+              <CompanyCard key={c.id} company={c} holding={holding} figures={snap.byCompany.get(c.id)} index={colorIndex(c.id)} />
             ))}
           </div>
         </div>
@@ -175,7 +176,7 @@ function PersonCard({ partner }: { partner: Partner }) {
   );
 }
 
-function CompanyCard({ company, holding, figures }: { company: Company; holding: Company; figures?: Figures }) {
+function CompanyCard({ company, holding, figures, index }: { company: Company; holding: Company; figures?: Figures; index?: number }) {
   const partners = company.partners?.filter((p) => p.name) ?? [];
   const isParent = (p: Partner) => p.name.toLowerCase() === holding.name.toLowerCase();
   const parentPct = company.ownershipPct ?? partners.find(isParent)?.pct;
@@ -183,9 +184,10 @@ function CompanyCard({ company, holding, figures }: { company: Company; holding:
   return (
     <Link
       href={`/patrimoine/societe/${company.id}`}
-      className="block rounded-3xl bg-card p-4 shadow-[0_1px_2px_rgba(15,27,45,0.04),0_8px_24px_rgba(15,27,45,0.05)] active:scale-[0.99]"
+      className="soft-card block rounded-[24px] p-4 active:scale-[0.99]"
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5">
+        <Avatar id={company.id} name={company.name} size={34} square index={index} />
         <span className="min-w-0 flex-1 truncate text-[16px] font-semibold text-navy">{company.name}</span>
         <span className="shrink-0 rounded-md bg-soft px-1.5 text-[10px] font-semibold uppercase text-ink-2">{company.kind}</span>
       </div>
