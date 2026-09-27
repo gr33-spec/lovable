@@ -10,11 +10,12 @@ import { eur } from "@/lib/format";
 import { todayIso, unpaidByUnit } from "@/lib/engine/leases";
 import { allReminders } from "@/lib/reminders";
 import { RentsView } from "@/components/gestion/rents";
+import { AnnualView } from "@/components/gestion/annual";
 import { TaskRow, TenantsView, managementTasks } from "@/components/gestion/tenants";
 import { ReminderRow } from "@/components/leases";
 import { Card, Page, PageHeader, SectionTitle, cx } from "@/components/ui";
 
-type View = "loyers" | "locataires" | "afaire";
+type View = "loyers" | "locataires" | "afaire" | "annee";
 const RENTAL = new Set(["lease_end", "revision", "unpaid", "deposit"]);
 
 export default function GestionPage() {
@@ -30,7 +31,7 @@ function Gestion() {
   const gestion = appView === "gestion";
   const router = useRouter();
   const params = useSearchParams();
-  const view = (["loyers", "locataires", "afaire"].includes(params.get("vue") ?? "") ? params.get("vue") : "loyers") as View;
+  const view = (["loyers", "locataires", "afaire", "annee"].includes(params.get("vue") ?? "") ? params.get("vue") : "loyers") as View;
   const today = todayIso();
 
   const rented = data.units.filter((u) => u.status !== "vacant").length;
@@ -51,12 +52,13 @@ function Gestion() {
     { value: "loyers", label: "Loyers" },
     { value: "locataires", label: "Locataires" },
     { value: "afaire", label: "À faire", badge: todo },
+    { value: "annee", label: "Bilan" },
   ];
 
   return (
     <>
       <PageHeader
-        title={gestion ? { loyers: "Loyers", locataires: "Locataires", afaire: "À faire" }[view] : "Gestion"}
+        title={gestion ? { loyers: "Loyers", locataires: "Locataires", afaire: "À faire", annee: "Bilan de l'année" }[view] : "Gestion"}
         subtitle={gestion ? data.settings.groupName || "Gestion locative" : "Loyers, locataires et démarches"}
         action={
           role === "gestion" ? (
@@ -107,6 +109,7 @@ function Gestion() {
         <div className="mt-4">
           {view === "loyers" && <RentsView />}
           {view === "locataires" && <TenantsView />}
+          {view === "annee" && <AnnualView />}
           {view === "afaire" &&
             (todo === 0 ? (
               <Card>
