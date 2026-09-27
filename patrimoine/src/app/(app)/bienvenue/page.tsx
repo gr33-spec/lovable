@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Briefcase, Building2, Landmark, Sparkles, Trash2, Wallet } from "lucide-react";
@@ -87,6 +89,9 @@ function Onboarding() {
             </Button>
           </div>
           <p className="mt-4 text-center text-xs text-muted">L&apos;exemple se supprime en un clic depuis « Plus ».</p>
+          <Link href="/plus/sauvegardes" className="mt-6 block text-center text-sm font-semibold text-series-1">
+            Restaurer une sauvegarde
+          </Link>
         </div>
       ) : (
         <>
