@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+/* Charte : sobre, inspirée des banques privées. Bleu nuit pour le texte,
+   bleu pour les données, or discret pour les accents, vert/rouge réservés
+   aux variations positives/négatives. */
+:root {
+  --bg: #f4f5f7;
+  --card: #ffffff;
+  --ink: #0f1b2d;
+  --ink-2: #4b5567;
+  --muted: #8a93a3;
+  --line: #e6e8ec;
+  --navy: #0b2545;
+  --navy-2: #13315c;
+  --gold: #b08d57;
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --pos: #0f8a5f;
+  --neg: #d23f3f;
+  --warn: #b7791f;
+  --soft: #eef2f8;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-navy: var(--navy);
+  --color-navy-2: var(--navy-2);
+  --color-gold: var(--gold);
+  --color-series-1: var(--series-1);
+  --color-series-2: var(--series-2);
+  --color-pos: var(--pos);
+  --color-neg: var(--neg);
+  --color-warn: var(--warn);
+  --color-soft: var(--soft);
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Évite le zoom automatique de Safari sur les champs (police ≥ 16px). */
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-sheet {
+  animation: sheet-in 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.animate-fade {
+  animation: fade-in 0.2s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-sheet,
+  .animate-fade {
+    animation: none;
+  }
+}
