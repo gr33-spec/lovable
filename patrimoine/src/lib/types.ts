@@ -228,6 +228,51 @@ export interface Scenario {
   createdAt?: string;
 }
 
+// ——— Comptes annuels (bilans) ———
+
+/** Chiffres clés d'un exercice. Tous facultatifs : null/undefined = non renseigné. */
+export interface StatementFigures {
+  // Compte de résultat
+  revenue?: number; // chiffre d'affaires / loyers facturés
+  otherIncome?: number;
+  externalCharges?: number;
+  taxes?: number; // impôts et taxes (taxe foncière…)
+  depreciation?: number; // dotations aux amortissements
+  operatingResult?: number;
+  financialCharges?: number; // intérêts d'emprunts
+  exceptionalResult?: number;
+  corporateTax?: number;
+  netResult?: number;
+  // Bilan
+  fixedAssetsGross?: number;
+  fixedAssetsNet?: number;
+  cash?: number; // disponibilités
+  totalAssets?: number;
+  equity?: number; // capitaux propres
+  shareCapital?: number;
+  bankDebt?: number; // emprunts auprès des établissements de crédit
+  partnerAccounts?: number; // comptes courants d'associés
+  otherDebts?: number;
+}
+
+export interface Statement {
+  id: Id;
+  companyId: Id;
+  /** Année de clôture de l'exercice. */
+  year: number;
+  closingDate?: string;
+  durationMonths?: number;
+  figures: StatementFigures;
+  source: "ia" | "manuel";
+  fileId?: string;
+  fileName?: string;
+  /** Points d'attention relevés lors de l'analyse. */
+  aiNotes?: string[];
+  confidence?: "haute" | "moyenne" | "faible";
+  notes?: string;
+  createdAt?: string;
+}
+
 export interface Settings {
   onboardingDone?: boolean;
   groupName?: string;
@@ -251,6 +296,7 @@ export interface AppData {
   /** Opérations futures validées (intégrées aux données réelles). */
   plans: Action[];
   scenarios: Scenario[];
+  statements: Statement[];
 }
 
 export type Collection = Exclude<keyof AppData, "schemaVersion" | "settings">;
@@ -268,6 +314,7 @@ export function emptyData(): AppData {
     withdrawals: [],
     plans: [],
     scenarios: [],
+    statements: [],
   };
 }
 
@@ -281,4 +328,5 @@ export const COLLECTIONS: Collection[] = [
   "withdrawals",
   "plans",
   "scenarios",
+  "statements",
 ];

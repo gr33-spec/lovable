@@ -7,6 +7,8 @@ import { useStore } from "@/lib/store";
 import { cashflowMonthly, ltv, netWorth } from "@/lib/engine/snapshot";
 import { milestones, type Milestone } from "@/lib/engine/milestones";
 import { qualityIssues } from "@/lib/engine/quality";
+import { portfolioIndicators } from "@/lib/engine/indicators";
+import { IndicatorTile } from "@/components/indicators";
 import { eur, eurCompact, eurSigned, pct } from "@/lib/format";
 import { Card, IconChip, Kpi, Page, SectionTitle, Segmented, cx, Insufficient, type ChipTone } from "@/components/ui";
 import { BarChart, LineChart } from "@/components/charts";
@@ -30,6 +32,11 @@ export default function Accueil() {
   const years = projection.years.map((r) => r.year);
   const future = projection.years.find((r) => r.year === y0 + horizon);
   const hasData = t.buildings > 0 || t.loans > 0;
+  const keyIndicators = useMemo(() => {
+    const all = portfolioIndicators(data, projection);
+    const pick = ["dscr", "occupancy", "avg-rate", "amortized-10"];
+    return pick.map((id) => all.find((i) => i.id === id)).filter((i): i is NonNullable<typeof i> => !!i && t.loans + t.buildings > 0);
+  }, [data, projection, t.loans, t.buildings]);
   const upcomingEnds = projection.events.filter((e) => e.kind === "loan_end").slice(0, 5);
 
   return (
@@ -134,6 +141,17 @@ export default function Accueil() {
             </Link>
           ))}
         </div>
+
+        {keyIndicators.length > 0 && (
+          <>
+            <SectionTitle action={<Link href="/plus/indicateurs" className="text-sm font-medium text-series-1">Tout voir</Link>}>Indicateurs clés</SectionTitle>
+            <div className="grid grid-cols-2 gap-2.5">
+              {keyIndicators.map((i) => (
+                <IndicatorTile key={i.id} ind={i} compact />
+              ))}
+            </div>
+          </>
+        )}
 
         {t.cash > 0 && (
           <Card className="mt-4">

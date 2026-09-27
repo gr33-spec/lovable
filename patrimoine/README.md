@@ -31,6 +31,14 @@ fonctionne en permanence.
 
 Les tables de la base sont créées automatiquement au premier accès.
 
+### Lecture automatique des bilans (facultatif)
+
+Pour que les PDF de bilans soient lus par l'IA (Claude, d'Anthropic) :
+créez une clé sur console.anthropic.com → API Keys, puis ajoutez la variable
+`ANTHROPIC_API_KEY` dans Vercel et redéployez. Sans cette clé, les PDF sont
+conservés et la saisie manuelle fonctionne. Rien n'est enregistré sans
+validation.
+
 ### Sur iPhone
 
 Ouvrez l'adresse dans Safari → bouton **Partager** → **Sur l'écran
