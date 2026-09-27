@@ -12,6 +12,10 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   serverExternalPackages: ["@react-pdf/renderer", "pg"],
+  // Polices du dossier banque, lues sur le disque au moment de la génération.
+  outputFileTracingIncludes: {
+    "/api/dossier-banque": ["./src/lib/pdf/fonts/**/*"],
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
