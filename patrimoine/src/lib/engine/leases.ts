@@ -172,7 +172,7 @@ export function unpaidByUnit(units: Unit[]): UnpaidLine[] {
 
 // ——— Rappels ———
 
-export type ReminderKind = "lease_end" | "revision" | "loan_end" | "unpaid";
+export type ReminderKind = "lease_end" | "revision" | "loan_end" | "unpaid" | "deposit";
 
 export interface Reminder {
   id: string;
@@ -212,7 +212,7 @@ export function reminders(
   const out: Reminder[] = [];
   for (const unit of data.units) {
     const { building, label } = unitPlace(data, unit);
-    const href = building ? `/patrimoine/immeuble/${building.id}?logement=${unit.id}` : "/patrimoine";
+    const href = building ? `/patrimoine/logement/${unit.id}` : "/patrimoine";
     if (unit.status !== "vacant") {
       const info = leaseInfo(unit, today);
       if (info.end && info.noticeDate && (info.expired || today >= info.noticeDate)) {

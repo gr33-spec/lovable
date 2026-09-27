@@ -9,6 +9,26 @@ import { eur, eurCompact } from "@/lib/format";
 import { expectedMonthly, monthKey, monthKeyLabel, outstanding, paidAmount, shiftMonthKey, todayIso, unpaidByUnit } from "@/lib/engine/leases";
 import { Button, Card, Empty, Grid2, NumberField, Page, PageHeader, SectionTitle, Segmented, Sheet, Stack, TextField, cx } from "@/components/ui";
 import { STATUS_LABEL } from "@/components/leases";
+import { DateField } from "@/components/ui";
+import type { AppData } from "@/lib/types";
+import { monthDue } from "@/lib/legal/receipts";
+
+/** Bail couvrant le mois (le montant appelé est alors calculé au prorata des jours d'occupation). */
+function tenancyForMonth(data: AppData, unit: Unit, month: string) {
+  const first = `${month}-01`;
+  const last = `${month}-31`;
+  return data.tenancies.find(
+    (t) => t.unitId === unit.id && t.status !== "brouillon" && (!t.startDate || t.startDate <= last) && (!t.endDate || t.endDate >= first),
+  );
+}
+
+/** Montant attendu pour le mois, avec le détail loyer / charges. */
+function dueFor(data: AppData, unit: Unit, month: string): Pick<RentPayment, "due" | "rent" | "charges" | "tenancyId"> {
+  const t = tenancyForMonth(data, unit, month);
+  if (!t) return { due: expectedMonthly(unit), rent: unit.rent, charges: unit.charges };
+  const d = monthDue(t, month);
+  return { due: d.total, rent: d.rent, charges: d.charges, tenancyId: t.id };
+}
 
 export default function LoyersPage() {
   return (
@@ -41,7 +61,7 @@ function Loyers() {
   let unpointed = 0;
   for (const u of units) {
     const p = u.payments?.[month];
-    expected += p?.due ?? expectedMonthly(u);
+    expected += p?.due ?? dueFor(data, u, month).due ?? 0;
     received += paidAmount(p);
     unpaidMonth += outstanding(p);
     if (!p) unpointed += 1;
@@ -59,11 +79,11 @@ function Loyers() {
   const toggle = (unit: Unit, status: RentPayment["status"]) => {
     const p = unit.payments?.[month];
     if (p?.status === status) setPayment(unit, undefined);
-    else setPayment(unit, { ...p, status, due: p?.due ?? expectedMonthly(unit) });
+    else setPayment(unit, { ...dueFor(data, unit, month), ...p, status });
   };
 
   const allPaid = (list: Unit[]) => {
-    for (const u of list) if (!u.payments?.[month]) setPayment(u, { status: "paye", due: expectedMonthly(u) });
+    for (const u of list) if (!u.payments?.[month]) setPayment(u, { ...dueFor(data, u, month), status: "paye" });
   };
 
   const editing = data.units.find((u) => u.id === editId);
@@ -154,7 +174,7 @@ function Loyers() {
                 <Card className="py-1">
                   <div className="divide-y divide-line">
                     {list.map((u) => (
-                      <PaymentRow key={u.id} unit={u} payment={u.payments?.[month]} onToggle={(s) => toggle(u, s)} onOpen={() => setEditId(u.id)} />
+                      <PaymentRow key={u.id} unit={u} expected={dueFor(data, u, month).due ?? 0} payment={u.payments?.[month]} onToggle={(s) => toggle(u, s)} onOpen={() => setEditId(u.id)} />
                     ))}
                   </div>
                 </Card>
@@ -168,15 +188,15 @@ function Loyers() {
       </Page>
 
       <Sheet open={!!editing} onClose={() => setEditId(null)} title={editing ? `${editing.name} · ${monthKeyLabel(month)}` : ""} footer={<Button full onClick={() => setEditId(null)}>Terminé</Button>}>
-        {editing && <PaymentEditor unit={editing} month={month} onChange={(p) => setPayment(editing, p)} />}
+        {editing && <PaymentEditor unit={editing} month={month} defaults={dueFor(data, editing, month)} onChange={(p) => setPayment(editing, p)} />}
       </Sheet>
     </>
   );
 }
 
-function PaymentRow({ unit, payment, onToggle, onOpen }: { unit: Unit; payment?: RentPayment; onToggle: (s: RentPayment["status"]) => void; onOpen: () => void }) {
+function PaymentRow({ unit, expected, payment, onToggle, onOpen }: { unit: Unit; expected: number; payment?: RentPayment; onToggle: (s: RentPayment["status"]) => void; onOpen: () => void }) {
   const tenant = [unit.tenantFirstName, unit.tenantLastName].filter(Boolean).join(" ");
-  const due = payment?.due ?? expectedMonthly(unit);
+  const due = payment?.due ?? expected;
   return (
     <div className="flex items-center gap-3 py-3">
       <button onClick={onOpen} className="min-w-0 flex-1 text-left active:opacity-60">
@@ -211,15 +231,15 @@ function PaymentRow({ unit, payment, onToggle, onOpen }: { unit: Unit; payment?:
   );
 }
 
-function PaymentEditor({ unit, month, onChange }: { unit: Unit; month: string; onChange: (p: RentPayment | undefined) => void }) {
+function PaymentEditor({ unit, month, defaults, onChange }: { unit: Unit; month: string; defaults: Pick<RentPayment, "due" | "rent" | "charges" | "tenancyId">; onChange: (p: RentPayment | undefined) => void }) {
   const p = unit.payments?.[month];
-  const due = p?.due ?? expectedMonthly(unit);
+  const due = p?.due ?? defaults.due ?? 0;
   const status = p?.status ?? "none";
   return (
     <Stack>
       <Segmented
         value={status}
-        onChange={(s) => onChange(s === "none" ? undefined : { ...p, status: s, due })}
+        onChange={(s) => onChange(s === "none" ? undefined : { ...defaults, ...p, status: s, due })}
         options={[
           { value: "none", label: "Non pointé" },
           { value: "paye", label: STATUS_LABEL.paye },
@@ -234,6 +254,7 @@ function PaymentEditor({ unit, month, onChange }: { unit: Unit; month: string; o
             {p.status === "partiel" && <NumberField label="Montant reçu" value={p.paid} onChange={(v) => onChange({ ...p, paid: v })} />}
           </Grid2>
           {outstanding(p) > 0 && <div className="rounded-2xl bg-neg/10 px-4 py-3 text-sm font-semibold text-neg">Reste dû : {eur(outstanding(p))}</div>}
+          <DateField label="Encaissé le" value={p.paidDate} onChange={(v) => onChange({ ...p, paidDate: v })} hint="Facultatif — repris sur la quittance." />
           <TextField label="Note" value={p.note} placeholder="Ex. relance envoyée le…" onChange={(v) => onChange({ ...p, note: v })} />
         </>
       )}

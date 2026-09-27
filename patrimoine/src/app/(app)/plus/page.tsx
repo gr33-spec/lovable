@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { BellRing, FlaskConical, ScanFace, Share2, LineChart as LineIcon, FileSpreadsheet, Gauge, CalendarClock, CircleAlert, FileText, Flag, Hammer, HandCoins, History, LogOut, Percent, Smartphone, Sparkles, Trash2, Wand2 } from "lucide-react";
+import { BellRing, FlaskConical, Scale, ScanFace, Share2, LineChart as LineIcon, FileSpreadsheet, Gauge, CalendarClock, CircleAlert, FileText, Flag, Hammer, HandCoins, History, LogOut, Percent, Smartphone, Sparkles, Trash2, Wand2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { demoData, hasDemo, withoutDemo } from "@/lib/demo";
 import { qualityIssues } from "@/lib/engine/quality";
-import { reminders, todayIso } from "@/lib/engine/leases";
+import { todayIso } from "@/lib/engine/leases";
+import { allReminders } from "@/lib/reminders";
 import { Button, Card, Divided, Page, PageHeader, Row, SectionTitle, Sheet } from "@/components/ui";
 
 export default function PlusPage() {
@@ -16,7 +17,7 @@ export default function PlusPage() {
   const [busy, setBusy] = useState(false);
   const issues = qualityIssues(data, projection.snapshot);
   const demo = hasDemo(data);
-  const alerts = reminders(data, todayIso(), projection.snapshot.resolvedLoans);
+  const alerts = allReminders(data, todayIso(), projection.snapshot.resolvedLoans);
   const worksPlanned = data.works.filter((w) => w.status !== "termine").length;
 
   const logout = async () => {
@@ -53,6 +54,7 @@ export default function PlusPage() {
           <Divided>
             <Row href="/plus/rappels" icon={<BellRing size={18} />} title="Rappels" subtitle={alerts.length ? `${alerts.length} à traiter` : "Fins de bail, révisions, crédits"} />
             <Row href="/simulations" icon={<FlaskConical size={18} />} title="Simulations" subtitle={`${data.scenarios.length} scénario(s) · vente, achat, refinancement…`} />
+            <Row href="/plus/cadre-juridique" icon={<Scale size={18} />} title="Cadre juridique des baux" subtitle="Modèles 2015 / 2026, états des lieux, quittances" />
             <Row href="/plus/historique" icon={<LineIcon size={18} />} title="Historique et plus-values" subtitle="Valeurs passées, plus-values latentes" />
             <Row href="/plus/bilans" icon={<FileSpreadsheet size={18} />} title="Bilans et comptes annuels" subtitle={`${data.statements.length} bilan(s) · import PDF intelligent`} />
             <Row href="/plus/indicateurs" icon={<Gauge size={18} />} title="Indicateurs financiers" subtitle="DSCR, rendement, LTV, CAF…" />

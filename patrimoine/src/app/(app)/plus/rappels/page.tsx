@@ -3,14 +3,15 @@
 import { useMemo } from "react";
 import { BellRing, RotateCcw } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { LEASE_END_NOTICE_MONTHS, LOAN_END_NOTICE_MONTHS, REVISION_NOTICE_MONTHS, reminders, todayIso } from "@/lib/engine/leases";
+import { LEASE_END_NOTICE_MONTHS, LOAN_END_NOTICE_MONTHS, REVISION_NOTICE_MONTHS, todayIso } from "@/lib/engine/leases";
+import { allReminders } from "@/lib/reminders";
 import { ReminderRow } from "@/components/leases";
 import { Card, Empty, Page, PageHeader, SectionTitle } from "@/components/ui";
 
 export default function RappelsPage() {
   const { data, projection, setSettings } = useStore();
   const today = todayIso();
-  const all = useMemo(() => reminders(data, today, projection.snapshot.resolvedLoans, { includeDismissed: true }), [data, today, projection]);
+  const all = useMemo(() => allReminders(data, today, projection.snapshot.resolvedLoans, { includeDismissed: true }), [data, today, projection]);
   const dismissedIds = new Set(data.settings.dismissedReminders ?? []);
   const active = all.filter((r) => !dismissedIds.has(r.id));
   const done = all.filter((r) => dismissedIds.has(r.id));
@@ -29,7 +30,7 @@ export default function RappelsPage() {
           <Card className="py-1">
             <div className="divide-y divide-line">
               {active.map((r) => (
-                <ReminderRow key={r.id} r={r} onDismiss={r.kind === "unpaid" ? undefined : () => dismiss(r.id)} />
+                <ReminderRow key={r.id} r={r} onDismiss={r.kind === "unpaid" || r.kind === "deposit" ? undefined : () => dismiss(r.id)} />
               ))}
             </div>
           </Card>
@@ -66,6 +67,9 @@ export default function RappelsPage() {
           </p>
           <p>
             <b className="text-ink">Fin de crédit</b> : {LOAN_END_NOTICE_MONTHS} mois avant la dernière échéance.
+          </p>
+          <p>
+            <b className="text-ink">Dépôt de garantie</b> : après un départ, jusqu&apos;à sa restitution (1 mois après la remise des clés si l&apos;état des lieux est conforme, 2 mois sinon).
           </p>
           <p>
             <b className="text-ink">Loyers impayés</b> : tant qu&apos;un mois pointé « impayé » ou « partiel » n&apos;est pas régularisé.
