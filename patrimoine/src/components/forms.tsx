@@ -7,6 +7,7 @@ import { eur, pct, dateFr } from "@/lib/format";
 import { monthLabel } from "@/lib/engine/dates";
 import { companyTree } from "@/lib/engine/snapshot";
 import { LeaseSection, PaymentStrip } from "./leases";
+import { LandlordFields } from "./company-registry";
 import { DateField, Details, Grid2, NumberField, Segmented, SelectField, Stack, TextField } from "./ui";
 
 // Formulaires d'édition : chaque saisie est enregistrée automatiquement.
@@ -56,6 +57,10 @@ export function CompanyForm({ company }: { company: Company }) {
         <button type="button" onClick={() => set({ partners: [...partners, { name: "" }] })} className="text-sm font-semibold text-series-1">
           + Ajouter un associé
         </button>
+      </Details>
+      <Details title="Coordonnées (baux et quittances)">
+        <LandlordFields company={company} set={set} />
+        <a href="/plus/societes" className="text-sm font-semibold text-series-1">Pré-remplir depuis l&apos;annuaire des entreprises</a>
       </Details>
       <TextField label="Fiscalité (régime, remarques)" value={company.taxRegime} placeholder="Ex. IS, IR…" onChange={(v) => set({ taxRegime: v })} />
       <TextField label="Notes" value={company.notes} multiline onChange={(v) => set({ notes: v })} />

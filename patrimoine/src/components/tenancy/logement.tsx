@@ -10,7 +10,7 @@ import { dateFr, eur } from "@/lib/format";
 import { activeTenancy, draftTenancy, inspectionsOf, landlordCompany, lastExitInspection, leavingTenancy, tenanciesOf, tenancyFromUnit, tenantsName, depositDue } from "@/lib/tenancy";
 import { leaseTermEnd } from "@/lib/legal/lease";
 import { newEntryInspection } from "@/lib/legal/inspection";
-import { depositSettlement } from "@/lib/legal/rules";
+import { depositSettlement, leaseYears } from "@/lib/legal/rules";
 import { todayIso } from "@/lib/engine/leases";
 import { UnitForm } from "../forms";
 import { PaymentStrip } from "../leases";
@@ -53,7 +53,7 @@ function Detail({ id }: { id: string }) {
   /** Dossier du bail en cours reconstitué à partir des informations du logement (rien n'est redemandé). */
   const ensureTenancy = (): Tenancy => {
     if (active) return active;
-    const t = tenancyFromUnit(unit, company);
+    const t = tenancyFromUnit(unit, company, leaseYears(data.settings));
     upsert("tenancies", t);
     return t;
   };

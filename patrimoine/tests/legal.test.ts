@@ -104,3 +104,12 @@ test("montants en lettres", () => {
   assert.equal(numberToWords(200300), "deux cent mille trois cents");
   assert.equal(euroWords(650.5), "six cent cinquante euros et cinquante centimes");
 });
+
+test("durée des nouveaux baux : 3 ans par défaut, réglable", async () => {
+  const { leaseYears } = await import("../src/lib/legal/rules");
+  const { newTenancyDraft } = await import("../src/lib/tenancy");
+  assert.equal(leaseYears(undefined), 3);
+  assert.equal(leaseYears({ leaseYears: 6 }), 6);
+  const d = newTenancyDraft({ id: "u", buildingId: "b", name: "Lot", rent: 500 }, undefined, { id: "c", name: "SCI", kind: "SCI" }, undefined, leaseYears({}));
+  assert.equal(d.durationYears, 3);
+});

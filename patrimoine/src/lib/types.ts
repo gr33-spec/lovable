@@ -527,6 +527,8 @@ export interface Settings {
   ownerName?: string;
   /** Rappels marqués comme traités (identifiant incluant l'échéance). */
   dismissedReminders?: string[];
+  /** Durée des nouveaux baux, en années (choix du propriétaire, 3 par défaut). */
+  leaseYears?: number;
 }
 
 export interface AppData {
