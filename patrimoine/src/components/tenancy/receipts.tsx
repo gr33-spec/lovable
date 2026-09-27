@@ -56,7 +56,7 @@ export function ReceiptPicker({ unit, tenancy }: { unit: Unit; tenancy: Tenancy 
                 fileName={`${r.kind === "quittance" ? "quittance" : "recu"}-${m}.pdf`}
                 action={
                   r.kind === "aucun" ? (
-                    <Link href={`/loyers?mois=${m}`} className="rounded-full bg-soft px-3 py-1.5 text-[12px] font-semibold text-series-1">
+                    <Link href={`/gestion?mois=${m}`} className="rounded-full bg-soft px-3 py-1.5 text-[12px] font-semibold text-series-1">
                       Pointer
                     </Link>
                   ) : undefined
@@ -85,7 +85,7 @@ export function ReceiptPicker({ unit, tenancy }: { unit: Unit; tenancy: Tenancy 
               {statement.kind === "incomplet" && (
                 <>
                   Mois non pointés : {statement.unpointed.map(monthLong).join(", ")}.{" "}
-                  <Link href={`/loyers?mois=${statement.unpointed[0]}`} className="font-semibold text-series-1 underline">
+                  <Link href={`/gestion?mois=${statement.unpointed[0]}`} className="font-semibold text-series-1 underline">
                     Les pointer
                   </Link>{" "}
                   avant d&apos;établir le document.

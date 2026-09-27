@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Building2, CloudOff, Coins, Ellipsis, House, Check, LoaderCircle } from "lucide-react";
+import { Building2, CloudOff, Ellipsis, KeyRound, House, Check, LoaderCircle } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { unpaidByUnit } from "@/lib/engine/leases";
 import { cx } from "./ui";
@@ -11,7 +11,7 @@ import { cx } from "./ui";
 const TABS = [
   { href: "/", label: "Accueil", icon: House },
   { href: "/patrimoine", label: "Patrimoine", icon: Building2 },
-  { href: "/loyers", label: "Loyers", icon: Coins },
+  { href: "/gestion", label: "Gestion", icon: KeyRound },
   { href: "/plus", label: "Plus", icon: Ellipsis },
 ];
 
@@ -51,7 +51,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 >
                   <Icon size={22} strokeWidth={active ? 2.2 : 1.8} />
                   {t.label}
-                  {t.href === "/loyers" && unpaid > 0 && (
+                  {t.href === "/gestion" && unpaid > 0 && (
                     <span
                       aria-label={`${unpaid} loyer(s) impayé(s)`}
                       className="absolute right-[10%] top-0 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-neg px-1 text-[10px] font-bold text-white ring-2 ring-white"

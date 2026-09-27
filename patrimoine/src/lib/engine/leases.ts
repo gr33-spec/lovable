@@ -248,7 +248,7 @@ export function reminders(
       date: `${line.months[0]}-01`,
       title: "Loyer impayé",
       detail: `${label} — ${line.months.length} mois (${line.months.map(monthKeyLabel).join(", ")})`,
-      href: "/loyers",
+      href: "/gestion",
       late: true,
       amount: line.amount,
     });
