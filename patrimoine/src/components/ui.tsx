@@ -355,6 +355,7 @@ export function TextField({
   hint,
   multiline,
   autoFocus,
+  type,
 }: {
   label: string;
   value: string | undefined;
@@ -363,6 +364,7 @@ export function TextField({
   hint?: string;
   multiline?: boolean;
   autoFocus?: boolean;
+  type?: "text" | "email" | "tel";
 }) {
   const id = useId();
   return (
@@ -379,6 +381,8 @@ export function TextField({
         <input
           id={id}
           className={inputCls}
+          type={type ?? "text"}
+          autoComplete={type === "email" ? "email" : type === "tel" ? "tel" : undefined}
           value={value ?? ""}
           placeholder={placeholder}
           autoFocus={autoFocus}

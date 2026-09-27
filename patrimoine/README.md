@@ -52,6 +52,18 @@ ou un associé, valable 7 jours à 1 an, révocable à tout moment. La personne
 voit la synthèse et télécharge le dossier PDF, sans rien pouvoir modifier.
 Le lien n'est affiché qu'une fois (seule son empreinte est stockée).
 
+### Gestion locative (location nue, résidence principale)
+
+Fiche de chaque logement (Patrimoine → immeuble → logement) :
+**Changer de locataire** (départ, état des lieux de sortie comparé à
+l'entrée, dépôt de garantie et retenues, nouveau locataire, bail, acte de
+cautionnement, état des lieux d'entrée) et **Obtenir une quittance** (un
+mois précis, ou attestation de loyers à jour ; reçu seulement si le paiement
+est partiel). Les textes juridiques sont versionnés dans `src/lib/legal/` :
+le modèle de bail est choisi selon la date de conclusion (contrat type 2015,
+ou version issue du décret n° 2026-596 pour les baux conclus à compter du
+1er octobre 2026). Voir Plus → Cadre juridique.
+
 ### Sur iPhone
 
 Ouvrez l'adresse dans Safari → bouton **Partager** → **Sur l'écran

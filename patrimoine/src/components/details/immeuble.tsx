@@ -109,7 +109,7 @@ function BuildingDetailInner({ id }: { id: string }) {
               {units.map((u) => (
                 <Row
                   key={u.id}
-                  onClick={() => setUnitId(u.id)}
+                  href={`/patrimoine/logement/${u.id}`}
                   icon={<DoorOpen size={18} />}
                   title={u.name}
                   subtitle={

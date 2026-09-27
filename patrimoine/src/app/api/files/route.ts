@@ -10,7 +10,8 @@ export async function POST(request: Request) {
   const name = typeof body.name === "string" ? body.name : "document.pdf";
   const size = Number(body.size);
   const mime = typeof body.mime === "string" ? body.mime : "application/pdf";
-  if (mime !== "application/pdf") return NextResponse.json({ error: "Seuls les PDF sont acceptés." }, { status: 400 });
+  // PDF (bilans) et photos d'états des lieux.
+  if (!["application/pdf", "image/jpeg", "image/png"].includes(mime)) return NextResponse.json({ error: "Format non accepté (PDF, JPEG ou PNG)." }, { status: 400 });
   if (!Number.isFinite(size) || size <= 0) return NextResponse.json({ error: "Fichier vide." }, { status: 400 });
   if (size > MAX_FILE_BYTES) return NextResponse.json({ error: "PDF trop volumineux (24 Mo maximum)." }, { status: 413 });
   const id = await createFile(name, mime, size);

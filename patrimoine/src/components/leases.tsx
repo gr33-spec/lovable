@@ -226,6 +226,7 @@ const REMINDER_STYLE: Record<Reminder["kind"], { icon: React.ReactNode; tone: Ch
   revision: { icon: <TrendingUp size={18} />, tone: "blue" },
   loan_end: { icon: <Landmark size={18} />, tone: "green" },
   unpaid: { icon: <TriangleAlert size={18} />, tone: "rose" },
+  deposit: { icon: <Landmark size={18} />, tone: "gold" },
 };
 
 export function ReminderRow({ r, onDismiss }: { r: Reminder; onDismiss?: () => void }) {
@@ -241,7 +242,7 @@ export function ReminderRow({ r, onDismiss }: { r: Reminder; onDismiss?: () => v
           </div>
           <div className="line-clamp-2 text-[13px] text-muted">{r.detail}</div>
         </div>
-        {r.kind === "unpaid" && r.amount ? (
+        {(r.kind === "unpaid" || r.kind === "deposit") && r.amount ? (
           <span className="tabular shrink-0 text-[14px] font-bold text-neg">{eurCompact(r.amount)}</span>
         ) : r.kind === "loan_end" && r.amount ? (
           <span className="tabular shrink-0 text-[13px] font-bold text-pos">+{eurCompact(r.amount)}/m</span>
@@ -275,7 +276,7 @@ export function RemindersCard({ items, limit = 3 }: { items: Reminder[]; limit?:
       </div>
       <div className="divide-y divide-line">
         {items.slice(0, limit).map((r) => (
-          <ReminderRow key={r.id} r={r} onDismiss={r.kind === "unpaid" ? undefined : () => dismiss(r.id)} />
+          <ReminderRow key={r.id} r={r} onDismiss={r.kind === "unpaid" || r.kind === "deposit" ? undefined : () => dismiss(r.id)} />
         ))}
       </div>
     </div>

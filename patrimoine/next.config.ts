@@ -16,6 +16,7 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/dossier-banque": ["./src/lib/pdf/fonts/**/*"],
     "/partage/[token]/dossier": ["./src/lib/pdf/fonts/**/*"],
+    "/api/documents": ["./src/lib/pdf/fonts/**/*"],
   },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];

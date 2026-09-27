@@ -25,6 +25,17 @@ export interface Company {
   partnerAccounts?: number;
   /** Régime / fiscalité, texte libre. */
   taxRegime?: string;
+  // ——— Bailleur (baux, états des lieux, quittances) ———
+  /** Adresse du siège social. */
+  address?: string;
+  siren?: string;
+  /** Représentant légal (gérant). */
+  representative?: string;
+  representativeRole?: string;
+  email?: string;
+  phone?: string;
+  /** SCI constituée exclusivement entre parents et alliés jusqu'au 4e degré (bail de 3 ans possible). */
+  familySci?: boolean;
   notes?: string;
   demo?: boolean;
 }
@@ -57,10 +68,21 @@ export interface Building {
   recentWorks?: string;
   plannedWorks?: string;
   notes?: string;
+  // ——— Informations reprises dans les baux ———
+  /** Commune en zone tendue (art. 17 loi 89-462). */
+  zoneTendue?: boolean;
+  /** Loyers encadrés (loyer de référence), cas particulier des zones tendues. */
+  rentControl?: boolean;
+  legalRegime?: "copropriete" | "monopropriete";
+  constructionPeriod?: ConstructionPeriod;
+  /** Équipements et services communs (ascenseur, local vélos…). */
+  commonFacilities?: string;
   /** Valeurs estimées passées, une par année (historique). */
   valueHistory?: ValuePoint[];
   demo?: boolean;
 }
+
+export type ConstructionPeriod = "avant_1949" | "1949_1974" | "1975_1989" | "1990_2005" | "apres_2005";
 
 export interface ValuePoint {
   year: number;
@@ -87,6 +109,27 @@ export interface Unit {
   condition?: Condition;
   plannedWorks?: string;
   value?: number;
+  // ——— Description reprise dans le bail ———
+  floor?: string;
+  door?: string;
+  /** Nombre de pièces principales. */
+  mainRooms?: number;
+  habitatType?: "collectif" | "individuel";
+  heating?: "individuel" | "collectif";
+  heatingEnergy?: string;
+  hotWater?: "individuel" | "collectif";
+  hotWaterEnergy?: string;
+  /** Équipements du logement (cuisine équipée, sanitaires…). */
+  equipments?: string;
+  /** Locaux et équipements accessoires à usage privatif (cave, parking…). */
+  accessories?: string;
+  dpeClass?: "A" | "B" | "C" | "D" | "E" | "F" | "G";
+  /** Montant estimé des dépenses annuelles d'énergie (bas et haut de fourchette) et année de référence. */
+  energyCostMin?: number;
+  energyCostMax?: number;
+  energyCostYear?: number;
+  /** Pièces pour l'état des lieux (reprises d'un état des lieux à l'autre). */
+  rooms?: string[];
   // ——— Bail ———
   leaseType?: LeaseType;
   /** Date de prise d'effet du bail (AAAA-MM-JJ). */
@@ -123,9 +166,164 @@ export interface RentPayment {
   status: "paye" | "impaye" | "partiel";
   /** Montant attendu (loyer + charges) au moment du pointage. */
   due?: number;
+  /** Détail du montant attendu : loyer hors charges et charges. */
+  rent?: number;
+  charges?: number;
+  /** Date d'encaissement (AAAA-MM-JJ). */
+  paidDate?: string;
+  /** Bail concerné. */
+  tenancyId?: string;
   /** Montant réellement encaissé (paiement partiel). */
   paid?: number;
   note?: string;
+}
+
+// ——— Gestion locative ———
+
+export interface Person {
+  firstName?: string;
+  lastName?: string;
+  birthDate?: string;
+  birthPlace?: string;
+  email?: string;
+  phone?: string;
+  /** Adresse (garant, ou nouvelle adresse du locataire après son départ). */
+  address?: string;
+}
+
+export interface Guarantor extends Person {
+  kind: "personne" | "visale" | "autre";
+  /** Montant maximal garanti (principal et accessoires), en euros. */
+  maxAmount?: number;
+  /** Durée de l'engagement en années (vide = durée du bail et renouvellements, voir acte). */
+  durationYears?: number;
+  visaNumber?: string;
+}
+
+export interface Deduction {
+  id: string;
+  label: string;
+  amount?: number;
+  kind: "degradation" | "loyers" | "charges" | "autre";
+  /** Justificatif (devis, facture…). */
+  justification?: string;
+}
+
+export type TenancyStatus = "brouillon" | "actif" | "sortie" | "clos";
+
+export interface Tenancy {
+  id: Id;
+  unitId: Id;
+  status: TenancyStatus;
+  tenants: Person[];
+  guarantors?: Guarantor[];
+  /** Date de signature (détermine le modèle de bail applicable). */
+  signDate?: string;
+  signPlace?: string;
+  startDate?: string;
+  durationYears?: number;
+  /** Loyer mensuel hors charges. */
+  rent?: number;
+  /** Charges mensuelles. */
+  charges?: number;
+  chargesMode?: "provision" | "forfait";
+  /** Jour de paiement dans le mois. */
+  paymentDay?: number;
+  paymentTerm?: "a_echoir" | "echu";
+  paymentMethod?: string;
+  deposit?: number;
+  // Révision
+  indexLabel?: string;
+  indexValue?: number;
+  // Zone tendue
+  referenceRent?: number;
+  referenceRentMax?: number;
+  rentSupplement?: number;
+  rentSupplementReason?: string;
+  previousTenantRent?: number;
+  previousTenantRentDate?: string;
+  previousRevisionDate?: string;
+  // Travaux
+  worksSinceLastLease?: string;
+  worksAmount?: number;
+  worksPlanned?: string;
+  // Clauses résolutoires facultatives (modèle 2026)
+  clauseInsurance?: boolean;
+  clauseNeighbours?: boolean;
+  clauseMainResidence?: boolean;
+  specialConditions?: string;
+  /** Annexes jointes (identifiants de la liste légale). */
+  annexes?: string[];
+  /** Bail existant saisi a posteriori (non généré par l'application). */
+  imported?: boolean;
+  // ——— Départ ———
+  noticeDate?: string;
+  noticeBy?: "locataire" | "bailleur";
+  endDate?: string;
+  keysReturnedDate?: string;
+  deductions?: Deduction[];
+  depositReturnedDate?: string;
+  depositReturnedAmount?: number;
+  closedAt?: string;
+  signatures?: Signatures;
+  createdAt?: string;
+  notes?: string;
+}
+
+export interface Signatures {
+  /** Images PNG (data URL) de signatures manuscrites numérisées. */
+  landlord?: string;
+  tenants?: (string | undefined)[];
+  signedAt?: string;
+}
+
+export type ItemState = "neuf" | "bon" | "usage" | "mauvais" | "absent";
+
+export interface InspectionItem {
+  id: string;
+  name: string;
+  state?: ItemState;
+  note?: string;
+  /** Identifiants de photos (stockées côté serveur). */
+  photos?: string[];
+}
+
+export interface InspectionRoom {
+  id: string;
+  name: string;
+  items: InspectionItem[];
+  note?: string;
+}
+
+export interface MeterReading {
+  id: string;
+  kind: string;
+  number?: string;
+  value?: string;
+}
+
+export interface KeyItem {
+  id: string;
+  kind: string;
+  count?: number;
+}
+
+export interface Inspection {
+  id: Id;
+  tenancyId: Id;
+  unitId: Id;
+  kind: "entree" | "sortie";
+  date?: string;
+  rooms: InspectionRoom[];
+  meters: MeterReading[];
+  keys: KeyItem[];
+  heating?: string;
+  hotWater?: string;
+  observations?: string;
+  /** État des lieux d'entrée de référence (pour une sortie). */
+  entryId?: Id;
+  signatures?: Signatures;
+  completedAt?: string;
 }
 
 export interface Loan {
@@ -345,6 +543,8 @@ export interface AppData {
   plans: Action[];
   scenarios: Scenario[];
   statements: Statement[];
+  tenancies: Tenancy[];
+  inspections: Inspection[];
 }
 
 export type Collection = Exclude<keyof AppData, "schemaVersion" | "settings">;
@@ -363,6 +563,8 @@ export function emptyData(): AppData {
     plans: [],
     scenarios: [],
     statements: [],
+    tenancies: [],
+    inspections: [],
   };
 }
 
@@ -377,4 +579,6 @@ export const COLLECTIONS: Collection[] = [
   "plans",
   "scenarios",
   "statements",
+  "tenancies",
+  "inspections",
 ];
