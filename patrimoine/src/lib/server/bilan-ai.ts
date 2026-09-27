@@ -55,14 +55,22 @@ const FIGURE_DESCRIPTIONS: Record<(typeof FIGURE_KEYS)[number], string> = {
   otherDebts: "Autres dettes (fournisseurs, fiscales et sociales, autres)",
 };
 
-const nullableNumber = { type: ["number", "null"] };
-
-function figuresSchema() {
+// Schéma de sortie sans aucun champ « nullable » (l'API limite le nombre de
+// types union) : chaque exercice est une liste de montants trouvés ; un
+// montant absent du document n'apparaît simplement pas dans la liste.
+function amountsSchema(description: string) {
   return {
-    type: "object",
-    additionalProperties: false,
-    required: [...FIGURE_KEYS],
-    properties: Object.fromEntries(FIGURE_KEYS.map((k) => [k, { ...nullableNumber, description: FIGURE_DESCRIPTIONS[k] }])),
+    type: "array",
+    description,
+    items: {
+      type: "object",
+      additionalProperties: false,
+      required: ["field", "value"],
+      properties: {
+        field: { type: "string", enum: [...FIGURE_KEYS] },
+        value: { type: "number", description: "Montant en euros, négatif si perte" },
+      },
+    },
   };
 }
 
@@ -71,15 +79,12 @@ const OUTPUT_SCHEMA = {
   additionalProperties: false,
   required: ["companyName", "siren", "closingDate", "durationMonths", "currentYear", "previousYear", "notes", "confidence"],
   properties: {
-    companyName: { type: ["string", "null"], description: "Dénomination de la société telle qu'écrite dans le document" },
-    siren: { type: ["string", "null"] },
-    closingDate: { type: ["string", "null"], description: "Date de clôture de l'exercice N au format AAAA-MM-JJ" },
-    durationMonths: { type: ["number", "null"], description: "Durée de l'exercice N en mois" },
-    currentYear: { ...figuresSchema(), description: "Montants de l'exercice N (colonne la plus récente), en euros" },
-    previousYear: {
-      anyOf: [{ type: "null" }, figuresSchema()],
-      description: "Montants de l'exercice N-1 si la colonne est présente, sinon null",
-    },
+    companyName: { type: "string", description: "Dénomination de la société telle qu'écrite dans le document, chaîne vide si absente" },
+    siren: { type: "string", description: "SIREN, chaîne vide si absent" },
+    closingDate: { type: "string", description: "Date de clôture de l'exercice N au format AAAA-MM-JJ, chaîne vide si absente" },
+    durationMonths: { type: "number", description: "Durée de l'exercice N en mois, 0 si inconnue" },
+    currentYear: amountsSchema("Montants de l'exercice N (colonne la plus récente) réellement présents dans le document"),
+    previousYear: amountsSchema("Montants de l'exercice N-1 réellement présents, liste vide si la colonne N-1 est absente"),
     notes: {
       type: "array",
       items: { type: "string" },
@@ -89,28 +94,48 @@ const OUTPUT_SCHEMA = {
   },
 };
 
-const figures = z.object(Object.fromEntries(FIGURE_KEYS.map((k) => [k, z.number().nullable()])) as Record<(typeof FIGURE_KEYS)[number], z.ZodNullable<z.ZodNumber>>);
+type FigureKey = (typeof FIGURE_KEYS)[number];
+type Figures = Record<FigureKey, number | null>;
 
-const resultSchema = z.object({
-  companyName: z.string().nullable(),
-  siren: z.string().nullable(),
-  closingDate: z.string().nullable(),
-  durationMonths: z.number().nullable(),
-  currentYear: figures,
-  previousYear: figures.nullable(),
+const amounts = z.array(z.object({ field: z.enum(FIGURE_KEYS), value: z.number() }));
+
+const rawSchema = z.object({
+  companyName: z.string(),
+  siren: z.string(),
+  closingDate: z.string(),
+  durationMonths: z.number(),
+  currentYear: amounts,
+  previousYear: amounts,
   notes: z.array(z.string()),
   confidence: z.enum(["haute", "moyenne", "faible"]),
 });
 
-export type BilanExtraction = z.infer<typeof resultSchema>;
+function toFigures(list: z.infer<typeof amounts>): Figures {
+  const out = Object.fromEntries(FIGURE_KEYS.map((k) => [k, null])) as Figures;
+  for (const { field, value } of list) if (Number.isFinite(value)) out[field] = Math.round(value);
+  return out;
+}
+
+export interface BilanExtraction {
+  companyName: string | null;
+  siren: string | null;
+  closingDate: string | null;
+  durationMonths: number | null;
+  currentYear: Figures;
+  previousYear: Figures | null;
+  notes: string[];
+  confidence: "haute" | "moyenne" | "faible";
+}
 
 const SYSTEM = `Tu es un expert-comptable français. Tu lis des comptes annuels (bilan, compte de résultat, liasse fiscale 2033/2065/2072, plaquette) de sociétés civiles immobilières et de sociétés commerciales.
 Règles impératives :
-- Extrais uniquement des montants réellement présents dans le document. N'invente, n'estime et ne calcule jamais un montant absent : mets null.
+- Extrais uniquement des montants réellement présents dans le document. N'invente, n'estime et ne calcule jamais un montant absent : ne le mets pas dans la liste.
 - Montants en euros, sans séparateur, arrondis à l'euro. Une perte ou un montant négatif est un nombre négatif.
 - Si le document présente les exercices N et N-1, remplis currentYear avec N (le plus récent) et previousYear avec N-1.
 - Pour une SCI à l'IR (déclaration 2072), les loyers bruts vont dans revenue ; le revenu net foncier ou le résultat dans netResult.
-- Les notes sont factuelles, courtes et en français.`;
+- Les notes sont factuelles, courtes et en français.
+Signification des champs (field) :
+${FIGURE_KEYS.map((k) => `- ${k} : ${FIGURE_DESCRIPTIONS[k]}`).join("\n")}`;
 
 export async function analyzeBilan(pdf: Buffer, companyHint?: string): Promise<BilanExtraction> {
   const client = new Anthropic();
@@ -139,7 +164,18 @@ export async function analyzeBilan(pdf: Buffer, companyHint?: string): Promise<B
   if (message.stop_reason === "refusal") throw new Error("L'analyse a été refusée par le modèle.");
   if (message.stop_reason === "max_tokens") throw new Error("Document trop long pour être analysé en une fois.");
   const text = message.content.map((b) => (b.type === "text" ? b.text : "")).join("");
-  const parsed = resultSchema.safeParse(JSON.parse(text));
+  const parsed = rawSchema.safeParse(JSON.parse(text));
   if (!parsed.success) throw new Error("Réponse de l'analyse illisible.");
-  return parsed.data;
+  const r = parsed.data;
+  const previous = toFigures(r.previousYear);
+  return {
+    companyName: r.companyName.trim() || null,
+    siren: r.siren.trim() || null,
+    closingDate: /^\d{4}-\d{2}-\d{2}$/.test(r.closingDate) ? r.closingDate : null,
+    durationMonths: r.durationMonths > 0 ? r.durationMonths : null,
+    currentYear: toFigures(r.currentYear),
+    previousYear: r.previousYear.length > 0 ? previous : null,
+    notes: r.notes,
+    confidence: r.confidence,
+  };
 }
