@@ -28,7 +28,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (role === "owner" && view === "patrimoine" && !onboarding && !rescue && !data.settings.onboardingDone && isEmpty) router.replace("/bienvenue");
-  }, [role, onboarding, rescue, data.settings.onboardingDone, isEmpty, router]);
+  }, [role, view, onboarding, rescue, data.settings.onboardingDone, isEmpty, router]);
 
   if (view === "gestion") {
     return (

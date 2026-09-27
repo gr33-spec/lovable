@@ -1,4 +1,4 @@
-import type { Building, Tenancy, Unit } from "../types";
+import type { Building, Guarantor, Tenancy, Unit } from "../types";
 import { addMonthsIso } from "../engine/leases";
 import { type Block, type DocContext, type LegalDoc, blank, dateLong, euroWords, landlordLine, money, personName, tenantsLabel } from "./doc";
 import { leaseReferenceDate, leaseVersionFor, type LegalVersion } from "./versions";
@@ -282,11 +282,22 @@ export function leaseDocument(ctx: DocContext): LegalDoc {
   };
 }
 
+/** Engagement de la caution : un loyer charges comprises par mois, pour toute la durée du bail par défaut. */
+export function guaranteeTerms(t: Pick<Tenancy, "rent" | "charges" | "durationYears" | "startDate">, g: Pick<Guarantor, "monthlyAmount" | "wholeLease" | "durationYears" | "maxAmount">) {
+  const monthly = g.monthlyAmount ?? Math.round(((t.rent ?? 0) + (t.charges ?? 0)) * 100) / 100;
+  const years = g.wholeLease === false ? g.durationYears ?? t.durationYears ?? 3 : t.durationYears ?? 3;
+  const months = years * 12;
+  const max = g.wholeLease === false && g.maxAmount ? g.maxAmount : Math.round(monthly * months * 100) / 100;
+  const end = g.wholeLease !== false && t.startDate ? addMonthsIso(t.startDate, months) : undefined;
+  return { monthly, months, max, end, years };
+}
+
 /** Acte de cautionnement (article 22-1 de la loi du 6 juillet 1989, articles 2288 et suivants du code civil). */
 export function guaranteeDocument(ctx: DocContext, index = 0): LegalDoc | undefined {
   const { landlord, tenancy: t } = ctx;
   const g = (t.guarantors ?? []).filter((x) => x.kind === "personne")[index];
   if (!g) return undefined;
+  const terms = guaranteeTerms(t, g);
   const blocks: Block[] = [
     { t: "h", text: "Parties" },
     {
@@ -309,8 +320,14 @@ export function guaranteeDocument(ctx: DocContext, index = 0): LegalDoc | undefi
         ["Montant du loyer mensuel", money(t.rent)],
         ["Charges mensuelles", money(t.charges)],
         ["Conditions de révision du loyer", `Révision annuelle à la date anniversaire du contrat selon l'indice de référence des loyers (trimestre de référence : ${t.indexLabel ?? blank(undefined)})`],
-        ["Montant maximal garanti (principal et accessoires)", g.maxAmount ? `${money(g.maxAmount)} (${euroWords(g.maxAmount)})` : blank(undefined)],
-        ["Durée de l'engagement", g.durationYears ? `${g.durationYears} ans` : blank(undefined)],
+        ["Montant garanti", `${money(terms.monthly)} par mois (loyer et charges)`],
+        ["Montant maximal garanti (principal et accessoires)", `${money(terms.max)} (${euroWords(terms.max)})`],
+        [
+          "Durée de l'engagement",
+          g.wholeLease === false
+            ? `${terms.years} ans à compter du ${dateLong(t.startDate)}`
+            : `Pendant toute la durée du bail, soit ${terms.years} ans à compter du ${dateLong(t.startDate)}${terms.end ? ` (jusqu'au ${dateLong(terms.end)})` : ""}`,
+        ],
       ],
     },
     {

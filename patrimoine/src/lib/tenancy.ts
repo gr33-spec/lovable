@@ -78,13 +78,14 @@ export function newTenancyDraft(unit: Unit, previous: Tenancy | undefined, _land
     signDate: todayIso(),
     signPlace: building?.city?.replace(/^\d{5}\s*/, ""),
     durationYears: years ?? leaseYears(undefined),
-    rent: previous?.rent ?? unit.rent,
-    charges: previous?.charges ?? unit.charges,
+    // Le logement porte les derniers montants (révisions, modifications) : ils priment.
+    rent: unit.rent ?? previous?.rent,
+    charges: unit.charges ?? previous?.charges,
     chargesMode: previous?.chargesMode ?? "provision",
     paymentDay: previous?.paymentDay ?? 5,
     paymentTerm: previous?.paymentTerm ?? "a_echoir",
     paymentMethod: previous?.paymentMethod,
-    deposit: previous?.rent ?? unit.rent,
+    deposit: unit.rent ?? previous?.rent,
     indexLabel: undefined,
     previousTenantRent: previous?.rent,
     previousTenantRentDate: lastPaid ? `${lastPaid}-${String(previous?.paymentDay ?? 5).padStart(2, "0")}` : undefined,
@@ -162,7 +163,7 @@ export function missingUnitInfo(unit: Unit): (keyof Unit)[] {
 
 export function missingBuildingInfo(b: Building | undefined): (keyof Building)[] {
   if (!b) return [];
-  const keys: (keyof Building)[] = ["address", "city", "legalRegime", "constructionPeriod", "zoneTendue"];
+  const keys: (keyof Building)[] = ["address", "city", "legalRegime", "constructionPeriod"];
   return keys.filter((k) => b[k] === undefined || b[k] === "");
 }
 
