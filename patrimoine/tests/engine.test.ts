@@ -146,3 +146,72 @@ test("indicateurs : DSCR, occupation et ratios de bilan", async () => {
   close(r.debtToCaf!, 8, 1e-9);
   close(r.interestCoverage!, 7, 1e-9);
 });
+
+test("baux : échéance reconduite, rappel 8 mois avant, révision anniversaire", async () => {
+  const { leaseInfo, reminders, revisedRent, addMonthsIso } = await import("../src/lib/engine/leases");
+  assert.equal(addMonthsIso("2024-01-31", 1), "2024-02-29");
+  const unit = { id: "u", buildingId: "b", name: "A", rent: 600, leaseStart: "2021-03-15", leaseDurationYears: 6 };
+  const info = leaseInfo(unit, "2026-09-27");
+  assert.equal(info.end, "2027-03-15");
+  assert.equal(info.noticeDate, "2026-07-15");
+  assert.equal(info.nextRevision, "2027-03-15");
+  // Révision appliquée en mars 2026 → prochaine en mars 2027.
+  assert.equal(leaseInfo({ ...unit, lastRevisionDate: "2026-03-15" }, "2026-09-27").nextRevision, "2027-03-15");
+  // Reconduction tacite après l'échéance.
+  assert.equal(leaseInfo({ ...unit, leaseStart: "2015-03-15" }, "2026-09-27").end, "2027-03-15");
+  // Date de fin passée sans durée : signalée.
+  assert.equal(leaseInfo({ ...unit, leaseDurationYears: undefined, leaseEnd: "2026-01-01" }, "2026-09-27").expired, true);
+  close(revisedRent(600, 140, 143.5)!, 615, 1e-9);
+  assert.equal(revisedRent(600, undefined, 143.5), undefined);
+
+  const data: AppData = { ...emptyData(), buildings: [{ id: "b", name: "B" }], units: [unit] };
+  const before = reminders(data, "2026-07-14");
+  assert.ok(!before.some((r) => r.kind === "lease_end"));
+  const after = reminders(data, "2026-07-15");
+  assert.ok(after.some((r) => r.kind === "lease_end" && r.date === "2027-03-15"));
+  // Marqué comme traité : disparaît.
+  const id = after.find((r) => r.kind === "lease_end")!.id;
+  assert.ok(!reminders({ ...data, settings: { dismissedReminders: [id] } }, "2026-08-01").some((r) => r.kind === "lease_end"));
+});
+
+test("encaissements : impayé cumulé", async () => {
+  const { unpaidByUnit } = await import("../src/lib/engine/leases");
+  const lines = unpaidByUnit([
+    {
+      id: "u",
+      buildingId: "b",
+      name: "A",
+      payments: {
+        "2026-07": { status: "paye", due: 650 },
+        "2026-08": { status: "impaye", due: 650 },
+        "2026-09": { status: "partiel", due: 650, paid: 400 },
+      },
+    },
+  ]);
+  assert.equal(lines.length, 1);
+  close(lines[0].amount, 900, 1e-9);
+  assert.deepEqual(lines[0].months, ["2026-08", "2026-09"]);
+});
+
+test("historique : valeurs reportées et plus-value latente", async () => {
+  const { valueHistory, latentGains } = await import("../src/lib/engine/history");
+  const data: AppData = {
+    ...emptyData(),
+    buildings: [
+      { id: "a", name: "A", acquisitionDate: "2020-05-01", acquisitionPrice: 400000, value: 520000, valueHistory: [{ year: 2023, value: 480000 }] },
+      { id: "b", name: "B", acquisitionDate: "2024-01-01", value: 300000 },
+    ],
+  };
+  const rows = valueHistory(data, 2026);
+  assert.equal(rows[0].year, 2020);
+  assert.equal(rows.find((r) => r.year === 2022)!.value, 400000);
+  assert.equal(rows.find((r) => r.year === 2023)!.value, 480000);
+  // B acquis en 2024 sans prix : années 2024-2025 incomplètes, 2026 complète.
+  assert.equal(rows.find((r) => r.year === 2024)!.missing, 1);
+  assert.equal(rows.find((r) => r.year === 2026)!.value, 820000);
+  assert.equal(rows.find((r) => r.year === 2026)!.missing, 0);
+  const g = latentGains(data, 2026);
+  assert.equal(g.known, 1);
+  close(g.gain, 120000, 0);
+  close(g.gainPct!, 30, 1e-9);
+});

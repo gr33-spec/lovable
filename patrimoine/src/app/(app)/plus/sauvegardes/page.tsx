@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Download, History, RotateCcw, Upload, Save } from "lucide-react";
+import { Download, History, RotateCcw, Upload, Save, FileSpreadsheet } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { isValidBackup } from "@/lib/ops";
 import type { AppData } from "@/lib/types";
@@ -97,6 +97,9 @@ export default function SauvegardesPage() {
         <div className="grid gap-3">
           <Button href="/api/backup" icon={<Download size={18} />} full>
             Exporter une sauvegarde complète
+          </Button>
+          <Button href="/api/export-excel" variant="secondary" icon={<FileSpreadsheet size={18} />} full>
+            Exporter en Excel
           </Button>
           <Button variant="secondary" onClick={() => fileRef.current?.click()} icon={<Upload size={18} />} full>
             Importer une sauvegarde

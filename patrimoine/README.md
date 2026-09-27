@@ -39,6 +39,19 @@ créez une clé sur console.anthropic.com → API Keys, puis ajoutez la variable
 conservés et la saisie manuelle fonctionne. Rien n'est enregistré sans
 validation.
 
+### Face ID
+
+Plus → **Connexion Face ID** → « Activer Face ID sur cet appareil ». La
+connexion se fait ensuite d'un geste ; le mot de passe reste valable.
+Changer `APP_PASSWORD` désactive toutes les clés Face ID.
+
+### Partage en lecture seule
+
+Plus → **Partager en lecture seule** : lien pour un banquier, un comptable
+ou un associé, valable 7 jours à 1 an, révocable à tout moment. La personne
+voit la synthèse et télécharge le dossier PDF, sans rien pouvoir modifier.
+Le lien n'est affiché qu'une fois (seule son empreinte est stockée).
+
 ### Sur iPhone
 
 Ouvrez l'adresse dans Safari → bouton **Partager** → **Sur l'écran
@@ -72,6 +85,7 @@ déconnectées.
   import, restauration ou suppression de la démo. Restauration depuis
   **Plus → Sauvegardes**.
 - Export / import d'un fichier de sauvegarde complet (JSON).
+- Export Excel (un onglet par thème, chiffres calculés inclus).
 
 ## Développement
 

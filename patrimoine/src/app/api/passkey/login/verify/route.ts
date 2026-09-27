@@ -1,0 +1,47 @@
+import { NextResponse } from "next/server";
+import { verifyAuthenticationResponse } from "@simplewebauthn/server";
+import { clearLoginFailures, isLoginBlocked, recordLoginFailure } from "@/lib/server/db";
+import { findPasskey, touchPasskey } from "@/lib/server/passkeys";
+import { SESSION_COOKIE, createSessionToken, sessionCookieOptions } from "@/lib/server/session";
+import { CHALLENGE_COOKIE, readChallenge, relyingParty } from "@/lib/server/webauthn";
+
+export const dynamic = "force-dynamic";
+
+function clientIp(request: Request): string {
+  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "local";
+}
+
+export async function POST(request: Request) {
+  const ip = clientIp(request);
+  if (await isLoginBlocked(ip)) return NextResponse.json({ error: "Trop de tentatives. Réessayez dans 15 minutes." }, { status: 429 });
+  const rp = relyingParty(request);
+  const expectedChallenge = readChallenge(request, "login");
+  if (!rp || !expectedChallenge) return NextResponse.json({ error: "Demande expirée, recommencez." }, { status: 400 });
+  const body = await request.json().catch(() => null);
+  const response = body?.response;
+  const key = typeof response?.id === "string" ? await findPasskey(response.id, rp.rpID) : undefined;
+  if (!key) {
+    await recordLoginFailure(ip);
+    return NextResponse.json({ error: "Face ID non reconnu : connectez-vous avec le mot de passe puis réactivez Face ID." }, { status: 401 });
+  }
+  try {
+    const result = await verifyAuthenticationResponse({
+      response,
+      expectedChallenge,
+      expectedOrigin: rp.origin,
+      expectedRPID: rp.rpID,
+      requireUserVerification: true,
+      credential: { id: key.id, publicKey: key.publicKey, counter: key.counter, transports: key.transports as AuthenticatorTransport[] | undefined },
+    });
+    if (!result.verified) throw new Error("non vérifié");
+    await touchPasskey(key.id, result.authenticationInfo.newCounter);
+  } catch {
+    await recordLoginFailure(ip);
+    return NextResponse.json({ error: "Face ID refusé." }, { status: 401 });
+  }
+  await clearLoginFailures(ip);
+  const res = NextResponse.json({ ok: true });
+  res.cookies.set(SESSION_COOKIE, createSessionToken(), sessionCookieOptions);
+  res.cookies.set(CHALLENGE_COOKIE, "", { path: "/api/passkey", maxAge: 0 });
+  return res;
+}

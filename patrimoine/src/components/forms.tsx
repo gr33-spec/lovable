@@ -6,6 +6,7 @@ import { COMPANY_KINDS, CONDITIONS, PRIORITIES, UNIT_TYPES, WORK_STATUSES } from
 import { eur, pct, dateFr } from "@/lib/format";
 import { monthLabel } from "@/lib/engine/dates";
 import { companyTree } from "@/lib/engine/snapshot";
+import { LeaseSection, PaymentStrip } from "./leases";
 import { DateField, Details, Grid2, NumberField, Segmented, SelectField, Stack, TextField } from "./ui";
 
 // Formulaires d'édition : chaque saisie est enregistrée automatiquement.
@@ -164,6 +165,8 @@ export function UnitForm({ unit }: { unit: Unit }) {
           <DateField label="Date d'entrée" value={unit.entryDate} onChange={(v) => set({ entryDate: v })} />
         </Details>
       )}
+      {unit.status !== "vacant" && <LeaseSection unit={unit} />}
+      {unit.status !== "vacant" && <PaymentStrip unit={unit} />}
       <Details title="État, travaux, valeur">
         <SelectField label="État du logement" value={unit.condition} options={CONDITIONS} onChange={(v) => set({ condition: v })} />
         <TextField label="Travaux à prévoir" value={unit.plannedWorks} multiline onChange={(v) => set({ plannedWorks: v })} />

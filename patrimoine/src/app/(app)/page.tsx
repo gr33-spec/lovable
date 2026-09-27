@@ -9,6 +9,8 @@ import { milestones, type Milestone } from "@/lib/engine/milestones";
 import { qualityIssues } from "@/lib/engine/quality";
 import { portfolioIndicators } from "@/lib/engine/indicators";
 import { IndicatorTile } from "@/components/indicators";
+import { RemindersCard } from "@/components/leases";
+import { reminders, todayIso } from "@/lib/engine/leases";
 import { eur, eurCompact, eurSigned, pct } from "@/lib/format";
 import { Card, IconChip, Kpi, Page, SectionTitle, Segmented, cx, Insufficient, type ChipTone } from "@/components/ui";
 import { BarChart, LineChart } from "@/components/charts";
@@ -37,6 +39,7 @@ export default function Accueil() {
     const pick = ["dscr", "occupancy", "avg-rate", "amortized-10"];
     return pick.map((id) => all.find((i) => i.id === id)).filter((i): i is NonNullable<typeof i> => !!i && t.loans + t.buildings > 0);
   }, [data, projection, t.loans, t.buildings]);
+  const alerts = useMemo(() => reminders(data, todayIso(), snap.resolvedLoans), [data, snap]);
   const upcomingEnds = projection.events.filter((e) => e.kind === "loan_end").slice(0, 5);
 
   return (
@@ -99,6 +102,8 @@ export default function Accueil() {
             </div>
           )}
         </div>
+
+        <RemindersCard items={alerts} />
 
         {/* Flux */}
         <Card className="mt-4">

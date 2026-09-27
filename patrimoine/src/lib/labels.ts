@@ -1,4 +1,4 @@
-import type { CompanyKind, Condition, Priority, UnitType, WithdrawalKind, WorkStatus } from "./types";
+import type { CompanyKind, Condition, LeaseType, Priority, UnitType, WithdrawalKind, WorkStatus } from "./types";
 
 export const COMPANY_KINDS: { value: CompanyKind; label: string }[] = [
   { value: "holding", label: "Holding" },
@@ -52,3 +52,17 @@ export const WITHDRAWAL_KINDS: { value: WithdrawalKind; label: string }[] = [
 export function labelOf<T extends string>(list: { value: T; label: string }[], value: T | undefined | null): string | undefined {
   return list.find((x) => x.value === value)?.label;
 }
+
+export const LEASE_TYPES: { value: LeaseType; label: string }[] = [
+  { value: "nue", label: "Location nue" },
+  { value: "meuble", label: "Location meublée" },
+  { value: "commercial", label: "Bail commercial" },
+  { value: "professionnel", label: "Bail professionnel" },
+  { value: "autre", label: "Autre" },
+];
+
+export const REVISIONS: { value: "annuelle" | "triennale" | "aucune"; label: string }[] = [
+  { value: "annuelle", label: "Annuelle" },
+  { value: "triennale", label: "Triennale" },
+  { value: "aucune", label: "Aucune" },
+];

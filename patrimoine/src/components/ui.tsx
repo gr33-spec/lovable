@@ -146,6 +146,13 @@ export function Row({
     </>
   );
   const cls = "flex w-full items-center gap-3 py-3 text-left active:opacity-60";
+  if (href?.startsWith("/api/")) {
+    return (
+      <a href={href} className={cls}>
+        {content}
+      </a>
+    );
+  }
   if (href) {
     return (
       <Link href={href} className={cls}>
