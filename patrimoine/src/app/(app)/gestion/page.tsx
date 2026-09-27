@@ -3,7 +3,8 @@
 import { Suspense, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, UserRound } from "lucide-react";
+import { ArrowLeftRight, CheckCircle2, UserRound } from "lucide-react";
+import { switchView } from "@/lib/view";
 import { useStore } from "@/lib/store";
 import { eur } from "@/lib/format";
 import { todayIso, unpaidByUnit } from "@/lib/engine/leases";
@@ -25,8 +26,8 @@ export default function GestionPage() {
 }
 
 function Gestion() {
-  const { data, projection, setSettings, role } = useStore();
-  const gestion = role === "gestion";
+  const { data, projection, setSettings, role, view: appView } = useStore();
+  const gestion = appView === "gestion";
   const router = useRouter();
   const params = useSearchParams();
   const view = (["loyers", "locataires", "afaire"].includes(params.get("vue") ?? "") ? params.get("vue") : "loyers") as View;
@@ -58,11 +59,18 @@ function Gestion() {
         title={gestion ? { loyers: "Loyers", locataires: "Locataires", afaire: "À faire" }[view] : "Gestion"}
         subtitle={gestion ? data.settings.groupName || "Gestion locative" : "Loyers, locataires et démarches"}
         action={
-          gestion ? (
+          role === "gestion" ? (
             <Link href="/plus/securite" aria-label="Mon compte" className="flex h-10 w-10 items-center justify-center rounded-full bg-soft text-navy">
               <UserRound size={19} />
             </Link>
-          ) : undefined
+          ) : (
+            <button
+              onClick={() => switchView(gestion ? "patrimoine" : "gestion")}
+              className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-3.5 text-[13px] font-semibold text-navy"
+            >
+              <ArrowLeftRight size={15} /> {gestion ? "Patrimoine" : "Vue gestion"}
+            </button>
+          )
         }
       />
       <Page>
