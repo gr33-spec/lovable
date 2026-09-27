@@ -4,6 +4,8 @@ export const SECTION_OPTIONS = [
   { id: "structure", label: "Structure du groupe" },
   { id: "patrimoine", label: "Patrimoine immobilier" },
   { id: "credits", label: "Tableau des crédits" },
+  { id: "indicateurs", label: "Indicateurs financiers (DSCR, rendement, LTV…)" },
+  { id: "comptes", label: "Comptes annuels (bilans)" },
   { id: "echeancier", label: "Échéancier des fins de crédits" },
   { id: "projection", label: "Projection 5 / 10 / 15 / 20 / 30 ans et graphiques" },
   { id: "chronologie", label: "Chronologie patrimoniale" },

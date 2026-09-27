@@ -27,6 +27,7 @@ import { compareScenario, totalWealth } from "../engine/scenario";
 import { eur, eurCompact, pct, pdfSafe, dateFr } from "../format";
 import { COMPANY_KINDS, WORK_STATUSES, labelOf } from "../labels";
 import { SECTION_OPTIONS } from "./sections";
+import { LEVEL_LABEL, formatIndicator, groupStatementIndicators, latestStatements, portfolioIndicators, statementRatios, type Indicator } from "../engine/indicators";
 
 // Dossier banque : présentation paysage (A4), inspirée des synthèses
 // patrimoniales « type présentation ». Tous les chiffres viennent du moteur
@@ -575,6 +576,22 @@ function EndsTimeline({ events, y0 }: { events: TimelineEvent[]; y0: number }) {
   );
 }
 
+function IndicatorGrid({ items }: { items: Indicator[] }) {
+  const color = (l: Indicator["level"]) => (l === "good" ? POS : l === "watch" ? "#b7791f" : l === "alert" ? NEG : ROYAL);
+  return (
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+      {items.map((i) => (
+        <View key={i.id} style={{ width: (CW - 24) / 4, backgroundColor: LAV_2, borderRadius: 8, padding: 10, borderLeftWidth: 3, borderLeftColor: color(i.level) }} wrap={false}>
+          <Text style={{ fontSize: 7.5, color: INK2, minHeight: 18 }}>{T(i.label)}</Text>
+          <Text style={{ ...XBOLD, fontSize: 16, color: NAVY, marginTop: 2 }}>{T(formatIndicator(i))}</Text>
+          {i.level !== "neutral" && <Text style={{ ...SEMI, fontSize: 7, color: color(i.level), marginTop: 1 }}>{T(LEVEL_LABEL[i.level])}</Text>}
+          <Text style={{ fontSize: 6.8, color: MUTED, marginTop: 4, lineHeight: 1.35 }}>{T(i.explain)}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 // ——— Document ———
 
 export interface DossierInput {
@@ -625,14 +642,25 @@ export function DossierDocument({ data, projection, nowMonth, sections, scenario
 
   // Numérotation des sections effectivement incluses.
   const order: SectionId[] = SECTIONS.map((x) => x.id).filter(
-    (id) => has(id) && (id !== "scenarios" || scenarios.length > 0) && (id !== "travaux" || data.works.some((w) => w.status !== "termine")),
+    (id) =>
+      has(id) &&
+      (id !== "scenarios" || scenarios.length > 0) &&
+      (id !== "travaux" || data.works.some((w) => w.status !== "termine")) &&
+      (id !== "comptes" || data.statements.length > 0),
   );
+  const indicators = portfolioIndicators(data, projection).filter((i) => i.value !== undefined);
+  const stIndicators = groupStatementIndicators(data, projection).filter((i) => i.value !== undefined);
+  const lastStatements = tree
+    .map(({ company }) => ({ company, st: latestStatements(data, company.id).last }))
+    .filter((x): x is { company: Company; st: NonNullable<typeof x.st> } => !!x.st);
   const num = (id: SectionId) => order.indexOf(id) + 1;
   const titles: Record<SectionId, string> = {
     synthese: "Synthèse",
     structure: "Structure du groupe",
     patrimoine: "Patrimoine immobilier",
     credits: "Endettement",
+    indicateurs: "Indicateurs financiers",
+    comptes: "Comptes annuels",
     echeancier: "Échéancier des crédits",
     projection: "Projection à 30 ans",
     chronologie: "Chronologie patrimoniale",
@@ -877,6 +905,38 @@ export function DossierDocument({ data, projection, nowMonth, sections, scenario
               height={150}
             />
           </View>
+        </SectionPage>
+      )}
+
+      {/* ——— Indicateurs ——— */}
+      {has("indicateurs") && indicators.length > 0 && (
+        <SectionPage {...common} num={num("indicateurs")} kicker="Analyse" title="Indicateurs financiers" lead="Ratios calculés à partir des loyers, charges, crédits et valeurs déclarés. Repères indicatifs usuels.">
+          <IndicatorGrid items={indicators} />
+        </SectionPage>
+      )}
+
+      {/* ——— Comptes annuels ——— */}
+      {has("comptes") && lastStatements.length > 0 && (
+        <SectionPage {...common} num={num("comptes")} kicker="Analyse" title="Comptes annuels" lead="Derniers comptes annuels de chaque société (montants en euros). EBE et CAF approchés : résultat + dotations aux amortissements.">
+          <Table
+            cols={[
+              { label: "Société", width: 18, get: (r: (typeof lastStatements)[number]) => r.company.name, bold: () => true },
+              { label: "Exercice", width: 8, get: (r) => String(r.st.year) },
+              { label: "CA / loyers", width: 11, right: true, get: (r) => K(r.st.figures.revenue) },
+              { label: "Résultat net", width: 11, right: true, get: (r) => K(r.st.figures.netResult), color: (r) => ((r.st.figures.netResult ?? 0) < 0 ? NEG : undefined) },
+              { label: "CAF", width: 10, right: true, get: (r) => K(statementRatios(r.st.figures).caf) },
+              { label: "Fonds propres", width: 12, right: true, get: (r) => K(r.st.figures.equity) },
+              { label: "Dettes banc.", width: 11, right: true, get: (r) => K(r.st.figures.bankDebt) },
+              { label: "C. courants", width: 10, right: true, get: (r) => K(r.st.figures.partnerAccounts) },
+              { label: "Trésorerie", width: 9, right: true, get: (r) => K(r.st.figures.cash) },
+            ]}
+            rows={lastStatements}
+          />
+          {stIndicators.length > 0 && (
+            <View style={{ marginTop: 16 }}>
+              <IndicatorGrid items={stIndicators} />
+            </View>
+          )}
         </SectionPage>
       )}
 

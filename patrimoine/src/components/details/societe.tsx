@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Briefcase, Building2, Landmark, Pencil, Plus } from "lucide-react";
@@ -10,6 +11,8 @@ import { eur, eurCompact, eurSigned, pct } from "@/lib/format";
 import { labelOf, COMPANY_KINDS } from "@/lib/labels";
 import type { Collection } from "@/lib/types";
 import { CompanyForm } from "../forms";
+import { BilanImport } from "../bilans";
+import { statementRatios } from "@/lib/engine/indicators";
 import { QuickBuilding, QuickCompany, QuickLoan } from "../quick-add";
 import { LineChart } from "../charts";
 import { Button, Card, ConfirmDelete, Divided, Empty, Kpi, Page, PageHeader, Row, SectionTitle, Sheet } from "../ui";
@@ -17,7 +20,7 @@ import { Button, Card, ConfirmDelete, Divided, Empty, Kpi, Page, PageHeader, Row
 export function CompanyDetail({ id }: { id: string }) {
   const { data, projection, removeMany, upsert } = useStore();
   const router = useRouter();
-  const [sheet, setSheet] = useState<null | "edit" | "building" | "loan" | "company">(null);
+  const [sheet, setSheet] = useState<null | "edit" | "building" | "loan" | "company" | "bilan">(null);
   const company = data.companies.find((c) => c.id === id);
   if (!company) {
     return (
@@ -28,6 +31,7 @@ export function CompanyDetail({ id }: { id: string }) {
     );
   }
   const snap = projection.snapshot;
+  const statements = data.statements.filter((s) => s.companyId === id).sort((a, b) => b.year - a.year);
   const f = snap.byCompany.get(id)!;
   const own = snap.ownByCompany.get(id);
   const children = data.companies.filter((c) => c.parentId === id);
@@ -173,6 +177,27 @@ export function CompanyDetail({ id }: { id: string }) {
           )}
         </Card>
 
+        <SectionTitle action={<AddLink onClick={() => setSheet("bilan")} label="Bilan" />}>Comptes annuels</SectionTitle>
+        {statements.length === 0 ? (
+          <button onClick={() => setSheet("bilan")} className="w-full rounded-2xl border border-dashed border-line px-4 py-4 text-left text-sm text-muted">
+            Aucun bilan. Importez le PDF : les chiffres sont lus automatiquement.
+          </button>
+        ) : (
+          <div className="grid grid-cols-2 gap-2">
+            {statements.slice(0, 4).map((s) => {
+              const r = statementRatios(s.figures);
+              return (
+                <Link key={s.id} href={`/plus/bilans/${s.id}`} className="soft-card rounded-[20px] p-3.5">
+                  <div className="text-[17px] font-extrabold text-navy">{s.year}</div>
+                  <div className="mt-1 text-[11px] text-muted">Résultat net</div>
+                  <div className="tabular text-[15px] font-bold text-ink">{eurCompact(s.figures.netResult)}</div>
+                  <div className="text-[11px] text-muted">CAF {eurCompact(r.caf)} · tréso {eurCompact(s.figures.cash)}</div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+
         {(company.partners?.length || company.taxRegime || company.notes) && (
           <>
             <SectionTitle>Informations</SectionTitle>
@@ -206,6 +231,9 @@ export function CompanyDetail({ id }: { id: string }) {
       </Sheet>
       <Sheet open={sheet === "loan"} onClose={() => setSheet(null)} title="Nouveau crédit">
         <QuickLoan companyId={id} onDone={(lid) => { setSheet(null); router.push(`/patrimoine/credit/${lid}`); }} />
+      </Sheet>
+      <Sheet open={sheet === "bilan"} onClose={() => setSheet(null)} title="Importer un bilan">
+        {sheet === "bilan" && <BilanImport companyId={id} onDone={() => setSheet(null)} />}
       </Sheet>
       <Sheet open={sheet === "company"} onClose={() => setSheet(null)} title="Nouvelle filiale">
         <QuickCompany parentId={id} onDone={() => setSheet(null)} />

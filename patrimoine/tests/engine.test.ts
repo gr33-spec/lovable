@@ -120,3 +120,29 @@ test("remboursement anticipé : fin avancée", () => {
   assert.equal(endBase, 2041);
   assert.ok(endSim < endBase);
 });
+
+test("indicateurs : DSCR, occupation et ratios de bilan", async () => {
+  const { portfolioIndicators, statementRatios } = await import("../src/lib/engine/indicators");
+  const data: AppData = {
+    ...emptyData(),
+    buildings: [{ id: "b", name: "B", value: 1000000, propertyTax: 12000 }],
+    units: [
+      { id: "u1", buildingId: "b", name: "1", rent: 3000, status: "occupe" },
+      { id: "u2", buildingId: "b", name: "2", rent: 1000, status: "vacant" },
+    ],
+    loans: [{ id: "l", buildingId: "b", remaining: 200000, monthlyPayment: 2000, ratePct: 3, endDate: "2036-09-01" }],
+  };
+  const ind = portfolioIndicators(data, project(data, NOW));
+  const get = (id: string) => ind.find((i) => i.id === id)!.value!;
+  close(get("dscr"), (36000 - 12000) / 24000, 1e-9);
+  close(get("occupancy"), 50, 1e-9);
+  close(get("vacancy-loss"), 25, 1e-9);
+  close(get("gross-yield"), 3.6, 1e-9);
+  close(get("avg-rate"), 3, 1e-9);
+  const r = statementRatios({ operatingResult: 50000, depreciation: 20000, netResult: 30000, financialCharges: 10000, bankDebt: 400000, equity: 100000 });
+  close(r.ebe!, 70000, 0);
+  close(r.caf!, 50000, 0);
+  close(r.gearing!, 4, 1e-9);
+  close(r.debtToCaf!, 8, 1e-9);
+  close(r.interestCoverage!, 7, 1e-9);
+});
