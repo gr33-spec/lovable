@@ -193,6 +193,8 @@ export interface Reminder {
   /** Échéance dépassée. */
   late: boolean;
   amount?: number;
+  /** Logement concerné (actions directes : réviser, marquer payé…). */
+  unitId?: string;
 }
 
 function unitPlace(data: AppData, unit: Unit): { building?: Building; label: string } {
@@ -238,6 +240,7 @@ export function reminders(
         const days = daysBetween(today, info.end);
         out.push({
           id: `lease:${unit.id}:${info.end}`,
+          unitId: unit.id,
           kind: "lease_end",
           date: info.end,
           title: info.expired ? "Bail arrivé à échéance" : "Fin de bail à anticiper",
@@ -249,6 +252,7 @@ export function reminders(
       if (info.nextRevision && today >= addMonthsIso(info.nextRevision, -REVISION_NOTICE_MONTHS)) {
         out.push({
           id: `revision:${unit.id}:${info.nextRevision}`,
+          unitId: unit.id,
           kind: "revision",
           date: info.nextRevision,
           title: "Révision du loyer",
@@ -263,6 +267,7 @@ export function reminders(
     const { label } = unitPlace(data, line.unit);
     out.push({
       id: `unpaid:${line.unit.id}:${line.months.join(",")}:${Math.round(line.amount)}`,
+      unitId: line.unit.id,
       kind: "unpaid",
       date: `${line.months[0]}-01`,
       title: "Loyer impayé",

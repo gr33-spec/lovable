@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleDashed, Coins, X } from "lucide-react";
+import { Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleDashed, Coins, RotateCcw, X } from "lucide-react";
+import { SwipeRow, toast, useUndoableUpdate } from "@/components/swipe";
+import { settleUnpaid } from "@/lib/revision";
 import { useStore } from "@/lib/store";
 import type { RentPayment, Unit } from "@/lib/types";
 import { eur, eurCompact } from "@/lib/format";
@@ -33,6 +35,7 @@ export function dueFor(data: AppData, unit: Unit, month: string): Pick<RentPayme
 /** Pointage mensuel des loyers (vue « Loyers » de l'onglet Gestion). */
 export function RentsView() {
   const { data, upsert } = useStore();
+  const update = useUndoableUpdate();
   const router = useRouter();
   const params = useSearchParams();
   const current = monthKey(todayIso());
@@ -135,13 +138,15 @@ export function RentsView() {
                   const b = data.buildings.find((x) => x.id === l.unit.buildingId);
                   const tenant = [l.unit.tenantFirstName, l.unit.tenantLastName].filter(Boolean).join(" ");
                   return (
-                    <button key={l.unit.id} onClick={() => setEditId(l.unit.id)} className="flex w-full items-center gap-3 py-3 text-left">
+                    <SwipeRow key={l.unit.id} actions={[{ label: "Payé", icon: <Check size={18} />, tone: "pos", onAction: () => update("units", l.unit, settleUnpaid(l.unit), "Loyers marqués payés") }]}>
+                    <button onClick={() => setEditId(l.unit.id)} className="flex w-full items-center gap-3 py-3 text-left">
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-[15px] font-medium text-ink">{[b?.name, l.unit.name].filter(Boolean).join(" · ")}</div>
                         <div className="truncate text-[13px] text-muted">{[tenant, l.months.map(monthKeyLabel).join(", ")].filter(Boolean).join(" — ")}</div>
                       </div>
                       <span className="tabular text-[15px] font-bold text-neg">{eur(l.amount)}</span>
                     </button>
+                    </SwipeRow>
                   );
                 })}
               </div>
@@ -197,7 +202,12 @@ export function RentsView() {
                   {isOpen && (
                     <div className="divide-y divide-line border-t border-line px-5">
                       {list.map((u) => (
-                        <PaymentRow key={u.id} unit={u} expected={dueFor(data, u, month).due ?? 0} payment={u.payments?.[month]} onToggle={(st) => toggle(u, st)} onOpen={() => setEditId(u.id)} />
+                        <SwipeRow
+                          key={u.id}
+                          actions={u.payments?.[month] ? [{ label: "Effacer", icon: <RotateCcw size={18} />, tone: "neutral", onAction: () => { setPayment(u, undefined); toast("Pointage effacé", () => upsert("units", u)); } }] : []}
+                        >
+                          <PaymentRow unit={u} expected={dueFor(data, u, month).due ?? 0} payment={u.payments?.[month]} onToggle={(st) => toggle(u, st)} onOpen={() => setEditId(u.id)} />
+                        </SwipeRow>
                       ))}
                     </div>
                   )}

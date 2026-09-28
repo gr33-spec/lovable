@@ -9,6 +9,7 @@ import type { Action, Scenario } from "@/lib/types";
 import { yearOf } from "@/lib/engine/dates";
 import { ACTION_ICONS, ACTION_LABELS, SIMULATION_TYPES, actionSummary, defaultAction } from "@/components/action-form";
 import { Button, Card, Divided, Empty, Page, PageHeader, Pill, Row, RoundButton, SectionTitle, Sheet, ConfirmDelete } from "@/components/ui";
+import { SwipeDelete } from "@/components/swipe";
 
 export default function SimulationsPage() {
   const { data, nowMonth, upsert, remove } = useStore();
@@ -50,7 +51,8 @@ export default function SimulationsPage() {
         ) : (
           <div className="space-y-3">
             {data.scenarios.map((s) => (
-              <Card key={s.id} onClick={() => router.push(`/simulations/${s.id}`)}>
+              <SwipeDelete key={s.id} inset={false} className="rounded-[26px]" items={[{ coll: "scenarios", id: s.id }]} message="Scénario supprimé">
+              <Card onClick={() => router.push(`/simulations/${s.id}`)}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="truncate text-[17px] font-semibold text-navy">{s.name}</div>
@@ -65,6 +67,7 @@ export default function SimulationsPage() {
                   </div>
                 </div>
               </Card>
+              </SwipeDelete>
             ))}
           </div>
         )}
@@ -75,10 +78,12 @@ export default function SimulationsPage() {
             <Card className="py-1">
               <Divided>
                 {data.plans.map((a) => (
-                  <div key={a.id} className="py-2">
-                    <Row icon={<CircleCheck size={18} />} title={actionSummary(a, names)} subtitle="Prise en compte dans toutes les projections" />
-                    <ConfirmDelete label="Retirer" message="Retirer cette opération des données réelles ?" onConfirm={() => remove("plans", a.id)} />
-                  </div>
+                  <SwipeDelete key={a.id} label="Retirer" items={[{ coll: "plans", id: a.id }]} message="Opération retirée des données réelles">
+                    <div className="py-2">
+                      <Row icon={<CircleCheck size={18} />} title={actionSummary(a, names)} subtitle="Prise en compte dans toutes les projections" />
+                      <ConfirmDelete label="Retirer" message="Retirer cette opération des données réelles ?" onConfirm={() => remove("plans", a.id)} />
+                    </div>
+                  </SwipeDelete>
                 ))}
               </Divided>
             </Card>

@@ -16,6 +16,7 @@ import { QuickLoan, QuickWork } from "../quick-add";
 import { Button, Card, ConfirmDelete, Divided, Empty, Kpi, Page, PageHeader, Pill, Row, SectionTitle, Sheet } from "../ui";
 import { AddLink } from "./societe";
 import { BuildingValueHistory } from "../value-history";
+import { SwipeDelete } from "@/components/swipe";
 
 export function BuildingDetail({ id }: { id: string }) {
   return (
@@ -107,8 +108,8 @@ function BuildingDetailInner({ id }: { id: string }) {
           ) : (
             <Divided>
               {units.map((u) => (
+                <SwipeDelete key={u.id} items={unitRemovals(data, u.id)} message={`${u.name} supprimé`}>
                 <Row
-                  key={u.id}
                   href={`/patrimoine/logement/${u.id}`}
                   icon={<DoorOpen size={18} />}
                   title={u.name}
@@ -120,6 +121,7 @@ function BuildingDetailInner({ id }: { id: string }) {
                   right={u.status === "vacant" ? <Pill tone="warn">Vacant</Pill> : eur(u.rent)}
                   rightSub={[labelOf(UNIT_TYPES, u.type), u.surface ? `${num(u.surface)} m²` : undefined].filter(Boolean).join(" · ")}
                 />
+                </SwipeDelete>
               ))}
             </Divided>
           )}
@@ -135,8 +137,8 @@ function BuildingDetailInner({ id }: { id: string }) {
                 const r = snap.resolvedLoans.get(l.id);
                 const now = snap.byLoan.get(l.id);
                 return (
+                  <SwipeDelete key={l.id} items={[{ coll: "loans", id: l.id }]} message="Crédit supprimé">
                   <Row
-                    key={l.id}
                     href={`/patrimoine/credit/${l.id}`}
                     icon={<Landmark size={18} />}
                     title={l.name || l.bank || "Crédit"}
@@ -144,6 +146,7 @@ function BuildingDetailInner({ id }: { id: string }) {
                     right={now?.balance === undefined ? "—" : eurCompact(now.balance)}
                     rightSub={now?.paymentMonthly ? `${eur(now.paymentMonthly)}/mois` : undefined}
                   />
+                  </SwipeDelete>
                 );
               })}
             </Divided>
@@ -157,14 +160,15 @@ function BuildingDetailInner({ id }: { id: string }) {
           ) : (
             <Divided>
               {works.map((w) => (
+                <SwipeDelete key={w.id} items={[{ coll: "works", id: w.id }]} message="Travaux supprimés">
                 <Row
-                  key={w.id}
                   onClick={() => setWorkId(w.id)}
                   icon={<Hammer size={18} />}
                   title={w.label}
                   subtitle={`${w.year ?? "Année ?"} · ${labelOf(WORK_STATUSES, w.status ?? "prevu")}`}
                   right={eur(w.amount)}
                 />
+                </SwipeDelete>
               ))}
             </Divided>
           )}

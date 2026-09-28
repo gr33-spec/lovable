@@ -103,3 +103,19 @@ export function revisionsDue(data: AppData, series: IrlPoint[] | null, today: st
     .filter((p): p is RevisionPlan => !!p && p.due <= limit && !dismissed.has(`revision:${p.unit.id}:${p.due}`))
     .sort((a, b) => a.due.localeCompare(b.due));
 }
+
+/** Révision volontairement non appliquée pour l'échéance en cours : la suivante sera proposée l'an prochain. */
+export function skipRevision(unit: Unit, today: string): Unit {
+  const due = leaseInfo(unit, today).nextRevision;
+  if (!due) return unit;
+  return { ...unit, lastRevisionDate: due < today ? today : due };
+}
+
+/** Loyers impayés ou partiels d'un logement marqués payés (régularisation). */
+export function settleUnpaid(unit: Unit): Unit {
+  const payments = { ...(unit.payments ?? {}) };
+  for (const [k, p] of Object.entries(payments)) {
+    if (p.status === "impaye" || p.status === "partiel") payments[k] = { ...p, status: "paye", paid: undefined };
+  }
+  return { ...unit, payments };
+}

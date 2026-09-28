@@ -7,6 +7,7 @@ import { Building2, ChartColumn, CloudOff, Coins, Ellipsis, KeyRound, House, Che
 import { useStore } from "@/lib/store";
 import { unpaidByUnit } from "@/lib/engine/leases";
 import { cx } from "./ui";
+import { ToastHost } from "./swipe";
 
 const TABS = [
   { href: "/", label: "Accueil", icon: House },
@@ -35,6 +36,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <>
         <SaveIndicator />
         {children}
+        <ToastHost />
         <Suspense>
           <GestionNav unpaid={unpaid} />
         </Suspense>
@@ -46,6 +48,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <>
       <SaveIndicator />
       {children}
+      <ToastHost />
       {!onboarding && (
         <nav className="safe-bottom pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-2">
           <div className="pointer-events-auto mx-auto flex max-w-md rounded-[28px] border border-white/60 bg-white/92 p-1.5 shadow-[0_10px_30px_-6px_rgba(11,37,69,0.25)] backdrop-blur-2xl">
