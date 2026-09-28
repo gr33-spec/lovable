@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useRouter } from "next/navigation";
-import { DoorOpen, Hammer, Landmark, Pencil } from "lucide-react";
+import { BadgeEuro, DoorOpen, Hammer, Landmark, Pencil } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { unitRemovals } from "@/lib/tenancy";
 import { newId } from "@/lib/ops";
@@ -17,19 +17,23 @@ import { Button, Card, ConfirmDelete, Divided, Empty, Kpi, MissingData, Page, Pa
 import { AddLink } from "./societe";
 import { BuildingValueHistory } from "../value-history";
 import { SwipeDelete } from "@/components/swipe";
+import { SaleSheet, newSale } from "@/components/sale/sheet";
+import { SalesList } from "@/components/sale/list";
+import type { SaleAction } from "@/lib/types";
 
-export function BuildingDetail({ id, edit }: { id: string; edit?: boolean }) {
+export function BuildingDetail({ id, edit, saleId }: { id: string; edit?: boolean; saleId?: string }) {
   return (
     <Suspense>
-      <BuildingDetailInner id={id} edit={edit} />
+      <BuildingDetailInner id={id} edit={edit} saleId={saleId} />
     </Suspense>
   );
 }
 
-function BuildingDetailInner({ id, edit }: { id: string; edit?: boolean }) {
+function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean; saleId?: string }) {
   const { data, projection, removeMany, upsert, remove } = useStore();
   const router = useRouter();
   const [sheet, setSheet] = useState<null | "edit" | "loan" | "work">(edit ? "edit" : null);
+  const [selling, setSelling] = useState<SaleAction | null>(null);
   const [unitId, setUnitId] = useState<string | null>(null);
   const [workId, setWorkId] = useState<string | null>(null);
   const building = data.buildings.find((b) => b.id === id);
@@ -175,6 +179,24 @@ function BuildingDetailInner({ id, edit }: { id: string; edit?: boolean }) {
         </Card>
 
         <BuildingValueHistory building={building} />
+
+        <SectionTitle action={<AddLink onClick={() => setSelling(newSale(building.id))} label="Vendre" />}>Vente</SectionTitle>
+        <Card className="py-1">
+          {data.plans.some((p) => p.type === "sale" && p.buildingId === building.id) ? (
+            <SalesList buildingId={building.id} openId={saleId} />
+          ) : (
+            <button onClick={() => setSelling(newSale(building.id))} className="flex w-full items-center gap-3 py-3 text-left">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-soft text-navy">
+                <BadgeEuro size={18} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[15px] font-medium text-ink">Vendre l&apos;immeuble ou des lots</span>
+                <span className="block text-[13px] text-muted">Prix par lot, date, remboursement : intégré aux projections et au dossier banque</span>
+              </span>
+            </button>
+          )}
+        </Card>
+        <SaleSheet sale={selling ?? undefined} open={!!selling} onClose={() => setSelling(null)} />
 
         <SectionTitle>Informations</SectionTitle>
         <Card className="space-y-1.5 text-[15px]">

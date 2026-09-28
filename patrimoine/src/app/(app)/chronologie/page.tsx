@@ -22,6 +22,7 @@ const ALL = "__all";
 /** Lien vers l'élément à l'origine de l'événement. */
 function hrefOf(e: TimelineEvent): string | undefined {
   if (e.id.startsWith("project-") && e.refId) return `/patrimoine/projet/${e.refId}`;
+  if (e.kind === "sale" && e.source === "plan" && e.buildingId) return `/patrimoine/immeuble/${e.buildingId}?vente=${e.refId}`;
   if (e.source === "plan") return "/simulations";
   if ((e.kind === "loan_end" || e.kind === "balloon" || e.kind === "prepayment") && e.loanId && !e.loanId.startsWith("loan-")) return `/patrimoine/credit/${e.loanId}`;
   if (e.kind === "works") return "/plus/travaux";

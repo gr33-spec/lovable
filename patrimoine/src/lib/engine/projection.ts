@@ -1,6 +1,7 @@
 import type { Action, AppData, Building, Unit } from "../types";
 import { monthIndex, parseMonth, yearOf, type MonthIndex } from "./dates";
 import { inProjection, projectCompanyKey, projectFigures } from "./projects";
+import { saleLabel, salePrice, saleShares } from "./sale";
 import { activityFor, amountFor, corporateTax } from "../fiscal/remuneration";
 import { WITHDRAWAL_KINDS, labelOf } from "../labels";
 import { annuityPayment, stepLoan, type LoanState } from "./loan";
@@ -68,11 +69,17 @@ export interface TimelineEvent {
   source: "real" | "plan" | "scenario";
   refId?: string;
   loanId?: string;
+  /** Immeuble concerné (vente). */
+  buildingId?: string;
 }
 
 export interface SaleResult {
   actionId: string;
   buildingId: string;
+  /** Lots vendus (vente partielle). */
+  unitIds?: string[];
+  month: MonthIndex;
+  source: "plan" | "scenario";
   year: number;
   price?: number;
   debtRepaid: number;
@@ -239,7 +246,12 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
     ...(opts.scenarioActions ?? []).map((a) => ({ action: a, source: "scenario" as const })),
   ]
     .filter((o) => o.action.year >= y0 && o.action.year <= y0 + horizon)
-    .map((o) => ({ ...o, month: actionMonth(o.action.year, nowMonth) }));
+    .map((o) => ({
+      ...o,
+      // Vente datée : au mois de l'acte.
+      month: o.action.type === "sale" && o.action.date ? Math.max(nowMonth, monthIndex(Number(o.action.date.slice(0, 4)), Number(o.action.date.slice(5, 7)) || 1)) : actionMonth(o.action.year, nowMonth),
+    }));
+  const soldUnits = new Set<string>();
 
   const events: TimelineEvent[] = [];
   const sales: SaleResult[] = [];
@@ -408,18 +420,57 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
       const a = op.action;
       if (a.type === "sale") {
         const b = buildings.find((x) => x.id === a.buildingId && x.soldAt === undefined);
+        const building = buildingsById.get(a.buildingId);
         if (!b) continue;
+        const remaining = (unitsByBuilding.get(b.id) ?? []).filter((u) => !soldUnits.has(u.id));
+        const shares = building ? saleShares(building, remaining, a.lots?.map((l) => l.unitId)) : undefined;
+        const whole = !shares || shares.whole;
         const bLoans = loans.filter((l) => l.buildingId === b.id && l.active && l.fromMonth <= m);
-        const paymentsRemoved = bLoans.reduce((s, l) => s + (l.payment + l.insurance), 0);
-        const debtRepaid = bLoans.reduce((s, l) => s + loanPayoff(l), 0);
+        const paymentsBefore = bLoans.reduce((s, l) => s + (l.payment + l.insurance), 0);
         const g = growth(settings.rentGrowthPct, b.refMonth, m);
-        const rentLost = b.rent0 * g;
-        const chargesRemoved = b.charges0 * growth(settings.chargesGrowthPct, b.refMonth, m);
-        const valueRemoved = (b.value ?? 0) * growth(settings.valueGrowthPct, b.refMonth, m);
-        b.soldAt = m;
+        const gc = growth(settings.chargesGrowthPct, b.refMonth, m);
+        const gv = growth(settings.valueGrowthPct, b.refMonth, m);
+        let debtRepaid = 0;
+        let rentLost: number;
+        let chargesRemoved: number;
+        let valueRemoved: number;
+        if (whole) {
+          debtRepaid = bLoans.reduce((s, l) => s + loanPayoff(l), 0);
+          rentLost = b.rent0 * g;
+          chargesRemoved = b.charges0 * gc;
+          valueRemoved = (b.value ?? 0) * gv;
+          b.soldAt = m;
+        } else {
+          // Vente partielle : l'immeuble reste, sans les lots vendus.
+          const share = shares.share;
+          rentLost = shares.rent * g;
+          chargesRemoved = b.charges0 * share * gc;
+          valueRemoved = (shares.value ?? 0) * gv;
+          b.rent0 = Math.max(0, b.rent0 - shares.rent);
+          b.charges0 = b.charges0 * (1 - share);
+          if (b.value !== undefined) b.value = Math.max(0, b.value - (shares.value ?? 0));
+          // Remboursement : montant saisi, sinon quote-part du capital restant dû ; mensualité recalculée (même fin).
+          const balance = bLoans.filter((l) => !l.paymentOnly).reduce((s, l) => s + l.balance, 0);
+          const target = Math.min(balance, a.debtRepaid ?? balance * share);
+          for (const l of bLoans) {
+            if (l.paymentOnly || balance <= 0) continue;
+            const part = target * (l.balance / balance);
+            l.balance -= part;
+            debtRepaid += part;
+            if (l.balance <= 0.01) {
+              l.balance = 0;
+              l.active = false;
+            } else if (l.kind === "amortissable" && l.endMonth !== undefined) {
+              l.payment = annuityPayment(l.balance, l.monthlyRate, Math.max(1, l.endMonth - m + 1));
+            }
+          }
+        }
+        for (const u of shares?.units ?? []) soldUnits.add(u.id);
+        const paymentsRemoved = paymentsBefore - bLoans.filter((l) => l.active).reduce((s, l) => s + (l.payment + l.insurance), 0);
+        const price = salePrice(a);
         const fees = a.fees ?? 0;
         const tax = a.tax ?? 0;
-        const netCash = a.price !== undefined ? a.price - fees - tax - debtRepaid : undefined;
+        const netCash = price !== undefined ? price - fees - tax - debtRepaid : undefined;
         if (netCash !== undefined) {
           addTreasury(b.companyKey, netCash);
           rowFor(b.companyKey, year).operations += netCash;
@@ -427,8 +478,10 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
         sales.push({
           actionId: a.id,
           buildingId: b.id,
+          unitIds: whole ? undefined : shares?.units.map((u) => u.id),
+          month: m,
           year,
-          price: a.price,
+          price,
           debtRepaid,
           fees,
           tax,
@@ -437,15 +490,17 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
           paymentsRemovedMonthly: paymentsRemoved,
           chargesRemovedAnnual: chargesRemoved,
           valueRemoved,
+          source: op.source,
         });
         events.push({
           id: `sale-${a.id}`,
           kind: "sale",
+          buildingId: b.id,
           month: m,
           year,
           companyKey: b.companyKey,
-          label: `Vente — ${buildingName(b.id) ?? "immeuble"}`,
-          amount: a.price,
+          label: `Vente — ${whole ? (buildingName(b.id) ?? "immeuble") : saleLabel(data, a)}`,
+          amount: price,
           source: op.source,
           refId: a.id,
         });
