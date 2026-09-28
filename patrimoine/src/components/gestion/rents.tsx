@@ -1,5 +1,6 @@
 "use client";
 
+import { sortedUnits } from "@/lib/move-tenant";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleDashed, Coins, RotateCcw, X } from "lucide-react";
@@ -33,7 +34,7 @@ export function RentsView() {
   // Logements concernés : occupés, ou déjà pointés pour ce mois.
   const units = data.units.filter((u) => u.status !== "vacant" || u.payments?.[month]);
   const buildings = data.buildings
-    .map((b) => ({ building: b, units: units.filter((u) => u.buildingId === b.id) }))
+    .map((b) => ({ building: b, units: sortedUnits(units.filter((u) => u.buildingId === b.id)) }))
     .filter((g) => g.units.length > 0);
 
   let expected = 0;

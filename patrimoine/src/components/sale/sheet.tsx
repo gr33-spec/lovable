@@ -1,5 +1,6 @@
 "use client";
 
+import { sortedUnits } from "@/lib/move-tenant";
 import { useState } from "react";
 import { Check, CircleCheck, Trash2 } from "lucide-react";
 import { useStore } from "@/lib/store";
@@ -37,7 +38,7 @@ function SaleForm({ initial, onClose, chooseBuilding }: { initial: SaleAction; o
   const [a, setA] = useState<SaleAction>(initial);
   const saved = data.plans.some((p) => p.id === a.id);
   const building = data.buildings.find((b) => b.id === a.buildingId);
-  const units = data.units.filter((u) => u.buildingId === a.buildingId);
+  const units = sortedUnits(data.units.filter((u) => u.buildingId === a.buildingId));
   const byLot = !!a.lots;
   const set = (patch: Partial<SaleAction>) => setA((cur) => ({ ...cur, ...patch }));
 

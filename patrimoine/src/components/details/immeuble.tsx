@@ -1,8 +1,8 @@
 "use client";
 
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeftRight, BadgeEuro, DoorOpen, GripVertical, Hammer, Landmark, Pencil } from "lucide-react";
+import { ArrowRightLeft, BadgeEuro, DoorOpen, Hammer, Landmark, Pencil } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { unitRemovals } from "@/lib/tenancy";
 import { newId } from "@/lib/ops";
@@ -13,13 +13,14 @@ import { dateFr, eur, eurCompact, eurSigned, num, pct } from "@/lib/format";
 import { CONDITIONS, UNIT_TYPES, WORK_STATUSES, labelOf } from "@/lib/labels";
 import { BuildingForm, UnitForm, WorkForm } from "../forms";
 import { QuickLoan, QuickWork } from "../quick-add";
-import { Button, Card, ConfirmDelete, Divided, Empty, Kpi, MissingData, Page, PageHeader, Pill, Row, SectionTitle, Sheet, cx } from "../ui";
+import { Button, Card, ConfirmDelete, Divided, Empty, Kpi, MissingData, Page, PageHeader, Pill, Row, SectionTitle, Sheet } from "../ui";
 import { AddLink } from "./societe";
 import { BuildingValueHistory } from "../value-history";
 import { SwipeDelete } from "@/components/swipe";
 import { SaleSheet, newSale } from "@/components/sale/sheet";
 import { SalesList } from "@/components/sale/list";
-import { SwapLotsSheet, useSwapLots } from "./swap-lots";
+import { DragGhost, MoveTenantSheet, TenantHandle, dropTarget, useMoveTenant, useTenantDnd } from "./move-tenant";
+import { hasTenant, sortedUnits, tenantLabel } from "@/lib/move-tenant";
 import type { SaleAction } from "@/lib/types";
 
 export function BuildingDetail({ id, edit, saleId }: { id: string; edit?: boolean; saleId?: string }) {
@@ -35,16 +36,13 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
   const router = useRouter();
   const [sheet, setSheet] = useState<null | "edit" | "loan" | "work">(edit ? "edit" : null);
   const [selling, setSelling] = useState<SaleAction | null>(null);
-  const [swapping, setSwapping] = useState(false);
-  const [dragId, setDragIdState] = useState<string | null>(null);
-  // Lot saisi, lu immédiatement pendant le glisser (l'état React peut arriver après le premier survol).
-  const dragRef = useRef<string | null>(null);
-  const setDragId = (id: string | null) => {
-    dragRef.current = id;
-    setDragIdState(id);
-  };
-  const [overId, setOverId] = useState<string | null>(null);
-  const swapLots = useSwapLots();
+  const [moving, setMoving] = useState(false);
+  const moveTenant = useMoveTenant();
+  const dnd = useTenantDnd((fromId, toId) => {
+    const from = data.units.find((u) => u.id === fromId);
+    const to = data.units.find((u) => u.id === toId);
+    if (from && to) moveTenant(from, to);
+  });
   const [unitId, setUnitId] = useState<string | null>(null);
   const [workId, setWorkId] = useState<string | null>(null);
   const building = data.buildings.find((b) => b.id === id);
@@ -59,7 +57,7 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
   const snap = projection.snapshot;
   const f = snap.byBuilding.get(id)!;
   const company = data.companies.find((c) => c.id === building.companyId);
-  const units = data.units.filter((u) => u.buildingId === id);
+  const units = sortedUnits(data.units.filter((u) => u.buildingId === id));
   const loans = data.loans.filter((l) => l.buildingId === id);
   const works = data.works.filter((w) => w.buildingId === id).sort((a, b) => (a.year ?? 9999) - (b.year ?? 9999));
   const cf = cashflowMonthly(f);
@@ -118,9 +116,9 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
         <SectionTitle
           action={
             <span className="flex items-center gap-4">
-              {units.length > 1 && (
-                <button onClick={() => setSwapping(true)} className="flex items-center gap-1 text-sm font-semibold text-series-1">
-                  <ArrowLeftRight size={15} /> Échanger
+              {units.length > 1 && units.some((u) => hasTenant(data, u)) && (
+                <button onClick={() => setMoving(true)} className="flex items-center gap-1 text-sm font-semibold text-series-1">
+                  <ArrowRightLeft size={15} /> Déplacer
                 </button>
               )}
               <AddLink onClick={addUnit} />
@@ -136,46 +134,11 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
             </div>
           ) : (
             <Divided>
-              {units.map((u) => (
-                // Ordinateur : glisser un lot (poignée ⋮⋮) sur un autre échange leurs numéros.
-                <div
-                  key={u.id}
-                  onDragOver={(e) => {
-                    if (!dragRef.current || dragRef.current === u.id) return;
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = "move";
-                    if (overId !== u.id) setOverId(u.id);
-                  }}
-                  onDragLeave={() => setOverId((cur) => (cur === u.id ? null : cur))}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    const from = units.find((x) => x.id === (dragRef.current ?? e.dataTransfer.getData("text/plain")));
-                    setDragId(null);
-                    setOverId(null);
-                    if (from && from.id !== u.id) swapLots(from, u);
-                  }}
-                  className={cx("group/lot relative rounded-xl transition", overId === u.id && "bg-series-1/10 ring-2 ring-series-1", dragId === u.id && "opacity-40")}
-                >
-                  <span
-                    draggable
-                    data-drag
-                    data-noswipe
-                    title="Glisser sur un autre lot pour échanger les numéros"
-                    onDragStart={(e) => {
-                      e.dataTransfer.setData("text/plain", u.id);
-                      e.dataTransfer.effectAllowed = "move";
-                      // Chrome annule le glisser si la page change au même instant : mise en forme différée.
-                      dragRef.current = u.id;
-                      setTimeout(() => setDragId(u.id), 0);
-                    }}
-                    onDragEnd={() => {
-                      setDragId(null);
-                      setOverId(null);
-                    }}
-                    className="absolute -left-4 top-1/2 z-10 hidden h-8 w-5 -translate-y-1/2 cursor-grab items-center justify-center rounded-md text-muted/60 hover:bg-soft hover:text-navy active:cursor-grabbing [@media(hover:hover)]:flex"
-                  >
-                    <GripVertical size={16} />
-                  </span>
+              {units.map((u) => {
+                const name = tenantLabel(data, u);
+                return (
+                // Les lots restent fixes : on fait glisser le nom du locataire vers un autre lot.
+                <div key={u.id} {...dropTarget(dnd, u.id, id)}>
                   <SwipeDelete items={unitRemovals(data, u.id)} message={`${u.name} supprimé`}>
                     <Row
                       href={`/patrimoine/logement/${u.id}`}
@@ -184,17 +147,26 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
                       subtitle={
                         u.status === "vacant"
                           ? "Vacant"
-                          : [u.tenantFirstName, u.tenantLastName].filter(Boolean).join(" ") || labelOf(UNIT_TYPES, u.type)
+                          : units.length > 1 && hasTenant(data, u)
+                            ? <TenantHandle dnd={dnd} unitId={u.id} group={id} label={name || "Locataire"} />
+                            : name || labelOf(UNIT_TYPES, u.type)
                       }
                       right={u.status === "vacant" ? <Pill tone="warn">Vacant</Pill> : eur(u.rent)}
                       rightSub={[labelOf(UNIT_TYPES, u.type), u.surface ? `${num(u.surface)} m²` : undefined].filter(Boolean).join(" · ")}
                     />
                   </SwipeDelete>
                 </div>
-              ))}
+                );
+              })}
             </Divided>
           )}
         </Card>
+        {units.length > 1 && units.some((u) => hasTenant(data, u)) && (
+          <p className="mt-2 px-1 text-[12.5px] text-muted">
+            Un locataire est dans le mauvais lot ? Faites glisser son nom sur le bon lot (sur téléphone : maintenez le doigt dessus). Lot occupé : les deux locataires sont échangés.
+          </p>
+        )}
+        <DragGhost dnd={dnd} units={units} />
 
         </div>
         <div className="min-w-0">
@@ -264,7 +236,7 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
           )}
         </Card>
         <SaleSheet sale={selling ?? undefined} open={!!selling} onClose={() => setSelling(null)} />
-        <SwapLotsSheet units={units} open={swapping} onClose={() => setSwapping(false)} />
+        <MoveTenantSheet units={units} open={moving} onClose={() => setMoving(false)} />
 
         <SectionTitle>Informations</SectionTitle>
         <Card className="space-y-1.5 text-[15px]">
