@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { openDocument } from "./pdf-viewer";
 import { ArrowLeft, ChevronRight, X } from "lucide-react";
 import { INSUFFICIENT } from "@/lib/format";
 
@@ -178,9 +179,9 @@ export function Row({
   const cls = "flex w-full items-center gap-3 py-3 text-left active:opacity-60";
   if (href?.startsWith("/api/")) {
     return (
-      <a href={href} className={cls}>
+      <button type="button" onClick={() => openDocument(href)} className={cls}>
         {content}
-      </a>
+      </button>
     );
   }
   if (href) {
@@ -257,11 +258,12 @@ export function Button({
     full && "w-full",
   );
   if (href?.startsWith("/api/")) {
+    // Documents générés : visionneuse intégrée (un PDF plein écran n'a pas de bouton retour dans l'app installée).
     return (
-      <a href={href} className={cls}>
+      <button type="button" disabled={disabled} onClick={() => openDocument(href)} className={cls}>
         {icon}
         {children}
-      </a>
+      </button>
     );
   }
   if (href) {

@@ -16,6 +16,7 @@ import { sharePdf } from "../tenancy/common";
 import { useBuildingOptions, useCompanyOptions } from "../forms";
 import { Button, Card, ConfirmDelete, DateField, Empty, Grid2, NumberField, Page, PageHeader, Pill, SectionTitle, SelectField, Stack, TextField, cx } from "../ui";
 import { STATUS_TONE } from "./list";
+import { openDocument } from "../pdf-viewer";
 
 type Tab = "bien" | "cout" | "financement" | "loyers" | "banque";
 
@@ -410,7 +411,7 @@ function QuoteButton({ cost, onChange }: { cost: ProjectCost; onChange: (c: Proj
   if (cost.fileId) {
     return (
       <span className="flex items-center gap-1.5">
-        <a href={`/api/files/${cost.fileId}`} target="_blank" rel="noreferrer" className="flex items-center gap-1 rounded-full bg-series-1/10 px-3 py-1 text-[12px] font-semibold text-series-1">
+        <a href={`/api/files/${cost.fileId}`} onClick={(e) => { e.preventDefault(); openDocument(`/api/files/${cost.fileId}`, cost.fileName); }} className="flex items-center gap-1 rounded-full bg-series-1/10 px-3 py-1 text-[12px] font-semibold text-series-1">
           <FileText size={13} /> Devis
         </a>
         <button type="button" aria-label="Retirer le devis" onClick={() => onChange({ ...cost, fileId: undefined, fileName: undefined })} className="text-muted">
@@ -617,7 +618,7 @@ function Documents({ p, set, editable }: SectionProps & { editable: boolean }) {
         {docs.map((d) => (
           <div key={d.id} className="flex items-center gap-3 py-2.5">
             <FileText size={18} className="shrink-0 text-muted" />
-            <a href={`/api/files/${d.fileId}`} target="_blank" rel="noreferrer" className="min-w-0 flex-1 truncate text-[14px] text-series-1">
+            <a href={`/api/files/${d.fileId}`} onClick={(e) => { e.preventDefault(); openDocument(`/api/files/${d.fileId}`, d.name); }} className="min-w-0 flex-1 truncate text-[14px] text-series-1">
               {d.name}
             </a>
             {editable && (
