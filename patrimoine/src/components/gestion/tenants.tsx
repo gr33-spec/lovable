@@ -12,8 +12,8 @@ import { eur } from "@/lib/format";
 import { leaseInfo, todayIso, unpaidByUnit, addMonthsIso, LEASE_END_NOTICE_MONTHS } from "@/lib/engine/leases";
 import { activeTenancy, draftTenancy, inspectionsOf, leavingTenancy, tenantsName } from "@/lib/tenancy";
 import { cx } from "../ui";
-import { DragGhost, TenantHandle, dropTarget, useMoveTenant, useTenantDnd, type TenantDnd } from "../details/move-tenant";
-import { hasTenant, sortedUnits } from "@/lib/move-tenant";
+import { DragGhost, LotHandle, dropTarget, useSwapNumbers, useTenantDnd, type TenantDnd } from "../details/lot-number";
+import { sortedUnits } from "@/lib/lots";
 
 // Vue « Locataires » de l'onglet Gestion : tous les logements, immeuble par
 // immeuble, avec leur situation et les actions courantes à portée de doigt.
@@ -53,11 +53,11 @@ export function TenantsView() {
   const open = new Set(openIds);
   const today = todayIso();
   const unpaid = useMemo(() => new Map(unpaidByUnit(data.units).map((l) => [l.unit.id, l.amount])), [data.units]);
-  const moveTenant = useMoveTenant();
+  const swapNumbers = useSwapNumbers();
   const dnd = useTenantDnd((fromId, toId) => {
     const from = data.units.find((u) => u.id === fromId);
     const to = data.units.find((u) => u.id === toId);
-    if (from && to) moveTenant(from, to);
+    if (from && to) swapNumbers(from, to);
   });
 
   const totalMissing = missingCount(data);
@@ -181,10 +181,10 @@ function UnitLine({ unit, flags, missing, dnd }: { unit: Unit; flags: UnitFlag[]
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[15px] font-semibold text-ink">
-            {unit.name}
+            {dnd ? <LotHandle dnd={dnd} unitId={unit.id} group={unit.buildingId} label={unit.name} /> : unit.name}
             <span className="font-normal text-muted">
               {" · "}
-              {vacant ? "Vacant" : dnd && hasTenant(data, unit) ? <TenantHandle dnd={dnd} unitId={unit.id} group={unit.buildingId} label={tenant || "Locataire"} className="text-[13.5px]" /> : tenant || "Locataire à renseigner"}
+              {vacant ? "Vacant" : tenant || "Locataire à renseigner"}
             </span>
           </span>
           <span className="tabular block text-[12.5px] text-muted">{eur((unit.rent ?? 0) + (unit.charges ?? 0))} / mois</span>

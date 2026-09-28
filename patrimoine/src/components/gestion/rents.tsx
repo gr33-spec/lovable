@@ -1,6 +1,6 @@
 "use client";
 
-import { sortedUnits } from "@/lib/move-tenant";
+import { sortedUnits } from "@/lib/lots";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleDashed, Coins, RotateCcw, X } from "lucide-react";

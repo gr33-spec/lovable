@@ -1,6 +1,6 @@
 "use client";
 
-import { sortedUnits } from "@/lib/move-tenant";
+import { sortedUnits } from "@/lib/lots";
 import { useStore } from "@/lib/store";
 import type { Building, Company, Loan, Unit, Work } from "@/lib/types";
 import { COMPANY_KINDS, CONDITIONS, PRIORITIES, UNIT_TYPES, WORK_STATUSES } from "@/lib/labels";

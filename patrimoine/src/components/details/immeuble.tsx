@@ -20,8 +20,8 @@ import { BuildingValueHistory } from "../value-history";
 import { SwipeDelete } from "@/components/swipe";
 import { SaleSheet, newSale } from "@/components/sale/sheet";
 import { SalesList } from "@/components/sale/list";
-import { DragGhost, MoveTenantSheet, TenantHandle, dropTarget, useMoveTenant, useTenantDnd } from "./move-tenant";
-import { hasTenant, sortedUnits, tenantLabel } from "@/lib/move-tenant";
+import { DragGhost, LotHandle, SwapNumbersSheet, dropTarget, useSwapNumbers, useTenantDnd } from "./lot-number";
+import { sortedUnits, tenantLabel } from "@/lib/lots";
 import type { SaleAction } from "@/lib/types";
 
 export function BuildingDetail({ id, edit, saleId }: { id: string; edit?: boolean; saleId?: string }) {
@@ -38,11 +38,11 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
   const [sheet, setSheet] = useState<null | "edit" | "loan" | "work">(edit ? "edit" : null);
   const [selling, setSelling] = useState<SaleAction | null>(null);
   const [moving, setMoving] = useState(false);
-  const moveTenant = useMoveTenant();
+  const swapNumbers = useSwapNumbers();
   const dnd = useTenantDnd((fromId, toId) => {
     const from = data.units.find((u) => u.id === fromId);
     const to = data.units.find((u) => u.id === toId);
-    if (from && to) moveTenant(from, to);
+    if (from && to) swapNumbers(from, to);
   });
   const [unitId, setUnitId] = useState<string | null>(null);
   const [workId, setWorkId] = useState<string | null>(null);
@@ -117,9 +117,9 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
         <SectionTitle
           action={
             <span className="flex items-center gap-4">
-              {units.length > 1 && units.some((u) => hasTenant(data, u)) && (
+              {units.length > 1 && (
                 <button onClick={() => setMoving(true)} className="flex items-center gap-1 text-sm font-semibold text-series-1">
-                  <ArrowRightLeft size={15} /> Déplacer
+                  <ArrowRightLeft size={15} /> Numéros
                 </button>
               )}
               <AddLink onClick={addUnit} />
@@ -138,19 +138,17 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
               {units.map((u) => {
                 const name = tenantLabel(data, u);
                 return (
-                // Les lots restent fixes : on fait glisser le nom du locataire vers un autre lot.
+                // Glisser le numéro d'un lot sur un autre échange leurs numéros (liste triée).
                 <div key={u.id} {...dropTarget(dnd, u.id, id)}>
                   <SwipeDelete items={unitRemovals(data, u.id)} message={`${u.name} supprimé`}>
                     <Row
                       href={`/patrimoine/logement/${u.id}`}
                       icon={<DoorOpen size={18} />}
-                      title={u.name}
+                      title={units.length > 1 ? <LotHandle dnd={dnd} unitId={u.id} group={id} label={u.name} /> : u.name}
                       subtitle={
                         u.status === "vacant"
                           ? "Vacant"
-                          : units.length > 1 && hasTenant(data, u)
-                            ? <TenantHandle dnd={dnd} unitId={u.id} group={id} label={name || "Locataire"} />
-                            : name || labelOf(UNIT_TYPES, u.type)
+                          : name || labelOf(UNIT_TYPES, u.type)
                       }
                       right={u.status === "vacant" ? <Pill tone="warn">Vacant</Pill> : eur(u.rent)}
                       rightSub={[labelOf(UNIT_TYPES, u.type), u.surface ? `${num(u.surface)} m²` : undefined].filter(Boolean).join(" · ")}
@@ -162,9 +160,9 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
             </Divided>
           )}
         </Card>
-        {units.length > 1 && units.some((u) => hasTenant(data, u)) && (
+        {units.length > 1 && (
           <p className="mt-2 px-1 text-[12.5px] text-muted">
-            Un locataire est dans le mauvais lot ? Faites glisser son nom sur le bon lot (sur téléphone : maintenez le doigt dessus). Lot occupé : les deux locataires sont échangés.
+            Un numéro de lot est faux ? Faites glisser le lot sur son vrai numéro (sur téléphone : maintenez le doigt dessus). Seuls les deux numéros s&apos;échangent, le logement garde son locataire.
           </p>
         )}
         <DragGhost dnd={dnd} units={units} />
@@ -237,7 +235,7 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
           )}
         </Card>
         <SaleSheet sale={selling ?? undefined} open={!!selling} onClose={() => setSelling(null)} />
-        <MoveTenantSheet units={units} open={moving} onClose={() => setMoving(false)} />
+        <SwapNumbersSheet units={units} open={moving} onClose={() => setMoving(false)} />
 
         <SectionTitle>Informations</SectionTitle>
         <Card className="space-y-1.5 text-[15px]">
