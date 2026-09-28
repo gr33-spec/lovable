@@ -23,7 +23,7 @@ function tenancyForMonth(data: AppData, unit: Unit, month: string) {
 }
 
 /** Montant attendu pour le mois, avec le détail loyer / charges. */
-function dueFor(data: AppData, unit: Unit, month: string): Pick<RentPayment, "due" | "rent" | "charges" | "tenancyId"> {
+export function dueFor(data: AppData, unit: Unit, month: string): Pick<RentPayment, "due" | "rent" | "charges" | "tenancyId"> {
   const t = tenancyForMonth(data, unit, month);
   if (!t) return { due: expectedMonthly(unit), rent: unit.rent, charges: unit.charges };
   const d = monthDue(t, month);
@@ -41,7 +41,7 @@ export function RentsView() {
   const [editId, setEditId] = useState<string | null>(null);
   const [open, setOpen] = useState<Set<string>>(() => new Set());
 
-  const go = (delta: number) => router.replace(`/gestion?mois=${shiftMonthKey(month, delta)}`, { scroll: false });
+  const go = (delta: number) => router.replace(`/gestion?vue=loyers&mois=${shiftMonthKey(month, delta)}`, { scroll: false });
 
   // Logements concernés : occupés, ou déjà pointés pour ce mois.
   const units = data.units.filter((u) => u.status !== "vacant" || u.payments?.[month]);
@@ -97,7 +97,7 @@ export function RentsView() {
           <div className="text-center">
             <div className="text-[17px] font-bold capitalize text-navy">{monthKeyLabel(month)}</div>
             {month !== current && (
-              <button onClick={() => router.replace(`/gestion?mois=${current}`, { scroll: false })} className="text-xs font-medium text-series-1">
+              <button onClick={() => router.replace(`/gestion?vue=loyers&mois=${current}`, { scroll: false })} className="text-xs font-medium text-series-1">
                 Revenir au mois en cours
               </button>
             )}

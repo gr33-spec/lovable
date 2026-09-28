@@ -5,9 +5,9 @@ import { BOTH, guardApi } from "@/lib/server/guard";
 import { readFile } from "@/lib/server/files";
 import { docContext, type LegalDoc } from "@/lib/legal/doc";
 import { guaranteeDocument, leaseDocument } from "@/lib/legal/lease";
-import { inspectionDocument, receiptDocument, statementDocument } from "@/lib/legal/documents";
+import { inspectionDocument, receiptDocument, revisionDocument, statementDocument } from "@/lib/legal/documents";
 import { monthReceipt, rentStatement } from "@/lib/legal/receipts";
-import { monthKey, todayIso } from "@/lib/engine/leases";
+import { monthKey, revisedRent, todayIso } from "@/lib/engine/leases";
 import { LegalPdf, type PhotoMap } from "@/lib/pdf/legal-pdf";
 
 export const dynamic = "force-dynamic";
@@ -60,6 +60,36 @@ export async function GET(request: Request) {
     const s = rentStatement(ctx.unit, tenancy, from, monthKey(asOf));
     if (s.kind === "incomplet") return NextResponse.json({ error: `Mois non pointés : ${s.unpointed.join(", ")}` }, { status: 409 });
     doc = statementDocument(ctx, s, asOf, today);
+  }
+  else if (type === "revision") {
+    // Courrier de révision : montants recalculés ici à partir des indices.
+    const num = (k: string) => {
+      const v = Number(url.searchParams.get(k));
+      return Number.isFinite(v) && v > 0 ? v : undefined;
+    };
+    const due = url.searchParams.get("due") ?? "";
+    const effective = url.searchParams.get("effective") ?? "";
+    const rent = num("rent");
+    const referenceValue = num("ref");
+    const indexValue = num("idx");
+    const newRent = revisedRent(rent, referenceValue, indexValue);
+    if (!DAY.test(due) || !DAY.test(effective) || !rent || !referenceValue || !indexValue || newRent === undefined)
+      return NextResponse.json({ error: "Données insuffisantes pour le courrier de révision" }, { status: 400 });
+    doc = revisionDocument(
+      ctx,
+      {
+        due,
+        effective,
+        rent,
+        newRent,
+        charges: num("charges"),
+        referenceLabel: url.searchParams.get("refLabel") || "indice de référence",
+        referenceValue,
+        indexLabel: url.searchParams.get("idxLabel") || "nouvel indice",
+        indexValue,
+      },
+      today,
+    );
   }
   if (!doc) return NextResponse.json({ error: "Document inconnu" }, { status: 400 });
 

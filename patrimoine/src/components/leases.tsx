@@ -4,28 +4,27 @@ import Link from "next/link";
 import { useState } from "react";
 import { BellRing, Check, ChevronRight, FileSignature, Landmark, TrendingUp, TriangleAlert } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { useIrlSeries } from "@/lib/use-irl";
-import { irlLabel, nextYearSameQuarter } from "@/lib/irl";
 import type { RentPayment, Unit } from "@/lib/types";
 import { LEASE_TYPES, REVISIONS } from "@/lib/labels";
-import { dateFr, eur, eurCompact, pct } from "@/lib/format";
+import { dateFr, eur, eurCompact } from "@/lib/format";
 import {
   LEASE_END_NOTICE_MONTHS,
   leaseInfo,
   monthKey,
   monthKeyLabel,
   outstanding,
-  revisedRent,
   shiftMonthKey,
   todayIso,
   type Reminder,
 } from "@/lib/engine/leases";
-import { Button, DateField, Details, Grid2, IconChip, NumberField, SelectField, TextField, cx, type ChipTone } from "./ui";
+import { RevisionSheet, revisionLetterUrl } from "./gestion/revision";
+import { DateField, Details, Grid2, IconChip, NumberField, SelectField, TextField, cx, type ChipTone } from "./ui";
 
 // ——— Bail d'un logement ———
 
 export function LeaseSection({ unit }: { unit: Unit }) {
-  const { upsert } = useStore();
+  const { data, upsert } = useStore();
+  const tenancyId = data.tenancies.find((t) => t.unitId === unit.id && t.status === "actif")?.id;
   const set = (patch: Partial<Unit>) => upsert("units", { ...unit, ...patch });
   const today = todayIso();
   const info = leaseInfo(unit, today);
@@ -88,7 +87,7 @@ export function LeaseSection({ unit }: { unit: Unit }) {
         <TextField label="Indice de référence" value={unit.indexLabel} placeholder="Ex. IRL T2 2025" onChange={(v) => set({ indexLabel: v })} />
         <NumberField label="Valeur de l'indice" suffix="" value={unit.indexValue} onChange={(v) => set({ indexValue: v })} placeholder="Ex. 145,77" />
       </Grid2>
-      <RevisionTool unit={unit} nextRevision={info.nextRevision} />
+      <RevisionTool unit={unit} />
       {(unit.rentHistory?.length ?? 0) > 0 && (
         <div>
           <div className="mb-1 px-1 text-[13px] font-medium text-ink-2">Historique du loyer</div>
@@ -99,9 +98,21 @@ export function LeaseSection({ unit }: { unit: Unit }) {
                   <div className="font-medium text-ink">{dateFr(h.date)}</div>
                   <div className="text-muted">{[h.indexLabel, h.note].filter(Boolean).join(" · ") || "Révision"}</div>
                 </div>
-                <div className="tabular text-right">
-                  <div className="font-semibold text-ink">{eur(h.rent)}</div>
-                  {h.previousRent ? <div className="text-muted">avant {eur(h.previousRent)}</div> : null}
+                <div className="flex items-center gap-3">
+                  {(() => {
+                    const url = h.previousRent && h.referenceValue && h.indexValue
+                      ? revisionLetterUrl({ tenancyId, due: h.dueDate ?? h.date, effective: h.date, rent: h.previousRent, charges: unit.charges, reference: { label: h.referenceLabel ?? "", value: h.referenceValue }, index: { label: h.indexLabel ?? "", value: h.indexValue } })
+                      : undefined;
+                    return url ? (
+                      <a href={url} target="_blank" rel="noopener" className="rounded-full bg-soft px-2.5 py-1 text-[12px] font-semibold text-navy">
+                        Courrier
+                      </a>
+                    ) : null;
+                  })()}
+                  <div className="tabular text-right">
+                    <div className="font-semibold text-ink">{eur(h.rent)}</div>
+                    {h.previousRent ? <div className="text-muted">avant {eur(h.previousRent)}</div> : null}
+                  </div>
                 </div>
               </div>
             ))}
@@ -112,96 +123,15 @@ export function LeaseSection({ unit }: { unit: Unit }) {
   );
 }
 
-function RevisionTool({ unit, nextRevision }: { unit: Unit; nextRevision?: string }) {
-  const { upsert, data } = useStore();
+function RevisionTool({ unit }: { unit: Unit }) {
   const [open, setOpen] = useState(false);
-  const [newLabel, setNewLabel] = useState<string | undefined>();
-  const [newValue, setNewValue] = useState<number | undefined>();
-  const irl = useIrlSeries();
-  // Indice de révision proposé automatiquement : même trimestre, un an après l'indice de référence.
-  const suggested = irl ? nextYearSameQuarter(irl, unit.indexLabel) : undefined;
-  if (open && suggested && newLabel === undefined && newValue === undefined) {
-    queueMicrotask(() => {
-      setNewLabel(irlLabel(suggested));
-      setNewValue(suggested.value);
-    });
-  }
-  const today = todayIso();
-  const proposal = revisedRent(unit.rent, unit.indexValue, newValue);
-  // Révision demandée en retard : elle court à partir de la demande (pas de rétroactivité).
-  // Demandée à l'avance : elle prend effet à la date de révision.
-  const late = !!nextRevision && nextRevision < today;
-  const date = nextRevision && !late ? nextRevision : today;
-
-  const apply = (rent: number | undefined, note?: string) => {
-    const history = [...(unit.rentHistory ?? [])];
-    if (rent !== undefined) {
-      history.push({ date, rent, previousRent: unit.rent, indexLabel: newLabel, indexValue: newValue, note });
-    }
-    upsert("units", {
-      ...unit,
-      rent: rent ?? unit.rent,
-      indexLabel: rent !== undefined ? newLabel ?? unit.indexLabel : unit.indexLabel,
-      indexValue: rent !== undefined ? newValue ?? unit.indexValue : unit.indexValue,
-      lastRevisionDate: date,
-      rentHistory: history,
-    });
-    // Le bail en cours suit le nouveau loyer et le nouvel indice de référence.
-    const active = data.tenancies.find((t) => t.unitId === unit.id && t.status === "actif");
-    if (active && rent !== undefined) upsert("tenancies", { ...active, rent, indexLabel: newLabel ?? active.indexLabel, indexValue: newValue ?? active.indexValue });
-    setOpen(false);
-    setNewLabel(undefined);
-    setNewValue(undefined);
-  };
-
-  if (!open) {
-    return (
+  return (
+    <>
       <button type="button" onClick={() => setOpen(true)} className="flex items-center gap-2 text-sm font-semibold text-series-1">
         <TrendingUp size={16} /> Réviser le loyer
       </button>
-    );
-  }
-  return (
-    <div className="space-y-3 rounded-2xl border border-series-1/30 bg-series-1/[0.04] p-4">
-      <div className="text-[14px] font-semibold text-ink">Révision au {dateFr(date)}</div>
-      {late && <p className="text-[12px] text-warn">Date de révision dépassée ({dateFr(nextRevision)}) : le nouveau loyer s&apos;applique à partir d&apos;aujourd&apos;hui, sans rappel des mois passés.</p>}
-      <div className="text-[13px] text-ink-2">
-        Loyer actuel : <b>{eur(unit.rent)}</b>
-        {unit.indexValue ? ` · indice de référence ${unit.indexLabel ?? ""} ${unit.indexValue.toLocaleString("fr-FR")}` : " · indice de référence non renseigné"}
-      </div>
-      <Grid2>
-        <TextField label="Nouvel indice" value={newLabel} placeholder="Ex. IRL T2 2026" onChange={setNewLabel} />
-        <NumberField label="Valeur" suffix="" value={newValue} onChange={setNewValue} />
-      </Grid2>
-      <div className="rounded-xl bg-card px-3 py-2.5 text-[13px]">
-        {proposal !== undefined ? (
-          <>
-            Nouveau loyer : <b className="tabular text-[15px] text-ink">{eur(proposal)}</b>{" "}
-            <span className="tabular text-muted">
-              ({proposal - (unit.rent ?? 0) >= 0 ? "+" : ""}
-              {eur(proposal - (unit.rent ?? 0))} · {pct(((proposal / (unit.rent ?? 1)) - 1) * 100, 2)})
-            </span>
-          </>
-        ) : (
-          <span className="text-muted">Données insuffisantes : loyer, indice de référence et nouvel indice nécessaires.</span>
-        )}
-      </div>
-      {suggested && newLabel === irlLabel(suggested) && <p className="text-[12px] text-pos">Nouvel indice repris automatiquement de l&apos;INSEE (même trimestre, un an après).</p>}
-      <p className="text-[12px] text-muted">
-        Calcul : loyer × nouvel indice ÷ indice de référence. Vérifiez la clause du bail et les éventuels plafonnements en vigueur : aucune règle n&apos;est appliquée automatiquement.
-      </p>
-      <div className="flex flex-wrap gap-2">
-        <Button disabled={proposal === undefined} onClick={() => apply(proposal)}>
-          Appliquer
-        </Button>
-        <Button variant="secondary" onClick={() => apply(undefined)}>
-          Pas de révision cette fois
-        </Button>
-        <Button variant="ghost" onClick={() => setOpen(false)}>
-          Annuler
-        </Button>
-      </div>
-    </div>
+      <RevisionSheet unit={unit} open={open} onClose={() => setOpen(false)} />
+    </>
   );
 }
 
@@ -215,7 +145,7 @@ export function PaymentStrip({ unit }: { unit: Unit }) {
     <div>
       <div className="mb-1.5 flex items-center justify-between px-1 text-[13px] font-medium text-ink-2">
         <span>Encaissements (12 mois)</span>
-        <Link href={`/gestion?mois=${current}`} className="font-semibold text-series-1">
+        <Link href={`/gestion?vue=loyers&mois=${current}`} className="font-semibold text-series-1">
           Pointer
         </Link>
       </div>

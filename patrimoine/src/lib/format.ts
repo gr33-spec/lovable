@@ -15,6 +15,14 @@ export function eur(value: number | undefined | null): string {
   return eurFormatter.format(Math.round(value) === 0 ? 0 : value);
 }
 
+const eurCentsFormatter = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+/** Montant au centime (loyers révisés, courriers). */
+export function eurCents(value: number | undefined | null): string {
+  if (value === undefined || value === null || !Number.isFinite(value)) return "—";
+  return eurCentsFormatter.format(value);
+}
+
 export function eurSigned(value: number): string {
   const s = eur(value);
   return value > 0.5 ? `+${s}` : s;
