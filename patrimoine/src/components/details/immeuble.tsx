@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BadgeEuro, DoorOpen, Hammer, Landmark, Pencil } from "lucide-react";
+import { ArrowLeftRight, BadgeEuro, DoorOpen, Hammer, Landmark, Pencil } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { unitRemovals } from "@/lib/tenancy";
 import { newId } from "@/lib/ops";
@@ -19,6 +19,7 @@ import { BuildingValueHistory } from "../value-history";
 import { SwipeDelete } from "@/components/swipe";
 import { SaleSheet, newSale } from "@/components/sale/sheet";
 import { SalesList } from "@/components/sale/list";
+import { SwapLotsSheet } from "./swap-lots";
 import type { SaleAction } from "@/lib/types";
 
 export function BuildingDetail({ id, edit, saleId }: { id: string; edit?: boolean; saleId?: string }) {
@@ -34,6 +35,7 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
   const router = useRouter();
   const [sheet, setSheet] = useState<null | "edit" | "loan" | "work">(edit ? "edit" : null);
   const [selling, setSelling] = useState<SaleAction | null>(null);
+  const [swapping, setSwapping] = useState(false);
   const [unitId, setUnitId] = useState<string | null>(null);
   const [workId, setWorkId] = useState<string | null>(null);
   const building = data.buildings.find((b) => b.id === id);
@@ -104,7 +106,18 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
         {/* Ordinateur : logements à gauche, financement et informations à droite. */}
         <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
         <div className="min-w-0">
-        <SectionTitle action={<AddLink onClick={addUnit} />}>
+        <SectionTitle
+          action={
+            <span className="flex items-center gap-4">
+              {units.length > 1 && (
+                <button onClick={() => setSwapping(true)} className="flex items-center gap-1 text-sm font-semibold text-series-1">
+                  <ArrowLeftRight size={15} /> Échanger
+                </button>
+              )}
+              <AddLink onClick={addUnit} />
+            </span>
+          }
+        >
           Logements {units.length > 0 && `(${units.length}${vacant ? ` · ${vacant} vacant${vacant > 1 ? "s" : ""}` : ""})`}
         </SectionTitle>
         <Card className="py-1">
@@ -202,6 +215,7 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
           )}
         </Card>
         <SaleSheet sale={selling ?? undefined} open={!!selling} onClose={() => setSelling(null)} />
+        <SwapLotsSheet units={units} open={swapping} onClose={() => setSwapping(false)} />
 
         <SectionTitle>Informations</SectionTitle>
         <Card className="space-y-1.5 text-[15px]">
