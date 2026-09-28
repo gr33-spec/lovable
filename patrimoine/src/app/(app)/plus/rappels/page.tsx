@@ -60,13 +60,13 @@ export default function RappelsPage() {
         <SectionTitle>Quand êtes-vous prévenu ?</SectionTitle>
         <Card className="space-y-2 text-[14px] text-ink-2">
           <p>
-            <b className="text-ink">Fin de bail</b> : {LEASE_END_NOTICE_MONTHS} mois avant l&apos;échéance (date de fin saisie, ou début + durée avec reconduction).
+            <b className="text-ink">Fin de bail</b> : {`${LEASE_END_NOTICE_MONTHS} mois`} avant l&apos;échéance (date de fin saisie, ou début + durée avec reconduction).
           </p>
           <p>
-            <b className="text-ink">Révision du loyer</b> : {REVISION_NOTICE_MONTHS} mois avant la date anniversaire du bail.
+            <b className="text-ink">Révision du loyer</b> : {`${REVISION_NOTICE_MONTHS} mois`} avant la date anniversaire du bail.
           </p>
           <p>
-            <b className="text-ink">Fin de crédit</b> : {LOAN_END_NOTICE_MONTHS} mois avant la dernière échéance.
+            <b className="text-ink">Fin de crédit</b> : {`${LOAN_END_NOTICE_MONTHS} mois`} avant la dernière échéance.
           </p>
           <p>
             <b className="text-ink">Dépôt de garantie</b> : après un départ, jusqu&apos;à sa restitution (1 mois après la remise des clés si l&apos;état des lieux est conforme, 2 mois sinon).

@@ -44,10 +44,6 @@ export function num(value: number | undefined | null): string {
   return numberFormatter.format(value);
 }
 
-export function plural(n: number, one: string, many: string): string {
-  return `${n} ${n > 1 ? many : one}`;
-}
-
 export function dateFr(iso: string | undefined): string {
   if (!iso) return "—";
   const [y, m, d] = iso.split("-");

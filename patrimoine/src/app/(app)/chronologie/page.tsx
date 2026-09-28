@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight, Flag } from "lucide-react";
 import { KIND_STYLE } from "@/components/event-style";
 import { useStore } from "@/lib/store";
 import { NO_COMPANY, companyTree } from "@/lib/engine/snapshot";
@@ -90,7 +91,16 @@ export default function ChronologiePage() {
 
   return (
     <>
-      <PageHeader title="Chronologie" back="/plus" subtitle={`${y0} → ${y0 + 30}`} />
+      <PageHeader
+        title="Chronologie"
+        back="/plus"
+        subtitle={`${y0} → ${y0 + 30}`}
+        action={
+          <Link href="/plus/evenements" className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-navy">
+            <Flag size={15} /> Événements
+          </Link>
+        }
+      />
       <Page>
         {insights.length > 0 && (
           <div className="hero-card space-y-2.5 rounded-[26px] p-5 text-white">

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowLeftRight, BellRing, Building2, KeyRound, CalendarRange, FlaskConical, Scale, ScanFace, Share2, LineChart as LineIcon, FileSpreadsheet, Gauge, CalendarClock, CircleAlert, FileText, Flag, Hammer, HandCoins, History, LogOut, Percent, Smartphone, Sparkles, Trash2, Wand2 } from "lucide-react";
+import { ArrowLeftRight, BellRing, Building2, KeyRound, CalendarRange, FlaskConical, Scale, ScanFace, Share2, LineChart as LineIcon, FileSpreadsheet, Gauge, CalendarClock, CircleAlert, FileText, Hammer, HandCoins, History, LogOut, Percent, Smartphone, Sparkles, Trash2, Wand2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { switchView } from "@/lib/view";
 import { demoData, hasDemo, withoutDemo } from "@/lib/demo";
@@ -54,7 +54,7 @@ export default function PlusPage() {
         <Card className="py-1">
           <Divided>
             <Row href="/plus/rappels" icon={<BellRing size={18} />} title="Rappels" subtitle={alerts.length ? `${alerts.length} à traiter` : "Fins de bail, révisions, crédits"} />
-            <Row href="/chronologie" icon={<CalendarRange size={18} />} title="Chronologie" subtitle="30 ans d'échéances, année par année" />
+            <Row href="/chronologie" icon={<CalendarRange size={18} />} title="Chronologie" subtitle="30 ans d'échéances · vos événements" />
             <Row href="/simulations" icon={<FlaskConical size={18} />} title="Simulations" subtitle={`${data.scenarios.length} scénario(s) · vente, achat, refinancement…`} />
             <Row href="/plus/societes" icon={<Building2 size={18} />} title="Informations des sociétés" subtitle="Siège, SIREN, gérant · durée des baux" />
             <Row href="/plus/cadre-juridique" icon={<Scale size={18} />} title="Cadre juridique des baux" subtitle="Modèles 2015 / 2026, états des lieux, quittances" />
@@ -63,7 +63,6 @@ export default function PlusPage() {
             <Row href="/plus/indicateurs" icon={<Gauge size={18} />} title="Indicateurs financiers" subtitle="DSCR, rendement, LTV, CAF…" />
             <Row href="/plus/travaux" icon={<Hammer size={18} />} title="Travaux" subtitle={`${worksPlanned} à venir`} />
             <Row href="/plus/remuneration" icon={<HandCoins size={18} />} title="Rémunération et comptes courants" subtitle="Sorties d'argent personnelles" />
-            <Row href="/plus/evenements" icon={<Flag size={18} />} title="Événements importants" subtitle="Repères dans la chronologie" />
             <Row href="/plus/hypotheses" icon={<Percent size={18} />} title="Hypothèses de projection" subtitle="Revalorisation, indexation des loyers" />
             <Row
               href="/plus/a-completer"
@@ -100,8 +99,8 @@ export default function PlusPage() {
         <Card className="py-1">
           <Divided>
             <Row onClick={() => setHomeSheet(true)} icon={<Smartphone size={18} />} title="Ajouter à l'écran d'accueil" subtitle="Comme une application iPhone" />
-            <Row onClick={() => switchView("gestion")} icon={<ArrowLeftRight size={18} />} title="Passer à l'accès gestion locative" subtitle="Vue simplifiée : loyers, locataires, à faire" />
-            <Row href="/plus/acces-gestion" icon={<KeyRound size={18} />} title="Accès gestion locative" subtitle="Espace simplifié pour Enora" />
+            <Row onClick={() => switchView("gestion")} icon={<ArrowLeftRight size={18} />} title="Passer en vue gestion locative" subtitle="Vue simplifiée : loyers, locataires, à faire, bilan" />
+            <Row href="/plus/acces-gestion" icon={<KeyRound size={18} />} title="Accès d'Enora" subtitle="Mot de passe de son espace gestion locative" />
             <Row href="/plus/securite" icon={<ScanFace size={18} />} title="Connexion Face ID" subtitle="Se connecter sans mot de passe" />
             <Row onClick={logout} icon={<LogOut size={18} />} title="Se déconnecter" />
           </Divided>

@@ -24,7 +24,7 @@ export default function EvenementsPage() {
   const sorted = [...data.events].sort((a, b) => a.year - b.year);
   return (
     <>
-      <PageHeader title="Événements" back="/plus" subtitle="Repères affichés dans la chronologie" action={<RoundButton label="Ajouter" onClick={add}><Plus size={22} /></RoundButton>} />
+      <PageHeader title="Événements" back="/chronologie" subtitle="Repères affichés dans la chronologie" action={<RoundButton label="Ajouter" onClick={add}><Plus size={22} /></RoundButton>} />
       <Page>
         {sorted.length === 0 ? (
           <Empty icon={<Flag size={26} />} title="Aucun événement" text="Ex. renouvellement d'un bail, départ à la retraite, transmission…" action={<Button onClick={add}>Ajouter un événement</Button>} />

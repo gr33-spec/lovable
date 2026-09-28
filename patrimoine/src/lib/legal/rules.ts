@@ -71,18 +71,6 @@ export function depositSettlement(t: Pick<Tenancy, "deposit" | "deductions">): D
   };
 }
 
-/** Fin de la période initiale du bail. */
-export function leaseEndDate(t: Pick<Tenancy, "startDate" | "durationYears">): string | undefined {
-  if (!isValidIso(t.startDate) || !t.durationYears) return undefined;
-  return prevDay(addMonthsIso(t.startDate, t.durationYears * 12));
-}
-
-function prevDay(iso: string): string {
-  const d = new Date(`${iso}T12:00:00Z`);
-  d.setUTCDate(d.getUTCDate() - 1);
-  return d.toISOString().slice(0, 10);
-}
-
 /** Jours d'occupation d'un mois (AAAA-MM) entre deux dates incluses. */
 export function occupiedDays(month: string, start?: string, end?: string): { days: number; total: number } {
   const [y, m] = month.split("-").map(Number);

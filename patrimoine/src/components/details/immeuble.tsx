@@ -1,9 +1,10 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { DoorOpen, Hammer, Landmark, Pencil } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { unitRemovals } from "@/lib/tenancy";
 import { newId } from "@/lib/ops";
 import type { Collection, Unit } from "@/lib/types";
 import { cashflowMonthly, ltv, netWorth } from "@/lib/engine/snapshot";
@@ -27,9 +28,8 @@ export function BuildingDetail({ id }: { id: string }) {
 function BuildingDetailInner({ id }: { id: string }) {
   const { data, projection, removeMany, upsert, remove } = useStore();
   const router = useRouter();
-  const params = useSearchParams();
   const [sheet, setSheet] = useState<null | "edit" | "loan" | "work">(null);
-  const [unitId, setUnitId] = useState<string | null>(params.get("logement"));
+  const [unitId, setUnitId] = useState<string | null>(null);
   const [workId, setWorkId] = useState<string | null>(null);
   const building = data.buildings.find((b) => b.id === id);
   if (!building) {
@@ -61,7 +61,7 @@ function BuildingDetailInner({ id }: { id: string }) {
 
   const removeBuilding = () => {
     const items: { coll: Collection; id: string }[] = [{ coll: "buildings", id }];
-    units.forEach((u) => items.push({ coll: "units", id: u.id }));
+    units.forEach((u) => items.push(...unitRemovals(data, u.id)));
     loans.forEach((l) => items.push({ coll: "loans", id: l.id }));
     works.forEach((w) => items.push({ coll: "works", id: w.id }));
     removeMany(items);
@@ -213,7 +213,7 @@ function BuildingDetailInner({ id }: { id: string }) {
         footer={
           <div className="space-y-2">
             <Button full onClick={() => setUnitId(null)}>Terminé</Button>
-            {unit && <ConfirmDelete label="Supprimer le logement" message="Supprimer ce logement ?" onConfirm={() => { remove("units", unit.id); setUnitId(null); }} />}
+            {unit && <ConfirmDelete label="Supprimer le logement" message="Supprimer ce logement ?" onConfirm={() => { removeMany(unitRemovals(data, unit.id)); setUnitId(null); }} />}
           </div>
         }
       >

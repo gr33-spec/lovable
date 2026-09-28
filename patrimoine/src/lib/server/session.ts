@@ -58,10 +58,6 @@ export function readSessionToken(token: string | undefined, now = Date.now()): S
   }
 }
 
-export function verifySessionToken(token: string | undefined, now = Date.now()): boolean {
-  return readSessionToken(token, now) !== null;
-}
-
 /** Empreinte courte du secret : change quand le mot de passe change. */
 export function secretTag(): string | undefined {
   const key = secret();

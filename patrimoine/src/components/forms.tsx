@@ -3,8 +3,7 @@
 import { useStore } from "@/lib/store";
 import type { Building, Company, Loan, Unit, Work } from "@/lib/types";
 import { COMPANY_KINDS, CONDITIONS, PRIORITIES, UNIT_TYPES, WORK_STATUSES } from "@/lib/labels";
-import { eur, pct, dateFr } from "@/lib/format";
-import { monthLabel } from "@/lib/engine/dates";
+import { eur } from "@/lib/format";
 import { companyTree } from "@/lib/engine/snapshot";
 import { LeaseSection, PaymentStrip } from "./leases";
 import { LandlordFields } from "./company-registry";
@@ -189,11 +188,10 @@ export function UnitForm({ unit }: { unit: Unit }) {
 }
 
 export function LoanForm({ loan }: { loan: Loan }) {
-  const { upsert, projection } = useStore();
+  const { upsert } = useStore();
   const set = (patch: Partial<Loan>) => upsert("loans", { ...loan, ...patch });
   const buildings = useBuildingOptions();
   const companies = useCompanyOptions();
-  const r = projection.snapshot.resolvedLoans.get(loan.id);
   return (
     <Stack>
       <Grid2>
@@ -231,19 +229,6 @@ export function LoanForm({ loan }: { loan: Loan }) {
         <NumberField label="Durée" suffix="mois" integer value={loan.durationMonths} onChange={(v) => set({ durationMonths: v })} />
       </Details>
       <TextField label="Notes" value={loan.notes} multiline onChange={(v) => set({ notes: v })} />
-      {r && (
-        <div className="rounded-2xl border border-line px-4 py-3 text-[13px] text-ink-2">
-          <div className="font-medium text-ink">Calcul</div>
-          <div>Capital restant dû aujourd&apos;hui : {r.balance === undefined ? "Données insuffisantes" : eur(r.balance)}</div>
-          <div>Mensualité : {r.payment === undefined ? "Données insuffisantes" : eur(r.payment)}</div>
-          <div>Fin : {r.endMonth === undefined ? "Données insuffisantes" : monthLabel(r.endMonth)}</div>
-          {r.impliedRatePct !== undefined && <div>Taux déduit : {pct(r.impliedRatePct, 2)}</div>}
-          {r.notes.map((n) => (
-            <div key={n} className="text-warn">{n}</div>
-          ))}
-          {loan.startDate && <div className="text-muted">Début : {dateFr(loan.startDate)}</div>}
-        </div>
-      )}
     </Stack>
   );
 }

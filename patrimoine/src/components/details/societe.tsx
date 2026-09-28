@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Briefcase, Building2, Landmark, Pencil, Plus } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { unitRemovals } from "@/lib/tenancy";
 import { cashflowMonthly, ltv, netWorth } from "@/lib/engine/snapshot";
 import { monthLabel } from "@/lib/engine/dates";
 import { eur, eurCompact, eurSigned, pct } from "@/lib/format";
@@ -47,7 +48,7 @@ export function CompanyDetail({ id }: { id: string }) {
     const items: { coll: Collection; id: string }[] = [{ coll: "companies", id }];
     for (const b of buildings) {
       items.push({ coll: "buildings", id: b.id });
-      data.units.filter((u) => u.buildingId === b.id).forEach((u) => items.push({ coll: "units", id: u.id }));
+      data.units.filter((u) => u.buildingId === b.id).forEach((u) => items.push(...unitRemovals(data, u.id)));
       data.works.filter((w) => w.buildingId === b.id).forEach((w) => items.push({ coll: "works", id: w.id }));
     }
     loans.forEach((l) => items.push({ coll: "loans", id: l.id }));
@@ -87,7 +88,7 @@ export function CompanyDetail({ id }: { id: string }) {
           )}
         </Card>
 
-        {rows.length > 0 && (f.value > 0 || f.debt > 0) && (
+        {rows.some((r) => r.debt > 0) && (
           <>
             <SectionTitle>Projection {hasChildren ? "(société seule)" : ""}</SectionTitle>
             <Card>

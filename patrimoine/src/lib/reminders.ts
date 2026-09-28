@@ -13,13 +13,15 @@ export function allReminders(data: AppData, today: string, resolvedLoans?: Map<s
     const due = depositDue(data, t);
     if (!due) continue;
     const unit = data.units.find((u) => u.id === t.unitId);
+    if (!unit) continue;
+    const building = data.buildings.find((b) => b.id === unit.buildingId);
     const s = depositSettlement(t);
     list.push({
       id: `deposit:${t.id}:${due}`,
       kind: "deposit",
       date: due,
       title: "Dépôt de garantie à restituer",
-      detail: `${[unit?.name, tenantsName(t)].filter(Boolean).join(" · ")} — ${s.toReturn > 0 ? `${s.toReturn.toLocaleString("fr-FR")} € ` : ""}avant le ${dateFr(due)}`,
+      detail: `${[building?.name, unit.name, tenantsName(t)].filter(Boolean).join(" · ")} — ${s.toReturn > 0 ? `${s.toReturn.toLocaleString("fr-FR")} € ` : ""}avant le ${dateFr(due)}`,
       href: `/patrimoine/logement/${t.unitId}/changement`,
       late: today > due,
       amount: s.toReturn,
