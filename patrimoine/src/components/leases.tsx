@@ -18,6 +18,7 @@ import {
   type Reminder,
 } from "@/lib/engine/leases";
 import { RevisionSheet, revisionLetterUrl } from "./gestion/revision";
+import { openDocument } from "./pdf-viewer";
 import { SwipeRow, useDismiss, useUndoableUpdate, type SwipeAction } from "./swipe";
 import { settleUnpaid, skipRevision } from "@/lib/revision";
 import { DateField, Details, Grid2, IconChip, NumberField, SelectField, TextField, cx, type ChipTone } from "./ui";
@@ -106,9 +107,9 @@ export function LeaseSection({ unit }: { unit: Unit }) {
                       ? revisionLetterUrl({ tenancyId, due: h.dueDate ?? h.date, effective: h.date, rent: h.previousRent, charges: unit.charges, reference: { label: h.referenceLabel ?? "", value: h.referenceValue }, index: { label: h.indexLabel ?? "", value: h.indexValue } })
                       : undefined;
                     return url ? (
-                      <a href={url} target="_blank" rel="noopener" className="rounded-full bg-soft px-2.5 py-1 text-[12px] font-semibold text-navy">
+                      <button type="button" onClick={() => openDocument(url)} className="rounded-full bg-soft px-2.5 py-1 text-[12px] font-semibold text-navy">
                         Courrier
-                      </a>
+                      </button>
                     ) : null;
                   })()}
                   <div className="tabular text-right">

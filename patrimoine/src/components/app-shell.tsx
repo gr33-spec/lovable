@@ -8,6 +8,7 @@ import { useStore } from "@/lib/store";
 import { unpaidByUnit } from "@/lib/engine/leases";
 import { cx } from "./ui";
 import { ToastHost } from "./swipe";
+import { PdfViewerHost } from "./pdf-viewer";
 
 const TABS = [
   { href: "/", label: "Accueil", icon: House },
@@ -37,6 +38,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <SaveIndicator />
         <div className="lg:pl-60">{children}</div>
         <ToastHost />
+        <PdfViewerHost />
         <Suspense>
           <GestionNav unpaid={unpaid} />
         </Suspense>
@@ -49,6 +51,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <SaveIndicator />
       <div className={cx(!onboarding && "lg:pl-60")}>{children}</div>
       <ToastHost />
+      <PdfViewerHost />
       {!onboarding && (
         <nav className="safe-bottom pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-2 lg:inset-y-0 lg:right-auto lg:w-60 lg:px-4 lg:py-6">
           <div className="pointer-events-auto mx-auto flex max-w-md rounded-[28px] border border-white/60 bg-white/92 p-1.5 shadow-[0_10px_30px_-6px_rgba(11,37,69,0.25)] backdrop-blur-2xl lg:h-full lg:max-w-none lg:flex-col lg:gap-1 lg:p-3">
