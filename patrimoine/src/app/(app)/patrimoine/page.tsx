@@ -1,5 +1,6 @@
 "use client";
 
+import { replaceQuery, usePageState } from "@/lib/nav";
 import { sortedUnits } from "@/lib/move-tenant";
 import Link from "next/link";
 import { Suspense, useState } from "react";
@@ -29,8 +30,14 @@ function Patrimoine() {
   const snap = projection.snapshot;
   const [adding, setAdding] = useState(false);
   const initial = useSearchParams().get("vue");
-  const [view, setView] = useState<"structure" | "organigramme" | "credits" | "projets">(initial === "projets" || initial === "credits" || initial === "organigramme" ? initial : "structure");
-  const [open, setOpen] = useState<Record<string, boolean>>(() => {
+  type View = "structure" | "organigramme" | "credits" | "projets";
+  const [view, setViewState] = useState<View>(initial === "projets" || initial === "credits" || initial === "organigramme" ? initial : "structure");
+  // L'onglet est gardé dans l'adresse : au retour d'une fiche, on retrouve le même.
+  const setView = (v: View) => {
+    setViewState(v);
+    replaceQuery({ vue: v === "structure" ? undefined : v });
+  };
+  const [open, setOpen] = usePageState<Record<string, boolean>>("arbre", () => {
     const o: Record<string, boolean> = {};
     for (const c of data.companies) if (c.kind === "holding" || !c.parentId) o[c.id] = true;
     return o;

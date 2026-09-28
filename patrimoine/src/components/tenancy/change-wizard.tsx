@@ -1,5 +1,6 @@
 "use client";
 
+import { goBack, replaceQuery } from "@/lib/nav";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
@@ -121,8 +122,14 @@ function Wizard({ unitId }: { unitId: string }) {
   // faire sauter l'écran à l'étape suivante.
   if (stepIndex === null) queueMicrotask(() => setStepIndex((cur) => cur ?? idx));
   const step = steps[idx];
+  // L'étape est gardée dans l'adresse : un retour sur l'assistant la retrouve.
+  const goTo = (i: number) => {
+    const next = Math.max(0, Math.min(steps.length - 1, i));
+    setStepIndex(next);
+    replaceQuery({ etape: steps[next] });
+  };
   const go = (d: number) => {
-    setStepIndex(Math.max(0, Math.min(steps.length - 1, idx + d)));
+    goTo(idx + d);
     window.scrollTo({ top: 0 });
   };
 
@@ -150,7 +157,7 @@ function Wizard({ unitId }: { unitId: string }) {
           {steps.map((s, i) => (
             <button
               key={s}
-              onClick={() => setStepIndex(i)}
+              onClick={() => goTo(i)}
               className={cx(
                 "flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-[12px] font-semibold",
                 i === idx ? "bg-navy text-white" : isComplete(s) ? "bg-pos/10 text-pos" : "bg-soft text-ink-2",
@@ -190,10 +197,10 @@ function Wizard({ unitId }: { unitId: string }) {
             unit={unit}
             tenancy={draft}
             outgoing={outgoing}
-            onActivated={() => router.push(back)}
+            onActivated={() => goBack(router, back)}
             onEditInfo={() => {
               const i = steps.indexOf("logement");
-              setStepIndex(i >= 0 ? i : steps.indexOf("conditions"));
+              goTo(i >= 0 ? i : steps.indexOf("conditions"));
             }}
           />
         )}
@@ -276,6 +283,8 @@ function ExitInspectionStep({ unit, tenancy, ensure }: { unit: Unit; tenancy?: T
   const { entry, exit } = t ? inspectionsOf(data, t.id) : { entry: undefined, exit: undefined };
   const start = () => {
     const base = t ?? ensure();
+    // Au retour de l'état des lieux, l'assistant reprend à l'étape suivante.
+    replaceQuery({ etape: "depot" });
     if (exit) return router.push(`/patrimoine/logement/${unit.id}/edl/${exit.id}?retour=${encodeURIComponent(`/patrimoine/logement/${unit.id}/changement?etape=depot`)}`);
     const insp = newExitInspection(unit, base, entry, base.endDate ?? todayIso());
     upsert("inspections", insp);
@@ -871,6 +880,7 @@ function DocumentsStep({ unit, tenancy: t, outgoing, onActivated, onEditInfo }: 
 
   const startEntry = () => {
     const retour = encodeURIComponent(`/patrimoine/logement/${unit.id}/changement?etape=documents`);
+    replaceQuery({ etape: "documents" });
     if (entry) return router.push(`/patrimoine/logement/${unit.id}/edl/${entry.id}?retour=${retour}`);
     const insp = newEntryInspection(unit, t, lastExitInspection(data, unit.id), t.startDate);
     upsert("inspections", insp);

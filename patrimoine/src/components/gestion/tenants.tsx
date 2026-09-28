@@ -1,7 +1,8 @@
 "use client";
 
+import { usePageState } from "@/lib/nav";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { ArrowRightLeft, ChevronDown, ChevronRight, ClipboardCheck, DoorOpen, FileSignature, ReceiptText, Search, Trash2, UserPlus } from "lucide-react";
 import { SwipeRow, useDismiss, useUndoableRemove, type SwipeAction } from "../swipe";
 import { missingCount, unitMissing, type MissingItem } from "@/lib/missing";
@@ -45,9 +46,11 @@ type Filter = "tous" | "loues" | "vacants" | "impayes" | "suivi" | "incomplets";
 
 export function TenantsView() {
   const { data } = useStore();
-  const [q, setQ] = useState("");
-  const [filter, setFilter] = useState<Filter>("tous");
-  const [open, setOpen] = useState<Set<string>>(() => new Set());
+  // Recherche, filtre et immeubles ouverts sont retrouvés au retour d'une fiche.
+  const [q, setQ] = usePageState("recherche", "");
+  const [filter, setFilter] = usePageState<Filter>("filtre", "tous");
+  const [openIds, setOpenIds] = usePageState<string[]>("ouverts", []);
+  const open = new Set(openIds);
   const today = todayIso();
   const unpaid = useMemo(() => new Map(unpaidByUnit(data.units).map((l) => [l.unit.id, l.amount])), [data.units]);
   const moveTenant = useMoveTenant();
@@ -119,7 +122,7 @@ export function TenantsView() {
           return (
             <div key={building.id} className="soft-card overflow-hidden rounded-[24px]">
               <button
-                onClick={() => setOpen((cur) => { const n = new Set(cur); if (n.has(building.id)) n.delete(building.id); else n.add(building.id); return n; })}
+                onClick={() => setOpenIds((cur) => (cur.includes(building.id) ? cur.filter((x) => x !== building.id) : [...cur, building.id]))}
                 className="flex w-full items-center gap-3 px-4 py-3.5 text-left"
                 aria-expanded={isOpen}
               >

@@ -1,5 +1,6 @@
 "use client";
 
+import { goBack } from "@/lib/nav";
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCheck, ChevronDown, Gauge, KeyRound, MessageSquarePlus, Minus, Plus, Trash2 } from "lucide-react";
@@ -60,7 +61,7 @@ function Editor({ unitId, inspectionId }: { unitId: string; inspectionId: string
     // Les clés sont en principe remises le jour de l'état des lieux de sortie.
     if (exit && !tenancy.keysReturnedDate && insp.date) upsert("tenancies", { ...tenancy, keysReturnedDate: insp.date });
     upsert("units", { ...unit, rooms: insp.rooms.map((r) => r.name) });
-    router.push(back);
+    goBack(router, back);
   };
 
   return (

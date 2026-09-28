@@ -1,5 +1,6 @@
 "use client";
 
+import { goBack } from "@/lib/nav";
 import { Suspense, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRightLeft, BadgeEuro, DoorOpen, Hammer, Landmark, Pencil } from "lucide-react";
@@ -79,7 +80,7 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
     loans.forEach((l) => items.push({ coll: "loans", id: l.id }));
     works.forEach((w) => items.push({ coll: "works", id: w.id }));
     removeMany(items);
-    router.push(company ? `/patrimoine/societe/${company.id}` : "/patrimoine");
+    goBack(router, company ? `/patrimoine/societe/${company.id}` : "/patrimoine");
   };
 
   return (

@@ -1,5 +1,6 @@
 "use client";
 
+import { goBack, openOverlay } from "@/lib/nav";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
@@ -31,7 +32,8 @@ export function PageHeader({
       <div className="mx-auto flex max-w-2xl items-center gap-2 px-5 pb-3 pt-4 lg:max-w-[2000px] lg:px-9 xl:px-11">
         {back && (
           <button
-            onClick={() => (typeof back === "string" ? router.push(back) : router.back())}
+            // Écran précédent réel ; `back` ne sert que si l'on est arrivé directement ici.
+            onClick={() => goBack(router, typeof back === "string" ? back : "/")}
             className="-ml-2 flex h-10 w-10 items-center justify-center rounded-full text-navy active:bg-black/5"
             aria-label="Retour"
           >
@@ -335,6 +337,15 @@ export function Sheet({
 }) {
   const [drag, setDrag] = useState<number | null>(null);
   const dragStart = useRef<number | null>(null);
+  const closeRef = useRef(onClose);
+  useEffect(() => {
+    closeRef.current = onClose;
+  });
+  // Bouton ou geste Retour du téléphone : ferme la feuille sans quitter l'écran.
+  useEffect(() => {
+    if (!open) return;
+    return openOverlay(() => closeRef.current());
+  }, [open]);
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;

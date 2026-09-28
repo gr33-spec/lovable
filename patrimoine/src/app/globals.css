@@ -154,3 +154,11 @@ textarea {
   background-clip: text;
   color: transparent;
 }
+
+/* Ligne dont on peut attraper le locataire : l'appui long ne doit pas ouvrir
+   l'aperçu de lien de Safari (iPhone) ni sélectionner le texte. */
+a:has([data-tenant-handle]) {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}

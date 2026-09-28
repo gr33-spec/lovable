@@ -1,5 +1,6 @@
 "use client";
 
+import { goBack } from "@/lib/nav";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, Pencil, Sparkles } from "lucide-react";
@@ -143,7 +144,7 @@ export function StatementDetail({ id }: { id: string }) {
             message="Supprimer ce bilan ? Le PDF joint reste dans l'historique de sauvegarde."
             onConfirm={() => {
               remove("statements", st.id);
-              router.push("/plus/bilans");
+              goBack(router, "/plus/bilans");
             }}
           />
         </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { goBack } from "@/lib/nav";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -227,7 +228,7 @@ export function ProjectDetail({ id }: { id: string }) {
             message={p.status === "realise" ? "Supprimer ce projet de l'historique ? L'immeuble et les crédits créés sont conservés." : "Supprimer ce projet ?"}
             onConfirm={() => {
               remove("projects", p.id);
-              router.push("/patrimoine?vue=projets");
+              goBack(router, "/patrimoine?vue=projets");
             }}
           />
         </div>

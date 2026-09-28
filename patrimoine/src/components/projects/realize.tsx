@@ -47,7 +47,7 @@ export function ProjectRealize({ id }: { id: string }) {
     for (const w of r.works) items.push({ coll: "works", item: w });
     items.push({ coll: "projects", item: r.project });
     upsertMany(items);
-    router.push(`/patrimoine/immeuble/${r.project.realizedBuildingId}`);
+    router.replace(`/patrimoine/immeuble/${r.project.realizedBuildingId}`);
   };
 
   return (

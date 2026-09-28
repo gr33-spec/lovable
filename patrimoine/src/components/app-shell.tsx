@@ -10,6 +10,7 @@ import { missingCount } from "@/lib/missing";
 import { cx } from "./ui";
 import { ToastHost } from "./swipe";
 import { PdfViewerHost } from "./pdf-viewer";
+import { afterRouteChange, installNavigation } from "@/lib/nav";
 
 const TABS = [
   { href: "/", label: "Accueil", icon: House },
@@ -17,6 +18,19 @@ const TABS = [
   { href: "/gestion", label: "Gestion", icon: KeyRound },
   { href: "/plus", label: "Plus", icon: Ellipsis },
 ];
+
+/** Historique de navigation : rang des écrans, défilement et état restitués au retour. */
+function NavTracker() {
+  const pathname = usePathname();
+  const search = useSearchParams().toString();
+  useEffect(() => {
+    installNavigation();
+  }, []);
+  useEffect(() => {
+    afterRouteChange();
+  }, [pathname, search]);
+  return null;
+}
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -37,6 +51,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return (
       <>
         <SaveIndicator />
+        <Suspense>
+          <NavTracker />
+        </Suspense>
         <div className="lg:pl-60">{children}</div>
         <ToastHost />
         <PdfViewerHost />
@@ -50,6 +67,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <SaveIndicator />
+      <Suspense>
+        <NavTracker />
+      </Suspense>
       {role === "lecture" && <ReadOnlyBanner />}
       <div className={cx(!onboarding && "lg:pl-60")}>{children}</div>
       <ToastHost />
