@@ -52,6 +52,7 @@ const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
 const lotFields = z
   .object({
+    lastRevisionDate: date,
     type: z.enum(["studio", "T1", "T2", "T3", "T4", "T5+", "commerce", "bureau", "parking", "autre"]),
     surface: z.number(),
     mainRooms: z.number(),
