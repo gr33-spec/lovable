@@ -3,12 +3,12 @@ import path from "node:path";
 import { Document, Font, Line, Page, Path, Svg, Text, View } from "@react-pdf/renderer";
 import type { AppData, Company, Project } from "../types";
 import type { MonthIndex } from "../engine/dates";
-import { monthLabel, yearOf } from "../engine/dates";
+import { yearOf } from "../engine/dates";
 import { remunerationYear } from "../fiscal/remuneration";
 import { BAREME_YEAR } from "../fiscal/bareme";
-import { NO_COMPANY, cashflowMonthly, companyTree, type Figures } from "../engine/snapshot";
-import { halfDebtYear, type Projection } from "../engine/projection";
-import { portfolioIndicators } from "../engine/indicators";
+import { cashflowMonthly, type Figures } from "../engine/snapshot";
+import type { Projection } from "../engine/projection";
+import { groupModel, type GroupModel } from "./model";
 import { projectCompanyName, projectFigures } from "../engine/projects";
 import type { ProjectImpact } from "../engine/project-impact";
 import { eur, eurCompact, pct, pdfSafe, dateFr } from "../format";
@@ -91,7 +91,11 @@ function Sheet({ label, kicker, title, children }: { label: string; kicker: stri
 }
 
 function H2({ children, top = 16 }: { children: string; top?: number }) {
-  return <Text style={{ ...W700, fontSize: 11, color: NAVY, marginTop: top, marginBottom: 6 }}>{T(children)}</Text>;
+  return (
+    <Text minPresenceAhead={60} style={{ ...W700, fontSize: 11, color: NAVY, marginTop: top, marginBottom: 6 }}>
+      {T(children)}
+    </Text>
+  );
 }
 
 function Para({ children }: { children: string }) {
@@ -233,148 +237,16 @@ function Chart({ title, years, values, kind, width = CW, height = 120, color = B
   );
 }
 
-// ——— Modèle du groupe (ou d'une société) ———
-
-interface GroupModel {
-  name: string;
-  f: Figures;
-  indicators: Map<string, number | undefined>;
-  buildings: {
-    name: string;
-    place: string;
-    company: string;
-    lots: number;
-    acquisition: string;
-    value?: number;
-    rentAnnual: number;
-    debt: number;
-  }[];
-  loansByCompany: { company: string; loans: { name: string; bank: string; initial?: number; balance?: number; monthly?: number; rate?: number; end?: string }[]; balance: number; monthly: number }[];
-  capacity: { company: string; rent: number; charges: number; payments: number; cf: number; dscr?: number }[];
-  highlights: string[];
-  milestones: { year: number; label: string; freed: number }[];
-  years: number[];
-  debtSeries: number[];
-  cfSeries: number[];
-  statements: { company: string; year: number; revenue?: number; net?: number; caf?: number; equity?: number; bankDebt?: number; cash?: number }[];
-}
-
-function groupModel(data: AppData, p: Projection, name: string): GroupModel {
-  const snap = p.snapshot;
-  const f = snap.total;
-  const indicators = new Map(portfolioIndicators(data, p).map((i) => [i.id, i.value]));
-  const companyName = (id?: string | null) => (id ? data.companies.find((c) => c.id === id)?.name : undefined) ?? "En direct";
-
-  const buildings = data.buildings.map((b) => {
-    const bf = snap.byBuilding.get(b.id)!;
-    return {
-      name: b.name,
-      place: [b.address, b.city].filter(Boolean).join(", "),
-      company: companyName(b.companyId),
-      lots: bf.units,
-      acquisition: [b.acquisitionDate ? b.acquisitionDate.slice(0, 4) : undefined, b.acquisitionPrice ? K(b.acquisitionPrice) : undefined].filter(Boolean).join(" · "),
-      value: bf.unvalued ? undefined : bf.value,
-      rentAnnual: bf.rentMonthly * 12,
-      debt: bf.debt,
-    };
-  });
-
-  const byCompany = new Map<string, GroupModel["loansByCompany"][number]>();
-  const buildingsById = new Map(data.buildings.map((b) => [b.id, b]));
-  for (const l of data.loans) {
-    const r = snap.resolvedLoans.get(l.id);
-    if (!r || r.finished) continue;
-    const now = snap.byLoan.get(l.id);
-    const key = l.buildingId ? (buildingsById.get(l.buildingId)?.companyId ?? NO_COMPANY) : (l.companyId ?? NO_COMPANY);
-    const label = key === NO_COMPANY ? "En direct" : companyName(key);
-    const g = byCompany.get(label) ?? { company: label, loans: [], balance: 0, monthly: 0 };
-    // Crédit signé mais pas encore débloqué : montant emprunté et mensualité à venir.
-    const upcoming = r.fromMonth > snap.nowMonth;
-    g.loans.push({
-      name: l.name || "Crédit",
-      bank: l.bank ?? "",
-      initial: l.initialAmount,
-      balance: upcoming ? (r.balance ?? l.initialAmount) : now?.balance,
-      monthly: upcoming ? (r.payment !== undefined ? r.payment + r.insurance : undefined) : now?.paymentMonthly || undefined,
-      rate: l.ratePct ?? r.impliedRatePct,
-      end: r.endMonth !== undefined ? monthLabel(r.endMonth) : undefined,
-    });
-    g.balance += (upcoming ? (r.balance ?? l.initialAmount) : now?.balance) ?? 0;
-    g.monthly += now?.paymentMonthly ?? 0;
-    byCompany.set(label, g);
-  }
-
-  const capacity = companyTree(data.companies)
-    .map(({ company }) => ({ company, own: snap.ownByCompany.get(company.id) }))
-    .filter((x): x is { company: Company; own: Figures } => !!x.own && (x.own.rentMonthly > 0 || x.own.paymentsMonthly > 0))
-    .map(({ company, own }) => {
-      const charges = own.chargesAnnual / 12;
-      return { company: company.name, rent: own.rentMonthly, charges, payments: own.paymentsMonthly, cf: cashflowMonthly(own), dscr: own.paymentsMonthly > 0 ? (own.rentMonthly - charges) / own.paymentsMonthly : undefined };
-    });
-  const direct = snap.ownByCompany.get(NO_COMPANY);
-  if (direct && (direct.rentMonthly > 0 || direct.paymentsMonthly > 0)) {
-    const charges = direct.chargesAnnual / 12;
-    capacity.push({ company: "En direct", rent: direct.rentMonthly, charges, payments: direct.paymentsMonthly, cf: cashflowMonthly(direct), dscr: direct.paymentsMonthly > 0 ? (direct.rentMonthly - charges) / direct.paymentsMonthly : undefined });
-  }
-
-  const cf = cashflowMonthly(f);
-  const occupancy = indicators.get("occupancy");
-  const dscr = indicators.get("dscr");
-  const half = halfDebtYear(p);
-  const highlights: string[] = [];
-  if (f.units > 0) highlights.push(`${f.buildings} immeuble(s), ${f.units} lots${occupancy !== undefined ? `, taux d'occupation de ${pct(occupancy)}` : ""}.`);
-  if (cf > 0 && f.unknownPayment === 0) highlights.push(`Cash-flow positif de ${eur(Math.round(cf))} par mois, après charges et mensualités.`);
-  if (dscr !== undefined && dscr >= 1.2 && f.unknownPayment === 0) highlights.push(`Loyers nets couvrant ${dscr.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} fois les mensualités de crédit.`);
-  if (half) highlights.push(`Capital restant dû divisé par deux d'ici ${half}.`);
-
-  const ends = new Map<number, { freed: number; names: string[] }>();
-  for (const e of p.events.filter((x) => x.kind === "loan_end")) {
-    const cur = ends.get(e.year) ?? { freed: 0, names: [] };
-    cur.freed += e.monthlyFreed ?? 0;
-    cur.names.push(e.label.replace(/^Fin — /, ""));
-    ends.set(e.year, cur);
-  }
-  const milestones = [...ends.entries()]
-    .sort((a, b) => a[0] - b[0])
-    .slice(0, 8)
-    .map(([year, v]) => ({ year, freed: v.freed, label: v.names.length > 2 ? `${v.names.length} crédits se terminent` : v.names.join(", ") }));
-
-  const statements = companyTree(data.companies)
-    .map(({ company }) => {
-      const st = [...data.statements].filter((s) => s.companyId === company.id).sort((a, b) => b.year - a.year)[0];
-      if (!st) return undefined;
-      const fg = st.figures;
-      return {
-        company: company.name,
-        year: st.year,
-        revenue: fg.revenue,
-        net: fg.netResult,
-        caf: fg.netResult !== undefined && fg.depreciation !== undefined ? fg.netResult + fg.depreciation : undefined,
-        equity: fg.equity,
-        bankDebt: fg.bankDebt,
-        cash: fg.cash,
-      };
-    })
-    .filter((x): x is NonNullable<typeof x> => !!x);
-
-  const horizon = p.years.slice(0, 26);
-  return {
-    name,
-    f,
-    indicators,
-    buildings,
-    loansByCompany: [...byCompany.values()],
-    capacity,
-    highlights,
-    milestones,
-    years: horizon.map((r) => r.year),
-    debtSeries: horizon.map((r) => r.debt),
-    cfSeries: horizon.map((r) => Math.round(r.cashflow / 12)),
-    statements,
-  };
-}
-
 // ——— Pages du groupe ———
+
+/** Données manquantes qui limitent les totaux : toujours signalées, jamais comblées. */
+function gapNote(f: Figures, missingCharges = 0): string {
+  const parts: string[] = [];
+  if (missingCharges > 0) parts.push(`${missingCharges} immeuble(s) loué(s) sans charges renseignées (taxe foncière, assurance) : cash-flow surestimé d'autant`);
+  if (f.unknownDebt > 0) parts.push(`${f.unknownDebt} crédit(s) au capital restant dû non communiqué, non inclus dans le total`);
+  if (f.unknownPayment > 0) parts.push(`${f.unknownPayment} crédit(s) à la mensualité estimée ou inconnue (taux non renseigné)`);
+  return parts.length ? ` Attention : ${parts.join(" ; ")}.` : "";
+}
 
 function SynthesisPage({ m, label, now }: { m: GroupModel; label: string; now: string }) {
   const f = m.f;
@@ -383,7 +255,7 @@ function SynthesisPage({ m, label, now }: { m: GroupModel; label: string; now: s
   const kpis: Kpi[] = [
     { label: "Loyers annuels", value: K(f.rentMonthly * 12), sub: `${E(Math.round(f.rentMonthly))} par mois` },
     { label: "Capital restant dû", value: K(f.debt), sub: `${f.loans} crédit(s) en cours` },
-    { label: "Mensualités", value: E(Math.round(f.paymentsMonthly)), sub: "par mois, assurance comprise" },
+    { label: "Mensualités", value: E(Math.round(f.paymentsMonthly)), sub: f.unknownPayment > 0 ? `par mois, dont ${f.unknownPayment} estimée(s)` : "par mois, assurance comprise" },
     { label: "Cash-flow", value: S(Math.round(cf)), sub: "par mois, après charges et crédits", tone: cf >= 0 ? "pos" : "neg" },
   ];
   const occ = m.indicators.get("occupancy");
@@ -401,26 +273,29 @@ function SynthesisPage({ m, label, now }: { m: GroupModel; label: string; now: s
           <Bullets items={m.highlights} />
         </>
       )}
+      {gapNote(m.f, m.missingCharges) && <Note>{gapNote(m.f, m.missingCharges).trim()}</Note>}
       <Trajectory m={m} />
     </Sheet>
   );
 }
 
 function AssetsPage({ m, label }: { m: GroupModel; label: string }) {
-  const total = { name: "Total", place: "", company: "", lots: m.buildings.reduce((s, b) => s + b.lots, 0), acquisition: "", value: m.buildings.every((b) => b.value !== undefined) ? m.buildings.reduce((s, b) => s + (b.value ?? 0), 0) : undefined, rentAnnual: m.buildings.reduce((s, b) => s + b.rentAnnual, 0), debt: m.buildings.reduce((s, b) => s + b.debt, 0) };
+  const rows = [...m.buildings];
+  if (m.companyLevelDebt > 1) rows.push({ name: "Crédits portés par les sociétés", place: "Emprunts non rattachés à un immeuble (apports, travaux…)", company: "—", lots: 0, acquisition: "", value: 0, rentAnnual: 0, debt: m.companyLevelDebt });
+  const total = { name: "Total", place: "", company: "", lots: m.buildings.reduce((s, b) => s + b.lots, 0), acquisition: "", value: m.buildings.every((b) => b.value !== undefined) ? m.buildings.reduce((s, b) => s + (b.value ?? 0), 0) : undefined, rentAnnual: m.buildings.reduce((s, b) => s + b.rentAnnual, 0), debt: rows.reduce((s, b) => s + b.debt, 0) };
   return (
     <Sheet label={label} kicker="Patrimoine" title="État du patrimoine immobilier">
       <Table
         cols={[
           { label: "Immeuble", w: 30, get: (r) => r.name, bold: true },
           { label: "Société", w: 16, get: (r) => r.company },
-          { label: "Lots", w: 7, right: true, get: (r) => String(r.lots || "—") },
-          { label: "Acquisition", w: 14, right: true, get: (r) => r.acquisition || "—" },
-          { label: "Valeur", w: 11, right: true, get: (r) => K(r.value) },
-          { label: "Loyers / an", w: 11, right: true, get: (r) => K(r.rentAnnual) },
+          { label: "Lots", w: 7, right: true, get: (r) => (r.company === "—" ? "" : String(r.lots || "—")) },
+          { label: "Acquisition", w: 14, right: true, get: (r) => (r.company === "—" ? "" : r.acquisition || "—") },
+          { label: "Valeur", w: 11, right: true, get: (r) => (r.company === "—" ? "" : K(r.value)) },
+          { label: "Loyers / an", w: 11, right: true, get: (r) => (r.company === "—" ? "" : K(r.rentAnnual)) },
           { label: "Dette", w: 11, right: true, get: (r) => K(r.debt) },
         ]}
-        rows={m.buildings}
+        rows={rows}
         sub={(r) => r.place || undefined}
         total={total}
       />
@@ -447,18 +322,18 @@ function LoansPage({ m, label }: { m: GroupModel; label: string }) {
     <Sheet label={label} kicker="Financement" title="Crédits en cours">
       {m.loansByCompany.map((g) => (
         <View key={g.company} style={{ marginBottom: 12 }}>
-          <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 4 }} wrap={false}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 4 }} wrap={false} minPresenceAhead={70}>
             <Text style={{ ...W700, fontSize: 9.5, color: NAVY }}>{T(g.company)}</Text>
             <Text style={{ fontSize: 8, color: INK2 }}>{T(`${K(g.balance)} restant dû · ${E(Math.round(g.monthly))} / mois`)}</Text>
           </View>
-          <Table cols={cols} rows={g.loans} />
+          <Table cols={cols} rows={g.loans} sub={(r) => r.note} />
         </View>
       ))}
       <View style={{ flexDirection: "row", justifyContent: "space-between", backgroundColor: NAVY, borderRadius: 4, paddingVertical: 6, paddingHorizontal: 8 }} wrap={false}>
         <Text style={{ ...W700, fontSize: 9, color: "#ffffff" }}>Total</Text>
         <Text style={{ ...W700, fontSize: 9, color: "#ffffff" }}>{T(`${K(totalBalance)} restant dû · ${E(Math.round(totalMonthly))} / mois`)}</Text>
       </View>
-      <Note>Mensualités assurance comprise. Capital restant dû calculé à ce jour à partir des tableaux d&apos;amortissement ou des conditions du prêt.</Note>
+      <Note>{`Mensualités assurance comprise. Capital restant dû calculé à ce jour à partir des tableaux d'amortissement ou des conditions du prêt.${gapNote(m.f, m.missingCharges)}`}</Note>
     </Sheet>
   );
 }
@@ -469,8 +344,8 @@ function CapacityPage({ m, label }: { m: GroupModel; label: string }) {
   const occ = m.indicators.get("occupancy");
   const ltv = m.indicators.get("ltv");
   const ratios: Kpi[] = [
-    { label: "Couverture des mensualités (DSCR)", value: dscr !== undefined ? `${dscr.toLocaleString("fr-FR", { maximumFractionDigits: 2 })}×` : "—", sub: "loyers nets ÷ mensualités" },
-    { label: "Part des loyers consacrée aux crédits", value: P(effort), sub: "mensualités ÷ loyers" },
+    { label: "Couverture des mensualités (DSCR)", value: dscr !== undefined ? `${dscr.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}×` : "—", sub: m.f.unknownPayment > 0 ? `loyers nets ÷ mensualités (${m.f.unknownPayment} estimée(s))` : "loyers nets ÷ mensualités" },
+    { label: "Part des loyers consacrée aux crédits", value: P(effort), sub: m.f.unknownPayment > 0 ? `mensualités ÷ loyers (${m.f.unknownPayment} estimée(s))` : "mensualités ÷ loyers" },
   ];
   if (occ !== undefined) ratios.push({ label: "Taux d'occupation", value: P(occ), sub: "lots loués ÷ lots" });
   if (ltv !== undefined) ratios.push({ label: "Dette / valeur (LTV)", value: P(ltv), sub: "capital restant dû ÷ valeur" });
@@ -488,12 +363,12 @@ function CapacityPage({ m, label }: { m: GroupModel; label: string }) {
               { label: "Charges", w: 14, right: true, get: (r) => E(Math.round(r.charges)) },
               { label: "Mensualités", w: 15, right: true, get: (r) => E(Math.round(r.payments)) },
               { label: "Cash-flow", w: 15, right: true, get: (r) => S(Math.round(r.cf)) },
-              { label: "DSCR", w: 13, right: true, get: (r) => (r.dscr !== undefined ? `${r.dscr.toLocaleString("fr-FR", { maximumFractionDigits: 2 })}×` : "—") },
+              { label: "DSCR", w: 13, right: true, get: (r) => (r.dscr !== undefined ? `${r.dscr.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}×` : "—") },
             ]}
             rows={m.capacity}
             total={{ company: "Total", ...tot, dscr: tot.payments > 0 ? (tot.rent - tot.charges) / tot.payments : undefined }}
           />
-          <Note>Charges : taxe foncière, assurance, comptabilité et autres charges annuelles déclarées, ramenées au mois.</Note>
+          <Note>{`Charges : taxe foncière, assurance, comptabilité et autres charges annuelles déclarées, ramenées au mois.${gapNote(m.f, m.missingCharges)}`}</Note>
         </>
       )}
     </Sheet>
@@ -807,7 +682,7 @@ export function ProjectDossier({ data, projection, nowMonth, scopeName, generate
           items={[
             { label: "Loyers prévus", value: E(Math.round(f.rentMonthly)), sub: "par mois, hors charges" },
             { label: "Cash-flow", value: f.cashflowMonthly === undefined ? "—" : S(Math.round(f.cashflowMonthly)), sub: "par mois, après crédit", tone: f.cashflowMonthly === undefined ? undefined : f.cashflowMonthly >= 0 ? "pos" : "neg" },
-            { label: "Couverture des mensualités", value: f.dscr !== undefined ? `${f.dscr.toLocaleString("fr-FR", { maximumFractionDigits: 2 })}×` : "—", sub: "loyers nets ÷ mensualités" },
+            { label: "Couverture des mensualités", value: f.dscr !== undefined ? `${f.dscr.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}×` : "—", sub: "loyers nets ÷ mensualités" },
             { label: "Rendement brut", value: P(f.grossYieldPct), sub: "loyers annuels ÷ coût total" },
             { label: "Rendement net", value: P(f.netYieldPct), sub: "après vacance et charges" },
             ...(p.valueAfterWorks ? [{ label: "Valeur estimée après travaux", value: K(p.valueAfterWorks) }] : []),

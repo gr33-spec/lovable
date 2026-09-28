@@ -23,10 +23,12 @@ export default function DossierBanquePage() {
     const scoped = scope ? companySubset(data, scope) : data;
     const list = qualityIssues(scoped, computeSnapshot(scoped, nowMonth));
     const holding = data.companies.find((c) => c.kind === "holding") ?? data.companies[0];
-    if (holding && !holding.email && !holding.phone) list.push({ id: "contact", label: "Coordonnées de contact", detail: "E-mail et téléphone affichés en couverture", href: "/plus/societes" });
+    if (holding && !holding.email && !holding.phone) list.push({ id: "contact", label: "Coordonnées de contact", detail: "E-mail et téléphone affichés en couverture", href: "/plus/societes", severity: "advice" });
     return list;
   }, [data, nowMonth, scope]);
 
+  const critical = issues.filter((i) => i.severity === "critical");
+  const advice = issues.filter((i) => i.severity !== "critical");
   const companies = companyTree(data.companies).map(({ company, depth }) => ({ value: company.id, label: `${"  ".repeat(depth)}${company.name}` }));
 
   return (
@@ -41,28 +43,47 @@ export default function DossierBanquePage() {
         </Card>
 
         <SectionTitle>Avant d&apos;envoyer</SectionTitle>
-        {issues.length === 0 ? (
+        {issues.length === 0 && (
           <Card>
             <div className="flex items-center gap-2 text-[14px] font-semibold text-pos">
-              <CircleCheck size={18} /> Tout est renseigné
+              <CircleCheck size={18} /> Tout est renseigné : les montants du dossier sont complets.
             </div>
           </Card>
-        ) : (
-          <Card className="py-1">
-            <div className="flex items-center gap-2 pb-1 pt-3 text-[13.5px] font-semibold text-warn">
-              <CircleAlert size={17} /> {issues.length} information(s) à compléter pour un dossier plus convaincant
+        )}
+        {critical.length > 0 && (
+          <Card className="border border-neg/30 py-1">
+            <div className="flex items-start gap-2 pb-1 pt-3 text-[13.5px] font-semibold text-neg">
+              <CircleAlert size={17} className="mt-0.5 shrink-0" />
+              <span>
+                {`${critical.length} élément(s) à compléter avant d'envoyer : sans eux, certains montants du dossier seraient faussés (mensualités sous-estimées ou charges manquantes).`}
+              </span>
             </div>
             <div className="divide-y divide-line">
-              {issues.slice(0, 8).map((i) => (
+              {critical.map((i) => (
+                <Link key={i.id} href={i.href} className="flex items-center justify-between gap-3 py-2.5 text-[13.5px]">
+                  <span className="min-w-0 flex-1 truncate text-ink">{i.label}</span>
+                  <span className="max-w-[60%] shrink-0 truncate text-[12.5px] font-medium text-series-1">{i.id.startsWith("c-") ? "Saisir les charges" : "Saisir la mensualité"}</span>
+                </Link>
+              ))}
+            </div>
+          </Card>
+        )}
+        {advice.length > 0 && (
+          <Card className="mt-3 py-1">
+            <div className="flex items-center gap-2 pb-1 pt-3 text-[13.5px] font-semibold text-warn">
+              <CircleAlert size={17} /> {`${advice.length} information(s) conseillée(s)`}
+            </div>
+            <div className="divide-y divide-line">
+              {advice.slice(0, 8).map((i) => (
                 <Link key={i.id} href={i.href} className="flex items-center justify-between gap-3 py-2.5 text-[13.5px]">
                   <span className="min-w-0 flex-1 truncate text-ink">{i.label}</span>
                   <span className="max-w-[55%] shrink-0 truncate text-muted">{i.detail}</span>
                 </Link>
               ))}
             </div>
-            {issues.length > 8 && (
+            {advice.length > 8 && (
               <Link href="/plus/a-completer" className="block py-2.5 text-[13.5px] font-medium text-series-1">
-                Voir les {issues.length} éléments
+                Voir les {advice.length} éléments
               </Link>
             )}
           </Card>

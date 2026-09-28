@@ -116,6 +116,8 @@ interface ProjLoan extends LoanState {
   companyKey: string;
   buildingId?: string;
   fromMonth: MonthIndex;
+  /** Mois du déblocage : la dette existe à partir de ce mois (défaut : fromMonth). */
+  debtFrom?: MonthIndex;
   /** Solde inconnu : seules les mensualités sont projetées. */
   paymentOnly: boolean;
   /** Solde connu mais échéancier impossible : dette maintenue constante. */
@@ -211,6 +213,8 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
       companyKey: loanCompanyKey(loan, buildingsById),
       buildingId: loan.buildingId ?? undefined,
       fromMonth: r.fromMonth,
+      // Crédit débloqué plus tard : la dette naît au déblocage (mois précédant la 1re échéance).
+      debtFrom: r.fromMonth > nowMonth ? r.fromMonth - 1 : r.fromMonth,
       balance: r.balance ?? 0,
       monthlyRate: r.monthlyRate,
       payment: r.payment ?? 0,
@@ -334,6 +338,7 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
         companyKey: key,
         buildingId: id,
         fromMonth: m + 1 + deferral,
+        debtFrom: m,
         balance: l.amount,
         monthlyRate: (l.ratePct ?? 0) / 1200,
         payment: lf.payment,
@@ -465,6 +470,7 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
             companyKey: key,
             buildingId: a.id,
             fromMonth: m + 1,
+            debtFrom: m,
             balance: loanAmount,
             monthlyRate: rate,
             payment: annuityPayment(loanAmount, rate, n),
@@ -506,6 +512,7 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
             companyKey: key,
             buildingId: buildingId ?? undefined,
             fromMonth: m + 1,
+            debtFrom: m,
             balance: amount,
             monthlyRate: rate,
             payment: annuityPayment(amount, rate, n),
@@ -680,7 +687,7 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
         rowFor(b.companyKey, year).value += (b.value ?? 0) * growth(settings.valueGrowthPct, b.refMonth, m);
       }
       for (const l of loans) {
-        if (!l.active || l.paymentOnly) continue;
+        if (!l.active || l.paymentOnly || m < (l.debtFrom ?? l.fromMonth)) continue;
         const row = rowFor(l.companyKey, year);
         row.debt += l.balance;
         row.activeLoans += 1;
