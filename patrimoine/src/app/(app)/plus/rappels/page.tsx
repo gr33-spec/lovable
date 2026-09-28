@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { BellRing, RotateCcw } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { LEASE_END_NOTICE_MONTHS, LOAN_END_NOTICE_MONTHS, REVISION_NOTICE_MONTHS, todayIso } from "@/lib/engine/leases";
+import { LEASE_END_NOTICE_MONTHS, LOAN_END_NOTICE_MONTHS, REVISION_CLAIM_MONTHS, REVISION_NOTICE_MONTHS, todayIso } from "@/lib/engine/leases";
 import { allReminders } from "@/lib/reminders";
 import { ReminderRow } from "@/components/leases";
 import { Card, Empty, Page, PageHeader, SectionTitle } from "@/components/ui";
@@ -63,7 +63,7 @@ export default function RappelsPage() {
             <b className="text-ink">Fin de bail</b> : {`${LEASE_END_NOTICE_MONTHS} mois`} avant l&apos;échéance (date de fin saisie, ou début + durée avec reconduction).
           </p>
           <p>
-            <b className="text-ink">Révision du loyer</b> : {`${REVISION_NOTICE_MONTHS} mois`} avant la date anniversaire du bail.
+            <b className="text-ink">Révision du loyer</b> : {`${REVISION_NOTICE_MONTHS} mois`} avant la date anniversaire du bail, le temps de prévenir le locataire. Si elle n&apos;est pas faite, le rappel reste affiché {`${REVISION_CLAIM_MONTHS} mois`} : passé ce délai, la révision de l&apos;année est perdue. Une révision demandée en retard ne s&apos;applique qu&apos;à partir de la demande. Bail commercial (révision triennale) : rappel à partir du 3ᵉ anniversaire, demande par lettre recommandée.
           </p>
           <p>
             <b className="text-ink">Fin de crédit</b> : {`${LOAN_END_NOTICE_MONTHS} mois`} avant la dernière échéance.

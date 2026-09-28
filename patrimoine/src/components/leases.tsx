@@ -66,7 +66,13 @@ export function LeaseSection({ unit }: { unit: Unit }) {
         )}
         {info.nextRevision && (
           <div>
-            Prochaine révision du loyer : <b className="text-ink">{dateFr(info.nextRevision)}</b>
+            {info.nextRevision < today ? "Révision non faite depuis le " : "Prochaine révision du loyer : "}
+            <b className="text-ink">{dateFr(info.nextRevision)}</b>
+            {info.revisionDeadline && info.nextRevision < today && (
+              <>
+                {" "}— à demander avant le <b className="text-ink">{dateFr(info.revisionDeadline)}</b>, sans effet rétroactif
+              </>
+            )}
           </div>
         )}
       </div>
@@ -122,7 +128,10 @@ function RevisionTool({ unit, nextRevision }: { unit: Unit; nextRevision?: strin
   }
   const today = todayIso();
   const proposal = revisedRent(unit.rent, unit.indexValue, newValue);
-  const date = nextRevision && nextRevision <= today ? nextRevision : today;
+  // Révision demandée en retard : elle court à partir de la demande (pas de rétroactivité).
+  // Demandée à l'avance : elle prend effet à la date de révision.
+  const late = !!nextRevision && nextRevision < today;
+  const date = nextRevision && !late ? nextRevision : today;
 
   const apply = (rent: number | undefined, note?: string) => {
     const history = [...(unit.rentHistory ?? [])];
@@ -155,6 +164,7 @@ function RevisionTool({ unit, nextRevision }: { unit: Unit; nextRevision?: strin
   return (
     <div className="space-y-3 rounded-2xl border border-series-1/30 bg-series-1/[0.04] p-4">
       <div className="text-[14px] font-semibold text-ink">Révision au {dateFr(date)}</div>
+      {late && <p className="text-[12px] text-warn">Date de révision dépassée ({dateFr(nextRevision)}) : le nouveau loyer s&apos;applique à partir d&apos;aujourd&apos;hui, sans rappel des mois passés.</p>}
       <div className="text-[13px] text-ink-2">
         Loyer actuel : <b>{eur(unit.rent)}</b>
         {unit.indexValue ? ` · indice de référence ${unit.indexLabel ?? ""} ${unit.indexValue.toLocaleString("fr-FR")}` : " · indice de référence non renseigné"}

@@ -154,9 +154,21 @@ test("baux : échéance reconduite, rappel 8 mois avant, révision anniversaire"
   const info = leaseInfo(unit, "2026-09-27");
   assert.equal(info.end, "2027-03-15");
   assert.equal(info.noticeDate, "2026-07-15");
-  assert.equal(info.nextRevision, "2027-03-15");
+  // Révision de mars 2026 non enregistrée : encore demandable jusqu'en mars 2027.
+  assert.equal(info.nextRevision, "2026-03-15");
+  assert.equal(info.revisionDeadline, "2027-03-15");
   // Révision appliquée en mars 2026 → prochaine en mars 2027.
   assert.equal(leaseInfo({ ...unit, lastRevisionDate: "2026-03-15" }, "2026-09-27").nextRevision, "2027-03-15");
+  // Plus d'un an après la date : révision perdue, on passe à la suivante.
+  assert.equal(leaseInfo({ ...unit, lastRevisionDate: "2024-03-15" }, "2026-09-27").nextRevision, "2026-03-15");
+  assert.equal(leaseInfo(unit, "2027-03-16").nextRevision, "2027-03-15");
+  // Sans date de début, la dernière révision connue sert de base.
+  assert.equal(leaseInfo({ ...unit, leaseStart: undefined, lastRevisionDate: "2026-04-01" }, "2026-09-27").nextRevision, "2027-04-01");
+  // Bail commercial : triennale, jamais perdue tant qu'elle n'est pas demandée.
+  const shop = { ...unit, leaseStart: "2021-01-13", revision: "triennale" as const };
+  assert.equal(leaseInfo(shop, "2026-09-27").nextRevision, "2024-01-13");
+  assert.equal(leaseInfo(shop, "2026-09-27").revisionDeadline, undefined);
+  assert.equal(leaseInfo({ ...shop, lastRevisionDate: "2024-06-01" }, "2026-09-27").nextRevision, "2027-01-13");
   // Reconduction tacite après l'échéance.
   assert.equal(leaseInfo({ ...unit, leaseStart: "2015-03-15" }, "2026-09-27").end, "2027-03-15");
   // Date de fin passée sans durée : signalée.
@@ -165,6 +177,9 @@ test("baux : échéance reconduite, rappel 8 mois avant, révision anniversaire"
   assert.equal(revisedRent(600, undefined, 143.5), undefined);
 
   const data: AppData = { ...emptyData(), buildings: [{ id: "b", name: "B" }], units: [unit] };
+  const rev = reminders(data, "2026-09-27").find((r) => r.kind === "revision")!;
+  assert.ok(rev.late && rev.detail.includes("avant le 15 mars 2027") && rev.detail.includes("non rétroactive"));
+  assert.ok(reminders({ ...data, units: [{ ...unit, lastRevisionDate: "2026-03-15" }] }, "2027-02-20").find((r) => r.kind === "revision")!.detail.includes("prévenir le locataire"));
   const before = reminders(data, "2026-07-14");
   assert.ok(!before.some((r) => r.kind === "lease_end"));
   const after = reminders(data, "2026-07-15");
