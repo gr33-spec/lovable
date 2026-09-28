@@ -11,6 +11,7 @@ import { companyLabel } from "@/lib/engine/milestones";
 import { yearOf } from "@/lib/engine/dates";
 import { eur, eurCompact, eurSigned } from "@/lib/format";
 import { LineChart } from "@/components/charts";
+import { remunerationYear } from "@/lib/fiscal/remuneration";
 import { Card, Page, PageHeader, SectionTitle, cx } from "@/components/ui";
 
 // Chronologie : ce qui change, et quand. Un escalier du cash-flow mensuel,
@@ -25,6 +26,7 @@ function hrefOf(e: TimelineEvent): string | undefined {
   if ((e.kind === "loan_end" || e.kind === "balloon" || e.kind === "prepayment") && e.loanId && !e.loanId.startsWith("loan-")) return `/patrimoine/credit/${e.loanId}`;
   if (e.kind === "works") return "/plus/travaux";
   if (e.kind === "event") return "/plus/evenements";
+  if (e.kind === "income") return "/plus/remuneration";
   if (e.kind === "acquisition" && e.refId) return `/patrimoine/immeuble/${e.refId}`;
   return undefined;
 }
@@ -38,6 +40,7 @@ function labelOf(e: TimelineEvent): string {
 function EventAmount({ e }: { e: TimelineEvent }) {
   if (e.monthlyFreed) return <span className="text-pos">+{eur(e.monthlyFreed)}/mois</span>;
   if (!e.amount) return null;
+  if (e.kind === "income") return <span className="text-ink">{eurCompact(e.amount)}/an</span>;
   const out = e.kind === "works" || e.kind === "balloon" || e.kind === "prepayment" || e.kind === "purchase";
   return <span className={out ? "text-neg" : "text-ink"}>{out ? "−" : ""}{eurCompact(Math.abs(e.amount))}</span>;
 }
@@ -89,6 +92,7 @@ export default function Chronologie() {
   // Situation une fois tous les crédits terminés (l'année suivant la dernière échéance, pleine).
   const endRow = debtFree ? (rows.find((r) => r.year === debtFree + 1) ?? rows.find((r) => r.year === debtFree)) : last;
   const loanYears = [...new Set(events.filter((e) => e.kind === "loan_end").map((e) => e.year))];
+  const household = useMemo(() => (data.withdrawals.length ? projection.years.map((r) => remunerationYear(data, r.year, y0)) : []), [data, projection.years, y0]);
   const scopeName = scope === ALL ? undefined : scopes.find((s) => s.key === scope)?.label;
 
   return (
@@ -146,6 +150,25 @@ export default function Chronologie() {
                 <span className="inline-block h-2.5 w-2.5 rounded-full bg-gold" /> Chaque marche = un ou plusieurs crédits terminés
               </div>
             )}
+          </Card>
+        )}
+
+        {/* Revenus du foyer */}
+        {scope === ALL && household.length > 1 && household.some((h) => h.net > 0) && (
+          <Card className="mt-3">
+            <div className="flex items-center justify-between">
+              <div className="text-[13px] text-muted">Revenus nets du foyer, après cotisations et impôts</div>
+              <Link href="/plus/remuneration" className="text-[13px] font-medium text-series-1">
+                Régler
+              </Link>
+            </div>
+            <div className="mt-0.5 flex items-baseline gap-2">
+              <span className="tabular text-[22px] font-extrabold text-navy">{eur(Math.round(household[0].net / 12))}</span>
+              <span className="text-[13px] text-muted">par mois en {household[0].year}</span>
+            </div>
+            <div className="mt-3">
+              <LineChart years={household.map((h) => h.year)} series={[{ label: "Revenus nets / mois", values: household.map((h) => Math.round(h.net / 12)), color: "#7c5cc4" }]} height={130} step />
+            </div>
           </Card>
         )}
 

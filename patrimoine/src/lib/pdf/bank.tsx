@@ -3,14 +3,16 @@ import path from "node:path";
 import { Document, Font, Line, Page, Path, Svg, Text, View } from "@react-pdf/renderer";
 import type { AppData, Company, Project } from "../types";
 import type { MonthIndex } from "../engine/dates";
-import { monthLabel } from "../engine/dates";
+import { monthLabel, yearOf } from "../engine/dates";
+import { remunerationYear } from "../fiscal/remuneration";
+import { BAREME_YEAR } from "../fiscal/bareme";
 import { NO_COMPANY, cashflowMonthly, companyTree, type Figures } from "../engine/snapshot";
 import { halfDebtYear, type Projection } from "../engine/projection";
 import { portfolioIndicators } from "../engine/indicators";
 import { projectCompanyName, projectFigures } from "../engine/projects";
 import type { ProjectImpact } from "../engine/project-impact";
 import { eur, eurCompact, pct, pdfSafe, dateFr } from "../format";
-import { CONDITIONS, UNIT_TYPES, labelOf } from "../labels";
+import { CONDITIONS, UNIT_TYPES, WITHDRAWAL_KINDS, labelOf } from "../labels";
 
 // Dossier banque, format A4 portrait : court (6 à 8 pages), sans répétition,
 // uniquement des chiffres connus. Deux usages :
@@ -523,6 +525,89 @@ function Trajectory({ m }: { m: GroupModel }) {
   );
 }
 
+function RemunerationPage({ data, projection, nowMonth, label }: { data: AppData; projection: Projection; nowMonth: MonthIndex; label: string }) {
+  if (!data.withdrawals.some((w) => w.annualAmount)) return null;
+  const y0 = yearOf(nowMonth);
+  const r = remunerationYear(data, y0, y0);
+  const h = data.settings.household ?? {};
+  const later = [0, 1, 2, 5, 10].map((i) => remunerationYear(data, y0 + i, y0));
+  const kind = (k: string) => ({ tns: "Gérance (TNS)", salaire: "Salaire", dividendes: "Dividendes", cca: "Compte courant", autre: "Autre" })[k] ?? labelOf(WITHDRAWAL_KINDS, k as never) ?? k;
+  // Part versée par les SCI et la holding : elle pèse sur le cash-flow des loyers.
+  const realEstate = (c?: Company) => !!c && (c.kind === "SCI" || c.kind === "SC" || c.kind === "holding");
+  const fromRealEstate = r.sources.filter((s) => realEstate(s.company)).reduce((a, s) => a + s.cost, 0);
+  const row = projection.years.find((x) => x.year === y0);
+  const cf = row ? row.cashflow : undefined;
+  return (
+    <Sheet label={label} kicker="Rémunération" title="Rémunération des dirigeants">
+      <KpiGrid
+        items={[
+          { label: "Revenus nets du foyer", value: E(Math.round(r.net)), sub: `soit ${E(Math.round(r.net / 12))} par mois` },
+          { label: "Coût pour les sociétés", value: E(Math.round(r.cost)), sub: "par an" },
+          { label: "Cotisations et impôts", value: E(Math.round(r.social + r.tax)), sub: r.cost > 0 ? `${pct(((r.social + r.tax) / r.cost) * 100)} du coût` : undefined },
+        ]}
+      />
+      {h.strategy && (
+        <>
+          <H2>Stratégie</H2>
+          <Para>{h.strategy}</Para>
+        </>
+      )}
+      <H2>{`Détail ${y0}`}</H2>
+      <Table
+        cols={[
+          { label: "Bénéficiaire", w: 15, get: (s) => s.person, bold: true },
+          { label: "Nature", w: 34, get: (s) => kind(s.withdrawal.kind) },
+          { label: "Coût / an", w: 13, right: true, get: (s) => E(Math.round(s.cost)) },
+          { label: "Cotisations", w: 14, right: true, get: (s) => E(Math.round(s.social + s.capitalSocial)) },
+          { label: "Impôt", w: 11, right: true, get: (s) => E(Math.round(s.incomeTax)) },
+          { label: "Net / an", w: 13, right: true, get: (s) => E(Math.round(s.net)) },
+        ]}
+        rows={r.sources}
+        sub={(s) => s.company?.name}
+      />
+      <H2>Dans le temps</H2>
+      <Table
+        cols={[
+          { label: "Année", w: 20, get: (x) => String(x.year), bold: true },
+          { label: "Coût pour les sociétés", w: 28, right: true, get: (x) => E(Math.round(x.cost)) },
+          { label: "Cotisations et impôts", w: 26, right: true, get: (x) => E(Math.round(x.social + x.tax)) },
+          { label: "Net par mois", w: 26, right: true, get: (x) => E(Math.round(x.net / 12)) },
+        ]}
+        rows={later}
+      />
+      {cf !== undefined && fromRealEstate > 0 && (
+        <>
+          <H2>Soutenabilité</H2>
+          <Bullets
+            items={[
+              `Cash-flow des loyers ${y0}, après charges et crédits : ${eur(Math.round(cf / 12))} par mois.`,
+              `Rémunérations et remboursements versés par les SCI et la holding : ${eur(Math.round(fromRealEstate / 12))} par mois.`,
+              `Reste après rémunération : ${eur(Math.round((cf - fromRealEstate) / 12))} par mois.`,
+            ]}
+          />
+        </>
+      )}
+      {r.companies.length > 0 && (
+        <>
+          <H2>Sociétés d&apos;exploitation</H2>
+          <Table
+            cols={[
+              { label: "Société", w: 22, get: (c) => c.company.name, bold: true },
+              { label: "Résultat avant rémun.", w: 20, right: true, get: (c) => E(Math.round(c.profitBefore + c.remunerationCost)) },
+              { label: "Rémunérations", w: 17, right: true, get: (c) => E(Math.round(c.remunerationCost)) },
+              { label: "IS", w: 13, right: true, get: (c) => E(Math.round(c.corporateTax)) },
+              { label: "Distribuable", w: 15, right: true, get: (c) => E(Math.round(c.distributable)) },
+              { label: "Dividendes", w: 13, right: true, get: (c) => E(Math.round(c.dividends)) },
+            ]}
+            rows={r.companies}
+          />
+        </>
+      )}
+      <Note>{`Estimation selon les barèmes ${BAREME_YEAR} : cotisations des indépendants (assiette abattue de 26 %), charges moyennes d'un dirigeant assimilé salarié, prélèvement forfaitaire de 31,4 % sur dividendes, impôt sur le revenu du foyer (${(h.parts ?? (h.couple ? 2 : 1)).toLocaleString("fr-FR")} part(s)), IS 15 % / 25 %. À confirmer par l'expert-comptable.`}</Note>
+    </Sheet>
+  );
+}
+
 function AccountsPage({ m, label }: { m: GroupModel; label: string }) {
   if (m.statements.length === 0) return null;
   return (
@@ -585,7 +670,7 @@ export interface GroupDossierInput {
   generatedAt: Date;
 }
 
-export function GroupDossier({ data, projection, scopeName, generatedAt }: GroupDossierInput) {
+export function GroupDossier({ data, projection, nowMonth, scopeName, generatedAt }: GroupDossierInput) {
   const m = groupModel(data, projection, scopeName);
   const date = generatedAt.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
   const label = `${scopeName} · présentation patrimoniale`;
@@ -596,6 +681,7 @@ export function GroupDossier({ data, projection, scopeName, generatedAt }: Group
       <AssetsPage m={m} label={label} />
       <LoansPage m={m} label={label} />
       <CapacityPage m={m} label={label} />
+      <RemunerationPage data={data} projection={projection} nowMonth={nowMonth} label={label} />
       <AccountsPage m={m} label={label} />
     </Document>
   );
@@ -606,7 +692,7 @@ export interface ProjectDossierInput extends GroupDossierInput {
   impact?: ProjectImpact;
 }
 
-export function ProjectDossier({ data, projection, scopeName, generatedAt, project: p, impact }: ProjectDossierInput) {
+export function ProjectDossier({ data, projection, nowMonth, scopeName, generatedAt, project: p, impact }: ProjectDossierInput) {
   const f = projectFigures(p);
   const m = groupModel(data, projection, scopeName);
   const date = generatedAt.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
@@ -766,6 +852,7 @@ export function ProjectDossier({ data, projection, scopeName, generatedAt, proje
       <SynthesisPage m={m} label={label} now={date} />
       <AssetsPage m={m} label={label} />
       <LoansPage m={m} label={label} />
+      <RemunerationPage data={data} projection={projection} nowMonth={nowMonth} label={label} />
     </Document>
   );
 }

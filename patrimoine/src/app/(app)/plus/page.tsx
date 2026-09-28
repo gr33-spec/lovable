@@ -62,7 +62,7 @@ export default function PlusPage() {
             <Row href="/plus/bilans" icon={<FileSpreadsheet size={18} />} title="Bilans et comptes annuels" subtitle={`${data.statements.length} bilan(s) · import PDF intelligent`} />
             <Row href="/plus/indicateurs" icon={<Gauge size={18} />} title="Indicateurs financiers" subtitle="DSCR, rendement, LTV, CAF…" />
             <Row href="/plus/travaux" icon={<Hammer size={18} />} title="Travaux" subtitle={`${worksPlanned} à venir`} />
-            <Row href="/plus/remuneration" icon={<HandCoins size={18} />} title="Rémunération et comptes courants" subtitle="Sorties d'argent personnelles" />
+            <Row href="/plus/remuneration" icon={<HandCoins size={18} />} title="Rémunération" subtitle="Salaires, dividendes, comptes courants · calcul 2026" />
             <Row href="/plus/hypotheses" icon={<Percent size={18} />} title="Hypothèses de projection" subtitle="Revalorisation, indexation des loyers" />
             <Row
               href="/plus/a-completer"

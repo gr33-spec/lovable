@@ -25,6 +25,10 @@ export interface Company {
   partnerAccounts?: number;
   /** Régime / fiscalité, texte libre. */
   taxRegime?: string;
+  /** Capital social (€) : sert au calcul des dividendes soumis aux cotisations TNS. */
+  shareCapital?: number;
+  /** Société d'exploitation : chiffre d'affaires et charges. */
+  activity?: CompanyActivity;
   // ——— Bailleur (baux, états des lieux, quittances) ———
   /** Adresse du siège social. */
   address?: string;
@@ -386,20 +390,67 @@ export interface LifeEvent {
   demo?: boolean;
 }
 
-export type WithdrawalKind = "cca" | "salaire" | "dividendes" | "autre";
+/**
+ * Nature d'une sortie d'argent :
+ * - tns : rémunération de gérant majoritaire (SARL/EURL), travailleur non salarié ;
+ * - salaire : dirigeant assimilé salarié (président de SAS, gérant minoritaire) ;
+ * - dividendes, cca (remboursement de compte courant), autre.
+ */
+export type WithdrawalKind = "tns" | "salaire" | "dividendes" | "cca" | "autre";
 
 export interface Withdrawal {
   id: Id;
   kind: WithdrawalKind;
   label?: string;
+  /** Bénéficiaire (ex. « Grégory », « Enora »). */
+  person?: string;
   companyId?: Id | null;
-  /** Montant brut annuel sortant de la société. */
+  /**
+   * Montant annuel sortant de la société : coût total pour la société
+   * (rémunération + cotisations) pour tns / salaire, montant brut pour
+   * dividendes, montant remboursé pour cca.
+   */
   annualAmount?: number;
   startYear?: number;
   endYear?: number;
-  /** Taux de charges / fiscalité saisi manuellement (%). */
+  /** Évolution annuelle du montant (%). */
+  growthPct?: number;
+  /** Dividendes : prélèvement forfaitaire unique (par défaut) ou barème progressif. */
+  dividendTax?: "pfu" | "bareme";
+  /** Dividendes d'une SARL versés à son gérant majoritaire (part > 10 % soumise aux cotisations TNS). */
+  majorityManager?: boolean;
+  /** « Autre » : taux de charges / fiscalité saisi manuellement (%). */
   taxRatePct?: number;
   demo?: boolean;
+}
+
+/** Foyer fiscal et hypothèses de la rémunération. */
+export interface Household {
+  /** Nombre de parts de quotient familial. */
+  parts?: number;
+  /** Imposition commune (mariés ou pacsés). */
+  couple?: boolean;
+  /** Autres revenus nets imposables du foyer (€/an), hors sources saisies ici. */
+  otherIncome?: number;
+  /** Stratégie de rémunération expliquée au banquier. */
+  strategy?: string;
+  /** Hypothèses modifiables (en %). Vides = barèmes 2026 intégrés. */
+  salaryEmployeePct?: number;
+  salaryEmployerPct?: number;
+  dividendSocialPct?: number;
+  pfuIncomePct?: number;
+}
+
+/** Activité d'une société d'exploitation (SARL de bâtiment, SAS…). */
+export interface CompanyActivity {
+  /** Chiffre d'affaires annuel hors taxes. */
+  revenue?: number;
+  /** Charges annuelles hors rémunération des dirigeants (achats, sous-traitance, frais…). */
+  expenses?: number;
+  /** Évolution annuelle du chiffre d'affaires et des charges (%). */
+  growthPct?: number;
+  /** Prestations facturées aux sociétés du groupe (€/an, incluses dans le chiffre d'affaires). */
+  billed?: { companyId: Id; annualAmount?: number }[];
 }
 
 // ——— Opérations futures (plans validés ou scénarios) ———
@@ -654,6 +705,8 @@ export interface Settings {
   dismissedReminders?: string[];
   /** Durée des nouveaux baux, en années (choix du propriétaire, 3 par défaut). */
   leaseYears?: number;
+  /** Foyer fiscal et hypothèses de rémunération. */
+  household?: Household;
 }
 
 export interface AppData {

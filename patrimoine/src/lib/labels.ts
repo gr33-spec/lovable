@@ -43,10 +43,11 @@ export const PRIORITIES: { value: Priority; label: string }[] = [
 ];
 
 export const WITHDRAWAL_KINDS: { value: WithdrawalKind; label: string }[] = [
-  { value: "cca", label: "Remboursement de compte courant" },
-  { value: "salaire", label: "Salaire / rémunération" },
+  { value: "tns", label: "Rémunération de gérant majoritaire (TNS)" },
+  { value: "salaire", label: "Salaire de dirigeant assimilé salarié" },
   { value: "dividendes", label: "Dividendes" },
-  { value: "autre", label: "Autre" },
+  { value: "cca", label: "Remboursement de compte courant" },
+  { value: "autre", label: "Autre (taux saisi)" },
 ];
 
 export function labelOf<T extends string>(list: { value: T; label: string }[], value: T | undefined | null): string | undefined {
