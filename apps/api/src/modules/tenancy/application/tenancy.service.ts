@@ -1,9 +1,8 @@
 import { DomainError } from "../../../platform/errors/domain-error.js";
+import { isUuid } from "../../../platform/validation/ids.js";
 import { normalizeCompanyName } from "../domain/company-name.js";
 import type { TenantContext } from "../domain/tenant-context.js";
 import type { CompanyMembershipView, CompanyRepository } from "./company.repository.js";
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export class TenancyService {
   constructor(private readonly companies: CompanyRepository) {}
@@ -26,7 +25,7 @@ export class TenancyService {
    */
   async resolveTenant(userId: string, requestedCompanyId: string | undefined): Promise<TenantContext> {
     if (requestedCompanyId !== undefined) {
-      const membership = UUID.test(requestedCompanyId)
+      const membership = isUuid(requestedCompanyId)
         ? await this.companies.findMembership(userId, requestedCompanyId)
         : null;
       if (!membership) throw new DomainError("not_found", "Company not found");

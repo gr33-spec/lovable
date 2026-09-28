@@ -10,6 +10,8 @@ export type ErrorCode =
   | "forbidden"
   | "not_found"
   | "conflict"
+  | "request_in_progress"
+  | "payload_too_large"
   | "onboarding_required"
   | "company_selection_required"
   | "internal_error";

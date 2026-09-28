@@ -1,5 +1,6 @@
 import { Body, Controller, Get, HttpCode, Inject, Post } from "@nestjs/common";
 import { z } from "zod";
+import { Idempotent } from "../../../platform/http/idempotency.interceptor.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
 import { CurrentUser, type AuthenticatedUser } from "../../identity/index.js";
 import { TenancyService } from "../application/tenancy.service.js";
@@ -22,6 +23,7 @@ export class MeController {
 
   @Post("companies")
   @HttpCode(201)
+  @Idempotent()
   async createCompany(
     @CurrentUser() user: AuthenticatedUser,
     @Body(new ZodPipe(createCompanyBody)) body: z.infer<typeof createCompanyBody>,

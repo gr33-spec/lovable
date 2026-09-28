@@ -14,9 +14,9 @@
 ## État actuel
 
 - `packages/domain` : **52 tests** unitaires.
-- `apps/api` : **21 tests** (configuration, identité, entreprises, chantiers),
-  dont les tests d'intégration sur PostgreSQL réel et le test d'isolation
-  entre entreprises. Ce dernier a été vérifié par mutation : en retirant le
+- `apps/api` : **35 tests** (configuration, identité, entreprises, chantiers,
+  recherche, double appui, erreurs réseau), dont les tests d'intégration sur
+  PostgreSQL réel et le test d'isolation entre entreprises. Ce dernier a été vérifié par mutation : en retirant le
   filtre d'entreprise d'une requête, il échoue.
 
 Tout se lance avec `pnpm turbo run lint typecheck test build`.

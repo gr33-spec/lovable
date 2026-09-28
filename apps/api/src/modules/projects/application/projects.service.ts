@@ -1,7 +1,7 @@
 import { notFound } from "../../../platform/errors/domain-error.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { normalizeOptionalText, normalizeProjectName, type Project, type ProjectStatus } from "../domain/project.js";
-import type { ProjectPage, ProjectPatch, ProjectRepository } from "./project.repository.js";
+import type { ProjectListQuery, ProjectPage, ProjectPatch, ProjectRepository } from "./project.repository.js";
 
 export interface CreateProjectInput {
   name: string;
@@ -34,7 +34,12 @@ export class ProjectsService {
     return project;
   }
 
-  list(tenant: TenantContext, query: { status: ProjectStatus; limit: number; cursor?: string }): Promise<ProjectPage> {
+  /**
+   * Chantiers du plus récemment travaillé au plus ancien. Une recherche
+   * porte par défaut sur tous les chantiers, archivés compris : l'artisan
+   * qui cherche « Dupont » veut aussi le chantier de l'an dernier.
+   */
+  list(tenant: TenantContext, query: ProjectListQuery): Promise<ProjectPage> {
     return this.projects.list(tenant, query);
   }
 

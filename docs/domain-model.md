@@ -25,7 +25,10 @@
   Au MVP : un propriétaire par entreprise, rôles prêts pour plus tard.
 
 ### Chantiers et documents
-- **Project** — `name`, `clientName?`, `address?`, `status` (`active` | `archived`).
+- **Project** — `name`, `clientName?`, `address?`, `status` (`active` |
+  `archived`, affichés « En cours » / « Terminé »), `lastActivityAt`
+  (dernière action métier ; sert au tri). La recherche porte sur le nom,
+  le client et l'adresse, sans accents.
 - **Document** — fichier importé : `storageKey`, `originalName`, `mimeType`
   (vérifié), `sizeBytes`, `sha256`, `pageCount?`, `source` (`upload` |
   `email` | `api` | `connector`), `purpose` (`takeoff_source` |

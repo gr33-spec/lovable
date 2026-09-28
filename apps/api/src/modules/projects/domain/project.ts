@@ -11,6 +11,7 @@ export interface Project {
   status: ProjectStatus;
   createdAt: Date;
   updatedAt: Date;
+  lastActivityAt: Date;
 }
 
 const LIMITS = { name: 120, clientName: 120, address: 300 } as const;

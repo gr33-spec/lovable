@@ -179,3 +179,40 @@ Pas une décision du fondateur : c'est une vérification technique et
 contractuelle que je mène (conservation, non-entraînement, région UE, DPA),
 documentée dans un ADR avant la moindre donnée réelle. D'ici là : données
 fictives uniquement.
+
+### PD-021 — Un seul geste pour ajouter un document : le bouton +
+- **Date** : 2026-09-28 · **Statut** : Décidé (audit global, `ux-audit-2026-09-28.md`)
+- **Décision** : le bouton **+** central de la barre remplace les trois
+  boutons d'import de l'accueil. Le type (devis client, liste, devis
+  fournisseur, facture) est reconnu automatiquement ; ouvert depuis une
+  fiche chantier, le document y est rangé.
+- **Raison** : un seul emplacement à mémoriser, accessible au pouce depuis
+  tous les écrans ; supprime un doublon.
+
+### PD-022 — « Terminé » plutôt qu'« archivé », et une recherche qui voit tout
+- **Date** : 2026-09-28 · **Statut** : Décidé (audit global)
+- **Décision** : à l'écran, un chantier est « En cours » ou « Terminé »
+  (statut technique `archived` inchangé). Une recherche porte sur tous les
+  chantiers ; sans recherche, la liste montre les chantiers en cours, du
+  plus récemment travaillé au plus ancien.
+- **Impact** : API `GET /v1/projects?q=&status=`, tests dédiés.
+
+### PD-023 — Après la comparaison : « Commander chez… »
+- **Date** : 2026-09-28 · **Statut** : **Proposé — à valider par le fondateur**
+- **Proposition** : la comparaison se termine par « Commander chez
+  [fournisseur] », qui prépare un message d'accord (modifiable, envoyé
+  depuis la boîte de l'artisan) et, en option, un court remerciement aux
+  autres fournisseurs. Le chantier passe à l'étape « Commandé ».
+- **Raison** : sans cela, le parcours s'arrête au moment précis où
+  l'artisan doit agir.
+- **Question** : l'artisan commande-t-il plutôt par e-mail, par téléphone
+  ou sur le site du négoce ? Si c'est rarement par e-mail, l'action devient
+  « Marquer comme commandé » (avec le numéro du fournisseur à portée de
+  pouce).
+
+### PD-024 — Pas de suppression dans le parcours courant
+- **Date** : 2026-09-28 · **Statut** : Décidé (audit global)
+- **Décision** : un chantier se « marque terminé » (réversible) ; la
+  suppression définitive n'existe que dans les réglages, avec confirmation
+  explicite. Même principe pour les documents : retirer d'un chantier
+  n'est pas détruire.

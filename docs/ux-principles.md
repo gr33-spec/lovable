@@ -45,22 +45,23 @@
 
 Jamais de pourcentage à l'écran. Jamais la couleur seule.
 
-## Navigation proposée
+## Navigation (validée par l'audit du 2026-09-28)
 
-| Mobile (barre basse) | Contenu |
+| Mobile — barre du bas | Rôle |
 |---|---|
-| **Accueil** | « Que voulez-vous faire ? » + file « À traiter » (réponses reçues, questions en attente, relances suggérées) |
-| **Chantiers** | Liste → fiche chantier : documents, liste de matériaux, demandes de prix, offres, comparaison, factures liées |
-| **Factures** | Import, historique, écarts de prix (phase 6) |
-| **Fournisseurs** | Carnet, historique des échanges |
+| **Accueil** | « À faire » (ce qui m'attend, une action par ligne) + chantiers récents + recherche |
+| **Chantiers** | Recherche (chantier, client, adresse), filtres En cours / Terminés / Tous, fiches |
+| **+** (centre, orange) | Ajouter un document : photo, fichier ou liste écrite à la main ; type reconnu automatiquement |
+| **Fournisseurs** | Carnet, appel en un geste, historique |
+| **Factures** | Contrôle des factures (phase 6 ; état vide explicatif d'ici là) |
 
-Paramètres et compte : menu de l'avatar. Pas d'onglet « Consultations » :
-une consultation n'existe que dans un chantier ; celles en cours remontent
-dans « À traiter ». *Proposition à valider avec de vrais utilisateurs.*
+Compte et réglages : avatar en haut de l'accueil. Pas d'onglet
+« Demandes de prix » : une demande n'existe que dans un chantier.
 
-Actions de l'accueil : **Importer un document** (devis, métré, liste —
-le type est détecté), **Créer une liste de matériaux**, **Importer une
-offre fournisseur**, **Analyser mes factures**.
+Les emplacements principaux, le lexique et les règles de navigation
+(Retour, contexte dans l'adresse, brouillons, double appui) sont dans
+[ux-audit-2026-09-28.md](ux-audit-2026-09-28.md) et **s'imposent** à
+l'application web.
 
 ## Parcours type : importer → valider
 

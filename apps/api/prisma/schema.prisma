@@ -144,10 +144,37 @@ model Project {
   createdById String?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+  /// Dernière activité métier (modification, document, réponse fournisseur…).
+  /// Sert à classer les chantiers : le plus récemment travaillé en premier.
+  lastActivityAt DateTime   @default(now())
 
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
   createdBy User?   @relation("ProjectCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 
-  @@index([companyId, status, updatedAt])
+  @@index([companyId, status, lastActivityAt(sort: Desc), id(sort: Desc)])
+  // Index de recherche plein texte sans accents (pg_trgm + unaccent) :
+  // créé en SQL dans la migration *_project_activity_idempotency, Prisma ne
+  // sachant pas décrire un index sur expression.
   @@map("project")
+}
+
+// ---------------------------------------------------------------------------
+// Plateforme
+// ---------------------------------------------------------------------------
+
+/// Requêtes rejouables (en-tête Idempotency-Key) : un double appui ou une
+/// nouvelle tentative réseau ne crée jamais deux fois la même chose.
+model IdempotencyRecord {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  userId         String
+  key            String
+  requestHash    String
+  /// null tant que la requête d'origine est en cours.
+  responseStatus Int?
+  responseBody   Json?
+  createdAt      DateTime @default(now())
+
+  @@unique([userId, key])
+  @@index([createdAt])
+  @@map("idempotency_record")
 }

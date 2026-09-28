@@ -1,7 +1,11 @@
 import { Body, Controller, Get, HttpCode, Inject, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { z } from "zod";
+import { validationFailed } from "../../../platform/errors/domain-error.js";
+import { Idempotent } from "../../../platform/http/idempotency.interceptor.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
+import { isUuid } from "../../../platform/validation/ids.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
+import type { ProjectCursor } from "../application/project.repository.js";
 import { ProjectsService } from "../application/projects.service.js";
 import type { Project } from "../domain/project.js";
 
@@ -22,10 +26,27 @@ const updateBody = z
   .strict();
 
 const listQuery = z.object({
-  status: z.enum(["active", "archived"]).default("active"),
+  /** Texte libre : nom du chantier, du client ou adresse. */
+  q: z.string().trim().max(100).optional(),
+  /** Par défaut : en cours ; en recherche : tous. */
+  status: z.enum(["active", "archived", "all"]).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(30),
-  cursor: z.string().optional(),
+  cursor: z.string().max(200).optional(),
 });
+
+/** Curseur opaque pour le client : base64url de « date|id ». */
+function encodeCursor(c: ProjectCursor): string {
+  return Buffer.from(`${c.lastActivityAt.toISOString()}|${c.id}`).toString("base64url");
+}
+
+function decodeCursor(raw: string): ProjectCursor {
+  const [iso, id] = Buffer.from(raw, "base64url").toString("utf8").split("|");
+  const date = iso ? new Date(iso) : new Date(Number.NaN);
+  if (!id || !isUuid(id) || Number.isNaN(date.getTime())) {
+    throw validationFailed("Invalid cursor", [{ path: "cursor", message: "invalid" }]);
+  }
+  return { lastActivityAt: date, id };
+}
 
 function toDto(p: Project) {
   return {
@@ -36,6 +57,7 @@ function toDto(p: Project) {
     status: p.status,
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
+    lastActivityAt: p.lastActivityAt.toISOString(),
   };
 }
 
@@ -46,18 +68,21 @@ export class ProjectsController {
 
   @Post()
   @HttpCode(201)
+  @Idempotent()
   async create(@Tenant() tenant: TenantContext, @Body(new ZodPipe(createBody)) body: z.infer<typeof createBody>) {
     return toDto(await this.projects.create(tenant, body));
   }
 
   @Get()
   async list(@Tenant() tenant: TenantContext, @Query(new ZodPipe(listQuery)) query: z.infer<typeof listQuery>) {
+    const search = query.q ? query.q.split(/\s+/).filter(Boolean).slice(0, 8) : [];
     const page = await this.projects.list(tenant, {
-      status: query.status,
+      status: query.status ?? (search.length > 0 ? "all" : "active"),
       limit: query.limit,
-      ...(query.cursor ? { cursor: query.cursor } : {}),
+      ...(search.length > 0 ? { search } : {}),
+      ...(query.cursor ? { cursor: decodeCursor(query.cursor) } : {}),
     });
-    return { items: page.items.map(toDto), nextCursor: page.nextCursor };
+    return { items: page.items.map(toDto), nextCursor: page.nextCursor ? encodeCursor(page.nextCursor) : null };
   }
 
   @Get(":id")

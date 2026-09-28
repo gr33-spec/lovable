@@ -9,9 +9,26 @@ export interface NewProject {
 
 export type ProjectPatch = Partial<NewProject & { status: ProjectStatus }>;
 
+/** Filtre de statut ; « all » = en cours et archivés (utile en recherche). */
+export type ProjectStatusFilter = ProjectStatus | "all";
+
+export interface ProjectListQuery {
+  status: ProjectStatusFilter;
+  /** Mots recherchés dans le nom, le client et l'adresse (tous doivent figurer). */
+  search?: string[];
+  limit: number;
+  cursor?: ProjectCursor;
+}
+
+/** Position dans la liste triée par dernière activité. */
+export interface ProjectCursor {
+  lastActivityAt: Date;
+  id: string;
+}
+
 export interface ProjectPage {
   items: Project[];
-  nextCursor: string | null;
+  nextCursor: ProjectCursor | null;
 }
 
 /**
@@ -22,7 +39,7 @@ export interface ProjectPage {
 export interface ProjectRepository {
   create(tenant: TenantContext, data: NewProject): Promise<Project>;
   findById(tenant: TenantContext, id: string): Promise<Project | null>;
-  list(tenant: TenantContext, query: { status: ProjectStatus; limit: number; cursor?: string }): Promise<ProjectPage>;
+  list(tenant: TenantContext, query: ProjectListQuery): Promise<ProjectPage>;
   update(tenant: TenantContext, id: string, patch: ProjectPatch): Promise<Project | null>;
 }
 
