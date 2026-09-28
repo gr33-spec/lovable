@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   const rp = relyingParty(request);
   if (!rp) return NextResponse.json({ error: "Origine invalide" }, { status: 400 });
   const session = (await currentSession())!;
-  const existing = await listPasskeys(rp.rpID, session.role);
+  const existing = await listPasskeys(rp.rpID, (session.role === "gestion" ? "gestion" : "owner"));
   const options = await generateRegistrationOptions({
     rpName: "Patrimoine",
     rpID: rp.rpID,

@@ -5,6 +5,7 @@ import { Ellipsis, RotateCcw, Trash2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { Collection } from "@/lib/types";
 import { cx } from "./ui";
+import { currentToast, dismissToast, subscribeToast, toast } from "@/lib/toast";
 
 // Balayage vers la gauche d'une ligne : fait apparaître ses actions (supprimer,
 // ignorer, marquer payé…). Un balayage complet déclenche la dernière action.
@@ -158,42 +159,10 @@ export function SwipeRow({ actions, children, className, inset = true }: { actio
 
 // ——— Bandeau « Annuler » ———
 
-interface Toast {
-  id: number;
-  message: string;
-  undo?: () => void;
-}
-
-let current: Toast | null = null;
-let timer: ReturnType<typeof setTimeout> | null = null;
-const listeners = new Set<() => void>();
-const emit = () => listeners.forEach((l) => l());
-
-export function toast(message: string, undo?: () => void) {
-  current = { id: Date.now(), message, undo };
-  if (timer) clearTimeout(timer);
-  timer = setTimeout(() => {
-    current = null;
-    emit();
-  }, 6000);
-  emit();
-}
-
-function dismissToast() {
-  current = null;
-  if (timer) clearTimeout(timer);
-  emit();
-}
+export { toast } from "@/lib/toast";
 
 export function ToastHost() {
-  const t = useSyncExternalStore(
-    (l) => {
-      listeners.add(l);
-      return () => listeners.delete(l);
-    },
-    () => current,
-    () => null,
-  );
+  const t = useSyncExternalStore(subscribeToast, currentToast, () => null);
   if (!t) return null;
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-[92px] z-[70] flex justify-center px-4 lg:bottom-6 lg:pl-64">

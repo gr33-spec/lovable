@@ -24,6 +24,11 @@ export function proxy(request: NextRequest) {
     }
     return NextResponse.next();
   }
+  if (session?.role === "lecture") {
+    // Consultation via un lien de partage : tout se consulte ; chaque route d'API
+    // refuse les écritures et vérifie que le lien est toujours valable.
+    return NextResponse.next();
+  }
   if (session?.role === "gestion") {
     // Espace gestion locative : uniquement ses écrans et ses API (la révocation
     // est vérifiée ensuite par chaque page et chaque route).

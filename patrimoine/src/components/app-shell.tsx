@@ -49,6 +49,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <SaveIndicator />
+      {role === "lecture" && <ReadOnlyBanner />}
       <div className={cx(!onboarding && "lg:pl-60")}>{children}</div>
       <ToastHost />
       <PdfViewerHost />
@@ -123,6 +124,26 @@ function GestionNav({ unpaid }: { unpaid: number }) {
         })}
       </div>
     </nav>
+  );
+}
+
+/** Consultation via un lien de partage : rappel permanent, et sortie en un geste. */
+function ReadOnlyBanner() {
+  return (
+    <div className="safe-top sticky top-0 z-[45] bg-gold/95 text-navy lg:pl-60">
+      <div className="mx-auto flex items-center justify-between gap-3 px-4 py-2 text-[13px] font-semibold">
+        <span>Consultation — lecture seule : vous pouvez tout ouvrir, rien n&apos;est modifié.</span>
+        <button
+          onClick={async () => {
+            await fetch("/api/logout", { method: "POST" }).catch(() => undefined);
+            window.location.href = "/connexion";
+          }}
+          className="shrink-0 rounded-full bg-navy px-3 py-1 text-[12px] text-white"
+        >
+          Quitter
+        </button>
+      </div>
+    </div>
   );
 }
 
