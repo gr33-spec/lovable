@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { ArrowRightLeft, ClipboardCheck, DoorOpen, FileSignature, Pencil, ReceiptText, UserPlus } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { Tenancy } from "@/lib/types";
@@ -34,6 +34,11 @@ function Detail({ id }: { id: string }) {
   const [sheet, setSheet] = useState<null | "edit" | "quittance" | "import" | "sign">(null);
   const fromGestion = params.get("action") === "quittance";
   const [autoOpened, setAutoOpened] = useState(false);
+  const [extraCaution, setExtraCaution] = useState(false);
+  const latest = useRef(data);
+  useEffect(() => {
+    latest.current = data;
+  }, [data]);
   const unit = data.units.find((u) => u.id === id);
   if (!unit) {
     return (
@@ -59,6 +64,13 @@ function Detail({ id }: { id: string }) {
     const t = tenancyFromUnit(unit, company, leaseYears(data.settings));
     upsert("tenancies", t);
     return t;
+  };
+
+  // Dépôt d'un document signé : sur le bail en cours, créé à partir du logement s'il n'existe pas encore.
+  const saveTenancy = (change: (t: Tenancy) => Tenancy) => {
+    // Données les plus récentes (le dépôt se termine après l'envoi du fichier).
+    const current = activeTenancy(latest.current, id) ?? tenancyFromUnit(unit, company, leaseYears(data.settings));
+    upsert("tenancies", change(current));
   };
 
   // Ouverture directe de « Obtenir une quittance » depuis l'onglet Gestion.
@@ -170,56 +182,74 @@ function Detail({ id }: { id: string }) {
 
         </div>
         <div className="min-w-0 lg:[&>*:first-child]:mt-0">
-        {active && (
+        {(active || unit.status !== "vacant") && (
           <>
             <SectionTitle>Documents</SectionTitle>
             <Card className="py-1">
               <div className="divide-y divide-line">
-                {active.imported ? (
-                  <DocRow
-                    title="Bail"
-                    status="Signé hors application"
-                    subtitle="Complétez le dossier pour les quittances et le départ"
-                    action={
-                      <button onClick={() => setSheet("import")} className="rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-navy">
-                        Compléter
-                      </button>
-                    }
-                  />
-                ) : (
-                  <DocRow
-                    title="Bail"
-                    status={active.signatures?.landlord ? "Signé" : "À signer"}
-                    tone={active.signatures?.landlord ? "pos" : "warn"}
-                    subtitle={active.signDate ? `Conclu le ${dateFr(active.signDate)}` : undefined}
-                    url={documentUrl({ type: "bail", tenancy: active.id })}
-                    fileName={`bail-${unit.name}.pdf`}
-                    action={
-                      <button onClick={() => setSheet("sign")} className="rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-navy">
-                        Signer
-                      </button>
-                    }
+                {active &&
+                  (active.imported ? (
+                    <DocRow
+                      title="Bail"
+                      status="Signé hors application"
+                      subtitle="Complétez le dossier pour les quittances et le départ"
+                      action={
+                        <button onClick={() => setSheet("import")} className="rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-navy">
+                          Compléter
+                        </button>
+                      }
+                    />
+                  ) : (
+                    <DocRow
+                      title="Bail"
+                      status={active.signatures?.landlord ? "Signé" : "À signer"}
+                      tone={active.signatures?.landlord ? "pos" : "warn"}
+                      subtitle={active.signDate ? `Conclu le ${dateFr(active.signDate)}` : undefined}
+                      url={documentUrl({ type: "bail", tenancy: active.id })}
+                      fileName={`bail-${unit.name}.pdf`}
+                      action={
+                        <button onClick={() => setSheet("sign")} className="rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-navy">
+                          Signer
+                        </button>
+                      }
+                    />
+                  ))}
+                {/* Bail et cautions signés : toujours possibles, le dossier est créé au besoin. */}
+                <SignedDocRow title="Bail signé" file={active?.signedLease} onChange={(f) => saveTenancy((t) => ({ ...t, signedLease: f }))} />
+                {(active?.guarantors ?? []).map((g, i) => (
+                  <div key={i}>
+                    {/* Acte généré par l'application (à faire signer), puis exemplaire signé déposé. */}
+                    {active && !active.imported && g.kind === "personne" && (
+                      <DocRow title="Acte de cautionnement" subtitle={[g.firstName, g.lastName].filter(Boolean).join(" ")} url={documentUrl({ type: "caution", tenancy: active.id, index: i })} fileName={`caution-${i + 1}.pdf`} />
+                    )}
+                    <SignedDocRow
+                      title={`Caution signée — ${[g.firstName, g.lastName].filter(Boolean).join(" ") || (g.kind === "visale" ? "Visale" : `garant ${i + 1}`)}`}
+                      file={g.signedFile}
+                      details={guarantorDetails(g)}
+                      onChange={(f) => saveTenancy((t) => ({ ...t, guarantors: (t.guarantors ?? []).map((x, j) => (j === i ? { ...x, signedFile: f } : x)) }))}
+                    />
+                  </div>
+                ))}
+                {/* Caution sans garant enregistré (ou caution supplémentaire) : un garant est créé avec le document. */}
+                {(!active?.guarantors?.length || extraCaution) && (
+                  <SignedDocRow
+                    title={active?.guarantors?.length ? "Autre caution signée" : "Caution signée"}
+                    subtitle="garant non renseigné"
+                    onChange={(f) => {
+                      saveTenancy((t) => ({ ...t, guarantors: [...(t.guarantors ?? []), { kind: "personne", signedFile: f }] }));
+                      setExtraCaution(false);
+                    }}
                   />
                 )}
-                <SignedDocRow title="Bail signé" file={active.signedLease} onChange={(f) => upsert("tenancies", { ...active, signedLease: f })} />
-                {(active.guarantors ?? []).map((g, i) =>
-                  g.kind !== "personne" ? null : (
-                    <div key={i}>
-                      {/* Acte généré par l'application (à faire signer), puis exemplaire signé déposé. */}
-                      {!active.imported && <DocRow title="Acte de cautionnement" subtitle={[g.firstName, g.lastName].filter(Boolean).join(" ")} url={documentUrl({ type: "caution", tenancy: active.id, index: i })} fileName={`caution-${i + 1}.pdf`} />}
-                      <SignedDocRow
-                        title={`Caution signée — ${[g.firstName, g.lastName].filter(Boolean).join(" ") || `garant ${i + 1}`}`}
-                        file={g.signedFile}
-                        details={guarantorDetails(g)}
-                        onChange={(f) => upsert("tenancies", { ...active, guarantors: (active.guarantors ?? []).map((x, j) => (j === i ? { ...x, signedFile: f } : x)) })}
-                      />
-                    </div>
-                  ),
+                {!!active?.guarantors?.length && !extraCaution && (
+                  <button onClick={() => setExtraCaution(true)} className="w-full py-3 text-left text-[14px] font-semibold text-series-1">
+                    + Joindre une autre caution
+                  </button>
                 )}
-                <InspectionRow tenancyId={active.id} kind="entree" onStart={() => startEntry(active)} unitId={id} />
+                {active && <InspectionRow tenancyId={active.id} kind="entree" onStart={() => startEntry(active)} unitId={id} />}
               </div>
             </Card>
-            {!active.imported && <div className="mt-3"><LegalBadge refDate={active.signDate || active.startDate} /></div>}
+            {active && !active.imported && <div className="mt-3"><LegalBadge refDate={active.signDate || active.startDate} /></div>}
           </>
         )}
 
