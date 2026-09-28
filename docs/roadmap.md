@@ -7,7 +7,7 @@ d'élargir.
 
 - Documentation, ADR, décisions produit.
 - `packages/domain` : argent, quantités, unités, offres, contrôle
-  arithmétique, moteur de comparaison v0.1.0 — 51 tests.
+  arithmétique, moteur de comparaison v0.2.0 — 52 tests.
 
 ## Phase 1 — Fondations (en cours)
 

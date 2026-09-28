@@ -13,7 +13,7 @@
 
 ## État actuel
 
-- `packages/domain` : **51 tests** unitaires.
+- `packages/domain` : **52 tests** unitaires.
 - `apps/api` : **21 tests** (configuration, identité, entreprises, chantiers),
   dont les tests d'intégration sur PostgreSQL réel et le test d'isolation
   entre entreprises. Ce dernier a été vérifié par mutation : en retirant le

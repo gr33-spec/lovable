@@ -6,7 +6,9 @@
 > **Mise à jour 2026-09-28 — réponses du fondateur** : Q1 → aucun
 > utilisateur réel, BatiClair est gelé dans `legacy/baticlair/` (option B) ;
 > Q2 → devis ou quantitatif, au choix (PD-016) ; Q4 → envoi depuis la boîte
-> de l'artisan (ADR-0010, PD-017). Q3, Q5, Q6, Q7 restent ouvertes.
+> de l'artisan (ADR-0010, PD-017). Q3, Q5, Q7 → décisions déléguées
+> (« mets-toi à ma place ») : PD-011, PD-018, PD-019. Q6 → vérification
+> technique menée par le CTO.
 >
 > Statut des éléments : **DÉCIDÉ** (je tranche), **PROPOSÉ** (ma
 > recommandation, validation souhaitée), **À DÉCIDER** (ta décision est
@@ -328,7 +330,7 @@ Détails : [ux-principles.md](ux-principles.md).
 
 ## 18. Stratégie de tests
 
-Pyramide : noyau métier très couvert (déjà 51 cas) → intégration avec un
+Pyramide : noyau métier très couvert (déjà 52 cas) → intégration avec un
 vrai PostgreSQL (dont tests d'isolation inter-entreprises) → adapters
 testés sur réponses enregistrées → E2E Playwright du parcours complet avec
 un faux fournisseur IA → évaluations IA séparées. Détails : [testing.md](testing.md).
@@ -373,11 +375,11 @@ les seuils de confiance initiaux (recalibrés par les évaluations).
 |---|---|---|---|
 | Q1 | Sort de BatiClair | ✅ Répondu : gelé dans `legacy/` | — |
 | Q2 | Documents de départ | ✅ Répondu : devis ou quantitatif (PD-016). Documents d'exemple toujours souhaités | Avant la fin de la phase 2 |
-| Q3 | Conditionnement : comparer le facturé ou le ramené au besoin (§46) | Non (le moteur calcule déjà les deux) | Avant la phase 3 |
+| Q3 | Conditionnement | ✅ Décidé : coût réellement payé pour couvrir le besoin (PD-011) | — |
 | Q4 | Identité d'envoi des demandes aux fournisseurs | ✅ Répondu : depuis la boîte de l'artisan (ADR-0010) | — |
-| Q5 | Essai gratuit, plans, multi-utilisateurs, quotas (§72, §132) | Non | Avant la phase 5 |
-| Q6 | Fournisseur IA et hébergement de production (contrats, région) | Non | Fin de phase 2 |
-| Q7 | Politique de conservation des documents | Non | Avant la phase 5 |
+| Q5 | Essai gratuit, plans, multi-utilisateurs, quotas | ✅ Décidé : 30 jours sans carte (PD-018), révisable | — |
+| Q6 | Fournisseur IA et hébergement de production | Vérification menée par le CTO | Fin de phase 2 |
+| Q7 | Conservation des documents | ✅ Décidé (PD-019), validation juridique avant lancement | — |
 
 ## 23. Mes questions importantes
 

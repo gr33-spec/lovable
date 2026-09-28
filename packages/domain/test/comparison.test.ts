@@ -13,11 +13,11 @@ const money = (m: Money | null | undefined) => m?.toString();
 describe("compareOffers — chantier Dupont", () => {
   it("calcule les totaux fournisseur (faits) et comparables (estimations)", () => {
     expect(money(supplier("A").computedTotalHT)).toBe("4897.40 EUR");
-    expect(money(supplier("A").comparableTotalHT)).toBe("4891.10 EUR");
+    expect(money(supplier("A").comparableTotalHT)).toBe("4897.40 EUR");
     expect(supplier("A").comparability).toBe("complete");
 
     expect(money(supplier("B").computedTotalHT)).toBe("4282.80 EUR");
-    expect(money(supplier("B").comparableTotalHT)).toBe("4951.95 EUR");
+    expect(money(supplier("B").comparableTotalHT)).toBe("4984.95 EUR");
     expect(money(supplier("B").estimatedPartHT)).toBe("702.15 EUR");
     expect(supplier("B").comparability).toBe("estimated");
 
@@ -45,7 +45,7 @@ describe("compareOffers — chantier Dupont", () => {
   it("recommande l'offre la moins chère seulement si elle est complète", () => {
     const [best] = findings("BEST_COMPARABLE_OFFER");
     expect(best).toMatchObject({ supplierId: "A", otherSupplierId: "B", nature: "RECOMMENDATION" });
-    expect(money(best!.amount)).toBe("60.85 EUR");
+    expect(money(best!.amount)).toBe("87.55 EUR");
   });
 
   it("ramène le conditionnement à la quantité demandée sans perdre le facturé", () => {
@@ -58,6 +58,16 @@ describe("compareOffers — chantier Dupont", () => {
     const crochetsB = item("crochets", "B");
     expect(crochetsB.offeredQuantity?.toString()).toBe("500 U");
     expect(money(crochetsB.normalizedAmount)).toBe("77.00 EUR");
+  });
+
+  it("compte le conditionnement entier dans le coût pour couvrir le besoin (PD-011)", () => {
+    // Rouleaux : 94 m² payés pour 91 demandés → coût réel 197,40, prix ramené 191,10
+    expect(money(item("ecran", "A").comparableAmount)).toBe("197.40 EUR");
+    expect(money(item("ecran", "A").normalizedAmount)).toBe("191.10 EUR");
+    // Boîte de 500 crochets pour 350 demandés → la boîte entière (110) est payée
+    expect(money(item("crochets", "B").comparableAmount)).toBe("110.00 EUR");
+    // Quantité proposée insuffisante : on complète au prix du fournisseur
+    expect(money(item("liteaux", "C").comparableAmount?.roundToCents())).toBe("366.66 EUR");
   });
 
   it("répartit la remise globale et signale une quantité inférieure", () => {

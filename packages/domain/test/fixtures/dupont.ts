@@ -11,9 +11,9 @@
  *   livraison 145 €, consigne palettes, ligne non demandée, remise globale 3 %,
  *   et un total imprimé qui additionne l'option par erreur.
  *
- * Totaux attendus (calculés à la main, HT) :
- * - A : total calculé 4 897,40 ; comparable 4 891,10 (complet)
- * - B : total calculé 4 282,80 ; comparable 4 951,95 (dont 702,15 estimés)
+ * Totaux attendus (calculés à la main, HT, règle PD-011 : conditionnement payé en entier) :
+ * - A : total calculé 4 897,40 ; comparable 4 897,40 (complet)
+ * - B : total calculé 4 282,80 ; comparable 4 984,95 (dont 702,15 estimés)
  * - C : total calculé 5 093,50 ; imprimé 5 453,50 ; comparable 5 036,71 (provisoire)
  */
 import {

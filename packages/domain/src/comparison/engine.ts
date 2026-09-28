@@ -27,7 +27,7 @@ import type {
  * Version du moteur, enregistrée avec chaque comparaison pour pouvoir
  * expliquer / rejouer un résultat. À incrémenter à chaque changement de règle.
  */
-export const COMPARISON_ENGINE_VERSION = "0.1.0";
+export const COMPARISON_ENGINE_VERSION = "0.2.0";
 
 export const DEFAULT_COMPARISON_CONFIG: ComparisonConfig = {
   categoryGapMinRatio: new Decimal("0.10"),
@@ -61,17 +61,17 @@ export function compareOffers(
   // 2. Estimation des manquants à partir des autres fournisseurs.
   const notQuotedByAnyone: string[] = [];
   for (const cmp of items) {
-    const priced = cmp.offers.filter((o) => o.status === "covered" && o.normalizedAmount);
+    const priced = cmp.offers.filter((o) => o.status === "covered" && o.comparableAmount);
     if (priced.length === 0) {
       notQuotedByAnyone.push(cmp.itemId);
       continue;
     }
-    const reference = Money.of(median(priced.map((o) => o.normalizedAmount!.amount)));
+    const reference = Money.of(median(priced.map((o) => o.comparableAmount!.amount)));
     for (const o of cmp.offers) {
       if (o.status === "missing") o.estimatedAmount = reference;
     }
     cmp.lowestSupplierId = [...priced].sort((a, b) =>
-      a.normalizedAmount!.compare(b.normalizedAmount!),
+      a.comparableAmount!.compare(b.comparableAmount!),
     )[0]!.supplierId;
   }
   if (notQuotedByAnyone.length > 0) {
@@ -122,6 +122,7 @@ function evaluateItem(
     offeredQuantity: null,
     billedAmount: null,
     normalizedAmount: null,
+    comparableAmount: null,
     effectiveUnitPrice: null,
     estimatedAmount: null,
     flags: [],
@@ -164,6 +165,7 @@ function evaluateItem(
   }
 
   let normalized: Money | null = null;
+  let comparable: Money | null = null;
   let unitPrice: Money | null = null;
   if (billed && offered && !offered.value.isZero()) {
     unitPrice = billed.divide(offered.value);
@@ -171,10 +173,14 @@ function evaluateItem(
     const cmp = offered.value.comparedTo(item.quantity.value);
     if (cmp < 0) flags.push("QUANTITY_LOWER");
     if (cmp > 0) flags.push("QUANTITY_HIGHER");
+    // PD-011 : on paie le conditionnement entier ; s'il manque de la
+    // quantité, on complète au prix unitaire du fournisseur.
+    comparable = cmp >= 0 ? billed : normalized;
   } else if (billed) {
     // Impossible de ramener à la quantité demandée : on garde le facturé,
     // signalé comme non comparable.
     normalized = billed;
+    comparable = billed;
   }
 
   return {
@@ -185,6 +191,7 @@ function evaluateItem(
     offeredQuantity: offered,
     billedAmount: billed,
     normalizedAmount: normalized,
+    comparableAmount: comparable,
     effectiveUnitPrice: unitPrice,
     flags,
   };
@@ -223,8 +230,8 @@ function summarizeSupplier(
   let computable = true;
   for (const { itemId, r } of results) {
     if (!commonBase.has(itemId)) continue;
-    if (r.status === "covered" && r.normalizedAmount) {
-      comparable = comparable.add(r.normalizedAmount);
+    if (r.status === "covered" && r.comparableAmount) {
+      comparable = comparable.add(r.comparableAmount);
     } else if (r.estimatedAmount) {
       comparable = comparable.add(r.estimatedAmount);
       estimated = estimated.add(r.estimatedAmount);
@@ -385,7 +392,8 @@ function rankingFindings(suppliers: SupplierSummary[]): Finding[] {
 
 /**
  * « X est 18 % moins cher que Y sur le bardage » : calculé uniquement sur
- * les besoins de la famille couverts par LES DEUX fournisseurs.
+ * les besoins de la famille couverts par LES DEUX fournisseurs, à niveau de
+ * prix égal (montants ramenés au besoin, sans l'effet des conditionnements).
  */
 function categoryFindings(
   requested: RequestedItem[],

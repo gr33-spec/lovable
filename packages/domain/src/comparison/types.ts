@@ -54,6 +54,12 @@ export interface ItemOfferResult {
   billedAmount: Money | null;
   /** Montant HT ramené à la quantité demandée (prix unitaire effectif × besoin). */
   normalizedAmount: Money | null;
+  /**
+   * Coût pour couvrir le besoin (PD-011) : le montant facturé si la quantité
+   * proposée couvre le besoin (on paie le conditionnement entier), sinon le
+   * montant ramené au besoin avec le prix du fournisseur.
+   */
+  comparableAmount: Money | null;
   /** Prix unitaire effectif HT dans l'unité du besoin, remises comprises. */
   effectiveUnitPrice: Money | null;
   /** Estimation pour un besoin manquant (médiane des autres fournisseurs). */
@@ -64,7 +70,7 @@ export interface ItemOfferResult {
 export interface ItemComparison {
   itemId: string;
   offers: ItemOfferResult[];
-  /** Fournisseur au montant normalisé le plus bas parmi ceux qui couvrent le besoin. */
+  /** Fournisseur au coût le plus bas pour couvrir le besoin. */
   lowestSupplierId: string | null;
 }
 
@@ -91,8 +97,9 @@ export interface SupplierSummary {
   missingCount: number;
   uncertainCount: number;
   /**
-   * ESTIMATION : coût pour la base commune des besoins, quantités demandées,
-   * frais inclus, consignes et articles non demandés exclus, manquants estimés.
+   * ESTIMATION : coût pour couvrir la base commune des besoins (conditionnements
+   * payés en entier), frais inclus, consignes et articles non demandés
+   * exclus, manquants estimés.
    */
   comparableTotalHT: Money | null;
   /** Part estimée (non chiffrée par ce fournisseur) du total comparable. */
