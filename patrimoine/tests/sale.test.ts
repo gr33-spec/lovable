@@ -92,3 +92,14 @@ test("vente : reprise dans le dossier banque (groupe et société seule)", async
   const sub = companySubset(d, "c");
   assert.equal(groupModel(sub, project(sub, NOW), "SCI").sales.length, 1);
 });
+
+test("renumérotation : échange des numéros de lots, le reste ne bouge pas", async () => {
+  const { swappedNames, cleanLotNote } = await import("../src/lib/renumber");
+  const u = (name: string) => ({ id: name, buildingId: "b", name });
+  assert.deepEqual(swappedNames(u("Lot 5 R+2 droit"), u("Lot 6 R+2 gauche")), ["Lot 6 R+2 droit", "Lot 5 R+2 gauche"]);
+  assert.deepEqual(swappedNames(u("Lot 2 · PMR"), u("Lot 10")), ["Lot 10 · PMR", "Lot 2"]);
+  assert.deepEqual(swappedNames(u("Local commercial"), u("Lot 3")), ["Lot 3", "Local commercial"]);
+  const t = { id: "t", unitId: "x", status: "actif" as const, tenants: [], notes: "Lot 6 selon le bail. Loyer en vigueur depuis le 01/02/2026." };
+  assert.equal(cleanLotNote(t, "Lot 6 R+2 droit").notes, "Loyer en vigueur depuis le 01/02/2026.");
+  assert.equal(cleanLotNote(t, "Lot 5").notes, t.notes);
+});
