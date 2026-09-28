@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { BellRing, Check, ChevronRight, FileSignature, Landmark, Trash2, TrendingUp, TriangleAlert, X } from "lucide-react";
+import { BellRing, Check, CheckCheck, ChevronRight, FileSignature, Landmark, Trash2, TrendingUp, TriangleAlert, X } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { RentPayment, Unit } from "@/lib/types";
 import { LEASE_TYPES, REVISIONS } from "@/lib/labels";
@@ -19,6 +19,8 @@ import {
 } from "@/lib/engine/leases";
 import { RevisionSheet, revisionLetterUrl } from "./gestion/revision";
 import { openDocument } from "./pdf-viewer";
+import { upToDate } from "@/lib/payments";
+import { toast } from "@/lib/toast";
 import { SwipeRow, useDismiss, useUndoableUpdate, type SwipeAction } from "./swipe";
 import { settleUnpaid, skipRevision } from "@/lib/revision";
 import { DateField, Details, Grid2, IconChip, NumberField, SelectField, TextField, cx, type ChipTone } from "./ui";
@@ -141,16 +143,34 @@ function RevisionTool({ unit }: { unit: Unit }) {
 // ——— Encaissements d'un logement (12 derniers mois) ———
 
 export function PaymentStrip({ unit }: { unit: Unit }) {
+  const { data, upsert } = useStore();
   const current = monthKey(todayIso());
   const months = Array.from({ length: 12 }, (_, i) => shiftMonthKey(current, i - 11));
   const unpaid = Object.values(unit.payments ?? {}).reduce((s, p) => s + outstanding(p), 0);
+  // Locataire à jour : tous les mois non pointés depuis son entrée passent à « payé » (annulable).
+  const markUpToDate = () => {
+    const r = upToDate(data, unit, todayIso());
+    if (!r.months.length) {
+      toast("Tous les mois depuis l'entrée sont déjà pointés.");
+      return;
+    }
+    upsert("units", { ...unit, payments: r.payments });
+    toast(`À jour : ${r.months.length} mois marqués payés depuis ${monthKeyLabel(r.months[0])}`, () => upsert("units", unit));
+  };
   return (
     <div>
-      <div className="mb-1.5 flex items-center justify-between px-1 text-[13px] font-medium text-ink-2">
+      <div className="mb-1.5 flex items-center justify-between gap-2 px-1 text-[13px] font-medium text-ink-2">
         <span>Encaissements (12 mois)</span>
-        <Link href={`/gestion?vue=loyers&mois=${current}`} className="font-semibold text-series-1">
-          Pointer
-        </Link>
+        <span className="flex items-center gap-3">
+          {unit.status !== "vacant" && (
+            <button onClick={markUpToDate} className="flex items-center gap-1 rounded-full bg-pos/10 px-2.5 py-1 font-semibold text-pos">
+              <CheckCheck size={14} /> À jour
+            </button>
+          )}
+          <Link href={`/gestion?vue=loyers&mois=${current}`} className="font-semibold text-series-1">
+            Pointer
+          </Link>
+        </span>
       </div>
       <div className="grid grid-cols-12 gap-1">
         {months.map((k) => {
