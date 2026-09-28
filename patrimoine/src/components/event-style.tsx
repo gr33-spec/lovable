@@ -1,4 +1,4 @@
-import { BadgeEuro, Flag, Hammer, Landmark, RefreshCw, ShoppingCart, TrendingUp } from "lucide-react";
+import { BadgeEuro, Flag, Hammer, HandCoins, Landmark, RefreshCw, ShoppingCart, TrendingUp } from "lucide-react";
 import type { EventKind } from "@/lib/engine/projection";
 
 export const KIND_STYLE: Record<EventKind, { color: string; icon: React.ReactNode; label: string }> = {
@@ -11,4 +11,5 @@ export const KIND_STYLE: Record<EventKind, { color: string; icon: React.ReactNod
   refinance: { color: "bg-navy text-white", icon: <RefreshCw size={12} />, label: "Refinancement" },
   prepayment: { color: "bg-navy text-white", icon: <BadgeEuro size={12} />, label: "Remb. anticipé" },
   event: { color: "bg-gold text-white", icon: <Flag size={12} />, label: "Événement" },
+  income: { color: "bg-[#7c5cc4] text-white", icon: <HandCoins size={12} />, label: "Rémunération" },
 };

@@ -1,6 +1,8 @@
 import type { Action, AppData, Building, Unit } from "../types";
 import { monthIndex, parseMonth, yearOf, type MonthIndex } from "./dates";
 import { inProjection, projectCompanyKey, projectFigures } from "./projects";
+import { activityFor, amountFor, corporateTax } from "../fiscal/remuneration";
+import { WITHDRAWAL_KINDS, labelOf } from "../labels";
 import { annuityPayment, stepLoan, type LoanState } from "./loan";
 import {
   NO_COMPANY,
@@ -33,6 +35,8 @@ export interface YearRow {
   /** Flux ponctuels de l'année (non annualisés). */
   works: number;
   withdrawals: number;
+  /** Résultat des sociétés d'exploitation après IS (hors rémunérations, déjà comptées). */
+  business: number;
   balloons: number;
   operations: number;
   /** Nombre de crédits en cours au 31/12. */
@@ -48,7 +52,8 @@ export type EventKind =
   | "refinance"
   | "prepayment"
   | "event"
-  | "acquisition";
+  | "acquisition"
+  | "income";
 
 export interface TimelineEvent {
   id: string;
@@ -131,6 +136,7 @@ function emptyRow(year: number): YearRow {
     cashflow: 0,
     works: 0,
     withdrawals: 0,
+    business: 0,
     balloons: 0,
     operations: 0,
     activeLoans: 0,
@@ -354,6 +360,21 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
       source: "plan",
       refId: p.id,
     });
+  }
+
+  // Rémunérations : début et fin, repères de la chronologie.
+  const activityCompanies = data.companies.filter((c) => c.activity && (c.activity.revenue || c.activity.expenses));
+  for (const w of data.withdrawals) {
+    if (!w.annualAmount || w.kind === "cca") continue;
+    const who = [w.person, companyName(w.companyId ?? "")].filter(Boolean).join(" · ");
+    const kind = labelOf(WITHDRAWAL_KINDS, w.kind) ?? "Rémunération";
+    const start = w.startYear ?? y0;
+    if (start > y0 && start <= y0 + horizon) {
+      events.push({ id: `income-${w.id}`, kind: "income", month: monthIndex(start, 1), year: start, companyKey: w.companyId ?? NO_COMPANY, label: `${kind}${who ? ` — ${who}` : ""}`, amount: w.annualAmount, source: "real", refId: w.id });
+    }
+    if (w.endYear !== undefined && w.endYear >= y0 && w.endYear < y0 + horizon) {
+      events.push({ id: `income-end-${w.id}`, kind: "income", month: monthIndex(w.endYear + 1, 1), year: w.endYear + 1, companyKey: w.companyId ?? NO_COMPANY, label: `Fin : ${kind.toLowerCase()}${who ? ` — ${who}` : ""}`, source: "real", refId: w.id });
+    }
   }
 
   // ——— Boucle mensuelle ———
@@ -622,14 +643,28 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
     }
 
     for (const w of data.withdrawals) {
-      if (!w.annualAmount) continue;
-      const start = w.startYear ?? y0;
-      const end = w.endYear ?? y0 + horizon;
-      if (year < start || year > end) continue;
+      const annual = amountFor(w, year, y0);
+      if (!annual) continue;
       const key = w.companyId ?? NO_COMPANY;
-      const amount = w.annualAmount / 12;
+      const amount = annual / 12;
       rowFor(key, year).withdrawals += amount;
       addTreasury(key, -amount);
+    }
+
+    // Sociétés d'exploitation : résultat après impôt sur les sociétés, et prestations facturées aux sociétés du groupe.
+    for (const c of activityCompanies) {
+      const { revenue, expenses } = activityFor(c, year, y0);
+      const remuneration = data.withdrawals.filter((w) => w.companyId === c.id && (w.kind === "tns" || w.kind === "salaire")).reduce((s, w) => s + amountFor(w, year, y0), 0);
+      const result = (revenue - expenses - corporateTax(revenue - expenses - remuneration)) / 12;
+      rowFor(c.id, year).business += result;
+      addTreasury(c.id, result);
+      const g = Math.pow(1 + (c.activity?.growthPct ?? 0) / 100, Math.max(0, year - y0));
+      for (const b of c.activity?.billed ?? []) {
+        if (!b.annualAmount || !b.companyId) continue;
+        const billed = (b.annualAmount * g) / 12;
+        rowFor(b.companyId, year).charges += billed;
+        addTreasury(b.companyId, -billed);
+      }
     }
 
     // Clôture d'année : valeurs de stock.
