@@ -1,5 +1,7 @@
 "use client";
 
+import { useInGestion } from "../use-gestion";
+import { unitCrumbs } from "@/lib/crumbs";
 import { goBack } from "@/lib/nav";
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -25,6 +27,7 @@ const uid = () => crypto.randomUUID();
 function Editor({ unitId, inspectionId }: { unitId: string; inspectionId: string }) {
   const { data, upsert } = useStore();
   const router = useRouter();
+  const inGestion = useInGestion();
   const back = useSearchParams().get("retour") || `/patrimoine/logement/${unitId}`;
   const insp = data.inspections.find((i) => i.id === inspectionId);
   const unit = data.units.find((u) => u.id === unitId);
@@ -66,7 +69,7 @@ function Editor({ unitId, inspectionId }: { unitId: string; inspectionId: string
 
   return (
     <>
-      <PageHeader title={exit ? "État des lieux de sortie" : "État des lieux d'entrée"} subtitle={`${building?.name ?? ""} · ${unit.name}`} back={back} />
+      <PageHeader title={exit ? "État des lieux de sortie" : "État des lieux d'entrée"} crumbs={unitCrumbs(data, unit, inGestion, true)} back={back} />
       <Page>
         <Card>
           <DateField label="Date de l'état des lieux" value={insp.date} onChange={(v) => set({ date: v })} />

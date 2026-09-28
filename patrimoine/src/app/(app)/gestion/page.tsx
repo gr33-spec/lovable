@@ -41,31 +41,30 @@ function Gestion() {
   };
 
   const missing = missingCount(data);
+  // Trois rubriques : ce qu'il y a à faire, l'argent (mois par mois ou sur l'année), les locataires.
   const TABS: { value: View; label: string; badge?: number; red?: boolean }[] = [
     { value: "afaire", label: "À faire", badge: todo },
     { value: "loyers", label: "Loyers" },
     { value: "locataires", label: "Locataires", badge: missing, red: true },
-    { value: "annee", label: "Bilan" },
   ];
+  const tab: View = view === "annee" ? "loyers" : view;
 
   return (
     <>
       <PageHeader
-        title={gestion ? { afaire: "À faire", loyers: "Loyers", locataires: "Locataires", annee: "Bilan de l'année" }[view] : "Gestion"}
-        subtitle={gestion ? data.settings.groupName || "Gestion locative" : "Loyers, locataires et démarches"}
+        title={gestion ? { afaire: "À faire", loyers: "Loyers", locataires: "Locataires", annee: "Loyers" }[view] : "Gestion locative"}
+        subtitle={gestion ? data.settings.groupName || "Gestion locative" : "À faire, loyers et locataires"}
         action={
           role === "gestion" ? (
             <Link href="/plus/securite" aria-label="Mon compte" className="flex h-10 w-10 items-center justify-center rounded-full bg-soft text-navy">
               <UserRound size={19} />
             </Link>
-          ) : (
-            <button
-              onClick={() => switchView(gestion ? "patrimoine" : "gestion")}
-              className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-3.5 text-[13px] font-semibold text-navy"
-            >
-              <ArrowLeftRight size={15} /> {gestion ? "Patrimoine" : "Vue gestion"}
+          ) : gestion ? (
+            // Propriétaire qui regarde l'espace d'Enora : une seule sortie, explicite.
+            <button onClick={() => switchView("patrimoine")} className="flex h-10 items-center gap-1.5 rounded-full bg-navy px-3.5 text-[13px] font-semibold text-white">
+              <ArrowLeftRight size={15} /> Quitter l&apos;aperçu
             </button>
-          )
+          ) : undefined
         }
       />
       <Page>
@@ -74,7 +73,7 @@ function Gestion() {
             <button
               key={t.value}
               onClick={() => setView(t.value)}
-              className={cx("relative flex-1 rounded-xl px-1 py-2.5 text-[14px] font-semibold transition", view === t.value ? "bg-card text-navy shadow-sm" : "text-ink-2")}
+              className={cx("relative flex-1 rounded-xl px-1 py-2.5 text-[14px] font-semibold transition", tab === t.value ? "bg-card text-navy shadow-sm" : "text-ink-2")}
             >
               {t.label}
               {t.badge ? <span className={cx("ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white", t.red ? "bg-neg" : "bg-warn")}>{t.badge}</span> : null}
@@ -82,7 +81,19 @@ function Gestion() {
           ))}
         </div>
 
-        <div className={cx(!gestion && "mt-4")}>
+        {tab === "loyers" && (
+          <div className={cx("flex justify-center", !gestion && "mt-3")}>
+            <div className="inline-flex rounded-full bg-black/5 p-0.5 text-[13px] font-semibold">
+              {(["loyers", "annee"] as const).map((v) => (
+                <button key={v} onClick={() => setView(v)} className={cx("rounded-full px-4 py-1.5 transition", view === v ? "bg-card text-navy shadow-sm" : "text-ink-2")}>
+                  {v === "loyers" ? "Mois par mois" : "Sur l'année"}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className={cx(!gestion && "mt-4", gestion && tab === "loyers" && "mt-3")}>
           {view === "afaire" && <TodayView onOpen={setView} />}
           {view === "loyers" && <RentsView />}
           {view === "locataires" && <TenantsView />}

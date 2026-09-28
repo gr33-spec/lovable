@@ -1,6 +1,7 @@
 "use client";
 
 import { goBack, openOverlay } from "@/lib/nav";
+import type { Crumb } from "@/lib/crumbs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
@@ -20,11 +21,14 @@ export function PageHeader({
   subtitle,
   back,
   action,
+  crumbs,
 }: {
   title: string;
   subtitle?: ReactNode;
   back?: string | boolean;
   action?: ReactNode;
+  /** Parents de l'écran (Patrimoine › Société › Immeuble) : on voit où l'on est et on remonte d'un appui. */
+  crumbs?: Crumb[];
 }) {
   const router = useRouter();
   return (
@@ -41,6 +45,22 @@ export function PageHeader({
           </button>
         )}
         <div className="min-w-0 flex-1">
+          {crumbs && crumbs.length > 0 && (
+            <nav aria-label="Vous êtes ici" className="flex min-w-0 items-center gap-1 overflow-hidden whitespace-nowrap text-[12.5px] font-medium text-muted">
+              {crumbs.map((c, i) => (
+                <span key={`${c.label}-${i}`} className={cx("flex min-w-0 items-center gap-1", i < crumbs.length - 1 ? "shrink-[2]" : "shrink")}>
+                  {i > 0 && <ChevronRight size={12} className="shrink-0 text-muted/60" />}
+                  {c.href ? (
+                    <Link href={c.href} className="truncate hover:text-navy hover:underline">
+                      {c.label}
+                    </Link>
+                  ) : (
+                    <span className="truncate">{c.label}</span>
+                  )}
+                </span>
+              ))}
+            </nav>
+          )}
           {/* Titres longs : taille réduite et deux lignes plutôt qu'un titre coupé. */}
           <h1
             className={cx(

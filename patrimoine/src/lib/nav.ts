@@ -19,6 +19,8 @@ import { usePathname } from "next/navigation";
 type Hist = { __idx?: number; __key?: string; __overlay?: string; __dead?: boolean } & Record<string, unknown>;
 
 let installed = false;
+/** Rubrique du dernier écran affiché. */
+let lastSection: Section | null = null;
 let hydrated = false;
 let restoring = false;
 /** Entrée affichée au dernier changement d'écran (sert au défilement). */
@@ -145,6 +147,15 @@ export function afterRouteChange() {
 
 function applyRoute() {
   const k = curKey();
+  // Rubrique de l'écran affiché : gardée avec son entrée, transmise aux écrans ouverts depuis lui.
+  if (k) {
+    const root = rootSection(location.pathname, location.search);
+    const sec = root ?? (saved.state[`${k}|§`] as Section | undefined) ?? lastSection ?? "patrimoine";
+    saved.state[`${k}|§`] = sec;
+    lastSection = sec;
+    touch(k);
+    persist();
+  }
   if (!k || k === shownKey) return;
   shownKey = k;
   // Clé déjà connue = retour (ou avance) sur une entrée existante.
@@ -159,6 +170,33 @@ function applyRoute() {
     else requestAnimationFrame(() => (restoring = false));
   };
   step();
+}
+
+// ——— Rubrique (onglet) ———
+
+export type Section = "accueil" | "patrimoine" | "gestion" | "plus";
+
+/** Rubrique d'un écran de premier niveau ; null pour une fiche, qui garde la rubrique d'où on l'a ouverte. */
+export function rootSection(pathname: string, search = ""): Section | null {
+  if (pathname === "/") return "accueil";
+  if (pathname === "/patrimoine") return "patrimoine";
+  if (pathname === "/gestion") return "gestion";
+  if (pathname.startsWith("/plus") || pathname.startsWith("/simulations") || pathname.startsWith("/chronologie")) return "plus";
+  if (search.includes("depuis=gestion")) return "gestion";
+  return null;
+}
+
+/**
+ * Onglet à mettre en évidence : une fiche (immeuble, lot, crédit…) reste dans
+ * la rubrique d'où l'utilisateur l'a ouverte (un lot ouvert depuis Gestion
+ * reste dans Gestion), pour qu'il sache toujours où il se trouve.
+ */
+export function useSection(): Section {
+  const pathname = usePathname();
+  const root = rootSection(pathname, typeof window === "undefined" ? "" : location.search);
+  if (root) return root;
+  if (typeof window === "undefined" || !hydrated) return "patrimoine";
+  return (saved.state[`${curKey()}|§`] as Section | undefined) ?? lastSection ?? "patrimoine";
 }
 
 /** Existe-t-il un écran précédent dans l'application (même onglet) ? */
@@ -217,7 +255,8 @@ export function replaceQuery(params: Record<string, string | undefined>) {
     if (v === undefined || v === "") u.searchParams.delete(k);
     else u.searchParams.set(k, v);
   }
-  if (u.href !== location.href) history.replaceState(history.state, "", u.pathname + u.search + u.hash);
+  // Sans l'état interne de Next.js : il se met alors à jour (useSearchParams suit l'adresse).
+  if (u.href !== location.href) history.replaceState(null, "", u.pathname + u.search + u.hash);
 }
 
 /**

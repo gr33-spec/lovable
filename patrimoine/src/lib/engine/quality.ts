@@ -36,7 +36,7 @@ export function qualityIssues(data: AppData, snap: Snapshot): QualityIssue[] {
   }
   for (const w of data.works) {
     if (w.status !== "termine" && !w.year) {
-      issues.push({ id: `w-${w.id}`, label: w.label, detail: "Travaux sans année prévue", href: `/plus/travaux`, severity: "advice" });
+      issues.push({ id: `w-${w.id}`, label: w.label, detail: "Travaux sans année prévue", href: `/patrimoine?vue=travaux`, severity: "advice" });
     }
   }
   return issues;

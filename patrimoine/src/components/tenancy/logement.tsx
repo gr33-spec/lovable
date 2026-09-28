@@ -1,5 +1,7 @@
 "use client";
 
+import { useInGestion } from "../use-gestion";
+import { unitCrumbs } from "@/lib/crumbs";
 import { goBack } from "@/lib/nav";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -31,11 +33,12 @@ export function LogementDetail({ id }: { id: string }) {
 }
 
 function Detail({ id }: { id: string }) {
-  const { data, upsert, removeMany, role, view } = useStore();
+  const { data, upsert, removeMany, role } = useStore();
   const router = useRouter();
   const params = useSearchParams();
   const [sheet, setSheet] = useState<null | "edit" | "quittance" | "import" | "sign">(null);
   const fromGestion = params.get("action") === "quittance";
+  const inGestion = useInGestion();
   const [autoOpened, setAutoOpened] = useState(false);
   const [extraCaution, setExtraCaution] = useState(false);
   const latest = useRef(data);
@@ -96,8 +99,8 @@ function Detail({ id }: { id: string }) {
     <>
       <PageHeader
         title={unit.name}
-        subtitle={[building?.name, company?.name].filter(Boolean).join(" · ")}
-        back={view === "gestion" || fromGestion || params.get("depuis") === "gestion" ? "/gestion?vue=locataires" : building ? `/patrimoine/immeuble/${building.id}` : "/patrimoine"}
+        crumbs={unitCrumbs(data, unit, inGestion)}
+        back={inGestion || fromGestion ? "/gestion?vue=locataires" : building ? `/patrimoine/immeuble/${building.id}` : "/patrimoine"}
         action={
           <button onClick={() => setSheet("edit")} className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-navy">
             <Pencil size={15} /> Modifier

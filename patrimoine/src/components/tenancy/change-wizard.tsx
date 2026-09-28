@@ -1,5 +1,7 @@
 "use client";
 
+import { useInGestion } from "../use-gestion";
+import { unitCrumbs } from "@/lib/crumbs";
 import { goBack, replaceQuery } from "@/lib/nav";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -65,6 +67,7 @@ export function ChangeTenantWizard({ unitId }: { unitId: string }) {
 
 function Wizard({ unitId }: { unitId: string }) {
   const { data, upsert } = useStore();
+  const inGestion = useInGestion();
   const requested = useSearchParams().get("etape") as StepId | null;
   const router = useRouter();
   const unit = data.units.find((u) => u.id === unitId);
@@ -150,7 +153,7 @@ function Wizard({ unitId }: { unitId: string }) {
 
   return (
     <>
-      <PageHeader title={outgoing || legacy ? "Changer de locataire" : "Nouveau locataire"} subtitle={`${building?.name ?? ""} · ${unit.name}`} back={back} />
+      <PageHeader title={outgoing || legacy ? "Changer de locataire" : "Nouveau locataire"} crumbs={unitCrumbs(data, unit, inGestion, true)} back={back} />
       <Page>
         {/* Progression */}
         <div className="no-scrollbar -mx-4 flex gap-1.5 overflow-x-auto px-4 pb-3">

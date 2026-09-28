@@ -270,7 +270,7 @@ export function RemindersCard({ items, limit = 3 }: { items: Reminder[]; limit?:
           <BellRing size={17} className="text-gold" /> Rappels
           <span className="rounded-full bg-navy px-2 py-0.5 text-[11px] font-bold text-white">{items.length}</span>
         </div>
-        <Link href="/plus/rappels" className="text-sm font-medium text-series-1">
+        <Link href="/gestion?vue=afaire" className="text-sm font-medium text-series-1">
           Tout voir
         </Link>
       </div>
@@ -306,9 +306,8 @@ function ReminderGroupRow({ kind, items }: { kind: Reminder["kind"]; items: Remi
   const style = REMINDER_STYLE[kind];
   const late = items.filter((r) => r.late).length;
   const amount = items.reduce((s, r) => s + (r.amount ?? 0), 0);
-  const rental = kind !== "loan_end";
   return (
-    <Link href={rental ? "/gestion" : "/plus/rappels"} className="flex items-center gap-3 py-3 active:opacity-60">
+    <Link href="/gestion?vue=afaire" className="flex items-center gap-3 py-3 active:opacity-60">
       <IconChip tone={style.tone} size={38}>{style.icon}</IconChip>
       <div className="min-w-0 flex-1">
         <div className="text-[15px] font-semibold text-ink">

@@ -201,7 +201,7 @@ export function AddMenu({ open, onClose }: { open: boolean; onClose: () => void 
       {kind === "company" && <QuickCompany onDone={(id) => { close(); router.push(`/patrimoine/societe/${id}`); }} />}
       {kind === "building" && <QuickBuilding onDone={(id) => { close(); router.push(`/patrimoine/immeuble/${id}`); }} />}
       {kind === "loan" && <QuickLoan onDone={(id) => { close(); router.push(`/patrimoine/credit/${id}`); }} />}
-      {kind === "work" && <QuickWork onDone={() => { close(); router.push(`/plus/travaux`); }} />}
+      {kind === "work" && <QuickWork onDone={() => { close(); router.push(`/patrimoine?vue=travaux`); }} />}
     </Sheet>
   );
 }

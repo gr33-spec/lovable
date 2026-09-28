@@ -3,20 +3,20 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
-import { Building2, ChartColumn, CloudOff, Coins, Ellipsis, KeyRound, House, Check, ListChecks, LoaderCircle, Users } from "lucide-react";
+import { Building2, CloudOff, Coins, Ellipsis, KeyRound, House, Check, ListChecks, LoaderCircle, Users } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { unpaidByUnit } from "@/lib/engine/leases";
 import { missingCount } from "@/lib/missing";
 import { cx } from "./ui";
 import { ToastHost } from "./swipe";
 import { PdfViewerHost } from "./pdf-viewer";
-import { afterRouteChange, installNavigation } from "@/lib/nav";
+import { afterRouteChange, installNavigation, useSection, type Section } from "@/lib/nav";
 
-const TABS = [
-  { href: "/", label: "Accueil", icon: House },
-  { href: "/patrimoine", label: "Patrimoine", icon: Building2 },
-  { href: "/gestion", label: "Gestion", icon: KeyRound },
-  { href: "/plus", label: "Plus", icon: Ellipsis },
+const TABS: { href: string; label: string; icon: typeof House; section: Section }[] = [
+  { href: "/", label: "Accueil", icon: House, section: "accueil" },
+  { href: "/patrimoine", label: "Patrimoine", icon: Building2, section: "patrimoine" },
+  { href: "/gestion", label: "Gestion", icon: KeyRound, section: "gestion" },
+  { href: "/plus", label: "Plus", icon: Ellipsis, section: "plus" },
 ];
 
 /** Historique de navigation : rang des écrans, défilement et état restitués au retour. */
@@ -42,6 +42,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isEmpty = data.companies.length === 0 && data.buildings.length === 0;
   // Pastille : logements avec un loyer impayé (ou partiellement payé) non régularisé.
   const unpaid = unpaidByUnit(data.units).length;
+  const section = useSection();
 
   useEffect(() => {
     if (role === "owner" && view === "patrimoine" && !onboarding && !rescue && !data.settings.onboardingDone && isEmpty) router.replace("/bienvenue");
@@ -79,9 +80,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="pointer-events-auto mx-auto flex max-w-md rounded-[28px] border border-white/60 bg-white/92 p-1.5 shadow-[0_10px_30px_-6px_rgba(11,37,69,0.25)] backdrop-blur-2xl lg:h-full lg:max-w-none lg:flex-col lg:gap-1 lg:p-3">
             <div className="hidden px-3 pb-4 pt-2 text-[20px] font-extrabold tracking-[-0.02em] text-navy lg:block">Patrimoine</div>
             {TABS.map((t) => {
-              // Simulations et chronologie, rangées dans « Plus », gardent cet onglet actif.
-              const active =
-                t.href === "/" ? pathname === "/" : pathname.startsWith(t.href) || (t.href === "/plus" && (pathname.startsWith("/simulations") || pathname.startsWith("/chronologie")));
+              // Une fiche reste dans la rubrique d'où on l'a ouverte (un lot ouvert depuis Gestion reste dans Gestion).
+              const active = t.section === section;
               const Icon = t.icon;
               return (
                 <Link
@@ -122,14 +122,15 @@ function GestionNav({ unpaid }: { unpaid: number }) {
     { vue: "afaire", label: "À faire", icon: ListChecks, badge: unpaid },
     { vue: "loyers", label: "Loyers", icon: Coins },
     { vue: "locataires", label: "Locataires", icon: Users, badge: missing },
-    { vue: "annee", label: "Bilan", icon: ChartColumn },
   ];
   return (
     <nav className="safe-bottom pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-2 lg:inset-y-0 lg:right-auto lg:w-60 lg:px-4 lg:py-6">
       <div className="pointer-events-auto mx-auto flex max-w-md rounded-[28px] border border-white/60 bg-white/92 p-1.5 shadow-[0_10px_30px_-6px_rgba(11,37,69,0.25)] backdrop-blur-2xl lg:h-full lg:max-w-none lg:flex-col lg:gap-1 lg:p-3">
             <div className="hidden px-3 pb-4 pt-2 text-[20px] font-extrabold tracking-[-0.02em] text-navy lg:block">Patrimoine</div>
         {tabs.map((t) => {
-          const active = pathname.startsWith("/patrimoine/logement") ? t.vue === "locataires" : pathname === "/gestion" && vue === t.vue;
+          // « Sur l'année » fait partie de Loyers.
+          const current = vue === "annee" ? "loyers" : vue;
+          const active = pathname.startsWith("/patrimoine/logement") ? t.vue === "locataires" : pathname === "/gestion" && current === t.vue;
           const Icon = t.icon;
           return (
             <Link
