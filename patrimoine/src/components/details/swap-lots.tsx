@@ -12,21 +12,11 @@ import { Button, SelectField, Sheet } from "@/components/ui";
 // Échange des numéros de deux lots d'un immeuble (erreur de numérotation) :
 // seuls les noms changent, locataires, baux et loyers restent en place.
 
-export function SwapLotsSheet({ units, open, onClose }: { units: Unit[]; open: boolean; onClose: () => void }) {
+/** Échange les numéros de deux lots (noms seulement), avec « Annuler ». */
+export function useSwapLots() {
   const { data, upsertMany } = useStore();
-  const [a, setA] = useState<string | undefined>();
-  const [b, setB] = useState<string | undefined>();
-  const ua = units.find((u) => u.id === a);
-  const ub = units.find((u) => u.id === b);
-  const names = ua && ub ? swappedNames(ua, ub) : undefined;
-  const label = (u: Unit) => {
-    const tenant = u.status === "vacant" ? "vacant" : [u.tenantFirstName, u.tenantLastName].filter(Boolean).join(" ");
-    return [u.name, tenant, u.rent ? eur(u.rent) : undefined].filter(Boolean).join(" · ");
-  };
-  const options = units.map((u) => ({ value: u.id, label: label(u) }));
-
-  const swap = () => {
-    if (!ua || !ub || !names) return;
+  return (ua: Unit, ub: Unit) => {
+    const names = swappedNames(ua, ub);
     const tenancies = data.tenancies.filter((t) => t.unitId === ua.id || t.unitId === ub.id);
     const updated = tenancies.map((t) => cleanLotNote(t, t.unitId === ua.id ? names[0] : names[1])).filter((t, i) => t !== tenancies[i]);
     upsertMany([
@@ -41,6 +31,25 @@ export function SwapLotsSheet({ units, open, onClose }: { units: Unit[]; open: b
         ...tenancies.filter((t) => updated.some((u) => u.id === t.id)).map((t) => ({ coll: "tenancies" as const, item: t })),
       ]),
     );
+  };
+}
+
+export function SwapLotsSheet({ units, open, onClose }: { units: Unit[]; open: boolean; onClose: () => void }) {
+  const [a, setA] = useState<string | undefined>();
+  const [b, setB] = useState<string | undefined>();
+  const ua = units.find((u) => u.id === a);
+  const ub = units.find((u) => u.id === b);
+  const names = ua && ub ? swappedNames(ua, ub) : undefined;
+  const label = (u: Unit) => {
+    const tenant = u.status === "vacant" ? "vacant" : [u.tenantFirstName, u.tenantLastName].filter(Boolean).join(" ");
+    return [u.name, tenant, u.rent ? eur(u.rent) : undefined].filter(Boolean).join(" · ");
+  };
+  const options = units.map((u) => ({ value: u.id, label: label(u) }));
+
+  const swapLots = useSwapLots();
+  const swap = () => {
+    if (!ua || !ub) return;
+    swapLots(ua, ub);
     setA(undefined);
     setB(undefined);
     onClose();

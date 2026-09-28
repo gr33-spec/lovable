@@ -32,8 +32,10 @@ import { compareInspections, newEntryInspection, newExitInspection, stateLabel }
 import { ANNEXES, CONSTRUCTION_PERIODS, guaranteeTerms } from "@/lib/legal/lease";
 import { depositSettlement, lateDepositPenalty, leaseYears, maxDeposit, minDurationYears } from "@/lib/legal/rules";
 import { leaseVersionFor } from "@/lib/legal/versions";
-import { Button, Card, DateField, Grid2, NumberField, Page, PageHeader, Segmented, SelectField, Stack, TextField, cx } from "../ui";
+import { Button, Card, DateField, Grid2, NumberField, Page, PageHeader, Segmented, SelectField, Sheet, Stack, TextField, cx } from "../ui";
 import { DocRow, LegalBadge, documentUrl } from "./common";
+import { anonymizedTenancy } from "@/lib/tenancy";
+import { filesOfTenancy } from "@/lib/tenancy-files";
 
 type StepId = "depart" | "edl-sortie" | "depot" | "locataire" | "conditions" | "garant" | "logement" | "bailleur" | "clauses" | "documents";
 
@@ -313,6 +315,25 @@ function ExitInspectionStep({ unit, tenancy, ensure }: { unit: Unit; tenancy?: T
 function DepositStep({ unit, tenancy: t, building }: { unit: Unit; tenancy: Tenancy; building?: Building }) {
   const { data, upsert } = useStore();
   const set = (patch: Partial<Tenancy>) => upsert("tenancies", { ...t, ...patch });
+  const [confirmClose, setConfirmClose] = useState(false);
+
+  // Clôture : le logement est soldé, puis les informations du locataire sortant sont effacées
+  // (identité, garants, documents, courriers). Restent les dates et montants, sans nom, pour le bilan.
+  const closeFile = () => {
+    // Loyers impayés retenus sur le dépôt : soldés par compensation.
+    const retained = deductions.filter((d) => d.kind === "loyers").reduce((a, d) => a + (d.amount ?? 0), 0);
+    let next: Unit = unit;
+    if (unpaid.months.length && retained >= unpaid.amount - 0.01) {
+      const payments = { ...(unit.payments ?? {}) };
+      for (const m of unpaid.months) payments[m] = { ...payments[m], status: "paye", note: "Réglé par imputation sur le dépôt de garantie" };
+      next = { ...unit, payments };
+    }
+    const stillActive = data.tenancies.some((x) => x.unitId === unit.id && x.status === "actif" && x.id !== t.id);
+    if (!stillActive) next = unitVacated(next);
+    if (next !== unit) upsert("units", next);
+    for (const fileId of filesOfTenancy(t)) void fetch(`/api/files/${fileId}`, { method: "DELETE" }).catch(() => undefined);
+    upsert("tenancies", anonymizedTenancy(t));
+  };
   const { entry, exit } = inspectionsOf(data, t.id);
   const cmp = exit ? compareInspections(entry, exit) : undefined;
   const unpaid = unpaidDuring(unit, t);
@@ -415,24 +436,27 @@ function DepositStep({ unit, tenancy: t, building }: { unit: Unit; tenancy: Tena
               full
               variant={t.status === "clos" ? "secondary" : "primary"}
               disabled={t.status === "clos"}
-              onClick={() => {
-                set({ status: "clos", closedAt: new Date().toISOString() });
-                // Loyers impayés retenus sur le dépôt : soldés par compensation.
-                const retained = deductions.filter((d) => d.kind === "loyers").reduce((a, d) => a + (d.amount ?? 0), 0);
-                let next: Unit = unit;
-                if (unpaid.months.length && retained >= unpaid.amount - 0.01) {
-                  const payments = { ...(unit.payments ?? {}) };
-                  for (const m of unpaid.months) payments[m] = { ...payments[m], status: "paye", note: "Réglé par imputation sur le dépôt de garantie" };
-                  next = { ...unit, payments };
-                }
-                const stillActive = data.tenancies.some((x) => x.unitId === unit.id && x.status === "actif" && x.id !== t.id);
-                if (!stillActive) next = unitVacated(next);
-                if (next !== unit) upsert("units", next);
-              }}
+              onClick={() => setConfirmClose(true)}
             >
               {t.status === "clos" ? "Dossier clos" : "Clôturer le dossier du locataire sortant"}
             </Button>
           )}
+          <Sheet
+            open={confirmClose}
+            onClose={() => setConfirmClose(false)}
+            title="Clôturer et effacer le dossier ?"
+            footer={
+              <Button full variant="danger" onClick={() => { closeFile(); setConfirmClose(false); }}>
+                Clôturer et effacer les informations
+              </Button>
+            }
+          >
+            <div className="space-y-2 pb-2 text-[14.5px] text-ink-2">
+              <p>Les informations de {tenantsName(t) || "l'ancien locataire"} seront effacées : identité, garants, bail et cautions signés, courriers et historique.</p>
+              <p>Restent attachés au logement : les loyers encaissés (comptes et bilan) et les états des lieux, qui servent de base au suivant.</p>
+              <p className="text-[13px] text-muted">Une sauvegarde automatique de la veille permet de revenir en arrière si besoin (Plus → Sauvegardes).</p>
+            </div>
+          </Sheet>
           {!t.depositReturnedDate && <p className="text-[12px] text-muted">Vous pouvez passer à l&apos;arrivée du nouveau locataire et revenir ici au moment de la restitution.</p>}
         </Stack>
       </Card>

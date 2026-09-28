@@ -199,6 +199,15 @@ export interface Person {
   address?: string;
 }
 
+export interface TenancyLetter {
+  id: Id;
+  kind: "revision" | "relance" | "mise_en_demeure" | "autre";
+  label: string;
+  /** Date du courrier (AAAA-MM-JJ). */
+  date: string;
+  file: StoredFileRef;
+}
+
 /** Fichier déposé (PDF ou photo), stocké côté serveur. */
 export interface StoredFileRef {
   fileId: string;
@@ -281,6 +290,8 @@ export interface Tenancy {
   imported?: boolean;
   /** Exemplaire signé du bail (scan), remplacé à chaque nouveau dépôt. */
   signedLease?: StoredFileRef;
+  /** Courriers joints (augmentation de loyer, relance…), gardés tant que le locataire est en place. */
+  letters?: TenancyLetter[];
   // ——— Départ ———
   noticeDate?: string;
   noticeBy?: "locataire" | "bailleur";

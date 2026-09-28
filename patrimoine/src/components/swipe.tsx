@@ -81,7 +81,10 @@ export function SwipeRow({ actions, children, className, inset = true }: { actio
       <div
         className={cx("relative", (x !== 0 || dragging) && "bg-card", inset && "px-5", !dragging && "transition-transform duration-200")}
         style={{ transform: `translateX(${x}px)`, touchAction: "pan-y" }}
-        onDragStart={(e) => e.preventDefault()}
+        onDragStart={(e) => {
+          // Pas de glisser natif des liens pendant un balayage (sauf poignée prévue pour).
+          if (!(e.target as HTMLElement).closest?.("[data-drag]")) e.preventDefault();
+        }}
         onPointerDown={(e) => {
           if (e.pointerType === "mouse" && e.button !== 0) return;
           if ((e.target as HTMLElement).closest("input, textarea, select, [data-noswipe]")) return;
