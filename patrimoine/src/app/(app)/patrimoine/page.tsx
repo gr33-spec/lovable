@@ -1,5 +1,6 @@
 "use client";
 
+import { sortedUnits } from "@/lib/move-tenant";
 import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -73,7 +74,7 @@ function Patrimoine() {
   };
 
   const renderBuilding = (b: Building, depth: number) => {
-    const units = data.units.filter((u) => u.buildingId === b.id);
+    const units = sortedUnits(data.units.filter((u) => u.buildingId === b.id));
     const isOpen = !!open[b.id];
     return (
       <div key={b.id}>

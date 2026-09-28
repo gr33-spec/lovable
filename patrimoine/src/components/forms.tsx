@@ -1,5 +1,6 @@
 "use client";
 
+import { sortedUnits } from "@/lib/move-tenant";
 import { useStore } from "@/lib/store";
 import type { Building, Company, Loan, Unit, Work } from "@/lib/types";
 import { COMPANY_KINDS, CONDITIONS, PRIORITIES, UNIT_TYPES, WORK_STATUSES } from "@/lib/labels";
@@ -238,7 +239,7 @@ export function WorkForm({ work }: { work: Work }) {
   const set = (patch: Partial<Work>) => upsert("works", { ...work, ...patch });
   const buildings = useBuildingOptions();
   const companies = useCompanyOptions();
-  const units = data.units.filter((u) => u.buildingId === work.buildingId).map((u) => ({ value: u.id, label: u.name }));
+  const units = sortedUnits(data.units.filter((u) => u.buildingId === work.buildingId)).map((u) => ({ value: u.id, label: u.name }));
   return (
     <Stack>
       <TextField label="Intitulé" value={work.label} placeholder="Ex. Façade" onChange={(v) => set({ label: v ?? "" })} />

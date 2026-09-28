@@ -11,6 +11,8 @@ import { eur } from "@/lib/format";
 import { leaseInfo, todayIso, unpaidByUnit, addMonthsIso, LEASE_END_NOTICE_MONTHS } from "@/lib/engine/leases";
 import { activeTenancy, draftTenancy, inspectionsOf, leavingTenancy, tenantsName } from "@/lib/tenancy";
 import { cx } from "../ui";
+import { DragGhost, TenantHandle, dropTarget, useMoveTenant, useTenantDnd, type TenantDnd } from "../details/move-tenant";
+import { hasTenant, sortedUnits } from "@/lib/move-tenant";
 
 // Vue « Locataires » de l'onglet Gestion : tous les logements, immeuble par
 // immeuble, avec leur situation et les actions courantes à portée de doigt.
@@ -48,12 +50,18 @@ export function TenantsView() {
   const [open, setOpen] = useState<Set<string>>(() => new Set());
   const today = todayIso();
   const unpaid = useMemo(() => new Map(unpaidByUnit(data.units).map((l) => [l.unit.id, l.amount])), [data.units]);
+  const moveTenant = useMoveTenant();
+  const dnd = useTenantDnd((fromId, toId) => {
+    const from = data.units.find((u) => u.id === fromId);
+    const to = data.units.find((u) => u.id === toId);
+    if (from && to) moveTenant(from, to);
+  });
 
   const totalMissing = missingCount(data);
   const needle = q.trim().toLowerCase();
   const groups = data.buildings
     .map((b) => {
-      const all = data.units.filter((u) => u.buildingId === b.id);
+      const all = sortedUnits(data.units.filter((u) => u.buildingId === b.id));
       const units = all.filter((u) => {
         const flags = unitFlags(data, u, unpaid, today);
         if (filter === "loues" && u.status === "vacant") return false;
@@ -134,7 +142,9 @@ export function TenantsView() {
               {isOpen && (
                 <div className="divide-y divide-line border-t border-line">
                   {units.map((u) => (
-                    <UnitLine key={u.id} unit={u} flags={unitFlags(data, u, unpaid, today)} missing={unitMissing(data, u)} />
+                    <div key={u.id} {...dropTarget(dnd, u.id, building.id)}>
+                      <UnitLine unit={u} flags={unitFlags(data, u, unpaid, today)} missing={unitMissing(data, u)} dnd={all.length > 1 ? dnd : undefined} />
+                    </div>
                   ))}
                 </div>
               )}
@@ -142,6 +152,7 @@ export function TenantsView() {
           );
         })}
       </div>
+      <DragGhost dnd={dnd} units={data.units} />
     </div>
   );
 }
@@ -153,7 +164,7 @@ const TONE: Record<UnitFlag["tone"], string> = {
   pos: "bg-pos/10 text-pos",
 };
 
-function UnitLine({ unit, flags, missing }: { unit: Unit; flags: UnitFlag[]; missing: MissingItem[] }) {
+function UnitLine({ unit, flags, missing, dnd }: { unit: Unit; flags: UnitFlag[]; missing: MissingItem[]; dnd?: TenantDnd }) {
   const { data } = useStore();
   const vacant = unit.status === "vacant";
   const active = activeTenancy(data, unit.id);
@@ -168,7 +179,10 @@ function UnitLine({ unit, flags, missing }: { unit: Unit; flags: UnitFlag[]; mis
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[15px] font-semibold text-ink">
             {unit.name}
-            <span className="font-normal text-muted"> · {vacant ? "Vacant" : tenant || "Locataire à renseigner"}</span>
+            <span className="font-normal text-muted">
+              {" · "}
+              {vacant ? "Vacant" : dnd && hasTenant(data, unit) ? <TenantHandle dnd={dnd} unitId={unit.id} group={unit.buildingId} label={tenant || "Locataire"} className="text-[13.5px]" /> : tenant || "Locataire à renseigner"}
+            </span>
           </span>
           <span className="tabular block text-[12.5px] text-muted">{eur((unit.rent ?? 0) + (unit.charges ?? 0))} / mois</span>
           {missing.length > 0 && (

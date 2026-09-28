@@ -1,4 +1,5 @@
 import type { AppData, Tenancy, Unit } from "../types";
+import { sortedUnits } from "../move-tenant";
 import { daysBetween, monthKey, todayIso } from "./leases";
 import { occupiedDays } from "../legal/rules";
 
@@ -72,8 +73,7 @@ export function yearStats(data: AppData, year: number, today = todayIso(), upToM
 
   const buildings: BuildingYear[] = data.buildings
     .map((b) => {
-      const units: UnitYear[] = data.units
-        .filter((u) => u.buildingId === b.id)
+      const units: UnitYear[] = sortedUnits(data.units.filter((u) => u.buildingId === b.id))
         .map((unit) => {
           const leases = tenanciesOf(data, unit.id);
           const known = leases.length > 0;
