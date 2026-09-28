@@ -1,5 +1,6 @@
 "use client";
 
+import { usePageState } from "@/lib/nav";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { CircleAlert, CircleCheck, FileDown, Loader2, Rocket, Share } from "lucide-react";
@@ -12,7 +13,7 @@ import { Button, Card, Page, PageHeader, SectionTitle, SelectField } from "@/com
 
 export default function DossierBanquePage() {
   const { data, nowMonth } = useStore();
-  const [scope, setScope] = useState<string | undefined>();
+  const [scope, setScope] = usePageState<string | undefined>("perimetre", undefined);
   const [sharing, setSharing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const url = scope ? `/api/dossier-banque?societe=${scope}` : "/api/dossier-banque";

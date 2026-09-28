@@ -1,5 +1,6 @@
 "use client";
 
+import { goBack } from "@/lib/nav";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
@@ -186,7 +187,7 @@ export function ScenarioDetail({ id }: { id: string }) {
               Intégrer aux données réelles
             </Button>
           )}
-          <ConfirmDelete label="Supprimer le scénario" message="Supprimer ce scénario ?" onConfirm={() => { remove("scenarios", id); router.push("/simulations"); }} />
+          <ConfirmDelete label="Supprimer le scénario" message="Supprimer ce scénario ?" onConfirm={() => { remove("scenarios", id); goBack(router, "/simulations"); }} />
         </div>
       </Page>
 

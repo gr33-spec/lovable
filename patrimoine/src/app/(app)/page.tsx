@@ -1,7 +1,8 @@
 "use client";
 
+import { usePageState } from "@/lib/nav";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { BadgeEuro, Briefcase, Building2, CalendarClock, ChevronRight, CircleAlert, DoorOpen, Flag, Hammer, Landmark, Receipt, RefreshCw, ShoppingCart, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { cashflowMonthly, ltv, netWorth } from "@/lib/engine/snapshot";
@@ -23,8 +24,8 @@ export default function Accueil() {
   const { data, projection, nowMonth } = useStore();
   const snap = projection.snapshot;
   const t = snap.total;
-  const [chart, setChart] = useState<"net" | "debt" | "cf">("net");
-  const [horizon, setHorizon] = useState(10);
+  const [chart, setChart] = usePageState<"net" | "debt" | "cf">("graphique", "net");
+  const [horizon, setHorizon] = usePageState("horizon", 10);
   const y0 = yearOf(nowMonth);
 
   const steps = useMemo(() => milestones(data, projection, 6), [data, projection]);

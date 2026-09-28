@@ -1,5 +1,6 @@
 "use client";
 
+import { openOverlay } from "@/lib/nav";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Download, LoaderCircle, Minus, Plus, Share, X } from "lucide-react";
 
@@ -102,15 +103,13 @@ function Viewer({ doc }: { doc: Doc }) {
 
   // Retour arrière (geste iOS, bouton Android) : ferme la visionneuse.
   useEffect(() => {
-    history.pushState({ pdfViewer: true }, "");
-    const onPop = () => closeDocument();
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && history.back();
-    window.addEventListener("popstate", onPop);
+    const release = openOverlay(() => closeDocument());
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && closeDocument();
     window.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
-      window.removeEventListener("popstate", onPop);
+      release();
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
     };
@@ -152,7 +151,7 @@ function Viewer({ doc }: { doc: Doc }) {
     };
   }, [doc.url, doc.fileName]);
 
-  const close = () => history.back();
+  const close = () => closeDocument();
 
   return (
     <div className="fixed inset-0 z-[90] flex flex-col bg-[#1f2530]" role="dialog" aria-modal="true" aria-label={name}>

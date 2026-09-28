@@ -1,5 +1,6 @@
 "use client";
 
+import { goBack } from "@/lib/nav";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -55,7 +56,7 @@ export function CompanyDetail({ id }: { id: string }) {
     removeMany(items);
     // Les filiales remontent d'un niveau.
     children.forEach((c) => upsert("companies", { ...c, parentId: company.parentId ?? null }));
-    router.push("/patrimoine");
+    goBack(router, "/patrimoine");
   };
 
   return (

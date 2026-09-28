@@ -201,6 +201,7 @@ export function TenantHandle({ dnd, unitId, group, label, className }: { dnd: Te
     <span
       ref={ref}
       data-noswipe
+      data-tenant-handle
       title="Glisser vers un autre lot pour déplacer le locataire"
       onContextMenu={(e) => e.preventDefault()}
       onDragStart={(e) => e.preventDefault()}

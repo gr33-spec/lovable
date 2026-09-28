@@ -35,7 +35,7 @@ function Onboarding() {
 
   const finish = () => {
     setSettings({ onboardingDone: true });
-    router.push("/");
+    router.replace("/");
   };
   const next = () => (step >= 4 ? finish() : setStep(step + 1));
 
@@ -58,7 +58,7 @@ function Onboarding() {
   const loadDemo = async () => {
     setBusy(true);
     await replaceAll(demoData(), "chargement démo");
-    router.push("/");
+    router.replace("/");
   };
 
   const steps = [

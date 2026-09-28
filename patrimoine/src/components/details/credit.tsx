@@ -1,5 +1,6 @@
 "use client";
 
+import { goBack } from "@/lib/nav";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
@@ -84,7 +85,7 @@ export function LoanDetail({ id }: { id: string }) {
         </div>
         </div>
         <div className="mt-8">
-          <ConfirmDelete label="Supprimer le crédit" message="Supprimer ce crédit ?" onConfirm={() => { remove("loans", id); router.push(back); }} />
+          <ConfirmDelete label="Supprimer le crédit" message="Supprimer ce crédit ?" onConfirm={() => { remove("loans", id); goBack(router, back); }} />
         </div>
       </Page>
     </>

@@ -1,5 +1,6 @@
 "use client";
 
+import { goBack } from "@/lib/nav";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
@@ -307,7 +308,7 @@ function Detail({ id }: { id: string }) {
               message="Supprimer ce logement ? Une sauvegarde automatique permet de revenir en arrière."
               onConfirm={() => {
                 removeMany(unitRemovals(data, unit.id));
-                router.push(building ? `/patrimoine/immeuble/${building.id}` : "/patrimoine");
+                goBack(router, building ? `/patrimoine/immeuble/${building.id}` : "/patrimoine");
               }}
             />}
           </div>
