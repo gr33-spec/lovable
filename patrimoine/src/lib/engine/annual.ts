@@ -1,5 +1,5 @@
 import type { AppData, Tenancy, Unit } from "../types";
-import { sortedUnits } from "../move-tenant";
+import { sortedUnits } from "../lots";
 import { daysBetween, monthKey, todayIso } from "./leases";
 import { occupiedDays } from "../legal/rules";
 

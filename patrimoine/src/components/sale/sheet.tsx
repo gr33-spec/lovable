@@ -1,6 +1,6 @@
 "use client";
 
-import { sortedUnits } from "@/lib/move-tenant";
+import { sortedUnits } from "@/lib/lots";
 import { useState } from "react";
 import { Check, CircleCheck, Trash2 } from "lucide-react";
 import { useStore } from "@/lib/store";

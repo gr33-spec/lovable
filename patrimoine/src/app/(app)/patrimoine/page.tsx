@@ -1,7 +1,7 @@
 "use client";
 
 import { replaceQuery, usePageState } from "@/lib/nav";
-import { sortedUnits } from "@/lib/move-tenant";
+import { sortedUnits } from "@/lib/lots";
 import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";

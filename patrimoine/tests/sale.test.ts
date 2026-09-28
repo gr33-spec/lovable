@@ -94,9 +94,11 @@ test("vente : reprise dans le dossier banque (groupe et société seule)", async
 });
 
 test("lots fixes : tri numérique et note « Lot N selon le bail »", async () => {
-  const { sortedUnits, cleanLotNote } = await import("../src/lib/move-tenant");
+  const { sortedUnits, cleanLotNote, swappedNames } = await import("../src/lib/lots");
   const u = (name: string) => ({ id: name, buildingId: "b", name });
   assert.deepEqual(sortedUnits([u("Lot 10 · maisonnette"), u("Lot 2"), u("Lot 1 · PMR"), u("Local commercial")]).map((x) => x.name), ["Local commercial", "Lot 1 · PMR", "Lot 2", "Lot 10 · maisonnette"]);
+  assert.deepEqual(swappedNames(u("Lot 5 R+2 droit"), u("Lot 6 R+2 gauche")), ["Lot 6 R+2 droit", "Lot 5 R+2 gauche"]);
+  assert.deepEqual(swappedNames(u("Local commercial"), u("Lot 3")), ["Lot 3", "Local commercial"]);
   const t = { id: "t", unitId: "x", status: "actif" as const, tenants: [], notes: "Lot 6 selon le bail. Loyer en vigueur depuis le 01/02/2026." };
   assert.equal(cleanLotNote(t, "Lot 6 R+2 droit").notes, "Loyer en vigueur depuis le 01/02/2026.");
   assert.equal(cleanLotNote(t, "Lot 5").notes, t.notes);

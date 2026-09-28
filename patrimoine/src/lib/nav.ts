@@ -139,6 +139,11 @@ export function installNavigation() {
 /** Appelé après chaque changement d'écran : restitue la position au retour. */
 export function afterRouteChange() {
   hydrated = true;
+  // Après la mise à jour de l'historique par Next.js (nouvelle entrée poussée).
+  setTimeout(applyRoute, 0);
+}
+
+function applyRoute() {
   const k = curKey();
   if (!k || k === shownKey) return;
   shownKey = k;

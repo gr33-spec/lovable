@@ -2,32 +2,33 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowRightLeft, GripVertical, UserRound } from "lucide-react";
+import { ArrowRightLeft, GripVertical, Hash } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { Unit } from "@/lib/types";
 import { eur } from "@/lib/format";
-import { hasTenant, moveTenant, tenantLabel } from "@/lib/move-tenant";
+import { renumber, swappedNames, tenantLabel } from "@/lib/lots";
 import { toast } from "@/components/swipe";
 import { Button, SelectField, Sheet, cx } from "@/components/ui";
 
-// Déplacement d'un locataire vers un autre lot : on attrape son nom et on le
-// lâche sur le bon lot (souris sur ordinateur, appui long puis glisser au
-// doigt). Les lots ne bougent jamais ; lot occupé = échange des locataires.
+// Correction d'un numéro de lot : on attrape le lot et on le lâche sur le bon
+// numéro (souris sur ordinateur, appui long puis glisser au doigt). Seuls les
+// deux numéros s'échangent : logement, locataire, bail, loyer et documents
+// restent ensemble. La liste reste dans l'ordre des numéros.
 
-/** Déplace (ou échange) un locataire, avec « Annuler ». */
-export function useMoveTenant() {
+const lotNo = (name: string) => name.split(/\s[·(-]/)[0].trim();
+
+/** Échange les numéros de deux lots, avec « Annuler ». */
+export function useSwapNumbers() {
   const { data, upsertMany } = useStore();
   return (from: Unit, to: Unit) => {
-    const who = tenantLabel(data, from) || "Le locataire";
-    const other = tenantLabel(data, to);
-    const { changes, swap } = moveTenant(data, from, to);
+    const changes = renumber(data, from, to);
     if (changes.length === 0) return;
     const before = changes
       .map((c) => ({ coll: c.coll, item: (data[c.coll] as { id: string }[]).find((x) => x.id === c.item.id) }))
       .filter((c): c is { coll: typeof c.coll; item: NonNullable<typeof c.item> } => !!c.item);
     upsertMany(changes);
-    const lot = (u: Unit) => u.name.split(" · ")[0];
-    toast(swap ? `Échange : ${who} → ${lot(to)}, ${other || "l'autre locataire"} → ${lot(from)}` : `${who} → ${lot(to)} (${lot(from)} libre)`, () => upsertMany(before as typeof changes));
+    const [na] = swappedNames(from, to);
+    toast(`${lotNo(from.name)} devient ${lotNo(na)} (et ${lotNo(to.name)} devient ${lotNo(from.name)})`, () => upsertMany(before as typeof changes));
   };
 }
 
@@ -139,8 +140,8 @@ export function dropTarget(dnd: TenantDnd, unitId: string, group: string) {
   };
 }
 
-/** Nom du locataire, à attraper pour le déplacer vers un autre lot. */
-export function TenantHandle({ dnd, unitId, group, label, className }: { dnd: TenantDnd; unitId: string; group: string; label: string; className?: string }) {
+/** Numéro du lot, à attraper pour le lâcher sur le bon numéro. */
+export function LotHandle({ dnd, unitId, group, label, className }: { dnd: TenantDnd; unitId: string; group: string; label: string; className?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const api = useRef(dnd);
   useEffect(() => {
@@ -202,7 +203,7 @@ export function TenantHandle({ dnd, unitId, group, label, className }: { dnd: Te
       ref={ref}
       data-noswipe
       data-tenant-handle
-      title="Glisser vers un autre lot pour déplacer le locataire"
+      title="Glisser sur le bon numéro pour corriger la numérotation"
       onContextMenu={(e) => e.preventDefault()}
       onDragStart={(e) => e.preventDefault()}
       onPointerDown={(e) => {
@@ -230,11 +231,11 @@ export function TenantHandle({ dnd, unitId, group, label, className }: { dnd: Te
         window.addEventListener("pointercancel", up);
       }}
       className={cx(
-        "inline-flex max-w-full cursor-grab select-none items-center gap-1 rounded-full bg-soft py-0.5 pl-1 pr-2 align-middle text-ink-2 ring-1 ring-line [-webkit-touch-callout:none] hover:bg-series-1/10 hover:text-navy active:cursor-grabbing",
+        "-ml-1 inline-flex max-w-full cursor-grab select-none items-center gap-1 rounded-lg px-1 align-middle [-webkit-touch-callout:none] hover:bg-series-1/10 active:cursor-grabbing",
         className,
       )}
     >
-      <GripVertical size={13} className="shrink-0 text-muted" />
+      <GripVertical size={14} className="shrink-0 text-muted/70" />
       <span className="truncate">{label}</span>
     </span>
   );
@@ -248,31 +249,30 @@ export function DragGhost({ dnd, units }: { dnd: TenantDnd; units: Unit[] }) {
   return createPortal(
     <div className="pointer-events-none fixed z-[90] -translate-x-1/2 -translate-y-[130%]" style={{ left: d.x, top: d.y }}>
       <div className="flex items-center gap-2 whitespace-nowrap rounded-full bg-navy px-3.5 py-2 text-[13.5px] font-semibold text-white shadow-xl">
-        <UserRound size={15} className="text-gold" />
+        <Hash size={15} className="text-gold" />
         {d.label}
-        <span className="font-normal text-white/70">{over ? `→ ${over.name.split(/\s[·(-]/)[0]}` : "→ choisir un lot"}</span>
+        <span className="font-normal text-white/70">{over ? `→ devient ${lotNo(over.name)}` : "→ choisir le bon numéro"}</span>
       </div>
     </div>,
     document.body,
   );
 }
 
-// ——— Sans glisser : choisir le locataire puis son lot ———
+// ——— Sans glisser : choisir le lot puis son vrai numéro ———
 
-export function MoveTenantSheet({ units, open, onClose }: { units: Unit[]; open: boolean; onClose: () => void }) {
+export function SwapNumbersSheet({ units, open, onClose }: { units: Unit[]; open: boolean; onClose: () => void }) {
   const { data } = useStore();
   const [a, setA] = useState<string | undefined>();
   const [b, setB] = useState<string | undefined>();
-  const move = useMoveTenant();
+  const swap = useSwapNumbers();
   const ua = units.find((u) => u.id === a);
   const ub = units.find((u) => u.id === b);
-  const swap = ub ? hasTenant(data, ub) : false;
-  const from = units.filter((u) => hasTenant(data, u)).map((u) => ({ value: u.id, label: `${tenantLabel(data, u) || "Locataire"} · ${u.name}${u.rent ? ` · ${eur(u.rent)}` : ""}` }));
-  const to = units.filter((u) => u.id !== a).map((u) => ({ value: u.id, label: `${u.name} · ${hasTenant(data, u) ? tenantLabel(data, u) || "occupé" : "libre"}` }));
+  const names = ua && ub ? swappedNames(ua, ub) : undefined;
+  const label = (u: Unit) => [u.name, u.status === "vacant" ? "vacant" : tenantLabel(data, u), u.rent ? eur(u.rent) : undefined].filter(Boolean).join(" · ");
 
   const submit = () => {
     if (!ua || !ub) return;
-    move(ua, ub);
+    swap(ua, ub);
     setA(undefined);
     setB(undefined);
     onClose();
@@ -282,34 +282,26 @@ export function MoveTenantSheet({ units, open, onClose }: { units: Unit[]; open:
     <Sheet
       open={open}
       onClose={onClose}
-      title="Déplacer un locataire"
+      title="Corriger un numéro de lot"
       footer={
-        <Button full disabled={!ua || !ub} onClick={submit} icon={<ArrowRightLeft size={18} />}>
-          {swap ? "Échanger les deux locataires" : "Déplacer le locataire"}
+        <Button full disabled={!names} onClick={submit} icon={<ArrowRightLeft size={18} />}>
+          Échanger les numéros
         </Button>
       }
     >
       <div className="space-y-3 pb-2">
         <p className="text-[14px] text-ink-2">
-          Les lots ne bougent pas : seul le locataire change de lot, avec son bail, son loyer, ses encaissements, ses garants et ses documents. Astuce : vous pouvez aussi faire glisser son nom directement sur le bon lot.
+          Seul le numéro change : chaque logement garde son locataire, son bail, son loyer et ses documents. Astuce : vous pouvez aussi faire glisser le lot directement sur le bon numéro.
         </p>
-        <SelectField label="Locataire" value={a} options={from} onChange={setA} />
-        <SelectField label="Vers le lot" value={b} options={to} onChange={setB} />
-        {ua && ub && (
+        <SelectField label="Lot mal numéroté" value={a} options={units.map((u) => ({ value: u.id, label: label(u) }))} onChange={setA} />
+        <SelectField label="Son vrai numéro" value={b} options={units.filter((u) => u.id !== a).map((u) => ({ value: u.id, label: lotNo(u.name) }))} onChange={setB} />
+        {ua && ub && names && (
           <div className="rounded-2xl bg-soft px-4 py-3 text-[14px] text-ink">
             <div>
-              <b>{tenantLabel(data, ua) || "Le locataire"}</b> <span className="text-muted">passe au</span> <b>{ub.name}</b>
+              {label(ua)} <span className="text-muted">devient</span> <b>{lotNo(names[0])}</b>
             </div>
             <div className="mt-1">
-              {swap ? (
-                <>
-                  <b>{tenantLabel(data, ub) || "Son locataire"}</b> <span className="text-muted">passe au</span> <b>{ua.name}</b>
-                </>
-              ) : (
-                <>
-                  <b>{ua.name}</b> <span className="text-muted">devient libre</span>
-                </>
-              )}
+              {label(ub)} <span className="text-muted">devient</span> <b>{lotNo(names[1])}</b>
             </div>
           </div>
         )}
