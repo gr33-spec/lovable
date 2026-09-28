@@ -9,15 +9,26 @@ d'élargir.
 - `packages/domain` : argent, quantités, unités, offres, contrôle
   arithmétique, moteur de comparaison v0.1.0 — 51 tests.
 
-## Phase 1 — Fondations (après réponse à Q1)
+## Phase 1 — Fondations (en cours)
 
-- Monorepo pnpm + Turborepo ; `apps/api` (NestJS), `apps/web` (Next.js),
-  `packages/{domain,contracts,ui,i18n}`.
-- Docker Compose local : PostgreSQL, MinIO, Mailpit.
-- Prisma : schéma tenancy + projects + documents + takeoff ; migrations.
-- Auth (Better Auth) : inscription, vérification, connexion, reset,
-  sessions ; entreprise créée à l'onboarding.
-- Contexte tenant + tests d'isolation.
+Fait (2026-09-28) :
+- ✅ BatiClair gelé dans `legacy/baticlair/` ; monorepo pnpm + Turborepo.
+- ✅ `apps/api` NestJS : configuration validée, logs JSON corrélés
+  (`requestId`, `userId`, `companyId`), erreurs normalisées avec code support,
+  en-têtes de sécurité, CORS.
+- ✅ Auth (Better Auth) : inscription, connexion, vérification d'e-mail,
+  réinitialisation du mot de passe, sessions ; e-mails via un port
+  (adapters de développement uniquement pour l'instant).
+- ✅ Entreprise + appartenance + contexte tenant ; chantiers (création,
+  liste paginée, lecture, modification, archivage) ; rôle lecture seule.
+- ✅ Tests d'intégration sur PostgreSQL réel, dont isolation entre entreprises.
+- ✅ ESLint avec règles de frontières de modules ; CI GitHub Actions.
+
+Reste :
+
+- `apps/web` (Next.js) : inscription, onboarding, liste de chantiers ;
+  `packages/{contracts,ui,i18n}`.
+- Adapter e-mail réel (transactionnel) ; suppression de compte.
 - `StorageProvider` S3, `JobQueue` pg-boss + worker, outbox d'événements.
 - `AIProvider` + `FakeAIProvider` + registre de prompts + `AIExecution`.
 - Logs structurés, `requestId`/`supportId`, erreurs normalisées.
@@ -38,16 +49,18 @@ conditions réelles, avec reprise après échec du fournisseur IA.
 
 ## Phase 3 — Consultation et comparaison
 
-Fournisseurs ; consultation (instantané) ; envoi e-mail (identité selon
-Q4) ; **réception par adresse dédiée** (avancé depuis la phase 4) ; import
+Fournisseurs ; consultation (instantané) ; **connexion de la boîte mail
+Gmail / Outlook et envoi depuis celle-ci** (ADR-0010, avancé depuis la
+phase 4) ; **réception par double adresse de réponse** ; lancement de la
+vérification de l'application OAuth par Google ; import
 manuel d'offres ; extraction des offres ; matching (règles + mémoire +
 IA) ; confirmations ; comparaison branchée sur le moteur ; synthèse ;
 comparateur desktop/mobile ; négociation.
 
 ## Phase 4 — E-mail avancé et notifications
 
-Envoi depuis la boîte de l'artisan (Gmail send / Graph), rattachement
-avancé (transferts, fils), notifications configurables, relances.
+Rattachement avancé (transferts, fils, sujets modifiés), autres
+messageries, notifications configurables, relances.
 
 ## Phase 5 — Lancement
 

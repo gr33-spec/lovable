@@ -1,6 +1,6 @@
 # ADR-0002 — Monorepo pnpm + Turborepo
 
-- **Date** : 2026-09-28 · **Statut** : Proposé (emplacement final dépendant de Q1)
+- **Date** : 2026-09-28 · **Statut** : Accepté (option B, après la réponse du fondateur à Q1 : aucun utilisateur réel)
 
 ## Contexte
 Le dépôt contient BatiClair (prototype Next.js à la racine, npm) et
@@ -11,9 +11,9 @@ paquets partagés (domaine, contrats, UI, i18n) et de deux applications.
 - pnpm workspaces + Turborepo (cache, tâches parallèles), TypeScript strict partout.
 - Arborescence cible : `apps/{web,api}`, `packages/{domain,contracts,ui,i18n}`, `tools/ai-evals`, `fixtures/`, `docs/`.
 - `patrimoine/` n'est pas concerné.
-- **En attendant Q1**, `packages/domain` est un paquet autonome (son propre
-  `package.json`, sans workspace racine) pour ne rien modifier de
-  BatiClair. Le passage en workspace se fera à la phase 1.
+- BatiClair est déplacé tel quel dans `legacy/baticlair/` (projet npm
+  indépendant, hors de l'espace de travail pnpm), comme `patrimoine/`.
+  L'historique git est conservé (déplacement, pas suppression).
 
 ## Options pour BatiClair (Q1)
 - A : évoluer sur place — déconseillé.
@@ -21,5 +21,6 @@ paquets partagés (domaine, contrats, UI, i18n) et de deux applications.
 - C : nouveau dépôt dédié.
 
 ## Conséquences
-Le déploiement Vercel actuel de BatiClair (racine du dépôt) devra pointer
-vers `legacy/baticlair/` si l'option B est retenue.
+Si un déploiement Vercel de BatiClair existe, son « Root Directory » doit
+désormais pointer vers `legacy/baticlair/`. La base de prix mutualisée
+(`PriceRecord`) n'est pas reprise (PD-012).

@@ -1,15 +1,15 @@
-import { confidenceLevel, type ConfidenceLevel } from "../confidence/confidence";
-import { Money } from "../money/money";
-import { verifyOfferArithmetic } from "../offer/arithmetic";
+import { confidenceLevel, type ConfidenceLevel } from "../confidence/confidence.js";
+import { Money } from "../money/money.js";
+import { verifyOfferArithmetic } from "../offer/arithmetic.js";
 import {
   computedTotalHT,
   effectiveGlobalDiscountRate,
   lineAmount,
   type OfferLine,
   type SupplierOffer,
-} from "../offer/offer";
-import { Quantity } from "../quantity/quantity";
-import { Decimal, median } from "../shared/decimal";
+} from "../offer/offer.js";
+import { Quantity } from "../quantity/quantity.js";
+import { Decimal, median } from "../shared/decimal.js";
 import type {
   Comparability,
   ComparisonConfig,
@@ -21,7 +21,7 @@ import type {
   ItemOfferResult,
   RequestedItem,
   SupplierSummary,
-} from "./types";
+} from "./types.js";
 
 /**
  * Version du moteur, enregistrée avec chaque comparaison pour pouvoir

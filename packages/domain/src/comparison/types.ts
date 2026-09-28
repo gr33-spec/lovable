@@ -1,9 +1,9 @@
-import type { ConfidenceLevel } from "../confidence/confidence";
-import type { Money } from "../money/money";
-import type { ArithmeticCheck } from "../offer/arithmetic";
-import type { SupplierOffer } from "../offer/offer";
-import type { Quantity } from "../quantity/quantity";
-import type { Decimal } from "../shared/decimal";
+import type { ConfidenceLevel } from "../confidence/confidence.js";
+import type { Money } from "../money/money.js";
+import type { ArithmeticCheck } from "../offer/arithmetic.js";
+import type { SupplierOffer } from "../offer/offer.js";
+import type { Quantity } from "../quantity/quantity.js";
+import type { Decimal } from "../shared/decimal.js";
 
 /** Un besoin de la consultation (instantané figé du quantitatif validé). */
 export interface RequestedItem {

@@ -13,9 +13,10 @@ comparaison vit ici, testé unitairement.
 | `src/comparison` | Moteur de comparaison déterministe et constats typés |
 
 ```bash
-pnpm install
-pnpm test        # Vitest
-pnpm typecheck   # tsc --noEmit
+pnpm install                                  # depuis la racine du monorepo
+pnpm --filter @baticlair/domain test         # Vitest
+pnpm --filter @baticlair/domain typecheck    # tsc --noEmit
+pnpm --filter @baticlair/domain build        # compile vers dist/
 ```
 
 Jeu de données de démonstration : `test/fixtures/dupont.ts` (chantier

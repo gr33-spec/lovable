@@ -1,5 +1,5 @@
-import { Decimal, toDecimal, type DecimalInput } from "../shared/decimal";
-import { UNIT_DEFINITIONS, dimensionOf, type UnitCode } from "./unit";
+import { Decimal, toDecimal, type DecimalInput } from "../shared/decimal.js";
+import { UNIT_DEFINITIONS, dimensionOf, type UnitCode } from "./unit.js";
 
 /**
  * Contenu d'un conditionnement, tel qu'indiqué par le document

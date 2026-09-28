@@ -1,4 +1,4 @@
-import { Decimal, toDecimal, type DecimalInput } from "../shared/decimal";
+import { Decimal, toDecimal, type DecimalInput } from "../shared/decimal.js";
 
 /**
  * Devises supportées. EUR uniquement pour l'instant ; ajouter une devise

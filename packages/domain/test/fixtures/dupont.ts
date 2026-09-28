@@ -24,7 +24,7 @@ import {
   type ItemMatch,
   type RequestedItem,
   type SupplierOffer,
-} from "../../src";
+} from "../../src/index.js";
 
 const eur = (v: string) => Money.of(v);
 const d = (v: string) => new Decimal(v);

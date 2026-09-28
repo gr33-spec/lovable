@@ -1,6 +1,6 @@
-import { Money } from "../money/money";
-import { Decimal } from "../shared/decimal";
-import type { PackagingSpec, Quantity } from "../quantity/quantity";
+import { Money } from "../money/money.js";
+import { Decimal } from "../shared/decimal.js";
+import type { PackagingSpec, Quantity } from "../quantity/quantity.js";
 
 /**
  * Nature d'une ligne d'offre fournisseur. C'est une notion MÉTIER explicite :

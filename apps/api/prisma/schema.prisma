@@ -1,0 +1,153 @@
+// Schéma de données du produit. Voir docs/domain-model.md.
+//
+// Conventions :
+// - toute donnée métier porte `companyId` (isolation multi-tenant, ADR-0007) ;
+// - montants et quantités en Decimal (numeric), jamais en Float (ADR-0009) ;
+// - noms de tables en snake_case via @@map.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Identité — tables imposées par Better Auth (module identity).
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String   @id
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sessions    Session[]
+  accounts    Account[]
+  memberships Membership[]
+  projects    Project[]    @relation("ProjectCreatedBy")
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+// ---------------------------------------------------------------------------
+// Tenancy — l'entreprise est le tenant.
+// ---------------------------------------------------------------------------
+
+enum MembershipRole {
+  owner
+  admin
+  member
+  viewer
+}
+
+model Company {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships Membership[]
+  projects    Project[]
+
+  @@map("company")
+}
+
+model Membership {
+  id        String         @id @default(uuid(7)) @db.Uuid
+  companyId String         @db.Uuid
+  userId    String
+  role      MembershipRole
+  createdAt DateTime       @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, userId])
+  @@index([userId])
+  @@map("membership")
+}
+
+// ---------------------------------------------------------------------------
+// Chantiers
+// ---------------------------------------------------------------------------
+
+enum ProjectStatus {
+  active
+  archived
+}
+
+model Project {
+  id          String        @id @default(uuid(7)) @db.Uuid
+  companyId   String        @db.Uuid
+  name        String
+  clientName  String?
+  address     String?
+  status      ProjectStatus @default(active)
+  /// Nul si l'auteur a supprimé son compte : le chantier appartient à l'entreprise.
+  createdById String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdBy User?   @relation("ProjectCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([companyId, status, updatedAt])
+  @@map("project")
+}

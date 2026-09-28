@@ -1,4 +1,4 @@
-import DecimalJs from "decimal.js";
+import { Decimal as DecimalJs } from "decimal.js";
 
 /**
  * Décimal à précision arbitraire utilisé pour TOUS les calculs métier

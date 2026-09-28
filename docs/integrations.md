@@ -9,6 +9,9 @@ métier. État de chaque intégration affiché honnêtement :
 
 | Intégration | Port | État |
 |---|---|---|
+| Authentification (Better Auth, e-mail + mot de passe) | module `identity` | **RÉEL** (testé) |
+| Connexion Google / Microsoft | module `identity` | NON CONNECTÉ (configuration prête, identifiants OAuth absents, non testé) |
+| E-mails système (vérification, mot de passe) | `TransactionalEmailSender` | **SIMULÉ** : affichés dans les logs (dev) ou capturés (tests) |
 | IA (Anthropic) | `AIProvider` | NON IMPLÉMENTÉ dans la nouvelle architecture (existe en direct dans BatiClair) |
 | Stockage S3 | `StorageProvider` | NON IMPLÉMENTÉ |
 | E-mail sortant | `TransactionalEmailProvider` | NON IMPLÉMENTÉ (Resend dans BatiClair) |
@@ -20,17 +23,17 @@ métier. État de chaque intégration affiché honnêtement :
 
 ## E-mail (ADR-0010)
 
-### Envoi des demandes de prix
-- **Phase 3** : envoi depuis notre domaine, au nom de l'artisan
-  (« Jean Martin via BatiClair »), `Reply-To` = adresse dédiée à la
-  consultation, artisan en copie. Sujet :
-  `[K7Q2M] Demande de prix — Réfection toiture Dupont`.
-- **Phase 4 (option)** : envoi depuis la vraie boîte de l'artisan via
-  Gmail (scope d'envoi seul) ou Microsoft Graph (`Mail.Send`).
+### Envoi des demandes de prix (phase 3)
+- Depuis la vraie boîte de l'artisan : Gmail (scope d'envoi seul) ou
+  Microsoft Graph (`Mail.Send`). Autres messageries : « au nom de »
+  l'artisan depuis notre domaine, artisan en copie.
+- `Reply-To` = adresse de l'artisan **+** adresse de suivi de la
+  consultation. Sujet : `[K7Q2M] Demande de prix — Réfection toiture Dupont`.
 
 ### Réception des réponses
-1. Adresse dédiée `k7q2m@reponses.<domaine>` (ou plus-addressing) → webhook
-   du prestataire d'e-mail entrant.
+1. Adresse de suivi `k7q2m@reponses.<domaine>` (présente dans le
+   `Reply-To`) → webhook du prestataire d'e-mail entrant. L'artisan reçoit
+   la même réponse dans sa propre boîte.
 2. Rattachement par indices, dans l'ordre de fiabilité :
    adresse de destination → en-têtes `In-Reply-To`/`References` (fil) →
    code `[K7Q2M]` dans le sujet → expéditeur connu d'une demande en cours →

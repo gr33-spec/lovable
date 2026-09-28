@@ -90,8 +90,9 @@ validation) · **Ouvert**.
 - **Décision** : correspondances validées, alias, historique de prix sont
   propres à chaque entreprise. Aucune mutualisation sans cadre juridique
   explicite et décision de ta part.
-- **Conséquence** : la table `PriceRecord` de BatiClair (mutualisée) ne
-  sera pas reprise en l'état (Q1).
+- **Conséquence** : la table `PriceRecord` de BatiClair (mutualisée) n'est
+  pas reprise ; BatiClair est gelé dans `legacy/baticlair/` (aucun
+  utilisateur réel, réponse du fondateur à Q1).
 
 ### PD-013 — Pas d'étape obligatoire « créer un chantier »
 - **Date** : 2026-09-28 · **Statut** : Proposé
@@ -103,3 +104,32 @@ validation) · **Ouvert**.
 - **Décision** : la consultation garde un instantané du quantitatif
   validé. Modifier le quantitatif ensuite crée une nouvelle version, sans
   fausser les offres déjà reçues.
+
+### PD-015 — On peut utiliser le produit avant d'avoir vérifié son e-mail
+- **Date** : 2026-09-28 · **Statut** : Décidé
+- **Décision** : l'inscription connecte immédiatement l'utilisateur ; l'e-mail
+  de vérification part en parallèle. La vérification sera **exigée avant tout
+  envoi vers des tiers** (demandes de prix aux fournisseurs).
+- **Raison** : onboarding très court (§67) sans permettre d'écrire à des
+  fournisseurs depuis une adresse non prouvée.
+- **Impact** : `modules/identity/infrastructure/auth.ts` ; le contrôle
+  « e-mail vérifié » sera ajouté au cas d'usage d'envoi (phase 3).
+
+### PD-016 — Deux points de départ : devis ou quantitatif, au choix de l'artisan
+- **Date** : 2026-09-28 · **Statut** : Décidé (réponse du fondateur à Q2)
+- **Décision** : un seul bouton « Importer un document » ; le type (devis
+  client ou quantitatif / liste de matériaux) est détecté automatiquement.
+  Chaque ligne extraite est classée `material` (matériau commandable) ou
+  `work_item` (ouvrage, ex. « 95 m² couverture ardoise posée »). Au MVP, un
+  ouvrage est conservé tel quel et signalé « à préciser en matériaux » ;
+  l'artisan complète. Un module de conversion ouvrage → matériaux (ratios
+  métier) viendra plus tard, construit à partir de vrais documents.
+- **Toujours souhaité** : 10 à 20 documents réels anonymisés pour calibrer
+  l'extraction.
+
+### PD-017 — Les demandes de prix partent de la boîte mail de l'artisan
+- **Date** : 2026-09-28 · **Statut** : Décidé (réponse du fondateur à Q4)
+- **Décision** : connexion Gmail ou Outlook (droit d'envoi uniquement) ;
+  réponses reçues à la fois dans sa boîte et dans le logiciel grâce à une
+  double adresse de réponse. Détails : ADR-0010.
+- **Impact** : la connexion de la boîte mail passe en phase 3.

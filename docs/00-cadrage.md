@@ -3,6 +3,11 @@
 > Document de synthèse demandé au §133 du prompt maître. Il résume les
 > décisions et renvoie vers les documents détaillés. Rédigé le 2026-09-28.
 >
+> **Mise à jour 2026-09-28 — réponses du fondateur** : Q1 → aucun
+> utilisateur réel, BatiClair est gelé dans `legacy/baticlair/` (option B) ;
+> Q2 → devis ou quantitatif, au choix (PD-016) ; Q4 → envoi depuis la boîte
+> de l'artisan (ADR-0010, PD-017). Q3, Q5, Q6, Q7 restent ouvertes.
+>
 > Statut des éléments : **DÉCIDÉ** (je tranche), **PROPOSÉ** (ma
 > recommandation, validation souhaitée), **À DÉCIDER** (ta décision est
 > nécessaire).
@@ -261,7 +266,7 @@ tools/
 fixtures/              données de démo fictives (chantier Dupont)
 docs/                  cette documentation + ADR
 patrimoine/            autre produit — inchangé
-legacy/baticlair/      (si Q1 = option B) prototype gelé
+legacy/baticlair/      prototype gelé (Q1 : option B retenue)
 ```
 
 ## 14. Pipeline documentaire
@@ -366,10 +371,10 @@ les seuils de confiance initiaux (recalibrés par les évaluations).
 
 | # | Sujet | Bloquant ? | Quand |
 |---|---|---|---|
-| Q1 | Sort de BatiClair (en production ? données réelles ?) | **Oui** — conditionne la structure du dépôt | Maintenant |
-| Q2 | Documents de départ réels (ouvrages vs matériaux) + documents d'exemple | Oui pour la qualité de la phase 2 | Maintenant |
+| Q1 | Sort de BatiClair | ✅ Répondu : gelé dans `legacy/` | — |
+| Q2 | Documents de départ | ✅ Répondu : devis ou quantitatif (PD-016). Documents d'exemple toujours souhaités | Avant la fin de la phase 2 |
 | Q3 | Conditionnement : comparer le facturé ou le ramené au besoin (§46) | Non (le moteur calcule déjà les deux) | Avant la phase 3 |
-| Q4 | Identité d'envoi des demandes aux fournisseurs | Non | Avant la phase 3 |
+| Q4 | Identité d'envoi des demandes aux fournisseurs | ✅ Répondu : depuis la boîte de l'artisan (ADR-0010) | — |
 | Q5 | Essai gratuit, plans, multi-utilisateurs, quotas (§72, §132) | Non | Avant la phase 5 |
 | Q6 | Fournisseur IA et hébergement de production (contrats, région) | Non | Fin de phase 2 |
 | Q7 | Politique de conservation des documents | Non | Avant la phase 5 |

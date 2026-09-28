@@ -1,5 +1,5 @@
-import { Money } from "../money/money";
-import { Decimal } from "../shared/decimal";
+import { Money } from "../money/money.js";
+import { Decimal } from "../shared/decimal.js";
 import {
   COUNTED_KINDS,
   DISCOUNTABLE_KINDS,
@@ -8,7 +8,7 @@ import {
   computedTotalHT,
   lineAmount,
   type SupplierOffer,
-} from "./offer";
+} from "./offer.js";
 
 /**
  * Vérification de la cohérence mathématique d'une offre (§54).

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Quantity, parseUnit } from "../src";
+import { Quantity, parseUnit } from "../src/index.js";
 
 describe("parseUnit", () => {
   it.each([

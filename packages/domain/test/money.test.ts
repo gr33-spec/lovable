@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CurrencyMismatchError, Money } from "../src";
+import { CurrencyMismatchError, Money } from "../src/index.js";
 
 describe("Money", () => {
   it("calcule sans erreur de flottant", () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { Decimal, Money, Quantity, computedTotalHT, verifyOfferArithmetic, type SupplierOffer } from "../src";
-import { offerA, offerC } from "./fixtures/dupont";
+import { Decimal, Money, Quantity, computedTotalHT, verifyOfferArithmetic, type SupplierOffer } from "../src/index.js";
+import { offerA, offerC } from "./fixtures/dupont.js";
 
 const eur = (v: string) => Money.of(v);
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { compareOffers, Money, Quantity, type ComparisonInput, type Finding } from "../src";
-import { dupontInput } from "./fixtures/dupont";
+import { compareOffers, Money, Quantity, type ComparisonInput, type Finding } from "../src/index.js";
+import { dupontInput } from "./fixtures/dupont.js";
 
 const result = compareOffers(dupontInput);
 const supplier = (id: string) => result.suppliers.find((s) => s.supplierId === id)!;
