@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Building2, ChevronDown, DoorOpen, Landmark, Plus, Briefcase } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { Building, Company } from "@/lib/types";
@@ -11,13 +12,23 @@ import { eurCompact, eurSigned } from "@/lib/format";
 import { labelOf, UNIT_TYPES } from "@/lib/labels";
 import { AddMenu } from "@/components/quick-add";
 import { OrgChart } from "@/components/org-chart";
+import { ProjectsList } from "@/components/projects/list";
 import { Avatar, Card, Empty, Page, PageHeader, Pill, RoundButton, Segmented, cx, Button } from "@/components/ui";
 
 export default function PatrimoinePage() {
+  return (
+    <Suspense>
+      <Patrimoine />
+    </Suspense>
+  );
+}
+
+function Patrimoine() {
   const { data, projection } = useStore();
   const snap = projection.snapshot;
   const [adding, setAdding] = useState(false);
-  const [view, setView] = useState<"structure" | "organigramme" | "credits">("structure");
+  const initial = useSearchParams().get("vue");
+  const [view, setView] = useState<"structure" | "organigramme" | "credits" | "projets">(initial === "projets" || initial === "credits" || initial === "organigramme" ? initial : "structure");
   const [open, setOpen] = useState<Record<string, boolean>>(() => {
     const o: Record<string, boolean> = {};
     for (const c of data.companies) if (c.kind === "holding" || !c.parentId) o[c.id] = true;
@@ -113,10 +124,13 @@ export default function PatrimoinePage() {
           options={[
             { value: "structure", label: "Structure" },
             { value: "organigramme", label: "Organigramme" },
-            { value: "credits", label: `Crédits (${data.loans.length})` },
+            { value: "credits", label: "Crédits" },
+            { value: "projets", label: "Projets" },
           ]}
         />
-        {view === "organigramme" ? (
+        {view === "projets" ? (
+          <ProjectsList />
+        ) : view === "organigramme" ? (
           <OrgChart />
         ) : view === "structure" ? (
           data.companies.length === 0 && data.buildings.length === 0 ? (

@@ -7,7 +7,7 @@ import { useStore } from "@/lib/store";
 import { newId } from "@/lib/ops";
 import type { Action, Scenario } from "@/lib/types";
 import { yearOf } from "@/lib/engine/dates";
-import { ACTION_ICONS, ACTION_LABELS, actionSummary, defaultAction } from "@/components/action-form";
+import { ACTION_ICONS, ACTION_LABELS, SIMULATION_TYPES, actionSummary, defaultAction } from "@/components/action-form";
 import { Button, Card, Divided, Empty, Page, PageHeader, Pill, Row, RoundButton, SectionTitle, Sheet, ConfirmDelete } from "@/components/ui";
 
 export default function SimulationsPage() {
@@ -44,7 +44,7 @@ export default function SimulationsPage() {
           <Empty
             icon={<FlaskConical size={26} />}
             title="Aucun scénario"
-            text="Testez une vente, un refinancement, un achat… et comparez avant / après."
+            text="Testez une vente, un refinancement, un remboursement anticipé… et comparez avant / après. Un achat se prépare dans Patrimoine → Projets."
             action={<Button onClick={() => setCreating(true)} icon={<Plus size={18} />}>Nouveau scénario</Button>}
           />
         ) : (
@@ -62,7 +62,6 @@ export default function SimulationsPage() {
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1">
                     {s.appliedAt && <Pill tone="pos">Intégré</Pill>}
-                    {s.includeInExport && <Pill tone="blue">Dossier banque</Pill>}
                   </div>
                 </div>
               </Card>
@@ -89,7 +88,7 @@ export default function SimulationsPage() {
 
       <Sheet open={creating} onClose={() => setCreating(false)} title="Que voulez-vous simuler ?">
         <div className="space-y-2 pb-2">
-          {(Object.keys(ACTION_LABELS) as Action["type"][]).map((t) => (
+          {SIMULATION_TYPES.map((t) => (
             <button key={t} onClick={() => create(t)} className="flex w-full items-center gap-4 rounded-2xl bg-card px-4 py-4 text-left shadow-sm active:scale-[0.99]">
               <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-soft text-navy">{ACTION_ICONS[t]}</span>
               <span className="text-[16px] font-semibold text-ink">{ACTION_LABELS[t]}</span>

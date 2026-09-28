@@ -9,7 +9,7 @@ import type { Action, Scenario } from "@/lib/types";
 import { compareScenario, totalWealth } from "@/lib/engine/scenario";
 import { yearOf } from "@/lib/engine/dates";
 import { eur, eurCompact, eurSigned } from "@/lib/format";
-import { ACTION_ICONS, ACTION_LABELS, ActionForm, defaultAction } from "../action-form";
+import { ACTION_ICONS, ACTION_LABELS, SIMULATION_TYPES, ActionForm, defaultAction } from "../action-form";
 import { LineChart } from "../charts";
 import { Button, Card, ConfirmDelete, Empty, Page, PageHeader, Pill, SectionTitle, Segmented, Sheet, TextField, cx } from "../ui";
 
@@ -167,10 +167,6 @@ export function ScenarioDetail({ id }: { id: string }) {
         )}
 
         <div className="mt-8 space-y-3">
-          <label className="flex items-center justify-between rounded-2xl bg-card px-4 py-4 shadow-sm">
-            <span className="text-[15px] font-medium text-ink">Inclure dans le dossier banque</span>
-            <input type="checkbox" className="h-6 w-6 accent-[#0b2545]" checked={!!scenario.includeInExport} onChange={(e) => save({ includeInExport: e.target.checked })} />
-          </label>
           {scenario.appliedAt ? (
             <div className="rounded-2xl bg-pos/10 px-4 py-3 text-sm text-pos">
               Intégré aux données réelles le {new Date(scenario.appliedAt).toLocaleDateString("fr-FR")}. Les opérations se retirent depuis l&apos;onglet Simulations.
@@ -196,7 +192,7 @@ export function ScenarioDetail({ id }: { id: string }) {
 
       <Sheet open={adding} onClose={() => setAdding(false)} title="Ajouter une opération">
         <div className="space-y-2 pb-2">
-          {(Object.keys(ACTION_LABELS) as Action["type"][]).map((t) => (
+          {SIMULATION_TYPES.map((t) => (
             <button
               key={t}
               onClick={() => {

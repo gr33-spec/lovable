@@ -55,7 +55,7 @@ export default function PlusPage() {
           <Divided>
             <Row href="/plus/rappels" icon={<BellRing size={18} />} title="Rappels" subtitle={alerts.length ? `${alerts.length} à traiter` : "Fins de bail, révisions, crédits"} />
             <Row href="/chronologie" icon={<CalendarRange size={18} />} title="Chronologie" subtitle="30 ans d'échéances · vos événements" />
-            <Row href="/simulations" icon={<FlaskConical size={18} />} title="Simulations" subtitle={`${data.scenarios.length} scénario(s) · vente, achat, refinancement…`} />
+            <Row href="/simulations" icon={<FlaskConical size={18} />} title="Simulations" subtitle={`${data.scenarios.length} scénario(s) · vente, refinancement…`} />
             <Row href="/plus/societes" icon={<Building2 size={18} />} title="Informations des sociétés" subtitle="Siège, SIREN, gérant · durée des baux" />
             <Row href="/plus/cadre-juridique" icon={<Scale size={18} />} title="Cadre juridique des baux" subtitle="Modèles 2015 / 2026, états des lieux, quittances" />
             <Row href="/plus/historique" icon={<LineIcon size={18} />} title="Historique et plus-values" subtitle="Valeurs passées, plus-values latentes" />

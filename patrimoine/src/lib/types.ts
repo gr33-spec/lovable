@@ -371,6 +371,8 @@ export interface Work {
   unitId?: Id | null;
   priority?: Priority;
   status?: WorkStatus;
+  /** Payés par un crédit : pas de sortie de trésorerie dans les projections. */
+  financedByLoan?: boolean;
   notes?: string;
   demo?: boolean;
 }
@@ -478,6 +480,123 @@ export interface Scenario {
   createdAt?: string;
 }
 
+// ——— Projets (acquisition, travaux) à présenter à la banque ———
+
+export type ProjectStatus = "idee" | "etude" | "soumis" | "accorde" | "realise" | "abandonne";
+export type PropertyType = "immeuble" | "appartement" | "maison" | "local" | "terrain" | "autre";
+
+export interface ProjectLot {
+  id: Id;
+  name: string;
+  type?: UnitType;
+  surface?: number;
+  /** Loyer mensuel prévu hors charges. */
+  rent?: number;
+  /** Provision sur charges mensuelle prévue (récupérable). */
+  charges?: number;
+}
+
+/** Poste de dépense : travaux (avec devis) ou autre frais. */
+export interface ProjectCost {
+  id: Id;
+  label: string;
+  kind: "travaux" | "frais";
+  amount?: number;
+  /** Devis joint (fichier stocké côté serveur). */
+  fileId?: string;
+  fileName?: string;
+}
+
+export interface ProjectLoan {
+  id: Id;
+  label?: string;
+  bank?: string;
+  amount?: number;
+  ratePct?: number;
+  durationMonths?: number;
+  /** Différé d'amortissement (intérêts seuls), en mois. */
+  deferralMonths?: number;
+  insuranceMonthly?: number;
+}
+
+export interface ProjectDocument {
+  id: Id;
+  fileId: string;
+  name: string;
+  mime?: string;
+}
+
+export interface Project {
+  id: Id;
+  name: string;
+  /** Achat d'un bien, ou travaux sur un immeuble déjà détenu. */
+  kind: "acquisition" | "travaux";
+  status: ProjectStatus;
+  createdAt?: string;
+  /** Immeuble concerné (projet de travaux). */
+  buildingId?: Id | null;
+  /** Hausse de loyers attendue après travaux (€/mois), en plus des lots ajoutés. */
+  extraRentMonthly?: number;
+  // ——— Le bien ———
+  propertyType?: PropertyType;
+  address?: string;
+  city?: string;
+  surface?: number;
+  condition?: Condition;
+  dpeClass?: "A" | "B" | "C" | "D" | "E" | "F" | "G";
+  constructionPeriod?: ConstructionPeriod;
+  legalRegime?: "copropriete" | "monopropriete";
+  description?: string;
+  lots: ProjectLot[];
+  documents?: ProjectDocument[];
+  // ——— Coût ———
+  price?: number;
+  agencyFees?: number;
+  /** Taux de frais de notaire saisi par l'utilisateur (aucun taux imposé). */
+  notaryFeesPct?: number;
+  /** Montant de frais de notaire connu (prioritaire sur le taux). */
+  notaryFees?: number;
+  /** Frais de dossier, garantie, courtage. */
+  bankFees?: number;
+  costs: ProjectCost[];
+  /** Valeur estimée du bien une fois les travaux faits. */
+  valueAfterWorks?: number;
+  // ——— Financement ———
+  equity?: number;
+  /** Provenance de l'apport (texte libre : trésorerie SCI, compte courant…). */
+  equitySource?: string;
+  loans: ProjectLoan[];
+  // ——— Exploitation ———
+  /** Date d'acte prévue. */
+  purchaseDate?: string;
+  /** Mise en location prévue (après travaux). */
+  rentStartDate?: string;
+  propertyTax?: number;
+  insurance?: number;
+  coproCharges?: number;
+  otherCharges?: number;
+  /** Vacance locative prudente, en % des loyers. */
+  vacancyPct?: number;
+  // ——— Structure ———
+  /** Société qui achète ; absente = nouvelle société (voir newCompanyName) ou détention en direct. */
+  companyId?: Id | null;
+  newCompanyName?: string;
+  newCompanyParentId?: Id | null;
+  // ——— Banque ———
+  /** Objet de la demande, présenté en tête du dossier. */
+  requestPurpose?: string;
+  submittedTo?: string;
+  submittedDate?: string;
+  /** Prendre ce projet en compte dans les projections (accueil, chronologie). */
+  inProjection?: boolean;
+  notes?: string;
+  // ——— Réalisation ———
+  realizedAt?: string;
+  realizedBuildingId?: Id;
+  realizedCompanyId?: Id;
+  realizedLoanIds?: Id[];
+}
+
 // ——— Comptes annuels (bilans) ———
 
 /** Chiffres clés d'un exercice. Tous facultatifs : null/undefined = non renseigné. */
@@ -553,6 +672,7 @@ export interface AppData {
   statements: Statement[];
   tenancies: Tenancy[];
   inspections: Inspection[];
+  projects: Project[];
 }
 
 export type Collection = Exclude<keyof AppData, "schemaVersion" | "settings">;
@@ -573,6 +693,7 @@ export function emptyData(): AppData {
     statements: [],
     tenancies: [],
     inspections: [],
+    projects: [],
   };
 }
 
@@ -589,4 +710,5 @@ export const COLLECTIONS: Collection[] = [
   "statements",
   "tenancies",
   "inspections",
+  "projects",
 ];

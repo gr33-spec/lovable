@@ -1,5 +1,6 @@
 import type { Action, AppData, Building, Unit } from "../types";
-import { monthIndex, yearOf, type MonthIndex } from "./dates";
+import { monthIndex, parseMonth, yearOf, type MonthIndex } from "./dates";
+import { inProjection, projectCompanyKey, projectFigures } from "./projects";
 import { annuityPayment, stepLoan, type LoanState } from "./loan";
 import {
   NO_COMPANY,
@@ -99,6 +100,8 @@ interface BuildingState {
   /** Mois de référence des valeurs (croissance calculée depuis ce mois). */
   refMonth: MonthIndex;
   activeFrom: MonthIndex;
+  /** Début des loyers, si différent (mise en location après travaux). */
+  rentFrom?: MonthIndex;
   soldAt?: MonthIndex;
 }
 
@@ -241,7 +244,8 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
       ? (buildingsById.get(w.buildingId)?.companyId ?? w.companyId ?? NO_COMPANY)
       : (w.companyId ?? NO_COMPANY);
     const list = worksByMonth.get(month) ?? [];
-    list.push({ key, amount: w.amount ?? 0 });
+    // Travaux financés par un crédit : la dépense est couverte par l'emprunt.
+    list.push({ key, amount: w.financedByLoan ? 0 : (w.amount ?? 0) });
     worksByMonth.set(month, list);
     const where = buildingName(w.buildingId) ?? companyName(key);
     events.push({
@@ -285,6 +289,71 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
         refId: b.id,
       });
     }
+  }
+
+  // Projets intégrés aux projections (achat ou travaux à venir).
+  const worksUplift = (after: number | undefined, buildingId?: string | null) => {
+    const b = buildingId ? buildingsById.get(buildingId) : undefined;
+    const before = b ? buildingValue(b, unitsByBuilding.get(b.id) ?? []) : undefined;
+    return after !== undefined && before !== undefined ? Math.max(0, after - before) : undefined;
+  };
+  const projectOutflows = new Map<MonthIndex, { key: string; amount: number }[]>();
+  const interestOnly: { key: string; from: MonthIndex; to: MonthIndex; amount: number }[] = [];
+  for (const p of (data.projects ?? []).filter(inProjection)) {
+    const f = projectFigures(p);
+    const m = Math.max(nowMonth, parseMonth(p.purchaseDate) ?? nowMonth);
+    if (m > lastMonth) continue;
+    const key = projectCompanyKey(p, data);
+    const rentFrom = Math.max(m, parseMonth(p.rentStartDate) ?? m);
+    const id = `proj-${p.id}`;
+    buildings.push({
+      id,
+      companyKey: key,
+      // Travaux : seule la plus-value éventuelle s'ajoute (la valeur actuelle est déjà comptée).
+      value: p.kind === "travaux" ? worksUplift(p.valueAfterWorks, p.buildingId) : (p.valueAfterWorks ?? p.price),
+      rent0: f.rentMonthly - f.vacancyMonthly,
+      charges0: f.chargesAnnual,
+      refMonth: m,
+      activeFrom: m,
+      rentFrom,
+    });
+    for (const lf of f.loans) {
+      const l = lf.loan;
+      if (!l.amount || lf.payment === undefined || !l.durationMonths) continue;
+      const deferral = Math.min(Math.max(0, l.deferralMonths ?? 0), l.durationMonths - 1);
+      if (deferral > 0) interestOnly.push({ key, from: m + 1, to: m + deferral, amount: (lf.deferralPayment ?? 0) + lf.insurance });
+      loans.push({
+        id: `loan-${p.id}-${l.id}`,
+        name: l.label || `Prêt ${p.name}`,
+        companyKey: key,
+        buildingId: id,
+        fromMonth: m + 1 + deferral,
+        balance: l.amount,
+        monthlyRate: (l.ratePct ?? 0) / 1200,
+        payment: lf.payment,
+        insurance: lf.insurance,
+        endMonth: m + l.durationMonths,
+        kind: "amortissable",
+        active: true,
+        paymentOnly: false,
+        frozen: false,
+        source: "plan",
+      });
+    }
+    // Part non empruntée : payée par la trésorerie à l'acte.
+    const out = (f.totalCost ?? 0) - f.loanTotal;
+    if (out > 0) projectOutflows.set(m, [...(projectOutflows.get(m) ?? []), { key, amount: out }]);
+    events.push({
+      id: `project-${p.id}`,
+      kind: p.kind === "travaux" ? "works" : "purchase",
+      month: m,
+      year: yearOf(m),
+      companyKey: key,
+      label: `${p.kind === "travaux" ? "Travaux" : "Achat"} — ${p.name}`,
+      amount: f.totalCost,
+      source: "plan",
+      refId: p.id,
+    });
   }
 
   // ——— Boucle mensuelle ———
@@ -488,11 +557,20 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
       addTreasury(w.key, -w.amount);
       rowFor(w.key, year).works += w.amount;
     }
+    for (const o of projectOutflows.get(m) ?? []) {
+      addTreasury(o.key, -o.amount);
+      rowFor(o.key, year).operations -= o.amount;
+    }
+    for (const d of interestOnly) {
+      if (m < d.from || m > d.to) continue;
+      rowFor(d.key, year).payments += d.amount;
+      addTreasury(d.key, -d.amount);
+    }
 
     for (const b of buildings) {
       if (m < b.activeFrom || (b.soldAt !== undefined && m >= b.soldAt)) continue;
       const row = rowFor(b.companyKey, year);
-      const rent = b.rent0 * growth(settings.rentGrowthPct, b.refMonth, m);
+      const rent = m < (b.rentFrom ?? b.activeFrom) ? 0 : b.rent0 * growth(settings.rentGrowthPct, b.refMonth, m);
       const charges = (b.charges0 / 12) * growth(settings.chargesGrowthPct, b.refMonth, m);
       row.rent += rent;
       row.charges += charges;
