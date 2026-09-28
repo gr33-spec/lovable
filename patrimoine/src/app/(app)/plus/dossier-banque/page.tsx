@@ -35,6 +35,8 @@ export default function DossierBanquePage() {
     <>
       <PageHeader title="Dossier banque" back="/plus" subtitle="Présentation de votre patrimoine" />
       <Page>
+        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
+        <div className="min-w-0">
         <Card>
           <SelectField label="Périmètre" value={scope} options={companies} onChange={setScope} emptyLabel="Tout le groupe" hint="Choisissez une société pour un dossier limité à elle (et ses filiales)." />
           <p className="mt-3 text-[13px] text-ink-2">
@@ -42,6 +44,8 @@ export default function DossierBanquePage() {
           </p>
         </Card>
 
+        </div>
+        <div className="min-w-0 lg:[&>*:first-child]:mt-0">
         <SectionTitle>Avant d&apos;envoyer</SectionTitle>
         {issues.length === 0 && (
           <Card>
@@ -89,7 +93,9 @@ export default function DossierBanquePage() {
           </Card>
         )}
 
-        <div className="mt-6 grid grid-cols-2 gap-2">
+        </div>
+        </div>
+        <div className="mt-6 grid grid-cols-2 gap-2 lg:mx-auto lg:max-w-xl">
           <Button href={url} icon={<FileDown size={18} />}>
             Ouvrir
           </Button>

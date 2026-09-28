@@ -49,7 +49,7 @@ export default function SimulationsPage() {
             action={<Button onClick={() => setCreating(true)} icon={<Plus size={18} />}>Nouveau scénario</Button>}
           />
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3 lg:grid lg:grid-cols-2 lg:items-start lg:gap-3 lg:space-y-0 2xl:grid-cols-3">
             {data.scenarios.map((s) => (
               <SwipeDelete key={s.id} inset={false} className="rounded-[26px]" items={[{ coll: "scenarios", id: s.id }]} message="Scénario supprimé">
               <Card onClick={() => router.push(`/simulations/${s.id}`)}>

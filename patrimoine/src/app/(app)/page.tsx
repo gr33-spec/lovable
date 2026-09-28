@@ -45,7 +45,7 @@ export default function Accueil() {
   return (
     <>
       <header className="safe-top pb-2 pt-6">
-        <div className="mx-auto max-w-2xl px-5 lg:max-w-5xl lg:px-9 xl:max-w-6xl 2xl:max-w-[1480px]">
+        <div className="mx-auto max-w-2xl px-5 lg:max-w-[2000px] lg:px-9 xl:px-11">
           <div>
             <div className="flex items-center justify-between text-[12px] font-semibold uppercase tracking-[0.12em] text-gold">
               <span className="truncate">{data.settings.groupName || "Mon patrimoine"}</span>

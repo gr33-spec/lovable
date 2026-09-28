@@ -89,6 +89,8 @@ export function RemunerationView() {
           </button>
         </div>
 
+        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
+        <div className="min-w-0">
         {/* Synthèse */}
         <div className="hero-card mt-3 rounded-[28px] p-5 text-white">
           <div className="text-[13px] text-white/60">Revenus nets du foyer, après cotisations et impôts</div>
@@ -171,6 +173,8 @@ export function RemunerationView() {
           if (removeIds.length) remove("withdrawals", removeIds);
         }} />
 
+        </div>
+        <div className="min-w-0">
         {/* Sociétés d'exploitation */}
         <SectionTitle action={<button onClick={() => setAddingCompany(true)} className="flex items-center gap-1 text-sm font-medium text-series-1"><Plus size={15} /> Société</button>}>Sociétés qui rémunèrent</SectionTitle>
         <Card className="py-1">
@@ -266,6 +270,8 @@ export function RemunerationView() {
         </Card>
 
         <CurrentAccounts year={year} y0={y0} />
+        </div>
+        </div>
       </Page>
 
       <SourceSheet w={edit} persons={persons} onClose={() => setEditId(null)} />

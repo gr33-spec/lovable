@@ -35,6 +35,8 @@ export function LoanDetail({ id }: { id: string }) {
     <>
       <PageHeader title={loan.name || loan.bank || "Crédit"} subtitle={[loan.bank, building?.name].filter(Boolean).join(" · ") || undefined} back={back} />
       <Page>
+        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
+        <div className="min-w-0">
         <Card>
           <div className="mb-3 flex gap-2">
             {r.finished ? <Pill tone="pos">Terminé</Pill> : r.quality === "complete" ? <Pill tone="blue">Projection calculée</Pill> : r.quality === "estimated" ? <Pill tone="warn">Projection estimée</Pill> : <Pill tone="neg">Données insuffisantes</Pill>}
@@ -72,11 +74,15 @@ export function LoanDetail({ id }: { id: string }) {
           </>
         )}
 
+        </div>
+        <div className="min-w-0 lg:[&>*:first-child]:mt-0">
         <SectionTitle>Caractéristiques</SectionTitle>
         <Card>
           <LoanForm loan={loan} />
         </Card>
 
+        </div>
+        </div>
         <div className="mt-8">
           <ConfirmDelete label="Supprimer le crédit" message="Supprimer ce crédit ?" onConfirm={() => { remove("loans", id); router.push(back); }} />
         </div>

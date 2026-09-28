@@ -91,6 +91,9 @@ function Detail({ id }: { id: string }) {
         }
       />
       <Page>
+        {/* Ordinateur : locataire et actions à gauche, documents et encaissements à droite. */}
+        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
+        <div className="min-w-0">
         <div className="hero-card rounded-[28px] p-5 text-white">
           {active ? (
             <>
@@ -165,6 +168,8 @@ function Detail({ id }: { id: string }) {
           </Link>
         )}
 
+        </div>
+        <div className="min-w-0 lg:[&>*:first-child]:mt-0">
         {active && (
           <>
             <SectionTitle>Documents</SectionTitle>
@@ -250,6 +255,8 @@ function Detail({ id }: { id: string }) {
             </Card>
           </>
         )}
+        </div>
+        </div>
       </Page>
 
       <Sheet

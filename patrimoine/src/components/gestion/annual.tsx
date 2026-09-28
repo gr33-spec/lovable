@@ -72,6 +72,9 @@ export function AnnualView() {
         </button>
       </div>
 
+      {/* Ordinateur : vacance, rotation et révisions côte à côte. */}
+      <div className="xl:grid xl:grid-cols-3 xl:items-start xl:gap-x-5">
+      <div className="min-w-0">
       {/* Vacance locative */}
       <SectionTitle>
         <span className="flex items-center gap-2">
@@ -103,6 +106,8 @@ export function AnnualView() {
         {s.estimatedUnits > 0 && <p className="mt-3 text-[11.5px] text-muted">{s.estimatedUnits} logement(s) sans historique de bail : occupation déduite du pointage ou du statut actuel.</p>}
       </Card>
 
+      </div>
+      <div className="min-w-0">
       {/* Turnover */}
       <SectionTitle>
         <span className="flex items-center gap-2">
@@ -127,6 +132,8 @@ export function AnnualView() {
         {years === 0 && <p className="mt-3 text-[12px] text-muted">Aucun départ ni arrivée enregistré cette année (les changements de locataire faits dans l&apos;application sont comptés automatiquement).</p>}
       </Card>
 
+      </div>
+      <div className="min-w-0">
       {/* Révisions */}
       <SectionTitle>
         <span className="flex items-center gap-2">
@@ -158,6 +165,8 @@ export function AnnualView() {
         )}
       </Card>
 
+      </div>
+      </div>
       {/* Calendrier annuel */}
       <SectionTitle>Calendrier de l&apos;année</SectionTitle>
       <div className="mb-2 flex flex-wrap gap-x-3 gap-y-1 px-1 text-[11px] text-muted">
@@ -167,7 +176,7 @@ export function AnnualView() {
           </span>
         ))}
       </div>
-      <div className="space-y-3">
+      <div className="space-y-3 lg:grid lg:grid-cols-2 lg:items-start lg:gap-3 lg:space-y-0 2xl:grid-cols-3">
         {s.buildings.map((b) => {
           const isOpen = open.has(b.buildingId);
           return (
