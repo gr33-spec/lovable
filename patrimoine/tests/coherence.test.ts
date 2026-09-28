@@ -162,3 +162,17 @@ test("rémunération : coût = cotisations + prélèvements + impôt + net, pour
   const sal = salaryContributions(30000);
   close(sal.net, (30000 / 1.45) * 0.78, 0.01, "salaire net");
 });
+
+test("bilan : avant un bail importé, l'occupation est inconnue (jamais comptée vacante)", async () => {
+  const { yearStats } = await import("../src/lib/engine/annual");
+  const d = emptyData();
+  d.buildings.push({ id: "b", name: "B" });
+  d.units.push({ id: "u", buildingId: "b", name: "Lot 1", rent: 600, status: "occupe" });
+  d.tenancies.push({ id: "t", unitId: "u", status: "actif", imported: true, tenants: [{ lastName: "X" }], startDate: "2026-06-15", rent: 600 });
+  const s = yearStats(d, 2026, "2026-09-28");
+  assert.equal(s.buildings[0].vacantMonths, 0);
+  assert.equal(s.buildings[0].lostRent, 0);
+  // Bail créé dans l'application (arrivée réelle) : le logement était vide avant.
+  d.tenancies[0] = { ...d.tenancies[0], imported: false };
+  assert.ok(yearStats(d, 2026, "2026-09-28").buildings[0].vacantMonths > 4);
+});

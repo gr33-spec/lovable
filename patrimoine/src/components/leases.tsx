@@ -254,10 +254,51 @@ export function RemindersCard({ items, limit = 3 }: { items: Reminder[]; limit?:
         </Link>
       </div>
       <div className="divide-y divide-line">
-        {items.slice(0, limit).map((r) => (
-          <ReminderRow key={r.id} r={r} />
-        ))}
+        {groupReminders(items)
+          .slice(0, limit)
+          .map((g) => (g.items.length === 1 ? <ReminderRow key={g.items[0].id} r={g.items[0]} /> : <ReminderGroupRow key={g.kind} kind={g.kind} items={g.items} />))}
       </div>
     </div>
+  );
+}
+
+const GROUP_LABEL: Record<Reminder["kind"], [string, string]> = {
+  revision: ["révision de loyer", "révisions de loyer"],
+  lease_end: ["fin de bail", "fins de bail"],
+  loan_end: ["fin de crédit", "fins de crédit"],
+  unpaid: ["loyer impayé", "loyers impayés"],
+  deposit: ["dépôt à restituer", "dépôts à restituer"],
+};
+
+/** Rappels regroupés par nature, dans l'ordre d'apparition (le plus urgent d'abord). */
+function groupReminders(items: Reminder[]): { kind: Reminder["kind"]; items: Reminder[] }[] {
+  const groups: { kind: Reminder["kind"]; items: Reminder[] }[] = [];
+  for (const r of items) {
+    const g = groups.find((x) => x.kind === r.kind);
+    if (g) g.items.push(r);
+    else groups.push({ kind: r.kind, items: [r] });
+  }
+  return groups;
+}
+
+function ReminderGroupRow({ kind, items }: { kind: Reminder["kind"]; items: Reminder[] }) {
+  const style = REMINDER_STYLE[kind];
+  const late = items.filter((r) => r.late).length;
+  const amount = items.reduce((s, r) => s + (r.amount ?? 0), 0);
+  const rental = kind !== "loan_end";
+  return (
+    <Link href={rental ? "/gestion" : "/plus/rappels"} className="flex items-center gap-3 py-3 active:opacity-60">
+      <IconChip tone={style.tone} size={38}>{style.icon}</IconChip>
+      <div className="min-w-0 flex-1">
+        <div className="text-[15px] font-semibold text-ink">
+          {items.length} {GROUP_LABEL[kind][1]}
+        </div>
+        <div className="truncate text-[13px] text-muted">
+          {late > 0 ? <span className="font-semibold text-neg">{late} en retard</span> : "À venir"}
+          {` · la plus proche : ${items[0].detail.split(" — ")[0]}`}
+        </div>
+      </div>
+      {amount > 0 && (kind === "unpaid" || kind === "deposit") ? <span className="tabular shrink-0 text-[14px] font-bold text-neg">{eurCompact(amount)}</span> : <ChevronRight size={16} className="shrink-0 text-muted/70" />}
+    </Link>
   );
 }

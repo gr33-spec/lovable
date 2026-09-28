@@ -73,7 +73,18 @@ export default function Accueil() {
             )}
           </div>
           <div className="tabular mt-1 text-[42px] font-extrabold leading-tight tracking-[-0.03em]">
-            {netWorth(t) !== undefined && (t.value > 0 || t.debt > 0) ? eur(netWorth(t)) : <span className="text-2xl font-bold text-white/75">Données insuffisantes</span>}
+            {netWorth(t) !== undefined && (t.value > 0 || t.debt > 0) ? (
+              eur(netWorth(t))
+            ) : (
+              <span className="block tracking-normal">
+                <span className="block text-[22px] font-bold text-white/80">Données insuffisantes</span>
+                {t.unvalued > 0 && (
+                  <Link href="/plus/a-completer" className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1.5 text-[13px] font-semibold text-white">
+                    Estimer la valeur de {t.unvalued} immeuble{t.unvalued > 1 ? "s" : ""} <ChevronRight size={14} />
+                  </Link>
+                )}
+              </span>
+            )}
           </div>
           <HeroSpark
             values={(t.unvalued > 0 ? projection.years.map((r) => r.debt) : projection.years.map((r) => r.net)).slice(0, 21)}

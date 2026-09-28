@@ -13,23 +13,23 @@ import { dateFr, eur, eurCompact, eurSigned, num, pct } from "@/lib/format";
 import { CONDITIONS, UNIT_TYPES, WORK_STATUSES, labelOf } from "@/lib/labels";
 import { BuildingForm, UnitForm, WorkForm } from "../forms";
 import { QuickLoan, QuickWork } from "../quick-add";
-import { Button, Card, ConfirmDelete, Divided, Empty, Kpi, Page, PageHeader, Pill, Row, SectionTitle, Sheet } from "../ui";
+import { Button, Card, ConfirmDelete, Divided, Empty, Kpi, MissingData, Page, PageHeader, Pill, Row, SectionTitle, Sheet } from "../ui";
 import { AddLink } from "./societe";
 import { BuildingValueHistory } from "../value-history";
 import { SwipeDelete } from "@/components/swipe";
 
-export function BuildingDetail({ id }: { id: string }) {
+export function BuildingDetail({ id, edit }: { id: string; edit?: boolean }) {
   return (
     <Suspense>
-      <BuildingDetailInner id={id} />
+      <BuildingDetailInner id={id} edit={edit} />
     </Suspense>
   );
 }
 
-function BuildingDetailInner({ id }: { id: string }) {
+function BuildingDetailInner({ id, edit }: { id: string; edit?: boolean }) {
   const { data, projection, removeMany, upsert, remove } = useStore();
   const router = useRouter();
-  const [sheet, setSheet] = useState<null | "edit" | "loan" | "work">(null);
+  const [sheet, setSheet] = useState<null | "edit" | "loan" | "work">(edit ? "edit" : null);
   const [unitId, setUnitId] = useState<string | null>(null);
   const [workId, setWorkId] = useState<string | null>(null);
   const building = data.buildings.find((b) => b.id === id);
@@ -84,7 +84,7 @@ function BuildingDetailInner({ id }: { id: string }) {
       <Page>
         <Card>
           <div className="grid grid-cols-2 gap-4">
-            <Kpi label="Valeur estimée" value={f.unvalued ? <span className="text-[15px] text-muted">Données insuffisantes</span> : eur(f.value)} />
+            <Kpi label="Valeur estimée" value={f.unvalued ? <MissingData action="Estimer" onClick={() => setSheet("edit")} /> : eur(f.value)} />
             <Kpi label="Patrimoine net" value={f.unvalued ? "—" : eurCompact(netWorth(f))} />
             <Kpi label="Capital restant dû" value={eurCompact(f.debt)} hint={ratio !== undefined ? `LTV ${pct(ratio)}` : undefined} />
             <Kpi label="Rendement brut" value={grossYield !== undefined ? pct(grossYield) : "—"} />
