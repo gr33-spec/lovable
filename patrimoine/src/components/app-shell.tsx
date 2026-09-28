@@ -6,6 +6,7 @@ import { Suspense, useEffect } from "react";
 import { Building2, ChartColumn, CloudOff, Coins, Ellipsis, KeyRound, House, Check, ListChecks, LoaderCircle, Users } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { unpaidByUnit } from "@/lib/engine/leases";
+import { missingCount } from "@/lib/missing";
 import { cx } from "./ui";
 import { ToastHost } from "./swipe";
 import { PdfViewerHost } from "./pdf-viewer";
@@ -94,11 +95,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 /** Barre d'onglets de l'espace gestion locative. */
 function GestionNav({ unpaid }: { unpaid: number }) {
   const pathname = usePathname();
+  const { data } = useStore();
+  const missing = missingCount(data);
   const vue = useSearchParams().get("vue") ?? "afaire";
   const tabs = [
     { vue: "afaire", label: "À faire", icon: ListChecks, badge: unpaid },
     { vue: "loyers", label: "Loyers", icon: Coins },
-    { vue: "locataires", label: "Locataires", icon: Users },
+    { vue: "locataires", label: "Locataires", icon: Users, badge: missing },
     { vue: "annee", label: "Bilan", icon: ChartColumn },
   ];
   return (
