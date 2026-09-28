@@ -22,19 +22,23 @@ function sign(payload: string, key: string): string {
   return createHmac("sha256", key).update(payload).digest("base64url");
 }
 
-export type Role = "owner" | "gestion";
+/** owner : propriétaire ; gestion : gestion locative ; lecture : consultation via un lien de partage (aucune écriture). */
+export type Role = "owner" | "gestion" | "lecture";
 
 export interface SessionInfo {
   role: Role;
   /** Version de l'accès gestion au moment de la connexion (révocation). */
   av?: number;
+  /** Lien de partage à l'origine d'une session de consultation (révocation). */
+  sid?: string;
 }
 
-export function createSessionToken(info: SessionInfo = { role: "owner" }, now = Date.now()): string {
+export function createSessionToken(info: SessionInfo = { role: "owner" }, now = Date.now(), expiresAt?: number): string {
   const key = secret();
   if (!key) throw new Error("APP_PASSWORD manquant");
+  const exp = Math.min(expiresAt ?? Infinity, now + SESSION_DAYS * 24 * 3600 * 1000);
   const payload = Buffer.from(
-    JSON.stringify({ iat: now, exp: now + SESSION_DAYS * 24 * 3600 * 1000, role: info.role, av: info.av }),
+    JSON.stringify({ iat: now, exp, role: info.role, av: info.av, sid: info.sid }),
   ).toString("base64url");
   return `${payload}.${sign(payload, key)}`;
 }
@@ -49,8 +53,9 @@ export function readSessionToken(token: string | undefined, now = Date.now()): S
   const given = Buffer.from(signature);
   if (expected.length !== given.length || !timingSafeEqual(expected, given)) return null;
   try {
-    const { exp, role, av } = JSON.parse(Buffer.from(payload, "base64url").toString());
+    const { exp, role, av, sid } = JSON.parse(Buffer.from(payload, "base64url").toString());
     if (typeof exp !== "number" || exp <= now) return null;
+    if (role === "lecture") return typeof sid === "string" ? { role: "lecture", sid } : null;
     // Anciennes sessions (sans rôle) : propriétaire.
     return role === "gestion" ? { role: "gestion", av: typeof av === "number" ? av : -1 } : { role: "owner" };
   } catch {

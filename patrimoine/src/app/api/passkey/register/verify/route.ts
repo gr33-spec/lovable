@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     if (!result.verified || !result.registrationInfo) throw new Error("non vérifié");
     const { credential } = result.registrationInfo;
     const session = (await currentSession())!;
-    await savePasskey({ id: credential.id, publicKey: credential.publicKey, counter: credential.counter, transports: credential.transports, name, rpId: rp.rpID, role: session.role, av: session.av });
+    await savePasskey({ id: credential.id, publicKey: credential.publicKey, counter: credential.counter, transports: credential.transports, name, rpId: rp.rpID, role: (session.role === "gestion" ? "gestion" : "owner"), av: session.av });
   } catch {
     return NextResponse.json({ error: "Enregistrement refusé." }, { status: 400 });
   }

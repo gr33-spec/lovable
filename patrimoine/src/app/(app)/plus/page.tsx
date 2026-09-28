@@ -81,7 +81,7 @@ export default function PlusPage() {
         <Card className="py-1">
           <Divided>
             <Row href="/plus/sauvegardes" icon={<History size={18} />} title="Sauvegardes" subtitle="Exporter, importer, restaurer" />
-            <Row href="/plus/partage" icon={<Share2 size={18} />} title="Partager en lecture seule" subtitle="Banquier, comptable, associé · avec expiration" />
+            <Row href="/plus/partage" icon={<Share2 size={18} />} title="Partager en lecture seule" subtitle="Toute l'application, sans rien pouvoir modifier" />
             <Row href="/api/export-excel" icon={<FileSpreadsheet size={18} />} title="Exporter en Excel" subtitle="Toutes les données, un onglet par thème" />
             <Row href="/bienvenue?etape=1" icon={<Wand2 size={18} />} title="Assistant de démarrage" subtitle="Structure, immeubles, crédits, revenus" />
             {demo ? (

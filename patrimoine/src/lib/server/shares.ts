@@ -99,3 +99,10 @@ export async function resolveShare(token: string | undefined, count = false): Pr
   );
   return res.rowCount ? toLink(res.rows[0]) : undefined;
 }
+
+/** Lien encore valable (session de consultation ouverte avec ce lien). */
+export async function shareActive(id: string): Promise<boolean> {
+  await ready();
+  const res = await pool().query("SELECT 1 FROM share_link WHERE id = $1 AND revoked_at IS NULL AND expires_at > now()", [id]);
+  return (res.rowCount ?? 0) > 0;
+}

@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { applyOps, type Op } from "./ops";
+import { toast } from "./toast";
 import type { AppData, Collection, Settings } from "./types";
 import { currentMonth, type MonthIndex } from "./engine/dates";
 import { project, type Projection } from "./engine/projection";
@@ -14,7 +15,7 @@ export type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 interface StoreValue {
   /** Espace connecté : propriétaire (tout) ou gestion locative (périmètre réduit). */
-  role: "owner" | "gestion";
+  role: "owner" | "gestion" | "lecture";
   /** Vue affichée : application complète ou espace gestion locative. */
   view: "patrimoine" | "gestion";
   data: AppData;
@@ -45,7 +46,7 @@ export function StoreProvider({
 }: {
   initialData: AppData;
   initialVersion: number;
-  role?: "owner" | "gestion";
+  role?: "owner" | "gestion" | "lecture";
   view?: "patrimoine" | "gestion";
   children: React.ReactNode;
 }) {
@@ -111,6 +112,11 @@ export function StoreProvider({
 
   const enqueue = useCallback(
     (ops: Op[], immediate = false) => {
+      // Consultation : on peut tout ouvrir, rien n'est modifié (le serveur refuse de toute façon).
+      if (role === "lecture") {
+        toast("Mode consultation : aucune modification n'est enregistrée.");
+        return;
+      }
       for (const op of ops) {
         // Fusionne les modifications successives d'un même élément.
         if (op.op === "upsert") {
@@ -125,7 +131,7 @@ export function StoreProvider({
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => void flush(), immediate ? 0 : DEBOUNCE_MS);
     },
-    [flush],
+    [flush, role],
   );
 
   const upsert = useCallback(
@@ -163,6 +169,10 @@ export function StoreProvider({
 
   const replaceAll = useCallback(
     async (next: AppData, reason: string) => {
+      if (role === "lecture") {
+        toast("Mode consultation : aucune modification n'est enregistrée.");
+        return false;
+      }
       await flush();
       setStatus("saving");
       try {
@@ -183,7 +193,7 @@ export function StoreProvider({
         return false;
       }
     },
-    [flush],
+    [flush, role],
   );
 
   const reload = useCallback(async () => {
