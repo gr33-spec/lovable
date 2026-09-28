@@ -72,6 +72,9 @@ export function TodayView({ onOpen }: { onOpen: (view: "loyers" | "locataires", 
 
   return (
     <div className="space-y-4">
+      {/* Ordinateur : l'argent à gauche, les démarches à droite. */}
+      <div className="space-y-4 lg:grid lg:grid-cols-2 lg:items-start lg:gap-6 lg:space-y-0">
+      <div className="min-w-0 space-y-4">
       {/* Loyers du mois : pointage en un geste */}
       <div className="hero-card rounded-[28px] p-5 text-white">
         <div className="flex items-baseline justify-between">
@@ -139,6 +142,8 @@ export function TodayView({ onOpen }: { onOpen: (view: "loyers" | "locataires", 
         </>
       )}
 
+      </div>
+      <div className="min-w-0 space-y-4 lg:[&>*:first-child]:mt-0">
       {revisions.length > 0 && (
         <>
           <SectionTitle action={revisionGain > 0 ? <span className="tabular text-sm font-bold text-pos">+{eurCents(revisionGain)}/mois</span> : undefined}>
@@ -188,6 +193,8 @@ export function TodayView({ onOpen }: { onOpen: (view: "loyers" | "locataires", 
         </>
       )}
 
+      </div>
+      </div>
       {!nothing && <p className="px-2 text-center text-[12px] text-muted">Balayez une ligne vers la gauche : marquer payé, passer une révision, ignorer ou supprimer. Chaque action peut être annulée.</p>}
 
       {nothing && (

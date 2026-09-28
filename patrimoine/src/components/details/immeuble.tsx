@@ -101,6 +101,9 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
           <div className="mt-3 text-xs text-muted">Charges annuelles : {eur(f.chargesAnnual)}</div>
         </Card>
 
+        {/* Ordinateur : logements à gauche, financement et informations à droite. */}
+        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
+        <div className="min-w-0">
         <SectionTitle action={<AddLink onClick={addUnit} />}>
           Logements {units.length > 0 && `(${units.length}${vacant ? ` · ${vacant} vacant${vacant > 1 ? "s" : ""}` : ""})`}
         </SectionTitle>
@@ -131,6 +134,8 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
           )}
         </Card>
 
+        </div>
+        <div className="min-w-0">
         <SectionTitle action={<AddLink onClick={() => setSheet("loan")} />}>Crédits</SectionTitle>
         <Card className="py-1">
           {loans.length === 0 ? (
@@ -214,6 +219,8 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
           </button>
         </Card>
 
+        </div>
+        </div>
         <div className="mt-8">
           <ConfirmDelete
             label="Supprimer l'immeuble"

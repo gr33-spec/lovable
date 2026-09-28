@@ -44,8 +44,8 @@ export default function Accueil() {
 
   return (
     <>
-      <header className="safe-top px-5 pb-2 pt-6">
-        <div className="mx-auto max-w-2xl">
+      <header className="safe-top pb-2 pt-6">
+        <div className="mx-auto max-w-2xl px-5 lg:max-w-5xl lg:px-9 xl:max-w-6xl 2xl:max-w-[1480px]">
           <div>
             <div className="flex items-center justify-between text-[12px] font-semibold uppercase tracking-[0.12em] text-gold">
               <span className="truncate">{data.settings.groupName || "Mon patrimoine"}</span>
@@ -64,6 +64,9 @@ export default function Accueil() {
         </div>
       </header>
       <Page>
+        {/* Ordinateur : deux colonnes (situation à gauche, perspectives à droite). */}
+        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
+        <div className="min-w-0">
         {/* Carte principale */}
         <div className="hero-card mt-3 rounded-[30px] p-6 text-white">
           <div className="flex items-center justify-between">
@@ -169,6 +172,8 @@ export default function Accueil() {
           </>
         )}
 
+        </div>
+        <div className="min-w-0 lg:mt-3 lg:[&>*:first-child]:mt-0">
         {t.cash > 0 && (
           <Card className="mt-4">
             <div className="flex items-center justify-between">
@@ -274,6 +279,8 @@ export default function Accueil() {
           )}
         </Card>
 
+        </div>
+        </div>
         <p className="mt-6 px-2 text-center text-xs text-muted">
           Hypothèses : valeurs {pct(data.settings.valueGrowthPct ?? 0)}/an · loyers {pct(data.settings.rentGrowthPct ?? 0)}/an ·{" "}
           <Link href="/plus/hypotheses" className="underline">modifier</Link>

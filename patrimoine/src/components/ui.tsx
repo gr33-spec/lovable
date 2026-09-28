@@ -28,7 +28,7 @@ export function PageHeader({
   const router = useRouter();
   return (
     <header className="safe-top sticky top-0 z-20 bg-bg/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-2xl items-center gap-2 px-5 pb-3 pt-4">
+      <div className="mx-auto flex max-w-2xl items-center gap-2 px-5 pb-3 pt-4 lg:max-w-5xl lg:px-9 xl:max-w-6xl 2xl:max-w-[1480px]">
         {back && (
           <button
             onClick={() => (typeof back === "string" ? router.push(back) : router.back())}
@@ -57,7 +57,7 @@ export function PageHeader({
 }
 
 export function Page({ children }: { children: ReactNode }) {
-  return <main className="mx-auto w-full max-w-2xl px-4 pb-32 lg:pb-16">{children}</main>;
+  return <main className="mx-auto w-full max-w-2xl px-4 pb-32 lg:max-w-5xl lg:px-8 lg:pb-16 xl:max-w-6xl 2xl:max-w-[1480px]">{children}</main>;
 }
 
 export function Card({ children, className, onClick }: { children: ReactNode; className?: string; onClick?: () => void }) {
