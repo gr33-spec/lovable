@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { BOTH, currentSession, guardApi } from "@/lib/server/guard";
 import { CHUNK_BYTES, deleteFile, putChunk, readFile } from "@/lib/server/files";
+import { loadDocument } from "@/lib/server/db";
+import { tenancyFileIds } from "@/lib/tenancy-files";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -27,8 +29,9 @@ export async function GET(request: Request, ctx: Ctx) {
   const { id } = await ctx.params;
   const file = await readFile(id).catch(() => undefined);
   if (!file) return NextResponse.json({ error: "Fichier introuvable" }, { status: 404 });
-  // L'espace gestion ne consulte que des photos (états des lieux).
-  if ((await currentSession())?.role === "gestion" && !file.mime.startsWith("image/")) return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
+  // L'espace gestion consulte les photos (états des lieux) et les baux / actes de caution signés, jamais les bilans.
+  if ((await currentSession())?.role === "gestion" && !file.mime.startsWith("image/") && !tenancyFileIds((await loadDocument()).data).has(id))
+    return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
   return new NextResponse(new Uint8Array(file.data), {
     headers: {
       "Content-Type": file.mime,
@@ -39,9 +42,11 @@ export async function GET(request: Request, ctx: Ctx) {
 }
 
 export async function DELETE(request: Request, ctx: Ctx) {
-  const denied = await guardApi(request);
+  const denied = await guardApi(request, BOTH);
   if (denied) return denied;
   const { id } = await ctx.params;
+  // L'espace gestion ne supprime que les documents signés des locataires (remplacement).
+  if ((await currentSession())?.role === "gestion" && !tenancyFileIds((await loadDocument()).data).has(id)) return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
   await deleteFile(id);
   return NextResponse.json({ ok: true });
 }
