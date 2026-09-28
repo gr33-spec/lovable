@@ -199,7 +199,16 @@ export interface Person {
   address?: string;
 }
 
+/** Fichier déposé (PDF ou photo), stocké côté serveur. */
+export interface StoredFileRef {
+  fileId: string;
+  name: string;
+  uploadedAt?: string;
+}
+
 export interface Guarantor extends Person {
+  /** Acte de cautionnement signé (scan). */
+  signedFile?: StoredFileRef;
   kind: "personne" | "visale" | "autre";
   /** Montant maximal garanti (principal et accessoires), en euros. */
   maxAmount?: number;
@@ -270,6 +279,8 @@ export interface Tenancy {
   annexes?: string[];
   /** Bail existant saisi a posteriori (non généré par l'application). */
   imported?: boolean;
+  /** Exemplaire signé du bail (scan), remplacé à chaque nouveau dépôt. */
+  signedLease?: StoredFileRef;
   // ——— Départ ———
   noticeDate?: string;
   noticeBy?: "locataire" | "bailleur";

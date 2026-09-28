@@ -17,6 +17,7 @@ import { PaymentStrip } from "../leases";
 import { Button, Card, ConfirmDelete, Empty, Grid2, NumberField, Page, PageHeader, SectionTitle, Sheet, Stack, TextField, DateField } from "../ui";
 import { DocRow, LegalBadge, SignaturePad, documentUrl } from "./common";
 import { ReceiptPicker } from "./receipts";
+import { SignedDocRow } from "./signed";
 
 export function LogementDetail({ id }: { id: string }) {
   return (
@@ -195,11 +196,20 @@ function Detail({ id }: { id: string }) {
                     }
                   />
                 )}
-                {(active.guarantors ?? [])
-                  .filter((g) => g.kind === "personne")
-                  .map((g, i) => (
-                    <DocRow key={i} title="Acte de cautionnement" subtitle={[g.firstName, g.lastName].filter(Boolean).join(" ")} url={documentUrl({ type: "caution", tenancy: active.id, index: i })} fileName={`caution-${i + 1}.pdf`} />
-                  ))}
+                <SignedDocRow title="Bail signé" file={active.signedLease} onChange={(f) => upsert("tenancies", { ...active, signedLease: f })} />
+                {(active.guarantors ?? []).map((g, i) =>
+                  g.kind !== "personne" ? null : (
+                    <div key={i}>
+                      {/* Acte généré par l'application (à faire signer), puis exemplaire signé déposé. */}
+                      {!active.imported && <DocRow title="Acte de cautionnement" subtitle={[g.firstName, g.lastName].filter(Boolean).join(" ")} url={documentUrl({ type: "caution", tenancy: active.id, index: i })} fileName={`caution-${i + 1}.pdf`} />}
+                      <SignedDocRow
+                        title={`Caution signée — ${[g.firstName, g.lastName].filter(Boolean).join(" ") || `garant ${i + 1}`}`}
+                        file={g.signedFile}
+                        onChange={(f) => upsert("tenancies", { ...active, guarantors: (active.guarantors ?? []).map((x, j) => (j === i ? { ...x, signedFile: f } : x)) })}
+                      />
+                    </div>
+                  ),
+                )}
                 <InspectionRow tenancyId={active.id} kind="entree" onStart={() => startEntry(active)} unitId={id} />
               </div>
             </Card>
@@ -227,6 +237,10 @@ function Detail({ id }: { id: string }) {
                     </div>
                     <div className="mt-1 divide-y divide-line">
                       {!t.imported && <DocRow title="Bail" url={documentUrl({ type: "bail", tenancy: t.id })} fileName="bail.pdf" />}
+                      <SignedDocRow title="Bail signé" file={t.signedLease} readOnly />
+                      {(t.guarantors ?? []).map((g, j) => (
+                        <SignedDocRow key={j} title={`Caution signée — ${[g.firstName, g.lastName].filter(Boolean).join(" ") || `garant ${j + 1}`}`} file={g.signedFile} readOnly />
+                      ))}
                       <InspectionRow tenancyId={t.id} kind="entree" unitId={id} />
                       <InspectionRow tenancyId={t.id} kind="sortie" unitId={id} />
                     </div>
