@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { FileCheck2, FileUp, LoaderCircle } from "lucide-react";
-import type { StoredFileRef } from "@/lib/types";
+import type { Person, StoredFileRef } from "@/lib/types";
 import { dateFr } from "@/lib/format";
 import { ACCEPTED_FILES, uploadFile } from "@/lib/upload";
 import { openDocument } from "@/components/pdf-viewer";
@@ -18,9 +18,12 @@ export function SignedDocRow({
   file,
   onChange,
   readOnly,
+  details,
 }: {
   title: string;
   subtitle?: string;
+  /** Informations connues (ex. garant : naissance, adresse), affichées même sans fichier. */
+  details?: string;
   file?: StoredFileRef;
   onChange?: (file: StoredFileRef) => void;
   readOnly?: boolean;
@@ -45,7 +48,7 @@ export function SignedDocRow({
     }
   };
 
-  if (readOnly && !file) return null;
+  if (readOnly && !file && !details) return null;
   return (
     <div className="py-3">
       <div className="flex items-center gap-3">
@@ -55,7 +58,9 @@ export function SignedDocRow({
         <div className="min-w-0 flex-1">
           <div className="text-[15px] font-medium leading-snug text-ink">{title}</div>
           <div className="line-clamp-2 text-[13px] leading-snug text-muted">
-            {file ? (
+            {!file && readOnly ? (
+              "Exemplaire signé non joint"
+            ) : file ? (
               <>
                 <span className="font-semibold text-pos">Déposé</span>
                 {file.uploadedAt ? ` le ${dateFr(file.uploadedAt)}` : ""}
@@ -65,6 +70,7 @@ export function SignedDocRow({
             )}
             {subtitle ? ` · ${subtitle}` : ""}
           </div>
+          {details && <div className="mt-0.5 text-[12.5px] leading-snug text-ink-2">{details}</div>}
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
           {progress !== null ? (
@@ -101,4 +107,11 @@ export function SignedDocRow({
       />
     </div>
   );
+}
+
+/** « Né(e) le 13/05/1963 à Paimpol · 3 chemin du Varadec, 22860 Plourivo » (uniquement ce qui est connu). */
+export function guarantorDetails(g: Person): string | undefined {
+  const birth = [g.birthDate ? `le ${dateFr(g.birthDate)}` : undefined, g.birthPlace ? `à ${g.birthPlace}` : undefined].filter(Boolean).join(" ");
+  const parts = [birth ? `Né(e) ${birth}` : undefined, g.address, g.phone, g.email].filter(Boolean);
+  return parts.length ? parts.join(" · ") : undefined;
 }

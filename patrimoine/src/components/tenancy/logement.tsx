@@ -17,7 +17,7 @@ import { PaymentStrip } from "../leases";
 import { Button, Card, ConfirmDelete, Empty, Grid2, NumberField, Page, PageHeader, SectionTitle, Sheet, Stack, TextField, DateField } from "../ui";
 import { DocRow, LegalBadge, SignaturePad, documentUrl } from "./common";
 import { ReceiptPicker } from "./receipts";
-import { SignedDocRow } from "./signed";
+import { SignedDocRow, guarantorDetails } from "./signed";
 
 export function LogementDetail({ id }: { id: string }) {
   return (
@@ -210,6 +210,7 @@ function Detail({ id }: { id: string }) {
                       <SignedDocRow
                         title={`Caution signée — ${[g.firstName, g.lastName].filter(Boolean).join(" ") || `garant ${i + 1}`}`}
                         file={g.signedFile}
+                        details={guarantorDetails(g)}
                         onChange={(f) => upsert("tenancies", { ...active, guarantors: (active.guarantors ?? []).map((x, j) => (j === i ? { ...x, signedFile: f } : x)) })}
                       />
                     </div>
@@ -244,7 +245,7 @@ function Detail({ id }: { id: string }) {
                       {!t.imported && <DocRow title="Bail" url={documentUrl({ type: "bail", tenancy: t.id })} fileName="bail.pdf" />}
                       <SignedDocRow title="Bail signé" file={t.signedLease} readOnly />
                       {(t.guarantors ?? []).map((g, j) => (
-                        <SignedDocRow key={j} title={`Caution signée — ${[g.firstName, g.lastName].filter(Boolean).join(" ") || `garant ${j + 1}`}`} file={g.signedFile} readOnly />
+                        <SignedDocRow key={j} title={`Caution signée — ${[g.firstName, g.lastName].filter(Boolean).join(" ") || `garant ${j + 1}`}`} file={g.signedFile} details={guarantorDetails(g)} readOnly />
                       ))}
                       <InspectionRow tenancyId={t.id} kind="entree" unitId={id} />
                       <InspectionRow tenancyId={t.id} kind="sortie" unitId={id} />
