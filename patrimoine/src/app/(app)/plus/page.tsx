@@ -50,6 +50,8 @@ export default function PlusPage() {
           </span>
         </Link>
 
+        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
+        <div className="min-w-0">
         <SectionTitle>Pilotage</SectionTitle>
         <Card className="py-1">
           <Divided>
@@ -73,6 +75,8 @@ export default function PlusPage() {
           </Divided>
         </Card>
 
+        </div>
+        <div className="min-w-0">
         <SectionTitle>Données</SectionTitle>
         <Card className="py-1">
           <Divided>
@@ -105,6 +109,8 @@ export default function PlusPage() {
             <Row onClick={logout} icon={<LogOut size={18} />} title="Se déconnecter" />
           </Divided>
         </Card>
+        </div>
+        </div>
         <p className="mt-6 flex items-center justify-center gap-1.5 text-center text-xs text-muted">
           <CalendarClock size={13} /> Enregistrement automatique · sauvegarde quotidienne
         </p>

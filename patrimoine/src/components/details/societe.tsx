@@ -88,6 +88,8 @@ export function CompanyDetail({ id }: { id: string }) {
           )}
         </Card>
 
+        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
+        <div className="min-w-0">
         {rows.some((r) => r.debt > 0) && (
           <>
             <SectionTitle>Projection {hasChildren ? "(société seule)" : ""}</SectionTitle>
@@ -153,6 +155,8 @@ export function CompanyDetail({ id }: { id: string }) {
           )}
         </Card>
 
+        </div>
+        <div className="min-w-0">
         <SectionTitle action={<AddLink onClick={() => setSheet("loan")} />}>Crédits</SectionTitle>
         <Card className="py-1">
           {loans.length === 0 ? (
@@ -215,6 +219,8 @@ export function CompanyDetail({ id }: { id: string }) {
           </>
         )}
 
+        </div>
+        </div>
         <div className="mt-8">
           <ConfirmDelete
             label="Supprimer la société"
