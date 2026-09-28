@@ -1,4 +1,5 @@
-import type { AppData, Company } from "../types";
+import type { AppData, Company, SaleAction } from "../types";
+import { saleLabel } from "../engine/sale";
 import { monthLabel } from "../engine/dates";
 import { NO_COMPANY, cashflowMonthly, companyTree, type Figures } from "../engine/snapshot";
 import { halfDebtYear, type Projection } from "../engine/projection";
@@ -38,6 +39,8 @@ export interface GroupModel {
   debtSeries: number[];
   cfSeries: number[];
   statements: { company: string; year: number; revenue?: number; net?: number; caf?: number; equity?: number; bankDebt?: number; cash?: number }[];
+  /** Ventes prévues (immeubles ou lots) prises en compte dans la trajectoire. */
+  sales: { label: string; when: string; price?: number; debtRepaid: number; costs: number; net?: number; rentLost: number; paymentsRemoved: number; underOffer: boolean }[];
 }
 
 export function groupModel(data: AppData, p: Projection, name: string): GroupModel {
@@ -167,6 +170,22 @@ export function groupModel(data: AppData, p: Projection, name: string): GroupMod
     debtSeries: horizon.map((r) => r.debt),
     cfSeries: horizon.map((r) => Math.round(r.cashflow / 12)),
     statements,
+    sales: p.sales
+      .filter((x) => x.source === "plan")
+      .map((x) => {
+        const a = data.plans.find((pl): pl is SaleAction => pl.id === x.actionId && pl.type === "sale");
+        return {
+          label: a ? pdfSafe(saleLabel(data, a)) : "Vente",
+          when: monthLabel(x.month),
+          price: x.price,
+          debtRepaid: x.debtRepaid,
+          costs: x.fees + x.tax,
+          net: x.netCash,
+          rentLost: x.rentLostMonthly,
+          paymentsRemoved: x.paymentsRemovedMonthly,
+          underOffer: !!a?.underOffer,
+        };
+      }),
   };
 }
 

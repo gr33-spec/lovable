@@ -384,6 +384,22 @@ function Trajectory({ m }: { m: GroupModel }) {
         <Chart title="Capital restant dû" years={m.years} values={m.debtSeries} kind="line" width={half} height={100} />
         <Chart title="Cash-flow par mois" years={m.years} values={m.cfSeries} kind="step" width={half} height={100} color={POS} />
       </View>
+      {m.sales.length > 0 && (
+        <View style={{ marginTop: 10 }} wrap={false}>
+          <Table
+            cols={[
+              { label: "Vente prévue", w: 30, get: (r) => `${r.label}${r.underOffer ? " (compromis signé)" : ""}`, bold: true },
+              { label: "Date", w: 13, get: (r) => r.when },
+              { label: "Prix", w: 14, right: true, get: (r) => (r.price !== undefined ? E(r.price) : "—") },
+              { label: "Remb. banque", w: 15, right: true, get: (r) => E(Math.round(r.debtRepaid)) },
+              { label: "Net", w: 14, right: true, get: (r) => (r.net !== undefined ? E(Math.round(r.net)) : "—") },
+              { label: "Loyers / mois", w: 14, right: true, get: (r) => `−${E(Math.round(r.rentLost))}` },
+            ]}
+            rows={m.sales}
+          />
+          <Note>{"Ventes intégrées à la trajectoire : loyers des lots vendus retirés, capital remboursé (quote-part des lots sauf montant indiqué), mensualités recalculées. Prix, frais et impôt sur la plus-value sont ceux saisis par le dirigeant."}</Note>
+        </View>
+      )}
       {m.milestones.length > 0 && (
         <View style={{ marginTop: 10 }}>
           <Table

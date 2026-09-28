@@ -36,7 +36,8 @@ export function companySubset(data: AppData, companyId: string): AppData {
     events: data.events.filter((e) => !!e.companyId && companies.has(e.companyId)),
     withdrawals: data.withdrawals.filter((w) => !!w.companyId && companies.has(w.companyId)),
     statements: data.statements.filter((s) => companies.has(s.companyId)),
-    plans: [],
+    // Ventes prévues des immeubles du périmètre (les autres opérations restent propres au groupe).
+    plans: data.plans.filter((a) => a.type === "sale" && buildingIds.has(a.buildingId)),
     scenarios: [],
     projects: (data.projects ?? []).filter((p) => (p.kind === "travaux" ? !!p.buildingId && buildingIds.has(p.buildingId) : !!p.companyId && companies.has(p.companyId))),
   };

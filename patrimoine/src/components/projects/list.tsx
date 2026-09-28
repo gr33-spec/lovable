@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Hammer, Plus, Rocket, X } from "lucide-react";
+import { BadgeEuro, Building2, Hammer, Plus, Rocket, X } from "lucide-react";
+import { SaleSheet, newSale } from "@/components/sale/sheet";
+import { SalesList } from "@/components/sale/list";
 import { useStore } from "@/lib/store";
 import { newId } from "@/lib/ops";
-import type { Project } from "@/lib/types";
+import type { Project, SaleAction } from "@/lib/types";
 import { STATUS_LABEL, isOpen, newProject, projectCompanyName, projectFigures } from "@/lib/engine/projects";
 import { eurCompact, eurSigned } from "@/lib/format";
 import { Button, Card, Empty, Pill, SectionTitle, Sheet, cx } from "../ui";
@@ -20,8 +22,8 @@ export const STATUS_TONE: Record<Project["status"], "neutral" | "blue" | "warn" 
   abandonne: "neutral",
 };
 
-export function NewProjectSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { upsert } = useStore();
+export function NewProjectSheet({ open, onClose, onSell }: { open: boolean; onClose: () => void; onSell?: (s: SaleAction) => void }) {
+  const { data, upsert } = useStore();
   const router = useRouter();
   const create = (kind: Project["kind"]) => {
     const p = newProject(kind, newId());
@@ -34,6 +36,17 @@ export function NewProjectSheet({ open, onClose }: { open: boolean; onClose: () 
       <div className="space-y-2 pb-2">
         <ChoiceButton icon={<Building2 size={20} />} title="Acheter un bien" text="Immeuble, appartement, local… avec ou sans travaux" onClick={() => create("acquisition")} />
         <ChoiceButton icon={<Hammer size={20} />} title="Travaux sur un immeuble" text="Rénovation, création de lots, financés ou non par un prêt" onClick={() => create("travaux")} />
+        {data.buildings.length > 0 && (
+          <ChoiceButton
+            icon={<BadgeEuro size={20} />}
+            title="Vendre un bien"
+            text="L'immeuble entier ou lot par lot, avec le prix de chaque lot"
+            onClick={() => {
+              onClose();
+              onSell?.(newSale(data.buildings[0].id));
+            }}
+          />
+        )}
       </div>
     </Sheet>
   );
@@ -56,20 +69,22 @@ export function ProjectsList() {
   const update = useUndoableUpdate();
   const router = useRouter();
   const [creating, setCreating] = useState(false);
+  const [selling, setSelling] = useState<SaleAction | null>(null);
   const projects = data.projects ?? [];
   const open = projects.filter(isOpen);
   const done = projects.filter((p) => !isOpen(p));
 
-  if (projects.length === 0) {
+  if (projects.length === 0 && !data.plans.some((p) => p.type === "sale")) {
     return (
       <>
         <Empty
           icon={<Rocket size={26} />}
           title="Aucun projet"
-          text="Préparez un achat ou des travaux : coût, financement, loyers, dossier pour la banque. Une fois le projet réalisé, il rejoint votre patrimoine en un geste."
+          text="Préparez un achat, des travaux ou une vente : coût, financement, loyers, dossier pour la banque. Une fois le projet réalisé, votre patrimoine est mis à jour en un geste."
           action={<Button onClick={() => setCreating(true)} icon={<Plus size={18} />}>Nouveau projet</Button>}
         />
-        <NewProjectSheet open={creating} onClose={() => setCreating(false)} />
+        <NewProjectSheet open={creating} onClose={() => setCreating(false)} onSell={setSelling} />
+        <SaleSheet sale={selling ?? undefined} open={!!selling} onClose={() => setSelling(null)} chooseBuilding />
       </>
     );
   }
@@ -119,13 +134,22 @@ export function ProjectsList() {
           <div className="space-y-3">{open.map(card)}</div>
         </>
       )}
+      {data.plans.some((p) => p.type === "sale") && (
+        <>
+          <SectionTitle>Ventes prévues</SectionTitle>
+          <Card className="py-1">
+            <SalesList />
+          </Card>
+        </>
+      )}
       {done.length > 0 && (
         <>
           <SectionTitle>Terminés</SectionTitle>
           <div className="space-y-3 opacity-80">{done.map(card)}</div>
         </>
       )}
-      <NewProjectSheet open={creating} onClose={() => setCreating(false)} />
+      <NewProjectSheet open={creating} onClose={() => setCreating(false)} onSell={setSelling} />
+      <SaleSheet sale={selling ?? undefined} open={!!selling} onClose={() => setSelling(null)} chooseBuilding />
     </div>
   );
 }

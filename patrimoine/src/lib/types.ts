@@ -459,16 +459,31 @@ export interface CompanyActivity {
 
 // ——— Opérations futures (plans validés ou scénarios) ———
 
+export interface SaleLot {
+  unitId: Id;
+  /** Prix de vente du lot (€). */
+  price?: number;
+}
+
 export interface SaleAction {
   id: Id;
   type: "sale";
   buildingId: Id;
   year: number;
+  /** Date prévue de l'acte (AAAA-MM-JJ), prioritaire sur l'année. */
+  date?: string;
+  /** Prix de l'immeuble entier (vente en bloc). */
   price?: number;
-  /** Frais (agence, diagnostics, remboursement anticipé…) en €. */
+  /** Vente lot par lot : lots vendus et prix de chacun (absent = tout l'immeuble). */
+  lots?: SaleLot[];
+  /** Frais (agence, diagnostics, indemnités de remboursement anticipé…) en €. */
   fees?: number;
   /** Impôt sur la plus-value saisi manuellement (€). */
   tax?: number;
+  /** Capital remboursé sur les crédits de l'immeuble (vente partielle ; par défaut la quote-part des lots). */
+  debtRepaid?: number;
+  /** Compromis signé (information pour le dossier). */
+  underOffer?: boolean;
 }
 
 export interface PurchaseAction {

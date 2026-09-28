@@ -1,5 +1,6 @@
 "use client";
 
+import { salePrice } from "@/lib/engine/sale";
 import { BadgeEuro, Hammer, RefreshCw, ShoppingCart, TrendingUp } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { newId } from "@/lib/ops";
@@ -22,7 +23,7 @@ export const SIMULATION_TYPES = (Object.keys(ACTION_LABELS) as Action["type"][])
 export function actionSummary(a: Action, names: { building: (id?: string | null) => string | undefined; loan: (id: string) => string | undefined }): string {
   switch (a.type) {
     case "sale":
-      return `Vendre ${names.building(a.buildingId) ?? "un immeuble"} en ${a.year}${a.price ? ` pour ${eurCompact(a.price)}` : ""}`;
+      return `Vendre ${names.building(a.buildingId) ?? "un immeuble"}${a.lots?.length ? ` (${a.lots.length} lot${a.lots.length > 1 ? "s" : ""})` : ""} en ${a.year}${salePrice(a) ? ` pour ${eurCompact(salePrice(a)!)}` : ""}`;
     case "refinance":
       return `Refinancer ${a.loanIds.length ? a.loanIds.map((id) => names.loan(id) ?? "crédit").join(", ") : ""} en ${a.year}${a.amount ? ` (${eurCompact(a.amount)})` : ""}`;
     case "works":
