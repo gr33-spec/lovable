@@ -78,7 +78,11 @@ export default function SauvegardesPage() {
       // Fichier de compléments : fusion par nom, avec aperçu.
       if (json?.type === "patrimoine-complements") {
         const parsed = complementsSchema.safeParse(json);
-        if (!parsed.success) throw new Error();
+        if (!parsed.success) {
+          const issue = parsed.error.issues[0];
+          setMessage(`Fichier de compléments non reconnu (${issue.path.join(" › ") || "fichier"} : ${issue.message}). Rechargez la page pour obtenir la dernière version de l'application, puis réessayez.`);
+          return;
+        }
         setComplements(planComplements(data, parsed.data));
         return;
       }
@@ -113,7 +117,7 @@ export default function SauvegardesPage() {
     <>
       <PageHeader title="Sauvegardes" back="/plus" />
       <Page>
-        {message && <div className="mb-4 rounded-2xl bg-pos/10 px-4 py-3 text-sm text-pos">{message}</div>}
+        {message && <div className={`mb-4 rounded-2xl px-4 py-3 text-sm ${/valide|non reconnu|échoué/.test(message) ? "bg-warn/10 text-warn" : "bg-pos/10 text-pos"}`}>{message}</div>}
         <div className="grid gap-3">
           <Button href="/api/backup" icon={<Download size={18} />} full>
             Exporter une sauvegarde complète
