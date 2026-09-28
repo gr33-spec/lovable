@@ -7,7 +7,7 @@ import { ArrowRightLeft, ClipboardCheck, DoorOpen, FileSignature, Pencil, Receip
 import { useStore } from "@/lib/store";
 import type { Tenancy } from "@/lib/types";
 import { dateFr, eur } from "@/lib/format";
-import { activeTenancy, draftTenancy, inspectionsOf, landlordCompany, lastExitInspection, leavingTenancy, tenanciesOf, tenancyFromUnit, tenantsName, depositDue } from "@/lib/tenancy";
+import { activeTenancy, draftTenancy, unitRemovals, inspectionsOf, landlordCompany, lastExitInspection, leavingTenancy, tenanciesOf, tenancyFromUnit, tenantsName, depositDue } from "@/lib/tenancy";
 import { leaseTermEnd } from "@/lib/legal/lease";
 import { newEntryInspection } from "@/lib/legal/inspection";
 import { depositSettlement, leaseYears } from "@/lib/legal/rules";
@@ -27,7 +27,7 @@ export function LogementDetail({ id }: { id: string }) {
 }
 
 function Detail({ id }: { id: string }) {
-  const { data, upsert, remove, role, view } = useStore();
+  const { data, upsert, removeMany, role, view } = useStore();
   const router = useRouter();
   const params = useSearchParams();
   const [sheet, setSheet] = useState<null | "edit" | "quittance" | "import" | "sign">(null);
@@ -48,7 +48,9 @@ function Detail({ id }: { id: string }) {
   const leaving = leavingTenancy(data, id);
   const draft = draftTenancy(data, id);
   const history = tenanciesOf(data, id).filter((t) => t.status === "clos");
-  const knownTenant = !active && unit.status !== "vacant" && (unit.tenantLastName || unit.tenantFirstName);
+  const occupiedOutside = !active && unit.status !== "vacant";
+  const knownTenant = occupiedOutside && (unit.tenantLastName || unit.tenantFirstName);
+  const rentLine = `loyer ${eur(unit.rent)}${unit.charges ? ` + charges ${eur(unit.charges)}` : ""}`;
 
   /** Dossier du bail en cours reconstitué à partir des informations du logement (rien n'est redemandé). */
   const ensureTenancy = (): Tenancy => {
@@ -107,21 +109,27 @@ function Detail({ id }: { id: string }) {
             <>
               <div className="text-[13px] text-white/60">Locataire</div>
               <div className="text-[24px] font-extrabold leading-tight">{[unit.tenantFirstName, unit.tenantLastName].filter(Boolean).join(" ")}</div>
-              <div className="mt-1 text-[13px] text-white/60">Bail signé hors de l&apos;application · loyer {eur(unit.rent)} + charges {eur(unit.charges)}</div>
+              <div className="mt-1 text-[13px] text-white/60">Bail signé hors de l&apos;application · {rentLine}</div>
+            </>
+          ) : occupiedOutside ? (
+            <>
+              <div className="text-[13px] text-white/60">Loué</div>
+              <div className="text-[24px] font-extrabold leading-tight">Nom du locataire à compléter</div>
+              <div className="mt-1 text-[13px] text-white/60">Touchez « Modifier » pour l&apos;ajouter · {rentLine}</div>
             </>
           ) : (
             <>
               <div className="text-[13px] text-white/60">Logement</div>
-              <div className="text-[24px] font-extrabold leading-tight">{unit.status === "vacant" ? "Vacant" : "Sans locataire enregistré"}</div>
-              <div className="mt-1 text-[13px] text-white/60">Loyer de référence : {eur(unit.rent)} + charges {eur(unit.charges)}</div>
+              <div className="text-[24px] font-extrabold leading-tight">Vacant</div>
+              <div className="mt-1 text-[13px] text-white/60">Loyer de référence : {rentLine.replace("loyer ", "")}</div>
             </>
           )}
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-2.5">
           <Link href={`/patrimoine/logement/${id}/changement`} className="soft-card flex flex-col gap-2 rounded-[22px] p-4 active:scale-[0.98]">
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-navy text-gold">{active || knownTenant || leaving ? <ArrowRightLeft size={19} /> : <UserPlus size={19} />}</span>
-            <span className="text-[15px] font-semibold text-ink">{active || knownTenant || leaving ? "Changer de locataire" : "Nouveau locataire"}</span>
+            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-navy text-gold">{active || occupiedOutside || leaving ? <ArrowRightLeft size={19} /> : <UserPlus size={19} />}</span>
+            <span className="text-[15px] font-semibold text-ink">{active || occupiedOutside || leaving ? "Changer de locataire" : "Nouveau locataire"}</span>
             <span className="text-[12px] text-muted">Départ, état des lieux, dépôt, nouveau bail</span>
           </Link>
           <button
@@ -241,7 +249,7 @@ function Detail({ id }: { id: string }) {
               label="Supprimer le logement"
               message="Supprimer ce logement ? Une sauvegarde automatique permet de revenir en arrière."
               onConfirm={() => {
-                remove("units", unit.id);
+                removeMany(unitRemovals(data, unit.id));
                 router.push(building ? `/patrimoine/immeuble/${building.id}` : "/patrimoine");
               }}
             />}

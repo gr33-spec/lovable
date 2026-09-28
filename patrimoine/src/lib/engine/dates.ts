@@ -29,10 +29,6 @@ export function currentMonth(now: Date = new Date()): MonthIndex {
   return monthIndex(now.getFullYear(), now.getMonth() + 1);
 }
 
-export function monthToIso(m: MonthIndex): string {
-  return `${yearOf(m)}-${String(monthOf(m)).padStart(2, "0")}-01`;
-}
-
 const MONTHS_FR = [
   "janv.",
   "févr.",

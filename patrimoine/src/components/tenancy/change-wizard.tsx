@@ -89,7 +89,7 @@ function Wizard({ unitId }: { unitId: string }) {
   const current = activeTenancy(data, unitId);
   const leaving = leavingTenancy(data, unitId);
   const outgoing = data.tenancies.find((t) => t.id === outgoingId) ?? leaving ?? current;
-  const legacy = !outgoing && unit.status !== "vacant" && (unit.tenantLastName || unit.tenantFirstName);
+  const legacy = !outgoing && unit.status !== "vacant";
   const draft = draftTenancy(data, unitId);
 
   const steps: StepId[] = [];
@@ -163,7 +163,7 @@ function Wizard({ unitId }: { unitId: string }) {
           <div className="mb-3 flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wide text-gold">
             {["depart", "edl-sortie", "depot"].includes(step) ? (
               <>
-                <UserMinus size={14} /> Départ de {outgoing ? tenantsName(outgoing) : [unit.tenantFirstName, unit.tenantLastName].filter(Boolean).join(" ")}
+                <UserMinus size={14} /> Départ de {(outgoing ? tenantsName(outgoing) : [unit.tenantFirstName, unit.tenantLastName].filter(Boolean).join(" ")) || "l'ancien locataire"}
               </>
             ) : (
               <>

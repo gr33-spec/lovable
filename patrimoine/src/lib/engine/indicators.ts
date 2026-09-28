@@ -1,6 +1,6 @@
 import type { AppData, Statement, StatementFigures } from "../types";
 import type { Projection } from "./projection";
-import { NO_COMPANY, buildingChargesAnnual, type Figures } from "./snapshot";
+import { NO_COMPANY, type Figures } from "./snapshot";
 
 // Indicateurs financiers : calculés à partir des données de l'application
 // (temps réel) et des comptes annuels saisis ou importés. Chaque indicateur
@@ -310,11 +310,6 @@ export function groupStatementIndicators(data: AppData, p: Projection): Indicato
       explain: "EBE ÷ charges financières.",
     },
   ];
-}
-
-/** Charges annuelles déclarées (fiches immeubles) — utile pour comparer aux comptes. */
-export function declaredCharges(data: AppData, companyId: string): number {
-  return data.buildings.filter((b) => b.companyId === companyId).reduce((s, b) => s + buildingChargesAnnual(b), 0);
 }
 
 export const LEVEL_LABEL: Record<Level, string> = {

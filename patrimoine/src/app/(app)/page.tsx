@@ -41,7 +41,6 @@ export default function Accueil() {
     return pick.map((id) => all.find((i) => i.id === id)).filter((i): i is NonNullable<typeof i> => !!i && t.loans + t.buildings > 0);
   }, [data, projection, t.loans, t.buildings]);
   const alerts = useMemo(() => allReminders(data, todayIso(), snap.resolvedLoans), [data, snap]);
-  const upcomingEnds = projection.events.filter((e) => e.kind === "loan_end").slice(0, 5);
 
   return (
     <>
@@ -217,7 +216,7 @@ export default function Accueil() {
               <LineChart
                 years={years}
                 series={[{ label: "Capital restant dû", values: projection.years.map((r) => r.debt), color: "var(--series-1)" }]}
-                markers={[...new Set(upcomingEnds.map((e) => e.year))]}
+                markers={[...new Set(projection.events.filter((e) => e.kind === "loan_end").slice(0, 5).map((e) => e.year))]}
               />
             )}
             {chart === "cf" && <BarChart years={years} values={projection.years.map((r) => r.cashflow)} label="Cash-flow annuel" />}
@@ -264,23 +263,6 @@ export default function Accueil() {
           )}
         </Card>
 
-        {/* Fins de crédits */}
-        {upcomingEnds.length > 0 && (
-          <>
-            <SectionTitle>Prochaines fins de crédits</SectionTitle>
-            <Card className="py-2">
-              <div className="divide-y divide-line">
-                {upcomingEnds.map((e) => (
-                  <Link key={e.id} href={e.loanId && !e.loanId.startsWith("loan-") ? `/patrimoine/credit/${e.loanId}` : "/chronologie"} className="flex items-center gap-3 py-3">
-                    <div className="tabular w-12 text-[17px] font-bold text-navy">{e.year}</div>
-                    <div className="min-w-0 flex-1 truncate text-[15px] text-ink">{e.label.replace(/^Fin — /, "")}</div>
-                    <div className="tabular text-sm font-semibold text-pos">+{eurCompact(e.monthlyFreed)}/mois</div>
-                  </Link>
-                ))}
-              </div>
-            </Card>
-          </>
-        )}
         <p className="mt-6 px-2 text-center text-xs text-muted">
           Hypothèses : valeurs {pct(data.settings.valueGrowthPct ?? 0)}/an · loyers {pct(data.settings.rentGrowthPct ?? 0)}/an ·{" "}
           <Link href="/plus/hypotheses" className="underline">modifier</Link>

@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/alt-text -- composant Image de react-pdf (PDF), sans attribut alt */
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { Document, Font, Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer";

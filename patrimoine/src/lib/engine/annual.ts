@@ -111,7 +111,8 @@ export function yearStats(data: AppData, year: number, today = todayIso(), upToM
 
   const limit = `${year}-${String(Math.max(lastMonth, 1)).padStart(2, "0")}-31`;
   const inYear = (d?: string) => !!d && d.startsWith(String(year)) && d <= limit;
-  const leases = data.tenancies.filter((t) => t.status !== "brouillon");
+  const unitIds = new Set(data.units.map((u) => u.id));
+  const leases = data.tenancies.filter((t) => t.status !== "brouillon" && unitIds.has(t.unitId));
   const departures = leases.filter((t) => inYear(t.endDate));
   const arrivals = leases.filter((t) => !t.imported && inYear(t.startDate));
 

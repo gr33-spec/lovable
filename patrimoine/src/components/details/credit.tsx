@@ -47,6 +47,9 @@ export function LoanDetail({ id }: { id: string }) {
             <Kpi label="Taux" value={loan.ratePct !== undefined ? pct(loan.ratePct, 2) : r.impliedRatePct !== undefined ? `${pct(r.impliedRatePct, 2)} (déduit)` : "—"} />
           </div>
           {totalInterest > 0 && <div className="mt-3 text-xs text-muted">Intérêts restant à payer : {eur(totalInterest)}</div>}
+          {r.notes.map((n) => (
+            <div key={n} className="mt-2 text-xs text-warn">{n}</div>
+          ))}
         </Card>
 
         {visible.length > 1 && (
