@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Hammer, Plus, Rocket } from "lucide-react";
+import { Building2, Hammer, Plus, Rocket, X } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { newId } from "@/lib/ops";
 import type { Project } from "@/lib/types";
 import { STATUS_LABEL, isOpen, newProject, projectCompanyName, projectFigures } from "@/lib/engine/projects";
 import { eurCompact, eurSigned } from "@/lib/format";
 import { Button, Card, Empty, Pill, SectionTitle, Sheet, cx } from "../ui";
+import { SwipeDelete, useUndoableUpdate } from "@/components/swipe";
 
 export const STATUS_TONE: Record<Project["status"], "neutral" | "blue" | "warn" | "pos" | "gold" | "neg"> = {
   idee: "neutral",
@@ -52,6 +53,7 @@ function ChoiceButton({ icon, title, text, onClick }: { icon: React.ReactNode; t
 
 export function ProjectsList() {
   const { data } = useStore();
+  const update = useUndoableUpdate();
   const router = useRouter();
   const [creating, setCreating] = useState(false);
   const projects = data.projects ?? [];
@@ -75,7 +77,15 @@ export function ProjectsList() {
   const card = (p: Project) => {
     const f = projectFigures(p);
     return (
-      <Card key={p.id} onClick={() => router.push(`/patrimoine/projet/${p.id}`)}>
+      <SwipeDelete
+        key={p.id}
+        inset={false}
+        className="rounded-[26px]"
+        items={[{ coll: "projects", id: p.id }]}
+        message="Projet supprimé"
+        extra={isOpen(p) ? [{ label: "Abandonner", icon: <X size={18} />, tone: "warn", onAction: () => update("projects", p, { ...p, status: "abandonne", inProjection: false }, "Projet abandonné") }] : []}
+      >
+      <Card onClick={() => router.push(`/patrimoine/projet/${p.id}`)}>
         <div className="flex items-start gap-3">
           <span className={cx("flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl", p.kind === "travaux" ? "bg-warn/10 text-warn" : "bg-series-1/10 text-series-1")}>
             {p.kind === "travaux" ? <Hammer size={18} /> : <Building2 size={18} />}
@@ -94,6 +104,7 @@ export function ProjectsList() {
           </div>
         </div>
       </Card>
+      </SwipeDelete>
     );
   };
 

@@ -1,13 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CheckCheck, CheckCircle2, ChevronRight, Coins, TrendingUp } from "lucide-react";
+import { Check, CheckCheck, CheckCircle2, ChevronRight, Coins, TrendingUp, X } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { Unit } from "@/lib/types";
 import { dateFr, eur, eurCents } from "@/lib/format";
 import { monthKey, monthKeyLabel, paidAmount, shiftMonthKey, todayIso, unpaidByUnit } from "@/lib/engine/leases";
 import { allReminders } from "@/lib/reminders";
-import { revisionsDue, type RevisionPlan } from "@/lib/revision";
+import { revisionsDue, settleUnpaid, skipRevision, type RevisionPlan } from "@/lib/revision";
+import { SwipeRow, toast, useUndoableUpdate } from "@/components/swipe";
 import { useIrlSeries } from "@/lib/use-irl";
 import { ReminderRow } from "@/components/leases";
 import { Button, Card, SectionTitle, Sheet, cx } from "@/components/ui";
@@ -31,7 +32,8 @@ export function useTodoCount(): number {
 }
 
 export function TodayView({ onOpen }: { onOpen: (view: "loyers" | "locataires", month?: string) => void }) {
-  const { data, projection, upsert, setSettings } = useStore();
+  const { data, projection, upsertMany } = useStore();
+  const update = useUndoableUpdate();
   const irl = useIrlSeries();
   const today = todayIso();
   const month = monthKey(today);
@@ -58,10 +60,12 @@ export function TodayView({ onOpen }: { onOpen: (view: "loyers" | "locataires", 
   const revisionGain = revisions.reduce((t, p) => t + (p.newRent !== undefined && p.rent !== undefined ? p.newRent - p.rent : 0), 0);
   const tasks = managementTasks(data);
   const others = allReminders(data, today, projection.snapshot.resolvedLoans).filter((r) => OTHER.has(r.kind));
-  const dismiss = (id: string) => setSettings({ dismissedReminders: [...(data.settings.dismissedReminders ?? []), id] });
 
   const markAllPaid = (list: Unit[]) => {
-    for (const u of list) upsert("units", { ...u, payments: { ...(u.payments ?? {}), [month]: { ...dueFor(data, u, month), status: "paye" } } });
+    upsertMany(list.map((u) => ({ coll: "units" as const, item: { ...u, payments: { ...(u.payments ?? {}), [month]: { ...dueFor(data, u, month), status: "paye" as const } } } })));
+    toast(`${list.length} loyer${list.length > 1 ? "s" : ""} marqué${list.length > 1 ? "s" : ""} payé${list.length > 1 ? "s" : ""}`, () => {
+      upsertMany(list.map((u) => ({ coll: "units" as const, item: u })));
+    });
   };
 
   const nothing = revisions.length + tasks.length + others.length + unpaid.length === 0 && unpointed.length === 0;
@@ -118,13 +122,15 @@ export function TodayView({ onOpen }: { onOpen: (view: "loyers" | "locataires", 
           <Card className="py-1">
             <div className="divide-y divide-line">
               {unpaid.map((l) => (
-                <button key={l.unit.id} onClick={() => onOpen("loyers", l.months[l.months.length - 1])} className="flex w-full items-center gap-3 py-3 text-left">
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[15px] font-medium text-ink">{placeOf(data, l.unit)}</span>
-                    <span className="block truncate text-[13px] text-muted">{l.months.map(monthKeyLabel).join(", ")}</span>
-                  </span>
-                  <span className="tabular text-[15px] font-bold text-neg">{eur(l.amount)}</span>
-                </button>
+                <SwipeRow key={l.unit.id} actions={[{ label: "Payé", icon: <Check size={18} />, tone: "pos", onAction: () => update("units", l.unit, settleUnpaid(l.unit), "Loyers marqués payés") }]}>
+                  <button onClick={() => onOpen("loyers", l.months[l.months.length - 1])} className="flex w-full items-center gap-3 py-3 text-left">
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[15px] font-medium text-ink">{placeOf(data, l.unit)}</span>
+                      <span className="block truncate text-[13px] text-muted">{l.months.map(monthKeyLabel).join(", ")}</span>
+                    </span>
+                    <span className="tabular text-[15px] font-bold text-neg">{eur(l.amount)}</span>
+                  </button>
+                </SwipeRow>
               ))}
             </div>
           </Card>
@@ -139,7 +145,9 @@ export function TodayView({ onOpen }: { onOpen: (view: "loyers" | "locataires", 
           <Card className="py-1">
             <div className="divide-y divide-line">
               {(allRevisions ? revisions : revisions.slice(0, 5)).map((p) => (
-                <RevisionRow key={p.unit.id} plan={p} onOpen={() => setRevising(p.unit.id)} />
+                <SwipeRow key={p.unit.id} actions={[{ label: "Pas cette année", icon: <X size={18} />, tone: "warn", onAction: () => update("units", p.unit, skipRevision(p.unit, today), "Révision passée pour cette année") }]}>
+                  <RevisionRow plan={p} onOpen={() => setRevising(p.unit.id)} />
+                </SwipeRow>
               ))}
             </div>
             {revisions.length > 5 && (
@@ -171,12 +179,14 @@ export function TodayView({ onOpen }: { onOpen: (view: "loyers" | "locataires", 
           <Card className="py-1">
             <div className="divide-y divide-line">
               {others.map((r) => (
-                <ReminderRow key={r.id} r={r} onDismiss={r.kind === "deposit" ? undefined : () => dismiss(r.id)} />
+                <ReminderRow key={r.id} r={r} />
               ))}
             </div>
           </Card>
         </>
       )}
+
+      {!nothing && <p className="px-2 text-center text-[12px] text-muted">Balayez une ligne vers la gauche : marquer payé, passer une révision, ignorer ou supprimer. Chaque action peut être annulée.</p>}
 
       {nothing && (
         <Card>

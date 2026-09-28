@@ -18,6 +18,7 @@ export function allReminders(data: AppData, today: string, resolvedLoans?: Map<s
     const s = depositSettlement(t);
     list.push({
       id: `deposit:${t.id}:${due}`,
+      unitId: unit.id,
       kind: "deposit",
       date: due,
       title: "Dépôt de garantie à restituer",

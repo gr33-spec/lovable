@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { ArrowLeft, ChevronRight, X } from "lucide-react";
 import { INSUFFICIENT } from "@/lib/format";
 
@@ -313,7 +314,8 @@ export function Sheet({
     };
   }, [open, onClose]);
   if (!open) return null;
-  return (
+  // Rendu au niveau du document : une ligne balayable (transformée) ne doit pas contenir la feuille.
+  const sheet = (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label={title}>
       <div className="animate-fade absolute inset-0 bg-[#0b1526]/40" onClick={onClose} />
       <div className="animate-sheet relative flex max-h-[92dvh] w-full max-w-lg flex-col rounded-t-[28px] bg-bg sm:rounded-[28px]">
@@ -328,6 +330,7 @@ export function Sheet({
       </div>
     </div>
   );
+  return typeof document === "undefined" ? sheet : createPortal(sheet, document.body);
 }
 
 // ——— Champs de formulaire ———

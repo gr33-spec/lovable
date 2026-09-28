@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { BellRing, Check, ChevronRight, FileSignature, Landmark, TrendingUp, TriangleAlert } from "lucide-react";
+import { BellRing, Check, ChevronRight, FileSignature, Landmark, Trash2, TrendingUp, TriangleAlert, X } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { RentPayment, Unit } from "@/lib/types";
 import { LEASE_TYPES, REVISIONS } from "@/lib/labels";
@@ -18,6 +18,8 @@ import {
   type Reminder,
 } from "@/lib/engine/leases";
 import { RevisionSheet, revisionLetterUrl } from "./gestion/revision";
+import { SwipeRow, useDismiss, useUndoableUpdate, type SwipeAction } from "./swipe";
+import { settleUnpaid, skipRevision } from "@/lib/revision";
 import { DateField, Details, Grid2, IconChip, NumberField, SelectField, TextField, cx, type ChipTone } from "./ui";
 
 // ——— Bail d'un logement ———
@@ -184,40 +186,62 @@ const REMINDER_STYLE: Record<Reminder["kind"], { icon: React.ReactNode; tone: Ch
   deposit: { icon: <Landmark size={18} />, tone: "gold" },
 };
 
-export function ReminderRow({ r, onDismiss }: { r: Reminder; onDismiss?: () => void }) {
+/**
+ * Rappel : un appui ouvre l'action (révision, fiche du logement…) ; un
+ * balayage vers la gauche propose de l'ignorer ou de le régler directement.
+ */
+export function ReminderRow({ r, dismissable = r.kind !== "unpaid" && r.kind !== "deposit" }: { r: Reminder; dismissable?: boolean }) {
+  const { data } = useStore();
   const style = REMINDER_STYLE[r.kind];
-  return (
-    <div className="flex items-center gap-3 py-3">
-      <Link href={r.href} className="flex min-w-0 flex-1 items-center gap-3 active:opacity-60">
-        <IconChip tone={style.tone} size={38}>{style.icon}</IconChip>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="truncate text-[15px] font-semibold text-ink">{r.title}</span>
-            {r.late && <span className="shrink-0 rounded-full bg-neg/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-neg">En retard</span>}
-          </div>
-          <div className="line-clamp-2 text-[13px] text-muted">{r.detail}</div>
+  const dismiss = useDismiss();
+  const update = useUndoableUpdate();
+  const [revising, setRevising] = useState(false);
+  const unit = r.unitId ? data.units.find((u) => u.id === r.unitId) : undefined;
+
+  const actions: SwipeAction[] = [];
+  if (r.kind === "revision" && unit) actions.push({ label: "Pas cette année", icon: <X size={18} />, tone: "warn", onAction: () => update("units", unit, skipRevision(unit, todayIso()), "Révision passée pour cette année") });
+  if (r.kind === "unpaid" && unit) actions.push({ label: "Payé", icon: <Check size={18} />, tone: "pos", onAction: () => update("units", unit, settleUnpaid(unit), "Loyers marqués payés") });
+  if (dismissable) actions.push({ label: "Ignorer", icon: <Trash2 size={18} />, tone: "neg", onAction: () => dismiss(r.id) });
+
+  const content = (
+    <>
+      <IconChip tone={style.tone} size={38}>{style.icon}</IconChip>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="truncate text-[15px] font-semibold text-ink">{r.title}</span>
+          {r.late && <span className="shrink-0 rounded-full bg-neg/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-neg">En retard</span>}
         </div>
-        {(r.kind === "unpaid" || r.kind === "deposit") && r.amount ? (
-          <span className="tabular shrink-0 text-[14px] font-bold text-neg">{eurCompact(r.amount)}</span>
-        ) : r.kind === "loan_end" && r.amount ? (
-          <span className="tabular shrink-0 text-[13px] font-bold text-pos">+{eurCompact(r.amount)}/m</span>
-        ) : (
-          <ChevronRight size={16} className="shrink-0 text-muted/70" />
-        )}
-      </Link>
-      {onDismiss && (
-        <button onClick={onDismiss} aria-label="Marquer comme traité" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-soft text-ink-2 active:scale-95">
-          <Check size={16} />
-        </button>
+        <div className="line-clamp-2 text-[13px] text-muted">{r.detail}</div>
+      </div>
+      {(r.kind === "unpaid" || r.kind === "deposit") && r.amount ? (
+        <span className="tabular shrink-0 text-[14px] font-bold text-neg">{eurCompact(r.amount)}</span>
+      ) : r.kind === "loan_end" && r.amount ? (
+        <span className="tabular shrink-0 text-[13px] font-bold text-pos">+{eurCompact(r.amount)}/m</span>
+      ) : (
+        <ChevronRight size={16} className="shrink-0 text-muted/70" />
       )}
-    </div>
+    </>
+  );
+  return (
+    <>
+    <SwipeRow actions={actions}>
+      {r.kind === "revision" && unit ? (
+        <button type="button" onClick={() => setRevising(true)} className="flex w-full items-center gap-3 py-3 text-left active:opacity-60">
+          {content}
+        </button>
+      ) : (
+        <Link href={r.href} className="flex items-center gap-3 py-3 active:opacity-60">
+          {content}
+        </Link>
+      )}
+    </SwipeRow>
+    {r.kind === "revision" && unit && <RevisionSheet unit={unit} open={revising} onClose={() => setRevising(false)} />}
+    </>
   );
 }
 
 export function RemindersCard({ items, limit = 3 }: { items: Reminder[]; limit?: number }) {
-  const { data, setSettings } = useStore();
   if (items.length === 0) return null;
-  const dismiss = (id: string) => setSettings({ dismissedReminders: [...(data.settings.dismissedReminders ?? []), id] });
   return (
     <div className="soft-card mt-4 rounded-[26px] px-5 pb-2 pt-4">
       <div className="flex items-center justify-between">
@@ -231,7 +255,7 @@ export function RemindersCard({ items, limit = 3 }: { items: Reminder[]; limit?:
       </div>
       <div className="divide-y divide-line">
         {items.slice(0, limit).map((r) => (
-          <ReminderRow key={r.id} r={r} onDismiss={r.kind === "unpaid" || r.kind === "deposit" ? undefined : () => dismiss(r.id)} />
+          <ReminderRow key={r.id} r={r} />
         ))}
       </div>
     </div>

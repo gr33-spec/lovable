@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArrowRightLeft, ChevronDown, ChevronRight, ClipboardCheck, DoorOpen, FileSignature, ReceiptText, Search, UserPlus } from "lucide-react";
+import { ArrowRightLeft, ChevronDown, ChevronRight, ClipboardCheck, DoorOpen, FileSignature, ReceiptText, Search, Trash2, UserPlus } from "lucide-react";
+import { SwipeRow, useDismiss, useUndoableRemove, type SwipeAction } from "../swipe";
 import { useStore } from "@/lib/store";
 import type { AppData, Unit } from "@/lib/types";
 import { eur } from "@/lib/format";
@@ -25,9 +26,10 @@ export function unitFlags(data: AppData, unit: Unit, unpaid: Map<string, number>
   if (draftTenancy(data, unit.id)) flags.push({ label: "Nouveau bail en cours", tone: "blue" });
   const active = activeTenancy(data, unit.id);
   if (active && !active.imported) {
-    if (!active.signatures?.landlord) flags.push({ label: "Bail à signer", tone: "warn" });
+    const dismissed = new Set(data.settings.dismissedReminders ?? []);
+    if (!active.signatures?.landlord && !dismissed.has(`sign:${active.id}`)) flags.push({ label: "Bail à signer", tone: "warn" });
     const { entry } = inspectionsOf(data, active.id);
-    if (!entry?.completedAt) flags.push({ label: "État des lieux à faire", tone: "warn" });
+    if (!entry?.completedAt && !dismissed.has(`edl:${active.id}`)) flags.push({ label: "État des lieux à faire", tone: "warn" });
   }
   if (unit.status !== "vacant") {
     const info = leaseInfo(unit, today);
@@ -189,6 +191,8 @@ function UnitLine({ unit, flags }: { unit: Unit; flags: UnitFlag[] }) {
 
 export interface Task {
   id: string;
+  /** Brouillon de bail (supprimable) ; sinon la démarche peut être ignorée. */
+  draftId?: string;
   title: string;
   detail: string;
   href: string;
@@ -204,7 +208,7 @@ export function managementTasks(data: AppData): Task[] {
     const place = [building?.name, unit.name].filter(Boolean).join(" · ");
     const href = `/patrimoine/logement/${unit.id}`;
     const draft = draftTenancy(data, unit.id);
-    if (draft) out.push({ id: `draft:${draft.id}`, title: "Nouveau bail à finaliser", detail: `${place}${tenantsName(draft) ? ` — ${tenantsName(draft)}` : ""}`, href: `${href}/changement`, tone: "blue", icon: <FileSignature size={18} /> });
+    if (draft) out.push({ id: `draft:${draft.id}`, draftId: draft.id, title: "Nouveau bail à finaliser", detail: `${place}${tenantsName(draft) ? ` — ${tenantsName(draft)}` : ""}`, href: `${href}/changement`, tone: "blue", icon: <FileSignature size={18} /> });
     const active = activeTenancy(data, unit.id);
     if (active && !active.imported) {
       const { entry } = inspectionsOf(data, active.id);
@@ -214,18 +218,37 @@ export function managementTasks(data: AppData): Task[] {
     const leaving = leavingTenancy(data, unit.id);
     if (leaving && !inspectionsOf(data, leaving.id).exit?.completedAt) out.push({ id: `exit:${leaving.id}`, title: "État des lieux de sortie à réaliser", detail: `${place} — ${tenantsName(leaving)}`, href: `${href}/changement`, tone: "warn", icon: <ClipboardCheck size={18} /> });
   }
-  return out;
+  const dismissed = new Set(data.settings.dismissedReminders ?? []);
+  return out.filter((t) => !dismissed.has(t.id));
 }
 
+/** Démarche : appui = ouvrir ; balayage = supprimer le brouillon ou ignorer (fait hors application). */
 export function TaskRow({ task }: { task: Task }) {
+  const { data } = useStore();
+  const dismiss = useDismiss();
+  const removeUndoable = useUndoableRemove();
+  const action: SwipeAction = task.draftId
+    ? {
+        label: "Supprimer",
+        icon: <Trash2 size={18} />,
+        tone: "neg",
+        onAction: () =>
+          removeUndoable(
+            [{ coll: "tenancies", id: task.draftId! }, ...data.inspections.filter((i) => i.tenancyId === task.draftId).map((i) => ({ coll: "inspections" as const, id: i.id }))],
+            "Brouillon de bail supprimé",
+          ),
+      }
+    : { label: "Ignorer", icon: <Trash2 size={18} />, tone: "neg", onAction: () => dismiss(task.id, "Démarche ignorée") };
   return (
-    <Link href={task.href} className="flex items-center gap-3 py-3 active:opacity-60">
-      <span className={cx("flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl", TONE[task.tone])}>{task.icon}</span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-[15px] font-semibold text-ink">{task.title}</span>
-        <span className="block truncate text-[13px] text-muted">{task.detail}</span>
-      </span>
-      <ChevronRight size={16} className="shrink-0 text-muted/70" />
-    </Link>
+    <SwipeRow actions={[action]}>
+      <Link href={task.href} className="flex items-center gap-3 py-3 active:opacity-60">
+        <span className={cx("flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl", TONE[task.tone])}>{task.icon}</span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[15px] font-semibold text-ink">{task.title}</span>
+          <span className="block truncate text-[13px] text-muted">{task.detail}</span>
+        </span>
+        <ChevronRight size={16} className="shrink-0 text-muted/70" />
+      </Link>
+    </SwipeRow>
   );
 }

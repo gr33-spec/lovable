@@ -8,6 +8,7 @@ import { eur, eurCompact } from "@/lib/format";
 import { WorkForm } from "@/components/forms";
 import { QuickWork } from "@/components/quick-add";
 import { Button, Card, ConfirmDelete, Divided, Empty, Page, PageHeader, Pill, Row, RoundButton, SectionTitle, Sheet } from "@/components/ui";
+import { SwipeDelete } from "@/components/swipe";
 
 export default function TravauxPage() {
   const { data, remove } = useStore();
@@ -40,8 +41,8 @@ export default function TravauxPage() {
               <Card className="py-1">
                 <Divided>
                   {list.map((w) => (
+                    <SwipeDelete key={w.id} items={[{ coll: "works", id: w.id }]} message="Travaux supprimés">
                     <Row
-                      key={w.id}
                       onClick={() => setEditId(w.id)}
                       icon={<Hammer size={18} />}
                       title={
@@ -53,6 +54,7 @@ export default function TravauxPage() {
                       subtitle={`${labelOf(WORK_STATUSES, w.status ?? "prevu")}${place(w) ? ` · ${place(w)}` : ""}`}
                       right={eur(w.amount)}
                     />
+                    </SwipeDelete>
                   ))}
                 </Divided>
               </Card>

@@ -15,7 +15,6 @@ export default function RappelsPage() {
   const dismissedIds = new Set(data.settings.dismissedReminders ?? []);
   const active = all.filter((r) => !dismissedIds.has(r.id));
   const done = all.filter((r) => dismissedIds.has(r.id));
-  const dismiss = (id: string) => setSettings({ dismissedReminders: [...(data.settings.dismissedReminders ?? []), id] });
   const restore = (id: string) => setSettings({ dismissedReminders: (data.settings.dismissedReminders ?? []).filter((x) => x !== id) });
 
   return (
@@ -30,11 +29,12 @@ export default function RappelsPage() {
           <Card className="py-1">
             <div className="divide-y divide-line">
               {active.map((r) => (
-                <ReminderRow key={r.id} r={r} onDismiss={r.kind === "unpaid" || r.kind === "deposit" ? undefined : () => dismiss(r.id)} />
+                <ReminderRow key={r.id} r={r} />
               ))}
             </div>
           </Card>
         )}
+        {active.length > 0 && <p className="mt-2 px-2 text-center text-[12px] text-muted">Balayez un rappel vers la gauche pour l&apos;ignorer ou le régler.</p>}
 
         {done.length > 0 && (
           <>

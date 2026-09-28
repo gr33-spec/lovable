@@ -9,6 +9,7 @@ import { eur } from "@/lib/format";
 import { yearOf } from "@/lib/engine/dates";
 import { useCompanyOptions } from "@/components/forms";
 import { Button, Card, ConfirmDelete, Divided, Empty, Grid2, NumberField, Page, PageHeader, Row, RoundButton, SelectField, Sheet, Stack, TextField } from "@/components/ui";
+import { SwipeDelete } from "@/components/swipe";
 
 export default function EvenementsPage() {
   const { data, upsert, remove, nowMonth } = useStore();
@@ -32,7 +33,9 @@ export default function EvenementsPage() {
           <Card className="py-1">
             <Divided>
               {sorted.map((e) => (
-                <Row key={e.id} onClick={() => setEditId(e.id)} icon={<Flag size={18} />} title={e.label} subtitle={String(e.year)} right={e.amount ? eur(e.amount) : undefined} />
+                <SwipeDelete key={e.id} items={[{ coll: "events", id: e.id }]} message="Événement supprimé">
+                  <Row onClick={() => setEditId(e.id)} icon={<Flag size={18} />} title={e.label} subtitle={String(e.year)} right={e.amount ? eur(e.amount) : undefined} />
+                </SwipeDelete>
               ))}
             </Divided>
           </Card>

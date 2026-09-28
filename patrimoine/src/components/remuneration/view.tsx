@@ -14,6 +14,7 @@ import { useCompanyOptions } from "../forms";
 import { QuickCompany } from "../quick-add";
 import { Toggle } from "../projects/detail";
 import { Button, Card, ConfirmDelete, Details, Grid2, NumberField, Page, PageHeader, RoundButton, SectionTitle, Segmented, SelectField, Sheet, Stack, TextField, cx } from "../ui";
+import { SwipeDelete } from "@/components/swipe";
 
 const SHORT: Record<WithdrawalKind, string> = {
   tns: "Rémunération TNS",
@@ -148,7 +149,8 @@ export function RemunerationView() {
             <SectionTitle>Hors période en {year}</SectionTitle>
             <Card className="py-1">
               {inactive.map((w) => (
-                <button key={w.id} onClick={() => setEditId(w.id)} className="flex w-full items-center justify-between gap-3 border-b border-line py-3 text-left last:border-0">
+                <SwipeDelete key={w.id} className="border-b border-line last:border-0" items={[{ coll: "withdrawals", id: w.id }]} message="Rémunération supprimée">
+                <button onClick={() => setEditId(w.id)} className="flex w-full items-center justify-between gap-3 py-3 text-left">
                   <span className="min-w-0 truncate text-[14px] text-ink">
                     {SHORT[w.kind]} · {w.person || "—"}
                   </span>
@@ -157,6 +159,7 @@ export function RemunerationView() {
                     {w.endYear ? ` → ${w.endYear}` : " →"}
                   </span>
                 </button>
+                </SwipeDelete>
               ))}
             </Card>
           </>
