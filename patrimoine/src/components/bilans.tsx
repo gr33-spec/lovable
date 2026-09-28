@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CircleAlert, FileUp, LoaderCircle, Sparkles } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { uploadFile } from "@/lib/upload";
 import { newId } from "@/lib/ops";
 import type { Statement, StatementFigures } from "@/lib/types";
 import { eur } from "@/lib/format";
@@ -57,27 +58,6 @@ export function FiguresForm({ figures, onChange }: { figures: StatementFigures; 
       </Details>
     </Stack>
   );
-}
-
-// ——— Envoi du PDF par morceaux ———
-
-async function uploadPdf(file: File, onProgress: (pct: number) => void): Promise<string> {
-  const init = await fetch("/api/files", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: file.name, size: file.size, mime: file.type || "application/pdf" }),
-  });
-  const meta = await init.json();
-  if (!init.ok) throw new Error(meta.error ?? "Envoi impossible");
-  const { id, chunkSize } = meta as { id: string; chunkSize: number };
-  const count = Math.max(1, Math.ceil(file.size / chunkSize));
-  for (let i = 0; i < count; i++) {
-    const part = file.slice(i * chunkSize, Math.min(file.size, (i + 1) * chunkSize));
-    const res = await fetch(`/api/files/${id}?i=${i}`, { method: "PUT", body: part });
-    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? "Envoi interrompu");
-    onProgress(Math.round(((i + 1) / count) * 100));
-  }
-  return id;
 }
 
 interface Extraction {
@@ -196,7 +176,7 @@ export function BilanImport({
     setStep("upload");
     let uploaded: string | undefined;
     try {
-      const id = await uploadPdf(file, setProgress);
+      const id = await uploadFile(file, setProgress);
       uploaded = id;
       setFileId(id);
       if (!aiOn) {

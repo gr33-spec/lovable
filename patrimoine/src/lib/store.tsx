@@ -25,6 +25,8 @@ interface StoreValue {
   upsert: <T extends { id: string }>(coll: Collection, item: T) => void;
   remove: (coll: Collection, id: string | string[]) => void;
   removeMany: (items: { coll: Collection; id: string }[]) => void;
+  /** Plusieurs créations / modifications enregistrées ensemble (une seule requête). */
+  upsertMany: (items: { coll: Collection; item: { id: string } }[]) => void;
   setSettings: (patch: Partial<Settings>) => void;
   replaceAll: (data: AppData, reason: string) => Promise<boolean>;
   reload: () => Promise<void>;
@@ -133,6 +135,13 @@ export function StoreProvider({
     [enqueue],
   );
 
+  const upsertMany = useCallback(
+    (items: { coll: Collection; item: { id: string } }[]) => {
+      if (items.length) enqueue(items.map((i) => ({ op: "upsert" as const, coll: i.coll, item: i.item as { id: string } & Record<string, unknown> })), true);
+    },
+    [enqueue],
+  );
+
   const removeMany = useCallback(
     (items: { coll: Collection; id: string }[]) => {
       if (items.length) enqueue(items.map((i) => ({ op: "delete" as const, coll: i.coll, id: i.id })), true);
@@ -215,8 +224,8 @@ export function StoreProvider({
   const projection = useMemo(() => project(data, nowMonth), [data, nowMonth]);
 
   const value = useMemo<StoreValue>(
-    () => ({ role, view, data, version, status, nowMonth, projection, upsert, remove, removeMany, setSettings, replaceAll, reload }),
-    [role, view, data, version, status, nowMonth, projection, upsert, remove, removeMany, setSettings, replaceAll, reload],
+    () => ({ role, view, data, version, status, nowMonth, projection, upsert, upsertMany, remove, removeMany, setSettings, replaceAll, reload }),
+    [role, view, data, version, status, nowMonth, projection, upsert, upsertMany, remove, removeMany, setSettings, replaceAll, reload],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

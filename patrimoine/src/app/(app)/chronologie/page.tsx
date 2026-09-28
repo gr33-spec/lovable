@@ -20,6 +20,7 @@ const ALL = "__all";
 
 /** Lien vers l'élément à l'origine de l'événement. */
 function hrefOf(e: TimelineEvent): string | undefined {
+  if (e.id.startsWith("project-") && e.refId) return `/patrimoine/projet/${e.refId}`;
   if (e.source === "plan") return "/simulations";
   if ((e.kind === "loan_end" || e.kind === "balloon" || e.kind === "prepayment") && e.loanId && !e.loanId.startsWith("loan-")) return `/patrimoine/credit/${e.loanId}`;
   if (e.kind === "works") return "/plus/travaux";
@@ -189,7 +190,7 @@ export default function Chronologie() {
                           <div className="text-[14.5px] leading-snug text-ink">{labelOf(e)}</div>
                           <div className="truncate text-[12px] text-muted">
                             {scope === ALL ? companyLabel(data, e.companyKey) : KIND_STYLE[e.kind].label}
-                            {e.source === "plan" ? " · opération validée" : ""}
+                            {e.id.startsWith("project-") ? " · projet" : e.source === "plan" ? " · opération validée" : ""}
                           </div>
                         </div>
                         <div className="tabular shrink-0 text-[13.5px] font-semibold">

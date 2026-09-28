@@ -16,6 +16,9 @@ export const ACTION_LABELS: Record<Action["type"], string> = {
   prepayment: "Remboursement anticipé",
 };
 
+/** Opérations proposées dans les simulations (l'achat se prépare dans Patrimoine → Projets). */
+export const SIMULATION_TYPES = (Object.keys(ACTION_LABELS) as Action["type"][]).filter((t) => t !== "purchase");
+
 export function actionSummary(a: Action, names: { building: (id?: string | null) => string | undefined; loan: (id: string) => string | undefined }): string {
   switch (a.type) {
     case "sale":
