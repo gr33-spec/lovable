@@ -76,3 +76,15 @@ test("compléments : baux, garants et lot vacant, sans rien inventer", () => {
   assert.equal(d.units[0].rent, 401.31);
   assert.equal(d.tenancies[0].tenants[0].lastName, "Ancien");
 });
+
+test("compléments : les actes signés déjà déposés sont conservés", () => {
+  const d = sample();
+  const file = { fileId: "f1", name: "caution.pdf" };
+  d.tenancies[0] = { ...d.tenancies[0], signedLease: { fileId: "b1", name: "bail.pdf" }, guarantors: [{ kind: "personne", signedFile: file }, { kind: "personne", signedFile: { fileId: "f2", name: "c2.pdf" } }] };
+  const patch = complementsSchema.parse({ type: "patrimoine-complements", buildings: [{ name: "Immeuble du Leff", lots: [{ name: "Lot 1", lease: { tenants: [{ lastName: "PIGNARD" }], guarantors: [{ lastName: "DUPONT", firstName: "Anne" }] } }] }] });
+  const t = planComplements(d, patch).data.tenancies.find((x) => x.id === "t1")!;
+  assert.equal(t.signedLease?.fileId, "b1");
+  assert.equal(t.guarantors?.[0].lastName, "DUPONT");
+  assert.equal(t.guarantors?.[0].signedFile?.fileId, "f1");
+  assert.equal(t.guarantors?.[1].signedFile?.fileId, "f2");
+});

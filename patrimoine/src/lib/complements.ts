@@ -180,7 +180,15 @@ export function planComplements(data: AppData, patch: Complements): ComplementsP
           imported: current?.imported ?? true,
           ...drop(rest),
           tenants: (tenants ?? current?.tenants ?? [{}]).map(drop),
-          ...(guarantors ? { guarantors: guarantors.map((g) => ({ kind: "personne" as const, wholeLease: true, ...drop(g) })) } : {}),
+          // Les actes signés déjà déposés restent attachés aux garants (même ordre).
+          ...(guarantors
+            ? {
+                guarantors: [
+                  ...guarantors.map((g, i) => ({ kind: "personne" as const, wholeLease: true, ...drop(g), ...(current?.guarantors?.[i]?.signedFile ? { signedFile: current.guarantors[i].signedFile } : {}) })),
+                  ...(current?.guarantors ?? []).slice(guarantors.length).filter((g) => g.signedFile),
+                ],
+              }
+            : {}),
         };
         tenancies = current ? tenancies.map((x) => (x.id === current.id ? t : x)) : [...tenancies, t];
         const linked = unitWithTenancy(next, t);
