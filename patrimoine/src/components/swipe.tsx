@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
-import { RotateCcw, Trash2 } from "lucide-react";
+import { Ellipsis, RotateCcw, Trash2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { Collection } from "@/lib/types";
 import { cx } from "./ui";
@@ -62,7 +62,7 @@ export function SwipeRow({ actions, children, className, inset = true }: { actio
   if (actions.length === 0) return <div className={className}>{children}</div>;
 
   return (
-    <div className={cx("relative overflow-hidden", inset && "-mx-5", className)}>
+    <div className={cx("group relative overflow-hidden", inset && "-mx-5", className)}>
       <div className={cx("absolute inset-y-0 right-0 flex", x === 0 && !dragging && "invisible")} style={{ width: Math.max(width, -x) }} aria-hidden={x === 0}>
         {actions.map((a, i) => (
           <button
@@ -136,6 +136,21 @@ export function SwipeRow({ actions, children, className, inset = true }: { actio
         }}
       >
         {children}
+        {/* Souris : bouton d'actions au survol (le balayage n'est pas évident sur ordinateur). */}
+        {x === 0 && (
+          <button
+            type="button"
+            aria-label="Actions"
+            onClick={(e) => {
+              e.stopPropagation();
+              window.dispatchEvent(new CustomEvent(OPEN_EVENT, { detail: id.current }));
+              setX(-width);
+            }}
+            className={cx("absolute top-1/2 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-soft text-ink-2 shadow-sm ring-1 ring-black/5 [@media(hover:hover)]:group-hover:flex", inset ? "right-3" : "right-2")}
+          >
+            <Ellipsis size={18} />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -181,7 +196,7 @@ export function ToastHost() {
   );
   if (!t) return null;
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[92px] z-[70] flex justify-center px-4">
+    <div className="pointer-events-none fixed inset-x-0 bottom-[92px] z-[70] flex justify-center px-4 lg:bottom-6 lg:pl-64">
       <div key={t.id} className="animate-fade pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-2xl bg-navy px-4 py-3 text-[14px] text-white shadow-lg">
         <span className="min-w-0 flex-1">{t.message}</span>
         {t.undo && (
