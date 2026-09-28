@@ -88,3 +88,23 @@ test("compléments : les actes signés déjà déposés sont conservés", () => 
   assert.equal(t.guarantors?.[0].signedFile?.fileId, "f1");
   assert.equal(t.guarantors?.[1].signedFile?.fileId, "f2");
 });
+
+test("encaissements : locataire à jour depuis son entrée, impayés conservés", async () => {
+  const { upToDate } = await import("../src/lib/payments");
+  const d = emptyData();
+  d.buildings.push({ id: "b", name: "B" });
+  const unit = { id: "u", buildingId: "b", name: "Lot 1", rent: 600, status: "occupe" as const, payments: { "2026-07": { status: "impaye" as const, due: 600 } } };
+  d.units.push(unit);
+  d.tenancies.push({ id: "t", unitId: "u", status: "actif", tenants: [{ lastName: "X" }], startDate: "2026-03-16", rent: 600 });
+  const r = upToDate(d, unit, "2026-09-28");
+  assert.deepEqual(r.months, ["2026-03", "2026-04", "2026-05", "2026-06", "2026-08", "2026-09"]);
+  assert.equal(r.payments["2026-07"].status, "impaye");
+  // Premier mois au prorata (entrée le 16 mars : 16 jours sur 31).
+  assert.ok(r.payments["2026-03"].due! < 600 && r.payments["2026-03"].due! > 300);
+  assert.equal(r.payments["2026-09"].status, "paye");
+  // Entrée ancienne : 3 ans au plus.
+  d.tenancies[0].startDate = "2012-02-09";
+  assert.equal(upToDate(d, unit, "2026-09-28").months.length, 35);
+  // Logement vacant : rien.
+  assert.equal(upToDate(d, { ...unit, status: "vacant" }, "2026-09-28").months.length, 0);
+});
