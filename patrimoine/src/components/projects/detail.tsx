@@ -71,7 +71,7 @@ export function ProjectDetail({ id }: { id: string }) {
 
   return (
     <>
-      <PageHeader title={p.name} subtitle={[acquisition ? "Achat" : "Travaux", projectCompanyName(p, data)].filter(Boolean).join(" · ")} back="/patrimoine?vue=projets" />
+      <PageHeader title={p.name} crumbs={[{ label: "Patrimoine", href: "/patrimoine" }, { label: "Projets", href: "/patrimoine?vue=projets" }]} subtitle={[acquisition ? "Achat" : "Travaux", projectCompanyName(p, data)].filter(Boolean).join(" · ")} back="/patrimoine?vue=projets" />
       <Page>
         {/* Étapes */}
         <div className="no-scrollbar -mx-4 mb-3 flex gap-1.5 overflow-x-auto px-4">

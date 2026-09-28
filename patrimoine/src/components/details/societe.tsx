@@ -1,5 +1,6 @@
 "use client";
 
+import { companyCrumbs } from "@/lib/crumbs";
 import { goBack } from "@/lib/nav";
 import Link from "next/link";
 import { useState } from "react";
@@ -63,6 +64,7 @@ export function CompanyDetail({ id }: { id: string }) {
     <>
       <PageHeader
         title={company.name}
+        crumbs={companyCrumbs(data, company.id, false)}
         subtitle={labelOf(COMPANY_KINDS, company.kind)}
         back="/patrimoine"
         action={

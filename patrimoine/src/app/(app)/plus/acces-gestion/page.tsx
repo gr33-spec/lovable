@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CircleCheck, CircleOff, KeyRound } from "lucide-react";
+import { CircleCheck, CircleOff, Eye, KeyRound } from "lucide-react";
+import { switchView } from "@/lib/view";
 import { Button, Card, Page, PageHeader, SectionTitle, Sheet, Stack, TextField } from "@/components/ui";
 
 interface AccessState {
@@ -79,6 +80,23 @@ export default function AccesGestionPage() {
                 Couper l&apos;accès
               </Button>
             )}
+          </div>
+        </Card>
+        {/* Seul endroit pour voir l'application comme Enora : pas de second mode caché ailleurs. */}
+        <Card className="mt-4">
+          <div className="flex items-center gap-3">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-soft text-navy">
+              <Eye size={22} />
+            </span>
+            <div className="flex-1">
+              <div className="text-[16px] font-semibold text-ink">Voir son espace</div>
+              <div className="text-[13px] text-muted">Aperçu de ce qu&apos;Enora voit : À faire, Loyers, Locataires. Bouton « Quitter l&apos;aperçu » pour revenir.</div>
+            </div>
+          </div>
+          <div className="mt-4">
+            <Button full variant="secondary" onClick={() => switchView("gestion")}>
+              Ouvrir l&apos;aperçu
+            </Button>
           </div>
         </Card>
 

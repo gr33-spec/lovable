@@ -1,5 +1,6 @@
 "use client";
 
+import { companyCrumbs } from "@/lib/crumbs";
 import { goBack } from "@/lib/nav";
 import { Suspense, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -87,7 +88,8 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
     <>
       <PageHeader
         title={building.name}
-        subtitle={[company?.name, building.city].filter(Boolean).join(" · ") || undefined}
+        crumbs={companyCrumbs(data, building.companyId)}
+        subtitle={building.city || undefined}
         back={company ? `/patrimoine/societe/${company.id}` : "/patrimoine"}
         action={
           <button onClick={() => setSheet("edit")} className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-navy">
@@ -126,7 +128,7 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
             </span>
           }
         >
-          Logements {units.length > 0 && `(${units.length}${vacant ? ` · ${vacant} vacant${vacant > 1 ? "s" : ""}` : ""})`}
+          Lots {units.length > 0 && `(${units.length}${vacant ? ` · ${vacant} vacant${vacant > 1 ? "s" : ""}` : ""})`}
         </SectionTitle>
         <Card className="py-1">
           {units.length === 0 ? (

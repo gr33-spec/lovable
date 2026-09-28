@@ -15,6 +15,7 @@ import { labelOf, UNIT_TYPES } from "@/lib/labels";
 import { AddMenu } from "@/components/quick-add";
 import { OrgChart } from "@/components/org-chart";
 import { ProjectsList } from "@/components/projects/list";
+import { WorksList } from "@/components/works-list";
 import { Avatar, Card, Empty, Page, PageHeader, Pill, RoundButton, Segmented, cx, Button } from "@/components/ui";
 
 export default function PatrimoinePage() {
@@ -30,13 +31,12 @@ function Patrimoine() {
   const snap = projection.snapshot;
   const [adding, setAdding] = useState(false);
   const initial = useSearchParams().get("vue");
-  type View = "structure" | "organigramme" | "credits" | "projets";
-  const [view, setViewState] = useState<View>(initial === "projets" || initial === "credits" || initial === "organigramme" ? initial : "structure");
-  // L'onglet est gardé dans l'adresse : au retour d'une fiche, on retrouve le même.
-  const setView = (v: View) => {
-    setViewState(v);
-    replaceQuery({ vue: v === "structure" ? undefined : v });
-  };
+  type View = "structure" | "credits" | "travaux" | "projets";
+  // La rubrique vit dans l'adresse : un retour ou un lien (ex. « Travaux ») y ramène directement.
+  const view: View = initial === "projets" || initial === "credits" || initial === "travaux" ? initial : "structure";
+  const setView = (v: View) => replaceQuery({ vue: v === "structure" ? undefined : v });
+  // L'organigramme est une autre façon de voir la structure, pas une rubrique à part.
+  const [chart, setChart] = usePageState("organigramme", initial === "organigramme");
   const [open, setOpen] = usePageState<Record<string, boolean>>("arbre", () => {
     const o: Record<string, boolean> = {};
     for (const c of data.companies) if (c.kind === "holding" || !c.parentId) o[c.id] = true;
@@ -131,14 +131,27 @@ function Patrimoine() {
           onChange={setView}
           options={[
             { value: "structure", label: "Structure" },
-            { value: "organigramme", label: "Organigramme" },
             { value: "credits", label: "Crédits" },
+            { value: "travaux", label: "Travaux" },
             { value: "projets", label: "Projets" },
           ]}
         />
+        {view === "structure" && (data.companies.length > 0 || data.buildings.length > 0) && (
+          <div className="mt-3 flex justify-end">
+            <div className="inline-flex rounded-full bg-black/5 p-0.5 text-[13px] font-semibold">
+              {[false, true].map((c) => (
+                <button key={String(c)} onClick={() => setChart(c)} className={cx("rounded-full px-3.5 py-1.5 transition", chart === c ? "bg-card text-navy shadow-sm" : "text-ink-2")}>
+                  {c ? "Organigramme" : "Liste"}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         {view === "projets" ? (
           <ProjectsList />
-        ) : view === "organigramme" ? (
+        ) : view === "travaux" ? (
+          <WorksList />
+        ) : view === "structure" && chart ? (
           <OrgChart />
         ) : view === "structure" ? (
           data.companies.length === 0 && data.buildings.length === 0 ? (
@@ -149,7 +162,7 @@ function Patrimoine() {
               action={<Button onClick={() => setAdding(true)} icon={<Plus size={18} />}>Ajouter</Button>}
             />
           ) : (
-            <Card className="mt-4 px-3 py-1">
+            <Card className="mt-3 px-3 py-1">
               <div className="divide-y divide-line">
                 {roots.map((c) => renderCompany(c, 0, seen))}
                 {orphanBuildings.length > 0 && (

@@ -64,7 +64,7 @@ export function AnnualView() {
           <ChevronLeft size={22} />
         </button>
         <div className="text-center">
-          <div className="text-[17px] font-bold text-navy">Bilan {year}</div>
+          <div className="text-[17px] font-bold text-navy">Année {year}</div>
           <div className="text-[11.5px] text-muted">{year === thisYear ? `Janvier → ${new Date().toLocaleDateString("fr-FR", { month: "long" })}` : year > thisYear ? "Année à venir" : "Année complète"}</div>
         </div>
         <button onClick={() => setYear(year + 1)} disabled={year >= thisYear} aria-label="Année suivante" className="flex h-10 w-10 items-center justify-center rounded-full text-navy active:bg-black/5 disabled:opacity-30">

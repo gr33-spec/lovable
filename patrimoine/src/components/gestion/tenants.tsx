@@ -2,6 +2,7 @@
 
 import { usePageState } from "@/lib/nav";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { ArrowRightLeft, ChevronDown, ChevronRight, ClipboardCheck, DoorOpen, FileSignature, ReceiptText, Search, Trash2, UserPlus } from "lucide-react";
 import { SwipeRow, useDismiss, useUndoableRemove, type SwipeAction } from "../swipe";
@@ -48,7 +49,8 @@ export function TenantsView() {
   const { data } = useStore();
   // Recherche, filtre et immeubles ouverts sont retrouvés au retour d'une fiche.
   const [q, setQ] = usePageState("recherche", "");
-  const [filter, setFilter] = usePageState<Filter>("filtre", "tous");
+  const params = useSearchParams();
+  const [filter, setFilter] = usePageState<Filter>("filtre", () => (params.get("filtre") === "incomplets" ? "incomplets" : "tous"));
   const [openIds, setOpenIds] = usePageState<string[]>("ouverts", []);
   const open = new Set(openIds);
   const today = todayIso();

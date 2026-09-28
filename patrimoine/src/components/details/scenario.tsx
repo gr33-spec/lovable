@@ -58,7 +58,7 @@ export function ScenarioDetail({ id }: { id: string }) {
 
   return (
     <>
-      <PageHeader title={scenario.name || "Scénario"} subtitle="Simulation — données réelles inchangées" back="/simulations" />
+      <PageHeader title={scenario.name || "Scénario"} crumbs={[{ label: "Plus", href: "/plus" }, { label: "Simulations", href: "/simulations" }]} subtitle="Simulation — données réelles inchangées" back="/simulations" />
       <Page>
         <Card>
           <TextField label="Nom du scénario" value={scenario.name} onChange={(v) => save({ name: v ?? "" })} />

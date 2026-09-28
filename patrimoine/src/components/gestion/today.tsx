@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Check, CheckCheck, CheckCircle2, ChevronRight, Coins, TrendingUp, X } from "lucide-react";
 import { useStore } from "@/lib/store";
@@ -19,7 +20,8 @@ import { TaskRow, managementTasks } from "./tenants";
 // Vue « À faire » : tout ce qui demande une action, du plus courant au plus
 // rare, avec l'action directement sur place.
 
-const OTHER = new Set(["lease_end", "deposit"]);
+// « À faire » est la seule liste de ce qui attend une action (y compris les fins de crédit).
+const OTHER = new Set(["lease_end", "deposit", "loan_end"]);
 
 export function useTodoCount(): number {
   const { data, projection } = useStore();
@@ -32,7 +34,7 @@ export function useTodoCount(): number {
 }
 
 export function TodayView({ onOpen }: { onOpen: (view: "loyers" | "locataires", month?: string) => void }) {
-  const { data, projection, upsertMany } = useStore();
+  const { data, projection, upsertMany, view, role } = useStore();
   const update = useUndoableUpdate();
   const irl = useIrlSeries();
   const today = todayIso();
@@ -196,6 +198,11 @@ export function TodayView({ onOpen }: { onOpen: (view: "loyers" | "locataires", 
       </div>
       </div>
       {!nothing && <p className="px-2 text-center text-[12px] text-muted">Balayez une ligne vers la gauche : marquer payé, passer une révision, ignorer ou supprimer. Chaque action peut être annulée.</p>}
+      {view !== "gestion" && role !== "gestion" && (
+        <Link href="/plus/rappels" className="mx-auto block w-fit px-3 py-1 text-center text-[13px] font-semibold text-series-1">
+          Rappels ignorés et réglages des alertes
+        </Link>
+      )}
 
       {nothing && (
         <Card>

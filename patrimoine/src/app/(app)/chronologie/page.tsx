@@ -25,7 +25,7 @@ function hrefOf(e: TimelineEvent): string | undefined {
   if (e.kind === "sale" && e.source === "plan" && e.buildingId) return `/patrimoine/immeuble/${e.buildingId}?vente=${e.refId}`;
   if (e.source === "plan") return "/simulations";
   if ((e.kind === "loan_end" || e.kind === "balloon" || e.kind === "prepayment") && e.loanId && !e.loanId.startsWith("loan-")) return `/patrimoine/credit/${e.loanId}`;
-  if (e.kind === "works") return "/plus/travaux";
+  if (e.kind === "works") return "/patrimoine?vue=travaux";
   if (e.kind === "event") return "/plus/evenements";
   if (e.kind === "income") return "/plus/remuneration";
   if (e.kind === "acquisition" && e.refId) return `/patrimoine/immeuble/${e.refId}`;

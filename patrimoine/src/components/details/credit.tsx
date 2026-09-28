@@ -1,5 +1,6 @@
 "use client";
 
+import { buildingCrumbs, companyCrumbs } from "@/lib/crumbs";
 import { goBack } from "@/lib/nav";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
@@ -34,7 +35,7 @@ export function LoanDetail({ id }: { id: string }) {
 
   return (
     <>
-      <PageHeader title={loan.name || loan.bank || "Crédit"} subtitle={[loan.bank, building?.name].filter(Boolean).join(" · ") || undefined} back={back} />
+      <PageHeader title={loan.name || loan.bank || "Crédit"} crumbs={building ? buildingCrumbs(data, building) : companyCrumbs(data, loan.companyId)} subtitle={loan.bank || undefined} back={back} />
       <Page>
         <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
         <div className="min-w-0">
