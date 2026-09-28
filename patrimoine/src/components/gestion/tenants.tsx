@@ -97,7 +97,7 @@ export function TenantsView() {
         ))}
       </div>
 
-      <div className="mt-4 space-y-3">
+      <div className="mt-4 space-y-3 lg:grid lg:grid-cols-2 lg:items-start lg:gap-3 lg:space-y-0 2xl:grid-cols-3">
         {groups.length === 0 && <div className="py-10 text-center text-sm text-muted">Aucun logement ne correspond.</div>}
         {groups.map(({ building, all, units }) => {
           const rented = all.filter((u) => u.status !== "vacant").length;

@@ -157,7 +157,7 @@ export function RentsView() {
         {buildings.length === 0 ? (
           <Empty icon={<Coins size={26} />} title="Aucun logement loué" text="Détaillez les logements de vos immeubles pour pointer les loyers chaque mois." />
         ) : (
-          <div className="mt-5 space-y-3">
+          <div className="mt-5 space-y-3 lg:grid lg:grid-cols-2 lg:items-start lg:gap-3 lg:space-y-0 2xl:grid-cols-3">
             {buildings.map(({ building, units: list }) => {
               const paidCount = list.filter((u) => u.payments?.[month]?.status === "paye").length;
               const pointed = list.filter((u) => u.payments?.[month]).length;

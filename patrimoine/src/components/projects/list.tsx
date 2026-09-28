@@ -131,7 +131,7 @@ export function ProjectsList() {
       {open.length > 0 && (
         <>
           <SectionTitle>En cours</SectionTitle>
-          <div className="space-y-3">{open.map(card)}</div>
+          <div className="space-y-3 lg:grid lg:grid-cols-2 lg:items-start lg:gap-3 lg:space-y-0 2xl:grid-cols-3">{open.map(card)}</div>
         </>
       )}
       {data.plans.some((p) => p.type === "sale") && (
@@ -145,7 +145,7 @@ export function ProjectsList() {
       {done.length > 0 && (
         <>
           <SectionTitle>Terminés</SectionTitle>
-          <div className="space-y-3 opacity-80">{done.map(card)}</div>
+          <div className="space-y-3 opacity-80 lg:grid lg:grid-cols-2 lg:items-start lg:gap-3 lg:space-y-0 2xl:grid-cols-3">{done.map(card)}</div>
         </>
       )}
       <NewProjectSheet open={creating} onClose={() => setCreating(false)} onSell={setSelling} />

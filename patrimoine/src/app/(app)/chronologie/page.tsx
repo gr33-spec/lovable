@@ -123,6 +123,7 @@ export default function Chronologie() {
           </div>
         )}
 
+        <div className="xl:grid xl:grid-cols-2 xl:items-start xl:gap-x-6 xl:[&>*]:!mt-0">
         {/* L'escalier du cash-flow */}
         {rows.length > 1 && now && (
           <Card>
@@ -173,6 +174,7 @@ export default function Chronologie() {
           </Card>
         )}
 
+        </div>
         {/* Frise */}
         <SectionTitle>Année après année</SectionTitle>
         <div className="relative pl-6">
