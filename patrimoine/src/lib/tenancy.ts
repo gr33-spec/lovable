@@ -187,3 +187,27 @@ export function unitRemovals(data: AppData, unitId: string): { coll: Collection;
     ...data.inspections.filter((i) => i.unitId === unitId).map((i) => ({ coll: "inspections" as const, id: i.id })),
   ];
 }
+
+/**
+ * Dossier clos d'un locataire parti : ses informations personnelles et ses
+ * documents sont effacés ; restent, sans nom, les dates et montants utiles au
+ * bilan (durée d'occupation, relocation, dépôt restitué).
+ */
+export function anonymizedTenancy(t: Tenancy): Tenancy {
+  return {
+    id: t.id,
+    unitId: t.unitId,
+    status: "clos",
+    closedAt: t.closedAt ?? new Date().toISOString(),
+    imported: t.imported,
+    tenants: [],
+    startDate: t.startDate,
+    endDate: t.endDate,
+    rent: t.rent,
+    charges: t.charges,
+    deposit: t.deposit,
+    keysReturnedDate: t.keysReturnedDate,
+    depositReturnedDate: t.depositReturnedDate,
+    depositReturnedAmount: t.depositReturnedAmount,
+  };
+}

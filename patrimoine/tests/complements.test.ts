@@ -123,3 +123,28 @@ test("gestion : éléments manquants d'un logement loué", async () => {
   assert.equal(unitMissing(d, u).length, 0);
   assert.equal(unitMissing(d, { ...u, status: "vacant" }).length, 0);
 });
+
+test("locataire : historique et effacement à la clôture", async () => {
+  const { anonymizedTenancy } = await import("../src/lib/tenancy");
+  const { filesOfTenancy } = await import("../src/lib/tenancy-files");
+  const t = {
+    id: "t", unitId: "u", status: "sortie" as const, tenants: [{ firstName: "Ana", lastName: "X", birthDate: "1990-01-01" }], startDate: "2024-01-01", endDate: "2026-08-31", rent: 600, deposit: 600,
+    guarantors: [{ kind: "personne" as const, lastName: "G", address: "1 rue", signedFile: { fileId: "g1", name: "c.pdf" } }],
+    signedLease: { fileId: "b1", name: "b.pdf" },
+    letters: [{ id: "l", kind: "revision" as const, label: "Courrier d'augmentation de loyer", date: "2025-01-10", file: { fileId: "l1", name: "l.pdf" } }],
+    notes: "Mme X", depositReturnedDate: "2026-09-15",
+  };
+  assert.deepEqual(filesOfTenancy(t).sort(), ["b1", "g1", "l1"]);
+  const a = anonymizedTenancy(t);
+  assert.equal(a.status, "clos");
+  assert.deepEqual(a.tenants, []);
+  assert.equal(a.guarantors, undefined);
+  assert.equal(a.signedLease, undefined);
+  assert.equal(a.letters, undefined);
+  assert.equal(a.notes, undefined);
+  // Dates et montants gardés pour le bilan.
+  assert.equal(a.startDate, "2024-01-01");
+  assert.equal(a.endDate, "2026-08-31");
+  assert.equal(a.depositReturnedDate, "2026-09-15");
+  assert.ok(!JSON.stringify(a).includes("Ana"));
+});

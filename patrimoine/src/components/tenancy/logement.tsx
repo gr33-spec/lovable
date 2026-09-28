@@ -7,7 +7,7 @@ import { ArrowRightLeft, ClipboardCheck, DoorOpen, FileSignature, Pencil, Receip
 import { useStore } from "@/lib/store";
 import type { Tenancy } from "@/lib/types";
 import { dateFr, eur } from "@/lib/format";
-import { activeTenancy, draftTenancy, unitRemovals, inspectionsOf, landlordCompany, lastExitInspection, leavingTenancy, tenanciesOf, tenancyFromUnit, tenantsName, depositDue } from "@/lib/tenancy";
+import { activeTenancy, draftTenancy, unitRemovals, inspectionsOf, landlordCompany, lastExitInspection, leavingTenancy, tenancyFromUnit, tenantsName, depositDue } from "@/lib/tenancy";
 import { leaseTermEnd } from "@/lib/legal/lease";
 import { newEntryInspection } from "@/lib/legal/inspection";
 import { depositSettlement, leaseYears } from "@/lib/legal/rules";
@@ -18,6 +18,8 @@ import { Button, Card, ConfirmDelete, Empty, Grid2, NumberField, Page, PageHeade
 import { DocRow, LegalBadge, SignaturePad, documentUrl } from "./common";
 import { ReceiptPicker } from "./receipts";
 import { SignedDocRow, guarantorDetails } from "./signed";
+import { LetterRows } from "./letters";
+import { TenantHistory } from "./history";
 
 export function LogementDetail({ id }: { id: string }) {
   return (
@@ -53,7 +55,6 @@ function Detail({ id }: { id: string }) {
   const active = activeTenancy(data, id);
   const leaving = leavingTenancy(data, id);
   const draft = draftTenancy(data, id);
-  const history = tenanciesOf(data, id).filter((t) => t.status === "clos");
   const occupiedOutside = !active && unit.status !== "vacant";
   const knownTenant = occupiedOutside && (unit.tenantLastName || unit.tenantFirstName);
   const rentLine = `loyer ${eur(unit.rent)}${unit.charges ? ` + charges ${eur(unit.charges)}` : ""}`;
@@ -246,6 +247,7 @@ function Detail({ id }: { id: string }) {
                     + Joindre une autre caution
                   </button>
                 )}
+                <LetterRows tenancy={active} onSave={saveTenancy} />
                 {active && <InspectionRow tenancyId={active.id} kind="entree" onStart={() => startEntry(active)} unitId={id} />}
               </div>
             </Card>
@@ -259,12 +261,15 @@ function Detail({ id }: { id: string }) {
           </Card>
         )}
 
-        {(history.length > 0 || leaving) && (
+        {active && <TenantHistory unit={unit} tenancy={active} />}
+
+        {/* Dossiers clos : informations effacées à la clôture ; seul un départ en cours reste affiché. */}
+        {leaving && (
           <>
-            <SectionTitle>Anciens locataires</SectionTitle>
+            <SectionTitle>Départ en cours</SectionTitle>
             <Card className="py-1">
               <div className="divide-y divide-line">
-                {[...(leaving ? [leaving] : []), ...history].map((t) => (
+                {[leaving].map((t) => (
                   <div key={t.id} className="py-3">
                     <div className="text-[15px] font-semibold text-ink">{tenantsName(t) || "Locataire"}</div>
                     <div className="text-[13px] text-muted">

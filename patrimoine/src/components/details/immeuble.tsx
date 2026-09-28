@@ -1,8 +1,8 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeftRight, BadgeEuro, DoorOpen, Hammer, Landmark, Pencil } from "lucide-react";
+import { ArrowLeftRight, BadgeEuro, DoorOpen, GripVertical, Hammer, Landmark, Pencil } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { unitRemovals } from "@/lib/tenancy";
 import { newId } from "@/lib/ops";
@@ -13,13 +13,13 @@ import { dateFr, eur, eurCompact, eurSigned, num, pct } from "@/lib/format";
 import { CONDITIONS, UNIT_TYPES, WORK_STATUSES, labelOf } from "@/lib/labels";
 import { BuildingForm, UnitForm, WorkForm } from "../forms";
 import { QuickLoan, QuickWork } from "../quick-add";
-import { Button, Card, ConfirmDelete, Divided, Empty, Kpi, MissingData, Page, PageHeader, Pill, Row, SectionTitle, Sheet } from "../ui";
+import { Button, Card, ConfirmDelete, Divided, Empty, Kpi, MissingData, Page, PageHeader, Pill, Row, SectionTitle, Sheet, cx } from "../ui";
 import { AddLink } from "./societe";
 import { BuildingValueHistory } from "../value-history";
 import { SwipeDelete } from "@/components/swipe";
 import { SaleSheet, newSale } from "@/components/sale/sheet";
 import { SalesList } from "@/components/sale/list";
-import { SwapLotsSheet } from "./swap-lots";
+import { SwapLotsSheet, useSwapLots } from "./swap-lots";
 import type { SaleAction } from "@/lib/types";
 
 export function BuildingDetail({ id, edit, saleId }: { id: string; edit?: boolean; saleId?: string }) {
@@ -36,6 +36,15 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
   const [sheet, setSheet] = useState<null | "edit" | "loan" | "work">(edit ? "edit" : null);
   const [selling, setSelling] = useState<SaleAction | null>(null);
   const [swapping, setSwapping] = useState(false);
+  const [dragId, setDragIdState] = useState<string | null>(null);
+  // Lot saisi, lu immédiatement pendant le glisser (l'état React peut arriver après le premier survol).
+  const dragRef = useRef<string | null>(null);
+  const setDragId = (id: string | null) => {
+    dragRef.current = id;
+    setDragIdState(id);
+  };
+  const [overId, setOverId] = useState<string | null>(null);
+  const swapLots = useSwapLots();
   const [unitId, setUnitId] = useState<string | null>(null);
   const [workId, setWorkId] = useState<string | null>(null);
   const building = data.buildings.find((b) => b.id === id);
@@ -128,20 +137,60 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
           ) : (
             <Divided>
               {units.map((u) => (
-                <SwipeDelete key={u.id} items={unitRemovals(data, u.id)} message={`${u.name} supprimé`}>
-                <Row
-                  href={`/patrimoine/logement/${u.id}`}
-                  icon={<DoorOpen size={18} />}
-                  title={u.name}
-                  subtitle={
-                    u.status === "vacant"
-                      ? "Vacant"
-                      : [u.tenantFirstName, u.tenantLastName].filter(Boolean).join(" ") || labelOf(UNIT_TYPES, u.type)
-                  }
-                  right={u.status === "vacant" ? <Pill tone="warn">Vacant</Pill> : eur(u.rent)}
-                  rightSub={[labelOf(UNIT_TYPES, u.type), u.surface ? `${num(u.surface)} m²` : undefined].filter(Boolean).join(" · ")}
-                />
-                </SwipeDelete>
+                // Ordinateur : glisser un lot (poignée ⋮⋮) sur un autre échange leurs numéros.
+                <div
+                  key={u.id}
+                  onDragOver={(e) => {
+                    if (!dragRef.current || dragRef.current === u.id) return;
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = "move";
+                    if (overId !== u.id) setOverId(u.id);
+                  }}
+                  onDragLeave={() => setOverId((cur) => (cur === u.id ? null : cur))}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const from = units.find((x) => x.id === (dragRef.current ?? e.dataTransfer.getData("text/plain")));
+                    setDragId(null);
+                    setOverId(null);
+                    if (from && from.id !== u.id) swapLots(from, u);
+                  }}
+                  className={cx("group/lot relative rounded-xl transition", overId === u.id && "bg-series-1/10 ring-2 ring-series-1", dragId === u.id && "opacity-40")}
+                >
+                  <span
+                    draggable
+                    data-drag
+                    data-noswipe
+                    title="Glisser sur un autre lot pour échanger les numéros"
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData("text/plain", u.id);
+                      e.dataTransfer.effectAllowed = "move";
+                      // Chrome annule le glisser si la page change au même instant : mise en forme différée.
+                      dragRef.current = u.id;
+                      setTimeout(() => setDragId(u.id), 0);
+                    }}
+                    onDragEnd={() => {
+                      setDragId(null);
+                      setOverId(null);
+                    }}
+                    className="absolute -left-4 top-1/2 z-10 hidden h-8 w-5 -translate-y-1/2 cursor-grab items-center justify-center rounded-md text-muted/60 hover:bg-soft hover:text-navy active:cursor-grabbing [@media(hover:hover)]:flex"
+                  >
+                    <GripVertical size={16} />
+                  </span>
+                  <SwipeDelete items={unitRemovals(data, u.id)} message={`${u.name} supprimé`}>
+                    <Row
+                      href={`/patrimoine/logement/${u.id}`}
+                      icon={<DoorOpen size={18} />}
+                      title={u.name}
+                      subtitle={
+                        u.status === "vacant"
+                          ? "Vacant"
+                          : [u.tenantFirstName, u.tenantLastName].filter(Boolean).join(" ") || labelOf(UNIT_TYPES, u.type)
+                      }
+                      right={u.status === "vacant" ? <Pill tone="warn">Vacant</Pill> : eur(u.rent)}
+                      rightSub={[labelOf(UNIT_TYPES, u.type), u.surface ? `${num(u.surface)} m²` : undefined].filter(Boolean).join(" · ")}
+                    />
+                  </SwipeDelete>
+                </div>
               ))}
             </Divided>
           )}
