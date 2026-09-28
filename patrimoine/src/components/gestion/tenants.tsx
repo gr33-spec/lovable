@@ -149,6 +149,9 @@ export function TenantsView() {
                       <UnitLine unit={u} flags={unitFlags(data, u, unpaid, today)} missing={unitMissing(data, u)} dnd={all.length > 1 ? dnd : undefined} />
                     </div>
                   ))}
+                  {all.length > 1 && (
+                    <p className="px-4 py-2.5 text-[12px] text-muted">Numéro de lot faux ? Maintenez ⋮⋮ puis glissez le lot sur son vrai numéro.</p>
+                  )}
                 </div>
               )}
             </div>
@@ -182,11 +185,9 @@ function UnitLine({ unit, flags, missing, dnd }: { unit: Unit; flags: UnitFlag[]
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[15px] font-semibold text-ink">
             {dnd ? <LotHandle dnd={dnd} unitId={unit.id} group={unit.buildingId} label={unit.name} /> : unit.name}
-            <span className="font-normal text-muted">
-              {" · "}
-              {vacant ? "Vacant" : tenant || "Locataire à renseigner"}
-            </span>
           </span>
+          {/* Locataire sur sa propre ligne : le numéro du lot reste lisible et facile à attraper. */}
+          <span className="block truncate text-[13px] text-ink-2">{vacant ? "Vacant" : tenant || "Locataire à renseigner"}</span>
           <span className="tabular block text-[12.5px] text-muted">{eur((unit.rent ?? 0) + (unit.charges ?? 0))} / mois</span>
           {missing.length > 0 && (
             <span className="mt-1 flex flex-wrap items-center gap-1">
