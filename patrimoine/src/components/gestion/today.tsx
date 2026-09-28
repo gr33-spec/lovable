@@ -125,8 +125,10 @@ export function TodayView({ onOpen }: { onOpen: (view: "loyers" | "locataires", 
                 <SwipeRow key={l.unit.id} actions={[{ label: "Payé", icon: <Check size={18} />, tone: "pos", onAction: () => update("units", l.unit, settleUnpaid(l.unit), "Loyers marqués payés") }]}>
                   <button onClick={() => onOpen("loyers", l.months[l.months.length - 1])} className="flex w-full items-center gap-3 py-3 text-left">
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[15px] font-medium text-ink">{placeOf(data, l.unit)}</span>
-                      <span className="block truncate text-[13px] text-muted">{l.months.map(monthKeyLabel).join(", ")}</span>
+                      <span className="block truncate text-[15px] font-medium text-ink">{[l.unit.name, [l.unit.tenantFirstName, l.unit.tenantLastName].filter(Boolean).join(" ")].filter(Boolean).join(" · ")}</span>
+                      <span className="block truncate text-[13px] text-muted">
+                        <span className="font-semibold text-neg">{l.months.map(monthKeyLabel).join(", ")}</span> · {data.buildings.find((b) => b.id === l.unit.buildingId)?.name}
+                      </span>
                     </span>
                     <span className="tabular text-[15px] font-bold text-neg">{eur(l.amount)}</span>
                   </button>
@@ -223,10 +225,6 @@ export function TodayView({ onOpen }: { onOpen: (view: "loyers" | "locataires", 
   );
 }
 
-function placeOf(data: ReturnType<typeof useStore>["data"], unit: Unit): string {
-  const b = data.buildings.find((x) => x.id === unit.buildingId);
-  return [b?.name, unit.name].filter(Boolean).join(" · ");
-}
 
 function RevisionRow({ plan, onOpen }: { plan: RevisionPlan; onOpen: () => void }) {
   const { data } = useStore();

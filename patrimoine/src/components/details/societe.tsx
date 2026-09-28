@@ -16,7 +16,7 @@ import { BilanImport } from "../bilans";
 import { statementRatios } from "@/lib/engine/indicators";
 import { QuickBuilding, QuickCompany, QuickLoan } from "../quick-add";
 import { LineChart } from "../charts";
-import { Button, Card, ConfirmDelete, Divided, Empty, Kpi, Page, PageHeader, Row, SectionTitle, Sheet } from "../ui";
+import { Button, Card, ConfirmDelete, Divided, Empty, Kpi, MissingData, Page, PageHeader, Row, SectionTitle, Sheet } from "../ui";
 
 export function CompanyDetail({ id }: { id: string }) {
   const { data, projection, removeMany, upsert } = useStore();
@@ -72,7 +72,7 @@ export function CompanyDetail({ id }: { id: string }) {
       />
       <Page>
         <Card>
-          <Kpi label={hasChildren ? "Patrimoine net consolidé" : "Patrimoine net"} value={netWorth(f) !== undefined && (f.value || f.debt) ? eur(netWorth(f)) : "Données insuffisantes"} big />
+          <Kpi label={hasChildren ? "Patrimoine net consolidé" : "Patrimoine net"} value={netWorth(f) !== undefined && (f.value || f.debt) ? eur(netWorth(f)) : <MissingData action={f.unvalued ? `Estimer ${f.unvalued} immeuble${f.unvalued > 1 ? "s" : ""}` : undefined} href="/plus/a-completer" />} big />
           <div className="mt-4 grid grid-cols-2 gap-4">
             <Kpi label="Valeur immobilière" value={f.unvalued ? "—" : eurCompact(f.value)} hint={f.unvalued ? `${f.unvalued} bien(s) sans valeur` : undefined} />
             <Kpi label="Dette totale" value={eurCompact(f.debt)} hint={ratio !== undefined ? `LTV ${pct(ratio)}` : undefined} />

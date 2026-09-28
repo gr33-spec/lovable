@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, ChevronRight, X } from "lucide-react";
 import { INSUFFICIENT } from "@/lib/format";
@@ -38,7 +38,15 @@ export function PageHeader({
           </button>
         )}
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-[30px] font-extrabold tracking-[-0.02em] text-navy">{title}</h1>
+          {/* Titres longs : taille réduite et deux lignes plutôt qu'un titre coupé. */}
+          <h1
+            className={cx(
+              "font-extrabold tracking-[-0.02em] text-navy",
+              title.length <= (action ? 11 : 16) ? "truncate text-[30px]" : title.length <= 24 ? "line-clamp-2 text-[25px] leading-[1.15]" : "line-clamp-2 text-[21px] leading-[1.2]",
+            )}
+          >
+            {title}
+          </h1>
           {subtitle && <div className="truncate text-sm text-muted">{subtitle}</div>}
         </div>
         {action}
@@ -93,7 +101,8 @@ export function Kpi({
       <div className="text-[13px] text-muted">{label}</div>
       <div
         className={cx(
-          "tabular truncate font-bold tracking-[-0.02em]",
+          "tabular font-bold tracking-[-0.02em]",
+          typeof value === "string" && "truncate",
           big ? "text-[30px]" : "text-[19px]",
           tone === "pos" && "text-pos",
           tone === "neg" && "text-neg",
@@ -104,6 +113,26 @@ export function Kpi({
       </div>
       {hint && <div className="truncate text-xs text-muted">{hint}</div>}
     </div>
+  );
+}
+
+/** Valeur impossible à calculer : on le dit, et on mène directement à ce qu'il faut renseigner. */
+export function MissingData({ action, href, onClick, dark }: { action?: string; href?: string; onClick?: () => void; dark?: boolean }) {
+  const cls = cx("mt-1 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-semibold", dark ? "bg-white/15 text-white" : "bg-series-1/10 text-series-1");
+  return (
+    <span className="block">
+      <span className={cx("block text-[15px] font-semibold leading-snug", dark ? "text-white/80" : "text-muted")}>{INSUFFICIENT}</span>
+      {action && href && (
+        <Link href={href} className={cls}>
+          {action} <ChevronRight size={13} />
+        </Link>
+      )}
+      {action && !href && onClick && (
+        <button type="button" onClick={onClick} className={cls}>
+          {action} <ChevronRight size={13} />
+        </button>
+      )}
+    </span>
   );
 }
 
@@ -302,6 +331,8 @@ export function Sheet({
   children: ReactNode;
   footer?: ReactNode;
 }) {
+  const [drag, setDrag] = useState<number | null>(null);
+  const dragStart = useRef<number | null>(null);
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -318,12 +349,39 @@ export function Sheet({
   const sheet = (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label={title}>
       <div className="animate-fade absolute inset-0 bg-[#0b1526]/40" onClick={onClose} />
-      <div className="animate-sheet relative flex max-h-[92dvh] w-full max-w-lg flex-col rounded-t-[28px] bg-bg sm:rounded-[28px]">
-        <div className="flex items-center justify-between px-5 pb-2 pt-4">
+      <div
+        className={cx("animate-sheet relative flex max-h-[92dvh] w-full max-w-lg flex-col rounded-t-[28px] bg-bg sm:rounded-[28px]", drag === null && "transition-transform duration-200")}
+        style={drag ? { transform: `translateY(${drag}px)` } : undefined}
+      >
+        {/* Poignée : tirer vers le bas pour fermer (comme sur iPhone). */}
+        <div
+          className="touch-none pt-2"
+          onPointerDown={(e) => {
+            dragStart.current = e.clientY;
+            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+          }}
+          onPointerMove={(e) => {
+            if (dragStart.current === null) return;
+            setDrag(Math.max(0, e.clientY - dragStart.current));
+          }}
+          onPointerUp={() => {
+            const d = drag ?? 0;
+            dragStart.current = null;
+            setDrag(null);
+            if (d > 90) onClose();
+          }}
+          onPointerCancel={() => {
+            dragStart.current = null;
+            setDrag(null);
+          }}
+        >
+          <div className="mx-auto h-1.5 w-10 rounded-full bg-black/15 sm:hidden" />
+        <div className="flex items-center justify-between px-5 pb-2 pt-2">
           <h2 className="text-[19px] font-bold text-navy">{title}</h2>
-          <button onClick={onClose} aria-label="Fermer" className="flex h-9 w-9 items-center justify-center rounded-full bg-black/5 text-ink-2">
+          <button onClick={onClose} onPointerDown={(e) => e.stopPropagation()} aria-label="Fermer" className="flex h-9 w-9 items-center justify-center rounded-full bg-black/5 text-ink-2">
             <X size={18} />
           </button>
+        </div>
         </div>
         <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-4">{children}</div>
         {footer && <div className="safe-bottom border-t border-line bg-bg px-5 pb-4 pt-3">{footer}</div>}
@@ -441,7 +499,7 @@ export function NumberField({
           inputMode={integer ? "numeric" : "decimal"}
           className={cx(inputCls, "tabular pr-12")}
           value={text}
-          placeholder={placeholder ?? "Non renseigné"}
+          placeholder={placeholder ?? "—"}
           onFocus={() => setFocused(true)}
           onBlur={() => {
             setFocused(false);

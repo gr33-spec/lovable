@@ -15,13 +15,13 @@ export function qualityIssues(data: AppData, snap: Snapshot): QualityIssue[] {
   const issues: QualityIssue[] = [];
   for (const b of data.buildings) {
     if ((snap.byBuilding.get(b.id)?.unvalued ?? 0) > 0) {
-      issues.push({ id: `b-${b.id}`, label: b.name, detail: "Valeur estimée manquante", href: `/patrimoine/immeuble/${b.id}`, severity: "advice" });
+      issues.push({ id: `b-${b.id}`, label: b.name, detail: "Valeur estimée manquante", href: `/patrimoine/immeuble/${b.id}?modifier=1`, severity: "advice" });
     }
   }
   for (const b of data.buildings) {
     const f = snap.byBuilding.get(b.id);
     if (f && f.rentMonthly > 0 && f.chargesAnnual === 0) {
-      issues.push({ id: `c-${b.id}`, label: b.name, detail: "Charges non renseignées (taxe foncière, assurance) : cash-flow surestimé", href: `/patrimoine/immeuble/${b.id}`, severity: "critical" });
+      issues.push({ id: `c-${b.id}`, label: b.name, detail: "Charges non renseignées (taxe foncière, assurance) : cash-flow surestimé", href: `/patrimoine/immeuble/${b.id}?modifier=1`, severity: "critical" });
     }
   }
   for (const l of data.loans) {
