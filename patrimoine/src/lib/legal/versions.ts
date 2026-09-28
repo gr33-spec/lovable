@@ -70,6 +70,14 @@ export const RECEIPT_VERSION: LegalVersion = {
   verified: true,
 };
 
+export const REVISION_LETTER_VERSION: LegalVersion = {
+  id: "revision-irl",
+  label: "Révision annuelle du loyer — article 17-1 de la loi du 6 juillet 1989",
+  from: "2014-03-27",
+  sources: ["Loi n° 89-462 du 6 juillet 1989, art. 17-1 (rédaction issue de la loi n° 2014-366 du 24 mars 2014)"],
+  verified: true,
+};
+
 /** Modèle de bail applicable à une date (AAAA-MM-JJ). */
 export function leaseVersionFor(date: string | undefined): LegalVersion {
   const d = date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : new Date().toISOString().slice(0, 10);

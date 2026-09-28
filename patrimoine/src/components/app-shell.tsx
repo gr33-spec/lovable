@@ -86,11 +86,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 /** Barre d'onglets de l'espace gestion locative. */
 function GestionNav({ unpaid }: { unpaid: number }) {
   const pathname = usePathname();
-  const vue = useSearchParams().get("vue") ?? "loyers";
+  const vue = useSearchParams().get("vue") ?? "afaire";
   const tabs = [
-    { vue: "loyers", label: "Loyers", icon: Coins, badge: unpaid },
+    { vue: "afaire", label: "À faire", icon: ListChecks, badge: unpaid },
+    { vue: "loyers", label: "Loyers", icon: Coins },
     { vue: "locataires", label: "Locataires", icon: Users },
-    { vue: "afaire", label: "À faire", icon: ListChecks },
     { vue: "annee", label: "Bilan", icon: ChartColumn },
   ];
   return (

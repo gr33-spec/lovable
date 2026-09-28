@@ -3,7 +3,7 @@ import { type Block, type DocContext, type LegalDoc, blank, dateLong, landlordLi
 import { compareInspections, stateLabel } from "./inspection";
 import { slug } from "./lease";
 import type { MonthReceipt, RentStatement } from "./receipts";
-import { INSPECTION_VERSION, RECEIPT_VERSION } from "./versions";
+import { INSPECTION_VERSION, RECEIPT_VERSION, REVISION_LETTER_VERSION } from "./versions";
 
 // États des lieux, quittances, reçus et attestations.
 
@@ -216,5 +216,65 @@ export function statementDocument(ctx: DocContext, s: RentStatement, asOf: strin
     reference: RECEIPT_VERSION.label,
     blocks,
     fileName: `${s.kind === "attestation" ? "attestation" : "recu"}-${slug(ctx.unit.name)}-${asOf}.pdf`,
+  };
+}
+
+// ——— Courrier de révision annuelle du loyer ———
+
+export interface RevisionLetter {
+  /** Date de révision prévue au bail (anniversaire). */
+  due: string;
+  /** Date d'effet du nouveau loyer. */
+  effective: string;
+  rent: number;
+  newRent: number;
+  charges?: number;
+  referenceLabel: string;
+  referenceValue: number;
+  indexLabel: string;
+  indexValue: number;
+}
+
+const idx = (n: number) => n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+export function revisionDocument(ctx: DocContext, r: RevisionLetter, issuedAt: string): LegalDoc {
+  const late = r.effective > r.due;
+  const blocks: Block[] = [partiesBlock(ctx)];
+  blocks.push({ t: "p", bold: true, text: "Objet : révision annuelle du loyer" });
+  blocks.push({ t: "p", text: "Madame, Monsieur," });
+  blocks.push({
+    t: "p",
+    text: `Conformément à la clause de révision de votre bail et à l'article 17-1 de la loi n° 89-462 du 6 juillet 1989, le loyer de votre logement est révisé chaque année en fonction de la variation de l'indice de référence des loyers (IRL) publié par l'INSEE. Le nouveau loyer est calculé comme suit :`,
+  });
+  const total = r.newRent + (r.charges ?? 0);
+  blocks.push({
+    t: "table",
+    head: ["Détail", "Montant"],
+    widths: [70, 30],
+    rows: [
+      ["Loyer mensuel actuel, hors charges", money(r.rent)],
+      [`Indice de référence : ${r.referenceLabel}`, idx(r.referenceValue)],
+      [`Nouvel indice : ${r.indexLabel}`, idx(r.indexValue)],
+      [`Calcul : ${money(r.rent)} × ${idx(r.indexValue)} ÷ ${idx(r.referenceValue)}`, money(r.newRent)],
+      ...(r.charges ? ([["Provisions sur charges (inchangées)", money(r.charges)]] as string[][]) : []),
+      ["Nouveau montant mensuel", money(total)],
+    ],
+    totalRow: true,
+  });
+  blocks.push({
+    t: "p",
+    text: late
+      ? `La date de révision prévue était le ${dateLong(r.due)}. Conformément à l'article 17-1 de la loi du 6 juillet 1989, la révision prend effet à la date de la présente demande, soit le ${dateLong(r.effective)}, sans effet rétroactif.`
+      : `Ce nouveau loyer s'applique à compter du ${dateLong(r.effective)}, date anniversaire de votre bail.`,
+  });
+  blocks.push({ t: "p", text: `Le montant de votre loyer passe ainsi de ${money(r.rent)} à ${money(r.newRent)} hors charges, soit ${money(total)} par mois charges comprises. Si vous réglez par virement permanent, nous vous remercions de bien vouloir le modifier en conséquence.` });
+  blocks.push({ t: "p", text: "Nous vous prions d'agréer, Madame, Monsieur, l'expression de nos salutations distinguées." });
+  blocks.push(signatureOf(ctx, issuedAt));
+  return {
+    title: "Révision du loyer",
+    subtitle: `À compter du ${dateLong(r.effective)}`,
+    reference: REVISION_LETTER_VERSION.label,
+    blocks,
+    fileName: `revision-loyer-${slug(ctx.unit.name)}-${r.effective.slice(0, 7)}.pdf`,
   };
 }

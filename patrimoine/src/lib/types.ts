@@ -163,6 +163,10 @@ export interface RentChange {
   previousRent?: number;
   indexLabel?: string;
   indexValue?: number;
+  /** Révision : indice de comparaison (un an avant) et date prévue au bail, pour régénérer le courrier. */
+  referenceLabel?: string;
+  referenceValue?: number;
+  dueDate?: string;
   note?: string;
 }
 
