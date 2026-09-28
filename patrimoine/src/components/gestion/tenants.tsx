@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ArrowRightLeft, ChevronDown, ChevronRight, ClipboardCheck, DoorOpen, FileSignature, ReceiptText, Search, Trash2, UserPlus } from "lucide-react";
 import { SwipeRow, useDismiss, useUndoableRemove, type SwipeAction } from "../swipe";
+import { missingCount, unitMissing, type MissingItem } from "@/lib/missing";
 import { useStore } from "@/lib/store";
 import type { AppData, Unit } from "@/lib/types";
 import { eur } from "@/lib/format";
@@ -38,7 +39,7 @@ export function unitFlags(data: AppData, unit: Unit, unpaid: Map<string, number>
   return flags;
 }
 
-type Filter = "tous" | "loues" | "vacants" | "impayes" | "suivi";
+type Filter = "tous" | "loues" | "vacants" | "impayes" | "suivi" | "incomplets";
 
 export function TenantsView() {
   const { data } = useStore();
@@ -48,6 +49,7 @@ export function TenantsView() {
   const today = todayIso();
   const unpaid = useMemo(() => new Map(unpaidByUnit(data.units).map((l) => [l.unit.id, l.amount])), [data.units]);
 
+  const totalMissing = missingCount(data);
   const needle = q.trim().toLowerCase();
   const groups = data.buildings
     .map((b) => {
@@ -58,6 +60,7 @@ export function TenantsView() {
         if (filter === "vacants" && u.status !== "vacant") return false;
         if (filter === "impayes" && !unpaid.has(u.id)) return false;
         if (filter === "suivi" && !flags.some((f) => f.tone !== "neg")) return false;
+        if (filter === "incomplets" && unitMissing(data, u).length === 0) return false;
         if (!needle) return true;
         return [u.name, u.tenantFirstName, u.tenantLastName, b.name, b.city].filter(Boolean).join(" ").toLowerCase().includes(needle);
       });
@@ -72,6 +75,7 @@ export function TenantsView() {
     { value: "vacants", label: "Vacants" },
     { value: "impayes", label: `Impayés${unpaid.size ? ` (${unpaid.size})` : ""}` },
     { value: "suivi", label: "À suivre" },
+    { value: "incomplets", label: `À compléter${totalMissing ? ` (${totalMissing})` : ""}` },
   ];
 
   return (
@@ -102,6 +106,7 @@ export function TenantsView() {
         {groups.map(({ building, all, units }) => {
           const rented = all.filter((u) => u.status !== "vacant").length;
           const late = all.filter((u) => unpaid.has(u.id)).length;
+          const missing = missingCount(data, all);
           const isOpen = expandAll || open.has(building.id);
           return (
             <div key={building.id} className="soft-card overflow-hidden rounded-[24px]">
@@ -111,9 +116,17 @@ export function TenantsView() {
                 aria-expanded={isOpen}
               >
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-[16px] font-bold text-navy">{building.name}</div>
+                  <div className="flex items-center gap-2">
+                    <span className="truncate text-[16px] font-bold text-navy">{building.name}</span>
+                    {missing > 0 && (
+                      <span aria-label={`${missing} élément(s) à compléter`} className="flex h-[20px] min-w-[20px] shrink-0 items-center justify-center rounded-full bg-neg px-1.5 text-[11px] font-bold text-white">
+                        {missing}
+                      </span>
+                    )}
+                  </div>
                   <div className="text-[12.5px] text-muted">
                     {rented}/{all.length} loués{late > 0 && <span className="font-semibold text-neg"> · {late} impayé{late > 1 ? "s" : ""}</span>}
+                    {missing > 0 && <span className="text-neg"> · {missing} à compléter</span>}
                   </div>
                 </div>
                 <ChevronDown size={18} className={cx("shrink-0 text-muted transition", isOpen && "rotate-180")} />
@@ -121,7 +134,7 @@ export function TenantsView() {
               {isOpen && (
                 <div className="divide-y divide-line border-t border-line">
                   {units.map((u) => (
-                    <UnitLine key={u.id} unit={u} flags={unitFlags(data, u, unpaid, today)} />
+                    <UnitLine key={u.id} unit={u} flags={unitFlags(data, u, unpaid, today)} missing={unitMissing(data, u)} />
                   ))}
                 </div>
               )}
@@ -140,7 +153,7 @@ const TONE: Record<UnitFlag["tone"], string> = {
   pos: "bg-pos/10 text-pos",
 };
 
-function UnitLine({ unit, flags }: { unit: Unit; flags: UnitFlag[] }) {
+function UnitLine({ unit, flags, missing }: { unit: Unit; flags: UnitFlag[]; missing: MissingItem[] }) {
   const { data } = useStore();
   const vacant = unit.status === "vacant";
   const active = activeTenancy(data, unit.id);
@@ -158,6 +171,16 @@ function UnitLine({ unit, flags }: { unit: Unit; flags: UnitFlag[] }) {
             <span className="font-normal text-muted"> · {vacant ? "Vacant" : tenant || "Locataire à renseigner"}</span>
           </span>
           <span className="tabular block text-[12.5px] text-muted">{eur((unit.rent ?? 0) + (unit.charges ?? 0))} / mois</span>
+          {missing.length > 0 && (
+            <span className="mt-1 flex flex-wrap items-center gap-1">
+              <span className="text-[10.5px] font-bold uppercase tracking-wide text-neg">Manque</span>
+              {missing.map((m) => (
+                <span key={m.id} className="rounded-full border border-neg/30 bg-neg/5 px-2 py-0.5 text-[10.5px] font-semibold text-neg">
+                  {m.label}
+                </span>
+              ))}
+            </span>
+          )}
           {flags.length > 0 && (
             <span className="mt-1 flex flex-wrap gap-1">
               {flags.map((f) => (

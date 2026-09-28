@@ -10,6 +10,7 @@ import { RentsView } from "@/components/gestion/rents";
 import { AnnualView } from "@/components/gestion/annual";
 import { TenantsView } from "@/components/gestion/tenants";
 import { TodayView, useTodoCount } from "@/components/gestion/today";
+import { missingCount } from "@/lib/missing";
 import { Page, PageHeader, cx } from "@/components/ui";
 
 type View = "afaire" | "loyers" | "locataires" | "annee";
@@ -39,10 +40,11 @@ function Gestion() {
     router.replace(`/gestion?${q.toString()}`, { scroll: false });
   };
 
-  const TABS: { value: View; label: string; badge?: number }[] = [
+  const missing = missingCount(data);
+  const TABS: { value: View; label: string; badge?: number; red?: boolean }[] = [
     { value: "afaire", label: "À faire", badge: todo },
     { value: "loyers", label: "Loyers" },
-    { value: "locataires", label: "Locataires" },
+    { value: "locataires", label: "Locataires", badge: missing, red: true },
     { value: "annee", label: "Bilan" },
   ];
 
@@ -75,7 +77,7 @@ function Gestion() {
               className={cx("relative flex-1 rounded-xl px-1 py-2.5 text-[14px] font-semibold transition", view === t.value ? "bg-card text-navy shadow-sm" : "text-ink-2")}
             >
               {t.label}
-              {t.badge ? <span className="ml-1 rounded-full bg-warn px-1.5 py-0.5 text-[10px] font-bold text-white">{t.badge}</span> : null}
+              {t.badge ? <span className={cx("ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white", t.red ? "bg-neg" : "bg-warn")}>{t.badge}</span> : null}
             </button>
           ))}
         </div>

@@ -108,3 +108,18 @@ test("encaissements : locataire à jour depuis son entrée, impayés conservés"
   // Logement vacant : rien.
   assert.equal(upToDate(d, { ...unit, status: "vacant" }, "2026-09-28").months.length, 0);
 });
+
+test("gestion : éléments manquants d'un logement loué", async () => {
+  const { unitMissing } = await import("../src/lib/missing");
+  const d = emptyData();
+  d.buildings.push({ id: "b", name: "B" });
+  const u = { id: "u", buildingId: "b", name: "Lot 1", status: "occupe" as const };
+  d.units.push(u);
+  assert.deepEqual(unitMissing(d, u).map((m) => m.id), ["tenant", "lease", "entry", "rent"]);
+  d.tenancies.push({ id: "t", unitId: "u", status: "actif", tenants: [{ lastName: "X" }], startDate: "2025-01-01", rent: 500, guarantors: [{ kind: "personne", lastName: "G" }, { kind: "personne", signedFile: { fileId: "f", name: "c.pdf" } }], signedLease: { fileId: "l", name: "b.pdf" } });
+  assert.deepEqual(unitMissing(d, u).map((m) => m.label), ["Caution signée"]);
+  // Pas de garant au bail : aucune caution attendue ; logement vacant : rien.
+  d.tenancies[0].guarantors = [];
+  assert.equal(unitMissing(d, u).length, 0);
+  assert.equal(unitMissing(d, { ...u, status: "vacant" }).length, 0);
+});
