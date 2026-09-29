@@ -46,12 +46,12 @@ export function PageHeader({
         )}
         <div className="min-w-0 flex-1">
           {crumbs && crumbs.length > 0 && (
-            <nav aria-label="Vous êtes ici" className="flex min-w-0 items-center gap-1 overflow-hidden whitespace-nowrap text-[12.5px] font-medium text-muted">
+            <nav aria-label="Vous êtes ici" className="-my-2.5 flex min-w-0 items-center gap-1 overflow-hidden whitespace-nowrap py-2.5 text-[12.5px] font-medium text-muted">
               {crumbs.map((c, i) => (
                 <span key={`${c.label}-${i}`} className={cx("flex min-w-0 items-center gap-1", i < crumbs.length - 1 ? "shrink-[2]" : "shrink")}>
                   {i > 0 && <ChevronRight size={12} className="shrink-0 text-muted/60" />}
                   {c.href ? (
-                    <Link href={c.href} className="truncate hover:text-brand hover:underline">
+                    <Link href={c.href} className="-my-2.5 truncate py-2.5 hover:text-brand hover:underline">
                       {c.label}
                     </Link>
                   ) : (
@@ -101,7 +101,8 @@ export function SectionTitle({ children, action }: { children: ReactNode; action
   return (
     <div className="mb-3 mt-8 flex items-center justify-between px-1">
       <h2 className="text-[19px] font-bold tracking-[-0.01em] text-navy">{children}</h2>
-      {action}
+      {/* Zone d'appui agrandie (≈ 44 px) sans changer la mise en page. */}
+      {action && <div className="[&_a]:-my-3 [&_a]:py-3 [&_button]:-my-3 [&_button]:py-3">{action}</div>}
     </div>
   );
 }
@@ -285,7 +286,7 @@ export function Button({
     "inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl px-5 text-[16px] font-semibold transition active:scale-[0.98] disabled:opacity-40",
     variant === "primary" && "bg-brand text-on-brand shadow-sm hover:bg-brand-hover active:bg-brand-hover",
     variant === "secondary" && "bg-soft text-brand hover:bg-brand/10",
-    variant === "danger" && "bg-neg/10 text-neg",
+    variant === "danger" && "bg-neg/10 text-neg write-action",
     variant === "ghost" && "text-brand",
     full && "w-full",
   );
@@ -328,6 +329,15 @@ export function RoundButton({ onClick, children, label }: { onClick: () => void;
 
 export function ConfirmDelete({ label = "Supprimer", message, onConfirm }: { label?: string; message: string; onConfirm: () => void }) {
   const [ask, setAsk] = useState(false);
+  const [done, setDone] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  // La question s'affiche au milieu de l'écran (jamais cachée sous la barre d'onglets),
+  // « Annuler » prend le focus : la validation demande un geste volontaire.
+  useEffect(() => {
+    if (!ask) return;
+    box.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    box.current?.querySelector("button")?.focus({ preventScroll: true });
+  }, [ask]);
   if (!ask) {
     return (
       <Button variant="danger" full onClick={() => setAsk(true)}>
@@ -336,13 +346,22 @@ export function ConfirmDelete({ label = "Supprimer", message, onConfirm }: { lab
     );
   }
   return (
-    <div className="rounded-2xl bg-neg/5 p-4">
+    <div ref={box} role="alertdialog" aria-label={label} className="rounded-2xl bg-neg/5 p-4">
       <div className="mb-3 text-sm text-ink">{message}</div>
       <div className="grid grid-cols-2 gap-2">
         <Button variant="secondary" onClick={() => setAsk(false)}>
           Annuler
         </Button>
-        <Button variant="danger" onClick={onConfirm}>
+        <Button
+          variant="danger"
+          disabled={done}
+          onClick={() => {
+            // Un seul envoi, même en cas de double appui.
+            if (done) return;
+            setDone(true);
+            onConfirm();
+          }}
+        >
           Confirmer
         </Button>
       </div>
@@ -351,6 +370,27 @@ export function ConfirmDelete({ label = "Supprimer", message, onConfirm }: { lab
 }
 
 // ——— Feuille modale (bottom sheet) ———
+
+// Double appui sur le bouton d'une feuille (« Créer… ») : le premier ferme la
+// feuille, le second tomberait sur ce qui apparaît dessous (barre d'onglets…).
+// Les appuis des 450 ms suivant la fermeture sont donc ignorés.
+let clickGuardUntil = 0;
+let clickGuardInstalled = false;
+function armClickGuard(ms: number) {
+  clickGuardUntil = Date.now() + ms;
+  if (clickGuardInstalled || typeof document === "undefined") return;
+  clickGuardInstalled = true;
+  document.addEventListener(
+    "click",
+    (e) => {
+      if (Date.now() < clickGuardUntil) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    },
+    true,
+  );
+}
 
 export function Sheet({
   open,
@@ -374,7 +414,11 @@ export function Sheet({
   // Bouton ou geste Retour du téléphone : ferme la feuille sans quitter l'écran.
   useEffect(() => {
     if (!open) return;
-    return openOverlay(() => closeRef.current());
+    const release = openOverlay(() => closeRef.current());
+    return () => {
+      release?.();
+      armClickGuard(450);
+    };
   }, [open]);
   useEffect(() => {
     if (!open) return;

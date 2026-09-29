@@ -55,6 +55,10 @@ export async function createFile(name: string, mime: string, size: number): Prom
   await ready();
   const id = randomUUID();
   const chunks = Math.max(1, Math.ceil(size / CHUNK_BYTES));
+  // Envois abandonnés depuis plus de 2 jours (jamais complétés) : effacés, ils ne servent à rien.
+  await pool()
+    .query(`DELETE FROM app_file f WHERE f.created_at < now() - interval '2 days' AND (SELECT count(*) FROM app_file_chunk c WHERE c.file_id = f.id) < f.chunks`)
+    .catch(() => undefined);
   // L'empreinte n'est jamais celle annoncée par le navigateur : elle est calculée
   // par le serveur sur le contenu reçu, une fois le fichier complet.
   await pool().query("INSERT INTO app_file (id, name, mime, size, chunks) VALUES ($1, $2, $3, $4, $5)", [id, name.slice(0, 200), mime, size, chunks]);
@@ -121,10 +125,12 @@ export async function putChunk(id: string, idx: number, data: Buffer): Promise<v
   }
 }
 
-export async function readFile(id: string): Promise<{ name: string; mime: string; data: Buffer } | undefined> {
+export async function readFile(id: string, { includeDeleted = true } = {}): Promise<{ name: string; mime: string; data: Buffer } | undefined> {
   await ready();
-  const meta = await pool().query("SELECT name, mime, size, chunks FROM app_file WHERE id = $1", [id]);
+  const meta = await pool().query("SELECT name, mime, size, chunks, deleted_at FROM app_file WHERE id = $1", [id]);
   if (!meta.rowCount) return undefined;
+  // Pièce à la corbeille : conservée (restauration possible) mais plus consultable.
+  if (!includeDeleted && meta.rows[0].deleted_at) return undefined;
   const parts = await pool().query("SELECT idx, data FROM app_file_chunk WHERE file_id = $1 ORDER BY idx", [id]);
   if (parts.rowCount !== meta.rows[0].chunks) throw new Error("Fichier incomplet");
   const data = Buffer.concat(parts.rows.map((r) => r.data as Buffer));

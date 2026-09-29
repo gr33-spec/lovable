@@ -10,7 +10,7 @@ import { restoreFiles } from "@/lib/server/files";
 
 const collection = z.enum(COLLECTIONS as [string, ...string[]]);
 const opSchema = z.union([
-  z.object({ op: z.literal("upsert"), coll: collection, item: z.looseObject({ id: z.string().min(1).max(100) }) }),
+  z.object({ op: z.literal("upsert"), coll: collection, item: z.looseObject({ id: z.string().min(1).max(100) }), base: z.looseObject({ id: z.string().min(1).max(100) }).optional() }),
   z.object({ op: z.literal("delete"), coll: collection, id: z.string().min(1).max(100) }),
   z.object({ op: z.literal("settings"), patch: z.record(z.string(), z.unknown()) }),
 ]);
