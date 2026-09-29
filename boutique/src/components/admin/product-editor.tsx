@@ -269,7 +269,7 @@ export function ProductEditor({
                     moveImage(dragIndex, i);
                     setDragIndex(null);
                   }}
-                  className="group relative aspect-square overflow-hidden rounded-xl bg-secondary"
+                  className="group relative aspect-square overflow-hidden rounded-xl bg-surface-2"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={imageSrc(img, 320)} alt={img.alt || `Photo ${i + 1}`} className="h-full w-full object-cover" draggable={false} />
@@ -297,7 +297,7 @@ export function ProductEditor({
                 </li>
               ))}
               {uploads.map((u) => (
-                <li key={u.key} className="relative flex aspect-square flex-col items-center justify-center gap-1 rounded-xl bg-secondary p-2 text-center text-xs">
+                <li key={u.key} className="relative flex aspect-square flex-col items-center justify-center gap-1 rounded-xl bg-surface-2 p-2 text-center text-xs">
                   {u.error ? (
                     <>
                       <span className="text-error">{u.error}</span>

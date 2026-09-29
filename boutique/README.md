@@ -43,7 +43,7 @@ erreurs soignées, partage Facebook/WhatsApp (OpenGraph), SEO (sitemap, robots, 
 stock faible, incidents, liste « avant d'ouvrir »), produits (photos glisser-déposer ou depuis le
 téléphone, principale, ordre, brouillon/publié/archivé, stock modifiable depuis la liste, actions
 groupées), commandes (préparation → expédition avec suivi → e-mail automatique, annulation /
-remboursement Stripe, effacement RGPD), catégories et collections, apparence (7 thèmes, logo, textes,
+remboursement Stripe, effacement RGPD), catégories et collections, apparence (12 thèmes + palette personnalisée, logo, textes,
 réseaux), livraison (modes, prix, gratuité, pays, retrait en main propre), paramètres (légal, TVA,
 Stripe, sécurité du compte et double authentification, sauvegardes, exports, journal).
 
@@ -63,7 +63,7 @@ vrai navigateur (voir § 7).
 | « Épuisé » | Pas un statut enregistré : c'est un produit publié dont le stock est à 0 | Une seule source de vérité : pas d'incohérence possible entre statut et stock. |
 | Commandes | Copie figée de ce qui a été acheté (nom, prix, photo) ; numéros lisibles non séquentiels (`BP-7K3F9Q`) ; lien de suivi par jeton de 256 bits | L'historique reste juste même si le produit change ; impossible de deviner la commande d'une autre. |
 | Webhooks | Signature vérifiée, chaque événement traité une seule fois, e-mails envoyés via une boîte d'envoi (un seul e-mail par commande et par type, nouvel essai automatique) | Double webhook, rafraîchissement, double clic : jamais de doublon. |
-| Thèmes | 7 thèmes définis dans le code (`src/lib/themes.ts`), contrastes vérifiés par les tests ; couleurs métier (épuisé, erreur…) fixes | Une palette illisible ne peut pas être livrée ; pas de nuancier compliqué. |
+| Thèmes | 12 thèmes + « Créer ma palette » (3 couleurs). Toutes les nuances (survol, fonds pâles, bordures, textes) sont calculées par `buildTokens` (`src/lib/themes.ts`) avec contrastes garantis ; testé sur les 12 thèmes et 300+ palettes aléatoires. Couleurs métier (épuisé, erreur…) fixes | Une palette illisible ne peut pas être livrée ; la créatrice ne règle jamais 20 variables. |
 | Codes promo | Créés dans Stripe (option à activer dans Paramètres) | Zéro complexité ajoutée ; le montant réellement payé est enregistré. |
 | Compte cliente | Non (commande invitée) | Inutile au lancement ; l'architecture permet de l'ajouter. |
 | Suivi d'audience | Aucun (ni Google Analytics, ni Meta Pixel) → **aucune bannière cookies nécessaire** | Seuls un cookie technique d'administration et le panier (dans le navigateur) existent. |

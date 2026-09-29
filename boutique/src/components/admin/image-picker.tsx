@@ -14,7 +14,7 @@ export function ImagePicker({ label, hint, value, onChange, round = false }: { l
     <div>
       <p className="field-label">{label}</p>
       <div className="flex items-center gap-4">
-        <div className={`flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden bg-secondary ${round ? "rounded-full" : "rounded-2xl"}`}>
+        <div className={`flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden bg-surface-2 ${round ? "rounded-full" : "rounded-2xl"}`}>
           {busy ? (
             <Loader2 className="animate-spin text-primary" aria-label="Envoi en cours" />
           ) : value ? (

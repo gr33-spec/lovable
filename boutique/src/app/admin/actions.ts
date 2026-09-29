@@ -25,7 +25,7 @@ import { paymentConfig, siteUrl } from "@/lib/server/env";
 import { audit, errorMessage } from "@/lib/server/monitoring";
 import { payments } from "@/lib/server/payments";
 import { ORDER_STATUSES, type OrderStatus } from "@/lib/order-status";
-import { THEMES } from "@/lib/themes";
+import { CUSTOM_THEME_ID, THEMES } from "@/lib/themes";
 import { cleanText, emailSchema, passwordSchema, socialLinkSchema, whatsappUrl } from "@/lib/validation";
 
 // Toutes les actions de l'administration. Chacune revérifie la session côté
@@ -178,11 +178,23 @@ export async function retryEmailsAction(orderId: string) {
 
 // ───────────── Apparence et marque ─────────────
 
-export async function saveThemeAction(themeId: string) {
+const hexColor = z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Couleur invalide");
+const paletteSchema = z.object({ primary: hexColor, secondary: hexColor, accent: hexColor }).strict();
+
+/** Thème prédéfini, ou palette personnalisée (3 couleurs, le reste est calculé). */
+export async function saveThemeAction(themeId: string, palette?: unknown) {
   return guarded(async (admin) => {
-    if (!THEMES.some((t) => t.id === themeId)) return { ok: false as const, error: "Thème inconnu." };
-    await query("UPDATE shop_settings SET theme = $1, version = version + 1 WHERE id = 1", [themeId]);
-    await audit(admin.id, "theme_changed", "settings", "theme", { theme: themeId });
+    if (themeId === CUSTOM_THEME_ID) {
+      const parsed = paletteSchema.safeParse(palette);
+      if (!parsed.success) return { ok: false as const, error: "Palette invalide." };
+      const p = { primary: parsed.data.primary.toUpperCase(), secondary: parsed.data.secondary.toUpperCase(), accent: parsed.data.accent.toUpperCase() };
+      await query("UPDATE shop_settings SET theme = $1, theme_custom = $2, version = version + 1 WHERE id = 1", [CUSTOM_THEME_ID, JSON.stringify(p)]);
+      await audit(admin.id, "theme_changed", "settings", "theme", { theme: CUSTOM_THEME_ID, palette: p });
+    } else {
+      if (!THEMES.some((t) => t.id === themeId)) return { ok: false as const, error: "Thème inconnu." };
+      await query("UPDATE shop_settings SET theme = $1, version = version + 1 WHERE id = 1", [themeId]);
+      await audit(admin.id, "theme_changed", "settings", "theme", { theme: themeId });
+    }
     invalidateSettings();
     return { ok: true as const };
   });

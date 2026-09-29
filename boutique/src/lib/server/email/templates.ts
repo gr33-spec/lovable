@@ -1,6 +1,6 @@
 import "server-only";
 import { countryName, formatDate, formatMoney } from "../../format";
-import { getTheme } from "../../themes";
+import { getTheme, type CustomPalette } from "../../themes";
 import type { EmailMessage } from "./provider";
 
 // Modèles d'e-mails. Toute donnée variable est échappée (un nom de produit ou
@@ -40,24 +40,25 @@ export interface EmailOrder {
 export interface EmailBrand {
   shopName: string;
   themeId: string;
+  themeCustom?: CustomPalette | null;
   siteUrl: string;
   contactEmail: string;
   logoUrl: string | null;
 }
 
 function layout(brand: EmailBrand, preheader: string, body: string): string {
-  const t = getTheme(brand.themeId).tokens;
+  const t = getTheme(brand.themeId, brand.themeCustom).tokens;
   const header = brand.logoUrl?.startsWith("https://")
     ? `<img src="${esc(brand.logoUrl)}" alt="${esc(brand.shopName)}" width="96" style="display:block;margin:0 auto;border-radius:50%;max-width:96px">`
-    : `<div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;color:${t.textPrimary};text-align:center">${esc(brand.shopName)}</div>`;
+    : `<div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;color:${t.text};text-align:center">${esc(brand.shopName)}</div>`;
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${esc(brand.shopName)}</title></head>
-<body style="margin:0;padding:0;background:${t.background};color:${t.textPrimary};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif">
+<body style="margin:0;padding:0;background:${t.background};color:${t.text};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif">
 <span style="display:none;max-height:0;overflow:hidden">${esc(preheader)}</span>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${t.background}"><tr><td align="center" style="padding:32px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
 <tr><td style="padding:0 0 24px">${header}</td></tr>
 <tr><td style="background:${t.surface};border:1px solid ${t.border};border-radius:16px;padding:32px 28px;font-size:15px;line-height:1.6">${body}</td></tr>
-<tr><td style="padding:24px 8px;text-align:center;font-size:12px;color:${t.textSecondary};line-height:1.6">
+<tr><td style="padding:24px 8px;text-align:center;font-size:12px;color:${t.textMuted};line-height:1.6">
 ${esc(brand.shopName)} — bijoux faits main<br>
 ${brand.contactEmail ? `Une question ? Répondez simplement à cet e-mail ou écrivez à <a href="mailto:${esc(brand.contactEmail)}" style="color:${t.primary}">${esc(brand.contactEmail)}</a><br>` : ""}
 <a href="${esc(brand.siteUrl)}" style="color:${t.primary}">${esc(brand.siteUrl.replace(/^https?:\/\//, ""))}</a>
@@ -65,27 +66,27 @@ ${brand.contactEmail ? `Une question ? Répondez simplement à cet e-mail ou éc
 }
 
 function button(brand: EmailBrand, href: string, label: string): string {
-  const t = getTheme(brand.themeId).tokens;
+  const t = getTheme(brand.themeId, brand.themeCustom).tokens;
   return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0"><tr><td style="background:${t.primary};border-radius:999px">
 <a href="${esc(href)}" style="display:inline-block;padding:13px 26px;color:${t.onPrimary};text-decoration:none;font-weight:600">${esc(label)}</a></td></tr></table>`;
 }
 
 function summary(brand: EmailBrand, o: EmailOrder): string {
-  const t = getTheme(brand.themeId).tokens;
+  const t = getTheme(brand.themeId, brand.themeCustom).tokens;
   const rows = o.items
     .map(
-      (i) => `<tr><td style="padding:8px 0;border-bottom:1px solid ${t.border}">${esc(i.name)}${i.quantity > 1 ? ` <span style="color:${t.textSecondary}">× ${i.quantity}</span>` : ""}</td>
+      (i) => `<tr><td style="padding:8px 0;border-bottom:1px solid ${t.border}">${esc(i.name)}${i.quantity > 1 ? ` <span style="color:${t.textMuted}">× ${i.quantity}</span>` : ""}</td>
 <td style="padding:8px 0;border-bottom:1px solid ${t.border};text-align:right;white-space:nowrap">${esc(formatMoney(i.lineTotalCents))}</td></tr>`,
     )
     .join("");
   const line = (label: string, value: string, strong = false) =>
-    `<tr><td style="padding:4px 0;${strong ? "font-weight:700;font-size:16px" : `color:${t.textSecondary}`}">${esc(label)}</td><td style="padding:4px 0;text-align:right;${strong ? "font-weight:700;font-size:16px" : ""}">${esc(value)}</td></tr>`;
+    `<tr><td style="padding:4px 0;${strong ? "font-weight:700;font-size:16px" : `color:${t.textMuted}`}">${esc(label)}</td><td style="padding:4px 0;text-align:right;${strong ? "font-weight:700;font-size:16px" : ""}">${esc(value)}</td></tr>`;
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;font-size:14px">${rows}
 ${line("Sous-total", formatMoney(o.subtotalCents))}
 ${line(`Livraison (${o.shippingMethodName})`, o.shippingCents ? formatMoney(o.shippingCents) : "Offerte")}
 ${o.discountCents ? line("Réduction", `− ${formatMoney(o.discountCents)}`) : ""}
 ${line("Total payé", formatMoney(o.totalCents), true)}
-</table>${o.vatMention ? `<p style="margin:0;font-size:12px;color:${t.textSecondary}">${esc(o.vatMention)}</p>` : ""}`;
+</table>${o.vatMention ? `<p style="margin:0;font-size:12px;color:${t.textMuted}">${esc(o.vatMention)}</p>` : ""}`;
 }
 
 function addressBlock(o: EmailOrder): string {

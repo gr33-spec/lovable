@@ -1,7 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import type { ImageRef } from "../image-ref";
-import { getTheme } from "../themes";
+import { CUSTOM_THEME_ID, getTheme, isHexColor, type CustomPalette } from "../themes";
 import { socialLinkSchema, type SocialNetwork } from "../validation";
 import { query, queryOne, type Queryable } from "./db";
 import { toImageRef, type ImageRow } from "./images";
@@ -27,6 +27,7 @@ export interface ShopSettings {
   aboutImageId: string | null;
   socials: { network: SocialNetwork; url: string }[];
   themeId: string;
+  themeCustom: CustomPalette | null;
   lowStockThreshold: number;
   ordersOpen: boolean;
   closedMessage: string;
@@ -79,7 +80,8 @@ export async function loadSettings(client?: Queryable): Promise<ShopSettings> {
     heroImageId: (row.hero_image_id as string) ?? null,
     aboutImageId: (row.about_image_id as string) ?? null,
     socials,
-    themeId: getTheme(row.theme as string).id,
+    themeId: row.theme === CUSTOM_THEME_ID && parsePalette(row.theme_custom) ? CUSTOM_THEME_ID : getTheme(row.theme as string).id,
+    themeCustom: parsePalette(row.theme_custom),
     lowStockThreshold: row.low_stock_threshold as number,
     ordersOpen: row.orders_open as boolean,
     closedMessage: row.closed_message as string,
@@ -123,4 +125,11 @@ export function vatMention(s: Pick<ShopSettings, "vatRegime">): string | null {
   if (s.vatRegime === "franchise") return "TVA non applicable, art. 293 B du CGI";
   if (s.vatRegime === "assujetti") return "Prix TTC";
   return null;
+}
+
+function parsePalette(value: unknown): CustomPalette | null {
+  if (!value || typeof value !== "object") return null;
+  const v = value as Record<string, unknown>;
+  const ok = (c: unknown): c is string => typeof c === "string" && isHexColor(c);
+  return ok(v.primary) && ok(v.secondary) && ok(v.accent) ? { primary: v.primary, secondary: v.secondary, accent: v.accent } : null;
 }

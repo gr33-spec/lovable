@@ -24,9 +24,9 @@ function Brand({ name, logo }: { name: string; logo: ImageRef | null }) {
           <img src={imageSrc(logo, 640)} alt={name} height={44} className="h-9 w-auto max-w-[200px] object-contain sm:h-11 sm:max-w-[260px]" />
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={imageSrc(logo, 320)} alt="" width={48} height={48} className="h-10 w-10 shrink-0 rounded-full object-cover shadow-soft ring-1 ring-border sm:h-12 sm:w-12" />
+          <img src={imageSrc(logo, 320)} alt="" width={48} height={48} className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-border sm:h-11 sm:w-11" />
         ))}
-      {!wide && <span className="truncate font-serif text-[1.2rem] leading-none font-semibold tracking-tight min-[400px]:text-[1.35rem] sm:text-2xl">{name}</span>}
+      {!wide && <span className="truncate font-serif text-[1.1rem] leading-none font-medium tracking-[-0.01em] min-[400px]:text-[1.3rem] sm:text-[1.6rem]">{name}</span>}
     </Link>
   );
 }
@@ -82,22 +82,22 @@ export function Header({ shopName, logo, categories }: { shopName: string; logo:
       <a href="#contenu" className="sr-only z-50 rounded-full bg-primary px-4 py-2 text-on-primary focus:not-sr-only focus:fixed focus:top-2 focus:left-2">
         Aller au contenu
       </a>
-      <header className="sticky top-0 z-30 border-b border-border/60 bg-bg/85 backdrop-blur-xl supports-[backdrop-filter]:bg-bg/70">
+      <header className="sticky top-0 z-30 border-b border-border/70 bg-surface/90 backdrop-blur-xl supports-[backdrop-filter]:bg-surface/75">
         <div className="container-page flex h-[var(--header-h)] items-center gap-2">
           <button type="button" className={`btn btn-ghost btn-icon -ml-2 ${many ? "" : "lg:hidden"}`} aria-label="Ouvrir le menu" onClick={() => menuRef.current?.showModal()}>
-            <Menu size={22} />
+            <Menu size={22} strokeWidth={1.6} />
           </button>
           <div className="min-w-0 flex-1 lg:flex-none">
             <Brand name={shopName} logo={logo} />
           </div>
           <nav aria-label="Navigation principale" className="mx-auto hidden lg:block">
-            <ul className="flex items-center gap-1">
+            <ul className="flex items-center gap-2">
               {topLinks.map((l) => (
                 <li key={l.href}>
                   <Link
                     href={l.href}
                     aria-current={isActive(l.href) ? "page" : undefined}
-                    className="rounded-full px-3.5 py-2 text-[15px] font-medium whitespace-nowrap no-underline transition-colors hover:bg-secondary aria-[current=page]:text-primary"
+                    className="relative px-3 py-2 text-[14px] font-medium tracking-[0.02em] whitespace-nowrap no-underline transition-colors duration-300 after:absolute after:inset-x-3 after:bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-accent after:transition-transform after:duration-300 hover:text-primary hover:after:scale-x-100 aria-[current=page]:text-primary aria-[current=page]:after:scale-x-100"
                   >
                     {l.label}
                   </Link>
@@ -107,12 +107,12 @@ export function Header({ shopName, logo, categories }: { shopName: string; logo:
           </nav>
           <div className="flex items-center">
             <button type="button" className="btn btn-ghost btn-icon" aria-label="Rechercher" onClick={() => searchRef.current?.showModal()}>
-              <Search size={21} />
+              <Search size={20} strokeWidth={1.6} />
             </button>
             <Link href="/panier" className="btn btn-ghost btn-icon relative -mr-2" aria-label={count ? `Panier, ${count} article${count > 1 ? "s" : ""}` : "Panier"}>
-              <ShoppingBag size={22} className={bump ? "animate-[rise_0.4s_ease]" : ""} />
+              <ShoppingBag size={21} strokeWidth={1.6} className={bump ? "animate-[rise_0.4s_ease]" : ""} />
               {count > 0 && (
-                <span className="absolute top-1 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-bold text-on-primary">
+                <span className="absolute top-1 right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-on-primary ring-2 ring-surface">
                   {count}
                 </span>
               )}
@@ -125,7 +125,7 @@ export function Header({ shopName, logo, categories }: { shopName: string; logo:
       <dialog
         ref={menuRef}
         aria-label="Menu"
-        className="m-0 h-dvh max-h-none w-[min(86vw,360px)] max-w-none bg-surface p-0 text-text shadow-lift backdrop:bg-black/40 open:animate-[rise_0.25s_ease]"
+        className="m-0 h-dvh max-h-none w-[min(86vw,360px)] max-w-none bg-surface p-0 text-text shadow-lift open:animate-[rise_0.25s_ease]"
         onClick={(e) => e.target === menuRef.current && menuRef.current?.close()}
       >
         <div className="flex h-full flex-col">
@@ -139,7 +139,7 @@ export function Header({ shopName, logo, categories }: { shopName: string; logo:
             <ul>
               {[{ href: "/", label: "Accueil" }, ...links, { href: "/contact", label: "Contact" }].map((l) => (
                 <li key={l.href}>
-                  <Link href={l.href} className="flex min-h-[52px] items-center rounded-xl px-4 font-serif text-[1.35rem] no-underline hover:bg-secondary">
+                  <Link href={l.href} className="flex min-h-[54px] items-center rounded-xl px-4 font-serif text-[1.45rem] no-underline transition-colors hover:bg-surface-2 hover:text-primary">
                     {l.label}
                   </Link>
                 </li>

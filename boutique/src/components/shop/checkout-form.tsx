@@ -370,7 +370,7 @@ export function CheckoutForm({ methods, vatMention, ordersOpen, closedMessage }:
                 )}
                 {rows.map(({ line, product }) => (
                   <li key={product!.id} className="flex items-center gap-3">
-                    <div className="relative h-16 w-14 shrink-0 overflow-hidden rounded-lg bg-secondary">
+                    <div className="relative h-16 w-14 shrink-0 overflow-hidden rounded-lg bg-surface-2">
                       <Img image={product!.image} alt="" sizes="64px" className="h-full w-full" />
                     </div>
                     <p className="min-w-0 flex-1 text-sm">

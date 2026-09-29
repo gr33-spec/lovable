@@ -4,7 +4,7 @@ import { after, before, describe, test } from "node:test";
 import sharp from "sharp";
 import { closePool, makeProduct, resetDatabase, sql, stockOf } from "./helpers";
 
-import { THEMES, STATUS_COLORS, contrastRatio, themeContrastChecks } from "../src/lib/themes";
+import { THEMES, STATUS_COLORS, colorDistance, contrastRatio, customTheme, getTheme, luminance, themeContrastChecks } from "../src/lib/themes";
 import { computeTotals, includedVat } from "../src/lib/pricing";
 import { emailSchema, parseEuros, whatsappUrl, addressErrors } from "../src/lib/validation";
 import { slugify, formatPrice } from "../src/lib/format";
@@ -35,9 +35,36 @@ describe("thèmes et accessibilité", () => {
       for (const theme of THEMES) assert.ok(contrastRatio(c.fg, theme.tokens.surface) >= 4.5, `${name} sur ${theme.name}`);
     }
   });
-  test("entre 5 et 8 thèmes, identifiants uniques", () => {
-    assert.ok(THEMES.length >= 5 && THEMES.length <= 8);
+  test("10 à 12 thèmes, identifiants uniques, fonds blancs ou presque", () => {
+    assert.ok(THEMES.length >= 10 && THEMES.length <= 12);
     assert.equal(new Set(THEMES.map((t) => t.id)).size, THEMES.length);
+    for (const t of THEMES) assert.ok(luminance(t.tokens.background) >= 0.93, `fond de ${t.name} trop coloré`);
+  });
+  test("thèmes réellement différents : aucune couleur principale trop proche d'une autre", () => {
+    for (const a of THEMES) {
+      for (const b of THEMES) {
+        if (a !== b) assert.ok(colorDistance(a.tokens.primary, b.tokens.primary) >= 40, `${a.name} et ${b.name} trop proches`);
+      }
+    }
+  });
+  test("palette personnalisée : n'importe quelles couleurs donnent un site lisible", () => {
+    // Couleurs extrêmes (blanc, jaune fluo, pastel, noir…) puis 300 palettes au hasard.
+    const extremes = ["#FFFFFF", "#000000", "#FFFF00", "#FFD6E0", "#7FFFD4", "#00FF00", "#808080", "#0000FF"];
+    const palettes = extremes.flatMap((p) => extremes.map((s) => ({ primary: p, secondary: s, accent: extremes[(extremes.indexOf(p) + 3) % extremes.length] })));
+    let seed = 42;
+    const rnd = () => `#${Array.from({ length: 3 }, () => ((seed = (seed * 1103515245 + 12345) % 2 ** 31) % 256).toString(16).padStart(2, "0")).join("")}`;
+    for (let i = 0; i < 300; i++) palettes.push({ primary: rnd(), secondary: rnd(), accent: rnd() });
+    for (const p of palettes) {
+      const t = customTheme(p);
+      for (const check of themeContrastChecks(t)) assert.ok(check.ratio >= check.min, `${JSON.stringify(p)} — ${check.label} : ${check.ratio.toFixed(2)}`);
+      assert.ok(luminance(t.tokens.background) >= 0.93, `${JSON.stringify(p)} — fond trop sombre`);
+      assert.ok(luminance(t.tokens.secondary) >= 0.72, `${JSON.stringify(p)} — aplat trop sombre`);
+    }
+  });
+  test("thème inconnu ou palette absente : thème par défaut", () => {
+    assert.equal(getTheme("inconnu").id, THEMES[0].id);
+    assert.equal(getTheme("personnalise", null).id, THEMES[0].id);
+    assert.equal(getTheme("personnalise", { primary: "#123456", secondary: "#EEEEEE", accent: "#C9A86A" }).name, "Ma palette");
   });
 });
 

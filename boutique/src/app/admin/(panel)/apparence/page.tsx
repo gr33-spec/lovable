@@ -9,7 +9,16 @@ export default async function AppearancePage() {
   const s = await loadSettings();
   return (
     <>
-      <PageTitle title="Apparence" subtitle="Logo, textes, réseaux sociaux et couleurs du site. Chaque changement s'applique partout, immédiatement." />
+      <PageTitle title="Apparence" subtitle="Couleurs, logo, textes et réseaux sociaux. Chaque changement s'applique partout, immédiatement." />
+      <nav aria-label="Sections de la page" className="-mt-2 mb-8 flex flex-wrap gap-2">
+        <a href="#couleurs" className="chip">
+          Couleurs du site
+        </a>
+        <a href="#identite" className="chip">
+          Logo et identité
+        </a>
+      </nav>
+      <ThemePicker current={s.themeId} custom={s.themeCustom} />
       <BrandEditor
         initial={{
           shopName: s.shopName,
@@ -24,7 +33,6 @@ export default async function AppearancePage() {
           socials: s.socials,
         }}
       />
-      <ThemePicker current={s.themeId} />
       {/* Espace pour la barre d'enregistrement fixe. */}
       <div className="h-28" aria-hidden="true" />
     </>

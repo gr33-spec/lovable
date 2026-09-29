@@ -24,7 +24,7 @@ function Editor({ table, row, onDone }: { table: "category" | "collection"; row?
   const toast = useToast();
   return (
     <form
-      className="space-y-3 rounded-2xl bg-secondary/60 p-4"
+      className="space-y-3 rounded-2xl bg-surface-2/60 p-4"
       onSubmit={(e) => {
         e.preventDefault();
         start(async () => {

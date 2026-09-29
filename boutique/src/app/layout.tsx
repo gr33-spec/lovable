@@ -9,7 +9,7 @@ import "./globals.css";
 
 // Polices auto-hébergées au moment de la construction : aucune requête vers
 // Google depuis le navigateur des clientes (confidentialité, rapidité).
-const display = Cormorant_Garamond({ subsets: ["latin"], weight: ["500", "600"], variable: "--font-display", display: "swap" });
+const display = Cormorant_Garamond({ subsets: ["latin"], weight: ["500", "600"], style: ["normal", "italic"], variable: "--font-display", display: "swap" });
 const body = DM_Sans({ subsets: ["latin"], variable: "--font-body", display: "swap" });
 
 async function safeSettings() {
@@ -43,13 +43,13 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#FBF8F2",
+  themeColor: "#FFFFFF",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   await connection();
   const s = await safeSettings();
-  const theme = getTheme(s?.themeId);
+  const theme = getTheme(s?.themeId, s?.themeCustom);
   return (
     <html lang="fr" className={`${display.variable} ${body.variable}`}>
       <head>

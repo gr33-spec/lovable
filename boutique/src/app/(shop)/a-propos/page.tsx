@@ -15,7 +15,7 @@ export default async function AboutPage() {
   return (
     <div className="container-page py-10 sm:py-16">
       <div className="grid items-start gap-10 md:grid-cols-[1fr_1.1fr] md:gap-16">
-        <div className="aspect-[4/5] overflow-hidden rounded-[28px] bg-secondary shadow-soft md:sticky md:top-24">
+        <div className="aspect-[4/5] overflow-hidden rounded-[28px] bg-surface-2 shadow-soft md:sticky md:top-24">
           <Img image={s.aboutImage ?? s.logo} alt={s.aboutImage?.alt || s.shopName} sizes="(min-width: 768px) 45vw, 100vw" priority fit={s.aboutImage ? "cover" : "contain"} className="h-full w-full" />
         </div>
         <div>

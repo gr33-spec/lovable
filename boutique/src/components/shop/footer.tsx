@@ -29,10 +29,10 @@ export function SocialLinks({ socials, className = "" }: { socials: ShopSettings
 
 export function Footer({ settings, categories }: { settings: ShopSettings; categories: { slug: string; name: string }[] }) {
   const year = new Date().getFullYear();
-  const link = "text-on-primary/80 no-underline transition hover:text-on-primary hover:underline";
+  const link = "text-text-2 no-underline transition-colors duration-300 hover:text-primary";
   return (
-    <footer className="relative mt-20 overflow-hidden bg-primary text-on-primary">
-      <div className="glitter-dust pointer-events-none absolute inset-0 opacity-40" aria-hidden="true" />
+    <footer className="relative mt-24 overflow-hidden border-t border-border bg-surface-2 text-text">
+      <div className="hairline absolute inset-x-0 top-0" aria-hidden="true" />
       <div className="container-page relative grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div className="sm:col-span-2 lg:col-span-1">
           <div className="flex items-center gap-3">
@@ -41,16 +41,16 @@ export function Footer({ settings, categories }: { settings: ShopSettings; categ
               <img
                 src={imageSrc(settings.logo, 320)}
                 alt=""
-                className={settings.logo.w / settings.logo.h >= 1.6 ? "h-12 w-auto max-w-[220px] rounded-lg bg-surface/95 object-contain p-1.5" : "h-14 w-14 rounded-full object-cover ring-2 ring-on-primary/30"}
+                className={settings.logo.w / settings.logo.h >= 1.6 ? "h-12 w-auto max-w-[220px] object-contain" : "h-14 w-14 rounded-full object-cover ring-1 ring-border"}
               />
             )}
-            <p className="font-serif text-3xl leading-tight">{settings.shopName}</p>
+            <p className="font-serif text-[1.9rem] leading-tight">{settings.shopName}</p>
           </div>
-          {settings.tagline && <p className="mt-3 max-w-xs text-sm text-on-primary/80">{plainText(settings.tagline)}</p>}
+          {settings.tagline && <p className="mt-3 max-w-xs text-sm text-text-2">{plainText(settings.tagline)}</p>}
           <SocialLinks socials={settings.socials} className="mt-6" />
         </div>
         <nav aria-label="Boutique">
-          <p className="mb-3 text-xs font-semibold tracking-[0.16em] uppercase opacity-70">Boutique</p>
+          <p className="mb-4 text-[11px] font-semibold tracking-[0.2em] text-accent-text uppercase">Boutique</p>
           <ul className="space-y-2 text-[15px]">
             <li>
               <Link href="/boutique" className={link}>
@@ -72,7 +72,7 @@ export function Footer({ settings, categories }: { settings: ShopSettings; categ
           </ul>
         </nav>
         <nav aria-label="Informations">
-          <p className="mb-3 text-xs font-semibold tracking-[0.16em] uppercase opacity-70">Informations</p>
+          <p className="mb-4 text-[11px] font-semibold tracking-[0.2em] text-accent-text uppercase">Informations</p>
           <ul className="space-y-2 text-[15px]">
             <li>
               <Link href="/a-propos" className={link}>
@@ -92,7 +92,7 @@ export function Footer({ settings, categories }: { settings: ShopSettings; categ
           </ul>
         </nav>
         <nav aria-label="Mentions">
-          <p className="mb-3 text-xs font-semibold tracking-[0.16em] uppercase opacity-70">Légal</p>
+          <p className="mb-4 text-[11px] font-semibold tracking-[0.2em] text-accent-text uppercase">Légal</p>
           <ul className="space-y-2 text-[15px]">
             <li>
               <Link href="/cgv" className={link}>
@@ -112,14 +112,14 @@ export function Footer({ settings, categories }: { settings: ShopSettings; categ
           </ul>
         </nav>
       </div>
-      <div className="relative border-t border-on-primary/15">
-        <div className="container-page flex flex-col gap-1 py-5 text-xs text-on-primary/75 sm:flex-row sm:justify-between">
+      <div className="relative border-t border-border">
+        <div className="container-page flex flex-col gap-1 py-5 text-xs text-text-2 sm:flex-row sm:justify-between">
           <p>
             © {year} {settings.shopName} — bijoux faits main
           </p>
           <p>
             Paiement sécurisé par Stripe · Aucun cookie publicitaire ·{" "}
-            <Link href="/admin/connexion" rel="nofollow" prefetch={false} className="text-on-primary/50 no-underline hover:text-on-primary hover:underline">
+            <Link href="/admin/connexion" rel="nofollow" prefetch={false} className="text-text-2 no-underline hover:text-primary hover:underline">
               Espace créatrice
             </Link>
           </p>
