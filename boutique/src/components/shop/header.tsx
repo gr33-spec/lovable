@@ -13,20 +13,23 @@ interface NavCategory {
   name: string;
 }
 
-function Brand({ name, logo }: { name: string; logo: ImageRef | null }) {
-  // Logo horizontal (nom dessiné) : affiché seul, en grand. Logo rond ou carré : à côté du nom.
+function Brand({ name, logo, center = false }: { name: string; logo: ImageRef | null; center?: boolean }) {
+  // Logo horizontal (nom dessiné) : affiché seul. Logo rond : sur téléphone, le
+  // logo seul (le nom y est écrit) ; sur ordinateur, le logo et le nom.
   const wide = logo ? logo.w / logo.h >= 1.6 : false;
   return (
-    <Link href="/" className="flex min-w-0 items-center gap-2.5 no-underline" aria-label={`${name} — accueil`}>
+    <Link href="/" className="flex min-w-0 items-center gap-3 no-underline" aria-label={`${name} — accueil`}>
       {logo &&
         (wide ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={imageSrc(logo, 640)} alt={name} height={44} className="h-9 w-auto max-w-[200px] object-contain sm:h-11 sm:max-w-[260px]" />
+          <img src={imageSrc(logo, 640)} alt={name} height={44} className="h-10 w-auto max-w-[190px] object-contain sm:h-11 sm:max-w-[260px]" />
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={imageSrc(logo, 320)} alt="" width={48} height={48} className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-border sm:h-11 sm:w-11" />
+          <img src={imageSrc(logo, 320)} alt="" width={52} height={52} className="h-12 w-12 shrink-0 rounded-full object-cover shadow-soft ring-1 ring-border lg:h-11 lg:w-11" />
         ))}
-      {!wide && <span className="truncate font-serif text-[1.1rem] leading-none font-medium tracking-[-0.01em] min-[400px]:text-[1.3rem] sm:text-[1.6rem]">{name}</span>}
+      {!wide && (
+        <span className={`truncate font-serif leading-none tracking-[-0.01em] ${logo && center ? "hidden lg:inline lg:text-[1.6rem]" : "text-[1.25rem] min-[400px]:text-[1.4rem] sm:text-[1.6rem]"}`}>{name}</span>
+      )}
     </Link>
   );
 }
@@ -57,6 +60,16 @@ export function Header({ shopName, logo, categories }: { shopName: string; logo:
     searchRef.current?.close();
   }, [pathname]);
 
+  // Accueil sur téléphone : le logo de l'en-tête reste discret tant que le grand logo est visible.
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 160);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  const hideBrand = pathname === "/" && Boolean(logo) && !scrolled;
+
   const links = [
     { href: "/boutique", label: "Toutes les créations" },
     ...categories.map((c) => ({ href: `/boutique/${c.slug}`, label: c.name })),
@@ -83,12 +96,16 @@ export function Header({ shopName, logo, categories }: { shopName: string; logo:
         Aller au contenu
       </a>
       <header className="sticky top-0 z-30 border-b border-border/70 bg-surface/90 backdrop-blur-xl supports-[backdrop-filter]:bg-surface/75">
-        <div className="container-page flex h-[var(--header-h)] items-center gap-2">
+        <div className="container-page relative flex h-[var(--header-h)] items-center gap-2">
           <button type="button" className={`btn btn-ghost btn-icon -ml-2 ${many ? "" : "lg:hidden"}`} aria-label="Ouvrir le menu" onClick={() => menuRef.current?.showModal()}>
             <Menu size={22} strokeWidth={1.6} />
           </button>
-          <div className="min-w-0 flex-1 lg:flex-none">
-            <Brand name={shopName} logo={logo} />
+          {/* Logo : centré sur téléphone. Sur l'accueil, il apparaît quand le grand logo du haut a défilé. */}
+          <div
+            className={`absolute left-1/2 min-w-0 -translate-x-1/2 transition-all duration-500 lg:static lg:flex-none lg:translate-x-0 lg:opacity-100 ${hideBrand ? "pointer-events-none -translate-y-1 opacity-0 lg:pointer-events-auto lg:translate-y-0" : "opacity-100"}`}
+            aria-hidden={hideBrand || undefined}
+          >
+            <Brand name={shopName} logo={logo} center />
           </div>
           <nav aria-label="Navigation principale" className="mx-auto hidden lg:block">
             <ul className="flex items-center gap-2">
@@ -105,7 +122,7 @@ export function Header({ shopName, logo, categories }: { shopName: string; logo:
               ))}
             </ul>
           </nav>
-          <div className="flex items-center">
+          <div className="ml-auto flex items-center lg:ml-0">
             <button type="button" className="btn btn-ghost btn-icon" aria-label="Rechercher" onClick={() => searchRef.current?.showModal()}>
               <Search size={20} strokeWidth={1.6} />
             </button>
