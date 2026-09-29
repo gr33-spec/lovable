@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import { Ellipsis, RotateCcw, Trash2 } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { expandRemoval, removalBackup } from "@/lib/removal";
 import type { Collection } from "@/lib/types";
 import { cx } from "./ui";
 import { currentToast, dismissToast, subscribeToast, toast } from "@/lib/toast";
@@ -194,10 +195,11 @@ export function useUndoableRemove() {
   const { data, removeMany, upsertMany } = useStore();
   return useCallback(
     (items: { coll: Collection; id: string }[], message = "Supprimé") => {
-      const saved = items
-        .map((i) => ({ coll: i.coll, item: (data[i.coll] as unknown as { id: string }[]).find((x) => x.id === i.id) }))
-        .filter((s): s is { coll: Collection; item: { id: string } } => !!s.item);
-      removeMany(items);
+      // Règle unique (lib/removal) : dépendances supprimées, documents conservés et remontés.
+      const plan = expandRemoval(data, items);
+      const saved = removalBackup(data, { ...plan, counts: {}, keptDocuments: 0 });
+      removeMany(plan.removes);
+      if (plan.updates.length) upsertMany(plan.updates);
       toast(message, () => upsertMany(saved));
     },
     [data, removeMany, upsertMany],
@@ -228,8 +230,6 @@ export function useDismiss() {
     [data.settings.dismissedReminders, setSettings],
   );
 }
-
-export const TrashIcon = <Trash2 size={18} />;
 
 /** Ligne supprimable par balayage (annulable), avec éventuellement d'autres actions avant. */
 export function SwipeDelete({

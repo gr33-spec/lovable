@@ -4,13 +4,13 @@ import { sortedUnits } from "@/lib/lots";
 import { useState } from "react";
 import { Check, CircleCheck, Trash2 } from "lucide-react";
 import { useStore } from "@/lib/store";
-import type { AppData, SaleAction } from "@/lib/types";
+import type { AppData, Collection, SaleAction } from "@/lib/types";
 import { eur, eurCompact } from "@/lib/format";
 import { project } from "@/lib/engine/projection";
 import { monthLabel } from "@/lib/engine/dates";
 import { addMonthsIso, todayIso } from "@/lib/engine/leases";
 import { saleLabel, salePrice, saleShares } from "@/lib/engine/sale";
-import { unitRemovals } from "@/lib/tenancy";
+import { expandRemoval, removalBackup } from "@/lib/removal";
 import { toast } from "@/components/swipe";
 import { Button, DateField, NumberField, Segmented, SelectField, Sheet, cx } from "@/components/ui";
 
@@ -72,20 +72,13 @@ function SaleForm({ initial, onClose, chooseBuilding }: { initial: SaleAction; o
   const realize = () => {
     if (!building) return;
     const whole = !shares || shares.whole;
-    const items = whole
-      ? [
-          ...units.flatMap((u) => unitRemovals(data, u.id)),
-          ...data.loans.filter((l) => l.buildingId === building.id).map((l) => ({ coll: "loans" as const, id: l.id })),
-          ...data.works.filter((w) => w.buildingId === building.id).map((w) => ({ coll: "works" as const, id: w.id })),
-          { coll: "buildings" as const, id: building.id },
-        ]
-      : (shares?.units ?? []).flatMap((u) => unitRemovals(data, u.id));
-    const all = [...items, { coll: "plans" as const, id: a.id }];
-    const backup = all
-      .map((i) => ({ coll: i.coll, item: (data[i.coll] as unknown as { id: string }[]).find((x) => x.id === i.id) }))
-      .filter((x): x is { coll: (typeof all)[number]["coll"]; item: { id: string } } => !!x.item);
+    // Règle commune (lib/removal) : logements, baux, crédits et travaux vendus sortent ; documents conservés.
+    const items: { coll: Collection; id: string }[] = whole ? [{ coll: "buildings", id: building.id }] : (shares?.units ?? []).map((u) => ({ coll: "units" as const, id: u.id }));
+    const plan = expandRemoval(data, [...items, { coll: "plans", id: a.id }]);
+    const backup = removalBackup(data, { ...plan, counts: {}, keptDocuments: 0 });
     const event = { id: uid(), label: `Vente — ${saleLabel(data, a)}`, year: Number(todayIso().slice(0, 4)), amount: price, companyId: building.companyId ?? undefined };
-    removeMany(all);
+    removeMany(plan.removes);
+    if (plan.updates.length) upsertMany(plan.updates);
     upsert("events", event);
     toast(whole ? "Immeuble vendu : retiré du patrimoine" : "Lots vendus : pensez à mettre à jour le capital restant dû du crédit", () => {
       upsertMany(backup);

@@ -5,6 +5,8 @@ import { BOTH, currentSession, guardApi } from "@/lib/server/guard";
 import { sanitizeGestionOps } from "@/lib/scope";
 import { COLLECTIONS } from "@/lib/types";
 import type { Op } from "@/lib/ops";
+import { referencedFileIds } from "@/lib/tenancy-files";
+import { restoreFiles } from "@/lib/server/files";
 
 const collection = z.enum(COLLECTIONS as [string, ...string[]]);
 const opSchema = z.union([
@@ -28,5 +30,7 @@ export async function POST(request: Request) {
   if (!parsed.success) return NextResponse.json({ error: "Modification invalide" }, { status: 400 });
   const session = await currentSession();
   const { version } = await applyDocumentOps(parsed.data.ops as Op[], session?.role === "gestion" ? sanitizeGestionOps : undefined);
+  // Une pièce de nouveau citée (annulation d'une suppression…) quitte la corbeille.
+  await restoreFiles([...referencedFileIds(parsed.data.ops)]).catch(() => undefined);
   return NextResponse.json({ ok: true, version });
 }

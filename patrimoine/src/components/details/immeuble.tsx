@@ -1,5 +1,6 @@
 "use client";
 
+import { removalPlan, removalSummary } from "@/lib/removal";
 import { DocumentsCard } from "@/components/documents/library";
 import { AnalysisEntry } from "@/components/analysis/entry";
 import { companyCrumbs } from "@/lib/crumbs";
@@ -8,9 +9,8 @@ import { Suspense, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRightLeft, BadgeEuro, DoorOpen, Hammer, Landmark, Pencil } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { unitRemovals } from "@/lib/tenancy";
 import { newId } from "@/lib/ops";
-import type { Collection, Unit } from "@/lib/types";
+import type { Unit } from "@/lib/types";
 import { cashflowMonthly, ltv, netWorth } from "@/lib/engine/snapshot";
 import { monthLabel } from "@/lib/engine/dates";
 import { dateFr, eur, eurCompact, eurSigned, num, pct } from "@/lib/format";
@@ -20,7 +20,7 @@ import { QuickLoan, QuickWork } from "../quick-add";
 import { Button, Card, ConfirmDelete, Divided, Empty, Kpi, MissingData, Page, PageHeader, Pill, Row, SectionTitle, Sheet } from "../ui";
 import { AddLink } from "./societe";
 import { BuildingValueHistory } from "../value-history";
-import { SwipeDelete } from "@/components/swipe";
+import { SwipeDelete, useUndoableRemove } from "@/components/swipe";
 import { SaleSheet, newSale } from "@/components/sale/sheet";
 import { SalesList } from "@/components/sale/list";
 import { DragGhost, LotHandle, SwapNumbersSheet, dropTarget, useSwapNumbers, useTenantDnd } from "./lot-number";
@@ -36,7 +36,8 @@ export function BuildingDetail({ id, edit, saleId }: { id: string; edit?: boolea
 }
 
 function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean; saleId?: string }) {
-  const { data, projection, removeMany, upsert, remove } = useStore();
+  const { data, projection, upsert, remove } = useStore();
+  const removeUndoable = useUndoableRemove();
   const router = useRouter();
   const [sheet, setSheet] = useState<null | "edit" | "loan" | "work">(edit ? "edit" : null);
   const [selling, setSelling] = useState<SaleAction | null>(null);
@@ -77,12 +78,9 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
     setUnitId(u.id);
   };
 
+  // Règle commune (lib/removal) : logements, baux, crédits, travaux supprimés ; documents conservés.
   const removeBuilding = () => {
-    const items: { coll: Collection; id: string }[] = [{ coll: "buildings", id }];
-    units.forEach((u) => items.push(...unitRemovals(data, u.id)));
-    loans.forEach((l) => items.push({ coll: "loans", id: l.id }));
-    works.forEach((w) => items.push({ coll: "works", id: w.id }));
-    removeMany(items);
+    removeUndoable([{ coll: "buildings", id }], `${building.name} supprimé`);
     goBack(router, company ? `/patrimoine/societe/${company.id}` : "/patrimoine");
   };
 
@@ -144,7 +142,7 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
                 return (
                 // Glisser le numéro d'un lot sur un autre échange leurs numéros (liste triée).
                 <div key={u.id} {...dropTarget(dnd, u.id, id)}>
-                  <SwipeDelete items={unitRemovals(data, u.id)} message={`${u.name} supprimé`}>
+                  <SwipeDelete items={[{ coll: "units", id: u.id }]} message={`${u.name} supprimé`}>
                     <Row
                       href={`/patrimoine/lot/${u.id}`}
                       icon={<DoorOpen size={18} />}
@@ -266,7 +264,7 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
         <div className="mt-8">
           <ConfirmDelete
             label="Supprimer l'immeuble"
-            message={`Supprimer ${building.name} avec ses logements, crédits et travaux ? Une sauvegarde automatique permet de revenir en arrière.`}
+            message={`Supprimer ${building.name} ? ${removalSummary(removalPlan(data, "buildings", building.id))}`}
             onConfirm={removeBuilding}
           />
         </div>
@@ -288,7 +286,7 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
         footer={
           <div className="space-y-2">
             <Button full onClick={() => setUnitId(null)}>Terminé</Button>
-            {unit && <ConfirmDelete label="Supprimer le logement" message="Supprimer ce logement ?" onConfirm={() => { removeMany(unitRemovals(data, unit.id)); setUnitId(null); }} />}
+            {unit && <ConfirmDelete label="Supprimer le logement" message="Supprimer ce logement ?" onConfirm={() => { removeUndoable([{ coll: "units", id: unit.id }], `${unit.name} supprimé`); setUnitId(null); }} />}
           </div>
         }
       >

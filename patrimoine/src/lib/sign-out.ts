@@ -7,6 +7,7 @@ export async function signOut(): Promise<void> {
   await fetch("/api/logout", { method: "POST" }).catch(() => undefined);
   try {
     sessionStorage.clear();
+    localStorage.removeItem("patrimoine-en-attente");
   } catch {
     /* stockage indisponible */
   }

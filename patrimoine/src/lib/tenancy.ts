@@ -1,4 +1,4 @@
-import type { AppData, Building, Collection, Company, Inspection, Tenancy, Unit } from "./types";
+import type { AppData, Building, Company, Inspection, Tenancy, Unit } from "./types";
 import { addMonthsIso, isValidIso, monthKey, outstanding, todayIso } from "./engine/leases";
 import { depositDeadline, leaseYears } from "./legal/rules";
 import { compareInspections } from "./legal/inspection";
@@ -177,15 +177,6 @@ export function missingLandlordInfo(c: Company | undefined): (keyof Company)[] {
 export function tenantsName(t: Tenancy | undefined): string {
   if (!t) return "";
   return t.tenants.map((p) => [p.firstName, p.lastName].filter(Boolean).join(" ")).filter(Boolean).join(" et ");
-}
-
-/** Éléments à supprimer avec un logement : ses baux et ses états des lieux. */
-export function unitRemovals(data: AppData, unitId: string): { coll: Collection; id: string }[] {
-  return [
-    { coll: "units", id: unitId },
-    ...data.tenancies.filter((t) => t.unitId === unitId).map((t) => ({ coll: "tenancies" as const, id: t.id })),
-    ...data.inspections.filter((i) => i.unitId === unitId).map((i) => ({ coll: "inspections" as const, id: i.id })),
-  ];
 }
 
 /**

@@ -36,6 +36,7 @@ async function ready(): Promise<void> {
          );
          ALTER TABLE app_file ADD COLUMN IF NOT EXISTS sha256 text;
          ALTER TABLE app_file ADD COLUMN IF NOT EXISTS sha_verified boolean NOT NULL DEFAULT false;
+         ALTER TABLE app_file ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
          CREATE INDEX IF NOT EXISTS app_file_sha256 ON app_file (sha256);`,
       )
       .then(() => undefined)
@@ -138,7 +139,24 @@ export async function fileCreatedAt(id: string): Promise<Date | undefined> {
   return res.rowCount ? new Date(res.rows[0].created_at) : undefined;
 }
 
+/** Délai de corbeille : une sauvegarde restaurée dans ce délai retrouve ses pièces. */
+export const FILE_RETENTION_DAYS = 90;
+
+/**
+ * Suppression douce : le fichier part à la corbeille et n'est effacé
+ * définitivement qu'après le délai de rétention (les corbeilles expirées
+ * sont vidées à cette occasion). Réutilisé entre-temps (même contenu
+ * redéposé, sauvegarde restaurée), il revient simplement en service.
+ */
 export async function deleteFile(id: string): Promise<void> {
   await ready();
-  await pool().query("DELETE FROM app_file WHERE id = $1", [id]);
+  await pool().query("UPDATE app_file SET deleted_at = now() WHERE id = $1 AND deleted_at IS NULL", [id]);
+  await pool().query(`DELETE FROM app_file WHERE deleted_at < now() - interval '${FILE_RETENTION_DAYS} days'`);
+}
+
+/** Fichier de nouveau cité par les données : il quitte la corbeille. */
+export async function restoreFiles(ids: string[]): Promise<void> {
+  if (!ids.length) return;
+  await ready();
+  await pool().query("UPDATE app_file SET deleted_at = NULL WHERE deleted_at IS NOT NULL AND id = ANY($1)", [ids]);
 }

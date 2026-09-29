@@ -606,7 +606,6 @@ export interface PrepaymentAction {
 }
 
 export type Action = SaleAction | PurchaseAction | RefinanceAction | WorksAction | PrepaymentAction;
-export type ActionType = Action["type"];
 
 export interface Scenario {
   id: Id;

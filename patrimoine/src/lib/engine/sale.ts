@@ -51,8 +51,3 @@ export function saleLabel(data: AppData, a: SaleAction): string {
   const names = a.lots!.map((l) => units.find((u) => u.id === l.unitId)?.name).filter(Boolean);
   return `${name} — ${lots <= 2 ? names.join(", ") : `${lots} lots`}`;
 }
-
-/** Mois de la vente : date prévue si connue, sinon janvier de l'année. */
-export function saleDate(a: SaleAction): string {
-  return a.date ?? `${a.year}-01-01`;
-}
