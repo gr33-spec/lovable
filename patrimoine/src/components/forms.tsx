@@ -125,8 +125,8 @@ export function BuildingForm({ building }: { building: Building }) {
       <Details title="Adresse et acquisition">
         <TextField label="Adresse" value={building.address} onChange={(v) => set({ address: v })} />
         <TextField label="Commune" value={building.city} onChange={(v) => set({ city: v })} />
-        <DateField label="Date d'acquisition" value={building.acquisitionDate} onChange={(v) => set({ acquisitionDate: v })} />
-        <NumberField label="Prix d'acquisition" value={building.acquisitionPrice} onChange={(v) => set({ acquisitionPrice: v })} />
+        <DateField label="Date d'achat (signature de l'acte)" value={building.acquisitionDate} onChange={(v) => set({ acquisitionDate: v })} />
+        <NumberField label="Prix d'achat" value={building.acquisitionPrice} onChange={(v) => set({ acquisitionPrice: v })} hint="Hors frais de notaire." />
         {mode === "manual" && (
           <Grid2>
             <NumberField label="Surface totale" suffix="m²" value={building.surface} onChange={(v) => set({ surface: v })} />
@@ -206,6 +206,20 @@ export function LoanForm({ loan }: { loan: Loan }) {
         <TextField label="Nom" value={loan.name} placeholder="Ex. Prêt Paimpol" onChange={(v) => set({ name: v })} />
         <TextField label="Banque" value={loan.bank} onChange={(v) => set({ bank: v })} />
       </Grid2>
+      <Grid2>
+        <TextField label="N° de prêt (banque)" value={loan.reference} placeholder="Sur l'offre ou le tableau" onChange={(v) => set({ reference: v })} />
+        <div>
+          <div className="mb-1 px-1 text-[13px] font-medium text-ink-2">Taux</div>
+          <Segmented
+            value={loan.rateType ?? "fixe"}
+            onChange={(v) => set({ rateType: v })}
+            options={[
+              { value: "fixe", label: "Fixe" },
+              { value: "variable", label: "Variable" },
+            ]}
+          />
+        </div>
+      </Grid2>
       <SelectField label="Immeuble financé" value={loan.buildingId ?? undefined} options={buildings} onChange={(v) => set({ buildingId: v ?? null })} emptyLabel="Aucun en particulier" />
       {!loan.buildingId && (
         <SelectField label="Société emprunteuse" value={loan.companyId ?? undefined} options={companies} onChange={(v) => set({ companyId: v ?? null })} />
@@ -238,7 +252,7 @@ export function LoanForm({ loan }: { loan: Loan }) {
           <NumberField label="Taux" suffix="%" value={loan.ratePct} onChange={(v) => set({ ratePct: v })} />
           <NumberField label="Assurance / mois" value={loan.insuranceMonthly} onChange={(v) => set({ insuranceMonthly: v })} />
         </Grid2>
-        <DateField label="Date de début" value={loan.startDate} onChange={(v) => set({ startDate: v })} />
+        <DateField label="Date de déblocage des fonds" value={loan.startDate} onChange={(v) => set({ startDate: v })} hint="La première échéance tombe en général le mois suivant." />
         <NumberField label="Durée" suffix="mois" integer value={loan.durationMonths} onChange={(v) => set({ durationMonths: v })} />
       </Details>
       <TextField label="Notes" value={loan.notes} multiline onChange={(v) => set({ notes: v })} />

@@ -7,12 +7,14 @@ import type { PdfCover, PdfPrefs, PdfSection } from "../types";
 // choix ne modifient jamais les chiffres, seulement la présentation.
 
 export const PDF_SECTIONS: { id: PdfSection; label: string; hint: string }[] = [
-  { id: "patrimoine", label: "État du patrimoine", hint: "Immeubles, valeurs, loyers, dette" },
+  { id: "structure", label: "Structure", hint: "Sociétés, détention, dette portée par chacune" },
+  { id: "patrimoine", label: "État du patrimoine", hint: "Biens, valeurs, loyers, dette" },
   { id: "credits", label: "Crédits en cours", hint: "Détail par société" },
   { id: "capacite", label: "Capacité de remboursement", hint: "DSCR, taux d'effort, par société" },
   { id: "trajectoire", label: "Trajectoire", hint: "Graphiques, ventes, fins de crédit" },
   { id: "remuneration", label: "Rémunération des dirigeants", hint: "Si des rémunérations sont saisies" },
   { id: "comptes", label: "Comptes annuels", hint: "Si des bilans sont saisis" },
+  { id: "pieces", label: "Pièces justificatives", hint: "Tableaux, offres, actes, baux disponibles" },
 ];
 
 export const PDF_COVERS: { id: PdfCover; label: string; hint: string }[] = [
@@ -41,8 +43,8 @@ const schema = z.object({
   recipient: text(120).catch(undefined),
   message: text(700).catch(undefined),
   hide: z
-    .array(z.enum(["patrimoine", "credits", "capacite", "trajectoire", "remuneration", "comptes"]))
-    .max(6)
+    .array(z.enum(["structure", "patrimoine", "credits", "capacite", "trajectoire", "remuneration", "comptes", "pieces"]))
+    .max(8)
     .optional()
     .catch(undefined),
 });

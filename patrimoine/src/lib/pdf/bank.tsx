@@ -4,7 +4,7 @@ import type { MonthIndex } from "../engine/dates";
 import { yearOf } from "../engine/dates";
 import { remunerationYear } from "../fiscal/remuneration";
 import { BAREME_YEAR } from "../fiscal/bareme";
-import { cashflowMonthly } from "../engine/snapshot";
+import { cashflowMonthly, rentalPayments } from "../engine/snapshot";
 import type { Projection } from "../engine/projection";
 import { groupModel, type GroupModel } from "./model";
 import { projectCompanyName, projectFigures } from "../engine/projects";
@@ -552,9 +552,9 @@ function SynthesisPage({ m, h, now, message, author, trajectory }: { m: GroupMod
   const paymentsSub = paymentsApprox ? ["par mois", m.estimatedLoans ? `${m.estimatedLoans} estimée(s)` : "", m.missingPaymentLoans ? `${m.missingPaymentLoans} non communiquée(s), exclue(s)` : ""].filter(Boolean).join(" · ") : "par mois, assurance comprise";
   const kpis: Kpi[] = [
     { label: "Loyers annuels", value: K(f.rentMonthly * 12), sub: `${E(Math.round(f.rentMonthly))} par mois` },
-    { label: "Capital restant dû", value: approx(K(f.debt), f.unknownDebt > 0 ? "≥" : undefined), sub: f.unknownDebt > 0 ? `${f.loans} crédit(s), dont ${f.unknownDebt} non communiqué(s)` : `${f.loans} crédit(s) en cours` },
-    { label: "Mensualités", value: approx(E(Math.round(f.paymentsMonthly)), paymentsApprox ? "≈" : undefined), sub: paymentsSub },
-    { label: "Cash-flow", value: approx(S(Math.round(cf)), cfMark), sub: m.missingCharges > 0 ? `par mois, surestimé : charges de ${m.missingCharges} bien(s) non renseignées` : "par mois, après charges et crédits", tone: cf >= 0 ? "pos" : "neg" },
+    { label: "Capital restant dû", value: approx(K(f.debt), f.unknownDebt > 0 ? "≥" : undefined), sub: [f.unknownDebt > 0 ? `${f.loans} crédit(s), dont ${f.unknownDebt} non communiqué(s)` : `${f.loans} crédit(s) en cours`, f.personalDebt > 0 ? `dont ${K(f.personalDebt)} résidence principale` : ""].filter(Boolean).join(" · ") },
+    { label: f.personalPaymentsMonthly > 0 ? "Mensualités locatives" : "Mensualités", value: approx(E(Math.round(rentalPayments(f))), paymentsApprox ? "≈" : undefined), sub: [paymentsSub, f.personalPaymentsMonthly > 0 ? `+ ${E(Math.round(f.personalPaymentsMonthly))} crédit personnel` : ""].filter(Boolean).join(" · ") },
+    { label: "Cash-flow locatif", value: approx(S(Math.round(cf)), cfMark), sub: m.missingCharges > 0 ? `par mois, surestimé : charges de ${m.missingCharges} bien(s) non renseignées` : "par mois, après charges et crédits locatifs", tone: cf >= 0 ? "pos" : "neg" },
   ];
   const occ = m.indicators.get("occupancy");
   if (occ !== undefined) kpis.push({ label: "Taux d'occupation", value: P(occ), sub: `${f.units - f.vacantUnits} lots loués sur ${f.units}` });
@@ -623,7 +623,7 @@ function LoansPage({ m, h }: { m: GroupModel; h: Head }) {
     { label: "Montant initial", w: 12, right: true, get: (r) => K(r.initial) },
     { label: "Restant dû", w: 12, right: true, get: (r) => K(r.balance) },
     { label: "Mensualité", w: 11, right: true, get: (r) => approx(E(r.monthly !== undefined ? Math.round(r.monthly) : undefined), r.monthlyEstimated ? "≈" : undefined) },
-    { label: "Taux", w: 8, right: true, get: (r) => approx(r.rate !== undefined ? P(r.rate, 2) : "—", r.rateEstimated ? "≈" : undefined) },
+    { label: "Taux", w: 8, right: true, get: (r) => `${approx(r.rate !== undefined ? P(r.rate, 2) : "—", r.rateEstimated ? "≈" : undefined)}${r.rateType ? " var." : ""}` },
     { label: "Fin", w: 13, right: true, get: (r) => approx(r.end ?? "—", r.endEstimated ? "≈" : undefined) },
   ];
   return (
@@ -634,7 +634,7 @@ function LoansPage({ m, h }: { m: GroupModel; h: Head }) {
             <Text style={{ ...(k.id === "signature" ? W700 : k.display), fontSize: 9.5, color: k.heading }}>{T(g.company)}</Text>
             <Text style={{ fontSize: 8, color: k.ink2 }}>{T(`${K(g.balance)} restant dû · ${approx(E(Math.round(g.monthly)), g.approx ? "≈" : undefined)} / mois`)}</Text>
           </View>
-          <Table cols={cols} rows={g.loans} sub={(r) => r.note} subTone={(r) => (r.incoherent ? "neg" : undefined)} />
+          <Table cols={cols} rows={g.loans} sub={(r) => [r.reference ? `Prêt n° ${r.reference}` : "", r.source === "Tableau de la banque" ? "chiffres du tableau de la banque" : "", r.note].filter(Boolean).join(" · ") || undefined} subTone={(r) => (r.incoherent ? "neg" : undefined)} />
         </View>
       ))}
       <View style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 7, paddingHorizontal: 9, ...tot.box }} wrap={false}>
@@ -728,6 +728,48 @@ function Trajectory({ m }: { m: GroupModel }) {
         </View>
       )}
     </View>
+  );
+}
+
+function StructurePage({ m, h }: { m: GroupModel; h: Head }) {
+  const tot = { name: "Total", form: "", owner: "", assets: m.structure.reduce((a, r) => a + r.assets, 0), value: m.structure.every((r) => r.value !== undefined || r.assets === 0) ? m.structure.reduce((a, r) => a + (r.value ?? 0), 0) : undefined, debt: m.structure.reduce((a, r) => a + r.debt, 0), rentAnnual: m.structure.reduce((a, r) => a + r.rentAnnual, 0), payments: m.structure.reduce((a, r) => a + r.payments, 0) };
+  return (
+    <Sheet {...h} title="Sociétés et détention">
+      <Para>Chaque société avec les biens qu&apos;elle détient en propre et la dette qu&apos;elle porte (hors filiales, pour éviter les doubles comptes).</Para>
+      <View style={{ height: 8 }} />
+      <Table
+        cols={[
+          { label: "Société", w: 25, get: (r) => r.name, bold: true },
+          { label: "Forme", w: 12, get: (r) => r.form },
+          { label: "Biens", w: 8, right: true, get: (r) => (r.assets ? String(r.assets) : "—") },
+          { label: "Valeur", w: 13, right: true, get: (r) => (r.assets ? K(r.value) : "—") },
+          { label: "Loyers / an", w: 13, right: true, get: (r) => (r.rentAnnual ? K(r.rentAnnual) : "—") },
+          { label: "Dette", w: 13, right: true, get: (r) => (r.debt ? K(r.debt) : "—") },
+          { label: "Mensualités", w: 16, right: true, get: (r) => (r.payments ? E(Math.round(r.payments)) : "—") },
+        ]}
+        rows={m.structure}
+        sub={(r) => (r.owner ? `Détenue par ${r.owner}` : undefined)}
+        total={tot}
+      />
+      <Note>Mensualités de tous les crédits de la société, assurance comprise (y compris un éventuel crédit personnel pour la ligne « En direct »).</Note>
+    </Sheet>
+  );
+}
+
+function EvidencePage({ m, h }: { m: GroupModel; h: Head }) {
+  return (
+    <Sheet {...h} title="Pièces justificatives">
+      <Para>Pièces classées dans le dossier numérique du groupe et disponibles sur demande. Elles ne sont pas recopiées ici.</Para>
+      <View style={{ height: 8 }} />
+      <Table
+        cols={[
+          { label: "Pièce", w: 34, get: (r) => r.label, bold: true },
+          { label: "Disponibles", w: 14, get: (r) => `${r.have} / ${r.total}` },
+          { label: "À fournir", w: 52, get: (r) => (r.missing.length ? `${r.missing.slice(0, 3).join(", ")}${r.missing.length > 3 ? ` et ${r.missing.length - 3} autre(s)` : ""}` : "Complet") },
+        ]}
+        rows={m.evidence}
+      />
+    </Sheet>
   );
 }
 
@@ -917,7 +959,7 @@ function CoverFoot({ toc, lines, date, dark, inset = 0 }: { toc: Section[]; line
           )}
         </View>
       </View>
-      <Text style={{ fontSize: 7, color: faint, marginTop: 12 }}>{T(`Document établi le ${date} · confidentiel`)}</Text>
+      <Text style={{ fontSize: 7, color: faint, marginTop: 12 }}>{T(`Situation patrimoniale au ${date} · document confidentiel`)}</Text>
     </View>
   );
 }
@@ -1064,7 +1106,7 @@ function FootColumns({ toc, lines, date, text, soft, accent, font }: { toc: Sect
           ))}
         </View>
       </View>
-      <Text style={{ fontSize: 7, color: soft, marginTop: 12 }}>{T(`Document établi le ${date} · confidentiel`)}</Text>
+      <Text style={{ fontSize: 7, color: soft, marginTop: 12 }}>{T(`Situation patrimoniale au ${date} · document confidentiel`)}</Text>
     </View>
   );
 }
@@ -1173,7 +1215,7 @@ function BentoCover({ kicker, title, subtitle, recipient, brand, lines, date, kp
           ))}
         </View>
       </View>
-      <Text style={{ position: "absolute", bottom: 16, left: m, fontSize: 7, color: k.muted }}>{T(`Document établi le ${date} · confidentiel`)}</Text>
+      <Text style={{ position: "absolute", bottom: 16, left: m, fontSize: 7, color: k.muted }}>{T(`Situation patrimoniale au ${date} · document confidentiel`)}</Text>
     </Page>
   );
 }
@@ -1274,21 +1316,25 @@ export function GroupDossier({ data, projection, nowMonth, scopeName, generatedA
   const label = `${title} · présentation patrimoniale`;
   const { toc, add } = numbering();
   const synth = add("Synthèse");
+  const structure = shows(prefs, "structure") && m.structure.length > 1 ? add("Structure") : undefined;
   const assets = shows(prefs, "patrimoine") && (m.buildings.length > 0 || m.companyLevelDebt > 1) ? add("Patrimoine") : undefined;
   const loans = shows(prefs, "credits") && m.loansByCompany.length > 0 ? add("Crédits") : undefined;
   const capacity = shows(prefs, "capacite") ? add("Capacité") : undefined;
   const remuneration = shows(prefs, "remuneration") && data.withdrawals.some((w) => w.annualAmount) ? add("Rémunération") : undefined;
   const accounts = shows(prefs, "comptes") && m.statements.length > 0 ? add("Comptes annuels") : undefined;
+  const pieces = shows(prefs, "pieces") && m.evidence.length > 0 ? add("Pièces justificatives") : undefined;
   const h = (section?: Section): Head => ({ label, running: title, section });
   return (
       <Document title={`Présentation patrimoniale - ${title}`} author={data.settings.ownerName ?? scopeName}>
         <Cover style={prefs.cover ?? DEFAULT_COVER} kicker="Présentation patrimoniale" title={title} subtitle={prefs.subtitle ?? data.settings.ownerName} recipient={prefs.recipient} brand={scopeTitle(data)} lines={contactLines(data)} date={date} kpis={groupKpis(m)} toc={toc} />
         <SynthesisPage m={m} h={h(synth)} now={date} message={prefs.message} author={data.settings.ownerName} trajectory={shows(prefs, "trajectoire")} />
+        {structure && <StructurePage m={m} h={h(structure)} />}
         {assets && <AssetsPage m={m} h={h(assets)} />}
         {loans && <LoansPage m={m} h={h(loans)} />}
         {capacity && <CapacityPage m={m} h={h(capacity)} />}
         {remuneration && <RemunerationPage data={data} projection={projection} nowMonth={nowMonth} h={h(remuneration)} />}
         {accounts && <AccountsPage m={m} h={h(accounts)} />}
+        {pieces && <EvidencePage m={m} h={h(pieces)} />}
       </Document>
   );
 }
@@ -1336,6 +1382,7 @@ export function ProjectDossier({ data, projection, nowMonth, scopeName, generate
   const sAssets = shows(prefs, "patrimoine") && (m.buildings.length > 0 || m.companyLevelDebt > 1) ? add("Patrimoine") : undefined;
   const sLoans = shows(prefs, "credits") && m.loansByCompany.length > 0 ? add("Crédits") : undefined;
   const sRem = shows(prefs, "remuneration") && data.withdrawals.some((w) => w.annualAmount) ? add("Rémunération") : undefined;
+  const sPieces = shows(prefs, "pieces") && m.evidence.length > 0 ? add("Pièces justificatives") : undefined;
   const h = (section?: Section): Head => ({ label, running: p.name, section });
 
   const exploitation = [
@@ -1479,6 +1526,7 @@ export function ProjectDossier({ data, projection, nowMonth, scopeName, generate
       {sAssets && <AssetsPage m={m} h={h(sAssets)} />}
       {sLoans && <LoansPage m={m} h={h(sLoans)} />}
       {sRem && <RemunerationPage data={data} projection={projection} nowMonth={nowMonth} h={h(sRem)} />}
+      {sPieces && <EvidencePage m={m} h={h(sPieces)} />}
     </Document>
   );
 }

@@ -1,6 +1,7 @@
 import type { AppData, Building, Company, Loan, Unit } from "../types";
 import type { MonthIndex } from "./dates";
 import { resolveLoan, type ResolvedLoan } from "./loan";
+import { paymentUncertain } from "./provenance";
 
 // Photographie « aujourd'hui » : valeurs, dettes, loyers, charges et
 // mensualités par immeuble, par société (avec consolidation des filiales)
@@ -29,6 +30,16 @@ export interface Figures {
   units: number;
   vacantUnits: number;
   loans: number;
+  /**
+   * Part « personnelle » (résidence principale ou secondaire) : comprise dans
+   * la valeur, la dette et les mensualités ci-dessus, mais exclue du cash-flow,
+   * du DSCR et des rendements, qui mesurent l'activité locative.
+   */
+  personalValue: number;
+  personalUnvalued: number;
+  personalDebt: number;
+  personalPaymentsMonthly: number;
+  personalChargesAnnual: number;
 }
 
 export function emptyFigures(): Figures {
@@ -48,6 +59,11 @@ export function emptyFigures(): Figures {
     units: 0,
     vacantUnits: 0,
     loans: 0,
+    personalValue: 0,
+    personalUnvalued: 0,
+    personalDebt: 0,
+    personalPaymentsMonthly: 0,
+    personalChargesAnnual: 0,
   };
 }
 
@@ -63,8 +79,39 @@ export function netWorth(f: Figures): number | undefined {
   return f.value - f.debt;
 }
 
+// ——— Formules métier (une seule source pour tous les écrans et le dossier) ———
+
+/** Mensualités de l'activité locative (hors crédits de la résidence principale ou secondaire). */
+export function rentalPayments(f: Figures): number {
+  return f.paymentsMonthly - f.personalPaymentsMonthly;
+}
+
+/** Charges annuelles de l'activité locative. */
+export function rentalCharges(f: Figures): number {
+  return f.chargesAnnual - f.personalChargesAnnual;
+}
+
+/** Cash-flow locatif mensuel : loyers − charges − mensualités (périmètre locatif). */
 export function cashflowMonthly(f: Figures): number {
-  return f.rentMonthly - f.chargesAnnual / 12 - f.paymentsMonthly;
+  return f.rentMonthly - rentalCharges(f) / 12 - rentalPayments(f);
+}
+
+/** Valeur des biens locatifs (undefined si l'un d'eux n'a pas de valeur). */
+export function rentalValue(f: Figures): number | undefined {
+  if (f.unvalued - f.personalUnvalued > 0) return undefined;
+  return f.value - f.personalValue;
+}
+
+/** Rendement brut locatif en % : loyers annuels ÷ valeur des biens locatifs. */
+export function grossYield(f: Figures): number | undefined {
+  const v = rentalValue(f);
+  return v && v > 0 && f.rentMonthly > 0 ? ((f.rentMonthly * 12) / v) * 100 : undefined;
+}
+
+/** DSCR : (loyers − charges) ÷ mensualités, sur le périmètre locatif. */
+export function dscr(f: Figures): number | undefined {
+  const pay = rentalPayments(f);
+  return pay > 0 && f.rentMonthly > 0 ? (f.rentMonthly - rentalCharges(f) / 12) / pay : undefined;
 }
 
 /** LTV en %, undefined si aucune valeur connue. */
@@ -171,9 +218,8 @@ export function computeSnapshot(data: AppData, nowMonth: MonthIndex): Snapshot {
     if (now.balance === undefined) f.unknownDebt = 1;
     else f.debt = now.balance;
     f.paymentsMonthly = now.paymentMonthly;
-    // Mensualité inconnue, ou seulement estimée (ni saisie, ni taux connu).
-    const exactPayment = loan.monthlyPayment !== undefined || loan.ratePct !== undefined || r.impliedRatePct !== undefined;
-    if (!r.finished && (r.payment === undefined || !exactPayment)) f.unknownPayment = 1;
+    // Mensualité inconnue, ou seulement estimée (règle unique : engine/provenance).
+    if (!r.finished && paymentUncertain(loan, r)) f.unknownPayment = 1;
     f.loans = r.finished ? 0 : 1;
     loanFigs.set(loan.id, f);
     if (loan.buildingId && byBuilding.has(loan.buildingId)) {
@@ -181,6 +227,17 @@ export function computeSnapshot(data: AppData, nowMonth: MonthIndex): Snapshot {
     } else {
       addToCompany(loanCompanyKey(loan, buildingsById), f);
     }
+  }
+
+  // Résidence principale ou secondaire : tout ce qui la concerne est marqué « personnel ».
+  for (const b of data.buildings) {
+    if (b.usage !== "residence_principale" && b.usage !== "residence_secondaire") continue;
+    const f = byBuilding.get(b.id)!;
+    f.personalValue = f.value;
+    f.personalUnvalued = f.unvalued;
+    f.personalDebt = f.debt;
+    f.personalPaymentsMonthly = f.paymentsMonthly;
+    f.personalChargesAnnual = f.chargesAnnual;
   }
 
   for (const b of data.buildings) addToCompany(b.companyId ?? NO_COMPANY, byBuilding.get(b.id)!);

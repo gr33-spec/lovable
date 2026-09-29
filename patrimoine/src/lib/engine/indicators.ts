@@ -1,6 +1,6 @@
 import type { AppData, Statement, StatementFigures } from "../types";
 import type { Projection } from "./projection";
-import { NO_COMPANY, type Figures } from "./snapshot";
+import { NO_COMPANY, rentalCharges, rentalPayments, rentalValue, type Figures } from "./snapshot";
 
 // Indicateurs financiers : calculés à partir des données de l'application
 // (temps réel) et des comptes annuels saisis ou importés. Chaque indicateur
@@ -18,14 +18,16 @@ export interface Indicator {
   level: Level;
   explain: string;
   group: "Rentabilité" | "Endettement" | "Occupation" | "Structure de la dette" | "Comptes annuels";
+  /** Valeur approchée (« env. », « max. ») : mensualités estimées ou charges manquantes. Pas de verdict dans ce cas. */
+  approx?: "env." | "max.";
 }
 
 const level = (v: number | undefined, good: (v: number) => boolean, watch: (v: number) => boolean): Level =>
   v === undefined ? "neutral" : good(v) ? "good" : watch(v) ? "watch" : "alert";
 
-/** Charges d'exploitation annuelles (hors crédits) d'un périmètre de figures. */
+/** Annuités de l'activité locative (hors crédits de la résidence principale ou secondaire). */
 function annualDebtService(f: Figures): number {
-  return f.paymentsMonthly * 12;
+  return rentalPayments(f) * 12;
 }
 
 export function portfolioIndicators(data: AppData, p: Projection): Indicator[] {
@@ -33,10 +35,13 @@ export function portfolioIndicators(data: AppData, p: Projection): Indicator[] {
   const t = snap.total;
   const rentYear = t.rentMonthly * 12;
   const potentialYear = t.potentialRentMonthly * 12;
-  const chargesYear = t.chargesAnnual;
+  const chargesYear = rentalCharges(t);
   const debtService = annualDebtService(t);
   const noi = rentYear - chargesYear; // revenu net d'exploitation (avant crédits)
   const valued = t.unvalued === 0 && t.value > 0;
+  // Rendements : loyers rapportés aux seuls biens locatifs (la résidence principale ne rapporte rien).
+  const rentalV = rentalValue(t);
+  const yieldBase = rentalV !== undefined && rentalV > 0 ? rentalV : undefined;
 
   // Structure de la dette : taux moyen pondéré et durée résiduelle pondérée.
   let rateWeight = 0;
@@ -66,7 +71,15 @@ export function portfolioIndicators(data: AppData, p: Projection): Indicator[] {
   const topShare = t.rentMonthly > 0 ? (Math.max(0, ...rents) / t.rentMonthly) * 100 : undefined;
   const occupied = t.units > 0 ? ((t.units - t.vacantUnits) / t.units) * 100 : undefined;
 
-  return [
+  // Même règle que le tableau de bord et le dossier : un ratio bâti sur des estimations est signalé, sans verdict.
+  const chargesMissing = data.buildings.some((b) => {
+    const bf = snap.byBuilding.get(b.id);
+    return !!bf && bf.rentMonthly > 0 && bf.chargesAnnual === 0;
+  });
+  const flowMark: Indicator["approx"] = t.unknownPayment > 0 ? "env." : chargesMissing ? "max." : undefined;
+  const flowIds = new Set(["dscr", "cf-margin", "net-yield"]);
+  const paymentIds = new Set(["effort", "debt-years"]);
+  const list: Indicator[] = [
     {
       id: "dscr",
       group: "Endettement",
@@ -74,7 +87,7 @@ export function portfolioIndicators(data: AppData, p: Projection): Indicator[] {
       value: debtService > 0 ? noi / debtService : undefined,
       format: "ratio",
       level: level(debtService > 0 ? noi / debtService : undefined, (v) => v >= 1.3, (v) => v >= 1.1),
-      explain: "Loyers nets de charges ÷ mensualités annuelles. Au-dessus de 1,3 : confortable pour une banque.",
+      explain: "Loyers nets de charges ÷ mensualités des crédits locatifs. Au-dessus de 1,3 : confortable pour une banque.",
     },
     {
       id: "effort",
@@ -98,28 +111,28 @@ export function portfolioIndicators(data: AppData, p: Projection): Indicator[] {
       id: "debt-years",
       group: "Endettement",
       label: "Années de loyers nets pour rembourser",
-      value: noi > 0 && debt > 0 ? debt / noi : undefined,
+      value: noi > 0 && debt - t.personalDebt > 0 ? (debt - t.personalDebt) / noi : undefined,
       format: "years",
-      level: level(noi > 0 && debt > 0 ? debt / noi : undefined, (v) => v <= 10, (v) => v <= 15),
-      explain: "Dette totale ÷ loyers nets annuels : le nombre d'années théoriques pour tout rembourser.",
+      level: level(noi > 0 && debt - t.personalDebt > 0 ? (debt - t.personalDebt) / noi : undefined, (v) => v <= 10, (v) => v <= 15),
+      explain: "Dette locative ÷ loyers nets annuels : le nombre d'années théoriques pour la rembourser.",
     },
     {
       id: "gross-yield",
       group: "Rentabilité",
       label: "Rendement brut",
-      value: valued ? (rentYear / t.value) * 100 : undefined,
+      value: yieldBase ? (rentYear / yieldBase) * 100 : undefined,
       format: "pct",
-      level: level(valued ? (rentYear / t.value) * 100 : undefined, (v) => v >= 7, (v) => v >= 5),
-      explain: "Loyers annuels ÷ valeur des biens.",
+      level: level(yieldBase ? (rentYear / yieldBase) * 100 : undefined, (v) => v >= 7, (v) => v >= 5),
+      explain: "Loyers annuels ÷ valeur des biens locatifs (hors résidence principale).",
     },
     {
       id: "net-yield",
       group: "Rentabilité",
       label: "Rendement net de charges",
-      value: valued ? (noi / t.value) * 100 : undefined,
+      value: yieldBase ? (noi / yieldBase) * 100 : undefined,
       format: "pct",
-      level: level(valued ? (noi / t.value) * 100 : undefined, (v) => v >= 5.5, (v) => v >= 4),
-      explain: "(Loyers − charges) ÷ valeur des biens.",
+      level: level(yieldBase ? (noi / yieldBase) * 100 : undefined, (v) => v >= 5.5, (v) => v >= 4),
+      explain: "(Loyers − charges) ÷ valeur des biens locatifs.",
     },
     {
       id: "cf-margin",
@@ -206,6 +219,15 @@ export function portfolioIndicators(data: AppData, p: Projection): Indicator[] {
       explain: "Part de l'encours actuel amortie dans les 10 prochaines années.",
     },
   ];
+  for (const ind of list) {
+    const mark = flowIds.has(ind.id) ? flowMark : paymentIds.has(ind.id) && t.unknownPayment > 0 ? "env." : undefined;
+    if (mark && ind.value !== undefined) {
+      ind.approx = mark;
+      ind.level = "neutral";
+      ind.explain = `${ind.explain} Valeur ${mark === "env." ? "estimée (mensualités non confirmées)" : "maximale (charges non renseignées)"}.`;
+    }
+  }
+  return list;
 }
 
 // ——— Comptes annuels ———
@@ -250,7 +272,7 @@ export function evolution(cur?: number, prev?: number): number | undefined {
 export function groupStatementIndicators(data: AppData, p: Projection): Indicator[] {
   const lasts = data.companies.map((c) => latestStatements(data, c.id).last).filter((s): s is Statement => !!s);
   // Annuités des seules sociétés dont on a les comptes (périmètre cohérent).
-  const debtService = lasts.reduce((acc, s) => acc + (p.snapshot.ownByCompany.get(s.companyId)?.paymentsMonthly ?? 0) * 12, 0);
+  const debtService = lasts.reduce((acc, s) => acc + rentalPayments(p.snapshot.ownByCompany.get(s.companyId) ?? ({ paymentsMonthly: 0, personalPaymentsMonthly: 0 } as Figures)) * 12, 0);
   if (lasts.length === 0) return [];
   const sum = (k: keyof StatementFigures) => {
     const vals = lasts.map((s) => s.figures[k]).filter((v): v is number => v !== undefined);
@@ -319,9 +341,10 @@ export const LEVEL_LABEL: Record<Level, string> = {
   neutral: "",
 };
 
-export function formatIndicator(i: Pick<Indicator, "value" | "format">): string {
+export function formatIndicator(i: Pick<Indicator, "value" | "format" | "approx">): string {
   const v = i.value;
   if (v === undefined || !Number.isFinite(v)) return "—";
+  if (i.approx) return `${i.approx} ${formatIndicator({ ...i, approx: undefined })}`;
   const nf = (d: number) => new Intl.NumberFormat("fr-FR", { maximumFractionDigits: d, minimumFractionDigits: 0 });
   switch (i.format) {
     case "pct":

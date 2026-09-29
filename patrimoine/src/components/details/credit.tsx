@@ -10,6 +10,8 @@ import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { yearlyBalances } from "@/lib/engine/loan";
 import { auditLoans } from "@/lib/engine/loan-audit";
+import { SOURCE_LABEL, balanceSource, endSource, paymentSource, rateSource } from "@/lib/engine/provenance";
+import { reliableInitial } from "@/lib/schedule";
 import { monthLabel } from "@/lib/engine/dates";
 import { eur, eurCompact, pct } from "@/lib/format";
 import { LoanForm } from "../forms";
@@ -34,6 +36,7 @@ export function LoanDetail({ id }: { id: string }) {
   }
   const now = projection.snapshot.byLoan.get(id);
   const findings = auditLoans(data, projection.snapshot).filter((f) => f.loanId === id);
+  const initial = reliableInitial(loan);
   const building = data.buildings.find((b) => b.id === loan.buildingId);
   const lastYear = schedule.findIndex((s) => s.balance < 1);
   const visible = lastYear >= 0 ? schedule.slice(0, lastYear + 2) : schedule;
@@ -52,10 +55,14 @@ export function LoanDetail({ id }: { id: string }) {
             {loan.kind === "in_fine" && <Pill>In fine</Pill>}
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Kpi label="Capital restant dû" value={now?.balance === undefined ? <span className="text-[15px] text-muted">Données insuffisantes</span> : eur(now.balance)} />
-            <Kpi label="Mensualité (avec assurance)" value={now?.paymentMonthly ? eur(now.paymentMonthly) : "—"} />
-            <Kpi label="Fin du crédit" value={r.endMonth !== undefined ? monthLabel(r.endMonth) : <span className="text-[15px] text-muted">Données insuffisantes</span>} />
-            <Kpi label="Taux" value={loan.ratePct !== undefined ? pct(loan.ratePct, 2) : r.impliedRatePct !== undefined ? `${pct(r.impliedRatePct, 2)} (déduit)` : "—"} />
+            <Kpi label="Capital restant dû" value={now?.balance === undefined ? <span className="text-[15px] text-muted">Données insuffisantes</span> : eur(now.balance)} hint={SOURCE_LABEL[balanceSource(loan, r)]} />
+            <Kpi label="Mensualité (avec assurance)" value={now?.paymentMonthly ? eur(now.paymentMonthly) : "—"} hint={SOURCE_LABEL[paymentSource(loan, r)]} />
+            <Kpi label="Fin du crédit" value={r.endMonth !== undefined ? monthLabel(r.endMonth) : <span className="text-[15px] text-muted">Données insuffisantes</span>} hint={SOURCE_LABEL[endSource(loan, r)]} />
+            <Kpi label="Taux" value={loan.ratePct !== undefined ? pct(loan.ratePct, 2) : r.impliedRatePct !== undefined ? pct(r.impliedRatePct, 2) : "—"} hint={rateSource(loan, r) === "calcul" ? "Déduit de la mensualité" : SOURCE_LABEL[rateSource(loan, r)]} />
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-4 border-t border-line pt-3">
+            <Kpi label="Montant emprunté" value={initial.value !== undefined ? eur(initial.value) : "—"} hint={initial.partialFrom ? "À saisir (offre de prêt)" : undefined} />
+            <Kpi label="N° de prêt" value={loan.reference || loan.schedule?.meta?.reference || "—"} hint={loan.bank || loan.schedule?.meta?.bank || undefined} />
           </div>
           {totalInterest > 0 && <div className="mt-3 text-xs text-muted">Intérêts restant à payer : {eur(totalInterest)}</div>}
           {!loan.schedule && r.notes.map((n) => (
