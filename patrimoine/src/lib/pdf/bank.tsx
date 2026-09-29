@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
-import { Document, Font, Line, Page, Path, Svg, Text, View } from "@react-pdf/renderer";
-import type { AppData, Company, Project } from "../types";
+import { renderToBuffer, Circle, ClipPath, Defs, G, Document, Font, Line, LinearGradient, Page, Path, RadialGradient, Rect, Stop, Svg, Text, View } from "@react-pdf/renderer";
+import type { AppData, Company, PdfPrefs, Project } from "../types";
 import type { MonthIndex } from "../engine/dates";
 import { yearOf } from "../engine/dates";
 import { remunerationYear } from "../fiscal/remuneration";
@@ -12,13 +12,16 @@ import { groupModel, type GroupModel } from "./model";
 import { projectCompanyName, projectFigures } from "../engine/projects";
 import type { ProjectImpact } from "../engine/project-impact";
 import { eur, eurCompact, pct, pdfSafe, dateFr } from "../format";
+import type { PdfCover } from "../types";
 import { CONDITIONS, UNIT_TYPES, WITHDRAWAL_KINDS, labelOf } from "../labels";
+import { DEFAULT_COVER, pdfColors, shows, type PdfColors } from "./prefs";
 
 // Dossier banque, format A4 portrait : court (6 à 8 pages), sans répétition,
 // uniquement des chiffres connus. Deux usages :
 //  - présentation du groupe (ou d'une seule société) ;
 //  - dossier de financement d'un projet, suivi du groupe en résumé.
-// Tous les chiffres viennent des moteurs de l'application.
+// Tous les chiffres viennent des moteurs de l'application. Les couleurs
+// viennent du thème (lib/theme.ts), la présentation des réglages (prefs.ts).
 
 // ——— Police ———
 const FONT_DIR = path.join(process.cwd(), "src/lib/pdf/fonts");
@@ -40,20 +43,30 @@ const W600 = HAS_INTER ? { fontFamily: "Inter", fontWeight: 600 as const } : { f
 const W700 = HAS_INTER ? { fontFamily: "Inter", fontWeight: 700 as const } : { fontFamily: "Helvetica-Bold" };
 const W800 = HAS_INTER ? { fontFamily: "Inter", fontWeight: 800 as const } : { fontFamily: "Helvetica-Bold" };
 
-// ——— Charte ———
-const NAVY = "#0b2545";
-const BLUE = "#2a5bd7";
-const SOFT = "#f1f3f8";
-const SOFT2 = "#f8f9fc";
-const GOLD = "#b08d57";
-const INK = "#0f1b2d";
-const INK2 = "#4b5567";
-const MUTED = "#8a93a3";
-const LINE = "#e3e6ef";
+// ——— Charte : neutres fixes, couleurs du thème via le contexte ———
+const INK = "#141c24";
+const INK2 = "#4d5663";
+const MUTED = "#8b929c";
+const LINE = "#e4e7ec";
 const POS = "#0f8a5f";
 const NEG = "#c73a3a";
 
+// Palette du document en cours. Les routes serveur n'ont pas accès au
+// contexte React ; l'arbre react-pdf est rendu d'un seul tenant (sans
+// attente), donc la palette posée par le document racine vaut pour tous
+// ses composants et ne peut pas se mêler à un autre rendu.
+let current: PdfColors = pdfColors(undefined, undefined);
+const cur = () => current;
+
+/** Rend un dossier aux couleurs choisies (seule entrée utilisée par les routes). */
+export function renderDossier(el: React.ReactElement<GroupDossierInput>, prefs: PdfPrefs | undefined, appTheme: string | undefined): Promise<Buffer> {
+  current = pdfColors(prefs, appTheme);
+  // Le rendu de l'arbre démarre ici même, sans attente : la palette ne peut pas changer entre-temps.
+  return renderToBuffer(el as Parameters<typeof renderToBuffer>[0]);
+}
+
 const PW = 595.28;
+const PH = 841.89;
 const MX = 44;
 const CW = PW - MX * 2;
 
@@ -62,48 +75,79 @@ const E = (n: number | undefined) => (n === undefined ? "—" : pdfSafe(eur(n)))
 const K = (n: number | undefined) => (n === undefined ? "—" : pdfSafe(eurCompact(n)));
 const P = (n: number | undefined, d = 1) => (n === undefined ? "—" : pdfSafe(pct(n, d)));
 const S = (n: number) => pdfSafe(`${n >= 0 ? "+" : "−"}${eur(Math.abs(n))}`);
+const two = (n: number) => String(n).padStart(2, "0");
 
 const base = { fontFamily: FONT, fontSize: 9, color: INK };
 
 // ——— Mise en page ———
 
+/** Numéro et nom de chaque partie, calculés une fois pour le sommaire et les pages. */
+interface Section {
+  n: number;
+  label: string;
+}
+
 function Footer({ label }: { label: string }) {
+  const c = cur();
   return (
-    <View fixed style={{ position: "absolute", bottom: 20, left: MX, right: MX, flexDirection: "row", justifyContent: "space-between", fontSize: 7, color: MUTED }}>
-      <Text>{T(label)}</Text>
-      <Text render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
+    <View fixed style={{ position: "absolute", bottom: 22, left: MX, right: MX, flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderTopWidth: 0.5, borderTopColor: LINE, paddingTop: 7 }}>
+      <Text style={{ fontSize: 7, color: MUTED }}>{T(label)}</Text>
+      <Text style={{ ...W700, fontSize: 7, color: c.brand, backgroundColor: c.soft, borderRadius: 7, paddingVertical: 2, paddingHorizontal: 7 }} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
     </View>
   );
 }
 
-function Sheet({ label, kicker, title, children }: { label: string; kicker: string; title: string; children: React.ReactNode }) {
+function Sheet({ label, running, section, title, children }: { label: string; running: string; section?: Section; title: string; children: React.ReactNode }) {
+  const c = cur();
   return (
-    <Page size="A4" style={{ ...base, paddingTop: 44, paddingBottom: 52, paddingHorizontal: MX }} wrap>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
-        <View style={{ width: 14, height: 2, backgroundColor: GOLD }} />
-        <Text style={{ ...W600, fontSize: 7.5, color: GOLD, letterSpacing: 1.4, textTransform: "uppercase" }}>{T(kicker)}</Text>
+    <Page size="A4" style={{ ...base, paddingTop: 66, paddingBottom: 60, paddingHorizontal: MX }} wrap>
+      <View fixed style={{ position: "absolute", top: 26, left: MX, right: MX, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <View style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: c.brand }} />
+          <Text style={{ ...W700, fontSize: 7, color: c.deep, letterSpacing: 1.2, textTransform: "uppercase" }}>{T(running)}</Text>
+        </View>
+        {section && <Text style={{ fontSize: 7, color: MUTED }}>{T(`${two(section.n)} · ${section.label}`)}</Text>}
       </View>
-      <Text style={{ ...W800, fontSize: 20, color: NAVY, letterSpacing: -0.3, marginBottom: 14 }}>{T(title)}</Text>
+      <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 12, marginBottom: 16, paddingBottom: 12, borderBottomWidth: 1.5, borderBottomColor: c.soft }}>
+        {section && <Text style={{ ...W800, fontSize: 34, color: c.brand, lineHeight: 1, letterSpacing: -1 }}>{two(section.n)}</Text>}
+        <View style={{ flex: 1, paddingBottom: 2 }}>
+          {section && <Text style={{ ...W700, fontSize: 7.5, color: c.brand, letterSpacing: 1.6, textTransform: "uppercase", marginBottom: 3 }}>{T(section.label)}</Text>}
+          <Text style={{ ...W800, fontSize: 19, color: c.deep, letterSpacing: -0.3, lineHeight: 1.15 }}>{T(title)}</Text>
+        </View>
+      </View>
       {children}
       <Footer label={label} />
     </Page>
   );
 }
 
-function H2({ children, top = 16 }: { children: string; top?: number }) {
+function H2({ children, top = 18 }: { children: string; top?: number }) {
+  const c = cur();
   return (
-    <Text minPresenceAhead={60} style={{ ...W700, fontSize: 11, color: NAVY, marginTop: top, marginBottom: 6 }}>
-      {T(children)}
-    </Text>
+    <View minPresenceAhead={60} style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: top, marginBottom: 7 }}>
+      <View style={{ width: 3, height: 11, borderRadius: 1.5, backgroundColor: c.brand }} />
+      <Text style={{ ...W700, fontSize: 11, color: c.deep }}>{T(children)}</Text>
+    </View>
   );
 }
 
 function Para({ children }: { children: string }) {
-  return <Text style={{ fontSize: 9, color: INK2, lineHeight: 1.5 }}>{T(children)}</Text>;
+  return <Text style={{ fontSize: 9, color: INK2, lineHeight: 1.55 }}>{T(children)}</Text>;
 }
 
 function Note({ children }: { children: string }) {
-  return <Text style={{ fontSize: 7, color: MUTED, marginTop: 6, lineHeight: 1.4 }}>{T(children)}</Text>;
+  return <Text style={{ fontSize: 7, color: MUTED, marginTop: 7, lineHeight: 1.45 }}>{T(children)}</Text>;
+}
+
+/** Mot d'introduction du dirigeant, tel qu'il l'a écrit. */
+function Message({ text, author }: { text: string; author?: string }) {
+  const c = cur();
+  return (
+    <View wrap={false} style={{ backgroundColor: c.soft, borderRadius: 8, borderLeftWidth: 3, borderLeftColor: c.brand, paddingVertical: 11, paddingHorizontal: 13, marginBottom: 14 }}>
+      <Text style={{ fontSize: 9.4, color: INK, lineHeight: 1.6 }}>{T(text)}</Text>
+      {author && <Text style={{ ...W600, fontSize: 8, color: c.brand, marginTop: 6 }}>{T(author)}</Text>}
+    </View>
+  );
 }
 
 interface Kpi {
@@ -113,16 +157,78 @@ interface Kpi {
   tone?: "pos" | "neg";
 }
 
+/** Fond dégradé du thème, comme les cartes principales de l'application. */
+function DeepBackground({ width, height, id, radius = 0, halos = true }: { width: number; height: number; id: string; radius?: number; halos?: boolean }) {
+  const c = cur();
+  return (
+    <View style={{ position: "absolute", top: 0, left: 0, width, height }}>
+    <Svg width={width} height={height}>
+      <Defs>
+        <ClipPath id={`${id}-clip`}>
+          <Rect x={0} y={0} width={width} height={height} rx={radius} ry={radius} />
+        </ClipPath>
+        <LinearGradient id={`${id}-bg`} x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor={c.deep} />
+          <Stop offset="0.55" stopColor={c.deep2} />
+          <Stop offset="1" stopColor={c.deep3} />
+        </LinearGradient>
+        <RadialGradient id={`${id}-glow`} cx="0.5" cy="0.5" r="0.5">
+          <Stop offset="0" stopColor={c.glow} stopOpacity={0.34} />
+          <Stop offset="1" stopColor={c.glow} stopOpacity={0} />
+        </RadialGradient>
+        <RadialGradient id={`${id}-brand`} cx="0.5" cy="0.5" r="0.5">
+          <Stop offset="0" stopColor={c.brand} stopOpacity={0.55} />
+          <Stop offset="1" stopColor={c.brand} stopOpacity={0} />
+        </RadialGradient>
+      </Defs>
+      <Rect x={0} y={0} width={width} height={height} rx={radius} ry={radius} fill={`url(#${id}-bg)`} />
+      {halos && (
+        <G clipPath={`url(#${id}-clip)`}>
+          <Circle cx={width - Math.min(width, height) * 0.12} cy={Math.min(width, height) * 0.05} r={Math.min(width, height) * 0.55} fill={`url(#${id}-glow)`} />
+          <Circle cx={Math.min(width, height) * 0.05} cy={height} r={Math.min(width, height) * 0.7} fill={`url(#${id}-brand)`} />
+        </G>
+      )}
+    </Svg>
+    </View>
+  );
+}
+
+/** Bandeau sombre des chiffres principaux. */
+function HeroKpis({ items }: { items: Kpi[] }) {
+  const c = cur();
+  const h = 74;
+  const w = CW / items.length;
+  return (
+    <View wrap={false} style={{ position: "relative", width: CW, height: h, borderRadius: 10, marginBottom: 10 }}>
+      <DeepBackground width={CW} height={h} id="hero" radius={10} />
+      <View style={{ flexDirection: "row", height: h, alignItems: "center" }}>
+        {items.map((k, i) => (
+          <View key={k.label} style={{ width: w, paddingHorizontal: 13, borderLeftWidth: i ? 0.6 : 0, borderLeftColor: c.deep3 }}>
+            <Text style={{ fontSize: 7, color: c.muted, textTransform: "uppercase", letterSpacing: 0.6 }}>{T(k.label)}</Text>
+            <Text style={{ ...W800, fontSize: 15.5, marginTop: 4, color: k.tone === "pos" ? "#8ee8bf" : k.tone === "neg" ? "#ffaaaa" : "#ffffff" }}>{T(k.value)}</Text>
+            {k.sub && <Text style={{ fontSize: 6.6, color: c.glow, marginTop: 3 }}>{T(k.sub)}</Text>}
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
 function KpiGrid({ items, cols = 3, dark }: { items: Kpi[]; cols?: number; dark?: boolean }) {
+  const c = cur();
+  if (dark) return <HeroKpis items={items} />;
   const gap = 8;
   const w = (CW - gap * (cols - 1)) / cols;
   return (
     <View style={{ flexDirection: "row", flexWrap: "wrap", gap }} wrap={false}>
       {items.map((k) => (
-        <View key={k.label} style={{ width: w, backgroundColor: dark ? NAVY : SOFT, borderRadius: 7, paddingVertical: 10, paddingHorizontal: 11 }}>
-          <Text style={{ fontSize: 7.5, color: dark ? "#b9c4dd" : INK2 }}>{T(k.label)}</Text>
-          <Text style={{ ...W800, fontSize: 15, marginTop: 3, color: k.tone === "pos" ? (dark ? "#7fe0b0" : POS) : k.tone === "neg" ? (dark ? "#ff9b9b" : NEG) : dark ? "#ffffff" : NAVY }}>{T(k.value)}</Text>
-          {k.sub && <Text style={{ fontSize: 7, color: dark ? "#8fa0c4" : MUTED, marginTop: 2 }}>{T(k.sub)}</Text>}
+        <View key={k.label} style={{ width: w, backgroundColor: c.stripe, borderRadius: 8, borderWidth: 0.6, borderColor: LINE, paddingVertical: 10, paddingHorizontal: 11 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+            <View style={{ width: 5, height: 5, borderRadius: 2.5, backgroundColor: k.tone === "pos" ? POS : k.tone === "neg" ? NEG : c.brand }} />
+            <Text style={{ fontSize: 7.3, color: INK2, flex: 1 }}>{T(k.label)}</Text>
+          </View>
+          <Text style={{ ...W800, fontSize: 15, marginTop: 4, color: k.tone === "pos" ? POS : k.tone === "neg" ? NEG : c.deep }}>{T(k.value)}</Text>
+          {k.sub && <Text style={{ fontSize: 6.8, color: MUTED, marginTop: 2 }}>{T(k.sub)}</Text>}
         </View>
       ))}
     </View>
@@ -138,32 +244,39 @@ interface Col<R> {
 }
 
 function Table<R>({ cols, rows, total, sub }: { cols: Col<R>[]; rows: R[]; total?: R; sub?: (r: R) => string | undefined }) {
-  return (
-    <View>
-      <View style={{ flexDirection: "row", borderBottomWidth: 1, borderBottomColor: NAVY, paddingBottom: 4, paddingHorizontal: 4 }} fixed>
-        {cols.map((c) => (
-          <Text key={c.label} style={{ ...W600, width: `${c.w}%`, fontSize: 6.8, color: INK2, textTransform: "uppercase", letterSpacing: 0.3, textAlign: c.right ? "right" : "left" }}>
-            {T(c.label)}
+  const c = cur();
+  const header = (
+    <View fixed style={{ flexDirection: "row", backgroundColor: c.soft, borderRadius: 5, paddingVertical: 5, paddingHorizontal: 5, marginBottom: 1 }}>
+      {cols.map((col) => (
+        <Text key={col.label} style={{ ...W700, width: `${col.w}%`, fontSize: 6.6, color: c.deep, textTransform: "uppercase", letterSpacing: 0.4, textAlign: col.right ? "right" : "left" }}>
+          {T(col.label)}
+        </Text>
+      ))}
+    </View>
+  );
+  const row = (r: R, i: number) => (
+    <View key={i} wrap={false} style={{ paddingVertical: 4.5, paddingHorizontal: 5, borderBottomWidth: 0.5, borderBottomColor: LINE, backgroundColor: i % 2 ? c.stripe : "#ffffff" }}>
+      <View style={{ flexDirection: "row" }}>
+        {cols.map((col) => (
+          <Text key={col.label} style={[{ width: `${col.w}%`, fontSize: 8.2, textAlign: col.right ? "right" : "left" }, col.bold ? { ...W600, color: c.deep } : {}]}>
+            {T(col.get(r))}
           </Text>
         ))}
       </View>
-      {rows.map((r, i) => (
-        <View key={i} wrap={false} style={{ paddingVertical: 4, paddingHorizontal: 4, borderBottomWidth: 0.5, borderBottomColor: LINE, backgroundColor: i % 2 ? SOFT2 : "#ffffff" }}>
-          <View style={{ flexDirection: "row" }}>
-            {cols.map((c) => (
-              <Text key={c.label} style={[{ width: `${c.w}%`, fontSize: 8.2, textAlign: c.right ? "right" : "left" }, c.bold ? W600 : {}]}>
-                {T(c.get(r))}
-              </Text>
-            ))}
-          </View>
-          {sub?.(r) && <Text style={{ fontSize: 7, color: MUTED, marginTop: 1 }}>{T(sub(r))}</Text>}
-        </View>
-      ))}
+      {sub?.(r) && <Text style={{ fontSize: 7, color: MUTED, marginTop: 1.5 }}>{T(sub(r))}</Text>}
+    </View>
+  );
+  // Un tableau court ne se coupe jamais (l'en-tête ne reste pas seul en bas
+  // de page) ; un long se poursuit page suivante, en-tête répété.
+  return (
+    <View wrap={rows.length > 12}>
+      {header}
+      {rows.map(row)}
       {total && (
-        <View wrap={false} style={{ flexDirection: "row", paddingVertical: 5, paddingHorizontal: 4, backgroundColor: NAVY, borderRadius: 4, marginTop: 3 }}>
-          {cols.map((c) => (
-            <Text key={c.label} style={{ ...W700, width: `${c.w}%`, fontSize: 8.2, color: "#ffffff", textAlign: c.right ? "right" : "left" }}>
-              {T(c.get(total))}
+        <View wrap={false} style={{ flexDirection: "row", paddingVertical: 6, paddingHorizontal: 5, backgroundColor: c.deep, borderRadius: 5, marginTop: 4 }}>
+          {cols.map((col) => (
+            <Text key={col.label} style={{ ...W700, width: `${col.w}%`, fontSize: 8.2, color: "#ffffff", textAlign: col.right ? "right" : "left" }}>
+              {T(col.get(total))}
             </Text>
           ))}
         </View>
@@ -173,11 +286,14 @@ function Table<R>({ cols, rows, total, sub }: { cols: Col<R>[]; rows: R[]; total
 }
 
 function Bullets({ items }: { items: string[] }) {
+  const c = cur();
   return (
     <View>
       {items.map((t) => (
-        <View key={t} style={{ flexDirection: "row", marginBottom: 4 }}>
-          <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: GOLD, marginTop: 4, marginRight: 7 }} />
+        <View key={t} style={{ flexDirection: "row", marginBottom: 5 }}>
+          <View style={{ width: 11, height: 11, borderRadius: 5.5, backgroundColor: c.soft, marginTop: 0.5, marginRight: 7, alignItems: "center", justifyContent: "center" }}>
+            <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: c.brand }} />
+          </View>
           <Text style={{ flex: 1, fontSize: 9, lineHeight: 1.45, color: INK }}>{T(t)}</Text>
         </View>
       ))}
@@ -194,10 +310,13 @@ function niceMax(v: number): number {
   return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * mag;
 }
 
-function Chart({ title, years, values, kind, width = CW, height = 120, color = BLUE }: { title: string; years: number[]; values: number[]; kind: "line" | "step"; width?: number; height?: number; color?: string }) {
+function Chart({ title, years, values, kind, width = CW, height = 120, color, id }: { title: string; years: number[]; values: number[]; kind: "line" | "step"; width?: number; height?: number; color?: string; id: string }) {
+  const c = cur();
+  const stroke = color ?? c.brand;
+  const sw = width - 18;
   const left = 44;
   const bottom = 14;
-  const iw = width - left - 6;
+  const iw = sw - left - 14;
   const ih = height - bottom - 6;
   const maxV = niceMax(Math.max(0, ...values));
   const minV = Math.min(0, ...values) < 0 ? -niceMax(-Math.min(0, ...values)) : 0;
@@ -209,16 +328,27 @@ function Chart({ title, years, values, kind, width = CW, height = 120, color = B
       ? values.map((v, i) => (i === 0 ? `M${x(0)},${y(v)}` : `L${x(i)},${y(values[i - 1])} L${x(i)},${y(v)}`)).join(" ")
       : values.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
   const areaD = `${d} L${x(values.length - 1)},${y(Math.max(minV, 0))} L${x(0)},${y(Math.max(minV, 0))} Z`;
+  const last = values.length - 1;
   return (
-    <View wrap={false}>
-      <Text style={{ ...W600, fontSize: 8.5, color: NAVY, marginBottom: 4 }}>{T(title)}</Text>
-      <View style={{ position: "relative", width, height }}>
-        <Svg width={width} height={height}>
+    <View wrap={false} style={{ backgroundColor: "#ffffff", borderWidth: 0.6, borderColor: LINE, borderRadius: 8, padding: 9 }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 6 }}>
+        <Text style={{ ...W700, fontSize: 8.5, color: c.deep }}>{T(title)}</Text>
+        {last >= 0 && <Text style={{ ...W600, fontSize: 7.5, color: stroke }}>{T(`${years[last]} : ${K(values[last])}`)}</Text>}
+      </View>
+      <View style={{ position: "relative", width: sw, height }}>
+        <Svg width={sw} height={height}>
+          <Defs>
+            <LinearGradient id={`${id}-area`} x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0" stopColor={stroke} stopOpacity={0.22} />
+              <Stop offset="1" stopColor={stroke} stopOpacity={0.02} />
+            </LinearGradient>
+          </Defs>
           {ticks.map((t) => (
-            <Line key={t} x1={left} x2={width - 6} y1={y(t)} y2={y(t)} stroke={t === 0 ? "#c7cde0" : "#edf0f6"} strokeWidth={0.7} />
+            <Line key={t} x1={left} x2={left + iw} y1={y(t)} y2={y(t)} stroke={t === 0 ? "#c9ced6" : "#eef0f3"} strokeWidth={0.7} />
           ))}
-          <Path d={areaD} fill={color} fillOpacity={0.08} />
-          <Path d={d} stroke={color} strokeWidth={1.6} fill="none" />
+          <Path d={areaD} fill={`url(#${id}-area)`} />
+          <Path d={d} stroke={stroke} strokeWidth={1.8} fill="none" />
+          {last >= 0 && <Circle cx={x(last)} cy={y(values[last])} r={2.6} fill="#ffffff" stroke={stroke} strokeWidth={1.4} />}
         </Svg>
         {ticks.map((t) => (
           <Text key={`l${t}`} style={{ position: "absolute", left: 0, width: left - 6, top: y(t) - 4, fontSize: 6.3, color: MUTED, textAlign: "right" }}>
@@ -248,7 +378,14 @@ function gapNote(f: Figures, missingCharges = 0): string {
   return parts.length ? ` Attention : ${parts.join(" ; ")}.` : "";
 }
 
-function SynthesisPage({ m, label, now }: { m: GroupModel; label: string; now: string }) {
+/** En-tête commun des pages : pied de page, titre courant, numéro de partie. */
+interface Head {
+  label: string;
+  running: string;
+  section?: Section;
+}
+
+function SynthesisPage({ m, h, now, message, author, trajectory }: { m: GroupModel; h: Head; now: string; message?: string; author?: string; trajectory: boolean }) {
   const f = m.f;
   const cf = cashflowMonthly(f);
   const valued = f.unvalued === 0 && f.value > 0;
@@ -263,10 +400,12 @@ function SynthesisPage({ m, label, now }: { m: GroupModel; label: string; now: s
   if (valued) kpis.push({ label: "Valeur estimée du patrimoine", value: K(f.value), sub: `Dette / valeur : ${P((f.debt / f.value) * 100)}` });
   if (f.cash > 0) kpis.push({ label: "Trésorerie des sociétés", value: K(f.cash) });
   return (
-    <Sheet label={label} kicker="Synthèse" title={`${m.name} en un coup d'œil`}>
+    <Sheet {...h} title={`${m.name} en un coup d'œil`}>
+      {message && <Message text={message} author={author} />}
       <Para>{`Situation au ${now}. Chiffres issus des baux, des tableaux d'amortissement et des données de gestion.`}</Para>
       <View style={{ height: 10 }} />
-      <KpiGrid items={kpis} />
+      <KpiGrid dark items={kpis.slice(0, 4)} />
+      {kpis.length > 4 && <KpiGrid items={kpis.slice(4)} />}
       {m.highlights.length > 0 && (
         <>
           <H2>Points forts</H2>
@@ -274,17 +413,17 @@ function SynthesisPage({ m, label, now }: { m: GroupModel; label: string; now: s
         </>
       )}
       {gapNote(m.f, m.missingCharges) && <Note>{gapNote(m.f, m.missingCharges).trim()}</Note>}
-      <Trajectory m={m} />
+      {trajectory && <Trajectory m={m} />}
     </Sheet>
   );
 }
 
-function AssetsPage({ m, label }: { m: GroupModel; label: string }) {
+function AssetsPage({ m, h }: { m: GroupModel; h: Head }) {
   const rows = [...m.buildings];
   if (m.companyLevelDebt > 1) rows.push({ name: "Crédits portés par les sociétés", place: "Emprunts non rattachés à un immeuble (apports, travaux…)", company: "—", lots: 0, acquisition: "", value: 0, rentAnnual: 0, debt: m.companyLevelDebt });
   const total = { name: "Total", place: "", company: "", lots: m.buildings.reduce((s, b) => s + b.lots, 0), acquisition: "", value: m.buildings.every((b) => b.value !== undefined) ? m.buildings.reduce((s, b) => s + (b.value ?? 0), 0) : undefined, rentAnnual: m.buildings.reduce((s, b) => s + b.rentAnnual, 0), debt: rows.reduce((s, b) => s + b.debt, 0) };
   return (
-    <Sheet label={label} kicker="Patrimoine" title="État du patrimoine immobilier">
+    <Sheet {...h} title="État du patrimoine immobilier">
       <Table
         cols={[
           { label: "Immeuble", w: 30, get: (r) => r.name, bold: true },
@@ -304,7 +443,8 @@ function AssetsPage({ m, label }: { m: GroupModel; label: string }) {
   );
 }
 
-function LoansPage({ m, label }: { m: GroupModel; label: string }) {
+function LoansPage({ m, h }: { m: GroupModel; h: Head }) {
+  const c = cur();
   if (m.loansByCompany.length === 0) return null;
   const totalBalance = m.loansByCompany.reduce((s, g) => s + g.balance, 0);
   const totalMonthly = m.loansByCompany.reduce((s, g) => s + g.monthly, 0);
@@ -319,17 +459,17 @@ function LoansPage({ m, label }: { m: GroupModel; label: string }) {
     { label: "Fin", w: 13, right: true, get: (r) => r.end ?? "—" },
   ];
   return (
-    <Sheet label={label} kicker="Financement" title="Crédits en cours">
+    <Sheet {...h} title="Crédits en cours">
       {m.loansByCompany.map((g) => (
-        <View key={g.company} style={{ marginBottom: 12 }}>
+        <View key={g.company} style={{ marginBottom: 12 }} wrap={g.loans.length > 12}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 4 }} wrap={false} minPresenceAhead={70}>
-            <Text style={{ ...W700, fontSize: 9.5, color: NAVY }}>{T(g.company)}</Text>
+            <Text style={{ ...W700, fontSize: 9.5, color: c.deep }}>{T(g.company)}</Text>
             <Text style={{ fontSize: 8, color: INK2 }}>{T(`${K(g.balance)} restant dû · ${E(Math.round(g.monthly))} / mois`)}</Text>
           </View>
           <Table cols={cols} rows={g.loans} sub={(r) => r.note} />
         </View>
       ))}
-      <View style={{ flexDirection: "row", justifyContent: "space-between", backgroundColor: NAVY, borderRadius: 4, paddingVertical: 6, paddingHorizontal: 8 }} wrap={false}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", backgroundColor: c.deep, borderRadius: 5, paddingVertical: 7, paddingHorizontal: 9 }} wrap={false}>
         <Text style={{ ...W700, fontSize: 9, color: "#ffffff" }}>Total</Text>
         <Text style={{ ...W700, fontSize: 9, color: "#ffffff" }}>{T(`${K(totalBalance)} restant dû · ${E(Math.round(totalMonthly))} / mois`)}</Text>
       </View>
@@ -338,7 +478,7 @@ function LoansPage({ m, label }: { m: GroupModel; label: string }) {
   );
 }
 
-function CapacityPage({ m, label }: { m: GroupModel; label: string }) {
+function CapacityPage({ m, h }: { m: GroupModel; h: Head }) {
   const dscr = m.indicators.get("dscr");
   const effort = m.indicators.get("effort");
   const occ = m.indicators.get("occupancy");
@@ -351,7 +491,7 @@ function CapacityPage({ m, label }: { m: GroupModel; label: string }) {
   if (ltv !== undefined) ratios.push({ label: "Dette / valeur (LTV)", value: P(ltv), sub: "capital restant dû ÷ valeur" });
   const tot = m.capacity.reduce((a, c) => ({ rent: a.rent + c.rent, charges: a.charges + c.charges, payments: a.payments + c.payments, cf: a.cf + c.cf }), { rent: 0, charges: 0, payments: 0, cf: 0 });
   return (
-    <Sheet label={label} kicker="Capacité" title="Capacité de remboursement">
+    <Sheet {...h} title="Capacité de remboursement">
       <KpiGrid items={ratios} cols={ratios.length > 2 ? 2 : 2} />
       {m.capacity.length > 0 && (
         <>
@@ -378,11 +518,11 @@ function CapacityPage({ m, label }: { m: GroupModel; label: string }) {
 function Trajectory({ m }: { m: GroupModel }) {
   const half = (CW - 12) / 2;
   return (
-    <View wrap={false}>
+    <View>
       <H2>Trajectoire</H2>
-      <View style={{ flexDirection: "row", gap: 12 }}>
-        <Chart title="Capital restant dû" years={m.years} values={m.debtSeries} kind="line" width={half} height={100} />
-        <Chart title="Cash-flow par mois" years={m.years} values={m.cfSeries} kind="step" width={half} height={100} color={POS} />
+      <View style={{ flexDirection: "row", gap: 12 }} wrap={false}>
+        <Chart id="debt" title="Capital restant dû" years={m.years} values={m.debtSeries} kind="line" width={half} height={100} />
+        <Chart id="cf" title="Cash-flow par mois" years={m.years} values={m.cfSeries} kind="step" width={half} height={100} color={POS} />
       </View>
       {m.sales.length > 0 && (
         <View style={{ marginTop: 10 }} wrap={false}>
@@ -416,7 +556,7 @@ function Trajectory({ m }: { m: GroupModel }) {
   );
 }
 
-function RemunerationPage({ data, projection, nowMonth, label }: { data: AppData; projection: Projection; nowMonth: MonthIndex; label: string }) {
+function RemunerationPage({ data, projection, nowMonth, h: head }: { data: AppData; projection: Projection; nowMonth: MonthIndex; h: Head }) {
   if (!data.withdrawals.some((w) => w.annualAmount)) return null;
   const y0 = yearOf(nowMonth);
   const r = remunerationYear(data, y0, y0);
@@ -429,7 +569,7 @@ function RemunerationPage({ data, projection, nowMonth, label }: { data: AppData
   const row = projection.years.find((x) => x.year === y0);
   const cf = row ? row.cashflow : undefined;
   return (
-    <Sheet label={label} kicker="Rémunération" title="Rémunération des dirigeants">
+    <Sheet {...head} title="Rémunération des dirigeants">
       <KpiGrid
         items={[
           { label: "Revenus nets du foyer", value: E(Math.round(r.net)), sub: `soit ${E(Math.round(r.net / 12))} par mois` },
@@ -499,10 +639,10 @@ function RemunerationPage({ data, projection, nowMonth, label }: { data: AppData
   );
 }
 
-function AccountsPage({ m, label }: { m: GroupModel; label: string }) {
+function AccountsPage({ m, h }: { m: GroupModel; h: Head }) {
   if (m.statements.length === 0) return null;
   return (
-    <Sheet label={label} kicker="Comptes" title="Comptes annuels">
+    <Sheet {...h} title="Comptes annuels">
       <Table
         cols={[
           { label: "Société", w: 22, get: (r) => r.company, bold: true },
@@ -521,25 +661,196 @@ function AccountsPage({ m, label }: { m: GroupModel; label: string }) {
   );
 }
 
-function Cover({ kicker, title, subtitle, lines, date }: { kicker: string; title: string; subtitle?: string; lines: string[]; date: string }) {
+// ——— Couverture (trois styles au choix) ———
+
+interface CoverProps {
+  style: PdfCover;
+  kicker: string;
+  title: string;
+  subtitle?: string;
+  recipient?: string;
+  /** Nom affiché à côté du monogramme, en haut de page. */
+  brand: string;
+  lines: string[];
+  date: string;
+  kpis: Kpi[];
+  toc: Section[];
+}
+
+function Monogram({ name, dark }: { name: string; dark?: boolean }) {
+  const c = cur();
+  const letter = (name.replace(/^(SC|SCI|SAS|SARL|EURL|SA)\s+(DU\s+|DE\s+LA\s+|DE\s+|DES\s+)?/i, "").trim()[0] ?? "P").toUpperCase();
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+      <View style={{ width: 24, height: 24, borderRadius: 7, backgroundColor: dark ? c.glow : c.brand, alignItems: "center", justifyContent: "center" }}>
+        <Text style={{ ...W800, fontSize: 12, color: dark ? c.deep : "#ffffff" }}>{T(letter)}</Text>
+      </View>
+      <Text style={{ ...W700, fontSize: 8, color: dark ? "#ffffff" : c.deep, letterSpacing: 1.4, textTransform: "uppercase" }}>{T(name)}</Text>
+    </View>
+  );
+}
+
+function Kicker({ text, dark }: { text: string; dark?: boolean }) {
+  const c = cur();
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+      <View style={{ width: 26, height: 2, borderRadius: 1, backgroundColor: dark ? c.glow : c.brand }} />
+      <Text style={{ ...W700, fontSize: 8.5, color: dark ? c.glow : c.brand, letterSpacing: 2.2, textTransform: "uppercase" }}>{T(text)}</Text>
+    </View>
+  );
+}
+
+function Recipient({ text, dark }: { text?: string; dark?: boolean }) {
+  const c = cur();
+  if (!text) return null;
+  return (
+    <View style={{ flexDirection: "row", alignSelf: "flex-start", marginTop: 22, borderWidth: 0.8, borderColor: dark ? c.deep3 : c.muted, backgroundColor: dark ? c.deep2 : c.soft, borderRadius: 14, paddingVertical: 6, paddingHorizontal: 12 }}>
+      <Text style={{ fontSize: 8.5, color: dark ? c.muted : INK2 }}>À l&apos;attention de </Text>
+      <Text style={{ ...W700, fontSize: 8.5, color: dark ? "#ffffff" : c.deep }}>{T(text)}</Text>
+    </View>
+  );
+}
+
+/** Sommaire et coordonnées, en bas de couverture. */
+function CoverFoot({ toc, lines, date, dark, inset = 0 }: { toc: Section[]; lines: string[]; date: string; dark?: boolean; inset?: number }) {
+  const c = cur();
+  const faint = dark ? c.muted : INK2;
+  return (
+    <View style={{ position: "absolute", bottom: 34, left: MX + inset, right: MX }}>
+      <View style={{ flexDirection: "row", gap: 24, paddingTop: 14, borderTopWidth: 0.6, borderTopColor: dark ? c.deep3 : LINE }}>
+        <View style={{ flex: 1.2 }}>
+          <Text style={{ ...W700, fontSize: 7, color: dark ? c.glow : c.brand, letterSpacing: 1.4, textTransform: "uppercase", marginBottom: 6 }}>Au sommaire</Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+            {toc.map((s) => (
+              <View key={s.n} style={{ width: "50%", flexDirection: "row", marginBottom: 3.5 }}>
+                <Text style={{ ...W700, fontSize: 8, color: dark ? c.glow : c.brand, width: 16 }}>{two(s.n)}</Text>
+                <Text style={{ fontSize: 8, color: dark ? "#ffffff" : INK }}>{T(s.label)}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={{ ...W700, fontSize: 7, color: dark ? c.glow : c.brand, letterSpacing: 1.4, textTransform: "uppercase", marginBottom: 6 }}>Contact</Text>
+          {lines.length ? (
+            lines.map((l) => (
+              <Text key={l} style={{ fontSize: 8, color: dark ? "#ffffff" : INK, marginBottom: 3 }}>
+                {T(l)}
+              </Text>
+            ))
+          ) : (
+            <Text style={{ fontSize: 8, color: faint }}>Coordonnées non renseignées</Text>
+          )}
+        </View>
+      </View>
+      <Text style={{ fontSize: 7, color: faint, marginTop: 12 }}>{T(`Document établi le ${date} · confidentiel`)}</Text>
+    </View>
+  );
+}
+
+function Cover(props: CoverProps) {
+  if (props.style === "bandeau") return <BandCover {...props} />;
+  if (props.style === "epure") return <CleanCover {...props} />;
+  return <ImmersiveCover {...props} />;
+}
+
+function ImmersiveCover({ kicker, title, subtitle, recipient, brand, lines, date, kpis, toc }: CoverProps) {
+  const c = cur();
+  return (
+    <Page size="A4" style={{ ...base, padding: 0, backgroundColor: c.deep }}>
+      <DeepBackground width={PW} height={PH} id="cover" />
+      <View style={{ position: "absolute", top: 0, right: 0, width: 240, height: 440 }}>
+        <Svg width={240} height={440}>
+          <Circle cx={200} cy={235} r={170} stroke={c.glow} strokeOpacity={0.18} strokeWidth={0.8} fill="none" />
+          <Circle cx={200} cy={235} r={120} stroke={c.glow} strokeOpacity={0.12} strokeWidth={0.8} fill="none" />
+        </Svg>
+      </View>
+      <View style={{ position: "absolute", top: 50, left: MX, right: MX }}>
+        <Monogram name={brand} dark />
+      </View>
+      <View style={{ position: "absolute", top: 232, left: MX, right: MX + 40 }}>
+        <Kicker text={kicker} dark />
+        <Text style={{ ...W800, fontSize: 38, color: "#ffffff", marginTop: 22, letterSpacing: -1, lineHeight: 1.1 }}>{T(title)}</Text>
+        {subtitle && <Text style={{ ...W600, fontSize: 14, color: c.muted, marginTop: 12 }}>{T(subtitle)}</Text>}
+        <Recipient text={recipient} dark />
+      </View>
+      {kpis.length > 0 && (
+        <View style={{ position: "absolute", top: 520, left: MX, right: MX, flexDirection: "row", gap: 14 }}>
+          {kpis.map((k) => (
+            <View key={k.label} style={{ flex: 1, borderTopWidth: 1.5, borderTopColor: c.glow, paddingTop: 9 }}>
+              <Text style={{ fontSize: 7, color: c.muted, textTransform: "uppercase", letterSpacing: 0.8 }}>{T(k.label)}</Text>
+              <Text style={{ ...W800, fontSize: 20, color: "#ffffff", marginTop: 4 }}>{T(k.value)}</Text>
+              {k.sub && <Text style={{ fontSize: 7.5, color: c.glow, marginTop: 2 }}>{T(k.sub)}</Text>}
+            </View>
+          ))}
+        </View>
+      )}
+      <CoverFoot toc={toc} lines={lines} date={date} dark />
+    </Page>
+  );
+}
+
+function BandCover({ kicker, title, subtitle, recipient, brand, lines, date, kpis, toc }: CoverProps) {
+  const band = 370;
   return (
     <Page size="A4" style={{ ...base, padding: 0 }}>
-      <View style={{ backgroundColor: NAVY, height: 330, paddingHorizontal: MX, paddingTop: 70 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-          <View style={{ width: 22, height: 2, backgroundColor: GOLD }} />
-          <Text style={{ ...W600, fontSize: 8.5, color: GOLD, letterSpacing: 2, textTransform: "uppercase" }}>{T(kicker)}</Text>
+      <View style={{ position: "relative", height: band }}>
+        <DeepBackground width={PW} height={band} id="band" />
+        <View style={{ paddingHorizontal: MX, paddingTop: 50 }}>
+          <Monogram name={brand} dark />
+          <View style={{ marginTop: 110 }}>
+            <Kicker text={kicker} dark />
+            <Text style={{ ...W800, fontSize: 34, color: "#ffffff", marginTop: 18, letterSpacing: -0.8, lineHeight: 1.1 }}>{T(title)}</Text>
+            {subtitle && <Text style={{ ...W600, fontSize: 13, color: "#ffffff", opacity: 0.75, marginTop: 10 }}>{T(subtitle)}</Text>}
+          </View>
         </View>
-        <Text style={{ ...W800, fontSize: 30, color: "#ffffff", marginTop: 26, letterSpacing: -0.5, lineHeight: 1.15 }}>{T(title)}</Text>
-        {subtitle && <Text style={{ ...W600, fontSize: 13, color: "#e2c795", marginTop: 10 }}>{T(subtitle)}</Text>}
       </View>
-      <View style={{ paddingHorizontal: MX, paddingTop: 34 }}>
-        {lines.map((l) => (
-          <Text key={l} style={{ fontSize: 10, color: INK2, marginBottom: 5 }}>
-            {T(l)}
-          </Text>
-        ))}
+      <View style={{ paddingHorizontal: MX, paddingTop: 8 }}>
+        <Recipient text={recipient} />
+        {kpis.length > 0 && (
+          <View style={{ marginTop: 26 }}>
+            <KpiGrid items={kpis} cols={kpis.length} />
+          </View>
+        )}
       </View>
-      <Text style={{ position: "absolute", bottom: 36, left: MX, fontSize: 8, color: MUTED }}>{T(`Document établi le ${date} · confidentiel`)}</Text>
+      <CoverFoot toc={toc} lines={lines} date={date} />
+    </Page>
+  );
+}
+
+function CleanCover({ kicker, title, subtitle, recipient, brand, lines, date, kpis, toc }: CoverProps) {
+  const c = cur();
+  return (
+    <Page size="A4" style={{ ...base, padding: 0 }}>
+      <View style={{ position: "absolute", top: 0, bottom: 0, left: 0, width: 12, backgroundColor: c.brand }} />
+      <View style={{ position: "absolute", top: 0, bottom: 0, left: 12, width: 4, backgroundColor: c.muted }} />
+      <View style={{ position: "absolute", top: 0, right: 0, width: 200, height: 200 }}>
+        <Svg width={200} height={200}>
+          <Circle cx={190} cy={70} r={128} fill={c.soft} />
+          <Circle cx={190} cy={70} r={80} stroke={c.muted} strokeWidth={0.8} fill="none" />
+        </Svg>
+      </View>
+      <View style={{ position: "absolute", top: 50, left: MX + 8, right: MX }}>
+        <Monogram name={brand} />
+      </View>
+      <View style={{ position: "absolute", top: 240, left: MX + 8, right: MX + 30 }}>
+        <Kicker text={kicker} />
+        <Text style={{ ...W800, fontSize: 38, color: c.deep, marginTop: 20, letterSpacing: -1, lineHeight: 1.1 }}>{T(title)}</Text>
+        {subtitle && <Text style={{ ...W600, fontSize: 14, color: INK2, marginTop: 12 }}>{T(subtitle)}</Text>}
+        <View style={{ width: 48, height: 3, borderRadius: 1.5, backgroundColor: c.brand, marginTop: 22 }} />
+        <Recipient text={recipient} />
+      </View>
+      {kpis.length > 0 && (
+        <View style={{ position: "absolute", top: 530, left: MX + 8, right: MX, flexDirection: "row" }}>
+          {kpis.map((k, i) => (
+            <View key={k.label} style={{ flex: 1, paddingLeft: i ? 14 : 0, borderLeftWidth: i ? 0.8 : 0, borderLeftColor: LINE }}>
+              <Text style={{ fontSize: 7, color: MUTED, textTransform: "uppercase", letterSpacing: 0.8 }}>{T(k.label)}</Text>
+              <Text style={{ ...W800, fontSize: 20, color: c.deep, marginTop: 4 }}>{T(k.value)}</Text>
+              {k.sub && <Text style={{ fontSize: 7.5, color: c.brand, marginTop: 2 }}>{T(k.sub)}</Text>}
+            </View>
+          ))}
+        </View>
+      )}
+      <CoverFoot toc={toc} lines={lines} date={date} inset={8} />
     </Page>
   );
 }
@@ -547,7 +858,28 @@ function Cover({ kicker, title, subtitle, lines, date }: { kicker: string; title
 function contactLines(data: AppData): string[] {
   const holding = data.companies.find((c) => c.kind === "holding") ?? data.companies[0];
   const who = holding?.representative ?? data.settings.ownerName;
-  return [who ? `Contact : ${who}${holding?.representativeRole ? `, ${holding.representativeRole}` : ""}` : "", [holding?.email, holding?.phone].filter(Boolean).join(" · "), holding?.address ?? ""].filter(Boolean);
+  return [who ? `${who}${holding?.representativeRole ? `, ${holding.representativeRole}` : ""}` : "", [holding?.email, holding?.phone].filter(Boolean).join(" · "), holding?.address ?? ""].filter(Boolean);
+}
+
+/** Numérotation des parties présentes, pour le sommaire et les en-têtes. */
+function numbering() {
+  const toc: Section[] = [];
+  const add = (label: string): Section => {
+    const s = { n: toc.length + 1, label };
+    toc.push(s);
+    return s;
+  };
+  return { toc, add };
+}
+
+function groupKpis(m: GroupModel): Kpi[] {
+  const f = m.f;
+  const out: Kpi[] = [];
+  if (f.buildings > 0) out.push({ label: "Immeubles", value: String(f.buildings), sub: `${f.units} lots` });
+  if (f.rentMonthly > 0) out.push({ label: "Loyers annuels", value: K(f.rentMonthly * 12) });
+  if (f.unvalued === 0 && f.value > 0) out.push({ label: "Valeur estimée", value: K(f.value) });
+  else if (f.debt > 0) out.push({ label: "Capital restant dû", value: K(f.debt) });
+  return out;
 }
 
 // ——— Documents ———
@@ -559,22 +891,35 @@ export interface GroupDossierInput {
   /** Nom du périmètre (groupe ou société). */
   scopeName: string;
   generatedAt: Date;
+  /** Présentation choisie (couleur, couverture, textes, parties). */
+  prefs?: PdfPrefs;
+  /** Dossier limité à une société : le titre personnalisé du groupe ne s'applique pas. */
+  scoped?: boolean;
 }
 
-export function GroupDossier({ data, projection, nowMonth, scopeName, generatedAt }: GroupDossierInput) {
+export function GroupDossier({ data, projection, nowMonth, scopeName, generatedAt, prefs = {}, scoped }: GroupDossierInput) {
   const m = groupModel(data, projection, scopeName);
   const date = generatedAt.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
-  const label = `${scopeName} · présentation patrimoniale`;
+  const title = (!scoped && prefs.title) || scopeName;
+  const label = `${title} · présentation patrimoniale`;
+  const { toc, add } = numbering();
+  const synth = add("Synthèse");
+  const assets = shows(prefs, "patrimoine") && (m.buildings.length > 0 || m.companyLevelDebt > 1) ? add("Patrimoine") : undefined;
+  const loans = shows(prefs, "credits") && m.loansByCompany.length > 0 ? add("Crédits") : undefined;
+  const capacity = shows(prefs, "capacite") ? add("Capacité") : undefined;
+  const remuneration = shows(prefs, "remuneration") && data.withdrawals.some((w) => w.annualAmount) ? add("Rémunération") : undefined;
+  const accounts = shows(prefs, "comptes") && m.statements.length > 0 ? add("Comptes annuels") : undefined;
+  const h = (section?: Section): Head => ({ label, running: title, section });
   return (
-    <Document title={`Présentation patrimoniale - ${scopeName}`} author={data.settings.ownerName ?? scopeName}>
-      <Cover kicker="Présentation patrimoniale" title={scopeName} subtitle={data.settings.ownerName} lines={contactLines(data)} date={date} />
-      <SynthesisPage m={m} label={label} now={date} />
-      <AssetsPage m={m} label={label} />
-      <LoansPage m={m} label={label} />
-      <CapacityPage m={m} label={label} />
-      <RemunerationPage data={data} projection={projection} nowMonth={nowMonth} label={label} />
-      <AccountsPage m={m} label={label} />
-    </Document>
+      <Document title={`Présentation patrimoniale - ${title}`} author={data.settings.ownerName ?? scopeName}>
+        <Cover style={prefs.cover ?? DEFAULT_COVER} kicker="Présentation patrimoniale" title={title} subtitle={prefs.subtitle ?? data.settings.ownerName} recipient={prefs.recipient} brand={scopeTitle(data)} lines={contactLines(data)} date={date} kpis={groupKpis(m)} toc={toc} />
+        <SynthesisPage m={m} h={h(synth)} now={date} message={prefs.message} author={data.settings.ownerName} trajectory={shows(prefs, "trajectoire")} />
+        {assets && <AssetsPage m={m} h={h(assets)} />}
+        {loans && <LoansPage m={m} h={h(loans)} />}
+        {capacity && <CapacityPage m={m} h={h(capacity)} />}
+        {remuneration && <RemunerationPage data={data} projection={projection} nowMonth={nowMonth} h={h(remuneration)} />}
+        {accounts && <AccountsPage m={m} h={h(accounts)} />}
+      </Document>
   );
 }
 
@@ -583,7 +928,7 @@ export interface ProjectDossierInput extends GroupDossierInput {
   impact?: ProjectImpact;
 }
 
-export function ProjectDossier({ data, projection, nowMonth, scopeName, generatedAt, project: p, impact }: ProjectDossierInput) {
+export function ProjectDossier({ data, projection, nowMonth, scopeName, generatedAt, project: p, impact, prefs = {} }: ProjectDossierInput) {
   const f = projectFigures(p);
   const m = groupModel(data, projection, scopeName);
   const date = generatedAt.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
@@ -613,6 +958,16 @@ export function ProjectDossier({ data, projection, nowMonth, scopeName, generate
   }
 
   const annualRent = f.rentMonthly * 12;
+  const { toc, add } = numbering();
+  const sDemand = add("La demande");
+  const sPlan = add("Plan de financement");
+  const sYield = add("Rentabilité");
+  const sGroup = add("Le groupe");
+  const sAssets = shows(prefs, "patrimoine") && (m.buildings.length > 0 || m.companyLevelDebt > 1) ? add("Patrimoine") : undefined;
+  const sLoans = shows(prefs, "credits") && m.loansByCompany.length > 0 ? add("Crédits") : undefined;
+  const sRem = shows(prefs, "remuneration") && data.withdrawals.some((w) => w.annualAmount) ? add("Rémunération") : undefined;
+  const h = (section?: Section): Head => ({ label, running: p.name, section });
+
   const exploitation = [
     { label: "Loyers prévus", value: annualRent },
     ...(f.vacancyMonthly ? [{ label: "Vacance prudente", value: -f.vacancyMonthly * 12 }] : []),
@@ -623,14 +978,24 @@ export function ProjectDossier({ data, projection, nowMonth, scopeName, generate
   return (
     <Document title={`Dossier de financement - ${p.name}`} author={data.settings.ownerName ?? scopeName}>
       <Cover
+        style={prefs.cover ?? DEFAULT_COVER}
         kicker="Dossier de financement"
         title={p.name}
         subtitle={[projectCompanyName(p, data), scopeName].filter(Boolean).join(" · ")}
-        lines={[request ? `Financement sollicité : ${eur(request)}${durations.length === 1 ? ` sur ${durations[0] / 12} ans` : ""}` : "", ...contactLines(data)].filter(Boolean)}
+        recipient={prefs.recipient}
+        brand={scopeName}
+        lines={contactLines(data)}
         date={date}
+        kpis={[
+          ...(request ? [{ label: "Financement sollicité", value: K(request), sub: durations.length === 1 ? `sur ${durations[0] / 12} ans` : undefined }] : []),
+          ...(f.totalCost ? [{ label: "Coût total", value: K(f.totalCost) }] : []),
+          ...(f.equity ? [{ label: "Apport", value: K(f.equity), sub: f.totalCost ? `${pct((f.equity / f.totalCost) * 100)} du coût` : undefined }] : []),
+        ]}
+        toc={toc}
       />
 
-      <Sheet label={label} kicker="La demande" title={acquisition ? "Le projet d'acquisition" : "Le projet de travaux"}>
+      <Sheet {...h(sDemand)} title={acquisition ? "Le projet d'acquisition" : "Le projet de travaux"}>
+        {prefs.message && <Message text={prefs.message} author={data.settings.ownerName} />}
         <KpiGrid
           dark
           items={[
@@ -667,10 +1032,10 @@ export function ProjectDossier({ data, projection, nowMonth, scopeName, generate
         <Para>{`${projectCompanyName(p, data) ?? scopeName}, au sein de ${scopeName} : ${m.f.buildings} immeuble(s), ${m.f.units} lots, ${eur(Math.round(m.f.rentMonthly * 12))} de loyers annuels (détail en fin de dossier).`}</Para>
       </Sheet>
 
-      <Sheet label={label} kicker="Financement" title="Plan de financement">
-        <Text style={{ ...W700, fontSize: 9.5, color: NAVY, marginBottom: 4 }}>Emplois</Text>
+      <Sheet {...h(sPlan)} title="Plan de financement">
+        <H2 top={0}>Emplois</H2>
         <Table cols={[{ label: "Poste", w: 70, get: (r) => r.label, bold: true }, { label: "Montant", w: 30, right: true, get: (r) => E(r.amount) }]} rows={uses} sub={(r) => r.sub} total={{ label: "Coût total", amount: f.totalCost }} />
-        <Text style={{ ...W700, fontSize: 9.5, color: NAVY, marginTop: 14, marginBottom: 4 }}>Ressources</Text>
+        <H2>Ressources</H2>
         <Table cols={[{ label: "Origine", w: 70, get: (r) => r.label, bold: true }, { label: "Montant", w: 30, right: true, get: (r) => E(r.amount) }]} rows={resources} sub={(r) => r.sub} total={{ label: "Total des ressources", amount: f.resources }} />
         {f.gap !== undefined && Math.abs(f.gap) > 1 && <Note>{f.gap > 0 ? `Reste à financer : ${eur(f.gap)}.` : `Ressources supérieures au coût de ${eur(-f.gap)}.`}</Note>}
         {f.loans.length > 0 && (
@@ -693,7 +1058,7 @@ export function ProjectDossier({ data, projection, nowMonth, scopeName, generate
         )}
       </Sheet>
 
-      <Sheet label={label} kicker="Rentabilité" title="Rentabilité prévisionnelle">
+      <Sheet {...h(sYield)} title="Rentabilité prévisionnelle">
         <KpiGrid
           items={[
             { label: "Loyers prévus", value: E(Math.round(f.rentMonthly)), sub: "par mois, hors charges" },
@@ -740,10 +1105,10 @@ export function ProjectDossier({ data, projection, nowMonth, scopeName, generate
         )}
       </Sheet>
 
-      <SynthesisPage m={m} label={label} now={date} />
-      <AssetsPage m={m} label={label} />
-      <LoansPage m={m} label={label} />
-      <RemunerationPage data={data} projection={projection} nowMonth={nowMonth} label={label} />
+      <SynthesisPage m={m} h={h(sGroup)} now={date} trajectory={shows(prefs, "trajectoire")} />
+      {sAssets && <AssetsPage m={m} h={h(sAssets)} />}
+      {sLoans && <LoansPage m={m} h={h(sLoans)} />}
+      {sRem && <RemunerationPage data={data} projection={projection} nowMonth={nowMonth} h={h(sRem)} />}
     </Document>
   );
 }

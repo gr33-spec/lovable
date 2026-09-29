@@ -168,6 +168,12 @@ export function StoreProvider({
             (p) => !(p.op === "upsert" && p.coll === op.coll && p.item.id === op.item.id),
           );
         }
+        // Réglages saisis au clavier : une seule opération pour la frappe en cours.
+        const last = pending.current[pending.current.length - 1];
+        if (op.op === "settings" && last?.op === "settings") {
+          pending.current[pending.current.length - 1] = { op: "settings", patch: { ...last.patch, ...op.patch } };
+          continue;
+        }
         pending.current.push(op);
       }
       savePending(role, pending.current);
