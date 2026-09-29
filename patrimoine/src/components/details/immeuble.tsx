@@ -94,7 +94,7 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
         subtitle={building.city || undefined}
         back={company ? `/patrimoine/societe/${company.id}` : "/patrimoine"}
         action={
-          <button onClick={() => setSheet("edit")} className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-navy">
+          <button onClick={() => setSheet("edit")} className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-brand">
             <Pencil size={15} /> Modifier
           </button>
         }
@@ -228,7 +228,7 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
             <SalesList buildingId={building.id} openId={saleId} />
           ) : (
             <button onClick={() => setSelling(newSale(building.id))} className="flex w-full items-center gap-3 py-3 text-left">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-soft text-navy">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-soft text-brand">
                 <BadgeEuro size={18} />
               </span>
               <span className="min-w-0 flex-1">

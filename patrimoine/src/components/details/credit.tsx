@@ -62,7 +62,7 @@ export function LoanDetail({ id }: { id: string }) {
           <>
             <SectionTitle>Capital restant dû dans le temps</SectionTitle>
             <Card>
-              <LineChart years={visible.map((s) => s.year)} series={[{ label: "Capital restant dû", values: visible.map((s) => s.balance), color: "var(--series-1)" }]} height={170} />
+              <LineChart years={visible.map((s) => s.year)} series={[{ label: "Capital restant dû", values: visible.map((s) => s.balance), color: "var(--brand)" }]} height={170} />
               <div className="mt-3 grid grid-cols-3 gap-2 text-center">
                 {[5, 10, 15].map((h) => {
                   const row = schedule[h];

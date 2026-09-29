@@ -55,7 +55,7 @@ export function NewProjectSheet({ open, onClose, onSell }: { open: boolean; onCl
 function ChoiceButton({ icon, title, text, onClick }: { icon: React.ReactNode; title: string; text: string; onClick: () => void }) {
   return (
     <button onClick={onClick} className="flex w-full items-center gap-4 rounded-2xl bg-card px-4 py-4 text-left shadow-sm active:scale-[0.99]">
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-soft text-navy">{icon}</span>
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-soft text-brand">{icon}</span>
       <span>
         <span className="block text-[16px] font-semibold text-ink">{title}</span>
         <span className="block text-[13px] text-muted">{text}</span>

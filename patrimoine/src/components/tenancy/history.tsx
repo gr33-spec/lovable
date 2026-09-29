@@ -82,7 +82,7 @@ export function TenantHistory({ unit, tenancy }: { unit: Unit; tenancy: Tenancy 
                 {it.detail && <div className="text-[13px] text-muted">{it.detail}</div>}
               </div>
               {it.open && (
-                <button type="button" onClick={() => openDocument(it.open!.url, it.open!.name)} className="mt-1 shrink-0 rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-navy">
+                <button type="button" onClick={() => openDocument(it.open!.url, it.open!.name)} className="mt-1 shrink-0 rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-brand">
                   Voir
                 </button>
               )}

@@ -107,7 +107,7 @@ export function TenantsView() {
           <button
             key={f.value}
             onClick={() => setFilter(f.value)}
-            className={cx("shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold", filter === f.value ? "bg-navy text-white" : "bg-soft text-ink-2")}
+            className={cx("shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold", filter === f.value ? "bg-brand text-on-brand" : "bg-soft text-ink-2")}
           >
             {f.label}
           </button>
@@ -181,7 +181,7 @@ function UnitLine({ unit, flags, missing, dnd }: { unit: Unit; flags: UnitFlag[]
   return (
     <div className="flex items-center gap-3 px-4 py-3">
       <Link href={`${href}?depuis=gestion`} className="flex min-w-0 flex-1 items-center gap-3 active:opacity-60">
-        <span className={cx("flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl", vacant ? "bg-warn/10 text-warn" : "bg-soft text-navy")}>
+        <span className={cx("flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl", vacant ? "bg-warn/10 text-warn" : "bg-soft text-brand")}>
           <DoorOpen size={18} />
         </span>
         <span className="min-w-0 flex-1">
@@ -213,7 +213,7 @@ function UnitLine({ unit, flags, missing, dnd }: { unit: Unit; flags: UnitFlag[]
         </span>
       </Link>
       {vacant ? (
-        <Link href={`${href}/changement`} className="flex shrink-0 items-center gap-1 rounded-full bg-navy px-3 py-2 text-[12.5px] font-semibold text-white">
+        <Link href={`${href}/changement`} className="flex shrink-0 items-center gap-1 rounded-full bg-brand px-3 py-2 text-[12.5px] font-semibold text-on-brand">
           <UserPlus size={14} /> Louer
         </Link>
       ) : (
@@ -221,7 +221,7 @@ function UnitLine({ unit, flags, missing, dnd }: { unit: Unit; flags: UnitFlag[]
           <Link href={`${href}?action=quittance`} aria-label="Quittance" className="flex h-9 w-9 items-center justify-center rounded-full bg-pos/10 text-pos">
             <ReceiptText size={16} />
           </Link>
-          <Link href={`${href}/changement`} aria-label="Changer de locataire" className="flex h-9 w-9 items-center justify-center rounded-full bg-soft text-navy">
+          <Link href={`${href}/changement`} aria-label="Changer de locataire" className="flex h-9 w-9 items-center justify-center rounded-full bg-soft text-brand">
             <ArrowRightLeft size={16} />
           </Link>
         </div>

@@ -82,7 +82,7 @@ export function ProjectDetail({ id }: { id: string }) {
               key={s}
               disabled={!editable}
               onClick={() => set({ status: s, ...(s === "soumis" && !p.submittedDate ? { submittedDate: new Date().toISOString().slice(0, 10) } : {}) })}
-              className={cx("shrink-0 rounded-full px-3 py-1.5 text-[12.5px] font-semibold disabled:opacity-60", p.status === s ? "bg-navy text-white" : "bg-soft text-ink-2")}
+              className={cx("shrink-0 rounded-full px-3 py-1.5 text-[12.5px] font-semibold disabled:opacity-60", p.status === s ? "bg-brand text-on-brand" : "bg-soft text-ink-2")}
             >
               {STATUS_LABEL[s]}
             </button>
@@ -149,7 +149,7 @@ export function ProjectDetail({ id }: { id: string }) {
         {/* Sections */}
         <div className="no-scrollbar -mx-4 mt-5 flex gap-1.5 overflow-x-auto px-4">
           {tabs.map((t) => (
-            <button key={t.value} onClick={() => setTab(t.value)} className={cx("shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold", tab === t.value ? "bg-navy text-white" : "bg-soft text-ink-2")}>
+            <button key={t.value} onClick={() => setTab(t.value)} className={cx("shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold", tab === t.value ? "bg-brand text-on-brand" : "bg-soft text-ink-2")}>
               {t.label}
             </button>
           ))}

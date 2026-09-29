@@ -187,7 +187,7 @@ function Patrimoine() {
                 const company = data.companies.find((c) => c.id === companyKey);
                 return (
                   <Link key={l.id} href={`/patrimoine/credit/${l.id}`} className="flex items-center gap-3 py-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-soft text-navy">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-soft text-brand">
                       <Landmark size={18} />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -257,7 +257,7 @@ function TreeRow({
         ) : avatar ? (
           avatar
         ) : (
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#2a78d6]/10 text-[#2a78d6]">{icon}</div>
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">{icon}</div>
         )}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">

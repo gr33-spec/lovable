@@ -109,7 +109,7 @@ export function LeaseSection({ unit }: { unit: Unit }) {
                       ? revisionLetterUrl({ tenancyId, due: h.dueDate ?? h.date, effective: h.date, rent: h.previousRent, charges: unit.charges, reference: { label: h.referenceLabel ?? "", value: h.referenceValue }, index: { label: h.indexLabel ?? "", value: h.indexValue } })
                       : undefined;
                     return url ? (
-                      <button type="button" onClick={() => openDocument(url)} className="rounded-full bg-soft px-2.5 py-1 text-[12px] font-semibold text-navy">
+                      <button type="button" onClick={() => openDocument(url)} className="rounded-full bg-soft px-2.5 py-1 text-[12px] font-semibold text-brand">
                         Courrier
                       </button>
                     ) : null;
@@ -268,7 +268,7 @@ export function RemindersCard({ items, limit = 3 }: { items: Reminder[]; limit?:
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-[15px] font-bold text-navy">
           <BellRing size={17} className="text-gold" /> Rappels
-          <span className="rounded-full bg-navy px-2 py-0.5 text-[11px] font-bold text-white">{items.length}</span>
+          <span className="rounded-full bg-brand px-2 py-0.5 text-[11px] font-bold text-on-brand">{items.length}</span>
         </div>
         <Link href="/gestion?vue=afaire" className="text-sm font-medium text-series-1">
           Tout voir

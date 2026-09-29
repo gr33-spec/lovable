@@ -229,12 +229,12 @@ export default function Accueil() {
               <div className="py-8 text-center text-sm text-muted">Données insuffisantes : valeur estimée manquante pour {t.unvalued} immeuble(s).</div>
             )}
             {chart === "net" && t.unvalued === 0 && (
-              <LineChart years={years} series={[{ label: "Patrimoine net", values: projection.years.map((r) => r.net), color: "var(--series-1)" }]} />
+              <LineChart years={years} series={[{ label: "Patrimoine net", values: projection.years.map((r) => r.net), color: "var(--brand)" }]} />
             )}
             {chart === "debt" && (
               <LineChart
                 years={years}
-                series={[{ label: "Capital restant dû", values: projection.years.map((r) => r.debt), color: "var(--series-1)" }]}
+                series={[{ label: "Capital restant dû", values: projection.years.map((r) => r.debt), color: "var(--brand)" }]}
                 markers={[...new Set(projection.events.filter((e) => e.kind === "loan_end").slice(0, 5).map((e) => e.year))]}
               />
             )}
@@ -255,7 +255,7 @@ export default function Accueil() {
                 onClick={() => setHorizon(h)}
                 className={cx(
                   "shrink-0 rounded-full px-4 py-2 text-sm font-semibold",
-                  horizon === h ? "bg-navy text-white" : "bg-soft text-navy",
+                  horizon === h ? "bg-brand text-on-brand" : "bg-soft text-brand",
                 )}
               >
                 {h} ans

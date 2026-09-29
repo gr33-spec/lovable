@@ -103,7 +103,7 @@ export default function Chronologie() {
         back="/plus"
         subtitle={scopeName ? `${scopeName} · ${y0} → ${y0 + 30}` : "Ce qui change, et quand"}
         action={
-          <Link href="/plus/evenements" className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-navy">
+          <Link href="/plus/evenements" className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-brand">
             <Plus size={15} /> Événement
           </Link>
         }
@@ -115,7 +115,7 @@ export default function Chronologie() {
               <button
                 key={s.key}
                 onClick={() => setScope(s.key)}
-                className={cx("shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold", scope === s.key ? "bg-navy text-white" : "bg-soft text-ink-2")}
+                className={cx("shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold", scope === s.key ? "bg-brand text-on-brand" : "bg-soft text-ink-2")}
               >
                 {s.label}
               </button>
@@ -141,7 +141,7 @@ export default function Chronologie() {
             <div className="mt-3">
               <LineChart
                 years={rows.map((r) => r.year)}
-                series={[{ label: "Cash-flow / mois", values: rows.map((r) => Math.round(r.cashflow / 12)), color: "var(--series-1)" }]}
+                series={[{ label: "Cash-flow / mois", values: rows.map((r) => Math.round(r.cashflow / 12)), color: "var(--brand)" }]}
                 markers={loanYears}
                 height={170}
                 step

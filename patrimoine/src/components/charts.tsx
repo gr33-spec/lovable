@@ -257,7 +257,7 @@ export function BarChart({
               width={r1(barW)}
               height={r1(h)}
               rx={Math.min(3, barW / 2)}
-              fill={v >= 0 ? "var(--series-1)" : "var(--neg)"}
+              fill={v >= 0 ? "var(--brand)" : "var(--neg)"}
               opacity={active >= 0 && active !== i ? 0.45 : 1}
             />
           );

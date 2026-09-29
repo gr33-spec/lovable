@@ -23,16 +23,16 @@ export default async function SharePage({ params, searchParams }: { params: Prom
   if (query.connecte && (await resolveShare(token))) {
     return (
       <main className="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center px-6 text-center">
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-soft text-navy">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-soft text-brand">
           <Lock size={24} />
         </div>
         <h1 className="text-xl font-bold text-navy">Vous êtes déjà connecté</h1>
         <p className="mt-2 text-sm text-muted">Ouvrir ce lien de consultation sur cet appareil remplace votre connexion : il faudra ensuite vous reconnecter avec votre mot de passe.</p>
         <div className="mt-6 grid w-full gap-2">
-          <a href={`/partage/${token}/ouvrir?confirmer=1`} className="rounded-2xl bg-navy px-5 py-3.5 text-[16px] font-semibold text-white">
+          <a href={`/partage/${token}/ouvrir?confirmer=1`} className="rounded-2xl bg-brand px-5 py-3.5 text-[16px] font-semibold text-on-brand">
             Voir comme la personne invitée
           </a>
-          <Link href="/" className="rounded-2xl bg-soft px-5 py-3.5 text-[16px] font-semibold text-navy">
+          <Link href="/" className="rounded-2xl bg-soft px-5 py-3.5 text-[16px] font-semibold text-brand">
             Rester connecté
           </Link>
         </div>
@@ -43,7 +43,7 @@ export default async function SharePage({ params, searchParams }: { params: Prom
   if (!link) {
     return (
       <main className="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center px-6 text-center">
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-soft text-navy">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-soft text-brand">
           <Lock size={24} />
         </div>
         <h1 className="text-xl font-bold text-navy">Lien invalide ou expiré</h1>

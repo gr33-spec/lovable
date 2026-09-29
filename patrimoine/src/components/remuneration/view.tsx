@@ -43,7 +43,7 @@ function Slider({ value, max, step = 500, onChange, label }: { value: number; ma
       value={Math.min(value, max)}
       aria-label={label}
       onChange={(e) => onChange(Number(e.target.value))}
-      className="w-full accent-[#0b2545]"
+      className="w-full accent-brand"
     />
   );
 }
@@ -185,7 +185,7 @@ export function RemunerationView() {
               const cap = r.companies.find((x) => x.company.id === c.id);
               return (
                 <button key={c.id} onClick={() => setActivityId(c.id)} className="flex w-full items-center gap-3 border-b border-line py-3 text-left last:border-0">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-soft text-navy">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-soft text-brand">
                     <Briefcase size={16} />
                   </span>
                   <span className="min-w-0 flex-1">
@@ -365,7 +365,7 @@ function SourceSheet({ w, persons, onClose }: { w?: Withdrawal; persons: string[
             <TextField label="Bénéficiaire" value={w.person} placeholder="Prénom" onChange={(v) => set({ person: v })} />
             <div className="mt-2 flex flex-wrap gap-1.5">
               {persons.map((p) => (
-                <button key={p} type="button" onClick={() => set({ person: p })} className={cx("rounded-full px-3 py-1 text-[12.5px] font-semibold", w.person === p ? "bg-navy text-white" : "bg-soft text-ink-2")}>
+                <button key={p} type="button" onClick={() => set({ person: p })} className={cx("rounded-full px-3 py-1 text-[12.5px] font-semibold", w.person === p ? "bg-brand text-on-brand" : "bg-soft text-ink-2")}>
                   {p}
                 </button>
               ))}

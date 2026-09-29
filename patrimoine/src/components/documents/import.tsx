@@ -293,12 +293,12 @@ function ImportRow({ item, importer, lockedScope }: { item: ImportItem; importer
           {status && <div className={cx("text-[12.5px]", item.state === "error" ? "text-neg" : "text-muted")}>{status}</div>}
         </div>
         {item.state === "saved" && (
-          <button type="button" onClick={() => importer.undo(item)} className="flex shrink-0 items-center gap-1 rounded-full bg-soft px-2.5 py-1 text-[12px] font-semibold text-navy">
+          <button type="button" onClick={() => importer.undo(item)} className="flex shrink-0 items-center gap-1 rounded-full bg-soft px-2.5 py-1 text-[12px] font-semibold text-brand">
             <RotateCcw size={12} /> Modifier
           </button>
         )}
         {item.fileId && item.state !== "saved" && !busy && (
-          <button type="button" onClick={() => openDocument(`/api/files/${item.fileId}`, item.file.name)} className="shrink-0 rounded-full bg-soft px-2.5 py-1 text-[12px] font-semibold text-navy">
+          <button type="button" onClick={() => openDocument(`/api/files/${item.fileId}`, item.file.name)} className="shrink-0 rounded-full bg-soft px-2.5 py-1 text-[12px] font-semibold text-brand">
             Voir
           </button>
         )}

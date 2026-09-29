@@ -3,11 +3,12 @@
 import { documentIndex } from "@/lib/documents";
 import Link from "next/link";
 import { useState } from "react";
-import { FolderOpen, Building2, KeyRound, CalendarRange, FlaskConical, Scale, ScanFace, Share2, LineChart as LineIcon, FileSpreadsheet, Gauge, CalendarClock, CircleAlert, FileText, HandCoins, History, LogOut, Percent, Smartphone, Sparkles, Trash2, Wand2 } from "lucide-react";
+import { FolderOpen, Building2, KeyRound, CalendarRange, FlaskConical, Scale, ScanFace, Share2, LineChart as LineIcon, FileSpreadsheet, Gauge, CalendarClock, CircleAlert, FileText, HandCoins, History, LogOut, Palette, Percent, Smartphone, Sparkles, Trash2, Wand2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { demoData, hasDemo, withoutDemo } from "@/lib/demo";
 import { qualityIssues } from "@/lib/engine/quality";
 import { unitMissing } from "@/lib/missing";
+import { themeDef } from "@/lib/theme";
 import { Button, Card, Divided, Page, PageHeader, Row, SectionTitle, Sheet } from "@/components/ui";
 
 export default function PlusPage() {
@@ -91,6 +92,7 @@ export default function PlusPage() {
         <SectionTitle>Réglages</SectionTitle>
         <Card className="py-1">
           <Divided>
+            <Row href="/plus/apparence" icon={<Palette size={18} />} title="Apparence" subtitle={`Couleur principale · ${themeDef(data.settings.theme).name}`} />
             <Row href="/plus/hypotheses" icon={<Percent size={18} />} title="Hypothèses de projection" subtitle="Revalorisation, indexation des loyers" />
             <Row href="/plus/cadre-juridique" icon={<Scale size={18} />} title="Cadre juridique des baux" subtitle="Modèles 2015 / 2026, états des lieux, quittances" />
             <Row href="/plus/acces-gestion" icon={<KeyRound size={18} />} title="Accès d'Enora" subtitle="Mot de passe, aperçu de son espace" />

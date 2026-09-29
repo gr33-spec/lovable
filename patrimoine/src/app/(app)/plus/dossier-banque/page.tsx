@@ -115,7 +115,7 @@ export default function DossierBanquePage() {
         {error && <p className="mt-2 text-center text-xs text-neg">{error}</p>}
 
         <Link href="/patrimoine?vue=projets" className="mt-6 flex items-center gap-3 rounded-2xl bg-card px-4 py-4 shadow-sm">
-          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-soft text-navy">
+          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-soft text-brand">
             <Rocket size={18} />
           </span>
           <span className="min-w-0 flex-1">

@@ -131,7 +131,7 @@ export function ProjectRealize({ id }: { id: string }) {
 function Item({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="flex items-start gap-2.5">
-      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-soft text-navy">{icon}</span>
+      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-soft text-brand">{icon}</span>
       <span className="pt-1">{children}</span>
     </div>
   );

@@ -127,7 +127,7 @@ function SaleForm({ initial, onClose, chooseBuilding }: { initial: SaleAction; o
               return (
                 <div key={u.id} className="px-3 py-2.5">
                   <button type="button" onClick={() => toggleLot(u.id)} className="flex w-full items-center gap-3 text-left">
-                    <span className={cx("flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2", lot ? "border-navy bg-navy text-white" : "border-line")}>{lot && <Check size={14} />}</span>
+                    <span className={cx("flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2", lot ? "border-brand bg-brand text-on-brand" : "border-line")}>{lot && <Check size={14} />}</span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-[15px] font-medium text-ink">{u.name}</span>
                       <span className="block truncate text-[12.5px] text-muted">
@@ -169,7 +169,7 @@ function SaleForm({ initial, onClose, chooseBuilding }: { initial: SaleAction; o
       )}
       <label className="flex items-center justify-between rounded-2xl bg-card px-4 py-3 text-[15px] text-ink">
         Compromis signé
-        <input type="checkbox" checked={!!a.underOffer} onChange={(e) => set({ underOffer: e.target.checked || undefined })} className="h-5 w-5 accent-[var(--navy,#0b2545)]" />
+        <input type="checkbox" checked={!!a.underOffer} onChange={(e) => set({ underOffer: e.target.checked || undefined })} className="h-5 w-5 accent-brand" />
       </label>
 
       {/* Résultat */}

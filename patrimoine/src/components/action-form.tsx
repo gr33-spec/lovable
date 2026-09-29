@@ -72,7 +72,7 @@ export function ActionForm({ action, onChange }: { action: Action; onChange: (a:
                 <label key={l.value} className="flex items-center gap-3 rounded-xl px-2 py-2">
                   <input
                     type="checkbox"
-                    className="h-5 w-5 accent-[#0b2545]"
+                    className="h-5 w-5 accent-brand"
                     checked={action.loanIds.includes(l.value)}
                     onChange={(e) =>
                       onChange({

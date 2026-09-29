@@ -78,17 +78,17 @@ export function LoanScheduleSection({ loan }: { loan: Loan }) {
             </div>
             <p className="mt-3 text-[13px] text-ink-2">Les calculs suivent ces échéances au centime : capital restant dû, intérêts, fin du crédit, projections, dossier banque et analyse IA.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button type="button" onClick={() => setShowRows(true)} className="inline-flex items-center gap-1.5 rounded-full bg-navy px-3.5 py-2 text-[13px] font-semibold text-white">
+              <button type="button" onClick={() => setShowRows(true)} className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3.5 py-2 text-[13px] font-semibold text-on-brand">
                 <Table2 size={15} /> Voir les échéances
               </button>
               {schedule.fileId && (
-                <button type="button" onClick={() => openDocument(`/api/files/${schedule.fileId}`, schedule.fileName)} className="rounded-full bg-soft px-3.5 py-2 text-[13px] font-semibold text-navy">
+                <button type="button" onClick={() => openDocument(`/api/files/${schedule.fileId}`, schedule.fileName)} className="rounded-full bg-soft px-3.5 py-2 text-[13px] font-semibold text-brand">
                   Voir le document
                 </button>
               )}
               {!readOnly && (
                 <>
-                  <button type="button" disabled={busy} onClick={importer.pick} className="rounded-full bg-soft px-3.5 py-2 text-[13px] font-semibold text-navy">
+                  <button type="button" disabled={busy} onClick={importer.pick} className="rounded-full bg-soft px-3.5 py-2 text-[13px] font-semibold text-brand">
                     Remplacer
                   </button>
                   <button type="button" onClick={removeSchedule} className="rounded-full px-3 py-2 text-[13px] font-semibold text-neg">
