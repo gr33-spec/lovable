@@ -179,11 +179,11 @@ export async function uploadImage(file: Buffer, kind: "product" | "brand", admin
     await reportEvent("warning", "upload", "Photo non traitée", { error: errorMessage(err) });
     return { ok: false as const, error: "Cette photo n'a pas pu être traitée. Essayez une autre photo." };
   }
-  await storeVariants(processed);
+  const baseUrl = await storeVariants(processed);
   const row = await queryOne<ImageRow>(
-    `INSERT INTO image (id, kind, width, height, widths, placeholder, content_hash, bytes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-     RETURNING id, width, height, widths, placeholder, alt`,
-    [id, kind, processed.width, processed.height, processed.widths, processed.placeholder, processed.contentHash, processed.bytes],
+    `INSERT INTO image (id, kind, width, height, widths, placeholder, content_hash, bytes, base_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+     RETURNING id, width, height, widths, placeholder, alt, base_url`,
+    [id, kind, processed.width, processed.height, processed.widths, processed.placeholder, processed.contentHash, processed.bytes, baseUrl],
   );
   await audit(adminId, "image_uploaded", "image", id, { kind, bytes: processed.bytes });
   return { ok: true as const, image: toImageRef(row!), contentHash: processed.contentHash };

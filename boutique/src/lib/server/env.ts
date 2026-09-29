@@ -55,7 +55,10 @@ export function paymentConfig(): PaymentConfig {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET ?? "";
   if (mode !== "test" && mode !== "live") return { ok: false, reason: "STRIPE_MODE doit valoir « test » ou « live »." };
   if (!secretKey) return { ok: false, reason: "STRIPE_SECRET_KEY manquante." };
-  if (!webhookSecret.startsWith("whsec_")) return { ok: false, reason: "STRIPE_WEBHOOK_SECRET manquant ou invalide." };
+  // En mode test (aperçu), le webhook est facultatif : la page de confirmation vérifie
+  // elle-même le paiement auprès de Stripe. En réel, il est obligatoire.
+  if (webhookSecret && !webhookSecret.startsWith("whsec_")) return { ok: false, reason: "STRIPE_WEBHOOK_SECRET invalide (doit commencer par whsec_)." };
+  if (!webhookSecret && mode === "live") return { ok: false, reason: "STRIPE_WEBHOOK_SECRET obligatoire en mode réel." };
   const keyMode = /^(sk|rk)_live_/.test(secretKey) ? "live" : /^(sk|rk)_test_/.test(secretKey) ? "test" : null;
   if (!keyMode) return { ok: false, reason: "STRIPE_SECRET_KEY n'est pas une clé secrète Stripe." };
   if (keyMode !== mode) {

@@ -76,7 +76,7 @@ async function imagesFor(productIds: string[], client?: Queryable, perProduct = 
   if (!productIds.length) return map;
   const rows = await query<ImageRow & { product_id: string; rn: number }>(
     `SELECT * FROM (
-       SELECT id, product_id, width, height, widths, placeholder, alt,
+       SELECT id, product_id, width, height, widths, placeholder, alt, base_url,
               row_number() OVER (PARTITION BY product_id ORDER BY position, created_at) AS rn
        FROM image WHERE product_id = ANY($1::uuid[]) AND kind = 'product'
      ) t WHERE rn <= $2 ORDER BY product_id, rn`,
@@ -185,7 +185,7 @@ export async function listCategories(client?: Queryable): Promise<CategoryLink[]
   );
   const coverIds = rows.map((r) => r.cover_id).filter(Boolean) as string[];
   const covers = coverIds.length
-    ? await query<ImageRow>("SELECT id, width, height, widths, placeholder, alt FROM image WHERE id = ANY($1::uuid[])", [coverIds], client)
+    ? await query<ImageRow>("SELECT id, width, height, widths, placeholder, alt, base_url FROM image WHERE id = ANY($1::uuid[])", [coverIds], client)
     : [];
   return rows.map((r) => {
     const cover = covers.find((c) => c.id === r.cover_id);

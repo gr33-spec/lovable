@@ -55,7 +55,7 @@ export async function loadSettings(client?: Queryable): Promise<ShopSettings> {
   if (!row) throw new Error("Paramètres introuvables");
   const imageIds = [row.logo_image_id, row.favicon_image_id, row.hero_image_id, row.about_image_id].filter(Boolean) as string[];
   const images = imageIds.length
-    ? await query<ImageRow>("SELECT id, width, height, widths, placeholder, alt FROM image WHERE id = ANY($1::uuid[])", [imageIds], client)
+    ? await query<ImageRow>("SELECT id, width, height, widths, placeholder, alt, base_url FROM image WHERE id = ANY($1::uuid[])", [imageIds], client)
     : [];
   const ref = (id: unknown) => {
     const img = images.find((i) => i.id === id);

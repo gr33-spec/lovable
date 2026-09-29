@@ -138,7 +138,11 @@ describe("configuration du paiement", () => {
     setEnv({ STRIPE_MODE: "test", STRIPE_SECRET_KEY: "sk_test_abc" });
     assert.equal(paymentConfig().ok, true);
     setEnv({ STRIPE_WEBHOOK_SECRET: "" });
-    assert.equal(paymentConfig().ok, false);
+    assert.equal(paymentConfig().ok, true, "webhook facultatif en mode test (aperçu)");
+    setEnv({ STRIPE_WEBHOOK_SECRET: "pas-un-secret" });
+    assert.equal(paymentConfig().ok, false, "secret invalide refusé");
+    setEnv({ STRIPE_WEBHOOK_SECRET: "", STRIPE_MODE: "live", STRIPE_SECRET_KEY: "sk_live_abc", VERCEL_ENV: "production", BOUTIQUE_TEST: undefined, NODE_ENV: "production" });
+    assert.equal(paymentConfig().ok, false, "webhook obligatoire en réel");
     setEnv(saved);
   });
 });

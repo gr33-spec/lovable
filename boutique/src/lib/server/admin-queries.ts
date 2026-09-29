@@ -88,7 +88,7 @@ export async function adminProducts(filter: { q?: string; status?: string; categ
     params,
   );
   const ids = rows.map((r) => r.img_id).filter(Boolean) as string[];
-  const images = ids.length ? await query<ImageRow>("SELECT id, width, height, widths, placeholder, alt FROM image WHERE id = ANY($1::uuid[])", [ids]) : [];
+  const images = ids.length ? await query<ImageRow>("SELECT id, width, height, widths, placeholder, alt, base_url FROM image WHERE id = ANY($1::uuid[])", [ids]) : [];
   return rows.map((r) => {
     const img = images.find((i) => i.id === r.img_id);
     return { ...r, reserved: Number(r.reserved), image: img ? toImageRef(img) : null };
@@ -99,7 +99,7 @@ export async function adminProduct(id: string) {
   if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
   const p = await queryOne<Record<string, unknown>>("SELECT * FROM product WHERE id = $1", [id]);
   if (!p) return null;
-  const images = await query<ImageRow>("SELECT id, width, height, widths, placeholder, alt FROM image WHERE product_id = $1 AND kind = 'product' ORDER BY position, created_at", [id]);
+  const images = await query<ImageRow>("SELECT id, width, height, widths, placeholder, alt, base_url FROM image WHERE product_id = $1 AND kind = 'product' ORDER BY position, created_at", [id]);
   const orders = await queryOne<{ n: string }>("SELECT count(DISTINCT order_id) AS n FROM order_item WHERE product_id = $1", [id]);
   return {
     id: p.id as string,
@@ -180,7 +180,7 @@ export async function adminOrder(id: string) {
     [id],
   );
   const imgIds = items.map((i) => i.image_id).filter(Boolean) as string[];
-  const images = imgIds.length ? await query<ImageRow>("SELECT id, width, height, widths, placeholder, alt FROM image WHERE id = ANY($1::uuid[])", [imgIds]) : [];
+  const images = imgIds.length ? await query<ImageRow>("SELECT id, width, height, widths, placeholder, alt, base_url FROM image WHERE id = ANY($1::uuid[])", [imgIds]) : [];
   const emails = await query<{ kind: string; status: string; sent_at: Date | null; last_error: string | null }>(
     "SELECT kind, status, sent_at, last_error FROM email_outbox WHERE order_id = $1 ORDER BY created_at",
     [id],

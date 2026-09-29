@@ -5,13 +5,13 @@ import type { NextConfig } from "next";
 // tiers n'est chargé sur la boutique, ce qui permet une politique stricte.
 
 const isDev = process.env.NODE_ENV !== "production";
-const mediaOrigin = process.env.STORAGE_DRIVER === "supabase" && process.env.SUPABASE_URL ? new URL(process.env.SUPABASE_URL).origin : "";
+const mediaOrigin = process.env.SUPABASE_URL && !process.env.BLOB_READ_WRITE_TOKEN ? new URL(process.env.SUPABASE_URL).origin : "";
 
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob: ${mediaOrigin}`.trim(),
+  `img-src 'self' data: blob: https://*.public.blob.vercel-storage.com ${mediaOrigin}`.trim(),
   "font-src 'self'",
   "connect-src 'self'",
   "media-src 'self'",

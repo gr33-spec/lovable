@@ -1,6 +1,7 @@
 import "server-only";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { del as blobDel, get as blobGet, put as blobPut } from "@vercel/blob";
 
 // Stockage des fichiers. Deux espaces bien séparés :
 //  - public : photos des produits et de la marque (servies par CDN) ;
@@ -11,7 +12,8 @@ import path from "node:path";
 export type Visibility = "public" | "private";
 
 interface StorageDriver {
-  put(visibility: Visibility, key: string, body: Buffer, contentType: string): Promise<void>;
+  /** Renvoie l'adresse publique du fichier quand le stockage la choisit lui-même. */
+  put(visibility: Visibility, key: string, body: Buffer, contentType: string): Promise<string | void>;
   get(visibility: Visibility, key: string): Promise<Buffer | null>;
   remove(visibility: Visibility, keys: string[]): Promise<void>;
   publicUrl(key: string): string;
@@ -110,15 +112,78 @@ function supabaseDriver(): StorageDriver {
   };
 }
 
+// ───────── Vercel Blob (tout se configure depuis Vercel, en un clic) ─────────
+// Photos : magasin PUBLIC (BLOB_READ_WRITE_TOKEN). Sauvegardes : magasin PRIVÉ
+// distinct et facultatif (BLOB_PRIVATE_READ_WRITE_TOKEN) — jamais de fichier
+// confidentiel dans le magasin public.
+
+class PrivateStorageMissing extends Error {
+  constructor() {
+    super("Stockage privé non configuré (BLOB_PRIVATE_READ_WRITE_TOKEN).");
+  }
+}
+
+function blobDriver(): StorageDriver {
+  const publicToken = process.env.BLOB_READ_WRITE_TOKEN;
+  if (!publicToken) throw new Error("BLOB_READ_WRITE_TOKEN manquant.");
+  const token = (v: Visibility) => {
+    const t = v === "public" ? publicToken : process.env.BLOB_PRIVATE_READ_WRITE_TOKEN;
+    if (!t) throw new PrivateStorageMissing();
+    return t;
+  };
+  return {
+    async put(visibility, key, body, contentType) {
+      const res = await blobPut(key, body, {
+        access: visibility,
+        token: token(visibility),
+        contentType,
+        addRandomSuffix: false,
+        allowOverwrite: true,
+        cacheControlMaxAge: visibility === "public" ? 31_536_000 : 60,
+      });
+      return res.url;
+    },
+    async get(visibility, key) {
+      const res = await blobGet(key, { access: visibility, token: token(visibility) });
+      if (!res || res.statusCode !== 200 || !res.stream) return null;
+      return Buffer.from(await new Response(res.stream).arrayBuffer());
+    },
+    async remove(visibility, keys) {
+      if (keys.length) await blobDel(keys, { token: token(visibility) });
+    },
+    publicUrl() {
+      // Avec Vercel Blob, l'adresse est enregistrée au moment de l'envoi (colonne image.base_url).
+      throw new Error("Adresse publique inconnue : utiliser l'adresse enregistrée");
+    },
+  };
+}
+
+export function storageDriverName(): "blob" | "supabase" | "local" {
+  const explicit = process.env.STORAGE_DRIVER;
+  if (explicit === "blob" || explicit === "supabase" || explicit === "local") return explicit;
+  if (process.env.BLOB_READ_WRITE_TOKEN) return "blob";
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) return "supabase";
+  return "local";
+}
+
+export function isPrivateStorageMissing(err: unknown): boolean {
+  return err instanceof PrivateStorageMissing;
+}
+
 let driver: StorageDriver | undefined;
 function current(): StorageDriver {
-  driver ??= process.env.STORAGE_DRIVER === "supabase" ? supabaseDriver() : localDriver;
+  if (!driver) {
+    const name = storageDriverName();
+    if (name === "local" && process.env.VERCEL) throw new Error("Aucun stockage de photos configuré (Vercel → Storage → Blob).");
+    driver = name === "blob" ? blobDriver() : name === "supabase" ? supabaseDriver() : localDriver;
+  }
   return driver;
 }
 
-export async function putFile(visibility: Visibility, key: string, body: Buffer, contentType: string) {
+export async function putFile(visibility: Visibility, key: string, body: Buffer, contentType: string): Promise<string> {
   assertKey(key);
-  await current().put(visibility, key, body, contentType);
+  const url = await current().put(visibility, key, body, contentType);
+  return url || (visibility === "public" ? current().publicUrl(key) : key);
 }
 
 export async function getFile(visibility: Visibility, key: string) {
@@ -139,6 +204,6 @@ export function publicFileUrl(key: string): string {
 
 /** Origine des images (pour la politique de sécurité du contenu). */
 export function mediaOrigin(): string | null {
-  if (process.env.STORAGE_DRIVER !== "supabase" || !process.env.SUPABASE_URL) return null;
+  if (storageDriverName() !== "supabase" || !process.env.SUPABASE_URL) return null;
   return new URL(process.env.SUPABASE_URL).origin;
 }

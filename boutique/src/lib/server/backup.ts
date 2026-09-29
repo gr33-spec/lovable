@@ -1,7 +1,7 @@
 import "server-only";
 import type { PoolClient } from "pg";
 import { query, transaction } from "./db";
-import { getFile, putFile, removeFiles } from "./storage";
+import { getFile, isPrivateStorageMissing, putFile, removeFiles } from "./storage";
 
 // Sauvegarde logique complète de la base (JSON) et restauration.
 // - automatique chaque nuit dans l'espace de stockage PRIVÉ (30 conservées) ;
@@ -90,7 +90,12 @@ export async function restoreBackup(file: BackupFile): Promise<void> {
 export async function storeNightlyBackup(): Promise<string> {
   const backup = await createBackup();
   const key = `backups/${backup.createdAt.slice(0, 10)}.json`;
-  await putFile("private", key, Buffer.from(JSON.stringify(backup)), "application/json");
+  try {
+    await putFile("private", key, Buffer.from(JSON.stringify(backup)), "application/json");
+  } catch (err) {
+    if (isPrivateStorageMissing(err)) return "ignorée : aucun stockage privé (sauvegarde manuelle depuis l'administration)";
+    throw err;
+  }
   // Conservation : 30 jours.
   const old = new Date(Date.now() - 31 * 86_400_000).toISOString().slice(0, 10);
   await removeFiles("private", [`backups/${old}.json`]).catch(() => undefined);

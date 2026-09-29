@@ -21,7 +21,7 @@ import { invalidateCatalog, invalidateSettings } from "@/lib/server/cached";
 import { newTotpSecret, readShortLived, signShortLived } from "@/lib/server/crypto";
 import { query, queryOne } from "@/lib/server/db";
 import { processOutbox } from "@/lib/server/email/outbox";
-import { paymentConfig } from "@/lib/server/env";
+import { paymentConfig, siteUrl } from "@/lib/server/env";
 import { audit, errorMessage } from "@/lib/server/monitoring";
 import { payments } from "@/lib/server/payments";
 import { ORDER_STATUSES, type OrderStatus } from "@/lib/order-status";
@@ -377,5 +377,34 @@ export async function resolveIncidentsAction() {
     await query("UPDATE system_event SET resolved_at = now() WHERE resolved_at IS NULL");
     await audit(admin.id, "incidents_resolved", "system", "");
     return { ok: true as const };
+  });
+}
+
+// ───────────── Créations d'exemple ─────────────
+
+export async function loadDemoAction() {
+  return guarded(async (admin) => {
+    const { headers } = await import("next/headers");
+    const h = await headers();
+    const host = h.get("x-forwarded-host") ?? h.get("host");
+    const origin = host ? `${h.get("x-forwarded-proto") ?? "https"}://${host}` : siteUrl();
+    const { createDemoProducts } = await import("@/lib/server/demo");
+    const res = await createDemoProducts(admin.id, async (file) => {
+      // Photos d'exemple servies par le site lui-même (dossier public/demo).
+      const r = await fetch(`${origin}/demo/${file}`, { cache: "no-store" });
+      if (!r.ok) throw new Error(`Photo d'exemple introuvable (${r.status})`);
+      return Buffer.from(await r.arrayBuffer());
+    });
+    if (res.ok) invalidateCatalog();
+    return res;
+  });
+}
+
+export async function removeDemoAction() {
+  return guarded(async (admin) => {
+    const { removeDemoProducts } = await import("@/lib/server/demo");
+    const count = await removeDemoProducts(admin.id);
+    invalidateCatalog();
+    return { ok: true as const, count };
   });
 }

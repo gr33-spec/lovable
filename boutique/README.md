@@ -7,6 +7,30 @@ Boutique e-commerce de bijoux artisanaux en résine : **simple devant, robuste d
 
 ---
 
+## 0. Voir la boutique en ligne (aperçu, ~15 minutes)
+
+Tout se fait dans **Vercel** : la base de données (Neon) et le stockage des photos (Blob) s'y ajoutent en un clic.
+Pas besoin de Supabase, Resend ni Stripe pour ce premier aperçu.
+
+1. **Intégrer le code à la branche principale du dépôt** (une seule fois) : sur GitHub, fusionner la branche
+   `claude/boutique-boheme-paillettes` (bouton *Create pull request*, puis *Merge*).
+2. <https://vercel.com/signup> → **Continue with GitHub** → autoriser l'accès au dépôt **lovable**.
+3. **Add New… → Project** → **Import** à côté de *lovable*.
+   - **Root Directory** → *Edit* → choisir **`boutique`** → *Continue*.
+   - **Environment Variables** : ajouter `APP_SECRET`, `CRON_SECRET` et `ADMIN_SETUP_TOKEN`
+     (trois longues suites de caractères aléatoires, différentes), et `STRIPE_MODE` = `test`.
+   - **Deploy**. Ce premier déploiement réussit mais le site affiche « pause technique » : la base n'existe pas encore.
+4. Dans le projet : onglet **Storage** → **Create Database** → **Neon** (Postgres) → région **Frankfurt** → *Create* → *Connect*.
+5. Toujours **Storage** → **Create** → **Blob** → accès **Public** (photos des produits) → *Create* → *Connect*.
+6. Onglet **Deployments** → sur la dernière ligne, menu **⋯** → **Redeploy**. La base se crée toute seule.
+7. Ouvrir `https://<votre-projet>.vercel.app/admin` → saisir le `ADMIN_SETUP_TOKEN` → créer votre compte.
+8. Sur le tableau de bord : **« Ajouter les exemples »** → la boutique se remplit de 4 créations d'exemple
+   (retirables d'un clic). Ouvrir `https://<votre-projet>.vercel.app` sur le téléphone.
+
+À ce stade, tout se visite et l'administration fonctionne entièrement. Le **paiement** s'active en ajoutant une clé
+de test Stripe (§ 3.3, étapes 1 et 3 : `STRIPE_SECRET_KEY` = `sk_test_…`, puis *Redeploy*) — carte de test
+`4242 4242 4242 4242`. Les **e-mails** s'activent avec Resend (§ 3.2). Avant d'ouvrir au public : suivre le § 3.
+
 ## 1. Ce qui est construit
 
 **Boutique** — accueil, catalogue (catégories, filtres utiles seulement, tri, recherche tolérante aux accents),
@@ -31,7 +55,7 @@ vrai navigateur (voir § 7).
 | Sujet | Décision | Raison |
 |---|---|---|
 | Architecture | Un seul site Next.js (boutique + admin + API), dossier `boutique/` | Monolithe bien découpé : rien à synchroniser, un seul déploiement. |
-| Hébergement | GitHub → Vercel ; base et photos chez Supabase ; paiement Stripe ; e-mails Resend | L'architecture proposée tient la route. Resend est ajouté car Supabase n'envoie pas d'e-mails transactionnels. |
+| Hébergement | GitHub → Vercel ; base PostgreSQL et photos ajoutées depuis Vercel (Neon + Vercel Blob) ; paiement Stripe ; e-mails Resend | Moins de comptes et de copier-coller : la base et le stockage se branchent en un clic. **Supabase reste pris en charge** (mêmes données, autre fournisseur) si tu le préfères. Resend est ajouté car ni Neon ni Supabase n'envoient d'e-mails. |
 | Accès aux données | **Uniquement depuis le serveur.** Aucune clé Supabase dans le navigateur ; RLS activée sur *toutes* les tables sans aucune autorisation publique (tout refusé) ; la migration échoue si une table n'a pas de RLS. | Personne ne peut interroger la base directement, même avec les outils du navigateur. |
 | Paiement | **Stripe Checkout** (page hébergée par Stripe) | Le plus simple et le plus sûr : aucune carte ne touche le site ; Apple Pay / Google Pay inclus. |
 | Prix | Recalculés **en base** à chaque paiement ; le navigateur n'envoie que des identifiants et des quantités | Impossible de payer 1 € un bijou à 40 €. |
@@ -49,7 +73,14 @@ vrai navigateur (voir § 7).
 
 Compter environ 1 heure. Tout se fait dans des tableaux de bord, sans ligne de commande.
 
-### 3.1 Base de données et photos — Supabase
+### 3.1 Base de données et photos
+
+**Option recommandée : depuis Vercel** (déjà fait si tu as suivi le § 0) — Storage → **Neon** (base, sauvegarde avec
+retour dans le temps intégrée) et Storage → **Blob** public (photos). Pour les sauvegardes nocturnes automatiques,
+créer un **second Blob en accès Private**, et copier son jeton dans une variable `BLOB_PRIVATE_READ_WRITE_TOKEN`
+(sinon : sauvegarde manuelle depuis l'administration).
+
+**Option Supabase** (au lieu de Neon + Blob) :
 1. <https://supabase.com> → **New project** → région **Europe (Paris) `eu-west-3`**, mot de passe fort (le noter).
 2. **Project Settings → Database → Connection string** → onglet **Transaction pooler** → copier l'URL
    (remplacer `[YOUR-PASSWORD]`) : c'est `DATABASE_URL`.
@@ -103,11 +134,12 @@ Le site refuse toute incohérence (clé de test avec `STRIPE_MODE=live`, clé r�
 
 | Variable | Obligatoire | Rôle |
 |---|---|---|
-| `SITE_URL` | oui | `https://labohemeenpaillettes.fr` |
+| `SITE_URL` | à l'ouverture | `https://labohemeenpaillettes.fr` (sinon : l'adresse `….vercel.app`). |
 | `APP_SECRET` | oui | 48 caractères aléatoires (`openssl rand -base64 48`). Protège sessions, liens de commande, double authentification. |
-| `DATABASE_URL` / `DATABASE_URL_MIGRATIONS` / `DATABASE_CA_CERT` | oui | Supabase (§ 3.1). |
-| `STORAGE_DRIVER=supabase`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | oui | Photos et sauvegardes. |
-| `PAYMENT_PROVIDER=stripe`, `STRIPE_MODE`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_ACCOUNT_ID` | oui | Paiement (§ 3.3). |
+| `DATABASE_URL` (+ `DATABASE_URL_UNPOOLED`) | oui | Posées automatiquement par Neon. Avec Supabase : `DATABASE_URL`, `DATABASE_URL_MIGRATIONS`, `DATABASE_CA_CERT` (§ 3.1). |
+| `BLOB_READ_WRITE_TOKEN` | oui | Posée automatiquement par Vercel Blob (photos). Avec Supabase : `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY`. |
+| `BLOB_PRIVATE_READ_WRITE_TOKEN` | conseillé | Jeton d'un second Blob **privé** : sauvegardes nocturnes. |
+| `STRIPE_MODE`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_ACCOUNT_ID` | oui | Paiement (§ 3.3). En mode test, le webhook et l'identifiant de compte sont facultatifs ; en réel, obligatoires. |
 | `EMAIL_PROVIDER=resend`, `RESEND_API_KEY`, `EMAIL_FROM` | oui | Ex. `EMAIL_FROM="La Bohème en Paillettes <commandes@labohemeenpaillettes.fr>"`. |
 | `CRON_SECRET` | oui | 32 caractères aléatoires (tâches nocturnes). |
 | `ADMIN_SETUP_TOKEN` | 1re installation | À supprimer ensuite. |

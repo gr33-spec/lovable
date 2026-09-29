@@ -60,6 +60,7 @@ interface LockedProduct {
   status: string;
   category_visible: boolean;
   image_id: string | null;
+  image_base: string | null;
 }
 
 async function moveStock(
@@ -201,13 +202,19 @@ export async function startCheckout(input: CheckoutInput): Promise<CheckoutResul
   await sweepExpiredReservations(5, productIds).catch(() => undefined);
 
   const token = randomToken();
-  let created: { orderId: string; number: string; lines: { name: string; unitAmountCents: number; quantity: number; imageId: string | null }[]; shippingCents: number };
+  let created: {
+    orderId: string;
+    number: string;
+    lines: { name: string; unitAmountCents: number; quantity: number; imageId: string | null; imageBase: string | null }[];
+    shippingCents: number;
+  };
   try {
     created = await transaction(async (c) => {
       // Verrouillage des produits dans un ordre fixe (évite les interblocages).
       const products = await query<LockedProduct>(
         `SELECT p.id, p.name, p.slug, p.sku, p.price_cents, p.stock, p.status, c.is_visible AS category_visible,
-                (SELECT i.id FROM image i WHERE i.product_id = p.id AND i.kind = 'product' ORDER BY i.position, i.created_at LIMIT 1) AS image_id
+                (SELECT i.id FROM image i WHERE i.product_id = p.id AND i.kind = 'product' ORDER BY i.position, i.created_at LIMIT 1) AS image_id,
+                (SELECT i.base_url FROM image i WHERE i.product_id = p.id AND i.kind = 'product' ORDER BY i.position, i.created_at LIMIT 1) AS image_base
          FROM product p JOIN category c ON c.id = p.category_id
          WHERE p.id = ANY($1::uuid[]) ORDER BY p.id FOR UPDATE OF p`,
         [productIds],
@@ -301,7 +308,7 @@ export async function startCheckout(input: CheckoutInput): Promise<CheckoutResul
         orderId,
         number,
         shippingCents: totals.shippingCents,
-        lines: lines.map((l) => ({ name: l.product.name, unitAmountCents: l.product.price_cents, quantity: l.quantity, imageId: l.product.image_id })),
+        lines: lines.map((l) => ({ name: l.product.name, unitAmountCents: l.product.price_cents, quantity: l.quantity, imageId: l.product.image_id, imageBase: l.product.image_base })),
       };
     });
   } catch (err) {
@@ -325,7 +332,7 @@ export async function startCheckout(input: CheckoutInput): Promise<CheckoutResul
       orderId: created.orderId,
       orderNumber: created.number,
       email: input.email,
-      lines: created.lines.map((l) => ({ name: l.name, unitAmountCents: l.unitAmountCents, quantity: l.quantity, imageUrl: l.imageId ? ogImageUrl({ id: l.imageId }) : undefined })),
+      lines: created.lines.map((l) => ({ name: l.name, unitAmountCents: l.unitAmountCents, quantity: l.quantity, imageUrl: l.imageId ? ogImageUrl({ id: l.imageId, base_url: l.imageBase }) : undefined })),
       shipping: { name: method.name, amountCents: created.shippingCents },
       successUrl: `${siteUrl()}/commande/suivi/${token}?merci=1`,
       cancelUrl: `${siteUrl()}/commande?retour=1`,

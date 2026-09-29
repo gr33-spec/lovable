@@ -1,6 +1,7 @@
 import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardList, PackageX, Plus, TrendingDown } from "lucide-react";
 import Link from "next/link";
 import { after } from "next/server";
+import { DemoCard } from "@/components/admin/demo-card";
 import { IncidentsCard } from "@/components/admin/incidents";
 import { StatusBadge } from "@/components/admin/ui";
 import { formatPrice, formatRelative } from "@/lib/format";
@@ -25,8 +26,10 @@ export default async function Dashboard() {
   const legalPages = await query<{ body: string }>("SELECT body FROM legal_page");
   const pagesToComplete = legalPages.filter((p) => hasPlaceholders(p.body)).length;
   const products = await query<{ n: string }>("SELECT count(*) AS n FROM product WHERE status = 'published'");
+  const catalog = await query<{ total: string; demo: string }>("SELECT count(*) AS total, count(*) FILTER (WHERE is_demo) AS demo FROM product");
   const setup = [
-    { done: Number(products[0].n) > 0, label: "Publier une première création", href: "/admin/produits/nouveau" },
+    { done: Number(products[0].n) - Number(catalog[0].demo) > 0, label: "Publier une première création", href: "/admin/produits/nouveau" },
+    { done: Number(catalog[0].demo) === 0, label: "Retirer les créations d'exemple", href: "/admin" },
     { done: Number(shipping[0].n) > 0, label: "Activer au moins un mode de livraison", href: "/admin/livraison" },
     { done: missing.length === 0, label: `Compléter les informations légales${missing.length ? ` (${missing.length} manquantes)` : ""}`, href: "/admin/parametres" },
     { done: pagesToComplete === 0, label: `Compléter les pages légales (CGV, confidentialité…)${pagesToComplete ? ` — ${pagesToComplete} à finir` : ""}`, href: "/admin/parametres#pages" },
@@ -46,6 +49,9 @@ export default async function Dashboard() {
           <Plus size={18} aria-hidden="true" /> Ajouter un produit
         </Link>
       </header>
+
+      {Number(catalog[0].total) === 0 && <DemoCard mode="load" />}
+      {Number(catalog[0].demo) > 0 && <DemoCard mode="remove" />}
 
       {setupLeft.length > 0 && (
         <section className="card mb-6 p-5" aria-labelledby="titre-ouverture">

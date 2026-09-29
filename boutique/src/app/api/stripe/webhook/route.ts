@@ -21,6 +21,7 @@ export async function POST(request: Request) {
   }
   let event;
   try {
+    if (!(process.env.PAYMENT_PROVIDER === "fake" || process.env.STRIPE_WEBHOOK_SECRET)) return json({ error: "Webhook non configuré" }, 503);
     event = await provider.parseWebhook(raw, request.headers.get("stripe-signature"));
   } catch (err) {
     await reportEvent("warning", "webhook", "Webhook refusé : signature invalide", { error: errorMessage(err) });

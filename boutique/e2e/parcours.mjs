@@ -36,12 +36,12 @@ function watch(page) {
 const client = await browser.newContext(phone);
 const page = await client.newPage();
 watch(page);
-const productSlug = "fleurs-pailletees-arc-en-ciel";
+const productSlug = "fleurs-pailletees-arc-en-ciel-exemple";
 const stockBefore = Number(sql(`SELECT stock FROM product WHERE slug = '${productSlug}'`));
 
 await step("La cliente arrive directement sur une fiche produit (lien Facebook)", async () => {
   await page.goto(`${BASE}/produit/${productSlug}`);
-  await page.getByRole("heading", { level: 1, name: "Fleurs pailletées Arc-en-ciel" }).waitFor();
+  await page.getByRole("heading", { level: 1, name: /Fleurs pailletées Arc-en-ciel/ }).waitFor();
   await page.screenshot({ path: `${SHOTS}01-fiche.png` });
 });
 

@@ -67,8 +67,10 @@ export async function processImage(input: Buffer, id: string, kind: "product" | 
   };
 }
 
-export async function storeVariants(processed: ProcessedImage): Promise<void> {
-  await Promise.all(processed.variants.map((v) => putFile("public", v.key, v.body, v.contentType)));
+/** Envoie les variantes et renvoie leur adresse de base (…/images/<id>). */
+export async function storeVariants(processed: ProcessedImage): Promise<string> {
+  const urls = await Promise.all(processed.variants.map((v) => putFile("public", v.key, v.body, v.contentType)));
+  return urls[0].replace(/\/[^/]+$/, "");
 }
 
 export async function deleteImageFiles(id: string, widths: number[]): Promise<void> {
@@ -82,6 +84,11 @@ export interface ImageRow {
   widths: number[];
   placeholder: string;
   alt: string;
+  base_url?: string | null;
+}
+
+function baseOf(row: { id: string; base_url?: string | null }): string {
+  return row.base_url || publicFileUrl(`images/${row.id}`);
 }
 
 /** Référence sérialisable envoyée aux composants (aucune donnée interne). */
@@ -93,10 +100,10 @@ export function toImageRef(row: ImageRow): ImageRef {
     widths: row.widths,
     ph: row.placeholder,
     alt: row.alt,
-    base: publicFileUrl(`images/${row.id}`),
+    base: baseOf(row),
   };
 }
 
-export function ogImageUrl(row: Pick<ImageRow, "id">): string {
-  return publicFileUrl(`images/${row.id}/og.jpg`);
+export function ogImageUrl(row: { id: string; base_url?: string | null }): string {
+  return `${baseOf(row)}/og.jpg`;
 }

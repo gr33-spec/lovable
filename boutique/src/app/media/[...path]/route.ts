@@ -1,9 +1,9 @@
-import { getFile } from "@/lib/server/storage";
+import { getFile, storageDriverName } from "@/lib/server/storage";
 
 // Développement uniquement : sert les photos du stockage local.
 // En production, les photos sont servies directement par le CDN de Supabase.
 export async function GET(_req: Request, { params }: { params: Promise<{ path: string[] }> }) {
-  if (process.env.STORAGE_DRIVER === "supabase") return new Response("Introuvable", { status: 404 });
+  if (storageDriverName() !== "local") return new Response("Introuvable", { status: 404 });
   const { path } = await params;
   const key = path.join("/");
   if (!/^images\/[0-9a-f-]{36}\/(\d{2,4}\.webp|og\.jpg)$/.test(key)) return new Response("Introuvable", { status: 404 });

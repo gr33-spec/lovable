@@ -61,7 +61,13 @@ export async function migrate(databaseUrl: string, log: (msg: string) => void = 
 }
 
 if (require.main === module) {
-  const url = process.env.DATABASE_URL_MIGRATIONS || process.env.DATABASE_URL;
+  // Connexion directe de préférence (noms posés par les intégrations Neon / Supabase de Vercel).
+  const url =
+    process.env.DATABASE_URL_MIGRATIONS ||
+    process.env.DATABASE_URL_UNPOOLED ||
+    process.env.POSTGRES_URL_NON_POOLING ||
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL;
   if (!url) {
     // Premier déploiement sans base : on laisse la construction continuer,
     // le site affichera « base non configurée ».

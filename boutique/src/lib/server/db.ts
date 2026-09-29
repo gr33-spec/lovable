@@ -17,7 +17,8 @@ function sslConfig(url: URL): false | { ca?: string; rejectUnauthorized: boolean
 
 export function pool(): Pool {
   if (!globalForDb.boutiquePool) {
-    const raw = process.env.DATABASE_URL;
+    // DATABASE_URL, ou POSTGRES_URL (nom posé par certaines intégrations Vercel).
+    const raw = process.env.DATABASE_URL || process.env.POSTGRES_URL;
     if (!raw) throw new Error("DATABASE_URL manquant : la base de données n'est pas configurée.");
     const url = new URL(raw);
     // Les paramètres sslmode de l'URL remplaceraient la configuration ci-dessous.

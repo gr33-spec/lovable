@@ -62,6 +62,7 @@ export async function healthCheck(): Promise<Health> {
   }
   const payment = paymentConfig();
   if (!payment.ok) problems.push(`Paiement : ${payment.reason}`);
+  else if (payment.provider === "stripe" && !payment.webhookSecret) problems.push("Webhook Stripe non configuré (conseillé même en test)");
   const failedEmails = await queryOne<{ n: string }>("SELECT count(*) AS n FROM email_outbox WHERE status = 'failed' AND created_at > now() - interval '7 days'");
   if (Number(failedEmails?.n) > 0) problems.push(`${failedEmails?.n} e-mail(s) non envoyé(s)`);
   const stuckEmails = await queryOne<{ n: string }>("SELECT count(*) AS n FROM email_outbox WHERE status = 'pending' AND created_at < now() - interval '2 hours'");
