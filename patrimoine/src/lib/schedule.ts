@@ -1,4 +1,4 @@
-import type { AppData, Building, Loan, LoanScheduleRow, ProjectLoan } from "./types";
+import type { AppData, Building, Loan, LoanScheduleRow, ProjectLoan, ScheduleMeta } from "./types";
 import { monthIndex, parseMonth, type MonthIndex } from "./engine/dates";
 
 // Tableau d'amortissement de la banque : contrôles de cohérence avant
@@ -66,27 +66,36 @@ export function checkSchedule(input: LoanScheduleRow[]): ScheduleCheck {
 /**
  * Champs du crédit repris du tableau : montant, dates, durée, échéance, taux,
  * assurance et capital restant dû au 1er du mois courant (tenu à jour chaque mois).
+ * `meta` (en-tête du document) complète un tableau partiel — édité en cours de
+ * prêt, il ne commence pas à la première échéance : montant, début et durée
+ * viennent alors de l'en-tête, jamais recalculés depuis la première ligne.
  */
-export function loanFieldsFromSchedule(input: LoanScheduleRow[], nowMonth?: MonthIndex): Partial<Loan> {
+export function loanFieldsFromSchedule(input: LoanScheduleRow[], nowMonth?: MonthIndex, meta?: ScheduleMeta): Partial<Loan> {
   const rows = normalizeRows(input);
   if (rows.length < 2) return {};
   const first = rows[0];
   const last = rows[rows.length - 1];
-  const initial = first.balance + first.principal;
+  const fromRows = first.balance + first.principal;
   // Échéance la plus fréquente (les premières ou dernières peuvent différer).
   const counts = new Map<number, number>();
   for (const r of rows) counts.set(Math.round(r.payment * 100), (counts.get(Math.round(r.payment * 100)) ?? 0) + 1);
   const payment = [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0] / 100;
   const m0 = parseMonth(first.month)!;
   const m1 = parseMonth(last.month)!;
-  const ratePct = initial > 0 ? Math.round((first.interest / initial) * 1200 * 1000) / 1000 : undefined;
+  const declaredStart = parseMonth(meta?.startDate);
+  const partial = !!meta?.initialAmount && meta.initialAmount > fromRows * 1.01 + TOL;
+  const initial = partial ? meta!.initialAmount! : fromRows;
+  const computedRate = fromRows > 0 ? Math.round((first.interest / fromRows) * 1200 * 1000) / 1000 : undefined;
+  // Taux imprimé retenu s'il est cohérent avec les intérêts (sinon c'est peut-être le TAEG).
+  const ratePct = meta?.ratePct && (computedRate === undefined || Math.abs(meta.ratePct - computedRate) <= 0.15) ? meta.ratePct : computedRate;
   const d = (m: number) => `${ym(m)}-01`;
+  const startMonth = partial ? (declaredStart ?? (meta?.durationMonths ? m1 - meta.durationMonths + 1 : undefined)) : m0;
   return {
     initialAmount: Math.round(initial * 100) / 100,
     // Déblocage le mois précédant la première échéance.
-    startDate: d(m0 - 1),
+    ...(startMonth === undefined ? {} : { startDate: partial && declaredStart !== undefined ? d(declaredStart) : d(startMonth - 1) }),
     endDate: d(m1),
-    durationMonths: m1 - m0 + 1,
+    durationMonths: partial ? (meta?.durationMonths ?? (startMonth !== undefined ? m1 - startMonth + 1 : undefined)) : m1 - m0 + 1,
     monthlyPayment: payment,
     ratePct,
     insuranceMonthly: first.insurance !== undefined ? first.insurance : undefined,
@@ -115,7 +124,7 @@ export function syncFromSchedules(data: AppData, nowMonth: MonthIndex): { loans:
   const loans: Loan[] = [];
   for (const loan of data.loans) {
     if (!loan.schedule || loan.schedule.rows.length < 2) continue;
-    const fields = loanFieldsFromSchedule(loan.schedule.rows, nowMonth);
+    const fields = loanFieldsFromSchedule(loan.schedule.rows, nowMonth, loan.schedule.meta);
     const next: Loan = { ...loan };
     let changed = false;
     for (const k of SYNCED) {
@@ -132,7 +141,7 @@ export function syncFromSchedules(data: AppData, nowMonth: MonthIndex): { loans:
     if (b.acquisitionDate) continue;
     const starts = data.loans
       .filter((l) => l.buildingId === b.id && l.schedule)
-      .map((l) => loanFieldsFromSchedule(l.schedule!.rows).startDate)
+      .map((l) => loanFieldsFromSchedule(l.schedule!.rows, undefined, l.schedule!.meta).startDate)
       .filter((d): d is string => !!d)
       .sort();
     if (starts[0]) buildings.push({ ...b, acquisitionDate: starts[0] });

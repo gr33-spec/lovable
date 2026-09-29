@@ -505,8 +505,8 @@ function FinancingSection({ p, set }: SectionProps) {
 /** Prêt d'un projet créé directement depuis le tableau d'amortissement de l'offre. */
 function NewLoanFromSchedule({ onAdd }: { onAdd: (l: ProjectLoan) => void }) {
   const importer = useScheduleImport({
-    onConfirm: ({ rows, fileId, fileName, bank }) =>
-      onAdd({ id: newId(), label: "Prêt principal", bank: bank ?? undefined, ...projectLoanFromSchedule(rows), schedule: scheduleOf(rows, fileId, fileName) }),
+    onConfirm: ({ rows, fileId, fileName, bank, meta }) =>
+      onAdd({ id: newId(), label: "Prêt principal", bank: bank ?? undefined, ...projectLoanFromSchedule(rows), schedule: scheduleOf(rows, fileId, fileName, meta) }),
   });
   return <ScheduleImportCard title="Importer le tableau de la banque" text="Montant, taux, durée, assurance, différé et échéances repris au centime (PDF ou photo)." importer={importer} />;
 }
@@ -517,10 +517,9 @@ function ProjectLoanCard({ lf, onChange, onRemove }: { lf: ReturnType<typeof pro
   const importer = useScheduleImport({
     hint: l.label || l.bank,
     compare: { initialAmount: l.amount, ratePct: l.ratePct, insuranceMonthly: l.insuranceMonthly },
-    onConfirm: ({ rows, fileId, fileName, bank }) => {
-      const old = l.schedule?.fileId;
-      onChange({ ...l, bank: l.bank || bank || undefined, ...projectLoanFromSchedule(rows), schedule: scheduleOf(rows, fileId, fileName) });
-      if (old && old !== fileId) void fetch(`/api/files/${old}`, { method: "DELETE" }).catch(() => undefined);
+    onConfirm: ({ rows, fileId, fileName, bank, meta }) => {
+      // L'ancien fichier n'est pas supprimé (aucune pièce effacée sans demande explicite).
+      onChange({ ...l, bank: l.bank || bank || undefined, ...projectLoanFromSchedule(rows), schedule: scheduleOf(rows, fileId, fileName, meta) });
     },
   });
   const removeSchedule = () => {

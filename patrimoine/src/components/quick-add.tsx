@@ -2,6 +2,8 @@
 
 import { ScheduleImportCard, scheduleOf, useScheduleImport } from "./details/loan-schedule";
 import { loanFieldsFromSchedule } from "@/lib/schedule";
+import { matchLoan } from "@/lib/loan-match";
+import { toast } from "./swipe";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Building2, Briefcase, Hammer, Landmark } from "lucide-react";
@@ -94,17 +96,25 @@ export function QuickLoan({ buildingId, companyId, onDone }: { buildingId?: stri
   // Le plus simple et le plus exact : créer le crédit directement depuis le tableau de la banque.
   const importer = useScheduleImport({
     hint: name || bank,
-    onConfirm: ({ rows, fileId, fileName, bank: readBank }) => {
+    onConfirm: ({ rows, fileId, fileName, bank: readBank, meta }) => {
+      // Même échéancier déjà enregistré : on ouvre ce crédit au lieu d'en créer un second.
+      const same = matchLoan(data, { rows, meta }, {}, nowMonth).identicalTo;
+      if (same) {
+        toast("Ce tableau est déjà enregistré sur un crédit existant");
+        onDone(same);
+        return;
+      }
       const id = newId();
-      const b = bank || readBank || undefined;
+      const b = bank || readBank || meta?.bank || undefined;
       upsert("loans", {
         id,
         name: name || (b ? `Prêt ${b}` : "Nouveau crédit"),
         bank: b,
         buildingId: building ?? null,
         companyId: building ? null : (companyId ?? null),
-        ...loanFieldsFromSchedule(rows, nowMonth),
-        schedule: scheduleOf(rows, fileId, fileName),
+        reference: meta?.reference || undefined,
+        ...loanFieldsFromSchedule(rows, nowMonth, meta),
+        schedule: scheduleOf(rows, fileId, fileName, meta),
       } satisfies Loan);
       onDone(id);
     },

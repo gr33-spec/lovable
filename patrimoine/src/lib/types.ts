@@ -386,6 +386,8 @@ export interface Loan {
   /** Assurance mensuelle. */
   insuranceMonthly?: number;
   durationMonths?: number;
+  /** Numéro ou référence du prêt chez la banque. */
+  reference?: string;
   notes?: string;
   /** Tableau d'amortissement de la banque : quand il est présent, il fait foi pour tous les calculs. */
   schedule?: LoanSchedule;
@@ -412,6 +414,24 @@ export interface LoanSchedule {
   fileName?: string;
   importedAt: string;
   source: "ia" | "manuel";
+  /** Informations imprimées sur le document (en-tête du tableau), telles quelles. */
+  meta?: ScheduleMeta;
+}
+
+/** En-tête d'un tableau d'amortissement : ce que la banque y indique. */
+export interface ScheduleMeta {
+  borrower?: string;
+  bank?: string;
+  /** Numéro ou référence du prêt. */
+  reference?: string;
+  /** Adresse du bien financé. */
+  address?: string;
+  initialAmount?: number;
+  /** Date de début (déblocage ou signature), AAAA-MM-JJ. */
+  startDate?: string;
+  durationMonths?: number;
+  /** Taux nominal annuel en %. */
+  ratePct?: number;
 }
 
 export type WorkStatus = "envisage" | "prevu" | "en_cours" | "termine";

@@ -49,13 +49,13 @@ test("caution, courrier, tableau d'amortissement, pièce libre", () => {
   assert.equal((c.ops[0].item as (typeof d.tenancies)[number]).guarantors?.[0].signedFile?.fileId, "f3");
   const l = fileDocument(d, { fileId: "f4", name: "courrier.pdf", category: "courrier", title: "Révision 2026", tenancyId: "t" }, NOW);
   assert.equal((l.ops[0].item as (typeof d.tenancies)[number]).letters?.[0].label, "Révision 2026");
-  const tab = fileDocument(d, { fileId: "f5", name: "tableau.pdf", category: "tableau_amortissement", loanId: "l", scheduleRows: table() }, NOW);
+  const tab = fileDocument(d, { fileId: "f5", name: "tableau.pdf", category: "tableau_amortissement", loanId: "l", scheduleRows: table(), loanPlan: { kind: "existing", loanId: "l" } }, NOW);
   const loan = tab.ops[0].item as (typeof d.loans)[number];
   assert.equal(tab.ops[0].coll, "loans");
   assert.equal(loan.schedule?.fileId, "f5");
   assert.equal(loan.initialAmount, 12_000);
-  // Tableau incohérent : pas de mise à jour du crédit, simple pièce rattachée.
   const bad = table().map((r, i) => (i === 5 ? { ...r, balance: r.balance + 500 } : r));
+  // Sans financement désigné, un tableau reste une pièce rattachée au prêt (jamais perdue).
   assert.equal(fileDocument(d, { fileId: "f6", name: "t.pdf", category: "tableau_amortissement", loanId: "l", scheduleRows: bad }, NOW).ops[0].coll, "documents");
   const ins = fileDocument(d, { fileId: "f7", name: "pno.pdf", category: "assurance", title: "Assurance PNO", buildingId: "b" }, NOW);
   assert.equal(ins.ops[0].coll, "documents");
