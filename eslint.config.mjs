@@ -7,6 +7,9 @@ const eslintConfig = defineConfig([
   ...nextTs,
   // Override default ignores of eslint-config-next.
   globalIgnores([
+    // Applications autonomes du dépôt (chacune a sa propre configuration) :
+    "boutique/**",
+    "patrimoine/**",
     // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",
