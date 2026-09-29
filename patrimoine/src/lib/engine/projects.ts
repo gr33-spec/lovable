@@ -1,4 +1,5 @@
 import type { AppData, Building, Company, Loan, Project, ProjectLoan, ProjectStatus, Unit, Work } from "../types";
+import { loanFieldsFromSchedule, scheduleSummary } from "../schedule";
 import { annuityPayment } from "./loan";
 import { NO_COMPANY } from "./snapshot";
 
@@ -40,6 +41,13 @@ export interface LoanFigures {
 
 export function loanFigures(loan: ProjectLoan): LoanFigures {
   const insurance = loan.insuranceMonthly ?? 0;
+  if (loan.schedule && loan.schedule.rows.length >= 2) {
+    // Tableau de la banque : chiffres lus, pas recalculés.
+    const s = scheduleSummary(loan.schedule.rows);
+    if (s.payment !== undefined) {
+      return { loan, payment: round2(s.payment), deferralPayment: s.deferralPayment, insurance, monthly: round2(s.payment + insurance), totalInterest: s.totalInterest };
+    }
+  }
   if (!loan.amount || !loan.durationMonths || loan.ratePct === undefined) return { loan, insurance };
   const r = loan.ratePct / 1200;
   const deferral = Math.min(Math.max(0, loan.deferralMonths ?? 0), loan.durationMonths - 1);
@@ -282,6 +290,8 @@ export function realizeProject(data: AppData, p: Project, input: RealizeInput, n
       startDate: date,
       insuranceMonthly: l.insuranceMonthly,
       notes: l.deferralMonths ? `Différé d'amortissement de ${l.deferralMonths} mois prévu au projet.` : undefined,
+      // Tableau de l'offre : le crédit réel le reprend tel quel (dates et échéances exactes).
+      ...(l.schedule ? { ...loanFieldsFromSchedule(l.schedule.rows), schedule: l.schedule, notes: undefined } : {}),
     }));
 
   const financed = loans.length > 0;

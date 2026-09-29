@@ -635,6 +635,8 @@ export interface ProjectLoan {
   /** Différé d'amortissement (intérêts seuls), en mois. */
   deferralMonths?: number;
   insuranceMonthly?: number;
+  /** Tableau d'amortissement de l'offre de prêt : il fait foi et devient celui du crédit à la réalisation. */
+  schedule?: LoanSchedule;
 }
 
 export interface ProjectDocument {

@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { CircleAlert, FileCheck2, FileUp, LoaderCircle, Table2 } from "lucide-react";
 import { useStore } from "@/lib/store";
-import type { Loan, LoanScheduleRow } from "@/lib/types";
+import type { Loan, LoanSchedule, LoanScheduleRow } from "@/lib/types";
 import { checkSchedule, loanFieldsFromSchedule } from "@/lib/schedule";
 import { monthIndex, monthLabel, parseMonth } from "@/lib/engine/dates";
 import { dateFr, eur } from "@/lib/format";
@@ -27,57 +27,21 @@ interface Extraction {
 
 export function LoanScheduleSection({ loan }: { loan: Loan }) {
   const { upsert, role, nowMonth } = useStore();
-  const input = useRef<HTMLInputElement>(null);
-  const [step, setStep] = useState<null | "upload" | "read">(null);
-  const [progress, setProgress] = useState(0);
-  const [error, setError] = useState<string | null>(null);
-  const [review, setReview] = useState<{ fileId: string; fileName: string; extraction: Extraction } | null>(null);
   const [showRows, setShowRows] = useState(false);
   const schedule = loan.schedule;
   const readOnly = role !== "owner";
 
-  const importFile = async (f: File) => {
-    setError(null);
-    setStep("upload");
-    setProgress(0);
-    let fileId: string | null = null;
-    try {
-      fileId = await uploadFile(f, setProgress);
-      setStep("read");
-      const res = await fetch("/api/credits/tableau", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ fileId, loanName: loan.name || loan.bank }) });
-      const j = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(j.error ?? "Lecture impossible.");
-      setReview({ fileId, fileName: f.name, extraction: j.extraction });
-    } catch (e) {
-      setError((e as Error).message);
-      if (fileId) void fetch(`/api/files/${fileId}`, { method: "DELETE" }).catch(() => undefined);
-    } finally {
-      setStep(null);
-    }
-  };
-
-  const cancelReview = () => {
-    if (review) void fetch(`/api/files/${review.fileId}`, { method: "DELETE" }).catch(() => undefined);
-    setReview(null);
-  };
-
-  const save = () => {
-    if (!review) return;
-    const fields = loanFieldsFromSchedule(review.extraction.rows, nowMonth);
+  const save = ({ rows, fileId, fileName, bank }: ImportedSchedule) => {
+    const fields = loanFieldsFromSchedule(rows, nowMonth);
     const previous = loan;
-    const next: Loan = {
-      ...loan,
-      ...fields,
-      bank: loan.bank || review.extraction.bank || undefined,
-      schedule: { rows: review.extraction.rows, fileId: review.fileId, fileName: review.fileName, importedAt: new Date().toISOString().slice(0, 10), source: "ia" },
-    };
-    upsert("loans", next);
+    upsert("loans", { ...loan, ...fields, bank: loan.bank || bank || undefined, schedule: scheduleOf(rows, fileId, fileName) });
     // L'ancien document est supprimé : un seul tableau en vigueur.
     const oldFile = previous.schedule?.fileId;
-    setReview(null);
     toast("Tableau d'amortissement enregistré", () => upsert("loans", previous));
-    if (oldFile && oldFile !== review.fileId) setTimeout(() => void fetch(`/api/files/${oldFile}`, { method: "DELETE" }).catch(() => undefined), 7000);
+    if (oldFile && oldFile !== fileId) setTimeout(() => void fetch(`/api/files/${oldFile}`, { method: "DELETE" }).catch(() => undefined), 7000);
   };
+  const importer = useScheduleImport({ hint: loan.name || loan.bank, compare: loan, onConfirm: save });
+  const busy = importer.busy;
 
   const removeSchedule = () => {
     const previous = loan;
@@ -94,7 +58,6 @@ export function LoanScheduleSection({ loan }: { loan: Loan }) {
   };
 
   const check = schedule ? checkSchedule(schedule.rows) : null;
-  const busy = step !== null;
 
   return (
     <>
@@ -125,7 +88,7 @@ export function LoanScheduleSection({ loan }: { loan: Loan }) {
               )}
               {!readOnly && (
                 <>
-                  <button type="button" disabled={busy} onClick={() => input.current?.click()} className="rounded-full bg-soft px-3.5 py-2 text-[13px] font-semibold text-navy">
+                  <button type="button" disabled={busy} onClick={importer.pick} className="rounded-full bg-soft px-3.5 py-2 text-[13px] font-semibold text-navy">
                     Remplacer
                   </button>
                   <button type="button" onClick={removeSchedule} className="rounded-full px-3 py-2 text-[13px] font-semibold text-neg">
@@ -150,31 +113,119 @@ export function LoanScheduleSection({ loan }: { loan: Loan }) {
             </div>
             {!readOnly && (
               <div className="mt-3">
-                <Button full disabled={busy} onClick={() => input.current?.click()} icon={busy ? <LoaderCircle size={18} className="animate-spin" /> : <FileUp size={18} />}>
-                  {step === "upload" ? `Envoi… ${progress} %` : step === "read" ? "Lecture du tableau… (jusqu'à 2 min)" : "Importer le tableau d'amortissement"}
+                <Button full disabled={busy} onClick={importer.pick} icon={busy ? <LoaderCircle size={18} className="animate-spin" /> : <FileUp size={18} />}>
+                  {importer.label ?? "Importer le tableau d'amortissement"}
                 </Button>
               </div>
             )}
           </>
         )}
-        {busy && schedule && <p className="mt-2 flex items-center gap-1.5 text-[13px] text-series-1"><LoaderCircle size={14} className="animate-spin" /> {step === "upload" ? `Envoi… ${progress} %` : "Lecture du nouveau tableau…"}</p>}
-        {error && <p className="mt-2 text-[13px] text-neg">{error}</p>}
-        <input
-          ref={input}
-          type="file"
-          accept={ACCEPTED_FILES}
-          className="hidden"
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) void importFile(f);
-            e.target.value = "";
-          }}
-        />
+        {busy && schedule && <p className="mt-2 flex items-center gap-1.5 text-[13px] text-series-1"><LoaderCircle size={14} className="animate-spin" /> {importer.label}</p>}
+        {importer.element}
       </Card>
 
-      {review && <ReviewSheet loan={loan} review={review} onCancel={cancelReview} onSave={save} />}
       {schedule && <RowsSheet rows={schedule.rows} open={showRows} onClose={() => setShowRows(false)} nowKey={monthKeyOf(nowMonth)} />}
     </>
+  );
+}
+
+export interface ImportedSchedule {
+  rows: LoanScheduleRow[];
+  fileId: string;
+  fileName: string;
+  bank: string | null;
+}
+
+export function scheduleOf(rows: LoanScheduleRow[], fileId: string, fileName: string): LoanSchedule {
+  return { rows, fileId, fileName, importedAt: new Date().toISOString().slice(0, 10), source: "ia" };
+}
+
+/**
+ * Import d'un tableau d'amortissement, commun à tous les écrans (création de
+ * crédit, fiche crédit, prêts d'un projet) : envoi du fichier, lecture par
+ * l'IA, vérification par l'utilisateur, puis `onConfirm`. Annuler supprime le
+ * fichier envoyé.
+ */
+export function useScheduleImport({ hint, compare, onConfirm }: { hint?: string; compare?: Partial<Loan>; onConfirm: (s: ImportedSchedule) => void }) {
+  const input = useRef<HTMLInputElement>(null);
+  const [step, setStep] = useState<null | "upload" | "read">(null);
+  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [review, setReview] = useState<{ fileId: string; fileName: string; extraction: Extraction } | null>(null);
+
+  const importFile = async (f: File) => {
+    setError(null);
+    setStep("upload");
+    setProgress(0);
+    let fileId: string | null = null;
+    try {
+      fileId = await uploadFile(f, setProgress);
+      setStep("read");
+      const res = await fetch("/api/credits/tableau", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ fileId, loanName: hint }) });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(j.error ?? "Lecture impossible.");
+      setReview({ fileId, fileName: f.name, extraction: j.extraction });
+    } catch (e) {
+      setError((e as Error).message);
+      if (fileId) void fetch(`/api/files/${fileId}`, { method: "DELETE" }).catch(() => undefined);
+    } finally {
+      setStep(null);
+    }
+  };
+  const cancel = () => {
+    if (review) void fetch(`/api/files/${review.fileId}`, { method: "DELETE" }).catch(() => undefined);
+    setReview(null);
+  };
+  const confirm = () => {
+    if (!review) return;
+    onConfirm({ rows: review.extraction.rows, fileId: review.fileId, fileName: review.fileName, bank: review.extraction.bank });
+    setReview(null);
+  };
+  const element = (
+    <>
+      {error && <p className="mt-2 text-[13px] text-neg">{error}</p>}
+      <input
+        ref={input}
+        type="file"
+        accept={ACCEPTED_FILES}
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) void importFile(f);
+          e.target.value = "";
+        }}
+      />
+      {review && <ReviewSheet loan={compare ?? {}} review={review} onCancel={cancel} onSave={confirm} />}
+    </>
+  );
+  return {
+    pick: () => input.current?.click(),
+    busy: step !== null,
+    label: step === "upload" ? `Envoi… ${progress} %` : step === "read" ? "Lecture du tableau… (jusqu'à 2 min)" : undefined,
+    element,
+  };
+}
+
+/** Carte d'invitation à importer le tableau (création de crédit, projet). */
+export function ScheduleImportCard({ title, text, importer }: { title: string; text: string; importer: ReturnType<typeof useScheduleImport> }) {
+  return (
+    <div className="rounded-2xl bg-series-1/5 p-4 ring-1 ring-series-1/15">
+      <div className="flex items-start gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-series-1/10 text-series-1">
+          <FileUp size={18} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="text-[15px] font-semibold text-ink">{title}</div>
+          <p className="mt-0.5 text-[13px] text-ink-2">{text}</p>
+        </div>
+      </div>
+      <div className="mt-3">
+        <Button full disabled={importer.busy} onClick={importer.pick} icon={importer.busy ? <LoaderCircle size={18} className="animate-spin" /> : <FileUp size={18} />}>
+          {importer.label ?? "Importer le tableau (PDF ou photo)"}
+        </Button>
+      </div>
+      {importer.element}
+    </div>
   );
 }
 
@@ -184,7 +235,7 @@ function monthName(key?: string) {
   return m === undefined ? "?" : monthLabel(m);
 }
 
-function ReviewSheet({ loan, review, onCancel, onSave }: { loan: Loan; review: { fileName: string; extraction: Extraction }; onCancel: () => void; onSave: () => void }) {
+function ReviewSheet({ loan, review, onCancel, onSave }: { loan: Partial<Loan>; review: { fileName: string; extraction: Extraction }; onCancel: () => void; onSave: () => void }) {
   const { rows, notes, confidence, bank } = review.extraction;
   const c = checkSchedule(rows);
   const f = loanFieldsFromSchedule(rows);
