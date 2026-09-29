@@ -117,7 +117,12 @@ export function Footer({ settings, categories }: { settings: ShopSettings; categ
           <p>
             © {year} {settings.shopName} — bijoux faits main
           </p>
-          <p>Paiement sécurisé par Stripe · Aucun cookie publicitaire</p>
+          <p>
+            Paiement sécurisé par Stripe · Aucun cookie publicitaire ·{" "}
+            <Link href="/admin/connexion" rel="nofollow" prefetch={false} className="text-on-primary/50 no-underline hover:text-on-primary hover:underline">
+              Espace créatrice
+            </Link>
+          </p>
         </div>
       </div>
     </footer>
