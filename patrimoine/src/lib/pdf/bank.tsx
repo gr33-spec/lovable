@@ -523,7 +523,7 @@ function Chart({ title, years, values, kind, width = CW, height = 120, tone = "b
 function gapNote(m: GroupModel): string {
   const f = m.f;
   const parts: string[] = [];
-  if (m.incoherentLoans > 0) parts.push(`${m.incoherentLoans} crédit(s) aux chiffres incohérents (restant dû supérieur au montant emprunté), à vérifier`);
+  if (m.incoherentLoans > 0) parts.push(`${m.incoherentLoans} crédit(s) aux chiffres contradictoires (détail sous chaque crédit), à vérifier`);
   if (m.missingCharges > 0) parts.push(`${m.missingCharges} bien(s) loué(s) sans charges renseignées (taxe foncière, assurance) : cash-flow surestimé d'autant`);
   if (f.unknownDebt > 0) parts.push(`${f.unknownDebt} crédit(s) au capital restant dû non communiqué, non inclus dans le total`);
   if (m.estimatedLoans > 0) parts.push(`${m.estimatedLoans} mensualité(s) estimée(s) faute de taux connu (marquées « env. »)`);

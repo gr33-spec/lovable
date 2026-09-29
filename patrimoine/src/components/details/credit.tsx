@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { yearlyBalances } from "@/lib/engine/loan";
+import { auditLoans } from "@/lib/engine/loan-audit";
 import { monthLabel } from "@/lib/engine/dates";
 import { eur, eurCompact, pct } from "@/lib/format";
 import { LoanForm } from "../forms";
@@ -32,6 +33,7 @@ export function LoanDetail({ id }: { id: string }) {
     );
   }
   const now = projection.snapshot.byLoan.get(id);
+  const findings = auditLoans(data, projection.snapshot).filter((f) => f.loanId === id);
   const building = data.buildings.find((b) => b.id === loan.buildingId);
   const lastYear = schedule.findIndex((s) => s.balance < 1);
   const visible = lastYear >= 0 ? schedule.slice(0, lastYear + 2) : schedule;
@@ -59,6 +61,16 @@ export function LoanDetail({ id }: { id: string }) {
           {!loan.schedule && r.notes.map((n) => (
             <div key={n} className="mt-2 text-xs text-warn">{n}</div>
           ))}
+          {findings.length > 0 && (
+            <div className="mt-3 space-y-1.5 rounded-2xl bg-black/[0.03] px-3 py-2.5">
+              <div className="text-[12px] font-semibold uppercase tracking-wide text-muted">Vérification des chiffres</div>
+              {findings.map((f) => (
+                <div key={f.text} className={`text-[13px] leading-snug ${f.severity === "critical" ? "text-neg" : "text-warn"}`}>
+                  {f.text}
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
 
         {visible.length > 1 && (

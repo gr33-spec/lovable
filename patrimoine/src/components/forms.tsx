@@ -1,6 +1,7 @@
 "use client";
 
 import { PROPERTY_KINDS, PROPERTY_USAGES } from "@/lib/assets";
+import { reliableInitial } from "@/lib/schedule";
 import { sortedUnits } from "@/lib/lots";
 import { useStore } from "@/lib/store";
 import type { Building, Company, Loan, Unit, Work } from "@/lib/types";
@@ -198,6 +199,7 @@ export function LoanForm({ loan }: { loan: Loan }) {
   const set = (patch: Partial<Loan>) => upsert("loans", { ...loan, ...patch });
   const buildings = useBuildingOptions();
   const companies = useCompanyOptions();
+  const partialFrom = reliableInitial(loan).partialFrom;
   return (
     <Stack>
       <Grid2>
@@ -226,7 +228,12 @@ export function LoanForm({ loan }: { loan: Loan }) {
       <NumberField label="Mensualité hors assurance" value={loan.monthlyPayment} onChange={(v) => set({ monthlyPayment: v })} />
       <DateField label="Date de fin" value={loan.endDate} onChange={(v) => set({ endDate: v })} />
       <Details title="Détails du prêt">
-        <NumberField label="Montant initial" value={loan.initialAmount} onChange={(v) => set({ initialAmount: v })} />
+        <NumberField
+          label="Montant initial"
+          value={loan.initialAmount}
+          onChange={(v) => set({ initialAmount: v })}
+          hint={partialFrom ? "Le tableau d'amortissement commence en cours de prêt : indiquez le montant de l'offre de prêt (la valeur actuelle n'est que le capital au début du tableau)." : undefined}
+        />
         <Grid2>
           <NumberField label="Taux" suffix="%" value={loan.ratePct} onChange={(v) => set({ ratePct: v })} />
           <NumberField label="Assurance / mois" value={loan.insuranceMonthly} onChange={(v) => set({ insuranceMonthly: v })} />

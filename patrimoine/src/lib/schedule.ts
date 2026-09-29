@@ -64,13 +64,40 @@ export function checkSchedule(input: LoanScheduleRow[]): ScheduleCheck {
 }
 
 /**
+ * Le tableau commence-t-il à la première échéance du prêt ? Un tableau édité
+ * en cours de prêt commence au capital restant dû du moment : le prendre pour
+ * le montant emprunté (et son premier mois pour le déblocage) serait faux.
+ * « first » : confirmé par l'en-tête (date de début, durée ou montant) ou par
+ * un capital de départ rond (les prêts se signent en montants ronds, un
+ * capital en cours de prêt ne l'est presque jamais) ; « partial » : l'en-tête
+ * montre un prêt commencé avant ; « unknown » : rien ne permet de le dire.
+ */
+export function scheduleStart(input: LoanScheduleRow[], meta?: ScheduleMeta): "first" | "partial" | "unknown" {
+  const rows = normalizeRows(input);
+  if (rows.length < 2) return "unknown";
+  const fromRows = rows[0].balance + rows[0].principal;
+  const m0 = parseMonth(rows[0].month)!;
+  if (meta?.initialAmount) {
+    if (meta.initialAmount > fromRows * 1.01 + TOL) return "partial";
+    if (Math.abs(meta.initialAmount - fromRows) <= Math.max(TOL, fromRows * 0.005)) return "first";
+  }
+  const declared = parseMonth(meta?.startDate);
+  if (declared !== undefined) return m0 - declared > 2 ? "partial" : "first";
+  if (meta?.durationMonths) {
+    if (meta.durationMonths > rows.length + 1) return "partial";
+    if (Math.abs(meta.durationMonths - rows.length) <= 1) return "first";
+  }
+  return Math.abs(fromRows - Math.round(fromRows / 100) * 100) <= 0.5 ? "first" : "unknown";
+}
+
+/**
  * Champs du crédit repris du tableau : montant, dates, durée, échéance, taux,
  * assurance et capital restant dû au 1er du mois courant (tenu à jour chaque mois).
  * `meta` (en-tête du document) complète un tableau partiel — édité en cours de
  * prêt, il ne commence pas à la première échéance : montant, début et durée
  * viennent alors de l'en-tête, jamais recalculés depuis la première ligne.
  */
-export function loanFieldsFromSchedule(input: LoanScheduleRow[], nowMonth?: MonthIndex, meta?: ScheduleMeta): Partial<Loan> {
+export function loanFieldsFromSchedule(input: LoanScheduleRow[], nowMonth?: MonthIndex, meta?: ScheduleMeta, assumeFirst = false): Partial<Loan> {
   const rows = normalizeRows(input);
   if (rows.length < 2) return {};
   const first = rows[0];
@@ -83,23 +110,25 @@ export function loanFieldsFromSchedule(input: LoanScheduleRow[], nowMonth?: Mont
   const m0 = parseMonth(first.month)!;
   const m1 = parseMonth(last.month)!;
   const declaredStart = parseMonth(meta?.startDate);
-  const partial = !!meta?.initialAmount && meta.initialAmount > fromRows * 1.01 + TOL;
-  const initial = partial ? meta!.initialAmount! : fromRows;
+  const start = assumeFirst ? "first" : scheduleStart(rows, meta);
+  const partial = start === "partial";
+  // Montant, déblocage et durée : seulement s'ils sont établis (jamais le capital d'un tableau commencé en cours de prêt).
+  const initial = partial ? meta?.initialAmount : start === "first" ? fromRows : undefined;
   const computedRate = fromRows > 0 ? Math.round((first.interest / fromRows) * 1200 * 1000) / 1000 : undefined;
   // Taux imprimé retenu s'il est cohérent avec les intérêts (sinon c'est peut-être le TAEG).
   const ratePct = meta?.ratePct && (computedRate === undefined || Math.abs(meta.ratePct - computedRate) <= 0.15) ? meta.ratePct : computedRate;
   const d = (m: number) => `${ym(m)}-01`;
-  const startMonth = partial ? (declaredStart ?? (meta?.durationMonths ? m1 - meta.durationMonths + 1 : undefined)) : m0;
+  const startMonth = partial ? (declaredStart ?? (meta?.durationMonths ? m1 - meta.durationMonths + 1 : undefined)) : start === "first" ? m0 : undefined;
   return {
-    initialAmount: Math.round(initial * 100) / 100,
+    ...(initial === undefined ? {} : { initialAmount: Math.round(initial * 100) / 100 }),
     // Déblocage le mois précédant la première échéance.
     ...(startMonth === undefined ? {} : { startDate: partial && declaredStart !== undefined ? d(declaredStart) : d(startMonth - 1) }),
     endDate: d(m1),
-    durationMonths: partial ? (meta?.durationMonths ?? (startMonth !== undefined ? m1 - startMonth + 1 : undefined)) : m1 - m0 + 1,
+    ...(start === "unknown" ? {} : { durationMonths: partial ? (meta?.durationMonths ?? (startMonth !== undefined ? m1 - startMonth + 1 : undefined)) : m1 - m0 + 1 }),
     monthlyPayment: payment,
     ratePct,
     insuranceMonthly: first.insurance !== undefined ? first.insurance : undefined,
-    kind: last.principal > initial * 0.5 ? "in_fine" : "amortissable",
+    kind: last.principal > (initial ?? fromRows) * 0.5 ? "in_fine" : "amortissable",
     ...(nowMonth === undefined ? {} : remainingAt(rows, nowMonth)),
   };
 }
@@ -140,7 +169,7 @@ export function syncFromSchedules(data: AppData, nowMonth: MonthIndex): { loans:
   for (const b of data.buildings) {
     if (b.acquisitionDate) continue;
     const starts = data.loans
-      .filter((l) => l.buildingId === b.id && l.schedule)
+      .filter((l) => l.buildingId === b.id && l.schedule && scheduleStart(l.schedule.rows, l.schedule.meta) !== "unknown")
       .map((l) => loanFieldsFromSchedule(l.schedule!.rows, undefined, l.schedule!.meta).startDate)
       .filter((d): d is string => !!d)
       .sort();
@@ -161,7 +190,8 @@ export function scheduleBalanceAt(rows: LoanScheduleRow[], year: number, month: 
 /** Conditions d'un prêt de projet reprises du tableau (montant, taux, durée, assurance, différé). */
 export function projectLoanFromSchedule(input: LoanScheduleRow[]): Partial<ProjectLoan> {
   const rows = normalizeRows(input);
-  const f = loanFieldsFromSchedule(rows);
+  // Prêt de projet : le tableau de l'offre commence toujours à la première échéance.
+  const f = loanFieldsFromSchedule(rows, undefined, undefined, true);
   if (!rows.length) return {};
   let deferral = 0;
   while (deferral < rows.length - 1 && rows[deferral].principal < 0.01) deferral++;
@@ -267,4 +297,35 @@ export function scheduleSummary(input: LoanScheduleRow[]): { payment?: number; d
     deferralPayment: deferred.length && deferred.length < rows.length ? deferred[0].payment : undefined,
     totalInterest: Math.round(rows.reduce((a, r) => a + r.interest, 0) * 100) / 100,
   };
+}
+
+/** Premier mois du tableau, et déblocage qu'on en déduirait à tort s'il commence en cours de prêt. */
+function derivedStart(rows: LoanScheduleRow[]): { fromRows: number; first: MonthIndex; startDate: string } | undefined {
+  const r = normalizeRows(rows);
+  if (r.length < 2) return undefined;
+  const first = parseMonth(r[0].month)!;
+  return { fromRows: r[0].balance + r[0].principal, first, startDate: `${ym(first - 1)}-01` };
+}
+
+/**
+ * Montant emprunté fiable. Avec un tableau commencé en cours de prêt, la valeur
+ * enregistrée peut n'être que le capital du début du tableau (ancienne
+ * déduction) : elle est alors écartée, jamais affichée comme montant emprunté.
+ */
+export function reliableInitial(loan: Loan): { value?: number; partialFrom?: string } {
+  if (!loan.schedule) return { value: loan.initialAmount };
+  const d = derivedStart(loan.schedule.rows);
+  const start = scheduleStart(loan.schedule.rows, loan.schedule.meta);
+  if (!d || start === "first") return { value: loan.initialAmount };
+  const v = loan.initialAmount;
+  if (v !== undefined && Math.abs(v - d.fromRows) > TOL) return { value: v };
+  return { partialFrom: ym(d.first) };
+}
+
+/** Date de déblocage fiable (même règle que le montant). */
+export function reliableStart(loan: Loan): string | undefined {
+  if (!loan.schedule || !loan.startDate) return loan.startDate;
+  const d = derivedStart(loan.schedule.rows);
+  if (!d || scheduleStart(loan.schedule.rows, loan.schedule.meta) === "first") return loan.startDate;
+  return loan.startDate.slice(0, 7) === d.startDate.slice(0, 7) ? undefined : loan.startDate;
 }

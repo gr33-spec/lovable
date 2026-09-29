@@ -289,7 +289,7 @@ export function realizeProject(data: AppData, p: Project, input: RealizeInput, n
       insuranceMonthly: l.insuranceMonthly,
       notes: l.deferralMonths ? `Différé d'amortissement de ${l.deferralMonths} mois prévu au projet.` : undefined,
       // Tableau de l'offre : le crédit réel le reprend tel quel (dates et échéances exactes).
-      ...(l.schedule ? { ...loanFieldsFromSchedule(l.schedule.rows), schedule: l.schedule, notes: undefined } : {}),
+      ...(l.schedule ? { ...loanFieldsFromSchedule(l.schedule.rows, undefined, l.schedule.meta, true), schedule: l.schedule, notes: undefined } : {}),
     }));
 
   const financed = loans.length > 0;
