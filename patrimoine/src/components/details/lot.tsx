@@ -1,12 +1,14 @@
 "use client";
 
+import { useUndoableRemove } from "@/components/swipe";
+import { removalPlan, removalSummary } from "@/lib/removal";
 import { DocumentsCard } from "@/components/documents/library";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronRight, DoorOpen, Hammer, KeyRound, UserPlus, UserRound } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { Unit } from "@/lib/types";
-import { activeTenancy, tenantsName, unitRemovals } from "@/lib/tenancy";
+import { activeTenancy, tenantsName } from "@/lib/tenancy";
 import { buildingCrumbs } from "@/lib/crumbs";
 import { goBack } from "@/lib/nav";
 import { CONDITIONS, UNIT_TYPES, WORK_STATUSES, labelOf } from "@/lib/labels";
@@ -25,7 +27,8 @@ const WHO = [
 ] as const;
 
 export function LotSheet({ id }: { id: string }) {
-  const { data, upsert, removeMany, role } = useStore();
+  const { data, upsert, role } = useStore();
+  const removeUndoable = useUndoableRemove();
   const router = useRouter();
   const unit = data.units.find((u) => u.id === id);
   if (!unit) {
@@ -185,9 +188,9 @@ export function LotSheet({ id }: { id: string }) {
               <div className="mt-8">
                 <ConfirmDelete
                   label="Supprimer ce lot"
-                  message="Supprimer ce lot, ses baux et ses états des lieux ? Une sauvegarde automatique permet de revenir en arrière."
+                  message={`Supprimer ce lot ? ${removalSummary(removalPlan(data, "units", unit.id))}`}
                   onConfirm={() => {
-                    removeMany(unitRemovals(data, unit.id));
+                    removeUndoable([{ coll: "units", id: unit.id }], `${unit.name} supprimé`);
                     goBack(router, back);
                   }}
                 />

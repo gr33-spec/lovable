@@ -84,8 +84,11 @@ export function useDocumentImport(defaults?: DocScope) {
   }, [data]);
   const patch = (id: string, p: Partial<ImportItem>) => setItems((cur) => cur.map((x) => (x.id === id ? { ...x, ...p } : x)));
 
+  // Pièces en cours d'enregistrement : un double clic sur « Confirmer » ne range jamais deux fois.
+  const saving = useRef(new Set<string>());
   const save = (item: ImportItem, placement: Placement) => {
-    if (!item.fileId) return;
+    if (!item.fileId || saving.current.has(item.id)) return;
+    saving.current.add(item.id);
     const d = dataRef.current;
     let target = placement;
     if (hasTable(item) && target.newLoan) {
@@ -134,6 +137,7 @@ export function useDocumentImport(defaults?: DocScope) {
   };
 
   const undo = (item: ImportItem) => {
+    saving.current.delete(item.id);
     // Tout revient comme avant : éléments modifiés restaurés, créés retirés, pièces reprises remises.
     const u = item.undo;
     if (u) {

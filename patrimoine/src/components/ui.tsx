@@ -271,6 +271,16 @@ export function Button({
   icon?: ReactNode;
   href?: string;
 }) {
+  // Double appui rapide (écran tactile, souris) : une seule action, jamais deux créations.
+  const last = useRef(0);
+  const click = onClick
+    ? () => {
+        const now = Date.now();
+        if (now - last.current < 700) return;
+        last.current = now;
+        onClick();
+      }
+    : undefined;
   const cls = cx(
     "inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl px-5 text-[16px] font-semibold transition active:scale-[0.98] disabled:opacity-40",
     variant === "primary" && "bg-brand text-on-brand shadow-sm hover:bg-brand-hover active:bg-brand-hover",
@@ -297,7 +307,7 @@ export function Button({
     );
   }
   return (
-    <button type={type} onClick={onClick} disabled={disabled} className={cls}>
+    <button type={type} onClick={click} disabled={disabled} className={cls}>
       {icon}
       {children}
     </button>

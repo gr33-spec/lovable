@@ -16,8 +16,6 @@ export const STATUS_LABEL: Record<ProjectStatus, string> = {
   abandonne: "Abandonné",
 };
 
-export const STATUS_ORDER: ProjectStatus[] = ["idee", "etude", "soumis", "accorde", "realise", "abandonne"];
-
 /** Projet encore en cours (ni réalisé, ni abandonné). */
 export const isOpen = (p: Project) => p.status !== "realise" && p.status !== "abandonne";
 

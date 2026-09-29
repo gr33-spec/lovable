@@ -68,6 +68,8 @@ export async function DELETE(request: Request, ctx: Ctx) {
   const { id } = await ctx.params;
   // L'espace gestion ne supprime que les pièces des dossiers locataires qui ne servent nulle part ailleurs.
   if ((await currentSession())?.role === "gestion" && !(await gestionMayUse(id, true))) return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
+  // Pièce encore citée par les données (annulation, autre rattachement…) : conservée.
+  if (referencedFileIds((await loadDocument()).data).has(id)) return NextResponse.json({ ok: true, kept: true });
   await deleteFile(id);
   return NextResponse.json({ ok: true });
 }

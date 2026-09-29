@@ -807,12 +807,6 @@ export function rowForYear(p: Projection, year: number, key?: string): YearRow |
   return list?.find((r) => r.year === year);
 }
 
-/** Première année où la dette projetée est nulle. */
-export function debtFreeYear(p: Projection): number | undefined {
-  if ((p.years[0]?.debt ?? 0) <= 0) return undefined;
-  return p.years.find((r) => r.debt < 1)?.year;
-}
-
 /** Première année où la dette est divisée par deux par rapport à aujourd'hui. */
 export function halfDebtYear(p: Projection): number | undefined {
   const d0 = p.snapshot.total.debt;

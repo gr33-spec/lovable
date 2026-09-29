@@ -1,5 +1,7 @@
 "use client";
 
+import { removalPlan, removalSummary } from "@/lib/removal";
+import { useUndoableRemove } from "@/components/swipe";
 import { DocumentsCard } from "@/components/documents/library";
 import { AnalysisEntry } from "@/components/analysis/entry";
 import { companyCrumbs } from "@/lib/crumbs";
@@ -9,12 +11,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Briefcase, Building2, Landmark, Pencil, Plus } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { unitRemovals } from "@/lib/tenancy";
 import { cashflowMonthly, ltv, netWorth } from "@/lib/engine/snapshot";
 import { monthLabel } from "@/lib/engine/dates";
 import { eur, eurCompact, eurSigned, pct } from "@/lib/format";
 import { labelOf, COMPANY_KINDS } from "@/lib/labels";
-import type { Collection } from "@/lib/types";
 import { CompanyForm } from "../forms";
 import { BilanImport } from "../bilans";
 import { statementRatios } from "@/lib/engine/indicators";
@@ -23,7 +23,8 @@ import { LineChart } from "../charts";
 import { Button, Card, ConfirmDelete, Divided, Empty, Kpi, MissingData, Page, PageHeader, Row, SectionTitle, Sheet } from "../ui";
 
 export function CompanyDetail({ id }: { id: string }) {
-  const { data, projection, removeMany, upsert } = useStore();
+  const { data, projection } = useStore();
+  const removeUndoable = useUndoableRemove();
   const router = useRouter();
   const [sheet, setSheet] = useState<null | "edit" | "building" | "loan" | "company" | "bilan">(null);
   const company = data.companies.find((c) => c.id === id);
@@ -48,17 +49,9 @@ export function CompanyDetail({ id }: { id: string }) {
   const cf = cashflowMonthly(f);
   const ratio = ltv(f);
 
+  // Règle commune (lib/removal) : immeubles, logements, crédits, bilans… supprimés ; documents conservés ; filiales remontées.
   const remove = () => {
-    const items: { coll: Collection; id: string }[] = [{ coll: "companies", id }];
-    for (const b of buildings) {
-      items.push({ coll: "buildings", id: b.id });
-      data.units.filter((u) => u.buildingId === b.id).forEach((u) => items.push(...unitRemovals(data, u.id)));
-      data.works.filter((w) => w.buildingId === b.id).forEach((w) => items.push({ coll: "works", id: w.id }));
-    }
-    loans.forEach((l) => items.push({ coll: "loans", id: l.id }));
-    removeMany(items);
-    // Les filiales remontent d'un niveau.
-    children.forEach((c) => upsert("companies", { ...c, parentId: company.parentId ?? null }));
+    removeUndoable([{ coll: "companies", id }], `${company.name} supprimée`);
     goBack(router, "/patrimoine");
   };
 
@@ -233,7 +226,7 @@ export function CompanyDetail({ id }: { id: string }) {
         <div className="mt-8">
           <ConfirmDelete
             label="Supprimer la société"
-            message={`Supprimer ${company.name}, ses immeubles, logements, crédits et travaux ? Les filiales sont conservées. Une sauvegarde automatique permet de revenir en arrière.`}
+            message={`Supprimer ${company.name} ? ${removalSummary(removalPlan(data, "companies", company.id))} Les filiales sont conservées.`}
             onConfirm={remove}
           />
         </div>

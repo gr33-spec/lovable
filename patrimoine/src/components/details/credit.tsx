@@ -1,5 +1,7 @@
 "use client";
 
+import { removalPlan, removalSummary } from "@/lib/removal";
+import { useUndoableRemove } from "@/components/swipe";
 import { DocumentsCard } from "@/components/documents/library";
 import { buildingCrumbs, companyCrumbs } from "@/lib/crumbs";
 import { goBack } from "@/lib/nav";
@@ -15,7 +17,8 @@ import { LineChart } from "../charts";
 import { Card, ConfirmDelete, Empty, Kpi, Page, PageHeader, Pill, SectionTitle } from "../ui";
 
 export function LoanDetail({ id }: { id: string }) {
-  const { data, projection, nowMonth, remove } = useStore();
+  const { data, projection, nowMonth } = useStore();
+  const removeUndoable = useUndoableRemove();
   const router = useRouter();
   const loan = data.loans.find((l) => l.id === id);
   const r = projection.snapshot.resolvedLoans.get(id);
@@ -93,7 +96,7 @@ export function LoanDetail({ id }: { id: string }) {
         </div>
         </div>
         <div className="mt-8">
-          <ConfirmDelete label="Supprimer le crédit" message="Supprimer ce crédit ?" onConfirm={() => { remove("loans", id); goBack(router, back); }} />
+          <ConfirmDelete label="Supprimer le crédit" message={`Supprimer ce crédit ? ${removalSummary(removalPlan(data, "loans", id))}`} onConfirm={() => { removeUndoable([{ coll: "loans", id }], "Crédit supprimé"); goBack(router, back); }} />
         </div>
       </Page>
     </>

@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Download, History, RotateCcw, Upload, Save, FileSpreadsheet } from "lucide-react";
+import { Download, History, RotateCcw, Upload, Save, FileSpreadsheet, ShieldCheck, TriangleAlert } from "lucide-react";
+import { integrityReport } from "@/lib/integrity";
+import { COLLECTIONS } from "@/lib/types";
 import { useStore } from "@/lib/store";
 import { isValidBackup } from "@/lib/ops";
 import { complementsSchema, planComplements, type ComplementsPlan } from "@/lib/complements";
@@ -141,6 +143,8 @@ export default function SauvegardesPage() {
           />
         </div>
 
+        <DataHealth />
+
         <SectionTitle action={<button onClick={manual} disabled={busy} className="flex items-center gap-1 text-sm font-semibold text-series-1"><Save size={15} /> Sauvegarder</button>}>
           Historique (restauration)
         </SectionTitle>
@@ -213,6 +217,42 @@ export default function SauvegardesPage() {
           ))}
         </div>
       </Sheet>
+    </>
+  );
+}
+
+/** Contrôle d'intégrité en continu : relations entre sociétés, immeubles, lots, baux, crédits et documents. */
+function DataHealth() {
+  const { data } = useStore();
+  const issues = integrityReport(data);
+  const count = COLLECTIONS.reduce((n, c) => n + ((data[c] as unknown[] | undefined)?.length ?? 0), 0);
+  return (
+    <>
+      <SectionTitle>État des données</SectionTitle>
+      <Card>
+        {issues.length === 0 ? (
+          <div className="flex items-start gap-3">
+            <ShieldCheck size={20} className="mt-0.5 shrink-0 text-pos" />
+            <div className="text-[14px] text-ink-2">
+              <b className="text-ink">Données cohérentes.</b> {count} éléments vérifiés : aucune relation cassée, aucun doublon, aucun rattachement contradictoire.
+            </div>
+          </div>
+        ) : (
+          <div>
+            <div className="flex items-start gap-3">
+              <TriangleAlert size={20} className="mt-0.5 shrink-0 text-warn" />
+              <div className="text-[14px] text-ink-2">
+                <b className="text-ink">{issues.length} point{issues.length > 1 ? "s" : ""} à vérifier</b> sur {count} éléments. Rien n&apos;est modifié automatiquement.
+              </div>
+            </div>
+            <ul className="mt-2 space-y-1 text-[12.5px] text-muted">
+              {issues.slice(0, 12).map((i) => (
+                <li key={`${i.coll}-${i.id}-${i.message}`}>• {i.message} ({i.coll} {i.id.slice(0, 8)})</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </Card>
     </>
   );
 }
