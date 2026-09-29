@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, DM_Sans } from "next/font/google";
+import { Geist, Instrument_Serif } from "next/font/google";
 import { connection } from "next/server";
 import { getSettings } from "@/lib/server/cached";
 import { isTestModeInProduction, siteUrl } from "@/lib/server/env";
@@ -9,8 +9,8 @@ import "./globals.css";
 
 // Polices auto-hébergées au moment de la construction : aucune requête vers
 // Google depuis le navigateur des clientes (confidentialité, rapidité).
-const display = Cormorant_Garamond({ subsets: ["latin"], weight: ["500", "600"], style: ["normal", "italic"], variable: "--font-display", display: "swap" });
-const body = DM_Sans({ subsets: ["latin"], variable: "--font-body", display: "swap" });
+const display = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-display", display: "swap" });
+const body = Geist({ subsets: ["latin"], variable: "--font-body", display: "swap" });
 
 async function safeSettings() {
   try {

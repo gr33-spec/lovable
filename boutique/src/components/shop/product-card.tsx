@@ -1,3 +1,4 @@
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { formatPrice } from "@/lib/format";
 import type { Availability, ProductCard as Card } from "@/lib/server/catalog";
@@ -54,6 +55,12 @@ export function ProductCard({ product, priority = false }: { product: Card; prio
             )}
             <AvailabilityBadge availability={product.availability} stock={product.stock} />
           </div>
+          <span
+            className="absolute right-3 bottom-3 hidden h-10 w-10 translate-y-2 items-center justify-center rounded-full bg-surface/95 text-text opacity-0 shadow-soft backdrop-blur transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 md:flex"
+            aria-hidden="true"
+          >
+            <ArrowUpRight size={17} />
+          </span>
         </div>
         <div className="mt-3.5 px-0.5">
           <h3 className="text-[15px] leading-snug font-medium transition-colors duration-300 group-hover:text-primary">{product.name}</h3>

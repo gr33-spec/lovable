@@ -112,6 +112,20 @@ export function Footer({ settings, categories }: { settings: ShopSettings; categ
           </ul>
         </nav>
       </div>
+      {/* Grand nom de marque, en typographie : la signature du site. */}
+      <div className="container-page relative overflow-hidden" aria-hidden="true">
+        <p className="pt-4 pb-3 text-center font-serif text-[clamp(2.6rem,10.5vw,10rem)] leading-none tracking-[-0.03em] whitespace-nowrap text-text/90 select-none">
+          {settings.shopName.split(" ").map((w, i, all) =>
+            i === all.length - 1 ? (
+              <em key={i} className="text-accent-text">
+                {w}
+              </em>
+            ) : (
+              <span key={i}>{w} </span>
+            ),
+          )}
+        </p>
+      </div>
       <div className="relative border-t border-border">
         <div className="container-page flex flex-col gap-1 py-5 text-xs text-text-2 sm:flex-row sm:justify-between">
           <p>
