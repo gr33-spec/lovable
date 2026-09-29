@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { clientIp } from "@/lib/server/client-ip";
 import { clearLoginFailures, isLoginBlocked, recordLoginFailure } from "@/lib/server/db";
 import { checkAccessPassword } from "@/lib/server/access";
 import { VIEW_COOKIE, viewCookieOptions } from "@/lib/view";
@@ -10,9 +11,6 @@ import {
   sessionCookieOptions,
 } from "@/lib/server/session";
 
-function clientIp(request: Request): string {
-  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "local";
-}
 
 export async function POST(request: Request) {
   if (!isConfigured()) {

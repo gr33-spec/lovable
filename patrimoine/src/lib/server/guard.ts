@@ -4,15 +4,18 @@ import { NextResponse } from "next/server";
 import { SESSION_COOKIE, readSessionToken, type Role, type SessionInfo } from "./session";
 import { accessState } from "./access";
 import { shareActive } from "./shares";
+import { sessionAlive } from "./session-store";
 
 /** Routes jamais ouvertes en consultation, même en lecture (export complet, accès, sauvegardes). */
-const LECTURE_DENIED = ["/api/analyse", "/api/credits", "/api/files/empreinte", "/api/documents/classer", "/api/backup", "/api/export-excel", "/api/shares", "/api/access", "/api/passkey", "/api/snapshots", "/api/bilans"];
+const LECTURE_DENIED = ["/api/analyse", "/api/credits", "/api/files/empreinte", "/api/documents/classer", "/api/backup", "/api/export-excel", "/api/shares", "/api/access", "/api/passkey", "/api/snapshots", "/api/bilans", "/api/sessions"];
 
 /** Session en cours, révocation de l'accès gestion comprise. */
 export async function currentSession(): Promise<SessionInfo | null> {
   const store = await cookies();
   const info = readSessionToken(store.get(SESSION_COOKIE)?.value);
   if (!info) return null;
+  // Déconnectée (ou « tout déconnecter ») : refusée même si le cookie est encore présenté.
+  if (!(await sessionAlive(info).catch(() => false))) return null;
   if (info.role === "gestion") {
     const state = await accessState().catch(() => null);
     if (!state?.enabled || state.version !== info.av) return null;
@@ -43,11 +46,19 @@ export async function guardApi(request: Request, roles: Role[] = ["owner"]): Pro
   }
   if (!roles.includes(session.role)) return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
   if (request.method !== "GET" && request.method !== "HEAD") {
+    // Protection CSRF : une modification ne peut venir que de l'application elle-même.
     const origin = request.headers.get("origin");
     const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
-    if (origin && host && new URL(origin).host !== host) {
-      return NextResponse.json({ error: "Origine refusée" }, { status: 403 });
+    const site = request.headers.get("sec-fetch-site");
+    let foreign = !!site && site !== "same-origin" && site !== "none";
+    if (origin && host) {
+      try {
+        foreign ||= new URL(origin).host !== host;
+      } catch {
+        foreign = true;
+      }
     }
+    if (foreign) return NextResponse.json({ error: "Origine refusée" }, { status: 403 });
   }
   return null;
 }

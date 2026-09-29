@@ -16,7 +16,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
   // Le propriétaire qui ouvre son propre lien est prévenu avant d'être déconnecté.
   const cookie = request.headers.get("cookie")?.match(new RegExp(`${SESSION_COOKIE}=([^;]+)`))?.[1];
   const current = readSessionToken(cookie);
-  if (current && current.role !== "lecture" && url.searchParams.get("confirmer") !== "1") {
+  // La confirmation doit venir de l'application elle-même : un site tiers ne peut pas remplacer la session en un clic.
+  const fromSite = request.headers.get("sec-fetch-site");
+  const confirmed = url.searchParams.get("confirmer") === "1" && (!fromSite || fromSite === "same-origin");
+  if (current && current.role !== "lecture" && !confirmed) {
     return NextResponse.redirect(new URL(`/partage/${token}?connecte=1`, url));
   }
   const expires = new Date(link.expiresAt).getTime();

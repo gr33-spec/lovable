@@ -1,6 +1,7 @@
 "use client";
 
 import { documentIndex } from "@/lib/documents";
+import { signOut } from "@/lib/sign-out";
 import Link from "next/link";
 import { useState } from "react";
 import { FolderOpen, Building2, KeyRound, CalendarRange, FlaskConical, Scale, ScanFace, Share2, LineChart as LineIcon, FileSpreadsheet, Gauge, CalendarClock, CircleAlert, FileText, HandCoins, History, LogOut, Palette, Percent, Smartphone, Sparkles, Trash2, Wand2 } from "lucide-react";
@@ -22,10 +23,7 @@ export default function PlusPage() {
   const docCount = documentIndex(data).length;
   const demo = hasDemo(data);
 
-  const logout = async () => {
-    await fetch("/api/logout", { method: "POST" });
-    window.location.href = "/connexion";
-  };
+  const logout = signOut;
 
   const removeDemo = async (keepStructure: boolean) => {
     setBusy(true);

@@ -89,7 +89,7 @@ export function PdfViewerHost() {
   return <Viewer key={doc.url} doc={doc} />;
 }
 
-type PdfDoc = { numPages: number; getPage: (n: number) => Promise<PdfPage>; destroy: () => void };
+type PdfDoc = { numPages: number; getPage: (n: number) => Promise<PdfPage> };
 type PdfPage = { getViewport: (o: { scale: number }) => { width: number; height: number }; render: (o: { canvas: HTMLCanvasElement; viewport: unknown }) => { promise: Promise<void>; cancel: () => void } };
 
 function Viewer({ doc }: { doc: Doc }) {
@@ -117,7 +117,8 @@ function Viewer({ doc }: { doc: Doc }) {
 
   useEffect(() => {
     let alive = true;
-    let loaded: PdfDoc | null = null;
+    // Tâche de chargement pdf.js : c'est elle qui libère le document et son worker.
+    let task: { destroy: () => unknown } | null = null;
     let objectUrl: string | null = null;
     (async () => {
       try {
@@ -138,7 +139,9 @@ function Viewer({ doc }: { doc: Doc }) {
         // Version « legacy » : compatible avec les navigateurs plus anciens (iPhone compris).
         const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
         pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/legacy/build/pdf.worker.min.mjs", import.meta.url).toString();
-        loaded = (await pdfjs.getDocument({ data: new Uint8Array(await b.arrayBuffer()) }).promise) as unknown as PdfDoc;
+        const loading = pdfjs.getDocument({ data: new Uint8Array(await b.arrayBuffer()), enableXfa: false });
+        task = loading;
+        const loaded = (await loading.promise) as unknown as PdfDoc;
         if (alive) setPdf(loaded);
       } catch (e) {
         if (alive) setError((e as Error).message || "Document illisible");
@@ -146,7 +149,7 @@ function Viewer({ doc }: { doc: Doc }) {
     })();
     return () => {
       alive = false;
-      loaded?.destroy();
+      void Promise.resolve(task?.destroy()).catch(() => undefined);
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, [doc.url, doc.fileName]);
