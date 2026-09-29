@@ -73,7 +73,7 @@ export function CompanyDetail({ id }: { id: string }) {
           <Kpi label={hasChildren ? "Patrimoine net consolidé" : "Patrimoine net"} value={netWorth(f) !== undefined && (f.value || f.debt) ? eur(netWorth(f)) : <MissingData action={f.unvalued ? `Estimer ${f.unvalued} bien${f.unvalued > 1 ? "s" : ""}` : undefined} href="/plus/a-completer" />} big />
           <div className="mt-4 grid grid-cols-2 gap-4">
             <Kpi label="Valeur immobilière" value={f.unvalued ? "—" : eurCompact(f.value)} hint={f.unvalued ? `${f.unvalued} bien(s) sans valeur` : undefined} />
-            <Kpi label="Dette totale" value={eurCompact(f.debt)} hint={ratio !== undefined ? `LTV ${pct(ratio)}` : undefined} />
+            <Kpi label="Capital restant dû" value={eurCompact(f.debt)} hint={ratio !== undefined ? `LTV ${pct(ratio)}` : undefined} />
             <Kpi label="Loyers / mois" value={eurCompact(f.rentMonthly)} />
             <Kpi label="Mensualités / mois" value={eurCompact(rentalPayments(f))} hint={f.personalPaymentsMonthly > 0 ? `+ ${eurCompact(f.personalPaymentsMonthly)} crédit personnel` : undefined} />
             <Kpi label="Cash-flow locatif / mois" value={eurSigned(cf)} tone={cf >= 0 ? "pos" : "neg"} />
@@ -253,7 +253,7 @@ export function CompanyDetail({ id }: { id: string }) {
 
 export function AddLink({ onClick, label = "Ajouter" }: { onClick: () => void; label?: string }) {
   return (
-    <button onClick={onClick} className="flex items-center gap-1 text-sm font-semibold text-series-1">
+    <button onClick={onClick} className="write-action flex items-center gap-1 text-sm font-semibold text-series-1">
       <Plus size={16} /> {label}
     </button>
   );

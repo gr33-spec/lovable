@@ -12,7 +12,7 @@ import { yearOf } from "@/lib/engine/dates";
 import { eur, eurCompact, eurSigned } from "@/lib/format";
 import { LineChart } from "@/components/charts";
 import { remunerationYear } from "@/lib/fiscal/remuneration";
-import { Card, Page, PageHeader, SectionTitle, cx } from "@/components/ui";
+import { Card, Empty, Page, PageHeader, SectionTitle, cx } from "@/components/ui";
 
 // Chronologie : ce qui change, et quand. Un escalier du cash-flow mensuel,
 // puis une carte par année où il se passe quelque chose.
@@ -95,6 +95,29 @@ export default function Chronologie() {
   const loanYears = [...new Set(events.filter((e) => e.kind === "loan_end").map((e) => e.year))];
   const household = useMemo(() => (data.withdrawals.length ? projection.years.map((r) => remunerationYear(data, r.year, y0)) : []), [data, projection.years, y0]);
   const scopeName = scope === ALL ? undefined : scopes.find((s) => s.key === scope)?.label;
+
+  // Rien de saisi : pas de courbe vide, mais le point de départ.
+  if (data.buildings.length === 0 && data.loans.length === 0) {
+    return (
+      <>
+        <PageHeader title="Chronologie" back="/plus" subtitle="Ce qui change, et quand" />
+        <Page>
+          <Card>
+            <Empty
+              icon={<Flag size={24} />}
+              title="Rien à projeter pour l'instant"
+              text="Ajoutez vos immeubles et vos crédits : la chronologie montrera la fin des crédits, les travaux et l'évolution du cash-flow sur 30 ans."
+              action={
+                <Link href="/patrimoine" className="inline-flex min-h-[48px] items-center gap-1.5 rounded-2xl bg-brand px-5 text-[15px] font-semibold text-on-brand">
+                  <Plus size={16} /> Ajouter un bien
+                </Link>
+              }
+            />
+          </Card>
+        </Page>
+      </>
+    );
+  }
 
   return (
     <>

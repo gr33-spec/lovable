@@ -107,7 +107,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </Suspense>
       <ScheduleSync />
       {role === "lecture" && <ReadOnlyBanner />}
-      <div className={cx(!onboarding && "lg:pl-60")}>{children}</div>
+      <div className={cx(!onboarding && "lg:pl-60")} data-readonly={role === "lecture" || undefined}>
+        {children}
+      </div>
       <ToastHost />
       <PdfViewerHost />
       {!onboarding && (

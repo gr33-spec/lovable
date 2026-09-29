@@ -84,7 +84,12 @@ export default function Accueil() {
               eur(netWorth(t))
             ) : (
               <span className="block tracking-normal">
-                <span className="block text-[22px] font-bold text-white/80">Données insuffisantes</span>
+                <span className="block text-[22px] font-bold text-white/80">{hasData ? "Données insuffisantes" : "Aucun bien pour l'instant"}</span>
+                {!hasData && (
+                  <Link href="/patrimoine" className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1.5 text-[13px] font-semibold text-white">
+                    Ajouter une société ou un immeuble <ChevronRight size={14} />
+                  </Link>
+                )}
                 {t.unvalued > 0 && (
                   <Link href="/plus/a-completer" className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1.5 text-[13px] font-semibold text-white">
                     Estimer la valeur de {t.unvalued} bien{t.unvalued > 1 ? "s" : ""} <ChevronRight size={14} />
@@ -95,7 +100,7 @@ export default function Accueil() {
           </div>
           <HeroSpark
             values={(t.unvalued > 0 ? projection.years.map((r) => r.debt) : projection.years.map((r) => r.net)).slice(0, 21)}
-            label={t.unvalued > 0 ? "Dette restante, 20 prochaines années" : "Patrimoine net, 20 prochaines années"}
+            label={t.unvalued > 0 ? "Capital restant dû, 20 prochaines années" : "Patrimoine net, 20 prochaines années"}
           />
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div className="rounded-2xl bg-white/[0.07] px-3.5 py-3 ring-1 ring-white/10">

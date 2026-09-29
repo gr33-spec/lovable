@@ -101,7 +101,7 @@ export function TodayView({ onOpen }: { onOpen: (view: "loyers" | "locataires", 
           </div>
         ) : (
           <div className="mt-4 flex items-center gap-2 text-[14px] font-semibold text-[#d4b483]">
-            <CheckCircle2 size={17} /> Tous les loyers du mois sont pointés
+            <CheckCircle2 size={17} /> {expected > 0 ? "Tous les loyers du mois sont pointés" : "Aucun loyer attendu ce mois-ci"}
           </div>
         )}
       </div>

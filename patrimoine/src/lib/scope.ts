@@ -1,4 +1,5 @@
 import type { Op } from "./ops";
+import { referencedFileIds } from "./tenancy-files";
 import type { AppData, Building, Company, Settings, Unit } from "./types";
 
 // Périmètre de l'espace « gestion locative » : ce que l'accès gestion peut
@@ -82,6 +83,11 @@ export function sanitizeGestionOps(current: AppData, ops: Op[]): Op[] {
     }
     const item = o.item as Record<string, unknown> & { id: string };
     if (o.coll === "tenancies" || o.coll === "inspections") {
+      // Un dossier locataire ne peut pas citer une pièce du patrimoine (bilan,
+      // tableau d'amortissement…) : ce serait un moyen de l'ouvrir ensuite.
+      const outside = referencedFileIds({ ...current, tenancies: [], inspections: [] });
+      const before = referencedFileIds((current[o.coll] as { id: string }[]).find((x) => x.id === item.id));
+      if ([...referencedFileIds(item)].some((f) => outside.has(f) && !before.has(f))) continue;
       out.push(o);
     } else if (o.coll === "units") {
       const existing = current.units.find((u) => u.id === item.id);
