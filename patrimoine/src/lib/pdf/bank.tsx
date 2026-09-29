@@ -4,7 +4,7 @@ import type { MonthIndex } from "../engine/dates";
 import { yearOf } from "../engine/dates";
 import { remunerationYear } from "../fiscal/remuneration";
 import { BAREME_YEAR } from "../fiscal/bareme";
-import { cashflowMonthly, type Figures } from "../engine/snapshot";
+import { cashflowMonthly } from "../engine/snapshot";
 import type { Projection } from "../engine/projection";
 import { groupModel, type GroupModel } from "./model";
 import { projectCompanyName, projectFigures } from "../engine/projects";
@@ -14,6 +14,7 @@ import type { PdfCover } from "../types";
 import { CONDITIONS, UNIT_TYPES, WITHDRAWAL_KINDS, labelOf } from "../labels";
 import { DEFAULT_COVER, pdfColors, shows, type PdfColors } from "./prefs";
 import { FONT, W600, W700, W800, kitFor, type Kit } from "./kit";
+import { biens } from "../assets";
 
 // Dossier banque, format A4 portrait : court (6 à 8 pages), sans répétition,
 // uniquement des chiffres connus. Deux usages :
@@ -240,6 +241,9 @@ function DeepBackground({ width, height, id, radius = 0, halos = true, vivid = f
   );
 }
 
+/** Taille de chiffre réduite pour les valeurs longues (« env. +8 896 € ») : jamais de retour à la ligne. */
+const fit = (v: string, size: number) => (v.length > 13 ? size * 0.74 : v.length > 10 ? size * 0.86 : size);
+
 const toneColor = (k: Kit, tone: Kpi["tone"], fallback: string) => (tone === "pos" ? k.pos : tone === "neg" ? k.neg : fallback);
 
 /** Bandeau des chiffres principaux, dessiné selon le modèle. */
@@ -253,7 +257,7 @@ function HeroKpis({ items }: { items: Kpi[] }) {
         {items.map((it, i) => (
           <View key={it.label} style={{ flex: 1, paddingVertical: 11, paddingLeft: i ? 12 : 0, borderLeftWidth: i ? 0.5 : 0, borderLeftColor: k.line }}>
             <Text style={{ ...W700, ...caps(6.6, 1), color: k.ink2 }}>{T(it.label)}</Text>
-            <Text style={{ ...k.number, fontSize: 21, marginTop: 4, color: toneColor(k, it.tone, k.heading) }}>{T(it.value)}</Text>
+            <Text style={{ ...k.number, fontSize: fit(it.value, 21), marginTop: 4, color: toneColor(k, it.tone, k.heading) }}>{T(it.value)}</Text>
             {it.sub && <Text style={{ ...k.italic, fontSize: 7.5, color: k.muted, marginTop: 2 }}>{T(it.sub)}</Text>}
           </View>
         ))}
@@ -269,7 +273,7 @@ function HeroKpis({ items }: { items: Kpi[] }) {
           <View key={it.label} style={{ position: "relative", width: w, height: h, borderRadius: k.radius, backgroundColor: k.card, padding: 11 }}>
             {i === 0 && <DeepBackground width={w} height={h} id={`hk${i}`} radius={k.radius} vivid />}
             <Text style={{ fontSize: 7, color: i === 0 ? "#ffffff" : k.muted }}>{T(it.label)}</Text>
-            <Text style={{ ...k.number, fontSize: 17, marginTop: 6, color: i === 0 ? "#ffffff" : toneColor(k, it.tone, k.ink) }}>{T(it.value)}</Text>
+            <Text style={{ ...k.number, fontSize: fit(it.value, 17), marginTop: 6, color: i === 0 ? "#ffffff" : toneColor(k, it.tone, k.ink) }}>{T(it.value)}</Text>
             {it.sub && <Text style={{ fontSize: 6.5, color: i === 0 ? c.muted : k.muted, marginTop: 3 }}>{T(it.sub)}</Text>}
           </View>
         ))}
@@ -282,7 +286,7 @@ function HeroKpis({ items }: { items: Kpi[] }) {
         {items.map((it, i) => (
           <View key={it.label} style={{ flex: 1, paddingVertical: 13, paddingHorizontal: 12, borderLeftWidth: i ? 0.6 : 0, borderLeftColor: c.muted }}>
             <Text style={{ ...k.display, ...caps(6.6, 1), color: c.onBrand }}>{T(it.label)}</Text>
-            <Text style={{ ...k.number, fontSize: 19, marginTop: 6, color: c.onBrand }}>{T(it.value)}</Text>
+            <Text style={{ ...k.number, fontSize: fit(it.value, 19), marginTop: 6, color: c.onBrand }}>{T(it.value)}</Text>
             {it.sub && <Text style={{ fontSize: 6.6, color: c.soft, marginTop: 3 }}>{T(it.sub)}</Text>}
           </View>
         ))}
@@ -297,7 +301,7 @@ function HeroKpis({ items }: { items: Kpi[] }) {
         {items.map((it, i) => (
           <View key={it.label} style={{ width: w, paddingHorizontal: 13, borderLeftWidth: i ? 0.6 : 0, borderLeftColor: c.deep3 }}>
             <Text style={{ ...caps(7, 0.6), color: c.muted }}>{T(it.label)}</Text>
-            <Text style={{ ...W800, fontSize: 15.5, marginTop: 4, color: it.tone === "pos" ? "#8ee8bf" : it.tone === "neg" ? "#ffaaaa" : "#ffffff" }}>{T(it.value)}</Text>
+            <Text style={{ ...W800, fontSize: fit(it.value, 15.5), marginTop: 4, color: it.tone === "pos" ? "#8ee8bf" : it.tone === "neg" ? "#ffaaaa" : "#ffffff" }}>{T(it.value)}</Text>
             {it.sub && <Text style={{ fontSize: 6.6, color: c.glow, marginTop: 3 }}>{T(it.sub)}</Text>}
           </View>
         ))}
@@ -326,7 +330,7 @@ function KpiGrid({ items, cols = 3, dark }: { items: Kpi[]; cols?: number; dark?
             {(k.id === "signature" || k.id === "bento") && <View style={{ width: 5, height: 5, borderRadius: 2.5, backgroundColor: toneColor(k, it.tone, k.id === "bento" ? k.accent : c.brand) }} />}
             <Text style={k.id === "suisse" || k.id === "editorial" ? { ...W700, ...caps(6.4, 0.9), color: k.ink2, flex: 1 } : { fontSize: 7.3, color: k.ink2, flex: 1 }}>{T(it.label)}</Text>
           </View>
-          <Text style={{ ...k.number, fontSize: k.id === "editorial" ? 18 : 15, marginTop: 4, color: toneColor(k, it.tone, k.heading) }}>{T(it.value)}</Text>
+          <Text style={{ ...k.number, fontSize: fit(it.value, k.id === "editorial" ? 18 : 15), marginTop: 4, color: toneColor(k, it.tone, k.heading) }}>{T(it.value)}</Text>
           {it.sub && <Text style={{ ...(k.id === "editorial" ? k.italic : {}), fontSize: 6.8, color: k.muted, marginTop: 2 }}>{T(it.sub)}</Text>}
         </View>
       ))}
@@ -352,7 +356,7 @@ function totalBox(): { box: object; text: object } {
   return { box: { backgroundColor: c.deep, borderRadius: 5, marginTop: 4 }, text: { ...W700, color: "#ffffff" } };
 }
 
-function Table<R>({ cols, rows, total, sub }: { cols: Col<R>[]; rows: R[]; total?: R; sub?: (r: R) => string | undefined }) {
+function Table<R>({ cols, rows, total, sub, subTone }: { cols: Col<R>[]; rows: R[]; total?: R; sub?: (r: R) => string | undefined; subTone?: (r: R) => "neg" | undefined }) {
   const c = cur();
   const k = kit();
   const tot = totalBox();
@@ -384,7 +388,7 @@ function Table<R>({ cols, rows, total, sub }: { cols: Col<R>[]; rows: R[]; total
           </Text>
         ))}
       </View>
-      {sub?.(r) && <Text style={{ fontSize: 7, color: k.muted, marginTop: 1.5 }}>{T(sub(r))}</Text>}
+      {sub?.(r) && <Text style={{ fontSize: 7, color: subTone?.(r) === "neg" ? k.neg : k.muted, marginTop: 1.5 }}>{T(sub(r))}</Text>}
     </View>
   );
   // Un tableau court ne se coupe jamais (l'en-tête ne reste pas seul en bas
@@ -515,11 +519,15 @@ function Chart({ title, years, values, kind, width = CW, height = 120, tone = "b
 // ——— Pages du groupe ———
 
 /** Données manquantes qui limitent les totaux : toujours signalées, jamais comblées. */
-function gapNote(f: Figures, missingCharges = 0): string {
+/** Données manquantes ou incohérentes qui limitent les totaux : toujours signalées, jamais comblées. */
+function gapNote(m: GroupModel): string {
+  const f = m.f;
   const parts: string[] = [];
-  if (missingCharges > 0) parts.push(`${missingCharges} immeuble(s) loué(s) sans charges renseignées (taxe foncière, assurance) : cash-flow surestimé d'autant`);
+  if (m.incoherentLoans > 0) parts.push(`${m.incoherentLoans} crédit(s) aux chiffres incohérents (restant dû supérieur au montant emprunté), à vérifier`);
+  if (m.missingCharges > 0) parts.push(`${m.missingCharges} bien(s) loué(s) sans charges renseignées (taxe foncière, assurance) : cash-flow surestimé d'autant`);
   if (f.unknownDebt > 0) parts.push(`${f.unknownDebt} crédit(s) au capital restant dû non communiqué, non inclus dans le total`);
-  if (f.unknownPayment > 0) parts.push(`${f.unknownPayment} crédit(s) à la mensualité estimée ou inconnue (taux non renseigné)`);
+  if (m.estimatedLoans > 0) parts.push(`${m.estimatedLoans} mensualité(s) estimée(s) faute de taux connu (marquées « env. »)`);
+  if (m.missingPaymentLoans > 0) parts.push(`${m.missingPaymentLoans} crédit(s) à la mensualité non communiquée, exclue des mensualités et du cash-flow`);
   return parts.length ? ` Attention : ${parts.join(" ; ")}.` : "";
 }
 
@@ -530,20 +538,29 @@ interface Head {
   section?: Section;
 }
 
+/** Préfixe d'une valeur estimée (env.), minorée (min.) ou majorée (max.), en toutes lettres : les symboles ≈ ≥ ≤ n'existent pas dans les polices du PDF. */
+const MARKS = { "≈": "env.", "≥": "min.", "≤": "max." } as const;
+const approx = (s: string, mark?: keyof typeof MARKS) => (mark && s !== "—" ? `${MARKS[mark]} ${s}` : s);
+const ratio = (n: number | undefined) => (n !== undefined ? `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}×` : "—");
+
 function SynthesisPage({ m, h, now, message, author, trajectory }: { m: GroupModel; h: Head; now: string; message?: string; author?: string; trajectory: boolean }) {
   const f = m.f;
   const cf = cashflowMonthly(f);
   const valued = f.unvalued === 0 && f.value > 0;
+  const paymentsApprox = m.estimatedLoans > 0 || m.missingPaymentLoans > 0;
+  const cfMark = paymentsApprox ? "≈" : m.missingCharges > 0 ? "≤" : undefined;
+  const paymentsSub = paymentsApprox ? ["par mois", m.estimatedLoans ? `${m.estimatedLoans} estimée(s)` : "", m.missingPaymentLoans ? `${m.missingPaymentLoans} non communiquée(s), exclue(s)` : ""].filter(Boolean).join(" · ") : "par mois, assurance comprise";
   const kpis: Kpi[] = [
     { label: "Loyers annuels", value: K(f.rentMonthly * 12), sub: `${E(Math.round(f.rentMonthly))} par mois` },
-    { label: "Capital restant dû", value: K(f.debt), sub: `${f.loans} crédit(s) en cours` },
-    { label: "Mensualités", value: E(Math.round(f.paymentsMonthly)), sub: f.unknownPayment > 0 ? `par mois, dont ${f.unknownPayment} estimée(s)` : "par mois, assurance comprise" },
-    { label: "Cash-flow", value: S(Math.round(cf)), sub: "par mois, après charges et crédits", tone: cf >= 0 ? "pos" : "neg" },
+    { label: "Capital restant dû", value: approx(K(f.debt), f.unknownDebt > 0 ? "≥" : undefined), sub: f.unknownDebt > 0 ? `${f.loans} crédit(s), dont ${f.unknownDebt} non communiqué(s)` : `${f.loans} crédit(s) en cours` },
+    { label: "Mensualités", value: approx(E(Math.round(f.paymentsMonthly)), paymentsApprox ? "≈" : undefined), sub: paymentsSub },
+    { label: "Cash-flow", value: approx(S(Math.round(cf)), cfMark), sub: m.missingCharges > 0 ? `par mois, surestimé : charges de ${m.missingCharges} bien(s) non renseignées` : "par mois, après charges et crédits", tone: cf >= 0 ? "pos" : "neg" },
   ];
   const occ = m.indicators.get("occupancy");
   if (occ !== undefined) kpis.push({ label: "Taux d'occupation", value: P(occ), sub: `${f.units - f.vacantUnits} lots loués sur ${f.units}` });
-  if (valued) kpis.push({ label: "Valeur estimée du patrimoine", value: K(f.value), sub: `Dette / valeur : ${P((f.debt / f.value) * 100)}` });
+  if (valued) kpis.push({ label: "Valeur estimée du patrimoine", value: K(f.value), sub: `${biens(m.mix.total)} · dette / valeur : ${P((f.debt / f.value) * 100)}` });
   if (f.cash > 0) kpis.push({ label: "Trésorerie des sociétés", value: K(f.cash) });
+  const gap = gapNote(m);
   return (
     <Sheet {...h} title={`${m.name} en un coup d'œil`}>
       {message && <Message text={message} author={author} />}
@@ -557,33 +574,37 @@ function SynthesisPage({ m, h, now, message, author, trajectory }: { m: GroupMod
           <Bullets items={m.highlights} />
         </>
       )}
-      {gapNote(m.f, m.missingCharges) && <Note>{gapNote(m.f, m.missingCharges).trim()}</Note>}
+      {gap && <Note>{`${gap.trim()} « env. » : valeur estimée ; « min. » / « max. » : au moins / au plus.`}</Note>}
       {trajectory && <Trajectory m={m} />}
     </Sheet>
   );
 }
 
 function AssetsPage({ m, h }: { m: GroupModel; h: Head }) {
-  const rows = [...m.buildings];
-  if (m.companyLevelDebt > 1) rows.push({ name: "Crédits portés par les sociétés", place: "Emprunts non rattachés à un immeuble (apports, travaux…)", company: "—", lots: 0, acquisition: "", value: 0, rentAnnual: 0, debt: m.companyLevelDebt });
-  const total = { name: "Total", place: "", company: "", lots: m.buildings.reduce((s, b) => s + b.lots, 0), acquisition: "", value: m.buildings.every((b) => b.value !== undefined) ? m.buildings.reduce((s, b) => s + (b.value ?? 0), 0) : undefined, rentAnnual: m.buildings.reduce((s, b) => s + b.rentAnnual, 0), debt: rows.reduce((s, b) => s + b.debt, 0) };
+  type Row = GroupModel["buildings"][number] & { extra?: boolean };
+  const rows: Row[] = [...m.buildings];
+  if (m.companyLevelDebt > 1) rows.push({ name: "Crédits portés par les sociétés", place: "Emprunts non rattachés à un bien (apports, travaux…)", nature: "", privateUse: false, allVacant: false, company: "—", lots: 0, acquisition: "", value: 0, rentAnnual: 0, debt: m.companyLevelDebt, extra: true });
+  const total: Row = { name: "Total", place: "", nature: "", privateUse: false, allVacant: false, company: "", lots: m.buildings.reduce((s, b) => s + b.lots, 0), acquisition: "", value: m.buildings.every((b) => b.value !== undefined) ? m.buildings.reduce((s, b) => s + (b.value ?? 0), 0) : undefined, rentAnnual: m.buildings.reduce((s, b) => s + b.rentAnnual, 0), debt: rows.reduce((s, b) => s + b.debt, 0) };
+  const rent = (r: Row) => (r.extra ? "" : r.rentAnnual > 0 ? K(r.rentAnnual) : r.allVacant ? "Vacant" : "—");
   return (
     <Sheet {...h} title="État du patrimoine immobilier">
+      <Para>{`${biens(m.mix.total)} : ${m.mix.text}.`}</Para>
+      <View style={{ height: 8 }} />
       <Table
         cols={[
-          { label: "Immeuble", w: 30, get: (r) => r.name, bold: true },
+          { label: "Bien", w: 30, get: (r) => r.name, bold: true },
           { label: "Société", w: 16, get: (r) => r.company },
-          { label: "Lots", w: 7, right: true, get: (r) => (r.company === "—" ? "" : String(r.lots || "—")) },
-          { label: "Acquisition", w: 14, right: true, get: (r) => (r.company === "—" ? "" : r.acquisition || "—") },
-          { label: "Valeur", w: 11, right: true, get: (r) => (r.company === "—" ? "" : K(r.value)) },
-          { label: "Loyers / an", w: 11, right: true, get: (r) => (r.company === "—" ? "" : K(r.rentAnnual)) },
+          { label: "Lots", w: 7, right: true, get: (r) => (r.extra ? "" : r.lots ? String(r.lots) : "—") },
+          { label: "Acquisition", w: 14, right: true, get: (r) => (r.extra ? "" : r.acquisition || "—") },
+          { label: "Valeur", w: 11, right: true, get: (r) => (r.extra ? "" : K(r.value)) },
+          { label: "Loyers / an", w: 11, right: true, get: (r) => rent(r) },
           { label: "Dette", w: 11, right: true, get: (r) => K(r.debt) },
         ]}
         rows={rows}
-        sub={(r) => r.place || undefined}
+        sub={(r) => [r.nature, r.place].filter(Boolean).join(" · ") || undefined}
         total={total}
       />
-      <Note>« — » : non communiqué. Valeurs estimées par le propriétaire ; aucune valeur n&apos;est extrapolée.</Note>
+      <Note>{`« — » : non communiqué, ou sans objet pour un bien non loué. Valeurs estimées par le propriétaire ; aucune valeur n'est extrapolée.${m.mix.unspecified ? ` Nature non précisée pour ${m.mix.unspecified} bien(s).` : ""}`}</Note>
     </Sheet>
   );
 }
@@ -594,15 +615,16 @@ function LoansPage({ m, h }: { m: GroupModel; h: Head }) {
   if (m.loansByCompany.length === 0) return null;
   const totalBalance = m.loansByCompany.reduce((s, g) => s + g.balance, 0);
   const totalMonthly = m.loansByCompany.reduce((s, g) => s + g.monthly, 0);
+  const anyApprox = m.loansByCompany.some((g) => g.approx);
   type Row = GroupModel["loansByCompany"][number]["loans"][number];
   const cols: Col<Row>[] = [
     { label: "Crédit", w: 27, get: (r) => r.name, bold: true },
     { label: "Banque", w: 17, get: (r) => r.bank || "—" },
     { label: "Montant initial", w: 12, right: true, get: (r) => K(r.initial) },
     { label: "Restant dû", w: 12, right: true, get: (r) => K(r.balance) },
-    { label: "Mensualité", w: 11, right: true, get: (r) => E(r.monthly !== undefined ? Math.round(r.monthly) : undefined) },
-    { label: "Taux", w: 8, right: true, get: (r) => (r.rate !== undefined ? P(r.rate, 2) : "—") },
-    { label: "Fin", w: 13, right: true, get: (r) => r.end ?? "—" },
+    { label: "Mensualité", w: 11, right: true, get: (r) => approx(E(r.monthly !== undefined ? Math.round(r.monthly) : undefined), r.monthlyEstimated ? "≈" : undefined) },
+    { label: "Taux", w: 8, right: true, get: (r) => approx(r.rate !== undefined ? P(r.rate, 2) : "—", r.rateEstimated ? "≈" : undefined) },
+    { label: "Fin", w: 13, right: true, get: (r) => approx(r.end ?? "—", r.endEstimated ? "≈" : undefined) },
   ];
   return (
     <Sheet {...h} title="Crédits en cours">
@@ -610,16 +632,16 @@ function LoansPage({ m, h }: { m: GroupModel; h: Head }) {
         <View key={g.company} style={{ marginBottom: 12 }} wrap={g.loans.length > 12}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 4 }} wrap={false} minPresenceAhead={70}>
             <Text style={{ ...(k.id === "signature" ? W700 : k.display), fontSize: 9.5, color: k.heading }}>{T(g.company)}</Text>
-            <Text style={{ fontSize: 8, color: k.ink2 }}>{T(`${K(g.balance)} restant dû · ${E(Math.round(g.monthly))} / mois`)}</Text>
+            <Text style={{ fontSize: 8, color: k.ink2 }}>{T(`${K(g.balance)} restant dû · ${approx(E(Math.round(g.monthly)), g.approx ? "≈" : undefined)} / mois`)}</Text>
           </View>
-          <Table cols={cols} rows={g.loans} sub={(r) => r.note} />
+          <Table cols={cols} rows={g.loans} sub={(r) => r.note} subTone={(r) => (r.incoherent ? "neg" : undefined)} />
         </View>
       ))}
       <View style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 7, paddingHorizontal: 9, ...tot.box }} wrap={false}>
         <Text style={{ ...tot.text, fontSize: 9 }}>Total</Text>
-        <Text style={{ ...tot.text, fontSize: 9 }}>{T(`${K(totalBalance)} restant dû · ${E(Math.round(totalMonthly))} / mois`)}</Text>
+        <Text style={{ ...tot.text, fontSize: 9 }}>{T(`${K(totalBalance)} restant dû · ${approx(E(Math.round(totalMonthly)), anyApprox ? "≈" : undefined)} / mois`)}</Text>
       </View>
-      <Note>{`Mensualités assurance comprise. Capital restant dû calculé à ce jour à partir des tableaux d'amortissement ou des conditions du prêt.${gapNote(m.f, m.missingCharges)}`}</Note>
+      <Note>{`Mensualités assurance comprise. Capital restant dû calculé à ce jour à partir des tableaux d'amortissement ou des conditions du prêt. « env. » : valeur estimée (taux, mensualité ou date de fin non communiqués) ; « — » : non communiqué.${gapNote(m)}`}</Note>
     </Sheet>
   );
 }
@@ -629,32 +651,37 @@ function CapacityPage({ m, h }: { m: GroupModel; h: Head }) {
   const effort = m.indicators.get("effort");
   const occ = m.indicators.get("occupancy");
   const ltv = m.indicators.get("ltv");
+  const paymentsApprox = m.estimatedLoans > 0 || m.missingPaymentLoans > 0;
+  // Charges manquantes : cash-flow et DSCR au plus ; mensualités estimées : approchés.
+  const mark = (approxRow: boolean, chargesMissing: boolean) => (approxRow ? ("≈" as const) : chargesMissing ? ("≤" as const) : undefined);
   const ratios: Kpi[] = [
-    { label: "Couverture des mensualités (DSCR)", value: dscr !== undefined ? `${dscr.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}×` : "—", sub: m.f.unknownPayment > 0 ? `loyers nets ÷ mensualités (${m.f.unknownPayment} estimée(s))` : "loyers nets ÷ mensualités" },
-    { label: "Part des loyers consacrée aux crédits", value: P(effort), sub: m.f.unknownPayment > 0 ? `mensualités ÷ loyers (${m.f.unknownPayment} estimée(s))` : "mensualités ÷ loyers" },
+    { label: "Couverture des mensualités (DSCR)", value: approx(ratio(dscr), mark(paymentsApprox, m.missingCharges > 0)), sub: "loyers nets ÷ mensualités" },
+    { label: "Part des loyers consacrée aux crédits", value: approx(P(effort), paymentsApprox ? "≈" : undefined), sub: "mensualités ÷ loyers" },
   ];
   if (occ !== undefined) ratios.push({ label: "Taux d'occupation", value: P(occ), sub: "lots loués ÷ lots" });
-  if (ltv !== undefined) ratios.push({ label: "Dette / valeur (LTV)", value: P(ltv), sub: "capital restant dû ÷ valeur" });
-  const tot = m.capacity.reduce((a, c) => ({ rent: a.rent + c.rent, charges: a.charges + c.charges, payments: a.payments + c.payments, cf: a.cf + c.cf }), { rent: 0, charges: 0, payments: 0, cf: 0 });
+  if (ltv !== undefined) ratios.push({ label: "Dette / valeur (LTV)", value: approx(P(ltv), m.f.unknownDebt > 0 ? "≥" : undefined), sub: "capital restant dû ÷ valeur" });
+  type Row = GroupModel["capacity"][number];
+  const tot: Row = m.capacity.reduce((a, c) => ({ ...a, rent: a.rent + c.rent, charges: a.charges + c.charges, payments: a.payments + c.payments, cf: a.cf + c.cf, chargesMissing: a.chargesMissing || c.chargesMissing, approx: a.approx || c.approx }), { company: "Total", rent: 0, charges: 0, payments: 0, cf: 0, chargesMissing: false, approx: false } as Row);
+  tot.dscr = tot.payments > 0 ? (tot.rent - tot.charges) / tot.payments : undefined;
   return (
     <Sheet {...h} title="Capacité de remboursement">
-      <KpiGrid items={ratios} cols={ratios.length > 2 ? 2 : 2} />
+      <KpiGrid items={ratios} cols={2} />
       {m.capacity.length > 0 && (
         <>
           <H2>Par société, par mois</H2>
           <Table
             cols={[
-              { label: "Société", w: 28, get: (r) => r.company, bold: true },
-              { label: "Loyers", w: 15, right: true, get: (r) => E(Math.round(r.rent)) },
-              { label: "Charges", w: 14, right: true, get: (r) => E(Math.round(r.charges)) },
-              { label: "Mensualités", w: 15, right: true, get: (r) => E(Math.round(r.payments)) },
-              { label: "Cash-flow", w: 15, right: true, get: (r) => S(Math.round(r.cf)) },
-              { label: "DSCR", w: 13, right: true, get: (r) => (r.dscr !== undefined ? `${r.dscr.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}×` : "—") },
+              { label: "Société", w: 25, get: (r) => r.company, bold: true },
+              { label: "Loyers", w: 14, right: true, get: (r) => E(Math.round(r.rent)) },
+              { label: "Charges", w: 16, right: true, get: (r) => (r.chargesMissing ? (r.charges > 0 ? approx(E(Math.round(r.charges)), "≥") : "Non renseignées") : E(Math.round(r.charges))) },
+              { label: "Mensualités", w: 15, right: true, get: (r) => approx(E(Math.round(r.payments)), r.approx ? "≈" : undefined) },
+              { label: "Cash-flow", w: 16, right: true, get: (r) => approx(S(Math.round(r.cf)), mark(r.approx, r.chargesMissing)) },
+              { label: "DSCR", w: 14, right: true, get: (r) => approx(ratio(r.dscr), mark(r.approx, r.chargesMissing)) },
             ]}
             rows={m.capacity}
-            total={{ company: "Total", ...tot, dscr: tot.payments > 0 ? (tot.rent - tot.charges) / tot.payments : undefined }}
+            total={tot}
           />
-          <Note>{`Charges : taxe foncière, assurance, comptabilité et autres charges annuelles déclarées, ramenées au mois.${gapNote(m.f, m.missingCharges)}`}</Note>
+          <Note>{`Charges : taxe foncière, assurance, comptabilité et autres charges annuelles déclarées, ramenées au mois. « max. » : au plus (charges non renseignées pour certains biens) ; « min. » : au moins ; « env. » : mensualités estimées.${gapNote(m)}`}</Note>
         </>
       )}
     </Sheet>
@@ -663,6 +690,7 @@ function CapacityPage({ m, h }: { m: GroupModel; h: Head }) {
 
 function Trajectory({ m }: { m: GroupModel }) {
   const half = (CW - 12) / 2;
+  const indicative = m.estimatedLoans + m.missingPaymentLoans + m.missingCharges + m.incoherentLoans > 0;
   return (
     <View>
       <H2>Trajectoire</H2>
@@ -670,6 +698,7 @@ function Trajectory({ m }: { m: GroupModel }) {
         <Chart id="debt" title="Capital restant dû" years={m.years} values={m.debtSeries} kind="line" width={half} height={100} />
         <Chart id="cf" title="Cash-flow par mois" years={m.years} values={m.cfSeries} kind="step" width={half} height={100} tone="pos" />
       </View>
+      {indicative && <Note>{"Projection indicative : elle reprend les mêmes estimations et données manquantes que ci-dessus (cash-flow surestimé tant que des charges ou des mensualités manquent)."}</Note>}
       {m.sales.length > 0 && (
         <View style={{ marginTop: 10 }} wrap={false}>
           <Table
@@ -690,9 +719,9 @@ function Trajectory({ m }: { m: GroupModel }) {
         <View style={{ marginTop: 10 }}>
           <Table
             cols={[
-              { label: "Fin de crédit", w: 14, get: (r) => String(r.year), bold: true },
+              { label: "Fin de crédit", w: 14, get: (r) => approx(String(r.year), r.estimated ? "≈" : undefined), bold: true },
               { label: "Crédit(s)", w: 62, get: (r) => r.label },
-              { label: "Mensualité libérée", w: 24, right: true, get: (r) => `+${E(Math.round(r.freed))}` },
+              { label: "Mensualité libérée", w: 24, right: true, get: (r) => approx(`+${E(Math.round(r.freed))}`, r.estimated ? "≈" : undefined) },
             ]}
             rows={m.milestones}
           />
@@ -1216,10 +1245,10 @@ function numbering() {
 function groupKpis(m: GroupModel): Kpi[] {
   const f = m.f;
   const out: Kpi[] = [];
-  if (f.buildings > 0) out.push({ label: "Immeubles", value: String(f.buildings), sub: `${f.units} lots` });
+  if (m.mix.total > 0) out.push({ label: m.mix.total > 1 ? "Biens immobiliers" : "Bien immobilier", value: String(m.mix.total), sub: f.units ? `${f.units} lot${f.units > 1 ? "s" : ""} locatif${f.units > 1 ? "s" : ""}` : undefined });
   if (f.rentMonthly > 0) out.push({ label: "Loyers annuels", value: K(f.rentMonthly * 12) });
   if (f.unvalued === 0 && f.value > 0) out.push({ label: "Valeur estimée", value: K(f.value) });
-  else if (f.debt > 0) out.push({ label: "Capital restant dû", value: K(f.debt) });
+  else if (f.debt > 0) out.push({ label: "Capital restant dû", value: f.unknownDebt > 0 ? `min. ${K(f.debt)}` : K(f.debt) });
   return out;
 }
 
@@ -1370,7 +1399,7 @@ export function ProjectDossier({ data, projection, nowMonth, scopeName, generate
           </>
         )}
         <H2>Porteur du projet</H2>
-        <Para>{`${projectCompanyName(p, data) ?? scopeName}, au sein de ${scopeName} : ${m.f.buildings} immeuble(s), ${m.f.units} lots, ${eur(Math.round(m.f.rentMonthly * 12))} de loyers annuels (détail en fin de dossier).`}</Para>
+        <Para>{`${projectCompanyName(p, data) ?? scopeName}, au sein de ${scopeName} : ${biens(m.mix.total)} (${m.mix.text}), ${m.f.units} lots locatifs, ${eur(Math.round(m.f.rentMonthly * 12))} de loyers annuels (détail en fin de dossier).`}</Para>
       </Sheet>
 
       <Sheet {...h(sPlan)} title="Plan de financement">

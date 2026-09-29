@@ -85,7 +85,7 @@ export default function Accueil() {
                 <span className="block text-[22px] font-bold text-white/80">Données insuffisantes</span>
                 {t.unvalued > 0 && (
                   <Link href="/plus/a-completer" className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1.5 text-[13px] font-semibold text-white">
-                    Estimer la valeur de {t.unvalued} immeuble{t.unvalued > 1 ? "s" : ""} <ChevronRight size={14} />
+                    Estimer la valeur de {t.unvalued} bien{t.unvalued > 1 ? "s" : ""} <ChevronRight size={14} />
                   </Link>
                 )}
               </span>
@@ -112,7 +112,7 @@ export default function Accueil() {
           )}
           {(t.unvalued > 0 || t.unknownDebt > 0) && (
             <div className="mt-3 text-xs text-white/60">
-              {t.unvalued > 0 && `${t.unvalued} immeuble(s) sans valeur`}
+              {t.unvalued > 0 && `${t.unvalued} bien(s) sans valeur`}
               {t.unvalued > 0 && t.unknownDebt > 0 && " · "}
               {t.unknownDebt > 0 && `${t.unknownDebt} crédit(s) sans capital restant dû`}
             </div>
@@ -226,7 +226,7 @@ export default function Accueil() {
           />
           <div className="mt-4">
             {chart === "net" && t.unvalued > 0 && (
-              <div className="py-8 text-center text-sm text-muted">Données insuffisantes : valeur estimée manquante pour {t.unvalued} immeuble(s).</div>
+              <div className="py-8 text-center text-sm text-muted">Données insuffisantes : valeur estimée manquante pour {t.unvalued} bien(s).</div>
             )}
             {chart === "net" && t.unvalued === 0 && (
               <LineChart years={years} series={[{ label: "Patrimoine net", values: projection.years.map((r) => r.net), color: "var(--brand)" }]} />

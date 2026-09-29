@@ -48,9 +48,16 @@ export interface Company {
 
 export type Condition = "neuf" | "bon" | "correct" | "a_renover";
 
+export type PropertyKind = "immeuble" | "maison" | "appartement" | "local" | "hangar" | "terrain" | "parking" | "autre";
+export type PropertyUsage = "location" | "residence_principale" | "residence_secondaire" | "professionnel" | "vacant";
+
 export interface Building {
   id: Id;
   name: string;
+  /** Nature du bien (voir lib/assets.ts) : jamais devinée, choisie par le propriétaire. */
+  kind?: PropertyKind;
+  /** Usage : location, résidence principale… */
+  usage?: PropertyUsage;
   companyId?: Id | null;
   address?: string;
   city?: string;

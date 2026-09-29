@@ -78,7 +78,7 @@ export async function buildWorkbook(data: AppData): Promise<Buffer> {
   }
   if (t.unvalued || t.unknownDebt || t.unknownPayment) {
     syn.addRow([]);
-    syn.addRow([`À compléter : ${t.unvalued} immeuble(s) sans valeur, ${t.unknownDebt} crédit(s) sans capital restant dû, ${t.unknownPayment} crédit(s) sans mensualité connue.`]).font = { italic: true, color: { argb: "FFB45309" } };
+    syn.addRow([`À compléter : ${t.unvalued} bien(s) sans valeur, ${t.unknownDebt} crédit(s) sans capital restant dû, ${t.unknownPayment} crédit(s) sans mensualité connue.`]).font = { italic: true, color: { argb: "FFB45309" } };
   }
 
   sheet(
@@ -123,7 +123,7 @@ export async function buildWorkbook(data: AppData): Promise<Buffer> {
     wb,
     "Immeubles",
     [
-      { header: "Immeuble", key: "name", width: 24 },
+      { header: "Bien", key: "name", width: 24 },
       { header: "Société", key: "company", width: 22 },
       { header: "Adresse", key: "address", width: 28 },
       { header: "Commune", key: "city" },
@@ -174,7 +174,7 @@ export async function buildWorkbook(data: AppData): Promise<Buffer> {
     wb,
     "Logements",
     [
-      { header: "Immeuble", key: "building", width: 22 },
+      { header: "Bien", key: "building", width: 22 },
       { header: "Logement", key: "name", width: 16 },
       { header: "Type", key: "type" },
       { header: "Surface m²", key: "surface" },
@@ -216,7 +216,7 @@ export async function buildWorkbook(data: AppData): Promise<Buffer> {
     [
       { header: "Crédit", key: "name", width: 24 },
       { header: "Banque", key: "bank", width: 16 },
-      { header: "Immeuble", key: "building", width: 20 },
+      { header: "Bien", key: "building", width: 20 },
       { header: "Société", key: "company", width: 20 },
       { header: "Type", key: "kind" },
       { header: "Montant initial", key: "initial", fmt: EUR },
@@ -278,7 +278,7 @@ export async function buildWorkbook(data: AppData): Promise<Buffer> {
       { header: "Année", key: "year" },
       { header: "Montant", key: "amount", fmt: EUR },
       { header: "État", key: "status" },
-      { header: "Immeuble", key: "building", width: 20 },
+      { header: "Bien", key: "building", width: 20 },
       { header: "Société", key: "company", width: 20 },
       { header: "Notes", key: "notes", width: 30 },
     ],
@@ -365,7 +365,7 @@ export async function buildWorkbook(data: AppData): Promise<Buffer> {
     "Encaissements",
     [
       { header: "Mois", key: "month" },
-      { header: "Immeuble", key: "building", width: 20 },
+      { header: "Bien", key: "building", width: 20 },
       { header: "Logement", key: "unit", width: 14 },
       { header: "Locataire", key: "tenant", width: 22 },
       { header: "Statut", key: "status" },

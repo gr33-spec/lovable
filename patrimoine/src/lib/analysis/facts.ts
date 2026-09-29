@@ -1,3 +1,4 @@
+import { kindLabel, usageLabel } from "../assets";
 import type { AppData, Building } from "../types";
 import type { MonthIndex } from "../engine/dates";
 import { yearOf } from "../engine/dates";
@@ -86,6 +87,8 @@ export function buildFacts(all: AppData, nowMonth: MonthIndex, scope: AnalysisSc
     return {
       id: b.id,
       nom: b.name,
+      nature: kindLabel(b.kind) ?? "non précisée",
+      usage: usageLabel(b.usage) ?? null,
       societe: companyName(b.companyId),
       ville: b.city ?? null,
       prixAchat: r0(b.acquisitionPrice),
