@@ -17,6 +17,22 @@ Différence avec patrimoine : l'application est en **deux morceaux**, donc
 > et `https://baticlair.vercel.app`. Si Vercel ajoute un suffixe (nom déjà
 > pris), notez l'adresse réelle affichée et utilisez-la partout ci-dessous.
 
+> **Le projet Vercel `lovable` déjà existant** met en ligne la *racine* du
+> dépôt, c'est-à-dire l'ancienne BatiClair, désormais rangée dans
+> `legacy/baticlair/`. Ses nouveaux déploiements échouent (rien à
+> construire à la racine) ; la version déjà en ligne reste affichée.
+> Au choix :
+> - **le réutiliser comme site** (recommandé, garde l'adresse) :
+>   projet **lovable** → **Settings** → **Build and Deployment** →
+>   **Root Directory** : `apps/web` → **Save**, puis faites l'étape 2
+>   ci-dessous *dans ce projet* au lieu d'en créer un nouveau (ajoutez
+>   `API_URL`, les anciennes variables peuvent rester ou être supprimées),
+>   et utilisez son adresse à la place de `https://baticlair.vercel.app` ;
+> - ou le **supprimer** (**Settings** → **Delete Project**) si l'ancienne
+>   version en ligne ne sert plus.
+>
+> Le projet **patrimoine** n'est pas concerné.
+
 ---
 
 ## Avant de commencer : le secret de session
