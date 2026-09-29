@@ -16,7 +16,10 @@ export const PDF_SECTIONS: { id: PdfSection; label: string; hint: string }[] = [
 ];
 
 export const PDF_COVERS: { id: PdfCover; label: string; hint: string }[] = [
-  { id: "immersive", label: "Immersive", hint: "Pleine page aux couleurs du thème" },
+  { id: "immersive", label: "Immersive", hint: "Couverture pleine page en dégradé" },
+  { id: "editorial", label: "Éditorial", hint: "Style magazine, titres à empattements" },
+  { id: "bento", label: "Bento", hint: "Sombre, en tuiles arrondies (idéal à l'écran)" },
+  { id: "suisse", label: "Suisse", hint: "Graphique, grille stricte, aplat de couleur" },
   { id: "bandeau", label: "Bandeau", hint: "Bandeau coloré, chiffres clés dessous" },
   { id: "epure", label: "Épurée", hint: "Fond blanc, touches de couleur" },
 ];
@@ -32,7 +35,7 @@ const text = (max: number) =>
 
 const schema = z.object({
   color: z.enum([APP_COLOR, ...THEMES.map((t) => t.id)] as [string, ...string[]]).optional().catch(undefined),
-  cover: z.enum(["immersive", "bandeau", "epure"]).optional().catch(undefined),
+  cover: z.enum(["immersive", "bandeau", "epure", "editorial", "bento", "suisse"]).optional().catch(undefined),
   title: text(80).catch(undefined),
   subtitle: text(120).catch(undefined),
   recipient: text(120).catch(undefined),

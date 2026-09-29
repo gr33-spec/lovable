@@ -804,7 +804,8 @@ export interface Settings {
 }
 
 export type PdfSection = "patrimoine" | "credits" | "capacite" | "trajectoire" | "remuneration" | "comptes";
-export type PdfCover = "immersive" | "bandeau" | "epure";
+/** Modèle du dossier : les trois premiers ne changent que la couverture, les suivants tout le document. */
+export type PdfCover = "immersive" | "bandeau" | "epure" | "editorial" | "bento" | "suisse";
 
 /** Personnalisation des dossiers PDF : rien n'y change les chiffres. */
 export interface PdfPrefs {

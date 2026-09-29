@@ -1,6 +1,4 @@
-import { existsSync } from "node:fs";
-import path from "node:path";
-import { renderToBuffer, Circle, ClipPath, Defs, G, Document, Font, Line, LinearGradient, Page, Path, RadialGradient, Rect, Stop, Svg, Text, View } from "@react-pdf/renderer";
+import { renderToBuffer, Circle, ClipPath, Defs, G, Document, Line, LinearGradient, Page, Path, RadialGradient, Rect, Stop, Svg, Text, View } from "@react-pdf/renderer";
 import type { AppData, Company, PdfPrefs, Project } from "../types";
 import type { MonthIndex } from "../engine/dates";
 import { yearOf } from "../engine/dates";
@@ -15,53 +13,35 @@ import { eur, eurCompact, pct, pdfSafe, dateFr } from "../format";
 import type { PdfCover } from "../types";
 import { CONDITIONS, UNIT_TYPES, WITHDRAWAL_KINDS, labelOf } from "../labels";
 import { DEFAULT_COVER, pdfColors, shows, type PdfColors } from "./prefs";
+import { FONT, W600, W700, W800, kitFor, type Kit } from "./kit";
 
 // Dossier banque, format A4 portrait : court (6 à 8 pages), sans répétition,
 // uniquement des chiffres connus. Deux usages :
 //  - présentation du groupe (ou d'une seule société) ;
 //  - dossier de financement d'un projet, suivi du groupe en résumé.
 // Tous les chiffres viennent des moteurs de l'application. Les couleurs
-// viennent du thème (lib/theme.ts), la présentation des réglages (prefs.ts).
+// viennent du thème (lib/theme.ts), la mise en page du modèle choisi (kit.ts).
 
-// ——— Police ———
-const FONT_DIR = path.join(process.cwd(), "src/lib/pdf/fonts");
-const HAS_INTER = existsSync(path.join(FONT_DIR, "inter-latin-400-normal.woff"));
-if (HAS_INTER) {
-  Font.register({
-    family: "Inter",
-    fonts: [
-      { src: path.join(FONT_DIR, "inter-latin-400-normal.woff"), fontWeight: 400 },
-      { src: path.join(FONT_DIR, "inter-latin-600-normal.woff"), fontWeight: 600 },
-      { src: path.join(FONT_DIR, "inter-latin-700-normal.woff"), fontWeight: 700 },
-      { src: path.join(FONT_DIR, "inter-latin-800-normal.woff"), fontWeight: 800 },
-    ],
-  });
-  Font.registerHyphenationCallback((word) => [word]);
-}
-const FONT = HAS_INTER ? "Inter" : "Helvetica";
-const W600 = HAS_INTER ? { fontFamily: "Inter", fontWeight: 600 as const } : { fontFamily: "Helvetica-Bold" };
-const W700 = HAS_INTER ? { fontFamily: "Inter", fontWeight: 700 as const } : { fontFamily: "Helvetica-Bold" };
-const W800 = HAS_INTER ? { fontFamily: "Inter", fontWeight: 800 as const } : { fontFamily: "Helvetica-Bold" };
-
-// ——— Charte : neutres fixes, couleurs du thème via le contexte ———
+// Neutres du modèle « signature » (couvertures Immersive, Bandeau, Épurée).
 const INK = "#141c24";
 const INK2 = "#4d5663";
 const MUTED = "#8b929c";
 const LINE = "#e4e7ec";
-const POS = "#0f8a5f";
-const NEG = "#c73a3a";
 
-// Palette du document en cours. Les routes serveur n'ont pas accès au
-// contexte React ; l'arbre react-pdf est rendu d'un seul tenant (sans
-// attente), donc la palette posée par le document racine vaut pour tous
-// ses composants et ne peut pas se mêler à un autre rendu.
+// Palette et modèle du document en cours. Les routes serveur n'ont pas accès
+// au contexte React ; l'arbre react-pdf est rendu d'un seul tenant (sans
+// attente), donc ce qui est posé par renderDossier vaut pour tous ses
+// composants et ne peut pas se mêler à un autre rendu.
 let current: PdfColors = pdfColors(undefined, undefined);
+let currentKit: Kit = kitFor(undefined, current);
 const cur = () => current;
+const kit = () => currentKit;
 
-/** Rend un dossier aux couleurs choisies (seule entrée utilisée par les routes). */
+/** Rend un dossier aux couleurs et au modèle choisis (seule entrée utilisée par les routes). */
 export function renderDossier(el: React.ReactElement<GroupDossierInput>, prefs: PdfPrefs | undefined, appTheme: string | undefined): Promise<Buffer> {
   current = pdfColors(prefs, appTheme);
-  // Le rendu de l'arbre démarre ici même, sans attente : la palette ne peut pas changer entre-temps.
+  currentKit = kitFor(prefs?.cover, current);
+  // Le rendu de l'arbre démarre ici même, sans attente : rien ne peut changer entre-temps.
   return renderToBuffer(el as Parameters<typeof renderToBuffer>[0]);
 }
 
@@ -76,8 +56,10 @@ const K = (n: number | undefined) => (n === undefined ? "—" : pdfSafe(eurCompa
 const P = (n: number | undefined, d = 1) => (n === undefined ? "—" : pdfSafe(pct(n, d)));
 const S = (n: number) => pdfSafe(`${n >= 0 ? "+" : "−"}${eur(Math.abs(n))}`);
 const two = (n: number) => String(n).padStart(2, "0");
-
 const base = { fontFamily: FONT, fontSize: 9, color: INK };
+
+/** Petites capitales espacées (étiquettes, en-têtes de colonnes). */
+const caps = (size: number, spacing = 1.2) => ({ fontSize: size, textTransform: "uppercase" as const, letterSpacing: spacing });
 
 // ——— Mise en page ———
 
@@ -89,32 +71,80 @@ interface Section {
 
 function Footer({ label }: { label: string }) {
   const c = cur();
+  const k = kit();
+  const pill =
+    k.id === "bento"
+      ? { ...W700, color: k.accent, backgroundColor: k.card, borderRadius: 7, paddingVertical: 2, paddingHorizontal: 7 }
+      : k.id === "signature"
+        ? { ...W700, color: c.brand, backgroundColor: c.soft, borderRadius: 7, paddingVertical: 2, paddingHorizontal: 7 }
+        : k.id === "editorial"
+          ? { ...k.italic, color: k.ink2, fontSize: 8 }
+          : { ...k.display, color: k.accent };
   return (
-    <View fixed style={{ position: "absolute", bottom: 22, left: MX, right: MX, flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderTopWidth: 0.5, borderTopColor: LINE, paddingTop: 7 }}>
-      <Text style={{ fontSize: 7, color: MUTED }}>{T(label)}</Text>
-      <Text style={{ ...W700, fontSize: 7, color: c.brand, backgroundColor: c.soft, borderRadius: 7, paddingVertical: 2, paddingHorizontal: 7 }} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
+    <View fixed style={{ position: "absolute", bottom: 22, left: MX, right: MX, flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderTopWidth: k.id === "suisse" ? 1.2 : 0.5, borderTopColor: k.id === "suisse" ? k.ink : k.line, paddingTop: 7 }}>
+      <Text style={{ fontSize: 7, color: k.muted }}>{T(label)}</Text>
+      <Text style={{ fontSize: 7, ...pill }} render={({ pageNumber, totalPages }) => (k.id === "editorial" ? `${pageNumber}` : k.id === "suisse" ? `${two(pageNumber)} / ${two(totalPages)}` : `${pageNumber} / ${totalPages}`)} />
+    </View>
+  );
+}
+
+function SectionHead({ section, title }: { section?: Section; title: string }) {
+  const c = cur();
+  const k = kit();
+  if (k.id === "editorial")
+    return (
+      <View style={{ marginBottom: 18 }}>
+        {section && <Text style={{ ...W700, ...caps(7.5, 2), color: k.accent, marginBottom: 6 }}>{T(`Chapitre ${two(section.n)} · ${section.label}`)}</Text>}
+        <Text style={{ ...k.display, fontSize: 26, color: k.heading, lineHeight: 1.12, letterSpacing: -0.4 }}>{T(title)}</Text>
+        <View style={{ height: 0.8, backgroundColor: k.ink, marginTop: 10 }} />
+      </View>
+    );
+  if (k.id === "bento")
+    return (
+      <View style={{ marginBottom: 16 }}>
+        {section && (
+          <View style={{ flexDirection: "row", alignSelf: "flex-start", backgroundColor: k.card, borderRadius: 10, paddingVertical: 4, paddingHorizontal: 9, marginBottom: 8 }}>
+            <Text style={{ ...k.display, fontSize: 8, color: k.accent }}>{two(section.n)}</Text>
+            <Text style={{ fontSize: 8, color: k.ink2, marginLeft: 6 }}>{T(section.label)}</Text>
+          </View>
+        )}
+        <Text style={{ ...k.display, fontSize: 24, color: k.heading, letterSpacing: -0.6, lineHeight: 1.1 }}>{T(title)}</Text>
+      </View>
+    );
+  if (k.id === "suisse")
+    return (
+      <View style={{ borderTopWidth: 2.2, borderTopColor: k.ink, paddingTop: 10, marginBottom: 18, flexDirection: "row", gap: 14 }}>
+        {section && <Text style={{ ...k.display, fontSize: 44, color: k.accent, lineHeight: 0.9, width: 66, letterSpacing: -2 }}>{two(section.n)}</Text>}
+        <View style={{ flex: 1 }}>
+          {section && <Text style={{ ...k.display, ...caps(7.5, 1.5), color: k.ink2, marginBottom: 4 }}>{T(section.label)}</Text>}
+          <Text style={{ ...k.display, fontSize: 21, color: k.heading, letterSpacing: -0.5, lineHeight: 1.1 }}>{T(title)}</Text>
+        </View>
+      </View>
+    );
+  return (
+    <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 12, marginBottom: 16, paddingBottom: 12, borderBottomWidth: 1.5, borderBottomColor: c.soft }}>
+      {section && <Text style={{ ...W800, fontSize: 34, color: c.brand, lineHeight: 1, letterSpacing: -1 }}>{two(section.n)}</Text>}
+      <View style={{ flex: 1, paddingBottom: 2 }}>
+        {section && <Text style={{ ...W700, ...caps(7.5, 1.6), color: c.brand, marginBottom: 3 }}>{T(section.label)}</Text>}
+        <Text style={{ ...W800, fontSize: 19, color: c.deep, letterSpacing: -0.3, lineHeight: 1.15 }}>{T(title)}</Text>
+      </View>
     </View>
   );
 }
 
 function Sheet({ label, running, section, title, children }: { label: string; running: string; section?: Section; title: string; children: React.ReactNode }) {
   const c = cur();
+  const k = kit();
   return (
-    <Page size="A4" style={{ ...base, paddingTop: 66, paddingBottom: 60, paddingHorizontal: MX }} wrap>
+    <Page size="A4" style={{ fontFamily: FONT, fontSize: 9, color: k.ink, backgroundColor: k.paper, paddingTop: 66, paddingBottom: 60, paddingHorizontal: MX }} wrap>
       <View fixed style={{ position: "absolute", top: 26, left: MX, right: MX, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <View style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: c.brand }} />
-          <Text style={{ ...W700, fontSize: 7, color: c.deep, letterSpacing: 1.2, textTransform: "uppercase" }}>{T(running)}</Text>
+          {k.id !== "editorial" && <View style={{ width: 8, height: 8, borderRadius: k.id === "suisse" ? 0 : k.id === "bento" ? 4 : 2, backgroundColor: k.id === "bento" ? k.accent : c.brand }} />}
+          <Text style={k.id === "editorial" ? { ...k.italic, fontSize: 9, color: k.heading } : { ...(k.id === "signature" ? W700 : k.display), ...caps(7, 1.2), color: k.heading }}>{T(running)}</Text>
         </View>
-        {section && <Text style={{ fontSize: 7, color: MUTED }}>{T(`${two(section.n)} · ${section.label}`)}</Text>}
+        {section && <Text style={{ fontSize: 7, color: k.muted }}>{T(`${two(section.n)} · ${section.label}`)}</Text>}
       </View>
-      <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 12, marginBottom: 16, paddingBottom: 12, borderBottomWidth: 1.5, borderBottomColor: c.soft }}>
-        {section && <Text style={{ ...W800, fontSize: 34, color: c.brand, lineHeight: 1, letterSpacing: -1 }}>{two(section.n)}</Text>}
-        <View style={{ flex: 1, paddingBottom: 2 }}>
-          {section && <Text style={{ ...W700, fontSize: 7.5, color: c.brand, letterSpacing: 1.6, textTransform: "uppercase", marginBottom: 3 }}>{T(section.label)}</Text>}
-          <Text style={{ ...W800, fontSize: 19, color: c.deep, letterSpacing: -0.3, lineHeight: 1.15 }}>{T(title)}</Text>
-        </View>
-      </View>
+      <SectionHead section={section} title={title} />
       {children}
       <Footer label={label} />
     </Page>
@@ -123,29 +153,45 @@ function Sheet({ label, running, section, title, children }: { label: string; ru
 
 function H2({ children, top = 18 }: { children: string; top?: number }) {
   const c = cur();
+  const k = kit();
+  const marker =
+    k.id === "signature" ? <View style={{ width: 3, height: 11, borderRadius: 1.5, backgroundColor: c.brand }} /> : k.id === "bento" ? <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: k.accent }} /> : k.id === "suisse" ? <View style={{ width: 7, height: 7, backgroundColor: k.accent }} /> : null;
+  const font = k.id === "editorial" ? { ...k.display, fontSize: 13.5 } : k.id === "suisse" ? { ...k.display, ...caps(9.5, 0.8) } : k.id === "bento" ? { ...k.display, fontSize: 12 } : { ...W700, fontSize: 11 };
   return (
     <View minPresenceAhead={60} style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: top, marginBottom: 7 }}>
-      <View style={{ width: 3, height: 11, borderRadius: 1.5, backgroundColor: c.brand }} />
-      <Text style={{ ...W700, fontSize: 11, color: c.deep }}>{T(children)}</Text>
+      {marker}
+      <Text style={{ ...font, color: k.heading }}>{T(children)}</Text>
     </View>
   );
 }
 
 function Para({ children }: { children: string }) {
-  return <Text style={{ fontSize: 9, color: INK2, lineHeight: 1.55 }}>{T(children)}</Text>;
+  return <Text style={{ fontSize: 9, color: kit().ink2, lineHeight: 1.55 }}>{T(children)}</Text>;
 }
 
 function Note({ children }: { children: string }) {
-  return <Text style={{ fontSize: 7, color: MUTED, marginTop: 7, lineHeight: 1.45 }}>{T(children)}</Text>;
+  return <Text style={{ fontSize: 7, color: kit().muted, marginTop: 7, lineHeight: 1.45 }}>{T(children)}</Text>;
 }
 
 /** Mot d'introduction du dirigeant, tel qu'il l'a écrit. */
 function Message({ text, author }: { text: string; author?: string }) {
   const c = cur();
+  const k = kit();
+  if (k.id === "editorial")
+    return (
+      <View wrap={false} style={{ flexDirection: "row", gap: 10, marginBottom: 16, paddingBottom: 12, borderBottomWidth: 0.5, borderBottomColor: k.line }}>
+        <Text style={{ ...k.display, fontSize: 40, color: k.accent, lineHeight: 0.9 }}>“</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={{ ...k.italic, fontSize: 12, color: k.ink, lineHeight: 1.5 }}>{T(text)}</Text>
+          {author && <Text style={{ ...W700, ...caps(7, 1.4), color: k.accent, marginTop: 7 }}>{T(author)}</Text>}
+        </View>
+      </View>
+    );
+  const suisse = k.id === "suisse";
   return (
-    <View wrap={false} style={{ backgroundColor: c.soft, borderRadius: 8, borderLeftWidth: 3, borderLeftColor: c.brand, paddingVertical: 11, paddingHorizontal: 13, marginBottom: 14 }}>
-      <Text style={{ fontSize: 9.4, color: INK, lineHeight: 1.6 }}>{T(text)}</Text>
-      {author && <Text style={{ ...W600, fontSize: 8, color: c.brand, marginTop: 6 }}>{T(author)}</Text>}
+    <View wrap={false} style={{ backgroundColor: suisse ? c.brand : k.id === "bento" ? k.card : c.soft, borderRadius: suisse ? 0 : k.id === "bento" ? 12 : 8, borderLeftWidth: suisse ? 0 : 3, borderLeftColor: k.id === "bento" ? k.accent : c.brand, paddingVertical: 12, paddingHorizontal: 14, marginBottom: 14 }}>
+      <Text style={{ fontSize: 9.4, color: suisse ? c.onBrand : k.ink, lineHeight: 1.6 }}>{T(text)}</Text>
+      {author && <Text style={{ ...W600, fontSize: 8, color: suisse ? c.onBrand : k.id === "bento" ? k.accent : c.brand, marginTop: 6 }}>{T(author)}</Text>}
     </View>
   );
 }
@@ -158,55 +204,101 @@ interface Kpi {
 }
 
 /** Fond dégradé du thème, comme les cartes principales de l'application. */
-function DeepBackground({ width, height, id, radius = 0, halos = true }: { width: number; height: number; id: string; radius?: number; halos?: boolean }) {
+function DeepBackground({ width, height, id, radius = 0, halos = true, vivid = false }: { width: number; height: number; id: string; radius?: number; halos?: boolean; vivid?: boolean }) {
   const c = cur();
+  const stops = vivid ? [c.brand, c.deep3, c.deep2] : [c.deep, c.deep2, c.deep3];
   return (
     <View style={{ position: "absolute", top: 0, left: 0, width, height }}>
-    <Svg width={width} height={height}>
-      <Defs>
-        <ClipPath id={`${id}-clip`}>
-          <Rect x={0} y={0} width={width} height={height} rx={radius} ry={radius} />
-        </ClipPath>
-        <LinearGradient id={`${id}-bg`} x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={c.deep} />
-          <Stop offset="0.55" stopColor={c.deep2} />
-          <Stop offset="1" stopColor={c.deep3} />
-        </LinearGradient>
-        <RadialGradient id={`${id}-glow`} cx="0.5" cy="0.5" r="0.5">
-          <Stop offset="0" stopColor={c.glow} stopOpacity={0.34} />
-          <Stop offset="1" stopColor={c.glow} stopOpacity={0} />
-        </RadialGradient>
-        <RadialGradient id={`${id}-brand`} cx="0.5" cy="0.5" r="0.5">
-          <Stop offset="0" stopColor={c.brand} stopOpacity={0.55} />
-          <Stop offset="1" stopColor={c.brand} stopOpacity={0} />
-        </RadialGradient>
-      </Defs>
-      <Rect x={0} y={0} width={width} height={height} rx={radius} ry={radius} fill={`url(#${id}-bg)`} />
-      {halos && (
-        <G clipPath={`url(#${id}-clip)`}>
-          <Circle cx={width - Math.min(width, height) * 0.12} cy={Math.min(width, height) * 0.05} r={Math.min(width, height) * 0.55} fill={`url(#${id}-glow)`} />
-          <Circle cx={Math.min(width, height) * 0.05} cy={height} r={Math.min(width, height) * 0.7} fill={`url(#${id}-brand)`} />
-        </G>
-      )}
-    </Svg>
+      <Svg width={width} height={height}>
+        <Defs>
+          <ClipPath id={`${id}-clip`}>
+            <Rect x={0} y={0} width={width} height={height} rx={radius} ry={radius} />
+          </ClipPath>
+          <LinearGradient id={`${id}-bg`} x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor={stops[0]} />
+            <Stop offset="0.55" stopColor={stops[1]} />
+            <Stop offset="1" stopColor={stops[2]} />
+          </LinearGradient>
+          <RadialGradient id={`${id}-glow`} cx="0.5" cy="0.5" r="0.5">
+            <Stop offset="0" stopColor={c.glow} stopOpacity={0.34} />
+            <Stop offset="1" stopColor={c.glow} stopOpacity={0} />
+          </RadialGradient>
+          <RadialGradient id={`${id}-brand`} cx="0.5" cy="0.5" r="0.5">
+            <Stop offset="0" stopColor={c.brand} stopOpacity={0.55} />
+            <Stop offset="1" stopColor={c.brand} stopOpacity={0} />
+          </RadialGradient>
+        </Defs>
+        <Rect x={0} y={0} width={width} height={height} rx={radius} ry={radius} fill={`url(#${id}-bg)`} />
+        {halos && (
+          <G clipPath={`url(#${id}-clip)`}>
+            <Circle cx={width - Math.min(width, height) * 0.12} cy={Math.min(width, height) * 0.05} r={Math.min(width, height) * 0.55} fill={`url(#${id}-glow)`} />
+            <Circle cx={Math.min(width, height) * 0.05} cy={height} r={Math.min(width, height) * 0.7} fill={`url(#${id}-brand)`} />
+          </G>
+        )}
+      </Svg>
     </View>
   );
 }
 
-/** Bandeau sombre des chiffres principaux. */
+const toneColor = (k: Kit, tone: Kpi["tone"], fallback: string) => (tone === "pos" ? k.pos : tone === "neg" ? k.neg : fallback);
+
+/** Bandeau des chiffres principaux, dessiné selon le modèle. */
 function HeroKpis({ items }: { items: Kpi[] }) {
   const c = cur();
+  const k = kit();
+  const n = items.length;
+  if (k.id === "editorial")
+    return (
+      <View wrap={false} style={{ flexDirection: "row", borderTopWidth: 1.4, borderTopColor: k.ink, borderBottomWidth: 0.5, borderBottomColor: k.line, marginBottom: 12 }}>
+        {items.map((it, i) => (
+          <View key={it.label} style={{ flex: 1, paddingVertical: 11, paddingLeft: i ? 12 : 0, borderLeftWidth: i ? 0.5 : 0, borderLeftColor: k.line }}>
+            <Text style={{ ...W700, ...caps(6.6, 1), color: k.ink2 }}>{T(it.label)}</Text>
+            <Text style={{ ...k.number, fontSize: 21, marginTop: 4, color: toneColor(k, it.tone, k.heading) }}>{T(it.value)}</Text>
+            {it.sub && <Text style={{ ...k.italic, fontSize: 7.5, color: k.muted, marginTop: 2 }}>{T(it.sub)}</Text>}
+          </View>
+        ))}
+      </View>
+    );
+  if (k.id === "bento") {
+    const gap = 8;
+    const w = (CW - gap * (n - 1)) / n;
+    const h = 82;
+    return (
+      <View wrap={false} style={{ flexDirection: "row", gap, marginBottom: 8 }}>
+        {items.map((it, i) => (
+          <View key={it.label} style={{ position: "relative", width: w, height: h, borderRadius: k.radius, backgroundColor: k.card, padding: 11 }}>
+            {i === 0 && <DeepBackground width={w} height={h} id={`hk${i}`} radius={k.radius} vivid />}
+            <Text style={{ fontSize: 7, color: i === 0 ? "#ffffff" : k.muted }}>{T(it.label)}</Text>
+            <Text style={{ ...k.number, fontSize: 17, marginTop: 6, color: i === 0 ? "#ffffff" : toneColor(k, it.tone, k.ink) }}>{T(it.value)}</Text>
+            {it.sub && <Text style={{ fontSize: 6.5, color: i === 0 ? c.muted : k.muted, marginTop: 3 }}>{T(it.sub)}</Text>}
+          </View>
+        ))}
+      </View>
+    );
+  }
+  if (k.id === "suisse")
+    return (
+      <View wrap={false} style={{ flexDirection: "row", backgroundColor: c.brand, marginBottom: 10 }}>
+        {items.map((it, i) => (
+          <View key={it.label} style={{ flex: 1, paddingVertical: 13, paddingHorizontal: 12, borderLeftWidth: i ? 0.6 : 0, borderLeftColor: c.muted }}>
+            <Text style={{ ...k.display, ...caps(6.6, 1), color: c.onBrand }}>{T(it.label)}</Text>
+            <Text style={{ ...k.number, fontSize: 19, marginTop: 6, color: c.onBrand }}>{T(it.value)}</Text>
+            {it.sub && <Text style={{ fontSize: 6.6, color: c.soft, marginTop: 3 }}>{T(it.sub)}</Text>}
+          </View>
+        ))}
+      </View>
+    );
   const h = 74;
-  const w = CW / items.length;
+  const w = CW / n;
   return (
     <View wrap={false} style={{ position: "relative", width: CW, height: h, borderRadius: 10, marginBottom: 10 }}>
       <DeepBackground width={CW} height={h} id="hero" radius={10} />
       <View style={{ flexDirection: "row", height: h, alignItems: "center" }}>
-        {items.map((k, i) => (
-          <View key={k.label} style={{ width: w, paddingHorizontal: 13, borderLeftWidth: i ? 0.6 : 0, borderLeftColor: c.deep3 }}>
-            <Text style={{ fontSize: 7, color: c.muted, textTransform: "uppercase", letterSpacing: 0.6 }}>{T(k.label)}</Text>
-            <Text style={{ ...W800, fontSize: 15.5, marginTop: 4, color: k.tone === "pos" ? "#8ee8bf" : k.tone === "neg" ? "#ffaaaa" : "#ffffff" }}>{T(k.value)}</Text>
-            {k.sub && <Text style={{ fontSize: 6.6, color: c.glow, marginTop: 3 }}>{T(k.sub)}</Text>}
+        {items.map((it, i) => (
+          <View key={it.label} style={{ width: w, paddingHorizontal: 13, borderLeftWidth: i ? 0.6 : 0, borderLeftColor: c.deep3 }}>
+            <Text style={{ ...caps(7, 0.6), color: c.muted }}>{T(it.label)}</Text>
+            <Text style={{ ...W800, fontSize: 15.5, marginTop: 4, color: it.tone === "pos" ? "#8ee8bf" : it.tone === "neg" ? "#ffaaaa" : "#ffffff" }}>{T(it.value)}</Text>
+            {it.sub && <Text style={{ fontSize: 6.6, color: c.glow, marginTop: 3 }}>{T(it.sub)}</Text>}
           </View>
         ))}
       </View>
@@ -216,19 +308,26 @@ function HeroKpis({ items }: { items: Kpi[] }) {
 
 function KpiGrid({ items, cols = 3, dark }: { items: Kpi[]; cols?: number; dark?: boolean }) {
   const c = cur();
+  const k = kit();
   if (dark) return <HeroKpis items={items} />;
-  const gap = 8;
+  const gap = k.id === "editorial" || k.id === "suisse" ? 14 : 8;
   const w = (CW - gap * (cols - 1)) / cols;
+  const box =
+    k.id === "editorial"
+      ? { borderTopWidth: 0.8, borderTopColor: k.ink, paddingTop: 8, paddingBottom: 6 }
+      : k.id === "suisse"
+        ? { borderLeftWidth: 1.2, borderLeftColor: k.ink, paddingLeft: 9, paddingVertical: 4 }
+        : { backgroundColor: k.card, borderRadius: k.radius, borderWidth: k.id === "bento" ? 0 : 0.6, borderColor: k.line, paddingVertical: 10, paddingHorizontal: 11 };
   return (
-    <View style={{ flexDirection: "row", flexWrap: "wrap", gap }} wrap={false}>
-      {items.map((k) => (
-        <View key={k.label} style={{ width: w, backgroundColor: c.stripe, borderRadius: 8, borderWidth: 0.6, borderColor: LINE, paddingVertical: 10, paddingHorizontal: 11 }}>
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap, rowGap: k.id === "signature" || k.id === "bento" ? gap : 12 }} wrap={false}>
+      {items.map((it) => (
+        <View key={it.label} style={{ width: w, ...box }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-            <View style={{ width: 5, height: 5, borderRadius: 2.5, backgroundColor: k.tone === "pos" ? POS : k.tone === "neg" ? NEG : c.brand }} />
-            <Text style={{ fontSize: 7.3, color: INK2, flex: 1 }}>{T(k.label)}</Text>
+            {(k.id === "signature" || k.id === "bento") && <View style={{ width: 5, height: 5, borderRadius: 2.5, backgroundColor: toneColor(k, it.tone, k.id === "bento" ? k.accent : c.brand) }} />}
+            <Text style={k.id === "suisse" || k.id === "editorial" ? { ...W700, ...caps(6.4, 0.9), color: k.ink2, flex: 1 } : { fontSize: 7.3, color: k.ink2, flex: 1 }}>{T(it.label)}</Text>
           </View>
-          <Text style={{ ...W800, fontSize: 15, marginTop: 4, color: k.tone === "pos" ? POS : k.tone === "neg" ? NEG : c.deep }}>{T(k.value)}</Text>
-          {k.sub && <Text style={{ fontSize: 6.8, color: MUTED, marginTop: 2 }}>{T(k.sub)}</Text>}
+          <Text style={{ ...k.number, fontSize: k.id === "editorial" ? 18 : 15, marginTop: 4, color: toneColor(k, it.tone, k.heading) }}>{T(it.value)}</Text>
+          {it.sub && <Text style={{ ...(k.id === "editorial" ? k.italic : {}), fontSize: 6.8, color: k.muted, marginTop: 2 }}>{T(it.sub)}</Text>}
         </View>
       ))}
     </View>
@@ -243,58 +342,96 @@ interface Col<R> {
   bold?: boolean;
 }
 
+/** Barre de total (tableaux, crédits) dans le style du modèle. */
+function totalBox(): { box: object; text: object } {
+  const c = cur();
+  const k = kit();
+  if (k.id === "editorial") return { box: { borderTopWidth: 1.2, borderTopColor: k.ink, marginTop: 2 }, text: { ...k.display, color: k.heading } };
+  if (k.id === "bento") return { box: { backgroundColor: c.brand, borderRadius: 8, marginTop: 4 }, text: { ...W700, color: c.onBrand } };
+  if (k.id === "suisse") return { box: { backgroundColor: c.brand, marginTop: 4 }, text: { ...k.display, color: c.onBrand } };
+  return { box: { backgroundColor: c.deep, borderRadius: 5, marginTop: 4 }, text: { ...W700, color: "#ffffff" } };
+}
+
 function Table<R>({ cols, rows, total, sub }: { cols: Col<R>[]; rows: R[]; total?: R; sub?: (r: R) => string | undefined }) {
   const c = cur();
+  const k = kit();
+  const tot = totalBox();
+  const headBox =
+    k.id === "editorial"
+      ? { borderBottomWidth: 0.8, borderBottomColor: k.ink, paddingBottom: 5 }
+      : k.id === "suisse"
+        ? { borderBottomWidth: 1.4, borderBottomColor: k.ink, paddingBottom: 5 }
+        : k.id === "bento"
+          ? { borderBottomWidth: 0.6, borderBottomColor: k.line, paddingBottom: 6 }
+          : { backgroundColor: c.soft, borderRadius: 5, paddingVertical: 5, marginBottom: 1 };
+  const headText = k.id === "suisse" ? { ...k.display, color: k.ink } : k.id === "bento" ? { ...W700, color: k.accent } : k.id === "editorial" ? { ...W700, color: k.accent } : { ...W700, color: c.deep };
+  const zebra = k.id === "signature";
   const header = (
-    <View fixed style={{ flexDirection: "row", backgroundColor: c.soft, borderRadius: 5, paddingVertical: 5, paddingHorizontal: 5, marginBottom: 1 }}>
+    <View fixed style={{ flexDirection: "row", paddingHorizontal: 5, ...headBox }}>
       {cols.map((col) => (
-        <Text key={col.label} style={{ ...W700, width: `${col.w}%`, fontSize: 6.6, color: c.deep, textTransform: "uppercase", letterSpacing: 0.4, textAlign: col.right ? "right" : "left" }}>
+        <Text key={col.label} style={{ ...headText, ...caps(6.6, 0.4), width: `${col.w}%`, textAlign: col.right ? "right" : "left" }}>
           {T(col.label)}
         </Text>
       ))}
     </View>
   );
   const row = (r: R, i: number) => (
-    <View key={i} wrap={false} style={{ paddingVertical: 4.5, paddingHorizontal: 5, borderBottomWidth: 0.5, borderBottomColor: LINE, backgroundColor: i % 2 ? c.stripe : "#ffffff" }}>
+    <View key={i} wrap={false} style={{ paddingVertical: 4.5, paddingHorizontal: 5, borderBottomWidth: 0.5, borderBottomColor: k.line, backgroundColor: zebra && i % 2 ? k.card : undefined }}>
       <View style={{ flexDirection: "row" }}>
         {cols.map((col) => (
-          <Text key={col.label} style={[{ width: `${col.w}%`, fontSize: 8.2, textAlign: col.right ? "right" : "left" }, col.bold ? { ...W600, color: c.deep } : {}]}>
+          <Text key={col.label} style={[{ width: `${col.w}%`, fontSize: 8.2, color: k.ink, textAlign: col.right ? "right" : "left" }, col.bold ? { ...W600, color: k.heading } : {}]}>
             {T(col.get(r))}
           </Text>
         ))}
       </View>
-      {sub?.(r) && <Text style={{ fontSize: 7, color: MUTED, marginTop: 1.5 }}>{T(sub(r))}</Text>}
+      {sub?.(r) && <Text style={{ fontSize: 7, color: k.muted, marginTop: 1.5 }}>{T(sub(r))}</Text>}
     </View>
   );
   // Un tableau court ne se coupe jamais (l'en-tête ne reste pas seul en bas
   // de page) ; un long se poursuit page suivante, en-tête répété.
-  return (
-    <View wrap={rows.length > 12}>
+  const body = (
+    <>
       {header}
       {rows.map(row)}
       {total && (
-        <View wrap={false} style={{ flexDirection: "row", paddingVertical: 6, paddingHorizontal: 5, backgroundColor: c.deep, borderRadius: 5, marginTop: 4 }}>
+        <View wrap={false} style={{ flexDirection: "row", paddingVertical: 6, paddingHorizontal: 5, ...tot.box }}>
           {cols.map((col) => (
-            <Text key={col.label} style={{ ...W700, width: `${col.w}%`, fontSize: 8.2, color: "#ffffff", textAlign: col.right ? "right" : "left" }}>
+            <Text key={col.label} style={{ ...tot.text, width: `${col.w}%`, fontSize: 8.2, textAlign: col.right ? "right" : "left" }}>
               {T(col.get(total))}
             </Text>
           ))}
         </View>
       )}
-    </View>
+    </>
   );
+  if (k.id === "bento")
+    return (
+      <View wrap={rows.length > 12} style={{ backgroundColor: k.card, borderRadius: 12, padding: 8 }}>
+        {body}
+      </View>
+    );
+  return <View wrap={rows.length > 12}>{body}</View>;
 }
 
 function Bullets({ items }: { items: string[] }) {
   const c = cur();
+  const k = kit();
+  const marker =
+    k.id === "editorial" ? (
+      <Text style={{ ...k.display, color: k.accent, width: 14, fontSize: 9 }}>—</Text>
+    ) : k.id === "suisse" ? (
+      <View style={{ width: 5, height: 5, backgroundColor: k.accent, marginTop: 3.5, marginRight: 8 }} />
+    ) : (
+      <View style={{ width: 11, height: 11, borderRadius: 5.5, backgroundColor: k.id === "bento" ? k.card : c.soft, marginTop: 0.5, marginRight: 7, alignItems: "center", justifyContent: "center" }}>
+        <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: k.accent }} />
+      </View>
+    );
   return (
     <View>
       {items.map((t) => (
         <View key={t} style={{ flexDirection: "row", marginBottom: 5 }}>
-          <View style={{ width: 11, height: 11, borderRadius: 5.5, backgroundColor: c.soft, marginTop: 0.5, marginRight: 7, alignItems: "center", justifyContent: "center" }}>
-            <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: c.brand }} />
-          </View>
-          <Text style={{ flex: 1, fontSize: 9, lineHeight: 1.45, color: INK }}>{T(t)}</Text>
+          {marker}
+          <Text style={{ flex: 1, fontSize: 9, lineHeight: 1.45, color: k.ink }}>{T(t)}</Text>
         </View>
       ))}
     </View>
@@ -310,10 +447,12 @@ function niceMax(v: number): number {
   return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * mag;
 }
 
-function Chart({ title, years, values, kind, width = CW, height = 120, color, id }: { title: string; years: number[]; values: number[]; kind: "line" | "step"; width?: number; height?: number; color?: string; id: string }) {
-  const c = cur();
-  const stroke = color ?? c.brand;
-  const sw = width - 18;
+function Chart({ title, years, values, kind, width = CW, height = 120, tone = "brand", id }: { title: string; years: number[]; values: number[]; kind: "line" | "step"; width?: number; height?: number; tone?: "brand" | "pos"; id: string }) {
+  const k = kit();
+  const stroke = tone === "pos" ? k.pos : k.accent;
+  const framed = k.id === "signature" || k.id === "bento";
+  const pad = framed ? 9 : 0;
+  const sw = width - pad * 2;
   const left = 44;
   const bottom = 14;
   const iw = sw - left - 14;
@@ -329,35 +468,41 @@ function Chart({ title, years, values, kind, width = CW, height = 120, color, id
       : values.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
   const areaD = `${d} L${x(values.length - 1)},${y(Math.max(minV, 0))} L${x(0)},${y(Math.max(minV, 0))} Z`;
   const last = values.length - 1;
+  const frame =
+    k.id === "signature"
+      ? { backgroundColor: "#ffffff", borderWidth: 0.6, borderColor: k.line, borderRadius: 8, padding: pad }
+      : k.id === "bento"
+        ? { backgroundColor: k.card, borderRadius: k.radius, padding: pad }
+        : { borderTopWidth: k.id === "suisse" ? 1.4 : 0.8, borderTopColor: k.ink, paddingTop: 7 };
   return (
-    <View wrap={false} style={{ backgroundColor: "#ffffff", borderWidth: 0.6, borderColor: LINE, borderRadius: 8, padding: 9 }}>
+    <View wrap={false} style={frame}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 6 }}>
-        <Text style={{ ...W700, fontSize: 8.5, color: c.deep }}>{T(title)}</Text>
+        <Text style={k.id === "editorial" ? { ...k.display, fontSize: 10, color: k.heading } : k.id === "suisse" ? { ...k.display, ...caps(7.5, 0.6), color: k.heading } : { ...W700, fontSize: 8.5, color: k.heading }}>{T(title)}</Text>
         {last >= 0 && <Text style={{ ...W600, fontSize: 7.5, color: stroke }}>{T(`${years[last]} : ${K(values[last])}`)}</Text>}
       </View>
       <View style={{ position: "relative", width: sw, height }}>
         <Svg width={sw} height={height}>
           <Defs>
             <LinearGradient id={`${id}-area`} x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0" stopColor={stroke} stopOpacity={0.22} />
-              <Stop offset="1" stopColor={stroke} stopOpacity={0.02} />
+              <Stop offset="0" stopColor={stroke} stopOpacity={k.id === "suisse" ? 0.9 : k.dark ? 0.35 : 0.22} />
+              <Stop offset="1" stopColor={stroke} stopOpacity={k.id === "suisse" ? 0.9 : 0.02} />
             </LinearGradient>
           </Defs>
           {ticks.map((t) => (
-            <Line key={t} x1={left} x2={left + iw} y1={y(t)} y2={y(t)} stroke={t === 0 ? "#c9ced6" : "#eef0f3"} strokeWidth={0.7} />
+            <Line key={t} x1={left} x2={left + iw} y1={y(t)} y2={y(t)} stroke={t === 0 ? k.muted : k.line} strokeWidth={t === 0 ? 0.6 : 0.5} />
           ))}
-          <Path d={areaD} fill={`url(#${id}-area)`} />
-          <Path d={d} stroke={stroke} strokeWidth={1.8} fill="none" />
-          {last >= 0 && <Circle cx={x(last)} cy={y(values[last])} r={2.6} fill="#ffffff" stroke={stroke} strokeWidth={1.4} />}
+          <Path d={areaD} fill={`url(#${id}-area)`} fillOpacity={k.id === "suisse" ? 0.18 : 1} />
+          <Path d={d} stroke={stroke} strokeWidth={k.id === "suisse" ? 2.2 : 1.8} fill="none" />
+          {last >= 0 && <Circle cx={x(last)} cy={y(values[last])} r={2.6} fill={k.id === "bento" ? k.card : k.paper} stroke={stroke} strokeWidth={1.4} />}
         </Svg>
         {ticks.map((t) => (
-          <Text key={`l${t}`} style={{ position: "absolute", left: 0, width: left - 6, top: y(t) - 4, fontSize: 6.3, color: MUTED, textAlign: "right" }}>
+          <Text key={`l${t}`} style={{ position: "absolute", left: 0, width: left - 6, top: y(t) - 4, fontSize: 6.3, color: k.muted, textAlign: "right" }}>
             {K(t)}
           </Text>
         ))}
         {years.map((yr, i) =>
           i % 5 === 0 || i === years.length - 1 ? (
-            <Text key={yr} style={{ position: "absolute", left: x(i) - 14, width: 28, top: height - 10, fontSize: 6.3, color: MUTED, textAlign: "center" }}>
+            <Text key={yr} style={{ position: "absolute", left: x(i) - 14, width: 28, top: height - 10, fontSize: 6.3, color: k.muted, textAlign: "center" }}>
               {String(yr)}
             </Text>
           ) : null,
@@ -444,7 +589,8 @@ function AssetsPage({ m, h }: { m: GroupModel; h: Head }) {
 }
 
 function LoansPage({ m, h }: { m: GroupModel; h: Head }) {
-  const c = cur();
+  const k = kit();
+  const tot = totalBox();
   if (m.loansByCompany.length === 0) return null;
   const totalBalance = m.loansByCompany.reduce((s, g) => s + g.balance, 0);
   const totalMonthly = m.loansByCompany.reduce((s, g) => s + g.monthly, 0);
@@ -463,15 +609,15 @@ function LoansPage({ m, h }: { m: GroupModel; h: Head }) {
       {m.loansByCompany.map((g) => (
         <View key={g.company} style={{ marginBottom: 12 }} wrap={g.loans.length > 12}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 4 }} wrap={false} minPresenceAhead={70}>
-            <Text style={{ ...W700, fontSize: 9.5, color: c.deep }}>{T(g.company)}</Text>
-            <Text style={{ fontSize: 8, color: INK2 }}>{T(`${K(g.balance)} restant dû · ${E(Math.round(g.monthly))} / mois`)}</Text>
+            <Text style={{ ...(k.id === "signature" ? W700 : k.display), fontSize: 9.5, color: k.heading }}>{T(g.company)}</Text>
+            <Text style={{ fontSize: 8, color: k.ink2 }}>{T(`${K(g.balance)} restant dû · ${E(Math.round(g.monthly))} / mois`)}</Text>
           </View>
           <Table cols={cols} rows={g.loans} sub={(r) => r.note} />
         </View>
       ))}
-      <View style={{ flexDirection: "row", justifyContent: "space-between", backgroundColor: c.deep, borderRadius: 5, paddingVertical: 7, paddingHorizontal: 9 }} wrap={false}>
-        <Text style={{ ...W700, fontSize: 9, color: "#ffffff" }}>Total</Text>
-        <Text style={{ ...W700, fontSize: 9, color: "#ffffff" }}>{T(`${K(totalBalance)} restant dû · ${E(Math.round(totalMonthly))} / mois`)}</Text>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 7, paddingHorizontal: 9, ...tot.box }} wrap={false}>
+        <Text style={{ ...tot.text, fontSize: 9 }}>Total</Text>
+        <Text style={{ ...tot.text, fontSize: 9 }}>{T(`${K(totalBalance)} restant dû · ${E(Math.round(totalMonthly))} / mois`)}</Text>
       </View>
       <Note>{`Mensualités assurance comprise. Capital restant dû calculé à ce jour à partir des tableaux d'amortissement ou des conditions du prêt.${gapNote(m.f, m.missingCharges)}`}</Note>
     </Sheet>
@@ -522,7 +668,7 @@ function Trajectory({ m }: { m: GroupModel }) {
       <H2>Trajectoire</H2>
       <View style={{ flexDirection: "row", gap: 12 }} wrap={false}>
         <Chart id="debt" title="Capital restant dû" years={m.years} values={m.debtSeries} kind="line" width={half} height={100} />
-        <Chart id="cf" title="Cash-flow par mois" years={m.years} values={m.cfSeries} kind="step" width={half} height={100} color={POS} />
+        <Chart id="cf" title="Cash-flow par mois" years={m.years} values={m.cfSeries} kind="step" width={half} height={100} tone="pos" />
       </View>
       {m.sales.length > 0 && (
         <View style={{ marginTop: 10 }} wrap={false}>
@@ -748,6 +894,9 @@ function CoverFoot({ toc, lines, date, dark, inset = 0 }: { toc: Section[]; line
 }
 
 function Cover(props: CoverProps) {
+  if (props.style === "editorial") return <EditorialCover {...props} />;
+  if (props.style === "bento") return <BentoCover {...props} />;
+  if (props.style === "suisse") return <SuisseCover {...props} />;
   if (props.style === "bandeau") return <BandCover {...props} />;
   if (props.style === "epure") return <CleanCover {...props} />;
   return <ImmersiveCover {...props} />;
@@ -851,6 +1000,198 @@ function CleanCover({ kicker, title, subtitle, recipient, brand, lines, date, kp
         </View>
       )}
       <CoverFoot toc={toc} lines={lines} date={date} inset={8} />
+    </Page>
+  );
+}
+
+/** « Septembre 2026 » à partir de la date longue du document. */
+const edition = (date: string) => {
+  const s = date.replace(/^\d+(er)?\s+/, "");
+  return s.charAt(0).toUpperCase() + s.slice(1);
+};
+
+/** Sommaire et coordonnées, colonnes simples, couleurs au choix. */
+function FootColumns({ toc, lines, date, text, soft, accent, font }: { toc: Section[]; lines: string[]; date: string; text: string; soft: string; accent: string; font: object }) {
+  return (
+    <View>
+      <View style={{ flexDirection: "row", gap: 24 }}>
+        <View style={{ flex: 1.2 }}>
+          <Text style={{ ...W700, ...caps(6.8, 1.4), color: accent, marginBottom: 6 }}>Au sommaire</Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+            {toc.map((s) => (
+              <View key={s.n} style={{ width: "50%", flexDirection: "row", marginBottom: 3.5 }}>
+                <Text style={{ ...font, fontSize: 8, color: accent, width: 17 }}>{two(s.n)}</Text>
+                <Text style={{ fontSize: 8, color: text }}>{T(s.label)}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={{ ...W700, ...caps(6.8, 1.4), color: accent, marginBottom: 6 }}>Contact</Text>
+          {(lines.length ? lines : ["Coordonnées non renseignées"]).map((l) => (
+            <Text key={l} style={{ fontSize: 8, color: lines.length ? text : soft, marginBottom: 3 }}>
+              {T(l)}
+            </Text>
+          ))}
+        </View>
+      </View>
+      <Text style={{ fontSize: 7, color: soft, marginTop: 12 }}>{T(`Document établi le ${date} · confidentiel`)}</Text>
+    </View>
+  );
+}
+
+function EditorialCover({ kicker, title, subtitle, recipient, brand, lines, date, kpis, toc }: CoverProps) {
+  const c = cur();
+  const k = kit();
+  const block = 300;
+  return (
+    <Page size="A4" style={{ ...base, padding: 0, backgroundColor: k.paper }}>
+      <View style={{ position: "absolute", top: 44, left: MX, right: MX, flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", borderBottomWidth: 1.4, borderBottomColor: k.ink, paddingBottom: 8 }}>
+        <Text style={{ ...W700, ...caps(8, 2.4), color: k.ink }}>{T(brand)}</Text>
+        <Text style={{ ...k.italic, fontSize: 10, color: k.ink2 }}>{T(edition(date))}</Text>
+      </View>
+      <View style={{ position: "absolute", top: 150, left: MX, right: MX + 20 }}>
+        <Text style={{ ...W700, ...caps(8, 2.4), color: k.accent }}>{T(kicker)}</Text>
+        <Text style={{ ...k.display, fontSize: 50, color: k.heading, marginTop: 16, lineHeight: 1.02, letterSpacing: -1.4 }}>{T(title)}</Text>
+        {subtitle && <Text style={{ ...k.italic, fontSize: 17, color: k.ink2, marginTop: 14 }}>{T(subtitle)}</Text>}
+        {recipient && (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 22 }}>
+            <View style={{ width: 22, height: 0.8, backgroundColor: k.accent }} />
+            <Text style={{ ...k.italic, fontSize: 10.5, color: k.ink }}>{T(`À l'attention de ${recipient}`)}</Text>
+          </View>
+        )}
+      </View>
+      <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: block, backgroundColor: c.deep }}>
+        <DeepBackground width={PW} height={block} id="ed" halos={false} />
+        <View style={{ paddingHorizontal: MX, paddingTop: 30 }}>
+          {kpis.length > 0 && (
+            <View style={{ flexDirection: "row", marginBottom: 30 }}>
+              {kpis.map((it, i) => (
+                <View key={it.label} style={{ flex: 1, paddingLeft: i ? 14 : 0, borderLeftWidth: i ? 0.5 : 0, borderLeftColor: c.deep3 }}>
+                  <Text style={{ ...W700, ...caps(6.6, 1.4), color: c.glow }}>{T(it.label)}</Text>
+                  <Text style={{ ...k.number, fontSize: 30, color: "#ffffff", marginTop: 4 }}>{T(it.value)}</Text>
+                  {it.sub && <Text style={{ ...k.italic, fontSize: 8.5, color: c.muted, marginTop: 2 }}>{T(it.sub)}</Text>}
+                </View>
+              ))}
+            </View>
+          )}
+          <View style={{ borderTopWidth: 0.5, borderTopColor: c.deep3, paddingTop: 14 }}>
+            <FootColumns toc={toc} lines={lines} date={date} text="#ffffff" soft={c.muted} accent={c.glow} font={k.display} />
+          </View>
+        </View>
+      </View>
+    </Page>
+  );
+}
+
+function BentoCover({ kicker, title, subtitle, recipient, brand, lines, date, kpis, toc }: CoverProps) {
+  const c = cur();
+  const k = kit();
+  const m = 28;
+  const w = PW - m * 2;
+  const heroH = 440;
+  const gap = 10;
+  const kw = kpis.length ? (w - gap * (kpis.length - 1)) / kpis.length : w;
+  return (
+    <Page size="A4" style={{ ...base, padding: m, backgroundColor: k.paper }}>
+      <View style={{ position: "relative", height: heroH, borderRadius: 20, padding: 26 }}>
+        <DeepBackground width={w} height={heroH} id="bento" radius={20} vivid />
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <Monogram name={brand} dark />
+          <Text style={{ ...k.display, fontSize: 8, color: "#ffffff", backgroundColor: c.deep, borderRadius: 9, paddingVertical: 4, paddingHorizontal: 9 }}>{T(edition(date))}</Text>
+        </View>
+        <View style={{ position: "absolute", left: 26, right: 40, bottom: 26 }}>
+          <Text style={{ ...k.display, ...caps(8, 2), color: c.soft }}>{T(kicker)}</Text>
+          <Text style={{ ...k.display, fontSize: 44, color: "#ffffff", marginTop: 12, letterSpacing: -1.6, lineHeight: 1.02 }}>{T(title)}</Text>
+          {subtitle && <Text style={{ fontSize: 12.5, color: c.soft, marginTop: 10 }}>{T(subtitle)}</Text>}
+          {recipient && (
+            <View style={{ flexDirection: "row", alignSelf: "flex-start", marginTop: 16, backgroundColor: c.deep, borderRadius: 12, paddingVertical: 6, paddingHorizontal: 11 }}>
+              <Text style={{ fontSize: 8.5, color: c.muted }}>À l&apos;attention de </Text>
+              <Text style={{ ...W700, fontSize: 8.5, color: "#ffffff" }}>{T(recipient)}</Text>
+            </View>
+          )}
+        </View>
+      </View>
+      {kpis.length > 0 && (
+        <View style={{ flexDirection: "row", gap, marginTop: gap }}>
+          {kpis.map((it) => (
+            <View key={it.label} style={{ width: kw, height: 118, backgroundColor: k.card, borderRadius: 16, padding: 14, justifyContent: "space-between" }}>
+              <Text style={{ fontSize: 7.5, color: k.muted }}>{T(it.label)}</Text>
+              <View>
+                <Text style={{ ...k.number, fontSize: 28, color: "#ffffff", letterSpacing: -0.8 }}>{T(it.value)}</Text>
+                {it.sub && <Text style={{ fontSize: 7.5, color: k.accent, marginTop: 3 }}>{T(it.sub)}</Text>}
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
+      <View style={{ flexDirection: "row", gap, marginTop: gap }}>
+        <View style={{ flex: 1.5, backgroundColor: k.card, borderRadius: 16, padding: 14 }}>
+          <Text style={{ ...W700, ...caps(6.8, 1.4), color: k.accent, marginBottom: 8 }}>Au sommaire</Text>
+          {toc.map((s) => (
+            <View key={s.n} style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
+              <Text style={{ ...k.display, fontSize: 8, color: k.accent, width: 18 }}>{two(s.n)}</Text>
+              <Text style={{ fontSize: 8.5, color: "#ffffff" }}>{T(s.label)}</Text>
+            </View>
+          ))}
+        </View>
+        <View style={{ flex: 1, backgroundColor: k.card, borderRadius: 16, padding: 14 }}>
+          <Text style={{ ...W700, ...caps(6.8, 1.4), color: k.accent, marginBottom: 8 }}>Contact</Text>
+          {(lines.length ? lines : ["Coordonnées non renseignées"]).map((l) => (
+            <Text key={l} style={{ fontSize: 8, color: lines.length ? "#ffffff" : k.muted, marginBottom: 4, lineHeight: 1.35 }}>
+              {T(l)}
+            </Text>
+          ))}
+        </View>
+      </View>
+      <Text style={{ position: "absolute", bottom: 16, left: m, fontSize: 7, color: k.muted }}>{T(`Document établi le ${date} · confidentiel`)}</Text>
+    </Page>
+  );
+}
+
+function SuisseCover({ kicker, title, subtitle, recipient, brand, lines, date, kpis, toc }: CoverProps) {
+  const c = cur();
+  const k = kit();
+  const block = 470;
+  const cols = [PW / 3, (PW * 2) / 3];
+  return (
+    <Page size="A4" style={{ ...base, padding: 0, backgroundColor: k.paper }}>
+      <View style={{ position: "absolute", top: 0, left: 0, right: 0, height: block, backgroundColor: c.brand }}>
+        {cols.map((x) => (
+          <View key={x} style={{ position: "absolute", top: 0, bottom: 0, left: x, width: 0.6, backgroundColor: c.muted, opacity: 0.35 }} />
+        ))}
+        <View style={{ position: "absolute", top: 44, left: MX, right: MX, flexDirection: "row", justifyContent: "space-between" }}>
+          <Text style={{ ...k.display, ...caps(8.5, 1.6), color: c.onBrand }}>{T(brand)}</Text>
+          <Text style={{ ...k.display, ...caps(8.5, 1.6), color: c.onBrand }}>{T(edition(date))}</Text>
+        </View>
+        <View style={{ position: "absolute", left: MX, right: MX + 30, bottom: 34 }}>
+          <Text style={{ ...k.display, ...caps(9, 2), color: c.soft }}>{T(kicker)}</Text>
+          <Text style={{ ...k.display, fontSize: 46, color: c.onBrand, marginTop: 14, letterSpacing: -1.8, lineHeight: 0.98 }}>{T(title)}</Text>
+          {subtitle && <Text style={{ ...k.number, fontSize: 15, color: c.soft, marginTop: 12 }}>{T(subtitle)}</Text>}
+        </View>
+      </View>
+      <View style={{ position: "absolute", top: block + 26, left: MX, right: MX }}>
+        {recipient && (
+          <View style={{ flexDirection: "row", marginBottom: 20 }}>
+            <Text style={{ ...k.display, ...caps(7.5, 1.4), color: k.ink2, width: 120 }}>À l&apos;attention de</Text>
+            <Text style={{ ...k.display, fontSize: 11, color: k.ink }}>{T(recipient)}</Text>
+          </View>
+        )}
+        {kpis.length > 0 && (
+          <View style={{ flexDirection: "row", borderTopWidth: 2.2, borderTopColor: k.ink }}>
+            {kpis.map((it, i) => (
+              <View key={it.label} style={{ flex: 1, paddingTop: 9, paddingLeft: i ? 12 : 0, borderLeftWidth: i ? 0.8 : 0, borderLeftColor: k.line }}>
+                <Text style={{ ...k.display, ...caps(6.8, 1.2), color: k.ink2 }}>{T(it.label)}</Text>
+                <Text style={{ ...k.number, fontSize: 28, color: k.ink, marginTop: 6, letterSpacing: -1 }}>{T(it.value)}</Text>
+                {it.sub && <Text style={{ fontSize: 7.5, color: k.accent, marginTop: 2 }}>{T(it.sub)}</Text>}
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
+      <View style={{ position: "absolute", left: MX, right: MX, bottom: 34, borderTopWidth: 1.2, borderTopColor: k.ink, paddingTop: 12 }}>
+        <FootColumns toc={toc} lines={lines} date={date} text={k.ink} soft={k.muted} accent={k.accent} font={k.display} />
+      </View>
     </Page>
   );
 }
