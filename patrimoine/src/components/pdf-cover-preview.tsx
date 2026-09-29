@@ -1,5 +1,11 @@
+import localFont from "next/font/local";
 import type { PdfCover } from "@/lib/types";
 import type { PdfColors } from "@/lib/pdf/prefs";
+
+// Mêmes polices que le PDF (fichiers embarqués, servis par l'application).
+const serif = localFont({ src: "../lib/pdf/fonts/fraunces-latin-600-normal.woff", display: "swap" });
+const serifItalic = localFont({ src: "../lib/pdf/fonts/fraunces-latin-400-italic.woff", display: "swap" });
+const grotesk = localFont({ src: "../lib/pdf/fonts/space-grotesk-latin-700-normal.woff", display: "swap" });
 
 // Aperçu de la couverture du dossier PDF, dessiné en HTML avec les mêmes
 // couleurs et la même composition que le vrai document (lib/pdf/bank.tsx).
@@ -87,6 +93,93 @@ export function CoverPreview({ style, colors: c, title, subtitle, recipient, kic
           <div className="absolute inset-x-[7.4cqw] top-[72cqw]">{kpis(false, true)}</div>
           {foot(false)}
         </>
+      )}
+      {style === "editorial" && (
+        <div className="absolute inset-0" style={{ background: "#fcfbf8" }}>
+          <div className="absolute inset-x-[7.4cqw] top-[7.4cqw] flex items-end justify-between border-b-[0.3cqw] border-[#1c1b18] pb-[1.4cqw]">
+            <span className="truncate text-[1.7cqw] font-bold uppercase tracking-[0.3em] text-[#1c1b18]">{brand}</span>
+            <span className={`${serifItalic.className} text-[2cqw] text-[#56524a]`}>Édition</span>
+          </div>
+          <div className="absolute left-[7.4cqw] right-[10cqw] top-[25cqw]">
+            <div className="text-[1.7cqw] font-bold uppercase tracking-[0.3em]" style={{ color: c.brand }}>{kicker}</div>
+            <div className={`${serif.className} mt-[2.6cqw] line-clamp-3 text-[9cqw] leading-[1.02] tracking-tight`} style={{ color: c.deep }}>{title}</div>
+            {subtitle && <div className={`${serifItalic.className} mt-[2cqw] truncate text-[3.2cqw] text-[#56524a]`}>{subtitle}</div>}
+            {recipient && <div className={`${serifItalic.className} mt-[3cqw] truncate text-[2.1cqw] text-[#1c1b18]`}>— À l&apos;attention de {recipient}</div>}
+          </div>
+          <div className="absolute inset-x-0 bottom-0 h-[50cqw]" style={{ background: gradient }}>
+            <div className="absolute inset-x-[7.4cqw] top-[5cqw] flex gap-[3cqw]">
+              {[0.55, 0.8, 0.7].map((v, i) => (
+                <div key={i} className="flex-1">
+                  <div className="h-[0.9cqw] w-[50%] rounded-full" style={{ background: c.glow, opacity: 0.8 }} />
+                  <div className="mt-[1.2cqw] h-[3.4cqw] rounded-[0.6cqw]" style={{ width: `${v * 100}%`, background: "#fff" }} />
+                </div>
+              ))}
+            </div>
+            <div className="absolute inset-x-[7.4cqw] bottom-[5cqw] space-y-[1cqw] border-t pt-[2cqw]" style={{ borderColor: c.deep3 }}>
+              {[0.5, 0.4].map((w, i) => (
+                <div key={i} className="h-[0.8cqw] rounded-full bg-white/40" style={{ width: `${w * 100}%` }} />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      {style === "bento" && (
+        <div className="absolute inset-0 p-[4.7cqw]" style={{ background: c.deep }}>
+          <div className="relative h-[74cqw] overflow-hidden rounded-[3.4cqw] p-[4.4cqw]" style={{ background: `radial-gradient(circle at 90% 5%, ${c.glow}55 0%, transparent 45%), linear-gradient(145deg, ${c.brand} 0%, ${c.deep3} 55%, ${c.deep2} 100%)` }}>
+            <div className="flex items-center gap-[1.6cqw]">
+              <span className="flex h-[4.4cqw] w-[4.4cqw] items-center justify-center rounded-[1.2cqw] text-[2.3cqw] font-extrabold" style={{ background: c.glow, color: c.deep }}>{letter}</span>
+              <span className="truncate text-[1.7cqw] font-bold uppercase tracking-[0.25em] text-white">{brand}</span>
+            </div>
+            <div className="absolute inset-x-[4.4cqw] bottom-[4.4cqw]">
+              <div className="text-[1.6cqw] font-bold uppercase tracking-[0.3em]" style={{ color: c.soft }}>{kicker}</div>
+              <div className={`${grotesk.className} mt-[2cqw] line-clamp-2 text-[7.6cqw] leading-[1.02] tracking-tight text-white`}>{title}</div>
+              {subtitle && <div className="mt-[1.4cqw] truncate text-[2.4cqw]" style={{ color: c.soft }}>{subtitle}</div>}
+              {recipient && <span className="mt-[2.4cqw] inline-block max-w-full truncate rounded-[2cqw] px-[2cqw] py-[0.8cqw] text-[1.8cqw] text-white" style={{ background: c.deep }}>À l&apos;attention de <b>{recipient}</b></span>}
+            </div>
+          </div>
+          <div className="mt-[1.8cqw] flex gap-[1.8cqw]">
+            {[0.55, 0.8, 0.7].map((v, i) => (
+              <div key={i} className="flex h-[20cqw] flex-1 flex-col justify-between rounded-[2.8cqw] p-[2.4cqw]" style={{ background: c.deep2 }}>
+                <div className="h-[0.9cqw] w-[55%] rounded-full bg-white/30" />
+                <div className="h-[3.4cqw] rounded-[0.6cqw]" style={{ width: `${v * 100}%`, background: "#fff" }} />
+              </div>
+            ))}
+          </div>
+          <div className="mt-[1.8cqw] flex gap-[1.8cqw]">
+            <div className="h-[24cqw] flex-[1.5] rounded-[2.8cqw]" style={{ background: c.deep2 }} />
+            <div className="h-[24cqw] flex-1 rounded-[2.8cqw]" style={{ background: c.deep2 }} />
+          </div>
+        </div>
+      )}
+      {style === "suisse" && (
+        <div className="absolute inset-0 bg-white">
+          <div className="absolute inset-x-0 top-0 h-[79cqw]" style={{ background: c.brand }}>
+            <div className="absolute inset-y-0 left-1/3 w-px opacity-40" style={{ background: c.muted }} />
+            <div className="absolute inset-y-0 left-2/3 w-px opacity-40" style={{ background: c.muted }} />
+            <div className="absolute inset-x-[7.4cqw] top-[7.4cqw] flex justify-between text-[1.6cqw] font-bold uppercase tracking-[0.25em] text-white">
+              <span className="truncate">{brand}</span>
+            </div>
+            <div className="absolute left-[7.4cqw] right-[10cqw] bottom-[5.4cqw]">
+              <div className="text-[1.6cqw] font-bold uppercase tracking-[0.3em]" style={{ color: c.soft }}>{kicker}</div>
+              <div className={`${grotesk.className} mt-[2.2cqw] line-clamp-2 text-[8.4cqw] leading-[0.98] tracking-tighter text-white`}>{title}</div>
+              {subtitle && <div className="mt-[1.8cqw] truncate text-[2.6cqw]" style={{ color: c.soft }}>{subtitle}</div>}
+            </div>
+          </div>
+          <div className="absolute inset-x-[7.4cqw] top-[84cqw]">
+            {recipient && <div className="mb-[2.6cqw] truncate text-[2cqw] font-semibold text-[#111316]"><span className="mr-[2cqw] text-[1.5cqw] uppercase tracking-[0.2em] text-[#4a4d52]">À l&apos;attention de</span>{recipient}</div>}
+            <div className="flex border-t-[0.5cqw] border-[#111316]">
+              {[0.55, 0.8, 0.7].map((v, i) => (
+                <div key={i} className={`flex-1 pt-[1.6cqw] ${i ? "border-l border-[#dcdddf] pl-[2cqw]" : ""}`}>
+                  <div className="h-[0.8cqw] w-[50%] rounded-full bg-[#c9ccd0]" />
+                  <div className="mt-[1.2cqw] h-[3.4cqw] rounded-[0.6cqw]" style={{ width: `${v * 100}%`, background: "#111316" }} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="absolute inset-x-[7.4cqw] bottom-[5cqw] border-t-[0.3cqw] border-[#111316] pt-[2cqw]">
+            <div className="h-[0.9cqw] w-[20%]" style={{ background: c.brand }} />
+          </div>
+        </div>
       )}
       {style === "epure" && (
         <>

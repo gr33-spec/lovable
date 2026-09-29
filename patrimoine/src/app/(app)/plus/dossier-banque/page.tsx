@@ -38,6 +38,7 @@ export default function DossierBanquePage() {
   const colors = pdfColors(prefs, data.settings.theme);
   const colorId = prefs.color ?? APP_COLOR;
   const appTheme = themeDef(data.settings.theme);
+  const model = prefs.cover ?? DEFAULT_COVER;
 
   // Vérification avant envoi : ce qui manque apparaîtra « — » dans le dossier.
   const issues = useMemo(() => {
@@ -99,36 +100,39 @@ export default function DossierBanquePage() {
           Personnaliser
         </SectionTitle>
         <Card>
-          <div className="flex gap-4">
-            <div className="w-[38%] max-w-[180px] shrink-0">
-              <CoverPreview style={prefs.cover ?? DEFAULT_COVER} colors={colors} title={coverTitle} subtitle={prefs.subtitle ?? data.settings.ownerName} recipient={prefs.recipient} brand={groupTitle} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">Couverture</p>
-              <div className="mt-2 space-y-1.5" role="radiogroup" aria-label="Style de couverture">
-                {PDF_COVERS.map((cv) => {
-                  const on = (prefs.cover ?? DEFAULT_COVER) === cv.id;
-                  return (
-                    <button
-                      key={cv.id}
-                      type="button"
-                      role="radio"
-                      aria-checked={on}
-                      disabled={readOnly}
-                      onClick={() => setPrefs({ cover: cv.id === DEFAULT_COVER ? undefined : cv.id })}
-                      className={cx("flex w-full items-center gap-2.5 rounded-2xl px-3 py-2 text-left transition", on ? "bg-soft ring-1 ring-brand/40" : "bg-black/[0.03]")}
-                    >
-                      <span className={cx("flex h-5 w-5 shrink-0 items-center justify-center rounded-full border", on ? "border-brand bg-brand text-on-brand" : "border-black/20")}>{on && <Check size={12} strokeWidth={3} />}</span>
-                      <span className="min-w-0">
-                        <span className={cx("block text-[14px] font-semibold", on ? "text-brand" : "text-ink")}>{cv.label}</span>
-                        <span className="block text-[12px] leading-snug text-muted">{cv.hint}</span>
+          <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">Modèle</p>
+          <div className="mt-2 grid grid-cols-3 gap-x-3 gap-y-3.5" role="radiogroup" aria-label="Modèle du dossier">
+            {PDF_COVERS.map((cv) => {
+              const on = model === cv.id;
+              return (
+                <button
+                  key={cv.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={on}
+                  aria-label={cv.label}
+                  disabled={readOnly}
+                  onClick={() => setPrefs({ cover: cv.id === DEFAULT_COVER ? undefined : cv.id })}
+                  className="group min-w-0 text-left transition active:scale-[0.98]"
+                >
+                  <span className={cx("relative block rounded-[12px] p-[3px] transition", on ? "bg-brand" : "bg-transparent")}>
+                    <CoverPreview style={cv.id} colors={colors} title={coverTitle} subtitle={prefs.subtitle ?? data.settings.ownerName} recipient={prefs.recipient} brand={groupTitle} />
+                    {on && (
+                      <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-brand text-on-brand shadow">
+                        <Check size={12} strokeWidth={3} />
                       </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+                    )}
+                  </span>
+                  <span className={cx("mt-1.5 block truncate text-center text-[13px] font-semibold", on ? "text-brand" : "text-ink")}>{cv.label}</span>
+                </button>
+              );
+            })}
           </div>
+          <p className="mt-3 text-[12.5px] text-muted">
+            {PDF_COVERS.find((cv) => cv.id === model)?.hint}.{" "}
+            {["editorial", "bento", "suisse"].includes(model) ? "Ce modèle habille tout le document, pas seulement la couverture." : "Ce style change la couverture ; les pages intérieures restent classiques."}
+            {model === "bento" && " Pages sombres : parfait à l'écran, plus gourmand en encre à l'impression."}
+          </p>
 
           <p className="mt-5 text-[12px] font-semibold uppercase tracking-wide text-muted">Couleur du document</p>
           <div className="mt-2 flex flex-wrap gap-2.5" role="radiogroup" aria-label="Couleur du document">
