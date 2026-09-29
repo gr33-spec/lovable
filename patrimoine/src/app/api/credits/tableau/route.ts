@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { guardApi } from "@/lib/server/guard";
 import { aiEnabled } from "@/lib/server/bilan-ai";
 import { readFile } from "@/lib/server/files";
-import { readSchedule } from "@/lib/server/schedule-ai";
+import { mockScheduleFromName, readSchedule } from "@/lib/server/schedule-ai";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   if (!file) return NextResponse.json({ error: "Fichier introuvable ou incomplet." }, { status: 404 });
   if (!["application/pdf", "image/jpeg", "image/png"].includes(file.mime)) return NextResponse.json({ error: "Format non pris en charge : PDF, JPEG ou PNG." }, { status: 400 });
   try {
-    const extraction = mock ? mockSchedule() : await readSchedule(file, hint);
+    const extraction = mock ? mockScheduleFromName(file.name) : await readSchedule(file, hint);
     if (extraction.rows.length < 2) return NextResponse.json({ error: "Aucune échéance lisible dans ce document." }, { status: 422 });
     return NextResponse.json({ extraction });
   } catch (err) {
@@ -33,20 +33,4 @@ export async function POST(request: Request) {
     if (err instanceof Anthropic.APIError) return NextResponse.json({ error: "Le service de lecture est momentanément indisponible." }, { status: 502 });
     return NextResponse.json({ error: (err as Error).message || "Lecture impossible." }, { status: 500 });
   }
-}
-
-/** Tableau de démonstration (tests sans clé) : 100 000 € à 2,4 % sur 15 ans. */
-function mockSchedule() {
-  const rows = [];
-  let b = 100_000;
-  const r = 0.024 / 12;
-  const pay = Math.round(((b * r) / (1 - Math.pow(1 + r, -180))) * 100) / 100;
-  for (let i = 0; i < 180; i++) {
-    const m = 2021 * 12 + i;
-    const interest = Math.round(b * r * 100) / 100;
-    const principal = i === 179 ? b : Math.round((pay - interest) * 100) / 100;
-    b = Math.round((b - principal) * 100) / 100;
-    rows.push({ month: `${Math.floor(m / 12)}-${String((m % 12) + 1).padStart(2, "0")}`, payment: Math.round((principal + interest) * 100) / 100, interest, principal, insurance: 18.5, balance: Math.max(0, b) });
-  }
-  return { bank: "Banque de démonstration", reference: "Prêt test", rows, notes: ["Tableau de démonstration."], confidence: "haute" as const };
 }

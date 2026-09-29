@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { CircleAlert, FileCheck2, FileUp, LoaderCircle, Table2 } from "lucide-react";
 import { useStore } from "@/lib/store";
-import type { Loan, LoanSchedule, LoanScheduleRow } from "@/lib/types";
+import type { AppDocument, Loan, LoanSchedule, LoanScheduleRow, ScheduleMeta } from "@/lib/types";
 import { checkSchedule, loanFieldsFromSchedule } from "@/lib/schedule";
 import { monthIndex, monthLabel, parseMonth } from "@/lib/engine/dates";
 import { dateFr, eur } from "@/lib/format";
@@ -20,25 +20,33 @@ import { Button, Card, Pill, SectionTitle, Sheet, cx } from "@/components/ui";
 interface Extraction {
   bank: string | null;
   reference: string | null;
+  meta?: ScheduleMeta;
   rows: LoanScheduleRow[];
   notes: string[];
   confidence: "haute" | "moyenne" | "faible";
 }
 
 export function LoanScheduleSection({ loan }: { loan: Loan }) {
-  const { upsert, role, nowMonth } = useStore();
+  const { upsert, upsertMany, remove, role, nowMonth } = useStore();
   const [showRows, setShowRows] = useState(false);
   const schedule = loan.schedule;
   const readOnly = role !== "owner";
 
-  const save = ({ rows, fileId, fileName, bank }: ImportedSchedule) => {
-    const fields = loanFieldsFromSchedule(rows, nowMonth);
+  const save = ({ rows, fileId, fileName, bank, meta }: ImportedSchedule) => {
+    const fields = loanFieldsFromSchedule(rows, nowMonth, meta);
     const previous = loan;
-    upsert("loans", { ...loan, ...fields, bank: loan.bank || bank || undefined, schedule: scheduleOf(rows, fileId, fileName) });
-    // L'ancien document est supprimé : un seul tableau en vigueur.
-    const oldFile = previous.schedule?.fileId;
-    toast("Tableau d'amortissement enregistré", () => upsert("loans", previous));
-    if (oldFile && oldFile !== fileId) setTimeout(() => void fetch(`/api/files/${oldFile}`, { method: "DELETE" }).catch(() => undefined), 7000);
+    const next: Loan = { ...loan, ...fields, bank: loan.bank || bank || meta?.bank || undefined, reference: loan.reference || meta?.reference || undefined, schedule: scheduleOf(rows, fileId, fileName, meta) };
+    // L'ancien tableau n'est pas supprimé : il reste consultable dans les documents du prêt.
+    const old = previous.schedule;
+    const archive: AppDocument | undefined =
+      old?.fileId && old.fileId !== fileId
+        ? { id: crypto.randomUUID(), fileId: old.fileId, name: old.fileName ?? "Tableau d'amortissement", category: "tableau_amortissement", title: `Ancien tableau d'amortissement — ${loan.name || loan.bank || "Crédit"}`, date: old.importedAt, loanId: loan.id, buildingId: loan.buildingId ?? null, companyId: loan.companyId ?? null, addedAt: new Date().toISOString().slice(0, 10), source: "manuel" }
+        : undefined;
+    upsertMany([{ coll: "loans", item: next }, ...(archive ? [{ coll: "documents" as const, item: archive }] : [])]);
+    toast("Tableau d'amortissement enregistré", () => {
+      upsert("loans", previous);
+      if (archive) remove("documents", archive.id);
+    });
   };
   const importer = useScheduleImport({ hint: loan.name || loan.bank, compare: loan, onConfirm: save });
   const busy = importer.busy;
@@ -134,10 +142,12 @@ export interface ImportedSchedule {
   fileId: string;
   fileName: string;
   bank: string | null;
+  /** En-tête du document (emprunteur, référence, montant, début…). */
+  meta?: ScheduleMeta;
 }
 
-export function scheduleOf(rows: LoanScheduleRow[], fileId: string, fileName: string): LoanSchedule {
-  return { rows, fileId, fileName, importedAt: new Date().toISOString().slice(0, 10), source: "ia" };
+export function scheduleOf(rows: LoanScheduleRow[], fileId: string, fileName: string, meta?: ScheduleMeta): LoanSchedule {
+  return { rows, fileId, fileName, importedAt: new Date().toISOString().slice(0, 10), source: "ia", ...(meta && Object.keys(meta).length ? { meta } : {}) };
 }
 
 /**
@@ -178,7 +188,7 @@ export function useScheduleImport({ hint, compare, onConfirm }: { hint?: string;
   };
   const confirm = () => {
     if (!review) return;
-    onConfirm({ rows: review.extraction.rows, fileId: review.fileId, fileName: review.fileName, bank: review.extraction.bank });
+    onConfirm({ rows: review.extraction.rows, fileId: review.fileId, fileName: review.fileName, bank: review.extraction.bank, meta: review.extraction.meta });
     setReview(null);
   };
   const element = (
@@ -236,9 +246,9 @@ function monthName(key?: string) {
 }
 
 function ReviewSheet({ loan, review, onCancel, onSave }: { loan: Partial<Loan>; review: { fileName: string; extraction: Extraction }; onCancel: () => void; onSave: () => void }) {
-  const { rows, notes, confidence, bank } = review.extraction;
+  const { rows, notes, confidence, bank, meta } = review.extraction;
   const c = checkSchedule(rows);
-  const f = loanFieldsFromSchedule(rows);
+  const f = loanFieldsFromSchedule(rows, undefined, meta);
   const line = (label: string, before: string, after: string) => (
     <div className="flex items-center justify-between gap-3 py-2 text-[14px]">
       <span className="text-ink-2">{label}</span>
@@ -264,7 +274,7 @@ function ReviewSheet({ loan, review, onCancel, onSave }: { loan: Partial<Loan>; 
       <div className="space-y-3 pb-2">
         <div className="flex flex-wrap items-center gap-2">
           <Pill tone={confidence === "haute" ? "pos" : confidence === "moyenne" ? "warn" : "neg"}>Lecture {confidence}</Pill>
-          <span className="text-[13px] text-muted">{[bank, review.fileName].filter(Boolean).join(" · ")}</span>
+          <span className="text-[13px] text-muted">{[meta?.borrower, bank, meta?.reference ? `réf. ${meta.reference}` : undefined, review.fileName].filter(Boolean).join(" · ")}</span>
         </div>
         {c.issues.length > 0 ? (
           <div className="rounded-2xl bg-warn/10 px-4 py-3 text-[13.5px] text-warn">
@@ -279,6 +289,7 @@ function ReviewSheet({ loan, review, onCancel, onSave }: { loan: Partial<Loan>; 
         <div className="divide-y divide-line rounded-2xl bg-card px-4">
           {line("Échéances lues", "—", `${c.count} (${monthName(c.firstMonth)} → ${monthName(c.lastMonth)})`)}
           {line("Montant emprunté", loan.initialAmount ? eur(loan.initialAmount) : "—", f.initialAmount ? eur(f.initialAmount) : "—")}
+          {line("Départ", loan.startDate ? monthName(loan.startDate.slice(0, 7)) : "—", f.startDate ? monthName(f.startDate.slice(0, 7)) : "—")}
           {line("Échéance hors assurance", loan.monthlyPayment ? eur(loan.monthlyPayment) : "—", f.monthlyPayment ? eur(f.monthlyPayment) : "—")}
           {line("Assurance", loan.insuranceMonthly !== undefined ? eur(loan.insuranceMonthly) : "—", f.insuranceMonthly !== undefined ? eur(f.insuranceMonthly) : "—")}
           {line("Taux", fmtRate(loan.ratePct), fmtRate(f.ratePct))}

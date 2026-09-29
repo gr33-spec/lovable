@@ -5,7 +5,7 @@ import { loadDocument } from "@/lib/server/db";
 import { readFile } from "@/lib/server/files";
 import { aiEnabled } from "@/lib/server/bilan-ai";
 import { classifyDocument, mockClassify, type Classification } from "@/lib/server/doc-ai";
-import { readSchedule } from "@/lib/server/schedule-ai";
+import { mockScheduleFromName, readSchedule } from "@/lib/server/schedule-ai";
 import { checkSchedule } from "@/lib/schedule";
 import type { AppData } from "@/lib/types";
 
@@ -52,13 +52,20 @@ export async function POST(request: Request) {
   try {
     const raw = mock ? mockClassify(file, data) : await classifyDocument(file, data);
     const suggestion = sanitize(raw, data);
-    let schedule: { rows: unknown[]; issues: string[] } | undefined;
+    let schedule: { rows: unknown[]; issues: string[]; meta: unknown } | undefined;
+    let scheduleError: string | undefined;
     if (suggestion.category === "tableau_amortissement") {
-      // Les échéances sont lues dans la foulée : le tableau pourra alimenter le crédit.
-      const rows = mock ? [] : (await readSchedule(file, suggestion.title).catch(() => undefined))?.rows;
-      if (rows && rows.length >= 2) schedule = { rows, issues: checkSchedule(rows).issues };
+      // Les échéances et l'en-tête sont lus dans la foulée : c'est le document
+      // qui désigne le financement (montant, dates, banque…) et l'alimente.
+      try {
+        const x = mock ? mockScheduleFromName(file.name) : await readSchedule(file);
+        if (x.rows.length >= 2) schedule = { rows: x.rows, issues: checkSchedule(x.rows).issues, meta: x.meta };
+        else scheduleError = "Aucune échéance lisible dans ce tableau.";
+      } catch (e) {
+        scheduleError = (e as Error).message || "Échéances illisibles.";
+      }
     }
-    return NextResponse.json({ suggestion, schedule });
+    return NextResponse.json({ suggestion, schedule, scheduleError });
   } catch (err) {
     if (err instanceof Anthropic.RateLimitError) return NextResponse.json({ error: "Service saturé, réessayez dans une minute." }, { status: 429 });
     if (err instanceof Anthropic.APIError) return NextResponse.json({ error: "Lecture momentanément indisponible : choisissez le rangement vous-même.", manual: true }, { status: 502 });

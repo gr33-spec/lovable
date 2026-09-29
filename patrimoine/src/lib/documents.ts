@@ -1,6 +1,7 @@
-import type { AppData, AppDocument, DocCategory, Loan, LoanScheduleRow, Tenancy } from "./types";
+import type { AppData, AppDocument, DocCategory, Loan, LoanScheduleRow, ScheduleMeta, Tenancy } from "./types";
 import type { MonthIndex } from "./engine/dates";
-import { checkSchedule, loanFieldsFromSchedule } from "./schedule";
+import { loanFieldsFromSchedule } from "./schedule";
+import { describeLoan, newLoanName, type LoanPlan } from "./loan-match";
 
 // Centre documentaire. Chaque fichier est stocké une seule fois (app_file) ;
 // les baux signés, cautions, courriers, tableaux d'amortissement, bilans et
@@ -108,7 +109,8 @@ export function documentIndex(data: AppData): DocEntry[] {
   for (const l of data.loans) {
     if (!l.schedule?.fileId) continue;
     const b = l.buildingId ? buildings.get(l.buildingId) : undefined;
-    out.push({ key: `tableau-${l.id}`, fileId: l.schedule.fileId, name: l.schedule.fileName ?? "Tableau d'amortissement", title: `Tableau d'amortissement — ${l.name || l.bank || "Crédit"}`, category: "tableau_amortissement", date: l.schedule.importedAt, ...up({ loanId: l.id }), summary: [l.bank, b?.name].filter(Boolean).join(" "), place: { label: l.name || l.bank || "Crédit", href: `/patrimoine/credit/${l.id}` } });
+    const c = companies.get(up({ loanId: l.id }).companyId ?? "");
+    out.push({ key: `tableau-${l.id}`, fileId: l.schedule.fileId, name: l.schedule.fileName ?? "Tableau d'amortissement", title: `Tableau — ${l.name || l.bank || "Crédit"}`, category: "tableau_amortissement", date: l.schedule.importedAt, ...up({ loanId: l.id }), summary: [describeLoan(l), l.reference, l.schedule.meta?.borrower, b?.name].filter(Boolean).join(" · "), place: { label: [c?.name, b?.name, l.name || l.bank || "Crédit"].filter(Boolean).join(" › "), href: `/patrimoine/credit/${l.id}` } });
   }
   for (const s of data.statements) {
     if (!s.fileId) continue;
@@ -175,49 +177,89 @@ export interface FilingInput {
   loanId?: string;
   /** Échéances lues (tableau d'amortissement). */
   scheduleRows?: LoanScheduleRow[];
+  /** En-tête du tableau (emprunteur, banque, référence, montant, début…). */
+  scheduleMeta?: ScheduleMeta;
+  /** Financement retenu pour le tableau : existant ou à créer. */
+  loanPlan?: LoanPlan;
 }
 
 export type FilingOp = { coll: "tenancies"; item: Tenancy } | { coll: "loans"; item: Loan } | { coll: "documents"; item: AppDocument };
+export type FilingRemove = { coll: "documents"; id: string };
 
 const today = () => new Date().toISOString().slice(0, 10);
 const uid = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : Math.random().toString(36).slice(2));
 
 /**
- * Range une pièce à son emplacement naturel quand il est libre : bail signé
- * ou acte de caution du locataire, courrier du dossier, tableau d'un crédit
- * (seulement s'il est cohérent). Sinon — ou si l'emplacement est déjà occupé,
- * rien n'étant jamais écrasé — elle devient une pièce libre rattachée aux
- * mêmes éléments. Renvoie les modifications et une phrase « rangé dans… ».
+ * Range une pièce à son emplacement naturel : bail signé ou acte de caution
+ * du locataire (si l'emplacement est libre), courrier du dossier, tableau
+ * d'amortissement sur son financement (existant ou créé). Rien n'est écrasé
+ * ni supprimé : un tableau remplacé reste consultable comme pièce du prêt.
+ * Une pièce libre du même fichier (rangée auparavant sans financement) est
+ * reprise : elle quitte la liste des pièces libres, le fichier est le même.
+ * Renvoie les modifications, les retraits et une phrase « rangé dans… ».
  */
-export function fileDocument(data: AppData, input: FilingInput, nowMonth: MonthIndex): { ops: FilingOp[]; placed: string } {
+export function fileDocument(data: AppData, input: FilingInput, nowMonth: MonthIndex): { ops: FilingOp[]; removes: FilingRemove[]; placed: string; loanId?: string } {
   const ref = { fileId: input.fileId, name: input.name, uploadedAt: today() };
   const tenancy = input.tenancyId ? data.tenancies.find((t) => t.id === input.tenancyId) : undefined;
-  const loan = input.loanId ? data.loans.find((l) => l.id === input.loanId) : undefined;
+  const loose = (data.documents ?? []).filter((d) => d.fileId === input.fileId).map((d) => ({ coll: "documents" as const, id: d.id }));
 
   if (tenancy && input.category === "bail" && !tenancy.signedLease) {
-    return { ops: [{ coll: "tenancies", item: { ...tenancy, signedLease: ref } }], placed: "Bail signé du locataire" };
+    return { ops: [{ coll: "tenancies", item: { ...tenancy, signedLease: ref } }], removes: loose, placed: "Bail signé du locataire" };
   }
   if (tenancy && input.category === "caution") {
     const i = (tenancy.guarantors ?? []).findIndex((g) => !g.signedFile);
     if (i >= 0) {
       const guarantors = tenancy.guarantors!.map((g, j) => (j === i ? { ...g, signedFile: ref } : g));
-      return { ops: [{ coll: "tenancies", item: { ...tenancy, guarantors } }], placed: "Acte de cautionnement du garant" };
+      return { ops: [{ coll: "tenancies", item: { ...tenancy, guarantors } }], removes: loose, placed: "Acte de cautionnement du garant" };
     }
   }
   if (tenancy && input.category === "courrier") {
     const letter = { id: uid(), kind: "autre" as const, label: input.title || "Courrier", date: input.date || today(), file: ref };
-    return { ops: [{ coll: "tenancies", item: { ...tenancy, letters: [...(tenancy.letters ?? []), letter] } }], placed: "Courriers du locataire" };
+    return { ops: [{ coll: "tenancies", item: { ...tenancy, letters: [...(tenancy.letters ?? []), letter] } }], removes: loose, placed: "Courriers du locataire" };
   }
-  if (loan && input.category === "tableau_amortissement" && !loan.schedule && input.scheduleRows && input.scheduleRows.length >= 2 && checkSchedule(input.scheduleRows).issues.length === 0) {
-    const item: Loan = {
-      ...loan,
-      ...loanFieldsFromSchedule(input.scheduleRows, nowMonth),
-      schedule: { rows: input.scheduleRows, fileId: input.fileId, fileName: input.name, importedAt: today(), source: "ia" },
+  const rows = input.scheduleRows;
+  if (input.category === "tableau_amortissement" && input.loanPlan && rows && rows.length >= 2) {
+    const meta = input.scheduleMeta;
+    const fields = loanFieldsFromSchedule(rows, nowMonth, meta);
+    const schedule = { rows, fileId: input.fileId, fileName: input.name, importedAt: today(), source: "ia" as const, ...(meta && Object.keys(meta).length ? { meta } : {}) };
+    const plan = input.loanPlan;
+    const existing = plan.kind === "existing" ? data.loans.find((l) => l.id === plan.loanId) : undefined;
+    if (existing) {
+      const ops: FilingOp[] = [];
+      const item: Loan = {
+        ...existing,
+        ...fields,
+        bank: existing.bank || meta?.bank || undefined,
+        reference: existing.reference || meta?.reference || undefined,
+        // Rattachement complété seulement s'il manquait.
+        buildingId: existing.buildingId ?? input.buildingId ?? null,
+        companyId: existing.companyId ?? (existing.buildingId ? existing.companyId : input.companyId) ?? null,
+        schedule,
+      };
+      ops.push({ coll: "loans", item });
+      const old = existing.schedule;
+      if (old?.fileId && old.fileId !== input.fileId) {
+        // L'ancien tableau reste consultable, rattaché au même prêt.
+        ops.push({ coll: "documents", item: { id: uid(), fileId: old.fileId, name: old.fileName ?? "Tableau d'amortissement", category: "tableau_amortissement", title: `Ancien tableau d'amortissement — ${existing.name || existing.bank || "Crédit"}`, date: old.importedAt, loanId: existing.id, buildingId: item.buildingId ?? null, companyId: item.companyId ?? null, addedAt: today(), source: "ia" } });
+      }
+      return { ops, removes: loose, placed: `Tableau du financement « ${existing.name || describeLoan(existing)} » · chiffres mis à jour`, loanId: existing.id };
+    }
+    const created: Loan = {
+      id: uid(),
+      name: newLoanName(fields, meta),
+      bank: meta?.bank || undefined,
+      reference: meta?.reference || undefined,
+      buildingId: input.buildingId ?? null,
+      companyId: input.companyId ?? null,
+      ...fields,
+      schedule,
     };
-    return { ops: [{ coll: "loans", item }], placed: "Tableau d'amortissement du crédit (chiffres mis à jour)" };
+    return { ops: [{ coll: "loans", item: created }], removes: loose, placed: `Nouveau financement « ${created.name} » créé d'après le tableau`, loanId: created.id };
   }
+  // Pièce déjà libre (reprise sans nouvel emplacement) : mise à jour, pas de doublon.
+  const same = (data.documents ?? []).find((d) => d.fileId === input.fileId);
   const doc: AppDocument = {
-    id: uid(),
+    id: same?.id ?? uid(),
     fileId: input.fileId,
     name: input.name,
     category: input.category,
@@ -229,8 +271,8 @@ export function fileDocument(data: AppData, input: FilingInput, nowMonth: MonthI
     unitId: input.unitId ?? null,
     tenancyId: input.tenancyId ?? null,
     loanId: input.loanId ?? null,
-    addedAt: today(),
+    addedAt: same?.addedAt ?? today(),
     source: "ia",
   };
-  return { ops: [{ coll: "documents", item: doc }], placed: "Documents" };
+  return { ops: [{ coll: "documents", item: doc }], removes: loose.filter((r) => r.id !== doc.id), placed: "Documents" };
 }

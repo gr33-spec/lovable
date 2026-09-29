@@ -73,7 +73,7 @@ export function classificationContext(data: AppData) {
       adresse: [b.address, b.city].filter(Boolean).join(", ") || null,
       lots: data.units.filter((u) => u.buildingId === b.id).map((u) => ({ id: u.id, nom: u.name, type: u.type ?? null, surface: u.surface ?? null, loyer: u.rent ?? null, baux: tenantsOf(u.id) })),
     })),
-    prets: data.loans.map((l) => ({ id: l.id, nom: l.name ?? null, banque: l.bank ?? null, immeubleId: l.buildingId ?? null, societeId: l.companyId ?? null, montant: l.initialAmount ?? null, debut: l.startDate ?? null, fin: l.endDate ?? null })),
+    prets: data.loans.map((l) => ({ id: l.id, banque: l.bank ?? null, reference: l.reference ?? null, immeubleId: l.buildingId ?? null, societeId: l.companyId ?? null, montant: l.initialAmount ?? null, debut: l.startDate ?? null, fin: l.endDate ?? null, echeance: l.monthlyPayment ?? null, taux: l.ratePct ?? null })),
   };
 }
 
@@ -81,6 +81,7 @@ const SYSTEM = `Tu classes les documents d'un investisseur immobilier français 
 Règles impératives :
 - Rattache uniquement à des identifiants présents dans la liste fournie. Si le document ne permet pas de choisir, laisse le champ vide.
 - Ne devine pas : un bail ne se rattache à un lot et à un locataire que si le document les désigne (adresse, numéro ou description du lot, nom du locataire, loyer…). En cas de doute, confiance « moyenne » ou « faible » et propose les alternatives.
+- Tableau d'amortissement ou offre de prêt : la société est l'emprunteur imprimé sur le document, l'immeuble est le bien financé (adresse). Ne choisis un prêt (loanId) que si ses caractéristiques (montant, date de départ, échéance, taux, banque, référence) correspondent aux chiffres du document ; le nom donné au prêt dans l'application n'est jamais un indice. Les chiffres sont vérifiés ensuite par l'application.
 - Un document qui concerne tout l'immeuble (assurance PNO, taxe foncière, diagnostic des parties communes…) n'a pas de lot.
 - Catégories : bail (contrat de location signé), caution (acte de cautionnement), etat_des_lieux, courrier (lettre au ou du locataire : révision, relance, congé…), identite (pièces du dossier locataire : identité, justificatifs), tableau_amortissement, offre_pret, banque (relevés, attestations, contrats bancaires), assurance, facture, devis, diagnostic (DPE, amiante, plomb, électricité…), acte (acte notarié, statuts, PV d'assemblée de la société), fiscal (taxe foncière, impôts), copropriete (AG, appels de fonds), bilan (comptes annuels), autre.
 - Écris le titre, le résumé et la raison en français, courts.`;
@@ -127,14 +128,16 @@ export function mockClassify(file: { name: string }, data: AppData): Classificat
   const b = data.buildings.find((x) => n.includes(x.name.toLowerCase().split(" ").pop() ?? "§"));
   const u = b ? data.units.find((x) => x.buildingId === b.id && n.includes(x.name.toLowerCase().split(" ").slice(0, 2).join(" "))) : undefined;
   const t = u ? data.tenancies.find((x) => x.unitId === u.id && x.status === "actif") : undefined;
-  const l = b && category === "tableau_amortissement" ? data.loans.find((x) => x.buildingId === b.id) : undefined;
-  const sure = !!b && (category !== "bail" || !!t) && (category !== "tableau_amortissement" || !!l);
+  // Tableaux : le financement est retrouvé par l'application à partir des chiffres lus.
+  const c = b ? undefined : data.companies.find((x) => x.name.toLowerCase().split(/\s+/).filter((w) => w.length > 3).some((w) => n.includes(w.normalize("NFD").replace(/[\u0300-\u036f]/g, ""))));
+  const l = undefined as { id: string } | undefined;
+  const sure = (!!b || !!c) && (category !== "bail" || !!t);
   return {
     category,
     title: `${category} ${b?.name ?? ""}`.trim(),
     date: "",
     summary: `Démonstration : ${file.name}`,
-    companyId: b?.companyId ?? "",
+    companyId: b?.companyId ?? c?.id ?? "",
     buildingId: b?.id ?? "",
     unitId: u?.id ?? "",
     tenancyId: t?.id ?? "",

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ChevronRight, FileText, Pencil, Search, Trash2 } from "lucide-react";
+import { ChevronRight, FileText, Landmark, Pencil, Search, Trash2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { AppDocument, DocCategory } from "@/lib/types";
 import { DOC_CATEGORIES, DOC_SHORTCUTS, categoryLabel, documentIndex, documentsOf, searchText, type DocEntry, type DocScope } from "@/lib/documents";
@@ -30,6 +30,31 @@ const ICON_TONE: Partial<Record<DocCategory, string>> = {
   devis: "bg-warn/10 text-warn",
   diagnostic: "bg-neg/10 text-neg",
 };
+
+/**
+ * Tableaux d'amortissement rangés comme simples pièces (import antérieur) :
+ * leurs échéances n'alimentent aucun financement. Un geste pour les relire
+ * et les rattacher — le fichier reste le même, rien n'est dupliqué.
+ */
+function UnlinkedTables({ index, importer }: { index: DocEntry[]; importer: ReturnType<typeof useDocumentImport> }) {
+  const { data, role } = useStore();
+  const busy = new Set(importer.items.map((x) => x.fileId));
+  const list = index.filter((e) => e.docId && e.category === "tableau_amortissement" && !busy.has(e.fileId) && (!e.loanId || !data.loans.find((l) => l.id === e.loanId)?.schedule));
+  if (role !== "owner" || !list.length) return null;
+  return (
+    <div className="mt-4 rounded-[20px] bg-warn/10 p-4">
+      <div className="flex items-start gap-3">
+        <Landmark size={18} className="mt-0.5 shrink-0 text-warn" />
+        <div className="min-w-0 flex-1 text-[13.5px] text-ink">
+          <b>{list.length} tableau{list.length > 1 ? "x" : ""} d&apos;amortissement</b> {list.length > 1 ? "ne sont reliés" : "n'est relié"} à aucun financement : {list.length > 1 ? "leurs" : "ses"} chiffres ne sont pas utilisés dans Patrimoine.
+        </div>
+      </div>
+      <button type="button" onClick={() => importer.addStored(list.map((e) => ({ fileId: e.fileId, name: e.name })))} className="mt-3 w-full rounded-2xl bg-brand py-2.5 text-[14px] font-semibold text-on-brand">
+        Les relire et les rattacher
+      </button>
+    </div>
+  );
+}
 
 export function DocumentsLibrary() {
   const { data } = useStore();
@@ -62,6 +87,7 @@ export function DocumentsLibrary() {
         <div className="lg:grid lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] lg:items-start lg:gap-x-6">
           <div className="min-w-0">
             <DropZone onFiles={importer.add} />
+            <UnlinkedTables index={index} importer={importer} />
             <ImportQueue importer={importer} />
           </div>
 
