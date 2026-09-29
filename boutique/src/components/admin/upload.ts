@@ -70,6 +70,10 @@ export async function uploadImageFile(file: File, kind: "product" | "brand"): Pr
     throw new Error("Connexion perdue pendant l'envoi. Réessayez.");
   }
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || "Envoi impossible.");
+  if (!res.ok) {
+    if (data.error) throw new Error(data.error);
+    if (res.status === 413) throw new Error("Photo trop lourde pour l'envoi. Essayez une photo plus petite.");
+    throw new Error(`Envoi impossible (erreur ${res.status}). Réessayez dans un instant.`);
+  }
   return data.image as ImageRef;
 }

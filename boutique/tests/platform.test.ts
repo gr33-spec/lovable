@@ -14,7 +14,7 @@ import { saveProduct, setStock, deleteProduct } from "../src/lib/server/admin-ca
 import { findProduct, listProducts } from "../src/lib/server/catalog";
 import { createBackup, restoreBackup, toCsv } from "../src/lib/server/backup";
 import { paymentConfig } from "../src/lib/server/env";
-import { putFile } from "../src/lib/server/storage";
+import { publicBlobToken, putFile } from "../src/lib/server/storage";
 import { esc } from "../src/lib/server/email/templates";
 import { renderRichText } from "../src/lib/rich-text";
 
@@ -118,6 +118,23 @@ describe("cryptographie et authentification", () => {
     }
     const mid = s.length - 10;
     assert.equal(readShortLived(s.slice(0, mid) + (s[mid] === "A" ? "B" : "A") + s.slice(mid + 1), "x"), null);
+  });
+});
+
+describe("stockage des photos", () => {
+  test("jeton Blob reconnu même avec un autre préfixe, jamais le jeton privé", () => {
+    const saved = { ...process.env };
+    try {
+      delete process.env.BLOB_READ_WRITE_TOKEN;
+      process.env.BLOB_PRIVATE_READ_WRITE_TOKEN = "vercel_blob_rw_prive";
+      assert.equal(publicBlobToken(), undefined);
+      process.env.STORAGE_READ_WRITE_TOKEN = "vercel_blob_rw_public";
+      assert.equal(publicBlobToken(), "vercel_blob_rw_public");
+      process.env.BLOB_READ_WRITE_TOKEN = "vercel_blob_rw_defaut";
+      assert.equal(publicBlobToken(), "vercel_blob_rw_defaut");
+    } finally {
+      process.env = saved;
+    }
   });
 });
 

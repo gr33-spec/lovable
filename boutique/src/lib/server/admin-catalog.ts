@@ -179,7 +179,14 @@ export async function uploadImage(file: Buffer, kind: "product" | "brand", admin
     await reportEvent("warning", "upload", "Photo non traitée", { error: errorMessage(err) });
     return { ok: false as const, error: "Cette photo n'a pas pu être traitée. Essayez une autre photo." };
   }
-  const baseUrl = await storeVariants(processed);
+  let baseUrl: string;
+  try {
+    baseUrl = await storeVariants(processed);
+  } catch (err) {
+    const reason = errorMessage(err);
+    await reportEvent("error", "upload", "Stockage des photos indisponible", { error: reason });
+    return { ok: false as const, error: `La photo n'a pas pu être enregistrée (stockage des photos : ${reason.slice(0, 160)}).` };
+  }
   const row = await queryOne<ImageRow>(
     `INSERT INTO image (id, kind, width, height, widths, placeholder, content_hash, bytes, base_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
      RETURNING id, width, height, widths, placeholder, alt, base_url`,
