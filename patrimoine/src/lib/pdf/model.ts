@@ -1,12 +1,14 @@
-import type { AppData, Company, SaleAction } from "../types";
+import type { AppData, Company, DocCategory, SaleAction } from "../types";
+import { documentIndex } from "../documents";
 import { saleLabel } from "../engine/sale";
 import { monthLabel } from "../engine/dates";
-import { NO_COMPANY, cashflowMonthly, companyTree, type Figures } from "../engine/snapshot";
+import { NO_COMPANY, cashflowMonthly, companyTree, dscr as dscrOf, rentalCharges, rentalPayments, type Figures } from "../engine/snapshot";
 import { halfDebtYear, type Projection } from "../engine/projection";
 import { portfolioIndicators } from "../engine/indicators";
 import { eur, eurCompact, pct, pdfSafe } from "../format";
 import { assetMix, isPrivateUse, kindLabel, usageLabel } from "../assets";
 import { reliableInitial } from "../schedule";
+import { SOURCE_LABEL, endSource, paymentSource, rateSource } from "../engine/provenance";
 import { auditLoans, suspectAcquisition } from "../engine/loan-audit";
 
 // Chiffres du dossier banque, calculés une seule fois et testés : chaque page
@@ -39,7 +41,7 @@ export interface GroupModel {
   }[];
   loansByCompany: {
     company: string;
-    loans: { name: string; bank: string; initial?: number; balance?: number; monthly?: number; rate?: number; end?: string; note?: string; monthlyEstimated: boolean; rateEstimated: boolean; endEstimated: boolean; incoherent: boolean }[];
+    loans: { name: string; bank: string; reference?: string; source: string; rateType?: string; initial?: number; balance?: number; monthly?: number; rate?: number; end?: string; note?: string; monthlyEstimated: boolean; rateEstimated: boolean; endEstimated: boolean; incoherent: boolean }[];
     balance: number;
     monthly: number;
     /** Au moins une mensualité estimée ou non communiquée dans le groupe. */
@@ -62,6 +64,10 @@ export interface GroupModel {
   debtSeries: number[];
   cfSeries: number[];
   statements: { company: string; year: number; revenue?: number; net?: number; caf?: number; equity?: number; bankDebt?: number; cash?: number }[];
+  /** Qui détient quoi et qui porte la dette (par société, chiffres propres, hors filiales). */
+  structure: { name: string; form: string; owner: string; assets: number; value?: number; debt: number; rentAnnual: number; payments: number }[];
+  /** Pièces justificatives disponibles dans l'application (non recopiées dans le PDF). */
+  evidence: { label: string; have: number; total: number; missing: string[] }[];
   /** Ventes prévues (immeubles ou lots) prises en compte dans la trajectoire. */
   sales: { label: string; when: string; price?: number; debtRepaid: number; costs: number; net?: number; rentLost: number; paymentsRemoved: number; underOffer: boolean }[];
 }
@@ -113,10 +119,10 @@ export function groupModel(data: AppData, p: Projection, name: string): GroupMod
     if (upcoming) notes.push(`Premières échéances en ${monthLabel(r.fromMonth)} : non inclus dans les totaux.`);
     if (!upcoming && now?.balance === undefined) notes.push("Capital restant dû non communiqué : non inclus dans le total.");
     // Mensualité estimée : ni saisie, ni taux connu, ni tableau de la banque (même règle que les totaux).
-    const monthlyEstimated = !upcoming && !l.schedule && l.monthlyPayment === undefined && l.ratePct === undefined && r.impliedRatePct === undefined && r.payment !== undefined;
-    const missingPayment = !upcoming && !r.finished && (r.payment === undefined || !(now?.paymentMonthly));
-    const rateEstimated = l.ratePct === undefined && r.impliedRatePct !== undefined;
-    const endEstimated = r.quality === "estimated" && !l.endDate && !l.schedule;
+    const monthlyEstimated = !upcoming && paymentSource(l, r) === "estimation";
+    const missingPayment = !upcoming && !r.finished && (paymentSource(l, r) === "inconnue" || !now?.paymentMonthly);
+    const rateEstimated = rateSource(l, r) === "calcul";
+    const endEstimated = endSource(l, r) === "estimation";
     const initial = reliableInitial(l).value;
     const balanceNow = upcoming ? (r.balance ?? initial) : now?.balance;
     // Vérification croisée : toute contradiction est écrite sous le crédit, en rouge si un montant est en cause.
@@ -132,7 +138,10 @@ export function groupModel(data: AppData, p: Projection, name: string): GroupMod
     if (incoherent) incoherentLoans++;
     g.loans.push({
       name: l.name || "Crédit",
-      bank: l.bank ?? "",
+      bank: l.bank ?? l.schedule?.meta?.bank ?? "",
+      reference: l.reference ?? l.schedule?.meta?.reference,
+      source: upcoming ? "Crédit signé" : SOURCE_LABEL[paymentSource(l, r)],
+      rateType: l.rateType === "variable" ? "variable" : undefined,
       initial,
       balance: balanceNow,
       monthly: upcoming ? (r.payment !== undefined ? r.payment + r.insurance : undefined) : now?.paymentMonthly || undefined,
@@ -162,25 +171,25 @@ export function groupModel(data: AppData, p: Projection, name: string): GroupMod
       })
       .map((b) => b.companyId ?? NO_COMPANY),
   );
+  // Capacité de remboursement : périmètre locatif (formules uniques de engine/snapshot).
   const capacityRow = (key: string, name: string, own: Figures) => {
-    const charges = own.chargesAnnual / 12;
     return {
       company: name,
       rent: own.rentMonthly,
-      charges,
-      payments: own.paymentsMonthly,
+      charges: rentalCharges(own) / 12,
+      payments: rentalPayments(own),
       cf: cashflowMonthly(own),
-      dscr: own.paymentsMonthly > 0 && own.rentMonthly > 0 ? (own.rentMonthly - charges) / own.paymentsMonthly : undefined,
+      dscr: dscrOf(own),
       chargesMissing: chargesMissingKeys.has(key),
       approx: approxKeys.has(key),
     };
   };
   const capacity = companyTree(data.companies)
     .map(({ company }) => ({ company, own: snap.ownByCompany.get(company.id) }))
-    .filter((x): x is { company: Company; own: Figures } => !!x.own && (x.own.rentMonthly > 0 || x.own.paymentsMonthly > 0 || x.own.chargesAnnual > 0))
+    .filter((x): x is { company: Company; own: Figures } => !!x.own && (x.own.rentMonthly > 0 || rentalPayments(x.own) > 0 || rentalCharges(x.own) > 0))
     .map(({ company, own }) => capacityRow(company.id, company.name, own));
   const direct = snap.ownByCompany.get(NO_COMPANY);
-  if (direct && (direct.rentMonthly > 0 || direct.paymentsMonthly > 0 || direct.chargesAnnual > 0)) capacity.push(capacityRow(NO_COMPANY, "En direct", direct));
+  if (direct && (direct.rentMonthly > 0 || rentalPayments(direct) > 0 || rentalCharges(direct) > 0)) capacity.push(capacityRow(NO_COMPANY, "En direct", direct));
 
   const cf = cashflowMonthly(f);
   const occupancy = indicators.get("occupancy");
@@ -202,7 +211,7 @@ export function groupModel(data: AppData, p: Projection, name: string): GroupMod
   if (half && reliable) highlights.push(`Capital restant dû divisé par deux d'ici ${half}.`);
 
   // Fin de crédit estimée (taux inconnu, ni date de fin ni tableau) : signalée comme telle.
-  const endGuessed = new Set(data.loans.filter((l) => snap.resolvedLoans.get(l.id)?.quality === "estimated" && !l.endDate && !l.schedule).map((l) => l.id));
+  const endGuessed = new Set(data.loans.filter((l) => snap.resolvedLoans.has(l.id) && endSource(l, snap.resolvedLoans.get(l.id)!) === "estimation").map((l) => l.id));
   const ends = new Map<number, { freed: number; names: string[]; estimated: boolean }>();
   for (const e of p.events.filter((x) => x.kind === "loan_end")) {
     const cur = ends.get(e.year) ?? { freed: 0, names: [], estimated: false };
@@ -244,6 +253,8 @@ export function groupModel(data: AppData, p: Projection, name: string): GroupMod
     mix,
     buildings,
     loansByCompany: [...byCompany.values()],
+    structure: structureRows(data, snap),
+    evidence: evidenceRows(data, snap),
     estimatedLoans,
     missingPaymentLoans,
     incoherentLoans,
@@ -278,3 +289,53 @@ export function groupModel(data: AppData, p: Projection, name: string): GroupMod
   };
 }
 
+
+function structureRows(data: AppData, snap: Projection["snapshot"]): GroupModel["structure"] {
+  const byId = new Map(data.companies.map((c) => [c.id, c]));
+  const row = (key: string, name: string, form: string, owner: string) => {
+    const f = snap.ownByCompany.get(key);
+    if (!f) return undefined;
+    const assets = data.buildings.filter((b) => (b.companyId ?? NO_COMPANY) === key).length;
+    if (!assets && f.debt <= 0 && f.loans === 0) return undefined;
+    return { name, form, owner, assets, value: f.unvalued ? undefined : f.value, debt: f.debt, rentAnnual: f.rentMonthly * 12, payments: f.paymentsMonthly };
+  };
+  const out: GroupModel["structure"] = [];
+  for (const { company } of companyTree(data.companies)) {
+    const parent = company.parentId ? byId.get(company.parentId) : undefined;
+    const owner = parent ? `${parent.name}${company.ownershipPct ? ` (${pct(company.ownershipPct, 0)})` : ""}` : (company.partners ?? []).map((p) => p.name).filter(Boolean).slice(0, 2).join(", ");
+    const r = row(company.id, company.name, company.kind === "holding" ? "Holding" : company.kind, owner);
+    if (r) out.push(r);
+    else if (company.kind === "holding") out.push({ name: company.name, form: "Holding", owner, assets: 0, value: undefined, debt: 0, rentAnnual: 0, payments: 0 });
+  }
+  const direct = row(NO_COMPANY, "En direct", "Personnes physiques", data.settings.ownerName ?? "");
+  if (direct) out.push(direct);
+  return out;
+}
+
+function evidenceRows(data: AppData, snap: Projection["snapshot"]): GroupModel["evidence"] {
+  const docs = documentIndex(data);
+  const has = (cat: DocCategory, pick: (d: (typeof docs)[number]) => boolean) => docs.some((d) => d.category === cat && pick(d));
+  const active = data.loans.filter((l) => {
+    const r = snap.resolvedLoans.get(l.id);
+    return r && !r.finished;
+  });
+  const rental = data.buildings.filter((b) => !isPrivateUse(b));
+  const leased = data.units.filter((u) => u.status !== "vacant");
+  const loanName = (l: (typeof active)[number]) => l.name || l.bank || "Crédit";
+  const rows: GroupModel["evidence"] = [];
+  const add = <T,>(label: string, list: T[], ok: (x: T) => boolean, name: (x: T) => string) => {
+    if (!list.length) return;
+    const missing = list.filter((x) => !ok(x));
+    rows.push({ label, have: list.length - missing.length, total: list.length, missing: missing.map(name) });
+  };
+  add("Tableaux d'amortissement de la banque", active, (l) => !!l.schedule || has("tableau_amortissement", (d) => d.loanId === l.id), loanName);
+  add("Offres de prêt", active, (l) => has("offre_pret", (d) => d.loanId === l.id), loanName);
+  add("Actes d'achat", rental, (b) => has("acte", (d) => d.buildingId === b.id), (b) => b.name);
+  add("Assurances des biens", rental, (b) => has("assurance", (d) => d.buildingId === b.id), (b) => b.name);
+  add("Baux signés", leased, (u) => data.tenancies.some((t) => t.unitId === u.id && t.status === "actif" && !!t.signedLease), (u) => {
+    const b = data.buildings.find((x) => x.id === u.buildingId);
+    return [b?.name, u.name].filter(Boolean).join(" · ");
+  });
+  add("Derniers bilans", data.companies.filter((c) => c.kind !== "holding" || data.statements.some((st) => st.companyId === c.id)), (c) => data.statements.some((st) => st.companyId === c.id && !!st.fileId), (c) => c.name);
+  return rows;
+}

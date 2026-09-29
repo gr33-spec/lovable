@@ -4,7 +4,7 @@ import ExcelJS from "exceljs";
 import type { AppData } from "../types";
 import { currentMonth, monthLabel, yearOf } from "../engine/dates";
 import { project } from "../engine/projection";
-import { buildingValue, cashflowMonthly, netWorth } from "../engine/snapshot";
+import { buildingValue, cashflowMonthly, rentalCharges, rentalPayments, netWorth } from "../engine/snapshot";
 import { latentGain } from "../engine/history";
 import { leaseInfo, outstanding, todayIso } from "../engine/leases";
 import { statementRatios } from "../engine/indicators";
@@ -63,12 +63,13 @@ export async function buildWorkbook(data: AppData): Promise<Buffer> {
     ["Capital restant dû", t.debt, EUR],
     ["Patrimoine net", nw === undefined ? "Données insuffisantes" : nw, EUR],
     ["Loyers mensuels", t.rentMonthly, EUR],
-    ["Mensualités de crédit", t.paymentsMonthly, EUR],
-    ["Charges annuelles", t.chargesAnnual, EUR],
-    ["Cash-flow mensuel", cashflowMonthly(t), EUR],
+    ["Mensualités des crédits locatifs", rentalPayments(t), EUR],
+    ["Mensualités des crédits personnels (résidence principale)", t.personalPaymentsMonthly, EUR],
+    ["Charges annuelles (biens locatifs)", rentalCharges(t), EUR],
+    ["Cash-flow locatif mensuel", cashflowMonthly(t), EUR],
     ["Trésorerie des sociétés", t.cash, EUR],
     ["Comptes courants d'associés", t.partnerAccounts, EUR],
-    ["Immeubles", t.buildings],
+    ["Biens", t.buildings],
     ["Lots", t.units],
     ["Lots vacants", t.vacantUnits],
     ["Crédits", t.loans],

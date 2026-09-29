@@ -46,7 +46,7 @@ export default function DossierBanquePage() {
     const scoped = scope ? companySubset(data, scope) : data;
     const list = qualityIssues(scoped, computeSnapshot(scoped, nowMonth));
     const holding = data.companies.find((c) => c.kind === "holding") ?? data.companies[0];
-    if (holding && !holding.email && !holding.phone) list.push({ id: "contact", label: "Coordonnées de contact", detail: "E-mail et téléphone affichés en couverture", href: "/plus/societes", severity: "advice" });
+    if (holding && !holding.email && !holding.phone) list.push({ id: "contact", label: "Coordonnées de contact", detail: "E-mail et téléphone affichés en couverture", href: "/plus/societes", severity: "advice", priority: "utile", group: { key: "contact", name: "Coordonnées", kind: "societe" } });
     return list;
   }, [data, nowMonth, scope]);
 

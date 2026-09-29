@@ -1,99 +1,124 @@
-import type { AppData } from "../types";
+import type { AppData, Building, Loan, Unit } from "../types";
 import type { Snapshot } from "./snapshot";
 import { auditLoans, suspectAcquisition } from "./loan-audit";
 import { reliableStart } from "../schedule";
+import { unitMissing } from "../missing";
+import { missingDocuments } from "../doc-completeness";
+
+// Ce qui manque ou se contredit, en langage métier : une ligne par sujet,
+// rattachée à l'élément concerné (bien, crédit, logement, société), avec une
+// priorité. Rien n'est inventé ni corrigé ici.
+//  - important : un chiffre affiché serait faux ou absent pour la banque ;
+//  - utile     : précise ou justifie les chiffres ;
+//  - optionnel : confort, sans effet sur les montants.
+
+export type Priority = "important" | "utile" | "optionnel";
 
 export interface QualityIssue {
   id: string;
+  /** Élément concerné (titre de la ligne). */
   label: string;
   detail: string;
   href: string;
-  /** « critical » : un montant du dossier serait faux (mensualité, capital) ; sinon simple information manquante. */
-  severity?: "critical" | "advice";
+  priority: Priority;
+  /** Regroupement par élément (un bien et ses logements, un crédit, une société). */
+  group: { key: string; name: string; kind: "bien" | "credit" | "societe" | "autre" };
+  /** Compatibilité : « critical » = important. */
+  severity: "critical" | "advice";
 }
 
-/** Données manquantes qui empêchent un calcul : affichées, jamais inventées. */
+export const PRIORITY_LABEL: Record<Priority, string> = { important: "Important", utile: "Utile", optionnel: "Optionnel" };
+
 export function qualityIssues(data: AppData, snap: Snapshot): QualityIssue[] {
   const issues: QualityIssue[] = [];
-  for (const b of data.buildings) {
-    if ((snap.byBuilding.get(b.id)?.unvalued ?? 0) > 0) {
-      issues.push({ id: `b-${b.id}`, label: b.name, detail: "Valeur estimée manquante", href: `/patrimoine/immeuble/${b.id}?modifier=1`, severity: "advice" });
-    }
-  }
+  const seen = new Set<string>();
+  const push = (id: string, priority: Priority, group: QualityIssue["group"], label: string, detail: string, href: string) => {
+    if (seen.has(id)) return;
+    seen.add(id);
+    issues.push({ id, priority, group, label, detail, href, severity: priority === "important" ? "critical" : "advice" });
+  };
+  const gB = (b: Building): QualityIssue["group"] => ({ key: `b-${b.id}`, name: b.name, kind: "bien" });
+  const gL = (l: Loan): QualityIssue["group"] => ({ key: `l-${l.id}`, name: l.name || l.bank || "Crédit", kind: "credit" });
+  const bHref = (b: Building, edit = false) => `/patrimoine/immeuble/${b.id}${edit ? "?modifier=1" : ""}`;
+
+  // ——— Biens ———
   for (const b of data.buildings) {
     const f = snap.byBuilding.get(b.id);
-    if (f && f.rentMonthly > 0 && f.chargesAnnual === 0) {
-      issues.push({ id: `c-${b.id}`, label: b.name, detail: "Charges non renseignées (taxe foncière, assurance) : cash-flow surestimé", href: `/patrimoine/immeuble/${b.id}?modifier=1`, severity: "critical" });
-    }
+    const units = data.units.filter((u) => u.buildingId === b.id);
+    const personal = b.usage === "residence_principale" || b.usage === "residence_secondaire";
+    if ((f?.unvalued ?? 0) > 0) push(`b-${b.id}`, personal ? "utile" : "important", gB(b), b.name, "Valeur actuelle non renseignée (patrimoine net, LTV)", bHref(b, true));
+    if (f && f.rentMonthly > 0 && f.chargesAnnual === 0) push(`c-${b.id}`, "important", gB(b), b.name, "Charges non renseignées (taxe foncière, assurance) : cash-flow surestimé", bHref(b, true));
+    if (!b.kind) push(`k-${b.id}`, "utile", gB(b), b.name, "Nature du bien à préciser (immeuble, maison, hangar…)", bHref(b, true));
+    if (!b.usage && !(f && f.rentMonthly > 0)) push(`u-${b.id}`, "utile", gB(b), b.name, "Usage à préciser (résidence principale, vacant…) : il détermine le périmètre locatif", bHref(b, true));
+    if (!b.acquisitionDate && !personal) push(`d-${b.id}`, "utile", gB(b), b.name, "Date d'achat à renseigner", bHref(b, true));
+    if (b.lotsCount && units.length && b.lotsCount !== units.length) push(`n-${b.id}`, "optionnel", gB(b), b.name, `${b.lotsCount} lots annoncés mais ${units.length} logement(s) saisi(s)`, bHref(b));
+
+    // Loyer global de l'immeuble (logements non détaillés) : rien à signaler par logement.
+    const globalRent = !!b.rentMonthly && !units.some((u) => u.rent && u.rent > 0);
+    const noRent = globalRent ? [] : units.filter((u) => u.status !== "vacant" && !(u.rent && u.rent > 0));
+    if (noRent.length) push(`r-${b.id}`, "important", gB(b), b.name, `${noRent.length} logement(s) occupé(s) sans loyer (${noRent.map((u) => u.name).slice(0, 3).join(", ")}) : loyers sous-estimés`, bHref(b));
+    for (const u of units) unitChecks(u, b);
+
+    if (suspectAcquisition(data, b)) push(`as-${b.id}`, "utile", gB(b), b.name, `Date d'achat (${b.acquisitionDate!.slice(0, 7)}) recopiée d'un tableau commencé en cours de prêt : à corriger`, bHref(b, true));
+    // Un crédit qui démarre avant l'achat du bien trahit en général une date d'achat erronée.
+    const first = data.loans.filter((l) => l.buildingId === b.id).map((l) => reliableStart(l)).filter((d): d is string => !!d).map((d) => d.slice(0, 7)).sort()[0];
+    if (b.acquisitionDate && first && b.acquisitionDate.slice(0, 7) > first) push(`a-${b.id}`, "utile", gB(b), b.name, `Date d'achat (${b.acquisitionDate.slice(0, 7)}) postérieure au déblocage de son crédit (${first}) : à vérifier`, bHref(b, true));
+    for (const d of missingDocuments(data, { buildingId: b.id })) push(`doc-b-${b.id}-${d.id}`, "utile", gB(b), b.name, `Document à ajouter : ${d.label}`, bHref(b));
   }
+
+  function unitChecks(u: Unit, b: Building) {
+    const lease = data.tenancies.find((t) => t.unitId === u.id && t.status === "actif");
+    const where = `${b.name} · ${u.name}`;
+    const href = `/patrimoine/logement/${u.id}?depuis=gestion`;
+    if (lease && u.status === "vacant") push(`v-${u.id}`, "important", gB(b), where, "Marqué vacant alors qu'un bail est en cours : occupation et loyers faussés", href);
+    else if (lease?.rent !== undefined && u.rent !== undefined && Math.abs(lease.rent - u.rent) > 1) push(`rl-${u.id}`, "important", gB(b), where, `Loyer du logement (${Math.round(u.rent)} €) différent du bail en cours (${Math.round(lease.rent)} €)`, href);
+    // Dossier du locataire : pièces et informations du bail.
+    const missing = unitMissing(data, u).filter((m) => m.id !== "rent");
+    if (missing.length) push(`t-${u.id}`, "utile", gB(b), where, `Dossier locataire : ${missing.map((m) => m.label.toLowerCase()).join(", ")}`, href);
+  }
+
+  // ——— Crédits ———
   for (const l of data.loans) {
     const r = snap.resolvedLoans.get(l.id);
     if (!r || r.finished) continue;
-    const name = l.name || l.bank || "Crédit";
-    const fix = " — le plus simple : importer le tableau d'amortissement";
-    if (r.quality === "insufficient") {
-      issues.push({ id: `l-${l.id}`, label: name, detail: (r.notes[r.notes.length - 1] ?? "Données insuffisantes") + fix, href: `/patrimoine/credit/${l.id}`, severity: "critical" });
-    } else if (r.quality === "estimated") {
-      issues.push({ id: `l-${l.id}`, label: name, detail: (r.notes[0] ?? "Projection estimée") + fix, href: `/patrimoine/credit/${l.id}`, severity: "critical" });
-    } else if (!l.schedule) {
-      // Calcul correct mais théorique : le tableau de la banque donne les chiffres exacts.
-      issues.push({ id: `ls-${l.id}`, label: name, detail: "Tableau d'amortissement à importer pour des chiffres exacts", href: `/patrimoine/credit/${l.id}`, severity: "advice" });
-    }
+    const href = `/patrimoine/credit/${l.id}`;
+    if (r.quality === "insufficient") push(`l-${l.id}`, "important", gL(l), gL(l).name, `${r.notes[r.notes.length - 1] ?? "Données insuffisantes"} : importer le tableau d'amortissement`, href);
+    else if (r.quality === "estimated") push(`l-${l.id}`, "important", gL(l), gL(l).name, `${r.notes[0] ?? "Projection estimée"} : importer le tableau d'amortissement`, href);
+    else if (!l.schedule) push(`ls-${l.id}`, "utile", gL(l), gL(l).name, "Tableau d'amortissement à importer (chiffres exacts de la banque)", href);
+    for (const d of missingDocuments(data, { loanId: l.id })) push(`doc-l-${l.id}-${d.id}`, "utile", gL(l), gL(l).name, `Document à ajouter : ${d.label}`, href);
   }
-  // Vérification croisée de chaque crédit (montant, taux, durée, mensualité, dates, doublons).
-  const seen = new Set<string>();
+  // Vérification croisée (montant, taux, durée, mensualité, dates, doublons).
   for (const x of auditLoans(data, snap)) {
     const l = data.loans.find((y) => y.id === x.loanId)!;
-    const id = `la-${l.id}-${x.short}`;
-    if (seen.has(id)) continue;
-    seen.add(id);
-    issues.push({ id: x.severity === "critical" ? `li-${l.id}-${seen.size}` : `la-${l.id}-${seen.size}`, label: l.name || l.bank || "Crédit", detail: x.text, href: `/patrimoine/credit/${l.id}`, severity: x.severity });
+    const priority: Priority = x.severity === "critical" ? "important" : x.short.startsWith("Banque") ? "optionnel" : "utile";
+    push(`${x.severity === "critical" ? "li" : "la"}-${l.id}-${x.short}`, priority, gL(l), gL(l).name, x.text, `/patrimoine/credit/${l.id}`);
   }
-  for (const b of data.buildings) {
-    const f = snap.byBuilding.get(b.id);
-    if (!b.kind) issues.push({ id: `k-${b.id}`, label: b.name, detail: "Nature du bien à préciser (immeuble, maison, hangar…)", href: `/patrimoine/immeuble/${b.id}?modifier=1`, severity: "advice" });
-    if (!b.usage && !(f && f.rentMonthly > 0)) issues.push({ id: `u-${b.id}`, label: b.name, detail: "Usage à préciser (résidence principale, vacant, professionnel…)", href: `/patrimoine/immeuble/${b.id}?modifier=1`, severity: "advice" });
-    // Nombre de lots annoncé et logements saisis doivent concorder.
-    const units = data.units.filter((u) => u.buildingId === b.id);
-    if (b.lotsCount && units.length && b.lotsCount !== units.length) issues.push({ id: `n-${b.id}`, label: b.name, detail: `${b.lotsCount} lots annoncés mais ${units.length} logement(s) saisi(s)`, href: `/patrimoine/immeuble/${b.id}`, severity: "advice" });
-    // Loyer global de l'immeuble (logements non détaillés) : rien à signaler par logement.
-    const globalRent = !!b.rentMonthly && !units.some((u) => u.rent && u.rent > 0);
-    const unpaid = globalRent ? [] : units.filter((u) => u.status !== "vacant" && !(u.rent && u.rent > 0));
-    if (unpaid.length) issues.push({ id: `r-${b.id}`, label: b.name, detail: `${unpaid.length} logement(s) occupé(s) sans loyer renseigné (${unpaid.map((u) => u.name).slice(0, 3).join(", ")}) : loyers sous-estimés`, href: `/patrimoine/immeuble/${b.id}`, severity: "critical" });
-    // Logement et bail en cours doivent dire la même chose (loyer, occupation).
-    for (const u of units) {
-      const lease = data.tenancies.find((t) => t.unitId === u.id && t.status === "actif");
-      if (!lease) continue;
-      if (u.status === "vacant") issues.push({ id: `v-${u.id}`, label: `${b.name} · ${u.name}`, detail: "Marqué vacant alors qu'un bail est en cours : taux d'occupation et loyers faussés", href: `/patrimoine/immeuble/${b.id}`, severity: "critical" });
-      else if (lease.rent !== undefined && u.rent !== undefined && Math.abs(lease.rent - u.rent) > 1) issues.push({ id: `rl-${u.id}`, label: `${b.name} · ${u.name}`, detail: `Loyer du logement (${Math.round(u.rent)} €) différent du bail en cours (${Math.round(lease.rent)} €) : à harmoniser`, href: `/patrimoine/immeuble/${b.id}`, severity: "critical" });
-    }
-    if (suspectAcquisition(data, b)) issues.push({ id: `as-${b.id}`, label: b.name, detail: `Date d'acquisition (${b.acquisitionDate!.slice(0, 7)}) déduite d'un tableau d'amortissement commencé en cours de prêt : à corriger`, href: `/patrimoine/immeuble/${b.id}?modifier=1`, severity: "advice" });
-    // Un crédit qui démarre avant l'achat du bien trahit en général une date d'acquisition erronée.
-    const starts = data.loans.filter((l) => l.buildingId === b.id).map((l) => reliableStart(l)).filter((d): d is string => !!d).map((d) => d.slice(0, 7));
-    const first = starts.sort()[0];
-    if (b.acquisitionDate && first && b.acquisitionDate.slice(0, 7) > first) {
-      issues.push({ id: `a-${b.id}`, label: b.name, detail: `Date d'acquisition (${b.acquisitionDate.slice(0, 7)}) postérieure au début de son crédit (${first}) : à vérifier`, href: `/patrimoine/immeuble/${b.id}?modifier=1`, severity: "advice" });
-    }
-  }
-  // Biens en double : même nom et même adresse (ou même nom sans adresse).
+
+  // ——— Doublons de biens ———
   const seenB = new Map<string, string>();
   for (const b of data.buildings) {
     const key = `${b.name.trim().toLowerCase()}|${(b.address ?? "").trim().toLowerCase()}|${(b.city ?? "").trim().toLowerCase()}`;
-    const other = seenB.get(key);
-    if (other) issues.push({ id: `bd-${b.id}`, label: b.name, detail: "Doublon probable d'un autre bien (même nom, même adresse) : compté deux fois (valeur, lots, dette)", href: `/patrimoine/immeuble/${b.id}`, severity: "critical" });
+    if (seenB.has(key)) push(`bd-${b.id}`, "important", gB(b), b.name, "Doublon probable d'un autre bien (même nom, même adresse) : compté deux fois", bHref(b));
     else seenB.set(key, b.id);
   }
+
+  // ——— Sociétés et divers ———
   for (const st of data.statements) {
     const fg = st.figures;
     if ([fg.revenue, fg.netResult, fg.equity, fg.bankDebt, fg.cash].every((v) => v === undefined)) {
       const c = data.companies.find((x) => x.id === st.companyId);
-      issues.push({ id: `s-${st.id}`, label: `Bilan ${st.year}${c ? ` · ${c.name}` : ""}`, detail: "Aucun chiffre saisi : absent du dossier", href: "/plus/bilans", severity: "advice" });
+      push(`s-${st.id}`, "optionnel", { key: `c-${st.companyId}`, name: c?.name ?? "Société", kind: "societe" }, `Bilan ${st.year}`, "Aucun chiffre saisi : absent du dossier banque", "/plus/bilans");
     }
   }
   for (const w of data.works) {
-    if (w.status !== "termine" && !w.year) {
-      issues.push({ id: `w-${w.id}`, label: w.label, detail: "Travaux sans année prévue", href: `/patrimoine?vue=travaux`, severity: "advice" });
-    }
+    if (w.status !== "termine" && !w.year) push(`w-${w.id}`, "optionnel", { key: "travaux", name: "Travaux", kind: "autre" }, w.label, "Travaux sans année prévue", "/patrimoine?vue=travaux");
   }
   return issues;
+}
+
+/** Points par priorité (tableau de bord, menu Plus). */
+export function issueCounts(issues: QualityIssue[]): Record<Priority, number> {
+  const out: Record<Priority, number> = { important: 0, utile: 0, optionnel: 0 };
+  for (const i of issues) out[i.priority]++;
+  return out;
 }

@@ -3,7 +3,7 @@ import type { AppData, Building } from "../types";
 import type { MonthIndex } from "../engine/dates";
 import { yearOf } from "../engine/dates";
 import { project } from "../engine/projection";
-import { cashflowMonthly, ltv, netWorth, NO_COMPANY, type Figures } from "../engine/snapshot";
+import { cashflowMonthly, grossYield, rentalPayments, ltv, netWorth, NO_COMPANY, type Figures } from "../engine/snapshot";
 import { formatIndicator, latestStatements, portfolioIndicators, statementRatios } from "../engine/indicators";
 import { qualityIssues } from "../engine/quality";
 import { companySubset } from "../engine/subset";
@@ -30,11 +30,12 @@ function figures(f: Figures) {
     loyersMensuels: r0(f.rentMonthly),
     loyersPotentielsMensuels: r0(f.potentialRentMonthly),
     chargesAnnuelles: r0(f.chargesAnnual),
-    mensualitesCredits: r0(f.paymentsMonthly),
+    mensualitesCreditsLocatifs: r0(rentalPayments(f)),
+    mensualitesCreditsPersonnels: f.personalPaymentsMonthly ? r0(f.personalPaymentsMonthly) : null,
     creditsMensualiteInconnue: f.unknownPayment,
-    cashflowMensuel: r0(cashflowMonthly(f)),
+    cashflowLocatifMensuel: r0(cashflowMonthly(f)),
     ltvPct: r1(l),
-    rendementBrutPct: f.value > 0 && !f.unvalued ? r1(((f.rentMonthly * 12) / f.value) * 100) : null,
+    rendementBrutPct: r1(grossYield(f)),
     lots: f.units,
     lotsVacants: f.vacantUnits,
   };

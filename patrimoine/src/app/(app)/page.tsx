@@ -6,9 +6,10 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { BadgeEuro, Briefcase, Building2, CalendarClock, ChevronRight, CircleAlert, DoorOpen, Flag, Hammer, Landmark, Receipt, RefreshCw, ShoppingCart, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { cashflowMonthly, ltv, netWorth } from "@/lib/engine/snapshot";
+import { cashflowMonthly, ltv, netWorth, rentalCharges, rentalPayments } from "@/lib/engine/snapshot";
 import { milestones, type Milestone } from "@/lib/engine/milestones";
-import { qualityIssues } from "@/lib/engine/quality";
+import { issueCounts, qualityIssues } from "@/lib/engine/quality";
+import { unpaidByUnit } from "@/lib/engine/leases";
 import { portfolioIndicators } from "@/lib/engine/indicators";
 import { IndicatorTile } from "@/components/indicators";
 import { RemindersCard } from "@/components/leases";
@@ -31,9 +32,16 @@ export default function Accueil() {
 
   const steps = useMemo(() => milestones(data, projection, 6), [data, projection]);
   const issues = useMemo(() => qualityIssues(data, snap), [data, snap]);
+  const counts = issueCounts(issues);
+  // Chiffres approchés : mêmes règles que le dossier banque (mensualités estimées, charges manquantes).
+  const missingCharges = issues.filter((i) => i.id.startsWith("c-")).length;
+  const cfMark = t.unknownPayment > 0 ? "env. " : missingCharges > 0 ? "max. " : "";
+  const unpaid = useMemo(() => unpaidByUnit(data.units), [data.units]);
+  const unpaidTotal = unpaid.reduce((s, l) => s + l.amount, 0);
+  const vacantUnits = data.units.filter((u) => u.status === "vacant");
   const cf = cashflowMonthly(t);
   const loanToValue = ltv(t);
-  const sciCount = data.companies.filter((c) => c.kind !== "holding").length;
+  const companyCount = data.companies.length;
   const years = projection.years.map((r) => r.year);
   const future = projection.years.find((r) => r.year === y0 + horizon);
   const hasData = t.buildings > 0 || t.loans > 0;
@@ -98,7 +106,8 @@ export default function Accueil() {
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div className="rounded-2xl bg-white/[0.07] px-3.5 py-3 ring-1 ring-white/10">
               <div className="text-[12px] text-white/60">Valeur des biens</div>
-              <div className="tabular text-[19px] font-bold">{t.unvalued > 0 ? "—" : eurCompact(t.value)}</div>
+              <div className="tabular text-[19px] font-bold">{t.value > 0 ? `${t.unvalued > 0 ? "min. " : ""}${eurCompact(t.value)}` : "—"}</div>
+              {t.unvalued > 0 && t.value > 0 && <div className="text-[11px] text-white/55">{t.buildings - t.unvalued} bien(s) sur {t.buildings} estimé(s)</div>}
             </div>
             <div className="rounded-2xl bg-white/[0.07] px-3.5 py-3 ring-1 ring-white/10">
               <div className="text-[12px] text-white/60">Capital restant dû</div>
@@ -129,8 +138,17 @@ export default function Accueil() {
               {cf >= 0 ? <TrendingUp size={22} /> : <TrendingDown size={22} />}
             </IconChip>
             <div className="min-w-0 flex-1">
-              <div className="text-[13px] text-muted">Cash-flow mensuel</div>
-              <div className={cx("tabular text-[30px] font-extrabold leading-tight tracking-[-0.02em]", cf >= 0 ? "text-pos" : "text-neg")}>{hasData ? eurSigned(cf) : "—"}</div>
+              <div className="text-[13px] text-muted">Cash-flow locatif mensuel</div>
+              <div className={cx("tabular text-[30px] font-extrabold leading-tight tracking-[-0.02em]", cf >= 0 ? "text-pos" : "text-neg")}>
+                {hasData ? (
+                  <>
+                    {cfMark && <span className="mr-1 text-[16px] font-bold">{cfMark.trim()}</span>}
+                    {eurSigned(cf)}
+                  </>
+                ) : (
+                  "—"
+                )}
+              </div>
             </div>
             <div className="text-right">
               <div className="text-[12px] text-muted">Par an</div>
@@ -139,20 +157,33 @@ export default function Accueil() {
           </div>
           <div className="mt-4 grid grid-cols-3 gap-2">
             <FlowTile icon={<Wallet size={17} />} tone="green" label="Loyers" value={eurCompact(t.rentMonthly)} hint="/ mois" />
-            <FlowTile icon={<Landmark size={17} />} tone="blue" label="Crédits" value={eurCompact(t.paymentsMonthly)} hint={t.unknownPayment ? "incomplet" : "/ mois"} />
-            <FlowTile icon={<Receipt size={17} />} tone="gold" label="Charges" value={eurCompact(t.chargesAnnual / 12)} hint="/ mois" />
+            <FlowTile icon={<Landmark size={17} />} tone="blue" label="Crédits" value={eurCompact(rentalPayments(t))} hint={t.unknownPayment ? "dont estimés" : "/ mois"} />
+            <FlowTile icon={<Receipt size={17} />} tone="gold" label="Charges" value={eurCompact(rentalCharges(t) / 12)} hint={missingCharges ? "incomplètes" : "/ mois"} />
           </div>
-          {t.unknownPayment > 0 && (
+          {t.personalPaymentsMonthly > 0 && <div className="mt-2 text-[12px] text-muted">Hors crédit personnel (résidence principale) : {eur(Math.round(t.personalPaymentsMonthly))} / mois.</div>}
+          {(t.unknownPayment > 0 || missingCharges > 0) && (
             <Link href="/plus/a-completer" className="mt-3 flex items-center gap-2 rounded-xl bg-warn/10 px-3 py-2 text-xs font-medium text-warn">
-              <CircleAlert size={14} /> Cash-flow incomplet : {t.unknownPayment} crédit(s) sans mensualité connue.
+              <CircleAlert size={14} />
+              <span>
+                {[t.unknownPayment > 0 ? `${t.unknownPayment} mensualité(s) estimée(s) ou inconnue(s)` : "", missingCharges > 0 ? `charges non renseignées pour ${missingCharges} bien(s) (cash-flow surestimé)` : ""].filter(Boolean).join(" · ")}
+              </span>
+            </Link>
+          )}
+          {t.units > 0 && (
+            <Link href="/gestion" className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-black/[0.03] px-3 py-2.5 text-[13px]">
+              <span className="text-ink-2">
+                <b className="text-ink">{t.units - t.vacantUnits}</b> lots loués sur {t.units}
+                {vacantUnits.length > 0 && <span className="text-warn"> · {vacantUnits.length} vacant{vacantUnits.length > 1 ? "s" : ""}</span>}
+              </span>
+              <span className={cx("shrink-0 font-semibold", unpaidTotal > 0 ? "text-neg" : "text-pos")}>{unpaidTotal > 0 ? `${eur(Math.round(unpaidTotal))} impayés` : "Aucun impayé"}</span>
             </Link>
           )}
         </Card>
 
         <div className="mt-4 grid grid-cols-4 gap-2">
           {[
-            { n: sciCount, l: "Sociétés", icon: <Briefcase size={16} />, tone: "violet" as const },
-            { n: t.buildings, l: "Immeubles", icon: <Building2 size={16} />, tone: "blue" as const },
+            { n: companyCount, l: "Sociétés", icon: <Briefcase size={16} />, tone: "violet" as const },
+            { n: t.buildings, l: "Biens", icon: <Building2 size={16} />, tone: "blue" as const },
             { n: t.units, l: "Lots", icon: <DoorOpen size={16} />, tone: "green" as const },
             { n: t.loans, l: "Crédits", icon: <Landmark size={16} />, tone: "gold" as const },
           ].map((x) => (
@@ -187,10 +218,12 @@ export default function Accueil() {
         )}
 
         {issues.length > 0 && (
-          <Link href="/plus/a-completer" className="mt-4 flex items-center gap-3 rounded-2xl bg-warn/10 px-4 py-3 text-sm text-warn">
+          <Link href="/plus/a-completer" className={cx("mt-4 flex items-center gap-3 rounded-2xl px-4 py-3 text-sm", counts.important ? "bg-warn/10 text-warn" : "bg-black/[0.03] text-ink-2")}>
             <CircleAlert size={18} />
             <span className="flex-1">
-              {issues.length} élément{issues.length > 1 ? "s" : ""} à compléter pour des calculs précis
+              {counts.important
+                ? `${counts.important} point${counts.important > 1 ? "s" : ""} important${counts.important > 1 ? "s" : ""} à compléter`
+                : `Chiffres complets · ${counts.utile} information${counts.utile > 1 ? "s" : ""} utile${counts.utile > 1 ? "s" : ""} à ajouter`}
             </span>
             <ChevronRight size={16} />
           </Link>

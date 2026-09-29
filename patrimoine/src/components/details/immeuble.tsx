@@ -11,7 +11,8 @@ import { ArrowRightLeft, BadgeEuro, DoorOpen, Hammer, Landmark, Pencil } from "l
 import { useStore } from "@/lib/store";
 import { newId } from "@/lib/ops";
 import type { Unit } from "@/lib/types";
-import { cashflowMonthly, ltv, netWorth } from "@/lib/engine/snapshot";
+import { cashflowMonthly, grossYield, ltv, netWorth } from "@/lib/engine/snapshot";
+import { missingDocuments } from "@/lib/doc-completeness";
 import { monthLabel } from "@/lib/engine/dates";
 import { dateFr, eur, eurCompact, eurSigned, num, pct } from "@/lib/format";
 import { CONDITIONS, UNIT_TYPES, WORK_STATUSES, labelOf } from "@/lib/labels";
@@ -67,7 +68,9 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
   const works = data.works.filter((w) => w.buildingId === id).sort((a, b) => (a.year ?? 9999) - (b.year ?? 9999));
   const cf = cashflowMonthly(f);
   const ratio = ltv(f);
-  const grossYield = f.value > 0 ? ((f.rentMonthly * 12) / f.value) * 100 : undefined;
+  const yieldPct = grossYield(f);
+  const personal = building.usage === "residence_principale" || building.usage === "residence_secondaire";
+  const missingDocs = missingDocuments(data, { buildingId: id });
   const unit = units.find((u) => u.id === unitId);
   const work = works.find((w) => w.id === workId);
   const vacant = units.filter((u) => u.status === "vacant").length;
@@ -103,19 +106,53 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
             <Kpi label="Valeur estimée" value={f.unvalued ? <MissingData action="Estimer" onClick={() => setSheet("edit")} /> : eur(f.value)} />
             <Kpi label="Patrimoine net" value={f.unvalued ? "—" : eurCompact(netWorth(f))} />
             <Kpi label="Capital restant dû" value={eurCompact(f.debt)} hint={ratio !== undefined ? `LTV ${pct(ratio)}` : undefined} />
-            <Kpi label="Rendement brut" value={grossYield !== undefined ? pct(grossYield) : "—"} />
+            <Kpi label="Rendement brut" value={personal ? <span className="text-[15px] text-muted">Usage personnel</span> : yieldPct !== undefined ? pct(yieldPct) : "—"} />
           </div>
           <div className="mt-4 grid grid-cols-3 gap-3 border-t border-line pt-4">
             <Kpi label="Loyers" value={eurCompact(f.rentMonthly)} hint={f.potentialRentMonthly > f.rentMonthly ? `${eurCompact(f.potentialRentMonthly)} si loué` : "par mois"} />
             <Kpi label="Mensualités" value={eurCompact(f.paymentsMonthly)} hint="par mois" />
             <Kpi label="Cash-flow" value={eurSigned(cf)} tone={cf >= 0 ? "pos" : "neg"} hint="par mois" />
           </div>
-          <div className="mt-3 text-xs text-muted">Charges annuelles : {eur(f.chargesAnnual)}</div>
+          <div className={`mt-3 text-xs ${f.rentMonthly > 0 && f.chargesAnnual === 0 ? "text-warn" : "text-muted"}`}>
+            {f.rentMonthly > 0 && f.chargesAnnual === 0 ? "Charges annuelles non renseignées : cash-flow surestimé" : `Charges annuelles : ${eur(f.chargesAnnual)}`}
+          </div>
+          <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 border-t border-line pt-3 text-[12.5px] text-ink-2">
+            <span>{company ? company.name : "Détenu en direct"}</span>
+            <span>{building.acquisitionDate ? `Acheté en ${building.acquisitionDate.slice(5, 7)}/${building.acquisitionDate.slice(0, 4)}${building.acquisitionPrice ? ` · ${eurCompact(building.acquisitionPrice)}` : ""}` : "Date d'achat non renseignée"}</span>
+            {units.length > 0 && <span>{units.length} lot{units.length > 1 ? "s" : ""}{vacant ? ` · ${vacant} vacant${vacant > 1 ? "s" : ""}` : " · tous loués"}</span>}
+            {!personal && <span className={missingDocs.length ? "text-warn" : "text-pos"}>{missingDocs.length ? `Documents : ${missingDocs.map((d) => d.label).join(", ")} à ajouter` : "Documents essentiels présents"}</span>}
+          </div>
         </Card>
 
-        {/* Ordinateur : logements à gauche, financement et informations à droite. */}
+        {/* Crédits d'abord (« combien je dois encore »), puis les lots ; à droite, le reste. */}
         <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
         <div className="min-w-0">
+        <SectionTitle action={<AddLink onClick={() => setSheet("loan")} />}>Crédits</SectionTitle>
+        <Card className="py-1">
+          {loans.length === 0 ? (
+            <div className="py-3 text-sm text-muted">Aucun crédit sur cet immeuble.</div>
+          ) : (
+            <Divided>
+              {loans.map((l) => {
+                const r = snap.resolvedLoans.get(l.id);
+                const now = snap.byLoan.get(l.id);
+                return (
+                  <SwipeDelete key={l.id} items={[{ coll: "loans", id: l.id }]} message="Crédit supprimé">
+                  <Row
+                    href={`/patrimoine/credit/${l.id}`}
+                    icon={<Landmark size={18} />}
+                    title={l.name || l.bank || "Crédit"}
+                    subtitle={r?.finished ? "Terminé" : r?.endMonth !== undefined ? `Fin ${monthLabel(r.endMonth)}` : "Fin : données insuffisantes"}
+                    right={now?.balance === undefined ? "—" : eurCompact(now.balance)}
+                    rightSub={now?.paymentMonthly ? `${eur(now.paymentMonthly)}/mois` : undefined}
+                  />
+                  </SwipeDelete>
+                );
+              })}
+            </Divided>
+          )}
+        </Card>
+
         <SectionTitle
           action={
             <span className="flex items-center gap-4">
@@ -171,32 +208,6 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
 
         </div>
         <div className="min-w-0">
-        <SectionTitle action={<AddLink onClick={() => setSheet("loan")} />}>Crédits</SectionTitle>
-        <Card className="py-1">
-          {loans.length === 0 ? (
-            <div className="py-3 text-sm text-muted">Aucun crédit sur cet immeuble.</div>
-          ) : (
-            <Divided>
-              {loans.map((l) => {
-                const r = snap.resolvedLoans.get(l.id);
-                const now = snap.byLoan.get(l.id);
-                return (
-                  <SwipeDelete key={l.id} items={[{ coll: "loans", id: l.id }]} message="Crédit supprimé">
-                  <Row
-                    href={`/patrimoine/credit/${l.id}`}
-                    icon={<Landmark size={18} />}
-                    title={l.name || l.bank || "Crédit"}
-                    subtitle={r?.finished ? "Terminé" : r?.endMonth !== undefined ? `Fin ${monthLabel(r.endMonth)}` : "Fin : données insuffisantes"}
-                    right={now?.balance === undefined ? "—" : eurCompact(now.balance)}
-                    rightSub={now?.paymentMonthly ? `${eur(now.paymentMonthly)}/mois` : undefined}
-                  />
-                  </SwipeDelete>
-                );
-              })}
-            </Divided>
-          )}
-        </Card>
-
         <SectionTitle action={<AddLink onClick={() => setSheet("work")} />}>Travaux</SectionTitle>
         <Card className="py-1">
           {works.length === 0 ? (

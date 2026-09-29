@@ -33,6 +33,9 @@ export interface YearRow {
   charges: number;
   payments: number;
   cashflow: number;
+  /** Mensualités et charges de la résidence principale ou secondaire (hors cash-flow locatif). */
+  personalPayments: number;
+  personalCharges: number;
   /** Flux ponctuels de l'année (non annualisés). */
   works: number;
   withdrawals: number;
@@ -109,6 +112,8 @@ interface BuildingState {
   value?: number;
   rent0: number;
   charges0: number;
+  /** Bien à usage personnel : charges hors cash-flow locatif. */
+  personal?: boolean;
   /** Mois de référence des valeurs (croissance calculée depuis ce mois). */
   refMonth: MonthIndex;
   activeFrom: MonthIndex;
@@ -130,6 +135,8 @@ interface ProjLoan extends LoanState {
   /** Solde connu mais échéancier impossible : dette maintenue constante. */
   frozen: boolean;
   source: "real" | "plan" | "scenario";
+  /** Crédit d'un bien à usage personnel : mensualités hors cash-flow locatif. */
+  personal?: boolean;
 }
 
 function emptyRow(year: number): YearRow {
@@ -143,6 +150,8 @@ function emptyRow(year: number): YearRow {
     charges: 0,
     payments: 0,
     cashflow: 0,
+    personalPayments: 0,
+    personalCharges: 0,
     works: 0,
     withdrawals: 0,
     business: 0,
@@ -199,6 +208,7 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
       charges0: buildingChargesAnnual(b),
       refMonth: nowMonth,
       activeFrom: acqMonth,
+      personal: b.usage === "residence_principale" || b.usage === "residence_secondaire",
     };
   });
 
@@ -233,6 +243,10 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
       paymentOnly,
       frozen,
       source: "real",
+      personal: (() => {
+        const b = loan.buildingId ? buildingsById.get(loan.buildingId) : undefined;
+        return b?.usage === "residence_principale" || b?.usage === "residence_secondaire";
+      })(),
     });
   }
 
@@ -659,7 +673,8 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
       const rent = m < (b.rentFrom ?? b.activeFrom) ? 0 : b.rent0 * growth(settings.rentGrowthPct, b.refMonth, m);
       const charges = (b.charges0 / 12) * growth(settings.chargesGrowthPct, b.refMonth, m);
       row.rent += rent;
-      row.charges += charges;
+      if (b.personal) row.personalCharges += charges;
+      else row.charges += charges;
       addTreasury(b.companyKey, rent - charges);
     }
 
@@ -672,7 +687,8 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
           continue;
         }
         const pay = l.paymentOnly ? l.payment + l.insurance : 0;
-        row.payments += pay;
+        if (l.personal) row.personalPayments += pay;
+        else row.payments += pay;
         addTreasury(l.companyKey, -pay);
         if (l.endMonth !== undefined && m === l.endMonth) {
           l.active = false;
@@ -686,7 +702,8 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
         continue;
       }
       const p = stepLoan(l, m);
-      row.payments += p.regular;
+      if (l.personal) row.personalPayments += p.regular;
+      else row.payments += p.regular;
       row.balloons += p.balloon;
       addTreasury(l.companyKey, -(p.regular + p.balloon));
       if (p.ended) {
@@ -767,6 +784,8 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
       first.rent *= scale;
       first.charges *= scale;
       first.payments *= scale;
+      first.personalPayments *= scale;
+      first.personalCharges *= scale;
     }
     for (const row of list) row.cashflow = row.rent - row.charges - row.payments;
   }
