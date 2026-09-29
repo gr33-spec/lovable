@@ -15,7 +15,7 @@ import {
   verifyTotp,
 } from "./crypto";
 import { query, queryOne, transaction } from "./db";
-import { isProduction } from "./env";
+import { secureCookies } from "./env";
 import { audit } from "./monitoring";
 import { hit, ipFromHeaders, resetBucket } from "./rate-limit";
 
@@ -27,7 +27,7 @@ import { hit, ipFromHeaders, resetBucket } from "./rate-limit";
 //  - limitation des essais par adresse IP et par compte ;
 //  - double authentification (code à 6 chiffres) facultative.
 
-export const SESSION_COOKIE = isProduction() ? "__Host-bp_admin" : "bp_admin";
+export const SESSION_COOKIE = secureCookies() ? "__Host-bp_admin" : "bp_admin";
 const SESSION_DAYS = 30;
 const IDLE_DAYS = 7;
 const SESSION_PURPOSE = "admin-session";
@@ -42,7 +42,7 @@ export interface AdminUser {
 }
 
 function cookieOptions(maxAgeSeconds: number) {
-  return { httpOnly: true, secure: isProduction(), sameSite: "lax" as const, path: "/", maxAge: maxAgeSeconds };
+  return { httpOnly: true, secure: secureCookies(), sameSite: "lax" as const, path: "/", maxAge: maxAgeSeconds };
 }
 
 async function requestContext() {

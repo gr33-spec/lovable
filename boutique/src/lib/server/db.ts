@@ -28,7 +28,8 @@ export function pool(): Pool {
       max: Number(process.env.DATABASE_POOL_MAX ?? 4),
       idleTimeoutMillis: 10_000,
       connectionTimeoutMillis: 8_000,
-      statement_timeout: 15_000,
+      // Délai côté client (compatible avec le « pooler » de Supabase, qui refuse certains paramètres de connexion).
+      query_timeout: 15_000,
     });
     globalForDb.boutiquePool.on("error", (err) => console.error("[db] erreur de connexion inactive", err.message));
   }

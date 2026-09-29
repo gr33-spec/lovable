@@ -10,6 +10,7 @@ import { paymentConfig } from "@/lib/server/env";
 import { runQuickMaintenance } from "@/lib/server/maintenance";
 import { missingLegalInfo } from "@/lib/server/settings";
 import { query } from "@/lib/server/db";
+import { hasPlaceholders } from "@/lib/rich-text";
 
 export const metadata = { title: "Tableau de bord" };
 
@@ -21,11 +22,15 @@ export default async function Dashboard() {
   const payment = paymentConfig();
   const missing = missingLegalInfo(settings);
   const shipping = await query<{ n: string }>("SELECT count(*) AS n FROM shipping_method WHERE is_active");
+  const legalPages = await query<{ body: string }>("SELECT body FROM legal_page");
+  const pagesToComplete = legalPages.filter((p) => hasPlaceholders(p.body)).length;
   const products = await query<{ n: string }>("SELECT count(*) AS n FROM product WHERE status = 'published'");
   const setup = [
     { done: Number(products[0].n) > 0, label: "Publier une première création", href: "/admin/produits/nouveau" },
     { done: Number(shipping[0].n) > 0, label: "Activer au moins un mode de livraison", href: "/admin/livraison" },
     { done: missing.length === 0, label: `Compléter les informations légales${missing.length ? ` (${missing.length} manquantes)` : ""}`, href: "/admin/parametres" },
+    { done: pagesToComplete === 0, label: `Compléter les pages légales (CGV, confidentialité…)${pagesToComplete ? ` — ${pagesToComplete} à finir` : ""}`, href: "/admin/parametres#pages" },
+    { done: !hasPlaceholders(settings.aboutText), label: "Écrire votre présentation (page « L'atelier »)", href: "/admin/apparence" },
     { done: payment.ok && payment.provider === "stripe", label: "Connecter le compte Stripe", href: "/admin/parametres#paiement" },
   ];
   const setupLeft = setup.filter((s) => !s.done);

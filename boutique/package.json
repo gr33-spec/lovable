@@ -12,8 +12,8 @@
     "test": "BOUTIQUE_TEST=1 tsx --conditions=react-server --test --test-concurrency=1 tests/*.test.ts",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx --conditions=react-server scripts/seed.ts",
-    
-    "db:restore": "tsx --conditions=react-server scripts/restore.ts"
+    "db:restore": "tsx --conditions=react-server scripts/restore.ts",
+    "test:e2e": "node e2e/parcours.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.48.0",
@@ -39,5 +39,8 @@
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">=20.9"
   }
 }

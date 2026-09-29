@@ -44,7 +44,9 @@ export function paymentConfig(): PaymentConfig {
   const provider = process.env.PAYMENT_PROVIDER ?? "stripe";
   const env = deployEnv();
   if (provider === "fake") {
-    if (env === "production") return { ok: false, reason: "Le simulateur de paiement est interdit en production." };
+    // Interdit en production ET sur toute plateforme en ligne (préproductions Vercel comprises) :
+    // n'importe qui pourrait y « payer » une commande sans argent.
+    if (env === "production" || process.env.VERCEL) return { ok: false, reason: "Le simulateur de paiement est réservé au développement local." };
     return { ok: true, provider: "fake", mode: "test" };
   }
   if (provider !== "stripe") return { ok: false, reason: `Fournisseur de paiement inconnu : ${provider}` };
@@ -70,6 +72,11 @@ export function paymentConfig(): PaymentConfig {
 export function isTestModeInProduction(): boolean {
   const cfg = paymentConfig();
   return isProduction() && cfg.ok && cfg.mode === "test";
+}
+
+/** Cookies « Secure » dès que le site est servi en HTTPS (production et préproduction). */
+export function secureCookies(): boolean {
+  return process.env.NODE_ENV === "production" && siteUrl().startsWith("https://");
 }
 
 export function cronSecret(): string | undefined {
