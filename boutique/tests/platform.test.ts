@@ -112,7 +112,12 @@ describe("cryptographie et authentification", () => {
     assert.equal(readShortLived(s, "x"), "admin-1");
     assert.equal(readShortLived(s, "y"), null);
     assert.equal(readShortLived(s, "x", Date.now() + 2000), null, "expiré");
-    assert.equal(readShortLived(s.replace(/.$/, "A"), "x"), null);
+    const last = s.at(-1)!;
+    for (const c of ["A", "B", "C", "D", "Q", "g", "w"].filter((x) => x !== last)) {
+      assert.equal(readShortLived(s.slice(0, -1) + c, "x"), null, `signature modifiée (${c})`);
+    }
+    const mid = s.length - 10;
+    assert.equal(readShortLived(s.slice(0, mid) + (s[mid] === "A" ? "B" : "A") + s.slice(mid + 1), "x"), null);
   });
 });
 
