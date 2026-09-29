@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 // Historique de navigation réel. Chaque entrée de l'historique du navigateur
 // porte un rang (__idx) et une clé (__key) :
@@ -193,7 +193,9 @@ export function rootSection(pathname: string, search = ""): Section | null {
  */
 export function useSection(): Section {
   const pathname = usePathname();
-  const root = rootSection(pathname, typeof window === "undefined" ? "" : location.search);
+  // Paramètres du nouvel écran (l'adresse du navigateur n'est mise à jour qu'après l'affichage).
+  const search = useSearchParams().toString();
+  const root = rootSection(pathname, search);
   if (root) return root;
   if (typeof window === "undefined" || !hydrated) return "patrimoine";
   return (saved.state[`${curKey()}|§`] as Section | undefined) ?? lastSection ?? "patrimoine";

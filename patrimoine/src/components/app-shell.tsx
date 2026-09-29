@@ -10,6 +10,7 @@ import { missingCount } from "@/lib/missing";
 import { cx } from "./ui";
 import { ToastHost } from "./swipe";
 import { PdfViewerHost } from "./pdf-viewer";
+import { syncFromSchedules } from "@/lib/schedule";
 import { afterRouteChange, installNavigation, useSection, type Section } from "@/lib/nav";
 
 const TABS: { href: string; label: string; icon: typeof House; section: Section }[] = [
@@ -18,6 +19,22 @@ const TABS: { href: string; label: string; icon: typeof House; section: Section 
   { href: "/gestion", label: "Gestion", icon: KeyRound, section: "gestion" },
   { href: "/plus", label: "Plus", icon: Ellipsis, section: "plus" },
 ];
+
+/**
+ * Tableaux d'amortissement : les fiches des crédits (capital restant dû,
+ * caractéristiques) et la date d'acquisition de l'immeuble suivent les
+ * tableaux enregistrés, y compris ceux importés avant, et chaque nouveau mois.
+ */
+function ScheduleSync() {
+  const { data, nowMonth, role, upsertMany } = useStore();
+  useEffect(() => {
+    if (role !== "owner") return;
+    const { loans, buildings } = syncFromSchedules(data, nowMonth);
+    if (loans.length + buildings.length === 0) return;
+    upsertMany([...loans.map((item) => ({ coll: "loans" as const, item })), ...buildings.map((item) => ({ coll: "buildings" as const, item }))]);
+  }, [data, nowMonth, role, upsertMany]);
+  return null;
+}
 
 /** Historique de navigation : rang des écrans, défilement et état restitués au retour. */
 function NavTracker() {
@@ -71,6 +88,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Suspense>
         <NavTracker />
       </Suspense>
+      <ScheduleSync />
       {role === "lecture" && <ReadOnlyBanner />}
       <div className={cx(!onboarding && "lg:pl-60")}>{children}</div>
       <ToastHost />
