@@ -1,9 +1,17 @@
-name: CI
+name: CI BatiClair
 
+# Uniquement l'application BatiClair (dossier baticlair/).
+# patrimoine/ est une autre application, non concernée.
 on:
   pull_request:
+    paths: ["baticlair/**", ".github/workflows/ci.yml"]
   push:
     branches: [main]
+    paths: ["baticlair/**", ".github/workflows/ci.yml"]
+
+defaults:
+  run:
+    working-directory: baticlair
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -32,10 +40,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: baticlair/package.json
       - uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
+          node-version-file: baticlair/.nvmrc
           cache: pnpm
+          cache-dependency-path: baticlair/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm turbo run lint typecheck test build
 
@@ -60,10 +71,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: baticlair/package.json
       - uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
+          node-version-file: baticlair/.nvmrc
           cache: pnpm
+          cache-dependency-path: baticlair/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @baticlair/web exec playwright install --with-deps chromium
       - run: pnpm turbo run build --filter=@baticlair/web

@@ -8,5 +8,5 @@ coverage/
 !.env.example
 .DS_Store
 *.log
-# Client Prisma généré (voir le script "postinstall" de apps/api)
-apps/api/src/generated/
+# Client Prisma généré (voir le script "postinstall" de baticlair/apps/api)
+baticlair/apps/api/src/generated/
