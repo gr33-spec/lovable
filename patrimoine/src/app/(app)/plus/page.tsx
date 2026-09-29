@@ -62,6 +62,7 @@ export default function PlusPage() {
         <SectionTitle>Analyser</SectionTitle>
         <Card className="py-1">
           <Divided>
+            <Row href="/plus/analyse" icon={<Sparkles size={18} />} title="Analyse IA" subtitle="Diagnostic et pistes de réinvestissement" />
             <Row href="/plus/indicateurs" icon={<Gauge size={18} />} title="Indicateurs financiers" subtitle="DSCR, rendement, LTV, CAF…" />
             <Row href="/plus/historique" icon={<LineIcon size={18} />} title="Historique et plus-values" subtitle="Valeurs passées, plus-values latentes" />
             <Row href="/chronologie" icon={<CalendarRange size={18} />} title="Chronologie" subtitle="30 ans d'échéances · vos événements" />

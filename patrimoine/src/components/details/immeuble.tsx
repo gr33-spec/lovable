@@ -1,5 +1,6 @@
 "use client";
 
+import { AnalysisEntry } from "@/components/analysis/entry";
 import { companyCrumbs } from "@/lib/crumbs";
 import { goBack } from "@/lib/nav";
 import { Suspense, useState } from "react";
@@ -238,6 +239,8 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
         </Card>
         <SaleSheet sale={selling ?? undefined} open={!!selling} onClose={() => setSelling(null)} />
         <SwapNumbersSheet units={units} open={moving} onClose={() => setMoving(false)} />
+
+        <AnalysisEntry scope={{ type: "building", id: building.id }} title="Analyse IA de cet immeuble" />
 
         <SectionTitle>Informations</SectionTitle>
         <Card className="space-y-1.5 text-[15px]">

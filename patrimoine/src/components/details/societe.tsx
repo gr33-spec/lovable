@@ -1,5 +1,6 @@
 "use client";
 
+import { AnalysisEntry } from "@/components/analysis/entry";
 import { companyCrumbs } from "@/lib/crumbs";
 import { goBack } from "@/lib/nav";
 import Link from "next/link";
@@ -208,6 +209,8 @@ export function CompanyDetail({ id }: { id: string }) {
 
         {(company.partners?.length || company.taxRegime || company.notes) && (
           <>
+            <AnalysisEntry scope={{ type: "company", id: company.id }} title="Analyse IA de cette société" />
+
             <SectionTitle>Informations</SectionTitle>
             <Card className="space-y-2 text-[15px]">
               {company.partners?.map((p, i) => (

@@ -6,7 +6,7 @@ import { accessState } from "./access";
 import { shareActive } from "./shares";
 
 /** Routes jamais ouvertes en consultation, même en lecture (export complet, accès, sauvegardes). */
-const LECTURE_DENIED = ["/api/backup", "/api/export-excel", "/api/shares", "/api/access", "/api/passkey", "/api/snapshots", "/api/bilans"];
+const LECTURE_DENIED = ["/api/analyse", "/api/backup", "/api/export-excel", "/api/shares", "/api/access", "/api/passkey", "/api/snapshots", "/api/bilans"];
 
 /** Session en cours, révocation de l'accès gestion comprise. */
 export async function currentSession(): Promise<SessionInfo | null> {

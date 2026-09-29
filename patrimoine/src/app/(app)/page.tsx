@@ -1,5 +1,6 @@
 "use client";
 
+import { AnalysisEntry } from "@/components/analysis/entry";
 import { usePageState } from "@/lib/nav";
 import Link from "next/link";
 import { useMemo } from "react";
@@ -119,6 +120,7 @@ export default function Accueil() {
         </div>
 
         <RemindersCard items={alerts} />
+        <AnalysisEntry scope={{ type: "global" }} />
 
         {/* Flux */}
         <Card className="mt-4">
