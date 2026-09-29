@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, ExternalLink, ImagePlus, Loader2, Minus, Plus, S
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState, useTransition } from "react";
-import { deleteProductAction, saveProductAction } from "@/app/admin/actions";
+import { deleteProductAction, saveGroupAction, saveProductAction } from "@/app/admin/actions";
 import { formatPrice, slugify } from "@/lib/format";
 import { imageSrc, type ImageRef } from "@/lib/image-ref";
 import { parseEuros, PRODUCT_COLORS } from "@/lib/validation";
@@ -40,7 +40,7 @@ const euros = (cents: number | null) => (cents === null ? "" : (cents / 100).toF
 export function ProductEditor({
   initial,
   isNew,
-  categories,
+  categories: initialCategories,
   collections,
 }: {
   initial: EditorProduct;
@@ -60,6 +60,26 @@ export function ProductEditor({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  const [categories, setCategories] = useState(initialCategories);
+  const [newCategory, setNewCategory] = useState<string | null>(null);
+  const [creatingCategory, startCreatingCategory] = useTransition();
+
+  function createCategory() {
+    const name = (newCategory ?? "").trim();
+    if (!name) return;
+    startCreatingCategory(async () => {
+      const res = await saveGroupAction("category", { name, slug: "", description: "", isVisible: true });
+      if (!res.ok) {
+        setErrors((e) => ({ ...e, categoryId: res.fieldErrors?.name ?? res.error }));
+        return;
+      }
+      setCategories((list) => [...list, { id: res.id, name }]);
+      update("categoryId", res.id);
+      setErrors((prev) => Object.fromEntries(Object.entries(prev).filter(([k]) => k !== "categoryId")));
+      setNewCategory(null);
+      toast(`Catégorie « ${name} » créée.`);
+    });
+  }
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -381,12 +401,35 @@ export function ProductEditor({
               ))}
             </select>
             {errors.categoryId && <p className="field-error">{errors.categoryId}</p>}
-            {categories.length === 0 && (
-              <p className="field-hint">
-                <Link href="/admin/categories" className="text-primary underline">
-                  Créer une catégorie
-                </Link>
-              </p>
+            {newCategory === null ? (
+              <button type="button" className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-primary" onClick={() => setNewCategory("")}>
+                <Plus size={15} /> Nouvelle catégorie (broches, bracelets…)
+              </button>
+            ) : (
+              <div className="mt-2 flex gap-2">
+                <input
+                  className="input flex-1"
+                  aria-label="Nom de la nouvelle catégorie"
+                  placeholder="Ex. : Broches"
+                  maxLength={80}
+                  value={newCategory}
+                  autoFocus
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      createCategory();
+                    }
+                    if (e.key === "Escape") setNewCategory(null);
+                  }}
+                />
+                <button type="button" className="btn btn-primary" disabled={creatingCategory || !newCategory.trim()} onClick={createCategory}>
+                  {creatingCategory ? <Loader2 size={16} className="animate-spin" /> : "Créer"}
+                </button>
+                <button type="button" className="btn btn-outline btn-icon" aria-label="Annuler" onClick={() => setNewCategory(null)}>
+                  <X size={16} />
+                </button>
+              </div>
             )}
           </div>
           <div>

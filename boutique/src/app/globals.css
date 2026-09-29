@@ -36,7 +36,7 @@
   --radius-card: 18px;
   --shadow-soft: 0 1px 2px rgb(46 42 36 / 0.04), 0 8px 24px -12px rgb(46 42 36 / 0.12);
   --shadow-lift: 0 2px 4px rgb(46 42 36 / 0.05), 0 18px 40px -18px rgb(46 42 36 / 0.25);
-  --header-h: 60px;
+  --header-h: 64px;
 }
 
 @theme inline {
@@ -415,5 +415,179 @@
   }
   body {
     background: #fff;
+  }
+}
+
+/* ═════════════ Touches « paillettes » (sobres, sans image, désactivées si l'utilisateur limite les animations) ═════════════ */
+
+/* Mot mis en valeur dans un titre : reflet nacré qui glisse lentement. */
+.text-shimmer {
+  color: var(--c-accent);
+  background: linear-gradient(100deg, var(--c-accent) 0%, color-mix(in srgb, var(--c-accent) 55%, #fff) 22%, var(--c-primary) 45%, color-mix(in srgb, var(--c-accent) 70%, #f3c8d8) 68%, var(--c-accent) 100%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer-text 7s ease-in-out infinite;
+  font-style: italic;
+  /* L'italique déborde à droite : on laisse de la place au dégradé. */
+  padding-right: 0.12em;
+  margin-right: -0.06em;
+}
+@keyframes shimmer-text {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Fond « poussière d'or » : de minuscules points dorés, comme des paillettes prises dans la résine. */
+.glitter-dust {
+  background-image:
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--c-accent) 55%, transparent) 0 1.2px, transparent 1.6px),
+    radial-gradient(circle at 78% 32%, color-mix(in srgb, var(--c-accent) 45%, transparent) 0 1px, transparent 1.4px),
+    radial-gradient(circle at 42% 72%, color-mix(in srgb, var(--c-primary) 35%, transparent) 0 1px, transparent 1.4px),
+    radial-gradient(circle at 88% 84%, color-mix(in srgb, var(--c-accent) 50%, transparent) 0 1.3px, transparent 1.7px),
+    radial-gradient(circle at 25% 90%, color-mix(in srgb, var(--c-accent) 40%, transparent) 0 0.9px, transparent 1.3px);
+  background-size: 140px 140px, 190px 190px, 230px 230px, 170px 170px, 110px 110px;
+}
+
+/* Étoile scintillante décorative. */
+.twinkle {
+  animation: twinkle 3.2s ease-in-out infinite;
+  transform-origin: center;
+}
+.twinkle.delay-1 {
+  animation-delay: 0.8s;
+}
+.twinkle.delay-2 {
+  animation-delay: 1.6s;
+}
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.7) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(20deg);
+  }
+}
+
+/* Reflet holographique qui traverse une photo au survol (comme la lumière sur la résine). */
+.holo-shine {
+  position: relative;
+  isolation: isolate;
+}
+.holo-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgb(255 255 255 / 0.05) 38%, rgb(255 236 250 / 0.35) 46%, rgb(214 240 255 / 0.3) 52%, rgb(255 246 214 / 0.3) 58%, transparent 66%);
+  background-size: 250% 100%;
+  background-position: 120% 0;
+  mix-blend-mode: soft-light;
+  transition: background-position 0.9s ease;
+  z-index: 2;
+}
+.group:hover .holo-shine::after,
+.holo-shine:hover::after {
+  background-position: -30% 0;
+}
+
+/* Contour irisé au survol. */
+.holo-ring {
+  position: relative;
+}
+.holo-ring::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(from 180deg, var(--c-accent), #f2c6d6, #bfe3f2, #f6e3b0, var(--c-primary), var(--c-accent));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.group:hover .holo-ring::before,
+.holo-ring:hover::before {
+  opacity: 1;
+}
+
+/* Bandeau défilant. */
+.marquee {
+  display: flex;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.marquee-track {
+  display: flex;
+  flex-shrink: 0;
+  gap: 2.5rem;
+  padding-right: 2.5rem;
+  animation: marquee 32s linear infinite;
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+/* Bouton principal : léger éclat au survol. */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 0.28) 50%, transparent 65%);
+  transform: translateX(-120%);
+  transition: transform 0.7s ease;
+}
+.btn-primary:hover:not(:disabled)::after {
+  transform: translateX(120%);
+}
+
+/* Défilement horizontal au doigt (rails de produits). */
+.rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 68%;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.rail::-webkit-scrollbar {
+  display: none;
+}
+.rail > * {
+  scroll-snap-align: start;
+}
+@media (min-width: 640px) {
+  .rail {
+    grid-auto-columns: 40%;
+  }
+}
+@media (min-width: 1024px) {
+  .rail {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+    overflow: visible;
   }
 }

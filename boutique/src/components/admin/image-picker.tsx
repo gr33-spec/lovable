@@ -19,7 +19,7 @@ export function ImagePicker({ label, hint, value, onChange, round = false }: { l
             <Loader2 className="animate-spin text-primary" aria-label="Envoi en cours" />
           ) : value ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={imageSrc(value, 320)} alt="" className="h-full w-full object-cover" />
+            <img src={imageSrc(value, 320)} alt="" className="h-full w-full object-contain" />
           ) : (
             <ImagePlus className="text-text-2" aria-hidden="true" />
           )}

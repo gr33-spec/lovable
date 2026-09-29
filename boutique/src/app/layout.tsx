@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { getSettings } from "@/lib/server/cached";
 import { isTestModeInProduction, siteUrl } from "@/lib/server/env";
 import { getTheme, themeCss } from "@/lib/themes";
+import { plainText } from "@/components/ui/sparkle";
 import "./globals.css";
 
 // Polices auto-hébergées au moment de la construction : aucune requête vers
@@ -24,11 +25,12 @@ export async function generateMetadata(): Promise<Metadata> {
   await connection();
   const s = await safeSettings();
   const name = s?.shopName ?? "La Bohème en Paillettes";
-  const description = s?.tagline ? `${s.tagline}. ${s.introText}`.slice(0, 160) : "Bijoux en résine pailletée, faits main.";
+  const tagline = s?.tagline ? plainText(s.tagline) : "";
+  const description = tagline ? `${tagline}. ${s?.introText ?? ""}`.slice(0, 160) : "Bijoux en résine pailletée, faits main.";
   const favicon = s?.favicon ?? s?.logo;
   return {
     metadataBase: new URL(siteUrl()),
-    title: { default: `${name} — ${s?.tagline || "Bijoux faits main"}`, template: `%s — ${name}` },
+    title: { default: `${name} — ${tagline || "Bijoux faits main"}`, template: `%s — ${name}` },
     description,
     applicationName: name,
     openGraph: { type: "website", locale: "fr_FR", siteName: name },

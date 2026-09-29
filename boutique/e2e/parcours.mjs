@@ -217,7 +217,7 @@ await step("Commande : préparation puis expédition avec suivi, e-mail à la cl
 const photo = (color) =>
   execSync(`node -e "require('sharp')({create:{width:1600,height:1200,channels:3,background:'${color}'}}).jpeg().toBuffer().then(b=>process.stdout.write(b))"`, { cwd: new URL("..", import.meta.url).pathname });
 
-await step("Nouvelle création depuis le téléphone : 2 photos, principale choisie, publiée", async () => {
+await step("Nouvelle création depuis le téléphone : 2 photos, principale choisie, nouvelle catégorie, publiée", async () => {
   await admin.goto(`${BASE}/admin/produits/nouveau`);
   const chooser = admin.waitForEvent("filechooser");
   await admin.getByRole("button", { name: "Ajouter des photos" }).click();
@@ -230,7 +230,12 @@ await step("Nouvelle création depuis le téléphone : 2 photos, principale choi
   await admin.getByRole("button", { name: "Choisir la photo 2 comme principale" }).click();
   await admin.locator("#field-name").fill("Boucles Soleil Test E2E");
   await admin.locator("#field-priceCents").fill("26,50");
-  await admin.locator("#field-categoryId").selectOption({ label: "Boucles d'oreilles" });
+  // Nouvelle catégorie créée sans quitter la fiche (ex. : des broches).
+  await admin.getByRole("button", { name: /Nouvelle catégorie/ }).click();
+  await admin.getByLabel("Nom de la nouvelle catégorie").fill("Broches");
+  await admin.getByRole("button", { name: "Créer", exact: true }).click();
+  await admin.getByText("Catégorie « Broches » créée.").waitFor();
+  assert.equal(await admin.locator("#field-categoryId option:checked").textContent(), "Broches");
   await admin.getByRole("button", { name: "Ajouter une pièce" }).click();
   await admin.screenshot({ path: `${SHOTS}07-admin-produit.png`, fullPage: true });
   await admin.getByRole("button", { name: "Publier" }).click();
@@ -239,8 +244,11 @@ await step("Nouvelle création depuis le téléphone : 2 photos, principale choi
   assert.equal(sql("SELECT status || '/' || stock || '/' || price_cents FROM product WHERE name = 'Boucles Soleil Test E2E'"), "published/2/2650");
 });
 
-await step("Le produit apparaît immédiatement dans la boutique", async () => {
+await step("Le produit apparaît immédiatement dans la boutique, dans sa nouvelle catégorie", async () => {
   await page.goto(`${BASE}/boutique`);
+  await page.getByText("Boucles Soleil Test E2E").waitFor();
+  await page.goto(`${BASE}/boutique/broches`);
+  await page.getByRole("heading", { name: "Broches" }).first().waitFor();
   await page.getByText("Boucles Soleil Test E2E").waitFor();
 });
 

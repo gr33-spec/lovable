@@ -50,8 +50,10 @@ export function readShortLived(token: string | undefined, purpose: string, now =
   if (!token) return null;
   const [payload, sig] = token.split(".");
   if (!payload || !sig) return null;
-  const expected = createHmac("sha256", derivedKey(`sig|${purpose}`)).update(payload).digest();
-  const given = Buffer.from(sig, "base64url");
+  // Comparaison sur le texte exact : une variante d'encodage (derniers bits
+  // base64 ignorés au décodage) n'est pas acceptée.
+  const expected = Buffer.from(createHmac("sha256", derivedKey(`sig|${purpose}`)).update(payload).digest("base64url"));
+  const given = Buffer.from(sig);
   if (given.length !== expected.length || !timingSafeEqual(given, expected)) return null;
   try {
     const { v, exp } = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));

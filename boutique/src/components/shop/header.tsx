@@ -14,13 +14,19 @@ interface NavCategory {
 }
 
 function Brand({ name, logo }: { name: string; logo: ImageRef | null }) {
+  // Logo horizontal (nom dessiné) : affiché seul, en grand. Logo rond ou carré : à côté du nom.
+  const wide = logo ? logo.w / logo.h >= 1.6 : false;
   return (
     <Link href="/" className="flex min-w-0 items-center gap-2.5 no-underline" aria-label={`${name} — accueil`}>
-      {logo && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={imageSrc(logo, 160)} alt="" width={40} height={40} className="h-9 w-9 shrink-0 rounded-full sm:h-10 sm:w-10 object-cover" />
-      )}
-      <span className="truncate font-serif text-[1.15rem] leading-none font-semibold tracking-tight min-[400px]:text-[1.3rem] sm:text-2xl">{name}</span>
+      {logo &&
+        (wide ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={imageSrc(logo, 640)} alt={name} height={44} className="h-9 w-auto max-w-[200px] object-contain sm:h-11 sm:max-w-[260px]" />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={imageSrc(logo, 320)} alt="" width={48} height={48} className="h-10 w-10 shrink-0 rounded-full object-cover shadow-soft ring-1 ring-border sm:h-12 sm:w-12" />
+        ))}
+      {!wide && <span className="truncate font-serif text-[1.2rem] leading-none font-semibold tracking-tight min-[400px]:text-[1.35rem] sm:text-2xl">{name}</span>}
     </Link>
   );
 }
@@ -57,6 +63,11 @@ export function Header({ shopName, logo, categories }: { shopName: string; logo:
     { href: "/boutique?tri=nouveautes", label: "Nouveautés" },
     { href: "/a-propos", label: "L'atelier" },
   ];
+  // Au-delà de 3 catégories, la barre du haut (ordinateur) n'affiche que les
+  // 3 premières ; toutes restent dans le menu, dont le bouton reste visible.
+  const MAX_TOP = 3;
+  const many = categories.length > MAX_TOP;
+  const topLinks = many ? links.filter((l) => !categories.slice(MAX_TOP).some((c) => l.href === `/boutique/${c.slug}`)) : links;
   const isActive = (href: string) => (href === "/boutique" ? pathname === "/boutique" : pathname === href.split("?")[0] && !href.includes("?"));
 
   const submitSearch = (e: React.FormEvent) => {
@@ -71,9 +82,9 @@ export function Header({ shopName, logo, categories }: { shopName: string; logo:
       <a href="#contenu" className="sr-only z-50 rounded-full bg-primary px-4 py-2 text-on-primary focus:not-sr-only focus:fixed focus:top-2 focus:left-2">
         Aller au contenu
       </a>
-      <header className="sticky top-0 z-30 border-b border-border/70 bg-bg/90 backdrop-blur-md supports-[backdrop-filter]:bg-bg/80">
+      <header className="sticky top-0 z-30 border-b border-border/60 bg-bg/85 backdrop-blur-xl supports-[backdrop-filter]:bg-bg/70">
         <div className="container-page flex h-[var(--header-h)] items-center gap-2">
-          <button type="button" className="btn btn-ghost btn-icon -ml-2 lg:hidden" aria-label="Ouvrir le menu" onClick={() => menuRef.current?.showModal()}>
+          <button type="button" className={`btn btn-ghost btn-icon -ml-2 ${many ? "" : "lg:hidden"}`} aria-label="Ouvrir le menu" onClick={() => menuRef.current?.showModal()}>
             <Menu size={22} />
           </button>
           <div className="min-w-0 flex-1 lg:flex-none">
@@ -81,12 +92,12 @@ export function Header({ shopName, logo, categories }: { shopName: string; logo:
           </div>
           <nav aria-label="Navigation principale" className="mx-auto hidden lg:block">
             <ul className="flex items-center gap-1">
-              {links.map((l) => (
+              {topLinks.map((l) => (
                 <li key={l.href}>
                   <Link
                     href={l.href}
                     aria-current={isActive(l.href) ? "page" : undefined}
-                    className="rounded-full px-3.5 py-2 text-[15px] font-medium no-underline transition-colors hover:bg-secondary aria-[current=page]:text-primary"
+                    className="rounded-full px-3.5 py-2 text-[15px] font-medium whitespace-nowrap no-underline transition-colors hover:bg-secondary aria-[current=page]:text-primary"
                   >
                     {l.label}
                   </Link>
@@ -119,7 +130,7 @@ export function Header({ shopName, logo, categories }: { shopName: string; logo:
       >
         <div className="flex h-full flex-col">
           <div className="flex h-[var(--header-h)] items-center justify-between border-b border-border px-4">
-            <span className="font-serif text-xl">{shopName}</span>
+            <Brand name={shopName} logo={logo} />
             <button type="button" className="btn btn-ghost btn-icon -mr-2" aria-label="Fermer le menu" onClick={() => menuRef.current?.close()}>
               <X size={22} />
             </button>
@@ -159,7 +170,7 @@ export function Header({ shopName, logo, categories }: { shopName: string; logo:
             type="search"
             enterKeyHint="search"
             autoComplete="off"
-            placeholder="Fleurs, doré, pendentif…"
+            placeholder="Fleurs, doré, broche…"
             className="min-h-12 flex-1 bg-transparent px-2 outline-none"
             value={q}
             onChange={(e) => setQ(e.target.value)}

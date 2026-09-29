@@ -2,6 +2,7 @@ import Link from "next/link";
 import { formatPrice } from "@/lib/format";
 import type { Availability, ProductCard as Card } from "@/lib/server/catalog";
 import { Img } from "../ui/img";
+import { Sparkle } from "../ui/sparkle";
 
 export function Price({ cents, compareAt, size = "md" }: { cents: number; compareAt?: number | null; size?: "md" | "lg" }) {
   return (
@@ -29,7 +30,7 @@ export function ProductCard({ product, priority = false }: { product: Card; prio
   return (
     <article className="group relative">
       <Link href={`/produit/${product.slug}`} className="block no-underline" aria-label={`${product.name}, ${formatPrice(product.priceCents)}${soldOut ? ", épuisé" : ""}`}>
-        <div className="relative aspect-[4/5] overflow-hidden rounded-[var(--radius-card)] bg-secondary shadow-soft">
+        <div className="holo-shine relative aspect-[4/5] overflow-hidden rounded-[24px] bg-secondary shadow-soft transition-shadow duration-500 group-hover:shadow-lift">
           <Img
             image={product.image}
             alt={product.image?.alt || product.name}
@@ -46,13 +47,17 @@ export function ProductCard({ product, priority = false }: { product: Card; prio
             />
           )}
           <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5">
-            {product.isNew && !soldOut && <span className="badge bg-surface/95 text-text shadow-soft">Nouveau</span>}
+            {product.isNew && !soldOut && (
+              <span className="badge gap-1 bg-surface/95 text-text shadow-soft backdrop-blur">
+                <Sparkle size={10} className="text-accent" /> Nouveau
+              </span>
+            )}
             <AvailabilityBadge availability={product.availability} stock={product.stock} />
           </div>
         </div>
-        <div className="mt-3 px-0.5">
-          <h3 className="font-sans text-[15px] leading-snug font-medium">{product.name}</h3>
-          <div className="mt-1 text-[15px]">
+        <div className="mt-3.5 px-1">
+          <h3 className="font-serif text-[1.2rem] leading-tight font-medium transition-colors group-hover:text-primary">{product.name}</h3>
+          <div className="mt-1 text-[15px] text-text-2">
             <Price cents={product.priceCents} compareAt={product.compareAtCents} />
           </div>
         </div>
@@ -63,7 +68,7 @@ export function ProductCard({ product, priority = false }: { product: Card; prio
 
 export function ProductGrid({ products, priorityCount = 0 }: { products: Card[]; priorityCount?: number }) {
   return (
-    <ul className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6">
+    <ul className="grid grid-cols-2 gap-x-3 gap-y-9 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6">
       {products.map((p, i) => (
         <li key={p.id} className="animate-rise" style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}>
           <ProductCard product={p} priority={i < priorityCount} />
