@@ -56,8 +56,26 @@ function supabaseDriver(): StorageDriver {
   if (!/^https:\/\//.test(base) || !serviceKey) throw new Error("SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY manquants pour le stockage.");
   const bucket = (v: Visibility) => (v === "public" ? process.env.SUPABASE_PUBLIC_BUCKET || "boutique-public" : process.env.SUPABASE_PRIVATE_BUCKET || "boutique-prive");
   const auth = { Authorization: `Bearer ${serviceKey}`, apikey: serviceKey };
+  // Les deux espaces sont créés automatiquement au premier envoi (public : photos ; privé : sauvegardes).
+  const ensured = new Set<Visibility>();
+  async function ensureBucket(visibility: Visibility) {
+    if (ensured.has(visibility)) return;
+    const res = await fetch(`${base}/storage/v1/bucket`, {
+      method: "POST",
+      headers: { ...auth, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: bucket(visibility),
+        name: bucket(visibility),
+        public: visibility === "public",
+        ...(visibility === "public" ? { allowed_mime_types: ["image/webp", "image/jpeg"], file_size_limit: 5 * 1024 * 1024 } : {}),
+      }),
+    });
+    // 200 : créé ; 400/409 : existe déjà.
+    if (res.ok || res.status === 400 || res.status === 409) ensured.add(visibility);
+  }
   return {
     async put(visibility, key, body, contentType) {
+      await ensureBucket(visibility);
       const res = await fetch(`${base}/storage/v1/object/${bucket(visibility)}/${key}`, {
         method: "POST",
         headers: {

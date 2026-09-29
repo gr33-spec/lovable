@@ -2,7 +2,7 @@
 
 import { AlertCircle, ArrowLeft, Loader2, Lock } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { countryName, formatPrice } from "@/lib/format";
 import { shippingPrice } from "@/lib/pricing";
@@ -75,8 +75,10 @@ function Field({
 }
 
 export function CheckoutForm({ methods, vatMention, ordersOpen, closedMessage }: { methods: Method[]; vatMention: string | null; ordersOpen: boolean; closedMessage: string }) {
-  const { lines, state } = useCartDetails();
+  const { lines, state, retry } = useCartDetails();
+  const [releasing, setReleasing] = useState(false);
   const params = useSearchParams();
+  const router = useRouter();
   const [fields, setFields] = useState<Fields>(EMPTY);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<{ tone: "error" | "info"; text: string } | null>(null);
@@ -85,31 +87,45 @@ export function CheckoutForm({ methods, vatMention, ordersOpen, closedMessage }:
   const formRef = useRef<HTMLFormElement>(null);
 
   // Données conservées pendant la visite (retour depuis la page de paiement, rafraîchissement).
+  const restored = useRef(false);
   useEffect(() => {
+    if (restored.current) return;
     try {
       const saved = JSON.parse(sessionStorage.getItem(FORM_KEY) ?? "null");
       if (saved && typeof saved === "object") setFields((f) => ({ ...f, ...saved }));
     } catch {
       /* rien à restaurer */
     }
+    restored.current = true;
   }, []);
-  useEffect(() => {
-    try {
-      sessionStorage.setItem(FORM_KEY, JSON.stringify(fields));
-    } catch {
-      /* navigation privée */
-    }
-  }, [fields]);
+  // Sauvegarde à chaque saisie (jamais au chargement : une saisie conservée n'est pas écrasée).
+  const updateFields = (fn: (prev: Fields) => Fields) =>
+    setFields((prev) => {
+      const next = fn(prev);
+      try {
+        sessionStorage.setItem(FORM_KEY, JSON.stringify(next));
+      } catch {
+        /* navigation privée */
+      }
+      return next;
+    });
 
   // Retour depuis Stripe sans payer : la réservation est libérée tout de suite.
   useEffect(() => {
     const token = sessionStorage.getItem(PENDING_KEY);
     if (params.get("retour") === "1" && token) {
       setMessage({ tone: "info", text: "Le paiement n'a pas été finalisé. Votre panier est intact : vous pouvez réessayer quand vous voulez." });
+      setReleasing(true);
       fetch("/api/checkout/cancel", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token }) })
         .then(() => sessionStorage.removeItem(PENDING_KEY))
-        .catch(() => undefined);
+        .catch(() => undefined)
+        .finally(() => {
+          // Le stock réservé vient d'être rendu : on relit les disponibilités.
+          setReleasing(false);
+          retry();
+        });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- une seule fois au retour du paiement
   }, [params]);
 
   const countries = useMemo(() => {
@@ -129,8 +145,8 @@ export function CheckoutForm({ methods, vatMention, ordersOpen, closedMessage }:
 
   const set = (key: keyof Fields) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const value = e.target.value;
-    setFields((f) => ({ ...f, [key]: value }));
-    if (errors[key]) setErrors(({ [key]: _removed, ...rest }) => rest);
+    updateFields((f) => ({ ...f, [key]: value }));
+    if (errors[key]) setErrors((prev) => Object.fromEntries(Object.entries(prev).filter(([k]) => k !== key)));
   };
 
   const validate = (): Record<string, string> => {
@@ -179,12 +195,13 @@ export function CheckoutForm({ methods, vatMention, ordersOpen, closedMessage }:
       const data = await res!.json().catch(() => ({}));
       if (data.ok && typeof data.url === "string") {
         sessionStorage.setItem(PENDING_KEY, data.orderToken);
+        // Page de paiement Stripe (site externe) : navigation complète.
         window.location.assign(data.url);
         return; // le bouton reste désactivé pendant la redirection
       }
       idempotencyKey.current = "";
       if (data.code === "already_paid" && data.orderToken) {
-        window.location.assign(`/commande/suivi/${data.orderToken}`);
+        router.push(`/commande/suivi/${data.orderToken}`);
         return;
       }
       if (data.code === "unavailable" && Array.isArray(data.unavailable)) {
@@ -202,7 +219,7 @@ export function CheckoutForm({ methods, vatMention, ordersOpen, closedMessage }:
     }
   };
 
-  if (state.status === "ready" && rows.length === 0) {
+  if (state.status === "ready" && rows.length === 0 && !releasing && lines.length === 0) {
     return (
       <div className="container-page py-16 text-center">
         <h1 className="text-4xl">Votre panier est vide</h1>
@@ -289,7 +306,7 @@ export function CheckoutForm({ methods, vatMention, ordersOpen, closedMessage }:
                           name="shippingMethodId"
                           value={m.id}
                           checked={checked}
-                          onChange={() => setFields((f) => ({ ...f, shippingMethodId: m.id }))}
+                          onChange={() => updateFields((f) => ({ ...f, shippingMethodId: m.id }))}
                           className="mt-1 h-5 w-5 accent-[var(--c-primary)]"
                         />
                         <span className="flex-1">
@@ -342,6 +359,15 @@ export function CheckoutForm({ methods, vatMention, ordersOpen, closedMessage }:
               </div>
             ) : (
               <ul className="mt-4 space-y-3">
+                {rows.length === 0 && (
+                  <li className="text-sm text-text-2">
+                    {releasing ? "Mise à jour du panier…" : (
+                      <>
+                        Les créations de votre panier ne sont plus disponibles. <Link href="/panier" className="text-primary underline">Voir le panier</Link>
+                      </>
+                    )}
+                  </li>
+                )}
                 {rows.map(({ line, product }) => (
                   <li key={product!.id} className="flex items-center gap-3">
                     <div className="relative h-16 w-14 shrink-0 overflow-hidden rounded-lg bg-secondary">
@@ -371,7 +397,7 @@ export function CheckoutForm({ methods, vatMention, ordersOpen, closedMessage }:
               </div>
             </dl>
             {vatMention && <p className="mt-1 text-right text-xs text-text-2">{vatMention}</p>}
-            <button type="submit" className="btn btn-primary mt-5 min-h-[54px] w-full text-base" disabled={submitting || !ordersOpen || state.status !== "ready" || methods.length === 0}>
+            <button type="submit" className="btn btn-primary mt-5 min-h-[54px] w-full text-base" disabled={submitting || releasing || !ordersOpen || state.status !== "ready" || rows.length === 0 || methods.length === 0}>
               {submitting ? (
                 <>
                   <Loader2 size={18} className="animate-spin" aria-hidden="true" /> Redirection vers le paiement…

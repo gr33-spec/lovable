@@ -8,7 +8,7 @@ import { isUniqueViolation, query, queryOne, transaction, type Queryable } from 
 import { siteUrl } from "./env";
 import { ogImageUrl } from "./images";
 import { errorMessage, reportEvent } from "./monitoring";
-import { payments, PaymentUnavailableError, type CheckoutSessionInfo, type PaymentEvent } from "./payments";
+import { payments, PaymentUnavailableError, verifyExpectedAccount, type CheckoutSessionInfo, type PaymentEvent } from "./payments";
 import { loadSettings } from "./settings";
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -162,6 +162,7 @@ export async function startCheckout(input: CheckoutInput): Promise<CheckoutResul
 
   try {
     payments();
+    if (!(await verifyExpectedAccount())) throw new Error("La clé Stripe n'appartient pas au compte officiel (STRIPE_ACCOUNT_ID).");
   } catch (err) {
     await reportEvent("error", "checkout", "Paiement indisponible (configuration)", { reason: errorMessage(err) });
     return { ok: false, code: "payment_unavailable", message: "Le paiement est momentanément indisponible. Merci de réessayer un peu plus tard." };
