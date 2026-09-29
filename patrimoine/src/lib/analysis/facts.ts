@@ -117,7 +117,7 @@ export function buildFacts(all: AppData, nowMonth: MonthIndex, scope: AnalysisSc
         mensualite: r0(now?.paymentMonthly),
         tauxPct: r1(l.ratePct ?? r.impliedRatePct),
         finAnnee: r.endMonth !== undefined ? yearOf(r.endMonth) : null,
-        fiabilite: r.quality,
+        fiabilite: l.schedule ? "tableau d'amortissement de la banque" : r.quality === "complete" ? "calculé à partir des caractéristiques saisies" : r.quality,
       };
     })
     .filter((x): x is NonNullable<typeof x> => !!x);

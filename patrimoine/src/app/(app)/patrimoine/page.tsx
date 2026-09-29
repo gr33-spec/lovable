@@ -200,6 +200,7 @@ function Patrimoine() {
                       <div className="tabular text-[15px] font-semibold text-ink">{now?.balance === undefined ? "—" : eurCompact(now.balance)}</div>
                       <div className="tabular text-xs text-muted">
                         {r?.finished ? "Terminé" : r?.endMonth !== undefined ? `fin ${monthLabel(r.endMonth)}` : "fin inconnue"}
+                        {!r?.finished && (l.schedule ? " · tableau banque" : r?.quality === "complete" ? " · calculé" : " · estimé")}
                       </div>
                     </div>
                   </Link>

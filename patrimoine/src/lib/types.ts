@@ -387,7 +387,31 @@ export interface Loan {
   insuranceMonthly?: number;
   durationMonths?: number;
   notes?: string;
+  /** Tableau d'amortissement de la banque : quand il est présent, il fait foi pour tous les calculs. */
+  schedule?: LoanSchedule;
   demo?: boolean;
+}
+
+/** Une échéance du tableau d'amortissement. */
+export interface LoanScheduleRow {
+  /** Mois de l'échéance (AAAA-MM). */
+  month: string;
+  /** Échéance hors assurance (capital + intérêts). */
+  payment: number;
+  interest: number;
+  principal: number;
+  insurance?: number;
+  /** Capital restant dû après l'échéance. */
+  balance: number;
+}
+
+export interface LoanSchedule {
+  rows: LoanScheduleRow[];
+  /** PDF ou photo d'origine (conservé pour consultation). */
+  fileId?: string;
+  fileName?: string;
+  importedAt: string;
+  source: "ia" | "manuel";
 }
 
 export type WorkStatus = "envisage" | "prevu" | "en_cours" | "termine";
