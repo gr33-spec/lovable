@@ -7,7 +7,7 @@ import { shareActive } from "./shares";
 import { sessionAlive } from "./session-store";
 
 /** Routes jamais ouvertes en consultation, même en lecture (export complet, accès, sauvegardes). */
-const LECTURE_DENIED = ["/api/analyse", "/api/credits", "/api/files/empreinte", "/api/documents/classer", "/api/backup", "/api/export-excel", "/api/shares", "/api/access", "/api/passkey", "/api/snapshots", "/api/bilans", "/api/sessions"];
+const LECTURE_DENIED = ["/api/analyse", "/api/files/empreinte", "/api/backup", "/api/export-excel", "/api/shares", "/api/access", "/api/passkey", "/api/snapshots", "/api/sessions"];
 
 /** Session en cours, révocation de l'accès gestion comprise. */
 export async function currentSession(): Promise<SessionInfo | null> {

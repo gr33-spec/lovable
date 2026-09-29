@@ -8,7 +8,7 @@ import { useStore } from "@/lib/store";
 import type { StatementFigures } from "@/lib/types";
 import { evolution, statementRatios } from "@/lib/engine/indicators";
 import { eur, eurCompact, pct } from "@/lib/format";
-import { BALANCE_FIELDS, BilanImport, FiguresForm, INCOME_FIELDS } from "./bilans";
+import { BALANCE_FIELDS, FiguresForm, INCOME_FIELDS } from "./bilans";
 import { Button, Card, ConfirmDelete, Empty, Kpi, Page, PageHeader, Pill, SectionTitle, Sheet, cx } from "./ui";
 import { openDocument } from "./pdf-viewer";
 
@@ -26,7 +26,6 @@ export function StatementDetail({ id }: { id: string }) {
   const { data, upsert, remove } = useStore();
   const router = useRouter();
   const [editing, setEditing] = useState(false);
-  const [analyzing, setAnalyzing] = useState(false);
   const st = data.statements.find((s) => s.id === id);
   if (!st) {
     return (
@@ -74,7 +73,7 @@ export function StatementDetail({ id }: { id: string }) {
             <span className="text-[13px] text-white/65">Résultat net {st.year}</span>
             {st.source === "ia" ? (
               <span className="flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold">
-                <Sparkles size={12} /> Lu par l&apos;IA{st.confidence ? ` · confiance ${st.confidence}` : ""}
+                <Sparkles size={12} /> Importé automatiquement
               </span>
             ) : (
               <span className="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold">Saisi</span>
@@ -130,11 +129,6 @@ export function StatementDetail({ id }: { id: string }) {
 
         <div className="mt-8 space-y-3">
           {st.fileId && (
-            <Button full icon={<Sparkles size={18} />} onClick={() => setAnalyzing(true)}>
-              {st.source === "ia" ? "Relancer la lecture du PDF" : "Lire ce PDF avec l'IA"}
-            </Button>
-          )}
-          {st.fileId && (
             <a href={`/api/files/${st.fileId}`} onClick={(e) => { e.preventDefault(); openDocument(`/api/files/${st.fileId}`); }} className="flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-soft text-[16px] font-semibold text-brand">
               <FileText size={18} /> Voir le PDF {st.fileName ? `(${st.fileName})` : ""}
             </a>
@@ -150,9 +144,6 @@ export function StatementDetail({ id }: { id: string }) {
         </div>
       </Page>
 
-      <Sheet open={analyzing} onClose={() => setAnalyzing(false)} title={`Lecture du bilan ${st.year}`}>
-        {analyzing && <BilanImport existing={st} onDone={() => setAnalyzing(false)} />}
-      </Sheet>
       <Sheet open={editing} onClose={() => setEditing(false)} title={`Bilan ${st.year}`} footer={<Button full onClick={() => setEditing(false)}>Terminé</Button>}>
         <FiguresForm figures={st.figures} onChange={(figures) => upsert("statements", { ...st, figures })} />
         <div className="mt-3">
