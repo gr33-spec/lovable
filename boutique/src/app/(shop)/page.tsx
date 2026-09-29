@@ -19,11 +19,17 @@ export default async function HomePage() {
   const newest = latest.items.slice(0, 8);
   const withPhotos = newest.filter((p) => p.image);
   const available = withPhotos.filter((p) => p.availability !== "sold_out");
-  // Visuel d'accueil : celui choisi dans l'administration, sinon la dernière création disponible.
-  // Visuel d'accueil : la photo choisie dans l'administration ; sinon une
-  // composition de trois créations (on présente une collection, pas un produit).
-  const collage = (available.length >= 3 ? available : withPhotos).slice(0, 3).map((p) => p.image!);
+  // Visuels d'accueil : la photo choisie dans l'administration en premier,
+  // complétée par les dernières créations (on présente une collection).
+  const pool = available.length >= 2 ? available : withPhotos;
+  const tiles = [settings.hero, ...pool.map((p) => p.image)].filter((img, i, all): img is NonNullable<typeof img> => !!img && all.findIndex((x) => x?.id === img.id) === i).slice(0, 2);
   const visibleCategories = categories.filter((c) => c.productCount > 0);
+  // Catégories en « bento » sur ordinateur : la première en grand, les autres autour.
+  const n = visibleCategories.length;
+  const bento =
+    n === 3 || n >= 5
+      ? { cols: `lg:auto-rows-[250px] ${n === 3 ? "lg:grid-cols-2" : "lg:grid-cols-3"}`, first: "lg:col-span-1 lg:row-span-2", tile: "aspect-[4/5] lg:aspect-auto" }
+      : { cols: n === 4 ? "lg:grid-cols-4" : "", first: "", tile: "aspect-[4/5] sm:aspect-[16/12] lg:aspect-[4/5]" };
   const aboutExcerpt = settings.aboutText.split(/\n{2,}/).find((p) => p.trim() && !p.includes("[À COMPLÉTER")) ?? "";
   const tagline = settings.tagline || settings.shopName;
 
@@ -41,17 +47,17 @@ export default async function HomePage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
 
-      {/* ───────── Introduction ───────── */}
+      {/* ───────── Introduction : titre éditorial + bento ───────── */}
       <section className="relative overflow-hidden">
         <div className="soft-glow pointer-events-none absolute inset-0" aria-hidden="true" />
-        <div className="container-page relative grid items-center gap-10 pt-4 pb-16 md:grid-cols-[1.1fr_1fr] md:gap-16 md:pt-16 md:pb-28">
-          <div>
+        <div className="container-page relative grid items-center gap-10 pt-6 pb-14 lg:grid-cols-12 lg:gap-12 lg:pt-14 lg:pb-24">
+          <div className="lg:col-span-6">
             <p className="eyebrow">Créations faites main · petites séries</p>
-            <h1 className="mt-5 text-[2.75rem] leading-[1.02] tracking-[-0.025em] sm:text-6xl lg:text-[4.8rem]">
+            <h1 className="mt-5 text-[3.1rem] leading-[0.98] sm:text-[4.4rem] lg:text-[5.4rem]">
               <Highlighted text={tagline} />
             </h1>
             {settings.introText && <p className="mt-6 max-w-md text-[17px] leading-relaxed text-text-2">{settings.introText}</p>}
-            <div className="mt-9 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/boutique" className="btn btn-primary min-h-[52px] px-7 text-[15px]">
                 Découvrir les créations <ArrowRight size={17} aria-hidden="true" />
               </Link>
@@ -59,7 +65,7 @@ export default async function HomePage() {
                 Nouveautés
               </Link>
             </div>
-            <ul className="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-[13px] font-medium tracking-wide text-text-2">
+            <ul className="mt-9 flex flex-wrap gap-x-7 gap-y-3 text-[13px] font-medium text-text-2">
               {[
                 { icon: Sparkles, label: "Pièces uniques" },
                 { icon: Gift, label: "Prêt à offrir" },
@@ -72,33 +78,37 @@ export default async function HomePage() {
             </ul>
           </div>
 
-          {/* Visuel : photo d'ambiance en arche, ou trois créations en arches (forme bohème). */}
-          {settings.hero ? (
-            <div className="relative isolate mx-auto w-[82%] max-w-[480px] md:w-full">
-              <div className="holo-shine aspect-[4/5] overflow-hidden rounded-t-[999px] rounded-b-[28px] bg-surface-2 shadow-lift">
-                <Img image={settings.hero} alt={settings.hero.alt || `Créations ${settings.shopName}`} sizes="(min-width: 768px) 45vw, 82vw" priority className="h-full w-full" />
-              </div>
-              <div className="pointer-events-none absolute -inset-3 -z-10 rounded-t-[999px] rounded-b-[36px] border border-accent/40" aria-hidden="true" />
-              <Sparkle size={24} className="absolute top-6 -right-1 text-accent" />
+          {tiles.length > 0 && (
+            <div className="grid h-[380px] grid-cols-[1.35fr_1fr] grid-rows-2 gap-3 sm:h-[520px] sm:gap-4 lg:col-span-6 lg:h-[600px]">
+              <Link href="/boutique" className="group row-span-2 overflow-hidden rounded-[28px] bg-surface-2 shadow-soft" aria-label="Découvrir les créations">
+                <span className="holo-shine block h-full w-full">
+                  <Img image={tiles[0]} alt="" sizes="(min-width: 1024px) 30vw, 55vw" priority className="h-full w-full transition duration-1000 ease-out group-hover:scale-[1.04]" />
+                </span>
+              </Link>
+              {tiles[1] ? (
+                <Link href="/boutique?tri=nouveautes" className="group overflow-hidden rounded-[28px] bg-surface-2 shadow-soft" aria-label="Voir les nouveautés">
+                  <span className="holo-shine block h-full w-full">
+                    <Img image={tiles[1]} alt="" sizes="(min-width: 1024px) 22vw, 40vw" className="h-full w-full transition duration-1000 ease-out group-hover:scale-[1.04]" />
+                  </span>
+                </Link>
+              ) : (
+                <div className="rounded-[28px] bg-primary-soft" aria-hidden="true" />
+              )}
+              {/* Tuile de couleur : la marque, sans photo */}
+              <Link href="/a-propos" className="group relative flex flex-col justify-between overflow-hidden rounded-[28px] bg-secondary p-4 no-underline sm:p-6">
+                <div className="glitter-dust pointer-events-none absolute inset-0 opacity-80" aria-hidden="true" />
+                <Sparkle size={20} className="relative text-accent" />
+                <span className="relative">
+                  <span className="block font-serif text-[1.35rem] leading-[1.05] sm:text-[1.9rem]">
+                    Fait main, <em className="text-accent-text">pièce par pièce</em>
+                  </span>
+                  <span className="mt-2 inline-flex items-center gap-1 text-[13px] font-semibold text-primary">
+                    L&apos;atelier <ArrowUpRight size={14} className="transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+                  </span>
+                </span>
+              </Link>
             </div>
-          ) : collage.length > 0 ? (
-            <div className="relative isolate mx-auto flex w-full max-w-[520px] items-end justify-center gap-3 sm:gap-4" aria-hidden="true">
-              {collage.map((image, i) => {
-                const center = collage.length === 3 ? i === 1 : i === 0;
-                return (
-                  <div
-                    key={image.id}
-                    className={`holo-shine overflow-hidden rounded-t-[999px] rounded-b-[22px] bg-surface-2 shadow-lift ${center ? "aspect-[3/5] w-[38%]" : "mb-8 aspect-[3/4.6] w-[29%]"}`}
-                  >
-                    <Img image={image} alt="" sizes="(min-width: 768px) 200px, 38vw" priority={center} className="h-full w-full" />
-                  </div>
-                );
-              })}
-              <div className="pointer-events-none absolute -bottom-3 left-1/2 -z-10 h-[78%] w-[46%] -translate-x-1/2 rounded-t-[999px] border border-b-0 border-accent/40" aria-hidden="true" />
-              <Sparkle size={22} className="absolute -top-2 right-[12%] text-accent" />
-              <Sparkle size={14} className="absolute top-[30%] left-[4%] text-accent" delay={1} />
-            </div>
-          ) : null}
+          )}
         </div>
       </section>
 
@@ -117,18 +127,18 @@ export default async function HomePage() {
 
       {/* ───────── Catégories ───────── */}
       {visibleCategories.length > 0 && (
-        <section className="container-page py-16 sm:py-24" aria-labelledby="titre-categories">
+        <section className="reveal container-page py-16 sm:py-24" aria-labelledby="titre-categories">
           <div className="mb-8 sm:mb-10">
             <p className="eyebrow">Explorer</p>
             <h2 id="titre-categories" className="mt-3 text-[2.2rem] sm:text-5xl">
               Trouver <em className="text-accent-text">la pièce</em> qui vous ressemble
             </h2>
           </div>
-          <ul className={`grid gap-3 sm:gap-5 ${visibleCategories.length === 1 ? "" : "grid-cols-2"} ${visibleCategories.length > 2 ? "lg:grid-cols-4" : ""}`}>
+          <ul className={`grid gap-3 sm:gap-4 ${visibleCategories.length === 1 ? "" : "grid-cols-2"} ${bento.cols}`}>
             {visibleCategories.map((c, i) => (
-              <li key={c.id} className={visibleCategories.length > 1 && visibleCategories.length % 2 === 1 && i === 0 ? "col-span-2" : ""}>
-                <Link href={`/boutique/${c.slug}`} className="group holo-ring lift block rounded-[24px] no-underline">
-                  <div className="holo-shine relative aspect-[4/5] overflow-hidden rounded-[24px] bg-surface-2 sm:aspect-[16/12]">
+              <li key={c.id} className={`${visibleCategories.length > 1 && visibleCategories.length % 2 === 1 && i === 0 ? "col-span-2" : ""} ${i === 0 ? bento.first : ""}`}>
+                <Link href={`/boutique/${c.slug}`} className="group holo-ring lift block h-full rounded-[28px] no-underline">
+                  <div className={`holo-shine relative h-full overflow-hidden rounded-[28px] bg-surface-2 ${bento.tile}`}>
                     <Img image={c.cover} alt="" sizes="(min-width: 640px) 50vw, 50vw" className="h-full w-full transition duration-700 ease-out group-hover:scale-[1.04]" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-transparent" aria-hidden="true" />
                     <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4 text-white sm:p-6">
@@ -151,7 +161,7 @@ export default async function HomePage() {
       )}
 
       {/* ───────── Nouveautés ───────── */}
-      <section className="container-page pb-16 sm:pb-24" aria-labelledby="titre-nouveautes">
+      <section className="reveal container-page pb-16 sm:pb-24" aria-labelledby="titre-nouveautes">
         <div className="mb-8 flex items-end justify-between gap-4 sm:mb-10">
           <div>
             <p className="eyebrow">Tout juste sorties de l&apos;atelier</p>
@@ -182,7 +192,7 @@ export default async function HomePage() {
       </section>
 
       {best.length > 0 && (
-        <section className="container-page pb-16 sm:pb-24" aria-labelledby="titre-best">
+        <section className="reveal container-page pb-16 sm:pb-24" aria-labelledby="titre-best">
           <p className="eyebrow">Vos coups de cœur</p>
           <h2 id="titre-best" className="mt-3 mb-8 text-[2.2rem] sm:mb-10 sm:text-5xl">
             Les plus <em className="text-accent-text">aimées</em>
@@ -193,7 +203,7 @@ export default async function HomePage() {
 
       {/* ───────── L'atelier ───────── */}
       <section className="relative overflow-hidden bg-surface-2" aria-labelledby="titre-atelier">
-        <div className="container-page relative grid items-center gap-12 py-16 sm:py-28 md:grid-cols-2 md:gap-20">
+        <div className="reveal container-page relative grid items-center gap-12 py-16 sm:py-28 md:grid-cols-2 md:gap-20">
           <div className="relative mx-auto w-full max-w-[420px]">
             <div className={`overflow-hidden bg-surface shadow-lift ${settings.aboutImage ? "aspect-[4/5] rounded-t-[999px] rounded-b-[28px]" : "aspect-square rounded-full p-6"}`}>
               <Img
@@ -221,7 +231,7 @@ export default async function HomePage() {
       </section>
 
       {/* ───────── Engagements ───────── */}
-      <section className="container-page py-14 sm:py-20" aria-label="Nos engagements">
+      <section className="reveal container-page py-14 sm:py-20" aria-label="Nos engagements">
         <ul className="grid gap-8 sm:grid-cols-3 sm:gap-6">
           {[
             { icon: Sparkles, title: "Fait main, pièce par pièce", text: "Chaque bijou est coulé, poncé et assemblé à la main." },
@@ -241,7 +251,7 @@ export default async function HomePage() {
 
       {/* ───────── Réseaux ───────── */}
       {settings.socials.length > 0 && (
-        <section className="container-page pb-8">
+        <section className="reveal container-page pb-8">
           <div className="holo-ring group relative overflow-hidden rounded-[28px] border border-border bg-surface px-6 py-14 text-center sm:py-20">
             <div className="soft-glow pointer-events-none absolute inset-0" aria-hidden="true" />
             <div className="relative">

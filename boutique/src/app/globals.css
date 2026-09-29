@@ -79,7 +79,7 @@
   --color-info-bg: var(--c-info-bg);
   --color-soldout: var(--c-soldout);
   --color-soldout-bg: var(--c-soldout-bg);
-  --font-serif: var(--font-display), "Cormorant Garamond", Georgia, serif;
+  --font-serif: var(--font-display), "Instrument Serif", Georgia, serif;
   --font-sans: var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
   --radius-card: var(--radius-card);
   --shadow-soft: var(--shadow-soft);
@@ -103,10 +103,17 @@
   h1,
   h2 {
     font-family: var(--font-serif);
-    font-weight: 500;
-    line-height: 1.08;
-    letter-spacing: -0.015em;
+    font-weight: 400;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
     text-wrap: balance;
+  }
+  /* La police de titre n'existe qu'en une graisse : jamais de faux gras. */
+  .font-serif,
+  h1,
+  h2 {
+    font-weight: 400 !important;
+    font-synthesis: none;
   }
   /* Petits titres : police d'interface, plus nette et plus moderne. */
   h3 {
@@ -439,6 +446,27 @@
   }
 }
 
+/* Apparition douce au défilement (navigateurs récents ; ailleurs, rien ne change). */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 22%;
+    }
+  }
+}
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .animate-rise {
   animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
@@ -477,8 +505,8 @@
   animation: shimmer-text 9s ease-in-out infinite;
   font-style: italic;
   /* L'italique déborde à droite : on laisse de la place au dégradé. */
-  padding-right: 0.12em;
-  margin-right: -0.06em;
+  padding-right: 0.06em;
+  margin-right: -0.04em;
 }
 @keyframes shimmer-text {
   0%,
