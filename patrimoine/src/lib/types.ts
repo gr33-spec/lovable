@@ -395,6 +395,8 @@ export interface Loan {
   durationMonths?: number;
   /** Numéro ou référence du prêt chez la banque. */
   reference?: string;
+  /** Taux fixe (par défaut) ou variable. */
+  rateType?: "fixe" | "variable";
   notes?: string;
   /** Tableau d'amortissement de la banque : quand il est présent, il fait foi pour tous les calculs. */
   schedule?: LoanSchedule;
@@ -810,7 +812,7 @@ export interface Settings {
   pdf?: PdfPrefs;
 }
 
-export type PdfSection = "patrimoine" | "credits" | "capacite" | "trajectoire" | "remuneration" | "comptes";
+export type PdfSection = "structure" | "patrimoine" | "credits" | "capacite" | "trajectoire" | "remuneration" | "comptes" | "pieces";
 /** Modèle du dossier : les trois premiers ne changent que la couverture, les suivants tout le document. */
 export type PdfCover = "immersive" | "bandeau" | "epure" | "editorial" | "bento" | "suisse";
 

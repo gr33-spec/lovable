@@ -75,6 +75,9 @@ export function auditLoans(data: AppData, snap: Snapshot): LoanFinding[] {
     }
 
     if (!l.bank && !l.schedule?.meta?.bank) push("advice", "Banque non renseignée.", "Banque non renseignée.");
+    // Numéro de prêt noté en commentaire mais pas dans son champ (qui sert à identifier le crédit).
+    const inNotes = !l.reference && !l.schedule?.meta?.reference ? l.notes?.match(/pr[êe]t\s*n[°o.]?\s*:?\s*([A-Z0-9][A-Z0-9 -]{4,}[A-Z0-9])/i)?.[1] : undefined;
+    if (inNotes) push("advice", `Numéro de prêt « ${inNotes.trim()} » présent dans les notes : à reporter dans le champ « N° de prêt ».`, "Numéro de prêt à reporter depuis les notes.");
   }
 
   // Doublons : même tableau, ou même nom et mêmes montants.
@@ -86,8 +89,13 @@ export function auditLoans(data: AppData, snap: Snapshot): LoanFinding[] {
       const ba = snap.byLoan.get(a.id)?.balance;
       const bb = snap.byLoan.get(b.id)?.balance;
       const sameAmounts = (a.initialAmount !== undefined && a.initialAmount === b.initialAmount) || (ba !== undefined && bb !== undefined && ba > 0 && close(ba, bb, 0.001, 1));
-      if (sameFile || (norm(a.name) !== "" && norm(a.name) === norm(b.name) && sameAmounts)) {
-        const why = sameFile ? "même tableau d'amortissement" : "même nom, mêmes montants";
+      // Le numéro de prêt de la banque identifie un crédit : deux numéros différents ne sont jamais un doublon.
+      const refA = norm(a.reference ?? a.schedule?.meta?.reference);
+      const refB = norm(b.reference ?? b.schedule?.meta?.reference);
+      const sameRef = refA !== "" && refA === refB && norm(a.bank) === norm(b.bank);
+      const differentRefs = refA !== "" && refB !== "" && refA !== refB;
+      if (!differentRefs && (sameRef || sameFile || (norm(a.name) !== "" && norm(a.name) === norm(b.name) && sameAmounts))) {
+        const why = sameRef ? "même banque, même numéro de prêt" : sameFile ? "même tableau d'amortissement" : "même nom, mêmes montants";
         for (const [x, y] of [[a, b], [b, a]]) {
           if (out.some((f) => f.loanId === x.id && f.short.startsWith("Doublon"))) continue;
           out.push({ loanId: x.id, severity: "critical", text: `Doublon probable avec un autre « ${y.name || y.bank || "Crédit"} » (${why}) : compté deux fois dans les totaux.`, short: "Doublon probable : compté deux fois." });

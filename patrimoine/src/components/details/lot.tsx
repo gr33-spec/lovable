@@ -13,7 +13,7 @@ import { buildingCrumbs } from "@/lib/crumbs";
 import { goBack } from "@/lib/nav";
 import { CONDITIONS, UNIT_TYPES, WORK_STATUSES, labelOf } from "@/lib/labels";
 import { dateFr, eur, num } from "@/lib/format";
-import { Card, ConfirmDelete, Empty, Grid2, NumberField, Page, PageHeader, SectionTitle, SelectField, Stack, TextField } from "../ui";
+import { Card, ConfirmDelete, Details, Empty, Grid2, NumberField, Page, PageHeader, SectionTitle, SelectField, Stack, TextField } from "../ui";
 
 // Fiche du lot dans Patrimoine : le bien lui-même (description, confort,
 // énergie, état, valeur), entièrement modifiable. La location (locataire,
@@ -107,8 +107,10 @@ export function LotSheet({ id }: { id: string }) {
               </Stack>
             </Card>
 
-            <SectionTitle>Confort et équipements</SectionTitle>
-            <Card>
+            {/* Informations reprises dans le bail : utiles, mais secondaires au quotidien (repliées). */}
+            <SectionTitle>Informations pour le bail</SectionTitle>
+            <div className="space-y-2">
+            <Details title="Confort et équipements">
               <Stack>
                 <Grid2>
                   <SelectField label="Chauffage" value={unit.heating} options={[...WHO]} onChange={(v) => set({ heating: v })} />
@@ -121,12 +123,8 @@ export function LotSheet({ id }: { id: string }) {
                 <TextField label="Équipements du logement" value={unit.equipments} multiline placeholder="Cuisine équipée, salle d'eau…" onChange={(v) => set({ equipments: v })} />
                 <TextField label="Annexes privatives" value={unit.accessories} placeholder="Cave, parking, jardin…" onChange={(v) => set({ accessories: v })} />
               </Stack>
-            </Card>
-          </div>
-
-          <div className="min-w-0 lg:[&>*:first-child]:mt-0">
-            <SectionTitle>Énergie (DPE)</SectionTitle>
-            <Card>
+            </Details>
+            <Details title={unit.dpeClass ? `Énergie (DPE ${unit.dpeClass})` : "Énergie (DPE à renseigner)"}>
               <Stack>
                 <SelectField label="Classe DPE" value={unit.dpeClass} options={DPE} onChange={(v) => set({ dpeClass: v })} />
                 {(unit.dpeClass === "F" || unit.dpeClass === "G") && (
@@ -138,17 +136,18 @@ export function LotSheet({ id }: { id: string }) {
                 </Grid2>
                 <NumberField label="Année de référence des prix" suffix="" integer value={unit.energyCostYear} onChange={(v) => set({ energyCostYear: v })} />
               </Stack>
-            </Card>
-
-            <SectionTitle>État, travaux et valeur</SectionTitle>
-            <Card>
+            </Details>
+            <Details title="État, travaux et valeur">
               <Stack>
                 <SelectField label="État du logement" value={unit.condition} options={CONDITIONS} onChange={(v) => set({ condition: v })} />
                 <TextField label="Travaux à prévoir" value={unit.plannedWorks} multiline onChange={(v) => set({ plannedWorks: v })} hint="Pour les chiffrer dans la chronologie, ajoutez-les dans Patrimoine › Travaux." />
                 {role === "owner" && <NumberField label="Estimation de valeur" value={unit.value} onChange={(v) => set({ value: v })} hint="Facultatif : sinon la valeur de l'immeuble est utilisée." />}
               </Stack>
-            </Card>
+            </Details>
+            </div>
+          </div>
 
+          <div className="min-w-0 lg:[&>*:first-child]:mt-0">
             <DocumentsCard scope={{ unitId: unit.id }} href={`/documents?immeuble=${unit.buildingId}&lot=${unit.id}`} title="Documents du lot" />
 
             {works.length > 0 && (

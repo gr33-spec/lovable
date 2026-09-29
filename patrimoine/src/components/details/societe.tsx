@@ -11,7 +11,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Briefcase, Building2, Landmark, Pencil, Plus } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { cashflowMonthly, ltv, netWorth } from "@/lib/engine/snapshot";
+import { cashflowMonthly, ltv, netWorth, rentalPayments } from "@/lib/engine/snapshot";
 import { monthLabel } from "@/lib/engine/dates";
 import { eur, eurCompact, eurSigned, pct } from "@/lib/format";
 import { labelOf, COMPANY_KINDS } from "@/lib/labels";
@@ -75,8 +75,8 @@ export function CompanyDetail({ id }: { id: string }) {
             <Kpi label="Valeur immobilière" value={f.unvalued ? "—" : eurCompact(f.value)} hint={f.unvalued ? `${f.unvalued} bien(s) sans valeur` : undefined} />
             <Kpi label="Dette totale" value={eurCompact(f.debt)} hint={ratio !== undefined ? `LTV ${pct(ratio)}` : undefined} />
             <Kpi label="Loyers / mois" value={eurCompact(f.rentMonthly)} />
-            <Kpi label="Mensualités / mois" value={eurCompact(f.paymentsMonthly)} />
-            <Kpi label="Cash-flow / mois" value={eurSigned(cf)} tone={cf >= 0 ? "pos" : "neg"} />
+            <Kpi label="Mensualités / mois" value={eurCompact(rentalPayments(f))} hint={f.personalPaymentsMonthly > 0 ? `+ ${eurCompact(f.personalPaymentsMonthly)} crédit personnel` : undefined} />
+            <Kpi label="Cash-flow locatif / mois" value={eurSigned(cf)} tone={cf >= 0 ? "pos" : "neg"} />
             <Kpi label="Trésorerie" value={eurCompact(f.cash)} />
           </div>
           {(own?.partnerAccounts ?? 0) > 0 && (
@@ -129,10 +129,10 @@ export function CompanyDetail({ id }: { id: string }) {
           </>
         )}
 
-        <SectionTitle action={<AddLink onClick={() => setSheet("building")} />}>Immeubles</SectionTitle>
+        <SectionTitle action={<AddLink onClick={() => setSheet("building")} />}>Biens</SectionTitle>
         <Card className="py-1">
           {buildings.length === 0 ? (
-            <div className="py-3 text-sm text-muted">Aucun immeuble détenu directement.</div>
+            <div className="py-3 text-sm text-muted">Aucun bien détenu directement.</div>
           ) : (
             <Divided>
               {buildings.map((b) => {
