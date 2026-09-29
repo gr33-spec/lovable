@@ -1,7 +1,10 @@
 "use client";
 
+import { replaceQuery, usePageState } from "@/lib/nav";
+import { sortedUnits } from "@/lib/lots";
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Building2, ChevronDown, DoorOpen, Landmark, Plus, Briefcase } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { Building, Company } from "@/lib/types";
@@ -11,14 +14,30 @@ import { eurCompact, eurSigned } from "@/lib/format";
 import { labelOf, UNIT_TYPES } from "@/lib/labels";
 import { AddMenu } from "@/components/quick-add";
 import { OrgChart } from "@/components/org-chart";
+import { ProjectsList } from "@/components/projects/list";
+import { WorksList } from "@/components/works-list";
 import { Avatar, Card, Empty, Page, PageHeader, Pill, RoundButton, Segmented, cx, Button } from "@/components/ui";
 
 export default function PatrimoinePage() {
+  return (
+    <Suspense>
+      <Patrimoine />
+    </Suspense>
+  );
+}
+
+function Patrimoine() {
   const { data, projection } = useStore();
   const snap = projection.snapshot;
   const [adding, setAdding] = useState(false);
-  const [view, setView] = useState<"structure" | "organigramme" | "credits">("structure");
-  const [open, setOpen] = useState<Record<string, boolean>>(() => {
+  const initial = useSearchParams().get("vue");
+  type View = "structure" | "credits" | "travaux" | "projets";
+  // La rubrique vit dans l'adresse : un retour ou un lien (ex. « Travaux ») y ramène directement.
+  const view: View = initial === "projets" || initial === "credits" || initial === "travaux" ? initial : "structure";
+  const setView = (v: View) => replaceQuery({ vue: v === "structure" ? undefined : v });
+  // L'organigramme est une autre façon de voir la structure, pas une rubrique à part.
+  const [chart, setChart] = usePageState("organigramme", initial === "organigramme");
+  const [open, setOpen] = usePageState<Record<string, boolean>>("arbre", () => {
     const o: Record<string, boolean> = {};
     for (const c of data.companies) if (c.kind === "holding" || !c.parentId) o[c.id] = true;
     return o;
@@ -62,7 +81,7 @@ export default function PatrimoinePage() {
   };
 
   const renderBuilding = (b: Building, depth: number) => {
-    const units = data.units.filter((u) => u.buildingId === b.id);
+    const units = sortedUnits(data.units.filter((u) => u.buildingId === b.id));
     const isOpen = !!open[b.id];
     return (
       <div key={b.id}>
@@ -80,7 +99,7 @@ export default function PatrimoinePage() {
           units.map((u) => (
             <Link
               key={u.id}
-              href={`/patrimoine/logement/${u.id}`}
+              href={`/patrimoine/lot/${u.id}`}
               className="flex items-center gap-3 py-2.5 pr-1"
               style={{ paddingLeft: 12 + (depth + 1) * 16 }}
             >
@@ -112,11 +131,27 @@ export default function PatrimoinePage() {
           onChange={setView}
           options={[
             { value: "structure", label: "Structure" },
-            { value: "organigramme", label: "Organigramme" },
-            { value: "credits", label: `Crédits (${data.loans.length})` },
+            { value: "credits", label: "Crédits" },
+            { value: "travaux", label: "Travaux" },
+            { value: "projets", label: "Projets" },
           ]}
         />
-        {view === "organigramme" ? (
+        {view === "structure" && (data.companies.length > 0 || data.buildings.length > 0) && (
+          <div className="mt-3 flex justify-end">
+            <div className="inline-flex rounded-full bg-black/5 p-0.5 text-[13px] font-semibold">
+              {[false, true].map((c) => (
+                <button key={String(c)} onClick={() => setChart(c)} className={cx("rounded-full px-3.5 py-1.5 transition", chart === c ? "bg-card text-navy shadow-sm" : "text-ink-2")}>
+                  {c ? "Organigramme" : "Liste"}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {view === "projets" ? (
+          <ProjectsList />
+        ) : view === "travaux" ? (
+          <WorksList />
+        ) : view === "structure" && chart ? (
           <OrgChart />
         ) : view === "structure" ? (
           data.companies.length === 0 && data.buildings.length === 0 ? (
@@ -127,7 +162,7 @@ export default function PatrimoinePage() {
               action={<Button onClick={() => setAdding(true)} icon={<Plus size={18} />}>Ajouter</Button>}
             />
           ) : (
-            <Card className="mt-4 px-3 py-1">
+            <Card className="mt-3 px-3 py-1">
               <div className="divide-y divide-line">
                 {roots.map((c) => renderCompany(c, 0, seen))}
                 {orphanBuildings.length > 0 && (
@@ -152,7 +187,7 @@ export default function PatrimoinePage() {
                 const company = data.companies.find((c) => c.id === companyKey);
                 return (
                   <Link key={l.id} href={`/patrimoine/credit/${l.id}`} className="flex items-center gap-3 py-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-soft text-navy">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-soft text-brand">
                       <Landmark size={18} />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -165,6 +200,7 @@ export default function PatrimoinePage() {
                       <div className="tabular text-[15px] font-semibold text-ink">{now?.balance === undefined ? "—" : eurCompact(now.balance)}</div>
                       <div className="tabular text-xs text-muted">
                         {r?.finished ? "Terminé" : r?.endMonth !== undefined ? `fin ${monthLabel(r.endMonth)}` : "fin inconnue"}
+                        {!r?.finished && (l.schedule ? " · tableau banque" : r?.quality === "complete" ? " · calculé" : " · estimé")}
                       </div>
                     </div>
                   </Link>
@@ -221,7 +257,7 @@ function TreeRow({
         ) : avatar ? (
           avatar
         ) : (
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#2a78d6]/10 text-[#2a78d6]">{icon}</div>
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">{icon}</div>
         )}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">

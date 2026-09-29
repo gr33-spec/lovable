@@ -1,34 +1,53 @@
 "use client";
 
+import { removalPlan, removalSummary } from "@/lib/removal";
+import { DocumentsCard } from "@/components/documents/library";
+import { AnalysisEntry } from "@/components/analysis/entry";
+import { companyCrumbs } from "@/lib/crumbs";
+import { goBack } from "@/lib/nav";
 import { Suspense, useState } from "react";
 import { useRouter } from "next/navigation";
-import { DoorOpen, Hammer, Landmark, Pencil } from "lucide-react";
+import { ArrowRightLeft, BadgeEuro, DoorOpen, Hammer, Landmark, Pencil } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { unitRemovals } from "@/lib/tenancy";
 import { newId } from "@/lib/ops";
-import type { Collection, Unit } from "@/lib/types";
+import type { Unit } from "@/lib/types";
 import { cashflowMonthly, ltv, netWorth } from "@/lib/engine/snapshot";
 import { monthLabel } from "@/lib/engine/dates";
 import { dateFr, eur, eurCompact, eurSigned, num, pct } from "@/lib/format";
 import { CONDITIONS, UNIT_TYPES, WORK_STATUSES, labelOf } from "@/lib/labels";
 import { BuildingForm, UnitForm, WorkForm } from "../forms";
 import { QuickLoan, QuickWork } from "../quick-add";
-import { Button, Card, ConfirmDelete, Divided, Empty, Kpi, Page, PageHeader, Pill, Row, SectionTitle, Sheet } from "../ui";
+import { Button, Card, ConfirmDelete, Divided, Empty, Kpi, MissingData, Page, PageHeader, Pill, Row, SectionTitle, Sheet } from "../ui";
 import { AddLink } from "./societe";
 import { BuildingValueHistory } from "../value-history";
+import { SwipeDelete, useUndoableRemove } from "@/components/swipe";
+import { SaleSheet, newSale } from "@/components/sale/sheet";
+import { SalesList } from "@/components/sale/list";
+import { DragGhost, LotHandle, SwapNumbersSheet, dropTarget, useSwapNumbers, useTenantDnd } from "./lot-number";
+import { sortedUnits, tenantLabel } from "@/lib/lots";
+import type { SaleAction } from "@/lib/types";
 
-export function BuildingDetail({ id }: { id: string }) {
+export function BuildingDetail({ id, edit, saleId }: { id: string; edit?: boolean; saleId?: string }) {
   return (
     <Suspense>
-      <BuildingDetailInner id={id} />
+      <BuildingDetailInner id={id} edit={edit} saleId={saleId} />
     </Suspense>
   );
 }
 
-function BuildingDetailInner({ id }: { id: string }) {
-  const { data, projection, removeMany, upsert, remove } = useStore();
+function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean; saleId?: string }) {
+  const { data, projection, upsert, remove } = useStore();
+  const removeUndoable = useUndoableRemove();
   const router = useRouter();
-  const [sheet, setSheet] = useState<null | "edit" | "loan" | "work">(null);
+  const [sheet, setSheet] = useState<null | "edit" | "loan" | "work">(edit ? "edit" : null);
+  const [selling, setSelling] = useState<SaleAction | null>(null);
+  const [moving, setMoving] = useState(false);
+  const swapNumbers = useSwapNumbers();
+  const dnd = useTenantDnd((fromId, toId) => {
+    const from = data.units.find((u) => u.id === fromId);
+    const to = data.units.find((u) => u.id === toId);
+    if (from && to) swapNumbers(from, to);
+  });
   const [unitId, setUnitId] = useState<string | null>(null);
   const [workId, setWorkId] = useState<string | null>(null);
   const building = data.buildings.find((b) => b.id === id);
@@ -43,7 +62,7 @@ function BuildingDetailInner({ id }: { id: string }) {
   const snap = projection.snapshot;
   const f = snap.byBuilding.get(id)!;
   const company = data.companies.find((c) => c.id === building.companyId);
-  const units = data.units.filter((u) => u.buildingId === id);
+  const units = sortedUnits(data.units.filter((u) => u.buildingId === id));
   const loans = data.loans.filter((l) => l.buildingId === id);
   const works = data.works.filter((w) => w.buildingId === id).sort((a, b) => (a.year ?? 9999) - (b.year ?? 9999));
   const cf = cashflowMonthly(f);
@@ -59,23 +78,21 @@ function BuildingDetailInner({ id }: { id: string }) {
     setUnitId(u.id);
   };
 
+  // Règle commune (lib/removal) : logements, baux, crédits, travaux supprimés ; documents conservés.
   const removeBuilding = () => {
-    const items: { coll: Collection; id: string }[] = [{ coll: "buildings", id }];
-    units.forEach((u) => items.push(...unitRemovals(data, u.id)));
-    loans.forEach((l) => items.push({ coll: "loans", id: l.id }));
-    works.forEach((w) => items.push({ coll: "works", id: w.id }));
-    removeMany(items);
-    router.push(company ? `/patrimoine/societe/${company.id}` : "/patrimoine");
+    removeUndoable([{ coll: "buildings", id }], `${building.name} supprimé`);
+    goBack(router, company ? `/patrimoine/societe/${company.id}` : "/patrimoine");
   };
 
   return (
     <>
       <PageHeader
         title={building.name}
-        subtitle={[company?.name, building.city].filter(Boolean).join(" · ") || undefined}
+        crumbs={companyCrumbs(data, building.companyId)}
+        subtitle={building.city || undefined}
         back={company ? `/patrimoine/societe/${company.id}` : "/patrimoine"}
         action={
-          <button onClick={() => setSheet("edit")} className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-navy">
+          <button onClick={() => setSheet("edit")} className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-brand">
             <Pencil size={15} /> Modifier
           </button>
         }
@@ -83,7 +100,7 @@ function BuildingDetailInner({ id }: { id: string }) {
       <Page>
         <Card>
           <div className="grid grid-cols-2 gap-4">
-            <Kpi label="Valeur estimée" value={f.unvalued ? <span className="text-[15px] text-muted">Données insuffisantes</span> : eur(f.value)} />
+            <Kpi label="Valeur estimée" value={f.unvalued ? <MissingData action="Estimer" onClick={() => setSheet("edit")} /> : eur(f.value)} />
             <Kpi label="Patrimoine net" value={f.unvalued ? "—" : eurCompact(netWorth(f))} />
             <Kpi label="Capital restant dû" value={eurCompact(f.debt)} hint={ratio !== undefined ? `LTV ${pct(ratio)}` : undefined} />
             <Kpi label="Rendement brut" value={grossYield !== undefined ? pct(grossYield) : "—"} />
@@ -96,8 +113,22 @@ function BuildingDetailInner({ id }: { id: string }) {
           <div className="mt-3 text-xs text-muted">Charges annuelles : {eur(f.chargesAnnual)}</div>
         </Card>
 
-        <SectionTitle action={<AddLink onClick={addUnit} />}>
-          Logements {units.length > 0 && `(${units.length}${vacant ? ` · ${vacant} vacant${vacant > 1 ? "s" : ""}` : ""})`}
+        {/* Ordinateur : logements à gauche, financement et informations à droite. */}
+        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
+        <div className="min-w-0">
+        <SectionTitle
+          action={
+            <span className="flex items-center gap-4">
+              {units.length > 1 && (
+                <button onClick={() => setMoving(true)} className="flex items-center gap-1 text-sm font-semibold text-series-1">
+                  <ArrowRightLeft size={15} /> Numéros
+                </button>
+              )}
+              <AddLink onClick={addUnit} />
+            </span>
+          }
+        >
+          Lots {units.length > 0 && `(${units.length}${vacant ? ` · ${vacant} vacant${vacant > 1 ? "s" : ""}` : ""})`}
         </SectionTitle>
         <Card className="py-1">
           {units.length === 0 ? (
@@ -106,25 +137,40 @@ function BuildingDetailInner({ id }: { id: string }) {
             </div>
           ) : (
             <Divided>
-              {units.map((u) => (
-                <Row
-                  key={u.id}
-                  href={`/patrimoine/logement/${u.id}`}
-                  icon={<DoorOpen size={18} />}
-                  title={u.name}
-                  subtitle={
-                    u.status === "vacant"
-                      ? "Vacant"
-                      : [u.tenantFirstName, u.tenantLastName].filter(Boolean).join(" ") || labelOf(UNIT_TYPES, u.type)
-                  }
-                  right={u.status === "vacant" ? <Pill tone="warn">Vacant</Pill> : eur(u.rent)}
-                  rightSub={[labelOf(UNIT_TYPES, u.type), u.surface ? `${num(u.surface)} m²` : undefined].filter(Boolean).join(" · ")}
-                />
-              ))}
+              {units.map((u) => {
+                const name = tenantLabel(data, u);
+                return (
+                // Glisser le numéro d'un lot sur un autre échange leurs numéros (liste triée).
+                <div key={u.id} {...dropTarget(dnd, u.id, id)}>
+                  <SwipeDelete items={[{ coll: "units", id: u.id }]} message={`${u.name} supprimé`}>
+                    <Row
+                      href={`/patrimoine/lot/${u.id}`}
+                      icon={<DoorOpen size={18} />}
+                      title={units.length > 1 ? <LotHandle dnd={dnd} unitId={u.id} group={id} label={u.name} /> : u.name}
+                      subtitle={
+                        u.status === "vacant"
+                          ? "Vacant"
+                          : name || labelOf(UNIT_TYPES, u.type)
+                      }
+                      right={u.status === "vacant" ? <Pill tone="warn">Vacant</Pill> : eur(u.rent)}
+                      rightSub={[labelOf(UNIT_TYPES, u.type), u.surface ? `${num(u.surface)} m²` : undefined].filter(Boolean).join(" · ")}
+                    />
+                  </SwipeDelete>
+                </div>
+                );
+              })}
             </Divided>
           )}
         </Card>
+        {units.length > 1 && (
+          <p className="mt-2 px-1 text-[12.5px] text-muted">
+            Un numéro de lot est faux ? Faites glisser le lot sur son vrai numéro (sur téléphone : maintenez le doigt dessus). Seuls les deux numéros s&apos;échangent, le logement garde son locataire.
+          </p>
+        )}
+        <DragGhost dnd={dnd} units={units} />
 
+        </div>
+        <div className="min-w-0">
         <SectionTitle action={<AddLink onClick={() => setSheet("loan")} />}>Crédits</SectionTitle>
         <Card className="py-1">
           {loans.length === 0 ? (
@@ -135,8 +181,8 @@ function BuildingDetailInner({ id }: { id: string }) {
                 const r = snap.resolvedLoans.get(l.id);
                 const now = snap.byLoan.get(l.id);
                 return (
+                  <SwipeDelete key={l.id} items={[{ coll: "loans", id: l.id }]} message="Crédit supprimé">
                   <Row
-                    key={l.id}
                     href={`/patrimoine/credit/${l.id}`}
                     icon={<Landmark size={18} />}
                     title={l.name || l.bank || "Crédit"}
@@ -144,6 +190,7 @@ function BuildingDetailInner({ id }: { id: string }) {
                     right={now?.balance === undefined ? "—" : eurCompact(now.balance)}
                     rightSub={now?.paymentMonthly ? `${eur(now.paymentMonthly)}/mois` : undefined}
                   />
+                  </SwipeDelete>
                 );
               })}
             </Divided>
@@ -157,20 +204,44 @@ function BuildingDetailInner({ id }: { id: string }) {
           ) : (
             <Divided>
               {works.map((w) => (
+                <SwipeDelete key={w.id} items={[{ coll: "works", id: w.id }]} message="Travaux supprimés">
                 <Row
-                  key={w.id}
                   onClick={() => setWorkId(w.id)}
                   icon={<Hammer size={18} />}
                   title={w.label}
                   subtitle={`${w.year ?? "Année ?"} · ${labelOf(WORK_STATUSES, w.status ?? "prevu")}`}
                   right={eur(w.amount)}
                 />
+                </SwipeDelete>
               ))}
             </Divided>
           )}
         </Card>
 
         <BuildingValueHistory building={building} />
+
+        <SectionTitle action={<AddLink onClick={() => setSelling(newSale(building.id))} label="Vendre" />}>Vente</SectionTitle>
+        <Card className="py-1">
+          {data.plans.some((p) => p.type === "sale" && p.buildingId === building.id) ? (
+            <SalesList buildingId={building.id} openId={saleId} />
+          ) : (
+            <button onClick={() => setSelling(newSale(building.id))} className="flex w-full items-center gap-3 py-3 text-left">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-soft text-brand">
+                <BadgeEuro size={18} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[15px] font-medium text-ink">Vendre l&apos;immeuble ou des lots</span>
+                <span className="block text-[13px] text-muted">Prix par lot, date, remboursement : intégré aux projections et au dossier banque</span>
+              </span>
+            </button>
+          )}
+        </Card>
+        <SaleSheet sale={selling ?? undefined} open={!!selling} onClose={() => setSelling(null)} />
+        <SwapNumbersSheet units={units} open={moving} onClose={() => setMoving(false)} />
+
+        <DocumentsCard scope={{ buildingId: building.id }} href={`/documents?immeuble=${building.id}`} />
+
+        <AnalysisEntry scope={{ type: "building", id: building.id }} title="Analyse IA de cet immeuble" />
 
         <SectionTitle>Informations</SectionTitle>
         <Card className="space-y-1.5 text-[15px]">
@@ -188,10 +259,12 @@ function BuildingDetailInner({ id }: { id: string }) {
           </button>
         </Card>
 
+        </div>
+        </div>
         <div className="mt-8">
           <ConfirmDelete
             label="Supprimer l'immeuble"
-            message={`Supprimer ${building.name} avec ses logements, crédits et travaux ? Une sauvegarde automatique permet de revenir en arrière.`}
+            message={`Supprimer ${building.name} ? ${removalSummary(removalPlan(data, "buildings", building.id))}`}
             onConfirm={removeBuilding}
           />
         </div>
@@ -213,7 +286,7 @@ function BuildingDetailInner({ id }: { id: string }) {
         footer={
           <div className="space-y-2">
             <Button full onClick={() => setUnitId(null)}>Terminé</Button>
-            {unit && <ConfirmDelete label="Supprimer le logement" message="Supprimer ce logement ?" onConfirm={() => { removeMany(unitRemovals(data, unit.id)); setUnitId(null); }} />}
+            {unit && <ConfirmDelete label="Supprimer le logement" message="Supprimer ce logement ?" onConfirm={() => { removeUndoable([{ coll: "units", id: unit.id }], `${unit.name} supprimé`); setUnitId(null); }} />}
           </div>
         }
       >

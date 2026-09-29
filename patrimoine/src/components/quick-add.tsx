@@ -1,5 +1,9 @@
 "use client";
 
+import { ScheduleImportCard, scheduleOf, useScheduleImport } from "./details/loan-schedule";
+import { loanFieldsFromSchedule } from "@/lib/schedule";
+import { matchLoan } from "@/lib/loan-match";
+import { toast } from "./swipe";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Building2, Briefcase, Hammer, Landmark } from "lucide-react";
@@ -85,10 +89,36 @@ export function QuickCompany({ parentId, onDone }: { parentId?: string; onDone: 
 }
 
 export function QuickLoan({ buildingId, companyId, onDone }: { buildingId?: string; companyId?: string; onDone: (id: string) => void }) {
-  const { upsert, data } = useStore();
+  const { upsert, data, nowMonth } = useStore();
   const [name, setName] = useState<string>();
   const [bank, setBank] = useState<string>();
   const [building, setBuilding] = useState<string | undefined>(buildingId);
+  // Le plus simple et le plus exact : créer le crédit directement depuis le tableau de la banque.
+  const importer = useScheduleImport({
+    hint: name || bank,
+    onConfirm: ({ rows, fileId, fileName, bank: readBank, meta }) => {
+      // Même échéancier déjà enregistré : on ouvre ce crédit au lieu d'en créer un second.
+      const same = matchLoan(data, { rows, meta }, {}, nowMonth).identicalTo;
+      if (same) {
+        toast("Ce tableau est déjà enregistré sur un crédit existant");
+        onDone(same);
+        return;
+      }
+      const id = newId();
+      const b = bank || readBank || meta?.bank || undefined;
+      upsert("loans", {
+        id,
+        name: name || (b ? `Prêt ${b}` : "Nouveau crédit"),
+        bank: b,
+        buildingId: building ?? null,
+        companyId: building ? null : (companyId ?? null),
+        reference: meta?.reference || undefined,
+        ...loanFieldsFromSchedule(rows, nowMonth, meta),
+        schedule: scheduleOf(rows, fileId, fileName, meta),
+      } satisfies Loan);
+      onDone(id);
+    },
+  });
   const [remaining, setRemaining] = useState<number>();
   const [payment, setPayment] = useState<number>();
   const [endDate, setEndDate] = useState<string>();
@@ -115,12 +145,20 @@ export function QuickLoan({ buildingId, companyId, onDone }: { buildingId?: stri
         <TextField label="Banque" value={bank} onChange={setBank} />
       </Grid2>
       <SelectField label="Immeuble financé" value={building} options={buildings} onChange={setBuilding} emptyLabel="Aucun en particulier" />
+      <ScheduleImportCard
+        title="Vous avez le tableau d'amortissement ?"
+        text="Importez-le (PDF ou photo) : montant, taux, échéances, assurance, capital restant et fin se remplissent tout seuls, au centime."
+        importer={importer}
+      />
+      <div className="flex items-center gap-3 px-1 text-[12.5px] font-semibold uppercase tracking-wide text-muted">
+        <span className="h-px flex-1 bg-line" /> ou saisissez l&apos;essentiel <span className="h-px flex-1 bg-line" />
+      </div>
       <NumberField label="Capital restant dû" value={remaining} onChange={setRemaining} />
       <Grid2>
         <NumberField label="Mensualité" value={payment} onChange={setPayment} />
         <DateField label="Date de fin" value={endDate} onChange={setEndDate} />
       </Grid2>
-      <p className="px-1 text-xs text-muted">Taux, montant initial et assurance pourront être ajoutés ensuite.</p>
+      <p className="px-1 text-xs text-muted">Taux, montant initial et assurance pourront être ajoutés ensuite, ou le tableau importé depuis la fiche du crédit.</p>
       <Button full onClick={create}>
         Créer le crédit
       </Button>
@@ -201,7 +239,7 @@ export function AddMenu({ open, onClose }: { open: boolean; onClose: () => void 
       {kind === "company" && <QuickCompany onDone={(id) => { close(); router.push(`/patrimoine/societe/${id}`); }} />}
       {kind === "building" && <QuickBuilding onDone={(id) => { close(); router.push(`/patrimoine/immeuble/${id}`); }} />}
       {kind === "loan" && <QuickLoan onDone={(id) => { close(); router.push(`/patrimoine/credit/${id}`); }} />}
-      {kind === "work" && <QuickWork onDone={() => { close(); router.push(`/plus/travaux`); }} />}
+      {kind === "work" && <QuickWork onDone={() => { close(); router.push(`/patrimoine?vue=travaux`); }} />}
     </Sheet>
   );
 }

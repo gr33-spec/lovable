@@ -43,7 +43,7 @@ function omit<T extends object>(obj: T, keys: (keyof T)[]): T {
 export function scopeForGestion(data: AppData): AppData {
   return {
     schemaVersion: data.schemaVersion,
-    settings: { groupName: data.settings.groupName, leaseYears: data.settings.leaseYears, dismissedReminders: data.settings.dismissedReminders, onboardingDone: true },
+    settings: { groupName: data.settings.groupName, leaseYears: data.settings.leaseYears, dismissedReminders: data.settings.dismissedReminders, theme: data.settings.theme, onboardingDone: true },
     companies: data.companies.map((c) => pick(c, COMPANY_READ) as Company),
     buildings: data.buildings.map((b) => pick(b, BUILDING_READ) as Building),
     units: data.units.map((u) => omit(u, UNIT_HIDDEN)),
@@ -56,6 +56,8 @@ export function scopeForGestion(data: AppData): AppData {
     plans: [],
     scenarios: [],
     statements: [],
+    projects: [],
+    documents: [],
   };
 }
 

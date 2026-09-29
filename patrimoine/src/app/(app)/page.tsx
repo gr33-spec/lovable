@@ -1,7 +1,9 @@
 "use client";
 
+import { AnalysisEntry } from "@/components/analysis/entry";
+import { usePageState } from "@/lib/nav";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { BadgeEuro, Briefcase, Building2, CalendarClock, ChevronRight, CircleAlert, DoorOpen, Flag, Hammer, Landmark, Receipt, RefreshCw, ShoppingCart, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { cashflowMonthly, ltv, netWorth } from "@/lib/engine/snapshot";
@@ -23,8 +25,8 @@ export default function Accueil() {
   const { data, projection, nowMonth } = useStore();
   const snap = projection.snapshot;
   const t = snap.total;
-  const [chart, setChart] = useState<"net" | "debt" | "cf">("net");
-  const [horizon, setHorizon] = useState(10);
+  const [chart, setChart] = usePageState<"net" | "debt" | "cf">("graphique", "net");
+  const [horizon, setHorizon] = usePageState("horizon", 10);
   const y0 = yearOf(nowMonth);
 
   const steps = useMemo(() => milestones(data, projection, 6), [data, projection]);
@@ -44,8 +46,8 @@ export default function Accueil() {
 
   return (
     <>
-      <header className="safe-top px-5 pb-2 pt-6">
-        <div className="mx-auto max-w-2xl">
+      <header className="safe-top pb-2 pt-6">
+        <div className="mx-auto max-w-2xl px-5 lg:max-w-[2000px] lg:px-9 xl:px-11">
           <div>
             <div className="flex items-center justify-between text-[12px] font-semibold uppercase tracking-[0.12em] text-gold">
               <span className="truncate">{data.settings.groupName || "Mon patrimoine"}</span>
@@ -64,6 +66,9 @@ export default function Accueil() {
         </div>
       </header>
       <Page>
+        {/* Ordinateur : deux colonnes (situation à gauche, perspectives à droite). */}
+        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
+        <div className="min-w-0">
         {/* Carte principale */}
         <div className="hero-card mt-3 rounded-[30px] p-6 text-white">
           <div className="flex items-center justify-between">
@@ -73,7 +78,18 @@ export default function Accueil() {
             )}
           </div>
           <div className="tabular mt-1 text-[42px] font-extrabold leading-tight tracking-[-0.03em]">
-            {netWorth(t) !== undefined && (t.value > 0 || t.debt > 0) ? eur(netWorth(t)) : <span className="text-2xl font-bold text-white/75">Données insuffisantes</span>}
+            {netWorth(t) !== undefined && (t.value > 0 || t.debt > 0) ? (
+              eur(netWorth(t))
+            ) : (
+              <span className="block tracking-normal">
+                <span className="block text-[22px] font-bold text-white/80">Données insuffisantes</span>
+                {t.unvalued > 0 && (
+                  <Link href="/plus/a-completer" className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1.5 text-[13px] font-semibold text-white">
+                    Estimer la valeur de {t.unvalued} immeuble{t.unvalued > 1 ? "s" : ""} <ChevronRight size={14} />
+                  </Link>
+                )}
+              </span>
+            )}
           </div>
           <HeroSpark
             values={(t.unvalued > 0 ? projection.years.map((r) => r.debt) : projection.years.map((r) => r.net)).slice(0, 21)}
@@ -104,6 +120,7 @@ export default function Accueil() {
         </div>
 
         <RemindersCard items={alerts} />
+        <AnalysisEntry scope={{ type: "global" }} />
 
         {/* Flux */}
         <Card className="mt-4">
@@ -158,6 +175,8 @@ export default function Accueil() {
           </>
         )}
 
+        </div>
+        <div className="min-w-0 lg:mt-3 lg:[&>*:first-child]:mt-0">
         {t.cash > 0 && (
           <Card className="mt-4">
             <div className="flex items-center justify-between">
@@ -210,12 +229,12 @@ export default function Accueil() {
               <div className="py-8 text-center text-sm text-muted">Données insuffisantes : valeur estimée manquante pour {t.unvalued} immeuble(s).</div>
             )}
             {chart === "net" && t.unvalued === 0 && (
-              <LineChart years={years} series={[{ label: "Patrimoine net", values: projection.years.map((r) => r.net), color: "var(--series-1)" }]} />
+              <LineChart years={years} series={[{ label: "Patrimoine net", values: projection.years.map((r) => r.net), color: "var(--brand)" }]} />
             )}
             {chart === "debt" && (
               <LineChart
                 years={years}
-                series={[{ label: "Capital restant dû", values: projection.years.map((r) => r.debt), color: "var(--series-1)" }]}
+                series={[{ label: "Capital restant dû", values: projection.years.map((r) => r.debt), color: "var(--brand)" }]}
                 markers={[...new Set(projection.events.filter((e) => e.kind === "loan_end").slice(0, 5).map((e) => e.year))]}
               />
             )}
@@ -236,7 +255,7 @@ export default function Accueil() {
                 onClick={() => setHorizon(h)}
                 className={cx(
                   "shrink-0 rounded-full px-4 py-2 text-sm font-semibold",
-                  horizon === h ? "bg-navy text-white" : "bg-soft text-navy",
+                  horizon === h ? "bg-brand text-on-brand" : "bg-soft text-brand",
                 )}
               >
                 {h} ans
@@ -263,6 +282,8 @@ export default function Accueil() {
           )}
         </Card>
 
+        </div>
+        </div>
         <p className="mt-6 px-2 text-center text-xs text-muted">
           Hypothèses : valeurs {pct(data.settings.valueGrowthPct ?? 0)}/an · loyers {pct(data.settings.rentGrowthPct ?? 0)}/an ·{" "}
           <Link href="/plus/hypotheses" className="underline">modifier</Link>

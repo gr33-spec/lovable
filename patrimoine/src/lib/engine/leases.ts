@@ -10,6 +10,8 @@ import { monthLabel } from "./dates";
 export const LEASE_END_NOTICE_MONTHS = 8;
 /** Délai avant la date de révision à partir duquel le rappel apparaît. */
 export const REVISION_NOTICE_MONTHS = 1;
+/** Bail d'habitation : délai après la date de révision pour la demander (au-delà, elle est perdue pour l'année). */
+export const REVISION_CLAIM_MONTHS = 12;
 /** Délai avant la fin d'un crédit à partir duquel le rappel apparaît. */
 export const LOAN_END_NOTICE_MONTHS = 12;
 
@@ -79,8 +81,10 @@ export interface LeaseInfo {
   expired?: boolean;
   /** Date du rappel (8 mois avant la fin). */
   noticeDate?: string;
-  /** Prochaine date de révision du loyer. */
+  /** Prochaine date de révision du loyer (éventuellement passée, si elle peut encore être demandée). */
   nextRevision?: string;
+  /** Date limite pour demander la révision (bail d'habitation : un an après la date de révision). */
+  revisionDeadline?: string;
 }
 
 /** Première date « base + k × pas (mois) » strictement postérieure à `after`. */
@@ -111,14 +115,18 @@ export function leaseInfo(unit: Unit, today: string): LeaseInfo {
   if (out.end) out.noticeDate = addMonthsIso(out.end, -LEASE_END_NOTICE_MONTHS);
 
   const step = unit.revision === "triennale" ? 36 : unit.revision === "aucune" ? 0 : 12;
-  if (step && isValidIso(unit.leaseStart)) {
-    // Sans révision enregistrée, les révisions passées sont supposées faites
-    // (seule une échéance des deux derniers mois est encore signalée).
-    const recent = addMonthsIso(today, -2);
-    const after = isValidIso(unit.lastRevisionDate)
-      ? unit.lastRevisionDate > unit.leaseStart ? unit.lastRevisionDate : unit.leaseStart
-      : recent > unit.leaseStart ? recent : unit.leaseStart;
-    out.nextRevision = nextOccurrence(unit.leaseStart, step, after);
+  const base = isValidIso(unit.leaseStart) ? unit.leaseStart : isValidIso(unit.lastRevisionDate) ? unit.lastRevisionDate : undefined;
+  if (step && base) {
+    // Dernière révision faite (ou début du bail). Bail d'habitation : une révision
+    // non demandée dans l'année est perdue ; bail commercial (triennale) : elle
+    // reste possible tant qu'elle n'est pas demandée.
+    let after = isValidIso(unit.lastRevisionDate) && unit.lastRevisionDate > base ? unit.lastRevisionDate : base;
+    if (step === 12) {
+      const lapsed = addMonthsIso(today, -REVISION_CLAIM_MONTHS);
+      if (lapsed > after) after = lapsed;
+    }
+    out.nextRevision = nextOccurrence(base, step, after);
+    if (step === 12) out.revisionDeadline = addMonthsIso(out.nextRevision, REVISION_CLAIM_MONTHS);
   }
   return out;
 }
@@ -185,6 +193,8 @@ export interface Reminder {
   /** Échéance dépassée. */
   late: boolean;
   amount?: number;
+  /** Logement concerné (actions directes : réviser, marquer payé…). */
+  unitId?: string;
 }
 
 function unitPlace(data: AppData, unit: Unit): { building?: Building; label: string } {
@@ -203,6 +213,17 @@ function loanLabel(data: AppData, loan: Loan): string {
   return [loan.name || loan.bank || "Crédit", building?.name].filter(Boolean).join(" · ");
 }
 
+function revisionDetail(info: LeaseInfo, today: string, commercial: boolean): string {
+  const date = dateLong(info.nextRevision!);
+  if (commercial) {
+    return today >= info.nextRevision!
+      ? `demande possible depuis le ${date}, par lettre recommandée ; le nouveau loyer court à partir de la demande`
+      : `possible à partir du ${date}, sur demande par lettre recommandée`;
+  }
+  if (today < info.nextRevision!) return `le ${date} : prévenir le locataire avec le calcul`;
+  return `date de révision le ${date}, à demander avant le ${dateLong(info.revisionDeadline!)} ; non rétroactive, le nouveau loyer court à partir de la demande`;
+}
+
 export function reminders(
   data: AppData,
   today: string,
@@ -219,6 +240,7 @@ export function reminders(
         const days = daysBetween(today, info.end);
         out.push({
           id: `lease:${unit.id}:${info.end}`,
+          unitId: unit.id,
           kind: "lease_end",
           date: info.end,
           title: info.expired ? "Bail arrivé à échéance" : "Fin de bail à anticiper",
@@ -230,10 +252,11 @@ export function reminders(
       if (info.nextRevision && today >= addMonthsIso(info.nextRevision, -REVISION_NOTICE_MONTHS)) {
         out.push({
           id: `revision:${unit.id}:${info.nextRevision}`,
+          unitId: unit.id,
           kind: "revision",
           date: info.nextRevision,
           title: "Révision du loyer",
-          detail: `${label} — ${today >= info.nextRevision ? "à appliquer depuis le" : "le"} ${dateLong(info.nextRevision)}`,
+          detail: `${label} — ${revisionDetail(info, today, unit.revision === "triennale")}`,
           href,
           late: today > info.nextRevision,
         });
@@ -244,6 +267,7 @@ export function reminders(
     const { label } = unitPlace(data, line.unit);
     out.push({
       id: `unpaid:${line.unit.id}:${line.months.join(",")}:${Math.round(line.amount)}`,
+      unitId: line.unit.id,
       kind: "unpaid",
       date: `${line.months[0]}-01`,
       title: "Loyer impayé",

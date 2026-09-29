@@ -1,5 +1,8 @@
 "use client";
 
+import { useInGestion } from "../use-gestion";
+import { unitCrumbs } from "@/lib/crumbs";
+import { goBack } from "@/lib/nav";
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCheck, ChevronDown, Gauge, KeyRound, MessageSquarePlus, Minus, Plus, Trash2 } from "lucide-react";
@@ -24,6 +27,7 @@ const uid = () => crypto.randomUUID();
 function Editor({ unitId, inspectionId }: { unitId: string; inspectionId: string }) {
   const { data, upsert } = useStore();
   const router = useRouter();
+  const inGestion = useInGestion();
   const back = useSearchParams().get("retour") || `/patrimoine/logement/${unitId}`;
   const insp = data.inspections.find((i) => i.id === inspectionId);
   const unit = data.units.find((u) => u.id === unitId);
@@ -60,12 +64,12 @@ function Editor({ unitId, inspectionId }: { unitId: string; inspectionId: string
     // Les clés sont en principe remises le jour de l'état des lieux de sortie.
     if (exit && !tenancy.keysReturnedDate && insp.date) upsert("tenancies", { ...tenancy, keysReturnedDate: insp.date });
     upsert("units", { ...unit, rooms: insp.rooms.map((r) => r.name) });
-    router.push(back);
+    goBack(router, back);
   };
 
   return (
     <>
-      <PageHeader title={exit ? "État des lieux de sortie" : "État des lieux d'entrée"} subtitle={`${building?.name ?? ""} · ${unit.name}`} back={back} />
+      <PageHeader title={exit ? "État des lieux de sortie" : "État des lieux d'entrée"} crumbs={unitCrumbs(data, unit, inGestion, true)} back={back} />
       <Page>
         <Card>
           <DateField label="Date de l'état des lieux" value={insp.date} onChange={(v) => set({ date: v })} />
@@ -327,7 +331,7 @@ function AddLine({ placeholder, onAdd, suggestions = [] }: { placeholder: string
             }
           }}
         />
-        <button type="button" disabled={!v.trim()} onClick={() => { onAdd(v.trim()); setV(""); }} className="rounded-xl bg-navy px-3 text-white disabled:opacity-30" aria-label="Ajouter">
+        <button type="button" disabled={!v.trim()} onClick={() => { onAdd(v.trim()); setV(""); }} className="rounded-xl bg-brand px-3 text-on-brand disabled:opacity-30" aria-label="Ajouter">
           <Plus size={16} />
         </button>
       </div>

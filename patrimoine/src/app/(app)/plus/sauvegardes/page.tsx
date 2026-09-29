@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Download, History, RotateCcw, Upload, Save, FileSpreadsheet } from "lucide-react";
+import { Download, History, RotateCcw, Upload, Save, FileSpreadsheet, ShieldCheck, TriangleAlert } from "lucide-react";
+import { integrityReport } from "@/lib/integrity";
+import { COLLECTIONS } from "@/lib/types";
 import { useStore } from "@/lib/store";
 import { isValidBackup } from "@/lib/ops";
 import { complementsSchema, planComplements, type ComplementsPlan } from "@/lib/complements";
@@ -78,7 +80,11 @@ export default function SauvegardesPage() {
       // Fichier de compléments : fusion par nom, avec aperçu.
       if (json?.type === "patrimoine-complements") {
         const parsed = complementsSchema.safeParse(json);
-        if (!parsed.success) throw new Error();
+        if (!parsed.success) {
+          const issue = parsed.error.issues[0];
+          setMessage(`Fichier de compléments non reconnu (${issue.path.join(" › ") || "fichier"} : ${issue.message}). Rechargez la page pour obtenir la dernière version de l'application, puis réessayez.`);
+          return;
+        }
         setComplements(planComplements(data, parsed.data));
         return;
       }
@@ -113,7 +119,7 @@ export default function SauvegardesPage() {
     <>
       <PageHeader title="Sauvegardes" back="/plus" />
       <Page>
-        {message && <div className="mb-4 rounded-2xl bg-pos/10 px-4 py-3 text-sm text-pos">{message}</div>}
+        {message && <div className={`mb-4 rounded-2xl px-4 py-3 text-sm ${/valide|non reconnu|échoué/.test(message) ? "bg-warn/10 text-warn" : "bg-pos/10 text-pos"}`}>{message}</div>}
         <div className="grid gap-3">
           <Button href="/api/backup" icon={<Download size={18} />} full>
             Exporter une sauvegarde complète
@@ -137,6 +143,8 @@ export default function SauvegardesPage() {
           />
         </div>
 
+        <DataHealth />
+
         <SectionTitle action={<button onClick={manual} disabled={busy} className="flex items-center gap-1 text-sm font-semibold text-series-1"><Save size={15} /> Sauvegarder</button>}>
           Historique (restauration)
         </SectionTitle>
@@ -149,7 +157,7 @@ export default function SauvegardesPage() {
             <Divided>
               {snapshots.map((s) => (
                 <div key={s.id} className="flex items-center gap-3 py-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-soft text-navy">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-soft text-brand">
                     <History size={18} />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -160,7 +168,7 @@ export default function SauvegardesPage() {
                       {REASONS[s.reason] ?? s.reason} · {s.counts.companies} sociétés, {s.counts.buildings} immeubles, {s.counts.loans} crédits
                     </div>
                   </div>
-                  <button onClick={() => setConfirm(s)} className="flex items-center gap-1 rounded-full bg-soft px-3 py-2 text-sm font-semibold text-navy">
+                  <button onClick={() => setConfirm(s)} className="flex items-center gap-1 rounded-full bg-soft px-3 py-2 text-sm font-semibold text-brand">
                     <RotateCcw size={14} /> Restaurer
                   </button>
                 </div>
@@ -209,6 +217,42 @@ export default function SauvegardesPage() {
           ))}
         </div>
       </Sheet>
+    </>
+  );
+}
+
+/** Contrôle d'intégrité en continu : relations entre sociétés, immeubles, lots, baux, crédits et documents. */
+function DataHealth() {
+  const { data } = useStore();
+  const issues = integrityReport(data);
+  const count = COLLECTIONS.reduce((n, c) => n + ((data[c] as unknown[] | undefined)?.length ?? 0), 0);
+  return (
+    <>
+      <SectionTitle>État des données</SectionTitle>
+      <Card>
+        {issues.length === 0 ? (
+          <div className="flex items-start gap-3">
+            <ShieldCheck size={20} className="mt-0.5 shrink-0 text-pos" />
+            <div className="text-[14px] text-ink-2">
+              <b className="text-ink">Données cohérentes.</b> {count} éléments vérifiés : aucune relation cassée, aucun doublon, aucun rattachement contradictoire.
+            </div>
+          </div>
+        ) : (
+          <div>
+            <div className="flex items-start gap-3">
+              <TriangleAlert size={20} className="mt-0.5 shrink-0 text-warn" />
+              <div className="text-[14px] text-ink-2">
+                <b className="text-ink">{issues.length} point{issues.length > 1 ? "s" : ""} à vérifier</b> sur {count} éléments. Rien n&apos;est modifié automatiquement.
+              </div>
+            </div>
+            <ul className="mt-2 space-y-1 text-[12.5px] text-muted">
+              {issues.slice(0, 12).map((i) => (
+                <li key={`${i.coll}-${i.id}-${i.message}`}>• {i.message} ({i.coll} {i.id.slice(0, 8)})</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </Card>
     </>
   );
 }

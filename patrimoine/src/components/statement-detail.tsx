@@ -1,5 +1,6 @@
 "use client";
 
+import { goBack } from "@/lib/nav";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, Pencil, Sparkles } from "lucide-react";
@@ -9,6 +10,7 @@ import { evolution, statementRatios } from "@/lib/engine/indicators";
 import { eur, eurCompact, pct } from "@/lib/format";
 import { BALANCE_FIELDS, BilanImport, FiguresForm, INCOME_FIELDS } from "./bilans";
 import { Button, Card, ConfirmDelete, Empty, Kpi, Page, PageHeader, Pill, SectionTitle, Sheet, cx } from "./ui";
+import { openDocument } from "./pdf-viewer";
 
 const HIGHER_BETTER: (keyof StatementFigures)[] = ["revenue", "otherIncome", "operatingResult", "exceptionalResult", "netResult", "cash", "equity"];
 const LOWER_BETTER: (keyof StatementFigures)[] = ["externalCharges", "taxes", "financialCharges", "corporateTax", "bankDebt", "otherDebts"];
@@ -61,7 +63,7 @@ export function StatementDetail({ id }: { id: string }) {
         subtitle={company?.name}
         back="/plus/bilans"
         action={
-          <button onClick={() => setEditing(true)} className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-navy">
+          <button onClick={() => setEditing(true)} className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-brand">
             <Pencil size={15} /> Modifier
           </button>
         }
@@ -133,7 +135,7 @@ export function StatementDetail({ id }: { id: string }) {
             </Button>
           )}
           {st.fileId && (
-            <a href={`/api/files/${st.fileId}`} target="_blank" rel="noopener" className="flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-soft text-[16px] font-semibold text-navy">
+            <a href={`/api/files/${st.fileId}`} onClick={(e) => { e.preventDefault(); openDocument(`/api/files/${st.fileId}`); }} className="flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-soft text-[16px] font-semibold text-brand">
               <FileText size={18} /> Voir le PDF {st.fileName ? `(${st.fileName})` : ""}
             </a>
           )}
@@ -142,7 +144,7 @@ export function StatementDetail({ id }: { id: string }) {
             message="Supprimer ce bilan ? Le PDF joint reste dans l'historique de sauvegarde."
             onConfirm={() => {
               remove("statements", st.id);
-              router.push("/plus/bilans");
+              goBack(router, "/plus/bilans");
             }}
           />
         </div>

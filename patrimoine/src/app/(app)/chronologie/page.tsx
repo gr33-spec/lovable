@@ -1,287 +1,316 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Flag } from "lucide-react";
+import { ChevronRight, Flag, PartyPopper, Plus } from "lucide-react";
 import { KIND_STYLE } from "@/components/event-style";
 import { useStore } from "@/lib/store";
 import { NO_COMPANY, companyTree } from "@/lib/engine/snapshot";
-import { debtFreeYear, halfDebtYear, type EventKind, type TimelineEvent } from "@/lib/engine/projection";
+import type { TimelineEvent, YearRow } from "@/lib/engine/projection";
 import { companyLabel } from "@/lib/engine/milestones";
 import { yearOf } from "@/lib/engine/dates";
 import { eur, eurCompact, eurSigned } from "@/lib/format";
-import { BarChart, LineChart } from "@/components/charts";
-import { Card, Kpi, Page, PageHeader, SectionTitle, Segmented, cx } from "@/components/ui";
+import { LineChart } from "@/components/charts";
+import { remunerationYear } from "@/lib/fiscal/remuneration";
+import { Card, Page, PageHeader, SectionTitle, cx } from "@/components/ui";
 
+// Chronologie : ce qui change, et quand. Un escalier du cash-flow mensuel,
+// puis une carte par année où il se passe quelque chose.
 
-const NAME_COL = 104;
+const ALL = "__all";
 
-export default function ChronologiePage() {
+/** Lien vers l'élément à l'origine de l'événement. */
+function hrefOf(e: TimelineEvent): string | undefined {
+  if (e.id.startsWith("project-") && e.refId) return `/patrimoine/projet/${e.refId}`;
+  if (e.kind === "sale" && e.source === "plan" && e.buildingId) return `/patrimoine/immeuble/${e.buildingId}?vente=${e.refId}`;
+  if (e.source === "plan") return "/simulations";
+  if ((e.kind === "loan_end" || e.kind === "balloon" || e.kind === "prepayment") && e.loanId && !e.loanId.startsWith("loan-")) return `/patrimoine/credit/${e.loanId}`;
+  if (e.kind === "works") return "/patrimoine?vue=travaux";
+  if (e.kind === "event") return "/plus/evenements";
+  if (e.kind === "income") return "/plus/remuneration";
+  if (e.kind === "acquisition" && e.refId) return `/patrimoine/immeuble/${e.refId}`;
+  return undefined;
+}
+
+/** Libellé lisible : « Fin — Prêt X » devient « Fin du crédit : Prêt X ». */
+function labelOf(e: TimelineEvent): string {
+  if (e.kind === "loan_end") return e.label.replace(/^Fin — /, "Fin du crédit · ");
+  return e.label;
+}
+
+function EventAmount({ e }: { e: TimelineEvent }) {
+  if (e.monthlyFreed) return <span className="text-pos">+{eur(e.monthlyFreed)}/mois</span>;
+  if (!e.amount) return null;
+  if (e.kind === "income") return <span className="text-ink">{eurCompact(e.amount)}/an</span>;
+  const out = e.kind === "works" || e.kind === "balloon" || e.kind === "prepayment" || e.kind === "purchase";
+  return <span className={out ? "text-neg" : "text-ink"}>{out ? "−" : ""}{eurCompact(Math.abs(e.amount))}</span>;
+}
+
+const monthly = (r: YearRow) => r.cashflow / 12;
+
+export default function Chronologie() {
   const { data, projection, nowMonth } = useStore();
   const y0 = yearOf(nowMonth);
-  const years = projection.years.map((r) => r.year);
-  const [zoom, setZoom] = useState<"10" | "20" | "30">("10");
-  const [selected, setSelected] = useState(y0 + 5);
-  const scroller = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState(360);
+  const [scope, setScope] = useState<string>(ALL);
 
-  useEffect(() => {
-    const el = scroller.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => setWidth(el.clientWidth));
-    ro.observe(el);
-    setWidth(el.clientWidth);
-    return () => ro.disconnect();
-  }, []);
+  // Sociétés concernées par au moins un événement (dans l'ordre de l'organigramme).
+  const scopes = useMemo(() => {
+    const keys = new Set(projection.events.map((e) => e.companyKey));
+    const list = companyTree(data.companies)
+      .map(({ company }) => company)
+      .filter((c) => keys.has(c.id))
+      .map((c) => ({ key: c.id, label: c.name }));
+    if (keys.has(NO_COMPANY)) list.push({ key: NO_COMPANY, label: "Hors société" });
+    return list;
+  }, [data.companies, projection.events]);
 
-  const visibleYears = Number(zoom) + 1;
-  const colW = Math.max(26, (width - NAME_COL) / visibleYears);
+  const rows = scope === ALL ? projection.years : (projection.byCompany.get(scope) ?? []);
+  const events = useMemo(
+    () => projection.events.filter((e) => e.year >= y0 && (scope === ALL || e.companyKey === scope)),
+    [projection.events, scope, y0],
+  );
 
-  // Garde l'année sélectionnée visible lors d'un changement de zoom ou d'année.
-  useEffect(() => {
-    const el = scroller.current;
-    if (!el) return;
-    const x = (selected - y0) * colW;
-    const viewW = el.clientWidth - NAME_COL;
-    if (x < el.scrollLeft || x + colW > el.scrollLeft + viewW) {
-      el.scrollTo({ left: Math.max(0, x - viewW / 2), behavior: "smooth" });
-    }
-  }, [selected, colW, y0]);
-
-  const lines = useMemo(() => {
-    const keys = companyTree(data.companies).map(({ company }) => ({ key: company.id, label: company.name }));
-    if (projection.events.some((e) => e.companyKey === NO_COMPANY) || data.buildings.some((b) => !b.companyId)) {
-      keys.push({ key: NO_COMPANY, label: "Hors société" });
-    }
-    return keys;
-  }, [data.companies, data.buildings, projection.events]);
-
-  const eventsByCell = useMemo(() => {
-    const map = new Map<string, TimelineEvent[]>();
-    for (const e of projection.events) {
-      const k = `${e.companyKey}|${e.year}`;
-      map.set(k, [...(map.get(k) ?? []), e]);
-    }
-    return map;
-  }, [projection.events]);
-
-  const row = projection.years.find((r) => r.year === selected);
-  const yearEvents = projection.events.filter((e) => e.year === selected);
-  const half = halfDebtYear(projection);
-  const free = debtFreeYear(projection);
-
-  const insights = useMemo(() => {
-    const out: string[] = [];
-    const ends = projection.events.filter((e) => e.kind === "loan_end");
+  const groups = useMemo(() => {
     const byYear = new Map<number, TimelineEvent[]>();
-    for (const e of ends) byYear.set(e.year, [...(byYear.get(e.year) ?? []), e]);
-    const first = ends[0];
-    if (first) {
-      out.push(`En ${first.year}, ${first.label.replace(/^Fin — /, "le ")} se termine : cash-flow +${eurCompact(first.monthlyFreed)}/mois.`);
+    for (const e of events) byYear.set(e.year, [...(byYear.get(e.year) ?? []), e]);
+    return [...byYear.entries()].sort((a, b) => a[0] - b[0]);
+  }, [events]);
+
+  // « Grande année » : celle qui libère le plus de mensualités (au moins deux fins de crédit).
+  const bigYear = useMemo(() => {
+    let best: { year: number; freed: number } | undefined;
+    for (const [year, list] of groups) {
+      const ends = list.filter((e) => e.kind === "loan_end");
+      const freed = ends.reduce((s, e) => s + (e.monthlyFreed ?? 0), 0);
+      if (ends.length >= 2 && (!best || freed > best.freed)) best = { year, freed };
     }
-    const busiest = [...byYear.entries()].filter(([, l]) => l.length > 1).sort((a, b) => b[1].length - a[1].length)[0];
-    if (busiest) {
-      const freed = busiest[1].reduce((s, e) => s + (e.monthlyFreed ?? 0), 0);
-      out.push(`En ${busiest[0]}, ${busiest[1].length} crédits se terminent : +${eurCompact(freed)}/mois.`);
-    }
-    if (half) out.push(`En ${half}, la dette est divisée par deux par rapport à aujourd'hui.`);
-    if (free) out.push(`En ${free}, le patrimoine est entièrement désendetté.`);
-    return out;
-  }, [projection.events, half, free]);
+    return best?.year;
+  }, [groups]);
+
+  const now = rows.find((r) => r.year === y0);
+  const last = rows[rows.length - 1];
+  const debtFree = rows.find((r) => r.year > y0 && r.debt < 1 && (now?.debt ?? 0) >= 1)?.year;
+  // Situation une fois tous les crédits terminés (l'année suivant la dernière échéance, pleine).
+  const endRow = debtFree ? (rows.find((r) => r.year === debtFree + 1) ?? rows.find((r) => r.year === debtFree)) : last;
+  const loanYears = [...new Set(events.filter((e) => e.kind === "loan_end").map((e) => e.year))];
+  const household = useMemo(() => (data.withdrawals.length ? projection.years.map((r) => remunerationYear(data, r.year, y0)) : []), [data, projection.years, y0]);
+  const scopeName = scope === ALL ? undefined : scopes.find((s) => s.key === scope)?.label;
 
   return (
     <>
       <PageHeader
         title="Chronologie"
         back="/plus"
-        subtitle={`${y0} → ${y0 + 30}`}
+        subtitle={scopeName ? `${scopeName} · ${y0} → ${y0 + 30}` : "Ce qui change, et quand"}
         action={
-          <Link href="/plus/evenements" className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-navy">
-            <Flag size={15} /> Événements
+          <Link href="/plus/evenements" className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-brand">
+            <Plus size={15} /> Événement
           </Link>
         }
       />
       <Page>
-        {insights.length > 0 && (
-          <div className="hero-card space-y-2.5 rounded-[26px] p-5 text-white">
-            {insights.map((t) => (
-              <div key={t} className="flex gap-2 text-[15px] leading-snug">
-                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gold" />
-                <span>{t}</span>
-              </div>
+        {scopes.length > 1 && (
+          <div className="no-scrollbar -mx-4 mb-3 flex gap-2 overflow-x-auto px-4">
+            {[{ key: ALL, label: "Tout le groupe" }, ...scopes].map((s) => (
+              <button
+                key={s.key}
+                onClick={() => setScope(s.key)}
+                className={cx("shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold", scope === s.key ? "bg-brand text-on-brand" : "bg-soft text-ink-2")}
+              >
+                {s.label}
+              </button>
             ))}
           </div>
         )}
 
-        <div className="mt-4 flex items-center gap-3">
-          <div className="flex-1">
-            <Segmented
-              value={zoom}
-              onChange={setZoom}
-              options={[
-                { value: "10", label: "10 ans" },
-                { value: "20", label: "20 ans" },
-                { value: "30", label: "30 ans" },
-              ]}
-            />
-          </div>
-        </div>
-
-        {/* Frise */}
-        <Card className="mt-3 overflow-hidden p-0">
-          <div ref={scroller} className="no-scrollbar relative overflow-x-auto">
-            <div style={{ width: NAME_COL + colW * years.length }}>
-              {/* En-tête des années */}
-              <div className="flex border-b border-line">
-                <div className="sticky left-0 z-10 shrink-0 bg-card" style={{ width: NAME_COL }} />
-                {years.map((y) => (
-                  <button
-                    key={y}
-                    onClick={() => setSelected(y)}
-                    className={cx(
-                      "tabular shrink-0 py-2 text-center text-[11px] font-medium",
-                      y === selected ? "bg-navy text-white" : y % 5 === 0 ? "text-ink" : "text-muted",
-                    )}
-                    style={{ width: colW }}
-                  >
-                    {colW < 34 ? (colW >= 20 || y % 5 === 0 || y === selected ? `’${String(y).slice(2)}` : "") : y}
-                  </button>
-                ))}
+        <div className="xl:grid xl:grid-cols-2 xl:items-start xl:gap-x-6 xl:[&>*]:!mt-0">
+        {/* L'escalier du cash-flow */}
+        {rows.length > 1 && now && (
+          <Card>
+            <div className="text-[13px] text-muted">Cash-flow par mois</div>
+            <div className="mt-0.5 flex items-baseline gap-2">
+              <span className={cx("tabular text-[26px] font-extrabold", monthly(now) >= 0 ? "text-navy" : "text-neg")}>{eurSigned(monthly(now))}</span>
+              <span className="text-[13px] text-muted">aujourd&apos;hui</span>
+            </div>
+            {endRow && endRow.year !== y0 && (
+              <div className="text-[14px] text-ink-2">
+                → <b className={cx("tabular", monthly(endRow) >= 0 ? "text-pos" : "text-neg")}>{eurSigned(monthly(endRow))}</b>{" "}
+                {debtFree ? `à partir de ${debtFree + 1 <= last.year ? debtFree + 1 : debtFree}, sans aucun crédit` : `en ${endRow.year}`}
               </div>
-              {lines.map((line) => (
-                <div key={line.key} className="flex border-b border-line/70 last:border-0">
-                  <div className="sticky left-0 z-10 flex shrink-0 items-center bg-card px-3 text-[12px] font-semibold leading-tight text-navy shadow-[4px_0_8px_-6px_rgba(0,0,0,0.15)]" style={{ width: NAME_COL, minHeight: 48 }}>
-                    <span className="line-clamp-2">{line.label}</span>
-                  </div>
-                  {years.map((y) => {
-                    const evs = eventsByCell.get(`${line.key}|${y}`) ?? [];
-                    return (
-                      <button
-                        key={y}
-                        onClick={() => setSelected(y)}
-                        className={cx("flex shrink-0 flex-col items-center justify-center gap-0.5 py-1", y === selected && "bg-navy/5")}
-                        style={{ width: colW, minHeight: 48 }}
-                        aria-label={`${line.label} ${y} : ${evs.length} événement(s)`}
-                      >
-                        {evs.slice(0, 2).map((e) => (
-                          <span key={e.id} className={cx("flex h-5 w-5 items-center justify-center rounded-full", KIND_STYLE[e.kind].color, e.source === "scenario" && "opacity-60")}>
-                            {KIND_STYLE[e.kind].icon}
-                          </span>
-                        ))}
-                        {evs.length > 2 && <span className="text-[10px] font-semibold text-ink-2">+{evs.length - 2}</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-              ))}
+            )}
+            <div className="mt-3">
+              <LineChart
+                years={rows.map((r) => r.year)}
+                series={[{ label: "Cash-flow / mois", values: rows.map((r) => Math.round(r.cashflow / 12)), color: "var(--brand)" }]}
+                markers={loanYears}
+                height={170}
+                step
+              />
             </div>
-          </div>
-        </Card>
-        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 px-1 text-[11px] text-ink-2">
-          {(["loan_end", "works", "sale", "balloon", "event"] as EventKind[]).map((k) => (
-            <span key={k} className="inline-flex items-center gap-1">
-              <span className={cx("flex h-3.5 w-3.5 items-center justify-center rounded-full", KIND_STYLE[k].color)} />
-              {KIND_STYLE[k].label}
-            </span>
-          ))}
-        </div>
-
-        {/* Photographie de l'année */}
-        <div className="mt-6 flex items-center justify-between px-1">
-          <button onClick={() => setSelected(Math.max(y0, selected - 1))} className="flex h-11 w-11 items-center justify-center rounded-full bg-card text-navy shadow-sm" aria-label="Année précédente">
-            <ChevronLeft size={22} />
-          </button>
-          <div className="text-center">
-            <div className="text-xs uppercase tracking-wider text-muted">Photographie</div>
-            <div className="tabular text-[30px] font-bold text-navy">{selected}</div>
-          </div>
-          <button onClick={() => setSelected(Math.min(y0 + 30, selected + 1))} className="flex h-11 w-11 items-center justify-center rounded-full bg-card text-navy shadow-sm" aria-label="Année suivante">
-            <ChevronRight size={22} />
-          </button>
-        </div>
-        <input
-          type="range"
-          min={y0}
-          max={y0 + 30}
-          value={selected}
-          onChange={(e) => setSelected(Number(e.target.value))}
-          className="mt-2 w-full accent-[#0b2545]"
-          aria-label="Choisir une année"
-        />
-        {row && (
-          <Card className="mt-3">
-            <div className="grid grid-cols-2 gap-4">
-              <Kpi label="Valeur patrimoniale" value={projection.snapshot.total.unvalued > 0 ? "—" : eurCompact(row.value)} />
-              <Kpi label="Dette restante" value={eurCompact(row.debt)} />
-              <Kpi label="Patrimoine net" value={projection.snapshot.total.unvalued > 0 ? "—" : eurCompact(row.net)} />
-              <Kpi label="Trésorerie cumulée" value={eurCompact(row.treasury)} />
-              <Kpi label="Loyers / mois" value={eurCompact(row.rent / 12)} />
-              <Kpi label="Mensualités / mois" value={eurCompact(row.payments / 12)} />
-            </div>
-            <div className="mt-4 flex items-end justify-between border-t border-line pt-4">
-              <Kpi label="Cash-flow estimé / mois" value={eurSigned(row.cashflow / 12)} tone={row.cashflow >= 0 ? "pos" : "neg"} big />
-              <div className="text-right text-sm text-muted">
-                <div>{eurSigned(row.cashflow)} / an</div>
-                <div>{row.activeLoans} crédit(s) en cours</div>
-              </div>
-            </div>
-            {(row.works > 0 || row.balloons > 0 || row.withdrawals > 0 || row.operations !== 0) && (
-              <div className="mt-3 space-y-1 border-t border-line pt-3 text-sm">
-                {row.works > 0 && <Line label="Travaux" value={-row.works} />}
-                {row.balloons > 0 && <Line label="Remboursements in fine" value={-row.balloons} />}
-                {row.withdrawals > 0 && <Line label="Sorties personnelles" value={-row.withdrawals} />}
-                {row.operations !== 0 && <Line label="Opérations (ventes, achats…)" value={row.operations} />}
+            {loanYears.length > 0 && (
+              <div className="mt-1 flex items-center gap-1.5 text-[11.5px] text-muted">
+                <span className="inline-block h-2.5 w-2.5 rounded-full bg-gold" /> Chaque marche = un ou plusieurs crédits terminés
               </div>
             )}
           </Card>
         )}
-        {yearEvents.length > 0 && (
-          <Card className="mt-3 py-2">
-            <div className="divide-y divide-line">
-              {yearEvents.map((e) => (
-                <div key={e.id} className="flex items-center gap-3 py-2.5">
-                  <span className={cx("flex h-7 w-7 shrink-0 items-center justify-center rounded-full", KIND_STYLE[e.kind].color)}>{KIND_STYLE[e.kind].icon}</span>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-[15px] text-ink">{e.label}</div>
-                    <div className="truncate text-xs text-muted">{companyLabel(data, e.companyKey)}{e.source === "plan" ? " · opération validée" : ""}</div>
-                  </div>
-                  <div className="tabular shrink-0 text-sm font-semibold">
-                    {e.monthlyFreed ? <span className="text-pos">+{eurCompact(e.monthlyFreed)}/m</span> : e.amount ? eurCompact(e.amount) : null}
-                  </div>
-                </div>
-              ))}
+
+        {/* Revenus du foyer */}
+        {scope === ALL && household.length > 1 && household.some((h) => h.net > 0) && (
+          <Card className="mt-3">
+            <div className="flex items-center justify-between">
+              <div className="text-[13px] text-muted">Revenus nets du foyer, après cotisations et impôts</div>
+              <Link href="/plus/remuneration" className="text-[13px] font-medium text-series-1">
+                Régler
+              </Link>
+            </div>
+            <div className="mt-0.5 flex items-baseline gap-2">
+              <span className="tabular text-[22px] font-extrabold text-navy">{eur(Math.round(household[0].net / 12))}</span>
+              <span className="text-[13px] text-muted">par mois en {household[0].year}</span>
+            </div>
+            <div className="mt-3">
+              <LineChart years={household.map((h) => h.year)} series={[{ label: "Revenus nets / mois", values: household.map((h) => Math.round(h.net / 12)), color: "#7c5cc4" }]} height={130} step />
             </div>
           </Card>
         )}
 
-        <SectionTitle>Projection</SectionTitle>
-        <Card>
-          <div className="mb-1 text-sm font-semibold text-ink">Dette restante</div>
-          <LineChart years={years} series={[{ label: "Dette restante", values: projection.years.map((r) => r.debt), color: "var(--series-1)" }]} selectedYear={selected} onSelectYear={setSelected} height={160} />
-        </Card>
-        <Card className="mt-3">
-          <div className="mb-1 text-sm font-semibold text-ink">Cash-flow annuel</div>
-          <BarChart years={years} values={projection.years.map((r) => r.cashflow)} selectedYear={selected} onSelectYear={setSelected} label="Cash-flow" height={150} />
-        </Card>
-        {projection.snapshot.total.unvalued === 0 && (
-        <Card className="mt-3">
-          <div className="mb-1 text-sm font-semibold text-ink">Patrimoine net</div>
-          <LineChart years={years} series={[{ label: "Patrimoine net", values: projection.years.map((r) => r.net), color: "var(--series-1)" }]} selectedYear={selected} onSelectYear={setSelected} height={160} />
-        </Card>
-        )}
+        </div>
+        {/* Frise */}
+        <SectionTitle>Année après année</SectionTitle>
+        <div className="relative pl-6">
+          <div className="absolute bottom-3 left-[9px] top-3 w-0.5 rounded bg-line" />
+
+          <YearNode label="Aujourd'hui" tone="navy">
+            {now ? (
+              <Summary row={now} hint={`${now.activeLoans} crédit(s) en cours`} />
+            ) : (
+              <p className="text-[13px] text-muted">Données insuffisantes</p>
+            )}
+          </YearNode>
+
+          {groups.length === 0 && (
+            <Card className="mb-3">
+              <p className="text-[14px] text-muted">Aucune échéance à venir{scopeName ? ` pour ${scopeName}` : ""}. Les fins de crédit, travaux et événements s&apos;afficheront ici.</p>
+            </Card>
+          )}
+
+          {groups.map(([year, list]) => {
+            // Situation une fois l'année passée (une fin de crédit en cours d'année ne pèse plus l'année suivante).
+            const row = rows.find((r) => r.year === year + 1) ?? rows.find((r) => r.year === year);
+            const big = year === bigYear;
+            return (
+              <YearNode
+                key={year}
+                label={String(year)}
+                tone={year === debtFree ? "pos" : big ? "gold" : "line"}
+                icon={year === debtFree ? <PartyPopper size={12} /> : undefined}
+                badge={year === debtFree ? "Dernier crédit" : big ? "Grande année" : undefined}
+              >
+                <div className="divide-y divide-line">
+                  {list.map((e) => {
+                    const href = hrefOf(e);
+                    const inner = (
+                      <>
+                        <span className={cx("flex h-8 w-8 shrink-0 items-center justify-center rounded-full", KIND_STYLE[e.kind].color)}>{KIND_STYLE[e.kind].icon}</span>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[14.5px] leading-snug text-ink">{labelOf(e)}</div>
+                          <div className="truncate text-[12px] text-muted">
+                            {scope === ALL ? companyLabel(data, e.companyKey) : KIND_STYLE[e.kind].label}
+                            {e.id.startsWith("project-") ? " · projet" : e.source === "plan" ? " · opération validée" : ""}
+                          </div>
+                        </div>
+                        <div className="tabular shrink-0 text-[13.5px] font-semibold">
+                          <EventAmount e={e} />
+                        </div>
+                        {href && <ChevronRight size={16} className="shrink-0 text-muted" />}
+                      </>
+                    );
+                    return href ? (
+                      <Link key={e.id} href={href} className="flex items-center gap-3 py-2.5">
+                        {inner}
+                      </Link>
+                    ) : (
+                      <div key={e.id} className="flex items-center gap-3 py-2.5">
+                        {inner}
+                      </div>
+                    );
+                  })}
+                </div>
+                {row && <Summary row={row} after />}
+                {year === debtFree && <div className="border-t border-line pb-1 pt-2.5 text-[14px] font-bold text-pos">Plus aucun crédit : tous les loyers restent disponibles.</div>}
+              </YearNode>
+            );
+          })}
+
+          {debtFree && !groups.some(([y]) => y === debtFree) && (
+            <YearNode label={String(debtFree)} tone="pos" icon={<PartyPopper size={12} />}>
+              <div className="py-2 text-[14px] font-bold text-pos">Plus aucun crédit : tous les loyers restent disponibles.</div>
+            </YearNode>
+          )}
+          {!debtFree && (
+            last &&
+            last.year !== y0 && (
+              <YearNode label={`En ${last.year}`} tone="line">
+                <Summary row={last} />
+              </YearNode>
+            )
+          )}
+        </div>
+
         <p className="mt-4 px-2 text-center text-xs text-muted">
-          Opérations datées au 1er janvier de l&apos;année. L&apos;année en cours est annualisée.
+          Cash-flow = loyers − charges − mensualités, hors travaux et opérations ponctuelles. Hypothèses modifiables dans{" "}
+          <Link href="/plus/hypotheses" className="underline">
+            Hypothèses de projection
+          </Link>
+          .
         </p>
       </Page>
     </>
   );
 }
 
-function Line({ label, value }: { label: string; value: number }) {
+/** Pastille d'année sur la frise, suivie de sa carte. */
+function YearNode({
+  label,
+  tone,
+  badge,
+  icon,
+  children,
+}: {
+  label: string;
+  tone: "navy" | "gold" | "pos" | "line";
+  badge?: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  const dot = { navy: "bg-navy", gold: "bg-gold", pos: "bg-pos", line: "bg-card ring-2 ring-line" }[tone];
   return (
-    <div className="flex justify-between">
-      <span className="text-ink-2">{label}</span>
-      <span className={cx("tabular font-medium", value >= 0 ? "text-pos" : "text-neg")}>{eur(value)}</span>
+    <div className="relative mb-4">
+      <span className={cx("absolute -left-6 top-1 flex h-5 w-5 items-center justify-center rounded-full text-white", dot)}>{icon ?? (tone === "gold" ? <Flag size={11} /> : null)}</span>
+      <div className="mb-1.5 flex items-center gap-2">
+        <span className="tabular text-[17px] font-extrabold text-navy">{label}</span>
+        {badge && <span className={cx("rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide", tone === "pos" ? "bg-pos/10 text-pos" : "bg-gold/15 text-gold")}>{badge}</span>}
+      </div>
+      <Card className="py-2">{children}</Card>
+    </div>
+  );
+}
+
+/** Situation en fin d'année : cash-flow mensuel et dette restante. */
+function Summary({ row, after, hint }: { row: YearRow; after?: boolean; hint?: string }) {
+  const cf = row.cashflow / 12;
+  return (
+    <div className={cx("flex flex-wrap items-baseline gap-x-4 gap-y-0.5 py-2 text-[13px]", after && "mt-1 border-t border-line pt-2.5")}>
+      {after && <span className="text-muted">Ensuite :</span>}
+      <span>
+        <span className="text-muted">Cash-flow </span>
+        <b className={cx("tabular", cf >= 0 ? "text-pos" : "text-neg")}>{eurSigned(cf)}/mois</b>
+      </span>
+      <span>
+        <span className="text-muted">Dette </span>
+        <b className="tabular text-ink">{eurCompact(row.debt)}</b>
+      </span>
+      {hint && <span className="text-muted">{hint}</span>}
     </div>
   );
 }

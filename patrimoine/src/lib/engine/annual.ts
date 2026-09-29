@@ -1,4 +1,5 @@
 import type { AppData, Tenancy, Unit } from "../types";
+import { sortedUnits } from "../lots";
 import { daysBetween, monthKey, todayIso } from "./leases";
 import { occupiedDays } from "../legal/rules";
 
@@ -72,19 +73,23 @@ export function yearStats(data: AppData, year: number, today = todayIso(), upToM
 
   const buildings: BuildingYear[] = data.buildings
     .map((b) => {
-      const units: UnitYear[] = data.units
-        .filter((u) => u.buildingId === b.id)
+      const units: UnitYear[] = sortedUnits(data.units.filter((u) => u.buildingId === b.id))
         .map((unit) => {
           const leases = tenanciesOf(data, unit.id);
           const known = leases.length > 0;
           if (!known) estimatedUnits += 1;
+          // Avant le premier bail connu, s'il a été saisi a posteriori (bail importé),
+          // l'occupation est inconnue : ces mois ne comptent ni comme loués ni comme vacants.
+          const first = [...leases].sort((a, b) => (a.startDate ?? "").localeCompare(b.startDate ?? ""))[0];
+          const unknownBefore = first?.imported && first.startDate ? monthKey(first.startDate) : undefined;
           let occupied = 0;
           let vacant = 0;
           const months: CellStatus[] = keys.map((k, i) => {
             if (i + 1 > lastMonth) return "futur";
             const p = unit.payments?.[k];
+            if (unknownBefore && k < unknownBefore && !p) return "non_pointe";
             // Occupation : baux connus, sinon pointage du mois, sinon statut actuel du logement.
-            const share = known ? occupancyShare(leases, k) : p ? 1 : unit.status === "vacant" ? 0 : 1;
+            const share = unknownBefore && k <= unknownBefore ? 1 : known ? occupancyShare(leases, k) : p ? 1 : unit.status === "vacant" ? 0 : 1;
             occupied += share;
             vacant += 1 - share;
             if (share === 0) return "vacant";

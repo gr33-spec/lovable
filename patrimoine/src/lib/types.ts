@@ -1,3 +1,5 @@
+import type { SavedAnalysis } from "./analysis/types";
+
 // Modèle de données de l'application. Tous les champs chiffrés sont
 // optionnels : l'application doit fonctionner avec des données partielles.
 
@@ -25,6 +27,10 @@ export interface Company {
   partnerAccounts?: number;
   /** Régime / fiscalité, texte libre. */
   taxRegime?: string;
+  /** Capital social (€) : sert au calcul des dividendes soumis aux cotisations TNS. */
+  shareCapital?: number;
+  /** Société d'exploitation : chiffre d'affaires et charges. */
+  activity?: CompanyActivity;
   // ——— Bailleur (baux, états des lieux, quittances) ———
   /** Adresse du siège social. */
   address?: string;
@@ -159,6 +165,10 @@ export interface RentChange {
   previousRent?: number;
   indexLabel?: string;
   indexValue?: number;
+  /** Révision : indice de comparaison (un an avant) et date prévue au bail, pour régénérer le courrier. */
+  referenceLabel?: string;
+  referenceValue?: number;
+  dueDate?: string;
   note?: string;
 }
 
@@ -191,7 +201,25 @@ export interface Person {
   address?: string;
 }
 
+export interface TenancyLetter {
+  id: Id;
+  kind: "revision" | "relance" | "mise_en_demeure" | "autre";
+  label: string;
+  /** Date du courrier (AAAA-MM-JJ). */
+  date: string;
+  file: StoredFileRef;
+}
+
+/** Fichier déposé (PDF ou photo), stocké côté serveur. */
+export interface StoredFileRef {
+  fileId: string;
+  name: string;
+  uploadedAt?: string;
+}
+
 export interface Guarantor extends Person {
+  /** Acte de cautionnement signé (scan). */
+  signedFile?: StoredFileRef;
   kind: "personne" | "visale" | "autre";
   /** Montant maximal garanti (principal et accessoires), en euros. */
   maxAmount?: number;
@@ -262,6 +290,10 @@ export interface Tenancy {
   annexes?: string[];
   /** Bail existant saisi a posteriori (non généré par l'application). */
   imported?: boolean;
+  /** Exemplaire signé du bail (scan), remplacé à chaque nouveau dépôt. */
+  signedLease?: StoredFileRef;
+  /** Courriers joints (augmentation de loyer, relance…), gardés tant que le locataire est en place. */
+  letters?: TenancyLetter[];
   // ——— Départ ———
   noticeDate?: string;
   noticeBy?: "locataire" | "bailleur";
@@ -354,8 +386,52 @@ export interface Loan {
   /** Assurance mensuelle. */
   insuranceMonthly?: number;
   durationMonths?: number;
+  /** Numéro ou référence du prêt chez la banque. */
+  reference?: string;
   notes?: string;
+  /** Tableau d'amortissement de la banque : quand il est présent, il fait foi pour tous les calculs. */
+  schedule?: LoanSchedule;
   demo?: boolean;
+}
+
+/** Une échéance du tableau d'amortissement. */
+export interface LoanScheduleRow {
+  /** Mois de l'échéance (AAAA-MM). */
+  month: string;
+  /** Échéance hors assurance (capital + intérêts). */
+  payment: number;
+  interest: number;
+  principal: number;
+  insurance?: number;
+  /** Capital restant dû après l'échéance. */
+  balance: number;
+}
+
+export interface LoanSchedule {
+  rows: LoanScheduleRow[];
+  /** PDF ou photo d'origine (conservé pour consultation). */
+  fileId?: string;
+  fileName?: string;
+  importedAt: string;
+  source: "ia" | "manuel";
+  /** Informations imprimées sur le document (en-tête du tableau), telles quelles. */
+  meta?: ScheduleMeta;
+}
+
+/** En-tête d'un tableau d'amortissement : ce que la banque y indique. */
+export interface ScheduleMeta {
+  borrower?: string;
+  bank?: string;
+  /** Numéro ou référence du prêt. */
+  reference?: string;
+  /** Adresse du bien financé. */
+  address?: string;
+  initialAmount?: number;
+  /** Date de début (déblocage ou signature), AAAA-MM-JJ. */
+  startDate?: string;
+  durationMonths?: number;
+  /** Taux nominal annuel en %. */
+  ratePct?: number;
 }
 
 export type WorkStatus = "envisage" | "prevu" | "en_cours" | "termine";
@@ -371,6 +447,8 @@ export interface Work {
   unitId?: Id | null;
   priority?: Priority;
   status?: WorkStatus;
+  /** Payés par un crédit : pas de sortie de trésorerie dans les projections. */
+  financedByLoan?: boolean;
   notes?: string;
   demo?: boolean;
 }
@@ -384,34 +462,96 @@ export interface LifeEvent {
   demo?: boolean;
 }
 
-export type WithdrawalKind = "cca" | "salaire" | "dividendes" | "autre";
+/**
+ * Nature d'une sortie d'argent :
+ * - tns : rémunération de gérant majoritaire (SARL/EURL), travailleur non salarié ;
+ * - salaire : dirigeant assimilé salarié (président de SAS, gérant minoritaire) ;
+ * - dividendes, cca (remboursement de compte courant), autre.
+ */
+export type WithdrawalKind = "tns" | "salaire" | "dividendes" | "cca" | "autre";
 
 export interface Withdrawal {
   id: Id;
   kind: WithdrawalKind;
   label?: string;
+  /** Bénéficiaire (ex. « Grégory », « Enora »). */
+  person?: string;
   companyId?: Id | null;
-  /** Montant brut annuel sortant de la société. */
+  /**
+   * Montant annuel sortant de la société : coût total pour la société
+   * (rémunération + cotisations) pour tns / salaire, montant brut pour
+   * dividendes, montant remboursé pour cca.
+   */
   annualAmount?: number;
   startYear?: number;
   endYear?: number;
-  /** Taux de charges / fiscalité saisi manuellement (%). */
+  /** Évolution annuelle du montant (%). */
+  growthPct?: number;
+  /** Dividendes : prélèvement forfaitaire unique (par défaut) ou barème progressif. */
+  dividendTax?: "pfu" | "bareme";
+  /** Dividendes d'une SARL versés à son gérant majoritaire (part > 10 % soumise aux cotisations TNS). */
+  majorityManager?: boolean;
+  /** « Autre » : taux de charges / fiscalité saisi manuellement (%). */
   taxRatePct?: number;
   demo?: boolean;
 }
 
+/** Foyer fiscal et hypothèses de la rémunération. */
+export interface Household {
+  /** Nombre de parts de quotient familial. */
+  parts?: number;
+  /** Imposition commune (mariés ou pacsés). */
+  couple?: boolean;
+  /** Autres revenus nets imposables du foyer (€/an), hors sources saisies ici. */
+  otherIncome?: number;
+  /** Stratégie de rémunération expliquée au banquier. */
+  strategy?: string;
+  /** Hypothèses modifiables (en %). Vides = barèmes 2026 intégrés. */
+  salaryEmployeePct?: number;
+  salaryEmployerPct?: number;
+  dividendSocialPct?: number;
+  pfuIncomePct?: number;
+}
+
+/** Activité d'une société d'exploitation (SARL de bâtiment, SAS…). */
+export interface CompanyActivity {
+  /** Chiffre d'affaires annuel hors taxes. */
+  revenue?: number;
+  /** Charges annuelles hors rémunération des dirigeants (achats, sous-traitance, frais…). */
+  expenses?: number;
+  /** Évolution annuelle du chiffre d'affaires et des charges (%). */
+  growthPct?: number;
+  /** Prestations facturées aux sociétés du groupe (€/an, incluses dans le chiffre d'affaires). */
+  billed?: { companyId: Id; annualAmount?: number }[];
+}
+
 // ——— Opérations futures (plans validés ou scénarios) ———
+
+export interface SaleLot {
+  unitId: Id;
+  /** Prix de vente du lot (€). */
+  price?: number;
+}
 
 export interface SaleAction {
   id: Id;
   type: "sale";
   buildingId: Id;
   year: number;
+  /** Date prévue de l'acte (AAAA-MM-JJ), prioritaire sur l'année. */
+  date?: string;
+  /** Prix de l'immeuble entier (vente en bloc). */
   price?: number;
-  /** Frais (agence, diagnostics, remboursement anticipé…) en €. */
+  /** Vente lot par lot : lots vendus et prix de chacun (absent = tout l'immeuble). */
+  lots?: SaleLot[];
+  /** Frais (agence, diagnostics, indemnités de remboursement anticipé…) en €. */
   fees?: number;
   /** Impôt sur la plus-value saisi manuellement (€). */
   tax?: number;
+  /** Capital remboursé sur les crédits de l'immeuble (vente partielle ; par défaut la quote-part des lots). */
+  debtRepaid?: number;
+  /** Compromis signé (information pour le dossier). */
+  underOffer?: boolean;
 }
 
 export interface PurchaseAction {
@@ -466,7 +606,6 @@ export interface PrepaymentAction {
 }
 
 export type Action = SaleAction | PurchaseAction | RefinanceAction | WorksAction | PrepaymentAction;
-export type ActionType = Action["type"];
 
 export interface Scenario {
   id: Id;
@@ -476,6 +615,125 @@ export interface Scenario {
   includeInExport?: boolean;
   appliedAt?: string;
   createdAt?: string;
+}
+
+// ——— Projets (acquisition, travaux) à présenter à la banque ———
+
+export type ProjectStatus = "idee" | "etude" | "soumis" | "accorde" | "realise" | "abandonne";
+export type PropertyType = "immeuble" | "appartement" | "maison" | "local" | "terrain" | "autre";
+
+export interface ProjectLot {
+  id: Id;
+  name: string;
+  type?: UnitType;
+  surface?: number;
+  /** Loyer mensuel prévu hors charges. */
+  rent?: number;
+  /** Provision sur charges mensuelle prévue (récupérable). */
+  charges?: number;
+}
+
+/** Poste de dépense : travaux (avec devis) ou autre frais. */
+export interface ProjectCost {
+  id: Id;
+  label: string;
+  kind: "travaux" | "frais";
+  amount?: number;
+  /** Devis joint (fichier stocké côté serveur). */
+  fileId?: string;
+  fileName?: string;
+}
+
+export interface ProjectLoan {
+  id: Id;
+  label?: string;
+  bank?: string;
+  amount?: number;
+  ratePct?: number;
+  durationMonths?: number;
+  /** Différé d'amortissement (intérêts seuls), en mois. */
+  deferralMonths?: number;
+  insuranceMonthly?: number;
+  /** Tableau d'amortissement de l'offre de prêt : il fait foi et devient celui du crédit à la réalisation. */
+  schedule?: LoanSchedule;
+}
+
+export interface ProjectDocument {
+  id: Id;
+  fileId: string;
+  name: string;
+  mime?: string;
+}
+
+export interface Project {
+  id: Id;
+  name: string;
+  /** Achat d'un bien, ou travaux sur un immeuble déjà détenu. */
+  kind: "acquisition" | "travaux";
+  status: ProjectStatus;
+  createdAt?: string;
+  /** Immeuble concerné (projet de travaux). */
+  buildingId?: Id | null;
+  /** Hausse de loyers attendue après travaux (€/mois), en plus des lots ajoutés. */
+  extraRentMonthly?: number;
+  // ——— Le bien ———
+  propertyType?: PropertyType;
+  address?: string;
+  city?: string;
+  surface?: number;
+  condition?: Condition;
+  dpeClass?: "A" | "B" | "C" | "D" | "E" | "F" | "G";
+  constructionPeriod?: ConstructionPeriod;
+  legalRegime?: "copropriete" | "monopropriete";
+  description?: string;
+  lots: ProjectLot[];
+  documents?: ProjectDocument[];
+  // ——— Coût ———
+  price?: number;
+  agencyFees?: number;
+  /** Taux de frais de notaire saisi par l'utilisateur (aucun taux imposé). */
+  notaryFeesPct?: number;
+  /** Montant de frais de notaire connu (prioritaire sur le taux). */
+  notaryFees?: number;
+  /** Frais de dossier, garantie, courtage. */
+  bankFees?: number;
+  costs: ProjectCost[];
+  /** Valeur estimée du bien une fois les travaux faits. */
+  valueAfterWorks?: number;
+  // ——— Financement ———
+  equity?: number;
+  /** Provenance de l'apport (texte libre : trésorerie SCI, compte courant…). */
+  equitySource?: string;
+  loans: ProjectLoan[];
+  // ——— Exploitation ———
+  /** Date d'acte prévue. */
+  purchaseDate?: string;
+  /** Mise en location prévue (après travaux). */
+  rentStartDate?: string;
+  propertyTax?: number;
+  insurance?: number;
+  coproCharges?: number;
+  otherCharges?: number;
+  /** Vacance locative prudente, en % des loyers. */
+  vacancyPct?: number;
+  // ——— Structure ———
+  /** Société qui achète ; absente = nouvelle société (voir newCompanyName) ou détention en direct. */
+  companyId?: Id | null;
+  newCompanyName?: string;
+  newCompanyParentId?: Id | null;
+  // ——— Banque ———
+  /** Objet de la demande, présenté en tête du dossier. */
+  requestPurpose?: string;
+  submittedTo?: string;
+  submittedDate?: string;
+  /** Prendre ce projet en compte dans les projections (accueil, chronologie). */
+  inProjection?: boolean;
+  notes?: string;
+  // ——— Réalisation ———
+  realizedAt?: string;
+  realizedBuildingId?: Id;
+  realizedCompanyId?: Id;
+  realizedLoanIds?: Id[];
 }
 
 // ——— Comptes annuels (bilans) ———
@@ -535,6 +793,12 @@ export interface Settings {
   dismissedReminders?: string[];
   /** Durée des nouveaux baux, en années (choix du propriétaire, 3 par défaut). */
   leaseYears?: number;
+  /** Foyer fiscal et hypothèses de rémunération. */
+  household?: Household;
+  /** Dernières analyses IA du patrimoine (5 au plus), jamais visibles de l'espace gestion. */
+  analyses?: SavedAnalysis[];
+  /** Couleur principale de l'application (voir lib/theme.ts), teal par défaut. */
+  theme?: string;
 }
 
 export interface AppData {
@@ -553,6 +817,55 @@ export interface AppData {
   statements: Statement[];
   tenancies: Tenancy[];
   inspections: Inspection[];
+  projects: Project[];
+  /** Pièces déposées sans emplacement dédié (assurance, facture, diagnostic…). */
+  documents: AppDocument[];
+}
+
+// ——— Documents ———
+
+export type DocCategory =
+  | "bail"
+  | "caution"
+  | "etat_des_lieux"
+  | "courrier"
+  | "identite"
+  | "tableau_amortissement"
+  | "offre_pret"
+  | "banque"
+  | "assurance"
+  | "facture"
+  | "devis"
+  | "diagnostic"
+  | "acte"
+  | "fiscal"
+  | "copropriete"
+  | "bilan"
+  | "autre";
+
+/**
+ * Pièce déposée qui n'a pas d'emplacement dédié ailleurs. Les baux signés,
+ * cautions, courriers, tableaux d'amortissement, bilans et pièces de projet
+ * restent à leur place : la bibliothèque les réunit sans les copier.
+ */
+export interface AppDocument {
+  id: Id;
+  fileId: string;
+  name: string;
+  category: DocCategory;
+  /** Titre lisible (« Assurance PNO 2026 »). */
+  title?: string;
+  /** Date du document (AAAA-MM-JJ). */
+  date?: string;
+  companyId?: Id | null;
+  buildingId?: Id | null;
+  unitId?: Id | null;
+  tenancyId?: Id | null;
+  loanId?: Id | null;
+  /** Résumé et mots-clés lus dans le document (recherche). */
+  summary?: string;
+  addedAt: string;
+  source: "ia" | "manuel";
 }
 
 export type Collection = Exclude<keyof AppData, "schemaVersion" | "settings">;
@@ -573,6 +886,8 @@ export function emptyData(): AppData {
     statements: [],
     tenancies: [],
     inspections: [],
+    projects: [],
+    documents: [],
   };
 }
 
@@ -589,4 +904,6 @@ export const COLLECTIONS: Collection[] = [
   "statements",
   "tenancies",
   "inspections",
+  "projects",
+  "documents",
 ];

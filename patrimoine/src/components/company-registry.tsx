@@ -93,7 +93,7 @@ export function RegistrySearch({ company, onPick }: { company: Company; onPick: 
           className="min-w-0 flex-1 rounded-2xl border border-line bg-card px-4 py-3 text-[16px] outline-none focus:border-series-1"
           placeholder="Nom ou SIREN"
         />
-        <button onClick={run} disabled={busy || q.trim().length < 3} className="flex items-center gap-1.5 rounded-2xl bg-navy px-4 font-semibold text-white disabled:opacity-40">
+        <button onClick={run} disabled={busy || q.trim().length < 3} className="flex items-center gap-1.5 rounded-2xl bg-brand px-4 font-semibold text-on-brand disabled:opacity-40">
           {busy ? <Loader2 size={17} className="animate-spin" /> : <Search size={17} />}
         </button>
       </div>

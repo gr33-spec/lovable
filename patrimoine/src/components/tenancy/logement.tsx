@@ -1,22 +1,28 @@
 "use client";
 
+import { DocumentsCard } from "@/components/documents/library";
+import { useInGestion } from "../use-gestion";
+import { unitCrumbs } from "@/lib/crumbs";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { ArrowRightLeft, ClipboardCheck, DoorOpen, FileSignature, Pencil, ReceiptText, UserPlus } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { Tenancy } from "@/lib/types";
 import { dateFr, eur } from "@/lib/format";
-import { activeTenancy, draftTenancy, unitRemovals, inspectionsOf, landlordCompany, lastExitInspection, leavingTenancy, tenanciesOf, tenancyFromUnit, tenantsName, depositDue } from "@/lib/tenancy";
+import { activeTenancy, draftTenancy, inspectionsOf, landlordCompany, lastExitInspection, leavingTenancy, tenancyFromUnit, tenantsName, depositDue } from "@/lib/tenancy";
 import { leaseTermEnd } from "@/lib/legal/lease";
 import { newEntryInspection } from "@/lib/legal/inspection";
 import { depositSettlement, leaseYears } from "@/lib/legal/rules";
 import { todayIso } from "@/lib/engine/leases";
 import { UnitForm } from "../forms";
 import { PaymentStrip } from "../leases";
-import { Button, Card, ConfirmDelete, Empty, Grid2, NumberField, Page, PageHeader, SectionTitle, Sheet, Stack, TextField, DateField } from "../ui";
+import { Button, Card, Empty, Grid2, NumberField, Page, PageHeader, SectionTitle, Sheet, Stack, TextField, DateField } from "../ui";
 import { DocRow, LegalBadge, SignaturePad, documentUrl } from "./common";
 import { ReceiptPicker } from "./receipts";
+import { SignedDocRow, guarantorDetails } from "./signed";
+import { LetterRows } from "./letters";
+import { TenantHistory } from "./history";
 
 export function LogementDetail({ id }: { id: string }) {
   return (
@@ -27,12 +33,18 @@ export function LogementDetail({ id }: { id: string }) {
 }
 
 function Detail({ id }: { id: string }) {
-  const { data, upsert, removeMany, role, view } = useStore();
+  const { data, upsert, role } = useStore();
   const router = useRouter();
   const params = useSearchParams();
   const [sheet, setSheet] = useState<null | "edit" | "quittance" | "import" | "sign">(null);
   const fromGestion = params.get("action") === "quittance";
+  const inGestion = useInGestion();
   const [autoOpened, setAutoOpened] = useState(false);
+  const [extraCaution, setExtraCaution] = useState(false);
+  const latest = useRef(data);
+  useEffect(() => {
+    latest.current = data;
+  }, [data]);
   const unit = data.units.find((u) => u.id === id);
   if (!unit) {
     return (
@@ -47,7 +59,6 @@ function Detail({ id }: { id: string }) {
   const active = activeTenancy(data, id);
   const leaving = leavingTenancy(data, id);
   const draft = draftTenancy(data, id);
-  const history = tenanciesOf(data, id).filter((t) => t.status === "clos");
   const occupiedOutside = !active && unit.status !== "vacant";
   const knownTenant = occupiedOutside && (unit.tenantLastName || unit.tenantFirstName);
   const rentLine = `loyer ${eur(unit.rent)}${unit.charges ? ` + charges ${eur(unit.charges)}` : ""}`;
@@ -58,6 +69,13 @@ function Detail({ id }: { id: string }) {
     const t = tenancyFromUnit(unit, company, leaseYears(data.settings));
     upsert("tenancies", t);
     return t;
+  };
+
+  // Dépôt d'un document signé : sur le bail en cours, créé à partir du logement s'il n'existe pas encore.
+  const saveTenancy = (change: (t: Tenancy) => Tenancy) => {
+    // Données les plus récentes (le dépôt se termine après l'envoi du fichier).
+    const current = activeTenancy(latest.current, id) ?? tenancyFromUnit(unit, company, leaseYears(data.settings));
+    upsert("tenancies", change(current));
   };
 
   // Ouverture directe de « Obtenir une quittance » depuis l'onglet Gestion.
@@ -81,15 +99,18 @@ function Detail({ id }: { id: string }) {
     <>
       <PageHeader
         title={unit.name}
-        subtitle={[building?.name, company?.name].filter(Boolean).join(" · ")}
-        back={view === "gestion" || fromGestion || params.get("depuis") === "gestion" ? "/gestion?vue=locataires" : building ? `/patrimoine/immeuble/${building.id}` : "/patrimoine"}
+        crumbs={unitCrumbs(data, unit, inGestion)}
+        back={inGestion || fromGestion ? "/gestion?vue=locataires" : building ? `/patrimoine/immeuble/${building.id}` : "/patrimoine"}
         action={
-          <button onClick={() => setSheet("edit")} className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-navy">
+          <button onClick={() => setSheet("edit")} className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-brand">
             <Pencil size={15} /> Modifier
           </button>
         }
       />
       <Page>
+        {/* Ordinateur : locataire et actions à gauche, documents et encaissements à droite. */}
+        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
+        <div className="min-w-0">
         <div className="hero-card rounded-[28px] p-5 text-white">
           {active ? (
             <>
@@ -164,46 +185,77 @@ function Detail({ id }: { id: string }) {
           </Link>
         )}
 
-        {active && (
+        </div>
+        <div className="min-w-0 lg:[&>*:first-child]:mt-0">
+        {(active || unit.status !== "vacant") && (
           <>
             <SectionTitle>Documents</SectionTitle>
             <Card className="py-1">
               <div className="divide-y divide-line">
-                {active.imported ? (
-                  <DocRow
-                    title="Bail"
-                    status="Signé hors application"
-                    subtitle="Complétez le dossier pour les quittances et le départ"
-                    action={
-                      <button onClick={() => setSheet("import")} className="rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-navy">
-                        Compléter
-                      </button>
-                    }
-                  />
-                ) : (
-                  <DocRow
-                    title="Bail"
-                    status={active.signatures?.landlord ? "Signé" : "À signer"}
-                    tone={active.signatures?.landlord ? "pos" : "warn"}
-                    subtitle={active.signDate ? `Conclu le ${dateFr(active.signDate)}` : undefined}
-                    url={documentUrl({ type: "bail", tenancy: active.id })}
-                    fileName={`bail-${unit.name}.pdf`}
-                    action={
-                      <button onClick={() => setSheet("sign")} className="rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-navy">
-                        Signer
-                      </button>
-                    }
+                {active &&
+                  (active.imported ? (
+                    <DocRow
+                      title="Bail"
+                      status="Signé hors application"
+                      subtitle="Complétez le dossier pour les quittances et le départ"
+                      action={
+                        <button onClick={() => setSheet("import")} className="rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-brand">
+                          Compléter
+                        </button>
+                      }
+                    />
+                  ) : (
+                    <DocRow
+                      title="Bail"
+                      status={active.signatures?.landlord ? "Signé" : "À signer"}
+                      tone={active.signatures?.landlord ? "pos" : "warn"}
+                      subtitle={active.signDate ? `Conclu le ${dateFr(active.signDate)}` : undefined}
+                      url={documentUrl({ type: "bail", tenancy: active.id })}
+                      fileName={`bail-${unit.name}.pdf`}
+                      action={
+                        <button onClick={() => setSheet("sign")} className="rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-brand">
+                          Signer
+                        </button>
+                      }
+                    />
+                  ))}
+                {/* Bail et cautions signés : toujours possibles, le dossier est créé au besoin. */}
+                <SignedDocRow title="Bail signé" file={active?.signedLease} onChange={(f) => saveTenancy((t) => ({ ...t, signedLease: f }))} />
+                {(active?.guarantors ?? []).map((g, i) => (
+                  <div key={i}>
+                    {/* Acte généré par l'application (à faire signer), puis exemplaire signé déposé. */}
+                    {active && !active.imported && g.kind === "personne" && (
+                      <DocRow title="Acte de cautionnement" subtitle={[g.firstName, g.lastName].filter(Boolean).join(" ")} url={documentUrl({ type: "caution", tenancy: active.id, index: i })} fileName={`caution-${i + 1}.pdf`} />
+                    )}
+                    <SignedDocRow
+                      title={`Caution signée — ${[g.firstName, g.lastName].filter(Boolean).join(" ") || (g.kind === "visale" ? "Visale" : `garant ${i + 1}`)}`}
+                      file={g.signedFile}
+                      details={guarantorDetails(g)}
+                      onChange={(f) => saveTenancy((t) => ({ ...t, guarantors: (t.guarantors ?? []).map((x, j) => (j === i ? { ...x, signedFile: f } : x)) }))}
+                    />
+                  </div>
+                ))}
+                {/* Caution sans garant enregistré (ou caution supplémentaire) : un garant est créé avec le document. */}
+                {(!active?.guarantors?.length || extraCaution) && (
+                  <SignedDocRow
+                    title={active?.guarantors?.length ? "Autre caution signée" : "Caution signée"}
+                    subtitle="garant non renseigné"
+                    onChange={(f) => {
+                      saveTenancy((t) => ({ ...t, guarantors: [...(t.guarantors ?? []), { kind: "personne", signedFile: f }] }));
+                      setExtraCaution(false);
+                    }}
                   />
                 )}
-                {(active.guarantors ?? [])
-                  .filter((g) => g.kind === "personne")
-                  .map((g, i) => (
-                    <DocRow key={i} title="Acte de cautionnement" subtitle={[g.firstName, g.lastName].filter(Boolean).join(" ")} url={documentUrl({ type: "caution", tenancy: active.id, index: i })} fileName={`caution-${i + 1}.pdf`} />
-                  ))}
-                <InspectionRow tenancyId={active.id} kind="entree" onStart={() => startEntry(active)} unitId={id} />
+                {!!active?.guarantors?.length && !extraCaution && (
+                  <button onClick={() => setExtraCaution(true)} className="w-full py-3 text-left text-[14px] font-semibold text-series-1">
+                    + Joindre une autre caution
+                  </button>
+                )}
+                <LetterRows tenancy={active} onSave={saveTenancy} />
+                {active && <InspectionRow tenancyId={active.id} kind="entree" onStart={() => startEntry(active)} unitId={id} />}
               </div>
             </Card>
-            {!active.imported && <div className="mt-3"><LegalBadge refDate={active.signDate || active.startDate} /></div>}
+            {active && !active.imported && <div className="mt-3"><LegalBadge refDate={active.signDate || active.startDate} /></div>}
           </>
         )}
 
@@ -213,12 +265,18 @@ function Detail({ id }: { id: string }) {
           </Card>
         )}
 
-        {(history.length > 0 || leaving) && (
+        {active && <TenantHistory unit={unit} tenancy={active} />}
+
+        {/* Pièces libres du lot et du locataire (pièces d'identité, justificatifs, assurance habitation…). */}
+        <DocumentsCard scope={{ unitId: unit.id }} href={`/documents?immeuble=${unit.buildingId}&lot=${unit.id}`} title="Autres documents" onlyLoose />
+
+        {/* Dossiers clos : informations effacées à la clôture ; seul un départ en cours reste affiché. */}
+        {leaving && (
           <>
-            <SectionTitle>Anciens locataires</SectionTitle>
+            <SectionTitle>Départ en cours</SectionTitle>
             <Card className="py-1">
               <div className="divide-y divide-line">
-                {[...(leaving ? [leaving] : []), ...history].map((t) => (
+                {[leaving].map((t) => (
                   <div key={t.id} className="py-3">
                     <div className="text-[15px] font-semibold text-ink">{tenantsName(t) || "Locataire"}</div>
                     <div className="text-[13px] text-muted">
@@ -227,6 +285,10 @@ function Detail({ id }: { id: string }) {
                     </div>
                     <div className="mt-1 divide-y divide-line">
                       {!t.imported && <DocRow title="Bail" url={documentUrl({ type: "bail", tenancy: t.id })} fileName="bail.pdf" />}
+                      <SignedDocRow title="Bail signé" file={t.signedLease} readOnly />
+                      {(t.guarantors ?? []).map((g, j) => (
+                        <SignedDocRow key={j} title={`Caution signée — ${[g.firstName, g.lastName].filter(Boolean).join(" ") || `garant ${j + 1}`}`} file={g.signedFile} details={guarantorDetails(g)} readOnly />
+                      ))}
                       <InspectionRow tenancyId={t.id} kind="entree" unitId={id} />
                       <InspectionRow tenancyId={t.id} kind="sortie" unitId={id} />
                     </div>
@@ -236,6 +298,8 @@ function Detail({ id }: { id: string }) {
             </Card>
           </>
         )}
+        </div>
+        </div>
       </Page>
 
       <Sheet
@@ -245,14 +309,12 @@ function Detail({ id }: { id: string }) {
         footer={
           <div className="space-y-2">
             <Button full onClick={() => setSheet(null)}>Terminé</Button>
-            {role === "owner" && <ConfirmDelete
-              label="Supprimer le logement"
-              message="Supprimer ce logement ? Une sauvegarde automatique permet de revenir en arrière."
-              onConfirm={() => {
-                removeMany(unitRemovals(data, unit.id));
-                router.push(building ? `/patrimoine/immeuble/${building.id}` : "/patrimoine");
-              }}
-            />}
+            {role === "owner" && (
+              // Description du bien et suppression du lot : dans sa fiche Patrimoine (un seul endroit).
+              <Link href={`/patrimoine/lot/${unit.id}`} className="block py-2 text-center text-[14px] font-semibold text-series-1">
+                Fiche du lot (description, DPE, valeur)
+              </Link>
+            )}
           </div>
         }
       >
@@ -292,7 +354,7 @@ function InspectionRow({ tenancyId, kind, onStart, unitId }: { tenancyId: string
         status="À réaliser"
         tone="warn"
         action={
-          <button onClick={onStart} className="flex items-center gap-1 rounded-full bg-navy px-3 py-1.5 text-[13px] font-semibold text-white">
+          <button onClick={onStart} className="flex items-center gap-1 rounded-full bg-brand px-3 py-1.5 text-[13px] font-semibold text-on-brand">
             <ClipboardCheck size={14} /> Commencer
           </button>
         }
@@ -308,7 +370,7 @@ function InspectionRow({ tenancyId, kind, onStart, unitId }: { tenancyId: string
       url={documentUrl({ type: "edl", tenancy: tenancyId, inspection: insp.id })}
       fileName={`etat-des-lieux-${kind}.pdf`}
       action={
-        <Link href={`/patrimoine/logement/${unitId}/edl/${insp.id}`} className="rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-navy">
+        <Link href={`/patrimoine/logement/${unitId}/edl/${insp.id}`} className="rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-brand">
           Ouvrir
         </Link>
       }

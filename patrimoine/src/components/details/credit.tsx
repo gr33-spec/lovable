@@ -1,5 +1,10 @@
 "use client";
 
+import { removalPlan, removalSummary } from "@/lib/removal";
+import { useUndoableRemove } from "@/components/swipe";
+import { DocumentsCard } from "@/components/documents/library";
+import { buildingCrumbs, companyCrumbs } from "@/lib/crumbs";
+import { goBack } from "@/lib/nav";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
@@ -7,11 +12,13 @@ import { yearlyBalances } from "@/lib/engine/loan";
 import { monthLabel } from "@/lib/engine/dates";
 import { eur, eurCompact, pct } from "@/lib/format";
 import { LoanForm } from "../forms";
+import { LoanScheduleSection } from "./loan-schedule";
 import { LineChart } from "../charts";
 import { Card, ConfirmDelete, Empty, Kpi, Page, PageHeader, Pill, SectionTitle } from "../ui";
 
 export function LoanDetail({ id }: { id: string }) {
-  const { data, projection, nowMonth, remove } = useStore();
+  const { data, projection, nowMonth } = useStore();
+  const removeUndoable = useUndoableRemove();
   const router = useRouter();
   const loan = data.loans.find((l) => l.id === id);
   const r = projection.snapshot.resolvedLoans.get(id);
@@ -33,11 +40,13 @@ export function LoanDetail({ id }: { id: string }) {
 
   return (
     <>
-      <PageHeader title={loan.name || loan.bank || "Crédit"} subtitle={[loan.bank, building?.name].filter(Boolean).join(" · ") || undefined} back={back} />
+      <PageHeader title={loan.name || loan.bank || "Crédit"} crumbs={building ? buildingCrumbs(data, building) : companyCrumbs(data, loan.companyId)} subtitle={loan.bank || undefined} back={back} />
       <Page>
+        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
+        <div className="min-w-0">
         <Card>
           <div className="mb-3 flex gap-2">
-            {r.finished ? <Pill tone="pos">Terminé</Pill> : r.quality === "complete" ? <Pill tone="blue">Projection calculée</Pill> : r.quality === "estimated" ? <Pill tone="warn">Projection estimée</Pill> : <Pill tone="neg">Données insuffisantes</Pill>}
+            {r.finished ? <Pill tone="pos">Terminé</Pill> : loan.schedule ? <Pill tone="pos">Tableau de la banque</Pill> : r.quality === "complete" ? <Pill tone="blue">Projection calculée</Pill> : r.quality === "estimated" ? <Pill tone="warn">Projection estimée</Pill> : <Pill tone="neg">Données insuffisantes</Pill>}
             {loan.kind === "in_fine" && <Pill>In fine</Pill>}
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -47,7 +56,7 @@ export function LoanDetail({ id }: { id: string }) {
             <Kpi label="Taux" value={loan.ratePct !== undefined ? pct(loan.ratePct, 2) : r.impliedRatePct !== undefined ? `${pct(r.impliedRatePct, 2)} (déduit)` : "—"} />
           </div>
           {totalInterest > 0 && <div className="mt-3 text-xs text-muted">Intérêts restant à payer : {eur(totalInterest)}</div>}
-          {r.notes.map((n) => (
+          {!loan.schedule && r.notes.map((n) => (
             <div key={n} className="mt-2 text-xs text-warn">{n}</div>
           ))}
         </Card>
@@ -56,7 +65,7 @@ export function LoanDetail({ id }: { id: string }) {
           <>
             <SectionTitle>Capital restant dû dans le temps</SectionTitle>
             <Card>
-              <LineChart years={visible.map((s) => s.year)} series={[{ label: "Capital restant dû", values: visible.map((s) => s.balance), color: "var(--series-1)" }]} height={170} />
+              <LineChart years={visible.map((s) => s.year)} series={[{ label: "Capital restant dû", values: visible.map((s) => s.balance), color: "var(--brand)" }]} height={170} />
               <div className="mt-3 grid grid-cols-3 gap-2 text-center">
                 {[5, 10, 15].map((h) => {
                   const row = schedule[h];
@@ -72,13 +81,22 @@ export function LoanDetail({ id }: { id: string }) {
           </>
         )}
 
+        </div>
+        <div className="min-w-0 lg:[&>*:first-child]:mt-0">
+        <LoanScheduleSection loan={loan} />
+
+        <DocumentsCard scope={{ loanId: loan.id }} href={`/documents?credit=${loan.id}`} title="Autres documents du prêt" onlyLoose />
+
         <SectionTitle>Caractéristiques</SectionTitle>
         <Card>
+          {loan.schedule && <p className="mb-3 rounded-xl bg-soft px-3 py-2 text-[12.5px] text-ink-2">Repris du tableau de la banque, qui fait foi pour les calculs.</p>}
           <LoanForm loan={loan} />
         </Card>
 
+        </div>
+        </div>
         <div className="mt-8">
-          <ConfirmDelete label="Supprimer le crédit" message="Supprimer ce crédit ?" onConfirm={() => { remove("loans", id); router.push(back); }} />
+          <ConfirmDelete label="Supprimer le crédit" message={`Supprimer ce crédit ? ${removalSummary(removalPlan(data, "loans", id))}`} onConfirm={() => { removeUndoable([{ coll: "loans", id }], "Crédit supprimé"); goBack(router, back); }} />
         </div>
       </Page>
     </>

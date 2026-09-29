@@ -1,14 +1,15 @@
 "use client";
 
+import { documentIndex } from "@/lib/documents";
+import { signOut } from "@/lib/sign-out";
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowLeftRight, BellRing, Building2, KeyRound, CalendarRange, FlaskConical, Scale, ScanFace, Share2, LineChart as LineIcon, FileSpreadsheet, Gauge, CalendarClock, CircleAlert, FileText, Hammer, HandCoins, History, LogOut, Percent, Smartphone, Sparkles, Trash2, Wand2 } from "lucide-react";
+import { FolderOpen, Building2, KeyRound, CalendarRange, FlaskConical, Scale, ScanFace, Share2, LineChart as LineIcon, FileSpreadsheet, Gauge, CalendarClock, CircleAlert, FileText, HandCoins, History, LogOut, Palette, Percent, Smartphone, Sparkles, Trash2, Wand2 } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { switchView } from "@/lib/view";
 import { demoData, hasDemo, withoutDemo } from "@/lib/demo";
 import { qualityIssues } from "@/lib/engine/quality";
-import { todayIso } from "@/lib/engine/leases";
-import { allReminders } from "@/lib/reminders";
+import { unitMissing } from "@/lib/missing";
+import { themeDef } from "@/lib/theme";
 import { Button, Card, Divided, Page, PageHeader, Row, SectionTitle, Sheet } from "@/components/ui";
 
 export default function PlusPage() {
@@ -17,14 +18,12 @@ export default function PlusPage() {
   const [homeSheet, setHomeSheet] = useState(false);
   const [busy, setBusy] = useState(false);
   const issues = qualityIssues(data, projection.snapshot);
+  const dossiers = data.units.filter((u) => unitMissing(data, u).length > 0).length;
+  const toComplete = issues.length + dossiers;
+  const docCount = documentIndex(data).length;
   const demo = hasDemo(data);
-  const alerts = allReminders(data, todayIso(), projection.snapshot.resolvedLoans);
-  const worksPlanned = data.works.filter((w) => w.status !== "termine").length;
 
-  const logout = async () => {
-    await fetch("/api/logout", { method: "POST" });
-    window.location.href = "/connexion";
-  };
+  const logout = signOut;
 
   const removeDemo = async (keepStructure: boolean) => {
     setBusy(true);
@@ -50,26 +49,52 @@ export default function PlusPage() {
           </span>
         </Link>
 
-        <SectionTitle>Pilotage</SectionTitle>
+        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
+        <div className="min-w-0">
+        <SectionTitle>Documents</SectionTitle>
+        <Card className="py-1">
+          <Row href="/documents" icon={<FolderOpen size={18} />} title="Tous les documents" subtitle={`${docCount} pièce${docCount > 1 ? "s" : ""} · baux, tableaux, assurances, factures… · importer`} />
+        </Card>
+
+        {toComplete > 0 && (
+          <>
+            <SectionTitle>À traiter</SectionTitle>
+            <Card className="py-1">
+              <Row href="/plus/a-completer" icon={<CircleAlert size={18} />} title="Données à compléter" subtitle={[dossiers ? `${dossiers} dossier${dossiers > 1 ? "s" : ""} de locataire` : "", issues.length ? `${issues.length} chiffre${issues.length > 1 ? "s" : ""} manquant${issues.length > 1 ? "s" : ""}` : ""].filter(Boolean).join(" · ")} />
+            </Card>
+          </>
+        )}
+
+        <SectionTitle>Analyser</SectionTitle>
         <Card className="py-1">
           <Divided>
-            <Row href="/plus/rappels" icon={<BellRing size={18} />} title="Rappels" subtitle={alerts.length ? `${alerts.length} à traiter` : "Fins de bail, révisions, crédits"} />
-            <Row href="/chronologie" icon={<CalendarRange size={18} />} title="Chronologie" subtitle="30 ans d'échéances · vos événements" />
-            <Row href="/simulations" icon={<FlaskConical size={18} />} title="Simulations" subtitle={`${data.scenarios.length} scénario(s) · vente, achat, refinancement…`} />
-            <Row href="/plus/societes" icon={<Building2 size={18} />} title="Informations des sociétés" subtitle="Siège, SIREN, gérant · durée des baux" />
-            <Row href="/plus/cadre-juridique" icon={<Scale size={18} />} title="Cadre juridique des baux" subtitle="Modèles 2015 / 2026, états des lieux, quittances" />
-            <Row href="/plus/historique" icon={<LineIcon size={18} />} title="Historique et plus-values" subtitle="Valeurs passées, plus-values latentes" />
-            <Row href="/plus/bilans" icon={<FileSpreadsheet size={18} />} title="Bilans et comptes annuels" subtitle={`${data.statements.length} bilan(s) · import PDF intelligent`} />
+            <Row href="/plus/analyse" icon={<Sparkles size={18} />} title="Analyse IA" subtitle="Diagnostic et pistes de réinvestissement" />
             <Row href="/plus/indicateurs" icon={<Gauge size={18} />} title="Indicateurs financiers" subtitle="DSCR, rendement, LTV, CAF…" />
-            <Row href="/plus/travaux" icon={<Hammer size={18} />} title="Travaux" subtitle={`${worksPlanned} à venir`} />
-            <Row href="/plus/remuneration" icon={<HandCoins size={18} />} title="Rémunération et comptes courants" subtitle="Sorties d'argent personnelles" />
+            <Row href="/plus/historique" icon={<LineIcon size={18} />} title="Historique et plus-values" subtitle="Valeurs passées, plus-values latentes" />
+            <Row href="/chronologie" icon={<CalendarRange size={18} />} title="Chronologie" subtitle="30 ans d'échéances · vos événements" />
+            <Row href="/simulations" icon={<FlaskConical size={18} />} title="Simulations" subtitle={`${data.scenarios.length} scénario(s) · vente, refinancement…`} />
+          </Divided>
+        </Card>
+
+        <SectionTitle>Sociétés</SectionTitle>
+        <Card className="py-1">
+          <Divided>
+            <Row href="/plus/societes" icon={<Building2 size={18} />} title="Informations des sociétés" subtitle="Siège, SIREN, gérant · durée des baux" />
+            <Row href="/plus/bilans" icon={<FileSpreadsheet size={18} />} title="Bilans et comptes annuels" subtitle={`${data.statements.length} bilan(s) · import PDF intelligent`} />
+            <Row href="/plus/remuneration" icon={<HandCoins size={18} />} title="Rémunération" subtitle="Salaires, dividendes, comptes courants · calcul 2026" />
+          </Divided>
+        </Card>
+
+        </div>
+        <div className="min-w-0">
+        <SectionTitle>Réglages</SectionTitle>
+        <Card className="py-1">
+          <Divided>
+            <Row href="/plus/apparence" icon={<Palette size={18} />} title="Apparence" subtitle={`Couleur principale · ${themeDef(data.settings.theme).name}`} />
             <Row href="/plus/hypotheses" icon={<Percent size={18} />} title="Hypothèses de projection" subtitle="Revalorisation, indexation des loyers" />
-            <Row
-              href="/plus/a-completer"
-              icon={<CircleAlert size={18} />}
-              title="Données à compléter"
-              subtitle={issues.length ? `${issues.length} élément(s)` : "Tout est renseigné"}
-            />
+            <Row href="/plus/cadre-juridique" icon={<Scale size={18} />} title="Cadre juridique des baux" subtitle="Modèles 2015 / 2026, états des lieux, quittances" />
+            <Row href="/plus/acces-gestion" icon={<KeyRound size={18} />} title="Accès d'Enora" subtitle="Mot de passe, aperçu de son espace" />
+            <Row href="/plus/securite" icon={<ScanFace size={18} />} title="Connexion Face ID" subtitle="Se connecter sans mot de passe" />
           </Divided>
         </Card>
 
@@ -77,7 +102,7 @@ export default function PlusPage() {
         <Card className="py-1">
           <Divided>
             <Row href="/plus/sauvegardes" icon={<History size={18} />} title="Sauvegardes" subtitle="Exporter, importer, restaurer" />
-            <Row href="/plus/partage" icon={<Share2 size={18} />} title="Partager en lecture seule" subtitle="Banquier, comptable, associé · avec expiration" />
+            <Row href="/plus/partage" icon={<Share2 size={18} />} title="Partager en lecture seule" subtitle="Toute l'application, sans rien pouvoir modifier" />
             <Row href="/api/export-excel" icon={<FileSpreadsheet size={18} />} title="Exporter en Excel" subtitle="Toutes les données, un onglet par thème" />
             <Row href="/bienvenue?etape=1" icon={<Wand2 size={18} />} title="Assistant de démarrage" subtitle="Structure, immeubles, crédits, revenus" />
             {demo ? (
@@ -99,12 +124,11 @@ export default function PlusPage() {
         <Card className="py-1">
           <Divided>
             <Row onClick={() => setHomeSheet(true)} icon={<Smartphone size={18} />} title="Ajouter à l'écran d'accueil" subtitle="Comme une application iPhone" />
-            <Row onClick={() => switchView("gestion")} icon={<ArrowLeftRight size={18} />} title="Passer en vue gestion locative" subtitle="Vue simplifiée : loyers, locataires, à faire, bilan" />
-            <Row href="/plus/acces-gestion" icon={<KeyRound size={18} />} title="Accès d'Enora" subtitle="Mot de passe de son espace gestion locative" />
-            <Row href="/plus/securite" icon={<ScanFace size={18} />} title="Connexion Face ID" subtitle="Se connecter sans mot de passe" />
             <Row onClick={logout} icon={<LogOut size={18} />} title="Se déconnecter" />
           </Divided>
         </Card>
+        </div>
+        </div>
         <p className="mt-6 flex items-center justify-center gap-1.5 text-center text-xs text-muted">
           <CalendarClock size={13} /> Enregistrement automatique · sauvegarde quotidienne
         </p>

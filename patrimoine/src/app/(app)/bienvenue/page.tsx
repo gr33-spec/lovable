@@ -35,7 +35,7 @@ function Onboarding() {
 
   const finish = () => {
     setSettings({ onboardingDone: true });
-    router.push("/");
+    router.replace("/");
   };
   const next = () => (step >= 4 ? finish() : setStep(step + 1));
 
@@ -58,7 +58,7 @@ function Onboarding() {
   const loadDemo = async () => {
     setBusy(true);
     await replaceAll(demoData(), "chargement démo");
-    router.push("/");
+    router.replace("/");
   };
 
   const steps = [
@@ -100,7 +100,7 @@ function Onboarding() {
               <button
                 key={s.label}
                 onClick={() => setStep(i + 1)}
-                className={cx("flex flex-1 flex-col items-center gap-1 rounded-2xl py-2 text-[11px] font-medium", step === i + 1 ? "bg-navy text-white" : step > i + 1 ? "bg-pos/10 text-pos" : "bg-card text-muted")}
+                className={cx("flex flex-1 flex-col items-center gap-1 rounded-2xl py-2 text-[11px] font-medium", step === i + 1 ? "bg-brand text-on-brand" : step > i + 1 ? "bg-pos/10 text-pos" : "bg-card text-muted")}
               >
                 {s.icon}
                 {s.label}
@@ -137,7 +137,7 @@ function Onboarding() {
                       if (newCompany) addCompany(newCompany);
                       setNewCompany(undefined);
                     }}
-                    className="mt-6 h-[50px] rounded-2xl bg-navy px-4 text-sm font-semibold text-white"
+                    className="mt-6 h-[50px] rounded-2xl bg-brand px-4 text-sm font-semibold text-on-brand"
                   >
                     Ajouter
                   </button>
@@ -145,7 +145,7 @@ function Onboarding() {
                 {SUGGESTED.some((n) => !data.companies.some((c) => c.name === n)) && (
                   <div className="mt-3 flex flex-wrap gap-2">
                     {SUGGESTED.filter((n) => !data.companies.some((c) => c.name === n)).map((n) => (
-                      <button key={n} onClick={() => addCompany(n)} className="rounded-full bg-soft px-3 py-1.5 text-sm font-medium text-navy">
+                      <button key={n} onClick={() => addCompany(n)} className="rounded-full bg-soft px-3 py-1.5 text-sm font-medium text-brand">
                         + {n}
                       </button>
                     ))}

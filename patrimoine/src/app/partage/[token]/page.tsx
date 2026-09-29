@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import Link from "next/link";
 import { FileText, Lock } from "lucide-react";
 import { loadDocument } from "@/lib/server/db";
 import { resolveShare } from "@/lib/server/shares";
@@ -13,13 +15,35 @@ export const metadata: Metadata = { title: "Patrimoine — consultation", robots
 
 // Consultation en lecture seule via un lien de partage. Aucune modification
 // possible : la page est rendue côté serveur, sans accès aux API privées.
-export default async function SharePage({ params }: { params: Promise<{ token: string }> }) {
+export default async function SharePage({ params, searchParams }: { params: Promise<{ token: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { token } = await params;
+  const query = await searchParams;
+  // Par défaut, le lien ouvre l'application entière en consultation.
+  if (!query.connecte && !query.apercu && (await resolveShare(token))) redirect(`/partage/${token}/ouvrir`);
+  if (query.connecte && (await resolveShare(token))) {
+    return (
+      <main className="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center px-6 text-center">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-soft text-brand">
+          <Lock size={24} />
+        </div>
+        <h1 className="text-xl font-bold text-navy">Vous êtes déjà connecté</h1>
+        <p className="mt-2 text-sm text-muted">Ouvrir ce lien de consultation sur cet appareil remplace votre connexion : il faudra ensuite vous reconnecter avec votre mot de passe.</p>
+        <div className="mt-6 grid w-full gap-2">
+          <a href={`/partage/${token}/ouvrir?confirmer=1`} className="rounded-2xl bg-brand px-5 py-3.5 text-[16px] font-semibold text-on-brand">
+            Voir comme la personne invitée
+          </a>
+          <Link href="/" className="rounded-2xl bg-soft px-5 py-3.5 text-[16px] font-semibold text-brand">
+            Rester connecté
+          </Link>
+        </div>
+      </main>
+    );
+  }
   const link = await resolveShare(token, true);
   if (!link) {
     return (
       <main className="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center px-6 text-center">
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-soft text-navy">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-soft text-brand">
           <Lock size={24} />
         </div>
         <h1 className="text-xl font-bold text-navy">Lien invalide ou expiré</h1>

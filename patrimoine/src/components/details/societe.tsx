@@ -1,25 +1,30 @@
 "use client";
 
+import { removalPlan, removalSummary } from "@/lib/removal";
+import { useUndoableRemove } from "@/components/swipe";
+import { DocumentsCard } from "@/components/documents/library";
+import { AnalysisEntry } from "@/components/analysis/entry";
+import { companyCrumbs } from "@/lib/crumbs";
+import { goBack } from "@/lib/nav";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Briefcase, Building2, Landmark, Pencil, Plus } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { unitRemovals } from "@/lib/tenancy";
 import { cashflowMonthly, ltv, netWorth } from "@/lib/engine/snapshot";
 import { monthLabel } from "@/lib/engine/dates";
 import { eur, eurCompact, eurSigned, pct } from "@/lib/format";
 import { labelOf, COMPANY_KINDS } from "@/lib/labels";
-import type { Collection } from "@/lib/types";
 import { CompanyForm } from "../forms";
 import { BilanImport } from "../bilans";
 import { statementRatios } from "@/lib/engine/indicators";
 import { QuickBuilding, QuickCompany, QuickLoan } from "../quick-add";
 import { LineChart } from "../charts";
-import { Button, Card, ConfirmDelete, Divided, Empty, Kpi, Page, PageHeader, Row, SectionTitle, Sheet } from "../ui";
+import { Button, Card, ConfirmDelete, Divided, Empty, Kpi, MissingData, Page, PageHeader, Row, SectionTitle, Sheet } from "../ui";
 
 export function CompanyDetail({ id }: { id: string }) {
-  const { data, projection, removeMany, upsert } = useStore();
+  const { data, projection } = useStore();
+  const removeUndoable = useUndoableRemove();
   const router = useRouter();
   const [sheet, setSheet] = useState<null | "edit" | "building" | "loan" | "company" | "bilan">(null);
   const company = data.companies.find((c) => c.id === id);
@@ -44,35 +49,28 @@ export function CompanyDetail({ id }: { id: string }) {
   const cf = cashflowMonthly(f);
   const ratio = ltv(f);
 
+  // Règle commune (lib/removal) : immeubles, logements, crédits, bilans… supprimés ; documents conservés ; filiales remontées.
   const remove = () => {
-    const items: { coll: Collection; id: string }[] = [{ coll: "companies", id }];
-    for (const b of buildings) {
-      items.push({ coll: "buildings", id: b.id });
-      data.units.filter((u) => u.buildingId === b.id).forEach((u) => items.push(...unitRemovals(data, u.id)));
-      data.works.filter((w) => w.buildingId === b.id).forEach((w) => items.push({ coll: "works", id: w.id }));
-    }
-    loans.forEach((l) => items.push({ coll: "loans", id: l.id }));
-    removeMany(items);
-    // Les filiales remontent d'un niveau.
-    children.forEach((c) => upsert("companies", { ...c, parentId: company.parentId ?? null }));
-    router.push("/patrimoine");
+    removeUndoable([{ coll: "companies", id }], `${company.name} supprimée`);
+    goBack(router, "/patrimoine");
   };
 
   return (
     <>
       <PageHeader
         title={company.name}
+        crumbs={companyCrumbs(data, company.id, false)}
         subtitle={labelOf(COMPANY_KINDS, company.kind)}
         back="/patrimoine"
         action={
-          <button onClick={() => setSheet("edit")} className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-navy">
+          <button onClick={() => setSheet("edit")} className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-brand">
             <Pencil size={15} /> Modifier
           </button>
         }
       />
       <Page>
         <Card>
-          <Kpi label={hasChildren ? "Patrimoine net consolidé" : "Patrimoine net"} value={netWorth(f) !== undefined && (f.value || f.debt) ? eur(netWorth(f)) : "Données insuffisantes"} big />
+          <Kpi label={hasChildren ? "Patrimoine net consolidé" : "Patrimoine net"} value={netWorth(f) !== undefined && (f.value || f.debt) ? eur(netWorth(f)) : <MissingData action={f.unvalued ? `Estimer ${f.unvalued} immeuble${f.unvalued > 1 ? "s" : ""}` : undefined} href="/plus/a-completer" />} big />
           <div className="mt-4 grid grid-cols-2 gap-4">
             <Kpi label="Valeur immobilière" value={f.unvalued ? "—" : eurCompact(f.value)} hint={f.unvalued ? `${f.unvalued} bien(s) sans valeur` : undefined} />
             <Kpi label="Dette totale" value={eurCompact(f.debt)} hint={ratio !== undefined ? `LTV ${pct(ratio)}` : undefined} />
@@ -88,13 +86,15 @@ export function CompanyDetail({ id }: { id: string }) {
           )}
         </Card>
 
+        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
+        <div className="min-w-0">
         {rows.some((r) => r.debt > 0) && (
           <>
             <SectionTitle>Projection {hasChildren ? "(société seule)" : ""}</SectionTitle>
             <Card>
               <LineChart
                 years={rows.map((r) => r.year)}
-                series={[{ label: "Capital restant dû", values: rows.map((r) => r.debt), color: "var(--series-1)" }]}
+                series={[{ label: "Capital restant dû", values: rows.map((r) => r.debt), color: "var(--brand)" }]}
                 height={160}
               />
             </Card>
@@ -153,6 +153,8 @@ export function CompanyDetail({ id }: { id: string }) {
           )}
         </Card>
 
+        </div>
+        <div className="min-w-0">
         <SectionTitle action={<AddLink onClick={() => setSheet("loan")} />}>Crédits</SectionTitle>
         <Card className="py-1">
           {loans.length === 0 ? (
@@ -201,6 +203,10 @@ export function CompanyDetail({ id }: { id: string }) {
 
         {(company.partners?.length || company.taxRegime || company.notes) && (
           <>
+            <DocumentsCard scope={{ companyId: company.id }} href={`/documents?societe=${company.id}`} />
+
+            <AnalysisEntry scope={{ type: "company", id: company.id }} title="Analyse IA de cette société" />
+
             <SectionTitle>Informations</SectionTitle>
             <Card className="space-y-2 text-[15px]">
               {company.partners?.map((p, i) => (
@@ -215,10 +221,12 @@ export function CompanyDetail({ id }: { id: string }) {
           </>
         )}
 
+        </div>
+        </div>
         <div className="mt-8">
           <ConfirmDelete
             label="Supprimer la société"
-            message={`Supprimer ${company.name}, ses immeubles, logements, crédits et travaux ? Les filiales sont conservées. Une sauvegarde automatique permet de revenir en arrière.`}
+            message={`Supprimer ${company.name} ? ${removalSummary(removalPlan(data, "companies", company.id))} Les filiales sont conservées.`}
             onConfirm={remove}
           />
         </div>

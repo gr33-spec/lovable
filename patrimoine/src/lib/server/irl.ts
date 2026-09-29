@@ -18,7 +18,7 @@ export async function irlSeries(): Promise<IrlPoint[]> {
   let lastError: unknown;
   for (const base of SOURCES) {
     try {
-      const res = await fetch(`${base}?lastNObservations=24`, { headers: { Accept: "application/xml" }, signal: AbortSignal.timeout(8000), cache: "no-store" });
+      const res = await fetch(`${base}?lastNObservations=100`, { headers: { Accept: "application/xml" }, signal: AbortSignal.timeout(8000), cache: "no-store" });
       if (!res.ok) throw new Error(String(res.status));
       const series = parseSdmx(await res.text());
       if (series.length === 0) throw new Error("série vide");

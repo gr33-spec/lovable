@@ -13,6 +13,10 @@ export interface Milestone {
 
 export function companyLabel(data: AppData, key: string): string {
   if (key === NO_COMPANY) return "Hors société";
+  if (key.startsWith("new-")) {
+    const p = (data.projects ?? []).find((x) => `new-${x.id}` === key);
+    return p?.newCompanyName ? `${p.newCompanyName} (à créer)` : "Nouvelle société";
+  }
   return data.companies.find((c) => c.id === key)?.name ?? "Société";
 }
 

@@ -1,38 +1,26 @@
 "use client";
 
+import { sortedUnits } from "@/lib/lots";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleDashed, Coins, X } from "lucide-react";
+import { Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleDashed, Coins, RotateCcw, X } from "lucide-react";
+import { SwipeRow, toast, useUndoableUpdate } from "@/components/swipe";
+import { settleUnpaid } from "@/lib/revision";
 import { useStore } from "@/lib/store";
 import type { RentPayment, Unit } from "@/lib/types";
 import { eur, eurCompact } from "@/lib/format";
-import { expectedMonthly, monthKey, monthKeyLabel, outstanding, paidAmount, shiftMonthKey, todayIso, unpaidByUnit } from "@/lib/engine/leases";
+import { monthKey, monthKeyLabel, outstanding, paidAmount, shiftMonthKey, todayIso, unpaidByUnit } from "@/lib/engine/leases";
 import { Button, Card, Empty, Grid2, NumberField, SectionTitle, Segmented, Sheet, Stack, TextField, cx } from "@/components/ui";
 import { STATUS_LABEL } from "@/components/leases";
 import { DateField } from "@/components/ui";
-import type { AppData } from "@/lib/types";
-import { monthDue } from "@/lib/legal/receipts";
+import { dueFor, upToDate } from "@/lib/payments";
 
-/** Bail couvrant le mois (le montant appelé est alors calculé au prorata des jours d'occupation). */
-function tenancyForMonth(data: AppData, unit: Unit, month: string) {
-  const first = `${month}-01`;
-  const last = `${month}-31`;
-  return data.tenancies.find(
-    (t) => t.unitId === unit.id && t.status !== "brouillon" && (!t.startDate || t.startDate <= last) && (!t.endDate || t.endDate >= first),
-  );
-}
-
-/** Montant attendu pour le mois, avec le détail loyer / charges. */
-function dueFor(data: AppData, unit: Unit, month: string): Pick<RentPayment, "due" | "rent" | "charges" | "tenancyId"> {
-  const t = tenancyForMonth(data, unit, month);
-  if (!t) return { due: expectedMonthly(unit), rent: unit.rent, charges: unit.charges };
-  const d = monthDue(t, month);
-  return { due: d.total, rent: d.rent, charges: d.charges, tenancyId: t.id };
-}
+export { dueFor } from "@/lib/payments";
 
 /** Pointage mensuel des loyers (vue « Loyers » de l'onglet Gestion). */
 export function RentsView() {
-  const { data, upsert } = useStore();
+  const { data, upsert, upsertMany } = useStore();
+  const update = useUndoableUpdate();
   const router = useRouter();
   const params = useSearchParams();
   const current = monthKey(todayIso());
@@ -41,12 +29,12 @@ export function RentsView() {
   const [editId, setEditId] = useState<string | null>(null);
   const [open, setOpen] = useState<Set<string>>(() => new Set());
 
-  const go = (delta: number) => router.replace(`/gestion?mois=${shiftMonthKey(month, delta)}`, { scroll: false });
+  const go = (delta: number) => router.replace(`/gestion?vue=loyers&mois=${shiftMonthKey(month, delta)}`, { scroll: false });
 
   // Logements concernés : occupés, ou déjà pointés pour ce mois.
   const units = data.units.filter((u) => u.status !== "vacant" || u.payments?.[month]);
   const buildings = data.buildings
-    .map((b) => ({ building: b, units: units.filter((u) => u.buildingId === b.id) }))
+    .map((b) => ({ building: b, units: sortedUnits(units.filter((u) => u.buildingId === b.id)) }))
     .filter((g) => g.units.length > 0);
 
   let expected = 0;
@@ -86,6 +74,19 @@ export function RentsView() {
   };
 
   const editing = data.units.find((u) => u.id === editId);
+  const [initializing, setInitializing] = useState(false);
+  // Démarrage du suivi : mois non pointés depuis l'entrée de chaque locataire (3 ans au plus).
+  const backlog = (() => {
+    const today = todayIso();
+    const units = data.units.map((u) => ({ unit: u, ...upToDate(data, u, today) })).filter((x) => x.months.length > 0);
+    return { units, months: units.reduce((n, x) => n + x.months.length, 0) };
+  })();
+  const initialize = () => {
+    const before = backlog.units.map((x) => x.unit);
+    upsertMany(backlog.units.map((x) => ({ coll: "units" as const, item: { ...x.unit, payments: x.payments } })));
+    toast(`${backlog.months} mois marqués payés (${backlog.units.length} logements)`, () => upsertMany(before.map((u) => ({ coll: "units" as const, item: u }))));
+    setInitializing(false);
+  };
 
   return (
     <>
@@ -97,7 +98,7 @@ export function RentsView() {
           <div className="text-center">
             <div className="text-[17px] font-bold capitalize text-navy">{monthKeyLabel(month)}</div>
             {month !== current && (
-              <button onClick={() => router.replace(`/gestion?mois=${current}`, { scroll: false })} className="text-xs font-medium text-series-1">
+              <button onClick={() => router.replace(`/gestion?vue=loyers&mois=${current}`, { scroll: false })} className="text-xs font-medium text-series-1">
                 Revenir au mois en cours
               </button>
             )}
@@ -126,6 +127,20 @@ export function RentsView() {
           </div>
         </div>
 
+        {backlog.months > 0 && (
+          <button onClick={() => setInitializing(true)} className="soft-card mt-4 flex w-full items-center gap-3 rounded-[22px] px-4 py-3.5 text-left">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-pos/10 text-pos">
+              <CheckCheck size={18} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[15px] font-semibold text-ink">Tous les locataires sont à jour ?</span>
+              <span className="block text-[13px] text-muted">
+                {backlog.months} mois non pointés depuis les entrées ({backlog.units.length} logement{backlog.units.length > 1 ? "s" : ""}) : les marquer payés en une fois
+              </span>
+            </span>
+          </button>
+        )}
+
         {unpaid.length > 0 && (
           <>
             <SectionTitle action={<span className="tabular text-sm font-bold text-neg">{eur(unpaidTotal)}</span>}>Impayés cumulés</SectionTitle>
@@ -135,13 +150,15 @@ export function RentsView() {
                   const b = data.buildings.find((x) => x.id === l.unit.buildingId);
                   const tenant = [l.unit.tenantFirstName, l.unit.tenantLastName].filter(Boolean).join(" ");
                   return (
-                    <button key={l.unit.id} onClick={() => setEditId(l.unit.id)} className="flex w-full items-center gap-3 py-3 text-left">
+                    <SwipeRow key={l.unit.id} actions={[{ label: "Payé", icon: <Check size={18} />, tone: "pos", onAction: () => update("units", l.unit, settleUnpaid(l.unit), "Loyers marqués payés") }]}>
+                    <button onClick={() => setEditId(l.unit.id)} className="flex w-full items-center gap-3 py-3 text-left">
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-[15px] font-medium text-ink">{[b?.name, l.unit.name].filter(Boolean).join(" · ")}</div>
                         <div className="truncate text-[13px] text-muted">{[tenant, l.months.map(monthKeyLabel).join(", ")].filter(Boolean).join(" — ")}</div>
                       </div>
                       <span className="tabular text-[15px] font-bold text-neg">{eur(l.amount)}</span>
                     </button>
+                    </SwipeRow>
                   );
                 })}
               </div>
@@ -152,7 +169,7 @@ export function RentsView() {
         {buildings.length === 0 ? (
           <Empty icon={<Coins size={26} />} title="Aucun logement loué" text="Détaillez les logements de vos immeubles pour pointer les loyers chaque mois." />
         ) : (
-          <div className="mt-5 space-y-3">
+          <div className="mt-5 space-y-3 lg:grid lg:grid-cols-2 lg:items-start lg:gap-3 lg:space-y-0 2xl:grid-cols-3">
             {buildings.map(({ building, units: list }) => {
               const paidCount = list.filter((u) => u.payments?.[month]?.status === "paye").length;
               const pointed = list.filter((u) => u.payments?.[month]).length;
@@ -197,7 +214,12 @@ export function RentsView() {
                   {isOpen && (
                     <div className="divide-y divide-line border-t border-line px-5">
                       {list.map((u) => (
-                        <PaymentRow key={u.id} unit={u} expected={dueFor(data, u, month).due ?? 0} payment={u.payments?.[month]} onToggle={(st) => toggle(u, st)} onOpen={() => setEditId(u.id)} />
+                        <SwipeRow
+                          key={u.id}
+                          actions={u.payments?.[month] ? [{ label: "Effacer", icon: <RotateCcw size={18} />, tone: "neutral", onAction: () => { setPayment(u, undefined); toast("Pointage effacé", () => upsert("units", u)); } }] : []}
+                        >
+                          <PaymentRow unit={u} expected={dueFor(data, u, month).due ?? 0} payment={u.payments?.[month]} onToggle={(st) => toggle(u, st)} onOpen={() => setEditId(u.id)} />
+                        </SwipeRow>
                       ))}
                     </div>
                   )}
@@ -211,6 +233,20 @@ export function RentsView() {
         </p>
       </div>
 
+      <Sheet
+        open={initializing}
+        onClose={() => setInitializing(false)}
+        title="Tous les locataires à jour"
+        footer={
+          <Button full onClick={initialize} icon={<CheckCheck size={18} />}>
+            Marquer {backlog.months} mois payés
+          </Button>
+        }
+      >
+        <p className="pb-2 text-[15px] text-ink-2">
+          Pour démarrer le suivi : chaque mois non pointé, depuis l&apos;entrée du locataire dans le logement (3 ans au plus, 12 mois si la date d&apos;entrée est inconnue) jusqu&apos;à ce mois-ci, est marqué payé. Les impayés et paiements partiels déjà signalés ne changent pas. Vous pourrez ensuite pointer mois par mois, ou corriger un mois en le touchant.
+        </p>
+      </Sheet>
       <Sheet open={!!editing} onClose={() => setEditId(null)} title={editing ? `${editing.name} · ${monthKeyLabel(month)}` : ""} footer={<Button full onClick={() => setEditId(null)}>Terminé</Button>}>
         {editing && <PaymentEditor unit={editing} month={month} defaults={dueFor(data, editing, month)} onChange={(p) => setPayment(editing, p)} />}
       </Sheet>

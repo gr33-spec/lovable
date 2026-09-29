@@ -2,30 +2,34 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { BellRing, Check, ChevronRight, FileSignature, Landmark, TrendingUp, TriangleAlert } from "lucide-react";
+import { BellRing, Check, CheckCheck, ChevronRight, FileSignature, Landmark, Trash2, TrendingUp, TriangleAlert, X } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { useIrlSeries } from "@/lib/use-irl";
-import { irlLabel, nextYearSameQuarter } from "@/lib/irl";
 import type { RentPayment, Unit } from "@/lib/types";
 import { LEASE_TYPES, REVISIONS } from "@/lib/labels";
-import { dateFr, eur, eurCompact, pct } from "@/lib/format";
+import { dateFr, eur, eurCompact } from "@/lib/format";
 import {
   LEASE_END_NOTICE_MONTHS,
   leaseInfo,
   monthKey,
   monthKeyLabel,
   outstanding,
-  revisedRent,
   shiftMonthKey,
   todayIso,
   type Reminder,
 } from "@/lib/engine/leases";
-import { Button, DateField, Details, Grid2, IconChip, NumberField, SelectField, TextField, cx, type ChipTone } from "./ui";
+import { RevisionSheet, revisionLetterUrl } from "./gestion/revision";
+import { openDocument } from "./pdf-viewer";
+import { upToDate } from "@/lib/payments";
+import { toast } from "@/lib/toast";
+import { SwipeRow, useDismiss, useUndoableUpdate, type SwipeAction } from "./swipe";
+import { settleUnpaid, skipRevision } from "@/lib/revision";
+import { DateField, Details, Grid2, IconChip, NumberField, SelectField, TextField, cx, type ChipTone } from "./ui";
 
 // ——— Bail d'un logement ———
 
 export function LeaseSection({ unit }: { unit: Unit }) {
-  const { upsert } = useStore();
+  const { data, upsert } = useStore();
+  const tenancyId = data.tenancies.find((t) => t.unitId === unit.id && t.status === "actif")?.id;
   const set = (patch: Partial<Unit>) => upsert("units", { ...unit, ...patch });
   const today = todayIso();
   const info = leaseInfo(unit, today);
@@ -66,7 +70,13 @@ export function LeaseSection({ unit }: { unit: Unit }) {
         )}
         {info.nextRevision && (
           <div>
-            Prochaine révision du loyer : <b className="text-ink">{dateFr(info.nextRevision)}</b>
+            {info.nextRevision < today ? "Révision non faite depuis le " : "Prochaine révision du loyer : "}
+            <b className="text-ink">{dateFr(info.nextRevision)}</b>
+            {info.revisionDeadline && info.nextRevision < today && (
+              <>
+                {" "}— à demander avant le <b className="text-ink">{dateFr(info.revisionDeadline)}</b>, sans effet rétroactif
+              </>
+            )}
           </div>
         )}
       </div>
@@ -82,7 +92,7 @@ export function LeaseSection({ unit }: { unit: Unit }) {
         <TextField label="Indice de référence" value={unit.indexLabel} placeholder="Ex. IRL T2 2025" onChange={(v) => set({ indexLabel: v })} />
         <NumberField label="Valeur de l'indice" suffix="" value={unit.indexValue} onChange={(v) => set({ indexValue: v })} placeholder="Ex. 145,77" />
       </Grid2>
-      <RevisionTool unit={unit} nextRevision={info.nextRevision} />
+      <RevisionTool unit={unit} />
       {(unit.rentHistory?.length ?? 0) > 0 && (
         <div>
           <div className="mb-1 px-1 text-[13px] font-medium text-ink-2">Historique du loyer</div>
@@ -93,9 +103,21 @@ export function LeaseSection({ unit }: { unit: Unit }) {
                   <div className="font-medium text-ink">{dateFr(h.date)}</div>
                   <div className="text-muted">{[h.indexLabel, h.note].filter(Boolean).join(" · ") || "Révision"}</div>
                 </div>
-                <div className="tabular text-right">
-                  <div className="font-semibold text-ink">{eur(h.rent)}</div>
-                  {h.previousRent ? <div className="text-muted">avant {eur(h.previousRent)}</div> : null}
+                <div className="flex items-center gap-3">
+                  {(() => {
+                    const url = h.previousRent && h.referenceValue && h.indexValue
+                      ? revisionLetterUrl({ tenancyId, due: h.dueDate ?? h.date, effective: h.date, rent: h.previousRent, charges: unit.charges, reference: { label: h.referenceLabel ?? "", value: h.referenceValue }, index: { label: h.indexLabel ?? "", value: h.indexValue } })
+                      : undefined;
+                    return url ? (
+                      <button type="button" onClick={() => openDocument(url)} className="rounded-full bg-soft px-2.5 py-1 text-[12px] font-semibold text-brand">
+                        Courrier
+                      </button>
+                    ) : null;
+                  })()}
+                  <div className="tabular text-right">
+                    <div className="font-semibold text-ink">{eur(h.rent)}</div>
+                    {h.previousRent ? <div className="text-muted">avant {eur(h.previousRent)}</div> : null}
+                  </div>
                 </div>
               </div>
             ))}
@@ -106,108 +128,49 @@ export function LeaseSection({ unit }: { unit: Unit }) {
   );
 }
 
-function RevisionTool({ unit, nextRevision }: { unit: Unit; nextRevision?: string }) {
-  const { upsert, data } = useStore();
+function RevisionTool({ unit }: { unit: Unit }) {
   const [open, setOpen] = useState(false);
-  const [newLabel, setNewLabel] = useState<string | undefined>();
-  const [newValue, setNewValue] = useState<number | undefined>();
-  const irl = useIrlSeries();
-  // Indice de révision proposé automatiquement : même trimestre, un an après l'indice de référence.
-  const suggested = irl ? nextYearSameQuarter(irl, unit.indexLabel) : undefined;
-  if (open && suggested && newLabel === undefined && newValue === undefined) {
-    queueMicrotask(() => {
-      setNewLabel(irlLabel(suggested));
-      setNewValue(suggested.value);
-    });
-  }
-  const today = todayIso();
-  const proposal = revisedRent(unit.rent, unit.indexValue, newValue);
-  const date = nextRevision && nextRevision <= today ? nextRevision : today;
-
-  const apply = (rent: number | undefined, note?: string) => {
-    const history = [...(unit.rentHistory ?? [])];
-    if (rent !== undefined) {
-      history.push({ date, rent, previousRent: unit.rent, indexLabel: newLabel, indexValue: newValue, note });
-    }
-    upsert("units", {
-      ...unit,
-      rent: rent ?? unit.rent,
-      indexLabel: rent !== undefined ? newLabel ?? unit.indexLabel : unit.indexLabel,
-      indexValue: rent !== undefined ? newValue ?? unit.indexValue : unit.indexValue,
-      lastRevisionDate: date,
-      rentHistory: history,
-    });
-    // Le bail en cours suit le nouveau loyer et le nouvel indice de référence.
-    const active = data.tenancies.find((t) => t.unitId === unit.id && t.status === "actif");
-    if (active && rent !== undefined) upsert("tenancies", { ...active, rent, indexLabel: newLabel ?? active.indexLabel, indexValue: newValue ?? active.indexValue });
-    setOpen(false);
-    setNewLabel(undefined);
-    setNewValue(undefined);
-  };
-
-  if (!open) {
-    return (
+  return (
+    <>
       <button type="button" onClick={() => setOpen(true)} className="flex items-center gap-2 text-sm font-semibold text-series-1">
         <TrendingUp size={16} /> Réviser le loyer
       </button>
-    );
-  }
-  return (
-    <div className="space-y-3 rounded-2xl border border-series-1/30 bg-series-1/[0.04] p-4">
-      <div className="text-[14px] font-semibold text-ink">Révision au {dateFr(date)}</div>
-      <div className="text-[13px] text-ink-2">
-        Loyer actuel : <b>{eur(unit.rent)}</b>
-        {unit.indexValue ? ` · indice de référence ${unit.indexLabel ?? ""} ${unit.indexValue.toLocaleString("fr-FR")}` : " · indice de référence non renseigné"}
-      </div>
-      <Grid2>
-        <TextField label="Nouvel indice" value={newLabel} placeholder="Ex. IRL T2 2026" onChange={setNewLabel} />
-        <NumberField label="Valeur" suffix="" value={newValue} onChange={setNewValue} />
-      </Grid2>
-      <div className="rounded-xl bg-card px-3 py-2.5 text-[13px]">
-        {proposal !== undefined ? (
-          <>
-            Nouveau loyer : <b className="tabular text-[15px] text-ink">{eur(proposal)}</b>{" "}
-            <span className="tabular text-muted">
-              ({proposal - (unit.rent ?? 0) >= 0 ? "+" : ""}
-              {eur(proposal - (unit.rent ?? 0))} · {pct(((proposal / (unit.rent ?? 1)) - 1) * 100, 2)})
-            </span>
-          </>
-        ) : (
-          <span className="text-muted">Données insuffisantes : loyer, indice de référence et nouvel indice nécessaires.</span>
-        )}
-      </div>
-      {suggested && newLabel === irlLabel(suggested) && <p className="text-[12px] text-pos">Nouvel indice repris automatiquement de l&apos;INSEE (même trimestre, un an après).</p>}
-      <p className="text-[12px] text-muted">
-        Calcul : loyer × nouvel indice ÷ indice de référence. Vérifiez la clause du bail et les éventuels plafonnements en vigueur : aucune règle n&apos;est appliquée automatiquement.
-      </p>
-      <div className="flex flex-wrap gap-2">
-        <Button disabled={proposal === undefined} onClick={() => apply(proposal)}>
-          Appliquer
-        </Button>
-        <Button variant="secondary" onClick={() => apply(undefined)}>
-          Pas de révision cette fois
-        </Button>
-        <Button variant="ghost" onClick={() => setOpen(false)}>
-          Annuler
-        </Button>
-      </div>
-    </div>
+      <RevisionSheet unit={unit} open={open} onClose={() => setOpen(false)} />
+    </>
   );
 }
 
 // ——— Encaissements d'un logement (12 derniers mois) ———
 
 export function PaymentStrip({ unit }: { unit: Unit }) {
+  const { data, upsert } = useStore();
   const current = monthKey(todayIso());
   const months = Array.from({ length: 12 }, (_, i) => shiftMonthKey(current, i - 11));
   const unpaid = Object.values(unit.payments ?? {}).reduce((s, p) => s + outstanding(p), 0);
+  // Locataire à jour : tous les mois non pointés depuis son entrée passent à « payé » (annulable).
+  const markUpToDate = () => {
+    const r = upToDate(data, unit, todayIso());
+    if (!r.months.length) {
+      toast("Tous les mois depuis l'entrée sont déjà pointés.");
+      return;
+    }
+    upsert("units", { ...unit, payments: r.payments });
+    toast(`À jour : ${r.months.length} mois marqués payés depuis ${monthKeyLabel(r.months[0])}`, () => upsert("units", unit));
+  };
   return (
     <div>
-      <div className="mb-1.5 flex items-center justify-between px-1 text-[13px] font-medium text-ink-2">
+      <div className="mb-1.5 flex items-center justify-between gap-2 px-1 text-[13px] font-medium text-ink-2">
         <span>Encaissements (12 mois)</span>
-        <Link href={`/gestion?mois=${current}`} className="font-semibold text-series-1">
-          Pointer
-        </Link>
+        <span className="flex items-center gap-3">
+          {unit.status !== "vacant" && (
+            <button onClick={markUpToDate} className="flex items-center gap-1 rounded-full bg-pos/10 px-2.5 py-1 font-semibold text-pos">
+              <CheckCheck size={14} /> À jour
+            </button>
+          )}
+          <Link href={`/gestion?vue=loyers&mois=${current}`} className="font-semibold text-series-1">
+            Pointer
+          </Link>
+        </span>
       </div>
       <div className="grid grid-cols-12 gap-1">
         {months.map((k) => {
@@ -244,56 +207,118 @@ const REMINDER_STYLE: Record<Reminder["kind"], { icon: React.ReactNode; tone: Ch
   deposit: { icon: <Landmark size={18} />, tone: "gold" },
 };
 
-export function ReminderRow({ r, onDismiss }: { r: Reminder; onDismiss?: () => void }) {
+/**
+ * Rappel : un appui ouvre l'action (révision, fiche du logement…) ; un
+ * balayage vers la gauche propose de l'ignorer ou de le régler directement.
+ */
+export function ReminderRow({ r, dismissable = r.kind !== "unpaid" && r.kind !== "deposit" }: { r: Reminder; dismissable?: boolean }) {
+  const { data } = useStore();
   const style = REMINDER_STYLE[r.kind];
-  return (
-    <div className="flex items-center gap-3 py-3">
-      <Link href={r.href} className="flex min-w-0 flex-1 items-center gap-3 active:opacity-60">
-        <IconChip tone={style.tone} size={38}>{style.icon}</IconChip>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="truncate text-[15px] font-semibold text-ink">{r.title}</span>
-            {r.late && <span className="shrink-0 rounded-full bg-neg/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-neg">En retard</span>}
-          </div>
-          <div className="line-clamp-2 text-[13px] text-muted">{r.detail}</div>
+  const dismiss = useDismiss();
+  const update = useUndoableUpdate();
+  const [revising, setRevising] = useState(false);
+  const unit = r.unitId ? data.units.find((u) => u.id === r.unitId) : undefined;
+
+  const actions: SwipeAction[] = [];
+  if (r.kind === "revision" && unit) actions.push({ label: "Pas cette année", icon: <X size={18} />, tone: "warn", onAction: () => update("units", unit, skipRevision(unit, todayIso()), "Révision passée pour cette année") });
+  if (r.kind === "unpaid" && unit) actions.push({ label: "Payé", icon: <Check size={18} />, tone: "pos", onAction: () => update("units", unit, settleUnpaid(unit), "Loyers marqués payés") });
+  if (dismissable) actions.push({ label: "Ignorer", icon: <Trash2 size={18} />, tone: "neg", onAction: () => dismiss(r.id) });
+
+  const content = (
+    <>
+      <IconChip tone={style.tone} size={38}>{style.icon}</IconChip>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="truncate text-[15px] font-semibold text-ink">{r.title}</span>
+          {r.late && <span className="shrink-0 rounded-full bg-neg/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-neg">En retard</span>}
         </div>
-        {(r.kind === "unpaid" || r.kind === "deposit") && r.amount ? (
-          <span className="tabular shrink-0 text-[14px] font-bold text-neg">{eurCompact(r.amount)}</span>
-        ) : r.kind === "loan_end" && r.amount ? (
-          <span className="tabular shrink-0 text-[13px] font-bold text-pos">+{eurCompact(r.amount)}/m</span>
-        ) : (
-          <ChevronRight size={16} className="shrink-0 text-muted/70" />
-        )}
-      </Link>
-      {onDismiss && (
-        <button onClick={onDismiss} aria-label="Marquer comme traité" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-soft text-ink-2 active:scale-95">
-          <Check size={16} />
-        </button>
+        <div className="line-clamp-2 text-[13px] text-muted">{r.detail}</div>
+      </div>
+      {(r.kind === "unpaid" || r.kind === "deposit") && r.amount ? (
+        <span className="tabular shrink-0 text-[14px] font-bold text-neg">{eurCompact(r.amount)}</span>
+      ) : r.kind === "loan_end" && r.amount ? (
+        <span className="tabular shrink-0 text-[13px] font-bold text-pos">+{eurCompact(r.amount)}/m</span>
+      ) : (
+        <ChevronRight size={16} className="shrink-0 text-muted/70" />
       )}
-    </div>
+    </>
+  );
+  return (
+    <>
+    <SwipeRow actions={actions}>
+      {r.kind === "revision" && unit ? (
+        <button type="button" onClick={() => setRevising(true)} className="flex w-full items-center gap-3 py-3 text-left active:opacity-60">
+          {content}
+        </button>
+      ) : (
+        <Link href={r.href} className="flex items-center gap-3 py-3 active:opacity-60">
+          {content}
+        </Link>
+      )}
+    </SwipeRow>
+    {r.kind === "revision" && unit && <RevisionSheet unit={unit} open={revising} onClose={() => setRevising(false)} />}
+    </>
   );
 }
 
 export function RemindersCard({ items, limit = 3 }: { items: Reminder[]; limit?: number }) {
-  const { data, setSettings } = useStore();
   if (items.length === 0) return null;
-  const dismiss = (id: string) => setSettings({ dismissedReminders: [...(data.settings.dismissedReminders ?? []), id] });
   return (
     <div className="soft-card mt-4 rounded-[26px] px-5 pb-2 pt-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-[15px] font-bold text-navy">
           <BellRing size={17} className="text-gold" /> Rappels
-          <span className="rounded-full bg-navy px-2 py-0.5 text-[11px] font-bold text-white">{items.length}</span>
+          <span className="rounded-full bg-brand px-2 py-0.5 text-[11px] font-bold text-on-brand">{items.length}</span>
         </div>
-        <Link href="/plus/rappels" className="text-sm font-medium text-series-1">
+        <Link href="/gestion?vue=afaire" className="text-sm font-medium text-series-1">
           Tout voir
         </Link>
       </div>
       <div className="divide-y divide-line">
-        {items.slice(0, limit).map((r) => (
-          <ReminderRow key={r.id} r={r} onDismiss={r.kind === "unpaid" || r.kind === "deposit" ? undefined : () => dismiss(r.id)} />
-        ))}
+        {groupReminders(items)
+          .slice(0, limit)
+          .map((g) => (g.items.length === 1 ? <ReminderRow key={g.items[0].id} r={g.items[0]} /> : <ReminderGroupRow key={g.kind} kind={g.kind} items={g.items} />))}
       </div>
     </div>
+  );
+}
+
+const GROUP_LABEL: Record<Reminder["kind"], [string, string]> = {
+  revision: ["révision de loyer", "révisions de loyer"],
+  lease_end: ["fin de bail", "fins de bail"],
+  loan_end: ["fin de crédit", "fins de crédit"],
+  unpaid: ["loyer impayé", "loyers impayés"],
+  deposit: ["dépôt à restituer", "dépôts à restituer"],
+};
+
+/** Rappels regroupés par nature, dans l'ordre d'apparition (le plus urgent d'abord). */
+function groupReminders(items: Reminder[]): { kind: Reminder["kind"]; items: Reminder[] }[] {
+  const groups: { kind: Reminder["kind"]; items: Reminder[] }[] = [];
+  for (const r of items) {
+    const g = groups.find((x) => x.kind === r.kind);
+    if (g) g.items.push(r);
+    else groups.push({ kind: r.kind, items: [r] });
+  }
+  return groups;
+}
+
+function ReminderGroupRow({ kind, items }: { kind: Reminder["kind"]; items: Reminder[] }) {
+  const style = REMINDER_STYLE[kind];
+  const late = items.filter((r) => r.late).length;
+  const amount = items.reduce((s, r) => s + (r.amount ?? 0), 0);
+  return (
+    <Link href="/gestion?vue=afaire" className="flex items-center gap-3 py-3 active:opacity-60">
+      <IconChip tone={style.tone} size={38}>{style.icon}</IconChip>
+      <div className="min-w-0 flex-1">
+        <div className="text-[15px] font-semibold text-ink">
+          {items.length} {GROUP_LABEL[kind][1]}
+        </div>
+        <div className="truncate text-[13px] text-muted">
+          {late > 0 ? <span className="font-semibold text-neg">{late} en retard</span> : "À venir"}
+          {` · la plus proche : ${items[0].detail.split(" — ")[0]}`}
+        </div>
+      </div>
+      {amount > 0 && (kind === "unpaid" || kind === "deposit") ? <span className="tabular shrink-0 text-[14px] font-bold text-neg">{eurCompact(amount)}</span> : <ChevronRight size={16} className="shrink-0 text-muted/70" />}
+    </Link>
   );
 }

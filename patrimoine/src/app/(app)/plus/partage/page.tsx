@@ -118,7 +118,7 @@ export default function PartagePage() {
           Créer un lien de partage
         </Button>
         <p className="mt-3 px-1 text-[13px] text-muted">
-          La personne voit la synthèse, les sociétés, immeubles, crédits et peut télécharger le dossier PDF. Elle ne peut rien modifier et n&apos;a accès ni aux locataires, ni aux sauvegardes.
+          Le lien ouvre l&apos;application entière en consultation : toutes les pages, tous les boutons et documents, locataires compris. Rien ne peut être modifié ni enregistré ; sauvegardes, exports et accès restent fermés. Révoquez le lien pour couper la consultation immédiatement.
         </p>
 
         <SectionTitle>Liens actifs</SectionTitle>

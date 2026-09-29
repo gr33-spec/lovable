@@ -1,8 +1,12 @@
 "use client";
 
+import { goBack, openOverlay } from "@/lib/nav";
+import type { Crumb } from "@/lib/crumbs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { openDocument } from "./pdf-viewer";
 import { ArrowLeft, ChevronRight, X } from "lucide-react";
 import { INSUFFICIENT } from "@/lib/format";
 
@@ -17,27 +21,55 @@ export function PageHeader({
   subtitle,
   back,
   action,
+  crumbs,
 }: {
   title: string;
   subtitle?: ReactNode;
   back?: string | boolean;
   action?: ReactNode;
+  /** Parents de l'écran (Patrimoine › Société › Immeuble) : on voit où l'on est et on remonte d'un appui. */
+  crumbs?: Crumb[];
 }) {
   const router = useRouter();
   return (
     <header className="safe-top sticky top-0 z-20 bg-bg/90 backdrop-blur-md">
-      <div className="flex items-center gap-2 px-5 pb-3 pt-4">
+      <div className="mx-auto flex max-w-2xl items-center gap-2 px-5 pb-3 pt-4 lg:max-w-[2000px] lg:px-9 xl:px-11">
         {back && (
           <button
-            onClick={() => (typeof back === "string" ? router.push(back) : router.back())}
-            className="-ml-2 flex h-10 w-10 items-center justify-center rounded-full text-navy active:bg-black/5"
+            // Écran précédent réel ; `back` ne sert que si l'on est arrivé directement ici.
+            onClick={() => goBack(router, typeof back === "string" ? back : "/")}
+            className="-ml-2 flex h-10 w-10 items-center justify-center rounded-full text-brand active:bg-black/5"
             aria-label="Retour"
           >
             <ArrowLeft size={22} />
           </button>
         )}
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-[30px] font-extrabold tracking-[-0.02em] text-navy">{title}</h1>
+          {crumbs && crumbs.length > 0 && (
+            <nav aria-label="Vous êtes ici" className="flex min-w-0 items-center gap-1 overflow-hidden whitespace-nowrap text-[12.5px] font-medium text-muted">
+              {crumbs.map((c, i) => (
+                <span key={`${c.label}-${i}`} className={cx("flex min-w-0 items-center gap-1", i < crumbs.length - 1 ? "shrink-[2]" : "shrink")}>
+                  {i > 0 && <ChevronRight size={12} className="shrink-0 text-muted/60" />}
+                  {c.href ? (
+                    <Link href={c.href} className="truncate hover:text-brand hover:underline">
+                      {c.label}
+                    </Link>
+                  ) : (
+                    <span className="truncate">{c.label}</span>
+                  )}
+                </span>
+              ))}
+            </nav>
+          )}
+          {/* Titres longs : taille réduite et deux lignes plutôt qu'un titre coupé. */}
+          <h1
+            className={cx(
+              "font-extrabold tracking-[-0.02em] text-navy",
+              title.length <= (action ? 11 : 16) ? "truncate text-[30px]" : title.length <= 24 ? "line-clamp-2 text-[25px] leading-[1.15]" : "line-clamp-2 text-[21px] leading-[1.2]",
+            )}
+          >
+            {title}
+          </h1>
           {subtitle && <div className="truncate text-sm text-muted">{subtitle}</div>}
         </div>
         {action}
@@ -47,7 +79,7 @@ export function PageHeader({
 }
 
 export function Page({ children }: { children: ReactNode }) {
-  return <main className="mx-auto w-full max-w-2xl px-4 pb-32">{children}</main>;
+  return <main className="mx-auto w-full max-w-2xl px-4 pb-32 lg:max-w-[2000px] lg:px-8 lg:pb-16 xl:px-10">{children}</main>;
 }
 
 export function Card({ children, className, onClick }: { children: ReactNode; className?: string; onClick?: () => void }) {
@@ -92,7 +124,8 @@ export function Kpi({
       <div className="text-[13px] text-muted">{label}</div>
       <div
         className={cx(
-          "tabular truncate font-bold tracking-[-0.02em]",
+          "tabular font-bold tracking-[-0.02em]",
+          typeof value === "string" && "truncate",
           big ? "text-[30px]" : "text-[19px]",
           tone === "pos" && "text-pos",
           tone === "neg" && "text-neg",
@@ -103,6 +136,26 @@ export function Kpi({
       </div>
       {hint && <div className="truncate text-xs text-muted">{hint}</div>}
     </div>
+  );
+}
+
+/** Valeur impossible à calculer : on le dit, et on mène directement à ce qu'il faut renseigner. */
+export function MissingData({ action, href, onClick, dark }: { action?: string; href?: string; onClick?: () => void; dark?: boolean }) {
+  const cls = cx("mt-1 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-semibold", dark ? "bg-white/15 text-white" : "bg-series-1/10 text-series-1");
+  return (
+    <span className="block">
+      <span className={cx("block text-[15px] font-semibold leading-snug", dark ? "text-white/80" : "text-muted")}>{INSUFFICIENT}</span>
+      {action && href && (
+        <Link href={href} className={cls}>
+          {action} <ChevronRight size={13} />
+        </Link>
+      )}
+      {action && !href && onClick && (
+        <button type="button" onClick={onClick} className={cls}>
+          {action} <ChevronRight size={13} />
+        </button>
+      )}
+    </span>
   );
 }
 
@@ -130,7 +183,7 @@ export function Row({
   const content = (
     <>
       {icon && (
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-soft text-navy">{icon}</div>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-soft text-brand">{icon}</div>
       )}
       <div className="min-w-0 flex-1">
         <div className="truncate text-[16px] font-medium text-ink">{title}</div>
@@ -148,9 +201,9 @@ export function Row({
   const cls = "flex w-full items-center gap-3 py-3 text-left active:opacity-60";
   if (href?.startsWith("/api/")) {
     return (
-      <a href={href} className={cls}>
+      <button type="button" onClick={() => openDocument(href)} className={cls}>
         {content}
-      </a>
+      </button>
     );
   }
   if (href) {
@@ -177,7 +230,7 @@ export function Divided({ children }: { children: ReactNode }) {
 export function Empty({ icon, title, text, action }: { icon?: ReactNode; title: string; text?: string; action?: ReactNode }) {
   return (
     <div className="flex flex-col items-center px-6 py-10 text-center">
-      {icon && <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-soft text-navy">{icon}</div>}
+      {icon && <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-soft text-brand">{icon}</div>}
       <div className="text-[17px] font-semibold text-ink">{title}</div>
       {text && <div className="mt-1 max-w-xs text-sm text-muted">{text}</div>}
       {action && <div className="mt-5">{action}</div>}
@@ -218,20 +271,31 @@ export function Button({
   icon?: ReactNode;
   href?: string;
 }) {
+  // Double appui rapide (écran tactile, souris) : une seule action, jamais deux créations.
+  const last = useRef(0);
+  const click = onClick
+    ? () => {
+        const now = Date.now();
+        if (now - last.current < 700) return;
+        last.current = now;
+        onClick();
+      }
+    : undefined;
   const cls = cx(
     "inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl px-5 text-[16px] font-semibold transition active:scale-[0.98] disabled:opacity-40",
-    variant === "primary" && "bg-navy text-white shadow-sm",
-    variant === "secondary" && "bg-soft text-navy",
+    variant === "primary" && "bg-brand text-on-brand shadow-sm hover:bg-brand-hover active:bg-brand-hover",
+    variant === "secondary" && "bg-soft text-brand hover:bg-brand/10",
     variant === "danger" && "bg-neg/10 text-neg",
-    variant === "ghost" && "text-navy",
+    variant === "ghost" && "text-brand",
     full && "w-full",
   );
   if (href?.startsWith("/api/")) {
+    // Documents générés : visionneuse intégrée (un PDF plein écran n'a pas de bouton retour dans l'app installée).
     return (
-      <a href={href} className={cls}>
+      <button type="button" disabled={disabled} onClick={() => openDocument(href)} className={cls}>
         {icon}
         {children}
-      </a>
+      </button>
     );
   }
   if (href) {
@@ -243,7 +307,7 @@ export function Button({
     );
   }
   return (
-    <button type={type} onClick={onClick} disabled={disabled} className={cls}>
+    <button type={type} onClick={click} disabled={disabled} className={cls}>
       {icon}
       {children}
     </button>
@@ -255,7 +319,7 @@ export function RoundButton({ onClick, children, label }: { onClick: () => void;
     <button
       onClick={onClick}
       aria-label={label}
-      className="flex h-11 w-11 items-center justify-center rounded-full bg-navy text-white shadow-md active:scale-95"
+      className="flex h-11 w-11 items-center justify-center rounded-full bg-brand text-on-brand shadow-md hover:bg-brand-hover active:scale-95"
     >
       {children}
     </button>
@@ -301,6 +365,17 @@ export function Sheet({
   children: ReactNode;
   footer?: ReactNode;
 }) {
+  const [drag, setDrag] = useState<number | null>(null);
+  const dragStart = useRef<number | null>(null);
+  const closeRef = useRef(onClose);
+  useEffect(() => {
+    closeRef.current = onClose;
+  });
+  // Bouton ou geste Retour du téléphone : ferme la feuille sans quitter l'écran.
+  useEffect(() => {
+    if (!open) return;
+    return openOverlay(() => closeRef.current());
+  }, [open]);
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -313,21 +388,50 @@ export function Sheet({
     };
   }, [open, onClose]);
   if (!open) return null;
-  return (
+  // Rendu au niveau du document : une ligne balayable (transformée) ne doit pas contenir la feuille.
+  const sheet = (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label={title}>
       <div className="animate-fade absolute inset-0 bg-[#0b1526]/40" onClick={onClose} />
-      <div className="animate-sheet relative flex max-h-[92dvh] w-full max-w-lg flex-col rounded-t-[28px] bg-bg sm:rounded-[28px]">
-        <div className="flex items-center justify-between px-5 pb-2 pt-4">
+      <div
+        className={cx("animate-sheet relative flex max-h-[92dvh] w-full max-w-lg flex-col rounded-t-[28px] bg-bg sm:rounded-[28px]", drag === null && "transition-transform duration-200")}
+        style={drag ? { transform: `translateY(${drag}px)` } : undefined}
+      >
+        {/* Poignée : tirer vers le bas pour fermer (comme sur iPhone). */}
+        <div
+          className="touch-none pt-2"
+          onPointerDown={(e) => {
+            dragStart.current = e.clientY;
+            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+          }}
+          onPointerMove={(e) => {
+            if (dragStart.current === null) return;
+            setDrag(Math.max(0, e.clientY - dragStart.current));
+          }}
+          onPointerUp={() => {
+            const d = drag ?? 0;
+            dragStart.current = null;
+            setDrag(null);
+            if (d > 90) onClose();
+          }}
+          onPointerCancel={() => {
+            dragStart.current = null;
+            setDrag(null);
+          }}
+        >
+          <div className="mx-auto h-1.5 w-10 rounded-full bg-black/15 sm:hidden" />
+        <div className="flex items-center justify-between px-5 pb-2 pt-2">
           <h2 className="text-[19px] font-bold text-navy">{title}</h2>
-          <button onClick={onClose} aria-label="Fermer" className="flex h-9 w-9 items-center justify-center rounded-full bg-black/5 text-ink-2">
+          <button onClick={onClose} onPointerDown={(e) => e.stopPropagation()} aria-label="Fermer" className="flex h-9 w-9 items-center justify-center rounded-full bg-black/5 text-ink-2">
             <X size={18} />
           </button>
+        </div>
         </div>
         <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-4">{children}</div>
         {footer && <div className="safe-bottom border-t border-line bg-bg px-5 pb-4 pt-3">{footer}</div>}
       </div>
     </div>
   );
+  return typeof document === "undefined" ? sheet : createPortal(sheet, document.body);
 }
 
 // ——— Champs de formulaire ———
@@ -438,7 +542,7 @@ export function NumberField({
           inputMode={integer ? "numeric" : "decimal"}
           className={cx(inputCls, "tabular pr-12")}
           value={text}
-          placeholder={placeholder ?? "Non renseigné"}
+          placeholder={placeholder ?? "—"}
           onFocus={() => setFocused(true)}
           onBlur={() => {
             setFocused(false);
@@ -547,7 +651,7 @@ export function Segmented<T extends string>({
           onClick={() => onChange(o.value)}
           className={cx(
             "flex-1 rounded-xl px-3 py-2 text-sm font-medium transition",
-            value === o.value ? "bg-card text-navy shadow-sm" : "text-ink-2",
+            value === o.value ? "bg-card font-semibold text-brand shadow-sm" : "text-ink-2",
           )}
         >
           {o.label}

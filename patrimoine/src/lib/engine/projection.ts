@@ -1,5 +1,9 @@
 import type { Action, AppData, Building, Unit } from "../types";
-import { monthIndex, yearOf, type MonthIndex } from "./dates";
+import { monthIndex, parseMonth, yearOf, type MonthIndex } from "./dates";
+import { inProjection, projectCompanyKey, projectFigures } from "./projects";
+import { saleLabel, salePrice, saleShares } from "./sale";
+import { activityFor, amountFor, corporateTax } from "../fiscal/remuneration";
+import { WITHDRAWAL_KINDS, labelOf } from "../labels";
 import { annuityPayment, stepLoan, type LoanState } from "./loan";
 import {
   NO_COMPANY,
@@ -32,6 +36,8 @@ export interface YearRow {
   /** Flux ponctuels de l'année (non annualisés). */
   works: number;
   withdrawals: number;
+  /** Résultat des sociétés d'exploitation après IS (hors rémunérations, déjà comptées). */
+  business: number;
   balloons: number;
   operations: number;
   /** Nombre de crédits en cours au 31/12. */
@@ -47,7 +53,8 @@ export type EventKind =
   | "refinance"
   | "prepayment"
   | "event"
-  | "acquisition";
+  | "acquisition"
+  | "income";
 
 export interface TimelineEvent {
   id: string;
@@ -62,11 +69,17 @@ export interface TimelineEvent {
   source: "real" | "plan" | "scenario";
   refId?: string;
   loanId?: string;
+  /** Immeuble concerné (vente). */
+  buildingId?: string;
 }
 
 export interface SaleResult {
   actionId: string;
   buildingId: string;
+  /** Lots vendus (vente partielle). */
+  unitIds?: string[];
+  month: MonthIndex;
+  source: "plan" | "scenario";
   year: number;
   price?: number;
   debtRepaid: number;
@@ -99,6 +112,8 @@ interface BuildingState {
   /** Mois de référence des valeurs (croissance calculée depuis ce mois). */
   refMonth: MonthIndex;
   activeFrom: MonthIndex;
+  /** Début des loyers, si différent (mise en location après travaux). */
+  rentFrom?: MonthIndex;
   soldAt?: MonthIndex;
 }
 
@@ -108,6 +123,8 @@ interface ProjLoan extends LoanState {
   companyKey: string;
   buildingId?: string;
   fromMonth: MonthIndex;
+  /** Mois du déblocage : la dette existe à partir de ce mois (défaut : fromMonth). */
+  debtFrom?: MonthIndex;
   /** Solde inconnu : seules les mensualités sont projetées. */
   paymentOnly: boolean;
   /** Solde connu mais échéancier impossible : dette maintenue constante. */
@@ -128,6 +145,7 @@ function emptyRow(year: number): YearRow {
     cashflow: 0,
     works: 0,
     withdrawals: 0,
+    business: 0,
     balloons: 0,
     operations: 0,
     activeLoans: 0,
@@ -202,6 +220,8 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
       companyKey: loanCompanyKey(loan, buildingsById),
       buildingId: loan.buildingId ?? undefined,
       fromMonth: r.fromMonth,
+      // Crédit débloqué plus tard : la dette naît au déblocage (mois précédant la 1re échéance).
+      debtFrom: r.fromMonth > nowMonth ? r.fromMonth - 1 : r.fromMonth,
       balance: r.balance ?? 0,
       monthlyRate: r.monthlyRate,
       payment: r.payment ?? 0,
@@ -209,6 +229,7 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
       endMonth: r.endMonth,
       kind: r.kind,
       active: true,
+      schedule: r.schedule,
       paymentOnly,
       frozen,
       source: "real",
@@ -226,7 +247,12 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
     ...(opts.scenarioActions ?? []).map((a) => ({ action: a, source: "scenario" as const })),
   ]
     .filter((o) => o.action.year >= y0 && o.action.year <= y0 + horizon)
-    .map((o) => ({ ...o, month: actionMonth(o.action.year, nowMonth) }));
+    .map((o) => ({
+      ...o,
+      // Vente datée : au mois de l'acte.
+      month: o.action.type === "sale" && o.action.date ? Math.max(nowMonth, monthIndex(Number(o.action.date.slice(0, 4)), Number(o.action.date.slice(5, 7)) || 1)) : actionMonth(o.action.year, nowMonth),
+    }));
+  const soldUnits = new Set<string>();
 
   const events: TimelineEvent[] = [];
   const sales: SaleResult[] = [];
@@ -241,7 +267,8 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
       ? (buildingsById.get(w.buildingId)?.companyId ?? w.companyId ?? NO_COMPANY)
       : (w.companyId ?? NO_COMPANY);
     const list = worksByMonth.get(month) ?? [];
-    list.push({ key, amount: w.amount ?? 0 });
+    // Travaux financés par un crédit : la dépense est couverte par l'emprunt.
+    list.push({ key, amount: w.financedByLoan ? 0 : (w.amount ?? 0) });
     worksByMonth.set(month, list);
     const where = buildingName(w.buildingId) ?? companyName(key);
     events.push({
@@ -287,6 +314,87 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
     }
   }
 
+  // Projets intégrés aux projections (achat ou travaux à venir).
+  const worksUplift = (after: number | undefined, buildingId?: string | null) => {
+    const b = buildingId ? buildingsById.get(buildingId) : undefined;
+    const before = b ? buildingValue(b, unitsByBuilding.get(b.id) ?? []) : undefined;
+    return after !== undefined && before !== undefined ? Math.max(0, after - before) : undefined;
+  };
+  const projectOutflows = new Map<MonthIndex, { key: string; amount: number }[]>();
+  const interestOnly: { key: string; from: MonthIndex; to: MonthIndex; amount: number }[] = [];
+  for (const p of (data.projects ?? []).filter(inProjection)) {
+    const f = projectFigures(p);
+    const m = Math.max(nowMonth, parseMonth(p.purchaseDate) ?? nowMonth);
+    if (m > lastMonth) continue;
+    const key = projectCompanyKey(p, data);
+    const rentFrom = Math.max(m, parseMonth(p.rentStartDate) ?? m);
+    const id = `proj-${p.id}`;
+    buildings.push({
+      id,
+      companyKey: key,
+      // Travaux : seule la plus-value éventuelle s'ajoute (la valeur actuelle est déjà comptée).
+      value: p.kind === "travaux" ? worksUplift(p.valueAfterWorks, p.buildingId) : (p.valueAfterWorks ?? p.price),
+      rent0: f.rentMonthly - f.vacancyMonthly,
+      charges0: f.chargesAnnual,
+      refMonth: m,
+      activeFrom: m,
+      rentFrom,
+    });
+    for (const lf of f.loans) {
+      const l = lf.loan;
+      if (!l.amount || lf.payment === undefined || !l.durationMonths) continue;
+      const deferral = Math.min(Math.max(0, l.deferralMonths ?? 0), l.durationMonths - 1);
+      if (deferral > 0) interestOnly.push({ key, from: m + 1, to: m + deferral, amount: (lf.deferralPayment ?? 0) + lf.insurance });
+      loans.push({
+        id: `loan-${p.id}-${l.id}`,
+        name: l.label || `Prêt ${p.name}`,
+        companyKey: key,
+        buildingId: id,
+        fromMonth: m + 1 + deferral,
+        debtFrom: m,
+        balance: l.amount,
+        monthlyRate: (l.ratePct ?? 0) / 1200,
+        payment: lf.payment,
+        insurance: lf.insurance,
+        endMonth: m + l.durationMonths,
+        kind: "amortissable",
+        active: true,
+        paymentOnly: false,
+        frozen: false,
+        source: "plan",
+      });
+    }
+    // Part non empruntée : payée par la trésorerie à l'acte.
+    const out = (f.totalCost ?? 0) - f.loanTotal;
+    if (out > 0) projectOutflows.set(m, [...(projectOutflows.get(m) ?? []), { key, amount: out }]);
+    events.push({
+      id: `project-${p.id}`,
+      kind: p.kind === "travaux" ? "works" : "purchase",
+      month: m,
+      year: yearOf(m),
+      companyKey: key,
+      label: `${p.kind === "travaux" ? "Travaux" : "Achat"} — ${p.name}`,
+      amount: f.totalCost,
+      source: "plan",
+      refId: p.id,
+    });
+  }
+
+  // Rémunérations : début et fin, repères de la chronologie.
+  const activityCompanies = data.companies.filter((c) => c.activity && (c.activity.revenue || c.activity.expenses));
+  for (const w of data.withdrawals) {
+    if (!w.annualAmount || w.kind === "cca") continue;
+    const who = [w.person, companyName(w.companyId ?? "")].filter(Boolean).join(" · ");
+    const kind = labelOf(WITHDRAWAL_KINDS, w.kind) ?? "Rémunération";
+    const start = w.startYear ?? y0;
+    if (start > y0 && start <= y0 + horizon) {
+      events.push({ id: `income-${w.id}`, kind: "income", month: monthIndex(start, 1), year: start, companyKey: w.companyId ?? NO_COMPANY, label: `${kind}${who ? ` — ${who}` : ""}`, amount: w.annualAmount, source: "real", refId: w.id });
+    }
+    if (w.endYear !== undefined && w.endYear >= y0 && w.endYear < y0 + horizon) {
+      events.push({ id: `income-end-${w.id}`, kind: "income", month: monthIndex(w.endYear + 1, 1), year: w.endYear + 1, companyKey: w.companyId ?? NO_COMPANY, label: `Fin : ${kind.toLowerCase()}${who ? ` — ${who}` : ""}`, source: "real", refId: w.id });
+    }
+  }
+
   // ——— Boucle mensuelle ———
   const keys = new Set<string>([NO_COMPANY, ...data.companies.map((c) => c.id)]);
   const rows = new Map<string, YearRow[]>();
@@ -313,18 +421,58 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
       const a = op.action;
       if (a.type === "sale") {
         const b = buildings.find((x) => x.id === a.buildingId && x.soldAt === undefined);
+        const building = buildingsById.get(a.buildingId);
         if (!b) continue;
+        const remaining = (unitsByBuilding.get(b.id) ?? []).filter((u) => !soldUnits.has(u.id));
+        const shares = building ? saleShares(building, remaining, a.lots?.map((l) => l.unitId)) : undefined;
+        const whole = !shares || shares.whole;
         const bLoans = loans.filter((l) => l.buildingId === b.id && l.active && l.fromMonth <= m);
-        const paymentsRemoved = bLoans.reduce((s, l) => s + (l.payment + l.insurance), 0);
-        const debtRepaid = bLoans.reduce((s, l) => s + loanPayoff(l), 0);
+        const paymentsBefore = bLoans.reduce((s, l) => s + (l.payment + l.insurance), 0);
         const g = growth(settings.rentGrowthPct, b.refMonth, m);
-        const rentLost = b.rent0 * g;
-        const chargesRemoved = b.charges0 * growth(settings.chargesGrowthPct, b.refMonth, m);
-        const valueRemoved = (b.value ?? 0) * growth(settings.valueGrowthPct, b.refMonth, m);
-        b.soldAt = m;
+        const gc = growth(settings.chargesGrowthPct, b.refMonth, m);
+        const gv = growth(settings.valueGrowthPct, b.refMonth, m);
+        let debtRepaid = 0;
+        let rentLost: number;
+        let chargesRemoved: number;
+        let valueRemoved: number;
+        if (whole) {
+          debtRepaid = bLoans.reduce((s, l) => s + loanPayoff(l), 0);
+          rentLost = b.rent0 * g;
+          chargesRemoved = b.charges0 * gc;
+          valueRemoved = (b.value ?? 0) * gv;
+          b.soldAt = m;
+        } else {
+          // Vente partielle : l'immeuble reste, sans les lots vendus.
+          const share = shares.share;
+          rentLost = shares.rent * g;
+          chargesRemoved = b.charges0 * share * gc;
+          valueRemoved = (shares.value ?? 0) * gv;
+          b.rent0 = Math.max(0, b.rent0 - shares.rent);
+          b.charges0 = b.charges0 * (1 - share);
+          if (b.value !== undefined) b.value = Math.max(0, b.value - (shares.value ?? 0));
+          // Remboursement : montant saisi, sinon quote-part du capital restant dû ; mensualité recalculée (même fin).
+          const balance = bLoans.filter((l) => !l.paymentOnly).reduce((s, l) => s + l.balance, 0);
+          const target = Math.min(balance, a.debtRepaid ?? balance * share);
+          for (const l of bLoans) {
+            if (l.paymentOnly || balance <= 0) continue;
+            const part = target * (l.balance / balance);
+            l.balance -= part;
+            l.schedule = undefined; // le tableau de la banque ne vaut plus après un remboursement partiel
+            debtRepaid += part;
+            if (l.balance <= 0.01) {
+              l.balance = 0;
+              l.active = false;
+            } else if (l.kind === "amortissable" && l.endMonth !== undefined) {
+              l.payment = annuityPayment(l.balance, l.monthlyRate, Math.max(1, l.endMonth - m + 1));
+            }
+          }
+        }
+        for (const u of shares?.units ?? []) soldUnits.add(u.id);
+        const paymentsRemoved = paymentsBefore - bLoans.filter((l) => l.active).reduce((s, l) => s + (l.payment + l.insurance), 0);
+        const price = salePrice(a);
         const fees = a.fees ?? 0;
         const tax = a.tax ?? 0;
-        const netCash = a.price !== undefined ? a.price - fees - tax - debtRepaid : undefined;
+        const netCash = price !== undefined ? price - fees - tax - debtRepaid : undefined;
         if (netCash !== undefined) {
           addTreasury(b.companyKey, netCash);
           rowFor(b.companyKey, year).operations += netCash;
@@ -332,8 +480,10 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
         sales.push({
           actionId: a.id,
           buildingId: b.id,
+          unitIds: whole ? undefined : shares?.units.map((u) => u.id),
+          month: m,
           year,
-          price: a.price,
+          price,
           debtRepaid,
           fees,
           tax,
@@ -342,15 +492,17 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
           paymentsRemovedMonthly: paymentsRemoved,
           chargesRemovedAnnual: chargesRemoved,
           valueRemoved,
+          source: op.source,
         });
         events.push({
           id: `sale-${a.id}`,
           kind: "sale",
+          buildingId: b.id,
           month: m,
           year,
           companyKey: b.companyKey,
-          label: `Vente — ${buildingName(b.id) ?? "immeuble"}`,
-          amount: a.price,
+          label: `Vente — ${whole ? (buildingName(b.id) ?? "immeuble") : saleLabel(data, a)}`,
+          amount: price,
           source: op.source,
           refId: a.id,
         });
@@ -375,6 +527,7 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
             companyKey: key,
             buildingId: a.id,
             fromMonth: m + 1,
+            debtFrom: m,
             balance: loanAmount,
             monthlyRate: rate,
             payment: annuityPayment(loanAmount, rate, n),
@@ -416,6 +569,7 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
             companyKey: key,
             buildingId: buildingId ?? undefined,
             fromMonth: m + 1,
+            debtFrom: m,
             balance: amount,
             monthlyRate: rate,
             payment: annuityPayment(amount, rate, n),
@@ -465,6 +619,7 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
         if (!l) continue;
         const amount = Math.min(a.amount ?? 0, l.balance);
         l.balance -= amount;
+        l.schedule = undefined; // nouvel échéancier après remboursement anticipé
         if (a.mode === "mensualite" && l.endMonth !== undefined && l.kind === "amortissable") {
           l.payment = annuityPayment(l.balance, l.monthlyRate, Math.max(1, l.endMonth - m + 1));
         }
@@ -488,11 +643,20 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
       addTreasury(w.key, -w.amount);
       rowFor(w.key, year).works += w.amount;
     }
+    for (const o of projectOutflows.get(m) ?? []) {
+      addTreasury(o.key, -o.amount);
+      rowFor(o.key, year).operations -= o.amount;
+    }
+    for (const d of interestOnly) {
+      if (m < d.from || m > d.to) continue;
+      rowFor(d.key, year).payments += d.amount;
+      addTreasury(d.key, -d.amount);
+    }
 
     for (const b of buildings) {
       if (m < b.activeFrom || (b.soldAt !== undefined && m >= b.soldAt)) continue;
       const row = rowFor(b.companyKey, year);
-      const rent = b.rent0 * growth(settings.rentGrowthPct, b.refMonth, m);
+      const rent = m < (b.rentFrom ?? b.activeFrom) ? 0 : b.rent0 * growth(settings.rentGrowthPct, b.refMonth, m);
       const charges = (b.charges0 / 12) * growth(settings.chargesGrowthPct, b.refMonth, m);
       row.rent += rent;
       row.charges += charges;
@@ -544,14 +708,28 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
     }
 
     for (const w of data.withdrawals) {
-      if (!w.annualAmount) continue;
-      const start = w.startYear ?? y0;
-      const end = w.endYear ?? y0 + horizon;
-      if (year < start || year > end) continue;
+      const annual = amountFor(w, year, y0);
+      if (!annual) continue;
       const key = w.companyId ?? NO_COMPANY;
-      const amount = w.annualAmount / 12;
+      const amount = annual / 12;
       rowFor(key, year).withdrawals += amount;
       addTreasury(key, -amount);
+    }
+
+    // Sociétés d'exploitation : résultat après impôt sur les sociétés, et prestations facturées aux sociétés du groupe.
+    for (const c of activityCompanies) {
+      const { revenue, expenses } = activityFor(c, year, y0);
+      const remuneration = data.withdrawals.filter((w) => w.companyId === c.id && (w.kind === "tns" || w.kind === "salaire")).reduce((s, w) => s + amountFor(w, year, y0), 0);
+      const result = (revenue - expenses - corporateTax(revenue - expenses - remuneration)) / 12;
+      rowFor(c.id, year).business += result;
+      addTreasury(c.id, result);
+      const g = Math.pow(1 + (c.activity?.growthPct ?? 0) / 100, Math.max(0, year - y0));
+      for (const b of c.activity?.billed ?? []) {
+        if (!b.annualAmount || !b.companyId) continue;
+        const billed = (b.annualAmount * g) / 12;
+        rowFor(b.companyId, year).charges += billed;
+        addTreasury(b.companyId, -billed);
+      }
     }
 
     // Clôture d'année : valeurs de stock.
@@ -567,7 +745,7 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
         rowFor(b.companyKey, year).value += (b.value ?? 0) * growth(settings.valueGrowthPct, b.refMonth, m);
       }
       for (const l of loans) {
-        if (!l.active || l.paymentOnly) continue;
+        if (!l.active || l.paymentOnly || m < (l.debtFrom ?? l.fromMonth)) continue;
         const row = rowFor(l.companyKey, year);
         row.debt += l.balance;
         row.activeLoans += 1;
@@ -627,12 +805,6 @@ function loanEndEvent(l: ProjLoan, m: MonthIndex, freed: number): TimelineEvent 
 export function rowForYear(p: Projection, year: number, key?: string): YearRow | undefined {
   const list = key ? p.byCompany.get(key) : p.years;
   return list?.find((r) => r.year === year);
-}
-
-/** Première année où la dette projetée est nulle. */
-export function debtFreeYear(p: Projection): number | undefined {
-  if ((p.years[0]?.debt ?? 0) <= 0) return undefined;
-  return p.years.find((r) => r.debt < 1)?.year;
 }
 
 /** Première année où la dette est divisée par deux par rapport à aujourd'hui. */

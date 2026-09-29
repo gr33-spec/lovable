@@ -8,6 +8,6 @@ export async function GET(request: Request) {
   const denied = await guardApi(request, BOTH);
   if (denied) return denied;
   const host = (request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "").split(":")[0];
-  const keys = await listPasskeys(host, (await currentSession())!.role);
+  const keys = await listPasskeys(host, ((await currentSession())!.role === "gestion" ? "gestion" : "owner"));
   return NextResponse.json({ passkeys: keys.map((k) => ({ id: k.id, name: k.name, createdAt: k.createdAt, lastUsedAt: k.lastUsedAt })) });
 }

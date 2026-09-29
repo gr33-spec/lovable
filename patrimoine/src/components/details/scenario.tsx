@@ -1,5 +1,6 @@
 "use client";
 
+import { goBack } from "@/lib/nav";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
@@ -9,7 +10,7 @@ import type { Action, Scenario } from "@/lib/types";
 import { compareScenario, totalWealth } from "@/lib/engine/scenario";
 import { yearOf } from "@/lib/engine/dates";
 import { eur, eurCompact, eurSigned } from "@/lib/format";
-import { ACTION_ICONS, ACTION_LABELS, ActionForm, defaultAction } from "../action-form";
+import { ACTION_ICONS, ACTION_LABELS, SIMULATION_TYPES, ActionForm, defaultAction } from "../action-form";
 import { LineChart } from "../charts";
 import { Button, Card, ConfirmDelete, Empty, Page, PageHeader, Pill, SectionTitle, Segmented, Sheet, TextField, cx } from "../ui";
 
@@ -57,7 +58,7 @@ export function ScenarioDetail({ id }: { id: string }) {
 
   return (
     <>
-      <PageHeader title={scenario.name || "Scénario"} subtitle="Simulation — données réelles inchangées" back="/simulations" />
+      <PageHeader title={scenario.name || "Scénario"} crumbs={[{ label: "Plus", href: "/plus" }, { label: "Simulations", href: "/simulations" }]} subtitle="Simulation — données réelles inchangées" back="/simulations" />
       <Page>
         <Card>
           <TextField label="Nom du scénario" value={scenario.name} onChange={(v) => save({ name: v ?? "" })} />
@@ -76,7 +77,7 @@ export function ScenarioDetail({ id }: { id: string }) {
           {scenario.actions.map((a) => (
             <Card key={a.id}>
               <div className="mb-4 flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-soft text-navy">{ACTION_ICONS[a.type]}</span>
+                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-soft text-brand">{ACTION_ICONS[a.type]}</span>
                 <div className="flex-1 text-[16px] font-semibold text-navy">{ACTION_LABELS[a.type]}</div>
                 <button onClick={() => save({ actions: scenario.actions.filter((x) => x.id !== a.id) })} aria-label="Retirer l'opération" className="rounded-full p-2 text-muted active:bg-black/5">
                   <Trash2 size={18} />
@@ -154,7 +155,7 @@ export function ScenarioDetail({ id }: { id: string }) {
                   years={cmp.base.years.map((r) => r.year)}
                   area={false}
                   series={[
-                    { label: "Sans le scénario", values: cmp.base.years.map((r) => value(r)), color: "var(--series-1)" },
+                    { label: "Sans le scénario", values: cmp.base.years.map((r) => value(r)), color: "var(--brand)" },
                     { label: "Avec le scénario", values: cmp.sim.years.map((r) => value(r)), color: "var(--series-2)", dashed: true },
                   ]}
                 />
@@ -167,10 +168,6 @@ export function ScenarioDetail({ id }: { id: string }) {
         )}
 
         <div className="mt-8 space-y-3">
-          <label className="flex items-center justify-between rounded-2xl bg-card px-4 py-4 shadow-sm">
-            <span className="text-[15px] font-medium text-ink">Inclure dans le dossier banque</span>
-            <input type="checkbox" className="h-6 w-6 accent-[#0b2545]" checked={!!scenario.includeInExport} onChange={(e) => save({ includeInExport: e.target.checked })} />
-          </label>
           {scenario.appliedAt ? (
             <div className="rounded-2xl bg-pos/10 px-4 py-3 text-sm text-pos">
               Intégré aux données réelles le {new Date(scenario.appliedAt).toLocaleDateString("fr-FR")}. Les opérations se retirent depuis l&apos;onglet Simulations.
@@ -190,13 +187,13 @@ export function ScenarioDetail({ id }: { id: string }) {
               Intégrer aux données réelles
             </Button>
           )}
-          <ConfirmDelete label="Supprimer le scénario" message="Supprimer ce scénario ?" onConfirm={() => { remove("scenarios", id); router.push("/simulations"); }} />
+          <ConfirmDelete label="Supprimer le scénario" message="Supprimer ce scénario ?" onConfirm={() => { remove("scenarios", id); goBack(router, "/simulations"); }} />
         </div>
       </Page>
 
       <Sheet open={adding} onClose={() => setAdding(false)} title="Ajouter une opération">
         <div className="space-y-2 pb-2">
-          {(Object.keys(ACTION_LABELS) as Action["type"][]).map((t) => (
+          {SIMULATION_TYPES.map((t) => (
             <button
               key={t}
               onClick={() => {
@@ -205,7 +202,7 @@ export function ScenarioDetail({ id }: { id: string }) {
               }}
               className="flex w-full items-center gap-4 rounded-2xl bg-card px-4 py-4 text-left shadow-sm"
             >
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-soft text-navy">{ACTION_ICONS[t]}</span>
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-soft text-brand">{ACTION_ICONS[t]}</span>
               <span className="text-[16px] font-semibold text-ink">{ACTION_LABELS[t]}</span>
             </button>
           ))}

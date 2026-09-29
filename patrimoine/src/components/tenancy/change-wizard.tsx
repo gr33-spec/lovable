@@ -1,5 +1,8 @@
 "use client";
 
+import { useInGestion } from "../use-gestion";
+import { unitCrumbs } from "@/lib/crumbs";
+import { goBack, replaceQuery } from "@/lib/nav";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
@@ -32,8 +35,10 @@ import { compareInspections, newEntryInspection, newExitInspection, stateLabel }
 import { ANNEXES, CONSTRUCTION_PERIODS, guaranteeTerms } from "@/lib/legal/lease";
 import { depositSettlement, lateDepositPenalty, leaseYears, maxDeposit, minDurationYears } from "@/lib/legal/rules";
 import { leaseVersionFor } from "@/lib/legal/versions";
-import { Button, Card, DateField, Grid2, NumberField, Page, PageHeader, Segmented, SelectField, Stack, TextField, cx } from "../ui";
+import { Button, Card, DateField, Grid2, NumberField, Page, PageHeader, Segmented, SelectField, Sheet, Stack, TextField, cx } from "../ui";
 import { DocRow, LegalBadge, documentUrl } from "./common";
+import { anonymizedTenancy } from "@/lib/tenancy";
+import { filesOfTenancy } from "@/lib/tenancy-files";
 
 type StepId = "depart" | "edl-sortie" | "depot" | "locataire" | "conditions" | "garant" | "logement" | "bailleur" | "clauses" | "documents";
 
@@ -62,6 +67,7 @@ export function ChangeTenantWizard({ unitId }: { unitId: string }) {
 
 function Wizard({ unitId }: { unitId: string }) {
   const { data, upsert } = useStore();
+  const inGestion = useInGestion();
   const requested = useSearchParams().get("etape") as StepId | null;
   const router = useRouter();
   const unit = data.units.find((u) => u.id === unitId);
@@ -119,8 +125,14 @@ function Wizard({ unitId }: { unitId: string }) {
   // faire sauter l'écran à l'étape suivante.
   if (stepIndex === null) queueMicrotask(() => setStepIndex((cur) => cur ?? idx));
   const step = steps[idx];
+  // L'étape est gardée dans l'adresse : un retour sur l'assistant la retrouve.
+  const goTo = (i: number) => {
+    const next = Math.max(0, Math.min(steps.length - 1, i));
+    setStepIndex(next);
+    replaceQuery({ etape: steps[next] });
+  };
   const go = (d: number) => {
-    setStepIndex(Math.max(0, Math.min(steps.length - 1, idx + d)));
+    goTo(idx + d);
     window.scrollTo({ top: 0 });
   };
 
@@ -141,17 +153,17 @@ function Wizard({ unitId }: { unitId: string }) {
 
   return (
     <>
-      <PageHeader title={outgoing || legacy ? "Changer de locataire" : "Nouveau locataire"} subtitle={`${building?.name ?? ""} · ${unit.name}`} back={back} />
+      <PageHeader title={outgoing || legacy ? "Changer de locataire" : "Nouveau locataire"} crumbs={unitCrumbs(data, unit, inGestion, true)} back={back} />
       <Page>
         {/* Progression */}
         <div className="no-scrollbar -mx-4 flex gap-1.5 overflow-x-auto px-4 pb-3">
           {steps.map((s, i) => (
             <button
               key={s}
-              onClick={() => setStepIndex(i)}
+              onClick={() => goTo(i)}
               className={cx(
                 "flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-[12px] font-semibold",
-                i === idx ? "bg-navy text-white" : isComplete(s) ? "bg-pos/10 text-pos" : "bg-soft text-ink-2",
+                i === idx ? "bg-brand text-on-brand" : isComplete(s) ? "bg-pos/10 text-pos" : "bg-soft text-ink-2",
               )}
             >
               {isComplete(s) && i !== idx && <Check size={12} />}
@@ -188,10 +200,10 @@ function Wizard({ unitId }: { unitId: string }) {
             unit={unit}
             tenancy={draft}
             outgoing={outgoing}
-            onActivated={() => router.push(back)}
+            onActivated={() => goBack(router, back)}
             onEditInfo={() => {
               const i = steps.indexOf("logement");
-              setStepIndex(i >= 0 ? i : steps.indexOf("conditions"));
+              goTo(i >= 0 ? i : steps.indexOf("conditions"));
             }}
           />
         )}
@@ -274,6 +286,8 @@ function ExitInspectionStep({ unit, tenancy, ensure }: { unit: Unit; tenancy?: T
   const { entry, exit } = t ? inspectionsOf(data, t.id) : { entry: undefined, exit: undefined };
   const start = () => {
     const base = t ?? ensure();
+    // Au retour de l'état des lieux, l'assistant reprend à l'étape suivante.
+    replaceQuery({ etape: "depot" });
     if (exit) return router.push(`/patrimoine/logement/${unit.id}/edl/${exit.id}?retour=${encodeURIComponent(`/patrimoine/logement/${unit.id}/changement?etape=depot`)}`);
     const insp = newExitInspection(unit, base, entry, base.endDate ?? todayIso());
     upsert("inspections", insp);
@@ -313,6 +327,25 @@ function ExitInspectionStep({ unit, tenancy, ensure }: { unit: Unit; tenancy?: T
 function DepositStep({ unit, tenancy: t, building }: { unit: Unit; tenancy: Tenancy; building?: Building }) {
   const { data, upsert } = useStore();
   const set = (patch: Partial<Tenancy>) => upsert("tenancies", { ...t, ...patch });
+  const [confirmClose, setConfirmClose] = useState(false);
+
+  // Clôture : le logement est soldé, puis les informations du locataire sortant sont effacées
+  // (identité, garants, documents, courriers). Restent les dates et montants, sans nom, pour le bilan.
+  const closeFile = () => {
+    // Loyers impayés retenus sur le dépôt : soldés par compensation.
+    const retained = deductions.filter((d) => d.kind === "loyers").reduce((a, d) => a + (d.amount ?? 0), 0);
+    let next: Unit = unit;
+    if (unpaid.months.length && retained >= unpaid.amount - 0.01) {
+      const payments = { ...(unit.payments ?? {}) };
+      for (const m of unpaid.months) payments[m] = { ...payments[m], status: "paye", note: "Réglé par imputation sur le dépôt de garantie" };
+      next = { ...unit, payments };
+    }
+    const stillActive = data.tenancies.some((x) => x.unitId === unit.id && x.status === "actif" && x.id !== t.id);
+    if (!stillActive) next = unitVacated(next);
+    if (next !== unit) upsert("units", next);
+    for (const fileId of filesOfTenancy(t)) void fetch(`/api/files/${fileId}`, { method: "DELETE" }).catch(() => undefined);
+    upsert("tenancies", anonymizedTenancy(t));
+  };
   const { entry, exit } = inspectionsOf(data, t.id);
   const cmp = exit ? compareInspections(entry, exit) : undefined;
   const unpaid = unpaidDuring(unit, t);
@@ -415,24 +448,27 @@ function DepositStep({ unit, tenancy: t, building }: { unit: Unit; tenancy: Tena
               full
               variant={t.status === "clos" ? "secondary" : "primary"}
               disabled={t.status === "clos"}
-              onClick={() => {
-                set({ status: "clos", closedAt: new Date().toISOString() });
-                // Loyers impayés retenus sur le dépôt : soldés par compensation.
-                const retained = deductions.filter((d) => d.kind === "loyers").reduce((a, d) => a + (d.amount ?? 0), 0);
-                let next: Unit = unit;
-                if (unpaid.months.length && retained >= unpaid.amount - 0.01) {
-                  const payments = { ...(unit.payments ?? {}) };
-                  for (const m of unpaid.months) payments[m] = { ...payments[m], status: "paye", note: "Réglé par imputation sur le dépôt de garantie" };
-                  next = { ...unit, payments };
-                }
-                const stillActive = data.tenancies.some((x) => x.unitId === unit.id && x.status === "actif" && x.id !== t.id);
-                if (!stillActive) next = unitVacated(next);
-                if (next !== unit) upsert("units", next);
-              }}
+              onClick={() => setConfirmClose(true)}
             >
               {t.status === "clos" ? "Dossier clos" : "Clôturer le dossier du locataire sortant"}
             </Button>
           )}
+          <Sheet
+            open={confirmClose}
+            onClose={() => setConfirmClose(false)}
+            title="Clôturer et effacer le dossier ?"
+            footer={
+              <Button full variant="danger" onClick={() => { closeFile(); setConfirmClose(false); }}>
+                Clôturer et effacer les informations
+              </Button>
+            }
+          >
+            <div className="space-y-2 pb-2 text-[14.5px] text-ink-2">
+              <p>Les informations de {tenantsName(t) || "l'ancien locataire"} seront effacées : identité, garants, bail et cautions signés, courriers et historique.</p>
+              <p>Restent attachés au logement : les loyers encaissés (comptes et bilan) et les états des lieux, qui servent de base au suivant.</p>
+              <p className="text-[13px] text-muted">Une sauvegarde automatique de la veille permet de revenir en arrière si besoin (Plus → Sauvegardes).</p>
+            </div>
+          </Sheet>
           {!t.depositReturnedDate && <p className="text-[12px] text-muted">Vous pouvez passer à l&apos;arrivée du nouveau locataire et revenir ici au moment de la restitution.</p>}
         </Stack>
       </Card>
@@ -803,7 +839,7 @@ function ClausesStep({ tenancy, ensure, unit, building }: { tenancy?: Tenancy; e
 function Toggle({ label, hint, value, onChange }: { label: string; hint?: string; value: boolean; onChange: (v: boolean) => void }) {
   return (
     <button type="button" onClick={() => onChange(!value)} className="flex w-full items-center gap-3 text-left">
-      <span className={cx("flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border", value ? "border-navy bg-navy text-white" : "border-line bg-card")}>{value && <Check size={14} />}</span>
+      <span className={cx("flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border", value ? "border-brand bg-brand text-on-brand" : "border-line bg-card")}>{value && <Check size={14} />}</span>
       <span className="flex-1 text-[14px] text-ink">
         {label}
         {hint && <span className="ml-1.5 rounded-full bg-warn/10 px-1.5 py-0.5 text-[10px] font-bold uppercase text-warn">{hint}</span>}
@@ -847,6 +883,7 @@ function DocumentsStep({ unit, tenancy: t, outgoing, onActivated, onEditInfo }: 
 
   const startEntry = () => {
     const retour = encodeURIComponent(`/patrimoine/logement/${unit.id}/changement?etape=documents`);
+    replaceQuery({ etape: "documents" });
     if (entry) return router.push(`/patrimoine/logement/${unit.id}/edl/${entry.id}?retour=${retour}`);
     const insp = newEntryInspection(unit, t, lastExitInspection(data, unit.id), t.startDate);
     upsert("inspections", insp);
@@ -885,7 +922,7 @@ function DocumentsStep({ unit, tenancy: t, outgoing, onActivated, onEditInfo }: 
             url={entry ? documentUrl({ type: "edl", tenancy: t.id, inspection: entry.id }) : undefined}
             fileName="etat-des-lieux-entree.pdf"
             action={
-              <button onClick={startEntry} className="rounded-full bg-navy px-3 py-1.5 text-[13px] font-semibold text-white">
+              <button onClick={startEntry} className="rounded-full bg-brand px-3 py-1.5 text-[13px] font-semibold text-on-brand">
                 {entry ? "Ouvrir" : "Préparer"}
               </button>
             }

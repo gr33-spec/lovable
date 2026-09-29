@@ -56,6 +56,7 @@ export function LineChart({
   onSelectYear,
   area = true,
   markers = [],
+  step = false,
 }: {
   years: number[];
   series: Series[];
@@ -65,6 +66,8 @@ export function LineChart({
   area?: boolean;
   /** Années à signaler par un petit repère sur l'axe (ex. fins de crédit). */
   markers?: number[];
+  /** Tracé en escalier : la valeur d'une année vaut jusqu'à la suivante. */
+  step?: boolean;
 }) {
   const [ref, width] = useWidth<HTMLDivElement>();
   const [hover, setHover] = useState<number | null>(null);
@@ -120,10 +123,12 @@ export function LineChart({
         {markers.map((yr) => {
           const i = years.indexOf(yr);
           if (i < 0) return null;
-          return <circle key={`m${yr}`} cx={x(i)} cy={PAD.top + innerH} r={3} fill="#b08d57" />;
+          return <circle key={`m${yr}`} cx={x(i)} cy={PAD.top + innerH} r={4} fill="#b08d57" stroke="#fff" strokeWidth={2} />;
         })}
         {series.map((s, si) => {
-          const d = s.values.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+          const d = step
+            ? s.values.map((v, i) => (i === 0 ? `M${x(0).toFixed(1)},${y(v).toFixed(1)}` : `L${x(i).toFixed(1)},${y(s.values[i - 1]).toFixed(1)} L${x(i).toFixed(1)},${y(v).toFixed(1)}`)).join(" ")
+            : s.values.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
           const areaD = `${d} L${x(s.values.length - 1)},${y(Math.max(yMin, 0))} L${x(0)},${y(Math.max(yMin, 0))} Z`;
           return (
             <g key={s.label}>
@@ -252,7 +257,7 @@ export function BarChart({
               width={r1(barW)}
               height={r1(h)}
               rx={Math.min(3, barW / 2)}
-              fill={v >= 0 ? "var(--series-1)" : "var(--neg)"}
+              fill={v >= 0 ? "var(--brand)" : "var(--neg)"}
               opacity={active >= 0 && active !== i ? 0.45 : 1}
             />
           );

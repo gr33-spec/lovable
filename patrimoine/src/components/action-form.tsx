@@ -1,5 +1,6 @@
 "use client";
 
+import { salePrice } from "@/lib/engine/sale";
 import { BadgeEuro, Hammer, RefreshCw, ShoppingCart, TrendingUp } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { newId } from "@/lib/ops";
@@ -16,10 +17,13 @@ export const ACTION_LABELS: Record<Action["type"], string> = {
   prepayment: "Remboursement anticipé",
 };
 
+/** Opérations proposées dans les simulations (l'achat se prépare dans Patrimoine → Projets). */
+export const SIMULATION_TYPES = (Object.keys(ACTION_LABELS) as Action["type"][]).filter((t) => t !== "purchase");
+
 export function actionSummary(a: Action, names: { building: (id?: string | null) => string | undefined; loan: (id: string) => string | undefined }): string {
   switch (a.type) {
     case "sale":
-      return `Vendre ${names.building(a.buildingId) ?? "un immeuble"} en ${a.year}${a.price ? ` pour ${eurCompact(a.price)}` : ""}`;
+      return `Vendre ${names.building(a.buildingId) ?? "un immeuble"}${a.lots?.length ? ` (${a.lots.length} lot${a.lots.length > 1 ? "s" : ""})` : ""} en ${a.year}${salePrice(a) ? ` pour ${eurCompact(salePrice(a)!)}` : ""}`;
     case "refinance":
       return `Refinancer ${a.loanIds.length ? a.loanIds.map((id) => names.loan(id) ?? "crédit").join(", ") : ""} en ${a.year}${a.amount ? ` (${eurCompact(a.amount)})` : ""}`;
     case "works":
@@ -68,7 +72,7 @@ export function ActionForm({ action, onChange }: { action: Action; onChange: (a:
                 <label key={l.value} className="flex items-center gap-3 rounded-xl px-2 py-2">
                   <input
                     type="checkbox"
-                    className="h-5 w-5 accent-[#0b2545]"
+                    className="h-5 w-5 accent-brand"
                     checked={action.loanIds.includes(l.value)}
                     onChange={(e) =>
                       onChange({

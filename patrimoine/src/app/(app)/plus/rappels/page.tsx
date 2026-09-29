@@ -1,12 +1,12 @@
 "use client";
 
 import { useMemo } from "react";
-import { BellRing, RotateCcw } from "lucide-react";
+import Link from "next/link";
+import { BellRing, ChevronRight, RotateCcw } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { LEASE_END_NOTICE_MONTHS, LOAN_END_NOTICE_MONTHS, REVISION_NOTICE_MONTHS, todayIso } from "@/lib/engine/leases";
+import { LEASE_END_NOTICE_MONTHS, LOAN_END_NOTICE_MONTHS, REVISION_CLAIM_MONTHS, REVISION_NOTICE_MONTHS, todayIso } from "@/lib/engine/leases";
 import { allReminders } from "@/lib/reminders";
-import { ReminderRow } from "@/components/leases";
-import { Card, Empty, Page, PageHeader, SectionTitle } from "@/components/ui";
+import { Card, Page, PageHeader, SectionTitle } from "@/components/ui";
 
 export default function RappelsPage() {
   const { data, projection, setSettings } = useStore();
@@ -15,30 +15,27 @@ export default function RappelsPage() {
   const dismissedIds = new Set(data.settings.dismissedReminders ?? []);
   const active = all.filter((r) => !dismissedIds.has(r.id));
   const done = all.filter((r) => dismissedIds.has(r.id));
-  const dismiss = (id: string) => setSettings({ dismissedReminders: [...(data.settings.dismissedReminders ?? []), id] });
   const restore = (id: string) => setSettings({ dismissedReminders: (data.settings.dismissedReminders ?? []).filter((x) => x !== id) });
 
   return (
     <>
-      <PageHeader title="Rappels" back="/plus" subtitle={active.length ? `${active.length} à traiter` : "Rien à traiter"} />
+      <PageHeader title="Rappels ignorés" back="/gestion?vue=afaire" subtitle="Et quand vous êtes prévenu" />
       <Page>
-        {active.length === 0 ? (
-          <Card>
-            <Empty icon={<BellRing size={26} />} title="Aucun rappel en cours" text="Vous serez prévenu ici et sur l'accueil dès qu'une échéance approche." />
-          </Card>
-        ) : (
-          <Card className="py-1">
-            <div className="divide-y divide-line">
-              {active.map((r) => (
-                <ReminderRow key={r.id} r={r} onDismiss={r.kind === "unpaid" || r.kind === "deposit" ? undefined : () => dismiss(r.id)} />
-              ))}
-            </div>
-          </Card>
-        )}
+        {/* Les rappels à traiter sont dans Gestion › À faire (une seule liste d'actions). */}
+        <Link href="/gestion?vue=afaire" className="soft-card flex items-center gap-3 rounded-[22px] px-4 py-3.5 active:opacity-70">
+          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-navy text-gold">
+            <BellRing size={18} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[15px] font-semibold text-ink">{active.length ? `${active.length} rappel${active.length > 1 ? "s" : ""} à traiter` : "Rien à traiter"}</span>
+            <span className="block text-[13px] text-muted">Ils sont dans Gestion › À faire</span>
+          </span>
+          <ChevronRight size={18} className="text-muted/70" />
+        </Link>
 
         {done.length > 0 && (
           <>
-            <SectionTitle>Traités</SectionTitle>
+            <SectionTitle>Ignorés ou traités</SectionTitle>
             <Card className="py-1">
               <div className="divide-y divide-line">
                 {done.map((r) => (
@@ -63,7 +60,7 @@ export default function RappelsPage() {
             <b className="text-ink">Fin de bail</b> : {`${LEASE_END_NOTICE_MONTHS} mois`} avant l&apos;échéance (date de fin saisie, ou début + durée avec reconduction).
           </p>
           <p>
-            <b className="text-ink">Révision du loyer</b> : {`${REVISION_NOTICE_MONTHS} mois`} avant la date anniversaire du bail.
+            <b className="text-ink">Révision du loyer</b> : {`${REVISION_NOTICE_MONTHS} mois`} avant la date anniversaire du bail, le temps de prévenir le locataire. Si elle n&apos;est pas faite, le rappel reste affiché {`${REVISION_CLAIM_MONTHS} mois`} : passé ce délai, la révision de l&apos;année est perdue. Une révision demandée en retard ne s&apos;applique qu&apos;à partir de la demande. Bail commercial (révision triennale) : rappel à partir du 3ᵉ anniversaire, demande par lettre recommandée.
           </p>
           <p>
             <b className="text-ink">Fin de crédit</b> : {`${LOAN_END_NOTICE_MONTHS} mois`} avant la dernière échéance.
