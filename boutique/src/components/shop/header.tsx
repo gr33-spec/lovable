@@ -63,6 +63,11 @@ export function Header({ shopName, logo, categories }: { shopName: string; logo:
     { href: "/boutique?tri=nouveautes", label: "Nouveautés" },
     { href: "/a-propos", label: "L'atelier" },
   ];
+  // Au-delà de 3 catégories, la barre du haut (ordinateur) n'affiche que les
+  // 3 premières ; toutes restent dans le menu, dont le bouton reste visible.
+  const MAX_TOP = 3;
+  const many = categories.length > MAX_TOP;
+  const topLinks = many ? links.filter((l) => !categories.slice(MAX_TOP).some((c) => l.href === `/boutique/${c.slug}`)) : links;
   const isActive = (href: string) => (href === "/boutique" ? pathname === "/boutique" : pathname === href.split("?")[0] && !href.includes("?"));
 
   const submitSearch = (e: React.FormEvent) => {
@@ -79,7 +84,7 @@ export function Header({ shopName, logo, categories }: { shopName: string; logo:
       </a>
       <header className="sticky top-0 z-30 border-b border-border/60 bg-bg/85 backdrop-blur-xl supports-[backdrop-filter]:bg-bg/70">
         <div className="container-page flex h-[var(--header-h)] items-center gap-2">
-          <button type="button" className="btn btn-ghost btn-icon -ml-2 lg:hidden" aria-label="Ouvrir le menu" onClick={() => menuRef.current?.showModal()}>
+          <button type="button" className={`btn btn-ghost btn-icon -ml-2 ${many ? "" : "lg:hidden"}`} aria-label="Ouvrir le menu" onClick={() => menuRef.current?.showModal()}>
             <Menu size={22} />
           </button>
           <div className="min-w-0 flex-1 lg:flex-none">
@@ -87,12 +92,12 @@ export function Header({ shopName, logo, categories }: { shopName: string; logo:
           </div>
           <nav aria-label="Navigation principale" className="mx-auto hidden lg:block">
             <ul className="flex items-center gap-1">
-              {links.map((l) => (
+              {topLinks.map((l) => (
                 <li key={l.href}>
                   <Link
                     href={l.href}
                     aria-current={isActive(l.href) ? "page" : undefined}
-                    className="rounded-full px-3.5 py-2 text-[15px] font-medium no-underline transition-colors hover:bg-secondary aria-[current=page]:text-primary"
+                    className="rounded-full px-3.5 py-2 text-[15px] font-medium whitespace-nowrap no-underline transition-colors hover:bg-secondary aria-[current=page]:text-primary"
                   >
                     {l.label}
                   </Link>
@@ -165,7 +170,7 @@ export function Header({ shopName, logo, categories }: { shopName: string; logo:
             type="search"
             enterKeyHint="search"
             autoComplete="off"
-            placeholder="Fleurs, doré, pendentif…"
+            placeholder="Fleurs, doré, broche…"
             className="min-h-12 flex-1 bg-transparent px-2 outline-none"
             value={q}
             onChange={(e) => setQ(e.target.value)}

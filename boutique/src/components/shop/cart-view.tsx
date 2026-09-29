@@ -40,7 +40,7 @@ export function CartView() {
             <ShoppingBag size={28} aria-hidden="true" />
           </span>
           <h1 className="mt-5 text-4xl">Votre panier est vide</h1>
-          <p className="mt-3 text-text-2">Laissez-vous tenter par une paire pailletée ou un pendentif unique.</p>
+          <p className="mt-3 text-text-2">Laissez-vous tenter par une création pailletée, faite main.</p>
           <Link href="/boutique" className="btn btn-primary mt-7">
             Découvrir les créations
           </Link>

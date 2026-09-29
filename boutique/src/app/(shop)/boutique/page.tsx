@@ -6,7 +6,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   const filtered = Object.keys(sp).some((k) => k !== "tri");
   return {
     title: sp.q ? `Recherche « ${String(sp.q).slice(0, 60)} »` : "Toutes les créations",
-    description: "Boucles d'oreilles, pendentifs et bijoux en résine pailletée, faits main.",
+    description: "Bijoux et créations en résine pailletée, faits main : boucles d'oreilles, pendentifs, broches…",
     alternates: { canonical: "/boutique" },
     // Les pages de recherche et de filtres ne sont pas indexées (contenu dupliqué).
     robots: filtered ? { index: false, follow: true } : undefined,

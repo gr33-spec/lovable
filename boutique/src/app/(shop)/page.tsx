@@ -131,7 +131,7 @@ export default async function HomePage() {
           </div>
           <ul className={`grid gap-3 sm:gap-5 ${visibleCategories.length === 1 ? "" : "grid-cols-2"} ${visibleCategories.length > 2 ? "lg:grid-cols-4" : ""}`}>
             {visibleCategories.map((c, i) => (
-              <li key={c.id} className={visibleCategories.length === 3 && i === 0 ? "col-span-2 lg:col-span-2" : ""}>
+              <li key={c.id} className={visibleCategories.length > 1 && visibleCategories.length % 2 === 1 && i === 0 ? "col-span-2" : ""}>
                 <Link href={`/boutique/${c.slug}`} className="group holo-ring block rounded-[28px] no-underline">
                   <div className="holo-shine relative aspect-[4/5] overflow-hidden rounded-[28px] shadow-soft sm:aspect-[16/12]">
                     <Img image={c.cover} alt="" sizes="(min-width: 640px) 50vw, 50vw" className="h-full w-full transition duration-700 group-hover:scale-[1.04]" />
