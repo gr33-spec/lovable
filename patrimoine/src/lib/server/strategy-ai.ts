@@ -126,7 +126,9 @@ Règles impératives :
 - Les identifiants (id) que tu cites dans cible et creditIds doivent être copiés exactement depuis les faits.
 - Pour la simulation d'une piste, n'indique un montant que s'il découle des faits (valeur estimée d'un immeuble, capital restant d'un crédit, coût de travaux prévu) ; sinon 0. L'utilisateur complétera.
 - Classe les pistes par impact sur la trésorerie et le patrimoine net ; pense aussi aux échéances (fins de crédit, DPE F et G interdits à la location progressivement, travaux prévus), à la vacance, à la concentration, à la capacité d'emprunt et à l'effet de levier.
-- Écris en français simple, phrases courtes, compréhensibles sans être expert.`;
+- Écris en français simple, phrases courtes, compréhensibles sans être expert.
+- Sois bref : synthèse en 3 phrases, 4 forces, 4 risques et 4 pistes au plus, chaque texte en une ou deux phrases.
+- « aCompleter » : les informations manquantes les plus utiles, en disant où les saisir dans l'application (ex. « Immeuble du Port : valeur estimée — fiche de l'immeuble »).`;
 
 export function strategyAiEnabled(): boolean {
   return Boolean(process.env.ANTHROPIC_API_KEY) || process.env.PATRIMOINE_AI_MOCK === "1";
@@ -150,23 +152,58 @@ function sanitize(result: z.infer<typeof schema>, facts: Facts): AnalysisResult 
   };
 }
 
+/**
+ * Faits sérialisés au plus court (économie de jetons) : valeurs nulles,
+ * listes vides et objets vides retirés (l'absence signifie « inconnu »),
+ * montants arrondis à l'euro, ratios à deux décimales.
+ */
+export function compactFacts(facts: Facts): string {
+  const clean = (v: unknown): unknown => {
+    if (v === null || v === undefined || v === "") return undefined;
+    if (typeof v === "number") return Math.abs(v) >= 100 ? Math.round(v) : Math.round(v * 100) / 100;
+    if (Array.isArray(v)) {
+      const list = v.map(clean).filter((x) => x !== undefined);
+      return list.length ? list : undefined;
+    }
+    if (typeof v === "object") {
+      const out: Record<string, unknown> = {};
+      for (const [k, x] of Object.entries(v)) {
+        const c = clean(x);
+        if (c !== undefined) out[k] = c;
+      }
+      return Object.keys(out).length ? out : undefined;
+    }
+    return v;
+  };
+  return JSON.stringify(clean(facts) ?? {});
+}
+
 export async function analyzeStrategy(facts: Facts, question?: string): Promise<AnalysisResult> {
   if (process.env.PATRIMOINE_AI_MOCK === "1" && !process.env.ANTHROPIC_API_KEY) return sanitize(mock(facts, question), facts);
   const client = new Anthropic();
+  // Coût maîtrisé : réflexion courte (effort bas), faits compacts mis en cache
+  // (une deuxième question sur le même périmètre dans les minutes qui suivent
+  // les relit à 10 % du prix), réponse plafonnée.
   const stream = client.beta.messages.stream({
     model: "claude-opus-5-5",
-    max_tokens: 32000,
+    max_tokens: 12000,
     betas: ["server-side-fallback-2026-07-01"],
     fallbacks: "default",
     thinking: { type: "adaptive" },
-    output_config: { effort: "high", format: { type: "json_schema", schema: OUTPUT_SCHEMA } },
-    system: SYSTEM,
+    output_config: { effort: "low", format: { type: "json_schema", schema: OUTPUT_SCHEMA } },
+    system: [{ type: "text", text: SYSTEM }],
     messages: [
       {
         role: "user",
-        content: `Faits du patrimoine (JSON) :\n${JSON.stringify(facts)}\n\n${
-          question ? `Question de l'investisseur : « ${question} ». Réponds-y dans « reponse », puis complète l'analyse.` : "Fais l'analyse complète (sans question particulière : « reponse » vide)."
-        }`,
+        content: [
+          { type: "text", text: `Faits du patrimoine (JSON ; un champ absent = inconnu) :\n${compactFacts(facts)}`, cache_control: { type: "ephemeral" } },
+          {
+            type: "text",
+            text: question
+              ? `Question de l'investisseur : « ${question} ». Réponds-y d'abord dans « reponse » (court), puis une analyse brève.`
+              : "Fais l'analyse (sans question : « reponse » vide).",
+          },
+        ],
       },
     ],
   });

@@ -161,6 +161,69 @@ export function searchText(e: DocEntry, data: AppData): string {
   return [e.title, e.name, categoryLabel(e.category), e.place.label, e.summary, b?.name, b?.city, b?.address, c?.name].filter(Boolean).join(" ").toLowerCase();
 }
 
+// ——— Pré-remplissage d'après le nom du fichier (sans IA) ———
+
+const CATEGORY_WORDS: [DocCategory, RegExp][] = [
+  ["tableau_amortissement", /amortissement|echeancier|tableau/],
+  ["etat_des_lieux", /etat des lieux|\bedl\b/],
+  ["caution", /caution/],
+  ["bail", /\bbail\b|\bbaux\b|contrat de location/],
+  ["offre_pret", /offre de pret|offre pret/],
+  ["assurance", /assurance|\bpno\b|multirisque/],
+  ["facture", /facture/],
+  ["devis", /devis/],
+  ["diagnostic", /\bdpe\b|diagnostic|amiante|plomb|electricite|termites/],
+  ["fiscal", /taxe|impot|fonciere|\bcfe\b/],
+  ["copropriete", /copro|syndic|appel de fonds|\bag\b/],
+  ["bilan", /bilan|liasse|comptes annuels/],
+  ["acte", /\bacte\b|statuts|notaire|\bpv\b|proces verbal|kbis/],
+  ["banque", /releve|\brib\b|banque|attestation bancaire/],
+  ["identite", /identite|\bcni\b|passeport|fiche de paie|bulletin de salaire|avis d.imposition/],
+  ["courrier", /courrier|lettre|conge|relance|revision/],
+];
+
+const plain = (s: string) =>
+  s
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[_\-.]+/g, " ");
+
+/** Mots propres à un nom (« SCI DU PORT » → port ; « Immeuble de Pléhédel » → plehedel). */
+const nameWords = (s: string) => plain(s).split(/[^a-z0-9]+/).filter((w) => w.length > 3 && !["immeuble", "appartement", "maison", "societe", "holding"].includes(w));
+
+/**
+ * Rangement proposé pour un fichier importé : type d'après les mots de son
+ * nom, société / immeuble s'ils y sont cités, et l'endroit d'où l'on
+ * importe (fiche immeuble, lot, crédit…). Calcul local, gratuit ;
+ * l'utilisateur confirme ou corrige toujours.
+ */
+export function guessPlacement(data: AppData, fileName: string, scope?: DocScope) {
+  const name = plain(fileName.replace(/\.[a-z0-9]+$/i, ""));
+  const category = CATEGORY_WORDS.find(([, re]) => re.test(name))?.[0] ?? "autre";
+  const hit = <T extends { name: string }>(list: T[]) => {
+    const found = list.filter((x) => nameWords(x.name).some((w) => name.includes(w)));
+    return found.length === 1 ? found[0] : undefined;
+  };
+  const building = scope?.buildingId ? undefined : hit(data.buildings);
+  const company = building ? undefined : hit(data.companies);
+  const loan = scope?.loanId ? data.loans.find((l) => l.id === scope.loanId) : undefined;
+  const unit = scope?.unitId ? data.units.find((u) => u.id === scope.unitId) : undefined;
+  const buildingId = scope?.buildingId ?? unit?.buildingId ?? loan?.buildingId ?? building?.id ?? "";
+  const companyId = scope?.companyId ?? data.buildings.find((b) => b.id === buildingId)?.companyId ?? loan?.companyId ?? company?.id ?? "";
+  return {
+    category: scope?.loanId && category === "autre" ? ("tableau_amortissement" as DocCategory) : category,
+    title: fileName.replace(/\.[a-z0-9]+$/i, "").replace(/[_]+/g, " ").trim(),
+    date: "",
+    summary: "",
+    companyId,
+    buildingId,
+    unitId: scope?.unitId ?? "",
+    tenancyId: scope?.tenancyId ?? "",
+    loanId: scope?.loanId ?? "",
+  };
+}
+
 // ——— Rangement d'une pièce importée ———
 
 export interface FilingInput {

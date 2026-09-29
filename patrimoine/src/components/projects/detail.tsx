@@ -508,7 +508,7 @@ function NewLoanFromSchedule({ onAdd }: { onAdd: (l: ProjectLoan) => void }) {
     onConfirm: ({ rows, fileId, fileName, bank, meta }) =>
       onAdd({ id: newId(), label: "Prêt principal", bank: bank ?? undefined, ...projectLoanFromSchedule(rows), schedule: scheduleOf(rows, fileId, fileName, meta) }),
   });
-  return <ScheduleImportCard title="Importer le tableau de la banque" text="Montant, taux, durée, assurance, différé et échéances repris au centime (PDF ou photo)." importer={importer} />;
+  return <ScheduleImportCard title="Importer le tableau de la banque" text="Montant, taux, durée, assurance, différé et échéances repris au centime (fichier JSON des échéances)." importer={importer} />;
 }
 
 function ProjectLoanCard({ lf, onChange, onRemove }: { lf: ReturnType<typeof projectFigures>["loans"][number]; onChange: (l: ProjectLoan) => void; onRemove: () => void }) {
@@ -559,7 +559,7 @@ function ProjectLoanCard({ lf, onChange, onRemove }: { lf: ReturnType<typeof pro
           </div>
         ) : (
           <button type="button" disabled={importer.busy} onClick={importer.pick} className="flex items-center justify-center gap-1.5 rounded-2xl bg-series-1/10 px-3 py-2.5 text-[13.5px] font-semibold text-series-1">
-            {importer.busy ? <Loader2 size={15} className="animate-spin" /> : <Paperclip size={15} />} {importer.label ?? "Importer le tableau d'amortissement de la banque"}
+            {importer.busy ? <Loader2 size={15} className="animate-spin" /> : <Paperclip size={15} />} {importer.label ?? "Importer les échéances de la banque (JSON)"}
           </button>
         )}
         {importer.element}
