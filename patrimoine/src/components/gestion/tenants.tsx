@@ -10,6 +10,7 @@ import { missingCount, unitMissing, type MissingItem } from "@/lib/missing";
 import { useStore } from "@/lib/store";
 import type { AppData, Unit } from "@/lib/types";
 import { eur } from "@/lib/format";
+import { searchKey } from "@/lib/documents";
 import { leaseInfo, todayIso, unpaidByUnit, addMonthsIso, LEASE_END_NOTICE_MONTHS } from "@/lib/engine/leases";
 import { activeTenancy, draftTenancy, inspectionsOf, leavingTenancy, tenantsName } from "@/lib/tenancy";
 import { cx } from "../ui";
@@ -63,7 +64,7 @@ export function TenantsView() {
   });
 
   const totalMissing = missingCount(data);
-  const needle = q.trim().toLowerCase();
+  const needle = searchKey(q.trim());
   const groups = data.buildings
     .map((b) => {
       const all = sortedUnits(data.units.filter((u) => u.buildingId === b.id));
@@ -75,7 +76,7 @@ export function TenantsView() {
         if (filter === "suivi" && !flags.some((f) => f.tone !== "neg")) return false;
         if (filter === "incomplets" && unitMissing(data, u).length === 0) return false;
         if (!needle) return true;
-        return [u.name, u.tenantFirstName, u.tenantLastName, b.name, b.city].filter(Boolean).join(" ").toLowerCase().includes(needle);
+        return searchKey([u.name, u.tenantFirstName, u.tenantLastName, b.name, b.city].filter(Boolean).join(" ")).includes(needle);
       });
       return { building: b, all, units };
     })

@@ -16,19 +16,14 @@ import { RemindersCard } from "@/components/leases";
 import { todayIso } from "@/lib/engine/leases";
 import { allReminders } from "@/lib/reminders";
 import { eur, eurCompact, eurSigned, pct } from "@/lib/format";
-import { Card, IconChip, Kpi, Page, SectionTitle, Segmented, cx, Insufficient, type ChipTone } from "@/components/ui";
+import { Card, IconChip, Kpi, Page, SectionTitle, Segmented, cx, type ChipTone } from "@/components/ui";
 import { BarChart, LineChart } from "@/components/charts";
-import { yearOf } from "@/lib/engine/dates";
-
-const HORIZONS = [5, 10, 15, 20, 30];
 
 export default function Accueil() {
-  const { data, projection, nowMonth } = useStore();
+  const { data, projection } = useStore();
   const snap = projection.snapshot;
   const t = snap.total;
   const [chart, setChart] = usePageState<"net" | "debt" | "cf">("graphique", "net");
-  const [horizon, setHorizon] = usePageState("horizon", 10);
-  const y0 = yearOf(nowMonth);
 
   const steps = useMemo(() => milestones(data, projection, 6), [data, projection]);
   const issues = useMemo(() => qualityIssues(data, snap), [data, snap]);
@@ -43,11 +38,10 @@ export default function Accueil() {
   const loanToValue = ltv(t);
   const companyCount = data.companies.length;
   const years = projection.years.map((r) => r.year);
-  const future = projection.years.find((r) => r.year === y0 + horizon);
   const hasData = t.buildings > 0 || t.loans > 0;
   const keyIndicators = useMemo(() => {
     const all = portfolioIndicators(data, projection);
-    const pick = ["dscr", "occupancy", "avg-rate", "amortized-10"];
+    const pick = ["dscr", "ltv", "gross-yield", "occupancy"];
     return pick.map((id) => all.find((i) => i.id === id)).filter((i): i is NonNullable<typeof i> => !!i && t.loans + t.buildings > 0);
   }, [data, projection, t.loans, t.buildings]);
   const alerts = useMemo(() => allReminders(data, todayIso(), snap.resolvedLoans), [data, snap]);
@@ -90,7 +84,12 @@ export default function Accueil() {
               eur(netWorth(t))
             ) : (
               <span className="block tracking-normal">
-                <span className="block text-[22px] font-bold text-white/80">Données insuffisantes</span>
+                <span className="block text-[22px] font-bold text-white/80">{hasData ? "Données insuffisantes" : "Aucun bien pour l'instant"}</span>
+                {!hasData && (
+                  <Link href="/patrimoine" className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1.5 text-[13px] font-semibold text-white">
+                    Ajouter une société ou un immeuble <ChevronRight size={14} />
+                  </Link>
+                )}
                 {t.unvalued > 0 && (
                   <Link href="/plus/a-completer" className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1.5 text-[13px] font-semibold text-white">
                     Estimer la valeur de {t.unvalued} bien{t.unvalued > 1 ? "s" : ""} <ChevronRight size={14} />
@@ -101,7 +100,7 @@ export default function Accueil() {
           </div>
           <HeroSpark
             values={(t.unvalued > 0 ? projection.years.map((r) => r.debt) : projection.years.map((r) => r.net)).slice(0, 21)}
-            label={t.unvalued > 0 ? "Dette restante, 20 prochaines années" : "Patrimoine net, 20 prochaines années"}
+            label={t.unvalued > 0 ? "Capital restant dû, 20 prochaines années" : "Patrimoine net, 20 prochaines années"}
           />
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div className="rounded-2xl bg-white/[0.07] px-3.5 py-3 ring-1 ring-white/10">
@@ -274,42 +273,10 @@ export default function Accueil() {
             {chart === "cf" && <BarChart years={years} values={projection.years.map((r) => r.cashflow)} label="Cash-flow annuel" />}
           </div>
           <div className="mt-1 text-xs text-muted">
-            {chart === "cf" ? "Loyers − charges − mensualités, par an." : "Touchez le graphique pour lire une année."}
+            {chart === "cf" ? "Cash-flow locatif : loyers − charges − mensualités, par an." : "Touchez le graphique pour lire une année."}
           </div>
-        </Card>
-
-        {/* Horizons */}
-        <SectionTitle>Et dans…</SectionTitle>
-        <Card>
-          <div className="flex gap-2 overflow-x-auto no-scrollbar">
-            {HORIZONS.map((h) => (
-              <button
-                key={h}
-                onClick={() => setHorizon(h)}
-                className={cx(
-                  "shrink-0 rounded-full px-4 py-2 text-sm font-semibold",
-                  horizon === h ? "bg-brand text-on-brand" : "bg-soft text-brand",
-                )}
-              >
-                {h} ans
-              </button>
-            ))}
-          </div>
-          {future ? (
-            <div className="mt-4">
-              <div className="text-sm text-muted">En {future.year}</div>
-              <div className="mt-2 grid grid-cols-2 gap-4">
-                <Kpi label="Patrimoine net" value={t.unvalued > 0 ? "—" : eurCompact(future.net)} />
-                <Kpi label="Dette restante" value={eurCompact(future.debt)} />
-                <Kpi label="Cash-flow / mois" value={eurSigned(future.cashflow / 12)} tone={future.cashflow >= 0 ? "pos" : "neg"} />
-                <Kpi label="Crédits en cours" value={String(future.activeLoans)} />
-              </div>
-            </div>
-          ) : (
-            <Insufficient />
-          )}
           {projection.incompleteLoans.length > 0 && (
-            <div className="mt-3 text-xs text-warn">
+            <div className="mt-2 text-xs text-warn">
               Projection partielle : {projection.incompleteLoans.length} crédit(s) sans échéancier calculable (dette maintenue constante).
             </div>
           )}

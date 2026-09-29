@@ -32,6 +32,35 @@ export function auditLoans(data: AppData, snap: Snapshot): LoanFinding[] {
     const r = snap.resolvedLoans.get(l.id);
     return r && !r.finished;
   });
+  // Saisies impossibles, sur TOUS les crédits : une faute de frappe sur une
+  // date peut faire passer un crédit pour « terminé » et le faire disparaître
+  // des dettes sans que rien ne le signale.
+  for (const l of data.loans) {
+    const push = (text: string, short: string) => out.push({ loanId: l.id, severity: "critical", text, short });
+    const negatives: [number | undefined, string][] = [
+      [l.remaining, "Capital restant dû"],
+      [l.monthlyPayment, "Mensualité"],
+      [l.insuranceMonthly, "Assurance"],
+      [l.initialAmount, "Montant initial"],
+    ];
+    for (const [v, label] of negatives) if (v !== undefined && v < 0) push(`${label} négatif (${eur(v)}) : un montant ne peut pas être négatif.`, `${label} négatif, à corriger.`);
+    const start = parseMonth(l.startDate);
+    const end = parseMonth(l.endDate);
+    if (start !== undefined && end !== undefined && end <= start) push(`Date de fin (${month(l.endDate!)}) antérieure au déblocage (${month(l.startDate!)}) : l'une des deux est fausse.`, "Date de fin antérieure au déblocage.");
+    if (l.durationMonths !== undefined && (l.durationMonths <= 0 || l.durationMonths > 600)) push(`Durée de ${l.durationMonths} mois improbable : faute de frappe ?`, "Durée improbable, à vérifier.");
+    const r = snap.resolvedLoans.get(l.id);
+    const known = parseMonth(l.remainingDate) ?? snap.nowMonth;
+    // Fin prévue : saisie, sinon déblocage + durée.
+    const plannedEnd = end ?? (start !== undefined && l.durationMonths ? start + l.durationMonths : undefined);
+    const endLabel = l.endDate ? month(l.endDate) : "la fin prévue (déblocage + durée)";
+    if (r?.finished && l.remaining !== undefined && l.remaining > 0 && plannedEnd !== undefined && plannedEnd < known) {
+      push(`Crédit considéré comme terminé (fin : ${endLabel}) alors qu'un capital restant dû de ${eur(l.remaining)} est saisi : il n'est plus compté dans les dettes.`, "Terminé mais capital restant dû saisi.");
+    } else if (r?.finished && plannedEnd !== undefined && plannedEnd > snap.nowMonth + 1) {
+      // Mensualité trop forte (faute de frappe) : le calcul solde le crédit bien avant sa fin prévue.
+      push(`Crédit calculé comme déjà remboursé alors que sa fin est prévue (${endLabel}) : vérifiez la mensualité et le capital restant dû. Il n'est plus compté dans les dettes.`, "Soldé avant sa date de fin, à vérifier.");
+    }
+  }
+
   for (const l of active) {
     const r = snap.resolvedLoans.get(l.id)!;
     const push = (severity: LoanFinding["severity"], text: string, short = text) => out.push({ loanId: l.id, severity, text, short });

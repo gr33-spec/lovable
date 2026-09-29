@@ -158,7 +158,12 @@ export function documentsOf(index: DocEntry[], scope: DocScope): DocEntry[] {
 export function searchText(e: DocEntry, data: AppData): string {
   const b = e.buildingId ? data.buildings.find((x) => x.id === e.buildingId) : undefined;
   const c = e.companyId ? data.companies.find((x) => x.id === e.companyId) : undefined;
-  return [e.title, e.name, categoryLabel(e.category), e.place.label, e.summary, b?.name, b?.city, b?.address, c?.name].filter(Boolean).join(" ").toLowerCase();
+  return searchKey([e.title, e.name, categoryLabel(e.category), e.place.label, e.summary, b?.name, b?.city, b?.address, c?.name].filter(Boolean).join(" "));
+}
+
+/** Forme de recherche : sans accents ni majuscules (« Goëlo » = « GOELO » = « goelo »). */
+export function searchKey(s: string): string {
+  return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 
 // ——— Pré-remplissage d'après le nom du fichier (sans IA) ———

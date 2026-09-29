@@ -80,6 +80,11 @@ export function StoreProvider({
   children: React.ReactNode;
 }) {
   const [data, setData] = useState(initialData);
+  // Dernier état affiché, pour noter l'état « avant modification » de chaque envoi.
+  const dataRef = useRef(data);
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
   const [version, setVersion] = useState(initialVersion);
   const [status, setStatus] = useState<SaveStatus>("idle");
   const [nowMonth] = useState(() => currentMonth());
@@ -161,12 +166,18 @@ export function StoreProvider({
         toast("Mode consultation : aucune modification n'est enregistrée.");
         return;
       }
-      for (const op of ops) {
+      for (const raw of ops) {
+        let op = raw;
         // Fusionne les modifications successives d'un même élément.
         if (op.op === "upsert") {
-          pending.current = pending.current.filter(
-            (p) => !(p.op === "upsert" && p.coll === op.coll && p.item.id === op.item.id),
-          );
+          const coll = op.coll;
+          const id = op.item.id;
+          // État de référence : celui d'avant la première modification encore en attente,
+          // sinon l'élément tel qu'affiché (dernier état connu du serveur + envois en cours).
+          const queued = pending.current.find((p) => p.op === "upsert" && p.coll === coll && p.item.id === id);
+          const base = queued?.op === "upsert" ? queued.base : (dataRef.current[coll] as { id: string }[]).find((x) => x.id === id);
+          op = base ? { ...op, base: base as { id: string } & Record<string, unknown> } : op;
+          pending.current = pending.current.filter((p) => !(p.op === "upsert" && p.coll === coll && p.item.id === id));
         }
         // Réglages saisis au clavier : une seule opération pour la frappe en cours.
         const last = pending.current[pending.current.length - 1];

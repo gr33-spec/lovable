@@ -36,7 +36,9 @@ export default function ACompleterPage() {
     <>
       <PageHeader title="À compléter" back subtitle={issues.length ? "Ce qui manque, par ordre d'importance" : "Tout est renseigné"} />
       <Page>
-        {issues.length === 0 ? (
+        {data.buildings.length === 0 && data.loans.length === 0 && data.companies.length === 0 ? (
+          <Empty icon={<CircleCheck size={26} />} title="Rien à compléter pour l'instant" text="Ajoutez vos sociétés, immeubles et crédits : ce qui manque pour des chiffres fiables apparaîtra ici." />
+        ) : issues.length === 0 ? (
           <Empty icon={<CircleCheck size={26} />} title="Tout est renseigné" text="Les chiffres reposent sur des données complètes." />
         ) : (
           <>

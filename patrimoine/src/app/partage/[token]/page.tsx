@@ -153,7 +153,7 @@ export default async function SharePage({ params, searchParams }: { params: Prom
         {horizons.length > 0 && (
           <Section title="Projection">
             <Table
-              head={["Année", "Dette restante", "Patrimoine net", "Cash-flow annuel"]}
+              head={["Année", "Capital restant dû", "Patrimoine net", "Cash-flow annuel"]}
               rows={horizons.map((r) => [String(r.year), eurCompact(r.debt), t.unvalued ? "—" : eurCompact(r.net), eurSigned(r.cashflow)])}
             />
             <p className="mt-2 text-xs text-muted">

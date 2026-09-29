@@ -187,7 +187,7 @@ export function DropZone({ onFiles, compact, label }: { onFiles: (f: FileList) =
         setOver(false);
         if (e.dataTransfer.files.length) onFiles(e.dataTransfer.files);
       }}
-      className={cx(compact ? "" : "rounded-[24px] border-2 border-dashed p-5 text-center transition", !compact && (over ? "border-series-1 bg-series-1/5" : "border-line bg-card"))}
+      className={cx("write-action", compact ? "" : "rounded-[24px] border-2 border-dashed p-5 text-center transition", !compact && (over ? "border-series-1 bg-series-1/5" : "border-line bg-card"))}
     >
       {!compact && (
         <>
