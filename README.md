@@ -8,11 +8,3 @@
 Les deux applications ne partagent **aucun** fichier : chacune a ses
 dépendances, ses outils et sa base de données. Rien d'une application ne
 doit être placé à la racine du dépôt.
-
-## `vercel.json` à la racine
-
-Il ne concerne **que** le projet Vercel `lovable`, dont le dossier est la
-racine du dépôt (l'ancienne BatiClair, supprimée). `"ignoreCommand": "exit 0"`
-lui dit de ne plus rien construire : son dernier site en ligne reste tel
-quel. Les projets dont le dossier est `patrimoine/`, `baticlair/…` ou
-`boutique/` ne lisent pas ce fichier.
