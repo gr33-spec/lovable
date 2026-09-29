@@ -18,6 +18,8 @@ import { useBuildingOptions, useCompanyOptions } from "../forms";
 import { Button, Card, ConfirmDelete, DateField, Empty, Grid2, NumberField, Page, PageHeader, Pill, SectionTitle, SelectField, Stack, TextField, cx } from "../ui";
 import { STATUS_TONE } from "./list";
 import { openDocument } from "../pdf-viewer";
+import { ScheduleImportCard, scheduleOf, useScheduleImport } from "../details/loan-schedule";
+import { projectLoanFromSchedule } from "@/lib/schedule";
 
 type Tab = "bien" | "cout" | "financement" | "loyers" | "banque";
 
@@ -486,53 +488,104 @@ function FinancingSection({ p, set }: SectionProps) {
       <SectionTitle action={<AddLink label="Prêt" onClick={() => set({ loans: [...loans, { id: newId(), label: loans.length ? `Prêt ${loans.length + 1}` : "Prêt principal", durationMonths: 240 }] })} />}>Prêts</SectionTitle>
       {loans.length === 0 ? (
         <Card>
-          <p className="text-[13.5px] text-muted">Ajoutez le ou les prêts envisagés : la mensualité est calculée automatiquement.</p>
+          <p className="mb-3 text-[13.5px] text-muted">Ajoutez le ou les prêts envisagés : la mensualité est calculée automatiquement. Vous avez déjà l&apos;offre de la banque ? Importez son tableau d&apos;amortissement.</p>
+          <NewLoanFromSchedule onAdd={(l) => set({ loans: [...loans, l] })} />
         </Card>
       ) : (
         <div className="space-y-2">
-          {f.loans.map((lf) => {
-            const l = lf.loan;
-            return (
-              <Card key={l.id}>
-                <Stack>
-                  <div className="flex items-center gap-2">
-                    <div className="min-w-0 flex-1">
-                      <Grid2>
-                        <TextField label="Nom" value={l.label} onChange={(v) => setLoan({ ...l, label: v })} />
-                        <TextField label="Banque" value={l.bank} onChange={(v) => setLoan({ ...l, bank: v })} />
-                      </Grid2>
-                    </div>
-                    <button type="button" aria-label="Retirer le prêt" onClick={() => set({ loans: loans.filter((x) => x.id !== l.id) })} className="self-start p-1 text-muted">
-                      <X size={18} />
-                    </button>
-                  </div>
-                  <NumberField label="Montant emprunté" value={l.amount} onChange={(v) => setLoan({ ...l, amount: v })} />
-                  <Grid2>
-                    <NumberField label="Taux" suffix="%" value={l.ratePct} onChange={(v) => setLoan({ ...l, ratePct: v })} />
-                    <NumberField label="Durée" suffix="ans" value={l.durationMonths !== undefined ? l.durationMonths / 12 : undefined} onChange={(v) => setLoan({ ...l, durationMonths: v !== undefined ? Math.round(v * 12) : undefined })} />
-                  </Grid2>
-                  <Grid2>
-                    <NumberField label="Assurance / mois" value={l.insuranceMonthly} onChange={(v) => setLoan({ ...l, insuranceMonthly: v })} />
-                    <NumberField label="Différé" suffix="mois" integer value={l.deferralMonths} onChange={(v) => setLoan({ ...l, deferralMonths: v })} />
-                  </Grid2>
-                  <div className="rounded-2xl bg-soft px-4 py-3 text-[13px] text-ink-2">
-                    {lf.monthly === undefined ? (
-                      "Mensualité : données insuffisantes (montant, taux et durée)."
-                    ) : (
-                      <>
-                        Mensualité <b className="tabular text-ink">{eur(lf.monthly)}</b> assurance comprise
-                        {lf.deferralPayment !== undefined && <> · pendant le différé {eur(lf.deferralPayment + lf.insurance)}</>}
-                        {lf.totalInterest !== undefined && <div className="text-[12px] text-muted">Coût des intérêts : {eur(lf.totalInterest)}</div>}
-                      </>
-                    )}
-                  </div>
-                </Stack>
-              </Card>
-            );
-          })}
+          {f.loans.map((lf) => (
+            <ProjectLoanCard key={lf.loan.id} lf={lf} onChange={setLoan} onRemove={() => set({ loans: loans.filter((x) => x.id !== lf.loan.id) })} />
+          ))}
         </div>
       )}
     </>
+  );
+}
+
+/** Prêt d'un projet créé directement depuis le tableau d'amortissement de l'offre. */
+function NewLoanFromSchedule({ onAdd }: { onAdd: (l: ProjectLoan) => void }) {
+  const importer = useScheduleImport({
+    onConfirm: ({ rows, fileId, fileName, bank }) =>
+      onAdd({ id: newId(), label: "Prêt principal", bank: bank ?? undefined, ...projectLoanFromSchedule(rows), schedule: scheduleOf(rows, fileId, fileName) }),
+  });
+  return <ScheduleImportCard title="Importer le tableau de la banque" text="Montant, taux, durée, assurance, différé et échéances repris au centime (PDF ou photo)." importer={importer} />;
+}
+
+function ProjectLoanCard({ lf, onChange, onRemove }: { lf: ReturnType<typeof projectFigures>["loans"][number]; onChange: (l: ProjectLoan) => void; onRemove: () => void }) {
+  const l = lf.loan;
+  const setLoan = (patch: Partial<ProjectLoan>) => onChange({ ...l, ...patch });
+  const importer = useScheduleImport({
+    hint: l.label || l.bank,
+    compare: { initialAmount: l.amount, ratePct: l.ratePct, insuranceMonthly: l.insuranceMonthly },
+    onConfirm: ({ rows, fileId, fileName, bank }) => {
+      const old = l.schedule?.fileId;
+      onChange({ ...l, bank: l.bank || bank || undefined, ...projectLoanFromSchedule(rows), schedule: scheduleOf(rows, fileId, fileName) });
+      if (old && old !== fileId) void fetch(`/api/files/${old}`, { method: "DELETE" }).catch(() => undefined);
+    },
+  });
+  const removeSchedule = () => {
+    const rest = { ...l };
+    delete rest.schedule;
+    onChange(rest);
+    if (l.schedule?.fileId) void fetch(`/api/files/${l.schedule.fileId}`, { method: "DELETE" }).catch(() => undefined);
+  };
+  return (
+    <Card>
+      <Stack>
+        <div className="flex items-center gap-2">
+          <div className="min-w-0 flex-1">
+            <Grid2>
+              <TextField label="Nom" value={l.label} onChange={(v) => setLoan({ label: v })} />
+              <TextField label="Banque" value={l.bank} onChange={(v) => setLoan({ bank: v })} />
+            </Grid2>
+          </div>
+          <button type="button" aria-label="Retirer le prêt" onClick={onRemove} className="self-start p-1 text-muted">
+            <X size={18} />
+          </button>
+        </div>
+        {l.schedule ? (
+          <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-pos/10 px-3 py-2 text-[13px] text-pos">
+            <span className="font-semibold">Tableau de la banque · {l.schedule.rows.length} échéances</span>
+            {l.schedule.fileId && (
+              <button type="button" onClick={() => openDocument(`/api/files/${l.schedule!.fileId}`, l.schedule!.fileName)} className="rounded-full bg-card px-2.5 py-1 text-[12px] font-semibold text-navy">
+                Voir
+              </button>
+            )}
+            <button type="button" disabled={importer.busy} onClick={importer.pick} className="rounded-full bg-card px-2.5 py-1 text-[12px] font-semibold text-navy">
+              Remplacer
+            </button>
+            <button type="button" onClick={removeSchedule} className="px-1 text-[12px] font-semibold text-neg">
+              Retirer
+            </button>
+          </div>
+        ) : (
+          <button type="button" disabled={importer.busy} onClick={importer.pick} className="flex items-center justify-center gap-1.5 rounded-2xl bg-series-1/10 px-3 py-2.5 text-[13.5px] font-semibold text-series-1">
+            {importer.busy ? <Loader2 size={15} className="animate-spin" /> : <Paperclip size={15} />} {importer.label ?? "Importer le tableau d'amortissement de la banque"}
+          </button>
+        )}
+        {importer.element}
+        <NumberField label="Montant emprunté" value={l.amount} onChange={(v) => setLoan({ amount: v })} />
+        <Grid2>
+          <NumberField label="Taux" suffix="%" value={l.ratePct} onChange={(v) => setLoan({ ratePct: v })} />
+          <NumberField label="Durée" suffix="ans" value={l.durationMonths !== undefined ? l.durationMonths / 12 : undefined} onChange={(v) => setLoan({ durationMonths: v !== undefined ? Math.round(v * 12) : undefined })} />
+        </Grid2>
+        <Grid2>
+          <NumberField label="Assurance / mois" value={l.insuranceMonthly} onChange={(v) => setLoan({ insuranceMonthly: v })} />
+          <NumberField label="Différé" suffix="mois" integer value={l.deferralMonths} onChange={(v) => setLoan({ deferralMonths: v })} />
+        </Grid2>
+        <div className="rounded-2xl bg-soft px-4 py-3 text-[13px] text-ink-2">
+          {lf.monthly === undefined ? (
+            "Mensualité : données insuffisantes (montant, taux et durée)."
+          ) : (
+            <>
+              Mensualité <b className="tabular text-ink">{eur(lf.monthly)}</b> assurance comprise{l.schedule ? " (tableau de la banque)" : ""}
+              {lf.deferralPayment !== undefined && <> · pendant le différé {eur(lf.deferralPayment + lf.insurance)}</>}
+              {lf.totalInterest !== undefined && <div className="text-[12px] text-muted">Coût des intérêts : {eur(lf.totalInterest)}</div>}
+            </>
+          )}
+        </div>
+      </Stack>
+    </Card>
   );
 }
 

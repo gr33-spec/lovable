@@ -1,4 +1,4 @@
-import type { AppData, Building, Loan, LoanScheduleRow } from "./types";
+import type { AppData, Building, Loan, LoanScheduleRow, ProjectLoan } from "./types";
 import { monthIndex, parseMonth, type MonthIndex } from "./engine/dates";
 
 // Tableau d'amortissement de la banque : contrôles de cohérence avant
@@ -147,4 +147,32 @@ export function scheduleBalanceAt(rows: LoanScheduleRow[], year: number, month: 
   const past = sorted.filter((r) => parseMonth(r.month)! < target);
   if (!past.length) return sorted[0] ? sorted[0].balance + sorted[0].principal : undefined;
   return past[past.length - 1].balance;
+}
+
+/** Conditions d'un prêt de projet reprises du tableau (montant, taux, durée, assurance, différé). */
+export function projectLoanFromSchedule(input: LoanScheduleRow[]): Partial<ProjectLoan> {
+  const rows = normalizeRows(input);
+  const f = loanFieldsFromSchedule(rows);
+  if (!rows.length) return {};
+  let deferral = 0;
+  while (deferral < rows.length - 1 && rows[deferral].principal < 0.01) deferral++;
+  return {
+    amount: f.initialAmount,
+    ratePct: f.ratePct,
+    durationMonths: f.durationMonths,
+    insuranceMonthly: f.insuranceMonthly,
+    deferralMonths: deferral || undefined,
+  };
+}
+
+/** Chiffres clés d'un tableau : échéance habituelle, échéance du différé, intérêts totaux. */
+export function scheduleSummary(input: LoanScheduleRow[]): { payment?: number; deferralPayment?: number; totalInterest: number } {
+  const rows = normalizeRows(input);
+  const f = loanFieldsFromSchedule(rows);
+  const deferred = rows.filter((r) => r.principal < 0.01);
+  return {
+    payment: f.monthlyPayment,
+    deferralPayment: deferred.length && deferred.length < rows.length ? deferred[0].payment : undefined,
+    totalInterest: Math.round(rows.reduce((a, r) => a + r.interest, 0) * 100) / 100,
+  };
 }

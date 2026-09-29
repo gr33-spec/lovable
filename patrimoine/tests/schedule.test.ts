@@ -102,3 +102,17 @@ test("fiches tenues à jour depuis les tableaux déjà enregistrés (rétroactif
   assert.equal(next.remainingDate, "2026-11-01");
   assert.ok(next.remaining! < l.remaining!);
 });
+
+test("prêt de projet depuis le tableau, repris par le crédit réel", async () => {
+  const { projectLoanFromSchedule } = await import("../src/lib/schedule");
+  const { loanFigures } = await import("../src/lib/engine/projects");
+  const rows = bankTable();
+  const pl = projectLoanFromSchedule(rows);
+  assert.equal(pl.amount, 200_000);
+  assert.equal(pl.durationMonths, 240);
+  assert.equal(pl.insuranceMonthly, 25);
+  const f = loanFigures({ id: "p", ...pl, schedule: { rows, importedAt: "2026-09-29", source: "ia" } });
+  const expected = rows.slice(12, 13)[0].payment;
+  assert.ok(f.payment !== undefined && Math.abs(f.payment - expected) < 0.02, `${f.payment} ≈ ${expected}`);
+  assert.equal(Math.round(f.totalInterest!), Math.round(rows.reduce((a, r) => a + r.interest, 0)));
+});

@@ -66,7 +66,7 @@ export function ProjectRealize({ id }: { id: string }) {
               <Item icon={<Building2 size={16} />}>{building ? `${building.name} mis à jour${p.valueAfterWorks ? " (valeur après travaux)" : ""}` : "Immeuble à choisir dans le projet"}</Item>
             )}
             {(p.lots ?? []).length > 0 && <Item icon={<DoorOpen size={16} />}>{p.lots.length} logement(s) avec leur loyer</Item>}
-            {loans.filter((l) => l.amount).length > 0 && <Item icon={<Landmark size={16} />}>{loans.filter((l) => l.amount).length} crédit(s), calculés à partir des conditions ci-dessous</Item>}
+            {loans.filter((l) => l.amount).length > 0 && <Item icon={<Landmark size={16} />}>{loans.filter((l) => l.amount).length} crédit(s){loans.some((l) => l.schedule) ? ", avec le tableau de la banque quand il a été importé" : ", calculés à partir des conditions ci-dessous"}</Item>}
             {worksCount > 0 && <Item icon={<Hammer size={16} />}>{worksCount} poste(s) de travaux prévus{loans.length ? ", financés par le crédit" : ""}</Item>}
           </div>
           {!ready && <p className="mt-3 text-[13px] text-warn">{acquisition ? "Choisissez d'abord la société qui achète (onglet « Le bien » du projet)." : "Choisissez d'abord l'immeuble concerné."}</p>}
@@ -99,6 +99,7 @@ export function ProjectRealize({ id }: { id: string }) {
                         <TextField label="Nom" value={l.label} onChange={(v) => setLoan({ label: v })} />
                         <TextField label="Banque" value={l.bank} onChange={(v) => setLoan({ bank: v })} />
                       </Grid2>
+                      {l.schedule && <div className="rounded-2xl bg-pos/10 px-3 py-2 text-[13px] font-semibold text-pos">Tableau de la banque ({l.schedule.rows.length} échéances) : repris tel quel pour le crédit.</div>}
                       <NumberField label="Montant" value={l.amount} onChange={(v) => setLoan({ amount: v })} />
                       <Grid2>
                         <NumberField label="Taux" suffix="%" value={l.ratePct} onChange={(v) => setLoan({ ratePct: v })} />
