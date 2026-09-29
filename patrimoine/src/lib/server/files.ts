@@ -1,5 +1,5 @@
 import "server-only";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { Pool } from "pg";
 
 // Stockage des PDF (bilans) dans la base, par morceaux : les envois vers le
@@ -33,7 +33,9 @@ async function ready(): Promise<void> {
            idx integer NOT NULL,
            data bytea NOT NULL,
            PRIMARY KEY (file_id, idx)
-         );`,
+         );
+         ALTER TABLE app_file ADD COLUMN IF NOT EXISTS sha256 text;
+         CREATE INDEX IF NOT EXISTS app_file_sha256 ON app_file (sha256);`,
       )
       .then(() => undefined)
       .catch((err) => {
@@ -47,12 +49,35 @@ async function ready(): Promise<void> {
 export const MAX_FILE_BYTES = 24 * 1024 * 1024;
 export const CHUNK_BYTES = 3 * 1024 * 1024;
 
-export async function createFile(name: string, mime: string, size: number): Promise<string> {
+export async function createFile(name: string, mime: string, size: number, sha256?: string): Promise<string> {
   await ready();
   const id = randomUUID();
   const chunks = Math.max(1, Math.ceil(size / CHUNK_BYTES));
-  await pool().query("INSERT INTO app_file (id, name, mime, size, chunks) VALUES ($1, $2, $3, $4, $5)", [id, name.slice(0, 200), mime, size, chunks]);
+  const hash = sha256 && /^[a-f0-9]{64}$/.test(sha256) ? sha256 : null;
+  await pool().query("INSERT INTO app_file (id, name, mime, size, chunks, sha256) VALUES ($1, $2, $3, $4, $5, $6)", [id, name.slice(0, 200), mime, size, chunks, hash]);
   return id;
+}
+
+/**
+ * Empreintes des fichiers déposés avant leur généralisation : calculées à la
+ * demande (quelques fichiers par appel), sans rien modifier d'autre.
+ */
+async function backfillHashes(limit = 40): Promise<void> {
+  const res = await pool().query("SELECT id FROM app_file WHERE sha256 IS NULL ORDER BY created_at DESC LIMIT $1", [limit]);
+  for (const row of res.rows as { id: string }[]) {
+    const file = await readFile(row.id).catch(() => undefined);
+    if (!file) continue;
+    await pool().query("UPDATE app_file SET sha256 = $2 WHERE id = $1", [row.id, createHash("sha256").update(file.data).digest("hex")]);
+  }
+}
+
+/** Fichiers déjà stockés avec la même empreinte (même contenu, octet pour octet). */
+export async function findByHash(sha256: string): Promise<{ id: string; name: string }[]> {
+  await ready();
+  if (!/^[a-f0-9]{64}$/.test(sha256)) return [];
+  await backfillHashes();
+  const res = await pool().query("SELECT id, name FROM app_file WHERE sha256 = $1 ORDER BY created_at", [sha256]);
+  return res.rows as { id: string; name: string }[];
 }
 
 export async function putChunk(id: string, idx: number, data: Buffer): Promise<void> {

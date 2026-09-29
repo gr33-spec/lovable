@@ -797,6 +797,54 @@ export interface AppData {
   tenancies: Tenancy[];
   inspections: Inspection[];
   projects: Project[];
+  /** Pièces déposées sans emplacement dédié (assurance, facture, diagnostic…). */
+  documents: AppDocument[];
+}
+
+// ——— Documents ———
+
+export type DocCategory =
+  | "bail"
+  | "caution"
+  | "etat_des_lieux"
+  | "courrier"
+  | "identite"
+  | "tableau_amortissement"
+  | "offre_pret"
+  | "banque"
+  | "assurance"
+  | "facture"
+  | "devis"
+  | "diagnostic"
+  | "acte"
+  | "fiscal"
+  | "copropriete"
+  | "bilan"
+  | "autre";
+
+/**
+ * Pièce déposée qui n'a pas d'emplacement dédié ailleurs. Les baux signés,
+ * cautions, courriers, tableaux d'amortissement, bilans et pièces de projet
+ * restent à leur place : la bibliothèque les réunit sans les copier.
+ */
+export interface AppDocument {
+  id: Id;
+  fileId: string;
+  name: string;
+  category: DocCategory;
+  /** Titre lisible (« Assurance PNO 2026 »). */
+  title?: string;
+  /** Date du document (AAAA-MM-JJ). */
+  date?: string;
+  companyId?: Id | null;
+  buildingId?: Id | null;
+  unitId?: Id | null;
+  tenancyId?: Id | null;
+  loanId?: Id | null;
+  /** Résumé et mots-clés lus dans le document (recherche). */
+  summary?: string;
+  addedAt: string;
+  source: "ia" | "manuel";
 }
 
 export type Collection = Exclude<keyof AppData, "schemaVersion" | "settings">;
@@ -818,6 +866,7 @@ export function emptyData(): AppData {
     tenancies: [],
     inspections: [],
     projects: [],
+    documents: [],
   };
 }
 
@@ -835,4 +884,5 @@ export const COLLECTIONS: Collection[] = [
   "tenancies",
   "inspections",
   "projects",
+  "documents",
 ];

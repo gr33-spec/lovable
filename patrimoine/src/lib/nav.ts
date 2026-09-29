@@ -181,7 +181,7 @@ export function rootSection(pathname: string, search = ""): Section | null {
   if (pathname === "/") return "accueil";
   if (pathname === "/patrimoine") return "patrimoine";
   if (pathname === "/gestion") return "gestion";
-  if (pathname.startsWith("/plus") || pathname.startsWith("/simulations") || pathname.startsWith("/chronologie")) return "plus";
+  if (pathname.startsWith("/plus") || pathname.startsWith("/simulations") || pathname.startsWith("/chronologie") || pathname.startsWith("/documents")) return "plus";
   if (search.includes("depuis=gestion")) return "gestion";
   return null;
 }

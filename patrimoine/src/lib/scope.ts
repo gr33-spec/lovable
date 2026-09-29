@@ -57,6 +57,7 @@ export function scopeForGestion(data: AppData): AppData {
     scenarios: [],
     statements: [],
     projects: [],
+    documents: [],
   };
 }
 

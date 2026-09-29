@@ -1,5 +1,6 @@
 "use client";
 
+import { DocumentsCard } from "@/components/documents/library";
 import { buildingCrumbs, companyCrumbs } from "@/lib/crumbs";
 import { goBack } from "@/lib/nav";
 import { useMemo } from "react";
@@ -80,6 +81,8 @@ export function LoanDetail({ id }: { id: string }) {
         </div>
         <div className="min-w-0 lg:[&>*:first-child]:mt-0">
         <LoanScheduleSection loan={loan} />
+
+        <DocumentsCard scope={{ loanId: loan.id }} href={`/documents?credit=${loan.id}`} title="Autres documents du prêt" onlyLoose />
 
         <SectionTitle>Caractéristiques</SectionTitle>
         <Card>

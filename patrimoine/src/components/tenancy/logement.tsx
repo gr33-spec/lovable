@@ -1,5 +1,6 @@
 "use client";
 
+import { DocumentsCard } from "@/components/documents/library";
 import { useInGestion } from "../use-gestion";
 import { unitCrumbs } from "@/lib/crumbs";
 import Link from "next/link";
@@ -265,6 +266,9 @@ function Detail({ id }: { id: string }) {
         )}
 
         {active && <TenantHistory unit={unit} tenancy={active} />}
+
+        {/* Pièces libres du lot et du locataire (pièces d'identité, justificatifs, assurance habitation…). */}
+        <DocumentsCard scope={{ unitId: unit.id }} href={`/documents?immeuble=${unit.buildingId}&lot=${unit.id}`} title="Autres documents" onlyLoose />
 
         {/* Dossiers clos : informations effacées à la clôture ; seul un départ en cours reste affiché. */}
         {leaving && (
