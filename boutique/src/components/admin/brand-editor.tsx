@@ -71,12 +71,20 @@ export function BrandEditor({ initial }: { initial: Brand }) {
   };
 
   return (
-    <section aria-labelledby="titre-marque" className="space-y-6 pb-40 lg:pb-24">
+    <section id="identite" aria-labelledby="titre-marque" className="mb-12 scroll-mt-6 space-y-6">
       <h2 id="titre-marque" className="font-serif text-2xl">
-        Identité de la marque
+        Logo et identité
       </h2>
       <div className="card grid gap-6 p-5 md:grid-cols-2">
-        <ImagePicker label="Logo" hint="Idéalement carré, sur fond clair." value={b.logo} onChange={(v) => set("logo", v)} round />
+        <div className="rounded-2xl bg-primary-light/60 p-4 md:col-span-2">
+          <ImagePicker
+            label="Votre logo"
+            hint="PNG (idéalement fond transparent) ou JPEG, 500 pixels de large ou plus. Logo rond ou carré : affiché à côté du nom. Logo horizontal : affiché seul, en grand. Il apparaît dans l'en-tête, le pied de page, les e-mails et l'onglet du navigateur."
+            value={b.logo}
+            onChange={(v) => set("logo", v)}
+            round={!b.logo || b.logo.w / b.logo.h < 1.6}
+          />
+        </div>
         <ImagePicker label="Icône de l'onglet (favicon)" hint="Facultatif : le logo est utilisé sinon." value={b.favicon} onChange={(v) => set("favicon", v)} round />
         <ImagePicker label="Visuel d'accueil" hint="Grande photo en haut de l'accueil (portrait conseillé). Sinon : la dernière création." value={b.hero} onChange={(v) => set("hero", v)} />
         <ImagePicker label="Photo de l'atelier" hint="Pour la page « L'atelier » (vous, vos mains, votre table de travail…)." value={b.aboutImage} onChange={(v) => set("aboutImage", v)} />
@@ -89,6 +97,7 @@ export function BrandEditor({ initial }: { initial: Brand }) {
         <label className="block">
           <span className="field-label">Phrase d&apos;accroche (titre de l&apos;accueil)</span>
           <input className="input" value={b.tagline} maxLength={160} onChange={(e) => set("tagline", e.target.value)} />
+          <span className="field-hint">Entourez un mot d&apos;étoiles pour le faire scintiller : Bijoux en résine *pailletée*, faits main</span>
         </label>
         <label className="block">
           <span className="field-label">Courte introduction</span>

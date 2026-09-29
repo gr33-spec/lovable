@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getSettings } from "@/lib/server/cached";
 import { getTheme } from "@/lib/themes";
+import { plainText } from "@/components/ui/sparkle";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +13,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
   return {
     name: s.shopName,
     short_name: s.shopName.length > 14 ? "La Bohème" : s.shopName,
-    description: s.tagline,
+    description: plainText(s.tagline),
     start_url: "/",
     display: "standalone",
     background_color: t.background,

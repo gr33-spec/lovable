@@ -9,8 +9,7 @@ export default async function AppearancePage() {
   const s = await loadSettings();
   return (
     <>
-      <PageTitle title="Apparence" subtitle="Couleurs du site, logo, textes et réseaux sociaux. Chaque changement s'applique partout, immédiatement." />
-      <ThemePicker current={s.themeId} />
+      <PageTitle title="Apparence" subtitle="Logo, textes, réseaux sociaux et couleurs du site. Chaque changement s'applique partout, immédiatement." />
       <BrandEditor
         initial={{
           shopName: s.shopName,
@@ -25,6 +24,9 @@ export default async function AppearancePage() {
           socials: s.socials,
         }}
       />
+      <ThemePicker current={s.themeId} />
+      {/* Espace pour la barre d'enregistrement fixe. */}
+      <div className="h-28" aria-hidden="true" />
     </>
   );
 }

@@ -33,7 +33,8 @@ export default async function Dashboard() {
     { done: Number(shipping[0].n) > 0, label: "Activer au moins un mode de livraison", href: "/admin/livraison" },
     { done: missing.length === 0, label: `Compléter les informations légales${missing.length ? ` (${missing.length} manquantes)` : ""}`, href: "/admin/parametres" },
     { done: pagesToComplete === 0, label: `Compléter les pages légales (CGV, confidentialité…)${pagesToComplete ? ` — ${pagesToComplete} à finir` : ""}`, href: "/admin/parametres#pages" },
-    { done: !hasPlaceholders(settings.aboutText), label: "Écrire votre présentation (page « L'atelier »)", href: "/admin/apparence" },
+    { done: Boolean(settings.logo), label: "Ajouter votre logo", href: "/admin/apparence#identite" },
+    { done: !hasPlaceholders(settings.aboutText), label: "Écrire votre présentation (page « L'atelier »)", href: "/admin/apparence#identite" },
     { done: payment.ok && payment.provider === "stripe", label: "Connecter le compte Stripe", href: "/admin/parametres#paiement" },
   ];
   const setupLeft = setup.filter((s) => !s.done);
