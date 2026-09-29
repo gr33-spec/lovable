@@ -153,7 +153,7 @@ export default function SauvegardesPage() {
             <Divided>
               {snapshots.map((s) => (
                 <div key={s.id} className="flex items-center gap-3 py-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-soft text-navy">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-soft text-brand">
                     <History size={18} />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -164,7 +164,7 @@ export default function SauvegardesPage() {
                       {REASONS[s.reason] ?? s.reason} · {s.counts.companies} sociétés, {s.counts.buildings} immeubles, {s.counts.loans} crédits
                     </div>
                   </div>
-                  <button onClick={() => setConfirm(s)} className="flex items-center gap-1 rounded-full bg-soft px-3 py-2 text-sm font-semibold text-navy">
+                  <button onClick={() => setConfirm(s)} className="flex items-center gap-1 rounded-full bg-soft px-3 py-2 text-sm font-semibold text-brand">
                     <RotateCcw size={14} /> Restaurer
                   </button>
                 </div>

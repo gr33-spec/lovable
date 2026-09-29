@@ -778,6 +778,8 @@ export interface Settings {
   household?: Household;
   /** Dernières analyses IA du patrimoine (5 au plus), jamais visibles de l'espace gestion. */
   analyses?: SavedAnalysis[];
+  /** Couleur principale de l'application (voir lib/theme.ts), teal par défaut. */
+  theme?: string;
 }
 
 export interface AppData {

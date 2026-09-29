@@ -3,22 +3,31 @@
 /* Charte : sobre, inspirée des banques privées. Bleu nuit pour le texte,
    bleu pour les données, or discret pour les accents, vert/rouge réservés
    aux variations positives/négatives. */
+/* Couleurs neutres fixes. La couleur principale et ses variantes (--brand,
+   --deep, --bg…) viennent du thème choisi (src/lib/theme.ts) et sont
+   injectées sur :root par le layout ; les valeurs ci-dessous ne servent que
+   de repli. */
 :root {
-  --bg: #f2f4f8;
+  --bg: #f4f6f6;
   --card: #ffffff;
   --ink: #0f1b2d;
   --ink-2: #4b5567;
   --muted: #8a93a3;
   --line: #e6e8ec;
-  --navy: #0b2545;
-  --navy-2: #13315c;
+  --brand: #147979;
+  --brand-hover: #0f6363;
+  --brand-soft: #e2f5f4;
+  --brand-muted: #b0dbda;
+  --brand-glow: #3ab9b9;
+  --on-brand: #ffffff;
+  --deep: #002d2d;
+  --deep-2: #053e3e;
+  --deep-3: #005353;
   --gold: #b08d57;
-  --series-1: #2a78d6;
   --series-2: #eb6834;
   --pos: #0f8a5f;
   --neg: #d23f3f;
   --warn: #b7791f;
-  --soft: #eef2f8;
 }
 
 @theme inline {
@@ -28,15 +37,24 @@
   --color-ink-2: var(--ink-2);
   --color-muted: var(--muted);
   --color-line: var(--line);
-  --color-navy: var(--navy);
-  --color-navy-2: var(--navy-2);
+  /* Thème : couleur principale et variantes. */
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-muted: var(--brand-muted);
+  --color-on-brand: var(--on-brand);
+  --color-deep: var(--deep);
+  /* Noms historiques, alignés sur le thème : navy = teinte foncée (titres),
+     series-1 = couleur principale (liens, graphiques), soft = fond clair. */
+  --color-navy: var(--deep);
+  --color-navy-2: var(--deep-2);
+  --color-series-1: var(--brand);
   --color-gold: var(--gold);
-  --color-series-1: var(--series-1);
   --color-series-2: var(--series-2);
   --color-pos: var(--pos);
   --color-neg: var(--neg);
   --color-warn: var(--warn);
-  --color-soft: var(--soft);
+  --color-soft: var(--brand-soft);
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
@@ -47,7 +65,7 @@ html {
 
 body {
   background:
-    radial-gradient(1200px 520px at 85% -120px, rgba(42, 120, 214, 0.10), transparent 60%),
+    radial-gradient(1200px 520px at 85% -120px, color-mix(in srgb, var(--brand) 9%, transparent), transparent 60%),
     radial-gradient(900px 480px at -10% -80px, rgba(176, 141, 87, 0.10), transparent 60%),
     var(--bg);
   background-attachment: fixed;
@@ -114,8 +132,8 @@ textarea {
 .hero-card {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(145deg, #0b2545 0%, #102f57 55%, #173d6e 100%);
-  box-shadow: 0 20px 40px -12px rgba(11, 37, 69, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background: linear-gradient(145deg, var(--deep) 0%, var(--deep-2) 55%, var(--deep-3) 100%);
+  box-shadow: 0 20px 40px -12px color-mix(in srgb, var(--deep) 45%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 .hero-card::before,
 .hero-card::after {
@@ -130,14 +148,14 @@ textarea {
   height: 220px;
   right: -60px;
   top: -80px;
-  background: rgba(96, 165, 250, 0.28);
+  background: color-mix(in srgb, var(--brand-glow) 30%, transparent);
 }
 .hero-card::after {
   width: 260px;
   height: 260px;
   left: -90px;
   bottom: -140px;
-  background: rgba(42, 120, 214, 0.35);
+  background: color-mix(in srgb, var(--brand) 38%, transparent);
 }
 .hero-card > * {
   position: relative;

@@ -85,7 +85,7 @@ export default function AccesGestionPage() {
         {/* Seul endroit pour voir l'application comme Enora : pas de second mode caché ailleurs. */}
         <Card className="mt-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-soft text-navy">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-soft text-brand">
               <Eye size={22} />
             </span>
             <div className="flex-1">

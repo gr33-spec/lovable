@@ -38,7 +38,7 @@ export function PageHeader({
           <button
             // Écran précédent réel ; `back` ne sert que si l'on est arrivé directement ici.
             onClick={() => goBack(router, typeof back === "string" ? back : "/")}
-            className="-ml-2 flex h-10 w-10 items-center justify-center rounded-full text-navy active:bg-black/5"
+            className="-ml-2 flex h-10 w-10 items-center justify-center rounded-full text-brand active:bg-black/5"
             aria-label="Retour"
           >
             <ArrowLeft size={22} />
@@ -51,7 +51,7 @@ export function PageHeader({
                 <span key={`${c.label}-${i}`} className={cx("flex min-w-0 items-center gap-1", i < crumbs.length - 1 ? "shrink-[2]" : "shrink")}>
                   {i > 0 && <ChevronRight size={12} className="shrink-0 text-muted/60" />}
                   {c.href ? (
-                    <Link href={c.href} className="truncate hover:text-navy hover:underline">
+                    <Link href={c.href} className="truncate hover:text-brand hover:underline">
                       {c.label}
                     </Link>
                   ) : (
@@ -183,7 +183,7 @@ export function Row({
   const content = (
     <>
       {icon && (
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-soft text-navy">{icon}</div>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-soft text-brand">{icon}</div>
       )}
       <div className="min-w-0 flex-1">
         <div className="truncate text-[16px] font-medium text-ink">{title}</div>
@@ -230,7 +230,7 @@ export function Divided({ children }: { children: ReactNode }) {
 export function Empty({ icon, title, text, action }: { icon?: ReactNode; title: string; text?: string; action?: ReactNode }) {
   return (
     <div className="flex flex-col items-center px-6 py-10 text-center">
-      {icon && <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-soft text-navy">{icon}</div>}
+      {icon && <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-soft text-brand">{icon}</div>}
       <div className="text-[17px] font-semibold text-ink">{title}</div>
       {text && <div className="mt-1 max-w-xs text-sm text-muted">{text}</div>}
       {action && <div className="mt-5">{action}</div>}
@@ -273,10 +273,10 @@ export function Button({
 }) {
   const cls = cx(
     "inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl px-5 text-[16px] font-semibold transition active:scale-[0.98] disabled:opacity-40",
-    variant === "primary" && "bg-navy text-white shadow-sm",
-    variant === "secondary" && "bg-soft text-navy",
+    variant === "primary" && "bg-brand text-on-brand shadow-sm hover:bg-brand-hover active:bg-brand-hover",
+    variant === "secondary" && "bg-soft text-brand hover:bg-brand/10",
     variant === "danger" && "bg-neg/10 text-neg",
-    variant === "ghost" && "text-navy",
+    variant === "ghost" && "text-brand",
     full && "w-full",
   );
   if (href?.startsWith("/api/")) {
@@ -309,7 +309,7 @@ export function RoundButton({ onClick, children, label }: { onClick: () => void;
     <button
       onClick={onClick}
       aria-label={label}
-      className="flex h-11 w-11 items-center justify-center rounded-full bg-navy text-white shadow-md active:scale-95"
+      className="flex h-11 w-11 items-center justify-center rounded-full bg-brand text-on-brand shadow-md hover:bg-brand-hover active:scale-95"
     >
       {children}
     </button>
@@ -641,7 +641,7 @@ export function Segmented<T extends string>({
           onClick={() => onChange(o.value)}
           className={cx(
             "flex-1 rounded-xl px-3 py-2 text-sm font-medium transition",
-            value === o.value ? "bg-card text-navy shadow-sm" : "text-ink-2",
+            value === o.value ? "bg-card font-semibold text-brand shadow-sm" : "text-ink-2",
           )}
         >
           {o.label}

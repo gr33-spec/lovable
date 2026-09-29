@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { DEFAULT_THEME, themeCss } from "@/lib/theme";
 
 export const metadata: Metadata = {
   title: "Patrimoine",
@@ -19,6 +20,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="fr">
+      <head>
+        <style id="theme-default" dangerouslySetInnerHTML={{ __html: themeCss(DEFAULT_THEME) }} />
+      </head>
       <body className="min-h-dvh antialiased">{children}</body>
     </html>
   );

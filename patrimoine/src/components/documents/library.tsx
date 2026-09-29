@@ -83,7 +83,7 @@ export function DocumentsLibrary() {
                     setShortcut(s.id);
                     setCategory(undefined);
                   }}
-                  className={cx("shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold", shortcut === s.id && !category ? "bg-navy text-white" : "bg-soft text-ink-2")}
+                  className={cx("shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold", shortcut === s.id && !category ? "bg-brand text-on-brand" : "bg-soft text-ink-2")}
                 >
                   {s.label}
                 </button>
@@ -152,7 +152,7 @@ export function DocRow({ entry: e, onEdit, hidePlace }: { entry: DocEntry; onEdi
     <SwipeRow actions={actions}>
       <div className="flex items-center gap-3 py-3">
         <button type="button" onClick={() => openDocument(`/api/files/${e.fileId}`, e.name)} className="flex min-w-0 flex-1 items-center gap-3 text-left active:opacity-60">
-          <span className={cx("flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl", ICON_TONE[e.category] ?? "bg-soft text-navy")}>
+          <span className={cx("flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl", ICON_TONE[e.category] ?? "bg-soft text-brand")}>
             <FileText size={18} />
           </span>
           <span className="min-w-0 flex-1">

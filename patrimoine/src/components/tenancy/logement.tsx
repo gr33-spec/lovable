@@ -102,7 +102,7 @@ function Detail({ id }: { id: string }) {
         crumbs={unitCrumbs(data, unit, inGestion)}
         back={inGestion || fromGestion ? "/gestion?vue=locataires" : building ? `/patrimoine/immeuble/${building.id}` : "/patrimoine"}
         action={
-          <button onClick={() => setSheet("edit")} className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-navy">
+          <button onClick={() => setSheet("edit")} className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-brand">
             <Pencil size={15} /> Modifier
           </button>
         }
@@ -199,7 +199,7 @@ function Detail({ id }: { id: string }) {
                       status="Signé hors application"
                       subtitle="Complétez le dossier pour les quittances et le départ"
                       action={
-                        <button onClick={() => setSheet("import")} className="rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-navy">
+                        <button onClick={() => setSheet("import")} className="rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-brand">
                           Compléter
                         </button>
                       }
@@ -213,7 +213,7 @@ function Detail({ id }: { id: string }) {
                       url={documentUrl({ type: "bail", tenancy: active.id })}
                       fileName={`bail-${unit.name}.pdf`}
                       action={
-                        <button onClick={() => setSheet("sign")} className="rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-navy">
+                        <button onClick={() => setSheet("sign")} className="rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-brand">
                           Signer
                         </button>
                       }
@@ -354,7 +354,7 @@ function InspectionRow({ tenancyId, kind, onStart, unitId }: { tenancyId: string
         status="À réaliser"
         tone="warn"
         action={
-          <button onClick={onStart} className="flex items-center gap-1 rounded-full bg-navy px-3 py-1.5 text-[13px] font-semibold text-white">
+          <button onClick={onStart} className="flex items-center gap-1 rounded-full bg-brand px-3 py-1.5 text-[13px] font-semibold text-on-brand">
             <ClipboardCheck size={14} /> Commencer
           </button>
         }
@@ -370,7 +370,7 @@ function InspectionRow({ tenancyId, kind, onStart, unitId }: { tenancyId: string
       url={documentUrl({ type: "edl", tenancy: tenancyId, inspection: insp.id })}
       fileName={`etat-des-lieux-${kind}.pdf`}
       action={
-        <Link href={`/patrimoine/logement/${unitId}/edl/${insp.id}`} className="rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-navy">
+        <Link href={`/patrimoine/logement/${unitId}/edl/${insp.id}`} className="rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-brand">
           Ouvrir
         </Link>
       }

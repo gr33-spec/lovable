@@ -77,7 +77,7 @@ export function ScenarioDetail({ id }: { id: string }) {
           {scenario.actions.map((a) => (
             <Card key={a.id}>
               <div className="mb-4 flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-soft text-navy">{ACTION_ICONS[a.type]}</span>
+                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-soft text-brand">{ACTION_ICONS[a.type]}</span>
                 <div className="flex-1 text-[16px] font-semibold text-navy">{ACTION_LABELS[a.type]}</div>
                 <button onClick={() => save({ actions: scenario.actions.filter((x) => x.id !== a.id) })} aria-label="Retirer l'opération" className="rounded-full p-2 text-muted active:bg-black/5">
                   <Trash2 size={18} />
@@ -155,7 +155,7 @@ export function ScenarioDetail({ id }: { id: string }) {
                   years={cmp.base.years.map((r) => r.year)}
                   area={false}
                   series={[
-                    { label: "Sans le scénario", values: cmp.base.years.map((r) => value(r)), color: "var(--series-1)" },
+                    { label: "Sans le scénario", values: cmp.base.years.map((r) => value(r)), color: "var(--brand)" },
                     { label: "Avec le scénario", values: cmp.sim.years.map((r) => value(r)), color: "var(--series-2)", dashed: true },
                   ]}
                 />
@@ -202,7 +202,7 @@ export function ScenarioDetail({ id }: { id: string }) {
               }}
               className="flex w-full items-center gap-4 rounded-2xl bg-card px-4 py-4 text-left shadow-sm"
             >
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-soft text-navy">{ACTION_ICONS[t]}</span>
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-soft text-brand">{ACTION_ICONS[t]}</span>
               <span className="text-[16px] font-semibold text-ink">{ACTION_LABELS[t]}</span>
             </button>
           ))}

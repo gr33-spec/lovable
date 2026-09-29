@@ -40,7 +40,7 @@ export default function HistoriquePage() {
             <SectionTitle>Valeur des biens, année par année</SectionTitle>
             <Card>
               {complete.length >= 2 ? (
-                <LineChart years={complete.map((r) => r.year)} series={[{ label: "Valeur des biens", values: complete.map((r) => r.value), color: "var(--series-1)" }]} />
+                <LineChart years={complete.map((r) => r.year)} series={[{ label: "Valeur des biens", values: complete.map((r) => r.value), color: "var(--brand)" }]} />
               ) : (
                 <div className="py-6 text-center text-sm text-muted">
                   Données insuffisantes : renseignez les dates et prix d&apos;acquisition (et les valeurs passées connues) de chaque immeuble.

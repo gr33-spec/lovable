@@ -95,7 +95,7 @@ export default function SimulationsPage() {
         <div className="space-y-2 pb-2">
           {SIMULATION_TYPES.map((t) => (
             <button key={t} onClick={() => create(t)} className="flex w-full items-center gap-4 rounded-2xl bg-card px-4 py-4 text-left shadow-sm active:scale-[0.99]">
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-soft text-navy">{ACTION_ICONS[t]}</span>
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-soft text-brand">{ACTION_ICONS[t]}</span>
               <span className="text-[16px] font-semibold text-ink">{ACTION_LABELS[t]}</span>
             </button>
           ))}

@@ -353,7 +353,7 @@ function IdeaCard({ idea, rank }: { idea: AnalysisIdea; rank: number }) {
           </div>
           {idea.aValider && <p className="mt-2 text-[12.5px] text-muted">À valider : {idea.aValider}</p>}
           {simulable && role !== "lecture" && (
-            <button type="button" onClick={test} className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-soft px-3.5 py-2 text-[13.5px] font-semibold text-navy active:bg-black/10">
+            <button type="button" onClick={test} className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-soft px-3.5 py-2 text-[13.5px] font-semibold text-brand active:bg-black/10">
               <FlaskConical size={15} /> Tester dans une simulation
             </button>
           )}

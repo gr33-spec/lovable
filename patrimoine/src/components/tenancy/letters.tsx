@@ -51,7 +51,7 @@ export function LetterRows({ tenancy, onSave, readOnly }: { tenancy?: Tenancy; o
               <div className="text-[15px] font-medium leading-snug text-ink">{l.label}</div>
               <div className="text-[13px] text-muted">du {dateFr(l.date)}</div>
             </div>
-            <button type="button" onClick={() => openDocument(`/api/files/${l.file.fileId}`, l.file.name)} className="shrink-0 rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-navy">
+            <button type="button" onClick={() => openDocument(`/api/files/${l.file.fileId}`, l.file.name)} className="shrink-0 rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-brand">
               Voir
             </button>
           </div>

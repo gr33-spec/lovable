@@ -80,12 +80,12 @@ export function SignedDocRow({
           ) : (
             <>
               {file && (
-                <button type="button" onClick={() => openDocument(`/api/files/${file.fileId}`, file.name)} className="rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-navy">
+                <button type="button" onClick={() => openDocument(`/api/files/${file.fileId}`, file.name)} className="rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-brand">
                   Voir
                 </button>
               )}
               {!readOnly && (
-                <button type="button" onClick={() => input.current?.click()} className={cx("rounded-full px-3 py-1.5 text-[13px] font-semibold", file ? "bg-soft text-navy" : "bg-navy text-white")}>
+                <button type="button" onClick={() => input.current?.click()} className={cx("rounded-full px-3 py-1.5 text-[13px] font-semibold", file ? "bg-soft text-brand" : "bg-brand text-on-brand")}>
                   {file ? "Remplacer" : "Joindre"}
                 </button>
               )}

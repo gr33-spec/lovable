@@ -331,7 +331,7 @@ function AddLine({ placeholder, onAdd, suggestions = [] }: { placeholder: string
             }
           }}
         />
-        <button type="button" disabled={!v.trim()} onClick={() => { onAdd(v.trim()); setV(""); }} className="rounded-xl bg-navy px-3 text-white disabled:opacity-30" aria-label="Ajouter">
+        <button type="button" disabled={!v.trim()} onClick={() => { onAdd(v.trim()); setV(""); }} className="rounded-xl bg-brand px-3 text-on-brand disabled:opacity-30" aria-label="Ajouter">
           <Plus size={16} />
         </button>
       </div>

@@ -163,7 +163,7 @@ function Wizard({ unitId }: { unitId: string }) {
               onClick={() => goTo(i)}
               className={cx(
                 "flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-[12px] font-semibold",
-                i === idx ? "bg-navy text-white" : isComplete(s) ? "bg-pos/10 text-pos" : "bg-soft text-ink-2",
+                i === idx ? "bg-brand text-on-brand" : isComplete(s) ? "bg-pos/10 text-pos" : "bg-soft text-ink-2",
               )}
             >
               {isComplete(s) && i !== idx && <Check size={12} />}
@@ -839,7 +839,7 @@ function ClausesStep({ tenancy, ensure, unit, building }: { tenancy?: Tenancy; e
 function Toggle({ label, hint, value, onChange }: { label: string; hint?: string; value: boolean; onChange: (v: boolean) => void }) {
   return (
     <button type="button" onClick={() => onChange(!value)} className="flex w-full items-center gap-3 text-left">
-      <span className={cx("flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border", value ? "border-navy bg-navy text-white" : "border-line bg-card")}>{value && <Check size={14} />}</span>
+      <span className={cx("flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border", value ? "border-brand bg-brand text-on-brand" : "border-line bg-card")}>{value && <Check size={14} />}</span>
       <span className="flex-1 text-[14px] text-ink">
         {label}
         {hint && <span className="ml-1.5 rounded-full bg-warn/10 px-1.5 py-0.5 text-[10px] font-bold uppercase text-warn">{hint}</span>}
@@ -922,7 +922,7 @@ function DocumentsStep({ unit, tenancy: t, outgoing, onActivated, onEditInfo }: 
             url={entry ? documentUrl({ type: "edl", tenancy: t.id, inspection: entry.id }) : undefined}
             fileName="etat-des-lieux-entree.pdf"
             action={
-              <button onClick={startEntry} className="rounded-full bg-navy px-3 py-1.5 text-[13px] font-semibold text-white">
+              <button onClick={startEntry} className="rounded-full bg-brand px-3 py-1.5 text-[13px] font-semibold text-on-brand">
                 {entry ? "Ouvrir" : "Préparer"}
               </button>
             }

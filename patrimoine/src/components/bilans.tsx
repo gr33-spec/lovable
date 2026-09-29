@@ -302,7 +302,7 @@ export function BilanImport({
       <FiguresForm figures={figures} onChange={setFigures} />
       {extraction && countFigures(prevFigures) > 0 && (
         <label className="flex items-center gap-3 rounded-2xl bg-card px-4 py-3 shadow-sm">
-          <input type="checkbox" className="h-5 w-5 accent-[#0b2545]" checked={savePrev} onChange={(e) => setSavePrev(e.target.checked)} />
+          <input type="checkbox" className="h-5 w-5 accent-brand" checked={savePrev} onChange={(e) => setSavePrev(e.target.checked)} />
           <span className="text-[15px]">
             Enregistrer aussi l&apos;exercice {year ? year - 1 : "précédent"} ({countFigures(prevFigures)} montants trouvés)
           </span>
@@ -313,13 +313,13 @@ export function BilanImport({
           <div className="text-[13px] font-semibold text-navy">Mettre à jour la fiche {company.name}</div>
           {figures.cash !== undefined && (
             <label className="flex items-center gap-3 text-[14px]">
-              <input type="checkbox" className="h-5 w-5 accent-[#0b2545]" checked={applyCash} onChange={(e) => setApplyCash(e.target.checked)} />
+              <input type="checkbox" className="h-5 w-5 accent-brand" checked={applyCash} onChange={(e) => setApplyCash(e.target.checked)} />
               Trésorerie : {eur(company.cash)} → <b>{eur(figures.cash)}</b>
             </label>
           )}
           {figures.partnerAccounts !== undefined && (
             <label className="flex items-center gap-3 text-[14px]">
-              <input type="checkbox" className="h-5 w-5 accent-[#0b2545]" checked={applyCca} onChange={(e) => setApplyCca(e.target.checked)} />
+              <input type="checkbox" className="h-5 w-5 accent-brand" checked={applyCca} onChange={(e) => setApplyCca(e.target.checked)} />
               Comptes courants : {eur(company.partnerAccounts)} → <b>{eur(figures.partnerAccounts)}</b>
             </label>
           )}

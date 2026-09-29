@@ -107,7 +107,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   href={t.href}
                   className={cx(
                     "relative flex flex-1 flex-col items-center gap-0.5 rounded-[22px] py-1.5 text-[10.5px] font-semibold transition-colors lg:flex-none lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-4 lg:py-3 lg:text-[15px]",
-                    active ? "bg-navy text-white shadow-sm" : "text-muted active:bg-black/5",
+                    active ? "bg-brand text-on-brand shadow-sm" : "text-muted active:bg-black/5",
                   )}
                 >
                   <Icon size={22} strokeWidth={active ? 2.2 : 1.8} />
@@ -154,7 +154,7 @@ function GestionNav({ unpaid }: { unpaid: number }) {
             <Link
               key={t.vue}
               href={`/gestion?vue=${t.vue}`}
-              className={cx("relative flex flex-1 flex-col items-center gap-0.5 rounded-[22px] py-1.5 text-[10.5px] font-semibold transition-colors lg:flex-none lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-4 lg:py-3 lg:text-[15px]", active ? "bg-navy text-white shadow-sm" : "text-muted active:bg-black/5")}
+              className={cx("relative flex flex-1 flex-col items-center gap-0.5 rounded-[22px] py-1.5 text-[10.5px] font-semibold transition-colors lg:flex-none lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-4 lg:py-3 lg:text-[15px]", active ? "bg-brand text-on-brand shadow-sm" : "text-muted active:bg-black/5")}
             >
               <Icon size={22} strokeWidth={active ? 2.2 : 1.8} />
               {t.label}

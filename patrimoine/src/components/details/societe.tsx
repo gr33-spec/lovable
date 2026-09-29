@@ -70,7 +70,7 @@ export function CompanyDetail({ id }: { id: string }) {
         subtitle={labelOf(COMPANY_KINDS, company.kind)}
         back="/patrimoine"
         action={
-          <button onClick={() => setSheet("edit")} className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-navy">
+          <button onClick={() => setSheet("edit")} className="flex h-10 items-center gap-1.5 rounded-full bg-soft px-4 text-sm font-semibold text-brand">
             <Pencil size={15} /> Modifier
           </button>
         }
@@ -101,7 +101,7 @@ export function CompanyDetail({ id }: { id: string }) {
             <Card>
               <LineChart
                 years={rows.map((r) => r.year)}
-                series={[{ label: "Capital restant dû", values: rows.map((r) => r.debt), color: "var(--series-1)" }]}
+                series={[{ label: "Capital restant dû", values: rows.map((r) => r.debt), color: "var(--brand)" }]}
                 height={160}
               />
             </Card>

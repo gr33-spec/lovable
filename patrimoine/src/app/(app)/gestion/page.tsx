@@ -56,12 +56,12 @@ function Gestion() {
         subtitle={gestion ? data.settings.groupName || "Gestion locative" : "À faire, loyers et locataires"}
         action={
           role === "gestion" ? (
-            <Link href="/plus/securite" aria-label="Mon compte" className="flex h-10 w-10 items-center justify-center rounded-full bg-soft text-navy">
+            <Link href="/plus/securite" aria-label="Mon compte" className="flex h-10 w-10 items-center justify-center rounded-full bg-soft text-brand">
               <UserRound size={19} />
             </Link>
           ) : gestion ? (
             // Propriétaire qui regarde l'espace d'Enora : une seule sortie, explicite.
-            <button onClick={() => switchView("patrimoine")} className="flex h-10 items-center gap-1.5 rounded-full bg-navy px-3.5 text-[13px] font-semibold text-white">
+            <button onClick={() => switchView("patrimoine")} className="flex h-10 items-center gap-1.5 rounded-full bg-brand px-3.5 text-[13px] font-semibold text-on-brand">
               <ArrowLeftRight size={15} /> Quitter l&apos;aperçu
             </button>
           ) : undefined

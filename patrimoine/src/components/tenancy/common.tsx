@@ -226,14 +226,14 @@ export function DocRow({
       {action}
       {url && (
         <>
-          <button type="button" onClick={() => openDocument(url, fileName)} className="rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-navy">
+          <button type="button" onClick={() => openDocument(url, fileName)} className="rounded-full bg-soft px-3 py-1.5 text-[13px] font-semibold text-brand">
             PDF
           </button>
           <button
             type="button"
             aria-label="Envoyer"
             onClick={async () => setError(await sharePdf(url, fileName ?? "document.pdf"))}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-soft text-navy"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-soft text-brand"
           >
             <Share size={15} />
           </button>
@@ -246,7 +246,7 @@ export function DocRow({
   return (
     <div className="py-3">
       <div className="flex items-center gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-soft text-navy">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-soft text-brand">
           <FileText size={18} />
         </span>
         <div className="min-w-0 flex-1">
