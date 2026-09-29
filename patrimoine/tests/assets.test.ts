@@ -31,7 +31,7 @@ test("contrôle : restant dû supérieur au montant emprunté signalé comme cri
   data.buildings.push(b("b1", "Immeuble", { kind: "immeuble", usage: "location" }));
   data.loans.push({ id: "l1", name: "Prêt 2", buildingId: "b1", initialAmount: 61000, remaining: 230000, monthlyPayment: 1535, ratePct: 1.8, endDate: "2045-01-01" });
   const issues = qualityIssues(data, computeSnapshot(data, currentMonth()));
-  const i = issues.find((x) => x.id === "li-l1");
+  const i = issues.find((x) => x.id.startsWith("li-l1") && x.detail.includes("supérieur au montant emprunté"));
   assert.ok(i, "incohérence détectée");
   assert.equal(i!.severity, "critical");
 });

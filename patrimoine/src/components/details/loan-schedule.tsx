@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { CircleAlert, FileCheck2, FileUp, LoaderCircle, Table2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { AppDocument, Loan, LoanSchedule, LoanScheduleRow, ScheduleMeta } from "@/lib/types";
-import { checkSchedule, loanFieldsFromSchedule, parseScheduleJson } from "@/lib/schedule";
+import { checkSchedule, loanFieldsFromSchedule, parseScheduleJson, scheduleStart } from "@/lib/schedule";
 import { monthIndex, monthLabel, parseMonth } from "@/lib/engine/dates";
 import { dateFr, eur } from "@/lib/format";
 import { openDocument } from "@/components/pdf-viewer";
@@ -234,6 +234,7 @@ function ReviewSheet({ loan, review, onCancel, onSave }: { loan: Partial<Loan>; 
   const { rows, notes, bank, meta } = review.extraction;
   const c = checkSchedule(rows);
   const f = loanFieldsFromSchedule(rows, undefined, meta);
+  const start = scheduleStart(rows, meta);
   const line = (label: string, before: string, after: string) => (
     <div className="flex items-center justify-between gap-3 py-2 text-[14px]">
       <span className="text-ink-2">{label}</span>
@@ -270,6 +271,13 @@ function ReviewSheet({ loan, review, onCancel, onSave }: { loan: Partial<Loan>; 
           </div>
         ) : (
           <div className="rounded-2xl bg-pos/10 px-4 py-3 text-[13.5px] font-semibold text-pos">Tableau cohérent : le capital restant dû suit chaque échéance.</div>
+        )}
+        {start !== "first" && (
+          <div className="rounded-2xl bg-warn/10 px-4 py-3 text-[13.5px] text-warn">
+            {start === "partial"
+              ? `Tableau édité en cours de prêt (première ligne : ${monthName(c.firstMonth)}) : montant emprunté et déblocage repris de l'en-tête du document.`
+              : `Le tableau commence en ${monthName(c.firstMonth)} avec un capital non rond : il a sans doute été édité en cours de prêt. Le montant emprunté et la date de déblocage ne sont pas déduits du tableau ; saisissez-les depuis l'offre de prêt (fiche du crédit, « Détails du prêt »).`}
+          </div>
         )}
         <div className="divide-y divide-line rounded-2xl bg-card px-4">
           {line("Échéances lues", "—", `${c.count} (${monthName(c.firstMonth)} → ${monthName(c.lastMonth)})`)}

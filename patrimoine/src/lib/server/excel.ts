@@ -1,3 +1,4 @@
+import { reliableInitial, reliableStart } from "../schedule";
 import "server-only";
 import ExcelJS from "exceljs";
 import type { AppData } from "../types";
@@ -238,9 +239,9 @@ export async function buildWorkbook(data: AppData): Promise<Buffer> {
         building: b?.name,
         company: companyName(b?.companyId ?? l.companyId),
         kind: l.kind === "in_fine" ? "In fine" : "Amortissable",
-        initial: l.initialAmount,
+        initial: reliableInitial(l).value,
         rate: l.ratePct ?? r?.impliedRatePct,
-        start: l.startDate,
+        start: reliableStart(l),
         end: r?.endMonth !== undefined ? monthLabel(r.endMonth) : l.endDate,
         balance: snap.byLoan.get(l.id)?.balance,
         payment: r?.payment,

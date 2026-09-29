@@ -6,6 +6,8 @@ import { halfDebtYear, type Projection } from "../engine/projection";
 import { portfolioIndicators } from "../engine/indicators";
 import { eur, eurCompact, pct, pdfSafe } from "../format";
 import { assetMix, isPrivateUse, kindLabel, usageLabel } from "../assets";
+import { reliableInitial } from "../schedule";
+import { auditLoans, suspectAcquisition } from "../engine/loan-audit";
 
 // Chiffres du dossier banque, calculés une seule fois et testés : chaque page
 // du PDF lit ce modèle, ce qui garantit des totaux identiques d'une page à l'autre.
@@ -82,7 +84,8 @@ export function groupModel(data: AppData, p: Projection, name: string): GroupMod
       allVacant: bf.units > 0 && bf.vacantUnits >= bf.units,
       company: companyName(b.companyId),
       lots: bf.units,
-      acquisition: [b.acquisitionDate ? b.acquisitionDate.slice(0, 4) : undefined, b.acquisitionPrice ? K(b.acquisitionPrice) : undefined].filter(Boolean).join(" · "),
+      // Date recopiée d'un tableau commencé en cours de prêt : non fiable, donc non affichée.
+      acquisition: [b.acquisitionDate && !suspectAcquisition(data, b) ? b.acquisitionDate.slice(0, 4) : undefined, b.acquisitionPrice ? K(b.acquisitionPrice) : undefined].filter(Boolean).join(" · "),
       value: bf.unvalued ? undefined : bf.value,
       rentAnnual: bf.rentMonthly * 12,
       debt: bf.debt,
@@ -90,6 +93,7 @@ export function groupModel(data: AppData, p: Projection, name: string): GroupMod
   });
 
   const byCompany = new Map<string, GroupModel["loansByCompany"][number]>();
+  const audit = auditLoans(data, snap);
   let estimatedLoans = 0;
   let missingPaymentLoans = 0;
   let incoherentLoans = 0;
@@ -113,9 +117,12 @@ export function groupModel(data: AppData, p: Projection, name: string): GroupMod
     const missingPayment = !upcoming && !r.finished && (r.payment === undefined || !(now?.paymentMonthly));
     const rateEstimated = l.ratePct === undefined && r.impliedRatePct !== undefined;
     const endEstimated = r.quality === "estimated" && !l.endDate && !l.schedule;
-    const balanceNow = upcoming ? (r.balance ?? l.initialAmount) : now?.balance;
-    const incoherent = l.initialAmount !== undefined && balanceNow !== undefined && balanceNow > l.initialAmount * 1.01 + 1;
-    if (incoherent) notes.push(`Incohérence à vérifier : restant dû supérieur au montant emprunté.`);
+    const initial = reliableInitial(l).value;
+    const balanceNow = upcoming ? (r.balance ?? initial) : now?.balance;
+    // Vérification croisée : toute contradiction est écrite sous le crédit, en rouge si un montant est en cause.
+    const findings = audit.filter((x) => x.loanId === l.id);
+    const incoherent = findings.some((x) => x.severity === "critical");
+    for (const x of findings) if (x.short !== "Banque non renseignée." && !notes.includes(x.short)) notes.push(x.short);
     if (missingPayment) notes.push("Mensualité non communiquée : exclue des mensualités et du cash-flow.");
     if (r.quality === "estimated") notes.push(r.notes[0] ?? "Échéancier estimé.");
     if (rateEstimated && r.quality !== "estimated") notes.push("Taux déduit de la mensualité et de la date de fin.");
@@ -126,7 +133,7 @@ export function groupModel(data: AppData, p: Projection, name: string): GroupMod
     g.loans.push({
       name: l.name || "Crédit",
       bank: l.bank ?? "",
-      initial: l.initialAmount,
+      initial,
       balance: balanceNow,
       monthly: upcoming ? (r.payment !== undefined ? r.payment + r.insurance : undefined) : now?.paymentMonthly || undefined,
       rate: l.ratePct ?? r.impliedRatePct,

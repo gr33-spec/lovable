@@ -226,8 +226,11 @@ export default function DossierBanquePage() {
             <div className="divide-y divide-line">
               {critical.map((i) => (
                 <Link key={i.id} href={i.href} className="flex items-center justify-between gap-3 py-2.5 text-[13.5px]">
-                  <span className="min-w-0 flex-1 truncate text-ink">{i.label}</span>
-                  <span className="max-w-[60%] shrink-0 truncate text-[12.5px] font-medium text-series-1">{i.id.startsWith("c-") ? "Saisir les charges" : i.id.startsWith("li-") ? "Montants incohérents" : "Saisir la mensualité"}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-ink">{i.label}</span>
+                    {/^(li|r|v|rl|bd)-/.test(i.id) && <span className="block text-[12px] leading-snug text-muted">{i.detail}</span>}
+                  </span>
+                  <span className="max-w-[60%] shrink-0 truncate text-[12.5px] font-medium text-series-1">{i.id.startsWith("c-") ? "Saisir les charges" : i.id.startsWith("r-") ? "Saisir les loyers" : /^(li|v|rl|bd)-/.test(i.id) ? "À vérifier" : "Saisir la mensualité"}</span>
                 </Link>
               ))}
             </div>

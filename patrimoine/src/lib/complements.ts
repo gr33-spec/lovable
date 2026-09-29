@@ -334,7 +334,8 @@ export function planComplements(data: AppData, patch: Complements): ComplementsP
     const fields = schedule ? loanFieldsFromSchedule(schedule.rows, currentMonth(), schedule.meta) : {};
     const sched = schedule ? { rows: schedule.rows, fileName: "Import JSON", importedAt: new Date().toISOString().slice(0, 10), source: "manuel" as const, ...(schedule.meta ? { meta: schedule.meta } : {}) } : undefined;
     if (target) {
-      const next: Loan = { ...target, ...set, ...fields, ...(sched ? { schedule: { ...sched, ...(target.schedule?.fileId ? { fileId: target.schedule.fileId, fileName: target.schedule.fileName } : {}) } } : {}) };
+      // Les valeurs données explicitement dans le JSON priment sur celles déduites du tableau.
+      const next: Loan = { ...target, ...fields, ...set, ...(sched ? { schedule: { ...sched, ...(target.schedule?.fileId ? { fileId: target.schedule.fileId, fileName: target.schedule.fileName } : {}) } } : {}) };
       loans = loans.map((x) => (x.id === target!.id ? next : x));
       lines.push({ label: target.name || label, ok: true, detail: [how, schedule ? `${schedule.rows.length} échéances` : "", Object.keys(set).length ? `${Object.keys(set).length} information(s)` : ""].filter(Boolean).join(" · ") });
       continue;
@@ -353,8 +354,8 @@ export function planComplements(data: AppData, patch: Complements): ComplementsP
       buildingId: building?.id ?? null,
       companyId: building ? null : (company?.id ?? null),
       ...(schedule?.meta?.bank ? { bank: schedule.meta.bank } : {}),
-      ...set,
       ...fields,
+      ...set,
       ...(sched ? { schedule: sched } : {}),
     };
     loans = [...loans, created];
