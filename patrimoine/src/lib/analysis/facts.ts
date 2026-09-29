@@ -4,7 +4,7 @@ import type { MonthIndex } from "../engine/dates";
 import { yearOf } from "../engine/dates";
 import { project } from "../engine/projection";
 import { cashflowMonthly, grossYield, rentalPayments, ltv, netWorth, NO_COMPANY, type Figures } from "../engine/snapshot";
-import { formatIndicator, latestStatements, portfolioIndicators, statementRatios } from "../engine/indicators";
+import { formatIndicator, latestStatements, portfolioIndicators, keyIndicators, KEY_INDICATORS, statementRatios } from "../engine/indicators";
 import { qualityIssues } from "../engine/quality";
 import { companySubset } from "../engine/subset";
 import { unpaidByUnit } from "../engine/leases";
@@ -144,7 +144,7 @@ export function buildFacts(all: AppData, nowMonth: MonthIndex, scope: AnalysisSc
       hausseChargesPct: data.settings.chargesGrowthPct ?? null,
     },
     totaux: figures(snap.total),
-    indicateurs: portfolioIndicators(data, p).map((i) => ({ nom: i.label, valeur: i.value === undefined ? "données insuffisantes" : formatIndicator(i), niveau: i.level, explication: i.explain })),
+    indicateurs: keyIndicators(portfolioIndicators(data, p), KEY_INDICATORS).map((i) => ({ nom: i.label, valeur: i.value === undefined ? "données insuffisantes" : formatIndicator(i), niveau: i.level, explication: i.explain })),
     societes: data.companies.map((c) => {
       const f = snap.ownByCompany.get(c.id);
       const { last } = latestStatements(data, c.id);

@@ -9,6 +9,18 @@ import { NO_COMPANY, rentalCharges, rentalPayments, rentalValue, type Figures } 
 
 export type Level = "good" | "watch" | "alert" | "neutral";
 
+/**
+ * Les indicateurs affichés : ceux qui servent au pilotage et au banquier.
+ * Les autres restent calculés en interne (dossier banque) mais ne sont plus montrés.
+ */
+export const KEY_INDICATORS = ["dscr", "ltv", "gross-yield", "occupancy", "avg-rate", "avg-duration"] as const;
+/** Comptes annuels : les trois ratios qu'un banquier lit en premier. */
+export const KEY_STATEMENT_INDICATORS = ["st-caf", "st-dscr", "st-debt-caf"] as const;
+
+export function keyIndicators(list: Indicator[], ids: readonly string[]): Indicator[] {
+  return ids.map((id) => list.find((i) => i.id === id)).filter((i): i is Indicator => !!i);
+}
+
 export interface Indicator {
   id: string;
   label: string;
