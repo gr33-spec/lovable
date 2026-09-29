@@ -111,8 +111,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <ToastHost />
       <PdfViewerHost />
       {!onboarding && (
-        <nav className="safe-bottom pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-2 lg:inset-y-0 lg:right-auto lg:w-60 lg:px-4 lg:py-6">
-          <div className="pointer-events-auto mx-auto flex max-w-md rounded-[28px] border border-white/60 bg-white/92 p-1.5 shadow-[0_10px_30px_-6px_rgba(11,37,69,0.25)] backdrop-blur-2xl lg:h-full lg:max-w-none lg:flex-col lg:gap-1 lg:p-3">
+        <nav className="tab-dock safe-bottom pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-2 lg:inset-y-0 lg:right-auto lg:w-60 lg:px-4 lg:py-6">
+          <div className="tab-bar pointer-events-auto relative mx-auto flex max-w-md rounded-[28px] p-1.5 lg:h-full lg:max-w-none lg:flex-col lg:gap-1 lg:p-3">
             <div className="hidden px-3 pb-4 pt-2 text-[20px] font-extrabold tracking-[-0.02em] text-navy lg:block">Patrimoine</div>
             {TABS.map((t) => {
               // Une fiche reste dans la rubrique d'où on l'a ouverte (un lot ouvert depuis Gestion reste dans Gestion).
@@ -124,7 +124,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   href={t.href}
                   className={cx(
                     "relative flex flex-1 flex-col items-center gap-0.5 rounded-[22px] py-1.5 text-[10.5px] font-semibold transition-colors lg:flex-none lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-4 lg:py-3 lg:text-[15px]",
-                    active ? "bg-brand text-on-brand shadow-sm" : "text-muted active:bg-black/5",
+                    active ? "bg-brand text-on-brand shadow-sm" : "text-ink-2 active:bg-black/5",
                   )}
                 >
                   <Icon size={22} strokeWidth={active ? 2.2 : 1.8} />
@@ -159,8 +159,8 @@ function GestionNav({ unpaid }: { unpaid: number }) {
     { vue: "locataires", label: "Locataires", icon: Users, badge: missing },
   ];
   return (
-    <nav className="safe-bottom pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-2 lg:inset-y-0 lg:right-auto lg:w-60 lg:px-4 lg:py-6">
-      <div className="pointer-events-auto mx-auto flex max-w-md rounded-[28px] border border-white/60 bg-white/92 p-1.5 shadow-[0_10px_30px_-6px_rgba(11,37,69,0.25)] backdrop-blur-2xl lg:h-full lg:max-w-none lg:flex-col lg:gap-1 lg:p-3">
+    <nav className="tab-dock safe-bottom pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-2 lg:inset-y-0 lg:right-auto lg:w-60 lg:px-4 lg:py-6">
+      <div className="tab-bar pointer-events-auto relative mx-auto flex max-w-md rounded-[28px] p-1.5 lg:h-full lg:max-w-none lg:flex-col lg:gap-1 lg:p-3">
             <div className="hidden px-3 pb-4 pt-2 text-[20px] font-extrabold tracking-[-0.02em] text-navy lg:block">Patrimoine</div>
         {tabs.map((t) => {
           // « Sur l'année » fait partie de Loyers.
@@ -171,7 +171,7 @@ function GestionNav({ unpaid }: { unpaid: number }) {
             <Link
               key={t.vue}
               href={`/gestion?vue=${t.vue}`}
-              className={cx("relative flex flex-1 flex-col items-center gap-0.5 rounded-[22px] py-1.5 text-[10.5px] font-semibold transition-colors lg:flex-none lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-4 lg:py-3 lg:text-[15px]", active ? "bg-brand text-on-brand shadow-sm" : "text-muted active:bg-black/5")}
+              className={cx("relative flex flex-1 flex-col items-center gap-0.5 rounded-[22px] py-1.5 text-[10.5px] font-semibold transition-colors lg:flex-none lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-4 lg:py-3 lg:text-[15px]", active ? "bg-brand text-on-brand shadow-sm" : "text-ink-2 active:bg-black/5")}
             >
               <Icon size={22} strokeWidth={active ? 2.2 : 1.8} />
               {t.label}
