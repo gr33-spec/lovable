@@ -28,10 +28,14 @@ export function qualityIssues(data: AppData, snap: Snapshot): QualityIssue[] {
     const r = snap.resolvedLoans.get(l.id);
     if (!r || r.finished) continue;
     const name = l.name || l.bank || "Crédit";
+    const fix = " — le plus simple : importer le tableau d'amortissement";
     if (r.quality === "insufficient") {
-      issues.push({ id: `l-${l.id}`, label: name, detail: r.notes[r.notes.length - 1] ?? "Données insuffisantes", href: `/patrimoine/credit/${l.id}`, severity: "critical" });
+      issues.push({ id: `l-${l.id}`, label: name, detail: (r.notes[r.notes.length - 1] ?? "Données insuffisantes") + fix, href: `/patrimoine/credit/${l.id}`, severity: "critical" });
     } else if (r.quality === "estimated") {
-      issues.push({ id: `l-${l.id}`, label: name, detail: r.notes[0] ?? "Projection estimée", href: `/patrimoine/credit/${l.id}`, severity: "critical" });
+      issues.push({ id: `l-${l.id}`, label: name, detail: (r.notes[0] ?? "Projection estimée") + fix, href: `/patrimoine/credit/${l.id}`, severity: "critical" });
+    } else if (!l.schedule) {
+      // Calcul correct mais théorique : le tableau de la banque donne les chiffres exacts.
+      issues.push({ id: `ls-${l.id}`, label: name, detail: "Tableau d'amortissement à importer pour des chiffres exacts", href: `/patrimoine/credit/${l.id}`, severity: "advice" });
     }
   }
   for (const w of data.works) {

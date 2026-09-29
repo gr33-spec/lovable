@@ -229,6 +229,7 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
       endMonth: r.endMonth,
       kind: r.kind,
       active: true,
+      schedule: r.schedule,
       paymentOnly,
       frozen,
       source: "real",
@@ -456,6 +457,7 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
             if (l.paymentOnly || balance <= 0) continue;
             const part = target * (l.balance / balance);
             l.balance -= part;
+            l.schedule = undefined; // le tableau de la banque ne vaut plus après un remboursement partiel
             debtRepaid += part;
             if (l.balance <= 0.01) {
               l.balance = 0;
@@ -617,6 +619,7 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
         if (!l) continue;
         const amount = Math.min(a.amount ?? 0, l.balance);
         l.balance -= amount;
+        l.schedule = undefined; // nouvel échéancier après remboursement anticipé
         if (a.mode === "mensualite" && l.endMonth !== undefined && l.kind === "amortissable") {
           l.payment = annuityPayment(l.balance, l.monthlyRate, Math.max(1, l.endMonth - m + 1));
         }

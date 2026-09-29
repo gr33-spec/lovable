@@ -9,6 +9,7 @@ import { yearlyBalances } from "@/lib/engine/loan";
 import { monthLabel } from "@/lib/engine/dates";
 import { eur, eurCompact, pct } from "@/lib/format";
 import { LoanForm } from "../forms";
+import { LoanScheduleSection } from "./loan-schedule";
 import { LineChart } from "../charts";
 import { Card, ConfirmDelete, Empty, Kpi, Page, PageHeader, Pill, SectionTitle } from "../ui";
 
@@ -41,7 +42,7 @@ export function LoanDetail({ id }: { id: string }) {
         <div className="min-w-0">
         <Card>
           <div className="mb-3 flex gap-2">
-            {r.finished ? <Pill tone="pos">Terminé</Pill> : r.quality === "complete" ? <Pill tone="blue">Projection calculée</Pill> : r.quality === "estimated" ? <Pill tone="warn">Projection estimée</Pill> : <Pill tone="neg">Données insuffisantes</Pill>}
+            {r.finished ? <Pill tone="pos">Terminé</Pill> : loan.schedule ? <Pill tone="pos">Tableau de la banque</Pill> : r.quality === "complete" ? <Pill tone="blue">Projection calculée</Pill> : r.quality === "estimated" ? <Pill tone="warn">Projection estimée</Pill> : <Pill tone="neg">Données insuffisantes</Pill>}
             {loan.kind === "in_fine" && <Pill>In fine</Pill>}
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -51,7 +52,7 @@ export function LoanDetail({ id }: { id: string }) {
             <Kpi label="Taux" value={loan.ratePct !== undefined ? pct(loan.ratePct, 2) : r.impliedRatePct !== undefined ? `${pct(r.impliedRatePct, 2)} (déduit)` : "—"} />
           </div>
           {totalInterest > 0 && <div className="mt-3 text-xs text-muted">Intérêts restant à payer : {eur(totalInterest)}</div>}
-          {r.notes.map((n) => (
+          {!loan.schedule && r.notes.map((n) => (
             <div key={n} className="mt-2 text-xs text-warn">{n}</div>
           ))}
         </Card>
@@ -78,8 +79,11 @@ export function LoanDetail({ id }: { id: string }) {
 
         </div>
         <div className="min-w-0 lg:[&>*:first-child]:mt-0">
+        <LoanScheduleSection loan={loan} />
+
         <SectionTitle>Caractéristiques</SectionTitle>
         <Card>
+          {loan.schedule && <p className="mb-3 rounded-xl bg-soft px-3 py-2 text-[12.5px] text-ink-2">Repris du tableau de la banque, qui fait foi pour les calculs.</p>}
           <LoanForm loan={loan} />
         </Card>
 

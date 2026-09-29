@@ -28,6 +28,59 @@ export interface ResolvedLoan {
   impliedRatePct?: number;
   /** Crédit déjà soldé. */
   finished: boolean;
+  /** Échéancier de la banque, par mois (prioritaire sur le calcul). */
+  schedule?: Map<MonthIndex, ScheduleStep>;
+}
+
+export interface ScheduleStep {
+  payment: number;
+  interest: number;
+  principal: number;
+  insurance: number;
+  balance: number;
+}
+
+/** Échéancier indexé par mois (lignes sans mois valide ignorées). */
+export function scheduleMap(loan: Loan): Map<MonthIndex, ScheduleStep> | undefined {
+  const rows = loan.schedule?.rows ?? [];
+  const map = new Map<MonthIndex, ScheduleStep>();
+  for (const r of rows) {
+    const m = parseMonth(r.month);
+    if (m === undefined) continue;
+    map.set(m, { payment: r.payment, interest: r.interest, principal: r.principal, insurance: r.insurance ?? loan.insuranceMonthly ?? 0, balance: Math.max(0, r.balance) });
+  }
+  return map.size >= 2 ? map : undefined;
+}
+
+/** Crédit décrit par le tableau de la banque : solde, échéance, taux et fin lus, pas estimés. */
+function resolveFromSchedule(loan: Loan, schedule: Map<MonthIndex, ScheduleStep>, nowMonth: MonthIndex): ResolvedLoan {
+  const months = [...schedule.keys()].sort((a, b) => a - b);
+  const first = months[0];
+  const last = months[months.length - 1];
+  const kind = loan.kind ?? "amortissable";
+  const past = months.filter((m) => m < nowMonth);
+  const firstRow = schedule.get(first)!;
+  // Capital restant dû au début du mois courant.
+  const balance = past.length ? schedule.get(past[past.length - 1])!.balance : firstRow.balance + firstRow.principal;
+  const nextMonth = months.find((m) => m >= nowMonth);
+  const ref = schedule.get(nextMonth ?? last)!;
+  const before = ref.balance + ref.principal;
+  const finished = nowMonth > last || (past.length > 0 && balance <= EPS);
+  return {
+    id: loan.id,
+    kind,
+    fromMonth: Math.max(nowMonth, first),
+    balance: finished ? 0 : balance,
+    monthlyRate: before > 0 ? ref.interest / before : 0,
+    payment: ref.payment,
+    insurance: ref.insurance,
+    endMonth: last,
+    quality: "complete",
+    notes: ["Échéancier de la banque"],
+    impliedRatePct: loan.ratePct === undefined && before > 0 ? Math.round((ref.interest / before) * 1200 * 100) / 100 : undefined,
+    finished,
+    schedule,
+  };
 }
 
 const EPS = 0.5;
@@ -90,6 +143,8 @@ function rollForward(
 }
 
 export function resolveLoan(loan: Loan, nowMonth: MonthIndex): ResolvedLoan {
+  const schedule = scheduleMap(loan);
+  if (schedule) return resolveFromSchedule(loan, schedule, nowMonth);
   const notes: string[] = [];
   let quality: LoanQuality = "complete";
   const kind = loan.kind ?? "amortissable";
@@ -225,6 +280,8 @@ export interface LoanState {
   endMonth?: MonthIndex;
   kind: "amortissable" | "in_fine";
   active: boolean;
+  /** Échéancier de la banque ; retiré dès qu'une opération modifie le capital. */
+  schedule?: Map<MonthIndex, ScheduleStep>;
 }
 
 export interface MonthPayment {
@@ -244,6 +301,15 @@ export function stepLoan(state: LoanState, m: MonthIndex): MonthPayment {
     state.active = false;
     state.balance = 0;
     return { ...none, ended: true };
+  }
+  const row = state.schedule?.get(m);
+  if (row) {
+    // Échéance réelle de la banque.
+    const ended = row.balance <= EPS || (state.endMonth !== undefined && m >= state.endMonth);
+    const balloon = ended && row.balance > EPS ? row.balance : 0;
+    state.balance = ended ? 0 : row.balance;
+    if (ended) state.active = false;
+    return { regular: row.payment + row.insurance, interest: row.interest, principal: row.principal, balloon, ended };
   }
   const interest = state.balance * state.monthlyRate;
   const isLast = state.endMonth !== undefined && m >= state.endMonth;
@@ -288,6 +354,7 @@ export function yearlyBalances(r: ResolvedLoan, nowMonth: MonthIndex, horizonYea
     endMonth: r.endMonth,
     kind: r.kind,
     active: true,
+    schedule: r.schedule,
   };
   const frozen = r.payment === undefined;
   let paid = 0;
