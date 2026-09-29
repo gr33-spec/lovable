@@ -79,7 +79,7 @@ export function OrderActions({
       )}
 
       {(status === "paid" || status === "preparing") && (
-        <div className="space-y-3 rounded-2xl bg-secondary/60 p-4">
+        <div className="space-y-3 rounded-2xl bg-surface-2/60 p-4">
           {!pickup && (
             <>
               <label className="block">

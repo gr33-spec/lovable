@@ -94,7 +94,7 @@ export function CartView() {
               const max = Math.min(product.stock, MAX_QUANTITY_PER_LINE);
               return (
                 <li key={product.id} className="flex gap-4 py-5">
-                  <Link href={`/produit/${product.slug}`} className="block h-28 w-24 shrink-0 overflow-hidden rounded-xl bg-secondary sm:h-32 sm:w-28">
+                  <Link href={`/produit/${product.slug}`} className="block h-28 w-24 shrink-0 overflow-hidden rounded-xl bg-surface-2 sm:h-32 sm:w-28">
                     <Img image={product.image} alt={product.name} sizes="120px" className={`h-full w-full ${soldOut ? "opacity-60 grayscale" : ""}`} />
                   </Link>
                   <div className="flex min-w-0 flex-1 flex-col">

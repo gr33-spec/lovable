@@ -113,7 +113,7 @@ export default async function Dashboard() {
           <ul className="card divide-y divide-border">
             {d.toPrepare.map((o) => (
               <li key={o.id}>
-                <Link href={`/admin/commandes/${o.id}`} className="flex items-center gap-3 p-4 no-underline hover:bg-secondary/50">
+                <Link href={`/admin/commandes/${o.id}`} className="flex items-center gap-3 p-4 no-underline hover:bg-surface-2/50">
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold">
                       {o.first_name} {o.last_name}
@@ -144,7 +144,7 @@ export default async function Dashboard() {
             <ul className="card divide-y divide-border">
               {d.soldOut.map((p) => (
                 <li key={p.id}>
-                  <Link href={`/admin/produits/${p.id}`} className="flex min-h-12 items-center justify-between gap-3 px-4 py-3 no-underline hover:bg-secondary/50">
+                  <Link href={`/admin/produits/${p.id}`} className="flex min-h-12 items-center justify-between gap-3 px-4 py-3 no-underline hover:bg-surface-2/50">
                     <span className="truncate">{p.name}</span>
                     <span className="badge bg-error-bg text-error">0</span>
                   </Link>
@@ -163,7 +163,7 @@ export default async function Dashboard() {
             <ul className="card divide-y divide-border">
               {d.lowStock.map((p) => (
                 <li key={p.id}>
-                  <Link href={`/admin/produits/${p.id}`} className="flex min-h-12 items-center justify-between gap-3 px-4 py-3 no-underline hover:bg-secondary/50">
+                  <Link href={`/admin/produits/${p.id}`} className="flex min-h-12 items-center justify-between gap-3 px-4 py-3 no-underline hover:bg-surface-2/50">
                     <span className="truncate">{p.name}</span>
                     <span className="badge bg-warning-bg text-warning">{p.stock}</span>
                   </Link>

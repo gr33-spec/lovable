@@ -43,54 +43,52 @@ export default async function HomePage() {
 
       {/* ───────── Introduction ───────── */}
       <section className="relative overflow-hidden">
-        <div className="glitter-dust pointer-events-none absolute inset-0 opacity-70" aria-hidden="true" />
-        <div
-          className="pointer-events-none absolute -top-40 -right-40 h-[520px] w-[520px] rounded-full opacity-60 blur-3xl"
-          style={{ background: "radial-gradient(circle, var(--c-primary-light), transparent 65%)" }}
-          aria-hidden="true"
-        />
-        <div className="container-page relative grid items-center gap-10 pt-6 pb-14 md:grid-cols-[1.05fr_1fr] md:gap-14 md:pt-14 md:pb-24">
+        <div className="soft-glow pointer-events-none absolute inset-0" aria-hidden="true" />
+        <div className="container-page relative grid items-center gap-10 pt-4 pb-16 md:grid-cols-[1.1fr_1fr] md:gap-16 md:pt-16 md:pb-28">
           <div className="order-2 md:order-1">
-            <p className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/80 px-3.5 py-1.5 text-[13px] font-medium backdrop-blur">
-              <Sparkle size={13} className="text-accent" /> Créations faites main, en petites séries
-            </p>
-            <h1 className="mt-5 text-[2.9rem] leading-[1.02] tracking-[-0.02em] sm:text-6xl lg:text-[4.6rem]">
+            <p className="eyebrow">Créations faites main · petites séries</p>
+            <h1 className="mt-5 text-[2.75rem] leading-[1.02] tracking-[-0.025em] sm:text-6xl lg:text-[4.8rem]">
               <Highlighted text={tagline} />
             </h1>
-            {settings.introText && <p className="mt-6 max-w-lg text-[17px] leading-relaxed text-text-2">{settings.introText}</p>}
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/boutique" className="btn btn-primary min-h-[52px] px-7 text-base">
-                Découvrir les créations <ArrowRight size={18} aria-hidden="true" />
+            {settings.introText && <p className="mt-6 max-w-md text-[17px] leading-relaxed text-text-2">{settings.introText}</p>}
+            <div className="mt-9 flex flex-wrap gap-3">
+              <Link href="/boutique" className="btn btn-primary min-h-[52px] px-7 text-[15px]">
+                Découvrir les créations <ArrowRight size={17} aria-hidden="true" />
               </Link>
-              <Link href="/boutique?tri=nouveautes" className="btn btn-outline min-h-[52px] px-6 text-base">
+              <Link href="/boutique?tri=nouveautes" className="btn btn-outline min-h-[52px] px-6 text-[15px]">
                 Nouveautés
               </Link>
             </div>
-            <ul className="mt-9 flex flex-wrap gap-x-6 gap-y-2 text-sm text-text-2">
-              {["Pièces uniques", "Résine & paillettes", "Paiement sécurisé"].map((t) => (
-                <li key={t} className="flex items-center gap-2">
-                  <Sparkle size={11} className="text-accent" delay={1} /> {t}
+            <ul className="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-[13px] font-medium tracking-wide text-text-2">
+              {[
+                { icon: Sparkles, label: "Pièces uniques" },
+                { icon: Gift, label: "Prêt à offrir" },
+                { icon: Lock, label: "Paiement sécurisé" },
+              ].map(({ icon: Icon, label }) => (
+                <li key={label} className="flex items-center gap-2">
+                  <Icon size={15} className="text-accent-text" aria-hidden="true" /> {label}
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Composition de photos */}
-          <div className="relative order-1 mx-auto mb-4 w-full max-w-[520px] md:order-2 md:mb-0">
-            <div className="holo-shine aspect-[5/4] overflow-hidden rounded-[32px] bg-secondary shadow-lift sm:aspect-[4/5] sm:rounded-[36px]">
+          {/* Photo en arche : la forme bohème, l'image en vedette */}
+          <div className="relative isolate order-1 mx-auto mb-6 w-[84%] max-w-[500px] md:order-2 md:mb-0 md:w-full">
+            <div className="holo-shine aspect-[4/5] overflow-hidden rounded-t-[999px] rounded-b-[28px] bg-surface-2 shadow-lift">
               <Img image={heroImage} alt={heroImage?.alt || `Création ${settings.shopName}`} sizes="(min-width: 768px) 45vw, 92vw" priority className="h-full w-full" />
             </div>
+            <div className="pointer-events-none absolute -inset-3 -z-10 rounded-t-[999px] rounded-b-[36px] border border-accent/40" aria-hidden="true" />
             {featured && (
               <Link
                 href={`/produit/${featured.slug}`}
-                className="group absolute -bottom-6 left-3 flex w-[72%] max-w-[270px] items-center gap-3 rounded-2xl border border-border bg-surface/95 p-2.5 pr-4 no-underline shadow-lift backdrop-blur sm:-left-8"
+                className="group lift absolute -bottom-7 -left-3 flex w-[86%] max-w-[280px] items-center gap-3 rounded-2xl border border-border bg-surface/95 p-2.5 pr-4 no-underline shadow-soft backdrop-blur sm:-left-10"
               >
-                <span className="holo-shine block h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-secondary">
+                <span className="block h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-surface-2">
                   <Img image={featured.image} alt="" sizes="64px" className="h-full w-full" />
                 </span>
                 <span className="min-w-0">
-                  <span className="flex items-center gap-1 text-[11px] font-semibold tracking-[0.12em] text-accent uppercase">
-                    <Sparkle size={10} /> Nouveau
+                  <span className="flex items-center gap-1 text-[10px] font-semibold tracking-[0.18em] text-accent-text uppercase">
+                    <Sparkle size={9} /> Nouveau
                   </span>
                   <span className="block truncate text-sm font-medium">{featured.name}</span>
                   <span className="text-sm text-text-2">{formatPrice(featured.priceCents)}</span>
@@ -98,20 +96,18 @@ export default async function HomePage() {
                 <ArrowUpRight size={16} className="ml-auto shrink-0 text-text-2 transition group-hover:text-primary" aria-hidden="true" />
               </Link>
             )}
-            <Sparkle size={34} className="absolute -top-4 -right-2 text-accent" />
-            <Sparkle size={18} className="absolute top-16 -left-5 text-accent" delay={1} />
-            <Sparkle size={14} className="absolute right-6 -bottom-3 text-primary" delay={2} />
+            <Sparkle size={26} className="absolute top-6 -right-1 text-accent" />
           </div>
         </div>
       </section>
 
       {/* ───────── Bandeau ───────── */}
-      <div className="marquee border-y border-primary bg-primary py-3.5 text-on-primary" aria-hidden="true">
+      <div className="marquee border-y border-border bg-surface py-3.5 text-text-2" aria-hidden="true">
         {[0, 1].map((k) => (
           <div key={k} className="marquee-track">
             {[...MARQUEE, ...MARQUEE].map((t, i) => (
-              <span key={`${k}-${i}`} className="flex items-center gap-10 font-serif text-xl whitespace-nowrap italic">
-                {t} <Sparkle size={13} className="opacity-80" />
+              <span key={`${k}-${i}`} className="flex items-center gap-10 text-[12px] font-semibold tracking-[0.22em] whitespace-nowrap uppercase">
+                {t} <Sparkle size={10} className="text-accent" />
               </span>
             ))}
           </div>
@@ -120,31 +116,29 @@ export default async function HomePage() {
 
       {/* ───────── Catégories ───────── */}
       {visibleCategories.length > 0 && (
-        <section className="container-page py-16 sm:py-20" aria-labelledby="titre-categories">
-          <div className="mb-7 flex items-end justify-between gap-4">
-            <div>
-              <p className="eyebrow">Explorer</p>
-              <h2 id="titre-categories" className="mt-1 text-4xl sm:text-5xl">
-                Trouver <span className="text-shimmer">la pièce</span> qui vous ressemble
-              </h2>
-            </div>
+        <section className="container-page py-16 sm:py-24" aria-labelledby="titre-categories">
+          <div className="mb-8 sm:mb-10">
+            <p className="eyebrow">Explorer</p>
+            <h2 id="titre-categories" className="mt-3 text-[2.2rem] sm:text-5xl">
+              Trouver <em className="text-accent-text">la pièce</em> qui vous ressemble
+            </h2>
           </div>
           <ul className={`grid gap-3 sm:gap-5 ${visibleCategories.length === 1 ? "" : "grid-cols-2"} ${visibleCategories.length > 2 ? "lg:grid-cols-4" : ""}`}>
             {visibleCategories.map((c, i) => (
               <li key={c.id} className={visibleCategories.length > 1 && visibleCategories.length % 2 === 1 && i === 0 ? "col-span-2" : ""}>
-                <Link href={`/boutique/${c.slug}`} className="group holo-ring block rounded-[28px] no-underline">
-                  <div className="holo-shine relative aspect-[4/5] overflow-hidden rounded-[28px] shadow-soft sm:aspect-[16/12]">
-                    <Img image={c.cover} alt="" sizes="(min-width: 640px) 50vw, 50vw" className="h-full w-full transition duration-700 group-hover:scale-[1.04]" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent" aria-hidden="true" />
+                <Link href={`/boutique/${c.slug}`} className="group holo-ring lift block rounded-[24px] no-underline">
+                  <div className="holo-shine relative aspect-[4/5] overflow-hidden rounded-[24px] bg-surface-2 sm:aspect-[16/12]">
+                    <Img image={c.cover} alt="" sizes="(min-width: 640px) 50vw, 50vw" className="h-full w-full transition duration-700 ease-out group-hover:scale-[1.04]" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-transparent" aria-hidden="true" />
                     <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4 text-white sm:p-6">
                       <div>
-                        <p className="font-serif text-2xl leading-tight sm:text-4xl">{c.name}</p>
-                        <p className="mt-1 text-sm opacity-90">
+                        <p className="font-serif text-[1.65rem] leading-tight sm:text-4xl">{c.name}</p>
+                        <p className="mt-0.5 text-[13px] opacity-90">
                           {c.productCount} création{c.productCount > 1 ? "s" : ""}
                         </p>
                       </div>
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/90 text-text transition group-hover:scale-110 sm:h-12 sm:w-12">
-                        <ArrowUpRight size={18} aria-hidden="true" />
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface/95 text-text transition duration-300 group-hover:scale-110 sm:h-11 sm:w-11">
+                        <ArrowUpRight size={17} aria-hidden="true" />
                       </span>
                     </div>
                   </div>
@@ -156,16 +150,16 @@ export default async function HomePage() {
       )}
 
       {/* ───────── Nouveautés ───────── */}
-      <section className="container-page pb-16 sm:pb-20" aria-labelledby="titre-nouveautes">
-        <div className="mb-7 flex items-end justify-between gap-4">
+      <section className="container-page pb-16 sm:pb-24" aria-labelledby="titre-nouveautes">
+        <div className="mb-8 flex items-end justify-between gap-4 sm:mb-10">
           <div>
             <p className="eyebrow">Tout juste sorties de l&apos;atelier</p>
-            <h2 id="titre-nouveautes" className="mt-1 text-4xl sm:text-5xl">
+            <h2 id="titre-nouveautes" className="mt-3 text-[2.2rem] sm:text-5xl">
               Nouveautés
             </h2>
           </div>
-          <Link href="/boutique?tri=nouveautes" className="inline-flex shrink-0 items-center gap-1 text-[15px] font-semibold text-primary">
-            Tout voir <ArrowRight size={16} aria-hidden="true" />
+          <Link href="/boutique?tri=nouveautes" className="group inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-primary no-underline">
+            Tout voir <ArrowRight size={16} className="transition group-hover:translate-x-0.5" aria-hidden="true" />
           </Link>
         </div>
         {newest.length ? (
@@ -177,8 +171,8 @@ export default async function HomePage() {
             ))}
           </ul>
         ) : (
-          <div className="card glitter-dust flex flex-col items-center gap-3 px-6 py-16 text-center">
-            <Sparkle size={28} className="text-accent" />
+          <div className="card flex flex-col items-center gap-3 px-6 py-16 text-center">
+            <Sparkle size={24} className="text-accent" />
             <p className="font-serif text-3xl">Les premières créations arrivent très bientôt</p>
             <p className="text-text-2">Suivez l&apos;atelier sur les réseaux pour ne rien manquer.</p>
             <SocialLinks socials={settings.socials} className="justify-center" />
@@ -187,21 +181,20 @@ export default async function HomePage() {
       </section>
 
       {best.length > 0 && (
-        <section className="container-page pb-16 sm:pb-20" aria-labelledby="titre-best">
+        <section className="container-page pb-16 sm:pb-24" aria-labelledby="titre-best">
           <p className="eyebrow">Vos coups de cœur</p>
-          <h2 id="titre-best" className="mt-1 mb-7 text-4xl sm:text-5xl">
-            Les plus <span className="text-shimmer">aimées</span>
+          <h2 id="titre-best" className="mt-3 mb-8 text-[2.2rem] sm:mb-10 sm:text-5xl">
+            Les plus <em className="text-accent-text">aimées</em>
           </h2>
           <ProductGrid products={best} />
         </section>
       )}
 
       {/* ───────── L'atelier ───────── */}
-      <section className="relative overflow-hidden bg-secondary" aria-labelledby="titre-atelier">
-        <div className="glitter-dust pointer-events-none absolute inset-0 opacity-80" aria-hidden="true" />
-        <div className="container-page relative grid items-center gap-10 py-16 sm:py-24 md:grid-cols-2 md:gap-16">
-          <div className="relative mx-auto w-full max-w-[460px]">
-            <div className="aspect-square overflow-hidden rounded-full border-[10px] border-surface bg-surface shadow-lift">
+      <section className="relative overflow-hidden bg-surface-2" aria-labelledby="titre-atelier">
+        <div className="container-page relative grid items-center gap-12 py-16 sm:py-28 md:grid-cols-2 md:gap-20">
+          <div className="relative mx-auto w-full max-w-[420px]">
+            <div className={`overflow-hidden bg-surface shadow-lift ${settings.aboutImage ? "aspect-[4/5] rounded-t-[999px] rounded-b-[28px]" : "aspect-square rounded-full p-6"}`}>
               <Img
                 image={settings.aboutImage ?? settings.logo}
                 alt={settings.aboutImage?.alt || "L'atelier"}
@@ -210,15 +203,15 @@ export default async function HomePage() {
                 className="h-full w-full"
               />
             </div>
-            <Sparkle size={30} className="absolute top-4 right-4 text-accent" />
-            <Sparkle size={16} className="absolute bottom-10 -left-2 text-accent" delay={2} />
+            <Sparkle size={22} className="absolute top-10 -right-2 text-accent" delay={1} />
           </div>
           <div>
             <p className="eyebrow">L&apos;atelier</p>
-            <h2 id="titre-atelier" className="mt-2 text-4xl sm:text-5xl">
+            <h2 id="titre-atelier" className="mt-3 text-[2.2rem] sm:text-5xl">
               {settings.aboutTitle || `Bienvenue chez ${settings.shopName}`}
             </h2>
-            {aboutExcerpt && <p className="mt-5 font-serif text-2xl leading-snug text-text italic sm:text-[1.7rem]">« {aboutExcerpt} »</p>}
+            {aboutExcerpt && <p className="mt-6 font-serif text-[1.6rem] leading-snug text-text italic sm:text-[1.9rem]">« {aboutExcerpt} »</p>}
+            <div className="hairline mt-8 max-w-xs" aria-hidden="true" />
             <Link href="/a-propos" className="btn btn-outline mt-8">
               Découvrir l&apos;atelier <ArrowRight size={16} aria-hidden="true" />
             </Link>
@@ -227,21 +220,19 @@ export default async function HomePage() {
       </section>
 
       {/* ───────── Engagements ───────── */}
-      <section className="container-page py-14" aria-label="Nos engagements">
-        <ul className="grid gap-3 sm:grid-cols-3 sm:gap-5">
+      <section className="container-page py-14 sm:py-20" aria-label="Nos engagements">
+        <ul className="grid gap-8 sm:grid-cols-3 sm:gap-6">
           {[
             { icon: Sparkles, title: "Fait main, pièce par pièce", text: "Chaque bijou est coulé, poncé et assemblé à la main." },
             { icon: Gift, title: "Emballage soigné", text: "Prêt à offrir… ou à vous faire plaisir." },
             { icon: Lock, title: "Paiement sécurisé", text: "Carte, Apple Pay ou Google Pay, via Stripe." },
           ].map(({ icon: Icon, title, text }) => (
-            <li key={title} className="card flex items-start gap-4 p-5">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary-light text-primary">
+            <li key={title} className="flex flex-col items-center gap-3 text-center">
+              <span className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-surface text-primary shadow-soft">
                 <Icon size={19} aria-hidden="true" />
               </span>
-              <span>
-                <strong className="block text-[15px]">{title}</strong>
-                <span className="text-sm text-text-2">{text}</span>
-              </span>
+              <strong className="text-[15px] font-semibold">{title}</strong>
+              <span className="max-w-[260px] text-sm text-text-2">{text}</span>
             </li>
           ))}
         </ul>
@@ -249,16 +240,16 @@ export default async function HomePage() {
 
       {/* ───────── Réseaux ───────── */}
       {settings.socials.length > 0 && (
-        <section className="container-page pb-6">
-          <div className="holo-ring group relative overflow-hidden rounded-[32px] bg-surface px-6 py-12 text-center shadow-soft sm:py-16">
-            <div className="glitter-dust pointer-events-none absolute inset-0 opacity-60" aria-hidden="true" />
+        <section className="container-page pb-8">
+          <div className="holo-ring group relative overflow-hidden rounded-[28px] border border-border bg-surface px-6 py-14 text-center sm:py-20">
+            <div className="soft-glow pointer-events-none absolute inset-0" aria-hidden="true" />
             <div className="relative">
-              <Sparkle size={26} className="mx-auto text-accent" />
-              <h2 className="mt-3 text-4xl sm:text-5xl">
-                Les coulisses de <span className="text-shimmer">l&apos;atelier</span>
+              <Sparkle size={20} className="mx-auto text-accent" />
+              <h2 className="mt-4 text-[2.2rem] sm:text-5xl">
+                Les coulisses de <em className="text-accent-text">l&apos;atelier</em>
               </h2>
-              <p className="mx-auto mt-3 max-w-md text-text-2">Nouvelles créations, marchés, paillettes en cours de séchage : suivez l&apos;aventure.</p>
-              <SocialLinks socials={settings.socials} className="mt-6 justify-center" />
+              <p className="mx-auto mt-4 max-w-md text-text-2">Nouvelles créations, marchés, paillettes en cours de séchage : suivez l&apos;aventure.</p>
+              <SocialLinks socials={settings.socials} className="mt-7 justify-center" />
             </div>
           </div>
         </section>

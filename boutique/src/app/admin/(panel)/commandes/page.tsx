@@ -60,7 +60,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
         <ul className="card divide-y divide-border">
           {rows.map((o) => (
             <li key={o.id}>
-              <Link href={`/admin/commandes/${o.id}`} className="flex items-center gap-3 p-4 no-underline hover:bg-secondary/50">
+              <Link href={`/admin/commandes/${o.id}`} className="flex items-center gap-3 p-4 no-underline hover:bg-surface-2/50">
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">
                     {o.first_name} {o.last_name}

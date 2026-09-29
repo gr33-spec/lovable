@@ -30,13 +30,13 @@ export function ProductCard({ product, priority = false }: { product: Card; prio
   return (
     <article className="group relative">
       <Link href={`/produit/${product.slug}`} className="block no-underline" aria-label={`${product.name}, ${formatPrice(product.priceCents)}${soldOut ? ", épuisé" : ""}`}>
-        <div className="holo-shine relative aspect-[4/5] overflow-hidden rounded-[24px] bg-secondary shadow-soft transition-shadow duration-500 group-hover:shadow-lift">
+        <div className="holo-shine lift relative aspect-[4/5] overflow-hidden rounded-[20px] bg-surface-2">
           <Img
             image={product.image}
             alt={product.image?.alt || product.name}
             sizes="(min-width: 1024px) 280px, (min-width: 640px) 33vw, 50vw"
             priority={priority}
-            className={`h-full w-full transition duration-500 ease-out group-hover:scale-[1.03] ${soldOut ? "opacity-70 grayscale-[35%]" : ""}`}
+            className={`h-full w-full transition duration-700 ease-out group-hover:scale-[1.035] ${soldOut ? "opacity-70 grayscale-[35%]" : ""}`}
           />
           {product.hoverImage && (
             <Img
@@ -48,15 +48,15 @@ export function ProductCard({ product, priority = false }: { product: Card; prio
           )}
           <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5">
             {product.isNew && !soldOut && (
-              <span className="badge gap-1 bg-surface/95 text-text shadow-soft backdrop-blur">
-                <Sparkle size={10} className="text-accent" /> Nouveau
+              <span className="badge gap-1 bg-surface/95 text-[11px] tracking-[0.08em] text-text uppercase shadow-soft backdrop-blur">
+                <Sparkle size={9} className="text-accent" /> Nouveau
               </span>
             )}
             <AvailabilityBadge availability={product.availability} stock={product.stock} />
           </div>
         </div>
-        <div className="mt-3.5 px-1">
-          <h3 className="font-serif text-[1.2rem] leading-tight font-medium transition-colors group-hover:text-primary">{product.name}</h3>
+        <div className="mt-3.5 px-0.5">
+          <h3 className="text-[15px] leading-snug font-medium transition-colors duration-300 group-hover:text-primary">{product.name}</h3>
           <div className="mt-1 text-[15px] text-text-2">
             <Price cents={product.priceCents} compareAt={product.compareAtCents} />
           </div>
@@ -68,7 +68,7 @@ export function ProductCard({ product, priority = false }: { product: Card; prio
 
 export function ProductGrid({ products, priorityCount = 0 }: { products: Card[]; priorityCount?: number }) {
   return (
-    <ul className="grid grid-cols-2 gap-x-3 gap-y-9 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6">
+    <ul className="grid grid-cols-2 gap-x-3.5 gap-y-10 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4 lg:gap-x-7 lg:gap-y-14">
       {products.map((p, i) => (
         <li key={p.id} className="animate-rise" style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}>
           <ProductCard product={p} priority={i < priorityCount} />

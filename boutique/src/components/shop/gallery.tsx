@@ -34,7 +34,7 @@ export function Gallery({ images, name }: { images: ImageRef[]; name: string }) 
 
   if (!images.length) {
     return (
-      <div className="flex aspect-square items-center justify-center rounded-[var(--radius-card)] bg-secondary text-text-2" role="img" aria-label={`${name} — photo à venir`}>
+      <div className="flex aspect-square items-center justify-center rounded-[var(--radius-card)] bg-surface-2 text-text-2" role="img" aria-label={`${name} — photo à venir`}>
         Photo à venir
       </div>
     );
@@ -55,7 +55,7 @@ export function Gallery({ images, name }: { images: ImageRef[]; name: string }) 
           }}
         >
           {images.map((img, i) => (
-            <div key={img.id} className="relative aspect-square w-full shrink-0 snap-center bg-secondary" aria-roledescription="diapositive" aria-label={`${i + 1} sur ${images.length}`}>
+            <div key={img.id} className="relative aspect-square w-full shrink-0 snap-center bg-surface-2" aria-roledescription="diapositive" aria-label={`${i + 1} sur ${images.length}`}>
               <button type="button" className="block h-full w-full cursor-zoom-in" onClick={() => zoomRef.current?.showModal()} aria-label="Agrandir la photo">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img

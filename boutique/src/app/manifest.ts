@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 // Permet d'ajouter la boutique (et l'administration) à l'écran d'accueil du téléphone.
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const s = await getSettings();
-  const t = getTheme(s.themeId).tokens;
+  const t = getTheme(s.themeId, s.themeCustom).tokens;
   const icon = s.favicon ?? s.logo;
   return {
     name: s.shopName,

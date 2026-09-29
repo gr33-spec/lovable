@@ -267,16 +267,28 @@ await step("Stock modifié depuis la liste des produits", async () => {
   assert.equal(sql("SELECT stock FROM product WHERE name = 'Boucles Soleil Test E2E'"), "3");
 });
 
-await step("Changement de thème : appliqué à la boutique", async () => {
+await step("Changement de thème : aperçu immédiat, puis appliqué à la boutique", async () => {
   await admin.goto(`${BASE}/admin/apparence`);
-  await admin.getByRole("radio", { name: /Rose Poudré/ }).click();
-  await admin.getByText(/Thème « Rose Poudré » appliqué/).waitFor();
+  await admin.getByRole("radio", { name: /Framboise/ }).click();
+  // Aperçu : l'administration change aussitôt, la boutique pas encore.
+  const preview = await admin.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--c-primary").trim());
+  assert.equal(preview.toLowerCase(), "#ae1f4e");
+  await admin.getByRole("button", { name: "Appliquer à la boutique" }).click();
+  await admin.getByText(/Couleurs « Framboise » appliquées/).waitFor();
   await page.goto(`${BASE}/`);
   const primary = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--c-primary").trim());
-  assert.equal(primary.toLowerCase(), "#8e4f5a");
-  await page.screenshot({ path: `${SHOTS}08-theme-rose.png` });
-  await admin.getByRole("radio", { name: /Bohème Sauge/ }).click();
-  await admin.getByText(/Bohème Sauge/).first().waitFor();
+  assert.equal(primary.toLowerCase(), "#ae1f4e");
+  await page.screenshot({ path: `${SHOTS}08-theme-framboise.png` });
+  // Palette personnalisée : 3 couleurs, une principale trop claire est approfondie.
+  await admin.getByRole("radio", { name: /Créer ma palette/ }).click();
+  await admin.getByLabel("Couleur principale", { exact: true }).fill("#F4A6B8");
+  await admin.getByText(/version plus profonde/).waitFor();
+  await admin.getByRole("button", { name: "Appliquer à la boutique" }).click();
+  await admin.getByText(/Couleurs « Ma palette » appliquées/).waitFor();
+  assert.match(sql("SELECT theme || ' ' || (theme_custom->>'primary') FROM shop_settings"), /^personnalise #F4A6B8$/);
+  await admin.getByRole("radio", { name: /Sauge & Champagne/ }).click();
+  await admin.getByRole("button", { name: "Appliquer à la boutique" }).click();
+  await admin.getByText(/Couleurs « Sauge & Champagne » appliquées/).waitFor();
 });
 
 await step("Session expirée / déconnexion : les actions sont refusées", async () => {

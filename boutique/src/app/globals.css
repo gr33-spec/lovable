@@ -8,49 +8,67 @@
  */
 
 :root {
-  /* Valeurs de repli (thème « Bohème Sauge ») si le thème n'est pas chargé. */
-  --c-primary: #4e5e48;
-  --c-primary-hover: #3e4c39;
-  --c-primary-light: #e6ebe0;
-  --c-on-primary: #ffffff;
-  --c-secondary: #f3eee4;
-  --c-accent: #b08a4f;
-  --c-bg: #fbf8f2;
+  /* Valeurs de repli (thème « Sauge & Champagne ») avant le chargement du thème.
+     Le thème réel est injecté dans <head> (src/lib/themes.ts → themeCss). */
+  --c-bg: #fdfcf9;
   --c-surface: #ffffff;
-  --c-border: #e6ded0;
-  --c-text: #2e2a24;
-  --c-text-2: #6b6257;
+  --c-surface-2: #f2f6f1;
+  --c-primary: #4f6a56;
+  --c-primary-hover: #3f5645;
+  --c-primary-soft: #edf0ee;
+  --c-on-primary: #ffffff;
+  --c-secondary: #e4ebe0;
+  --c-accent: #c9a86a;
+  --c-accent-text: #876931;
+  --c-text: #1f211f;
+  --c-text-muted: #666764;
+  --c-border: #eaeae7;
+  --c-border-strong: #8e908c;
+
+  /* Anciens noms, conservés comme alias. */
+  --c-primary-light: var(--c-primary-soft);
+  --c-text-2: var(--c-text-muted);
 
   /* Couleurs métier : identiques pour tous les thèmes. */
   --c-success: #2f6b3f;
-  --c-success-bg: #e5f2e8;
+  --c-success-bg: #e8f3ea;
   --c-error: #a12d2d;
-  --c-error-bg: #fbe9e7;
-  --c-warning: #8a5a00;
-  --c-warning-bg: #fdf1d8;
+  --c-error-bg: #fcebe9;
+  --c-warning: #855600;
+  --c-warning-bg: #fdf2dc;
   --c-info: #2c5a87;
-  --c-info-bg: #e5eef7;
-  --c-soldout: #5f5a55;
-  --c-soldout-bg: #eceae7;
+  --c-info-bg: #e8f0f8;
+  --c-soldout: #5b5752;
+  --c-soldout-bg: #efedea;
 
-  --radius-card: 18px;
-  --shadow-soft: 0 1px 2px rgb(46 42 36 / 0.04), 0 8px 24px -12px rgb(46 42 36 / 0.12);
-  --shadow-lift: 0 2px 4px rgb(46 42 36 / 0.05), 0 18px 40px -18px rgb(46 42 36 / 0.25);
+  --radius-card: 20px;
+  /* Ombres très légères, teintées par le texte du thème. */
+  --shadow-soft: 0 1px 2px color-mix(in srgb, var(--c-text) 4%, transparent), 0 10px 30px -18px color-mix(in srgb, var(--c-text) 18%, transparent);
+  --shadow-lift: 0 2px 6px color-mix(in srgb, var(--c-text) 5%, transparent), 0 24px 48px -24px color-mix(in srgb, var(--c-text) 28%, transparent);
+  --ease-out: cubic-bezier(0.22, 0.8, 0.24, 1);
   --header-h: 64px;
 }
 
 @theme inline {
+  /* Jetons du système de design (noms longs) … */
+  --color-background: var(--c-bg);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
   --color-primary: var(--c-primary);
   --color-primary-hover: var(--c-primary-hover);
-  --color-primary-light: var(--c-primary-light);
+  --color-primary-soft: var(--c-primary-soft);
   --color-on-primary: var(--c-on-primary);
   --color-secondary: var(--c-secondary);
   --color-accent: var(--c-accent);
-  --color-bg: var(--c-bg);
-  --color-surface: var(--c-surface);
-  --color-border: var(--c-border);
+  --color-accent-text: var(--c-accent-text);
   --color-text: var(--c-text);
-  --color-text-2: var(--c-text-2);
+  --color-text-muted: var(--c-text-muted);
+  --color-border: var(--c-border);
+  --color-border-strong: var(--c-border-strong);
+  /* … et alias courts déjà utilisés dans les pages. */
+  --color-bg: var(--c-bg);
+  --color-primary-light: var(--c-primary-soft);
+  --color-text-2: var(--c-text-muted);
   --color-success: var(--c-success);
   --color-success-bg: var(--c-success-bg);
   --color-error: var(--c-error);
@@ -83,12 +101,17 @@
     text-rendering: optimizeLegibility;
   }
   h1,
-  h2,
-  h3 {
+  h2 {
     font-family: var(--font-serif);
     font-weight: 500;
-    line-height: 1.15;
-    letter-spacing: -0.01em;
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  /* Petits titres : police d'interface, plus nette et plus moderne. */
+  h3 {
+    font-weight: 600;
+    line-height: 1.3;
     text-wrap: balance;
   }
   p {
@@ -104,7 +127,8 @@
     border-radius: 6px;
   }
   ::selection {
-    background: var(--c-primary-light);
+    background: var(--c-primary-soft);
+    color: var(--c-text);
   }
   button,
   [role="button"],
@@ -121,8 +145,8 @@
     max-width: 100%;
   }
   dialog::backdrop {
-    background: rgb(30 26 22 / 0.45);
-    backdrop-filter: blur(2px);
+    background: color-mix(in srgb, var(--c-text) 38%, transparent);
+    backdrop-filter: blur(4px);
   }
 }
 
@@ -145,17 +169,17 @@
     justify-content: center;
     gap: 0.5rem;
     min-height: 48px;
-    padding: 0 1.4rem;
+    padding: 0 1.5rem;
     border-radius: 999px;
     font-weight: 600;
     font-size: 15px;
     letter-spacing: 0.01em;
     transition:
-      background-color 0.18s ease,
-      color 0.18s ease,
-      border-color 0.18s ease,
-      transform 0.12s ease,
-      box-shadow 0.18s ease;
+      background-color 0.25s var(--ease-out),
+      color 0.25s var(--ease-out),
+      border-color 0.25s var(--ease-out),
+      transform 0.25s var(--ease-out),
+      box-shadow 0.25s var(--ease-out);
     text-decoration: none;
     white-space: nowrap;
   }
@@ -172,22 +196,25 @@
   }
   .btn-primary:hover:not(:disabled) {
     background: var(--c-primary-hover);
+    box-shadow: 0 10px 24px -12px color-mix(in srgb, var(--c-primary) 70%, transparent);
+    transform: translateY(-1px);
   }
   .btn-outline {
-    border: 1.5px solid var(--c-border);
+    border: 1px solid color-mix(in srgb, var(--c-text) 18%, transparent);
     background: var(--c-surface);
     color: var(--c-text);
   }
   .btn-outline:hover:not(:disabled) {
     border-color: var(--c-primary);
     color: var(--c-primary);
+    background: var(--c-primary-soft);
   }
   .btn-ghost {
     color: var(--c-text);
     background: transparent;
   }
   .btn-ghost:hover:not(:disabled) {
-    background: var(--c-secondary);
+    background: var(--c-surface-2);
   }
   .btn-danger {
     background: var(--c-error);
@@ -209,6 +236,7 @@
     background: var(--c-surface);
     border: 1px solid var(--c-border);
     border-radius: var(--radius-card);
+    box-shadow: var(--shadow-soft);
   }
 
   .field-label {
@@ -234,8 +262,8 @@
     min-height: 48px;
     padding: 10px 14px;
     background: var(--c-surface);
-    border: 1.5px solid var(--c-border);
-    border-radius: 12px;
+    border: 1px solid var(--c-border-strong);
+    border-radius: 14px;
     color: var(--c-text);
     transition:
       border-color 0.15s ease,
@@ -247,7 +275,7 @@
   .input:focus {
     outline: none;
     border-color: var(--c-primary);
-    box-shadow: 0 0 0 3px var(--c-primary-light);
+    box-shadow: 0 0 0 4px var(--c-primary-soft);
   }
   .input[aria-invalid="true"] {
     border-color: var(--c-error);
@@ -259,9 +287,15 @@
   }
   select.input {
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' stroke='%236b6257' stroke-width='2'%3E%3Cpath d='m5 8 5 5 5-5'/%3E%3C/svg%3E");
+    /* Chevron dessiné en CSS : il suit la couleur du thème. */
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--c-text-muted) 50%),
+      linear-gradient(135deg, var(--c-text-muted) 50%, transparent 50%);
+    background-position:
+      calc(100% - 21px) 52%,
+      calc(100% - 16px) 52%;
+    background-size: 5px 5px;
     background-repeat: no-repeat;
-    background-position: right 12px center;
     padding-right: 40px;
   }
 
@@ -272,18 +306,20 @@
     min-height: 40px;
     padding: 0 16px;
     border-radius: 999px;
-    border: 1.5px solid var(--c-border);
+    border: 1px solid color-mix(in srgb, var(--c-text) 14%, transparent);
     background: var(--c-surface);
     font-size: 14px;
     font-weight: 500;
     white-space: nowrap;
     text-decoration: none;
     transition:
-      border-color 0.15s,
-      background-color 0.15s;
+      border-color 0.2s var(--ease-out),
+      background-color 0.2s var(--ease-out),
+      color 0.2s var(--ease-out);
   }
   .chip:hover {
     border-color: var(--c-primary);
+    color: var(--c-primary);
   }
   .chip[aria-current="page"],
   .chip[aria-pressed="true"] {
@@ -305,13 +341,22 @@
   }
 
   .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
     font-size: 12px;
     font-weight: 600;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--c-accent);
+    color: var(--c-accent-text);
   }
-  /* Accent doré sur fond clair : réservé aux textes décoratifs ≥ 12 px en gras. */
+  /* Petit filet doré devant les sur-titres. */
+  .eyebrow::before {
+    content: "";
+    width: 18px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--c-accent));
+  }
 
   .prose-shop {
     color: var(--c-text);
@@ -345,7 +390,7 @@
   }
 
   .skeleton {
-    background: linear-gradient(90deg, var(--c-secondary) 25%, color-mix(in srgb, var(--c-secondary) 50%, white) 50%, var(--c-secondary) 75%);
+    background: linear-gradient(90deg, var(--c-surface-2) 25%, var(--c-surface) 50%, var(--c-surface-2) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.4s infinite linear;
     border-radius: 12px;
@@ -418,17 +463,18 @@
   }
 }
 
-/* ═════════════ Touches « paillettes » (sobres, sans image, désactivées si l'utilisateur limite les animations) ═════════════ */
+/* ═════════════ Touches « paillettes » : rares, fines, jamais criardes ═════════════
+   Toutes suivent le thème et s'arrêtent si l'utilisateur limite les animations. */
 
-/* Mot mis en valeur dans un titre : reflet nacré qui glisse lentement. */
+/* Mot mis en valeur dans un titre : reflet nacré qui passe très lentement. */
 .text-shimmer {
-  color: var(--c-accent);
-  background: linear-gradient(100deg, var(--c-accent) 0%, color-mix(in srgb, var(--c-accent) 55%, #fff) 22%, var(--c-primary) 45%, color-mix(in srgb, var(--c-accent) 70%, #f3c8d8) 68%, var(--c-accent) 100%);
-  background-size: 250% 100%;
+  color: var(--c-accent-text);
+  background: linear-gradient(100deg, var(--c-primary) 0%, var(--c-accent-text) 30%, color-mix(in srgb, var(--c-accent) 70%, #fff) 50%, var(--c-accent-text) 70%, var(--c-primary) 100%);
+  background-size: 220% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: shimmer-text 7s ease-in-out infinite;
+  animation: shimmer-text 9s ease-in-out infinite;
   font-style: italic;
   /* L'italique déborde à droite : on laisse de la place au dégradé. */
   padding-right: 0.12em;
@@ -444,41 +490,51 @@
   }
 }
 
-/* Fond « poussière d'or » : de minuscules points dorés, comme des paillettes prises dans la résine. */
+/* Poussière dorée : quelques points très fins, comme des paillettes prises dans la résine. */
 .glitter-dust {
   background-image:
-    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--c-accent) 55%, transparent) 0 1.2px, transparent 1.6px),
-    radial-gradient(circle at 78% 32%, color-mix(in srgb, var(--c-accent) 45%, transparent) 0 1px, transparent 1.4px),
-    radial-gradient(circle at 42% 72%, color-mix(in srgb, var(--c-primary) 35%, transparent) 0 1px, transparent 1.4px),
-    radial-gradient(circle at 88% 84%, color-mix(in srgb, var(--c-accent) 50%, transparent) 0 1.3px, transparent 1.7px),
-    radial-gradient(circle at 25% 90%, color-mix(in srgb, var(--c-accent) 40%, transparent) 0 0.9px, transparent 1.3px);
-  background-size: 140px 140px, 190px 190px, 230px 230px, 170px 170px, 110px 110px;
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--c-accent) 45%, transparent) 0 1px, transparent 1.4px),
+    radial-gradient(circle at 78% 32%, color-mix(in srgb, var(--c-accent) 35%, transparent) 0 0.8px, transparent 1.2px),
+    radial-gradient(circle at 42% 72%, color-mix(in srgb, var(--c-accent) 30%, transparent) 0 0.8px, transparent 1.2px),
+    radial-gradient(circle at 88% 84%, color-mix(in srgb, var(--c-accent) 40%, transparent) 0 1px, transparent 1.4px);
+  background-size:
+    160px 160px,
+    210px 210px,
+    250px 250px,
+    190px 190px;
 }
 
-/* Étoile scintillante décorative. */
+/* Voile de lumière très léger (fond de héro, encadrés). */
+.soft-glow {
+  background:
+    radial-gradient(60% 60% at 85% 10%, color-mix(in srgb, var(--c-secondary) 70%, transparent), transparent 70%),
+    radial-gradient(50% 50% at 0% 100%, color-mix(in srgb, var(--c-accent) 10%, transparent), transparent 70%);
+}
+
+/* Étoile décorative : un scintillement lent et discret. */
 .twinkle {
-  animation: twinkle 3.2s ease-in-out infinite;
+  animation: twinkle 4.5s ease-in-out infinite;
   transform-origin: center;
 }
 .twinkle.delay-1 {
-  animation-delay: 0.8s;
+  animation-delay: 1.2s;
 }
 .twinkle.delay-2 {
-  animation-delay: 1.6s;
+  animation-delay: 2.4s;
 }
 @keyframes twinkle {
   0%,
   100% {
-    opacity: 0.25;
-    transform: scale(0.7) rotate(0deg);
+    opacity: 0.35;
+    transform: scale(0.85);
   }
   50% {
     opacity: 1;
-    transform: scale(1) rotate(20deg);
+    transform: scale(1) rotate(12deg);
   }
 }
 
-/* Reflet holographique qui traverse une photo au survol (comme la lumière sur la résine). */
+/* Reflet qui traverse une photo au survol, comme la lumière sur la résine. */
 .holo-shine {
   position: relative;
   isolation: isolate;
@@ -488,11 +544,11 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(115deg, transparent 30%, rgb(255 255 255 / 0.05) 38%, rgb(255 236 250 / 0.35) 46%, rgb(214 240 255 / 0.3) 52%, rgb(255 246 214 / 0.3) 58%, transparent 66%);
-  background-size: 250% 100%;
+  background: linear-gradient(115deg, transparent 34%, rgb(255 255 255 / 0.22) 47%, color-mix(in srgb, var(--c-accent) 18%, transparent) 53%, transparent 64%);
+  background-size: 260% 100%;
   background-position: 120% 0;
   mix-blend-mode: soft-light;
-  transition: background-position 0.9s ease;
+  transition: background-position 1.1s var(--ease-out);
   z-index: 2;
 }
 .group:hover .holo-shine::after,
@@ -500,29 +556,49 @@
   background-position: -30% 0;
 }
 
-/* Contour irisé au survol. */
+/* Liseré nacré au survol (fin, aux couleurs du thème). */
 .holo-ring {
   position: relative;
 }
 .holo-ring::before {
   content: "";
   position: absolute;
-  inset: -2px;
+  inset: -1px;
   border-radius: inherit;
-  padding: 2px;
-  background: conic-gradient(from 180deg, var(--c-accent), #f2c6d6, #bfe3f2, #f6e3b0, var(--c-primary), var(--c-accent));
+  padding: 1px;
+  background: conic-gradient(from 200deg, var(--c-accent), var(--c-secondary), var(--c-surface), var(--c-accent), var(--c-primary-soft), var(--c-accent));
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   opacity: 0;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.4s var(--ease-out);
   pointer-events: none;
 }
 .group:hover .holo-ring::before,
 .holo-ring:hover::before {
   opacity: 1;
+}
+
+/* Carte qui s'élève doucement au survol. */
+.lift {
+  transition:
+    transform 0.45s var(--ease-out),
+    box-shadow 0.45s var(--ease-out);
+}
+@media (hover: hover) {
+  .group:hover .lift,
+  .lift:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lift);
+  }
+}
+
+/* Filet dégradé très fin. */
+.hairline {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--c-accent) 55%, var(--c-border)), transparent);
 }
 
 /* Bandeau défilant. */
@@ -553,9 +629,9 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 0.28) 50%, transparent 65%);
+  background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 0.18) 50%, transparent 65%);
   transform: translateX(-120%);
-  transition: transform 0.7s ease;
+  transition: transform 0.9s var(--ease-out);
 }
 .btn-primary:hover:not(:disabled)::after {
   transform: translateX(120%);

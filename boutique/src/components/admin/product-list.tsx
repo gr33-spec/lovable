@@ -208,7 +208,7 @@ export function ProductList({
             <li key={r.id} className="flex items-center gap-3 p-3 sm:p-4">
               <input type="checkbox" className="h-5 w-5 shrink-0 accent-[var(--c-primary)]" checked={selected.has(r.id)} onChange={() => toggle(r.id)} aria-label={`Sélectionner ${r.name}`} />
               <Link href={`/admin/produits/${r.id}`} className="flex min-w-0 flex-1 items-center gap-3 no-underline">
-                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-secondary">
+                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-surface-2">
                   <Img image={r.image} alt="" sizes="56px" className="h-full w-full" />
                 </div>
                 <div className="min-w-0">

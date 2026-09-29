@@ -82,7 +82,7 @@ export default async function OrderPage({ params, searchParams }: Props) {
             const Icon = s.icon;
             return (
               <li key={s.label} className="flex flex-col items-center gap-2 text-center text-sm">
-                <span className={`flex h-10 w-10 items-center justify-center rounded-full ${done ? "bg-primary text-on-primary" : "bg-secondary text-text-2"}`}>
+                <span className={`flex h-10 w-10 items-center justify-center rounded-full ${done ? "bg-primary text-on-primary" : "bg-surface-2 text-text-2"}`}>
                   <Icon size={18} aria-hidden="true" />
                 </span>
                 <span className={done ? "font-semibold" : "text-text-2"}>

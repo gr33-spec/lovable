@@ -28,6 +28,7 @@ export async function brand(): Promise<EmailBrand> {
   return {
     shopName: s.shopName,
     themeId: s.themeId,
+    themeCustom: s.themeCustom,
     siteUrl: siteUrl(),
     contactEmail: s.contactEmail,
     // JPEG : lisible par tous les logiciels de messagerie (Outlook ne lit pas le WebP).

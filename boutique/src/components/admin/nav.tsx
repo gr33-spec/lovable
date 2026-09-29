@@ -43,7 +43,7 @@ export function AdminNav({ shopName, toPrepare, adminName }: { shopName: string;
                 <Link
                   href={href}
                   aria-current={active(href) ? "page" : undefined}
-                  className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-[15px] font-medium no-underline transition hover:bg-secondary aria-[current=page]:bg-primary-light aria-[current=page]:text-primary"
+                  className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-[15px] font-medium no-underline transition hover:bg-surface-2 aria-[current=page]:bg-primary-light aria-[current=page]:text-primary"
                 >
                   <Icon size={19} aria-hidden="true" /> {label} {badge(href)}
                 </Link>
@@ -52,11 +52,11 @@ export function AdminNav({ shopName, toPrepare, adminName }: { shopName: string;
           </ul>
         </nav>
         <div className="space-y-1 border-t border-border p-3">
-          <a href="/" target="_blank" className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm no-underline hover:bg-secondary">
+          <a href="/" target="_blank" className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm no-underline hover:bg-surface-2">
             <ExternalLink size={17} aria-hidden="true" /> Voir la boutique
           </a>
           <form action={logoutAction}>
-            <button type="submit" className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-sm hover:bg-secondary">
+            <button type="submit" className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-sm hover:bg-surface-2">
               <LogOut size={17} aria-hidden="true" /> Se déconnecter
             </button>
           </form>

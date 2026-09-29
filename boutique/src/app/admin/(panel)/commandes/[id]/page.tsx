@@ -66,7 +66,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             <ul className="mt-3 divide-y divide-border">
               {data.items.map((i) => (
                 <li key={`${i.product_name}-${i.product_sku}`} className="flex items-center gap-3 py-3">
-                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-secondary">
+                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-surface-2">
                     <Img image={i.image} alt="" sizes="64px" className="h-full w-full" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -84,7 +84,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                       {i.product_sku ? ` · Réf. ${i.product_sku}` : ""}
                     </p>
                   </div>
-                  <span className={`badge text-sm ${i.quantity > 1 ? "bg-primary text-on-primary" : "bg-secondary"}`}>× {i.quantity}</span>
+                  <span className={`badge text-sm ${i.quantity > 1 ? "bg-primary text-on-primary" : "bg-surface-2"}`}>× {i.quantity}</span>
                 </li>
               ))}
             </ul>

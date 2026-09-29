@@ -32,7 +32,7 @@ function MethodForm({ initial, onDone }: { initial: Method; onDone: () => void }
   const toast = useToast();
   return (
     <form
-      className="space-y-4 rounded-2xl bg-secondary/60 p-4"
+      className="space-y-4 rounded-2xl bg-surface-2/60 p-4"
       onSubmit={(e) => {
         e.preventDefault();
         const priceCents = price.trim() === "" ? 0 : parseEuros(price);
