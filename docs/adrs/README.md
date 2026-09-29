@@ -20,3 +20,4 @@ nouveau (« Remplacé par ADR-XXXX »).
 | [0012](0012-deterministic-comparison-engine.md) | Moteur de comparaison déterministe | Accepté |
 | [0013](0013-hosting-eu-containers.md) | Hébergement en conteneurs, région UE | Proposé |
 | [0014](0014-domain-events-outbox.md) | Événements métier via outbox transactionnelle | Accepté |
+| [0015](0015-trial-hosting-vercel-neon.md) | Mise en ligne d'essai : Vercel + Neon, comme patrimoine | Accepté |

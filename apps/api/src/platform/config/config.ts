@@ -13,16 +13,27 @@ const envSchema = z
     DATABASE_URL: z.string().min(1),
     /** Secret de signature des sessions (≥ 32 caractères). */
     AUTH_SECRET: z.string().min(32),
-    /** URL publique de l'API (liens de vérification d'e-mail, OAuth). */
+    /**
+     * URL publique par laquelle les navigateurs joignent l'API. En ligne,
+     * c'est l'adresse du site web, qui relaie /v1/* vers l'API (même
+     * origine : cookies de session fiables, y compris sur Safari).
+     */
     API_PUBLIC_URL: z.url().default("http://localhost:4000"),
     /** URL de l'application web (CORS, redirections après vérification). */
     WEB_APP_URL: z.url().default("http://localhost:3000"),
     /**
-     * Envoi des e-mails transactionnels. Seuls des adapters de développement
-     * existent pour l'instant : `console` (affiche dans les logs) et
-     * `capture` (tests). Aucun envoi réel n'est encore branché.
+     * Envoi des e-mails transactionnels (vérification, mot de passe oublié) :
+     * - `resend`   : envoi réel via Resend (RESEND_API_KEY, EMAIL_FROM) ;
+     * - `disabled` : aucun envoi, et l'application le dit (mise en ligne sans clé) ;
+     * - `console`  : affichés dans les logs (développement uniquement) ;
+     * - `capture`  : conservés en mémoire (tests uniquement).
+     * Par défaut : `resend` si une clé est fournie, sinon `console` en
+     * développement et `disabled` en ligne.
      */
-    EMAIL_PROVIDER: z.enum(["console", "capture"]).default("console"),
+    EMAIL_PROVIDER: z.enum(["resend", "disabled", "console", "capture"]).optional(),
+    RESEND_API_KEY: z.string().min(1).optional(),
+    /** Expéditeur, ex. « BatiClair <bonjour@mondomaine.fr> » (domaine vérifié chez Resend). */
+    EMAIL_FROM: z.string().min(3).optional(),
     GOOGLE_CLIENT_ID: z.string().min(1).optional(),
     GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
     MICROSOFT_CLIENT_ID: z.string().min(1).optional(),
@@ -34,8 +45,14 @@ const envSchema = z
       ctx.addIssue({
         code: "custom",
         path: ["EMAIL_PROVIDER"],
-        message: "un fournisseur d'e-mail réel est obligatoire hors développement",
+        message: "« console » et « capture » sont réservés au développement et aux tests",
       });
+    }
+    if (env.EMAIL_PROVIDER === "resend" && !env.RESEND_API_KEY) {
+      ctx.addIssue({ code: "custom", path: ["RESEND_API_KEY"], message: "obligatoire avec EMAIL_PROVIDER=resend" });
+    }
+    if ((env.EMAIL_PROVIDER === "resend" || (!env.EMAIL_PROVIDER && env.RESEND_API_KEY)) && !env.EMAIL_FROM) {
+      ctx.addIssue({ code: "custom", path: ["EMAIL_FROM"], message: "obligatoire pour envoyer des e-mails" });
     }
     for (const provider of ["GOOGLE", "MICROSOFT"] as const) {
       if (Boolean(env[`${provider}_CLIENT_ID`]) !== Boolean(env[`${provider}_CLIENT_SECRET`])) {
@@ -61,7 +78,8 @@ export interface AppConfig {
   authSecret: string;
   apiPublicUrl: string;
   webAppUrl: string;
-  emailProvider: "console" | "capture";
+  emailProvider: "resend" | "disabled" | "console" | "capture";
+  resend?: { apiKey: string; from: string };
   oauth: { google?: OAuthClientConfig; microsoft?: OAuthClientConfig };
 }
 
@@ -80,6 +98,8 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     );
   }
   const e = parsed.data;
+  const isDeployed = e.NODE_ENV === "production" || e.NODE_ENV === "staging";
+  const emailProvider = e.EMAIL_PROVIDER ?? (e.RESEND_API_KEY ? "resend" : isDeployed ? "disabled" : "console");
   const oauth = (id?: string, secret?: string) => (id && secret ? { clientId: id, clientSecret: secret } : undefined);
   const google = oauth(e.GOOGLE_CLIENT_ID, e.GOOGLE_CLIENT_SECRET);
   const microsoft = oauth(e.MICROSOFT_CLIENT_ID, e.MICROSOFT_CLIENT_SECRET);
@@ -91,7 +111,10 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     authSecret: e.AUTH_SECRET,
     apiPublicUrl: e.API_PUBLIC_URL,
     webAppUrl: e.WEB_APP_URL,
-    emailProvider: e.EMAIL_PROVIDER,
+    emailProvider,
+    ...(emailProvider === "resend" && e.RESEND_API_KEY && e.EMAIL_FROM
+      ? { resend: { apiKey: e.RESEND_API_KEY, from: e.EMAIL_FROM } }
+      : {}),
     oauth: { ...(google ? { google } : {}), ...(microsoft ? { microsoft } : {}) },
   };
 }

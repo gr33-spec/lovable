@@ -1,7 +1,8 @@
-import type { TransactionalEmail, TransactionalEmailSender } from "./email.port.js";
+import type { EmailCapability, TransactionalEmail, TransactionalEmailSender } from "./email.port.js";
 
 /** TESTS UNIQUEMENT : conserve les e-mails en mémoire pour les inspecter. */
-export class CapturingEmailSender implements TransactionalEmailSender {
+export class CapturingEmailSender implements TransactionalEmailSender, EmailCapability {
+  readonly deliversEmail = true;
   readonly sent: TransactionalEmail[] = [];
   async send(email: TransactionalEmail): Promise<void> {
     this.sent.push(email);

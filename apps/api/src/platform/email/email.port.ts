@@ -1,8 +1,7 @@
 /**
  * Port d'envoi d'e-mails transactionnels (vérification, mot de passe…).
- * Adapters actuels : développement uniquement (console, capture).
- * Un adapter réel (Resend, Brevo, Postmark…) sera ajouté avant tout
- * déploiement — la configuration refuse de démarrer sans lui hors dev.
+ * Adapters : Resend (réel), désactivé (en ligne sans clé), console (dev),
+ * capture (tests). Changer de prestataire = écrire un adapter.
  */
 export interface TransactionalEmail {
   to: string;
@@ -12,4 +11,9 @@ export interface TransactionalEmail {
 
 export interface TransactionalEmailSender {
   send(email: TransactionalEmail): Promise<void>;
+}
+
+/** Indique si des e-mails partent réellement (l'interface l'affiche honnêtement). */
+export interface EmailCapability {
+  readonly deliversEmail: boolean;
 }

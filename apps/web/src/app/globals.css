@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+/*
+ * Jetons du design system (maquette « moderne ») : une seule source pour
+ * les couleurs, rayons et ombres. Accent orange réservé à l'essentiel ;
+ * textes orange en #C2410C pour le contraste.
+ */
+@theme {
+  --color-ink: #0e1116;
+  --color-ground: #f3f4f6;
+  --color-surface: #ffffff;
+  --color-muted: #5b6470;
+  --color-subtle: #9ba3af;
+  --color-line: #eef0f3;
+  --color-accent: #ff5a1f;
+  --color-accent-text: #c2410c;
+  --color-ok-bg: #ddf5ec;
+  --color-ok: #0b7a53;
+  --color-warn-bg: #fff1d6;
+  --color-warn: #8a5300;
+  --color-danger-bg: #ffe4da;
+  --color-danger: #b3360f;
+  --font-sans: "Plus Jakarta Sans Variable", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque Variable", "Plus Jakarta Sans Variable", system-ui, sans-serif;
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.05), 0 8px 24px rgba(16, 24, 40, 0.06);
+  --shadow-float: 0 14px 30px rgba(14, 17, 22, 0.28);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-ground);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

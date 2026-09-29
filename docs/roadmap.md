@@ -24,10 +24,16 @@ Fait (2026-09-28) :
 - ✅ Tests d'intégration sur PostgreSQL réel, dont isolation entre entreprises.
 - ✅ ESLint avec règles de frontières de modules ; CI GitHub Actions.
 
+- ✅ `apps/web` (Next.js) : inscription en un écran (compte + entreprise),
+  connexion, mot de passe oublié, accueil « À faire », chantiers (recherche,
+  filtres, création, fiche, terminé), bouton « + », compte ; mobile et
+  ordinateur ; 14 tests de bout en bout (Playwright).
+- ✅ Mise en ligne d'essai Vercel + Neon, comme patrimoine (ADR-0015,
+  `docs/mise-en-ligne.md`) ; e-mails Resend facultatifs.
+
 Reste :
 
-- `apps/web` (Next.js) : inscription, onboarding, liste de chantiers ;
-  `packages/{contracts,ui,i18n}`.
+- `packages/{contracts,ui,i18n}` quand un deuxième client (mobile) en aura besoin.
 - Adapter e-mail réel (transactionnel) ; suppression de compte.
 - `StorageProvider` S3, `JobQueue` pg-boss + worker, outbox d'événements.
 - `AIProvider` + `FakeAIProvider` + registre de prompts + `AIExecution`.
