@@ -197,18 +197,25 @@ fictives uniquement.
   plus récemment travaillé au plus ancien.
 - **Impact** : API `GET /v1/projects?q=&status=`, tests dédiés.
 
-### PD-023 — Après la comparaison : « Commander chez… »
-- **Date** : 2026-09-28 · **Statut** : **Proposé — à valider par le fondateur**
-- **Proposition** : la comparaison se termine par « Commander chez
-  [fournisseur] », qui prépare un message d'accord (modifiable, envoyé
-  depuis la boîte de l'artisan) et, en option, un court remerciement aux
-  autres fournisseurs. Le chantier passe à l'étape « Commandé ».
-- **Raison** : sans cela, le parcours s'arrête au moment précis où
-  l'artisan doit agir.
-- **Question** : l'artisan commande-t-il plutôt par e-mail, par téléphone
-  ou sur le site du négoce ? Si c'est rarement par e-mail, l'action devient
-  « Marquer comme commandé » (avec le numéro du fournisseur à portée de
-  pouce).
+### PD-023 — Après la comparaison : « Commander chez… », de la façon habituelle de l'artisan
+- **Date** : 2026-09-28, révisée le 2026-09-29 · **Statut** : Décidé
+  (le fondateur : « la validation de commande peut se faire de plusieurs
+  façons : téléphone, e-mail, contact réel… »)
+- **Décision** : la comparaison se termine par « Commander chez
+  [fournisseur] ». Un seul écran propose trois façons, avec le même
+  résultat (le chantier passe à « Commandé ») :
+  - **par e-mail** : message d'accord prêt, modifiable, envoyé depuis la
+    boîte de l'artisan ;
+  - **par téléphone** : appel en un geste, référence et montant affichés
+    pendant l'appel, puis « C'est commandé » ;
+  - **c'est déjà fait** (comptoir, commercial, site du négoce) : simple
+    enregistrement.
+  Date de livraison facultative. Option pour remercier les autres
+  fournisseurs (message relu avant envoi).
+- **Raison** : le logiciel suit la façon de travailler de l'artisan, il ne
+  l'impose pas ; ce qui compte est que le chantier sache ce qui est
+  commandé, chez qui et quand (base du futur contrôle facture ↔ devis
+  accepté).
 
 ### PD-024 — Pas de suppression dans le parcours courant
 - **Date** : 2026-09-28 · **Statut** : Décidé (audit global)

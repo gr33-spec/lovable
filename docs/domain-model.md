@@ -107,6 +107,15 @@ une `Clarification` au lieu d'écraser.
   `result` (JSON figé), `createdAt`. Recalculée à chaque nouvelle offre ou
   correction ; l'historique reste consultable.
 
+### Commande (PD-023)
+- **SupplierOrder** — `projectId`, `supplierId`, `supplierOfferId` (le
+  devis retenu, version figée), `channel` (`email` | `phone` |
+  `in_person` | `other`), `orderedAt`, `expectedDeliveryDate?`, `note?`,
+  `emailMessageId?` (si envoyé par e-mail), `createdBy`. Une commande est
+  **enregistrée** par l'artisan, quel que soit le canal ; le logiciel ne
+  suppose jamais qu'une commande a eu lieu. Sert plus tard au contrôle
+  facture ↔ devis accepté.
+
 ### Factures (phase 6)
 - **Invoice**, **InvoiceLine** (même structure de ligne que les offres).
 - **PriceObservation** — prix unitaire observé pour un `CanonicalProduct`
