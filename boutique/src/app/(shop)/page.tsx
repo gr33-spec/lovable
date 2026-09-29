@@ -4,7 +4,6 @@ import { SocialLinks } from "@/components/shop/footer";
 import { ProductCard, ProductGrid } from "@/components/shop/product-card";
 import { Img } from "@/components/ui/img";
 import { Highlighted, plainText, Sparkle } from "@/components/ui/sparkle";
-import { formatPrice } from "@/lib/format";
 import { getBestSellers, getCategories, getListing, getSettings } from "@/lib/server/cached";
 import { siteUrl } from "@/lib/server/env";
 
@@ -21,8 +20,9 @@ export default async function HomePage() {
   const withPhotos = newest.filter((p) => p.image);
   const available = withPhotos.filter((p) => p.availability !== "sold_out");
   // Visuel d'accueil : celui choisi dans l'administration, sinon la dernière création disponible.
-  const heroImage = settings.hero ?? (available[0] ?? withPhotos[0])?.image ?? null;
-  const featured = (available.find((p) => p.image?.id !== heroImage?.id) ?? withPhotos.find((p) => p.image?.id !== heroImage?.id)) || null;
+  // Visuel d'accueil : la photo choisie dans l'administration ; sinon une
+  // composition de trois créations (on présente une collection, pas un produit).
+  const collage = (available.length >= 3 ? available : withPhotos).slice(0, 3).map((p) => p.image!);
   const visibleCategories = categories.filter((c) => c.productCount > 0);
   const aboutExcerpt = settings.aboutText.split(/\n{2,}/).find((p) => p.trim() && !p.includes("[À COMPLÉTER")) ?? "";
   const tagline = settings.tagline || settings.shopName;
@@ -45,7 +45,7 @@ export default async function HomePage() {
       <section className="relative overflow-hidden">
         <div className="soft-glow pointer-events-none absolute inset-0" aria-hidden="true" />
         <div className="container-page relative grid items-center gap-10 pt-4 pb-16 md:grid-cols-[1.1fr_1fr] md:gap-16 md:pt-16 md:pb-28">
-          <div className="order-2 md:order-1">
+          <div>
             <p className="eyebrow">Créations faites main · petites séries</p>
             <h1 className="mt-5 text-[2.75rem] leading-[1.02] tracking-[-0.025em] sm:text-6xl lg:text-[4.8rem]">
               <Highlighted text={tagline} />
@@ -72,32 +72,33 @@ export default async function HomePage() {
             </ul>
           </div>
 
-          {/* Photo en arche : la forme bohème, l'image en vedette */}
-          <div className="relative isolate order-1 mx-auto mb-6 w-[84%] max-w-[500px] md:order-2 md:mb-0 md:w-full">
-            <div className="holo-shine aspect-[4/5] overflow-hidden rounded-t-[999px] rounded-b-[28px] bg-surface-2 shadow-lift">
-              <Img image={heroImage} alt={heroImage?.alt || `Création ${settings.shopName}`} sizes="(min-width: 768px) 45vw, 92vw" priority className="h-full w-full" />
+          {/* Visuel : photo d'ambiance en arche, ou trois créations en arches (forme bohème). */}
+          {settings.hero ? (
+            <div className="relative isolate mx-auto w-[82%] max-w-[480px] md:w-full">
+              <div className="holo-shine aspect-[4/5] overflow-hidden rounded-t-[999px] rounded-b-[28px] bg-surface-2 shadow-lift">
+                <Img image={settings.hero} alt={settings.hero.alt || `Créations ${settings.shopName}`} sizes="(min-width: 768px) 45vw, 82vw" priority className="h-full w-full" />
+              </div>
+              <div className="pointer-events-none absolute -inset-3 -z-10 rounded-t-[999px] rounded-b-[36px] border border-accent/40" aria-hidden="true" />
+              <Sparkle size={24} className="absolute top-6 -right-1 text-accent" />
             </div>
-            <div className="pointer-events-none absolute -inset-3 -z-10 rounded-t-[999px] rounded-b-[36px] border border-accent/40" aria-hidden="true" />
-            {featured && (
-              <Link
-                href={`/produit/${featured.slug}`}
-                className="group lift absolute -bottom-7 -left-3 flex w-[86%] max-w-[280px] items-center gap-3 rounded-2xl border border-border bg-surface/95 p-2.5 pr-4 no-underline shadow-soft backdrop-blur sm:-left-10"
-              >
-                <span className="block h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-surface-2">
-                  <Img image={featured.image} alt="" sizes="64px" className="h-full w-full" />
-                </span>
-                <span className="min-w-0">
-                  <span className="flex items-center gap-1 text-[10px] font-semibold tracking-[0.18em] text-accent-text uppercase">
-                    <Sparkle size={9} /> Nouveau
-                  </span>
-                  <span className="block truncate text-sm font-medium">{featured.name}</span>
-                  <span className="text-sm text-text-2">{formatPrice(featured.priceCents)}</span>
-                </span>
-                <ArrowUpRight size={16} className="ml-auto shrink-0 text-text-2 transition group-hover:text-primary" aria-hidden="true" />
-              </Link>
-            )}
-            <Sparkle size={26} className="absolute top-6 -right-1 text-accent" />
-          </div>
+          ) : collage.length > 0 ? (
+            <div className="relative isolate mx-auto flex w-full max-w-[520px] items-end justify-center gap-3 sm:gap-4" aria-hidden="true">
+              {collage.map((image, i) => {
+                const center = collage.length === 3 ? i === 1 : i === 0;
+                return (
+                  <div
+                    key={image.id}
+                    className={`holo-shine overflow-hidden rounded-t-[999px] rounded-b-[22px] bg-surface-2 shadow-lift ${center ? "aspect-[3/5] w-[38%]" : "mb-8 aspect-[3/4.6] w-[29%]"}`}
+                  >
+                    <Img image={image} alt="" sizes="(min-width: 768px) 200px, 38vw" priority={center} className="h-full w-full" />
+                  </div>
+                );
+              })}
+              <div className="pointer-events-none absolute -bottom-3 left-1/2 -z-10 h-[78%] w-[46%] -translate-x-1/2 rounded-t-[999px] border border-b-0 border-accent/40" aria-hidden="true" />
+              <Sparkle size={22} className="absolute -top-2 right-[12%] text-accent" />
+              <Sparkle size={14} className="absolute top-[30%] left-[4%] text-accent" delay={1} />
+            </div>
+          ) : null}
         </div>
       </section>
 
