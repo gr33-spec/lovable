@@ -82,7 +82,7 @@ export function StoreProvider({
             body: JSON.stringify({ ops: batch }),
           });
           if (res.status === 401) {
-            window.location.href = "/connexion";
+            window.location.replace("/connexion");
             return;
           }
           if (!res.ok) throw new Error(String(res.status));
@@ -201,7 +201,7 @@ export function StoreProvider({
     try {
       const res = await fetch("/api/data", { cache: "no-store" });
       if (res.status === 401) {
-        window.location.href = "/connexion";
+        window.location.replace("/connexion");
         return;
       }
       if (!res.ok) return;

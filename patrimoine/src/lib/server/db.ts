@@ -190,14 +190,16 @@ export async function createManualSnapshot(): Promise<void> {
 
 const MAX_FAILURES = 8;
 const WINDOW_MINUTES = 15;
+/** Toutes adresses confondues (attaque répartie sur de nombreuses adresses) : au-delà, pause générale. */
+const MAX_GLOBAL_FAILURES = 60;
 
 export async function isLoginBlocked(ip: string): Promise<boolean> {
   await ensureSchema();
   const res = await pool().query(
-    `SELECT count(*)::int AS n FROM login_attempt WHERE ip = $1 AND created_at > now() - ($2 || ' minutes')::interval`,
+    `SELECT count(*) FILTER (WHERE ip = $1)::int AS n, count(*)::int AS total FROM login_attempt WHERE created_at > now() - ($2 || ' minutes')::interval`,
     [ip, String(WINDOW_MINUTES)],
   );
-  return res.rows[0].n >= MAX_FAILURES;
+  return res.rows[0].n >= MAX_FAILURES || res.rows[0].total >= MAX_GLOBAL_FAILURES;
 }
 
 export async function recordLoginFailure(ip: string): Promise<void> {

@@ -1,5 +1,6 @@
 "use client";
 
+import { signOut } from "@/lib/sign-out";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
@@ -49,7 +50,23 @@ function NavTracker() {
   return null;
 }
 
+/**
+ * Page restaurée depuis le cache du navigateur (bouton Retour après une
+ * déconnexion) : rechargée, donc revérifiée par le serveur — aucune donnée
+ * affichée sans session valide.
+ */
+function useNoStaleRestore() {
+  useEffect(() => {
+    const onShow = (e: PageTransitionEvent) => {
+      if (e.persisted) window.location.reload();
+    };
+    window.addEventListener("pageshow", onShow);
+    return () => window.removeEventListener("pageshow", onShow);
+  }, []);
+}
+
 export function AppShell({ children }: { children: React.ReactNode }) {
+  useNoStaleRestore();
   const pathname = usePathname();
   const router = useRouter();
   const { data, role, view } = useStore();
@@ -176,10 +193,7 @@ function ReadOnlyBanner() {
       <div className="mx-auto flex items-center justify-between gap-3 px-4 py-2 text-[13px] font-semibold">
         <span>Consultation — lecture seule : vous pouvez tout ouvrir, rien n&apos;est modifié.</span>
         <button
-          onClick={async () => {
-            await fetch("/api/logout", { method: "POST" }).catch(() => undefined);
-            window.location.href = "/connexion";
-          }}
+          onClick={signOut}
           className="shrink-0 rounded-full bg-navy px-3 py-1 text-[12px] text-white"
         >
           Quitter

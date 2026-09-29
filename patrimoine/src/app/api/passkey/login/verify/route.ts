@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { clientIp } from "@/lib/server/client-ip";
 import { verifyAuthenticationResponse } from "@simplewebauthn/server";
 import { clearLoginFailures } from "@/lib/server/db";
 import { findPasskey, touchPasskey } from "@/lib/server/passkeys";
@@ -9,9 +10,6 @@ import { CHALLENGE_COOKIE, readChallenge, relyingParty } from "@/lib/server/weba
 
 export const dynamic = "force-dynamic";
 
-function clientIp(request: Request): string {
-  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "local";
-}
 
 export async function POST(request: Request) {
   const ip = clientIp(request);

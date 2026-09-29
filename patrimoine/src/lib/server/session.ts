@@ -1,4 +1,4 @@
-import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 
 // Session signée (HMAC-SHA256) stockée dans un cookie httpOnly. Le mot de
 // passe n'existe que dans les variables d'environnement du serveur.
@@ -31,6 +31,10 @@ export interface SessionInfo {
   av?: number;
   /** Lien de partage à l'origine d'une session de consultation (révocation). */
   sid?: string;
+  /** Identifiant de la session (déconnexion : révoqué côté serveur). Conservé quand la session est prolongée. */
+  jti?: string;
+  /** Début de la session (« déconnecter tous les appareils » invalide les sessions plus anciennes). */
+  iat?: number;
 }
 
 export function createSessionToken(info: SessionInfo = { role: "owner" }, now = Date.now(), expiresAt?: number): string {
@@ -38,7 +42,7 @@ export function createSessionToken(info: SessionInfo = { role: "owner" }, now = 
   if (!key) throw new Error("APP_PASSWORD manquant");
   const exp = Math.min(expiresAt ?? Infinity, now + SESSION_DAYS * 24 * 3600 * 1000);
   const payload = Buffer.from(
-    JSON.stringify({ iat: now, exp, role: info.role, av: info.av, sid: info.sid }),
+    JSON.stringify({ iat: info.iat ?? now, exp, role: info.role, av: info.av, sid: info.sid, jti: info.jti ?? randomUUID() }),
   ).toString("base64url");
   return `${payload}.${sign(payload, key)}`;
 }
@@ -53,11 +57,12 @@ export function readSessionToken(token: string | undefined, now = Date.now()): S
   const given = Buffer.from(signature);
   if (expected.length !== given.length || !timingSafeEqual(expected, given)) return null;
   try {
-    const { exp, role, av, sid } = JSON.parse(Buffer.from(payload, "base64url").toString());
+    const { exp, role, av, sid, jti, iat } = JSON.parse(Buffer.from(payload, "base64url").toString());
     if (typeof exp !== "number" || exp <= now) return null;
-    if (role === "lecture") return typeof sid === "string" ? { role: "lecture", sid } : null;
+    const ids = { ...(typeof jti === "string" ? { jti } : {}), ...(typeof iat === "number" ? { iat } : {}) };
+    if (role === "lecture") return typeof sid === "string" ? { role: "lecture", sid, ...ids } : null;
     // Anciennes sessions (sans rôle) : propriétaire.
-    return role === "gestion" ? { role: "gestion", av: typeof av === "number" ? av : -1 } : { role: "owner" };
+    return role === "gestion" ? { role: "gestion", av: typeof av === "number" ? av : -1, ...ids } : { role: "owner", ...ids };
   } catch {
     return null;
   }

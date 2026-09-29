@@ -1,17 +1,26 @@
-import type { AppData } from "./types";
-
-/** Fichiers rattachés aux baux : exemplaires signés du bail et des actes de caution. */
-export function tenancyFileIds(data: AppData): Set<string> {
-  const ids = new Set<string>();
-  for (const t of data.tenancies) {
-    if (t.signedLease?.fileId) ids.add(t.signedLease.fileId);
-    for (const g of t.guarantors ?? []) if (g.signedFile?.fileId) ids.add(g.signedFile.fileId);
-    for (const l of t.letters ?? []) if (l.file?.fileId) ids.add(l.file.fileId);
-  }
-  return ids;
-}
-
 /** Fichiers propres au dossier d'un locataire (supprimés avec lui). */
 export function filesOfTenancy(t: import("./types").Tenancy): string[] {
   return [t.signedLease?.fileId, ...(t.guarantors ?? []).map((g) => g.signedFile?.fileId), ...(t.letters ?? []).map((l) => l.file?.fileId)].filter((x): x is string => !!x);
+}
+
+/**
+ * Tous les fichiers cités par un ensemble de données (champs `fileId`, photos
+ * des états des lieux), où qu'ils soient. Sert à n'ouvrir à un accès restreint
+ * que les pièces de son périmètre.
+ */
+export function referencedFileIds(value: unknown, out = new Set<string>()): Set<string> {
+  if (Array.isArray(value)) {
+    for (const v of value) referencedFileIds(v, out);
+  } else if (value && typeof value === "object") {
+    for (const [k, v] of Object.entries(value)) {
+      if (k === "fileId" && typeof v === "string") {
+        out.add(v);
+      } else if (k === "photos" && Array.isArray(v)) {
+        for (const p of v) if (typeof p === "string") out.add(p);
+      } else {
+        referencedFileIds(v, out);
+      }
+    }
+  }
+  return out;
 }

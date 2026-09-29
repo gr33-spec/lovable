@@ -17,8 +17,8 @@
     "@simplewebauthn/server": "^13.3.3",
     "exceljs": "^4.4.0",
     "lucide-react": "^1.48.0",
-    "next": "^16.2.9",
-    "pdfjs-dist": "^5.7.284",
+    "next": "^16.3.7",
+    "pdfjs-dist": "^6.3.289",
     "pg": "^8.23.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -32,9 +32,12 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "eslint": "^9.39.5",
-    "eslint-config-next": "^16.2.9",
+    "eslint-config-next": "^16.3.7",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
   }
 }

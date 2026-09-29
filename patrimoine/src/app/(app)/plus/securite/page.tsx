@@ -5,6 +5,7 @@ import { KeyRound, ScanFace, Trash2 } from "lucide-react";
 import { browserSupportsWebAuthn, startRegistration } from "@simplewebauthn/browser";
 import { LogOut } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { signOut } from "@/lib/sign-out";
 import { Button, Card, Page, PageHeader, SectionTitle, TextField } from "@/components/ui";
 
 interface Passkey {
@@ -124,22 +125,50 @@ export default function SecuritePage() {
             ? "Le mot de passe fonctionne toujours. S'il est changé, Face ID devra être réactivé."
             : "Le mot de passe fonctionne toujours. Changer le mot de passe (variable APP_PASSWORD) désactive toutes les clés Face ID et toutes les sessions."}
         </p>
+        {role === "owner" && <SignOutEverywhere />}
               {role === "gestion" && (
           <div className="mt-6">
             <Button
               full
               variant="secondary"
               icon={<LogOut size={18} />}
-              onClick={async () => {
-                await fetch("/api/logout", { method: "POST" });
-                window.location.href = "/connexion";
-              }}
+              onClick={signOut}
             >
               Se déconnecter
             </Button>
           </div>
         )}
       </Page>
+    </>
+  );
+}
+
+/** Coupe l'accès de tous les autres appareils (téléphone perdu, ordinateur partagé…). */
+function SignOutEverywhere() {
+  const [state, setState] = useState<"idle" | "busy" | "done" | "error">("idle");
+  return (
+    <>
+      <SectionTitle>Sessions ouvertes</SectionTitle>
+      <Card>
+        <p className="text-[14px] text-ink-2">Un appareil perdu ou un ordinateur partagé ? Déconnectez tous les autres appareils : ils devront saisir le mot de passe (ou Face ID) à nouveau. Cet appareil reste connecté.</p>
+        <div className="mt-3">
+          <Button
+            full
+            variant="secondary"
+            disabled={state === "busy"}
+            icon={<LogOut size={18} />}
+            onClick={async () => {
+              setState("busy");
+              const res = await fetch("/api/sessions", { method: "POST" }).catch(() => null);
+              setState(res?.ok ? "done" : "error");
+            }}
+          >
+            Déconnecter tous les autres appareils
+          </Button>
+        </div>
+        {state === "done" && <p className="mt-2 text-[13px] text-pos">C&apos;est fait : seules les nouvelles connexions sont acceptées.</p>}
+        {state === "error" && <p className="mt-2 text-[13px] text-neg">Impossible pour le moment, réessayez.</p>}
+      </Card>
     </>
   );
 }
