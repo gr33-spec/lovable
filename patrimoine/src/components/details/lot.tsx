@@ -1,5 +1,6 @@
 "use client";
 
+import { DocumentsCard } from "@/components/documents/library";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronRight, DoorOpen, Hammer, KeyRound, UserPlus, UserRound } from "lucide-react";
@@ -144,6 +145,8 @@ export function LotSheet({ id }: { id: string }) {
                 {role === "owner" && <NumberField label="Estimation de valeur" value={unit.value} onChange={(v) => set({ value: v })} hint="Facultatif : sinon la valeur de l'immeuble est utilisée." />}
               </Stack>
             </Card>
+
+            <DocumentsCard scope={{ unitId: unit.id }} href={`/documents?immeuble=${unit.buildingId}&lot=${unit.id}`} title="Documents du lot" />
 
             {works.length > 0 && (
               <>

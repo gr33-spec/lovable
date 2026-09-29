@@ -1,8 +1,9 @@
 "use client";
 
+import { documentIndex } from "@/lib/documents";
 import Link from "next/link";
 import { useState } from "react";
-import { Building2, KeyRound, CalendarRange, FlaskConical, Scale, ScanFace, Share2, LineChart as LineIcon, FileSpreadsheet, Gauge, CalendarClock, CircleAlert, FileText, HandCoins, History, LogOut, Percent, Smartphone, Sparkles, Trash2, Wand2 } from "lucide-react";
+import { FolderOpen, Building2, KeyRound, CalendarRange, FlaskConical, Scale, ScanFace, Share2, LineChart as LineIcon, FileSpreadsheet, Gauge, CalendarClock, CircleAlert, FileText, HandCoins, History, LogOut, Percent, Smartphone, Sparkles, Trash2, Wand2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { demoData, hasDemo, withoutDemo } from "@/lib/demo";
 import { qualityIssues } from "@/lib/engine/quality";
@@ -17,6 +18,7 @@ export default function PlusPage() {
   const issues = qualityIssues(data, projection.snapshot);
   const dossiers = data.units.filter((u) => unitMissing(data, u).length > 0).length;
   const toComplete = issues.length + dossiers;
+  const docCount = documentIndex(data).length;
   const demo = hasDemo(data);
 
   const logout = async () => {
@@ -50,6 +52,11 @@ export default function PlusPage() {
 
         <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
         <div className="min-w-0">
+        <SectionTitle>Documents</SectionTitle>
+        <Card className="py-1">
+          <Row href="/documents" icon={<FolderOpen size={18} />} title="Tous les documents" subtitle={`${docCount} pièce${docCount > 1 ? "s" : ""} · baux, tableaux, assurances, factures… · importer`} />
+        </Card>
+
         {toComplete > 0 && (
           <>
             <SectionTitle>À traiter</SectionTitle>

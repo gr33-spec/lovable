@@ -1,5 +1,6 @@
 "use client";
 
+import { DocumentsCard } from "@/components/documents/library";
 import { AnalysisEntry } from "@/components/analysis/entry";
 import { companyCrumbs } from "@/lib/crumbs";
 import { goBack } from "@/lib/nav";
@@ -209,6 +210,8 @@ export function CompanyDetail({ id }: { id: string }) {
 
         {(company.partners?.length || company.taxRegime || company.notes) && (
           <>
+            <DocumentsCard scope={{ companyId: company.id }} href={`/documents?societe=${company.id}`} />
+
             <AnalysisEntry scope={{ type: "company", id: company.id }} title="Analyse IA de cette société" />
 
             <SectionTitle>Informations</SectionTitle>
