@@ -799,6 +799,27 @@ export interface Settings {
   analyses?: SavedAnalysis[];
   /** Couleur principale de l'application (voir lib/theme.ts), teal par défaut. */
   theme?: string;
+  /** Présentation des dossiers PDF (voir lib/pdf/prefs.ts). */
+  pdf?: PdfPrefs;
+}
+
+export type PdfSection = "patrimoine" | "credits" | "capacite" | "trajectoire" | "remuneration" | "comptes";
+export type PdfCover = "immersive" | "bandeau" | "epure";
+
+/** Personnalisation des dossiers PDF : rien n'y change les chiffres. */
+export interface PdfPrefs {
+  /** "app" (couleur de l'application, par défaut) ou l'identifiant d'un thème. */
+  color?: string;
+  cover?: PdfCover;
+  /** Titre et sous-titre de couverture (sinon nom du groupe et du dirigeant). */
+  title?: string;
+  subtitle?: string;
+  /** « À l'attention de » : banque, conseiller… */
+  recipient?: string;
+  /** Mot d'introduction affiché en tête de la synthèse. */
+  message?: string;
+  /** Parties retirées du dossier. */
+  hide?: PdfSection[];
 }
 
 export interface AppData {

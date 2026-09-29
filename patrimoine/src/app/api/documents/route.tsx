@@ -9,6 +9,7 @@ import { inspectionDocument, receiptDocument, revisionDocument, statementDocumen
 import { monthReceipt, rentStatement } from "@/lib/legal/receipts";
 import { monthKey, revisedRent, todayIso } from "@/lib/engine/leases";
 import { LegalPdf, type PhotoMap } from "@/lib/pdf/legal-pdf";
+import { parsePdfPrefs, pdfColors } from "@/lib/pdf/prefs";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -93,7 +94,7 @@ export async function GET(request: Request) {
   }
   if (!doc) return NextResponse.json({ error: "Document inconnu" }, { status: 400 });
 
-  const buffer = await renderToBuffer(<LegalPdf doc={doc} photos={photos} />);
+  const buffer = await renderToBuffer(<LegalPdf doc={doc} photos={photos} colors={pdfColors(parsePdfPrefs(data.settings.pdf), data.settings.theme)} />);
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/pdf",
