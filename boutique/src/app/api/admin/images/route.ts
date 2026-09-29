@@ -26,6 +26,11 @@ export async function POST(request: Request) {
   const kind = form.get("kind") === "brand" ? "brand" : "product";
   if (!(file instanceof File)) return json({ error: "Aucune photo reçue." }, 400);
   if (file.size > MAX_UPLOAD_BYTES) return json({ error: "Photo trop lourde (4 Mo maximum)." }, 413);
-  const res = await uploadImage(Buffer.from(await file.arrayBuffer()), kind, admin.id);
-  return res.ok ? json({ image: res.image }) : json({ error: res.error }, 422);
+  try {
+    const res = await uploadImage(Buffer.from(await file.arrayBuffer()), kind, admin.id);
+    return res.ok ? json({ image: res.image }) : json({ error: res.error }, 422);
+  } catch (err) {
+    console.error("[upload]", err);
+    return json({ error: "Erreur du serveur pendant l'enregistrement de la photo. Réessayez dans un instant." }, 500);
+  }
 }

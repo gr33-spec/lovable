@@ -117,6 +117,19 @@ function supabaseDriver(): StorageDriver {
 // distinct et facultatif (BLOB_PRIVATE_READ_WRITE_TOKEN) — jamais de fichier
 // confidentiel dans le magasin public.
 
+/**
+ * Jeton du magasin public. Vercel le nomme BLOB_READ_WRITE_TOKEN par défaut,
+ * mais un autre préfixe peut être choisi en reliant le magasin (ex.
+ * STORAGE_READ_WRITE_TOKEN) : on le reconnaît alors à sa forme.
+ */
+export function publicBlobToken(): string | undefined {
+  if (process.env.BLOB_READ_WRITE_TOKEN) return process.env.BLOB_READ_WRITE_TOKEN;
+  for (const [key, value] of Object.entries(process.env)) {
+    if (key.endsWith("_READ_WRITE_TOKEN") && key !== "BLOB_PRIVATE_READ_WRITE_TOKEN" && value?.startsWith("vercel_blob_rw_")) return value;
+  }
+  return undefined;
+}
+
 class PrivateStorageMissing extends Error {
   constructor() {
     super("Stockage privé non configuré (BLOB_PRIVATE_READ_WRITE_TOKEN).");
@@ -124,7 +137,7 @@ class PrivateStorageMissing extends Error {
 }
 
 function blobDriver(): StorageDriver {
-  const publicToken = process.env.BLOB_READ_WRITE_TOKEN;
+  const publicToken = publicBlobToken();
   if (!publicToken) throw new Error("BLOB_READ_WRITE_TOKEN manquant.");
   const token = (v: Visibility) => {
     const t = v === "public" ? publicToken : process.env.BLOB_PRIVATE_READ_WRITE_TOKEN;
@@ -161,7 +174,7 @@ function blobDriver(): StorageDriver {
 export function storageDriverName(): "blob" | "supabase" | "local" {
   const explicit = process.env.STORAGE_DRIVER;
   if (explicit === "blob" || explicit === "supabase" || explicit === "local") return explicit;
-  if (process.env.BLOB_READ_WRITE_TOKEN) return "blob";
+  if (publicBlobToken()) return "blob";
   if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) return "supabase";
   return "local";
 }
