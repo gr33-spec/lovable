@@ -62,5 +62,14 @@ export function dateFr(iso: string | undefined): string {
 
 /** Remplace les espaces fines insécables (non supportées par les polices PDF standard). */
 export function pdfSafe(text: string): string {
-  return text.replace(/[  ]/g, " ").replace(/−/g, "-");
+  // Les polices embarquées ne couvrent que l'alphabet latin : tout autre
+  // symbole s'afficherait en caractère illisible dans le PDF.
+  return text
+    .replace(/[  ]/g, " ")
+    .replace(/−/g, "-")
+    .replace(/≈/g, "env.")
+    .replace(/≤/g, "max.")
+    .replace(/≥/g, "min.")
+    .replace(/[→⇒]/g, "->")
+    .replace(/[✓✔]/g, "oui");
 }

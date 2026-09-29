@@ -10,6 +10,7 @@ import { qualityIssues } from "@/lib/engine/quality";
 import { companySubset } from "@/lib/engine/subset";
 import { sharePdf } from "@/components/tenancy/common";
 import { CoverPreview } from "@/components/pdf-cover-preview";
+import { AssetsNature } from "@/components/assets-nature";
 import { APP_COLOR, DEFAULT_COVER, PDF_COVERS, PDF_SECTIONS, pdfColors, pdfThemeId, prefsQuery } from "@/lib/pdf/prefs";
 import { paletteFor, themeDef, THEMES } from "@/lib/theme";
 import type { PdfPrefs, PdfSection } from "@/lib/types";
@@ -87,6 +88,9 @@ export default function DossierBanquePage() {
         {actions("mt-3")}
         {error && <p className="mt-2 text-center text-xs text-neg">{error}</p>}
         {critical.length > 0 && <p className="mt-2 text-[12.5px] text-neg">{`${critical.length} élément(s) à compléter avant d'envoyer : voir « Avant d'envoyer ».`}</p>}
+        <div className="mt-3">
+          <AssetsNature />
+        </div>
 
         <SectionTitle
           action={
@@ -222,8 +226,11 @@ export default function DossierBanquePage() {
             <div className="divide-y divide-line">
               {critical.map((i) => (
                 <Link key={i.id} href={i.href} className="flex items-center justify-between gap-3 py-2.5 text-[13.5px]">
-                  <span className="min-w-0 flex-1 truncate text-ink">{i.label}</span>
-                  <span className="max-w-[60%] shrink-0 truncate text-[12.5px] font-medium text-series-1">{i.id.startsWith("c-") ? "Saisir les charges" : "Saisir la mensualité"}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-ink">{i.label}</span>
+                    {/^(li|r|v|rl|bd)-/.test(i.id) && <span className="block text-[12px] leading-snug text-muted">{i.detail}</span>}
+                  </span>
+                  <span className="max-w-[60%] shrink-0 truncate text-[12.5px] font-medium text-series-1">{i.id.startsWith("c-") ? "Saisir les charges" : i.id.startsWith("r-") ? "Saisir les loyers" : /^(li|v|rl|bd)-/.test(i.id) ? "À vérifier" : "Saisir la mensualité"}</span>
                 </Link>
               ))}
             </div>

@@ -5,6 +5,9 @@ import { NO_COMPANY, cashflowMonthly, companyTree, type Figures } from "../engin
 import { halfDebtYear, type Projection } from "../engine/projection";
 import { portfolioIndicators } from "../engine/indicators";
 import { eur, eurCompact, pct, pdfSafe } from "../format";
+import { assetMix, isPrivateUse, kindLabel, usageLabel } from "../assets";
+import { reliableInitial } from "../schedule";
+import { auditLoans, suspectAcquisition } from "../engine/loan-audit";
 
 // Chiffres du dossier banque, calculés une seule fois et testés : chaque page
 // du PDF lit ce modèle, ce qui garantit des totaux identiques d'une page à l'autre.
@@ -17,9 +20,16 @@ export interface GroupModel {
   name: string;
   f: Figures;
   indicators: Map<string, number | undefined>;
+  /** Nature des biens : « 6 immeubles de rapport, 3 maisons et 1 hangar ». */
+  mix: { total: number; text: string; unspecified: number };
   buildings: {
     name: string;
     place: string;
+    /** Type et usage déclarés (« Maison · Résidence principale »). */
+    nature: string;
+    privateUse: boolean;
+    /** Tous les lots sont vacants. */
+    allVacant: boolean;
     company: string;
     lots: number;
     acquisition: string;
@@ -27,14 +37,27 @@ export interface GroupModel {
     rentAnnual: number;
     debt: number;
   }[];
-  loansByCompany: { company: string; loans: { name: string; bank: string; initial?: number; balance?: number; monthly?: number; rate?: number; end?: string; note?: string }[]; balance: number; monthly: number }[];
+  loansByCompany: {
+    company: string;
+    loans: { name: string; bank: string; initial?: number; balance?: number; monthly?: number; rate?: number; end?: string; note?: string; monthlyEstimated: boolean; rateEstimated: boolean; endEstimated: boolean; incoherent: boolean }[];
+    balance: number;
+    monthly: number;
+    /** Au moins une mensualité estimée ou non communiquée dans le groupe. */
+    approx: boolean;
+  }[];
+  /** Crédits dont la mensualité n'est qu'estimée (taux inconnu). */
+  estimatedLoans: number;
+  /** Crédits en cours dont la mensualité est inconnue : exclus des mensualités. */
+  missingPaymentLoans: number;
+  /** Crédits aux chiffres contradictoires (restant dû supérieur au montant emprunté…). */
+  incoherentLoans: number;
   /** Crédits rattachés à une société et non à un immeuble. */
   companyLevelDebt: number;
   /** Immeubles loués sans aucune charge renseignée. */
   missingCharges: number;
-  capacity: { company: string; rent: number; charges: number; payments: number; cf: number; dscr?: number }[];
+  capacity: { company: string; rent: number; charges: number; payments: number; cf: number; dscr?: number; chargesMissing: boolean; approx: boolean }[];
   highlights: string[];
-  milestones: { year: number; label: string; freed: number }[];
+  milestones: { year: number; label: string; freed: number; estimated: boolean }[];
   years: number[];
   debtSeries: number[];
   cfSeries: number[];
@@ -49,14 +72,20 @@ export function groupModel(data: AppData, p: Projection, name: string): GroupMod
   const indicators = new Map(portfolioIndicators(data, p).map((i) => [i.id, i.value]));
   const companyName = (id?: string | null) => (id ? data.companies.find((c) => c.id === id)?.name : undefined) ?? "En direct";
 
-  const buildings = data.buildings.map((b) => {
+  // Biens locatifs d'abord, biens à usage privé ensuite.
+  const ordered = [...data.buildings.filter((b) => !isPrivateUse(b)), ...data.buildings.filter(isPrivateUse)];
+  const buildings = ordered.map((b) => {
     const bf = snap.byBuilding.get(b.id)!;
     return {
       name: b.name,
       place: [b.address, b.city].filter(Boolean).join(", "),
+      nature: [kindLabel(b.kind), b.usage && b.usage !== "location" ? usageLabel(b.usage) : undefined].filter(Boolean).join(" · "),
+      privateUse: isPrivateUse(b),
+      allVacant: bf.units > 0 && bf.vacantUnits >= bf.units,
       company: companyName(b.companyId),
       lots: bf.units,
-      acquisition: [b.acquisitionDate ? b.acquisitionDate.slice(0, 4) : undefined, b.acquisitionPrice ? K(b.acquisitionPrice) : undefined].filter(Boolean).join(" · "),
+      // Date recopiée d'un tableau commencé en cours de prêt : non fiable, donc non affichée.
+      acquisition: [b.acquisitionDate && !suspectAcquisition(data, b) ? b.acquisitionDate.slice(0, 4) : undefined, b.acquisitionPrice ? K(b.acquisitionPrice) : undefined].filter(Boolean).join(" · "),
       value: bf.unvalued ? undefined : bf.value,
       rentAnnual: bf.rentMonthly * 12,
       debt: bf.debt,
@@ -64,6 +93,12 @@ export function groupModel(data: AppData, p: Projection, name: string): GroupMod
   });
 
   const byCompany = new Map<string, GroupModel["loansByCompany"][number]>();
+  const audit = auditLoans(data, snap);
+  let estimatedLoans = 0;
+  let missingPaymentLoans = 0;
+  let incoherentLoans = 0;
+  const approxKeys = new Set<string>();
+  const approxKeysLoans = new Set<string>();
   const buildingsById = new Map(data.buildings.map((b) => [b.id, b]));
   for (const l of data.loans) {
     const r = snap.resolvedLoans.get(l.id);
@@ -71,40 +106,81 @@ export function groupModel(data: AppData, p: Projection, name: string): GroupMod
     const now = snap.byLoan.get(l.id);
     const key = l.buildingId ? (buildingsById.get(l.buildingId)?.companyId ?? NO_COMPANY) : (l.companyId ?? NO_COMPANY);
     const label = key === NO_COMPANY ? "En direct" : companyName(key);
-    const g = byCompany.get(label) ?? { company: label, loans: [], balance: 0, monthly: 0 };
+    const g = byCompany.get(label) ?? { company: label, loans: [], balance: 0, monthly: 0, approx: false };
     // Crédit signé mais pas encore débloqué : montant et mensualité à venir, hors totaux d'aujourd'hui.
     const upcoming = r.fromMonth > snap.nowMonth;
     const notes: string[] = [];
     if (upcoming) notes.push(`Premières échéances en ${monthLabel(r.fromMonth)} : non inclus dans les totaux.`);
     if (!upcoming && now?.balance === undefined) notes.push("Capital restant dû non communiqué : non inclus dans le total.");
+    // Mensualité estimée : ni saisie, ni taux connu, ni tableau de la banque (même règle que les totaux).
+    const monthlyEstimated = !upcoming && !l.schedule && l.monthlyPayment === undefined && l.ratePct === undefined && r.impliedRatePct === undefined && r.payment !== undefined;
+    const missingPayment = !upcoming && !r.finished && (r.payment === undefined || !(now?.paymentMonthly));
+    const rateEstimated = l.ratePct === undefined && r.impliedRatePct !== undefined;
+    const endEstimated = r.quality === "estimated" && !l.endDate && !l.schedule;
+    const initial = reliableInitial(l).value;
+    const balanceNow = upcoming ? (r.balance ?? initial) : now?.balance;
+    // Vérification croisée : toute contradiction est écrite sous le crédit, en rouge si un montant est en cause.
+    const findings = audit.filter((x) => x.loanId === l.id);
+    const incoherent = findings.some((x) => x.severity === "critical");
+    for (const x of findings) if (x.short !== "Banque non renseignée." && !notes.includes(x.short)) notes.push(x.short);
+    if (missingPayment) notes.push("Mensualité non communiquée : exclue des mensualités et du cash-flow.");
     if (r.quality === "estimated") notes.push(r.notes[0] ?? "Échéancier estimé.");
+    if (rateEstimated && r.quality !== "estimated") notes.push("Taux déduit de la mensualité et de la date de fin.");
+    if (monthlyEstimated) estimatedLoans++;
+    if (monthlyEstimated || missingPayment) approxKeysLoans.add(l.id);
+    if (missingPayment) missingPaymentLoans++;
+    if (incoherent) incoherentLoans++;
     g.loans.push({
       name: l.name || "Crédit",
       bank: l.bank ?? "",
-      initial: l.initialAmount,
-      balance: upcoming ? (r.balance ?? l.initialAmount) : now?.balance,
+      initial,
+      balance: balanceNow,
       monthly: upcoming ? (r.payment !== undefined ? r.payment + r.insurance : undefined) : now?.paymentMonthly || undefined,
       rate: l.ratePct ?? r.impliedRatePct,
       end: r.endMonth !== undefined ? monthLabel(r.endMonth) : undefined,
       note: notes.join(" ") || undefined,
+      monthlyEstimated,
+      rateEstimated,
+      endEstimated,
+      incoherent,
     });
+    if (monthlyEstimated || missingPayment) {
+      g.approx = true;
+      approxKeys.add(key);
+    }
     g.balance += upcoming ? 0 : (now?.balance ?? 0);
     g.monthly += now?.paymentMonthly ?? 0;
     byCompany.set(label, g);
   }
 
+  // Sociétés dont un bien loué n'a aucune charge renseignée.
+  const chargesMissingKeys = new Set(
+    data.buildings
+      .filter((b) => {
+        const bf = snap.byBuilding.get(b.id);
+        return !!bf && bf.rentMonthly > 0 && bf.chargesAnnual === 0;
+      })
+      .map((b) => b.companyId ?? NO_COMPANY),
+  );
+  const capacityRow = (key: string, name: string, own: Figures) => {
+    const charges = own.chargesAnnual / 12;
+    return {
+      company: name,
+      rent: own.rentMonthly,
+      charges,
+      payments: own.paymentsMonthly,
+      cf: cashflowMonthly(own),
+      dscr: own.paymentsMonthly > 0 && own.rentMonthly > 0 ? (own.rentMonthly - charges) / own.paymentsMonthly : undefined,
+      chargesMissing: chargesMissingKeys.has(key),
+      approx: approxKeys.has(key),
+    };
+  };
   const capacity = companyTree(data.companies)
     .map(({ company }) => ({ company, own: snap.ownByCompany.get(company.id) }))
     .filter((x): x is { company: Company; own: Figures } => !!x.own && (x.own.rentMonthly > 0 || x.own.paymentsMonthly > 0 || x.own.chargesAnnual > 0))
-    .map(({ company, own }) => {
-      const charges = own.chargesAnnual / 12;
-      return { company: company.name, rent: own.rentMonthly, charges, payments: own.paymentsMonthly, cf: cashflowMonthly(own), dscr: own.paymentsMonthly > 0 && own.rentMonthly > 0 ? (own.rentMonthly - charges) / own.paymentsMonthly : undefined };
-    });
+    .map(({ company, own }) => capacityRow(company.id, company.name, own));
   const direct = snap.ownByCompany.get(NO_COMPANY);
-  if (direct && (direct.rentMonthly > 0 || direct.paymentsMonthly > 0 || direct.chargesAnnual > 0)) {
-    const charges = direct.chargesAnnual / 12;
-    capacity.push({ company: "En direct", rent: direct.rentMonthly, charges, payments: direct.paymentsMonthly, cf: cashflowMonthly(direct), dscr: direct.paymentsMonthly > 0 && direct.rentMonthly > 0 ? (direct.rentMonthly - charges) / direct.paymentsMonthly : undefined });
-  }
+  if (direct && (direct.rentMonthly > 0 || direct.paymentsMonthly > 0 || direct.chargesAnnual > 0)) capacity.push(capacityRow(NO_COMPANY, "En direct", direct));
 
   const cf = cashflowMonthly(f);
   const occupancy = indicators.get("occupancy");
@@ -116,28 +192,37 @@ export function groupModel(data: AppData, p: Projection, name: string): GroupMod
     return !!bf && bf.rentMonthly > 0 && bf.chargesAnnual === 0;
   });
   const highlights: string[] = [];
-  if (f.units > 0) highlights.push(`${f.buildings} immeuble(s), ${f.units} lots${occupancy !== undefined ? `, taux d'occupation de ${pct(occupancy)}` : ""}.`);
-  if (cf > 0 && f.unknownPayment === 0 && chargesComplete) highlights.push(`Cash-flow positif de ${eur(Math.round(cf))} par mois, après charges et mensualités.`);
-  if (dscr !== undefined && dscr >= 1.2 && f.unknownPayment === 0 && chargesComplete) highlights.push(`Loyers nets couvrant ${dscr.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} fois les mensualités de crédit.`);
-  if (half) highlights.push(`Capital restant dû divisé par deux d'ici ${half}.`);
+  // Chaque affirmation repose sur des chiffres complets et cohérents ; sinon elle est omise.
+  const mix = assetMix(data.buildings);
+  const reliable = f.unknownPayment === 0 && f.unknownDebt === 0 && incoherentLoans === 0;
+  if (mix.total > 0) highlights.push(`${mix.total > 1 ? `${mix.total} biens immobiliers` : "1 bien immobilier"} : ${mix.text}.`);
+  if (f.units > 0) highlights.push(`${f.units} lot${f.units > 1 ? "s" : ""} locatif${f.units > 1 ? "s" : ""}${occupancy !== undefined ? `, taux d'occupation de ${pct(occupancy)} (${f.units - f.vacantUnits} loué${f.units - f.vacantUnits > 1 ? "s" : ""})` : ""}.`);
+  if (cf > 0 && reliable && chargesComplete) highlights.push(`Cash-flow positif de ${eur(Math.round(cf))} par mois, après charges et mensualités.`);
+  if (dscr !== undefined && dscr >= 1.2 && reliable && chargesComplete) highlights.push(`Loyers nets couvrant ${dscr.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} fois les mensualités de crédit.`);
+  if (half && reliable) highlights.push(`Capital restant dû divisé par deux d'ici ${half}.`);
 
-  const ends = new Map<number, { freed: number; names: string[] }>();
+  // Fin de crédit estimée (taux inconnu, ni date de fin ni tableau) : signalée comme telle.
+  const endGuessed = new Set(data.loans.filter((l) => snap.resolvedLoans.get(l.id)?.quality === "estimated" && !l.endDate && !l.schedule).map((l) => l.id));
+  const ends = new Map<number, { freed: number; names: string[]; estimated: boolean }>();
   for (const e of p.events.filter((x) => x.kind === "loan_end")) {
-    const cur = ends.get(e.year) ?? { freed: 0, names: [] };
+    const cur = ends.get(e.year) ?? { freed: 0, names: [], estimated: false };
     cur.freed += e.monthlyFreed ?? 0;
     cur.names.push(e.label.replace(/^Fin — /, ""));
+    if (e.loanId && (endGuessed.has(e.loanId) || approxKeysLoans.has(e.loanId))) cur.estimated = true;
     ends.set(e.year, cur);
   }
   const milestones = [...ends.entries()]
     .sort((a, b) => a[0] - b[0])
     .slice(0, 8)
-    .map(([year, v]) => ({ year, freed: v.freed, label: v.names.length > 2 ? `${v.names.length} crédits se terminent` : v.names.join(", ") }));
+    .map(([year, v]) => ({ year, freed: v.freed, estimated: v.estimated, label: v.names.length > 3 ? `${v.names.slice(0, 2).join(", ")} et ${v.names.length - 2} autres` : v.names.join(", ") }));
 
   const statements = companyTree(data.companies)
     .map(({ company }) => {
       const st = [...data.statements].filter((s) => s.companyId === company.id).sort((a, b) => b.year - a.year)[0];
       if (!st) return undefined;
       const fg = st.figures;
+      // Un exercice sans aucun chiffre saisi n'apporte rien au dossier.
+      if ([fg.revenue, fg.netResult, fg.equity, fg.bankDebt, fg.cash].every((v) => v === undefined)) return undefined;
       return {
         company: company.name,
         year: st.year,
@@ -156,8 +241,12 @@ export function groupModel(data: AppData, p: Projection, name: string): GroupMod
     name,
     f,
     indicators,
+    mix,
     buildings,
     loansByCompany: [...byCompany.values()],
+    estimatedLoans,
+    missingPaymentLoans,
+    incoherentLoans,
     companyLevelDebt: Math.max(0, f.debt - buildings.reduce((s, b) => s + b.debt, 0)),
     missingCharges: data.buildings.filter((b) => {
       const bf = snap.byBuilding.get(b.id);
