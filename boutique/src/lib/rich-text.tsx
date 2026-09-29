@@ -7,18 +7,25 @@ import { Fragment, type ReactNode } from "react";
 
 function inline(text: string, keyPrefix: string): ReactNode[] {
   const out: ReactNode[] = [];
-  const pattern = /\*\*([^*]+)\*\*|\[([^\]]{1,200})\]\((https:\/\/[^\s)]{1,500}|mailto:[^\s)]{1,254}|\/[^\s)]{0,300})\)/g;
+  const pattern = /(\[À (?:COMPLÉTER|VÉRIFIER|VALIDER)[^\]]*\])|\*\*([^*]+)\*\*|\[([^\]]{1,200})\]\((https:\/\/[^\s)]{1,500}|mailto:[^\s)]{1,254}|\/[^\s)]{0,300})\)/g;
   let last = 0;
   let m: RegExpExecArray | null;
   let i = 0;
   while ((m = pattern.exec(text))) {
     if (m.index > last) out.push(text.slice(last, m.index));
-    if (m[1]) out.push(<strong key={`${keyPrefix}-b${i++}`}>{m[1]}</strong>);
-    else {
-      const external = m[3].startsWith("https://");
+    if (m[1]) {
+      // Passage à compléter : bien visible tant qu'il n'a pas été remplacé.
       out.push(
-        <a key={`${keyPrefix}-a${i++}`} href={m[3]} {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
-          {m[2]}
+        <mark key={`${keyPrefix}-m${i++}`} className="rounded bg-warning-bg px-1 font-semibold text-warning">
+          {m[1]}
+        </mark>,
+      );
+    } else if (m[2]) out.push(<strong key={`${keyPrefix}-b${i++}`}>{m[2]}</strong>);
+    else {
+      const external = m[4].startsWith("https://");
+      out.push(
+        <a key={`${keyPrefix}-a${i++}`} href={m[4]} {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
+          {m[3]}
         </a>,
       );
     }

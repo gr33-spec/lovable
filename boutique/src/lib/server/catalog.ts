@@ -334,3 +334,21 @@ export async function sitemapEntries(client?: Queryable) {
   const categories = await query<{ slug: string; updated_at: Date }>("SELECT slug, updated_at FROM category WHERE is_visible", [], client);
   return { products, categories };
 }
+
+/** Meilleures ventes des 90 derniers jours (affichées seulement s'il y a assez de ventes pour que ce soit vrai). */
+export async function bestSellers(lowThreshold: number, limit = 4, client?: Queryable): Promise<ProductCard[]> {
+  const rows = await query<CardRow>(
+    `SELECT p.id, p.slug, p.name, p.price_cents, p.compare_at_cents, p.stock, p.published_at, c.name AS category_name
+     FROM product p JOIN category c ON c.id = p.category_id
+     JOIN (SELECT i.product_id, sum(i.quantity) AS sold FROM order_item i JOIN customer_order o ON o.id = i.order_id
+           WHERE o.status IN ('paid', 'preparing', 'shipped', 'completed') AND o.paid_at > now() - interval '90 days'
+           GROUP BY i.product_id HAVING sum(i.quantity) >= 2) s ON s.product_id = p.id
+     WHERE p.status = 'published' AND c.is_visible AND p.stock > 0
+     ORDER BY s.sold DESC, p.published_at DESC LIMIT $1`,
+    [limit],
+    client,
+  );
+  if (rows.length < limit) return [];
+  const imgs = await imagesFor(rows.map((r) => r.id), client);
+  return rows.map((r) => toCard(r, imgs.get(r.id), lowThreshold));
+}

@@ -11,9 +11,9 @@
     "typecheck": "tsc --noEmit",
     "test": "BOUTIQUE_TEST=1 tsx --conditions=react-server --test --test-concurrency=1 tests/*.test.ts",
     "db:migrate": "tsx scripts/migrate.ts",
-    "db:seed": "tsx scripts/seed.ts",
-    "db:backup": "tsx scripts/backup.ts",
-    "db:restore": "tsx scripts/restore.ts"
+    "db:seed": "tsx --conditions=react-server scripts/seed.ts",
+    
+    "db:restore": "tsx --conditions=react-server scripts/restore.ts"
   },
   "dependencies": {
     "lucide-react": "^1.48.0",
