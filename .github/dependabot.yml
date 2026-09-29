@@ -1,0 +1,14 @@
+# Mises à jour de sécurité proposées automatiquement (jamais appliquées sans relecture).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /boutique
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    groups:
+      mineures:
+        update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
