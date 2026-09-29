@@ -137,7 +137,7 @@ Le site refuse toute incohérence (clé de test avec `STRIPE_MODE=live`, clé r�
 | `SITE_URL` | à l'ouverture | `https://labohemeenpaillettes.fr` (sinon : l'adresse `….vercel.app`). |
 | `APP_SECRET` | oui | 48 caractères aléatoires (`openssl rand -base64 48`). Protège sessions, liens de commande, double authentification. |
 | `DATABASE_URL` (+ `DATABASE_URL_UNPOOLED`) | oui | Posées automatiquement par Neon. Avec Supabase : `DATABASE_URL`, `DATABASE_URL_MIGRATIONS`, `DATABASE_CA_CERT` (§ 3.1). |
-| `BLOB_READ_WRITE_TOKEN` | oui | Posée automatiquement par Vercel Blob (photos). Avec Supabase : `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY`. |
+| `BLOB_STORE_ID` ou `BLOB_READ_WRITE_TOKEN` | oui | Posée automatiquement par Vercel en reliant le magasin Blob (photos) ; les deux méthodes de connexion sont acceptées. Avec Supabase : `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY`. |
 | `BLOB_PRIVATE_READ_WRITE_TOKEN` | conseillé | Jeton d'un second Blob **privé** : sauvegardes nocturnes. |
 | `STRIPE_MODE`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_ACCOUNT_ID` | oui | Paiement (§ 3.3). En mode test, le webhook et l'identifiant de compte sont facultatifs ; en réel, obligatoires. |
 | `EMAIL_PROVIDER=resend`, `RESEND_API_KEY`, `EMAIL_FROM` | oui | Ex. `EMAIL_FROM="La Bohème en Paillettes <commandes@labohemeenpaillettes.fr>"`. |

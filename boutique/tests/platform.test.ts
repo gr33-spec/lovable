@@ -14,7 +14,7 @@ import { saveProduct, setStock, deleteProduct } from "../src/lib/server/admin-ca
 import { findProduct, listProducts } from "../src/lib/server/catalog";
 import { createBackup, restoreBackup, toCsv } from "../src/lib/server/backup";
 import { paymentConfig } from "../src/lib/server/env";
-import { publicBlobToken, putFile } from "../src/lib/server/storage";
+import { publicBlobToken, putFile, storageDriverName } from "../src/lib/server/storage";
 import { esc } from "../src/lib/server/email/templates";
 import { renderRichText } from "../src/lib/rich-text";
 
@@ -132,6 +132,19 @@ describe("stockage des photos", () => {
       assert.equal(publicBlobToken(), "vercel_blob_rw_public");
       process.env.BLOB_READ_WRITE_TOKEN = "vercel_blob_rw_defaut";
       assert.equal(publicBlobToken(), "vercel_blob_rw_defaut");
+    } finally {
+      process.env = saved;
+    }
+  });
+  test("magasin relié par Vercel sans jeton (BLOB_STORE_ID) : stockage Blob utilisé", () => {
+    const saved = { ...process.env };
+    try {
+      for (const k of Object.keys(process.env)) if (k.endsWith("_READ_WRITE_TOKEN")) delete process.env[k];
+      delete process.env.STORAGE_DRIVER;
+      delete process.env.BLOB_STORE_ID;
+      assert.notEqual(storageDriverName(), "blob");
+      process.env.BLOB_STORE_ID = "store_abc";
+      assert.equal(storageDriverName(), "blob");
     } finally {
       process.env = saved;
     }

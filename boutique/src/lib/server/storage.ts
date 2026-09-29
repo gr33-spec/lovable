@@ -138,9 +138,12 @@ class PrivateStorageMissing extends Error {
 
 function blobDriver(): StorageDriver {
   const publicToken = publicBlobToken();
-  if (!publicToken) throw new Error("BLOB_READ_WRITE_TOKEN manquant.");
-  const token = (v: Visibility) => {
-    const t = v === "public" ? publicToken : process.env.BLOB_PRIVATE_READ_WRITE_TOKEN;
+  // Sans jeton, le magasin public relié au projet est utilisé via BLOB_STORE_ID
+  // (connexion sécurisée fournie par Vercel, sans secret à copier).
+  if (!publicToken && !process.env.BLOB_STORE_ID) throw new Error("Stockage des photos non relié (BLOB_STORE_ID ou BLOB_READ_WRITE_TOKEN manquant).");
+  const token = (v: Visibility): string | undefined => {
+    if (v === "public") return publicToken;
+    const t = process.env.BLOB_PRIVATE_READ_WRITE_TOKEN;
     if (!t) throw new PrivateStorageMissing();
     return t;
   };
@@ -174,7 +177,7 @@ function blobDriver(): StorageDriver {
 export function storageDriverName(): "blob" | "supabase" | "local" {
   const explicit = process.env.STORAGE_DRIVER;
   if (explicit === "blob" || explicit === "supabase" || explicit === "local") return explicit;
-  if (publicBlobToken()) return "blob";
+  if (publicBlobToken() || process.env.BLOB_STORE_ID) return "blob";
   if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) return "supabase";
   return "local";
 }
