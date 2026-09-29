@@ -695,3 +695,17 @@
     overflow: visible;
   }
 }
+
+/* Bons de préparation : une commande par page A4. */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+  .slips .slip {
+    break-after: page;
+  }
+  .slips .slip:last-child {
+    break-after: auto;
+  }
+}

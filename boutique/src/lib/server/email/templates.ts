@@ -177,3 +177,57 @@ ${button(brand, url, "Choisir un nouveau mot de passe")}
 export function formatOrderDate(value: string) {
   return formatDate(value);
 }
+
+// ───────────── Récapitulatif du lundi (créatrice) ─────────────
+
+export interface WeeklyReport {
+  from: Date;
+  to: Date;
+  revenueCents: number;
+  previousRevenueCents: number;
+  orders: number;
+  previousOrders: number;
+  averageCents: number;
+  items: number;
+  toPrepare: number;
+  top: { name: string; quantity: number; revenueCents: number }[];
+  soldOut: string[];
+  lowStock: { name: string; stock: number }[];
+}
+
+function trend(current: number, previous: number): string {
+  if (!previous && !current) return "";
+  if (!previous) return `<span style="color:#2F6B3F">nouveau</span>`;
+  const pct = Math.round(((current - previous) / previous) * 100);
+  return `<span style="color:${pct >= 0 ? "#2F6B3F" : "#A12D2D"}">${pct >= 0 ? "▲ +" : "▼ "}${pct} %</span>`;
+}
+
+export function weeklyReportEmail(brand: EmailBrand, r: WeeklyReport, adminUrl: string): Omit<EmailMessage, "to"> {
+  const t = getTheme(brand.themeId, brand.themeCustom).tokens;
+  const period = `du ${formatDate(r.from)} au ${formatDate(r.to)}`;
+  const cell = (label: string, value: string, extra = "") =>
+    `<td style="padding:12px;border:1px solid ${t.border};border-radius:12px;width:50%;vertical-align:top"><div style="font-size:12px;color:${t.textMuted}">${esc(label)}</div><div style="font-size:22px;font-weight:700;margin-top:2px">${esc(value)}</div><div style="font-size:12px">${extra}</div></td>`;
+  const list = (title: string, rows: string[]) =>
+    rows.length ? `<h2 style="font-size:15px;margin:24px 0 8px">${esc(title)}</h2><ul style="margin:0;padding-left:18px">${rows.join("")}</ul>` : "";
+  const body = `<h1 style="font-family:Georgia,serif;font-weight:normal;font-size:24px;margin:0 0 4px">Votre semaine ✨</h1>
+<p style="margin:0 0 18px;color:${t.textMuted}">Ventes ${esc(period)}, comparées aux 7 jours précédents.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="8" style="border-collapse:separate;margin:0 -8px">
+<tr>${cell("Chiffre d'affaires", formatMoney(r.revenueCents), trend(r.revenueCents, r.previousRevenueCents))}${cell("Commandes", String(r.orders), trend(r.orders, r.previousOrders))}</tr>
+<tr>${cell("Panier moyen", formatMoney(r.averageCents))}${cell("Bijoux vendus", String(r.items))}</tr>
+</table>
+${
+  r.toPrepare
+    ? `<p style="margin:20px 0 0;padding:12px 14px;background:${t.primarySoft};border-radius:12px"><strong>${r.toPrepare} commande${r.toPrepare > 1 ? "s" : ""} à préparer</strong> — les bons de préparation sont prêts à imprimer dans l'administration.</p>`
+    : `<p style="margin:20px 0 0;color:${t.textMuted}">Aucune commande en attente : tout est expédié.</p>`
+}
+${list("Meilleures ventes", r.top.map((p) => `<li>${esc(p.name)} — ${p.quantity} vendu${p.quantity > 1 ? "s" : ""} (${esc(formatMoney(p.revenueCents))})</li>`))}
+${list("Épuisés (à refaire ?)", r.soldOut.map((n) => `<li>${esc(n)}</li>`))}
+${list("Stock faible", r.lowStock.map((p) => `<li>${esc(p.name)} — plus que ${p.stock}</li>`))}
+${r.orders === 0 ? `<p style="margin-top:20px">Pas de vente cette semaine : une nouvelle création ou une publication sur vos réseaux peut relancer l'intérêt.</p>` : ""}
+${button(brand, adminUrl, "Ouvrir le tableau de bord")}`;
+  return {
+    subject: `Votre semaine — ${formatMoney(r.revenueCents)}, ${r.orders} commande${r.orders > 1 ? "s" : ""}${r.toPrepare ? `, ${r.toPrepare} à préparer` : ""}`,
+    html: layout(brand, `Récapitulatif ${period}`, body),
+    text: `Votre semaine (${period})\nChiffre d'affaires : ${formatMoney(r.revenueCents)}\nCommandes : ${r.orders}\nÀ préparer : ${r.toPrepare}\n\n${adminUrl}`,
+  };
+}

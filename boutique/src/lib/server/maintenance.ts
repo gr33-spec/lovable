@@ -3,7 +3,7 @@ import { purgeOldAddresses } from "./admin-orders";
 import { cleanupOrphanImages } from "./admin-catalog";
 import { storeNightlyBackup } from "./backup";
 import { query, queryOne } from "./db";
-import { processOutbox, queueAdminAlert } from "./email/outbox";
+import { processOutbox, queueAdminAlert, queueWeeklyReport } from "./email/outbox";
 import { paymentConfig } from "./env";
 import { errorMessage, reportEvent } from "./monitoring";
 import { sweepExpiredReservations } from "./orders";
@@ -43,6 +43,7 @@ export async function runNightly(): Promise<Record<string, unknown>> {
     if (h.status !== "ok") await queueAdminAlert("La boutique signale un problème", h.problems.join(" • "));
     return h.status;
   });
+  await step("weeklyReport", () => queueWeeklyReport());
   await step("alerts", () => processOutbox(5));
   return result;
 }
