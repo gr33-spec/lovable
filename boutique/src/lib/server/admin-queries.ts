@@ -220,3 +220,119 @@ export async function auditTrail(limit = 100) {
     [limit],
   );
 }
+
+// ───────────── Statistiques de ventes (tableau de bord) ─────────────
+//
+// Une commande « vendue » = payée et ni annulée ni remboursée en totalité.
+// Le chiffre d'affaires est net des remboursements. Jours et mois comptés à
+// l'heure de Paris.
+
+export type StatsPeriod = "7j" | "30j" | "12m";
+
+const ACTIVE = "o.status IN ('paid', 'preparing', 'shipped', 'completed')";
+const LOCAL = "(o.paid_at AT TIME ZONE 'Europe/Paris')";
+
+export interface SalesStats {
+  period: StatsPeriod;
+  current: { revenueCents: number; orders: number; items: number; averageCents: number; customers: number };
+  previous: { revenueCents: number; orders: number; items: number; averageCents: number; customers: number };
+  series: { label: string; key: string; revenueCents: number; orders: number }[];
+  topProducts: { name: string; productId: string | null; image: ImageRef | null; quantity: number; revenueCents: number }[];
+  categories: { name: string; revenueCents: number; quantity: number }[];
+  shipping: { name: string; orders: number }[];
+  returning: { newCustomers: number; returningCustomers: number };
+}
+
+export async function salesStats(period: StatsPeriod): Promise<SalesStats> {
+  const months = period === "12m";
+  const span = period === "7j" ? 7 : period === "30j" ? 30 : 12;
+  const unit = months ? "month" : "day";
+  // Début de la période (inclus) et de la période précédente, à l'heure de Paris.
+  const start = `date_trunc('${unit}', now() AT TIME ZONE 'Europe/Paris') - interval '${span - 1} ${unit}'`;
+  const prevStart = `${start} - interval '${span} ${unit}'`;
+
+  const totals = (from: string, to: string | null) =>
+    queryOne<{ revenue: string | null; orders: string; items: string | null; customers: string }>(
+      `SELECT sum(o.total_cents - o.refunded_cents) FILTER (WHERE ${ACTIVE}) AS revenue,
+              count(*) FILTER (WHERE ${ACTIVE}) AS orders,
+              (SELECT sum(i.quantity) FROM order_item i JOIN customer_order o2 ON o2.id = i.order_id
+                WHERE o2.status IN ('paid', 'preparing', 'shipped', 'completed')
+                  AND (o2.paid_at AT TIME ZONE 'Europe/Paris') >= ${from} ${to ? `AND (o2.paid_at AT TIME ZONE 'Europe/Paris') < ${to}` : ""}) AS items,
+              count(DISTINCT lower(o.email)) FILTER (WHERE ${ACTIVE}) AS customers
+       FROM customer_order o
+       WHERE o.paid_at IS NOT NULL AND ${LOCAL} >= ${from} ${to ? `AND ${LOCAL} < ${to}` : ""}`,
+    );
+
+  const [cur, prev, series, top, cats, ship, ret] = await Promise.all([
+    totals(start, null),
+    totals(prevStart, start),
+    query<{ bucket: Date; revenue: string | null; orders: string }>(
+      `SELECT b.bucket, sum(o.total_cents - o.refunded_cents) AS revenue, count(o.id) AS orders
+       FROM generate_series(${start}, date_trunc('${unit}', now() AT TIME ZONE 'Europe/Paris'), interval '1 ${unit}') AS b(bucket)
+       LEFT JOIN customer_order o ON ${ACTIVE} AND date_trunc('${unit}', ${LOCAL}) = b.bucket
+       GROUP BY b.bucket ORDER BY b.bucket`,
+    ),
+    query<{ name: string; product_id: string | null; image_id: string | null; quantity: string; revenue: string }>(
+      `SELECT min(i.product_name) AS name, i.product_id, coalesce((array_agg(i.image_id ORDER BY o.paid_at DESC) FILTER (WHERE i.image_id IS NOT NULL))[1],
+                (SELECT im.id FROM image im WHERE im.product_id = i.product_id ORDER BY im.position LIMIT 1)) AS image_id,
+              sum(i.quantity) AS quantity, sum(i.line_total_cents) AS revenue
+       FROM order_item i JOIN customer_order o ON o.id = i.order_id
+       WHERE ${ACTIVE} AND ${LOCAL} >= ${start}
+       GROUP BY i.product_id ORDER BY sum(i.line_total_cents) DESC, sum(i.quantity) DESC LIMIT 5`,
+    ),
+    query<{ name: string | null; revenue: string; quantity: string }>(
+      `SELECT c.name, sum(i.line_total_cents) AS revenue, sum(i.quantity) AS quantity
+       FROM order_item i JOIN customer_order o ON o.id = i.order_id
+       LEFT JOIN product p ON p.id = i.product_id LEFT JOIN category c ON c.id = p.category_id
+       WHERE ${ACTIVE} AND ${LOCAL} >= ${start}
+       GROUP BY c.name ORDER BY sum(i.line_total_cents) DESC`,
+    ),
+    query<{ name: string; orders: string }>(
+      `SELECT o.shipping_method_name AS name, count(*) AS orders FROM customer_order o
+       WHERE ${ACTIVE} AND ${LOCAL} >= ${start} GROUP BY o.shipping_method_name ORDER BY count(*) DESC`,
+    ),
+    // Fidèles : clientes de la période qui avaient déjà commandé avant.
+    queryOne<{ new_customers: string; returning_customers: string }>(
+      `WITH buyers AS (
+         SELECT DISTINCT lower(o.email) AS email FROM customer_order o WHERE ${ACTIVE} AND ${LOCAL} >= ${start}
+       )
+       SELECT count(*) FILTER (WHERE NOT EXISTS (
+                SELECT 1 FROM customer_order p WHERE lower(p.email) = b.email AND p.status IN ('paid', 'preparing', 'shipped', 'completed')
+                  AND (p.paid_at AT TIME ZONE 'Europe/Paris') < ${start})) AS new_customers,
+              count(*) FILTER (WHERE EXISTS (
+                SELECT 1 FROM customer_order p WHERE lower(p.email) = b.email AND p.status IN ('paid', 'preparing', 'shipped', 'completed')
+                  AND (p.paid_at AT TIME ZONE 'Europe/Paris') < ${start})) AS returning_customers
+       FROM buyers b`,
+    ),
+  ]);
+
+  const imageIds = top.map((t) => t.image_id).filter(Boolean) as string[];
+  const images = imageIds.length
+    ? await query<ImageRow>("SELECT id, width, height, widths, placeholder, alt, base_url FROM image WHERE id = ANY($1::uuid[])", [imageIds])
+    : [];
+  const imageOf = (id: string | null) => {
+    const row = images.find((i) => i.id === id);
+    return row ? toImageRef(row) : null;
+  };
+  const shape = (r: typeof cur) => {
+    const revenueCents = Number(r?.revenue ?? 0);
+    const orders = Number(r?.orders ?? 0);
+    return { revenueCents, orders, items: Number(r?.items ?? 0), averageCents: orders ? Math.round(revenueCents / orders) : 0, customers: Number(r?.customers ?? 0) };
+  };
+  const dayFmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", timeZone: "UTC" });
+  const monthFmt = new Intl.DateTimeFormat("fr-FR", { month: "short", year: "2-digit", timeZone: "UTC" });
+  return {
+    period,
+    current: shape(cur),
+    previous: shape(prev),
+    series: series.map((s) => {
+      const d = new Date(s.bucket);
+      const utc = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      return { key: utc.toISOString().slice(0, 10), label: (months ? monthFmt : dayFmt).format(utc), revenueCents: Number(s.revenue ?? 0), orders: Number(s.orders) };
+    }),
+    topProducts: top.map((t) => ({ name: t.name, productId: t.product_id, image: imageOf(t.image_id), quantity: Number(t.quantity), revenueCents: Number(t.revenue) })),
+    categories: cats.map((c) => ({ name: c.name ?? "Sans catégorie", revenueCents: Number(c.revenue), quantity: Number(c.quantity) })),
+    shipping: ship.map((s) => ({ name: s.name, orders: Number(s.orders) })),
+    returning: { newCustomers: Number(ret?.new_customers ?? 0), returningCustomers: Number(ret?.returning_customers ?? 0) },
+  };
+}
