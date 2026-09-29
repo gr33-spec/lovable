@@ -4,15 +4,17 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { Sparkles } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { groupStatementIndicators, portfolioIndicators, type Indicator } from "@/lib/engine/indicators";
+import { KEY_INDICATORS, KEY_STATEMENT_INDICATORS, groupStatementIndicators, keyIndicators, portfolioIndicators, type Indicator } from "@/lib/engine/indicators";
 import { IndicatorTile } from "@/components/indicators";
 import { Page, PageHeader, SectionTitle } from "@/components/ui";
 
 export default function IndicateursPage() {
   const { data, projection } = useStore();
-  const all = useMemo(() => [...portfolioIndicators(data, projection), ...groupStatementIndicators(data, projection)], [data, projection]);
+  const all = useMemo(() => [...keyIndicators(portfolioIndicators(data, projection), KEY_INDICATORS), ...keyIndicators(groupStatementIndicators(data, projection), KEY_STATEMENT_INDICATORS)], [data, projection]);
   const groups = new Map<string, Indicator[]>();
-  for (const i of all) groups.set(i.group, [...(groups.get(i.group) ?? []), i]);
+  // Deux blocs lisibles : la dette (ce que regarde d'abord la banque), puis les revenus.
+  const section = (i: Indicator) => (i.group === "Comptes annuels" ? i.group : ["gross-yield", "occupancy"].includes(i.id) ? "Revenus" : "Dette");
+  for (const i of all) groups.set(section(i), [...(groups.get(section(i)) ?? []), i]);
   const hasStatements = data.statements.length > 0;
 
   return (
@@ -37,7 +39,7 @@ export default function IndicateursPage() {
         {!hasStatements && (
           <Link href="/plus/bilans" className="mt-6 flex items-center gap-3 rounded-2xl bg-navy px-4 py-4 text-white">
             <Sparkles size={20} className="text-[#e8d3ad]" />
-            <span className="flex-1 text-sm">Importez vos bilans pour ajouter CAF, EBE, capacité de remboursement et couverture des intérêts.</span>
+            <span className="flex-1 text-sm">Saisissez vos bilans pour ajouter la CAF et la capacité de remboursement.</span>
           </Link>
         )}
         <p className="mt-6 px-2 text-center text-xs text-muted">
