@@ -5,6 +5,7 @@ import { siteUrl } from "../env";
 import { errorMessage, reportEvent } from "../monitoring";
 import { loadPublicOrder, ORDER_TOKEN_PURPOSE, orderUrl } from "../orders";
 import { loadSettings, vatMention } from "../settings";
+import { dashboard, salesStats } from "../admin-queries";
 import { emailProvider } from "./provider";
 import {
   adminAlertEmail,
@@ -14,6 +15,8 @@ import {
   orderShippedEmail,
   type EmailBrand,
   type EmailOrder,
+  type WeeklyReport,
+  weeklyReportEmail,
 } from "./templates";
 
 // Envoi des e-mails en attente. Chaque e-mail est « réservé » avant l'envoi
@@ -40,6 +43,7 @@ async function renderFor(kind: string, orderId: string | null, payload: Record<s
   if (kind === "admin_alert") {
     return adminAlertEmail(b, String(payload.title ?? "Alerte"), String(payload.message ?? ""), `${siteUrl()}/admin`);
   }
+  if (kind === "weekly_report") return weeklyReportEmail(b, await buildWeeklyReport(), `${siteUrl()}/admin?periode=7j`);
   if (!orderId) throw new Error("E-mail sans commande");
   const order = await loadPublicOrder("id = $1", orderId);
   if (!order) throw new Error("Commande introuvable");
@@ -119,4 +123,58 @@ export async function queueAdminAlert(title: string, message: string): Promise<v
      WHERE NOT EXISTS (SELECT 1 FROM email_outbox WHERE kind = 'admin_alert' AND payload->>'title' = $3 AND created_at > now() - interval '6 hours')`,
     [to, { title, message }, title],
   );
+}
+
+async function buildWeeklyReport(): Promise<WeeklyReport> {
+  const s = await loadSettings();
+  const [stats, d] = await Promise.all([salesStats("7j"), dashboard(s.lowStockThreshold)]);
+  const to = new Date();
+  const from = new Date(to.getTime() - 6 * 86_400_000);
+  return {
+    from,
+    to,
+    revenueCents: stats.current.revenueCents,
+    previousRevenueCents: stats.previous.revenueCents,
+    orders: stats.current.orders,
+    previousOrders: stats.previous.orders,
+    averageCents: stats.current.averageCents,
+    items: stats.current.items,
+    toPrepare: d.toPrepareCount,
+    top: stats.topProducts.slice(0, 3).map((p) => ({ name: p.name, quantity: p.quantity, revenueCents: p.revenueCents })),
+    soldOut: d.soldOut.map((p) => p.name),
+    lowStock: d.lowStock.map((p) => ({ name: p.name, stock: p.stock })),
+  };
+}
+
+/** Semaine ISO (ex. « 2026-W40 ») à l'heure de Paris : un seul récapitulatif par semaine. */
+export function isoWeek(date: Date): string {
+  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+  const d = new Date(`${parts}T00:00:00Z`);
+  const day = (d.getUTCDay() + 6) % 7;
+  d.setUTCDate(d.getUTCDate() - day + 3);
+  const firstThursday = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
+  const week = 1 + Math.round(((d.getTime() - firstThursday.getTime()) / 86_400_000 - 3 + ((firstThursday.getUTCDay() + 6) % 7)) / 7);
+  return `${d.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
+}
+
+/**
+ * Récapitulatif du lundi : programmé par la tâche de nuit ; seulement le
+ * lundi (heure de Paris), une seule fois par semaine même si la tâche
+ * repasse. Renvoie vrai si un récapitulatif a été programmé.
+ */
+export async function queueWeeklyReport(now = new Date(), force = false): Promise<boolean> {
+  const weekday = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", weekday: "short" }).format(now);
+  if (!force && weekday !== "Mon") return false;
+  const s = await loadSettings();
+  const to = s.notificationEmail || s.contactEmail;
+  if (!to) return false;
+  const week = isoWeek(now);
+  const rows = await query(
+    `INSERT INTO email_outbox (order_id, kind, recipient, payload)
+     SELECT NULL, 'weekly_report', $1, $2
+     WHERE NOT EXISTS (SELECT 1 FROM email_outbox WHERE kind = 'weekly_report' AND payload->>'week' = $3)
+     RETURNING id`,
+    [to, { week }, week],
+  );
+  return rows.length > 0;
 }

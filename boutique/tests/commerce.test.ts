@@ -8,7 +8,7 @@ import { payments } from "../src/lib/server/payments";
 import type { FakeProvider } from "../src/lib/server/payments/fake";
 import { refundOrder, setOrderStatus } from "../src/lib/server/admin-orders";
 import { salesStats } from "../src/lib/server/admin-queries";
-import { processOutbox } from "../src/lib/server/email/outbox";
+import { isoWeek, processOutbox, queueWeeklyReport } from "../src/lib/server/email/outbox";
 import { sent } from "../src/lib/server/email/provider";
 
 const fake = () => payments() as FakeProvider;
@@ -330,6 +330,23 @@ describe("commandes côté créatrice", () => {
     const rows = await sql<{ invoice_number: string }>("SELECT invoice_number FROM customer_order WHERE invoice_number IS NOT NULL ORDER BY invoice_number");
     const numbers = rows.map((r) => Number(r.invoice_number.split("-")[1]));
     numbers.forEach((n, i) => assert.equal(n, i + 1));
+  });
+
+  test("récapitulatif du lundi : seulement le lundi, une fois par semaine, chiffres de la semaine", async () => {
+    await sql("UPDATE shop_settings SET notification_email = 'creatrice@exemple.fr'");
+    await sql("DELETE FROM email_outbox WHERE kind = 'weekly_report'");
+    const monday = new Date("2026-10-05T04:17:00Z");
+    assert.equal(isoWeek(monday), "2026-W41");
+    assert.equal(isoWeek(new Date("2027-01-01T12:00:00Z")), "2026-W53");
+    assert.equal(await queueWeeklyReport(new Date("2026-10-06T04:17:00Z")), false, "pas le mardi");
+    assert.equal(await queueWeeklyReport(monday), true);
+    assert.equal(await queueWeeklyReport(new Date("2026-10-05T20:00:00Z")), false, "une seule fois par semaine");
+    sent.length = 0;
+    await processOutbox();
+    const mail = sent.find((m) => m.to === "creatrice@exemple.fr" && m.subject.startsWith("Votre semaine"));
+    assert.ok(mail, "récapitulatif envoyé à la créatrice");
+    assert.match(mail.html, /Chiffre d(&#39;|')affaires/);
+    assert.match(mail.html, /tableau de bord/);
   });
 
   test("tableau de bord : ventes nettes, périodes comparées, clientes fidèles", async () => {

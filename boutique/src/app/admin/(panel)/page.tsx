@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardList, PackageX, Plus, TrendingDown } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardList, PackageX, Plus, Printer, TrendingDown } from "lucide-react";
 import Link from "next/link";
 import { after } from "next/server";
 import { DemoCard } from "@/components/admin/demo-card";
@@ -106,9 +106,16 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           <h2 id="titre-preparer" className="font-serif text-2xl">
             Commandes à préparer
           </h2>
-          <Link href="/admin/commandes" className="text-sm font-semibold text-primary">
-            Toutes les commandes
-          </Link>
+          <span className="flex flex-wrap items-center gap-4">
+            {d.toPrepareCount > 0 && (
+              <Link href="/admin/bons?commande=a-preparer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+                <Printer size={15} aria-hidden="true" /> Imprimer les bons
+              </Link>
+            )}
+            <Link href="/admin/commandes" className="text-sm font-semibold text-primary">
+              Toutes les commandes
+            </Link>
+          </span>
         </div>
         {d.toPrepare.length === 0 ? (
           <div className="card flex items-center gap-3 p-5 text-text-2">

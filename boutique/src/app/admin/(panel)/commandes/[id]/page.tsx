@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowLeft, Mail, Phone } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Mail, Phone, Printer } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { OrderActions } from "@/components/admin/order-actions";
@@ -46,6 +46,11 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
       <header className="mt-3 mb-6 flex flex-wrap items-center gap-3">
         <h1 className="text-3xl sm:text-4xl">Commande {String(o.number)}</h1>
         <StatusBadge status={status} />
+        {o.paid_at && (
+          <Link href={`/admin/bons?commande=${id}`} className="btn btn-outline btn-sm ml-auto">
+            <Printer size={16} aria-hidden="true" /> Bon de préparation
+          </Link>
+        )}
       </header>
 
       {o.needs_attention && (
