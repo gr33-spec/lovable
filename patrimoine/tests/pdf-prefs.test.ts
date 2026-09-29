@@ -33,3 +33,8 @@ test("réglages PDF : parties masquées", () => {
   assert.equal(shows({ hide: ["credits"] }, "credits"), false);
   assert.equal(shows({}, "credits"), true);
 });
+
+test("réglages PDF : les modèles modernes sont acceptés", () => {
+  for (const cover of ["editorial", "bento", "suisse", "immersive", "bandeau", "epure"] as const) assert.equal(parsePdfPrefs({ cover }).cover, cover);
+  assert.equal(parsePdfPrefs({ cover: "brutalist" }).cover, undefined);
+});
