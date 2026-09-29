@@ -145,7 +145,6 @@ export function AnalysisView() {
                     <li>Dans Vercel : projet <b>patrimoine</b> → Settings → Environment Variables → ajoutez <b>ANTHROPIC_API_KEY</b> avec cette clé.</li>
                     <li>Deployments → ⋯ → Redeploy.</li>
                   </ol>
-                  <p className="mt-2 text-xs text-muted">La même clé active aussi la lecture automatique des bilans.</p>
                 </Card>
               </>
             )}

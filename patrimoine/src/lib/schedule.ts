@@ -174,6 +174,89 @@ export function projectLoanFromSchedule(input: LoanScheduleRow[]): Partial<Proje
   };
 }
 
+// ——— Import d'un échéancier en JSON (sans IA) ———
+
+const ROW_KEYS = {
+  month: ["month", "mois", "date", "echeance_date", "dateEcheance"],
+  payment: ["payment", "echeance", "mensualite", "montant"],
+  interest: ["interest", "interets", "intérêts"],
+  principal: ["principal", "capital", "amortissement", "capitalAmorti"],
+  insurance: ["insurance", "assurance"],
+  balance: ["balance", "restant", "capitalRestant", "crd", "capital_restant_du"],
+} as const;
+
+const num = (v: unknown): number | undefined => {
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  if (typeof v === "string" && v.trim()) {
+    const n = Number(v.replace(/\s|€/g, "").replace(",", "."));
+    return Number.isFinite(n) ? n : undefined;
+  }
+  return undefined;
+};
+
+/** « 2021-03 », « 2021-03-05 » ou « 05/03/2021 » → « 2021-03 ». */
+const monthOfText = (v: unknown): string | undefined => {
+  if (typeof v !== "string") return undefined;
+  const iso = /^(\d{4})-(\d{2})/.exec(v.trim());
+  if (iso) return `${iso[1]}-${iso[2]}`;
+  const fr = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(v.trim());
+  return fr ? `${fr[3]}-${fr[2].padStart(2, "0")}` : undefined;
+};
+
+/**
+ * Échéancier fourni en JSON : un tableau de lignes, ou un objet { rows | echeances,
+ * meta, bank }. Les noms de colonnes courants (français ou anglais) sont
+ * reconnus. Les lignes illisibles sont signalées, jamais inventées.
+ */
+export function parseScheduleJson(text: string): { rows: LoanScheduleRow[]; meta?: ScheduleMeta; bank: string | null; notes: string[] } {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(text);
+  } catch {
+    throw new Error("Fichier JSON illisible.");
+  }
+  const obj = (Array.isArray(raw) ? { rows: raw } : raw) as Record<string, unknown>;
+  const list = (obj.rows ?? obj.echeances ?? obj.lignes) as unknown;
+  if (!Array.isArray(list)) throw new Error("Aucune liste d'échéances (« rows ») dans le fichier.");
+  const pick = (r: Record<string, unknown>, keys: readonly string[]) => keys.map((k) => r[k]).find((v) => v !== undefined && v !== null && v !== "");
+  const rows: LoanScheduleRow[] = [];
+  let skipped = 0;
+  for (const item of list) {
+    const r = (item ?? {}) as Record<string, unknown>;
+    const month = monthOfText(pick(r, ROW_KEYS.month));
+    const interest = num(pick(r, ROW_KEYS.interest));
+    const principal = num(pick(r, ROW_KEYS.principal));
+    const balance = num(pick(r, ROW_KEYS.balance));
+    const insurance = num(pick(r, ROW_KEYS.insurance));
+    const payment = num(pick(r, ROW_KEYS.payment)) ?? (interest !== undefined && principal !== undefined ? interest + principal : undefined);
+    if (!month || payment === undefined || interest === undefined || principal === undefined || balance === undefined) {
+      skipped++;
+      continue;
+    }
+    rows.push({ month, payment, interest, principal, balance, ...(insurance ? { insurance } : {}) });
+  }
+  const m = (obj.meta ?? {}) as Record<string, unknown>;
+  const meta: ScheduleMeta = {};
+  const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : undefined);
+  const bank = str(m.bank) ?? str(obj.bank) ?? str(obj.banque);
+  if (bank) meta.bank = bank;
+  const reference = str(m.reference) ?? str(obj.reference);
+  if (reference) meta.reference = reference;
+  const borrower = str(m.borrower) ?? str(obj.emprunteur);
+  if (borrower) meta.borrower = borrower;
+  const initialAmount = num(m.initialAmount ?? obj.montant);
+  if (initialAmount) meta.initialAmount = initialAmount;
+  const start = str(m.startDate) ?? str(obj.debut);
+  if (start && /^\d{4}-\d{2}(-\d{2})?$/.test(start)) meta.startDate = start.length === 7 ? `${start}-01` : start;
+  const duration = num(m.durationMonths ?? obj.dureeMois);
+  if (duration) meta.durationMonths = Math.round(duration);
+  const rate = num(m.ratePct ?? obj.taux);
+  if (rate) meta.ratePct = rate;
+  const sorted = normalizeRows(rows);
+  if (sorted.length < 2) throw new Error("Moins de deux échéances lisibles : vérifiez le fichier (mois, échéance, intérêts, capital, capital restant dû).");
+  return { rows: sorted, meta: Object.keys(meta).length ? meta : undefined, bank: bank ?? null, notes: skipped ? [`${skipped} ligne(s) incomplète(s) ignorée(s).`] : [] };
+}
+
 /** Chiffres clés d'un tableau : échéance habituelle, échéance du différé, intérêts totaux. */
 export function scheduleSummary(input: LoanScheduleRow[]): { payment?: number; deferralPayment?: number; totalInterest: number } {
   const rows = normalizeRows(input);

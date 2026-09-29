@@ -4,6 +4,7 @@ import path from "node:path";
 import { Document, Font, Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { Block, LegalDoc } from "../legal/doc";
 import { dateLong } from "../legal/doc";
+import { pdfColors, type PdfColors } from "./prefs";
 
 // Mise en page A4 portrait des documents de gestion locative (bail, états
 // des lieux, quittances…) à partir du modèle neutre `LegalDoc`.
@@ -26,8 +27,6 @@ const FONT = HAS_INTER ? "Inter" : "Helvetica";
 const BOLD = HAS_INTER ? { fontFamily: "Inter", fontWeight: 700 as const } : { fontFamily: "Helvetica-Bold" };
 const SEMI = HAS_INTER ? { fontFamily: "Inter", fontWeight: 600 as const } : { fontFamily: "Helvetica-Bold" };
 
-const NAVY = "#0b2545";
-const GOLD = "#b08d57";
 const INK = "#16202e";
 const INK2 = "#4b5567";
 const MUTED = "#8a93a3";
@@ -37,7 +36,9 @@ const WARN_BG = "#fdecec";
 
 const T = (s: string) => s.replace(/[  ]/g, " ").replace(/−/g, "-");
 
-const st = StyleSheet.create({
+/** Styles aux couleurs du thème choisi (voir lib/pdf/prefs.ts). */
+function makeStyles({ deep: NAVY }: PdfColors) {
+  return StyleSheet.create({
   page: { paddingTop: 44, paddingBottom: 54, paddingHorizontal: 46, fontFamily: FONT, fontSize: 9.4, color: INK, lineHeight: 1.45 },
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", borderBottomWidth: 2, borderBottomColor: NAVY, paddingBottom: 10, marginBottom: 14 },
   title: { ...BOLD, fontSize: 19, color: NAVY, letterSpacing: -0.3, lineHeight: 1.25 },
@@ -52,11 +53,15 @@ const st = StyleSheet.create({
   th: { ...SEMI, fontSize: 7.8, color: "#ffffff", paddingVertical: 4, paddingHorizontal: 5 },
   td: { fontSize: 8.4, paddingVertical: 3.4, paddingHorizontal: 5 },
   footer: { position: "absolute", bottom: 22, left: 46, right: 46, flexDirection: "row", justifyContent: "space-between", fontSize: 7, color: MUTED, borderTopWidth: 0.5, borderTopColor: LINE, paddingTop: 5 },
-});
+  });
+}
+type Styles = ReturnType<typeof makeStyles>;
 
 export type PhotoMap = Map<string, { data: Buffer; format: "jpg" | "png" }>;
 
-function BlockView({ b, photos }: { b: Block; photos: PhotoMap }) {
+function BlockView({ b, photos, st, c }: { b: Block; photos: PhotoMap; st: Styles; c: PdfColors }) {
+  const NAVY = c.deep;
+  const GOLD = c.brand;
   switch (b.t) {
     case "h":
       return <Text style={st.h} minPresenceAhead={40}>{T(b.text)}</Text>;
@@ -166,7 +171,8 @@ function BlockView({ b, photos }: { b: Block; photos: PhotoMap }) {
   }
 }
 
-export function LegalPdf({ doc, photos = new Map() }: { doc: LegalDoc; photos?: PhotoMap }) {
+export function LegalPdf({ doc, photos = new Map(), colors = pdfColors(undefined, undefined) }: { doc: LegalDoc; photos?: PhotoMap; colors?: PdfColors }) {
+  const st = makeStyles(colors);
   return (
     <Document title={doc.title} author="Patrimoine" subject={doc.subtitle}>
       <Page size="A4" style={st.page} wrap>
@@ -175,10 +181,10 @@ export function LegalPdf({ doc, photos = new Map() }: { doc: LegalDoc; photos?: 
             <Text style={st.title}>{T(doc.title)}</Text>
             {doc.subtitle && <Text style={st.subtitle}>{T(doc.subtitle)}</Text>}
           </View>
-          <View style={{ width: 34, height: 4, backgroundColor: GOLD, borderRadius: 2, marginBottom: 6 }} />
+          <View style={{ width: 34, height: 4, backgroundColor: colors.brand, borderRadius: 2, marginBottom: 6 }} />
         </View>
         {doc.blocks.map((b, i) => (
-          <BlockView key={i} b={b} photos={photos} />
+          <BlockView key={i} b={b} photos={photos} st={st} c={colors} />
         ))}
         <View style={st.footer} fixed>
           <Text style={{ maxWidth: "80%" }}>{T(doc.reference)}</Text>

@@ -80,7 +80,7 @@ export default function PlusPage() {
         <Card className="py-1">
           <Divided>
             <Row href="/plus/societes" icon={<Building2 size={18} />} title="Informations des sociétés" subtitle="Siège, SIREN, gérant · durée des baux" />
-            <Row href="/plus/bilans" icon={<FileSpreadsheet size={18} />} title="Bilans et comptes annuels" subtitle={`${data.statements.length} bilan(s) · import PDF intelligent`} />
+            <Row href="/plus/bilans" icon={<FileSpreadsheet size={18} />} title="Bilans et comptes annuels" subtitle={`${data.statements.length} bilan(s) · saisie ou import JSON`} />
             <Row href="/plus/remuneration" icon={<HandCoins size={18} />} title="Rémunération" subtitle="Salaires, dividendes, comptes courants · calcul 2026" />
           </Divided>
         </Card>

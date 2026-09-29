@@ -147,7 +147,7 @@ export function QuickLoan({ buildingId, companyId, onDone }: { buildingId?: stri
       <SelectField label="Immeuble financé" value={building} options={buildings} onChange={setBuilding} emptyLabel="Aucun en particulier" />
       <ScheduleImportCard
         title="Vous avez le tableau d'amortissement ?"
-        text="Importez-le (PDF ou photo) : montant, taux, échéances, assurance, capital restant et fin se remplissent tout seuls, au centime."
+        text="Importez ses échéances en fichier JSON : montant, taux, échéances, assurance, capital restant et fin se remplissent tout seuls, au centime."
         importer={importer}
       />
       <div className="flex items-center gap-3 px-1 text-[12.5px] font-semibold uppercase tracking-wide text-muted">
