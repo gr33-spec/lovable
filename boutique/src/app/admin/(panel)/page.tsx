@@ -5,7 +5,8 @@ import { DemoCard } from "@/components/admin/demo-card";
 import { IncidentsCard } from "@/components/admin/incidents";
 import { StatusBadge } from "@/components/admin/ui";
 import { formatPrice, formatRelative } from "@/lib/format";
-import { dashboard } from "@/lib/server/admin-queries";
+import { SalesOverview } from "@/components/admin/sales-overview";
+import { dashboard, salesStats, type StatsPeriod } from "@/lib/server/admin-queries";
 import { getSettings } from "@/lib/server/cached";
 import { paymentConfig } from "@/lib/server/env";
 import { runQuickMaintenance } from "@/lib/server/maintenance";
@@ -15,9 +16,11 @@ import { hasPlaceholders } from "@/lib/rich-text";
 
 export const metadata = { title: "Tableau de bord" };
 
-export default async function Dashboard() {
+export default async function Dashboard({ searchParams }: { searchParams: Promise<{ periode?: string }> }) {
+  const { periode } = await searchParams;
+  const period: StatsPeriod = periode === "7j" || periode === "12m" ? periode : "30j";
   const settings = await getSettings();
-  const d = await dashboard(settings.lowStockThreshold);
+  const [d, stats] = await Promise.all([dashboard(settings.lowStockThreshold), salesStats(period)]);
   // Petite maintenance en arrière-plan à chaque visite (e-mails en attente, réservations expirées).
   after(() => runQuickMaintenance());
   const payment = paymentConfig();
@@ -89,11 +92,13 @@ export default async function Dashboard() {
           <p className="mt-1 text-4xl font-semibold tabular-nums">{d.soldOut.length}</p>
           <p className="text-sm text-text-2">produit(s) en ligne</p>
         </Link>
-        <div className="card p-5">
-          <p className="text-sm text-text-2">Ce mois-ci</p>
-          <p className="mt-1 text-4xl font-semibold tabular-nums">{formatPrice(d.month.revenueCents)}</p>
-          <p className="text-sm text-text-2">{d.month.orders} commande(s)</p>
-        </div>
+        <Link href="/admin/produits" className="card p-5 no-underline transition hover:border-primary">
+          <p className="flex items-center gap-2 text-sm text-text-2">
+            <TrendingDown size={17} aria-hidden="true" /> Stock faible
+          </p>
+          <p className="mt-1 text-4xl font-semibold tabular-nums">{d.lowStock.length}</p>
+          <p className="text-sm text-text-2">{settings.lowStockThreshold ? `à ${settings.lowStockThreshold} pièce(s) ou moins` : "alerte désactivée"}</p>
+        </Link>
       </div>
 
       <section className="mt-8" aria-labelledby="titre-preparer">
@@ -111,7 +116,7 @@ export default async function Dashboard() {
           </div>
         ) : (
           <ul className="card divide-y divide-border">
-            {d.toPrepare.map((o) => (
+            {d.toPrepare.slice(0, 5).map((o) => (
               <li key={o.id}>
                 <Link href={`/admin/commandes/${o.id}`} className="flex items-center gap-3 p-4 no-underline hover:bg-surface-2/50">
                   <div className="min-w-0 flex-1">
@@ -133,9 +138,16 @@ export default async function Dashboard() {
             ))}
           </ul>
         )}
+        {d.toPrepareCount > 5 && (
+          <Link href="/admin/commandes?statut=a-preparer" className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary">
+            Voir les {d.toPrepareCount} commandes à préparer <ArrowRight size={15} aria-hidden="true" />
+          </Link>
+        )}
       </section>
 
-      <div className="mt-8 grid gap-6 md:grid-cols-2">
+      <SalesOverview stats={stats} />
+
+      <div className="mt-10 grid gap-6 md:grid-cols-2">
         <section aria-labelledby="titre-epuises">
           <h2 id="titre-epuises" className="mb-3 font-serif text-2xl">
             Épuisés

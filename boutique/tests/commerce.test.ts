@@ -7,6 +7,7 @@ import { cancelPendingByToken, findOrderByToken, handlePaymentEvent, startChecko
 import { payments } from "../src/lib/server/payments";
 import type { FakeProvider } from "../src/lib/server/payments/fake";
 import { refundOrder, setOrderStatus } from "../src/lib/server/admin-orders";
+import { salesStats } from "../src/lib/server/admin-queries";
 import { processOutbox } from "../src/lib/server/email/outbox";
 import { sent } from "../src/lib/server/email/provider";
 
@@ -329,6 +330,35 @@ describe("commandes côté créatrice", () => {
     const rows = await sql<{ invoice_number: string }>("SELECT invoice_number FROM customer_order WHERE invoice_number IS NOT NULL ORDER BY invoice_number");
     const numbers = rows.map((r) => Number(r.invoice_number.split("-")[1]));
     numbers.forEach((n, i) => assert.equal(n, i + 1));
+  });
+
+  test("tableau de bord : ventes nettes, périodes comparées, clientes fidèles", async () => {
+    async function paid(email: string) {
+      const id = await makeProduct({ stock: 3, price: 2000 });
+      const res = await checkout(shipId, [{ productId: id, quantity: 1 }], { email });
+      assert.ok(res.ok);
+      if (!res.ok) throw new Error();
+      const session = fake().pay(sessionIdFrom(res.url));
+      await handlePaymentEvent({ id: `evt_${session.id}`, kind: "checkout_completed", livemode: false, session });
+      return orderBySession(session.id);
+    }
+    const before = await salesStats("30j");
+    const kept = await paid("fidele@exemple.fr");
+    const cancelled = await paid("annulee@exemple.fr");
+    await refundOrder(cancelled.id, null as unknown as string, { restock: true, cancel: true });
+    const old = await paid("fidele@exemple.fr");
+    await sql("UPDATE customer_order SET paid_at = now() - interval '40 days' WHERE id = $1", [old.id]);
+    const after = await salesStats("30j");
+    const [{ total_cents }] = await sql<{ total_cents: number }>("SELECT total_cents FROM customer_order WHERE id = $1", [kept.id]);
+
+    assert.equal(after.current.orders, before.current.orders + 1, "commande annulée non comptée");
+    assert.equal(after.current.revenueCents, before.current.revenueCents + total_cents, "chiffre d'affaires net");
+    assert.equal(after.previous.orders, before.previous.orders + 1, "commande d'il y a 40 jours = période précédente");
+    assert.equal(after.series.length, 30);
+    assert.equal(after.series.reduce((a, x) => a + x.revenueCents, 0), after.current.revenueCents, "graphique = total");
+    assert.ok(after.returning.returningCustomers >= 1, "cliente revenue reconnue comme fidèle");
+    assert.ok(after.topProducts.length > 0 && after.categories.length > 0 && after.shipping.length > 0);
+    assert.equal((await salesStats("12m")).series.length, 12);
   });
 });
 
