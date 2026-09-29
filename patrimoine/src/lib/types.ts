@@ -1,3 +1,5 @@
+import type { SavedAnalysis } from "./analysis/types";
+
 // Modèle de données de l'application. Tous les champs chiffrés sont
 // optionnels : l'application doit fonctionner avec des données partielles.
 
@@ -748,6 +750,8 @@ export interface Settings {
   leaseYears?: number;
   /** Foyer fiscal et hypothèses de rémunération. */
   household?: Household;
+  /** Dernières analyses IA du patrimoine (5 au plus), jamais visibles de l'espace gestion. */
+  analyses?: SavedAnalysis[];
 }
 
 export interface AppData {
