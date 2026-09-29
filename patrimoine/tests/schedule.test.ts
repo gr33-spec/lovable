@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { checkSchedule, loanFieldsFromSchedule } from "../src/lib/schedule";
+import { checkSchedule, loanFieldsFromSchedule, syncFromSchedules } from "../src/lib/schedule";
 import { resolveLoan, yearlyBalances } from "../src/lib/engine/loan";
 import { project } from "../src/lib/engine/projection";
 import { monthIndex } from "../src/lib/engine/dates";
@@ -74,4 +74,31 @@ test("remboursement anticipé : le tableau cède la place au calcul", () => {
   const p = project(d, monthIndex(2026, 10));
   const dec2028 = rows.find((x) => x.month === "2028-12")!;
   assert.ok(p.years.find((y) => y.year === 2028)!.debt < dec2028.balance - 40_000);
+});
+
+test("fiches tenues à jour depuis les tableaux déjà enregistrés (rétroactif)", () => {
+  const rows = bankTable();
+  const d = emptyData();
+  d.buildings = [{ id: "b", name: "Immeuble" }, { id: "b2", name: "Autre", acquisitionDate: "2015-06-01" }];
+  d.loans = [
+    { id: "l", buildingId: "b", schedule: { rows, importedAt: "2026-01-10", source: "ia" }, remaining: 150_000, remainingDate: "2024-01-01", ratePct: 4 },
+    { id: "l2", buildingId: "b2", schedule: { rows, importedAt: "2026-01-10", source: "ia" } },
+    { id: "sans", remaining: 1000 },
+  ];
+  const now = monthIndex(2026, 10);
+  const { loans, buildings } = syncFromSchedules(d, now);
+  const l = loans.find((x) => x.id === "l")!;
+  assert.equal(l.remaining, rows.filter((x) => x.month < "2026-10").pop()!.balance);
+  assert.equal(l.remainingDate, "2026-10-01");
+  assert.equal(l.initialAmount, 200_000);
+  assert.ok(Math.abs(l.ratePct! - 3.2) < 0.01);
+  assert.ok(!loans.some((x) => x.id === "sans"));
+  assert.deepEqual(buildings.map((b) => [b.id, b.acquisitionDate]), [["b", "2020-01-01"]], "date d'acquisition remplie seulement si vide");
+  // Une fois à jour, plus rien à faire ; le mois suivant, le capital restant avance.
+  d.loans = d.loans.map((x) => loans.find((y) => y.id === x.id) ?? x);
+  d.buildings = d.buildings.map((x) => buildings.find((y) => y.id === x.id) ?? x);
+  assert.deepEqual(syncFromSchedules(d, now), { loans: [], buildings: [] });
+  const next = syncFromSchedules(d, now + 1).loans.find((x) => x.id === "l")!;
+  assert.equal(next.remainingDate, "2026-11-01");
+  assert.ok(next.remaining! < l.remaining!);
 });

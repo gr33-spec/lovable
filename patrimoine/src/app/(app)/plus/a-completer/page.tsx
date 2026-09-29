@@ -31,7 +31,7 @@ export default function ACompleterPage() {
                 {dossiers.slice(0, 8).map(({ unit, building, missing }) => (
                   <Row
                     key={unit.id}
-                    href={`/patrimoine/logement/${unit.id}`}
+                    href={`/patrimoine/logement/${unit.id}?depuis=gestion`}
                     icon={<CircleAlert size={18} className="text-neg" />}
                     title={`${unit.name} · ${building.name}`}
                     subtitle={missing.map((m) => m.label).join(", ")}

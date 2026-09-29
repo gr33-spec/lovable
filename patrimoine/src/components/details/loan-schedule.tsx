@@ -63,7 +63,7 @@ export function LoanScheduleSection({ loan }: { loan: Loan }) {
 
   const save = () => {
     if (!review) return;
-    const fields = loanFieldsFromSchedule(review.extraction.rows);
+    const fields = loanFieldsFromSchedule(review.extraction.rows, nowMonth);
     const previous = loan;
     const next: Loan = {
       ...loan,

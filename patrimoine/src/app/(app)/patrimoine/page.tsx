@@ -99,7 +99,7 @@ function Patrimoine() {
           units.map((u) => (
             <Link
               key={u.id}
-              href={`/patrimoine/logement/${u.id}`}
+              href={`/patrimoine/lot/${u.id}`}
               className="flex items-center gap-3 py-2.5 pr-1"
               style={{ paddingLeft: 12 + (depth + 1) * 16 }}
             >

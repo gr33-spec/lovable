@@ -1,5 +1,5 @@
-import type { Loan, LoanScheduleRow } from "./types";
-import { monthIndex, parseMonth } from "./engine/dates";
+import type { AppData, Building, Loan, LoanScheduleRow } from "./types";
+import { monthIndex, parseMonth, type MonthIndex } from "./engine/dates";
 
 // Tableau d'amortissement de la banque : contrôles de cohérence avant
 // enregistrement, et champs du crédit qui s'en déduisent.
@@ -63,8 +63,11 @@ export function checkSchedule(input: LoanScheduleRow[]): ScheduleCheck {
   };
 }
 
-/** Champs du crédit repris du tableau (montant, dates, durée, échéance, taux, assurance). */
-export function loanFieldsFromSchedule(input: LoanScheduleRow[]): Partial<Loan> {
+/**
+ * Champs du crédit repris du tableau : montant, dates, durée, échéance, taux,
+ * assurance et capital restant dû au 1er du mois courant (tenu à jour chaque mois).
+ */
+export function loanFieldsFromSchedule(input: LoanScheduleRow[], nowMonth?: MonthIndex): Partial<Loan> {
   const rows = normalizeRows(input);
   if (rows.length < 2) return {};
   const first = rows[0];
@@ -88,10 +91,53 @@ export function loanFieldsFromSchedule(input: LoanScheduleRow[]): Partial<Loan> 
     ratePct,
     insuranceMonthly: first.insurance !== undefined ? first.insurance : undefined,
     kind: last.principal > initial * 0.5 ? "in_fine" : "amortissable",
-    // Le solde vient du tableau : on retire l'ancien point de repère saisi à la main.
-    remaining: undefined,
-    remainingDate: undefined,
+    ...(nowMonth === undefined ? {} : remainingAt(rows, nowMonth)),
   };
+}
+
+/** Capital restant dû au 1er du mois (0 une fois le crédit terminé). */
+function remainingAt(rows: LoanScheduleRow[], nowMonth: MonthIndex): Pick<Loan, "remaining" | "remainingDate"> {
+  const past = rows.filter((r) => parseMonth(r.month)! < nowMonth);
+  const first = rows[0];
+  const balance = past.length ? past[past.length - 1].balance : first.balance + first.principal;
+  return { remaining: Math.round(Math.max(0, balance) * 100) / 100, remainingDate: `${ym(nowMonth)}-01` };
+}
+
+const SYNCED: (keyof Loan)[] = ["initialAmount", "startDate", "endDate", "durationMonths", "monthlyPayment", "ratePct", "insuranceMonthly", "kind", "remaining", "remainingDate"];
+
+/**
+ * Mise en cohérence des fiches avec les tableaux d'amortissement enregistrés :
+ * caractéristiques et capital restant dû des crédits, date d'acquisition de
+ * l'immeuble quand elle n'est pas renseignée (déblocage de son premier prêt).
+ * Ne renvoie que ce qui change (rien à faire = listes vides).
+ */
+export function syncFromSchedules(data: AppData, nowMonth: MonthIndex): { loans: Loan[]; buildings: Building[] } {
+  const loans: Loan[] = [];
+  for (const loan of data.loans) {
+    if (!loan.schedule || loan.schedule.rows.length < 2) continue;
+    const fields = loanFieldsFromSchedule(loan.schedule.rows, nowMonth);
+    const next: Loan = { ...loan };
+    let changed = false;
+    for (const k of SYNCED) {
+      const v = fields[k];
+      if (v !== undefined && next[k] !== v) {
+        (next as unknown as Record<string, unknown>)[k] = v;
+        changed = true;
+      }
+    }
+    if (changed) loans.push(next);
+  }
+  const buildings: Building[] = [];
+  for (const b of data.buildings) {
+    if (b.acquisitionDate) continue;
+    const starts = data.loans
+      .filter((l) => l.buildingId === b.id && l.schedule)
+      .map((l) => loanFieldsFromSchedule(l.schedule!.rows).startDate)
+      .filter((d): d is string => !!d)
+      .sort();
+    if (starts[0]) buildings.push({ ...b, acquisitionDate: starts[0] });
+  }
+  return { loans, buildings };
 }
 
 /** Capital restant dû d'après le tableau au 1er du mois donné. */

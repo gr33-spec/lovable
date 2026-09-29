@@ -145,7 +145,7 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
                 <div key={u.id} {...dropTarget(dnd, u.id, id)}>
                   <SwipeDelete items={unitRemovals(data, u.id)} message={`${u.name} supprimé`}>
                     <Row
-                      href={`/patrimoine/logement/${u.id}`}
+                      href={`/patrimoine/lot/${u.id}`}
                       icon={<DoorOpen size={18} />}
                       title={units.length > 1 ? <LotHandle dnd={dnd} unitId={u.id} group={id} label={u.name} /> : u.name}
                       subtitle={

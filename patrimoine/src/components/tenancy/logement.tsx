@@ -2,7 +2,6 @@
 
 import { useInGestion } from "../use-gestion";
 import { unitCrumbs } from "@/lib/crumbs";
-import { goBack } from "@/lib/nav";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
@@ -10,14 +9,14 @@ import { ArrowRightLeft, ClipboardCheck, DoorOpen, FileSignature, Pencil, Receip
 import { useStore } from "@/lib/store";
 import type { Tenancy } from "@/lib/types";
 import { dateFr, eur } from "@/lib/format";
-import { activeTenancy, draftTenancy, unitRemovals, inspectionsOf, landlordCompany, lastExitInspection, leavingTenancy, tenancyFromUnit, tenantsName, depositDue } from "@/lib/tenancy";
+import { activeTenancy, draftTenancy, inspectionsOf, landlordCompany, lastExitInspection, leavingTenancy, tenancyFromUnit, tenantsName, depositDue } from "@/lib/tenancy";
 import { leaseTermEnd } from "@/lib/legal/lease";
 import { newEntryInspection } from "@/lib/legal/inspection";
 import { depositSettlement, leaseYears } from "@/lib/legal/rules";
 import { todayIso } from "@/lib/engine/leases";
 import { UnitForm } from "../forms";
 import { PaymentStrip } from "../leases";
-import { Button, Card, ConfirmDelete, Empty, Grid2, NumberField, Page, PageHeader, SectionTitle, Sheet, Stack, TextField, DateField } from "../ui";
+import { Button, Card, Empty, Grid2, NumberField, Page, PageHeader, SectionTitle, Sheet, Stack, TextField, DateField } from "../ui";
 import { DocRow, LegalBadge, SignaturePad, documentUrl } from "./common";
 import { ReceiptPicker } from "./receipts";
 import { SignedDocRow, guarantorDetails } from "./signed";
@@ -33,7 +32,7 @@ export function LogementDetail({ id }: { id: string }) {
 }
 
 function Detail({ id }: { id: string }) {
-  const { data, upsert, removeMany, role } = useStore();
+  const { data, upsert, role } = useStore();
   const router = useRouter();
   const params = useSearchParams();
   const [sheet, setSheet] = useState<null | "edit" | "quittance" | "import" | "sign">(null);
@@ -306,14 +305,12 @@ function Detail({ id }: { id: string }) {
         footer={
           <div className="space-y-2">
             <Button full onClick={() => setSheet(null)}>Terminé</Button>
-            {role === "owner" && <ConfirmDelete
-              label="Supprimer le logement"
-              message="Supprimer ce logement ? Une sauvegarde automatique permet de revenir en arrière."
-              onConfirm={() => {
-                removeMany(unitRemovals(data, unit.id));
-                goBack(router, building ? `/patrimoine/immeuble/${building.id}` : "/patrimoine");
-              }}
-            />}
+            {role === "owner" && (
+              // Description du bien et suppression du lot : dans sa fiche Patrimoine (un seul endroit).
+              <Link href={`/patrimoine/lot/${unit.id}`} className="block py-2 text-center text-[14px] font-semibold text-series-1">
+                Fiche du lot (description, DPE, valeur)
+              </Link>
+            )}
           </div>
         }
       >
