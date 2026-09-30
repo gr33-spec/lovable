@@ -1,0 +1,67 @@
+import type { TenantContext } from "../../tenancy/index.js";
+import type { RequestedLine } from "./price-request-email.js";
+
+export type RecipientStatus = "to_send" | "sent" | "received" | "declined";
+
+export interface RecipientRecord {
+  id: string;
+  supplier: {
+    id: string;
+    name: string;
+    contactName: string | null;
+    email: string;
+    phone: string | null;
+  };
+  status: RecipientStatus;
+  sentAt: Date | null;
+  document: { id: string; name: string; status: string } | null;
+}
+
+export interface PriceRequestRecord {
+  id: string;
+  projectId: string;
+  takeoffId: string;
+  lines: RequestedLine[];
+  message: string | null;
+  dueDate: Date | null;
+  createdAt: Date;
+  recipients: RecipientRecord[];
+}
+
+export interface ValidatedTakeoff {
+  id: string;
+  trade: string;
+  lines: RequestedLine[];
+}
+
+export interface Sender {
+  companyName: string;
+  senderName: string;
+  project: { name: string; address: string | null };
+}
+
+export interface PriceRequestRepository {
+  /** Dernière liste de matériaux VALIDÉE du chantier. */
+  validatedTakeoff(tenant: TenantContext, projectId: string): Promise<ValidatedTakeoff | null>;
+  sender(tenant: TenantContext, projectId: string): Promise<Sender | null>;
+  create(
+    tenant: TenantContext,
+    data: {
+      projectId: string;
+      takeoffId: string;
+      lines: RequestedLine[];
+      message: string | null;
+      dueDate: Date | null;
+      supplierIds: string[];
+    },
+  ): Promise<PriceRequestRecord>;
+  addRecipients(tenant: TenantContext, requestId: string, supplierIds: string[]): Promise<void>;
+  listByProject(tenant: TenantContext, projectId: string): Promise<PriceRequestRecord[]>;
+  findById(tenant: TenantContext, id: string): Promise<PriceRequestRecord | null>;
+  findByRecipient(tenant: TenantContext, recipientId: string): Promise<PriceRequestRecord | null>;
+  setStatus(tenant: TenantContext, recipientId: string, status: RecipientStatus): Promise<void>;
+  attachDocument(tenant: TenantContext, recipientId: string, documentId: string): Promise<void>;
+  delete(tenant: TenantContext, id: string): Promise<boolean>;
+}
+
+export const PRICE_REQUEST_REPOSITORY = Symbol("PRICE_REQUEST_REPOSITORY");
