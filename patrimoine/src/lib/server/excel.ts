@@ -4,7 +4,7 @@ import ExcelJS from "exceljs";
 import type { AppData } from "../types";
 import { currentMonth, monthLabel, yearOf } from "../engine/dates";
 import { project } from "../engine/projection";
-import { buildingValue, cashflowMonthly, rentalCharges, rentalPayments, netWorth } from "../engine/snapshot";
+import { buildingValue, cashflowMonthly, leasedUnits, rentalCharges, rentalPayments, netWorth } from "../engine/snapshot";
 import { latentGain } from "../engine/history";
 import { leaseInfo, outstanding, todayIso } from "../engine/leases";
 import { statementRatios } from "../engine/indicators";
@@ -191,7 +191,7 @@ export async function buildWorkbook(data: AppData): Promise<Buffer> {
       { header: "Indice de référence", key: "index", width: 18 },
       { header: "Impayé cumulé", key: "unpaid", fmt: EUR2 },
     ],
-    data.units.map((u) => {
+    leasedUnits(data).map((u) => {
       const info = leaseInfo(u, today);
       return {
         building: buildingName(u.buildingId),

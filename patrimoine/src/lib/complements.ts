@@ -331,7 +331,7 @@ export function planComplements(data: AppData, patch: Complements): ComplementsP
       }
     }
     const set = (l.set ?? {}) as Partial<Loan>;
-    const fields = schedule ? loanFieldsFromSchedule(schedule.rows, currentMonth(), schedule.meta) : {};
+    const fields = schedule ? loanFieldsFromSchedule(schedule.rows, undefined, schedule.meta) : {};
     const sched = schedule ? { rows: schedule.rows, fileName: "Import JSON", importedAt: new Date().toISOString().slice(0, 10), source: "manuel" as const, ...(schedule.meta ? { meta: schedule.meta } : {}) } : undefined;
     if (target) {
       // Les valeurs données explicitement dans le JSON priment sur celles déduites du tableau.

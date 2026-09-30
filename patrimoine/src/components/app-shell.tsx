@@ -22,15 +22,15 @@ const TABS: { href: string; label: string; icon: typeof House; section: Section 
 ];
 
 /**
- * Tableaux d'amortissement : les fiches des crédits (capital restant dû,
- * caractéristiques) et la date d'acquisition de l'immeuble suivent les
- * tableaux enregistrés, y compris ceux importés avant, et chaque nouveau mois.
+ * Tableaux d'amortissement : les caractéristiques des crédits suivent les
+ * tableaux enregistrés, y compris ceux importés avant. Le capital restant dû
+ * n'est pas recopié : il est recalculé à partir du tableau à chaque affichage.
  */
 function ScheduleSync() {
   const { data, nowMonth, role, upsertMany } = useStore();
   useEffect(() => {
     if (role !== "owner") return;
-    const { loans, buildings } = syncFromSchedules(data, nowMonth);
+    const { loans, buildings } = syncFromSchedules(data);
     if (loans.length + buildings.length === 0) return;
     upsertMany([...loans.map((item) => ({ coll: "loans" as const, item })), ...buildings.map((item) => ({ coll: "buildings" as const, item }))]);
   }, [data, nowMonth, role, upsertMany]);

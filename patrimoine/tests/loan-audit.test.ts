@@ -47,7 +47,7 @@ test("tableau commencé en cours de prêt : jamais pris pour le montant emprunt�
   // Montant saisi par le propriétaire : conservé et jamais écrasé par la synchronisation.
   const data = emptyData();
   data.loans.push({ ...loan, initialAmount: 250000 });
-  const synced = syncFromSchedules(data, currentMonth()).loans[0] ?? data.loans[0];
+  const synced = syncFromSchedules(data).loans[0] ?? data.loans[0];
   assert.equal(synced.initialAmount, 250000);
   assert.equal(reliableInitial(synced).value, 250000);
 });

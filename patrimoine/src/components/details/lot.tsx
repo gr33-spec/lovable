@@ -14,6 +14,7 @@ import { goBack } from "@/lib/nav";
 import { CONDITIONS, UNIT_TYPES, WORK_STATUSES, labelOf } from "@/lib/labels";
 import { dateFr, eur, num } from "@/lib/format";
 import { Card, ConfirmDelete, Details, Empty, Grid2, NumberField, Page, PageHeader, SectionTitle, SelectField, Stack, TextField } from "../ui";
+import { leasedUnits } from "@/lib/engine/snapshot";
 
 // Fiche du lot dans Patrimoine : le bien lui-même (description, confort,
 // énergie, état, valeur), entièrement modifiable. La location (locataire,
@@ -31,6 +32,8 @@ export function LotSheet({ id }: { id: string }) {
   const removeUndoable = useUndoableRemove();
   const router = useRouter();
   const unit = data.units.find((u) => u.id === id);
+  // Loyer du bail en cours s'il existe, sinon loyer de référence du logement.
+  const leased = leasedUnits(data).find((u) => u.id === id);
   if (!unit) {
     return (
       <>
@@ -67,7 +70,7 @@ export function LotSheet({ id }: { id: string }) {
                 <span className="block text-[13px] text-white/70">
                   {vacant
                     ? "Nouveau locataire, bail, état des lieux — dans la gestion locative"
-                    : [unit.rent ? `${eur(unit.rent)}${unit.charges ? ` + ${eur(unit.charges)} de charges` : ""}` : undefined, since ? `depuis le ${dateFr(since)}` : undefined].filter(Boolean).join(" · ")}
+                    : [leased?.rent ? `${eur(leased.rent)}${leased.charges ? ` + ${eur(leased.charges)} de charges` : ""}` : undefined, since ? `depuis le ${dateFr(since)}` : undefined].filter(Boolean).join(" · ")}
                 </span>
               </span>
               <ChevronRight size={20} className="shrink-0 text-white/60" />

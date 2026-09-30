@@ -58,7 +58,7 @@ export function placementPath(data: AppData, p: Pick<Placement, "companyId" | "b
 }
 
 export function useDocumentImport(defaults?: DocScope) {
-  const { data, upsertMany, removeMany, nowMonth, role } = useStore();
+  const { data, upsertMany, removeMany, role } = useStore();
   const [items, setItems] = useState<ImportItem[]>([]);
   // Données les plus récentes pour les rangements successifs d'un même lot de fichiers.
   const dataRef = useRef(data);
@@ -88,7 +88,6 @@ export function useDocumentImport(defaults?: DocScope) {
         tenancyId: placement.tenancyId || undefined,
         loanId: placement.loanId || undefined,
       },
-      nowMonth,
     );
     // Pour annuler : état d'avant des éléments modifiés, éléments créés, pièces reprises.
     const find = (coll: FilingOp["coll"], id: string) => (d[coll] as { id: string }[]).find((x) => x.id === id);

@@ -191,7 +191,7 @@ function UnitLine({ unit, flags, missing, dnd }: { unit: Unit; flags: UnitFlag[]
           </span>
           {/* Locataire sur sa propre ligne : le numéro du lot reste lisible et facile à attraper. */}
           <span className="block truncate text-[13px] text-ink-2">{vacant ? "Vacant" : tenant || "Locataire à renseigner"}</span>
-          <span className="tabular block text-[12.5px] text-muted">{eur((unit.rent ?? 0) + (unit.charges ?? 0))} / mois</span>
+          <span className="tabular block text-[12.5px] text-muted">{eur((active?.rent ?? unit.rent ?? 0) + (active?.charges ?? unit.charges ?? 0))} / mois</span>
           {missing.length > 0 && (
             <span className="mt-1 flex flex-wrap items-center gap-1">
               <span className="text-[10.5px] font-bold uppercase tracking-wide text-neg">Manque</span>

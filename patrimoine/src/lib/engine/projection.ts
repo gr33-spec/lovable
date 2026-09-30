@@ -10,6 +10,7 @@ import {
   buildingChargesAnnual,
   buildingRent,
   buildingValue,
+  leasedUnits,
   computeSnapshot,
   loanCompanyKey,
   type Snapshot,
@@ -187,7 +188,7 @@ export function project(data: AppData, nowMonth: MonthIndex, opts: ProjectionOpt
 
   const buildingsById = new Map(data.buildings.map((b) => [b.id, b]));
   const unitsByBuilding = new Map<string, Unit[]>();
-  for (const u of data.units) {
+  for (const u of leasedUnits(data)) {
     const list = unitsByBuilding.get(u.buildingId) ?? [];
     list.push(u);
     unitsByBuilding.set(u.buildingId, list);

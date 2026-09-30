@@ -141,19 +141,21 @@ function remainingAt(rows: LoanScheduleRow[], nowMonth: MonthIndex): Pick<Loan, 
   return { remaining: Math.round(Math.max(0, balance) * 100) / 100, remainingDate: `${ym(nowMonth)}-01` };
 }
 
-const SYNCED: (keyof Loan)[] = ["initialAmount", "startDate", "endDate", "durationMonths", "monthlyPayment", "ratePct", "insuranceMonthly", "kind", "remaining", "remainingDate"];
+// Le capital restant dû n'est jamais recopié depuis le tableau : il est
+// recalculé à chaque affichage (une valeur stockée vieillirait chaque mois).
+const SYNCED: (keyof Loan)[] = ["initialAmount", "startDate", "endDate", "durationMonths", "monthlyPayment", "ratePct", "insuranceMonthly", "kind"];
 
 /**
  * Mise en cohérence des fiches avec les tableaux d'amortissement enregistrés :
- * caractéristiques et capital restant dû des crédits, date d'acquisition de
- * l'immeuble quand elle n'est pas renseignée (déblocage de son premier prêt).
- * Ne renvoie que ce qui change (rien à faire = listes vides).
+ * caractéristiques des crédits (montant, dates, durée, mensualité, taux).
+ * La date d'acquisition d'un immeuble reste une donnée saisie (le déblocage
+ * d'un prêt n'est pas la date de l'acte). Ne renvoie que ce qui change.
  */
-export function syncFromSchedules(data: AppData, nowMonth: MonthIndex): { loans: Loan[]; buildings: Building[] } {
+export function syncFromSchedules(data: AppData): { loans: Loan[]; buildings: Building[] } {
   const loans: Loan[] = [];
   for (const loan of data.loans) {
     if (!loan.schedule || loan.schedule.rows.length < 2) continue;
-    const fields = loanFieldsFromSchedule(loan.schedule.rows, nowMonth, loan.schedule.meta);
+    const fields = loanFieldsFromSchedule(loan.schedule.rows, undefined, loan.schedule.meta);
     const next: Loan = { ...loan };
     let changed = false;
     for (const k of SYNCED) {
@@ -165,17 +167,7 @@ export function syncFromSchedules(data: AppData, nowMonth: MonthIndex): { loans:
     }
     if (changed) loans.push(next);
   }
-  const buildings: Building[] = [];
-  for (const b of data.buildings) {
-    if (b.acquisitionDate) continue;
-    const starts = data.loans
-      .filter((l) => l.buildingId === b.id && l.schedule && scheduleStart(l.schedule.rows, l.schedule.meta) !== "unknown")
-      .map((l) => loanFieldsFromSchedule(l.schedule!.rows, undefined, l.schedule!.meta).startDate)
-      .filter((d): d is string => !!d)
-      .sort();
-    if (starts[0]) buildings.push({ ...b, acquisitionDate: starts[0] });
-  }
-  return { loans, buildings };
+  return { loans, buildings: [] as Building[] };
 }
 
 /** Capital restant dû d'après le tableau au 1er du mois donné. */

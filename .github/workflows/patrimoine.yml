@@ -1,0 +1,71 @@
+name: Patrimoine
+
+on:
+  push:
+    branches: [main]
+    paths: ["patrimoine/**", ".github/workflows/patrimoine.yml"]
+  pull_request:
+    paths: ["patrimoine/**", ".github/workflows/patrimoine.yml"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: patrimoine-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: patrimoine
+
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: patrimoine_ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # Base et mots de passe jetables, propres à la CI (aucune donnée réelle).
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/patrimoine_ci
+      APP_PASSWORD: ci-proprietaire-2026
+      PATRIMOINE_AI_MOCK: "1"
+      NEXT_TELEMETRY_DISABLED: "1"
+      E2E_BASE_URL: http://localhost:3000
+      E2E_OWNER_PASSWORD: ci-proprietaire-2026
+      E2E_GESTION_PASSWORD: ci-gestion-2026
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: patrimoine/package-lock.json
+      - run: npm ci
+      - name: Vérification des types
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Tests unitaires
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Navigateur de test
+        run: npx playwright install --with-deps chromium
+      - name: Tests de parcours
+        run: |
+          npm start -- -p 3000 > server.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf -o /dev/null http://localhost:3000/connexion && break; sleep 1; done
+          npm run e2e
+      - name: Journal du serveur
+        if: failure()
+        run: tail -n 200 server.log

@@ -32,7 +32,7 @@ export function LoanScheduleSection({ loan }: { loan: Loan }) {
   const readOnly = role !== "owner";
 
   const save = ({ rows, fileId, fileName, bank, meta }: ImportedSchedule) => {
-    const fields = loanFieldsFromSchedule(rows, nowMonth, meta);
+    const fields = loanFieldsFromSchedule(rows, undefined, meta);
     const previous = loan;
     const next: Loan = { ...loan, ...fields, bank: loan.bank || bank || meta?.bank || undefined, reference: loan.reference || meta?.reference || undefined, schedule: scheduleOf(rows, fileId, fileName, meta) };
     // L'ancien tableau n'est pas supprimé : il reste consultable dans les documents du prêt.

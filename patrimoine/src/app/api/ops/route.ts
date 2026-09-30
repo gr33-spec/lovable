@@ -3,7 +3,8 @@ import { z } from "zod";
 import { applyDocumentOps } from "@/lib/server/db";
 import { BOTH, currentSession, guardApi } from "@/lib/server/guard";
 import { sanitizeGestionOps } from "@/lib/scope";
-import { COLLECTIONS } from "@/lib/types";
+import { COLLECTIONS, type Collection } from "@/lib/types";
+import { validateItem } from "@/lib/validation";
 import type { Op } from "@/lib/ops";
 import { referencedFileIds } from "@/lib/tenancy-files";
 import { restoreFiles } from "@/lib/server/files";
@@ -28,6 +29,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "JSON invalide" }, { status: 400 });
   }
   if (!parsed.success) return NextResponse.json({ error: "Modification invalide" }, { status: 400 });
+  // Valeurs manifestement fausses (taux de 300 %, montant négatif, date illisible…) : refusées, avec la raison.
+  for (const op of parsed.data.ops) {
+    if (op.op !== "upsert") continue;
+    const invalid = validateItem(op.coll as Collection, op.item as { id: string } & Record<string, unknown>);
+    if (invalid) return NextResponse.json({ error: invalid.message }, { status: 422 });
+  }
   const session = await currentSession();
   const { version } = await applyDocumentOps(parsed.data.ops as Op[], session?.role === "gestion" ? sanitizeGestionOps : undefined);
   // Une pièce de nouveau citée (annulation d'une suppression…) quitte la corbeille.

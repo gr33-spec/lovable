@@ -37,8 +37,10 @@ export function auditLoans(data: AppData, snap: Snapshot): LoanFinding[] {
   // des dettes sans que rien ne le signale.
   for (const l of data.loans) {
     const push = (text: string, short: string) => out.push({ loanId: l.id, severity: "critical", text, short });
+    // Avec un tableau, le restant dû saisi autrefois n'est plus utilisé (calculé d'après le tableau).
+    const typedRemaining = l.schedule ? undefined : l.remaining;
     const negatives: [number | undefined, string][] = [
-      [l.remaining, "Capital restant dû"],
+      [typedRemaining, "Capital restant dû"],
       [l.monthlyPayment, "Mensualité"],
       [l.insuranceMonthly, "Assurance"],
       [l.initialAmount, "Montant initial"],
@@ -53,8 +55,8 @@ export function auditLoans(data: AppData, snap: Snapshot): LoanFinding[] {
     // Fin prévue : saisie, sinon déblocage + durée.
     const plannedEnd = end ?? (start !== undefined && l.durationMonths ? start + l.durationMonths : undefined);
     const endLabel = l.endDate ? month(l.endDate) : "la fin prévue (déblocage + durée)";
-    if (r?.finished && l.remaining !== undefined && l.remaining > 0 && plannedEnd !== undefined && plannedEnd < known) {
-      push(`Crédit considéré comme terminé (fin : ${endLabel}) alors qu'un capital restant dû de ${eur(l.remaining)} est saisi : il n'est plus compté dans les dettes.`, "Terminé mais capital restant dû saisi.");
+    if (r?.finished && typedRemaining !== undefined && typedRemaining > 0 && plannedEnd !== undefined && plannedEnd < known) {
+      push(`Crédit considéré comme terminé (fin : ${endLabel}) alors qu'un capital restant dû de ${eur(typedRemaining)} est saisi : il n'est plus compté dans les dettes.`, "Terminé mais capital restant dû saisi.");
     } else if (r?.finished && plannedEnd !== undefined && plannedEnd > snap.nowMonth + 1) {
       // Mensualité trop forte (faute de frappe) : le calcul solde le crédit bien avant sa fin prévue.
       push(`Crédit calculé comme déjà remboursé alors que sa fin est prévue (${endLabel}) : vérifiez la mensualité et le capital restant dû. Il n'est plus compté dans les dettes.`, "Soldé avant sa date de fin, à vérifier.");

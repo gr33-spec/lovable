@@ -4,6 +4,7 @@ import { checkSchedule, loanFieldsFromSchedule, syncFromSchedules } from "../src
 import { resolveLoan, yearlyBalances } from "../src/lib/engine/loan";
 import { project } from "../src/lib/engine/projection";
 import { monthIndex } from "../src/lib/engine/dates";
+import { computeSnapshot } from "../src/lib/engine/snapshot";
 import { emptyData } from "../src/lib/types";
 import type { Loan, LoanScheduleRow } from "../src/lib/types";
 
@@ -76,7 +77,7 @@ test("remboursement anticipé : le tableau cède la place au calcul", () => {
   assert.ok(p.years.find((y) => y.year === 2028)!.debt < dec2028.balance - 40_000);
 });
 
-test("fiches tenues à jour depuis les tableaux déjà enregistrés (rétroactif)", () => {
+test("fiches tenues à jour depuis les tableaux, sans recopier de valeur déduite", () => {
   const rows = bankTable();
   const d = emptyData();
   d.buildings = [{ id: "b", name: "Immeuble" }, { id: "b2", name: "Autre", acquisitionDate: "2015-06-01" }];
@@ -86,21 +87,21 @@ test("fiches tenues à jour depuis les tableaux déjà enregistrés (rétroactif
     { id: "sans", remaining: 1000 },
   ];
   const now = monthIndex(2026, 10);
-  const { loans, buildings } = syncFromSchedules(d, now);
+  const { loans, buildings } = syncFromSchedules(d);
   const l = loans.find((x) => x.id === "l")!;
-  assert.equal(l.remaining, rows.filter((x) => x.month < "2026-10").pop()!.balance);
-  assert.equal(l.remainingDate, "2026-10-01");
   assert.equal(l.initialAmount, 200_000);
   assert.ok(Math.abs(l.ratePct! - 3.2) < 0.01);
   assert.ok(!loans.some((x) => x.id === "sans"));
-  assert.deepEqual(buildings.map((b) => [b.id, b.acquisitionDate]), [["b", "2020-01-01"]], "date d'acquisition remplie seulement si vide");
-  // Une fois à jour, plus rien à faire ; le mois suivant, le capital restant avance.
+  // Le restant dû n'est ni recopié ni effacé (non destructif) ; la date d'achat reste une saisie.
+  assert.equal(l.remaining, 150_000);
+  assert.equal(l.remainingDate, "2024-01-01");
+  assert.deepEqual(buildings, []);
+  // Le restant dû affiché vient du tableau, pas de la valeur ancienne.
   d.loans = d.loans.map((x) => loans.find((y) => y.id === x.id) ?? x);
-  d.buildings = d.buildings.map((x) => buildings.find((y) => y.id === x.id) ?? x);
-  assert.deepEqual(syncFromSchedules(d, now), { loans: [], buildings: [] });
-  const next = syncFromSchedules(d, now + 1).loans.find((x) => x.id === "l")!;
-  assert.equal(next.remainingDate, "2026-11-01");
-  assert.ok(next.remaining! < l.remaining!);
+  assert.equal(computeSnapshot(d, now).byLoan.get("l")!.balance, rows.filter((x) => x.month < "2026-10").pop()!.balance);
+  // Une fois à jour, plus rien à faire, y compris les mois suivants.
+  assert.deepEqual(syncFromSchedules(d), { loans: [], buildings: [] });
+  assert.deepEqual(syncFromSchedules(d), { loans: [], buildings: [] });
 });
 
 test("prêt de projet depuis le tableau, repris par le crédit réel", async () => {
