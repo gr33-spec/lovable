@@ -77,3 +77,16 @@ describe("ResendEmailSender", () => {
     expect(logs).toEqual([{ status: 429, subject: "S" }]);
   });
 });
+
+describe("remarques de l'IA pour l'artisan", () => {
+  it("écarte le jargon technique et garde ce qui sert aux achats", async () => {
+    const { artisanNotes } = await import("../src/platform/ai/artisan-notes.js");
+    expect(
+      artisanNotes([
+        "Les lignes du devis ont été lues sur le PDF (page 1) : aucune référence [page:ligne] de texte n'est disponible, sourceRefs est donc vide.",
+        "Non listés : dépose de l'ancienne couverture (main-d'œuvre), cheminée fournie par le client.",
+        "  ",
+      ]),
+    ).toEqual(["Non listés : dépose de l'ancienne couverture (main-d'œuvre), cheminée fournie par le client."]);
+  });
+});

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { ZodPipe } from "../../../platform/http/zod.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
 import { TakeoffService, type ReviewedTakeoff } from "../application/takeoff.service.js";
+import { artisanNotes } from "../../../platform/ai/artisan-notes.js";
 
 const optionalText = (max: number) =>
   z
@@ -29,7 +30,7 @@ function toDto({ takeoff, validation }: ReviewedTakeoff) {
     status: takeoff.status,
     model: takeoff.model,
     promptVersion: takeoff.promptVersion,
-    notes: takeoff.notes,
+    notes: artisanNotes(takeoff.notes),
     createdAt: takeoff.createdAt.toISOString(),
     validatedAt: takeoff.validatedAt?.toISOString() ?? null,
     counts: validation.counts,
