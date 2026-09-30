@@ -182,6 +182,12 @@ export function storageDriverName(): "blob" | "supabase" | "local" {
   return "local";
 }
 
+/** Vrai si les sauvegardes nocturnes peuvent être rangées dans un espace privé. */
+export function privateStorageReady(): boolean {
+  const name = storageDriverName();
+  return name !== "blob" || Boolean(process.env.BLOB_PRIVATE_READ_WRITE_TOKEN);
+}
+
 export function isPrivateStorageMissing(err: unknown): boolean {
   return err instanceof PrivateStorageMissing;
 }

@@ -143,6 +143,11 @@ await step("Administration inaccessible sans connexion (page et API)", async () 
   assert.match(p.url(), /\/admin\/connexion/);
   const exp2 = await p.request.get(`${BASE}/api/admin/export/sauvegarde`);
   assert.equal(exp2.status(), 401);
+  // Le corps de la redirection ne doit contenir AUCUNE donnée (pages rendues en parallèle du layout).
+  for (const u of ["/admin", "/admin/reservations", "/admin/produits", "/admin/commandes", "/admin/parametres"]) {
+    const body = await (await p.request.get(`${BASE}${u}`, { maxRedirects: 0 })).text();
+    assert.ok(!/06 12 34 56 78|Réservations en attente|Fleurs pailletées|creatrice@/.test(body), `${u} : données visibles sans session`);
+  }
   await anon.close();
 });
 
@@ -153,7 +158,8 @@ await step("Réservation envoyée depuis un autre site : refusée", async () => 
 
 await step("Faux webhook Stripe : refusé", async () => {
   const r = await fetch(`${BASE}/api/stripe/webhook`, { method: "POST", body: JSON.stringify({ id: "evt_x", kind: "checkout_completed" }) });
-  assert.equal(r.status, 400);
+  // 400 : signature invalide ; 503 : paiement en ligne non configuré (mode réservation). Refusé dans les deux cas.
+  assert.ok([400, 503].includes(r.status), `statut ${r.status}`);
 });
 
 await step("Tâche planifiée sans secret : refusée", async () => {

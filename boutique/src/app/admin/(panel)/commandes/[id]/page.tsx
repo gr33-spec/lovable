@@ -1,4 +1,5 @@
 import { AlertTriangle, ArrowLeft, Mail, Phone, Printer } from "lucide-react";
+import { requireAdminPage } from "@/lib/server/auth";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { OrderActions } from "@/components/admin/order-actions";
@@ -29,6 +30,9 @@ const ACTION_LABEL: Record<string, string> = {
 };
 
 export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {
+  // Chaque page vérifie elle-même la session : la mise en page (layout) est rendue en
+  // parallèle et ne protège pas, à elle seule, les données de la page.
+  await requireAdminPage();
   const { id } = await params;
   const data = await adminOrder(id);
   if (!data) notFound();

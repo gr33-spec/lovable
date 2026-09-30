@@ -7,7 +7,7 @@ import { useTransition } from "react";
 import { reservationAction } from "@/app/admin/actions";
 import { formatDateTime, formatPrice } from "@/lib/format";
 import type { AdminReservation, ReservationStatus } from "@/lib/server/reservations";
-import { DELIVERY_LABELS, whatsappUrl } from "@/lib/validation";
+import { DELIVERY_LABELS, whatsappUrl } from "@/lib/shared";
 import { Img } from "../ui/img";
 import { useConfirm, useToast } from "./ui";
 

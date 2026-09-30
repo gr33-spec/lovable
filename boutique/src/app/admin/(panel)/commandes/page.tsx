@@ -1,4 +1,5 @@
 import { AlertTriangle, ChevronRight, Download, Inbox } from "lucide-react";
+import { requireAdminPage } from "@/lib/server/auth";
 import Link from "next/link";
 import { PageTitle, StatusBadge } from "@/components/admin/ui";
 import { OrderSearch } from "@/components/admin/order-search";
@@ -18,6 +19,9 @@ const FILTERS = [
 ];
 
 export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ statut?: string; q?: string }> }) {
+  // Chaque page vérifie elle-même la session : la mise en page (layout) est rendue en
+  // parallèle et ne protège pas, à elle seule, les données de la page.
+  await requireAdminPage();
   const sp = await searchParams;
   const rows = await adminOrders({ status: sp.statut, q: sp.q });
   const qs = (statut: string) => {

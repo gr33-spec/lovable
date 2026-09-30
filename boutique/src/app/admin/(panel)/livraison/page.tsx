@@ -1,10 +1,14 @@
 import { ShippingManager } from "@/components/admin/shipping-manager";
+import { requireAdminPage } from "@/lib/server/auth";
 import { PageTitle } from "@/components/admin/ui";
 import { shippingMethods } from "@/lib/server/admin-queries";
 
 export const metadata = { title: "Livraison" };
 
 export default async function ShippingPage() {
+  // Chaque page vérifie elle-même la session : la mise en page (layout) est rendue en
+  // parallèle et ne protège pas, à elle seule, les données de la page.
+  await requireAdminPage();
   const methods = await shippingMethods();
   return (
     <>

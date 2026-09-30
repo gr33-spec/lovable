@@ -27,7 +27,8 @@ export function AvailabilityBadge({ availability, stock }: { availability: Avail
   return null;
 }
 
-export function ProductCard({ product, priority = false }: { product: Card; priority?: boolean }) {
+export function ProductCard({ product, priority = false, headingLevel = 3 }: { product: Card; priority?: boolean; headingLevel?: 2 | 3 }) {
+  const Title = headingLevel === 2 ? "h2" : "h3";
   const soldOut = product.availability === "sold_out" || product.availability === "reserved";
   return (
     <article className="group relative">
@@ -64,7 +65,7 @@ export function ProductCard({ product, priority = false }: { product: Card; prio
           </span>
         </div>
         <div className="mt-3.5 px-0.5">
-          <h3 className="text-[15px] leading-snug font-medium transition-colors duration-300 group-hover:text-primary">{product.name}</h3>
+          <Title className="text-[15px] leading-snug font-medium transition-colors duration-300 group-hover:text-primary">{product.name}</Title>
           <div className="mt-1 text-[15px] text-text-2">
             <Price cents={product.priceCents} compareAt={product.compareAtCents} />
           </div>
@@ -74,14 +75,25 @@ export function ProductCard({ product, priority = false }: { product: Card; prio
   );
 }
 
-export function ProductGrid({ products, priorityCount = 0, withSidebar = false }: { products: Card[]; priorityCount?: number; withSidebar?: boolean }) {
+export function ProductGrid({
+  products,
+  priorityCount = 0,
+  withSidebar = false,
+  headingLevel = 3,
+}: {
+  products: Card[];
+  priorityCount?: number;
+  withSidebar?: boolean;
+  /** 2 quand la grille suit directement le titre principal de la page. */
+  headingLevel?: 2 | 3;
+}) {
   return (
     <ul
       className={`grid grid-cols-2 gap-x-3.5 gap-y-10 sm:grid-cols-3 sm:gap-x-6 lg:gap-x-7 lg:gap-y-14 ${withSidebar ? "lg:grid-cols-3 2xl:grid-cols-4" : "lg:grid-cols-4"}`}
     >
       {products.map((p, i) => (
         <li key={p.id} className="animate-rise" style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}>
-          <ProductCard product={p} priority={i < priorityCount} />
+          <ProductCard product={p} priority={i < priorityCount} headingLevel={headingLevel} />
         </li>
       ))}
     </ul>

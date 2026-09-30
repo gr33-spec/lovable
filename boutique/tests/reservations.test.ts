@@ -187,3 +187,18 @@ describe("notifications", () => {
     assert.match(client.text, /Aucun paiement n'est demandé sur le site/);
   });
 });
+
+describe("données personnelles", () => {
+  test("réservations closes anonymisées après 30 jours ; en attente jamais touchées", async () => {
+    const { purgeOldAddresses } = await import("../src/lib/server/admin-orders");
+    const id = await makeProduct({ stock: 3 });
+    await createReservation(input(id, { firstName: "Vieille", email: "v@exemple.fr" }));
+    await createReservation(input(id, { firstName: "Recente" }));
+    await sql("UPDATE reservation SET status = 'cancelled', closed_at = now() - interval '40 days' WHERE first_name = 'Vieille'");
+    await sql("UPDATE reservation SET created_at = now() - interval '40 days' WHERE first_name = 'Recente'");
+    await purgeOldAddresses(null);
+    const rows = await sql<{ first_name: string; phone: string; email: string | null }>("SELECT first_name, phone, email FROM reservation WHERE product_id = $1 ORDER BY created_at", [id]);
+    assert.deepEqual(rows.map((r) => r.first_name).sort(), ["Anonyme", "Recente"]);
+    assert.ok(rows.some((r) => r.phone === "••••••" && r.email === null));
+  });
+});

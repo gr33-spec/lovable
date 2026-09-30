@@ -3,7 +3,7 @@
 import { ChevronRight, Home, Mail, Menu, Search, ShoppingBag, Sparkles, Store, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { ImageRef } from "@/lib/image-ref";
 import { imageSrc } from "@/lib/image-ref";
 import type { ShopSettings } from "@/lib/server/settings";
@@ -86,7 +86,18 @@ export function Header({
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+  // Sur ordinateur le logo reste toujours visible : on ne le masque (et ne le retire du clavier) que sur téléphone.
+  const narrow = useSyncExternalStore(
+    (cb) => {
+      const mq = window.matchMedia("(max-width: 1023px)");
+      mq.addEventListener("change", cb);
+      return () => mq.removeEventListener("change", cb);
+    },
+    () => window.matchMedia("(max-width: 1023px)").matches,
+    () => false,
+  );
   const hideBrand = pathname === "/" && Boolean(logo) && !scrolled;
+  const brandHiddenForReaders = hideBrand && narrow;
 
   const links = [
     { href: "/boutique", label: "Toutes les créations" },
@@ -123,7 +134,8 @@ export function Header({
           {/* Logo : centré sur téléphone. Sur l'accueil, il apparaît quand le grand logo du haut a défilé. */}
           <div
             className={`absolute left-1/2 min-w-0 -translate-x-1/2 transition-all duration-500 lg:static lg:flex-none lg:translate-x-0 lg:opacity-100 ${hideBrand ? "pointer-events-none -translate-y-1 opacity-0 lg:pointer-events-auto lg:translate-y-0" : "opacity-100"}`}
-            aria-hidden={hideBrand || undefined}
+            aria-hidden={brandHiddenForReaders || undefined}
+            inert={brandHiddenForReaders || undefined}
           >
             <Brand name={shopName} logo={logo} center />
           </div>

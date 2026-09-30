@@ -8,7 +8,7 @@ export default function GlobalError({ reset }: { error: Error & { digest?: strin
         <main style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, textAlign: "center" }}>
           <p style={{ fontFamily: "Georgia, serif", fontSize: 28, margin: 0 }}>La Bohème en Paillettes</p>
           <h1 style={{ fontSize: 22, fontWeight: 500 }}>La boutique fait une courte pause technique.</h1>
-          <p style={{ color: "#666764", maxWidth: 420 }}>Merci de réessayer dans quelques minutes. Votre panier est conservé.</p>
+          <p style={{ color: "#666764", maxWidth: 420 }}>Merci de réessayer dans quelques minutes.</p>
           <button type="button" onClick={reset} style={{ marginTop: 16, padding: "12px 24px", borderRadius: 999, border: 0, background: "#4F6A56", color: "#fff", fontSize: 16, fontWeight: 600 }}>
             Réessayer
           </button>

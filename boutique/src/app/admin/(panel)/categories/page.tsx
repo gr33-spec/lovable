@@ -1,4 +1,5 @@
 import { CategoryTree } from "@/components/admin/category-tree";
+import { requireAdminPage } from "@/lib/server/auth";
 import { GroupManager } from "@/components/admin/group-manager";
 import { PageTitle } from "@/components/admin/ui";
 import { groups } from "@/lib/server/admin-queries";
@@ -6,6 +7,9 @@ import { groups } from "@/lib/server/admin-queries";
 export const metadata = { title: "Catégories" };
 
 export default async function CategoriesPage() {
+  // Chaque page vérifie elle-même la session : la mise en page (layout) est rendue en
+  // parallèle et ne protège pas, à elle seule, les données de la page.
+  await requireAdminPage();
   const { categories, collections } = await groups();
   return (
     <>

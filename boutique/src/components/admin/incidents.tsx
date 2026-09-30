@@ -41,7 +41,7 @@ export function IncidentsCard({
       )}
       {emailsFailed > 0 && (
         <Notice tone="warning">
-          {emailsFailed} e-mail(s) n&apos;ont pas pu être envoyés. Ouvrez la commande concernée pour réessayer.
+          {emailsFailed} e-mail(s) n&apos;ont pas pu être envoyés. Vérifiez le service d&apos;e-mail ; pour une commande, ouvrez-la pour réessayer.
         </Notice>
       )}
       {incidents.length > 0 && (
@@ -50,7 +50,7 @@ export function IncidentsCard({
           <ul className="mt-1 space-y-1">
             {incidents.map((i) => (
               <li key={i.id}>
-                {SOURCE[i.source] ?? i.source} — {i.message} <span className="opacity-75">({formatRelative(i.created_at)})</span>
+                {SOURCE[i.source] ?? i.source} — {i.message} <span>({formatRelative(i.created_at)})</span>
               </li>
             ))}
           </ul>

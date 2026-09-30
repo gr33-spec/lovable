@@ -127,11 +127,11 @@ export function CategoryPicker({
       ) : (
         <div className="flex flex-wrap gap-x-4 gap-y-1">
           {deepest && deepest.depth < 3 && !deepest.archived && (
-            <button type="button" className="inline-flex items-center gap-1 text-sm font-semibold text-primary" onClick={() => setCreating({ parentId: deepest.id, name: "" })}>
+            <button type="button" className="inline-flex min-h-9 items-center gap-1 text-sm font-semibold text-primary" onClick={() => setCreating({ parentId: deepest.id, name: "" })}>
               <Plus size={15} /> Sous-catégorie dans « {deepest.name} »
             </button>
           )}
-          <button type="button" className="inline-flex items-center gap-1 text-sm font-semibold text-primary" onClick={() => setCreating({ parentId: null, name: "" })}>
+          <button type="button" className="inline-flex min-h-9 items-center gap-1 text-sm font-semibold text-primary" onClick={() => setCreating({ parentId: null, name: "" })}>
             <Plus size={15} /> Nouvelle catégorie principale
           </button>
         </div>

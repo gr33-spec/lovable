@@ -1,4 +1,5 @@
 import { BrandEditor } from "@/components/admin/brand-editor";
+import { requireAdminPage } from "@/lib/server/auth";
 import { ThemePicker } from "@/components/admin/theme-picker";
 import { PageTitle } from "@/components/admin/ui";
 import { loadSettings } from "@/lib/server/settings";
@@ -6,6 +7,9 @@ import { loadSettings } from "@/lib/server/settings";
 export const metadata = { title: "Apparence" };
 
 export default async function AppearancePage() {
+  // Chaque page vérifie elle-même la session : la mise en page (layout) est rendue en
+  // parallèle et ne protège pas, à elle seule, les données de la page.
+  await requireAdminPage();
   const s = await loadSettings();
   return (
     <>

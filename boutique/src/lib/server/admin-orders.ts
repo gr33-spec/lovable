@@ -151,7 +151,18 @@ export async function purgeOldAddresses(months: number | null): Promise<number> 
        ship_line1 = NULL, ship_line2 = NULL, ship_postal_code = NULL, ship_city = NULL, anonymized_at = now()
      WHERE status = 'expired' AND anonymized_at IS NULL AND created_at < now() - interval '30 days'`,
   );
+  // Réservations annulées ou expirées : aucune vente, coordonnées effacées après 30 jours.
+  await query(
+    `UPDATE reservation SET first_name = 'Anonyme', phone = '••••••', email = NULL
+     WHERE status IN ('cancelled', 'expired') AND first_name <> 'Anonyme' AND coalesce(closed_at, created_at) < now() - interval '30 days'`,
+  );
   if (!months) return 0;
+  // Réservations confirmées : même durée de conservation que les adresses des commandes.
+  await query(
+    `UPDATE reservation SET first_name = 'Anonyme', phone = '••••••', email = NULL
+     WHERE status = 'confirmed' AND first_name <> 'Anonyme' AND coalesce(confirmed_at, created_at) < now() - make_interval(months => $1)`,
+    [months],
+  );
   const rows = await query(
     `UPDATE customer_order SET phone = NULL, ship_line1 = NULL, ship_line2 = NULL, tracking_number = NULL, tracking_url = NULL, anonymized_at = coalesce(anonymized_at, now())
      WHERE status IN ('completed', 'cancelled', 'refunded', 'shipped') AND ship_line1 IS NOT NULL

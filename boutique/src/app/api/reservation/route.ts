@@ -13,7 +13,8 @@ export async function POST(request: Request) {
     if (!RESERVATION_MODE) return json({ ok: false, code: "closed", message: "Les réservations ne sont pas ouvertes." }, 404);
     if (!sameOrigin(request)) return json({ error: "Origine refusée." }, 403);
     const ip = await clientIp();
-    const limit = await hit(`reservation:${ip}`, 8, 60 * 60);
+    // 30 par heure et par adresse IP : sur mobile, beaucoup de clientes partagent la même adresse publique.
+    const limit = await hit(`reservation:${ip}`, 30, 60 * 60);
     if (!limit.allowed) return json({ ok: false, code: "rate", message: "Trop de demandes. Merci de patienter un peu ou de nous contacter directement." }, 429, { "Retry-After": String(limit.retryAfter) });
     const parsed = reservationSchema.safeParse(await readJson(request));
     if (!parsed.success) return json({ ok: false, code: "invalid", message: "Certains champs sont à vérifier.", fieldErrors: fieldErrors(parsed.error) }, 400);

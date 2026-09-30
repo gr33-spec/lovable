@@ -195,11 +195,11 @@ export function ProductEditor({
   return (
     <div className="pb-40 lg:pb-24">
       <div className="mb-5 flex items-center justify-between gap-3">
-        <Link href="/admin/produits" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">
+        <Link href="/admin/produits" className="inline-flex min-h-10 items-center gap-1.5 text-sm font-medium text-primary">
           <ArrowLeft size={16} aria-hidden="true" /> Produits
         </Link>
         {!isNew && saved.status === "published" && (
-          <a href={`/produit/${saved.slug}`} target="_blank" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">
+          <a href={`/produit/${saved.slug}`} target="_blank" className="inline-flex min-h-10 items-center gap-1.5 text-sm font-medium text-primary">
             Voir dans la boutique <ExternalLink size={14} aria-hidden="true" />
           </a>
         )}

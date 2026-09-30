@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ArrowRight, ArrowUpRight, Gift, HeartHandshake, Lock, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { SocialLinks } from "@/components/shop/footer";
@@ -9,6 +10,8 @@ import { getBestSellers, getCategories, getListing, getSettings } from "@/lib/se
 import { siteUrl } from "@/lib/server/env";
 import { RESERVATION_MODE } from "@/lib/sales-mode";
 
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 const MARQUEE = ["Fait main", "Résine & paillettes", "Pièces uniques", "Petites séries", "Envoi soigné", "Prêt à offrir"];
 
 export default async function HomePage() {
@@ -219,7 +222,7 @@ export default async function HomePage() {
               Nouveautés
             </h2>
           </div>
-          <Link href="/boutique?tri=nouveautes" className="group inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-primary no-underline">
+          <Link href="/boutique?tri=nouveautes" className="group inline-flex min-h-10 shrink-0 items-center gap-1.5 text-sm font-semibold text-primary no-underline">
             Tout voir <ArrowRight size={16} className="transition group-hover:translate-x-0.5" aria-hidden="true" />
           </Link>
         </div>
