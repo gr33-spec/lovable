@@ -75,6 +75,11 @@ export interface DocumentRepository {
   findById(tenant: TenantContext, id: string): Promise<DocumentWithProcessing | null>;
   findPages(tenant: TenantContext, processingId: string): Promise<PageRecord[]>;
   readContent(tenant: TenantContext, id: string): Promise<{ bytes: Uint8Array; mimeType: string; originalName: string } | null>;
+  /**
+   * Supprime le document, son fichier et ses lectures. Les appels IA et les
+   * analyses déjà décomptées sont conservés (coûts et paliers restent justes).
+   */
+  delete(tenant: TenantContext, id: string): Promise<boolean>;
 }
 
 export const DOCUMENT_REPOSITORY = Symbol("DOCUMENT_REPOSITORY");

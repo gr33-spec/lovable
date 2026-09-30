@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, FileUp, Loader2 } from "lucide-react";
+import { FileText, FileUp, Loader2, Trash2 } from "lucide-react";
 import { useCallback, useId, useRef, useState } from "react";
 import { Badge, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, getActiveCompanyId, MAX_DOCUMENT_BYTES, type DocumentPurpose, type ProjectDocument } from "@/lib/api";
@@ -51,6 +51,11 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
     setData({ items: [doc, ...docs.filter((d) => d.id !== doc.id)] });
   }
 
+  function removed(id: string) {
+    setNotice("Devis supprimé.");
+    setData({ items: docs.filter((d) => d.id !== id) });
+  }
+
   return (
     <>
       {clientQuotes.length === 0 && !archived ? (
@@ -76,7 +81,7 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
       ) : null}
 
       {clientQuotes.length > 0 ? (
-        <DocumentGroup title="Devis client" docs={clientQuotes} />
+        <DocumentGroup title="Devis client" docs={clientQuotes} onRemoved={removed} />
       ) : null}
 
       <section aria-labelledby="supplier-quotes" className="flex flex-col gap-3">
@@ -84,7 +89,7 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
           DEVIS FOURNISSEURS
         </h2>
         {supplierQuotes.length > 0 ? (
-          <DocumentList docs={supplierQuotes} />
+          <DocumentList docs={supplierQuotes} onRemoved={removed} />
         ) : (
           <p className="text-sm text-muted">Aucun devis fournisseur pour l&apos;instant.</p>
         )}
@@ -94,29 +99,32 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
   );
 }
 
-function DocumentGroup({ title, docs }: { title: string; docs: ProjectDocument[] }) {
+function DocumentGroup({ title, docs, onRemoved }: { title: string; docs: ProjectDocument[]; onRemoved: (id: string) => void }) {
   return (
     <section className="flex flex-col gap-3">
       <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">{title.toUpperCase()}</h2>
-      <DocumentList docs={docs} />
+      <DocumentList docs={docs} onRemoved={onRemoved} />
     </section>
   );
 }
 
-function DocumentList({ docs }: { docs: ProjectDocument[] }) {
+function DocumentList({ docs, onRemoved }: { docs: ProjectDocument[]; onRemoved: (id: string) => void }) {
   return (
     <ul className="flex flex-col gap-2.5">
       {docs.map((d) => (
         <li key={d.id}>
-          <DocumentCard doc={d} />
+          <DocumentCard doc={d} onRemoved={onRemoved} />
         </li>
       ))}
     </ul>
   );
 }
 
-function DocumentCard({ doc }: { doc: ProjectDocument }) {
+function DocumentCard({ doc, onRemoved }: { doc: ProjectDocument; onRemoved: (id: string) => void }) {
   const [opening, setOpening] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<ApiError | null>(null);
   const failed = doc.status === "failed";
 
   /** Ouvre le PDF d'origine (téléchargé avec la session et l'entreprise active). */
@@ -136,6 +144,18 @@ function DocumentCard({ doc }: { doc: ProjectDocument }) {
       win?.close();
     } finally {
       setOpening(false);
+    }
+  }
+
+  async function remove() {
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await api<null>(`/v1/documents/${encodeURIComponent(doc.id)}`, { method: "DELETE" });
+      onRemoved(doc.id);
+    } catch (e) {
+      setDeleteError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+      setDeleting(false);
     }
   }
 
@@ -162,15 +182,52 @@ function DocumentCard({ doc }: { doc: ProjectDocument }) {
           <p className="text-[13px] text-muted">Liste de matériaux : prochaine étape, pas encore disponible.</p>
         </>
       )}
-      <button
-        type="button"
-        onClick={() => void open()}
-        disabled={opening}
-        className="inline-flex min-h-11 items-center gap-2 self-start text-sm font-bold text-accent-text disabled:opacity-60"
-      >
-        {opening ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : null}
-        Ouvrir le PDF
-      </button>
+      {deleteError ? <ErrorNotice error={deleteError} /> : null}
+      {confirming ? (
+        <div role="group" aria-label="Confirmer la suppression" className="flex flex-col gap-2 rounded-2xl bg-ground p-3">
+          <p className="text-sm font-semibold">Supprimer ce devis du chantier ? Vous pourrez le déposer à nouveau.</p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => void remove()}
+              disabled={deleting}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-danger px-4 text-sm font-extrabold text-white disabled:opacity-60"
+            >
+              {deleting ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : null}
+              Oui, supprimer
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirming(false)}
+              disabled={deleting}
+              className="inline-flex min-h-11 items-center rounded-xl px-4 text-sm font-bold disabled:opacity-60"
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={() => void open()}
+            disabled={opening}
+            className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-accent-text disabled:opacity-60"
+          >
+            {opening ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : null}
+            Ouvrir le PDF
+          </button>
+          <button
+            type="button"
+            onClick={() => setConfirming(true)}
+            aria-label={`Supprimer ${doc.name}`}
+            className="inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-muted"
+          >
+            <Trash2 size={16} aria-hidden="true" />
+            Supprimer
+          </button>
+        </div>
+      )}
     </Card>
   );
 }

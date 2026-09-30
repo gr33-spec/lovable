@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Inject,
@@ -118,6 +119,12 @@ export class DocumentsController {
   async get(@Tenant() tenant: TenantContext, @Param("id") id: string) {
     const { document, pages } = await this.documents.get(tenant, id);
     return { ...this.toDto(document), pages: pages.map((p) => this.pageDto(p)) };
+  }
+
+  @Delete("documents/:id")
+  @HttpCode(204)
+  async remove(@Tenant() tenant: TenantContext, @Param("id") id: string): Promise<void> {
+    await this.documents.remove(tenant, id);
   }
 
   @Get("documents/:id/file")

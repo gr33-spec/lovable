@@ -186,4 +186,17 @@ test("un couvreur dépose son devis client et un devis fournisseur (lecture sans
   await expect(usage.getByText("2 · 5 pages")).toBeVisible();
   await expect(usage.getByText("· sans plafond pendant l'essai")).toBeVisible();
   await expect(usage.getByText(/la lecture des devis est gratuite/)).toBeVisible();
+
+  // Un devis déposé par erreur se supprime (avec confirmation), puis se redépose.
+  await page.goBack();
+  await page.getByRole("button", { name: "Supprimer devis-fournisseur-couvreur.pdf" }).click();
+  await page.getByRole("button", { name: "Annuler" }).click();
+  await expect(page.getByText("devis-fournisseur-couvreur.pdf")).toBeVisible();
+  await page.getByRole("button", { name: "Supprimer devis-fournisseur-couvreur.pdf" }).click();
+  await page.getByRole("button", { name: "Oui, supprimer" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Devis supprimé." })).toBeVisible();
+  await expect(page.getByText("devis-fournisseur-couvreur.pdf")).toHaveCount(0);
+  await expect(page.getByText("Aucun devis fournisseur pour l'instant.")).toBeVisible();
+  await page.getByLabel("Ajouter un devis fournisseur (PDF)").setInputFiles(fixture("devis-fournisseur-couvreur.pdf"));
+  await expect(page.getByText("devis-fournisseur-couvreur.pdf")).toBeVisible();
 });
