@@ -21,13 +21,14 @@ async function signUp(page: Page) {
   return email;
 }
 
-/** Chaque ligne douteuse est regardée : « C'est bon » (l'artisan la garde telle quelle). */
+/** Les questions arrivent une par une : « C'est bon » à chacune (l'artisan garde la ligne telle quelle). */
 async function confirmDoubts(page: Page) {
-  const buttons = page.getByRole("button", { name: /^C'est bon/ });
-  while ((await buttons.count()) > 0) {
-    const before = await buttons.count();
-    await buttons.first().click();
-    await expect(buttons).toHaveCount(before - 1);
+  for (let i = 0; i < 30; i++) {
+    const button = page.getByRole("button", { name: /^C'est bon/ }).first();
+    if (!(await button.isVisible())) return;
+    const label = (await button.getAttribute("aria-label"))!;
+    await button.click();
+    await expect(page.getByRole("button", { name: label, exact: true })).toHaveCount(0);
   }
 }
 
@@ -182,9 +183,10 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
 
   // Devis client : 3 pages (tableau, page scannée, conditions générales).
   await page.getByLabel("Choisir le devis (PDF)").setInputFiles(fixture("devis-client-couvreur.pdf"));
-  await expect(page.getByText("DEVIS CLIENT", { exact: true })).toBeVisible();
   await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
-  await expect(page.getByText("1 page lue · 1 page à lire en image · 1 page ignorée (conditions générales…)")).toBeVisible();
+  // Une seule chose à faire ensuite, sans détail technique.
+  await expect(page.getByRole("button", { name: "Préparer la liste de matériaux" })).toBeVisible();
+  await expect(page.getByText(/page lue|pages lues/)).toHaveCount(0);
   await expect(page.getByText("PROCHAINE ÉTAPE", { exact: true })).toHaveCount(0);
 
   // Après rechargement, le devis est toujours là.
@@ -220,25 +222,27 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
 
   // IA simulée en test (AI_PROVIDER=fake) : même parcours, aucun appel payant.
   await page.getByRole("button", { name: "Préparer la liste de matériaux" }).click();
-  await expect(page.getByText("Tuile romane canal rouge 12,5 u/m²")).toBeVisible();
-  await expect(page.getByText(/^6 lignes · \d+ à vérifier/)).toBeVisible();
 
-  // Le doute de l'IA est affiché directement sur la ligne ; un appui sur la ligne montre d'où elle vient.
-  const doubts = page.getByRole("list", { name: "Lignes à vérifier" });
-  await doubts.getByRole("button", { name: /^Crochet inox ardoise 100 mm/ }).click();
-  await expect(doubts.getByText(/Devis : page 1, ligne \d+/)).toBeVisible();
-  await expect(doubts.getByText("L'IA hésite : Vendu en paquets, sans nombre de pièces par paquet.")).toBeVisible();
-  await expect(page.getByRole("button", { name: /Encore \d+ lignes? à vérifier/ })).toBeDisabled();
+  // Une question à la fois, dans l'ordre du devis, avec deux gros boutons.
+  const question = page.getByRole("region", { name: /^À vérifier : / });
+  await expect(question).toHaveCount(1);
+  await expect(question.getByText("À vérifier · encore 2")).toBeVisible();
+  // Le devis client tient désormais sur une ligne.
+  await expect(page.getByRole("button", { name: "Ouvrir devis-client-couvreur.pdf" })).toBeVisible();
+  await question.getByRole("button", { name: /^C'est bon/ }).click();
 
-  // Crochets en paquets sans contenu indiqué : l'artisan précise la quantité en pièces.
-  await page.getByRole("button", { name: "Corriger Crochet inox ardoise 100 mm" }).click();
+  // Question suivante : les crochets vendus en paquets. L'artisan précise en pièces.
+  await expect(question.getByText("Dernière ligne à vérifier")).toBeVisible();
+  await expect(question.getByText("Combien de pièces par paquet ?")).toBeVisible();
+  await question.getByRole("button", { name: "Corriger Crochet inox ardoise 100 mm" }).click();
   await page.getByLabel("Quantité").fill("200");
   await page.getByLabel("Unité").fill("u");
   await page.getByRole("button", { name: "Enregistrer" }).click();
-  await expect(doubts.getByText("Crochet inox ardoise 100 mm")).toHaveCount(0);
-  await expect(page.getByText("Vérifiée par vous").first()).toBeVisible();
+  await expect(page.getByText("Tout est vérifié")).toBeVisible();
 
-  // Une ligne ajoutée à la main, puis retirée.
+  // La liste complète reste à un appui : noms courts, ajout et retrait d'une ligne.
+  await page.getByRole("button", { name: "Voir la liste" }).click();
+  await expect(page.getByText("Tuile romane canal rouge 12,5 u/m²")).toBeVisible();
   await page.getByRole("button", { name: "Ajouter une ligne" }).click();
   await page.getByLabel("Désignation").fill("Closoir ventilé");
   await page.getByLabel("Quantité").fill("12");
@@ -248,14 +252,16 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await page.getByRole("button", { name: "Retirer Closoir ventilé" }).click();
   await page.getByRole("button", { name: "Oui, retirer" }).click();
   await expect(page.getByText("Closoir ventilé")).toHaveCount(0);
+  await page.getByRole("button", { name: "Fermer la liste" }).click();
 
   await confirmDoubts(page);
+  await expect(page.getByText("Tout est vérifié")).toBeVisible();
   await page.getByRole("button", { name: "Valider la liste" }).click();
-  await expect(page.getByText(/^Liste validée le /)).toBeVisible();
+  await expect(page.getByText("Liste validée · 6 articles")).toBeVisible();
 
   // La liste validée est conservée.
   await page.reload();
-  await expect(page.getByText(/^Liste validée le /)).toBeVisible();
+  await expect(page.getByText("Liste validée · 6 articles")).toBeVisible();
 
   // Une correction reste possible après validation : la liste est à valider à nouveau.
   await page.getByRole("button", { name: "Voir ou corriger la liste" }).click();
@@ -263,7 +269,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await page.getByLabel("Quantité").fill("1 300");
   await page.getByRole("button", { name: "Enregistrer" }).click();
   await page.getByRole("button", { name: "Valider la liste" }).click();
-  await expect(page.getByText(/^Liste validée le /)).toBeVisible();
+  await expect(page.getByText("Liste validée · 6 articles")).toBeVisible();
 
   // L'analyse est décomptée dans la consommation du mois.
   await page.goto("/compte");
@@ -295,7 +301,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await createProject(page, "Toiture Garnier", "M. Garnier", "5 rue du Port, Vannes");
   await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await page.getByRole("button", { name: "Préparer la liste de matériaux" }).click();
-  await expect(page.getByText("Tuile romane canal rouge 12,5 u/m²")).toBeVisible();
+  await page.getByRole("button", { name: "Voir toute la liste (6)" }).click();
   await page.getByRole("button", { name: "Corriger Crochet inox ardoise 100 mm" }).click();
   await page.getByLabel("Quantité").fill("200");
   await page.getByLabel("Unité").fill("u");
@@ -397,10 +403,10 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
   await expect(page.getByText("devis-client-demo.pdf")).toBeVisible();
 
   await page.getByRole("button", { name: "Préparer la liste de matériaux" }).click();
-  await expect(page.getByText(/^\d+ lignes · /)).toBeVisible();
+  await expect(page.getByRole("region", { name: /^À vérifier : / })).toBeVisible();
   await confirmDoubts(page);
   await page.getByRole("button", { name: "Valider la liste" }).click();
-  await expect(page.getByText(/^Liste validée le /)).toBeVisible();
+  await expect(page.getByText(/^Liste validée · \d+ articles$/)).toBeVisible();
 
   for (const name of ["Tuilerie de l'Ouest (démo)", "Négoce Breizh (démo)", "Matériaux Atlantique (démo)"]) {
     await page.getByRole("checkbox", { name: new RegExp(name.replace(/[()]/g, "\\$&")) }).check();

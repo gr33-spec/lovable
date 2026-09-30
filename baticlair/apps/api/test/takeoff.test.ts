@@ -42,7 +42,7 @@ describe("liste de matériaux tirée du devis client (IA simulée)", () => {
     expect(crochets.status).toBe("to_verify");
     expect(crochets.issues.map((i: { code: string }) => i.code)).toContain("PACKAGE_CONTENT_MISSING");
     // Le doute de l'IA est montré tel quel à l'artisan.
-    expect(crochets.aiDoubt).toBe("Vendu en paquets, sans nombre de pièces par paquet.");
+    expect(crochets.aiDoubt).toBe("Combien de pièces par paquet ?");
     expect(crochets.issues.map((i: { code: string }) => i.code)).toContain("AI_DOUBT");
     expect(crochets.confirmed).toBe(false);
 
@@ -60,7 +60,7 @@ describe("liste de matériaux tirée du devis client (IA simulée)", () => {
 
     expect(await ctx.prisma.aiExecution.count()).toBe(1);
     const execution = await ctx.prisma.aiExecution.findFirstOrThrow();
-    expect(execution).toMatchObject({ task: "takeoff_extraction", promptId: "takeoff_extraction", promptVersion: 4, status: "success", pagesText: 1 });
+    expect(execution).toMatchObject({ task: "takeoff_extraction", promptId: "takeoff_extraction", promptVersion: 5, status: "success", pagesText: 1 });
     expect(execution.costMicroUsd).toBeGreaterThan(0n);
     const usage = await agent.get("/v1/ai-usage");
     expect(usage.body.analyses.used).toBe(1);
