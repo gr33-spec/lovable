@@ -56,8 +56,20 @@ const unreadableReasons: Record<string, string> = {
   read_failed: "La lecture automatique a échoué de notre côté, pas à cause de votre PDF. Le fichier est bien enregistré : l'IA peut le lire directement.",
 };
 
+/** Motifs précis renvoyés par l'API, quel que soit le code. */
+const reasonMessages: Record<string, string> = {
+  email_taken: "Ce fournisseur est déjà dans votre carnet (même adresse e-mail).",
+  takeoff_not_validated: "Validez d'abord la liste de matériaux.",
+  no_material: "La liste ne contient aucun matériau à demander.",
+  no_supplier: "Choisissez au moins un fournisseur.",
+  supplier_archived: "Un des fournisseurs choisis est archivé.",
+  quote_received: "Son devis est déjà reçu. Supprimez-le d'abord pour en mettre un autre.",
+  quote_already_attached: "Ce PDF est déjà rangé chez un autre fournisseur de ce chantier.",
+};
+
 export function errorMessage(code: string, reason?: string): string {
   if (code === "unreadable_document" && reason && unreadableReasons[reason]) return unreadableReasons[reason];
+  if (reason && reasonMessages[reason]) return reasonMessages[reason];
   return errorMessages[code] ?? errorMessages.internal_error!;
 }
 

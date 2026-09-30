@@ -205,3 +205,38 @@ export interface Takeoff {
   issues: (TakeoffIssue & { lineIds: string[] })[];
   lines: TakeoffLine[];
 }
+
+export interface Supplier {
+  id: string;
+  name: string;
+  contactName: string | null;
+  email: string;
+  phone: string | null;
+  notes: string | null;
+  archived: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type RecipientStatus = "to_send" | "sent" | "received" | "declined";
+
+export interface PriceRequestRecipient {
+  id: string;
+  supplier: Pick<Supplier, "id" | "name" | "contactName" | "email" | "phone">;
+  status: RecipientStatus;
+  sentAt: string | null;
+  document: { id: string; name: string; status: string } | null;
+  /** E-mail prêt à envoyer (texte brut). */
+  email: { subject: string; body: string } | null;
+}
+
+export interface PriceRequest {
+  id: string;
+  projectId: string;
+  /** Copie figée de la liste validée au moment de la demande. */
+  lines: { designation: string; quantity: string | null; unit: string | null; reference: string | null }[];
+  message: string | null;
+  dueDate: string | null;
+  createdAt: string;
+  recipients: PriceRequestRecipient[];
+}

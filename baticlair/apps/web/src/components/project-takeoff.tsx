@@ -2,6 +2,7 @@
 
 import { Check, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { useCallback, useId, useState } from "react";
+import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { Badge, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, type ProjectDocument, type Takeoff, type TakeoffLine } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
@@ -182,8 +183,8 @@ export function ProjectTakeoff({ projectId, clientQuote, archived }: { projectId
       {!draft ? (
         <Card className="flex flex-col gap-2 p-4">
           <p className="text-sm">
-            Liste validée{takeoff.validatedAt ? ` le ${new Date(takeoff.validatedAt).toLocaleDateString("fr-FR")}` : ""}. Prochaine
-            étape : les demandes de prix aux fournisseurs (bientôt).
+            Liste validée{takeoff.validatedAt ? ` le ${new Date(takeoff.validatedAt).toLocaleDateString("fr-FR")}` : ""}. Les
+            demandes de prix déjà préparées gardent la liste telle qu&apos;elle était.
           </p>
           {!archived ? (
             <Button
@@ -196,6 +197,7 @@ export function ProjectTakeoff({ projectId, clientQuote, archived }: { projectId
           ) : null}
         </Card>
       ) : null}
+      {!draft ? <ProjectPriceRequests projectId={projectId} archived={archived} /> : null}
     </section>
   );
 }

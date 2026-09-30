@@ -295,3 +295,21 @@ fictives uniquement.
 - **Sans clé** (`AI_PROVIDER=disabled`) : l'application le dit, rien
   n'est promis. En test, `AI_PROVIDER=fake` simule l'extraction (interdit
   en ligne).
+
+### PD-030 — Demandes de prix : envoyées depuis la messagerie de l'artisan
+- **Date** : 2026-09-30 · **Statut** : Décidé (demande du fondateur :
+  « ne cherche pas à automatiser l'envoi tout de suite », « ULTRA SIMPLE »)
+- **Décision** : le chantier est le centre. Une fois la liste validée,
+  l'artisan coche ses fournisseurs (carnet : société, e-mail, contact,
+  téléphone, notes). BatiClair prépare un e-mail par fournisseur ;
+  « Envoyer l'e-mail » ouvre sa propre messagerie (lien `mailto:`) et
+  marque la demande « Envoyée ». « Copier le texte » et « Déjà envoyé »
+  couvrent les autres cas. Aucun e-mail ne part de nos serveurs.
+- **Liste figée** : la demande garde une copie de la liste validée
+  (matériaux seulement, sans la main-d'œuvre). Modifier la liste ensuite
+  ne change pas ce qui a été demandé.
+- **Statuts** : à envoyer → envoyée → devis reçu (PDF déposé à la main sur
+  la ligne du fournisseur) ; « Pas de réponse » en fin de course. Un même
+  PDF ne peut pas être rangé chez deux fournisseurs.
+- **Ensuite** : lecture des devis reçus par l'IA et comparaison ligne à
+  ligne (lot 3-4), bouton « Classé » avec le ou les fournisseurs retenus.

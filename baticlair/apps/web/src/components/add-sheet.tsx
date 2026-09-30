@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Camera, FileText, Warehouse, X } from "lucide-react";
+import { Camera, FileText, Truck, Warehouse, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { fr } from "@/lib/fr";
 
 /**
  * Le bouton « + » : un seul endroit pour ajouter quelque chose (PD-021).
- * Seule la création de chantier est branchée aujourd'hui ; la lecture des
- * documents arrive à la phase 2 et est annoncée honnêtement.
+ * Chantier et fournisseur sont branchés ; la photo d'un devis n'existe pas
+ * encore et est annoncée honnêtement.
  */
 export function AddSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -55,6 +55,15 @@ export function AddSheet({ open, onClose }: { open: boolean; onClose: () => void
           <span className="flex flex-col">
             <span className="text-base font-extrabold">Nouveau chantier</span>
             <span className="text-[13px] text-[#c9ced6]">Nom, client, adresse</span>
+          </span>
+        </Link>
+        <Link href="/fournisseurs?nouveau" className="flex min-h-18 items-center gap-3.5 rounded-[20px] bg-surface px-4 shadow-card">
+          <span className="flex size-11 items-center justify-center rounded-[14px] bg-ground">
+            <Truck size={22} aria-hidden="true" />
+          </span>
+          <span className="flex flex-col">
+            <span className="text-base font-extrabold">Nouveau fournisseur</span>
+            <span className="text-[13px] text-muted">Société, e-mail, téléphone</span>
           </span>
         </Link>
         {[

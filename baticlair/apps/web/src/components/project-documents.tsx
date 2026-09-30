@@ -4,8 +4,9 @@ import { FileText, FileUp, Loader2, Trash2 } from "lucide-react";
 import { useCallback, useId, useRef, useState } from "react";
 import { ProjectTakeoff } from "@/components/project-takeoff";
 import { Badge, Card, ErrorNotice, Spinner } from "@/components/ui";
-import { api, ApiError, getActiveCompanyId, MAX_DOCUMENT_BYTES, type DocumentPurpose, type ProjectDocument } from "@/lib/api";
+import { api, ApiError, MAX_DOCUMENT_BYTES, type DocumentPurpose, type ProjectDocument } from "@/lib/api";
 import { unreadableMessage } from "@/lib/fr";
+import { openDocument } from "@/lib/open-document";
 import { useResource } from "@/lib/use-resource";
 
 const PURPOSE_LABEL: Record<DocumentPurpose, string> = {
@@ -45,7 +46,6 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
 
   const docs = data.items;
   const clientQuotes = docs.filter((d) => d.purpose === "client_quote");
-  const supplierQuotes = docs.filter((d) => d.purpose === "supplier_quote");
 
   function added(doc: ProjectDocument) {
     setNotice(doc.duplicate ? "Ce devis était déjà dans ce chantier : rien n'a été ajouté." : null);
@@ -87,17 +87,6 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
 
       <ProjectTakeoff key={clientQuotes[0]?.id ?? "none"} projectId={projectId} clientQuote={clientQuotes[0] ?? null} archived={archived} />
 
-      <section aria-labelledby="supplier-quotes" className="flex flex-col gap-3">
-        <h2 id="supplier-quotes" className="text-xs font-extrabold tracking-[0.04em] text-muted">
-          DEVIS FOURNISSEURS
-        </h2>
-        {supplierQuotes.length > 0 ? (
-          <DocumentList docs={supplierQuotes} onRemoved={removed} />
-        ) : (
-          <p className="text-sm text-muted">Aucun devis fournisseur pour l&apos;instant.</p>
-        )}
-        <UploadButton projectId={projectId} purpose="supplier_quote" label="Ajouter un devis fournisseur (PDF)" tone="light" onAdded={added} />
-      </section>
     </>
   );
 }
@@ -132,24 +121,10 @@ function DocumentCard({ doc, onRemoved }: { doc: ProjectDocument; onRemoved: (id
   const readByAi = doc.reading?.errorCode === "read_failed";
   const failed = doc.status === "failed" && !readByAi;
 
-  /** Ouvre le PDF d'origine (téléchargé avec la session et l'entreprise active). */
   async function open() {
     setOpening(true);
-    const win = window.open("", "_blank");
-    try {
-      const headers: Record<string, string> = {};
-      const companyId = getActiveCompanyId();
-      if (companyId) headers["x-company-id"] = companyId;
-      const res = await fetch(`/v1/documents/${doc.id}/file`, { headers, credentials: "same-origin" });
-      if (!res.ok) throw new Error(String(res.status));
-      const url = URL.createObjectURL(await res.blob());
-      if (win) win.location.href = url;
-      else window.location.href = url;
-    } catch {
-      win?.close();
-    } finally {
-      setOpening(false);
-    }
+    await openDocument(doc.id);
+    setOpening(false);
   }
 
   async function remove() {
