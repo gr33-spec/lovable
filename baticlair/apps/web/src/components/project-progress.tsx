@@ -2,7 +2,7 @@
 
 import { ArrowDown, Check } from "lucide-react";
 import { createContext, useCallback, useContext, useState } from "react";
-import { api, type PriceRequest, type ProjectDocument, type Takeoff } from "@/lib/api";
+import { api, type Offer, type PriceRequest, type ProjectDocument, type Takeoff } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 
 /**
@@ -32,6 +32,8 @@ interface Snapshot {
   documents: ProjectDocument[];
   takeoff: Takeoff | null;
   requests: PriceRequest[];
+  /** Devis déjà lus de la demande en cours. */
+  offers: Offer[];
 }
 
 type StepKey = "devis" | "materiaux" | "fournisseurs" | "reponses" | "comparer";
@@ -43,7 +45,7 @@ interface Progress {
   next: { label: string; target: string | null };
 }
 
-export function computeProgress({ documents, takeoff, requests }: Snapshot): Progress {
+export function computeProgress({ documents, takeoff, requests, offers }: Snapshot): Progress {
   const hasQuote = documents.some((d) => d.purpose === "client_quote");
   const validated = takeoff?.status === "validated";
   const recipients = requests.flatMap((r) => r.recipients);
@@ -57,7 +59,7 @@ export function computeProgress({ documents, takeoff, requests }: Snapshot): Pro
     materiaux: validated,
     fournisseurs: sent > 0,
     reponses: received > 0,
-    comparer: false,
+    comparer: requests.some((r) => r.classifiedAt !== null),
   };
 
   if (!hasQuote) return { done, current: "devis", next: { label: "Ajouter le devis client", target: "devis" } };
@@ -73,7 +75,13 @@ export function computeProgress({ documents, takeoff, requests }: Snapshot): Pro
   if (received === 0) {
     return { done, current: "reponses", next: { label: `Déposer les devis reçus (0 sur ${recipients.length})`, target: "fournisseurs" } };
   }
-  return { done, current: "comparer", next: { label: `${received} devis reçu${received > 1 ? "s" : ""} · comparaison bientôt`, target: null } };
+  const read = new Set(offers.map((o) => o.recipientId));
+  const unread = recipients.filter((r) => r.status === "received" && !read.has(r.id)).length;
+  if (unread > 0) {
+    return { done, current: "comparer", next: { label: `Lire ${unread > 1 ? `les ${unread} devis reçus` : "le devis reçu"}`, target: "fournisseurs" } };
+  }
+  if (!done.comparer) return { done, current: "comparer", next: { label: "Comparer et classer", target: "comparer" } };
+  return { done, current: "comparer", next: { label: "Chantier classé ✓", target: null } };
 }
 
 const STEPS: { key: StepKey; label: string }[] = [
@@ -94,7 +102,9 @@ function ProgressBar({ projectId, tick }: { projectId: string; tick: number }) {
         api<{ takeoff: Takeoff | null }>(`/v1/projects/${id}/takeoff`, { signal }),
         api<{ items: PriceRequest[] }>(`/v1/projects/${id}/price-requests`, { signal }),
       ]);
-      return { documents: docs.items, takeoff: takeoff.takeoff, requests: requests.items };
+      const first = requests.items[0];
+      const offers = first ? (await api<{ items: Offer[] }>(`/v1/price-requests/${first.id}/offers`, { signal })).items : [];
+      return { documents: docs.items, takeoff: takeoff.takeoff, requests: requests.items, offers };
     },
     [projectId, tick],
   );

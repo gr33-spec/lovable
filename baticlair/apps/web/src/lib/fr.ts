@@ -65,8 +65,16 @@ const reasonMessages: Record<string, string> = {
   no_supplier: "Choisissez au moins un fournisseur.",
   supplier_archived: "Un des fournisseurs choisis est archivé.",
   quote_received: "Son devis est déjà reçu. Supprimez-le d'abord pour en mettre un autre.",
+  no_quote: "Déposez d'abord le devis PDF de ce fournisseur.",
+  unknown_request_line: "Cette ligne n'existe pas dans la liste demandée.",
   quote_already_attached: "Ce PDF est déjà rangé chez un autre fournisseur de ce chantier.",
 };
+
+/** « 2805.3 » → « 2 805,30 € ». */
+export function euros(amount: string | null | undefined): string {
+  if (amount == null) return "—";
+  return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(Number(amount));
+}
 
 export function errorMessage(code: string, reason?: string): string {
   if (code === "unreadable_document" && reason && unreadableReasons[reason]) return unreadableReasons[reason];

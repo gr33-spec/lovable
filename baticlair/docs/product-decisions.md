@@ -369,3 +369,20 @@ fictives uniquement.
   Les entreprises existantes sont passées en couverture.
 - **Ajouter un métier** : écrire un profil et l'ajouter à la liste ; ni
   écran ni parcours à modifier.
+
+### PD-034 — Devis fournisseurs : lus une fois, comparés par le code
+- **Date** : 2026-09-30 · **Statut** : Décidé (boucle V1, étapes Réponses → Comparer)
+- **Lecture** : « Lire ce devis » : l'IA relève chaque ligne telle qu'imprimée
+  (montants recopiés, jamais calculés), sa nature (article, produit remplacé,
+  variante, option, frais, consigne) et la ligne demandée à laquelle elle
+  répond (sûre / probable / incertaine). 1 analyse décomptée par devis, une
+  seule fois ; relire est gratuit.
+- **Calculs** : tout est recalculé par le moteur du domaine (montants de
+  ligne, remises, totaux, contrôle des totaux imprimés).
+- **Comparaison** : coût pour toute la liste, HT, frais compris ; un article
+  manquant est estimé au prix médian des autres, jamais compté à zéro ; le
+  « moins cher » est signalé avec ses manques. Détail ligne à ligne.
+- **L'artisan tranche** : il corrige une correspondance d'un geste (elle
+  fait foi), puis « Classé », avec le ou les fournisseurs retenus en option.
+- **Architecture** : lecteur IA commun (`platform/ai`) et préparation des
+  documents commune (`DocumentAiInput`) pour toutes les lectures.

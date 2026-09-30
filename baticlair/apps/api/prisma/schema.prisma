@@ -116,6 +116,7 @@ model Company {
   aiAnalyses    AiAnalysis[]
   suppliers     Supplier[]
   priceRequests PriceRequest[]
+  offers        SupplierOffer[]
 
   @@map("company")
 }
@@ -213,6 +214,7 @@ model Document {
   takeoff     Takeoff?
   /// Devis fournisseur reçu en réponse à une demande de prix.
   recipient   PriceRequestRecipient?
+  offer       SupplierOffer?
 
   @@index([companyId, sha256])
   @@index([projectId, createdAt])
@@ -438,27 +440,27 @@ model Takeoff {
 }
 
 model TakeoffLine {
-  id          String   @id @default(uuid(7)) @db.Uuid
-  takeoffId   String   @db.Uuid
+  id          String    @id @default(uuid(7)) @db.Uuid
+  takeoffId   String    @db.Uuid
   position    Int
   designation String
   quantityRaw String?
   unitRaw     String?
   reference   String?
   /// Références « page:ligne » du texte du devis qui justifient la ligne.
-  sourceRefs  Json     @default("[]")
+  sourceRefs  Json      @default("[]")
   /// Pages lues sur image (pas de texte numéroté à citer).
-  sourcePages Json     @default("[]")
+  sourcePages Json      @default("[]")
   /// ai = proposée par l'IA ; manual = ajoutée par l'artisan.
-  origin      String   @default("ai")
+  origin      String    @default("ai")
   /// Modifiée par l'artisan après la proposition de l'IA.
-  edited      Boolean  @default(false)
+  edited      Boolean   @default(false)
   /// Doute exprimé par l'IA sur cette ligne (montré tel quel à l'artisan).
   aiDoubt     String?
   /// L'artisan a vérifié la ligne et la garde telle quelle.
   confirmedAt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   takeoff Takeoff @relation(fields: [takeoffId], references: [id], onDelete: Cascade)
 
@@ -494,16 +496,19 @@ model Supplier {
 /// Demande de prix d'un chantier : copie FIGÉE de la liste de matériaux
 /// validée au moment de la demande (ce que les fournisseurs ont reçu).
 model PriceRequest {
-  id          String    @id @default(uuid(7)) @db.Uuid
-  companyId   String    @db.Uuid
-  projectId   String    @db.Uuid
-  takeoffId   String    @db.Uuid
+  id                  String    @id @default(uuid(7)) @db.Uuid
+  companyId           String    @db.Uuid
+  projectId           String    @db.Uuid
+  takeoffId           String    @db.Uuid
   /// [{ designation, quantity, unit, reference }] dans l'ordre de la liste.
-  lines       Json
-  message     String?
-  dueDate     DateTime? @db.Date
-  createdById String?
-  createdAt   DateTime  @default(now())
+  lines               Json
+  message             String?
+  dueDate             DateTime? @db.Date
+  createdById         String?
+  createdAt           DateTime  @default(now())
+  /// « Classé » : l'artisan a fait son choix (fournisseurs retenus facultatifs).
+  classifiedAt        DateTime?
+  retainedSupplierIds String[]  @default([])
 
   company    Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
   project    Project                 @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -537,4 +542,68 @@ model PriceRequestRecipient {
 
   @@unique([priceRequestId, supplierId])
   @@map("price_request_recipient")
+}
+
+/// Devis fournisseur lu par l'IA (une lecture par document). Montants en
+/// texte décimal exact, tels qu'imprimés ; tout calcul est fait par le code.
+model SupplierOffer {
+  id                   String   @id @default(uuid(7)) @db.Uuid
+  companyId            String   @db.Uuid
+  documentId           String   @unique @db.Uuid
+  analysisId           String?  @db.Uuid
+  promptId             String
+  promptVersion        Int
+  model                String
+  totalHT              String?
+  totalVAT             String?
+  totalTTC             String?
+  /// Remise globale : taux décimal (« 0.05 ») ou montant HT.
+  globalDiscountRate   String?
+  globalDiscountAmount String?
+  /// Le devis indique « franco » / livraison incluse.
+  deliveryIncluded     Boolean?
+  notes                Json     @default("[]")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  company  Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  document Document            @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  lines    SupplierOfferLine[]
+
+  @@map("supplier_offer")
+}
+
+model SupplierOfferLine {
+  id                String   @id @default(uuid(7)) @db.Uuid
+  offerId           String   @db.Uuid
+  position          Int
+  /// main | substitution | variant | option | fee | deposit | info (voir domaine OfferLineKind).
+  kind              String
+  designation       String
+  reference         String?
+  quantityRaw       String?
+  unitRaw           String?
+  unitPrice         String?
+  /// Remise ligne, taux décimal (« 0.10 »).
+  discountRate      String?
+  lineTotal         String?
+  /// Contenu du conditionnement (« 1 rouleau = 75 m² »).
+  packagingQuantity String?
+  packagingUnit     String?
+  /// Rang (à partir de 0) de la ligne demandée correspondante, ou null.
+  requestIndex      Int?
+  /// Confiance de l'IA dans la correspondance : sure | probable | unsure.
+  matchConfidence   String?
+  /// Correspondance confirmée par l'artisan.
+  matchConfirmed    Boolean  @default(false)
+  aiDoubt           String?
+  sourceRefs        Json     @default("[]")
+  edited            Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  offer SupplierOffer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  @@index([offerId, position])
+  @@map("supplier_offer_line")
 }

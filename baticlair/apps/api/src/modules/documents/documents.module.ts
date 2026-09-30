@@ -5,9 +5,11 @@ import type { AppLogger } from "../../platform/logging/logger.js";
 import { CONFIG, LOGGER } from "../../platform/tokens.js";
 import { TenancyModule } from "../tenancy/index.js";
 import { DOCUMENT_REPOSITORY, type DocumentRepository } from "./application/document.repository.js";
+import { DocumentAiInput } from "./application/ai-input.js";
 import { DocumentsService } from "./application/documents.service.js";
 import { PDF_READER, type PdfReader } from "./application/pdf-reader.js";
 import { DocumentsController } from "./http/documents.controller.js";
+import { extractPdfPages, pdfPageCount } from "./infrastructure/pdf-pages.js";
 import { PdfJsPdfReader } from "./infrastructure/pdfjs-pdf-reader.js";
 import { PrismaDocumentRepository } from "./infrastructure/prisma-document.repository.js";
 
@@ -18,6 +20,12 @@ import { PrismaDocumentRepository } from "./infrastructure/prisma-document.repos
     { provide: DOCUMENT_REPOSITORY, useFactory: (p: PrismaService) => new PrismaDocumentRepository(p), inject: [PrismaService] },
     { provide: PDF_READER, useFactory: () => new PdfJsPdfReader() },
     {
+      provide: DocumentAiInput,
+      useFactory: (r: DocumentRepository, config: AppConfig) =>
+        new DocumentAiInput(r, { extract: extractPdfPages, pageCount: pdfPageCount }, { maxPages: config.documents.maxPages }),
+      inject: [DOCUMENT_REPOSITORY, CONFIG],
+    },
+    {
       provide: DocumentsService,
       useFactory: (r: DocumentRepository, reader: PdfReader, config: AppConfig, logger: AppLogger) =>
         new DocumentsService(r, reader, config.documents, undefined, undefined, (error, documentId) =>
@@ -26,6 +34,6 @@ import { PrismaDocumentRepository } from "./infrastructure/prisma-document.repos
       inject: [DOCUMENT_REPOSITORY, PDF_READER, CONFIG, LOGGER],
     },
   ],
-  exports: [DOCUMENT_REPOSITORY, DocumentsService],
+  exports: [DOCUMENT_REPOSITORY, DocumentsService, DocumentAiInput],
 })
 export class DocumentsModule {}
