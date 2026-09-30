@@ -14,3 +14,4 @@ export * from "./documents/page-analysis.js";
 export * from "./documents/cost-estimate.js";
 export { containsKeyword, type MaterialFamily, type CompanionRule } from "./trades/trade-profile.js";
 export * from "./takeoff/validation.js";
+export * from "./takeoff/extraction.js";

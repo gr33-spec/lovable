@@ -45,6 +45,18 @@ const envSchema = z
     AI_USD_TO_EUR: z.string().regex(/^\d+(\.\d+)?$/).default("0.92"),
     /** Budget IA mensuel par entreprise en usage normal (prévision interne, PD-027). */
     AI_MONTHLY_BUDGET_EUR: z.string().regex(/^\d+(\.\d+)?$/).default("10"),
+    /**
+     * Lecture des devis par l'IA :
+     * - `anthropic` : appels réels (ANTHROPIC_API_KEY) ;
+     * - `disabled`  : pas d'IA, et l'application le dit ;
+     * - `fake`      : extraction simulée, déterministe (développement et tests uniquement).
+     * Par défaut : `anthropic` si une clé est fournie, sinon `disabled`.
+     */
+    AI_PROVIDER: z.enum(["anthropic", "disabled", "fake"]).optional(),
+    ANTHROPIC_API_KEY: z.string().min(1).optional(),
+    /** Modèle d'extraction (audit des coûts : Sonnet 5.5, évalué contre Haiku à l'étape D). */
+    AI_EXTRACTION_MODEL: z.string().min(1).default("claude-sonnet-5-5"),
+    AI_EXTRACTION_EFFORT: z.enum(["low", "medium", "high", "xhigh", "max"]).default("high"),
     GOOGLE_CLIENT_ID: z.string().min(1).optional(),
     GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
     MICROSOFT_CLIENT_ID: z.string().min(1).optional(),
@@ -58,6 +70,12 @@ const envSchema = z
         path: ["EMAIL_PROVIDER"],
         message: "« console » et « capture » sont réservés au développement et aux tests",
       });
+    }
+    if (isDeployed && env.AI_PROVIDER === "fake") {
+      ctx.addIssue({ code: "custom", path: ["AI_PROVIDER"], message: "« fake » est réservé au développement et aux tests" });
+    }
+    if (env.AI_PROVIDER === "anthropic" && !env.ANTHROPIC_API_KEY) {
+      ctx.addIssue({ code: "custom", path: ["ANTHROPIC_API_KEY"], message: "obligatoire avec AI_PROVIDER=anthropic" });
     }
     if (env.EMAIL_PROVIDER === "resend" && !env.RESEND_API_KEY) {
       ctx.addIssue({ code: "custom", path: ["RESEND_API_KEY"], message: "obligatoire avec EMAIL_PROVIDER=resend" });
@@ -94,6 +112,12 @@ export interface AppConfig {
   oauth: { google?: OAuthClientConfig; microsoft?: OAuthClientConfig };
   documents: { maxBytes: number; maxPages: number };
   aiCost: { usdToEur: string; monthlyBudgetEur: string };
+  ai: {
+    provider: "anthropic" | "disabled" | "fake";
+    apiKey?: string;
+    extractionModel: string;
+    effort: "low" | "medium" | "high" | "xhigh" | "max";
+  };
 }
 
 export class ConfigError extends Error {
@@ -131,5 +155,11 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     oauth: { ...(google ? { google } : {}), ...(microsoft ? { microsoft } : {}) },
     documents: { maxBytes: e.DOCUMENT_MAX_BYTES, maxPages: e.DOCUMENT_MAX_PAGES },
     aiCost: { usdToEur: e.AI_USD_TO_EUR, monthlyBudgetEur: e.AI_MONTHLY_BUDGET_EUR },
+    ai: {
+      provider: e.AI_PROVIDER ?? (e.ANTHROPIC_API_KEY ? "anthropic" : "disabled"),
+      ...(e.ANTHROPIC_API_KEY ? { apiKey: e.ANTHROPIC_API_KEY } : {}),
+      extractionModel: e.AI_EXTRACTION_MODEL,
+      effort: e.AI_EXTRACTION_EFFORT,
+    },
   };
 }

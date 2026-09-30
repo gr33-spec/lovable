@@ -110,6 +110,7 @@ model Company {
   projects     Project[]
   documents    Document[]
   aiExecutions AiExecution[]
+  takeoffs     Takeoff[]
   aiAnalyses   AiAnalysis[]
 
   @@map("company")
@@ -204,6 +205,7 @@ model Document {
   project     Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
   blob        DocumentBlob?
   processings DocumentProcessing[]
+  takeoff     Takeoff?
 
   @@index([companyId, sha256])
   @@index([projectId, createdAt])
@@ -390,4 +392,65 @@ model IdempotencyRecord {
   @@unique([userId, key])
   @@index([createdAt])
   @@map("idempotency_record")
+}
+
+enum TakeoffStatus {
+  /// Proposé par l'IA ou en cours de correction : pas encore utilisable.
+  draft
+  /// Vérifié et validé par l'artisan : sert aux demandes de prix.
+  validated
+}
+
+/// Quantitatif (liste de matériaux) tiré d'un devis client. Toujours relu
+/// par l'artisan avant usage (PD-026) ; chaque ligne garde sa preuve.
+model Takeoff {
+  id            String        @id @default(uuid(7)) @db.Uuid
+  companyId     String        @db.Uuid
+  projectId     String        @db.Uuid
+  documentId    String        @unique @db.Uuid
+  analysisId    String?       @db.Uuid
+  trade         String
+  status        TakeoffStatus @default(draft)
+  /// Prompt et modèle ayant produit la proposition (traçabilité).
+  promptId      String
+  promptVersion Int
+  model         String
+  /// Remarques de l'IA sur le document (page illisible, ligne ambiguë…).
+  notes         Json          @default("[]")
+  createdById   String?
+  createdAt     DateTime      @default(now())
+  validatedAt   DateTime?
+  validatedById String?
+
+  company  Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  document Document      @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  lines    TakeoffLine[]
+
+  @@index([companyId, projectId])
+  @@map("takeoff")
+}
+
+model TakeoffLine {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  takeoffId   String   @db.Uuid
+  position    Int
+  designation String
+  quantityRaw String?
+  unitRaw     String?
+  reference   String?
+  /// Références « page:ligne » du texte du devis qui justifient la ligne.
+  sourceRefs  Json     @default("[]")
+  /// Pages lues sur image (pas de texte numéroté à citer).
+  sourcePages Json     @default("[]")
+  /// ai = proposée par l'IA ; manual = ajoutée par l'artisan.
+  origin      String   @default("ai")
+  /// Modifiée par l'artisan après la proposition de l'IA.
+  edited      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  takeoff Takeoff @relation(fields: [takeoffId], references: [id], onDelete: Cascade)
+
+  @@index([takeoffId, position])
+  @@map("takeoff_line")
 }

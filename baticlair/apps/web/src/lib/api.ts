@@ -166,5 +166,42 @@ export const MAX_DOCUMENT_BYTES = 4_000_000;
 
 export interface Health {
   status: "ok";
-  features: { email: boolean };
+  features: { email: boolean; ai: boolean };
+}
+
+export interface TakeoffIssue {
+  code: string;
+  severity: "blocking" | "to_verify" | "info";
+  message: string;
+}
+
+export interface TakeoffLine {
+  id: string;
+  position: number;
+  designation: string;
+  quantity: string | null;
+  unit: string | null;
+  reference: string | null;
+  sourceRefs: string[];
+  sourcePages: number[];
+  origin: "ai" | "manual";
+  edited: boolean;
+  kind: "material" | "labor" | "unknown";
+  family: string | null;
+  status: "certain" | "probable" | "to_verify";
+  issues: TakeoffIssue[];
+}
+
+export interface Takeoff {
+  id: string;
+  projectId: string;
+  documentId: string;
+  status: "draft" | "validated";
+  model: string;
+  notes: string[];
+  createdAt: string;
+  validatedAt: string | null;
+  counts: { certain: number; probable: number; toVerify: number; labor: number; blocking: number };
+  issues: (TakeoffIssue & { lineIds: string[] })[];
+  lines: TakeoffLine[];
 }

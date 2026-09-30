@@ -13,6 +13,7 @@ const apiEnv = {
   API_PUBLIC_URL: "http://localhost:3000",
   WEB_APP_URL: "http://localhost:3000",
   EMAIL_PROVIDER: "console",
+  AI_PROVIDER: "fake",
   LOG_LEVEL: "warn",
 };
 
