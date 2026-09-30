@@ -80,5 +80,6 @@ jobs:
           cache-dependency-path: baticlair/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @baticlair/web exec playwright install --with-deps chromium
-      - run: pnpm turbo run build --filter=@baticlair/web
+      # L'API tourne depuis ses sources (tsx) : ses paquets internes doivent être compilés.
+      - run: pnpm turbo run build --filter=@baticlair/web --filter='@baticlair/api^...'
       - run: pnpm --filter @baticlair/web e2e
