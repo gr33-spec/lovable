@@ -1,4 +1,6 @@
 import { Module } from "@nestjs/common";
+import { AiUsageModule } from "./modules/ai-usage/index.js";
+import { DocumentsModule } from "./modules/documents/index.js";
 import { HealthModule } from "./modules/health/health.module.js";
 import { IdentityModule } from "./modules/identity/index.js";
 import { ProjectsModule } from "./modules/projects/index.js";
@@ -17,6 +19,8 @@ import { LoggingModule } from "./platform/logging/logging.module.js";
     IdentityModule,
     TenancyModule,
     ProjectsModule,
+    DocumentsModule,
+    AiUsageModule,
     HealthModule,
   ],
 })

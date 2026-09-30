@@ -34,6 +34,17 @@ const envSchema = z
     RESEND_API_KEY: z.string().min(1).optional(),
     /** Expéditeur, ex. « BatiClair <bonjour@mondomaine.fr> » (domaine vérifié chez Resend). */
     EMAIL_FROM: z.string().min(3).optional(),
+    /**
+     * Taille maximale d'un document déposé. 4 Mo par défaut : c'est sous la
+     * limite d'une requête vers une fonction Vercel (4,5 Mo). Un devis
+     * généré par un logiciel pèse rarement plus de 1 Mo.
+     */
+    DOCUMENT_MAX_BYTES: z.coerce.number().int().positive().max(50_000_000).default(4_000_000),
+    DOCUMENT_MAX_PAGES: z.coerce.number().int().positive().max(600).default(60),
+    /** Taux de conversion utilisé pour AFFICHER les coûts IA en euros (les coûts sont stockés en dollars). */
+    AI_USD_TO_EUR: z.string().regex(/^\d+(\.\d+)?$/).default("0.92"),
+    /** Budget IA mensuel par entreprise en usage normal (prévision interne, PD-027). */
+    AI_MONTHLY_BUDGET_EUR: z.string().regex(/^\d+(\.\d+)?$/).default("10"),
     GOOGLE_CLIENT_ID: z.string().min(1).optional(),
     GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
     MICROSOFT_CLIENT_ID: z.string().min(1).optional(),
@@ -81,6 +92,8 @@ export interface AppConfig {
   emailProvider: "resend" | "disabled" | "console" | "capture";
   resend?: { apiKey: string; from: string };
   oauth: { google?: OAuthClientConfig; microsoft?: OAuthClientConfig };
+  documents: { maxBytes: number; maxPages: number };
+  aiCost: { usdToEur: string; monthlyBudgetEur: string };
 }
 
 export class ConfigError extends Error {
@@ -116,5 +129,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       ? { resend: { apiKey: e.RESEND_API_KEY, from: e.EMAIL_FROM } }
       : {}),
     oauth: { ...(google ? { google } : {}), ...(microsoft ? { microsoft } : {}) },
+    documents: { maxBytes: e.DOCUMENT_MAX_BYTES, maxPages: e.DOCUMENT_MAX_PAGES },
+    aiCost: { usdToEur: e.AI_USD_TO_EUR, monthlyBudgetEur: e.AI_MONTHLY_BUDGET_EUR },
   };
 }

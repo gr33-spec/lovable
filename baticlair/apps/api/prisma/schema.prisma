@@ -103,8 +103,10 @@ model Company {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  memberships Membership[]
-  projects    Project[]
+  memberships  Membership[]
+  projects     Project[]
+  documents    Document[]
+  aiExecutions AiExecution[]
 
   @@map("company")
 }
@@ -134,28 +136,196 @@ enum ProjectStatus {
 }
 
 model Project {
-  id          String        @id @default(uuid(7)) @db.Uuid
-  companyId   String        @db.Uuid
-  name        String
-  clientName  String?
-  address     String?
-  status      ProjectStatus @default(active)
+  id             String        @id @default(uuid(7)) @db.Uuid
+  companyId      String        @db.Uuid
+  name           String
+  clientName     String?
+  address        String?
+  status         ProjectStatus @default(active)
   /// Nul si l'auteur a supprimé son compte : le chantier appartient à l'entreprise.
-  createdById String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdById    String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
   /// Dernière activité métier (modification, document, réponse fournisseur…).
   /// Sert à classer les chantiers : le plus récemment travaillé en premier.
-  lastActivityAt DateTime   @default(now())
+  lastActivityAt DateTime      @default(now())
 
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  createdBy User?   @relation("ProjectCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdBy User?      @relation("ProjectCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  documents Document[]
 
   @@index([companyId, status, lastActivityAt(sort: Desc), id(sort: Desc)])
   // Index de recherche plein texte sans accents (pg_trgm + unaccent) :
   // créé en SQL dans la migration *_project_activity_idempotency, Prisma ne
   // sachant pas décrire un index sur expression.
   @@map("project")
+}
+
+// ---------------------------------------------------------------------------
+// Documents (devis client, devis fournisseurs) — docs/document-pipeline.md
+// ---------------------------------------------------------------------------
+
+enum DocumentPurpose {
+  client_quote
+  supplier_quote
+}
+
+enum DocumentStatus {
+  /// Fichier reçu et stocké, lecture pas encore faite.
+  stored
+  /// Lecture automatique (sans IA) terminée.
+  read
+  /// Lecture impossible (fichier corrompu, protégé…).
+  failed
+}
+
+model Document {
+  id           String          @id @default(uuid(7)) @db.Uuid
+  companyId    String          @db.Uuid
+  projectId    String          @db.Uuid
+  purpose      DocumentPurpose
+  /// Métier dont le profil sert à lire le document (MVP : roofing).
+  trade        String          @default("roofing")
+  originalName String
+  mimeType     String
+  sizeBytes    Int
+  /// Empreinte du contenu : détection des doublons, jamais deux analyses payées pour le même fichier.
+  sha256       String
+  pageCount    Int?
+  status       DocumentStatus  @default(stored)
+  uploadedById String?
+  createdAt    DateTime        @default(now())
+
+  company     Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  project     Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  blob        DocumentBlob?
+  processings DocumentProcessing[]
+
+  @@index([companyId, sha256])
+  @@index([projectId, createdAt])
+  @@map("document")
+}
+
+/// Contenu du fichier, à part pour ne jamais le charger en listant les documents.
+/// Stockage en base pendant l'essai ; un stockage objet le remplacera (port DocumentStorage).
+model DocumentBlob {
+  documentId String @id @db.Uuid
+  bytes      Bytes
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@map("document_blob")
+}
+
+enum ProcessingStatus {
+  processing
+  completed
+  failed
+}
+
+/// Une lecture d'un document par une version donnée du pipeline. Un
+/// retraitement crée une nouvelle ligne : l'historique est conservé.
+model DocumentProcessing {
+  id                String           @id @default(uuid(7)) @db.Uuid
+  companyId         String           @db.Uuid
+  documentId        String           @db.Uuid
+  pipelineVersion   String
+  status            ProcessingStatus
+  errorCode         String?
+  pagesTotal        Int              @default(0)
+  pagesText         Int              @default(0)
+  pagesVision       Int              @default(0)
+  pagesSkipped      Int              @default(0)
+  /// Estimation (haute) du coût IA de l'extraction, calculée sans appel.
+  estimatedMicroUsd BigInt           @default(0)
+  estimate          Json?
+  /// Somme des coûts réels des appels IA de ce traitement (AiExecution).
+  actualMicroUsd    BigInt           @default(0)
+  startedAt         DateTime         @default(now())
+  finishedAt        DateTime?
+
+  document     Document       @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  pages        DocumentPage[]
+  aiExecutions AiExecution[]
+
+  @@index([documentId, startedAt(sort: Desc)])
+  @@map("document_processing")
+}
+
+enum PageRoute {
+  text
+  vision
+  skip
+}
+
+model DocumentPage {
+  processingId String    @db.Uuid
+  pageNumber   Int
+  route        PageRoute
+  reason       String
+  widthPt      Decimal   @db.Decimal(9, 2)
+  heightPt     Decimal   @db.Decimal(9, 2)
+  chars        Int
+  metrics      Json
+  /// Lignes numérotées « page:ligne » — ce que l'IA recevra, et la preuve qu'elle citera.
+  lines        Json
+
+  processing DocumentProcessing @relation(fields: [processingId], references: [id], onDelete: Cascade)
+
+  @@id([processingId, pageNumber])
+  @@map("document_page")
+}
+
+// ---------------------------------------------------------------------------
+// IA — une ligne par appel au fournisseur (docs/ai-architecture.md, audit coûts)
+// ---------------------------------------------------------------------------
+
+enum AiExecutionStatus {
+  success
+  invalid_output
+  refused
+  provider_error
+  timeout
+}
+
+model AiExecution {
+  id                 String            @id @default(uuid(7)) @db.Uuid
+  companyId          String            @db.Uuid
+  projectId          String?           @db.Uuid
+  documentId         String?           @db.Uuid
+  processingId       String?           @db.Uuid
+  /// takeoff_extraction, offer_extraction, matching…
+  task               String
+  /// text | vision | fallback | escalation
+  route              String
+  provider           String
+  model              String
+  promptId           String
+  promptVersion      Int
+  /// 1 pour le premier essai ; > 1 = nouvelle tentative (comptée à part dans les rapports).
+  attempt            Int               @default(1)
+  pagesText          Int               @default(0)
+  pagesVision        Int               @default(0)
+  inputTokens        Int               @default(0)
+  outputTokens       Int               @default(0)
+  cacheReadTokens    Int               @default(0)
+  cacheWrite5mTokens Int               @default(0)
+  cacheWrite1hTokens Int               @default(0)
+  batch              Boolean           @default(false)
+  costMicroUsd       BigInt
+  priceTableVersion  String
+  status             AiExecutionStatus
+  errorCode          String?
+  durationMs         Int
+  createdAt          DateTime          @default(now())
+
+  company    Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  processing DocumentProcessing? @relation(fields: [processingId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, createdAt])
+  @@index([projectId])
+  @@index([documentId])
+  @@map("ai_execution")
 }
 
 // ---------------------------------------------------------------------------
