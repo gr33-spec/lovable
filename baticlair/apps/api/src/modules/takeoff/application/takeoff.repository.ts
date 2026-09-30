@@ -1,0 +1,65 @@
+import type { TenantContext } from "../../tenancy/index.js";
+
+export type TakeoffStatus = "draft" | "validated";
+export type LineOrigin = "ai" | "manual";
+
+export interface LineFields {
+  designation: string;
+  quantityRaw: string | null;
+  unitRaw: string | null;
+  reference: string | null;
+}
+
+export interface NewTakeoffLine extends LineFields {
+  sourceRefs: string[];
+  sourcePages: number[];
+}
+
+export interface TakeoffLineRecord extends NewTakeoffLine {
+  id: string;
+  position: number;
+  origin: LineOrigin;
+  edited: boolean;
+}
+
+export interface TakeoffRecord {
+  id: string;
+  projectId: string;
+  documentId: string;
+  trade: string;
+  status: TakeoffStatus;
+  promptId: string;
+  promptVersion: number;
+  model: string;
+  notes: string[];
+  createdAt: Date;
+  validatedAt: Date | null;
+  lines: TakeoffLineRecord[];
+}
+
+export interface NewTakeoff {
+  projectId: string;
+  documentId: string;
+  analysisId: string | null;
+  trade: string;
+  promptId: string;
+  promptVersion: number;
+  model: string;
+  notes: string[];
+  lines: NewTakeoffLine[];
+}
+
+export interface TakeoffRepository {
+  findByDocument(tenant: TenantContext, documentId: string): Promise<TakeoffRecord | null>;
+  findLatestByProject(tenant: TenantContext, projectId: string): Promise<TakeoffRecord | null>;
+  findById(tenant: TenantContext, id: string): Promise<TakeoffRecord | null>;
+  /** Quantitatif auquel appartient une ligne (dans l'entreprise active). */
+  findByLine(tenant: TenantContext, lineId: string): Promise<TakeoffRecord | null>;
+  create(tenant: TenantContext, data: NewTakeoff): Promise<TakeoffRecord>;
+  updateLine(tenant: TenantContext, lineId: string, fields: LineFields): Promise<void>;
+  addLine(tenant: TenantContext, takeoffId: string, fields: LineFields): Promise<void>;
+  deleteLine(tenant: TenantContext, lineId: string): Promise<void>;
+  setStatus(tenant: TenantContext, id: string, status: TakeoffStatus): Promise<void>;
+}
+
+export const TAKEOFF_REPOSITORY = Symbol("TAKEOFF_REPOSITORY");

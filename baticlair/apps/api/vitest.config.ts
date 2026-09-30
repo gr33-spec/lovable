@@ -14,6 +14,7 @@ export default defineConfig({
       DATABASE_URL: databaseUrl,
       AUTH_SECRET: "test-secret-test-secret-test-secret-000",
       EMAIL_PROVIDER: "capture",
+      AI_PROVIDER: "fake",
       LOG_LEVEL: "silent",
       API_PUBLIC_URL: "http://localhost:4000",
       WEB_APP_URL: "http://localhost:3000",

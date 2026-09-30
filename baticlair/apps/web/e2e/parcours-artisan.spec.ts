@@ -200,3 +200,45 @@ test("un couvreur dépose son devis client et un devis fournisseur (lecture sans
   await page.getByLabel("Ajouter un devis fournisseur (PDF)").setInputFiles(fixture("devis-fournisseur-couvreur.pdf"));
   await expect(page.getByText("devis-fournisseur-couvreur.pdf")).toBeVisible();
 });
+
+test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et la valide", async ({ page }) => {
+  await signUp(page);
+  await createProject(page, "Toiture Morel", "Mme Morel", "3 impasse des Lilas, Lorient");
+  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
+
+  // IA simulée en test (AI_PROVIDER=fake) : même parcours, aucun appel payant.
+  await page.getByRole("button", { name: "Préparer la liste de matériaux" }).click();
+  await expect(page.getByText("Tuile romane canal rouge 12,5 u/m²")).toBeVisible();
+  await expect(page.getByText(/^6 lignes · \d+ à vérifier/)).toBeVisible();
+  await expect(page.getByText(/Devis : page 1, ligne \d+/).first()).toBeVisible();
+
+  // Crochets en paquets sans contenu indiqué : l'artisan précise la quantité en pièces.
+  await page.getByRole("button", { name: "Corriger Crochet inox ardoise 100 mm" }).click();
+  await page.getByLabel("Quantité").fill("200");
+  await page.getByLabel("Unité").fill("u");
+  await page.getByRole("button", { name: "Enregistrer" }).click();
+  await expect(page.getByText("(corrigée par vous)")).toBeVisible();
+
+  // Une ligne ajoutée à la main, puis retirée.
+  await page.getByRole("button", { name: "Ajouter une ligne" }).click();
+  await page.getByLabel("Désignation").fill("Closoir ventilé");
+  await page.getByLabel("Quantité").fill("12");
+  await page.getByLabel("Unité").fill("ml");
+  await page.getByRole("button", { name: "Ajouter", exact: true }).click();
+  await expect(page.getByText("Ajoutée par vous")).toBeVisible();
+  await page.getByRole("button", { name: "Retirer Closoir ventilé" }).click();
+  await page.getByRole("button", { name: "Oui, retirer" }).click();
+  await expect(page.getByText("Closoir ventilé")).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Valider la liste" }).click();
+  await expect(page.getByText(/^Liste validée le /)).toBeVisible();
+
+  // La liste validée est conservée.
+  await page.reload();
+  await expect(page.getByText(/^Liste validée le /)).toBeVisible();
+
+  // L'analyse est décomptée dans la consommation du mois.
+  await page.goto("/compte");
+  await expect(page.getByRole("heading", { name: "Consommation IA ce mois-ci" })).toBeVisible();
+});

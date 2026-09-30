@@ -30,6 +30,8 @@ const errorMessages: Record<string, string> = {
   payload_too_large: "C'est trop volumineux pour être envoyé.",
   unreadable_document: "Ce fichier ne peut pas être lu.",
   analysis_quota_reached: "Vous avez utilisé toutes les analyses de votre formule ce mois-ci. Les documents déjà analysés restent consultables.",
+  ai_unavailable: "La lecture par l'IA n'est pas encore activée sur ce compte.",
+  analysis_failed: "L'IA n'a pas réussi à lire ce devis. Rien n'a été décompté de votre formule ; réessayez dans un instant.",
   onboarding_required: "Indiquez d'abord le nom de votre entreprise.",
   company_selection_required: "Choisissez l'entreprise avec laquelle travailler.",
   internal_error: "Un problème est survenu de notre côté. Vos données sont conservées ; réessayez dans un instant.",
@@ -51,7 +53,7 @@ const unreadableReasons: Record<string, string> = {
   encrypted: "Ce PDF est protégé par un mot de passe. Enregistrez-le sans protection, puis réessayez.",
   corrupted: "Ce PDF est abîmé et ne peut pas être lu.",
   too_many_pages: "Ce document a trop de pages. Envoyez seulement le devis.",
-  read_failed: "Lecture impossible pour l'instant : c'est un problème de notre côté, pas de votre PDF. Le fichier est bien enregistré.",
+  read_failed: "La lecture automatique a échoué de notre côté, pas à cause de votre PDF. Le fichier est bien enregistré : l'IA peut le lire directement.",
 };
 
 export function errorMessage(code: string, reason?: string): string {

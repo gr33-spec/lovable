@@ -271,3 +271,27 @@ fictives uniquement.
 - **Suivi** : décompte par entreprise et par utilisateur (celui qui a
   lancé l'analyse), avec appels et coût IA, dans `GET /v1/ai-usage` et
   « Mon compte ».
+
+### PD-029 — Liste de matériaux : l'IA propose, le code vérifie, l'artisan valide
+- **Date** : 2026-09-30 · **Statut** : Décidé (demande du fondateur :
+  « intégrer l'IA »)
+- **Décision** : l'IA (Claude, `AI_EXTRACTION_MODEL`, Sonnet 5.5 par
+  défaut) lit le devis client : le texte numéroté des pages propres, et
+  seulement les pages douteuses en image (PDF réduit à ces pages). Chaque
+  ligne proposée cite ses références « page:ligne ». Le code vérifie que
+  ces références existent et que la quantité y figure ; sinon la ligne est
+  « à vérifier ». Aucune quantité n'est calculée par l'IA.
+- **Validation** : rien n'est utilisable avant que l'artisan ait validé la
+  liste ; une ligne sans quantité lisible bloque la validation. Les lignes
+  corrigées ou ajoutées par l'artisan font foi.
+- **Coûts** : une analyse décomptée par devis (PD-028), vérifiée avant
+  l'appel ; chaque tentative (2 au plus) est enregistrée avec son coût.
+  Relancer la préparation d'un devis déjà lu ne coûte rien.
+- **Panne de lecture locale** : si la lecture du texte échoue pour une
+  raison technique (pas un fichier abîmé), l'IA lit le PDF entier.
+- **Repli de modèle en cas de refus** : non activé pour l'instant. Un
+  refus est rapporté comme un échec (non décompté) ; l'activer demandera
+  d'enregistrer le coût au tarif du modèle de repli.
+- **Sans clé** (`AI_PROVIDER=disabled`) : l'application le dit, rien
+  n'est promis. En test, `AI_PROVIDER=fake` simule l'extraction (interdit
+  en ligne).

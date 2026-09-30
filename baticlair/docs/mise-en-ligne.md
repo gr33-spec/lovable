@@ -45,9 +45,13 @@ Gardez-la de côté pour l'étape 1. Ne la communiquez à personne.
 ## Étape 1 — Le moteur (`baticlair-api`)
 
 1. Allez sur <https://vercel.com/new> (connecté avec GitHub).
-2. Choisissez le dépôt **lovable** → **Import**.
+2. **N'utilisez pas le bouton « Import » de la liste** : la branche par
+   défaut du dépôt n'est pas `main`. Collez plutôt
+   `https://github.com/gr33-spec/lovable/tree/main` dans le champ du haut
+   et validez. Vérifiez que la branche affichée est **main**.
 3. **Project Name** : `baticlair-api`.
 4. **Root Directory** → **Edit** → choisissez **baticlair** → **apps** → **api** → **Continue**.
+   **Application Preset** : **NestJS** (choisissez-le s'il affiche « Services »).
    Vercel reconnaît **NestJS**.
 5. **Environment Variables** — ajoutez :
    - `AUTH_SECRET` : le secret préparé plus haut ;
@@ -59,6 +63,9 @@ Gardez-la de côté pour l'étape 1. Ne la communiquez à personne.
    Postgres) → **Continue** → région **Frankfurt** (eu-central-1) →
    **Create** → **Connect** au projet. Vercel ajoute tout seul
    `DATABASE_URL` et `DATABASE_URL_UNPOOLED`.
+   Réglages de l'écran de connexion : **Auth** désactivé ; case
+   **Preview** cochée (une copie de base par essai) ; **Custom Prefix** =
+   `DATABASE` (le moteur attend `DATABASE_URL` et `DATABASE_URL_UNPOOLED`).
 8. Onglet **Deployments** → dernière ligne, menu **⋯** → **Redeploy**.
    Les tables sont créées automatiquement pendant ce déploiement.
 9. Vérification : ouvrez `https://baticlair-api.vercel.app/v1/health`.
@@ -66,9 +73,10 @@ Gardez-la de côté pour l'étape 1. Ne la communiquez à personne.
 
 ## Étape 2 — Les écrans (`baticlair`)
 
-1. De nouveau <https://vercel.com/new> → dépôt **lovable** → **Import**.
+1. De nouveau <https://vercel.com/new>, même méthode : l'adresse
+   `https://github.com/gr33-spec/lovable/tree/main` dans le champ du haut.
 2. **Project Name** : `baticlair`.
-3. **Root Directory** → **baticlair** → **apps** → **web** → **Continue**. Vercel reconnaît **Next.js**.
+3. **Root Directory** → **baticlair** → **apps** → **web** → **Continue**. **Application Preset** : **Next.js**.
 4. **Environment Variables** :
    - `API_URL` : `https://baticlair-api.vercel.app`.
 5. **Deploy**.
@@ -83,6 +91,18 @@ Si c'est l'adresse de l'API qui diffère : projet **baticlair** → corrigez
 `API_URL` → **Redeploy**.
 
 ---
+
+## Étape 4 — Brancher l'IA (lecture des devis)
+
+1. Créez une clé sur <https://console.anthropic.com> → **API Keys** →
+   **Create Key**. Fixez une limite de dépense mensuelle (Billing → Limits).
+2. Projet **baticlair-api** → **Settings** → **Environment Variables** :
+   `ANTHROPIC_API_KEY` = la clé.
+3. **Deployments** → **Redeploy**. Vérification : `/v1/health` affiche
+   `"ai":true`.
+
+Sans cette clé, l'application fonctionne et indique que la lecture par
+l'IA n'est pas activée.
 
 ## Facultatif — les e-mails (confirmation d'adresse, mot de passe oublié)
 
@@ -120,7 +140,7 @@ alors déconnectées.
 | Entreprise, chantiers (créer, chercher, modifier, marquer terminé) | **RÉEL** |
 | Bouton « + » : nouveau chantier | **RÉEL** |
 | Fiche chantier : déposer le devis client et les devis fournisseurs (PDF ≤ 4 Mo) | **RÉEL** : stockage, anti-doublon, lecture du texte page par page, estimation du coût IA |
-| Analyse des devis par l'IA (extraction des lignes) | **NON IMPLÉMENTÉ** : aucun appel IA payant pour l'instant |
+| Liste de matériaux préparée par l'IA depuis le devis client, corrigée et validée par l'artisan | **RÉEL** si `ANTHROPIC_API_KEY` est configurée (étape 4), sinon indiqué comme non activé |
 | Mon compte : consommation IA et analyses du mois (propriétaire, admin) | **RÉEL** (à zéro tant que l'IA n'est pas branchée) |
 | Bouton « + » : photo / fichier d'un devis | **NON IMPLÉMENTÉ** (affiché « Bientôt ») |
 | Fournisseurs, Factures | **NON IMPLÉMENTÉ** (écrans « Bientôt ici ») |

@@ -29,7 +29,7 @@ export function SessionGate({ children, requireCompany = true }: { children: Rea
   const router = useRouter();
   const pathname = usePathname();
   const [me, setMe] = useState<Me | null>(null);
-  const [features, setFeatures] = useState<Health["features"]>({ email: false });
+  const [features, setFeatures] = useState<Health["features"]>({ email: false, ai: false });
   const [failure, setFailure] = useState<ApiError | null>(null);
 
   const [attempt, setAttempt] = useState(0);

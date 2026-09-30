@@ -2,6 +2,7 @@
 
 import { FileText, FileUp, Loader2, Trash2 } from "lucide-react";
 import { useCallback, useId, useRef, useState } from "react";
+import { ProjectTakeoff } from "@/components/project-takeoff";
 import { Badge, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, getActiveCompanyId, MAX_DOCUMENT_BYTES, type DocumentPurpose, type ProjectDocument } from "@/lib/api";
 import { unreadableMessage } from "@/lib/fr";
@@ -83,6 +84,8 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
       {clientQuotes.length > 0 ? (
         <DocumentGroup title="Devis client" docs={clientQuotes} onRemoved={removed} />
       ) : null}
+
+      <ProjectTakeoff key={clientQuotes[0]?.id ?? "none"} projectId={projectId} clientQuote={clientQuotes[0] ?? null} archived={archived} />
 
       <section aria-labelledby="supplier-quotes" className="flex flex-col gap-3">
         <h2 id="supplier-quotes" className="text-xs font-extrabold tracking-[0.04em] text-muted">
@@ -177,10 +180,7 @@ function DocumentCard({ doc, onRemoved }: { doc: ProjectDocument; onRemoved: (id
       {failed ? (
         <p className="text-sm text-danger">{unreadableMessage(doc.reading?.errorCode)}</p>
       ) : (
-        <>
-          <p className="text-sm">{readingSummary(doc)}</p>
-          <p className="text-[13px] text-muted">Liste de matériaux : prochaine étape, pas encore disponible.</p>
-        </>
+        <p className="text-sm">{readingSummary(doc)}</p>
       )}
       {deleteError ? <ErrorNotice error={deleteError} /> : null}
       {confirming ? (
