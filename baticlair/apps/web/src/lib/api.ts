@@ -186,6 +186,10 @@ export interface TakeoffLine {
   sourcePages: number[];
   origin: "ai" | "manual";
   edited: boolean;
+  /** Doute exprimé par l'IA sur la ligne. */
+  aiDoubt: string | null;
+  /** L'artisan a vérifié la ligne et la garde telle quelle. */
+  confirmed: boolean;
   kind: "material" | "labor" | "unknown";
   family: string | null;
   status: "certain" | "probable" | "to_verify";

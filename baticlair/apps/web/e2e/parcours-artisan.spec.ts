@@ -19,6 +19,16 @@ async function signUp(page: Page) {
   return email;
 }
 
+/** Chaque ligne douteuse est regardée : « C'est bon » (l'artisan la garde telle quelle). */
+async function confirmDoubts(page: Page) {
+  const buttons = page.getByRole("button", { name: /^C'est bon/ });
+  while ((await buttons.count()) > 0) {
+    const before = await buttons.count();
+    await buttons.first().click();
+    await expect(buttons).toHaveCount(before - 1);
+  }
+}
+
 async function createProject(page: Page, name: string, client: string, address: string) {
   await page.goto("/chantiers/nouveau");
   await page.getByLabel("Nom du chantier").fill(name);
@@ -200,12 +210,18 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await expect(page.getByText(/^6 lignes · \d+ à vérifier/)).toBeVisible();
   await expect(page.getByText(/Devis : page 1, ligne \d+/).first()).toBeVisible();
 
+  // Le doute de l'IA est affiché directement sur la ligne.
+  const doubts = page.getByRole("list", { name: "Lignes à vérifier" });
+  await expect(doubts.getByText("L'IA hésite : Vendu en paquets, sans nombre de pièces par paquet.")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Encore \d+ lignes? à vérifier/ })).toBeDisabled();
+
   // Crochets en paquets sans contenu indiqué : l'artisan précise la quantité en pièces.
   await page.getByRole("button", { name: "Corriger Crochet inox ardoise 100 mm" }).click();
   await page.getByLabel("Quantité").fill("200");
   await page.getByLabel("Unité").fill("u");
   await page.getByRole("button", { name: "Enregistrer" }).click();
-  await expect(page.getByText("(corrigée par vous)")).toBeVisible();
+  await expect(doubts.getByText("Crochet inox ardoise 100 mm")).toHaveCount(0);
+  await expect(page.getByText("Vérifiée par vous").first()).toBeVisible();
 
   // Une ligne ajoutée à la main, puis retirée.
   await page.getByRole("button", { name: "Ajouter une ligne" }).click();
@@ -213,16 +229,24 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await page.getByLabel("Quantité").fill("12");
   await page.getByLabel("Unité").fill("ml");
   await page.getByRole("button", { name: "Ajouter", exact: true }).click();
-  await expect(page.getByText("Ajoutée par vous")).toBeVisible();
+  await expect(page.getByText("Closoir ventilé")).toBeVisible();
   await page.getByRole("button", { name: "Retirer Closoir ventilé" }).click();
   await page.getByRole("button", { name: "Oui, retirer" }).click();
   await expect(page.getByText("Closoir ventilé")).toHaveCount(0);
 
+  await confirmDoubts(page);
   await page.getByRole("button", { name: "Valider la liste" }).click();
   await expect(page.getByText(/^Liste validée le /)).toBeVisible();
 
   // La liste validée est conservée.
   await page.reload();
+  await expect(page.getByText(/^Liste validée le /)).toBeVisible();
+
+  // Une correction reste possible après validation : la liste est à valider à nouveau.
+  await page.getByRole("button", { name: "Corriger Tuile romane canal rouge 12,5 u/m²" }).click();
+  await page.getByLabel("Quantité").fill("1 300");
+  await page.getByRole("button", { name: "Enregistrer" }).click();
+  await page.getByRole("button", { name: "Valider la liste" }).click();
   await expect(page.getByText(/^Liste validée le /)).toBeVisible();
 
   // L'analyse est décomptée dans la consommation du mois.
@@ -260,6 +284,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await page.getByLabel("Quantité").fill("200");
   await page.getByLabel("Unité").fill("u");
   await page.getByRole("button", { name: "Enregistrer" }).click();
+  await confirmDoubts(page);
   await page.getByRole("button", { name: "Valider la liste" }).click();
 
   // Prochaine étape : choisir les fournisseurs, dont un créé sur place.

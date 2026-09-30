@@ -38,6 +38,8 @@ export class FakeTakeoffExtractor implements TakeoffExtractor {
         reference: found.index >= 2 ? cols[0]! : null,
         sourceRefs: [m[1]!],
         sourcePages: [],
+        // Règle simulée : un conditionnement sans contenu indiqué est un doute.
+        doubt: parseUnit(found.unit) === "PAQUET" ? "Vendu en paquets, sans nombre de pièces par paquet." : null,
       });
     }
     const notes = request.imagePages.length > 0 ? [`Pages ${request.imagePages.join(", ")} non lues (extraction simulée).`] : [];

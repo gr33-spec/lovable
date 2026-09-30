@@ -31,7 +31,7 @@ function mailtoHref(r: PriceRequestRecipient): string {
  * choisir les fournisseurs, envoyer l'e-mail préparé depuis sa messagerie,
  * puis déposer le devis PDF reçu de chacun.
  */
-export function ProjectPriceRequests({ projectId, archived }: { projectId: string; archived: boolean }) {
+export function ProjectPriceRequests({ projectId, archived, canCreate }: { projectId: string; archived: boolean; canCreate: boolean }) {
   const fetchRequests = useCallback(
     (signal: AbortSignal) => api<{ items: PriceRequest[] }>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests`, { signal }),
     [projectId],
@@ -45,7 +45,7 @@ export function ProjectPriceRequests({ projectId, archived }: { projectId: strin
   const replace = (r: PriceRequest) => setData({ items: [r, ...data.items.filter((x) => x.id !== r.id)] });
 
   if (!request) {
-    if (archived) return null;
+    if (archived || !canCreate) return null;
     return (
       <section
         aria-labelledby="price-request-title"

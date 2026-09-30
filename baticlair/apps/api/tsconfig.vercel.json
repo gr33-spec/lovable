@@ -1,0 +1,5 @@
+{
+  "//": "Reproduit la compilation de Vercel (mode non strict) : une erreur ici bloquerait la mise en ligne.",
+  "extends": "./tsconfig.build.json",
+  "compilerOptions": { "strict": false, "noEmit": true }
+}

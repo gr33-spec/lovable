@@ -13,6 +13,8 @@ export interface LineFields {
 export interface NewTakeoffLine extends LineFields {
   sourceRefs: string[];
   sourcePages: number[];
+  /** Doute exprimé par l'IA sur la ligne, montré tel quel à l'artisan. */
+  aiDoubt: string | null;
 }
 
 export interface TakeoffLineRecord extends NewTakeoffLine {
@@ -20,6 +22,8 @@ export interface TakeoffLineRecord extends NewTakeoffLine {
   position: number;
   origin: LineOrigin;
   edited: boolean;
+  /** L'artisan a vérifié la ligne et la garde telle quelle. */
+  confirmed: boolean;
 }
 
 export interface TakeoffRecord {
@@ -56,7 +60,9 @@ export interface TakeoffRepository {
   /** Quantitatif auquel appartient une ligne (dans l'entreprise active). */
   findByLine(tenant: TenantContext, lineId: string): Promise<TakeoffRecord | null>;
   create(tenant: TenantContext, data: NewTakeoff): Promise<TakeoffRecord>;
+  /** Corrige une ligne ; une confirmation précédente est retirée (la ligne corrigée est relue). */
   updateLine(tenant: TenantContext, lineId: string, fields: LineFields): Promise<void>;
+  confirmLine(tenant: TenantContext, lineId: string): Promise<void>;
   addLine(tenant: TenantContext, takeoffId: string, fields: LineFields): Promise<void>;
   deleteLine(tenant: TenantContext, lineId: string): Promise<void>;
   setStatus(tenant: TenantContext, id: string, status: TakeoffStatus): Promise<void>;

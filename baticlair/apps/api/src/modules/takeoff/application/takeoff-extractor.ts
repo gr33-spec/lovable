@@ -11,6 +11,8 @@ export const extractionOutputSchema = z.object({
       reference: z.string().nullable(),
       sourceRefs: z.array(z.string()),
       sourcePages: z.array(z.number().int()),
+      /** Doute sur cette ligne en une phrase courte, ou null si la ligne est claire. */
+      doubt: z.string().nullable(),
     }),
   ),
   notes: z.array(z.string()),
