@@ -47,6 +47,8 @@ function toDto({ takeoff, validation }: ReviewedTakeoff) {
         sourcePages: l.sourcePages,
         origin: l.origin,
         edited: l.edited,
+        aiDoubt: l.aiDoubt,
+        confirmed: l.confirmed,
         kind: v?.kind ?? "unknown",
         family: v?.familyLabel ?? null,
         status: v?.status ?? "to_verify",
@@ -84,6 +86,13 @@ export class TakeoffController {
   @Patch("takeoff-lines/:id")
   async updateLine(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(lineBody)) body: z.infer<typeof lineBody>) {
     return toDto(await this.takeoffs.updateLine(tenant, id, fields(body)));
+  }
+
+  /** « C'est bon » : ligne douteuse vérifiée par l'artisan, gardée telle quelle. */
+  @Post("takeoff-lines/:id/confirm")
+  @HttpCode(200)
+  async confirmLine(@Tenant() tenant: TenantContext, @Param("id") id: string) {
+    return toDto(await this.takeoffs.confirmLine(tenant, id));
   }
 
   @Delete("takeoff-lines/:id")

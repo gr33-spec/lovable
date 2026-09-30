@@ -451,6 +451,10 @@ model TakeoffLine {
   origin      String   @default("ai")
   /// Modifiée par l'artisan après la proposition de l'IA.
   edited      Boolean  @default(false)
+  /// Doute exprimé par l'IA sur cette ligne (montré tel quel à l'artisan).
+  aiDoubt     String?
+  /// L'artisan a vérifié la ligne et la garde telle quelle.
+  confirmedAt DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

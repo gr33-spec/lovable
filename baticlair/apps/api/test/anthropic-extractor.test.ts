@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { AnthropicTakeoffExtractor } from "../src/modules/takeoff/infrastructure/anthropic-takeoff-extractor.js";
 
 const output = {
-  lines: [{ designation: "Tuile romane", quantity: "1 250", unit: "u", reference: "TUI", sourceRefs: ["1:004"], sourcePages: [] }],
+  lines: [{ designation: "Tuile romane", quantity: "1 250", unit: "u", reference: "TUI", sourceRefs: ["1:004"], sourcePages: [], doubt: null }],
   notes: [],
 };
 

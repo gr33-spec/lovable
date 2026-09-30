@@ -33,6 +33,9 @@ async function projectWithValidatedList(agent: Agent) {
       contentType: "application/pdf",
     });
   const takeoff = (await agent.post(`/v1/documents/${doc.body.id}/takeoff`)).body;
+  for (const line of takeoff.lines.filter((l: { status: string }) => l.status === "to_verify")) {
+    await agent.post(`/v1/takeoff-lines/${line.id}/confirm`).expect(200);
+  }
   await agent.post(`/v1/takeoffs/${takeoff.id}/validate`).expect(200);
   return project.body.id as string;
 }

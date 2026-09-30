@@ -54,4 +54,26 @@ describe("relecture du quantitatif proposé par l'IA", () => {
     );
     expect(validation.lines[0]!.kind).toBe("labor");
   });
+
+  it("montre à l'artisan le doute exprimé par l'IA", () => {
+    const { validation } = reviewExtractedTakeoff([line({ aiDoubt: "contenu du paquet non indiqué" })], source, ROOFING_PROFILE);
+    expect(validation.lines[0]!.status).toBe("to_verify");
+    expect(validation.lines[0]!.issues.find((i) => i.code === "AI_DOUBT")?.message).toBe("L'IA hésite : contenu du paquet non indiqué");
+  });
+
+  it("une ligne confirmée par l'artisan devient sûre", () => {
+    const { validation } = reviewExtractedTakeoff(
+      [line({ quantity: "1 520", aiDoubt: "chiffre peu lisible", confirmedByArtisan: true })],
+      source,
+      ROOFING_PROFILE,
+    );
+    expect(validation.lines[0]!.status).toBe("certain");
+    expect(validation.lines[0]!.issues).toEqual([]);
+  });
+
+  it("une confirmation ne remplace pas une quantité absente", () => {
+    const { validation } = reviewExtractedTakeoff([line({ quantity: null, confirmedByArtisan: true })], source, ROOFING_PROFILE);
+    expect(validation.lines[0]!.status).toBe("to_verify");
+    expect(validation.counts.blocking).toBe(1);
+  });
 });

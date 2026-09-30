@@ -28,6 +28,10 @@ export interface ExtractedLine {
   sourcePages: number[];
   /** Ligne saisie ou corrigée par l'artisan : c'est lui la source, rien à retrouver dans le devis. */
   enteredByArtisan?: boolean;
+  /** Doute exprimé par l'IA sur cette ligne (phrase courte), ou null. */
+  aiDoubt?: string | null;
+  /** L'artisan a regardé la ligne et confirmé qu'elle est juste telle quelle. */
+  confirmedByArtisan?: boolean;
 }
 
 export interface ReviewedLine extends TakeoffLineInput {
@@ -42,6 +46,13 @@ function digits(value: string): string {
 
 function provenanceIssues(line: ExtractedLine, source: ReadonlyMap<string, string>): TakeoffIssue[] {
   if (line.enteredByArtisan) return [];
+  const doubt: TakeoffIssue[] = line.aiDoubt?.trim()
+    ? [{ code: "AI_DOUBT", severity: "to_verify", message: `L'IA hésite : ${line.aiDoubt.trim()}` }]
+    : [];
+  return [...doubt, ...sourceIssues(line, source)];
+}
+
+function sourceIssues(line: ExtractedLine, source: ReadonlyMap<string, string>): TakeoffIssue[] {
   const cited = line.sourceRefs.filter((ref) => source.has(ref));
   const issues: TakeoffIssue[] = [];
   if (cited.length === 0 && line.sourcePages.length === 0) {
@@ -75,8 +86,10 @@ function provenanceIssues(line: ExtractedLine, source: ReadonlyMap<string, strin
 }
 
 /**
- * Valide le quantitatif proposé : règles métier (famille, unité, oublis)
- * puis traçabilité de chaque ligne jusqu'au document.
+ * Valide le quantitatif proposé : règles métier (famille, unité, oublis),
+ * traçabilité de chaque ligne jusqu'au document et doutes de l'IA.
+ * Une ligne confirmée par l'artisan devient sûre ; seul un problème
+ * bloquant (quantité illisible) reste, car on ne commande pas sans quantité.
  */
 export function reviewExtractedTakeoff(
   lines: readonly (ExtractedLine & { id: string })[],
@@ -96,9 +109,15 @@ export function reviewExtractedTakeoff(
   const validation = validateTakeoff(inputs, profile);
   const merged: LineValidation[] = validation.lines.map((v, i) => {
     if (v.kind === "labor") return v;
-    const extra = provenanceIssues(lines[i]!, source);
+    const line = lines[i]!;
+    const extra = provenanceIssues(line, source);
+    const all = [...v.issues, ...extra];
+    if (line.confirmedByArtisan) {
+      const kept = all.filter((x) => x.severity !== "to_verify");
+      return { ...v, issues: kept, status: kept.some((x) => x.severity === "blocking") ? "to_verify" : "certain" };
+    }
     if (extra.length === 0) return v;
-    return { ...v, issues: [...v.issues, ...extra], status: "to_verify" };
+    return { ...v, issues: all, status: "to_verify" };
   });
   const counts = {
     ...validation.counts,

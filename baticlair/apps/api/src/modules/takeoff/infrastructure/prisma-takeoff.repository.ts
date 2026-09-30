@@ -42,6 +42,8 @@ function toRecord(row: Row): TakeoffRecord {
       sourcePages: numbers(l.sourcePages),
       origin: l.origin === "manual" ? "manual" : "ai",
       edited: l.edited,
+      aiDoubt: l.aiDoubt,
+      confirmed: l.confirmedAt !== null,
     })),
   };
 }
@@ -102,6 +104,7 @@ export class PrismaTakeoffRepository implements TakeoffRepository {
             reference: l.reference,
             sourceRefs: l.sourceRefs,
             sourcePages: l.sourcePages,
+            aiDoubt: l.aiDoubt,
           })),
         },
       },
@@ -113,7 +116,14 @@ export class PrismaTakeoffRepository implements TakeoffRepository {
   async updateLine(tenant: TenantContext, lineId: string, fields: LineFields): Promise<void> {
     await this.prisma.takeoffLine.updateMany({
       where: { id: lineId, takeoff: { companyId: tenant.companyId } },
-      data: { ...fields, edited: true },
+      data: { ...fields, edited: true, confirmedAt: null },
+    });
+  }
+
+  async confirmLine(tenant: TenantContext, lineId: string): Promise<void> {
+    await this.prisma.takeoffLine.updateMany({
+      where: { id: lineId, takeoff: { companyId: tenant.companyId } },
+      data: { confirmedAt: new Date() },
     });
   }
 

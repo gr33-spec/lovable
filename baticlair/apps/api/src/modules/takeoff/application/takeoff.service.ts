@@ -107,6 +107,7 @@ export class TakeoffService {
         reference: l.reference?.trim() || null,
         sourceRefs: l.sourceRefs,
         sourcePages: l.sourcePages,
+        aiDoubt: l.doubt?.trim() || null,
       })),
     });
     await this.meter.complete(analysisId);
@@ -124,6 +125,13 @@ export class TakeoffService {
     return this.reload(tenant, takeoff.id);
   }
 
+  /** « C'est bon » : l'artisan a regardé la ligne douteuse et la garde telle quelle. */
+  async confirmLine(tenant: TenantContext, lineId: string): Promise<ReviewedTakeoff> {
+    const takeoff = await this.editable(tenant, await this.takeoffs.findByLine(tenant, lineId));
+    await this.takeoffs.confirmLine(tenant, lineId);
+    return this.reload(tenant, takeoff.id);
+  }
+
   async deleteLine(tenant: TenantContext, lineId: string): Promise<ReviewedTakeoff> {
     const takeoff = await this.editable(tenant, await this.takeoffs.findByLine(tenant, lineId));
     await this.takeoffs.deleteLine(tenant, lineId);
@@ -136,12 +144,19 @@ export class TakeoffService {
     return this.reload(tenant, takeoff.id);
   }
 
-  /** L'artisan valide : seulement si aucune ligne n'est bloquante (quantité absente ou illisible). */
+  /**
+   * L'artisan valide : seulement quand aucune ligne n'est bloquante (quantité
+   * absente ou illisible) et que chaque doute a été vu (corrigé ou confirmé).
+   * Rien ne part chez un fournisseur avec un doute non levé.
+   */
   async validate(tenant: TenantContext, takeoffId: string): Promise<ReviewedTakeoff> {
     const takeoff = await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
     const { validation } = await this.review(tenant, takeoff);
     if (validation.counts.blocking > 0) {
       throw validationFailed("Blocking issues remain", { reason: "blocking_issues", count: validation.counts.blocking });
+    }
+    if (validation.counts.toVerify > 0) {
+      throw validationFailed("Lines to check remain", { reason: "lines_to_check", count: validation.counts.toVerify });
     }
     await this.takeoffs.setStatus(tenant, takeoff.id, "validated");
     return this.reload(tenant, takeoff.id);
@@ -155,10 +170,14 @@ export class TakeoffService {
     return this.reload(tenant, takeoff.id);
   }
 
+  /**
+   * Toute modification d'une liste validée la rouvre : l'artisan la valide à
+   * nouveau. Les demandes de prix déjà préparées gardent leur copie figée.
+   */
   private async editable(tenant: TenantContext, takeoff: TakeoffRecord | null): Promise<TakeoffRecord> {
     assertCanWrite(tenant);
     if (!takeoff) throw notFound("Takeoff");
-    if (takeoff.status !== "draft") throw new DomainError("conflict", "Takeoff already validated");
+    if (takeoff.status !== "draft") await this.takeoffs.setStatus(tenant, takeoff.id, "draft");
     return takeoff;
   }
 
@@ -183,6 +202,8 @@ export class TakeoffService {
         sourceRefs: l.sourceRefs,
         sourcePages: l.sourcePages,
         enteredByArtisan: l.origin === "manual" || l.edited,
+        aiDoubt: l.aiDoubt,
+        confirmedByArtisan: l.confirmed,
       })),
       source,
       profile,

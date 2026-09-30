@@ -313,3 +313,17 @@ fictives uniquement.
   PDF ne peut pas être rangé chez deux fournisseurs.
 - **Ensuite** : lecture des devis reçus par l'IA et comparaison ligne à
   ligne (lot 3-4), bouton « Classé » avec le ou les fournisseurs retenus.
+
+### PD-031 — Liste de matériaux : chaque doute est vu avant l'envoi
+- **Date** : 2026-09-30 · **Statut** : Décidé (retour du fondateur : « si
+  l'IA a un doute, l'artisan doit le voir direct »)
+- **Décision** : l'IA note son doute sur chaque ligne en une phrase (prompt
+  v2), affiché tel quel. Les lignes douteuses passent en tête, avec la
+  raison en clair et deux gestes : « C'est bon » (gardée telle quelle) ou
+  « Corriger ». La liste ne se valide qu'une fois chaque doute levé.
+- **Fiabilité** : trois niveaux en mots, jamais un faux pourcentage :
+  Fiable (justifiée par le devis), Doute (IA ou contrôle du code),
+  Incomplète (quantité absente). « Vérifiée par vous » après un geste de
+  l'artisan.
+- **Modifier après validation** : toujours possible ; la liste repasse « à
+  valider ». Les demandes de prix déjà préparées gardent leur copie.

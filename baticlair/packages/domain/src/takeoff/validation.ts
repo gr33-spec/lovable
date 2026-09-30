@@ -43,6 +43,7 @@ export type TakeoffIssueCode =
   | "SOURCE_NOT_FOUND"
   | "QUANTITY_NOT_IN_SOURCE"
   | "READ_FROM_IMAGE"
+  | "AI_DOUBT"
   | "DUPLICATE_LINE"
   | "POSSIBLE_OMISSION"
   | "NO_MATERIAL";

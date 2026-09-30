@@ -60,6 +60,8 @@ const unreadableReasons: Record<string, string> = {
 const reasonMessages: Record<string, string> = {
   email_taken: "Ce fournisseur est déjà dans votre carnet (même adresse e-mail).",
   takeoff_not_validated: "Validez d'abord la liste de matériaux.",
+  lines_to_check: "Des lignes sont encore à vérifier : pour chacune, « C'est bon » ou « Corriger ».",
+  blocking_issues: "Des lignes n'ont pas de quantité : indiquez-la ou retirez la ligne.",
   no_material: "La liste ne contient aucun matériau à demander.",
   no_supplier: "Choisissez au moins un fournisseur.",
   supplier_archived: "Un des fournisseurs choisis est archivé.",
