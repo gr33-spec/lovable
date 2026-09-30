@@ -18,6 +18,7 @@ interface Row {
   price_cents: number;
   stock: number;
   reserved: number;
+  booked: number;
   category_name: string;
   image: ImageRef | null;
 }
@@ -215,7 +216,13 @@ export function ProductList({
                   <p className="truncate font-medium">{r.name}</p>
                   <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text-2">
                     {formatPrice(r.price_cents)} · {r.category_name}
-                    <ProductStatusBadge status={r.status} stock={r.stock} />
+                    {r.booked > 0 && r.stock === 0 ? (
+                      <Link href="/admin/reservations" className="badge bg-primary-soft text-primary no-underline">
+                        Réservé
+                      </Link>
+                    ) : (
+                      <ProductStatusBadge status={r.status} stock={r.stock} />
+                    )}
                     {r.reserved > 0 && <span className="badge bg-info-bg text-info">{r.reserved} en cours de paiement</span>}
                   </p>
                 </div>

@@ -3,12 +3,16 @@ import { AdminProviders } from "@/components/admin/ui";
 import { requireAdminPage } from "@/lib/server/auth";
 import { getSettings } from "@/lib/server/cached";
 import { queryOne } from "@/lib/server/db";
+import { RESERVATION_MODE } from "@/lib/sales-mode";
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   const admin = await requireAdminPage();
   const [settings, pending] = await Promise.all([
     getSettings(),
-    queryOne<{ n: string }>("SELECT count(*) AS n FROM customer_order WHERE status IN ('paid', 'preparing')"),
+    // Pastille du menu : réservations en attente (mode réservation) ou commandes à préparer.
+    queryOne<{ n: string }>(
+      RESERVATION_MODE ? "SELECT count(*) AS n FROM reservation WHERE status = 'pending'" : "SELECT count(*) AS n FROM customer_order WHERE status IN ('paid', 'preparing')",
+    ),
   ]);
   return (
     <AdminProviders>

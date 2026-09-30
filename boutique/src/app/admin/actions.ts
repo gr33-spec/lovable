@@ -24,6 +24,7 @@ import { processOutbox } from "@/lib/server/email/outbox";
 import { paymentConfig, siteUrl } from "@/lib/server/env";
 import { audit, errorMessage } from "@/lib/server/monitoring";
 import { payments } from "@/lib/server/payments";
+import { updateReservation } from "@/lib/server/reservations";
 import { ORDER_STATUSES, type OrderStatus } from "@/lib/order-status";
 import { CUSTOM_THEME_ID, THEMES } from "@/lib/themes";
 import { cleanText, emailSchema, passwordSchema, socialLinkSchema, whatsappUrl } from "@/lib/validation";
@@ -244,6 +245,17 @@ export async function saveBrandAction(input: unknown) {
   });
 }
 
+// ───────────── Réservations ─────────────
+
+/** Confirmer une réservation, ou l'annuler (le bijou redevient disponible). */
+export async function reservationAction(id: string, action: "confirm" | "cancel") {
+  return guarded(async (admin) => {
+    const res = await updateReservation(uuid.parse(id), z.enum(["confirm", "cancel"]).parse(action), admin.id);
+    if (res.ok) invalidateCatalog();
+    return res;
+  });
+}
+
 // ───────────── Paramètres ─────────────
 
 const optionalEmail = z.union([z.literal(""), emailSchema]);
@@ -255,6 +267,7 @@ const settingsSchema = z
     ordersOpen: z.boolean(),
     closedMessage: z.string().trim().max(300),
     allowPromotionCodes: z.boolean(),
+    reservationAutoExpire: z.boolean(),
     vatRegime: z.enum(["franchise", "assujetti"]).nullable(),
     vatRateBp: z.number().int().min(0).max(10000),
     addressRetentionMonths: z.number().int().min(1).max(240).nullable(),
@@ -287,7 +300,7 @@ export async function saveSettingsAction(input: unknown) {
       `UPDATE shop_settings SET contact_email=$1, notification_email=$2, low_stock_threshold=$3, orders_open=$4, closed_message=$5,
          allow_promotion_codes=$6, vat_regime=$7, vat_rate_bp=$8, address_retention_months=$9,
          legal_name=$10, legal_status=$11, legal_siret=$12, legal_registration=$13, legal_vat_number=$14, legal_address=$15,
-         legal_publisher=$16, legal_host=$17, legal_mediator=$18, version = version + 1, updated_at = now() WHERE id = 1`,
+         legal_publisher=$16, legal_host=$17, legal_mediator=$18, reservation_auto_expire=$19, version = version + 1, updated_at = now() WHERE id = 1`,
       [
         s.contactEmail,
         s.notificationEmail,
@@ -307,6 +320,7 @@ export async function saveSettingsAction(input: unknown) {
         s.legal.publisher,
         s.legal.host,
         s.legal.mediator,
+        s.reservationAutoExpire,
       ],
     );
     await audit(admin.id, "settings_updated", "settings", "general", {

@@ -21,6 +21,7 @@ export const BACKUP_TABLES = [
   "legal_page",
   "customer_order",
   "order_item",
+  "reservation",
   "stock_movement",
   "payment_event",
   "email_outbox",

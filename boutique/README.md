@@ -33,6 +33,13 @@ de test Stripe (§ 3.3, étapes 1 et 3 : `STRIPE_SECRET_KEY` = `sk_test_…`, pu
 
 ## 1. Ce qui est construit
 
+> **Mode actuel : réservation, sans paiement en ligne.** Sur chaque bijou, « Je réserve ce bijou »
+> (prénom, téléphone, e-mail facultatif, main propre ou envoi). La pièce est bloquée aussitôt, la
+> créatrice reçoit un e-mail et gère tout dans **Administration → Réservations** (appel, WhatsApp,
+> confirmer, annuler / remettre disponible ; libération automatique après 24 h, désactivable dans
+> Paramètres). Le panier et Stripe restent dans le code, désactivés : `RESERVATION_MODE` dans
+> `src/lib/sales-mode.ts` les réactive.
+
 **Boutique** — accueil, catalogue (catégories, filtres utiles seulement, tri, recherche tolérante aux accents),
 fiche produit (photos au doigt, zoom, barre « Ajouter au panier » fixe sur mobile), panier conservé,
 commande invitée (autocomplétion des adresses), paiement Stripe (carte, Apple Pay, Google Pay),
@@ -47,7 +54,7 @@ remboursement Stripe, effacement RGPD), catégories et collections, apparence (1
 réseaux), livraison (modes, prix, gratuité, pays, retrait en main propre), paramètres (légal, TVA,
 Stripe, sécurité du compte et double authentification, sauvegardes, exports, journal).
 
-**Vérifié automatiquement** — 56 tests serveur sur une vraie base PostgreSQL et 26 parcours dans un
+**Vérifié automatiquement** — 82 tests serveur sur une vraie base PostgreSQL et 24 parcours dans un
 vrai navigateur (voir § 7).
 
 ## 2. Décisions importantes (et pourquoi)

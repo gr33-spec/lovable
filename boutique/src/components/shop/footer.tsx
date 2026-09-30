@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ShopSettings } from "@/lib/server/settings";
 import { imageSrc } from "@/lib/image-ref";
 import { SOCIAL_LABELS } from "@/lib/validation";
+import { RESERVATION_MODE } from "@/lib/sales-mode";
 import { plainText } from "../ui/sparkle";
 import { SocialIcon } from "../ui/social-icon";
 
@@ -132,7 +133,7 @@ export function Footer({ settings, categories }: { settings: ShopSettings; categ
             © {year} {settings.shopName} — bijoux faits main
           </p>
           <p>
-            Paiement sécurisé par Stripe · Aucun cookie publicitaire ·{" "}
+            {RESERVATION_MODE ? "Réservation sans paiement en ligne" : "Paiement sécurisé par Stripe"} · Aucun cookie publicitaire ·{" "}
             <Link href="/admin/connexion" rel="nofollow" prefetch={false} className="text-text-2 no-underline hover:text-primary hover:underline">
               Espace créatrice
             </Link>

@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardList, PackageX, Plus, Printer, TrendingDown } from "lucide-react";
+import { AlertTriangle, ArrowRight, CalendarHeart, CheckCircle2, ClipboardList, PackageX, Plus, Printer, TrendingDown } from "lucide-react";
 import Link from "next/link";
 import { after } from "next/server";
 import { DemoCard } from "@/components/admin/demo-card";
@@ -13,6 +13,7 @@ import { runQuickMaintenance } from "@/lib/server/maintenance";
 import { missingLegalInfo } from "@/lib/server/settings";
 import { query } from "@/lib/server/db";
 import { hasPlaceholders } from "@/lib/rich-text";
+import { RESERVATION_MODE } from "@/lib/sales-mode";
 
 export const metadata = { title: "Tableau de bord" };
 
@@ -30,15 +31,18 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const pagesToComplete = legalPages.filter((p) => hasPlaceholders(p.body)).length;
   const products = await query<{ n: string }>("SELECT count(*) AS n FROM product WHERE status = 'published'");
   const catalog = await query<{ total: string; demo: string }>("SELECT count(*) AS total, count(*) FILTER (WHERE is_demo) AS demo FROM product");
+  const reservations = await query<{ pending: string; today: string }>(
+    "SELECT count(*) FILTER (WHERE status = 'pending') AS pending, count(*) FILTER (WHERE status = 'pending' AND created_at > now() - interval '24 hours') AS today FROM reservation",
+  );
   const setup = [
     { done: Number(products[0].n) - Number(catalog[0].demo) > 0, label: "Publier une première création", href: "/admin/produits/nouveau" },
     { done: Number(catalog[0].demo) === 0, label: "Retirer les créations d'exemple", href: "/admin" },
-    { done: Number(shipping[0].n) > 0, label: "Activer au moins un mode de livraison", href: "/admin/livraison" },
+    ...(RESERVATION_MODE ? [] : [{ done: Number(shipping[0].n) > 0, label: "Activer au moins un mode de livraison", href: "/admin/livraison" }]),
     { done: missing.length === 0, label: `Compléter les informations légales${missing.length ? ` (${missing.length} manquantes)` : ""}`, href: "/admin/parametres" },
     { done: pagesToComplete === 0, label: `Compléter les pages légales (CGV, confidentialité…)${pagesToComplete ? ` — ${pagesToComplete} à finir` : ""}`, href: "/admin/parametres#pages" },
     { done: Boolean(settings.logo), label: "Ajouter votre logo", href: "/admin/apparence#identite" },
     { done: !hasPlaceholders(settings.aboutText), label: "Écrire votre présentation (page « L'atelier »)", href: "/admin/apparence#identite" },
-    { done: payment.ok && payment.provider === "stripe", label: "Connecter le compte Stripe", href: "/admin/parametres#paiement" },
+    ...(RESERVATION_MODE ? [] : [{ done: payment.ok && payment.provider === "stripe", label: "Connecter le compte Stripe", href: "/admin/parametres#paiement" }]),
   ];
   const setupLeft = setup.filter((s) => !s.done);
 
@@ -75,16 +79,26 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         </section>
       )}
 
-      <IncidentsCard incidents={d.incidents.map((i) => ({ ...i, created_at: new Date(i.created_at).toISOString() }))} emailsFailed={d.emailsFailed} paymentProblem={payment.ok ? null : payment.reason} />
+      <IncidentsCard incidents={d.incidents.map((i) => ({ ...i, created_at: new Date(i.created_at).toISOString() }))} emailsFailed={d.emailsFailed} paymentProblem={payment.ok || RESERVATION_MODE ? null : payment.reason} />
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <Link href="/admin/commandes?statut=a-preparer" className="card p-5 no-underline transition hover:border-primary">
-          <p className="flex items-center gap-2 text-sm text-text-2">
-            <ClipboardList size={17} aria-hidden="true" /> À préparer
-          </p>
-          <p className="mt-1 text-4xl font-semibold tabular-nums">{d.toPrepareCount}</p>
-          <p className="text-sm text-text-2">{d.newCount ? `dont ${d.newCount} nouvelle${d.newCount > 1 ? "s" : ""}` : "commande(s)"}</p>
-        </Link>
+        {RESERVATION_MODE ? (
+          <Link href="/admin/reservations" className="card p-5 no-underline transition hover:border-primary">
+            <p className="flex items-center gap-2 text-sm text-text-2">
+              <CalendarHeart size={17} aria-hidden="true" /> Réservations en attente
+            </p>
+            <p className="mt-1 text-4xl font-semibold tabular-nums">{Number(reservations[0].pending)}</p>
+            <p className="text-sm text-text-2">{Number(reservations[0].today) ? `dont ${reservations[0].today} depuis hier` : "à confirmer ou annuler"}</p>
+          </Link>
+        ) : (
+          <Link href="/admin/commandes?statut=a-preparer" className="card p-5 no-underline transition hover:border-primary">
+            <p className="flex items-center gap-2 text-sm text-text-2">
+              <ClipboardList size={17} aria-hidden="true" /> À préparer
+            </p>
+            <p className="mt-1 text-4xl font-semibold tabular-nums">{d.toPrepareCount}</p>
+            <p className="text-sm text-text-2">{d.newCount ? `dont ${d.newCount} nouvelle${d.newCount > 1 ? "s" : ""}` : "commande(s)"}</p>
+          </Link>
+        )}
         <Link href="/admin/produits?stock=epuise" className="card p-5 no-underline transition hover:border-primary">
           <p className="flex items-center gap-2 text-sm text-text-2">
             <PackageX size={17} aria-hidden="true" /> Épuisés
@@ -101,56 +115,58 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         </Link>
       </div>
 
-      <section className="mt-8" aria-labelledby="titre-preparer">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 id="titre-preparer" className="font-serif text-2xl">
-            Commandes à préparer
-          </h2>
-          <span className="flex flex-wrap items-center gap-4">
-            {d.toPrepareCount > 0 && (
-              <Link href="/admin/bons?commande=a-preparer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-                <Printer size={15} aria-hidden="true" /> Imprimer les bons
-              </Link>
-            )}
-            <Link href="/admin/commandes" className="text-sm font-semibold text-primary">
-              Toutes les commandes
-            </Link>
-          </span>
-        </div>
-        {d.toPrepare.length === 0 ? (
-          <div className="card flex items-center gap-3 p-5 text-text-2">
-            <CheckCircle2 className="text-success" aria-hidden="true" /> Tout est expédié. Rien à préparer pour le moment.
-          </div>
-        ) : (
-          <ul className="card divide-y divide-border">
-            {d.toPrepare.slice(0, 5).map((o) => (
-              <li key={o.id}>
-                <Link href={`/admin/commandes/${o.id}`} className="flex items-center gap-3 p-4 no-underline hover:bg-surface-2/50">
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold">
-                      {o.first_name} {o.last_name}
-                      {o.needs_attention && <AlertTriangle size={16} className="ml-2 inline text-warning" aria-label="À vérifier" />}
-                    </p>
-                    <p className="text-sm text-text-2">
-                      {o.number} · {o.item_count} article{Number(o.item_count) > 1 ? "s" : ""} · {formatRelative(o.paid_at)}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold">{formatPrice(o.total_cents)}</p>
-                    <StatusBadge status={o.status} />
-                  </div>
-                  <ArrowRight size={18} className="text-text-2" aria-hidden="true" />
+      {!RESERVATION_MODE && (
+        <section className="mt-8" aria-labelledby="titre-preparer">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 id="titre-preparer" className="font-serif text-2xl">
+              Commandes à préparer
+            </h2>
+            <span className="flex flex-wrap items-center gap-4">
+              {d.toPrepareCount > 0 && (
+                <Link href="/admin/bons?commande=a-preparer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+                  <Printer size={15} aria-hidden="true" /> Imprimer les bons
                 </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-        {d.toPrepareCount > 5 && (
-          <Link href="/admin/commandes?statut=a-preparer" className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary">
-            Voir les {d.toPrepareCount} commandes à préparer <ArrowRight size={15} aria-hidden="true" />
-          </Link>
-        )}
-      </section>
+              )}
+              <Link href="/admin/commandes" className="text-sm font-semibold text-primary">
+                Toutes les commandes
+              </Link>
+            </span>
+          </div>
+          {d.toPrepare.length === 0 ? (
+            <div className="card flex items-center gap-3 p-5 text-text-2">
+              <CheckCircle2 className="text-success" aria-hidden="true" /> Tout est expédié. Rien à préparer pour le moment.
+            </div>
+          ) : (
+            <ul className="card divide-y divide-border">
+              {d.toPrepare.slice(0, 5).map((o) => (
+                <li key={o.id}>
+                  <Link href={`/admin/commandes/${o.id}`} className="flex items-center gap-3 p-4 no-underline hover:bg-surface-2/50">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold">
+                        {o.first_name} {o.last_name}
+                        {o.needs_attention && <AlertTriangle size={16} className="ml-2 inline text-warning" aria-label="À vérifier" />}
+                      </p>
+                      <p className="text-sm text-text-2">
+                        {o.number} · {o.item_count} article{Number(o.item_count) > 1 ? "s" : ""} · {formatRelative(o.paid_at)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold">{formatPrice(o.total_cents)}</p>
+                      <StatusBadge status={o.status} />
+                    </div>
+                    <ArrowRight size={18} className="text-text-2" aria-hidden="true" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+          {d.toPrepareCount > 5 && (
+            <Link href="/admin/commandes?statut=a-preparer" className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary">
+              Voir les {d.toPrepareCount} commandes à préparer <ArrowRight size={15} aria-hidden="true" />
+            </Link>
+          )}
+        </section>
+      )}
 
       <SalesOverview stats={stats} />
 

@@ -20,6 +20,7 @@ export function Price({ cents, compareAt, size = "md" }: { cents: number; compar
 
 export function AvailabilityBadge({ availability, stock }: { availability: Availability; stock: number }) {
   if (availability === "sold_out") return <span className="badge bg-soldout-bg text-soldout">Épuisé</span>;
+  if (availability === "reserved") return <span className="badge bg-primary-soft text-primary">Réservé</span>;
   if (availability === "low_stock") {
     return <span className="badge bg-warning-bg text-warning">{stock === 1 ? "Pièce unique restante" : `Plus que ${stock}`}</span>;
   }
@@ -27,10 +28,10 @@ export function AvailabilityBadge({ availability, stock }: { availability: Avail
 }
 
 export function ProductCard({ product, priority = false }: { product: Card; priority?: boolean }) {
-  const soldOut = product.availability === "sold_out";
+  const soldOut = product.availability === "sold_out" || product.availability === "reserved";
   return (
     <article className="group relative">
-      <Link href={`/produit/${product.slug}`} className="block no-underline" aria-label={`${product.name}, ${formatPrice(product.priceCents)}${soldOut ? ", épuisé" : ""}`}>
+      <Link href={`/produit/${product.slug}`} className="block no-underline" aria-label={`${product.name}, ${formatPrice(product.priceCents)}${product.availability === "reserved" ? ", réservé" : soldOut ? ", épuisé" : ""}`}>
         <div className="holo-shine lift relative aspect-[4/5] overflow-hidden rounded-[20px] bg-surface-2">
           <Img
             image={product.image}

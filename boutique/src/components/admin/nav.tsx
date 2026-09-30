@@ -1,20 +1,28 @@
 "use client";
 
-import { ExternalLink, Home, LayoutGrid, LogOut, MoreHorizontal, Package, Palette, Settings, ShoppingBag, Tags, Truck, X } from "lucide-react";
+import { CalendarHeart, ExternalLink, Home, LayoutGrid, LogOut, MoreHorizontal, Package, Palette, Settings, ShoppingBag, Tags, Truck, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { logoutAction } from "@/app/admin/auth-actions";
+import { RESERVATION_MODE } from "@/lib/sales-mode";
 
+const ORDERS = { href: "/admin/commandes", label: "Commandes", short: "Commandes", icon: ShoppingBag };
+const RESERVATIONS = { href: "/admin/reservations", label: "Réservations", short: "Réservations", icon: CalendarHeart };
+
+// En mode réservation, « Réservations » prend la place de « Commandes » (qui reste dans « Plus » pour l'historique).
 const ITEMS = [
   { href: "/admin", label: "Tableau de bord", short: "Accueil", icon: Home },
   { href: "/admin/produits", label: "Produits", short: "Produits", icon: Package },
-  { href: "/admin/commandes", label: "Commandes", short: "Commandes", icon: ShoppingBag },
+  RESERVATION_MODE ? RESERVATIONS : ORDERS,
   { href: "/admin/categories", label: "Catégories", short: "Catégories", icon: Tags },
   { href: "/admin/apparence", label: "Apparence", short: "Apparence", icon: Palette },
   { href: "/admin/livraison", label: "Livraison", short: "Livraison", icon: Truck },
   { href: "/admin/parametres", label: "Paramètres", short: "Paramètres", icon: Settings },
+  ...(RESERVATION_MODE ? [ORDERS] : []),
 ];
+
+const BADGE_HREF = RESERVATION_MODE ? RESERVATIONS.href : ORDERS.href;
 
 export function AdminNav({ shopName, toPrepare, adminName }: { shopName: string; toPrepare: number; adminName: string }) {
   const pathname = usePathname();
@@ -22,8 +30,8 @@ export function AdminNav({ shopName, toPrepare, adminName }: { shopName: string;
   const active = (href: string) => (href === "/admin" ? pathname === "/admin" : pathname.startsWith(href));
   useEffect(() => more.current?.close(), [pathname]);
   const badge = (href: string) =>
-    href === "/admin/commandes" && toPrepare > 0 ? (
-      <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-on-primary" aria-label={`${toPrepare} à préparer`}>
+    href === BADGE_HREF && toPrepare > 0 ? (
+      <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-on-primary" aria-label={`${toPrepare} ${RESERVATION_MODE ? "en attente" : "à préparer"}`}>
         {toPrepare}
       </span>
     ) : null;
@@ -72,7 +80,7 @@ export function AdminNav({ shopName, toPrepare, adminName }: { shopName: string;
               <Link href={href} aria-current={active(href) ? "page" : undefined} className="relative flex min-h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium text-text-2 no-underline aria-[current=page]:text-primary">
                 <Icon size={22} aria-hidden="true" />
                 {short}
-                {href === "/admin/commandes" && toPrepare > 0 && (
+                {href === BADGE_HREF && toPrepare > 0 && (
                   <span className="absolute top-2 left-1/2 ml-2 rounded-full bg-primary px-1.5 text-[10px] font-bold text-on-primary">{toPrepare}</span>
                 )}
               </Link>

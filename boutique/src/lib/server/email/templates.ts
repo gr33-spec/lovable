@@ -1,5 +1,5 @@
 import "server-only";
-import { countryName, formatDate, formatMoney } from "../../format";
+import { countryName, formatDate, formatDateTime, formatMoney } from "../../format";
 import { getTheme, type CustomPalette } from "../../themes";
 import type { EmailMessage } from "./provider";
 
@@ -229,5 +229,60 @@ ${button(brand, adminUrl, "Ouvrir le tableau de bord")}`;
     subject: `Votre semaine — ${formatMoney(r.revenueCents)}, ${r.orders} commande${r.orders > 1 ? "s" : ""}${r.toPrepare ? `, ${r.toPrepare} à préparer` : ""}`,
     html: layout(brand, `Récapitulatif ${period}`, body),
     text: `Votre semaine (${period})\nChiffre d'affaires : ${formatMoney(r.revenueCents)}\nCommandes : ${r.orders}\nÀ préparer : ${r.toPrepare}\n\n${adminUrl}`,
+  };
+}
+
+// ───────────── Réservations (sans paiement en ligne) ─────────────
+
+export interface EmailReservation {
+  number: string;
+  productName: string;
+  productSku: string | null;
+  priceCents: number;
+  firstName: string;
+  phone: string;
+  email: string | null;
+  deliveryLabel: string;
+  createdAt: string;
+  telUrl: string;
+  whatsappUrl: string | null;
+}
+
+export function adminNewReservationEmail(brand: EmailBrand, r: EmailReservation, adminUrl: string): Omit<EmailMessage, "to"> {
+  const t = getTheme(brand.themeId, brand.themeCustom).tokens;
+  const row = (label: string, value: string) =>
+    `<tr><td style="padding:6px 0;color:${t.textMuted};width:40%">${esc(label)}</td><td style="padding:6px 0">${value}</td></tr>`;
+  const body = `<h1 style="font-family:Georgia,serif;font-weight:normal;font-size:24px;margin:0 0 8px">Nouvelle réservation ✨</h1>
+<p style="margin:0 0 12px"><strong>${esc(r.firstName)}</strong> souhaite réserver <strong>${esc(r.productName)}</strong> (${esc(formatMoney(r.priceCents))}).</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;margin:8px 0 4px">
+${row("Bijou", `${esc(r.productName)}${r.productSku ? ` · réf. ${esc(r.productSku)}` : ""}`)}
+${row("Prénom", esc(r.firstName))}
+${row("Téléphone", `<a href="${esc(r.telUrl)}" style="color:${t.primary}">${esc(r.phone)}</a>`)}
+${r.email ? row("E-mail", `<a href="mailto:${esc(r.email)}" style="color:${t.primary}">${esc(r.email)}</a>`) : ""}
+${row("Remise", esc(r.deliveryLabel))}
+${row("Demande faite le", esc(formatDateTime(r.createdAt)))}
+${row("N° de réservation", esc(r.number))}
+</table>
+${r.whatsappUrl ? button(brand, r.whatsappUrl, "Contacter sur WhatsApp") : ""}
+<p style="margin:0">Le bijou est bloqué en attendant votre confirmation. Confirmez ou annulez depuis l'administration :</p>
+${button(brand, adminUrl, "Ouvrir les réservations")}`;
+  return {
+    subject: `Nouvelle réservation — ${r.productName} (${r.firstName})`,
+    html: layout(brand, `${r.firstName} réserve ${r.productName}`, body),
+    text: `Nouvelle réservation ${r.number}\n\nBijou : ${r.productName}${r.productSku ? ` (réf. ${r.productSku})` : ""} — ${formatMoney(r.priceCents)}\nPrénom : ${r.firstName}\nTéléphone : ${r.phone}${
+      r.email ? `\nE-mail : ${r.email}` : ""
+    }\nRemise : ${r.deliveryLabel}\n${r.whatsappUrl ? `WhatsApp : ${r.whatsappUrl}\n` : ""}\n${adminUrl}`,
+  };
+}
+
+export function reservationReceivedEmail(brand: EmailBrand, r: EmailReservation): Omit<EmailMessage, "to"> {
+  const body = `<h1 style="font-family:Georgia,serif;font-weight:normal;font-size:24px;margin:0 0 8px">Merci ${esc(r.firstName)} !</h1>
+<p>Votre demande de réservation pour <strong>${esc(r.productName)}</strong> (${esc(formatMoney(r.priceCents))}) a bien été enregistrée.</p>
+<p>${esc(brand.shopName)} vous contactera rapidement pour confirmer votre réservation et organiser ${r.deliveryLabel === "Envoi postal" ? "l'envoi" : "la remise en main propre"}. Aucun paiement n'est demandé sur le site.</p>
+<p style="font-size:13px">Référence de votre demande : ${esc(r.number)}</p>`;
+  return {
+    subject: `Votre réservation — ${r.productName}`,
+    html: layout(brand, "Votre demande de réservation est enregistrée.", body),
+    text: `Merci ${r.firstName} !\n\nVotre demande de réservation pour ${r.productName} (${formatMoney(r.priceCents)}) a bien été enregistrée. ${brand.shopName} vous contactera rapidement pour confirmer votre réservation et organiser la remise ou l'envoi. Aucun paiement n'est demandé sur le site.\n\nRéférence : ${r.number}`,
   };
 }

@@ -1,8 +1,10 @@
-import { ChevronRight, Hand, Package, ShieldCheck } from "lucide-react";
+import { ChevronRight, Hand, HeartHandshake, Package, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { AddToCart } from "@/components/shop/add-to-cart";
+import { ReserveButton } from "@/components/shop/reserve-button";
+import { RESERVATION_MODE } from "@/lib/sales-mode";
 import { Gallery } from "@/components/shop/gallery";
 import { AvailabilityBadge, Price, ProductGrid } from "@/components/shop/product-card";
 import { getListing, getProduct, getRelated, getSettings } from "@/lib/server/cached";
@@ -90,7 +92,7 @@ export default async function ProductPage({ params }: Props) {
         url,
         priceCurrency: "EUR",
         price: (p.priceCents / 100).toFixed(2),
-        availability: p.availability === "sold_out" ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+        availability: p.availability === "sold_out" ? "https://schema.org/SoldOut" : p.availability === "reserved" ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
         itemCondition: "https://schema.org/NewCondition",
       },
     },
@@ -144,7 +146,11 @@ export default async function ProductPage({ params }: Props) {
           {mention && <p className="mt-1 text-xs text-text-2">{mention}</p>}
 
           <div className="mt-7">
-            <AddToCart productId={p.id} name={p.name} priceCents={p.priceCents} stock={p.stock} ordersOpen={settings.ordersOpen} />
+            {RESERVATION_MODE ? (
+              <ReserveButton productId={p.id} name={p.name} priceCents={p.priceCents} availability={p.availability} ordersOpen={settings.ordersOpen} shopName={settings.shopName} />
+            ) : (
+              <AddToCart productId={p.id} name={p.name} priceCents={p.priceCents} stock={p.stock} ordersOpen={settings.ordersOpen} />
+            )}
           </div>
 
           {p.description && <div className="prose-shop mt-8 text-[16px]">{renderRichText(p.description)}</div>}
@@ -182,9 +188,15 @@ export default async function ProductPage({ params }: Props) {
                 Envoi soigné · <Link href="/livraison-retours">Livraison et retours</Link>
               </span>
             </li>
-            <li className="flex items-center gap-3">
-              <ShieldCheck size={18} className="shrink-0 text-primary" aria-hidden="true" /> Paiement sécurisé (carte, Apple Pay, Google Pay)
-            </li>
+            {RESERVATION_MODE ? (
+              <li className="flex items-center gap-3">
+                <HeartHandshake size={18} className="shrink-0 text-primary" aria-hidden="true" /> Remise en main propre ou envoi, organisés ensemble après votre réservation
+              </li>
+            ) : (
+              <li className="flex items-center gap-3">
+                <ShieldCheck size={18} className="shrink-0 text-primary" aria-hidden="true" /> Paiement sécurisé (carte, Apple Pay, Google Pay)
+              </li>
+            )}
           </ul>
         </div>
       </div>

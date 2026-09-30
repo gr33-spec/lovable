@@ -9,6 +9,7 @@ import { imageSrc } from "@/lib/image-ref";
 import type { ShopSettings } from "@/lib/server/settings";
 import { Img } from "../ui/img";
 import { plainText } from "../ui/sparkle";
+import { RESERVATION_MODE } from "@/lib/sales-mode";
 import { useCartCount } from "./cart-store";
 import { SocialLinks } from "./footer";
 
@@ -140,17 +141,19 @@ export function Header({
             </ul>
           </nav>
           <div className="ml-auto flex items-center lg:ml-0">
-            <button type="button" className="btn btn-ghost btn-icon" aria-label="Rechercher" onClick={() => searchRef.current?.showModal()}>
+            <button type="button" className={`btn btn-ghost btn-icon ${RESERVATION_MODE ? "-mr-2" : ""}`} aria-label="Rechercher" onClick={() => searchRef.current?.showModal()}>
               <Search size={20} strokeWidth={1.6} />
             </button>
-            <Link href="/panier" className="btn btn-ghost btn-icon relative -mr-2" aria-label={count ? `Panier, ${count} article${count > 1 ? "s" : ""}` : "Panier"}>
-              <ShoppingBag size={21} strokeWidth={1.6} className={bump ? "animate-[rise_0.4s_ease]" : ""} />
-              {count > 0 && (
-                <span className="absolute top-1 right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-on-primary ring-2 ring-surface">
-                  {count}
-                </span>
-              )}
-            </Link>
+            {!RESERVATION_MODE && (
+              <Link href="/panier" className="btn btn-ghost btn-icon relative -mr-2" aria-label={count ? `Panier, ${count} article${count > 1 ? "s" : ""}` : "Panier"}>
+                <ShoppingBag size={21} strokeWidth={1.6} className={bump ? "animate-[rise_0.4s_ease]" : ""} />
+                {count > 0 && (
+                  <span className="absolute top-1 right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-on-primary ring-2 ring-surface">
+                    {count}
+                  </span>
+                )}
+              </Link>
+            )}
           </div>
         </div>
       </header>
@@ -257,12 +260,16 @@ export function Header({
             </div>
           </nav>
 
-          <div className="relative space-y-3 border-t border-border bg-surface/90 p-4 backdrop-blur">
-            {socials.length > 0 && <SocialLinks socials={socials} className="justify-center" />}
-            <Link href="/panier" className="btn btn-primary w-full">
-              <ShoppingBag size={18} /> Voir le panier{count ? ` (${count})` : ""}
-            </Link>
-          </div>
+          {(socials.length > 0 || !RESERVATION_MODE) && (
+            <div className="relative space-y-3 border-t border-border bg-surface/90 p-4 backdrop-blur">
+              {socials.length > 0 && <SocialLinks socials={socials} className="justify-center" />}
+              {!RESERVATION_MODE && (
+                <Link href="/panier" className="btn btn-primary w-full">
+                  <ShoppingBag size={18} /> Voir le panier{count ? ` (${count})` : ""}
+                </Link>
+              )}
+            </div>
+          )}
         </div>
       </dialog>
 

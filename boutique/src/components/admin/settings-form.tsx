@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { saveSettingsAction } from "@/app/admin/actions";
+import { RESERVATION_HOURS, RESERVATION_MODE } from "@/lib/sales-mode";
 import { Notice, useToast, useUnsavedGuard } from "./ui";
 
 interface Settings {
@@ -13,6 +14,7 @@ interface Settings {
   ordersOpen: boolean;
   closedMessage: string;
   allowPromotionCodes: boolean;
+  reservationAutoExpire: boolean;
   vatRegime: "franchise" | "assujetti" | null;
   vatRateBp: number;
   addressRetentionMonths: number | null;
@@ -63,8 +65,10 @@ export function SettingsForm({ initial }: { initial: Settings }) {
         <div className="card space-y-5 p-5">
           <label className="flex items-start justify-between gap-4">
             <span>
-              <span className="block font-semibold">Commandes ouvertes</span>
-              <span className="text-sm text-text-2">Désactivez pendant des vacances ou un salon : les créations restent visibles mais ne peuvent pas être commandées.</span>
+              <span className="block font-semibold">{RESERVATION_MODE ? "Réservations ouvertes" : "Commandes ouvertes"}</span>
+              <span className="text-sm text-text-2">
+                Désactivez pendant des vacances ou un salon : les créations restent visibles mais ne peuvent pas être {RESERVATION_MODE ? "réservées" : "commandées"}.
+              </span>
             </span>
             <input type="checkbox" className="mt-1 h-6 w-6 shrink-0 accent-[var(--c-primary)]" checked={s.ordersOpen} onChange={(e) => set("ordersOpen", e.target.checked)} />
           </label>
@@ -80,7 +84,7 @@ export function SettingsForm({ initial }: { initial: Settings }) {
               <input className="input" type="email" value={s.contactEmail} onChange={(e) => set("contactEmail", e.target.value)} placeholder="contact@labohemeenpaillettes.fr" />
             </label>
             <label className="block">
-              <span className="field-label">E-mail qui reçoit les nouvelles commandes</span>
+              <span className="field-label">{RESERVATION_MODE ? "E-mail qui reçoit les nouvelles réservations" : "E-mail qui reçoit les nouvelles commandes"}</span>
               <input className="input" type="email" value={s.notificationEmail} onChange={(e) => set("notificationEmail", e.target.value)} />
             </label>
           </div>
@@ -95,13 +99,25 @@ export function SettingsForm({ initial }: { initial: Settings }) {
               ))}
             </select>
           </label>
-          <label className="flex items-start justify-between gap-4">
-            <span>
-              <span className="block font-semibold">Accepter les codes promo</span>
-              <span className="text-sm text-text-2">Les codes se créent dans votre tableau de bord Stripe (Catalogue → Coupons). Un champ « code promo » apparaît alors au paiement.</span>
-            </span>
-            <input type="checkbox" className="mt-1 h-6 w-6 shrink-0 accent-[var(--c-primary)]" checked={s.allowPromotionCodes} onChange={(e) => set("allowPromotionCodes", e.target.checked)} />
-          </label>
+          {RESERVATION_MODE ? (
+            <label className="flex items-start justify-between gap-4">
+              <span>
+                <span className="block font-semibold">Libérer automatiquement après {RESERVATION_HOURS} h</span>
+                <span className="text-sm text-text-2">
+                  Une réservation que vous n&apos;avez pas confirmée dans les {RESERVATION_HOURS} h est annulée et le bijou redevient disponible. Décochez pour tout gérer vous-même.
+                </span>
+              </span>
+              <input type="checkbox" className="mt-1 h-6 w-6 shrink-0 accent-[var(--c-primary)]" checked={s.reservationAutoExpire} onChange={(e) => set("reservationAutoExpire", e.target.checked)} />
+            </label>
+          ) : (
+            <label className="flex items-start justify-between gap-4">
+              <span>
+                <span className="block font-semibold">Accepter les codes promo</span>
+                <span className="text-sm text-text-2">Les codes se créent dans votre tableau de bord Stripe (Catalogue → Coupons). Un champ « code promo » apparaît alors au paiement.</span>
+              </span>
+              <input type="checkbox" className="mt-1 h-6 w-6 shrink-0 accent-[var(--c-primary)]" checked={s.allowPromotionCodes} onChange={(e) => set("allowPromotionCodes", e.target.checked)} />
+            </label>
+          )}
         </div>
       </section>
 
