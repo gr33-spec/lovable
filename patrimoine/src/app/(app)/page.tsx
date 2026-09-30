@@ -2,8 +2,8 @@
 
 import { usePageState } from "@/lib/nav";
 import Link from "next/link";
-import { useMemo } from "react";
-import { BadgeEuro, Briefcase, Building2, CalendarClock, ChevronRight, CircleAlert, DoorOpen, Flag, Hammer, Landmark, Receipt, RefreshCw, ShoppingCart, TrendingDown, TrendingUp, Wallet } from "lucide-react";
+import { useMemo, useState } from "react";
+import { BadgeEuro, Briefcase, Info, Building2, CalendarClock, ChevronRight, CircleAlert, DoorOpen, Flag, Hammer, Landmark, Receipt, RefreshCw, ShoppingCart, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { cashflowMonthly, ltv, netWorth, rentalCharges, rentalPayments } from "@/lib/engine/snapshot";
 import { milestones, type Milestone } from "@/lib/engine/milestones";
@@ -17,12 +17,15 @@ import { allReminders } from "@/lib/reminders";
 import { eur, eurCompact, eurSigned, pct } from "@/lib/format";
 import { Card, IconChip, Kpi, Page, SectionTitle, Segmented, cx, type ChipTone } from "@/components/ui";
 import { BarChart, LineChart } from "@/components/charts";
+import { WhySheet } from "@/components/why";
+import type { ExplainKind } from "@/lib/engine/explain";
 
 export default function Accueil() {
   const { data, projection } = useStore();
   const snap = projection.snapshot;
   const t = snap.total;
   const [chart, setChart] = usePageState<"net" | "debt" | "cf">("graphique", "net");
+  const [why, setWhy] = useState<ExplainKind | null>(null);
 
   const steps = useMemo(() => milestones(data, projection, 6), [data, projection]);
   const issues = useMemo(() => qualityIssues(data, snap), [data, snap]);
@@ -32,7 +35,6 @@ export default function Accueil() {
   const cfMark = t.unknownPayment > 0 ? "env. " : missingCharges > 0 ? "max. " : "";
   const unpaid = useMemo(() => unpaidByUnit(data.units), [data.units]);
   const unpaidTotal = unpaid.reduce((s, l) => s + l.amount, 0);
-  const vacantUnits = data.units.filter((u) => u.status === "vacant");
   const cf = cashflowMonthly(t);
   const loanToValue = ltv(t);
   const companyCount = data.companies.length;
@@ -44,6 +46,18 @@ export default function Accueil() {
     return pick.map((id) => all.find((i) => i.id === id)).filter((i): i is NonNullable<typeof i> => !!i && t.loans + t.buildings > 0);
   }, [data, projection, t.loans, t.buildings]);
   const alerts = useMemo(() => allReminders(data, todayIso(), snap.resolvedLoans), [data, snap]);
+  // Prochaine action : un impayé d'abord, puis ce qui fausse un chiffre, puis l'échéance la plus proche.
+  const next: { title: string; detail?: string; href: string; tone: ChipTone; icon: React.ReactNode } | undefined = (() => {
+    if (unpaid.length) {
+      const first = unpaid[0];
+      return { title: `Relancer ${unpaid.length > 1 ? `${unpaid.length} loyers impayés` : "un loyer impayé"}`, detail: `${first.unit.name} · ${eur(Math.round(first.amount))}`, href: "/gestion?vue=loyers", tone: "rose", icon: <Wallet size={19} /> };
+    }
+    const important = issues.find((i) => i.priority === "important");
+    if (important) return { title: important.detail, detail: important.label, href: important.href, tone: "gold", icon: <CircleAlert size={19} /> };
+    const late = alerts.find((a) => a.late) ?? alerts[0];
+    if (late) return { title: late.title, detail: late.detail, href: late.href, tone: "blue", icon: <CalendarClock size={19} /> };
+    return undefined;
+  })();
 
   return (
     <>
@@ -80,7 +94,10 @@ export default function Accueil() {
           </div>
           <div className="tabular mt-1 text-[42px] font-extrabold leading-tight tracking-[-0.03em]">
             {netWorth(t) !== undefined && (t.value > 0 || t.debt > 0) ? (
-              eur(netWorth(t))
+              <button onClick={() => setWhy("net")} className="flex items-center gap-2 text-left" aria-label="Pourquoi ce chiffre ?">
+                {eur(netWorth(t))}
+                <Info size={18} className="text-white/50" />
+              </button>
             ) : (
               <span className="block tracking-normal">
                 <span className="block text-[22px] font-bold text-white/80">{hasData ? "Données insuffisantes" : "Aucun bien pour l'instant"}</span>
@@ -101,19 +118,35 @@ export default function Accueil() {
             values={(t.unvalued > 0 ? projection.years.map((r) => r.debt) : projection.years.map((r) => r.net)).slice(0, 21)}
             label={t.unvalued > 0 ? "Capital restant dû, 20 prochaines années" : "Patrimoine net, 20 prochaines années"}
           />
+          {/* Les trois chiffres qui disent si tout va bien. */}
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-white/[0.07] px-3.5 py-3 ring-1 ring-white/10">
-              <div className="text-[12px] text-white/60">Valeur des biens</div>
-              <div className="tabular text-[19px] font-bold">{t.value > 0 ? `${t.unvalued > 0 ? "min. " : ""}${eurCompact(t.value)}` : "—"}</div>
-              {t.unvalued > 0 && t.value > 0 && <div className="text-[11px] text-white/55">{t.buildings - t.unvalued} bien(s) sur {t.buildings} estimé(s)</div>}
-            </div>
-            <div className="rounded-2xl bg-white/[0.07] px-3.5 py-3 ring-1 ring-white/10">
-              <div className="text-[12px] text-white/60">Capital restant dû</div>
-              <div className="tabular text-[19px] font-bold">{eurCompact(t.debt)}</div>
-            </div>
+            <button onClick={() => setWhy("cashflow")} className="rounded-2xl bg-white/[0.07] px-3.5 py-3 text-left ring-1 ring-white/10 active:bg-white/10">
+              <div className="flex items-center gap-1 text-[12px] text-white/60">
+                Cash-flow du mois <Info size={12} />
+              </div>
+              <div className={cx("tabular text-[19px] font-bold", hasData && cf < 0 ? "text-[#f3a8a0]" : "")}>
+                {hasData ? `${cfMark}${eurSigned(cf)}` : "—"}
+              </div>
+              <div className="text-[11px] text-white/55">{hasData ? `${eurSigned(cf * 12)} / an` : "loyers − charges − crédits"}</div>
+            </button>
+            <Link href={unpaidTotal > 0 ? "/gestion?vue=loyers" : "/gestion"} className="rounded-2xl bg-white/[0.07] px-3.5 py-3 ring-1 ring-white/10 active:bg-white/10">
+              <div className="text-[12px] text-white/60">Loyers impayés</div>
+              <div className={cx("tabular text-[19px] font-bold", unpaidTotal > 0 ? "text-[#f3a8a0]" : "")}>{unpaidTotal > 0 ? eur(Math.round(unpaidTotal)) : "Aucun"}</div>
+              <div className="text-[11px] text-white/55">
+                {t.units > 0 ? `${t.units - t.vacantUnits}/${t.units} lots loués` : "aucun lot"}
+              </div>
+            </Link>
+          </div>
+          <div className="mt-3 flex items-center justify-between gap-2 text-[12.5px] text-white/70">
+            <button onClick={() => setWhy("value")} className="tabular underline decoration-white/30 underline-offset-4">
+              Biens {t.value > 0 ? `${t.unvalued > 0 ? "min. " : ""}${eurCompact(t.value)}` : "—"}
+            </button>
+            <button onClick={() => setWhy("debt")} className="tabular underline decoration-white/30 underline-offset-4">
+              Dette {eurCompact(t.debt)}
+            </button>
           </div>
           {loanToValue !== undefined && (
-            <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/10">
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
               <div className="h-full rounded-full bg-gradient-to-r from-[#d4b483] to-[#b08d57]" style={{ width: `${Math.min(100, loanToValue)}%` }} />
             </div>
           )}
@@ -126,32 +159,32 @@ export default function Accueil() {
           )}
         </div>
 
+        {next && (
+          <Link href={next.href} className="soft-card mt-4 flex items-center gap-3 rounded-[24px] px-4 py-3.5 active:scale-[0.99]">
+            <IconChip tone={next.tone} size={40}>{next.icon}</IconChip>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[12px] font-semibold uppercase tracking-wide text-muted">Prochaine action</span>
+              <span className="block text-[15px] font-semibold leading-snug text-ink">{next.title}</span>
+              {next.detail && <span className="block truncate text-[13px] text-muted">{next.detail}</span>}
+            </span>
+            <ChevronRight size={18} className="shrink-0 text-muted" />
+          </Link>
+        )}
+
         <RemindersCard items={alerts} />
 
-        {/* Flux */}
+        {/* Détail du mois */}
         <Card className="mt-4">
-          <div className="flex items-center gap-3">
-            <IconChip tone={cf >= 0 ? "green" : "rose"} size={46}>
-              {cf >= 0 ? <TrendingUp size={22} /> : <TrendingDown size={22} />}
+          <button onClick={() => setWhy("cashflow")} className="flex w-full items-center gap-3 text-left">
+            <IconChip tone={cf >= 0 ? "green" : "rose"} size={38}>
+              {cf >= 0 ? <TrendingUp size={19} /> : <TrendingDown size={19} />}
             </IconChip>
-            <div className="min-w-0 flex-1">
-              <div className="text-[13px] text-muted">Cash-flow locatif mensuel</div>
-              <div className={cx("tabular text-[30px] font-extrabold leading-tight tracking-[-0.02em]", cf >= 0 ? "text-pos" : "text-neg")}>
-                {hasData ? (
-                  <>
-                    {cfMark && <span className="mr-1 text-[16px] font-bold">{cfMark.trim()}</span>}
-                    {eurSigned(cf)}
-                  </>
-                ) : (
-                  "—"
-                )}
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-[12px] text-muted">Par an</div>
-              <div className={cx("tabular text-[16px] font-bold", cf >= 0 ? "text-pos" : "text-neg")}>{hasData ? eurSigned(cf * 12) : "—"}</div>
-            </div>
-          </div>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[15px] font-semibold text-ink">D&apos;où vient le cash-flow</span>
+              <span className="block text-[12.5px] text-muted">Loyers − crédits − charges, bien par bien</span>
+            </span>
+            <ChevronRight size={17} className="shrink-0 text-muted" />
+          </button>
           <div className="mt-4 grid grid-cols-3 gap-2">
             <FlowTile icon={<Wallet size={17} />} tone="green" label="Loyers" value={eurCompact(t.rentMonthly)} hint="/ mois" />
             <FlowTile icon={<Landmark size={17} />} tone="blue" label="Crédits" value={eurCompact(rentalPayments(t))} hint={t.unknownPayment ? "dont estimés" : "/ mois"} />
@@ -164,15 +197,6 @@ export default function Accueil() {
               <span>
                 {[t.unknownPayment > 0 ? `${t.unknownPayment} mensualité(s) estimée(s) ou inconnue(s)` : "", missingCharges > 0 ? `charges non renseignées pour ${missingCharges} bien(s) (cash-flow surestimé)` : ""].filter(Boolean).join(" · ")}
               </span>
-            </Link>
-          )}
-          {t.units > 0 && (
-            <Link href="/gestion" className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-black/[0.03] px-3 py-2.5 text-[13px]">
-              <span className="text-ink-2">
-                <b className="text-ink">{t.units - t.vacantUnits}</b> lots loués sur {t.units}
-                {vacantUnits.length > 0 && <span className="text-warn"> · {vacantUnits.length} vacant{vacantUnits.length > 1 ? "s" : ""}</span>}
-              </span>
-              <span className={cx("shrink-0 font-semibold", unpaidTotal > 0 ? "text-neg" : "text-pos")}>{unpaidTotal > 0 ? `${eur(Math.round(unpaidTotal))} impayés` : "Aucun impayé"}</span>
             </Link>
           )}
         </Card>
@@ -287,6 +311,7 @@ export default function Accueil() {
           <Link href="/plus/hypotheses" className="underline">modifier</Link>
         </p>
       </Page>
+      <WhySheet kind={why} onClose={() => setWhy(null)} />
     </>
   );
 }

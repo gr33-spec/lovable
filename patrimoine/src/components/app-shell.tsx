@@ -3,8 +3,9 @@
 import { signOut } from "@/lib/sign-out";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect } from "react";
-import { Building2, CloudOff, Coins, Ellipsis, KeyRound, House, Check, ListChecks, LoaderCircle, Users } from "lucide-react";
+import { Fragment, Suspense, useEffect, useState } from "react";
+import { Building2, CloudOff, Coins, Ellipsis, KeyRound, House, Check, ListChecks, LoaderCircle, Plus, Users } from "lucide-react";
+import { AddMenu } from "./quick-add";
 import { useStore } from "@/lib/store";
 import { unpaidByUnit } from "@/lib/engine/leases";
 import { missingCount } from "@/lib/missing";
@@ -77,6 +78,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Pastille : logements avec un loyer impayé (ou partiellement payé) non régularisé.
   const unpaid = unpaidByUnit(data.units).length;
   const section = useSection();
+  const [adding, setAdding] = useState(false);
 
   useEffect(() => {
     if (role === "owner" && view === "patrimoine" && !onboarding && !rescue && !data.settings.onboardingDone && isEmpty) router.replace("/bienvenue");
@@ -116,13 +118,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <nav className="tab-dock safe-bottom pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-2 lg:inset-y-0 lg:right-auto lg:w-60 lg:px-4 lg:py-6">
           <div className="tab-bar pointer-events-auto relative mx-auto flex max-w-md rounded-[28px] p-1.5 lg:h-full lg:max-w-none lg:flex-col lg:gap-1 lg:p-3">
             <div className="hidden px-3 pb-4 pt-2 text-[20px] font-extrabold tracking-[-0.02em] text-navy lg:block">Patrimoine</div>
-            {TABS.map((t) => {
+            {TABS.map((t, i) => {
               // Une fiche reste dans la rubrique d'où on l'a ouverte (un lot ouvert depuis Gestion reste dans Gestion).
               const active = t.section === section;
               const Icon = t.icon;
               return (
+                <Fragment key={t.href}>
+                {/* Ajouter : au centre sur téléphone, sous le menu sur ordinateur. */}
+                {i === 2 && role === "owner" && (
+                  <button
+                    onClick={() => setAdding(true)}
+                    aria-label="Ajouter"
+                    className="flex flex-1 flex-col items-center justify-center lg:order-last lg:mt-3 lg:flex-none lg:flex-row lg:gap-3 lg:rounded-2xl lg:bg-brand lg:px-4 lg:py-3 lg:text-[15px] lg:font-semibold lg:text-on-brand"
+                  >
+                    <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand text-on-brand shadow-md active:scale-95 lg:h-auto lg:w-auto lg:bg-transparent lg:shadow-none">
+                      <Plus size={24} strokeWidth={2.4} />
+                    </span>
+                    <span className="hidden lg:inline">Ajouter</span>
+                  </button>
+                )}
                 <Link
-                  key={t.href}
                   href={t.href}
                   className={cx(
                     "relative flex flex-1 flex-col items-center gap-0.5 rounded-[22px] py-1.5 text-[10.5px] font-semibold transition-colors lg:flex-none lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-4 lg:py-3 lg:text-[15px]",
@@ -140,11 +155,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     </span>
                   )}
                 </Link>
+                </Fragment>
               );
             })}
           </div>
         </nav>
       )}
+      {role === "owner" && <AddMenu open={adding} onClose={() => setAdding(false)} />}
     </>
   );
 }
