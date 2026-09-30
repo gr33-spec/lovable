@@ -1,4 +1,6 @@
-import Anthropic from "@anthropic-ai/sdk";
+// Imports nommés (pas l'export par défaut) : même résultat quel que soit le
+// format (CJS/ESM) retenu par le compilateur de Vercel (voir helmet, app.ts).
+import { Anthropic, APIConnectionTimeoutError, APIError } from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type { AiUsage } from "@baticlair/domain";
 import { TAKEOFF_PROMPT, takeoffSystemPrompt } from "../application/prompt.js";
@@ -89,10 +91,10 @@ export class AnthropicTakeoffExtractor implements TakeoffExtractor {
       return { ...attempt, status: "success", output: parsed.data, errorCode: null };
     } catch (error) {
       const durationMs = Date.now() - started;
-      if (error instanceof Anthropic.APIConnectionTimeoutError) {
+      if (error instanceof APIConnectionTimeoutError) {
         return { ...base, usage: NO_USAGE, status: "timeout", output: null, errorCode: "timeout", durationMs };
       }
-      if (error instanceof Anthropic.APIError) {
+      if (error instanceof APIError) {
         const code = error.status ? `http_${error.status}` : "connection";
         return { ...base, usage: NO_USAGE, status: "provider_error", output: null, errorCode: code, durationMs };
       }
