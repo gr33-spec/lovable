@@ -44,7 +44,7 @@ const classifyBody = z.object({ classified: z.boolean(), retainedSupplierIds: z.
 /** Plafond technique de réception ; la limite métier est vérifiée par le service des documents. */
 const HARD_MAX_UPLOAD_BYTES = 50_000_000;
 
-function toDto(r: PriceRequestView) {
+export function toDto(r: PriceRequestView) {
   return {
     id: r.id,
     projectId: r.projectId,

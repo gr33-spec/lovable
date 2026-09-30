@@ -1,9 +1,9 @@
 "use client";
 
-import { FileText, FileUp, Loader2, Trash2 } from "lucide-react";
+import { CircleCheck, FileText, FileUp, Loader2, Trash2 } from "lucide-react";
 import { useCallback, useId, useRef, useState } from "react";
 import { ProjectTakeoff } from "@/components/project-takeoff";
-import { Badge, Card, ErrorNotice, Spinner } from "@/components/ui";
+import { Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, MAX_DOCUMENT_BYTES, type DocumentPurpose, type ProjectDocument } from "@/lib/api";
 import { unreadableMessage } from "@/lib/fr";
 import { openDocument } from "@/lib/open-document";
@@ -14,20 +14,6 @@ const PURPOSE_LABEL: Record<DocumentPurpose, string> = {
   client_quote: "Devis client",
   supplier_quote: "Devis fournisseur",
 };
-
-function plural(n: number, one: string, many: string) {
-  return `${n} ${n > 1 ? many : one}`;
-}
-
-/** Résumé de la lecture automatique, en mots d'artisan. */
-function readingSummary(doc: ProjectDocument): string {
-  const r = doc.reading;
-  if (!r || r.status !== "completed") return "";
-  const parts = [plural(r.pagesText, "page lue", "pages lues")];
-  if (r.pagesVision > 0) parts.push(`${plural(r.pagesVision, "page", "pages")} à lire en image`);
-  if (r.pagesSkipped > 0) parts.push(`${plural(r.pagesSkipped, "page ignorée", "pages ignorées")} (conditions générales…)`);
-  return parts.join(" · ");
-}
 
 /**
  * Documents du chantier : le devis client (point de départ) et les devis
@@ -73,9 +59,7 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
             PROCHAINE ÉTAPE
           </span>
           <span className="font-display text-[22px] leading-tight font-extrabold tracking-[-0.02em]">Ajouter le devis client</span>
-          <p className="text-sm text-[#c9ced6]">
-            Le PDF du devis fait avec votre logiciel. Il sert à préparer la liste de matériaux à demander aux fournisseurs.
-          </p>
+          <p className="text-sm text-[#c9ced6]">Le PDF fait avec votre logiciel de devis.</p>
           <UploadButton projectId={projectId} purpose="client_quote" label="Choisir le devis (PDF)" tone="dark" onAdded={added} />
         </section>
       ) : null}
@@ -86,38 +70,19 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
         </p>
       ) : null}
 
-      {clientQuotes.length > 0 ? (
-        <DocumentGroup title="Devis client" docs={clientQuotes} onRemoved={removed} />
-      ) : null}
-
-      <ProjectTakeoff key={clientQuotes[0]?.id ?? "none"} projectId={projectId} clientQuote={clientQuotes[0] ?? null} archived={archived} />
+      <ProjectTakeoff
+        key={clientQuotes[0]?.id ?? "none"}
+        projectId={projectId}
+        clientQuote={clientQuotes[0] ?? null}
+        quoteCard={(compact) => (clientQuotes[0] ? <DocumentCard doc={clientQuotes[0]} compact={compact} onRemoved={removed} /> : null)}
+        archived={archived}
+      />
 
     </>
   );
 }
 
-function DocumentGroup({ title, docs, onRemoved }: { title: string; docs: ProjectDocument[]; onRemoved: (id: string) => void }) {
-  return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">{title.toUpperCase()}</h2>
-      <DocumentList docs={docs} onRemoved={onRemoved} />
-    </section>
-  );
-}
-
-function DocumentList({ docs, onRemoved }: { docs: ProjectDocument[]; onRemoved: (id: string) => void }) {
-  return (
-    <ul className="flex flex-col gap-2.5">
-      {docs.map((d) => (
-        <li key={d.id}>
-          <DocumentCard doc={d} onRemoved={onRemoved} />
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function DocumentCard({ doc, onRemoved }: { doc: ProjectDocument; onRemoved: (id: string) => void }) {
+function DocumentCard({ doc, compact, onRemoved }: { doc: ProjectDocument; compact: boolean; onRemoved: (id: string) => void }) {
   const [opening, setOpening] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -144,38 +109,36 @@ function DocumentCard({ doc, onRemoved }: { doc: ProjectDocument; onRemoved: (id
     }
   }
 
+  if (compact) {
+    return (
+      <div className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-2 shadow-card">
+        <CircleCheck size={20} className="shrink-0 text-ok" aria-hidden="true" />
+        <span className="min-w-0 grow truncate text-[15px] font-bold">{PURPOSE_LABEL[doc.purpose]}</span>
+        <button
+          type="button"
+          onClick={() => void open()}
+          disabled={opening}
+          aria-label={`Ouvrir ${doc.name}`}
+          className="inline-flex min-h-11 shrink-0 items-center text-sm font-bold text-accent-text disabled:opacity-60"
+        >
+          Ouvrir
+        </button>
+      </div>
+    );
+  }
+
   return (
     <Card className="flex flex-col gap-2 p-4">
-      <div className="flex items-start gap-3">
+      <div className="flex items-center gap-3">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-ground text-accent" aria-hidden="true">
           <FileText size={20} />
         </span>
         <div className="flex min-w-0 grow flex-col">
+          <span className="text-[13px] font-bold text-muted">{PURPOSE_LABEL[doc.purpose]}</span>
           <span className="truncate text-[15px] font-bold">{doc.name}</span>
-          <span className="text-[13px] text-muted">
-            {PURPOSE_LABEL[doc.purpose]}
-            {doc.pageCount ? ` · ${plural(doc.pageCount, "page", "pages")}` : ""}
-          </span>
         </div>
-        {failed ? (
-          <Badge tone="danger">Illisible</Badge>
-        ) : readByAi ? (
-          <Badge tone="neutral">Enregistré</Badge>
-        ) : (
-          <Badge tone="ok">Lu</Badge>
-        )}
       </div>
-      {readByAi ? (
-        <p className="text-sm text-muted">
-          {doc.purpose === "client_quote"
-            ? "Devis bien enregistré. L'IA le lira en entier au moment de préparer la liste de matériaux."
-            : "Devis bien enregistré."}
-        </p>
-      ) : failed ? (
-        <p className="text-sm text-danger">{unreadableMessage(doc.reading?.errorCode)}</p>
-      ) : (
-        <p className="text-sm">{readingSummary(doc)}</p>
-      )}
+      {failed ? <p className="text-sm text-danger">{unreadableMessage(doc.reading?.errorCode)}</p> : null}
       {deleteError ? <ErrorNotice error={deleteError} /> : null}
       {confirming ? (
         <div role="group" aria-label="Confirmer la suppression" className="flex flex-col gap-2 rounded-2xl bg-ground p-3">

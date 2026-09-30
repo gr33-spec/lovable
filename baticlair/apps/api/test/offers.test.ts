@@ -70,7 +70,7 @@ describe("lecture des devis fournisseurs (IA simulée)", () => {
     await agent.post(`/v1/price-request-recipients/${ra}/analysis`).expect(201);
     expect(await ctx.prisma.aiExecution.count()).toBe(before + 1);
     const execution = await ctx.prisma.aiExecution.findFirstOrThrow({ where: { task: "offer_extraction" } });
-    expect(execution).toMatchObject({ promptId: "offer_extraction", promptVersion: 1, status: "success" });
+    expect(execution).toMatchObject({ promptId: "offer_extraction", promptVersion: 2, status: "success" });
     expect((await agent.get("/v1/ai-usage")).body.analyses.used).toBe(2);
   });
 
@@ -130,7 +130,7 @@ describe("lecture des devis fournisseurs (IA simulée)", () => {
     expect((await b.agent.patch(`/v1/price-requests/${requestId}/classification`).send({ classified: true })).status).toBe(404);
     const intrusion = await b.agent
       .post(`/v1/price-request-recipients/${ra}/quote`)
-      .attach("file", Buffer.from(await makePdf(["intrus"], undefined, undefined, "DEVIS INTRUS")), { filename: "x.pdf", contentType: "application/pdf" });
+      .attach("file", Buffer.from(await makePdf(["devis"], undefined, undefined, "DEVIS INTRUS")), { filename: "x.pdf", contentType: "application/pdf" });
     expect(intrusion.status).toBe(404);
 
     // Devis retiré : plus rien à lire.

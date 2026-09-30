@@ -4,7 +4,7 @@ import type { RequestedLineForAi } from "./offer-extractor.js";
  * Prompt versionné (règle projet : jamais modifié sans nouvelle version).
  * La version est enregistrée avec chaque appel et chaque devis lu.
  */
-export const OFFER_PROMPT = { id: "offer_extraction", version: 1 } as const;
+export const OFFER_PROMPT = { id: "offer_extraction", version: 2 } as const;
 
 export function offerSystemPrompt(tradeLabel: string): string {
   return `Tu aides un artisan (${tradeLabel}) à comparer les devis de ses fournisseurs (négoces). On te donne le devis d'UN fournisseur et la liste des articles que l'artisan lui a demandés. Ta tâche : relever chaque ligne du devis telle qu'elle est écrite et dire à quelle ligne demandée elle correspond.
@@ -23,7 +23,7 @@ Règles :
 - totalHT, totalVAT, totalTTC : les totaux imprimés, tels qu'écrits, ou null.
 - globalDiscountPercent / globalDiscountAmount : une remise sur l'ensemble du devis, telle qu'écrite (l'un ou l'autre), ou null.
 - deliveryIncluded : true si le devis dit que la livraison est incluse ou franco, false s'il dit qu'elle est en sus, null s'il n'en dit rien.
-- notes : ce qui concerne tout le devis (conditions de validité, délai, page illisible), en phrases courtes. Liste vide si rien.
+- notes : ce qui concerne tout le devis (conditions de validité, délai, page illisible), en phrases courtes écrites pour un artisan : jamais de nom de champ ni de référence [page:ligne], jamais de remarque sur ta façon de lire le document. Liste vide si rien.
 
 En cas de doute sur une valeur, recopie-la telle quelle et explique le doute : l'artisan vérifiera. Ne devine jamais.`;
 }

@@ -1,11 +1,12 @@
 "use client";
 
-import { Check, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
+import { Check, CircleCheck, HelpCircle, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { useCallback, useId, useState } from "react";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { useProgressRefresh } from "@/components/project-progress";
-import { Badge, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
+import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, type ProjectDocument, type Takeoff, type TakeoffLine } from "@/lib/api";
+import { doubtText, shortName } from "@/lib/labels";
 import { useResource } from "@/lib/use-resource";
 
 /** Le devis client peut être lu par l'IA : texte lu, ou lecture locale en panne (l'IA lit alors le PDF). */
@@ -13,23 +14,25 @@ export function canPrepareTakeoff(doc: ProjectDocument): boolean {
   return doc.status === "read" || doc.reading?.errorCode === "read_failed";
 }
 
-function sourceLabel(line: TakeoffLine): string | null {
-  if (line.origin === "manual") return "Ajoutée par vous";
-  const refs = line.sourceRefs.map((ref) => {
-    const [page, row] = ref.split(":");
-    return `page ${page}, ligne ${Number(row)}`;
-  });
-  if (refs.length > 0) return `Devis : ${refs.join(" ; ")}${line.edited ? " (corrigée par vous)" : ""}`;
-  if (line.sourcePages.length > 0) return `Devis : page ${line.sourcePages.join(", ")} (lue sur l'image)`;
-  return null;
-}
+const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? "s" : ""}`;
 
 /**
- * Liste de matériaux tirée du devis client. L'IA propose, le code signale
- * ce qui est douteux, l'artisan corrige et valide : rien ne part chez un
- * fournisseur sans cette validation.
+ * Liste de matériaux tirée du devis client. Une seule chose à l'écran à la
+ * fois : préparer la liste, répondre aux questions une par une, valider.
+ * Le détail complet reste à un appui (« Voir toute la liste »).
  */
-export function ProjectTakeoff({ projectId, clientQuote, archived }: { projectId: string; clientQuote: ProjectDocument | null; archived: boolean }) {
+export function ProjectTakeoff({
+  projectId,
+  clientQuote,
+  quoteCard,
+  archived,
+}: {
+  projectId: string;
+  clientQuote: ProjectDocument | null;
+  /** Carte du devis client : complète tant que la liste n'existe pas, sur une ligne ensuite. */
+  quoteCard: (compact: boolean) => React.ReactNode;
+  archived: boolean;
+}) {
   const fetchTakeoff = useCallback(
     (signal: AbortSignal) =>
       api<{ takeoff: Takeoff | null; aiAvailable: boolean }>(`/v1/projects/${encodeURIComponent(projectId)}/takeoff`, { signal }),
@@ -66,35 +69,24 @@ export function ProjectTakeoff({ projectId, clientQuote, archived }: { projectId
     if (!clientQuote) return null;
     const readable = canPrepareTakeoff(clientQuote);
     return (
-      <section id="materiaux" aria-labelledby="takeoff-title" className="flex scroll-mt-4 flex-col gap-3">
-        <h2 id="takeoff-title" className="text-xs font-extrabold tracking-[0.04em] text-muted">
-          LISTE DE MATÉRIAUX
-        </h2>
-        <Card className="flex flex-col gap-3 p-4">
-          {!data.aiAvailable ? (
-            <p className="text-sm text-muted">La lecture par l&apos;IA n&apos;est pas encore activée sur ce compte.</p>
-          ) : !readable ? (
-            <p className="text-sm text-muted">Ce devis ne peut pas être lu. Déposez une autre version du PDF.</p>
-          ) : (
-            <>
-              <p className="text-sm">
-                L&apos;IA lit votre devis et prépare la liste des matériaux à commander. Vous la vérifiez et la corrigez avant tout
-                envoi. Cela compte pour <strong>1 analyse</strong> de votre formule.
-              </p>
-              {actionError ? <ErrorNotice error={actionError} /> : null}
-              <Button
-                pending={pending}
-                disabled={archived}
-                onClick={() =>
-                  void run(() => api<Takeoff>(`/v1/documents/${encodeURIComponent(clientQuote.id)}/takeoff`, { method: "POST" }), update)
-                }
-              >
-                <Sparkles size={18} aria-hidden="true" />
-                {pending ? "L'IA lit votre devis… (jusqu'à une minute)" : "Préparer la liste de matériaux"}
-              </Button>
-            </>
-          )}
-        </Card>
+      <section id="materiaux" aria-label="Liste de matériaux" className="flex scroll-mt-4 flex-col gap-3">
+        {quoteCard(false)}
+        {!data.aiAvailable ? (
+          <p className="text-sm text-muted">La lecture par l&apos;IA n&apos;est pas encore activée sur ce compte.</p>
+        ) : !readable ? null : (
+          <>
+            {actionError ? <ErrorNotice error={actionError} /> : null}
+            <Button
+              pending={pending}
+              disabled={archived}
+              onClick={() => void run(() => api<Takeoff>(`/v1/documents/${encodeURIComponent(clientQuote.id)}/takeoff`, { method: "POST" }), update)}
+            >
+              <Sparkles size={18} aria-hidden="true" />
+              {pending ? "L'IA lit votre devis… (jusqu'à une minute)" : "Préparer la liste de matériaux"}
+            </Button>
+            {!pending ? <p className="text-center text-[13px] text-muted">L&apos;IA lit le devis pour vous · 1 analyse</p> : null}
+          </>
+        )}
       </section>
     );
   }
@@ -103,7 +95,6 @@ export function ProjectTakeoff({ projectId, clientQuote, archived }: { projectId
   const materials = takeoff.lines.filter((l) => l.kind !== "labor");
   const labor = takeoff.lines.filter((l) => l.kind === "labor");
   const toCheck = materials.filter((l) => l.status !== "certain");
-  const checked = materials.filter((l) => l.status === "certain");
   const editable = !archived;
   const call = (path: string, method: "POST" | "PATCH" | "DELETE", body?: unknown) =>
     run(() => api<Takeoff>(path, { method, ...(body !== undefined ? { body } : {}) }), update);
@@ -112,100 +103,108 @@ export function ProjectTakeoff({ projectId, clientQuote, archived }: { projectId
     onDelete: () => call(`/v1/takeoff-lines/${line.id}`, "DELETE"),
     onConfirm: () => call(`/v1/takeoff-lines/${line.id}/confirm`, "POST"),
   });
+  const validate = () => {
+    setShowList(false);
+    void call(`/v1/takeoffs/${takeoff.id}/validate`, "POST");
+  };
+  const linkStyle = "inline-flex min-h-11 items-center justify-center gap-1.5 self-center text-sm font-bold text-accent-text";
 
-  return (
-    <section id="materiaux" aria-labelledby="takeoff-title" className="flex scroll-mt-4 flex-col gap-3">
-      <div className="flex items-center justify-between gap-2">
-        <h2 id="takeoff-title" className="text-xs font-extrabold tracking-[0.04em] text-muted">
-          LISTE DE MATÉRIAUX
-        </h2>
-        {!draft ? <Badge tone="ok">Validée</Badge> : toCheck.length > 0 ? <Badge tone="warn">À vérifier</Badge> : <Badge>À valider</Badge>}
-      </div>
-
-      <p role="status" className="text-sm">
-        {materials.length} ligne{materials.length > 1 ? "s" : ""} · {toCheck.length} à vérifier
-        {labor.length > 0 ? ` · ${labor.length} prestation${labor.length > 1 ? "s" : ""} (rien à commander)` : ""}
-      </p>
-
-      {actionError ? <ErrorNotice error={actionError} /> : null}
-
-      {!draft && !showList ? (
-        <button
-          type="button"
-          onClick={() => setShowList(true)}
-          className="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-bold text-accent-text"
-        >
-          Voir ou corriger la liste
-        </button>
-      ) : (
-        <>
-        {toCheck.length > 0 ? (
-          <h3 className="text-sm font-extrabold text-warn">À vérifier ({toCheck.length})</h3>
-        ) : null}
-        {toCheck.length > 0 ? (
-          <ul className="flex flex-col gap-2" aria-label="Lignes à vérifier">
-            {toCheck.map((line) => (
-              <li key={line.id}>
-                <DoubtCard line={line} editable={editable} pending={pending} {...lineActions(line)} />
-              </li>
-            ))}
-          </ul>
-        ) : null}
-
-        {checked.length > 0 && toCheck.length > 0 ? <h3 className="text-sm font-extrabold text-ok">Vérifiées ({checked.length})</h3> : null}
-        {checked.length > 0 ? (
-          <Card className="flex flex-col divide-y divide-line px-4 py-1">
-            {checked.map((line) => (
-              <CheckedRow key={line.id} line={line} editable={editable} pending={pending} {...lineActions(line)} />
-            ))}
-          </Card>
-        ) : null}
-
-        {takeoff.notes.length > 0 || takeoff.issues.length > 0 ? (
-          <Card className="flex flex-col gap-1 p-4">
-            <span className="text-sm font-bold">À savoir</span>
-            <ul className="list-disc pl-5 text-sm text-muted">
-              {takeoff.issues.map((i) => (
-                <li key={i.code + i.message}>{i.message}</li>
+  let body: React.ReactNode;
+  if (showList) {
+    body = (
+      <>
+        <Card className="flex flex-col divide-y divide-line px-4 py-1">
+          {materials.map((line) => (
+            <ListRow key={line.id} line={line} editable={editable} pending={pending} {...lineActions(line)} />
+          ))}
+        </Card>
+        {editable ? <AddLine pending={pending} onAdd={(fields) => call(`/v1/takeoffs/${takeoff.id}/lines`, "POST", fields)} /> : null}
+        {labor.length > 0 || takeoff.notes.length > 0 ? (
+          <details className="rounded-2xl bg-surface p-4 text-sm shadow-card">
+            <summary className="cursor-pointer font-bold">Ce que l&apos;IA a mis de côté</summary>
+            <ul className="mt-2 flex list-disc flex-col gap-1 pl-5 text-muted">
+              {labor.map((l) => (
+                <li key={l.id}>{shortName(l.designation)} (main-d&apos;œuvre, rien à commander)</li>
               ))}
               {takeoff.notes.map((n) => (
-                <li key={n}>L&apos;IA : {n}</li>
-              ))}
-            </ul>
-          </Card>
-        ) : null}
-
-        {labor.length > 0 ? (
-          <details className="rounded-2xl bg-surface p-4 text-sm shadow-card">
-            <summary className="cursor-pointer font-bold">Prestations lues, rien à commander ({labor.length})</summary>
-            <ul className="mt-2 flex flex-col gap-1 text-muted">
-              {labor.map((l) => (
-                <li key={l.id}>{l.designation}</li>
+                <li key={n}>{n}</li>
               ))}
             </ul>
           </details>
         ) : null}
-
-        {editable ? <AddLine pending={pending} onAdd={(fields) => call(`/v1/takeoffs/${takeoff.id}/lines`, "POST", fields)} /> : null}
-        </>
-      )}
-
-      {draft && editable ? (
-        <Button pending={pending} disabled={toCheck.length > 0} onClick={() => void call(`/v1/takeoffs/${takeoff.id}/validate`, "POST")}>
-          <Check size={18} aria-hidden="true" />
-          {toCheck.length > 0 ? `Encore ${toCheck.length} ligne${toCheck.length > 1 ? "s" : ""} à vérifier` : "Valider la liste"}
-        </Button>
-      ) : null}
-
-      {!draft ? (
-        <p className="text-sm text-muted">
-          Liste validée{takeoff.validatedAt ? ` le ${new Date(takeoff.validatedAt).toLocaleDateString("fr-FR")}` : ""}.
-          {showList ? " Une correction la fera repasser « à valider » ; les demandes déjà préparées gardent leur liste." : ""}
+        {draft && editable && toCheck.length === 0 ? (
+          <Button pending={pending} onClick={validate}>
+            <Check size={18} aria-hidden="true" />
+            Valider la liste
+          </Button>
+        ) : null}
+        <button type="button" onClick={() => setShowList(false)} className={linkStyle}>
+          Fermer la liste
+        </button>
+      </>
+    );
+  } else if (draft && toCheck.length > 0) {
+    const line = toCheck[0]!;
+    body = (
+      <>
+        <QuestionCard key={line.id} line={line} remaining={toCheck.length} editable={editable} pending={pending} {...lineActions(line)} />
+        <button type="button" onClick={() => setShowList(true)} className={linkStyle}>
+          Voir toute la liste ({materials.length})
+        </button>
+      </>
+    );
+  } else if (draft) {
+    body = (
+      <Card className="flex flex-col gap-3 p-5">
+        <p className="flex items-center gap-2 text-[20px] font-extrabold">
+          <CircleCheck size={24} className="text-ok" aria-hidden="true" />
+          Tout est vérifié
         </p>
-      ) : null}
+        <p className="text-[15px] text-muted">{plural(materials.length, "article")} à demander aux fournisseurs.</p>
+        {editable ? (
+          <Button pending={pending} onClick={validate}>
+            <Check size={18} aria-hidden="true" />
+            Valider la liste
+          </Button>
+        ) : null}
+        <button type="button" onClick={() => setShowList(true)} className={linkStyle}>
+          Voir la liste
+        </button>
+      </Card>
+    );
+  } else {
+    body = (
+      <DoneLine
+        label={`Liste validée · ${plural(materials.length, "article")}`}
+        action="Voir"
+        actionLabel="Voir ou corriger la liste"
+        onAction={() => setShowList(true)}
+      />
+    );
+  }
 
+  return (
+    <>
+      {quoteCard(true)}
+      <section id="materiaux" aria-label="Liste de matériaux" className="flex scroll-mt-4 flex-col gap-3">
+        {actionError ? <ErrorNotice error={actionError} /> : null}
+        {body}
+      </section>
       <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} />
-    </section>
+    </>
+  );
+}
+
+/** Étape terminée : une ligne, et de quoi y revenir. */
+export function DoneLine({ label, action, actionLabel, onAction }: { label: string; action: string; actionLabel?: string; onAction: () => void }) {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-2 shadow-card">
+      <CircleCheck size={20} className="shrink-0 text-ok" aria-hidden="true" />
+      <span className="min-w-0 grow truncate text-[15px] font-bold">{label}</span>
+      <button type="button" onClick={onAction} aria-label={actionLabel ?? action} className="inline-flex min-h-11 shrink-0 items-center text-sm font-bold text-accent-text">
+        {action}
+      </button>
+    </div>
   );
 }
 
@@ -222,124 +221,101 @@ interface LineActions {
   onConfirm: () => Promise<void>;
 }
 
-/** Fiabilité d'une ligne, en mots simples (jamais un faux pourcentage). */
-function reliability(line: TakeoffLine): { label: string; tone: "ok" | "warn" | "danger"; level: 1 | 2 | 3 } {
-  if (line.issues.some((i) => i.severity === "blocking")) return { label: "Incomplète", tone: "danger", level: 1 };
-  if (line.status !== "certain") return { label: "Doute", tone: "warn", level: 2 };
-  if (line.confirmed || line.edited || line.origin === "manual") return { label: "Vérifiée par vous", tone: "ok", level: 3 };
-  return { label: "Fiable", tone: "ok", level: 3 };
-}
-
-function Reliability({ line }: { line: TakeoffLine }) {
-  const r = reliability(line);
-  const color = { ok: "bg-ok", warn: "bg-warn", danger: "bg-danger" }[r.tone];
-  const text = { ok: "text-ok", warn: "text-warn", danger: "text-danger" }[r.tone];
-  return (
-    <span className={`inline-flex shrink-0 items-center gap-1.5 text-xs font-extrabold ${text}`}>
-      <span className="flex items-end gap-0.5" aria-hidden="true">
-        {[1, 2, 3].map((n) => (
-          <span key={n} className={`w-1 rounded-full ${n <= r.level ? color : "bg-line"}`} style={{ height: 4 + n * 3 }} />
-        ))}
-      </span>
-      {r.label}
-    </span>
-  );
-}
-
-function Quantity({ line }: { line: TakeoffLine }) {
-  return (
-    <span className="text-sm">
-      <strong>{line.quantity ?? "Quantité ?"}</strong> {line.unit ?? ""}
-      {line.reference ? <span className="text-muted"> · réf. {line.reference}</span> : null}
-    </span>
-  );
-}
-
-/** Ligne douteuse, compacte sur téléphone : le doute en une ligne, deux gestes. */
-function DoubtCard({ line, editable, pending, onSave, onDelete, onConfirm }: { line: TakeoffLine; editable: boolean; pending: boolean } & LineActions) {
+/** Une question à la fois : l'article, sa quantité, le doute en une phrase, deux gros boutons. */
+function QuestionCard({
+  line,
+  remaining,
+  editable,
+  pending,
+  onSave,
+  onDelete,
+  onConfirm,
+}: { line: TakeoffLine; remaining: number; editable: boolean; pending: boolean } & LineActions) {
   const [editing, setEditing] = useState(false);
-  const [open, setOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showSource, setShowSource] = useState(false);
   const blocking = line.issues.some((i) => i.severity === "blocking");
-  const reasons = [...line.issues].filter((i) => i.severity !== "info").sort((a, b) => Number(b.code === "AI_DOUBT") - Number(a.code === "AI_DOUBT"));
-  const shown = open ? reasons : reasons.slice(0, 1);
-
-  if (editing) {
-    return (
-      <Card className="p-4">
-        <LineForm initial={line} submitLabel="Enregistrer" pending={pending} onCancel={() => setEditing(false)} onSubmit={async (f) => { await onSave(f); setEditing(false); }} />
-      </Card>
-    );
-  }
+  const reason = [...line.issues]
+    .filter((i) => i.severity !== "info")
+    .sort((a, b) => Number(b.code === "AI_DOUBT") - Number(a.code === "AI_DOUBT"))[0];
+  const name = shortName(line.designation);
 
   return (
-    <Card className="flex flex-col gap-1.5 border-l-4 border-warn px-3.5 py-3">
-      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="flex items-start gap-3 text-left">
-        <span className={`min-w-0 grow text-[15px] leading-snug font-bold ${open ? "" : "line-clamp-2"}`}>{line.designation}</span>
-        <span className="shrink-0 text-right text-[15px] leading-snug">
-          <strong>{line.quantity ?? "?"}</strong> {line.unit ?? ""}
-        </span>
-      </button>
-      <ul className="flex flex-col gap-0.5 text-[13px] leading-snug font-semibold text-warn">
-        {shown.map((i) => (
-          <li key={i.code}>{i.message}</li>
-        ))}
-        {!open && reasons.length > 1 ? (
-          <li>
-            <button type="button" onClick={() => setOpen(true)} className="text-muted underline">
-              + {reasons.length - 1} autre{reasons.length > 2 ? "s" : ""}
-            </button>
-          </li>
-        ) : null}
-      </ul>
-      {open ? (
-        <p className="text-[13px] text-muted">{[line.reference ? `Réf. ${line.reference}` : null, sourceLabel(line)].filter(Boolean).join(" · ")}</p>
-      ) : null}
-      {editable ? (
-        confirmDelete ? (
-          <DeleteConfirm pending={pending} onDelete={onDelete} onCancel={() => setConfirmDelete(false)} />
-        ) : (
-          <div className="mt-1 flex items-center gap-2">
-            {!blocking ? (
-              <button
-                type="button"
-                disabled={pending}
-                onClick={() => void onConfirm()}
-                aria-label={`C'est bon : ${line.designation}`}
-                className="inline-flex min-h-11 grow basis-0 items-center justify-center gap-1.5 rounded-xl bg-ink text-sm font-extrabold text-white disabled:opacity-60"
-              >
-                <Check size={16} aria-hidden="true" />
-                C&apos;est bon
-              </button>
-            ) : null}
-            <button
-              type="button"
-              onClick={() => setEditing(true)}
-              aria-label={`Corriger ${line.designation}`}
-              className={`inline-flex min-h-11 grow basis-0 items-center justify-center gap-1.5 rounded-xl text-sm font-extrabold ${blocking ? "bg-ink text-white" : "bg-ground text-ink"}`}
-            >
-              <Pencil size={16} aria-hidden="true" />
-              Corriger
-            </button>
-            <button
-              type="button"
-              onClick={() => setConfirmDelete(true)}
-              aria-label={`Retirer ${line.designation}`}
-              className="flex size-11 shrink-0 items-center justify-center rounded-xl text-muted"
-            >
-              <Trash2 size={18} aria-hidden="true" />
-            </button>
+    <section aria-label={`À vérifier : ${line.designation}`} className="flex flex-col gap-4 rounded-3xl border-l-4 border-warn bg-surface p-5 shadow-card">
+      <span className="text-sm font-extrabold text-warn">{remaining > 1 ? `À vérifier · encore ${remaining}` : "Dernière ligne à vérifier"}</span>
+      {editing ? (
+        <LineForm initial={line} submitLabel="Enregistrer" pending={pending} onCancel={() => setEditing(false)} onSubmit={async (f) => { await onSave(f); setEditing(false); }} />
+      ) : (
+        <>
+          <div className="flex flex-col gap-1">
+            <p className="text-[22px] leading-tight font-extrabold">{name}</p>
+            <p className="text-[20px]">
+              <strong>{line.quantity ?? "Quantité ?"}</strong> {line.unit ?? ""}
+            </p>
           </div>
-        )
-      ) : null}
-    </Card>
+          {reason ? (
+            <p className="flex items-start gap-2 rounded-2xl bg-warn-bg p-3 text-[15px] leading-snug font-semibold text-warn">
+              <HelpCircle size={20} className="mt-px shrink-0" aria-hidden="true" />
+              {doubtText(reason.message)}
+            </p>
+          ) : null}
+          {editable ? (
+            confirmDelete ? (
+              <DeleteConfirm pending={pending} onDelete={onDelete} onCancel={() => setConfirmDelete(false)} />
+            ) : (
+              <>
+                <div className={`grid gap-2 ${blocking ? "grid-cols-1" : "grid-cols-2"}`}>
+                  {!blocking ? (
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() => void onConfirm()}
+                      aria-label={`C'est bon : ${line.designation}`}
+                      className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-ink text-base font-extrabold text-white disabled:opacity-60"
+                    >
+                      <Check size={20} aria-hidden="true" />
+                      C&apos;est bon
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => setEditing(true)}
+                    aria-label={`Corriger ${line.designation}`}
+                    className={`inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl text-base font-extrabold ${blocking ? "bg-ink text-white" : "bg-ground text-ink"}`}
+                  >
+                    <Pencil size={18} aria-hidden="true" />
+                    Corriger
+                  </button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <button type="button" onClick={() => setShowSource(!showSource)} aria-expanded={showSource} className="inline-flex min-h-11 items-center text-sm font-bold text-muted">
+                    Texte du devis
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDelete(true)}
+                    aria-label={`Retirer ${line.designation}`}
+                    className="inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-muted"
+                  >
+                    <Trash2 size={16} aria-hidden="true" />
+                    Retirer
+                  </button>
+                </div>
+                {showSource ? <p className="-mt-2 text-sm text-muted">« {line.designation} »{line.reference ? ` · réf. ${line.reference}` : ""}</p> : null}
+              </>
+            )
+          ) : null}
+        </>
+      )}
+    </section>
   );
 }
 
-/** Ligne sûre : une rangée compacte, modifiable d'un appui. */
-function CheckedRow({ line, editable, pending, onSave, onDelete }: { line: TakeoffLine; editable: boolean; pending: boolean } & LineActions) {
+/** Une ligne de la liste complète : nom court, quantité, crayon. */
+function ListRow({ line, editable, pending, onSave, onDelete, onConfirm }: { line: TakeoffLine; editable: boolean; pending: boolean } & LineActions) {
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const doubt = line.status !== "certain";
 
   if (editing) {
     return (
@@ -350,35 +326,34 @@ function CheckedRow({ line, editable, pending, onSave, onDelete }: { line: Takeo
   }
 
   return (
-    <div className="flex flex-col gap-2 py-3">
-      <div className="flex items-start gap-3">
-        <div className="flex min-w-0 grow flex-col">
-          <span className="line-clamp-2 text-[15px] leading-snug font-bold">{line.designation}</span>
-          <Quantity line={line} />
-        </div>
-        <div className="flex shrink-0 flex-col items-end gap-1">
-          <Reliability line={line} />
-          {editable ? (
-            <div className="flex">
-              <button
-                type="button"
-                onClick={() => setEditing(true)}
-                aria-label={`Corriger ${line.designation}`}
-                className="flex size-10 items-center justify-center rounded-full text-accent-text"
-              >
-                <Pencil size={16} aria-hidden="true" />
+    <div className="flex flex-col gap-2 py-2.5">
+      <div className="flex items-center gap-3">
+        {doubt ? (
+          <HelpCircle size={18} className="shrink-0 text-warn" aria-label="à vérifier" />
+        ) : (
+          <CircleCheck size={18} className="shrink-0 text-ok" aria-label="vérifiée" />
+        )}
+        <span className="min-w-0 grow">
+          <span className="line-clamp-2 text-[15px] leading-snug font-bold">{shortName(line.designation)}</span>
+          <span className="text-sm text-muted">
+            {line.quantity ?? "?"} {line.unit ?? ""}
+          </span>
+        </span>
+        {editable ? (
+          <span className="flex shrink-0">
+            {doubt ? (
+              <button type="button" disabled={pending} onClick={() => void onConfirm()} aria-label={`C'est bon : ${line.designation}`} className="flex size-11 items-center justify-center rounded-full text-ok">
+                <Check size={18} aria-hidden="true" />
               </button>
-              <button
-                type="button"
-                onClick={() => setConfirmDelete(true)}
-                aria-label={`Retirer ${line.designation}`}
-                className="flex size-10 items-center justify-center rounded-full text-muted"
-              >
-                <Trash2 size={16} aria-hidden="true" />
-              </button>
-            </div>
-          ) : null}
-        </div>
+            ) : null}
+            <button type="button" onClick={() => setEditing(true)} aria-label={`Corriger ${line.designation}`} className="flex size-11 items-center justify-center rounded-full text-accent-text">
+              <Pencil size={16} aria-hidden="true" />
+            </button>
+            <button type="button" onClick={() => setConfirmDelete(true)} aria-label={`Retirer ${line.designation}`} className="flex size-11 items-center justify-center rounded-full text-muted">
+              <Trash2 size={16} aria-hidden="true" />
+            </button>
+          </span>
+        ) : null}
       </div>
       {confirmDelete ? <DeleteConfirm pending={pending} onDelete={onDelete} onCancel={() => setConfirmDelete(false)} /> : null}
     </div>
