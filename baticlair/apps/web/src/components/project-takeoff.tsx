@@ -121,17 +121,13 @@ export function ProjectTakeoff({ projectId, clientQuote, archived }: { projectId
         {labor.length > 0 ? ` · ${labor.length} prestation${labor.length > 1 ? "s" : ""} (rien à commander)` : ""}
       </p>
 
-      {draft && toCheck.length > 0 ? (
-        <p className="rounded-2xl bg-warn-bg p-3 text-sm font-semibold text-warn">
-          Avant l&apos;envoi aux fournisseurs, regardez {toCheck.length > 1 ? `ces ${toCheck.length} lignes` : "cette ligne"} : « C&apos;est bon » si
-          elle est juste, sinon « Corriger ».
-        </p>
-      ) : null}
-
       {actionError ? <ErrorNotice error={actionError} /> : null}
 
       {toCheck.length > 0 ? (
-        <ul className="flex flex-col gap-2.5" aria-label="Lignes à vérifier">
+        <h3 className="text-sm font-extrabold text-warn">À vérifier ({toCheck.length})</h3>
+      ) : null}
+      {toCheck.length > 0 ? (
+        <ul className="flex flex-col gap-2" aria-label="Lignes à vérifier">
           {toCheck.map((line) => (
             <li key={line.id}>
               <DoubtCard line={line} editable={editable} pending={pending} {...lineActions(line)} />
@@ -140,6 +136,7 @@ export function ProjectTakeoff({ projectId, clientQuote, archived }: { projectId
         </ul>
       ) : null}
 
+      {checked.length > 0 && toCheck.length > 0 ? <h3 className="text-sm font-extrabold text-ok">Vérifiées ({checked.length})</h3> : null}
       {checked.length > 0 ? (
         <Card className="flex flex-col divide-y divide-line px-4 py-1">
           {checked.map((line) => (
@@ -240,13 +237,14 @@ function Quantity({ line }: { line: TakeoffLine }) {
   );
 }
 
-/** Ligne douteuse : le doute est écrit en clair, l'artisan tranche en un geste. */
+/** Ligne douteuse, compacte sur téléphone : le doute en une ligne, deux gestes. */
 function DoubtCard({ line, editable, pending, onSave, onDelete, onConfirm }: { line: TakeoffLine; editable: boolean; pending: boolean } & LineActions) {
   const [editing, setEditing] = useState(false);
+  const [open, setOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const blocking = line.issues.some((i) => i.severity === "blocking");
   const reasons = [...line.issues].filter((i) => i.severity !== "info").sort((a, b) => Number(b.code === "AI_DOUBT") - Number(a.code === "AI_DOUBT"));
-  const source = sourceLabel(line);
+  const shown = open ? reasons : reasons.slice(0, 1);
 
   if (editing) {
     return (
@@ -257,32 +255,40 @@ function DoubtCard({ line, editable, pending, onSave, onDelete, onConfirm }: { l
   }
 
   return (
-    <Card className="flex flex-col gap-2 border-l-4 border-warn p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 flex-col">
-          <span className="text-[15px] font-bold">{line.designation}</span>
-          <Quantity line={line} />
-        </div>
-        <Reliability line={line} />
-      </div>
-      <ul className="flex flex-col gap-1 text-sm font-semibold text-warn">
-        {reasons.map((i) => (
+    <Card className="flex flex-col gap-1.5 border-l-4 border-warn px-3.5 py-3">
+      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="flex items-start gap-3 text-left">
+        <span className={`min-w-0 grow text-[15px] leading-snug font-bold ${open ? "" : "line-clamp-2"}`}>{line.designation}</span>
+        <span className="shrink-0 text-right text-[15px] leading-snug">
+          <strong>{line.quantity ?? "?"}</strong> {line.unit ?? ""}
+        </span>
+      </button>
+      <ul className="flex flex-col gap-0.5 text-[13px] leading-snug font-semibold text-warn">
+        {shown.map((i) => (
           <li key={i.code}>{i.message}</li>
         ))}
+        {!open && reasons.length > 1 ? (
+          <li>
+            <button type="button" onClick={() => setOpen(true)} className="text-muted underline">
+              + {reasons.length - 1} autre{reasons.length > 2 ? "s" : ""}
+            </button>
+          </li>
+        ) : null}
       </ul>
-      {source ? <p className="text-[13px] text-muted">{source}</p> : null}
+      {open ? (
+        <p className="text-[13px] text-muted">{[line.reference ? `Réf. ${line.reference}` : null, sourceLabel(line)].filter(Boolean).join(" · ")}</p>
+      ) : null}
       {editable ? (
         confirmDelete ? (
           <DeleteConfirm pending={pending} onDelete={onDelete} onCancel={() => setConfirmDelete(false)} />
         ) : (
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="mt-1 flex items-center gap-2">
             {!blocking ? (
               <button
                 type="button"
                 disabled={pending}
                 onClick={() => void onConfirm()}
                 aria-label={`C'est bon : ${line.designation}`}
-                className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-ink px-4 text-sm font-extrabold text-white disabled:opacity-60"
+                className="inline-flex min-h-11 grow basis-0 items-center justify-center gap-1.5 rounded-xl bg-ink text-sm font-extrabold text-white disabled:opacity-60"
               >
                 <Check size={16} aria-hidden="true" />
                 C&apos;est bon
@@ -292,7 +298,7 @@ function DoubtCard({ line, editable, pending, onSave, onDelete, onConfirm }: { l
               type="button"
               onClick={() => setEditing(true)}
               aria-label={`Corriger ${line.designation}`}
-              className={`inline-flex min-h-11 items-center gap-1.5 rounded-xl px-4 text-sm font-extrabold ${blocking ? "bg-ink text-white" : "bg-ground text-ink"}`}
+              className={`inline-flex min-h-11 grow basis-0 items-center justify-center gap-1.5 rounded-xl text-sm font-extrabold ${blocking ? "bg-ink text-white" : "bg-ground text-ink"}`}
             >
               <Pencil size={16} aria-hidden="true" />
               Corriger
@@ -301,10 +307,9 @@ function DoubtCard({ line, editable, pending, onSave, onDelete, onConfirm }: { l
               type="button"
               onClick={() => setConfirmDelete(true)}
               aria-label={`Retirer ${line.designation}`}
-              className="ml-auto inline-flex min-h-11 items-center gap-1.5 px-2 text-sm font-bold text-muted"
+              className="flex size-11 shrink-0 items-center justify-center rounded-xl text-muted"
             >
-              <Trash2 size={16} aria-hidden="true" />
-              Retirer
+              <Trash2 size={18} aria-hidden="true" />
             </button>
           </div>
         )
@@ -330,7 +335,7 @@ function CheckedRow({ line, editable, pending, onSave, onDelete }: { line: Takeo
     <div className="flex flex-col gap-2 py-3">
       <div className="flex items-start gap-3">
         <div className="flex min-w-0 grow flex-col">
-          <span className="text-[15px] font-bold">{line.designation}</span>
+          <span className="line-clamp-2 text-[15px] leading-snug font-bold">{line.designation}</span>
           <Quantity line={line} />
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">

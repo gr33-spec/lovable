@@ -38,7 +38,8 @@ describe("relecture du quantitatif proposé par l'IA", () => {
   it("signale une ligne lue sur une image", () => {
     const { validation } = reviewExtractedTakeoff([line({ sourceRefs: [], sourcePages: [2] })], source, ROOFING_PROFILE);
     expect(validation.lines[0]!.issues.map((i) => i.code)).toContain("READ_FROM_IMAGE");
-    expect(validation.lines[0]!.status).toBe("to_verify");
+    // Simple information : seul un doute de l'IA rend la ligne « à vérifier ».
+    expect(validation.lines[0]!.status).toBe("certain");
   });
 
   it("fait confiance à une ligne corrigée par l'artisan", () => {
@@ -75,5 +76,16 @@ describe("relecture du quantitatif proposé par l'IA", () => {
     const { validation } = reviewExtractedTakeoff([line({ quantity: null, confirmedByArtisan: true })], source, ROOFING_PROFILE);
     expect(validation.lines[0]!.status).toBe("to_verify");
     expect(validation.counts.blocking).toBe(1);
+  });
+
+  it("ne met pas en doute un matériau hors référentiel (autre métier) : simple information", () => {
+    const src = new Map([["1:010", "Mitigeur thermostatique encastré  1  u  420,00"]]);
+    const { validation } = reviewExtractedTakeoff(
+      [line({ designation: "Mitigeur thermostatique encastré", quantity: "1", unit: "u", reference: null, sourceRefs: ["1:010"] })],
+      src,
+      ROOFING_PROFILE,
+    );
+    expect(validation.lines[0]!.status).toBe("certain");
+    expect(validation.lines[0]!.issues.map((i) => [i.code, i.severity])).toContainEqual(["FAMILY_UNKNOWN", "info"]);
   });
 });
