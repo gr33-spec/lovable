@@ -2,7 +2,7 @@
 
 import { Check, ChevronDown, Sparkles, TriangleAlert } from "lucide-react";
 import { useCallback, useState } from "react";
-import { Badge, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
+import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, type Comparison, type ComparisonSupplier, type ItemFlag, type Offer, type OfferLine, type PriceRequest } from "@/lib/api";
 import { euros } from "@/lib/fr";
 import { useResource } from "@/lib/use-resource";
@@ -166,6 +166,12 @@ function OfferLines({ offer, request, archived, onChange }: { offer: Offer; requ
   );
 }
 
+const UNIT_TEXT: Record<string, string> = { U: "u", M: "m", ML: "ml", M2: "m²", M3: "m³", L: "L", KG: "kg", T: "t" };
+function fmtQty(q: { value: string; unit: string }): string {
+  const value = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(Number(q.value));
+  return `${value} ${UNIT_TEXT[q.unit] ?? q.unit.toLowerCase()}`;
+}
+
 const FLAG_LABEL: Record<ItemFlag, string> = {
   SUBSTITUTION: "autre produit",
   QUANTITY_LOWER: "quantité inférieure",
@@ -175,15 +181,18 @@ const FLAG_LABEL: Record<ItemFlag, string> = {
   NOT_PRICED: "sans prix",
 };
 
-function supplierVerdict(s: ComparisonSupplier): string[] {
-  const parts: string[] = [];
+/** Faits sur un fournisseur, en mots simples : ce qu'il manque, ce qu'il faut vérifier. */
+function supplierFacts(s: ComparisonSupplier): { text: string; warn: boolean }[] {
+  const facts: { text: string; warn: boolean }[] = [];
   if (s.missingCount > 0) {
-    parts.push(`il manque ${s.missingCount} article${s.missingCount > 1 ? "s" : ""}${s.estimatedPartHT && Number(s.estimatedPartHT) > 0 ? ` (estimé${s.missingCount > 1 ? "s" : ""} ${euros(s.estimatedPartHT)})` : ""}`);
-  } else parts.push("liste complète");
-  if (s.feesHT && Number(s.feesHT) > 0) parts.push(`frais ${euros(s.feesHT)}`);
-  if (s.uncertainCount > 0) parts.push(`${s.uncertainCount} correspondance${s.uncertainCount > 1 ? "s" : ""} à vérifier`);
-  if (s.arithmetic === "inconsistent") parts.push("totaux à vérifier");
-  return parts;
+    const estimate = s.estimatedPartHT && Number(s.estimatedPartHT) > 0 ? ` (estimé${s.missingCount > 1 ? "s" : ""} ${euros(s.estimatedPartHT)})` : "";
+    facts.push({ text: `${s.missingCount} article${s.missingCount > 1 ? "s" : ""} manquant${s.missingCount > 1 ? "s" : ""}${estimate}`, warn: true });
+  } else facts.push({ text: "Toute la liste chiffrée", warn: false });
+  if (s.feesHT && Number(s.feesHT) > 0) facts.push({ text: `Frais ${euros(s.feesHT)}`, warn: false });
+  const toCheck = s.uncertainCount + (s.arithmetic === "inconsistent" ? 1 : 0);
+  if (toCheck > 0) facts.push({ text: `${toCheck} point${toCheck > 1 ? "s" : ""} à vérifier`, warn: true });
+  if (s.extrasCount > 0) facts.push({ text: `${s.extrasCount} ligne${s.extrasCount > 1 ? "s" : ""} non reconnue${s.extrasCount > 1 ? "s" : ""}`, warn: true });
+  return facts;
 }
 
 /**
@@ -226,24 +235,42 @@ export function ProjectComparison({
       </h2>
       <p className="text-sm text-muted">Coût pour toute votre liste, hors taxes, frais compris. Un article manquant est estimé au prix des autres, jamais compté à zéro.</p>
       <ol className="flex flex-col gap-2">
-        {ranked.map((s, i) => (
-          <li key={s.supplierId}>
-            <Card className={`flex flex-col gap-1 p-4 ${i === 0 && ranked.length > 1 ? "ring-2 ring-ok" : ""}`}>
-              <div className="flex items-baseline justify-between gap-3">
-                <span className="text-[17px] font-extrabold">{s.name}</span>
-                <span className="text-[17px] font-extrabold">{euros(s.comparableTotalHT)}</span>
-              </div>
-              <span className={`text-sm ${s.missingCount > 0 || s.arithmetic === "inconsistent" ? "font-semibold text-warn" : "text-muted"}`}>{supplierVerdict(s).join(" · ")}</span>
-              {i === 0 && ranked.length > 1 ? (
-                <Badge tone="ok">{s.missingCount > 0 ? "Le moins cher, estimation comprise" : "Le moins cher"}</Badge>
-              ) : null}
-            </Card>
-          </li>
-        ))}
+        {ranked.map((s, i) => {
+          const gap = i > 0 && s.comparableTotalHT && best.comparableTotalHT ? Number(s.comparableTotalHT) - Number(best.comparableTotalHT) : null;
+          return (
+            <li key={s.supplierId}>
+              <Card className={`flex flex-col gap-1.5 p-4 ${i === 0 && ranked.length > 1 ? "ring-2 ring-ok" : ""}`}>
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="text-[17px] font-extrabold">{s.name}</span>
+                  <span className="text-[17px] font-extrabold">{euros(s.comparableTotalHT)}</span>
+                </div>
+                {ranked.length > 1 ? (
+                  i === 0 ? (
+                    <span className="text-sm font-bold text-ok">Moins cher sur le total</span>
+                  ) : gap !== null ? (
+                    <span className="text-sm font-bold text-muted">
+                      +{euros(String(gap))} par rapport à {best.name}
+                    </span>
+                  ) : null
+                ) : null}
+                <ul className="flex flex-wrap gap-1.5">
+                  {supplierFacts(s).map((f) => (
+                    <li key={f.text} className={`rounded-full px-2.5 py-1 text-xs font-bold ${f.warn ? "bg-warn-bg text-warn" : "bg-ground text-muted"}`}>
+                      {f.text}
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            </li>
+          );
+        })}
       </ol>
       {ranked.length > 1 && best.missingCount > 0 ? (
-        <p className="text-sm font-semibold text-warn">Attention : {best.name} n&apos;a pas chiffré toute la liste. Demandez-lui le reste avant de choisir.</p>
+        <p className="text-sm font-semibold text-warn">
+          {best.name} n&apos;a pas chiffré toute la liste : son total comprend une estimation. Demandez-lui le reste avant de décider.
+        </p>
       ) : null}
+      {ranked.length === 1 ? <p className="text-sm text-muted">Un seul devis lu pour l&apos;instant : ajoutez-en un autre pour comparer.</p> : null}
 
       <details className="rounded-2xl bg-surface p-4 text-sm shadow-card">
         <summary className="cursor-pointer font-bold">Détail ligne par ligne</summary>
@@ -256,18 +283,28 @@ export function ProjectComparison({
               </span>
               {item.offers.map((o) => {
                 const lowest = o.supplierId === item.lowestSupplierId && data.suppliers.length > 1;
+                const notes = [...o.flags.map((f) => FLAG_LABEL[f]), ...(o.confidence === "to_verify" ? ["à vérifier"] : [])];
                 return (
-                  <span key={o.supplierId} className="flex justify-between gap-3">
-                    <span className="min-w-0 truncate text-muted">
-                      {names.get(o.supplierId)}
-                      {o.flags.length > 0 ? ` · ${o.flags.map((f) => FLAG_LABEL[f]).join(", ")}` : ""}
-                      {o.confidence === "to_verify" ? " · à vérifier" : ""}
+                  <span key={o.supplierId} className="flex flex-col">
+                    <span className="flex justify-between gap-3">
+                      <span className="min-w-0 truncate text-muted">{names.get(o.supplierId)}</span>
+                      {o.status === "missing" ? (
+                        <span className="shrink-0 font-semibold text-warn">manquant</span>
+                      ) : (
+                        <span className={`shrink-0 ${lowest ? "font-extrabold text-ok" : "font-semibold"}`}>{euros(o.comparableAmount)}</span>
+                      )}
                     </span>
-                    {o.status === "missing" ? (
-                      <span className="shrink-0 font-semibold text-warn">manquant</span>
-                    ) : (
-                      <span className={`shrink-0 ${lowest ? "font-extrabold text-ok" : "font-semibold"}`}>{euros(o.comparableAmount)}</span>
-                    )}
+                    {o.status === "covered" && (o.offeredQuantity || notes.length > 0) ? (
+                      <span className="text-xs text-muted">
+                        {o.offeredQuantity && o.effectiveUnitPrice ? `${fmtQty(o.offeredQuantity)} à ${euros(o.effectiveUnitPrice)} net` : ""}
+                        {notes.length > 0 ? (
+                          <span className="font-semibold text-warn">
+                            {o.offeredQuantity ? " · " : ""}
+                            {notes.join(", ")}
+                          </span>
+                        ) : null}
+                      </span>
+                    ) : null}
                   </span>
                 );
               })}

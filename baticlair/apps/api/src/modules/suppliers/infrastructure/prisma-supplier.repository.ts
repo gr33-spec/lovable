@@ -95,4 +95,14 @@ export class PrismaSupplierRepository implements SupplierRepository {
     });
     return count > 0 ? this.findById(tenant, id) : null;
   }
+
+  async delete(tenant: TenantContext, id: string): Promise<"deleted" | "in_use" | "not_found"> {
+    if (!isUuid(id)) return "not_found";
+    const supplier = await this.prisma.supplier.findFirst({ where: { id, companyId: tenant.companyId }, select: { id: true } });
+    if (!supplier) return "not_found";
+    const used = await this.prisma.priceRequestRecipient.count({ where: { supplierId: id } });
+    if (used > 0) return "in_use";
+    await this.prisma.supplier.deleteMany({ where: { id, companyId: tenant.companyId } });
+    return "deleted";
+  }
 }

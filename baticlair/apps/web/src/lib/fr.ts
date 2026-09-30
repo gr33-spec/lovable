@@ -65,6 +65,7 @@ const reasonMessages: Record<string, string> = {
   no_supplier: "Choisissez au moins un fournisseur.",
   supplier_archived: "Un des fournisseurs choisis est archivé.",
   quote_received: "Son devis est déjà reçu. Supprimez-le d'abord pour en mettre un autre.",
+  supplier_in_use: "Ce fournisseur a déjà reçu une demande de prix : archivez-le plutôt, il restera visible dans vos chantiers.",
   no_quote: "Déposez d'abord le devis PDF de ce fournisseur.",
   unknown_request_line: "Cette ligne n'existe pas dans la liste demandée.",
   quote_already_attached: "Ce PDF est déjà rangé chez un autre fournisseur de ce chantier.",

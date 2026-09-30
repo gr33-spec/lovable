@@ -72,8 +72,9 @@ export function computeProgress({ documents, takeoff, requests, offers }: Snapsh
   if (toSend > 0) {
     return { done, current: "fournisseurs", next: { label: `Envoyer ${toSend > 1 ? `les ${toSend} demandes` : "la demande"}`, target: "fournisseurs" } };
   }
+  const answering = recipients.filter((r) => r.status !== "declined").length;
   if (received === 0) {
-    return { done, current: "reponses", next: { label: `Déposer les devis reçus (0 sur ${recipients.length})`, target: "fournisseurs" } };
+    return { done, current: "reponses", next: { label: `Ajouter les devis reçus (0 sur ${answering})`, target: "fournisseurs" } };
   }
   const read = new Set(offers.map((o) => o.recipientId));
   const unread = recipients.filter((r) => r.status === "received" && !read.has(r.id)).length;
@@ -112,6 +113,9 @@ function ProgressBar({ projectId, tick }: { projectId: string; tick: number }) {
   if (!data) return <div className="h-[104px]" aria-hidden="true" />;
 
   const { done, current, next } = computeProgress(data);
+  const recipients = data.requests.flatMap((r) => r.recipients);
+  const counts: Partial<Record<StepKey, string>> =
+    recipients.length > 0 ? { reponses: `${recipients.filter((r) => r.status === "received").length}/${recipients.length}` } : {};
 
   return (
     <nav aria-label="Avancement du chantier" className="flex flex-col gap-3 rounded-3xl bg-surface p-3.5 shadow-card">
@@ -130,6 +134,7 @@ function ProgressBar({ projectId, tick }: { projectId: string; tick: number }) {
               </span>
               <span className={`text-[11px] leading-tight ${isCurrent ? "font-extrabold text-ink" : isDone ? "font-bold text-ok" : "text-muted"}`}>
                 {step.label}
+                {counts[step.key] ? <span className="block font-bold">{counts[step.key]}</span> : null}
               </span>
             </li>
           );

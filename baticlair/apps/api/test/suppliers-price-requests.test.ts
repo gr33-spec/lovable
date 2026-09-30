@@ -92,6 +92,25 @@ describe("carnet de fournisseurs", () => {
   });
 });
 
+describe("suppression d'un fournisseur", () => {
+  it("supprime un fournisseur jamais consulté, sinon demande de l'archiver", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
+    const unused = await supplier(agent, "Erreur de saisie", "faux@x.fr");
+    await agent.delete(`/v1/suppliers/${unused.body.id}`).expect(204);
+    expect((await agent.get(`/v1/suppliers/${unused.body.id}`)).status).toBe(404);
+
+    const projectId = await projectWithValidatedList(agent);
+    const used = await supplier(agent, "Point.P", "contact@pointp.fr");
+    await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [used.body.id] }).expect(201);
+    const refused = await agent.delete(`/v1/suppliers/${used.body.id}`);
+    expect(refused.status).toBe(409);
+    expect(refused.body.error.details).toMatchObject({ reason: "supplier_in_use" });
+
+    const other = await signUpWithCompany(ctx.app, "b@example.fr", "Couverture Leroy");
+    expect((await other.agent.delete(`/v1/suppliers/${used.body.id}`)).status).toBe(404);
+  });
+});
+
 describe("demandes de prix", () => {
   it("exige une liste de matériaux validée", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
