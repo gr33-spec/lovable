@@ -140,6 +140,11 @@ export class DocumentsService {
     return { document, pages };
   }
 
+  async remove(tenant: TenantContext, id: string): Promise<void> {
+    assertCanWrite(tenant);
+    if (!(await this.documents.delete(tenant, id))) throw notFound("Document");
+  }
+
   async content(tenant: TenantContext, id: string) {
     const content = await this.documents.readContent(tenant, id);
     if (!content) throw notFound("Document");

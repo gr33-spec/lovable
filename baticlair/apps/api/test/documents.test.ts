@@ -138,6 +138,57 @@ describe("dépôt et lecture d'un devis (sans IA)", () => {
     expect((await b.agent.get(`/v1/documents/${doc.body.id}/file`)).status).toBe(404);
   });
 
+  it("supprime un devis ; il peut ensuite être déposé à nouveau", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
+    const projectId = await chantier(agent);
+    const pdf = await makePdf(["devis"]);
+    const doc = await upload(agent, projectId, pdf);
+
+    const del = await agent.delete(`/v1/documents/${doc.body.id}`);
+    expect(del.status).toBe(204);
+    expect((await agent.get(`/v1/projects/${projectId}/documents`)).body.items).toEqual([]);
+    expect((await agent.get(`/v1/documents/${doc.body.id}`)).status).toBe(404);
+    expect(await ctx.prisma.documentBlob.count()).toBe(0);
+    expect(await ctx.prisma.documentProcessing.count()).toBe(0);
+
+    const again = await upload(agent, projectId, pdf);
+    expect(again.status).toBe(201);
+    expect(again.body.duplicate).toBe(false);
+    expect((await agent.delete(`/v1/documents/${doc.body.id}`)).status).toBe(404);
+  });
+
+  it("garde les analyses IA décomptées quand un devis est supprimé", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
+    const projectId = await chantier(agent);
+    const doc = await upload(agent, projectId, await makePdf(["devis"]));
+    const document = await ctx.prisma.document.findUniqueOrThrow({ where: { id: doc.body.id } });
+    await ctx.prisma.aiAnalysis.create({
+      data: {
+        companyId: document.companyId,
+        projectId,
+        documentId: document.id,
+        kind: "client_quote",
+        status: "completed",
+        billable: true,
+        billingMonth: "2026-09",
+      },
+    });
+
+    expect((await agent.delete(`/v1/documents/${doc.body.id}`)).status).toBe(204);
+    expect(await ctx.prisma.aiAnalysis.count({ where: { billable: true } })).toBe(1);
+  });
+
+  it("ne laisse pas une autre entreprise supprimer un devis", async () => {
+    const a = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
+    const b = await signUpWithCompany(ctx.app, "b@example.fr", "Couverture Leroy");
+    const projectId = await chantier(a.agent);
+    const doc = await upload(a.agent, projectId, await makePdf(["devis"]));
+
+    expect((await b.agent.delete(`/v1/documents/${doc.body.id}`)).status).toBe(404);
+    expect((await b.agent.delete("/v1/documents/pas-un-uuid")).status).toBe(404);
+    expect((await a.agent.get(`/v1/documents/${doc.body.id}`)).status).toBe(200);
+  });
+
   it("fait remonter le chantier en tête de liste quand un devis y est déposé", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const older = await chantier(agent);

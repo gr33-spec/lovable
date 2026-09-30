@@ -42,7 +42,7 @@ export function setActiveCompanyId(id: string | null): void {
 }
 
 export interface RequestOptions {
-  method?: "GET" | "POST" | "PATCH";
+  method?: "GET" | "POST" | "PATCH" | "DELETE";
   /** Objet envoyé en JSON, ou formulaire (envoi de fichier). */
   body?: unknown;
   /**

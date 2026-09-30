@@ -195,4 +195,10 @@ export class PrismaDocumentRepository implements DocumentRepository {
     if (!row?.blob) return null;
     return { bytes: new Uint8Array(row.blob.bytes), mimeType: row.mimeType, originalName: row.originalName };
   }
+
+  async delete(tenant: TenantContext, id: string): Promise<boolean> {
+    if (!isUuid(id)) return false;
+    const { count } = await this.prisma.document.deleteMany({ where: { id, companyId: tenant.companyId } });
+    return count > 0;
+  }
 }
