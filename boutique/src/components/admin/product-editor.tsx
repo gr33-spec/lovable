@@ -4,10 +4,11 @@ import { ArrowLeft, ArrowRight, ExternalLink, ImagePlus, Loader2, Minus, Plus, S
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState, useTransition } from "react";
-import { deleteProductAction, saveGroupAction, saveProductAction } from "@/app/admin/actions";
+import { deleteProductAction, saveProductAction } from "@/app/admin/actions";
 import { formatPrice, slugify } from "@/lib/format";
 import { imageSrc, type ImageRef } from "@/lib/image-ref";
 import { parseEuros, PRODUCT_COLORS } from "@/lib/validation";
+import { CategoryPicker, type PickerCategory } from "./category-picker";
 import { Notice, ProductStatusBadge, useConfirm, useToast, useUnsavedGuard } from "./ui";
 import { uploadImageFile } from "./upload";
 
@@ -42,11 +43,14 @@ export function ProductEditor({
   isNew,
   categories: initialCategories,
   collections,
+  suggestions = [],
 }: {
   initial: EditorProduct;
   isNew: boolean;
-  categories: { id: string; name: string }[];
+  categories: PickerCategory[];
   collections: { id: string; name: string }[];
+  /** Caractéristiques déjà utilisées (pour écrire toujours de la même façon : « Motif », « Marinière »…). */
+  suggestions?: { label: string; values: string[] }[];
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -61,25 +65,6 @@ export function ProductEditor({
   const [formError, setFormError] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const [categories, setCategories] = useState(initialCategories);
-  const [newCategory, setNewCategory] = useState<string | null>(null);
-  const [creatingCategory, startCreatingCategory] = useTransition();
-
-  function createCategory() {
-    const name = (newCategory ?? "").trim();
-    if (!name) return;
-    startCreatingCategory(async () => {
-      const res = await saveGroupAction("category", { name, slug: "", description: "", isVisible: true });
-      if (!res.ok) {
-        setErrors((e) => ({ ...e, categoryId: res.fieldErrors?.name ?? res.error }));
-        return;
-      }
-      setCategories((list) => [...list, { id: res.id, name }]);
-      update("categoryId", res.id);
-      setErrors((prev) => Object.fromEntries(Object.entries(prev).filter(([k]) => k !== "categoryId")));
-      setNewCategory(null);
-      toast(`Catégorie « ${name} » créée.`);
-    });
-  }
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -388,50 +373,89 @@ export function ProductEditor({
               {errors.stock && <p className="field-error">{errors.stock}</p>}
             </div>
           </div>
-          <div>
-            <label htmlFor="field-categoryId" className="field-label">
-              Catégorie <span className="text-error">*</span>
-            </label>
-            <select id="field-categoryId" className="input" value={p.categoryId} onChange={(e) => update("categoryId", e.target.value)} aria-invalid={errors.categoryId ? true : undefined}>
-              <option value="">Choisir…</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
+          <CategoryPicker
+            categories={categories}
+            value={p.categoryId}
+            onChange={(id) => update("categoryId", id)}
+            onCreated={(c) => {
+              setCategories((list) => [...list, c]);
+              toast(`« ${c.name} » créée.`);
+            }}
+            error={errors.categoryId}
+          />
+          <fieldset>
+            <legend className="field-label">Caractéristiques (motif, matière, taille…)</legend>
+            <p className="field-hint mb-2">Elles s&apos;affichent sur la fiche et deviennent des filtres dans la boutique dès que plusieurs créations les partagent.</p>
+            <ul className="space-y-2">
+              {p.features.map((f, i) => (
+                <li key={i} className="flex gap-2">
+                  <input
+                    className="input w-[42%] shrink-0 sm:w-1/3"
+                    placeholder="Ex. : Motif"
+                    aria-label="Nom de la caractéristique"
+                    list="caracteristiques-noms"
+                    value={f.label}
+                    maxLength={40}
+                    onChange={(e) => update("features", p.features.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))}
+                  />
+                  <input
+                    className="input min-w-0 flex-1"
+                    placeholder="Ex. : Marinière"
+                    aria-label="Valeur"
+                    list={`caracteristiques-valeurs-${i}`}
+                    value={f.value}
+                    maxLength={120}
+                    onChange={(e) => update("features", p.features.map((x, j) => (j === i ? { ...x, value: e.target.value } : x)))}
+                  />
+                  <datalist id={`caracteristiques-valeurs-${i}`}>
+                    {(suggestions.find((sg) => sg.label.toLowerCase() === f.label.trim().toLowerCase())?.values ?? []).map((v) => (
+                      <option key={v} value={v} />
+                    ))}
+                  </datalist>
+                  <button type="button" className="btn btn-ghost btn-icon shrink-0" aria-label="Retirer" onClick={() => update("features", p.features.filter((_, j) => j !== i))}>
+                    <X size={18} />
+                  </button>
+                </li>
               ))}
-            </select>
-            {errors.categoryId && <p className="field-error">{errors.categoryId}</p>}
-            {newCategory === null ? (
-              <button type="button" className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-primary" onClick={() => setNewCategory("")}>
-                <Plus size={15} /> Nouvelle catégorie (broches, bracelets…)
-              </button>
-            ) : (
-              <div className="mt-2 flex gap-2">
-                <input
-                  className="input flex-1"
-                  aria-label="Nom de la nouvelle catégorie"
-                  placeholder="Ex. : Broches"
-                  maxLength={80}
-                  value={newCategory}
-                  autoFocus
-                  onChange={(e) => setNewCategory(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      createCategory();
-                    }
-                    if (e.key === "Escape") setNewCategory(null);
-                  }}
-                />
-                <button type="button" className="btn btn-primary" disabled={creatingCategory || !newCategory.trim()} onClick={createCategory}>
-                  {creatingCategory ? <Loader2 size={16} className="animate-spin" /> : "Créer"}
-                </button>
-                <button type="button" className="btn btn-outline btn-icon" aria-label="Annuler" onClick={() => setNewCategory(null)}>
-                  <X size={16} />
+            </ul>
+            <datalist id="caracteristiques-noms">
+              {suggestions.map((sg) => (
+                <option key={sg.label} value={sg.label} />
+              ))}
+            </datalist>
+            {p.features.length < 12 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {[...new Set([...suggestions.map((sg) => sg.label), "Motif", "Matière", "Taille", "Style"])]
+                  .filter((label) => !p.features.some((f) => f.label.trim().toLowerCase() === label.toLowerCase()))
+                  .slice(0, 6)
+                  .map((label) => (
+                    <button key={label} type="button" className="chip !min-h-9 text-[13px]" onClick={() => update("features", [...p.features, { label, value: "" }])}>
+                      <Plus size={13} aria-hidden="true" /> {label}
+                    </button>
+                  ))}
+                <button type="button" className="chip !min-h-9 text-[13px]" onClick={() => update("features", [...p.features, { label: "", value: "" }])}>
+                  <Plus size={13} aria-hidden="true" /> Autre
                 </button>
               </div>
             )}
-          </div>
+          </fieldset>
+          <fieldset>
+            <legend className="field-label">Couleurs (servent au filtre de la boutique)</legend>
+            <div className="flex flex-wrap gap-2">
+              {PRODUCT_COLORS.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  className="chip"
+                  aria-pressed={p.colors.includes(c.id)}
+                  onClick={() => update("colors", p.colors.includes(c.id) ? p.colors.filter((x) => x !== c.id) : [...p.colors, c.id])}
+                >
+                  <span className="h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: c.hex === "conic" ? "conic-gradient(#e3a2b0,#e8c547,#5e8b5a,#3f6fb0,#8565a8,#e3a2b0)" : c.hex }} aria-hidden="true" />
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
           <div>
             <label htmlFor="field-description" className="field-label">
               Description
@@ -444,7 +468,7 @@ export function ProductEditor({
 
       {/* 3. Options (repliées pour ne pas encombrer) */}
       <details className="card mt-6 p-4 sm:p-5">
-        <summary className="font-semibold">Plus d&apos;options (collection, couleurs, prix barré, référence…)</summary>
+        <summary className="font-semibold">Plus d&apos;options (collection, prix barré, référence…)</summary>
         <div className="mt-5 grid gap-5 md:grid-cols-2">
           <div>
             <label htmlFor="field-collectionId" className="field-label">
@@ -466,42 +490,8 @@ export function ProductEditor({
             <input id="field-compareAtCents" className="input" inputMode="decimal" value={compareAt} onChange={(e) => setCompareAt(e.target.value.replace(/[^\d,.]/g, "").slice(0, 9))} placeholder="Uniquement pour une vraie promotion" />
             {errors.compareAtCents && <p className="field-error">{errors.compareAtCents}</p>}
           </div>
-          <fieldset className="md:col-span-2">
-            <legend className="field-label">Couleurs (servent au filtre de la boutique)</legend>
-            <div className="flex flex-wrap gap-2">
-              {PRODUCT_COLORS.map((c) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  className="chip"
-                  aria-pressed={p.colors.includes(c.id)}
-                  onClick={() => update("colors", p.colors.includes(c.id) ? p.colors.filter((x) => x !== c.id) : [...p.colors, c.id])}
-                >
-                  <span className="h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: c.hex === "conic" ? "conic-gradient(#e3a2b0,#e8c547,#5e8b5a,#3f6fb0,#8565a8,#e3a2b0)" : c.hex }} aria-hidden="true" />
-                  {c.label}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-          <fieldset className="md:col-span-2">
-            <legend className="field-label">Caractéristiques</legend>
-            <ul className="space-y-2">
-              {p.features.map((f, i) => (
-                <li key={i} className="flex gap-2">
-                  <input className="input" placeholder="Ex. : Dimensions" aria-label="Nom" value={f.label} maxLength={40} onChange={(e) => update("features", p.features.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} />
-                  <input className="input" placeholder="Ex. : 3,5 cm" aria-label="Valeur" value={f.value} maxLength={120} onChange={(e) => update("features", p.features.map((x, j) => (j === i ? { ...x, value: e.target.value } : x)))} />
-                  <button type="button" className="btn btn-ghost btn-icon shrink-0" aria-label="Retirer" onClick={() => update("features", p.features.filter((_, j) => j !== i))}>
-                    <X size={18} />
-                  </button>
-                </li>
-              ))}
-            </ul>
-            {p.features.length < 12 && (
-              <button type="button" className="btn btn-outline btn-sm mt-2" onClick={() => update("features", [...p.features, { label: "", value: "" }])}>
-                <Plus size={15} aria-hidden="true" /> Ajouter une caractéristique
-              </button>
-            )}
-          </fieldset>
+
+
           <div>
             <label htmlFor="field-sku" className="field-label">
               Référence (facultatif)

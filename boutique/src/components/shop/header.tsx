@@ -99,7 +99,9 @@ export function Header({
   const MAX_TOP = 3;
   const many = categories.length > MAX_TOP;
   const topLinks = many ? links.filter((l) => !categories.slice(MAX_TOP).some((c) => l.href === `/boutique/${c.slug}`)) : links;
-  const isActive = (href: string) => (href === "/boutique" ? pathname === "/boutique" : pathname === href.split("?")[0] && !href.includes("?"));
+  // Une famille reste « active » dans ses sous-catégories (/boutique/pampilles/coeurs → Pampilles).
+  const isActive = (href: string) =>
+    href === "/boutique" ? pathname === "/boutique" : !href.includes("?") && (pathname === href || (href.startsWith("/boutique/") && pathname.startsWith(`${href}/`)));
 
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -217,7 +219,7 @@ export function Header({
                     <li key={c.slug} className="menu-item" style={{ "--i": i + 2 } as React.CSSProperties}>
                       <Link
                         href={`/boutique/${c.slug}`}
-                        aria-current={pathname === `/boutique/${c.slug}` ? "page" : undefined}
+                        aria-current={isActive(`/boutique/${c.slug}`) ? "page" : undefined}
                         className="group flex items-center gap-3 rounded-2xl px-2 py-2 no-underline transition-colors hover:bg-surface-2 aria-[current=page]:bg-primary-soft"
                       >
                         <span className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-surface-2 ring-1 ring-border">

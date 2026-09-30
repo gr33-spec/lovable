@@ -29,7 +29,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: SP 
       />
       <ProductList
         rows={rows.map((r) => ({ ...r, updated_at: new Date(r.updated_at).toISOString() }))}
-        categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+        categories={categories.filter((c) => !c.archived).map((c) => ({ id: c.id, name: c.label }))}
         filters={{ q: sp.q ?? "", statut: sp.statut ?? "", categorie: sp.categorie ?? "", stock: sp.stock ?? "" }}
         lowThreshold={settings.lowStockThreshold}
       />

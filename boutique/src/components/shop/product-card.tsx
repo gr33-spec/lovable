@@ -74,9 +74,11 @@ export function ProductCard({ product, priority = false }: { product: Card; prio
   );
 }
 
-export function ProductGrid({ products, priorityCount = 0 }: { products: Card[]; priorityCount?: number }) {
+export function ProductGrid({ products, priorityCount = 0, withSidebar = false }: { products: Card[]; priorityCount?: number; withSidebar?: boolean }) {
   return (
-    <ul className="grid grid-cols-2 gap-x-3.5 gap-y-10 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4 lg:gap-x-7 lg:gap-y-14">
+    <ul
+      className={`grid grid-cols-2 gap-x-3.5 gap-y-10 sm:grid-cols-3 sm:gap-x-6 lg:gap-x-7 lg:gap-y-14 ${withSidebar ? "lg:grid-cols-3 2xl:grid-cols-4" : "lg:grid-cols-4"}`}
+    >
       {products.map((p, i) => (
         <li key={p.id} className="animate-rise" style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}>
           <ProductCard product={p} priority={i < priorityCount} />

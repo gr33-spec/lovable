@@ -218,7 +218,7 @@ await step("Annuler une réservation : le bijou redevient disponible", async () 
 const photo = (color) =>
   execSync(`node -e "require('sharp')({create:{width:1600,height:1200,channels:3,background:'${color}'}}).jpeg().toBuffer().then(b=>process.stdout.write(b))"`, { cwd: new URL("..", import.meta.url).pathname });
 
-await step("Nouvelle création depuis le téléphone : 2 photos, principale choisie, nouvelle catégorie, publiée", async () => {
+await step("Nouvelle création depuis le téléphone : 2 photos, principale choisie, nouvelle sous-catégorie, publiée", async () => {
   await admin.goto(`${BASE}/admin/produits/nouveau`);
   const chooser = admin.waitForEvent("filechooser");
   await admin.getByRole("button", { name: "Ajouter des photos" }).click();
@@ -226,17 +226,21 @@ await step("Nouvelle création depuis le téléphone : 2 photos, principale choi
     { name: "IMG_0001.jpg", mimeType: "image/jpeg", buffer: photo("#c96") },
     { name: "IMG_0002.jpg", mimeType: "image/jpeg", buffer: photo("#69c") },
   ]);
-  await admin.getByText("Principale").waitFor();
+  await admin.getByText("Principale", { exact: true }).waitFor();
   await admin.waitForFunction(() => document.querySelectorAll("li img").length >= 2, null, { timeout: 30000 });
   await admin.getByRole("button", { name: "Choisir la photo 2 comme principale" }).click();
   await admin.locator("#field-name").fill("Boucles Soleil Test E2E");
   await admin.locator("#field-priceCents").fill("26,50");
-  // Nouvelle catégorie créée sans quitter la fiche (ex. : des broches).
-  await admin.getByRole("button", { name: /Nouvelle catégorie/ }).click();
-  await admin.getByLabel("Nom de la nouvelle catégorie").fill("Broches");
+  // Catégorie puis nouvelle sous-catégorie créée sans quitter la fiche.
+  await admin.locator("#field-category-0").selectOption({ label: "Boucles d'oreilles" });
+  await admin.getByRole("button", { name: /Sous-catégorie dans « Boucles d'oreilles »/ }).click();
+  await admin.getByLabel("Nom", { exact: true }).fill("Soleils");
   await admin.getByRole("button", { name: "Créer", exact: true }).click();
-  await admin.getByText("Catégorie « Broches » créée.").waitFor();
-  assert.equal(await admin.locator("#field-categoryId option:checked").textContent(), "Broches");
+  await admin.getByText("« Soleils » créée.").waitFor();
+  assert.equal(await admin.locator("#field-category-1 option:checked").textContent(), "Soleils");
+  // Une caractéristique qui servira de filtre.
+  await admin.getByRole("button", { name: "Motif", exact: true }).click();
+  await admin.getByLabel("Valeur").last().fill("Soleil");
   await admin.getByRole("button", { name: "Ajouter une pièce" }).click();
   await admin.screenshot({ path: `${SHOTS}07-admin-produit.png`, fullPage: true });
   await admin.getByRole("button", { name: "Publier" }).click();
@@ -245,12 +249,45 @@ await step("Nouvelle création depuis le téléphone : 2 photos, principale choi
   assert.equal(sql("SELECT status || '/' || stock || '/' || price_cents FROM product WHERE name = 'Boucles Soleil Test E2E'"), "published/2/2650");
 });
 
-await step("Le produit apparaît immédiatement dans la boutique, dans sa nouvelle catégorie", async () => {
+await step("Le produit apparaît immédiatement dans la boutique, dans sa sous-catégorie et sa famille", async () => {
   await page.goto(`${BASE}/boutique`);
   await page.getByText("Boucles Soleil Test E2E").waitFor();
-  await page.goto(`${BASE}/boutique/broches`);
-  await page.getByRole("heading", { name: "Broches" }).first().waitFor();
+  await page.goto(`${BASE}/boutique/boucles-d-oreilles/soleils`);
+  await page.getByRole("heading", { name: "Soleils" }).first().waitFor();
   await page.getByText("Boucles Soleil Test E2E").waitFor();
+  await page.getByRole("link", { name: "Boucles d'oreilles" }).first().waitFor();
+  await page.goto(`${BASE}/boutique/boucles-d-oreilles`);
+  await page.getByText("Boucles Soleil Test E2E").waitFor();
+  await page.getByRole("link", { name: /Soleils/ }).first().waitFor();
+});
+
+await step("Catégories : sous-catégorie ajoutée, renommée avec son adresse, ancienne adresse redirigée, vide supprimée", async () => {
+  await admin.goto(`${BASE}/admin/categories`);
+  await admin.getByRole("button", { name: "Ajouter une sous-catégorie dans Boucles d'oreilles" }).click();
+  await admin.getByLabel("Nom").fill("Créoles");
+  await admin.getByRole("button", { name: "Enregistrer" }).click();
+  await admin.getByText("« Créoles » créée.").waitFor();
+  // Renommer « Soleils » et changer son adresse.
+  await admin.getByRole("button", { name: "Plus d'actions pour Soleils" }).click();
+  await admin.getByRole("button", { name: /Renommer, déplacer/ }).click();
+  await admin.getByLabel("Nom").fill("Soleils dorés");
+  await admin.getByLabel("Fin de l'adresse").fill("soleils-dores");
+  await admin.getByRole("button", { name: "Enregistrer" }).click();
+  await admin.getByText("Catégorie enregistrée.").waitFor();
+  await admin.screenshot({ path: `${SHOTS}07b-admin-categories.png`, fullPage: true });
+  await page.goto(`${BASE}/boutique/boucles-d-oreilles/soleils`);
+  await page.waitForURL(`${BASE}/boutique/boucles-d-oreilles/soleils-dores`);
+  await page.getByRole("heading", { name: "Soleils dorés" }).first().waitFor();
+  // « Créoles » est vide : supprimée directement ; une catégorie pleine ne l'est jamais sans destination.
+  await admin.getByRole("button", { name: "Plus d'actions pour Créoles" }).click();
+  await admin.getByRole("button", { name: "Supprimer…" }).click();
+  await admin.getByRole("button", { name: "Supprimer", exact: true }).click();
+  await admin.getByText("Catégorie supprimée.").waitFor();
+  await admin.getByRole("button", { name: "Plus d'actions pour Soleils dorés" }).click();
+  await admin.getByRole("button", { name: "Supprimer…" }).click();
+  await admin.getByText("Rien n'est supprimé brutalement").waitFor();
+  await admin.getByRole("button", { name: "Annuler" }).last().click();
+  assert.equal(sql("SELECT count(*) FROM category WHERE slug = 'soleils-dores'"), "1");
 });
 
 await step("Fichier piégé (texte renommé en .jpg) : refusé avec un message clair", async () => {

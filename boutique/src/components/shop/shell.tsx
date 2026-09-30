@@ -5,7 +5,8 @@ import { Header } from "./header";
 /** Structure commune des pages de la boutique : en-tête, contenu, pied de page. */
 export async function ShopShell({ children }: { children: React.ReactNode }) {
   const [settings, categories] = await Promise.all([getSettings(), getCategories()]);
-  const nav = categories.filter((c) => c.productCount > 0).map((c) => ({ slug: c.slug, name: c.name, cover: c.cover }));
+  // Menu et pied de page : les familles principales (catégories de premier niveau) qui contiennent des créations.
+  const nav = categories.filter((c) => c.parentId === null && c.productCount > 0).map((c) => ({ slug: c.path, name: c.name, cover: c.cover }));
   return (
     <div className="flex min-h-dvh flex-col">
       <Header shopName={settings.shopName} logo={settings.logo} tagline={settings.tagline} socials={settings.socials} categories={nav} />

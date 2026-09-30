@@ -1,6 +1,7 @@
 import "server-only";
 import type { ImageRef } from "../image-ref";
 import type { OrderStatus } from "../order-status";
+import { adminCategoryTree } from "./categories";
 import { query, queryOne } from "./db";
 import { toImageRef, type ImageRow } from "./images";
 
@@ -72,8 +73,9 @@ export async function adminProducts(filter: { q?: string; status?: string; categ
     where.push(`p.status = $${params.length}`);
   } else where.push("p.status <> 'archived'");
   if (filter.categoryId && /^[0-9a-f-]{36}$/.test(filter.categoryId)) {
+    // La catégorie et toutes ses sous-catégories.
     params.push(filter.categoryId);
-    where.push(`p.category_id = $${params.length}`);
+    where.push(`p.category_id IN (WITH RECURSIVE t AS (SELECT id FROM category WHERE id = $${params.length} UNION ALL SELECT c.id FROM category c JOIN t ON c.parent_id = t.id) SELECT id FROM t)`);
   }
   if (filter.stock === "epuise") where.push("p.stock = 0");
   if (filter.q) {
@@ -81,7 +83,10 @@ export async function adminProducts(filter: { q?: string; status?: string; categ
     where.push(`(lower(p.name) LIKE $${params.length} OR lower(coalesce(p.sku, '')) LIKE $${params.length})`);
   }
   const rows = await query<Omit<AdminProductRow, "image" | "reserved" | "booked"> & { reserved: string; booked: string; img_id: string | null }>(
-    `SELECT p.id, p.name, p.slug, p.sku, p.status, p.price_cents, p.stock, p.updated_at, c.name AS category_name,
+    `SELECT p.id, p.name, p.slug, p.sku, p.status, p.price_cents, p.stock, p.updated_at,
+            (WITH RECURSIVE up AS (SELECT id, parent_id, name, 1 AS lvl FROM category WHERE id = p.category_id
+                                   UNION ALL SELECT k.id, k.parent_id, k.name, up.lvl + 1 FROM category k JOIN up ON k.id = up.parent_id)
+             SELECT string_agg(name, ' › ' ORDER BY lvl DESC) FROM up) AS category_name,
             coalesce((SELECT sum(i.quantity) FROM order_item i JOIN customer_order o ON o.id = i.order_id WHERE i.product_id = p.id AND o.status = 'pending'), 0) AS reserved,
             (SELECT count(*) FROM reservation rv WHERE rv.product_id = p.id AND rv.status = 'pending') AS booked,
             (SELECT im.id FROM image im WHERE im.product_id = p.id AND im.kind = 'product' ORDER BY im.position LIMIT 1) AS img_id
@@ -129,14 +134,24 @@ export async function adminProduct(id: string) {
 
 export async function groups() {
   const [categories, collections] = await Promise.all([
-    query<{ id: string; name: string; slug: string; description: string; is_visible: boolean; product_count: string }>(
-      "SELECT c.*, (SELECT count(*) FROM product p WHERE p.category_id = c.id AND p.status <> 'archived') AS product_count FROM category c ORDER BY position, name",
-    ),
+    adminCategoryTree(),
     query<{ id: string; name: string; slug: string; description: string; is_visible: boolean; product_count: string }>(
       "SELECT c.*, (SELECT count(*) FROM product p WHERE p.collection_id = c.id AND p.status <> 'archived') AS product_count FROM collection c ORDER BY position, name",
     ),
   ]);
   return { categories, collections };
+}
+
+/** Caractéristiques déjà saisies (nom → valeurs), les plus utilisées d'abord : suggestions dans la fiche produit. */
+export async function attributeSuggestions(): Promise<{ label: string; values: string[] }[]> {
+  const rows = await query<{ label: string; values: string[] }>(
+    `SELECT mode() WITHIN GROUP (ORDER BY btrim(f->>'label')) AS label,
+            (array_agg(DISTINCT btrim(f->>'value')) FILTER (WHERE btrim(f->>'value') <> ''))[1:40] AS values
+     FROM product p, jsonb_array_elements(p.features) f
+     WHERE p.status <> 'archived' AND slugish(f->>'label') <> ''
+     GROUP BY slugish(f->>'label') ORDER BY count(*) DESC LIMIT 30`,
+  );
+  return rows.map((r) => ({ label: r.label, values: r.values ?? [] }));
 }
 
 export interface AdminOrderRow {

@@ -25,7 +25,8 @@ export default async function HomePage() {
   // complétée par les dernières créations (on présente une collection).
   const pool = available.length >= 2 ? available : withPhotos;
   const tiles = [settings.hero, ...pool.map((p) => p.image)].filter((img, i, all): img is NonNullable<typeof img> => !!img && all.findIndex((x) => x?.id === img.id) === i).slice(0, 2);
-  const visibleCategories = categories.filter((c) => c.productCount > 0);
+  // Familles principales seulement (les sous-catégories se découvrent en entrant dedans).
+  const visibleCategories = categories.filter((c) => c.parentId === null && c.productCount > 0);
   const wideLogo = settings.logo ? settings.logo.w / settings.logo.h >= 1.6 : false;
   // Catégories en « bento » sur ordinateur : la première en grand, les autres autour.
   const n = visibleCategories.length;

@@ -62,7 +62,7 @@ export async function hasDemoProducts(): Promise<boolean> {
 /** `load` fournit le contenu d'une photo de démonstration (disque ou adresse du site). */
 export async function createDemoProducts(adminId: string, load: (file: string) => Promise<Buffer>): Promise<{ ok: true; count: number } | { ok: false; error: string }> {
   if (await queryOne("SELECT 1 FROM product LIMIT 1")) return { ok: false, error: "Des produits existent déjà : les exemples ne sont proposés que sur une boutique vide." };
-  const categories = await query<{ id: string; slug: string }>("SELECT id, slug FROM category");
+  const categories = await query<{ id: string; slug: string }>("SELECT id, slug FROM category WHERE parent_id IS NULL AND archived_at IS NULL ORDER BY position");
   let count = 0;
   for (const d of DEMO) {
     const category = categories.find((c) => c.slug === d.category) ?? categories[0];

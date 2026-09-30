@@ -12,6 +12,7 @@ import { getFile, isPrivateStorageMissing, putFile, removeFiles } from "./storag
 export const BACKUP_TABLES = [
   "admin_user",
   "category",
+  "category_redirect",
   "collection",
   "product",
   "product_slug_redirect",
@@ -73,6 +74,21 @@ async function insertRows(c: PoolClient, table: string, rows: Record<string, unk
   }
 }
 
+/** Catégories : chaque parent est recréé avant ses sous-catégories. */
+function parentsFirst(rows: Record<string, unknown>[]): Record<string, unknown>[] {
+  const out: Record<string, unknown>[] = [];
+  const placed = new Set<unknown>();
+  let pending = rows;
+  while (pending.length) {
+    const ready = pending.filter((r) => !r.parent_id || placed.has(r.parent_id));
+    if (!ready.length) return [...out, ...pending]; // données incohérentes : la base refusera proprement
+    for (const r of ready) placed.add(r.id);
+    out.push(...ready);
+    pending = pending.filter((r) => !placed.has(r.id));
+  }
+  return out;
+}
+
 /** Remplace TOUTES les données par celles de la sauvegarde (dans une transaction : tout ou rien). */
 export async function restoreBackup(file: BackupFile): Promise<void> {
   if (file.format !== "boheme-backup" || file.version !== 1) throw new Error("Fichier de sauvegarde non reconnu.");
@@ -82,7 +98,8 @@ export async function restoreBackup(file: BackupFile): Promise<void> {
     const settings = file.tables.shop_settings ?? [];
     for (const t of BACKUP_TABLES) {
       if (t === "shop_settings") continue;
-      await insertRows(c, t, file.tables[t] ?? []);
+      const rows = file.tables[t] ?? [];
+      await insertRows(c, t, t === "category" ? parentsFirst(rows) : rows);
     }
     await insertRows(c, "shop_settings", settings);
   });
