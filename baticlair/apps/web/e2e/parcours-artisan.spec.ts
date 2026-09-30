@@ -1,3 +1,4 @@
+import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
 /** Adresse unique par exécution : les tests ne dépendent pas de l'état de la base. */
@@ -141,4 +142,47 @@ test("les onglets pas encore construits le disent clairement", async ({ page }) 
   await expect(page.getByRole("heading", { name: "Bientôt ici" })).toBeVisible();
   await page.getByRole("link", { name: "Fournisseurs" }).click();
   await expect(page.getByRole("heading", { name: "Bientôt ici" })).toBeVisible();
+});
+
+test("un couvreur dépose son devis client et un devis fournisseur (lecture sans IA)", async ({ page }) => {
+  await signUp(page);
+  await createProject(page, "Toiture Leroy", "M. Leroy", "8 rue du Moulin, Vannes");
+
+  const fixture = (name: string) => path.join(__dirname, "fixtures", name);
+
+  // Un fichier qui n'est pas un PDF est refusé avec un message clair.
+  await page.getByLabel("Choisir le devis (PDF)").setInputFiles({
+    name: "devis.pdf",
+    mimeType: "application/pdf",
+    buffer: Buffer.from("<html>pas un pdf</html>"),
+  });
+  await expect(page.getByRole("alert").filter({ hasText: "Ce fichier n'est pas un PDF" })).toBeVisible();
+
+  // Devis client : 3 pages (tableau, page scannée, conditions générales).
+  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(fixture("devis-client-couvreur.pdf"));
+  await expect(page.getByText("DEVIS CLIENT")).toBeVisible();
+  await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
+  await expect(page.getByText("1 page lue · 1 page à lire en image · 1 page ignorée (conditions générales…)")).toBeVisible();
+  await expect(page.getByText("PROCHAINE ÉTAPE", { exact: true })).toHaveCount(0);
+
+  // Devis fournisseur.
+  await page.getByLabel("Ajouter un devis fournisseur (PDF)").setInputFiles(fixture("devis-fournisseur-couvreur.pdf"));
+  await expect(page.getByText("devis-fournisseur-couvreur.pdf")).toBeVisible();
+  await expect(page.getByText("2 pages lues")).toBeVisible();
+
+  // Le même fichier une seconde fois : rien n'est ajouté.
+  await page.getByLabel("Ajouter un devis fournisseur (PDF)").setInputFiles(fixture("devis-fournisseur-couvreur.pdf"));
+  await expect(page.getByRole("status").filter({ hasText: "déjà dans ce chantier" })).toBeVisible();
+
+  // Après rechargement, les documents sont toujours là.
+  await page.reload();
+  await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
+  await expect(page.getByText("devis-fournisseur-couvreur.pdf")).toHaveCount(1);
+
+  // Le propriétaire voit la consommation IA : rien de dépensé, volume lu mesuré.
+  await page.goto("/compte");
+  const usage = page.locator("section, div").filter({ has: page.getByRole("heading", { name: "Consommation IA ce mois-ci" }) }).last();
+  await expect(usage.getByText("0,00 €").first()).toBeVisible();
+  await expect(usage.getByText("2 · 5 pages")).toBeVisible();
+  await expect(usage.getByText(/la lecture des devis est gratuite/)).toBeVisible();
 });

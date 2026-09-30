@@ -223,3 +223,33 @@ fictives uniquement.
   suppression définitive n'existe que dans les réglages, avec confirmation
   explicite. Même principe pour les documents : retirer d'un chantier
   n'est pas détruire.
+
+### PD-025 — MVP réservé aux charpentiers-couvreurs, architecture ouverte aux autres métiers
+- **Date** : 2026-09-30 · **Statut** : Décidé (le fondateur)
+- **Décision** : règles métier, vocabulaire, unités, matériaux et contrôles
+  sont pensés pour la charpente-couverture (tuiles, ardoises, liteaux,
+  écrans, zinguerie, bois de charpente). Tout ce qui dépend du métier est
+  regroupé dans un **profil métier** (`packages/domain/src/trades/`) : un
+  autre corps d'état = un nouveau profil, pas une réécriture.
+- **Impact** : chaque document porte son métier (`trade`, `roofing` par
+  défaut) ; le routage des pages lit le profil.
+
+### PD-026 — On optimise les coûts IA, jamais au détriment de la précision
+- **Date** : 2026-09-30 · **Statut** : Décidé (le fondateur)
+- **Décision** : un PDF difficile à lire passe par un traitement plus
+  coûteux (image, modèle plus puissant) plutôt que de risquer une erreur
+  sur une quantité, une référence, une unité, un prix ou la TVA. Dans le
+  doute, la voie la plus sûre ; une valeur incertaine est signalée « à
+  vérifier », jamais devinée. Un modèle moins cher n'est adopté que s'il
+  égale le plus cher sur l'évaluation de vrais devis de couvreurs.
+- **Impact** : routage des pages (une page douteuse part en image) ;
+  politique d'extraction par défaut Sonnet 5.5 partout
+  (`DEFAULT_EXTRACTION_POLICY`) tant que l'évaluation n'a pas tranché.
+
+### PD-027 — Budget IA : 10 € maximum par artisan et par mois en usage normal
+- **Date** : 2026-09-30 · **Statut** : Décidé (prévision interne)
+- **Décision** : plafond de prévision 10 €/artisan/mois en usage normal ;
+  objectif réel 3 à 6 €. Le coût réel est mesuré appel par appel
+  (`ai_execution`) et affiché au propriétaire (Mon compte). Les prix
+  d'abonnement seront fixés sur les mesures des premiers artisans, pas
+  sur les estimations. Voir `couts-ia.md`.

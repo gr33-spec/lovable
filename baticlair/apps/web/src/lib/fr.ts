@@ -28,6 +28,7 @@ const errorMessages: Record<string, string> = {
   conflict: "Cette action a déjà été faite.",
   request_in_progress: "C'est en cours d'enregistrement, patientez une seconde.",
   payload_too_large: "C'est trop volumineux pour être envoyé.",
+  unreadable_document: "Ce fichier ne peut pas être lu.",
   onboarding_required: "Indiquez d'abord le nom de votre entreprise.",
   company_selection_required: "Choisissez l'entreprise avec laquelle travailler.",
   internal_error: "Un problème est survenu de notre côté. Vos données sont conservées ; réessayez dans un instant.",
@@ -42,6 +43,20 @@ const errorMessages: Record<string, string> = {
   EMAIL_ALREADY_VERIFIED: "Votre adresse e-mail est déjà confirmée.",
 };
 
-export function errorMessage(code: string): string {
+/** Motifs précis d'un document refusé. */
+const unreadableReasons: Record<string, string> = {
+  not_pdf: "Ce fichier n'est pas un PDF. Enregistrez le devis en PDF depuis votre logiciel, puis réessayez.",
+  empty: "Ce fichier est vide.",
+  encrypted: "Ce PDF est protégé par un mot de passe. Enregistrez-le sans protection, puis réessayez.",
+  corrupted: "Ce PDF est abîmé et ne peut pas être lu.",
+  too_many_pages: "Ce document a trop de pages. Envoyez seulement le devis.",
+};
+
+export function errorMessage(code: string, reason?: string): string {
+  if (code === "unreadable_document" && reason && unreadableReasons[reason]) return unreadableReasons[reason];
   return errorMessages[code] ?? errorMessages.internal_error!;
+}
+
+export function unreadableMessage(reason: string | null | undefined): string {
+  return (reason && unreadableReasons[reason]) ?? unreadableReasons.corrupted!;
 }

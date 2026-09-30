@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { AiUsageCard } from "@/components/ai-usage-card";
 import { BackButton, Badge, Button, Card, ErrorNotice, PageTitle } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/session";
@@ -86,6 +87,7 @@ export default function ComptePage() {
           <span className="text-[15px] font-bold">{company?.name}</span>
         )}
       </Card>
+      {company && (company.role === "owner" || company.role === "admin") ? <AiUsageCard companyId={company.id} /> : null}
       <Button variant="secondary" pending={leaving} onClick={() => void signOut()}>
         Se déconnecter
       </Button>

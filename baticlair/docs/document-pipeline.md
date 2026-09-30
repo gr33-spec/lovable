@@ -25,6 +25,16 @@ Seul l'étage d'entrée diffère.
 États visibles : `queued → processing → completed | partial | failed`.
 `partial` = résultat exploitable avec des zones illisibles signalées.
 
+## État (2026-09-30)
+
+Réalisé, sans IA : étapes 1 à 5 et 7, en ligne dans la requête de dépôt
+(lecture de quelques centaines de millisecondes) — PDF uniquement,
+**4 Mo maximum** (`DOCUMENT_MAX_BYTES`, limite d'une requête vers une
+fonction Vercel), 60 pages maximum, stockage en base (`document_blob`)
+derrière un port. Un PDF illisible est conservé et marqué `failed` avec
+son motif (`encrypted`, `corrupted`, `too_many_pages`). Photos, file de
+jobs et stockage objet : plus tard. Voir `couts-ia.md`.
+
 ## Texte natif ou vision ?
 
 Heuristique déterministe par page (pas d'appel IA) :

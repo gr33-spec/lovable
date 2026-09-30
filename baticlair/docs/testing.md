@@ -13,11 +13,19 @@
 
 ## État actuel
 
-- `packages/domain` : **52 tests** unitaires.
-- `apps/api` : **35 tests** (configuration, identité, entreprises, chantiers,
-  recherche, double appui, erreurs réseau), dont les tests d'intégration sur
+- `packages/domain` : **70 tests** unitaires (dont coût d'un appel IA,
+  grilles de prix datées, routage des pages d'un devis de couvreur).
+- `apps/api` : **53 tests** (configuration, identité, entreprises, chantiers,
+  recherche, double appui, erreurs réseau, dépôt et lecture de PDF,
+  consommation IA), dont les tests d'intégration sur
   PostgreSQL réel et le test d'isolation entre entreprises. Ce dernier a été vérifié par mutation : en retirant le
   filtre d'entreprise d'une requête, il échoue.
+
+- `apps/web` : **8 parcours** de bout en bout, chacun sur téléphone et sur
+  ordinateur (16 exécutions), dont le dépôt de devis PDF.
+
+Les PDF de test sont générés (`apps/api/test/support/pdf-fixtures.ts`) :
+aucun document réel dans le dépôt.
 
 Tout se lance avec `pnpm turbo run lint typecheck test build`.
 

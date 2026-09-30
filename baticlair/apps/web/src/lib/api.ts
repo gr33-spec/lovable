@@ -10,8 +10,10 @@ export class ApiError extends Error {
     readonly status: number,
     readonly supportId?: string,
     readonly details?: { path: string; message: string }[],
+    /** Motif précis, quand l'API en donne un (ex. document illisible : « encrypted »). */
+    readonly reason?: string,
   ) {
-    super(errorMessage(code));
+    super(errorMessage(code, reason));
     this.name = "ApiError";
   }
 
@@ -41,6 +43,7 @@ export function setActiveCompanyId(id: string | null): void {
 
 export interface RequestOptions {
   method?: "GET" | "POST" | "PATCH";
+  /** Objet envoyé en JSON, ou formulaire (envoi de fichier). */
   body?: unknown;
   /**
    * Clé de l'action utilisateur : un double appui ou une nouvelle tentative
@@ -52,7 +55,8 @@ export interface RequestOptions {
 
 export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const headers: Record<string, string> = { accept: "application/json" };
-  if (options.body !== undefined) headers["content-type"] = "application/json";
+  const isForm = typeof FormData !== "undefined" && options.body instanceof FormData;
+  if (options.body !== undefined && !isForm) headers["content-type"] = "application/json";
   if (options.idempotencyKey) headers["idempotency-key"] = options.idempotencyKey;
   const companyId = getActiveCompanyId();
   if (companyId && !path.startsWith("/v1/auth")) headers["x-company-id"] = companyId;
@@ -63,7 +67,7 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
       method: options.method ?? "GET",
       headers,
       credentials: "same-origin",
-      ...(options.body !== undefined ? { body: JSON.stringify(options.body) } : {}),
+      ...(options.body !== undefined ? { body: isForm ? (options.body as FormData) : JSON.stringify(options.body) } : {}),
       ...(options.signal ? { signal: options.signal } : {}),
     });
   } catch (error) {
@@ -76,9 +80,12 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   if (res.ok) return data as T;
 
   // Deux formats : l'API métier ({ error: { code } }) et l'authentification ({ code }).
-  const body = (data ?? {}) as { error?: { code?: string; supportId?: string; details?: never }; code?: string };
+  const body = (data ?? {}) as { error?: { code?: string; supportId?: string; details?: unknown }; code?: string };
   const code = body.error?.code ?? body.code ?? (res.status >= 500 ? "internal_error" : "validation_failed");
-  throw new ApiError(code, res.status, body.error?.supportId, body.error?.details);
+  const details = body.error?.details;
+  const fieldErrors = Array.isArray(details) ? (details as { path: string; message: string }[]) : undefined;
+  const reason = details && typeof details === "object" && "reason" in details ? String(details.reason) : undefined;
+  throw new ApiError(code, res.status, body.error?.supportId, fieldErrors, reason);
 }
 
 function safeJson(text: string): unknown {
@@ -120,6 +127,40 @@ export interface ProjectPage {
   items: Project[];
   nextCursor: string | null;
 }
+
+export type DocumentPurpose = "client_quote" | "supplier_quote";
+
+export interface ProjectDocument {
+  id: string;
+  projectId: string;
+  purpose: DocumentPurpose;
+  name: string;
+  sizeBytes: number;
+  pageCount: number | null;
+  status: "stored" | "read" | "failed";
+  createdAt: string;
+  reading: {
+    status: "processing" | "completed" | "failed";
+    errorCode: string | null;
+    pagesTotal: number;
+    pagesText: number;
+    pagesVision: number;
+    pagesSkipped: number;
+    estimatedAiCostEur: string;
+    actualAiCostEur: string;
+  } | null;
+  duplicate?: boolean;
+}
+
+export interface AiUsageReport {
+  month: string;
+  budgetEur: string;
+  actual: { calls: number; retries: number; failedCalls: number; pagesText: number; pagesVision: number; costEur: string; budgetUsedPercent: number };
+  reading: { documents: number; pagesTotal: number; pagesText: number; pagesVision: number; pagesSkipped: number; estimatedCostEur: string };
+}
+
+/** Taille maximale d'un document (même valeur par défaut que l'API). */
+export const MAX_DOCUMENT_BYTES = 4_000_000;
 
 export interface Health {
   status: "ok";

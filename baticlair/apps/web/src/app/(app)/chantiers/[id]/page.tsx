@@ -1,8 +1,9 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { FileText, MapPin, Pencil } from "lucide-react";
+import { MapPin, Pencil } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
+import { ProjectDocuments } from "@/components/project-documents";
 import { Badge, BackButton, Button, Card, ErrorNotice, Field, Spinner } from "@/components/ui";
 import { api, ApiError, type Project } from "@/lib/api";
 import { fr } from "@/lib/fr";
@@ -32,7 +33,7 @@ export default function ChantierPage() {
       ) : (
         <Header project={project} onEdit={() => setEditing(true)} />
       )}
-      <NextStep project={project} />
+      <ProjectDocuments projectId={project.id} archived={project.status === "archived"} />
       <StatusAction project={project} onChange={setProject} />
     </>
   );
@@ -99,25 +100,6 @@ function EditForm({ project, onDone }: { project: Project; onDone: (p: Project |
         </Button>
       </div>
     </form>
-  );
-}
-
-/** Ce qui arrive ensuite ; tant que la lecture des devis n'existe pas, on le dit. */
-function NextStep({ project }: { project: Project }) {
-  if (project.status === "archived") return null;
-  return (
-    <section aria-labelledby="next-step" className="flex flex-col gap-3 rounded-[26px] bg-[radial-gradient(130%_100%_at_100%_0%,rgba(255,90,31,0.45)_0%,rgba(255,90,31,0)_55%)] bg-ink p-4.5 text-white shadow-[0_18px_40px_rgba(14,17,22,0.22)]">
-      <span id="next-step" className="text-xs font-extrabold tracking-[0.04em] text-[#ffb48f]">
-        PROCHAINE ÉTAPE
-      </span>
-      <span className="font-display text-[22px] leading-tight font-extrabold tracking-[-0.02em]">Préparer la liste de matériaux</span>
-      <p className="text-sm text-[#c9ced6]">
-        Bientôt : photographiez votre devis client, je prépare la liste de matériaux et je demande les prix à vos fournisseurs.
-      </p>
-      <span className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-white/10 font-extrabold text-[#c9ced6]" aria-disabled="true">
-        <FileText size={18} aria-hidden="true" /> Ajouter le devis client · {fr.soon}
-      </span>
-    </section>
   );
 }
 

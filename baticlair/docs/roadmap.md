@@ -32,12 +32,18 @@ Fait (2026-09-28) :
 - ✅ Mise en ligne d'essai Vercel + Neon, comme patrimoine (ADR-0015,
   `docs/mise-en-ligne.md`) ; e-mails Resend facultatifs.
 
+- ✅ (2026-09-30) Étapes A et B de l'audit des coûts IA (`couts-ia.md`) :
+  mesure des appels IA et rapport mensuel ; dépôt de devis PDF, lecture
+  locale page par page, routage texte / image / écarter selon le profil
+  couvreur, estimation du coût avant tout appel. Aucun appel IA payant.
+
 Reste :
 
 - `packages/{contracts,ui,i18n}` quand un deuxième client (mobile) en aura besoin.
 - Adapter e-mail réel (transactionnel) ; suppression de compte.
 - `StorageProvider` S3, `JobQueue` pg-boss + worker, outbox d'événements.
-- `AIProvider` + `FakeAIProvider` + registre de prompts + `AIExecution`.
+- `AIProvider` + `FakeAIProvider` + registre de prompts (étape C ;
+  `AIExecution` et le calcul des coûts sont faits).
 - Logs structurés, `requestId`/`supportId`, erreurs normalisées.
 - Design system : jetons + composants de base + layout mobile/desktop.
 - CI : lint, typecheck, tests, build.
