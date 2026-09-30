@@ -6,6 +6,7 @@ import { SupplierForm } from "@/components/supplier-form";
 import { Badge, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, MAX_DOCUMENT_BYTES, newActionKey, type PriceRequest, type PriceRequestRecipient, type Supplier } from "@/lib/api";
 import { openDocument } from "@/lib/open-document";
+import { useProgressRefresh } from "@/components/project-progress";
 import { useResource } from "@/lib/use-resource";
 
 const STATUS: Record<PriceRequestRecipient["status"], { label: string; tone: "ok" | "warn" | "neutral" }> = {
@@ -37,19 +38,24 @@ export function ProjectPriceRequests({ projectId, archived, canCreate }: { proje
     [projectId],
   );
   const { data, setData, error, reload } = useResource(fetchRequests);
+  const refreshProgress = useProgressRefresh();
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
 
   const request = data.items[0] ?? null;
-  const replace = (r: PriceRequest) => setData({ items: [r, ...data.items.filter((x) => x.id !== r.id)] });
+  const replace = (r: PriceRequest) => {
+    setData({ items: [r, ...data.items.filter((x) => x.id !== r.id)] });
+    refreshProgress();
+  };
 
   if (!request) {
     if (archived || !canCreate) return null;
     return (
       <section
+        id="fournisseurs"
         aria-labelledby="price-request-title"
-        className="flex flex-col gap-3 rounded-[26px] bg-[radial-gradient(130%_100%_at_100%_0%,rgba(255,90,31,0.45)_0%,rgba(255,90,31,0)_55%)] bg-ink p-4.5 text-white shadow-[0_18px_40px_rgba(14,17,22,0.22)]"
+        className="scroll-mt-4 flex flex-col gap-3 rounded-[26px] bg-[radial-gradient(130%_100%_at_100%_0%,rgba(255,90,31,0.45)_0%,rgba(255,90,31,0)_55%)] bg-ink p-4.5 text-white shadow-[0_18px_40px_rgba(14,17,22,0.22)]"
       >
         <span className="text-xs font-extrabold tracking-[0.04em] text-[#ffb48f]">PROCHAINE ÉTAPE</span>
         <h2 id="price-request-title" className="font-display text-[22px] leading-tight font-extrabold tracking-[-0.02em]">
@@ -62,7 +68,7 @@ export function ProjectPriceRequests({ projectId, archived, canCreate }: { proje
   }
 
   return (
-    <section aria-labelledby="price-request-title" className="flex flex-col gap-3">
+    <section id="fournisseurs" aria-labelledby="price-request-title" className="flex scroll-mt-4 flex-col gap-3">
       <h2 id="price-request-title" className="text-xs font-extrabold tracking-[0.04em] text-muted">
         DEMANDES DE PRIX
       </h2>
@@ -72,7 +78,10 @@ export function ProjectPriceRequests({ projectId, archived, canCreate }: { proje
       <ul className="flex flex-col gap-2.5">
         {request.recipients.map((r) => (
           <li key={r.id}>
-            <RecipientCard recipient={r} archived={archived} onChange={replace} onReload={reload} />
+            <RecipientCard recipient={r} archived={archived} onChange={replace} onReload={() => {
+              reload();
+              refreshProgress();
+            }} />
           </li>
         ))}
       </ul>

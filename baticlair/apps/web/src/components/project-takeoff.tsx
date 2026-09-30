@@ -3,6 +3,7 @@
 import { Check, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { useCallback, useId, useState } from "react";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
+import { useProgressRefresh } from "@/components/project-progress";
 import { Badge, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, type ProjectDocument, type Takeoff, type TakeoffLine } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
@@ -37,12 +38,17 @@ export function ProjectTakeoff({ projectId, clientQuote, archived }: { projectId
   const { data, setData, error, reload } = useResource(fetchTakeoff);
   const [pending, setPending] = useState(false);
   const [actionError, setActionError] = useState<ApiError | null>(null);
+  const [showList, setShowList] = useState(false);
+  const refreshProgress = useProgressRefresh();
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
 
   const takeoff = data.takeoff;
-  const update = (t: Takeoff) => setData({ ...data, takeoff: t });
+  const update = (t: Takeoff) => {
+    setData({ ...data, takeoff: t });
+    refreshProgress();
+  };
 
   async function run<T>(action: () => Promise<T>, onDone: (value: T) => void) {
     setPending(true);
@@ -60,7 +66,7 @@ export function ProjectTakeoff({ projectId, clientQuote, archived }: { projectId
     if (!clientQuote) return null;
     const readable = canPrepareTakeoff(clientQuote);
     return (
-      <section aria-labelledby="takeoff-title" className="flex flex-col gap-3">
+      <section id="materiaux" aria-labelledby="takeoff-title" className="flex scroll-mt-4 flex-col gap-3">
         <h2 id="takeoff-title" className="text-xs font-extrabold tracking-[0.04em] text-muted">
           LISTE DE MATÉRIAUX
         </h2>
@@ -108,7 +114,7 @@ export function ProjectTakeoff({ projectId, clientQuote, archived }: { projectId
   });
 
   return (
-    <section aria-labelledby="takeoff-title" className="flex flex-col gap-3">
+    <section id="materiaux" aria-labelledby="takeoff-title" className="flex scroll-mt-4 flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
         <h2 id="takeoff-title" className="text-xs font-extrabold tracking-[0.04em] text-muted">
           LISTE DE MATÉRIAUX
@@ -123,54 +129,66 @@ export function ProjectTakeoff({ projectId, clientQuote, archived }: { projectId
 
       {actionError ? <ErrorNotice error={actionError} /> : null}
 
-      {toCheck.length > 0 ? (
-        <h3 className="text-sm font-extrabold text-warn">À vérifier ({toCheck.length})</h3>
-      ) : null}
-      {toCheck.length > 0 ? (
-        <ul className="flex flex-col gap-2" aria-label="Lignes à vérifier">
-          {toCheck.map((line) => (
-            <li key={line.id}>
-              <DoubtCard line={line} editable={editable} pending={pending} {...lineActions(line)} />
-            </li>
-          ))}
-        </ul>
-      ) : null}
-
-      {checked.length > 0 && toCheck.length > 0 ? <h3 className="text-sm font-extrabold text-ok">Vérifiées ({checked.length})</h3> : null}
-      {checked.length > 0 ? (
-        <Card className="flex flex-col divide-y divide-line px-4 py-1">
-          {checked.map((line) => (
-            <CheckedRow key={line.id} line={line} editable={editable} pending={pending} {...lineActions(line)} />
-          ))}
-        </Card>
-      ) : null}
-
-      {takeoff.notes.length > 0 || takeoff.issues.length > 0 ? (
-        <Card className="flex flex-col gap-1 p-4">
-          <span className="text-sm font-bold">À savoir</span>
-          <ul className="list-disc pl-5 text-sm text-muted">
-            {takeoff.issues.map((i) => (
-              <li key={i.code + i.message}>{i.message}</li>
-            ))}
-            {takeoff.notes.map((n) => (
-              <li key={n}>L&apos;IA : {n}</li>
+      {!draft && !showList ? (
+        <button
+          type="button"
+          onClick={() => setShowList(true)}
+          className="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-bold text-accent-text"
+        >
+          Voir ou corriger la liste
+        </button>
+      ) : (
+        <>
+        {toCheck.length > 0 ? (
+          <h3 className="text-sm font-extrabold text-warn">À vérifier ({toCheck.length})</h3>
+        ) : null}
+        {toCheck.length > 0 ? (
+          <ul className="flex flex-col gap-2" aria-label="Lignes à vérifier">
+            {toCheck.map((line) => (
+              <li key={line.id}>
+                <DoubtCard line={line} editable={editable} pending={pending} {...lineActions(line)} />
+              </li>
             ))}
           </ul>
-        </Card>
-      ) : null}
+        ) : null}
 
-      {labor.length > 0 ? (
-        <details className="rounded-2xl bg-surface p-4 text-sm shadow-card">
-          <summary className="cursor-pointer font-bold">Prestations lues, rien à commander ({labor.length})</summary>
-          <ul className="mt-2 flex flex-col gap-1 text-muted">
-            {labor.map((l) => (
-              <li key={l.id}>{l.designation}</li>
+        {checked.length > 0 && toCheck.length > 0 ? <h3 className="text-sm font-extrabold text-ok">Vérifiées ({checked.length})</h3> : null}
+        {checked.length > 0 ? (
+          <Card className="flex flex-col divide-y divide-line px-4 py-1">
+            {checked.map((line) => (
+              <CheckedRow key={line.id} line={line} editable={editable} pending={pending} {...lineActions(line)} />
             ))}
-          </ul>
-        </details>
-      ) : null}
+          </Card>
+        ) : null}
 
-      {editable ? <AddLine pending={pending} onAdd={(fields) => call(`/v1/takeoffs/${takeoff.id}/lines`, "POST", fields)} /> : null}
+        {takeoff.notes.length > 0 || takeoff.issues.length > 0 ? (
+          <Card className="flex flex-col gap-1 p-4">
+            <span className="text-sm font-bold">À savoir</span>
+            <ul className="list-disc pl-5 text-sm text-muted">
+              {takeoff.issues.map((i) => (
+                <li key={i.code + i.message}>{i.message}</li>
+              ))}
+              {takeoff.notes.map((n) => (
+                <li key={n}>L&apos;IA : {n}</li>
+              ))}
+            </ul>
+          </Card>
+        ) : null}
+
+        {labor.length > 0 ? (
+          <details className="rounded-2xl bg-surface p-4 text-sm shadow-card">
+            <summary className="cursor-pointer font-bold">Prestations lues, rien à commander ({labor.length})</summary>
+            <ul className="mt-2 flex flex-col gap-1 text-muted">
+              {labor.map((l) => (
+                <li key={l.id}>{l.designation}</li>
+              ))}
+            </ul>
+          </details>
+        ) : null}
+
+        {editable ? <AddLine pending={pending} onAdd={(fields) => call(`/v1/takeoffs/${takeoff.id}/lines`, "POST", fields)} /> : null}
+        </>
+      )}
 
       {draft && editable ? (
         <Button pending={pending} disabled={toCheck.length > 0} onClick={() => void call(`/v1/takeoffs/${takeoff.id}/validate`, "POST")}>
@@ -181,8 +199,8 @@ export function ProjectTakeoff({ projectId, clientQuote, archived }: { projectId
 
       {!draft ? (
         <p className="text-sm text-muted">
-          Liste validée{takeoff.validatedAt ? ` le ${new Date(takeoff.validatedAt).toLocaleDateString("fr-FR")}` : ""}. Vous pouvez encore
-          corriger une ligne : il faudra alors la valider à nouveau. Les demandes déjà préparées gardent leur liste.
+          Liste validée{takeoff.validatedAt ? ` le ${new Date(takeoff.validatedAt).toLocaleDateString("fr-FR")}` : ""}.
+          {showList ? " Une correction la fera repasser « à valider » ; les demandes déjà préparées gardent leur liste." : ""}
         </p>
       ) : null}
 

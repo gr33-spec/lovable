@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { MapPin, Pencil } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { ProjectDocuments } from "@/components/project-documents";
+import { ProjectProgressProvider } from "@/components/project-progress";
 import { Badge, BackButton, Button, Card, ErrorNotice, Field, Spinner } from "@/components/ui";
 import { api, ApiError, type Project } from "@/lib/api";
 import { fr } from "@/lib/fr";
@@ -33,7 +34,9 @@ export default function ChantierPage() {
       ) : (
         <Header project={project} onEdit={() => setEditing(true)} />
       )}
-      <ProjectDocuments projectId={project.id} archived={project.status === "archived"} />
+      <ProjectProgressProvider projectId={project.id} archived={project.status === "archived"}>
+        <ProjectDocuments projectId={project.id} archived={project.status === "archived"} />
+      </ProjectProgressProvider>
       <StatusAction project={project} onChange={setProject} />
     </>
   );

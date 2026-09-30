@@ -327,3 +327,24 @@ fictives uniquement.
   l'artisan.
 - **Modifier après validation** : toujours possible ; la liste repasse « à
   valider ». Les demandes de prix déjà préparées gardent leur copie.
+
+### PD-032 — Boussole : une seule boucle, parfaitement réussie
+- **Date** : 2026-09-30 · **Statut** : Décidé (charte des trois associés :
+  fondateur, Claude en CTO, ChatGPT en associé produit)
+- **Boussole** : « BatiClair fait peu de choses, mais les fait tellement
+  bien que le couvreur ne veut plus s'en passer. »
+- **Règle d'entrée dans le MVP** : une fonctionnalité fait gagner du temps,
+  économiser de l'argent ou éviter une erreur au couvreur ; sinon, backlog.
+  Pas d'ERP, de CRM ni de planning.
+- **La boucle V1** : devis client → quantitatif → validation → consultation
+  fournisseurs → réception des devis → analyse → comparaison. Compréhensible
+  en moins de 30 secondes ; une information saisie ou extraite une fois
+  n'est jamais ressaisie ; le chantier est le centre, avec un fil
+  Devis → Matériaux → Fournisseurs → Réponses → Comparer.
+- **Cible** : charpentiers-couvreurs uniquement. L'architecture peut prévoir
+  d'autres métiers, sans jamais compliquer le MVP.
+- **Conséquences immédiates** : onglet Factures retiré du menu, entrées
+  « Bientôt » retirées du « + », fil du chantier avec une seule action
+  « prochaine étape », liste validée repliée.
+- **Backlog** : envoi/réception automatiques des e-mails (attend un nom de
+  domaine), factures, étape « Commander », contrôles d'autres métiers.

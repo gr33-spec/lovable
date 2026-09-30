@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Plus, ReceiptText, Truck, Warehouse } from "lucide-react";
+import { Home, Plus, Truck, UserRound, Warehouse } from "lucide-react";
 import { useState } from "react";
 import { fr } from "@/lib/fr";
 import { AddSheet } from "./add-sheet";
@@ -11,7 +11,7 @@ const items = [
   { href: "/", label: fr.nav.home, icon: Home, match: (p: string) => p === "/" },
   { href: "/chantiers", label: fr.nav.projects, icon: Warehouse, match: (p: string) => p.startsWith("/chantiers") },
   { href: "/fournisseurs", label: fr.nav.suppliers, icon: Truck, match: (p: string) => p.startsWith("/fournisseurs") },
-  { href: "/factures", label: fr.nav.invoices, icon: ReceiptText, match: (p: string) => p.startsWith("/factures") },
+  { href: "/compte", label: fr.nav.account, icon: UserRound, match: (p: string) => p.startsWith("/compte") },
 ];
 
 /**
@@ -53,7 +53,7 @@ export function AppNav() {
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
-          aria-label="Ajouter : nouveau chantier ou document"
+          aria-label="Ajouter : nouveau chantier ou fournisseur"
           aria-haspopup="dialog"
           className="flex size-13.5 items-center justify-center justify-self-center rounded-full bg-accent text-white shadow-[0_6px_16px_rgba(255,90,31,0.45)] lg:order-first lg:mb-3 lg:h-13 lg:w-full lg:gap-2 lg:rounded-2xl lg:font-extrabold"
         >

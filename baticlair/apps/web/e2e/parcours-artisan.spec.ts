@@ -45,9 +45,8 @@ test("un artisan crée son compte et son premier chantier depuis le +", async ({
 
   await page.getByRole("button", { name: /Ajouter : nouveau chantier/ }).click();
   await expect(page.getByRole("dialog", { name: "Ajouter" })).toBeVisible();
-  // La lecture de documents n'existe pas encore : c'est affiché honnêtement.
-  await expect(page.getByText("Prendre en photo un devis")).toBeVisible();
-  await expect(page.getByRole("dialog").getByText("Bientôt").first()).toBeVisible();
+  // Deux choses seulement : un chantier ou un fournisseur.
+  await expect(page.getByRole("dialog").getByRole("link", { name: /Nouveau fournisseur/ })).toBeVisible();
   await page.getByRole("link", { name: /Nouveau chantier/ }).click();
 
   await page.getByLabel("Nom du chantier").fill("Toiture Dupont");
@@ -56,6 +55,9 @@ test("un artisan crée son compte et son premier chantier depuis le +", async ({
   await page.getByRole("button", { name: "Créer le chantier" }).click();
   await expect(page.getByRole("heading", { name: "Toiture Dupont" })).toBeVisible();
   await expect(page.getByText("PROCHAINE ÉTAPE")).toBeVisible();
+  // Le fil du chantier montre où on en est et quoi faire ensuite.
+  const progress = page.getByRole("navigation", { name: "Avancement du chantier" });
+  await expect(progress.getByRole("link", { name: "Ajouter le devis client" })).toBeVisible();
 
   // Retour depuis la fiche : on revient à l'accueil (d'où l'on venait), pas au formulaire.
   await page.getByRole("button", { name: "Retour" }).click();
@@ -146,10 +148,12 @@ test("déconnexion puis reconnexion ramène à la page demandée", async ({ page
   await expect(page).toHaveURL(/\/chantiers\?q=dupont/);
 });
 
-test("les onglets pas encore construits le disent clairement", async ({ page }) => {
+test("le menu ne propose que l'essentiel : accueil, chantiers, fournisseurs, compte", async ({ page }) => {
   await signUp(page);
-  await page.getByRole("link", { name: "Factures" }).click();
-  await expect(page.getByRole("heading", { name: "Bientôt ici" })).toBeVisible();
+  const nav = page.getByRole("navigation", { name: "Navigation principale" });
+  await expect(nav.getByRole("link")).toHaveText(["Accueil", "Chantiers", "Fournisseurs", "Compte"]);
+  await nav.getByRole("link", { name: "Compte" }).click();
+  await expect(page.getByRole("heading", { name: "Mon compte" })).toBeVisible();
 });
 
 test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) => {
@@ -168,7 +172,7 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
 
   // Devis client : 3 pages (tableau, page scannée, conditions générales).
   await page.getByLabel("Choisir le devis (PDF)").setInputFiles(fixture("devis-client-couvreur.pdf"));
-  await expect(page.getByText("DEVIS CLIENT")).toBeVisible();
+  await expect(page.getByText("DEVIS CLIENT", { exact: true })).toBeVisible();
   await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
   await expect(page.getByText("1 page lue · 1 page à lire en image · 1 page ignorée (conditions générales…)")).toBeVisible();
   await expect(page.getByText("PROCHAINE ÉTAPE", { exact: true })).toHaveCount(0);
@@ -244,6 +248,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await expect(page.getByText(/^Liste validée le /)).toBeVisible();
 
   // Une correction reste possible après validation : la liste est à valider à nouveau.
+  await page.getByRole("button", { name: "Voir ou corriger la liste" }).click();
   await page.getByRole("button", { name: "Corriger Tuile romane canal rouge 12,5 u/m²" }).click();
   await page.getByLabel("Quantité").fill("1 300");
   await page.getByRole("button", { name: "Enregistrer" }).click();
@@ -289,6 +294,8 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await page.getByRole("button", { name: "Valider la liste" }).click();
 
   // Prochaine étape : choisir les fournisseurs, dont un créé sur place.
+  const progress = page.getByRole("navigation", { name: "Avancement du chantier" });
+  await expect(progress.getByRole("link", { name: "Choisir les fournisseurs" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Demander les prix aux fournisseurs" })).toBeVisible();
   await page.getByRole("checkbox", { name: /Point.P Vannes/ }).check();
   await page.getByRole("button", { name: "Nouveau fournisseur" }).click();
@@ -311,6 +318,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   // Envoyé autrement : marqué à la main.
   await pointp.getByRole("button", { name: "Déjà envoyé" }).click();
   await expect(pointp.getByText("Envoyée", { exact: true })).toBeVisible();
+  await expect(progress.getByRole("link", { name: "Envoyer la demande" })).toBeVisible();
 
   // Le devis du fournisseur arrive : on le dépose sur sa ligne.
   await pointp.getByLabel("Ajouter son devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
@@ -324,6 +332,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await expect(tuiles.getByRole("alert")).toContainText("déjà rangé chez un autre fournisseur");
   await tuiles.getByRole("button", { name: "N'a pas répondu" }).click();
   await expect(tuiles.getByText("Pas de réponse")).toBeVisible();
+  await expect(progress.getByText("1 devis reçu · comparaison bientôt")).toBeVisible();
 
   // Tout est conservé.
   await page.reload();

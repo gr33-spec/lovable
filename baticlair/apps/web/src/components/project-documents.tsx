@@ -7,6 +7,7 @@ import { Badge, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, MAX_DOCUMENT_BYTES, type DocumentPurpose, type ProjectDocument } from "@/lib/api";
 import { unreadableMessage } from "@/lib/fr";
 import { openDocument } from "@/lib/open-document";
+import { useProgressRefresh } from "@/components/project-progress";
 import { useResource } from "@/lib/use-resource";
 
 const PURPOSE_LABEL: Record<DocumentPurpose, string> = {
@@ -40,6 +41,7 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
   );
   const { data, setData, error, reload } = useResource(fetchDocs);
   const [notice, setNotice] = useState<string | null>(null);
+  const refreshProgress = useProgressRefresh();
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
@@ -50,19 +52,22 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
   function added(doc: ProjectDocument) {
     setNotice(doc.duplicate ? "Ce devis était déjà dans ce chantier : rien n'a été ajouté." : null);
     setData({ items: [doc, ...docs.filter((d) => d.id !== doc.id)] });
+    refreshProgress();
   }
 
   function removed(id: string) {
     setNotice("Devis supprimé.");
     setData({ items: docs.filter((d) => d.id !== id) });
+    refreshProgress();
   }
 
   return (
     <>
       {clientQuotes.length === 0 && !archived ? (
         <section
+          id="devis"
           aria-labelledby="next-step"
-          className="flex flex-col gap-3 rounded-[26px] bg-[radial-gradient(130%_100%_at_100%_0%,rgba(255,90,31,0.45)_0%,rgba(255,90,31,0)_55%)] bg-ink p-4.5 text-white shadow-[0_18px_40px_rgba(14,17,22,0.22)]"
+          className="scroll-mt-4 flex flex-col gap-3 rounded-[26px] bg-[radial-gradient(130%_100%_at_100%_0%,rgba(255,90,31,0.45)_0%,rgba(255,90,31,0)_55%)] bg-ink p-4.5 text-white shadow-[0_18px_40px_rgba(14,17,22,0.22)]"
         >
           <span id="next-step" className="text-xs font-extrabold tracking-[0.04em] text-[#ffb48f]">
             PROCHAINE ÉTAPE

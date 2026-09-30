@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Camera, FileText, Truck, Warehouse, X } from "lucide-react";
+import { Truck, Warehouse, X } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { fr } from "@/lib/fr";
 
 /**
  * Le bouton « + » : un seul endroit pour ajouter quelque chose (PD-021).
- * Chantier et fournisseur sont branchés ; la photo d'un devis n'existe pas
- * encore et est annoncée honnêtement.
+ * On y crée un chantier ou un fournisseur ; le devis se dépose ensuite
+ * depuis le chantier, qui reste le centre de tout (PD-032).
  */
 export function AddSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -66,21 +65,6 @@ export function AddSheet({ open, onClose }: { open: boolean; onClose: () => void
             <span className="text-[13px] text-muted">Société, e-mail, téléphone</span>
           </span>
         </Link>
-        {[
-          { icon: Camera, title: "Prendre en photo un devis", text: "Je lirai le devis et préparerai la liste de matériaux" },
-          { icon: FileText, title: "Choisir un fichier", text: "PDF ou photo déjà sur le téléphone" },
-        ].map(({ icon: Icon, title, text }) => (
-          <div key={title} aria-disabled="true" className="flex min-h-18 items-center gap-3.5 rounded-[20px] bg-surface px-4 opacity-70 shadow-card">
-            <span className="flex size-11 items-center justify-center rounded-[14px] bg-ground">
-              <Icon size={22} aria-hidden="true" />
-            </span>
-            <span className="flex grow flex-col">
-              <span className="text-base font-extrabold">{title}</span>
-              <span className="text-[13px] text-muted">{text}</span>
-            </span>
-            <span className="rounded-full bg-warn-bg px-2.5 py-1 text-xs font-extrabold text-warn">{fr.soon}</span>
-          </div>
-        ))}
       </div>
     </dialog>
   );
