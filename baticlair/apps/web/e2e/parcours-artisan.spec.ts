@@ -184,5 +184,6 @@ test("un couvreur dépose son devis client et un devis fournisseur (lecture sans
   const usage = page.locator("section, div").filter({ has: page.getByRole("heading", { name: "Consommation IA ce mois-ci" }) }).last();
   await expect(usage.getByText("0,00 €").first()).toBeVisible();
   await expect(usage.getByText("2 · 5 pages")).toBeVisible();
+  await expect(usage.getByText("· sans plafond pendant l'essai")).toBeVisible();
   await expect(usage.getByText(/la lecture des devis est gratuite/)).toBeVisible();
 });

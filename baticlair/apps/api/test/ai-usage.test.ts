@@ -1,14 +1,18 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { AiUsageRecorder, type AiCallReport } from "../src/modules/ai-usage/index.js";
+import { randomUUID } from "node:crypto";
+import { AiUsageRecorder, AnalysisMeter, type AiCallReport } from "../src/modules/ai-usage/index.js";
+import { DomainError } from "../src/platform/errors/domain-error.js";
 import { currentMonth } from "../src/modules/ai-usage/application/ai-usage.service.js";
 import { makePdf } from "./support/pdf-fixtures.js";
-import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
+import { createTestApp, resetDatabase, signUp, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
 let ctx: TestContext;
 let recorder: AiUsageRecorder;
+let meter: AnalysisMeter;
 beforeAll(async () => {
   ctx = await createTestApp();
   recorder = ctx.app.get(AiUsageRecorder);
+  meter = ctx.app.get(AnalysisMeter);
 });
 afterAll(async () => {
   await ctx.app.close();
@@ -122,5 +126,93 @@ describe("rapport mensuel de consommation", () => {
     await ctx.prisma.membership.updateMany({ where: { companyId }, data: { role: "member" } });
     const res = await agent.get("/v1/ai-usage");
     expect(res.status).toBe(403);
+  });
+});
+
+describe("paliers : décompte des analyses par mois et par utilisateur", () => {
+  async function companyWithTwoUsers() {
+    const owner = await signUpWithCompany(ctx.app, "chef@example.fr", "Toitures Martin");
+    const project = await owner.agent.post("/v1/projects").send({ name: "Toiture Dupont" });
+    const ouvrier = await signUp(ctx.app, "ouvrier@example.fr", "Paul Ouvrier");
+    const ouvrierUser = await ctx.prisma.user.findUniqueOrThrow({ where: { email: "ouvrier@example.fr" } });
+    await ctx.prisma.membership.create({ data: { companyId: owner.companyId, userId: ouvrierUser.id, role: "member" } });
+    void ouvrier;
+    const chefUser = await ctx.prisma.user.findUniqueOrThrow({ where: { email: "chef@example.fr" } });
+    return { ...owner, projectId: project.body.id as string, chefId: chefUser.id, ouvrierId: ouvrierUser.id };
+  }
+  const begin = (c: { companyId: string; projectId: string }, userId: string, documentId = randomUUID()) =>
+    meter.begin({ companyId: c.companyId, userId, projectId: c.projectId, documentId, kind: "supplier_quote" });
+
+  it("décompte une analyse réussie, une seule fois par document", async () => {
+    const c = await companyWithTwoUsers();
+    const documentId = randomUUID();
+    const first = await begin(c, c.chefId, documentId);
+    expect(first.status).toBe("go");
+    await meter.complete(first.analysis.id);
+
+    const again = await begin(c, c.ouvrierId, documentId);
+    expect(again.status).toBe("already_done");
+    expect((await c.agent.get("/v1/ai-usage")).body.analyses).toEqual({ used: 1, limit: null, remaining: null });
+  });
+
+  it("ne décompte pas un échec, et laisse reprendre", async () => {
+    const c = await companyWithTwoUsers();
+    const documentId = randomUUID();
+    const first = await begin(c, c.chefId, documentId);
+    await meter.fail(first.analysis.id);
+    expect((await c.agent.get("/v1/ai-usage")).body.analyses.used).toBe(0);
+
+    const retry = await begin(c, c.chefId, documentId);
+    expect(retry).toMatchObject({ status: "go", analysis: { id: first.analysis.id, status: "started" } });
+  });
+
+  it("bloque avant tout appel IA quand le palier du mois est atteint", async () => {
+    const c = await companyWithTwoUsers();
+    await ctx.prisma.company.update({ where: { id: c.companyId }, data: { monthlyAnalysisLimit: 2 } });
+    for (let i = 0; i < 2; i++) await meter.complete((await begin(c, c.chefId)).analysis.id);
+
+    const blocked = begin(c, c.ouvrierId);
+    await expect(blocked).rejects.toBeInstanceOf(DomainError);
+    await expect(blocked).rejects.toMatchObject({ code: "analysis_quota_reached", details: { limit: 2, used: 2 } });
+    // Un document déjà analysé reste consultable même palier atteint (aucun nouvel appel).
+    expect((await c.agent.get("/v1/ai-usage")).body.analyses).toEqual({ used: 2, limit: 2, remaining: 0 });
+  });
+
+  it("donne analyses, appels et coût par utilisateur ; le coût s'ajoute à l'analyse", async () => {
+    const c = await companyWithTwoUsers();
+    const a1 = (await begin(c, c.chefId)).analysis;
+    const call = {
+      companyId: c.companyId,
+      projectId: c.projectId,
+      documentId: a1.documentId,
+      analysisId: a1.id,
+      userId: c.chefId,
+      task: "offer_extraction",
+      route: "text" as const,
+      provider: "anthropic",
+      model: "claude-sonnet-5-5",
+      promptId: "offer-extraction",
+      promptVersion: 1,
+      attempt: 1,
+      usage: { inputTokens: 10_000, outputTokens: 3_000 },
+      status: "success" as const,
+      durationMs: 3000,
+    };
+    await recorder.record({ ...call, status: "invalid_output" });
+    await recorder.record({ ...call, attempt: 2, route: "fallback" });
+    await meter.complete(a1.id);
+
+    const a2 = (await begin(c, c.ouvrierId)).analysis;
+    await recorder.record({ ...call, documentId: a2.documentId, analysisId: a2.id, userId: c.ouvrierId });
+    await meter.complete(a2.id);
+
+    expect((await ctx.prisma.aiAnalysis.findUniqueOrThrow({ where: { id: a1.id } })).costMicroUsd).toBe(100_000n);
+
+    const report = (await c.agent.get("/v1/ai-usage")).body;
+    expect(report.analyses.used).toBe(2);
+    expect(report.byUser).toEqual([
+      { userId: c.chefId, userName: "Artisan Test", analyses: 1, calls: 2, costEur: "0.092" },
+      { userId: c.ouvrierId, userName: "Paul Ouvrier", analyses: 1, calls: 1, costEur: "0.046" },
+    ]);
   });
 });

@@ -2,19 +2,13 @@ import { microUsdToEur } from "@baticlair/domain";
 import { DomainError } from "../../../platform/errors/domain-error.js";
 import type { TenantContext } from "../../tenancy/index.js";
 import type { AiUsageRepository, MonthlyUsage } from "./ai-usage.repository.js";
+import { currentMonth, USAGE_TIMEZONE } from "./usage-month.js";
 
-export const USAGE_TIMEZONE = "Europe/Paris";
+export { currentMonth, USAGE_TIMEZONE };
 
 export interface CostDisplay {
   usdToEur: string;
   monthlyBudgetEur: string;
-}
-
-/** Mois civil courant à Paris, au format « 2026-09 ». */
-export function currentMonth(now: Date, timeZone = USAGE_TIMEZONE): string {
-  const parts = new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit" }).formatToParts(now);
-  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
-  return `${get("year")}-${get("month")}`;
 }
 
 /**
@@ -52,6 +46,19 @@ export class AiUsageService {
       currency: "EUR",
       usdToEur: this.display.usdToEur,
       budgetEur: budget,
+      /** Palier : analyses de documents décomptées ce mois-ci. */
+      analyses: {
+        used: u.analyses,
+        limit: u.analysisLimit,
+        remaining: u.analysisLimit === null ? null : Math.max(0, u.analysisLimit - u.analyses),
+      },
+      byUser: u.byUser.map((x) => ({
+        userId: x.userId,
+        userName: x.userName,
+        analyses: x.analyses,
+        calls: x.calls,
+        costEur: this.eur(x.costMicroUsd),
+      })),
       actual: {
         calls: u.totals.calls,
         retries: u.totals.retries,

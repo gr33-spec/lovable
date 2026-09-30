@@ -73,6 +73,17 @@ citera les numéros de ligne au lieu de recopier le texte.
   modèle, budget consommé, et volume lu avec son coût estimé. Affiché dans
   « Mon compte ».
 
+## Paliers : comptage des analyses (PD-028)
+
+- `ai_analysis` : une ligne par document analysé (unique par document),
+  statut, utilisateur, mois de décompte, coût IA cumulé.
+- `AnalysisMeter.begin()` avant tout appel IA : refuse au-delà du palier
+  (`analysis_quota_reached`), renvoie « déjà fait » si le document a déjà
+  été analysé (aucun appel, aucun décompte) ; `complete()` décompte,
+  `fail()` ne décompte pas.
+- Chaque appel IA porte `analysisId` et `userId` : coût par analyse, par
+  personne, par mois.
+
 ## Modèle économique (orientation, pas de prix)
 
 Coût faible, prévisible, proportionnel aux pages, avec une longue traîne

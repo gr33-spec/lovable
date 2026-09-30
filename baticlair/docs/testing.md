@@ -13,11 +13,12 @@
 
 ## État actuel
 
-- `packages/domain` : **70 tests** unitaires (dont coût d'un appel IA,
-  grilles de prix datées, routage des pages d'un devis de couvreur).
-- `apps/api` : **53 tests** (configuration, identité, entreprises, chantiers,
+- `packages/domain` : **105 tests** unitaires (dont coût d'un appel IA,
+  grilles de prix datées, routage des pages, référentiel et validation
+  du quantitatif couvreur).
+- `apps/api` : **57 tests** (configuration, identité, entreprises, chantiers,
   recherche, double appui, erreurs réseau, dépôt et lecture de PDF,
-  consommation IA), dont les tests d'intégration sur
+  consommation IA, paliers d'analyses), dont les tests d'intégration sur
   PostgreSQL réel et le test d'isolation entre entreprises. Ce dernier a été vérifié par mutation : en retirant le
   filtre d'entreprise d'une requête, il échoue.
 

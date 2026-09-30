@@ -1,0 +1,255 @@
+import type { ConfidenceLevel } from "../confidence/confidence.js";
+import type { PackagingSpec } from "../quantity/quantity.js";
+import { dimensionOf, parseUnit, type UnitCode } from "../quantity/unit.js";
+import { Decimal } from "../shared/decimal.js";
+import { containsKeyword, normalizeText, type MaterialFamily, type TradeProfile } from "../trades/trade-profile.js";
+
+/**
+ * Validation d'un quantitatif (liste de matériaux) selon le profil métier.
+ *
+ * Principe (PD-026) : le code ne corrige jamais une valeur. Il classe la
+ * ligne, vérifie ce qui est vérifiable, et dit à l'artisan précisément ce
+ * qu'il doit regarder. Une ligne n'est « certaine » que si rien ne cloche.
+ */
+export interface TakeoffLineInput {
+  id: string;
+  designation: string;
+  /** Quantité telle que lue (« 1 250 », « 12,5 ») ou nulle si absente. */
+  quantityRaw: string | null;
+  /** Unité telle que lue (« u », « m² », « rlx »). */
+  unitRaw: string | null;
+  reference?: string | null;
+  /** Contenu du conditionnement, s'il est écrit dans le document. */
+  packaging?: PackagingSpec | null;
+  /** Ligne issue du devis client (où « fourniture et pose en m² » est courant). */
+  source?: "client_quote" | "supplier_quote" | "manual";
+}
+
+export type LineKind = "material" | "labor" | "unknown";
+
+export type TakeoffIssueCode =
+  | "QUANTITY_MISSING"
+  | "QUANTITY_UNREADABLE"
+  | "QUANTITY_NOT_POSITIVE"
+  | "UNIT_MISSING"
+  | "UNIT_UNKNOWN"
+  | "UNIT_UNUSUAL_FOR_FAMILY"
+  | "FRACTIONAL_PIECES"
+  | "AREA_NEEDS_PRODUCT_YIELD"
+  | "PACKAGE_CONTENT_MISSING"
+  | "QUANTITY_UNUSUALLY_HIGH"
+  | "FAMILY_UNKNOWN"
+  | "LABOR_LINE"
+  | "DUPLICATE_LINE"
+  | "POSSIBLE_OMISSION"
+  | "NO_MATERIAL";
+
+export type IssueSeverity = "blocking" | "to_verify" | "info";
+
+export interface TakeoffIssue {
+  code: TakeoffIssueCode;
+  severity: IssueSeverity;
+  /** Message pour l'artisan, en français simple. */
+  message: string;
+  lineIds?: string[];
+}
+
+export interface LineValidation {
+  lineId: string;
+  kind: LineKind;
+  family: string | null;
+  familyLabel: string | null;
+  unit: UnitCode | null;
+  /** Quantité décimale exacte lue, si lisible. */
+  quantity: Decimal | null;
+  status: ConfidenceLevel;
+  issues: TakeoffIssue[];
+}
+
+export interface TakeoffValidation {
+  trade: string;
+  lines: LineValidation[];
+  /** Constats sur l'ensemble (doublons, oublis possibles). */
+  issues: TakeoffIssue[];
+  counts: { certain: number; probable: number; toVerify: number; labor: number; blocking: number };
+}
+
+const UNIT_LABEL: Partial<Record<UnitCode, string>> = {
+  U: "pièces",
+  M: "m",
+  ML: "ml",
+  M2: "m²",
+  M3: "m³",
+  KG: "kg",
+  ROULEAU: "rouleaux",
+  PAQUET: "paquets",
+  BOTTE: "bottes",
+  PALETTE: "palettes",
+  BOITE: "boîtes",
+  SAC: "sacs",
+};
+const unitLabel = (u: UnitCode) => UNIT_LABEL[u] ?? u.toLowerCase();
+
+/** Première famille du référentiel qui correspond (l'ordre du référentiel fait foi). */
+export function classifyMaterial(designation: string, profile: TradeProfile): MaterialFamily | null {
+  const text = normalizeText(designation);
+  for (const family of profile.families) {
+    if (family.excludes?.some((e) => containsKeyword(text, e))) continue;
+    if (family.keywords.some((k) => containsKeyword(text, k))) return family;
+  }
+  return null;
+}
+
+/**
+ * Matériau, prestation ou inconnu. « Fourniture et pose de tuiles » est un
+ * matériau (la fourniture est à commander) ; « Dépose de la couverture
+ * existante » est une prestation.
+ */
+export function lineKind(designation: string, profile: TradeProfile): { kind: LineKind; family: MaterialFamily | null } {
+  const text = normalizeText(designation);
+  const family = classifyMaterial(designation, profile);
+  const isSupply = profile.supplyKeywords.some((k) => containsKeyword(text, k));
+  const isLabor = profile.laborKeywords.some((k) => containsKeyword(text, k));
+  if (isLabor && !isSupply) return { kind: "labor", family: null };
+  if (family) return { kind: "material", family };
+  return { kind: "unknown", family: null };
+}
+
+/** « 1 250,50 » → 1250.50 ; null si la valeur n'est pas un nombre clair (jamais de devinette). */
+export function parseFrenchQuantity(raw: string | null | undefined): Decimal | null {
+  if (raw == null) return null;
+  const compact = raw.trim().replace(/[\s  ]/g, "");
+  if (!/^-?\d+(?:[.,]\d+)?$/.test(compact)) return null;
+  return new Decimal(compact.replace(",", "."));
+}
+
+const issue = (code: TakeoffIssueCode, severity: IssueSeverity, message: string): TakeoffIssue => ({ code, severity, message });
+
+export function validateTakeoffLine(line: TakeoffLineInput, profile: TradeProfile): LineValidation {
+  const issues: TakeoffIssue[] = [];
+  const { kind, family } = lineKind(line.designation, profile);
+  const unit = parseUnit(line.unitRaw);
+  const quantity = parseFrenchQuantity(line.quantityRaw);
+
+  const base = { lineId: line.id, kind, family: family?.code ?? null, familyLabel: family?.label ?? null, unit, quantity };
+
+  if (kind === "labor") {
+    issues.push(issue("LABOR_LINE", "info", "Prestation (pose, dépose, échafaudage…) : rien à commander au fournisseur."));
+    return { ...base, status: "certain", issues };
+  }
+
+  // Quantité
+  if (line.quantityRaw == null || line.quantityRaw.trim() === "") {
+    issues.push(issue("QUANTITY_MISSING", "blocking", "Quantité absente : indiquez-la avant de demander des prix."));
+  } else if (!quantity) {
+    issues.push(issue("QUANTITY_UNREADABLE", "blocking", `Quantité illisible (« ${line.quantityRaw} ») : corrigez-la.`));
+  } else if (quantity.lessThanOrEqualTo(0)) {
+    issues.push(issue("QUANTITY_NOT_POSITIVE", "blocking", "La quantité doit être supérieure à zéro."));
+  }
+
+  // Unité
+  if (!line.unitRaw || line.unitRaw.trim() === "") {
+    issues.push(issue("UNIT_MISSING", "to_verify", "Unité absente : pièces, m², ml, rouleaux… ?"));
+  } else if (!unit) {
+    issues.push(issue("UNIT_UNKNOWN", "to_verify", `Unité « ${line.unitRaw} » non reconnue : précisez-la.`));
+  }
+
+  if (family && unit) {
+    if (!family.allowedUnits.includes(unit)) {
+      issues.push(
+        issue(
+          "UNIT_UNUSUAL_FOR_FAMILY",
+          "to_verify",
+          `${family.label} en ${unitLabel(unit)}, c'est inhabituel (d'ordinaire : ${family.allowedUnits.map(unitLabel).join(", ")}).`,
+        ),
+      );
+    }
+    if (family.wholeUnits && unit === "U" && quantity && !quantity.isInteger()) {
+      issues.push(issue("FRACTIONAL_PIECES", "to_verify", `${family.label} : une quantité en pièces devrait être entière.`));
+    }
+    if (family.areaNeedsYield && unit === "M2") {
+      issues.push(
+        issue(
+          "AREA_NEEDS_PRODUCT_YIELD",
+          "to_verify",
+          `${family.label} chiffrées en m² : le nombre de pièces dépend du modèle choisi (pièces au m²). Indiquez le modèle ou le rendement.`,
+        ),
+      );
+    }
+    if (dimensionOf(unit) === "package") {
+      const usable = line.packaging && line.packaging.packageUnit === unit;
+      if (!usable) {
+        issues.push(
+          issue(
+            "PACKAGE_CONTENT_MISSING",
+            "to_verify",
+            `Contenu du conditionnement non indiqué (combien par ${unitLabel(unit).replace(/s$/, "")} ?) : nécessaire pour comparer les fournisseurs.`,
+          ),
+        );
+      }
+    }
+    const max = family.plausibleMax?.[unit];
+    if (max !== undefined && quantity && quantity.greaterThan(max)) {
+      issues.push(
+        issue(
+          "QUANTITY_UNUSUALLY_HIGH",
+          "to_verify",
+          `${quantity.toString()} ${unitLabel(unit)} de ${family.label.toLowerCase()}, c'est beaucoup pour un chantier : vérifiez (erreur d'unité ou de virgule ?).`,
+        ),
+      );
+    }
+  }
+
+  if (kind === "unknown") {
+    issues.push(issue("FAMILY_UNKNOWN", "to_verify", "Matériau non reconnu dans le référentiel couverture : vérifiez la ligne."));
+  }
+
+  const status: ConfidenceLevel = issues.some((i) => i.severity !== "info") ? "to_verify" : "certain";
+  return { ...base, status, issues };
+}
+
+/** Validation de l'ensemble du quantitatif : chaque ligne, puis doublons et oublis fréquents du métier. */
+export function validateTakeoff(lines: readonly TakeoffLineInput[], profile: TradeProfile): TakeoffValidation {
+  const validated = lines.map((l) => validateTakeoffLine(l, profile));
+  const issues: TakeoffIssue[] = [];
+
+  // Doublons : même désignation normalisée, même unité.
+  const seen = new Map<string, string[]>();
+  lines.forEach((l, i) => {
+    const v = validated[i]!;
+    if (v.kind !== "material") return;
+    const key = `${normalizeText(l.designation)}|${v.unit ?? ""}`;
+    seen.set(key, [...(seen.get(key) ?? []), l.id]);
+  });
+  for (const ids of seen.values()) {
+    if (ids.length > 1) {
+      issues.push({ ...issue("DUPLICATE_LINE", "to_verify", "La même ligne apparaît plusieurs fois : doublon ou quantités à additionner ?"), lineIds: ids });
+    }
+  }
+
+  // Oublis fréquents : une question, jamais un ajout automatique.
+  const present = new Set(validated.filter((v) => v.kind === "material").map((v) => v.family));
+  for (const rule of profile.companionRules) {
+    if (present.has(rule.when) && !rule.expectAnyOf.some((f) => present.has(f))) {
+      issues.push(issue("POSSIBLE_OMISSION", "info", rule.message));
+    }
+  }
+
+  const materials = validated.filter((v) => v.kind === "material" || v.kind === "unknown");
+  if (materials.length === 0) {
+    issues.push(issue("NO_MATERIAL", "blocking", "Aucun matériau à commander n'a été trouvé."));
+  }
+
+  return {
+    trade: profile.id,
+    lines: validated,
+    issues,
+    counts: {
+      certain: validated.filter((v) => v.kind !== "labor" && v.status === "certain").length,
+      probable: validated.filter((v) => v.status === "probable").length,
+      toVerify: validated.filter((v) => v.status === "to_verify").length,
+      labor: validated.filter((v) => v.kind === "labor").length,
+      blocking: validated.filter((v) => v.issues.some((i) => i.severity === "blocking")).length + issues.filter((i) => i.severity === "blocking").length,
+    },
+  };
+}

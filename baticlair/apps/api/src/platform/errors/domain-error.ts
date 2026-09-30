@@ -13,6 +13,7 @@ export type ErrorCode =
   | "request_in_progress"
   | "payload_too_large"
   | "unreadable_document"
+  | "analysis_quota_reached"
   | "onboarding_required"
   | "company_selection_required"
   | "internal_error";

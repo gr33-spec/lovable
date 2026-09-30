@@ -6,6 +6,10 @@ export interface AiCallReport {
   projectId?: string | null;
   documentId?: string | null;
   processingId?: string | null;
+  /** Analyse facturable concernée (AnalysisMeter.begin). */
+  analysisId?: string | null;
+  /** Utilisateur à l'origine de l'appel. */
+  userId?: string | null;
   /** takeoff_extraction, offer_extraction, matching… */
   task: string;
   route: AiRoute;
@@ -46,6 +50,8 @@ export class AiUsageRecorder {
       projectId: report.projectId ?? null,
       documentId: report.documentId ?? null,
       processingId: report.processingId ?? null,
+      analysisId: report.analysisId ?? null,
+      userId: report.userId ?? null,
       task: report.task,
       route: report.route,
       provider: report.provider,

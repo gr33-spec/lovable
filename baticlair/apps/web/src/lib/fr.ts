@@ -29,6 +29,7 @@ const errorMessages: Record<string, string> = {
   request_in_progress: "C'est en cours d'enregistrement, patientez une seconde.",
   payload_too_large: "C'est trop volumineux pour être envoyé.",
   unreadable_document: "Ce fichier ne peut pas être lu.",
+  analysis_quota_reached: "Vous avez utilisé toutes les analyses de votre formule ce mois-ci. Les documents déjà analysés restent consultables.",
   onboarding_required: "Indiquez d'abord le nom de votre entreprise.",
   company_selection_required: "Choisissez l'entreprise avec laquelle travailler.",
   internal_error: "Un problème est survenu de notre côté. Vos données sont conservées ; réessayez dans un instant.",

@@ -92,6 +92,18 @@ une `Clarification` au lieu d'écraser.
   `lineTotal`, `vatRate?`, `feeType?`, `relatesToLineIds[]`, provenance,
   `extracted` immuable, `userEditedFields[]`.
 
+### Référentiel métier (PD-025)
+- **TradeProfile** — profil d'un corps d'état (`packages/domain/src/trades/`) :
+  familles de matériaux (mots-clés, unités admises, pièces entières,
+  rendement au m², plafonds de vraisemblance), mots de prestation et de
+  fourniture, oublis fréquents. MVP : `roofing` (couverture, 22 familles).
+- **Validation du quantitatif** (`validateTakeoff`) : matériau / prestation
+  / inconnu, quantité et unité, unité inhabituelle pour la famille,
+  surface à convertir en pièces, contenu de conditionnement manquant,
+  quantité anormale, doublons, oublis fréquents. Rien n'est corrigé ni
+  ajouté automatiquement : tout écart devient « à vérifier » ou une
+  question.
+
 ### Mémoire métier (privée par entreprise)
 - **CanonicalProduct** — `label`, `category?`, `unit`, `attributes` (JSON :
   dimensions, épaisseur, matière…).
@@ -124,7 +136,11 @@ une `Clarification` au lieu d'écraser.
   `dismissed`).
 
 ### Plateforme
-- **AIExecution** — voir [ai-architecture.md](ai-architecture.md).
+- **AIExecution** — un appel au fournisseur d'IA (voir
+  [couts-ia.md](couts-ia.md)) : modèle, voie, pages, tokens, tentative,
+  coût, `analysisId`, `userId`.
+- **AiAnalysis** — l'unité des paliers d'abonnement : l'analyse d'un
+  document, décomptée une fois, seulement si réussie (PD-028).
 - **OutboxEvent**, **AuditEvent**, **Notification**,
   **NotificationPreference**.
 - **Connection** — intégration externe : `provider`, `scopes`, jetons

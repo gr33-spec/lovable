@@ -155,6 +155,8 @@ export interface ProjectDocument {
 export interface AiUsageReport {
   month: string;
   budgetEur: string;
+  analyses: { used: number; limit: number | null; remaining: number | null };
+  byUser: { userId: string | null; userName: string | null; analyses: number; calls: number; costEur: string }[];
   actual: { calls: number; retries: number; failedCalls: number; pagesText: number; pagesVision: number; costEur: string; budgetUsedPercent: number };
   reading: { documents: number; pagesTotal: number; pagesText: number; pagesVision: number; pagesSkipped: number; estimatedCostEur: string };
 }

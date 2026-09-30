@@ -1,5 +1,5 @@
 import { parseUnit } from "../quantity/unit.js";
-import { normalizeText, type TradeProfile } from "../trades/trade-profile.js";
+import { containsKeyword, normalizeText, type TradeProfile } from "../trades/trade-profile.js";
 
 /**
  * Routage déterministe page par page (sans IA) : quelle page peut être lue
@@ -83,8 +83,8 @@ export function pageMetrics(lines: readonly string[], profile: TradeProfile): Pa
     readableRatio: visible.length === 0 ? 0 : readable / visible.length,
     amounts: (raw.match(AMOUNT) ?? []).length,
     units,
-    materialHits: profile.materialKeywords.filter((k) => normalized.includes(k)).length,
-    boilerplateHits: profile.boilerplateMarkers.filter((k) => normalized.includes(k)).length,
+    materialHits: profile.materialKeywords.filter((k) => containsKeyword(normalized, k)).length,
+    boilerplateHits: profile.boilerplateMarkers.filter((k) => containsKeyword(normalized, k)).length,
   };
 }
 

@@ -98,15 +98,19 @@ enum MembershipRole {
 }
 
 model Company {
-  id        String   @id @default(uuid(7)) @db.Uuid
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                   String   @id @default(uuid(7)) @db.Uuid
+  name                 String
+  /// Palier d'abonnement : nombre d'analyses de documents incluses par mois.
+  /// Nul = pas de plafond (période d'essai, tant que les paliers ne sont pas fixés).
+  monthlyAnalysisLimit Int?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
   memberships  Membership[]
   projects     Project[]
   documents    Document[]
   aiExecutions AiExecution[]
+  aiAnalyses   AiAnalysis[]
 
   @@map("company")
 }
@@ -294,6 +298,10 @@ model AiExecution {
   projectId          String?           @db.Uuid
   documentId         String?           @db.Uuid
   processingId       String?           @db.Uuid
+  /// Analyse facturable à laquelle l'appel appartient (AiAnalysis).
+  analysisId         String?           @db.Uuid
+  /// Utilisateur à l'origine de l'appel (nul pour un traitement automatique).
+  userId             String?
   /// takeoff_extraction, offer_extraction, matching…
   task               String
   /// text | vision | fallback | escalation
@@ -325,7 +333,42 @@ model AiExecution {
   @@index([companyId, createdAt])
   @@index([projectId])
   @@index([documentId])
+  @@index([analysisId])
   @@map("ai_execution")
+}
+
+enum AiAnalysisStatus {
+  started
+  completed
+  failed
+}
+
+/// Une analyse = l'extraction d'UN document (devis client ou fournisseur).
+/// C'est l'unité des paliers d'abonnement : seules les analyses réussies
+/// sont décomptées ; les relances, les modèles de secours et la
+/// comparaison ne comptent pas en plus. Un document n'est décompté qu'une
+/// fois, même s'il est ré-analysé.
+model AiAnalysis {
+  id           String           @id @default(uuid(7)) @db.Uuid
+  companyId    String           @db.Uuid
+  userId       String?
+  projectId    String           @db.Uuid
+  documentId   String           @unique @db.Uuid
+  kind         DocumentPurpose
+  status       AiAnalysisStatus
+  /// Décomptée dans le palier (vrai seulement si réussie).
+  billable     Boolean          @default(false)
+  /// Mois civil de décompte à l'heure de Paris (« 2026-09 »), fixé à la première réussite.
+  billingMonth String?
+  costMicroUsd BigInt           @default(0)
+  startedAt    DateTime         @default(now())
+  completedAt  DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, billingMonth])
+  @@index([companyId, userId, billingMonth])
+  @@map("ai_analysis")
 }
 
 // ---------------------------------------------------------------------------

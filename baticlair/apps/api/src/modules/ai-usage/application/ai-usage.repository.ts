@@ -7,6 +7,8 @@ export interface AiExecutionRecord {
   projectId: string | null;
   documentId: string | null;
   processingId: string | null;
+  analysisId: string | null;
+  userId: string | null;
   task: string;
   route: AiRoute;
   provider: string;
@@ -74,7 +76,21 @@ export interface ReadingTotals {
   estimatedMicroUsd: bigint;
 }
 
+export interface UserUsage {
+  userId: string | null;
+  userName: string | null;
+  /** Analyses décomptées (réussies) ce mois-ci. */
+  analyses: number;
+  /** Appels IA (toutes tentatives confondues). */
+  calls: number;
+  costMicroUsd: bigint;
+}
+
 export interface MonthlyUsage {
+  /** Analyses décomptées pour le palier (réussies, une par document). */
+  analyses: number;
+  analysisLimit: number | null;
+  byUser: UserUsage[];
   totals: UsageTotals;
   byProject: ProjectUsage[];
   byModel: ModelUsage[];
@@ -83,7 +99,7 @@ export interface MonthlyUsage {
 }
 
 export interface AiUsageRepository {
-  /** Enregistre l'appel et l'ajoute au coût réel du traitement concerné (même transaction). */
+  /** Enregistre l'appel et l'ajoute au coût réel du traitement et de l'analyse concernés (même transaction). */
   insert(record: AiExecutionRecord): Promise<{ id: string }>;
   monthly(companyId: string, window: MonthWindow): Promise<MonthlyUsage>;
 }

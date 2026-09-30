@@ -36,6 +36,12 @@ export class PrismaAiUsageRepository implements AiUsageRepository {
         data: { ...record, costMicroUsd: BigInt(record.costMicroUsd) },
         select: { id: true },
       });
+      if (record.analysisId) {
+        await tx.aiAnalysis.update({
+          where: { id: record.analysisId, companyId: record.companyId },
+          data: { costMicroUsd: { increment: BigInt(record.costMicroUsd) } },
+        });
+      }
       if (record.processingId) {
         await tx.documentProcessing.update({
           where: { id: record.processingId, companyId: record.companyId },
@@ -50,7 +56,7 @@ export class PrismaAiUsageRepository implements AiUsageRepository {
     const company = Prisma.sql`e."companyId" = ${companyId}::uuid`;
     const month = inMonth(`e."createdAt"`, window);
 
-    const [totalsRows, projectRows, modelRows, readingRows, versionRows] = await Promise.all([
+    const [totalsRows, projectRows, modelRows, readingRows, versionRows, userRows, analysesUsed, companyRow] = await Promise.all([
       this.prisma.$queryRaw<Record<string, bigint | null>[]>`
         SELECT count(*) AS calls,
                count(*) FILTER (WHERE e.attempt > 1) AS retries,
@@ -83,6 +89,23 @@ export class PrismaAiUsageRepository implements AiUsageRepository {
         WHERE ${company} AND e.status = 'completed' AND ${inMonth(`e."startedAt"`, window)}`,
       this.prisma.$queryRaw<{ version: string }[]>`
         SELECT DISTINCT e."priceTableVersion" AS version FROM ai_execution e WHERE ${company} AND ${month} ORDER BY 1`,
+      // Par utilisateur : analyses décomptées dans le mois + appels et coût IA du mois.
+      this.prisma.$queryRaw<{ user_id: string | null; name: string | null; analyses: bigint; calls: bigint; cost: bigint }[]>`
+        WITH a AS (
+          SELECT "userId" AS user_id, count(*) AS analyses FROM ai_analysis
+          WHERE "companyId" = ${companyId}::uuid AND "billingMonth" = ${window.month} AND billable
+          GROUP BY "userId"
+        ), x AS (
+          SELECT e."userId" AS user_id, count(*) AS calls, sum(e."costMicroUsd")::bigint AS cost
+          FROM ai_execution e WHERE ${company} AND ${month} GROUP BY e."userId"
+        )
+        SELECT coalesce(a.user_id, x.user_id) AS user_id, u.name,
+               coalesce(a.analyses, 0) AS analyses, coalesce(x.calls, 0) AS calls, coalesce(x.cost, 0) AS cost
+        FROM a FULL OUTER JOIN x ON coalesce(a.user_id, '') = coalesce(x.user_id, '')
+        LEFT JOIN "user" u ON u.id = coalesce(a.user_id, x.user_id)
+        ORDER BY analyses DESC, cost DESC`,
+      this.prisma.aiAnalysis.count({ where: { companyId, billingMonth: window.month, billable: true } }),
+      this.prisma.company.findUnique({ where: { id: companyId }, select: { monthlyAnalysisLimit: true } }),
     ]);
 
     const t = totalsRows[0] ?? {};
@@ -121,6 +144,21 @@ export class PrismaAiUsageRepository implements AiUsageRepository {
       pagesSkipped: n(r.pages_skipped),
       estimatedMicroUsd: big(r.estimated),
     };
-    return { totals, byProject, byModel, reading, priceTableVersions: versionRows.map((v) => v.version) };
+    return {
+      analyses: analysesUsed,
+      analysisLimit: companyRow?.monthlyAnalysisLimit ?? null,
+      byUser: userRows.map((u) => ({
+        userId: u.user_id,
+        userName: u.name,
+        analyses: n(u.analyses),
+        calls: n(u.calls),
+        costMicroUsd: big(u.cost),
+      })),
+      totals,
+      byProject,
+      byModel,
+      reading,
+      priceTableVersions: versionRows.map((v) => v.version),
+    };
   }
 }

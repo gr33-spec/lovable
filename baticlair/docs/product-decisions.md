@@ -253,3 +253,21 @@ fictives uniquement.
   (`ai_execution`) et affiché au propriétaire (Mon compte). Les prix
   d'abonnement seront fixés sur les mesures des premiers artisans, pas
   sur les estimations. Voir `couts-ia.md`.
+
+### PD-028 — Paliers d'abonnement comptés en analyses de documents
+- **Date** : 2026-09-30 · **Statut** : Décidé (modèle du fondateur :
+  paliers d'analyses mensuelles) ; règles de décompte proposées par le CTO,
+  modifiables.
+- **Décision** : l'unité facturable est **l'analyse d'un document** (un
+  devis client ou un devis fournisseur analysé avec succès). Ne comptent
+  pas en plus : les nouvelles tentatives, le passage à un modèle de
+  secours, la comparaison, le rapprochement. Un échec ne compte pas. Un
+  document déjà analysé n'est jamais décompté deux fois. Le mois de
+  décompte est le mois civil à Paris de la première réussite.
+- **Plafond** : `company.monthlyAnalysisLimit` (nul = pas de plafond,
+  pendant l'essai). Il est vérifié **avant** tout appel IA : au-delà du
+  palier, rien n'est dépensé ; les documents déjà analysés restent
+  consultables.
+- **Suivi** : décompte par entreprise et par utilisateur (celui qui a
+  lancé l'analyse), avec appels et coût IA, dans `GET /v1/ai-usage` et
+  « Mon compte ».

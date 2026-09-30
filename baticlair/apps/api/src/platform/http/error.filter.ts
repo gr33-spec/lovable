@@ -16,6 +16,7 @@ const STATUS: Record<ErrorCode, number> = {
   request_in_progress: 409,
   payload_too_large: 413,
   unreadable_document: 422,
+  analysis_quota_reached: 402,
   internal_error: 500,
 };
 
