@@ -15,7 +15,7 @@ interface Row {
   count: number;
 }
 
-function Editor({ table, row, onDone }: { table: "category" | "collection"; row?: Row; onDone: () => void }) {
+function Editor({ table, row, onDone }: { table: "collection"; row?: Row; onDone: () => void }) {
   const [name, setName] = useState(row?.name ?? "");
   const [description, setDescription] = useState(row?.description ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +58,7 @@ function Editor({ table, row, onDone }: { table: "category" | "collection"; row?
   );
 }
 
-export function GroupManager({ table, title, rows }: { table: "category" | "collection"; title: string; rows: Row[] }) {
+export function GroupManager({ table, title, rows }: { table: "collection"; title: string; rows: Row[] }) {
   const [editing, setEditing] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const router = useRouter();
@@ -92,7 +92,7 @@ export function GroupManager({ table, title, rows }: { table: "category" | "coll
         </div>
       )}
       {rows.length === 0 ? (
-        <p className="card p-5 text-text-2">{table === "category" ? "Aucune catégorie : créez-en une pour classer vos créations." : "Aucune collection pour l'instant."}</p>
+        <p className="card p-5 text-text-2">Aucune collection pour l&apos;instant.</p>
       ) : (
         <ul className="card divide-y divide-border">
           {rows.map((r, i) => (

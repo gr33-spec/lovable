@@ -16,6 +16,7 @@ import {
   setStock,
   type BulkAction,
 } from "@/lib/server/admin-catalog";
+import { archiveCategory, deleteCategory, reorderCategory, saveCategory } from "@/lib/server/categories";
 import { changePassword, disableTotp, enableTotp, requireAdmin, revokeOtherSessions, UnauthorizedError, type AdminUser } from "@/lib/server/auth";
 import { invalidateCatalog, invalidateSettings } from "@/lib/server/cached";
 import { newTotpSecret, readShortLived, signShortLived } from "@/lib/server/crypto";
@@ -94,27 +95,62 @@ export async function moveProductAction(id: string, direction: "up" | "down") {
   });
 }
 
-// ───────────── Catégories, collections, livraison ─────────────
+// ───────────── Catégories (arborescence) ─────────────
 
-export async function saveGroupAction(table: "category" | "collection", input: unknown) {
+export async function saveCategoryAction(input: unknown) {
   return guarded(async (admin) => {
-    const res = await saveGroup(z.enum(["category", "collection"]).parse(table), input, admin.id);
+    const res = await saveCategory(input, admin.id);
     if (res.ok) invalidateCatalog();
     return res;
   });
 }
 
-export async function deleteGroupAction(table: "category" | "collection", id: string) {
-  return guarded(async (admin) => {
-    const res = await deleteGroup(z.enum(["category", "collection"]).parse(table), uuid.parse(id), admin.id);
-    if (res.ok) invalidateCatalog();
-    return res;
-  });
-}
-
-export async function moveGroupAction(table: "category" | "collection", id: string, direction: "up" | "down") {
+export async function reorderCategoryAction(id: string, direction: "up" | "down") {
   return guarded(async () => {
-    await moveGroup(z.enum(["category", "collection"]).parse(table), uuid.parse(id), z.enum(["up", "down"]).parse(direction));
+    await reorderCategory(uuid.parse(id), z.enum(["up", "down"]).parse(direction));
+    invalidateCatalog();
+    return { ok: true as const };
+  });
+}
+
+export async function archiveCategoryAction(id: string, archive: boolean) {
+  return guarded(async (admin) => {
+    const res = await archiveCategory(uuid.parse(id), z.boolean().parse(archive), admin.id);
+    if (res.ok) invalidateCatalog();
+    return res;
+  });
+}
+
+/** Suppression : refusée tant qu'il reste des produits, sauf si on indique où les déplacer. */
+export async function deleteCategoryAction(id: string, moveTo: string | null) {
+  return guarded(async (admin) => {
+    const res = await deleteCategory(uuid.parse(id), moveTo === null ? null : uuid.parse(moveTo), admin.id);
+    if (res.ok) invalidateCatalog();
+    return res;
+  });
+}
+
+// ───────────── Collections, livraison ─────────────
+
+export async function saveGroupAction(table: "collection", input: unknown) {
+  return guarded(async (admin) => {
+    const res = await saveGroup(z.literal("collection").parse(table), input, admin.id);
+    if (res.ok) invalidateCatalog();
+    return res;
+  });
+}
+
+export async function deleteGroupAction(table: "collection", id: string) {
+  return guarded(async (admin) => {
+    const res = await deleteGroup(z.literal("collection").parse(table), uuid.parse(id), admin.id);
+    if (res.ok) invalidateCatalog();
+    return res;
+  });
+}
+
+export async function moveGroupAction(table: "collection", id: string, direction: "up" | "down") {
+  return guarded(async () => {
+    await moveGroup(z.literal("collection").parse(table), uuid.parse(id), z.enum(["up", "down"]).parse(direction));
     invalidateCatalog();
     return { ok: true as const };
   });

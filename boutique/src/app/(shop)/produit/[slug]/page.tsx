@@ -2,6 +2,7 @@ import { ChevronRight, Hand, HeartHandshake, Package, ShieldCheck } from "lucide
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
+import { Fragment } from "react";
 import { AddToCart } from "@/components/shop/add-to-cart";
 import { ReserveButton } from "@/components/shop/reserve-button";
 import { RESERVATION_MODE } from "@/lib/sales-mode";
@@ -51,14 +52,14 @@ export default async function ProductPage({ params }: Props) {
   if (found.kind === "redirect") permanentRedirect(`/produit/${found.slug}`);
   if (found.kind === "missing") notFound();
   if (found.kind === "unavailable") {
-    const others = await getListing({ category: found.categorySlug, availableOnly: true }, settings.lowStockThreshold);
+    const others = await getListing({ category: found.categoryPath ?? undefined, availableOnly: true }, settings.lowStockThreshold);
     return (
       <div className="container-page py-12">
         <div className="mx-auto max-w-xl text-center">
           <p className="eyebrow">Création indisponible</p>
           <h1 className="mt-2 text-4xl">« {found.name} » n&apos;est plus proposée</h1>
           <p className="mt-4 text-text-2">Chaque bijou est fait main en petite série. D&apos;autres créations pourraient vous plaire :</p>
-          <Link href={`/boutique/${found.categorySlug}`} className="btn btn-primary mt-6">
+          <Link href={found.categoryPath ? `/boutique/${found.categoryPath}` : "/boutique"} className="btn btn-primary mt-6">
             Voir les {found.categoryName.toLowerCase()}
           </Link>
         </div>
@@ -72,7 +73,8 @@ export default async function ProductPage({ params }: Props) {
   }
 
   const p = found.product;
-  const related = await getRelated(p.id, p.category.slug, settings.lowStockThreshold);
+  const related = await getRelated(p.id, p.category.path, settings.lowStockThreshold);
+  const crumbs = [...p.categoryTrail, { name: p.category.name, path: p.category.path }];
   const colors = PRODUCT_COLORS.filter((c) => p.colors.includes(c.id)).map((c) => c.label);
   const mention = vatMention(settings);
   const url = `${siteUrl()}/produit/${p.slug}`;
@@ -101,8 +103,8 @@ export default async function ProductPage({ params }: Props) {
       "@type": "BreadcrumbList",
       itemListElement: [
         { "@type": "ListItem", position: 1, name: "Boutique", item: `${siteUrl()}/boutique` },
-        { "@type": "ListItem", position: 2, name: p.category.name, item: `${siteUrl()}/boutique/${p.category.slug}` },
-        { "@type": "ListItem", position: 3, name: p.name, item: url },
+        ...crumbs.map((c, i) => ({ "@type": "ListItem", position: i + 2, name: c.name, item: `${siteUrl()}/boutique/${c.path}` })),
+        { "@type": "ListItem", position: crumbs.length + 2, name: p.name, item: url },
       ],
     },
   ];
@@ -117,12 +119,16 @@ export default async function ProductPage({ params }: Props) {
               Boutique
             </Link>
           </li>
-          <ChevronRight size={14} aria-hidden="true" />
-          <li>
-            <Link href={`/boutique/${p.category.slug}`} className="no-underline hover:underline">
-              {p.category.name}
-            </Link>
-          </li>
+          {crumbs.map((c) => (
+            <Fragment key={c.path}>
+              <ChevronRight size={14} aria-hidden="true" />
+              <li>
+                <Link href={`/boutique/${c.path}`} className="no-underline hover:underline">
+                  {c.name}
+                </Link>
+              </li>
+            </Fragment>
+          ))}
           <ChevronRight size={14} aria-hidden="true" />
           <li aria-current="page" className="truncate text-text">
             {p.name}
@@ -134,8 +140,8 @@ export default async function ProductPage({ params }: Props) {
         <Gallery images={p.images} name={p.name} />
 
         <div className="md:pt-2">
-          <Link href={`/boutique/${p.category.slug}`} className="eyebrow no-underline">
-            {p.category.name}
+          <Link href={`/boutique/${p.category.path}`} className="eyebrow no-underline">
+            {crumbs.map((c) => c.name).join(" · ")}
             {p.collection ? ` · ${p.collection.name}` : ""}
           </Link>
           <h1 className="mt-2 text-[2.2rem] leading-tight sm:text-5xl">{p.name}</h1>

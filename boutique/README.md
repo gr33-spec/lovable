@@ -46,6 +46,15 @@ commande invitée (autocomplétion des adresses), paiement Stripe (carte, Apple 
 page de confirmation et de suivi, justificatif imprimable, pages L'atelier / Contact / légales, 404 et
 erreurs soignées, partage Facebook/WhatsApp (OpenGraph), SEO (sitemap, robots, données structurées).
 
+**Catégories** — arborescence libre, créée par la créatrice : catégorie → sous-catégorie →
+sous-sous-catégorie (3 niveaux au plus), rien n'est codé en dur. Adresses propres et modifiables
+(`/boutique/pampilles/coeurs`) ; une ancienne adresse redirige vers la nouvelle. Une catégorie vide,
+masquée ou archivée n'apparaît jamais en boutique ; une catégorie pleine n'est jamais supprimée sans
+choisir où déplacer ses créations. Règle : **la structure pour naviguer** (catégories), **les
+attributs pour filtrer** (couleurs et « caractéristiques » de la fiche : motif, matière, taille…
+deviennent des filtres dès qu'au moins deux créations partagent une valeur), **le nom du produit
+pour identifier le modèle** (recherche dans chaque catégorie).
+
 **Administration** (`/admin`, invisible dans la navigation) — tableau de bord (à préparer, épuisés,
 stock faible, incidents, liste « avant d'ouvrir »), produits (photos glisser-déposer ou depuis le
 téléphone, principale, ordre, brouillon/publié/archivé, stock modifiable depuis la liste, actions
@@ -54,7 +63,7 @@ remboursement Stripe, effacement RGPD), catégories et collections, apparence (1
 réseaux), livraison (modes, prix, gratuité, pays, retrait en main propre), paramètres (légal, TVA,
 Stripe, sécurité du compte et double authentification, sauvegardes, exports, journal).
 
-**Vérifié automatiquement** — 82 tests serveur sur une vraie base PostgreSQL et 24 parcours dans un
+**Vérifié automatiquement** — 100 tests serveur sur une vraie base PostgreSQL et 25 parcours dans un
 vrai navigateur (voir § 7).
 
 ## 2. Décisions importantes (et pourquoi)

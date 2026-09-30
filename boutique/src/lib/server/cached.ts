@@ -17,22 +17,22 @@ const SETTINGS = "settings";
 
 export const getSettings = cache(unstable_cache(() => loadSettings(), ["settings-v1", VERSION], { tags: [SETTINGS], revalidate: 3600 }));
 
-export const getCategories = unstable_cache(() => listCategories(), ["categories-v1", VERSION], { tags: [CATALOG], revalidate: 3600 });
+export const getCategories = unstable_cache(() => listCategories(), ["categories-v2", VERSION], { tags: [CATALOG], revalidate: 3600 });
 
 export const getCollections = unstable_cache(() => listCollections(), ["collections-v1", VERSION], { tags: [CATALOG], revalidate: 3600 });
 
-export const getListing = unstable_cache((filters: ListingFilters, low: number) => listProducts(filters, low), ["listing-v1", VERSION], {
+export const getListing = unstable_cache((filters: ListingFilters, low: number) => listProducts(filters, low), ["listing-v2", VERSION], {
   tags: [CATALOG],
   revalidate: 3600,
 });
 
-export const getFacets = unstable_cache((category: string | undefined) => catalogFacets(category), ["facets-v1", VERSION], { tags: [CATALOG], revalidate: 3600 });
+export const getFacets = unstable_cache((category: string | undefined) => catalogFacets(category), ["facets-v2", VERSION], { tags: [CATALOG], revalidate: 3600 });
 
 export const getProduct = cache(
-  unstable_cache((slug: string, low: number) => findProduct(slug, low), ["product-v1", VERSION], { tags: [CATALOG], revalidate: 3600 }),
+  unstable_cache((slug: string, low: number) => findProduct(slug, low), ["product-v2", VERSION], { tags: [CATALOG], revalidate: 3600 }),
 );
 
-export const getRelated = unstable_cache((id: string, category: string, low: number) => relatedProducts(id, category, low), ["related-v1", VERSION], {
+export const getRelated = unstable_cache((id: string, category: string, low: number) => relatedProducts(id, category, low), ["related-v2", VERSION], {
   tags: [CATALOG],
   revalidate: 3600,
 });

@@ -201,6 +201,18 @@ export const categoryInputSchema = z
   })
   .strict();
 
+/** Catégorie de l'arborescence (parentId vide = premier niveau). */
+export const categoryTreeInputSchema = z
+  .object({
+    id: z.string().uuid().optional(),
+    parentId: z.string().uuid().nullable().default(null),
+    name: required(80, "Donnez un nom"),
+    slug: z.string().trim().max(80).regex(/^([a-z0-9]+(-[a-z0-9]+)*)?$/, "Adresse invalide (lettres minuscules, chiffres et tirets)").default(""),
+    description: trimmed(1000).default("").transform(cleanText),
+    isVisible: z.boolean().default(true),
+  })
+  .strict();
+
 export const shippingInputSchema = z
   .object({
     id: z.string().uuid().optional(),

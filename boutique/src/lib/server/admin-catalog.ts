@@ -30,8 +30,8 @@ export async function saveProduct(raw: unknown, adminId: string): Promise<SaveRe
   const p: ProductInput = parsed.data;
   try {
     const result = await transaction(async (c): Promise<SaveResult & { removedImages?: { id: string; widths: number[] }[] }> => {
-      const existing = await queryOne<{ slug: string; status: string; version: number; price_cents: number; stock: number; published_at: Date | null }>(
-        "SELECT slug, status, version, price_cents, stock, published_at FROM product WHERE id = $1 FOR UPDATE",
+      const existing = await queryOne<{ slug: string; status: string; version: number; price_cents: number; stock: number; published_at: Date | null; category_id: string }>(
+        "SELECT slug, status, version, price_cents, stock, published_at, category_id FROM product WHERE id = $1 FOR UPDATE",
         [p.id],
         c,
       );
@@ -39,8 +39,12 @@ export async function saveProduct(raw: unknown, adminId: string): Promise<SaveRe
         return { ok: false as const, error: "Cette fiche a été modifiée entre-temps (autre onglet ou appareil). Rechargez la page pour voir la dernière version." };
       }
       if (!existing && p.version !== 0) return { ok: false as const, error: "Ce produit n'existe plus." };
-      const category = await queryOne("SELECT 1 FROM category WHERE id = $1", [p.categoryId], c);
+      const category = await queryOne<{ archived_at: Date | null }>("SELECT archived_at FROM category WHERE id = $1", [p.categoryId], c);
       if (!category) return { ok: false as const, error: "Catégorie introuvable.", fieldErrors: { categoryId: "Choisissez une catégorie" } };
+      // On ne range pas un nouveau produit dans une catégorie archivée (un produit déjà dedans peut y rester).
+      if (category.archived_at && existing?.category_id !== p.categoryId) {
+        return { ok: false as const, error: "Cette catégorie est archivée.", fieldErrors: { categoryId: "Catégorie archivée : choisissez-en une autre" } };
+      }
       if (p.collectionId && !(await queryOne("SELECT 1 FROM collection WHERE id = $1", [p.collectionId], c))) {
         return { ok: false as const, error: "Collection introuvable.", fieldErrors: { collectionId: "Collection introuvable" } };
       }
@@ -233,7 +237,10 @@ export async function bulkUpdate(ids: string[], action: BulkAction, adminId: str
   if (!safeIds.length) return 0;
   let rows: unknown[];
   if (action.type === "category") {
-    rows = await query("UPDATE product SET category_id = $2, version = version + 1 WHERE id = ANY($1::uuid[]) AND EXISTS (SELECT 1 FROM category WHERE id = $2) RETURNING id", [safeIds, action.categoryId]);
+    rows = await query(
+      "UPDATE product SET category_id = $2, version = version + 1 WHERE id = ANY($1::uuid[]) AND EXISTS (SELECT 1 FROM category WHERE id = $2 AND archived_at IS NULL) RETURNING id",
+      [safeIds, action.categoryId],
+    );
   } else {
     const status = action.type === "publish" ? "published" : action.type === "draft" ? "draft" : "archived";
     rows = await query(

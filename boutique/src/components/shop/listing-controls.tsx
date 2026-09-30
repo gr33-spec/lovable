@@ -42,6 +42,7 @@ export function SortSelect({ value }: { value: string }) {
 interface Options {
   colors: { id: string; label: string; hex: string }[];
   collections: { slug: string; name: string }[];
+  attributes: { key: string; label: string; values: { key: string; label: string }[] }[];
   hasSoldOut: boolean;
   priceRange: boolean;
 }
@@ -53,7 +54,7 @@ export function FilterSheet({
 }: {
   base: string;
   options: Options;
-  current: { dispo?: boolean; couleur?: string; collection?: string; min?: number; max?: number };
+  current: { dispo?: boolean; couleur?: string; collection?: string; attributes: Record<string, string>; min?: number; max?: number };
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const router = useRouter();
@@ -61,9 +62,10 @@ export function FilterSheet({
   const [dispo, setDispo] = useState(Boolean(current.dispo));
   const [couleur, setCouleur] = useState(current.couleur ?? "");
   const [collection, setCollection] = useState(current.collection ?? "");
+  const [attributes, setAttributes] = useState<Record<string, string>>(current.attributes);
   const [min, setMin] = useState(current.min !== undefined ? String(current.min / 100) : "");
   const [max, setMax] = useState(current.max !== undefined ? String(current.max / 100) : "");
-  const count = [current.dispo, current.couleur, current.collection, current.min ?? current.max].filter((v) => v !== undefined && v !== false).length;
+  const count = [current.dispo, current.couleur, current.collection, current.min ?? current.max].filter((v) => v !== undefined && v !== false).length + Object.keys(current.attributes).length;
 
   const apply = () => {
     const sp = new URLSearchParams(params.toString());
@@ -72,6 +74,7 @@ export function FilterSheet({
     set("dispo", dispo ? "1" : "");
     set("couleur", couleur);
     set("collection", collection);
+    for (const a of options.attributes) set(a.key, attributes[a.key] ?? "");
     set("prix-min", /^\d+$/.test(min) ? min : "");
     set("prix-max", /^\d+$/.test(max) ? max : "");
     ref.current?.close();
@@ -105,6 +108,24 @@ export function FilterSheet({
                 <input type="checkbox" className="h-6 w-6 accent-[var(--c-primary)]" checked={dispo} onChange={(e) => setDispo(e.target.checked)} />
               </label>
             )}
+            {options.attributes.map((a) => (
+              <fieldset key={a.key}>
+                <legend className="mb-3 font-semibold">{a.label}</legend>
+                <div className="flex flex-wrap gap-2">
+                  {a.values.map((v) => (
+                    <button
+                      key={v.key}
+                      type="button"
+                      className="chip"
+                      aria-pressed={attributes[a.key] === v.key}
+                      onClick={() => setAttributes((prev) => ({ ...prev, [a.key]: prev[a.key] === v.key ? "" : v.key }))}
+                    >
+                      {v.label}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            ))}
             {options.collections.length > 0 && (
               <fieldset>
                 <legend className="mb-3 font-semibold">Collection</legend>
@@ -161,6 +182,7 @@ export function FilterSheet({
                 setDispo(false);
                 setCouleur("");
                 setCollection("");
+                setAttributes({});
                 setMin("");
                 setMax("");
               }}

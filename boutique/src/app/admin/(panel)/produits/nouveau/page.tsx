@@ -1,11 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { ProductEditor } from "@/components/admin/product-editor";
-import { groups } from "@/lib/server/admin-queries";
+import { attributeSuggestions, groups } from "@/lib/server/admin-queries";
 
 export const metadata = { title: "Nouvelle création" };
 
 export default async function NewProductPage() {
-  const { categories, collections } = await groups();
+  const [{ categories, collections }, suggestions] = await Promise.all([groups(), attributeSuggestions()]);
   return (
     <ProductEditor
       isNew
@@ -17,7 +17,7 @@ export default async function NewProductPage() {
         slug: "",
         sku: "",
         description: "",
-        categoryId: categories.length === 1 ? categories[0].id : "",
+        categoryId: categories.filter((c) => !c.archived).length === 1 ? categories.find((c) => !c.archived)!.id : "",
         collectionId: null,
         priceCents: null,
         compareAtCents: null,
@@ -31,7 +31,8 @@ export default async function NewProductPage() {
         images: [],
         orderCount: 0,
       }}
-      categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+      categories={categories.map((c) => ({ id: c.id, parentId: c.parentId, name: c.name, depth: c.depth, archived: c.archived, isVisible: c.isVisible }))}
+      suggestions={suggestions}
       collections={collections.map((c) => ({ id: c.id, name: c.name }))}
     />
   );
