@@ -1,16 +1,16 @@
 "use client";
 
-import { Archive, ArrowDown, ArrowUp, CornerDownRight, ExternalLink, Eye, EyeOff, FolderPlus, List, Loader2, MoreHorizontal, Pencil, Plus, RotateCcw, Trash2, X } from "lucide-react";
+import { Archive, ArrowDown, ArrowUp, ChevronDown, CornerDownRight, ExternalLink, Eye, EyeOff, FolderPlus, List, Loader2, MoreHorizontal, Pencil, Plus, RotateCcw, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { archiveCategoryAction, deleteCategoryAction, reorderCategoryAction, saveCategoryAction } from "@/app/admin/actions";
-import { slugify } from "@/lib/format";
 import { useConfirm, useToast } from "./ui";
 
-// Gestion de l'arborescence des catégories, pensée pour le téléphone :
-// une ligne par catégorie (indentée selon son niveau), un bouton « + » pour
-// ajouter une sous-catégorie, et un menu « … » pour tout le reste.
+// Gestion des catégories, pensée pour être évidente :
+// une carte par famille (Boucles d'oreilles, Pampilles…) avec ses
+// sous-catégories dedans, et un bouton toujours visible pour en ajouter
+// (on tape le nom, Entrée, et on peut enchaîner). Le reste est dans « … ».
 
 export interface TreeRow {
   id: string;
@@ -30,85 +30,162 @@ export interface TreeRow {
 }
 
 const MAX_DEPTH = 3;
-const LEVEL = ["Catégorie", "Sous-catégorie", "Sous-sous-catégorie"];
+const LEVEL = ["Famille", "Sous-catégorie", "Précision (3e niveau)"];
 
-type Editing = { mode: "new"; parentId: string | null } | { mode: "edit"; id: string } | null;
+/** Ajout rapide : un nom, Entrée, et on peut enchaîner (Cœurs ↵ Fleurs ↵ Étoiles ↵). */
+function QuickAdd({ parentId, parentName, existing, onClose }: { parentId: string | null; parentName?: string; existing: string[]; onClose: () => void }) {
+  const [name, setName] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [added, setAdded] = useState<string[]>([]);
+  // Le champ se vide dès l'Entrée : on peut taper le nom suivant pendant l'enregistrement.
+  // Un même nom déjà en cours d'enregistrement est ignoré (pas de doublon sur double Entrée).
+  const inFlight = useRef(new Set<string>());
+  const [saving, setSaving] = useState(0);
+  const [, startRefresh] = useTransition();
+  const router = useRouter();
+  const input = useRef<HTMLInputElement>(null);
+  const submit = async () => {
+    const value = name.trim();
+    if (!value || inFlight.current.has(value.toLowerCase())) return;
+    if ([...existing, ...added].some((n) => n.toLowerCase() === value.toLowerCase())) {
+      setError(`« ${value} » existe déjà ${parentName ? `dans « ${parentName} »` : "comme famille"}.`);
+      return;
+    }
+    inFlight.current.add(value.toLowerCase());
+    setName("");
+    setSaving((n) => n + 1);
+    const res = await saveCategoryAction({ parentId, name: value, slug: "", description: "", isVisible: true });
+    setSaving((n) => n - 1);
+    inFlight.current.delete(value.toLowerCase());
+    if (!res.ok) {
+      setError(res.fieldErrors?.name ?? res.error);
+      setName((current) => current || value);
+      return;
+    }
+    setAdded((list) => [...list, value]);
+    setError(null);
+    startRefresh(() => router.refresh());
+    input.current?.focus();
+  };
+  const pending = saving > 0;
+  return (
+    <form
+      className="rounded-2xl border border-primary/40 bg-primary-soft/40 p-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+        submit();
+      }}
+    >
+      <label className="block">
+        <span className="field-label">{parentName ? `Nouvelle sous-catégorie dans « ${parentName} »` : "Nouvelle famille"}</span>
+        <span className="flex gap-2">
+          <input
+            ref={input}
+            className="input flex-1"
+            value={name}
+            maxLength={80}
+            autoFocus
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => e.key === "Escape" && onClose()}
+            placeholder={parentName ? "Ex. : Cœurs, Fleurs, Étoiles…" : "Ex. : Pampilles, Broches, Bracelets…"}
+          />
+          <button type="submit" className="btn btn-primary" disabled={!name.trim()}>
+            {pending ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Plus size={16} aria-hidden="true" />} Ajouter
+          </button>
+        </span>
+      </label>
+      {error && <p className="field-error">{error}</p>}
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-sm">
+        <span className="text-text-2">
+          {added.length > 0 ? (
+            <>
+              Ajoutée{added.length > 1 ? "s" : ""} : <strong className="text-text">{added.join(", ")}</strong>. Vous pouvez en taper une autre.
+            </>
+          ) : (
+            "Tapez le nom puis Entrée. Vous pourrez en ajouter plusieurs à la suite."
+          )}
+        </span>
+        <button type="button" className="btn btn-ghost btn-sm" onClick={onClose}>
+          {added.length ? "Terminé" : "Annuler"}
+        </button>
+      </div>
+    </form>
+  );
+}
 
-function Editor({ rows, editing, onDone }: { rows: TreeRow[]; editing: Exclude<Editing, null>; onDone: () => void }) {
-  const self = editing.mode === "edit" ? rows.find((r) => r.id === editing.id) : undefined;
-  const [name, setName] = useState(self?.name ?? "");
-  const [parentId, setParentId] = useState<string | null>(self ? self.parentId : editing.mode === "new" ? editing.parentId : null);
-  const [slug, setSlug] = useState(self?.slug ?? "");
-  const [slugTouched, setSlugTouched] = useState(Boolean(self));
-  const [description, setDescription] = useState(self?.description ?? "");
+/** Modifier une catégorie existante : le nom d'abord, le reste replié. */
+function Editor({ rows, id, onDone }: { rows: TreeRow[]; id: string; onDone: () => void }) {
+  const self = rows.find((r) => r.id === id)!;
+  const [name, setName] = useState(self.name);
+  const [parentId, setParentId] = useState<string | null>(self.parentId);
+  const [slug, setSlug] = useState(self.slug);
+  const [description, setDescription] = useState(self.description);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pending, start] = useTransition();
   const router = useRouter();
   const toast = useToast();
   const parent = rows.find((r) => r.id === parentId);
-  const shownSlug = slugTouched ? slug : slugify(name).slice(0, 70);
   // Emplacements possibles : pas dans elle-même ni dans ses sous-catégories, et 3 niveaux au plus.
-  const parents = rows.filter(
-    (r) => !r.archived && r.depth + 1 + (self?.height ?? 0) <= MAX_DEPTH && (!self || (r.id !== self.id && !r.path.startsWith(`${self.path}/`))),
-  );
+  const parents = rows.filter((r) => !r.archived && r.depth + 1 + self.height <= MAX_DEPTH && r.id !== self.id && !r.path.startsWith(`${self.path}/`));
 
   return (
     <form
-      className="space-y-4 rounded-2xl border border-primary/30 bg-surface-2/60 p-4"
+      className="space-y-4 rounded-2xl border border-primary/40 bg-surface-2/60 p-4"
       onSubmit={(e) => {
         e.preventDefault();
         start(async () => {
-          const res = await saveCategoryAction({ id: self?.id, parentId, name, slug: slugTouched ? slug : "", description, isVisible: self?.isVisible ?? true });
+          const res = await saveCategoryAction({ id: self.id, parentId, name, slug, description, isVisible: self.isVisible });
           if (res.ok) {
-            toast(self ? "Catégorie enregistrée." : `« ${name.trim()} » créée.`);
+            toast("Catégorie enregistrée.");
             onDone();
             router.refresh();
           } else setErrors({ ...(res.fieldErrors ?? {}), _form: res.fieldErrors?.name ? "" : res.error });
         });
       }}
     >
-      <p className="text-sm font-semibold">{self ? `Modifier « ${self.name} »` : parent ? `Nouvelle sous-catégorie dans « ${parent.name} »` : "Nouvelle catégorie"}</p>
       <label className="block">
         <span className="field-label">Nom</span>
-        <input className="input" value={name} maxLength={80} onChange={(e) => setName(e.target.value)} autoFocus required placeholder={parent ? "Ex. : Cœurs, Fleurs, Créoles…" : "Ex. : Boucles d'oreilles, Pampilles…"} />
+        <input className="input" value={name} maxLength={80} onChange={(e) => setName(e.target.value)} autoFocus required />
         {errors.name && <span className="field-error">{errors.name}</span>}
       </label>
-      <label className="block">
-        <span className="field-label">Rangée dans</span>
-        <select className="input" value={parentId ?? ""} onChange={(e) => setParentId(e.target.value || null)}>
-          <option value="">— Premier niveau (famille principale)</option>
-          {parents.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.label}
-            </option>
-          ))}
-        </select>
-        {errors.parentId && <span className="field-error">{errors.parentId}</span>}
-      </label>
-      <label className="block">
-        <span className="field-label">Adresse de la page</span>
-        <span className="flex items-center overflow-hidden rounded-xl border border-border bg-surface focus-within:border-primary">
-          <span className="shrink-0 truncate py-2 pl-3 text-sm text-text-2" title={`/boutique/${parent ? `${parent.path}/` : ""}`}>
-            /boutique/{parent ? `${parent.path}/` : ""}
-          </span>
-          <input
-            className="min-h-11 min-w-0 flex-1 bg-transparent px-1 py-2 text-sm outline-none"
-            value={shownSlug}
-            maxLength={80}
-            aria-label="Fin de l'adresse"
-            onChange={(e) => {
-              setSlugTouched(true);
-              setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"));
-            }}
-          />
-        </span>
-        <span className="field-hint">Créée automatiquement à partir du nom. Si vous la changez, l&apos;ancienne adresse redirige vers la nouvelle.</span>
-        {errors.slug && <span className="field-error">{errors.slug}</span>}
-      </label>
-      <label className="block">
-        <span className="field-label">Courte présentation (facultatif)</span>
-        <textarea className="input !min-h-20" value={description} maxLength={1000} onChange={(e) => setDescription(e.target.value)} placeholder="Affichée en haut de la page de la catégorie." />
-      </label>
+      <details className="group" open={Boolean(errors.parentId || errors.slug)}>
+        <summary className="flex cursor-pointer list-none items-center gap-1 text-sm font-semibold text-primary">
+          <ChevronDown size={16} className="transition group-open:rotate-180" aria-hidden="true" /> Plus d&apos;options (déplacer, adresse, présentation)
+        </summary>
+        <div className="mt-3 space-y-4">
+          <label className="block">
+            <span className="field-label">Rangée dans</span>
+            <select className="input" value={parentId ?? ""} onChange={(e) => setParentId(e.target.value || null)}>
+              <option value="">— Aucune : c&apos;est une famille principale</option>
+              {parents.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.label}
+                </option>
+              ))}
+            </select>
+            {errors.parentId && <span className="field-error">{errors.parentId}</span>}
+          </label>
+          <label className="block">
+            <span className="field-label">Adresse de la page</span>
+            <span className="flex items-center overflow-hidden rounded-xl border border-border bg-surface focus-within:border-primary">
+              <span className="shrink-0 truncate py-2 pl-3 text-sm text-text-2">/boutique/{parent ? `${parent.path}/` : ""}</span>
+              <input
+                className="min-h-11 min-w-0 flex-1 bg-transparent px-1 py-2 text-sm outline-none"
+                value={slug}
+                maxLength={80}
+                aria-label="Fin de l'adresse"
+                onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
+              />
+            </span>
+            <span className="field-hint">Changer le nom ne change pas l&apos;adresse (les liens déjà partagés restent bons). Si vous changez l&apos;adresse, l&apos;ancienne redirige vers la nouvelle.</span>
+            {errors.slug && <span className="field-error">{errors.slug}</span>}
+          </label>
+          <label className="block">
+            <span className="field-label">Courte présentation (facultatif)</span>
+            <textarea className="input !min-h-20" value={description} maxLength={1000} onChange={(e) => setDescription(e.target.value)} placeholder="Affichée en haut de la page de la catégorie." />
+          </label>
+        </div>
+      </details>
       {errors._form && <p className="field-error">{errors._form}</p>}
       <div className="flex gap-2">
         <button type="submit" className="btn btn-primary btn-sm" disabled={pending || !name.trim()}>
@@ -122,8 +199,11 @@ function Editor({ rows, editing, onDone }: { rows: TreeRow[]; editing: Exclude<E
   );
 }
 
+type Adding = { parentId: string | null } | null;
+
 export function CategoryTree({ rows }: { rows: TreeRow[] }) {
-  const [editing, setEditing] = useState<Editing>(null);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [adding, setAdding] = useState<Adding>(null);
   const [menuFor, setMenuFor] = useState<TreeRow | null>(null);
   const [deleting, setDeleting] = useState<{ row: TreeRow; count: number } | null>(null);
   const [moveTo, setMoveTo] = useState("");
@@ -202,68 +282,103 @@ export function CategoryTree({ rows }: { rows: TreeRow[] }) {
 
   return (
     <section aria-labelledby="titre-categories">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 id="titre-categories" className="font-serif text-2xl">
-          Catégories
-        </h2>
-        {!(editing?.mode === "new" && editing.parentId === null) && (
-          <button type="button" className="btn btn-primary btn-sm" onClick={() => setEditing({ mode: "new", parentId: null })}>
-            <Plus size={16} aria-hidden="true" /> Ajouter une catégorie
+      <h2 id="titre-categories" className="mb-2 font-serif text-2xl">
+        Catégories
+      </h2>
+      <div className="mb-5 rounded-2xl bg-surface-2 p-4 text-sm">
+        <p className="font-semibold">Comment ça marche ?</p>
+        <p className="mt-1 text-text-2">
+          Une <strong className="text-text">famille</strong> (ex. : Pampilles) contient des <strong className="text-text">sous-catégories</strong> (ex. : Cœurs, Fleurs, Étoiles). Les
+          clientes choisissent la famille, puis la sous-catégorie. Les couleurs, motifs ou matières ne sont pas des catégories : indiquez-les dans la fiche de chaque création.
+        </p>
+      </div>
+
+      <div className="mb-5">
+        {adding?.parentId === null ? (
+          <QuickAdd parentId={null} existing={active.filter((x) => x.parentId === null).map((x) => x.name)} onClose={() => setAdding(null)} />
+        ) : (
+          <button type="button" className="btn btn-primary w-full sm:w-auto" onClick={() => setAdding({ parentId: null })}>
+            <Plus size={18} aria-hidden="true" /> Nouvelle famille
           </button>
         )}
       </div>
-      <p className="mb-4 text-sm text-text-2">
-        Catégorie → sous-catégorie → sous-sous-catégorie (3 niveaux au plus). Les couleurs, motifs, matières ou tailles ne sont pas des catégories : renseignez-les dans la fiche
-        produit (« Caractéristiques »), ils deviennent des filtres.
-      </p>
-
-      {editing?.mode === "new" && editing.parentId === null && (
-        <div className="mb-3">
-          <Editor rows={rows} editing={editing} onDone={() => setEditing(null)} />
-        </div>
-      )}
 
       {active.length === 0 ? (
-        <p className="card p-5 text-text-2">Aucune catégorie : créez-en une pour classer vos créations.</p>
+        <p className="card p-5 text-text-2">Aucune catégorie pour l&apos;instant. Commencez par créer une famille, par exemple « Boucles d&apos;oreilles ».</p>
       ) : (
-        <ul className="card divide-y divide-border overflow-hidden">
-          {active.map((r) => (
-            <li key={r.id} className={r.depth === 1 ? "bg-surface" : "bg-surface-2/30"}>
-              {editing?.mode === "edit" && editing.id === r.id ? (
+        <ul className="space-y-4">
+          {active
+            .filter((r) => r.depth === 1)
+            .map((root) => (
+              <li key={root.id} className="card overflow-hidden">
+                {editing === root.id ? (
+                  <div className="p-3">
+                    <Editor rows={rows} id={root.id} onDone={() => setEditing(null)} />
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 border-b border-border bg-surface-2/40 px-4 py-3">
+                    <div className="min-w-0 flex-1">
+                      <p className={`truncate font-serif text-xl ${root.isVisible ? "" : "text-text-2"}`}>{root.name}</p>
+                      <RowInfo row={root} />
+                    </div>
+                    <button type="button" className="btn btn-outline btn-sm" onClick={() => setEditing(root.id)}>
+                      <Pencil size={15} aria-hidden="true" /> <span className="max-sm:sr-only">Modifier</span>
+                    </button>
+                    <button type="button" className="btn btn-ghost btn-icon" aria-label={`Plus d'actions pour ${root.name}`} onClick={() => setMenuFor(root)}>
+                      <MoreHorizontal size={19} />
+                    </button>
+                  </div>
+                )}
+
+                {active.filter((c) => c.parentId === root.id).length > 0 && (
+                  <ul className="divide-y divide-border">
+                    {active
+                      .filter((c) => c.parentId === root.id)
+                      .flatMap((child) => [child, ...active.filter((g) => g.parentId === child.id)])
+                      .map((r) => (
+                        <li key={r.id}>
+                          {editing === r.id ? (
+                            <div className="p-3">
+                              <Editor rows={rows} id={r.id} onDone={() => setEditing(null)} />
+                            </div>
+                          ) : (
+                            <div className={`flex min-h-14 items-center gap-2 py-2 pr-2 ${r.depth === 3 ? "pl-10" : "pl-4"}`}>
+                              {r.depth === 3 && <CornerDownRight size={15} className="shrink-0 text-text-2" aria-hidden="true" />}
+                              <button type="button" className="min-w-0 flex-1 text-left" onClick={() => setEditing(r.id)} aria-label={`Modifier ${r.label}`}>
+                                <span className={`block truncate font-medium ${r.isVisible ? "" : "text-text-2"}`}>{r.name}</span>
+                                <RowInfo row={r} />
+                              </button>
+                              <button type="button" className="btn btn-ghost btn-icon" aria-label={`Plus d'actions pour ${r.name}`} onClick={() => setMenuFor(r)}>
+                                <MoreHorizontal size={19} />
+                              </button>
+                            </div>
+                          )}
+                          {adding?.parentId === r.id && (
+                            <div className="px-3 pb-3 pl-10">
+                              <QuickAdd parentId={r.id} parentName={r.name} existing={active.filter((x) => x.parentId === r.id).map((x) => x.name)} onClose={() => setAdding(null)} />
+                            </div>
+                          )}
+                        </li>
+                      ))}
+                  </ul>
+                )}
+
                 <div className="p-3">
-                  <Editor rows={rows} editing={editing} onDone={() => setEditing(null)} />
-                </div>
-              ) : (
-                <div className="flex min-h-14 items-center gap-1.5 py-2 pr-2" style={{ paddingLeft: `${0.75 + (r.depth - 1) * 1.4}rem` }}>
-                  {r.depth > 1 && <CornerDownRight size={15} className="shrink-0 text-text-2" aria-hidden="true" />}
-                  <button type="button" className="min-w-0 flex-1 text-left" onClick={() => setMenuFor(r)} aria-label={`Actions pour ${r.label}`}>
-                    <span className={`block truncate ${r.depth === 1 ? "font-semibold" : "font-medium"} ${r.isVisible ? "" : "text-text-2"}`}>{r.name}</span>
-                    <span className="flex flex-wrap items-center gap-x-2 text-xs text-text-2">
-                      <span>
-                        {r.totalCount} création{r.totalCount > 1 ? "s" : ""}
-                        {r.childCount > 0 && r.ownCount > 0 && r.ownCount !== r.totalCount ? ` (dont ${r.ownCount} ici)` : ""}
-                      </span>
-                      {!r.isVisible && <span className="badge bg-soldout-bg py-0 text-soldout">Masquée</span>}
-                      {r.isVisible && r.totalCount === 0 && <span title="Une catégorie vide n'apparaît pas dans la boutique">vide · invisible en boutique</span>}
-                    </span>
-                  </button>
-                  {r.depth < MAX_DEPTH && (
-                    <button type="button" className="btn btn-ghost btn-icon" title="Ajouter une sous-catégorie" aria-label={`Ajouter une sous-catégorie dans ${r.name}`} onClick={() => setEditing({ mode: "new", parentId: r.id })}>
-                      <FolderPlus size={18} />
+                  {adding?.parentId === root.id ? (
+                    <QuickAdd parentId={root.id} parentName={root.name} existing={active.filter((x) => x.parentId === root.id).map((x) => x.name)} onClose={() => setAdding(null)} />
+                  ) : (
+                    <button
+                      type="button"
+                      className="btn btn-ghost w-full justify-start border border-dashed border-border-strong text-primary"
+                      aria-label={`Ajouter une sous-catégorie à « ${root.name} »`}
+                      onClick={() => setAdding({ parentId: root.id })}
+                    >
+                      <Plus size={17} aria-hidden="true" /> Ajouter une sous-catégorie
                     </button>
                   )}
-                  <button type="button" className="btn btn-ghost btn-icon" aria-label={`Plus d'actions pour ${r.name}`} onClick={() => setMenuFor(r)}>
-                    <MoreHorizontal size={19} />
-                  </button>
                 </div>
-              )}
-              {editing?.mode === "new" && editing.parentId === r.id && (
-                <div className="p-3 pt-0" style={{ paddingLeft: `${0.75 + r.depth * 1.4}rem` }}>
-                  <Editor rows={rows} editing={editing} onDone={() => setEditing(null)} />
-                </div>
-              )}
-            </li>
-          ))}
+              </li>
+            ))}
         </ul>
       )}
 
@@ -310,11 +425,11 @@ export function CategoryTree({ rows }: { rows: TreeRow[] }) {
               count={siblings(menuFor).length}
               pending={pending}
               onEdit={() => {
-                setEditing({ mode: "edit", id: menuFor.id });
+                setEditing(menuFor.id);
                 closeMenu();
               }}
               onSub={() => {
-                setEditing({ mode: "new", parentId: menuFor.id });
+                setAdding({ parentId: menuFor.id });
                 closeMenu();
               }}
               onMove={(direction) => run(() => reorderCategoryAction(menuFor.id, direction), "Ordre modifié.")}
@@ -457,8 +572,8 @@ function MenuItems({
   );
   return (
     <ul className="p-2">
-      {item(<Pencil size={18} />, "Renommer, déplacer, modifier l'adresse", onEdit)}
-      {row.depth < MAX_DEPTH && item(<FolderPlus size={18} />, "Ajouter une sous-catégorie", onSub)}
+      {item(<Pencil size={18} />, "Renommer ou déplacer", onEdit)}
+      {row.depth < MAX_DEPTH && item(<FolderPlus size={18} />, row.depth === 1 ? "Ajouter une sous-catégorie" : "Ajouter une précision (3e niveau)", onSub)}
       {item(<ArrowUp size={18} />, "Monter", () => onMove("up"), { disabled: index <= 0 })}
       {item(<ArrowDown size={18} />, "Descendre", () => onMove("down"), { disabled: index < 0 || index >= count - 1 })}
       {item(row.isVisible ? <EyeOff size={18} /> : <Eye size={18} />, row.isVisible ? "Masquer de la boutique" : "Afficher dans la boutique", onToggle)}
@@ -477,5 +592,18 @@ function MenuItems({
       {item(<Archive size={18} />, "Archiver", onArchive)}
       {item(<Trash2 size={18} />, "Supprimer…", onDelete, { danger: true })}
     </ul>
+  );
+}
+
+function RowInfo({ row }: { row: TreeRow }) {
+  return (
+    <span className="flex flex-wrap items-center gap-x-2 text-xs text-text-2">
+      <span>
+        {row.totalCount} création{row.totalCount > 1 ? "s" : ""}
+        {row.childCount > 0 && row.ownCount > 0 && row.ownCount !== row.totalCount ? ` (dont ${row.ownCount} rangée${row.ownCount > 1 ? "s" : ""} directement ici)` : ""}
+      </span>
+      {!row.isVisible && <span className="badge bg-soldout-bg py-0 text-soldout">Masquée</span>}
+      {row.isVisible && row.totalCount === 0 && <span>vide · pas encore visible en boutique</span>}
+    </span>
   );
 }
