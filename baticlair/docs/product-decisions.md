@@ -386,3 +386,19 @@ fictives uniquement.
   fait foi), puis « Classé », avec le ou les fournisseurs retenus en option.
 - **Architecture** : lecteur IA commun (`platform/ai`) et préparation des
   documents commune (`DocumentAiInput`) pour toutes les lectures.
+
+### PD-035 — Mode démo : tout le parcours, seul, avec des données fictives
+
+- **Pourquoi** : tester BatiClair sans vrai client ni vrai fournisseur (et
+  sans nom de domaine pour les e-mails).
+- **Quoi** : depuis l'accueil, « Créer un chantier de démonstration » crée un
+  chantier fictif avec un devis client de toiture (PDF généré) et ajoute au
+  carnet 3 fournisseurs fictifs (adresses `@demo.baticlair.fr`). Sur la fiche
+  chantier, « Simuler sa réponse (démo) » établit le devis PDF du fournisseur
+  à partir de la liste demandée et le range, comme un dépôt manuel.
+- **Réalisme** : prix d'achat courants, un fournisseur facture la livraison,
+  un autre oublie un article, totaux justes au centime.
+- **Aucune exception dans le parcours** : lecture IA, comparaison et
+  décompte des analyses sont les mêmes que pour un vrai chantier. Les données
+  fictives se suppriment ou s'archivent comme les autres. Seuls les
+  fournisseurs fictifs peuvent « répondre » seuls.

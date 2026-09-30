@@ -2,6 +2,7 @@
 
 import { Check, Copy, FileUp, Loader2, Mail, Plus, Send } from "lucide-react";
 import { useCallback, useId, useRef, useState } from "react";
+import { DemoAnswer, isDemoSupplier } from "@/components/demo";
 import { OfferPanel, ProjectComparison } from "@/components/project-offers";
 import { SupplierForm } from "@/components/supplier-form";
 import { Badge, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
@@ -354,6 +355,7 @@ function RecipientCard({
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const status = STATUS[r.status];
+  const demo = isDemoSupplier(r.supplier.email);
 
   async function setStatus(next: "to_send" | "sent" | "declined") {
     setPending(true);
@@ -421,7 +423,9 @@ function RecipientCard({
       ) : null}
       {offerSlot}
 
-      {!archived && r.status === "to_send" ? (
+      {!archived && demo && !r.document && r.status !== "declined" ? <DemoAnswer recipientId={r.id} onChange={onChange} /> : null}
+
+      {!archived && r.status === "to_send" && !demo ? (
         <>
           {/* Ouvre la messagerie avec l'e-mail rempli, et note la demande comme envoyée. */}
           <a

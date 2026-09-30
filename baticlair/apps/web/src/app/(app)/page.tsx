@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MailCheck, Search, Warehouse } from "lucide-react";
 import { useCallback } from "react";
+import { DemoCard } from "@/components/demo";
 import { ProjectList } from "@/components/project-row";
 import { ErrorNotice, Spinner } from "@/components/ui";
 import { api, type ProjectPage } from "@/lib/api";
@@ -96,6 +97,8 @@ export default function AccueilPage() {
           <p className="rounded-3xl bg-surface p-4 text-[15px] text-muted shadow-card">Aucun chantier pour l&apos;instant. Touchez « + » pour en créer un.</p>
         ) : null}
       </section>
+
+      <DemoCard />
     </>
   );
 }

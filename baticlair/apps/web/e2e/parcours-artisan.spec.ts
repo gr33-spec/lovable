@@ -389,3 +389,35 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await expect(page.locator("li").filter({ hasText: "Point.P Vannes" }).getByText("Devis lu · 6/6 articles")).toBeVisible();
   await expect(page.locator("section#comparer").getByText(/Classé le/)).toBeVisible();
 });
+
+test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs", async ({ page }) => {
+  await signUp(page);
+  await page.getByRole("button", { name: "Créer un chantier de démonstration" }).click();
+  await expect(page.getByRole("heading", { name: "Démo – Toiture Martin" })).toBeVisible();
+  await expect(page.getByText("devis-client-demo.pdf")).toBeVisible();
+
+  await page.getByRole("button", { name: "Préparer la liste de matériaux" }).click();
+  await expect(page.getByText(/^\d+ lignes · /)).toBeVisible();
+  await confirmDoubts(page);
+  await page.getByRole("button", { name: "Valider la liste" }).click();
+  await expect(page.getByText(/^Liste validée le /)).toBeVisible();
+
+  for (const name of ["Tuilerie de l'Ouest (démo)", "Négoce Breizh (démo)", "Matériaux Atlantique (démo)"]) {
+    await page.getByRole("checkbox", { name: new RegExp(name.replace(/[()]/g, "\\$&")) }).check();
+  }
+  await page.getByRole("button", { name: "Préparer les 3 e-mails" }).click();
+  await expect(page.getByText("DEMANDES DE PRIX")).toBeVisible();
+
+  const progress = page.getByRole("navigation", { name: "Avancement du chantier" });
+  for (const name of ["Tuilerie de l'Ouest", "Négoce Breizh", "Matériaux Atlantique"]) {
+    const card = page.locator("li").filter({ hasText: name });
+    await card.getByRole("button", { name: "Simuler sa réponse (démo)" }).click();
+    await expect(card.getByText("Devis reçu")).toBeVisible();
+    await card.getByRole("button", { name: "Lire ce devis (1 analyse)" }).click();
+    await expect(card.getByText(/^Devis lu · /)).toBeVisible();
+  }
+  await expect(page.locator("li").filter({ hasText: "Négoce Breizh" }).getByText("Il manque 1 article de votre liste.")).toBeVisible();
+  const compare = page.locator("section#comparer");
+  await expect(compare.getByText("Moins cher sur le total")).toBeVisible();
+  await expect(progress.getByRole("link", { name: "Comparer et classer" })).toBeVisible();
+});

@@ -23,6 +23,6 @@ import { PrismaPriceRequestRepository } from "./infrastructure/prisma-price-requ
       inject: [PRICE_REQUEST_REPOSITORY, SUPPLIER_REPOSITORY, DocumentsService],
     },
   ],
-  exports: [PRICE_REQUEST_REPOSITORY],
+  exports: [PRICE_REQUEST_REPOSITORY, PriceRequestsService],
 })
 export class PriceRequestsModule {}

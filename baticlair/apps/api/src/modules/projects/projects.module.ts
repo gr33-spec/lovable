@@ -13,5 +13,6 @@ import { PrismaProjectRepository } from "./infrastructure/prisma-project.reposit
     { provide: PROJECT_REPOSITORY, useFactory: (p: PrismaService) => new PrismaProjectRepository(p), inject: [PrismaService] },
     { provide: ProjectsService, useFactory: (r: ProjectRepository) => new ProjectsService(r), inject: [PROJECT_REPOSITORY] },
   ],
+  exports: [ProjectsService],
 })
 export class ProjectsModule {}
