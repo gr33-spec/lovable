@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { CheckoutForm } from "@/components/shop/checkout-form";
+import { RESERVATION_MODE } from "@/lib/sales-mode";
 import { getSettings } from "@/lib/server/cached";
 import { query } from "@/lib/server/db";
 import { vatMention } from "@/lib/server/settings";
@@ -7,6 +9,7 @@ import { vatMention } from "@/lib/server/settings";
 export const metadata: Metadata = { title: "Commande", robots: { index: false } };
 
 export default async function CheckoutPage() {
+  if (RESERVATION_MODE) redirect("/boutique");
   const settings = await getSettings();
   const methods = await query<{
     id: string;

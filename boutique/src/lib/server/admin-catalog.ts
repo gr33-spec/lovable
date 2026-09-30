@@ -213,8 +213,8 @@ export async function setStock(productId: string, next: number, expected: number
 }
 
 export async function deleteProduct(productId: string, adminId: string): Promise<{ ok: true } | { ok: false; error: string }> {
-  const ordered = await queryOne("SELECT 1 FROM order_item WHERE product_id = $1 LIMIT 1", [productId]);
-  if (ordered) return { ok: false, error: "Ce produit figure dans des commandes : il ne peut pas être supprimé, mais vous pouvez l'archiver (il disparaîtra de la boutique)." };
+  const ordered = await queryOne("SELECT 1 FROM order_item WHERE product_id = $1 UNION ALL SELECT 1 FROM reservation WHERE product_id = $1 LIMIT 1", [productId]);
+  if (ordered) return { ok: false, error: "Ce produit figure dans des commandes ou des réservations : il ne peut pas être supprimé, mais vous pouvez l'archiver (il disparaîtra de la boutique)." };
   const images = await transaction(async (c) => {
     const imgs = await query<{ id: string; widths: number[] }>("SELECT id, widths FROM image WHERE product_id = $1", [productId], c);
     await query("DELETE FROM image WHERE product_id = $1", [productId], c);

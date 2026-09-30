@@ -46,6 +46,7 @@ export interface ShopSettings {
     mediator: string;
   };
   addressRetentionMonths: number | null;
+  reservationAutoExpire: boolean;
   version: number;
 }
 
@@ -100,6 +101,7 @@ export async function loadSettings(client?: Queryable): Promise<ShopSettings> {
       mediator: row.legal_mediator as string,
     },
     addressRetentionMonths: (row.address_retention_months as number) ?? null,
+    reservationAutoExpire: (row.reservation_auto_expire as boolean | undefined) ?? true,
     version: row.version as number,
   };
 }

@@ -7,7 +7,7 @@ import { toImageRef, type ImageRow } from "./images";
 // Lecture du catalogue PUBLIC : seuls les produits publiés de catégories
 // visibles, et seulement les colonnes utiles à l'affichage.
 
-export type Availability = "in_stock" | "low_stock" | "sold_out";
+export type Availability = "in_stock" | "low_stock" | "reserved" | "sold_out";
 
 export interface ProductCard {
   id: string;
@@ -65,8 +65,8 @@ export interface ListingFilters {
   page?: number;
 }
 
-export function availabilityOf(stock: number, lowThreshold: number): Availability {
-  if (stock <= 0) return "sold_out";
+export function availabilityOf(stock: number, lowThreshold: number, reserved = false): Availability {
+  if (stock <= 0) return reserved ? "reserved" : "sold_out";
   if (lowThreshold > 0 && stock <= lowThreshold) return "low_stock";
   return "in_stock";
 }
@@ -100,7 +100,11 @@ interface CardRow {
   stock: number;
   published_at: string | Date;
   category_name: string;
+  reserved?: boolean;
 }
+
+// Pièce bloquée par une réservation en attente de confirmation.
+const RESERVED = "EXISTS (SELECT 1 FROM reservation rv WHERE rv.product_id = p.id AND rv.status = 'pending') AS reserved";
 
 function toCard(r: CardRow, imgs: ImageRef[] | undefined, lowThreshold: number): ProductCard {
   return {
@@ -110,7 +114,7 @@ function toCard(r: CardRow, imgs: ImageRef[] | undefined, lowThreshold: number):
     priceCents: r.price_cents,
     compareAtCents: r.compare_at_cents,
     stock: r.stock,
-    availability: availabilityOf(r.stock, lowThreshold),
+    availability: availabilityOf(r.stock, lowThreshold, r.reserved),
     isNew: Date.now() - new Date(r.published_at).getTime() < NEW_DAYS * 86_400_000,
     categoryName: r.category_name,
     image: imgs?.[0] ?? null,
@@ -156,7 +160,7 @@ export async function listProducts(filters: ListingFilters, lowThreshold: number
   const page = Math.min(Math.max(1, filters.page ?? 1), 50);
   const limit = page * PAGE_SIZE;
   const rows = await query<CardRow & { total: string }>(
-    `SELECT p.id, p.slug, p.name, p.price_cents, p.compare_at_cents, p.stock, p.published_at, c.name AS category_name,
+    `SELECT p.id, p.slug, p.name, p.price_cents, p.compare_at_cents, p.stock, p.published_at, ${RESERVED}, c.name AS category_name,
             count(*) OVER () AS total
      FROM product p
      JOIN category c ON c.id = p.category_id
@@ -249,7 +253,7 @@ export async function findProduct(slug: string, lowThreshold: number, client?: Q
       updated_at: string | Date;
     }
   >(
-    `SELECT p.id, p.slug, p.name, p.price_cents, p.compare_at_cents, p.stock, p.published_at, p.updated_at, p.sku, p.description,
+    `SELECT p.id, p.slug, p.name, p.price_cents, p.compare_at_cents, p.stock, p.published_at, ${RESERVED}, p.updated_at, p.sku, p.description,
             p.features, p.colors, p.status, p.seo_title, p.seo_description,
             c.id AS category_id, c.slug AS category_slug, c.name AS category_name, c.is_visible AS category_visible,
             col.slug AS collection_slug, col.name AS collection_name
@@ -295,7 +299,7 @@ export async function findProduct(slug: string, lowThreshold: number, client?: Q
 /** Quelques créations proches (même catégorie, disponibles d'abord). */
 export async function relatedProducts(productId: string, categorySlug: string, lowThreshold: number, limit = 4, client?: Queryable): Promise<ProductCard[]> {
   const rows = await query<CardRow>(
-    `SELECT p.id, p.slug, p.name, p.price_cents, p.compare_at_cents, p.stock, p.published_at, c.name AS category_name
+    `SELECT p.id, p.slug, p.name, p.price_cents, p.compare_at_cents, p.stock, p.published_at, ${RESERVED}, c.name AS category_name
      FROM product p JOIN category c ON c.id = p.category_id
      WHERE p.status = 'published' AND c.is_visible AND c.slug = $1 AND p.id <> $2
      ORDER BY (p.stock = 0), random() LIMIT $3`,
@@ -310,7 +314,7 @@ export async function relatedProducts(productId: string, categorySlug: string, l
 export async function cartProducts(ids: string[], lowThreshold: number, client?: Queryable): Promise<ProductCard[]> {
   if (!ids.length) return [];
   const rows = await query<CardRow & { status: string; category_visible: boolean }>(
-    `SELECT p.id, p.slug, p.name, p.price_cents, p.compare_at_cents, p.stock, p.published_at, p.status,
+    `SELECT p.id, p.slug, p.name, p.price_cents, p.compare_at_cents, p.stock, p.published_at, ${RESERVED}, p.status,
             c.name AS category_name, c.is_visible AS category_visible
      FROM product p JOIN category c ON c.id = p.category_id WHERE p.id = ANY($1::uuid[])`,
     [ids],
@@ -338,7 +342,7 @@ export async function sitemapEntries(client?: Queryable) {
 /** Meilleures ventes des 90 derniers jours (affichées seulement s'il y a assez de ventes pour que ce soit vrai). */
 export async function bestSellers(lowThreshold: number, limit = 4, client?: Queryable): Promise<ProductCard[]> {
   const rows = await query<CardRow>(
-    `SELECT p.id, p.slug, p.name, p.price_cents, p.compare_at_cents, p.stock, p.published_at, c.name AS category_name
+    `SELECT p.id, p.slug, p.name, p.price_cents, p.compare_at_cents, p.stock, p.published_at, ${RESERVED}, c.name AS category_name
      FROM product p JOIN category c ON c.id = p.category_id
      JOIN (SELECT i.product_id, sum(i.quantity) AS sold FROM order_item i JOIN customer_order o ON o.id = i.order_id
            WHERE o.status IN ('paid', 'preparing', 'shipped', 'completed') AND o.paid_at > now() - interval '90 days'

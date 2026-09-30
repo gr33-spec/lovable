@@ -78,6 +78,7 @@ export default async function SettingsPage() {
           ordersOpen: s.ordersOpen,
           closedMessage: s.closedMessage,
           allowPromotionCodes: s.allowPromotionCodes,
+          reservationAutoExpire: s.reservationAutoExpire,
           vatRegime: s.vatRegime,
           vatRateBp: s.vatRateBp,
           addressRetentionMonths: s.addressRetentionMonths,

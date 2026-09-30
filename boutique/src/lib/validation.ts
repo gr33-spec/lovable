@@ -71,6 +71,28 @@ export const checkoutSchema = z
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
 
+/** Téléphone obligatoire pour une réservation : 8 à 15 chiffres. */
+export const phoneSchema = z
+  .string()
+  .trim()
+  .max(30, "Numéro de téléphone trop long")
+  .refine((v) => /^\+?[0-9 .()-]{6,25}$/.test(v) && /^\d{8,15}$/.test(v.replace(/\D/g, "")), "Numéro de téléphone invalide (exemple : 06 12 34 56 78)");
+
+export const DELIVERY_LABELS = { hand: "Remise en main propre", post: "Envoi postal" } as const;
+
+export const reservationSchema = z
+  .object({
+    idempotencyKey: z.string().uuid(),
+    productId: z.string().uuid(),
+    firstName: required(80, "Indiquez votre prénom"),
+    phone: phoneSchema,
+    email: z.union([z.literal(""), emailSchema]).optional().default(""),
+    delivery: z.enum(["hand", "post"], { message: "Choisissez la remise en main propre ou l'envoi" }),
+  })
+  .strict();
+
+export type ReservationInput = z.infer<typeof reservationSchema>;
+
 /** Contrôle de l'adresse, seulement si le mode de livraison en exige une. */
 export function addressErrors(input: Pick<CheckoutInput, "line1" | "postalCode" | "city" | "country">): Record<string, string> {
   const errors: Record<string, string> = {};

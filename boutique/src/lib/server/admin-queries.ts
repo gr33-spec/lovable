@@ -57,6 +57,8 @@ export interface AdminProductRow {
   price_cents: number;
   stock: number;
   reserved: number;
+  /** Réservations (sans paiement) en attente de confirmation. */
+  booked: number;
   category_name: string;
   image: ImageRef | null;
   updated_at: Date;
@@ -78,9 +80,10 @@ export async function adminProducts(filter: { q?: string; status?: string; categ
     params.push(`%${filter.q.toLowerCase().replace(/[\\%_]/g, (c) => `\\${c}`).slice(0, 60)}%`);
     where.push(`(lower(p.name) LIKE $${params.length} OR lower(coalesce(p.sku, '')) LIKE $${params.length})`);
   }
-  const rows = await query<Omit<AdminProductRow, "image" | "reserved"> & { reserved: string; img_id: string | null }>(
+  const rows = await query<Omit<AdminProductRow, "image" | "reserved" | "booked"> & { reserved: string; booked: string; img_id: string | null }>(
     `SELECT p.id, p.name, p.slug, p.sku, p.status, p.price_cents, p.stock, p.updated_at, c.name AS category_name,
             coalesce((SELECT sum(i.quantity) FROM order_item i JOIN customer_order o ON o.id = i.order_id WHERE i.product_id = p.id AND o.status = 'pending'), 0) AS reserved,
+            (SELECT count(*) FROM reservation rv WHERE rv.product_id = p.id AND rv.status = 'pending') AS booked,
             (SELECT im.id FROM image im WHERE im.product_id = p.id AND im.kind = 'product' ORDER BY im.position LIMIT 1) AS img_id
      FROM product p JOIN category c ON c.id = p.category_id
      WHERE ${where.join(" AND ")}
@@ -91,7 +94,7 @@ export async function adminProducts(filter: { q?: string; status?: string; categ
   const images = ids.length ? await query<ImageRow>("SELECT id, width, height, widths, placeholder, alt, base_url FROM image WHERE id = ANY($1::uuid[])", [ids]) : [];
   return rows.map((r) => {
     const img = images.find((i) => i.id === r.img_id);
-    return { ...r, reserved: Number(r.reserved), image: img ? toImageRef(img) : null };
+    return { ...r, reserved: Number(r.reserved), booked: Number(r.booked), image: img ? toImageRef(img) : null };
   });
 }
 

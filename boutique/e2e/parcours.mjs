@@ -37,7 +37,9 @@ const client = await browser.newContext(phone);
 const page = await client.newPage();
 watch(page);
 const productSlug = "fleurs-pailletees-arc-en-ciel-exemple";
-const stockBefore = Number(sql(`SELECT stock FROM product WHERE slug = '${productSlug}'`));
+// Pièce unique : la réservation doit la bloquer pour les autres clientes.
+sql(`UPDATE product SET stock = 1 WHERE slug = '${productSlug}'`);
+const stockBefore = 1;
 
 await step("La cliente arrive directement sur une fiche produit (lien Facebook)", async () => {
   await page.goto(`${BASE}/produit/${productSlug}`);
@@ -52,80 +54,65 @@ await step("Elle swipe les photos", async () => {
   assert.ok((await track.evaluate((el) => el.scrollLeft)) > 100);
 });
 
-await step("Elle ajoute au panier : confirmation et compteur", async () => {
-  await page.getByRole("button", { name: "Ajouter au panier" }).first().click();
-  await page.getByText("ajouté au panier").waitFor();
-  await page.getByRole("link", { name: /Panier, 1 article/ }).waitFor();
+await step("« Je réserve ce bijou » : petit formulaire, erreurs claires, saisie conservée", async () => {
+  await page.getByRole("button", { name: "Je réserve ce bijou" }).click();
+  const dialog = page.getByRole("dialog", { name: /Fleurs pailletées Arc-en-ciel/ });
+  await dialog.waitFor();
+  await dialog.getByLabel("Prénom").fill("Camille");
+  await dialog.getByRole("button", { name: "Confirmer ma réservation" }).click();
+  await dialog.getByText("Indiquez un numéro de téléphone valide").waitFor();
+  await dialog.getByText("Choisissez la remise en main propre ou l'envoi").waitFor();
+  assert.equal(await dialog.getByLabel("Prénom").inputValue(), "Camille", "le prénom n'est pas effacé");
+  await page.screenshot({ path: `${SHOTS}02-reservation-formulaire.png` });
 });
 
-await step("Double clic sur « Ajouter » : jamais plus que le stock", async () => {
-  const add = page.getByRole("button", { name: /Ajouter au panier|Déjà dans votre panier/ }).first();
-  for (let i = 0; i < 6; i++) await add.click({ force: true }).catch(() => undefined);
-  const count = await page.evaluate(() => JSON.parse(localStorage.getItem("boheme-panier-v1"))[0].quantity);
-  assert.ok(count <= stockBefore, `quantité ${count} > stock ${stockBefore}`);
-  await page.evaluate(() => localStorage.setItem("boheme-panier-v1", JSON.stringify([{ productId: JSON.parse(localStorage.getItem("boheme-panier-v1"))[0].productId, quantity: 1 }])));
-});
-
-await step("Panier : produit, photo, total ; panier conservé après fermeture", async () => {
-  await page.goto(`${BASE}/panier`);
-  await page.getByRole("heading", { name: "Panier" }).waitFor();
-  await page.getByText("Fleurs pailletées Arc-en-ciel").first().waitFor();
-  await page.screenshot({ path: `${SHOTS}02-panier.png`, fullPage: true });
-});
-
-await step("Prix falsifié dans le navigateur : ignoré par le serveur", async () => {
-  // Une personne malveillante envoie elle-même une requête avec un prix.
-  const res = await page.evaluate(async () => {
-    const r = await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ idempotencyKey: crypto.randomUUID(), items: [{ productId: JSON.parse(localStorage.getItem("boheme-panier-v1"))[0].productId, quantity: 1 }], priceCents: 1, email: "a@b.fr", firstName: "A", lastName: "B", shippingMethodId: crypto.randomUUID(), country: "FR" }) });
+await step("Champ falsifié envoyé directement (prix, statut) : refusé par le serveur", async () => {
+  const productId = sql(`SELECT id FROM product WHERE slug = '${productSlug}'`);
+  const status = await page.evaluate(async (id) => {
+    const r = await fetch("/api/reservation", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ idempotencyKey: crypto.randomUUID(), productId: id, firstName: "A", phone: "0612345678", delivery: "hand", priceCents: 1 }) });
     return r.status;
-  });
-  assert.equal(res, 400);
+  }, productId);
+  assert.equal(status, 400);
+  assert.equal(Number(sql(`SELECT stock FROM product WHERE slug = '${productSlug}'`)), stockBefore);
 });
 
-await step("Commande : formulaire avec erreurs claires, saisie conservée", async () => {
-  await page.goto(`${BASE}/commande`);
-  await page.locator("#email").fill("camille.test@exemple.fr");
-  await page.locator("#firstName").fill("Camille");
-  await page.locator("#lastName").fill("Martin");
-  await page.getByRole("radio", { name: /Envoi suivi/ }).check();
-  await page.locator("#line1").fill("12 rue des Lilas");
-  await page.locator("#postalCode").fill("2250");
-  await page.locator("#city").fill("Paimpol");
-  await page.getByRole("button", { name: /Payer/ }).click();
-  await page.getByText("Code postal invalide pour ce pays").waitFor();
-  assert.equal(await page.locator("#line1").inputValue(), "12 rue des Lilas", "l'adresse n'est pas effacée");
-  await page.locator("#postalCode").fill("22500");
-  await page.screenshot({ path: `${SHOTS}03-commande.png`, fullPage: true });
-});
-
-await step("Paiement abandonné (retour arrière) : stock rendu, panier intact", async () => {
-  await page.getByRole("button", { name: /Payer/ }).click();
-  await page.waitForURL(/\/dev\/paiement\//);
-  assert.equal(Number(sql(`SELECT stock FROM product WHERE slug = '${productSlug}'`)), stockBefore - 1, "réservé pendant le paiement");
-  await page.getByRole("button", { name: "Revenir sans payer" }).click();
-  await page.getByText("Le paiement n'a pas été finalisé").waitFor();
-  await page.waitForTimeout(800);
-  assert.equal(Number(sql(`SELECT stock FROM product WHERE slug = '${productSlug}'`)), stockBefore, "stock rendu");
-});
-
-await step("Paiement réussi (webhook envoyé deux fois) : confirmation claire, un seul e-mail", async () => {
-  await page.getByRole("button", { name: /Payer/ }).click();
-  await page.waitForURL(/\/dev\/paiement\//);
-  await page.getByRole("button", { name: "Payer + webhook envoyé deux fois" }).click();
-  await page.waitForURL(/\/commande\/suivi\//);
-  await page.getByRole("heading", { name: /Merci Camille/ }).waitFor();
-  await page.screenshot({ path: `${SHOTS}04-confirmation.png`, fullPage: true });
-  const n = sql("SELECT count(*) FROM email_outbox o JOIN customer_order c ON c.id = o.order_id WHERE c.email = 'camille.test@exemple.fr' AND o.kind = 'order_confirmation'");
-  assert.equal(n, "1");
+await step("Réservation enregistrée : message clair, pièce bloquée, e-mail à la créatrice", async () => {
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Numéro de téléphone").fill("06 12 34 56 78");
+  await dialog.getByText("Envoi postal").click();
+  await dialog.getByRole("button", { name: "Confirmer ma réservation" }).click();
+  await dialog.getByText("Votre demande de réservation a bien été enregistrée").waitFor();
+  await dialog.getByText("Aucun paiement n'est demandé sur le site").waitFor();
+  await page.screenshot({ path: `${SHOTS}03-reservation-ok.png` });
   assert.equal(Number(sql(`SELECT stock FROM product WHERE slug = '${productSlug}'`)), stockBefore - 1);
+  assert.equal(sql("SELECT status || ' ' || delivery || ' ' || phone FROM reservation WHERE first_name = 'Camille'"), "pending post 06 12 34 56 78");
+  assert.equal(sql("SELECT count(*) FROM email_outbox o JOIN reservation r ON r.id = o.reservation_id WHERE r.first_name = 'Camille' AND o.kind = 'admin_new_reservation'"), "1");
+  await dialog.getByRole("button", { name: "Fermer" }).last().click();
 });
 
-await step("Rafraîchir la page de confirmation : aucun doublon, panier vidé", async () => {
-  await page.reload();
-  await page.getByRole("heading", { name: /Merci Camille/ }).waitFor();
-  assert.equal(sql("SELECT count(*) FROM customer_order WHERE email = 'camille.test@exemple.fr' AND status = 'paid'"), "1");
-  const cart = await page.evaluate(() => localStorage.getItem("boheme-panier-v1"));
-  assert.equal(cart, "[]");
+await step("Une autre cliente voit « Réservé » et ne peut plus réserver la pièce", async () => {
+  const other = await browser.newContext(phone);
+  const p = await other.newPage();
+  await p.goto(`${BASE}/produit/${productSlug}`);
+  await p.getByText("Réservé – en attente de confirmation").waitFor();
+  assert.equal(await p.getByRole("button", { name: "Je réserve ce bijou" }).count(), 0);
+  await p.screenshot({ path: `${SHOTS}04-reserve.png` });
+  // Même en appelant le serveur directement : refusé.
+  const productId = sql(`SELECT id FROM product WHERE slug = '${productSlug}'`);
+  const status = await p.evaluate(async (id) => {
+    const r = await fetch("/api/reservation", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ idempotencyKey: crypto.randomUUID(), productId: id, firstName: "Inès", phone: "0698765432", delivery: "hand" }) });
+    return r.status;
+  }, productId);
+  assert.equal(status, 409);
+  await other.close();
+});
+
+await step("Panier et paiement en ligne désactivés", async () => {
+  await page.goto(`${BASE}/panier`);
+  await page.waitForURL(`${BASE}/boutique`);
+  assert.equal(await page.getByRole("link", { name: /^Panier/ }).count(), 0);
+  const status = await page.evaluate(async () => (await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" })).status);
+  assert.equal(status, 422);
 });
 
 await step("Ancien lien produit / page inconnue : page propre, pas d'erreur", async () => {
@@ -159,8 +146,8 @@ await step("Administration inaccessible sans connexion (page et API)", async () 
   await anon.close();
 });
 
-await step("Requête de paiement venant d'un autre site : refusée", async () => {
-  const r = await fetch(`${BASE}/api/checkout`, { method: "POST", headers: { Origin: "https://attaquant.example", "Content-Type": "application/json" }, body: "{}" });
+await step("Réservation envoyée depuis un autre site : refusée", async () => {
+  const r = await fetch(`${BASE}/api/reservation`, { method: "POST", headers: { Origin: "https://attaquant.example", "Content-Type": "application/json" }, body: "{}" });
   assert.equal(r.status, 403);
 });
 
@@ -193,25 +180,39 @@ await step("Connexion : mauvais mot de passe refusé", async () => {
   await admin.getByText("E-mail ou mot de passe incorrect").waitFor();
 });
 
-await step("Connexion réussie : tableau de bord avec la commande à préparer", async () => {
+await step("Connexion réussie : tableau de bord avec la réservation en attente", async () => {
   await admin.getByLabel("Mot de passe").fill("paillettes-demo-2026");
   await admin.getByRole("button", { name: "Se connecter" }).click();
   await admin.waitForURL(`${BASE}/admin`);
-  await admin.getByRole("heading", { name: "Commandes à préparer" }).waitFor();
-  await admin.getByText("Camille Martin").first().waitFor();
+  await admin.getByText("Réservations en attente").waitFor();
   await admin.screenshot({ path: `${SHOTS}05-admin-dashboard.png`, fullPage: true });
 });
 
-await step("Commande : préparation puis expédition avec suivi, e-mail à la cliente", async () => {
-  await admin.getByText("Camille Martin").first().click();
-  await admin.getByRole("button", { name: "Je commence la préparation" }).click();
-  await admin.getByText("Commande passée en préparation.").waitFor();
-  await admin.getByLabel("N° de suivi (facultatif)").fill("6A12345678901");
-  await admin.getByRole("button", { name: "Marquer comme expédiée" }).click();
-  await admin.getByText(/Expédiée : la cliente/).waitFor();
-  await admin.screenshot({ path: `${SHOTS}06-admin-commande.png`, fullPage: true });
-  assert.equal(sql("SELECT status FROM customer_order WHERE email = 'camille.test@exemple.fr' AND status <> 'expired'"), "shipped");
-  assert.equal(sql("SELECT count(*) FROM email_outbox o JOIN customer_order c ON c.id = o.order_id WHERE c.email = 'camille.test@exemple.fr' AND o.kind = 'order_shipped'"), "1");
+await step("Réservations : fiche complète, appel et WhatsApp en un geste, confirmation", async () => {
+  await admin.getByRole("link", { name: /Réservations/ }).first().click();
+  await admin.waitForURL(`${BASE}/admin/reservations`);
+  const card = admin.getByRole("listitem").filter({ hasText: "Camille" });
+  await card.getByText("Fleurs pailletées Arc-en-ciel").waitFor();
+  await card.getByText("Envoi postal").waitFor();
+  assert.equal(await card.getByRole("link", { name: "Appeler" }).getAttribute("href"), "tel:0612345678");
+  assert.match(await card.getByRole("link", { name: "Contacter sur WhatsApp" }).getAttribute("href"), /^https:\/\/wa\.me\/33612345678\?text=/);
+  await admin.screenshot({ path: `${SHOTS}06-admin-reservations.png`, fullPage: true });
+  await card.getByRole("button", { name: "Confirmer" }).click();
+  await admin.getByText("Réservation confirmée.").waitFor();
+  assert.equal(sql("SELECT status FROM reservation WHERE first_name = 'Camille'"), "confirmed");
+  assert.equal(Number(sql(`SELECT stock FROM product WHERE slug = '${productSlug}'`)), stockBefore - 1);
+});
+
+await step("Annuler une réservation : le bijou redevient disponible", async () => {
+  await admin.goto(`${BASE}/admin/reservations?statut=confirmed`);
+  const card = admin.getByRole("listitem").filter({ hasText: "Camille" });
+  await card.getByRole("button", { name: /Annuler · remettre disponible/ }).click();
+  await admin.getByRole("button", { name: "Annuler et remettre disponible" }).click();
+  await admin.getByText("le bijou est de nouveau disponible").waitFor();
+  assert.equal(sql("SELECT status FROM reservation WHERE first_name = 'Camille'"), "cancelled");
+  assert.equal(Number(sql(`SELECT stock FROM product WHERE slug = '${productSlug}'`)), stockBefore);
+  await page.goto(`${BASE}/produit/${productSlug}`);
+  await page.getByRole("button", { name: "Je réserve ce bijou" }).waitFor();
 });
 
 const photo = (color) =>

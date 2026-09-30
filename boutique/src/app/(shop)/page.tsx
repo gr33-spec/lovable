@@ -1,4 +1,4 @@
-import { ArrowRight, ArrowUpRight, Gift, Lock, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Gift, HeartHandshake, Lock, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { SocialLinks } from "@/components/shop/footer";
 import { ProductCard, ProductGrid } from "@/components/shop/product-card";
@@ -7,6 +7,7 @@ import { imageSrc } from "@/lib/image-ref";
 import { Highlighted, plainText, Sparkle } from "@/components/ui/sparkle";
 import { getBestSellers, getCategories, getListing, getSettings } from "@/lib/server/cached";
 import { siteUrl } from "@/lib/server/env";
+import { RESERVATION_MODE } from "@/lib/sales-mode";
 
 const MARQUEE = ["Fait main", "Résine & paillettes", "Pièces uniques", "Petites séries", "Envoi soigné", "Prêt à offrir"];
 
@@ -19,7 +20,7 @@ export default async function HomePage() {
   ]);
   const newest = latest.items.slice(0, 8);
   const withPhotos = newest.filter((p) => p.image);
-  const available = withPhotos.filter((p) => p.availability !== "sold_out");
+  const available = withPhotos.filter((p) => p.availability !== "sold_out" && p.availability !== "reserved");
   // Visuels d'accueil : la photo choisie dans l'administration en premier,
   // complétée par les dernières créations (on présente une collection).
   const pool = available.length >= 2 ? available : withPhotos;
@@ -93,7 +94,7 @@ export default async function HomePage() {
               {[
                 { icon: Sparkles, label: "Pièces uniques" },
                 { icon: Gift, label: "Prêt à offrir" },
-                { icon: Lock, label: "Paiement sécurisé" },
+                RESERVATION_MODE ? { icon: HeartHandshake, label: "Réservation sans paiement en ligne" } : { icon: Lock, label: "Paiement sécurisé" },
               ].map(({ icon: Icon, label }) => (
                 <li key={label} className="flex items-center gap-2">
                   <Icon size={15} className="text-accent-text" aria-hidden="true" /> {label}
@@ -278,7 +279,9 @@ export default async function HomePage() {
           {[
             { icon: Sparkles, title: "Fait main, pièce par pièce", text: "Chaque bijou est coulé, poncé et assemblé à la main." },
             { icon: Gift, title: "Emballage soigné", text: "Prêt à offrir… ou à vous faire plaisir." },
-            { icon: Lock, title: "Paiement sécurisé", text: "Carte, Apple Pay ou Google Pay, via Stripe." },
+            RESERVATION_MODE
+              ? { icon: HeartHandshake, title: "Réservation simple", text: "Réservez en un instant, sans compte : nous vous recontactons pour la remise ou l'envoi." }
+              : { icon: Lock, title: "Paiement sécurisé", text: "Carte, Apple Pay ou Google Pay, via Stripe." },
           ].map(({ icon: Icon, title, text }) => (
             <li key={title} className="flex flex-col items-center gap-3 text-center">
               <span className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-surface text-primary shadow-soft">

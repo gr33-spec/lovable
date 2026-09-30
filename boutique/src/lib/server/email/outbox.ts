@@ -4,13 +4,17 @@ import { query, transaction } from "../db";
 import { siteUrl } from "../env";
 import { errorMessage, reportEvent } from "../monitoring";
 import { loadPublicOrder, ORDER_TOKEN_PURPOSE, orderUrl } from "../orders";
+import { loadReservation } from "../reservations";
 import { loadSettings, vatMention } from "../settings";
+import { DELIVERY_LABELS, whatsappUrl } from "../../validation";
 import { dashboard, salesStats } from "../admin-queries";
 import { emailProvider } from "./provider";
 import {
   adminAlertEmail,
   adminNewOrderEmail,
+  adminNewReservationEmail,
   orderConfirmationEmail,
+  reservationReceivedEmail,
   orderRefundedEmail,
   orderShippedEmail,
   type EmailBrand,
@@ -39,7 +43,22 @@ export async function brand(): Promise<EmailBrand> {
   };
 }
 
-async function renderFor(kind: string, orderId: string | null, payload: Record<string, unknown>, b: EmailBrand) {
+async function renderReservation(kind: string, reservationId: string, b: EmailBrand) {
+  const r = await loadReservation(reservationId);
+  if (!r) throw new Error("Réservation introuvable");
+  const data = {
+    ...r,
+    deliveryLabel: DELIVERY_LABELS[r.delivery],
+    telUrl: `tel:${r.phone.replace(/[^\d+]/g, "")}`,
+    whatsappUrl: whatsappUrl(r.phone),
+  };
+  if (kind === "admin_new_reservation") return adminNewReservationEmail(b, data, `${siteUrl()}/admin/reservations`);
+  if (kind === "reservation_received") return reservationReceivedEmail(b, data);
+  throw new Error(`Type d'e-mail inconnu : ${kind}`);
+}
+
+async function renderFor(kind: string, orderId: string | null, payload: Record<string, unknown>, b: EmailBrand, reservationId: string | null = null) {
+  if (reservationId) return renderReservation(kind, reservationId, b);
   if (kind === "admin_alert") {
     return adminAlertEmail(b, String(payload.title ?? "Alerte"), String(payload.message ?? ""), `${siteUrl()}/admin`);
   }
@@ -70,8 +89,8 @@ async function renderFor(kind: string, orderId: string | null, payload: Record<s
 
 export async function processOutbox(limit = 20): Promise<{ sent: number; failed: number }> {
   const claimed = await transaction(async (c) => {
-    const rows = await query<{ id: string; order_id: string | null; kind: string; recipient: string; payload: Record<string, unknown>; attempts: number }>(
-      `SELECT id, order_id, kind, recipient, payload, attempts FROM email_outbox
+    const rows = await query<{ id: string; order_id: string | null; reservation_id: string | null; kind: string; recipient: string; payload: Record<string, unknown>; attempts: number }>(
+      `SELECT id, order_id, reservation_id, kind, recipient, payload, attempts FROM email_outbox
        WHERE status = 'pending' AND next_attempt_at <= now()
        ORDER BY created_at LIMIT $1 FOR UPDATE SKIP LOCKED`,
       [limit],
@@ -89,7 +108,7 @@ export async function processOutbox(limit = 20): Promise<{ sent: number; failed:
   let failed = 0;
   for (const row of claimed) {
     try {
-      const message = await renderFor(row.kind, row.order_id, row.payload, b);
+      const message = await renderFor(row.kind, row.order_id, row.payload, b, row.reservation_id);
       await emailProvider().send({ ...message, to: row.recipient, replyTo: b.contactEmail || undefined });
       await query("UPDATE email_outbox SET status = 'sent', sent_at = now(), last_error = NULL WHERE id = $1", [row.id]);
       sent++;
