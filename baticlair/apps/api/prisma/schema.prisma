@@ -106,12 +106,14 @@ model Company {
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
-  memberships  Membership[]
-  projects     Project[]
-  documents    Document[]
-  aiExecutions AiExecution[]
-  takeoffs     Takeoff[]
-  aiAnalyses   AiAnalysis[]
+  memberships   Membership[]
+  projects      Project[]
+  documents     Document[]
+  aiExecutions  AiExecution[]
+  takeoffs      Takeoff[]
+  aiAnalyses    AiAnalysis[]
+  suppliers     Supplier[]
+  priceRequests PriceRequest[]
 
   @@map("company")
 }
@@ -155,9 +157,10 @@ model Project {
   /// Sert à classer les chantiers : le plus récemment travaillé en premier.
   lastActivityAt DateTime      @default(now())
 
-  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  createdBy User?      @relation("ProjectCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
-  documents Document[]
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdBy     User?          @relation("ProjectCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  documents     Document[]
+  priceRequests PriceRequest[]
 
   @@index([companyId, status, lastActivityAt(sort: Desc), id(sort: Desc)])
   // Index de recherche plein texte sans accents (pg_trgm + unaccent) :
@@ -201,11 +204,13 @@ model Document {
   uploadedById String?
   createdAt    DateTime        @default(now())
 
-  company     Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  project     Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  company     Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  project     Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
   blob        DocumentBlob?
   processings DocumentProcessing[]
   takeoff     Takeoff?
+  /// Devis fournisseur reçu en réponse à une demande de prix.
+  recipient   PriceRequestRecipient?
 
   @@index([companyId, sha256])
   @@index([projectId, createdAt])
@@ -453,4 +458,77 @@ model TakeoffLine {
 
   @@index([takeoffId, position])
   @@map("takeoff_line")
+}
+
+// ---------------------------------------------------------------------------
+// Fournisseurs et demandes de prix
+// ---------------------------------------------------------------------------
+
+/// Carnet de fournisseurs de l'entreprise. Archivé plutôt que supprimé :
+/// les demandes passées gardent leur destinataire.
+model Supplier {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  companyId   String    @db.Uuid
+  name        String
+  contactName String?
+  email       String
+  phone       String?
+  notes       String?
+  archivedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  company    Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  recipients PriceRequestRecipient[]
+
+  @@index([companyId, archivedAt, name])
+  @@map("supplier")
+}
+
+/// Demande de prix d'un chantier : copie FIGÉE de la liste de matériaux
+/// validée au moment de la demande (ce que les fournisseurs ont reçu).
+model PriceRequest {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  companyId   String    @db.Uuid
+  projectId   String    @db.Uuid
+  takeoffId   String    @db.Uuid
+  /// [{ designation, quantity, unit, reference }] dans l'ordre de la liste.
+  lines       Json
+  message     String?
+  dueDate     DateTime? @db.Date
+  createdById String?
+  createdAt   DateTime  @default(now())
+
+  company    Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  project    Project                 @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  recipients PriceRequestRecipient[]
+
+  @@index([companyId, projectId, createdAt])
+  @@map("price_request")
+}
+
+enum RecipientStatus {
+  to_send
+  sent
+  received
+  declined
+}
+
+model PriceRequestRecipient {
+  id             String          @id @default(uuid(7)) @db.Uuid
+  priceRequestId String          @db.Uuid
+  supplierId     String          @db.Uuid
+  status         RecipientStatus @default(to_send)
+  sentAt         DateTime?
+  /// Devis PDF reçu du fournisseur (déposé à la main pour le MVP).
+  documentId     String?         @unique @db.Uuid
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  priceRequest PriceRequest @relation(fields: [priceRequestId], references: [id], onDelete: Cascade)
+  supplier     Supplier     @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  document     Document?    @relation(fields: [documentId], references: [id], onDelete: SetNull)
+
+  @@unique([priceRequestId, supplierId])
+  @@map("price_request_recipient")
 }

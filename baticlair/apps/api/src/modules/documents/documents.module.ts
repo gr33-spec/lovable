@@ -26,6 +26,6 @@ import { PrismaDocumentRepository } from "./infrastructure/prisma-document.repos
       inject: [DOCUMENT_REPOSITORY, PDF_READER, CONFIG, LOGGER],
     },
   ],
-  exports: [DOCUMENT_REPOSITORY],
+  exports: [DOCUMENT_REPOSITORY, DocumentsService],
 })
 export class DocumentsModule {}

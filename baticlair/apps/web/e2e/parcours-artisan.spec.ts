@@ -140,11 +140,9 @@ test("les onglets pas encore construits le disent clairement", async ({ page }) 
   await signUp(page);
   await page.getByRole("link", { name: "Factures" }).click();
   await expect(page.getByRole("heading", { name: "Bientôt ici" })).toBeVisible();
-  await page.getByRole("link", { name: "Fournisseurs" }).click();
-  await expect(page.getByRole("heading", { name: "Bientôt ici" })).toBeVisible();
 });
 
-test("un couvreur dépose son devis client et un devis fournisseur (lecture sans IA)", async ({ page }) => {
+test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Toiture Leroy", "M. Leroy", "8 rue du Moulin, Vannes");
 
@@ -165,40 +163,29 @@ test("un couvreur dépose son devis client et un devis fournisseur (lecture sans
   await expect(page.getByText("1 page lue · 1 page à lire en image · 1 page ignorée (conditions générales…)")).toBeVisible();
   await expect(page.getByText("PROCHAINE ÉTAPE", { exact: true })).toHaveCount(0);
 
-  // Devis fournisseur.
-  await page.getByLabel("Ajouter un devis fournisseur (PDF)").setInputFiles(fixture("devis-fournisseur-couvreur.pdf"));
-  await expect(page.getByText("devis-fournisseur-couvreur.pdf")).toBeVisible();
-  await expect(page.getByText("2 pages lues")).toBeVisible();
-
-  // Le même fichier une seconde fois : rien n'est ajouté.
-  await page.getByLabel("Ajouter un devis fournisseur (PDF)").setInputFiles(fixture("devis-fournisseur-couvreur.pdf"));
-  await expect(page.getByRole("status").filter({ hasText: "déjà dans ce chantier" })).toBeVisible();
-
-  // Après rechargement, les documents sont toujours là.
+  // Après rechargement, le devis est toujours là.
   await page.reload();
   await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
-  await expect(page.getByText("devis-fournisseur-couvreur.pdf")).toHaveCount(1);
 
   // Le propriétaire voit la consommation IA : rien de dépensé, volume lu mesuré.
   await page.goto("/compte");
   const usage = page.locator("section, div").filter({ has: page.getByRole("heading", { name: "Consommation IA ce mois-ci" }) }).last();
   await expect(usage.getByText("0,00 €").first()).toBeVisible();
-  await expect(usage.getByText("2 · 5 pages")).toBeVisible();
+  await expect(usage.getByText("1 · 3 pages")).toBeVisible();
   await expect(usage.getByText("· sans plafond pendant l'essai")).toBeVisible();
   await expect(usage.getByText(/la lecture des devis est gratuite/)).toBeVisible();
 
   // Un devis déposé par erreur se supprime (avec confirmation), puis se redépose.
   await page.goBack();
-  await page.getByRole("button", { name: "Supprimer devis-fournisseur-couvreur.pdf" }).click();
+  await page.getByRole("button", { name: "Supprimer devis-client-couvreur.pdf" }).click();
   await page.getByRole("button", { name: "Annuler" }).click();
-  await expect(page.getByText("devis-fournisseur-couvreur.pdf")).toBeVisible();
-  await page.getByRole("button", { name: "Supprimer devis-fournisseur-couvreur.pdf" }).click();
+  await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
+  await page.getByRole("button", { name: "Supprimer devis-client-couvreur.pdf" }).click();
   await page.getByRole("button", { name: "Oui, supprimer" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Devis supprimé." })).toBeVisible();
-  await expect(page.getByText("devis-fournisseur-couvreur.pdf")).toHaveCount(0);
-  await expect(page.getByText("Aucun devis fournisseur pour l'instant.")).toBeVisible();
-  await page.getByLabel("Ajouter un devis fournisseur (PDF)").setInputFiles(fixture("devis-fournisseur-couvreur.pdf"));
-  await expect(page.getByText("devis-fournisseur-couvreur.pdf")).toBeVisible();
+  await expect(page.getByText("devis-client-couvreur.pdf")).toHaveCount(0);
+  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(fixture("devis-client-couvreur.pdf"));
+  await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
 });
 
 test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et la valide", async ({ page }) => {
@@ -241,4 +228,79 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   // L'analyse est décomptée dans la consommation du mois.
   await page.goto("/compte");
   await expect(page.getByRole("heading", { name: "Consommation IA ce mois-ci" })).toBeVisible();
+});
+
+test("un couvreur demande les prix à ses fournisseurs et range leurs devis", async ({ page }) => {
+  await signUp(page);
+
+  // Carnet de fournisseurs, depuis le « + ».
+  await page.getByRole("button", { name: /Ajouter : nouveau chantier/ }).click();
+  await page.getByRole("link", { name: /Nouveau fournisseur/ }).click();
+  await page.getByLabel("Société").fill("Point.P Vannes");
+  await page.getByLabel("E-mail pour les demandes de prix").fill("pas-un-email");
+  await page.getByRole("button", { name: "Ajouter", exact: true }).click();
+  await expect(page.getByText("Cette adresse e-mail n'est pas valide.")).toBeVisible();
+  await page.getByLabel("E-mail pour les demandes de prix").fill("Devis@PointP.fr");
+  await page.getByLabel("Contact (facultatif)").fill("Paul");
+  await page.getByRole("button", { name: "Ajouter", exact: true }).click();
+  await expect(page.getByText("devis@pointp.fr")).toBeVisible();
+
+  // Modifier une fiche.
+  await page.getByRole("button", { name: "Modifier Point.P Vannes" }).click();
+  await page.getByLabel("Notes, spécialités (facultatif)").fill("Tuiles, zinc");
+  await page.getByRole("button", { name: "Enregistrer" }).click();
+  await expect(page.getByText("Tuiles, zinc")).toBeVisible();
+
+  // Chantier, devis client, liste validée.
+  await createProject(page, "Toiture Garnier", "M. Garnier", "5 rue du Port, Vannes");
+  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByRole("button", { name: "Préparer la liste de matériaux" }).click();
+  await expect(page.getByText("Tuile romane canal rouge 12,5 u/m²")).toBeVisible();
+  await page.getByRole("button", { name: "Corriger Crochet inox ardoise 100 mm" }).click();
+  await page.getByLabel("Quantité").fill("200");
+  await page.getByLabel("Unité").fill("u");
+  await page.getByRole("button", { name: "Enregistrer" }).click();
+  await page.getByRole("button", { name: "Valider la liste" }).click();
+
+  // Prochaine étape : choisir les fournisseurs, dont un créé sur place.
+  await expect(page.getByRole("heading", { name: "Demander les prix aux fournisseurs" })).toBeVisible();
+  await page.getByRole("checkbox", { name: /Point.P Vannes/ }).check();
+  await page.getByRole("button", { name: "Nouveau fournisseur" }).click();
+  await page.getByLabel("Société").fill("Tuiles & Co");
+  await page.getByLabel("E-mail pour les demandes de prix").fill("devis@tuiles.fr");
+  await page.getByRole("button", { name: "Ajouter", exact: true }).click();
+  await expect(page.getByRole("checkbox", { name: /Tuiles & Co/ })).toBeChecked();
+  await page.getByRole("button", { name: "Préparer les 2 e-mails" }).click();
+
+  await expect(page.getByText("DEMANDES DE PRIX")).toBeVisible();
+  const pointp = page.locator("li").filter({ hasText: "Point.P Vannes" });
+  const tuiles = page.locator("li").filter({ hasText: "Tuiles & Co" });
+  await expect(pointp.getByText("À envoyer")).toBeVisible();
+  // « Envoyer l'e-mail » ouvre la messagerie avec l'e-mail rempli.
+  const href = await pointp.getByRole("link", { name: "Envoyer l'e-mail" }).getAttribute("href");
+  expect(href).toMatch(/^mailto:devis@pointp\.fr\?subject=Demande%20de%20prix/);
+  expect(decodeURIComponent(href!)).toContain("Bonjour Paul,");
+  expect(decodeURIComponent(href!)).toContain("Tuile romane canal rouge 12,5 u/m²");
+
+  // Envoyé autrement : marqué à la main.
+  await pointp.getByRole("button", { name: "Déjà envoyé" }).click();
+  await expect(pointp.getByText("Envoyée", { exact: true })).toBeVisible();
+
+  // Le devis du fournisseur arrive : on le dépose sur sa ligne.
+  await pointp.getByLabel("Ajouter son devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
+  await expect(pointp.getByText("Devis reçu")).toBeVisible();
+  await expect(pointp.getByText(/Ouvrir son devis \(devis-fournisseur-couvreur\.pdf\)/)).toBeVisible();
+  await expect(page.getByText("1 devis reçu sur 2")).toBeVisible();
+
+  // Le même PDF ne peut pas aller chez un second fournisseur.
+  await tuiles.getByRole("button", { name: "Déjà envoyé" }).click();
+  await tuiles.getByLabel("Ajouter son devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
+  await expect(tuiles.getByRole("alert")).toContainText("déjà rangé chez un autre fournisseur");
+  await tuiles.getByRole("button", { name: "N'a pas répondu" }).click();
+  await expect(tuiles.getByText("Pas de réponse")).toBeVisible();
+
+  // Tout est conservé.
+  await page.reload();
+  await expect(page.locator("li").filter({ hasText: "Point.P Vannes" }).getByText("Devis reçu")).toBeVisible();
+  await expect(page.locator("li").filter({ hasText: "Tuiles & Co" }).getByText("Pas de réponse")).toBeVisible();
 });
