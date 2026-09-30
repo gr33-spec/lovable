@@ -33,7 +33,8 @@ export async function generateMetadata(): Promise<Metadata> {
     title: { default: `${name} — ${tagline || "Bijoux faits main"}`, template: `%s — ${name}` },
     description,
     applicationName: name,
-    openGraph: { type: "website", locale: "fr_FR", siteName: name },
+    // Image de partage par défaut (accueil, pages sans photo) : la photo d'accueil, sinon le logo.
+    openGraph: { type: "website", locale: "fr_FR", siteName: name, images: (s?.hero ?? s?.logo) ? [{ url: `${(s?.hero ?? s?.logo)!.base}/og.jpg` }] : undefined },
     icons: favicon ? { icon: `${favicon.base}/${favicon.widths[0]}.webp`, apple: `${favicon.base}/og.jpg` } : { icon: "/icon.svg" },
     formatDetection: { telephone: false },
   };

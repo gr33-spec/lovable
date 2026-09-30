@@ -135,7 +135,7 @@ export async function Listing({ params, category }: { params: RawParams; categor
       <nav aria-label="Fil d'Ariane" className="mb-4 text-sm text-text-2">
         <ol className="flex flex-wrap items-center gap-1">
           <li>
-            <Link href="/" className="no-underline hover:underline">
+            <Link href="/" className="inline-block py-1.5 no-underline hover:underline">
               Accueil
             </Link>
           </li>
@@ -143,7 +143,7 @@ export async function Listing({ params, category }: { params: RawParams; categor
           {category ? (
             <>
               <li>
-                <Link href="/boutique" className="no-underline hover:underline">
+                <Link href="/boutique" className="inline-block py-1.5 no-underline hover:underline">
                   Boutique
                 </Link>
               </li>
@@ -151,7 +151,7 @@ export async function Listing({ params, category }: { params: RawParams; categor
                 <Fragment key={t.path}>
                   <ChevronRight size={14} aria-hidden="true" />
                   <li>
-                    <Link href={`/boutique/${t.path}`} className="no-underline hover:underline">
+                    <Link href={`/boutique/${t.path}`} className="inline-block py-1.5 no-underline hover:underline">
                       {t.name}
                     </Link>
                   </li>
@@ -297,7 +297,7 @@ export async function Listing({ params, category }: { params: RawParams; categor
 
           {listing.items.length ? (
             <>
-              <ProductGrid products={listing.items} priorityCount={4} withSidebar />
+              <ProductGrid products={listing.items} priorityCount={4} withSidebar headingLevel={2} />
               {listing.hasMore && (
                 <div className="mt-12 flex flex-col items-center gap-2">
                   <p className="text-sm text-text-2">

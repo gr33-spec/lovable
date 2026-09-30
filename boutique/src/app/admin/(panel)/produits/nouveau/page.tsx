@@ -1,10 +1,14 @@
 import { randomUUID } from "node:crypto";
+import { requireAdminPage } from "@/lib/server/auth";
 import { ProductEditor } from "@/components/admin/product-editor";
 import { attributeSuggestions, groups } from "@/lib/server/admin-queries";
 
 export const metadata = { title: "Nouvelle création" };
 
 export default async function NewProductPage() {
+  // Chaque page vérifie elle-même la session : la mise en page (layout) est rendue en
+  // parallèle et ne protège pas, à elle seule, les données de la page.
+  await requireAdminPage();
   const [{ categories, collections }, suggestions] = await Promise.all([groups(), attributeSuggestions()]);
   return (
     <ProductEditor

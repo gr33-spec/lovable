@@ -65,7 +65,7 @@ export default async function ProductPage({ params }: Props) {
         </div>
         {others.items.length > 0 && (
           <div className="mt-12">
-            <ProductGrid products={others.items.slice(0, 8)} />
+            <ProductGrid products={others.items.slice(0, 8)} headingLevel={2} />
           </div>
         )}
       </div>
@@ -115,7 +115,7 @@ export default async function ProductPage({ params }: Props) {
       <nav aria-label="Fil d'Ariane" className="mb-4 hidden text-sm text-text-2 sm:block">
         <ol className="flex flex-wrap items-center gap-1">
           <li>
-            <Link href="/boutique" className="no-underline hover:underline">
+            <Link href="/boutique" className="inline-block py-1.5 no-underline hover:underline">
               Boutique
             </Link>
           </li>
@@ -123,7 +123,7 @@ export default async function ProductPage({ params }: Props) {
             <Fragment key={c.path}>
               <ChevronRight size={14} aria-hidden="true" />
               <li>
-                <Link href={`/boutique/${c.path}`} className="no-underline hover:underline">
+                <Link href={`/boutique/${c.path}`} className="inline-block py-1.5 no-underline hover:underline">
                   {c.name}
                 </Link>
               </li>
@@ -140,7 +140,7 @@ export default async function ProductPage({ params }: Props) {
         <Gallery images={p.images} name={p.name} />
 
         <div className="md:pt-2">
-          <Link href={`/boutique/${p.category.path}`} className="eyebrow no-underline">
+          <Link href={`/boutique/${p.category.path}`} className="eyebrow py-1.5 no-underline">
             {crumbs.map((c) => c.name).join(" · ")}
             {p.collection ? ` · ${p.collection.name}` : ""}
           </Link>

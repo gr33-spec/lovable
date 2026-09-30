@@ -17,7 +17,8 @@ const ITEMS = [
   RESERVATION_MODE ? RESERVATIONS : ORDERS,
   { href: "/admin/categories", label: "Catégories", short: "Catégories", icon: Tags },
   { href: "/admin/apparence", label: "Apparence", short: "Apparence", icon: Palette },
-  { href: "/admin/livraison", label: "Livraison", short: "Livraison", icon: Truck },
+  // Frais de port convenus avec chaque cliente en mode réservation : page inutile dans le menu.
+  ...(RESERVATION_MODE ? [] : [{ href: "/admin/livraison", label: "Livraison", short: "Livraison", icon: Truck }]),
   { href: "/admin/parametres", label: "Paramètres", short: "Paramètres", icon: Settings },
   ...(RESERVATION_MODE ? [ORDERS] : []),
 ];

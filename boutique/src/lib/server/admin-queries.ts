@@ -29,7 +29,7 @@ export async function dashboard(lowThreshold: number) {
     query<{ id: string; level: string; source: string; message: string; created_at: Date }>(
       "SELECT id, level, source, message, created_at FROM system_event WHERE resolved_at IS NULL AND level <> 'info' AND created_at > now() - interval '14 days' ORDER BY created_at DESC LIMIT 8",
     ),
-    queryOne<{ n: string }>("SELECT count(*) AS n FROM email_outbox WHERE status = 'failed'"),
+    queryOne<{ n: string }>("SELECT count(*) AS n FROM email_outbox WHERE status = 'failed' AND coalesce(last_error, '') NOT LIKE 'Abandonné%'"),
     queryOne<{ received_at: Date }>("SELECT received_at FROM payment_event ORDER BY received_at DESC LIMIT 1"),
     queryOne<{ n: string; total: string | null }>(
       "SELECT count(*) AS n, sum(total_cents - refunded_cents) AS total FROM customer_order WHERE paid_at > date_trunc('month', now()) AND status NOT IN ('pending','expired')",

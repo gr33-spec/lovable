@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ShopSettings } from "@/lib/server/settings";
 import { imageSrc } from "@/lib/image-ref";
-import { SOCIAL_LABELS } from "@/lib/validation";
+import { SOCIAL_LABELS } from "@/lib/shared";
 import { RESERVATION_MODE } from "@/lib/sales-mode";
 import { plainText } from "../ui/sparkle";
 import { SocialIcon } from "../ui/social-icon";
@@ -30,7 +30,7 @@ export function SocialLinks({ socials, className = "" }: { socials: ShopSettings
 
 export function Footer({ settings, categories }: { settings: ShopSettings; categories: { slug: string; name: string }[] }) {
   const year = new Date().getFullYear();
-  const link = "text-text-2 no-underline transition-colors duration-300 hover:text-primary";
+  const link = "inline-block py-1 text-text-2 no-underline transition-colors duration-300 hover:text-primary";
   return (
     <footer className="relative mt-24 overflow-hidden border-t border-border bg-surface-2 text-text">
       <div className="hairline absolute inset-x-0 top-0" aria-hidden="true" />

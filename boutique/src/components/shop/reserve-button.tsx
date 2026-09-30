@@ -50,29 +50,23 @@ export function ReserveButton({
     return () => obs.disconnect();
   }, []);
 
-  if (availability === "reserved" && !done) {
-    return (
-      <div className="rounded-2xl bg-primary-soft p-4 text-primary" role="status">
-        <p className="font-semibold">Réservé – en attente de confirmation</p>
-        <p className="mt-1 text-sm">Ce bijou vient d&apos;être réservé. Il sera peut-être de nouveau disponible prochainement : d&apos;autres modèles vous attendent dans la boutique.</p>
-      </div>
-    );
-  }
-  if (availability === "sold_out" && !done) {
-    return (
-      <div className="rounded-2xl bg-soldout-bg p-4 text-soldout" role="status">
-        <p className="font-semibold">Cette création n&apos;est plus disponible.</p>
-        <p className="mt-1 text-sm">Chaque pièce est faite main : d&apos;autres modèles vous attendent dans la boutique.</p>
-      </div>
-    );
-  }
-  if (!ordersOpen && !done) {
-    return (
-      <p className="rounded-2xl bg-primary-light p-4 text-sm font-medium text-primary" role="status">
-        Les réservations sont momentanément en pause.
-      </p>
-    );
-  }
+  // Pièce indisponible : message à la place du bouton. La fenêtre de réservation reste
+  // montée, pour qu'une cliente devancée d'une seconde lise l'explication au lieu de la voir disparaître.
+  const blocked = done ? null : availability === "reserved" ? (
+    <div className="rounded-2xl bg-primary-soft p-4 text-primary" role="status">
+      <p className="font-semibold">Réservé – en attente de confirmation</p>
+      <p className="mt-1 text-sm">Ce bijou vient d&apos;être réservé. Il sera peut-être de nouveau disponible prochainement : d&apos;autres modèles vous attendent dans la boutique.</p>
+    </div>
+  ) : availability === "sold_out" ? (
+    <div className="rounded-2xl bg-soldout-bg p-4 text-soldout" role="status">
+      <p className="font-semibold">Cette création n&apos;est plus disponible.</p>
+      <p className="mt-1 text-sm">Chaque pièce est faite main : d&apos;autres modèles vous attendent dans la boutique.</p>
+    </div>
+  ) : !ordersOpen ? (
+    <p className="rounded-2xl bg-primary-light p-4 text-sm font-medium text-primary" role="status">
+      Les réservations sont momentanément en pause.
+    </p>
+  ) : null;
 
   const open = () => {
     key.current ??= crypto.randomUUID();
@@ -131,7 +125,7 @@ export function ReserveButton({
   return (
     <>
       <div ref={mainButton}>
-        {done ? (
+        {blocked ?? (done ? (
           <SuccessMessage shopName={shopName} />
         ) : (
           <>
@@ -140,7 +134,7 @@ export function ReserveButton({
             </button>
             <p className="mt-2.5 text-center text-sm text-text-2">Sans compte et sans paiement en ligne : nous vous recontactons.</p>
           </>
-        )}
+        ))}
       </div>
 
       <dialog
@@ -263,7 +257,7 @@ export function ReserveButton({
       </dialog>
 
       {/* Barre fixe sur mobile quand le bouton principal n'est plus visible. */}
-      {!done && (
+      {!done && !blocked && (
         <div
           className={`fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur transition-transform duration-300 md:hidden ${
             showBar ? "translate-y-0" : "translate-y-full"

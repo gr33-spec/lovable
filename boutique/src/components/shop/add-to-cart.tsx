@@ -4,7 +4,7 @@ import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { formatPrice } from "@/lib/format";
-import { MAX_QUANTITY_PER_LINE } from "@/lib/validation";
+import { MAX_QUANTITY_PER_LINE } from "@/lib/shared";
 import { cart, useCart } from "./cart-store";
 
 // Bouton « Ajouter au panier ». Sur téléphone, une barre fixe en bas de

@@ -63,7 +63,7 @@ remboursement Stripe, effacement RGPD), catégories et collections, apparence (1
 réseaux), livraison (modes, prix, gratuité, pays, retrait en main propre), paramètres (légal, TVA,
 Stripe, sécurité du compte et double authentification, sauvegardes, exports, journal).
 
-**Vérifié automatiquement** — 100 tests serveur sur une vraie base PostgreSQL et 25 parcours dans un
+**Vérifié automatiquement** — 103 tests serveur sur une vraie base PostgreSQL et 25 parcours dans un
 vrai navigateur (voir § 7).
 
 ## 2. Décisions importantes (et pourquoi)
@@ -200,13 +200,16 @@ dès que les informations légales sont complètes. En cas de remboursement, fau
 - Admin : mot de passe haché (scrypt), sessions aléatoires révocables (30 j max, 7 j d'inactivité), cookies `HttpOnly`/`Secure`/`SameSite`,
   10 essais / 15 min par IP et 8 par compte, double authentification (codes à usage unique), réinitialisation par lien unique de 30 min,
   changement de mot de passe = déconnexion des autres appareils. Chaque page, action et API revérifie la session en base.
+  **Règle pour tout nouvel écran d'administration** : appeler `requireAdminPage()` en première ligne de la page (Next.js rend la
+  mise en page et la page en parallèle : la vérification du layout ne protège pas les données de la page). Un test le vérifie.
 - Toutes les entrées validées côté serveur (types, tailles, formats) ; requêtes SQL paramétrées ; textes jamais interprétés comme du HTML ;
   contrôle d'origine sur les écritures ; en-têtes CSP, HSTS, nosniff, Referrer-Policy, Permissions-Policy, anti-iframe.
 - Photos : fichier entièrement décodé puis réencodé (un faux .jpg est refusé), limite de taille et de pixels, métadonnées (dont GPS) supprimées,
   noms de fichiers générés par le serveur.
 - Journal des actions sensibles, sans aucun mot de passe, jeton ni donnée bancaire.
 - RGPD : minimisation (téléphone facultatif, pas de compte, pas de newsletter, pas de traceur), export des données d'une cliente,
-  effacement par commande, purge automatique configurable, paiements non aboutis anonymisés après 30 jours.
+  effacement par commande, purge automatique configurable, paiements non aboutis anonymisés après 30 jours ; réservations annulées
+  ou expirées anonymisées après 30 jours, réservations confirmées selon la même durée que les adresses.
 
 ## 7. Développement
 

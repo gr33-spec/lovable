@@ -83,9 +83,7 @@ function LivePreview() {
             <span className="btn btn-outline btn-sm">Nouveautés</span>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
-            <span className="chip" aria-pressed="true">
-              Boucles d&apos;oreilles
-            </span>
+            <span className="chip !border-primary !bg-primary !text-on-primary">Boucles d&apos;oreilles</span>
             <span className="chip">Broches</span>
             <span className="badge bg-primary-soft text-primary">Sélection</span>
           </div>
@@ -236,11 +234,11 @@ export function ThemePicker({ current, custom }: { current: string; custom: Cust
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-3 2xl:grid-cols-4" role="radiogroup" aria-label="Thème">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-3 2xl:grid-cols-4" role="radiogroup" aria-label="Thème">
           {THEMES.map((t) => {
             const active = selected === t.id;
             return (
-              <li key={t.id}>
+              <div key={t.id}>
                 <button
                   type="button"
                   role="radio"
@@ -256,10 +254,10 @@ export function ThemePicker({ current, custom }: { current: string; custom: Cust
                   </span>
                   <span className="block px-1 pb-1 text-xs leading-snug text-text-2">{t.description}</span>
                 </button>
-              </li>
+              </div>
             );
           })}
-          <li>
+          <div>
             <button
               type="button"
               role="radio"
@@ -281,8 +279,8 @@ export function ThemePicker({ current, custom }: { current: string; custom: Cust
               </span>
               <span className="block px-1 pb-1 text-xs leading-snug text-text-2">Trois couleurs, le reste est calculé pour vous.</span>
             </button>
-          </li>
-        </ul>
+          </div>
+        </div>
 
         <div className="space-y-4 xl:sticky xl:top-24 xl:self-start">
           <LivePreview />

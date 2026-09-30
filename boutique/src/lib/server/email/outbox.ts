@@ -87,7 +87,25 @@ async function renderFor(kind: string, orderId: string | null, payload: Record<s
   }
 }
 
+const NOT_CONFIGURED = "Service d'e-mail pas encore configuré : les e-mails attendent et partiront dès sa configuration (Resend, voir le guide).";
+
 export async function processOutbox(limit = 20): Promise<{ sent: number; failed: number }> {
+  // Service d'e-mail absent : une seule alerte claire (pas une par e-mail et par essai),
+  // et les e-mails restent en attente sans consommer leurs essais.
+  try {
+    emailProvider();
+  } catch {
+    const open = await query("SELECT 1 FROM system_event WHERE source = 'email' AND message = $1 AND resolved_at IS NULL LIMIT 1", [NOT_CONFIGURED]);
+    const waiting = await query("SELECT 1 FROM email_outbox WHERE status = 'pending' LIMIT 1");
+    if (!open.length && waiting.length) await reportEvent("warning", "email", NOT_CONFIGURED);
+    return { sent: 0, failed: 0 };
+  }
+  // Notifications de réservation devenues trop anciennes (service configuré tardivement) :
+  // abandonnées plutôt qu'envoyées des jours après (la réservation reste visible dans l'administration).
+  await query(
+    `UPDATE email_outbox SET status = 'failed', last_error = 'Abandonné : trop ancien (service d''e-mail configuré après coup)'
+     WHERE status = 'pending' AND kind IN ('admin_new_reservation', 'reservation_received') AND created_at < now() - interval '3 days'`,
+  );
   const claimed = await transaction(async (c) => {
     const rows = await query<{ id: string; order_id: string | null; reservation_id: string | null; kind: string; recipient: string; payload: Record<string, unknown>; attempts: number }>(
       `SELECT id, order_id, reservation_id, kind, recipient, payload, attempts FROM email_outbox

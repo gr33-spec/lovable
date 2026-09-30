@@ -1,4 +1,5 @@
 import { Plus } from "lucide-react";
+import { requireAdminPage } from "@/lib/server/auth";
 import Link from "next/link";
 import { ProductList } from "@/components/admin/product-list";
 import { PageTitle } from "@/components/admin/ui";
@@ -10,6 +11,9 @@ export const metadata = { title: "Produits" };
 type SP = Promise<{ q?: string; statut?: string; categorie?: string; stock?: string }>;
 
 export default async function ProductsPage({ searchParams }: { searchParams: SP }) {
+  // Chaque page vérifie elle-même la session : la mise en page (layout) est rendue en
+  // parallèle et ne protège pas, à elle seule, les données de la page.
+  await requireAdminPage();
   const sp = await searchParams;
   const [rows, { categories }, settings] = await Promise.all([
     adminProducts({ q: sp.q, status: sp.statut, categoryId: sp.categorie, stock: sp.stock }),

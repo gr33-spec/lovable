@@ -1,4 +1,4 @@
-import type { SocialNetwork } from "@/lib/validation";
+import type { SocialNetwork } from "@/lib/shared";
 
 // Pictogrammes des réseaux (tracés simplifiés, sans dépendance).
 const PATHS: Record<SocialNetwork, string> = {

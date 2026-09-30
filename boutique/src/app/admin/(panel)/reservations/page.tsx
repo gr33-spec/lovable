@@ -1,4 +1,5 @@
 import { CalendarHeart } from "lucide-react";
+import { requireAdminPage } from "@/lib/server/auth";
 import Link from "next/link";
 import { ReservationList } from "@/components/admin/reservation-list";
 import { PageTitle } from "@/components/admin/ui";
@@ -16,6 +17,9 @@ const FILTERS: { v: ReservationFilter; label: string }[] = [
 ];
 
 export default async function ReservationsPage({ searchParams }: { searchParams: Promise<{ statut?: string }> }) {
+  // Chaque page vérifie elle-même la session : la mise en page (layout) est rendue en
+  // parallèle et ne protège pas, à elle seule, les données de la page.
+  await requireAdminPage();
   const sp = await searchParams;
   const filter = FILTERS.find((f) => f.v === sp.statut)?.v ?? "pending";
   // Les réservations non confirmées à temps sont libérées avant l'affichage (si l'option est active).

@@ -1,7 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { MAX_CART_LINES, MAX_QUANTITY_PER_LINE } from "@/lib/validation";
+import { MAX_CART_LINES, MAX_QUANTITY_PER_LINE } from "@/lib/shared";
 
 // Panier conservé dans le navigateur (localStorage) : seulement des
 // identifiants et des quantités. Les prix et le stock sont TOUJOURS relus

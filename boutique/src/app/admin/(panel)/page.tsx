@@ -1,4 +1,5 @@
 import { AlertTriangle, ArrowRight, CalendarHeart, CheckCircle2, ClipboardList, PackageX, Plus, Printer, TrendingDown } from "lucide-react";
+import { requireAdminPage } from "@/lib/server/auth";
 import Link from "next/link";
 import { after } from "next/server";
 import { DemoCard } from "@/components/admin/demo-card";
@@ -18,6 +19,9 @@ import { RESERVATION_MODE } from "@/lib/sales-mode";
 export const metadata = { title: "Tableau de bord" };
 
 export default async function Dashboard({ searchParams }: { searchParams: Promise<{ periode?: string }> }) {
+  // Chaque page vérifie elle-même la session : la mise en page (layout) est rendue en
+  // parallèle et ne protège pas, à elle seule, les données de la page.
+  await requireAdminPage();
   const { periode } = await searchParams;
   const period: StatsPeriod = periode === "7j" || periode === "12m" ? periode : "30j";
   const settings = await getSettings();
@@ -168,7 +172,8 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         </section>
       )}
 
-      <SalesOverview stats={stats} />
+      {/* Ventes en ligne : sans objet tant que la boutique fonctionne en réservation. */}
+      {!RESERVATION_MODE && <SalesOverview stats={stats} />}
 
       <div className="mt-10 grid gap-6 md:grid-cols-2">
         <section aria-labelledby="titre-epuises">

@@ -3,13 +3,15 @@ import { AccountSecurity } from "@/components/admin/account-security";
 import { LegalPagesEditor } from "@/components/admin/legal-pages-editor";
 import { SettingsForm } from "@/components/admin/settings-form";
 import { StripeStatus } from "@/components/admin/stripe-status";
-import { PageTitle } from "@/components/admin/ui";
+import { Notice, PageTitle } from "@/components/admin/ui";
 import { formatDateTime, formatRelative } from "@/lib/format";
 import { auditTrail } from "@/lib/server/admin-queries";
 import { listSessions, requireAdminPage } from "@/lib/server/auth";
 import { query } from "@/lib/server/db";
 import { deployEnv, paymentConfig } from "@/lib/server/env";
 import { loadSettings } from "@/lib/server/settings";
+import { privateStorageReady } from "@/lib/server/storage";
+import { RESERVATION_MODE } from "@/lib/sales-mode";
 
 export const metadata = { title: "Paramètres" };
 
@@ -92,7 +94,14 @@ export default async function SettingsPage() {
         <h2 id="titre-paiement" className="mb-3 font-serif text-2xl">
           Paiement (Stripe)
         </h2>
-        <StripeStatus configured={payment.ok ? { provider: payment.provider, mode: payment.mode } : null} problem={payment.ok ? null : payment.reason} environment={deployEnv()} />
+        {RESERVATION_MODE ? (
+          <Notice>
+            Paiement en ligne désactivé : la boutique fonctionne en <strong>réservation</strong> (vous réglez le paiement directement avec chaque cliente). Stripe
+            pourra être réactivé plus tard sans rien refaire.
+          </Notice>
+        ) : (
+          <StripeStatus configured={payment.ok ? { provider: payment.provider, mode: payment.mode } : null} problem={payment.ok ? null : payment.reason} environment={deployEnv()} />
+        )}
       </section>
 
       <AccountSecurity
@@ -105,9 +114,19 @@ export default async function SettingsPage() {
         <h2 id="titre-donnees" className="mb-1 font-serif text-2xl">
           Sauvegardes et exports
         </h2>
-        <p className="mb-4 text-sm text-text-2">
-          Une sauvegarde complète est faite automatiquement chaque nuit (30 jours conservés). Vous pouvez aussi en télécharger une copie à garder chez vous.
-        </p>
+        {privateStorageReady() ? (
+          <p className="mb-4 text-sm text-text-2">
+            Une sauvegarde complète est faite automatiquement chaque nuit (30 jours conservés). Vous pouvez aussi en télécharger une copie à garder chez vous.
+          </p>
+        ) : (
+          <div className="mb-4">
+            <Notice tone="warning">
+              <strong>Sauvegarde nocturne automatique non activée</strong> : il manque un espace de stockage privé (Vercel → Storage → Blob privé, variable
+              BLOB_PRIVATE_READ_WRITE_TOKEN). En attendant, téléchargez une « Sauvegarde complète » chaque semaine et gardez-la sur votre ordinateur. La base de
+              données garde aussi son propre historique de retour en arrière chez l&apos;hébergeur.
+            </Notice>
+          </div>
+        )}
         <div className="grid gap-2 sm:grid-cols-2">
           {[
             ["sauvegarde", "Sauvegarde complète (à conserver)"],
@@ -139,7 +158,7 @@ export default async function SettingsPage() {
         <h2 id="titre-journal" className="mb-3 font-serif text-2xl">
           Journal des actions
         </h2>
-        <ul className="card max-h-96 divide-y divide-border overflow-y-auto text-sm">
+        <ul className="card max-h-96 divide-y divide-border overflow-y-auto text-sm" tabIndex={0} aria-label="Journal des actions">
           {trail.map((t, i) => (
             <li key={i} className="flex justify-between gap-3 px-4 py-2.5">
               <span>

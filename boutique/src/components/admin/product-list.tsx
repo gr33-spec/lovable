@@ -207,7 +207,7 @@ export function ProductList({
         <ul className="card divide-y divide-border">
           {rows.map((r, i) => (
             <li key={r.id} className="flex items-center gap-3 p-3 sm:p-4">
-              <input type="checkbox" className="h-5 w-5 shrink-0 accent-[var(--c-primary)]" checked={selected.has(r.id)} onChange={() => toggle(r.id)} aria-label={`Sélectionner ${r.name}`} />
+              <input type="checkbox" className="h-6 w-6 shrink-0 accent-[var(--c-primary)]" checked={selected.has(r.id)} onChange={() => toggle(r.id)} aria-label={`Sélectionner ${r.name}`} />
               <Link href={`/admin/produits/${r.id}`} className="flex min-w-0 flex-1 items-center gap-3 no-underline">
                 <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-surface-2">
                   <Img image={r.image} alt="" sizes="56px" className="h-full w-full" />
@@ -217,9 +217,7 @@ export function ProductList({
                   <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text-2">
                     {formatPrice(r.price_cents)} · {r.category_name}
                     {r.booked > 0 && r.stock === 0 ? (
-                      <Link href="/admin/reservations" className="badge bg-primary-soft text-primary no-underline">
-                        Réservé
-                      </Link>
+                      <span className="badge bg-primary-soft text-primary">Réservé</span>
                     ) : (
                       <ProductStatusBadge status={r.status} stock={r.stock} />
                     )}
