@@ -238,12 +238,14 @@ await step("Nouvelle création depuis le téléphone : 2 photos, principale choi
   await admin.locator("#field-name").fill("Boucles Soleil Test E2E");
   await admin.locator("#field-priceCents").fill("26,50");
   // Catégorie puis nouvelle sous-catégorie créée sans quitter la fiche.
-  await admin.locator("#field-category-0").selectOption({ label: "Boucles d'oreilles" });
-  await admin.getByRole("button", { name: /Sous-catégorie dans « Boucles d'oreilles »/ }).click();
-  await admin.getByLabel("Nom", { exact: true }).fill("Soleils");
+  // Pastilles : la famille, puis « + Nouvelle » sous-catégorie.
+  await admin.getByRole("button", { name: "Boucles d'oreilles", exact: true }).click();
+  await admin.getByRole("button", { name: "Nouvelle", exact: true }).click();
+  await admin.getByLabel("Nom de la nouvelle catégorie").fill("Soleils");
   await admin.getByRole("button", { name: "Créer", exact: true }).click();
   await admin.getByText("« Soleils » créée.").waitFor();
-  assert.equal(await admin.locator("#field-category-1 option:checked").textContent(), "Soleils");
+  await admin.getByText("Rangée dans : Boucles d'oreilles › Soleils").waitFor();
+  assert.equal(await admin.getByRole("button", { name: "Soleils" }).getAttribute("aria-pressed"), "true");
   // Une caractéristique qui servira de filtre.
   await admin.getByRole("button", { name: "Motif", exact: true }).click();
   await admin.getByLabel("Valeur").last().fill("Soleil");
@@ -269,14 +271,25 @@ await step("Le produit apparaît immédiatement dans la boutique, dans sa sous-c
 
 await step("Catégories : sous-catégorie ajoutée, renommée avec son adresse, ancienne adresse redirigée, vide supprimée", async () => {
   await admin.goto(`${BASE}/admin/categories`);
-  await admin.getByRole("button", { name: "Ajouter une sous-catégorie dans Boucles d'oreilles" }).click();
-  await admin.getByLabel("Nom").fill("Créoles");
-  await admin.getByRole("button", { name: "Enregistrer" }).click();
-  await admin.getByText("« Créoles » créée.").waitFor();
+  // Ajout rapide en chaîne dans la carte de la famille : nom, Entrée, nom, Entrée.
+  await admin.getByRole("button", { name: "Ajouter une sous-catégorie à « Boucles d'oreilles »" }).click();
+  const quick = admin.getByLabel("Nouvelle sous-catégorie dans « Boucles d'oreilles »");
+  await quick.fill("Créoles");
+  await quick.press("Enter");
+  await admin.getByText("Ajoutée : Créoles.").waitFor();
+  await quick.fill("Pendantes");
+  await quick.press("Enter");
+  await admin.getByText("Ajoutées : Créoles, Pendantes.").waitFor();
+  // Même nom une seconde fois : prévenue, pas de doublon.
+  await quick.fill("créoles");
+  await quick.press("Enter");
+  await admin.getByText("« créoles » existe déjà dans « Boucles d'oreilles ».").waitFor();
+  await admin.getByRole("button", { name: "Terminé" }).click();
+  assert.equal(sql("SELECT count(*) FROM category c JOIN category p ON p.id = c.parent_id WHERE p.slug = 'boucles-d-oreilles' AND c.name IN ('Créoles', 'Pendantes')"), "2");
   // Renommer « Soleils » et changer son adresse.
-  await admin.getByRole("button", { name: "Plus d'actions pour Soleils" }).click();
-  await admin.getByRole("button", { name: /Renommer, déplacer/ }).click();
-  await admin.getByLabel("Nom").fill("Soleils dorés");
+  await admin.getByRole("button", { name: "Modifier Boucles d'oreilles › Soleils" }).click();
+  await admin.getByLabel("Nom", { exact: true }).fill("Soleils dorés");
+  await admin.getByText(/Plus d'options/).click();
   await admin.getByLabel("Fin de l'adresse").fill("soleils-dores");
   await admin.getByRole("button", { name: "Enregistrer" }).click();
   await admin.getByText("Catégorie enregistrée.").waitFor();
@@ -289,6 +302,10 @@ await step("Catégories : sous-catégorie ajoutée, renommée avec son adresse, 
   await admin.getByRole("button", { name: "Supprimer…" }).click();
   await admin.getByRole("button", { name: "Supprimer", exact: true }).click();
   await admin.getByText("Catégorie supprimée.").waitFor();
+  await admin.getByRole("button", { name: "Plus d'actions pour Pendantes" }).click();
+  await admin.getByRole("button", { name: "Supprimer…" }).click();
+  await admin.getByRole("button", { name: "Supprimer", exact: true }).click();
+  await admin.waitForTimeout(800);
   await admin.getByRole("button", { name: "Plus d'actions pour Soleils dorés" }).click();
   await admin.getByRole("button", { name: "Supprimer…" }).click();
   await admin.getByText("Rien n'est supprimé brutalement").waitFor();
