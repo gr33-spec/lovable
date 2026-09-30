@@ -14,7 +14,7 @@
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
-    "vercel-build": "prisma generate && prisma migrate deploy && tsc -p tsconfig.build.json"
+    "vercel-build": "pnpm --filter @baticlair/domain build && prisma generate && prisma migrate deploy && tsc -p tsconfig.build.json"
   },
   "dependencies": {
     "@baticlair/domain": "workspace:*",

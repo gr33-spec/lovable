@@ -119,6 +119,9 @@ alors déconnectées.
 | Mot de passe oublié, confirmation d'e-mail | **RÉEL** si Resend est configuré, sinon indiqué comme indisponible |
 | Entreprise, chantiers (créer, chercher, modifier, marquer terminé) | **RÉEL** |
 | Bouton « + » : nouveau chantier | **RÉEL** |
+| Fiche chantier : déposer le devis client et les devis fournisseurs (PDF ≤ 4 Mo) | **RÉEL** : stockage, anti-doublon, lecture du texte page par page, estimation du coût IA |
+| Analyse des devis par l'IA (extraction des lignes) | **NON IMPLÉMENTÉ** : aucun appel IA payant pour l'instant |
+| Mon compte : consommation IA et analyses du mois (propriétaire, admin) | **RÉEL** (à zéro tant que l'IA n'est pas branchée) |
 | Bouton « + » : photo / fichier d'un devis | **NON IMPLÉMENTÉ** (affiché « Bientôt ») |
 | Fournisseurs, Factures | **NON IMPLÉMENTÉ** (écrans « Bientôt ici ») |
 | Comparaison de devis | Moteur réel et testé, **pas encore relié aux écrans** |
