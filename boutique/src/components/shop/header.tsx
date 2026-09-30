@@ -1,16 +1,21 @@
 "use client";
 
-import { Menu, Search, ShoppingBag, X } from "lucide-react";
+import { ChevronRight, Home, Mail, Menu, Search, ShoppingBag, Sparkles, Store, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { ImageRef } from "@/lib/image-ref";
 import { imageSrc } from "@/lib/image-ref";
+import type { ShopSettings } from "@/lib/server/settings";
+import { Img } from "../ui/img";
+import { plainText } from "../ui/sparkle";
 import { useCartCount } from "./cart-store";
+import { SocialLinks } from "./footer";
 
 interface NavCategory {
   slug: string;
   name: string;
+  cover: ImageRef | null;
 }
 
 function Brand({ name, logo, center = false }: { name: string; logo: ImageRef | null; center?: boolean }) {
@@ -34,7 +39,19 @@ function Brand({ name, logo, center = false }: { name: string; logo: ImageRef | 
   );
 }
 
-export function Header({ shopName, logo, categories }: { shopName: string; logo: ImageRef | null; categories: NavCategory[] }) {
+export function Header({
+  shopName,
+  logo,
+  tagline = "",
+  socials = [],
+  categories,
+}: {
+  shopName: string;
+  logo: ImageRef | null;
+  tagline?: string;
+  socials?: ShopSettings["socials"];
+  categories: NavCategory[];
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const count = useCartCount();
@@ -142,28 +159,106 @@ export function Header({ shopName, logo, categories }: { shopName: string; logo:
       <dialog
         ref={menuRef}
         aria-label="Menu"
-        className="m-0 h-dvh max-h-none w-[min(86vw,360px)] max-w-none bg-surface p-0 text-text shadow-lift open:animate-[rise_0.25s_ease]"
+        className="menu-panel m-0 h-dvh max-h-none w-[min(88vw,380px)] max-w-none overflow-hidden rounded-r-[28px] bg-surface p-0 text-text shadow-lift"
         onClick={(e) => e.target === menuRef.current && menuRef.current?.close()}
       >
-        <div className="flex h-full flex-col">
-          <div className="flex h-[var(--header-h)] items-center justify-between border-b border-border px-4">
-            <Brand name={shopName} logo={logo} />
-            <button type="button" className="btn btn-ghost btn-icon -mr-2" aria-label="Fermer le menu" onClick={() => menuRef.current?.close()}>
-              <X size={22} />
-            </button>
+        <div className="relative flex h-full flex-col">
+          <div className="soft-glow pointer-events-none absolute inset-0" aria-hidden="true" />
+          <div className="glitter-dust pointer-events-none absolute inset-0 opacity-70" aria-hidden="true" />
+
+          {/* En-tête : le logo en vedette. Le focus va d'abord sur « Fermer ». */}
+          <div className="relative px-5 pt-4 pb-5">
+            <div className="flex justify-end">
+              <button type="button" autoFocus className="btn btn-ghost btn-icon -mr-2 focus-visible:outline-2" aria-label="Fermer le menu" onClick={() => menuRef.current?.close()}>
+                <X size={22} strokeWidth={1.6} />
+              </button>
+            </div>
+            <Link href="/" className="-mt-4 flex flex-col items-center gap-3 text-center no-underline outline-none">
+              {logo && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={imageSrc(logo, 320)}
+                  alt=""
+                  className={logo.w / logo.h >= 1.6 ? "h-14 w-auto max-w-[240px] object-contain" : "holo-ring h-20 w-20 rounded-full object-cover shadow-soft ring-4 ring-surface"}
+                />
+              )}
+              <span className="font-serif text-[1.75rem] leading-none tracking-[-0.01em]">{shopName}</span>
+            </Link>
+            {tagline && <p className="mx-auto mt-2 max-w-[260px] text-center text-[13px] text-text-2">{plainText(tagline)}</p>}
           </div>
-          <nav aria-label="Menu mobile" className="flex-1 overflow-y-auto px-2 py-3">
-            <ul>
-              {[{ href: "/", label: "Accueil" }, ...links, { href: "/contact", label: "Contact" }].map((l) => (
-                <li key={l.href}>
-                  <Link href={l.href} className="flex min-h-[54px] items-center rounded-xl px-4 font-serif text-[1.45rem] no-underline transition-colors hover:bg-surface-2 hover:text-primary">
-                    {l.label}
-                  </Link>
-                </li>
+
+          <nav aria-label="Menu mobile" className="relative flex-1 overflow-y-auto px-4 pb-4">
+            {/* Mise en avant : tout le catalogue */}
+            <Link
+              href="/boutique"
+              style={{ "--i": 0 } as React.CSSProperties}
+              className="menu-item holo-shine group flex items-center gap-3 rounded-2xl bg-primary px-4 py-3.5 text-on-primary no-underline shadow-soft"
+            >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-on-primary/15">
+                <Sparkles size={19} strokeWidth={1.6} />
+              </span>
+              <span className="flex-1">
+                <span className="block font-serif text-[1.3rem] leading-tight">Toutes les créations</span>
+                <span className="block text-[12px] opacity-80">Tout le catalogue de l&apos;atelier</span>
+              </span>
+              <ChevronRight size={18} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+            </Link>
+
+            {categories.length > 0 && (
+              <>
+                <p className="eyebrow menu-item mt-6 mb-2 px-1" style={{ "--i": 1 } as React.CSSProperties}>
+                  Collections
+                </p>
+                <ul className="space-y-1">
+                  {categories.map((c, i) => (
+                    <li key={c.slug} className="menu-item" style={{ "--i": i + 2 } as React.CSSProperties}>
+                      <Link
+                        href={`/boutique/${c.slug}`}
+                        aria-current={pathname === `/boutique/${c.slug}` ? "page" : undefined}
+                        className="group flex items-center gap-3 rounded-2xl px-2 py-2 no-underline transition-colors hover:bg-surface-2 aria-[current=page]:bg-primary-soft"
+                      >
+                        <span className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-surface-2 ring-1 ring-border">
+                          <Img image={c.cover} alt="" sizes="48px" className="h-full w-full" />
+                        </span>
+                        <span className="flex-1 font-serif text-[1.3rem] leading-tight">{c.name}</span>
+                        <ChevronRight size={17} className="text-text-2 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
+                      </Link>
+                    </li>
+                  ))}
+                  <li className="menu-item" style={{ "--i": categories.length + 2 } as React.CSSProperties}>
+                    <Link href="/boutique?tri=nouveautes" className="group flex items-center gap-3 rounded-2xl px-2 py-2 no-underline transition-colors hover:bg-surface-2">
+                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
+                        <Sparkles size={19} strokeWidth={1.6} className="twinkle" />
+                      </span>
+                      <span className="flex-1 font-serif text-[1.3rem] leading-tight">Nouveautés</span>
+                      <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-semibold tracking-[0.12em] text-accent-text uppercase">Nouveau</span>
+                    </Link>
+                  </li>
+                </ul>
+              </>
+            )}
+
+            <div className="menu-item mt-6 grid grid-cols-3 gap-2" style={{ "--i": categories.length + 3 } as React.CSSProperties}>
+              {[
+                { href: "/", label: "Accueil", icon: Home },
+                { href: "/a-propos", label: "L'atelier", icon: Store },
+                { href: "/contact", label: "Contact", icon: Mail },
+              ].map(({ href, label, icon: Icon }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  aria-current={pathname === href ? "page" : undefined}
+                  className="flex flex-col items-center gap-1.5 rounded-2xl border border-border bg-surface/80 px-2 py-3 text-[13px] font-medium no-underline transition-colors hover:border-primary hover:text-primary aria-[current=page]:border-primary aria-[current=page]:text-primary"
+                >
+                  <Icon size={19} strokeWidth={1.6} aria-hidden="true" />
+                  {label}
+                </Link>
               ))}
-            </ul>
+            </div>
           </nav>
-          <div className="border-t border-border p-4">
+
+          <div className="relative space-y-3 border-t border-border bg-surface/90 p-4 backdrop-blur">
+            {socials.length > 0 && <SocialLinks socials={socials} className="justify-center" />}
             <Link href="/panier" className="btn btn-primary w-full">
               <ShoppingBag size={18} /> Voir le panier{count ? ` (${count})` : ""}
             </Link>
