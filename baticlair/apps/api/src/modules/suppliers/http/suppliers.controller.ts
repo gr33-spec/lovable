@@ -70,7 +70,15 @@ export class SuppliersController {
   @HttpCode(201)
   @Idempotent()
   async create(@Tenant() tenant: TenantContext, @Body(new ZodPipe(createBody)) body: z.infer<typeof createBody>) {
-    return supplierDto(await this.suppliers.create(tenant, body));
+    // Champs explicites : la compilation Vercel (non stricte) voit les champs zod comme facultatifs.
+    const fields = {
+      name: body.name,
+      email: body.email,
+      contactName: body.contactName ?? null,
+      phone: body.phone ?? null,
+      notes: body.notes ?? null,
+    };
+    return supplierDto(await this.suppliers.create(tenant, fields));
   }
 
   @Patch(":id")

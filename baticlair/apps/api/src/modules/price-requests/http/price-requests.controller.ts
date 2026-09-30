@@ -85,7 +85,8 @@ export class PriceRequestsController {
     @Param("projectId") projectId: string,
     @Body(new ZodPipe(createBody)) body: z.infer<typeof createBody>,
   ) {
-    return toDto(await this.requests.create(tenant, projectId, body));
+    const input = { supplierIds: body.supplierIds, message: body.message ?? null, dueDate: body.dueDate ?? null };
+    return toDto(await this.requests.create(tenant, projectId, input));
   }
 
   @Post("price-requests/:id/recipients")
