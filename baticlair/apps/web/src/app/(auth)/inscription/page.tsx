@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { TradePicker } from "@/components/trade-picker";
 import { Button, ErrorNotice, Field, PageTitle } from "@/components/ui";
 import { api, ApiError, newActionKey } from "@/lib/api";
 
@@ -14,6 +15,7 @@ export default function InscriptionPage() {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
+  const [trades, setTrades] = useState<string[]>([]);
   const companyKey = useRef(newActionKey());
   // Si le compte est créé mais que l'entreprise échoue (réseau), « réessayer »
   // ne doit pas recréer le compte : on reprend à l'étape suivante.
@@ -44,7 +46,7 @@ export default function InscriptionPage() {
       }
       await api("/v1/companies", {
         method: "POST",
-        body: { name: String(form.get("company")) },
+        body: { name: String(form.get("company")), trades },
         idempotencyKey: companyKey.current,
       });
       router.replace("/");
@@ -61,6 +63,7 @@ export default function InscriptionPage() {
         {error ? <ErrorNotice error={error} /> : null}
         <Field id="name" name="name" label="Prénom et nom" autoComplete="name" required />
         <Field id="company" name="company" label="Nom de votre entreprise" autoComplete="organization" required />
+        <TradePicker value={trades} onChange={setTrades} />
         <Field id="email" name="email" type="email" label="E-mail professionnel" autoComplete="email" inputMode="email" required />
         <Field
           id="password"

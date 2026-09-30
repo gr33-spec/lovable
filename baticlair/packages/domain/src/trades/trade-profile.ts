@@ -7,7 +7,9 @@ import type { UnitCode } from "../quantity/unit.js";
  * et, plus tard, les consignes d'extraction lisent le profil au lieu de
  * coder un métier en dur : ouvrir un corps d'état = écrire un profil.
  *
- * MVP : couverture uniquement (PD-025).
+ * Un seul moteur pour tous les métiers : le profil n'est que de la donnée.
+ * Une entreprise multi-métiers lit ses devis avec la fusion de ses profils
+ * (voir trades/index.ts, PD-033).
  */
 export interface TradeProfile {
   id: string;
@@ -38,8 +40,12 @@ export interface MaterialFamily {
   keywords: readonly string[];
   /** Si l'un de ces mots est présent, ce n'est PAS cette famille (ex. crochet de gouttière ≠ crochet d'ardoise). */
   excludes?: readonly string[];
-  /** Unités dans lesquelles la famille se commande ou se chiffre normalement. */
-  allowedUnits: readonly UnitCode[];
+  /**
+   * Unités dans lesquelles la famille se commande ou se chiffre normalement.
+   * Absent = famille « légère » : elle sert à reconnaître le matériau (et à
+   * guider l'IA), sans aucun contrôle d'unité, de quantité ni de conditionnement.
+   */
+  allowedUnits?: readonly UnitCode[];
   /** Au-delà, la quantité est inhabituelle pour un chantier : « à vérifier » (jamais un refus). */
   plausibleMax?: Partial<Record<UnitCode, number>>;
   /** Vendu à la pièce : une quantité en unités doit être entière. */

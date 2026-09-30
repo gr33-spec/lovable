@@ -91,6 +91,12 @@ const UNIT_LABEL: Partial<Record<UnitCode, string>> = {
   PALETTE: "palettes",
   BOITE: "boîtes",
   SAC: "sacs",
+  POT: "pots",
+  SEAU: "seaux",
+  BIDON: "bidons",
+  CARTON: "cartons",
+  BARRE: "barres",
+  COURONNE: "couronnes",
 };
 const unitLabel = (u: UnitCode) => UNIT_LABEL[u] ?? u.toLowerCase();
 
@@ -158,7 +164,9 @@ export function validateTakeoffLine(line: TakeoffLineInput, profile: TradeProfil
     issues.push(issue("UNIT_UNKNOWN", "to_verify", `Unité « ${line.unitRaw} » non reconnue : précisez-la.`));
   }
 
-  if (family && unit) {
+  // Familles « légères » (sans unités de référence) : reconnaissance seulement, aucun contrôle métier
+  // tant que de vrais devis ne les ont pas validés (PD-033).
+  if (family?.allowedUnits && unit) {
     if (!family.allowedUnits.includes(unit)) {
       issues.push(
         issue(
@@ -207,7 +215,7 @@ export function validateTakeoffLine(line: TakeoffLineInput, profile: TradeProfil
   if (kind === "unknown") {
     // Simple information : le référentiel ne couvre pas tous les matériaux (autres métiers, produits
     // rares). En faire un doute noierait les vrais doutes (retour terrain du 30/09).
-    issues.push(issue("FAMILY_UNKNOWN", "info", "Matériau hors référentiel couverture : pas de contrôle d'unité automatique."));
+    issues.push(issue("FAMILY_UNKNOWN", "info", "Matériau hors référentiel du métier : pas de contrôle automatique."));
   }
 
   const status: ConfidenceLevel = issues.some((i) => i.severity !== "info") ? "to_verify" : "certain";

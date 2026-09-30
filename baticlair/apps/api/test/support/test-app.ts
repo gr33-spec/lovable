@@ -47,9 +47,9 @@ export async function signUp(app: INestApplication, email: string, name = "Artis
 }
 
 /** Compte + entreprise : l'état normal après l'onboarding. */
-export async function signUpWithCompany(app: INestApplication, email: string, companyName: string) {
+export async function signUpWithCompany(app: INestApplication, email: string, companyName: string, trades: string[] = ["roofing"]) {
   const agent = await signUp(app, email);
-  const res = await agent.post("/v1/companies").send({ name: companyName });
+  const res = await agent.post("/v1/companies").send({ name: companyName, trades });
   if (res.status !== 201) throw new Error(`company creation failed: ${res.status} ${res.text}`);
   return { agent, companyId: res.body.id as string };
 }

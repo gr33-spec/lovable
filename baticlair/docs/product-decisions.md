@@ -348,3 +348,24 @@ fictives uniquement.
   « prochaine étape », liste validée repliée.
 - **Backlog** : envoi/réception automatiques des e-mails (attend un nom de
   domaine), factures, étape « Commander », contrôles d'autres métiers.
+
+### PD-033 — Multi-métiers dès la V1 : un moteur, des profils de données
+- **Date** : 2026-09-30 · **Statut** : Décidé (remplace la cible « couvreurs
+  uniquement » de PD-032 ; la boucle et la règle anti-usine-à-gaz restent)
+- **Décision** : une seule application et un seul parcours. Tout ce qui
+  change d'un métier à l'autre est de la donnée (`packages/domain/src/trades`) :
+  socle commun (main-d'œuvre, fourniture, pages sans matériaux) + un profil
+  par métier (familles de matériaux, vocabulaire, unités, contrôles).
+- **Métiers au lancement** : couverture-charpente-zinguerie (profil complet,
+  déjà éprouvé), maçonnerie, plâtrerie-isolation, peinture, carrelage,
+  sols-parquet, électricité, plomberie-chauffage, menuiserie, autre métier.
+- **Profils légers** : hors couverture, les familles servent à reconnaître
+  les lignes et à guider l'IA (vocabulaire ajouté au prompt v3). Aucun
+  contrôle d'unité, de quantité ni d'oubli tant que de vrais devis ne l'ont
+  pas validé.
+- **Pour l'artisan** : une seule question, « Votre métier » (un ou plusieurs),
+  à l'inscription et dans Mon compte. Aucune question par chantier : une
+  entreprise multi-métiers lit ses devis avec la fusion de ses profils.
+  Les entreprises existantes sont passées en couverture.
+- **Ajouter un métier** : écrire un profil et l'ajouter à la liste ; ni
+  écran ni parcours à modifier.

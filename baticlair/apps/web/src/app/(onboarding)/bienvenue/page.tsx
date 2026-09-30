@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { TradePicker } from "@/components/trade-picker";
 import { Button, ErrorNotice, Field, PageTitle } from "@/components/ui";
 import { api, ApiError, newActionKey } from "@/lib/api";
 import { SessionGate } from "@/lib/session";
@@ -12,6 +13,7 @@ function CompanyForm() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const key = useRef(newActionKey());
+  const [trades, setTrades] = useState<string[]>([]);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -20,7 +22,7 @@ function CompanyForm() {
     try {
       await api("/v1/companies", {
         method: "POST",
-        body: { name: String(new FormData(event.currentTarget).get("company")) },
+        body: { name: String(new FormData(event.currentTarget).get("company")), trades },
         idempotencyKey: key.current,
       });
       router.replace("/");
@@ -33,10 +35,11 @@ function CompanyForm() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 px-5 pt-12">
       <PageTitle>Bienvenue</PageTitle>
-      <p className="text-[15px] text-muted">Une seule chose avant de commencer : le nom de votre entreprise.</p>
+      <p className="text-[15px] text-muted">Avant de commencer : votre entreprise et votre métier.</p>
       <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
         {error ? <ErrorNotice error={error} /> : null}
         <Field id="company" name="company" label="Nom de votre entreprise" autoComplete="organization" required />
+        <TradePicker value={trades} onChange={setTrades} />
         <Button type="submit" pending={pending}>
           Continuer
         </Button>

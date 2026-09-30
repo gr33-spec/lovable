@@ -22,6 +22,8 @@ export type ExtractionOutput = z.infer<typeof extractionOutputSchema>;
 
 export interface ExtractionRequest {
   tradeLabel: string;
+  /** Familles de matériaux habituelles du métier (vocabulaire pour l'IA), vide pour « autre métier ». */
+  materialFamilies: string[];
   /** Lignes numérotées « [2:014] texte » des pages lues en texte (peut être vide). */
   numberedText: string;
   /** PDF réduit aux pages à lire en image (ou le document entier si la lecture locale a échoué). */

@@ -107,7 +107,7 @@ export function newActionKey(): string {
 
 export interface Me {
   user: { id: string; email: string; name: string; emailVerified: boolean };
-  companies: { id: string; name: string; role: "owner" | "admin" | "member" | "viewer" }[];
+  companies: { id: string; name: string; role: "owner" | "admin" | "member" | "viewer"; trades: string[] }[];
 }
 
 export type ProjectStatus = "active" | "archived";
