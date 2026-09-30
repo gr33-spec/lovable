@@ -128,7 +128,9 @@ function DocumentCard({ doc, onRemoved }: { doc: ProjectDocument; onRemoved: (id
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<ApiError | null>(null);
-  const failed = doc.status === "failed";
+  // Panne de lecture de notre côté : le fichier est sain et l'IA le lira en entier.
+  const readByAi = doc.reading?.errorCode === "read_failed";
+  const failed = doc.status === "failed" && !readByAi;
 
   /** Ouvre le PDF d'origine (téléchargé avec la session et l'entreprise active). */
   async function open() {
@@ -175,9 +177,21 @@ function DocumentCard({ doc, onRemoved }: { doc: ProjectDocument; onRemoved: (id
             {doc.pageCount ? ` · ${plural(doc.pageCount, "page", "pages")}` : ""}
           </span>
         </div>
-        {failed ? <Badge tone="danger">Illisible</Badge> : <Badge tone="ok">Lu</Badge>}
+        {failed ? (
+          <Badge tone="danger">Illisible</Badge>
+        ) : readByAi ? (
+          <Badge tone="neutral">Enregistré</Badge>
+        ) : (
+          <Badge tone="ok">Lu</Badge>
+        )}
       </div>
-      {failed ? (
+      {readByAi ? (
+        <p className="text-sm text-muted">
+          {doc.purpose === "client_quote"
+            ? "Devis bien enregistré. L'IA le lira en entier au moment de préparer la liste de matériaux."
+            : "Devis bien enregistré."}
+        </p>
+      ) : failed ? (
         <p className="text-sm text-danger">{unreadableMessage(doc.reading?.errorCode)}</p>
       ) : (
         <p className="text-sm">{readingSummary(doc)}</p>
