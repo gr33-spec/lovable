@@ -12,7 +12,7 @@ import { useResource } from "@/lib/use-resource";
 
 const STATUS: Record<PriceRequestRecipient["status"], { label: string; tone: "ok" | "warn" | "neutral" }> = {
   to_send: { label: "À envoyer", tone: "warn" },
-  sent: { label: "Envoyée", tone: "neutral" },
+  sent: { label: "En attente de réponse", tone: "neutral" },
   received: { label: "Devis reçu", tone: "ok" },
   declined: { label: "Pas de réponse", tone: "neutral" },
 };
@@ -180,6 +180,7 @@ function SupplierPicker({
           <h3 className="font-display text-lg font-extrabold">Nouveau fournisseur</h3>
           <SupplierForm
             submitLabel="Ajouter"
+            others={data.items}
             onDone={(s) => {
               if (s) {
                 setData({ items: [...data.items, s] });
@@ -404,6 +405,8 @@ function RecipientCard({
 
       {error ? <ErrorNotice error={error} /> : null}
 
+      {r.email ? <EmailPreview to={r.supplier.email} email={r.email} /> : null}
+
       {r.status === "received" && r.document ? (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <button type="button" onClick={() => void openDocument(r.document!.id)} className={`${small} min-w-0 text-accent-text`}>
@@ -517,5 +520,25 @@ function QuoteUpload({ recipientId, onChange }: { recipientId: string; onChange:
         {pending ? "Enregistrement du devis…" : "Ajouter son devis (PDF)"}
       </label>
     </div>
+  );
+}
+
+/** Ce qui part (ou est parti) chez le fournisseur, mot pour mot : aucune surprise. */
+function EmailPreview({ to, email }: { to: string; email: { subject: string; body: string } }) {
+  return (
+    <details className="rounded-2xl bg-ground px-3 py-2 text-sm">
+      <summary className="cursor-pointer font-bold">Voir l&apos;e-mail</summary>
+      <dl className="mt-2 flex flex-col gap-1">
+        <div>
+          <dt className="inline font-bold">À : </dt>
+          <dd className="inline">{to}</dd>
+        </div>
+        <div>
+          <dt className="inline font-bold">Objet : </dt>
+          <dd className="inline">{email.subject}</dd>
+        </div>
+      </dl>
+      <pre className="mt-2 font-sans text-[13px] leading-snug whitespace-pre-wrap">{email.body}</pre>
+    </details>
   );
 }

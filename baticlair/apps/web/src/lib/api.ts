@@ -299,6 +299,9 @@ export interface ComparisonSupplier {
   coveredCount: number;
   missingCount: number;
   uncertainCount: number;
+  /** Lignes proposées qui ne correspondent à aucun article demandé (non comptées). */
+  extrasCount: number;
+  extrasHT: string | null;
   comparability: "complete" | "provisional" | "estimated" | "incomplete";
   arithmetic: "consistent" | "inconsistent" | "insufficient_data";
 }

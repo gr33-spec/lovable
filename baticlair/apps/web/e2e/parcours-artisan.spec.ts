@@ -327,7 +327,11 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
 
   // Envoyé autrement : marqué à la main.
   await pointp.getByRole("button", { name: "Déjà envoyé" }).click();
-  await expect(pointp.getByText("Envoyée", { exact: true })).toBeVisible();
+  await expect(pointp.getByText("En attente de réponse", { exact: true })).toBeVisible();
+  // L'e-mail envoyé se relit mot pour mot.
+  await pointp.getByText("Voir l'e-mail").click();
+  await expect(pointp.getByText("Objet :")).toBeVisible();
+  await expect(pointp.getByText(/Bonjour Paul,/)).toBeVisible();
   await expect(progress.getByRole("link", { name: "Envoyer la demande" })).toBeVisible();
 
   // Le devis du fournisseur arrive : on le dépose sur sa ligne.
@@ -358,8 +362,10 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   const compare = page.locator("section#comparer");
   await expect(compare.getByRole("listitem").first()).toContainText("Tuiles & Co");
   await expect(compare.getByRole("listitem").first()).toContainText("2 724,40 €");
-  await expect(compare.getByText(/il manque 1 article \(estimé 511,20\s€\)/)).toBeVisible();
-  await expect(compare.getByText("Le moins cher, estimation comprise")).toBeVisible();
+  await expect(compare.getByText(/1 article manquant \(estimé 511,20\s€\)/)).toBeVisible();
+  await expect(compare.getByText("Moins cher sur le total")).toBeVisible();
+  await expect(compare.getByText(/\+80,90\s€ par rapport à Tuiles & Co/)).toBeVisible();
+  await expect(compare.getByText("1 ligne non reconnue")).toHaveCount(0);
   await expect(progress.getByRole("link", { name: "Comparer et classer" })).toBeVisible();
 
   // « Classé », avec le fournisseur retenu (facultatif).

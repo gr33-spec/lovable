@@ -14,14 +14,23 @@ const FIELD_ERRORS: Record<string, string> = {
  * Fiche fournisseur : seuls la société et l'e-mail sont obligatoires.
  * Sert au carnet de fournisseurs et à l'ajout rapide depuis un chantier.
  */
+/** « Point.P  Vannes » et « point.p vannes » : même fournisseur probable. */
+function sameName(a: string, b: string): boolean {
+  const n = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  return n(a).length > 0 && n(a) === n(b);
+}
+
 export function SupplierForm({
   supplier,
   onDone,
   submitLabel = fr.actions.save,
+  others = [],
 }: {
   supplier?: Supplier;
   onDone: (s: Supplier | null) => void;
   submitLabel?: string;
+  /** Fournisseurs déjà connus : signale un doublon probable (même nom), sans bloquer. */
+  others?: Supplier[];
 }) {
   const id = useId();
   const [values, setValues] = useState({
@@ -36,6 +45,7 @@ export function SupplierForm({
   // Une clé par formulaire : double appui = un seul fournisseur.
   const key = useRef(newActionKey());
 
+  const twin = others.find((o) => o.id !== supplier?.id && sameName(o.name, values.name));
   const fieldError = (path: string) => (error?.details?.some((d) => d.path === path) ? (FIELD_ERRORS[path] ?? "Texte trop long.") : undefined);
   const set = (field: keyof typeof values) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setValues({ ...values, [field]: e.target.value });
@@ -67,6 +77,11 @@ export function SupplierForm({
     <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
       {error && !error.details ? <ErrorNotice error={error} /> : null}
       <Field id={`${id}-name`} label="Société" placeholder="ex. Point.P Vannes" value={values.name} onChange={set("name")} error={fieldError("name")} autoFocus />
+      {twin ? (
+        <p role="status" className="-mt-2 text-sm font-semibold text-warn">
+          Déjà dans votre carnet : {twin.name} ({twin.email}). Vérifiez que ce n&apos;est pas le même.
+        </p>
+      ) : null}
       <Field
         id={`${id}-email`}
         label="E-mail pour les demandes de prix"

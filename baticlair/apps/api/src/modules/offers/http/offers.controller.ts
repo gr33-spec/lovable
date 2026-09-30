@@ -88,6 +88,9 @@ function comparisonDto({ request, suppliers, result }: ComparisonView) {
         coveredCount: r.coveredCount,
         missingCount: r.missingCount,
         uncertainCount: r.uncertainCount,
+        /** Lignes proposées qui ne correspondent à aucun article demandé. */
+        extrasCount: result.findings.find((f) => f.code === "EXTRA_LINES" && f.supplierId === s.supplierId)?.count ?? 0,
+        extrasHT: money(r.extrasHT),
         comparability: r.comparability,
         arithmetic: r.arithmetic.status,
       };

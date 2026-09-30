@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Inject, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { z } from "zod";
 import { Idempotent } from "../../../platform/http/idempotency.interceptor.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
@@ -84,5 +84,12 @@ export class SuppliersController {
   @Patch(":id")
   async update(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(updateBody)) body: z.infer<typeof updateBody>) {
     return supplierDto(await this.suppliers.update(tenant, id, body));
+  }
+
+  /** Supprime un fournisseur jamais consulté ; sinon 409 (à archiver). */
+  @Delete(":id")
+  @HttpCode(204)
+  async remove(@Tenant() tenant: TenantContext, @Param("id") id: string): Promise<void> {
+    await this.suppliers.remove(tenant, id);
   }
 }

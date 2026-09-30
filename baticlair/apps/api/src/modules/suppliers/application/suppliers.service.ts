@@ -30,6 +30,13 @@ export class SuppliersService {
     return updated;
   }
 
+  async remove(tenant: TenantContext, id: string): Promise<void> {
+    assertCanWrite(tenant);
+    const result = await this.suppliers.delete(tenant, id);
+    if (result === "not_found") throw notFound("Supplier");
+    if (result === "in_use") throw new DomainError("conflict", "Supplier already consulted", { reason: "supplier_in_use" });
+  }
+
   private async assertEmailFree(tenant: TenantContext, email: string, exceptId: string | null): Promise<void> {
     const existing = await this.suppliers.findByEmail(tenant, email);
     if (existing && existing.id !== exceptId) {

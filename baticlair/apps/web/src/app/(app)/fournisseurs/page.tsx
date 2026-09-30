@@ -54,6 +54,7 @@ function Suppliers() {
           <h2 className="font-display text-xl font-extrabold">Nouveau fournisseur</h2>
           <SupplierForm
             submitLabel="Ajouter"
+            others={items}
             onDone={(s) => {
               if (s) saved(s);
               setCreating(false);
@@ -94,12 +95,20 @@ function Suppliers() {
               <Card className="flex flex-col gap-3 p-4">
                 <SupplierForm
                   supplier={s}
+                  others={items}
                   onDone={(updated) => {
                     if (updated) saved(updated);
                     setEditingId(null);
                   }}
                 />
                 <ArchiveButton supplier={s} onChange={saved} />
+                <DeleteButton
+                  supplier={s}
+                  onDeleted={() => {
+                    setData({ items: items.filter((x) => x.id !== s.id) });
+                    setEditingId(null);
+                  }}
+                />
               </Card>
             ) : (
               <SupplierCard supplier={s} onEdit={() => setEditingId(s.id)} />
@@ -175,5 +184,52 @@ function ArchiveButton({ supplier, onChange }: { supplier: Supplier; onChange: (
         {supplier.archived ? "Réactiver ce fournisseur" : "Archiver (ne plus le proposer)"}
       </Button>
     </>
+  );
+}
+
+/** Suppression d'une fiche jamais utilisée (erreur de saisie) ; sinon, archiver. */
+function DeleteButton({ supplier, onDeleted }: { supplier: Supplier; onDeleted: () => void }) {
+  const [confirming, setConfirming] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<ApiError | null>(null);
+
+  async function remove() {
+    setPending(true);
+    setError(null);
+    try {
+      await api<null>(`/v1/suppliers/${supplier.id}`, { method: "DELETE" });
+      onDeleted();
+    } catch (e) {
+      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+      setPending(false);
+    }
+  }
+
+  if (!confirming) {
+    return (
+      <button type="button" onClick={() => setConfirming(true)} className="inline-flex min-h-11 items-center self-center text-sm font-bold text-muted">
+        Supprimer ce fournisseur
+      </button>
+    );
+  }
+  return (
+    <div role="group" aria-label="Confirmer la suppression du fournisseur" className="flex flex-col gap-2 rounded-2xl bg-ground p-3">
+      {error ? <ErrorNotice error={error} /> : <p className="text-sm font-semibold">Supprimer {supplier.name} ? C&apos;est définitif.</p>}
+      <div className="flex gap-2">
+        {!error ? (
+          <button
+            type="button"
+            onClick={() => void remove()}
+            disabled={pending}
+            className="inline-flex min-h-11 items-center rounded-xl bg-danger px-4 text-sm font-extrabold text-white disabled:opacity-60"
+          >
+            Oui, supprimer
+          </button>
+        ) : null}
+        <button type="button" onClick={() => setConfirming(false)} className="inline-flex min-h-11 items-center px-4 text-sm font-bold">
+          {error ? "Fermer" : "Annuler"}
+        </button>
+      </div>
+    </div>
   );
 }
