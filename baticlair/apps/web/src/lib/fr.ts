@@ -51,6 +51,7 @@ const unreadableReasons: Record<string, string> = {
   encrypted: "Ce PDF est protégé par un mot de passe. Enregistrez-le sans protection, puis réessayez.",
   corrupted: "Ce PDF est abîmé et ne peut pas être lu.",
   too_many_pages: "Ce document a trop de pages. Envoyez seulement le devis.",
+  read_failed: "Lecture impossible pour l'instant : c'est un problème de notre côté, pas de votre PDF. Le fichier est bien enregistré.",
 };
 
 export function errorMessage(code: string, reason?: string): string {

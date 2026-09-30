@@ -14,7 +14,8 @@ export type PageRoute = "text" | "vision" | "skip";
 export const PIPELINE_VERSION = "read-v1";
 
 /** Raisons d'un document illisible, traduites en message par l'interface. */
-export type UnreadableReason = "not_pdf" | "empty" | "encrypted" | "corrupted" | "too_many_pages";
+/** `read_failed` : échec technique de notre côté, le fichier n'est pas en cause. */
+export type UnreadableReason = "not_pdf" | "empty" | "encrypted" | "corrupted" | "too_many_pages" | "read_failed";
 
 /** Un PDF commence par « %PDF- » (tolère quelques octets parasites avant, comme les lecteurs PDF). */
 export function looksLikePdf(bytes: Uint8Array): boolean {
