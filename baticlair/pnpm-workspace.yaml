@@ -1,0 +1,11 @@
+# Espace de travail de BatiClair uniquement (dossier baticlair/).
+# patrimoine/ est une autre application, totalement indépendante.
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Scripts d'installation autorisés (pnpm les bloque par défaut).
+onlyBuiltDependencies:
+  - "@prisma/engines"
+  - esbuild
+  - prisma

@@ -1,0 +1,21 @@
+{
+  "name": "baticlair",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "db:migrate": "pnpm --filter @baticlair/api db:migrate",
+    "db:deploy": "pnpm --filter @baticlair/api db:deploy"
+  },
+  "devDependencies": {
+    "turbo": "^2.11.5",
+    "typescript": "5.9.3"
+  }
+}

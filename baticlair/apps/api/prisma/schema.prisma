@@ -1,0 +1,393 @@
+// Schéma de données du produit. Voir docs/domain-model.md.
+//
+// Conventions :
+// - toute donnée métier porte `companyId` (isolation multi-tenant, ADR-0007) ;
+// - montants et quantités en Decimal (numeric), jamais en Float (ADR-0009) ;
+// - noms de tables en snake_case via @@map.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Identité — tables imposées par Better Auth (module identity).
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String   @id
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sessions    Session[]
+  accounts    Account[]
+  memberships Membership[]
+  projects    Project[]    @relation("ProjectCreatedBy")
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+// ---------------------------------------------------------------------------
+// Tenancy — l'entreprise est le tenant.
+// ---------------------------------------------------------------------------
+
+enum MembershipRole {
+  owner
+  admin
+  member
+  viewer
+}
+
+model Company {
+  id                   String   @id @default(uuid(7)) @db.Uuid
+  name                 String
+  /// Palier d'abonnement : nombre d'analyses de documents incluses par mois.
+  /// Nul = pas de plafond (période d'essai, tant que les paliers ne sont pas fixés).
+  monthlyAnalysisLimit Int?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  memberships  Membership[]
+  projects     Project[]
+  documents    Document[]
+  aiExecutions AiExecution[]
+  aiAnalyses   AiAnalysis[]
+
+  @@map("company")
+}
+
+model Membership {
+  id        String         @id @default(uuid(7)) @db.Uuid
+  companyId String         @db.Uuid
+  userId    String
+  role      MembershipRole
+  createdAt DateTime       @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, userId])
+  @@index([userId])
+  @@map("membership")
+}
+
+// ---------------------------------------------------------------------------
+// Chantiers
+// ---------------------------------------------------------------------------
+
+enum ProjectStatus {
+  active
+  archived
+}
+
+model Project {
+  id             String        @id @default(uuid(7)) @db.Uuid
+  companyId      String        @db.Uuid
+  name           String
+  clientName     String?
+  address        String?
+  status         ProjectStatus @default(active)
+  /// Nul si l'auteur a supprimé son compte : le chantier appartient à l'entreprise.
+  createdById    String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  /// Dernière activité métier (modification, document, réponse fournisseur…).
+  /// Sert à classer les chantiers : le plus récemment travaillé en premier.
+  lastActivityAt DateTime      @default(now())
+
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdBy User?      @relation("ProjectCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  documents Document[]
+
+  @@index([companyId, status, lastActivityAt(sort: Desc), id(sort: Desc)])
+  // Index de recherche plein texte sans accents (pg_trgm + unaccent) :
+  // créé en SQL dans la migration *_project_activity_idempotency, Prisma ne
+  // sachant pas décrire un index sur expression.
+  @@map("project")
+}
+
+// ---------------------------------------------------------------------------
+// Documents (devis client, devis fournisseurs) — docs/document-pipeline.md
+// ---------------------------------------------------------------------------
+
+enum DocumentPurpose {
+  client_quote
+  supplier_quote
+}
+
+enum DocumentStatus {
+  /// Fichier reçu et stocké, lecture pas encore faite.
+  stored
+  /// Lecture automatique (sans IA) terminée.
+  read
+  /// Lecture impossible (fichier corrompu, protégé…).
+  failed
+}
+
+model Document {
+  id           String          @id @default(uuid(7)) @db.Uuid
+  companyId    String          @db.Uuid
+  projectId    String          @db.Uuid
+  purpose      DocumentPurpose
+  /// Métier dont le profil sert à lire le document (MVP : roofing).
+  trade        String          @default("roofing")
+  originalName String
+  mimeType     String
+  sizeBytes    Int
+  /// Empreinte du contenu : détection des doublons, jamais deux analyses payées pour le même fichier.
+  sha256       String
+  pageCount    Int?
+  status       DocumentStatus  @default(stored)
+  uploadedById String?
+  createdAt    DateTime        @default(now())
+
+  company     Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  project     Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  blob        DocumentBlob?
+  processings DocumentProcessing[]
+
+  @@index([companyId, sha256])
+  @@index([projectId, createdAt])
+  @@map("document")
+}
+
+/// Contenu du fichier, à part pour ne jamais le charger en listant les documents.
+/// Stockage en base pendant l'essai ; un stockage objet le remplacera (port DocumentStorage).
+model DocumentBlob {
+  documentId String @id @db.Uuid
+  bytes      Bytes
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@map("document_blob")
+}
+
+enum ProcessingStatus {
+  processing
+  completed
+  failed
+}
+
+/// Une lecture d'un document par une version donnée du pipeline. Un
+/// retraitement crée une nouvelle ligne : l'historique est conservé.
+model DocumentProcessing {
+  id                String           @id @default(uuid(7)) @db.Uuid
+  companyId         String           @db.Uuid
+  documentId        String           @db.Uuid
+  pipelineVersion   String
+  status            ProcessingStatus
+  errorCode         String?
+  pagesTotal        Int              @default(0)
+  pagesText         Int              @default(0)
+  pagesVision       Int              @default(0)
+  pagesSkipped      Int              @default(0)
+  /// Estimation (haute) du coût IA de l'extraction, calculée sans appel.
+  estimatedMicroUsd BigInt           @default(0)
+  estimate          Json?
+  /// Somme des coûts réels des appels IA de ce traitement (AiExecution).
+  actualMicroUsd    BigInt           @default(0)
+  startedAt         DateTime         @default(now())
+  finishedAt        DateTime?
+
+  document     Document       @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  pages        DocumentPage[]
+  aiExecutions AiExecution[]
+
+  @@index([documentId, startedAt(sort: Desc)])
+  @@map("document_processing")
+}
+
+enum PageRoute {
+  text
+  vision
+  skip
+}
+
+model DocumentPage {
+  processingId String    @db.Uuid
+  pageNumber   Int
+  route        PageRoute
+  reason       String
+  widthPt      Decimal   @db.Decimal(9, 2)
+  heightPt     Decimal   @db.Decimal(9, 2)
+  chars        Int
+  metrics      Json
+  /// Lignes numérotées « page:ligne » — ce que l'IA recevra, et la preuve qu'elle citera.
+  lines        Json
+
+  processing DocumentProcessing @relation(fields: [processingId], references: [id], onDelete: Cascade)
+
+  @@id([processingId, pageNumber])
+  @@map("document_page")
+}
+
+// ---------------------------------------------------------------------------
+// IA — une ligne par appel au fournisseur (docs/ai-architecture.md, audit coûts)
+// ---------------------------------------------------------------------------
+
+enum AiExecutionStatus {
+  success
+  invalid_output
+  refused
+  provider_error
+  timeout
+}
+
+model AiExecution {
+  id                 String            @id @default(uuid(7)) @db.Uuid
+  companyId          String            @db.Uuid
+  projectId          String?           @db.Uuid
+  documentId         String?           @db.Uuid
+  processingId       String?           @db.Uuid
+  /// Analyse facturable à laquelle l'appel appartient (AiAnalysis).
+  analysisId         String?           @db.Uuid
+  /// Utilisateur à l'origine de l'appel (nul pour un traitement automatique).
+  userId             String?
+  /// takeoff_extraction, offer_extraction, matching…
+  task               String
+  /// text | vision | fallback | escalation
+  route              String
+  provider           String
+  model              String
+  promptId           String
+  promptVersion      Int
+  /// 1 pour le premier essai ; > 1 = nouvelle tentative (comptée à part dans les rapports).
+  attempt            Int               @default(1)
+  pagesText          Int               @default(0)
+  pagesVision        Int               @default(0)
+  inputTokens        Int               @default(0)
+  outputTokens       Int               @default(0)
+  cacheReadTokens    Int               @default(0)
+  cacheWrite5mTokens Int               @default(0)
+  cacheWrite1hTokens Int               @default(0)
+  batch              Boolean           @default(false)
+  costMicroUsd       BigInt
+  priceTableVersion  String
+  status             AiExecutionStatus
+  errorCode          String?
+  durationMs         Int
+  createdAt          DateTime          @default(now())
+
+  company    Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  processing DocumentProcessing? @relation(fields: [processingId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, createdAt])
+  @@index([projectId])
+  @@index([documentId])
+  @@index([analysisId])
+  @@map("ai_execution")
+}
+
+enum AiAnalysisStatus {
+  started
+  completed
+  failed
+}
+
+/// Une analyse = l'extraction d'UN document (devis client ou fournisseur).
+/// C'est l'unité des paliers d'abonnement : seules les analyses réussies
+/// sont décomptées ; les relances, les modèles de secours et la
+/// comparaison ne comptent pas en plus. Un document n'est décompté qu'une
+/// fois, même s'il est ré-analysé.
+model AiAnalysis {
+  id           String           @id @default(uuid(7)) @db.Uuid
+  companyId    String           @db.Uuid
+  userId       String?
+  projectId    String           @db.Uuid
+  documentId   String           @unique @db.Uuid
+  kind         DocumentPurpose
+  status       AiAnalysisStatus
+  /// Décomptée dans le palier (vrai seulement si réussie).
+  billable     Boolean          @default(false)
+  /// Mois civil de décompte à l'heure de Paris (« 2026-09 »), fixé à la première réussite.
+  billingMonth String?
+  costMicroUsd BigInt           @default(0)
+  startedAt    DateTime         @default(now())
+  completedAt  DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, billingMonth])
+  @@index([companyId, userId, billingMonth])
+  @@map("ai_analysis")
+}
+
+// ---------------------------------------------------------------------------
+// Plateforme
+// ---------------------------------------------------------------------------
+
+/// Requêtes rejouables (en-tête Idempotency-Key) : un double appui ou une
+/// nouvelle tentative réseau ne crée jamais deux fois la même chose.
+model IdempotencyRecord {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  userId         String
+  key            String
+  requestHash    String
+  /// null tant que la requête d'origine est en cours.
+  responseStatus Int?
+  responseBody   Json?
+  createdAt      DateTime @default(now())
+
+  @@unique([userId, key])
+  @@index([createdAt])
+  @@map("idempotency_record")
+}
