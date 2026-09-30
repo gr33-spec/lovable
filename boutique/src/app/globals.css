@@ -709,3 +709,36 @@
     break-after: auto;
   }
 }
+
+/* Menu mobile : le panneau glisse depuis la gauche, les liens arrivent un à un. */
+@keyframes panel-in {
+  from {
+    opacity: 0.4;
+    transform: translateX(-28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes item-in {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+dialog.menu-panel[open] {
+  animation: panel-in 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+dialog.menu-panel::backdrop {
+  background: color-mix(in srgb, var(--c-text) 28%, transparent);
+  backdrop-filter: blur(3px);
+}
+dialog.menu-panel[open] .menu-item {
+  animation: item-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(80ms + var(--i, 0) * 40ms);
+}
