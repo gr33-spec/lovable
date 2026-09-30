@@ -66,8 +66,9 @@ function sourceIssues(line: ExtractedLine, source: ReadonlyMap<string, string>):
   if (cited.length === 0) {
     issues.push({
       code: "READ_FROM_IMAGE",
-      severity: "to_verify",
-      message: `Lu sur l'image de la page ${line.sourcePages.join(", ")} : vérifiez la quantité et l'unité.`,
+      severity: "info",
+      // Information seulement : sur une page image, c'est le doute de l'IA qui signale une lecture difficile.
+      message: `Lu sur l'image de la page ${line.sourcePages.join(", ")}.`,
     });
     return issues;
   }
@@ -116,7 +117,7 @@ export function reviewExtractedTakeoff(
       const kept = all.filter((x) => x.severity !== "to_verify");
       return { ...v, issues: kept, status: kept.some((x) => x.severity === "blocking") ? "to_verify" : "certain" };
     }
-    if (extra.length === 0) return v;
+    if (!extra.some((x) => x.severity !== "info")) return { ...v, issues: all };
     return { ...v, issues: all, status: "to_verify" };
   });
   const counts = {

@@ -208,10 +208,11 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await page.getByRole("button", { name: "Préparer la liste de matériaux" }).click();
   await expect(page.getByText("Tuile romane canal rouge 12,5 u/m²")).toBeVisible();
   await expect(page.getByText(/^6 lignes · \d+ à vérifier/)).toBeVisible();
-  await expect(page.getByText(/Devis : page 1, ligne \d+/).first()).toBeVisible();
 
-  // Le doute de l'IA est affiché directement sur la ligne.
+  // Le doute de l'IA est affiché directement sur la ligne ; un appui sur la ligne montre d'où elle vient.
   const doubts = page.getByRole("list", { name: "Lignes à vérifier" });
+  await doubts.getByRole("button", { name: /^Crochet inox ardoise 100 mm/ }).click();
+  await expect(doubts.getByText(/Devis : page 1, ligne \d+/)).toBeVisible();
   await expect(doubts.getByText("L'IA hésite : Vendu en paquets, sans nombre de pièces par paquet.")).toBeVisible();
   await expect(page.getByRole("button", { name: /Encore \d+ lignes? à vérifier/ })).toBeDisabled();
 

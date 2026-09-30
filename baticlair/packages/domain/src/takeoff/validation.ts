@@ -153,7 +153,7 @@ export function validateTakeoffLine(line: TakeoffLineInput, profile: TradeProfil
 
   // Unité
   if (!line.unitRaw || line.unitRaw.trim() === "") {
-    issues.push(issue("UNIT_MISSING", "to_verify", "Unité absente : pièces, m², ml, rouleaux… ?"));
+    issues.push(issue("UNIT_MISSING", "to_verify", "Unité absente (pièces, m², ml… ?)."));
   } else if (!unit) {
     issues.push(issue("UNIT_UNKNOWN", "to_verify", `Unité « ${line.unitRaw} » non reconnue : précisez-la.`));
   }
@@ -169,14 +169,14 @@ export function validateTakeoffLine(line: TakeoffLineInput, profile: TradeProfil
       );
     }
     if (family.wholeUnits && unit === "U" && quantity && !quantity.isInteger()) {
-      issues.push(issue("FRACTIONAL_PIECES", "to_verify", `${family.label} : une quantité en pièces devrait être entière.`));
+      issues.push(issue("FRACTIONAL_PIECES", "to_verify", `Quantité en pièces non entière.`));
     }
     if (family.areaNeedsYield && unit === "M2") {
       issues.push(
         issue(
           "AREA_NEEDS_PRODUCT_YIELD",
           "to_verify",
-          `${family.label} chiffrées en m² : le nombre de pièces dépend du modèle choisi (pièces au m²). Indiquez le modèle ou le rendement.`,
+          `${family.label} en m² : combien de pièces au m² (modèle) ?`,
         ),
       );
     }
@@ -187,7 +187,7 @@ export function validateTakeoffLine(line: TakeoffLineInput, profile: TradeProfil
           issue(
             "PACKAGE_CONTENT_MISSING",
             "to_verify",
-            `Contenu du conditionnement non indiqué (combien par ${unitLabel(unit).replace(/s$/, "")} ?) : nécessaire pour comparer les fournisseurs.`,
+            `Combien par ${unitLabel(unit).replace(/s$/, "")} ? Contenu non indiqué.`,
           ),
         );
       }
@@ -205,7 +205,9 @@ export function validateTakeoffLine(line: TakeoffLineInput, profile: TradeProfil
   }
 
   if (kind === "unknown") {
-    issues.push(issue("FAMILY_UNKNOWN", "to_verify", "Matériau non reconnu dans le référentiel couverture : vérifiez la ligne."));
+    // Simple information : le référentiel ne couvre pas tous les matériaux (autres métiers, produits
+    // rares). En faire un doute noierait les vrais doutes (retour terrain du 30/09).
+    issues.push(issue("FAMILY_UNKNOWN", "info", "Matériau hors référentiel couverture : pas de contrôle d'unité automatique."));
   }
 
   const status: ConfidenceLevel = issues.some((i) => i.severity !== "info") ? "to_verify" : "certain";
