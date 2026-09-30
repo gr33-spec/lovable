@@ -1,6 +1,6 @@
 import {
   reviewExtractedTakeoff,
-  TRADE_PROFILES,
+  tradeProfile,
   type LineValidation,
   type TakeoffIssue,
   type TakeoffValidation,
@@ -189,8 +189,7 @@ export class TakeoffService {
 
   /** Relecture déterministe, recalculée à chaque lecture (règles métier à jour). */
   private async review(tenant: TenantContext, takeoff: TakeoffRecord): Promise<ReviewedTakeoff> {
-    const profile = TRADE_PROFILES[takeoff.trade];
-    if (!profile) throw new Error(`Profil métier inconnu : ${takeoff.trade}`);
+    const profile = tradeProfile(takeoff.trade);
     const source = await this.sourceLines(tenant, takeoff.documentId);
     const { validation } = reviewExtractedTakeoff(
       takeoff.lines.map((l: TakeoffLineRecord) => ({
@@ -240,7 +239,7 @@ export class TakeoffService {
       }
       const pages = Array.from({ length: count }, (_, i) => i + 1);
       return {
-        request: { tradeLabel: this.tradeLabel(doc.trade), numberedText: "", imagePdf: content.bytes, imagePages: pages },
+        request: { ...this.tradeHints(doc.trade), numberedText: "", imagePdf: content.bytes, imagePages: pages },
         processingId: processing?.id ?? null,
         pagesText: 0,
         pagesVision: count,
@@ -261,15 +260,17 @@ export class TakeoffService {
       imagePdf = await this.pdf.extract(content.bytes, visionPages);
     }
     return {
-      request: { tradeLabel: this.tradeLabel(doc.trade), numberedText, imagePdf, imagePages: visionPages },
+      request: { ...this.tradeHints(doc.trade), numberedText, imagePdf, imagePages: visionPages },
       processingId: processing.id,
       pagesText: textPages.length,
       pagesVision: visionPages.length,
     };
   }
 
-  private tradeLabel(trade: string): string {
-    return TRADE_PROFILES[trade]?.label ?? trade;
+  /** Ce que l'IA sait du métier : son nom et ses familles de matériaux habituelles (vocabulaire). */
+  private tradeHints(trade: string): { tradeLabel: string; materialFamilies: string[] } {
+    const profile = tradeProfile(trade);
+    return { tradeLabel: profile.label, materialFamilies: profile.families.map((f) => f.label) };
   }
 
   private async record(

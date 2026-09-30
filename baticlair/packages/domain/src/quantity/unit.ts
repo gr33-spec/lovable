@@ -38,6 +38,12 @@ export const UNIT_DEFINITIONS = {
   PAQUET: { dimension: "package", toBase: null },
   BOTTE: { dimension: "package", toBase: null },
   LOT: { dimension: "package", toBase: null },
+  POT: { dimension: "package", toBase: null },
+  SEAU: { dimension: "package", toBase: null },
+  BIDON: { dimension: "package", toBase: null },
+  CARTON: { dimension: "package", toBase: null },
+  BARRE: { dimension: "package", toBase: null },
+  COURONNE: { dimension: "package", toBase: null },
   FORFAIT: { dimension: "lump_sum", toBase: null },
 } as const satisfies Record<string, UnitDefinition>;
 
@@ -72,6 +78,13 @@ const UNIT_ALIASES: Record<string, UnitCode> = {
   paq: "PAQUET", pqt: "PAQUET", paquet: "PAQUET", paquets: "PAQUET", colis: "PAQUET",
   botte: "BOTTE", bottes: "BOTTE",
   lot: "LOT", lots: "LOT",
+  pot: "POT", pots: "POT",
+  seau: "SEAU", seaux: "SEAU",
+  bidon: "BIDON", bidons: "BIDON",
+  carton: "CARTON", cartons: "CARTON", ctn: "CARTON", crt: "CARTON",
+  barre: "BARRE", barres: "BARRE", br: "BARRE",
+  couronne: "COURONNE", couronnes: "COURONNE", cour: "COURONNE",
+  plaque: "U", plaques: "U", cartouche: "U", cartouches: "U",
   ft: "FORFAIT", fft: "FORFAIT", forfait: "FORFAIT",
 };
 

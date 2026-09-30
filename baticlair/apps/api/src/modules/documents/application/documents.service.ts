@@ -1,12 +1,12 @@
 import { createHash } from "node:crypto";
 import {
   DEFAULT_EXTRACTION_POLICY,
-  DEFAULT_TRADE,
   estimateDocumentCost,
   numberLines,
   priceTableAt,
   routePage,
-  TRADE_PROFILES,
+  tradeKey,
+  tradeProfile,
   type ExtractionPolicy,
 } from "@baticlair/domain";
 import { DomainError, notFound } from "../../../platform/errors/domain-error.js";
@@ -68,7 +68,8 @@ export class DocumentsService {
       if (doc) return { document: doc, duplicate: true };
     }
 
-    const trade = DEFAULT_TRADE;
+    // Métiers de l'entreprise au moment du dépôt : ils choisissent le profil de lecture (PD-033).
+    const trade = tradeKey(tenant.trades);
     const created = await this.documents.create(
       tenant,
       {
@@ -91,8 +92,7 @@ export class DocumentsService {
 
   /** Lecture locale : jamais d'erreur remontée à l'artisan, le résultat est enregistré (réussi ou non). */
   private async read(tenant: TenantContext, documentId: string, trade: string, bytes: Uint8Array): Promise<void> {
-    const profile = TRADE_PROFILES[trade];
-    if (!profile) throw new Error(`Profil métier inconnu : ${trade}`);
+    const profile = tradeProfile(trade);
     let content;
     try {
       content = await this.reader.read(bytes, { maxPages: this.limits.maxPages });

@@ -10,6 +10,8 @@ export interface TenantContext {
   readonly companyId: string;
   readonly userId: string;
   readonly role: MembershipRole;
+  /** Métiers de l'entreprise : choisissent les profils de lecture des devis (PD-033). */
+  readonly trades: readonly string[];
 }
 
 /** Au MVP, seul le rôle « viewer » est en lecture seule. */

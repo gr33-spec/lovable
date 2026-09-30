@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { makePdf } from "./support/pdf-fixtures.js";
 import { createTestApp, resetDatabase, signUp, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
 let ctx: TestContext;
@@ -26,7 +27,25 @@ describe("onboarding et entreprise", () => {
     expect(created.status).toBe(201);
     expect(created.body).toMatchObject({ name: "Toitures Martin", role: "owner" });
     const me = await agent.get("/v1/me");
-    expect(me.body.companies).toEqual([{ id: created.body.id, name: "Toitures Martin", role: "owner" }]);
+    // Sans métier choisi : « autre métier » (le socle commun).
+    expect(me.body.companies).toEqual([{ id: created.body.id, name: "Toitures Martin", role: "owner", trades: ["other"] }]);
+  });
+
+  it("enregistre les métiers choisis et permet de les changer", async () => {
+    const agent = await signUp(ctx.app, "a@example.fr");
+    const created = await agent.post("/v1/companies").send({ name: "Déco Martin", trades: ["painting", "drywall", "painting", "inconnu"] });
+    expect(created.body.trades).toEqual(["painting", "drywall"]);
+
+    const doc = await agent
+      .post(`/v1/projects/${(await agent.post("/v1/projects").send({ name: "Salon" })).body.id}/documents`)
+      .field("purpose", "client_quote")
+      .attach("file", Buffer.from(await makePdf(["devis"])), { filename: "devis.pdf", contentType: "application/pdf" });
+    expect(doc.body.trade).toBe("painting,drywall");
+
+    const changed = await agent.patch("/v1/company/trades").send({ trades: ["tiling"] });
+    expect(changed.body).toEqual({ trades: ["tiling"] });
+    expect((await agent.get("/v1/me")).body.companies[0].trades).toEqual(["tiling"]);
+    expect((await agent.patch("/v1/company/trades").send({ trades: "tiling" })).status).toBe(400);
   });
 
   it("valide le nom de l'entreprise", async () => {

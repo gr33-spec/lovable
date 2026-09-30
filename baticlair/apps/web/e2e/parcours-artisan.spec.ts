@@ -12,6 +12,8 @@ async function signUp(page: Page) {
   await page.getByRole("link", { name: "Créer un compte" }).click();
   await page.getByLabel("Prénom et nom").fill("Jean Martin");
   await page.getByLabel("Nom de votre entreprise").fill("Toitures Martin");
+  // Seule question métier : un appui (ici un couvreur).
+  await page.getByRole("button", { name: "Couverture, charpente, zinguerie" }).click();
   await page.getByLabel("E-mail professionnel").fill(email);
   await page.getByLabel("Mot de passe").fill("motdepasse-solide");
   await page.getByRole("button", { name: "Créer mon compte" }).click();
@@ -154,6 +156,14 @@ test("le menu ne propose que l'essentiel : accueil, chantiers, fournisseurs, com
   await expect(nav.getByRole("link")).toHaveText(["Accueil", "Chantiers", "Fournisseurs", "Compte"]);
   await nav.getByRole("link", { name: "Compte" }).click();
   await expect(page.getByRole("heading", { name: "Mon compte" })).toBeVisible();
+
+  // Les métiers se changent en deux appuis ; BatiClair adapte la lecture des prochains devis.
+  await expect(page.getByRole("button", { name: "Couverture, charpente, zinguerie" })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Peinture" }).click();
+  await page.getByRole("button", { name: "Enregistrer mes métiers" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Métiers enregistrés." })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Peinture" })).toHaveAttribute("aria-pressed", "true");
 });
 
 test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) => {

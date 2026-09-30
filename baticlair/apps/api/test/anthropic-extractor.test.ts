@@ -32,6 +32,7 @@ describe("lecture par l'API Anthropic (réseau simulé)", () => {
     const extractor = new AnthropicTakeoffExtractor("sk-test", "claude-sonnet-5-5", "high", api.fetchImpl);
     const attempt = await extractor.extract({
       tradeLabel: "Couverture",
+      materialFamilies: ["Tuile"],
       numberedText: "[1:004] TUI  Tuile romane  1 250 u",
       imagePdf: new Uint8Array([37, 80, 68, 70]),
       imagePages: [2],
@@ -51,6 +52,7 @@ describe("lecture par l'API Anthropic (réseau simulé)", () => {
     const cut = fakeApi(message('{"lines": [', "max_tokens"));
     const attempt = await new AnthropicTakeoffExtractor("sk-test", "claude-sonnet-5-5", "high", cut.fetchImpl).extract({
       tradeLabel: "Couverture",
+      materialFamilies: ["Tuile"],
       numberedText: "[1:001] x",
       imagePdf: null,
       imagePages: [],
@@ -63,6 +65,7 @@ describe("lecture par l'API Anthropic (réseau simulé)", () => {
     const down = fakeApi({ type: "error", error: { type: "overloaded_error", message: "busy" } }, 529);
     const attempt = await new AnthropicTakeoffExtractor("sk-test", "claude-sonnet-5-5", "high", down.fetchImpl).extract({
       tradeLabel: "Couverture",
+      materialFamilies: ["Tuile"],
       numberedText: "[1:001] x",
       imagePdf: null,
       imagePages: [],

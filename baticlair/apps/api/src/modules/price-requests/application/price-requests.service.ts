@@ -1,4 +1,4 @@
-import { lineKind, TRADE_PROFILES } from "@baticlair/domain";
+import { lineKind, tradeProfile } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { DocumentsService } from "../../documents/index.js";
 import type { SupplierRepository } from "../../suppliers/index.js";
@@ -38,9 +38,9 @@ export class PriceRequestsService {
       throw validationFailed("Validate the materials list first", {
         reason: "takeoff_not_validated",
       });
-    const profile = TRADE_PROFILES[takeoff.trade];
+    const profile = tradeProfile(takeoff.trade);
     // Les prestations (pose, dépose…) ne se commandent pas : elles ne partent pas chez le fournisseur.
-    const lines = takeoff.lines.filter((l) => !profile || lineKind(l.designation, profile).kind !== "labor");
+    const lines = takeoff.lines.filter((l) => lineKind(l.designation, profile).kind !== "labor");
     if (lines.length === 0) throw validationFailed("Nothing to order", { reason: "no_material" });
     const supplierIds = await this.checkSuppliers(tenant, input.supplierIds);
     const created = await this.requests.create(tenant, {

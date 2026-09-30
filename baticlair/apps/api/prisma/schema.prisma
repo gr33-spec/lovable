@@ -103,6 +103,8 @@ model Company {
   /// Palier d'abonnement : nombre d'analyses de documents incluses par mois.
   /// Nul = pas de plafond (période d'essai, tant que les paliers ne sont pas fixés).
   monthlyAnalysisLimit Int?
+  /// Métiers de l'entreprise (profils de lecture, PD-033). Vide = « autre métier ».
+  trades               String[] @default([])
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 

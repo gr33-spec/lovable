@@ -1,3 +1,4 @@
+import { COMMON_BOILERPLATE, COMMON_LABOR, COMMON_SUPPLY } from "./common.js";
 import type { MaterialFamily, TradeProfile } from "./trade-profile.js";
 
 /**
@@ -179,12 +180,8 @@ export const ROOFING_PROFILE: TradeProfile = {
   id: "roofing",
   label: "Couverture",
   families: FAMILIES,
-  laborKeywords: [
-    "main d oeuvre", "pose", "depose", "demontage", "echafaudage", "location", "benne", "evacuation",
-    "mise en decharge", "nettoyage", "demoussage", "deplacement", "installation de chantier", "repli de chantier",
-    "protection", "bache", "mise en securite", "diagnostic", "garantie", "etude", "prestation", "traitement",
-  ],
-  supplyKeywords: ["fourniture", "fournir", "fourni"],
+  laborKeywords: [...COMMON_LABOR, "demoussage", "bache", "traitement"],
+  supplyKeywords: COMMON_SUPPLY,
   companionRules: [
     {
       when: "roof_tile",
@@ -217,26 +214,7 @@ export const ROOFING_PROFILE: TradeProfile = {
       message: "Une gouttière sans naissance ni descente : l'évacuation est-elle oubliée ?",
     },
   ],
-  boilerplateMarkers: [
-    "conditions generales de vente",
-    "conditions generales",
-    "clause de reserve de propriete",
-    "reserve de propriete",
-    "tribunal de commerce",
-    "penalites de retard",
-    "indemnite forfaitaire pour frais de recouvrement",
-    "article 1",
-    "article 2",
-    "mediateur de la consommation",
-    "droit de retractation",
-    "garantie decennale",
-  ],
+  boilerplateMarkers: COMMON_BOILERPLATE,
   materialKeywords: FAMILIES.flatMap((f) => f.keywords),
 };
 
-/** Profils disponibles. MVP : couverture seulement. */
-export const TRADE_PROFILES: Readonly<Record<string, TradeProfile>> = {
-  roofing: ROOFING_PROFILE,
-};
-
-export const DEFAULT_TRADE = "roofing";

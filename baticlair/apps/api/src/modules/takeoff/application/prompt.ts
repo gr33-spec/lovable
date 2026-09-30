@@ -2,9 +2,13 @@
  * Prompt versionné (règle projet : jamais modifié sans nouvelle version).
  * La version est enregistrée avec chaque appel et chaque quantitatif.
  */
-export const TAKEOFF_PROMPT = { id: "takeoff_extraction", version: 2 } as const;
+export const TAKEOFF_PROMPT = { id: "takeoff_extraction", version: 3 } as const;
 
-export function takeoffSystemPrompt(tradeLabel: string): string {
+export function takeoffSystemPrompt(tradeLabel: string, materialFamilies: readonly string[] = []): string {
+  const vocabulary =
+    materialFamilies.length > 0
+      ? `\n\nMatériaux habituels de ce métier (pour t'aider à reconnaître les lignes, pas une liste à compléter) : ${materialFamilies.join(" ; ")}.`
+      : "";
   return `Tu aides un artisan (${tradeLabel}) à préparer ses achats. On te donne le devis qu'il a envoyé à son client. Ta tâche : lister les matériaux et fournitures à commander, ligne par ligne, tels qu'ils sont écrits dans le devis.
 
 Le texte du devis t'est donné en lignes numérotées « [page:ligne] texte ». Des pages peuvent aussi t'être données en PDF (pages scannées ou sans texte lisible) : leur numéro d'origine est indiqué.
@@ -22,5 +26,5 @@ Règles :
 - Ignore les totaux, sous-totaux, TVA, acomptes, conditions générales et mentions légales.
 - notes : signale en phrases courtes ce qui concerne tout le devis (page illisible, tableau coupé). Les doutes sur une ligne vont dans son champ doubt. Liste vide si rien.
 
-En cas de doute sur une valeur, recopie-la telle quelle et explique le doute : l'artisan vérifiera. Ne devine jamais.`;
+En cas de doute sur une valeur, recopie-la telle quelle et explique le doute : l'artisan vérifiera. Ne devine jamais.${vocabulary}`;
 }

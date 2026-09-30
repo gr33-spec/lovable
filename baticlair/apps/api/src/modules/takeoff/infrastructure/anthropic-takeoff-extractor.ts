@@ -65,7 +65,7 @@ export class AnthropicTakeoffExtractor implements TakeoffExtractor {
       const response = await this.client.messages.create({
         model: this.model,
         max_tokens: 16000,
-        system: [{ type: "text", text: takeoffSystemPrompt(request.tradeLabel), cache_control: { type: "ephemeral" } }],
+        system: [{ type: "text", text: takeoffSystemPrompt(request.tradeLabel, request.materialFamilies), cache_control: { type: "ephemeral" } }],
         messages: [{ role: "user", content }],
         output_config: { effort: this.effort, format: zodOutputFormat(extractionOutputSchema) },
         metadata: { user_id: `${TAKEOFF_PROMPT.id}-v${TAKEOFF_PROMPT.version}` },
