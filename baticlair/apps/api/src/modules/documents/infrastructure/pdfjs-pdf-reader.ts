@@ -12,6 +12,9 @@ interface TextFragment {
 }
 
 type PdfJs = typeof PdfJsModule;
+
+/** Erreurs de pdf.js qui mettent en cause le contenu du fichier. */
+const FILE_ERRORS = new Set(["InvalidPDFException", "FormatError", "MissingPDFException", "UnknownErrorException"]);
 let pdfjs: Promise<PdfJs> | undefined;
 
 /**
@@ -78,7 +81,10 @@ export class PdfJsPdfReader implements PdfReader {
     } catch (error) {
       const name = (error as { name?: string }).name;
       if (name === "PasswordException") throw new PdfReadError("encrypted", "PDF protégé par un mot de passe");
-      throw new PdfReadError("corrupted", `PDF illisible : ${name ?? "erreur inconnue"}`);
+      // Seules les erreurs qui décrivent le fichier le déclarent abîmé ; les
+      // autres (pdf.js indisponible, mémoire…) sont des pannes de notre côté.
+      if (name && FILE_ERRORS.has(name)) throw new PdfReadError("corrupted", `PDF illisible : ${name}`);
+      throw error;
     }
     try {
       if (doc.numPages > options.maxPages) {

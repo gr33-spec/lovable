@@ -48,6 +48,7 @@ export class DocumentsService {
     private readonly limits: DocumentLimits,
     private readonly policy: ExtractionPolicy = DEFAULT_EXTRACTION_POLICY,
     private readonly now: () => Date = () => new Date(),
+    private readonly onReadFailure: (error: unknown, documentId: string) => void = () => {},
   ) {}
 
   async upload(tenant: TenantContext, projectId: string, input: UploadInput): Promise<UploadResult> {
@@ -96,7 +97,9 @@ export class DocumentsService {
     try {
       content = await this.reader.read(bytes, { maxPages: this.limits.maxPages });
     } catch (error) {
-      const code = error instanceof PdfReadError ? error.reason : "corrupted";
+      // Un échec technique n'est jamais présenté comme un fichier abîmé.
+      const code = error instanceof PdfReadError ? error.reason : "read_failed";
+      if (!(error instanceof PdfReadError)) this.onReadFailure(error, documentId);
       await this.documents.saveProcessing(tenant, documentId, PIPELINE_VERSION, { status: "failed", errorCode: code });
       return;
     }
