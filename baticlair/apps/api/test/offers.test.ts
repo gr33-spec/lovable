@@ -126,6 +126,12 @@ describe("lecture des devis fournisseurs (IA simulée)", () => {
     expect((await b.agent.get(`/v1/price-requests/${requestId}/comparison`)).status).toBe(404);
     const line = (await a.agent.get(`/v1/price-requests/${requestId}/offers`)).body.items[0].lines[0];
     expect((await b.agent.patch(`/v1/offer-lines/${line.id}`).send({ requestLine: null })).status).toBe(404);
+    expect((await b.agent.get(`/v1/price-requests/${requestId}/offers`)).status).toBe(404);
+    expect((await b.agent.patch(`/v1/price-requests/${requestId}/classification`).send({ classified: true })).status).toBe(404);
+    const intrusion = await b.agent
+      .post(`/v1/price-request-recipients/${ra}/quote`)
+      .attach("file", Buffer.from(await makePdf(["intrus"], undefined, undefined, "DEVIS INTRUS")), { filename: "x.pdf", contentType: "application/pdf" });
+    expect(intrusion.status).toBe(404);
 
     // Devis retiré : plus rien à lire.
     const request = (await a.agent.get(`/v1/projects/${(await a.agent.get("/v1/projects")).body.items[0].id}/price-requests`)).body.items[0];

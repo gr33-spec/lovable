@@ -314,7 +314,10 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await page.getByRole("button", { name: "Ajouter", exact: true }).click();
   await expect(page.getByRole("checkbox", { name: /Tuiles & Co/ })).toBeChecked();
   await page.getByRole("button", { name: "Préparer les 2 e-mails" }).click();
+  await expect(page.getByText("DEMANDES DE PRIX")).toBeVisible();
 
+  // Rechargement à chaque étape : rien ne se perd.
+  await page.reload();
   await expect(page.getByText("DEMANDES DE PRIX")).toBeVisible();
   const pointp = page.locator("li").filter({ hasText: "Point.P Vannes" });
   const tuiles = page.locator("li").filter({ hasText: "Tuiles & Co" });
@@ -339,6 +342,9 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await expect(pointp.getByText("Devis reçu")).toBeVisible();
   await expect(pointp.getByText(/Ouvrir son devis \(devis-fournisseur-couvreur\.pdf\)/)).toBeVisible();
   await expect(page.getByText("1 devis reçu sur 2")).toBeVisible();
+  await page.reload();
+  await expect(page.getByText("1 devis reçu sur 2")).toBeVisible();
+  await expect(pointp.getByText("Devis reçu")).toBeVisible();
 
   // Le même PDF ne peut pas aller chez un second fournisseur.
   await tuiles.getByRole("button", { name: "Déjà envoyé" }).click();
@@ -355,6 +361,9 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await tuiles.getByRole("button", { name: "Lire ce devis (1 analyse)" }).click();
   await expect(tuiles.getByText("Devis lu · 5/6 articles")).toBeVisible();
   await expect(tuiles.getByText("Il manque 1 article de votre liste.")).toBeVisible();
+  await page.reload();
+  await expect(pointp.getByText("Devis lu · 6/6 articles")).toBeVisible();
+  await expect(tuiles.getByText("Devis lu · 5/6 articles")).toBeVisible();
   await tuiles.getByRole("button", { name: "Voir le détail" }).click();
   await expect(tuiles.getByText("Livraison chantier")).toBeVisible();
 
