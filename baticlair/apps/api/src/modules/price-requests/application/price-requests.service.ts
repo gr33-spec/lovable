@@ -113,6 +113,20 @@ export class PriceRequestsService {
     return this.reload(tenant, request.id);
   }
 
+  /**
+   * « Classé » : l'artisan a fait son choix ; retenir un ou plusieurs
+   * fournisseurs est facultatif. `classified: false` rouvre la demande.
+   */
+  async classify(tenant: TenantContext, requestId: string, classified: boolean, retainedSupplierIds: string[]): Promise<PriceRequestView> {
+    assertCanWrite(tenant);
+    const request = await this.requests.findById(tenant, requestId);
+    if (!request) throw notFound("PriceRequest");
+    const known = new Set(request.recipients.map((r) => r.supplier.id));
+    if (retainedSupplierIds.some((id) => !known.has(id))) throw validationFailed("Unknown supplier", { reason: "not_a_recipient" });
+    await this.requests.classify(tenant, request.id, classified ? [...new Set(retainedSupplierIds)] : null);
+    return this.reload(tenant, request.id);
+  }
+
   async remove(tenant: TenantContext, requestId: string): Promise<void> {
     assertCanWrite(tenant);
     if (!(await this.requests.delete(tenant, requestId))) throw notFound("PriceRequest");

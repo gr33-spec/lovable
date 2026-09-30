@@ -3,6 +3,7 @@ import { AiUsageModule } from "./modules/ai-usage/index.js";
 import { DocumentsModule } from "./modules/documents/index.js";
 import { HealthModule } from "./modules/health/health.module.js";
 import { IdentityModule } from "./modules/identity/index.js";
+import { OffersModule } from "./modules/offers/index.js";
 import { PriceRequestsModule } from "./modules/price-requests/index.js";
 import { ProjectsModule } from "./modules/projects/index.js";
 import { SuppliersModule } from "./modules/suppliers/index.js";
@@ -27,6 +28,7 @@ import { LoggingModule } from "./platform/logging/logging.module.js";
     TakeoffModule,
     SuppliersModule,
     PriceRequestsModule,
+    OffersModule,
     HealthModule,
   ],
 })

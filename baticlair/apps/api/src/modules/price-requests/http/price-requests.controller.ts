@@ -39,6 +39,7 @@ const addBody = z.object({ supplierIds });
 const statusBody = z.object({
   status: z.enum(["to_send", "sent", "declined"]),
 });
+const classifyBody = z.object({ classified: z.boolean(), retainedSupplierIds: z.array(z.string()).max(20).optional() });
 
 /** Plafond technique de réception ; la limite métier est vérifiée par le service des documents. */
 const HARD_MAX_UPLOAD_BYTES = 50_000_000;
@@ -51,6 +52,8 @@ function toDto(r: PriceRequestView) {
     message: r.message,
     dueDate: r.dueDate ? r.dueDate.toISOString().slice(0, 10) : null,
     createdAt: r.createdAt.toISOString(),
+    classifiedAt: r.classifiedAt?.toISOString() ?? null,
+    retainedSupplierIds: r.retainedSupplierIds,
     recipients: r.recipients.map((x) => ({
       id: x.id,
       supplier: x.supplier,
@@ -99,6 +102,12 @@ export class PriceRequestsController {
   @HttpCode(204)
   async remove(@Tenant() tenant: TenantContext, @Param("id") id: string): Promise<void> {
     await this.requests.remove(tenant, id);
+  }
+
+  /** « Classé » (fournisseurs retenus facultatifs), ou réouverture. */
+  @Patch("price-requests/:id/classification")
+  async classify(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(classifyBody)) body: z.infer<typeof classifyBody>) {
+    return toDto(await this.requests.classify(tenant, id, body.classified, body.retainedSupplierIds ?? []));
   }
 
   @Patch("price-request-recipients/:id")

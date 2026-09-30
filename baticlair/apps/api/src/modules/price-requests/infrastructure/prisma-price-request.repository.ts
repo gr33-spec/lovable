@@ -36,6 +36,8 @@ interface Row {
   message: string | null;
   dueDate: Date | null;
   createdAt: Date;
+  classifiedAt: Date | null;
+  retainedSupplierIds: string[];
   recipients: {
     id: string;
     status: RecipientStatus;
@@ -73,6 +75,8 @@ function toRecord(row: Row): PriceRequestRecord {
     message: row.message,
     dueDate: row.dueDate,
     createdAt: row.createdAt,
+    classifiedAt: row.classifiedAt,
+    retainedSupplierIds: row.retainedSupplierIds,
     recipients: row.recipients.map((r) => ({
       id: r.id,
       supplier: r.supplier,
@@ -216,6 +220,15 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
     return row ? toRecord(row) : null;
   }
 
+  async findByDocument(tenant: TenantContext, documentId: string): Promise<PriceRequestRecord | null> {
+    if (!isUuid(documentId)) return null;
+    const row = await this.prisma.priceRequest.findFirst({
+      where: { companyId: tenant.companyId, recipients: { some: { documentId } } },
+      include: INCLUDE,
+    });
+    return row ? toRecord(row) : null;
+  }
+
   async setStatus(tenant: TenantContext, recipientId: string, status: RecipientStatus): Promise<void> {
     await this.prisma.priceRequestRecipient.updateMany({
       where: { id: recipientId, priceRequest: { companyId: tenant.companyId } },
@@ -239,5 +252,12 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
       where: { id, companyId: tenant.companyId },
     });
     return count > 0;
+  }
+
+  async classify(tenant: TenantContext, id: string, retainedSupplierIds: string[] | null): Promise<void> {
+    await this.prisma.priceRequest.updateMany({
+      where: { id, companyId: tenant.companyId },
+      data: retainedSupplierIds ? { classifiedAt: new Date(), retainedSupplierIds } : { classifiedAt: null, retainedSupplierIds: [] },
+    });
   }
 }

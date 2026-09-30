@@ -242,5 +242,91 @@ export interface PriceRequest {
   message: string | null;
   dueDate: string | null;
   createdAt: string;
+  /** « Classé » : l'artisan a fait son choix (fournisseurs retenus facultatifs). */
+  classifiedAt: string | null;
+  retainedSupplierIds: string[];
   recipients: PriceRequestRecipient[];
+}
+
+export type OfferLineKind = "main" | "substitution" | "variant" | "option" | "fee" | "deposit" | "info";
+
+export interface OfferLine {
+  id: string;
+  position: number;
+  kind: OfferLineKind;
+  designation: string;
+  reference: string | null;
+  quantity: string | null;
+  unit: string | null;
+  unitPrice: string | null;
+  discountRate: string | null;
+  lineTotal: string | null;
+  /** Montant HT retenu pour la ligne (imprimé, sinon recalculé), en euros. */
+  amount: string | null;
+  /** Ligne demandée correspondante (numéro à partir de 1), ou null. */
+  requestLine: number | null;
+  matchConfidence: "sure" | "probable" | "unsure" | null;
+  matchConfirmed: boolean;
+  aiDoubt: string | null;
+  edited: boolean;
+}
+
+/** Devis fournisseur lu par l'IA ; tous les montants sont recalculés par le code. */
+export interface Offer {
+  recipientId: string;
+  id: string;
+  documentId: string;
+  notes: string[];
+  printed: { totalHT: string | null; totalVAT: string | null; totalTTC: string | null };
+  deliveryIncluded: boolean | null;
+  computedTotalHT: string | null;
+  arithmetic: { status: "consistent" | "inconsistent" | "insufficient_data"; issues: { code: string; lineId: string | null; computed: string | null; printed: string | null }[] };
+  requestedCount: number;
+  answeredCount: number;
+  lines: OfferLine[];
+}
+
+export interface ComparisonSupplier {
+  recipientId: string;
+  supplierId: string;
+  name: string;
+  computedTotalHT: string | null;
+  printedTotalHT: string | null;
+  feesHT: string | null;
+  /** Coût pour couvrir toute la liste (manquants estimés), frais compris. */
+  comparableTotalHT: string | null;
+  estimatedPartHT: string | null;
+  coveredCount: number;
+  missingCount: number;
+  uncertainCount: number;
+  comparability: "complete" | "provisional" | "estimated" | "incomplete";
+  arithmetic: "consistent" | "inconsistent" | "insufficient_data";
+}
+
+export type ItemFlag = "SUBSTITUTION" | "QUANTITY_LOWER" | "QUANTITY_HIGHER" | "UNIT_NOT_COMPARABLE" | "ONLY_AS_VARIANT" | "NOT_PRICED";
+
+export interface ComparisonItem {
+  index: number;
+  designation: string;
+  quantity: string | null;
+  unit: string | null;
+  lowestSupplierId: string | null;
+  offers: {
+    supplierId: string;
+    status: "covered" | "missing";
+    confidence: "certain" | "probable" | "to_verify" | null;
+    comparableAmount: string | null;
+    effectiveUnitPrice: string | null;
+    offeredQuantity: { value: string; unit: string } | null;
+    estimatedAmount: string | null;
+    flags: ItemFlag[];
+  }[];
+}
+
+export interface Comparison {
+  engineVersion: string;
+  classifiedAt: string | null;
+  retainedSupplierIds: string[];
+  suppliers: ComparisonSupplier[];
+  items: ComparisonItem[];
 }

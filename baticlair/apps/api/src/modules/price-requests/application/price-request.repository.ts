@@ -25,6 +25,9 @@ export interface PriceRequestRecord {
   message: string | null;
   dueDate: Date | null;
   createdAt: Date;
+  /** « Classé » : l'artisan a fait son choix. */
+  classifiedAt: Date | null;
+  retainedSupplierIds: string[];
   recipients: RecipientRecord[];
 }
 
@@ -59,9 +62,13 @@ export interface PriceRequestRepository {
   listByProject(tenant: TenantContext, projectId: string): Promise<PriceRequestRecord[]>;
   findById(tenant: TenantContext, id: string): Promise<PriceRequestRecord | null>;
   findByRecipient(tenant: TenantContext, recipientId: string): Promise<PriceRequestRecord | null>;
+  /** Demande dont un destinataire a déposé ce devis. */
+  findByDocument(tenant: TenantContext, documentId: string): Promise<PriceRequestRecord | null>;
   setStatus(tenant: TenantContext, recipientId: string, status: RecipientStatus): Promise<void>;
   attachDocument(tenant: TenantContext, recipientId: string, documentId: string): Promise<void>;
   delete(tenant: TenantContext, id: string): Promise<boolean>;
+  /** Classe la demande (fournisseurs retenus facultatifs) ; `null` la rouvre. */
+  classify(tenant: TenantContext, id: string, retainedSupplierIds: string[] | null): Promise<void>;
 }
 
 export const PRICE_REQUEST_REPOSITORY = Symbol("PRICE_REQUEST_REPOSITORY");

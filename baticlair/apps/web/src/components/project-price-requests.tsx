@@ -2,9 +2,10 @@
 
 import { Check, Copy, FileUp, Loader2, Mail, Plus, Send } from "lucide-react";
 import { useCallback, useId, useRef, useState } from "react";
+import { OfferPanel, ProjectComparison } from "@/components/project-offers";
 import { SupplierForm } from "@/components/supplier-form";
 import { Badge, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
-import { api, ApiError, MAX_DOCUMENT_BYTES, newActionKey, type PriceRequest, type PriceRequestRecipient, type Supplier } from "@/lib/api";
+import { api, ApiError, MAX_DOCUMENT_BYTES, newActionKey, type Offer, type PriceRequest, type PriceRequestRecipient, type Supplier } from "@/lib/api";
 import { openDocument } from "@/lib/open-document";
 import { useProgressRefresh } from "@/components/project-progress";
 import { useResource } from "@/lib/use-resource";
@@ -39,11 +40,29 @@ export function ProjectPriceRequests({ projectId, archived, canCreate }: { proje
   );
   const { data, setData, error, reload } = useResource(fetchRequests);
   const refreshProgress = useProgressRefresh();
+  const requestId = data?.items[0]?.id ?? null;
+  // Devis déjà lus par l'IA, par destinataire ; `version` fait suivre la comparaison.
+  const [version, setVersion] = useState(0);
+  const fetchOffers = useCallback(
+    (signal: AbortSignal) =>
+      requestId
+        ? api<{ aiAvailable: boolean; items: Offer[] }>(`/v1/price-requests/${requestId}/offers`, { signal })
+        : Promise.resolve({ aiAvailable: false, items: [] as Offer[] }),
+    [requestId],
+  );
+  const offers = useResource(fetchOffers);
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
 
   const request = data.items[0] ?? null;
+  const offerOf = (recipientId: string) => offers.data?.items.find((o) => o.recipientId === recipientId) ?? null;
+  const offerChanged = (offer: Offer) => {
+    const items = (offers.data?.items ?? []).filter((o) => o.recipientId !== offer.recipientId);
+    offers.setData({ aiAvailable: offers.data?.aiAvailable ?? true, items: [...items, offer] });
+    setVersion((v) => v + 1);
+    refreshProgress();
+  };
   const replace = (r: PriceRequest) => {
     setData({ items: [r, ...data.items.filter((x) => x.id !== r.id)] });
     refreshProgress();
@@ -78,14 +97,34 @@ export function ProjectPriceRequests({ projectId, archived, canCreate }: { proje
       <ul className="flex flex-col gap-2.5">
         {request.recipients.map((r) => (
           <li key={r.id}>
-            <RecipientCard recipient={r} archived={archived} onChange={replace} onReload={() => {
-              reload();
-              refreshProgress();
-            }} />
+            <RecipientCard
+              recipient={r}
+              archived={archived}
+              onChange={replace}
+              onReload={() => {
+                reload();
+                offers.reload();
+                setVersion((v) => v + 1);
+                refreshProgress();
+              }}
+              offerSlot={
+                r.status === "received" && r.document ? (
+                  <OfferPanel
+                    recipientId={r.id}
+                    offer={offerOf(r.id)}
+                    aiAvailable={offers.data?.aiAvailable ?? false}
+                    request={request}
+                    archived={archived}
+                    onChange={offerChanged}
+                  />
+                ) : null
+              }
+            />
           </li>
         ))}
       </ul>
       {!archived ? <AddRecipients request={request} onChange={replace} /> : null}
+      {(offers.data?.items.length ?? 0) > 0 ? <ProjectComparison request={request} version={version} archived={archived} onRequestChange={replace} /> : null}
     </section>
   );
 }
@@ -301,11 +340,14 @@ function RecipientCard({
   archived,
   onChange,
   onReload,
+  offerSlot,
 }: {
   recipient: PriceRequestRecipient;
   archived: boolean;
   onChange: (req: PriceRequest) => void;
   onReload: () => void;
+  /** Lecture du devis reçu (résumé, détail), fournie par la section. */
+  offerSlot: React.ReactNode;
 }) {
   const [pending, setPending] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -374,6 +416,7 @@ function RecipientCard({
           ) : null}
         </div>
       ) : null}
+      {offerSlot}
 
       {!archived && r.status === "to_send" ? (
         <>

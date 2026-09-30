@@ -7,7 +7,9 @@ import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
  */
 export type FixturePage = "devis" | "scan" | "cgv" | "totaux";
 
-const DEVIS_LINES: [string, string, string, string, string][] = [
+export type FixtureRow = [string, string, string, string, string];
+
+export const DEVIS_LINES: FixtureRow[] = [
   ["TUI-RC12", "Tuile romane canal rouge 12,5 u/m²", "1 250 u", "1,12", "1 400,00"],
   ["FAI-R", "Faîtière ronde à emboîtement", "42 u", "4,85", "203,70"],
   ["LIT-2738", "Liteau sapin traité classe 2 27x38", "480 ml", "0,62", "297,60"],
@@ -16,7 +18,10 @@ const DEVIS_LINES: [string, string, string, string, string][] = [
   ["GOU-ZN33", "Gouttière zinc demi-ronde dév. 33", "36 ml", "14,20", "511,20"],
 ];
 
-export async function makePdf(pages: FixturePage[]): Promise<Uint8Array> {
+/** `rows` / `totals` : un autre tableau (devis d'un autre fournisseur, par exemple). */
+export async function makePdf(pages: FixturePage[], rows: FixtureRow[] = DEVIS_LINES, totals = "Total HT 2 805,30   TVA 10 % 280,53   Total TTC 3 085,83",
+  title = "DEVIS N° 2026-118 – Toitures Martin",
+): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   for (const kind of pages) {
@@ -26,16 +31,16 @@ export async function makePdf(pages: FixturePage[]): Promise<Uint8Array> {
       page.drawText(text, { x, y, size, font });
     };
     if (kind === "devis") {
-      write("DEVIS N° 2026-118 – Toitures Martin", 40, 14);
+      write(title, 40, 14);
       y -= 30;
       const cols = [40, 110, 330, 420, 490];
       ["Réf.", "Désignation", "Qté", "P.U. HT", "Total HT"].forEach((h, i) => write(h, cols[i]));
-      for (const row of DEVIS_LINES) {
+      for (const row of rows) {
         y -= 18;
         row.forEach((cell, i) => write(cell, cols[i]));
       }
       y -= 30;
-      write("Total HT 2 805,30   TVA 10 % 280,53   Total TTC 3 085,83");
+      write(totals);
     } else if (kind === "totaux") {
       write("Total HT 12 450,00");
       y -= 16;
