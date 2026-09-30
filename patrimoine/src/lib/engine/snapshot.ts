@@ -132,6 +132,25 @@ export function buildingValue(b: Building, units: Unit[]): number | undefined {
   return undefined;
 }
 
+/**
+ * Logements avec leur loyer effectif : celui du bail en cours s'il existe
+ * (source unique du loyer d'un logement loué), sinon le loyer de référence
+ * saisi sur le logement (vacant, ou loué sans bail enregistré).
+ */
+export function leasedUnits(data: Pick<AppData, "units" | "tenancies">): Unit[] {
+  const active = new Map<string, { rent?: number; charges?: number; startDate?: string }>();
+  for (const t of data.tenancies ?? []) {
+    if (t.status !== "actif") continue;
+    const cur = active.get(t.unitId);
+    if (!cur || (t.startDate ?? "") > (cur.startDate ?? "")) active.set(t.unitId, t);
+  }
+  return data.units.map((u) => {
+    const t = active.get(u.id);
+    if (!t) return u;
+    return { ...u, status: "occupe", rent: t.rent ?? u.rent, charges: t.charges ?? u.charges };
+  });
+}
+
 export function buildingRent(b: Building, units: Unit[]): { rent: number; potential: number } {
   const withRent = units.filter((u) => u.rent !== undefined && u.rent > 0);
   if (withRent.length === 0) {
@@ -178,7 +197,7 @@ export function loanNowFigures(r: ResolvedLoan, nowMonth: MonthIndex) {
 export function computeSnapshot(data: AppData, nowMonth: MonthIndex): Snapshot {
   const buildingsById = new Map(data.buildings.map((b) => [b.id, b]));
   const unitsByBuilding = new Map<string, Unit[]>();
-  for (const u of data.units) {
+  for (const u of leasedUnits(data)) {
     const list = unitsByBuilding.get(u.buildingId) ?? [];
     list.push(u);
     unitsByBuilding.set(u.buildingId, list);

@@ -101,6 +101,7 @@ export function StoreProvider({
     fetch("/api/ops", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ops }) });
 
   const flush = useCallback(async () => {
+    let resync = false;
     if (timer.current) {
       clearTimeout(timer.current);
       timer.current = null;
@@ -124,13 +125,20 @@ export function StoreProvider({
             // Une modification refusée ne doit pas bloquer les autres : envoi une à une,
             // seules celles que le serveur refuse sont abandonnées (et signalées).
             let refused = 0;
+            let reason: string | undefined;
             for (const op of batch) {
               res = await send([op]);
-              if (REJECTED.has(res.status)) refused++;
-              else if (!res.ok) throw new Error(String(res.status));
+              if (REJECTED.has(res.status)) {
+                refused++;
+                reason = ((await res.json().catch(() => null)) as { error?: string } | null)?.error ?? reason;
+              } else if (!res.ok) throw new Error(String(res.status));
               else setVersion((await res.json()).version);
             }
-            if (refused) toast(refused > 1 ? `${refused} modifications n'ont pas pu être enregistrées.` : "Une modification n'a pas pu être enregistrée.");
+            if (refused) {
+              toast(refused > 1 ? `${refused} modifications refusées${reason ? ` (${reason})` : ""}.` : reason ? `Non enregistré : ${reason}` : "Une modification n'a pas pu être enregistrée.");
+              // L'écran affichait la valeur refusée : on reprend l'état enregistré sur le serveur.
+              resync = true;
+            }
           } else {
             if (!res.ok) throw new Error(String(res.status));
             setVersion((await res.json()).version);
@@ -145,6 +153,14 @@ export function StoreProvider({
           retryDelay.current = Math.min(delay * 2, 30000);
           timer.current = setTimeout(() => retry.current(), delay);
           return;
+        }
+      }
+      if (resync && pending.current.length === 0) {
+        const res = await fetch("/api/data", { cache: "no-store" }).catch(() => undefined);
+        if (res?.ok && pending.current.length === 0) {
+          const json = await res.json();
+          setData(json.data);
+          setVersion(json.version);
         }
       }
       setStatus("saved");

@@ -1,5 +1,5 @@
 import type { AppData, Building, Loan, Unit } from "../types";
-import type { Snapshot } from "./snapshot";
+import { leasedUnits, type Snapshot } from "./snapshot";
 import { auditLoans, suspectAcquisition } from "./loan-audit";
 import { reliableStart } from "../schedule";
 import { unitMissing } from "../missing";
@@ -42,6 +42,7 @@ export function qualityIssues(data: AppData, snap: Snapshot): QualityIssue[] {
   const bHref = (b: Building, edit = false) => `/patrimoine/immeuble/${b.id}${edit ? "?modifier=1" : ""}`;
 
   // ——— Biens ———
+  const leased = leasedUnits(data);
   for (const b of data.buildings) {
     const f = snap.byBuilding.get(b.id);
     const units = data.units.filter((u) => u.buildingId === b.id);
@@ -54,8 +55,10 @@ export function qualityIssues(data: AppData, snap: Snapshot): QualityIssue[] {
     if (b.lotsCount && units.length && b.lotsCount !== units.length) push(`n-${b.id}`, "optionnel", gB(b), b.name, `${b.lotsCount} lots annoncés mais ${units.length} logement(s) saisi(s)`, bHref(b));
 
     // Loyer global de l'immeuble (logements non détaillés) : rien à signaler par logement.
-    const globalRent = !!b.rentMonthly && !units.some((u) => u.rent && u.rent > 0);
-    const noRent = globalRent ? [] : units.filter((u) => u.status !== "vacant" && !(u.rent && u.rent > 0));
+    // Loyer effectif : celui du bail en cours, sinon celui du logement.
+    const effective = leased.filter((u) => u.buildingId === b.id);
+    const globalRent = !!b.rentMonthly && !effective.some((u) => u.rent && u.rent > 0);
+    const noRent = globalRent ? [] : effective.filter((u) => u.status !== "vacant" && !(u.rent && u.rent > 0));
     if (noRent.length) push(`r-${b.id}`, "important", gB(b), b.name, `${noRent.length} logement(s) occupé(s) sans loyer (${noRent.map((u) => u.name).slice(0, 3).join(", ")}) : loyers sous-estimés`, bHref(b));
     for (const u of units) unitChecks(u, b);
 
@@ -70,8 +73,8 @@ export function qualityIssues(data: AppData, snap: Snapshot): QualityIssue[] {
     const lease = data.tenancies.find((t) => t.unitId === u.id && t.status === "actif");
     const where = `${b.name} · ${u.name}`;
     const href = `/patrimoine/logement/${u.id}?depuis=gestion`;
-    if (lease && u.status === "vacant") push(`v-${u.id}`, "important", gB(b), where, "Marqué vacant alors qu'un bail est en cours : occupation et loyers faussés", href);
-    else if (lease?.rent !== undefined && u.rent !== undefined && Math.abs(lease.rent - u.rent) > 1) push(`rl-${u.id}`, "important", gB(b), where, `Loyer du logement (${Math.round(u.rent)} €) différent du bail en cours (${Math.round(lease.rent)} €)`, href);
+    // Le bail en cours fait foi pour l'occupation et le loyer : un écart avec la fiche du logement ne fausse plus les chiffres.
+    if (lease && u.status === "vacant") push(`v-${u.id}`, "optionnel", gB(b), where, "Marqué vacant alors qu'un bail est en cours (le bail est retenu)", href);
     // Dossier du locataire : pièces et informations du bail.
     const missing = unitMissing(data, u).filter((m) => m.id !== "rent");
     if (missing.length) push(`t-${u.id}`, "utile", gB(b), where, `Dossier locataire : ${missing.map((m) => m.label.toLowerCase()).join(", ")}`, href);

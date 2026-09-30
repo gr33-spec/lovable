@@ -2,7 +2,7 @@ import type { AppData, Company, DocCategory, SaleAction } from "../types";
 import { documentIndex } from "../documents";
 import { saleLabel } from "../engine/sale";
 import { monthLabel } from "../engine/dates";
-import { NO_COMPANY, cashflowMonthly, companyTree, dscr as dscrOf, rentalCharges, rentalPayments, type Figures } from "../engine/snapshot";
+import { NO_COMPANY, cashflowMonthly, companyTree, dscr as dscrOf, leasedUnits, rentalCharges, rentalPayments, type Figures } from "../engine/snapshot";
 import { halfDebtYear, type Projection } from "../engine/projection";
 import { portfolioIndicators } from "../engine/indicators";
 import { eur, eurCompact, pct, pdfSafe } from "../format";
@@ -320,7 +320,7 @@ function evidenceRows(data: AppData, snap: Projection["snapshot"]): GroupModel["
     return r && !r.finished;
   });
   const rental = data.buildings.filter((b) => !isPrivateUse(b));
-  const leased = data.units.filter((u) => u.status !== "vacant");
+  const leased = leasedUnits(data).filter((u) => u.status !== "vacant");
   const loanName = (l: (typeof active)[number]) => l.name || l.bank || "Crédit";
   const rows: GroupModel["evidence"] = [];
   const add = <T,>(label: string, list: T[], ok: (x: T) => boolean, name: (x: T) => string) => {

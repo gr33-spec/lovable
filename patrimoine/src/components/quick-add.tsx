@@ -113,7 +113,7 @@ export function QuickLoan({ buildingId, companyId, onDone }: { buildingId?: stri
         buildingId: building ?? null,
         companyId: building ? null : (companyId ?? null),
         reference: meta?.reference || undefined,
-        ...loanFieldsFromSchedule(rows, nowMonth, meta),
+        ...loanFieldsFromSchedule(rows, undefined, meta),
         schedule: scheduleOf(rows, fileId, fileName, meta),
       } satisfies Loan);
       onDone(id);

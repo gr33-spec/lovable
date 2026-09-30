@@ -195,8 +195,10 @@ export function UnitForm({ unit }: { unit: Unit }) {
 }
 
 export function LoanForm({ loan }: { loan: Loan }) {
-  const { upsert } = useStore();
+  const { upsert, projection } = useStore();
   const set = (patch: Partial<Loan>) => upsert("loans", { ...loan, ...patch });
+  // Avec un tableau, le restant dû est celui du tableau à ce jour (jamais saisi).
+  const fromSchedule = loan.schedule && loan.schedule.rows.length >= 2 ? (projection.snapshot.byLoan.get(loan.id)?.balance ?? 0) : undefined;
   const buildings = useBuildingOptions();
   const companies = useCompanyOptions();
   const partialFrom = reliableInitial(loan).partialFrom;
@@ -235,8 +237,15 @@ export function LoanForm({ loan }: { loan: Loan }) {
       <div className="rounded-2xl bg-soft px-4 py-3 text-[13px] text-ink-2">
         L&apos;essentiel : <b>capital restant dû</b>, <b>mensualité</b> et <b>date de fin</b>. Le reste affine la projection.
       </div>
-      <NumberField label="Capital restant dû" value={loan.remaining} onChange={(v) => set({ remaining: v })} />
-      {loan.remaining !== undefined && (
+      {fromSchedule !== undefined ? (
+        <div className="flex items-baseline justify-between gap-3 rounded-2xl bg-card px-4 py-3 shadow-sm">
+          <span className="text-[13.5px] text-ink-2">Capital restant dû (d&apos;après le tableau)</span>
+          <span className="tabular text-[15px] font-semibold text-ink">{eur(fromSchedule)}</span>
+        </div>
+      ) : (
+        <NumberField label="Capital restant dû" value={loan.remaining} onChange={(v) => set({ remaining: v })} />
+      )}
+      {fromSchedule === undefined && loan.remaining !== undefined && (
         <DateField label="…connu à la date du" value={loan.remainingDate} onChange={(v) => set({ remainingDate: v })} hint="Vide = aujourd'hui." />
       )}
       <NumberField label="Mensualité hors assurance" value={loan.monthlyPayment} onChange={(v) => set({ monthlyPayment: v })} />

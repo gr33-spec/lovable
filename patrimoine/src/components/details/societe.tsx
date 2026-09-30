@@ -3,7 +3,6 @@
 import { removalPlan, removalSummary } from "@/lib/removal";
 import { useUndoableRemove } from "@/components/swipe";
 import { DocumentsCard } from "@/components/documents/library";
-import { AnalysisEntry } from "@/components/analysis/entry";
 import { companyCrumbs } from "@/lib/crumbs";
 import { goBack } from "@/lib/nav";
 import Link from "next/link";
@@ -204,8 +203,6 @@ export function CompanyDetail({ id }: { id: string }) {
         {(company.partners?.length || company.taxRegime || company.notes) && (
           <>
             <DocumentsCard scope={{ companyId: company.id }} href={`/documents?societe=${company.id}`} />
-
-            <AnalysisEntry scope={{ type: "company", id: company.id }} title="Analyse IA de cette société" />
 
             <SectionTitle>Informations</SectionTitle>
             <Card className="space-y-2 text-[15px]">

@@ -2,7 +2,6 @@
 
 import { removalPlan, removalSummary } from "@/lib/removal";
 import { DocumentsCard } from "@/components/documents/library";
-import { AnalysisEntry } from "@/components/analysis/entry";
 import { companyCrumbs } from "@/lib/crumbs";
 import { goBack } from "@/lib/nav";
 import { Suspense, useState } from "react";
@@ -27,6 +26,7 @@ import { SalesList } from "@/components/sale/list";
 import { DragGhost, LotHandle, SwapNumbersSheet, dropTarget, useSwapNumbers, useTenantDnd } from "./lot-number";
 import { sortedUnits, tenantLabel } from "@/lib/lots";
 import type { SaleAction } from "@/lib/types";
+import { leasedUnits } from "@/lib/engine/snapshot";
 
 export function BuildingDetail({ id, edit, saleId }: { id: string; edit?: boolean; saleId?: string }) {
   return (
@@ -64,6 +64,8 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
   const f = snap.byBuilding.get(id)!;
   const company = data.companies.find((c) => c.id === building.companyId);
   const units = sortedUnits(data.units.filter((u) => u.buildingId === id));
+  // Loyer affiché : celui du bail en cours s'il existe.
+  const rentOf = new Map(leasedUnits(data).map((u) => [u.id, u.rent]));
   const loans = data.loans.filter((l) => l.buildingId === id);
   const works = data.works.filter((w) => w.buildingId === id).sort((a, b) => (a.year ?? 9999) - (b.year ?? 9999));
   const cf = cashflowMonthly(f);
@@ -189,7 +191,7 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
                           ? "Vacant"
                           : name || labelOf(UNIT_TYPES, u.type)
                       }
-                      right={u.status === "vacant" ? <Pill tone="warn">Vacant</Pill> : eur(u.rent)}
+                      right={u.status === "vacant" ? <Pill tone="warn">Vacant</Pill> : eur(rentOf.get(u.id) ?? u.rent)}
                       rightSub={[labelOf(UNIT_TYPES, u.type), u.surface ? `${num(u.surface)} m²` : undefined].filter(Boolean).join(" · ")}
                     />
                   </SwipeDelete>
@@ -251,8 +253,6 @@ function BuildingDetailInner({ id, edit, saleId }: { id: string; edit?: boolean;
         <SwapNumbersSheet units={units} open={moving} onClose={() => setMoving(false)} />
 
         <DocumentsCard scope={{ buildingId: building.id }} href={`/documents?immeuble=${building.id}`} />
-
-        <AnalysisEntry scope={{ type: "building", id: building.id }} title="Analyse IA de cet immeuble" />
 
         <SectionTitle>Informations</SectionTitle>
         <Card className="space-y-1.5 text-[15px]">
