@@ -139,6 +139,7 @@ export function ProjectDetail({ id }: { id: string }) {
               <ImpactRow label="Cash-flow / mois" before={eurSigned(Math.round(impact.before.cashflowMonthly))} after={eurSigned(Math.round(impact.after.cashflowMonthly))} />
               <ImpactRow label="Dette" before={eurCompact(impact.before.debt)} after={eurCompact(impact.after.debt)} />
               {impact.before.ltvPct !== undefined && impact.after.ltvPct !== undefined && <ImpactRow label="LTV" before={pct(impact.before.ltvPct)} after={pct(impact.after.ltvPct)} />}
+              {impact.before.dscr !== undefined && impact.after.dscr !== undefined && <ImpactRow label="Couverture des mensualités" before={`${impact.before.dscr.toFixed(2).replace(".", ",")}×`} after={`${impact.after.dscr.toFixed(2).replace(".", ",")}×`} />}
             </div>
             <p className="mt-2 text-[11.5px] text-muted">
               {p.inProjection && editable ? "Le projet est intégré à l'accueil, à la chronologie et au dossier banque du groupe." : "Activez « Dans les projections » pour voir le projet dans l'accueil et la chronologie."}

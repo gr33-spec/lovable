@@ -48,6 +48,16 @@ for (const [label, opts] of SIZES) {
   }
   check(`${label} : ${pages.length} écrans sans erreur`, errors.length === 0, errors.slice(0, 5).join(" | "));
   check(`${label} : aucun débordement horizontal`, overflow.length === 0, overflow.join(" | "));
+  // Accueil : le détail d'un chiffre et le bouton « Ajouter » global.
+  await page.goto(base + "/");
+  await page.waitForTimeout(600);
+  await page.getByRole("button", { name: /Cash-flow du mois/ }).click();
+  check(`${label} : « Pourquoi ce chiffre ? » s'ouvre`, await page.getByText("Pourquoi ce chiffre ?").isVisible().catch(() => false));
+  await page.goto(base + "/patrimoine");
+  await page.waitForTimeout(400);
+  await page.getByRole("button", { name: "Ajouter" }).first().click();
+  await page.waitForTimeout(400);
+  check(`${label} : menu Ajouter (document, crédit, bien, locataire)`, await page.getByRole("button", { name: /Locataire/ }).isVisible().catch(() => false));
   if (label === "ordinateur") {
     const dossier = await page.request.get(base + "/api/dossier-banque");
     check("dossier banque généré (PDF)", dossier.status() === 200 && (await dossier.body()).subarray(0, 5).toString() === "%PDF-", dossier.status());

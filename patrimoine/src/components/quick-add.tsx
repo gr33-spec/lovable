@@ -6,7 +6,8 @@ import { matchLoan } from "@/lib/loan-match";
 import { toast } from "./swipe";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Briefcase, Hammer, Landmark } from "lucide-react";
+import { Building2, Briefcase, ChevronRight, FileUp, Hammer, Landmark, UserPlus } from "lucide-react";
+import { sortedUnits } from "@/lib/lots";
 import { useStore } from "@/lib/store";
 import { newId } from "@/lib/ops";
 import type { Building, Company, Loan, Work } from "@/lib/types";
@@ -203,9 +204,9 @@ export function QuickWork({ buildingId, companyId, onDone }: { buildingId?: stri
   );
 }
 
-type AddKind = "company" | "building" | "loan" | "work";
+type AddKind = "company" | "building" | "loan" | "work" | "tenant";
 
-/** Menu « + » de l'onglet Patrimoine. */
+/** Menu « + » : un seul point d'entrée pour tout ajouter (barre de navigation et Patrimoine). */
 export function AddMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   const router = useRouter();
   const [kind, setKind] = useState<AddKind | null>(null);
@@ -213,33 +214,65 @@ export function AddMenu({ open, onClose }: { open: boolean; onClose: () => void 
     setKind(null);
     onClose();
   };
+  const go = (href: string) => {
+    close();
+    router.push(href);
+  };
   const titles: Record<AddKind, string> = {
     company: "Nouvelle société",
-    building: "Nouvel immeuble",
+    building: "Nouveau bien",
     loan: "Nouveau crédit",
     work: "Nouveaux travaux",
+    tenant: "Nouveau locataire",
   };
+  const items: { label: string; hint: string; icon: React.ReactNode; onClick: () => void }[] = [
+    { label: "Document", hint: "PDF ou photo, rangé au bon endroit", icon: <FileUp size={24} />, onClick: () => go("/documents") },
+    { label: "Crédit", hint: "Avec ou sans tableau", icon: <Landmark size={24} />, onClick: () => setKind("loan") },
+    { label: "Bien", hint: "Immeuble, maison, local…", icon: <Building2 size={24} />, onClick: () => setKind("building") },
+    { label: "Locataire", hint: "Entrée dans un logement", icon: <UserPlus size={24} />, onClick: () => setKind("tenant") },
+    { label: "Société", hint: "SCI, holding…", icon: <Briefcase size={24} />, onClick: () => setKind("company") },
+    { label: "Travaux", hint: "Prévus ou réalisés", icon: <Hammer size={24} />, onClick: () => setKind("work") },
+  ];
   return (
     <Sheet open={open} onClose={close} title={kind ? titles[kind] : "Ajouter"}>
       {!kind && (
         <div className="grid grid-cols-2 gap-3 pb-2">
-          {[
-            { k: "company" as const, label: "Société", icon: <Briefcase size={26} /> },
-            { k: "building" as const, label: "Immeuble", icon: <Building2 size={26} /> },
-            { k: "loan" as const, label: "Crédit", icon: <Landmark size={26} /> },
-            { k: "work" as const, label: "Travaux", icon: <Hammer size={26} /> },
-          ].map((x) => (
-            <button key={x.k} onClick={() => setKind(x.k)} className="flex flex-col items-center gap-2 rounded-3xl bg-card py-6 text-navy shadow-sm active:scale-[0.98]">
+          {items.map((x) => (
+            <button key={x.label} onClick={x.onClick} className="flex flex-col items-center gap-1.5 rounded-3xl bg-card px-2 py-5 text-navy shadow-sm active:scale-[0.98]">
               {x.icon}
               <span className="text-[15px] font-semibold">{x.label}</span>
+              <span className="text-center text-[12px] leading-tight text-muted">{x.hint}</span>
             </button>
           ))}
         </div>
       )}
-      {kind === "company" && <QuickCompany onDone={(id) => { close(); router.push(`/patrimoine/societe/${id}`); }} />}
-      {kind === "building" && <QuickBuilding onDone={(id) => { close(); router.push(`/patrimoine/immeuble/${id}`); }} />}
-      {kind === "loan" && <QuickLoan onDone={(id) => { close(); router.push(`/patrimoine/credit/${id}`); }} />}
-      {kind === "work" && <QuickWork onDone={() => { close(); router.push(`/patrimoine?vue=travaux`); }} />}
+      {kind === "company" && <QuickCompany onDone={(id) => go(`/patrimoine/societe/${id}`)} />}
+      {kind === "building" && <QuickBuilding onDone={(id) => go(`/patrimoine/immeuble/${id}`)} />}
+      {kind === "loan" && <QuickLoan onDone={(id) => go(`/patrimoine/credit/${id}`)} />}
+      {kind === "work" && <QuickWork onDone={() => go(`/patrimoine?vue=travaux`)} />}
+      {kind === "tenant" && <TenantPicker onPick={(unitId) => go(`/patrimoine/logement/${unitId}/changement?depuis=gestion`)} />}
     </Sheet>
+  );
+}
+
+/** Choix du logement qui accueille le locataire (logements vacants d'abord). */
+function TenantPicker({ onPick }: { onPick: (unitId: string) => void }) {
+  const { data } = useStore();
+  const name = (id: string) => data.buildings.find((b) => b.id === id)?.name ?? "";
+  const units = sortedUnits(data.units).sort((a, b) => Number(b.status === "vacant") - Number(a.status === "vacant"));
+  if (!units.length) return <p className="pb-4 text-[14px] text-muted">Ajoutez d&apos;abord un bien et ses logements.</p>;
+  return (
+    <div className="divide-y divide-line pb-2">
+      {units.map((u) => (
+        <button key={u.id} onClick={() => onPick(u.id)} className="flex w-full items-center gap-3 py-3 text-left active:opacity-60">
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-[15px] font-semibold text-ink">{u.name}</span>
+            <span className="block truncate text-[12.5px] text-muted">{name(u.buildingId)}</span>
+          </span>
+          {u.status === "vacant" ? <span className="rounded-full bg-warn/10 px-2 py-0.5 text-[12px] font-semibold text-warn">Vacant</span> : <span className="text-[12px] text-muted">Changer de locataire</span>}
+          <ChevronRight size={16} className="shrink-0 text-muted" />
+        </button>
+      ))}
+    </div>
   );
 }

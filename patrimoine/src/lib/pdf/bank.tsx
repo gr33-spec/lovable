@@ -56,6 +56,7 @@ const E = (n: number | undefined) => (n === undefined ? "—" : pdfSafe(eur(n)))
 const K = (n: number | undefined) => (n === undefined ? "—" : pdfSafe(eurCompact(n)));
 const P = (n: number | undefined, d = 1) => (n === undefined ? "—" : pdfSafe(pct(n, d)));
 const S = (n: number) => pdfSafe(`${n >= 0 ? "+" : "−"}${eur(Math.abs(n))}`);
+const X = (n: number) => pdfSafe(`${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}×`);
 const two = (n: number) => String(n).padStart(2, "0");
 const base = { fontFamily: FONT, fontSize: 9, color: INK };
 
@@ -1516,6 +1517,7 @@ export function ProjectDossier({ data, projection, nowMonth, scopeName, generate
                 { label: "Cash-flow par mois", before: S(Math.round(impact.before.cashflowMonthly)), after: S(Math.round(impact.after.cashflowMonthly)) },
                 { label: "Capital restant dû", before: K(impact.before.debt), after: K(impact.after.debt) },
                 ...(impact.before.ltvPct !== undefined && impact.after.ltvPct !== undefined ? [{ label: "Dette / valeur (LTV)", before: P(impact.before.ltvPct), after: P(impact.after.ltvPct) }] : []),
+                ...(impact.before.dscr !== undefined && impact.after.dscr !== undefined ? [{ label: "Couverture des mensualités (DSCR)", before: X(impact.before.dscr), after: X(impact.after.dscr) }] : []),
               ]}
             />
           </>
