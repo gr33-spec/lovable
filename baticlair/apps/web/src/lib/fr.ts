@@ -5,7 +5,7 @@
  * pour le lexique.
  */
 export const fr = {
-  nav: { home: "Accueil", projects: "Chantiers", add: "Ajouter", suppliers: "Fournisseurs", invoices: "Factures" },
+  nav: { home: "Accueil", projects: "Chantiers", add: "Ajouter", suppliers: "Fournisseurs", account: "Compte" },
   status: { active: "En cours", archived: "Terminé" },
   actions: {
     retry: "Réessayer",
@@ -15,7 +15,6 @@ export const fr = {
     saving: "Enregistrement…",
     loadMore: "Afficher plus",
   },
-  soon: "Bientôt",
 } as const;
 
 /** Messages d'erreur par code (API métier et authentification). */

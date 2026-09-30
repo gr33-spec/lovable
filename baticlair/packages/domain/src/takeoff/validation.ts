@@ -187,7 +187,7 @@ export function validateTakeoffLine(line: TakeoffLineInput, profile: TradeProfil
           issue(
             "PACKAGE_CONTENT_MISSING",
             "to_verify",
-            `Combien par ${unitLabel(unit).replace(/s$/, "")} ? Contenu non indiqué.`,
+            `Combien par ${unitLabel(unit).replace(/[sx]$/, "")} ? Contenu non indiqué.`,
           ),
         );
       }
