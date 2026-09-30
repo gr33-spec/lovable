@@ -4,7 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 npx tsx e2e/seed.mts
 status=0
-for t in data security pages; do
+for t in data security pages statement; do
   echo "── $t"
   node "e2e/$t.mjs" || status=1
 done
