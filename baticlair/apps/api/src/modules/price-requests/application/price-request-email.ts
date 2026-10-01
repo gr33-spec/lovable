@@ -1,4 +1,4 @@
-import { dimensionOf, parseUnit } from "@baticlair/domain";
+import { dimensionOf, keyCharacteristics, normalizeText, parseUnit, suppliedObject } from "@baticlair/domain";
 
 export interface RequestedLine {
   designation: string;
@@ -69,6 +69,35 @@ export function purchaseLabel(designation: string): string {
 }
 
 /**
+ * Ligne envoyée au fournisseur : intitulé court, mais SANS PERTE. On garde le
+ * titre de l'ouvrage, l'objet réellement fourni s'il n'est pas déjà dans le
+ * titre (« Faîtage » → « faîtières ventilées »), puis toute caractéristique
+ * qui peut changer le produit, la quantité ou le prix (HPV, rouge, sable,
+ * Ø80, hauteur 4 m, « crochets et naissances compris »…), une seule fois.
+ * La phrase de pose du devis client (« pour la création de la lame d'air »)
+ * disparaît, elle n'apprend rien au fournisseur.
+ */
+export function supplierLineLabel(designation: string): string {
+  const [titlePart, ...rest] = designation.split(/\s[-–—]\s/);
+  const title = purchaseLabel(titlePart ?? designation);
+  const description = rest.join(" - ");
+  // « 27x40 » et « 27×40 » s'écrivent pareil ici.
+  const norm = (t: string) => normalizeText(t.replace(/×/g, "x"));
+  const has = (text: string, piece: string) => {
+    const words = norm(piece).split(" ").filter((w) => w.length > 2 || /\d/.test(w));
+    const hay = norm(text);
+    return words.length > 0 && words.every((w) => hay.includes(w.replace(/s$/, "")));
+  };
+  const extras: string[] = [];
+  const object = description ? suppliedObject(description) : null;
+  if (object && !has(title, object)) extras.push(object);
+  for (const c of keyCharacteristics(designation)) {
+    if (!has(`${title} ${extras.join(" ")}`, c)) extras.push(c);
+  }
+  return extras.length > 0 ? `${title} (${extras.join(", ")})` : title;
+}
+
+/**
  * E-mail de demande de prix, en texte simple : lisible dans toutes les
  * messageries et copiable tel quel. Aucune donnée n'est inventée : seules
  * les lignes validées par l'artisan y figurent.
@@ -81,7 +110,7 @@ export function priceRequestEmail(input: EmailInput): {
   const hello = input.contactName ? `Bonjour ${input.contactName},` : "Bonjour,";
   const lines = input.lines.map((l) => {
     const ref = l.reference ? ` (réf. ${l.reference})` : "";
-    return `- ${purchaseLabel(l.designation)}${ref} : ${requestedQuantityText(l)}`;
+    return `- ${supplierLineLabel(l.designation)}${ref} : ${requestedQuantityText(l)}`;
   });
   const body = [
     hello,

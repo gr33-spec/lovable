@@ -115,6 +115,37 @@ describe("textes pour l'artisan et le fournisseur", () => {
     expect(requestedQuantityText({ designation: "Rives de toit", quantity: "24", unit: "m", reference: null, basis: "work" })).toBe(
       "pour une longueur de 24 m (quantité à calculer)",
     );
+    // Cas de référence D-2026-015 : l'intitulé envoyé est simplifié, mais AUCUNE caractéristique ne se perd.
+    const { supplierLineLabel } = await import("../src/modules/price-requests/application/price-request-email.js");
+    const D2026015: [string, string[]][] = [
+      [
+        "Écran de sous-toiture respirant (Fourniture & Pose) - Fourniture et pose d'un écran de sous-toiture HPV (Hautement Perméable à la Vapeur) respirant, posé sur fermettes d'entraxe 90 cm (Surface : 120 m²)",
+        ["respirant", "HPV"],
+      ],
+      ["Contre-lattage en liteaux 27x40 (Fourniture & Pose) - Fourniture et pose de contre-lattes en liteaux de section 27x40 mm pour la création de la lame d'air (Surface : 120 m²)", ["27x40", "contre-lattes"]],
+      ["Couverture en tuiles terre cuite HP10 rouge (Fourniture & Pose) - Fourniture et pose de tuiles en terre cuite grand moule type HP10 de coloris rouge (Surface : 120 m²)", ["HP10", "rouge", "terre cuite", "grand moule"]],
+      ["Rives de toit (Fourniture & Pose) - Fourniture et pose de tuiles de rive pour la finition des rives latérales (4 rives de 6 m)", ["tuiles de rive"]],
+      ["Faîtage (Fourniture & Pose) - Fourniture et pose de faîtières ventilées avec closoir ventilé et accessoires de fixation (Longueur : 10 m)", ["faîtières ventilées", "closoir ventilé", "accessoires de fixation"]],
+      [
+        "Gouttière PVC de 25 sable (Fourniture & Pose) - Fourniture et pose de gouttières demi-ronde de 25 en PVC de coloris sable, crochets et naissances compris (Longueur : 2 x 10 m)",
+        ["PVC", "de 25", "sable", "demi-ronde", "crochets et naissances compris"],
+      ],
+      [
+        "Descente d'eau pluviale PVC Ø80 avec coudes (Fourniture & Pose) - Fourniture et pose d'un ensemble de descente d'eau pluviale en PVC Ø80 coloris sable, hauteur 4m, comprenant 2 jeux de coudes et les colliers de fixation par descente (2 ensembles au total)",
+        ["PVC", "Ø80", "sable", "hauteur 4 m", "2 jeux de coudes", "colliers"],
+      ],
+      ["Chatières de ventilation (Fourniture & Pose) - Fourniture et pose de tuiles chatières de ventilation adaptées au modèle HP10 (5 de chaque côté)", ["chatières", "HP10"]],
+      [
+        "Sortie de toit Poujoulat (Fourniture & Pose) - Fourniture et pose d'une sortie de toit complète de marque Poujoulat avec solin d'étanchéité adapté à la tuile HP10",
+        ["Poujoulat", "solin", "HP10"],
+      ],
+    ];
+    for (const [designation, kept] of D2026015) {
+      const label = supplierLineLabel(designation);
+      for (const k of kept) expect(label, label).toContain(k);
+      expect(label).not.toMatch(/fourniture|lame d'air/i);
+    }
+    expect(supplierLineLabel(D2026015[1]![0])).toBe("Contre-lattage en liteaux 27x40 (contre-lattes en liteaux de section 27x40 mm)");
     // La mention « (Fourniture & Pose) » du devis client ne part pas chez le fournisseur.
     expect(purchaseLabel("Faîtage (Fourniture & Pose)")).toBe("Faîtage");
     expect(purchaseLabel("Couverture en tuiles terre cuite HP10 rouge (Fourniture & Pose)")).toBe("Couverture en tuiles terre cuite HP10 rouge");

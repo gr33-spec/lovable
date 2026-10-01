@@ -16,3 +16,4 @@ export { containsKeyword, type MaterialFamily, type CompanionRule } from "./trad
 export * from "./takeoff/validation.js";
 export * from "./takeoff/extraction.js";
 export * from "./referential/index.js";
+export { keyCharacteristics, suppliedObject } from "./takeoff/characteristics.js";

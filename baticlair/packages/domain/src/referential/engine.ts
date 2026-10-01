@@ -200,6 +200,24 @@ export function computeWorkItem(ref: Referential, input: WorkItemInput, options:
   return { workItemId: work.id, referentialVersion: ref.version, needs, nextQuestion };
 }
 
+/**
+ * Tout le CHANTIER : chaque ouvrage calculé, et une seule prochaine question
+ * pour l'ensemble (celle qui débloque le plus de besoins demandés par le
+ * devis ; une même question n'est posée qu'une fois, même si plusieurs
+ * ouvrages en ont besoin).
+ */
+export function computeChantier(
+  ref: Referential,
+  inputs: WorkItemInput[],
+  options: EngineOptions = {},
+): { workItems: WorkItemResult[]; nextQuestion: Question | null; questionsPending: string[] } {
+  const workItems = inputs.map((i) => computeWorkItem(ref, i, options));
+  const asked = workItems.flatMap((w) => w.needs.filter((n) => n.question && n.origin !== "suggested").map((n) => n.question!));
+  const count = (key: string) => asked.filter((q) => q.key === key).length;
+  const nextQuestion = asked.reduce<Question | null>((best, q) => (!best || count(q.key) > count(best.key) ? q : best), null);
+  return { workItems, nextQuestion, questionsPending: [...new Set(asked.map((q) => q.key))] };
+}
+
 function provenanceLine(p: { source: string; verification: { status: string; verifiedAt?: string } }, sources: Map<string, Source>): Pick<TraceLine, "from" | "verified" | "url"> {
   const s = sources.get(p.source);
   const verified = p.verification.status === "verified";
@@ -269,7 +287,10 @@ function computeNeed(
     }
 
     // 1. Le produit : écrit sur le devis, confirmé, ou habituel ; sinon UNE question.
-    if (!product) {
+    //    Si la règle n'utilise AUCUNE caractéristique du produit (2 descentes × 4 m = 8 m de tube),
+    //    le besoin se calcule quand même : seule la conversion en unités de vente attend le produit.
+    const usesProduct = formulaVariables(parseFormula(rule.formula)).some((v) => v.startsWith(`${slot.key}.`));
+    if (!product && usesProduct) {
       const candidates = ref.products.filter((p) => p.family === slot.family);
       if (candidates.length === 0) throw new Stop({ status: "unknown", reason: `Calcul impossible sans les données du produit (${slot.label}).` });
       throw new Stop({
@@ -282,7 +303,7 @@ function computeNeed(
         },
       });
     }
-    if (resolved?.choice.origin === "alias") {
+    if (product && resolved?.choice.origin === "alias") {
       throw new Stop({
         status: "question",
         question: {
@@ -296,7 +317,7 @@ function computeNeed(
         },
       });
     }
-    if (resolved?.choice.origin === "preference") {
+    if (product && resolved?.choice.origin === "preference") {
       trace.push({ label: "Produit", value: product.shortLabel, unit: "", from: "Votre produit habituel", verified: true });
     }
 
@@ -367,12 +388,12 @@ function computeNeed(
     if (!sameDim(raw.dim, needUnit.dim)) throw new FormulaError(`La règle ${rule.id} ne donne pas des ${rule.unit}`);
 
     // 4. Marge : réglage de l'entreprise (produit, puis famille), sinon règle sourcée la plus précise, sinon 0 % dit.
-    const companyRate = input.preferences?.waste?.[product.id] ?? input.preferences?.waste?.[slot.family];
+    const companyRate = (product ? input.preferences?.waste?.[product.id] : undefined) ?? input.preferences?.waste?.[slot.family];
     const wasteRule = ref.wasteRules
       .filter(
         (w) =>
           w.family === slot.family &&
-          (w.product === undefined || w.product === product.id) &&
+          (w.product === undefined || w.product === product?.id) &&
           (w.workItem === undefined || w.workItem === work.id) &&
           (w.verification.status === "verified" || options.acceptDraft),
       )
@@ -401,7 +422,7 @@ function computeNeed(
     }
 
     // 5. Achat : la commande pour la plus petite ET la plus grande valeur possible.
-    const converted = toPurchase(product, need, rule.unit, useFact);
+    const converted = product ? toPurchase(product, need, rule.unit, useFact) : { pending: `Produit à identifier (${slot.label.toLowerCase()}) pour convertir en unités de vente.` };
     const purchaseUnavailable = converted && "pending" in converted ? converted.pending : undefined;
     const purchase = converted && "pending" in converted ? null : converted;
     if (!exact) {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  computeChantier,
   computeWorkItem,
   identifyProducts,
   paramsFromContext,
@@ -226,5 +227,85 @@ describe("cas de référence D-2026-015 : contexte chantier et questions", () =>
     expect(byNeed(r.needs, "contre-liteaux").trace).toContainEqual(
       expect.objectContaining({ label: "Entraxe des chevrons ou fermettes", value: "90", from: "Devis, ligne 1 (« fermettes d'entraxe 90 cm »)" }),
     );
+  });
+});
+
+describe("cas de référence D-2026-015 : chantier complet avec ouvrages composés", () => {
+  // Faits relevés dans le devis (ce que l'extraction devra trouver, avec ses preuves).
+  const facts: ChantierContext["facts"] = [
+    ...CONTEXT.facts,
+    { key: "longueur_faitage", value: "10", unit: "m", evidence: "Devis, ligne 6", origin: "devis" },
+    { key: "longueur_gouttiere", value: "20", unit: "m", evidence: "Devis, ligne 7 (2 × 10 m)", origin: "devis" },
+    { key: "nb_descentes", value: "2", unit: "u", evidence: "Devis, ligne 8 (2 ensembles)", origin: "devis" },
+    { key: "hauteur_descente", value: "4", unit: "m", evidence: "Devis, ligne 8", origin: "devis" },
+    // « 2 jeux de coudes » n'est PAS un nombre de coudes : aucun fait « coudes_par_descente ».
+  ];
+  const work = (id: string) => ROOFING_REFERENTIAL.workItems.find((w) => w.id === id)!;
+  const p = (id: string) => paramsFromContext({ facts }, work(id)).params;
+  type Answers = { tuileOk?: boolean; pureau?: string; faitiere?: string; ecran?: string };
+  const inputs = (a: Answers = {}) => [
+    {
+      workItemId: "couverture-tuiles-emboitement",
+      params: { ...p("couverture-tuiles-emboitement"), ...(a.pureau ? { pureau: { value: a.pureau, unit: "cm", origin: "artisan" as const } } : {}) },
+      products: {
+        tuile: { productId: "edilians-hp10-huguenot", origin: a.tuileOk ? ("artisan" as const) : ("alias" as const) },
+        liteau: { productId: "liteau-sapin-27x40", origin: "devis" as const },
+        contre_liteau: { productId: "liteau-sapin-27x40", origin: "devis" as const },
+      },
+      mentioned: ["ecran", "contre_liteau", "liteau", "tuile"],
+      ...(a.ecran ? { preferences: { products: { ecran: a.ecran } } } : {}),
+    },
+    {
+      workItemId: "faitage",
+      params: p("faitage"),
+      products: a.faitiere ? { faitiere: { productId: a.faitiere, origin: "artisan" as const } } : {},
+      mentioned: ["faitiere", "closoir", "fixation_faitiere"],
+    },
+    { workItemId: "gouttiere", params: p("gouttiere"), products: {}, mentioned: ["profil", "crochet", "naissance"] },
+    { workItemId: "descente", params: p("descente"), products: {}, mentioned: ["tube", "coude", "collier"] },
+  ];
+  const all = (r: ReturnType<typeof computeChantier>) => r.workItems.flatMap((w) => w.needs);
+  const need = (r: ReturnType<typeof computeChantier>, id: string) => all(r).find((n) => n.needId === id)!;
+
+  it("« faîtières ventilées » ne désigne pas la faîtière angulaire 710 : jamais d'identification sans preuve", () => {
+    expect(identifyProducts(line("ligne 6").designation, ROOFING_REFERENTIAL, "ridge_tile").candidates).toEqual([]);
+  });
+
+  it("aujourd'hui : une seule question, et seulement pour un calcul que BatiClair sait terminer", () => {
+    const r = computeChantier(ROOFING_REFERENTIAL, inputs());
+    // Les règles en attente ne déclenchent AUCUNE question (inutile de demander le pureau si on ne peut pas calculer).
+    expect(r.questionsPending).toEqual(["product:faitiere"]);
+    expect(r.nextQuestion).toMatchObject({ kind: "choose_product", options: [{ label: "Faîtières angulaires 710" }] });
+    // Si l'artisan confirme le modèle 710 : 10 m × 3 pièces/ml (Edilians, vérifié) = 30 faîtières, calcul certain.
+    const answered = computeChantier(ROOFING_REFERENTIAL, inputs({ faitiere: "edilians-faitiere-angulaire-710" }));
+    expect(need(answered, "faitieres")).toMatchObject({ status: "calculated", quantity: { value: "30" }, purchase: { order: { count: "30" } }, provisional: false });
+    expect(answered.questionsPending).toEqual([]);
+  });
+
+  it("règles validées : ce qui se calcule, ce qui reste à confirmer, ce qui est impossible", () => {
+    const r = computeChantier(
+      ROOFING_REFERENTIAL,
+      inputs({ tuileOk: true, pureau: "34.3", faitiere: "edilians-faitiere-angulaire-710", ecran: "soprema-sop-ecran-hpv-r2-150x50" }),
+      { acceptDraft: true },
+    );
+    const row = (id: string) => {
+      const n = need(r, id);
+      return [n.status, n.quantity?.value ?? (n.quantityRange ? `${n.quantityRange.min}–${n.quantityRange.max}` : null), n.purchase?.order.count ?? null];
+    };
+    expect(row("tuiles")).toEqual(["calculated", "1305.43", "1306"]);
+    expect(row("liteaux")).toEqual(["calculated", "349.85", "88"]);
+    expect(row("contre-liteaux")).toEqual(["calculated", "133.33", "34"]);
+    expect(row("ecran")).toEqual(["calculated", "128.57–138.46", "2"]);
+    expect(row("faitieres")).toEqual(["calculated", "30", "30"]);
+    // Besoin certain d'après le devis, produit pas encore identifié : la conversion attend.
+    for (const [id, qty] of [["closoir", "10"], ["profil", "20"], ["naissances", "2"], ["tubes", "8"]] as const) {
+      expect(row(id)).toEqual(["calculated", qty, null]);
+      expect(need(r, id).purchaseUnavailable).toMatch(/Produit à identifier/);
+    }
+    // Impossible sans la fiche du système (espacement maximal des crochets et des colliers).
+    expect(need(r, "crochets")).toMatchObject({ status: "unknown", reason: "Calcul impossible sans les données du produit (Crochets)." });
+    expect(need(r, "colliers")).toMatchObject({ status: "unknown", reason: "Calcul impossible sans les données du produit (Colliers)." });
+    // « 2 jeux de coudes par descente » : ambigu, la seule question qui reste.
+    expect(r.questionsPending).toEqual(["param:coudes_par_descente"]);
   });
 });

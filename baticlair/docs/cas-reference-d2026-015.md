@@ -184,3 +184,120 @@ Tuiles chatières HP10 rouge               10 pièces
 Sortie de toit Poujoulat + solin HP10     1 (modèle à préciser)
 Rives, faîtage, gouttière, descentes      à calculer dès réception des fiches (§ 6)
 ```
+
+
+---
+
+## Rejouée n° 2 (2026-10-01, après les sources officielles relayées par le fondateur)
+
+**Accès aux sources** : edilians.com, particuliers.soprema.fr et nicoll.fr
+sont **bloqués par le réseau de l'environnement de développement**. Les
+données saisies sont celles que tu as relevées sur les documents officiels :
+- HP 10 (2024) : largeur utile, 9,9 à 12 tuiles/m², 240 tuiles/palette ;
+- faîtière angulaire 710 : 3 pièces/ml ;
+- SOP'ÉCRAN : 1,50 × 50 m = 75 m².
+
+Rien d'autre n'a été saisi : pas de longueur de barre, pas d'espacement de
+crochets, pas de conditionnement de liteaux.
+
+### Ce qui a changé
+
+1. **Aucune information du devis ne se perd** dans la liste fournisseur.
+   L'intitulé est court, mais il garde l'objet fourni (« faîtières
+   ventilées ») et toutes les caractéristiques : HPV, rouge, terre cuite,
+   grand moule, PVC, de 25, sable, demi-ronde, Ø80, hauteur 4 m,
+   « crochets et naissances compris », « avec closoir ventilé et accessoires
+   de fixation », Poujoulat, solin HP10. La phrase de pose (« pour la
+   création de la lame d'air ») disparaît. C'est un test permanent.
+2. **Ouvrages composés**. Chaque matériau est justifié par le devis :
+   - faîtage → faîtières + closoir (+ fixations : aucune donnée) ;
+   - gouttière → profil + crochets + naissances ;
+   - descente → tubes + coudes + colliers.
+3. **Un besoin certain n'attend plus le produit.** 10 ml de closoir, 20 ml
+   de gouttière, 2 naissances, 8 ml de tube : ces chiffres viennent du
+   devis. Seule la conversion en unités de vente attend le produit.
+4. **Chantier complet.** Tous les ouvrages sont calculés ensemble, une seule
+   question à la fois. **En production, aucune question pour un calcul que
+   BatiClair ne sait pas encore terminer** : il ne demande pas le pureau
+   tant que la règle des tuiles n'est pas validée.
+
+### Avant → après
+
+| | Avant (rejouée n° 1) | Après (aujourd'hui, en production) | Après validation des règles en attente |
+|---|---|---|---|
+| Lignes calculées | 0 | **1** : faîtières, 10 m × 3/ml = **30 pièces** (si l'artisan confirme le modèle 710) | **9 besoins** : tuiles 1 306 · liteaux 349,85 ml · contre-lattes 133,33 ml · écran 2 rouleaux · faîtières 30 · closoir 10 ml · gouttière 20 ml · naissances 2 · tubes 8 ml |
+| Questions | 2 (+1 au 1er chantier) | **1** : le modèle de faîtière | **4** : modèle HP10, pureau, modèle de faîtière, coudes par descente (+ l'écran au 1er chantier) |
+| Impossible | rives, faîtage, gouttière, descentes, sortie | crochets, colliers, fixations de faîtage, rives, chatière exacte, sortie Poujoulat | crochets et colliers (espacement Nicoll), fixations de faîtage, rives, sortie Poujoulat (modèle, diamètre) |
+
+**Pourquoi chaque question reste :**
+- **Modèle de tuile** : « type HP10 » ne cite ni la marque ni la référence.
+- **Pureau** : « pureau adapté » n'est pas une valeur, et il change la
+  commande de 1 191 à 1 445 tuiles.
+- **Modèle de faîtière** : le devis demande des faîtières **ventilées**.
+  Rien ne prouve que la faîtière angulaire 710 l'est : **BatiClair ne la
+  choisit pas à ta place** (test permanent).
+- **Coudes** : « 2 jeux de coudes par descente » n'est pas un nombre de
+  coudes. C'est la seule ambiguïté du devis.
+- **Écran** : au premier chantier seulement.
+
+### Règles en attente : ce qu'il faut pour les valider
+
+| Règle | Nature | Comment la valider |
+|---|---|---|
+| Tuiles = surface ÷ (largeur utile × pureau) | règle fabricant | **Déjà prouvée** : elle redonne les 9,9 à 12 tuiles/m² Edilians (test). Ton OK sur cette preuve suffit. |
+| Liteaux = surface ÷ pureau | règle fabricant | **Déjà prouvée** par le tableau Edilians 3,22 / 2,91 / 2,66 ml/m² (test). Ton OK sur cette preuve suffit. |
+| Contre-lattes = une file par fermette | pose | Guide de pose SOP'ÉCRAN (site bloqué) ou ta validation de pratique |
+| Écran = surface × largeur ÷ (largeur − recouvrement) | géométrie + recouvrements Soprema | Ta validation de pratique (les recouvrements sont déjà sourcés) |
+| Closoir = longueur du faîtage | pratique | Ta validation de pratique |
+| Gouttière = longueur ; 1 naissance par descente | pratique (ou fiche Nicoll) | Ta validation, ou la fiche Nicoll |
+| Tubes = nombre de descentes × hauteur | pratique | Ta validation (sans déduire les coudes) |
+
+### Documents encore nécessaires (sites bloqués depuis l'environnement)
+
+1. **Nicoll, gouttière LG25 et descente Ø80 (système)** : longueur des barres
+   et des tubes, **espacement maximal des crochets et des colliers**, et un
+   « jeu de coudes ». Ce sont des PDF ou des captures de pages
+   nicoll.fr.
+2. **Edilians HP 10 (2024)**, pages accessoires : faîtière **ventilée**
+   (référence et pièces au mètre), rives gauche et droite, fixations de
+   faîtage, chatière. Le PDF à fournir est
+   `205_fag_hp_10_huguenot_19042024_bd.pdf`.
+3. **Poujoulat** : rien à chercher tant que le devis ne dit ni le modèle ni
+   le diamètre. C'est une information **manquante du chantier**, pas une
+   donnée de référentiel.
+4. **Liteaux** : la fiche du négoce, quand tu l'auras. En attendant, les ml
+   sont calculés et le conditionnement reste à confirmer.
+
+### Liste envoyée aujourd'hui au fournisseur (code réel, sans perte)
+
+```
+- Écran de sous-toiture respirant (écran de sous-toiture HPV, entraxe 90 cm) : pour une surface de 120 m² (quantité à calculer)
+- Contre-lattage en liteaux 27x40 (contre-lattes en liteaux de section 27x40 mm) : pour une surface de 120 m² (quantité à calculer)
+- Lattage en liteaux 27x40 pour tuiles HP10 (liteaux de section 27x40 mm) : pour une surface de 120 m² (quantité à calculer)
+- Couverture en tuiles terre cuite HP10 rouge (tuiles en terre cuite grand moule type HP10 de coloris rouge) : pour une surface de 120 m² (quantité à calculer)
+- Rives de toit (tuiles de rive) : pour une longueur de 24 m (quantité à calculer)
+- Faîtage (faîtières ventilées, avec closoir ventilé et accessoires de fixation) : pour une longueur de 10 m (quantité à calculer)
+- Gouttière PVC de 25 sable (gouttières demi-ronde de 25 en PVC de coloris sable, 2×10 m, crochets et naissances compris) : 20 m
+- Descente d'eau pluviale PVC Ø80 avec coudes (ensemble de descente d'eau pluviale en PVC Ø80 coloris sable, hauteur 4 m, comprenant 2 jeux de coudes et les colliers de fixation par descente) : 2 unités
+- Chatières de ventilation (tuiles chatières de ventilation adaptées au modèle HP10) : 10 unités
+- Sortie de toit Poujoulat (sortie de toit complète de marque Poujoulat, HP10, avec solin d'étanchéité adapté à la tuile HP10) : 1 unité
+```
+
+### La liste d'achat visée (après validation des règles et réponses)
+
+```
+Tuiles terre cuite HP10 rouge         1 306 pièces   ≈ 6 palettes
+Liteaux 27×40                         349,85 ml      (conditionnement à confirmer)
+Contre-lattes 27×40                   133,33 ml      (conditionnement à confirmer)
+Écran HPV SOP'ÉCRAN 1,50 × 50 m       2 rouleaux
+Faîtières (modèle confirmé)           30 pièces
+Closoir ventilé                       10 ml          (produit à préciser)
+Gouttière PVC demi-ronde 25 sable     20 ml          (longueur des barres : fiche Nicoll)
+Naissances LG25 Ø80 sable             2
+Tubes PVC Ø80 sable                   8 ml           (longueur des tubes : fiche Nicoll)
+Coudes Ø80 sable                      selon votre réponse
+Crochets, colliers                    impossibles sans l'espacement Nicoll
+Rives HP10 gauche/droite              impossibles sans les fiches accessoires
+Chatières HP10 rouge                  10 pièces      (référence à préciser)
+Sortie de toit Poujoulat + solin HP10 1              (modèle et diamètre manquants)
+```
