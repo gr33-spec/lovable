@@ -414,8 +414,8 @@ fictives uniquement.
   fournisseurs. L'IA lit en parallèle tous les devis reçus et pas encore
   lus ; la comparaison s'affiche ensuite.
 - **Décompte** : le lot compte pour **1 analyse**, quel que soit le nombre
-  de devis (rien si aucun n'a pu être lu ; un devis en échec se relance
-  sans décompte supplémentaire s'il est relu avec un autre lot… ou seul).
-  Un devis arrivé plus tard se lit avec un nouvel appui (1 analyse).
+  de devis ; rien n'est décompté si aucun n'a pu être lu. Un devis arrivé
+  plus tard, ou qui n'a pas pu être lu, se lit avec un nouvel appui
+  (nouveau lot, 1 analyse).
 - **Coût réel** : chaque lecture reste mesurée (AiExecution) pour suivre
   la marge ; seul le compteur des paliers change.
