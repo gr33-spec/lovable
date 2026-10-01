@@ -400,5 +400,8 @@ fictives uniquement.
   un autre oublie un article, totaux justes au centime.
 - **Aucune exception dans le parcours** : lecture IA, comparaison et
   décompte des analyses sont les mêmes que pour un vrai chantier. Les données
-  fictives se suppriment ou s'archivent comme les autres. Seuls les
-  fournisseurs fictifs peuvent « répondre » seuls.
+  fictives se suppriment ou s'archivent comme les autres.
+- **Tester sur un vrai chantier** : sous un vrai fournisseur, un lien discret
+  « Test : simuler un devis fictif » range un devis établi sur la liste
+  demandée, marqué « DEVIS FICTIF (TEST) » (titre et nom de fichier). Il se
+  retire comme un autre (« Retirer ce devis ») quand le vrai devis arrive.

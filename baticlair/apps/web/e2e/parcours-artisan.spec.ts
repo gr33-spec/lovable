@@ -343,6 +343,9 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await expect(pointp.getByText(/Bonjour Paul,/)).toBeVisible();
   await expect(progress.getByRole("link", { name: "Envoyer la demande" })).toBeVisible();
 
+  // Pour tester sans attendre, un devis fictif peut être simulé (lien discret).
+  await expect(pointp.getByRole("button", { name: "Test : simuler un devis fictif" })).toBeVisible();
+
   // Le devis du fournisseur arrive : on le dépose sur sa ligne.
   await pointp.getByLabel("Ajouter son devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
   await expect(pointp.getByText("Devis reçu")).toBeVisible();
