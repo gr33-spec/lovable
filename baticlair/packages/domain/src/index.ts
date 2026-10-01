@@ -22,3 +22,4 @@ export { articleScope, isPlaceTitle } from "./takeoff/sections.js";
 export * from "./trust/assessment.js";
 export * from "./trust/preferences.js";
 export * from "./trust/corrections.js";
+export * from "./trust/artisan-view.js";

@@ -512,7 +512,8 @@ function computeNeed(
     } else if (wasteRule) {
       trace.push({ label: "Marge recommandée", value: wasteRule.rate.replace(".", ","), unit: "%", origin: "referential", ...provenanceLine(wasteRule, sources) });
     } else {
-      trace.push({ label: "Marge", value: "0", unit: "%", from: "Aucune marge réglée", verified: true });
+      // Ni règle sourcée, ni réglage : 0 %, et c'est dit (c'est un réglage de l'entreprise, ici vide).
+      trace.push({ label: "Marge", value: "0", unit: "%", from: "Aucune marge réglée par votre entreprise", origin: "company", verified: true });
     }
 
     // 5. Achat : la commande pour la plus petite ET la plus grande valeur possible.

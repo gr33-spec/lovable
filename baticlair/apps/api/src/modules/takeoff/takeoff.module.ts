@@ -5,7 +5,7 @@ import type { AppLogger } from "../../platform/logging/logger.js";
 import { CONFIG, LOGGER } from "../../platform/tokens.js";
 import { AiUsageModule, AiUsageRecorder, AnalysisMeter } from "../ai-usage/index.js";
 import { DOCUMENT_REPOSITORY, DocumentAiInput, DocumentsModule, type DocumentRepository } from "../documents/index.js";
-import { CorrectionJournal, LearningModule } from "../learning/index.js";
+import { CompanyMemory, CorrectionJournal, LearningModule } from "../learning/index.js";
 import { TenancyModule } from "../tenancy/index.js";
 import { TAKEOFF_EXTRACTOR, type TakeoffExtractor } from "./application/takeoff-extractor.js";
 import { TAKEOFF_REPOSITORY, type TakeoffRepository } from "./application/takeoff.repository.js";
@@ -44,6 +44,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
         recorder: AiUsageRecorder,
         aiInput: DocumentAiInput,
         journal: CorrectionJournal,
+        memory: CompanyMemory,
         logger: AppLogger,
       ) =>
         new TakeoffService(
@@ -54,9 +55,10 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
           recorder,
           aiInput,
           journal,
+          memory,
           (error) => logger.error({ err: error }, "takeoff: coût IA non enregistré"),
         ),
-      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, TAKEOFF_EXTRACTOR, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, LOGGER],
+      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, TAKEOFF_EXTRACTOR, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER],
     },
   ],
 })

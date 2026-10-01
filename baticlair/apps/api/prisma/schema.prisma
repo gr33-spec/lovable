@@ -436,6 +436,8 @@ model Takeoff {
   model         String
   /// Remarques de l'IA sur le document (page illisible, ligne ambiguë…).
   notes         Json          @default("[]")
+  /// Réponses de l'artisan aux questions du calcul, pour CE chantier (« product:tuile », « param:pureau »).
+  answers       Json          @default("{}")
   createdById   String?
   createdAt     DateTime      @default(now())
   validatedAt   DateTime?

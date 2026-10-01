@@ -1,7 +1,14 @@
 import {
+  artisanView,
   assessTakeoffLine,
+  computeWithAnswers,
+  planQuote,
   reviewExtractedTakeoff,
+  ROOFING_REFERENTIAL,
+  slotsGivenByQuote,
   tradeProfile,
+  type ArtisanView,
+  type EngineAnswer,
   type CorrectionAction,
   type LineSnapshot,
   type LineValidation,
@@ -11,7 +18,7 @@ import {
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { AiUsageRecorder, AnalysisMeter } from "../../ai-usage/index.js";
 import type { DocumentAiInput, DocumentRepository, DocumentWithProcessing, PreparedDocument } from "../../documents/index.js";
-import type { CorrectionJournal } from "../../learning/index.js";
+import type { CompanyMemory, CorrectionJournal } from "../../learning/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { TAKEOFF_PROMPT } from "./prompt.js";
 import type { ExtractionAttempt, TakeoffExtractor } from "./takeoff-extractor.js";
@@ -23,6 +30,8 @@ const MAX_ATTEMPTS = 2;
 export interface ReviewedTakeoff {
   takeoff: TakeoffRecord;
   validation: TakeoffValidation;
+  /** Ce que voit l'artisan : compteurs ✓/⚠/?, décisions regroupées, éléments prêts et leur preuve. */
+  view: ArtisanView;
 }
 
 
@@ -42,6 +51,7 @@ export class TakeoffService {
     private readonly recorder: AiUsageRecorder,
     private readonly aiInput: DocumentAiInput,
     private readonly journal: CorrectionJournal,
+    private readonly memory: CompanyMemory,
     private readonly onRecordFailure: (error: unknown) => void = () => {},
   ) {}
 
@@ -205,19 +215,69 @@ export class TakeoffService {
   }
 
   /**
+   * UNE décision de l'artisan qui règle toutes les lignes visées en un geste :
+   * « Oui, à la pièce » (unité « u » sur les seules lignes SANS unité, puis
+   * gardées) ou « Oui, tels qu'écrits » / « C'est bon » (gardées). Chaque ligne
+   * est journalisée (avant / après).
+   */
+  async decide(tenant: TenantContext, takeoffId: string, input: { action: "pieces" | "keep"; lineIds: string[]; pieceLineIds: string[] }): Promise<ReviewedTakeoff> {
+    const takeoff = await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
+    const before = await this.review(tenant, takeoff);
+    const own = new Map(takeoff.lines.map((l) => [l.id, l]));
+    const lineIds = [...new Set(input.lineIds)].filter((id) => own.has(id));
+    if (lineIds.length === 0) throw notFound("TakeoffLine");
+    const pieces = input.action === "pieces" ? [...new Set(input.pieceLineIds)].filter((id) => lineIds.includes(id) && !own.get(id)!.unitRaw?.trim()) : [];
+    for (const id of pieces) {
+      const l = own.get(id)!;
+      await this.takeoffs.updateLine(tenant, id, { designation: l.designation, quantityRaw: l.quantityRaw, unitRaw: "u", reference: l.reference });
+    }
+    for (const id of lineIds) await this.takeoffs.confirmLine(tenant, id);
+    const after = await this.reload(tenant, takeoff.id);
+    for (const id of pieces) await this.recordGesture(tenant, "edit", id, before, after);
+    for (const id of lineIds) await this.recordGesture(tenant, "confirm", id, before, after);
+    return after;
+  }
+
+  /**
+   * Réponse à une question du calcul, pour CE chantier : elle sert à tous les
+   * ouvrages qui en dépendent, et la question n'est plus reposée.
+   */
+  async answer(tenant: TenantContext, takeoffId: string, key: string, value: EngineAnswer): Promise<ReviewedTakeoff> {
+    const takeoff = await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
+    const previous = takeoff.answers[key];
+    await this.takeoffs.setAnswer(tenant, takeoff.id, key, value);
+    const after = await this.reload(tenant, takeoff.id);
+    const text = (v: EngineAnswer | undefined) => (v === undefined ? null : v === null ? "aucun" : typeof v === "string" ? v : `${v.value} ${v.unit}`);
+    await this.journal.record(tenant, {
+      projectId: takeoff.projectId,
+      takeoffId: takeoff.id,
+      takeoffLineId: null,
+      action: "answer",
+      before: previous === undefined ? null : { designation: key, quantity: null, unit: null, reference: text(previous) },
+      after: { designation: key, quantity: null, unit: null, reference: text(value) },
+      documentExcerpt: [],
+      context: { trade: takeoff.trade, promptVersion: takeoff.promptVersion },
+    });
+    return after;
+  }
+
+  /**
    * L'artisan valide : seulement quand aucune ligne n'est bloquante (quantité
    * absente ou illisible) et que chaque doute a été vu (corrigé ou confirmé).
    * Rien ne part chez un fournisseur avec un doute non levé.
    */
   async validate(tenant: TenantContext, takeoffId: string): Promise<ReviewedTakeoff> {
     const takeoff = await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
-    const { validation } = await this.review(tenant, takeoff);
+    const { validation, view } = await this.review(tenant, takeoff);
     if (validation.counts.blocking > 0) {
       throw validationFailed("Blocking issues remain", { reason: "blocking_issues", count: validation.counts.blocking });
     }
     if (validation.counts.toVerify > 0) {
       throw validationFailed("Lines to check remain", { reason: "lines_to_check", count: validation.counts.toVerify });
     }
+    // Un ⚠ sur une ligne du devis attend une décision (article inconnu…) : rien ne part sans elle.
+    const open = view.items.filter((i) => i.kind === "line" && i.state === "to_confirm").length;
+    if (open > 0) throw validationFailed("Decisions remain", { reason: "decisions_remaining", count: open });
     await this.takeoffs.setStatus(tenant, takeoff.id, "validated");
     return this.reload(tenant, takeoff.id);
   }
@@ -268,7 +328,20 @@ export class TakeoffService {
       source,
       profile,
     );
-    return { takeoff, validation };
+    // Ce que voit l'artisan : la lecture, plus le calcul des matériaux là où BatiClair sait le faire
+    // (données VÉRIFIÉES seulement), avec les réponses de ce chantier et les habitudes de l'entreprise.
+    const lines = takeoff.lines.map((l) => ({
+      id: l.id,
+      designation: l.designation,
+      quantity: l.quantityRaw,
+      unit: l.unitRaw,
+      section: l.section,
+      confirmed: l.confirmed,
+      enteredByArtisan: l.origin === "manual" || l.edited,
+    }));
+    const plan = planQuote(lines.map((l) => ({ ref: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, section: l.section })), ROOFING_REFERENTIAL, profile);
+    const engine = plan.inputs.length > 0 ? computeWithAnswers(ROOFING_REFERENTIAL, plan, takeoff.answers, await this.memory.forEngine(tenant), {}, slotsGivenByQuote(plan, validation)) : { needs: [], questions: [], declined: [] };
+    return { takeoff, validation, view: artisanView(lines, validation, engine) };
   }
 
   /** Ce que l'IA sait du métier : son nom et ses familles de matériaux habituelles (vocabulaire). */

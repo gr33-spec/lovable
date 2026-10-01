@@ -132,7 +132,9 @@ describe("liste de matériaux tirée du devis client (IA simulée)", () => {
       current = (await agent.post(`/v1/takeoff-lines/${line.id}/confirm`).expect(200)).body;
     }
     const crochets = current.lines.find((l: { reference: string }) => l.reference === "CRO-INOX");
-    expect(crochets).toMatchObject({ confirmed: true, status: "certain", issues: [] });
+    expect(crochets).toMatchObject({ confirmed: true, status: "certain" });
+    // Plus aucun doute à trancher ; le contenu du paquet reste une note pour le fournisseur.
+    expect(crochets.issues.filter((i: { severity: string }) => i.severity !== "info")).toEqual([]);
     expect(current.counts.toVerify).toBe(0);
     expect((await agent.post(`/v1/takeoffs/${draft.id}/validate`)).body.status).toBe("validated");
 

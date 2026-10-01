@@ -29,6 +29,7 @@ function toRecord(row: Row): TakeoffRecord {
     promptVersion: row.promptVersion,
     model: row.model,
     notes: strings(row.notes),
+    answers: answers(row.answers),
     createdAt: row.createdAt,
     validatedAt: row.validatedAt,
     lines: row.lines.map((l) => ({
@@ -47,6 +48,19 @@ function toRecord(row: Row): TakeoffRecord {
       confirmed: l.confirmedAt !== null,
     })),
   };
+}
+
+function answers(value: unknown): TakeoffRecord["answers"] {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const out: TakeoffRecord["answers"] = {};
+  for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+    if (v === null) out[k] = null;
+    else if (typeof v === "string") out[k] = v;
+    else if (v && typeof v === "object" && typeof (v as { value?: unknown }).value === "string" && typeof (v as { unit?: unknown }).unit === "string") {
+      out[k] = { value: (v as { value: string }).value, unit: (v as { unit: string }).unit };
+    }
+  }
+  return out;
 }
 
 export class PrismaTakeoffRepository implements TakeoffRepository {
@@ -119,6 +133,15 @@ export class PrismaTakeoffRepository implements TakeoffRepository {
     await this.prisma.takeoffLine.updateMany({
       where: { id: lineId, takeoff: { companyId: tenant.companyId } },
       data: { ...fields, edited: true, confirmedAt: null },
+    });
+  }
+
+  async setAnswer(tenant: TenantContext, id: string, key: string, value: string | { value: string; unit: string } | null): Promise<void> {
+    const row = await this.prisma.takeoff.findFirst({ where: { id, companyId: tenant.companyId }, select: { answers: true } });
+    if (!row) return;
+    await this.prisma.takeoff.updateMany({
+      where: { id, companyId: tenant.companyId },
+      data: { answers: { ...answers(row.answers), [key]: value } },
     });
   }
 

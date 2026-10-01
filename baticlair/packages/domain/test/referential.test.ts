@@ -178,7 +178,7 @@ describe("moteur : ouvrage → besoins → achat", () => {
     const trace = need(r, "tuiles").trace;
     expect(trace.find((t) => t.label === "Surface de toiture")).toMatchObject({ value: "120", from: "Devis, ligne 4" });
     expect(trace.find((t) => t.label.startsWith("Largeur utile"))).toMatchObject({ value: "0,268", unit: "m", verified: true });
-    expect(trace.find((t) => t.label === "Marge")).toMatchObject({ value: "0", from: "Aucune marge réglée" });
+    expect(trace.find((t) => t.label === "Marge")).toMatchObject({ value: "0", from: "Aucune marge réglée par votre entreprise", origin: "company" });
     expect(need(r, "tuiles").exclusions).toMatch(/Hors tuiles de rive/);
   });
 

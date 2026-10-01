@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch, Post, Us
 import { z } from "zod";
 import { ZodPipe } from "../../../platform/http/zod.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
+import type { ArtisanView } from "@baticlair/domain";
 import { TakeoffService, type ReviewedTakeoff } from "../application/takeoff.service.js";
 import { artisanNotes } from "../../../platform/ai/artisan-notes.js";
 
@@ -21,13 +22,57 @@ const lineBody = z.object({
   reference: optionalText(80),
 });
 
-function toDto({ takeoff, validation }: ReviewedTakeoff) {
+/**
+ * Ce que reçoit l'écran : compteurs, décisions, ouvrages demandés pour leur
+ * mesure, et pour chaque élément sa PREUVE (« Voir le calcul ») — critères et
+ * origines, calcul détaillé pour un besoin calculé. Aucun pourcentage.
+ */
+function viewDto(view: ArtisanView) {
+  return {
+    counts: { verified: view.counts.verified, toConfirm: view.counts.to_confirm, missing: view.counts.missing },
+    decisions: view.decisions.map((d) => ({
+      key: d.key,
+      state: d.state === "to_confirm" ? "to_confirm" : "missing",
+      title: d.title,
+      text: d.text,
+      lineIds: d.lineIds,
+      pieceLineIds: d.pieceLineIds ?? [],
+      primary: d.primary,
+      secondary: d.secondary,
+      question: d.question
+        ? { key: d.question.key, kind: d.question.kind, unit: d.question.unit ?? null, hint: d.question.hint ?? null, options: d.question.options ?? [] }
+        : null,
+    })),
+    measures: view.measures,
+    items: view.items.map((i) => ({
+      kind: i.kind,
+      id: i.id,
+      label: i.label,
+      quantity: i.quantity,
+      state: i.state === "to_confirm" ? "to_confirm" : i.state,
+      reason: i.reason,
+      proof: i.assessment.criteria.map((c) => ({ key: c.key, status: c.status, detail: c.detail, origin: c.origin ?? null, comparisonRisk: c.comparisonRisk ?? false })),
+      calculation: i.need
+        ? {
+            slot: i.need.slot,
+            formula: i.need.formula ?? null,
+            exclusions: i.need.exclusions ?? null,
+            productOrigin: i.need.productOrigin ?? null,
+            trace: i.need.trace.map((t) => ({ label: t.label, value: t.value, unit: t.unit, from: t.from, origin: t.origin ?? null, url: t.url ?? null })),
+          }
+        : null,
+    })),
+  };
+}
+
+function toDto({ takeoff, validation, view }: ReviewedTakeoff) {
   const byId = new Map(validation.lines.map((v) => [v.lineId, v]));
   return {
     id: takeoff.id,
     projectId: takeoff.projectId,
     documentId: takeoff.documentId,
     status: takeoff.status,
+    view: viewDto(view),
     model: takeoff.model,
     promptVersion: takeoff.promptVersion,
     notes: artisanNotes(takeoff.notes),
@@ -60,6 +105,21 @@ function toDto({ takeoff, validation }: ReviewedTakeoff) {
     }),
   };
 }
+
+const uuidList = z.array(z.string().uuid()).max(500);
+const decisionBody = z.object({
+  action: z.enum(["pieces", "keep"]),
+  lineIds: uuidList.min(1),
+  pieceLineIds: uuidList.default([]),
+});
+const answerBody = z.object({
+  key: z.string().regex(/^(product|param):[a-z0-9_]{1,40}$/),
+  value: z.union([
+    z.string().trim().max(120),
+    z.object({ value: z.string().trim().regex(/^\d+(?:[.,]\d+)?$/), unit: z.string().trim().min(1).max(10) }),
+    z.null(),
+  ]),
+});
 
 const fields = (b: z.infer<typeof lineBody>) => ({
   designation: b.designation,
@@ -107,6 +167,21 @@ export class TakeoffController {
   @HttpCode(201)
   async addLine(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(lineBody)) body: z.infer<typeof lineBody>) {
     return toDto(await this.takeoffs.addLine(tenant, id, fields(body)));
+  }
+
+  /** Une décision qui règle plusieurs lignes en un geste (« Oui, à la pièce », « Oui, tels qu'écrits »). */
+  @Post("takeoffs/:id/decisions")
+  @HttpCode(200)
+  async decide(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(decisionBody)) body: z.infer<typeof decisionBody>) {
+    return toDto(await this.takeoffs.decide(tenant, id, body));
+  }
+
+  /** Réponse à une question du calcul (produit, donnée du chantier), pour ce chantier. */
+  @Post("takeoffs/:id/answers")
+  @HttpCode(200)
+  async answer(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(answerBody)) body: z.infer<typeof answerBody>) {
+    const value = body.value && typeof body.value === "object" ? { value: body.value.value.replace(",", "."), unit: body.value.unit } : body.value;
+    return toDto(await this.takeoffs.answer(tenant, id, body.key, value));
   }
 
   @Post("takeoffs/:id/validate")

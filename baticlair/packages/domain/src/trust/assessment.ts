@@ -53,6 +53,12 @@ export type OrderImpact = "product" | "quantity" | "packaging" | "compatibility"
 export interface Criterion {
   key: CriterionKey;
   status: CriterionStatus;
+  /**
+   * D'où vient le doute, quand il en a un : le contrôle de lecture
+   * (« UNITS_ABSENT », « MULTIPLIER_IN_DESIGNATION »…), « unknown_article »
+   * ou « work_measure ». Sert à regrouper les décisions de l'artisan.
+   */
+  cause?: string;
   /** Une phrase pour « Voir le calcul ». */
   detail: string;
   origin?: Origin;
@@ -156,6 +162,7 @@ export function assessTakeoffLine(v: LineValidation, ctx: LineContext = {}): Ass
     const resolved = ctx.confirmedByArtisan && map.status === "to_confirm";
     criteria.push({
       key: map.key,
+      cause: issue.code,
       status: resolved ? "established" : map.status,
       detail: resolved ? `${issue.message} — confirmé pour ce chantier.` : issue.message,
       origin: resolved ? "project" : readingOrigin,
@@ -171,6 +178,7 @@ export function assessTakeoffLine(v: LineValidation, ctx: LineContext = {}): Ass
     // Pas de famille connue : BatiClair ne sait pas si c'est un article à commander. Cela change la commande.
     criteria.push({
       key: "work_item",
+      cause: "unknown_article",
       status: ctx.confirmedByArtisan ? "established" : "to_confirm",
       detail: ctx.confirmedByArtisan ? "Article gardé tel qu'écrit pour ce chantier." : "Article non reconnu : à commander tel qu'écrit ?",
       origin: ctx.confirmedByArtisan ? "project" : "devis",
@@ -180,6 +188,7 @@ export function assessTakeoffLine(v: LineValidation, ctx: LineContext = {}): Ass
     // Mesure d'ouvrage : la quantité à commander n'est PAS établie. Jamais ✓ : on ne la fait pas passer pour un achat.
     criteria.push({
       key: "work_item",
+      cause: "work_measure",
       status: "missing",
       detail: "Quantité à commander non calculée : la mesure de l'ouvrage est envoyée au fournisseur.",
       origin: "referential",

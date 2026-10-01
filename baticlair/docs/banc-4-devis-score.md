@@ -16,11 +16,11 @@ identiques (un lieu différent ne change pas l'article ; une marque ou un lot di
 
 | Devis | Lignes matériaux | A — Compréhension | B — Quantitatif exact | Besoins identifiés | Questions | Inconnus | Erreurs | Lignes envoyées (avant → après regroupement) |
 |---|---|---|---|---|---|---|---|---|
-| Morellec — électricité + plomberie (scanné) | 152 | **80 %** (122) | **13 %** (19) | 73 | 3 | 79 | 12 | 155 → 71 |
+| Morellec — électricité + plomberie (scanné) | 152 | **80 %** (122) | **13 %** (19) | 73 | 2 | 79 | 12 | 155 → 71 |
 | Lézardrieux — plâtrerie, isolation | 21 | **86 %** (18) | **5 %** (1) | 2 | 0 | 19 | 0 | 24 → 24 |
 | Piscine | 34 | **0 %** (0) | **0 %** (0) | 0 | 1 | 34 | 0 | 37 → 37 |
 | D-2026-011 — salle de bain | 15 | **100 %** (15) | **60 %** (9) | 10 | 1 | 5 | 0 | 15 → 15 |
-| **Total** | **222** | **70 %** (155) | **13 %** (29) | 85 | 5 | 137 | 12 | 231 → 147 |
+| **Total** | **222** | **70 %** (155) | **13 %** (29) | 85 | 4 | 137 | 12 | 231 → 147 |
 
 Référence couverture :
 
@@ -87,7 +87,6 @@ Chaque devis doit garder au moins ses scores A et B de l'étape précédente, sa
 
 ### Morellec — électricité + plomberie (scanné)
 
-- La même ligne apparaît deux fois de suite : doublon ou quantités à additionner ?
 - 29 lignes sans unité : ce devis compte-t-il en pièces ?
 - « FIXATION INOX WC BIDET 6X70 X2, et Manchon de racc » : La désignation indique « x2 » : combien d'articles commander au total ?
 

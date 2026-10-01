@@ -38,6 +38,8 @@ export interface TakeoffRecord {
   promptVersion: number;
   model: string;
   notes: string[];
+  /** Réponses aux questions du calcul pour ce chantier : produit, valeur, « aucun » (null), « pas celui-ci » (""). */
+  answers: Record<string, string | { value: string; unit: string } | null>;
   createdAt: Date;
   validatedAt: Date | null;
   lines: TakeoffLineRecord[];
@@ -68,6 +70,7 @@ export interface TakeoffRepository {
   addLine(tenant: TenantContext, takeoffId: string, fields: LineFields): Promise<void>;
   deleteLine(tenant: TenantContext, lineId: string): Promise<void>;
   setStatus(tenant: TenantContext, id: string, status: TakeoffStatus): Promise<void>;
+  setAnswer(tenant: TenantContext, id: string, key: string, value: string | { value: string; unit: string } | null): Promise<void>;
 }
 
 export const TAKEOFF_REPOSITORY = Symbol("TAKEOFF_REPOSITORY");

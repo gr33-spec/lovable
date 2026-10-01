@@ -152,6 +152,10 @@ describe("demandes de prix", () => {
     for (const line of reviewed.lines.filter((l: { status: string }) => l.status === "to_verify")) {
       await agent.post(`/v1/takeoff-lines/${line.id}/confirm`).expect(200);
     }
+    // Entreprise de couverture : les articles d'électricité lui sont inconnus. UNE décision les garde tous.
+    reviewed = (await agent.get(`/v1/projects/${project.body.id}/takeoff`)).body.takeoff;
+    const unknown = reviewed.view.decisions.find((d: { key: string }) => d.key === "group:unknown");
+    await agent.post(`/v1/takeoffs/${takeoff.id}/decisions`).send({ action: "keep", lineIds: unknown.lineIds }).expect(200);
     await agent.post(`/v1/takeoffs/${takeoff.id}/validate`).expect(200);
     const s = await supplier(agent, "Rexel", "devis@rexel.fr");
     const created = await agent.post(`/v1/projects/${project.body.id}/price-requests`).send({ supplierIds: [s.body.id] });

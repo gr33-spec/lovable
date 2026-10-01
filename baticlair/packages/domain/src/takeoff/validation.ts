@@ -313,9 +313,11 @@ export function validateTakeoffLine(line: TakeoffLineInput, profile: TradeProfil
       const usable = line.packaging && line.packaging.packageUnit === unit;
       if (!usable) {
         issues.push(
+          // Le fournisseur indique le contenu de son conditionnement (demandé dans l'e-mail) : la
+          // quantité commandée (« 2 paquets ») est juste, l'artisan n'est pas dérangé (PD-045).
           issue(
             "PACKAGE_CONTENT_MISSING",
-            "to_verify",
+            "info",
             `Combien par ${unitLabel(unit).replace(/[sx]$/, "")} ? Contenu non indiqué.`,
           ),
         );
@@ -369,11 +371,16 @@ export function validateTakeoff(lines: readonly TakeoffLineInput[], profile: Tra
   for (const indexes of seen.values()) {
     if (indexes.length < 2) continue;
     const ids = indexes.map((i) => lines[i]!.id);
-    // Copie probable : deux lignes qui se suivent, avec la même quantité.
-    const adjacent = indexes.some((i, k) => k > 0 && i === indexes[k - 1]! + 1 && lines[i]!.quantityRaw === lines[i - 1]!.quantityRaw);
+    // Copie probable : deux lignes qui se suivent, avec la même quantité, sous les MÊMES titres
+    // (le point lumineux du WC puis celui de la cuisine ne sont pas une copie).
+    const sameSection = (a: TakeoffLineInput, b: TakeoffLineInput) => (a.section ?? []).map(normalizeText).join("|") === (b.section ?? []).map(normalizeText).join("|");
+    const copies = indexes.filter((i, k) => k > 0 && i === indexes[k - 1]! + 1 && lines[i]!.quantityRaw === lines[i - 1]!.quantityRaw && sameSection(lines[i]!, lines[i - 1]!));
     issues.push(
-      adjacent
-        ? { ...issue("DUPLICATE_LINE", "to_verify", "La même ligne apparaît deux fois de suite : doublon ou quantités à additionner ?"), lineIds: ids }
+      copies.length > 0
+        ? {
+            ...issue("DUPLICATE_LINE", "to_verify", "La même ligne apparaît deux fois de suite : doublon ou quantités à additionner ?"),
+            lineIds: [...new Set(copies.flatMap((i) => [lines[i - 1]!.id, lines[i]!.id]))],
+          }
         : { ...issue("DUPLICATE_LINE", "info", `Même article sur ${ids.length} lignes du devis : quantités à additionner pour la commande.`), lineIds: ids },
     );
   }
