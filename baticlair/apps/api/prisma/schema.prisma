@@ -123,6 +123,8 @@ model Company {
   suppliers     Supplier[]
   priceRequests PriceRequest[]
   offers        SupplierOffer[]
+  preferences   CompanyPreference[]
+  corrections   CorrectionEvent[]
 
   @@map("company")
 }
@@ -617,3 +619,67 @@ model SupplierOfferLine {
   @@index([offerId, position])
   @@map("supplier_offer_line")
 }
+
+/// MÉMOIRE DE L'ENTREPRISE (PD-045) : ce que « votre entreprise utilise
+/// habituellement ». Un choix (produit du référentiel, fournisseur, nom),
+/// jamais une donnée fabricant. Propre à UNE entreprise ; jamais supprimée
+/// (remplacée ou désactivée, l'historique reste).
+model CompanyPreference {
+  id                 String    @id @default(uuid(7)) @db.Uuid
+  companyId          String    @db.Uuid
+  /// supplier | naming | product | brand | packaging | waste
+  kind               String
+  /// « slot:ecran », « family:underlay », « name:ecran maison »
+  key                String
+  value              String
+  /// active | replaced | disabled
+  status             String    @default("active")
+  /// Réglée explicitement par l'artisan (« désormais ») : établie sans attendre.
+  explicit           Boolean   @default(false)
+  /// Chantiers où ce choix a été fait : [{ projectId, at }]
+  confirmations      Json      @default("[]")
+  lastContradictedAt DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, kind, key])
+  @@map("company_preference")
+}
+
+/// JOURNAL DES CORRECTIONS (PD-045) : chaque geste de l'artisan sur une
+/// proposition de BatiClair, AJOUTÉ jamais réécrit, avec l'avant et l'après.
+/// Ne modifie jamais le référentiel général. patternKey permet de compter des
+/// situations similaires entre entreprises sans lire leurs données.
+model CorrectionEvent {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  companyId       String   @db.Uuid
+  projectId       String?  @db.Uuid
+  /// Gardés même si la ligne est supprimée (pas de lien de suppression en cascade).
+  takeoffId       String?  @db.Uuid
+  takeoffLineId   String?  @db.Uuid
+  /// edit | delete | add | confirm | answer | preference
+  action          String
+  /// Cause déduite de ce qui a changé (null pour une confirmation).
+  cause           String?
+  /// Raison donnée par l'artisan, si elle existe.
+  reason          String?
+  /// Ce que BatiClair avait compris / proposé, puis ce que l'artisan en a fait.
+  before          Json?
+  after           Json?
+  /// Lignes du devis citées (ce que contenait le document).
+  documentExcerpt Json     @default("[]")
+  /// Métier, section, version de la lecture IA et du référentiel.
+  context         Json     @default("{}")
+  patternKey      String
+  userId          String?
+  createdAt       DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, createdAt])
+  @@index([patternKey])
+  @@map("correction_event")
+}
+

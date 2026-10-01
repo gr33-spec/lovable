@@ -19,3 +19,6 @@ export * from "./referential/index.js";
 export { keyCharacteristics, suppliedObject } from "./takeoff/characteristics.js";
 export { groupIdenticalLines, type GroupableLine, type GroupedLine } from "./takeoff/grouping.js";
 export { articleScope, isPlaceTitle } from "./takeoff/sections.js";
+export * from "./trust/assessment.js";
+export * from "./trust/preferences.js";
+export * from "./trust/corrections.js";

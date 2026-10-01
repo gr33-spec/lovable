@@ -29,6 +29,20 @@ Référence couverture :
 | D-2026-015 — couverture (référence) | 10 | **90 %** (9) | **20 %** (2) | 3 | 1 | 7 | 1 | 10 → 10 |
 | **Total** | **10** | **90 %** (9) | **20 %** (2) | 3 | 1 | 7 | 1 | 10 → 10 |
 
+## Ce que verrait l'artisan (lecture seule, avant toute réponse)
+
+✓ : assez d'éléments établis pour produire la ligne sans lui. ⚠ : un doute qui change la commande,
+tranché en un geste. ? : une donnée indispensable manque (dont les mesures d'ouvrage, que BatiClair
+ne sait pas encore convertir : elles partent au fournisseur comme mesure, jamais comme achat).
+
+| Devis | ✓ Vérifié | ⚠ À confirmer | ? Information manquante |
+|---|---|---|---|
+| Morellec — électricité + plomberie (scanné) | 80 | 44 | 31 |
+| Lézardrieux — plâtrerie, isolation | 2 | 6 | 16 |
+| Piscine | 0 | 37 | 0 |
+| D-2026-011 — salle de bain | 9 | 1 | 5 |
+| D-2026-015 — couverture (référence) | 4 | 0 | 6 |
+
 ## Non-régression
 
 Chaque devis doit garder au moins ses scores A et B de l'étape précédente, sans erreur de plus

@@ -1,6 +1,9 @@
 import {
+  assessTakeoffLine,
   reviewExtractedTakeoff,
   tradeProfile,
+  type CorrectionAction,
+  type LineSnapshot,
   type LineValidation,
   type TakeoffIssue,
   type TakeoffValidation,
@@ -8,6 +11,7 @@ import {
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { AiUsageRecorder, AnalysisMeter } from "../../ai-usage/index.js";
 import type { DocumentAiInput, DocumentRepository, DocumentWithProcessing, PreparedDocument } from "../../documents/index.js";
+import type { CorrectionJournal } from "../../learning/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { TAKEOFF_PROMPT } from "./prompt.js";
 import type { ExtractionAttempt, TakeoffExtractor } from "./takeoff-extractor.js";
@@ -37,6 +41,7 @@ export class TakeoffService {
     private readonly meter: AnalysisMeter,
     private readonly recorder: AiUsageRecorder,
     private readonly aiInput: DocumentAiInput,
+    private readonly journal: CorrectionJournal,
     private readonly onRecordFailure: (error: unknown) => void = () => {},
   ) {}
 
@@ -109,29 +114,94 @@ export class TakeoffService {
     return takeoff ? this.review(tenant, takeoff) : null;
   }
 
+  // Chaque geste de l'artisan est journalisé avec l'AVANT (ce que BatiClair avait compris et
+  // montré) et l'APRÈS. Le journal ne touche ni la liste ni le référentiel (PD-045).
+
   async updateLine(tenant: TenantContext, lineId: string, fields: LineFields): Promise<ReviewedTakeoff> {
     const takeoff = await this.editable(tenant, await this.takeoffs.findByLine(tenant, lineId));
+    const before = await this.review(tenant, takeoff);
     await this.takeoffs.updateLine(tenant, lineId, fields);
-    return this.reload(tenant, takeoff.id);
+    const after = await this.reload(tenant, takeoff.id);
+    await this.recordGesture(tenant, "edit", lineId, before, after);
+    return after;
   }
 
   /** « C'est bon » : l'artisan a regardé la ligne douteuse et la garde telle quelle. */
   async confirmLine(tenant: TenantContext, lineId: string): Promise<ReviewedTakeoff> {
     const takeoff = await this.editable(tenant, await this.takeoffs.findByLine(tenant, lineId));
+    const before = await this.review(tenant, takeoff);
     await this.takeoffs.confirmLine(tenant, lineId);
-    return this.reload(tenant, takeoff.id);
+    const after = await this.reload(tenant, takeoff.id);
+    await this.recordGesture(tenant, "confirm", lineId, before, after);
+    return after;
   }
 
   async deleteLine(tenant: TenantContext, lineId: string): Promise<ReviewedTakeoff> {
     const takeoff = await this.editable(tenant, await this.takeoffs.findByLine(tenant, lineId));
+    const before = await this.review(tenant, takeoff);
     await this.takeoffs.deleteLine(tenant, lineId);
-    return this.reload(tenant, takeoff.id);
+    const after = await this.reload(tenant, takeoff.id);
+    await this.recordGesture(tenant, "delete", lineId, before, after);
+    return after;
   }
 
   async addLine(tenant: TenantContext, takeoffId: string, fields: LineFields): Promise<ReviewedTakeoff> {
     const takeoff = await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
+    const known = new Set(takeoff.lines.map((l) => l.id));
     await this.takeoffs.addLine(tenant, takeoff.id, fields);
-    return this.reload(tenant, takeoff.id);
+    const after = await this.reload(tenant, takeoff.id);
+    const added = after.takeoff.lines.find((l) => !known.has(l.id));
+    if (added) await this.recordGesture(tenant, "add", added.id, null, after);
+    return after;
+  }
+
+  /** Ce que BatiClair avait compris d'une ligne, ou ce que l'artisan en a fait : texte, lecture, état ✓/⚠/?. */
+  private snapshot(reviewed: ReviewedTakeoff, lineId: string): LineSnapshot | null {
+    const line = reviewed.takeoff.lines.find((l) => l.id === lineId);
+    const v = reviewed.validation.lines.find((x) => x.lineId === lineId);
+    if (!line || !v) return null;
+    const assessment = assessTakeoffLine(v, {
+      documentIssues: reviewed.validation.issues,
+      confirmedByArtisan: line.confirmed,
+      enteredByArtisan: line.origin === "manual" || line.edited,
+    });
+    return {
+      designation: line.designation,
+      quantity: line.quantityRaw,
+      unit: line.unitRaw,
+      reference: line.reference,
+      kind: v.kind,
+      family: v.family,
+      basis: v.basis,
+      state: assessment?.state ?? null,
+    };
+  }
+
+  private async recordGesture(
+    tenant: TenantContext,
+    action: CorrectionAction,
+    lineId: string,
+    before: ReviewedTakeoff | null,
+    after: ReviewedTakeoff,
+  ): Promise<void> {
+    const line = (before ?? after).takeoff.lines.find((l) => l.id === lineId);
+    const source = line && line.sourceRefs.length > 0 ? await this.aiInput.sourceLines(tenant, after.takeoff.documentId) : new Map<string, string>();
+    await this.journal.record(tenant, {
+      projectId: after.takeoff.projectId,
+      takeoffId: after.takeoff.id,
+      takeoffLineId: lineId,
+      action,
+      before: before ? this.snapshot(before, lineId) : null,
+      after: action === "delete" ? null : this.snapshot(after, lineId),
+      documentExcerpt: (line?.sourceRefs ?? []).flatMap((ref) => (source.has(ref) ? [`[${ref}] ${source.get(ref)}`] : [])),
+      context: {
+        trade: after.takeoff.trade,
+        section: line?.section ?? [],
+        promptId: after.takeoff.promptId,
+        promptVersion: after.takeoff.promptVersion,
+        model: after.takeoff.model,
+      },
+    });
   }
 
   /**

@@ -39,8 +39,14 @@ export interface SlotChoice {
  * choisir à la place d'une question (« mon écran habituel »).
  */
 export interface CompanyPreferences {
-  /** Produit habituel, par emplacement (« ecran ») ou par famille (« underlay »). */
+  /** Produit habituel ÉTABLI, par emplacement (« ecran ») ou par famille (« underlay ») : utilisé sans question. */
   products?: Record<string, string>;
+  /**
+   * Produit habituel PAS ENCORE ÉTABLI (en essai, périmé, contredit récemment) :
+   * proposé à l'artisan en une question (« Votre écran habituel : X ? »), jamais
+   * utilisé en silence.
+   */
+  proposals?: Record<string, string>;
   /** Marge habituelle (« 5 » = 5 %), par produit ou par famille. */
   waste?: Record<string, string>;
 }
@@ -75,10 +81,21 @@ export interface Question {
   impact?: string;
 }
 
+/**
+ * D'où vient un élément du calcul. Quatre natures, jamais mélangées :
+ *  - « devis »       : lu dans le devis du client ;
+ *  - « referential » : BatiClair sait (référentiel sourcé et vérifié) ;
+ *  - « company »     : votre entreprise utilise habituellement (préférence apprise) ;
+ *  - « project »     : choisi ou répondu par l'artisan pour CE chantier.
+ */
+export type Origin = "devis" | "referential" | "company" | "project";
+
 export interface TraceLine {
   label: string;
   value: string;
   unit: string;
+  /** Nature de la donnée (voir Origin) ; absente pour un élément sans effet (donnée inconnue sans effet). */
+  origin?: Origin;
   /** Provenance lisible : « Devis, ligne 4 », « Fiche Edilians (vérifiée le 02/10/2026) ». */
   from: string;
   verified: boolean;
@@ -138,6 +155,10 @@ export interface NeedResult {
   missing?: MissingData;
   /** Calcul fait avec au moins une donnée en brouillon (option acceptDraft). */
   provisional: boolean;
+  /** D'où vient le produit retenu : écrit au devis, reconnu par appellation, choisi pour le chantier, préférence de l'entreprise. */
+  productOrigin?: "devis" | "alias" | "artisan" | "preference" | "proposal";
+  /** Préférence de l'entreprise écartée (produit absent, autre famille…) : la vérification normale a repris. */
+  preferenceIgnored?: string;
   formula?: string;
   exclusions?: string;
   trace: TraceLine[];
@@ -260,17 +281,29 @@ function computeNeed(
   options: EngineOptions,
 ): NeedResult {
   const slot = work.slots.find((s) => s.key === rule.slot)!;
-  const productFor = (slotKey: string): { product: Product; choice: SlotChoice | { origin: "preference" } } | undefined => {
+  let preferenceIgnored: string | undefined;
+  const productFor = (slotKey: string): { product: Product; choice: SlotChoice | { origin: "preference" | "proposal" } } | undefined => {
     const chosen = input.products[slotKey];
     if (chosen) {
       const p = ref.products.find((x) => x.id === chosen.productId);
       return p ? { product: p, choice: chosen } : undefined;
     }
-    // Pas sur le devis : le produit habituel de l'entreprise évite la question.
+    // Pas sur le devis : le produit habituel de l'entreprise évite la question (établi) ou la simplifie (à reconfirmer).
+    // Il ne passe JAMAIS outre le référentiel : un produit inconnu ou d'une autre famille est écarté.
     const family = work.slots.find((s) => s.key === slotKey)?.family;
-    const preferred = input.preferences?.products?.[slotKey] ?? (family ? input.preferences?.products?.[family] : undefined);
-    const p = preferred ? ref.products.find((x) => x.id === preferred && x.family === family) : undefined;
-    return p ? { product: p, choice: { origin: "preference" } } : undefined;
+    for (const kind of ["preference", "proposal"] as const) {
+      const map = kind === "preference" ? input.preferences?.products : input.preferences?.proposals;
+      const preferred = map?.[slotKey] ?? (family ? map?.[family] : undefined);
+      if (!preferred) continue;
+      const p = ref.products.find((x) => x.id === preferred);
+      if (p && p.family === family) return { product: p, choice: { origin: kind } };
+      if (slotKey === slot.key) {
+        preferenceIgnored = p
+          ? `Produit habituel « ${p.shortLabel} » écarté : ce n'est pas un produit de cette famille.`
+          : `Produit habituel écarté : il n'est plus au référentiel.`;
+      }
+    }
+    return undefined;
   };
   const resolved = productFor(slot.key);
   const product = resolved?.product;
@@ -284,6 +317,8 @@ function computeNeed(
     label: product?.shortLabel ?? slot.label,
     slotLabel: slot.label,
     origin,
+    ...(resolved ? { productOrigin: resolved.choice.origin } : {}),
+    ...(preferenceIgnored ? { preferenceIgnored } : {}),
     formula: rule.formula,
     ...(rule.exclusions ? { exclusions: rule.exclusions } : {}),
   };
@@ -298,7 +333,7 @@ function computeNeed(
       provisional = true;
     }
     const unit = parseRefUnit(fact.unit);
-    trace.push({ label, value: fact.value.replace(".", ","), unit: fact.unit, ...provenanceLine(fact, sources) });
+    trace.push({ label, value: fact.value.replace(".", ","), unit: fact.unit, origin: "referential", ...provenanceLine(fact, sources) });
     return point(new Decimal(fact.value).times(unit.factor), unit.dim);
   };
 
@@ -348,8 +383,30 @@ function computeNeed(
         },
       });
     }
-    if (product && resolved?.choice.origin === "preference") {
-      trace.push({ label: "Produit", value: product.shortLabel, unit: "", from: "Votre produit habituel", verified: true });
+    if (product && resolved?.choice.origin === "proposal") {
+      throw new Stop({
+        status: "question",
+        question: {
+          key: `product:${slot.key}`,
+          kind: "confirm_product",
+          text: `${slot.label} habituel de votre entreprise : ${product.shortLabel}. On le garde pour ce chantier ?`,
+          options: [
+            { label: "Oui", value: product.id },
+            { label: "Modifier", value: "" },
+          ],
+        },
+      });
+    }
+    if (product && resolved) {
+      const o = resolved.choice.origin;
+      trace.push({
+        label: "Produit",
+        value: product.shortLabel,
+        unit: "",
+        from: o === "preference" ? "Préférence de votre entreprise" : o === "artisan" ? "Votre choix pour ce chantier" : "Devis",
+        origin: o === "preference" ? "company" : o === "artisan" ? "project" : "devis",
+        verified: true,
+      });
     }
 
     // 2. Les valeurs de la formule. Une donnée de chantier inconnue n'est pas devinée :
@@ -412,6 +469,7 @@ function computeNeed(
         value: given.value.replace(".", ","),
         unit: given.unit,
         from: given.evidence ?? (given.origin === "devis" ? "Devis" : "Votre réponse"),
+        origin: given.origin === "devis" ? "devis" : "project",
         verified: true,
       });
       return point(value, unit.dim);
@@ -446,12 +504,13 @@ function computeNeed(
       label: "Besoin calculé",
       value: exact ? fr(raw.lo.dividedBy(needUnit.factor)) : `${fr(raw.lo.dividedBy(needUnit.factor))} à ${fr(raw.hi.dividedBy(needUnit.factor))}`,
       unit: rule.unit,
+      origin: "referential",
       ...provenanceLine(rule, sources),
     });
     if (companyRate !== undefined) {
-      trace.push({ label: "Marge (votre réglage)", value: companyRate.replace(".", ","), unit: "%", from: "Votre réglage", verified: true });
+      trace.push({ label: "Marge (votre réglage)", value: companyRate.replace(".", ","), unit: "%", from: "Réglage de votre entreprise", origin: "company", verified: true });
     } else if (wasteRule) {
-      trace.push({ label: "Marge recommandée", value: wasteRule.rate.replace(".", ","), unit: "%", ...provenanceLine(wasteRule, sources) });
+      trace.push({ label: "Marge recommandée", value: wasteRule.rate.replace(".", ","), unit: "%", origin: "referential", ...provenanceLine(wasteRule, sources) });
     } else {
       trace.push({ label: "Marge", value: "0", unit: "%", from: "Aucune marge réglée", verified: true });
     }

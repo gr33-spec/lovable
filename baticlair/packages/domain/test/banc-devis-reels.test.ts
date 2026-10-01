@@ -3,7 +3,7 @@ import { documentationNeeds, groupIdenticalLines, ROOFING_REFERENTIAL, scoreQuot
 import { D2026_011_LINES } from "./devis-reels/d2026-011.js";
 import { D2026_015_LINES } from "./devis-reels/d2026-015.js";
 import { MORELLEC_LINES } from "./devis-reels/electricite-plomberie-morellec.js";
-import { decompositionNeeds, errorDigest, evaluateQuote, evaluationDetail, evaluationTable } from "./devis-reels/evaluate.js";
+import { decompositionNeeds, errorDigest, evaluateQuote, evaluationDetail, evaluationTable, trustTable } from "./devis-reels/evaluate.js";
 import { REAL_QUOTES, type RealQuoteCase } from "./devis-reels/index.js";
 import { PISCINE_LINES } from "./devis-reels/piscine.js";
 import { LEZARDRIEUX_LINES } from "./devis-reels/platrerie-lezardrieux.js";
@@ -228,6 +228,14 @@ describe("banc d'essai : 4 devis de métiers différents (score « après »)", 
       "Référence couverture :",
       "",
       evaluationTable([reference]),
+      "",
+      "## Ce que verrait l'artisan (lecture seule, avant toute réponse)",
+      "",
+      "✓ : assez d'éléments établis pour produire la ligne sans lui. ⚠ : un doute qui change la commande,",
+      "tranché en un geste. ? : une donnée indispensable manque (dont les mesures d'ouvrage, que BatiClair",
+      "ne sait pas encore convertir : elles partent au fournisseur comme mesure, jamais comme achat).",
+      "",
+      trustTable([...evals, reference]),
       "",
       "## Non-régression",
       "",

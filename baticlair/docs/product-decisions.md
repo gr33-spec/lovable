@@ -548,3 +548,31 @@ fictives uniquement.
   titres du devis (section) accompagnent chaque ligne ; la rubrique utile
   (hors lieux) part dans la demande de prix. Rien n'est déduit d'un titre.
 
+### PD-045 — Confiance explicable et apprentissage contrôlé
+
+- **Date** : 2026-10-01 · **Statut** : Décidé (le fondateur) — étapes 1 et 2
+- **Trois états**, jamais un pourcentage : ✓ vérifié (assez d'éléments
+  ÉTABLIS pour produire la ligne sans l'artisan — pas « plus de question »),
+  ⚠ à confirmer (un doute qui change la commande, tranché en un geste),
+  ? information manquante (BatiClair n'invente pas). Ils découlent de
+  critères explicites : lecture, ouvrage, produit, caractéristique fabricant,
+  règle, données chantier, cohérence, conditionnement.
+- Un doute sans effet sur la commande ne dérange pas l'artisan. Le
+  conditionnement est demandé au fournisseur, jamais à l'artisan, mais reste
+  dans le raisonnement (risque de comparaison entre fournisseurs).
+- **Quatre origines, jamais mélangées** : lu dans le devis · BatiClair sait
+  (référentiel vérifié) · votre entreprise utilise (préférence) · choisi pour
+  ce chantier. Deux lignes ✓ peuvent avoir des origines différentes.
+- **Mémoire de l'entreprise** : un choix, jamais une donnée fabricant ; propre
+  à une entreprise ; jamais appliquée si elle est incompatible avec le
+  référentiel (la vérification normale reprend). En essai, ancienne ou
+  contredite : proposée en une question, jamais appliquée en silence.
+- **Politiques par type** (paramètres EXPÉRIMENTAUX de bêta, modifiables sans
+  toucher au code) : fournisseur et appellation interne établis dès 1
+  chantier ; produit, marque, conditionnement après 2 chantiers ; marge jamais
+  apprise (réglage explicite) ; reproposée après 365 jours sans confirmation.
+- **Journal des corrections** : ajouté, jamais réécrit ; avant, après, extrait
+  du devis, contexte, cause déduite, empreinte anonyme pour compter plus tard
+  des corrections similaires entre entreprises. Ne modifie jamais le
+  référentiel général. Détails : `confiance-et-apprentissage.md`.
+

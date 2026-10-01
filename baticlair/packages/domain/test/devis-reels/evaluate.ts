@@ -1,4 +1,4 @@
-import { groupIdenticalLines, ROOFING_REFERENTIAL, scoreQuote, tradeProfile, validateTakeoff, type LineValidation, type QuoteScore } from "../../src/index.js";
+import { assessTakeoffLine, groupIdenticalLines, ROOFING_REFERENTIAL, trustCounts, scoreQuote, tradeProfile, validateTakeoff, type LineValidation, type QuoteScore } from "../../src/index.js";
 import { MATERIAL_TRUTHS, type BenchLine } from "./truth.js";
 
 /**
@@ -36,6 +36,8 @@ export interface Evaluation {
   certain: number;
   /** Lignes non main-d'œuvre envoyées au fournisseur : telles quelles, puis regroupées. */
   sent: { before: number; after: number; withSection: number };
+  /** Ce que verrait l'artisan sur la liste lue : ✓ vérifié, ⚠ à confirmer, ? information manquante. */
+  trust: { verified: number; to_confirm: number; missing: number };
   questions: number;
   unknown: number;
   errors: number;
@@ -110,6 +112,7 @@ export function evaluateQuote(id: string, lines: BenchLine[], trade: string, acc
     needsIdentified: material.filter((e) => e.needIdentified).length,
     certain: material.filter((e) => e.certain).length,
     sent: { before: toSend.length, after: grouped.length, withSection: grouped.filter((g) => g.section.length > 0).length },
+    trust: trustCounts(takeoff.lines.map((l) => assessTakeoffLine(l, { documentIssues: takeoff.issues }))),
     questions: evaluated.filter((e) => e.asks).length + documentQuestions + engineQuestions,
     unknown: material.filter((e) => e.unknown).length,
     errors: evaluated.reduce((n, e) => n + e.errors.length, 0),
@@ -211,5 +214,14 @@ export function decompositionNeeds(evals: Evaluation[]): string {
     ...[...byFamily.entries()]
       .sort((a, b) => b[1].lines - a[1].lines)
       .map(([family, v]) => `| ${family} | ${v.lines} | ${[...v.devis].join(", ")} | ${v.example.replace(/\|/g, "/")} |`),
+  ].join("\n");
+}
+
+/** « Votre liste est prête — ✓ · ⚠ · ? » sur chaque vrai devis, avant toute réponse de l'artisan. */
+export function trustTable(evals: Evaluation[]): string {
+  return [
+    "| Devis | ✓ Vérifié | ⚠ À confirmer | ? Information manquante |",
+    "|---|---|---|---|",
+    ...evals.map((e) => `| ${e.id} | ${e.trust.verified} | ${e.trust.to_confirm} | ${e.trust.missing} |`),
   ].join("\n");
 }
