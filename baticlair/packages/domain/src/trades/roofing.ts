@@ -112,6 +112,7 @@ const FAMILIES: MaterialFamily[] = [
     label: "Liteau et contre-liteau",
     keywords: ["contre liteau", "liteau", "latte"],
     allowedUnits: ["ML", "M", "BOTTE", "U", "PAQUET"],
+    areaOfWork: true,
     plausibleMax: { ML: 20000, M: 20000, BOTTE: 300, U: 5000 },
   },
   {

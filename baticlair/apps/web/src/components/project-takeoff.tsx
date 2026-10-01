@@ -335,7 +335,9 @@ function ListRow({ line, editable, pending, onSave, onDelete, onConfirm }: { lin
         <span className="min-w-0 grow">
           <span className="line-clamp-2 text-[15px] leading-snug font-bold">{shortName(line.designation)}</span>
           <span className="text-sm text-muted">
+            {line.basis === "work" ? "Pour " : ""}
             {line.quantity ?? "?"} {line.unit ?? ""}
+            {line.basis === "work" ? <span className="font-semibold text-warn"> · quantité à calculer</span> : null}
           </span>
         </span>
         {editable ? (

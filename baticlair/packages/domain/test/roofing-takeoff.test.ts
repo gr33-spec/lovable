@@ -89,10 +89,18 @@ describe("validation d'une ligne de quantitatif", () => {
     expect(codes(line("l", "Gouttière zinc", "12", "m²"))).toContain("UNIT_UNUSUAL_FOR_FAMILY");
   });
 
-  it("demande le rendement quand des tuiles sont chiffrées en m² (jamais supposé)", () => {
-    const v = validateTakeoffLine(line("l", "Fourniture et pose de tuiles romanes", "120", "m²", { source: "client_quote" }), P);
-    expect(v.status).toBe("to_verify");
-    expect(v.issues[0]).toMatchObject({ code: "AREA_NEEDS_PRODUCT_YIELD" });
+  it("une surface de tuiles ou de liteaux est une quantité d'OUVRAGE, jamais une quantité d'achat", () => {
+    for (const [designation] of [["Fourniture et pose de tuiles romanes"], ["Liteaux 27x40"], ["Contre-liteaux 27x40"]]) {
+      const v = validateTakeoffLine(line("l", designation!, "120", "m²", { source: "client_quote" }), P);
+      expect(v.basis).toBe("work");
+      expect(v.issues.map((i) => i.code)).toEqual(["WORK_QUANTITY"]);
+      // La surface est juste : rien à « confirmer », elle partira comme surface d'ouvrage.
+      expect(v.status).toBe("certain");
+    }
+    // Ailleurs, le m² reste une anomalie d'unité, et une quantité d'achat reste une quantité d'achat.
+    expect(validateTakeoffLine(line("l", "Gouttière zinc", "12", "m²"), P).basis).toBe("purchase");
+    expect(validateTakeoffLine(line("l", "Liteaux 27x40", "372", "ml"), P).basis).toBe("purchase");
+    expect(validateTakeoffLine(line("l", "Écran sous-toiture HPV", "120", "m²"), P).basis).toBe("purchase");
   });
 
   it("refuse des pièces fractionnaires", () => {

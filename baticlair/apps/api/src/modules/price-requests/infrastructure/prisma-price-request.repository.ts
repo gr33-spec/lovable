@@ -62,6 +62,7 @@ function lines(value: unknown): RequestedLine[] {
       quantity: typeof l.quantity === "string" ? l.quantity : null,
       unit: typeof l.unit === "string" ? l.unit : null,
       reference: typeof l.reference === "string" ? l.reference : null,
+      ...(l.basis === "work" ? { basis: "work" as const } : {}),
     };
   });
 }

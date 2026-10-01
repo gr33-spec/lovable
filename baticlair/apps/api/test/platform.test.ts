@@ -106,6 +106,11 @@ describe("textes pour l'artisan et le fournisseur", () => {
     const { purchaseLabel } = await import("../src/modules/price-requests/application/price-request-email.js");
     expect(purchaseLabel("Fourniture isolation murs 100mm - Fourniture de laine de verre")).toBe("Isolation murs 100mm - laine de verre");
     expect(purchaseLabel("Fourniture et pose descente zinc diamètre 80")).toBe("Descente zinc diamètre 80");
+    // Surface d'ouvrage : jamais présentée au fournisseur comme une quantité d'achat.
+    const { requestedQuantityText } = await import("../src/modules/price-requests/application/price-request-email.js");
+    const line = { designation: "Liteaux 27x40", quantity: "120", unit: "m²", reference: null };
+    expect(requestedQuantityText(line)).toBe("120 m²");
+    expect(requestedQuantityText({ ...line, basis: "work" })).toBe("pour une surface de 120 m² (quantité à calculer)");
     expect(purchaseLabel("Tuile romane canal rouge 12,5 u/m²")).toBe("Tuile romane canal rouge 12,5 u/m²");
   });
 });
