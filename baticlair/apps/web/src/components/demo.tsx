@@ -93,11 +93,10 @@ export function DemoAnswer({ recipientId, discreet = false, onChange }: { recipi
   return (
     <div className="flex flex-col gap-2">
       {error ? <ErrorNotice error={error} /> : null}
-      <Button variant="accent" pending={pending} onClick={() => void answer()}>
+      <Button variant="secondary" pending={pending} onClick={() => void answer()}>
         <Sparkles size={18} aria-hidden="true" />
         {pending ? "Le fournisseur prépare son devis…" : "Simuler sa réponse (démo)"}
       </Button>
-      <p className="text-[13px] text-muted">Fournisseur fictif : son devis PDF est créé à partir de votre liste et rangé ici.</p>
     </div>
   );
 }

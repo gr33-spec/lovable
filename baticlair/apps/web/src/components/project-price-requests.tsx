@@ -1,9 +1,9 @@
 "use client";
 
-import { Check, Copy, FileUp, Loader2, Mail, Plus, Send } from "lucide-react";
+import { FileUp, Loader2, Mail, MoreHorizontal, Plus, Send } from "lucide-react";
 import { useCallback, useId, useRef, useState } from "react";
 import { DemoAnswer, isDemoSupplier } from "@/components/demo";
-import { OfferPanel, ProjectComparison, ReadAllQuotes } from "@/components/project-offers";
+import { CompareQuotes, OfferLines, offerFacts, ProjectComparison } from "@/components/project-offers";
 import { SupplierForm } from "@/components/supplier-form";
 import { Badge, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, MAX_DOCUMENT_BYTES, newActionKey, type Offer, type PriceRequest, type PriceRequestRecipient, type Supplier } from "@/lib/api";
@@ -11,12 +11,6 @@ import { openDocument } from "@/lib/open-document";
 import { useProgressRefresh } from "@/components/project-progress";
 import { useResource } from "@/lib/use-resource";
 
-const STATUS: Record<PriceRequestRecipient["status"], { label: string; tone: "ok" | "warn" | "neutral" }> = {
-  to_send: { label: "À envoyer", tone: "warn" },
-  sent: { label: "En attente de réponse", tone: "neutral" },
-  received: { label: "Devis reçu", tone: "ok" },
-  declined: { label: "Pas de réponse", tone: "neutral" },
-};
 
 function toError(e: unknown): ApiError {
   return e instanceof ApiError ? e : new ApiError("internal_error", 500);
@@ -42,7 +36,7 @@ export function ProjectPriceRequests({ projectId, archived, canCreate }: { proje
   const { data, setData, error, reload } = useResource(fetchRequests);
   const refreshProgress = useProgressRefresh();
   const requestId = data?.items[0]?.id ?? null;
-  // Devis déjà lus par l'IA, par destinataire ; `version` fait suivre la comparaison.
+  // Devis déjà lus, par destinataire ; `version` fait suivre la comparaison.
   const [version, setVersion] = useState(0);
   const fetchOffers = useCallback(
     (signal: AbortSignal) =>
@@ -57,7 +51,6 @@ export function ProjectPriceRequests({ projectId, archived, canCreate }: { proje
   if (!data) return <Spinner />;
 
   const request = data.items[0] ?? null;
-  const unread = request ? request.recipients.filter((r) => r.status === "received" && r.document && !offers.data?.items.some((o) => o.recipientId === r.id)).length : 0;
   const offerOf = (recipientId: string) => offers.data?.items.find((o) => o.recipientId === recipientId) ?? null;
   const offerChanged = (offer: Offer) => {
     const items = (offers.data?.items ?? []).filter((o) => o.recipientId !== offer.recipientId);
@@ -67,6 +60,12 @@ export function ProjectPriceRequests({ projectId, archived, canCreate }: { proje
   };
   const replace = (r: PriceRequest) => {
     setData({ items: [r, ...data.items.filter((x) => x.id !== r.id)] });
+    refreshProgress();
+  };
+  const reloadAll = () => {
+    reload();
+    offers.reload();
+    setVersion((v) => v + 1);
     refreshProgress();
   };
 
@@ -88,71 +87,48 @@ export function ProjectPriceRequests({ projectId, archived, canCreate }: { proje
     );
   }
 
+  const received = request.recipients.filter((r) => r.status === "received" && r.document);
+  const unread = received.filter((r) => !offerOf(r.id)).length;
+  const waiting = request.recipients.filter((r) => r.status === "sent").length;
+  const hasOffers = (offers.data?.items.length ?? 0) > 0;
+
   return (
-    <section id="fournisseurs" aria-labelledby="price-request-title" className="flex scroll-mt-4 flex-col gap-3">
-      <h2 id="price-request-title" className="text-xs font-extrabold tracking-[0.04em] text-muted">
-        DEMANDES DE PRIX
-      </h2>
-      <p role="status" className="text-sm">
-        {summary(request)}
-      </p>
+    <section id="fournisseurs" aria-label="Fournisseurs" className="flex scroll-mt-4 flex-col gap-3">
       {!archived && unread > 0 && offers.data ? (
-        <ReadAllQuotes
+        <CompareQuotes
           requestId={request.id}
-          unread={unread}
-          waiting={request.recipients.filter((r) => r.status === "sent").length}
+          received={received.length}
+          waiting={waiting}
           aiAvailable={offers.data.aiAvailable}
-          onRead={(result) => {
+          onDone={(result) => {
             offers.setData({ aiAvailable: result.aiAvailable, items: result.items });
             setVersion((v) => v + 1);
             refreshProgress();
           }}
         />
       ) : null}
-      <ul className="flex flex-col gap-2.5">
+      {hasOffers ? <ProjectComparison request={request} version={version} archived={archived} onRequestChange={replace} /> : null}
+      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">FOURNISSEURS</h2>
+      <ul className="flex flex-col gap-2" aria-label="Vos fournisseurs">
         {request.recipients.map((r) => (
           <li key={r.id}>
             <RecipientCard
               recipient={r}
+              offer={offerOf(r.id)}
+              request={request}
               archived={archived}
               onChange={replace}
-              onReload={() => {
-                reload();
-                offers.reload();
-                setVersion((v) => v + 1);
-                refreshProgress();
-              }}
-              offerSlot={
-                r.status === "received" && r.document ? (
-                  <OfferPanel
-                    offer={offerOf(r.id)}
-                    request={request}
-                    archived={archived}
-                    onChange={offerChanged}
-                  />
-                ) : null
-              }
+              onOfferChange={offerChanged}
+              onReload={reloadAll}
             />
           </li>
         ))}
       </ul>
       {!archived ? <AddRecipients request={request} onChange={replace} /> : null}
-      {(offers.data?.items.length ?? 0) > 0 ? <ProjectComparison request={request} version={version} archived={archived} onRequestChange={replace} /> : null}
     </section>
   );
 }
 
-function summary(request: PriceRequest): string {
-  const count = (s: PriceRequestRecipient["status"]) => request.recipients.filter((r) => r.status === s).length;
-  const parts = [`${request.lines.length} ligne${request.lines.length > 1 ? "s" : ""} demandée${request.lines.length > 1 ? "s" : ""}`];
-  const toSend = count("to_send");
-  const received = count("received");
-  if (toSend > 0) parts.push(`${toSend} à envoyer`);
-  parts.push(`${received} devis reçu${received > 1 ? "s" : ""} sur ${request.recipients.length}`);
-  return parts.join(" · ");
-}
-
-/** Liste des fournisseurs à cocher, avec création rapide d'un nouveau. */
 function SupplierPicker({
   exclude = [],
   selected,
@@ -349,142 +325,168 @@ function AddRecipients({ request, onChange }: { request: PriceRequest; onChange:
   );
 }
 
+type CardState = { label: string; tone: "ok" | "warn" | "neutral"; info: string };
+
+/** Où en est le fournisseur, en deux mots, et une seule information utile. */
+function cardState(r: PriceRequestRecipient, offer: Offer | null): CardState {
+  if (offer) {
+    const facts = offerFacts(offer);
+    return { label: facts.toCheck ? "À vérifier" : "Comparé", tone: facts.toCheck ? "warn" : "ok", info: facts.text };
+  }
+  switch (r.status) {
+    case "to_send":
+      return { label: "À envoyer", tone: "warn", info: r.supplier.email };
+    case "sent":
+      return { label: "En attente", tone: "neutral", info: r.sentAt ? `Demande envoyée le ${new Date(r.sentAt).toLocaleDateString("fr-FR")}` : "Demande envoyée" };
+    case "received":
+      return { label: "Devis reçu", tone: "ok", info: "Prêt à comparer" };
+    case "declined":
+      return { label: "Pas de réponse", tone: "neutral", info: "" };
+  }
+}
+
+type Panel = "email" | "lines" | null;
+
+/**
+ * Un fournisseur : son nom, où il en est, et au plus une action utile à
+ * l'étape (envoyer, ajouter son devis). Tout le reste est dans « ••• ».
+ */
 function RecipientCard({
   recipient: r,
+  offer,
+  request,
   archived,
   onChange,
+  onOfferChange,
   onReload,
-  offerSlot,
 }: {
   recipient: PriceRequestRecipient;
+  offer: Offer | null;
+  request: PriceRequest;
   archived: boolean;
   onChange: (req: PriceRequest) => void;
+  onOfferChange: (offer: Offer) => void;
   onReload: () => void;
-  /** Lecture du devis reçu (résumé, détail), fournie par la section. */
-  offerSlot: React.ReactNode;
 }) {
   const [pending, setPending] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [menu, setMenu] = useState(false);
+  const [panel, setPanel] = useState<Panel>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
-  const status = STATUS[r.status];
+  const state = cardState(r, offer);
   const demo = isDemoSupplier(r.supplier.email);
 
-  async function setStatus(next: "to_send" | "sent" | "declined") {
+  async function run(action: () => Promise<void>) {
+    setMenu(false);
     setPending(true);
     setError(null);
     try {
-      onChange(await api<PriceRequest>(`/v1/price-request-recipients/${r.id}`, { method: "PATCH", body: { status: next } }));
+      await action();
     } catch (e) {
       setError(toError(e));
     } finally {
       setPending(false);
     }
   }
-
-  /** Devis déposé par erreur : on le retire, la demande repasse « Envoyée ». */
-  async function removeQuote(documentId: string) {
-    setPending(true);
-    setError(null);
-    try {
+  const setStatus = (next: "to_send" | "sent" | "declined") =>
+    run(async () => onChange(await api<PriceRequest>(`/v1/price-request-recipients/${r.id}`, { method: "PATCH", body: { status: next } })));
+  const removeQuote = (documentId: string) =>
+    run(async () => {
       await api<null>(`/v1/documents/${encodeURIComponent(documentId)}`, { method: "DELETE" });
       onReload();
-    } catch (e) {
-      setError(toError(e));
-      setPending(false);
-    }
-  }
-
-  async function copy() {
-    if (!r.email) return;
-    try {
+    });
+  const simulate = () =>
+    run(async () => {
+      onChange(await api<PriceRequest>(`/v1/demo/recipients/${r.id}/quote`, { method: "POST" }));
+    });
+  const copy = () =>
+    run(async () => {
+      if (!r.email) return;
       await navigator.clipboard.writeText(`${r.email.subject}\n\n${r.email.body}`);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    } catch {
-      /* presse-papiers indisponible : l'artisan peut encore utiliser « Envoyer » */
-    }
-  }
+      setNotice("Texte de l'e-mail copié.");
+      setTimeout(() => setNotice(null), 2500);
+    });
+  const toggle = (p: Panel) => {
+    setMenu(false);
+    setPanel(panel === p ? null : p);
+  };
 
-  const small = "inline-flex min-h-11 items-center gap-1.5 text-sm font-bold disabled:opacity-60";
+  const items: { label: string; onSelect: () => void }[] = [];
+  if (r.email) items.push({ label: panel === "email" ? "Masquer l'e-mail" : "Voir l'e-mail", onSelect: () => toggle("email") });
+  if (r.document) items.push({ label: "Ouvrir son devis (PDF)", onSelect: () => void openDocument(r.document!.id) });
+  if (offer) items.push({ label: panel === "lines" ? "Masquer les lignes" : "Voir les lignes de son devis", onSelect: () => toggle("lines") });
+  if (!archived) {
+    if (r.status === "to_send") {
+      items.push({ label: "Copier le texte de l'e-mail", onSelect: () => void copy() });
+      items.push({ label: "Déjà envoyé", onSelect: () => void setStatus("sent") });
+    }
+    if (r.status === "sent") {
+      items.push({ label: "Renvoyer l'e-mail", onSelect: () => window.open(mailtoHref(r), "_self") });
+      if (!demo) items.push({ label: "Test : simuler un devis fictif", onSelect: () => void simulate() });
+      items.push({ label: "N'a pas répondu", onSelect: () => void setStatus("declined") });
+    }
+    if (r.status === "declined") items.push({ label: "Remettre en attente", onSelect: () => void setStatus("sent") });
+    if (r.document) items.push({ label: "Retirer ce devis", onSelect: () => void removeQuote(r.document!.id) });
+  }
 
   return (
     <Card className="flex flex-col gap-2.5 p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 flex-col">
-          <span className="text-[17px] font-extrabold">{r.supplier.name}</span>
-          <span className="truncate text-[13px] text-muted">{r.supplier.email}</span>
+      <div className="flex items-start gap-3">
+        <div className="flex min-w-0 grow flex-col">
+          <span className="text-[17px] leading-snug font-extrabold">{r.supplier.name}</span>
+          {state.info ? <span className={`text-[13px] ${state.tone === "warn" && offer ? "font-semibold text-warn" : "text-muted"}`}>{state.info}</span> : null}
         </div>
-        <Badge tone={status.tone}>{status.label}</Badge>
+        <Badge tone={state.tone}>{state.label}</Badge>
+        {items.length > 0 ? (
+          <button
+            type="button"
+            onClick={() => setMenu(!menu)}
+            aria-expanded={menu}
+            aria-label={`Plus d'actions : ${r.supplier.name}`}
+            className="-mt-1.5 -mr-1.5 flex size-11 shrink-0 items-center justify-center rounded-full text-muted"
+          >
+            <MoreHorizontal size={20} aria-hidden="true" />
+          </button>
+        ) : null}
       </div>
 
+      {menu ? (
+        <ul role="menu" aria-label={`Actions : ${r.supplier.name}`} className="flex flex-col divide-y divide-line rounded-2xl bg-ground px-3">
+          {items.map((item) => (
+            <li key={item.label} role="none">
+              <button type="button" role="menuitem" onClick={item.onSelect} className="flex min-h-11 w-full items-center text-left text-sm font-bold">
+                {item.label}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
       {error ? <ErrorNotice error={error} /> : null}
-
-      {r.email ? <EmailPreview to={r.supplier.email} email={r.email} /> : null}
-
-      {r.status === "received" && r.document ? (
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <button type="button" onClick={() => void openDocument(r.document!.id)} className={`${small} min-w-0 text-accent-text`}>
-            <span className="truncate">Ouvrir son devis ({r.document.name})</span>
-          </button>
-          {!archived ? (
-            <button type="button" onClick={() => void removeQuote(r.document!.id)} disabled={pending} className={`${small} text-muted`}>
-              Retirer ce devis
-            </button>
-          ) : null}
-        </div>
+      {notice ? (
+        <p role="status" className="text-sm font-semibold text-ok">
+          {notice}
+        </p>
       ) : null}
-      {offerSlot}
+      {panel === "email" && r.email ? <EmailPreview to={r.supplier.email} email={r.email} /> : null}
+      {panel === "lines" && offer ? <OfferLines offer={offer} request={request} archived={archived} onChange={onOfferChange} /> : null}
 
-      {!archived && demo && !r.document && r.status !== "declined" ? <DemoAnswer recipientId={r.id} onChange={onChange} /> : null}
-
-      {!archived && r.status === "to_send" && !demo ? (
-        <>
-          {/* Ouvre la messagerie avec l'e-mail rempli, et note la demande comme envoyée. */}
-          <a
-            href={mailtoHref(r)}
-            onClick={() => void setStatus("sent")}
-            className="inline-flex min-h-13 items-center justify-center gap-2 rounded-2xl bg-ink px-5 text-base font-extrabold text-white"
-          >
-            <Send size={18} aria-hidden="true" />
-            Envoyer l&apos;e-mail
-          </a>
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <button type="button" onClick={() => void copy()} className={`${small} text-accent-text`}>
-              {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
-              {copied ? "Texte copié" : "Copier le texte"}
-            </button>
-            <button type="button" onClick={() => void setStatus("sent")} disabled={pending} className={`${small} text-muted`}>
-              Déjà envoyé
-            </button>
-          </div>
-        </>
+      {/* Au plus une action à l'écran : celle de l'étape. */}
+      {!archived && demo && !r.document && (r.status === "to_send" || r.status === "sent") ? (
+        <DemoAnswer recipientId={r.id} onChange={onChange} />
       ) : null}
-
-      {!archived && (r.status === "sent" || r.status === "declined") ? (
-        <>
-          {r.status === "sent" && r.sentAt ? (
-            <p className="text-sm text-muted">Envoyée le {new Date(r.sentAt).toLocaleDateString("fr-FR")}. Déposez son devis dès qu&apos;il arrive.</p>
-          ) : null}
-          <QuoteUpload recipientId={r.id} onChange={onChange} />
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <a href={mailtoHref(r)} className={`${small} text-accent-text`}>
-              <Mail size={16} aria-hidden="true" />
-              Renvoyer l&apos;e-mail
-            </a>
-            {r.status === "sent" ? (
-              <button type="button" onClick={() => void setStatus("declined")} disabled={pending} className={`${small} text-muted`}>
-                N&apos;a pas répondu
-              </button>
-            ) : (
-              <button type="button" onClick={() => void setStatus("sent")} disabled={pending} className={`${small} text-muted`}>
-                Remettre en attente
-              </button>
-            )}
-          </div>
-        </>
+      {!archived && !demo && r.status === "to_send" ? (
+        <a
+          href={mailtoHref(r)}
+          onClick={() => void setStatus("sent")}
+          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-ink px-5 text-base font-extrabold text-white"
+        >
+          <Send size={18} aria-hidden="true" />
+          Envoyer l&apos;e-mail
+        </a>
       ) : null}
-
-      {!archived && !demo && !r.document && r.status !== "declined" ? <DemoAnswer recipientId={r.id} discreet onChange={onChange} /> : null}
+      {!archived && !demo && r.status === "sent" && !r.document ? <QuoteUpload recipientId={r.id} onChange={onChange} /> : null}
+      {pending ? <Spinner /> : null}
     </Card>
   );
 }
@@ -532,7 +534,7 @@ function QuoteUpload({ recipientId, onChange }: { recipientId: string; onChange:
       <label
         htmlFor={inputId}
         aria-disabled={pending}
-        className={`inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-accent px-4 font-extrabold text-white focus-within:ring-2 ${pending ? "pointer-events-none opacity-70" : ""}`}
+        className={`inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-ground px-4 font-extrabold text-ink focus-within:ring-2 ${pending ? "pointer-events-none opacity-70" : ""}`}
       >
         {pending ? <Loader2 size={18} className="animate-spin" aria-hidden="true" /> : <FileUp size={18} aria-hidden="true" />}
         {pending ? "Enregistrement du devis…" : "Ajouter son devis (PDF)"}
@@ -544,9 +546,8 @@ function QuoteUpload({ recipientId, onChange }: { recipientId: string; onChange:
 /** Ce qui part (ou est parti) chez le fournisseur, mot pour mot : aucune surprise. */
 function EmailPreview({ to, email }: { to: string; email: { subject: string; body: string } }) {
   return (
-    <details className="rounded-2xl bg-ground px-3 py-2 text-sm">
-      <summary className="cursor-pointer font-bold">Voir l&apos;e-mail</summary>
-      <dl className="mt-2 flex flex-col gap-1">
+    <div className="rounded-2xl bg-ground px-3 py-2 text-sm">
+      <dl className="flex flex-col gap-1">
         <div>
           <dt className="inline font-bold">À : </dt>
           <dd className="inline">{to}</dd>
@@ -557,6 +558,6 @@ function EmailPreview({ to, email }: { to: string; email: { subject: string; bod
         </div>
       </dl>
       <pre className="mt-2 font-sans text-[13px] leading-snug whitespace-pre-wrap">{email.body}</pre>
-    </details>
+    </div>
   );
 }

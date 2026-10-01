@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronDown, Sparkles, TriangleAlert } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, type Comparison, type ComparisonSupplier, type ItemFlag, type Offer, type OfferLine, type PriceRequest } from "@/lib/api";
@@ -13,31 +13,32 @@ function toError(e: unknown): ApiError {
 }
 
 /**
- * « Lire et comparer » : l'IA lit d'un coup tous les devis reçus et pas
- * encore lus ; le lot compte pour une seule analyse.
+ * L'action de l'étape « Réponses » : comparer les offres reçues. Derrière ce
+ * seul bouton, BatiClair lit les devis pas encore lus (les autres sont
+ * réutilisés), les rapproche de la liste et calcule les écarts.
  */
-export function ReadAllQuotes({
+export function CompareQuotes({
   requestId,
-  unread,
+  received,
   waiting,
   aiAvailable,
-  onRead,
+  onDone,
 }: {
   requestId: string;
-  /** Devis reçus pas encore lus. */
-  unread: number;
+  /** Devis reçus (lus ou non). */
+  received: number;
   /** Fournisseurs qui n'ont pas encore répondu. */
   waiting: number;
   aiAvailable: boolean;
-  onRead: (result: { aiAvailable: boolean; items: Offer[] }) => void;
+  onDone: (result: { aiAvailable: boolean; items: Offer[] }) => void;
 }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const [failed, setFailed] = useState<string[]>([]);
 
-  if (!aiAvailable) return <p className="text-sm text-muted">La lecture par l&apos;IA n&apos;est pas encore activée sur ce compte.</p>;
+  if (!aiAvailable) return <p className="text-sm text-muted">La comparaison automatique n&apos;est pas encore activée sur ce compte.</p>;
 
-  async function readAll() {
+  async function compare() {
     setPending(true);
     setError(null);
     setFailed([]);
@@ -46,8 +47,8 @@ export function ReadAllQuotes({
         method: "POST",
       });
       setFailed(result.failed.map((f) => f.supplier));
-      onRead(result);
-      if (result.failed.length === 0) setTimeout(() => document.getElementById("comparer")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+      onDone(result);
+      setTimeout(() => document.getElementById("comparer")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
     } catch (e) {
       setError(toError(e));
     } finally {
@@ -55,76 +56,37 @@ export function ReadAllQuotes({
     }
   }
 
+  const label = received > 1 ? (waiting > 0 ? `Comparer les ${received} devis reçus` : `Comparer les ${received} devis`) : "Voir l'offre reçue";
   return (
     <div className="flex flex-col gap-2">
       {error ? <ErrorNotice error={error} /> : null}
       {failed.length > 0 ? (
         <p role="alert" className="text-sm font-semibold text-warn">
-          {failed.length > 1 ? `Les devis de ${failed.join(", ")} n'ont pas pu être lus.` : `Le devis de ${failed[0]} n'a pas pu être lu.`} Réessayez :
-          rien n&apos;est décompté pour eux.
+          {failed.length > 1 ? `Les devis de ${failed.join(", ")} n'ont pas pu être lus.` : `Le devis de ${failed[0]} n'a pas pu être lu.`} Réessayez dans un
+          instant.
         </p>
       ) : null}
-      <Button variant="accent" pending={pending} onClick={() => void readAll()}>
+      <Button variant="accent" pending={pending} onClick={() => void compare()}>
         <Sparkles size={18} aria-hidden="true" />
-        {pending
-          ? `L'IA lit ${unread > 1 ? `les ${unread} devis` : "le devis"}… (jusqu'à une minute)`
-          : unread > 1
-            ? `Lire et comparer les ${unread} devis`
-            : "Lire le devis reçu"}
+        {pending ? "Comparaison en cours… (jusqu'à une minute)" : label}
       </Button>
-      {!pending ? (
+      {!pending && waiting > 0 ? (
         <p className="text-center text-[13px] text-muted">
-          1 seule analyse pour {unread > 1 ? "tous les devis" : "ce devis"}
-          {waiting > 0 ? ` · ${waiting > 1 ? `${waiting} fournisseurs n'ont` : "1 fournisseur n'a"} pas encore répondu` : ""}
+          {waiting > 1 ? `${waiting} fournisseurs n'ont` : "1 fournisseur n'a"} pas encore répondu : vous pouvez aussi attendre.
         </p>
       ) : null}
     </div>
   );
 }
 
-/** Devis reçu et lu : un résumé, puis le détail ligne par ligne, où l'artisan corrige une correspondance d'un geste. */
-export function OfferPanel({
-  offer,
-  request,
-  archived,
-  onChange,
-}: {
-  offer: Offer | null;
-  request: PriceRequest;
-  archived: boolean;
-  onChange: (offer: Offer) => void;
-}) {
-  const [open, setOpen] = useState(false);
-
-  // Pas encore lu : la lecture se lance pour tous les devis à la fois (« Lire et comparer »).
-  if (!offer) return null;
-
-  const doubts = offer.lines.filter((l) => l.aiDoubt && !l.edited).length;
+/** Ce qu'on retient d'un devis lu, en une ligne : articles chiffrés, manques, points à vérifier. */
+export function offerFacts(offer: Offer): { text: string; toCheck: boolean } {
+  const doubts = offer.lines.filter((l) => l.aiDoubt && !l.edited).length + (offer.arithmetic.status === "inconsistent" ? 1 : 0);
   const missing = offer.requestedCount - offer.answeredCount;
-
-  return (
-    <div className="flex flex-col gap-2 rounded-2xl bg-ground p-3">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <span className="text-sm font-bold">
-          Devis lu · {offer.answeredCount}/{offer.requestedCount} articles
-        </span>
-        <span className="text-[15px] font-extrabold">{euros(offer.computedTotalHT)} HT</span>
-      </div>
-      {missing > 0 ? <p className="text-sm font-semibold text-warn">Il manque {missing} article{missing > 1 ? "s" : ""} de votre liste.</p> : null}
-      {offer.arithmetic.status === "inconsistent" ? (
-        <p className="flex items-start gap-1.5 text-sm font-semibold text-warn">
-          <TriangleAlert size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
-          Les totaux du devis ne tombent pas juste : vérifiez les lignes signalées.
-        </p>
-      ) : null}
-      {doubts > 0 ? <p className="text-sm font-semibold text-warn">L&apos;IA a un doute sur {doubts} ligne{doubts > 1 ? "s" : ""}.</p> : null}
-      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="inline-flex min-h-10 items-center gap-1 self-start text-sm font-bold text-accent-text">
-        <ChevronDown size={16} className={open ? "rotate-180" : ""} aria-hidden="true" />
-        {open ? "Masquer le détail" : "Voir le détail"}
-      </button>
-      {open ? <OfferLines offer={offer} request={request} archived={archived} onChange={onChange} /> : null}
-    </div>
-  );
+  const parts = [`${offer.answeredCount}/${offer.requestedCount} articles chiffrés`];
+  if (missing > 0) parts.push(`${missing} manquant${missing > 1 ? "s" : ""}`);
+  if (doubts > 0) parts.push(`${doubts} à vérifier`);
+  return { text: parts.join(" · "), toCheck: doubts > 0 };
 }
 
 const KIND_LABEL: Partial<Record<OfferLine["kind"], string>> = {
@@ -135,7 +97,7 @@ const KIND_LABEL: Partial<Record<OfferLine["kind"], string>> = {
   deposit: "Consigne",
 };
 
-function OfferLines({ offer, request, archived, onChange }: { offer: Offer; request: PriceRequest; archived: boolean; onChange: (o: Offer) => void }) {
+export function OfferLines({ offer, request, archived, onChange }: { offer: Offer; request: PriceRequest; archived: boolean; onChange: (o: Offer) => void }) {
   const [error, setError] = useState<ApiError | null>(null);
   const issueLines = new Set(offer.arithmetic.issues.map((i) => i.lineId).filter(Boolean));
 
@@ -268,7 +230,7 @@ export function ProjectComparison({
       <h2 id="compare-title" className="text-xs font-extrabold tracking-[0.04em] text-muted">
         COMPARER
       </h2>
-      <p className="text-sm text-muted">Coût pour toute votre liste, hors taxes, frais compris. Un article manquant est estimé au prix des autres, jamais compté à zéro.</p>
+      <p className="text-sm text-muted">Total HT pour toute votre liste, frais compris.</p>
       <ol className="flex flex-col gap-2">
         {ranked.map((s, i) => {
           const gap = i > 0 && s.comparableTotalHT && best.comparableTotalHT ? Number(s.comparableTotalHT) - Number(best.comparableTotalHT) : null;

@@ -320,61 +320,66 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await page.getByRole("button", { name: "Ajouter", exact: true }).click();
   await expect(page.getByRole("checkbox", { name: /Tuiles & Co/ })).toBeChecked();
   await page.getByRole("button", { name: "Préparer les 2 e-mails" }).click();
-  await expect(page.getByText("DEMANDES DE PRIX")).toBeVisible();
+  await expect(page.getByRole("list", { name: "Vos fournisseurs" })).toBeVisible();
 
   // Rechargement à chaque étape : rien ne se perd.
   await page.reload();
-  await expect(page.getByText("DEMANDES DE PRIX")).toBeVisible();
-  const pointp = page.locator("li").filter({ hasText: "Point.P Vannes" });
-  const tuiles = page.locator("li").filter({ hasText: "Tuiles & Co" });
+  await expect(page.getByRole("list", { name: "Vos fournisseurs" })).toBeVisible();
+  const suppliers = page.getByRole("list", { name: "Vos fournisseurs" });
+  const pointp = suppliers.getByRole("listitem").filter({ hasText: "Point.P Vannes" });
+  const tuiles = suppliers.getByRole("listitem").filter({ hasText: "Tuiles & Co" });
+  const menu = async (card: typeof pointp, item: string) => {
+    await card.getByRole("button", { name: /^Plus d'actions/ }).click();
+    await card.getByRole("menuitem", { name: item }).click();
+  };
   await expect(pointp.getByText("À envoyer")).toBeVisible();
-  // « Envoyer l'e-mail » ouvre la messagerie avec l'e-mail rempli.
+  // Une seule action à l'écran : « Envoyer l'e-mail » ouvre la messagerie avec l'e-mail rempli.
   const href = await pointp.getByRole("link", { name: "Envoyer l'e-mail" }).getAttribute("href");
   expect(href).toMatch(/^mailto:devis@pointp\.fr\?subject=Demande%20de%20prix/);
   expect(decodeURIComponent(href!)).toContain("Bonjour Paul,");
   expect(decodeURIComponent(href!)).toContain("Tuile romane canal rouge 12,5 u/m²");
+  await expect(pointp.getByText("Voir l'e-mail")).toHaveCount(0);
 
-  // Envoyé autrement : marqué à la main.
-  await pointp.getByRole("button", { name: "Déjà envoyé" }).click();
-  await expect(pointp.getByText("En attente de réponse", { exact: true })).toBeVisible();
-  // L'e-mail envoyé se relit mot pour mot.
-  await pointp.getByText("Voir l'e-mail").click();
+  // Le reste est dans « ••• » : envoyé autrement, marqué à la main ; l'e-mail se relit mot pour mot.
+  await menu(pointp, "Déjà envoyé");
+  await expect(pointp.getByText("En attente", { exact: true })).toBeVisible();
+  await menu(pointp, "Voir l'e-mail");
   await expect(pointp.getByText("Objet :")).toBeVisible();
   await expect(pointp.getByText(/Bonjour Paul,/)).toBeVisible();
   await expect(progress.getByRole("link", { name: "Envoyer la demande" })).toBeVisible();
-
-  // Pour tester sans attendre, un devis fictif peut être simulé (lien discret).
-  await expect(pointp.getByRole("button", { name: "Test : simuler un devis fictif" })).toBeVisible();
+  // Pour tester sans attendre, un devis fictif peut être simulé (dans le menu).
+  await pointp.getByRole("button", { name: /^Plus d'actions/ }).click();
+  await expect(pointp.getByRole("menuitem", { name: "Test : simuler un devis fictif" })).toBeVisible();
+  await pointp.getByRole("button", { name: /^Plus d'actions/ }).click();
 
   // Le devis du fournisseur arrive : on le dépose sur sa ligne.
   await pointp.getByLabel("Ajouter son devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
   await expect(pointp.getByText("Devis reçu")).toBeVisible();
-  await expect(pointp.getByText(/Ouvrir son devis \(devis-fournisseur-couvreur\.pdf\)/)).toBeVisible();
-  await expect(page.getByText("1 devis reçu sur 2")).toBeVisible();
+  await expect(pointp.getByText("Prêt à comparer")).toBeVisible();
+  await expect(progress.getByText("1/2")).toBeVisible();
   await page.reload();
-  await expect(page.getByText("1 devis reçu sur 2")).toBeVisible();
   await expect(pointp.getByText("Devis reçu")).toBeVisible();
+  // Un seul devis : on peut déjà le voir, ou attendre l'autre.
+  await expect(page.getByRole("button", { name: "Voir l'offre reçue" })).toBeVisible();
 
   // Le même PDF ne peut pas aller chez un second fournisseur.
-  await tuiles.getByRole("button", { name: "Déjà envoyé" }).click();
+  await menu(tuiles, "Déjà envoyé");
   await tuiles.getByLabel("Ajouter son devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
   await expect(tuiles.getByRole("alert")).toContainText("déjà rangé chez un autre fournisseur");
   await tuiles.getByLabel("Ajouter son devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-2.pdf"));
   await expect(tuiles.getByText("Devis reçu")).toBeVisible();
-  await expect(progress.getByRole("link", { name: "Lire les 2 devis reçus" })).toBeVisible();
+  await expect(progress.getByRole("link", { name: "Comparer les 2 devis" })).toBeVisible();
 
-  // Un seul bouton : l'IA lit tous les devis reçus d'un coup (1 analyse, simulée en test) ; le code recalcule tout.
-  await expect(page.getByText("1 seule analyse pour tous les devis")).toBeVisible();
-  await page.getByRole("button", { name: "Lire et comparer les 2 devis" }).click();
-  await expect(pointp.getByText("Devis lu · 6/6 articles")).toBeVisible();
-  await expect(pointp.getByText("2 805,30 € HT")).toBeVisible();
-  await expect(tuiles.getByText("Devis lu · 5/6 articles")).toBeVisible();
-  await expect(page.getByRole("button", { name: /^Lire et comparer/ })).toHaveCount(0);
-  await expect(tuiles.getByText("Il manque 1 article de votre liste.")).toBeVisible();
+  // L'action de l'étape : « Comparer ». BatiClair lit les devis (simulé en test), rapproche et calcule tout.
+  await page.getByRole("button", { name: "Comparer les 2 devis" }).click();
+  await expect(pointp.getByText("6/6 articles chiffrés")).toBeVisible();
+  await expect(tuiles.getByText("5/6 articles chiffrés · 1 manquant")).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Comparer les/ })).toHaveCount(0);
+  await expect(page.getByText(/analyse/i)).toHaveCount(0);
   await page.reload();
-  await expect(pointp.getByText("Devis lu · 6/6 articles")).toBeVisible();
-  await expect(tuiles.getByText("Devis lu · 5/6 articles")).toBeVisible();
-  await tuiles.getByRole("button", { name: "Voir le détail" }).click();
+  await expect(tuiles.getByText("5/6 articles chiffrés · 1 manquant")).toBeVisible();
+  // Le détail lu reste accessible, au second plan.
+  await menu(tuiles, "Voir les lignes de son devis");
   await expect(tuiles.getByText("Livraison chantier")).toBeVisible();
 
   // Comparer : un total honnête, le manquant estimé, jamais compté à zéro.
@@ -385,7 +390,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await expect(compare.getByText("Moins cher sur le total")).toBeVisible();
   await expect(compare.getByText(/\+80,90\s€ par rapport à Tuiles & Co/)).toBeVisible();
   await expect(compare.getByText("1 ligne non reconnue")).toHaveCount(0);
-  await expect(progress.getByRole("link", { name: "Comparer et classer" })).toBeVisible();
+  await expect(progress.getByRole("link", { name: "Choisir mon fournisseur" })).toBeVisible();
 
   // « Classé », avec le fournisseur retenu (facultatif).
   await compare.getByRole("button", { name: "Classer" }).click();
@@ -396,7 +401,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
 
   // Tout est conservé.
   await page.reload();
-  await expect(page.locator("li").filter({ hasText: "Point.P Vannes" }).getByText("Devis lu · 6/6 articles")).toBeVisible();
+  await expect(pointp.getByText("6/6 articles chiffrés")).toBeVisible();
   await expect(page.locator("section#comparer").getByText(/Classé le/)).toBeVisible();
 });
 
@@ -416,20 +421,21 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
     await page.getByRole("checkbox", { name: new RegExp(name.replace(/[()]/g, "\\$&")) }).check();
   }
   await page.getByRole("button", { name: "Préparer les 3 e-mails" }).click();
-  await expect(page.getByText("DEMANDES DE PRIX")).toBeVisible();
+  await expect(page.getByRole("list", { name: "Vos fournisseurs" })).toBeVisible();
 
   const progress = page.getByRole("navigation", { name: "Avancement du chantier" });
+  const cards = page.getByRole("list", { name: "Vos fournisseurs" }).getByRole("listitem");
   for (const name of ["Tuilerie de l'Ouest", "Négoce Breizh", "Matériaux Atlantique"]) {
-    const card = page.locator("li").filter({ hasText: name });
+    const card = cards.filter({ hasText: name });
     await card.getByRole("button", { name: "Simuler sa réponse (démo)" }).click();
     await expect(card.getByText("Devis reçu")).toBeVisible();
   }
-  await page.getByRole("button", { name: "Lire et comparer les 3 devis" }).click();
+  await page.getByRole("button", { name: "Comparer les 3 devis" }).click();
   for (const name of ["Tuilerie de l'Ouest", "Négoce Breizh", "Matériaux Atlantique"]) {
-    await expect(page.locator("li").filter({ hasText: name }).getByText(/^Devis lu · /)).toBeVisible();
+    await expect(cards.filter({ hasText: name }).getByText(/articles chiffrés/)).toBeVisible();
   }
-  await expect(page.locator("li").filter({ hasText: "Négoce Breizh" }).getByText("Il manque 1 article de votre liste.")).toBeVisible();
+  await expect(cards.filter({ hasText: "Négoce Breizh" }).getByText(/1 manquant/)).toBeVisible();
   const compare = page.locator("section#comparer");
   await expect(compare.getByText("Moins cher sur le total")).toBeVisible();
-  await expect(progress.getByRole("link", { name: "Comparer et classer" })).toBeVisible();
+  await expect(progress.getByRole("link", { name: "Choisir mon fournisseur" })).toBeVisible();
 });
