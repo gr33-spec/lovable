@@ -18,6 +18,11 @@ export default defineConfig({
       LOG_LEVEL: "silent",
       API_PUBLIC_URL: "http://localhost:4000",
       WEB_APP_URL: "http://localhost:3000",
+      // Les tests métier créent librement des chantiers ; billing.test.ts vérifie les vraies limites.
+      BILLING_PLANS: JSON.stringify([
+        { key: "trial", label: "Essai gratuit", projectLimit: 1000, period: "trial", priceEurMonth: null, offered: false },
+        { key: "solo", label: "Solo", projectLimit: 10, period: "month", priceEurMonth: 39, offered: true },
+      ]),
     },
   },
 });

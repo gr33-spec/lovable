@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { Paywall, useBilling } from "@/components/paywall";
 import { BackButton, Button, ErrorNotice, Field, PageTitle } from "@/components/ui";
 import { api, ApiError, newActionKey, type Project } from "@/lib/api";
 import { useDraft } from "@/lib/draft";
@@ -13,6 +14,7 @@ export default function NouveauChantierPage() {
   const [error, setError] = useState<ApiError | null>(null);
   // Une clé par formulaire : double appui ou nouvelle tentative = un seul chantier.
   const key = useRef(newActionKey());
+  const billing = useBilling();
 
   const fieldError = (path: string) =>
     error?.details?.some((d) => d.path === path) ? (path === "name" ? "Donnez un nom au chantier." : "Texte trop long.") : undefined;
@@ -31,9 +33,21 @@ export default function NouveauChantierPage() {
       // replace : « Retour » depuis la fiche ramène à la liste, pas au formulaire.
       router.replace(`/chantiers/${project.id}`);
     } catch (e) {
-      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+      const err = e instanceof ApiError ? e : new ApiError("internal_error", 500);
+      // Limite de la formule atteinte : on montre les formules, sans perdre la saisie.
+      if (err.code === "plan_limit_reached") billing.reload();
+      else setError(err);
       setPending(false);
     }
+  }
+
+  if (billing.data?.limitReached) {
+    return (
+      <>
+        <BackButton fallback="/chantiers" />
+        <Paywall status={billing.data} onChange={billing.setData} />
+      </>
+    );
   }
 
   return (

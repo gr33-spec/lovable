@@ -14,6 +14,7 @@ export type ErrorCode =
   | "payload_too_large"
   | "unreadable_document"
   | "analysis_quota_reached"
+  | "plan_limit_reached"
   | "ai_unavailable"
   | "analysis_failed"
   | "onboarding_required"

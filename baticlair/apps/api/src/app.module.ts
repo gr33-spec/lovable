@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { AiUsageModule } from "./modules/ai-usage/index.js";
+import { BillingModule } from "./modules/billing/index.js";
 import { DemoModule } from "./modules/demo/index.js";
 import { DocumentsModule } from "./modules/documents/index.js";
 import { HealthModule } from "./modules/health/health.module.js";
@@ -31,6 +32,7 @@ import { LoggingModule } from "./platform/logging/logging.module.js";
     PriceRequestsModule,
     OffersModule,
     DemoModule,
+    BillingModule,
     HealthModule,
   ],
 })

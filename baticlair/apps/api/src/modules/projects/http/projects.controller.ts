@@ -8,6 +8,7 @@ import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js"
 import type { ProjectCursor } from "../application/project.repository.js";
 import { ProjectsService } from "../application/projects.service.js";
 import type { Project } from "../domain/project.js";
+import { BillingService } from "../../billing/index.js";
 
 const createBody = z.object({
   name: z.string(),
@@ -64,13 +65,18 @@ function toDto(p: Project) {
 @Controller("v1/projects")
 @UseGuards(TenantGuard)
 export class ProjectsController {
-  constructor(@Inject(ProjectsService) private readonly projects: ProjectsService) {}
+  constructor(
+    @Inject(ProjectsService) private readonly projects: ProjectsService,
+    @Inject(BillingService) private readonly billing: BillingService,
+  ) {}
 
   @Post()
   @HttpCode(201)
   @Idempotent()
   async create(@Tenant() tenant: TenantContext, @Body(new ZodPipe(createBody)) body: z.infer<typeof createBody>) {
-    return toDto(await this.projects.create(tenant, body));
+    // La formule limite les nouveaux chantiers ; jamais un chantier déjà commencé.
+    await this.billing.assertCanCreateProject(tenant);
+    return toDto(await this.projects.create(tenant, { name: body.name, clientName: body.clientName, address: body.address }));
   }
 
   @Get()

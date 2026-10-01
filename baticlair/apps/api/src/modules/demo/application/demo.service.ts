@@ -37,6 +37,7 @@ export class DemoService {
       name: "Démo – Toiture Martin",
       clientName: "M. Martin (fictif)",
       address: "12 rue des Tilleuls, Vannes",
+      demo: true,
     });
     const sender = await this.requestsRepo.sender(tenant, project.id);
     await this.documents.upload(tenant, project.id, {

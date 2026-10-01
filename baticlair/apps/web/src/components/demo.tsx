@@ -40,15 +40,12 @@ export function DemoCard() {
     <section aria-labelledby="demo-title" className="flex flex-col gap-2.5 rounded-3xl border border-dashed border-line bg-surface p-4">
       <h2 id="demo-title" className="flex items-center gap-2 text-[17px] font-extrabold">
         <FlaskConical size={18} aria-hidden="true" />
-        Essayer avec un chantier fictif
+        Essayez BatiClair avec un chantier fictif
       </h2>
-      <p className="text-sm text-muted">
-        Un devis client de toiture et 3 fournisseurs fictifs qui répondent tout seuls : faites tout le parcours, jusqu&apos;à la comparaison. Chaque
-        lecture par l&apos;IA compte comme une analyse.
-      </p>
+      <p className="text-sm text-muted">Découvrez tout le parcours : devis client, matériaux, consultation de fournisseurs et comparaison des offres.</p>
       {error ? <ErrorNotice error={error} /> : null}
       <Button variant="secondary" pending={pending} onClick={() => void start()}>
-        {pending ? "Préparation du chantier…" : "Créer un chantier de démonstration"}
+        {pending ? "Préparation du chantier…" : "Lancer la démonstration"}
       </Button>
     </section>
   );

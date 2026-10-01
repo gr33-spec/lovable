@@ -1,11 +1,11 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { MapPin, Pencil } from "lucide-react";
+import { MapPin, MoreHorizontal } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { ProjectDocuments } from "@/components/project-documents";
 import { ProjectProgressProvider } from "@/components/project-progress";
-import { Badge, BackButton, Button, Card, ErrorNotice, Field, Spinner } from "@/components/ui";
+import { Badge, BackButton, Button, ErrorNotice, Field, Spinner } from "@/components/ui";
 import { api, ApiError, type Project } from "@/lib/api";
 import { fr } from "@/lib/fr";
 import { useResource } from "@/lib/use-resource";
@@ -32,28 +32,72 @@ export default function ChantierPage() {
       {editing ? (
         <EditForm project={project} onDone={(p) => { if (p) setProject(p); setEditing(false); }} />
       ) : (
-        <Header project={project} onEdit={() => setEditing(true)} />
+        <Header project={project} onEdit={() => setEditing(true)} onChange={setProject} />
       )}
       <ProjectProgressProvider projectId={project.id} archived={project.status === "archived"}>
         <ProjectDocuments projectId={project.id} archived={project.status === "archived"} />
       </ProjectProgressProvider>
-      <StatusAction project={project} onChange={setProject} />
     </>
   );
 }
 
-function Header({ project, onEdit }: { project: Project; onEdit: () => void }) {
+function Header({ project, onEdit, onChange }: { project: Project; onEdit: () => void; onChange: (p: Project) => void }) {
   const mapsUrl = project.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(project.address)}` : null;
+  const [menu, setMenu] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<ApiError | null>(null);
+  const busy = useRef(false);
+  const done = project.status === "archived";
+
+  async function toggleStatus() {
+    if (busy.current) return;
+    busy.current = true;
+    setMenu(false);
+    setPending(true);
+    setError(null);
+    try {
+      onChange(await api<Project>(`/v1/projects/${project.id}`, { method: "PATCH", body: { status: done ? "active" : "archived" } }));
+    } catch (e) {
+      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+    } finally {
+      busy.current = false;
+      setPending(false);
+    }
+  }
+
+  const item = "flex min-h-11 w-full items-center text-left text-sm font-bold";
   return (
     <header className="flex flex-col gap-2">
       <div className="flex items-start justify-between gap-3">
         <h1 className="font-display text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em]">{project.name}</h1>
-        <button type="button" onClick={onEdit} aria-label="Modifier le chantier" className="flex size-11 shrink-0 items-center justify-center rounded-full bg-surface shadow-card">
-          <Pencil size={18} aria-hidden="true" />
+        <button
+          type="button"
+          onClick={() => setMenu(!menu)}
+          aria-expanded={menu}
+          aria-label="Plus d'actions sur le chantier"
+          disabled={pending}
+          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-surface shadow-card disabled:opacity-60"
+        >
+          <MoreHorizontal size={20} aria-hidden="true" />
         </button>
       </div>
+      {menu ? (
+        <ul role="menu" aria-label="Actions sur le chantier" className="flex flex-col divide-y divide-line rounded-2xl bg-surface px-4 shadow-card">
+          <li role="none">
+            <button type="button" role="menuitem" className={item} onClick={() => { setMenu(false); onEdit(); }}>
+              Modifier le chantier
+            </button>
+          </li>
+          <li role="none">
+            <button type="button" role="menuitem" className={item} onClick={() => void toggleStatus()}>
+              {done ? "Reprendre le chantier" : "Marquer terminé"}
+            </button>
+          </li>
+        </ul>
+      ) : null}
+      {error ? <ErrorNotice error={error} /> : null}
       <div className="flex flex-wrap items-center gap-2 text-sm text-muted">
-        {project.status === "archived" ? <Badge tone="ok">{fr.status.archived}</Badge> : <Badge>{fr.status.active}</Badge>}
+        {done ? <Badge tone="ok">{fr.status.archived}</Badge> : <Badge>{fr.status.active}</Badge>}
         <span>{project.clientName ?? "Client non renseigné"}</span>
       </div>
       {mapsUrl ? (
@@ -103,41 +147,5 @@ function EditForm({ project, onDone }: { project: Project; onDone: (p: Project |
         </Button>
       </div>
     </form>
-  );
-}
-
-function StatusAction({ project, onChange }: { project: Project; onChange: (p: Project) => void }) {
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<ApiError | null>(null);
-  const done = project.status === "archived";
-  const busy = useRef(false);
-
-  async function toggle() {
-    if (busy.current) return;
-    busy.current = true;
-    setPending(true);
-    setError(null);
-    try {
-      onChange(await api<Project>(`/v1/projects/${project.id}`, { method: "PATCH", body: { status: done ? "active" : "archived" } }));
-    } catch (e) {
-      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
-    } finally {
-      busy.current = false;
-      setPending(false);
-    }
-  }
-
-  return (
-    <Card className="flex flex-col gap-3 p-4">
-      {error ? <ErrorNotice error={error} /> : null}
-      <p className="text-sm text-muted">
-        {done
-          ? "Ce chantier est terminé. Il reste consultable et se retrouve par la recherche."
-          : "Chantier fini ? Marquez-le terminé : il quitte la liste « En cours » mais reste consultable. Rien n'est supprimé."}
-      </p>
-      <Button variant="secondary" pending={pending} onClick={() => void toggle()}>
-        {done ? "Reprendre le chantier" : "Marquer terminé"}
-      </Button>
-    </Card>
   );
 }

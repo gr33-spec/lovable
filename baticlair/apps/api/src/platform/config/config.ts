@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { parseActivationCodes, parsePlans, type Plan } from "./plans.js";
 
 /**
  * Configuration validée au démarrage : l'application refuse de démarrer si
@@ -61,6 +62,10 @@ const envSchema = z
     GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
     MICROSOFT_CLIENT_ID: z.string().min(1).optional(),
     MICROSOFT_CLIENT_SECRET: z.string().min(1).optional(),
+    /** Catalogue des formules en JSON (voir modules/billing/application/plans.ts) ; défaut dans le code. */
+    BILLING_PLANS: z.string().min(2).optional(),
+    /** Codes d'activation manuelle d'une formule, pour les tests : « CODE:solo,AUTRE:pro ». Vide = désactivé. */
+    PLAN_ACTIVATION_CODES: z.string().optional(),
   })
   .superRefine((env, ctx) => {
     const isDeployed = env.NODE_ENV === "production" || env.NODE_ENV === "staging";
@@ -112,6 +117,7 @@ export interface AppConfig {
   oauth: { google?: OAuthClientConfig; microsoft?: OAuthClientConfig };
   documents: { maxBytes: number; maxPages: number };
   aiCost: { usdToEur: string; monthlyBudgetEur: string };
+  billing: { plans: Plan[]; activationCodes: Record<string, string> };
   ai: {
     provider: "anthropic" | "disabled" | "fake";
     apiKey?: string;
@@ -135,6 +141,12 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     );
   }
   const e = parsed.data;
+  let plans: Plan[];
+  try {
+    plans = parsePlans(e.BILLING_PLANS);
+  } catch (err) {
+    throw new ConfigError([`BILLING_PLANS : ${err instanceof Error ? err.message : String(err)}`]);
+  }
   const isDeployed = e.NODE_ENV === "production" || e.NODE_ENV === "staging";
   const emailProvider = e.EMAIL_PROVIDER ?? (e.RESEND_API_KEY ? "resend" : isDeployed ? "disabled" : "console");
   const oauth = (id?: string, secret?: string) => (id && secret ? { clientId: id, clientSecret: secret } : undefined);
@@ -155,6 +167,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     oauth: { ...(google ? { google } : {}), ...(microsoft ? { microsoft } : {}) },
     documents: { maxBytes: e.DOCUMENT_MAX_BYTES, maxPages: e.DOCUMENT_MAX_PAGES },
     aiCost: { usdToEur: e.AI_USD_TO_EUR, monthlyBudgetEur: e.AI_MONTHLY_BUDGET_EUR },
+    billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES) },
     ai: {
       provider: e.AI_PROVIDER ?? (e.ANTHROPIC_API_KEY ? "anthropic" : "disabled"),
       ...(e.ANTHROPIC_API_KEY ? { apiKey: e.ANTHROPIC_API_KEY } : {}),
