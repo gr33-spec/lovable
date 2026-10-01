@@ -61,6 +61,13 @@ Tout se lance avec `pnpm turbo run lint typecheck test build`.
 - Aucun appel réseau réel dans la CI (sauf campagne d'évaluation
   explicitement lancée).
 - Aucun test désactivé pour « faire passer » la CI.
+- **Chaque cas tordu découvert sur le terrain** (devis client, réponse
+  fournisseur, contrôle du fondateur) **devient un test permanent** avant
+  sa correction : le test échoue, on corrige, il passe, il reste. Une
+  correction ne doit jamais en défaire une autre trois semaines plus tard.
+- **Référentiel métier** : chaque chantier contrôlé par un professionnel
+  (devis → quantitatif attendu → commande réelle) devient un cas de
+  référence rejoué à chaque version du moteur ; un écart est une régression.
 
 ## CI (phase 1)
 

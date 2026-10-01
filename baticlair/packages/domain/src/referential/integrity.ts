@@ -1,5 +1,5 @@
 import { formulaVariables, inferDim, parseFormula } from "./expression.js";
-import type { Fact, Provenance, Referential } from "./model.js";
+import { PRODUCT_DATA_SOURCES, type Fact, type Provenance, type Referential } from "./model.js";
 import { dimLabel, parseRefUnit, sameDim, type Dim } from "./units.js";
 import { normalizeText } from "../trades/trade-profile.js";
 
@@ -41,6 +41,14 @@ export function checkReferential(ref: Referential): string[] {
     if (dim && expected && !sameDim(dim, expected)) err(where, `unité ${f.unit} (${dimLabel(dim)}) au lieu de ${dimLabel(expected)}`);
   };
 
+  /** Une caractéristique produit se prouve par le fabricant (ou une norme, un distributeur), jamais par l'habitude. */
+  const productFact = (where: string, f: Fact, expected: Dim | null, nature: Fact["kind"]) => {
+    fact(where, f, expected);
+    if (f.kind !== nature) err(where, `nature « ${f.kind} » rangée comme « ${nature} »`);
+    const sourceKind = ref.sources.find((s) => s.id === f.source)?.kind;
+    if (sourceKind && !PRODUCT_DATA_SOURCES.includes(sourceKind)) err(where, `donnée produit sourcée par « ${sourceKind} » : il faut une source fabricant, norme ou distributeur`);
+  };
+
   const families = new Map(ref.families.map((f) => [f.code, f]));
   for (const f of ref.families) {
     unitDim(`famille ${f.code}`, f.needUnit);
@@ -62,11 +70,11 @@ export function checkReferential(ref: Referential): string[] {
     for (const [key, f] of Object.entries(p.attributes)) {
       const def = family.attributes.find((a) => a.key === key);
       if (!def) err(where, `caractéristique « ${key} » non déclarée pour la famille ${family.code}`);
-      fact(`${where}.${key}`, f, def ? unitDim(`${where}.${key}`, def.unit) : null);
+      productFact(`${where}.${key}`, f, def ? unitDim(`${where}.${key}`, def.unit) : null, "manufacturer_spec");
     }
     const needDim = unitDim(where, family.needUnit);
     if (p.sellingUnits.filter((s) => s.primary).length !== 1) err(where, "il faut exactement une unité de commande principale");
-    for (const su of p.sellingUnits) fact(`${where} vendu par ${su.id}`, su.contains, needDim);
+    for (const su of p.sellingUnits) productFact(`${where} vendu par ${su.id}`, su.contains, needDim, "packaging");
     for (const alias of p.aliases) {
       const key = `${p.family}|${normalizeText(alias)}`;
       const owner = aliasOwners.get(key);
@@ -79,7 +87,10 @@ export function checkReferential(ref: Referential): string[] {
     const where = `ouvrage ${w.id}`;
     for (const t of w.triggers) if (!families.has(t)) err(where, `famille déclencheuse inconnue « ${t} »`);
     for (const s of w.slots) if (!families.has(s.family)) err(where, `emplacement ${s.key} : famille inconnue « ${s.family} »`);
-    for (const [k, c] of Object.entries(w.constants)) fact(`${where}.regle.${k}`, c);
+    for (const [k, c] of Object.entries(w.constants)) {
+      fact(`${where}.regle.${k}`, c);
+      if (c.kind !== "installation_condition") err(`${where}.regle.${k}`, `une constante d'ouvrage est une condition de pose, pas « ${c.kind} »`);
+    }
     const paramDims = new Map<string, Dim | null>(w.params.map((p) => [p.key, unitDim(`${where}.${p.key}`, p.unit)]));
     const dimOf = (name: string): Dim => {
       const [head, attr] = name.split(".");
@@ -133,6 +144,8 @@ export function checkReferential(ref: Referential): string[] {
   for (const r of ref.wasteRules) {
     provenance(`marge ${r.family}`, r);
     if (!families.has(r.family)) err(`marge ${r.family}`, "famille inconnue");
+    if (r.product && !ref.products.some((p) => p.id === r.product && p.family === r.family)) err(`marge ${r.family}`, `produit inconnu « ${r.product} »`);
+    if (r.workItem && !ref.workItems.some((w) => w.id === r.workItem)) err(`marge ${r.family}`, `ouvrage inconnu « ${r.workItem} »`);
     if (!/^\d+(\.\d+)?$/.test(r.rate)) err(`marge ${r.family}`, "taux invalide");
   }
   return errors;

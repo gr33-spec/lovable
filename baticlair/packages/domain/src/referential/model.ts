@@ -58,8 +58,24 @@ export interface Provenance {
   note?: string;
 }
 
+/**
+ * Les cinq natures de savoir, JAMAIS mélangées :
+ *  - caractéristique fabricant (largeur utile, pureau mini/maxi) ;
+ *  - condition de pose (recouvrement de l'écran selon la pente, pente
+ *    minimale admissible : elle autorise ou non un produit, elle ne fixe
+ *    pas une quantité) ;
+ *  - donnée du chantier (surface, pente, longueurs, pureau retenu) ;
+ *  - préférence ou pratique de l'artisan (marge, longueur de liteau habituelle) ;
+ *  - conditionnement (palette, rouleau, longueur vendue).
+ * Les trois premières et la dernière vivent dans le référentiel (sourcées) ;
+ * les données du chantier et les préférences viennent du devis ou de l'artisan.
+ */
+export type KnowledgeKind = "manufacturer_spec" | "installation_condition" | "site_data" | "artisan_preference" | "packaging";
+
 /** Une valeur chiffrée prouvée : « 0,268 m (fiche Edilians, vérifiée le…) ». */
 export interface Fact extends Provenance {
+  /** Nature de la donnée (contrôlée selon l'endroit où elle est rangée). */
+  kind: "manufacturer_spec" | "installation_condition" | "packaging";
   /** Décimal en texte, point décimal (« 0.268 »). */
   value: string;
   /** Unité du référentiel (« m », « m2 », « u/m2 », « % »). */
@@ -115,6 +131,12 @@ export interface ParamDef {
   key: string;
   label: string;
   unit: string;
+  /**
+   * « site_data » : propre à ce chantier (lu dans le devis ou demandé) ;
+   * « artisan_preference » : habitude de l'entreprise, réutilisable d'un chantier à l'autre.
+   * Jamais de valeur par défaut : une formule ne calcule qu'avec des données présentes.
+   */
+  kind: "site_data" | "artisan_preference";
   /** Question posée s'il manque (courte, mots simples). */
   question: string;
   hint?: string;
@@ -160,12 +182,28 @@ export interface WorkItemType {
   needs: NeedRule[];
 }
 
-/** Marge de casse ou de coupe recommandée par une source (sinon : réglage de l'artisan). */
+/**
+ * Marge de casse ou de coupe recommandée par une source. Jamais
+ * universelle : elle vise une famille, et peut se restreindre à un produit
+ * ou à un ouvrage (la plus précise l'emporte). Sans règle, c'est le
+ * réglage de l'artisan, sinon 0 % affiché.
+ */
 export interface WasteRule extends Provenance {
   family: string;
+  product?: string;
+  workItem?: string;
   /** En pourcentage (« 5 » = 5 %). */
   rate: string;
 }
+
+/**
+ * Deux savoirs distincts :
+ *  - DONNÉE PRODUIT (caractéristiques, conditionnements) : prouvée par le
+ *    fabricant, une norme ou un distributeur, jamais par l'habitude ;
+ *  - RÈGLE DE MISE EN ŒUVRE (formules, constantes, marges) : norme, DTU,
+ *    ou règle BatiClair validée par un professionnel.
+ */
+export const PRODUCT_DATA_SOURCES: readonly SourceKind[] = ["manufacturer", "standard", "retailer", "definition"];
 
 export interface Referential {
   id: string;
