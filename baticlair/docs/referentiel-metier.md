@@ -1,7 +1,8 @@
 # Du devis client à la liste d'achat fournisseur : audit et architecture
 
-> **Statut** : proposition (2026-10-01), à valider par le fondateur avant
-> toute implémentation. Rien n'est codé à ce stade.
+> **Statut** : décidé (2026-10-01) : le moteur de quantitatif est le cœur de
+> BatiClair. Étapes 0 et 1 réalisées ; structure et premier exemple :
+> `referentiel-exemple-couverture.md`.
 >
 > **Principe** : complexité derrière, simplicité devant. BatiClair **sait et
 > justifie**, ou **demande**, ou **dit qu'il ne sait pas**. Jamais de fausse
