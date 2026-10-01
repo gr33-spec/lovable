@@ -12,8 +12,11 @@ export class FakeTakeoffExtractor implements TakeoffExtractor {
   readonly provider = "fake";
 
   async extract(request: ExtractionRequest): Promise<ExtractionAttempt> {
+    const scope = request.scope ? new Set(request.scope.pages) : null;
     const lines: NonNullable<ExtractionAttempt["output"]>["lines"] = fakeRows(request.numberedText)
       .filter((row) => row.index >= 1)
+      // Bloc d'un gros devis : seulement les lignes de ses pages (les autres sont du contexte).
+      .filter((row) => !scope || scope.has(Number.parseInt(row.ref, 10)))
       .map((row) => ({
         designation: row.cols[row.index - 1]!,
         quantity: row.quantity,

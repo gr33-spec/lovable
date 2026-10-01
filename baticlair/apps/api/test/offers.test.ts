@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { OFFER_EXTRACTOR, type OfferAttempt, type OfferExtractor } from "../src/modules/offers/application/offer-extractor.js";
 import { makePdf, type FixtureRow } from "./support/pdf-fixtures.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
 
@@ -161,5 +162,32 @@ describe("lecture des devis fournisseurs (IA simulée)", () => {
     const res = await a.agent.post(`/v1/price-request-recipients/${recipient.id}/analysis`);
     expect(res.status).toBe(400);
     expect(res.body.error.details).toMatchObject({ reason: "no_quote" });
+  });
+});
+
+describe("devis fournisseur dont la réponse est coupée", () => {
+  let cut: TestContext;
+  let calls = 0;
+  const truncated: OfferExtractor = {
+    provider: "anthropic",
+    async extract(): Promise<OfferAttempt> {
+      calls++;
+      return { provider: "anthropic", model: "claude-sonnet-5-5", usage: { inputTokens: 9000, outputTokens: 16000 }, status: "invalid_output", output: null, errorCode: "max_tokens", durationMs: 1 };
+    },
+  };
+  beforeAll(async () => {
+    cut = await createTestApp((b) => b.overrideProvider(OFFER_EXTRACTOR).useValue(truncated));
+  });
+  afterAll(async () => {
+    await cut.app.close();
+  });
+
+  it("n'est pas redemandé à l'identique : un seul appel payé, échec net", async () => {
+    await resetDatabase(cut.prisma);
+    const { agent } = await signUpWithCompany(cut.app, "a@example.fr", "Toitures Martin");
+    const { ra } = await withTwoQuotes(agent);
+    const res = await agent.post(`/v1/price-request-recipients/${ra}/analysis`);
+    expect(res.status).toBe(502);
+    expect(calls).toBe(1);
   });
 });

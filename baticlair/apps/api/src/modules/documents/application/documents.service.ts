@@ -119,7 +119,19 @@ export class DocumentsService {
       };
     });
 
-    const estimate = estimateDocumentCost(pages, this.policy, priceTableAt(this.now()));
+    // Même plan que celui de la lecture : un appel, ou des blocs pour un très gros devis.
+    const estimate = estimateDocumentCost(
+      pages.map((p) => ({
+        pageNumber: p.pageNumber,
+        route: p.route,
+        chars: p.route === "text" ? p.lines.reduce((s, l) => s + l.ref.length + l.text.length + 4, 0) : 0,
+        lines: p.route === "text" ? p.lines.length : 0,
+        widthPt: p.widthPt,
+        heightPt: p.heightPt,
+      })),
+      this.policy,
+      priceTableAt(this.now()),
+    );
     await this.documents.saveProcessing(tenant, documentId, PIPELINE_VERSION, {
       status: "completed",
       pageCount: content.pageCount,

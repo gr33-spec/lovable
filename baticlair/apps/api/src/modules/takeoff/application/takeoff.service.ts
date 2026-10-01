@@ -2,7 +2,12 @@ import {
   artisanView,
   assessTakeoffLine,
   computeWithAnswers,
+  DEFAULT_EXTRACTION_POLICY,
+  mergeChunkLines,
   planQuote,
+  planReading,
+  priceTableAt,
+  splitChunk,
   reviewExtractedTakeoff,
   ROOFING_REFERENTIAL,
   slotsGivenByQuote,
@@ -10,6 +15,8 @@ import {
   type ArtisanView,
   type EngineAnswer,
   type CorrectionAction,
+  type ExtractionPolicy,
+  type ReadingChunk,
   type LineSnapshot,
   type LineValidation,
   type TakeoffIssue,
@@ -21,11 +28,39 @@ import type { DocumentAiInput, DocumentRepository, DocumentWithProcessing, Prepa
 import type { CompanyMemory, CorrectionJournal } from "../../learning/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { TAKEOFF_PROMPT } from "./prompt.js";
-import type { ExtractionAttempt, TakeoffExtractor } from "./takeoff-extractor.js";
+import type { ExtractionAttempt, ExtractionOutput, TakeoffExtractor } from "./takeoff-extractor.js";
 import type { LineFields, TakeoffLineRecord, TakeoffRecord, TakeoffRepository } from "./takeoff.repository.js";
 
-/** Deux tentatives au plus : une relance si la réponse est inexploitable, jamais plus (coût maîtrisé). */
-const MAX_ATTEMPTS = 2;
+/**
+ * Lecture d'un devis par l'IA (PD-046) :
+ * - un seul appel pour un devis normal ; un très gros devis est lu en blocs
+ *   de pages, décidés avant tout appel par le plan de lecture ;
+ * - une réponse coupée (trop longue) n'est JAMAIS redemandée à l'identique :
+ *   le bloc est relu en deux moitiés ; une page seule trop dense échoue ;
+ * - une réponse illisible ou une panne passagère : une seule relance ;
+ * - un document dont le coût estimé est anormal pour un devis est refusé
+ *   avant tout appel, et le nombre d'appels est plafonné.
+ */
+export interface ReadingOptions {
+  policy?: ExtractionPolicy;
+  /** Coût estimé au-delà duquel un document n'est pas un devis normal (micro-dollars). */
+  maxAnalysisMicroUsd?: number;
+  now?: () => Date;
+}
+
+/** Plafond par défaut (≈ 2,8 €) : environ 5 fois un devis de 500 lignes scanné (≈ 0,6 €). */
+export const DEFAULT_MAX_ANALYSIS_MICRO_USD = 3_000_000;
+
+type ChunkParts = { chunk: ReadingChunk; output: ExtractionOutput }[];
+type ChunkFailure = { ok: false; reason: string };
+type ChunkResult = { ok: true; parts: ChunkParts } | ChunkFailure;
+
+/** Une réponse coupée ou trop longue à venir : la même demande échouerait pareil. */
+const tooLong = (a: ExtractionAttempt) => a.status === "timeout" || (a.status === "invalid_output" && a.errorCode === "max_tokens");
+/** Échec imprévisible (réponse mal formée, panne passagère) : une relance a un sens. */
+const transient = (a: ExtractionAttempt) =>
+  (a.status === "invalid_output" && a.errorCode !== "max_tokens") ||
+  (a.status === "provider_error" && (a.errorCode === "http_429" || !/^http_4\d\d$/.test(a.errorCode ?? "")));
 
 export interface ReviewedTakeoff {
   takeoff: TakeoffRecord;
@@ -53,6 +88,7 @@ export class TakeoffService {
     private readonly journal: CorrectionJournal,
     private readonly memory: CompanyMemory,
     private readonly onRecordFailure: (error: unknown) => void = () => {},
+    private readonly reading: ReadingOptions = {},
   ) {}
 
   get aiAvailable(): boolean {
@@ -70,6 +106,12 @@ export class TakeoffService {
     if (!this.extractor) throw new DomainError("ai_unavailable", "AI reading is not configured");
 
     const prepared = await this.aiInput.prepare(tenant, doc);
+    const policy = this.reading.policy ?? DEFAULT_EXTRACTION_POLICY;
+    const plan = planReading(prepared.pages, policy, priceTableAt((this.reading.now ?? (() => new Date()))()));
+    // Garde-fou : un document au coût anormal pour un devis n'est pas envoyé (rien n'est dépensé ni décompté).
+    if (plan.estimate.totalMicroUsd > (this.reading.maxAnalysisMicroUsd ?? DEFAULT_MAX_ANALYSIS_MICRO_USD)) {
+      throw new DomainError("unreadable_document", "Estimated reading cost is abnormal for a quote", { reason: "abnormal_size" });
+    }
     const begin = await this.meter.begin({
       companyId: tenant.companyId,
       userId: tenant.userId,
@@ -80,20 +122,19 @@ export class TakeoffService {
     if (begin.status === "already_done") throw new DomainError("conflict", "Analysis already completed for this document");
     const analysisId = begin.analysis.id;
 
-    let success: ExtractionAttempt | null = null;
-    let last: ExtractionAttempt | null = null;
-    for (let attempt = 1; attempt <= MAX_ATTEMPTS && !success; attempt++) {
-      const result = await this.extractor.extract({ ...prepared.input, ...this.tradeHints(doc.trade) });
-      last = result;
-      await this.record(tenant, doc, prepared, analysisId, attempt, result);
-      if (result.status === "success") success = result;
-      else if (result.status === "refused") break;
-    }
-
-    if (!success?.output) {
+    const read = await this.readPlan(tenant, doc, prepared, analysisId, plan.chunks, policy);
+    if (read.ok === false) {
       await this.meter.fail(analysisId);
-      throw new DomainError("analysis_failed", "The AI could not read this quote", { reason: last?.status ?? "unknown" });
+      throw new DomainError("analysis_failed", "The AI could not read this quote", { reason: read.reason });
     }
+    const output: ExtractionOutput =
+      read.parts.length === 1 && read.parts[0]!.chunk.context.length === 0
+        ? read.parts[0]!.output
+        : {
+            lines: mergeChunkLines(read.parts.map((p) => ({ chunk: p.chunk, lines: p.output.lines }))).lines,
+            notes: [...new Set(read.parts.flatMap((p) => p.output.notes))],
+          };
+    const success = { model: read.model, output };
 
     const takeoff = await this.takeoffs.create(tenant, {
       projectId: doc.projectId,
@@ -344,6 +385,62 @@ export class TakeoffService {
     return { takeoff, validation, view: artisanView(lines, validation, engine) };
   }
 
+  /**
+   * Exécute le plan : les blocs en parallèle (un seul bloc pour un devis
+   * normal). Toutes les pages doivent être lues : un bloc en échec fait
+   * échouer la lecture, jamais une liste incomplète présentée comme entière.
+   */
+  private async readPlan(
+    tenant: TenantContext,
+    doc: DocumentWithProcessing,
+    prepared: Prepared,
+    analysisId: string,
+    chunks: readonly ReadingChunk[],
+    policy: ExtractionPolicy,
+  ): Promise<{ ok: true; model: string; parts: ChunkParts } | ChunkFailure> {
+    if (!this.extractor || chunks.length === 0) return { ok: false, reason: "nothing_to_read" };
+    const extractor = this.extractor;
+    const hints = this.tradeHints(doc.trade);
+    const allPages = prepared.pages.length;
+    const maxCalls = Math.max(policy.maxCallsPerAnalysis, chunks.length);
+    let calls = 0;
+    let model = "";
+
+    const readChunk = async (chunk: ReadingChunk, depth: number): Promise<ChunkResult> => {
+      const whole = chunk.context.length === 0 && chunk.pages.length === allPages;
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        if (calls >= maxCalls) return { ok: false, reason: "too_many_calls" };
+        // Numéro pris avant toute attente : les blocs lus en parallèle ont chacun le leur.
+        const call = ++calls;
+        const input = whole ? prepared.input : await prepared.slice([...chunk.pages, ...chunk.context]);
+        const result = await extractor.extract({ ...input, ...hints, ...(whole ? {} : { scope: { pages: chunk.pages } }) });
+        const sent = new Set(whole ? prepared.pages.map((p) => p.pageNumber) : [...chunk.pages, ...chunk.context]);
+        const routes = prepared.pages.filter((p) => sent.has(p.pageNumber));
+        const pages = { text: routes.filter((p) => p.route === "text").length, vision: routes.filter((p) => p.route === "vision").length };
+        await this.record(tenant, doc, pages, prepared.processingId, analysisId, call, result);
+        if (result.status === "success" && result.output) {
+          model = result.model;
+          return { ok: true, parts: [{ chunk, output: result.output }] };
+        }
+        if (tooLong(result)) {
+          // Jamais la même demande : deux moitiés, chacune avec son contexte.
+          const halves = depth < 2 ? splitChunk(chunk, prepared.pages, policy) : null;
+          if (!halves) return { ok: false, reason: "page_too_dense" };
+          const results = await Promise.all(halves.map((h) => readChunk(h, depth + 1)));
+          const failed = results.find((r): r is ChunkFailure => !r.ok);
+          return failed ?? { ok: true, parts: results.flatMap((r) => (r.ok ? r.parts : [])) };
+        }
+        if (!transient(result) || attempt === 2) return { ok: false, reason: result.status };
+      }
+      return { ok: false, reason: "unknown" };
+    };
+
+    const results = await Promise.all(chunks.map((c) => readChunk(c, 0)));
+    const failed = results.find((r): r is ChunkFailure => !r.ok);
+    if (failed) return failed;
+    return { ok: true, model, parts: results.flatMap((r) => (r.ok ? r.parts : [])) };
+  }
+
   /** Ce que l'IA sait du métier : son nom et ses familles de matériaux habituelles (vocabulaire). */
   private tradeHints(trade: string): { tradeLabel: string; materialFamilies: string[] } {
     const profile = tradeProfile(trade);
@@ -353,7 +450,8 @@ export class TakeoffService {
   private async record(
     tenant: TenantContext,
     doc: DocumentWithProcessing,
-    prepared: Prepared,
+    pages: { text: number; vision: number },
+    processingId: string | null,
     analysisId: string,
     attempt: number,
     result: ExtractionAttempt,
@@ -363,18 +461,18 @@ export class TakeoffService {
         companyId: tenant.companyId,
         projectId: doc.projectId,
         documentId: doc.id,
-        processingId: prepared.processingId,
+        processingId,
         analysisId,
         userId: tenant.userId,
         task: "takeoff_extraction",
-        route: prepared.pagesVision > 0 ? "vision" : "text",
+        route: pages.vision > 0 ? "vision" : "text",
         provider: result.provider,
         model: result.model,
         promptId: TAKEOFF_PROMPT.id,
         promptVersion: TAKEOFF_PROMPT.version,
         attempt,
-        pagesText: prepared.pagesText,
-        pagesVision: prepared.pagesVision,
+        pagesText: pages.text,
+        pagesVision: pages.vision,
         usage: result.usage,
         status: result.status,
         errorCode: result.errorCode,

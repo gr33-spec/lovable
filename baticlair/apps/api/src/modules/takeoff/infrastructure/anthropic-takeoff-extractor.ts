@@ -1,7 +1,8 @@
 import { AnthropicDocumentReader } from "../../../platform/ai/anthropic-document-reader.js";
-import { TAKEOFF_PROMPT, takeoffSystemPrompt } from "../application/prompt.js";
+import { scopeInstruction, TAKEOFF_PROMPT, takeoffSystemPrompt } from "../application/prompt.js";
 import {
-  extractionOutputSchema,
+  decodeExtraction,
+  extractionWireSchema,
   type ExtractionAttempt,
   type ExtractionRequest,
   type TakeoffExtractor,
@@ -19,13 +20,15 @@ export class AnthropicTakeoffExtractor implements TakeoffExtractor {
     this.reader = new AnthropicDocumentReader(apiKey, model, effort, fetchImpl);
   }
 
-  extract(request: ExtractionRequest): Promise<ExtractionAttempt> {
-    return this.reader.read({
+  async extract(request: ExtractionRequest): Promise<ExtractionAttempt> {
+    const attempt = await this.reader.read({
       system: takeoffSystemPrompt(request.tradeLabel, request.materialFamilies),
-      schema: extractionOutputSchema,
+      schema: extractionWireSchema,
       document: request,
       documentName: "devis",
+      ...(request.scope ? { extra: scopeInstruction(request.scope.pages) } : {}),
       tag: `${TAKEOFF_PROMPT.id}-v${TAKEOFF_PROMPT.version}`,
     });
+    return { ...attempt, output: attempt.output ? decodeExtraction(attempt.output) : null };
   }
 }

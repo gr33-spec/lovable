@@ -53,6 +53,8 @@ const unreadableReasons: Record<string, string> = {
   encrypted: "Ce PDF est protégé par un mot de passe. Enregistrez-le sans protection, puis réessayez.",
   corrupted: "Ce PDF est abîmé et ne peut pas être lu.",
   too_many_pages: "Ce document a trop de pages. Envoyez seulement le devis.",
+  abnormal_size:
+    "Ce document est bien plus long qu'un devis habituel. Vérifiez qu'il ne contient que le devis (sans catalogue ni annexes), puis réessayez.",
   read_failed: "Le devis est bien enregistré.",
   photo_unreadable: "Cette photo ne peut pas être lue. Réessayez avec une photo en JPEG ou en PNG.",
 };

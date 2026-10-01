@@ -576,3 +576,38 @@ fictives uniquement.
   des corrections similaires entre entreprises. Ne modifie jamais le
   référentiel général. Détails : `confiance-et-apprentissage.md`.
 
+
+### PD-046 — Lecture des gros devis : un appel normalement, des blocs seulement si nécessaire (2026-10-01)
+
+Validée par le fondateur après l'audit simplicité / coût. Principe inchangé :
+**une lecture IA du devis, puis tout le reste en code**.
+
+- **Réponse compacte (prompt v7)** : chaque suite de titres n'est écrite
+  qu'une fois (les lignes y renvoient par son numéro), une seule liste de
+  sources par ligne, noms de champ courts. Même information, environ 40 % de
+  réponse en moins sur Morellec.
+- **Plan de lecture décidé avant tout appel, sans IA** : si la réponse
+  attendue (estimation haute) tient largement dans la limite d'un appel
+  (9 000 tokens sur 16 000), un seul appel, comme avant. Sinon, blocs de
+  pages consécutives de tailles voisines, lus en parallèle. Chaque bloc voit
+  toutes les pages qui le précèdent (titres en cours) et la page suivante
+  (ligne coupée), mais ne liste que ses pages. L'artisan ne choisit rien.
+- **Réunion déterministe** : une ligne appartient au bloc de la page où elle
+  commence ; une ligne lue dans le contexte d'un autre bloc, ou qui reprend
+  une référence déjà retenue, est écartée ; l'ordre est celui des pages.
+- **Jamais la même demande deux fois** : une réponse coupée (ou trop longue à
+  venir) fait relire le bloc en deux moitiés ; une page seule trop dense
+  échoue net. Une seule relance, seulement pour une réponse mal formée ou une
+  panne passagère. Même règle pour les devis fournisseurs (sans découpage).
+- **Garde-fou** : le coût estimé avant lecture est comparé à
+  `AI_ANALYSIS_MAX_EUR` (3 € par défaut, environ 5 fois un devis de 500
+  lignes scanné) ; au-delà, le document n'est pas un devis normal (catalogue,
+  annexes) et n'est pas envoyé. Appels plafonnés à 12 par analyse.
+- **Tests permanents** : devis synthétiques de 300 et 500 lignes (texte et
+  scan, IA simulée qui désobéit parfois), Morellec en 9 pages scannées,
+  bout en bout sur vrai PDF avec service IA simulé. Rapport généré :
+  `lecture-gros-devis.md`.
+- **Limites connues** : sur une page image, un reliquat de ligne coupée relu
+  à tort par le bloc suivant ne se distingue pas d'une vraie ligne (pas de
+  numéro de ligne) ; fichiers limités à 4 Mo ; les devis fournisseurs ne sont
+  pas encore découpés.

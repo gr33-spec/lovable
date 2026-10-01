@@ -46,6 +46,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
         journal: CorrectionJournal,
         memory: CompanyMemory,
         logger: AppLogger,
+        config: AppConfig,
       ) =>
         new TakeoffService(
           repo,
@@ -57,8 +58,9 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
           journal,
           memory,
           (error) => logger.error({ err: error }, "takeoff: coût IA non enregistré"),
+          { maxAnalysisMicroUsd: Math.round((Number(config.aiCost.analysisMaxEur) / Number(config.aiCost.usdToEur)) * 1_000_000) },
         ),
-      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, TAKEOFF_EXTRACTOR, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER],
+      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, TAKEOFF_EXTRACTOR, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG],
     },
   ],
 })
