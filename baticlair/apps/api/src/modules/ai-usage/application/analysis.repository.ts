@@ -26,6 +26,8 @@ export interface AnalysisRepository {
   complete(id: string, billingMonth: string, at: Date, billable?: boolean): Promise<AnalysisRecord>;
   markBillable(id: string): Promise<void>;
   fail(id: string, at: Date): Promise<AnalysisRecord>;
+  /** Mesures de la lecture (télémétrie), sans effet sur l'analyse. */
+  saveReadingStats(id: string, stats: object): Promise<void>;
 }
 
 export const ANALYSIS_REPOSITORY = Symbol("ANALYSIS_REPOSITORY");

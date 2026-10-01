@@ -5,6 +5,7 @@ import {
   DEFAULT_EXTRACTION_POLICY,
   mergeChunkLines,
   planQuote,
+  scanBoundaryRisks,
   planReading,
   priceTableAt,
   splitChunk,
@@ -42,6 +43,8 @@ import type { LineFields, TakeoffLineRecord, TakeoffRecord, TakeoffRepository } 
  *   avant tout appel, et le nombre d'appels est plafonné.
  */
 export interface ReadingOptions {
+  /** Mesures de chaque lecture (journal du serveur), en plus de leur enregistrement avec l'analyse. */
+  onStats?: (stats: ReadingStats) => void;
   policy?: ExtractionPolicy;
   /** Coût estimé au-delà duquel un document n'est pas un devis normal (micro-dollars). */
   maxAnalysisMicroUsd?: number;
@@ -50,6 +53,45 @@ export interface ReadingOptions {
 
 /** Plafond par défaut (≈ 2,8 €) : environ 5 fois un devis de 500 lignes scanné (≈ 0,6 €). */
 export const DEFAULT_MAX_ANALYSIS_MICRO_USD = 3_000_000;
+
+/**
+ * MESURES D'UNE LECTURE (télémétrie, PD-046), enregistrées avec l'analyse :
+ * de quoi vérifier sur de vrais devis que le découpage ne perd ni ne double
+ * rien, et ce que coûte réellement une lecture. Sans effet sur le résultat.
+ */
+export interface ReadingStats {
+  version: 1;
+  outcome: "completed" | "failed";
+  failure?: string;
+  strategy: "single" | "split";
+  /** « text » : PDF texte ; « scan » : pages en image (scan, photos) ; « mixed » : les deux. */
+  document: "text" | "scan" | "mixed";
+  pages: { text: number; scan: number };
+  plannedBlocks: number;
+  calls: number;
+  /** Issue de chaque appel : success, truncated (réponse coupée), timeout, invalid_output, provider_error, refused. */
+  callOutcomes: Record<string, number>;
+  /** Blocs relus en deux moitiés après une réponse coupée. */
+  splits: number;
+  linesBeforeMerge: number;
+  linesAfterMerge: number;
+  droppedOutsideBlock: number;
+  droppedDuplicates: number;
+  /** Frontières entre blocs scannés où une ligne coupée a pu être relue (constat seulement). */
+  scanBoundaryRisks: { pages: [number, number]; signals: string[] }[];
+  tokens: { input: number; output: number; cacheRead: number; cacheWrite: number };
+  costMicroUsd: number;
+  estimatedMicroUsd: number;
+  durationMs: number;
+}
+
+interface CallTally {
+  calls: number;
+  outcomes: Record<string, number>;
+  splits: number;
+  tokens: ReadingStats["tokens"];
+  costMicroUsd: number;
+}
 
 type ChunkParts = { chunk: ReadingChunk; output: ExtractionOutput }[];
 type ChunkFailure = { ok: false; reason: string };
@@ -122,18 +164,48 @@ export class TakeoffService {
     if (begin.status === "already_done") throw new DomainError("conflict", "Analysis already completed for this document");
     const analysisId = begin.analysis.id;
 
-    const read = await this.readPlan(tenant, doc, prepared, analysisId, plan.chunks, policy);
+    const started = Date.now();
+    const tally: CallTally = { calls: 0, outcomes: {}, splits: 0, tokens: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, costMicroUsd: 0 };
+    const read = await this.readPlan(tenant, doc, prepared, analysisId, plan.chunks, policy, tally);
+    const pages = {
+      text: prepared.pages.filter((p) => p.route === "text").length,
+      scan: prepared.pages.filter((p) => p.route === "vision").length,
+    };
+    const stats = (extra: Pick<ReadingStats, "outcome" | "linesBeforeMerge" | "linesAfterMerge" | "droppedOutsideBlock" | "droppedDuplicates" | "scanBoundaryRisks"> & { failure?: string }): ReadingStats => ({
+      version: 1,
+      ...extra,
+      strategy: plan.strategy,
+      document: pages.text > 0 && pages.scan > 0 ? "mixed" : pages.scan > 0 ? "scan" : "text",
+      pages,
+      plannedBlocks: plan.chunks.length,
+      calls: tally.calls,
+      callOutcomes: tally.outcomes,
+      splits: tally.splits,
+      tokens: tally.tokens,
+      costMicroUsd: tally.costMicroUsd,
+      estimatedMicroUsd: plan.estimate.totalMicroUsd,
+      durationMs: Date.now() - started,
+    });
     if (read.ok === false) {
+      await this.saveStats(analysisId, stats({ outcome: "failed", failure: read.reason, linesBeforeMerge: 0, linesAfterMerge: 0, droppedOutsideBlock: 0, droppedDuplicates: 0, scanBoundaryRisks: [] }));
       await this.meter.fail(analysisId);
       throw new DomainError("analysis_failed", "The AI could not read this quote", { reason: read.reason });
     }
-    const output: ExtractionOutput =
-      read.parts.length === 1 && read.parts[0]!.chunk.context.length === 0
-        ? read.parts[0]!.output
-        : {
-            lines: mergeChunkLines(read.parts.map((p) => ({ chunk: p.chunk, lines: p.output.lines }))).lines,
-            notes: [...new Set(read.parts.flatMap((p) => p.output.notes))],
-          };
+    const blocks = read.parts.map((p) => ({ chunk: p.chunk, lines: p.output.lines }));
+    const whole = read.parts.length === 1 && read.parts[0]!.chunk.context.length === 0;
+    const merged = whole ? { lines: read.parts[0]!.output.lines, droppedOutsideBlock: 0, droppedDuplicates: 0 } : mergeChunkLines(blocks);
+    const output: ExtractionOutput = whole ? read.parts[0]!.output : { lines: merged.lines, notes: [...new Set(read.parts.flatMap((p) => p.output.notes))] };
+    await this.saveStats(
+      analysisId,
+      stats({
+        outcome: "completed",
+        linesBeforeMerge: blocks.reduce((n, b) => n + b.lines.length, 0),
+        linesAfterMerge: output.lines.length,
+        droppedOutsideBlock: merged.droppedOutsideBlock,
+        droppedDuplicates: merged.droppedDuplicates,
+        scanBoundaryRisks: whole ? [] : scanBoundaryRisks(blocks, new Set(prepared.pages.filter((p) => p.route === "vision").map((p) => p.pageNumber!))),
+      }),
+    );
     const success = { model: read.model, output };
 
     const takeoff = await this.takeoffs.create(tenant, {
@@ -397,6 +469,7 @@ export class TakeoffService {
     analysisId: string,
     chunks: readonly ReadingChunk[],
     policy: ExtractionPolicy,
+    tally: CallTally,
   ): Promise<{ ok: true; model: string; parts: ChunkParts } | ChunkFailure> {
     if (!this.extractor || chunks.length === 0) return { ok: false, reason: "nothing_to_read" };
     const extractor = this.extractor;
@@ -417,7 +490,16 @@ export class TakeoffService {
         const sent = new Set(whole ? prepared.pages.map((p) => p.pageNumber) : [...chunk.pages, ...chunk.context]);
         const routes = prepared.pages.filter((p) => sent.has(p.pageNumber));
         const pages = { text: routes.filter((p) => p.route === "text").length, vision: routes.filter((p) => p.route === "vision").length };
-        await this.record(tenant, doc, pages, prepared.processingId, analysisId, call, result);
+        tally.calls = Math.max(tally.calls, call);
+        const outcome = result.errorCode === "max_tokens" ? "truncated" : result.status;
+        tally.outcomes[outcome] = (tally.outcomes[outcome] ?? 0) + 1;
+        tally.tokens.input += result.usage.inputTokens;
+        tally.tokens.output += result.usage.outputTokens;
+        tally.tokens.cacheRead += result.usage.cacheReadTokens ?? 0;
+        tally.tokens.cacheWrite += (result.usage.cacheWrite5mTokens ?? 0) + (result.usage.cacheWrite1hTokens ?? 0);
+        // Valeur lue APRÈS l'attente : les blocs lus en parallèle ajoutent chacun leur coût.
+        const cost = await this.record(tenant, doc, pages, prepared.processingId, analysisId, call, result);
+        tally.costMicroUsd += cost;
         if (result.status === "success" && result.output) {
           model = result.model;
           return { ok: true, parts: [{ chunk, output: result.output }] };
@@ -426,6 +508,7 @@ export class TakeoffService {
           // Jamais la même demande : deux moitiés, chacune avec son contexte.
           const halves = depth < 2 ? splitChunk(chunk, prepared.pages, policy) : null;
           if (!halves) return { ok: false, reason: "page_too_dense" };
+          tally.splits++;
           const results = await Promise.all(halves.map((h) => readChunk(h, depth + 1)));
           const failed = results.find((r): r is ChunkFailure => !r.ok);
           return failed ?? { ok: true, parts: results.flatMap((r) => (r.ok ? r.parts : [])) };
@@ -455,9 +538,9 @@ export class TakeoffService {
     analysisId: string,
     attempt: number,
     result: ExtractionAttempt,
-  ): Promise<void> {
+  ): Promise<number> {
     try {
-      await this.recorder.record({
+      const { costMicroUsd } = await this.recorder.record({
         companyId: tenant.companyId,
         projectId: doc.projectId,
         documentId: doc.id,
@@ -478,8 +561,20 @@ export class TakeoffService {
         errorCode: result.errorCode,
         durationMs: result.durationMs,
       });
+      return costMicroUsd;
     } catch (error) {
       // La mesure du coût ne doit jamais faire perdre une lecture réussie ; l'écart est journalisé.
+      this.onRecordFailure(error);
+      return 0;
+    }
+  }
+
+  /** Mesures de la lecture : enregistrées avec l'analyse et journalisées ; jamais bloquantes. */
+  private async saveStats(analysisId: string, stats: ReadingStats): Promise<void> {
+    try {
+      await this.meter.recordReading(analysisId, stats);
+      this.reading.onStats?.(stats);
+    } catch (error) {
       this.onRecordFailure(error);
     }
   }

@@ -280,26 +280,77 @@ export function linePage(line: SourcedLine): number | null {
  * écartée), une ligne qui reprend une référence déjà retenue par un autre
  * bloc est un doublon de frontière, l'ordre est celui des pages.
  */
-export function mergeChunkLines<T extends SourcedLine>(parts: readonly { chunk: ReadingChunk; lines: readonly T[] }[]): { lines: T[]; dropped: number } {
+export function mergeChunkLines<T extends SourcedLine>(parts: readonly { chunk: ReadingChunk; lines: readonly T[] }[]): {
+  lines: T[];
+  dropped: number;
+  /** Lignes lues dans le contexte d'un autre bloc (elles commencent sur une page qui n'est pas la sienne). */
+  droppedOutsideBlock: number;
+  /** Lignes qui reprennent une référence déjà retenue par un autre bloc (doublon de frontière). */
+  droppedDuplicates: number;
+} {
   const ordered = [...parts].sort((a, b) => a.chunk.pages[0]! - b.chunk.pages[0]!);
   const taken = new Map<string, number>();
   const lines: T[] = [];
-  let dropped = 0;
+  let droppedOutsideBlock = 0;
+  let droppedDuplicates = 0;
   ordered.forEach((part, index) => {
     const owned = new Set(part.chunk.pages);
     for (const line of part.lines) {
       const page = linePage(line);
-      const foreign = page !== null && !owned.has(page);
-      const duplicate = line.sourceRefs.some((r) => taken.has(r) && taken.get(r) !== index);
-      if (foreign || duplicate) {
-        dropped++;
+      if (page !== null && !owned.has(page)) {
+        droppedOutsideBlock++;
+        continue;
+      }
+      if (line.sourceRefs.some((r) => taken.has(r) && taken.get(r) !== index)) {
+        droppedDuplicates++;
         continue;
       }
       for (const r of line.sourceRefs) taken.set(r, index);
       lines.push(line);
     }
   });
-  return { lines, dropped };
+  return { lines, dropped: droppedOutsideBlock + droppedDuplicates, droppedOutsideBlock, droppedDuplicates };
+}
+
+/** Risque de ligne coupée à la frontière de deux blocs scannés : seulement constaté, jamais corrigé. */
+export interface BoundaryRisk {
+  /** Dernière page d'un bloc, première page du suivant. */
+  pages: [number, number];
+  /**
+   * « ligne_a_cheval » : le premier bloc a lu une ligne qui continue sur la page
+   * suivante (le second a pu en relire la fin) ; « debut_sans_quantite » : la
+   * première ligne du second bloc n'a pas de quantité (souvent une fin de ligne).
+   */
+  signals: ("ligne_a_cheval" | "debut_sans_quantite")[];
+}
+
+/**
+ * Sur une page image, une ligne n'a pas de numéro : un reste de ligne coupée,
+ * relu à tort par le bloc suivant, ne peut pas être écarté avec certitude.
+ * On le signale seulement (télémétrie), à partir de ce que les blocs ont rendu,
+ * sans nouvel appel ni supposition. Les pages en texte n'en ont pas besoin :
+ * leurs doublons sont écartés par référence de ligne.
+ */
+export function scanBoundaryRisks<T extends SourcedLine & { quantity?: string | null }>(
+  merged: readonly { chunk: ReadingChunk; lines: readonly T[] }[],
+  visionPages: ReadonlySet<number>,
+): BoundaryRisk[] {
+  const ordered = [...merged].sort((a, b) => a.chunk.pages[0]! - b.chunk.pages[0]!);
+  const risks: BoundaryRisk[] = [];
+  for (let i = 0; i + 1 < ordered.length; i++) {
+    const a = ordered[i]!;
+    const b = ordered[i + 1]!;
+    const last = a.chunk.pages[a.chunk.pages.length - 1]!;
+    const first = b.chunk.pages[0]!;
+    if (first !== last + 1 || !visionPages.has(first)) continue;
+    const signals: BoundaryRisk["signals"] = [];
+    const tail = [...a.lines].reverse().find((l) => linePage(l) === last);
+    if (tail?.sourcePages.includes(first)) signals.push("ligne_a_cheval");
+    const head = b.lines.find((l) => linePage(l) === first);
+    if (head && !head.quantity?.trim()) signals.push("debut_sans_quantite");
+    if (signals.length > 0) risks.push({ pages: [last, first], signals });
+  }
+  return risks;
 }
 
 /** Estimation du coût d'un document avant tout appel : celle du plan de lecture. */

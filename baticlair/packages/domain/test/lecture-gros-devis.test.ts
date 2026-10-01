@@ -5,6 +5,7 @@ import {
   mergeChunkLines,
   planReading,
   priceTableByVersion,
+  scanBoundaryRisks,
   splitChunk,
   tradeProfile,
   validateTakeoff,
@@ -239,5 +240,47 @@ ${rows.join("\n")}
    et qui sert de garde-fou (3 € par document par défaut, \`AI_ANALYSIS_MAX_EUR\`).
 `;
     await expect(doc).toMatchFileSnapshot("../../../docs/lecture-gros-devis.md");
+  });
+});
+
+describe("mesures de la lecture (télémétrie) : frontières de scan", () => {
+  it("compte séparément les lignes hors bloc et les doublons de frontière", () => {
+    const quote = syntheticQuote(500);
+    const pages = pagesForPlan(quote);
+    const plan = planReading(pages, policy, table);
+    const parts = plan.chunks.map((c) => ({ chunk: c, lines: simulateReading(quote, [...c.pages, ...c.context].sort((a, b) => a - b), c.pages, true).lines }));
+    const merged = mergeChunkLines(parts);
+    expect(merged.droppedOutsideBlock).toBeGreaterThan(0);
+    expect(merged.dropped).toBe(merged.droppedOutsideBlock + merged.droppedDuplicates);
+    expect(parts.reduce((n, p) => n + p.lines.length, 0)).toBe(merged.lines.length + merged.dropped);
+
+    // Doublon de frontière : le reste d'une ligne coupée, relu par le bloc suivant.
+    const a: ReadingChunk = { pages: [1], context: [2] };
+    const b: ReadingChunk = { pages: [2], context: [1] };
+    const boundary = mergeChunkLines([
+      { chunk: a, lines: [{ sourceRefs: ["1:036", "2:001"], sourcePages: [] }] },
+      { chunk: b, lines: [{ sourceRefs: ["2:001"], sourcePages: [] }, { sourceRefs: ["2:002"], sourcePages: [] }] },
+    ]);
+    expect(boundary).toMatchObject({ droppedOutsideBlock: 0, droppedDuplicates: 1 });
+    expect(boundary.lines).toHaveLength(2);
+  });
+
+  it("scan : une ligne à cheval entre deux blocs, ou un bloc qui commence sans quantité, est signalée — rien n'est modifié", () => {
+    const a: ReadingChunk = { pages: [1, 2], context: [3] };
+    const b: ReadingChunk = { pages: [3, 4], context: [1, 2, 5] };
+    const line = (pagesOf: number[], quantity: string | null) => ({ sourceRefs: [], sourcePages: pagesOf, quantity });
+    const parts = [
+      { chunk: a, lines: [line([1], "3"), line([2, 3], "12")] },
+      { chunk: b, lines: [line([3], null), line([4], "5")] },
+    ];
+    expect(scanBoundaryRisks(parts, new Set([1, 2, 3, 4]))).toEqual([{ pages: [2, 3], signals: ["ligne_a_cheval", "debut_sans_quantite"] }]);
+    // Frontière nette : rien à signaler.
+    const clean = [
+      { chunk: a, lines: [line([2], "3")] },
+      { chunk: b, lines: [line([3], "4")] },
+    ];
+    expect(scanBoundaryRisks(clean, new Set([1, 2, 3, 4]))).toEqual([]);
+    // Pages en texte : les doublons s'écartent par référence de ligne, pas de risque à signaler.
+    expect(scanBoundaryRisks(parts, new Set())).toEqual([]);
   });
 });

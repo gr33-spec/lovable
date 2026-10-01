@@ -1,3 +1,4 @@
+import type { Prisma } from "../../../generated/prisma/client.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { AnalysisKind, AnalysisRecord, AnalysisRepository } from "../application/analysis.repository.js";
 
@@ -50,6 +51,10 @@ export class PrismaAnalysisRepository implements AnalysisRepository {
 
   async markBillable(id: string): Promise<void> {
     await this.prisma.aiAnalysis.update({ where: { id }, data: { billable: true } });
+  }
+
+  async saveReadingStats(id: string, stats: object): Promise<void> {
+    await this.prisma.aiAnalysis.update({ where: { id }, data: { readingStats: stats as Prisma.InputJsonValue } });
   }
 
   fail(id: string, at: Date): Promise<AnalysisRecord> {

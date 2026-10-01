@@ -60,7 +60,7 @@ function fakeAnthropic(options: { maxTokens?: number } = {}) {
         lignes.push({ des: item[2]!.trim(), qte: item[3]!, unite: item[4]!, ref: null, src: [ref], sec, doute: null });
       }
     }
-    const output = { sections, lignes: lignes.filter((l) => l.des !== "__contexte__"), notes: [] };
+    const output = { sections, lignes: lignes.filter((l) => !l.des.startsWith("__contexte__")), notes: [] };
     const json = JSON.stringify(output);
     const outputTokens = Math.ceil(json.length / 3) + 3000;
     const truncated = outputTokens > (options.maxTokens ?? 16_000);
@@ -134,6 +134,21 @@ describe("gros devis : plan automatique, blocs, aucune ligne perdue", () => {
     expect(api.calls[0]!.scope).toBeNull();
     expect(res.body.lines).toHaveLength(100);
     expect(await ctx.prisma.aiExecution.count()).toBe(1);
+    const { readingStats } = await ctx.prisma.aiAnalysis.findFirstOrThrow();
+    expect(readingStats).toMatchObject({
+      outcome: "completed",
+      strategy: "single",
+      document: "text",
+      pages: { text: 4, scan: 0 },
+      plannedBlocks: 1,
+      calls: 1,
+      callOutcomes: { success: 1 },
+      linesBeforeMerge: 100,
+      linesAfterMerge: 100,
+      droppedOutsideBlock: 0,
+      droppedDuplicates: 0,
+      scanBoundaryRisks: [],
+    });
   });
 
   it.each([300, 500])("%i lignes : lu en blocs, aucune réponse coupée, toutes les lignes avec leurs sections, une fois chacune", async (count) => {
@@ -158,6 +173,18 @@ describe("gros devis : plan automatique, blocs, aucune ligne perdue", () => {
 
     const takeoff = await ctx.prisma.takeoffLine.findMany({ orderBy: { position: "asc" } });
     expect(takeoff.map((l) => ({ designation: l.designation, section: l.section }))).toEqual(truthOf(quote));
+
+    // Mesures enregistrées avec l'analyse : elles concordent avec les appels réellement payés.
+    const { readingStats, costMicroUsd } = await ctx.prisma.aiAnalysis.findFirstOrThrow();
+    const stats = readingStats as Record<string, unknown> & { tokens: { input: number; output: number }; durationMs: number; costMicroUsd: number; estimatedMicroUsd: number };
+    expect(stats).toMatchObject({ outcome: "completed", strategy: "split", document: "text", calls: api.calls.length, callOutcomes: { success: api.calls.length }, splits: 0, linesAfterMerge: count });
+    expect(stats.linesBeforeMerge).toBe(count);
+    expect(stats.tokens.input).toBe(executions.reduce((n, e) => n + e.inputTokens, 0));
+    expect(stats.tokens.output).toBe(executions.reduce((n, e) => n + e.outputTokens, 0));
+    expect(BigInt(stats.costMicroUsd)).toBe(executions.reduce((n, e) => n + e.costMicroUsd, 0n));
+    expect(BigInt(stats.costMicroUsd)).toBe(costMicroUsd);
+    expect(stats.estimatedMicroUsd).toBeGreaterThan(0);
+    expect(stats.durationMs).toBeGreaterThanOrEqual(0);
   });
 });
 
@@ -195,6 +222,14 @@ describe("réponse coupée : jamais la même demande deux fois", () => {
     ]);
     const lines = await ctx.prisma.takeoffLine.findMany({ orderBy: { position: "asc" } });
     expect(lines.map((l) => ({ designation: l.designation, section: l.section }))).toEqual(truthOf(quote));
+    expect((await ctx.prisma.aiAnalysis.findFirstOrThrow()).readingStats).toMatchObject({
+      outcome: "completed",
+      strategy: "single",
+      calls: 3,
+      callOutcomes: { truncated: 1, success: 2 },
+      splits: 1,
+      linesAfterMerge: 100,
+    });
   });
 
   it("une seule page trop dense : un seul appel payé, un échec net, l'analyse n'est pas décomptée", async () => {
@@ -207,7 +242,10 @@ describe("réponse coupée : jamais la même demande deux fois", () => {
     expect(res.status).toBe(502);
     expect(res.body.error).toMatchObject({ code: "analysis_failed", details: { reason: "page_too_dense" } });
     expect(api.calls).toHaveLength(1);
-    expect(await ctx.prisma.aiAnalysis.findFirstOrThrow()).toMatchObject({ status: "failed" });
+    expect(await ctx.prisma.aiAnalysis.findFirstOrThrow()).toMatchObject({
+      status: "failed",
+      readingStats: { outcome: "failed", failure: "page_too_dense", calls: 1, callOutcomes: { truncated: 1 }, linesAfterMerge: 0 },
+    });
   });
 });
 
