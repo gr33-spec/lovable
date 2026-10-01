@@ -25,6 +25,25 @@ const dateFr = (d: Date) =>
     timeZone: "Europe/Paris",
   });
 
+const SUPPLY_PREFIX = /^(?:fourniture\s+et\s+pose|fourniture\s*&\s*pose|f\.?\s*(?:et|&)\s*p\.?|fourniture)\s+(?:(?:de\s+la|du|des|de)\s+|(?:de\s+l|d)['’]\s*)?/i;
+
+/**
+ * Ce que le fournisseur doit chiffrer, sans le jargon du devis client :
+ * « Fourniture isolation murs 100mm - Fourniture de laine de verre »
+ * devient « Isolation murs 100mm - laine de verre ».
+ */
+export function purchaseLabel(designation: string): string {
+  const parts = designation
+    .split(/\s[-–—]\s/)
+    .map((part) => {
+      const stripped = part.trim().replace(SUPPLY_PREFIX, "");
+      return stripped.length >= 2 ? stripped : part.trim();
+    })
+    .filter((part) => part.length > 0 && !/^fourniture$/i.test(part));
+  const label = parts.join(" - ") || designation.trim();
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
 /**
  * E-mail de demande de prix, en texte simple : lisible dans toutes les
  * messageries et copiable tel quel. Aucune donnée n'est inventée : seules
@@ -39,7 +58,7 @@ export function priceRequestEmail(input: EmailInput): {
   const lines = input.lines.map((l) => {
     const qty = [l.quantity, l.unit].filter(Boolean).join(" ") || "quantité à préciser";
     const ref = l.reference ? ` (réf. ${l.reference})` : "";
-    return `- ${l.designation}${ref} : ${qty}`;
+    return `- ${purchaseLabel(l.designation)}${ref} : ${qty}`;
   });
   const body = [
     hello,
