@@ -94,12 +94,17 @@ describe("référentiel couverture", () => {
     // Fiche HP 10 : 3,22 / 2,91 / 2,66 ml de liteaux par m² aux pureaux 310 / 343 / 376 mm ; 9,9 à 12 tuiles/m².
     const r = (pureauCm: string) =>
       computeWorkItem(allVerified(ROOFING_REFERENTIAL), { ...CASE, params: { ...CASE.params, surface: { value: "1", unit: "m2", origin: "devis" }, pureau: { value: pureauCm, unit: "cm", origin: "artisan" } } });
-    const ml = (p: string) => Number(need(r(p), "liteaux").quantity!.value).toFixed(2);
-    expect([ml("31"), ml("34.3"), ml("37.6")]).toEqual(["3.23", "2.92", "2.66"]);
-    // Au centième près, la fiche arrondit au plus proche (3,226 → 3,22 sur la fiche : écart < 0,01 ml/m²).
-    const tiles = (p: string) => Number(need(r(p), "tuiles").quantity!.value);
-    expect(tiles("31")).toBeCloseTo(12.04, 2);
-    expect(tiles("37.6")).toBeCloseTo(9.92, 2);
+    // Démonstration complète : docs/demonstration-regles-tuiles-liteaux.md.
+    // La fiche donne 2 décimales (tronquées à 310 et 343 mm, arrondies à 376 mm) : écart toléré < 0,01 ml/m².
+    const FICHE_LITEAUX = [["31", 3.22], ["34.3", 2.91], ["37.6", 2.66]] as const;
+    for (const [pureau, fiche] of FICHE_LITEAUX) {
+      expect(Math.abs(Number(need(r(pureau), "liteaux").quantity!.value) - fiche)).toBeLessThan(0.01);
+    }
+    // Tuiles : la fiche annonce 9,9 à 12 tuiles/m² (1 décimale) ; le calcul donne 9,92 et 12,04.
+    const FICHE_TUILES = [["31", 12], ["37.6", 9.9]] as const;
+    for (const [pureau, fiche] of FICHE_TUILES) {
+      expect(Math.abs(Number(need(r(pureau), "tuiles").quantity!.value) - fiche)).toBeLessThan(0.05);
+    }
   });
 
   it("range chaque donnée dans sa nature : fabricant, pose, chantier, artisan, conditionnement", () => {
@@ -161,10 +166,11 @@ describe("moteur : ouvrage → besoins → achat", () => {
       purchase: { order: { count: "1306", unit: { many: "pièces" } } },
       provisional: false,
     });
-    // 120 m² ÷ 0,343 m = 349,85 ml → 88 longueurs de 4 m.
-    expect(need(r, "liteaux")).toMatchObject({ quantity: { value: "349.85", unit: "ml" }, purchase: { order: { count: "88" } }, origin: "explicit" });
+    // 120 m² ÷ 0,343 m = 349,85 ml ; conditionnement de liteau non saisi → pas de nombre de longueurs inventé.
+    expect(need(r, "liteaux")).toMatchObject({ quantity: { value: "349.85", unit: "ml" }, origin: "explicit" });
+    expect(need(r, "liteaux").purchase).toBeUndefined();
     // 120 m² ÷ 0,60 m = 200 ml → 50 longueurs ; absent du devis : seulement suggéré.
-    expect(need(r, "contre-liteaux")).toMatchObject({ quantity: { value: "200", unit: "ml" }, purchase: { order: { count: "50" } }, origin: "suggested" });
+    expect(need(r, "contre-liteaux")).toMatchObject({ quantity: { value: "200", unit: "ml" }, origin: "suggested" });
     // Pente 45 % ≥ 30 % : recouvrement 10 cm → 120 × 1,5 ÷ 1,4 = 128,57 m² → 2 rouleaux de 75 m².
     expect(need(r, "ecran")).toMatchObject({ quantity: { value: "128.57", unit: "m2" }, purchase: { order: { count: "2", unit: { many: "rouleaux" } } } });
 
@@ -203,17 +209,20 @@ describe("moteur : ouvrage → besoins → achat", () => {
     expect(r.nextQuestion).toBeNull();
   });
 
-  it("conditionnement pas encore vérifié : le besoin reste affiché, seule la conversion attend (cas D-2026-015)", () => {
-    const pending: Referential = structuredClone(ref);
-    const liteau = pending.products.find((p) => p.id === "liteau-sapin-27x40")!;
-    liteau.sellingUnits[0]!.contains = { ...liteau.sellingUnits[0]!.contains, verification: { status: "draft" } };
-    const r = computeWorkItem(pending, CASE);
+  it("conditionnement inconnu : le besoin reste affiché, seule la conversion attend (cas D-2026-015)", () => {
+    // Le liteau n'a AUCUNE unité de vente saisie : la longueur vendue dépend du négoce, BatiClair ne la choisit pas.
+    expect(ROOFING_REFERENTIAL.products.find((p) => p.id === "liteau-sapin-27x40")!.sellingUnits).toEqual([]);
+    const r = computeWorkItem(ref, CASE);
     expect(need(r, "liteaux")).toMatchObject({ status: "calculated", quantity: { value: "349.85", unit: "ml" } });
-    expect(need(r, "liteaux").purchase).toBeUndefined();
-    expect(need(r, "liteaux").purchaseUnavailable).toMatch(/en attente de vérification : Contenu : 1 longueur de 4 m/);
+    expect(need(r, "liteaux").purchaseUnavailable).toBe("Conditionnement à confirmer : aucune unité de vente vérifiée pour Liteaux 27×40.");
+    // Même chose quand l'unité de vente existe mais n'est pas vérifiée.
+    const pending: Referential = structuredClone(ref);
+    const ecran = pending.products.find((p) => p.id === "soprema-sop-ecran-hpv-r2-150x50")!;
+    ecran.sellingUnits[0]!.contains = { ...ecran.sellingUnits[0]!.contains, verification: { status: "draft" } };
+    expect(need(computeWorkItem(pending, CASE), "ecran").purchaseUnavailable).toMatch(/en attente de vérification : Contenu : 1 rouleau/);
     // Une donnée inconnue + conversion impossible : on ne peut pas prouver qu'elle est sans effet → question.
     const { pureau: _p, ...params } = CASE.params;
-    expect(need(computeWorkItem(pending, { ...CASE, params }), "liteaux").status).toBe("question");
+    expect(need(computeWorkItem(ref, { ...CASE, params }), "liteaux").status).toBe("question");
   });
 
   it("applique la marge réglée par l'artisan, jamais une marge inventée", () => {

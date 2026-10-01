@@ -49,7 +49,7 @@ const ONE_PIECE: Fact = packaging("1", "u", "definition", { status: "verified", 
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.01-4",
+  version: "roofing-2026.10.01-5",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -163,14 +163,8 @@ export const ROOFING_REFERENTIAL: Referential = {
         epaisseur: spec("27", "mm", "negoce-liteau-27x40", DRAFT, "Section nominale (désignation commerciale)."),
         largeur: spec("40", "mm", "negoce-liteau-27x40", DRAFT, "Section nominale (désignation commerciale)."),
       },
-      sellingUnits: [
-        {
-          id: "longueur-4m",
-          label: { one: "longueur de 4 m", many: "longueurs de 4 m" },
-          contains: packaging("4", "m", "negoce-liteau-27x40", DRAFT, "Longueur vendue à confirmer avec le négoce."),
-          primary: true,
-        },
-      ],
+      // Aucun conditionnement saisi : la longueur vendue dépend du négoce (fiche article à fournir).
+      sellingUnits: [],
     },
     {
       id: "soprema-sop-ecran-hpv-r2-150x50",

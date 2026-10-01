@@ -4,6 +4,7 @@ import {
   computeWorkItem,
   identifyProducts,
   paramsFromContext,
+  purchaseList,
   ROOFING_REFERENTIAL,
   tradeProfile,
   validateTakeoffLine,
@@ -209,7 +210,9 @@ describe("cas de référence D-2026-015 : contexte chantier et questions", () =>
     r = run(confirmed);
     expect(r.nextQuestion).toMatchObject({ key: "param:pureau", impact: "De 1 191 à 1 445 pièces selon la réponse." });
     // L'entraxe des contre-lattes n'est PAS demandé : il est sur la ligne de l'écran (90 cm).
-    expect(byNeed(r.needs, "contre-liteaux")).toMatchObject({ status: "calculated", quantity: { value: "133.33", unit: "ml" }, purchase: { order: { count: "34" } } });
+    expect(byNeed(r.needs, "contre-liteaux")).toMatchObject({ status: "calculated", quantity: { value: "133.33", unit: "ml" } });
+    // Aucun conditionnement de liteau saisi (dépend du négoce) : les ml sont certains, la conversion attend.
+    expect(byNeed(r.needs, "contre-liteaux").purchaseUnavailable).toMatch(/Conditionnement à confirmer/);
 
     r = run(confirmed, { pureau: { value: "34.3", unit: "cm" } });
     expect(r.nextQuestion).toMatchObject({ kind: "choose_product", key: "product:ecran" });
@@ -219,8 +222,8 @@ describe("cas de référence D-2026-015 : contexte chantier et questions", () =>
     expect(r.nextQuestion).toBeNull();
     expect(r.needs.map((n) => [n.needId, n.quantity?.value ?? `${n.quantityRange?.min}–${n.quantityRange?.max}`, n.purchase?.order.count, n.purchase?.order.unit.many])).toEqual([
       ["tuiles", "1305.43", "1306", "pièces"],
-      ["liteaux", "349.85", "88", "longueurs de 4 m"],
-      ["contre-liteaux", "133.33", "34", "longueurs de 4 m"],
+      ["liteaux", "349.85", undefined, undefined],
+      ["contre-liteaux", "133.33", undefined, undefined],
       // La pente n'est jamais demandée : 2 rouleaux quelle qu'elle soit.
       ["ecran", "128.57–138.46", "2", "rouleaux"],
     ]);
@@ -293,8 +296,8 @@ describe("cas de référence D-2026-015 : chantier complet avec ouvrages compos�
       return [n.status, n.quantity?.value ?? (n.quantityRange ? `${n.quantityRange.min}–${n.quantityRange.max}` : null), n.purchase?.order.count ?? null];
     };
     expect(row("tuiles")).toEqual(["calculated", "1305.43", "1306"]);
-    expect(row("liteaux")).toEqual(["calculated", "349.85", "88"]);
-    expect(row("contre-liteaux")).toEqual(["calculated", "133.33", "34"]);
+    expect(row("liteaux")).toEqual(["calculated", "349.85", null]);
+    expect(row("contre-liteaux")).toEqual(["calculated", "133.33", null]);
     expect(row("ecran")).toEqual(["calculated", "128.57–138.46", "2"]);
     expect(row("faitieres")).toEqual(["calculated", "30", "30"]);
     // Besoin certain d'après le devis, produit pas encore identifié : la conversion attend.
@@ -307,5 +310,51 @@ describe("cas de référence D-2026-015 : chantier complet avec ouvrages compos�
     expect(need(r, "colliers")).toMatchObject({ status: "unknown", reason: "Calcul impossible sans les données du produit (Colliers)." });
     // « 2 jeux de coudes par descente » : ambigu, la seule question qui reste.
     expect(r.questionsPending).toEqual(["param:coudes_par_descente"]);
+  });
+});
+
+describe("cas de référence D-2026-015 : la liste d'achat vue par l'artisan", () => {
+  it("trois états seulement, quantité à commander d'abord, une seule précision, coloris conservés", () => {
+    const facts: ChantierContext["facts"] = [
+      ...CONTEXT.facts,
+      { key: "longueur_faitage", value: "10", unit: "m", evidence: "Devis, ligne 6", origin: "devis" },
+      { key: "nb_descentes", value: "2", unit: "u", evidence: "Devis, ligne 8", origin: "devis" },
+      { key: "hauteur_descente", value: "4", unit: "m", evidence: "Devis, ligne 8", origin: "devis" },
+    ];
+    const params = (id: string) => paramsFromContext({ facts }, ROOFING_REFERENTIAL.workItems.find((w) => w.id === id)!).params;
+    const r = computeChantier(
+      ROOFING_REFERENTIAL,
+      [
+        {
+          workItemId: "couverture-tuiles-emboitement",
+          params: { ...params("couverture-tuiles-emboitement"), pureau: { value: "34.3", unit: "cm", origin: "artisan" } },
+          products: {
+            tuile: { productId: "edilians-hp10-huguenot", origin: "artisan" },
+            liteau: { productId: "liteau-sapin-27x40", origin: "devis" },
+            contre_liteau: { productId: "liteau-sapin-27x40", origin: "devis" },
+          },
+          mentioned: ["ecran", "contre_liteau", "liteau", "tuile"],
+          preferences: { products: { ecran: "soprema-sop-ecran-hpv-r2-150x50" } },
+        },
+        { workItemId: "faitage", params: params("faitage"), products: {}, mentioned: ["faitiere", "closoir"] },
+        { workItemId: "descente", params: params("descente"), products: {}, mentioned: ["tube", "coude", "collier"] },
+      ],
+      { acceptDraft: true },
+    );
+    const rows = purchaseList(r.workItems, { tuile: ["rouge"], tube: ["PVC", "Ø80", "sable"] });
+    const view = (id: string) => {
+      const x = rows.find((row) => row.needId === id)!;
+      return [x.label, x.state, x.quantity ?? null, x.detail ?? null];
+    };
+    expect(view("tuiles")).toEqual(["Tuiles HP10 rouge", "ready", "1 306 pièces", "≈ 6 palettes"]);
+    // Conditionnement de liteau non saisi (dépend du négoce) : les ml, et ce qui reste à confirmer.
+    expect(view("liteaux")).toEqual(["Liteaux 27×40", "ready", "349,85 ml", "conditionnement à confirmer"]);
+    expect(view("ecran")).toEqual(["Écran HPV", "ready", "2 rouleaux", "donnée inconnue sans effet sur la commande"]);
+    // Besoin certain, produit pas encore identifié : la quantité est dite, la conversion reste à confirmer.
+    expect(view("tubes")).toEqual(["Tubes de descente PVC Ø80 sable", "ready", "8 ml", "conditionnement à confirmer"]);
+    // Il manque le modèle de faîtière : une question, pas de chiffre.
+    expect(view("faitieres")).toEqual(["Faîtières", "question", null, null]);
+    // Impossible sans la fiche du fabricant : BatiClair le dit, en une phrase.
+    expect(view("colliers")).toEqual(["Colliers", "unknown", null, "Calcul impossible sans les données du produit (Colliers)."]);
   });
 });

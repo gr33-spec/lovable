@@ -6,3 +6,4 @@ export { identifyProducts, type Identification } from "./resolve.js";
 export { checkReferential } from "./integrity.js";
 export { ROOFING_REFERENTIAL } from "./data/roofing.js";
 export { paramsFromContext, type ChantierContext, type SiteFact, type ContextConflict } from "./context.js";
+export { purchaseList, type PurchaseRow } from "./purchase-list.js";

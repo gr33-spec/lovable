@@ -475,7 +475,7 @@ function toPurchase(
     return { lo: lo.dividedBy(content.lo).ceil(), hi: hi.dividedBy(content.lo).ceil() };
   };
   const primary = product.sellingUnits.find((s) => s.primary);
-  if (!primary) return null;
+  if (!primary) return { pending: `Conditionnement à confirmer : aucune unité de vente vérifiée pour ${product.shortLabel}.` };
   let order: { lo: Decimal; hi: Decimal } | null;
   try {
     order = counts(primary);
