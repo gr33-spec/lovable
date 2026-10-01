@@ -70,8 +70,41 @@ export class OffersService {
     const existing = await this.offers.findByDocument(tenant, recipient.document.id);
     if (existing) return this.view(existing, request);
     if (!this.extractor) throw new DomainError("ai_unavailable", "AI reading is not configured");
+    return (await this.readQuote(tenant, request, recipient.document.id, true)).offer;
+  }
 
-    const doc = await this.documents.findById(tenant, recipient.document.id);
+  /**
+   * « Lire et comparer » : tous les devis reçus et pas encore lus de la
+   * demande, en une fois et en parallèle. Le lot compte pour UNE analyse,
+   * quel que soit le nombre de devis (rien si aucun n'a pu être lu).
+   */
+  async analyzeAll(tenant: TenantContext, requestId: string): Promise<{ read: number; failed: { recipientId: string; supplier: string }[] }> {
+    assertCanWrite(tenant);
+    const request = await this.requests.findById(tenant, requestId);
+    if (!request) throw notFound("PriceRequest");
+    const already = await this.offersOf(tenant, request);
+    const pending = request.recipients.filter((r) => r.document && !already.has(r.id));
+    if (pending.length === 0) return { read: 0, failed: [] };
+    if (!this.extractor) throw new DomainError("ai_unavailable", "AI reading is not configured");
+
+    const results = await Promise.allSettled(pending.map((r) => this.readQuote(tenant, request, r.document!.id, false)));
+    const done = results.flatMap((r) => (r.status === "fulfilled" ? [r.value.analysisId] : []));
+    if (done.length > 0) await this.meter.markBillable(done[0]!);
+    const failed = pending.flatMap((r, i) => (results[i]!.status === "rejected" ? [{ recipientId: r.id, supplier: r.supplier.name }] : []));
+    // Plafond atteint : rien n'a été lu, l'artisan doit le savoir (pas un simple échec de lecture).
+    const quota = results.find((r) => r.status === "rejected" && r.reason instanceof DomainError && r.reason.code === "analysis_quota_reached");
+    if (done.length === 0 && quota && quota.status === "rejected") throw quota.reason;
+    return { read: done.length, failed };
+  }
+
+  private async readQuote(
+    tenant: TenantContext,
+    request: PriceRequestRecord,
+    documentId: string,
+    billable: boolean,
+  ): Promise<{ offer: OfferView; analysisId: string }> {
+    const extractor = this.extractor!;
+    const doc = await this.documents.findById(tenant, documentId);
     if (!doc) throw notFound("Document");
     const prepared = await this.aiInput.prepare(tenant, doc);
     const begin = await this.meter.begin({
@@ -88,7 +121,7 @@ export class OffersService {
     let success: OfferAttempt | null = null;
     let last: OfferAttempt | null = null;
     for (let attempt = 1; attempt <= MAX_ATTEMPTS && !success; attempt++) {
-      const result = await this.extractor.extract({ ...prepared.input, tradeLabel: profile.label, requested: request.lines });
+      const result = await extractor.extract({ ...prepared.input, tradeLabel: profile.label, requested: request.lines });
       last = result;
       await this.record(tenant, request.projectId, doc.id, prepared, analysisId, attempt, result);
       if (result.status === "success") success = result;
@@ -115,8 +148,8 @@ export class OffersService {
       notes: out.notes,
       lines: out.lines.map((l) => toNewLine(l, request.lines.length)),
     });
-    await this.meter.complete(analysisId);
-    return this.view(offer, request);
+    await this.meter.complete(analysisId, { billable });
+    return { offer: this.view(offer, request), analysisId };
   }
 
   /** Les devis déjà lus d'une demande de prix, par destinataire. */

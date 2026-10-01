@@ -405,3 +405,38 @@ fictives uniquement.
   « Test : simuler un devis fictif » range un devis établi sur la liste
   demandée, marqué « DEVIS FICTIF (TEST) » (titre et nom de fichier). Il se
   retire comme un autre (« Retirer ce devis ») quand le vrai devis arrive.
+
+### PD-036 — « Lire et comparer » : tous les devis d'un coup, une seule analyse
+
+- **Pourquoi** : un bouton par devis, c'est autant de gestes et d'analyses
+  décomptées ; l'artisan veut comparer, pas lire un par un.
+- **Quoi** : un seul bouton « Lire et comparer les N devis » au-dessus des
+  fournisseurs. L'IA lit en parallèle tous les devis reçus et pas encore
+  lus ; la comparaison s'affiche ensuite.
+- **Décompte** : le lot compte pour **1 analyse**, quel que soit le nombre
+  de devis ; rien n'est décompté si aucun n'a pu être lu. Un devis arrivé
+  plus tard, ou qui n'a pas pu être lu, se lit avec un nouvel appui
+  (nouveau lot, 1 analyse).
+- **Coût réel** : chaque lecture reste mesurée (AiExecution) pour suivre
+  la marge ; seul le compteur des paliers change.
+
+### PD-037 — Écran fournisseurs : une action métier, le reste au second plan
+
+- **Boussole** : à chaque étape, l'écran met en avant ce que l'artisan veut
+  faire (préparer ma liste, valider ma liste, envoyer mes demandes,
+  comparer les offres). Rien de technique n'est montré : pas d'« analyse »,
+  d'IA, de lecture devis par devis.
+- **Réponses** : un seul bouton « Comparer les N devis » (« … reçus » si un
+  fournisseur n'a pas répondu, avec « vous pouvez aussi attendre »). Derrière :
+  lecture des seuls devis non lus, réutilisation des autres, rapprochement,
+  écarts, puis la comparaison s'ouvre. Un seul devis : « Voir l'offre reçue ».
+- **Ordre de l'écran** : action « Comparer », puis la comparaison, puis les
+  cartes fournisseurs.
+- **Carte fournisseur** : nom, statut (À envoyer, En attente, Devis reçu,
+  Comparé, À vérifier, Pas de réponse), une information (« 6/7 articles
+  chiffrés · 1 manquant · 1 à vérifier »), et au plus une action d'étape
+  (Envoyer l'e-mail, Ajouter son devis). Voir l'e-mail, ouvrir le PDF, voir
+  les lignes lues, retirer le devis, relancer… sont dans « ••• ».
+- **Fil du chantier** : avec plusieurs devis reçus, « Comparer » passe avant
+  « Envoyer la demande » au dernier fournisseur ; ensuite « Choisir mon
+  fournisseur ».

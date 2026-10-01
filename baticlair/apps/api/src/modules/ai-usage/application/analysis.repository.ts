@@ -22,7 +22,9 @@ export interface AnalysisRepository {
   create(data: { companyId: string; userId: string | null; projectId: string; documentId: string; kind: AnalysisKind }): Promise<AnalysisRecord>;
   restart(id: string, userId: string | null): Promise<AnalysisRecord>;
   /** Réussite : décomptée dans le mois donné (sauf si elle l'était déjà). */
-  complete(id: string, billingMonth: string, at: Date): Promise<AnalysisRecord>;
+  /** `billable: false` : lecture faite dans un lot déjà décompté (devis fournisseurs lus ensemble). */
+  complete(id: string, billingMonth: string, at: Date, billable?: boolean): Promise<AnalysisRecord>;
+  markBillable(id: string): Promise<void>;
   fail(id: string, at: Date): Promise<AnalysisRecord>;
 }
 

@@ -138,6 +138,23 @@ export class OffersController {
     return offerDto(id, await this.offers.analyze(tenant, id));
   }
 
+  /**
+   * « Lire et comparer » : tous les devis reçus pas encore lus, en une fois.
+   * Le lot compte pour une seule analyse.
+   */
+  @Post("price-requests/:id/analysis")
+  @HttpCode(201)
+  async analyzeAll(@Tenant() tenant: TenantContext, @Param("id") id: string) {
+    const result = await this.offers.analyzeAll(tenant, id);
+    const views = await this.offers.forRequest(tenant, id);
+    return {
+      read: result.read,
+      failed: result.failed,
+      aiAvailable: this.offers.aiAvailable,
+      items: [...views.entries()].map(([recipientId, v]) => offerDto(recipientId, v)),
+    };
+  }
+
   @Get("price-requests/:id/offers")
   async list(@Tenant() tenant: TenantContext, @Param("id") id: string) {
     const views = await this.offers.forRequest(tenant, id);
