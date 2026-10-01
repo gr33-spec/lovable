@@ -96,12 +96,7 @@ function ChantiersList() {
 
   return (
     <>
-      <div className="flex items-center justify-between gap-3">
-        <PageTitle>Chantiers</PageTitle>
-        <ButtonLink href="/chantiers/nouveau" className="min-h-11 rounded-xl px-3.5 text-sm">
-          + Nouveau
-        </ButtonLink>
-      </div>
+      <PageTitle>Chantiers</PageTitle>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="search" className="text-xs font-bold text-muted">
           Chercher un chantier, un client ou une adresse

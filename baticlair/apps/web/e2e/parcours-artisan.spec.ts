@@ -46,11 +46,9 @@ test("un artisan crée son compte et son premier chantier depuis le +", async ({
   await expect(page.getByText("Toitures Martin")).toBeVisible();
   await expect(page.getByText("Créez votre premier chantier")).toBeVisible();
 
-  await page.getByRole("button", { name: /Ajouter : nouveau chantier/ }).click();
-  await expect(page.getByRole("dialog", { name: "Ajouter" })).toBeVisible();
-  // Deux choses seulement : un chantier ou un fournisseur.
-  await expect(page.getByRole("dialog").getByRole("link", { name: /Nouveau fournisseur/ })).toBeVisible();
-  await page.getByRole("link", { name: /Nouveau chantier/ }).click();
+  // Le « + » crée un chantier, directement : aucune question intermédiaire.
+  await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Nouveau chantier" }).click();
+  await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
 
   await page.getByLabel("Nom du chantier").fill("Toiture Dupont");
   await page.getByLabel("Client (facultatif)").fill("M. Dupont");
@@ -156,7 +154,8 @@ test("déconnexion puis reconnexion ramène à la page demandée", async ({ page
 test("le menu ne propose que l'essentiel : accueil, chantiers, fournisseurs, compte", async ({ page }) => {
   await signUp(page);
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  await expect(nav.getByRole("link")).toHaveText(["Accueil", "Chantiers", "Fournisseurs", "Compte"]);
+  // Quatre rubriques, et au centre le « + » : un nouveau chantier, directement.
+  await expect(nav.getByRole("link")).toHaveText(["Accueil", "Chantiers", "Nouveau chantier", "Fournisseurs", "Compte"]);
   await nav.getByRole("link", { name: "Compte" }).click();
   await expect(page.getByRole("heading", { name: "Mon compte" })).toBeVisible();
 
@@ -275,9 +274,9 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
 test("un couvreur demande les prix à ses fournisseurs et range leurs devis", async ({ page }) => {
   await signUp(page);
 
-  // Carnet de fournisseurs, depuis le « + ».
-  await page.getByRole("button", { name: /Ajouter : nouveau chantier/ }).click();
-  await page.getByRole("link", { name: /Nouveau fournisseur/ }).click();
+  // Carnet de fournisseurs : « Nouveau fournisseur » vit dans sa page.
+  await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Fournisseurs" }).click();
+  await page.getByRole("button", { name: "Nouveau fournisseur" }).click();
   await page.getByLabel("Société").fill("Point.P Vannes");
   await page.getByLabel("E-mail pour les demandes de prix").fill("pas-un-email");
   await page.getByRole("button", { name: "Ajouter", exact: true }).click();

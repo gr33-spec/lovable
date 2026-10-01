@@ -134,7 +134,7 @@ function ProgressBar({ projectId, tick }: { projectId: string; tick: number }) {
       {next.target ? (
         <a
           href={`#${next.target}`}
-          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-ink px-4 text-[15px] font-extrabold text-white"
+          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-accent px-4 text-[15px] font-extrabold text-white"
         >
           {next.label}
           <ArrowDown size={18} aria-hidden="true" />

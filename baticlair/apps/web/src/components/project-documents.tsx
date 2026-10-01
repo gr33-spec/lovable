@@ -53,9 +53,9 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
         <section
           id="devis"
           aria-labelledby="next-step"
-          className="scroll-mt-4 flex flex-col gap-3 rounded-[26px] bg-[radial-gradient(130%_100%_at_100%_0%,rgba(255,90,31,0.45)_0%,rgba(255,90,31,0)_55%)] bg-ink p-4.5 text-white shadow-[0_18px_40px_rgba(14,17,22,0.22)]"
+          className="scroll-mt-4 flex flex-col gap-3 rounded-[26px] bg-[radial-gradient(130%_100%_at_100%_0%,var(--color-accent-glow)_0%,transparent_55%)] bg-ink p-4.5 text-white shadow-[0_18px_40px_rgba(14,17,22,0.22)]"
         >
-          <span id="next-step" className="text-xs font-extrabold tracking-[0.04em] text-[#ffb48f]">
+          <span id="next-step" className="text-xs font-extrabold tracking-[0.04em] text-accent-on-dark">
             PROCHAINE ÉTAPE
           </span>
           <span className="font-display text-[22px] leading-tight font-extrabold tracking-[-0.02em]">Ajouter le devis client</span>

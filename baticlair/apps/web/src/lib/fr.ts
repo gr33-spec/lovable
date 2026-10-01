@@ -5,7 +5,7 @@
  * pour le lexique.
  */
 export const fr = {
-  nav: { home: "Accueil", projects: "Chantiers", add: "Ajouter", suppliers: "Fournisseurs", account: "Compte" },
+  nav: { home: "Accueil", projects: "Chantiers", suppliers: "Fournisseurs", account: "Compte" },
   status: { active: "En cours", archived: "Terminé" },
   actions: {
     retry: "Réessayer",

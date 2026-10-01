@@ -18,7 +18,7 @@ export default function FournisseursPage() {
 }
 
 function Suppliers() {
-  // « + » → « Nouveau fournisseur » arrive ici avec ?nouveau.
+  // Lien direct possible vers le formulaire : /fournisseurs?nouveau.
   const wantsNew = useSearchParams().has("nouveau");
   const fetchSuppliers = useCallback((signal: AbortSignal) => api<{ items: Supplier[] }>("/v1/suppliers?archived=include", { signal }), []);
   const { data, setData, error, reload } = useResource(fetchSuppliers);

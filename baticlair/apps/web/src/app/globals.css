@@ -1,9 +1,16 @@
 @import "tailwindcss";
 
 /*
- * Jetons du design system (maquette « moderne ») : une seule source pour
- * les couleurs, rayons et ombres. Accent orange réservé à l'essentiel ;
- * textes orange en #C2410C pour le contraste.
+ * Jetons du design system : une seule source pour les couleurs, rayons et
+ * ombres. Rôles des couleurs (PD-040) :
+ * - accent (bleu profond) : marque et actions principales, et rien d'autre ;
+ * - ok (vert) : succès, validé, terminé ;
+ * - warn (ambre) : attention, à vérifier ;
+ * - danger (rouge) : erreur ;
+ * - blanc et gris clair : fonds.
+ * Pour changer la teinte de la marque, ne modifier que les 4 jetons accent.
+ * Contrastes : accent / blanc 7,8:1 ; accent-text / blanc 9,3:1 ;
+ * accent-on-dark / ink 10,6:1.
  */
 @theme {
   --color-ink: #0e1116;
@@ -12,8 +19,10 @@
   --color-muted: #5b6470;
   --color-subtle: #9ba3af;
   --color-line: #eef0f3;
-  --color-accent: #ff5a1f;
-  --color-accent-text: #c2410c;
+  --color-accent: #1c3fd1;
+  --color-accent-text: #1838b4;
+  --color-accent-on-dark: #a9c1ff;
+  --color-accent-glow: rgba(28, 63, 209, 0.5);
   --color-ok-bg: #ddf5ec;
   --color-ok: #0b7a53;
   --color-warn-bg: #fff1d6;

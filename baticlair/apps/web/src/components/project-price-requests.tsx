@@ -75,9 +75,9 @@ export function ProjectPriceRequests({ projectId, archived, canCreate }: { proje
       <section
         id="fournisseurs"
         aria-labelledby="price-request-title"
-        className="scroll-mt-4 flex flex-col gap-3 rounded-[26px] bg-[radial-gradient(130%_100%_at_100%_0%,rgba(255,90,31,0.45)_0%,rgba(255,90,31,0)_55%)] bg-ink p-4.5 text-white shadow-[0_18px_40px_rgba(14,17,22,0.22)]"
+        className="scroll-mt-4 flex flex-col gap-3 rounded-[26px] bg-[radial-gradient(130%_100%_at_100%_0%,var(--color-accent-glow)_0%,transparent_55%)] bg-ink p-4.5 text-white shadow-[0_18px_40px_rgba(14,17,22,0.22)]"
       >
-        <span className="text-xs font-extrabold tracking-[0.04em] text-[#ffb48f]">PROCHAINE ÉTAPE</span>
+        <span className="text-xs font-extrabold tracking-[0.04em] text-accent-on-dark">PROCHAINE ÉTAPE</span>
         <h2 id="price-request-title" className="font-display text-[22px] leading-tight font-extrabold tracking-[-0.02em]">
           Demander les prix aux fournisseurs
         </h2>
@@ -157,7 +157,7 @@ function SupplierPicker({
       ) : null}
       {choices.map((s) => (
         <label key={s.id} className="flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl bg-surface px-4 text-ink shadow-card">
-          <input type="checkbox" checked={selected.has(s.id)} onChange={(e) => onToggle(s.id, e.target.checked)} className="size-5 accent-[#ff5a1f]" />
+          <input type="checkbox" checked={selected.has(s.id)} onChange={(e) => onToggle(s.id, e.target.checked)} className="size-5 accent-accent" />
           <span className="flex min-w-0 flex-col">
             <span className="font-bold">{s.name}</span>
             <span className="truncate text-[13px] text-muted">{s.email}</span>
@@ -479,7 +479,7 @@ function RecipientCard({
         <a
           href={mailtoHref(r)}
           onClick={() => void setStatus("sent")}
-          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-ink px-5 text-base font-extrabold text-white"
+          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-accent px-5 text-base font-extrabold text-white"
         >
           <Send size={18} aria-hidden="true" />
           Envoyer l&apos;e-mail

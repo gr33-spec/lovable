@@ -270,7 +270,7 @@ function QuestionCard({
                       disabled={pending}
                       onClick={() => void onConfirm()}
                       aria-label={`C'est bon : ${line.designation}`}
-                      className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-ink text-base font-extrabold text-white disabled:opacity-60"
+                      className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-accent text-base font-extrabold text-white disabled:opacity-60"
                     >
                       <Check size={20} aria-hidden="true" />
                       C&apos;est bon
@@ -280,7 +280,7 @@ function QuestionCard({
                     type="button"
                     onClick={() => setEditing(true)}
                     aria-label={`Corriger ${line.designation}`}
-                    className={`inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl text-base font-extrabold ${blocking ? "bg-ink text-white" : "bg-ground text-ink"}`}
+                    className={`inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl text-base font-extrabold ${blocking ? "bg-accent text-white" : "bg-ground text-ink"}`}
                   >
                     <Pencil size={18} aria-hidden="true" />
                     Corriger

@@ -465,3 +465,20 @@ fictives uniquement.
   chantier commencé, jamais la démonstration. « Choisir cette formule » note
   la demande (paiement en ligne à venir) ; PLAN_ACTIVATION_CODES permet
   d'activer une formule à la main (tests, premiers clients).
+
+### PD-040 — Bleu de confiance, et le « + » crée un chantier
+
+- **Couleur de marque et d'action : bleu profond #1C3FD1** (blanc dessus :
+  7,8:1, AAA). Liens : #1838B4 (9,3:1). Sur fond sombre : #A9C1FF (10,6:1).
+  Halo : rgba(28, 63, 209, 0.5). Tout passe par les jetons `accent` de
+  `globals.css` : changer la teinte = changer ces 4 lignes.
+- **Rôles** : bleu = marque et actions principales ; vert = validé, terminé ;
+  ambre = à vérifier ; rouge = erreur ; blanc et gris clair = fonds. Le bleu
+  remplace l'orange, il n'ajoute pas de couche visuelle.
+- **Boutons** : la variante « primary » est bleue (Préparer, Valider,
+  Envoyer, Comparer, Retenir…), comme le bouton du fil du chantier, « C'est
+  bon », « Envoyer l'e-mail » et le « + ». Le noir reste pour les états
+  sélectionnés (filtres, métiers) et les fonds sombres.
+- **« + » central = Nouveau chantier**, sans feuille intermédiaire. Plus de
+  « + Nouveau » en double sur la page Chantiers. « Nouveau fournisseur » vit
+  dans la page Fournisseurs et dans le choix des fournisseurs d'un chantier.
