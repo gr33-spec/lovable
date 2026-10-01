@@ -52,6 +52,7 @@ function toDto({ takeoff, validation }: ReviewedTakeoff) {
         confirmed: l.confirmed,
         kind: v?.kind ?? "unknown",
         family: v?.familyLabel ?? null,
+        basis: v?.basis ?? "purchase",
         status: v?.status ?? "to_verify",
         issues: (v?.issues ?? []).map((i) => ({ code: i.code, severity: i.severity, message: i.message })),
       };

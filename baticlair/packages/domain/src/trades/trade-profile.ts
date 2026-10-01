@@ -56,6 +56,12 @@ export interface MaterialFamily {
    * logiciel ne suppose jamais ce rendement.
    */
   areaNeedsYield?: boolean;
+  /**
+   * Sur un devis client, une surface (m²) de cette famille est la surface
+   * de l'OUVRAGE (« liteaux 120 m² » = 120 m² de toiture liteautée) : la
+   * quantité d'achat (ml, longueurs) reste à calculer.
+   */
+  areaOfWork?: boolean;
 }
 
 export interface CompanionRule {

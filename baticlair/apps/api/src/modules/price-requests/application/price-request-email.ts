@@ -3,6 +3,18 @@ export interface RequestedLine {
   quantity: string | null;
   unit: string | null;
   reference: string | null;
+  /**
+   * « work » : la quantité est la surface de l'ouvrage (« liteaux 120 m² »),
+   * pas une quantité d'achat. Elle est demandée comme telle au fournisseur.
+   */
+  basis?: "work";
+}
+
+/** « 120 m² » ou, pour une surface d'ouvrage, « pour une surface de 120 m² (quantité à calculer) ». */
+export function requestedQuantityText(l: RequestedLine): string {
+  const qty = [l.quantity, l.unit].filter(Boolean).join(" ");
+  if (!qty) return "quantité à préciser";
+  return l.basis === "work" ? `pour une surface de ${qty} (quantité à calculer)` : qty;
 }
 
 export interface EmailInput {
@@ -56,9 +68,8 @@ export function priceRequestEmail(input: EmailInput): {
   const subject = `Demande de prix – ${input.projectName} – ${input.companyName}`;
   const hello = input.contactName ? `Bonjour ${input.contactName},` : "Bonjour,";
   const lines = input.lines.map((l) => {
-    const qty = [l.quantity, l.unit].filter(Boolean).join(" ") || "quantité à préciser";
     const ref = l.reference ? ` (réf. ${l.reference})` : "";
-    return `- ${purchaseLabel(l.designation)}${ref} : ${qty}`;
+    return `- ${purchaseLabel(l.designation)}${ref} : ${requestedQuantityText(l)}`;
   });
   const body = [
     hello,

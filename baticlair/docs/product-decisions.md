@@ -495,3 +495,23 @@ fictives uniquement.
 - Le dépôt reste possible même si la demande n'est pas marquée envoyée (ou
   si le fournisseur n'avait pas répondu) : **••• → « Ajouter son devis
   reçu »**. Le fournisseur passe alors en « Devis reçu ».
+
+### PD-042 — Le moteur de quantitatif est le cœur de BatiClair
+
+- **Date** : 2026-10-01 · **Statut** : Décidé (le fondateur)
+- **Principe** : l'IA comprend → le référentiel connaît → le code calcule →
+  l'artisan vérifie simplement. Un devis client décrit des OUVRAGES ;
+  BatiClair produit une LISTE D'ACHAT fournisseur (pièces, ml, longueurs,
+  rouleaux…).
+- **Fiabilité** : aucune valeur sans source (fabricant, DTU, règle validée) ;
+  seules les données vérifiées par une personne identifiée servent au
+  calcul ; un brouillon (web, IA) attend sa vérification. Trois issues :
+  sait → calcule ; doute → UNE question ; ne sait pas → le dit.
+- **Marges** : jamais universelles. Sourcées par produit/système, ou réglées
+  par l'artisan, toujours affichées dans « Voir le calcul ».
+- **Un seul référentiel** pour le quantitatif et la comparaison des offres.
+- **Validation** : couverture validée par le fondateur (ancien couvreur) ;
+  artisans référents pour les autres métiers ; jeu de vérité (devis →
+  quantitatif attendu → commande réelle) pour mesurer la précision avant
+  toute promesse publique.
+- Détails : `referentiel-metier.md`, `referentiel-exemple-couverture.md`.

@@ -35,7 +35,7 @@ export type TakeoffIssueCode =
   | "UNIT_UNKNOWN"
   | "UNIT_UNUSUAL_FOR_FAMILY"
   | "FRACTIONAL_PIECES"
-  | "AREA_NEEDS_PRODUCT_YIELD"
+  | "WORK_QUANTITY"
   | "PACKAGE_CONTENT_MISSING"
   | "QUANTITY_UNUSUALLY_HIGH"
   | "FAMILY_UNKNOWN"
@@ -66,6 +66,13 @@ export interface LineValidation {
   unit: UnitCode | null;
   /** Quantité décimale exacte lue, si lisible. */
   quantity: Decimal | null;
+  /**
+   * « purchase » : la quantité se commande telle quelle. « work » : c'est la
+   * surface de l'OUVRAGE (« liteaux 120 m² » = 120 m² de toiture liteautée),
+   * pas une quantité d'achat : elle doit être convertie (référentiel métier),
+   * jamais envoyée comme si c'était une quantité de matériau.
+   */
+  basis: "purchase" | "work";
   status: ConfidenceLevel;
   issues: TakeoffIssue[];
 }
@@ -125,6 +132,16 @@ export function lineKind(designation: string, profile: TradeProfile): { kind: Li
   return { kind: "unknown", family: null };
 }
 
+/**
+ * Surface d'ouvrage plutôt que quantité d'achat : une famille que le devis
+ * client chiffre à la surface de toiture (tuiles, ardoises, liteaux),
+ * exprimée en m². Ailleurs (gouttière en m²…), c'est une vraie anomalie.
+ */
+export function isWorkQuantity(family: MaterialFamily | null, unit: UnitCode | null): boolean {
+  if (!family || !unit || dimensionOf(unit) !== "area") return false;
+  return family.areaNeedsYield === true || family.areaOfWork === true;
+}
+
 /** « 1 250,50 » → 1250.50 ; null si la valeur n'est pas un nombre clair (jamais de devinette). */
 export function parseFrenchQuantity(raw: string | null | undefined): Decimal | null {
   if (raw == null) return null;
@@ -141,7 +158,8 @@ export function validateTakeoffLine(line: TakeoffLineInput, profile: TradeProfil
   const unit = parseUnit(line.unitRaw);
   const quantity = parseFrenchQuantity(line.quantityRaw);
 
-  const base = { lineId: line.id, kind, family: family?.code ?? null, familyLabel: family?.label ?? null, unit, quantity };
+  const basis = kind === "material" && isWorkQuantity(family, unit) ? "work" : "purchase";
+  const base = { lineId: line.id, kind, family: family?.code ?? null, familyLabel: family?.label ?? null, unit, quantity, basis } as const;
 
   if (kind === "labor") {
     issues.push(issue("LABOR_LINE", "info", "Prestation (pose, dépose, échafaudage…) : rien à commander au fournisseur."));
@@ -166,7 +184,13 @@ export function validateTakeoffLine(line: TakeoffLineInput, profile: TradeProfil
 
   // Familles « légères » (sans unités de référence) : reconnaissance seulement, aucun contrôle métier
   // tant que de vrais devis ne les ont pas validés (PD-033).
-  if (family?.allowedUnits && unit) {
+  if (basis === "work") {
+    // Ni « unité inhabituelle » ni « confirmez » : la surface est juste, c'est une quantité d'ouvrage.
+    // Elle part au fournisseur comme telle (« pour 120 m² ») tant que le référentiel ne la convertit pas.
+    issues.push(
+      issue("WORK_QUANTITY", "info", "Surface de l'ouvrage : la quantité à commander reste à calculer (demandée au fournisseur pour cette surface)."),
+    );
+  } else if (family?.allowedUnits && unit) {
     if (!family.allowedUnits.includes(unit)) {
       issues.push(
         issue(
@@ -178,15 +202,6 @@ export function validateTakeoffLine(line: TakeoffLineInput, profile: TradeProfil
     }
     if (family.wholeUnits && unit === "U" && quantity && !quantity.isInteger()) {
       issues.push(issue("FRACTIONAL_PIECES", "to_verify", `Quantité en pièces non entière.`));
-    }
-    if (family.areaNeedsYield && unit === "M2") {
-      issues.push(
-        issue(
-          "AREA_NEEDS_PRODUCT_YIELD",
-          "to_verify",
-          `${family.label} en m² : combien de pièces au m² (modèle) ?`,
-        ),
-      );
     }
     if (dimensionOf(unit) === "package") {
       const usable = line.packaging && line.packaging.packageUnit === unit;

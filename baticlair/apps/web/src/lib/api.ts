@@ -192,6 +192,8 @@ export interface TakeoffLine {
   confirmed: boolean;
   kind: "material" | "labor" | "unknown";
   family: string | null;
+  /** « work » : surface de l'ouvrage (liteaux 120 m²), quantité d'achat encore à calculer. */
+  basis: "purchase" | "work";
   status: "certain" | "probable" | "to_verify";
   issues: TakeoffIssue[];
 }
