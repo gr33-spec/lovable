@@ -109,7 +109,9 @@ export function containsKeyword(normalized: string, keyword: string): boolean {
 export function keywordPosition(normalized: string, keyword: string): number {
   let re = keywordCache.get(keyword);
   if (!re) {
-    re = new RegExp(`(?:^|[^a-z0-9])(${escapeRegExp(normalizeText(keyword))})(?:s|x)?(?![a-z0-9])`);
+    // Pluriel accepté sur chaque mot : « tuile de rive » reconnaît « tuiles de rives ».
+    const words = normalizeText(keyword).split(" ").map(escapeRegExp);
+    re = new RegExp(`(?:^|[^a-z0-9])(${words.map((w, i) => (i < words.length - 1 ? `${w}(?:s|x)?` : w)).join(" ")})(?:s|x)?(?![a-z0-9])`);
     keywordCache.set(keyword, re);
   }
   const m = re.exec(normalized);

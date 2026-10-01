@@ -1,0 +1,171 @@
+import { describe, expect, it } from "vitest";
+import { documentationNeeds, ROOFING_REFERENTIAL, scoreQuote, tradeProfile, type LineOutcome, type QuoteScore } from "../src/index.js";
+import { REAL_QUOTES, type RealQuoteCase } from "./devis-reels/index.js";
+
+/**
+ * BANC D'ESSAI « VRAIS DEVIS » — la mesure de réussite de BatiClair :
+ * sur des devis rédigés par des entreprises différentes, combien de lignes
+ * deviennent une liste d'achat, et avec combien de questions ?
+ *
+ * Le tableau est recalculé à chaque passage et comparé au fichier
+ * docs/banc-devis-reels-score.md : toute évolution (règle validée, donnée
+ * documentée, nouveau devis) le fait bouger explicitement
+ * (`pnpm --filter @baticlair/domain test -- -u` pour l'accepter).
+ */
+const run = (c: RealQuoteCase, acceptDraft: boolean) =>
+  scoreQuote(c.lines, ROOFING_REFERENTIAL, tradeProfile(c.trade), { answers: c.answers, acceptDraft, ...(c.preferences ? { preferences: c.preferences } : {}) });
+
+const questions = (s: QuoteScore) => s.asked.length + s.declined.length + s.unanswered.length;
+
+const OUTCOME_FR: Record<LineOutcome, string> = {
+  order: "commande connue",
+  need: "besoin connu, conditionnement à confirmer",
+  question: "attend une réponse",
+  unknown: "ne sait pas encore",
+  not_covered: "ouvrage pas encore couvert",
+  not_material: "hors achat",
+};
+
+function table(title: string, acceptDraft: boolean): string {
+  const head = [
+    `### ${title}`,
+    "",
+    "| Devis | Lignes matériaux | Commande connue | Besoin connu (conditionnement à confirmer) | Attend une réponse | Ne sait pas encore | Ouvrage pas encore couvert | Questions |",
+    "|---|---|---|---|---|---|---|---|",
+  ];
+  const rows = REAL_QUOTES.map((c) => {
+    const s = run(c, acceptDraft);
+    const k = s.counts;
+    return `| ${c.id} | ${s.materialLines} | ${k.order} | ${k.need} | ${k.question} | ${k.unknown} | ${k.not_covered} | ${questions(s)} |`;
+  });
+  return [...head, ...rows].join("\n");
+}
+
+function detail(c: RealQuoteCase): string {
+  const today = run(c, false);
+  const validated = run(c, true);
+  const out = [`### ${c.id}`, "", `Origine : ${c.origin}`, "", "| Ligne | Aujourd'hui | Si les règles en attente étaient validées |", "|---|---|---|"];
+  for (const l of today.lines) {
+    const v = validated.lines.find((x) => x.ref === l.ref)!;
+    out.push(`| ${l.ref} | ${OUTCOME_FR[l.outcome]} | ${OUTCOME_FR[v.outcome]}${v.reason ? ` — ${v.reason}` : ""} |`);
+  }
+  const q = (s: QuoteScore) => [
+    ...s.asked.map((x) => `- posée : « ${x.text} »${c.answersWhy[x.key] ? ` — ${c.answersWhy[x.key]}` : ""}`),
+    ...s.declined.map((x) => `- aucune proposition ne convient : « ${x.text} »${c.answersWhy[x.key] ? ` — ${c.answersWhy[x.key]}` : ""}`),
+    ...s.unanswered.map((x) => `- sans réponse connue : « ${x.text} »${x.impact ? ` (${x.impact})` : ""}`),
+  ];
+  out.push("", "Questions (règles validées) :", "", ...q(validated));
+  out.push("", "À documenter pour aller plus loin (règles validées) :", "");
+  for (const d of documentationNeeds(ROOFING_REFERENTIAL, validated.plan, validated.workItems, validated.declined)) {
+    out.push(`- ${d.title} (${d.lines.join(", ")}) — ${d.idealSource}`);
+  }
+  out.push("", "À documenter aujourd'hui (règles en attente) :", "");
+  for (const d of documentationNeeds(ROOFING_REFERENTIAL, today.plan, today.workItems, today.declined).filter((d) => d.kind === "rule")) {
+    out.push(`- ${d.title} (${d.lines.join(", ")})${d.pendingSource ? ` — en attente : ${d.pendingSource}` : ""}`);
+  }
+  return out.join("\n");
+}
+
+describe("banc d'essai : vrais devis", () => {
+  it("le tableau de score est à jour (docs/banc-devis-reels-score.md)", async () => {
+    const report = [
+      "# Banc d'essai — vrais devis : tableau de score",
+      "",
+      "Fichier GÉNÉRÉ par `packages/domain/test/banc-devis-reels.test.ts` : ne pas modifier à la main.",
+      `Référentiel : ${ROOFING_REFERENTIAL.version}.`,
+      "",
+      "Une ligne « commande connue » a toutes ses quantités à commander ; « besoin connu » a ses quantités",
+      "(ml, m², pièces) mais pas encore l'unité de vente vérifiée. Les questions comptent celles qui sont",
+      "posées, celles où aucune proposition ne convient et celles restées sans réponse connue.",
+      "",
+      table("Aujourd'hui, pour un artisan (données vérifiées seulement)", false),
+      "",
+      table("Si les règles en attente étaient validées (écran du validateur)", true),
+      "",
+      "## Détail par devis",
+      "",
+      ...REAL_QUOTES.map(detail),
+      "",
+    ].join("\n");
+    await expect(report).toMatchFileSnapshot("../../../docs/banc-devis-reels-score.md");
+  });
+
+  for (const c of REAL_QUOTES) {
+    describe(c.id, () => {
+      it("aucune quantité sans donnée vérifiée pour un artisan", () => {
+        const s = run(c, false);
+        for (const n of s.workItems.flatMap((w) => w.needs)) {
+          expect(n.provisional).toBe(false);
+          if (n.status === "calculated") expect(n.trace.every((t) => t.verified)).toBe(true);
+        }
+        for (const r of s.rows) expect(r.provisional).toBe(false);
+      });
+
+      it("chaque ligne a une issue, et une raison quand BatiClair ne sait pas", () => {
+        for (const acceptDraft of [false, true]) {
+          const s = run(c, acceptDraft);
+          expect(s.lines.map((l) => l.ref)).toEqual(c.lines.map((l) => l.ref));
+          for (const l of s.lines) if (l.outcome === "unknown" || l.outcome === "not_covered") expect(l.reason).toBeTruthy();
+        }
+      });
+
+      it("une question n'est jamais posée deux fois", () => {
+        const s = run(c, true);
+        const keys = [...s.asked, ...s.declined, ...s.unanswered].map((q) => q.key);
+        expect(new Set(keys).size).toBe(keys.length);
+      });
+    });
+  }
+});
+
+describe("banc d'essai : le pont devis → moteur retrouve la lecture faite à la main (D-2026-015)", () => {
+  const s = run(REAL_QUOTES.find((c) => c.id === "D-2026-015")!, true);
+  const input = (id: string) => s.plan.inputs.find((i) => i.workItemId === id)!;
+
+  it("rattache chaque ligne à son ouvrage et à son emplacement", () => {
+    expect(s.plan.lines.map((l) => (l.status === "planned" ? [l.ref, l.workItemId, l.slot, l.mentions] : [l.ref, l.status]))).toEqual([
+      ["ligne 1", "couverture-tuiles-emboitement", "ecran", []],
+      ["ligne 2", "couverture-tuiles-emboitement", "contre_liteau", []],
+      ["ligne 3", "couverture-tuiles-emboitement", "liteau", ["tuile"]],
+      ["ligne 4", "couverture-tuiles-emboitement", "tuile", []],
+      ["ligne 5", "not_covered"],
+      ["ligne 6", "faitage", "faitiere", ["closoir", "fixation_faitiere"]],
+      ["ligne 7", "gouttiere", "profil", ["crochet", "naissance"]],
+      ["ligne 8", "descente", "tube", ["coude", "collier"]],
+      ["ligne 9", "not_covered"],
+      ["ligne 10", "not_covered"],
+    ]);
+  });
+
+  it("lit les données écrites, avec leur preuve, et rien d'autre", () => {
+    expect(input("couverture-tuiles-emboitement").params).toEqual({
+      surface: { value: "120", unit: "m2", origin: "devis", evidence: "Devis, ligne 1, Devis, ligne 2, Devis, ligne 3, Devis, ligne 4" },
+      entraxe_supports: { value: "90", unit: "cm", origin: "devis", evidence: "Devis, ligne 1 (« entraxe »)" },
+    });
+    expect(input("descente").params).toEqual({
+      nb_descentes: { value: "2", unit: "u", origin: "devis", evidence: "Devis, ligne 8" },
+      hauteur_descente: { value: "4", unit: "m", origin: "devis", evidence: "Devis, ligne 8 (« hauteur »)" },
+    });
+    // « 2 jeux de coudes » n'est pas un nombre de coudes par descente : rien n'est lu.
+    expect(input("descente").params.coudes_par_descente).toBeUndefined();
+    // « pureau adapté » : pas de valeur écrite, rien n'est lu.
+    expect(input("couverture-tuiles-emboitement").params.pureau).toBeUndefined();
+  });
+
+  it("produits : le liteau 27×40 est écrit, la tuile HP10 se fait confirmer, la faîtière ventilée reste inconnue", () => {
+    expect(s.plan.inputs[0]!.products).toEqual({
+      contre_liteau: { productId: "liteau-sapin-27x40", origin: "devis" },
+      liteau: { productId: "liteau-sapin-27x40", origin: "devis" },
+      tuile: { productId: "edilians-hp10-huguenot", origin: "alias" },
+    });
+    expect(input("faitage").products).toEqual({});
+  });
+
+  it("noms d'achat : caractéristiques du produit gardées, sans doublon ni donnée de chantier", () => {
+    const label = (id: string) => s.rows.find((r) => r.needId === id)!.label;
+    expect(label("tuiles")).toBe("Tuiles HP10 terre cuite rouge grand moule");
+    expect(label("liteaux")).toBe("Liteaux 27×40");
+    expect(label("contre-liteaux")).toBe("Contre-liteaux (Liteaux 27×40)");
+    expect(label("tubes")).toBe("Tubes de descente Ø80 PVC sable");
+  });
+});

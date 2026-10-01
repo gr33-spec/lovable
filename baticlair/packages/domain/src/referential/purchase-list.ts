@@ -42,8 +42,14 @@ const UNIT_LABEL: Record<string, { one: string; many: string }> = {
 };
 const unitText = (count: string, unit: { one: string; many: string }) => `${fr(count)} ${new Decimal(count).equals(1) ? unit.one : unit.many}`;
 
-function row(workItemId: string, n: NeedResult, characteristics: string[]): PurchaseRow {
-  const label = characteristics.length > 0 ? `${n.label} ${characteristics.join(" ")}` : n.label;
+const norm = (t: string) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+function row(workItemId: string, n: NeedResult, characteristics: string[], sameProductTwice: boolean): PurchaseRow {
+  // Même produit pour deux emplacements (liteaux et contre-liteaux) : l'emplacement les distingue.
+  const name = sameProductTwice && !norm(n.label).startsWith(norm(n.slotLabel)) ? `${n.slotLabel} (${n.label})` : n.label;
+  // Une caractéristique déjà dans le nom (« 27×40 », « HP10 ») n'est pas répétée.
+  const extra = characteristics.filter((c) => !norm(name).includes(norm(c)));
+  const label = extra.length > 0 ? `${name} ${extra.join(" ")}` : name;
   const base = { needId: n.needId, workItemId, label, toConfirm: n.origin === "suggested", provisional: n.provisional, trace: n.trace };
   if (n.status === "question") return { ...base, state: "question", ...(n.question ? { question: n.question } : {}) };
   if (n.status === "unknown") return { ...base, state: "unknown", detail: n.reason ?? "Information manquante." };
@@ -72,5 +78,7 @@ function row(workItemId: string, n: NeedResult, characteristics: string[]): Purc
  * elles ne doivent jamais se perdre entre le devis et le fournisseur.
  */
 export function purchaseList(workItems: WorkItemResult[], characteristicsBySlot: Record<string, string[]> = {}): PurchaseRow[] {
-  return workItems.flatMap((w) => w.needs.map((n) => row(w.workItemId, n, characteristicsBySlot[n.slot] ?? [])));
+  const needs = workItems.flatMap((w) => w.needs.map((n) => ({ w, n })));
+  const twice = (n: NeedResult) => needs.filter((x) => x.n.label === n.label).length > 1;
+  return needs.map(({ w, n }) => row(w.workItemId, n, characteristicsBySlot[n.slot] ?? [], twice(n)));
 }

@@ -85,6 +85,25 @@ export interface TraceLine {
   url?: string;
 }
 
+/**
+ * Ce qui bloque, en clair et rangé par nature : c'est la liste de ce qu'il
+ * faut documenter (fiche fabricant, conditionnement, règle) pour que
+ * BatiClair sache la prochaine fois.
+ */
+export interface MissingData {
+  kind: "rule" | "product" | "product_data" | "packaging" | "constant";
+  /** « Espacement maximal », « Règle de calcul : contre-liteaux », « Conditionnement ». */
+  label: string;
+  workItemId: string;
+  slot: string;
+  family: string;
+  productId?: string;
+  /** Caractéristique attendue (« espacement_max »). */
+  attribute?: string;
+  /** Source déclarée (en attente de vérification), s'il y en a une. */
+  sourceId?: string;
+}
+
 export interface PurchaseQuantity {
   count: string;
   unit: { one: string; many: string };
@@ -96,6 +115,8 @@ export interface NeedResult {
   family: string;
   /** Nom court (« Liteaux 27×40 ») ou, sans produit, le nom de l'emplacement. */
   label: string;
+  /** Nom de l'emplacement (« Contre-liteaux »), même quand le produit est connu. */
+  slotLabel: string;
   /** « explicit » : cité par le devis ; « deduced » : cœur de l'ouvrage ; « suggested » : à confirmer. */
   origin: "explicit" | "deduced" | "suggested";
   status: "calculated" | "question" | "unknown";
@@ -113,6 +134,8 @@ export interface NeedResult {
   question?: Question;
   /** Pourquoi BatiClair ne sait pas (« unknown »). */
   reason?: string;
+  /** Ce qu'il faut documenter pour débloquer le besoin (« unknown ») ou sa conversion en unités de vente. */
+  missing?: MissingData;
   /** Calcul fait avec au moins une donnée en brouillon (option acceptDraft). */
   provisional: boolean;
   formula?: string;
@@ -134,7 +157,7 @@ export interface WorkItemResult {
 
 class Stop extends Error {
   constructor(
-    readonly outcome: { status: "question"; question: Question } | { status: "unknown"; reason: string },
+    readonly outcome: { status: "question"; question: Question } | { status: "unknown"; reason: string; missing?: MissingData },
   ) {
     super("stop");
   }
@@ -259,18 +282,19 @@ function computeNeed(
     slot: slot.key,
     family: slot.family,
     label: product?.shortLabel ?? slot.label,
+    slotLabel: slot.label,
     origin,
     formula: rule.formula,
     ...(rule.exclusions ? { exclusions: rule.exclusions } : {}),
   };
 
+  const gap = (m: Omit<MissingData, "workItemId" | "slot" | "family">): MissingData => ({ workItemId: work.id, slot: slot.key, family: slot.family, ...m });
   /** Une donnée du référentiel n'est utilisable que vérifiée (ou en brouillon, sur l'écran du validateur). */
-  const useFact = (label: string, fact: Fact): IntervalValue => {
-    if (fact.verification.status === "deprecated") throw new Stop({ status: "unknown", reason: `Donnée retirée du référentiel : ${label}.` });
+  const useFact = (label: string, fact: Fact, missing: Omit<MissingData, "workItemId" | "slot" | "family" | "label" | "sourceId">): IntervalValue => {
+    const blocked = (reason: string) => new Stop({ status: "unknown", reason, missing: gap({ ...missing, label, sourceId: fact.source }) });
+    if (fact.verification.status === "deprecated") throw blocked(`Donnée retirée du référentiel : ${label}.`);
     if (fact.verification.status === "draft") {
-      if (!options.acceptDraft) {
-        throw new Stop({ status: "unknown", reason: `Donnée en attente de vérification : ${label} (${sources.get(fact.source)?.title ?? fact.source}).` });
-      }
+      if (!options.acceptDraft) throw blocked(`Donnée en attente de vérification : ${label} (${sources.get(fact.source)?.title ?? fact.source}).`);
       provisional = true;
     }
     const unit = parseRefUnit(fact.unit);
@@ -281,7 +305,12 @@ function computeNeed(
   try {
     if (rule.verification.status !== "verified") {
       if (rule.verification.status === "deprecated" || !options.acceptDraft) {
-        throw new Stop({ status: "unknown", reason: `Règle de calcul en attente de vérification (${sources.get(rule.source)?.title ?? rule.source}).` });
+        throw new Stop({
+          status: "unknown",
+          // La source détaillée va dans « missing » (liste à documenter) ; l'artisan lit une phrase courte.
+          reason: "Règle de calcul en attente de vérification.",
+          missing: gap({ kind: "rule", label: `Règle de calcul : ${slot.label.toLowerCase()}`, sourceId: rule.source }),
+        });
       }
       provisional = true;
     }
@@ -292,7 +321,9 @@ function computeNeed(
     const usesProduct = formulaVariables(parseFormula(rule.formula)).some((v) => v.startsWith(`${slot.key}.`));
     if (!product && usesProduct) {
       const candidates = ref.products.filter((p) => p.family === slot.family);
-      if (candidates.length === 0) throw new Stop({ status: "unknown", reason: `Calcul impossible sans les données du produit (${slot.label}).` });
+      if (candidates.length === 0) {
+        throw new Stop({ status: "unknown", reason: `Calcul impossible sans les données du produit (${slot.label}).`, missing: gap({ kind: "product", label: slot.label }) });
+      }
       throw new Stop({
         status: "question",
         question: {
@@ -330,17 +361,21 @@ function computeNeed(
       if (attr !== undefined) {
         if (head === "regle") {
           const fact = work.constants[attr];
-          if (!fact) throw new Stop({ status: "unknown", reason: `Constante absente du référentiel : ${attr}.` });
-          return useFact(attr.replace(/_/g, " "), fact);
+          if (!fact) throw new Stop({ status: "unknown", reason: `Constante absente du référentiel : ${attr}.`, missing: gap({ kind: "constant", label: attr.replace(/_/g, " "), attribute: attr }) });
+          return useFact(attr.replace(/_/g, " "), fact, { kind: "constant", attribute: attr });
         }
         const p = productFor(head!)?.product;
         const family = ref.families.find((f) => f.code === work.slots.find((s) => s.key === head)?.family);
         const def = family?.attributes.find((a) => a.key === attr);
         const fact = p?.attributes[attr];
         if (!p || !fact) {
-          throw new Stop({ status: "unknown", reason: `Calcul impossible sans « ${def?.label ?? attr} » de ${p?.shortLabel ?? head}.` });
+          throw new Stop({
+            status: "unknown",
+            reason: `Calcul impossible sans « ${def?.label ?? attr} » de ${p?.shortLabel ?? head}.`,
+            missing: gap({ kind: "product_data", label: def?.label ?? attr, attribute: attr, ...(p ? { productId: p.id } : {}) }),
+          });
         }
-        return useFact(`${def?.label ?? attr} (${p.shortLabel})`, fact);
+        return useFact(`${def?.label ?? attr} (${p.shortLabel})`, fact, { kind: "product_data", attribute: attr, productId: p.id });
       }
       const def = work.params.find((p) => p.key === name);
       if (!def) throw new FormulaError(`Variable inconnue : ${name}`);
@@ -422,8 +457,11 @@ function computeNeed(
     }
 
     // 5. Achat : la commande pour la plus petite ET la plus grande valeur possible.
-    const converted = product ? toPurchase(product, need, rule.unit, useFact) : { pending: `Produit à identifier (${slot.label.toLowerCase()}) pour convertir en unités de vente.` };
+    const converted = product
+      ? toPurchase(product, need, rule.unit, (label, fact) => useFact(label, fact, { kind: "packaging", productId: product.id }))
+      : { pending: `Produit à identifier (${slot.label.toLowerCase()}) pour convertir en unités de vente.`, missing: gap({ kind: "product", label: slot.label }) };
     const purchaseUnavailable = converted && "pending" in converted ? converted.pending : undefined;
+    const purchaseMissing = converted && "pending" in converted && converted.missing ? { ...converted.missing, workItemId: work.id, slot: slot.key, family: slot.family } : undefined;
     const purchase = converted && "pending" in converted ? null : converted;
     if (!exact) {
       const decided = purchase && purchase.orderLo.equals(purchase.orderHi) && purchase.orderLo.isFinite();
@@ -446,6 +484,7 @@ function computeNeed(
         : { quantityRange: { min: need.lo.toDecimalPlaces(2).toFixed(), max: need.hi.toDecimalPlaces(2).toFixed(), unit: rule.unit } }),
       ...(purchase ? { purchase: { order: { count: purchase.orderLo.toFixed(), unit: purchase.unit }, approx: purchase.approx } } : {}),
       ...(purchaseUnavailable ? { purchaseUnavailable } : {}),
+      ...(purchaseMissing ? { missing: purchaseMissing } : {}),
       provisional,
       trace,
     };
@@ -465,7 +504,7 @@ function toPurchase(
   need: IntervalValue,
   needUnitText: string,
   useFact: (label: string, fact: Fact) => IntervalValue,
-): { orderLo: Decimal; orderHi: Decimal; unit: { one: string; many: string }; approx: PurchaseQuantity[] } | { pending: string } | null {
+): { orderLo: Decimal; orderHi: Decimal; unit: { one: string; many: string }; approx: PurchaseQuantity[] } | { pending: string; missing?: MissingData } | null {
   const needUnit = parseRefUnit(needUnitText);
   const lo = need.lo.times(needUnit.factor);
   const hi = need.hi.times(needUnit.factor);
@@ -475,13 +514,18 @@ function toPurchase(
     return { lo: lo.dividedBy(content.lo).ceil(), hi: hi.dividedBy(content.lo).ceil() };
   };
   const primary = product.sellingUnits.find((s) => s.primary);
-  if (!primary) return { pending: `Conditionnement à confirmer : aucune unité de vente vérifiée pour ${product.shortLabel}.` };
+  if (!primary) {
+    return {
+      pending: `Conditionnement à confirmer : aucune unité de vente vérifiée pour ${product.shortLabel}.`,
+      missing: { kind: "packaging", label: "Conditionnement (unité de vente)", workItemId: "", slot: "", family: product.family, productId: product.id },
+    };
+  }
   let order: { lo: Decimal; hi: Decimal } | null;
   try {
     order = counts(primary);
   } catch (e) {
     // Conditionnement pas encore vérifié : le BESOIN reste juste et affiché ; seule la conversion attend.
-    if (e instanceof Stop && e.outcome.status === "unknown") return { pending: e.outcome.reason };
+    if (e instanceof Stop && e.outcome.status === "unknown") return { pending: e.outcome.reason, ...(e.outcome.missing ? { missing: e.outcome.missing } : {}) };
     throw e;
   }
   if (!order) return null;

@@ -99,6 +99,12 @@ export interface ProductFamily {
   attributes: AttributeDef[];
   /** Caractéristiques à comparer entre deux offres (« même besoin, caractéristique différente »). */
   keyAttributes: string[];
+  /**
+   * Mots qui désignent la famille dans une ligne de devis (« faîtage »,
+   * « faîtière »). Du vocabulaire, jamais une quantité : le mot le plus tôt
+   * dans la ligne nomme l'ouvrage (« Gouttière… crochets compris » = gouttière).
+   */
+  keywords?: string[];
 }
 
 /** Façon de vendre un produit : à la pièce, à la longueur de 4 m, au rouleau… */
@@ -121,6 +127,12 @@ export interface Product {
   manufacturer?: string;
   /** Appellations chantier et fournisseur (normalisées à la lecture). */
   aliases: string[];
+  /**
+   * Produit entièrement défini par ce que le devis écrit (« liteau 27×40 ») :
+   * reconnu, il ne demande pas de confirmation. Un modèle de marque
+   * (« HP10 ») se fait toujours confirmer.
+   */
+  generic?: boolean;
   attributes: Record<string, Fact>;
   sellingUnits: SellingUnit[];
   note?: string;
@@ -142,6 +154,10 @@ export interface ParamDef {
   hint?: string;
   /** Bornes admises, en variables de formule (« tuile.pureau_min »). */
   range?: { min: string; max: string };
+  /** La quantité de la ligne de l'ouvrage EST cette donnée (« 120 m² » = la surface ; « 2 ensembles » = 2 descentes). */
+  fromLineQuantity?: boolean;
+  /** Mots qui l'annoncent dans le texte d'une ligne de cet ouvrage (« entraxe 90 cm », « hauteur 4 m »). */
+  textLabels?: string[];
 }
 
 /** Place d'un produit dans l'ouvrage (« la tuile », « le liteau »). */
@@ -149,6 +165,8 @@ export interface Slot {
   key: string;
   family: string;
   label: string;
+  /** Départage deux emplacements d'une même famille (« contre-lattage » ≠ « lattage »). */
+  keywords?: string[];
 }
 
 /** Besoin matériau d'un ouvrage : une formule sourcée. */

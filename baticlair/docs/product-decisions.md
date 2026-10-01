@@ -515,3 +515,19 @@ fictives uniquement.
   quantitatif attendu → commande réelle) pour mesurer la précision avant
   toute promesse publique.
 - Détails : `referentiel-metier.md`, `referentiel-exemple-couverture.md`.
+
+### PD-043 — Nourrir le moteur de preuves et de vrais devis
+
+- **Date** : 2026-10-01 · **Statut** : Décidé (le fondateur)
+- Pas de nouvelle architecture importante : le moteur est construit ; il
+  faut le confronter à des vrais cas et le nourrir de sources.
+- **Mesure de réussite** : sur plusieurs vrais devis différents (3 à 5,
+  couverture d'abord), combien de lignes deviennent une liste d'achat, et
+  avec combien de questions. Banc permanent : `banc-devis-reels.md`.
+- **Enrichissement progressif** : un produit rencontré → documentation
+  vérifiée → données → tests → réutilisation. Pas de grande base remplie à
+  la main avant la bêta. Référentiel en couches, ouvert à une base externe
+  sans changer le moteur. Détails : `enrichissement-referentiel.md`.
+- Toute donnée non sourcée est retirée, même plausible ; les règles non
+  prouvées restent en attente.
+
