@@ -78,7 +78,8 @@ export const LEZARDRIEUX_LINES: BenchLine[] = [
   line("Fourniture d'un bloc-porte alvéolaire, pré-peint, dimension 73x204cm, HUI88, y compris béquillage.", "33,000", "U", "D"),
   line("Pose des portes dans murs intérieurs maçonnés", "7,000", "U", "L"),
   line("Fourniture d'une trappe isolée", "3,000", "U", "D", "Dimensions non précisées : question réelle."),
-  line("Bande armée pour angles saillants.", "530,000", "ML", "C", "530 ml → rouleaux (longueur du rouleau à documenter)."),
+  // Grille corrigée : une longueur d'un produit défini se commande telle quelle (conditionnement à confirmer).
+  line("Bande armée pour angles saillants.", "530,000", "ML", "D", "530 ml : rouleaux (longueur du rouleau à documenter)."),
   line("Pose des portes dans cloisons de distribution (fourniture par le lot menuiseries intérieures).", "30,000", "U", "L", "Fourniture par un autre lot : rien à commander."),
   line(
     "Renfort avec un parement en plaque de type HABITO hydrofuge de chez placo (ou équivalent) L'implantation des renforts se fera selon les plans transmis par mail par les lots techniques (sans plan de localisation des renforts, l'entreprise ne sera pas responsable de l'absence de renfort sur le chantier)",

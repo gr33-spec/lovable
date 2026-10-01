@@ -61,7 +61,8 @@ export const D2026_015_LINES: BenchLine[] = [
       "Gouttière PVC de 25 sable (Fourniture & Pose) - Fourniture et pose de gouttières demi-ronde de 25 en PVC de coloris sable, crochets et naissances compris (Longueur : 2 x 10 m)",
     quantity: "20",
     unit: "m",
-    truth: "C",
+    // Grille corrigée : 20 m de gouttière se commandent tels quels ; crochets et naissances s'ajoutent.
+    truth: "P",
     note: "Profil + crochets + naissances.",
   },
   {

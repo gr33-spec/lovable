@@ -6,12 +6,14 @@ import type { QuoteLine } from "../../src/index.js";
  *  - « D » achat direct : la quantité de la ligne se commande telle quelle (produit défini) ;
  *  - « C » ouvrage à convertir : la quantité mesure l'ouvrage (m², points…), les
  *    matériaux à commander s'en déduisent (plaques, rails, câble, colle…) ;
+ *  - « P » élément principal + accessoires : la quantité compte bien l'article principal
+ *    (8 prises, 20 m de gouttière), mais d'autres matériaux s'y ajoutent (boîtes, câble, crochets) ;
  *  - « X » fourniture en vrac indéterminée (« accessoires de raccordement : raccords, coudes… ») ;
  *  - « L » main-d'œuvre ou service ; « LI » main-d'œuvre qui consomme des matériaux non listés
  *    (étanchéité, colle, joints…) ;
  *  - « I » information, frais, remise (rien à commander).
  */
-export type Truth = "D" | "C" | "X" | "L" | "LI" | "I";
+export type Truth = "D" | "P" | "C" | "X" | "L" | "LI" | "I";
 
 export interface BenchLine extends QuoteLine {
   truth: Truth;
@@ -19,7 +21,7 @@ export interface BenchLine extends QuoteLine {
   note?: string;
 }
 
-export const MATERIAL_TRUTHS: readonly Truth[] = ["D", "C", "X"];
+export const MATERIAL_TRUTHS: readonly Truth[] = ["D", "P", "C", "X"];
 
 let counter = 0;
 /** Ligne de banc : référence automatique « l001 »… dans l'ordre du devis. */

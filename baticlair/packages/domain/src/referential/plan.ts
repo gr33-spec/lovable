@@ -82,7 +82,10 @@ function readLabelled(normalized: string, label: string): { value: string; unit:
 }
 
 export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradeProfile, preferences?: CompanyPreferences): QuotePlan {
-  const families = ref.families.filter((f) => f.keywords?.length).map((f) => ({ item: f.code, keywords: f.keywords! }));
+  // Le vocabulaire d'un référentiel ne vaut que pour SON métier : dans un devis de plombier,
+  // « coude PVC » n'est pas un coude de descente de gouttière.
+  const covered = profile.id.split(",").includes(ref.trade);
+  const families = covered ? ref.families.filter((f) => f.keywords?.length).map((f) => ({ item: f.code, keywords: f.keywords! })) : [];
   const read = lines.map((line) => {
     const v = validateTakeoffLine({ id: line.ref, designation: line.designation, quantityRaw: line.quantity, unitRaw: line.unit, source: "client_quote" }, profile);
     const text = normalizeText(line.designation);
@@ -110,7 +113,11 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
         ref: line.ref,
         status: "not_covered",
         family,
-        reason: label ? `${label} : pas encore de règle de calcul dans BatiClair.` : "Ouvrage non reconnu par BatiClair.",
+        reason: !covered
+          ? "Le calcul des quantités n'existe pas encore pour ce métier."
+          : label
+            ? `${label} : pas encore de règle de calcul dans BatiClair.`
+            : "Ouvrage non reconnu par BatiClair.",
       });
       continue;
     }

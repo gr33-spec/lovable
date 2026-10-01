@@ -6,6 +6,8 @@ export const COMMON_LABOR: readonly string[] = [
   "main d oeuvre", "pose", "depose", "demontage", "echafaudage", "location", "benne", "evacuation",
   "mise en decharge", "nettoyage", "deplacement", "installation de chantier", "repli de chantier",
   "protection", "mise en securite", "diagnostic", "garantie", "etude", "prestation", "mise en service",
+  // Verbes de prestation : ils ne comptent qu'en TÊTE de ligne ou avant tout matériau (voir lineKind).
+  "installation", "application", "percement", "mesure", "essai", "formation", "frais de port",
 ];
 
 export const COMMON_SUPPLY: readonly string[] = ["fourniture", "fournir", "fourni"];

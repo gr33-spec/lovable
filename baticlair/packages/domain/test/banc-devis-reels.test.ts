@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { documentationNeeds, ROOFING_REFERENTIAL, scoreQuote, tradeProfile, type LineOutcome, type QuoteScore } from "../src/index.js";
+import { D2026_011_LINES } from "./devis-reels/d2026-011.js";
+import { D2026_015_LINES } from "./devis-reels/d2026-015.js";
+import { MORELLEC_LINES } from "./devis-reels/electricite-plomberie-morellec.js";
+import { errorDigest, evaluateQuote, evaluationDetail, evaluationTable } from "./devis-reels/evaluate.js";
 import { REAL_QUOTES, type RealQuoteCase } from "./devis-reels/index.js";
+import { PISCINE_LINES } from "./devis-reels/piscine.js";
+import { LEZARDRIEUX_LINES } from "./devis-reels/platrerie-lezardrieux.js";
 
 /**
  * BANC D'ESSAI « VRAIS DEVIS » — la mesure de réussite de BatiClair :
@@ -167,5 +173,64 @@ describe("banc d'essai : le pont devis → moteur retrouve la lecture faite à l
     expect(label("liteaux")).toBe("Liteaux 27×40");
     expect(label("contre-liteaux")).toBe("Contre-liteaux (Liteaux 27×40)");
     expect(label("tubes")).toBe("Tubes de descente Ø80 PVC sable");
+  });
+});
+
+/**
+ * Les 4 devis du 2026-10-01 (électricité-plomberie, plâtrerie, piscine,
+ * salle de bain), notés contre leur vérité terrain. Le score « avant » est
+ * gelé (docs/banc-4-devis-avant*.md) ; celui-ci est recalculé à chaque passage.
+ */
+describe("banc d'essai : 4 devis de métiers différents (score « après »)", () => {
+  const cases = [
+    ["Morellec — électricité + plomberie (scanné)", MORELLEC_LINES, "electrical,plumbing"],
+    ["Lézardrieux — plâtrerie, isolation", LEZARDRIEUX_LINES, "drywall"],
+    ["Piscine", PISCINE_LINES, "other"],
+    ["D-2026-011 — salle de bain", D2026_011_LINES, "plumbing,tiling,electrical,painting"],
+  ] as const;
+  const evals = cases.map(([id, lines, trade]) => evaluateQuote(id, lines, trade));
+  const reference = evaluateQuote("D-2026-015 — couverture (référence)", D2026_015_LINES, "roofing");
+
+  it("le score est à jour (docs/banc-4-devis-score.md)", async () => {
+    const report = [
+      "# Banc d'essai — 4 devis de métiers différents : score ACTUEL",
+      "",
+      "Fichier GÉNÉRÉ par `packages/domain/test/banc-devis-reels.test.ts` : ne pas modifier à la main.",
+      "Points de départ gelés : `banc-4-devis-avant.md` (passage à l'aveugle) et",
+      "`banc-4-devis-avant-grille-corrigee.md` (même code, grille de ce fichier).",
+      "",
+      "« Correctement comprise » : matériau ou main-d'œuvre, famille, et mesure d'ouvrage ou quantité",
+      "d'achat justes. « Besoin identifié » : BatiClair sait quel article commander (ou le moteur sait",
+      "décomposer l'ouvrage). « Quantité certaine » : la commande de la ligne est complète et sûre.",
+      "",
+      evaluationTable(evals),
+      "",
+      "Référence couverture :",
+      "",
+      evaluationTable([reference]),
+      "",
+      "## Erreurs restantes",
+      "",
+      errorDigest([...evals, reference]) || "Aucune.",
+      "",
+      "## Questions posées à l'artisan",
+      "",
+      ...[...evals, reference].flatMap((e) => [`### ${e.id}`, "", ...(e.questionTexts.length ? e.questionTexts.map((q) => `- ${q}`) : ["- aucune"]), ""]),
+      "## Détail",
+      "",
+      ...[...evals, reference].map(evaluationDetail),
+      "",
+    ].join("\n");
+    await expect(report).toMatchFileSnapshot("../../../docs/banc-4-devis-score.md");
+  });
+
+  it("aucune ligne de main-d'œuvre ou d'information n'est envoyée comme matériau", () => {
+    for (const e of [...evals, reference]) {
+      expect(e.lines.filter((l) => l.errors.some((x) => x.includes("prise pour un matériau"))).map((l) => l.line.designation)).toEqual([]);
+    }
+  });
+
+  it("le vocabulaire couverture ne s'applique jamais à un autre métier", () => {
+    for (const e of evals) expect(e.lines.filter((l) => l.errors.some((x) => x.includes("couverture"))).map((l) => l.line.designation)).toEqual([]);
   });
 });

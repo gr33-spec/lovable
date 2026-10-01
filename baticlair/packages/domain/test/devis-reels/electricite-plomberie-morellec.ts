@@ -13,7 +13,11 @@ import { line, resetLines, type BenchLine, type Truth } from "./truth.js";
 resetLines();
 
 const POINT_NOTE = "Point d'installation (mécanisme + plaque + boîte + câble + gaine) : ouvrage composé, longueur de câble inconnue.";
-const pt = (designation: string, qty: string) => line(designation, qty, "U", "C", POINT_NOTE);
+const PRISE_NOTE = "Prise : la quantité compte les prises à commander ; boîtes, plaques et câble s'y ajoutent.";
+// Grille corrigée après le passage à l'aveugle : une PRISE se compte à la pièce (« P »), un point lumineux
+// ou une alimentation reste un ouvrage composé (« C »). Appliquée aussi au score « avant ».
+const pt = (designation: string, qty: string) =>
+  designation.startsWith("PRISE") ? line(designation, qty, "U", "P", PRISE_NOTE) : line(designation, qty, "U", "C", POINT_NOTE);
 const tableau = () =>
   line(
     "TABLEAU GENERAL ELECTRIQUE HAGER INTERUPTEURS DIFFERENTIELS HAUTE SENSIBILITE 30 MA DISJONCTEURS 2A DISJONCTEURS 10A DISJONCTEURS 16A DISJONCTEURS 20A DISJONCTEURS 32A CONTACTEUR J/N FILS BARETTE MONTAGE",

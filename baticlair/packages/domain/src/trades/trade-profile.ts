@@ -57,6 +57,12 @@ export interface MaterialFamily {
    */
   areaNeedsYield?: boolean;
   /**
+   * Une quantité EN PIÈCES de cette famille compte des OUVRAGES (« 2 points
+   * lumineux », « 17 alimentations radiateur ») : chacun se décompose en
+   * matériaux (appareillage, boîte, câble…) ; ce n'est pas un nombre d'articles.
+   */
+  countOfWork?: boolean;
+  /**
    * Sur un devis client, une surface (m²) de cette famille est la surface
    * de l'OUVRAGE (« liteaux 120 m² » = 120 m² de toiture liteautée) : la
    * quantité d'achat (ml, longueurs) reste à calculer.
@@ -83,6 +89,9 @@ export interface CompanionRule {
 export function normalizeText(raw: string): string {
   return raw
     .toLowerCase()
+    // Ligatures : « main d'œuvre » = « main d'oeuvre ».
+    .replace(/œ/g, "oe")
+    .replace(/æ/g, "ae")
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .replace(/[’'`-]/g, " ")

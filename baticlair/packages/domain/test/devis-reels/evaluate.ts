@@ -1,4 +1,4 @@
-import { ROOFING_REFERENTIAL, scoreQuote, tradeProfile, validateTakeoffLine, type LineValidation, type QuoteScore } from "../../src/index.js";
+import { ROOFING_REFERENTIAL, scoreQuote, tradeProfile, validateTakeoff, type LineValidation, type QuoteScore } from "../../src/index.js";
 import { MATERIAL_TRUTHS, type BenchLine } from "./truth.js";
 
 /**
@@ -33,6 +33,8 @@ export interface Evaluation {
   questions: number;
   unknown: number;
   errors: number;
+  /** Les questions telles que l'artisan les lirait (une par sujet). */
+  questionTexts: string[];
   score: QuoteScore;
 }
 
@@ -43,31 +45,38 @@ const flagged = (v: LineValidation) => v.issues.some((i) => i.severity === "bloc
 export function evaluateQuote(id: string, lines: BenchLine[], trade: string, acceptDraft = false): Evaluation {
   const profile = tradeProfile(trade);
   const score = scoreQuote(lines, ROOFING_REFERENTIAL, profile, { acceptDraft });
-  const evaluated = lines.map((line): EvaluatedLine => {
-    const v = validateTakeoffLine({ id: line.ref, designation: line.designation, quantityRaw: line.quantity, unitRaw: line.unit, source: "client_quote" }, profile);
+  // Lecture de tout le document (comme dans l'application) : les questions communes à plusieurs lignes comptent une fois.
+  const takeoff = validateTakeoff(
+    lines.map((l) => ({ id: l.ref, designation: l.designation, quantityRaw: l.quantity, unitRaw: l.unit, source: "client_quote" as const })),
+    profile,
+  );
+  const evaluated = lines.map((line, index): EvaluatedLine => {
+    const v = takeoff.lines[index]!;
     const engine = score.lines.find((l) => l.ref === line.ref)!;
     const material = MATERIAL_TRUTHS.includes(line.truth);
     const errors: string[] = [];
     if (material && v.kind === "labor") errors.push("matériau pris pour de la main-d'œuvre");
     if (!material && v.kind === "material") errors.push(line.truth === "I" ? "information prise pour un matériau" : "main-d'œuvre prise pour un matériau");
     if (line.truth === "C" && v.kind === "material" && v.basis === "purchase" && !blocking(v)) errors.push("mesure d'ouvrage envoyée comme quantité d'achat");
-    if (line.truth === "D" && v.kind === "material" && v.basis === "work") errors.push("quantité d'achat bloquée comme mesure d'ouvrage");
+    if ((line.truth === "D" || line.truth === "P") && v.kind === "material" && v.basis === "work") errors.push("quantité d'achat bloquée comme mesure d'ouvrage");
     // Le vocabulaire couverture ne doit rien reconnaître dans un devis d'un autre métier.
     const planned = score.plan.lines.find((l) => l.ref === line.ref)!;
     if (trade !== "roofing" && planned.status === "planned") errors.push("rattachée à un ouvrage de couverture");
     if (trade !== "roofing" && planned.status === "not_covered" && planned.family) errors.push(`vocabulaire couverture appliqué à tort (« ${planned.family} »)`);
 
-    const basisOk = line.truth === "D" ? v.basis === "purchase" : line.truth === "C" ? v.basis === "work" : true;
+    const basisOk = line.truth === "D" || line.truth === "P" ? v.basis === "purchase" : line.truth === "C" ? v.basis === "work" : true;
     const understood = material ? v.kind === "material" && v.family !== null && basisOk : v.kind !== "material";
-    const directOk = line.truth === "D" && v.kind === "material" && v.basis === "purchase" && v.quantity !== null && v.unit !== null && !blocking(v);
+    const directOk = (line.truth === "D" || line.truth === "P") && v.kind === "material" && v.basis === "purchase" && v.quantity !== null && v.unit !== null && !blocking(v);
     const converted = line.truth === "C" && ["order", "need", "question"].includes(engine.outcome);
     const needIdentified = directOk || converted;
-    const certain = (directOk && isCount(v) && !flagged(v)) || (line.truth === "C" && engine.outcome === "order");
+    // « P » : l'article principal est juste, mais la commande n'est complète qu'avec ses accessoires.
+    const certain = (directOk && line.truth === "D" && isCount(v) && !flagged(v)) || ((line.truth === "C" || line.truth === "P") && engine.outcome === "order");
     const unknown = material && !needIdentified;
     return { line, validation: v, engine, understood, needIdentified, certain, asks: material && flagged(v), unknown, errors };
   });
   const material = evaluated.filter((e) => MATERIAL_TRUTHS.includes(e.line.truth));
   const engineQuestions = score.asked.length + score.declined.length + score.unanswered.length;
+  const documentQuestions = takeoff.issues.filter((i) => i.severity !== "info").length;
   return {
     id,
     lines: evaluated,
@@ -75,9 +84,14 @@ export function evaluateQuote(id: string, lines: BenchLine[], trade: string, acc
     understood: material.filter((e) => e.understood).length,
     needsIdentified: material.filter((e) => e.needIdentified).length,
     certain: material.filter((e) => e.certain).length,
-    questions: evaluated.filter((e) => e.asks).length + engineQuestions,
+    questions: evaluated.filter((e) => e.asks).length + documentQuestions + engineQuestions,
     unknown: material.filter((e) => e.unknown).length,
     errors: evaluated.reduce((n, e) => n + e.errors.length, 0),
+    questionTexts: [
+      ...takeoff.issues.filter((i) => i.severity !== "info").map((i) => i.message),
+      ...evaluated.filter((e) => e.asks).flatMap((e) => e.validation.issues.filter((i) => i.severity !== "info").map((i) => `« ${e.line.designation.slice(0, 50)} » : ${i.message}`)),
+      ...[...score.asked, ...score.declined, ...score.unanswered].map((q) => q.text),
+    ],
     score,
   };
 }
@@ -119,6 +133,7 @@ export function errorDigest(evals: Evaluation[]): string {
 
 const TRUTH_FR: Record<BenchLine["truth"], string> = {
   D: "achat direct",
+  P: "article principal + accessoires",
   C: "ouvrage à convertir",
   X: "fourniture en vrac",
   L: "main-d'œuvre",

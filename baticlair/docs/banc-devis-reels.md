@@ -47,14 +47,32 @@ convient, celles restées sans réponse connue.
   vérifiée pour un artisan ; une issue pour chaque ligne ; aucune question
   posée deux fois.
 
+## Les deux niveaux, jamais confondus (4 devis du 2026-10-01)
+
+Chaque ligne d'un vrai devis est annotée à la main (`test/devis-reels/truth.ts`) :
+achat direct, article principal + accessoires, ouvrage à convertir, fourniture en
+vrac, main-d'œuvre, information. BatiClair est noté contre cette vérité :
+
+1. **J'ai compris la ligne** : matériau ou main-d'œuvre, famille, et surtout
+   mesure d'ouvrage (à convertir) ou quantité d'achat (à commander telle quelle).
+2. **Je sais quoi commander** : besoin identifié, puis quantité certaine.
+
+Les **erreurs** comptent ce qui partirait faux chez le fournisseur.
+Scores : `banc-4-devis-avant.md` (passage à l'aveugle, gelé),
+`banc-4-devis-avant-grille-corrigee.md` (même code, grille corrigée, gelé),
+`banc-4-devis-score.md` (actuel, généré).
+
 ## Ajouter un vrai devis (10 minutes)
 
 1. Anonymiser : garder seulement désignation, quantité, unité de chaque
    ligne (ni nom, ni adresse, ni prix, ni coordonnées).
 2. Créer `packages/domain/test/devis-reels/<id>.ts` sur le modèle de
    `d2026-015.ts`.
-3. L'ajouter à `REAL_QUOTES` (`test/devis-reels/index.ts`), avec les seules
-   réponses justifiées par le devis et leur raison.
+3. Couverture : l'ajouter à `REAL_QUOTES` (`test/devis-reels/index.ts`), avec les
+   seules réponses justifiées par le devis et leur raison. Tous métiers : annoter
+   chaque ligne (`line(…, vérité, note)`) et l'ajouter au banc des devis de métiers
+   différents (`banc-devis-reels.test.ts`). Faire d'abord un passage À L'AVEUGLE et
+   le geler avant toute correction.
 4. `pnpm --filter @baticlair/domain test -- -u` : le tableau de score est
    régénéré. Relire ce qui a bougé.
 5. Si une ligne est mal rattachée : corriger le vocabulaire du référentiel
