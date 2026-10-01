@@ -59,7 +59,7 @@ describe("mode démo", () => {
     expect((await agent.post(`/v1/demo/recipients/${request.recipients[0].id}/quote`)).status).toBe(409);
   });
 
-  it("un vrai fournisseur ne répond jamais tout seul, et une autre entreprise n'a accès à rien", async () => {
+  it("un vrai fournisseur peut recevoir un devis fictif de test, clairement marqué ; une autre entreprise n'a accès à rien", async () => {
     const a = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const b = await signUpWithCompany(ctx.app, "b@example.fr", "Couverture Leroy");
     const { projectId } = (await a.agent.post("/v1/demo/project").expect(201)).body;
@@ -71,10 +71,12 @@ describe("mode démo", () => {
     await a.agent.post(`/v1/takeoffs/${takeoff.id}/validate`).expect(200);
     const real = (await a.agent.post("/v1/suppliers").send({ name: "Point.P", email: "devis@pointp.fr" })).body;
     const request = (await a.agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [real.id] })).body;
+    const recipientId = request.recipients[0].id as string;
 
-    const refused = await a.agent.post(`/v1/demo/recipients/${request.recipients[0].id}/quote`);
-    expect(refused.status).toBe(400);
-    expect(refused.body.error.details).toMatchObject({ reason: "not_demo_supplier" });
-    expect((await b.agent.post(`/v1/demo/recipients/${request.recipients[0].id}/quote`)).status).toBe(404);
+    expect((await b.agent.post(`/v1/demo/recipients/${recipientId}/quote`)).status).toBe(404);
+
+    const res = await a.agent.post(`/v1/demo/recipients/${recipientId}/quote`).expect(201);
+    expect(res.body.recipients[0]).toMatchObject({ status: "received", document: { name: "devis-fictif-test-devis.pdf" } });
+    await a.agent.post(`/v1/price-request-recipients/${recipientId}/analysis`).expect(201);
   });
 });

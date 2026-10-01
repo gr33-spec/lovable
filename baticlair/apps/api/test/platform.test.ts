@@ -90,3 +90,22 @@ describe("remarques de l'IA pour l'artisan", () => {
     ).toEqual(["Non listés : dépose de l'ancienne couverture (main-d'œuvre), cheminée fournie par le client."]);
   });
 });
+
+describe("textes pour l'artisan et le fournisseur", () => {
+  it("écarte les remarques sur la façon dont l'IA a lu le devis", async () => {
+    const { artisanNotes } = await import("../src/platform/ai/artisan-notes.js");
+    expect(
+      artisanNotes([
+        "Les pages du devis ont été lues en image : aucune ligne de texte numérotée n'était disponible, donc les références de ligne sont vides.",
+        "Le client fournit la cheminée.",
+      ]),
+    ).toEqual(["Le client fournit la cheminée."]);
+  });
+
+  it("retire « Fourniture » des lignes envoyées au fournisseur, sans perdre le détail", async () => {
+    const { purchaseLabel } = await import("../src/modules/price-requests/application/price-request-email.js");
+    expect(purchaseLabel("Fourniture isolation murs 100mm - Fourniture de laine de verre")).toBe("Isolation murs 100mm - laine de verre");
+    expect(purchaseLabel("Fourniture et pose descente zinc diamètre 80")).toBe("Descente zinc diamètre 80");
+    expect(purchaseLabel("Tuile romane canal rouge 12,5 u/m²")).toBe("Tuile romane canal rouge 12,5 u/m²");
+  });
+});

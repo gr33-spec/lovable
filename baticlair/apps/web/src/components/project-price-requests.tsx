@@ -471,6 +471,8 @@ function RecipientCard({
           </div>
         </>
       ) : null}
+
+      {!archived && !demo && !r.document && r.status !== "declined" ? <DemoAnswer recipientId={r.id} discreet onChange={onChange} /> : null}
     </Card>
   );
 }

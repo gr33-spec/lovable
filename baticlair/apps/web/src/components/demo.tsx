@@ -54,8 +54,11 @@ export function DemoCard() {
   );
 }
 
-/** Fiche chantier : le fournisseur fictif « répond » et son devis PDF est rangé. */
-export function DemoAnswer({ recipientId, onChange }: { recipientId: string; onChange: (r: PriceRequest) => void }) {
+/**
+ * Fiche chantier : le fournisseur « répond » (test) et son devis PDF est rangé.
+ * Gros bouton pour un fournisseur fictif ; simple lien pour un vrai fournisseur.
+ */
+export function DemoAnswer({ recipientId, discreet = false, onChange }: { recipientId: string; discreet?: boolean; onChange: (r: PriceRequest) => void }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
 
@@ -68,6 +71,23 @@ export function DemoAnswer({ recipientId, onChange }: { recipientId: string; onC
       setError(asError(e));
       setPending(false);
     }
+  }
+
+  if (discreet) {
+    return (
+      <div className="flex flex-col gap-1">
+        {error ? <ErrorNotice error={error} /> : null}
+        <button
+          type="button"
+          disabled={pending}
+          onClick={() => void answer()}
+          className="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-bold text-muted disabled:opacity-60"
+        >
+          <FlaskConical size={16} aria-hidden="true" />
+          {pending ? "Création du devis fictif…" : "Test : simuler un devis fictif"}
+        </button>
+      </div>
+    );
   }
 
   return (

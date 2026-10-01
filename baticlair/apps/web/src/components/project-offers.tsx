@@ -6,6 +6,7 @@ import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, type Comparison, type ComparisonSupplier, type ItemFlag, type Offer, type OfferLine, type PriceRequest } from "@/lib/api";
 import { euros } from "@/lib/fr";
 import { useResource } from "@/lib/use-resource";
+import { shortName } from "@/lib/labels";
 
 function toError(e: unknown): ApiError {
   return e instanceof ApiError ? e : new ApiError("internal_error", 500);
@@ -123,7 +124,7 @@ function OfferLines({ offer, request, archived, onChange }: { offer: Offer; requ
           .map((l) => (
             <li key={l.id} className="flex flex-col gap-1 py-2.5">
               <div className="flex items-start justify-between gap-3">
-                <span className="min-w-0 text-sm leading-snug font-bold">{l.designation}</span>
+                <span className="min-w-0 text-sm leading-snug font-bold">{shortName(l.designation)}</span>
                 <span className="shrink-0 text-sm font-extrabold">{euros(l.amount)}</span>
               </div>
               <span className="text-[13px] text-muted">
@@ -148,7 +149,7 @@ function OfferLines({ offer, request, archived, onChange }: { offer: Offer; requ
                     <option value="">Aucun article demandé</option>
                     {request.lines.map((r, i) => (
                       <option key={i} value={i + 1}>
-                        {i + 1}. {r.designation}
+                        {i + 1}. {shortName(r.designation)}
                       </option>
                     ))}
                   </select>
@@ -278,7 +279,7 @@ export function ProjectComparison({
           {data.items.map((item) => (
             <li key={item.index} className="flex flex-col gap-1 py-2.5">
               <span className="font-bold">
-                {item.index}. {item.designation}
+                {item.index}. {shortName(item.designation)}
                 <span className="font-normal text-muted"> · {[item.quantity, item.unit].filter(Boolean).join(" ")}</span>
               </span>
               {item.offers.map((o) => {

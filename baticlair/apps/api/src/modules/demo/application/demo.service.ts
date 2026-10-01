@@ -1,4 +1,4 @@
-import { DomainError, notFound } from "../../../platform/errors/domain-error.js";
+import { notFound } from "../../../platform/errors/domain-error.js";
 import type { DocumentsService } from "../../documents/index.js";
 import type { PriceRequestRepository, PriceRequestsService, PriceRequestView } from "../../price-requests/index.js";
 import type { ProjectsService } from "../../projects/index.js";
@@ -47,19 +47,23 @@ export class DemoService {
     return { projectId: project.id };
   }
 
-  /** Le fournisseur fictif « répond » : son devis PDF est établi sur la liste demandée et rangé. */
+  /**
+   * Simule la réponse d'un fournisseur (test) : un devis PDF établi sur la
+   * liste demandée est rangé sur sa ligne. Possible aussi pour un fournisseur
+   * réel, pour tester sur un vrai chantier : le devis est alors marqué
+   * « fictif » et se retire comme un autre (« Retirer ce devis »).
+   */
   async simulateQuote(tenant: TenantContext, recipientId: string): Promise<PriceRequestView> {
     assertCanWrite(tenant);
     const request = await this.requestsRepo.findByRecipient(tenant, recipientId);
     if (!request) throw notFound("Recipient");
     const recipient = request.recipients.find((r) => r.id === recipientId)!;
-    if (!isDemoSupplier(recipient.supplier.email)) {
-      throw new DomainError("validation_failed", "Only demo suppliers can answer on their own", { reason: "not_demo_supplier" });
-    }
     const sender = await this.requestsRepo.sender(tenant, request.projectId);
     const bytes = await demoSupplierQuote(request.lines, recipient.supplier.email, recipient.supplier.name, sender?.project.name ?? "Chantier");
     if (recipient.status === "to_send") await this.requests.setStatus(tenant, recipientId, "sent");
+    // Un fournisseur réel reçoit un devis clairement marqué « fictif » (titre et nom de fichier).
     const slug = recipient.supplier.email.split("@")[0];
-    return this.requests.attachQuote(tenant, recipientId, { fileName: `devis-${slug}-demo.pdf`, bytes });
+    const fileName = isDemoSupplier(recipient.supplier.email) ? `devis-${slug}-demo.pdf` : `devis-fictif-test-${slug}.pdf`;
+    return this.requests.attachQuote(tenant, recipientId, { fileName, bytes });
   }
 }

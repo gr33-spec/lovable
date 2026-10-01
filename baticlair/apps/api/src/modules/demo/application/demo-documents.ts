@@ -88,6 +88,15 @@ const KNOWN_PRICES: { keyword: RegExp; unit: RegExp; cents: number }[] = [
   { keyword: /goutti[eè]re/i, unit: /^m/, cents: 1340 },
   { keyword: /descente/i, unit: /^m/, cents: 1190 },
   { keyword: /velux|fen[eê]tre de toit/i, unit: /^u/, cents: 42000 },
+  // Plâtrerie, isolation (prix au m² de surface traitée).
+  { keyword: /(isol|laine).*(2[0-9]{2}|3[0-9]{2})\s*mm|(isol|laine).*plafond|combles/i, unit: /m²|m2/, cents: 1450 },
+  { keyword: /isol|laine|ouate|polystyr/i, unit: /m²|m2/, cents: 690 },
+  { keyword: /plaque|ba\s?13|placo|plâtre/i, unit: /m²|m2/, cents: 340 },
+  { keyword: /plaque|ba\s?13|placo/i, unit: /^u/, cents: 850 },
+  { keyword: /ossature|rail|montant|fourrure/i, unit: /m²|m2/, cents: 480 },
+  { keyword: /ossature|rail|montant|fourrure/i, unit: /^m/, cents: 160 },
+  { keyword: /bande|enduit|joint/i, unit: /m²|m2/, cents: 120 },
+  { keyword: /bande|enduit|joint/i, unit: /sac|seau|^u/, cents: 1890 },
 ];
 
 /** Prix unitaire de base, plausible selon l'unité, stable pour une même désignation. */
@@ -233,7 +242,9 @@ export function demoClientQuote(companyName: string): Promise<Uint8Array> {
  */
 export function demoSupplierQuote(lines: readonly DemoLine[], email: string, supplierName: string, projectName: string): Promise<Uint8Array> {
   const key = email.split("@")[0]!.toLowerCase();
-  const profile = DEMO_SUPPLIERS.find((s) => s.key === key) ?? { ...DEMO_SUPPLIERS[0]!, factor: 1 + (hash(key) % 12) / 100 };
+  // Fournisseur réel (devis fictif de test) : un des 3 comportements, stable pour une même adresse.
+  const demo = isDemoSupplier(email);
+  const profile = DEMO_SUPPLIERS.find((s) => s.key === key) ?? DEMO_SUPPLIERS[hash(email.toLowerCase()) % DEMO_SUPPLIERS.length]!;
   const quoted = lines.slice(0, Math.max(1, lines.length - profile.skipLast));
   let total = 0;
   const rows = quoted.map((l) => {
@@ -250,7 +261,7 @@ export function demoSupplierQuote(lines: readonly DemoLine[], email: string, sup
   }
   const vat = Math.round(total * 0.2);
   return renderPdf({
-    title: `DEVIS ${supplierName.toUpperCase()} N° D-${(hash(key + projectName) % 9000) + 1000}`,
+    title: `${demo ? "DEVIS" : "DEVIS FICTIF (TEST) –"} ${supplierName.toUpperCase()} N° D-${(hash(key + projectName) % 9000) + 1000}`,
     subtitle: [`Chantier : ${projectName}`, "Offre valable 30 jours – document fictif de démonstration"],
     header: ["Désignation", "Qté", "P.U. HT", "Total HT"],
     columns: [40, 360, 440, 505],
