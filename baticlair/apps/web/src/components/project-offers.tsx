@@ -72,7 +72,7 @@ export function CompareQuotes({
       </Button>
       {!pending ? (
         <p className="text-center text-[13px] text-muted">
-          {waiting > 0 ? `${received} offre${received > 1 ? "s" : ""} reçue${received > 1 ? "s" : ""} sur ${received + waiting} · vous pouvez aussi attendre` : `${received} offres reçues`}
+          {waiting > 0 ? `${received} offre${received > 1 ? "s" : ""} reçue${received > 1 ? "s" : ""} sur ${received + waiting} · vous pouvez aussi attendre` : received > 1 ? `${received} offres reçues` : "1 offre reçue"}
         </p>
       ) : null}
     </div>

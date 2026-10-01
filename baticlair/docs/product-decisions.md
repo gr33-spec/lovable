@@ -482,3 +482,16 @@ fictives uniquement.
 - **« + » central = Nouveau chantier**, sans feuille intermédiaire. Plus de
   « + Nouveau » en double sur la page Chantiers. « Nouveau fournisseur » vit
   dans la page Fournisseurs et dans le choix des fournisseurs d'un chantier.
+
+### PD-041 — Devis fournisseur en PDF ou en photos
+
+- Sous chaque fournisseur : **« Ajouter son devis (PDF ou photos) »**. Un
+  devis reçu au comptoir, par SMS ou photographié s'ajoute comme un PDF.
+- **Photos** : une par page, 10 au plus, jamais mélangées à un PDF. Le
+  téléphone les allège avant l'envoi (JPEG, côté ≤ 2000 px, sous 4 Mo au
+  total ; le HEIC de l'iPhone est converti). Le serveur les rassemble en un
+  seul PDF (pdf-lib, dates fixes : mêmes photos = même fichier, anti-doublon).
+  Ces pages sans texte sont lues par l'IA « en image », sans autre réglage.
+- Le dépôt reste possible même si la demande n'est pas marquée envoyée (ou
+  si le fournisseur n'avait pas répondu) : **••• → « Ajouter son devis
+  reçu »**. Le fournisseur passe alors en « Devis reçu ».

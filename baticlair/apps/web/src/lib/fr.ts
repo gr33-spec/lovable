@@ -54,6 +54,7 @@ const unreadableReasons: Record<string, string> = {
   corrupted: "Ce PDF est abîmé et ne peut pas être lu.",
   too_many_pages: "Ce document a trop de pages. Envoyez seulement le devis.",
   read_failed: "Le devis est bien enregistré.",
+  photo_unreadable: "Cette photo ne peut pas être lue. Réessayez avec une photo en JPEG ou en PNG.",
 };
 
 /** Motifs précis renvoyés par l'API, quel que soit le code. */
@@ -67,7 +68,9 @@ const reasonMessages: Record<string, string> = {
   supplier_archived: "Un des fournisseurs choisis est archivé.",
   quote_received: "Son devis est déjà reçu. Supprimez-le d'abord pour en mettre un autre.",
   supplier_in_use: "Ce fournisseur a déjà reçu une demande de prix : archivez-le plutôt, il restera visible dans vos chantiers.",
-  no_quote: "Déposez d'abord le devis PDF de ce fournisseur.",
+  no_quote: "Déposez d'abord le devis de ce fournisseur.",
+  one_pdf_or_photos: "Envoyez soit un PDF, soit des photos du devis (une par page), pas les deux.",
+  too_many_photos: "10 photos au maximum pour un devis.",
   unknown_request_line: "Cette ligne n'existe pas dans la liste demandée.",
   quote_already_attached: "Ce PDF est déjà rangé chez un autre fournisseur de ce chantier.",
   invalid_activation_code: "Ce code n'est pas valable.",

@@ -2,6 +2,9 @@ import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
 /** Adresse unique par exécution : les tests ne dépendent pas de l'état de la base. */
+/** Photo minimale (1 px, PNG valide). */
+const PNG_1PX = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
+
 const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
 async function signUp(page: Page) {
@@ -348,7 +351,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await pointp.getByRole("button", { name: /^Plus d'actions/ }).click();
 
   // Le devis du fournisseur arrive : on le dépose sur sa ligne.
-  await pointp.getByLabel("Ajouter son devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
+  await pointp.getByLabel("Ajouter son devis (PDF ou photos)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
   await expect(pointp.getByText("Devis reçu")).toBeVisible();
   await expect(pointp.getByText("Prêt à comparer")).toBeVisible();
   await expect(progress.getByText("1/2")).toBeVisible();
@@ -359,9 +362,15 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
 
   // Le même PDF ne peut pas aller chez un second fournisseur.
   await menu(tuiles, "Déjà envoyé");
-  await tuiles.getByLabel("Ajouter son devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
+  await tuiles.getByLabel("Ajouter son devis (PDF ou photos)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
   await expect(tuiles.getByRole("alert")).toContainText("déjà rangé chez un autre fournisseur");
-  await tuiles.getByLabel("Ajouter son devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-2.pdf"));
+  // Un devis peut aussi arriver en photos (une par page), mais jamais mélangées à un PDF.
+  await tuiles.getByLabel("Ajouter son devis (PDF ou photos)").setInputFiles([
+    { name: "devis.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4") },
+    { name: "page-2.png", mimeType: "image/png", buffer: PNG_1PX },
+  ]);
+  await expect(tuiles.getByRole("alert")).toContainText("soit un PDF, soit des photos");
+  await tuiles.getByLabel("Ajouter son devis (PDF ou photos)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-2.pdf"));
   await expect(tuiles.getByText("Devis reçu")).toBeVisible();
   await expect(progress.getByRole("link", { name: "Comparer les offres" })).toBeVisible();
 

@@ -8,16 +8,17 @@ import {
   Param,
   Patch,
   Post,
-  UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
+import { FilesInterceptor } from "@nestjs/platform-express";
 import { memoryStorage } from "multer";
 import { z } from "zod";
 import { validationFailed } from "../../../platform/errors/domain-error.js";
 import { Idempotent } from "../../../platform/http/idempotency.interceptor.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
+import { assembleQuote } from "../../documents/index.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
 import { PriceRequestsService, type PriceRequestView } from "../application/price-requests.service.js";
 
@@ -43,6 +44,8 @@ const classifyBody = z.object({ classified: z.boolean(), retainedSupplierIds: z.
 
 /** Plafond technique de réception ; la limite métier est vérifiée par le service des documents. */
 const HARD_MAX_UPLOAD_BYTES = 50_000_000;
+/** Un devis photographié page par page. */
+const MAX_QUOTE_PHOTOS = 10;
 
 export function toDto(r: PriceRequestView) {
   return {
@@ -119,26 +122,27 @@ export class PriceRequestsController {
     return toDto(await this.requests.setStatus(tenant, id, body.status));
   }
 
-  /** Devis PDF reçu du fournisseur, déposé à la main (MVP). */
+  /** Devis reçu du fournisseur, déposé à la main : un PDF, ou des photos (une par page). */
   @Post("price-request-recipients/:id/quote")
   @HttpCode(201)
   @UseInterceptors(
-    FileInterceptor("file", {
+    FilesInterceptor("file", MAX_QUOTE_PHOTOS, {
       storage: memoryStorage(),
-      limits: { fileSize: HARD_MAX_UPLOAD_BYTES, files: 1 },
+      limits: { fileSize: HARD_MAX_UPLOAD_BYTES, files: MAX_QUOTE_PHOTOS },
     }),
   )
   async attachQuote(
     @Tenant() tenant: TenantContext,
     @Param("id") id: string,
-    @UploadedFile() file: { originalname: string; buffer: Buffer } | undefined,
+    @UploadedFiles() files: { originalname: string; buffer: Buffer }[] | undefined,
   ) {
-    if (!file) throw validationFailed("Missing file", [{ path: "file", message: "required" }]);
-    return toDto(
-      await this.requests.attachQuote(tenant, id, {
+    if (!files?.length) throw validationFailed("Missing file", [{ path: "file", message: "required" }]);
+    const quote = await assembleQuote(
+      files.map((file) => ({
         fileName: Buffer.from(file.originalname, "latin1").toString("utf8"),
         bytes: new Uint8Array(file.buffer.buffer, file.buffer.byteOffset, file.buffer.byteLength),
-      }),
+      })),
     );
+    return toDto(await this.requests.attachQuote(tenant, id, quote));
   }
 }
