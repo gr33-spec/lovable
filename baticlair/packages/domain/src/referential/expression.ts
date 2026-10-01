@@ -270,3 +270,109 @@ export function evaluate(expr: Expr, valueOf: (name: string) => DimValue): DimVa
   }
   throw new FormulaError("Formule invalide");
 }
+
+/**
+ * Valeur connue à un intervalle près : [lo, hi], bornes incluses (±∞
+ * possibles). Une valeur exacte est un intervalle réduit à un point.
+ */
+export interface IntervalValue {
+  lo: Decimal;
+  hi: Decimal;
+  dim: Dim;
+}
+
+const INF = new Decimal(Infinity);
+const NEG_INF = new Decimal(-Infinity);
+const ALL = (dim: Dim): IntervalValue => ({ lo: NEG_INF, hi: INF, dim });
+
+/** Produit sûr : ∞ × 0 n'a pas de sens, l'intervalle devient alors « tout ». */
+function mulBounds(a: IntervalValue, b: IntervalValue, dim: Dim): IntervalValue {
+  const products = [a.lo.times(b.lo), a.lo.times(b.hi), a.hi.times(b.lo), a.hi.times(b.hi)];
+  if (products.some((p) => p.isNaN())) return ALL(dim);
+  return { lo: Decimal.min(...products), hi: Decimal.max(...products), dim };
+}
+
+/**
+ * Calcul sur intervalles (arithmétique d'intervalles, conservative) : le
+ * résultat CONTIENT toujours toutes les valeurs possibles. Sert à décider,
+ * sans rien supposer, si une donnée inconnue peut changer la commande :
+ * si la quantité à commander est la même aux deux bornes, la question est
+ * inutile, quelle que soit la vraie valeur.
+ */
+export function evaluateInterval(expr: Expr, valueOf: (name: string) => IntervalValue): IntervalValue {
+  switch (expr.type) {
+    case "num": {
+      const v = new Decimal(expr.value);
+      return { lo: v, hi: v, dim: DIMENSIONLESS };
+    }
+    case "var":
+      return valueOf(expr.name);
+    case "neg": {
+      const v = evaluateInterval(expr.arg, valueOf);
+      return { lo: v.hi.negated(), hi: v.lo.negated(), dim: v.dim };
+    }
+    case "bin": {
+      const a = evaluateInterval(expr.left, valueOf);
+      const b = evaluateInterval(expr.right, valueOf);
+      const dim = combine(expr.op, a.dim, b.dim);
+      const zero = new Decimal(0);
+      const one = new Decimal(1);
+      const truth = (always: boolean, never: boolean): IntervalValue =>
+        always ? { lo: one, hi: one, dim } : never ? { lo: zero, hi: zero, dim } : { lo: zero, hi: one, dim };
+      switch (expr.op) {
+        case "+": {
+          const lo = a.lo.plus(b.lo);
+          const hi = a.hi.plus(b.hi);
+          return lo.isNaN() || hi.isNaN() ? ALL(dim) : { lo, hi, dim };
+        }
+        case "-": {
+          const lo = a.lo.minus(b.hi);
+          const hi = a.hi.minus(b.lo);
+          return lo.isNaN() || hi.isNaN() ? ALL(dim) : { lo, hi, dim };
+        }
+        case "*":
+          return mulBounds(a, b, dim);
+        case "/":
+          if (b.lo.lessThanOrEqualTo(0) && b.hi.greaterThanOrEqualTo(0)) return ALL(dim);
+          return mulBounds(a, { lo: new Decimal(1).dividedBy(b.hi), hi: new Decimal(1).dividedBy(b.lo), dim: b.dim }, dim);
+        case "<":
+          return truth(a.hi.lessThan(b.lo), a.lo.greaterThanOrEqualTo(b.hi));
+        case "<=":
+          return truth(a.hi.lessThanOrEqualTo(b.lo), a.lo.greaterThan(b.hi));
+        case ">":
+          return truth(a.lo.greaterThan(b.hi), a.hi.lessThanOrEqualTo(b.lo));
+        case ">=":
+          return truth(a.lo.greaterThanOrEqualTo(b.hi), a.hi.lessThan(b.lo));
+      }
+      break;
+    }
+    case "call": {
+      if (expr.fn === "si") {
+        const cond = evaluateInterval(expr.args[0]!, valueOf);
+        const yes = evaluateInterval(expr.args[1]!, valueOf);
+        const no = evaluateInterval(expr.args[2]!, valueOf);
+        callDim("si", [cond.dim, yes.dim, no.dim]);
+        if (cond.lo.equals(1)) return yes;
+        if (cond.hi.equals(0)) return no;
+        // Condition indécidable : les deux branches restent possibles.
+        return { lo: Decimal.min(yes.lo, no.lo), hi: Decimal.max(yes.hi, no.hi), dim: yes.dim };
+      }
+      const args = expr.args.map((a) => evaluateInterval(a, valueOf));
+      const dim = callDim(
+        expr.fn,
+        args.map((a) => a.dim),
+      );
+      switch (expr.fn) {
+        case "arrondi_sup":
+          return { lo: args[0]!.lo.ceil(), hi: args[0]!.hi.ceil(), dim };
+        case "arrondi_inf":
+          return { lo: args[0]!.lo.floor(), hi: args[0]!.hi.floor(), dim };
+        case "min":
+          return { lo: Decimal.min(...args.map((a) => a.lo)), hi: Decimal.min(...args.map((a) => a.hi)), dim };
+        case "max":
+          return { lo: Decimal.max(...args.map((a) => a.lo)), hi: Decimal.max(...args.map((a) => a.hi)), dim };
+      }
+    }
+  }
+  throw new FormulaError("Formule invalide");
+}

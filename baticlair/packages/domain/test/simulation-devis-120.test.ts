@@ -5,6 +5,7 @@ import {
   ROOFING_REFERENTIAL,
   tradeProfile,
   validateTakeoffLine,
+  type CompanyPreferences,
   type NeedResult,
   type ParamValue,
   type SlotChoice,
@@ -105,39 +106,43 @@ describe("simulation : devis test 120 m² (frontière savoir / question)", () =>
     ]);
   });
 
-  it("une fois les règles validées : la suite exacte des questions, une à la fois", () => {
+  it("une fois les règles validées : seules les questions qui changent la commande, une à la fois", () => {
     const { params, products, mentioned } = fromDevis();
-    const ask = (p: Record<string, ParamValue>, prod: Record<string, SlotChoice>) =>
-      computeWorkItem(ROOFING_REFERENTIAL, { workItemId: "couverture-tuiles-emboitement", params: p, products: prod, mentioned }, { acceptDraft: true });
+    const ask = (p: Record<string, ParamValue>, prod: Record<string, SlotChoice>, preferences?: CompanyPreferences) =>
+      computeWorkItem(
+        ROOFING_REFERENTIAL,
+        { workItemId: "couverture-tuiles-emboitement", params: p, products: prod, mentioned, ...(preferences ? { preferences } : {}) },
+        { acceptDraft: true },
+      );
 
     let r = ask(params, products);
     expect(r.nextQuestion).toMatchObject({ kind: "confirm_product", text: "J'ai identifié : Tuiles HP10. C'est bien ce modèle ?" });
     const confirmed = { ...products, tuile: { productId: "edilians-hp10-huguenot", origin: "artisan" } as SlotChoice };
 
     r = ask(params, confirmed);
-    expect(r.nextQuestion).toMatchObject({ key: "param:pureau", text: "À quel pureau posez-vous ces tuiles ?" });
+    // Le pureau change la commande de 254 tuiles : la question est indispensable, et dit pourquoi.
+    expect(r.nextQuestion).toMatchObject({ key: "param:pureau", impact: "De 1 191 à 1 445 pièces selon la réponse." });
     const p2 = { ...params, pureau: { value: "34.3", unit: "cm", origin: "artisan" } as ParamValue };
 
     r = ask(p2, confirmed);
     expect(r.nextQuestion).toMatchObject({ key: "param:entraxe_chevrons" });
     const p3 = { ...p2, entraxe_chevrons: { value: "60", unit: "cm", origin: "artisan" } as ParamValue };
 
+    // Premier chantier : « Quel produit pour l'écran ? ». Ensuite, le produit habituel de l'entreprise répond.
     r = ask(p3, confirmed);
-    expect(r.nextQuestion).toMatchObject({ kind: "choose_product", key: "product:ecran", options: [{ label: "Écran HPV" }] });
-    const withScreen = { ...confirmed, ecran: { productId: "soprema-sop-ecran-hpv-r2-150x50", origin: "artisan" } as SlotChoice };
+    expect(r.nextQuestion).toMatchObject({ kind: "choose_product", key: "product:ecran" });
+    r = ask(p3, confirmed, { products: { ecran: "soprema-sop-ecran-hpv-r2-150x50" } });
 
-    r = ask(p3, withScreen);
-    expect(r.nextQuestion).toMatchObject({ key: "param:pente" });
-    const p4 = { ...p3, pente: { value: "45", unit: "%", origin: "artisan" } as ParamValue };
-
-    r = ask(p4, withScreen);
+    // La pente n'est JAMAIS demandée ici : de 128,57 m² (> 30 %) à 138,46 m² (≤ 30 %), c'est 2 rouleaux.
     expect(r.nextQuestion).toBeNull();
-    expect(r.needs.map((n) => [n.needId, n.quantity?.value, n.purchase?.order.count, n.purchase?.order.unit.many, n.origin, n.provisional])).toEqual([
-      ["tuiles", "1305.43", "1306", "pièces", "explicit", true],
-      ["liteaux", "349.85", "88", "longueurs de 4 m", "explicit", true],
-      ["contre-liteaux", "200", "50", "longueurs de 4 m", "explicit", true],
-      ["ecran", "128.57", "2", "rouleaux", "explicit", true],
+    expect(r.needs.map((n) => [n.needId, n.quantity?.value ?? `${n.quantityRange?.min}–${n.quantityRange?.max}`, n.purchase?.order.count, n.purchase?.order.unit.many, n.origin])).toEqual([
+      ["tuiles", "1305.43", "1306", "pièces", "explicit"],
+      ["liteaux", "349.85", "88", "longueurs de 4 m", "explicit"],
+      ["contre-liteaux", "200", "50", "longueurs de 4 m", "explicit"],
+      ["ecran", "128.57–138.46", "2", "rouleaux", "explicit"],
     ]);
+    expect(byNeed(r.needs, "ecran").trace).toContainEqual({ label: "Pente du toit", value: "inconnue", unit: "", from: "Sans effet sur la commande", verified: true });
+    expect(byNeed(r.needs, "ecran").trace).toContainEqual({ label: "Produit", value: "Écran HPV", unit: "", from: "Votre produit habituel", verified: true });
     expect(byNeed(r.needs, "tuiles").purchase?.approx).toEqual([{ count: "6", unit: { one: "palette", many: "palettes" } }]);
   });
 });

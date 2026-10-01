@@ -63,40 +63,56 @@ Les règles des liteaux et des tuiles **redonnent déjà les tableaux de la
 fiche Edilians** (3,22 / 2,91 / 2,66 ml/m² ; 9,9 à 12 tuiles/m², à
 l'arrondi de la fiche près). C'est vérifié par un test.
 
-## 4. Le parcours de l'artisan, si les règles étaient validées
+## 4. Le parcours de l'artisan, si les règles étaient validées *(mis à jour)*
 
-Cinq questions, une à la fois :
-1. « J'ai identifié : Tuiles HP10. C'est bien ce modèle ? » → Oui
-2. « À quel pureau posez-vous ces tuiles ? » → 34,3 cm
-3. « Entraxe des chevrons ? » → 60 cm
-4. « Quel produit pour : écran sous-toiture ? » → SOP'ÉCRAN HPV R2 1,50 × 50
-5. « Pente du toit ? » → 45 %
+**Nouvelle règle du moteur** : une donnée inconnue n'est demandée que si
+elle **change la commande**. Le moteur calcule la commande pour **toutes**
+ses valeurs possibles (calcul sur intervalles, sans tirer de valeurs au
+hasard). Si la commande est la même partout, il ne pose pas la question et
+écrit « inconnue, sans effet sur la commande » dans « Voir le calcul ».
 
-Puis la liste d'achat :
+| # | Question | Indispensable ? | Pourquoi |
+|---|---|---|---|
+| 1 | « J'ai identifié : Tuiles HP10. C'est bien ce modèle ? » | **Oui**, pour ce devis | « type HP10 » ne cite ni la marque ni la référence. **Disparaît** si le devis écrit « Edilians HP 10 réf. 205 ». |
+| 2 | « À quel pureau posez-vous ces tuiles ? » | **Oui** | Il change la commande : **de 1 191 à 1 445 tuiles** (la question l'affiche). Aucune donnée prouvée ne permet de le déduire. |
+| 3 | « Entraxe des chevrons ? » | **Oui**, si le devis ne le donne pas | Sans entraxe, le nombre de contre-liteaux peut tout valoir. **Disparaît** si le devis ou un plan l'indique. |
+| 4 | « Quel produit pour : écran sous-toiture ? » | **Au premier chantier seulement** | Ensuite, l'**écran habituel** de l'entreprise répond (préférence mémorisée, modifiable, jamais une donnée fabricant). |
+| — | ~~« Pente du toit ? »~~ | **Supprimée** | De 128,57 m² (pente > 30 %) à 138,46 m² (≤ 30 %) : **2 rouleaux dans tous les cas**. Pour 70 m², la pente compte (1 ou 2 rouleaux) : là, elle est demandée. Les deux cas sont testés. |
+
+**Bilan** : 4 questions au premier chantier, 3 ensuite. Ce serait **1 seule**
+(le pureau) si le devis citait la marque, la référence et l'entraxe. C'est
+encore au-dessus de l'objectif « 0 ou 1 », mais chaque question restante a une
+raison chiffrée.
+
+Liste d'achat obtenue :
 
 ```
 Tuiles HP10          1 306 pièces   ≈ 6 palettes
 Liteaux 27×40        88 longueurs de 4 m   (349,85 ml)
 Contre-liteaux 27×40 50 longueurs de 4 m   (200 ml)
-Écran HPV            2 rouleaux            (128,57 m²)
+Écran HPV            2 rouleaux            (128,57 à 138,46 m², pente sans effet)
 + faîtage, rives, gouttière, descente : tels qu'écrits (hors référentiel)
 ```
 
-**Cinq questions, c'est trop pour l'objectif « 1 ou 2 corrections ».** Pistes
-pour en supprimer, chacune à prouver avant d'être codée :
-- **Pente** : ici elle ne change pas le résultat (2 rouleaux à 128,57 ou
-  138,46 m²). Le moteur peut tester toute la plage admise et **ne pas poser
-  la question si la commande est identique**. C'est déterministe, sans
-  supposition.
-- **Écran** : la **préférence de l'entreprise** (« mon écran habituel »)
-  supprime la question dès le deuxième chantier.
-- **Entraxe des chevrons, pente** : souvent sur le devis ou le plan. L'IA les
-  cherchera, avec preuve.
-- **Modèle de tuile** : la confirmation disparaît si le devis cite la marque
-  ou la référence (« Edilians HP 10 réf. 205 »).
-- **Pureau** : seulement si une règle prouvée le permet (par exemple le
-  partage du rampant en rangs entiers, si la longueur du rampant est
-  connue), à valider par toi.
+## 4 bis. Faiblesses restantes de l'architecture (révélées par ce cas)
+
+1. **Ouvrages linéaires.** « Faîtage 12 ml » ou « rives 20 ml » sont des
+   mesures d'ouvrage, comme les m². Elles partent pourtant telles quelles,
+   car l'étape 0 ne traite que les surfaces. Le moteur sait déjà faire
+   « 1 ouvrage → plusieurs matériaux ». Il manque les données (fiches
+   accessoires) et les ouvrages faîtage, rives, gouttière et descente.
+2. **Extraction du contexte chantier.** La structure existe et elle est
+   testée : preuves réunies, contradictions signalées, réponse de
+   l'artisan prioritaire. L'IA qui remplit ce contexte à partir du devis
+   (prompt v6, avec preuves) reste à écrire.
+3. **Préférences de l'entreprise.** Elles fonctionnent dans le moteur. Leur
+   enregistrement (base de données, écran pour les modifier) reste à
+   faire.
+4. **Données sans borne prouvée** (entraxe). Sans plage admissible
+   sourcée, une donnée inconnue peut tout valoir : la question reste
+   nécessaire, sauf si le devis la donne.
+5. **Validation des règles.** Tant que les 4 règles de calcul ne sont pas
+   validées, rien n'est montré à un artisan.
 
 ## 5. Ce qu'il faut pour aller plus loin
 
