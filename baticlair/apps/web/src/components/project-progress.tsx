@@ -52,7 +52,6 @@ export function computeProgress({ documents, takeoff, requests, offers }: Snapsh
   const toSend = recipients.filter((r) => r.status === "to_send").length;
   const sent = recipients.filter((r) => r.status !== "to_send").length;
   const received = recipients.filter((r) => r.status === "received").length;
-  const toCheck = takeoff ? takeoff.lines.filter((l) => l.kind !== "labor" && l.status !== "certain").length : 0;
 
   const done = {
     devis: hasQuote,
@@ -64,27 +63,17 @@ export function computeProgress({ documents, takeoff, requests, offers }: Snapsh
 
   if (!hasQuote) return { done, current: "devis", next: { label: "Ajouter le devis client", target: "devis" } };
   if (!takeoff) return { done, current: "materiaux", next: { label: "Préparer la liste de matériaux", target: "materiaux" } };
-  if (!validated) {
-    const label = toCheck > 0 ? `Vérifier la liste (${toCheck} ligne${toCheck > 1 ? "s" : ""})` : "Valider la liste de matériaux";
-    return { done, current: "materiaux", next: { label, target: "materiaux" } };
-  }
-  if (recipients.length === 0) return { done, current: "fournisseurs", next: { label: "Choisir les fournisseurs", target: "fournisseurs" } };
+  if (!validated) return { done, current: "materiaux", next: { label: "Valider la liste", target: "materiaux" } };
+  if (recipients.length === 0) return { done, current: "fournisseurs", next: { label: "Envoyer les demandes", target: "fournisseurs" } };
   const read = new Set(offers.map((o) => o.recipientId));
   const unread = recipients.filter((r) => r.status === "received" && !read.has(r.id)).length;
-  // Plusieurs devis reçus à comparer : c'est l'action qui compte, même si un fournisseur reste à relancer.
-  if (unread > 0 && received > 1) {
-    return { done, current: "comparer", next: { label: `Comparer les ${received} devis`, target: "fournisseurs" } };
-  }
-  if (toSend > 0) {
-    return { done, current: "fournisseurs", next: { label: `Envoyer ${toSend > 1 ? `les ${toSend} demandes` : "la demande"}`, target: "fournisseurs" } };
-  }
-  const answering = recipients.filter((r) => r.status !== "declined").length;
-  if (received === 0) {
-    return { done, current: "reponses", next: { label: `Ajouter les devis reçus (0 sur ${answering})`, target: "fournisseurs" } };
-  }
+  // Plusieurs offres reçues : comparer passe avant la relance du dernier fournisseur.
+  if (unread > 0 && received > 1) return { done, current: "comparer", next: { label: "Comparer les offres", target: "fournisseurs" } };
+  if (toSend > 0) return { done, current: "fournisseurs", next: { label: "Envoyer les demandes", target: "fournisseurs" } };
+  if (received === 0) return { done, current: "reponses", next: { label: "Ajouter les offres reçues", target: "fournisseurs" } };
   if (unread > 0) return { done, current: "comparer", next: { label: "Voir l'offre reçue", target: "fournisseurs" } };
-  if (!done.comparer) return { done, current: "comparer", next: { label: "Choisir mon fournisseur", target: "comparer" } };
-  return { done, current: "comparer", next: { label: "Chantier classé ✓", target: null } };
+  if (!done.comparer) return { done, current: "comparer", next: { label: "Choisir un fournisseur", target: "comparer" } };
+  return { done, current: "comparer", next: { label: "Fournisseur choisi ✓", target: null } };
 }
 
 const STEPS: { key: StepKey; label: string }[] = [
@@ -92,7 +81,7 @@ const STEPS: { key: StepKey; label: string }[] = [
   { key: "materiaux", label: "Matériaux" },
   { key: "fournisseurs", label: "Fournisseurs" },
   { key: "reponses", label: "Réponses" },
-  { key: "comparer", label: "Comparer" },
+  { key: "comparer", label: "Choisir" },
 ];
 
 function ProgressBar({ projectId, tick }: { projectId: string; tick: number }) {

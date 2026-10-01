@@ -103,6 +103,12 @@ model Company {
   /// Palier d'abonnement : nombre d'analyses de documents incluses par mois.
   /// Nul = pas de plafond (période d'essai, tant que les paliers ne sont pas fixés).
   monthlyAnalysisLimit Int?
+  /// Formule (catalogue dans la config : trial, solo, pro…). « trial » à l'inscription.
+  plan                 String   @default("trial")
+  planActivatedAt      DateTime?
+  /// Formule demandée depuis l'écran des formules (en attendant le paiement en ligne).
+  requestedPlan        String?
+  requestedPlanAt      DateTime?
   /// Métiers de l'entreprise (profils de lecture, PD-033). Vide = « autre métier ».
   trades               String[] @default([])
   createdAt            DateTime @default(now())
@@ -152,6 +158,8 @@ model Project {
   clientName     String?
   address        String?
   status         ProjectStatus @default(active)
+  /// Chantier de démonstration : ne compte jamais dans la formule.
+  demo           Boolean       @default(false)
   /// Nul si l'auteur a supprimé son compte : le chantier appartient à l'entreprise.
   createdById    String?
   createdAt      DateTime      @default(now())

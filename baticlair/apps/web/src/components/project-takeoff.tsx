@@ -72,7 +72,7 @@ export function ProjectTakeoff({
       <section id="materiaux" aria-label="Liste de matériaux" className="flex scroll-mt-4 flex-col gap-3">
         {quoteCard(false)}
         {!data.aiAvailable ? (
-          <p className="text-sm text-muted">La lecture par l&apos;IA n&apos;est pas encore activée sur ce compte.</p>
+          <p className="text-sm text-muted">Cette fonction n&apos;est pas encore activée sur votre compte.</p>
         ) : !readable ? null : (
           <>
             {actionError ? <ErrorNotice error={actionError} /> : null}
@@ -82,9 +82,8 @@ export function ProjectTakeoff({
               onClick={() => void run(() => api<Takeoff>(`/v1/documents/${encodeURIComponent(clientQuote.id)}/takeoff`, { method: "POST" }), update)}
             >
               <Sparkles size={18} aria-hidden="true" />
-              {pending ? "L'IA lit votre devis… (jusqu'à une minute)" : "Préparer la liste de matériaux"}
+              {pending ? "Préparation de la liste… (jusqu'à une minute)" : "Préparer la liste de matériaux"}
             </Button>
-            {!pending ? <p className="text-center text-[13px] text-muted">L&apos;IA lit le devis pour vous · 1 analyse</p> : null}
           </>
         )}
       </section>
@@ -121,7 +120,7 @@ export function ProjectTakeoff({
         {editable ? <AddLine pending={pending} onAdd={(fields) => call(`/v1/takeoffs/${takeoff.id}/lines`, "POST", fields)} /> : null}
         {labor.length > 0 || takeoff.notes.length > 0 ? (
           <details className="rounded-2xl bg-surface p-4 text-sm shadow-card">
-            <summary className="cursor-pointer font-bold">Ce que l&apos;IA a mis de côté</summary>
+            <summary className="cursor-pointer font-bold">Lignes mises de côté</summary>
             <ul className="mt-2 flex list-disc flex-col gap-1 pl-5 text-muted">
               {labor.map((l) => (
                 <li key={l.id}>{shortName(l.designation)} (main-d&apos;œuvre, rien à commander)</li>

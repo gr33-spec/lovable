@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import type { INestApplication } from "@nestjs/common";
-import { Test } from "@nestjs/testing";
+import { Test, type TestingModuleBuilder } from "@nestjs/testing";
 import request from "supertest";
 import { AppModule } from "../../src/app.module.js";
 import { configureApp } from "../../src/app.js";
@@ -16,8 +16,8 @@ export interface TestContext {
   emails: CapturingEmailSender;
 }
 
-export async function createTestApp(): Promise<TestContext> {
-  const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
+export async function createTestApp(customize: (builder: TestingModuleBuilder) => TestingModuleBuilder = (b) => b): Promise<TestContext> {
+  const moduleRef = await customize(Test.createTestingModule({ imports: [AppModule] })).compile();
   const app = moduleRef.createNestApplication({ bodyParser: false });
   configureApp(app);
   await app.init();

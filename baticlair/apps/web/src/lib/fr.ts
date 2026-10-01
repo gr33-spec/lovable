@@ -28,9 +28,10 @@ const errorMessages: Record<string, string> = {
   request_in_progress: "C'est en cours d'enregistrement, patientez une seconde.",
   payload_too_large: "C'est trop volumineux pour être envoyé.",
   unreadable_document: "Ce fichier ne peut pas être lu.",
-  analysis_quota_reached: "Vous avez utilisé toutes les analyses de votre formule ce mois-ci. Les documents déjà analysés restent consultables.",
-  ai_unavailable: "La lecture par l'IA n'est pas encore activée sur ce compte.",
-  analysis_failed: "L'IA n'a pas réussi à lire ce devis. Rien n'a été décompté de votre formule ; réessayez dans un instant.",
+  analysis_quota_reached: "Vous avez atteint la limite de votre formule ce mois-ci. Vos chantiers en cours restent consultables.",
+  ai_unavailable: "Cette fonction n'est pas encore activée sur votre compte.",
+  analysis_failed: "Ce devis n'a pas pu être lu. Réessayez dans un instant.",
+  plan_limit_reached: "Vous avez atteint le nombre de chantiers de votre formule.",
   onboarding_required: "Indiquez d'abord le nom de votre entreprise.",
   company_selection_required: "Choisissez l'entreprise avec laquelle travailler.",
   internal_error: "Un problème est survenu de notre côté. Vos données sont conservées ; réessayez dans un instant.",
@@ -52,7 +53,7 @@ const unreadableReasons: Record<string, string> = {
   encrypted: "Ce PDF est protégé par un mot de passe. Enregistrez-le sans protection, puis réessayez.",
   corrupted: "Ce PDF est abîmé et ne peut pas être lu.",
   too_many_pages: "Ce document a trop de pages. Envoyez seulement le devis.",
-  read_failed: "La lecture automatique a échoué de notre côté, pas à cause de votre PDF. Le fichier est bien enregistré : l'IA peut le lire directement.",
+  read_failed: "Le devis est bien enregistré.",
 };
 
 /** Motifs précis renvoyés par l'API, quel que soit le code. */
@@ -69,6 +70,8 @@ const reasonMessages: Record<string, string> = {
   no_quote: "Déposez d'abord le devis PDF de ce fournisseur.",
   unknown_request_line: "Cette ligne n'existe pas dans la liste demandée.",
   quote_already_attached: "Ce PDF est déjà rangé chez un autre fournisseur de ce chantier.",
+  invalid_activation_code: "Ce code n'est pas valable.",
+  unknown_plan: "Cette formule n'existe pas.",
 };
 
 /** « 2805.3 » → « 2 805,30 € ». */

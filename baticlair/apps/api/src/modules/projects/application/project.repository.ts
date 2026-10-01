@@ -5,9 +5,11 @@ export interface NewProject {
   name: string;
   clientName: string | null;
   address: string | null;
+  /** Chantier de démonstration : ne compte pas dans la formule. */
+  demo?: boolean;
 }
 
-export type ProjectPatch = Partial<NewProject & { status: ProjectStatus }>;
+export type ProjectPatch = Partial<Omit<NewProject, "demo"> & { status: ProjectStatus }>;
 
 /** Filtre de statut ; « all » = en cours et archivés (utile en recherche). */
 export type ProjectStatusFilter = ProjectStatus | "all";

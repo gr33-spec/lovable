@@ -440,3 +440,28 @@ fictives uniquement.
 - **Fil du chantier** : avec plusieurs devis reçus, « Comparer » passe avant
   « Envoyer la demande » au dernier fournisseur ; ensuite « Choisir mon
   fournisseur ».
+
+### PD-038 — Intuitif : 1 écran = 1 objectif = 1 gros bouton ; formules en chantiers
+
+- **Parcours** : je dépose → je vérifie → j'envoie → je compare → je choisis.
+  Actions : Préparer la liste de matériaux, Valider la liste, Envoyer les
+  demandes, Comparer les offres, Choisir un fournisseur (dernière étape du
+  fil : « Choisir »).
+- **Comparaison honnête** : pour chaque fournisseur, le montant réellement
+  chiffré ; une offre incomplète affiche « ⚠️ N article(s) manquant(s) » et,
+  à part, « Total estimé avec … ». Les offres complètes passent en premier ;
+  « Le moins cher » n'est donné qu'à une offre complète (« … des offres
+  complètes » si une offre incomplète paraît moins chère). Écarts lisibles :
+  quantités différentes, produits différents, points à vérifier, livraison.
+- **Choisir** : « Retenir cette offre » sur chaque offre, « Changer d'avis ».
+- **Accueil** : « À faire » = la prochaine action réelle de chaque chantier
+  (GET /v1/next-actions), sinon « Tout est à jour ».
+- **Plus de jargon** : ni IA, ni analyse, ni coûts techniques côté artisan
+  (la carte de consommation IA quitte le compte ; l'API reste pour nous).
+- **Formules (PD-039 à venir pour le paiement)** : essai gratuit de
+  3 chantiers, puis Solo / Pro en chantiers par mois. Catalogue par défaut
+  dans le code, remplaçable sans redéployer le code par BILLING_PLANS (JSON).
+  La limite ne bloque que la création d'un nouveau chantier — jamais un
+  chantier commencé, jamais la démonstration. « Choisir cette formule » note
+  la demande (paiement en ligne à venir) ; PLAN_ACTIVATION_CODES permet
+  d'activer une formule à la main (tests, premiers clients).

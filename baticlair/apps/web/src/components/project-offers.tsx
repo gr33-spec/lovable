@@ -3,7 +3,7 @@
 import { Check, Sparkles } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
-import { api, ApiError, type Comparison, type ComparisonSupplier, type ItemFlag, type Offer, type OfferLine, type PriceRequest } from "@/lib/api";
+import { api, ApiError, type Comparison, type ComparisonItem, type ComparisonSupplier, type ItemFlag, type Offer, type OfferLine, type PriceRequest } from "@/lib/api";
 import { euros } from "@/lib/fr";
 import { useResource } from "@/lib/use-resource";
 import { shortName } from "@/lib/labels";
@@ -56,7 +56,7 @@ export function CompareQuotes({
     }
   }
 
-  const label = received > 1 ? (waiting > 0 ? `Comparer les ${received} devis reçus` : `Comparer les ${received} devis`) : "Voir l'offre reçue";
+  const label = received > 1 ? "Comparer les offres" : "Voir l'offre reçue";
   return (
     <div className="flex flex-col gap-2">
       {error ? <ErrorNotice error={error} /> : null}
@@ -70,9 +70,9 @@ export function CompareQuotes({
         <Sparkles size={18} aria-hidden="true" />
         {pending ? "Comparaison en cours… (jusqu'à une minute)" : label}
       </Button>
-      {!pending && waiting > 0 ? (
+      {!pending ? (
         <p className="text-center text-[13px] text-muted">
-          {waiting > 1 ? `${waiting} fournisseurs n'ont` : "1 fournisseur n'a"} pas encore répondu : vous pouvez aussi attendre.
+          {waiting > 0 ? `${received} offre${received > 1 ? "s" : ""} reçue${received > 1 ? "s" : ""} sur ${received + waiting} · vous pouvez aussi attendre` : `${received} offres reçues`}
         </p>
       ) : null}
     </div>
@@ -130,7 +130,7 @@ export function OfferLines({ offer, request, archived, onChange }: { offer: Offe
                 {KIND_LABEL[l.kind] ? ` · ${KIND_LABEL[l.kind]}` : ""}
               </span>
               {issueLines.has(l.id) ? <span className="text-[13px] font-semibold text-warn">Le total de cette ligne ne correspond pas au calcul.</span> : null}
-              {l.aiDoubt && !l.edited ? <span className="text-[13px] font-semibold text-warn">L&apos;IA hésite : {l.aiDoubt}</span> : null}
+              {l.aiDoubt && !l.edited ? <span className="text-[13px] font-semibold text-warn">À vérifier : {l.aiDoubt}</span> : null}
               {l.kind !== "fee" && l.kind !== "deposit" ? (
                 <label className="flex items-center gap-2 text-[13px]">
                   <span className="shrink-0 text-muted">Correspond à</span>
@@ -178,24 +178,38 @@ const FLAG_LABEL: Record<ItemFlag, string> = {
   NOT_PRICED: "sans prix",
 };
 
-/** Faits sur un fournisseur, en mots simples : ce qu'il manque, ce qu'il faut vérifier. */
-function supplierFacts(s: ComparisonSupplier): { text: string; warn: boolean }[] {
+const plural = (n: number, one: string, many: string) => `${n} ${n > 1 ? many : one}`;
+
+/** Ce qui distingue l'offre d'un fournisseur, ligne à ligne : quantités, produits, points à vérifier. */
+function supplierDiffs(s: ComparisonSupplier, items: ComparisonItem[]): { text: string; warn: boolean }[] {
+  let quantity = 0;
+  let product = 0;
+  let check = s.uncertainCount + (s.arithmetic === "inconsistent" ? 1 : 0);
+  for (const item of items) {
+    const o = item.offers.find((x) => x.supplierId === s.supplierId);
+    if (!o || o.status !== "covered") continue;
+    if (o.flags.includes("QUANTITY_LOWER") || o.flags.includes("QUANTITY_HIGHER")) quantity++;
+    if (o.flags.includes("SUBSTITUTION") || o.flags.includes("ONLY_AS_VARIANT")) product++;
+    if (o.flags.includes("UNIT_NOT_COMPARABLE") || o.flags.includes("NOT_PRICED")) check++;
+  }
   const facts: { text: string; warn: boolean }[] = [];
-  if (s.missingCount > 0) {
-    const estimate = s.estimatedPartHT && Number(s.estimatedPartHT) > 0 ? ` (estimé${s.missingCount > 1 ? "s" : ""} ${euros(s.estimatedPartHT)})` : "";
-    facts.push({ text: `${s.missingCount} article${s.missingCount > 1 ? "s" : ""} manquant${s.missingCount > 1 ? "s" : ""}${estimate}`, warn: true });
-  } else facts.push({ text: "Toute la liste chiffrée", warn: false });
-  if (s.feesHT && Number(s.feesHT) > 0) facts.push({ text: `Frais ${euros(s.feesHT)}`, warn: false });
-  const toCheck = s.uncertainCount + (s.arithmetic === "inconsistent" ? 1 : 0);
-  if (toCheck > 0) facts.push({ text: `${toCheck} point${toCheck > 1 ? "s" : ""} à vérifier`, warn: true });
-  if (s.extrasCount > 0) facts.push({ text: `${s.extrasCount} ligne${s.extrasCount > 1 ? "s" : ""} non reconnue${s.extrasCount > 1 ? "s" : ""}`, warn: true });
+  if (quantity > 0) facts.push({ text: plural(quantity, "quantité différente", "quantités différentes"), warn: true });
+  if (product > 0) facts.push({ text: plural(product, "produit différent", "produits différents"), warn: true });
+  if (check > 0) facts.push({ text: plural(check, "point à vérifier", "points à vérifier"), warn: true });
+  if (s.feesHT && Number(s.feesHT) > 0) facts.push({ text: `Livraison ${euros(s.feesHT)}`, warn: false });
   return facts;
 }
 
+/** Montant réellement chiffré par le fournisseur (frais compris), sans aucune estimation. */
+function quotedHT(s: ComparisonSupplier): number | null {
+  if (s.comparableTotalHT === null) return null;
+  return Number(s.comparableTotalHT) - Number(s.estimatedPartHT ?? 0);
+}
+
 /**
- * Comparaison : un total honnête par fournisseur (toute la liste couverte,
- * manquants estimés, frais compris), le détail ligne à ligne, puis
- * « Classé ». Tous les montants viennent du moteur de calcul, pas de l'IA.
+ * Choisir un fournisseur : pour chacun, ce qu'il a vraiment chiffré. Une
+ * offre incomplète n'est jamais « la moins chère » : ses manques sont dits
+ * en clair, et son total estimé est présenté à part, comme une estimation.
  */
 export function ProjectComparison({
   request,
@@ -216,66 +230,128 @@ export function ProjectComparison({
     [request.id, version],
   );
   const { data, error, reload } = useResource(fetchComparison);
+  const [pending, setPending] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<ApiError | null>(null);
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
   if (data.suppliers.length === 0) return null;
 
-  const ranked = [...data.suppliers].sort((a, b) => Number(a.comparableTotalHT ?? Infinity) - Number(b.comparableTotalHT ?? Infinity));
-  const best = ranked[0]!;
+  const byTotal = (a: ComparisonSupplier, b: ComparisonSupplier) => Number(a.comparableTotalHT ?? Infinity) - Number(b.comparableTotalHT ?? Infinity);
+  // Les offres complètes d'abord : ce sont elles qu'on peut comparer sans réserve.
+  const complete = data.suppliers.filter((s) => s.missingCount === 0).sort(byTotal);
+  const incomplete = data.suppliers.filter((s) => s.missingCount > 0).sort(byTotal);
+  const ranked = [...complete, ...incomplete];
+  const reference = complete[0] ?? null;
+  // Une offre incomplète moins chère « sur le papier » : le moins cher n'est vrai que parmi les offres complètes.
+  const cheaperIncomplete = reference !== null && incomplete.some((s) => Number(s.comparableTotalHT ?? Infinity) < Number(reference.comparableTotalHT ?? Infinity));
+  const refLabel = cheaperIncomplete ? "Le moins cher des offres complètes" : "Le moins cher";
   const names = new Map(data.suppliers.map((s) => [s.supplierId, s.name]));
+  const chosen = request.classifiedAt ? new Set(request.retainedSupplierIds) : null;
+
+  async function choose(supplierId: string | null) {
+    setPending(supplierId ?? "reset");
+    setActionError(null);
+    try {
+      onRequestChange(
+        await api<PriceRequest>(`/v1/price-requests/${request.id}/classification`, {
+          method: "PATCH",
+          body: supplierId ? { classified: true, retainedSupplierIds: [supplierId] } : { classified: false, retainedSupplierIds: [] },
+        }),
+      );
+    } catch (e) {
+      setActionError(toError(e));
+    } finally {
+      setPending(null);
+    }
+  }
 
   return (
     <section id="comparer" aria-labelledby="compare-title" className="flex scroll-mt-4 flex-col gap-3">
-      <h2 id="compare-title" className="text-xs font-extrabold tracking-[0.04em] text-muted">
-        COMPARER
-      </h2>
-      <p className="text-sm text-muted">Total HT pour toute votre liste, frais compris.</p>
-      <ol className="flex flex-col gap-2">
-        {ranked.map((s, i) => {
-          const gap = i > 0 && s.comparableTotalHT && best.comparableTotalHT ? Number(s.comparableTotalHT) - Number(best.comparableTotalHT) : null;
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 id="compare-title" className="font-display text-[22px] leading-tight font-extrabold tracking-[-0.02em]">
+          {chosen ? "Offre retenue" : ranked.length > 1 ? "Choisir un fournisseur" : "L'offre reçue"}
+        </h2>
+        <span className="text-xs font-bold text-muted">Prix HT</span>
+      </div>
+      {actionError ? <ErrorNotice error={actionError} /> : null}
+      <ol className="flex flex-col gap-2" aria-label="Offres">
+        {ranked.map((s) => {
+          const isRef = reference?.supplierId === s.supplierId && complete.length > 0 && ranked.length > 1;
+          const retained = chosen?.has(s.supplierId) ?? false;
+          const quoted = quotedHT(s);
+          const gap = reference && s.missingCount === 0 && !isRef && s.comparableTotalHT && reference.comparableTotalHT
+            ? Number(s.comparableTotalHT) - Number(reference.comparableTotalHT)
+            : null;
+          const diffs = supplierDiffs(s, data.items);
           return (
             <li key={s.supplierId}>
-              <Card className={`flex flex-col gap-1.5 p-4 ${i === 0 && ranked.length > 1 ? "ring-2 ring-ok" : ""}`}>
+              <Card className={`flex flex-col gap-2 p-4 ${retained ? "ring-2 ring-ok" : isRef && !chosen ? "ring-2 ring-ok/60" : ""} ${chosen && !retained ? "opacity-60" : ""}`}>
                 <div className="flex items-baseline justify-between gap-3">
-                  <span className="text-[17px] font-extrabold">{s.name}</span>
-                  <span className="text-[17px] font-extrabold">{euros(s.comparableTotalHT)}</span>
+                  <span className="min-w-0 text-[17px] leading-snug font-extrabold">{s.name}</span>
+                  <span className="shrink-0 text-right">
+                    <span className="block text-[19px] font-extrabold">{euros(quoted === null ? null : quoted.toFixed(2))}</span>
+                    {s.missingCount > 0 ? <span className="block text-xs font-bold text-muted">chiffrés</span> : null}
+                  </span>
                 </div>
-                {ranked.length > 1 ? (
-                  i === 0 ? (
-                    <span className="text-sm font-bold text-ok">Moins cher sur le total</span>
-                  ) : gap !== null ? (
-                    <span className="text-sm font-bold text-muted">
-                      +{euros(String(gap))} par rapport à {best.name}
-                    </span>
-                  ) : null
+                {retained ? <span className="text-sm font-extrabold text-ok">✓ Offre retenue</span> : null}
+                {!retained && isRef ? <span className="text-sm font-extrabold text-ok">{refLabel}</span> : null}
+                {gap !== null && gap > 0 ? (
+                  <span className="text-sm font-bold text-muted">
+                    +{euros(gap.toFixed(2))} par rapport à {reference!.name}
+                  </span>
                 ) : null}
-                <ul className="flex flex-wrap gap-1.5">
-                  {supplierFacts(s).map((f) => (
-                    <li key={f.text} className={`rounded-full px-2.5 py-1 text-xs font-bold ${f.warn ? "bg-warn-bg text-warn" : "bg-ground text-muted"}`}>
-                      {f.text}
-                    </li>
-                  ))}
-                </ul>
+                {s.missingCount > 0 ? (
+                  <div className="flex flex-col gap-0.5 rounded-2xl bg-warn-bg px-3 py-2">
+                    <span className="text-sm font-extrabold text-warn">
+                      ⚠️ {plural(s.missingCount, "article manquant", "articles manquants")}
+                    </span>
+                    {s.comparableTotalHT ? (
+                      <span className="text-[13px] text-warn">
+                        Total estimé avec {s.missingCount > 1 ? "les articles manquants" : "l'article manquant"} : {euros(s.comparableTotalHT)}
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
+                {diffs.length > 0 ? (
+                  <ul className="flex flex-wrap gap-1.5">
+                    {diffs.map((f) => (
+                      <li key={f.text} className={`rounded-full px-2.5 py-1 text-xs font-bold ${f.warn ? "bg-warn-bg text-warn" : "bg-ground text-muted"}`}>
+                        {f.text}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                {!archived && !chosen && ranked.length > 1 ? (
+                  <Button variant={isRef ? "primary" : "secondary"} pending={pending === s.supplierId} disabled={pending !== null} onClick={() => void choose(s.supplierId)}>
+                    <Check size={18} aria-hidden="true" />
+                    Retenir cette offre
+                  </Button>
+                ) : null}
               </Card>
             </li>
           );
         })}
       </ol>
-      {ranked.length > 1 && best.missingCount > 0 ? (
-        <p className="text-sm font-semibold text-warn">
-          {best.name} n&apos;a pas chiffré toute la liste : son total comprend une estimation. Demandez-lui le reste avant de décider.
-        </p>
+      {ranked.length === 1 ? <p className="text-sm text-muted">Une seule offre pour l&apos;instant : attendez les autres pour comparer.</p> : null}
+      {chosen && !archived ? (
+        <button
+          type="button"
+          onClick={() => void choose(null)}
+          disabled={pending !== null}
+          className="inline-flex min-h-11 items-center self-center text-sm font-bold text-muted disabled:opacity-60"
+        >
+          Changer d&apos;avis
+        </button>
       ) : null}
-      {ranked.length === 1 ? <p className="text-sm text-muted">Un seul devis lu pour l&apos;instant : ajoutez-en un autre pour comparer.</p> : null}
 
       <details className="rounded-2xl bg-surface p-4 text-sm shadow-card">
-        <summary className="cursor-pointer font-bold">Détail ligne par ligne</summary>
+        <summary className="cursor-pointer font-bold">Voir le détail ligne par ligne</summary>
         <ul className="mt-3 flex flex-col divide-y divide-line">
           {data.items.map((item) => (
             <li key={item.index} className="flex flex-col gap-1 py-2.5">
               <span className="font-bold">
-                {item.index}. {shortName(item.designation)}
+                {shortName(item.designation)}
                 <span className="font-normal text-muted"> · {[item.quantity, item.unit].filter(Boolean).join(" ")}</span>
               </span>
               {item.offers.map((o) => {
@@ -309,103 +385,6 @@ export function ProjectComparison({
           ))}
         </ul>
       </details>
-
-      <Classify request={request} suppliers={ranked} archived={archived} onChange={onRequestChange} />
     </section>
-  );
-}
-
-/** « Classé » : l'artisan a fait son choix ; indiquer le ou les fournisseurs retenus est facultatif. */
-function Classify({
-  request,
-  suppliers,
-  archived,
-  onChange,
-}: {
-  request: PriceRequest;
-  suppliers: ComparisonSupplier[];
-  archived: boolean;
-  onChange: (r: PriceRequest) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [retained, setRetained] = useState<Set<string>>(new Set(request.retainedSupplierIds));
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<ApiError | null>(null);
-
-  async function save(classified: boolean) {
-    setPending(true);
-    setError(null);
-    try {
-      onChange(
-        await api<PriceRequest>(`/v1/price-requests/${request.id}/classification`, {
-          method: "PATCH",
-          body: { classified, retainedSupplierIds: classified ? [...retained] : [] },
-        }),
-      );
-      setOpen(false);
-    } catch (e) {
-      setError(toError(e));
-    } finally {
-      setPending(false);
-    }
-  }
-
-  if (request.classifiedAt) {
-    const names = suppliers.filter((s) => request.retainedSupplierIds.includes(s.supplierId)).map((s) => s.name);
-    return (
-      <Card className="flex flex-col gap-2 p-4">
-        <span className="font-bold text-ok">
-          ✓ Classé le {new Date(request.classifiedAt).toLocaleDateString("fr-FR")}
-          {names.length > 0 ? ` · retenu : ${names.join(", ")}` : ""}
-        </span>
-        {error ? <ErrorNotice error={error} /> : null}
-        {!archived ? (
-          <button type="button" onClick={() => void save(false)} disabled={pending} className="inline-flex min-h-10 items-center self-start text-sm font-bold text-muted">
-            Rouvrir
-          </button>
-        ) : null}
-      </Card>
-    );
-  }
-  if (archived) return null;
-  if (!open) {
-    return (
-      <Button variant="secondary" onClick={() => setOpen(true)}>
-        <Check size={18} aria-hidden="true" />
-        Classer
-      </Button>
-    );
-  }
-  return (
-    <Card className="flex flex-col gap-3 p-4">
-      <span className="font-bold">Fournisseur retenu (facultatif)</span>
-      {suppliers.map((s) => (
-        <label key={s.supplierId} className="flex min-h-11 items-center gap-3">
-          <input
-            type="checkbox"
-            checked={retained.has(s.supplierId)}
-            onChange={(e) =>
-              setRetained((prev) => {
-                const next = new Set(prev);
-                if (e.target.checked) next.add(s.supplierId);
-                else next.delete(s.supplierId);
-                return next;
-              })
-            }
-            className="size-5 accent-[#ff5a1f]"
-          />
-          {s.name}
-        </label>
-      ))}
-      {error ? <ErrorNotice error={error} /> : null}
-      <div className="grid grid-cols-2 gap-3">
-        <Button variant="secondary" onClick={() => setOpen(false)} disabled={pending}>
-          Annuler
-        </Button>
-        <Button pending={pending} onClick={() => void save(true)}>
-          Classer
-        </Button>
-      </div>
-    </Card>
   );
 }

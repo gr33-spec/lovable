@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { AiUsageCard } from "@/components/ai-usage-card";
+import { PlanSummary } from "@/components/paywall";
 import { TradePicker } from "@/components/trade-picker";
 import { BackButton, Badge, Button, Card, ErrorNotice, PageTitle } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
@@ -67,6 +67,7 @@ export default function ComptePage() {
           <p className="text-sm text-muted">La confirmation par e-mail sera activée prochainement.</p>
         )}
       </Card>
+      <PlanSummary />
       <Card className="flex flex-col gap-2 p-4">
         <span className="text-xs font-extrabold tracking-[0.04em] text-muted">ENTREPRISE</span>
         {me.companies.length > 1 ? (
@@ -89,7 +90,6 @@ export default function ComptePage() {
         )}
       </Card>
       {company && company.role !== "viewer" ? <TradesCard initial={company.trades} /> : null}
-      {company && (company.role === "owner" || company.role === "admin") ? <AiUsageCard companyId={company.id} /> : null}
       <Button variant="secondary" pending={leaving} onClick={() => void signOut()}>
         Se déconnecter
       </Button>

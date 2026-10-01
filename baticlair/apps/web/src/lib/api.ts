@@ -333,3 +333,31 @@ export interface Comparison {
   suppliers: ComparisonSupplier[];
   items: ComparisonItem[];
 }
+
+/** Prochaine action réelle d'un chantier (accueil « À faire »). */
+export interface NextAction {
+  projectId: string;
+  projectName: string;
+  kind: "add_quote" | "prepare_list" | "validate_list" | "send_requests" | "compare" | "view_offer" | "choose_supplier";
+  label: string;
+  detail: string | null;
+  target: "devis" | "materiaux" | "fournisseurs" | "comparer";
+}
+
+/** Formule et utilisation, en nombre de chantiers. */
+export interface BillingPlan {
+  key: string;
+  label: string;
+  projectLimit: number | null;
+  period: "trial" | "month";
+  priceEurMonth: number | null;
+}
+
+export interface BillingStatus {
+  plan: BillingPlan;
+  usage: { projects: number; limit: number | null; remaining: number | null };
+  limitReached: boolean;
+  offers: BillingPlan[];
+  requestedPlan: string | null;
+  activationEnabled: boolean;
+}

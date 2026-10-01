@@ -7,6 +7,7 @@ export interface CreateProjectInput {
   name: string;
   clientName?: string | null | undefined;
   address?: string | null | undefined;
+  demo?: boolean | undefined;
 }
 
 export interface UpdateProjectInput {
@@ -25,6 +26,7 @@ export class ProjectsService {
       name: normalizeProjectName(input.name),
       clientName: normalizeOptionalText(input.clientName, "clientName"),
       address: normalizeOptionalText(input.address, "address"),
+      demo: input.demo === true,
     });
   }
 

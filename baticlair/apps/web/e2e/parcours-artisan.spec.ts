@@ -99,8 +99,10 @@ test("un client appelle : on retrouve son chantier, et Retour garde la recherche
 test("marquer terminé retire le chantier des « En cours » sans le perdre", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Bardage Lefèvre", "SCI Lefèvre", "Zone artisanale, Vannes");
-  await page.getByRole("button", { name: "Marquer terminé" }).click();
-  await expect(page.getByText("Ce chantier est terminé.")).toBeVisible();
+  // Action secondaire : dans le menu « ••• » du chantier.
+  await page.getByRole("button", { name: "Plus d'actions sur le chantier" }).click();
+  await page.getByRole("menuitem", { name: "Marquer terminé" }).click();
+  await expect(page.getByText("Terminé", { exact: true })).toBeVisible();
 
   await page.goto("/chantiers");
   await expect(page.getByText("Aucun chantier en cours")).toBeVisible();
@@ -193,13 +195,11 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
   await page.reload();
   await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
 
-  // Le propriétaire voit la consommation IA : rien de dépensé, volume lu mesuré.
+  // Compte : la formule en mots simples (essai, chantiers utilisés), jamais de coûts techniques.
   await page.goto("/compte");
-  const usage = page.locator("section, div").filter({ has: page.getByRole("heading", { name: "Consommation IA ce mois-ci" }) }).last();
-  await expect(usage.getByText("0,00 €").first()).toBeVisible();
-  await expect(usage.getByText("1 · 3 pages")).toBeVisible();
-  await expect(usage.getByText("· sans plafond pendant l'essai")).toBeVisible();
-  await expect(usage.getByText(/la lecture des devis est gratuite/)).toBeVisible();
+  await expect(page.getByText("Essai gratuit")).toBeVisible();
+  await expect(page.getByText("1 chantier sur 3")).toBeVisible();
+  await expect(page.getByText(/Consommation IA|analyse|tokens/i)).toHaveCount(0);
 
   // Un devis déposé par erreur se supprime (avec confirmation), puis se redépose.
   await page.goBack();
@@ -270,10 +270,6 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await page.getByRole("button", { name: "Enregistrer" }).click();
   await page.getByRole("button", { name: "Valider la liste" }).click();
   await expect(page.getByText("Liste validée · 6 articles")).toBeVisible();
-
-  // L'analyse est décomptée dans la consommation du mois.
-  await page.goto("/compte");
-  await expect(page.getByRole("heading", { name: "Consommation IA ce mois-ci" })).toBeVisible();
 });
 
 test("un couvreur demande les prix à ses fournisseurs et range leurs devis", async ({ page }) => {
@@ -311,7 +307,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
 
   // Prochaine étape : choisir les fournisseurs, dont un créé sur place.
   const progress = page.getByRole("navigation", { name: "Avancement du chantier" });
-  await expect(progress.getByRole("link", { name: "Choisir les fournisseurs" })).toBeVisible();
+  await expect(progress.getByRole("link", { name: "Envoyer les demandes" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Demander les prix aux fournisseurs" })).toBeVisible();
   await page.getByRole("checkbox", { name: /Point.P Vannes/ }).check();
   await page.getByRole("button", { name: "Nouveau fournisseur" }).click();
@@ -346,7 +342,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await menu(pointp, "Voir l'e-mail");
   await expect(pointp.getByText("Objet :")).toBeVisible();
   await expect(pointp.getByText(/Bonjour Paul,/)).toBeVisible();
-  await expect(progress.getByRole("link", { name: "Envoyer la demande" })).toBeVisible();
+  await expect(progress.getByRole("link", { name: "Envoyer les demandes" })).toBeVisible();
   // Pour tester sans attendre, un devis fictif peut être simulé (dans le menu).
   await pointp.getByRole("button", { name: /^Plus d'actions/ }).click();
   await expect(pointp.getByRole("menuitem", { name: "Test : simuler un devis fictif" })).toBeVisible();
@@ -368,10 +364,11 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await expect(tuiles.getByRole("alert")).toContainText("déjà rangé chez un autre fournisseur");
   await tuiles.getByLabel("Ajouter son devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-2.pdf"));
   await expect(tuiles.getByText("Devis reçu")).toBeVisible();
-  await expect(progress.getByRole("link", { name: "Comparer les 2 devis" })).toBeVisible();
+  await expect(progress.getByRole("link", { name: "Comparer les offres" })).toBeVisible();
 
   // L'action de l'étape : « Comparer ». BatiClair lit les devis (simulé en test), rapproche et calcule tout.
-  await page.getByRole("button", { name: "Comparer les 2 devis" }).click();
+  await expect(page.getByText("2 offres reçues")).toBeVisible();
+  await page.getByRole("button", { name: "Comparer les offres" }).click();
   await expect(pointp.getByText("6/6 articles chiffrés")).toBeVisible();
   await expect(tuiles.getByText("5/6 articles chiffrés · 1 manquant")).toBeVisible();
   await expect(page.getByRole("button", { name: /^Comparer les/ })).toHaveCount(0);
@@ -382,32 +379,37 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await menu(tuiles, "Voir les lignes de son devis");
   await expect(tuiles.getByText("Livraison chantier")).toBeVisible();
 
-  // Comparer : un total honnête, le manquant estimé, jamais compté à zéro.
+  // Choisir : ce qui est vraiment chiffré d'un côté, l'estimation de l'autre ; une offre incomplète n'est jamais « la moins chère ».
   const compare = page.locator("section#comparer");
-  await expect(compare.getByRole("listitem").first()).toContainText("Tuiles & Co");
-  await expect(compare.getByRole("listitem").first()).toContainText("2 724,40 €");
-  await expect(compare.getByText(/1 article manquant \(estimé 511,20\s€\)/)).toBeVisible();
-  await expect(compare.getByText("Moins cher sur le total")).toBeVisible();
-  await expect(compare.getByText(/\+80,90\s€ par rapport à Tuiles & Co/)).toBeVisible();
-  await expect(compare.getByText("1 ligne non reconnue")).toHaveCount(0);
-  await expect(progress.getByRole("link", { name: "Choisir mon fournisseur" })).toBeVisible();
+  await expect(compare.getByRole("heading", { name: "Choisir un fournisseur" })).toBeVisible();
+  const offers = compare.getByRole("list", { name: "Offres" }).getByRole("listitem");
+  await expect(offers.first()).toContainText("Point.P Vannes");
+  await expect(offers.first()).toContainText("2 805,30 €");
+  await expect(offers.first().getByText("Le moins cher des offres complètes")).toBeVisible();
+  const tuilesOffer = offers.filter({ hasText: "Tuiles & Co" });
+  await expect(tuilesOffer.getByText(/2\s213,20\s€/)).toBeVisible();
+  await expect(tuilesOffer.getByText("chiffrés")).toBeVisible();
+  await expect(tuilesOffer.getByText("⚠️ 1 article manquant")).toBeVisible();
+  await expect(tuilesOffer.getByText(/Total estimé avec l'article manquant : 2\s724,40\s€/)).toBeVisible();
+  await expect(tuilesOffer.getByText(/Livraison 60,00\s€/)).toBeVisible();
+  await expect(tuilesOffer.getByText(/moins cher/i)).toHaveCount(0);
+  await expect(progress.getByRole("link", { name: "Choisir un fournisseur" })).toBeVisible();
 
-  // « Classé », avec le fournisseur retenu (facultatif).
-  await compare.getByRole("button", { name: "Classer" }).click();
-  await compare.getByRole("checkbox", { name: "Point.P Vannes" }).check();
-  await compare.getByRole("button", { name: "Classer" }).last().click();
-  await expect(compare.getByText(/Classé le .* · retenu : Point.P Vannes/)).toBeVisible();
-  await expect(progress.getByText("Chantier classé ✓")).toBeVisible();
+  // « Retenir cette offre » : un geste, compris tout de suite.
+  await offers.first().getByRole("button", { name: "Retenir cette offre" }).click();
+  await expect(compare.getByRole("heading", { name: "Offre retenue" })).toBeVisible();
+  await expect(offers.first().getByText("✓ Offre retenue")).toBeVisible();
+  await expect(progress.getByText("Fournisseur choisi ✓")).toBeVisible();
 
   // Tout est conservé.
   await page.reload();
   await expect(pointp.getByText("6/6 articles chiffrés")).toBeVisible();
-  await expect(page.locator("section#comparer").getByText(/Classé le/)).toBeVisible();
+  await expect(page.locator("section#comparer").getByText("✓ Offre retenue")).toBeVisible();
 });
 
 test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs", async ({ page }) => {
   await signUp(page);
-  await page.getByRole("button", { name: "Créer un chantier de démonstration" }).click();
+  await page.getByRole("button", { name: "Lancer la démonstration" }).click();
   await expect(page.getByRole("heading", { name: "Démo – Toiture Martin" })).toBeVisible();
   await expect(page.getByText("devis-client-demo.pdf")).toBeVisible();
 
@@ -430,12 +432,46 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
     await card.getByRole("button", { name: "Simuler sa réponse (démo)" }).click();
     await expect(card.getByText("Devis reçu")).toBeVisible();
   }
-  await page.getByRole("button", { name: "Comparer les 3 devis" }).click();
+  await page.getByRole("button", { name: "Comparer les offres" }).click();
   for (const name of ["Tuilerie de l'Ouest", "Négoce Breizh", "Matériaux Atlantique"]) {
     await expect(cards.filter({ hasText: name }).getByText(/articles chiffrés/)).toBeVisible();
   }
   await expect(cards.filter({ hasText: "Négoce Breizh" }).getByText(/1 manquant/)).toBeVisible();
   const compare = page.locator("section#comparer");
-  await expect(compare.getByText("Moins cher sur le total")).toBeVisible();
-  await expect(progress.getByRole("link", { name: "Choisir mon fournisseur" })).toBeVisible();
+  await expect(compare.getByRole("button", { name: "Retenir cette offre" }).first()).toBeVisible();
+  await expect(compare.getByText("⚠️ 1 article manquant")).toBeVisible();
+  await expect(progress.getByRole("link", { name: "Choisir un fournisseur" })).toBeVisible();
+});
+
+test("accueil : la prochaine action de chaque chantier, puis l'essai et les formules", async ({ page }) => {
+  await signUp(page);
+  const todo = page.getByRole("region", { name: /à faire|Tout est à jour/i });
+  await createProject(page, "Toiture Garnier", "M. Garnier", "5 rue du Port, Vannes");
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: /^\d+ actions? à faire$/ })).toBeVisible();
+  await expect(todo.getByText("Toiture Garnier")).toBeVisible();
+  await todo.getByRole("link", { name: "Ajouter le devis client" }).click();
+  await expect(page.getByRole("heading", { name: "Toiture Garnier" })).toBeVisible();
+
+  // Essai : 3 chantiers. Au 4e, l'écran des formules, sans jargon ni crédits.
+  await createProject(page, "Chantier 2", "", "");
+  await createProject(page, "Chantier 3", "", "");
+  await page.goto("/chantiers/nouveau");
+  await expect(page.getByRole("heading", { name: "Votre essai est terminé" })).toBeVisible();
+  await expect(page.getByText("Continuez à utiliser BatiClair pour analyser vos devis et comparer vos fournisseurs.")).toBeVisible();
+  const plans = page.getByRole("list", { name: "Formules" }).getByRole("listitem");
+  await expect(plans).toHaveCount(2);
+  await expect(plans.first()).toContainText("chantiers / mois");
+  await plans.first().getByRole("button", { name: "Choisir cette formule" }).click();
+  await expect(page.getByText(/Merci ! Nous vous contactons très vite/)).toBeVisible();
+  await page.goto("/");
+  await expect(page.getByText("Votre essai est terminé")).toBeVisible();
+
+  // Activation manuelle (tests, premiers clients) : un code, et c'est reparti.
+  await page.goto("/formules");
+  await page.getByRole("button", { name: "J'ai un code d'activation" }).click();
+  await page.getByLabel("Code d'activation").fill("E2E-SOLO-CODE");
+  await page.getByRole("button", { name: "Activer" }).click();
+  await expect(page.getByText("Votre formule actuelle")).toBeVisible();
+  await createProject(page, "Chantier 4", "", "");
 });

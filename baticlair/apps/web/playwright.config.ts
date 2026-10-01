@@ -14,6 +14,7 @@ const apiEnv = {
   WEB_APP_URL: "http://localhost:3000",
   EMAIL_PROVIDER: "console",
   AI_PROVIDER: "fake",
+  PLAN_ACTIVATION_CODES: "E2E-SOLO-CODE:solo",
   LOG_LEVEL: "warn",
 };
 
