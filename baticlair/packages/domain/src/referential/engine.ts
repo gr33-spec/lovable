@@ -39,7 +39,7 @@ export interface WorkItemInput {
   products: Record<string, SlotChoice>;
   /** Emplacements que le devis cite explicitement (« liteaux » écrits sur le devis). */
   mentioned: string[];
-  /** Marges réglées par l'artisan, par famille (« 5 » = 5 %). Priment sur le référentiel. */
+  /** Marges réglées par l'artisan, par produit ou par famille (« 5 » = 5 %). Priment sur le référentiel. */
   companyWaste?: Record<string, string>;
 }
 
@@ -276,8 +276,18 @@ function computeNeed(
     trace.push({ label: "Besoin calculé", value: fr(need), unit: rule.unit, ...provenanceLine(rule, sources) });
 
     // 4. Marge : réglage de l'artisan, sinon règle sourcée, sinon aucune (dit clairement).
-    const companyRate = input.companyWaste?.[slot.family];
-    const wasteRule = ref.wasteRules.find((w) => w.family === slot.family && (w.verification.status === "verified" || options.acceptDraft));
+    // Réglage de l'artisan : pour ce produit, sinon pour la famille.
+    const companyRate = input.companyWaste?.[product.id] ?? input.companyWaste?.[slot.family];
+    // Règle sourcée la plus précise : produit + ouvrage, puis produit, puis ouvrage, puis famille.
+    const wasteRule = ref.wasteRules
+      .filter(
+        (w) =>
+          w.family === slot.family &&
+          (w.product === undefined || w.product === product.id) &&
+          (w.workItem === undefined || w.workItem === work.id) &&
+          (w.verification.status === "verified" || options.acceptDraft),
+      )
+      .sort((a, b) => Number(b.product !== undefined) * 2 + Number(b.workItem !== undefined) - (Number(a.product !== undefined) * 2 + Number(a.workItem !== undefined)))[0];
     if (companyRate !== undefined) {
       need = need.times(new Decimal(companyRate).dividedBy(100).plus(1));
       trace.push({ label: "Marge (votre réglage)", value: companyRate.replace(".", ","), unit: "%", from: "Votre réglage", verified: true });

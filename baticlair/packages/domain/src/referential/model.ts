@@ -160,12 +160,28 @@ export interface WorkItemType {
   needs: NeedRule[];
 }
 
-/** Marge de casse ou de coupe recommandée par une source (sinon : réglage de l'artisan). */
+/**
+ * Marge de casse ou de coupe recommandée par une source. Jamais
+ * universelle : elle vise une famille, et peut se restreindre à un produit
+ * ou à un ouvrage (la plus précise l'emporte). Sans règle, c'est le
+ * réglage de l'artisan, sinon 0 % affiché.
+ */
 export interface WasteRule extends Provenance {
   family: string;
+  product?: string;
+  workItem?: string;
   /** En pourcentage (« 5 » = 5 %). */
   rate: string;
 }
+
+/**
+ * Deux savoirs distincts :
+ *  - DONNÉE PRODUIT (caractéristiques, conditionnements) : prouvée par le
+ *    fabricant, une norme ou un distributeur, jamais par l'habitude ;
+ *  - RÈGLE DE MISE EN ŒUVRE (formules, constantes, marges) : norme, DTU,
+ *    ou règle BatiClair validée par un professionnel.
+ */
+export const PRODUCT_DATA_SOURCES: readonly SourceKind[] = ["manufacturer", "standard", "retailer", "definition"];
 
 export interface Referential {
   id: string;

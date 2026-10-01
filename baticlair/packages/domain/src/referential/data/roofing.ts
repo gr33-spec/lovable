@@ -73,9 +73,9 @@ export const ROOFING_REFERENTIAL: Referential = {
     },
     {
       id: "longueur-liteau-courante",
-      kind: "other",
-      title: "Longueur commerciale courante des liteaux",
-      documentRef: "À confirmer auprès des fournisseurs de l'artisan (3 m, 4 m, 4,2 m… selon le négoce)",
+      kind: "retailer",
+      title: "Fiche article liteau sapin traité 27 × 40 (négoce)",
+      documentRef: "Fiche article du négoce à fournir (longueur, botte) : 3 m, 4 m, 4,2 m… selon le négoce",
       retrievedAt: "2026-10-01",
     },
   ],
@@ -182,7 +182,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       ],
       constants: {
         seuil_pente_ecran: fact("30", "%", "dtu-40-29"),
-        recouvrement_faible_pente: fact("0.20", "m", "dtu-40-29", "Pente inférieure au seuil."),
+        recouvrement_faible_pente: fact("0.20", "m", "dtu-40-29", "Pente inférieure OU ÉGALE au seuil (fiche SOP'ÉCRAN HPV R2 : « ≤ 30 % »)."),
         recouvrement_forte_pente: fact("0.10", "m", "dtu-40-29", "Pente supérieure au seuil."),
       },
       needs: [
@@ -223,7 +223,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           id: "ecran",
           slot: "ecran",
           formula:
-            "surface * ecran.largeur_rouleau / (ecran.largeur_rouleau - si(pente < regle.seuil_pente_ecran, regle.recouvrement_faible_pente, regle.recouvrement_forte_pente))",
+            "surface * ecran.largeur_rouleau / (ecran.largeur_rouleau - si(pente <= regle.seuil_pente_ecran, regle.recouvrement_faible_pente, regle.recouvrement_forte_pente))",
           unit: "m2",
           core: false,
           exclusions: "Hors recouvrements en bout de rouleau, relevés et chutes.",

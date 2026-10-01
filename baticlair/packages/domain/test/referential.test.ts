@@ -93,7 +93,10 @@ describe("référentiel couverture", () => {
     broken.products[0]!.attributes.largeur_utile = { ...broken.products[0]!.attributes.largeur_utile!, verification: { status: "verified" } };
     broken.products[1]!.attributes.epaisseur = { ...broken.products[1]!.attributes.epaisseur!, source: "inconnue" };
     broken.products[2]!.aliases.push("27x40"); // même appellation que le liteau, mais autre famille : permis
+    // Une habitude métier ne peut pas fixer une caractéristique produit.
+    broken.products[0]!.attributes.pureau_min = { ...broken.products[0]!.attributes.pureau_min!, source: "baticlair-geometrie-liteaunage" };
     const errors = checkReferential(broken);
+    expect(errors.some((e) => e.includes("pureau_min") && e.includes("donnée produit sourcée par « baticlair_rule »"))).toBe(true);
     expect(errors.some((e) => e.includes("liteaux") && e.includes("pas des m2"))).toBe(true);
     expect(errors.some((e) => e.includes("vérifiée sans date ni vérificateur"))).toBe(true);
     expect(errors.some((e) => e.includes("source inconnue"))).toBe(true);
@@ -131,11 +134,38 @@ describe("moteur : ouvrage → besoins → achat", () => {
     expect(need(r, "tuiles").exclusions).toMatch(/Hors tuiles de rive/);
   });
 
+  it("écran : à 30 % de pente pile, recouvrement de 20 cm (« ≤ 30 % », cas limite)", () => {
+    const r = computeWorkItem(ref, { ...CASE, params: { ...CASE.params, pente: { value: "30", unit: "%", origin: "artisan" } } });
+    // 120 × 1,5 ÷ (1,5 − 0,20) = 138,46 m² → 2 rouleaux de 75 m².
+    expect(need(r, "ecran")).toMatchObject({ quantity: { value: "138.46" }, purchase: { order: { count: "2" } } });
+  });
+
   it("applique la marge réglée par l'artisan, jamais une marge inventée", () => {
     const r = computeWorkItem(ref, { ...CASE, companyWaste: { roof_tile: "5" } });
     // 1 305,43 × 1,05 = 1 370,70 → 1 371 pièces.
     expect(need(r, "tuiles")).toMatchObject({ quantity: { value: "1370.7" }, purchase: { order: { count: "1371" } } });
     expect(need(r, "liteaux").quantity?.value).toBe("349.85");
+  });
+
+  it("prend la marge la plus précise : réglage artisan (produit, puis famille), sinon règle sourcée (produit, puis famille)", () => {
+    const sourced: Referential = {
+      ...ref,
+      wasteRules: [
+        { family: "roof_tile", rate: "3", source: "edilians-hp10", verification: { status: "verified", verifiedAt: "2026-10-01", verifiedBy: "test" }, version: 1 },
+        { family: "roof_tile", product: "edilians-hp10-huguenot", rate: "4", source: "edilians-hp10", verification: { status: "verified", verifiedAt: "2026-10-01", verifiedBy: "test" }, version: 1 },
+      ],
+    };
+    expect(checkReferential(sourced)).toEqual([]);
+    const ruled = computeWorkItem(sourced, CASE);
+    // 1 305,43 × 1,04 = 1 357,64 : la règle du produit l'emporte sur celle de la famille.
+    expect(need(ruled, "tuiles").quantity?.value).toBe("1357.64");
+    expect(need(ruled, "tuiles").trace.find((t) => t.label === "Marge recommandée")).toMatchObject({ value: "4" });
+    // Le réglage de l'artisan pour ce produit prime sur tout.
+    const own = computeWorkItem(sourced, { ...CASE, companyWaste: { roof_tile: "8", "edilians-hp10-huguenot": "2" } });
+    // 1 305,4262 × 1,02 = 1 331,5347.
+    expect(need(own, "tuiles").quantity?.value).toBe("1331.53");
+    // Aucune règle pour les liteaux : 0 %, dit clairement.
+    expect(need(own, "liteaux").trace.find((t) => t.label === "Marge")).toMatchObject({ value: "0" });
   });
 
   it("pose UNE question quand il manque une information, au lieu de deviner", () => {
