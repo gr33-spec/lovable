@@ -22,6 +22,13 @@ const supplier = (agent: Agent, name: string, email: string) =>
     notes: "Tuiles, zinc",
   });
 
+/** Photos minimales (1 px) : un JPEG et un PNG valides. */
+const JPEG_1PX = Buffer.from(
+  "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+  "base64",
+);
+const PNG_1PX = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
+
 /** Chantier avec devis client lu et liste de matériaux validée (IA simulée). */
 async function projectWithValidatedList(agent: Agent) {
   const project = await agent.post("/v1/projects").send({ name: "Toiture Dupont", address: "12 rue des Lilas, Vannes" });
@@ -180,6 +187,40 @@ describe("demandes de prix", () => {
 
     const list = await agent.get(`/v1/projects/${projectId}/price-requests`);
     expect(list.body.items).toHaveLength(1);
+  });
+
+  it("accepte le devis en photos (une par page), rassemblées en un PDF", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
+    const projectId = await projectWithValidatedList(agent);
+    const p = await supplier(agent, "Point.P", "contact@pointp.fr");
+    const t = await supplier(agent, "Tuiles & Co", "devis@tuiles.fr");
+    const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [p.body.id, t.body.id] })).body;
+    const [first, second] = created.recipients as { id: string }[];
+
+    const quote = await agent
+      .post(`/v1/price-request-recipients/${first!.id}/quote`)
+      .attach("file", JPEG_1PX, { filename: "IMG_0001.jpg", contentType: "image/jpeg" })
+      .attach("file", PNG_1PX, { filename: "IMG_0002.png", contentType: "image/png" });
+    expect(quote.status).toBe(201);
+    expect(quote.body.recipients[0]).toMatchObject({ status: "received", document: { name: "IMG_0001.pdf" } });
+    const doc = (await agent.get(`/v1/projects/${projectId}/documents`)).body.items.find(
+      (d: { purpose: string }) => d.purpose === "supplier_quote",
+    );
+    // Deux pages sans texte : la lecture passera par l'IA « en image ».
+    expect(doc.reading).toMatchObject({ status: "completed", pagesTotal: 2, pagesVision: 2 });
+
+    // Un PDF avec des photos, ou un fichier inconnu : refusés clairement.
+    const mixed = await agent
+      .post(`/v1/price-request-recipients/${second!.id}/quote`)
+      .attach("file", Buffer.from(await makePdf(["devis"])), { filename: "devis.pdf", contentType: "application/pdf" })
+      .attach("file", PNG_1PX, { filename: "IMG.png", contentType: "image/png" });
+    expect(mixed.status).toBe(400);
+    expect(mixed.body.error.details).toMatchObject({ reason: "one_pdf_or_photos" });
+    const text = await agent
+      .post(`/v1/price-request-recipients/${second!.id}/quote`)
+      .attach("file", Buffer.from("bonjour"), { filename: "devis.txt", contentType: "text/plain" });
+    expect(text.status).toBe(422);
+    expect(text.body.error.details).toMatchObject({ reason: "not_pdf" });
   });
 
   it("garde la liste envoyée même si la liste du chantier change ensuite", async () => {

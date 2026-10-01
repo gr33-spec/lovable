@@ -8,6 +8,7 @@ import { SupplierForm } from "@/components/supplier-form";
 import { Badge, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, MAX_DOCUMENT_BYTES, newActionKey, type Offer, type PriceRequest, type PriceRequestRecipient, type Supplier } from "@/lib/api";
 import { openDocument } from "@/lib/open-document";
+import { isPhoto, MAX_QUOTE_PHOTOS, preparePhotos } from "@/lib/photos";
 import { useProgressRefresh } from "@/components/project-progress";
 import { useResource } from "@/lib/use-resource";
 
@@ -26,7 +27,7 @@ function mailtoHref(r: PriceRequestRecipient): string {
 /**
  * Demandes de prix du chantier, après validation de la liste de matériaux :
  * choisir les fournisseurs, envoyer l'e-mail préparé depuis sa messagerie,
- * puis déposer le devis PDF reçu de chacun.
+ * puis déposer le devis reçu de chacun (PDF ou photos).
  */
 export function ProjectPriceRequests({ projectId, archived, canCreate }: { projectId: string; archived: boolean; canCreate: boolean }) {
   const fetchRequests = useCallback(
@@ -345,7 +346,7 @@ function cardState(r: PriceRequestRecipient, offer: Offer | null): CardState {
   }
 }
 
-type Panel = "email" | "lines" | null;
+type Panel = "email" | "lines" | "upload" | null;
 
 /**
  * Un fournisseur : son nom, où il en est, et au plus une action utile à
@@ -413,7 +414,7 @@ function RecipientCard({
 
   const items: { label: string; onSelect: () => void }[] = [];
   if (r.email) items.push({ label: panel === "email" ? "Masquer l'e-mail" : "Voir l'e-mail", onSelect: () => toggle("email") });
-  if (r.document) items.push({ label: "Ouvrir son devis (PDF)", onSelect: () => void openDocument(r.document!.id) });
+  if (r.document) items.push({ label: "Ouvrir son devis", onSelect: () => void openDocument(r.document!.id) });
   if (offer) items.push({ label: panel === "lines" ? "Masquer les lignes" : "Voir les lignes de son devis", onSelect: () => toggle("lines") });
   if (!archived) {
     if (r.status === "to_send") {
@@ -426,6 +427,10 @@ function RecipientCard({
       items.push({ label: "N'a pas répondu", onSelect: () => void setStatus("declined") });
     }
     if (r.status === "declined") items.push({ label: "Remettre en attente", onSelect: () => void setStatus("sent") });
+    // Devis reçu par un autre chemin (téléphone, comptoir, photo) : on peut toujours le ranger ici.
+    if (!r.document && (r.status !== "sent" || demo)) {
+      items.push({ label: panel === "upload" ? "Masquer l'ajout du devis" : "Ajouter son devis reçu", onSelect: () => toggle("upload") });
+    }
     if (r.document) items.push({ label: "Retirer ce devis", onSelect: () => void removeQuote(r.document!.id) });
   }
 
@@ -485,7 +490,9 @@ function RecipientCard({
           Envoyer l&apos;e-mail
         </a>
       ) : null}
-      {!archived && !demo && r.status === "sent" && !r.document ? <QuoteUpload recipientId={r.id} onChange={onChange} /> : null}
+      {!archived && !r.document && ((!demo && r.status === "sent") || panel === "upload") ? (
+        <QuoteUpload recipientId={r.id} onChange={onChange} />
+      ) : null}
       {pending ? <Spinner /> : null}
     </Card>
   );
@@ -497,16 +504,26 @@ function QuoteUpload({ recipientId, onChange }: { recipientId: string; onChange:
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
 
-  async function send(file: File) {
+  /** Un PDF, ou une ou plusieurs photos du devis (une par page). */
+  async function send(files: File[]) {
     setError(null);
-    if (file.size > MAX_DOCUMENT_BYTES) {
+    const photos = files.filter(isPhoto);
+    if (files.length > 1 && photos.length < files.length) {
+      setError(new ApiError("validation_failed", 400, undefined, undefined, "one_pdf_or_photos"));
+      return;
+    }
+    if (photos.length > MAX_QUOTE_PHOTOS) {
+      setError(new ApiError("validation_failed", 400, undefined, undefined, "too_many_photos"));
+      return;
+    }
+    if (photos.length === 0 && files[0]!.size > MAX_DOCUMENT_BYTES) {
       setError(new ApiError("payload_too_large", 413));
       return;
     }
     setPending(true);
     try {
       const form = new FormData();
-      form.append("file", file, file.name);
+      for (const file of photos.length > 0 ? await preparePhotos(photos) : files) form.append("file", file, file.name);
       onChange(await api<PriceRequest>(`/v1/price-request-recipients/${recipientId}/quote`, { method: "POST", body: form }));
     } catch (e) {
       setError(toError(e));
@@ -523,12 +540,13 @@ function QuoteUpload({ recipientId, onChange }: { recipientId: string; onChange:
         ref={input}
         id={inputId}
         type="file"
-        accept="application/pdf,.pdf"
+        accept="application/pdf,.pdf,image/*"
+        multiple
         className="sr-only"
         disabled={pending}
         onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) void send(file);
+          const files = [...(e.target.files ?? [])];
+          if (files.length > 0) void send(files);
         }}
       />
       <label
@@ -537,7 +555,7 @@ function QuoteUpload({ recipientId, onChange }: { recipientId: string; onChange:
         className={`inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-ground px-4 font-extrabold text-ink focus-within:ring-2 ${pending ? "pointer-events-none opacity-70" : ""}`}
       >
         {pending ? <Loader2 size={18} className="animate-spin" aria-hidden="true" /> : <FileUp size={18} aria-hidden="true" />}
-        {pending ? "Enregistrement du devis…" : "Ajouter son devis (PDF)"}
+        {pending ? "Enregistrement du devis…" : "Ajouter son devis (PDF ou photos)"}
       </label>
     </div>
   );
