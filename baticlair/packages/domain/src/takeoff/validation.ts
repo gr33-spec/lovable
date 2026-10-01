@@ -3,6 +3,7 @@ import type { PackagingSpec } from "../quantity/quantity.js";
 import { dimensionOf, parseUnit, type UnitCode } from "../quantity/unit.js";
 import { Decimal } from "../shared/decimal.js";
 import { containsKeyword, keywordPosition, normalizeText, type MaterialFamily, type TradeProfile } from "../trades/trade-profile.js";
+import { articleScope } from "./sections.js";
 
 /**
  * Validation d'un quantitatif (liste de matériaux) selon le profil métier.
@@ -21,6 +22,12 @@ export interface TakeoffLineInput {
   reference?: string | null;
   /** Contenu du conditionnement, s'il est écrit dans le document. */
   packaging?: PackagingSpec | null;
+  /**
+   * Titres du devis au-dessus de la ligne, du plus général au plus précis
+   * (« Appareillage Hager Essensya », « Logement T3 n°1 », « Cuisine ») : une
+   * information globale (marque, lot, pièce) reste attachée aux lignes qu'elle couvre.
+   */
+  section?: readonly string[];
   /** Ligne issue du devis client (où « fourniture et pose en m² » est courant). */
   source?: "client_quote" | "supplier_quote" | "manual";
 }
@@ -355,7 +362,8 @@ export function validateTakeoff(lines: readonly TakeoffLineInput[], profile: Tra
   lines.forEach((l, i) => {
     const v = validated[i]!;
     if (v.kind !== "material") return;
-    const key = `${normalizeText(l.designation)}|${v.unit ?? ""}`;
+    // Même règle que le regroupement à l'envoi : un lieu différent ne change pas l'article, un autre titre si.
+    const key = [normalizeText(l.designation), v.unit ?? "", ...articleScope(l.section)].join("|");
     seen.set(key, [...(seen.get(key) ?? []), i]);
   });
   for (const indexes of seen.values()) {

@@ -1,4 +1,4 @@
-import { isWorkQuantity, lineKind, parseUnit, tradeProfile } from "@baticlair/domain";
+import { groupIdenticalLines, isWorkQuantity, lineKind, parseUnit, tradeProfile } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { DocumentsService } from "../../documents/index.js";
 import type { SupplierRepository } from "../../suppliers/index.js";
@@ -40,12 +40,18 @@ export class PriceRequestsService {
       });
     const profile = tradeProfile(takeoff.trade);
     // Les prestations (pose, dépose…) ne se commandent pas : elles ne partent pas chez le fournisseur.
-    const lines = takeoff.lines.flatMap((l) => {
+    const sent = takeoff.lines.flatMap((l) => {
       const { kind, family } = lineKind(l.designation, profile);
       if (kind === "labor") return [];
       // Surface d'ouvrage (« liteaux 120 m² ») : demandée comme telle, jamais comme une quantité d'achat.
       return [{ ...l, ...(kind === "material" && isWorkQuantity(family, parseUnit(l.unit)) ? { basis: "work" as const } : {}) }];
     });
+    // Le même article répété pièce par pièce part en une seule ligne, avec le total et ses titres communs.
+    const lines = groupIdenticalLines(sent).map(({ mergedFrom, section, ...l }) => ({
+      ...l,
+      ...(section.length > 0 ? { section } : {}),
+      ...(mergedFrom > 1 ? { mergedFrom } : {}),
+    }));
     if (lines.length === 0) throw validationFailed("Nothing to order", { reason: "no_material" });
     const supplierIds = await this.checkSuppliers(tenant, input.supplierIds);
     const created = await this.requests.create(tenant, {

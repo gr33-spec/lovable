@@ -13,6 +13,8 @@ export interface LineFields {
 export interface NewTakeoffLine extends LineFields {
   sourceRefs: string[];
   sourcePages: number[];
+  /** Titres du devis au-dessus de la ligne (lot, marque, logement, pièce). */
+  section: string[];
   /** Doute exprimé par l'IA sur la ligne, montré tel quel à l'artisan. */
   aiDoubt: string | null;
 }

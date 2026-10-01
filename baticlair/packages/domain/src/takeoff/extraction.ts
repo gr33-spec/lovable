@@ -26,6 +26,8 @@ export interface ExtractedLine {
   sourceRefs: string[];
   /** Pages lues sur l'image du document (pas de texte numéroté à citer). */
   sourcePages: number[];
+  /** Titres du devis au-dessus de la ligne, du plus général au plus précis (vide si aucun). */
+  section?: readonly string[];
   /** Ligne saisie ou corrigée par l'artisan : c'est lui la source, rien à retrouver dans le devis. */
   enteredByArtisan?: boolean;
   /** Doute exprimé par l'IA sur cette ligne (phrase courte), ou null. */
@@ -106,6 +108,7 @@ export function reviewExtractedTakeoff(
     source: l.enteredByArtisan ? "manual" : "client_quote",
     sourceRefs: l.sourceRefs,
     sourcePages: l.sourcePages,
+    ...(l.section?.length ? { section: l.section } : {}),
   }));
   const validation = validateTakeoff(inputs, profile);
   const merged: LineValidation[] = validation.lines.map((v, i) => {

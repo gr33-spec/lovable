@@ -338,6 +338,8 @@ function ListRow({ line, editable, pending, onSave, onDelete, onConfirm }: { lin
             {line.basis === "work" ? "Pour " : ""}
             {line.quantity ?? "?"} {line.unit ?? ""}
             {line.basis === "work" ? <span className="font-semibold text-warn"> · quantité à calculer</span> : null}
+            {/* Où la ligne se trouve dans le devis (logement, pièce) : pour s'y retrouver d'un coup d'œil. */}
+            {line.section?.length ? <span> · {line.section.slice(-2).join(" › ")}</span> : null}
           </span>
         </span>
         {editable ? (

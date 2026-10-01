@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { documentationNeeds, ROOFING_REFERENTIAL, scoreQuote, tradeProfile, type LineOutcome, type QuoteScore } from "../src/index.js";
+import { documentationNeeds, groupIdenticalLines, ROOFING_REFERENTIAL, scoreQuote, tradeProfile, type LineOutcome, type QuoteScore } from "../src/index.js";
 import { D2026_011_LINES } from "./devis-reels/d2026-011.js";
 import { D2026_015_LINES } from "./devis-reels/d2026-015.js";
 import { MORELLEC_LINES } from "./devis-reels/electricite-plomberie-morellec.js";
-import { errorDigest, evaluateQuote, evaluationDetail, evaluationTable } from "./devis-reels/evaluate.js";
+import { decompositionNeeds, errorDigest, evaluateQuote, evaluationDetail, evaluationTable } from "./devis-reels/evaluate.js";
 import { REAL_QUOTES, type RealQuoteCase } from "./devis-reels/index.js";
 import { PISCINE_LINES } from "./devis-reels/piscine.js";
 import { LEZARDRIEUX_LINES } from "./devis-reels/platrerie-lezardrieux.js";
@@ -181,6 +181,20 @@ describe("banc d'essai : le pont devis → moteur retrouve la lecture faite à l
  * salle de bain), notés contre leur vérité terrain. Le score « avant » est
  * gelé (docs/banc-4-devis-avant*.md) ; celui-ci est recalculé à chaque passage.
  */
+/** Scores enregistrés à chaque étape (A = lignes comprises, B = quantités exactes) : ils ne doivent jamais baisser. */
+const STEPS: { name: string; scores: Record<string, { a: number; b: number; errors: number }> }[] = [
+  {
+    name: "1. Règles générales de lecture (2026-10-01)",
+    scores: {
+      Morellec: { a: 122, b: 19, errors: 12 },
+      Lézardrieux: { a: 18, b: 1, errors: 0 },
+      Piscine: { a: 0, b: 0, errors: 0 },
+      "D-2026-011": { a: 15, b: 9, errors: 0 },
+      "D-2026-015": { a: 9, b: 2, errors: 1 },
+    },
+  },
+];
+
 describe("banc d'essai : 4 devis de métiers différents (score « après »)", () => {
   const cases = [
     ["Morellec — électricité + plomberie (scanné)", MORELLEC_LINES, "electrical,plumbing"],
@@ -199,15 +213,34 @@ describe("banc d'essai : 4 devis de métiers différents (score « après »)", 
       "Points de départ gelés : `banc-4-devis-avant.md` (passage à l'aveugle) et",
       "`banc-4-devis-avant-grille-corrigee.md` (même code, grille de ce fichier).",
       "",
-      "« Correctement comprise » : matériau ou main-d'œuvre, famille, et mesure d'ouvrage ou quantité",
-      "d'achat justes. « Besoin identifié » : BatiClair sait quel article commander (ou le moteur sait",
-      "décomposer l'ouvrage). « Quantité certaine » : la commande de la ligne est complète et sûre.",
+      "Deux scores, toujours séparés :",
+      "- **A — Compréhension documentaire** : la ligne est bien lue (matériau ou main-d'œuvre, famille,",
+      "  mesure d'ouvrage ou quantité d'achat).",
+      "- **B — Quantitatif exact** : la quantité à commander est justifiée par le devis + une règle ou",
+      "  une donnée sourcée et vérifiée. « Ouvrage reconnu » ne compte jamais pour B.",
+      "",
+      "« Besoin identifié » : BatiClair sait quel article commander, sans forcément sa quantité exacte.",
+      "« Lignes envoyées » : lignes qui partent au fournisseur, puis après regroupement des articles",
+      "identiques (un lieu différent ne change pas l'article ; une marque ou un lot différent, si).",
       "",
       evaluationTable(evals),
       "",
       "Référence couverture :",
       "",
       evaluationTable([reference]),
+      "",
+      "## Non-régression",
+      "",
+      "Chaque devis doit garder au moins ses scores A et B de l'étape précédente, sans erreur de plus",
+      "(test « aucun devis ne régresse »). Étapes enregistrées :",
+      "",
+      "| Étape | Devis | A | B | Erreurs |",
+      "|---|---|---|---|---|",
+      ...STEPS.flatMap((step) => Object.entries(step.scores).map(([id, v]) => `| ${step.name} | ${id} | ${v.a} | ${v.b} | ${v.errors} |`)),
+      "",
+      "## Ce qu'il faudrait savoir décomposer (score B)",
+      "",
+      decompositionNeeds([...evals, reference]),
       "",
       "## Erreurs restantes",
       "",
@@ -224,10 +257,51 @@ describe("banc d'essai : 4 devis de métiers différents (score « après »)", 
     await expect(report).toMatchFileSnapshot("../../../docs/banc-4-devis-score.md");
   });
 
+  it("aucun devis ne régresse : A et B au moins égaux, erreurs au plus égales, à chaque étape enregistrée", () => {
+    for (const e of [...evals, reference]) {
+      const key = e.id.split(" — ")[0]!;
+      for (const step of STEPS) {
+        const before = step.scores[key];
+        if (!before) continue;
+        expect({ step: step.name, devis: key, a: e.understood >= before.a, b: e.certain >= before.b, errors: e.errors <= before.errors }).toEqual({
+          step: step.name,
+          devis: key,
+          a: true,
+          b: true,
+          errors: true,
+        });
+      }
+    }
+  });
+
   it("aucune ligne de main-d'œuvre ou d'information n'est envoyée comme matériau", () => {
     for (const e of [...evals, reference]) {
       expect(e.lines.filter((l) => l.errors.some((x) => x.includes("prise pour un matériau"))).map((l) => l.line.designation)).toEqual([]);
     }
+  });
+
+  it("Morellec : les prises de tous les logements partent en une ligne, avec la marque écrite en titre", () => {
+    const sent = groupIdenticalLines(
+      MORELLEC_LINES.map((l) => ({ designation: l.designation, quantity: l.quantity, unit: l.unit, reference: null, section: l.section ?? [] })),
+    );
+    const prises = sent.filter((l) => l.designation === "PRISE DE COURANT 16A+T");
+    expect(prises).toEqual([
+      expect.objectContaining({ quantity: "59", mergedFrom: 19, section: ["DEVIS ELECTRICITE", "APPAREILLAGE HAGER ESSENSYA"] }),
+    ]);
+    // Un tableau par logement + les communs : même article sous les mêmes titres (hors lieux) → 5 tableaux.
+    expect(sent.filter((l) => l.designation.startsWith("TABLEAU GENERAL")).map((l) => [l.quantity, l.mergedFrom])).toEqual([["5", 5]]);
+  });
+
+  it("Lézardrieux : la même plus-value sous quatre ouvrages différents reste quatre lignes", () => {
+    const sent = groupIdenticalLines(
+      LEZARDRIEUX_LINES.map((l) => ({ designation: l.designation, quantity: l.quantity, unit: l.unit, reference: null, section: l.section ?? [] })),
+    );
+    expect(sent.filter((l) => l.designation.startsWith("Plus value PPM")).map((l) => l.section)).toEqual([
+      ["Doublage isolant"],
+      ["BA13 collée"],
+      ["Cloison SAD"],
+      ["Cloison 72/48"],
+    ]);
   });
 
   it("le vocabulaire couverture ne s'applique jamais à un autre métier", () => {

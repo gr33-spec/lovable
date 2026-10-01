@@ -1,4 +1,4 @@
-import { dimensionOf, keyCharacteristics, normalizeText, parseUnit, suppliedObject } from "@baticlair/domain";
+import { dimensionOf, isPlaceTitle, keyCharacteristics, normalizeText, parseUnit, suppliedObject } from "@baticlair/domain";
 
 export interface RequestedLine {
   designation: string;
@@ -10,6 +10,22 @@ export interface RequestedLine {
    * pas une quantité d'achat. Elle est demandée comme telle au fournisseur.
    */
   basis?: "work";
+  /**
+   * Titres du devis qui couvrent la ligne (communs à toutes les lignes
+   * réunies) : « Appareillage Hager Essensya » vaut pour chaque prise.
+   */
+  section?: string[];
+  /** Lignes identiques du devis réunies en celle-ci (pièce par pièce, logement par logement). */
+  mergedFrom?: number;
+}
+
+/**
+ * Rubrique du devis utile au fournisseur : les titres qui ne sont pas de
+ * simples lieux (la pièce ne change pas l'article, la marque si).
+ */
+export function supplierSection(l: RequestedLine): string | null {
+  const titles = (l.section ?? []).filter((t) => !isPlaceTitle(t));
+  return titles.length > 0 ? titles.join(" › ") : null;
 }
 
 /**
@@ -110,7 +126,8 @@ export function priceRequestEmail(input: EmailInput): {
   const hello = input.contactName ? `Bonjour ${input.contactName},` : "Bonjour,";
   const lines = input.lines.map((l) => {
     const ref = l.reference ? ` (réf. ${l.reference})` : "";
-    return `- ${supplierLineLabel(l.designation)}${ref} : ${requestedQuantityText(l)}`;
+    const section = supplierSection(l);
+    return `- ${supplierLineLabel(l.designation)}${ref} : ${requestedQuantityText(l)}${section ? ` — rubrique du devis : ${section}` : ""}`;
   });
   const body = [
     hello,

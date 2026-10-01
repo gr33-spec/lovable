@@ -96,6 +96,7 @@ export class TakeoffService {
         reference: l.reference?.trim() || null,
         sourceRefs: l.sourceRefs,
         sourcePages: l.sourcePages,
+        section: l.section.map((t) => t.trim()).filter((t) => t.length > 0),
         aiDoubt: l.doubt?.trim() || null,
       })),
     });
@@ -189,6 +190,7 @@ export class TakeoffService {
         reference: l.reference,
         sourceRefs: l.sourceRefs,
         sourcePages: l.sourcePages,
+        section: l.section,
         enteredByArtisan: l.origin === "manual" || l.edited,
         aiDoubt: l.aiDoubt,
         confirmedByArtisan: l.confirmed,

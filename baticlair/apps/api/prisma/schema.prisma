@@ -465,6 +465,8 @@ model TakeoffLine {
   edited      Boolean   @default(false)
   /// Doute exprimé par l'IA sur cette ligne (montré tel quel à l'artisan).
   aiDoubt     String?
+  /// Titres du devis au-dessus de la ligne (lot, marque, logement, pièce), du plus général au plus précis.
+  section     Json      @default("[]")
   /// L'artisan a vérifié la ligne et la garde telle quelle.
   confirmedAt DateTime?
   createdAt   DateTime  @default(now())

@@ -39,7 +39,8 @@ describe("lecture par l'API Anthropic (réseau simulé)", () => {
     });
 
     expect(attempt).toMatchObject({ status: "success", model: "claude-sonnet-5-5", usage: { inputTokens: 1200, outputTokens: 300 } });
-    expect(attempt.output).toEqual(output);
+    // Le schéma complète « section » à [] quand l'IA ne la donne pas.
+    expect(attempt.output).toEqual({ ...output, lines: output.lines.map((l) => ({ section: [], ...l })) });
     const sent = api.requests[0]!;
     expect(sent.url).toContain("/v1/messages");
     expect(sent.body).toMatchObject({ model: "claude-sonnet-5-5", output_config: { effort: "high", format: { type: "json_schema" } } });

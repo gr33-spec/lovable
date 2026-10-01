@@ -46,6 +46,7 @@ function toDto({ takeoff, validation }: ReviewedTakeoff) {
         reference: l.reference,
         sourceRefs: l.sourceRefs,
         sourcePages: l.sourcePages,
+        section: l.section,
         origin: l.origin,
         edited: l.edited,
         aiDoubt: l.aiDoubt,

@@ -91,6 +91,32 @@ describe("remarques de l'IA pour l'artisan", () => {
   });
 });
 
+describe("rubrique du devis dans la demande de prix", () => {
+  it("la marque ou le lot en titre part avec la ligne ; la pièce et le logement non", async () => {
+    const { priceRequestEmail, supplierSection } = await import("../src/modules/price-requests/application/price-request-email.js");
+    expect(supplierSection({ designation: "Prise 16 A", quantity: "59", unit: "U", reference: null, section: ["DEVIS ELECTRICITE", "APPAREILLAGE HAGER ESSENSYA"] })).toBe(
+      "DEVIS ELECTRICITE › APPAREILLAGE HAGER ESSENSYA",
+    );
+    expect(supplierSection({ designation: "WC suspendu", quantity: "4", unit: "U", reference: null, section: ["Logement n°2", "Salle d'eau"] })).toBeNull();
+    const { body } = priceRequestEmail({
+      companyName: "Élec Martin",
+      senderName: "Paul",
+      projectName: "Immeuble",
+      projectAddress: null,
+      supplierName: "Rexel",
+      contactName: null,
+      lines: [
+        { designation: "Prise de courant 16A+T", quantity: "59", unit: "U", reference: null, section: ["Appareillage Schneider Odace"], mergedFrom: 20 },
+        { designation: "Plaque de commande double touche", quantity: "4", unit: "U", reference: null, section: ["Sanitaire", "WC niveau 0"] },
+      ],
+      message: null,
+      dueDate: null,
+    });
+    expect(body).toContain("- Prise de courant 16A+T : 59 U — rubrique du devis : Appareillage Schneider Odace");
+    expect(body).toContain("- Plaque de commande double touche : 4 U — rubrique du devis : Sanitaire\n");
+  });
+});
+
 describe("textes pour l'artisan et le fournisseur", () => {
   it("écarte les remarques sur la façon dont l'IA a lu le devis", async () => {
     const { artisanNotes } = await import("../src/platform/ai/artisan-notes.js");

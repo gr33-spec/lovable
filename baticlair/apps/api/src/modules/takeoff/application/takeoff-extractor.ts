@@ -13,6 +13,8 @@ export const extractionOutputSchema = z.object({
       sourcePages: z.array(z.number().int()),
       /** Doute sur cette ligne en une phrase courte, ou null si la ligne est claire. */
       doubt: z.string().nullable(),
+      /** Titres du devis au-dessus de la ligne, du plus général au plus précis ([] si aucun). */
+      section: z.array(z.string()).default([]),
     }),
   ),
   notes: z.array(z.string()),

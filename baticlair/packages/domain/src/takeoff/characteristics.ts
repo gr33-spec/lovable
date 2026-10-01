@@ -116,7 +116,12 @@ export function keyCharacteristics(text: string): string[] {
   // Classes et types normalisés : « type A », « colle C2 » est déjà un sigle.
   for (const m of text.matchAll(/\btype\s+(A|AC|F|B|HPI|\d+)\b/g)) push(`type ${m[1]}`);
   // Sigles produit : « HPV », « HP10 », « R2 », « LG25 » (majuscules, éventuellement suivies de chiffres).
+  // Dans un texte écrit TOUT EN MAJUSCULES (« SALLE DE BAINS »), un mot en capitales n'est pas un
+  // sigle : seuls ceux qui portent un chiffre (« HP10 », « LG25 ») restent reconnaissables.
+  const capitalized = (text.match(/\b\p{L}{2,}\b/gu) ?? []).filter((w) => w === w.toUpperCase());
+  const shouting = capitalized.length >= 2 && capitalized.length / (text.match(/\b\p{L}{2,}\b/gu) ?? []).length > 0.6;
   for (const m of text.matchAll(/\b([A-Z]{2,}[0-9]*|[A-Z][0-9]{1,3})\b/g)) {
+    if (shouting && !/\d/.test(m[1]!)) continue;
     if (!["TVA", "HT", "TTC", "FR", "SARL", "SAS"].includes(m[1]!)) push(m[1]!);
   }
   // Marques citées comme telles : « de marque Poujoulat ».

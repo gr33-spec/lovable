@@ -531,3 +531,20 @@ fictives uniquement.
 - Toute donnée non sourcée est retirée, même plausible ; les règles non
   prouvées restent en attente.
 
+### PD-044 — Deux scores séparés : compréhension (A) et quantitatif (B)
+
+- **Date** : 2026-10-01 · **Statut** : Décidé (le fondateur)
+- **A — Compréhension documentaire** : BatiClair lit-il correctement ce qui
+  est écrit (matériau ou main-d'œuvre, famille, mesure d'ouvrage ou quantité
+  d'achat) ?
+- **B — Quantitatif exact** : une ligne ne réussit que si la quantité à
+  commander est justifiable par une donnée du devis + une règle ou une
+  donnée sourcée et vérifiée. « Ouvrage reconnu » ne vaut jamais
+  « quantitatif correct ».
+- Le banc garde les deux scores, avant/après, par devis, et refuse toute
+  régression d'un devis quand un autre métier progresse.
+- **Envoi fournisseur** : les articles identiques sont regroupés (le lieu ne
+  change pas l'article ; une marque, une gamme ou un lot en titre si). Les
+  titres du devis (section) accompagnent chaque ligne ; la rubrique utile
+  (hors lieux) part dans la demande de prix. Rien n'est déduit d'un titre.
+

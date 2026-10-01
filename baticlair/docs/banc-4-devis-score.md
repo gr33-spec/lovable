@@ -4,24 +4,66 @@ Fichier GÉNÉRÉ par `packages/domain/test/banc-devis-reels.test.ts` : ne pas m
 Points de départ gelés : `banc-4-devis-avant.md` (passage à l'aveugle) et
 `banc-4-devis-avant-grille-corrigee.md` (même code, grille de ce fichier).
 
-« Correctement comprise » : matériau ou main-d'œuvre, famille, et mesure d'ouvrage ou quantité
-d'achat justes. « Besoin identifié » : BatiClair sait quel article commander (ou le moteur sait
-décomposer l'ouvrage). « Quantité certaine » : la commande de la ligne est complète et sûre.
+Deux scores, toujours séparés :
+- **A — Compréhension documentaire** : la ligne est bien lue (matériau ou main-d'œuvre, famille,
+  mesure d'ouvrage ou quantité d'achat).
+- **B — Quantitatif exact** : la quantité à commander est justifiée par le devis + une règle ou
+  une donnée sourcée et vérifiée. « Ouvrage reconnu » ne compte jamais pour B.
 
-| Devis | Lignes matériaux | Correctement comprises | Besoins identifiés | Quantités certaines | Questions | Inconnus | Erreurs |
-|---|---|---|---|---|---|---|---|
-| Morellec — électricité + plomberie (scanné) | 152 | 122 (80 %) | 73 (48 %) | 19 (13 %) | 3 | 79 | 12 |
-| Lézardrieux — plâtrerie, isolation | 21 | 18 (86 %) | 2 (10 %) | 1 (5 %) | 0 | 19 | 0 |
-| Piscine | 34 | 0 (0 %) | 0 (0 %) | 0 (0 %) | 1 | 34 | 0 |
-| D-2026-011 — salle de bain | 15 | 15 (100 %) | 10 (67 %) | 9 (60 %) | 1 | 5 | 0 |
-| **Total** | **222** | **155 (70 %)** | **85 (38 %)** | **29 (13 %)** | **5** | **137** | **12** |
+« Besoin identifié » : BatiClair sait quel article commander, sans forcément sa quantité exacte.
+« Lignes envoyées » : lignes qui partent au fournisseur, puis après regroupement des articles
+identiques (un lieu différent ne change pas l'article ; une marque ou un lot différent, si).
+
+| Devis | Lignes matériaux | A — Compréhension | B — Quantitatif exact | Besoins identifiés | Questions | Inconnus | Erreurs | Lignes envoyées (avant → après regroupement) |
+|---|---|---|---|---|---|---|---|---|
+| Morellec — électricité + plomberie (scanné) | 152 | **80 %** (122) | **13 %** (19) | 73 | 3 | 79 | 12 | 155 → 71 |
+| Lézardrieux — plâtrerie, isolation | 21 | **86 %** (18) | **5 %** (1) | 2 | 0 | 19 | 0 | 24 → 24 |
+| Piscine | 34 | **0 %** (0) | **0 %** (0) | 0 | 1 | 34 | 0 | 37 → 37 |
+| D-2026-011 — salle de bain | 15 | **100 %** (15) | **60 %** (9) | 10 | 1 | 5 | 0 | 15 → 15 |
+| **Total** | **222** | **70 %** (155) | **13 %** (29) | 85 | 5 | 137 | 12 | 231 → 147 |
 
 Référence couverture :
 
-| Devis | Lignes matériaux | Correctement comprises | Besoins identifiés | Quantités certaines | Questions | Inconnus | Erreurs |
-|---|---|---|---|---|---|---|---|
-| D-2026-015 — couverture (référence) | 10 | 9 (90 %) | 3 (30 %) | 2 (20 %) | 1 | 7 | 1 |
-| **Total** | **10** | **9 (90 %)** | **3 (30 %)** | **2 (20 %)** | **1** | **7** | **1** |
+| Devis | Lignes matériaux | A — Compréhension | B — Quantitatif exact | Besoins identifiés | Questions | Inconnus | Erreurs | Lignes envoyées (avant → après regroupement) |
+|---|---|---|---|---|---|---|---|---|
+| D-2026-015 — couverture (référence) | 10 | **90 %** (9) | **20 %** (2) | 3 | 1 | 7 | 1 | 10 → 10 |
+| **Total** | **10** | **90 %** (9) | **20 %** (2) | 3 | 1 | 7 | 1 | 10 → 10 |
+
+## Non-régression
+
+Chaque devis doit garder au moins ses scores A et B de l'étape précédente, sans erreur de plus
+(test « aucun devis ne régresse »). Étapes enregistrées :
+
+| Étape | Devis | A | B | Erreurs |
+|---|---|---|---|---|
+| 1. Règles générales de lecture (2026-10-01) | Morellec | 122 | 19 | 12 |
+| 1. Règles générales de lecture (2026-10-01) | Lézardrieux | 18 | 1 | 0 |
+| 1. Règles générales de lecture (2026-10-01) | Piscine | 0 | 0 | 0 |
+| 1. Règles générales de lecture (2026-10-01) | D-2026-011 | 15 | 9 | 0 |
+| 1. Règles générales de lecture (2026-10-01) | D-2026-015 | 9 | 2 | 1 |
+
+## Ce qu'il faudrait savoir décomposer (score B)
+
+| Famille lue | Lignes bloquées | Devis | Exemple |
+|---|---|---|---|
+| Prise, interrupteur | 54 | Morellec | PRISE DE COURANT 16A+T |
+| Point d'installation (lumineux, alimentation) | 31 | Morellec | LAMPLE SIMPLE 1 POINT LUMINEUX |
+| Plaque de plâtre | 13 | Lézardrieux | Doublage Placostil en BA13 sur ossature métallique 48mm doub |
+| Non reconnu | 7 | Morellec, Lézardrieux, Piscine | LIAISON EQUIPOTENTIEL |
+| Tableau, protection | 5 | Morellec | TABLEAU GENERAL ELECTRIQUE HAGER INTERUPTEURS DIFFERENTIELS  |
+| Gaine, conduit, goulotte | 3 | Morellec | RESEAU DE GAINE Y COMPRIS SUPPORT |
+| Carrelage, faïence | 3 | D-2026-011 | Carrelage sol grès cérame 40x40 gris anthracite - Fourniture |
+| Tube, tuyau | 2 | Morellec | TUBE PER PRE GAINE 10X12 BLEU |
+| Isolant | 2 | Lézardrieux | Mise en place d'une isolation thermique en doublages Typolog |
+| Liteau et contre-liteau | 2 | D-2026-015 | Contre-lattage en liteaux 27x40 (Fourniture & Pose) - Fourni |
+| Accessoire de couverture (faîtière, arêtier, rive, chatière, sortie) | 2 | D-2026-015 | Rives de toit (Fourniture & Pose) - Fourniture et pose de tu |
+| Ossature (rail, montant, fourrure) | 1 | Lézardrieux | Cloison séparative d'appartements SAD120 duo'tech 25. Cloiso |
+| Ragréage, primaire | 1 | D-2026-011 | Ragréage du sol - Application d'une couche de ragréage fibré |
+| Peinture, laque, lasure | 1 | D-2026-011 | Peinture plafond salle de bain - Fourniture peinture spécial |
+| Écran sous-toiture / pare-pluie | 1 | D-2026-015 | Écran de sous-toiture respirant (Fourniture & Pose) - Fourni |
+| Tuile | 1 | D-2026-015 | Couverture en tuiles terre cuite HP10 rouge (Fourniture & Po |
+| Gouttière | 1 | D-2026-015 | Gouttière PVC de 25 sable (Fourniture & Pose) - Fourniture e |
+| Descente d'eaux pluviales | 1 | D-2026-015 | Descente d'eau pluviale PVC Ø80 avec coudes (Fourniture & Po |
 
 ## Erreurs restantes
 

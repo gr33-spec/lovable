@@ -188,6 +188,8 @@ export interface TakeoffLine {
   edited: boolean;
   /** Doute exprimé par l'IA sur la ligne. */
   aiDoubt: string | null;
+  /** Titres du devis au-dessus de la ligne (lot, marque, logement, pièce). */
+  section?: string[];
   /** L'artisan a vérifié la ligne et la garde telle quelle. */
   confirmed: boolean;
   kind: "material" | "labor" | "unknown";

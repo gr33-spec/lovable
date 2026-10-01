@@ -2,7 +2,7 @@
  * Prompt versionné (règle projet : jamais modifié sans nouvelle version).
  * La version est enregistrée avec chaque appel et chaque quantitatif.
  */
-export const TAKEOFF_PROMPT = { id: "takeoff_extraction", version: 5 } as const;
+export const TAKEOFF_PROMPT = { id: "takeoff_extraction", version: 6 } as const;
 
 export function takeoffSystemPrompt(tradeLabel: string, materialFamilies: readonly string[] = []): string {
   const vocabulary =
@@ -21,6 +21,7 @@ Règles :
 - reference : la référence produit si elle est écrite, sinon null.
 - sourceRefs : les références [page:ligne] exactes des lignes du texte qui contiennent cette fourniture.
 - sourcePages : pour une ligne lue sur une page PDF, le numéro d'origine de la page ; sinon [].
+- section : les titres du devis sous lesquels se trouve la ligne, du plus général au plus précis, recopiés tels qu'écrits (lot, marque ou gamme annoncée en titre, logement, pièce : « APPAREILLAGE HAGER ESSENSYA », « N°1 TYPE T3 », « CUISINE »). Seulement des titres réellement écrits au-dessus de la ligne, jamais déduits ; [] s'il n'y en a pas.
 - doubt : si tu as le moindre doute sur cette ligne (chiffre peu lisible, unité ambiguë, conditionnement sans contenu indiqué, ligne coupée, fourniture ou prestation ?), pose à l'artisan UNE question courte, en mots simples, qu'il tranche d'un coup d'œil (12 mots maximum : « Combien de crochets par paquet ? », « Rouleaux ou flocons ? ») ; sinon null.
 - Les prestations de main-d'œuvre seule (pose, dépose, échafaudage, nettoyage…) ne sont pas à commander : ne les liste que si la ligne comprend une fourniture (« fourniture et pose de… »).
 - Ignore les totaux, sous-totaux, TVA, acomptes, conditions générales et mentions légales.

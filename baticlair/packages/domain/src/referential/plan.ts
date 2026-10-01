@@ -23,6 +23,8 @@ export interface QuoteLine {
   designation: string;
   quantity: string | null;
   unit: string | null;
+  /** Titres du devis au-dessus de la ligne (voir TakeoffLineInput.section). */
+  section?: readonly string[];
 }
 
 export type LinePlan =

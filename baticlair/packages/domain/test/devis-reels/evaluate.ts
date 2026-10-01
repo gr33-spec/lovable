@@ -1,12 +1,14 @@
-import { ROOFING_REFERENTIAL, scoreQuote, tradeProfile, validateTakeoff, type LineValidation, type QuoteScore } from "../../src/index.js";
+import { groupIdenticalLines, ROOFING_REFERENTIAL, scoreQuote, tradeProfile, validateTakeoff, type LineValidation, type QuoteScore } from "../../src/index.js";
 import { MATERIAL_TRUTHS, type BenchLine } from "./truth.js";
 
 /**
- * ÉVALUATION d'un vrai devis contre sa vérité terrain, en deux niveaux
- * qui ne se confondent pas :
- *  1. « J'ai compris la ligne » : matériau ou main-d'œuvre, famille, et
- *     surtout mesure d'OUVRAGE (à convertir) ou quantité d'ACHAT.
- *  2. « Je sais quoi commander » : besoin identifié, puis quantité certaine.
+ * ÉVALUATION d'un vrai devis contre sa vérité terrain, en DEUX SCORES qui
+ * ne se confondent jamais :
+ *  A — Compréhension documentaire : BatiClair comprend-il ce qui est écrit ?
+ *      (matériau ou main-d'œuvre, famille, mesure d'OUVRAGE ou quantité d'ACHAT)
+ *  B — Quantitatif exact : la quantité finale à commander est-elle
+ *      justifiable par une donnée du devis + une règle ou donnée sourcée et
+ *      vérifiée ? « Ouvrage reconnu » ne compte JAMAIS pour B.
  * Les erreurs comptent ce qui partirait faux chez le fournisseur.
  */
 export interface EvaluatedLine {
@@ -27,9 +29,13 @@ export interface Evaluation {
   id: string;
   lines: EvaluatedLine[];
   materialLines: number;
+  /** Score A : lignes de matériaux correctement comprises. */
   understood: number;
   needsIdentified: number;
+  /** Score B : lignes dont la quantité à commander est exacte et justifiée. */
   certain: number;
+  /** Lignes non main-d'œuvre envoyées au fournisseur : telles quelles, puis regroupées. */
+  sent: { before: number; after: number; withSection: number };
   questions: number;
   unknown: number;
   errors: number;
@@ -47,7 +53,14 @@ export function evaluateQuote(id: string, lines: BenchLine[], trade: string, acc
   const score = scoreQuote(lines, ROOFING_REFERENTIAL, profile, { acceptDraft });
   // Lecture de tout le document (comme dans l'application) : les questions communes à plusieurs lignes comptent une fois.
   const takeoff = validateTakeoff(
-    lines.map((l) => ({ id: l.ref, designation: l.designation, quantityRaw: l.quantity, unitRaw: l.unit, source: "client_quote" as const })),
+    lines.map((l) => ({
+      id: l.ref,
+      designation: l.designation,
+      quantityRaw: l.quantity,
+      unitRaw: l.unit,
+      source: "client_quote" as const,
+      ...(l.section ? { section: l.section } : {}),
+    })),
     profile,
   );
   const evaluated = lines.map((line, index): EvaluatedLine => {
@@ -75,6 +88,18 @@ export function evaluateQuote(id: string, lines: BenchLine[], trade: string, acc
     return { line, validation: v, engine, understood, needIdentified, certain, asks: material && flagged(v), unknown, errors };
   });
   const material = evaluated.filter((e) => MATERIAL_TRUTHS.includes(e.line.truth));
+  // Ce qui part chez le fournisseur : tout sauf la main-d'œuvre (comme l'application), regroupé.
+  const toSend = evaluated
+    .filter((e) => e.validation.kind !== "labor")
+    .map((e) => ({
+      designation: e.line.designation,
+      quantity: e.line.quantity,
+      unit: e.line.unit,
+      reference: null,
+      ...(e.validation.basis === "work" ? { basis: "work" as const } : {}),
+      ...(e.line.section ? { section: e.line.section } : {}),
+    }));
+  const grouped = groupIdenticalLines(toSend);
   const engineQuestions = score.asked.length + score.declined.length + score.unanswered.length;
   const documentQuestions = takeoff.issues.filter((i) => i.severity !== "info").length;
   return {
@@ -84,6 +109,7 @@ export function evaluateQuote(id: string, lines: BenchLine[], trade: string, acc
     understood: material.filter((e) => e.understood).length,
     needsIdentified: material.filter((e) => e.needIdentified).length,
     certain: material.filter((e) => e.certain).length,
+    sent: { before: toSend.length, after: grouped.length, withSection: grouped.filter((g) => g.section.length > 0).length },
     questions: evaluated.filter((e) => e.asks).length + documentQuestions + engineQuestions,
     unknown: material.filter((e) => e.unknown).length,
     errors: evaluated.reduce((n, e) => n + e.errors.length, 0),
@@ -101,15 +127,15 @@ const pct = (n: number, d: number) => (d === 0 ? "—" : `${Math.round((100 * n)
 export function evaluationTable(evals: Evaluation[]): string {
   const rows = evals.map(
     (e) =>
-      `| ${e.id} | ${e.materialLines} | ${e.understood} (${pct(e.understood, e.materialLines)}) | ${e.needsIdentified} (${pct(e.needsIdentified, e.materialLines)}) | ${e.certain} (${pct(e.certain, e.materialLines)}) | ${e.questions} | ${e.unknown} | ${e.errors} |`,
+      `| ${e.id} | ${e.materialLines} | **${pct(e.understood, e.materialLines)}** (${e.understood}) | **${pct(e.certain, e.materialLines)}** (${e.certain}) | ${e.needsIdentified} | ${e.questions} | ${e.unknown} | ${e.errors} | ${e.sent.before} → ${e.sent.after} |`,
   );
-  const sum = (k: keyof Pick<Evaluation, "materialLines" | "understood" | "needsIdentified" | "certain" | "questions" | "unknown" | "errors">) => evals.reduce((n, e) => n + e[k], 0);
-  const m = sum("materialLines");
+  const sum = (f: (e: Evaluation) => number) => evals.reduce((n, e) => n + f(e), 0);
+  const m = sum((e) => e.materialLines);
   return [
-    "| Devis | Lignes matériaux | Correctement comprises | Besoins identifiés | Quantités certaines | Questions | Inconnus | Erreurs |",
-    "|---|---|---|---|---|---|---|---|",
+    "| Devis | Lignes matériaux | A — Compréhension | B — Quantitatif exact | Besoins identifiés | Questions | Inconnus | Erreurs | Lignes envoyées (avant → après regroupement) |",
+    "|---|---|---|---|---|---|---|---|---|",
     ...rows,
-    `| **Total** | **${m}** | **${sum("understood")} (${pct(sum("understood"), m)})** | **${sum("needsIdentified")} (${pct(sum("needsIdentified"), m)})** | **${sum("certain")} (${pct(sum("certain"), m)})** | **${sum("questions")}** | **${sum("unknown")}** | **${sum("errors")}** |`,
+    `| **Total** | **${m}** | **${pct(sum((e) => e.understood), m)}** (${sum((e) => e.understood)}) | **${pct(sum((e) => e.certain), m)}** (${sum((e) => e.certain)}) | ${sum((e) => e.needsIdentified)} | ${sum((e) => e.questions)} | ${sum((e) => e.unknown)} | ${sum((e) => e.errors)} | ${sum((e) => e.sent.before)} → ${sum((e) => e.sent.after)} |`,
   ].join("\n");
 }
 
@@ -158,5 +184,32 @@ export function evaluationDetail(e: Evaluation): string {
     ...rows,
     "",
     "</details>",
+  ].join("\n");
+}
+
+/**
+ * Ce qui empêche le score B de monter : les lignes d'OUVRAGE (à convertir,
+ * ou article principal + accessoires) dont la quantité à commander n'est pas
+ * encore justifiable, regroupées par famille lue. C'est la liste des
+ * décompositions à construire (avec des sources), par ordre d'impact.
+ */
+export function decompositionNeeds(evals: Evaluation[]): string {
+  const byFamily = new Map<string, { lines: number; devis: Set<string>; example: string }>();
+  for (const e of evals) {
+    for (const l of e.lines) {
+      if (!(l.line.truth === "C" || l.line.truth === "P") || l.certain) continue;
+      const family = l.validation.familyLabel ?? "Non reconnu";
+      const entry = byFamily.get(family) ?? { lines: 0, devis: new Set<string>(), example: l.line.designation.slice(0, 60) };
+      entry.lines++;
+      entry.devis.add(e.id.split(" — ")[0]!);
+      byFamily.set(family, entry);
+    }
+  }
+  return [
+    "| Famille lue | Lignes bloquées | Devis | Exemple |",
+    "|---|---|---|---|",
+    ...[...byFamily.entries()]
+      .sort((a, b) => b[1].lines - a[1].lines)
+      .map(([family, v]) => `| ${family} | ${v.lines} | ${[...v.devis].join(", ")} | ${v.example.replace(/\|/g, "/")} |`),
   ].join("\n");
 }

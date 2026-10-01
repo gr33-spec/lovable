@@ -130,6 +130,38 @@ describe("demandes de prix", () => {
     });
   });
 
+  it("regroupe le même article répété dans le devis : une ligne, le total (jamais deux forfaits sans unité)", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Électricité Martin");
+    const project = await agent.post("/v1/projects").send({ name: "Maison Durand" });
+    const doc = await agent
+      .post(`/v1/projects/${project.body.id}/documents`)
+      .field("purpose", "client_quote")
+      .attach("file", Buffer.from(await makePdf(["devis"])), { filename: "devis.pdf", contentType: "application/pdf" });
+    const takeoff = (await agent.post(`/v1/documents/${doc.body.id}/takeoff`)).body;
+    // Pièce par pièce, comme sur un vrai devis d'électricien.
+    let reviewed = takeoff;
+    for (const [designation, quantity, unit] of [
+      ["Prise 2P+T 16 A", "3", "u"],
+      ["Interrupteur simple", "1", "u"],
+      ["Prise 2P+T 16 A", "2", "U"],
+      ["Accessoires de raccordement", "1", ""],
+      ["Accessoires de raccordement", "1", ""],
+    ]) {
+      reviewed = (await agent.post(`/v1/takeoffs/${takeoff.id}/lines`).send({ designation, quantity, unit }).expect(201)).body;
+    }
+    for (const line of reviewed.lines.filter((l: { status: string }) => l.status === "to_verify")) {
+      await agent.post(`/v1/takeoff-lines/${line.id}/confirm`).expect(200);
+    }
+    await agent.post(`/v1/takeoffs/${takeoff.id}/validate`).expect(200);
+    const s = await supplier(agent, "Rexel", "devis@rexel.fr");
+    const created = await agent.post(`/v1/projects/${project.body.id}/price-requests`).send({ supplierIds: [s.body.id] });
+    expect(created.status).toBe(201);
+    const prises = created.body.lines.filter((l: { designation: string }) => l.designation === "Prise 2P+T 16 A");
+    expect(prises).toEqual([expect.objectContaining({ quantity: "5", mergedFrom: 2 })]);
+    expect(created.body.lines.filter((l: { designation: string }) => l.designation === "Accessoires de raccordement")).toHaveLength(2);
+    expect(created.body.recipients[0].email.body).toContain("- Prise 2P+T 16 A : 5 u");
+  });
+
   it("prépare un e-mail par fournisseur avec la liste validée, puis suit l'envoi et la réception du devis", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const projectId = await projectWithValidatedList(agent);

@@ -37,3 +37,9 @@ export const line = (designation: string, quantity: string | null, unit: string 
 export const resetLines = () => {
   counter = 0;
 };
+
+/**
+ * Titres du devis au-dessus de ces lignes (du plus général au plus précis),
+ * tels qu'écrits : ce que la lecture du document doit rattacher à chaque ligne.
+ */
+export const under = (section: string[], ...lines: (BenchLine | BenchLine[])[]): BenchLine[] => lines.flat().map((l) => ({ ...l, section }));

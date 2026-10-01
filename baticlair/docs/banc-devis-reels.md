@@ -53,9 +53,15 @@ Chaque ligne d'un vrai devis est annotée à la main (`test/devis-reels/truth.ts
 achat direct, article principal + accessoires, ouvrage à convertir, fourniture en
 vrac, main-d'œuvre, information. BatiClair est noté contre cette vérité :
 
-1. **J'ai compris la ligne** : matériau ou main-d'œuvre, famille, et surtout
-   mesure d'ouvrage (à convertir) ou quantité d'achat (à commander telle quelle).
-2. **Je sais quoi commander** : besoin identifié, puis quantité certaine.
+- **A — Compréhension documentaire** : matériau ou main-d'œuvre, famille, et
+  surtout mesure d'ouvrage (à convertir) ou quantité d'achat (telle quelle).
+- **B — Quantitatif exact** : la quantité à commander est justifiée par le
+  devis + une règle ou donnée sourcée et vérifiée. « Ouvrage reconnu » ne
+  compte jamais pour B (PD-044).
+
+Le banc garde aussi le nombre de lignes envoyées au fournisseur avant et
+après regroupement, et une table d'étapes : aucun devis ne doit perdre en A
+ou en B, ni gagner une erreur, d'une étape à l'autre.
 
 Les **erreurs** comptent ce qui partirait faux chez le fournisseur.
 Scores : `banc-4-devis-avant.md` (passage à l'aveugle, gelé),
