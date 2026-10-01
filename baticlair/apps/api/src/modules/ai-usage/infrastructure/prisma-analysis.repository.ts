@@ -38,14 +38,18 @@ export class PrismaAnalysisRepository implements AnalysisRepository {
     return this.prisma.aiAnalysis.update({ where: { id }, data: { status: "started", userId, completedAt: null }, select: FIELDS });
   }
 
-  async complete(id: string, billingMonth: string, at: Date): Promise<AnalysisRecord> {
+  async complete(id: string, billingMonth: string, at: Date, billable = true): Promise<AnalysisRecord> {
     const current = await this.prisma.aiAnalysis.findUniqueOrThrow({ where: { id }, select: { billingMonth: true } });
     return this.prisma.aiAnalysis.update({
       where: { id },
       // Le mois de décompte est fixé une fois pour toutes, à la première réussite.
-      data: { status: "completed", billable: true, billingMonth: current.billingMonth ?? billingMonth, completedAt: at },
+      data: { status: "completed", billable, billingMonth: current.billingMonth ?? billingMonth, completedAt: at },
       select: FIELDS,
     });
+  }
+
+  async markBillable(id: string): Promise<void> {
+    await this.prisma.aiAnalysis.update({ where: { id }, data: { billable: true } });
   }
 
   fail(id: string, at: Date): Promise<AnalysisRecord> {

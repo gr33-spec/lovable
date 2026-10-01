@@ -13,34 +13,41 @@ function toError(e: unknown): ApiError {
 }
 
 /**
- * Devis reçu d'un fournisseur : « Lire ce devis » (l'IA le lit une fois,
- * 1 analyse), puis un résumé et le détail ligne par ligne, où l'artisan
- * corrige une correspondance d'un geste.
+ * « Lire et comparer » : l'IA lit d'un coup tous les devis reçus et pas
+ * encore lus ; le lot compte pour une seule analyse.
  */
-export function OfferPanel({
-  recipientId,
-  offer,
+export function ReadAllQuotes({
+  requestId,
+  unread,
+  waiting,
   aiAvailable,
-  request,
-  archived,
-  onChange,
+  onRead,
 }: {
-  recipientId: string;
-  offer: Offer | null;
+  requestId: string;
+  /** Devis reçus pas encore lus. */
+  unread: number;
+  /** Fournisseurs qui n'ont pas encore répondu. */
+  waiting: number;
   aiAvailable: boolean;
-  request: PriceRequest;
-  archived: boolean;
-  onChange: (offer: Offer) => void;
+  onRead: (result: { aiAvailable: boolean; items: Offer[] }) => void;
 }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
-  const [open, setOpen] = useState(false);
+  const [failed, setFailed] = useState<string[]>([]);
 
-  async function read() {
+  if (!aiAvailable) return <p className="text-sm text-muted">La lecture par l&apos;IA n&apos;est pas encore activée sur ce compte.</p>;
+
+  async function readAll() {
     setPending(true);
     setError(null);
+    setFailed([]);
     try {
-      onChange(await api<Offer>(`/v1/price-request-recipients/${recipientId}/analysis`, { method: "POST" }));
+      const result = await api<{ aiAvailable: boolean; items: Offer[]; failed: { supplier: string }[] }>(`/v1/price-requests/${requestId}/analysis`, {
+        method: "POST",
+      });
+      setFailed(result.failed.map((f) => f.supplier));
+      onRead(result);
+      if (result.failed.length === 0) setTimeout(() => document.getElementById("comparer")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
     } catch (e) {
       setError(toError(e));
     } finally {
@@ -48,22 +55,49 @@ export function OfferPanel({
     }
   }
 
-  if (!offer) {
-    if (archived) return null;
-    return (
-      <div className="flex flex-col gap-2">
-        {error ? <ErrorNotice error={error} /> : null}
-        {aiAvailable ? (
-          <Button variant="accent" pending={pending} onClick={() => void read()}>
-            <Sparkles size={18} aria-hidden="true" />
-            {pending ? "L'IA lit le devis… (jusqu'à une minute)" : "Lire ce devis (1 analyse)"}
-          </Button>
-        ) : (
-          <p className="text-sm text-muted">La lecture par l&apos;IA n&apos;est pas encore activée sur ce compte.</p>
-        )}
-      </div>
-    );
-  }
+  return (
+    <div className="flex flex-col gap-2">
+      {error ? <ErrorNotice error={error} /> : null}
+      {failed.length > 0 ? (
+        <p role="alert" className="text-sm font-semibold text-warn">
+          {failed.length > 1 ? `Les devis de ${failed.join(", ")} n'ont pas pu être lus.` : `Le devis de ${failed[0]} n'a pas pu être lu.`} Réessayez :
+          rien n&apos;est décompté pour eux.
+        </p>
+      ) : null}
+      <Button variant="accent" pending={pending} onClick={() => void readAll()}>
+        <Sparkles size={18} aria-hidden="true" />
+        {pending
+          ? `L'IA lit ${unread > 1 ? `les ${unread} devis` : "le devis"}… (jusqu'à une minute)`
+          : unread > 1
+            ? `Lire et comparer les ${unread} devis`
+            : "Lire le devis reçu"}
+      </Button>
+      {!pending ? (
+        <p className="text-center text-[13px] text-muted">
+          1 seule analyse pour {unread > 1 ? "tous les devis" : "ce devis"}
+          {waiting > 0 ? ` · ${waiting > 1 ? `${waiting} fournisseurs n'ont` : "1 fournisseur n'a"} pas encore répondu` : ""}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/** Devis reçu et lu : un résumé, puis le détail ligne par ligne, où l'artisan corrige une correspondance d'un geste. */
+export function OfferPanel({
+  offer,
+  request,
+  archived,
+  onChange,
+}: {
+  offer: Offer | null;
+  request: PriceRequest;
+  archived: boolean;
+  onChange: (offer: Offer) => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  // Pas encore lu : la lecture se lance pour tous les devis à la fois (« Lire et comparer »).
+  if (!offer) return null;
 
   const doubts = offer.lines.filter((l) => l.aiDoubt && !l.edited).length;
   const missing = offer.requestedCount - offer.answeredCount;

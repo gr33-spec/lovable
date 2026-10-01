@@ -23,7 +23,9 @@ export type BeginResult =
  * - 1 analyse = 1 document (devis client ou fournisseur) analysé avec succès ;
  * - les relances, modèles de secours et appels de comparaison ne comptent pas en plus ;
  * - un échec ne compte pas ;
- * - un document déjà analysé n'est jamais décompté une seconde fois.
+ * - un document déjà analysé n'est jamais décompté une seconde fois ;
+ * - des devis fournisseurs lus ensemble (« Lire et comparer ») comptent pour
+ *   une seule analyse, quel que soit leur nombre.
  *
  * Le plafond est vérifié AVANT tout appel IA : au-delà du palier, rien
  * n'est dépensé.
@@ -52,9 +54,14 @@ export class AnalysisMeter {
     return { status: "go", analysis };
   }
 
-  complete(analysisId: string): Promise<AnalysisRecord> {
+  complete(analysisId: string, options: { billable?: boolean } = {}): Promise<AnalysisRecord> {
     const at = this.now();
-    return this.analyses.complete(analysisId, currentMonth(at), at);
+    return this.analyses.complete(analysisId, currentMonth(at), at, options.billable ?? true);
+  }
+
+  /** Le lot de devis lus ensemble compte pour une analyse : on la porte sur l'une d'elles. */
+  markBillable(analysisId: string): Promise<void> {
+    return this.analyses.markBillable(analysisId);
   }
 
   fail(analysisId: string): Promise<AnalysisRecord> {

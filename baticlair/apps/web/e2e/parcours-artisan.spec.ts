@@ -363,12 +363,13 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await expect(tuiles.getByText("Devis reçu")).toBeVisible();
   await expect(progress.getByRole("link", { name: "Lire les 2 devis reçus" })).toBeVisible();
 
-  // L'IA lit chaque devis une fois (simulée en test) ; le code recalcule tout.
-  await pointp.getByRole("button", { name: "Lire ce devis (1 analyse)" }).click();
+  // Un seul bouton : l'IA lit tous les devis reçus d'un coup (1 analyse, simulée en test) ; le code recalcule tout.
+  await expect(page.getByText("1 seule analyse pour tous les devis")).toBeVisible();
+  await page.getByRole("button", { name: "Lire et comparer les 2 devis" }).click();
   await expect(pointp.getByText("Devis lu · 6/6 articles")).toBeVisible();
   await expect(pointp.getByText("2 805,30 € HT")).toBeVisible();
-  await tuiles.getByRole("button", { name: "Lire ce devis (1 analyse)" }).click();
   await expect(tuiles.getByText("Devis lu · 5/6 articles")).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Lire et comparer/ })).toHaveCount(0);
   await expect(tuiles.getByText("Il manque 1 article de votre liste.")).toBeVisible();
   await page.reload();
   await expect(pointp.getByText("Devis lu · 6/6 articles")).toBeVisible();
@@ -422,8 +423,10 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
     const card = page.locator("li").filter({ hasText: name });
     await card.getByRole("button", { name: "Simuler sa réponse (démo)" }).click();
     await expect(card.getByText("Devis reçu")).toBeVisible();
-    await card.getByRole("button", { name: "Lire ce devis (1 analyse)" }).click();
-    await expect(card.getByText(/^Devis lu · /)).toBeVisible();
+  }
+  await page.getByRole("button", { name: "Lire et comparer les 3 devis" }).click();
+  for (const name of ["Tuilerie de l'Ouest", "Négoce Breizh", "Matériaux Atlantique"]) {
+    await expect(page.locator("li").filter({ hasText: name }).getByText(/^Devis lu · /)).toBeVisible();
   }
   await expect(page.locator("li").filter({ hasText: "Négoce Breizh" }).getByText("Il manque 1 article de votre liste.")).toBeVisible();
   const compare = page.locator("section#comparer");

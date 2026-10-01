@@ -3,7 +3,7 @@
 import { Check, Copy, FileUp, Loader2, Mail, Plus, Send } from "lucide-react";
 import { useCallback, useId, useRef, useState } from "react";
 import { DemoAnswer, isDemoSupplier } from "@/components/demo";
-import { OfferPanel, ProjectComparison } from "@/components/project-offers";
+import { OfferPanel, ProjectComparison, ReadAllQuotes } from "@/components/project-offers";
 import { SupplierForm } from "@/components/supplier-form";
 import { Badge, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, MAX_DOCUMENT_BYTES, newActionKey, type Offer, type PriceRequest, type PriceRequestRecipient, type Supplier } from "@/lib/api";
@@ -57,6 +57,7 @@ export function ProjectPriceRequests({ projectId, archived, canCreate }: { proje
   if (!data) return <Spinner />;
 
   const request = data.items[0] ?? null;
+  const unread = request ? request.recipients.filter((r) => r.status === "received" && r.document && !offers.data?.items.some((o) => o.recipientId === r.id)).length : 0;
   const offerOf = (recipientId: string) => offers.data?.items.find((o) => o.recipientId === recipientId) ?? null;
   const offerChanged = (offer: Offer) => {
     const items = (offers.data?.items ?? []).filter((o) => o.recipientId !== offer.recipientId);
@@ -95,6 +96,19 @@ export function ProjectPriceRequests({ projectId, archived, canCreate }: { proje
       <p role="status" className="text-sm">
         {summary(request)}
       </p>
+      {!archived && unread > 0 && offers.data ? (
+        <ReadAllQuotes
+          requestId={request.id}
+          unread={unread}
+          waiting={request.recipients.filter((r) => r.status === "sent").length}
+          aiAvailable={offers.data.aiAvailable}
+          onRead={(result) => {
+            offers.setData({ aiAvailable: result.aiAvailable, items: result.items });
+            setVersion((v) => v + 1);
+            refreshProgress();
+          }}
+        />
+      ) : null}
       <ul className="flex flex-col gap-2.5">
         {request.recipients.map((r) => (
           <li key={r.id}>
@@ -111,9 +125,7 @@ export function ProjectPriceRequests({ projectId, archived, canCreate }: { proje
               offerSlot={
                 r.status === "received" && r.document ? (
                   <OfferPanel
-                    recipientId={r.id}
                     offer={offerOf(r.id)}
-                    aiAvailable={offers.data?.aiAvailable ?? false}
                     request={request}
                     archived={archived}
                     onChange={offerChanged}

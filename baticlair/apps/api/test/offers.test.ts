@@ -74,6 +74,27 @@ describe("lecture des devis fournisseurs (IA simulée)", () => {
     expect((await agent.get("/v1/ai-usage")).body.analyses.used).toBe(2);
   });
 
+  it("« Lire et comparer » : tous les devis reçus d'un coup, pour une seule analyse", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
+    const other = await signUpWithCompany(ctx.app, "b@example.fr", "Couverture Leroy");
+    const { requestId, ra, rb } = await withTwoQuotes(agent);
+    const usedBefore = (await agent.get("/v1/ai-usage")).body.analyses.used; // le devis client
+
+    expect((await other.agent.post(`/v1/price-requests/${requestId}/analysis`)).status).toBe(404);
+
+    const res = await agent.post(`/v1/price-requests/${requestId}/analysis`).expect(201);
+    expect(res.body).toMatchObject({ read: 2, failed: [] });
+    expect(res.body.items.map((o: { recipientId: string }) => o.recipientId).sort()).toEqual([ra, rb].sort());
+    expect((await agent.get("/v1/ai-usage")).body.analyses.used).toBe(usedBefore + 1);
+
+    // Rien de nouveau à lire : aucun appel, aucun décompte.
+    const executions = await ctx.prisma.aiExecution.count();
+    expect((await agent.post(`/v1/price-requests/${requestId}/analysis`).expect(201)).body).toMatchObject({ read: 0 });
+    expect(await ctx.prisma.aiExecution.count()).toBe(executions);
+    expect((await agent.get("/v1/ai-usage")).body.analyses.used).toBe(usedBefore + 1);
+    expect((await agent.get(`/v1/price-requests/${requestId}/comparison`)).body.suppliers).toHaveLength(2);
+  });
+
   it("compare ligne à ligne avec un total honnête (article manquant, livraison)", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const { requestId, ra, rb, supplierA, supplierB } = await withTwoQuotes(agent);
