@@ -3,9 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Plus, Truck, UserRound, Warehouse } from "lucide-react";
-import { useState } from "react";
 import { fr } from "@/lib/fr";
-import { AddSheet } from "./add-sheet";
 
 const items = [
   { href: "/", label: fr.nav.home, icon: Home, match: (p: string) => p === "/" },
@@ -16,12 +14,11 @@ const items = [
 
 /**
  * Navigation principale : barre flottante en bas sur téléphone (pouce),
- * colonne à gauche sur ordinateur. Même organisation partout ; le « + »
- * central ouvre toujours la même feuille.
+ * colonne à gauche sur ordinateur. Le « + » central crée un chantier, le
+ * cœur de BatiClair : un appui, aucune question.
  */
 export function AppNav() {
   const pathname = usePathname();
-  const [sheetOpen, setSheetOpen] = useState(false);
   const [left, right] = [items.slice(0, 2), items.slice(2)];
 
   const link = (item: (typeof items)[number]) => {
@@ -50,19 +47,16 @@ export function AppNav() {
       >
         <span className="hidden px-3 pt-2 pb-4 font-display text-xl font-extrabold text-white lg:block">BatiClair</span>
         {left.map(link)}
-        <button
-          type="button"
-          onClick={() => setSheetOpen(true)}
-          aria-label="Ajouter : nouveau chantier ou fournisseur"
-          aria-haspopup="dialog"
-          className="flex size-13.5 items-center justify-center justify-self-center rounded-full bg-accent text-white shadow-[0_6px_16px_rgba(255,90,31,0.45)] lg:order-first lg:mb-3 lg:h-13 lg:w-full lg:gap-2 lg:rounded-2xl lg:font-extrabold"
+        <Link
+          href="/chantiers/nouveau"
+          aria-label="Nouveau chantier"
+          className="flex size-13.5 items-center justify-center justify-self-center rounded-full bg-accent text-white ring-2 ring-white/20 shadow-[0_6px_16px_var(--color-accent-glow)] lg:order-first lg:mb-3 lg:h-13 lg:w-full lg:gap-2 lg:rounded-2xl lg:font-extrabold"
         >
           <Plus size={26} strokeWidth={2.6} aria-hidden="true" />
-          <span className="hidden lg:inline">{fr.nav.add}</span>
-        </button>
+          <span className="hidden lg:inline">Nouveau chantier</span>
+        </Link>
         {right.map(link)}
       </nav>
-      <AddSheet open={sheetOpen} onClose={() => setSheetOpen(false)} />
     </>
   );
 }

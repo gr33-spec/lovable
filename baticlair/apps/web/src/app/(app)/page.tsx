@@ -80,7 +80,7 @@ export default function AccueilPage() {
       </form>
       <h1 className="mt-1.5 font-display text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em]">Bonjour {firstName}</h1>
 
-      <section aria-labelledby="todo-title" className="flex flex-col gap-1 rounded-[28px] bg-[radial-gradient(130%_90%_at_100%_0%,rgba(255,90,31,0.45)_0%,rgba(255,90,31,0)_55%)] bg-ink px-4 pt-4.5 pb-2.5 text-white shadow-[0_18px_40px_rgba(14,17,22,0.22)]">
+      <section aria-labelledby="todo-title" className="flex flex-col gap-1 rounded-[28px] bg-[radial-gradient(130%_90%_at_100%_0%,var(--color-accent-glow)_0%,transparent_55%)] bg-ink px-4 pt-4.5 pb-2.5 text-white shadow-[0_18px_40px_rgba(14,17,22,0.22)]">
         <h2 id="todo-title" className="pb-1.5 font-display text-[22px] font-extrabold tracking-[-0.02em]">
           {(recent === null || next === null) && !error ? "À faire" : todo.length === 0 ? "Tout est à jour" : `${todo.length} action${todo.length > 1 ? "s" : ""} à faire`}
         </h2>
@@ -92,7 +92,7 @@ export default function AccueilPage() {
           todo.map((t) => (
             <div key={t.key} className="flex flex-col gap-2 border-t border-white/10 py-3">
               <span className="flex items-center gap-3">
-                <span className="text-[#ffb48f]">{t.icon}</span>
+                <span className="text-accent-on-dark">{t.icon}</span>
                 <span className="flex min-w-0 grow flex-col gap-0.5">
                   <span className="truncate text-[15px] font-bold">{t.title}</span>
                   {t.text ? <span className="text-[13px] text-[#c9ced6]">{t.text}</span> : null}
