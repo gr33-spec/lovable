@@ -1,5 +1,5 @@
 import { Decimal } from "../shared/decimal.js";
-import { evaluate, FormulaError, parseFormula, type DimValue } from "./expression.js";
+import { evaluate, FormulaError, formulaVariables, parseFormula, type DimValue } from "./expression.js";
 import type { Fact, NeedRule, Product, Referential, SellingUnit, Source, WorkItemType } from "./model.js";
 import { parseRefUnit, sameDim } from "./units.js";
 
@@ -117,6 +117,48 @@ class Stop extends Error {
 }
 
 const fr = (d: Decimal, places = 2) => d.toDecimalPlaces(places).toFixed().replace(".", ",");
+
+/** Ce dont une règle a besoin pour être déterministe, rangé par nature (jamais mélangé). */
+export interface RequiredInputs {
+  /** Produits à identifier (emplacements). */
+  products: { slot: string; label: string }[];
+  /** Données du chantier et préférences de l'artisan (paramètres). */
+  params: { key: string; label: string; kind: "site_data" | "artisan_preference" }[];
+  /** Caractéristiques fabricant citées. */
+  manufacturerSpecs: { slot: string; key: string; label: string }[];
+  /** Conditions de pose citées. */
+  installationConditions: string[];
+  /** Conditionnement de l'unité de commande du produit. */
+  packaging: true;
+}
+
+/**
+ * Liste exacte des données dont une règle a besoin. Sans l'une d'elles, le
+ * moteur ne calcule pas : il la lit dans le devis, ou la demande. Aucune
+ * valeur par défaut, aucun choix à la place de l'artisan.
+ */
+export function requiredInputs(ref: Referential, workItemId: string, needId: string): RequiredInputs {
+  const work = ref.workItems.find((w) => w.id === workItemId);
+  const rule = work?.needs.find((n) => n.id === needId);
+  if (!work || !rule) throw new Error(`Besoin inconnu : ${workItemId}/${needId}`);
+  const vars = new Set(formulaVariables(parseFormula(rule.formula)));
+  // Les bornes d'un paramètre utilisé (pureau entre mini et maxi de la fiche) font partie des données requises.
+  for (const p of work.params) if (vars.has(p.key) && p.range) [p.range.min, p.range.max].forEach((v) => vars.add(v));
+  const slotKeys = new Set([rule.slot, ...[...vars].filter((v) => v.includes(".") && !v.startsWith("regle.")).map((v) => v.split(".")[0]!)]);
+  return {
+    products: work.slots.filter((s) => slotKeys.has(s.key)).map((s) => ({ slot: s.key, label: s.label })),
+    params: work.params.filter((p) => vars.has(p.key)).map((p) => ({ key: p.key, label: p.label, kind: p.kind })),
+    manufacturerSpecs: [...vars]
+      .filter((v) => v.includes(".") && !v.startsWith("regle."))
+      .map((v) => {
+        const [slot, key] = v.split(".") as [string, string];
+        const family = ref.families.find((f) => f.code === work.slots.find((s) => s.key === slot)?.family);
+        return { slot, key, label: family?.attributes.find((a) => a.key === key)?.label ?? key };
+      }),
+    installationConditions: [...vars].filter((v) => v.startsWith("regle.")).map((v) => v.slice("regle.".length)),
+    packaging: true,
+  };
+}
 
 export function computeWorkItem(ref: Referential, input: WorkItemInput, options: EngineOptions = {}): WorkItemResult {
   const work = ref.workItems.find((w) => w.id === input.workItemId);

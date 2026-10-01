@@ -24,6 +24,8 @@ const FAMILIES: MaterialFamily[] = [
     label: "Écran sous-toiture / pare-pluie",
     keywords: ["ecran sous toiture", "ecran hpv", "ecran de sous toiture", "pare pluie", "sous toiture"],
     allowedUnits: ["ROULEAU", "M2"],
+    // Sur un devis client, « écran 120 m² » = 120 m² de toiture couverte, pas 120 m² d'écran (recouvrements).
+    areaOfWork: true,
     plausibleMax: { ROULEAU: 60, M2: 3000 },
   },
   {

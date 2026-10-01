@@ -100,7 +100,10 @@ describe("validation d'une ligne de quantitatif", () => {
     // Ailleurs, le m² reste une anomalie d'unité, et une quantité d'achat reste une quantité d'achat.
     expect(validateTakeoffLine(line("l", "Gouttière zinc", "12", "m²"), P).basis).toBe("purchase");
     expect(validateTakeoffLine(line("l", "Liteaux 27x40", "372", "ml"), P).basis).toBe("purchase");
-    expect(validateTakeoffLine(line("l", "Écran sous-toiture HPV", "120", "m²"), P).basis).toBe("purchase");
+    // Cas trouvé par la simulation du devis 120 m² : « écran 120 m² » est la surface couverte, pas la surface
+    // d'écran (recouvrements) ; en rouleaux, c'est bien une quantité d'achat.
+    expect(validateTakeoffLine(line("l", "Écran sous-toiture HPV", "120", "m²"), P).basis).toBe("work");
+    expect(validateTakeoffLine(line("l", "Écran sous-toiture HPV", "2", "rouleau"), P).basis).toBe("purchase");
   });
 
   it("refuse des pièces fractionnaires", () => {
