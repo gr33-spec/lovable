@@ -1,3 +1,5 @@
+import { dimensionOf, parseUnit } from "@baticlair/domain";
+
 export interface RequestedLine {
   designation: string;
   quantity: string | null;
@@ -10,11 +12,17 @@ export interface RequestedLine {
   basis?: "work";
 }
 
-/** « 120 m² » ou, pour une surface d'ouvrage, « pour une surface de 120 m² (quantité à calculer) ». */
+/**
+ * « 120 m² » ou, pour une mesure d'ouvrage, « pour une surface de 120 m² »
+ * / « pour une longueur de 24 m » (quantité à calculer).
+ */
 export function requestedQuantityText(l: RequestedLine): string {
   const qty = [l.quantity, l.unit].filter(Boolean).join(" ");
   if (!qty) return "quantité à préciser";
-  return l.basis === "work" ? `pour une surface de ${qty} (quantité à calculer)` : qty;
+  if (l.basis !== "work") return qty;
+  const unit = parseUnit(l.unit);
+  const measure = unit && dimensionOf(unit) === "length" ? "une longueur" : "une surface";
+  return `pour ${measure} de ${qty} (quantité à calculer)`;
 }
 
 export interface EmailInput {
@@ -37,6 +45,9 @@ const dateFr = (d: Date) =>
     timeZone: "Europe/Paris",
   });
 
+/** « (Fourniture & Pose) », « (F&P) », « (fourniture et pose) » au milieu d'un titre de devis client. */
+const SUPPLY_MARK = /\s*\((?:fourniture\s*(?:&|et)\s*pose|f\.?\s*(?:&|et)\s*p\.?|fourniture\s+seule|fourniture)\)/gi;
+
 const SUPPLY_PREFIX = /^(?:fourniture\s+et\s+pose|fourniture\s*&\s*pose|f\.?\s*(?:et|&)\s*p\.?|fourniture)\s+(?:(?:de\s+la|du|des|de)\s+|(?:de\s+l|d)['’]\s*)?/i;
 
 /**
@@ -46,6 +57,7 @@ const SUPPLY_PREFIX = /^(?:fourniture\s+et\s+pose|fourniture\s*&\s*pose|f\.?\s*(
  */
 export function purchaseLabel(designation: string): string {
   const parts = designation
+    .replace(SUPPLY_MARK, "")
     .split(/\s[-–—]\s/)
     .map((part) => {
       const stripped = part.trim().replace(SUPPLY_PREFIX, "");

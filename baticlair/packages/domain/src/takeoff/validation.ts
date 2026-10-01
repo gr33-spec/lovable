@@ -2,7 +2,7 @@ import type { ConfidenceLevel } from "../confidence/confidence.js";
 import type { PackagingSpec } from "../quantity/quantity.js";
 import { dimensionOf, parseUnit, type UnitCode } from "../quantity/unit.js";
 import { Decimal } from "../shared/decimal.js";
-import { containsKeyword, normalizeText, type MaterialFamily, type TradeProfile } from "../trades/trade-profile.js";
+import { containsKeyword, keywordPosition, normalizeText, type MaterialFamily, type TradeProfile } from "../trades/trade-profile.js";
 
 /**
  * Validation d'un quantitatif (liste de matériaux) selon le profil métier.
@@ -107,14 +107,25 @@ const UNIT_LABEL: Partial<Record<UnitCode, string>> = {
 };
 const unitLabel = (u: UnitCode) => UNIT_LABEL[u] ?? u.toLowerCase();
 
-/** Première famille du référentiel qui correspond (l'ordre du référentiel fait foi). */
+/**
+ * Famille de la ligne : celle de son NOM D'OUVRAGE, c'est-à-dire le mot
+ * reconnu le plus tôt dans le texte. Une description d'ouvrage énumère ses
+ * composants (« Gouttière PVC… crochets et naissances compris »,
+ * « Faîtage… avec closoir », « Sortie de toit… avec solin ») : ce ne sont
+ * pas eux qui nomment la ligne. À position égale (« tuile de rive » /
+ * « tuile »), l'ordre du référentiel départage (le plus précis d'abord).
+ */
 export function classifyMaterial(designation: string, profile: TradeProfile): MaterialFamily | null {
   const text = normalizeText(designation);
+  let best: { family: MaterialFamily; position: number } | null = null;
   for (const family of profile.families) {
     if (family.excludes?.some((e) => containsKeyword(text, e))) continue;
-    if (family.keywords.some((k) => containsKeyword(text, k))) return family;
+    const positions = family.keywords.map((k) => keywordPosition(text, k)).filter((p) => p >= 0);
+    if (positions.length === 0) continue;
+    const position = Math.min(...positions);
+    if (!best || position < best.position) best = { family, position };
   }
-  return null;
+  return best?.family ?? null;
 }
 
 /**
@@ -133,13 +144,15 @@ export function lineKind(designation: string, profile: TradeProfile): { kind: Li
 }
 
 /**
- * Surface d'ouvrage plutôt que quantité d'achat : une famille que le devis
- * client chiffre à la surface de toiture (tuiles, ardoises, liteaux),
- * exprimée en m². Ailleurs (gouttière en m²…), c'est une vraie anomalie.
+ * Mesure d'OUVRAGE plutôt que quantité d'achat : une surface de toiture
+ * (tuiles, ardoises, liteaux, écran en m²) ou une longueur d'ouvrage
+ * (faîtage, rives en m). Ailleurs (gouttière en m²…), c'est une anomalie.
  */
 export function isWorkQuantity(family: MaterialFamily | null, unit: UnitCode | null): boolean {
-  if (!family || !unit || dimensionOf(unit) !== "area") return false;
-  return family.areaNeedsYield === true || family.areaOfWork === true;
+  if (!family || !unit) return false;
+  if (dimensionOf(unit) === "area") return family.areaNeedsYield === true || family.areaOfWork === true;
+  if (dimensionOf(unit) === "length") return family.lengthOfWork === true;
+  return false;
 }
 
 /** « 1 250,50 » → 1250.50 ; null si la valeur n'est pas un nombre clair (jamais de devinette). */
@@ -188,7 +201,7 @@ export function validateTakeoffLine(line: TakeoffLineInput, profile: TradeProfil
     // Ni « unité inhabituelle » ni « confirmez » : la surface est juste, c'est une quantité d'ouvrage.
     // Elle part au fournisseur comme telle (« pour 120 m² ») tant que le référentiel ne la convertit pas.
     issues.push(
-      issue("WORK_QUANTITY", "info", "Surface de l'ouvrage : la quantité à commander reste à calculer (demandée au fournisseur pour cette surface)."),
+      issue("WORK_QUANTITY", "info", "Mesure de l'ouvrage : la quantité à commander reste à calculer (demandée au fournisseur pour cette mesure)."),
     );
   } else if (family?.allowedUnits && unit) {
     if (!family.allowedUnits.includes(unit)) {

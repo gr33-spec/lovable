@@ -49,7 +49,7 @@ const ONE_PIECE: Fact = packaging("1", "u", "definition", { status: "verified", 
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.01-2",
+  version: "roofing-2026.10.01-3",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -188,7 +188,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           hint: "Il change le nombre de tuiles et de liteaux.",
           range: { min: "tuile.pureau_min", max: "tuile.pureau_max" },
         },
-        { key: "entraxe_chevrons", label: "Entraxe des chevrons", unit: "cm", kind: "site_data", question: "Entraxe des chevrons ?" },
+        { key: "entraxe_supports", label: "Entraxe des chevrons ou fermettes", unit: "cm", kind: "site_data", question: "Entraxe des chevrons (ou fermettes) ?" },
         { key: "pente", label: "Pente du toit", unit: "%", kind: "site_data", question: "Pente du toit (en %) ?" },
       ],
       slots: [
@@ -228,10 +228,10 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "contre-liteaux",
           slot: "contre_liteau",
-          formula: "surface / entraxe_chevrons",
+          formula: "surface / entraxe_supports",
           unit: "ml",
           core: false,
-          exclusions: "Suppose des chevrons réguliers sur toute la surface.",
+          exclusions: "Une file par chevron ou fermette ; suppose un entraxe régulier sur toute la surface.",
           source: "baticlair-geometrie-couverture",
           verification: DRAFT,
           version: 1,

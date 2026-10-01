@@ -48,7 +48,7 @@ const CASE: WorkItemInput = {
   params: {
     surface: { value: "120", unit: "m2", origin: "devis", evidence: "Devis, ligne 4" },
     pureau: { value: "34.3", unit: "cm", origin: "artisan" },
-    entraxe_chevrons: { value: "60", unit: "cm", origin: "artisan" },
+    entraxe_supports: { value: "60", unit: "cm", origin: "artisan" },
     pente: { value: "45", unit: "%", origin: "artisan" },
   },
   products: ALL_PRODUCTS,
@@ -192,15 +192,28 @@ describe("moteur : ouvrage → besoins → achat", () => {
     const small = computeWorkItem(ref, { ...CASE, params: { ...sansPente, surface: { value: "70", unit: "m2", origin: "devis" } } });
     expect(need(small, "ecran")).toMatchObject({ status: "question", question: { key: "param:pente", impact: "De 1 à 2 rouleaux selon la réponse." } });
     // Sans aucune borne connue (entraxe), la commande peut tout valoir : question.
-    const { entraxe_chevrons: _e, ...sansEntraxe } = CASE.params;
+    const { entraxe_supports: _e, ...sansEntraxe } = CASE.params;
     expect(need(computeWorkItem(ref, { ...CASE, params: sansEntraxe }), "contre-liteaux").status).toBe("question");
   });
 
   it("ne pose jamais de question pour un besoin seulement suggéré (absent du devis)", () => {
-    const { entraxe_chevrons: _e, ...params } = CASE.params;
+    const { entraxe_supports: _e, ...params } = CASE.params;
     const r = computeWorkItem(ref, { ...CASE, params, mentioned: ["tuile", "liteau"] });
     expect(need(r, "contre-liteaux")).toMatchObject({ origin: "suggested", status: "question" });
     expect(r.nextQuestion).toBeNull();
+  });
+
+  it("conditionnement pas encore vérifié : le besoin reste affiché, seule la conversion attend (cas D-2026-015)", () => {
+    const pending: Referential = structuredClone(ref);
+    const liteau = pending.products.find((p) => p.id === "liteau-sapin-27x40")!;
+    liteau.sellingUnits[0]!.contains = { ...liteau.sellingUnits[0]!.contains, verification: { status: "draft" } };
+    const r = computeWorkItem(pending, CASE);
+    expect(need(r, "liteaux")).toMatchObject({ status: "calculated", quantity: { value: "349.85", unit: "ml" } });
+    expect(need(r, "liteaux").purchase).toBeUndefined();
+    expect(need(r, "liteaux").purchaseUnavailable).toMatch(/en attente de vérification : Contenu : 1 longueur de 4 m/);
+    // Une donnée inconnue + conversion impossible : on ne peut pas prouver qu'elle est sans effet → question.
+    const { pureau: _p, ...params } = CASE.params;
+    expect(need(computeWorkItem(pending, { ...CASE, params }), "liteaux").status).toBe("question");
   });
 
   it("applique la marge réglée par l'artisan, jamais une marge inventée", () => {
@@ -327,8 +340,8 @@ describe("contexte chantier : une information trouvée n'importe où sert à tou
           { key: "surface", value: "120", unit: "m2", evidence: "Devis, ligne 5", origin: "devis" },
           { key: "pureau", value: "343", unit: "mm", evidence: "Devis, en-tête", origin: "devis" },
           { key: "pureau", value: "34.3", unit: "cm", evidence: "Devis, ligne 5", origin: "devis" },
-          { key: "entraxe_chevrons", value: "60", unit: "cm", evidence: "Devis, ligne 2", origin: "devis" },
-          { key: "entraxe_chevrons", value: "50", unit: "cm", evidence: "Devis, ligne 9", origin: "devis" },
+          { key: "entraxe_supports", value: "60", unit: "cm", evidence: "Devis, ligne 2", origin: "devis" },
+          { key: "entraxe_supports", value: "50", unit: "cm", evidence: "Devis, ligne 9", origin: "devis" },
         ],
       },
       work,
@@ -336,22 +349,22 @@ describe("contexte chantier : une information trouvée n'importe où sert à tou
     expect(params.surface).toMatchObject({ value: "120", origin: "devis", evidence: "Devis, ligne 4, Devis, ligne 5" });
     // « 343 mm » et « 34,3 cm » : la même valeur, aucune contradiction.
     expect(params.pureau).toMatchObject({ value: "343", unit: "mm" });
-    expect(params.entraxe_chevrons).toBeUndefined();
-    expect(conflicts.map((c) => c.key)).toEqual(["entraxe_chevrons"]);
+    expect(params.entraxe_supports).toBeUndefined();
+    expect(conflicts.map((c) => c.key)).toEqual(["entraxe_supports"]);
   });
 
   it("la réponse de l'artisan l'emporte sur le document", () => {
     const { params, conflicts } = paramsFromContext(
       {
         facts: [
-          { key: "entraxe_chevrons", value: "60", unit: "cm", evidence: "Devis, ligne 2", origin: "devis" },
-          { key: "entraxe_chevrons", value: "50", unit: "cm", evidence: "Devis, ligne 9", origin: "devis" },
-          { key: "entraxe_chevrons", value: "60", unit: "cm", evidence: "Votre réponse", origin: "artisan" },
+          { key: "entraxe_supports", value: "60", unit: "cm", evidence: "Devis, ligne 2", origin: "devis" },
+          { key: "entraxe_supports", value: "50", unit: "cm", evidence: "Devis, ligne 9", origin: "devis" },
+          { key: "entraxe_supports", value: "60", unit: "cm", evidence: "Votre réponse", origin: "artisan" },
         ],
       },
       work,
     );
-    expect(params.entraxe_chevrons).toMatchObject({ value: "60", origin: "artisan" });
+    expect(params.entraxe_supports).toMatchObject({ value: "60", origin: "artisan" });
     expect(conflicts).toEqual([]);
   });
 });

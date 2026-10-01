@@ -22,7 +22,7 @@ const FAMILIES: MaterialFamily[] = [
   {
     code: "underlay",
     label: "Écran sous-toiture / pare-pluie",
-    keywords: ["ecran sous toiture", "ecran hpv", "ecran de sous toiture", "pare pluie", "sous toiture"],
+    keywords: ["ecran sous toiture", "ecran hpv", "ecran de sous toiture", "pare pluie", "sous toiture", "membrane respirante", "membrane sous toiture"],
     allowedUnits: ["ROULEAU", "M2"],
     // Sur un devis client, « écran 120 m² » = 120 m² de toiture couverte, pas 120 m² d'écran (recouvrements).
     areaOfWork: true,
@@ -89,7 +89,24 @@ const FAMILIES: MaterialFamily[] = [
   {
     code: "roof_accessory",
     label: "Accessoire de couverture (faîtière, arêtier, rive, chatière, sortie)",
-    keywords: ["faitiere", "faitage", "aretier", "rive", "about", "chatiere", "tuile a douille", "sortie de toit", "lanterne", "rencontre", "fronton"],
+    keywords: [
+      "faitiere",
+      "faitage",
+      "aretier",
+      "rive",
+      "about",
+      "chatiere",
+      "tuile a douille",
+      "tuile de rive",
+      "tuile chatiere",
+      "tuile faitiere",
+      "sortie de toit",
+      "lanterne",
+      "rencontre",
+      "fronton",
+    ],
+    // « Faîtage 10 m », « rives 24 m » : longueur d'ouvrage ; ce sont des pièces qui s'achètent.
+    lengthOfWork: true,
     allowedUnits: ["U", "ML", "M"],
     wholeUnits: true,
     plausibleMax: { U: 3000, ML: 1000, M: 1000 },

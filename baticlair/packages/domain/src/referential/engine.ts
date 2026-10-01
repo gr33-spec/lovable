@@ -108,6 +108,8 @@ export interface NeedResult {
   quantityRange?: { min: string; max: string; unit: string };
   /** Quantité à commander (arrondie au supérieur) et ordres de grandeur. */
   purchase?: { order: PurchaseQuantity; approx: PurchaseQuantity[] };
+  /** Besoin juste, mais conversion en unité de vente impossible (conditionnement pas encore vérifié). */
+  purchaseUnavailable?: string;
   question?: Question;
   /** Pourquoi BatiClair ne sait pas (« unknown »). */
   reason?: string;
@@ -399,7 +401,9 @@ function computeNeed(
     }
 
     // 5. Achat : la commande pour la plus petite ET la plus grande valeur possible.
-    const purchase = toPurchase(product, need, rule.unit, useFact);
+    const converted = toPurchase(product, need, rule.unit, useFact);
+    const purchaseUnavailable = converted && "pending" in converted ? converted.pending : undefined;
+    const purchase = converted && "pending" in converted ? null : converted;
     if (!exact) {
       const decided = purchase && purchase.orderLo.equals(purchase.orderHi) && purchase.orderLo.isFinite();
       if (!decided) {
@@ -420,6 +424,7 @@ function computeNeed(
         ? { quantity: { value: need.lo.toDecimalPlaces(2).toFixed(), unit: rule.unit } }
         : { quantityRange: { min: need.lo.toDecimalPlaces(2).toFixed(), max: need.hi.toDecimalPlaces(2).toFixed(), unit: rule.unit } }),
       ...(purchase ? { purchase: { order: { count: purchase.orderLo.toFixed(), unit: purchase.unit }, approx: purchase.approx } } : {}),
+      ...(purchaseUnavailable ? { purchaseUnavailable } : {}),
       provisional,
       trace,
     };
@@ -439,7 +444,7 @@ function toPurchase(
   need: IntervalValue,
   needUnitText: string,
   useFact: (label: string, fact: Fact) => IntervalValue,
-): { orderLo: Decimal; orderHi: Decimal; unit: { one: string; many: string }; approx: PurchaseQuantity[] } | null {
+): { orderLo: Decimal; orderHi: Decimal; unit: { one: string; many: string }; approx: PurchaseQuantity[] } | { pending: string } | null {
   const needUnit = parseRefUnit(needUnitText);
   const lo = need.lo.times(needUnit.factor);
   const hi = need.hi.times(needUnit.factor);
@@ -450,7 +455,14 @@ function toPurchase(
   };
   const primary = product.sellingUnits.find((s) => s.primary);
   if (!primary) return null;
-  const order = counts(primary);
+  let order: { lo: Decimal; hi: Decimal } | null;
+  try {
+    order = counts(primary);
+  } catch (e) {
+    // Conditionnement pas encore vérifié : le BESOIN reste juste et affiché ; seule la conversion attend.
+    if (e instanceof Stop && e.outcome.status === "unknown") return { pending: e.outcome.reason };
+    throw e;
+  }
   if (!order) return null;
   const approx = product.sellingUnits
     .filter((s) => s !== primary)

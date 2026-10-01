@@ -7,7 +7,8 @@
 const SUPPLY_PREFIX = /^\s*(?:fourniture\s+et\s+pose|fourniture\s*&\s*pose|f\.?\s*(?:et|&)\s*p\.?|fourniture|pose)\s+(?:(?:de\s+la|du|des|de)\s+|(?:de\s+l|d)['’]\s*)?/i;
 
 export function shortName(designation: string): string {
-  let text = designation.trim();
+  // « Faîtage (Fourniture & Pose) » : la mention du devis client n'apprend rien à l'artisan.
+  let text = designation.replace(/\s*\((?:fourniture\s*(?:&|et)\s*pose|f\.?\s*(?:&|et)\s*p\.?|fourniture\s+seule|fourniture)\)/gi, "").trim();
   const stripped = text.replace(SUPPLY_PREFIX, "");
   if (stripped.length >= 3) text = stripped;
   // « Isolation plafond 300mm - Fourniture de rouleaux… » : la partie avant le tiret suffit.

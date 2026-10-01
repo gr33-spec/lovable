@@ -14,7 +14,7 @@ import { parseRefUnit, sameDim } from "./units.js";
  * donnée ne sont jamais départagées en silence : c'est une question.
  */
 export interface SiteFact {
-  /** Clé de donnée chantier, la même que les paramètres d'ouvrage (« surface », « pente », « entraxe_chevrons »). */
+  /** Clé de donnée chantier, la même que les paramètres d'ouvrage (« surface », « pente », « entraxe_supports »). */
   key: string;
   value: string;
   unit: string;

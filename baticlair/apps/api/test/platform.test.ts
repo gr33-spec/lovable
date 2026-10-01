@@ -111,6 +111,13 @@ describe("textes pour l'artisan et le fournisseur", () => {
     const line = { designation: "Liteaux 27x40", quantity: "120", unit: "m²", reference: null };
     expect(requestedQuantityText(line)).toBe("120 m²");
     expect(requestedQuantityText({ ...line, basis: "work" })).toBe("pour une surface de 120 m² (quantité à calculer)");
+    // Cas de référence D-2026-015 : « Rives 24 m », « Faîtage 10 m » sont des longueurs d'ouvrage.
+    expect(requestedQuantityText({ designation: "Rives de toit", quantity: "24", unit: "m", reference: null, basis: "work" })).toBe(
+      "pour une longueur de 24 m (quantité à calculer)",
+    );
+    // La mention « (Fourniture & Pose) » du devis client ne part pas chez le fournisseur.
+    expect(purchaseLabel("Faîtage (Fourniture & Pose)")).toBe("Faîtage");
+    expect(purchaseLabel("Couverture en tuiles terre cuite HP10 rouge (Fourniture & Pose)")).toBe("Couverture en tuiles terre cuite HP10 rouge");
     expect(purchaseLabel("Tuile romane canal rouge 12,5 u/m²")).toBe("Tuile romane canal rouge 12,5 u/m²");
   });
 });

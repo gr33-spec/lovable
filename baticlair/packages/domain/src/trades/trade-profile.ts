@@ -62,6 +62,12 @@ export interface MaterialFamily {
    * quantité d'achat (ml, longueurs) reste à calculer.
    */
   areaOfWork?: boolean;
+  /**
+   * Sur un devis client, une longueur (m, ml) de cette famille est la
+   * longueur de l'OUVRAGE (« faîtage 10 m », « rives 24 m ») : ce qui
+   * s'achète, ce sont des pièces (faîtières, tuiles de rive) à calculer.
+   */
+  lengthOfWork?: boolean;
 }
 
 export interface CompanionRule {
@@ -96,10 +102,16 @@ const keywordCache = new Map<string, RegExp>();
  * reconnaît pas « dépose ».
  */
 export function containsKeyword(normalized: string, keyword: string): boolean {
+  return keywordPosition(normalized, keyword) >= 0;
+}
+
+/** Position du mot (ou de l'expression) dans le texte normalisé, ou -1. */
+export function keywordPosition(normalized: string, keyword: string): number {
   let re = keywordCache.get(keyword);
   if (!re) {
-    re = new RegExp(`(?:^|[^a-z0-9])${escapeRegExp(normalizeText(keyword))}(?:s|x)?(?![a-z0-9])`);
+    re = new RegExp(`(?:^|[^a-z0-9])(${escapeRegExp(normalizeText(keyword))})(?:s|x)?(?![a-z0-9])`);
     keywordCache.set(keyword, re);
   }
-  return re.test(normalized);
+  const m = re.exec(normalized);
+  return m ? m.index + m[0].indexOf(m[1]!) : -1;
 }
