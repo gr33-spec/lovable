@@ -3,6 +3,7 @@ import { D2026_015_LINES } from "../../../packages/domain/test/devis-reels/d2026
 import { PISCINE_LINES } from "../../../packages/domain/test/devis-reels/piscine.js";
 import { LEZARDRIEUX_LINES } from "../../../packages/domain/test/devis-reels/platrerie-lezardrieux.js";
 import type { BenchLine } from "../../../packages/domain/test/devis-reels/truth.js";
+import { ROOFING_REFERENTIAL } from "@baticlair/domain";
 import { CompanyMemory } from "../src/modules/learning/application/company-memory.js";
 import { CorrectionJournal } from "../src/modules/learning/application/correction-journal.js";
 import type { TenantContext } from "../src/modules/tenancy/index.js";
@@ -145,11 +146,15 @@ describe("questions du calcul : une réponse, une seule fois, et la preuve", () 
     const { takeoffId } = await projectWith(agent, D2026_015_LINES);
     const view = (await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "product:faitiere", value: "edilians-faitiere-angulaire-710" }).expect(200)).body.view as View;
     const needs = view.items.filter((i) => i.kind === "need");
-    // Seules les faîtières se calculent (règle et donnée vérifiées) ; les règles en attente ne produisent rien.
-    expect(needs.map((n) => [n.id, n.state])).toEqual([["faitieres", "verified"]]);
+    // Chaque ✓ vient d'une règle VALIDÉE ; crochets de gouttière, coudes et colliers (sans règle validée) ne produisent rien.
+    const verifiedRules = new Set(ROOFING_REFERENTIAL.workItems.flatMap((w) => w.needs.filter((n) => n.verification.status === "verified").map((n) => n.id)));
+    for (const n of needs.filter((x) => x.state === "verified")) expect(verifiedRules.has(n.id)).toBe(true);
+    expect(needs.filter((n) => ["crochets", "coudes", "colliers"].includes(n.id) && n.state === "verified")).toEqual([]);
     // « Voir le calcul » : chaque élément dit d'où il vient (devis, référentiel, chantier).
-    expect(needs[0]!.calculation!.trace.filter((t) => t.origin === null).map((t) => t.from)).toEqual([]);
-    expect(new Set(needs[0]!.calculation!.trace.map((t) => t.origin))).toEqual(new Set(["devis", "referential", "project", "company"]));
+    const faitieres = needs.find((n) => n.id === "faitieres")!;
+    expect(faitieres.state).toBe("verified");
+    expect(faitieres.calculation!.trace.filter((t) => t.origin === null).map((t) => t.from)).toEqual([]);
+    expect(new Set(faitieres.calculation!.trace.map((t) => t.origin))).toEqual(new Set(["devis", "referential", "project", "company"]));
   });
 
   it("la préférence de l'entreprise A n'apparaît jamais chez B", async () => {
@@ -233,7 +238,7 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
     expect(body).toMatch(/Chatières.*: 10 unités$/m);
   });
 
-  it("une règle en brouillon ne produit aucun ✓, et aucun nouvel appel IA n'a lieu après la lecture", async () => {
+  it("après modèle et pureau : 1 306 tuiles et 349,85 ml de liteaux calculés, sans nouvel appel IA ; un composant sans règle validée bloque le ✓", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "c@example.fr", "Toitures Martin");
     const { takeoffId, projectId } = await projectWith(agent, D2026_015_LINES);
     const before = await ctx.prisma.aiExecution.count();
@@ -241,10 +246,11 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
     const after = (await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "param:pureau", value: { value: "34.3", unit: "cm" } }).expect(200)).body.view as View & { ouvrages: Ouvrage[] };
     await getView(agent, projectId);
     expect(await ctx.prisma.aiExecution.count()).toBe(before);
-    for (const o of after.ouvrages.filter((x) => x.role === "measure")) {
-      expect(o.state).not.toBe("verified");
-      for (const n of o.needs) expect(n.state).not.toBe("verified");
-    }
+    const tuiles = ouvrage(after, "Couverture").needs.find((n) => n.slot === "tuile")!;
+    expect(tuiles).toMatchObject({ need: { value: "1305.43", unit: "u" }, order: { count: "1306" }, provisional: false, state: "verified" });
+    expect(ouvrage(after, "Lattage").needs.find((n) => n.slot === "liteau")).toMatchObject({ need: { value: "349.85", unit: "ml" }, provisional: false });
+    // Crochets de gouttière, coudes, colliers : aucune règle validée → « à préciser », et l'ouvrage n'est jamais ✓.
+    for (const start of ["Gouttière", "Descente"]) expect(ouvrage(after, start).state).not.toBe("verified");
   });
 });
 
@@ -284,7 +290,7 @@ describe("ouvrages comptés : « 6 unités » de jouées n'est jamais 6 ardoises
   });
 });
 
-describe("mode validateur : les calculs des règles en brouillon, visibles et jamais ✓", () => {
+describe("mode validateur : n'ouvre que les règles en brouillon, jamais ✓", () => {
   let vctx: TestContext;
   beforeAll(async () => {
     const config = loadConfig();
@@ -297,7 +303,7 @@ describe("mode validateur : les calculs des règles en brouillon, visibles et ja
   const levels = async (agent: Agent, projectId: string) =>
     ((await agent.get(`/v1/projects/${projectId}/takeoff`)).body.takeoff.view as { ouvrages: { designation: string; state: string; needs: { slot: string; need: { value: string; unit: string } | null; provisional: boolean; state: string }[] }[] }).ouvrages;
 
-  it("le validateur voit 349,85 ml de liteaux « provisoire » ; un autre artisan ne voit aucun calcul", async () => {
+  it("règles validées : tout artisan voit 349,85 ml de liteaux, non provisoire ; un provisoire n'est jamais ✓", async () => {
     await resetDatabase(vctx.prisma);
     const run = async (email: string) => {
       const { agent } = await signUpWithCompany(vctx.app, email, `Toitures ${email}`);
@@ -317,11 +323,13 @@ describe("mode validateur : les calculs des règles en brouillon, visibles et ja
     };
     const founder = await run("fondateur@example.fr");
     const lattage = founder.find((o) => o.designation.startsWith("Lattage"))!.needs.find((n) => n.slot === "liteau")!;
-    expect(lattage).toMatchObject({ need: { value: "349.85", unit: "ml" }, provisional: true });
+    expect(lattage).toMatchObject({ need: { value: "349.85", unit: "ml" }, provisional: false });
     for (const o of founder) {
       for (const n of o.needs.filter((x) => x.provisional)) expect(n.state).not.toBe("verified");
     }
     const other = await run("autre@example.fr");
-    for (const o of other) for (const n of o.needs) expect(n).toMatchObject({ need: null, provisional: false });
+    expect(other.find((o) => o.designation.startsWith("Lattage"))!.needs.find((n) => n.slot === "liteau")).toMatchObject({ need: { value: "349.85", unit: "ml" }, provisional: false });
+    // Hors mode validateur, aucun calcul provisoire.
+    for (const o of other) for (const n of o.needs) expect(n.provisional).toBe(false);
   });
 });

@@ -19,6 +19,16 @@ import type { Fact, Provenance, Referential } from "../model.js";
  * demandée. Il n'est jamais choisi par BatiClair.
  */
 const DRAFT = { status: "draft" } as const;
+/**
+ * Règles présentées une par une au fondateur (couvreur), avec formule et
+ * exemple chiffré, et validées par lui le 2026-10-02 (« Oui » aux 10 règles).
+ */
+const FOUNDER_VALIDATED = {
+  status: "verified",
+  verifiedAt: "2026-10-02",
+  verifiedBy: "Fondateur (couvreur)",
+  note: "Validée sur présentation de la formule et d'un exemple chiffré (D-2026-015).",
+} as const;
 const FOUNDER_CHECKED = {
   status: "verified",
   verifiedAt: "2026-10-01",
@@ -49,7 +59,7 @@ const ONE_PIECE: Fact = packaging("1", "u", "definition", { status: "verified", 
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.02-7",
+  version: "roofing-2026.10.02-8",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -76,28 +86,28 @@ export const ROOFING_REFERENTIAL: Referential = {
       kind: "baticlair_rule",
       title: "Règle BatiClair : rangs au pureau, files de contre-liteaux par chevron, tuiles par m² couvert, surface d'écran avec recouvrements",
       retrievedAt: "2026-10-01",
-      note: "Redonne le tableau Edilians « ml de liteaux par m² » et les 9,9 à 12 tuiles/m² (tests). Validation métier attendue.",
+      note: "Redonne le tableau Edilians « ml de liteaux par m² » et les 9,9 à 12 tuiles/m² (tests). Validée par le fondateur (couvreur) le 2026-10-02.",
     },
     {
       id: "baticlair-pratique-accessoires",
       kind: "baticlair_rule",
       title: "Règle de pratique BatiClair : faîtage, gouttière, descente",
       retrievedAt: "2026-10-01",
-      note: "Closoir = longueur de faîtage, profil = longueur de gouttière, 1 naissance par descente, tubes = nombre × hauteur… À sourcer (notice fabricant) ou à valider comme pratique métier écrite.",
+      note: "Closoir = longueur de faîtage, profil = longueur de gouttière, 1 naissance par descente, tubes = nombre × hauteur… Validée comme pratique métier par le fondateur (couvreur) le 2026-10-02 ; crochets de gouttière, coudes et colliers restent à sourcer.",
     },
     {
       id: "fondateur-pratique-2026-10-02",
       kind: "baticlair_rule",
       title: "Pratique déclarée par le fondateur (couvreur)",
       retrievedAt: "2026-10-02",
-      note: "« Les liteaux pour ardoise, c'est souvent du 18/40 » : une habitude de métier, pas une règle. Montrée « à confirmer », jamais imposée.",
+      note: "« Les liteaux pour ardoise, c'est souvent du 18/40 » : section par défaut quand le devis ne la précise pas, validée le 2026-10-02. Le devis l'emporte toujours.",
     },
     {
       id: "baticlair-geometrie-ardoise",
       kind: "baticlair_rule",
       title: "Règle BatiClair : ardoises au crochet (ardoises par m² couvert, un crochet par ardoise, une file de liteaux par rang)",
       retrievedAt: "2026-10-02",
-      note: "Même géométrie que les tuiles (largeur × pureau) ; « un crochet par ardoise » est une hypothèse de pose à valider. Validation métier attendue.",
+      note: "Même géométrie que les tuiles (largeur × pureau) ; un crochet par ardoise. Validée par le fondateur (couvreur) le 2026-10-02.",
     },
     {
       id: "designation-liteau",
@@ -110,7 +120,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       kind: "definition",
       title: "Format commercial d'une ardoise « L × l » (en cm), écrit dans le devis",
       retrievedAt: "2026-10-02",
-      note: "Convention « longueur × largeur » à confirmer par le fondateur avant usage (30×22 = 30 cm de long, 22 cm de large).",
+      note: "Convention « longueur × largeur » (30×22 = 30 cm de long, 22 cm de large), confirmée par le fondateur le 2026-10-02.",
     },
     {
       id: "negoce-liteau-27x40",
@@ -197,7 +207,18 @@ export const ROOFING_REFERENTIAL: Referential = {
       keyAttributes: ["largeur", "longueur"],
       keywords: ["ardoise"],
     },
-    { code: "slate_hook", label: "Crochet d'ardoise", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["crochet d ardoise", "crochets d ardoise"] },
+    { code: "slate_hook", label: "Crochet d'ardoise", needUnit: "u", attributes: [], keyAttributes: [], keywords: [
+        "crochet d ardoise",
+        "crochet ardoise",
+        "crochet pour ardoise",
+        // « Crochet inox ardoise 100 mm » : la matière s'intercale, c'est toujours un crochet.
+        "crochet inox ardoise",
+        "crochet cuivre ardoise",
+        "crochet galva ardoise",
+        "crochet galvanise ardoise",
+        "crochet teinte ardoise",
+      ],
+    },
     // Familles de VOCABULAIRE seulement (aucun produit ni règle encore) : elles évitent qu'une
     // « tuile chatière » ou un « solin adapté à la tuile HP10 » soit pris pour une tuile.
     { code: "vent_tile", label: "Tuile chatière", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["chatiere", "tuile chatiere", "tuile de ventilation"] },
@@ -247,8 +268,8 @@ export const ROOFING_REFERENTIAL: Referential = {
       aliases: ["18x40", "18 x 40", "18*40", "18 40", "18/40"],
       generic: true,
       attributes: {
-        epaisseur: spec("18", "mm", "designation-liteau", DRAFT, "Section nominale (désignation commerciale)."),
-        largeur: spec("40", "mm", "designation-liteau", DRAFT, "Section nominale (désignation commerciale)."),
+        epaisseur: spec("18", "mm", "designation-liteau", FOUNDER_VALIDATED, "Section nominale (désignation commerciale)."),
+        largeur: spec("40", "mm", "designation-liteau", FOUNDER_VALIDATED, "Section nominale (désignation commerciale)."),
       },
       sellingUnits: [],
     },
@@ -260,8 +281,8 @@ export const ROOFING_REFERENTIAL: Referential = {
       aliases: ["30x22", "30 x 22", "30*22"],
       generic: true,
       attributes: {
-        longueur: spec("0.30", "m", "format-ardoise", DRAFT),
-        largeur: spec("0.22", "m", "format-ardoise", DRAFT),
+        longueur: spec("0.30", "m", "format-ardoise", FOUNDER_VALIDATED),
+        largeur: spec("0.22", "m", "format-ardoise", FOUNDER_VALIDATED),
       },
       sellingUnits: [{ id: "piece", label: { one: "pièce", many: "pièces" }, contains: ONE_PIECE, primary: true }],
     },
@@ -340,7 +361,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: true,
           exclusions: "Hors tuiles de rive, faîtières et accessoires (calculés à part).",
           source: "baticlair-geometrie-couverture",
-          verification: DRAFT,
+          verification: FOUNDER_VALIDATED,
           version: 1,
         },
         {
@@ -351,7 +372,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: false,
           exclusions: "Hors doublage du liteau d'égout et liteaux de faîtage.",
           source: "baticlair-geometrie-couverture",
-          verification: DRAFT,
+          verification: FOUNDER_VALIDATED,
           version: 1,
         },
         {
@@ -362,7 +383,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: false,
           exclusions: "Une file par chevron ou fermette ; suppose un entraxe régulier sur toute la surface.",
           source: "baticlair-geometrie-couverture",
-          verification: DRAFT,
+          verification: FOUNDER_VALIDATED,
           version: 1,
         },
         {
@@ -375,7 +396,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           exclusions: "Hors recouvrements en bout de rouleau (10 cm au droit d'un support), relevés et chutes.",
           // Les recouvrements viennent de Soprema ; la formule qui en tire la surface d'écran est une règle BatiClair.
           source: "baticlair-geometrie-couverture",
-          verification: DRAFT,
+          verification: FOUNDER_VALIDATED,
           version: 1,
         },
       ],
@@ -407,7 +428,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           family: "batten",
           label: "Liteaux",
           keywords: ["lattage", "liteau", "latte"],
-          usual: { text: "18×40 d'ordinaire pour l'ardoise (pratique de couvreur, à confirmer)", source: "fondateur-pratique-2026-10-02" },
+          usual: { text: "Section 18×40 par défaut : le devis ne la précise pas (règle validée par le fondateur).", source: "fondateur-pratique-2026-10-02", productShort: "Liteaux 18×40" },
         },
         { key: "contre_liteau", family: "batten", label: "Contre-liteaux", keywords: ["contre lattage", "contre latte", "contre liteau"] },
         { key: "ecran", family: "underlay", label: "Écran sous-toiture" },
@@ -426,7 +447,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: true,
           exclusions: "Hors ardoises de rive, doublis à l'égout, coupes en noue et en arêtier, casse.",
           source: "baticlair-geometrie-ardoise",
-          verification: DRAFT,
+          verification: FOUNDER_VALIDATED,
           version: 1,
         },
         {
@@ -435,9 +456,9 @@ export const ROOFING_REFERENTIAL: Referential = {
           formula: "surface / (ardoise.largeur * pureau)",
           unit: "u",
           core: true,
-          exclusions: "Hypothèse « un crochet par ardoise » à valider ; hors ardoises de rive et doublis.",
+          exclusions: "Un crochet par ardoise (règle validée par le fondateur) ; hors ardoises de rive et doublis.",
           source: "baticlair-geometrie-ardoise",
-          verification: DRAFT,
+          verification: FOUNDER_VALIDATED,
           version: 1,
         },
         {
@@ -448,7 +469,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: false,
           exclusions: "Une file par rang ; hors doublis à l'égout et liteaux de faîtage.",
           source: "baticlair-geometrie-ardoise",
-          verification: DRAFT,
+          verification: FOUNDER_VALIDATED,
           version: 1,
         },
         {
@@ -459,7 +480,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: false,
           exclusions: "Une file par chevron ; suppose un entraxe régulier.",
           source: "baticlair-geometrie-couverture",
-          verification: DRAFT,
+          verification: FOUNDER_VALIDATED,
           version: 1,
         },
         {
@@ -471,7 +492,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: false,
           exclusions: "Hors recouvrements en bout de rouleau, relevés et chutes.",
           source: "baticlair-geometrie-couverture",
-          verification: DRAFT,
+          verification: FOUNDER_VALIDATED,
           version: 1,
         },
       ],
@@ -509,7 +530,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: false,
           exclusions: "Closoir sur toute la longueur du faîtage ; recouvrements selon le produit.",
           source: "baticlair-pratique-accessoires",
-          verification: DRAFT,
+          verification: FOUNDER_VALIDATED,
           version: 1,
         },
       ],
@@ -538,7 +559,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: true,
           exclusions: "Hors recouvrements ou jonctions propres au système.",
           source: "baticlair-pratique-accessoires",
-          verification: DRAFT,
+          verification: FOUNDER_VALIDATED,
           version: 1,
         },
         {
@@ -560,7 +581,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: false,
           exclusions: "Une naissance par descente.",
           source: "baticlair-pratique-accessoires",
-          verification: DRAFT,
+          verification: FOUNDER_VALIDATED,
           version: 1,
         },
       ],
@@ -590,7 +611,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: true,
           exclusions: "Hauteur du devis, sans déduire les coudes ni ajouter de dauphin.",
           source: "baticlair-pratique-accessoires",
-          verification: DRAFT,
+          verification: FOUNDER_VALIDATED,
           version: 1,
         },
         {

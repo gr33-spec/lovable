@@ -177,10 +177,11 @@ describe("écran de l'artisan sur les vrais devis", () => {
     expect(v.measures?.lineIds).toContain("l001");
   });
 
-  it("aucune donnée non vérifiée ne devient établie : sur le devis couverture, aucun besoin calculé avec une règle en attente", () => {
+  it("aucune donnée non vérifiée ne devient établie : sur le devis couverture, aucun besoin provisoire, et chaque ✓ vient d'une règle validée", () => {
     const v = view(toLines(D2026_015_LINES), "roofing");
     for (const i of v.items.filter((x) => x.kind === "need")) expect(i.need!.provisional).toBe(false);
-    expect(v.items.filter((x) => x.kind === "need" && x.state === "verified")).toEqual([]);
+    const rules = new Map(ROOFING_REFERENTIAL.workItems.flatMap((w) => w.needs.map((n) => [n.id, n.verification.status] as const)));
+    for (const i of v.items.filter((x) => x.kind === "need" && x.state === "verified")) expect(rules.get(i.need!.needId)).toBe("verified");
   });
 
   it("chaque ✓ explique son origine (« Voir le calcul »)", () => {

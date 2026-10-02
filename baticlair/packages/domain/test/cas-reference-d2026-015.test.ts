@@ -174,7 +174,7 @@ describe("cas de référence D-2026-015 : contexte chantier et questions", () =>
     contre_liteau: { productId: "liteau-sapin-27x40", origin: "devis" },
   };
   const mentioned = ["ecran", "contre_liteau", "liteau", "tuile"];
-  const run = (prods: Record<string, SlotChoice>, extra: Record<string, { value: string; unit: string }> = {}, preferences?: CompanyPreferences, acceptDraft = true) =>
+  const run = (prods: Record<string, SlotChoice>, extra: Record<string, { value: string; unit: string }> = {}, preferences?: CompanyPreferences, acceptDraft = false) =>
     computeWorkItem(
       ROOFING_REFERENTIAL,
       {
@@ -197,9 +197,12 @@ describe("cas de référence D-2026-015 : contexte chantier et questions", () =>
     expect(params.pente).toBeUndefined();
   });
 
-  it("aujourd'hui pour un artisan : aucune quantité (règles de calcul en attente de validation)", () => {
-    const r = run(products, {}, undefined, false);
-    for (const n of r.needs) expect(n.quantity ?? n.quantityRange).toBeUndefined();
+  it("pour un artisan, avant toute réponse : seul ce que le devis permet est calculé (contre-liteaux), rien de provisoire", () => {
+    const r = run(products);
+    // Entraxe lu sur la ligne de l'écran (90 cm) : 120 / 0,9 = 133,33 ml, sans rien demander.
+    expect(byNeed(r.needs, "contre-liteaux")).toMatchObject({ status: "calculated", provisional: false, quantity: { value: "133.33", unit: "ml" } });
+    // Pureau non écrit (« pureau adapté ») : tuiles et liteaux attendent la réponse, aucun chiffre deviné.
+    for (const id of ["tuiles", "liteaux"]) expect(byNeed(r.needs, id).quantity ?? byNeed(r.needs, id).quantityRange).toBeUndefined();
   });
 
   it("règles validées : 2 questions seulement (modèle, pureau), +1 au tout premier chantier (écran)", () => {
@@ -274,23 +277,23 @@ describe("cas de référence D-2026-015 : chantier complet avec ouvrages compos�
     expect(identifyProducts(line("ligne 6").designation, ROOFING_REFERENTIAL, "ridge_tile").candidates).toEqual([]);
   });
 
-  it("aujourd'hui : une seule question, et seulement pour un calcul que BatiClair sait terminer", () => {
+  it("quatre questions seulement, chacune pour un calcul que BatiClair sait terminer", () => {
     const r = computeChantier(ROOFING_REFERENTIAL, inputs());
-    // Les règles en attente ne déclenchent AUCUNE question (inutile de demander le pureau si on ne peut pas calculer).
-    expect(r.questionsPending).toEqual(["product:faitiere"]);
-    expect(r.nextQuestion).toMatchObject({ kind: "choose_product", options: [{ label: "Faîtières angulaires 710" }] });
+    // Modèle de tuile, pureau, écran, faîtière : rien d'autre (crochets, coudes, colliers n'ont pas de règle : aucune question inutile).
+    expect(r.questionsPending).toEqual(["product:tuile", "param:pureau", "product:ecran", "product:faitiere"]);
     // Si l'artisan confirme le modèle 710 : 10 m × 3 pièces/ml (Edilians, vérifié) = 30 faîtières, calcul certain.
     const answered = computeChantier(ROOFING_REFERENTIAL, inputs({ faitiere: "edilians-faitiere-angulaire-710" }));
     expect(need(answered, "faitieres")).toMatchObject({ status: "calculated", quantity: { value: "30" }, purchase: { order: { count: "30" } }, provisional: false });
-    expect(answered.questionsPending).toEqual([]);
+    expect(answered.questionsPending).toEqual(["product:tuile", "param:pureau", "product:ecran"]);
   });
 
   it("règles validées : ce qui se calcule, ce qui reste à confirmer, ce qui est impossible", () => {
     const r = computeChantier(
       ROOFING_REFERENTIAL,
       inputs({ tuileOk: true, pureau: "34.3", faitiere: "edilians-faitiere-angulaire-710", ecran: "soprema-sop-ecran-hpv-r2-150x50" }),
-      { acceptDraft: true },
     );
+    // Calculé pour l'artisan lui-même : aucun besoin provisoire.
+    expect(all(r).filter((n) => n.provisional)).toEqual([]);
     const row = (id: string) => {
       const n = need(r, id);
       return [n.status, n.quantity?.value ?? (n.quantityRange ? `${n.quantityRange.min}–${n.quantityRange.max}` : null), n.purchase?.order.count ?? null];
@@ -305,11 +308,18 @@ describe("cas de référence D-2026-015 : chantier complet avec ouvrages compos�
       expect(row(id)).toEqual(["calculated", qty, null]);
       expect(need(r, id).purchaseUnavailable).toMatch(/Produit à identifier/);
     }
-    // Impossible sans la fiche du système (espacement maximal des crochets et des colliers).
-    expect(need(r, "crochets")).toMatchObject({ status: "unknown", reason: "Calcul impossible sans les données du produit (Crochets)." });
-    expect(need(r, "colliers")).toMatchObject({ status: "unknown", reason: "Calcul impossible sans les données du produit (Colliers)." });
-    // « 2 jeux de coudes par descente » : ambigu, la seule question qui reste.
-    expect(r.questionsPending).toEqual(["param:coudes_par_descente"]);
+    // Crochets de gouttière, coudes, colliers : aucune règle validée → « à préciser », sans chiffre ni question.
+    for (const id of ["crochets", "coudes", "colliers"]) expect(need(r, id)).toMatchObject({ status: "unknown", reason: "Règle de calcul en attente de vérification." });
+    expect(r.questionsPending).toEqual([]);
+    // Écran du validateur (brouillon accepté) : impossible sans la fiche du système, et « 2 jeux de coudes » reste ambigu.
+    const v = computeChantier(
+      ROOFING_REFERENTIAL,
+      inputs({ tuileOk: true, pureau: "34.3", faitiere: "edilians-faitiere-angulaire-710", ecran: "soprema-sop-ecran-hpv-r2-150x50" }),
+      { acceptDraft: true },
+    );
+    expect(need(v, "crochets")).toMatchObject({ status: "unknown", reason: "Calcul impossible sans les données du produit (Crochets)." });
+    expect(need(v, "colliers")).toMatchObject({ status: "unknown", reason: "Calcul impossible sans les données du produit (Colliers)." });
+    expect(v.questionsPending).toEqual(["param:coudes_par_descente"]);
   });
 });
 

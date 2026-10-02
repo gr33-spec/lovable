@@ -167,13 +167,15 @@ function needName(n: NeedResult, all: readonly NeedResult[]): string {
   return twice && !norm(n.label).startsWith(norm(n.slotLabel)) ? `${n.slotLabel} (${n.label})` : n.label;
 }
 
-function needLevels(n: OwnedNeed, all: readonly NeedResult[], usual: string | null = null): NeedLevels {
+function needLevels(n: OwnedNeed, all: readonly NeedResult[], usual: { text: string; productShort?: string } | null = null): NeedLevels {
   const a = assessNeed(n);
   const calculated = n.status === "calculated";
+  // Produit nommé par le devis, sinon produit d'usage (« Liteaux 18×40 ») annoncé comme tel.
+  const named = n.trace.some((t) => t.label === "Produit");
   return {
     needId: n.needId,
     slot: n.slot,
-    label: needName(n, all),
+    label: !named && usual?.productShort ? usual.productShort : needName(n, all),
     origin: n.origin === "explicit" ? "explicit" : "deduced",
     need: calculated && n.quantity ? n.quantity : null,
     needRange: calculated && n.quantityRange ? n.quantityRange : null,
@@ -181,7 +183,7 @@ function needLevels(n: OwnedNeed, all: readonly NeedResult[], usual: string | nu
     missing: !calculated ? (n.reason ?? n.question?.text ?? "Information manquante.") : !n.purchase ? (n.purchaseUnavailable ?? "Conditionnement à préciser par le fournisseur.") : null,
     provisional: calculated && n.provisional,
     // Le produit d'usage n'est dit que si le devis n'en nomme aucun.
-    usual: n.trace.some((t) => t.label === "Produit") ? null : usual,
+    usual: named ? null : (usual?.text ?? null),
     state: a.state,
   };
 }
@@ -383,7 +385,7 @@ export function artisanView(
       const line = lines.find((l) => l.id === item.id)!;
       const v = validation.lines.find((x) => x.lineId === item.id)!;
       const role = link.roles.get(item.id) ?? null;
-      const usualOf = (n: OwnedNeed) => link.ref.workItems.find((w) => w.id === n.workItemId)?.slots.find((x) => x.key === n.slot)?.usual?.text ?? null;
+      const usualOf = (n: OwnedNeed) => link.ref.workItems.find((w) => w.id === n.workItemId)?.slots.find((x) => x.key === n.slot)?.usual ?? null;
       const needs = (owned.get(item.id) ?? []).map((n) => needLevels(n, engine.needs, usualOf(n)));
       // Tout composant que la ligne cite reste visible, même sans règle de calcul (« fixations »).
       const planned0 = link.plan.lines.find((l) => l.ref === item.id);
@@ -424,7 +426,7 @@ export function artisanView(
       measureIds.length > 0
         ? {
             lineIds: measureIds,
-            text: `${plural(measureIds.length, "ouvrage mesuré", "ouvrages mesurés")} (m², ml…) : BatiClair ne sait pas encore en déduire les matériaux. ${measureIds.length > 1 ? "Ils seront demandés" : "Il sera demandé"} aux fournisseurs pour la mesure du devis.`,
+            text: `${plural(measureIds.length, "ouvrage mesuré", "ouvrages mesurés")} (m², ml…) : les matériaux en sont calculés quand une règle existe ; ce qui reste « à préciser » sera demandé aux fournisseurs pour la mesure du devis.`,
           }
         : null,
     items,

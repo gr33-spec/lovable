@@ -17,7 +17,7 @@ seulement : ce que verrait un artisan aujourd'hui.
 - ⚠ **Articles que BatiClair ne connaît pas encore** — 21 articles que BatiClair ne connaît pas encore, dont 5 sans unité. Les demander aux fournisseurs tels qu'écrits, à la pièce quand l'unité manque ? _(21 lignes en une fois)_
 - ⚠ **FIXATION INOX WC BIDET 6X70 X2, et Manchon de raccordement** — La désignation indique « x2 » : combien d'articles commander au total ?
 
-Information (pas une décision) : 30 ouvrages mesurés (m², ml…) : BatiClair ne sait pas encore en déduire les matériaux. Ils seront demandés aux fournisseurs pour la mesure du devis.
+Information (pas une décision) : 30 ouvrages mesurés (m², ml…) : les matériaux en sont calculés quand une règle existe ; ce qui reste « à préciser » sera demandé aux fournisseurs pour la mesure du devis.
 
 **Après 2 réponses** : ✓ 122 prêts · ⚠ 0 à confirmer · ? 33 information manquante
 
@@ -46,7 +46,7 @@ Information (pas une décision) : 30 ouvrages mesurés (m², ml…) : BatiClair 
 - ⚠ **Articles que BatiClair ne connaît pas encore** — 6 articles que BatiClair ne connaît pas encore, dont 1 sans unité. Les demander aux fournisseurs tels qu'écrits, à la pièce quand l'unité manque ? _(6 lignes en une fois)_
 - ⚠ **CEE Prime versée sous forme de remise financée par Hellio So** — Unité « F » non reconnue : précisez-la.
 
-Information (pas une décision) : 16 ouvrages mesurés (m², ml…) : BatiClair ne sait pas encore en déduire les matériaux. Ils seront demandés aux fournisseurs pour la mesure du devis.
+Information (pas une décision) : 16 ouvrages mesurés (m², ml…) : les matériaux en sont calculés quand une règle existe ; ce qui reste « à préciser » sera demandé aux fournisseurs pour la mesure du devis.
 
 **Après 1 réponse** : ✓ 8 prêts · ⚠ 0 à confirmer · ? 16 information manquante
 
@@ -100,7 +100,7 @@ Information (pas une décision) : 16 ouvrages mesurés (m², ml…) : BatiClair 
 
 - ⚠ **Spots LED encastrables pour douche (x3) - Fourniture de 3 sp** — La désignation indique « x3 » : combien d'articles commander au total ?
 
-Information (pas une décision) : 5 ouvrages mesurés (m², ml…) : BatiClair ne sait pas encore en déduire les matériaux. Ils seront demandés aux fournisseurs pour la mesure du devis.
+Information (pas une décision) : 5 ouvrages mesurés (m², ml…) : les matériaux en sont calculés quand une règle existe ; ce qui reste « à préciser » sera demandé aux fournisseurs pour la mesure du devis.
 
 **Après 1 réponse** : ✓ 10 prêts · ⚠ 0 à confirmer · ? 5 information manquante
 
@@ -122,15 +122,18 @@ Information (pas une décision) : 5 ouvrages mesurés (m², ml…) : BatiClair n
 
 ## D-2026-015 — couverture
 
-**À l'arrivée** : ✓ 4 prêts · ⚠ 1 à confirmer · ? 6 information manquante
+**À l'arrivée** : ✓ 7 prêts · ⚠ 3 à confirmer · ? 7 information manquante
 
-**Décisions à prendre : 1**
+**Décisions à prendre : 4**
 
+- ⚠ **Tuiles** — J'ai identifié : Tuiles HP10. C'est bien ce modèle ?
+- ? **À quel pureau posez-vous ces tuiles** — À quel pureau posez-vous ces tuiles ?
+- ⚠ **Écran sous-toiture** — Quel produit pour : écran sous-toiture ?
 - ⚠ **Faîtières** — Quel produit pour : faîtières ?
 
-Information (pas une décision) : 6 ouvrages mesurés (m², ml…) : BatiClair ne sait pas encore en déduire les matériaux. Ils seront demandés aux fournisseurs pour la mesure du devis.
+Information (pas une décision) : 6 ouvrages mesurés (m², ml…) : les matériaux en sont calculés quand une règle existe ; ce qui reste « à préciser » sera demandé aux fournisseurs pour la mesure du devis.
 
-**Après 1 réponse** : ✓ 4 prêts · ⚠ 0 à confirmer · ? 6 information manquante
+**Après 4 réponses** : ✓ 7 prêts · ⚠ 0 à confirmer · ? 6 information manquante
 
 **Liste envoyée aux fournisseurs : 10 lignes** (10 lignes du devis regroupées)
 

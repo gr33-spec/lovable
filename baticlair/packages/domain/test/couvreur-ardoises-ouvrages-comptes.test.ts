@@ -29,11 +29,11 @@ const LINES = [
   { ref: "a5", designation: "Chatières de ventilation", quantity: "12", unit: "unités" },
 ];
 
-function read(answers: Record<string, EngineAnswer> = {}, acceptDraft = false) {
+function read(answers: Record<string, EngineAnswer> = {}, acceptDraft = false, lines: typeof LINES = LINES) {
   const profile = tradeProfile("roofing");
-  const raw = validateTakeoff(LINES.map((l) => ({ id: l.ref, designation: l.designation, quantityRaw: l.quantity, unitRaw: l.unit, source: "client_quote" as const })), profile);
-  const plan = planQuote(LINES.map((l) => ({ ...l })), ROOFING_REFERENTIAL, profile);
-  const proposals = proposeLineRoles(LINES.map((l) => ({ ref: l.ref, designation: l.designation })), plan, raw, ROOFING_REFERENTIAL);
+  const raw = validateTakeoff(lines.map((l) => ({ id: l.ref, designation: l.designation, quantityRaw: l.quantity, unitRaw: l.unit, source: "client_quote" as const })), profile);
+  const plan = planQuote(lines.map((l) => ({ ...l })), ROOFING_REFERENTIAL, profile);
+  const proposals = proposeLineRoles(lines.map((l) => ({ ref: l.ref, designation: l.designation })), plan, raw, ROOFING_REFERENTIAL);
   const roles = new Map<string, LineRole>([...proposals].map(([k, v]) => [k, v.role]));
   for (const [key, value] of Object.entries(answers)) {
     if (key.startsWith("role:") && (value === "measure" || value === "purchase")) roles.set(key.slice(5), value);
@@ -42,7 +42,7 @@ function read(answers: Record<string, EngineAnswer> = {}, acceptDraft = false) {
   const validation = applyLineRoles(raw, roles);
   const engine = computeWithAnswers(ROOFING_REFERENTIAL, plan, answers, {}, { acceptDraft }, slotsGivenByQuote(plan, validation));
   const view = artisanView(
-    LINES.map((l) => ({ id: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: false, enteredByArtisan: false })),
+    lines.map((l) => ({ id: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: false, enteredByArtisan: false })),
     validation,
     engine,
     { plan, roles, ref: ROOFING_REFERENTIAL, asks },
@@ -82,27 +82,63 @@ describe("ouvrages comptés : jamais un nombre d'articles", () => {
 });
 
 describe("couverture en ardoises au crochet : chaque composant détaillé", () => {
-  it("ardoises, crochets d'ardoise, liteaux (18×40 d'usage, à confirmer) : visibles même avant tout calcul", () => {
+  it("ardoises, crochets d'ardoise, liteaux 18×40 par défaut : visibles même avant tout calcul, rien de deviné sans pureau", () => {
     const { ouvrage } = read();
     const couverture = ouvrage("a1");
     expect(couverture.role).toBe("measure");
     expect(couverture.needs.map((n) => n.slot)).toEqual(expect.arrayContaining(["ardoise", "crochet"]));
     const liteaux = ouvrage("a2").needs.find((n) => n.slot === "liteau")!;
-    expect(liteaux.usual).toMatch(/18×40.*à confirmer/);
-    // Règles en brouillon : rien n'est calculé pour l'artisan, rien n'est ✓.
+    // Le devis ne précise pas la section : 18×40 par défaut, annoncé comme tel.
+    expect(liteaux.label).toBe("Liteaux 18×40");
+    expect(liteaux.usual).toMatch(/18×40 par défaut.*ne la précise pas/);
+    // Pureau inconnu : aucune quantité inventée.
     for (const o of [couverture, ouvrage("a2")]) for (const n of o.needs) expect(n).toMatchObject({ need: null, provisional: false });
   });
 
-  it("mode validateur : quantités provisoires visibles, jamais ✓ (pureau donné pour l'exemple)", () => {
-    const { ouvrage } = read({ "param:pureau": { value: "11", unit: "cm" } }, true);
+  it("pureau donné : ardoises, crochets et liteaux calculés pour l'artisan (règles validées), jamais provisoires", () => {
+    const { ouvrage } = read({ "param:pureau": { value: "11", unit: "cm" } });
     const ardoises = ouvrage("a1").needs.find((n) => n.slot === "ardoise")!;
     const crochets = ouvrage("a1").needs.find((n) => n.slot === "crochet")!;
     const liteaux = ouvrage("a2").needs.find((n) => n.slot === "liteau")!;
-    // 200 / (0,22 × 0,11) = 8 264,46 ardoises ; un crochet par ardoise (hypothèse à valider) ; 200 / 0,11 = 1 818,18 m.
+    // 200 / (0,22 × 0,11) = 8 264,46 ardoises ; un crochet par ardoise ; 200 / 0,11 = 1 818,18 m.
     expect(ardoises.need).toEqual({ value: "8264.46", unit: "u" });
     expect(crochets.need).toEqual({ value: "8264.46", unit: "u" });
     expect(liteaux.need).toEqual({ value: "1818.18", unit: "ml" });
-    for (const n of [ardoises, crochets, liteaux]) expect(n).toMatchObject({ provisional: true });
-    for (const n of [ardoises, crochets, liteaux]) expect(n.state).not.toBe("verified");
+    for (const n of [ardoises, crochets, liteaux]) expect(n).toMatchObject({ provisional: false });
+  });
+
+  it("le devis nomme une autre section de liteau : elle l'emporte, plus de « 18×40 par défaut »", () => {
+    const lines = LINES.map((l) => (l.ref === "a2" ? { ...l, designation: "Liteaux sapin 27x40 pour ardoises" } : l));
+    const liteaux = read({}, false, lines).ouvrage("a2").needs.find((n) => n.slot === "liteau")!;
+    expect(liteaux.label).toBe("Liteaux 27×40");
+    expect(liteaux.usual).toBeNull();
+  });
+});
+
+describe("un crochet d'ardoise n'est jamais une ardoise", () => {
+  // Cas réel (devis de démonstration, 2026-10-02) : un devis de TUILES qui achète « Crochet inox ardoise 100 mm — 2 paquets ».
+  const TUILES = [
+    { ref: "t1", designation: "Fourniture et pose tuile romane canal rouge 12,5 u/m² (réf. TUI-RC12)", quantity: "1 250", unit: "u" },
+    { ref: "t2", designation: "Crochet inox ardoise 100 mm", quantity: "2", unit: "paquet" },
+  ];
+  const familyOf = (designation: string) => {
+    const p = planQuote([{ ref: "x", designation, quantity: "10", unit: "u" }], ROOFING_REFERENTIAL, tradeProfile("roofing")).lines[0]!;
+    if (p.status === "not_material") return null;
+    if (p.status === "not_covered") return p.family;
+    return ROOFING_REFERENTIAL.workItems.find((w) => w.id === p.workItemId)!.slots.find((s) => s.key === p.slot)!.family;
+  };
+
+  it("« Crochet inox ardoise » est lu comme un crochet ; aucune question sur des ardoises que le devis n'a pas", () => {
+    expect(familyOf(TUILES[1]!.designation)).toBe("slate_hook");
+    const { view } = read({}, false, TUILES);
+    expect(view.decisions.map((d) => d.key)).not.toContain("product:ardoise");
+    expect(view.ouvrages.flatMap((o) => o.needs).some((n) => n.slot === "ardoise")).toBe(false);
+  });
+
+  it("le vocabulaire reste juste : « Crochets d'ardoise », « crochet pour ardoise » → crochet ; « crochet de gouttière » → gouttière", () => {
+    expect(familyOf("Crochets d'ardoise inox")).toBe("slate_hook");
+    expect(familyOf("Crochet pour ardoise 90 mm")).toBe("slate_hook");
+    expect(familyOf("Crochet de gouttière zinc")).toBe("gutter_hook");
+    expect(familyOf("Ardoises naturelles 30x22")).toBe("roof_slate");
   });
 });

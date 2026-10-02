@@ -16,6 +16,7 @@ import {
 import { evaluate, evaluateInterval, inferDim } from "../src/referential/expression.js";
 import { Decimal } from "../src/shared/decimal.js";
 import { parseRefUnit } from "../src/referential/units.js";
+import { drafted } from "./support/brouillon.js";
 
 /** Copie du référentiel où tout est vérifié : uniquement pour tester le moteur, jamais une vraie donnée. */
 function allVerified(ref: Referential): Referential {
@@ -78,11 +79,17 @@ describe("référentiel couverture", () => {
     expect(checkReferential(ROOFING_REFERENTIAL)).toEqual([]);
   });
 
-  it("tant que les règles de calcul ne sont pas validées, aucun chiffre n'est donné à un artisan", () => {
-    // Les caractéristiques fabricant sont vérifiées, mais les formules (règles BatiClair) attendent la validation métier.
+  it("règles de calcul validées par le fondateur : tracées (qui, quand) et calculées pour l'artisan", () => {
     expect(ROOFING_REFERENTIAL.products[0]!.attributes.largeur_utile!.verification.status).toBe("verified");
-    expect(ROOFING_REFERENTIAL.workItems[0]!.needs.every((n) => n.verification.status === "draft")).toBe(true);
+    for (const n of ROOFING_REFERENTIAL.workItems[0]!.needs) {
+      expect(n.verification).toMatchObject({ status: "verified", verifiedAt: "2026-10-02", verifiedBy: "Fondateur (couvreur)" });
+    }
     const r = computeWorkItem(ROOFING_REFERENTIAL, CASE);
+    expect(need(r, "tuiles")).toMatchObject({ status: "calculated", provisional: false, quantity: { value: "1305.43" } });
+  });
+
+  it("une règle remise en brouillon ne donne aucun chiffre à un artisan", () => {
+    const r = computeWorkItem(drafted(ROOFING_REFERENTIAL), CASE);
     for (const n of r.needs) {
       expect(n.status).toBe("unknown");
       expect(n.quantity).toBeUndefined();
@@ -296,7 +303,7 @@ describe("moteur : ouvrage → besoins → achat", () => {
   });
 
   it("marque « provisoire » un calcul fait en brouillon (écran du validateur uniquement)", () => {
-    const r = computeWorkItem(ROOFING_REFERENTIAL, CASE, { acceptDraft: true });
+    const r = computeWorkItem(drafted(ROOFING_REFERENTIAL), CASE, { acceptDraft: true });
     expect(need(r, "tuiles")).toMatchObject({ status: "calculated", provisional: true, quantity: { value: "1305.43" } });
     // La caractéristique fabricant est vérifiée ; c'est la règle de calcul qui attend sa validation.
     expect(need(r, "tuiles").trace.find((t) => t.label.startsWith("Largeur utile"))).toMatchObject({ verified: true });

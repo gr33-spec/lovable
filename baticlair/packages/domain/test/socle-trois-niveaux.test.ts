@@ -12,7 +12,9 @@ import {
   type EngineAnswer,
   type LineRole,
   type OuvrageLevels,
+  type Referential,
 } from "../src/index.js";
+import { drafted } from "./support/brouillon.js";
 import { D2026_015_LINES } from "./devis-reels/d2026-015.js";
 
 /**
@@ -20,21 +22,22 @@ import { D2026_015_LINES } from "./devis-reels/d2026-015.js";
  *  1. ce que dit le devis (mesure de l'ouvrage, ou quantité à commander) ;
  *  2. le besoin matériel calculé ;
  *  3. la quantité à commander (seulement si le conditionnement est sourcé).
- * Les règles de couverture restent EN BROUILLON : ces tests le vérifient aussi.
+ * Les règles de couverture sont validées par le fondateur (2026-10-02) ; les
+ * garanties « brouillon » restent prouvées sur une copie remise en brouillon.
  */
-function read(answers: Record<string, EngineAnswer> = {}, acceptDraft = false) {
+function read(answers: Record<string, EngineAnswer> = {}, acceptDraft = false, ref: Referential = ROOFING_REFERENTIAL) {
   const profile = tradeProfile("roofing");
   const raw = validateTakeoff(
     D2026_015_LINES.map((l) => ({ id: l.ref, designation: l.designation, quantityRaw: l.quantity, unitRaw: l.unit, source: "client_quote" as const })),
     profile,
   );
-  const plan = planQuote(D2026_015_LINES.map((l) => ({ ...l })), ROOFING_REFERENTIAL, profile);
-  const proposals = proposeLineRoles(D2026_015_LINES.map((l) => ({ ref: l.ref })), plan, raw, ROOFING_REFERENTIAL);
+  const plan = planQuote(D2026_015_LINES.map((l) => ({ ...l })), ref, profile);
+  const proposals = proposeLineRoles(D2026_015_LINES.map((l) => ({ ref: l.ref })), plan, raw, ref);
   const roles = new Map<string, LineRole>([...proposals].map(([k, v]) => [k, v.role]));
   const validation = applyLineRoles(raw, roles);
-  const engine = computeWithAnswers(ROOFING_REFERENTIAL, plan, answers, {}, { acceptDraft }, slotsGivenByQuote(plan, validation));
+  const engine = computeWithAnswers(ref, plan, answers, {}, { acceptDraft }, slotsGivenByQuote(plan, validation));
   const lines = D2026_015_LINES.map((l) => ({ id: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: false, enteredByArtisan: false }));
-  const view = artisanView(lines, validation, engine, { plan, roles, ref: ROOFING_REFERENTIAL });
+  const view = artisanView(lines, validation, engine, { plan, roles, ref });
   return { proposals, roles, validation, view, ouvrage: (ref: string) => view.ouvrages.find((o) => o.lineId === ref)! };
 }
 
@@ -88,15 +91,21 @@ describe("niveau 2 : le besoin, dans SA propre unité", () => {
     }
   });
 
-  it("règles en brouillon : le besoin en liteaux est « à calculer », avec la raison", () => {
-    const liteaux = read(ANSWERS).ouvrage("ligne 3").needs.find((n) => n.slot === "liteau")!;
+  it("règle remise en brouillon : le besoin en liteaux est « à calculer », avec la raison", () => {
+    const liteaux = read(ANSWERS, false, drafted(ROOFING_REFERENTIAL)).ouvrage("ligne 3").needs.find((n) => n.slot === "liteau")!;
     expect(liteaux).toMatchObject({ need: null, order: null, state: "missing" });
     expect(liteaux.missing).toMatch(/en attente de vérification/);
   });
 
-  it("calcul provisoire (règle en brouillon, écran du validateur) : un besoin en mètres de liteaux, distinct de la surface", () => {
-    const liteaux = read(ANSWERS, true).ouvrage("ligne 3").needs.find((n) => n.slot === "liteau")!;
+  it("sans pureau, le besoin en liteaux reste « à calculer » : rien n'est deviné", () => {
+    const liteaux = read().ouvrage("ligne 3").needs.find((n) => n.slot === "liteau")!;
+    expect(liteaux).toMatchObject({ need: null, order: null });
+  });
+
+  it("règle validée : un besoin en mètres de liteaux, distinct de la surface, jamais provisoire", () => {
+    const liteaux = read(ANSWERS).ouvrage("ligne 3").needs.find((n) => n.slot === "liteau")!;
     expect(liteaux.need).toEqual({ value: "349.85", unit: "ml" });
+    expect(liteaux.provisional).toBe(false);
     // Longueur vendue du liteau non sourcée : rien à commander, le fournisseur précise.
     expect(liteaux.order).toBeNull();
     expect(liteaux.missing).toMatch(/[Cc]onditionnement/);
@@ -106,7 +115,7 @@ describe("niveau 2 : le besoin, dans SA propre unité", () => {
 describe("niveau 3 : à commander, jamais avant que le besoin ne soit établi", () => {
   it("une règle en brouillon ne produit aucun ✓, même quand le calcul provisoire aboutit", () => {
     for (const draft of [false, true]) {
-      const { view } = read(ANSWERS, draft);
+      const { view } = read(ANSWERS, draft, drafted(ROOFING_REFERENTIAL));
       for (const o of view.ouvrages.filter((x) => x.role === "measure")) {
         for (const n of o.needs) expect(n.state).not.toBe("verified");
         expect(o.state).not.toBe("verified");
@@ -191,12 +200,11 @@ describe("rapport : D-2026-015 en trois niveaux", () => {
       "# D-2026-015 en trois niveaux : lu dans le devis → il faut → à commander",
       "",
       "Fichier GÉNÉRÉ par `packages/domain/test/socle-trois-niveaux.test.ts` : ne pas modifier à la main.",
-      "Valeurs réellement produites par BatiClair. Les règles de couverture sont EN BROUILLON :",
-      "aucune n'a été validée pour ce rapport.",
+      "Valeurs réellement produites par BatiClair. Règles de couverture validées par le fondateur (couvreur)",
+      "le 2026-10-02 ; ce qui n'a pas de règle sourcée reste « à calculer » ou « à préciser ».",
       "",
-      table("1. Aujourd'hui, sans réponse de l'artisan (ce que voit l'application)", {}, false),
+      table("1. Sans réponse de l'artisan (ce que voit l'application à l'ouverture)", {}, false),
       table("2. Après les réponses de l'artisan (modèle de tuile, pureau 34,3 cm, écran)", ANSWERS, false),
-      table("3. Calcul PROVISOIRE avec les règles en brouillon (écran du validateur, jamais montré à l'artisan)", ANSWERS, true),
     ].join("\n");
     await expect(doc).toMatchFileSnapshot("../../../docs/socle-trois-niveaux-d2026-015.md");
   });
