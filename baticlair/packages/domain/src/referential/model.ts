@@ -169,10 +169,11 @@ export interface Slot {
   keywords?: string[];
   /**
    * Produit d'usage quand le devis ne le précise pas (« liteaux 18×40 pour l'ardoise ») :
-   * une PRATIQUE déclarée, jamais une règle. Montrée à l'artisan « à confirmer » ;
-   * elle ne change aucune quantité et ne choisit jamais le produit à sa place.
+   * une pratique validée et sourcée, montrée à l'artisan comme le choix par défaut
+   * (`productShort` nomme alors le besoin). Elle ne change aucune quantité, et
+   * s'efface dès que le devis nomme un produit.
    */
-  usual?: { text: string; source: string };
+  usual?: { text: string; source: string; productShort?: string };
 }
 
 /**

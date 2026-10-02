@@ -1,7 +1,7 @@
 # Banc d'essai — vrais devis : tableau de score
 
 Fichier GÉNÉRÉ par `packages/domain/test/banc-devis-reels.test.ts` : ne pas modifier à la main.
-Référentiel : roofing-2026.10.02-7.
+Référentiel : roofing-2026.10.02-8.
 
 Une ligne « commande connue » a toutes ses quantités à commander ; « besoin connu » a ses quantités
 (ml, m², pièces) mais pas encore l'unité de vente vérifiée. Les questions comptent celles qui sont
@@ -11,7 +11,7 @@ posées, celles où aucune proposition ne convient et celles restées sans répo
 
 | Devis | Lignes matériaux | Commande connue | Besoin connu (conditionnement à confirmer) | Attend une réponse | Ne sait pas encore | Ouvrage pas encore couvert | Questions |
 |---|---|---|---|---|---|---|---|
-| D-2026-015 | 10 | 0 | 0 | 0 | 7 | 3 | 1 |
+| D-2026-015 | 10 | 0 | 1 | 4 | 2 | 3 | 4 |
 
 ### Si les règles en attente étaient validées (écran du validateur)
 
@@ -27,12 +27,12 @@ Origine : Devis client d'une entreprise de couverture, transmis par le fondateur
 
 | Ligne | Aujourd'hui | Si les règles en attente étaient validées |
 |---|---|---|
-| ligne 1 | ne sait pas encore | attend une réponse |
-| ligne 2 | ne sait pas encore | besoin connu, conditionnement à confirmer |
-| ligne 3 | ne sait pas encore | attend une réponse |
-| ligne 4 | ne sait pas encore | attend une réponse |
+| ligne 1 | attend une réponse | attend une réponse |
+| ligne 2 | besoin connu, conditionnement à confirmer | besoin connu, conditionnement à confirmer |
+| ligne 3 | attend une réponse | attend une réponse |
+| ligne 4 | attend une réponse | attend une réponse |
 | ligne 5 | ouvrage pas encore couvert | ouvrage pas encore couvert — Tuile de rive : pas encore de règle de calcul dans BatiClair. |
-| ligne 6 | ne sait pas encore | attend une réponse |
+| ligne 6 | attend une réponse | attend une réponse |
 | ligne 7 | ne sait pas encore | ne sait pas encore — Calcul impossible sans les données du produit (Crochets). |
 | ligne 8 | ne sait pas encore | ne sait pas encore — Calcul impossible sans les données du produit (Colliers). |
 | ligne 9 | ouvrage pas encore couvert | ouvrage pas encore couvert — Tuile chatière : pas encore de règle de calcul dans BatiClair. |
@@ -62,14 +62,6 @@ Questions (règles validées) :
 
 À documenter aujourd'hui (règles en attente) :
 
-- Tuiles — règle de calcul (ligne 3, ligne 4) — en attente : Règle BatiClair : rangs au pureau, files de contre-liteaux par chevron, tuiles par m² couvert, surface d'écran avec recouvrements
-- Liteaux — règle de calcul (ligne 3) — en attente : Règle BatiClair : rangs au pureau, files de contre-liteaux par chevron, tuiles par m² couvert, surface d'écran avec recouvrements
-- Contre-liteaux — règle de calcul (ligne 2) — en attente : Règle BatiClair : rangs au pureau, files de contre-liteaux par chevron, tuiles par m² couvert, surface d'écran avec recouvrements
-- Écran sous-toiture — règle de calcul (ligne 1) — en attente : Règle BatiClair : rangs au pureau, files de contre-liteaux par chevron, tuiles par m² couvert, surface d'écran avec recouvrements
-- Closoir — règle de calcul (ligne 6) — en attente : Règle de pratique BatiClair : faîtage, gouttière, descente
-- Gouttière — règle de calcul (ligne 7) — en attente : Règle de pratique BatiClair : faîtage, gouttière, descente
 - Crochets — règle de calcul (ligne 7) — en attente : Règle de pratique BatiClair : faîtage, gouttière, descente
-- Naissances — règle de calcul (ligne 7) — en attente : Règle de pratique BatiClair : faîtage, gouttière, descente
-- Tubes de descente — règle de calcul (ligne 8) — en attente : Règle de pratique BatiClair : faîtage, gouttière, descente
 - Coudes — règle de calcul (ligne 8) — en attente : Règle de pratique BatiClair : faîtage, gouttière, descente
 - Colliers — règle de calcul (ligne 8) — en attente : Règle de pratique BatiClair : faîtage, gouttière, descente

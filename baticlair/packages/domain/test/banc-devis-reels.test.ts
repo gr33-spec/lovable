@@ -204,6 +204,18 @@ const STEPS: { name: string; scores: Record<string, { a: number; b: number; erro
       "D-2026-015": { a: 9, b: 2, errors: 0 },
     },
   },
+  {
+    // Les 10 règles de couverture validées par le fondateur : besoins identifiés 2 → 7 sur D-2026-015.
+    // B (lecture seule, avant réponse) ne bouge pas : tuiles et liteaux attendent le pureau, qui n'est pas écrit.
+    name: "3. Règles de couverture validées par le fondateur (2026-10-02)",
+    scores: {
+      Morellec: { a: 122, b: 19, errors: 12 },
+      Lézardrieux: { a: 18, b: 1, errors: 0 },
+      Piscine: { a: 0, b: 0, errors: 0 },
+      "D-2026-011": { a: 15, b: 9, errors: 0 },
+      "D-2026-015": { a: 9, b: 2, errors: 0 },
+    },
+  },
 ];
 
 describe("banc d'essai : 4 devis de métiers différents (score « après »)", () => {

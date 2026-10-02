@@ -611,3 +611,26 @@ Validée par le fondateur après l'audit simplicité / coût. Principe inchangé
   à tort par le bloc suivant ne se distingue pas d'une vraie ligne (pas de
   numéro de ligne) ; fichiers limités à 4 Mo ; les devis fournisseurs ne sont
   pas encore découpés.
+
+### PD-047 — Règles de couverture validées par le fondateur (2026-10-02)
+
+- **Décision** : les 10 règles présentées une par une au fondateur (couvreur),
+  avec la formule et un exemple chiffré sur D-2026-015, sont validées
+  (« Oui » à toutes) et calculées pour tous les artisans :
+  tuiles = surface ÷ (largeur utile × pureau) ; liteaux = surface ÷ pureau ;
+  contre-liteaux = surface ÷ entraxe ; écran = surface + recouvrements
+  fabricant, en rouleaux ; ardoises = surface ÷ (largeur × pureau) ; un
+  crochet par ardoise ; liteaux 18×40 pour l'ardoise quand le devis ne dit
+  rien (le devis l'emporte toujours) ; gouttière = longueur, une naissance par
+  descente ; tubes = nombre × hauteur ; closoir = longueur du faîtage.
+- **Traçabilité** : chaque règle porte « vérifiée le 2026-10-02 par le
+  fondateur (couvreur) » ; le référentiel passe en `roofing-2026.10.02-8`.
+- **Rien d'inventé** : le pureau est demandé une fois par chantier s'il n'est
+  pas écrit ; crochets de gouttière, coudes, colliers, rives restent « à
+  préciser », sans chiffre ni question inutile. Les garanties « une règle en
+  brouillon ne donne ni chiffre ni ✓ » restent prouvées par les tests, sur
+  une copie du référentiel remise en brouillon.
+- **Cas trouvé en route (test permanent)** : « Crochet inox ardoise 100 mm »
+  sur un devis de tuiles était lu comme une ardoise et faisait demander un
+  modèle d'ardoise. Le vocabulaire « crochet … ardoise » désigne désormais un
+  crochet d'ardoise.
