@@ -217,3 +217,21 @@ describe("compareOffers — cas limites", () => {
     expect(v.flags).toContain("ONLY_AS_VARIANT");
   });
 });
+
+describe("quantité demandée inconnue (mesure d'ouvrage, quantité absente)", () => {
+  it("n'est jamais remplacée : aucune offre n'est ramenée à une quantité inventée", () => {
+    const input: ComparisonInput = {
+      ...dupontInput,
+      items: dupontInput.items.map((i) => (i.id === "ecran" ? { ...i, quantity: null } : i)),
+    };
+    const out = compareOffers(input);
+    for (const o of out.items.find((i) => i.itemId === "ecran")!.offers.filter((x) => x.status === "covered")) {
+      expect(o.flags).toContain("REQUESTED_QUANTITY_UNKNOWN");
+      expect(o.flags).not.toContain("QUANTITY_HIGHER");
+      expect(o.flags).not.toContain("QUANTITY_LOWER");
+      expect(o.effectiveUnitPrice).toBeNull();
+      // Le facturé reste le facturé : il n'est pas « ramené » à une quantité demandée.
+      expect(o.comparableAmount?.toString()).toBe(o.billedAmount?.toString());
+    }
+  });
+});

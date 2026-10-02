@@ -117,6 +117,7 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
         unit: l.unitRaw,
         reference: l.reference,
         section: Array.isArray(l.section) ? l.section.filter((t): t is string => typeof t === "string") : [],
+        role: l.role === "measure" || l.role === "purchase" || l.role === "undetermined" ? l.role : null,
       })),
     };
   }

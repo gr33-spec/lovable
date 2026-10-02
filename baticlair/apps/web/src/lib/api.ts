@@ -196,6 +196,8 @@ export interface TakeoffLine {
   family: string | null;
   /** « work » : surface de l'ouvrage (liteaux 120 m²), quantité d'achat encore à calculer. */
   basis: "purchase" | "work";
+  /** Rôle de la quantité : mesure d'un ouvrage, à commander telle quelle, ou indéterminé. */
+  role: "measure" | "purchase" | "undetermined" | null;
   status: "certain" | "probable" | "to_verify";
   issues: TakeoffIssue[];
 }
@@ -262,10 +264,32 @@ export interface TakeoffViewItem {
   } | null;
 }
 
+/** Une ligne du devis en trois niveaux : lu dans le devis → il faut → à commander. */
+export interface TakeoffOuvrage {
+  lineId: string;
+  designation: string;
+  role: "measure" | "purchase" | "undetermined" | null;
+  read: { quantity: string | null; unit: string | null };
+  needs: {
+    slot: string;
+    label: string;
+    origin: "explicit" | "deduced";
+    need: { value: string; unit: string } | null;
+    needRange: { min: string; max: string; unit: string } | null;
+    order: { count: string; unit: { one: string; many: string } } | null;
+    missing: string | null;
+    state: "verified" | "to_confirm" | "missing";
+  }[];
+  direct: { quantity: string; unit: string } | null;
+  pending: string | null;
+  state: "verified" | "to_confirm" | "missing";
+}
+
 export interface TakeoffView {
   counts: { verified: number; toConfirm: number; missing: number };
   decisions: TakeoffDecision[];
   measures: { lineIds: string[]; text: string } | null;
+  ouvrages: TakeoffOuvrage[];
   items: TakeoffViewItem[];
 }
 

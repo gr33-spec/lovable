@@ -1,5 +1,6 @@
 import { computeChantier, type CompanyPreferences, type EngineOptions, type NeedResult, type Question } from "../referential/engine.js";
 import type { Referential } from "../referential/model.js";
+import type { LineRole } from "../referential/line-roles.js";
 import type { QuotePlan } from "../referential/plan.js";
 import type { TakeoffValidation } from "../takeoff/validation.js";
 import { assessNeed, assessTakeoffLine, type Assessment, type TrustState } from "./assessment.js";
@@ -74,12 +75,105 @@ export interface ViewItem {
   need?: NeedResult;
 }
 
+/** Niveaux 2 et 3 d'un besoin matériel, rattaché à l'ouvrage du devis dont il provient. */
+export interface NeedLevels {
+  needId: string;
+  slot: string;
+  /** « Liteaux 27×40 », ou le nom de l'emplacement sans produit (« Crochets »). */
+  label: string;
+  /** « explicit » : cité par le devis ; « deduced » : cœur de l'ouvrage. */
+  origin: "explicit" | "deduced";
+  /** Niveau 2 — besoin matériel dans SON unité (m de liteaux, pièces) ; null = à calculer. */
+  need: { value: string; unit: string } | null;
+  /** Besoin connu à une fourchette près (donnée sans effet sur la commande). */
+  needRange: { min: string; max: string; unit: string } | null;
+  /** Niveau 3 — quantité à commander, seulement si le conditionnement est sourcé ; sinon null. */
+  order: { count: string; unit: { one: string; many: string } } | null;
+  /** Ce qui manque pour le besoin, ou pour la commande (en clair). */
+  missing: string | null;
+  state: TrustState;
+}
+
+/**
+ * UNE LIGNE DU DEVIS ET CE QU'ELLE DEVIENT, en trois niveaux jamais confondus :
+ *  - « read »  : ce que dit le devis (mesure de l'ouvrage, ou quantité à commander) ;
+ *  - « needs » : les besoins matériels calculés à partir de cet ouvrage ;
+ *  - « order » : ce qui se commande (dans chaque besoin, ou la ligne elle-même si
+ *    elle est déjà une quantité d'article).
+ */
+export interface OuvrageLevels {
+  lineId: string;
+  designation: string;
+  role: LineRole | null;
+  /** Niveau 1, tel qu'écrit dans le devis. */
+  read: { quantity: string | null; unit: string | null };
+  /** Besoins issus de cet ouvrage (vide pour une quantité à commander telle quelle). */
+  needs: NeedLevels[];
+  /** Ligne à commander telle qu'écrite : niveaux 2 et 3 = la ligne. */
+  direct: { quantity: string; unit: string } | null;
+  /** Mesure sans aucun besoin calculable : pourquoi (ouvrage sans règle, métier non couvert). */
+  pending: string | null;
+  /** État de l'ouvrage : jamais ✓ tant qu'un de ses besoins n'est pas établi. */
+  state: TrustState;
+}
+
 export interface ArtisanView {
   counts: Record<TrustState, number>;
   decisions: Decision[];
   /** Ouvrages demandés au fournisseur pour la mesure du devis : BatiClair ne calcule pas encore leurs matériaux. */
   measures: { lineIds: string[]; text: string } | null;
   items: ViewItem[];
+  /** Chaque ligne du devis en trois niveaux (lu → il faut → à commander). Vide sans plan du calcul. */
+  ouvrages: OuvrageLevels[];
+}
+
+type OwnedNeed = NeedResult & { workItemId?: string };
+const RANK: Record<TrustState, number> = { verified: 0, to_confirm: 1, missing: 2 };
+const worst = (states: TrustState[]): TrustState => states.reduce<TrustState>((w, s) => (RANK[s] > RANK[w] ? s : w), "verified");
+
+/**
+ * À quelle ligne du devis appartient un besoin : la ligne qui désigne son
+ * emplacement, sinon celle qui le cite (« crochets compris »), sinon la
+ * première mesure de son ouvrage. Un besoin seulement suggéré n'appartient
+ * à aucune ligne (il n'est pas dans le devis).
+ */
+function needOwner(n: OwnedNeed, plan: QuotePlan, roles: ReadonlyMap<string, LineRole>): string | null {
+  if (n.origin === "suggested" || !n.workItemId) return null;
+  const planned = plan.lines.filter((l): l is Extract<QuotePlan["lines"][number], { status: "planned" }> => l.status === "planned" && l.workItemId === n.workItemId);
+  return (
+    planned.find((l) => l.slot === n.slot)?.ref ??
+    planned.find((l) => l.mentions.includes(n.slot))?.ref ??
+    planned.find((l) => roles.get(l.ref) === "measure")?.ref ??
+    null
+  );
+}
+
+const norm = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+/**
+ * Deux besoins ne portent jamais le même nom : « Liteaux 27×40 » pour le
+ * lattage et « Contre-liteaux (Liteaux 27×40) » pour le contre-lattage. Deux
+ * lignes identiques sur une commande, c'est une erreur qui attend de se produire.
+ */
+function needName(n: NeedResult, all: readonly NeedResult[]): string {
+  const twice = all.filter((x) => x.label === n.label).length > 1;
+  return twice && !norm(n.label).startsWith(norm(n.slotLabel)) ? `${n.slotLabel} (${n.label})` : n.label;
+}
+
+function needLevels(n: OwnedNeed, all: readonly NeedResult[]): NeedLevels {
+  const a = assessNeed(n);
+  const calculated = n.status === "calculated";
+  return {
+    needId: n.needId,
+    slot: n.slot,
+    label: needName(n, all),
+    origin: n.origin === "explicit" ? "explicit" : "deduced",
+    need: calculated && n.quantity ? n.quantity : null,
+    needRange: calculated && n.quantityRange ? n.quantityRange : null,
+    order: calculated && n.purchase ? n.purchase.order : null,
+    missing: !calculated ? (n.reason ?? n.question?.text ?? "Information manquante.") : !n.purchase ? (n.purchaseUnavailable ?? "Conditionnement à préciser par le fournisseur.") : null,
+    state: a.state,
+  };
 }
 
 const UNIT_CAUSES = new Set(["UNITS_ABSENT", "UNIT_MISSING"]);
@@ -149,8 +243,19 @@ function engineDecision(q: Question, need: NeedResult | undefined): Decision {
 export function artisanView(
   lines: readonly ViewLine[],
   validation: TakeoffValidation,
-  engine: { needs: readonly NeedResult[]; questions: readonly Question[]; declined?: readonly string[] } = { needs: [], questions: [] },
+  engine: { needs: readonly OwnedNeed[]; questions: readonly Question[]; declined?: readonly string[] } = { needs: [], questions: [] },
+  /** Plan du calcul et rôles des lignes : pour rattacher chaque besoin à son ouvrage. */
+  link?: { plan: QuotePlan; roles: ReadonlyMap<string, LineRole>; ref: Referential },
 ): ArtisanView {
+  // Besoins rattachés à leur ligne du devis (hors suggestions et réponses « aucun de ces produits »).
+  const owned = new Map<string, OwnedNeed[]>();
+  if (link) {
+    for (const n of engine.needs) {
+      if (n.question && engine.declined?.includes(n.question.key)) continue;
+      const owner = needOwner(n, link.plan, link.roles);
+      if (owner) owned.set(owner, [...(owned.get(owner) ?? []), n]);
+    }
+  }
   const items: ViewItem[] = [];
   const decisions: Decision[] = [];
   const groups = new Map<string, ViewLine[]>();
@@ -160,8 +265,22 @@ export function artisanView(
   for (const v of validation.lines) {
     const line = lines.find((l) => l.id === v.lineId);
     if (!line) continue;
-    const a = assessTakeoffLine(v, { documentIssues: validation.issues, confirmedByArtisan: line.confirmed, enteredByArtisan: line.enteredByArtisan });
-    if (!a) continue; // prestation : rien à commander
+    const assessed = assessTakeoffLine(v, { documentIssues: validation.issues, confirmedByArtisan: line.confirmed, enteredByArtisan: line.enteredByArtisan });
+    if (!assessed) continue; // prestation : rien à commander
+    // Un ✓ ne masque jamais un besoin du même ouvrage encore à établir.
+    const openNeeds = (owned.get(line.id) ?? []).filter((n) => assessNeed(n).state !== "verified");
+    const a: Assessment =
+      assessed.state === "verified" && openNeeds.length > 0
+        ? {
+            ...assessed,
+            state: worst(openNeeds.map((n) => assessNeed(n).state)),
+            reason: `À établir dans cet ouvrage : ${openNeeds.map((n) => n.label.toLowerCase()).join(", ")}.`,
+            criteria: [
+              ...assessed.criteria,
+              { key: "work_item", cause: "work_measure", status: "missing", detail: `Besoins à établir : ${openNeeds.map((n) => n.label).join(", ")}.`, origin: "referential", affects: ["quantity"] },
+            ],
+          }
+        : assessed;
     items.push({ kind: "line", id: line.id, label: line.designation, quantity: [line.quantity, line.unit].filter(Boolean).join(" ") || null, state: a.state, reason: a.reason, assessment: a });
     if (a.state === "verified") continue;
 
@@ -211,12 +330,53 @@ export function artisanView(
     if (n.origin === "suggested" || n.status === "unknown" || (n.question && engine.declined?.includes(n.question.key))) continue;
     const a = assessNeed(n);
     const quantity = n.purchase ? `${n.purchase.order.count} ${n.purchase.order.unit.many}` : n.quantity ? `${n.quantity.value} ${n.quantity.unit}` : null;
-    items.push({ kind: "need", id: n.needId, label: n.label, quantity, state: a.state, reason: a.reason, assessment: a, need: n });
+    items.push({ kind: "need", id: n.needId, label: needName(n, engine.needs), quantity, state: a.state, reason: a.reason, assessment: a, need: n });
   }
   const engineDecisions = engine.questions.map((q) => engineDecision(q, engine.needs.find((n) => n.question?.key === q.key)));
 
   const counts: Record<TrustState, number> = { verified: 0, to_confirm: 0, missing: 0 };
   for (const i of items) counts[i.state]++;
+
+  // Les trois niveaux, ligne par ligne du devis.
+  const ouvrages: OuvrageLevels[] = [];
+  if (link) {
+    for (const item of items.filter((i) => i.kind === "line")) {
+      const line = lines.find((l) => l.id === item.id)!;
+      const v = validation.lines.find((x) => x.lineId === item.id)!;
+      const role = link.roles.get(item.id) ?? null;
+      const needs = (owned.get(item.id) ?? []).map((n) => needLevels(n, engine.needs));
+      // Tout composant que la ligne cite reste visible, même sans règle de calcul (« fixations »).
+      const planned0 = link.plan.lines.find((l) => l.ref === item.id);
+      if (v.basis === "work" && planned0?.status === "planned") {
+        const work = link.ref.workItems.find((w) => w.id === planned0.workItemId);
+        for (const key of [planned0.slot, ...planned0.mentions]) {
+          const slot = work?.slots.find((x) => x.key === key);
+          // Seulement un composant que le calcul ne connaît pas du tout : un besoin calculé ailleurs
+          // (« pour tuiles HP10 » sur la ligne des liteaux) appartient déjà à sa propre ligne.
+          if (!slot || needs.some((n) => n.slot === key) || engine.needs.some((n) => n.workItemId === work!.id && n.slot === key)) continue;
+          needs.push({ needId: `${work!.id}/${key}`, slot: key, label: slot.label, origin: "explicit", need: null, needRange: null, order: null, missing: "Pas encore de règle de calcul dans BatiClair.", state: "missing" });
+        }
+      }
+      const direct = v.basis === "purchase" && role !== "undetermined" && line.quantity && line.unit && needs.length === 0 ? { quantity: line.quantity, unit: line.unit } : null;
+      const planned = link.plan.lines.find((l) => l.ref === item.id);
+      const pending =
+        v.basis === "work" && needs.length === 0
+          ? planned && planned.status === "not_covered"
+            ? planned.reason
+            : "BatiClair ne sait pas encore calculer les matériaux de cet ouvrage."
+          : null;
+      ouvrages.push({
+        lineId: item.id,
+        designation: line.designation,
+        role,
+        read: { quantity: line.quantity, unit: line.unit },
+        needs,
+        direct,
+        pending,
+        state: v.basis === "work" ? (needs.length > 0 ? worst(needs.map((n) => n.state)) : "missing") : worst([item.state, ...needs.map((n) => n.state)]),
+      });
+    }
+  }
   return {
     counts,
     decisions: [...lineDecisions.filter((d) => d.state === "missing"), ...groupDecisions, ...engineDecisions, ...lineDecisions.filter((d) => d.state !== "missing")],
@@ -228,6 +388,7 @@ export function artisanView(
           }
         : null,
     items,
+    ouvrages,
   };
 }
 
@@ -263,7 +424,7 @@ export function computeWithAnswers(
   options: EngineOptions = {},
   /** Emplacements déjà donnés comme achat par le devis (voir slotsGivenByQuote) : ni calcul montré, ni question. */
   given: ReadonlySet<string> = new Set(),
-): { needs: NeedResult[]; questions: Question[]; declined: string[] } {
+): { needs: (NeedResult & { workItemId: string })[]; questions: Question[]; declined: string[] } {
   const declined = new Set(Object.entries(answers).filter(([, v]) => v === null).map(([k]) => k));
   const inputs = plan.inputs.map((input) => {
     const work = ref.workItems.find((w) => w.id === input.workItemId)!;
@@ -291,7 +452,8 @@ export function computeWithAnswers(
     return { ...input, products, params, preferences: prefs };
   });
   const result = computeChantier(ref, inputs, options);
-  const needs = result.workItems.flatMap((w) => w.needs.filter((n) => !given.has(`${w.workItemId}/${n.slot}`)));
+  // Chaque besoin garde son ouvrage : il sera rattaché à la ligne du devis dont il provient.
+  const needs = result.workItems.flatMap((w) => w.needs.filter((n) => !given.has(`${w.workItemId}/${n.slot}`)).map((n) => ({ ...n, workItemId: w.workItemId })));
   const seen = new Set<string>();
   const questions: Question[] = [];
   for (const n of needs) {

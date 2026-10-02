@@ -475,6 +475,9 @@ model TakeoffLine {
   section     Json      @default("[]")
   /// L'artisan a vérifié la ligne et la garde telle quelle.
   confirmedAt DateTime?
+  /// Rôle de la quantité (niveau 1) : « measure » (mesure d'un ouvrage), « purchase » (à commander telle
+  /// quelle) ou « undetermined » (ambigu, gardé tel quel). Proposé par le code à la lecture, sans IA.
+  role        String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 

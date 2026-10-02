@@ -26,8 +26,8 @@ Référence couverture :
 
 | Devis | Lignes matériaux | A — Compréhension | B — Quantitatif exact | Besoins identifiés | Questions | Inconnus | Erreurs | Lignes envoyées (avant → après regroupement) |
 |---|---|---|---|---|---|---|---|---|
-| D-2026-015 — couverture (référence) | 10 | **90 %** (9) | **20 %** (2) | 3 | 1 | 7 | 1 | 10 → 10 |
-| **Total** | **10** | **90 %** (9) | **20 %** (2) | 3 | 1 | 7 | 1 | 10 → 10 |
+| D-2026-015 — couverture (référence) | 10 | **90 %** (9) | **20 %** (2) | 2 | 1 | 8 | 0 | 10 → 10 |
+| **Total** | **10** | **90 %** (9) | **20 %** (2) | 2 | 1 | 8 | 0 | 10 → 10 |
 
 ## Ce que verrait l'artisan (lecture seule, avant toute réponse)
 
@@ -41,7 +41,7 @@ ne sait pas encore convertir : elles partent au fournisseur comme mesure, jamais
 | Lézardrieux — plâtrerie, isolation | 2 | 6 | 16 |
 | Piscine | 0 | 37 | 0 |
 | D-2026-011 — salle de bain | 9 | 1 | 5 |
-| D-2026-015 — couverture (référence) | 4 | 0 | 6 |
+| D-2026-015 — couverture (référence) | 2 | 0 | 8 |
 
 ## Non-régression
 
@@ -55,6 +55,11 @@ Chaque devis doit garder au moins ses scores A et B de l'étape précédente, sa
 | 1. Règles générales de lecture (2026-10-01) | Piscine | 0 | 0 | 0 |
 | 1. Règles générales de lecture (2026-10-01) | D-2026-011 | 15 | 9 | 0 |
 | 1. Règles générales de lecture (2026-10-01) | D-2026-015 | 9 | 2 | 1 |
+| 2. Socle en trois niveaux : lu → il faut → à commander (2026-10-02) | Morellec | 122 | 19 | 12 |
+| 2. Socle en trois niveaux : lu → il faut → à commander (2026-10-02) | Lézardrieux | 18 | 1 | 0 |
+| 2. Socle en trois niveaux : lu → il faut → à commander (2026-10-02) | Piscine | 0 | 0 | 0 |
+| 2. Socle en trois niveaux : lu → il faut → à commander (2026-10-02) | D-2026-011 | 15 | 9 | 0 |
+| 2. Socle en trois niveaux : lu → il faut → à commander (2026-10-02) | D-2026-015 | 9 | 2 | 0 |
 
 ## Ce qu'il faudrait savoir décomposer (score B)
 
@@ -81,7 +86,7 @@ Chaque devis doit garder au moins ses scores A et B de l'étape précédente, sa
 
 ## Erreurs restantes
 
-- mesure d'ouvrage envoyée comme quantité d'achat : 13 (ex. Morellec — électricité + plomberie (scanné) : « TABLEAU GENERAL ELECTRIQUE HAGER INTERUPTEURS DIFFERENTIELS HAUTE SENS »)
+- mesure d'ouvrage envoyée comme quantité d'achat : 12 (ex. Morellec — électricité + plomberie (scanné) : « TABLEAU GENERAL ELECTRIQUE HAGER INTERUPTEURS DIFFERENTIELS HAUTE SENS »)
 
 ## Questions posées à l'artisan
 
@@ -405,8 +410,8 @@ Chaque devis doit garder au moins ses scores A et B de l'étape précédente, sa
 | ligne 4 | Couverture en tuiles terre cuite HP10 rouge (Fourniture & Pose) - Fourniture et  | 120 m² | ouvrage à convertir | matériau (roof_tile), ouvrage | compris |  |
 | ligne 5 | Rives de toit (Fourniture & Pose) - Fourniture et pose de tuiles de rive pour la | 24 m | ouvrage à convertir | matériau (roof_accessory), ouvrage | compris |  |
 | ligne 6 | Faîtage (Fourniture & Pose) - Fourniture et pose de faîtières ventilées avec clo | 10 m | ouvrage à convertir | matériau (roof_accessory), ouvrage | compris |  |
-| ligne 7 | Gouttière PVC de 25 sable (Fourniture & Pose) - Fourniture et pose de gouttières | 20 m | article principal + accessoires | matériau (gutter), achat | besoin identifié |  |
-| ligne 8 | Descente d'eau pluviale PVC Ø80 avec coudes (Fourniture & Pose) - Fourniture et  | 2 unités | ouvrage à convertir | matériau (downpipe), achat | — | mesure d'ouvrage envoyée comme quantité d'achat |
+| ligne 7 | Gouttière PVC de 25 sable (Fourniture & Pose) - Fourniture et pose de gouttières | 20 m | article principal + accessoires | matériau (gutter), ouvrage | — |  |
+| ligne 8 | Descente d'eau pluviale PVC Ø80 avec coudes (Fourniture & Pose) - Fourniture et  | 2 unités | ouvrage à convertir | matériau (downpipe), ouvrage | compris |  |
 | ligne 9 | Chatières de ventilation (Fourniture & Pose) - Fourniture et pose de tuiles chat | 10 unités | achat direct | matériau (roof_accessory), achat | quantité certaine |  |
 | ligne 10 | Sortie de toit Poujoulat (Fourniture & Pose) - Fourniture et pose d'une sortie d | 1 unité | achat direct | matériau (roof_accessory), achat | quantité certaine |  |
 

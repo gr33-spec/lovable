@@ -15,6 +15,12 @@ const apiEnv = {
   EMAIL_PROVIDER: "console",
   AI_PROVIDER: "fake",
   PLAN_ACTIVATION_CODES: "E2E-SOLO-CODE:solo",
+  // Les parcours vérifient la limite de l'essai (3 chantiers), comme à l'ouverture ; en bêta, l'essai est sans limite.
+  BILLING_PLANS: JSON.stringify([
+    { key: "trial", label: "Essai gratuit", projectLimit: 3, period: "trial", priceEurMonth: null, offered: false },
+    { key: "solo", label: "Solo", projectLimit: 10, period: "month", priceEurMonth: 39, offered: true },
+    { key: "pro", label: "Pro", projectLimit: 30, period: "month", priceEurMonth: 79, offered: true },
+  ]),
   LOG_LEVEL: "warn",
 };
 

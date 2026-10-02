@@ -151,26 +151,30 @@ function evaluateItem(
   if (!billed) flags.push("NOT_PRICED");
 
   // Quantité proposée dans l'unité du besoin (conditionnement compris).
-  const converted = productLines.map((l) =>
-    l.quantity ? l.quantity.convertTo(item.quantity.unit, l.packaging) : null,
-  );
+  // Demande sans quantité à commander (mesure d'ouvrage, quantité inconnue) : rien à ramener.
+  const wanted = item.quantity;
   let offered: Quantity | null = null;
-  if (converted.every((q) => q !== null)) {
-    offered = Quantity.of(
-      converted.reduce((acc, q) => acc.plus(q!.value), new Decimal(0)),
-      item.quantity.unit,
-    );
+  if (!wanted) {
+    flags.push("REQUESTED_QUANTITY_UNKNOWN");
   } else {
-    flags.push("UNIT_NOT_COMPARABLE");
+    const converted = productLines.map((l) => (l.quantity ? l.quantity.convertTo(wanted.unit, l.packaging) : null));
+    if (converted.every((q) => q !== null)) {
+      offered = Quantity.of(
+        converted.reduce((acc, q) => acc.plus(q!.value), new Decimal(0)),
+        wanted.unit,
+      );
+    } else {
+      flags.push("UNIT_NOT_COMPARABLE");
+    }
   }
 
   let normalized: Money | null = null;
   let comparable: Money | null = null;
   let unitPrice: Money | null = null;
-  if (billed && offered && !offered.value.isZero()) {
+  if (billed && offered && wanted && !offered.value.isZero()) {
     unitPrice = billed.divide(offered.value);
-    normalized = unitPrice.multiply(item.quantity.value);
-    const cmp = offered.value.comparedTo(item.quantity.value);
+    normalized = unitPrice.multiply(wanted.value);
+    const cmp = offered.value.comparedTo(wanted.value);
     if (cmp < 0) flags.push("QUANTITY_LOWER");
     if (cmp > 0) flags.push("QUANTITY_HIGHER");
     // PD-011 : on paie le conditionnement entier ; s'il manque de la
@@ -275,7 +279,7 @@ function summarizeSupplier(
     if (r.flags.includes("QUANTITY_LOWER") || r.flags.includes("QUANTITY_HIGHER")) {
       findings.push({ code: "QUANTITY_DIFFERS", nature: "FACT", severity: r.flags.includes("QUANTITY_LOWER") ? "attention" : "info", supplierId: sid, itemIds: [itemId], lineIds: r.lineIds, priority: r.flags.includes("QUANTITY_LOWER") ? 55 : 25 });
     }
-    if (r.flags.includes("UNIT_NOT_COMPARABLE")) {
+    if (r.flags.includes("UNIT_NOT_COMPARABLE") || r.flags.includes("REQUESTED_QUANTITY_UNKNOWN")) {
       findings.push({ code: "UNIT_NOT_COMPARABLE", nature: "WARNING", severity: "attention", supplierId: sid, itemIds: [itemId], lineIds: r.lineIds, priority: 58 });
     }
     if (r.status === "covered" && r.confidence === "to_verify") {

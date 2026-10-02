@@ -43,8 +43,10 @@ export class PriceRequestsService {
     const sent = takeoff.lines.flatMap((l) => {
       const { kind, family } = lineKind(l.designation, profile);
       if (kind === "labor") return [];
-      // Surface d'ouvrage (« liteaux 120 m² ») : demandée comme telle, jamais comme une quantité d'achat.
-      return [{ ...l, ...(kind === "material" && isWorkQuantity(family, parseUnit(l.unit)) ? { basis: "work" as const } : {}) }];
+      // Mesure d'ouvrage (« liteaux 120 m² », « 2 descentes ») : demandée comme telle, jamais comme une
+      // quantité d'achat. Le rôle enregistré avec la ligne fait foi ; à défaut, la famille et l'unité.
+      const measure = l.role ? l.role === "measure" : kind === "material" && isWorkQuantity(family, parseUnit(l.unit));
+      return [{ designation: l.designation, quantity: l.quantity, unit: l.unit, reference: l.reference, section: l.section, ...(measure ? { basis: "work" as const } : {}) }];
     });
     // Le même article répété pièce par pièce part en une seule ligne, avec le total et ses titres communs.
     const lines = groupIdenticalLines(sent).map(({ mergedFrom, section, ...l }) => ({

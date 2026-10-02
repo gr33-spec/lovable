@@ -3,7 +3,7 @@
 import { AlertTriangle, Check, ChevronDown, CircleCheck, HelpCircle, Pencil, Trash2 } from "lucide-react";
 import { useId, useState } from "react";
 import { Button } from "@/components/ui";
-import type { Origin, ProofCriterion, TakeoffDecision, TakeoffLine, TakeoffView, TakeoffViewItem } from "@/lib/api";
+import type { TakeoffOuvrage, Origin, ProofCriterion, TakeoffDecision, TakeoffLine, TakeoffView, TakeoffViewItem } from "@/lib/api";
 import { doubtText, shortName } from "@/lib/labels";
 
 /**
@@ -414,7 +414,11 @@ export function ReadyList({ items, onAnswer, editable }: { items: TakeoffViewIte
 }
 
 /** Ouvrages mesurés : une information, pas une décision. Ils partent au fournisseur pour leur mesure. */
-export function MeasuresNote({ measures, items }: { measures: NonNullable<TakeoffView["measures"]>; items: TakeoffViewItem[] }) {
+/** « 349,85 m », « 2 pièces » : le besoin dans sa propre unité. */
+const needUnit = (u: string) => (u === "u" ? "pièce(s)" : u === "m2" ? "m²" : u);
+const frNumber = (v: string) => v.replace(".", ",");
+
+export function MeasuresNote({ measures, items, ouvrages = [] }: { measures: NonNullable<TakeoffView["measures"]>; items: TakeoffViewItem[]; ouvrages?: TakeoffOuvrage[] }) {
   const [openId, setOpenId] = useState<string | null>(null);
   return (
     <details className="rounded-2xl bg-surface px-4 py-3 shadow-card">
@@ -431,7 +435,14 @@ export function MeasuresNote({ measures, items }: { measures: NonNullable<Takeof
               <div className="flex items-center gap-2">
                 <span className="min-w-0 grow">
                   <span className="line-clamp-1 font-semibold">{shortName(item.label)}</span>
-                  <span className="text-muted">Pour {item.quantity ?? "?"} · quantité à calculer</span>
+                  {/* Niveau 1 : la mesure de l'ouvrage, jamais présentée comme une quantité de matériau. */}
+                  <span className="block text-muted">Lu dans le devis : {item.quantity ?? "?"}</span>
+                  {(ouvrages.find((o) => o.lineId === id)?.needs ?? []).map((n) => (
+                    <span key={n.slot} className="block text-muted">
+                      Il faut : {n.label} —{" "}
+                      {n.need ? `${frNumber(n.need.value)} ${needUnit(n.need.unit)}` : <span className="font-semibold text-warn">à calculer</span>}
+                    </span>
+                  ))}
                 </span>
                 <button type="button" onClick={() => setOpenId(openId === id ? null : id)} aria-expanded={openId === id} className="inline-flex min-h-11 shrink-0 items-center font-bold text-accent-text">
                   Voir le calcul

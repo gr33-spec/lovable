@@ -44,6 +44,17 @@ function viewDto(view: ArtisanView) {
         : null,
     })),
     measures: view.measures,
+    // Les trois niveaux, ligne par ligne : lu dans le devis → il faut → à commander.
+    ouvrages: view.ouvrages.map((o) => ({
+      lineId: o.lineId,
+      designation: o.designation,
+      role: o.role,
+      read: o.read,
+      needs: o.needs.map((n) => ({ slot: n.slot, label: n.label, origin: n.origin, need: n.need, needRange: n.needRange, order: n.order, missing: n.missing, state: n.state })),
+      direct: o.direct,
+      pending: o.pending,
+      state: o.state,
+    })),
     items: view.items.map((i) => ({
       kind: i.kind,
       id: i.id,
@@ -65,7 +76,7 @@ function viewDto(view: ArtisanView) {
   };
 }
 
-function toDto({ takeoff, validation, view }: ReviewedTakeoff) {
+function toDto({ takeoff, validation, view, roles }: ReviewedTakeoff) {
   const byId = new Map(validation.lines.map((v) => [v.lineId, v]));
   return {
     id: takeoff.id,
@@ -99,6 +110,8 @@ function toDto({ takeoff, validation, view }: ReviewedTakeoff) {
         kind: v?.kind ?? "unknown",
         family: v?.familyLabel ?? null,
         basis: v?.basis ?? "purchase",
+        role: roles.get(l.id)?.role ?? null,
+        roleWhy: roles.get(l.id)?.why ?? null,
         status: v?.status ?? "to_verify",
         issues: (v?.issues ?? []).map((i) => ({ code: i.code, severity: i.severity, message: i.message })),
       };

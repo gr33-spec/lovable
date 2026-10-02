@@ -1,4 +1,16 @@
-import { assessTakeoffLine, groupIdenticalLines, ROOFING_REFERENTIAL, trustCounts, scoreQuote, tradeProfile, validateTakeoff, type LineValidation, type QuoteScore } from "../../src/index.js";
+import {
+  applyLineRoles,
+  assessTakeoffLine,
+  groupIdenticalLines,
+  proposeLineRoles,
+  ROOFING_REFERENTIAL,
+  trustCounts,
+  scoreQuote,
+  tradeProfile,
+  validateTakeoff,
+  type LineValidation,
+  type QuoteScore,
+} from "../../src/index.js";
 import { MATERIAL_TRUTHS, type BenchLine } from "./truth.js";
 
 /**
@@ -54,7 +66,7 @@ export function evaluateQuote(id: string, lines: BenchLine[], trade: string, acc
   const profile = tradeProfile(trade);
   const score = scoreQuote(lines, ROOFING_REFERENTIAL, profile, { acceptDraft });
   // Lecture de tout le document (comme dans l'application) : les questions communes à plusieurs lignes comptent une fois.
-  const takeoff = validateTakeoff(
+  const read = validateTakeoff(
     lines.map((l) => ({
       id: l.ref,
       designation: l.designation,
@@ -65,6 +77,9 @@ export function evaluateQuote(id: string, lines: BenchLine[], trade: string, acc
     })),
     profile,
   );
+  // Comme dans l'application : le rôle de chaque quantité (mesure d'ouvrage ou à commander) fait foi.
+  const roles = proposeLineRoles(lines.map((l) => ({ ref: l.ref })), score.plan, read, ROOFING_REFERENTIAL);
+  const takeoff = applyLineRoles(read, new Map([...roles].map(([k, v]) => [k, v.role])));
   const evaluated = lines.map((line, index): EvaluatedLine => {
     const v = takeoff.lines[index]!;
     const engine = score.lines.find((l) => l.ref === line.ref)!;
@@ -73,7 +88,10 @@ export function evaluateQuote(id: string, lines: BenchLine[], trade: string, acc
     if (material && v.kind === "labor") errors.push("matériau pris pour de la main-d'œuvre");
     if (!material && v.kind === "material") errors.push(line.truth === "I" ? "information prise pour un matériau" : "main-d'œuvre prise pour un matériau");
     if (line.truth === "C" && v.kind === "material" && v.basis === "purchase" && !blocking(v)) errors.push("mesure d'ouvrage envoyée comme quantité d'achat");
-    if ((line.truth === "D" || line.truth === "P") && v.kind === "material" && v.basis === "work") errors.push("quantité d'achat bloquée comme mesure d'ouvrage");
+    // « P » : un ouvrage dont le devis cite les composants (« crochets compris ») se décompose : le traiter en
+    // mesure n'est pas une erreur, l'envoyer comme un seul article en serait une (accessoires perdus).
+    const decomposed = line.truth === "P" && roles.get(line.ref)?.why.includes("compris");
+    if ((line.truth === "D" || line.truth === "P") && v.kind === "material" && v.basis === "work" && !decomposed) errors.push("quantité d'achat bloquée comme mesure d'ouvrage");
     // Le vocabulaire couverture ne doit rien reconnaître dans un devis d'un autre métier.
     const planned = score.plan.lines.find((l) => l.ref === line.ref)!;
     if (trade !== "roofing" && planned.status === "planned") errors.push("rattachée à un ouvrage de couverture");

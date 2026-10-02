@@ -160,7 +160,7 @@ export function ProjectTakeoff({
         {view.decisions.map((d) => (
           <DecisionCard key={d.key} decision={d} lines={takeoff.lines} editable={editable} pending={pending} handlers={handlers} />
         ))}
-        {view.measures ? <MeasuresNote measures={view.measures} items={view.items} /> : null}
+        {view.measures ? <MeasuresNote measures={view.measures} items={view.items} ouvrages={view.ouvrages ?? []} /> : null}
         <ReadyList items={view.items} onAnswer={handlers.onAnswer} editable={editable} />
         {editable && blocking === 0 ? (
           <Card className="flex flex-col gap-3 p-5">
@@ -254,9 +254,9 @@ function ListRow({ line, editable, pending, onSave, onDelete, onConfirm }: { lin
         <span className="min-w-0 grow">
           <span className="line-clamp-2 text-[15px] leading-snug font-bold">{shortName(line.designation)}</span>
           <span className="text-sm text-muted">
-            {line.basis === "work" ? "Pour " : ""}
+            {line.basis === "work" ? "Lu dans le devis : " : ""}
             {line.quantity ?? "?"} {line.unit ?? ""}
-            {line.basis === "work" ? <span className="font-semibold text-warn"> · quantité à calculer</span> : null}
+            {line.basis === "work" ? <span className="font-semibold text-warn"> · matériaux à calculer</span> : null}
             {/* Où la ligne se trouve dans le devis (logement, pièce) : pour s'y retrouver d'un coup d'œil. */}
             {line.section?.length ? <span> · {line.section.slice(-2).join(" › ")}</span> : null}
           </span>
