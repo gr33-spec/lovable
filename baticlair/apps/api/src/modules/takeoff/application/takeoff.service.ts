@@ -47,6 +47,8 @@ import type { LineFields, TakeoffLineRecord, TakeoffRecord, TakeoffRepository } 
  *   avant tout appel, et le nombre d'appels est plafonné.
  */
 export interface ReadingOptions {
+  /** Compte autorisé à voir les calculs des règles en brouillon (marqués « provisoire »), pour les valider. */
+  isValidator?: (tenant: TenantContext) => Promise<boolean>;
   /** Mesures de chaque lecture (journal du serveur), en plus de leur enregistrement avec l'analyse. */
   onStats?: (stats: ReadingStats) => void;
   policy?: ExtractionPolicy;
@@ -462,16 +464,29 @@ export class TakeoffService {
     const plan = planQuote(lines.map((l) => ({ ref: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, section: l.section })), ROOFING_REFERENTIAL, profile);
     // Niveau 1 : le rôle de chaque quantité (mesure d'ouvrage ou à commander), proposé par le code
     // et ENREGISTRÉ avec la ligne ; une mesure ne devient jamais une quantité d'achat.
-    const proposals = proposeLineRoles(takeoff.lines.map((l) => ({ ref: l.id, reference: l.reference })), plan, read, ROOFING_REFERENTIAL);
+    const proposals = proposeLineRoles(takeoff.lines.map((l) => ({ ref: l.id, reference: l.reference, designation: l.designation })), plan, read, ROOFING_REFERENTIAL);
     const roles = new Map<string, LineRole>([...proposals].map(([id, p]) => [id, p.role]));
+    // L'artisan a tranché une ambiguïté (« 6 : ardoises ou jouées ? ») : sa réponse fait foi pour ce chantier.
+    for (const [key, value] of Object.entries(takeoff.answers)) {
+      const id = key.startsWith("role:") ? key.slice(5) : null;
+      if (id && roles.has(id) && (value === "measure" || value === "purchase")) roles.set(id, value);
+    }
+    const asks = new Map([...proposals].filter(([id, p]) => p.ask && roles.get(id) === "undetermined").map(([id, p]) => [id, p.ask!]));
     const changed = new Map([...roles].filter(([id, role]) => takeoff.lines.find((l) => l.id === id)?.role !== role));
     if (changed.size > 0) {
       await this.takeoffs.setRoles(tenant, changed);
       takeoff = { ...takeoff, lines: takeoff.lines.map((l) => (changed.has(l.id) ? { ...l, role: changed.get(l.id)! } : l)) };
     }
     const validation = applyLineRoles(read, roles);
-    const engine = plan.inputs.length > 0 ? computeWithAnswers(ROOFING_REFERENTIAL, plan, takeoff.answers, await this.memory.forEngine(tenant), {}, slotsGivenByQuote(plan, validation)) : { needs: [], questions: [], declined: [] };
-    return { takeoff, validation, roles: proposals, view: artisanView(lines, validation, engine, { plan, roles, ref: ROOFING_REFERENTIAL }) };
+    // Mode validateur (fondateur) : les calculs des règles EN BROUILLON sont montrés, marqués « provisoire »,
+    // jamais ✓ et jamais envoyés au fournisseur (la demande de prix ne reprend que les lignes du devis).
+    const acceptDraft = (await this.reading.isValidator?.(tenant)) ?? false;
+    const engine =
+      plan.inputs.length > 0
+        ? computeWithAnswers(ROOFING_REFERENTIAL, plan, takeoff.answers, await this.memory.forEngine(tenant), { acceptDraft }, slotsGivenByQuote(plan, validation))
+        : { needs: [], questions: [], declined: [] };
+    const reviewed = { takeoff, validation, roles: new Map([...proposals].map(([id, p]) => [id, { ...p, role: roles.get(id) ?? p.role }])) };
+    return { ...reviewed, view: artisanView(lines, validation, engine, { plan, roles, ref: ROOFING_REFERENTIAL, asks }) };
   }
 
   /**

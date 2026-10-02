@@ -246,8 +246,11 @@ function ListRow({ line, editable, pending, onSave, onDelete, onConfirm }: { lin
   return (
     <div className="flex flex-col gap-2 py-2.5">
       <div className="flex items-center gap-3">
+        {/* Jamais de coche verte sur une mesure d'ouvrage ou une quantité ambiguë : rien n'y est encore à commander. */}
         {doubt ? (
           <HelpCircle size={18} className="shrink-0 text-warn" aria-label="à vérifier" />
+        ) : line.basis === "work" || line.role === "undetermined" ? (
+          <HelpCircle size={18} className="shrink-0 text-muted" aria-label="matériaux à calculer" />
         ) : (
           <CircleCheck size={18} className="shrink-0 text-ok" aria-label="vérifiée" />
         )}

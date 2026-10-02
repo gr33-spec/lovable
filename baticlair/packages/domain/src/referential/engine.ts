@@ -72,7 +72,8 @@ export interface EngineOptions {
 export interface Question {
   /** Clé stable : la même question n'est posée qu'une fois pour tout l'ouvrage. */
   key: string;
-  kind: "confirm_product" | "choose_product" | "param";
+  /** « choose » : un choix simple entre des lectures (« 6 ardoises » ou « 6 jouées »). */
+  kind: "confirm_product" | "choose_product" | "param" | "choose";
   text: string;
   hint?: string;
   unit?: string;

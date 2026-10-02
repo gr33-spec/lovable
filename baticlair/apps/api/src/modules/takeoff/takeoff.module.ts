@@ -47,6 +47,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
         memory: CompanyMemory,
         logger: AppLogger,
         config: AppConfig,
+        prisma: PrismaService,
       ) =>
         new TakeoffService(
           repo,
@@ -61,9 +62,14 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
           {
             maxAnalysisMicroUsd: Math.round((Number(config.aiCost.analysisMaxEur) / Number(config.aiCost.usdToEur)) * 1_000_000),
             onStats: (stats) => logger.info({ reading: stats }, "takeoff: lecture du devis"),
+            isValidator: async (tenant) => {
+              if (config.referentialValidators.length === 0) return false;
+              const user = await prisma.user.findUnique({ where: { id: tenant.userId }, select: { email: true } });
+              return !!user && config.referentialValidators.includes(user.email.toLowerCase());
+            },
           },
         ),
-      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, TAKEOFF_EXTRACTOR, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG],
+      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, TAKEOFF_EXTRACTOR, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService],
     },
   ],
 })

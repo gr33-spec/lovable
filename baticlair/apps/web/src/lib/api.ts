@@ -232,7 +232,7 @@ export interface TakeoffDecision {
   secondary: ("pieces" | "keep" | "edit" | "answer" | "remove")[];
   question: {
     key: string;
-    kind: "confirm_product" | "choose_product" | "param";
+    kind: "confirm_product" | "choose_product" | "param" | "choose";
     unit: string | null;
     hint: string | null;
     options: { label: string; value: string }[];
@@ -278,6 +278,10 @@ export interface TakeoffOuvrage {
     needRange: { min: string; max: string; unit: string } | null;
     order: { count: string; unit: { one: string; many: string } } | null;
     missing: string | null;
+    /** Calcul provisoire (règle en brouillon, mode validateur) : à juger, jamais ✓. */
+    provisional: boolean;
+    /** Produit d'usage quand le devis ne le précise pas (« 18×40 d'ordinaire… à confirmer »). */
+    usual: string | null;
     state: "verified" | "to_confirm" | "missing";
   }[];
   direct: { quantity: string; unit: string } | null;

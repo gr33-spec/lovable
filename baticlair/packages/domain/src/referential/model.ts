@@ -167,6 +167,23 @@ export interface Slot {
   label: string;
   /** Départage deux emplacements d'une même famille (« contre-lattage » ≠ « lattage »). */
   keywords?: string[];
+  /**
+   * Produit d'usage quand le devis ne le précise pas (« liteaux 18×40 pour l'ardoise ») :
+   * une PRATIQUE déclarée, jamais une règle. Montrée à l'artisan « à confirmer » ;
+   * elle ne change aucune quantité et ne choisit jamais le produit à sa place.
+   */
+  usual?: { text: string; source: string };
+}
+
+/**
+ * Ouvrage que le devis COMPTE (« 2 entourages de cheminée », « 6 jouées ») :
+ * du vocabulaire, aucune quantité. Une ligne comptée ainsi n'est jamais un
+ * nombre d'articles : c'est un nombre d'ouvrages, ou une ambiguïté à lever.
+ */
+export interface CountedWork {
+  key: string;
+  label: { one: string; many: string };
+  keywords: string[];
 }
 
 /** Besoin matériau d'un ouvrage : une formule sourcée. */
@@ -233,4 +250,6 @@ export interface Referential {
   products: Product[];
   workItems: WorkItemType[];
   wasteRules: WasteRule[];
+  /** Ouvrages comptés à l'unité dans les devis (vocabulaire). */
+  countedWorks?: CountedWork[];
 }

@@ -6,6 +6,8 @@ import type { BenchLine } from "../../../packages/domain/test/devis-reels/truth.
 import { CompanyMemory } from "../src/modules/learning/application/company-memory.js";
 import { CorrectionJournal } from "../src/modules/learning/application/correction-journal.js";
 import type { TenantContext } from "../src/modules/tenancy/index.js";
+import { loadConfig } from "../src/platform/config/config.js";
+import { CONFIG } from "../src/platform/tokens.js";
 import { makePdf } from "./support/pdf-fixtures.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
 
@@ -243,5 +245,83 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
       expect(o.state).not.toBe("verified");
       for (const n of o.needs) expect(n.state).not.toBe("verified");
     }
+  });
+});
+
+describe("ouvrages comptés : « 6 unités » de jouées n'est jamais 6 ardoises", () => {
+  const ARDOISES: BenchLine[] = [
+    { ref: "l1", designation: "Couverture en ardoises naturelles 30x22 posées au crochet", quantity: "200", unit: "m²", truth: "C" },
+    { ref: "l2", designation: "Ardoises pour jouées de lucarnes", quantity: "6", unit: "unités", truth: "C" },
+    { ref: "l3", designation: "Entourage de cheminée zinc et solin", quantity: "2", unit: "unités", truth: "C" },
+    { ref: "l4", designation: "Chatières de ventilation", quantity: "12", unit: "unités", truth: "D" },
+  ];
+
+  it("une question tranche l'ambiguïté ; la liste ne se valide pas avant ; la réponse est enregistrée et part juste chez le fournisseur", async () => {
+    const { agent, companyId } = await signUpWithCompany(ctx.app, "c@example.fr", "Toitures Martin");
+    const { projectId, takeoffId, view } = await projectWith(agent, ARDOISES);
+    const question = view.decisions.find((d) => d.key.startsWith("role:"))!;
+    expect(question.question).toMatchObject({ kind: "choose" });
+    expect(question.text).toBe("6 : c'est le nombre d'ardoises à commander, ou le nombre de jouées ?");
+    // Rien ne part avec une ambiguïté qui change la commande.
+    expect((await agent.post(`/v1/takeoffs/${takeoffId}/validate`)).status).toBe(400);
+
+    const answered = (await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: question.question!.key, value: "measure" }).expect(200)).body;
+    expect(answered.view.decisions.some((d: { key: string }) => d.key.startsWith("role:"))).toBe(false);
+    const line = answered.lines.find((l: { designation: string }) => l.designation.startsWith("Ardoises pour jouées"));
+    expect(line).toMatchObject({ role: "measure", basis: "work" });
+    expect((await ctx.prisma.takeoffLine.findUniqueOrThrow({ where: { id: line.id } })).role).toBe("measure");
+    // Une réponse hors des deux lectures est refusée.
+    expect((await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: question.question!.key, value: "autre" })).status).toBe(400);
+
+    await agent.post(`/v1/takeoffs/${takeoffId}/validate`).expect(200);
+    const s = await agent.post("/v1/suppliers").send({ name: "Point.P", email: "devis@pointp.fr" });
+    const body = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [s.body.id] }).expect(201)).body.recipients[0].email.body as string;
+    expect(body).toMatch(/Ardoises pour jouées de lucarnes : pour 6 unités d'ouvrage \(quantité à calculer\)/);
+    expect(body).toMatch(/Entourage de cheminée.*: pour 2 unités d'ouvrage \(quantité à calculer\)/);
+    expect(body).toMatch(/Chatières de ventilation : 12 unités/);
+    const events = await ctx.app.get(CorrectionJournal).list(await tenantOf(companyId), { projectId });
+    expect(events.some((e) => e.action === "answer" && e.after?.designation === question.question!.key)).toBe(true);
+  });
+});
+
+describe("mode validateur : les calculs des règles en brouillon, visibles et jamais ✓", () => {
+  let vctx: TestContext;
+  beforeAll(async () => {
+    const config = loadConfig();
+    vctx = await createTestApp((b) => b.overrideProvider(CONFIG).useValue({ ...config, referentialValidators: ["fondateur@example.fr"] }));
+  });
+  afterAll(async () => {
+    await vctx.app.close();
+  });
+
+  const levels = async (agent: Agent, projectId: string) =>
+    ((await agent.get(`/v1/projects/${projectId}/takeoff`)).body.takeoff.view as { ouvrages: { designation: string; state: string; needs: { slot: string; need: { value: string; unit: string } | null; provisional: boolean; state: string }[] }[] }).ouvrages;
+
+  it("le validateur voit 349,85 ml de liteaux « provisoire » ; un autre artisan ne voit aucun calcul", async () => {
+    await resetDatabase(vctx.prisma);
+    const run = async (email: string) => {
+      const { agent } = await signUpWithCompany(vctx.app, email, `Toitures ${email}`);
+      const project = await agent.post("/v1/projects").send({ name: "Chantier" });
+      const doc = await agent
+        .post(`/v1/projects/${project.body.id}/documents`)
+        .field("purpose", "client_quote")
+        .attach("file", Buffer.from(await makePdf(["devis"])), { filename: "devis.pdf", contentType: "application/pdf" });
+      const takeoff = (await agent.post(`/v1/documents/${doc.body.id}/takeoff`)).body;
+      for (const l of takeoff.lines) await agent.delete(`/v1/takeoff-lines/${l.id}`).expect(200);
+      for (const l of D2026_015_LINES) await agent.post(`/v1/takeoffs/${takeoff.id}/lines`).send({ designation: l.designation, quantity: l.quantity, unit: l.unit }).expect(201);
+      for (const [key, value] of [
+        ["product:tuile", "edilians-hp10-huguenot"],
+        ["param:pureau", { value: "34.3", unit: "cm" }],
+      ] as const) await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key, value }).expect(200);
+      return levels(agent, project.body.id);
+    };
+    const founder = await run("fondateur@example.fr");
+    const lattage = founder.find((o) => o.designation.startsWith("Lattage"))!.needs.find((n) => n.slot === "liteau")!;
+    expect(lattage).toMatchObject({ need: { value: "349.85", unit: "ml" }, provisional: true });
+    for (const o of founder) {
+      for (const n of o.needs.filter((x) => x.provisional)) expect(n.state).not.toBe("verified");
+    }
+    const other = await run("autre@example.fr");
+    for (const o of other) for (const n of o.needs) expect(n).toMatchObject({ need: null, provisional: false });
   });
 });
