@@ -515,3 +515,99 @@ fictives uniquement.
   quantitatif attendu → commande réelle) pour mesurer la précision avant
   toute promesse publique.
 - Détails : `referentiel-metier.md`, `referentiel-exemple-couverture.md`.
+
+### PD-043 — Nourrir le moteur de preuves et de vrais devis
+
+- **Date** : 2026-10-01 · **Statut** : Décidé (le fondateur)
+- Pas de nouvelle architecture importante : le moteur est construit ; il
+  faut le confronter à des vrais cas et le nourrir de sources.
+- **Mesure de réussite** : sur plusieurs vrais devis différents (3 à 5,
+  couverture d'abord), combien de lignes deviennent une liste d'achat, et
+  avec combien de questions. Banc permanent : `banc-devis-reels.md`.
+- **Enrichissement progressif** : un produit rencontré → documentation
+  vérifiée → données → tests → réutilisation. Pas de grande base remplie à
+  la main avant la bêta. Référentiel en couches, ouvert à une base externe
+  sans changer le moteur. Détails : `enrichissement-referentiel.md`.
+- Toute donnée non sourcée est retirée, même plausible ; les règles non
+  prouvées restent en attente.
+
+### PD-044 — Deux scores séparés : compréhension (A) et quantitatif (B)
+
+- **Date** : 2026-10-01 · **Statut** : Décidé (le fondateur)
+- **A — Compréhension documentaire** : BatiClair lit-il correctement ce qui
+  est écrit (matériau ou main-d'œuvre, famille, mesure d'ouvrage ou quantité
+  d'achat) ?
+- **B — Quantitatif exact** : une ligne ne réussit que si la quantité à
+  commander est justifiable par une donnée du devis + une règle ou une
+  donnée sourcée et vérifiée. « Ouvrage reconnu » ne vaut jamais
+  « quantitatif correct ».
+- Le banc garde les deux scores, avant/après, par devis, et refuse toute
+  régression d'un devis quand un autre métier progresse.
+- **Envoi fournisseur** : les articles identiques sont regroupés (le lieu ne
+  change pas l'article ; une marque, une gamme ou un lot en titre si). Les
+  titres du devis (section) accompagnent chaque ligne ; la rubrique utile
+  (hors lieux) part dans la demande de prix. Rien n'est déduit d'un titre.
+
+### PD-045 — Confiance explicable et apprentissage contrôlé
+
+- **Date** : 2026-10-01 · **Statut** : Décidé (le fondateur) — étapes 1 et 2
+- **Trois états**, jamais un pourcentage : ✓ vérifié (assez d'éléments
+  ÉTABLIS pour produire la ligne sans l'artisan — pas « plus de question »),
+  ⚠ à confirmer (un doute qui change la commande, tranché en un geste),
+  ? information manquante (BatiClair n'invente pas). Ils découlent de
+  critères explicites : lecture, ouvrage, produit, caractéristique fabricant,
+  règle, données chantier, cohérence, conditionnement.
+- Un doute sans effet sur la commande ne dérange pas l'artisan. Le
+  conditionnement est demandé au fournisseur, jamais à l'artisan, mais reste
+  dans le raisonnement (risque de comparaison entre fournisseurs).
+- **Quatre origines, jamais mélangées** : lu dans le devis · BatiClair sait
+  (référentiel vérifié) · votre entreprise utilise (préférence) · choisi pour
+  ce chantier. Deux lignes ✓ peuvent avoir des origines différentes.
+- **Mémoire de l'entreprise** : un choix, jamais une donnée fabricant ; propre
+  à une entreprise ; jamais appliquée si elle est incompatible avec le
+  référentiel (la vérification normale reprend). En essai, ancienne ou
+  contredite : proposée en une question, jamais appliquée en silence.
+- **Politiques par type** (paramètres EXPÉRIMENTAUX de bêta, modifiables sans
+  toucher au code) : fournisseur et appellation interne établis dès 1
+  chantier ; produit, marque, conditionnement après 2 chantiers ; marge jamais
+  apprise (réglage explicite) ; reproposée après 365 jours sans confirmation.
+- **Journal des corrections** : ajouté, jamais réécrit ; avant, après, extrait
+  du devis, contexte, cause déduite, empreinte anonyme pour compter plus tard
+  des corrections similaires entre entreprises. Ne modifie jamais le
+  référentiel général. Détails : `confiance-et-apprentissage.md`.
+
+
+### PD-046 — Lecture des gros devis : un appel normalement, des blocs seulement si nécessaire (2026-10-01)
+
+Validée par le fondateur après l'audit simplicité / coût. Principe inchangé :
+**une lecture IA du devis, puis tout le reste en code**.
+
+- **Réponse compacte (prompt v7)** : chaque suite de titres n'est écrite
+  qu'une fois (les lignes y renvoient par son numéro), une seule liste de
+  sources par ligne, noms de champ courts. Même information, environ 40 % de
+  réponse en moins sur Morellec.
+- **Plan de lecture décidé avant tout appel, sans IA** : si la réponse
+  attendue (estimation haute) tient largement dans la limite d'un appel
+  (9 000 tokens sur 16 000), un seul appel, comme avant. Sinon, blocs de
+  pages consécutives de tailles voisines, lus en parallèle. Chaque bloc voit
+  toutes les pages qui le précèdent (titres en cours) et la page suivante
+  (ligne coupée), mais ne liste que ses pages. L'artisan ne choisit rien.
+- **Réunion déterministe** : une ligne appartient au bloc de la page où elle
+  commence ; une ligne lue dans le contexte d'un autre bloc, ou qui reprend
+  une référence déjà retenue, est écartée ; l'ordre est celui des pages.
+- **Jamais la même demande deux fois** : une réponse coupée (ou trop longue à
+  venir) fait relire le bloc en deux moitiés ; une page seule trop dense
+  échoue net. Une seule relance, seulement pour une réponse mal formée ou une
+  panne passagère. Même règle pour les devis fournisseurs (sans découpage).
+- **Garde-fou** : le coût estimé avant lecture est comparé à
+  `AI_ANALYSIS_MAX_EUR` (3 € par défaut, environ 5 fois un devis de 500
+  lignes scanné) ; au-delà, le document n'est pas un devis normal (catalogue,
+  annexes) et n'est pas envoyé. Appels plafonnés à 12 par analyse.
+- **Tests permanents** : devis synthétiques de 300 et 500 lignes (texte et
+  scan, IA simulée qui désobéit parfois), Morellec en 9 pages scannées,
+  bout en bout sur vrai PDF avec service IA simulé. Rapport généré :
+  `lecture-gros-devis.md`.
+- **Limites connues** : sur une page image, un reliquat de ligne coupée relu
+  à tort par le bloc suivant ne se distingue pas d'une vraie ligne (pas de
+  numéro de ligne) ; fichiers limités à 4 Mo ; les devis fournisseurs ne sont
+  pas encore découpés.

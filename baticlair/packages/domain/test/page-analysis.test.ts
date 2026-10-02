@@ -87,24 +87,27 @@ describe("estimation du coût avant appel", () => {
     expect(estimateImageTokens(595, 842, 1568)).toBe(2240);
   });
 
-  it("sépare pages en texte, en image et écartées", () => {
+  it("sépare pages en texte, en image et écartées ; un devis normal tient en un seul appel", () => {
     const est = estimateDocumentCost(
       [
-        { route: "text", chars: 3000, ...A4 },
-        { route: "text", chars: 3000, ...A4 },
+        { route: "text", chars: 3000, lines: 40, ...A4 },
+        { route: "text", chars: 3000, lines: 40, ...A4 },
         { route: "vision", chars: 0, ...A4 },
         { route: "skip", chars: 2500, ...A4 },
       ],
       DEFAULT_EXTRACTION_POLICY,
       table,
     );
-    expect(est).toMatchObject({ pagesText: 2, pagesVision: 1, pagesSkipped: 1 });
-    expect(est.calls).toHaveLength(2);
-    const text = est.calls[0]!;
-    expect(text.inputTokens).toBe(2000 + 2 * 1000);
-    expect(text.outputTokens).toBe(2 * 600 + 500);
-    // 4000 × 2 + 1700 × 10 = 25 000 micro-dollars
-    expect(text.microUsd).toBe(25_000);
+    expect(est).toMatchObject({ strategy: "single", pagesText: 2, pagesVision: 1, pagesSkipped: 1 });
+    // Texte et image partent dans le même appel, comme dans la lecture réelle.
+    expect(est.calls).toHaveLength(1);
+    const call = est.calls[0]!;
+    expect(call).toMatchObject({ pages: 3, contextPages: 0, imageTokens: 2240 });
+    expect(call.inputTokens).toBe(2000 + 2 * 1000);
+    // Sortie haute : contenu des pages texte + 15 par ligne, 1 600 par page image, réflexion.
+    expect(call.outputTokens).toBe(2 * (1000 + 40 * 15) + 1600 + 2000);
+    // (4000 + 2240) × 2 + 6800 × 10 = 80 480 micro-dollars
+    expect(call.microUsd).toBe(80_480);
     expect(est.totalMicroUsd).toBe(est.calls.reduce((s, c) => s + c.microUsd, 0));
   });
 });

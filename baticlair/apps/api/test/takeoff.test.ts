@@ -60,7 +60,7 @@ describe("liste de matériaux tirée du devis client (IA simulée)", () => {
 
     expect(await ctx.prisma.aiExecution.count()).toBe(1);
     const execution = await ctx.prisma.aiExecution.findFirstOrThrow();
-    expect(execution).toMatchObject({ task: "takeoff_extraction", promptId: "takeoff_extraction", promptVersion: 5, status: "success", pagesText: 1 });
+    expect(execution).toMatchObject({ task: "takeoff_extraction", promptId: "takeoff_extraction", promptVersion: 7, status: "success", pagesText: 1 });
     expect(execution.costMicroUsd).toBeGreaterThan(0n);
     const usage = await agent.get("/v1/ai-usage");
     expect(usage.body.analyses.used).toBe(1);
@@ -132,7 +132,9 @@ describe("liste de matériaux tirée du devis client (IA simulée)", () => {
       current = (await agent.post(`/v1/takeoff-lines/${line.id}/confirm`).expect(200)).body;
     }
     const crochets = current.lines.find((l: { reference: string }) => l.reference === "CRO-INOX");
-    expect(crochets).toMatchObject({ confirmed: true, status: "certain", issues: [] });
+    expect(crochets).toMatchObject({ confirmed: true, status: "certain" });
+    // Plus aucun doute à trancher ; le contenu du paquet reste une note pour le fournisseur.
+    expect(crochets.issues.filter((i: { severity: string }) => i.severity !== "info")).toEqual([]);
     expect(current.counts.toVerify).toBe(0);
     expect((await agent.post(`/v1/takeoffs/${draft.id}/validate`)).body.status).toBe("validated");
 

@@ -64,6 +64,11 @@ export class AnalysisMeter {
     return this.analyses.markBillable(analysisId);
   }
 
+  /** Mesures de la lecture d'un document (blocs, lignes, écarts, tokens, coût, durée). */
+  recordReading(analysisId: string, stats: object): Promise<void> {
+    return this.analyses.saveReadingStats(analysisId, stats);
+  }
+
   fail(analysisId: string): Promise<AnalysisRecord> {
     return this.analyses.fail(analysisId, this.now());
   }

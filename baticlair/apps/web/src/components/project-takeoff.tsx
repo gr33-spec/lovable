@@ -3,10 +3,11 @@
 import { Check, CircleCheck, HelpCircle, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { useCallback, useId, useState } from "react";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
+import { DecisionCard, MeasuresNote, ReadyList, TrustHeader, type DecisionHandlers } from "@/components/takeoff-view";
 import { useProgressRefresh } from "@/components/project-progress";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, type ProjectDocument, type Takeoff, type TakeoffLine } from "@/lib/api";
-import { doubtText, shortName } from "@/lib/labels";
+import { shortName } from "@/lib/labels";
 import { useResource } from "@/lib/use-resource";
 
 /** Le devis client peut être lu par l'IA : texte lu, ou lecture locale en panne (l'IA lit alors le PDF). */
@@ -17,9 +18,10 @@ export function canPrepareTakeoff(doc: ProjectDocument): boolean {
 const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? "s" : ""}`;
 
 /**
- * Liste de matériaux tirée du devis client. Une seule chose à l'écran à la
- * fois : préparer la liste, répondre aux questions une par une, valider.
- * Le détail complet reste à un appui (« Voir toute la liste »).
+ * Liste de matériaux tirée du devis client. L'artisan ne voit que les
+ * DÉCISIONS utiles (une réponse règle toutes les lignes concernées) ; ce qui
+ * est prêt reste replié, la preuve derrière « Voir le calcul ». Le détail
+ * complet reste à un appui (« Voir toute la liste »).
  */
 export function ProjectTakeoff({
   projectId,
@@ -93,7 +95,6 @@ export function ProjectTakeoff({
   const draft = takeoff.status === "draft";
   const materials = takeoff.lines.filter((l) => l.kind !== "labor");
   const labor = takeoff.lines.filter((l) => l.kind === "labor");
-  const toCheck = materials.filter((l) => l.status !== "certain");
   const editable = !archived;
   const call = (path: string, method: "POST" | "PATCH" | "DELETE", body?: unknown) =>
     run(() => api<Takeoff>(path, { method, ...(body !== undefined ? { body } : {}) }), update);
@@ -102,6 +103,13 @@ export function ProjectTakeoff({
     onDelete: () => call(`/v1/takeoff-lines/${line.id}`, "DELETE"),
     onConfirm: () => call(`/v1/takeoff-lines/${line.id}/confirm`, "POST"),
   });
+  const view = takeoff.view;
+  const handlers: DecisionHandlers = {
+    onDecide: (d) => call(`/v1/takeoffs/${takeoff.id}/decisions`, "POST", { action: d.primary?.action, lineIds: d.lineIds, pieceLineIds: d.pieceLineIds }),
+    onAnswer: (key, value) => call(`/v1/takeoffs/${takeoff.id}/answers`, "POST", { key, value }),
+    onSaveLine: (lineId, fields) => call(`/v1/takeoff-lines/${lineId}`, "PATCH", fields),
+    onDeleteLine: (lineId) => call(`/v1/takeoff-lines/${lineId}`, "DELETE"),
+  };
   const validate = () => {
     setShowList(false);
     void call(`/v1/takeoffs/${takeoff.id}/validate`, "POST");
@@ -131,7 +139,7 @@ export function ProjectTakeoff({
             </ul>
           </details>
         ) : null}
-        {draft && editable && toCheck.length === 0 ? (
+        {draft && editable && view.decisions.every((d) => d.lineIds.length === 0) ? (
           <Button pending={pending} onClick={validate}>
             <Check size={18} aria-hidden="true" />
             Valider la liste
@@ -142,34 +150,35 @@ export function ProjectTakeoff({
         </button>
       </>
     );
-  } else if (draft && toCheck.length > 0) {
-    const line = toCheck[0]!;
+  } else if (draft) {
+    // Les décisions qui touchent des lignes du devis bloquent l'envoi ; les questions du calcul, non
+    // (sans réponse, l'ouvrage part simplement pour sa mesure).
+    const blocking = view.decisions.filter((d) => d.lineIds.length > 0).length;
     body = (
       <>
-        <QuestionCard key={line.id} line={line} remaining={toCheck.length} editable={editable} pending={pending} {...lineActions(line)} />
+        <TrustHeader counts={view.counts} />
+        {view.decisions.map((d) => (
+          <DecisionCard key={d.key} decision={d} lines={takeoff.lines} editable={editable} pending={pending} handlers={handlers} />
+        ))}
+        {view.measures ? <MeasuresNote measures={view.measures} items={view.items} /> : null}
+        <ReadyList items={view.items} onAnswer={handlers.onAnswer} editable={editable} />
+        {editable && blocking === 0 ? (
+          <Card className="flex flex-col gap-3 p-5">
+            <p className="flex items-center gap-2 text-[20px] font-extrabold">
+              <CircleCheck size={24} className="text-ok" aria-hidden="true" />
+              Votre liste est prête
+            </p>
+            <p className="text-[15px] text-muted">{plural(materials.length, "article")} à demander aux fournisseurs.</p>
+            <Button pending={pending} onClick={validate}>
+              <Check size={18} aria-hidden="true" />
+              Valider la liste
+            </Button>
+          </Card>
+        ) : null}
         <button type="button" onClick={() => setShowList(true)} className={linkStyle}>
           Voir toute la liste ({materials.length})
         </button>
       </>
-    );
-  } else if (draft) {
-    body = (
-      <Card className="flex flex-col gap-3 p-5">
-        <p className="flex items-center gap-2 text-[20px] font-extrabold">
-          <CircleCheck size={24} className="text-ok" aria-hidden="true" />
-          Tout est vérifié
-        </p>
-        <p className="text-[15px] text-muted">{plural(materials.length, "article")} à demander aux fournisseurs.</p>
-        {editable ? (
-          <Button pending={pending} onClick={validate}>
-            <Check size={18} aria-hidden="true" />
-            Valider la liste
-          </Button>
-        ) : null}
-        <button type="button" onClick={() => setShowList(true)} className={linkStyle}>
-          Voir la liste
-        </button>
-      </Card>
     );
   } else {
     body = (
@@ -220,96 +229,6 @@ interface LineActions {
   onConfirm: () => Promise<void>;
 }
 
-/** Une question à la fois : l'article, sa quantité, le doute en une phrase, deux gros boutons. */
-function QuestionCard({
-  line,
-  remaining,
-  editable,
-  pending,
-  onSave,
-  onDelete,
-  onConfirm,
-}: { line: TakeoffLine; remaining: number; editable: boolean; pending: boolean } & LineActions) {
-  const [editing, setEditing] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [showSource, setShowSource] = useState(false);
-  const blocking = line.issues.some((i) => i.severity === "blocking");
-  const reason = [...line.issues]
-    .filter((i) => i.severity !== "info")
-    .sort((a, b) => Number(b.code === "AI_DOUBT") - Number(a.code === "AI_DOUBT"))[0];
-  const name = shortName(line.designation);
-
-  return (
-    <section aria-label={`À vérifier : ${line.designation}`} className="flex flex-col gap-4 rounded-3xl border-l-4 border-warn bg-surface p-5 shadow-card">
-      <span className="text-sm font-extrabold text-warn">{remaining > 1 ? `À vérifier · encore ${remaining}` : "Dernière ligne à vérifier"}</span>
-      {editing ? (
-        <LineForm initial={line} submitLabel="Enregistrer" pending={pending} onCancel={() => setEditing(false)} onSubmit={async (f) => { await onSave(f); setEditing(false); }} />
-      ) : (
-        <>
-          <div className="flex flex-col gap-1">
-            <p className="text-[22px] leading-tight font-extrabold">{name}</p>
-            <p className="text-[20px]">
-              <strong>{line.quantity ?? "Quantité ?"}</strong> {line.unit ?? ""}
-            </p>
-          </div>
-          {reason ? (
-            <p className="flex items-start gap-2 rounded-2xl bg-warn-bg p-3 text-[15px] leading-snug font-semibold text-warn">
-              <HelpCircle size={20} className="mt-px shrink-0" aria-hidden="true" />
-              {doubtText(reason.message)}
-            </p>
-          ) : null}
-          {editable ? (
-            confirmDelete ? (
-              <DeleteConfirm pending={pending} onDelete={onDelete} onCancel={() => setConfirmDelete(false)} />
-            ) : (
-              <>
-                <div className={`grid gap-2 ${blocking ? "grid-cols-1" : "grid-cols-2"}`}>
-                  {!blocking ? (
-                    <button
-                      type="button"
-                      disabled={pending}
-                      onClick={() => void onConfirm()}
-                      aria-label={`C'est bon : ${line.designation}`}
-                      className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-accent text-base font-extrabold text-white disabled:opacity-60"
-                    >
-                      <Check size={20} aria-hidden="true" />
-                      C&apos;est bon
-                    </button>
-                  ) : null}
-                  <button
-                    type="button"
-                    onClick={() => setEditing(true)}
-                    aria-label={`Corriger ${line.designation}`}
-                    className={`inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl text-base font-extrabold ${blocking ? "bg-accent text-white" : "bg-ground text-ink"}`}
-                  >
-                    <Pencil size={18} aria-hidden="true" />
-                    Corriger
-                  </button>
-                </div>
-                <div className="flex items-center justify-between">
-                  <button type="button" onClick={() => setShowSource(!showSource)} aria-expanded={showSource} className="inline-flex min-h-11 items-center text-sm font-bold text-muted">
-                    Texte du devis
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setConfirmDelete(true)}
-                    aria-label={`Retirer ${line.designation}`}
-                    className="inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-muted"
-                  >
-                    <Trash2 size={16} aria-hidden="true" />
-                    Retirer
-                  </button>
-                </div>
-                {showSource ? <p className="-mt-2 text-sm text-muted">« {line.designation} »{line.reference ? ` · réf. ${line.reference}` : ""}</p> : null}
-              </>
-            )
-          ) : null}
-        </>
-      )}
-    </section>
-  );
-}
-
 /** Une ligne de la liste complète : nom court, quantité, crayon. */
 function ListRow({ line, editable, pending, onSave, onDelete, onConfirm }: { line: TakeoffLine; editable: boolean; pending: boolean } & LineActions) {
   const [editing, setEditing] = useState(false);
@@ -338,6 +257,8 @@ function ListRow({ line, editable, pending, onSave, onDelete, onConfirm }: { lin
             {line.basis === "work" ? "Pour " : ""}
             {line.quantity ?? "?"} {line.unit ?? ""}
             {line.basis === "work" ? <span className="font-semibold text-warn"> · quantité à calculer</span> : null}
+            {/* Où la ligne se trouve dans le devis (logement, pièce) : pour s'y retrouver d'un coup d'œil. */}
+            {line.section?.length ? <span> · {line.section.slice(-2).join(" › ")}</span> : null}
           </span>
         </span>
         {editable ? (

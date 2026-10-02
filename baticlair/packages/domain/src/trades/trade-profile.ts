@@ -57,11 +57,23 @@ export interface MaterialFamily {
    */
   areaNeedsYield?: boolean;
   /**
+   * Une quantité EN PIÈCES de cette famille compte des OUVRAGES (« 2 points
+   * lumineux », « 17 alimentations radiateur ») : chacun se décompose en
+   * matériaux (appareillage, boîte, câble…) ; ce n'est pas un nombre d'articles.
+   */
+  countOfWork?: boolean;
+  /**
    * Sur un devis client, une surface (m²) de cette famille est la surface
    * de l'OUVRAGE (« liteaux 120 m² » = 120 m² de toiture liteautée) : la
    * quantité d'achat (ml, longueurs) reste à calculer.
    */
   areaOfWork?: boolean;
+  /**
+   * Sur un devis client, une longueur (m, ml) de cette famille est la
+   * longueur de l'OUVRAGE (« faîtage 10 m », « rives 24 m ») : ce qui
+   * s'achète, ce sont des pièces (faîtières, tuiles de rive) à calculer.
+   */
+  lengthOfWork?: boolean;
 }
 
 export interface CompanionRule {
@@ -77,6 +89,9 @@ export interface CompanionRule {
 export function normalizeText(raw: string): string {
   return raw
     .toLowerCase()
+    // Ligatures : « main d'œuvre » = « main d'oeuvre ».
+    .replace(/œ/g, "oe")
+    .replace(/æ/g, "ae")
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .replace(/[’'`-]/g, " ")
@@ -96,10 +111,18 @@ const keywordCache = new Map<string, RegExp>();
  * reconnaît pas « dépose ».
  */
 export function containsKeyword(normalized: string, keyword: string): boolean {
+  return keywordPosition(normalized, keyword) >= 0;
+}
+
+/** Position du mot (ou de l'expression) dans le texte normalisé, ou -1. */
+export function keywordPosition(normalized: string, keyword: string): number {
   let re = keywordCache.get(keyword);
   if (!re) {
-    re = new RegExp(`(?:^|[^a-z0-9])${escapeRegExp(normalizeText(keyword))}(?:s|x)?(?![a-z0-9])`);
+    // Pluriel accepté sur chaque mot : « tuile de rive » reconnaît « tuiles de rives ».
+    const words = normalizeText(keyword).split(" ").map(escapeRegExp);
+    re = new RegExp(`(?:^|[^a-z0-9])(${words.map((w, i) => (i < words.length - 1 ? `${w}(?:s|x)?` : w)).join(" ")})(?:s|x)?(?![a-z0-9])`);
     keywordCache.set(keyword, re);
   }
-  return re.test(normalized);
+  const m = re.exec(normalized);
+  return m ? m.index + m[0].indexOf(m[1]!) : -1;
 }

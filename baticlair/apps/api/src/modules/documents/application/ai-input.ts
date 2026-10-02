@@ -1,3 +1,4 @@
+import type { PageForEstimate } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { DocumentInput } from "../../../platform/ai/document-reader.js";
 import type { TenantContext } from "../../tenancy/index.js";
@@ -13,7 +14,14 @@ export interface PreparedDocument {
   processingId: string | null;
   pagesText: number;
   pagesVision: number;
+  /** Pages à lire (texte ou image), pour décider du plan de lecture avant tout appel. */
+  pages: PageForEstimate[];
+  /** Ce que l'IA lit pour un bloc de pages (gros devis lu en plusieurs parties). */
+  slice(pageNumbers: readonly number[]): Promise<DocumentInput>;
 }
+
+/** Taille d'une page A4 en points : dimension par défaut d'une page jamais analysée localement. */
+const A4 = { widthPt: 595.28, heightPt: 841.89 };
 
 /**
  * Ce que l'IA doit lire d'un document déjà déposé : le texte numéroté des
@@ -46,6 +54,11 @@ export class DocumentAiInput {
         processingId: processing?.id ?? null,
         pagesText: 0,
         pagesVision: count,
+        pages: pages.map((pageNumber) => ({ pageNumber, route: "vision" as const, chars: 0, ...A4 })),
+        slice: async (wanted) => {
+          const keep = pages.filter((p) => wanted.includes(p));
+          return { numberedText: "", imagePdf: await this.pdf.extract(content.bytes, keep), imagePages: keep };
+        },
       };
     }
 
@@ -55,18 +68,40 @@ export class DocumentAiInput {
     if (textPages.length === 0 && visionPages.length === 0) {
       throw validationFailed("No page to read", { reason: "nothing_to_read" });
     }
-    const numberedText = textPages.flatMap((p) => p.lines.map((l) => `[${l.ref}] ${l.text}`)).join("\n");
+    const pageText = (p: (typeof textPages)[number]) => p.lines.map((l) => `[${l.ref}] ${l.text}`).join("\n");
+    const numberedText = textPages.map(pageText).join("\n");
+    let bytes: Uint8Array | null = null;
     let imagePdf: Uint8Array | null = null;
     if (visionPages.length > 0) {
       const content = await this.documents.readContent(tenant, doc.id);
       if (!content) throw notFound("Document");
-      imagePdf = await this.pdf.extract(content.bytes, visionPages);
+      bytes = content.bytes;
+      imagePdf = await this.pdf.extract(bytes, visionPages);
     }
+    const readable = pages.filter((p) => p.route === "text" || p.route === "vision");
     return {
       input: { numberedText, imagePdf, imagePages: visionPages },
       processingId: processing.id,
       pagesText: textPages.length,
       pagesVision: visionPages.length,
+      pages: readable.map((p) => ({
+        pageNumber: p.pageNumber,
+        route: p.route,
+        chars: p.route === "text" ? pageText(p).length : 0,
+        lines: p.route === "text" ? p.lines.length : 0,
+        widthPt: p.widthPt,
+        heightPt: p.heightPt,
+      })),
+      slice: async (wanted) => {
+        const set = new Set(wanted);
+        const text = textPages.filter((p) => set.has(p.pageNumber)).map(pageText).join("\n");
+        const images = visionPages.filter((n) => set.has(n));
+        return {
+          numberedText: text,
+          imagePdf: images.length > 0 && bytes ? await this.pdf.extract(bytes, images) : null,
+          imagePages: images,
+        };
+      },
     };
   }
 

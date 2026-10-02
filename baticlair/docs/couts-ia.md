@@ -32,6 +32,13 @@ Le PDF n'est **jamais relu** après l'extraction : tout le reste travaille
 sur le JSON stocké. Un même fichier déposé deux fois dans un chantier
 n'est ni stocké ni lu deux fois.
 
+## Gros devis (PD-046)
+
+Un appel pour un devis normal ; au-delà de ce qu'un appel peut rendre sans
+risque, lecture en blocs de pages décidée avant tout appel ; jamais deux fois
+la même demande ; garde-fou de coût par document (`AI_ANALYSIS_MAX_EUR`).
+Stratégie et coût par taille de devis : `lecture-gros-devis.md` (généré).
+
 ## Modèles et tarifs (USD par million de tokens)
 
 | Modèle | Entrée | Sortie | Cache (lecture) | Rôle prévu |

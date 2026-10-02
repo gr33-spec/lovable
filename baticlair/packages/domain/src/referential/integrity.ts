@@ -73,7 +73,8 @@ export function checkReferential(ref: Referential): string[] {
       productFact(`${where}.${key}`, f, def ? unitDim(`${where}.${key}`, def.unit) : null, "manufacturer_spec");
     }
     const needDim = unitDim(where, family.needUnit);
-    if (p.sellingUnits.filter((s) => s.primary).length !== 1) err(where, "il faut exactement une unité de commande principale");
+    // Aucune unité de vente = conditionnement encore inconnu (permis : les besoins s'affichent, la conversion attend).
+    if (p.sellingUnits.length > 0 && p.sellingUnits.filter((s) => s.primary).length !== 1) err(where, "il faut exactement une unité de commande principale");
     for (const su of p.sellingUnits) productFact(`${where} vendu par ${su.id}`, su.contains, needDim, "packaging");
     for (const alias of p.aliases) {
       const key = `${p.family}|${normalizeText(alias)}`;

@@ -63,6 +63,8 @@ function lines(value: unknown): RequestedLine[] {
       unit: typeof l.unit === "string" ? l.unit : null,
       reference: typeof l.reference === "string" ? l.reference : null,
       ...(l.basis === "work" ? { basis: "work" as const } : {}),
+      ...(Array.isArray(l.section) ? { section: l.section.filter((t): t is string => typeof t === "string") } : {}),
+      ...(typeof l.mergedFrom === "number" && l.mergedFrom > 1 ? { mergedFrom: l.mergedFrom } : {}),
     };
   });
 }
@@ -114,6 +116,7 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
         quantity: l.quantityRaw,
         unit: l.unitRaw,
         reference: l.reference,
+        section: Array.isArray(l.section) ? l.section.filter((t): t is string => typeof t === "string") : [],
       })),
     };
   }

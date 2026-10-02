@@ -18,7 +18,7 @@ import { decimalText, offerMatches, percentToRate, requestedItems, toSupplierOff
 import type { NewOfferLine, OfferLineFields, OfferRecord, OfferRepository } from "./offer.repository.js";
 import { OFFER_PROMPT } from "./prompt.js";
 
-/** Deux tentatives au plus : une relance si la réponse est inexploitable, jamais plus (coût maîtrisé). */
+/** Deux tentatives au plus : une relance si la réponse est mal formée ou en cas de panne passagère, jamais pour une réponse coupée. */
 const MAX_ATTEMPTS = 2;
 
 export interface OfferView {
@@ -125,7 +125,8 @@ export class OffersService {
       last = result;
       await this.record(tenant, request.projectId, doc.id, prepared, analysisId, attempt, result);
       if (result.status === "success") success = result;
-      else if (result.status === "refused") break;
+      // Refus, ou réponse coupée car trop longue : la même demande échouerait pareil, pas de second paiement.
+      else if (result.status === "refused" || result.status === "timeout" || result.errorCode === "max_tokens") break;
     }
     if (!success?.output) {
       await this.meter.fail(analysisId);

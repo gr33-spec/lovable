@@ -139,7 +139,7 @@ utilisable. Plus tard, cette validation se fera dans un écran dédié.
 
 ### Questions de métier
 - **Pureau** *(tranché le 2026-10-01 : donnée du chantier, jamais choisie
-  par BatiClair ; voir `simulation-devis-120m2.md`)* : un artisan connaît-il son pureau, ou faut-il plutôt demander
+  par BatiClair ; voir `cas-reference-d2026-015.md`)* : un artisan connaît-il son pureau, ou faut-il plutôt demander
   « combien de tuiles au m² ? » (d'après la fiche) ou la pente et la zone ?
 - **Casse** : quelle marge réglerais-tu par défaut sur tes chantiers ?
   Elle restera un réglage de l'artisan, affiché dans le calcul.

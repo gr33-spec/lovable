@@ -188,6 +188,8 @@ export interface TakeoffLine {
   edited: boolean;
   /** Doute exprimé par l'IA sur la ligne. */
   aiDoubt: string | null;
+  /** Titres du devis au-dessus de la ligne (lot, marque, logement, pièce). */
+  section?: string[];
   /** L'artisan a vérifié la ligne et la garde telle quelle. */
   confirmed: boolean;
   kind: "material" | "labor" | "unknown";
@@ -210,6 +212,61 @@ export interface Takeoff {
   counts: { certain: number; probable: number; toVerify: number; labor: number; blocking: number };
   issues: (TakeoffIssue & { lineIds: string[] })[];
   lines: TakeoffLine[];
+  /** Ce que voit l'artisan : compteurs, décisions à prendre, éléments prêts et leur preuve. */
+  view: TakeoffView;
+}
+
+/** D'où vient un élément : lu dans le devis, BatiClair (vérifié), votre entreprise, choisi pour ce chantier. */
+export type Origin = "devis" | "referential" | "company" | "project";
+
+export interface TakeoffDecision {
+  key: string;
+  state: "to_confirm" | "missing";
+  title: string;
+  text: string;
+  lineIds: string[];
+  pieceLineIds: string[];
+  primary: { action: "pieces" | "keep" | "edit" | "answer" | "remove"; label: string } | null;
+  secondary: ("pieces" | "keep" | "edit" | "answer" | "remove")[];
+  question: {
+    key: string;
+    kind: "confirm_product" | "choose_product" | "param";
+    unit: string | null;
+    hint: string | null;
+    options: { label: string; value: string }[];
+  } | null;
+}
+
+export interface ProofCriterion {
+  key: "reading" | "work_item" | "product" | "manufacturer_data" | "rule" | "site_data" | "consistency" | "packaging";
+  status: "established" | "to_confirm" | "missing" | "no_effect" | "supplier";
+  detail: string;
+  origin: Origin | null;
+  comparisonRisk: boolean;
+}
+
+export interface TakeoffViewItem {
+  kind: "line" | "need";
+  id: string;
+  label: string;
+  quantity: string | null;
+  state: "verified" | "to_confirm" | "missing";
+  reason: string | null;
+  proof: ProofCriterion[];
+  calculation: {
+    slot: string;
+    formula: string | null;
+    exclusions: string | null;
+    productOrigin: string | null;
+    trace: { label: string; value: string; unit: string; from: string; origin: Origin | null; url: string | null }[];
+  } | null;
+}
+
+export interface TakeoffView {
+  counts: { verified: number; toConfirm: number; missing: number };
+  decisions: TakeoffDecision[];
+  measures: { lineIds: string[]; text: string } | null;
+  items: TakeoffViewItem[];
 }
 
 export interface Supplier {

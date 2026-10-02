@@ -47,6 +47,12 @@ const envSchema = z
     /** Budget IA mensuel par entreprise en usage normal (prévision interne, PD-027). */
     AI_MONTHLY_BUDGET_EUR: z.string().regex(/^\d+(\.\d+)?$/).default("10"),
     /**
+     * Garde-fou par document (PD-046) : au-delà de ce coût ESTIMÉ avant lecture,
+     * le document n'est pas un devis normal (catalogue, annexes) et n'est pas
+     * envoyé à l'IA. Un très gros devis (500 lignes scannées) reste bien en dessous.
+     */
+    AI_ANALYSIS_MAX_EUR: z.string().regex(/^\d+(\.\d+)?$/).default("3"),
+    /**
      * Lecture des devis par l'IA :
      * - `anthropic` : appels réels (ANTHROPIC_API_KEY) ;
      * - `disabled`  : pas d'IA, et l'application le dit ;
@@ -116,7 +122,7 @@ export interface AppConfig {
   resend?: { apiKey: string; from: string };
   oauth: { google?: OAuthClientConfig; microsoft?: OAuthClientConfig };
   documents: { maxBytes: number; maxPages: number };
-  aiCost: { usdToEur: string; monthlyBudgetEur: string };
+  aiCost: { usdToEur: string; monthlyBudgetEur: string; analysisMaxEur: string };
   billing: { plans: Plan[]; activationCodes: Record<string, string> };
   ai: {
     provider: "anthropic" | "disabled" | "fake";
@@ -166,7 +172,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       : {}),
     oauth: { ...(google ? { google } : {}), ...(microsoft ? { microsoft } : {}) },
     documents: { maxBytes: e.DOCUMENT_MAX_BYTES, maxPages: e.DOCUMENT_MAX_PAGES },
-    aiCost: { usdToEur: e.AI_USD_TO_EUR, monthlyBudgetEur: e.AI_MONTHLY_BUDGET_EUR },
+    aiCost: { usdToEur: e.AI_USD_TO_EUR, monthlyBudgetEur: e.AI_MONTHLY_BUDGET_EUR, analysisMaxEur: e.AI_ANALYSIS_MAX_EUR },
     billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES) },
     ai: {
       provider: e.AI_PROVIDER ?? (e.ANTHROPIC_API_KEY ? "anthropic" : "disabled"),

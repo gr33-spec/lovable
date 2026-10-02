@@ -6,13 +6,15 @@ import {
   tradeProfile,
   requiredInputs,
   identifyProducts,
+  paramsFromContext,
   parseFormula,
   ROOFING_REFERENTIAL,
   type Fact,
   type Referential,
   type WorkItemInput,
 } from "../src/index.js";
-import { evaluate, inferDim } from "../src/referential/expression.js";
+import { evaluate, evaluateInterval, inferDim } from "../src/referential/expression.js";
+import { Decimal } from "../src/shared/decimal.js";
 import { parseRefUnit } from "../src/referential/units.js";
 
 /** Copie du référentiel où tout est vérifié : uniquement pour tester le moteur, jamais une vraie donnée. */
@@ -46,7 +48,7 @@ const CASE: WorkItemInput = {
   params: {
     surface: { value: "120", unit: "m2", origin: "devis", evidence: "Devis, ligne 4" },
     pureau: { value: "34.3", unit: "cm", origin: "artisan" },
-    entraxe_chevrons: { value: "60", unit: "cm", origin: "artisan" },
+    entraxe_supports: { value: "60", unit: "cm", origin: "artisan" },
     pente: { value: "45", unit: "%", origin: "artisan" },
   },
   products: ALL_PRODUCTS,
@@ -92,12 +94,17 @@ describe("référentiel couverture", () => {
     // Fiche HP 10 : 3,22 / 2,91 / 2,66 ml de liteaux par m² aux pureaux 310 / 343 / 376 mm ; 9,9 à 12 tuiles/m².
     const r = (pureauCm: string) =>
       computeWorkItem(allVerified(ROOFING_REFERENTIAL), { ...CASE, params: { ...CASE.params, surface: { value: "1", unit: "m2", origin: "devis" }, pureau: { value: pureauCm, unit: "cm", origin: "artisan" } } });
-    const ml = (p: string) => Number(need(r(p), "liteaux").quantity!.value).toFixed(2);
-    expect([ml("31"), ml("34.3"), ml("37.6")]).toEqual(["3.23", "2.92", "2.66"]);
-    // Au centième près, la fiche arrondit au plus proche (3,226 → 3,22 sur la fiche : écart < 0,01 ml/m²).
-    const tiles = (p: string) => Number(need(r(p), "tuiles").quantity!.value);
-    expect(tiles("31")).toBeCloseTo(12.04, 2);
-    expect(tiles("37.6")).toBeCloseTo(9.92, 2);
+    // Démonstration complète : docs/demonstration-regles-tuiles-liteaux.md.
+    // La fiche donne 2 décimales (tronquées à 310 et 343 mm, arrondies à 376 mm) : écart toléré < 0,01 ml/m².
+    const FICHE_LITEAUX = [["31", 3.22], ["34.3", 2.91], ["37.6", 2.66]] as const;
+    for (const [pureau, fiche] of FICHE_LITEAUX) {
+      expect(Math.abs(Number(need(r(pureau), "liteaux").quantity!.value) - fiche)).toBeLessThan(0.01);
+    }
+    // Tuiles : la fiche annonce 9,9 à 12 tuiles/m² (1 décimale) ; le calcul donne 9,92 et 12,04.
+    const FICHE_TUILES = [["31", 12], ["37.6", 9.9]] as const;
+    for (const [pureau, fiche] of FICHE_TUILES) {
+      expect(Math.abs(Number(need(r(pureau), "tuiles").quantity!.value) - fiche)).toBeLessThan(0.05);
+    }
   });
 
   it("range chaque donnée dans sa nature : fabricant, pose, chantier, artisan, conditionnement", () => {
@@ -159,10 +166,11 @@ describe("moteur : ouvrage → besoins → achat", () => {
       purchase: { order: { count: "1306", unit: { many: "pièces" } } },
       provisional: false,
     });
-    // 120 m² ÷ 0,343 m = 349,85 ml → 88 longueurs de 4 m.
-    expect(need(r, "liteaux")).toMatchObject({ quantity: { value: "349.85", unit: "ml" }, purchase: { order: { count: "88" } }, origin: "explicit" });
+    // 120 m² ÷ 0,343 m = 349,85 ml ; conditionnement de liteau non saisi → pas de nombre de longueurs inventé.
+    expect(need(r, "liteaux")).toMatchObject({ quantity: { value: "349.85", unit: "ml" }, origin: "explicit" });
+    expect(need(r, "liteaux").purchase).toBeUndefined();
     // 120 m² ÷ 0,60 m = 200 ml → 50 longueurs ; absent du devis : seulement suggéré.
-    expect(need(r, "contre-liteaux")).toMatchObject({ quantity: { value: "200", unit: "ml" }, purchase: { order: { count: "50" } }, origin: "suggested" });
+    expect(need(r, "contre-liteaux")).toMatchObject({ quantity: { value: "200", unit: "ml" }, origin: "suggested" });
     // Pente 45 % ≥ 30 % : recouvrement 10 cm → 120 × 1,5 ÷ 1,4 = 128,57 m² → 2 rouleaux de 75 m².
     expect(need(r, "ecran")).toMatchObject({ quantity: { value: "128.57", unit: "m2" }, purchase: { order: { count: "2", unit: { many: "rouleaux" } } } });
 
@@ -170,7 +178,7 @@ describe("moteur : ouvrage → besoins → achat", () => {
     const trace = need(r, "tuiles").trace;
     expect(trace.find((t) => t.label === "Surface de toiture")).toMatchObject({ value: "120", from: "Devis, ligne 4" });
     expect(trace.find((t) => t.label.startsWith("Largeur utile"))).toMatchObject({ value: "0,268", unit: "m", verified: true });
-    expect(trace.find((t) => t.label === "Marge")).toMatchObject({ value: "0", from: "Aucune marge réglée" });
+    expect(trace.find((t) => t.label === "Marge")).toMatchObject({ value: "0", from: "Aucune marge réglée par votre entreprise", origin: "company" });
     expect(need(r, "tuiles").exclusions).toMatch(/Hors tuiles de rive/);
   });
 
@@ -180,8 +188,45 @@ describe("moteur : ouvrage → besoins → achat", () => {
     expect(need(r, "ecran")).toMatchObject({ quantity: { value: "138.46" }, purchase: { order: { count: "2" } } });
   });
 
+  it("une donnée inconnue n'est demandée que si elle change la commande (calcul sur toutes ses valeurs possibles)", () => {
+    const { pente: _p, ...sansPente } = CASE.params;
+    // 120 m² : 2 rouleaux quelle que soit la pente → pas de question, fourchette du besoin dite.
+    const r = computeWorkItem(ref, { ...CASE, params: sansPente });
+    expect(need(r, "ecran")).toMatchObject({ status: "calculated", quantityRange: { min: "128.57", max: "138.46" }, purchase: { order: { count: "2" } } });
+    expect(need(r, "ecran").quantity).toBeUndefined();
+    // 70 m² : 75 m² (pente > 30 %) = 1 rouleau, mais 80,77 m² (≤ 30 %) = 2 rouleaux → la pente compte, on la demande.
+    const small = computeWorkItem(ref, { ...CASE, params: { ...sansPente, surface: { value: "70", unit: "m2", origin: "devis" } } });
+    expect(need(small, "ecran")).toMatchObject({ status: "question", question: { key: "param:pente", impact: "De 1 à 2 rouleaux selon la réponse." } });
+    // Sans aucune borne connue (entraxe), la commande peut tout valoir : question.
+    const { entraxe_supports: _e, ...sansEntraxe } = CASE.params;
+    expect(need(computeWorkItem(ref, { ...CASE, params: sansEntraxe }), "contre-liteaux").status).toBe("question");
+  });
+
+  it("ne pose jamais de question pour un besoin seulement suggéré (absent du devis)", () => {
+    const { entraxe_supports: _e, ...params } = CASE.params;
+    const r = computeWorkItem(ref, { ...CASE, params, mentioned: ["tuile", "liteau"] });
+    expect(need(r, "contre-liteaux")).toMatchObject({ origin: "suggested", status: "question" });
+    expect(r.nextQuestion).toBeNull();
+  });
+
+  it("conditionnement inconnu : le besoin reste affiché, seule la conversion attend (cas D-2026-015)", () => {
+    // Le liteau n'a AUCUNE unité de vente saisie : la longueur vendue dépend du négoce, BatiClair ne la choisit pas.
+    expect(ROOFING_REFERENTIAL.products.find((p) => p.id === "liteau-sapin-27x40")!.sellingUnits).toEqual([]);
+    const r = computeWorkItem(ref, CASE);
+    expect(need(r, "liteaux")).toMatchObject({ status: "calculated", quantity: { value: "349.85", unit: "ml" } });
+    expect(need(r, "liteaux").purchaseUnavailable).toBe("Conditionnement à confirmer : aucune unité de vente vérifiée pour Liteaux 27×40.");
+    // Même chose quand l'unité de vente existe mais n'est pas vérifiée.
+    const pending: Referential = structuredClone(ref);
+    const ecran = pending.products.find((p) => p.id === "soprema-sop-ecran-hpv-r2-150x50")!;
+    ecran.sellingUnits[0]!.contains = { ...ecran.sellingUnits[0]!.contains, verification: { status: "draft" } };
+    expect(need(computeWorkItem(pending, CASE), "ecran").purchaseUnavailable).toMatch(/en attente de vérification : Contenu : 1 rouleau/);
+    // Une donnée inconnue + conversion impossible : on ne peut pas prouver qu'elle est sans effet → question.
+    const { pureau: _p, ...params } = CASE.params;
+    expect(need(computeWorkItem(ref, { ...CASE, params }), "liteaux").status).toBe("question");
+  });
+
   it("applique la marge réglée par l'artisan, jamais une marge inventée", () => {
-    const r = computeWorkItem(ref, { ...CASE, companyWaste: { roof_tile: "5" } });
+    const r = computeWorkItem(ref, { ...CASE, preferences: { waste: { roof_tile: "5" } } });
     // 1 305,43 × 1,05 = 1 370,70 → 1 371 pièces.
     expect(need(r, "tuiles")).toMatchObject({ quantity: { value: "1370.7" }, purchase: { order: { count: "1371" } } });
     expect(need(r, "liteaux").quantity?.value).toBe("349.85");
@@ -201,7 +246,7 @@ describe("moteur : ouvrage → besoins → achat", () => {
     expect(need(ruled, "tuiles").quantity?.value).toBe("1357.64");
     expect(need(ruled, "tuiles").trace.find((t) => t.label === "Marge recommandée")).toMatchObject({ value: "4" });
     // Le réglage de l'artisan pour ce produit prime sur tout.
-    const own = computeWorkItem(sourced, { ...CASE, companyWaste: { roof_tile: "8", "edilians-hp10-huguenot": "2" } });
+    const own = computeWorkItem(sourced, { ...CASE, preferences: { waste: { roof_tile: "8", "edilians-hp10-huguenot": "2" } } });
     // 1 305,4262 × 1,02 = 1 331,5347.
     expect(need(own, "tuiles").quantity?.value).toBe("1331.53");
     // Aucune règle pour les liteaux : 0 %, dit clairement.
@@ -226,7 +271,10 @@ describe("moteur : ouvrage → besoins → achat", () => {
   it("pose UNE question quand il manque une information, au lieu de deviner", () => {
     const { pureau: _p, ...params } = CASE.params;
     const r = computeWorkItem(ref, { ...CASE, params });
-    expect(need(r, "tuiles")).toMatchObject({ status: "question", question: { key: "param:pureau", text: "À quel pureau posez-vous ces tuiles ?" } });
+    expect(need(r, "tuiles")).toMatchObject({
+      status: "question",
+      question: { key: "param:pureau", text: "À quel pureau posez-vous ces tuiles ?", impact: "De 1 191 à 1 445 pièces selon la réponse." },
+    });
     expect(need(r, "tuiles").quantity).toBeUndefined();
     expect(r.nextQuestion?.key).toBe("param:pureau");
     // Le pureau sert aussi aux liteaux : c'est la même question, posée une fois.
@@ -270,5 +318,62 @@ describe("reconnaissance des appellations (devis client et fournisseurs)", () =>
     }
     expect(identifyProducts("Liteaux sapin 27 x 40", ROOFING_REFERENTIAL).candidates[0]?.product.shortLabel).toBe("Liteaux 27×40");
     expect(identifyProducts("Tuile romane canal", ROOFING_REFERENTIAL).candidates).toEqual([]);
+  });
+});
+
+describe("calcul sur intervalles (sûr : contient toujours toutes les valeurs possibles)", () => {
+  const iv = (lo: string | number, hi: string | number, L = 0) => ({ lo: new Decimal(lo), hi: new Decimal(hi), dim: { L, M: 0 } });
+  const run = (f: string, vars: Record<string, ReturnType<typeof iv>>) => {
+    const r = evaluateInterval(parseFormula(f), (n) => vars[n]!);
+    return [r.lo.toString(), r.hi.toString()];
+  };
+  it("encadre sans jamais exclure une valeur possible", () => {
+    expect(run("a * b", { a: iv(-2, 3), b: iv(4, 5) })).toEqual(["-10", "15"]);
+    expect(run("a / b", { a: iv(1, 1), b: iv(2, 4) })).toEqual(["0.25", "0.5"]);
+    // Division par un intervalle qui contient 0 : tout est possible.
+    expect(run("a / b", { a: iv(1, 1), b: iv(-1, 1) })).toEqual(["-Infinity", "Infinity"]);
+    // Condition indécidable : les deux branches restent possibles.
+    expect(run("si(p <= 30, 20, 10)", { p: iv("-Infinity", "Infinity") })).toEqual(["10", "20"]);
+    expect(run("si(p <= 30, 20, 10)", { p: iv(31, 50) })).toEqual(["10", "10"]);
+    expect(run("arrondi_sup(a)", { a: iv("1.2", "1.9") })).toEqual(["2", "2"]);
+  });
+});
+
+describe("contexte chantier : une information trouvée n'importe où sert à tout l'ouvrage", () => {
+  const work = ROOFING_REFERENTIAL.workItems[0]!;
+  it("réunit les preuves concordantes, et signale les contradictions au lieu de choisir", () => {
+    const { params, conflicts } = paramsFromContext(
+      {
+        facts: [
+          { key: "surface", value: "120", unit: "m2", evidence: "Devis, ligne 4", origin: "devis" },
+          { key: "surface", value: "120", unit: "m2", evidence: "Devis, ligne 5", origin: "devis" },
+          { key: "pureau", value: "343", unit: "mm", evidence: "Devis, en-tête", origin: "devis" },
+          { key: "pureau", value: "34.3", unit: "cm", evidence: "Devis, ligne 5", origin: "devis" },
+          { key: "entraxe_supports", value: "60", unit: "cm", evidence: "Devis, ligne 2", origin: "devis" },
+          { key: "entraxe_supports", value: "50", unit: "cm", evidence: "Devis, ligne 9", origin: "devis" },
+        ],
+      },
+      work,
+    );
+    expect(params.surface).toMatchObject({ value: "120", origin: "devis", evidence: "Devis, ligne 4, Devis, ligne 5" });
+    // « 343 mm » et « 34,3 cm » : la même valeur, aucune contradiction.
+    expect(params.pureau).toMatchObject({ value: "343", unit: "mm" });
+    expect(params.entraxe_supports).toBeUndefined();
+    expect(conflicts.map((c) => c.key)).toEqual(["entraxe_supports"]);
+  });
+
+  it("la réponse de l'artisan l'emporte sur le document", () => {
+    const { params, conflicts } = paramsFromContext(
+      {
+        facts: [
+          { key: "entraxe_supports", value: "60", unit: "cm", evidence: "Devis, ligne 2", origin: "devis" },
+          { key: "entraxe_supports", value: "50", unit: "cm", evidence: "Devis, ligne 9", origin: "devis" },
+          { key: "entraxe_supports", value: "60", unit: "cm", evidence: "Votre réponse", origin: "artisan" },
+        ],
+      },
+      work,
+    );
+    expect(params.entraxe_supports).toMatchObject({ value: "60", origin: "artisan" });
+    expect(conflicts).toEqual([]);
   });
 });

@@ -69,6 +69,14 @@ Tout se lance avec `pnpm turbo run lint typecheck test build`.
   (devis → quantitatif attendu → commande réelle) devient un cas de
   référence rejoué à chaque version du moteur ; un écart est une régression.
 
+## Banc d'essai « vrais devis »
+
+`packages/domain/test/banc-devis-reels.test.ts` fait passer chaque vrai
+devis anonymisé par le chemin de l'application et régénère
+`docs/banc-devis-reels-score.md` (lignes transformées, questions). Toute
+évolution du score est visible dans la revue. Mode d'emploi :
+`banc-devis-reels.md`.
+
 ## CI (phase 1)
 
 `lint → typecheck → tests unitaires → tests d'intégration (Postgres) →
