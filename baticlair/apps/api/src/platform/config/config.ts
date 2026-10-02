@@ -51,6 +51,12 @@ const envSchema = z
      * le document n'est pas un devis normal (catalogue, annexes) et n'est pas
      * envoyé à l'IA. Un très gros devis (500 lignes scannées) reste bien en dessous.
      */
+    /**
+     * Comptes VALIDATEURS du référentiel (e-mails, séparés par des virgules) : ils voient les
+     * calculs des règles encore en brouillon, marqués « provisoire », pour les valider sur de
+     * vrais devis. Jamais ✓, jamais envoyés au fournisseur. Vide : personne.
+     */
+    REFERENTIAL_VALIDATORS: z.string().optional(),
     AI_ANALYSIS_MAX_EUR: z.string().regex(/^\d+(\.\d+)?$/).default("3"),
     /**
      * Lecture des devis par l'IA :
@@ -123,6 +129,8 @@ export interface AppConfig {
   oauth: { google?: OAuthClientConfig; microsoft?: OAuthClientConfig };
   documents: { maxBytes: number; maxPages: number };
   aiCost: { usdToEur: string; monthlyBudgetEur: string; analysisMaxEur: string };
+  /** E-mails (en minuscules) des validateurs du référentiel. */
+  referentialValidators: string[];
   billing: { plans: Plan[]; activationCodes: Record<string, string> };
   ai: {
     provider: "anthropic" | "disabled" | "fake";
@@ -173,6 +181,10 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     oauth: { ...(google ? { google } : {}), ...(microsoft ? { microsoft } : {}) },
     documents: { maxBytes: e.DOCUMENT_MAX_BYTES, maxPages: e.DOCUMENT_MAX_PAGES },
     aiCost: { usdToEur: e.AI_USD_TO_EUR, monthlyBudgetEur: e.AI_MONTHLY_BUDGET_EUR, analysisMaxEur: e.AI_ANALYSIS_MAX_EUR },
+    referentialValidators: (e.REFERENTIAL_VALIDATORS ?? "")
+      .split(",")
+      .map((x) => x.trim().toLowerCase())
+      .filter((x) => x.length > 0),
     billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES) },
     ai: {
       provider: e.AI_PROVIDER ?? (e.ANTHROPIC_API_KEY ? "anthropic" : "disabled"),

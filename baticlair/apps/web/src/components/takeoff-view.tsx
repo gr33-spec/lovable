@@ -190,6 +190,18 @@ function DecisionButtons({
       </div>
     );
   }
+  if (q?.kind === "choose") {
+    // Deux lectures possibles d'une même ligne (« 6 ardoises » ou « 6 jouées ») : l'artisan tranche.
+    return (
+      <div className="flex flex-col gap-2">
+        {q.options.map((o) => (
+          <button key={o.value} type="button" disabled={pending} onClick={() => void handlers.onAnswer(q.key, o.value)} className={`${bigButton} bg-accent text-white`}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+    );
+  }
   if (q?.kind === "confirm_product") {
     return (
       <div className="grid grid-cols-2 gap-2">
@@ -441,6 +453,9 @@ export function MeasuresNote({ measures, items, ouvrages = [] }: { measures: Non
                     <span key={n.slot} className="block text-muted">
                       Il faut : {n.label} —{" "}
                       {n.need ? `${frNumber(n.need.value)} ${needUnit(n.need.unit)}` : <span className="font-semibold text-warn">à calculer</span>}
+                      {n.need && n.provisional ? <span className="font-semibold text-warn"> (provisoire, règle à valider)</span> : null}
+                      {n.order ? ` · à commander : ${n.order.count} ${Number(n.order.count) > 1 ? n.order.unit.many : n.order.unit.one}${n.provisional ? " (provisoire)" : ""}` : null}
+                      {n.usual ? <span className="block text-xs">{n.usual}</span> : null}
                     </span>
                   ))}
                 </span>

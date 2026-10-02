@@ -1,4 +1,5 @@
 import type { TakeoffIssue, TakeoffValidation } from "../takeoff/validation.js";
+import { keywordPosition, normalizeText } from "../trades/trade-profile.js";
 import type { Referential } from "./model.js";
 import { LINE_UNITS, type QuotePlan } from "./plan.js";
 import { parseRefUnit, sameDim } from "./units.js";
@@ -23,10 +24,17 @@ export interface RoleProposal {
   role: LineRole;
   /** Pourquoi, en une phrase (montré dans « Voir le calcul »). */
   why: string;
+  /**
+   * Ambiguïté qui change la commande (« 6 : des ardoises, ou des jouées ? ») :
+   * la question, et ce que serait chacune des deux lectures.
+   */
+  ask?: { text: string; purchase: string; measure: string };
 }
 
 export interface RoleLine {
   ref: string;
+  /** Désignation (pour reconnaître un ouvrage compté : « 2 entourages de cheminée »). */
+  designation?: string;
   /** Référence produit écrite sur la ligne (catalogue) : elle désigne un article. */
   reference?: string | null;
 }
@@ -54,6 +62,25 @@ export function proposeLineRoles(lines: readonly RoleLine[], plan: QuotePlan, va
     }
     if (v.basis === "work") {
       roles.set(v.lineId, { role: "measure", why: "La quantité mesure l'ouvrage (surface, longueur ou nombre d'ouvrages), pas un matériau." });
+      continue;
+    }
+    // Ouvrage compté à l'unité (« 2 entourages de cheminée », « ardoises pour 6 jouées ») : jamais un nombre d'articles.
+    const counted = v.unit === "U" && line?.designation ? countedWork(line.designation, ref) : null;
+    if (counted) {
+      const qty = v.quantity?.toFixed() ?? "?";
+      if (!counted.material) {
+        roles.set(v.lineId, { role: "measure", why: `La quantité compte des ouvrages (${counted.work.label.many}), pas des articles.` });
+      } else {
+        roles.set(v.lineId, {
+          role: "undetermined",
+          why: `« ${qty} » peut compter des ${counted.material} ou des ${counted.work.label.many} : cela change la commande.`,
+          ask: {
+            text: `${qty} : c'est le nombre ${de(counted.material)} à commander, ou le nombre ${de(counted.work.label.many)} ?`,
+            purchase: `${qty} ${counted.material} à commander`,
+            measure: `${qty} ${Number(qty) > 1 ? counted.work.label.many : counted.work.label.one} (matériaux à calculer)`,
+          },
+        });
+      }
       continue;
     }
     if (planned?.status === "planned") {
@@ -95,6 +122,11 @@ export function applyLineRoles(validation: TakeoffValidation, roles: ReadonlyMap
       if (role === "measure" && v.basis !== "work") {
         return { ...v, basis: "work", issues: [...v.issues.filter((i) => i.code !== "WORK_QUANTITY"), MEASURE_ISSUE] };
       }
+      // Ambiguïté tranchable (« 6 : ardoises ou jouées ? ») : tant que l'artisan n'a pas répondu, ce n'est
+      // PAS une quantité d'achat (ni ✓, ni emplacement « déjà donné » qui effacerait un calcul).
+      if (role === "undetermined" && v.unit !== null && v.basis !== "work") {
+        return { ...v, basis: "work" };
+      }
       if (role === "purchase" && v.basis === "work") {
         return { ...v, basis: "purchase", issues: v.issues.filter((i) => i.code !== "WORK_QUANTITY") };
       }
@@ -102,3 +134,32 @@ export function applyLineRoles(validation: TakeoffValidation, roles: ReadonlyMap
     }),
   };
 }
+
+/**
+ * L'ouvrage compté que nomme la ligne, et le matériau nommé AVANT lui s'il y en
+ * a un (« Ardoises pour jouées » : matériau « Ardoise », ouvrage « jouée ») :
+ * dans ce cas, le nombre peut compter l'un ou l'autre.
+ */
+function countedWork(designation: string, ref: Referential): { work: NonNullable<Referential["countedWorks"]>[number]; material: string | null } | null {
+  const text = normalizeText(designation);
+  let best: { work: NonNullable<Referential["countedWorks"]>[number]; pos: number } | null = null;
+  for (const work of ref.countedWorks ?? []) {
+    for (const k of work.keywords) {
+      const pos = keywordPosition(text, k);
+      if (pos >= 0 && (!best || pos < best.pos)) best = { work, pos };
+    }
+  }
+  if (!best) return null;
+  // Le matériau, tel que le devis le nomme (« ardoises »), au pluriel.
+  let material: { word: string; pos: number } | null = null;
+  for (const f of ref.families) {
+    for (const k of f.keywords ?? []) {
+      const pos = keywordPosition(text, k);
+      if (pos >= 0 && pos < best.pos && (!material || pos < material.pos)) material = { word: /[sx]$/.test(k) ? k : `${k}s`, pos };
+    }
+  }
+  return { work: best.work, material: material?.word ?? null };
+}
+
+/** « de jouées », « d'ardoises ». */
+const de = (word: string) => (/^[aeiouyhéè]/i.test(word) ? `d'${word}` : `de ${word}`);

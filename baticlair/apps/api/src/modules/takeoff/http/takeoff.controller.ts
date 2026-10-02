@@ -50,7 +50,18 @@ function viewDto(view: ArtisanView) {
       designation: o.designation,
       role: o.role,
       read: o.read,
-      needs: o.needs.map((n) => ({ slot: n.slot, label: n.label, origin: n.origin, need: n.need, needRange: n.needRange, order: n.order, missing: n.missing, state: n.state })),
+      needs: o.needs.map((n) => ({
+        slot: n.slot,
+        label: n.label,
+        origin: n.origin,
+        need: n.need,
+        needRange: n.needRange,
+        order: n.order,
+        missing: n.missing,
+        provisional: n.provisional,
+        usual: n.usual,
+        state: n.state,
+      })),
       direct: o.direct,
       pending: o.pending,
       state: o.state,
@@ -125,14 +136,17 @@ const decisionBody = z.object({
   lineIds: uuidList.min(1),
   pieceLineIds: uuidList.default([]),
 });
-const answerBody = z.object({
-  key: z.string().regex(/^(product|param):[a-z0-9_]{1,40}$/),
-  value: z.union([
-    z.string().trim().max(120),
-    z.object({ value: z.string().trim().regex(/^\d+(?:[.,]\d+)?$/), unit: z.string().trim().min(1).max(10) }),
-    z.null(),
-  ]),
-});
+const answerBody = z
+  .object({
+    // « role:<ligne> » : l'artisan tranche une ambiguïté (« 6 : ardoises ou jouées ? »).
+    key: z.string().regex(/^(?:(?:product|param):[a-z0-9_]{1,40}|role:[0-9a-f-]{36})$/),
+    value: z.union([
+      z.string().trim().max(120),
+      z.object({ value: z.string().trim().regex(/^\d+(?:[.,]\d+)?$/), unit: z.string().trim().min(1).max(10) }),
+      z.null(),
+    ]),
+  })
+  .refine((b) => !b.key.startsWith("role:") || b.value === "measure" || b.value === "purchase", { message: "role answer must be measure or purchase" });
 
 const fields = (b: z.infer<typeof lineBody>) => ({
   designation: b.designation,

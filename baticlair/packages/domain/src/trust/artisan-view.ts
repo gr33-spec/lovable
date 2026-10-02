@@ -91,6 +91,13 @@ export interface NeedLevels {
   order: { count: string; unit: { one: string; many: string } } | null;
   /** Ce qui manque pour le besoin, ou pour la commande (en clair). */
   missing: string | null;
+  /**
+   * Calcul PROVISOIRE (règle ou donnée encore en brouillon, mode validateur
+   * seulement) : la quantité est montrée pour être jugée, jamais ✓.
+   */
+  provisional: boolean;
+  /** Produit d'usage quand le devis ne le précise pas (pratique déclarée, à confirmer). */
+  usual: string | null;
   state: TrustState;
 }
 
@@ -160,7 +167,7 @@ function needName(n: NeedResult, all: readonly NeedResult[]): string {
   return twice && !norm(n.label).startsWith(norm(n.slotLabel)) ? `${n.slotLabel} (${n.label})` : n.label;
 }
 
-function needLevels(n: OwnedNeed, all: readonly NeedResult[]): NeedLevels {
+function needLevels(n: OwnedNeed, all: readonly NeedResult[], usual: string | null = null): NeedLevels {
   const a = assessNeed(n);
   const calculated = n.status === "calculated";
   return {
@@ -172,6 +179,9 @@ function needLevels(n: OwnedNeed, all: readonly NeedResult[]): NeedLevels {
     needRange: calculated && n.quantityRange ? n.quantityRange : null,
     order: calculated && n.purchase ? n.purchase.order : null,
     missing: !calculated ? (n.reason ?? n.question?.text ?? "Information manquante.") : !n.purchase ? (n.purchaseUnavailable ?? "Conditionnement à préciser par le fournisseur.") : null,
+    provisional: calculated && n.provisional,
+    // Le produit d'usage n'est dit que si le devis n'en nomme aucun.
+    usual: n.trace.some((t) => t.label === "Produit") ? null : usual,
     state: a.state,
   };
 }
@@ -245,7 +255,13 @@ export function artisanView(
   validation: TakeoffValidation,
   engine: { needs: readonly OwnedNeed[]; questions: readonly Question[]; declined?: readonly string[] } = { needs: [], questions: [] },
   /** Plan du calcul et rôles des lignes : pour rattacher chaque besoin à son ouvrage. */
-  link?: { plan: QuotePlan; roles: ReadonlyMap<string, LineRole>; ref: Referential },
+  link?: {
+    plan: QuotePlan;
+    roles: ReadonlyMap<string, LineRole>;
+    ref: Referential;
+    /** Ambiguïtés de rôle qui changent la commande (« 6 : ardoises ou jouées ? ») : une question chacune. */
+    asks?: ReadonlyMap<string, { text: string; purchase: string; measure: string }>;
+  },
 ): ArtisanView {
   // Besoins rattachés à leur ligne du devis (hors suggestions et réponses « aucun de ces produits »).
   const owned = new Map<string, OwnedNeed[]>();
@@ -269,8 +285,18 @@ export function artisanView(
     if (!assessed) continue; // prestation : rien à commander
     // Un ✓ ne masque jamais un besoin du même ouvrage encore à établir.
     const openNeeds = (owned.get(line.id) ?? []).filter((n) => assessNeed(n).state !== "verified");
-    const a: Assessment =
-      assessed.state === "verified" && openNeeds.length > 0
+    const ask = link?.roles.get(line.id) === "undetermined" ? link.asks?.get(line.id) : undefined;
+    const a: Assessment = ask
+      ? {
+          ...assessed,
+          state: "to_confirm",
+          reason: ask.text,
+          criteria: [
+            ...assessed.criteria.filter((c) => c.key !== "work_item"),
+            { key: "work_item", cause: "role_ambiguous", status: "to_confirm", detail: ask.text, origin: "devis", affects: ["order"] },
+          ],
+        }
+      : assessed.state === "verified" && openNeeds.length > 0
         ? {
             ...assessed,
             state: worst(openNeeds.map((n) => assessNeed(n).state)),
@@ -290,7 +316,20 @@ export function artisanView(
     if (group) groups.set(group, [...(groups.get(group) ?? []), line]);
     if (open.some((o) => o.cause === "work_measure")) measureIds.push(line.id);
     // Doutes propres à cette ligne (multiplicateur, quantité introuvable, doute de lecture…) : une décision par ligne.
-    const own = open.filter((o) => !UNIT_CAUSES.has(o.cause) && o.cause !== "unknown_article" && o.cause !== "work_measure" && o.cause !== "DUPLICATE_LINE");
+    if (ask) {
+      // Une seule question, deux lectures : la réponse change la commande.
+      decisions.push({
+        key: `role:${line.id}`,
+        state: "to_confirm",
+        title: line.designation,
+        text: ask.text,
+        lineIds: [line.id],
+        primary: { action: "answer", label: "Choisir" },
+        secondary: ["edit"],
+        question: { key: `role:${line.id}`, kind: "choose", text: ask.text, options: [{ label: ask.purchase, value: "purchase" }, { label: ask.measure, value: "measure" }] },
+      });
+    }
+    const own = open.filter((o) => !UNIT_CAUSES.has(o.cause) && o.cause !== "unknown_article" && o.cause !== "work_measure" && o.cause !== "DUPLICATE_LINE" && o.cause !== "role_ambiguous");
     if (own.length > 0) {
       const missing = own.find((o) => o.state === "missing");
       decisions.push({
@@ -344,7 +383,8 @@ export function artisanView(
       const line = lines.find((l) => l.id === item.id)!;
       const v = validation.lines.find((x) => x.lineId === item.id)!;
       const role = link.roles.get(item.id) ?? null;
-      const needs = (owned.get(item.id) ?? []).map((n) => needLevels(n, engine.needs));
+      const usualOf = (n: OwnedNeed) => link.ref.workItems.find((w) => w.id === n.workItemId)?.slots.find((x) => x.key === n.slot)?.usual?.text ?? null;
+      const needs = (owned.get(item.id) ?? []).map((n) => needLevels(n, engine.needs, usualOf(n)));
       // Tout composant que la ligne cite reste visible, même sans règle de calcul (« fixations »).
       const planned0 = link.plan.lines.find((l) => l.ref === item.id);
       if (v.basis === "work" && planned0?.status === "planned") {
@@ -354,7 +394,7 @@ export function artisanView(
           // Seulement un composant que le calcul ne connaît pas du tout : un besoin calculé ailleurs
           // (« pour tuiles HP10 » sur la ligne des liteaux) appartient déjà à sa propre ligne.
           if (!slot || needs.some((n) => n.slot === key) || engine.needs.some((n) => n.workItemId === work!.id && n.slot === key)) continue;
-          needs.push({ needId: `${work!.id}/${key}`, slot: key, label: slot.label, origin: "explicit", need: null, needRange: null, order: null, missing: "Pas encore de règle de calcul dans BatiClair.", state: "missing" });
+          needs.push({ needId: `${work!.id}/${key}`, slot: key, label: slot.label, origin: "explicit", need: null, needRange: null, order: null, missing: "Pas encore de règle de calcul dans BatiClair.", provisional: false, usual: slot.usual?.text ?? null, state: "missing" });
         }
       }
       const direct = v.basis === "purchase" && role !== "undetermined" && line.quantity && line.unit && needs.length === 0 ? { quantity: line.quantity, unit: line.unit } : null;
