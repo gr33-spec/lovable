@@ -6,10 +6,11 @@ import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } fro
 
 let ctx: TestContext;
 beforeAll(async () => {
-  // Vraies formules (essai : 3 chantiers) et un code d'activation de test.
+  // Formules réelles, avec l'essai limité à 3 chantiers comme à l'ouverture (en bêta, l'essai est sans limite).
+  const plans = DEFAULT_PLANS.map((p) => (p.key === "trial" ? { ...p, projectLimit: 3 } : p));
   ctx = await createTestApp((b) =>
     b.overrideProvider(BillingService).useFactory({
-      factory: (p: PrismaService) => new BillingService(p, { plans: DEFAULT_PLANS, activationCodes: { "TEST-SOLO-2026": "solo" } }),
+      factory: (p: PrismaService) => new BillingService(p, { plans, activationCodes: { "TEST-SOLO-2026": "solo" } }),
       inject: [PrismaService],
     }),
   );
@@ -19,6 +20,12 @@ afterAll(async () => {
 });
 beforeEach(async () => {
   await resetDatabase(ctx.prisma);
+});
+
+describe("bêta : essai sans limite de chantiers", () => {
+  it("les formules par défaut ne bloquent jamais un chantier pendant l'essai", () => {
+    expect(DEFAULT_PLANS.find((p) => p.key === "trial")?.projectLimit).toBeNull();
+  });
 });
 
 describe("formules : essai, limite, activation", () => {

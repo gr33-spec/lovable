@@ -20,8 +20,13 @@ export const planSchema = z.object({
 
 export type Plan = z.infer<typeof planSchema>;
 
+/**
+ * Bêta (décision du fondateur, 2026-10-02) : l'essai n'a PAS de limite de
+ * chantiers, pour tester avec de vrais devis. Le mécanisme de limite reste en
+ * place et testé ; pour le rétablir : `projectLimit: 3` (ou BILLING_PLANS).
+ */
 export const DEFAULT_PLANS: Plan[] = [
-  { key: "trial", label: "Essai gratuit", projectLimit: 3, period: "trial", priceEurMonth: null, offered: false },
+  { key: "trial", label: "Essai gratuit", projectLimit: null, period: "trial", priceEurMonth: null, offered: false },
   { key: "solo", label: "Solo", projectLimit: 10, period: "month", priceEurMonth: 39, offered: true },
   { key: "pro", label: "Pro", projectLimit: 30, period: "month", priceEurMonth: 79, offered: true },
 ];
