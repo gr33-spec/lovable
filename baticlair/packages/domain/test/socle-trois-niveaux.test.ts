@@ -201,3 +201,15 @@ describe("rapport : D-2026-015 en trois niveaux", () => {
     await expect(doc).toMatchFileSnapshot("../../../docs/socle-trois-niveaux-d2026-015.md");
   });
 });
+
+describe("aucune ambiguïté de nom pour l'artisan", () => {
+  it("lattage et contre-lattage ne portent jamais le même nom de besoin", () => {
+    for (const draft of [false, true]) {
+      const { ouvrage } = read(ANSWERS, draft);
+      const lattage = ouvrage("ligne 3").needs.find((n) => n.slot === "liteau")!.label;
+      const contre = ouvrage("ligne 2").needs.find((n) => n.slot === "contre_liteau")!.label;
+      expect(lattage).not.toBe(contre);
+      expect(contre).toMatch(/^Contre-liteaux/);
+    }
+  });
+});

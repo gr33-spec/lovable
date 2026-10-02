@@ -9,7 +9,7 @@ aucune n'a été validée pour ce rapport.
 | Ligne du devis | Lu dans le devis | Il faut | À commander | État |
 |---|---|---|---|---|
 | ligne 1 — Écran de sous-toiture respirant | 120 m² (mesure de l'ouvrage) | Écran sous-toiture : à calculer | Écran sous-toiture : à préciser | ? |
-| ligne 2 — Contre-lattage en liteaux 27x40 | 120 m² (mesure de l'ouvrage) | Liteaux 27×40 : à calculer | Liteaux 27×40 : à préciser | ? |
+| ligne 2 — Contre-lattage en liteaux 27x40 | 120 m² (mesure de l'ouvrage) | Contre-liteaux (Liteaux 27×40) : à calculer | Contre-liteaux (Liteaux 27×40) : à préciser | ? |
 | ligne 3 — Lattage en liteaux 27x40 pour tuiles HP10 | 120 m² (mesure de l'ouvrage) | Liteaux 27×40 : à calculer | Liteaux 27×40 : à préciser | ? |
 | ligne 4 — Couverture en tuiles terre cuite HP10 rouge | 120 m² (mesure de l'ouvrage) | Tuiles HP10 : à calculer | Tuiles HP10 : à préciser | ? |
 | ligne 5 — Rives de toit | 24 m (mesure de l'ouvrage) | à calculer — Tuile de rive : pas encore de règle de calcul dans BatiClair. | — | ? |
@@ -24,7 +24,7 @@ aucune n'a été validée pour ce rapport.
 | Ligne du devis | Lu dans le devis | Il faut | À commander | État |
 |---|---|---|---|---|
 | ligne 1 — Écran de sous-toiture respirant | 120 m² (mesure de l'ouvrage) | Écran HPV : à calculer | Écran HPV : à préciser | ? |
-| ligne 2 — Contre-lattage en liteaux 27x40 | 120 m² (mesure de l'ouvrage) | Liteaux 27×40 : à calculer | Liteaux 27×40 : à préciser | ? |
+| ligne 2 — Contre-lattage en liteaux 27x40 | 120 m² (mesure de l'ouvrage) | Contre-liteaux (Liteaux 27×40) : à calculer | Contre-liteaux (Liteaux 27×40) : à préciser | ? |
 | ligne 3 — Lattage en liteaux 27x40 pour tuiles HP10 | 120 m² (mesure de l'ouvrage) | Liteaux 27×40 : à calculer | Liteaux 27×40 : à préciser | ? |
 | ligne 4 — Couverture en tuiles terre cuite HP10 rouge | 120 m² (mesure de l'ouvrage) | Tuiles HP10 : à calculer | Tuiles HP10 : à préciser | ? |
 | ligne 5 — Rives de toit | 24 m (mesure de l'ouvrage) | à calculer — Tuile de rive : pas encore de règle de calcul dans BatiClair. | — | ? |
@@ -39,7 +39,7 @@ aucune n'a été validée pour ce rapport.
 | Ligne du devis | Lu dans le devis | Il faut | À commander | État |
 |---|---|---|---|---|
 | ligne 1 — Écran de sous-toiture respirant | 120 m² (mesure de l'ouvrage) | Écran HPV : 128,57 à 138,46 m² | Écran HPV : 2 rouleaux | ? |
-| ligne 2 — Contre-lattage en liteaux 27x40 | 120 m² (mesure de l'ouvrage) | Liteaux 27×40 : 133,33 ml | Liteaux 27×40 : à préciser | ? |
+| ligne 2 — Contre-lattage en liteaux 27x40 | 120 m² (mesure de l'ouvrage) | Contre-liteaux (Liteaux 27×40) : 133,33 ml | Contre-liteaux (Liteaux 27×40) : à préciser | ? |
 | ligne 3 — Lattage en liteaux 27x40 pour tuiles HP10 | 120 m² (mesure de l'ouvrage) | Liteaux 27×40 : 349,85 ml | Liteaux 27×40 : à préciser | ? |
 | ligne 4 — Couverture en tuiles terre cuite HP10 rouge | 120 m² (mesure de l'ouvrage) | Tuiles HP10 : 1305,43 pièce(s) | Tuiles HP10 : 1306 pièces | ? |
 | ligne 5 — Rives de toit | 24 m (mesure de l'ouvrage) | à calculer — Tuile de rive : pas encore de règle de calcul dans BatiClair. | — | ? |

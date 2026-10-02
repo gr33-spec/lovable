@@ -148,13 +148,25 @@ function needOwner(n: OwnedNeed, plan: QuotePlan, roles: ReadonlyMap<string, Lin
   );
 }
 
-function needLevels(n: OwnedNeed): NeedLevels {
+const norm = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+/**
+ * Deux besoins ne portent jamais le même nom : « Liteaux 27×40 » pour le
+ * lattage et « Contre-liteaux (Liteaux 27×40) » pour le contre-lattage. Deux
+ * lignes identiques sur une commande, c'est une erreur qui attend de se produire.
+ */
+function needName(n: NeedResult, all: readonly NeedResult[]): string {
+  const twice = all.filter((x) => x.label === n.label).length > 1;
+  return twice && !norm(n.label).startsWith(norm(n.slotLabel)) ? `${n.slotLabel} (${n.label})` : n.label;
+}
+
+function needLevels(n: OwnedNeed, all: readonly NeedResult[]): NeedLevels {
   const a = assessNeed(n);
   const calculated = n.status === "calculated";
   return {
     needId: n.needId,
     slot: n.slot,
-    label: n.label,
+    label: needName(n, all),
     origin: n.origin === "explicit" ? "explicit" : "deduced",
     need: calculated && n.quantity ? n.quantity : null,
     needRange: calculated && n.quantityRange ? n.quantityRange : null,
@@ -318,7 +330,7 @@ export function artisanView(
     if (n.origin === "suggested" || n.status === "unknown" || (n.question && engine.declined?.includes(n.question.key))) continue;
     const a = assessNeed(n);
     const quantity = n.purchase ? `${n.purchase.order.count} ${n.purchase.order.unit.many}` : n.quantity ? `${n.quantity.value} ${n.quantity.unit}` : null;
-    items.push({ kind: "need", id: n.needId, label: n.label, quantity, state: a.state, reason: a.reason, assessment: a, need: n });
+    items.push({ kind: "need", id: n.needId, label: needName(n, engine.needs), quantity, state: a.state, reason: a.reason, assessment: a, need: n });
   }
   const engineDecisions = engine.questions.map((q) => engineDecision(q, engine.needs.find((n) => n.question?.key === q.key)));
 
@@ -332,7 +344,7 @@ export function artisanView(
       const line = lines.find((l) => l.id === item.id)!;
       const v = validation.lines.find((x) => x.lineId === item.id)!;
       const role = link.roles.get(item.id) ?? null;
-      const needs = (owned.get(item.id) ?? []).map(needLevels);
+      const needs = (owned.get(item.id) ?? []).map((n) => needLevels(n, engine.needs));
       // Tout composant que la ligne cite reste visible, même sans règle de calcul (« fixations »).
       const planned0 = link.plan.lines.find((l) => l.ref === item.id);
       if (v.basis === "work" && planned0?.status === "planned") {
