@@ -1,4 +1,5 @@
 import {
+  applyLineRoles,
   artisanView,
   assessTakeoffLine,
   computeWithAnswers,
@@ -7,6 +8,7 @@ import {
   planQuote,
   scanBoundaryRisks,
   planReading,
+  proposeLineRoles,
   priceTableAt,
   splitChunk,
   reviewExtractedTakeoff,
@@ -17,6 +19,8 @@ import {
   type EngineAnswer,
   type CorrectionAction,
   type ExtractionPolicy,
+  type LineRole,
+  type RoleProposal,
   type ReadingChunk,
   type LineSnapshot,
   type LineValidation,
@@ -107,6 +111,8 @@ const transient = (a: ExtractionAttempt) =>
 export interface ReviewedTakeoff {
   takeoff: TakeoffRecord;
   validation: TakeoffValidation;
+  /** Rôle de la quantité de chaque ligne, avec sa raison. */
+  roles: ReadonlyMap<string, RoleProposal>;
   /** Ce que voit l'artisan : compteurs ✓/⚠/?, décisions regroupées, éléments prêts et leur preuve. */
   view: ArtisanView;
 }
@@ -421,10 +427,11 @@ export class TakeoffService {
   }
 
   /** Relecture déterministe, recalculée à chaque lecture (règles métier à jour). */
-  private async review(tenant: TenantContext, takeoff: TakeoffRecord): Promise<ReviewedTakeoff> {
+  private async review(tenant: TenantContext, record: TakeoffRecord): Promise<ReviewedTakeoff> {
+    let takeoff = record;
     const profile = tradeProfile(takeoff.trade);
     const source = await this.aiInput.sourceLines(tenant, takeoff.documentId);
-    const { validation } = reviewExtractedTakeoff(
+    const { validation: read } = reviewExtractedTakeoff(
       takeoff.lines.map((l: TakeoffLineRecord) => ({
         id: l.id,
         designation: l.designation,
@@ -453,8 +460,18 @@ export class TakeoffService {
       enteredByArtisan: l.origin === "manual" || l.edited,
     }));
     const plan = planQuote(lines.map((l) => ({ ref: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, section: l.section })), ROOFING_REFERENTIAL, profile);
+    // Niveau 1 : le rôle de chaque quantité (mesure d'ouvrage ou à commander), proposé par le code
+    // et ENREGISTRÉ avec la ligne ; une mesure ne devient jamais une quantité d'achat.
+    const proposals = proposeLineRoles(takeoff.lines.map((l) => ({ ref: l.id, reference: l.reference })), plan, read, ROOFING_REFERENTIAL);
+    const roles = new Map<string, LineRole>([...proposals].map(([id, p]) => [id, p.role]));
+    const changed = new Map([...roles].filter(([id, role]) => takeoff.lines.find((l) => l.id === id)?.role !== role));
+    if (changed.size > 0) {
+      await this.takeoffs.setRoles(tenant, changed);
+      takeoff = { ...takeoff, lines: takeoff.lines.map((l) => (changed.has(l.id) ? { ...l, role: changed.get(l.id)! } : l)) };
+    }
+    const validation = applyLineRoles(read, roles);
     const engine = plan.inputs.length > 0 ? computeWithAnswers(ROOFING_REFERENTIAL, plan, takeoff.answers, await this.memory.forEngine(tenant), {}, slotsGivenByQuote(plan, validation)) : { needs: [], questions: [], declined: [] };
-    return { takeoff, validation, view: artisanView(lines, validation, engine) };
+    return { takeoff, validation, roles: proposals, view: artisanView(lines, validation, engine, { plan, roles, ref: ROOFING_REFERENTIAL }) };
   }
 
   /**

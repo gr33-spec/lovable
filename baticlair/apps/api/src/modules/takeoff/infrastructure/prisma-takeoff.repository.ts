@@ -1,3 +1,4 @@
+import type { LineRole } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { isUuid } from "../../../platform/validation/ids.js";
 import type { TenantContext } from "../../tenancy/index.js";
@@ -46,6 +47,7 @@ function toRecord(row: Row): TakeoffRecord {
       edited: l.edited,
       aiDoubt: l.aiDoubt,
       confirmed: l.confirmedAt !== null,
+      role: l.role === "measure" || l.role === "purchase" || l.role === "undetermined" ? l.role : null,
     })),
   };
 }
@@ -134,6 +136,13 @@ export class PrismaTakeoffRepository implements TakeoffRepository {
       where: { id: lineId, takeoff: { companyId: tenant.companyId } },
       data: { ...fields, edited: true, confirmedAt: null },
     });
+  }
+
+  async setRoles(tenant: TenantContext, roles: ReadonlyMap<string, LineRole>): Promise<void> {
+    if (roles.size === 0) return;
+    await this.prisma.$transaction(
+      [...roles].map(([id, role]) => this.prisma.takeoffLine.updateMany({ where: { id, takeoff: { companyId: tenant.companyId } }, data: { role } })),
+    );
   }
 
   async setAnswer(tenant: TenantContext, id: string, key: string, value: string | { value: string; unit: string } | null): Promise<void> {

@@ -70,7 +70,7 @@ const familyOf = (ref: Referential, code: string): ProductFamily | undefined => 
 const slotWords = (ref: Referential, slot: Slot) => [...(slot.keywords ?? []), ...(familyOf(ref, slot.family)?.keywords ?? [])];
 
 /** Unités de ligne de devis → unités du référentiel. */
-const LINE_UNITS: Record<string, string> = { U: "u", M: "m", ML: "m", M2: "m2", M3: "m3", KG: "kg", T: "t" };
+export const LINE_UNITS: Record<string, string> = { U: "u", M: "m", ML: "m", M2: "m2", M3: "m3", KG: "kg", T: "t" };
 const TEXT_UNITS: Record<string, string> = { mm: "mm", cm: "cm", m: "m", ml: "m", m2: "m2", "m²": "m2", "%": "%" };
 
 /** « entraxe 90 cm », « hauteur : 4m », « pureau de 34,3 cm » → valeur et unité, seulement si elles sont écrites. */

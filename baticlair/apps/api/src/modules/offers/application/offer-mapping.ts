@@ -17,6 +17,8 @@ export interface RequestedLine {
   quantity: string | null;
   unit: string | null;
   reference: string | null;
+  /** « work » : mesure d'un ouvrage, pas une quantité à commander. */
+  basis?: "work";
 }
 
 /** « 1 250,00 € » → « 1250.00 » ; null si ce n'est pas un nombre clair (jamais de devinette). */
@@ -37,9 +39,10 @@ const itemId = (index: number) => `item-${index}`;
 /** Les besoins de la comparaison : la liste demandée, dans l'ordre. */
 export function requestedItems(lines: readonly RequestedLine[]): RequestedItem[] {
   return lines.map((l, i) => {
-    const qty = parseFrenchQuantity(l.quantity);
-    const unit = parseUnit(l.unit) ?? "U";
-    return { id: itemId(i), designation: l.designation, quantity: Quantity.of(qty ?? 1, unit) };
+    // Mesure d'ouvrage, quantité ou unité inconnue : pas de quantité à commander (jamais 1 par défaut).
+    const qty = l.basis === "work" ? null : parseFrenchQuantity(l.quantity);
+    const unit = parseUnit(l.unit);
+    return { id: itemId(i), designation: l.designation, quantity: qty !== null && unit ? Quantity.of(qty, unit) : null };
   });
 }
 

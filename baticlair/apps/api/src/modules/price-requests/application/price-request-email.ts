@@ -37,7 +37,10 @@ export function requestedQuantityText(l: RequestedLine): string {
   if (!qty) return "quantité à préciser";
   if (l.basis !== "work") return qty;
   const unit = parseUnit(l.unit);
-  const measure = unit && dimensionOf(unit) === "length" ? "une longueur" : "une surface";
+  const dim = unit ? dimensionOf(unit) : null;
+  // Un nombre d'ouvrages (« 2 descentes ») n'est ni une surface ni un nombre d'articles.
+  if (dim === "count") return `pour ${qty} d'ouvrage (quantité à calculer)`;
+  const measure = dim === "length" ? "une longueur" : "une surface";
   return `pour ${measure} de ${qty} (quantité à calculer)`;
 }
 

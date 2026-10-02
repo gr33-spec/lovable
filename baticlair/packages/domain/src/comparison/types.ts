@@ -9,7 +9,12 @@ import type { Decimal } from "../shared/decimal.js";
 export interface RequestedItem {
   id: string;
   designation: string;
-  quantity: Quantity;
+  /**
+   * Quantité à commander demandée. null : inconnue (mesure d'un ouvrage
+   * encore à convertir, ou quantité absente) — jamais remplacée par 1 :
+   * les offres ne sont alors pas ramenées à une quantité.
+   */
+  quantity: Quantity | null;
   /** Famille de produits (« Couverture », « Bardage »…). */
   category?: string;
 }
@@ -40,6 +45,8 @@ export type ItemFlag =
   | "QUANTITY_LOWER"
   | "QUANTITY_HIGHER"
   | "UNIT_NOT_COMPARABLE"
+  /** La quantité demandée n'est pas une quantité à commander (mesure d'ouvrage, ou inconnue). */
+  | "REQUESTED_QUANTITY_UNKNOWN"
   | "ONLY_AS_VARIANT"
   | "NOT_PRICED";
 

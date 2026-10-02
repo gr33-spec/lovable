@@ -167,3 +167,81 @@ describe("questions du calcul : une réponse, une seule fois, et la preuve", () 
     expect(JSON.stringify(viewB)).not.toContain("Préférence de votre entreprise");
   });
 });
+
+describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut → à commander", () => {
+  interface Ouvrage {
+    lineId: string;
+    designation: string;
+    role: string | null;
+    read: { quantity: string | null; unit: string | null };
+    needs: { slot: string; label: string; origin: string; need: { value: string; unit: string } | null; order: unknown; missing: string | null; state: string }[];
+    direct: { quantity: string; unit: string } | null;
+    state: string;
+  }
+  const ouvrage = (view: View & { ouvrages: Ouvrage[] }, start: string) => view.ouvrages.find((o) => o.designation.startsWith(start))!;
+
+  it("le rôle de chaque quantité est ENREGISTRÉ avec la ligne : mesure d'ouvrage ou à commander", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "c@example.fr", "Toitures Martin");
+    const { takeoffId } = await projectWith(agent, D2026_015_LINES);
+    const rows = await ctx.prisma.takeoffLine.findMany({ where: { takeoffId }, orderBy: { position: "asc" } });
+    expect(rows.map((r) => [r.designation.split(" (")[0], r.role])).toEqual([
+      ["Écran de sous-toiture respirant", "measure"],
+      ["Contre-lattage en liteaux 27x40", "measure"],
+      ["Lattage en liteaux 27x40 pour tuiles HP10", "measure"],
+      ["Couverture en tuiles terre cuite HP10 rouge", "measure"],
+      ["Rives de toit", "measure"],
+      ["Faîtage", "measure"],
+      ["Gouttière PVC de 25 sable", "measure"],
+      ["Descente d'eau pluviale PVC Ø80 avec coudes", "measure"],
+      ["Chatières de ventilation", "purchase"],
+      ["Sortie de toit Poujoulat", "purchase"],
+    ]);
+  });
+
+  it("120 m² de lattage reste 120 m² de toiture ; le besoin en liteaux est « à calculer », jamais 120 ml", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "c@example.fr", "Toitures Martin");
+    const { view } = await projectWith(agent, D2026_015_LINES);
+    const v = view as View & { ouvrages: Ouvrage[] };
+    const lattage = ouvrage(v, "Lattage");
+    expect(lattage).toMatchObject({ role: "measure", read: { quantity: "120", unit: "m²" }, direct: null, state: "missing" });
+    expect(lattage.needs).toEqual([expect.objectContaining({ slot: "liteau", need: null, order: null, state: "missing" })]);
+    expect(JSON.stringify(v)).not.toMatch(/"120 m"|"120 ml"/);
+  });
+
+  it("2 descentes ne deviennent pas 2 articles ; 20 m de gouttière n'est pas ✓ tant que crochets et naissances ne sont pas établis", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "c@example.fr", "Toitures Martin");
+    const { view, takeoffId, projectId } = await projectWith(agent, D2026_015_LINES);
+    const v = view as View & { ouvrages: Ouvrage[] };
+    const descente = ouvrage(v, "Descente");
+    expect(descente).toMatchObject({ role: "measure", direct: null });
+    expect(descente.needs.map((n) => n.slot).sort()).toEqual(["collier", "coude", "tube"]);
+    const gouttiere = ouvrage(v, "Gouttière");
+    expect(gouttiere.needs.map((n) => n.slot).sort()).toEqual(["crochet", "naissance", "profil"]);
+    expect(gouttiere.state).not.toBe("verified");
+    for (const id of [descente.lineId, gouttiere.lineId]) expect(v.items.find((i) => i.id === id)!.state).not.toBe("verified");
+
+    // Partie chez le fournisseur : la descente est demandée comme un ouvrage, pas comme 2 articles.
+    await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "product:faitiere", value: null }).expect(200);
+    await agent.post(`/v1/takeoffs/${takeoffId}/validate`).expect(200);
+    const s = await agent.post("/v1/suppliers").send({ name: "Point.P", email: "devis@pointp.fr" });
+    const created = await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [s.body.id] }).expect(201);
+    const body = created.body.recipients[0].email.body as string;
+    expect(body).toMatch(/Descente.*: pour 2 unités d'ouvrage \(quantité à calculer\)/);
+    expect(body).toMatch(/Gouttière.*: pour une longueur de 20 m \(quantité à calculer\)/);
+    expect(body).toMatch(/Chatières.*: 10 unités$/m);
+  });
+
+  it("une règle en brouillon ne produit aucun ✓, et aucun nouvel appel IA n'a lieu après la lecture", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "c@example.fr", "Toitures Martin");
+    const { takeoffId, projectId } = await projectWith(agent, D2026_015_LINES);
+    const before = await ctx.prisma.aiExecution.count();
+    await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "product:tuile", value: "edilians-hp10-huguenot" }).expect(200);
+    const after = (await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "param:pureau", value: { value: "34.3", unit: "cm" } }).expect(200)).body.view as View & { ouvrages: Ouvrage[] };
+    await getView(agent, projectId);
+    expect(await ctx.prisma.aiExecution.count()).toBe(before);
+    for (const o of after.ouvrages.filter((x) => x.role === "measure")) {
+      expect(o.state).not.toBe("verified");
+      for (const n of o.needs) expect(n.state).not.toBe("verified");
+    }
+  });
+});

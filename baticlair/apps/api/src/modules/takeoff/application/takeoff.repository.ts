@@ -1,3 +1,4 @@
+import type { LineRole } from "@baticlair/domain";
 import type { TenantContext } from "../../tenancy/index.js";
 
 export type TakeoffStatus = "draft" | "validated";
@@ -26,6 +27,8 @@ export interface TakeoffLineRecord extends NewTakeoffLine {
   edited: boolean;
   /** L'artisan a vérifié la ligne et la garde telle quelle. */
   confirmed: boolean;
+  /** Rôle de la quantité : mesure d'ouvrage, à commander, ou indéterminé (null : pas encore établi). */
+  role: LineRole | null;
 }
 
 export interface TakeoffRecord {
@@ -71,6 +74,8 @@ export interface TakeoffRepository {
   deleteLine(tenant: TenantContext, lineId: string): Promise<void>;
   setStatus(tenant: TenantContext, id: string, status: TakeoffStatus): Promise<void>;
   setAnswer(tenant: TenantContext, id: string, key: string, value: string | { value: string; unit: string } | null): Promise<void>;
+  /** Enregistre le rôle de la quantité de ces lignes (niveau 1 : mesure ou à commander). */
+  setRoles(tenant: TenantContext, roles: ReadonlyMap<string, LineRole>): Promise<void>;
 }
 
 export const TAKEOFF_REPOSITORY = Symbol("TAKEOFF_REPOSITORY");

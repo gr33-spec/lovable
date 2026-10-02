@@ -11,3 +11,4 @@ export { planQuote, type QuoteLine, type QuotePlan, type LinePlan } from "./plan
 export { scoreQuote, type QuoteScore, type LineOutcome, type Answer } from "./scorecard.js";
 export { documentationNeeds, type DocumentationNeed } from "./documentation.js";
 export { mergeReferentials, type ReferentialLayer, type ReferentialProvider } from "./layers.js";
+export { applyLineRoles, proposeLineRoles, type LineRole, type RoleLine, type RoleProposal } from "./line-roles.js";

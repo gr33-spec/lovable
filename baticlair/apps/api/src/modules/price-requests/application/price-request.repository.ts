@@ -34,7 +34,8 @@ export interface PriceRequestRecord {
 export interface ValidatedTakeoff {
   id: string;
   trade: string;
-  lines: RequestedLine[];
+  /** Lignes validées, avec le rôle de leur quantité (mesure d'ouvrage ou à commander). */
+  lines: (RequestedLine & { role: "measure" | "purchase" | "undetermined" | null })[];
 }
 
 export interface Sender {
