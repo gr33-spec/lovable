@@ -392,6 +392,13 @@ export interface PriceRequest {
   classifiedAt: string | null;
   retainedSupplierIds: string[];
   recipients: PriceRequestRecipient[];
+  /** §43 : les trois blocs envoyés au fournisseur (mail et PDF) ; absent pour une demande d'avant. */
+  packet: { entreprise: string; chantier: string; articles: string[]; a_chiffrer: string[]; resume: string[]; joindre_detail: boolean } | null;
+}
+
+/** Réglages des envois fournisseur (§42.2), par entreprise. */
+export interface PriceRequestSettings {
+  attachQuoteDetail: boolean;
 }
 
 export type OfferLineKind = "main" | "substitution" | "variant" | "option" | "fee" | "deposit" | "info";

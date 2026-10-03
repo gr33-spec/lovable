@@ -1,5 +1,7 @@
 import { Module } from "@nestjs/common";
 import { PrismaService } from "../../platform/database/prisma.service.js";
+import type { EmailCapability, TransactionalEmailSender } from "../../platform/email/email.port.js";
+import { EMAIL_SENDER } from "../../platform/tokens.js";
 import { DocumentsModule, DocumentsService } from "../documents/index.js";
 import { SUPPLIER_REPOSITORY, SuppliersModule, type SupplierRepository } from "../suppliers/index.js";
 import { TakeoffModule, TakeoffService } from "../takeoff/index.js";
@@ -20,9 +22,9 @@ import { PrismaPriceRequestRepository } from "./infrastructure/prisma-price-requ
     },
     {
       provide: PriceRequestsService,
-      useFactory: (r: PriceRequestRepository, s: SupplierRepository, d: DocumentsService, t: TakeoffService) =>
-        new PriceRequestsService(r, s, d, async (tenant, takeoffId) => (await t.reviewed(tenant, takeoffId)).purchase),
-      inject: [PRICE_REQUEST_REPOSITORY, SUPPLIER_REPOSITORY, DocumentsService, TakeoffService],
+      useFactory: (r: PriceRequestRepository, s: SupplierRepository, d: DocumentsService, t: TakeoffService, mailer: TransactionalEmailSender & EmailCapability) =>
+        new PriceRequestsService(r, s, d, (tenant, takeoffId) => t.reviewed(tenant, takeoffId), mailer),
+      inject: [PRICE_REQUEST_REPOSITORY, SUPPLIER_REPOSITORY, DocumentsService, TakeoffService, EMAIL_SENDER],
     },
   ],
   exports: [PRICE_REQUEST_REPOSITORY, PriceRequestsService],

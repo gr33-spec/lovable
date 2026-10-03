@@ -32,6 +32,7 @@ function toRecord(row: Row): TakeoffRecord {
     promptVersion: row.promptVersion,
     model: row.model,
     notes: strings(row.notes),
+    context: stringMap(row.context),
     answers: answers(row.answers),
     createdAt: row.createdAt,
     validatedAt: row.validatedAt,
@@ -49,10 +50,20 @@ function toRecord(row: Row): TakeoffRecord {
       edited: l.edited,
       aiDoubt: l.aiDoubt,
       priceRaw: l.priceRaw,
+      material: l.material,
+      dimensions: stringMap(l.dimensions),
       confirmed: l.confirmedAt !== null,
       role: l.role === "measure" || l.role === "purchase" || l.role === "undetermined" ? l.role : null,
     })),
   };
+}
+
+/** Un objet « clé → texte » lu tel quel depuis la base ; tout le reste est ignoré. */
+function stringMap(value: unknown): Record<string, string> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(value as Record<string, unknown>)) if (typeof v === "string") out[k] = v;
+  return Object.keys(out).length > 0 ? out : null;
 }
 
 function answers(value: unknown): TakeoffRecord["answers"] {
@@ -116,6 +127,7 @@ export class PrismaTakeoffRepository implements TakeoffRepository {
         promptVersion: data.promptVersion,
         model: data.model,
         notes: data.notes,
+        context: data.context ?? undefined,
         createdById: tenant.userId,
         lines: {
           create: data.lines.map((l, i) => ({
@@ -130,6 +142,8 @@ export class PrismaTakeoffRepository implements TakeoffRepository {
             aiDoubt: l.aiDoubt,
             priceRaw: l.priceRaw ?? null,
             origin: l.origin ?? "ai",
+            material: l.material ?? null,
+            dimensions: l.dimensions ?? undefined,
           })),
         },
       },

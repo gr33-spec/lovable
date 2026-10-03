@@ -30,6 +30,9 @@ model User {
   updatedAt     DateTime @updatedAt
   /// Dernière visite (au jour près) : les données sont effacées 3 ans après (page Confidentialité).
   lastSeenAt    DateTime @default(now())
+  /// §43.4 : nombre de fois où l'activation des notifications a été proposée (1er envoi, puis 3e), et activation.
+  notificationsPromptCount Int       @default(0)
+  notificationsEnabledAt   DateTime?
 
   sessions    Session[]
   accounts    Account[]
@@ -114,6 +117,8 @@ model Company {
   requestedPlanAt      DateTime?
   /// Métiers de l'entreprise (profils de lecture, PD-033). Vide = « autre métier ».
   trades               String[] @default([])
+  /// §42.2 : joindre le « Détail du chantier (sans prix) » aux envois fournisseur (case mémorisée).
+  attachQuoteDetail    Boolean  @default(true)
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
@@ -451,6 +456,8 @@ model Takeoff {
   notes         Json          @default("[]")
   /// Réponses de l'artisan aux questions du calcul, pour CE chantier (« product:tuile », « param:pureau »).
   answers       Json          @default("{}")
+  /// En-tête et notes du devis lus par l'IA (adresse, type de bâtiment, neuf/rénovation, pente…), §41.1.
+  context       Json?
   createdById   String?
   createdAt     DateTime      @default(now())
   validatedAt   DateTime?
@@ -474,6 +481,9 @@ model TakeoffLine {
   reference   String?
   /// Prix unitaire tel qu'envoyé par un partenaire (« 38,50 ») ; gardé, jamais utilisé pour calculer.
   priceRaw    String?
+  /// Matériau et format nommés sur la ligne (« ardoise 32×22 »), et dimensions lues ({ pente: "35°" }), §41.1.
+  material    String?
+  dimensions  Json?
   /// Références « page:ligne » du texte du devis qui justifient la ligne.
   sourceRefs  Json      @default("[]")
   /// Pages lues sur image (pas de texte numéroté à citer).
@@ -536,6 +546,8 @@ model PriceRequest {
   lines               Json
   message             String?
   dueDate             DateTime? @db.Date
+  /// §43 : les trois blocs envoyés au fournisseur (mail et PDF), figés avec la demande.
+  packet              Json?
   createdById         String?
   createdAt           DateTime  @default(now())
   /// « Classé » : l'artisan a fait son choix (fournisseurs retenus facultatifs).

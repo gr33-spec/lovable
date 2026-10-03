@@ -18,7 +18,8 @@
 - les schémas des fichiers de référentiel (section 32) et les sources officielles (section 33) ;
 - les données fabricant qui font foi sur les sections 3, 5 et 7 : ardoise Cupa (section 34), tuiles Edilians et pentes DTU (section 35), zinc VMZINC (section 36) ; anciennes valeurs dans `referentiels/couverture/CHANGELOG.md` ;
 - l'état du référentiel (section 37), l'API partenaires, API first (section 38), la compréhension et la modification du quantitatif ligne par ligne (section 39) ;
-- le test du fournisseur : chaque ligne commandable telle quelle, unités interdites en sortie (section 40) ; les deux prompts système à brancher tels quels, A lecture et B chat, la règle des questions et ce que l'artisan peut modifier (section 41).
+- le test du fournisseur : chaque ligne commandable telle quelle, unités interdites en sortie (section 40) ; les deux prompts système à brancher tels quels, A lecture et B chat, la règle des questions et ce que l'artisan peut modifier (section 41) ;
+- l'annexe fournisseur « détail du devis sans prix » (section 42) ; l'envoi fournisseur : un seul générateur, le mail et le PDF ont le même contenu en trois blocs, zéro IA, aucun prix (test permanent `apps/api/test/envoi-fournisseur.test.ts`), notifications demandées au premier envoi, lien « une question ? » en v3.1 (section 43).
 
 Avant de toucher au moteur, aux règles ou aux écrans, lire la section concernée. Tout chiffre codé doit citer sa section ou sa source ; un chiffre sans source est une hypothèse à faire valider par l'artisan, jamais une quantité affichée comme certaine.
 

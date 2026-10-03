@@ -7,6 +7,8 @@ export interface TransactionalEmail {
   to: string;
   subject: string;
   text: string;
+  /** Pièces jointes (le PDF de commande fournisseur, §43) : contenu en base64. */
+  attachments?: { filename: string; contentType: string; contentBase64: string }[];
 }
 
 export interface TransactionalEmailSender {

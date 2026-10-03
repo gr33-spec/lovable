@@ -4,10 +4,11 @@ import { FileUp, Loader2, Mail, MoreHorizontal, Plus, Send } from "lucide-react"
 import { useCallback, useId, useRef, useState } from "react";
 import { AssistantMessage, Say } from "@/components/chat";
 import { DemoAnswer, isDemoSupplier } from "@/components/demo";
+import { NotificationsPrompt } from "@/components/notifications-prompt";
 import { CompareQuotes, OfferLines, offerFacts, ProjectComparison } from "@/components/project-offers";
 import { SupplierForm } from "@/components/supplier-form";
 import { Badge, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
-import { api, ApiError, MAX_DOCUMENT_BYTES, newActionKey, type Offer, type PriceRequest, type PriceRequestRecipient, type Supplier } from "@/lib/api";
+import { api, ApiError, MAX_DOCUMENT_BYTES, newActionKey, type Offer, type PriceRequest, type PriceRequestRecipient, type PriceRequestSettings, type Supplier } from "@/lib/api";
 import { openDocument } from "@/lib/open-document";
 import { isPhoto, MAX_QUOTE_PHOTOS, preparePhotos } from "@/lib/photos";
 import { useProgressRefresh } from "@/components/project-progress";
@@ -37,6 +38,11 @@ export function ProjectPriceRequests({ projectId, archived, canCreate }: { proje
   );
   const { data, setData, error, reload } = useResource(fetchRequests);
   const refreshProgress = useProgressRefresh();
+  // Des e-mails partent-ils du serveur (§43) ? Sinon, l'artisan envoie depuis sa messagerie.
+  const fetchSettings = useCallback((signal: AbortSignal) => api<PriceRequestSettings & { deliversEmail: boolean }>("/v1/price-requests/settings", { signal }), []);
+  const deliversEmail = useResource(fetchSettings).data?.deliversEmail ?? false;
+  // § 43.4 : après un envoi (jamais avant), l'écran « Active tes notifications » peut se proposer.
+  const [sentCount, setSentCount] = useState(0);
   const requestId = data?.items[0]?.id ?? null;
   // Devis déjà lus, par destinataire ; `version` fait suivre la comparaison.
   const [version, setVersion] = useState(0);
@@ -114,6 +120,7 @@ export function ProjectPriceRequests({ projectId, archived, canCreate }: { proje
       ) : null}
       {hasOffers ? <ProjectComparison request={request} version={version} archived={archived} onRequestChange={replace} /> : null}
       <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">FOURNISSEURS</h2>
+      <NotificationsPrompt trigger={sentCount} />
       <ul className="flex flex-col gap-2" aria-label="Vos fournisseurs">
         {request.recipients.map((r) => (
           <li key={r.id}>
@@ -122,6 +129,8 @@ export function ProjectPriceRequests({ projectId, archived, canCreate }: { proje
               offer={offerOf(r.id)}
               request={request}
               archived={archived}
+              deliversEmail={deliversEmail}
+              onSent={() => setSentCount((n) => n + 1)}
               onChange={replace}
               onOfferChange={offerChanged}
               onReload={reloadAll}
@@ -206,6 +215,14 @@ function NewRequest({ projectId, onCreated }: { projectId: string; onCreated: (r
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const key = useRef(newActionKey());
+  // §42.2 : « Joindre le détail du chantier (sans prix) », cochée par défaut, mémorisée par entreprise.
+  const fetchSettings = useCallback((signal: AbortSignal) => api<PriceRequestSettings>("/v1/price-requests/settings", { signal }), []);
+  const settings = useResource(fetchSettings);
+  const attachDetail = settings.data?.attachQuoteDetail ?? true;
+  const setAttachDetail = async (value: boolean) => {
+    settings.setData((prev) => (prev ? { ...prev, attachQuoteDetail: value } : prev));
+    await api<PriceRequestSettings>("/v1/price-requests/settings", { method: "PATCH", body: { attachQuoteDetail: value } });
+  };
 
   const toggle = (supplierId: string, on: boolean) =>
     setSelected((prev) => {
@@ -237,6 +254,10 @@ function NewRequest({ projectId, onCreated }: { projectId: string; onCreated: (r
       <SupplierPicker selected={selected} onToggle={toggle} dark={false} />
       <details className="rounded-2xl bg-surface p-3 text-sm shadow-card">
         <summary className="cursor-pointer font-bold">Ajouter un message ou une date de réponse (facultatif)</summary>
+        <label className="flex min-h-11 items-center gap-3 text-sm">
+          <input type="checkbox" checked={attachDetail} onChange={(e) => void setAttachDetail(e.target.checked)} className="size-5 accent-accent" />
+          Joindre le détail du chantier (sans prix)
+        </label>
         <div className="mt-3 flex flex-col gap-3">
           <label htmlFor={`${id}-message`} className="font-bold">
             Message
@@ -361,6 +382,8 @@ function RecipientCard({
   offer,
   request,
   archived,
+  deliversEmail,
+  onSent,
   onChange,
   onOfferChange,
   onReload,
@@ -369,6 +392,8 @@ function RecipientCard({
   offer: Offer | null;
   request: PriceRequest;
   archived: boolean;
+  deliversEmail: boolean;
+  onSent: () => void;
   onChange: (req: PriceRequest) => void;
   onOfferChange: (offer: Offer) => void;
   onReload: () => void;
@@ -380,6 +405,12 @@ function RecipientCard({
   const [error, setError] = useState<ApiError | null>(null);
   const state = cardState(r, offer);
   const demo = isDemoSupplier(r.supplier.email);
+  const send = () =>
+    run(async () => {
+      onChange(await api<PriceRequest>(`/v1/price-request-recipients/${r.id}/send`, { method: "POST" }));
+      setNotice("Envoyé, avec le PDF de la commande.");
+      onSent();
+    });
 
   async function run(action: () => Promise<void>) {
     setMenu(false);
@@ -485,13 +516,26 @@ function RecipientCard({
         <DemoAnswer recipientId={r.id} onChange={onChange} />
       ) : null}
       {!archived && !demo && r.status === "to_send" ? (
-        <a
-          href={mailtoHref(r)}
-          onClick={() => void setStatus("sent")}
-          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-accent px-5 text-base font-extrabold text-white"
-        >
-          <Send size={18} aria-hidden="true" />
-          Envoyer l&apos;e-mail
+        deliversEmail ? (
+          // §43 : le serveur envoie le mail (trois blocs) avec le PDF joint.
+          <Button pending={pending} onClick={() => void send()}>
+            <Send size={18} aria-hidden="true" />
+            Envoyer à {r.supplier.name}
+          </Button>
+        ) : (
+          <a
+            href={mailtoHref(r)}
+            onClick={() => void setStatus("sent")}
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-accent px-5 text-base font-extrabold text-white"
+          >
+            <Send size={18} aria-hidden="true" />
+            Envoyer l&apos;e-mail
+          </a>
+        )
+      ) : null}
+      {!archived && request.packet ? (
+        <a href={`/v1/price-requests/${encodeURIComponent(request.id)}/commande.pdf`} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-bold text-accent-text">
+          Télécharger le PDF de la commande
         </a>
       ) : null}
       {!archived && !r.document && ((!demo && r.status === "sent") || panel === "upload") ? (

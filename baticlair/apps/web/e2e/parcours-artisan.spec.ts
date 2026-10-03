@@ -367,19 +367,22 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
     await card.getByRole("menuitem", { name: item }).click();
   };
   await expect(pointp.getByText("À envoyer")).toBeVisible();
-  // Une seule action à l'écran : « Envoyer l'e-mail » ouvre la messagerie avec l'e-mail rempli.
-  const href = await pointp.getByRole("link", { name: "Envoyer l'e-mail" }).getAttribute("href");
-  expect(href).toMatch(/^mailto:devis@pointp\.fr\?subject=Demande%20de%20prix/);
-  expect(decodeURIComponent(href!)).toContain("Bonjour Paul,");
-  expect(decodeURIComponent(href!)).toContain("Tuile romane canal rouge 12,5 u/m²");
-  await expect(pointp.getByText("Voir l'e-mail")).toHaveCount(0);
-
-  // Le reste est dans « ••• » : envoyé autrement, marqué à la main ; l'e-mail se relit mot pour mot.
-  await menu(pointp, "Déjà envoyé");
+  // § 43 : une seule action à l'écran : le serveur envoie le mail en trois blocs, avec le PDF de la commande joint.
+  await expect(pointp.getByRole("link", { name: "Télécharger le PDF de la commande" })).toHaveAttribute("href", /\/commande\.pdf$/);
+  await pointp.getByRole("button", { name: "Envoyer à Point.P Vannes" }).click();
+  await expect(pointp.getByText("Envoyé, avec le PDF de la commande.")).toBeVisible();
   await expect(pointp.getByText("En attente", { exact: true })).toBeVisible();
+  // § 43.4 : juste après le premier envoi, et jamais avant, l'écran des notifications ; « Plus tard » le referme.
+  const prompt = page.getByRole("dialog", { name: "Activer les notifications" });
+  await expect(prompt).toBeVisible();
+  await prompt.getByRole("button", { name: "Plus tard" }).click();
+  await expect(prompt).toHaveCount(0);
+  // L'e-mail se relit mot pour mot : le contenu en trois blocs, sans un prix.
   await menu(pointp, "Voir l'e-mail");
   await expect(pointp.getByText("Objet :")).toBeVisible();
-  await expect(pointp.getByText(/Bonjour Paul,/)).toBeVisible();
+  await expect(pointp.getByText(/^COMMANDE : /)).toBeVisible();
+  await expect(pointp.getByText(/À COMMANDER/)).toBeVisible();
+  await expect(pointp.getByText(/€/)).toHaveCount(0);
   await expect(page.getByText("La demande est prête. Envoyez-la à chaque fournisseur :")).toBeVisible();
   // Pour tester sans attendre, un devis fictif peut être simulé (dans le menu).
   await pointp.getByRole("button", { name: /^Plus d'actions/ }).click();

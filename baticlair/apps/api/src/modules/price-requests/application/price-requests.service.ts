@@ -1,15 +1,98 @@
-import { groupIdenticalLines, parseUnit, type PurchaseView } from "@baticlair/domain";
+import { groupIdenticalLines, parseUnit, ROOFING_REFERENTIAL } from "@baticlair/domain";
+import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { DocumentsService } from "../../documents/index.js";
 import type { SupplierRepository } from "../../suppliers/index.js";
+import type { ReviewedTakeoff } from "../../takeoff/index.js";
 import type { RequestedLine } from "./price-request-email.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
-import { priceRequestEmail } from "./price-request-email.js";
+import { priceRequestEmail, requestedQuantityText, supplierLineLabel } from "./price-request-email.js";
 import type { PriceRequestRecord, PriceRequestRepository, RecipientStatus } from "./price-request.repository.js";
+import { packetPdf, packetSubject, packetText, type SupplierPacket } from "./supplier-packet.js";
 
 export interface PriceRequestView extends PriceRequestRecord {
-  /** E-mail prêt à envoyer, par destinataire. */
+  /** E-mail prêt à envoyer, par destinataire : le texte des trois blocs (§43.5). */
   emails: Map<string, { subject: string; body: string }>;
+}
+
+/** La date du jour, AAAA-MM-JJ, en heure de Paris. */
+const today = (now: Date) => now.toLocaleDateString("fr-CA", { timeZone: "Europe/Paris" });
+
+/** La commune d'une adresse de chantier (« 3 impasse des Lilas, 22500 Paimpol » → « Paimpol »). */
+function communeOf(address: string | null): string | null {
+  if (!address) return null;
+  const m = /\b\d{5}\s+([^,;\n]+)/.exec(address);
+  const text = (m?.[1] ?? address.split(",").pop() ?? "").trim();
+  return text ? text.replace(/^\d{5}\s*/, "").trim() || null : null;
+}
+
+/**
+ * LES TROIS BLOCS (§42, §43), assemblés depuis le quantitatif, la lecture du devis et les réponses
+ * de l'artisan. Aucun prix n'entre ici : les montants du devis client ne sont jamais lus.
+ */
+export function buildPacket(
+  reviewed: ReviewedTakeoff,
+  sender: { companyName: string; projectName: string; projectAddress: string | null },
+  options: { date: string; joindreDetail: boolean; message: string | null; dueDate: Date | null },
+  /** Les lignes reprises du devis telles qu'elles partent (identiques réunies, §43.5 : une ligne par article). */
+  direct: readonly RequestedLine[],
+): SupplierPacket {
+  const { purchase, takeoff, validation } = reviewed;
+  const articles = [
+    ...purchase.toBuy.filter((b) => b.kind === "computed").map((b) => `${b.label} : ${b.quantity ?? "quantité à préciser"}${b.approx ? `, soit ${b.approx}` : ""}`),
+    ...direct.map((l) => `${supplierLineLabel(l.designation)}${l.reference ? ` (réf. ${l.reference})` : ""} : ${requestedQuantityText(l)}`),
+  ];
+  const a_chiffrer = purchase.toQuote.map((q) => `${supplierLineLabel(q.label)}${q.measure ? ` · ${q.measure}` : ""} — ${q.reason}`);
+  // Le chantier en bref : le contexte lu dans le devis, puis les réponses et hypothèses du calcul, 3 par ligne, 5 lignes au plus.
+  const facts: string[] = [];
+  for (const [k, v] of Object.entries(takeoff.context ?? {})) if (v.trim() && !/adresse|client|nom/i.test(k)) facts.push(v.trim());
+  // Les réponses de l'artisan (§42.1, « précisions chantier ») : pente, façonnage, nombre de descentes, modèle choisi…
+  // TODO plan v3, étape 3 : les libellés viendront du dossier du métier, pas du référentiel couverture en dur.
+  const params = ROOFING_REFERENTIAL.workItems.flatMap((w) => w.params);
+  for (const [key, value] of Object.entries(takeoff.answers)) {
+    if (value === null || value === "") continue;
+    if (key.startsWith("param:") && typeof value === "object") {
+      const def = params.find((d) => d.key === key.slice("param:".length));
+      if (!def) continue;
+      const shown = def.display?.[value.value] ?? value.value.replace(".", ",");
+      const unit = !value.unit || value.unit === "u" ? "" : value.unit === "°" ? "°" : ` ${value.unit.replace("m2", "m²")}`;
+      facts.push(`${def.label.toLowerCase()} ${shown}${unit}`);
+    } else if (key.startsWith("product:") && typeof value === "string") {
+      const product = ROOFING_REFERENTIAL.products.find((x) => x.id === value);
+      if (product) facts.push(product.shortLabel);
+    }
+  }
+  for (const a of purchase.assumptions) {
+    if (!a.key.startsWith("param:") && !a.key.startsWith("derived:")) continue;
+    const unit = !a.unit || a.unit === "u" ? "" : a.unit === "°" ? "°" : ` ${a.unit.replace("m2", "m²")}`;
+    facts.push(`${a.label.toLowerCase()} ${a.value}${unit}`);
+  }
+  const resume: string[] = [];
+  for (let i = 0; i < facts.length && resume.length < 5; i += 3) resume.push(facts.slice(i, i + 3).join(" · "));
+  const dateFr = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Paris" });
+  if (options.dueDate) resume.push(`Réponse souhaitée avant le ${dateFr(options.dueDate)}`);
+  if (options.message?.trim()) resume.push(options.message.trim());
+  // Le devis sans les prix (§42) : une ligne par ouvrage, la main-d'œuvre seule exclue, jamais le prix.
+  const kinds = new Map(validation.lines.map((l) => [l.lineId, l.kind]));
+  const detail = takeoff.lines
+    .filter((l) => kinds.get(l.id) !== "labor")
+    .map((l) => ({
+      libelle: l.designation,
+      mesure: [l.quantityRaw, l.unitRaw].filter(Boolean).join(" ") || null,
+      precisions: [...(l.material ? [l.material] : []), ...Object.entries(l.dimensions ?? {}).map(([k, v]) => `${k} ${v}`)],
+    }));
+  return {
+    entreprise: sender.companyName,
+    chantier: sender.projectName,
+    commune: communeOf(sender.projectAddress),
+    date: options.date,
+    articles,
+    a_chiffrer,
+    resume,
+    detail,
+    joindre_detail: options.joindreDetail,
+    question_lien: null,
+  };
 }
 
 /**
@@ -22,9 +105,56 @@ export class PriceRequestsService {
     private readonly requests: PriceRequestRepository,
     private readonly suppliers: SupplierRepository,
     private readonly documents: DocumentsService,
-    /** La liste d'achats du quantitatif validé (calculée par le moteur), par identifiant de quantitatif. */
-    private readonly purchaseList: (tenant: TenantContext, takeoffId: string) => Promise<PurchaseView>,
+    /** Le quantitatif validé, revu par le moteur (liste d'achats, lecture du devis, hypothèses). */
+    private readonly reviewedTakeoff: (tenant: TenantContext, takeoffId: string) => Promise<ReviewedTakeoff>,
+    private readonly mailer: TransactionalEmailSender & { readonly deliversEmail: boolean },
+    private readonly clock: () => Date = () => new Date(),
   ) {}
+
+  /** Des e-mails partent-ils vraiment du serveur (sinon : messagerie de l'artisan + PDF à télécharger) ? */
+  get deliversEmail(): boolean {
+    return this.mailer.deliversEmail;
+  }
+
+  async settings(tenant: TenantContext): Promise<{ attachQuoteDetail: boolean }> {
+    return { attachQuoteDetail: await this.requests.attachQuoteDetail(tenant) };
+  }
+
+  async setSettings(tenant: TenantContext, settings: { attachQuoteDetail: boolean }): Promise<{ attachQuoteDetail: boolean }> {
+    assertCanWrite(tenant);
+    await this.requests.setAttachQuoteDetail(tenant, settings.attachQuoteDetail);
+    return { attachQuoteDetail: settings.attachQuoteDetail };
+  }
+
+  /** Le PDF de la commande (§43.1) : les mêmes trois blocs que le mail. */
+  async pdf(tenant: TenantContext, requestId: string): Promise<{ filename: string; bytes: Uint8Array }> {
+    const request = await this.requests.findById(tenant, requestId);
+    if (!request?.packet) throw notFound("PriceRequest");
+    const name = request.packet.chantier.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase() || "chantier";
+    return { filename: `commande-${name}.pdf`, bytes: await packetPdf(request.packet) };
+  }
+
+  /**
+   * Envoi par le serveur (§43) : le texte des trois blocs dans le corps, le PDF joint. Puis « envoyée ».
+   * Sans prestataire d'e-mail, l'artisan envoie depuis sa messagerie : ce chemin répond 409.
+   */
+  async send(tenant: TenantContext, recipientId: string): Promise<PriceRequestView> {
+    assertCanWrite(tenant);
+    if (!this.mailer.deliversEmail) throw new DomainError("conflict", "Email delivery is not enabled", { reason: "email_disabled" });
+    const request = await this.requests.findByRecipient(tenant, recipientId);
+    if (!request) throw notFound("PriceRequestRecipient");
+    const recipient = request.recipients.find((r) => r.id === recipientId)!;
+    if (!request.packet) throw new DomainError("conflict", "This request predates the supplier packet", { reason: "no_packet" });
+    const pdf = await this.pdf(tenant, request.id);
+    await this.mailer.send({
+      to: recipient.supplier.email,
+      subject: packetSubject(request.packet),
+      text: packetText(request.packet),
+      attachments: [{ filename: pdf.filename, contentType: "application/pdf", contentBase64: Buffer.from(pdf.bytes).toString("base64") }],
+    });
+    await this.requests.setStatus(tenant, recipientId, "sent");
+    return this.reload(tenant, request.id);
+  }
 
   async create(
     tenant: TenantContext,
@@ -44,7 +174,8 @@ export class PriceRequestsService {
     // Ce qui part chez le fournisseur, c'est LA LISTE D'ACHATS : les articles calculés par BatiClair dans leur
     // unité de commande, les quantités écrites telles quelles dans le devis, et ce qui reste à faire chiffrer
     // pour la mesure du devis. Jamais une mesure d'ouvrage présentée comme une quantité d'article.
-    const purchase = await this.purchaseList(tenant, takeoff.id);
+    const reviewed = await this.reviewedTakeoff(tenant, takeoff.id);
+    const purchase = reviewed.purchase;
     const byId = new Map(takeoff.lines.map((l) => [l.id, l]));
     const computed: RequestedLine[] = purchase.toBuy
       .filter((b) => b.kind === "computed")
@@ -77,6 +208,14 @@ export class PriceRequestsService {
     const lines: RequestedLine[] = [...computed, ...grouped, ...toQuote];
     if (lines.length === 0) throw validationFailed("Nothing to order", { reason: "no_material" });
     const supplierIds = await this.checkSuppliers(tenant, input.supplierIds);
+    // §43 : les trois blocs, figés avec la demande (le mail et le PDF en sont deux rendus).
+    const sender = await this.requests.sender(tenant, projectId);
+    const packet = buildPacket(
+      reviewed,
+      { companyName: sender?.companyName ?? "", projectName: sender?.project.name ?? "", projectAddress: sender?.project.address ?? null },
+      { date: today(this.clock()), joindreDetail: await this.requests.attachQuoteDetail(tenant), message: input.message, dueDate: input.dueDate },
+      grouped,
+    );
     const created = await this.requests.create(tenant, {
       projectId,
       takeoffId: takeoff.id,
@@ -84,6 +223,7 @@ export class PriceRequestsService {
       message: input.message,
       dueDate: input.dueDate,
       supplierIds,
+      packet,
     });
     return this.view(tenant, created);
   }
@@ -191,6 +331,11 @@ export class PriceRequestsService {
     const sender = await this.requests.sender(tenant, request.projectId);
     const emails = new Map<string, { subject: string; body: string }>();
     for (const r of request.recipients) {
+      // Depuis §43 : le texte des trois blocs ; les demandes d'avant gardent leur ancien e-mail.
+      if (request.packet) {
+        emails.set(r.id, { subject: packetSubject(request.packet), body: packetText(request.packet) });
+        continue;
+      }
       emails.set(
         r.id,
         priceRequestEmail({
