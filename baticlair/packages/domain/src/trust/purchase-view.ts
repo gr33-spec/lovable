@@ -88,6 +88,34 @@ const UNIT_LABEL: Record<string, { one: string; many: string }> = {
   m: { one: "m", many: "m" },
   m2: { one: "m²", many: "m²" },
 };
+/** Unités telles qu'écrites dans les devis (« u », « rlx », « paquet ») → leur nom en français, au singulier et au pluriel. */
+const WRITTEN_UNITS: [RegExp, { one: string; many: string }][] = [
+  [/^(u|un|unit[eé]s?|pces?|pcs?|pi[eè]ces?|ens|nb|nbre)$/, { one: "pièce", many: "pièces" }],
+  [/^(rouleaux?|rlx?)$/, { one: "rouleau", many: "rouleaux" }],
+  [/^(paquets?|pqts?|pq)$/, { one: "paquet", many: "paquets" }],
+  [/^(bottes?)$/, { one: "botte", many: "bottes" }],
+  [/^(cartons?|ctn)$/, { one: "carton", many: "cartons" }],
+  [/^(sacs?)$/, { one: "sac", many: "sacs" }],
+  [/^(palettes?|pal)$/, { one: "palette", many: "palettes" }],
+  [/^(bo[iî]tes?|bte)$/, { one: "boîte", many: "boîtes" }],
+  [/^(seaux?)$/, { one: "seau", many: "seaux" }],
+  [/^(m2|m²)$/, { one: "m²", many: "m²" }],
+  [/^(ml|m)$/, { one: "ml", many: "ml" }],
+];
+/** « 42 » « u » → « 42 pièces » ; une unité inconnue reste telle qu'écrite. */
+function writtenQuantity(quantity: string, unit: string | null): { text: string; unit: string } {
+  const raw = (unit ?? "").trim();
+  const known = WRITTEN_UNITS.find(([re]) => re.test(raw.toLowerCase()));
+  if (!known) return { text: [quantity, raw].filter(Boolean).join(" "), unit: raw };
+  let many = true;
+  try {
+    many = new Decimal(quantity.replace(/\s/g, "").replace(",", ".")).greaterThanOrEqualTo(2);
+  } catch {
+    // Quantité illisible : le pluriel par défaut.
+  }
+  const label = many ? known[1].many : known[1].one;
+  return { text: `${quantity} ${label}`, unit: known[1].many };
+}
 const unitText = (count: Decimal, unit: { one: string; many: string }) => `${fr(count)} ${count.equals(1) ? unit.one : unit.many}`;
 const named = (n: NeedResult) => n.trace.some((t) => t.label === "Produit");
 
@@ -231,12 +259,12 @@ export function purchaseView(
     // Une ligne sans unité reste « indéterminée » jusqu'à ce que l'artisan la garde telle quelle (« C'est bon ») : alors elle part.
     const kept = o.role !== "undetermined" || item?.state === "verified";
     if (!v || v.kind === "labor" || v.basis !== "purchase" || !kept || o.needs.length > 0) continue;
-    const quantity = o.read.quantity ? [o.read.quantity, o.read.unit].filter(Boolean).join(" ") : null;
+    const written = o.read.quantity ? writtenQuantity(o.read.quantity, o.read.unit) : null;
     toBuy.push({
       key: `line:${o.lineId}`,
       label: o.designation,
-      quantity,
-      order: o.read.quantity ? { count: o.read.quantity, unit: o.read.unit ?? "" } : null,
+      quantity: written?.text ?? null,
+      order: o.read.quantity ? { count: o.read.quantity, unit: written!.unit } : null,
       approx: null,
       kind: "direct",
       needIds: [],

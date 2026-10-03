@@ -1,10 +1,10 @@
 "use client";
 
-import { CircleCheck, FileText, FileUp, Loader2, Trash2 } from "lucide-react";
+import { CircleCheck, FileUp, Loader2 } from "lucide-react";
 import { useCallback, useId, useRef, useState } from "react";
 import { AssistantMessage } from "@/components/chat";
 import { ProjectTakeoff } from "@/components/project-takeoff";
-import { Card, ErrorNotice, Spinner } from "@/components/ui";
+import { ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, MAX_DOCUMENT_BYTES, type DocumentPurpose, type ProjectDocument } from "@/lib/api";
 import { unreadableMessage } from "@/lib/fr";
 import { openDocument } from "@/lib/open-document";
@@ -55,7 +55,7 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
   return (
     <div className="flex flex-col gap-4">
       {quote ? (
-        <div className="w-[88%] self-end">
+        <div className="w-[80%] self-end">
           <DocumentCard doc={quote} compact={false} onRemoved={removed} />
         </div>
       ) : archived ? null : (
@@ -125,22 +125,23 @@ function DocumentCard({ doc, compact, onRemoved }: { doc: ProjectDocument; compa
     );
   }
 
+  // Le devis déposé, comme une pièce jointe envoyée dans la conversation : nom, ouvrir, retirer (discret).
   return (
-    <Card className="flex flex-col gap-2 p-4">
+    <div className="flex flex-col gap-1.5 rounded-[18px_18px_4px_18px] bg-surface p-3 shadow-card">
       <div className="flex items-center gap-3">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-ground text-accent" aria-hidden="true">
-          <FileText size={20} />
+        <span className="flex h-11 w-9 shrink-0 items-center justify-center rounded-md bg-danger-bg text-[10px] font-extrabold text-danger" aria-hidden="true">
+          PDF
         </span>
-        <div className="flex min-w-0 grow flex-col">
-          <span className="text-[13px] font-bold text-muted">{PURPOSE_LABEL[doc.purpose]}</span>
+        <span className="flex min-w-0 grow flex-col">
           <span className="truncate text-[15px] font-bold">{doc.name}</span>
-        </div>
+          <span className="text-[13px] text-muted">{PURPOSE_LABEL[doc.purpose]}</span>
+        </span>
       </div>
       {failed ? <p className="text-sm text-danger">{unreadableMessage(doc.reading?.errorCode)}</p> : null}
       {deleteError ? <ErrorNotice error={deleteError} /> : null}
       {confirming ? (
         <div role="group" aria-label="Confirmer la suppression" className="flex flex-col gap-2 rounded-2xl bg-ground p-3">
-          <p className="text-sm font-semibold">Supprimer ce devis du chantier ? Vous pourrez le déposer à nouveau.</p>
+          <p className="text-sm font-semibold">Retirer ce devis du chantier ? Vous pourrez le déposer à nouveau.</p>
           <div className="flex gap-2">
             <button
               type="button"
@@ -162,28 +163,27 @@ function DocumentCard({ doc, compact, onRemoved }: { doc: ProjectDocument; compa
           </div>
         </div>
       ) : (
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-4 pl-12">
           <button
             type="button"
             onClick={() => void open()}
             disabled={opening}
-            className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-accent-text disabled:opacity-60"
+            className="inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-accent-text disabled:opacity-60"
           >
             {opening ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : null}
-            Ouvrir le PDF
+            Ouvrir
           </button>
           <button
             type="button"
             onClick={() => setConfirming(true)}
             aria-label={`Supprimer ${doc.name}`}
-            className="inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-muted"
+            className="inline-flex min-h-11 items-center text-sm font-semibold text-muted"
           >
-            <Trash2 size={16} aria-hidden="true" />
-            Supprimer
+            Retirer
           </button>
         </div>
       )}
-    </Card>
+    </div>
   );
 }
 

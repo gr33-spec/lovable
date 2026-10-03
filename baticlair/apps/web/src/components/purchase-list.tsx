@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, ChevronDown, CircleCheck } from "lucide-react";
+import { AlertTriangle, ChevronDown } from "lucide-react";
 import { useId, useState } from "react";
 import { Proof, type DecisionHandlers } from "@/components/takeoff-view";
 import { Button } from "@/components/ui";
@@ -26,7 +26,7 @@ export function QuantityCard({
 }) {
   const p = takeoff.purchase;
   const byKey = new Map(p.toBuy.map((b) => [b.key, b]));
-  const caption = "text-[13px] font-extrabold tracking-[0.04em] text-muted uppercase";
+  const caption = "text-sm font-bold text-muted";
   return (
     <section aria-label="Quantitatif" className="flex flex-col overflow-hidden rounded-[20px] bg-surface shadow-card">
       <h2 className="px-4 pt-4 pb-1 font-display text-[22px] font-extrabold">À commander</h2>
@@ -67,27 +67,28 @@ export function QuantityCard({
 function BuyRow({ item, takeoff }: { item: PurchaseItem; takeoff: Takeoff }) {
   const [open, setOpen] = useState(false);
   const proofs = takeoff.view.items.filter((i) => (item.kind === "computed" ? i.kind === "need" && item.needIds.includes(i.id) : i.kind === "line" && item.lineIds.includes(i.id)));
+  const name = item.kind === "direct" ? shortName(item.label) : item.label;
+  // Une ligne = l'article à gauche, sa quantité à droite ; un appui sur la ligne montre le calcul.
+  const row = (
+    <>
+      {item.state === "to_confirm" ? <AlertTriangle size={18} className="mt-0.5 shrink-0 text-warn" aria-label="à confirmer" /> : null}
+      <span className="min-w-0 grow text-[15px] leading-snug">{name}</span>
+      <span className="flex shrink-0 flex-col items-end text-right">
+        <span className="text-[15px] font-extrabold whitespace-nowrap">{item.quantity ?? "à préciser"}</span>
+        {item.approx ? <span className="text-[13px] whitespace-nowrap text-muted">{item.approx}</span> : null}
+      </span>
+      {proofs.length > 0 ? <ChevronDown size={16} aria-hidden="true" className={`mt-1 shrink-0 text-subtle ${open ? "rotate-180" : ""}`} /> : null}
+    </>
+  );
   return (
-    <li className="flex flex-col gap-1.5 py-2.5">
-      <div className="flex items-center gap-3">
-        {item.state === "to_confirm" ? (
-          <AlertTriangle size={18} className="shrink-0 text-warn" aria-label="à confirmer" />
-        ) : (
-          <CircleCheck size={18} className="shrink-0 text-ok" aria-hidden="true" />
-        )}
-        <span className="min-w-0 grow">
-          <span className="line-clamp-2 text-[15px] leading-snug font-bold">{item.kind === "direct" ? shortName(item.label) : item.label}</span>
-          <span className="block text-sm">
-            <span className="font-extrabold">{item.quantity ?? "quantité à préciser"}</span>
-            {item.approx ? <span className="text-muted"> · {item.approx}</span> : null}
-          </span>
-        </span>
-        {proofs.length > 0 ? (
-          <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label={`Voir le calcul : ${item.label}`} className="inline-flex min-h-11 shrink-0 items-center text-sm font-bold text-accent-text">
-            Voir le calcul
-          </button>
-        ) : null}
-      </div>
+    <li className="flex flex-col gap-1.5 py-2">
+      {proofs.length > 0 ? (
+        <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label={`Voir le calcul : ${item.label}`} className="flex min-h-11 w-full items-start gap-3 text-left">
+          {row}
+        </button>
+      ) : (
+        <div className="flex min-h-11 items-start gap-3">{row}</div>
+      )}
       {open ? proofs.map((i) => <Proof key={`${i.kind}:${i.id}`} item={i} />) : null}
     </li>
   );

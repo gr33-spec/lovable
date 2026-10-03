@@ -11,7 +11,11 @@
 - le parcours conversationnel et la règle des 10 ans (section 21) ;
 - le mandat d'architecture : un métier = un dossier de référentiel, moteur générique, plan avant code (section 22) ;
 - l'amélioration continue et le coût IA (section 23) ;
-- le périmètre du MVP : jusqu'à l'envoi au fournisseur (section 24).
+- le périmètre du MVP : jusqu'à l'envoi au fournisseur (section 24) ;
+- les points singuliers et petites fournitures (section 25), les régions et matériaux dominants (section 26) ;
+- le gabarit universel multi-métiers, à lire en premier (section 27) ; les règles de pose (section 28) ;
+- le vocabulaire des devis (section 29), les cas de test (section 30), le plan de complétion (section 31) ;
+- les schémas des fichiers de référentiel (section 32) et les sources officielles (section 33).
 
 Avant de toucher au moteur, aux règles ou aux écrans, lire la section concernée. Tout chiffre codé doit citer sa section ou sa source ; un chiffre sans source est une hypothèse à faire valider par l'artisan, jamais une quantité affichée comme certaine.
 

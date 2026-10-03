@@ -101,7 +101,7 @@ export function reasoningOf(takeoff: Takeoff): React.ReactNode[] {
   return steps;
 }
 
-/** Le raisonnement : déplié juste après la lecture, replié ensuite (« Devis lu · 5 étapes »). */
+/** Le raisonnement : déplié juste après la lecture, replié ensuite (« Ce que j'ai compris »). */
 export function ReasoningSteps({ takeoff, fresh }: { takeoff: Takeoff; fresh: boolean }) {
   const [open, setOpen] = useState(fresh);
   const steps = reasoningOf(takeoff);
@@ -114,7 +114,7 @@ export function ReasoningSteps({ takeoff, fresh }: { takeoff: Takeoff; fresh: bo
         className="inline-flex min-h-11 items-center gap-1.5 self-start rounded-xl bg-surface px-3 text-sm font-semibold text-muted shadow-card"
       >
         <Check size={16} strokeWidth={2.5} className="text-ok" aria-hidden="true" />
-        Devis lu · {plural(steps.length, "étape")}
+        Ce que j&apos;ai compris
         <ChevronDown size={16} aria-hidden="true" className={open ? "rotate-180" : ""} />
       </button>
       {open ? (
@@ -192,7 +192,7 @@ export function ChatInput({ onSend, disabled, placeholder }: { onSend: (text: st
 
   return (
     <form
-      className="sticky bottom-24 z-20 flex items-center gap-2 rounded-[28px] bg-surface p-1.5 shadow-float lg:bottom-4"
+      className="sticky bottom-3 z-20 flex items-center gap-2 rounded-[28px] bg-surface p-1.5 shadow-float lg:bottom-4"
       onSubmit={(e) => {
         e.preventDefault();
         if (!text.trim() || disabled) return;

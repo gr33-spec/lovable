@@ -85,8 +85,8 @@ describe("liste d'achats : D-2026-015 (tuiles HP10, 120 m²)", () => {
       ["Tubes de descente Ø80 PVC sable", "8 ml"],
       ["Coudes", "4 pièces"],
       ["Colliers", "8 pièces"],
-      ["Chatières de ventilation", "10 unités"],
-      ["Sortie de toit Poujoulat", "1 unité"],
+      ["Chatières de ventilation", "10 pièces"],
+      ["Sortie de toit Poujoulat", "1 pièce"],
     ]);
     expect(v.toQuote).toEqual([]);
     expect(v.canValidate).toBe(true);
@@ -120,7 +120,7 @@ describe("liste d'achats : devis ardoises (200 m², jouées, cheminée)", () => 
       ["Pattes de fixation", "51 pièces"],
       ["Gouttière zinc", "5 longueurs de 4 m"],
       ["Crochets de gouttière", "43 pièces"],
-      ["Chatières de ventilation", "12 unités"],
+      ["Chatières de ventilation", "12 pièces"],
     ]);
     // Un faîtage ZINC ne donne jamais des faîtières en terre cuite.
     expect(v.toBuy.some((b) => /Faîtières/.test(b.label))).toBe(false);

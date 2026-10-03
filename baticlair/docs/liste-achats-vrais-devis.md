@@ -31,8 +31,8 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Tubes de descente Ø80 PVC sable | 8 ml |  |
 | Coudes | 4 pièces |  |
 | Colliers | 8 pièces |  |
-| Chatières de ventilation | 10 unités |  |
-| Sortie de toit Poujoulat | 1 unité |  |
+| Chatières de ventilation | 10 pièces |  |
+| Sortie de toit Poujoulat | 1 pièce |  |
 
 **Hypothèses (modifiables) :** zone climatique 3 · pente du toit 45° · pureau 31 cm · coudes par descente 2
 
@@ -58,8 +58,8 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Tubes de descente Ø80 PVC sable | 8 ml |  |
 | Coudes | 4 pièces |  |
 | Colliers | 8 pièces |  |
-| Chatières de ventilation | 10 unités |  |
-| Sortie de toit Poujoulat | 1 unité |  |
+| Chatières de ventilation | 10 pièces |  |
+| Sortie de toit Poujoulat | 1 pièce |  |
 
 **Hypothèses (modifiables) :** zone climatique 3 · pente du toit 45° · pureau 31 cm · coudes par descente 2
 
@@ -85,8 +85,8 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Tubes de descente Ø80 PVC sable | 8 ml |  |
 | Coudes | 4 pièces |  |
 | Colliers | 8 pièces |  |
-| Chatières de ventilation | 10 unités |  |
-| Sortie de toit Poujoulat | 1 unité |  |
+| Chatières de ventilation | 10 pièces |  |
+| Sortie de toit Poujoulat | 1 pièce |  |
 
 **Hypothèses (modifiables) :** pente du toit 45° · zone climatique 3 · coudes par descente 2
 
@@ -114,7 +114,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Pattes de fixation | 51 pièces |  |
 | Gouttière zinc | 5 longueurs de 4 m | 17 ml |
 | Crochets de gouttière | 43 pièces |  |
-| Chatières de ventilation | 12 unités |  |
+| Chatières de ventilation | 12 pièces |  |
 
 **À faire chiffrer par le fournisseur :**
 
@@ -140,7 +140,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Gouttière zinc | 5 longueurs de 4 m | 17 ml |
 | Crochets de gouttière | 43 pièces |  |
 | Naissances | 2 pièces |  |
-| Chatières de ventilation | 12 unités |  |
+| Chatières de ventilation | 12 pièces |  |
 
 **À faire chiffrer par le fournisseur :**
 
@@ -167,7 +167,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Gouttière zinc | 5 longueurs de 4 m | 17 ml |
 | Crochets de gouttière | 34 pièces |  |
 | Naissances | 2 pièces |  |
-| Chatières de ventilation | 12 unités |  |
+| Chatières de ventilation | 12 pièces |  |
 
 **À faire chiffrer par le fournisseur :**
 
