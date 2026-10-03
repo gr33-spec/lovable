@@ -38,6 +38,8 @@ export type LinePlan =
       /** Autres emplacements que la ligne cite (« crochets et naissances compris »). */
       mentions: string[];
       characteristics: string[];
+      /** La mesure de l'ouvrage est écrite dans le texte (« sur 200 m² »), pas dans la colonne quantité. */
+      measureInText?: { value: string; unit: string };
     }
   /** Main-d'œuvre, location, forfait : rien à acheter. */
   | { ref: string; status: "not_material" }
@@ -69,6 +71,15 @@ function earliest<T>(text: string, items: { item: T; keywords: string[] }[]): T 
 
 const familyOf = (ref: Referential, code: string): ProductFamily | undefined => ref.families.find((f) => f.code === code);
 const slotWords = (ref: Referential, slot: Slot) => [...(slot.keywords ?? []), ...(familyOf(ref, slot.family)?.keywords ?? [])];
+
+/** « sur 200 m² », « 35 ml de gouttière » : les mesures d'ouvrage écrites dans un texte (surfaces et longueurs). */
+function measuresInText(normalized: string): { value: string; unit: string }[] {
+  const out: { value: string; unit: string }[] = [];
+  for (const m of normalized.matchAll(/(?:^|[^0-9.,x*])(\d{1,3}(?:[ .]\d{3})+(?:,\d+)?|\d+(?:[.,]\d+)?)\s*(m²|m2|ml)(?![a-z0-9])/g)) {
+    out.push({ value: m[1]!.replace(/[ .](?=\d{3})/g, "").replace(",", "."), unit: m[2] === "ml" ? "m" : "m2" });
+  }
+  return out;
+}
 
 /** Unités de ligne de devis → unités du référentiel. */
 export const LINE_UNITS: Record<string, string> = { U: "u", M: "m", ML: "m", M2: "m2", M3: "m3", KG: "kg", T: "t" };
@@ -157,9 +168,21 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
 
     // 4. Les données écrites : la quantité de la ligne, et les valeurs annoncées par leur nom.
     const unit = v.unit ? LINE_UNITS[v.unit] : undefined;
-    if (unit && v.quantity) {
-      for (const p of work.params.filter((x) => x.fromLineQuantity && sameDimUnit(x.unit, unit) && (!x.forSlots || x.forSlots.includes(slot.key)))) {
+    const fromQuantity = work.params.filter((x) => x.fromLineQuantity && (!x.forSlots || x.forSlots.includes(slot.key)));
+    let measureInText: { value: string; unit: string } | undefined;
+    if (unit && v.quantity && fromQuantity.some((p) => sameDimUnit(p.unit, unit))) {
+      for (const p of fromQuantity.filter((x) => sameDimUnit(x.unit, unit))) {
         facts.push({ key: p.key, value: v.quantity.toFixed(), unit, evidence: `Devis, ${line.ref}`, origin: "devis" });
+      }
+    } else {
+      // Quantité en forfait, ensemble ou absente, mais « 200 m² » écrit dans la désignation : c'est la
+      // mesure de l'ouvrage (règle du fondateur : un couvreur qui parle de 200 m² parle de toiture).
+      // Une seule mesure de la bonne dimension, sinon rien n'est deviné.
+      for (const p of fromQuantity) {
+        const found = measuresInText(text).filter((m) => sameDimUnit(p.unit, m.unit));
+        if (found.length !== 1) continue;
+        measureInText = found[0]!;
+        facts.push({ key: p.key, ...found[0]!, evidence: `Devis, ${line.ref} (« ${found[0]!.value.replace(".", ",")} ${found[0]!.unit === "m2" ? "m²" : found[0]!.unit} » dans le texte)`, origin: "devis" });
       }
     }
     for (const p of work.params) {
@@ -173,7 +196,7 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
     }
     const chars = productCharacteristics(ref, work, slot, line.designation);
     if (chars.length > 0) characteristicsBySlot[slot.key] = [...new Set([...(characteristicsBySlot[slot.key] ?? []), ...chars])];
-    plans.push({ ref: line.ref, status: "planned", workItemId: work.id, slot: slot.key, mentions, characteristics: chars });
+    plans.push({ ref: line.ref, status: "planned", workItemId: work.id, slot: slot.key, mentions, characteristics: chars, ...(measureInText ? { measureInText } : {}) });
   }
 
   // Une donnée hors devis (zone) ne vaut que si le devis ne la donne pas : jamais de conflit avec lui.
