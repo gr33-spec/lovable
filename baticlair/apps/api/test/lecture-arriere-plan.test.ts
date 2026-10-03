@@ -3,7 +3,8 @@ import type { ExtractionAttempt, ExtractionRequest, TakeoffExtractor } from "../
 import { TAKEOFF_EXTRACTOR } from "../src/modules/takeoff/application/takeoff-extractor.js";
 import { FakeTakeoffExtractor } from "../src/modules/takeoff/infrastructure/fake-takeoff-extractor.js";
 import { loadConfig, type AppConfig } from "../src/platform/config/config.js";
-import { CONFIG } from "../src/platform/tokens.js";
+import type { Alerter, AlertKind } from "../src/platform/alerts/alerter.js";
+import { ALERTER, CONFIG } from "../src/platform/tokens.js";
 import { makePdf } from "./support/pdf-fixtures.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
 
@@ -36,10 +37,12 @@ class GatedExtractor implements TakeoffExtractor {
 }
 
 const extractor = new GatedExtractor();
+const alerts: { kind: AlertKind; message: string }[] = [];
+const alerter: Alerter = { enabled: true, alert: (kind, message) => alerts.push({ kind, message }) };
 let ctx: TestContext;
 beforeAll(async () => {
   const config: AppConfig = { ...loadConfig(), ai: { ...loadConfig().ai, answerWithinMs: 50 } };
-  ctx = await createTestApp((b) => b.overrideProvider(CONFIG).useValue(config).overrideProvider(TAKEOFF_EXTRACTOR).useValue(extractor));
+  ctx = await createTestApp((b) => b.overrideProvider(CONFIG).useValue(config).overrideProvider(TAKEOFF_EXTRACTOR).useValue(extractor).overrideProvider(ALERTER).useValue(alerter));
 });
 afterAll(async () => {
   await ctx.app.close();
@@ -103,6 +106,8 @@ describe("lecture longue : elle continue après la réponse", () => {
       (r) => r.body.reading?.status === "failed",
     );
     expect(failed.body.takeoff).toBeNull();
+    // L'équipe est prévenue (B5), sans aucune donnée du devis dans le message.
+    expect(alerts).toEqual([{ kind: "ai_reading_failed", message: "raison : unexpected_error." }]);
 
     // Relance : nouvelle tentative, cette fois réussie (en un temps court : réponse directe).
     extractor.reset();

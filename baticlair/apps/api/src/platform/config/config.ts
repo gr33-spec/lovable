@@ -84,6 +84,9 @@ const envSchema = z
      */
     RATE_LIMIT: z.enum(["on", "off"]).default("on"),
     /** Délai de réponse d'une lecture de devis : au-delà, « lecture en cours » et elle continue en arrière-plan. */
+    /** Alertes de production (B5) : webhook (Slack, Discord, ntfy…) et/ou e-mail. Vide : pas d'alerte. */
+    ALERT_WEBHOOK_URL: z.url().optional(),
+    ALERT_EMAIL: z.email().optional(),
     READING_ANSWER_WITHIN_MS: z.coerce.number().int().positive().max(60_000).default(8000),
   })
   .superRefine((env, ctx) => {
@@ -143,6 +146,7 @@ export interface AppConfig {
   referentialValidators: string[];
   billing: { plans: Plan[]; activationCodes: Record<string, string> };
   rateLimit: { enabled: boolean };
+  alerts: { webhookUrl?: string; email?: string };
   ai: {
     provider: "anthropic" | "disabled" | "fake";
     apiKey?: string;
@@ -200,6 +204,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       .filter((x) => x.length > 0),
     billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES) },
     rateLimit: { enabled: e.RATE_LIMIT === "on" },
+    alerts: { ...(e.ALERT_WEBHOOK_URL ? { webhookUrl: e.ALERT_WEBHOOK_URL } : {}), ...(e.ALERT_EMAIL ? { email: e.ALERT_EMAIL } : {}) },
     ai: {
       provider: e.AI_PROVIDER ?? (e.ANTHROPIC_API_KEY ? "anthropic" : "disabled"),
       ...(e.ANTHROPIC_API_KEY ? { apiKey: e.ANTHROPIC_API_KEY } : {}),

@@ -16,9 +16,9 @@ Ce qui ne l'est pas : la lecture des PDF (librairie vulnérable, lecture faite d
 
 1. ~~**Mettre à jour `pdfjs-dist` et désactiver l'exécution de code dans les PDF** (B1) — S.~~ Fait le 3 octobre.
 2. ~~**Limiter le débit** sur connexion, inscription, upload et lecture IA (B2) — S.~~ Fait le 3 octobre.
-3. **Sortir la lecture IA de la requête HTTP** : file d'attente + statut interrogé par l'écran, sinon les devis de 30 pages scannées tombent en timeout (B3) — M.
-4. **Suppression de compte et export des données** (RGPD) + page « Confidentialité » (B4) — M.
-5. **Alerte en cas d'erreur en prod** (Sentry ou équivalent) + contrôle que les sauvegardes Neon sont actives (B5, M1) — S.
+3. ~~**Sortir la lecture IA de la requête HTTP** : file d'attente + statut interrogé par l'écran, sinon les devis de 30 pages scannées tombent en timeout (B3) — M.~~ Fait le 3 octobre.
+4. ~~**Suppression de compte et export des données** (RGPD) (B4) — M.~~ Fait le 3 octobre ; la page « Confidentialité » reste à rédiger.
+5. ~~**Alerte en cas d'erreur en prod** (B5) — S.~~ Fait le 3 octobre ; reste à brancher le canal, et le contrôle des sauvegardes Neon (M1).
 
 Et, en parallèle, **faire tester l'écran « liste d'achats » par 3 couvreurs qui ne sont pas le fondateur**, sans aucune explication, en les regardant faire (U1). C'est la seule façon de vérifier la règle des 10 ans.
 
@@ -36,17 +36,17 @@ Et, en parallèle, **faire tester l'écran « liste d'achats » par 3 couvreurs 
 - Risque : force brute sur les mots de passe ; un seul script vide le budget IA (3 € par document × autant de requêtes qu'on veut, `config.ts:60` ne plafonne que par document, le palier mensuel compte après l'appel) ; saturation de la base par l'upload.
 - Correctif : `@nestjs/throttler` (par IP sur auth, par entreprise sur documents et lecture), plafond IA **mensuel dur** par entreprise vérifié avant l'appel. Effort : S.
 
-### B3 — La lecture IA se fait dans la requête d'upload
+### B3 — La lecture IA se fait dans la requête d'upload — **corrigé le 3 octobre** (202 « lecture en cours », waitUntil, état suivi par l'écran, lecture interrompue détectée)
 - Preuve : `documents.service.ts:87` `await this.read(...)` dans `upload()` ; client Anthropic `timeout: 180_000` (`anthropic-document-reader.ts:51`) ; `apps/api/vercel.json` ne fixe pas `maxDuration`. Un devis de 30 pages scannées = plusieurs appels vision successifs.
 - Risque : la fonction Vercel coupe avant la fin ; l'artisan voit une erreur ou un document « en cours » pour toujours ; le coût IA est déjà dépensé. Testé en local seulement avec l'IA simulée ; aucun test avec un vrai devis de 30 pages.
 - Correctif : enregistrer le document, répondre tout de suite, lire dans une tâche de fond (Vercel background function, ou simple table `jobs` + cron), l'écran interroge le statut toutes les 3 s (il affiche déjà « jusqu'à une minute »). Effort : M.
 
-### B4 — Ni suppression de compte, ni export des données
+### B4 — Ni suppression de compte, ni export des données — **corrigé le 3 octobre** (export JSON, suppression en tapant SUPPRIMER ; reste : page Confidentialité et durée de conservation, à rédiger)
 - Preuve : aucune route `DELETE` dans `apps/api/src/modules/identity` ni `tenancy` (`grep "@Delete"` → price-requests, takeoff-lines, suppliers, documents seulement) ; aucun mot « rgpd / export » dans `apps/api/src`.
 - Risque : illégal dès le premier client payant (RGPD art. 17 et 20) ; les devis clients contiennent des noms et adresses de particuliers.
 - Correctif : `DELETE /v1/me` (anonymisation + purge des `DocumentBlob` de l'entreprise si dernier membre), `GET /v1/me/export` (zip JSON + PDF), bouton dans Compte, politique de confidentialité et durée de conservation (proposition : 24 mois après dernière activité). Effort : M.
 
-### B5 — Aucune alerte quand la prod casse
+### B5 — Aucune alerte quand la prod casse — **corrigé le 3 octobre** (alertes webhook/e-mail sur 5xx et lecture échouée ; reste : brancher le canal et un moniteur externe, voir docs/observability.md)
 - Preuve : journalisation pino seulement (`apps/api/src/platform/logging`), `GET /v1/health` existe, mais aucun Sentry/OpenTelemetry/alerte (`grep "sentry|otel"` → rien). Les échecs de lecture IA sont enregistrés en base (`status: failed`) et nulle part ailleurs.
 - Risque : on apprend les pannes par les artisans, ou jamais.
 - Correctif : Sentry sur API + web (DSN en variable d'env), alerte si taux d'échec IA > 20 % sur 1 h, uptime check sur `/v1/health`. Effort : S.

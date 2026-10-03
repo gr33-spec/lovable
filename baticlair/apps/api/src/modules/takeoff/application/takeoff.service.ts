@@ -67,6 +67,8 @@ export interface ReadingOptions {
    * et la lecture continue en arrière-plan ; l'écran suit son état. Audit de lancement, B3.
    */
   answerWithinMs?: number;
+  /** Lecture échouée (IA en panne, réponse inutilisable, erreur imprévue) : prévenir l'équipe (B5). */
+  onReadingFailed?: (reason: string) => void;
   /** Garde la lecture en vie après la réponse (Vercel : waitUntil). Par défaut : elle continue seule. */
   keepAlive?: (work: Promise<unknown>) => void;
 }
@@ -243,7 +245,9 @@ export class TakeoffService {
     try {
       return await this.readAndSave(tenant, doc, prepared, plan, policy, analysisId);
     } catch (error) {
-      if (!(error instanceof DomainError && error.code === "analysis_failed")) await this.meter.fail(analysisId).catch(() => undefined);
+      const known = error instanceof DomainError && error.code === "analysis_failed";
+      if (!known) await this.meter.fail(analysisId).catch(() => undefined);
+      this.reading.onReadingFailed?.(known ? String((error.details as { reason?: string } | undefined)?.reason ?? "analysis_failed") : "unexpected_error");
       throw error;
     }
   }

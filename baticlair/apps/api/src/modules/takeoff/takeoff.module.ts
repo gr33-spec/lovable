@@ -1,9 +1,10 @@
 import { waitUntil } from "@vercel/functions";
+import type { Alerter } from "../../platform/alerts/alerter.js";
 import { Module } from "@nestjs/common";
 import type { AppConfig } from "../../platform/config/config.js";
 import { PrismaService } from "../../platform/database/prisma.service.js";
 import type { AppLogger } from "../../platform/logging/logger.js";
-import { CONFIG, LOGGER } from "../../platform/tokens.js";
+import { CONFIG, LOGGER, ALERTER } from "../../platform/tokens.js";
 import { AiUsageModule, AiUsageRecorder, AnalysisMeter } from "../ai-usage/index.js";
 import { DOCUMENT_REPOSITORY, DocumentAiInput, DocumentsModule, type DocumentRepository } from "../documents/index.js";
 import { CompanyMemory, CorrectionJournal, LearningModule } from "../learning/index.js";
@@ -49,6 +50,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
         logger: AppLogger,
         config: AppConfig,
         prisma: PrismaService,
+        alerter: Alerter,
       ) =>
         new TakeoffService(
           repo,
@@ -66,6 +68,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             // Sur Vercel, la lecture d'un gros devis continue après la réponse (sinon la fonction s'arrête).
             keepAlive: (work) => waitUntil(work),
             answerWithinMs: config.ai.answerWithinMs,
+            onReadingFailed: (reason) => alerter.alert("ai_reading_failed", `raison : ${reason}.`),
             isValidator: async (tenant) => {
               if (config.referentialValidators.length === 0) return false;
               const user = await prisma.user.findUnique({ where: { id: tenant.userId }, select: { email: true } });
@@ -77,7 +80,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             },
           },
         ),
-      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, TAKEOFF_EXTRACTOR, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService],
+      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, TAKEOFF_EXTRACTOR, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService, ALERTER],
     },
   ],
   exports: [TakeoffService],

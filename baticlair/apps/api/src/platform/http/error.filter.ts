@@ -2,6 +2,7 @@ import { type ArgumentsHost, Catch, type ExceptionFilter, HttpException } from "
 import type { Response } from "express";
 import { ZodError } from "zod";
 import { DomainError, type ErrorCode } from "../errors/domain-error.js";
+import { NO_ALERTS, type Alerter } from "../alerts/alerter.js";
 import type { AppLogger } from "../logging/logger.js";
 import { currentRequestContext, toSupportId } from "../logging/request-context.js";
 
@@ -53,7 +54,10 @@ function httpStatusOf(exception: unknown): number | undefined {
  */
 @Catch()
 export class ErrorFilter implements ExceptionFilter {
-  constructor(private readonly logger: AppLogger) {}
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly alerter: Alerter = NO_ALERTS,
+  ) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
     const res = host.switchToHttp().getResponse<Response>();
@@ -80,6 +84,9 @@ export class ErrorFilter implements ExceptionFilter {
     const status = STATUS[code];
     if (status >= 500) {
       this.logger.error({ err: exception }, "unhandled error");
+      // Le code support suffit pour retrouver l'erreur dans le journal ; rien du client dans l'alerte.
+      const req = host.switchToHttp().getRequest<{ method?: string; route?: { path?: string } }>();
+      this.alerter.alert("server_error", `${code} sur ${req.method ?? "?"} ${req.route?.path ?? "?"} (code support ${toSupportId(requestId)}).`);
     }
 
     res.status(status).json({
