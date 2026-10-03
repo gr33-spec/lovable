@@ -7,7 +7,7 @@ import type { Fact, ParamDef, Product, Provenance, Referential } from "../model.
  *  - caractéristiques Edilians HP 10 et Soprema SOP'ÉCRAN HPV R2 : confirmées
  *    par le fondateur sur la documentation officielle des fabricants ;
  *  - règles de calcul, tableau de recouvrement de l'ardoise, pertes,
- *    conditionnements courants et HYPOTHÈSES PAR DÉFAUT (pente 45 %, zone
+ *    conditionnements courants et HYPOTHÈSES PAR DÉFAUT (pente 45°, zone
  *    littorale, rampant ≤ 5,5 m, entraxe 60 cm) : référentiel quantitatif
  *    rédigé et validé par le fondateur (couvreur) ;
  *  - produits GÉNÉRIQUES (« faîtière standard », « écran HPV standard ») :
@@ -89,16 +89,16 @@ const F = "fondateur-referentiel-2026-10-03";
 const PENTE_PARAM: ParamDef = {
   key: "pente",
   label: "Pente du toit",
-  unit: "%",
+  unit: "°",
   kind: "site_data",
   question: "Pente du toit ?",
   textLabels: ["pente"],
   default: { value: "45", source: F, verification: FOUNDER_DOC, version: 1, note: "pente moyenne d'une toiture" },
+  // Règle du fondateur (2026-10-03) : la pente est en degrés partout, jamais en % ; boutons 30° / 35° / 45°, « autre » = saisie libre.
   choices: [
-    { label: "Faible (30 %)", value: "30" },
-    { label: "Moyenne (45 %)", value: "45" },
-    { label: "Forte (60 %)", value: "60" },
-    { label: "Très forte (100 %)", value: "100" },
+    { label: "30°", value: "30" },
+    { label: "35°", value: "35" },
+    { label: "45°", value: "45" },
   ],
 };
 /** Zone climatique (1 intérieur, 2 intermédiaire, 3 littoral et montagne) : déduite du code postal, sinon le bord de mer. */
@@ -134,15 +134,15 @@ const USUAL_LITEAU_TUILE = { text: "Liteaux 27×40 pour la tuile (section couran
 const USUAL_CONTRE_LITEAU = { text: "Contre-liteaux 27×40 sur chevrons (section courante).", source: F, productShort: "Liteaux 27×40", productId: "liteau-sapin-27x40" };
 const USUAL_ECRAN = { text: "Écran HPV courant en rouleau de 1,5 × 50 m (75 m²).", source: F, productId: "ecran-hpv-standard" };
 const ECRAN_CONSTANTS = {
-  seuil_pente_ecran: condition("30", "%", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED),
-  recouvrement_faible_pente: condition("0.20", "m", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED, "Pente inférieure OU ÉGALE au seuil (« ≤ 30 % »)."),
+  seuil_pente_ecran: condition("16.7", "°", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED, "Fiche Soprema : « pente ≤ 30 % », soit 16,7°."),
+  recouvrement_faible_pente: condition("0.20", "m", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED, "Pente inférieure OU ÉGALE au seuil (« ≤ 30 % », 16,7°)."),
   recouvrement_forte_pente: condition("0.10", "m", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED, "Pente supérieure au seuil."),
 };
 const ECRAN_FORMULA = "surface * ecran.largeur_rouleau / (ecran.largeur_rouleau - si(pente <= regle.seuil_pente_ecran, regle.recouvrement_faible_pente, regle.recouvrement_forte_pente))";
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.03-9",
+  version: "roofing-2026.10.03-10",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -458,14 +458,14 @@ export const ROOFING_REFERENTIAL: Referential = {
           hint: "Il change le nombre de tuiles et de liteaux.",
           range: { min: "tuile.pureau_min", max: "tuile.pureau_max" },
           textLabels: ["pureau"],
-          // Référentiel du fondateur : « en zone 3 et pente < 35 %, prendre le pureau mini » ; sinon le pureau se cale
+          // Référentiel du fondateur : « en zone 3 et pente < 35 % (19,3°), prendre le pureau mini » ; sinon le pureau se cale
           // selon la pente, le maxi du fabricant pour une pente courante. Dit comme hypothèse, modifiable.
           default: {
             formula: "si(zone >= regle.zone_littorale, tuile.pureau_min, si(pente < regle.seuil_pente_pureau, tuile.pureau_min, tuile.pureau_max))",
             source: F,
             verification: FOUNDER_DOC,
             version: 1,
-            note: "pureau mini du fabricant en zone littorale ou pente < 35 %, sinon pureau maxi",
+            note: "pureau mini du fabricant en zone littorale ou pente < 19,3° (35 %), sinon pureau maxi",
           },
         },
         ENTRAXE_PARAM,
@@ -482,7 +482,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       ],
       constants: {
         ...ECRAN_CONSTANTS,
-        seuil_pente_pureau: condition("35", "%", F, FOUNDER_DOC, "Sous cette pente, pureau mini (nombre de tuiles maxi)."),
+        seuil_pente_pureau: condition("19.3", "°", F, FOUNDER_DOC, "Sous cette pente (35 %, soit 19,3°), pureau mini (nombre de tuiles maxi)."),
         zone_littorale: condition("3", "u", F, FOUNDER_DOC),
       },
       needs: [
@@ -606,7 +606,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           label: "Recouvrement de l'ardoise",
           unit: "mm",
           axes: [
-            { param: "pente", thresholds: ["45", "58", "70", "84", "100", "119"] },
+            { param: "pente", thresholds: ["25", "30", "35", "40", "45", "50"] },
             { param: "zone", thresholds: ["1", "2", "3"] },
           ],
           values: [
@@ -620,7 +620,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
-          note: "Pose au crochet, rampant ≤ 5,5 m. Lignes 25° (47 %), 30°, 35°, 40°, 45°, ≥ 50° du référentiel ; la première ligne vaut dès la pente minimale de l'ardoise (45 %). Sous 45 % : hors table, l'ouvrage n'est pas calculé.",
+          note: "Pose au crochet, rampant ≤ 5,5 m. Lignes 25°, 30°, 35°, 40°, 45°, ≥ 50° du référentiel (§3) ; la première ligne vaut dès la pente minimale de l'ardoise (24°, arrondie à 25°). Sous 25° : hors table, l'ouvrage n'est pas calculé.",
         },
       },
       derived: [

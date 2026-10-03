@@ -17,42 +17,43 @@ const ARDOISE: WorkItemInput = {
 };
 
 describe("hypothèses par défaut : utilisées sans question, dites, modifiables", () => {
-  it("pente 45 %, zone littorale, rampant ≤ 5,5 m, entraxe 60 cm : le devis ne dit rien, tout se calcule quand même", () => {
+  it("pente 45°, zone littorale, rampant ≤ 5,5 m, entraxe 60 cm : le devis ne dit rien, tout se calcule quand même", () => {
     const r = computeWorkItem(ROOFING_REFERENTIAL, ARDOISE);
     expect(r.nextQuestion).toBeNull();
     for (const n of r.needs) expect(n.status).toBe("calculated");
     // Chaque hypothèse est tracée comme telle, jamais confondue avec une donnée lue ou répondue.
     const ardoises = need(r, "ardoises");
     expect(ardoises.trace.filter((t) => t.origin === "assumption").map((t) => [t.label, t.value, t.unit])).toEqual([
-      ["Pente du toit", "45", "%"],
+      ["Pente du toit", "45", "°"],
       ["Zone climatique", "3", "u"],
       ["Longueur du rampant", "5,5", "m"],
-      ["Pureau", "8,5", "cm"],
+      ["Pureau", "10,25", "cm"],
     ]);
     expect(ardoises.assumptions.map((a) => a.key)).toEqual(["param:pente", "param:zone", "param:longueur_rampant", "derived:recouvrement", "param:pureau"]);
     // Les hypothèses à boutons gardent leurs réponses proposées (l'artisan ne tape rien).
-    expect(ardoises.assumptions.find((a) => a.key === "param:pente")?.choices?.map((c) => c.label)).toEqual(["Faible (30 %)", "Moyenne (45 %)", "Forte (60 %)", "Très forte (100 %)"]);
+    expect(ardoises.assumptions.find((a) => a.key === "param:pente")?.choices?.map((c) => c.label)).toEqual(["30°", "35°", "45°"]);
     expect(need(r, "contre-liteaux-ardoise").assumptions.map((a) => a.key)).toEqual(["product:contre_liteau", "param:entraxe_supports"]);
   });
 
   it("une réponse de l'artisan remplace l'hypothèse, et seulement elle", () => {
     const r = computeWorkItem(ROOFING_REFERENTIAL, { ...ARDOISE, params: { ...ARDOISE.params, pente: { value: "100", unit: "%", origin: "artisan" }, zone: { value: "1", unit: "u", origin: "artisan" } } });
     const ardoises = need(r, "ardoises");
-    // Pente 100 %, zone 1 : recouvrement 80 mm → pureau (300 − 80) / 2 = 110 mm → 200 / (0,22 × 0,11) = 8 264,46 + 5 %.
+    // Pente 100 % (une ancienne réponse en %) = 45°, zone 1 : recouvrement 80 mm → pureau (300 − 80) / 2 = 110 mm → 200 / (0,22 × 0,11) = 8 264,46 + 5 %.
     expect(ardoises.quantity).toEqual({ value: "8677.69", unit: "u" });
     expect(ardoises.assumptions.map((a) => a.key)).toEqual(["param:longueur_rampant", "derived:recouvrement", "param:pureau"]);
-    expect(ardoises.trace.find((t) => t.label === "Pente du toit")).toMatchObject({ origin: "project", value: "100" });
+    expect(ardoises.trace.find((t) => t.label === "Pente du toit")).toMatchObject({ origin: "project", value: "45", unit: "°" });
   });
 
   it("table de recouvrement : la cellule des plus grands seuils atteints ; sous la pente minimale, rien n'est deviné", () => {
-    const at = (pente: string, zone: string) => need(computeWorkItem(ROOFING_REFERENTIAL, { ...ARDOISE, params: { ...ARDOISE.params, pente: { value: pente, unit: "%", origin: "artisan" }, zone: { value: zone, unit: "u", origin: "artisan" } } }), "ardoises");
+    const at = (pente: string, zone: string) => need(computeWorkItem(ROOFING_REFERENTIAL, { ...ARDOISE, params: { ...ARDOISE.params, pente: { value: pente, unit: "°", origin: "artisan" }, zone: { value: zone, unit: "u", origin: "artisan" } } }), "ardoises");
     const recouvrement = (pente: string, zone: string) => at(pente, zone).trace.find((t) => t.label === "Recouvrement")!.value;
-    expect([recouvrement("45", "1"), recouvrement("47", "1"), recouvrement("57", "1"), recouvrement("58", "1"), recouvrement("130", "3")]).toEqual(["110", "110", "110", "100", "90"]);
-    // Rampant de 6 m : +10 mm, arrondi aux 5 mm supérieurs.
+    expect([recouvrement("25", "1"), recouvrement("26", "1"), recouvrement("29.9", "1"), recouvrement("30", "1"), recouvrement("80", "3")]).toEqual(["110", "110", "110", "100", "90"]);
+    // Rampant de 6 m (45°, zone 3 : 95 mm) : +10 mm, arrondi aux 5 mm supérieurs.
     const long = need(computeWorkItem(ROOFING_REFERENTIAL, { ...ARDOISE, params: { ...ARDOISE.params, longueur_rampant: { value: "6", unit: "m", origin: "artisan" } } }), "ardoises");
-    expect(long.trace.find((t) => t.label === "Recouvrement")!.value).toBe("140");
-    // Pente 30 % : sous le premier seuil, l'ouvrage n'est pas calculé, et la raison est dite.
-    expect(at("30", "3")).toMatchObject({ status: "unknown", reason: "Pente du toit trop faible pour cet ouvrage (minimum 45 %)." });
+    expect(long.trace.find((t) => t.label === "Recouvrement")!.value).toBe("105");
+    // Pente 20° (et 5°) : sous le premier seuil, l'ouvrage n'est pas calculé, et la raison est dite.
+    expect(at("20", "3")).toMatchObject({ status: "unknown", reason: "Pente du toit trop faible pour cet ouvrage (minimum 25 °)." });
+    expect(at("5", "1")).toMatchObject({ status: "unknown" });
   });
 
   it("produit par défaut (liteaux 18×40, crochets, écran) : dit comme hypothèse ; « aucun de ces modèles » le retire", () => {
