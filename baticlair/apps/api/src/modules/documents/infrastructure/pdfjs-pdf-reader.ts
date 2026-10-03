@@ -73,6 +73,9 @@ export class PdfJsPdfReader implements PdfReader {
       data: new Uint8Array(bytes),
       disableFontFace: true,
       useSystemFonts: false,
+      // Un PDF vient d'un inconnu : pdf.js ≥ 6 n'exécute plus jamais de code tiré du fichier
+      // (l'option « eval » des polices a disparu avec la faille qu'elle ouvrait) ; pas d'accès réseau non plus.
+      disableAutoFetch: true,
       verbosity: 0,
     });
     let doc: Awaited<typeof task.promise>;
@@ -116,7 +119,7 @@ export class PdfJsPdfReader implements PdfReader {
       }
       return { pageCount: doc.numPages, pages };
     } finally {
-      await doc.destroy();
+      await task.destroy();
     }
   }
 }

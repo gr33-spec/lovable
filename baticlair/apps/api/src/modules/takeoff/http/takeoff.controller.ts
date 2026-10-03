@@ -1,3 +1,5 @@
+import { Throttle } from "@nestjs/throttler";
+import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import { z } from "zod";
 import { ZodPipe } from "../../../platform/http/zod.js";
@@ -172,6 +174,7 @@ export class TakeoffController {
   constructor(@Inject(TakeoffService) private readonly takeoffs: TakeoffService) {}
 
   /** Lance la lecture du devis client par l'IA (ou renvoie la liste déjà préparée, sans nouveau coût). */
+  @Throttle({ default: HOURLY(30) })
   @Post("documents/:id/takeoff")
   @HttpCode(201)
   async extract(@Tenant() tenant: TenantContext, @Param("id") id: string) {

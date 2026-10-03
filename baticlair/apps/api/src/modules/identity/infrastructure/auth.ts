@@ -53,6 +53,22 @@ export function createAuth(config: AppConfig, prisma: PrismaService, email: Tran
       ...(google ? { google: { clientId: google.clientId, clientSecret: google.clientSecret } } : {}),
       ...(microsoft ? { microsoft: { clientId: microsoft.clientId, clientSecret: microsoft.clientSecret } } : {}),
     },
+    // Force brute et inscriptions en rafale : compteurs par adresse IP, en base (partagés entre
+    // les instances). Les fenêtres sont courtes : un artisan qui se trompe trois fois n'est pas gêné.
+    rateLimit: {
+      enabled: config.rateLimit.enabled,
+      storage: "database",
+      modelName: "rateLimit",
+      window: 60,
+      max: 60,
+      customRules: {
+        "/sign-in/email": { window: 60, max: 5 },
+        "/sign-up/email": { window: 3600, max: 5 },
+        "/request-password-reset": { window: 3600, max: 3 },
+        "/forget-password": { window: 3600, max: 3 },
+        "/send-verification-email": { window: 3600, max: 3 },
+      },
+    },
     advanced: {
       useSecureCookies: config.env === "production" || config.env === "staging",
     },

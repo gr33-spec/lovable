@@ -1,3 +1,5 @@
+import { Throttle } from "@nestjs/throttler";
+import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import {
   Body,
   Controller,
@@ -90,6 +92,7 @@ export class DocumentsController {
     };
   }
 
+  @Throttle({ default: HOURLY(30) })
   @Post("projects/:projectId/documents")
   @UseInterceptors(FileInterceptor("file", { storage: memoryStorage(), limits: { fileSize: HARD_MAX_UPLOAD_BYTES, files: 1 } }))
   async upload(

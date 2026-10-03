@@ -26,12 +26,12 @@ Et, en parallèle, **faire tester l'écran « liste d'achats » par 3 couvreurs 
 
 ## Bloquant (avant toute mise en ligne publique)
 
-### B1 — Librairie PDF vulnérable, exécutée sur des fichiers envoyés par n'importe qui
+### B1 — Librairie PDF vulnérable, exécutée sur des fichiers envoyés par n'importe qui — **corrigé le 3 octobre** (pdfjs-dist 6.3.289, `disableAutoFetch`)
 - Preuve : `pnpm audit` → **high** « PDF.js: Arbitrary JavaScript execution upon opening a malicious PDF », version installée `pdfjs-dist@5.7.284` (`apps/api/package.json:31`), correctif ≥ 6.2.108. Le lecteur `apps/api/src/modules/documents/infrastructure/pdfjs-pdf-reader.ts` ne passe pas `isEvalSupported: false` (aucune occurrence dans le fichier).
 - Risque : un PDF piégé exécute du code dans le serveur de l'API, là où se trouvent la clé Anthropic et la base.
 - Correctif : monter `pdfjs-dist`, passer `isEvalSupported: false` à `getDocument`, ajouter un test qui ouvre un PDF avec une police malveillante connue et vérifie qu'il est refusé. Effort : S.
 
-### B2 — Aucune limite de débit
+### B2 — Aucune limite de débit — **corrigé le 3 octobre** (compteurs en base, voir `docs/security.md`)
 - Preuve : `grep -ri "throttl|rateLimit" apps/api/src apps/api/package.json` → rien. Routes `POST /v1/auth/*`, `POST documents` (50 Mo autorisés par requête, `documents.controller.ts:39`), lecture IA.
 - Risque : force brute sur les mots de passe ; un seul script vide le budget IA (3 € par document × autant de requêtes qu'on veut, `config.ts:60` ne plafonne que par document, le palier mensuel compte après l'appel) ; saturation de la base par l'upload.
 - Correctif : `@nestjs/throttler` (par IP sur auth, par entreprise sur documents et lecture), plafond IA **mensuel dur** par entreprise vérifié avant l'appel. Effort : S.

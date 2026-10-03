@@ -1,3 +1,5 @@
+import { Throttle } from "@nestjs/throttler";
+import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import { Controller, HttpCode, Inject, Param, Post, UseGuards } from "@nestjs/common";
 import { priceRequestDto } from "../../price-requests/index.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
@@ -9,6 +11,7 @@ export class DemoController {
   constructor(@Inject(DemoService) private readonly demo: DemoService) {}
 
   /** Crée un chantier fictif (devis client compris) et les fournisseurs fictifs. */
+  @Throttle({ default: HOURLY(10) })
   @Post("project")
   @HttpCode(201)
   createProject(@Tenant() tenant: TenantContext) {

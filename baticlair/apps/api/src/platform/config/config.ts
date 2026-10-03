@@ -78,6 +78,11 @@ const envSchema = z
     BILLING_PLANS: z.string().min(2).optional(),
     /** Codes d'activation manuelle d'une formule, pour les tests : « CODE:solo,AUTRE:pro ». Vide = désactivé. */
     PLAN_ACTIVATION_CODES: z.string().optional(),
+    /**
+     * Limitation de débit (connexion, inscription, dépôts de devis, lecture IA) : `on` partout,
+     * `off` uniquement pour les tests automatisés qui enchaînent des centaines de requêtes.
+     */
+    RATE_LIMIT: z.enum(["on", "off"]).default("on"),
   })
   .superRefine((env, ctx) => {
     const isDeployed = env.NODE_ENV === "production" || env.NODE_ENV === "staging";
@@ -87,6 +92,9 @@ const envSchema = z
         path: ["EMAIL_PROVIDER"],
         message: "« console » et « capture » sont réservés au développement et aux tests",
       });
+    }
+    if (isDeployed && env.RATE_LIMIT === "off") {
+      ctx.addIssue({ code: "custom", path: ["RATE_LIMIT"], message: "la limitation de débit ne se coupe pas en ligne" });
     }
     if (isDeployed && env.AI_PROVIDER === "fake") {
       ctx.addIssue({ code: "custom", path: ["AI_PROVIDER"], message: "« fake » est réservé au développement et aux tests" });
@@ -132,6 +140,7 @@ export interface AppConfig {
   /** E-mails (en minuscules) des validateurs du référentiel. */
   referentialValidators: string[];
   billing: { plans: Plan[]; activationCodes: Record<string, string> };
+  rateLimit: { enabled: boolean };
   ai: {
     provider: "anthropic" | "disabled" | "fake";
     apiKey?: string;
@@ -186,6 +195,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       .map((x) => x.trim().toLowerCase())
       .filter((x) => x.length > 0),
     billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES) },
+    rateLimit: { enabled: e.RATE_LIMIT === "on" },
     ai: {
       provider: e.AI_PROVIDER ?? (e.ANTHROPIC_API_KEY ? "anthropic" : "disabled"),
       ...(e.ANTHROPIC_API_KEY ? { apiKey: e.ANTHROPIC_API_KEY } : {}),

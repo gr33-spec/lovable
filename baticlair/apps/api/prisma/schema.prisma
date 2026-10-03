@@ -690,3 +690,27 @@ model CorrectionEvent {
   @@map("correction_event")
 }
 
+// ---------------------------------------------------------------------------
+// Limitation de débit (docs/security.md) : compteurs partagés entre toutes les
+// instances (fonctions serverless), donc en base plutôt qu'en mémoire.
+// ---------------------------------------------------------------------------
+
+/// Compteurs de Better Auth (connexion, inscription, mot de passe oublié), par adresse IP et chemin.
+model RateLimit {
+  id          String  @id
+  key         String  @unique
+  count       Int
+  lastRequest BigInt
+
+  @@map("rate_limit")
+}
+
+/// Compteurs des routes de l'API (dépôt de devis, lecture IA…) : clé = limiteur + adresse IP.
+model ApiRateLimit {
+  key       String   @id
+  hits      Int
+  expiresAt DateTime
+
+  @@index([expiresAt])
+  @@map("api_rate_limit")
+}

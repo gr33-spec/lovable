@@ -1,3 +1,5 @@
+import { Throttle } from "@nestjs/throttler";
+import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import { Body, Controller, Get, HttpCode, Inject, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import { lineAmount, Money, type ComparisonResult, type Quantity } from "@baticlair/domain";
 import { z } from "zod";
@@ -132,6 +134,7 @@ export class OffersController {
   constructor(@Inject(OffersService) private readonly offers: OffersService) {}
 
   /** Lit le devis reçu d'un fournisseur par l'IA (1 analyse), ou renvoie la lecture déjà faite. */
+  @Throttle({ default: HOURLY(30) })
   @Post("price-request-recipients/:id/analysis")
   @HttpCode(201)
   async analyze(@Tenant() tenant: TenantContext, @Param("id") id: string) {
@@ -142,6 +145,7 @@ export class OffersController {
    * « Lire et comparer » : tous les devis reçus pas encore lus, en une fois.
    * Le lot compte pour une seule analyse.
    */
+  @Throttle({ default: HOURLY(30) })
   @Post("price-requests/:id/analysis")
   @HttpCode(201)
   async analyzeAll(@Tenant() tenant: TenantContext, @Param("id") id: string) {

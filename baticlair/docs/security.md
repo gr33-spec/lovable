@@ -35,7 +35,9 @@ finaux, coordonnées de fournisseurs, e-mails. Toutes sont traitées comme
   HEIC (+ CSV/XLSX pour les imports tabulaires plus tard).
 - Taille et nombre de pages bornés ; PDF chiffrés refusés avec explication.
 - Aucun contenu actif exécuté (JavaScript PDF, formulaires) : les PDF sont
-  seulement lus ou rendus en images côté worker.
+  seulement lus ou rendus en images côté worker. Lecture avec pdf.js ≥ 6
+  (plus aucun chemin d'exécution de code tiré des polices, faille corrigée
+  en 6.2.108), `disableAutoFetch`, et dépendance suivie par `pnpm audit`.
 - Téléchargement servi avec `Content-Disposition: attachment` et le type
   vérifié, jamais depuis notre domaine applicatif.
 - Antivirus (ClamAV en job) avant mise à disposition au téléchargement :
@@ -91,6 +93,13 @@ documentée de : conservation, non-entraînement, région, DPA, sécurité
 - Validation Zod de toute entrée API ; sortie sérialisée par schéma.
 - En-têtes de sécurité (CSP stricte côté web, HSTS), protection CSRF
   (cookies `SameSite` + vérification d'origine).
+- **Limitation de débit** (`platform/http/rate-limit.module.ts`, `RATE_LIMIT=on`) :
+  compteurs en base (`rate_limit`, `api_rate_limit`), donc partagés entre toutes
+  les instances serverless. Par adresse IP. Better Auth : connexion 5/min,
+  inscription 5/h, mot de passe oublié 3/h. API : 120 écritures/min, et par
+  heure 30 dépôts de devis, 30 lectures IA, 30 devis fournisseurs, 10 démos,
+  5 entreprises créées. Les lectures (GET) ne sont jamais comptées. Réponse
+  `429 too_many_requests` avec `retryAfterSeconds`.
 - Dépendances : audit automatique en CI, mises à jour régulières.
 - Revue de sécurité avant chaque phase de lancement.
 

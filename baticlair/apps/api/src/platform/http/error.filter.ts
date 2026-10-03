@@ -15,6 +15,7 @@ const STATUS: Record<ErrorCode, number> = {
   conflict: 409,
   request_in_progress: 409,
   payload_too_large: 413,
+  too_many_requests: 429,
   unreadable_document: 422,
   analysis_quota_reached: 402,
   plan_limit_reached: 402,
@@ -31,10 +32,11 @@ const FROM_HTTP_STATUS: Record<number, ErrorCode> = {
   409: "conflict",
   413: "payload_too_large",
   415: "validation_failed",
+  429: "too_many_requests",
 };
 
 /** Codes pour lesquels une nouvelle tentative a une chance d'aboutir. */
-const RETRYABLE: ReadonlySet<ErrorCode> = new Set(["internal_error", "request_in_progress"]);
+const RETRYABLE: ReadonlySet<ErrorCode> = new Set(["internal_error", "request_in_progress", "too_many_requests"]);
 
 /** Erreurs HTTP levées hors de NestJS (ex. parseur de corps : trop gros, JSON invalide). */
 function httpStatusOf(exception: unknown): number | undefined {
