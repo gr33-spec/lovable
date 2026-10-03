@@ -78,15 +78,24 @@ describe("jamais de quantité demandée à l'artisan", () => {
     expect(bought(one("Ardoises naturelles 32x22 pose au crochet", "200", "m²"))).toMatchObject({ "Ardoises 32×22": "8 447 pièces", "Crochets d'ardoise": "8 616 pièces" });
   });
 
-  it("exemple complet du référentiel (§3) : 200 m², 32×22, 45°, zone 3, rampant 6 m → 8 460 ardoises théoriques, 1 950 ml de liteaux", () => {
+  it("exemple du §3 (32×22, 45°, région III, rampant 6 m) : recouvrement 105 mm, au-delà du maximum Cupa (103 mm) → format non admis, le voisin proposé", () => {
     const v = read([{ ref: "1", designation: "Ardoises 32x22 crochets compris", quantity: "200", unit: "m2" } as unknown as BenchLine], {
       "param:longueur_rampant": { value: "6", unit: "m" },
     });
-    // R = 95 + 10 = 105 mm → pureau 107,5 mm → Cupa : 200 / (0,1075 × 0,221) = 8 418,4 ; + 5 % de perte = 8 839,3.
-    expect(bought(v)["Ardoises 32×22"]).toBe("8 840 pièces");
-    expect(bought(v)["Crochets d'ardoise"]).toBe("9 017 pièces");
-    // Liteaux : 200 / 0,1075 = 1 860,5 ml + 5 % = 1 953,5 → 1 954 ml (référentiel : 1 950 ml, 39 bottes).
-    expect(bought(v)["Liteaux 18×40"]).toBe("1 954 ml");
+    // R = 95 + 10 = 105 mm ; la table Cupa (§34) admet le 32×22 de 69 à 103 mm : « proposer le format voisin ».
+    expect(bought(v)["Ardoises 32×22"]).toBeUndefined();
+    const q = v.questions.find((d) => d.question?.key === "product:ardoise")!;
+    expect(q.question!.text).toMatch(/^Ardoises 32×22 non admis ici : recouvrement posé 105 mm, au-delà du maximum de 103 mm pour ce format \(Cupa Pizarras\)\. Quel format \?$/);
+    expect(q.question!.options!.map((o) => o.label)).toEqual(["Ardoises 33×23 (conseillé)", "Ardoises 35×22", "Ardoises 35×25", "Ardoises 40×22"]);
+    expect(q.question!.text).not.toMatch(/quelle quantité/i);
+    // L'artisan prend le 33×23 conseillé : tout se calcule (table Cupa : pas de ligne à 105, formule hors table).
+    const after = read([{ ref: "1", designation: "Ardoises 32x22 crochets compris", quantity: "200", unit: "m2" } as unknown as BenchLine], {
+      "param:longueur_rampant": { value: "6", unit: "m" },
+      "product:ardoise": "ardoise-33x23",
+    });
+    expect(after.questions.some((d) => d.question?.key === "product:ardoise")).toBe(false);
+    expect(bought(after)["Ardoises 33×23"]).toMatch(/^\d[\d ]* pièces$/);
+    expect(Number(bought(after)["Crochets d'ardoise"]!.replace(/\D/g, ""))).toBeGreaterThanOrEqual(Number(bought(after)["Ardoises 33×23"]!.replace(/\D/g, "")));
   });
 
   it("surface vraiment absente (1 forfait, rien d'écrit) : UNE question, à boutons, jamais « quelle quantité ? »", () => {

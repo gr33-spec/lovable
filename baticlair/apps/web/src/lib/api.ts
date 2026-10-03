@@ -208,6 +208,19 @@ export interface ReadingState {
   reason: string | null;
 }
 
+/**
+ * Le quantitatif de la porte /v1/quantitatifs (§38) : le même objet pour l'appli et les partenaires.
+ * `ecran` (demandé avec `?ecran=1`) : le détail de l'écran de l'appli.
+ */
+export interface Quantitatif {
+  id: string;
+  projetId: string;
+  etat: "en_cours" | "questions" | "pret" | "erreur";
+  erreur?: { raison: string };
+  valide?: boolean;
+  ecran?: Takeoff;
+}
+
 export interface Takeoff {
   id: string;
   projectId: string;

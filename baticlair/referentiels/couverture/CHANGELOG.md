@@ -1,6 +1,15 @@
 # Référentiel couverture — CHANGELOG
 
-## Version roofing-2026.10.03-12 (appliquée dans le moteur)
+## Version roofing-2026.10.03-13 (appliquée dans le moteur)
+
+**Format non admissible (§34)** : un recouvrement hors des bornes Cupa d'un format (32×22 : 69 à 103 mm ; 30×22 : 69 à 100 mm…) rend ce format non admis. Rien n'est calculé pour les ardoises et les crochets ; UNE question à boutons propose les formats dont la plage contient ce recouvrement, le plus proche d'abord, marqué « conseillé ».
+
+| Cas | Avant | Maintenant |
+|---|---|---|
+| 32×22, 45°, région III, rampant 6 m (R 105) — exemple du §3 | 8 840 ardoises (formule) | non admis → 33×23 (conseillé), 35×22, 35×25, 40×22 |
+| 30×22, 30°, région III (R 120) | calculé par la formule | non admis → 40×22 (conseillé)… |
+
+## Version roofing-2026.10.03-12
 
 Décision du fondateur : **la table Cupa (§34) fait foi** pour tous les formats et recouvrements qu'elle couvre ; la formule Cupa ne sert qu'hors table.
 
@@ -12,8 +21,6 @@ Décision du fondateur : **la table Cupa (§34) fait foi** pour tous les formats
 | 200 m², 30×22, 45°, région I (R 80) | 8 639 | **40,7/m² → 8 547** |
 | 200 m², 30×22, 45°, région III (R 95, hors table) | 9 271 / 9 200 à Brest | inchangé (formule) |
 | Région ardoise | — | marquée **« estimation »** dans l'explication (zone climatique du département, en attendant la liste du DTU 40.11) |
-
-Pas encore traité : un recouvrement hors des bornes d'un format (ex. 30×22 au-delà de R 100) devrait rendre le format « non admissible » et proposer le voisin (§34) ; aujourd'hui la formule calcule quand même.
 
 ## Version roofing-2026.10.03-11
 

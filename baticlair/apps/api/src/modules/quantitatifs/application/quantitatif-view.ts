@@ -124,5 +124,7 @@ export function quantitatifView(
     a_chiffrer: purchase.toQuote.map((q) => ({ id: q.key, libelle: q.label, mesure: q.measure, raison: q.reason })),
     hypotheses: purchase.assumptions.map((a) => ({ cle: a.key, libelle: a.label, valeur: a.value, unite: a.unit, choix: a.choices ?? [] })),
     peut_partir: purchase.canValidate,
+    /** L'artisan a validé la liste : elle peut partir en demande de prix. */
+    valide: takeoff.status === "validated",
   };
 }

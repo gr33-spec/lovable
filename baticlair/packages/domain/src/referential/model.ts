@@ -237,6 +237,12 @@ export interface PointTable extends Provenance {
   rows: string[][];
   /** Hors table : cette formule, de même unité. */
   otherwise: string;
+  /**
+   * Bornes du fabricant : pour un produit donné (les premières clés), la dernière clé doit rester entre
+   * le plus petit et le plus grand de ses lignes (32×22 : recouvrement 69 à 103 mm). Au-delà, le produit
+   * de cet emplacement n'est pas admis : UNE question, avec les produits admis, le plus proche d'abord.
+   */
+  admissible?: { slot: string };
   note?: string;
 }
 

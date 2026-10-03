@@ -140,6 +140,8 @@ const CUPA_ARDOISES_M2 = {
     { variable: "recouvrement_pose", unit: "mm" },
   ],
   otherwise: "1 / (pureau * (ardoise.largeur + diametre_crochet))",
+  // « Un R hors des bornes du format = format non admissible pour cette pente/région → proposer le format voisin » (§34).
+  admissible: { slot: "ardoise" },
   source: "cupa-pureau-ardoises-m2",
   verification: FOUNDER_DOC,
   version: 1,
@@ -413,7 +415,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.03-12",
+  version: "roofing-2026.10.03-13",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },

@@ -93,6 +93,24 @@ describe("table Cupa (§34) : elle fait foi, la formule ne sert que hors table",
     expect(work.points!.ardoises_m2!.rows).toEqual(fromDoc);
   });
 
+  it("format non admis (30×22 à 30°, région III : recouvrement 120 mm, maximum Cupa 100 mm) : UNE question, le 40×22 conseillé", () => {
+    const r = at("30", "3");
+    const ardoises = need(r, "ardoises");
+    expect(ardoises).toMatchObject({ status: "question", question: { key: "product:ardoise", kind: "choose_product" } });
+    expect(ardoises.question!.text).toBe("Ardoises 30×22 non admis ici : recouvrement posé 120 mm, au-delà du maximum de 100 mm pour ce format (Cupa Pizarras). Quel format ?");
+    expect(ardoises.question!.options![0]).toEqual({ label: "Ardoises 40×22 (conseillé)", value: "ardoise-40x22" });
+    // Les crochets attendent la même réponse ; rien n'est inventé entre-temps.
+    expect(need(r, "crochets-ardoise")).toMatchObject({ status: "question", question: { key: "product:ardoise" } });
+    // Avec le format conseillé, tout se calcule.
+    const ok = at("30", "3", "1", "ardoise-40x22");
+    expect(need(ok, "ardoises").status).toBe("calculated");
+    expect(order(ok, "crochets-ardoise")).toBeGreaterThanOrEqual(order(ok, "ardoises"));
+  });
+
+  it("dans les bornes, aucune question de format (30×22 de 69 à 100 mm)", () => {
+    for (const [pente, zone] of [["45", "1"], ["45", "3"], ["40", "3"], ["50", "2"]] as const) expect(need(at(pente, zone), "ardoises").status).toBe("calculated");
+  });
+
   it("la région ardoise est marquée « estimation » (zone climatique du département, en attendant le DTU 40.11)", () => {
     expect(need(at("45", "3"), "ardoises").trace.find((t) => t.label === "Région ardoise")).toMatchObject({ estimation: true });
   });

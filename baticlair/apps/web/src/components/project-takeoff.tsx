@@ -1,14 +1,14 @@
 "use client";
 
 import { Check, CircleCheck, HelpCircle, Pencil, Plus, Send, Sparkles, Trash2 } from "lucide-react";
-import { Fragment, useCallback, useEffect, useId, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AssistantMessage, ChatInput, parseCommand, ReasoningSteps, Say, ThinkingSteps, UserBubble } from "@/components/chat";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { QuantityCard } from "@/components/purchase-list";
 import { DecisionCard, type DecisionHandlers } from "@/components/takeoff-view";
 import { useProgressRefresh } from "@/components/project-progress";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
-import { api, ApiError, type ProjectDocument, type ReadingState, type Takeoff, type TakeoffLine } from "@/lib/api";
+import { api, ApiError, type ProjectDocument, type Quantitatif, type ReadingState, type TakeoffLine } from "@/lib/api";
 import { shortName } from "@/lib/labels";
 import { useResource } from "@/lib/use-resource";
 
@@ -45,12 +45,19 @@ export function ProjectTakeoff({
   /** Devis tout juste déposé : la lecture part d'elle-même. */
   autoStart: boolean;
 }) {
-  const fetchTakeoff = useCallback(
-    (signal: AbortSignal) =>
-      api<{ takeoff: Takeoff | null; aiAvailable: boolean; reading: ReadingState | null }>(`/v1/projects/${encodeURIComponent(projectId)}/takeoff`, { signal }),
+  // Le chat passe par la même porte que les partenaires (§38) : /v1/quantitatifs, avec le détail de l'écran.
+  const fetchQuantitatif = useCallback(
+    (signal: AbortSignal) => api<{ items: Quantitatif[]; ia_disponible: boolean }>(`/v1/quantitatifs?projetId=${encodeURIComponent(projectId)}&ecran=1`, { signal }),
     [projectId],
   );
-  const { data, setData, error, reload } = useResource(fetchTakeoff);
+  const { data: raw, setData, error, reload } = useResource(fetchQuantitatif);
+  const quantitatif = raw?.items[0] ?? null;
+  const data = useMemo(() => {
+    if (!raw) return null;
+    const q = raw.items[0];
+    const reading: ReadingState | null = q?.etat === "en_cours" ? { status: "reading", reason: null } : q?.etat === "erreur" ? { status: "failed", reason: q.erreur?.raison ?? null } : null;
+    return { takeoff: q?.ecran ?? null, aiAvailable: raw.ia_disponible, reading };
+  }, [raw]);
   const [pending, setPending] = useState(false);
   const [actionError, setActionError] = useState<ApiError | null>(null);
   const [showList, setShowList] = useState(false);
@@ -61,8 +68,8 @@ export function ProjectTakeoff({
   const readable = clientQuote ? canPrepareTakeoff(clientQuote) : false;
 
   const update = useCallback(
-    (t: Takeoff) => {
-      setData((prev) => (prev ? { ...prev, takeoff: t } : prev));
+    (q: Quantitatif) => {
+      setData((prev) => (prev ? { ...prev, items: [q] } : prev));
       refreshProgress();
     },
     [setData, refreshProgress],
@@ -82,16 +89,15 @@ export function ProjectTakeoff({
 
   const prepare = useCallback(() => {
     if (!clientQuote) return;
+    // Gros devis : la porte répond « en_cours » et la lecture continue sur le serveur ; l'écran la suit (audit B3).
     void run(
-      () => api<Takeoff | { reading: ReadingState }>(`/v1/documents/${encodeURIComponent(clientQuote.id)}/takeoff`, { method: "POST" }),
-      (res) => {
+      () => api<Quantitatif>(`/v1/quantitatifs?ecran=1`, { method: "POST", body: { documentId: clientQuote.id } }),
+      (q) => {
         setFresh(true);
-        // Gros devis : la lecture continue sur le serveur ; l'écran la suit (audit B3).
-        if ("reading" in res) setData((prev) => (prev ? { ...prev, reading: res.reading } : prev));
-        else update(res);
+        update(q);
       },
     );
-  }, [clientQuote, run, update, setData]);
+  }, [clientQuote, run, update]);
 
   // Lecture en cours sur le serveur : on regarde toutes les 3 secondes où elle en est.
   const readingNow = data?.takeoff === null && data.reading?.status === "reading";
@@ -155,13 +161,18 @@ export function ProjectTakeoff({
   const articles = takeoff.purchase.toBuy.length;
   const labor = takeoff.lines.filter((l) => l.kind === "labor");
   const editable = !archived;
-  const call = (path: string, method: "POST" | "PATCH" | "DELETE", body?: unknown) =>
-    run(() => api<Takeoff>(path, { method, ...(body !== undefined ? { body } : {}) }), update);
+  // Toutes les actions passent par la porte : réponses, corrections, validation.
+  const qid = encodeURIComponent(quantitatif!.id);
+  const call = (path: "reponses" | "corrections" | "validation", body?: unknown) =>
+    run(() => api<Quantitatif>(`/v1/quantitatifs/${qid}/${path}?ecran=1`, { method: "POST", ...(body !== undefined ? { body } : {}) }), update);
+  const ligne = (f: LineFieldsInput) => ({ libelle: f.designation, quantite: f.quantity, unite: f.unit, reference: f.reference });
+  const answer = (key: string, value: string | { value: string; unit: string } | null) =>
+    call("reponses", { reponses: [value !== null && typeof value === "object" ? { question: key, valeur: value.value, unite: value.unit } : { question: key, valeur: value }] });
   const remember = (text: string, reply: string | null = null) => setSaid((prev) => [...prev, { id: prev.length, text, reply }]);
   const lineActions = (line: TakeoffLine) => ({
-    onSave: (fields: LineFieldsInput) => call(`/v1/takeoff-lines/${line.id}`, "PATCH", fields),
-    onDelete: () => call(`/v1/takeoff-lines/${line.id}`, "DELETE"),
-    onConfirm: () => call(`/v1/takeoff-lines/${line.id}/confirm`, "POST"),
+    onSave: (fields: LineFieldsInput) => call("corrections", { action: "modifier_ligne", id: line.id, ligne: ligne(fields) }),
+    onDelete: () => call("corrections", { action: "retirer", id: line.id }),
+    onConfirm: () => call("corrections", { action: "confirmer", id: line.id }),
   });
   // Chaque réponse de l'artisan s'affiche dans le fil, comme un message.
   const answerLabel = (key: string, value: string | { value: string; unit: string } | null): string => {
@@ -176,18 +187,18 @@ export function ProjectTakeoff({
   const handlers: DecisionHandlers = {
     onDecide: (d) => {
       if (d.primary) remember(d.primary.label);
-      return call(`/v1/takeoffs/${takeoff.id}/decisions`, "POST", { action: d.primary?.action, lineIds: d.lineIds, pieceLineIds: d.pieceLineIds });
+      return call("reponses", { reponses: [{ question: d.key, valeur: "ok" }] });
     },
     onAnswer: (key, value) => {
       remember(answerLabel(key, value));
-      return call(`/v1/takeoffs/${takeoff.id}/answers`, "POST", { key, value });
+      return answer(key, value);
     },
-    onSaveLine: (lineId, fields) => call(`/v1/takeoff-lines/${lineId}`, "PATCH", fields),
-    onDeleteLine: (lineId) => call(`/v1/takeoff-lines/${lineId}`, "DELETE"),
+    onSaveLine: (lineId, fields) => call("corrections", { action: "modifier_ligne", id: lineId, ligne: ligne(fields) }),
+    onDeleteLine: (lineId) => call("corrections", { action: "retirer", id: lineId }),
   };
   const validate = () => {
     setShowList(false);
-    void call(`/v1/takeoffs/${takeoff.id}/validate`, "POST");
+    void call("validation");
   };
   const typed = (text: string) => {
     const command = parseCommand(text);
@@ -198,7 +209,7 @@ export function ProjectTakeoff({
     // Honnête : si la valeur ne sert à aucun calcul de ce devis, on le dit plutôt que « recalculé ».
     const used = takeoff.purchase.assumptions.some((a) => a.key === command.key) || takeoff.view.decisions.some((d) => d.question?.key === command.key || d.question?.key === `engine:${command.key}`);
     remember(text, used ? `C'est noté : ${command.said}. J'ai recalculé.` : `C'est noté : ${command.said}. Ça ne change rien à cette commande.`);
-    void call(`/v1/takeoffs/${takeoff.id}/answers`, "POST", { key: command.key, value: command.value });
+    void answer(command.key, command.value);
   };
   const linkStyle = "inline-flex min-h-11 items-center justify-center gap-1.5 self-start text-sm font-bold text-accent-text";
   const decisions = takeoff.view.decisions;
@@ -212,7 +223,7 @@ export function ProjectTakeoff({
             <ListRow key={line.id} line={line} editable={editable} pending={pending} {...lineActions(line)} />
           ))}
         </Card>
-        {editable ? <AddLine pending={pending} onAdd={(fields) => call(`/v1/takeoffs/${takeoff.id}/lines`, "POST", fields)} /> : null}
+        {editable ? <AddLine pending={pending} onAdd={(fields) => call("corrections", { action: "ajouter", ligne: ligne(fields) })} /> : null}
         {labor.length > 0 || takeoff.notes.length > 0 ? (
           <details className="rounded-2xl bg-surface p-4 text-sm shadow-card">
             <summary className="cursor-pointer font-bold">Lignes mises de côté</summary>

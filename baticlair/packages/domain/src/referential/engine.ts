@@ -655,6 +655,7 @@ function computeNeed(
       const formula = evaluateInterval(parseFormula(pts.otherwise), valueOf);
       const shown = (x: Decimal) => fr(x.dividedBy(unit.factor));
       const exact = keys.every((k) => isPoint(k.v));
+      if (exact && pts.admissible) checkAdmissible(pts, keys.map((k) => k.v.lo.dividedBy(k.factor)));
       const row = exact ? pts.rows.find((r) => keys.every((k, i) => k.v.lo.dividedBy(k.factor).minus(new Decimal(r[i]!)).abs().lessThan("0.000001"))) : undefined;
       if (row) {
         const value = new Decimal(row[keys.length]!);
@@ -669,6 +670,63 @@ function computeNeed(
         ...provenanceLine(pts, sources),
       });
       return formula;
+    }
+    /**
+     * Bornes du fabricant (§34) : un recouvrement hors de la plage d'un format le rend non admis. Les
+     * formats proposés sont ceux dont la plage contient ce recouvrement, du plus proche au plus éloigné.
+     */
+    function checkAdmissible(pts: PointTable, values: Decimal[]): void {
+      const last = values.length - 1;
+      const target = values[last]!;
+      const rangeOf = (lead: Decimal[]) => {
+        const rs = pts.rows.filter((r) => lead.every((v, i) => v.minus(new Decimal(r[i]!)).abs().lessThan("0.000001"))).map((r) => new Decimal(r[last]!));
+        return rs.length ? { min: Decimal.min(...rs), max: Decimal.max(...rs) } : null;
+      };
+      const range = rangeOf(values.slice(0, last));
+      if (!range || (target.greaterThanOrEqualTo(range.min) && target.lessThanOrEqualTo(range.max))) return;
+      const slotKey = pts.admissible!.slot;
+      const slotDef = work.slots.find((x) => x.key === slotKey)!;
+      const current = productFor(slotKey)?.product;
+      const lead = pts.keys.slice(0, last);
+      // Valeurs des premières clés pour un autre produit (« ardoise.longueur » en cm).
+      const leadOf = (p: Product): Decimal[] | null => {
+        const out: Decimal[] = [];
+        for (const k of lead) {
+          const [head, attr] = k.variable.split(".");
+          const fact = head === slotKey && attr ? p.attributes[attr] : undefined;
+          if (!fact) return null;
+          out.push(new Decimal(fact.value).times(parseRefUnit(fact.unit).factor).dividedBy(parseRefUnit(k.unit).factor));
+        }
+        return out;
+      };
+      const here = values.slice(0, last);
+      const candidates = ref.products
+        .filter((p) => p.family === slotDef.family && p.id !== current?.id)
+        .map((p) => ({ p, lead: leadOf(p) }))
+        .filter((c): c is { p: Product; lead: Decimal[] } => {
+          if (!c.lead) return false;
+          const r = rangeOf(c.lead);
+          return !!r && target.greaterThanOrEqualTo(r.min) && target.lessThanOrEqualTo(r.max);
+        })
+        .map((c) => ({ ...c, distance: c.lead.reduce((sum, v, i) => sum.plus(v.minus(here[i]!).abs()), new Decimal(0)) }))
+        .sort((a, b) => a.distance.comparedTo(b.distance));
+      const unit = pts.keys[last]!.unit;
+      const bound = target.lessThan(range.min) ? `sous le minimum de ${fr(range.min, 0)} ${unit}` : `au-delà du maximum de ${fr(range.max, 0)} ${unit}`;
+      const name = current?.shortLabel ?? slotDef.label;
+      const variable = pts.keys[last]!.variable;
+      const what = (work.derived?.find((d) => d.key === variable)?.label ?? work.params.find((p) => p.key === variable)?.label ?? variable.replace(/_/g, " ")).toLowerCase();
+      const reason = `${name} non admis ici : ${what} ${fr(target, 0)} ${unit}, ${bound} pour ce format (${sources.get(pts.source)?.publisher ?? "fabricant"}).`;
+      trace.push({ label: "Format non admis", value: reason, unit: "", origin: "referential", ...provenanceLine(pts, sources) });
+      if (candidates.length === 0) throw new Stop({ status: "unknown", reason });
+      throw new Stop({
+        status: "question",
+        question: {
+          key: `product:${slotKey}`,
+          kind: "choose_product",
+          text: `${reason} Quel format ?`,
+          options: candidates.map((c, i) => ({ label: i === 0 ? `${c.p.shortLabel} (conseillé)` : c.p.shortLabel, value: c.p.id })),
+        },
+      });
     }
     /** Table : la cellule des plus grands seuils atteints ; une entrée hors table arrête le calcul (rien n'est deviné). */
     function useTable(name: string, table: LookupTable): IntervalValue {

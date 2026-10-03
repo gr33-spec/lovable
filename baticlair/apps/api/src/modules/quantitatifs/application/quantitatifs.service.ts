@@ -4,7 +4,7 @@ import { DomainError, notFound, validationFailed } from "../../../platform/error
 import type { BillingService } from "../../billing/index.js";
 import type { DocumentsService } from "../../documents/index.js";
 import type { ProjectsService } from "../../projects/index.js";
-import type { TakeoffService, ReviewedTakeoff } from "../../takeoff/index.js";
+import { takeoffDto, type ReviewedTakeoff, type TakeoffService } from "../../takeoff/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { quantitatifView } from "./quantitatif-view.js";
 
@@ -13,6 +13,7 @@ export interface LigneEntree {
   quantite: string | null;
   unite: string | null;
   prix: string | null;
+  reference?: string | null;
 }
 
 export interface Contexte {
@@ -22,12 +23,25 @@ export interface Contexte {
   adresse?: string | undefined;
 }
 
+/** `ecran` : l'appli reçoit en plus le détail de son écran (lignes lues, décisions, preuves). */
+export interface Rendu {
+  ecran?: boolean | undefined;
+}
+
+export type Correction =
+  | { action: "modifier"; cle: string; valeur: string; unite?: string | undefined }
+  | { action: "ajouter"; ligne: LigneEntree }
+  | { action: "modifier_ligne"; id: string; ligne: LigneEntree }
+  | { action: "retirer"; id: string }
+  | { action: "confirmer"; id: string };
+
 type Row = { id: string; projectId: string; source: string; documentId: string | null; takeoffId: string | null; reference: string | null };
 
 /**
- * LA PORTE D'ENTRÉE (§38) : l'app et les partenaires (Rappidos d'abord) passent tous ici. Deux
- * entrées : un PDF (lu par l'IA, en arrière-plan) ou des lignes déjà structurées (aucune IA). Une
- * seule sortie : l'état, les questions, les lignes à commander avec leur explication (§39).
+ * LA PORTE D'ENTRÉE (§38) : l'app et les partenaires (Rappidos d'abord) passent tous ici. Trois
+ * entrées : un PDF (lu par l'IA, en arrière-plan), un devis déjà déposé sur le chantier, ou des
+ * lignes déjà structurées (aucune IA). Une seule sortie : l'état, les questions, les lignes à
+ * commander avec leur explication (§39).
  */
 export class QuantitatifsService {
   constructor(
@@ -38,7 +52,11 @@ export class QuantitatifsService {
     private readonly takeoffs: TakeoffService,
   ) {}
 
-  async fromPdf(tenant: TenantContext, file: { name: string; bytes: Uint8Array }, ctx: Contexte) {
+  get iaDisponible(): boolean {
+    return this.takeoffs.aiAvailable;
+  }
+
+  async fromPdf(tenant: TenantContext, file: { name: string; bytes: Uint8Array }, ctx: Contexte, rendu: Rendu = {}) {
     const projectId = await this.project(tenant, ctx);
     const upload = await this.documents.upload(tenant, projectId, { purpose: "client_quote", fileName: file.name, bytes: file.bytes }).catch(async (error: unknown) => {
       // Pas un PDF : le chantier créé pour ce devis ne doit pas rester vide.
@@ -52,10 +70,27 @@ export class QuantitatifsService {
     // Fichier illisible (pas un devis, protégé…) : erreur tout de suite, sans dépenser une lecture.
     const unreadable = document.status === "failed" && document.processing?.status === "failed" && document.processing.errorCode !== "read_failed";
     if (!unreadable) await this.takeoffs.start(tenant, document.id);
-    return this.get(tenant, row.id);
+    return this.get(tenant, row.id, rendu);
   }
 
-  async fromLines(tenant: TenantContext, lignes: readonly LigneEntree[], ctx: Contexte) {
+  /** Un devis déjà déposé sur le chantier (le chat de l'appli) : même quantitatif s'il existe, lecture sinon. */
+  async fromDocument(tenant: TenantContext, documentId: string, ctx: Contexte, rendu: Rendu = {}) {
+    assertCanWrite(tenant);
+    if (!/^[0-9a-f-]{36}$/i.test(documentId)) throw notFound("Document");
+    const { document } = await this.documents.get(tenant, documentId);
+    if (ctx.projetId && ctx.projetId !== document.projectId) throw validationFailed("Document of another project", [{ path: "documentId", message: "not in projetId" }]);
+    const existing = await this.prisma.quantitatif.findFirst({ where: { companyId: tenant.companyId, documentId }, orderBy: { createdAt: "desc" } });
+    const row =
+      existing ??
+      (await this.prisma.quantitatif.create({
+        data: { companyId: tenant.companyId, projectId: document.projectId, source: "pdf", documentId, reference: ctx.reference ?? null },
+      }));
+    // Déjà lu : rien n'est relu ni décompté. Lecture en cours : elle n'est pas relancée.
+    await this.takeoffs.start(tenant, documentId);
+    return this.get(tenant, row.id, rendu);
+  }
+
+  async fromLines(tenant: TenantContext, lignes: readonly LigneEntree[], ctx: Contexte, rendu: Rendu = {}) {
     const projectId = await this.project(tenant, ctx);
     const trade = tenant.trades[0] ?? "roofing";
     const reviewed = await this.takeoffs.fromLines(
@@ -67,13 +102,37 @@ export class QuantitatifsService {
     const row = await this.prisma.quantitatif.create({
       data: { companyId: tenant.companyId, projectId, source: "lignes", takeoffId: reviewed.takeoff.id, reference: ctx.reference ?? null },
     });
-    return this.view(row, reviewed);
+    return this.view(row, reviewed, rendu);
   }
 
-  async get(tenant: TenantContext, id: string) {
+  /**
+   * Le quantitatif le plus récent d'un chantier. Une liste préparée avant la porte (ou par la démo)
+   * reçoit son identifiant de quantitatif à la première lecture.
+   */
+  async forProject(tenant: TenantContext, projectId: string, rendu: Rendu = {}) {
+    if (!/^[0-9a-f-]{36}$/i.test(projectId)) throw notFound("Project");
+    await this.projects.get(tenant, projectId);
+    let row = await this.prisma.quantitatif.findFirst({ where: { companyId: tenant.companyId, projectId }, orderBy: { createdAt: "desc" } });
+    const latest = await this.takeoffs.forProject(tenant, projectId);
+    if (latest && (!row || (row.takeoffId !== latest.takeoff.id && row.documentId !== latest.takeoff.documentId))) {
+      row = await this.prisma.quantitatif.create({
+        data: {
+          companyId: tenant.companyId,
+          projectId,
+          source: latest.takeoff.source,
+          documentId: latest.takeoff.documentId,
+          takeoffId: latest.takeoff.id,
+          reference: null,
+        },
+      });
+    }
+    return row ? [await this.get(tenant, row.id, rendu)] : [];
+  }
+
+  async get(tenant: TenantContext, id: string, rendu: Rendu = {}) {
     const row = await this.row(tenant, id);
     const reviewed = await this.reviewed(tenant, row);
-    if (reviewed) return this.view(row, reviewed);
+    if (reviewed) return this.view(row, reviewed, rendu);
     const base = this.base(row);
     const document = row.documentId ? await this.documents.get(tenant, row.documentId).then((d) => d.document, () => null) : null;
     if (document && document.status === "failed" && document.processing?.status === "failed" && document.processing.errorCode !== "read_failed") {
@@ -84,51 +143,85 @@ export class QuantitatifsService {
     return { ...base, etat: "en_cours" as const };
   }
 
-  /** Réponses aux questions : une valeur, « ok » pour garder une ligne telle quelle, null pour « je ne sais pas ». */
-  async answer(tenant: TenantContext, id: string, reponses: readonly { question: string; valeur: string | null; unite?: string | undefined }[]) {
+  /**
+   * Réponses : à une question (son `id`), ou une valeur du calcul réglée directement (« param:pente »,
+   * « product:ardoise », « role:<ligne> »). Une valeur, « ok » pour garder une ligne telle quelle,
+   * null pour « je ne sais pas ».
+   */
+  async answer(tenant: TenantContext, id: string, reponses: readonly { question: string; valeur: string | null; unite?: string | undefined }[], rendu: Rendu = {}) {
     const row = await this.row(tenant, id);
-    let reviewed = await this.reviewed(tenant, row);
-    if (!reviewed) throw new DomainError("conflict", "Quantitatif not ready", { etat: "en_cours" });
+    let reviewed = await this.ready(tenant, row);
     for (const r of reponses) {
       const decision = reviewed.purchase.questions.find((d) => d.key === r.question);
-      if (!decision) throw validationFailed("Unknown question", [{ path: "question", message: r.question }]);
-      const q = decision.question;
-      if (!q) {
+      const q = decision?.question;
+      if (decision && !q) {
         if (r.valeur !== "ok" || !decision.primary || (decision.primary.action !== "keep" && decision.primary.action !== "pieces")) {
           throw validationFailed("This question takes « ok »", [{ path: "valeur", message: r.question }]);
         }
         reviewed = await this.takeoffs.decide(tenant, reviewed.takeoff.id, { action: decision.primary.action, lineIds: decision.lineIds, pieceLineIds: decision.pieceLineIds ?? [] });
         continue;
       }
-      const value: EngineAnswer =
-        r.valeur === null ? null : q.kind === "param" ? { value: r.valeur.replace(",", "."), unit: r.unite ?? q.unit ?? "u" } : r.valeur;
-      reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, q.key, value);
+      const key = q?.key ?? r.question.replace(/^engine:/, "");
+      if (!/^(?:(?:product|param):[a-z0-9_]{1,40}|role:[0-9a-f-]{36})$/.test(key)) throw validationFailed("Unknown question", [{ path: "question", message: r.question }]);
+      if (key.startsWith("role:") && r.valeur !== "measure" && r.valeur !== "purchase") throw validationFailed("Role answer must be measure or purchase", [{ path: "valeur", message: r.question }]);
+      let value: EngineAnswer;
+      if (r.valeur === null || !key.startsWith("param:")) value = r.valeur;
+      else {
+        const unit = r.unite ?? q?.unit ?? reviewed.purchase.assumptions.find((a) => a.key === key)?.unit;
+        if (!unit) throw validationFailed("Missing unit", [{ path: "unite", message: r.question }]);
+        if (!/^\d+(?:[.,]\d+)?$/.test(r.valeur.trim())) throw validationFailed("Not a number", [{ path: "valeur", message: r.question }]);
+        value = { value: r.valeur.trim().replace(",", "."), unit };
+      }
+      reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, key, value);
     }
-    return this.view(row, reviewed);
+    return this.view(row, reviewed, rendu);
   }
 
-  /** Corrections (§39) : changer une hypothèse (pente, zone, perte…) ou ajouter une ligne libre. */
-  async correct(
-    tenant: TenantContext,
-    id: string,
-    correction: { action: "modifier"; cle: string; valeur: string; unite?: string | undefined } | { action: "ajouter"; ligne: LigneEntree },
-  ) {
+  /** Corrections (§39) : changer une valeur (pente, zone, perte…), ajouter, modifier, retirer ou confirmer une ligne du devis. */
+  async correct(tenant: TenantContext, id: string, correction: Correction, rendu: Rendu = {}) {
     const row = await this.row(tenant, id);
-    const reviewed = await this.reviewed(tenant, row);
-    if (!reviewed) throw new DomainError("conflict", "Quantitatif not ready", { etat: "en_cours" });
-    if (correction.action === "ajouter") {
-      const l = correction.ligne;
-      return this.view(row, await this.takeoffs.addLine(tenant, reviewed.takeoff.id, { designation: l.libelle, quantityRaw: l.quantite, unitRaw: l.unite, reference: null }));
+    const reviewed = await this.ready(tenant, row);
+    const fields = (l: LigneEntree) => ({ designation: l.libelle, quantityRaw: l.quantite, unitRaw: l.unite, reference: l.reference ?? null });
+    const line = (lineId: string) => {
+      // Une ligne d'un autre quantitatif n'existe pas pour celui-ci.
+      if (!reviewed.takeoff.lines.some((l) => l.id === lineId)) throw notFound("Line");
+      return lineId;
+    };
+    switch (correction.action) {
+      case "ajouter":
+        return this.view(row, await this.takeoffs.addLine(tenant, reviewed.takeoff.id, fields(correction.ligne)), rendu);
+      case "modifier_ligne":
+        return this.view(row, await this.takeoffs.updateLine(tenant, line(correction.id), fields(correction.ligne)), rendu);
+      case "retirer":
+        return this.view(row, await this.takeoffs.deleteLine(tenant, line(correction.id)), rendu);
+      case "confirmer":
+        return this.view(row, await this.takeoffs.confirmLine(tenant, line(correction.id)), rendu);
+      case "modifier": {
+        // Une clé modifiable : une hypothèse en cours, ou une valeur déjà choisie (elle porte sa clé dans l'explication).
+        const hyp = reviewed.purchase.assumptions.find((a) => a.key === correction.cle);
+        const morceau = quantitatifView(this.base(row), reviewed)
+          .lignes.flatMap((l) => l.explication.morceaux)
+          .find((m) => "cle" in m && m.cle === correction.cle);
+        const unit = correction.unite ?? hyp?.unit ?? (morceau && "unite" in morceau ? morceau.unite : undefined);
+        if (!correction.cle.startsWith("param:") || (!hyp && !morceau) || !unit) throw validationFailed("Unknown value", [{ path: "cle", message: correction.cle }]);
+        const after = await this.takeoffs.answer(tenant, reviewed.takeoff.id, correction.cle, { value: correction.valeur.replace(",", "."), unit });
+        return this.view(row, after, rendu);
+      }
     }
-    // Une clé modifiable : une hypothèse en cours, ou une valeur déjà choisie (elle porte sa clé dans l'explication).
-    const hyp = reviewed.purchase.assumptions.find((a) => a.key === correction.cle);
-    const morceau = quantitatifView(this.base(row), reviewed)
-      .lignes.flatMap((l) => l.explication.morceaux)
-      .find((m) => "cle" in m && m.cle === correction.cle);
-    const unit = correction.unite ?? hyp?.unit ?? (morceau && "unite" in morceau ? morceau.unite : undefined);
-    if (!correction.cle.startsWith("param:") || (!hyp && !morceau) || !unit) throw validationFailed("Unknown value", [{ path: "cle", message: correction.cle }]);
-    const after = await this.takeoffs.answer(tenant, reviewed.takeoff.id, correction.cle, { value: correction.valeur.replace(",", "."), unit });
-    return this.view(row, after);
+  }
+
+  /** L'artisan valide la liste : elle peut partir chez les fournisseurs (demande de prix). */
+  async validate(tenant: TenantContext, id: string, rendu: Rendu = {}) {
+    const row = await this.row(tenant, id);
+    const reviewed = await this.ready(tenant, row);
+    return this.view(row, await this.takeoffs.validate(tenant, reviewed.takeoff.id), rendu);
+  }
+
+  /** Rouvrir une liste validée pour la corriger. */
+  async reopen(tenant: TenantContext, id: string, rendu: Rendu = {}) {
+    const row = await this.row(tenant, id);
+    const reviewed = await this.ready(tenant, row);
+    return this.view(row, await this.takeoffs.reopen(tenant, reviewed.takeoff.id), rendu);
   }
 
   private async project(tenant: TenantContext, ctx: Contexte): Promise<string> {
@@ -152,6 +245,12 @@ export class QuantitatifsService {
     return row;
   }
 
+  private async ready(tenant: TenantContext, row: Row): Promise<ReviewedTakeoff> {
+    const reviewed = await this.reviewed(tenant, row);
+    if (!reviewed) throw new DomainError("conflict", "Quantitatif not ready", { etat: "en_cours" });
+    return reviewed;
+  }
+
   private async reviewed(tenant: TenantContext, row: Row): Promise<ReviewedTakeoff | null> {
     if (row.takeoffId) return this.takeoffs.reviewed(tenant, row.takeoffId);
     if (!row.documentId) return null;
@@ -164,7 +263,7 @@ export class QuantitatifsService {
     return { id: row.id, reference: row.reference, projetId: row.projectId, source: row.source === "lignes" ? ("lignes" as const) : ("pdf" as const) };
   }
 
-  private view(row: Row, reviewed: ReviewedTakeoff) {
-    return quantitatifView(this.base(row), reviewed);
+  private view(row: Row, reviewed: ReviewedTakeoff, rendu: Rendu) {
+    return { ...quantitatifView(this.base(row), reviewed), ...(rendu.ecran ? { ecran: takeoffDto(reviewed) } : {}) };
   }
 }

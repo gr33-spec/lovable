@@ -64,4 +64,22 @@ Réponses :
 - Changer une valeur : `{ "action": "modifier", "cle": "param:pente", "valeur": "30" }`. Seules les lignes qui en dépendent sont recalculées.
 - Ajouter une ligne : `{ "action": "ajouter", "ligne": { "libelle": "Chatière", "quantite": "4", "unite": "u", "prix": null } }`.
 
+- Lignes du devis (champ `devis`) :
+  - `{ "action": "modifier_ligne", "id": "<ligne>", "ligne": { "libelle": "…", "quantite": "200", "unite": "u" } }` ;
+  - `{ "action": "retirer", "id": "<ligne>" }` ;
+  - `{ "action": "confirmer", "id": "<ligne>" }` (ligne douteuse gardée telle quelle).
+
 La réponse est toujours le quantitatif complet, à jour.
+
+## Valider — `POST /v1/quantitatifs/{id}/validation`
+
+L'artisan valide la liste (`valide: true`) : elle peut partir en demande de prix. `POST …/reouverture` la rouvre pour la corriger.
+
+## L'appli (le chat du chantier)
+
+Le chat n'appelle que cette porte :
+
+- **Devis déjà déposé sur le chantier** : `POST /v1/quantitatifs` avec `{ "documentId": "…" }`. Déjà lu : rien n'est relu ni décompté.
+- **Retrouver le quantitatif d'un chantier** : `GET /v1/quantitatifs?projetId=…` → `{ items: [le plus récent], ia_disponible }`.
+- **`?ecran=1`** sur toutes les routes : ajoute `ecran`, le détail de l'écran de l'appli (lignes lues, décisions, preuves du calcul). Un partenaire n'en a pas besoin.
+- **Réponse directe à une valeur du calcul** : `{ "question": "param:pente", "valeur": "40", "unite": "°" }` (ou `product:…`, `role:<ligne>`).

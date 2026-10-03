@@ -167,6 +167,7 @@ export function checkReferential(ref: Referential): string[] {
       } catch (e) {
         err(tw, (e as Error).message);
       }
+      if (t.admissible && !w.slots.some((x) => x.key === t.admissible!.slot)) err(tw, `emplacement inconnu « ${t.admissible.slot} »`);
       if (t.rows.length === 0) err(tw, "table vide");
       if (t.rows.some((r) => r.length !== t.keys.length + 1 || r.some((x) => !/^-?\d+(\.\d+)?$/.test(x)))) err(tw, `il faut ${t.keys.length + 1} valeurs décimales par ligne`);
       const seen = new Set(t.rows.map((r) => r.slice(0, -1).join("|")));

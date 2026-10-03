@@ -2,7 +2,7 @@
 
 import { ArrowDown, Check } from "lucide-react";
 import { createContext, useCallback, useContext, useState } from "react";
-import { api, type Offer, type PriceRequest, type ProjectDocument, type Takeoff } from "@/lib/api";
+import { api, type Offer, type PriceRequest, type ProjectDocument, type Quantitatif, type Takeoff } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 
 /**
@@ -102,7 +102,7 @@ function ProgressBar({ projectId, tick }: { projectId: string; tick: number }) {
       const id = encodeURIComponent(projectId);
       const [docs, takeoff, requests] = await Promise.all([
         api<{ items: ProjectDocument[] }>(`/v1/projects/${id}/documents`, { signal }),
-        api<{ takeoff: Takeoff | null }>(`/v1/projects/${id}/takeoff`, { signal }),
+        api<{ items: Quantitatif[] }>(`/v1/quantitatifs?projetId=${id}&ecran=1`, { signal }).then((r) => ({ takeoff: r.items[0]?.ecran ?? null })),
         api<{ items: PriceRequest[] }>(`/v1/projects/${id}/price-requests`, { signal }),
       ]);
       const first = requests.items[0];
