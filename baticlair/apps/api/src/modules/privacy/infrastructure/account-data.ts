@@ -5,6 +5,9 @@ import type { PrismaService } from "../../../platform/database/prisma.service.js
  * effacer (article 17). Les données appartiennent à l'entreprise : celle dont l'artisan est le seul
  * membre part avec lui ; une entreprise partagée reste, il en est seulement retiré.
  */
+/** Durée de conservation après la dernière connexion (page Confidentialité). */
+export const INACTIVE_YEARS = 3;
+
 export class AccountData {
   constructor(private readonly prisma: PrismaService) {}
 
@@ -57,6 +60,15 @@ export class AccountData {
       });
     }
     return { exportedAt: new Date().toISOString(), user, companies };
+  }
+
+  /** Comptes sans visite depuis 3 ans : effacés comme une suppression demandée (page Confidentialité). */
+  async purgeInactive(now: Date = new Date()): Promise<{ usersDeleted: number }> {
+    const cutoff = new Date(now);
+    cutoff.setFullYear(cutoff.getFullYear() - INACTIVE_YEARS);
+    const stale = await this.prisma.user.findMany({ where: { lastSeenAt: { lt: cutoff } }, select: { id: true }, take: 200 });
+    for (const u of stale) await this.delete(u.id);
+    return { usersDeleted: stale.length };
   }
 
   /**

@@ -147,6 +147,9 @@ function MyData({ onDeleted }: { onDeleted: () => void }) {
       <Button variant="secondary" pending={exporting} onClick={() => void download()}>
         Télécharger mes données
       </Button>
+      <a href="/confidentialite" className="inline-flex min-h-11 items-center self-start text-sm font-bold text-accent-text">
+        Ce que BatiClair garde, et combien de temps
+      </a>
       {confirming ? (
         <div role="group" aria-label="Confirmer la suppression du compte" className="flex flex-col gap-3 rounded-2xl bg-danger-bg p-3">
           <p className="text-sm font-semibold">

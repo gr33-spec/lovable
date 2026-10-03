@@ -211,7 +211,7 @@ export interface ReadingState {
 export interface Takeoff {
   id: string;
   projectId: string;
-  documentId: string;
+  documentId: string | null;
   status: "draft" | "validated";
   model: string;
   notes: string[];
