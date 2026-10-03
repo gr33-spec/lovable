@@ -166,7 +166,7 @@ export const MAX_DOCUMENT_BYTES = 4_000_000;
 
 export interface Health {
   status: "ok";
-  features: { email: boolean; ai: boolean };
+  features: { email: boolean; ai: boolean; alerts?: boolean };
 }
 
 export interface TakeoffIssue {
@@ -200,6 +200,12 @@ export interface TakeoffLine {
   role: "measure" | "purchase" | "undetermined" | null;
   status: "certain" | "probable" | "to_verify";
   issues: TakeoffIssue[];
+}
+
+/** Lecture du devis client encore sur le serveur (gros devis) : en cours, ou échouée (on peut relancer). */
+export interface ReadingState {
+  status: "reading" | "failed";
+  reason: string | null;
 }
 
 export interface Takeoff {

@@ -29,7 +29,7 @@ describe("identité", () => {
     const res = await request(ctx.app.getHttpServer()).get("/v1/health").set("x-request-id", "abcd1234-test");
     expect(res.status).toBe(200);
     expect(res.headers["x-request-id"]).toBe("abcd1234-test");
-    expect(res.body).toEqual({ status: "ok", features: { email: true, ai: true } });
+    expect(res.body).toEqual({ status: "ok", features: { email: true, ai: true, alerts: false } });
   });
 
   it("inscrit, connecte immédiatement et envoie l'e-mail de vérification", async () => {

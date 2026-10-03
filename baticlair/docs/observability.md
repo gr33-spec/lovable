@@ -42,10 +42,27 @@ d'upload jusqu'à la fin du job.
 - Produit : entonnoir (inscription → premier document → liste validée →
   première consultation → première comparaison).
 
-## Alertes (à partir du staging)
+## Alertes (en place : audit de lancement, B5)
 
-Taux d'échec des jobs, file bloquée, fournisseur IA ou e-mail en erreur,
-coût IA journalier au-delà d'un seuil, échec de sauvegarde.
+L'API prévient l'équipe elle-même (`platform/alerts/alerter.ts`) :
+
+- **erreur serveur** (toute réponse 5xx) : code, route, code support — jamais de donnée de client ;
+- **lecture de devis échouée** (IA en panne, réponse inutilisable, erreur imprévue) : la raison.
+
+Au plus une alerte par sorte toutes les 10 minutes ; la suivante dit combien ont été tues.
+`GET /v1/health` → `features.alerts` dit si un canal est branché.
+
+**Brancher les alertes** (projet Vercel `baticlair-api` → Settings → Environment Variables, puis Redeploy) :
+
+1. `ALERT_WEBHOOK_URL` : l'adresse d'un webhook **Discord** (salon → Modifier → Intégrations →
+   Webhooks → Copier l'URL ; notifications sur le téléphone avec l'appli Discord) ou **Slack**
+   (Incoming Webhook).
+2. et/ou `ALERT_EMAIL` : une adresse e-mail (nécessite l'envoi d'e-mails configuré, `RESEND_API_KEY`).
+
+**Le site répond-il ?** (à faire une fois, hors de Vercel) : un moniteur gratuit
+(UptimeRobot ou Better Stack) sur `https://baticlair-api.vercel.app/v1/health`, toutes les
+5 minutes, alerte par e-mail ou SMS. Il détecte ce que l'API ne peut pas dire elle-même : qu'elle
+ne répond plus.
 
 ## Journal d'audit
 

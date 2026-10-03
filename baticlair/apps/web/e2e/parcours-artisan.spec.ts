@@ -540,3 +540,22 @@ test("accueil : la prochaine action de chaque chantier, puis l'essai et les form
   await expect(page.getByText("Votre formule actuelle")).toBeVisible();
   await createProject(page, "Chantier 4", "", "");
 });
+
+test("RGPD : l'artisan télécharge ses données, puis supprime son compte (en tapant SUPPRIMER)", async ({ page }) => {
+  await signUp(page);
+  await createProject(page, "Toiture Dupont", "M. Dupont", "4 rue du Port, Quimper");
+  await page.goto("/compte");
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Télécharger mes données" }).click();
+  expect((await download).suggestedFilename()).toMatch(/^baticlair-mes-donnees-\d{4}-\d{2}-\d{2}\.json$/);
+
+  await page.getByRole("button", { name: "Supprimer mon compte" }).click();
+  const confirm = page.getByRole("button", { name: "Supprimer définitivement" });
+  await expect(confirm).toBeDisabled();
+  await page.getByLabel("Tapez SUPPRIMER pour confirmer").fill("supprimer");
+  await confirm.click();
+  await expect(page.getByText("Votre compte et toutes ses données ont été supprimés.")).toBeVisible();
+  // Plus de session : l'accueil renvoie vers la connexion.
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/connexion/);
+});

@@ -8,7 +8,7 @@ import { QuantityCard } from "@/components/purchase-list";
 import { DecisionCard, type DecisionHandlers } from "@/components/takeoff-view";
 import { useProgressRefresh } from "@/components/project-progress";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
-import { api, ApiError, type ProjectDocument, type Takeoff, type TakeoffLine } from "@/lib/api";
+import { api, ApiError, type ProjectDocument, type ReadingState, type Takeoff, type TakeoffLine } from "@/lib/api";
 import { shortName } from "@/lib/labels";
 import { useResource } from "@/lib/use-resource";
 
@@ -47,7 +47,7 @@ export function ProjectTakeoff({
 }) {
   const fetchTakeoff = useCallback(
     (signal: AbortSignal) =>
-      api<{ takeoff: Takeoff | null; aiAvailable: boolean }>(`/v1/projects/${encodeURIComponent(projectId)}/takeoff`, { signal }),
+      api<{ takeoff: Takeoff | null; aiAvailable: boolean; reading: ReadingState | null }>(`/v1/projects/${encodeURIComponent(projectId)}/takeoff`, { signal }),
     [projectId],
   );
   const { data, setData, error, reload } = useResource(fetchTakeoff);
@@ -83,13 +83,23 @@ export function ProjectTakeoff({
   const prepare = useCallback(() => {
     if (!clientQuote) return;
     void run(
-      () => api<Takeoff>(`/v1/documents/${encodeURIComponent(clientQuote.id)}/takeoff`, { method: "POST" }),
-      (t) => {
+      () => api<Takeoff | { reading: ReadingState }>(`/v1/documents/${encodeURIComponent(clientQuote.id)}/takeoff`, { method: "POST" }),
+      (res) => {
         setFresh(true);
-        update(t);
+        // Gros devis : la lecture continue sur le serveur ; l'écran la suit (audit B3).
+        if ("reading" in res) setData((prev) => (prev ? { ...prev, reading: res.reading } : prev));
+        else update(res);
       },
     );
-  }, [clientQuote, run, update]);
+  }, [clientQuote, run, update, setData]);
+
+  // Lecture en cours sur le serveur : on regarde toutes les 3 secondes où elle en est.
+  const readingNow = data?.takeoff === null && data.reading?.status === "reading";
+  useEffect(() => {
+    if (!readingNow) return;
+    const t = setInterval(reload, 3000);
+    return () => clearInterval(t);
+  }, [readingNow, reload]);
 
   // Devis tout juste déposé : on lit sans attendre un appui de plus.
   useEffect(() => {
@@ -112,21 +122,26 @@ export function ProjectTakeoff({
         </AssistantMessage>
       );
     }
+    const failed = data.reading?.status === "failed";
     return (
       <section id="materiaux" aria-label="Liste de matériaux" className="flex scroll-mt-4 flex-col gap-3">
         <AssistantMessage>
-          {pending ? (
+          {pending || readingNow ? (
             <>
               <Say>Je regarde votre devis (jusqu&apos;à une minute).</Say>
               <ThinkingSteps />
             </>
           ) : (
             <>
-              <Say>Je lis votre devis et je vous sors la liste des matériaux à commander.</Say>
+              <Say>
+                {failed
+                  ? "Je n'ai pas réussi à lire ce devis jusqu'au bout (coupure ou panne de mon côté). Rien ne vous est décompté : on réessaie ?"
+                  : "Je lis votre devis et je vous sors la liste des matériaux à commander."}
+              </Say>
               {actionError ? <ErrorNotice error={actionError} /> : null}
               <Button disabled={archived} onClick={prepare}>
                 <Sparkles size={18} aria-hidden="true" />
-                {actionError ? "Réessayer" : "Lire le devis"}
+                {actionError || failed ? "Réessayer" : "Lire le devis"}
               </Button>
             </>
           )}

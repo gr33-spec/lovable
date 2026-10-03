@@ -62,7 +62,28 @@ export interface ReadingOptions {
   /** Coût estimé au-delà duquel un document n'est pas un devis normal (micro-dollars). */
   maxAnalysisMicroUsd?: number;
   now?: () => Date;
+  /**
+   * Lecture longue (gros devis scanné) : au-delà de ce délai, la réponse part (« lecture en cours »)
+   * et la lecture continue en arrière-plan ; l'écran suit son état. Audit de lancement, B3.
+   */
+  answerWithinMs?: number;
+  /** Lecture échouée (IA en panne, réponse inutilisable, erreur imprévue) : prévenir l'équipe (B5). */
+  onReadingFailed?: (reason: string) => void;
+  /** Garde la lecture en vie après la réponse (Vercel : waitUntil). Par défaut : elle continue seule. */
+  keepAlive?: (work: Promise<unknown>) => void;
 }
+
+/** Une lecture « en cours » depuis plus longtemps a été interrompue (fonction coupée) : elle compte comme échouée. */
+export const STALE_READING_MS = 6 * 60 * 1000;
+
+/** Où en est la lecture du devis client d'un chantier, tant que la liste n'existe pas. */
+export interface ReadingState {
+  status: "reading" | "failed";
+  /** Raison de l'échec (« interrupted », « abnormal_size »…), ou null. */
+  reason: string | null;
+}
+
+export type StartResult = { state: "ready"; result: ReviewedTakeoff } | { state: "reading" };
 
 /** Plafond par défaut (≈ 2,8 €) : environ 5 fois un devis de 500 lignes scanné (≈ 0,6 €). */
 export const DEFAULT_MAX_ANALYSIS_MICRO_USD = 3_000_000;
@@ -154,6 +175,47 @@ export class TakeoffService {
     return this.extractor !== null;
   }
 
+  /**
+   * Lance la lecture et répond vite : la liste si elle est prête dans le délai, sinon « lecture en
+   * cours » (la lecture continue, l'écran interroge `readingState`). Une lecture déjà en cours n'est
+   * jamais relancée (double appui, rechargement) : rien n'est payé deux fois.
+   */
+  async start(tenant: TenantContext, documentId: string): Promise<StartResult> {
+    assertCanWrite(tenant);
+    const running = await this.meter.current(tenant.companyId, documentId);
+    if (running?.status === "started" && !this.stale(running.startedAt)) return { state: "reading" };
+    const work = this.extract(tenant, documentId);
+    const wait = this.reading.answerWithinMs ?? 8000;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<"later">((resolve) => {
+      timer = setTimeout(() => resolve("later"), wait);
+    });
+    try {
+      const first = await Promise.race([work.then((result) => ({ result })), timeout]);
+      if (first !== "later") return { state: "ready", result: first.result };
+    } finally {
+      clearTimeout(timer);
+    }
+    // Trop long pour une réponse : la lecture continue ; son échec éventuel est enregistré avec l'analyse.
+    const background = work.catch((error: unknown) => this.onRecordFailure(error));
+    (this.reading.keepAlive ?? (() => {}))(background);
+    return { state: "reading" };
+  }
+
+  /** La lecture du devis client du chantier : en cours, échouée, ou rien (pas commencée, ou liste prête). */
+  async readingState(tenant: TenantContext, projectId: string): Promise<ReadingState | null> {
+    const quote = (await this.documents.listByProject(tenant, projectId)).find((d) => d.purpose === "client_quote");
+    if (!quote) return null;
+    const analysis = await this.meter.current(tenant.companyId, quote.id);
+    if (!analysis || analysis.status === "completed") return null;
+    if (analysis.status === "started") return this.stale(analysis.startedAt) ? { status: "failed", reason: "interrupted" } : { status: "reading", reason: null };
+    return { status: "failed", reason: "analysis_failed" };
+  }
+
+  private stale(startedAt: Date): boolean {
+    return (this.reading.now ?? (() => new Date()))().getTime() - startedAt.getTime() > STALE_READING_MS;
+  }
+
   async extract(tenant: TenantContext, documentId: string): Promise<ReviewedTakeoff> {
     assertCanWrite(tenant);
     const doc = await this.documents.findById(tenant, documentId);
@@ -180,7 +242,25 @@ export class TakeoffService {
     });
     if (begin.status === "already_done") throw new DomainError("conflict", "Analysis already completed for this document");
     const analysisId = begin.analysis.id;
+    try {
+      return await this.readAndSave(tenant, doc, prepared, plan, policy, analysisId);
+    } catch (error) {
+      const known = error instanceof DomainError && error.code === "analysis_failed";
+      if (!known) await this.meter.fail(analysisId).catch(() => undefined);
+      this.reading.onReadingFailed?.(known ? String((error.details as { reason?: string } | undefined)?.reason ?? "analysis_failed") : "unexpected_error");
+      throw error;
+    }
+  }
 
+  private async readAndSave(
+    tenant: TenantContext,
+    doc: NonNullable<Awaited<ReturnType<DocumentRepository["findById"]>>>,
+    prepared: Prepared,
+    plan: ReturnType<typeof planReading>,
+    policy: ExtractionPolicy,
+    analysisId: string,
+  ): Promise<ReviewedTakeoff> {
+    const documentId = doc.id;
     const started = Date.now();
     const tally: CallTally = { calls: 0, outcomes: {}, splits: 0, tokens: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, costMicroUsd: 0 };
     const read = await this.readPlan(tenant, doc, prepared, analysisId, plan.chunks, policy, tally);

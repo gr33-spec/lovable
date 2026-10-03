@@ -12,6 +12,8 @@ export interface AnalysisRecord {
   billable: boolean;
   billingMonth: string | null;
   costMicroUsd: bigint;
+  /** Début de la dernière tentative : une lecture « en cours » depuis trop longtemps a été interrompue. */
+  startedAt: Date;
 }
 
 export interface AnalysisRepository {

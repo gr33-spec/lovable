@@ -9,7 +9,8 @@ import type { AppConfig } from "./platform/config/config.js";
 import { ErrorFilter } from "./platform/http/error.filter.js";
 import { requestContextMiddleware } from "./platform/http/request-context.middleware.js";
 import { NestPinoLogger, type AppLogger } from "./platform/logging/logger.js";
-import { AUTH, CONFIG, LOGGER } from "./platform/tokens.js";
+import type { Alerter } from "./platform/alerts/alerter.js";
+import { ALERTER, AUTH, CONFIG, LOGGER } from "./platform/tokens.js";
 
 type Helmet = (
   options?: Readonly<HelmetOptions>,
@@ -41,6 +42,6 @@ export function configureApp(app: INestApplication): void {
   app.use(requestContextMiddleware(logger));
   express.getHttpAdapter().getInstance().all(`${AUTH_BASE_PATH}/*splat`, toNodeHandler(auth));
   express.useBodyParser("json", { limit: "1mb" });
-  app.useGlobalFilters(new ErrorFilter(logger));
+  app.useGlobalFilters(new ErrorFilter(logger, app.get<Alerter>(ALERTER)));
   app.enableShutdownHooks();
 }
