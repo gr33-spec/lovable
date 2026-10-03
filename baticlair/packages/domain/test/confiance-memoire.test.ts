@@ -238,7 +238,7 @@ describe("mémoire de l'entreprise : apprise, datée, remplaçable", () => {
     expect(resolve(m)).toMatchObject({ use: "propose" });
     m = choose(m, "ecran-x", "chantier-2");
     expect(resolve(m)).toMatchObject({ value: "ecran-x", use: "silent", standing: "active" });
-    expect(enginePreferences(m, now)).toEqual({ products: { ecran: "ecran-x" }, proposals: {} });
+    expect(enginePreferences(m, now)).toEqual({ products: { ecran: "ecran-x" }, proposals: {}, params: {} });
   });
 
   it("les seuils sont des paramètres (bêta), pas des constantes du code", () => {
@@ -259,7 +259,7 @@ describe("mémoire de l'entreprise : apprise, datée, remplaçable", () => {
     m = choose(m, "ecran-x", "chantier-2", "2025-01-15T00:00:00.000Z");
     expect(preferenceStanding(m[0]!, new Date("2025-06-01"))).toBe("active");
     expect(preferenceStanding(m[0]!, new Date("2026-03-01"))).toBe("to_reconfirm");
-    expect(enginePreferences(m, new Date("2026-03-01"))).toEqual({ products: {}, proposals: { ecran: "ecran-x" } });
+    expect(enginePreferences(m, new Date("2026-03-01"))).toEqual({ products: {}, proposals: { ecran: "ecran-x" }, params: {} });
   });
 
   it("l'artisan change d'habitude : l'ancienne est reproposée, puis remplacée (gardée dans l'historique)", () => {

@@ -65,6 +65,11 @@ export interface CompanyPreferences {
   proposals?: Record<string, string>;
   /** Marge habituelle (« 5 » = 5 %), par produit ou par famille. */
   waste?: Record<string, string>;
+  /**
+   * Habitude ÉTABLIE sur un paramètre d'entreprise (« faconnage » = « 1 » : je façonne), apprise à la
+   * deuxième confirmation sur deux chantiers différents : la question n'est plus posée, l'habitude est dite.
+   */
+  params?: Record<string, string>;
 }
 
 export interface WorkItemInput {
@@ -293,16 +298,29 @@ export function computeWorkItem(ref: Referential, input: WorkItemInput, options:
     const expr = parseFormula(rule.when);
     const values = new Map<string, IntervalValue>();
     for (const name of formulaVariables(expr)) {
+      // Une constante sourcée de l'ouvrage (« regle.rampant_max_bac ») : un seuil de la condition.
+      if (name.startsWith("regle.")) {
+        const c = work.constants?.[name.slice("regle.".length)];
+        if (!c) throw new FormulaError(`Condition du besoin ${rule.id} : constante inconnue ${name}`);
+        const u = parseRefUnit(c.unit);
+        values.set(name, point(new Decimal(c.value).times(u.factor), u.dim));
+        continue;
+      }
       const def = work.params.find((p) => p.key === name);
       if (!def) throw new FormulaError(`Condition du besoin ${rule.id} : variable inconnue ${name}`);
       const factor = parseRefUnit(def.unit);
       const given = input.params[name];
       const raw = given ? given.value : def.default?.value;
-      if (raw === undefined) return true;
+      // Donnée inconnue : toutes les valeurs restent possibles ; le besoin existe si la condition PEUT être vraie
+      // (il posera alors sa question), et n'existe pas si elle est fausse quoi qu'il arrive.
+      if (raw === undefined) {
+        values.set(name, { lo: new Decimal(-Infinity), hi: new Decimal(Infinity), dim: factor.dim });
+        continue;
+      }
       values.set(name, point(new Decimal(raw).times(given ? parseRefUnit(given.unit).factor : factor.factor), factor.dim));
     }
     const v = evaluateInterval(expr, (name) => values.get(name)!);
-    return !v.lo.isZero();
+    return !v.hi.isZero();
   };
   const needs = work.needs
     .filter((rule) => (rule.requires ?? []).every(known) && applies(rule))
@@ -820,8 +838,12 @@ function computeNeed(
     }
     // Condition d'existence encore indécise (« faconnage » sans réponse) : sa question, avant tout calcul.
     if (rule.when) {
+      // La condition tranchée, une donnée inconnue qu'elle a rencontrée sans en avoir besoin (« bacs longs » quand
+      // le rampant fait 5,5 m) n'est pas un manque : elle ne doit ni s'afficher « inconnue » ni devenir une question.
+      const missingBefore = missing.length;
       const w = evaluateInterval(parseFormula(rule.when), valueOf);
       if (!isPoint(w) && missing[0]) throw new Stop({ status: "question", question: missing[0].question });
+      missing.splice(missingBefore);
     }
     const raw = evaluateInterval(expr, valueOf);
 

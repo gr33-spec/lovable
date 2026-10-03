@@ -388,6 +388,23 @@ const FACONNAGE_PARAM: ParamDef = {
   ],
   display: { "1": "je façonne", "2": "commandé façonné" },
 };
+/**
+ * Rampant de plus de 10 m en bacs (§7 : « bacs profilés à longueur (max 10 à 15 m) ») : soit la bobine est
+ * profilée sur place (zinc au kg), soit les bacs viennent en plusieurs longueurs. Pas de défaut : on demande.
+ */
+const BACS_LONGS_PARAM: ParamDef = {
+  key: "bacs_longs",
+  label: "Rampant de plus de 10 m",
+  unit: "u",
+  kind: "artisan_preference",
+  question: "Rampant de plus de 10 m : bobine profilée sur place, ou bacs en plusieurs longueurs ?",
+  hint: "Profilée sur place : zinc en bobine au kg. Plusieurs longueurs : un bac tous les 10 m, avec jonction transversale.",
+  choices: [
+    { label: "Bobine profilée sur place", value: "1" },
+    { label: "Bacs en plusieurs longueurs", value: "2" },
+  ],
+  display: { "1": "bobine profilée sur place", "2": "bacs en plusieurs longueurs" },
+};
 /** Épaisseur du zinc (§36.1) : 0,65 mm standard, 0,70 au-delà de 900 m ou bacs > 10 m, 0,80 mm. */
 const EPAISSEUR_ZINC_PARAM: ParamDef = {
   key: "epaisseur_zinc",
@@ -638,7 +655,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     { code: "solin_support", label: "Bande porte-solin", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["porte-solin", "porte solin"] },
     // Abergement (entourage de cheminée) : un ouvrage compté, converti en bandes zinc façonnées ou en bobine (§7 « Abergement de cheminée »).
     { code: "chimney_flashing", label: "Abergement de cheminée", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["abergement", "entourage de cheminee", "entourage cheminee", "solin de cheminee", "habillage de cheminee"] },
-    { code: "sheathing", label: "Volige", needUnit: "m2", attributes: [], keyAttributes: [], keywords: ["volige", "voligeage", "planche de volige"] },
+    { code: "sheathing", label: "Volige", needUnit: "m2", attributes: [], keyAttributes: [], keywords: ["volige", "voligeage", "planche de volige", "osb", "panneau osb", "panneaux osb", "contreplaque", "ctbx"] },
     { code: "verge_tile", label: "Tuile de rive", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["tuile de rive", "rive"] },
     { code: "gutter", label: "Gouttière (profil)", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["gouttiere"] },
     {
@@ -838,6 +855,15 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("bac-joint-debout-standard", "zinc_panel", "Bac joint debout zinc naturel, façonné à la longueur du rampant (largeur utile 430 ou 580 mm)", "Bacs joint debout zinc"),
     generic("bande-zinc-faconnee-standard", "zinc_strip", "Bande zinc façonnée, longueurs de 2 m (développé et épaisseur du chantier)", "Bandes zinc façonnées 2 m"),
     generic("porte-solin-standard", "solin_support", "Bande porte-solin, longueurs de 2 m", "Bandes porte-solin 2 m"),
+    // §7 : « Panneaux OSB 3 / contreplaqué CTBX : m² × 1,05 / surface panneau (2,50 × 1,25 = 3,125 m²) ». Le m² est
+    // admis pour un panneau (§40.3) ; le nombre de panneaux est donné à côté dès que le conditionnement est connu.
+    generic("panneau-osb-standard", "sheathing", "Panneau OSB 3 (ou contreplaqué CTBX) 2,50 × 1,25 m, épaisseur selon le chantier", "Panneaux OSB", {
+      aliases: ["osb", "osb 3", "osb3", "panneau osb", "contreplaque", "ctbx"],
+      sellingUnits: [
+        { id: "m2", label: { one: "m²", many: "m²" }, contains: packaging("1", "m2", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }), primary: true },
+        { id: "panneau", label: { one: "panneau de 2,50 × 1,25 m", many: "panneaux de 2,50 × 1,25 m" }, contains: packaging("3.125", "m2", F, FOUNDER_DOC, "2,50 × 1,25 = 3,125 m².") },
+      ],
+    }),
     generic("volige-sapin-standard", "sheathing", "Volige sapin traité 18 mm", "Voliges sapin 18 mm", {
       sellingUnits: [{ id: "m2", label: { one: "m²", many: "m²" }, contains: packaging("1", "m2", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }), primary: true }],
     }),
@@ -1337,7 +1363,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       trade: "roofing",
       label: "Couverture zinc à joint debout",
       triggers: ["standing_seam"],
-      params: [SURFACE_PARAM, FACONNAGE_PARAM, EPAISSEUR_ZINC_PARAM, RAMPANT_PARAM, ZONE_PARAM],
+      params: [SURFACE_PARAM, FACONNAGE_PARAM, EPAISSEUR_ZINC_PARAM, RAMPANT_PARAM, BACS_LONGS_PARAM, ZONE_PARAM],
       slots: [
         { key: "couverture", family: "standing_seam", label: "Couverture zinc joint debout", measureOnly: true },
         { key: "bobine", family: "zinc_coil", label: "Zinc en bobine", usual: { text: "Zinc naturel en bobine, largeur 650 mm (500 mm en bord de mer), vendu au kg.", source: F, productId: "bobine-zinc-standard" } },
@@ -1356,6 +1382,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         poids_080: condition("7", "kg/m2", "vmzinc-joint-debout", FOUNDER_DOC),
         seuil_070: condition("0.7", "mm", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }),
         seuil_080: condition("0.8", "mm", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }),
+        rampant_max_bac: condition("10", "m", F, FOUNDER_DOC, "« bacs profilés à longueur (max 10 à 15 m) » (§7) : 10 m retenu."),
       },
       tables: {
         // VMZINC 36.2 : pattes coulissantes + fixes par m², selon le rampant (lignes 0,5-1,5 … 13-15 m).
@@ -1391,7 +1418,8 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "zinc-bobines",
           slot: "bobine",
-          when: "faconnage < 2",
+          // Je façonne ; ou bien je commande façonné mais le rampant dépasse 10 m et je profile la bobine sur place.
+          when: "si(faconnage < 2, 1, si(longueur_rampant > regle.rampant_max_bac, si(bacs_longs < 2, 1, 0), 0))",
           formula: "surface * poids_zinc",
           unit: "kg",
           core: true,
@@ -1403,11 +1431,12 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "zinc-bacs",
           slot: "bac",
-          when: "faconnage >= 2",
-          formula: "arrondi_sup(largeur_pan / entraxe_joints)",
+          // Commandé façonné ; au-delà de 10 m de rampant, seulement si l'artisan veut des bacs en plusieurs longueurs.
+          when: "si(faconnage >= 2, si(longueur_rampant > regle.rampant_max_bac, si(bacs_longs >= 2, 1, 0), 1), 0)",
+          formula: "arrondi_sup(largeur_pan / entraxe_joints) * si(longueur_rampant > regle.rampant_max_bac, arrondi_sup(longueur_rampant / regle.rampant_max_bac), 1)",
           unit: "u",
           core: true,
-          exclusions: "Un pan rectangulaire ; chaque bac fait la longueur du rampant. Hors bandes d'égout, de rive, de faîtage et de noue.",
+          exclusions: "Un pan rectangulaire ; chaque bac fait la longueur du rampant, ou 10 m au plus avec jonction transversale au-delà. Hors bandes d'égout, de rive, de faîtage et de noue.",
           source: F,
           verification: FOUNDER_DOC,
           version: 1,

@@ -516,6 +516,16 @@ export class TakeoffService {
     const takeoff = await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
     const previous = takeoff.answers[key];
     await this.takeoffs.setAnswer(tenant, takeoff.id, key, value);
+    // Mémoire de l'entreprise : un produit choisi, ou une réponse d'habitude (« je façonne », épaisseur du zinc),
+    // compte pour SON entreprise ; établie au deuxième chantier différent, elle n'est plus demandée (dite, modifiable).
+    const [kind, name] = key.split(":") as [string, string];
+    if (kind === "product" && typeof value === "string" && value !== "") {
+      await this.memory.recordChoice(tenant, { kind: "product", key: `slot:${name}`, value, projectId: takeoff.projectId });
+    }
+    if (kind === "param" && value && typeof value === "object") {
+      const def = ROOFING_REFERENTIAL.workItems.flatMap((w) => w.params).find((p) => p.key === name);
+      if (def?.kind === "artisan_preference") await this.memory.recordChoice(tenant, { kind: "param", key: `param:${name}`, value: value.value, projectId: takeoff.projectId });
+    }
     const after = await this.reload(tenant, takeoff.id);
     const text = (v: EngineAnswer | undefined) => (v === undefined ? null : v === null ? "aucun" : typeof v === "string" ? v : `${v.value} ${v.unit}`);
     await this.journal.record(tenant, {

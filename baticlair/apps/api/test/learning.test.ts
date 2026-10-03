@@ -54,9 +54,9 @@ describe("mémoire de l'entreprise : aucune contamination", () => {
     const memory = ctx.app.get(CompanyMemory);
     await memory.recordChoice(a.tenant, { ...ecran, value: "soprema-sop-ecran-hpv-r2-150x50", projectId: "00000000-0000-7000-8000-000000000001" });
     await memory.recordChoice(a.tenant, { ...ecran, value: "soprema-sop-ecran-hpv-r2-150x50", projectId: "00000000-0000-7000-8000-000000000002" });
-    expect(await memory.forEngine(a.tenant)).toEqual({ products: { ecran: "soprema-sop-ecran-hpv-r2-150x50" }, proposals: {} });
+    expect(await memory.forEngine(a.tenant)).toEqual({ products: { ecran: "soprema-sop-ecran-hpv-r2-150x50" }, proposals: {}, params: {} });
 
-    expect(await memory.forEngine(b.tenant)).toEqual({ products: {}, proposals: {} });
+    expect(await memory.forEngine(b.tenant)).toEqual({ products: {}, proposals: {}, params: {} });
     expect(await memory.list(b.tenant)).toEqual([]);
     expect(await memory.resolve(b.tenant, "product", "slot:ecran")).toBeNull();
 
@@ -84,9 +84,9 @@ describe("mémoire de l'entreprise : aucune contamination", () => {
     const memory = new CompanyMemory(store, journal, DEFAULT_PREFERENCE_POLICIES, () => now);
     await memory.recordChoice(a.tenant, { ...ecran, value: "ecran-a", projectId: "00000000-0000-7000-8000-000000000001" });
     await memory.recordChoice(a.tenant, { ...ecran, value: "ecran-a", projectId: "00000000-0000-7000-8000-000000000002" });
-    expect(await memory.forEngine(a.tenant)).toEqual({ products: { ecran: "ecran-a" }, proposals: {} });
+    expect(await memory.forEngine(a.tenant)).toEqual({ products: { ecran: "ecran-a" }, proposals: {}, params: {} });
     now = new Date("2026-06-01T00:00:00Z");
-    expect(await memory.forEngine(a.tenant)).toEqual({ products: {}, proposals: { ecran: "ecran-a" } });
+    expect(await memory.forEngine(a.tenant)).toEqual({ products: {}, proposals: { ecran: "ecran-a" }, params: {} });
   });
 
   it("les seuils sont des paramètres de bêta : on les change sans toucher au code", async () => {

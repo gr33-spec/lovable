@@ -99,8 +99,8 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 **Questions :**
 
 - Tu façonnes tes bandes zinc toi-même, ou tu les commandes façonnées ? → [Je façonne (bobine)] [Je commande façonné (bandes 2 m)]
-- Périmètre d'une cheminée (les 4 côtés) ? → [2 m] [3 m] [4 m] [5 m]
 - Combien de descentes pour cette gouttière ? → [1] [2] [3] [4]
+- Périmètre d'une cheminée (les 4 côtés) ? → [2 m] [3 m] [4 m] [5 m]
 - 6 : c'est le nombre d'ardoises à commander, ou le nombre de jouées ? → [6 ardoises à commander] [6 jouées (matériaux à calculer)]
 
 **À acheter :**

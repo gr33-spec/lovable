@@ -22,7 +22,9 @@ export type PreferenceKind =
   /** Conditionnement habituel (rouleau de 50 m plutôt que 25 m). Plus important. */
   | "packaging"
   /** Marge de casse ou de coupe. Sensible : peut changer fortement le quantitatif. */
-  | "waste";
+  | "waste"
+  /** Réponse habituelle à un paramètre d'entreprise (« param:faconnage » = « 1 »). Apprise à la 2e confirmation. */
+  | "param";
 
 /**
  * Politique d'un type de préférence. PARAMÈTRES EXPÉRIMENTAUX de la bêta
@@ -48,6 +50,7 @@ export const DEFAULT_PREFERENCE_POLICIES: Readonly<Record<PreferenceKind, Prefer
   brand: { confirmationsToActivate: 2, staleAfterDays: 365, learnable: true },
   packaging: { confirmationsToActivate: 2, staleAfterDays: 365, learnable: true },
   waste: { confirmationsToActivate: 1, staleAfterDays: 365, learnable: false },
+  param: { confirmationsToActivate: 2, staleAfterDays: 365, learnable: true },
 };
 
 export interface CompanyPreference {
@@ -179,7 +182,7 @@ export function enginePreferences(
   memory: readonly CompanyPreference[],
   now: Date,
   policies = DEFAULT_PREFERENCE_POLICIES,
-): { products: Record<string, string>; proposals: Record<string, string> } {
+): { products: Record<string, string>; proposals: Record<string, string>; params: Record<string, string> } {
   const products: Record<string, string> = {};
   const proposals: Record<string, string> = {};
   const keys = new Set(memory.filter((p) => p.kind === "product").map((p) => normalizeText(p.key)));
@@ -189,5 +192,11 @@ export function enginePreferences(
     const engineKey = key.replace(/^(slot|family):/, "");
     (r.use === "silent" ? products : proposals)[engineKey] = r.value;
   }
-  return { products, proposals };
+  // Habitudes de paramètre (« je façonne ») : seulement ÉTABLIES (deux chantiers), jamais proposées en silence sinon.
+  const params: Record<string, string> = {};
+  for (const key of new Set(memory.filter((p) => p.kind === "param").map((p) => normalizeText(p.key)))) {
+    const r = resolvePreference(memory, { kind: "param", key }, now, policies);
+    if (r?.use === "silent") params[key.replace(/^param:/, "")] = r.value;
+  }
+  return { products, proposals, params };
 }
