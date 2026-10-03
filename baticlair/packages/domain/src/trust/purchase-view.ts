@@ -41,6 +41,8 @@ export interface PurchaseItem {
   state: "ready" | "to_confirm";
   /** Hypothèses dont cette ligne dépend. */
   assumptionKeys: string[];
+  /** Ce que l'artisan a réécrit lui-même sur cette ligne (§41.4) : le libellé, la quantité. */
+  edited?: ("label" | "quantity")[];
 }
 
 export interface ToQuoteItem {
@@ -130,6 +132,26 @@ function keepCharacteristic(c: string): boolean {
   // « 2×10 m », « 4 m » : une quantité ou une dimension d'ouvrage, pas une caractéristique de l'article.
   if (/\d\s*[×x*]\s*\d/.test(n) || /^\d+(?:[.,]\d+)?\s*(?:m|ml|m2|cm|mm)$/.test(n)) return false;
   return /\d/.test(n) || n.includes("-") || n.split(" ").some((w) => MATERIAL_WORDS.has(w));
+}
+
+/**
+ * LE TEST DU FOURNISSEUR (§40, verrou moteur §41.3) : une ligne « À commander » doit pouvoir être
+ * chargée dans le camion sans rappeler l'artisan. Interdits en sortie : les m², un ml de métal sans
+ * largeur ni épaisseur, « lot », « forfait », « ensemble ». Une telle ligne va chez « Le fournisseur
+ * chiffrera » avec sa mesure, avec la raison ; elle ne part jamais en commande telle quelle.
+ */
+const METAL_WORDS = /\b(zinc|cuivre|alu|aluminium|inox|acier|galva|galvanise|plomb|tole|metal)\b/;
+const SHEET_WORDS = /\b(voliges?|voligeage|osb|contreplaques?|panneaux?|ecrans?|membranes?|pare[ -]?(?:pluie|vapeur)|isolant|laine|frein[ -]?vapeur|epdm|feutre)\b/;
+const DIMENSION = /\d\s*(?:mm|cm)\b|\bd[ée]v\.?\s*\d|d[ée]velopp|\bø|\bdiam|\blargeur\b|\bep\.?\s*\d|\bepaisseur\b|\d\s*[×x]\s*\d/;
+export function supplierTest(designation: string, unit: string | null): string | null {
+  const u = (unit ?? "").trim().toLowerCase().replace("²", "2");
+  const d = norm(designation);
+  // Les panneaux et rouleaux se vendent au m² (volige, OSB, écran, isolant) : le fournisseur sait les charger.
+  if (/^(m2|m²)$/.test(u) && SHEET_WORDS.test(d)) return null;
+  if (/^(m2|m²)$/.test(u)) return "Une surface en m² ne se charge pas dans un camion : il faut des pièces aux dimensions. Pas encore de règle de calcul pour cet ouvrage.";
+  if (/^(lot|lots|forfait|forfaits|ft|ens|ensembles?|selon besoin)$/.test(u)) return `« ${unit!.trim()} » n'est pas une unité de commande : le fournisseur ne sait pas quoi charger.`;
+  if (/^(ml|m)$/.test(u) && METAL_WORDS.test(d) && !DIMENSION.test(d)) return "Du métal au mètre sans largeur ni épaisseur : le fournisseur ne sait pas quoi charger.";
+  return null;
 }
 
 /** Regroupe les besoins d'un même article (même produit) sur tout le chantier. */
@@ -251,6 +273,7 @@ export function purchaseView(
     view.ouvrages,
     link.plan.characteristicsBySlot,
   );
+  const failedSupplierTest: ToQuoteItem[] = [];
   // Quantités écrites telles quelles dans le devis (chatières, sortie de toit) : à acheter, sans calcul.
   // Une ligne sans unité ou sans quantité y figure aussi, à confirmer : elle ne disparaît jamais en silence.
   for (const o of view.ouvrages) {
@@ -260,6 +283,12 @@ export function purchaseView(
     const kept = o.role !== "undetermined" || item?.state === "verified";
     if (!v || v.kind === "labor" || v.basis !== "purchase" || !kept || o.needs.length > 0) continue;
     const written = o.read.quantity ? writtenQuantity(o.read.quantity, o.read.unit) : null;
+    // Le test du fournisseur (§40) : une mesure n'est jamais une commande.
+    const refused = supplierTest(o.designation, o.read.unit);
+    if (refused) {
+      failedSupplierTest.push({ key: `line:${o.lineId}`, label: o.designation, measure: [o.read.quantity, o.read.unit].filter(Boolean).join(" "), reason: refused, lineIds: [o.lineId] });
+      continue;
+    }
     toBuy.push({
       key: `line:${o.lineId}`,
       label: o.designation,
@@ -273,7 +302,7 @@ export function purchaseView(
       assumptionKeys: [],
     });
   }
-  const toQuote: ToQuoteItem[] = [];
+  const toQuote: ToQuoteItem[] = [...failedSupplierTest];
   // « Aucun de ces modèles » sur une pièce : BatiClair n'invente rien, le fournisseur chiffre pour la mesure du devis.
   for (const n of engine.needs) {
     if (!(n.question && engine.declined?.includes(n.question.key)) || n.origin === "suggested") continue;
@@ -288,7 +317,7 @@ export function purchaseView(
     // Une ambiguïté encore ouverte (« 6 : ardoises ou jouées ? ») est une question, pas un article à faire chiffrer.
     if (link.roles.get(o.lineId) === "undetermined") continue;
     if (o.pending) {
-      toQuote.push({ key: `line:${o.lineId}`, label: o.designation, measure, reason: o.pending, lineIds: [o.lineId] });
+      if (!toQuote.some((q) => q.key === `line:${o.lineId}`)) toQuote.push({ key: `line:${o.lineId}`, label: o.designation, measure, reason: o.pending, lineIds: [o.lineId] });
       continue;
     }
     // Un composant cité sans règle, ou un besoin que BatiClair ne sait pas établir : le fournisseur chiffre pour la mesure.
@@ -322,4 +351,29 @@ export function purchaseView(
   const canValidate = questions.every((q) => q.lineIds.length === 0) && toBuy.every((b) => b.state === "ready");
   const groups = groupsOf(toBuy, engine.needs, view, link.plan, link.ref);
   return { understood: understood(view, link.plan, link.ref), toBuy, groups, toQuote, assumptions, questions, canValidate };
+}
+
+/**
+ * § 41.4 : l'artisan réécrit d'un tap le libellé ou la quantité d'une ligne du quantitatif. Ses mots
+ * remplacent ceux de BatiClair (réponses « libelle:<ligne> » et « quantite:<ligne> ») ; le calcul
+ * reste visible derrière, marqué « fixé par vous ».
+ */
+export function applyPurchaseOverrides(purchase: PurchaseView, answers: Record<string, string | { value: string; unit: string } | null>): PurchaseView {
+  const toBuy = purchase.toBuy.map((item) => {
+    const label = answers[`libelle:${item.key}`];
+    const quantity = answers[`quantite:${item.key}`];
+    const edited: NonNullable<PurchaseItem["edited"]> = [];
+    let out = item;
+    if (typeof label === "string" && label.trim()) {
+      out = { ...out, label: label.trim() };
+      edited.push("label");
+    }
+    if (quantity && typeof quantity === "object") {
+      const unit = quantity.unit.trim();
+      out = { ...out, quantity: `${fr(new Decimal(quantity.value))} ${unit}`.trim(), order: { count: quantity.value, unit }, approx: null };
+      edited.push("quantity");
+    }
+    return edited.length > 0 ? { ...out, edited } : item;
+  });
+  return { ...purchase, toBuy };
 }

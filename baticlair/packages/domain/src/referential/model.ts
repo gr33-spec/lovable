@@ -260,6 +260,8 @@ export interface Slot {
    * Elle s'efface dès que le devis nomme un produit.
    */
   usual?: { text: string; source: string; productShort?: string; productId?: string };
+  /** La ligne du devis donne une MESURE (« 91 m² de joint debout ») ; rien ne se commande sous ce nom. */
+  measureOnly?: true;
 }
 
 /**
@@ -299,6 +301,11 @@ export interface NeedRule extends Provenance {
    * sans question ni « inconnu ».
    */
   requires?: string[];
+  /**
+   * Condition d'existence (« faconnage < 2 ») : le besoin n'existe que si elle est vraie. Tant que
+   * ses données ne sont pas connues, le besoin existe et pose sa question (« tu façonnes ? »).
+   */
+  when?: string;
 }
 
 export interface WorkItemType {

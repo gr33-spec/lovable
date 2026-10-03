@@ -398,7 +398,7 @@ export function artisanView(
           const slot = work?.slots.find((x) => x.key === key);
           // Seulement un composant que le calcul ne connaît pas du tout : un besoin calculé ailleurs
           // (« pour tuiles HP10 » sur la ligne des liteaux) appartient déjà à sa propre ligne.
-          if (!slot || needs.some((n) => n.slot === key) || engine.needs.some((n) => n.workItemId === work!.id && n.slot === key)) continue;
+          if (!slot || slot.measureOnly || needs.some((n) => n.slot === key) || engine.needs.some((n) => n.workItemId === work!.id && n.slot === key)) continue;
           needs.push({ needId: `${work!.id}/${key}`, slot: key, label: slot.label, origin: "explicit", need: null, needRange: null, order: null, missing: "Pas encore de règle de calcul dans BatiClair.", provisional: false, usual: slot.usual?.text ?? null, assumptions: [], state: "missing" });
         }
       }

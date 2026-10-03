@@ -22,7 +22,7 @@ export class AnthropicTakeoffExtractor implements TakeoffExtractor {
 
   async extract(request: ExtractionRequest): Promise<ExtractionAttempt> {
     const attempt = await this.reader.read({
-      system: takeoffSystemPrompt(request.tradeLabel, request.materialFamilies),
+      system: takeoffSystemPrompt(request.tradeLabel, request.materialFamilies, request.workItems ?? []),
       schema: extractionWireSchema,
       document: request,
       documentName: "devis",

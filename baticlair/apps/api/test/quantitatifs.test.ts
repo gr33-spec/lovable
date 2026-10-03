@@ -54,7 +54,7 @@ const RAPPIDOS = {
   ],
 };
 
-type Ligne = { id: string; libelle: string; quantite: number | null; unite: string | null; prix?: string; estimation?: string; explication: { phrase: string; morceaux: { cle?: string; valeur?: string; confiance: string }[] } };
+type Ligne = { id: string; libelle: string; quantite: number | null; unite: string | null; prix?: string; estimation?: string; explication: { phrase: string; morceaux: { texte: string; cle?: string; valeur?: string; confiance: string }[] } };
 const ligne = (body: { lignes: Ligne[] }, libelle: string) => body.lignes.find((l) => l.libelle === libelle)!;
 
 async function pdfQuote(agent: Agent, extra: Record<string, string> = {}) {
@@ -377,5 +377,40 @@ describe("le chat de l'appli passe par la porte", () => {
     expect((await a.agent.post("/v1/quantitatifs").send({ documentId })).status).toBe(404);
     expect((await a.agent.get(`/v1/quantitatifs?projetId=${projectId}`)).status).toBe(404);
     expect((await a.agent.post("/v1/quantitatifs").send({ documentId, lignes: RAPPIDOS.lignes })).status).toBe(400);
+  });
+});
+
+describe("§ 41.4 : chaque ligne du quantitatif se réécrit d'un tap", () => {
+  it("ligne calculée : le libellé et la quantité de l'artisan passent devant le calcul, et restent", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
+    const q = (await agent.post("/v1/quantitatifs").send(RAPPIDOS)).body;
+    const renamed = await agent.post(`/v1/quantitatifs/${q.id}/corrections`).send({ action: "renommer", id: "product:Ardoises 30×22", libelle: "Ardoises Cupa 30×22 naturelles" });
+    expect(renamed.status).toBe(201);
+    const line = ligne(renamed.body, "Ardoises Cupa 30×22 naturelles");
+    expect(line).toMatchObject({ id: "product:Ardoises 30×22", quantite: 9200, modifie: ["libelle"] });
+
+    const fixed = await agent.post(`/v1/quantitatifs/${q.id}/corrections`).send({ action: "fixer_quantite", id: "product:Ardoises 30×22", quantite: "9000", unite: "pièces" });
+    const after = ligne(fixed.body, "Ardoises Cupa 30×22 naturelles");
+    expect(after).toMatchObject({ quantite: 9000, unite: "pièces", texte: "9 000 pièces", modifie: ["libelle", "quantite"] });
+    expect(after.explication.phrase).toMatch(/^9 000 pièces = quantité fixée par vous/);
+    expect(after.explication.morceaux[0]).toEqual({ texte: "quantité fixée par vous", confiance: "artisan" });
+    // Le calcul reste visible derrière, et les crochets suivent toujours le calcul, pas la quantité réécrite.
+    expect(after.explication.morceaux.some((m: { texte: string }) => m.texte.startsWith("pente du toit"))).toBe(true);
+    expect((await agent.get(`/v1/quantitatifs/${q.id}`)).body.lignes.find((l: { id: string }) => l.id === "product:Ardoises 30×22")).toMatchObject({ libelle: "Ardoises Cupa 30×22 naturelles", quantite: 9000 });
+    // Une ligne qui n'existe pas, ou une quantité qui n'en est pas une : refusées.
+    expect((await agent.post(`/v1/quantitatifs/${q.id}/corrections`).send({ action: "renommer", id: "product:Rien", libelle: "x" })).status).toBe(404);
+    expect((await agent.post(`/v1/quantitatifs/${q.id}/corrections`).send({ action: "fixer_quantite", id: "product:Ardoises 30×22", quantite: "beaucoup", unite: "pièces" })).status).toBe(400);
+  });
+
+  it("ligne reprise du devis : c'est la ligne du devis qui est corrigée", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
+    const q = (await agent.post("/v1/quantitatifs").send({ ...RAPPIDOS, lignes: [...RAPPIDOS.lignes, { libelle: "Chatière de ventilation", quantite: "4", unite: "u", prix: null }] })).body;
+    const direct = q.lignes.find((l: { origine: string }) => l.origine === "devis");
+    expect(direct.libelle).toBe("Chatière de ventilation");
+    const res = await agent.post(`/v1/quantitatifs/${q.id}/corrections`).send({ action: "renommer", id: direct.id, libelle: "Chatière de ventilation 30×30" });
+    expect(res.body.devis.some((l: { libelle: string }) => l.libelle === "Chatière de ventilation 30×30")).toBe(true);
+    expect(res.body.lignes.find((l: { id: string }) => l.id === direct.id)).toMatchObject({ libelle: "Chatière de ventilation 30×30", modifie: [] });
+    const fixed = await agent.post(`/v1/quantitatifs/${q.id}/corrections`).send({ action: "fixer_quantite", id: direct.id, quantite: "6", unite: "u" });
+    expect(fixed.body.lignes.find((l: { id: string }) => l.id === direct.id)).toMatchObject({ quantite: 6 });
   });
 });

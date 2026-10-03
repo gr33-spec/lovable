@@ -47,10 +47,11 @@ describe("lecture par l'API Anthropic (réseau simulé)", () => {
     // Remise dans la forme complète : rien de perdu, rien d'inventé.
     expect(attempt.output).toEqual({
       lines: [
-        { designation: "Tuile romane", quantity: "1 250", unit: "u", reference: "TUI", sourceRefs: ["1:004"], sourcePages: [], doubt: null, section: ["TOITURE PRINCIPALE"] },
-        { designation: "Faîtière ronde", quantity: "42", unit: "u", reference: null, sourceRefs: [], sourcePages: [2], doubt: "Ronde ou angulaire ?", section: [] },
+        { designation: "Tuile romane", quantity: "1 250", unit: "u", reference: "TUI", sourceRefs: ["1:004"], sourcePages: [], doubt: null, section: ["TOITURE PRINCIPALE"], workItem: "inconnu", material: null, dimensions: null },
+        { designation: "Faîtière ronde", quantity: "42", unit: "u", reference: null, sourceRefs: [], sourcePages: [2], doubt: "Ronde ou angulaire ?", section: [], workItem: "inconnu", material: null, dimensions: null },
       ],
       notes: [],
+      context: null,
     });
     const sent = api.requests[0]!;
     expect(sent.url).toContain("/v1/messages");
@@ -151,7 +152,8 @@ describe("réponse compacte (prompt v7) sur un vrai devis du banc", () => {
       imagePdf: null,
       imagePages: [],
     });
-    expect(attempt.output).toEqual(full);
+    // v9 (prompt A) ajoute l'ouvrage, le matériau, les dimensions et le contexte ; l'ancien format les laisse vides.
+    expect(attempt.output).toEqual({ ...full, context: null, lines: full.lines.map((l) => ({ ...l, workItem: "inconnu", material: null, dimensions: null })) });
     // Avant (v6) : chaque ligne répétait ses titres et ses noms de champ longs.
     const before = JSON.stringify(full).length;
     const after = JSON.stringify(wire).length;

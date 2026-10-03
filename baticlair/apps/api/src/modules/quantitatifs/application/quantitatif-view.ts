@@ -92,11 +92,15 @@ export function quantitatifView(
       // Le prix d'une ligne de devis est celui de l'ouvrage (85 €/m² de couverture), pas d'un article calculé.
       ...(b.kind !== "computed" && line?.priceRaw ? { prix: line.priceRaw } : {}),
       hypotheses: b.assumptionKeys,
+      /** Ce que l'artisan a réécrit lui-même (§41.4) : « libelle », « quantite ». */
+      modifie: (b.edited ?? []).map((e) => (e === "label" ? "libelle" : "quantite")),
       /** Chiffre approché (recouvrement hors table du fabricant…) : pourquoi, en une phrase ; sinon absent. */
       ...(need?.trace.some((t) => t.label === "Estimation") ? { estimation: need.trace.filter((t) => t.label === "Estimation").map((t) => t.value).join(" ") } : {}),
-      explication: need
-        ? explication(b.quantity, need.trace, purchase.assumptions)
-        : { phrase: `${b.quantity ?? "?"} = repris tel quel du devis`, morceaux: [{ texte: "repris tel quel du devis", confiance: "devis" as const }] },
+      explication: b.edited?.includes("quantity")
+        ? { phrase: `${b.quantity} = quantité fixée par vous`, morceaux: [{ texte: "quantité fixée par vous", confiance: "artisan" as const }, ...(need ? explication(b.quantity, need.trace, purchase.assumptions).morceaux : [])] }
+        : need
+          ? explication(b.quantity, need.trace, purchase.assumptions)
+          : { phrase: `${b.quantity ?? "?"} = repris tel quel du devis`, morceaux: [{ texte: "repris tel quel du devis", confiance: "devis" as const }] },
     };
   });
   const questions = purchase.questions.map((d) => {

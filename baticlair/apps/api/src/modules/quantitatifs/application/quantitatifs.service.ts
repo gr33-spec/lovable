@@ -33,7 +33,10 @@ export type Correction =
   | { action: "ajouter"; ligne: LigneEntree }
   | { action: "modifier_ligne"; id: string; ligne: LigneEntree }
   | { action: "retirer"; id: string }
-  | { action: "confirmer"; id: string };
+  | { action: "confirmer"; id: string }
+  // § 41.4 : une ligne du quantitatif (champ `lignes`) réécrite par l'artisan.
+  | { action: "renommer"; id: string; libelle: string }
+  | { action: "fixer_quantite"; id: string; quantite: string; unite: string };
 
 type Row = { id: string; projectId: string; source: string; documentId: string | null; takeoffId: string | null; reference: string | null };
 
@@ -196,6 +199,22 @@ export class QuantitatifsService {
         return this.view(row, await this.takeoffs.deleteLine(tenant, line(correction.id)), rendu);
       case "confirmer":
         return this.view(row, await this.takeoffs.confirmLine(tenant, line(correction.id)), rendu);
+      case "renommer":
+      case "fixer_quantite": {
+        if (!reviewed.purchase.toBuy.some((b) => b.key === correction.id)) throw notFound("Line");
+        // Une ligne reprise du devis : c'est la ligne du devis qu'on corrige. Une ligne calculée : les mots de l'artisan passent devant.
+        const direct = correction.id.startsWith("line:") ? reviewed.takeoff.lines.find((l) => l.id === correction.id.slice("line:".length)) : undefined;
+        if (direct) {
+          const fields = { designation: direct.designation, quantityRaw: direct.quantityRaw, unitRaw: direct.unitRaw, reference: direct.reference };
+          const next = correction.action === "renommer" ? { ...fields, designation: correction.libelle } : { ...fields, quantityRaw: correction.quantite, unitRaw: correction.unite };
+          return this.view(row, await this.takeoffs.updateLine(tenant, direct.id, next), rendu);
+        }
+        const after =
+          correction.action === "renommer"
+            ? await this.takeoffs.answer(tenant, reviewed.takeoff.id, `libelle:${correction.id}`, correction.libelle)
+            : await this.takeoffs.answer(tenant, reviewed.takeoff.id, `quantite:${correction.id}`, { value: correction.quantite.replace(",", "."), unit: correction.unite });
+        return this.view(row, after, rendu);
+      }
       case "modifier": {
         // Une clé modifiable : une hypothèse en cours, ou une valeur déjà choisie (elle porte sa clé dans l'explication).
         const hyp = reviewed.purchase.assumptions.find((a) => a.key === correction.cle);

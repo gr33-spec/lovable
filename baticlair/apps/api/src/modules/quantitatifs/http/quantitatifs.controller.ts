@@ -62,6 +62,9 @@ const correction = z.discriminatedUnion("action", [
   z.object({ action: z.literal("modifier_ligne"), id: z.string().uuid(), ligne }),
   z.object({ action: z.literal("retirer"), id: z.string().uuid() }),
   z.object({ action: z.literal("confirmer"), id: z.string().uuid() }),
+  // Les lignes du quantitatif (champ `lignes`), réécrites d'un tap (§41.4).
+  z.object({ action: z.literal("renommer"), id: z.string().min(1).max(200), libelle: z.string().trim().min(1).max(300) }),
+  z.object({ action: z.literal("fixer_quantite"), id: z.string().min(1).max(200), quantite: z.string().trim().regex(/^\d+(?:[.,]\d+)?$/), unite: z.string().trim().min(1).max(30) }),
 ]);
 
 /**

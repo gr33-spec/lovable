@@ -251,6 +251,8 @@ export interface PurchaseItem {
   lineIds: string[];
   state: "ready" | "to_confirm";
   assumptionKeys: string[];
+  /** Réécrit par l'artisan (§41.4). */
+  edited: ("label" | "quantity")[];
 }
 
 export interface PurchaseAssumption {

@@ -4,12 +4,12 @@ import { Check, CircleCheck, HelpCircle, Pencil, Plus, Send, Sparkles, Trash2 } 
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AssistantMessage, ChatInput, parseCommand, ReasoningSteps, Say, ThinkingSteps, UserBubble } from "@/components/chat";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
-import { QuantityCard } from "@/components/purchase-list";
+import { QuantityCard, type ItemEdit } from "@/components/purchase-list";
 import { DecisionCard, type DecisionHandlers } from "@/components/takeoff-view";
 import { useProgressRefresh } from "@/components/project-progress";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
-import { api, ApiError, type ProjectDocument, type Quantitatif, type ReadingState, type TakeoffLine } from "@/lib/api";
-import { shortName } from "@/lib/labels";
+import { api, ApiError, type ProjectDocument, type PurchaseItem, type Quantitatif, type ReadingState, type TakeoffLine } from "@/lib/api";
+import { parseQuantity, shortName } from "@/lib/labels";
 import { useResource } from "@/lib/use-resource";
 
 /** Le devis client peut être lu par l'IA : texte lu, ou lecture locale en panne (l'IA lit alors le PDF). */
@@ -196,6 +196,23 @@ export function ProjectTakeoff({
     onSaveLine: (lineId, fields) => call("corrections", { action: "modifier_ligne", id: lineId, ligne: ligne(fields) }),
     onDeleteLine: (lineId) => call("corrections", { action: "retirer", id: lineId }),
   };
+  // § 41.4 : chaque ligne du quantitatif se réécrit d'un tap. Ligne reprise du devis : on corrige la ligne du
+  // devis ; ligne calculée : les mots de l'artisan passent devant le calcul, qui reste visible.
+  const editItem = async (item: PurchaseItem, e: ItemEdit) => {
+    const direct = item.kind === "direct" ? takeoff.lines.find((l) => item.lineIds.includes(l.id)) : undefined;
+    const before = item.quantity ? parseQuantity(item.quantity) : null;
+    const quantityChanged = (e.quantite ?? "") !== (before?.quantity ?? "") || (e.unite ?? "") !== (before?.unit ?? "");
+    if (direct) {
+      // Quantité inchangée : on garde celle du devis telle qu'écrite (« 1 250 u »), pas sa forme affichée (« pièces »).
+      const ligne = { libelle: e.libelle, quantite: quantityChanged ? e.quantite : direct.quantity, unite: quantityChanged ? e.unite : direct.unit, reference: direct.reference };
+      await call("corrections", { action: "modifier_ligne", id: direct.id, ligne });
+      return;
+    }
+    if (e.libelle !== item.label) await call("corrections", { action: "renommer", id: item.key, libelle: e.libelle });
+    if (e.quantite && e.unite && quantityChanged) {
+      await call("corrections", { action: "fixer_quantite", id: item.key, quantite: e.quantite.replace(/\s/g, ""), unite: e.unite });
+    }
+  };
   const validate = () => {
     setShowList(false);
     void call("validation");
@@ -256,7 +273,7 @@ export function ProjectTakeoff({
     body = (
       <>
         <Say>Voici votre quantitatif.</Say>
-        <QuantityCard takeoff={takeoff} editable={editable} pending={pending} onAnswer={handlers.onAnswer} />
+        <QuantityCard takeoff={takeoff} editable={editable} pending={pending} onAnswer={handlers.onAnswer} onEditItem={editItem} />
         {editable && takeoff.purchase.canValidate ? (
           <Button pending={pending} onClick={validate}>
             <Send size={18} aria-hidden="true" />

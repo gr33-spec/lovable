@@ -224,6 +224,13 @@ export function checkReferential(ref: Referential): string[] {
       provenance(nw, n);
       if (!w.slots.some((s) => s.key === n.slot)) err(nw, `emplacement inconnu « ${n.slot} »`);
       for (const r of n.requires ?? []) if (!paramDims.has(r)) err(nw, `donnée requise inconnue « ${r} »`);
+      if (n.when) {
+        try {
+          for (const v of formulaVariables(parseFormula(n.when))) if (!paramDims.has(v)) err(nw, `condition « ${n.when} » : seule une donnée de l'ouvrage peut y figurer (« ${v} »)`);
+        } catch (e) {
+          err(nw, `condition : ${(e as Error).message}`);
+        }
+      }
       const expected = unitDim(nw, n.unit);
       try {
         const expr = parseFormula(n.formula);

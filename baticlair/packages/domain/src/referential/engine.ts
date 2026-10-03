@@ -285,8 +285,26 @@ export function computeWorkItem(ref: Referential, input: WorkItemInput, options:
   const known = (key: string) => input.params[key] !== undefined || work.params.find((p) => p.key === key)?.default !== undefined;
   // Dans l'ordre : un besoin peut partir de la commande d'un besoin précédent (« commande.ardoises »).
   const done = new Map<string, Earlier>();
+  // Condition d'existence d'un besoin (« faconnage < 2 ») : jugée sur les données connues (réponse, devis,
+  // hypothèse fixe) ; une donnée encore inconnue laisse le besoin exister, et il posera sa question.
+  const applies = (rule: NeedRule): boolean => {
+    if (!rule.when) return true;
+    const expr = parseFormula(rule.when);
+    const values = new Map<string, IntervalValue>();
+    for (const name of formulaVariables(expr)) {
+      const def = work.params.find((p) => p.key === name);
+      if (!def) throw new FormulaError(`Condition du besoin ${rule.id} : variable inconnue ${name}`);
+      const factor = parseRefUnit(def.unit);
+      const given = input.params[name];
+      const raw = given ? given.value : def.default?.value;
+      if (raw === undefined) return true;
+      values.set(name, point(new Decimal(raw).times(given ? parseRefUnit(given.unit).factor : factor.factor), factor.dim));
+    }
+    const v = evaluateInterval(expr, (name) => values.get(name)!);
+    return !v.lo.isZero();
+  };
   const needs = work.needs
-    .filter((rule) => (rule.requires ?? []).every(known))
+    .filter((rule) => (rule.requires ?? []).every(known) && applies(rule))
     .map((rule) => {
       let exact: IntervalValue | undefined;
       const result = computeNeed(ref, work, rule, input, sources, options, done, (v) => (exact = v));
@@ -790,6 +808,11 @@ function computeNeed(
       const shown = (x: Decimal) => fr(x.dividedBy(unit.factor));
       trace.push({ label: table.label, value: isPoint(v) ? shown(v.lo) : `${shown(v.lo)} à ${shown(v.hi)}`, unit: table.unit, origin: "referential", ...provenanceLine(table, sources) });
       return v;
+    }
+    // Condition d'existence encore indécise (« faconnage » sans réponse) : sa question, avant tout calcul.
+    if (rule.when) {
+      const w = evaluateInterval(parseFormula(rule.when), valueOf);
+      if (!isPoint(w) && missing[0]) throw new Stop({ status: "question", question: missing[0].question });
     }
     const raw = evaluateInterval(expr, valueOf);
 

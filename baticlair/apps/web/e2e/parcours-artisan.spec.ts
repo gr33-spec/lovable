@@ -260,6 +260,16 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await page.getByRole("button", { name: "Voir le calcul : Tuile romane canal rouge 12,5 u/m²" }).click();
   await expect(page.getByText("(lu dans le devis)").first()).toBeVisible();
 
+  // § 41.4 : la désignation d'une ligne se réécrit d'un tap, sans aide (test de recette : une personne hors BTP).
+  await page.getByRole("button", { name: "Modifier : Tuile romane canal rouge 12,5 u/m²" }).click();
+  const edit = page.getByRole("form", { name: "Modifier : Tuile romane canal rouge 12,5 u/m²" });
+  await edit.getByLabel("Désignation").fill("Tuile romane canal rouge 12,5 u/m² Toit principal");
+  await edit.getByRole("button", { name: "Enregistrer" }).click();
+  // Une ligne réécrite repasse par « C'est bon » (ligne modifiée = à confirmer), puis la carte la montre sous son nouveau nom.
+  await confirmDoubts(page);
+  await expect(page.getByText("Voici votre quantitatif.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Voir le calcul : Tuile romane canal rouge 12,5 u/m² Toit principal" })).toBeVisible();
+
   // Le devis lu reste à un appui : noms courts, ajout et retrait d'une ligne.
   await page.getByRole("button", { name: "Voir le devis lu (6 lignes)" }).click();
   await expect(page.getByText("Tuile romane canal rouge 12,5 u/m²")).toBeVisible();

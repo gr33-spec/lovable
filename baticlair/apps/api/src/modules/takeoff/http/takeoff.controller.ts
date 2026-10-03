@@ -33,7 +33,8 @@ const decisionBody = z.object({
 const answerBody = z
   .object({
     // « role:<ligne> » : l'artisan tranche une ambiguïté (« 6 : ardoises ou jouées ? »).
-    key: z.string().regex(/^(?:(?:product|param):[a-z0-9_]{1,40}|role:[0-9a-f-]{36})$/),
+    // « libelle:<ligne> » et « quantite:<ligne> » : l'artisan réécrit une ligne du quantitatif (§41.4).
+    key: z.string().regex(/^(?:(?:product|param):[a-z0-9_]{1,40}|role:[0-9a-f-]{36}|(?:libelle|quantite):.{1,200})$/),
     value: z.union([
       z.string().trim().max(120),
       z.object({ value: z.string().trim().regex(/^\d+(?:[.,]\d+)?$/), unit: z.string().trim().min(1).max(10) }),
