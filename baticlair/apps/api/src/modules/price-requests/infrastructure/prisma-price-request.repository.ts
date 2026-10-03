@@ -112,6 +112,7 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
       id: row.id,
       trade: row.trade,
       lines: row.lines.map((l) => ({
+        id: l.id,
         designation: l.designation,
         quantity: l.quantityRaw,
         unit: l.unitRaw,

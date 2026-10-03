@@ -2,7 +2,10 @@ import {
   applyLineRoles,
   artisanView,
   assessTakeoffLine,
+  climateZone,
   computeWithAnswers,
+  postalCodeIn,
+  purchaseView,
   DEFAULT_EXTRACTION_POLICY,
   mergeChunkLines,
   planQuote,
@@ -17,6 +20,8 @@ import {
   tradeProfile,
   type ArtisanView,
   type EngineAnswer,
+  type PurchaseView,
+  type SiteFact,
   type CorrectionAction,
   type ExtractionPolicy,
   type LineRole,
@@ -49,6 +54,8 @@ import type { LineFields, TakeoffLineRecord, TakeoffRecord, TakeoffRepository } 
 export interface ReadingOptions {
   /** Compte autorisé à voir les calculs des règles en brouillon (marqués « provisoire »), pour les valider. */
   isValidator?: (tenant: TenantContext) => Promise<boolean>;
+  /** Adresse du chantier (code postal → zone climatique), sans rien demander à l'artisan. */
+  projectAddress?: (tenant: TenantContext, projectId: string) => Promise<string | null>;
   /** Mesures de chaque lecture (journal du serveur), en plus de leur enregistrement avec l'analyse. */
   onStats?: (stats: ReadingStats) => void;
   policy?: ExtractionPolicy;
@@ -117,6 +124,8 @@ export interface ReviewedTakeoff {
   roles: ReadonlyMap<string, RoleProposal>;
   /** Ce que voit l'artisan : compteurs ✓/⚠/?, décisions regroupées, éléments prêts et leur preuve. */
   view: ArtisanView;
+  /** LA LISTE D'ACHATS : à acheter, à faire chiffrer, hypothèses, questions. */
+  purchase: PurchaseView;
 }
 
 
@@ -243,6 +252,11 @@ export class TakeoffService {
   async forProject(tenant: TenantContext, projectId: string): Promise<ReviewedTakeoff | null> {
     const takeoff = await this.takeoffs.findLatestByProject(tenant, projectId);
     return takeoff ? this.review(tenant, takeoff) : null;
+  }
+
+  /** La liste d'achats d'un quantitatif (pour la demande de prix), recalculée avec les règles du jour. */
+  async reviewed(tenant: TenantContext, takeoffId: string): Promise<ReviewedTakeoff> {
+    return this.reload(tenant, takeoffId);
   }
 
   // Chaque geste de l'artisan est journalisé avec l'AVANT (ce que BatiClair avait compris et
@@ -389,16 +403,19 @@ export class TakeoffService {
    */
   async validate(tenant: TenantContext, takeoffId: string): Promise<ReviewedTakeoff> {
     const takeoff = await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
-    const { validation, view } = await this.review(tenant, takeoff);
+    const { validation, purchase } = await this.review(tenant, takeoff);
     if (validation.counts.blocking > 0) {
       throw validationFailed("Blocking issues remain", { reason: "blocking_issues", count: validation.counts.blocking });
     }
     if (validation.counts.toVerify > 0) {
       throw validationFailed("Lines to check remain", { reason: "lines_to_check", count: validation.counts.toVerify });
     }
-    // Un ⚠ sur une ligne du devis attend une décision (article inconnu…) : rien ne part sans elle.
-    const open = view.items.filter((i) => i.kind === "line" && i.state === "to_confirm").length;
-    if (open > 0) throw validationFailed("Decisions remain", { reason: "decisions_remaining", count: open });
+    // Une question qui porte sur une ligne du devis (ambiguïté, article inconnu) attend sa réponse : rien ne part sans elle.
+    // Une question du calcul restée sans réponse ne bloque pas : l'article part « à faire chiffrer ».
+    if (!purchase.canValidate) {
+      const open = purchase.questions.filter((q) => q.lineIds.length > 0).length + purchase.toBuy.filter((b) => b.state !== "ready").length;
+      throw validationFailed("Decisions remain", { reason: "decisions_remaining", count: open });
+    }
     await this.takeoffs.setStatus(tenant, takeoff.id, "validated");
     return this.reload(tenant, takeoff.id);
   }
@@ -461,7 +478,11 @@ export class TakeoffService {
       confirmed: l.confirmed,
       enteredByArtisan: l.origin === "manual" || l.edited,
     }));
-    const plan = planQuote(lines.map((l) => ({ ref: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, section: l.section })), ROOFING_REFERENTIAL, profile);
+    // La zone climatique vient du code postal du chantier (jamais demandée) ; le devis l'emporte s'il l'écrit.
+    const address = (await this.reading.projectAddress?.(tenant, takeoff.projectId)) ?? null;
+    const zone = climateZone(postalCodeIn(address));
+    const extraFacts: SiteFact[] = zone ? [{ key: "zone", value: String(zone), unit: "u", evidence: `Code postal du chantier (${postalCodeIn(address)})`, origin: "document" }] : [];
+    const plan = planQuote(lines.map((l) => ({ ref: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, section: l.section })), ROOFING_REFERENTIAL, profile, undefined, extraFacts);
     // Niveau 1 : le rôle de chaque quantité (mesure d'ouvrage ou à commander), proposé par le code
     // et ENREGISTRÉ avec la ligne ; une mesure ne devient jamais une quantité d'achat.
     const proposals = proposeLineRoles(takeoff.lines.map((l) => ({ ref: l.id, reference: l.reference, designation: l.designation })), plan, read, ROOFING_REFERENTIAL);
@@ -486,7 +507,8 @@ export class TakeoffService {
         ? computeWithAnswers(ROOFING_REFERENTIAL, plan, takeoff.answers, await this.memory.forEngine(tenant), { acceptDraft }, slotsGivenByQuote(plan, validation))
         : { needs: [], questions: [], declined: [] };
     const reviewed = { takeoff, validation, roles: new Map([...proposals].map(([id, p]) => [id, { ...p, role: roles.get(id) ?? p.role }])) };
-    return { ...reviewed, view: artisanView(lines, validation, engine, { plan, roles, ref: ROOFING_REFERENTIAL, asks }) };
+    const view = artisanView(lines, validation, engine, { plan, roles, ref: ROOFING_REFERENTIAL, asks });
+    return { ...reviewed, view, purchase: purchaseView(view, engine, { plan, roles, ref: ROOFING_REFERENTIAL, validation }) };
   }
 
   /**

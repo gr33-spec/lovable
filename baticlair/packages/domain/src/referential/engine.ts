@@ -1,6 +1,6 @@
 import { Decimal } from "../shared/decimal.js";
 import { evaluateInterval, FormulaError, formulaVariables, parseFormula, type IntervalValue } from "./expression.js";
-import type { Fact, NeedRule, Product, Referential, SellingUnit, Source, WorkItemType } from "./model.js";
+import type { Fact, LookupTable, NeedRule, ParamDef, Product, Referential, SellingUnit, Source, WorkItemType } from "./model.js";
 import { parseRefUnit, sameDim } from "./units.js";
 
 /**
@@ -34,6 +34,22 @@ export interface SlotChoice {
 }
 
 /**
+ * HYPOTHÈSE utilisée par le calcul (donnée par défaut du référentiel ou
+ * produit par défaut), dite à l'artisan en une ligne et modifiable : la clé
+ * est celle de la réponse qui la remplace (« param:pente », « product:liteau »).
+ */
+export interface Assumption {
+  key: string;
+  label: string;
+  value: string;
+  unit: string;
+  /** Pourquoi cette valeur (« Pente moyenne d'une toiture »). */
+  note?: string;
+  /** Réponses proposées en boutons. */
+  choices?: { label: string; value: string }[];
+}
+
+/**
  * Préférences de l'ENTREPRISE (apprises de ses réponses, modifiables).
  * Jamais une donnée fabricant ni une règle technique : elles ne font que
  * choisir à la place d'une question (« mon écran habituel »).
@@ -58,6 +74,8 @@ export interface WorkItemInput {
   /** Emplacements que le devis cite explicitement (« liteaux » écrits sur le devis). */
   mentioned: string[];
   preferences?: CompanyPreferences;
+  /** Emplacements où l'artisan a dit « aucun de ces modèles » : ni produit lu, ni produit par défaut. */
+  declined?: string[];
 }
 
 export interface EngineOptions {
@@ -87,9 +105,10 @@ export interface Question {
  *  - « devis »       : lu dans le devis du client ;
  *  - « referential » : BatiClair sait (référentiel sourcé et vérifié) ;
  *  - « company »     : votre entreprise utilise habituellement (préférence apprise) ;
- *  - « project »     : choisi ou répondu par l'artisan pour CE chantier.
+ *  - « project »     : choisi ou répondu par l'artisan pour CE chantier ;
+ *  - « assumption »  : hypothèse par défaut du référentiel (dite, modifiable).
  */
-export type Origin = "devis" | "referential" | "company" | "project";
+export type Origin = "devis" | "referential" | "company" | "project" | "assumption";
 
 export interface TraceLine {
   label: string;
@@ -156,8 +175,10 @@ export interface NeedResult {
   missing?: MissingData;
   /** Calcul fait avec au moins une donnée en brouillon (option acceptDraft). */
   provisional: boolean;
-  /** D'où vient le produit retenu : écrit au devis, reconnu par appellation, choisi pour le chantier, préférence de l'entreprise. */
-  productOrigin?: "devis" | "alias" | "artisan" | "preference" | "proposal";
+  /** Hypothèses par défaut utilisées (dites à l'artisan, modifiables). */
+  assumptions: Assumption[];
+  /** D'où vient le produit retenu : écrit au devis, reconnu par appellation, choisi pour le chantier, préférence de l'entreprise, par défaut. */
+  productOrigin?: "devis" | "alias" | "artisan" | "preference" | "proposal" | "default";
   /** Préférence de l'entreprise écartée (produit absent, autre famille…) : la vérification normale a repris. */
   preferenceIgnored?: string;
   formula?: string;
@@ -215,14 +236,25 @@ export function requiredInputs(ref: Referential, workItemId: string, needId: str
   const rule = work?.needs.find((n) => n.id === needId);
   if (!work || !rule) throw new Error(`Besoin inconnu : ${workItemId}/${needId}`);
   const vars = new Set(formulaVariables(parseFormula(rule.formula)));
+  // Une valeur intermédiaire ou une table cite d'autres données : elles font partie du besoin.
+  for (let grew = true; grew; ) {
+    grew = false;
+    for (const v of [...vars]) {
+      const derived = work.derived?.find((d) => d.key === v);
+      const table = v.startsWith("table.") ? work.tables?.[v.slice("table.".length)] : undefined;
+      const more = derived ? formulaVariables(parseFormula(derived.formula)) : table ? table.axes.map((a) => a.param) : [];
+      for (const m of more) if (!vars.has(m)) (vars.add(m), (grew = true));
+    }
+  }
   // Les bornes d'un paramètre utilisé (pureau entre mini et maxi de la fiche) font partie des données requises.
   for (const p of work.params) if (vars.has(p.key) && p.range) [p.range.min, p.range.max].forEach((v) => vars.add(v));
-  const slotKeys = new Set([rule.slot, ...[...vars].filter((v) => v.includes(".") && !v.startsWith("regle.")).map((v) => v.split(".")[0]!)]);
+  const isSpec = (v: string) => v.includes(".") && !v.startsWith("regle.") && !v.startsWith("table.");
+  const slotKeys = new Set([rule.slot, ...[...vars].filter(isSpec).map((v) => v.split(".")[0]!)]);
   return {
     products: work.slots.filter((s) => slotKeys.has(s.key)).map((s) => ({ slot: s.key, label: s.label })),
     params: work.params.filter((p) => vars.has(p.key)).map((p) => ({ key: p.key, label: p.label, kind: p.kind })),
     manufacturerSpecs: [...vars]
-      .filter((v) => v.includes(".") && !v.startsWith("regle."))
+      .filter(isSpec)
       .map((v) => {
         const [slot, key] = v.split(".") as [string, string];
         const family = ref.families.find((f) => f.code === work.slots.find((s) => s.key === slot)?.family);
@@ -237,7 +269,9 @@ export function computeWorkItem(ref: Referential, input: WorkItemInput, options:
   const work = ref.workItems.find((w) => w.id === input.workItemId);
   if (!work) throw new Error(`Ouvrage inconnu du référentiel : ${input.workItemId}`);
   const sources = new Map(ref.sources.map((s) => [s.id, s]));
-  const needs = work.needs.map((rule) => computeNeed(ref, work, rule, input, sources, options));
+  // Un besoin qui exige une donnée que rien ne donne (ni devis, ni réponse, ni hypothèse) n'existe pas pour ce chantier.
+  const known = (key: string) => input.params[key] !== undefined || work.params.find((p) => p.key === key)?.default !== undefined;
+  const needs = work.needs.filter((rule) => (rule.requires ?? []).every(known)).map((rule) => computeNeed(ref, work, rule, input, sources, options));
   // La question qui débloque le plus de besoins demandés par le devis (à égalité : la première).
   const asked = needs.filter((n) => n.question && n.origin !== "suggested").map((n) => n.question!);
   const count = (key: string) => asked.filter((q) => q.key === key).length;
@@ -283,7 +317,7 @@ function computeNeed(
 ): NeedResult {
   const slot = work.slots.find((s) => s.key === rule.slot)!;
   let preferenceIgnored: string | undefined;
-  const productFor = (slotKey: string): { product: Product; choice: SlotChoice | { origin: "preference" | "proposal" } } | undefined => {
+  const productFor = (slotKey: string): { product: Product; choice: SlotChoice | { origin: "preference" | "proposal" | "default" } } | undefined => {
     const chosen = input.products[slotKey];
     if (chosen) {
       const p = ref.products.find((x) => x.id === chosen.productId);
@@ -291,7 +325,8 @@ function computeNeed(
     }
     // Pas sur le devis : le produit habituel de l'entreprise évite la question (établi) ou la simplifie (à reconfirmer).
     // Il ne passe JAMAIS outre le référentiel : un produit inconnu ou d'une autre famille est écarté.
-    const family = work.slots.find((s) => s.key === slotKey)?.family;
+    const slotDef = work.slots.find((s) => s.key === slotKey);
+    const family = slotDef?.family;
     for (const kind of ["preference", "proposal"] as const) {
       const map = kind === "preference" ? input.preferences?.products : input.preferences?.proposals;
       const preferred = map?.[slotKey] ?? (family ? map?.[family] : undefined);
@@ -304,12 +339,20 @@ function computeNeed(
           : `Produit habituel écarté : il n'est plus au référentiel.`;
       }
     }
+    // Rien de nommé, pas d'habitude : le produit par défaut du référentiel (pratique validée), dit comme hypothèse.
+    // Sauf si l'artisan a répondu « aucun de ces modèles » : le besoin reste à faire chiffrer.
+    const usual = slotDef?.usual?.productId && !input.declined?.includes(slotKey) ? ref.products.find((x) => x.id === slotDef.usual!.productId) : undefined;
+    if (usual && usual.family === family) return { product: usual, choice: { origin: "default" } };
     return undefined;
   };
   const resolved = productFor(slot.key);
   const product = resolved?.product;
   const origin: NeedResult["origin"] = input.mentioned.includes(slot.key) ? "explicit" : rule.core ? "deduced" : "suggested";
   const trace: TraceLine[] = [];
+  const assumptions: Assumption[] = [];
+  const assume = (a: Assumption) => {
+    if (!assumptions.some((x) => x.key === a.key)) assumptions.push(a);
+  };
   let provisional = false;
   const base = {
     needId: rule.id,
@@ -400,23 +443,35 @@ function computeNeed(
     }
     if (product && resolved) {
       const o = resolved.choice.origin;
-      trace.push({
-        label: "Produit",
-        value: product.shortLabel,
-        unit: "",
-        from: o === "preference" ? "Préférence de votre entreprise" : o === "artisan" ? "Votre choix pour ce chantier" : "Devis",
-        origin: o === "preference" ? "company" : o === "artisan" ? "project" : "devis",
-        verified: true,
-      });
+      if (o === "default") {
+        const usual = slot.usual!;
+        trace.push({ label: "Produit", value: product.shortLabel, unit: "", from: `Par défaut : ${usual.text}`, origin: "assumption", verified: true });
+        assume({ key: `product:${slot.key}`, label: slot.label, value: product.shortLabel, unit: "", note: usual.text });
+      } else {
+        trace.push({
+          label: "Produit",
+          value: product.shortLabel,
+          unit: "",
+          from: o === "preference" ? "Préférence de votre entreprise" : o === "artisan" ? "Votre choix pour ce chantier" : "Devis",
+          origin: o === "preference" ? "company" : o === "artisan" ? "project" : "devis",
+          verified: true,
+        });
+      }
     }
 
     // 2. Les valeurs de la formule. Une donnée de chantier inconnue n'est pas devinée :
     //    elle prend TOUTES ses valeurs admissibles (intervalle), et on regarde si la commande change.
     const expr = parseFormula(rule.formula);
     const missing: { key: string; label: string; question: Question }[] = [];
+    const derivedCache = new Map<string, IntervalValue>();
     const valueOf = (name: string): IntervalValue => {
       const [head, attr] = name.split(".");
       if (attr !== undefined) {
+        if (head === "table") {
+          const table = work.tables?.[attr];
+          if (!table) throw new Stop({ status: "unknown", reason: `Table absente du référentiel : ${attr}.`, missing: gap({ kind: "constant", label: attr.replace(/_/g, " "), attribute: attr }) });
+          return useTable(attr, table);
+        }
         if (head === "regle") {
           const fact = work.constants[attr];
           if (!fact) throw new Stop({ status: "unknown", reason: `Constante absente du référentiel : ${attr}.`, missing: gap({ kind: "constant", label: attr.replace(/_/g, " "), attribute: attr }) });
@@ -435,17 +490,37 @@ function computeNeed(
         }
         return useFact(`${def?.label ?? attr} (${p.shortLabel})`, fact, { kind: "product_data", attribute: attr, productId: p.id });
       }
+      const derived = work.derived?.find((d) => d.key === name);
+      if (derived) {
+        const cached = derivedCache.get(name);
+        if (cached) return cached;
+        if (derived.verification.status !== "verified") {
+          if (derived.verification.status === "deprecated" || !options.acceptDraft) {
+            throw new Stop({ status: "unknown", reason: "Règle de calcul en attente de vérification.", missing: gap({ kind: "rule", label: `Règle : ${derived.label.toLowerCase()}`, sourceId: derived.source }) });
+          }
+          provisional = true;
+        }
+        const unit = parseRefUnit(derived.unit);
+        const v = evaluateInterval(parseFormula(derived.formula), valueOf);
+        if (!sameDim(v.dim, unit.dim)) throw new FormulaError(`La valeur ${derived.key} ne donne pas des ${derived.unit}`);
+        derivedCache.set(name, v);
+        const shown = (x: Decimal) => fr(x.dividedBy(unit.factor));
+        trace.push({ label: derived.label, value: isPoint(v) ? shown(v.lo) : `${shown(v.lo)} à ${shown(v.hi)}`, unit: derived.unit, origin: "referential", ...provenanceLine(derived, sources) });
+        if (derived.shown && isPoint(v)) assume({ key: `derived:${derived.key}`, label: derived.label, value: shown(v.lo), unit: derived.unit });
+        return v;
+      }
       const def = work.params.find((p) => p.key === name);
       if (!def) throw new FormulaError(`Variable inconnue : ${name}`);
       const expected = parseRefUnit(def.unit);
       const bounds = def.range ? { min: valueOf(def.range.min), max: valueOf(def.range.max) } : null;
       const given = input.params[name];
+      if (!given && def.default) return useDefault(def, def.default, expected);
       if (!given) {
         if (!missing.some((m) => m.key === name)) {
           missing.push({
             key: name,
             label: def.label,
-            question: { key: `param:${name}`, kind: "param", text: def.question, unit: def.unit, ...(def.hint ? { hint: def.hint } : {}) },
+            question: { key: `param:${name}`, kind: "param", text: def.question, unit: def.unit, ...(def.hint ? { hint: def.hint } : {}), ...(def.choices ? { options: def.choices } : {}) },
           });
         }
         return bounds ? { lo: bounds.min.lo, hi: bounds.max.hi, dim: expected.dim } : { lo: new Decimal(-Infinity), hi: new Decimal(Infinity), dim: expected.dim };
@@ -475,6 +550,75 @@ function computeNeed(
       });
       return point(value, unit.dim);
     };
+    /** Hypothèse par défaut : une valeur fixe ou une formule, tracée et dite à l'artisan. */
+    function useDefault(def: ParamDef, d: NonNullable<ParamDef["default"]>, expected: ReturnType<typeof parseRefUnit>): IntervalValue {
+      if (d.verification.status !== "verified") {
+        if (d.verification.status === "deprecated" || !options.acceptDraft) {
+          throw new Stop({ status: "unknown", reason: `Hypothèse par défaut en attente de vérification : ${def.label.toLowerCase()}.`, missing: gap({ kind: "constant", label: `Hypothèse : ${def.label}`, sourceId: d.source }) });
+        }
+        provisional = true;
+      }
+      const cached = derivedCache.get(`default:${def.key}`);
+      if (cached) return cached;
+      let v: IntervalValue;
+      if (d.formula) {
+        v = evaluateInterval(parseFormula(d.formula), valueOf);
+        if (!sameDim(v.dim, expected.dim)) throw new FormulaError(`L'hypothèse ${def.key} ne donne pas des ${def.unit}`);
+      } else {
+        v = point(new Decimal(d.value ?? "0").times(expected.factor), expected.dim);
+      }
+      derivedCache.set(`default:${def.key}`, v);
+      const shown = (x: Decimal) => fr(x.dividedBy(expected.factor));
+      const value = isPoint(v) ? shown(v.lo) : `${shown(v.lo)} à ${shown(v.hi)}`;
+      const prov = provenanceLine(d, sources);
+      trace.push({ label: def.label, value, unit: def.unit, from: `Hypothèse${d.note ? ` : ${d.note}` : ""} (${prov.from})`, verified: prov.verified, ...(prov.url ? { url: prov.url } : {}), origin: "assumption" });
+      assume({ key: `param:${def.key}`, label: def.label, value, unit: def.unit, ...(d.note ? { note: d.note } : {}), ...(def.choices ? { choices: def.choices } : {}) });
+      return v;
+    }
+    /** Table : la cellule des plus grands seuils atteints ; une entrée hors table arrête le calcul (rien n'est deviné). */
+    function useTable(name: string, table: LookupTable): IntervalValue {
+      if (table.verification.status !== "verified") {
+        if (table.verification.status === "deprecated" || !options.acceptDraft) {
+          throw new Stop({ status: "unknown", reason: "Règle de calcul en attente de vérification.", missing: gap({ kind: "rule", label: `Table : ${table.label.toLowerCase()}`, sourceId: table.source }) });
+        }
+        provisional = true;
+      }
+      const unit = parseRefUnit(table.unit);
+      const inputs = table.axes.map((axis) => {
+        const def = work.params.find((p) => p.key === axis.param);
+        if (!def) throw new FormulaError(`Table ${name} : paramètre inconnu ${axis.param}`);
+        const v = valueOf(axis.param);
+        const factor = parseRefUnit(def.unit).factor;
+        return { axis, lo: v.lo.dividedBy(factor), hi: v.hi.dividedBy(factor) };
+      });
+      const index = (axis: LookupTable["axes"][number], x: Decimal): number => {
+        let best = -1;
+        axis.thresholds.forEach((t, i) => {
+          if (x.greaterThanOrEqualTo(new Decimal(t))) best = i;
+        });
+        return best;
+      };
+      const cell = (ij: number[]): Decimal => new Decimal(table.values[ij[0]!]![ij[1] ?? 0]!);
+      const los = inputs.map((i) => index(i.axis, i.lo));
+      const his = inputs.map((i) => index(i.axis, i.hi));
+      if (his.some((i) => i < 0)) {
+        const which = inputs[his.findIndex((i) => i < 0)]!;
+        const def = work.params.find((p) => p.key === which.axis.param)!;
+        throw new Stop({ status: "unknown", reason: `${def.label} trop faible pour cet ouvrage (minimum ${which.axis.thresholds[0]} ${def.unit}).` });
+      }
+      // Entrées connues à un intervalle près : toutes les cellules entre les deux coins restent possibles.
+      const candidates: Decimal[] = [];
+      const i0 = Math.max(los[0]!, 0);
+      for (let i = i0; i <= his[0]!; i++) {
+        if (inputs.length === 1) candidates.push(cell([i]));
+        else for (let j = Math.max(los[1]!, 0); j <= his[1]!; j++) candidates.push(cell([i, j]));
+      }
+      if (los.some((i) => i < 0)) candidates.push(new Decimal(-Infinity));
+      const v: IntervalValue = { lo: Decimal.min(...candidates).times(unit.factor), hi: Decimal.max(...candidates).times(unit.factor), dim: unit.dim };
+      const shown = (x: Decimal) => fr(x.dividedBy(unit.factor));
+      trace.push({ label: table.label, value: isPoint(v) ? shown(v.lo) : `${shown(v.lo)} à ${shown(v.hi)}`, unit: table.unit, origin: "referential", ...provenanceLine(table, sources) });
+      return v;
+    }
     const raw = evaluateInterval(expr, valueOf);
 
     // 3. Unité du besoin.
@@ -547,11 +691,12 @@ function computeNeed(
       ...(purchaseUnavailable ? { purchaseUnavailable } : {}),
       ...(purchaseMissing ? { missing: purchaseMissing } : {}),
       provisional,
+      assumptions,
       trace,
     };
   } catch (e) {
     if (!(e instanceof Stop)) throw e;
-    return { ...base, ...e.outcome, provisional, trace };
+    return { ...base, ...e.outcome, provisional, assumptions, trace };
   }
 }
 
@@ -572,7 +717,9 @@ function toPurchase(
   const counts = (su: SellingUnit) => {
     const content = useFact(`Contenu : 1 ${su.label.one}`, su.contains);
     if (!sameDim(content.dim, needUnit.dim) || content.lo.isZero()) return null;
-    return { lo: lo.dividedBy(content.lo).ceil(), hi: hi.dividedBy(content.lo).ceil() };
+    // Arrondi au supérieur après avoir effacé le bruit décimal (333,333… × 1,05 vaut 350, pas 351).
+    const whole = (x: Decimal) => x.dividedBy(content.lo).toDecimalPlaces(6).ceil();
+    return { lo: whole(lo), hi: whole(hi) };
   };
   const primary = product.sellingUnits.find((s) => s.primary);
   if (!primary) {

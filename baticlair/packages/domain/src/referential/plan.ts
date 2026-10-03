@@ -83,7 +83,11 @@ function readLabelled(normalized: string, label: string): { value: string; unit:
   return { value: m[1]!.replace(",", "."), unit: TEXT_UNITS[m[2]!]! };
 }
 
-export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradeProfile, preferences?: CompanyPreferences): QuotePlan {
+/**
+ * @param extraFacts données du chantier connues hors du devis (zone climatique déduite du
+ *   code postal de l'adresse) : elles complètent le contexte, le devis l'emporte s'il les écrit.
+ */
+export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradeProfile, preferences?: CompanyPreferences, extraFacts: readonly SiteFact[] = []): QuotePlan {
   // Le vocabulaire d'un référentiel ne vaut que pour SON métier : dans un devis de plombier,
   // « coude PVC » n'est pas un coude de descente de gouttière.
   const covered = profile.id.split(",").includes(ref.trade);
@@ -153,7 +157,7 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
     // 4. Les données écrites : la quantité de la ligne, et les valeurs annoncées par leur nom.
     const unit = v.unit ? LINE_UNITS[v.unit] : undefined;
     if (unit && v.quantity) {
-      for (const p of work.params.filter((x) => x.fromLineQuantity && sameDimUnit(x.unit, unit))) {
+      for (const p of work.params.filter((x) => x.fromLineQuantity && sameDimUnit(x.unit, unit) && (!x.forSlots || x.forSlots.includes(slot.key)))) {
         facts.push({ key: p.key, value: v.quantity.toFixed(), unit, evidence: `Devis, ${line.ref}`, origin: "devis" });
       }
     }
@@ -168,6 +172,8 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
     plans.push({ ref: line.ref, status: "planned", workItemId: work.id, slot: slot.key, mentions, characteristics: chars });
   }
 
+  // Une donnée hors devis (zone) ne vaut que si le devis ne la donne pas : jamais de conflit avec lui.
+  for (const f of extraFacts) if (!facts.some((x) => x.key === f.key)) facts.push(f);
   const context: ChantierContext = { facts };
   const conflicts: string[] = [];
   const inputs: WorkItemInput[] = active

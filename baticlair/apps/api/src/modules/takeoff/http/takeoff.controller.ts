@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch, Post, Us
 import { z } from "zod";
 import { ZodPipe } from "../../../platform/http/zod.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
-import type { ArtisanView } from "@baticlair/domain";
+import type { ArtisanView, PurchaseView } from "@baticlair/domain";
 import { TakeoffService, type ReviewedTakeoff } from "../application/takeoff.service.js";
 import { artisanNotes } from "../../../platform/ai/artisan-notes.js";
 
@@ -27,6 +27,16 @@ const lineBody = z.object({
  * mesure, et pour chaque élément sa PREUVE (« Voir le calcul ») — critères et
  * origines, calcul détaillé pour un besoin calculé. Aucun pourcentage.
  */
+function purchaseDto(p: PurchaseView) {
+  return {
+    understood: p.understood,
+    toBuy: p.toBuy.map((b) => ({ key: b.key, label: b.label, quantity: b.quantity, approx: b.approx, kind: b.kind, needIds: b.needIds, lineIds: b.lineIds, state: b.state, assumptionKeys: b.assumptionKeys })),
+    toQuote: p.toQuote.map((q) => ({ key: q.key, label: q.label, measure: q.measure, reason: q.reason, lineIds: q.lineIds })),
+    assumptions: p.assumptions.map((a) => ({ key: a.key, label: a.label, value: a.value, unit: a.unit, note: a.note ?? null, choices: a.choices ?? [] })),
+    canValidate: p.canValidate,
+  };
+}
+
 function viewDto(view: ArtisanView) {
   return {
     counts: { verified: view.counts.verified, toConfirm: view.counts.to_confirm, missing: view.counts.missing },
@@ -40,7 +50,7 @@ function viewDto(view: ArtisanView) {
       primary: d.primary,
       secondary: d.secondary,
       question: d.question
-        ? { key: d.question.key, kind: d.question.kind, unit: d.question.unit ?? null, hint: d.question.hint ?? null, options: d.question.options ?? [] }
+        ? { key: d.question.key, kind: d.question.kind, unit: d.question.unit ?? null, hint: d.question.hint ?? null, options: d.question.options ?? [], impact: d.question.impact ?? null }
         : null,
     })),
     measures: view.measures,
@@ -87,7 +97,7 @@ function viewDto(view: ArtisanView) {
   };
 }
 
-function toDto({ takeoff, validation, view, roles }: ReviewedTakeoff) {
+function toDto({ takeoff, validation, view, roles, purchase }: ReviewedTakeoff) {
   const byId = new Map(validation.lines.map((v) => [v.lineId, v]));
   return {
     id: takeoff.id,
@@ -95,6 +105,7 @@ function toDto({ takeoff, validation, view, roles }: ReviewedTakeoff) {
     documentId: takeoff.documentId,
     status: takeoff.status,
     view: viewDto(view),
+    purchase: purchaseDto(purchase),
     model: takeoff.model,
     promptVersion: takeoff.promptVersion,
     notes: artisanNotes(takeoff.notes),

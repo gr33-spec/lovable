@@ -1,24 +1,32 @@
-import type { Fact, Provenance, Referential } from "../model.js";
+import type { Fact, ParamDef, Product, Provenance, Referential } from "../model.js";
 
 /**
- * Référentiel COUVERTURE — premier système réel, pour prouver le moteur.
+ * Référentiel COUVERTURE.
  *
- * Statut des données (2026-10-01) :
+ * Statut des données (2026-10-03) :
  *  - caractéristiques Edilians HP 10 et Soprema SOP'ÉCRAN HPV R2 : confirmées
- *    par le fondateur sur la documentation officielle des fabricants ; page
- *    et version exactes à compléter à réception des PDF ;
- *  - règles de calcul (tuiles, liteaux, contre-liteaux) : règles BatiClair,
- *    EN ATTENTE de validation métier par le fondateur → inutilisables pour un
- *    artisan tant qu'elles ne sont pas validées ;
- *  - liteaux (longueur vendue, section) : en attente de la fiche du négoce.
+ *    par le fondateur sur la documentation officielle des fabricants ;
+ *  - règles de calcul, tableau de recouvrement de l'ardoise, pertes,
+ *    conditionnements courants et HYPOTHÈSES PAR DÉFAUT (pente 45 %, zone
+ *    littorale, rampant ≤ 5,5 m, entraxe 60 cm) : référentiel quantitatif
+ *    rédigé et validé par le fondateur (couvreur) ;
+ *  - produits GÉNÉRIQUES (« faîtière standard », « écran HPV standard ») :
+ *    pièces par défaut quand le devis ne nomme rien, données tirées du même
+ *    référentiel ; le fournisseur propose la marque.
  *
- * Le PUREAU n'est pas une caractéristique figée de la tuile : la fiche donne
- * une plage (310 à 376 mm), et la pente, la zone et la situation servent aux
- * pentes MINIMALES admissibles (condition d'emploi), pas au choix du pureau.
- * Le pureau retenu est donc une donnée du CHANTIER : lue dans le devis, ou
- * demandée. Il n'est jamais choisi par BatiClair.
+ * Principe produit : l'artisan dépose son devis, BatiClair sort la liste
+ * d'achats. Une donnée que le devis ne dit pas prend son hypothèse par défaut,
+ * DITE et modifiable ; une question n'est posée que si rien ne permet de
+ * calculer et que la réponse change la commande.
  */
 const DRAFT = { status: "draft" } as const;
+/** Référentiel quantitatif couverture écrit par le fondateur (couvreur), validé par lui le 2026-10-03. */
+const FOUNDER_DOC = {
+  status: "verified",
+  verifiedAt: "2026-10-03",
+  verifiedBy: "Fondateur (couvreur)",
+  note: "Référentiel quantitatif couverture rédigé et validé par le fondateur.",
+} as const;
 /**
  * Règles présentées une par une au fondateur (couvreur), avec formule et
  * exemple chiffré, et validées par lui le 2026-10-02 (« Oui » aux 10 règles).
@@ -56,10 +64,85 @@ const condition = (value: string, unit: string, source: string, verification: Pr
 
 /** « 1 pièce contient 1 pièce » : une définition, pas une donnée à prouver. */
 const ONE_PIECE: Fact = packaging("1", "u", "definition", { status: "verified", verifiedAt: "2026-10-01", verifiedBy: "BatiClair (définition)" });
+const ONE_METRE: Fact = packaging("1", "m", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" });
+const BY_PIECE: Product["sellingUnits"] = [{ id: "piece", label: { one: "pièce", many: "pièces" }, contains: ONE_PIECE, primary: true }];
+/** Liteaux : commandés au mètre ; la botte de 50 ml donne l'ordre de grandeur (référentiel du fondateur). */
+const BATTEN_UNITS: Product["sellingUnits"] = [
+  { id: "ml", label: { one: "ml", many: "ml" }, contains: ONE_METRE, primary: true },
+  { id: "botte", label: { one: "botte de 50 ml", many: "bottes de 50 ml" }, contains: packaging("50", "m", "fondateur-referentiel-2026-10-03", FOUNDER_DOC) },
+];
+/** Produit GÉNÉRIQUE : la pièce par défaut quand le devis ne nomme rien (le fournisseur propose la marque). */
+const generic = (id: string, family: string, label: string, shortLabel: string, extra: Partial<Product> = {}): Product => ({
+  id,
+  family,
+  label,
+  shortLabel,
+  aliases: [],
+  generic: true,
+  attributes: {},
+  sellingUnits: BY_PIECE,
+  ...extra,
+});
+const F = "fondateur-referentiel-2026-10-03";
+
+/** Hypothèses par défaut du référentiel du fondateur : dites à l'artisan, modifiables d'un geste. */
+const PENTE_PARAM: ParamDef = {
+  key: "pente",
+  label: "Pente du toit",
+  unit: "%",
+  kind: "site_data",
+  question: "Pente du toit ?",
+  textLabels: ["pente"],
+  default: { value: "45", source: F, verification: FOUNDER_DOC, version: 1, note: "pente moyenne d'une toiture" },
+  choices: [
+    { label: "Faible (30 %)", value: "30" },
+    { label: "Moyenne (45 %)", value: "45" },
+    { label: "Forte (60 %)", value: "60" },
+    { label: "Très forte (100 %)", value: "100" },
+  ],
+};
+/** Zone climatique (1 intérieur, 2 intermédiaire, 3 littoral et montagne) : déduite du code postal, sinon le bord de mer. */
+const ZONE_PARAM: ParamDef = {
+  key: "zone",
+  label: "Zone climatique",
+  unit: "u",
+  kind: "site_data",
+  question: "Le chantier est plutôt…",
+  default: { value: "3", source: F, verification: FOUNDER_DOC, version: 1, note: "bord de mer ou montagne (zone 3), à défaut de code postal" },
+  choices: [
+    { label: "Intérieur des terres", value: "1" },
+    { label: "À 20–40 km de la mer, ou 200–500 m d'altitude", value: "2" },
+    { label: "Bord de mer, ou plus de 500 m", value: "3" },
+  ],
+};
+const ENTRAXE_PARAM: ParamDef = {
+  key: "entraxe_supports",
+  label: "Entraxe des chevrons ou fermettes",
+  unit: "cm",
+  kind: "site_data",
+  question: "Entraxe des chevrons (ou fermettes) ?",
+  textLabels: ["entraxe"],
+  default: { value: "60", source: F, verification: FOUNDER_DOC, version: 1, note: "entraxe courant en rénovation" },
+  choices: [
+    { label: "45 cm", value: "45" },
+    { label: "60 cm", value: "60" },
+    { label: "90 cm (fermettes)", value: "90" },
+  ],
+};
+const SURFACE_PARAM: ParamDef = { key: "surface", label: "Surface de toiture", unit: "m2", kind: "site_data", question: "Quelle surface de toiture ?", fromLineQuantity: true };
+const USUAL_LITEAU_TUILE = { text: "Liteaux 27×40 pour la tuile (section courante).", source: F, productShort: "Liteaux 27×40", productId: "liteau-sapin-27x40" };
+const USUAL_CONTRE_LITEAU = { text: "Contre-liteaux 27×40 sur chevrons (section courante).", source: F, productShort: "Liteaux 27×40", productId: "liteau-sapin-27x40" };
+const USUAL_ECRAN = { text: "Écran HPV courant en rouleau de 1,5 × 50 m (75 m²).", source: F, productId: "ecran-hpv-standard" };
+const ECRAN_CONSTANTS = {
+  seuil_pente_ecran: condition("30", "%", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED),
+  recouvrement_faible_pente: condition("0.20", "m", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED, "Pente inférieure OU ÉGALE au seuil (« ≤ 30 % »)."),
+  recouvrement_forte_pente: condition("0.10", "m", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED, "Pente supérieure au seuil."),
+};
+const ECRAN_FORMULA = "surface * ecran.largeur_rouleau / (ecran.largeur_rouleau - si(pente <= regle.seuil_pente_ecran, regle.recouvrement_faible_pente, regle.recouvrement_forte_pente))";
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.02-8",
+  version: "roofing-2026.10.03-9",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -123,6 +206,14 @@ export const ROOFING_REFERENTIAL: Referential = {
       note: "Convention « longueur × largeur » (30×22 = 30 cm de long, 22 cm de large), confirmée par le fondateur le 2026-10-02.",
     },
     {
+      id: "fondateur-referentiel-2026-10-03",
+      kind: "trade_practice",
+      title: "Référentiel quantitatif couverture (document du fondateur, couvreur)",
+      documentRef: "Document « Référentiel quantitatif couverture-étanchéité », rédigé par le fondateur, 2026-10-03",
+      retrievedAt: "2026-10-03",
+      note: "Formules, tableau de recouvrement de l'ardoise (pente × zone), pertes, conditionnements courants, hypothèses par défaut. Les chiffres qu'il cite comme « valeurs courantes des DTU et fiches fabricants » restent à retrouver dans un document public : jusque-là, ils valent comme pratique validée par le fondateur (docs/ratios-a-valider.md).",
+    },
+    {
       id: "negoce-liteau-27x40",
       kind: "retailer",
       title: "Fiche article liteau sapin traité 27 × 40 (négoce)",
@@ -140,7 +231,11 @@ export const ROOFING_REFERENTIAL: Referential = {
       keywords: ["faitiere", "faitage"],
     },
     { code: "ridge_closure", label: "Closoir de faîtage", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["closoir"] },
-    { code: "ridge_fixing", label: "Fixation de faîtière", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["fixation de faitiere", "agrafe de faitiere"] },
+    { code: "ridge_fixing", label: "Fixation de faîtière", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["fixation de faitiere", "agrafe de faitiere", "crochet de faitiere"] },
+    { code: "ridge_end", label: "About de faîtage", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["about de faitage", "about"] },
+    // Un faîtage EN ZINC est une bande, jamais des faîtières en terre cuite : le mot « zinc » le départage.
+    { code: "zinc_ridge", label: "Faîtage zinc (bande)", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["faitage zinc", "faitage en zinc", "faitiere zinc", "faitiere en zinc", "bande de faitage zinc", "bande de faitage"] },
+    { code: "zinc_clip", label: "Patte de fixation zinc", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["patte de fixation", "patte zinc"] },
     { code: "verge_tile", label: "Tuile de rive", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["tuile de rive", "rive"] },
     { code: "gutter", label: "Gouttière (profil)", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["gouttiere"] },
     {
@@ -257,8 +352,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         epaisseur: spec("27", "mm", "negoce-liteau-27x40", DRAFT, "Section nominale (désignation commerciale)."),
         largeur: spec("40", "mm", "negoce-liteau-27x40", DRAFT, "Section nominale (désignation commerciale)."),
       },
-      // Aucun conditionnement saisi : la longueur vendue dépend du négoce (fiche article à fournir).
-      sellingUnits: [],
+      sellingUnits: BATTEN_UNITS,
     },
     {
       id: "liteau-sapin-18x40",
@@ -271,7 +365,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         epaisseur: spec("18", "mm", "designation-liteau", FOUNDER_VALIDATED, "Section nominale (désignation commerciale)."),
         largeur: spec("40", "mm", "designation-liteau", FOUNDER_VALIDATED, "Section nominale (désignation commerciale)."),
       },
-      sellingUnits: [],
+      sellingUnits: BATTEN_UNITS,
     },
     {
       id: "ardoise-30x22",
@@ -312,6 +406,40 @@ export const ROOFING_REFERENTIAL: Referential = {
       attributes: { pieces_par_ml: spec("3", "u/m", "edilians-hp10", FOUNDER_CHECKED, "« 3 pièces/ml » (documentation HP 10, 19/04/2024).") },
       sellingUnits: [{ id: "piece", label: { one: "pièce", many: "pièces" }, contains: ONE_PIECE, primary: true }],
     },
+    // ---- Produits génériques (référentiel du fondateur) : utilisés par défaut, dits comme hypothèse.
+    generic("faitiere-standard", "ridge_tile", "Faîtière 40 à 42 cm, recouvrement 5 à 7 cm (modèle à préciser)", "Faîtières", {
+      attributes: { pieces_par_ml: spec("2.9", "u/m", F, FOUNDER_DOC, "« ml faîtage / 0,35 ≈ 2,9 pièces/ml ».") },
+    }),
+    generic("closoir-standard-5m", "ridge_closure", "Closoir ventilé de faîtage, rouleau de 5 m (modèle à préciser)", "Closoir", {
+      sellingUnits: [{ id: "rouleau", label: { one: "rouleau de 5 m", many: "rouleaux de 5 m" }, contains: packaging("5", "m", F, FOUNDER_DOC), primary: true }],
+    }),
+    generic("crochet-faitiere-standard", "ridge_fixing", "Crochet de faîtière à sec (modèle à préciser)", "Crochets de faîtière"),
+    generic("about-faitage-standard", "ridge_end", "About de faîtage (modèle à préciser)", "Abouts de faîtage"),
+    generic("ecran-hpv-standard", "underlay", "Écran de sous-toiture HPV, rouleau 1,5 × 50 m (modèle à préciser)", "Écran HPV", {
+      attributes: {
+        largeur_rouleau: spec("1.5", "m", F, FOUNDER_DOC),
+        longueur_rouleau: spec("50", "m", F, FOUNDER_DOC),
+      },
+      sellingUnits: [{ id: "rouleau", label: { one: "rouleau", many: "rouleaux" }, contains: packaging("75", "m2", F, FOUNDER_DOC, "1,5 × 50 m = 75 m²."), primary: true }],
+    }),
+    generic("crochet-ardoise-standard", "slate_hook", "Crochet d'ardoise inox (longueur = pureau + 10 à 20 mm)", "Crochets d'ardoise"),
+    generic("tuile-rive-standard", "verge_tile", "Tuile de rive (modèle de la tuile)", "Tuiles de rive"),
+    generic("gouttiere-standard-4m", "gutter", "Gouttière, longueurs de 4 m (profil à préciser)", "Gouttière", {
+      sellingUnits: [
+        { id: "longueur", label: { one: "longueur de 4 m", many: "longueurs de 4 m" }, contains: packaging("4", "m", F, FOUNDER_DOC), primary: true },
+      ],
+    }),
+    generic("crochet-gouttiere-standard", "gutter_hook", "Crochet de gouttière (modèle à préciser)", "Crochets de gouttière"),
+    generic("naissance-standard", "gutter_outlet", "Naissance de gouttière (modèle à préciser)", "Naissances"),
+    generic("tube-descente-standard", "downpipe", "Tube de descente (modèle à préciser)", "Tubes de descente", {
+      sellingUnits: [{ id: "ml", label: { one: "ml", many: "ml" }, contains: ONE_METRE, primary: true }],
+    }),
+    generic("coude-descente-standard", "downpipe_elbow", "Coude de descente (modèle à préciser)", "Coudes"),
+    generic("bande-faitage-zinc-standard", "zinc_ridge", "Bande de faîtage zinc, développé 25 à 33 cm, longueurs de 3 m", "Faîtage zinc (bande)", {
+      sellingUnits: [{ id: "longueur", label: { one: "longueur de 3 m", many: "longueurs de 3 m" }, contains: packaging("3", "m", F, FOUNDER_DOC), primary: true }],
+    }),
+    generic("patte-zinc-standard", "zinc_clip", "Patte de fixation pour bande zinc", "Pattes de fixation"),
+    generic("collier-descente-standard", "downpipe_clamp", "Collier de descente (modèle à préciser)", "Colliers"),
   ],
   workItems: [
     {
@@ -320,7 +448,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       label: "Couverture en tuiles à emboîtement sur liteaux",
       triggers: ["roof_tile"],
       params: [
-        { key: "surface", label: "Surface de toiture", unit: "m2", kind: "site_data", question: "Quelle surface de toiture ?", fromLineQuantity: true },
+        SURFACE_PARAM,
         {
           key: "pureau",
           label: "Pureau",
@@ -330,27 +458,32 @@ export const ROOFING_REFERENTIAL: Referential = {
           hint: "Il change le nombre de tuiles et de liteaux.",
           range: { min: "tuile.pureau_min", max: "tuile.pureau_max" },
           textLabels: ["pureau"],
+          // Référentiel du fondateur : « en zone 3 et pente < 35 %, prendre le pureau mini » ; sinon le pureau se cale
+          // selon la pente, le maxi du fabricant pour une pente courante. Dit comme hypothèse, modifiable.
+          default: {
+            formula: "si(zone >= regle.zone_littorale, tuile.pureau_min, si(pente < regle.seuil_pente_pureau, tuile.pureau_min, tuile.pureau_max))",
+            source: F,
+            verification: FOUNDER_DOC,
+            version: 1,
+            note: "pureau mini du fabricant en zone littorale ou pente < 35 %, sinon pureau maxi",
+          },
         },
-        {
-          key: "entraxe_supports",
-          label: "Entraxe des chevrons ou fermettes",
-          unit: "cm",
-          kind: "site_data",
-          question: "Entraxe des chevrons (ou fermettes) ?",
-          textLabels: ["entraxe"],
-        },
-        { key: "pente", label: "Pente du toit", unit: "%", kind: "site_data", question: "Pente du toit (en %) ?", textLabels: ["pente"] },
+        ENTRAXE_PARAM,
+        PENTE_PARAM,
+        ZONE_PARAM,
+        { key: "longueur_rives", label: "Longueur de rives", unit: "m", kind: "site_data", question: "Longueur totale des rives ?", fromLineQuantity: true, forSlots: ["rive"] },
       ],
       slots: [
         { key: "tuile", family: "roof_tile", label: "Tuiles" },
-        { key: "liteau", family: "batten", label: "Liteaux", keywords: ["lattage", "liteau", "latte"] },
-        { key: "contre_liteau", family: "batten", label: "Contre-liteaux", keywords: ["contre lattage", "contre latte", "contre liteau"] },
-        { key: "ecran", family: "underlay", label: "Écran sous-toiture" },
+        { key: "liteau", family: "batten", label: "Liteaux", keywords: ["lattage", "liteau", "latte"], usual: USUAL_LITEAU_TUILE },
+        { key: "contre_liteau", family: "batten", label: "Contre-liteaux", keywords: ["contre lattage", "contre latte", "contre liteau"], usual: USUAL_CONTRE_LITEAU },
+        { key: "ecran", family: "underlay", label: "Écran sous-toiture", usual: USUAL_ECRAN },
+        { key: "rive", family: "verge_tile", label: "Tuiles de rive", keywords: ["rive"], usual: { text: "Tuile de rive du modèle de tuile posé.", source: F, productId: "tuile-rive-standard" } },
       ],
       constants: {
-        seuil_pente_ecran: condition("30", "%", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED),
-        recouvrement_faible_pente: condition("0.20", "m", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED, "Pente inférieure OU ÉGALE au seuil (« ≤ 30 % »)."),
-        recouvrement_forte_pente: condition("0.10", "m", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED, "Pente supérieure au seuil."),
+        ...ECRAN_CONSTANTS,
+        seuil_pente_pureau: condition("35", "%", F, FOUNDER_DOC, "Sous cette pente, pureau mini (nombre de tuiles maxi)."),
+        zone_littorale: condition("3", "u", F, FOUNDER_DOC),
       },
       needs: [
         {
@@ -369,7 +502,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           slot: "liteau",
           formula: "surface / pureau",
           unit: "ml",
-          core: false,
+          core: true,
           exclusions: "Hors doublage du liteau d'égout et liteaux de faîtage.",
           source: "baticlair-geometrie-couverture",
           verification: FOUNDER_VALIDATED,
@@ -380,7 +513,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           slot: "contre_liteau",
           formula: "surface / entraxe_supports",
           unit: "ml",
-          core: false,
+          core: true,
           exclusions: "Une file par chevron ou fermette ; suppose un entraxe régulier sur toute la surface.",
           source: "baticlair-geometrie-couverture",
           verification: FOUNDER_VALIDATED,
@@ -389,14 +522,25 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "ecran",
           slot: "ecran",
-          formula:
-            "surface * ecran.largeur_rouleau / (ecran.largeur_rouleau - si(pente <= regle.seuil_pente_ecran, regle.recouvrement_faible_pente, regle.recouvrement_forte_pente))",
+          formula: ECRAN_FORMULA,
           unit: "m2",
-          core: false,
+          core: true,
           exclusions: "Hors recouvrements en bout de rouleau (10 cm au droit d'un support), relevés et chutes.",
           // Les recouvrements viennent de Soprema ; la formule qui en tire la surface d'écran est une règle BatiClair.
           source: "baticlair-geometrie-couverture",
           verification: FOUNDER_VALIDATED,
+          version: 1,
+        },
+        {
+          id: "tuiles-de-rive",
+          slot: "rive",
+          formula: "longueur_rives / pureau",
+          unit: "u",
+          core: true,
+          requires: ["longueur_rives"],
+          exclusions: "Une tuile de rive par rang, sur la longueur totale des rives du devis (gauche et droite) ; hors abouts.",
+          source: F,
+          verification: FOUNDER_DOC,
           version: 1,
         },
       ],
@@ -407,7 +551,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       label: "Couverture en ardoises au crochet sur liteaux",
       triggers: ["roof_slate"],
       params: [
-        { key: "surface", label: "Surface de toiture", unit: "m2", kind: "site_data", question: "Quelle surface de toiture ?", fromLineQuantity: true },
+        SURFACE_PARAM,
         {
           key: "pureau",
           label: "Pureau",
@@ -416,28 +560,81 @@ export const ROOFING_REFERENTIAL: Referential = {
           question: "À quel pureau posez-vous ces ardoises ?",
           hint: "Il change le nombre d'ardoises, de crochets et de liteaux.",
           textLabels: ["pureau"],
+          // Pose au crochet, double recouvrement : pureau = (hauteur − recouvrement) / 2 (référentiel du fondateur).
+          default: { formula: "(ardoise.longueur - recouvrement) / 2", source: F, verification: FOUNDER_DOC, version: 1, note: "(hauteur de l'ardoise − recouvrement) ÷ 2" },
         },
-        { key: "entraxe_supports", label: "Entraxe des chevrons", unit: "cm", kind: "site_data", question: "Entraxe des chevrons ?", textLabels: ["entraxe"] },
-        { key: "pente", label: "Pente du toit", unit: "%", kind: "site_data", question: "Pente du toit (en %) ?", textLabels: ["pente"] },
+        ENTRAXE_PARAM,
+        PENTE_PARAM,
+        ZONE_PARAM,
+        {
+          key: "longueur_rampant",
+          label: "Longueur du rampant",
+          unit: "m",
+          kind: "site_data",
+          question: "Longueur du rampant (de l'égout au faîtage) ?",
+          textLabels: ["rampant"],
+          default: { value: "5.5", source: F, verification: FOUNDER_DOC, version: 1, note: "rampant courant, jusqu'à 5,5 m" },
+          choices: [
+            { label: "Jusqu'à 5,5 m", value: "5.5" },
+            { label: "5,5 à 8 m", value: "8" },
+            { label: "Plus de 8 m", value: "10" },
+          ],
+        },
       ],
       slots: [
         { key: "ardoise", family: "roof_slate", label: "Ardoises" },
-        { key: "crochet", family: "slate_hook", label: "Crochets d'ardoise", keywords: ["crochet"] },
+        { key: "crochet", family: "slate_hook", label: "Crochets d'ardoise", keywords: ["crochet"], usual: { text: "Un crochet inox par ardoise.", source: F, productId: "crochet-ardoise-standard" } },
         {
           key: "liteau",
           family: "batten",
           label: "Liteaux",
           keywords: ["lattage", "liteau", "latte"],
-          usual: { text: "Section 18×40 par défaut : le devis ne la précise pas (règle validée par le fondateur).", source: "fondateur-pratique-2026-10-02", productShort: "Liteaux 18×40" },
+          usual: { text: "Section 18×40 par défaut : le devis ne la précise pas (règle validée par le fondateur).", source: "fondateur-pratique-2026-10-02", productShort: "Liteaux 18×40", productId: "liteau-sapin-18x40" },
         },
-        { key: "contre_liteau", family: "batten", label: "Contre-liteaux", keywords: ["contre lattage", "contre latte", "contre liteau"] },
-        { key: "ecran", family: "underlay", label: "Écran sous-toiture" },
+        { key: "contre_liteau", family: "batten", label: "Contre-liteaux", keywords: ["contre lattage", "contre latte", "contre liteau"], usual: USUAL_CONTRE_LITEAU },
+        { key: "ecran", family: "underlay", label: "Écran sous-toiture", usual: USUAL_ECRAN },
       ],
       constants: {
-        seuil_pente_ecran: condition("30", "%", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED),
-        recouvrement_faible_pente: condition("0.20", "m", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED, "Pente inférieure OU ÉGALE au seuil (« ≤ 30 % »)."),
-        recouvrement_forte_pente: condition("0.10", "m", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED, "Pente supérieure au seuil."),
+        ...ECRAN_CONSTANTS,
+        seuil_rampant: condition("5.5", "m", F, FOUNDER_DOC, "Au-delà, +10 mm de recouvrement."),
+        supplement_rampant: condition("10", "mm", F, FOUNDER_DOC),
+        supplement_nul: condition("0", "mm", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }),
+        pas_recouvrement: condition("5", "mm", F, FOUNDER_DOC, "Recouvrement arrondi aux 5 mm supérieurs."),
       },
+      tables: {
+        recouvrement: {
+          label: "Recouvrement de l'ardoise",
+          unit: "mm",
+          axes: [
+            { param: "pente", thresholds: ["45", "58", "70", "84", "100", "119"] },
+            { param: "zone", thresholds: ["1", "2", "3"] },
+          ],
+          values: [
+            ["110", "120", "130"],
+            ["100", "110", "120"],
+            ["90", "100", "110"],
+            ["85", "90", "100"],
+            ["80", "85", "95"],
+            ["70", "80", "90"],
+          ],
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+          note: "Pose au crochet, rampant ≤ 5,5 m. Lignes 25° (47 %), 30°, 35°, 40°, 45°, ≥ 50° du référentiel ; la première ligne vaut dès la pente minimale de l'ardoise (45 %). Sous 45 % : hors table, l'ouvrage n'est pas calculé.",
+        },
+      },
+      derived: [
+        {
+          key: "recouvrement",
+          label: "Recouvrement",
+          unit: "mm",
+          formula: "arrondi_sup((table.recouvrement + si(longueur_rampant > regle.seuil_rampant, regle.supplement_rampant, regle.supplement_nul)) / regle.pas_recouvrement) * regle.pas_recouvrement",
+          shown: true,
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+      ],
       needs: [
         {
           id: "ardoises",
@@ -445,7 +642,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           formula: "surface / (ardoise.largeur * pureau)",
           unit: "u",
           core: true,
-          exclusions: "Hors ardoises de rive, doublis à l'égout, coupes en noue et en arêtier, casse.",
+          exclusions: "Hors ardoises de rive, doublis à l'égout, coupes en noue et en arêtier (la perte de 5 % couvre casse et coupes de rive d'un pan simple).",
           source: "baticlair-geometrie-ardoise",
           verification: FOUNDER_VALIDATED,
           version: 1,
@@ -456,7 +653,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           formula: "surface / (ardoise.largeur * pureau)",
           unit: "u",
           core: true,
-          exclusions: "Un crochet par ardoise (règle validée par le fondateur) ; hors ardoises de rive et doublis.",
+          exclusions: "Un crochet par ardoise, +2 % (référentiel du fondateur) ; hors ardoises de rive et doublis.",
           source: "baticlair-geometrie-ardoise",
           verification: FOUNDER_VALIDATED,
           version: 1,
@@ -466,7 +663,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           slot: "liteau",
           formula: "surface / pureau",
           unit: "ml",
-          core: false,
+          core: true,
           exclusions: "Une file par rang ; hors doublis à l'égout et liteaux de faîtage.",
           source: "baticlair-geometrie-ardoise",
           verification: FOUNDER_VALIDATED,
@@ -477,7 +674,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           slot: "contre_liteau",
           formula: "surface / entraxe_supports",
           unit: "ml",
-          core: false,
+          core: true,
           exclusions: "Une file par chevron ; suppose un entraxe régulier.",
           source: "baticlair-geometrie-couverture",
           verification: FOUNDER_VALIDATED,
@@ -486,10 +683,9 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "ecran-ardoise",
           slot: "ecran",
-          formula:
-            "surface * ecran.largeur_rouleau / (ecran.largeur_rouleau - si(pente <= regle.seuil_pente_ecran, regle.recouvrement_faible_pente, regle.recouvrement_forte_pente))",
+          formula: ECRAN_FORMULA,
           unit: "m2",
-          core: false,
+          core: true,
           exclusions: "Hors recouvrements en bout de rouleau, relevés et chutes.",
           source: "baticlair-geometrie-couverture",
           verification: FOUNDER_VALIDATED,
@@ -500,15 +696,18 @@ export const ROOFING_REFERENTIAL: Referential = {
     {
       id: "faitage",
       trade: "roofing",
-      label: "Faîtage (faîtières, closoir, fixations)",
+      label: "Faîtage (faîtières, closoir, abouts, fixations)",
       triggers: ["ridge_tile"],
       params: [{ key: "longueur_faitage", label: "Longueur du faîtage", unit: "m", kind: "site_data", question: "Longueur du faîtage ?", fromLineQuantity: true }],
       slots: [
-        { key: "faitiere", family: "ridge_tile", label: "Faîtières" },
-        { key: "closoir", family: "ridge_closure", label: "Closoir" },
-        { key: "fixation_faitiere", family: "ridge_fixing", label: "Fixations de faîtières", keywords: ["fixation"] },
+        { key: "faitiere", family: "ridge_tile", label: "Faîtières", usual: { text: "Faîtière courante (40 à 42 cm) : le modèle suit la tuile ou l'ardoise posée.", source: F, productId: "faitiere-standard" } },
+        { key: "closoir", family: "ridge_closure", label: "Closoir", usual: { text: "Closoir ventilé en rouleau de 5 m.", source: F, productId: "closoir-standard-5m" } },
+        { key: "fixation_faitiere", family: "ridge_fixing", label: "Crochets de faîtière", keywords: ["fixation", "crochet"], usual: { text: "Faîtage à sec : un crochet par faîtière.", source: F, productId: "crochet-faitiere-standard" } },
+        { key: "about", family: "ridge_end", label: "Abouts de faîtage", usual: { text: "Un about à chaque extrémité du faîtage.", source: F, productId: "about-faitage-standard" } },
       ],
-      constants: {},
+      constants: {
+        abouts_par_faitage: condition("2", "u", F, FOUNDER_DOC, "Deux extrémités libres par ligne de faîtage (une seule ligne supposée)."),
+      },
       needs: [
         {
           id: "faitieres",
@@ -517,7 +716,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           formula: "longueur_faitage * faitiere.pieces_par_ml",
           unit: "u",
           core: true,
-          exclusions: "Hors abouts/frontons de faîtage et tuiles de rive.",
+          exclusions: "Hors abouts (comptés à part) et rencontres d'arêtiers.",
           source: "definition",
           verification: { status: "verified", verifiedAt: "2026-10-01", verifiedBy: "BatiClair (définition d'un ratio au mètre)" },
           version: 1,
@@ -527,10 +726,67 @@ export const ROOFING_REFERENTIAL: Referential = {
           slot: "closoir",
           formula: "longueur_faitage",
           unit: "ml",
-          core: false,
+          core: true,
           exclusions: "Closoir sur toute la longueur du faîtage ; recouvrements selon le produit.",
           source: "baticlair-pratique-accessoires",
           verification: FOUNDER_VALIDATED,
+          version: 1,
+        },
+        {
+          id: "crochets-faitiere",
+          slot: "fixation_faitiere",
+          formula: "longueur_faitage * faitiere.pieces_par_ml",
+          unit: "u",
+          core: true,
+          exclusions: "Un crochet par faîtière (faîtage à sec).",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "abouts",
+          slot: "about",
+          formula: "regle.abouts_par_faitage",
+          unit: "u",
+          core: true,
+          exclusions: "Deux abouts pour une ligne de faîtage ; un faîtage en plusieurs lignes en demande davantage.",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+      ],
+    },
+    {
+      id: "faitage-zinc",
+      trade: "roofing",
+      label: "Faîtage en bande zinc",
+      triggers: ["zinc_ridge"],
+      params: [{ key: "longueur_faitage", label: "Longueur du faîtage", unit: "m", kind: "site_data", question: "Longueur du faîtage ?", fromLineQuantity: true }],
+      slots: [
+        { key: "bande", family: "zinc_ridge", label: "Faîtage zinc (bande)", usual: { text: "Bande zinc en longueurs de 3 m (développé 25 à 33 cm).", source: F, productId: "bande-faitage-zinc-standard" } },
+        { key: "patte", family: "zinc_clip", label: "Pattes de fixation", keywords: ["patte"], usual: { text: "Trois pattes par mètre.", source: F, productId: "patte-zinc-standard" } },
+      ],
+      constants: { pattes_par_metre: condition("3", "u/m", F, FOUNDER_DOC) },
+      needs: [
+        {
+          id: "bande-faitage-zinc",
+          slot: "bande",
+          formula: "longueur_faitage",
+          unit: "ml",
+          core: true,
+          exclusions: "Recouvrements des longueurs couverts par la perte de 5 %.",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "pattes-faitage-zinc",
+          slot: "patte",
+          formula: "longueur_faitage * regle.pattes_par_metre",
+          unit: "u",
+          core: true,
+          source: F,
+          verification: FOUNDER_DOC,
           version: 1,
         },
       ],
@@ -542,14 +798,31 @@ export const ROOFING_REFERENTIAL: Referential = {
       triggers: ["gutter"],
       params: [
         { key: "longueur_gouttiere", label: "Longueur de gouttière", unit: "m", kind: "site_data", question: "Longueur de gouttière ?", fromLineQuantity: true },
-        { key: "nb_descentes", label: "Nombre de descentes", unit: "u", kind: "site_data", question: "Combien de descentes ?" },
+        {
+          key: "nb_descentes",
+          label: "Nombre de descentes",
+          unit: "u",
+          kind: "site_data",
+          question: "Combien de descentes pour cette gouttière ?",
+          choices: [
+            { label: "1", value: "1" },
+            { label: "2", value: "2" },
+            { label: "3", value: "3" },
+            { label: "4", value: "4" },
+          ],
+        },
+        ZONE_PARAM,
       ],
       slots: [
-        { key: "profil", family: "gutter", label: "Gouttière" },
-        { key: "crochet", family: "gutter_hook", label: "Crochets", keywords: ["crochet"] },
-        { key: "naissance", family: "gutter_outlet", label: "Naissances" },
+        { key: "profil", family: "gutter", label: "Gouttière", usual: { text: "Longueurs de 4 m ; le profil (demi-ronde de 25, de 33…) suit le devis.", source: F, productId: "gouttiere-standard-4m" } },
+        { key: "crochet", family: "gutter_hook", label: "Crochets", keywords: ["crochet"], usual: { text: "Un crochet tous les 50 cm (40 cm en bord de mer).", source: F, productId: "crochet-gouttiere-standard" } },
+        { key: "naissance", family: "gutter_outlet", label: "Naissances", usual: { text: "Une naissance par descente.", source: F, productId: "naissance-standard" } },
       ],
-      constants: {},
+      constants: {
+        espacement_crochet: condition("0.5", "m", F, FOUNDER_DOC),
+        espacement_crochet_littoral: condition("0.4", "m", F, FOUNDER_DOC, "Zone 3 (bord de mer)."),
+        zone_littorale: condition("3", "u", F, FOUNDER_DOC),
+      },
       needs: [
         {
           id: "profil",
@@ -565,12 +838,12 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "crochets",
           slot: "crochet",
-          formula: "longueur_gouttiere / crochet.espacement_max",
+          formula: "longueur_gouttiere / si(zone >= regle.zone_littorale, regle.espacement_crochet_littoral, regle.espacement_crochet)",
           unit: "u",
-          core: false,
-          exclusions: "Hors crochet supplémentaire en extrémité et aux naissances selon le fabricant.",
-          source: "baticlair-pratique-accessoires",
-          verification: DRAFT,
+          core: true,
+          exclusions: "Hors le crochet supplémentaire en bout de chaque ligne de gouttière.",
+          source: F,
+          verification: FOUNDER_DOC,
           version: 1,
         },
         {
@@ -578,7 +851,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           slot: "naissance",
           formula: "nb_descentes",
           unit: "u",
-          core: false,
+          core: true,
           exclusions: "Une naissance par descente.",
           source: "baticlair-pratique-accessoires",
           verification: FOUNDER_VALIDATED,
@@ -594,14 +867,28 @@ export const ROOFING_REFERENTIAL: Referential = {
       params: [
         { key: "nb_descentes", label: "Nombre de descentes", unit: "u", kind: "site_data", question: "Combien de descentes ?", fromLineQuantity: true },
         { key: "hauteur_descente", label: "Hauteur d'une descente", unit: "m", kind: "site_data", question: "Hauteur d'une descente ?", textLabels: ["hauteur"] },
-        { key: "coudes_par_descente", label: "Coudes par descente", unit: "u", kind: "site_data", question: "Combien de coudes par descente ?" },
+        {
+          key: "coudes_par_descente",
+          label: "Coudes par descente",
+          unit: "u",
+          kind: "site_data",
+          question: "Combien de coudes par descente ?",
+          default: { value: "2", source: F, verification: FOUNDER_DOC, version: 1, note: "un dévoiement sous la gouttière = 2 coudes" },
+          choices: [
+            { label: "Aucun", value: "0" },
+            { label: "2 (un dévoiement)", value: "2" },
+            { label: "4 (deux dévoiements)", value: "4" },
+          ],
+        },
       ],
       slots: [
-        { key: "tube", family: "downpipe", label: "Tubes de descente" },
-        { key: "coude", family: "downpipe_elbow", label: "Coudes" },
-        { key: "collier", family: "downpipe_clamp", label: "Colliers" },
+        { key: "tube", family: "downpipe", label: "Tubes de descente", usual: { text: "Le diamètre et la matière suivent le devis.", source: F, productId: "tube-descente-standard" } },
+        { key: "coude", family: "downpipe_elbow", label: "Coudes", usual: { text: "Coudes du même système que la descente.", source: F, productId: "coude-descente-standard" } },
+        { key: "collier", family: "downpipe_clamp", label: "Colliers", usual: { text: "Un collier tous les 1,8 m, plus un.", source: F, productId: "collier-descente-standard" } },
       ],
-      constants: {},
+      constants: {
+        espacement_collier: condition("1.8", "m", F, FOUNDER_DOC, "Un collier tous les 1,5 à 2 m."),
+      },
       needs: [
         {
           id: "tubes",
@@ -619,26 +906,34 @@ export const ROOFING_REFERENTIAL: Referential = {
           slot: "coude",
           formula: "nb_descentes * coudes_par_descente",
           unit: "u",
-          core: false,
-          source: "baticlair-pratique-accessoires",
-          verification: DRAFT,
+          core: true,
+          exclusions: "Hors dauphin ou bague de pied.",
+          source: F,
+          verification: FOUNDER_DOC,
           version: 1,
         },
         {
           id: "colliers",
           slot: "collier",
-          formula: "nb_descentes * hauteur_descente / collier.espacement_max",
+          formula: "nb_descentes * (arrondi_sup(hauteur_descente / regle.espacement_collier) + 1)",
           unit: "u",
-          core: false,
-          exclusions: "Hors collier supplémentaire en tête et en pied selon le fabricant.",
-          source: "baticlair-pratique-accessoires",
-          verification: DRAFT,
+          core: true,
+          exclusions: "Un collier tous les 1,8 m plus un par descente.",
+          source: F,
+          verification: FOUNDER_DOC,
           version: 1,
         },
       ],
     },
   ],
-  wasteRules: [],
+  wasteRules: [
+    // Pertes du référentiel du fondateur (pan simple) : appliquées après le calcul, avant l'arrondi au conditionnement.
+    { family: "roof_slate", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Casse et coupes de rive, pans rectangulaires simples." },
+    { family: "slate_hook", rate: "2", source: F, verification: FOUNDER_DOC, version: 1, note: "« Commander crochets = ardoises × 1,02 »." },
+    { family: "roof_tile", rate: "3", source: F, verification: FOUNDER_DOC, version: 1, note: "Tuiles mécaniques." },
+    { family: "batten", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Chutes de liteaux et contre-liteaux." },
+    { family: "zinc_ridge", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Recouvrements des bandes de 3 m." },
+  ],
   // Ouvrages que les devis de couverture comptent à l'unité (vocabulaire seulement).
   countedWorks: [
     { key: "jouee", label: { one: "jouée", many: "jouées" }, keywords: ["jouee", "jouees"] },

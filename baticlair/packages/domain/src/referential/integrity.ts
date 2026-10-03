@@ -1,5 +1,5 @@
 import { formulaVariables, inferDim, parseFormula } from "./expression.js";
-import { PRODUCT_DATA_SOURCES, type Fact, type Provenance, type Referential } from "./model.js";
+import { GENERIC_PRODUCT_DATA_SOURCES, PRODUCT_DATA_SOURCES, type Fact, type Provenance, type Referential } from "./model.js";
 import { dimLabel, parseRefUnit, sameDim, type Dim } from "./units.js";
 import { normalizeText } from "../trades/trade-profile.js";
 
@@ -41,12 +41,16 @@ export function checkReferential(ref: Referential): string[] {
     if (dim && expected && !sameDim(dim, expected)) err(where, `unité ${f.unit} (${dimLabel(dim)}) au lieu de ${dimLabel(expected)}`);
   };
 
-  /** Une caractéristique produit se prouve par le fabricant (ou une norme, un distributeur), jamais par l'habitude. */
-  const productFact = (where: string, f: Fact, expected: Dim | null, nature: Fact["kind"]) => {
+  /**
+   * Une caractéristique produit se prouve par le fabricant (ou une norme, un distributeur), jamais par
+   * l'habitude ; seul un produit GÉNÉRIQUE (sans marque) peut tenir ses données d'une pratique métier validée.
+   */
+  const productFact = (where: string, f: Fact, expected: Dim | null, nature: Fact["kind"], generic = false) => {
     fact(where, f, expected);
     if (f.kind !== nature) err(where, `nature « ${f.kind} » rangée comme « ${nature} »`);
     const sourceKind = ref.sources.find((s) => s.id === f.source)?.kind;
-    if (sourceKind && !PRODUCT_DATA_SOURCES.includes(sourceKind)) err(where, `donnée produit sourcée par « ${sourceKind} » : il faut une source fabricant, norme ou distributeur`);
+    const allowed = generic ? GENERIC_PRODUCT_DATA_SOURCES : PRODUCT_DATA_SOURCES;
+    if (sourceKind && !allowed.includes(sourceKind)) err(where, `donnée produit sourcée par « ${sourceKind} » : il faut une source fabricant, norme ou distributeur`);
   };
 
   const families = new Map(ref.families.map((f) => [f.code, f]));
@@ -70,12 +74,12 @@ export function checkReferential(ref: Referential): string[] {
     for (const [key, f] of Object.entries(p.attributes)) {
       const def = family.attributes.find((a) => a.key === key);
       if (!def) err(where, `caractéristique « ${key} » non déclarée pour la famille ${family.code}`);
-      productFact(`${where}.${key}`, f, def ? unitDim(`${where}.${key}`, def.unit) : null, "manufacturer_spec");
+      productFact(`${where}.${key}`, f, def ? unitDim(`${where}.${key}`, def.unit) : null, "manufacturer_spec", p.generic === true);
     }
     const needDim = unitDim(where, family.needUnit);
     // Aucune unité de vente = conditionnement encore inconnu (permis : les besoins s'affichent, la conversion attend).
     if (p.sellingUnits.length > 0 && p.sellingUnits.filter((s) => s.primary).length !== 1) err(where, "il faut exactement une unité de commande principale");
-    for (const su of p.sellingUnits) productFact(`${where} vendu par ${su.id}`, su.contains, needDim, "packaging");
+    for (const su of p.sellingUnits) productFact(`${where} vendu par ${su.id}`, su.contains, needDim, "packaging", p.generic === true);
     for (const alias of p.aliases) {
       const key = `${p.family}|${normalizeText(alias)}`;
       const owner = aliasOwners.get(key);
@@ -87,19 +91,47 @@ export function checkReferential(ref: Referential): string[] {
   for (const w of ref.workItems) {
     const where = `ouvrage ${w.id}`;
     for (const t of w.triggers) if (!families.has(t)) err(where, `famille déclencheuse inconnue « ${t} »`);
-    for (const s of w.slots) if (!families.has(s.family)) err(where, `emplacement ${s.key} : famille inconnue « ${s.family} »`);
+    for (const s of w.slots) {
+      if (!families.has(s.family)) err(where, `emplacement ${s.key} : famille inconnue « ${s.family} »`);
+      if (s.usual) {
+        if (!sourceIds.has(s.usual.source)) err(`${where} emplacement ${s.key}`, `source inconnue « ${s.usual.source} »`);
+        const p = s.usual.productId ? ref.products.find((x) => x.id === s.usual!.productId) : undefined;
+        if (s.usual.productId && (!p || p.family !== s.family)) err(`${where} emplacement ${s.key}`, `produit par défaut « ${s.usual.productId} » inconnu ou d'une autre famille`);
+      }
+    }
     for (const [k, c] of Object.entries(w.constants)) {
       fact(`${where}.regle.${k}`, c);
       if (c.kind !== "installation_condition") err(`${where}.regle.${k}`, `une constante d'ouvrage est une condition de pose, pas « ${c.kind} »`);
     }
     const paramDims = new Map<string, Dim | null>(w.params.map((p) => [p.key, unitDim(`${where}.${p.key}`, p.unit)]));
+    for (const [k, t] of Object.entries(w.tables ?? {})) {
+      const tw = `${where} table ${k}`;
+      provenance(tw, t);
+      unitDim(tw, t.unit);
+      if (t.axes.length < 1 || t.axes.length > 2) err(tw, "une table a une ou deux entrées");
+      for (const a of t.axes) {
+        if (!paramDims.has(a.param)) err(tw, `entrée inconnue « ${a.param} »`);
+        if (a.thresholds.length === 0 || a.thresholds.some((x) => !/^-?\d+(\.\d+)?$/.test(x))) err(tw, "seuils non décimaux ou absents");
+        if (a.thresholds.some((x, i) => i > 0 && Number(x) <= Number(a.thresholds[i - 1]))) err(tw, "seuils non croissants");
+      }
+      const rows = t.axes[0]?.thresholds.length ?? 0;
+      const cols = t.axes[1]?.thresholds.length ?? 1;
+      if (t.values.length !== rows || t.values.some((r) => r.length !== cols)) err(tw, `il faut ${rows} lignes de ${cols} valeurs`);
+      if (t.values.flat().some((x) => !/^-?\d+(\.\d+)?$/.test(x))) err(tw, "valeur non décimale");
+    }
+    const derivedDims = new Map<string, Dim | null>((w.derived ?? []).map((d) => [d.key, unitDim(`${where}.${d.key}`, d.unit)]));
     const dimOf = (name: string): Dim => {
       const [head, attr] = name.split(".");
       if (attr === undefined) {
-        const d = paramDims.get(name);
+        const d = paramDims.get(name) ?? derivedDims.get(name);
         if (d === undefined) throw new Error(`variable inconnue « ${name} »`);
         if (d === null) throw new Error(`unité invalide pour « ${name} »`);
         return d;
+      }
+      if (head === "table") {
+        const t = w.tables?.[attr];
+        if (!t) throw new Error(`table inconnue « ${attr} »`);
+        return parseRefUnit(t.unit).dim;
       }
       if (head === "regle") {
         const c = w.constants[attr];
@@ -112,15 +144,46 @@ export function checkReferential(ref: Referential): string[] {
       return parseRefUnit(def.unit).dim;
     };
     for (const p of w.params) {
-      if (!p.range) continue;
-      for (const bound of [p.range.min, p.range.max]) {
+      const own = paramDims.get(p.key);
+      for (const bound of p.range ? [p.range.min, p.range.max] : []) {
         try {
           const d = dimOf(bound);
-          const own = paramDims.get(p.key);
           if (own && !sameDim(d, own)) err(`${where}.${p.key}`, `borne ${bound} d'une autre dimension`);
         } catch (e) {
           err(`${where}.${p.key}`, (e as Error).message);
         }
+      }
+      if (p.default) {
+        const dw = `${where}.${p.key} (hypothèse)`;
+        provenance(dw, p.default);
+        if ((p.default.value === undefined) === (p.default.formula === undefined)) err(dw, "une valeur OU une formule");
+        if (p.default.value !== undefined && !/^-?\d+(\.\d+)?$/.test(p.default.value)) err(dw, `valeur « ${p.default.value} » non décimale`);
+        if (p.default.formula !== undefined) {
+          try {
+            const expr = parseFormula(p.default.formula);
+            if (formulaVariables(expr).includes(p.key)) err(dw, "l'hypothèse se cite elle-même");
+            const d = inferDim(expr, dimOf);
+            if (own && !sameDim(d, own)) err(dw, `la formule donne ${dimLabel(d)}, pas des ${p.unit}`);
+          } catch (e) {
+            err(dw, (e as Error).message);
+          }
+        }
+      }
+      if (p.choices?.some((c) => !/^-?\d+(\.\d+)?$/.test(c.value))) err(`${where}.${p.key}`, "réponse proposée non décimale");
+      for (const s of p.forSlots ?? []) if (!w.slots.some((x) => x.key === s)) err(`${where}.${p.key}`, `emplacement inconnu « ${s} »`);
+    }
+    for (const d of w.derived ?? []) {
+      const dw = `${where} valeur ${d.key}`;
+      provenance(dw, d);
+      if (paramDims.has(d.key)) err(dw, "même clé qu'un paramètre");
+      try {
+        const expr = parseFormula(d.formula);
+        if (formulaVariables(expr).includes(d.key)) err(dw, "la valeur se cite elle-même");
+        const dim = inferDim(expr, dimOf);
+        const own = derivedDims.get(d.key);
+        if (own && !sameDim(dim, own)) err(dw, `la formule donne ${dimLabel(dim)}, pas des ${d.unit}`);
+      } catch (e) {
+        err(dw, (e as Error).message);
       }
     }
     const needIds = new Set<string>();
@@ -130,6 +193,7 @@ export function checkReferential(ref: Referential): string[] {
       needIds.add(n.id);
       provenance(nw, n);
       if (!w.slots.some((s) => s.key === n.slot)) err(nw, `emplacement inconnu « ${n.slot} »`);
+      for (const r of n.requires ?? []) if (!paramDims.has(r)) err(nw, `donnée requise inconnue « ${r} »`);
       const expected = unitDim(nw, n.unit);
       try {
         const expr = parseFormula(n.formula);

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { checkReferential, mergeReferentials, planQuote, ROOFING_REFERENTIAL, scoreQuote, tradeProfile, documentationNeeds, type QuoteLine, type Referential } from "../src/index.js";
+import { sansHypotheses } from "./support/sans-hypotheses.js";
 
 const PROFILE = tradeProfile("roofing");
 const L = (ref: string, designation: string, quantity: string | null = null, unit: string | null = null): QuoteLine => ({ ref, designation, quantity, unit });
@@ -32,7 +33,7 @@ describe("pont devis → moteur : formulations variées", () => {
     ]);
   });
 
-  it("ne rattache jamais au plus proche : rive, noue, abergement, fenêtre de toit, chatière restent non couverts", () => {
+  it("ne rattache jamais au plus proche : les rives suivent la couverture ; noue, abergement, fenêtre de toit, chatière restent non couverts", () => {
     expect(
       where([
         L("a", "Couverture tuiles HP10", "60", "m2"),
@@ -42,7 +43,13 @@ describe("pont devis → moteur : formulations variées", () => {
         L("e", "Fenêtre de toit 78x98 avec raccord pour tuiles", "1", "u"),
         L("f", "Tuiles chatières HP10", "4", "u"),
       ]),
-    ).toEqual(["a:couverture-tuiles-emboitement/tuile", "b:not_covered", "c:not_covered", "d:not_covered", "e:not_covered", "f:not_covered"]);
+    ).toEqual(["a:couverture-tuiles-emboitement/tuile", "b:couverture-tuiles-emboitement/rive", "c:not_covered", "d:not_covered", "e:not_covered", "f:not_covered"]);
+  });
+
+  it("« 480 ml » sur une ligne de liteaux est une quantité de liteaux, jamais une longueur de rives (cas trouvé sur le devis de démonstration)", () => {
+    const p = plan([L("a", "Fourniture et pose tuile romane canal rouge", "1250", "u"), L("b", "Liteau sapin traité classe 2 27x38", "480", "ml"), L("c", "Rives de toit, tuiles de rive", "24", "m")]);
+    expect(p.inputs[0]!.params.longueur_rives).toMatchObject({ value: "24", evidence: "Devis, c" });
+    expect(p.lines[1]).toMatchObject({ status: "planned", slot: "liteau" });
   });
 
   it("un ouvrage sans ligne déclencheuse n'est pas inventé : des liteaux seuls ne font pas une couverture", () => {
@@ -82,26 +89,31 @@ describe("pont devis → moteur : formulations variées", () => {
 
 describe("enrichissement progressif", () => {
   it("un produit rencontré mais inconnu donne la liste précise de ce qu'il faut documenter", () => {
-    const s = scoreQuote([L("a", "Gouttière PVC demi-ronde 25 sable, crochets compris", "12", "ml")], ROOFING_REFERENTIAL, PROFILE, { acceptDraft: true });
-    expect(documentationNeeds(ROOFING_REFERENTIAL, s.plan, s.workItems).map((d) => [d.kind, d.title, d.lines])).toEqual([
+    // Sans produit par défaut (référentiel du fondateur retiré) : ce qu'il faudrait documenter est listé précisément.
+    const bare = sansHypotheses(ROOFING_REFERENTIAL);
+    // (Sans hypothèse, la zone est demandée pour les crochets : répondue ici.)
+    const s = scoreQuote([L("a", "Gouttière PVC demi-ronde 25 sable, crochets compris", "12", "ml")], bare, PROFILE, { acceptDraft: true, answers: { "param:zone": { value: "1", unit: "u" } } });
+    expect(documentationNeeds(bare, s.plan, s.workItems).map((d) => [d.kind, d.title, d.lines])).toEqual([
       ["product", "Gouttière — produit à identifier", ["a"]],
       ["product", "Crochets — produit à identifier", ["a"]],
     ]);
   });
 
   it("une couche documentée (ou une base externe) s'ajoute sans changer le moteur, et suit les mêmes règles", () => {
+    const draft = { status: "draft" as const };
+    const fact = (value: string, unit: string) => ({ kind: "manufacturer_spec" as const, value, unit, source: "fiche-tuile-x", verification: draft, version: 1 });
     const layer = {
       id: "chantiers-2026-10",
       version: "1",
-      sources: [{ id: "fiche-crochet-x", kind: "manufacturer" as const, title: "Fiche crochet X (fabricant)", documentRef: "Fiche technique crochet X", retrievedAt: "2026-10-01" }],
+      sources: [{ id: "fiche-tuile-x", kind: "manufacturer" as const, title: "Fiche tuile X (fabricant)", documentRef: "Fiche technique tuile X", retrievedAt: "2026-10-01" }],
       products: [
         {
-          id: "crochet-x",
-          family: "gutter_hook",
-          label: "Crochet X",
-          shortLabel: "Crochets X",
-          aliases: ["crochet x"],
-          attributes: { espacement_max: { kind: "manufacturer_spec" as const, value: "0.5", unit: "m", source: "fiche-crochet-x", verification: { status: "draft" as const }, version: 1 } },
+          id: "tuile-x",
+          family: "roof_tile",
+          label: "Tuile X",
+          shortLabel: "Tuiles X",
+          aliases: ["tuile x"],
+          attributes: { largeur_utile: fact("0.3", "m"), pureau_min: fact("0.3", "m"), pureau_max: fact("0.4", "m") },
           sellingUnits: [],
         },
       ],
@@ -112,11 +124,10 @@ describe("enrichissement progressif", () => {
     // Donnée importée en brouillon : visible pour le validateur, jamais pour l'artisan.
     // (Modèle de marque reconnu dans le devis : l'artisan le confirme d'abord.)
     const run = (acceptDraft: boolean) =>
-      scoreQuote([L("a", "Gouttière PVC 25, crochet X compris", "12", "ml")], merged, PROFILE, { acceptDraft, answers: { "product:crochet": "crochet-x" } }).workItems[0]!.needs.find(
-        (n) => n.needId === "crochets",
-      )!;
+      scoreQuote([L("a", "Couverture tuile X", "12", "m2")], merged, PROFILE, { acceptDraft, answers: { "product:tuile": "tuile-x" } }).workItems[0]!.needs.find((n) => n.needId === "tuiles")!;
     expect(run(false).status).toBe("unknown");
-    expect(run(true)).toMatchObject({ status: "calculated", quantity: { value: "24" }, provisional: true });
+    // 12 m² ÷ (0,3 × 0,3 : pureau mini, zone littorale par défaut) = 133,33, + 3 % = 137,33.
+    expect(run(true)).toMatchObject({ status: "calculated", quantity: { value: "137.33" }, provisional: true });
   });
 
   it("une couche qui casse une règle (donnée sans source) est refusée par le contrôle d'intégrité", () => {

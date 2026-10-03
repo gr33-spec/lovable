@@ -23,6 +23,13 @@ export type SourceKind =
   | "retailer"
   /** Définition (1 pièce = 1 pièce) : rien à prouver. */
   | "definition"
+  /**
+   * Pratique de métier écrite et validée par un professionnel identifié
+   * (référentiel du fondateur). Peut porter une règle, une hypothèse par
+   * défaut, et les données d'un produit GÉNÉRIQUE (« faîtière standard ») ;
+   * jamais celles d'un produit de marque.
+   */
+  | "trade_practice"
   | "other";
 
 export interface Source {
@@ -138,7 +145,20 @@ export interface Product {
   note?: string;
 }
 
-/** Paramètre d'un ouvrage : lu dans le devis ou demandé à l'artisan. */
+/**
+ * HYPOTHÈSE PAR DÉFAUT d'un paramètre, sourcée et validée : utilisée sans
+ * question quand le devis ne dit rien, DITE à l'artisan (« Hypothèses :
+ * pente 45 % ») et modifiable d'un geste. Une valeur fixe (« 45 % »), ou une
+ * formule sur les autres données (« le pureau mini du fabricant »).
+ */
+export interface ParamDefault extends Provenance {
+  value?: string;
+  formula?: string;
+  /** Pourquoi, en mots d'artisan (« Pente moyenne d'une toiture »). */
+  note?: string;
+}
+
+/** Paramètre d'un ouvrage : lu dans le devis, supposé par défaut, ou demandé à l'artisan. */
 export interface ParamDef {
   key: string;
   label: string;
@@ -146,7 +166,6 @@ export interface ParamDef {
   /**
    * « site_data » : propre à ce chantier (lu dans le devis ou demandé) ;
    * « artisan_preference » : habitude de l'entreprise, réutilisable d'un chantier à l'autre.
-   * Jamais de valeur par défaut : une formule ne calcule qu'avec des données présentes.
    */
   kind: "site_data" | "artisan_preference";
   /** Question posée s'il manque (courte, mots simples). */
@@ -156,8 +175,45 @@ export interface ParamDef {
   range?: { min: string; max: string };
   /** La quantité de la ligne de l'ouvrage EST cette donnée (« 120 m² » = la surface ; « 2 ensembles » = 2 descentes). */
   fromLineQuantity?: boolean;
+  /**
+   * Seulement depuis une ligne de ces emplacements (« 24 m » de la ligne RIVES = la longueur de rives ;
+   * « 480 ml » d'une ligne de liteaux n'en est pas une). Sans restriction : toute ligne de l'ouvrage.
+   */
+  forSlots?: string[];
   /** Mots qui l'annoncent dans le texte d'une ligne de cet ouvrage (« entraxe 90 cm », « hauteur 4 m »). */
   textLabels?: string[];
+  /** Sans valeur lue ni répondue : cette hypothèse, dite et modifiable. Sans hypothèse : une question. */
+  default?: ParamDefault;
+  /** Réponses proposées en boutons (l'artisan ne tape rien) : « Faible (30 %) », « Moyenne (45 %) »… */
+  choices?: { label: string; value: string }[];
+}
+
+/**
+ * VALEUR INTERMÉDIAIRE d'un ouvrage (le pureau d'une ardoise, déduit du
+ * recouvrement) : une formule sourcée, citée par son nom dans les règles.
+ */
+export interface DerivedRule extends Provenance {
+  key: string;
+  label: string;
+  unit: string;
+  formula: string;
+  /** Dite dans les hypothèses à l'artisan (« pureau 10 cm »). */
+  shown?: boolean;
+}
+
+/**
+ * TABLE à une ou deux entrées (recouvrement de l'ardoise selon la pente et
+ * la zone) : la cellule retenue est celle des plus grands seuils atteints
+ * par chaque entrée ; une entrée sous le premier seuil est hors table (le
+ * calcul le dit, il ne devine pas). Citée « table.nom » dans les formules.
+ */
+export interface LookupTable extends Provenance {
+  label: string;
+  unit: string;
+  axes: { param: string; thresholds: string[] }[];
+  /** values[i][j] : i = ligne du premier axe, j = colonne du second (une seule colonne sans second axe). */
+  values: string[][];
+  note?: string;
 }
 
 /** Place d'un produit dans l'ouvrage (« la tuile », « le liteau »). */
@@ -168,12 +224,12 @@ export interface Slot {
   /** Départage deux emplacements d'une même famille (« contre-lattage » ≠ « lattage »). */
   keywords?: string[];
   /**
-   * Produit d'usage quand le devis ne le précise pas (« liteaux 18×40 pour l'ardoise ») :
-   * une pratique validée et sourcée, montrée à l'artisan comme le choix par défaut
-   * (`productShort` nomme alors le besoin). Elle ne change aucune quantité, et
-   * s'efface dès que le devis nomme un produit.
+   * Produit par défaut quand le devis ne le précise pas (« liteaux 18×40 pour
+   * l'ardoise », « faîtière standard ») : une pratique validée et sourcée,
+   * utilisée sans question, dite à l'artisan dans les hypothèses et modifiable.
+   * Elle s'efface dès que le devis nomme un produit.
    */
-  usual?: { text: string; source: string; productShort?: string };
+  usual?: { text: string; source: string; productShort?: string; productId?: string };
 }
 
 /**
@@ -203,6 +259,12 @@ export interface NeedRule extends Provenance {
   core: boolean;
   /** Ce que la règle ne compte pas (dit à l'artisan dans « Voir le calcul »). */
   exclusions?: string;
+  /**
+   * Besoin qui n'existe que si ces données sont connues (« tuiles de rive »
+   * seulement si le devis donne une longueur de rives) : sinon il est omis,
+   * sans question ni « inconnu ».
+   */
+  requires?: string[];
 }
 
 export interface WorkItemType {
@@ -215,6 +277,10 @@ export interface WorkItemType {
   slots: Slot[];
   /** Constantes de règle (recouvrement minimal…), chacune sourcée. Citées « regle.cle ». */
   constants: Record<string, Fact>;
+  /** Valeurs intermédiaires (pureau de l'ardoise), citées par leur clé. */
+  derived?: DerivedRule[];
+  /** Tables (recouvrement selon pente et zone), citées « table.nom ». */
+  tables?: Record<string, LookupTable>;
   needs: NeedRule[];
 }
 
@@ -240,6 +306,8 @@ export interface WasteRule extends Provenance {
  *    ou règle BatiClair validée par un professionnel.
  */
 export const PRODUCT_DATA_SOURCES: readonly SourceKind[] = ["manufacturer", "standard", "retailer", "definition"];
+/** Un produit GÉNÉRIQUE (sans marque) peut en plus tenir ses données d'une pratique métier validée. */
+export const GENERIC_PRODUCT_DATA_SOURCES: readonly SourceKind[] = [...PRODUCT_DATA_SOURCES, "trade_practice"];
 
 export interface Referential {
   id: string;

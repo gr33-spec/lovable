@@ -47,7 +47,7 @@ interface Item {
   kind: string;
   id: string;
   state: string;
-  proof: { key: string; status: string; origin: string | null }[];
+  proof: { key: string; status: string; origin: string | null; detail: string }[];
   calculation: { trace: { origin: string | null; from: string }[] } | null;
 }
 interface View {
@@ -55,6 +55,13 @@ interface View {
   decisions: Decision[];
   measures: { lineIds: string[]; text: string } | null;
   items: Item[];
+}
+interface Purchase {
+  understood: string[];
+  toBuy: { key: string; label: string; quantity: string | null; approx: string | null; kind: string; needIds: string[]; lineIds: string[]; state: string; assumptionKeys: string[] }[];
+  toQuote: { key: string; label: string; measure: string; reason: string; lineIds: string[] }[];
+  assumptions: { key: string; label: string; value: string; unit: string; choices: { label: string; value: string }[] }[];
+  canValidate: boolean;
 }
 
 async function tenantOf(companyId: string): Promise<TenantContext> {
@@ -78,7 +85,7 @@ async function projectWith(agent: Agent, bench: BenchLine[]) {
       .expect(201);
   }
   const body = (await agent.get(`/v1/projects/${project.body.id}/takeoff`)).body.takeoff;
-  return { projectId: project.body.id as string, takeoffId: takeoff.id as string, view: body.view as View };
+  return { projectId: project.body.id as string, takeoffId: takeoff.id as string, view: body.view as View, purchase: body.purchase as Purchase };
 }
 
 const getView = async (agent: Agent, projectId: string) => (await agent.get(`/v1/projects/${projectId}/takeoff`)).body.takeoff.view as View;
@@ -130,13 +137,18 @@ describe("une information manquante ne devient jamais ✓ en fermant l'écran", 
 });
 
 describe("questions du calcul : une réponse, une seule fois, et la preuve", () => {
-  it("couverture : « aucun de ces modèles » arrête la question, la réponse est journalisée", async () => {
+  it("couverture : « aucun de ces modèles » retire la pièce par défaut, l'article passe « à faire chiffrer », la réponse est journalisée", async () => {
     const { agent, companyId } = await signUpWithCompany(ctx.app, "c@example.fr", "Toitures Martin");
-    const { projectId, takeoffId, view } = await projectWith(agent, D2026_015_LINES);
-    const faitiere = view.decisions.filter((d) => d.question?.key === "product:faitiere");
-    expect(faitiere).toHaveLength(1);
-    const after = (await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "product:faitiere", value: null }).expect(200)).body.view as View;
+    const { projectId, takeoffId, view, purchase } = await projectWith(agent, D2026_015_LINES);
+    // Aucune question sur la faîtière : la pièce par défaut (29 pour 10 m) est dans la liste d'achats.
+    expect(view.decisions.some((d) => d.question?.key === "product:faitiere")).toBe(false);
+    expect(purchase.toBuy.find((b) => b.needIds.includes("faitieres"))).toMatchObject({ quantity: "29 pièces" });
+    const answered = (await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "product:faitiere", value: null }).expect(200)).body;
+    const after = answered.view as View;
+    const afterPurchase = answered.purchase as Purchase;
     expect(after.decisions.some((d) => d.question?.key === "product:faitiere")).toBe(false);
+    expect(afterPurchase.toBuy.some((b) => b.needIds.includes("faitieres"))).toBe(false);
+    expect(afterPurchase.toQuote.some((q) => q.key === "need:faitieres")).toBe(true);
     const events = await ctx.app.get(CorrectionJournal).list(await tenantOf(companyId), { projectId });
     expect(events.filter((e) => e.action === "answer")).toEqual([expect.objectContaining({ after: expect.objectContaining({ designation: "product:faitiere", reference: "aucun" }) })]);
   });
@@ -149,7 +161,9 @@ describe("questions du calcul : une réponse, une seule fois, et la preuve", () 
     // Chaque ✓ vient d'une règle VALIDÉE ; crochets de gouttière, coudes et colliers (sans règle validée) ne produisent rien.
     const verifiedRules = new Set(ROOFING_REFERENTIAL.workItems.flatMap((w) => w.needs.filter((n) => n.verification.status === "verified").map((n) => n.id)));
     for (const n of needs.filter((x) => x.state === "verified")) expect(verifiedRules.has(n.id)).toBe(true);
-    expect(needs.filter((n) => ["crochets", "coudes", "colliers"].includes(n.id) && n.state === "verified")).toEqual([]);
+    // Chaque hypothèse utilisée est dite comme telle dans la preuve, jamais confondue avec une donnée du devis.
+    const crochets = needs.find((n) => n.id === "crochets")!;
+    expect(crochets.proof.find((p) => p.key === "site_data" && p.origin === "assumption")?.detail).toMatch(/^Zone climatique : 3/);
     // « Voir le calcul » : chaque élément dit d'où il vient (devis, référentiel, chantier).
     const faitieres = needs.find((n) => n.id === "faitieres")!;
     expect(faitieres.state).toBe("verified");
@@ -164,12 +178,12 @@ describe("questions du calcul : une réponse, une seule fois, et la preuve", () 
 
     const viewA = (await projectWith(a.agent, D2026_015_LINES)).view;
     const viewB = (await projectWith(b.agent, D2026_015_LINES)).view;
-    // Chez A : le produit habituel répond à la question, et la preuve le dit (« votre entreprise »).
+    // Chez A : le produit habituel remplace la pièce par défaut, et la preuve le dit (« votre entreprise »).
     expect(viewA.decisions.some((d) => d.question?.key === "product:faitiere")).toBe(false);
     const faitieres = viewA.items.find((i) => i.id === "faitieres")!;
     expect(faitieres.proof.find((p) => p.key === "product")?.origin).toBe("company");
-    // Chez B : rien de A, la question est posée.
-    expect(viewB.decisions.some((d) => d.question?.key === "product:faitiere")).toBe(true);
+    // Chez B : rien de A ; la pièce par défaut du référentiel, dite comme hypothèse.
+    expect(viewB.items.find((i) => i.id === "faitieres")!.proof.find((p) => p.key === "product")?.origin).toBe("assumption");
     expect(viewB.items.some((i) => i.proof.some((p) => p.key === "product" && p.origin === "company"))).toBe(false);
     expect(JSON.stringify(viewB)).not.toContain("Préférence de votre entreprise");
   });
@@ -205,40 +219,46 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
     ]);
   });
 
-  it("120 m² de lattage reste 120 m² de toiture ; le besoin en liteaux est « à calculer », jamais 120 ml", async () => {
+  it("120 m² de lattage reste 120 m² de toiture ; les liteaux se calculent en mètres avec l'hypothèse de pureau, jamais 120 ml", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "c@example.fr", "Toitures Martin");
-    const { view } = await projectWith(agent, D2026_015_LINES);
+    const { view, purchase } = await projectWith(agent, D2026_015_LINES);
     const v = view as View & { ouvrages: Ouvrage[] };
     const lattage = ouvrage(v, "Lattage");
-    expect(lattage).toMatchObject({ role: "measure", read: { quantity: "120", unit: "m²" }, direct: null, state: "missing" });
-    expect(lattage.needs).toEqual([expect.objectContaining({ slot: "liteau", need: null, order: null, state: "missing" })]);
+    expect(lattage).toMatchObject({ role: "measure", read: { quantity: "120", unit: "m²" }, direct: null, state: "verified" });
+    // 120 / 0,31 (pureau mini du fabricant, zone littorale par défaut) + 5 % = 406,45 ml.
+    expect(lattage.needs).toEqual([expect.objectContaining({ slot: "liteau", need: { value: "406.45", unit: "ml" }, state: "verified" })]);
     expect(JSON.stringify(v)).not.toMatch(/"120 m"|"120 ml"/);
+    // La liste d'achats réunit lattage et contre-lattage en UNE ligne de liteaux 27×40, et dit ses hypothèses.
+    expect(purchase.toBuy.find((b) => b.needIds.includes("liteaux"))).toMatchObject({ quantity: "547 ml", needIds: ["liteaux", "contre-liteaux"] });
+    expect(purchase.assumptions.map((a) => a.key)).toEqual(expect.arrayContaining(["param:zone", "param:pente", "param:pureau"]));
+    expect(purchase.understood[0]).toBe("Couverture en tuiles à emboîtement sur liteaux : 120 m²");
   });
 
-  it("2 descentes ne deviennent pas 2 articles ; 20 m de gouttière n'est pas ✓ tant que crochets et naissances ne sont pas établis", async () => {
+  it("2 descentes deviennent 8 m de tube, 4 coudes et 8 colliers ; 20 m de gouttière deviennent 5 longueurs, 50 crochets, 2 naissances — et c'est cette liste qui part au fournisseur", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "c@example.fr", "Toitures Martin");
     const { view, takeoffId, projectId } = await projectWith(agent, D2026_015_LINES);
     const v = view as View & { ouvrages: Ouvrage[] };
     const descente = ouvrage(v, "Descente");
-    expect(descente).toMatchObject({ role: "measure", direct: null });
-    expect(descente.needs.map((n) => n.slot).sort()).toEqual(["collier", "coude", "tube"]);
+    expect(descente).toMatchObject({ role: "measure", direct: null, state: "verified" });
+    expect(descente.needs.map((n) => [n.slot, n.need?.value]).sort()).toEqual([["collier", "8"], ["coude", "4"], ["tube", "8"]]);
     const gouttiere = ouvrage(v, "Gouttière");
-    expect(gouttiere.needs.map((n) => n.slot).sort()).toEqual(["crochet", "naissance", "profil"]);
-    expect(gouttiere.state).not.toBe("verified");
-    for (const id of [descente.lineId, gouttiere.lineId]) expect(v.items.find((i) => i.id === id)!.state).not.toBe("verified");
+    expect(gouttiere.needs.map((n) => [n.slot, n.need?.value]).sort()).toEqual([["crochet", "50"], ["naissance", "2"], ["profil", "20"]]);
 
-    // Partie chez le fournisseur : la descente est demandée comme un ouvrage, pas comme 2 articles.
-    await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "product:faitiere", value: null }).expect(200);
+    // Partie chez le fournisseur : la liste d'achats, jamais « 2 unités d'ouvrage ».
+    await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "product:tuile", value: "edilians-hp10-huguenot" }).expect(200);
     await agent.post(`/v1/takeoffs/${takeoffId}/validate`).expect(200);
     const s = await agent.post("/v1/suppliers").send({ name: "Point.P", email: "devis@pointp.fr" });
     const created = await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [s.body.id] }).expect(201);
     const body = created.body.recipients[0].email.body as string;
-    expect(body).toMatch(/Descente.*: pour 2 unités d'ouvrage \(quantité à calculer\)/);
-    expect(body).toMatch(/Gouttière.*: pour une longueur de 20 m \(quantité à calculer\)/);
+    expect(body).toMatch(/Tuiles HP10 rouge : 1488 pièces/);
+    expect(body).toMatch(/Tubes de descente.*: 8 ml/);
+    expect(body).toMatch(/Coudes : 4 pièces/);
+    expect(body).toMatch(/Gouttière.*longueurs de 4 m.*: 5 u/);
     expect(body).toMatch(/Chatières.*: 10 unités$/m);
+    expect(body).not.toMatch(/quantité à calculer/);
   });
 
-  it("après modèle et pureau : 1 306 tuiles et 349,85 ml de liteaux calculés, sans nouvel appel IA ; un composant sans règle validée bloque le ✓", async () => {
+  it("après modèle et pureau : 1 345 tuiles (+3 %) et 367,35 ml de liteaux (+5 %) calculés, sans nouvel appel IA", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "c@example.fr", "Toitures Martin");
     const { takeoffId, projectId } = await projectWith(agent, D2026_015_LINES);
     const before = await ctx.prisma.aiExecution.count();
@@ -247,10 +267,9 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
     await getView(agent, projectId);
     expect(await ctx.prisma.aiExecution.count()).toBe(before);
     const tuiles = ouvrage(after, "Couverture").needs.find((n) => n.slot === "tuile")!;
-    expect(tuiles).toMatchObject({ need: { value: "1305.43", unit: "u" }, order: { count: "1306" }, provisional: false, state: "verified" });
-    expect(ouvrage(after, "Lattage").needs.find((n) => n.slot === "liteau")).toMatchObject({ need: { value: "349.85", unit: "ml" }, provisional: false });
-    // Crochets de gouttière, coudes, colliers : aucune règle validée → « à préciser », et l'ouvrage n'est jamais ✓.
-    for (const start of ["Gouttière", "Descente"]) expect(ouvrage(after, start).state).not.toBe("verified");
+    expect(tuiles).toMatchObject({ need: { value: "1344.59", unit: "u" }, order: { count: "1345" }, provisional: false, state: "verified" });
+    expect(ouvrage(after, "Lattage").needs.find((n) => n.slot === "liteau")).toMatchObject({ need: { value: "367.35", unit: "ml" }, provisional: false });
+    for (const start of ["Gouttière", "Descente"]) expect(ouvrage(after, start).state).toBe("verified");
   });
 });
 
@@ -303,7 +322,7 @@ describe("mode validateur : n'ouvre que les règles en brouillon, jamais ✓", (
   const levels = async (agent: Agent, projectId: string) =>
     ((await agent.get(`/v1/projects/${projectId}/takeoff`)).body.takeoff.view as { ouvrages: { designation: string; state: string; needs: { slot: string; need: { value: string; unit: string } | null; provisional: boolean; state: string }[] }[] }).ouvrages;
 
-  it("règles validées : tout artisan voit 349,85 ml de liteaux, non provisoire ; un provisoire n'est jamais ✓", async () => {
+  it("règles validées : tout artisan voit 367,35 ml de liteaux, non provisoire ; un provisoire n'est jamais ✓", async () => {
     await resetDatabase(vctx.prisma);
     const run = async (email: string) => {
       const { agent } = await signUpWithCompany(vctx.app, email, `Toitures ${email}`);
@@ -323,12 +342,12 @@ describe("mode validateur : n'ouvre que les règles en brouillon, jamais ✓", (
     };
     const founder = await run("fondateur@example.fr");
     const lattage = founder.find((o) => o.designation.startsWith("Lattage"))!.needs.find((n) => n.slot === "liteau")!;
-    expect(lattage).toMatchObject({ need: { value: "349.85", unit: "ml" }, provisional: false });
+    expect(lattage).toMatchObject({ need: { value: "367.35", unit: "ml" }, provisional: false });
     for (const o of founder) {
       for (const n of o.needs.filter((x) => x.provisional)) expect(n.state).not.toBe("verified");
     }
     const other = await run("autre@example.fr");
-    expect(other.find((o) => o.designation.startsWith("Lattage"))!.needs.find((n) => n.slot === "liteau")).toMatchObject({ need: { value: "349.85", unit: "ml" }, provisional: false });
+    expect(other.find((o) => o.designation.startsWith("Lattage"))!.needs.find((n) => n.slot === "liteau")).toMatchObject({ need: { value: "367.35", unit: "ml" }, provisional: false });
     // Hors mode validateur, aucun calcul provisoire.
     for (const o of other) for (const n of o.needs) expect(n.provisional).toBe(false);
   });

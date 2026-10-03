@@ -1,0 +1,106 @@
+import { describe, expect, it } from "vitest";
+import { checkReferential, computeWorkItem, ROOFING_REFERENTIAL, type Referential, type WorkItemInput } from "../src/index.js";
+import { sansHypotheses } from "./support/sans-hypotheses.js";
+
+/**
+ * LA RÈGLE PRODUIT (2026-10-03) : l'artisan dépose son devis, BatiClair sort la
+ * liste d'achats. Une donnée que le devis ne dit pas prend l'hypothèse par
+ * défaut du référentiel du fondateur, DITE et modifiable ; une question n'est
+ * posée que si rien ne permet de calculer et que la réponse change la commande.
+ */
+const need = (r: ReturnType<typeof computeWorkItem>, id: string) => r.needs.find((n) => n.needId === id)!;
+const ARDOISE: WorkItemInput = {
+  workItemId: "couverture-ardoises-crochet",
+  params: { surface: { value: "200", unit: "m2", origin: "devis", evidence: "Devis, ligne 2" } },
+  products: { ardoise: { productId: "ardoise-30x22", origin: "devis" } },
+  mentioned: ["ardoise", "liteau"],
+};
+
+describe("hypothèses par défaut : utilisées sans question, dites, modifiables", () => {
+  it("pente 45 %, zone littorale, rampant ≤ 5,5 m, entraxe 60 cm : le devis ne dit rien, tout se calcule quand même", () => {
+    const r = computeWorkItem(ROOFING_REFERENTIAL, ARDOISE);
+    expect(r.nextQuestion).toBeNull();
+    for (const n of r.needs) expect(n.status).toBe("calculated");
+    // Chaque hypothèse est tracée comme telle, jamais confondue avec une donnée lue ou répondue.
+    const ardoises = need(r, "ardoises");
+    expect(ardoises.trace.filter((t) => t.origin === "assumption").map((t) => [t.label, t.value, t.unit])).toEqual([
+      ["Pente du toit", "45", "%"],
+      ["Zone climatique", "3", "u"],
+      ["Longueur du rampant", "5,5", "m"],
+      ["Pureau", "8,5", "cm"],
+    ]);
+    expect(ardoises.assumptions.map((a) => a.key)).toEqual(["param:pente", "param:zone", "param:longueur_rampant", "derived:recouvrement", "param:pureau"]);
+    // Les hypothèses à boutons gardent leurs réponses proposées (l'artisan ne tape rien).
+    expect(ardoises.assumptions.find((a) => a.key === "param:pente")?.choices?.map((c) => c.label)).toEqual(["Faible (30 %)", "Moyenne (45 %)", "Forte (60 %)", "Très forte (100 %)"]);
+    expect(need(r, "contre-liteaux-ardoise").assumptions.map((a) => a.key)).toEqual(["product:contre_liteau", "param:entraxe_supports"]);
+  });
+
+  it("une réponse de l'artisan remplace l'hypothèse, et seulement elle", () => {
+    const r = computeWorkItem(ROOFING_REFERENTIAL, { ...ARDOISE, params: { ...ARDOISE.params, pente: { value: "100", unit: "%", origin: "artisan" }, zone: { value: "1", unit: "u", origin: "artisan" } } });
+    const ardoises = need(r, "ardoises");
+    // Pente 100 %, zone 1 : recouvrement 80 mm → pureau (300 − 80) / 2 = 110 mm → 200 / (0,22 × 0,11) = 8 264,46 + 5 %.
+    expect(ardoises.quantity).toEqual({ value: "8677.69", unit: "u" });
+    expect(ardoises.assumptions.map((a) => a.key)).toEqual(["param:longueur_rampant", "derived:recouvrement", "param:pureau"]);
+    expect(ardoises.trace.find((t) => t.label === "Pente du toit")).toMatchObject({ origin: "project", value: "100" });
+  });
+
+  it("table de recouvrement : la cellule des plus grands seuils atteints ; sous la pente minimale, rien n'est deviné", () => {
+    const at = (pente: string, zone: string) => need(computeWorkItem(ROOFING_REFERENTIAL, { ...ARDOISE, params: { ...ARDOISE.params, pente: { value: pente, unit: "%", origin: "artisan" }, zone: { value: zone, unit: "u", origin: "artisan" } } }), "ardoises");
+    const recouvrement = (pente: string, zone: string) => at(pente, zone).trace.find((t) => t.label === "Recouvrement")!.value;
+    expect([recouvrement("45", "1"), recouvrement("47", "1"), recouvrement("57", "1"), recouvrement("58", "1"), recouvrement("130", "3")]).toEqual(["110", "110", "110", "100", "90"]);
+    // Rampant de 6 m : +10 mm, arrondi aux 5 mm supérieurs.
+    const long = need(computeWorkItem(ROOFING_REFERENTIAL, { ...ARDOISE, params: { ...ARDOISE.params, longueur_rampant: { value: "6", unit: "m", origin: "artisan" } } }), "ardoises");
+    expect(long.trace.find((t) => t.label === "Recouvrement")!.value).toBe("140");
+    // Pente 30 % : sous le premier seuil, l'ouvrage n'est pas calculé, et la raison est dite.
+    expect(at("30", "3")).toMatchObject({ status: "unknown", reason: "Pente du toit trop faible pour cet ouvrage (minimum 45 %)." });
+  });
+
+  it("produit par défaut (liteaux 18×40, crochets, écran) : dit comme hypothèse ; « aucun de ces modèles » le retire", () => {
+    const r = computeWorkItem(ROOFING_REFERENTIAL, ARDOISE);
+    expect(need(r, "liteaux-ardoise")).toMatchObject({ label: "Liteaux 18×40", productOrigin: "default" });
+    expect(need(r, "liteaux-ardoise").assumptions).toContainEqual(expect.objectContaining({ key: "product:liteau", value: "Liteaux 18×40" }));
+    const declined = computeWorkItem(ROOFING_REFERENTIAL, { ...ARDOISE, declined: ["ecran"] });
+    // Écran refusé : rien n'est inventé, le besoin attend un produit (question à boutons).
+    expect(need(declined, "ecran-ardoise")).toMatchObject({ status: "question", question: { kind: "choose_product" } });
+  });
+
+  it("un besoin qui exige une donnée absente (tuiles de rive sans longueur de rives) n'existe pas : ni chiffre, ni question", () => {
+    const tuiles: WorkItemInput = {
+      workItemId: "couverture-tuiles-emboitement",
+      params: { surface: { value: "120", unit: "m2", origin: "devis" } },
+      products: { tuile: { productId: "edilians-hp10-huguenot", origin: "artisan" } },
+      mentioned: ["tuile"],
+    };
+    expect(computeWorkItem(ROOFING_REFERENTIAL, tuiles).needs.map((n) => n.needId)).toEqual(["tuiles", "liteaux", "contre-liteaux", "ecran"]);
+    const withRives = computeWorkItem(ROOFING_REFERENTIAL, { ...tuiles, params: { ...tuiles.params, longueur_rives: { value: "24", unit: "m", origin: "devis" } } });
+    // 24 m / 0,31 m (pureau mini, zone littorale par défaut) = 77,42 tuiles de rive → 78.
+    expect(need(withRives, "tuiles-de-rive")).toMatchObject({ status: "calculated", purchase: { order: { count: "78" } } });
+  });
+
+  it("pertes du référentiel du fondateur : ardoise 5 %, crochets 2 %, tuile 3 %, liteaux 5 %, dites dans le calcul", () => {
+    const r = computeWorkItem(ROOFING_REFERENTIAL, { ...ARDOISE, params: { ...ARDOISE.params, pureau: { value: "10", unit: "cm", origin: "artisan" } } });
+    // 200 / (0,22 × 0,10) = 9 090,91 ardoises (45,5/m², comme le tableau du référentiel pour le 30×22 à R = 100).
+    expect(need(r, "ardoises").trace.find((t) => t.label === "Besoin calculé")!.value).toBe("9 090,91");
+    expect(need(r, "ardoises")).toMatchObject({ quantity: { value: "9545.45" } });
+    expect(need(r, "ardoises").trace.find((t) => t.label === "Marge recommandée")).toMatchObject({ value: "5", unit: "%" });
+    expect(need(r, "crochets-ardoise")).toMatchObject({ quantity: { value: "9272.73" } });
+    expect(need(r, "liteaux-ardoise")).toMatchObject({ quantity: { value: "2100" } });
+  });
+
+  it("sans ces hypothèses, le moteur redemande : la règle produit tient aux données, pas à un contournement", () => {
+    const bare = sansHypotheses(ROOFING_REFERENTIAL);
+    const r = computeWorkItem(bare, ARDOISE);
+    expect(need(r, "ardoises").status).toBe("question");
+    expect(r.nextQuestion?.key).toBe("param:pureau");
+  });
+
+  it("le contrôle d'intégrité refuse une hypothèse ou une table mal formée", () => {
+    const broken: Referential = structuredClone(ROOFING_REFERENTIAL);
+    const ardoise = broken.workItems.find((w) => w.id === "couverture-ardoises-crochet")!;
+    ardoise.params.find((p) => p.key === "pente")!.default = { value: "45", formula: "1", source: "fondateur-referentiel-2026-10-03", verification: { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "test" }, version: 1 };
+    ardoise.tables!.recouvrement!.values[0] = ["110", "120"];
+    const errors = checkReferential(broken);
+    expect(errors.some((e) => e.includes("pente (hypothèse)") && e.includes("une valeur OU une formule"))).toBe(true);
+    expect(errors.some((e) => e.includes("table recouvrement") && e.includes("lignes de 3 valeurs"))).toBe(true);
+  });
+});

@@ -258,10 +258,11 @@ export function assessNeed(n: NeedResult): Assessment {
       : { key: "product", status: "established", detail: `${n.label}, tel que décrit au devis.`, origin: "devis" },
   );
   // Une donnée du chantier par critère : lue dans le devis ou répondue pour ce chantier, jamais confondues.
-  const params = n.trace.filter((t) => (t.origin === "devis" || t.origin === "project") && t.label !== "Produit");
+  const params = n.trace.filter((t) => (t.origin === "devis" || t.origin === "project" || t.origin === "assumption") && t.label !== "Produit");
   const noEffect = n.trace.filter((t) => t.from === "Sans effet sur la commande");
+  // Une hypothèse par défaut (pente 45 %) est établie : validée, dite à l'artisan et modifiable d'un geste.
   for (const p of params) criteria.push({ key: "site_data", status: "established", detail: `${p.label} : ${p.value} ${p.unit} (${p.from})`, origin: p.origin! });
-  if (params.length === 0) criteria.push({ key: "site_data", status: "established", detail: "Aucune donnée de chantier nécessaire." });
+  if (params.length === 0) criteria.push({ key: "site_data", status: "established", detail: "Aucune donnée de chantier nécessaire.", origin: "referential" });
   for (const t of noEffect) criteria.push({ key: "site_data", status: "no_effect", detail: `${t.label} inconnue : sans effet sur la commande.` });
   criteria.push({ key: "consistency", status: "established", detail: "Aucune contradiction relevée." });
   criteria.push(

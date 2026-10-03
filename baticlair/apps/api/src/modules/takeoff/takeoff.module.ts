@@ -67,10 +67,15 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
               const user = await prisma.user.findUnique({ where: { id: tenant.userId }, select: { email: true } });
               return !!user && config.referentialValidators.includes(user.email.toLowerCase());
             },
+            projectAddress: async (tenant, projectId) => {
+              const project = await prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { address: true } });
+              return project?.address ?? null;
+            },
           },
         ),
       inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, TAKEOFF_EXTRACTOR, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService],
     },
   ],
+  exports: [TakeoffService],
 })
 export class TakeoffModule {}

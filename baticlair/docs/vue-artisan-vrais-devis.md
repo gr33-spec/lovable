@@ -122,18 +122,15 @@ Information (pas une décision) : 5 ouvrages mesurés (m², ml…) : les matéri
 
 ## D-2026-015 — couverture
 
-**À l'arrivée** : ✓ 7 prêts · ⚠ 3 à confirmer · ? 7 information manquante
+**À l'arrivée** : ✓ 12 prêts · ⚠ 1 à confirmer · ? 6 information manquante
 
-**Décisions à prendre : 4**
+**Décisions à prendre : 1**
 
 - ⚠ **Tuiles** — J'ai identifié : Tuiles HP10. C'est bien ce modèle ?
-- ? **À quel pureau posez-vous ces tuiles** — À quel pureau posez-vous ces tuiles ?
-- ⚠ **Écran sous-toiture** — Quel produit pour : écran sous-toiture ?
-- ⚠ **Faîtières** — Quel produit pour : faîtières ?
 
 Information (pas une décision) : 6 ouvrages mesurés (m², ml…) : les matériaux en sont calculés quand une règle existe ; ce qui reste « à préciser » sera demandé aux fournisseurs pour la mesure du devis.
 
-**Après 4 réponses** : ✓ 7 prêts · ⚠ 0 à confirmer · ? 6 information manquante
+**Après 1 réponse** : ✓ 12 prêts · ⚠ 0 à confirmer · ? 6 information manquante
 
 **Liste envoyée aux fournisseurs : 10 lignes** (10 lignes du devis regroupées)
 
