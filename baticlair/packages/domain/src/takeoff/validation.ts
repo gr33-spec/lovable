@@ -54,6 +54,7 @@ export type TakeoffIssueCode =
   | "QUANTITY_NOT_IN_SOURCE"
   | "READ_FROM_IMAGE"
   | "AI_DOUBT"
+  | "AI_CALCULATION_NOTE"
   | "DUPLICATE_LINE"
   | "POSSIBLE_OMISSION"
   | "NO_MATERIAL";

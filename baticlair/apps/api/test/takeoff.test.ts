@@ -41,8 +41,8 @@ describe("liste de matériaux tirée du devis client (IA simulée)", () => {
     const crochets = res.body.lines.find((l: { reference: string }) => l.reference === "CRO-INOX");
     expect(crochets.status).toBe("to_verify");
     expect(crochets.issues.map((i: { code: string }) => i.code)).toContain("PACKAGE_CONTENT_MISSING");
-    // Le doute de l'IA est montré tel quel à l'artisan.
-    expect(crochets.aiDoubt).toBe("Combien de pièces par paquet ?");
+    // Un doute de LECTURE de l'IA est montré tel quel à l'artisan.
+    expect(crochets.aiDoubt).toBe("Chiffre peu lisible : 2 ou 3 paquets ?");
     expect(crochets.issues.map((i: { code: string }) => i.code)).toContain("AI_DOUBT");
     expect(crochets.confirmed).toBe(false);
 
@@ -60,7 +60,7 @@ describe("liste de matériaux tirée du devis client (IA simulée)", () => {
 
     expect(await ctx.prisma.aiExecution.count()).toBe(1);
     const execution = await ctx.prisma.aiExecution.findFirstOrThrow();
-    expect(execution).toMatchObject({ task: "takeoff_extraction", promptId: "takeoff_extraction", promptVersion: 7, status: "success", pagesText: 1 });
+    expect(execution).toMatchObject({ task: "takeoff_extraction", promptId: "takeoff_extraction", promptVersion: 8, status: "success", pagesText: 1 });
     expect(execution.costMicroUsd).toBeGreaterThan(0n);
     const usage = await agent.get("/v1/ai-usage");
     expect(usage.body.analyses.used).toBe(1);
