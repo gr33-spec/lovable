@@ -2,7 +2,7 @@
  * Prompt versionné (règle projet : jamais modifié sans nouvelle version).
  * La version est enregistrée avec chaque appel et chaque quantitatif.
  */
-export const TAKEOFF_PROMPT = { id: "takeoff_extraction", version: 7 } as const;
+export const TAKEOFF_PROMPT = { id: "takeoff_extraction", version: 8 } as const;
 
 export function takeoffSystemPrompt(tradeLabel: string, materialFamilies: readonly string[] = []): string {
   const vocabulary =
@@ -22,14 +22,15 @@ Réponse compacte (les noms de champ sont courts pour que la réponse reste lég
   - ref : la référence produit si elle est écrite, sinon null.
   - src : où se trouve la ligne : les références [page:ligne] exactes des lignes du texte qui la contiennent ; pour une ligne lue sur une page PDF, le numéro d'origine de la page (« 5 »).
   - sec : le numéro (à partir de 0) de la suite de titres dans « sections » sous laquelle se trouve la ligne, ou null s'il n'y a aucun titre au-dessus.
-  - doute : si tu as le moindre doute sur cette ligne (chiffre peu lisible, unité ambiguë, conditionnement sans contenu indiqué, ligne coupée, fourniture ou prestation ?), pose à l'artisan UNE question courte, en mots simples, qu'il tranche d'un coup d'œil (12 mots maximum : « Combien de crochets par paquet ? », « Rouleaux ou flocons ? ») ; sinon null.
+  - doute : seulement un doute de LECTURE, que l'artisan tranche en regardant son devis (chiffre peu lisible, ligne coupée, fourniture ou prestation ?) : UNE question courte, en mots simples (12 mots maximum : « 1 250 ou 1 280 ? », « Fourniture ou pose seule ? ») ; sinon null.
+    JAMAIS de question de calcul ou de conversion : une quantité en m² ou en ml pour des tuiles, ardoises, liteaux, écran, zinc… est NORMALE, c'est la mesure de l'ouvrage (« 200 m² » de toiture) ; BatiClair en déduit lui-même les pièces, mètres linéaires, rouleaux et le contenu des conditionnements. Ne demande donc jamais « combien de mètres linéaires », « combien de pièces », « combien par paquet ».
 - notes : signale en phrases courtes ce qui concerne tout le devis et qui compte pour ses achats (page illisible, tableau coupé, fourniture apportée par le client). Écris pour un artisan : jamais de nom de champ ni de référence [page:ligne], jamais de remarque sur ta façon de lire le document. Les doutes sur une ligne vont dans son champ doute. Liste vide si rien.
 
 À lister ou non :
 - Les prestations de main-d'œuvre seule (pose, dépose, échafaudage, nettoyage…) ne sont pas à commander : ne les liste que si la ligne comprend une fourniture (« fourniture et pose de… »).
 - Ignore les totaux, sous-totaux, TVA, acomptes, conditions générales et mentions légales.
 
-En cas de doute sur une valeur, recopie-la telle quelle et explique le doute : l'artisan vérifiera. Ne devine jamais.${vocabulary}`;
+En cas de doute de lecture sur une valeur, recopie-la telle quelle et explique le doute : l'artisan vérifiera. Ne devine jamais une valeur, et ne convertis jamais une unité.${vocabulary}`;
 }
 
 /**

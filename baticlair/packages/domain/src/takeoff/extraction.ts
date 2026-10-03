@@ -1,4 +1,4 @@
-import type { TradeProfile } from "../trades/trade-profile.js";
+import { normalizeText, type TradeProfile } from "../trades/trade-profile.js";
 import {
   validateTakeoff,
   type LineValidation,
@@ -46,11 +46,29 @@ function digits(value: string): string {
   return value.replace(/\D/g, "");
 }
 
+/** Doute de LECTURE : ce que seul l'artisan peut trancher en regardant son devis. */
+const READING_DOUBT = /(lisible|flou|coupe|efface|tache|manuscrit|rature|fourniture ou|prestation|pose seule|main d oeuvre)/;
+/**
+ * Doute de CALCUL : convertir des m² en ml, compter des pièces, le contenu d'un paquet… C'est le
+ * travail de BatiClair (référentiel, hypothèses par défaut), jamais celui de l'artisan (règle du
+ * fondateur, 2026-10-03 : « ce n'est pas à l'artisan de calculer »).
+ */
+const CALCULATION_DOUBT = /(combien|quantite|lineaire|\bml\b|\bm2\b|m²|metre|convers|convert|par (paquet|rouleau|botte|carton|palette|boite|lot)|contenu|conditionnement|nombre d|en pieces|surface|a calculer)/;
+
+/** Un doute de calcul est gardé pour mémoire (info), jamais posé comme question. */
+export function isCalculationDoubt(doubt: string): boolean {
+  const n = normalizeText(doubt);
+  return !READING_DOUBT.test(n) && CALCULATION_DOUBT.test(n);
+}
+
 function provenanceIssues(line: ExtractedLine, source: ReadonlyMap<string, string>): TakeoffIssue[] {
   if (line.enteredByArtisan) return [];
-  const doubt: TakeoffIssue[] = line.aiDoubt?.trim()
-    ? [{ code: "AI_DOUBT", severity: "to_verify", message: `L'IA hésite : ${line.aiDoubt.trim()}` }]
-    : [];
+  const text = line.aiDoubt?.trim();
+  const doubt: TakeoffIssue[] = !text
+    ? []
+    : isCalculationDoubt(text)
+      ? [{ code: "AI_CALCULATION_NOTE", severity: "info", message: `L'IA s'est demandé : ${text} (BatiClair calcule).` }]
+      : [{ code: "AI_DOUBT", severity: "to_verify", message: `L'IA hésite : ${text}` }];
   return [...doubt, ...sourceIssues(line, source)];
 }
 

@@ -247,16 +247,10 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await expect(page.getByRole("list", { name: "Ce que BatiClair a compris" })).toBeVisible();
   await expect(page.getByText(/^J'ai lu les \d+ lignes du devis\.$/)).toBeVisible();
 
-  // Les crochets vendus en paquets : l'IA hésite, l'artisan précise en pièces (les questions arrivent une à une).
-  const crochets = page.getByRole("region", { name: "À régler : Crochet inox ardoise 100 mm" });
+  // Les crochets en paquets : seul un doute de LECTURE est posé (« 2 ou 3 ? »), jamais « combien par paquet ».
   await answerUntil(page, "À régler : Crochet inox ardoise 100 mm");
-  await expect(crochets.getByText("Combien de pièces par paquet ?")).toBeVisible();
-  await crochets.getByRole("button", { name: "Corriger Crochet inox ardoise 100 mm" }).click();
-  await page.getByLabel("Quantité").fill("200");
-  await page.getByLabel("Unité").fill("u");
-  await page.getByRole("button", { name: "Enregistrer" }).click();
-  // Corrigée en pièces, la ligne n'a plus de doute : la carte disparaît d'elle-même.
-  await expect(crochets).toHaveCount(0);
+  await expect(page.getByText("Chiffre peu lisible : 2 ou 3 paquets ?")).toBeVisible();
+  await expect(page.getByText(/combien par paquet|pièces par paquet/i)).toHaveCount(0);
   await confirmDoubts(page);
   // Les réponses restent dans le fil, comme des messages.
   await expect(page.getByText("Voici votre quantitatif.")).toBeVisible();

@@ -56,10 +56,24 @@ describe("relecture du quantitatif proposé par l'IA", () => {
     expect(validation.lines[0]!.kind).toBe("labor");
   });
 
-  it("montre à l'artisan le doute exprimé par l'IA", () => {
-    const { validation } = reviewExtractedTakeoff([line({ aiDoubt: "contenu du paquet non indiqué" })], source, ROOFING_PROFILE);
+  it("montre à l'artisan un doute de LECTURE exprimé par l'IA", () => {
+    const { validation } = reviewExtractedTakeoff([line({ aiDoubt: "Chiffre peu lisible : 1 250 ou 1 280 m² ?" })], source, ROOFING_PROFILE);
     expect(validation.lines[0]!.status).toBe("to_verify");
-    expect(validation.lines[0]!.issues.find((i) => i.code === "AI_DOUBT")?.message).toBe("L'IA hésite : contenu du paquet non indiqué");
+    expect(validation.lines[0]!.issues.find((i) => i.code === "AI_DOUBT")?.message).toBe("L'IA hésite : Chiffre peu lisible : 1 250 ou 1 280 m² ?");
+  });
+
+  // Règle du fondateur (2026-10-03) : « ce n'est pas à l'artisan de calculer, mais à l'IA ».
+  it.each([
+    "Quantité en m² : combien de mètres linéaires de liteaux ?",
+    "contenu du paquet non indiqué",
+    "Combien de crochets par paquet ?",
+    "Surface en m², à convertir en nombre de tuiles ?",
+    "Combien de ml de gouttière ?",
+  ])("un doute de CALCUL (« %s ») n'est jamais posé à l'artisan : BatiClair calcule", (doubt) => {
+    const { validation } = reviewExtractedTakeoff([line({ aiDoubt: doubt })], source, ROOFING_PROFILE);
+    expect(validation.lines[0]!.status).toBe("certain");
+    expect(validation.lines[0]!.issues.find((i) => i.code === "AI_DOUBT")).toBeUndefined();
+    expect(validation.lines[0]!.issues.find((i) => i.code === "AI_CALCULATION_NOTE")).toMatchObject({ severity: "info" });
   });
 
   it("une ligne confirmée par l'artisan devient sûre", () => {

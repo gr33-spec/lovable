@@ -25,7 +25,8 @@ export class FakeTakeoffExtractor implements TakeoffExtractor {
         sourceRefs: [row.ref],
         sourcePages: [],
         // Règle simulée : un conditionnement sans contenu indiqué est un doute.
-        doubt: parseUnit(row.unit) === "PAQUET" ? "Combien de pièces par paquet ?" : null,
+        // Le seul doute qu'une lecture pose désormais : un doute de LECTURE (prompt v8).
+        doubt: parseUnit(row.unit) === "PAQUET" ? "Chiffre peu lisible : 2 ou 3 paquets ?" : null,
         section: [],
       }));
     const notes = request.imagePages.length > 0 ? [`Pages ${request.imagePages.join(", ")} non lues (extraction simulée).`] : [];
