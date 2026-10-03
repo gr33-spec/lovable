@@ -33,6 +33,7 @@ function purchaseDto(p: PurchaseView) {
   return {
     understood: p.understood,
     toBuy: p.toBuy.map((b) => ({ key: b.key, label: b.label, quantity: b.quantity, approx: b.approx, kind: b.kind, needIds: b.needIds, lineIds: b.lineIds, state: b.state, assumptionKeys: b.assumptionKeys })),
+    groups: p.groups.map((g) => ({ key: g.key, label: g.label, measure: g.measure, itemKeys: g.itemKeys })),
     toQuote: p.toQuote.map((q) => ({ key: q.key, label: q.label, measure: q.measure, reason: q.reason, lineIds: q.lineIds })),
     assumptions: p.assumptions.map((a) => ({ key: a.key, label: a.label, value: a.value, unit: a.unit, note: a.note ?? null, choices: a.choices ?? [] })),
     canValidate: p.canValidate,

@@ -17,12 +17,23 @@ export function useProgressRefresh(): () => void {
   return useContext(RefreshContext);
 }
 
-export function ProjectProgressProvider({ projectId, archived, children }: { projectId: string; archived: boolean; children: React.ReactNode }) {
+export function ProjectProgressProvider({
+  projectId,
+  archived,
+  bar = true,
+  children,
+}: {
+  projectId: string;
+  archived: boolean;
+  /** Le chat du chantier se passe de la barre en 5 étapes (référentiel §21). */
+  bar?: boolean;
+  children: React.ReactNode;
+}) {
   const [tick, setTick] = useState(0);
   const refresh = useCallback(() => setTick((t) => t + 1), []);
   return (
     <RefreshContext value={refresh}>
-      {archived ? null : <ProgressBar projectId={projectId} tick={tick} />}
+      {archived || !bar ? null : <ProgressBar projectId={projectId} tick={tick} />}
       {children}
     </RefreshContext>
   );

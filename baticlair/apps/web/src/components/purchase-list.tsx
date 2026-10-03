@@ -1,117 +1,65 @@
 "use client";
 
-import { AlertTriangle, Check, ChevronDown, CircleCheck, Pencil } from "lucide-react";
+import { AlertTriangle, ChevronDown, CircleCheck } from "lucide-react";
 import { useId, useState } from "react";
-import { DecisionCard, Proof, type DecisionHandlers } from "@/components/takeoff-view";
-import { Button, Card } from "@/components/ui";
+import { Proof, type DecisionHandlers } from "@/components/takeoff-view";
+import { Button } from "@/components/ui";
 import type { PurchaseAssumption, PurchaseItem, Takeoff } from "@/lib/api";
 import { shortName } from "@/lib/labels";
 
 /**
- * LA LISTE D'ACHATS : ce que l'artisan voit, et rien d'autre.
- *  - une phrase « J'ai compris » (les ouvrages du devis et leur mesure) ;
- *  - les questions, seulement si une réponse change la commande (boutons) ;
- *  - « À acheter » : un article, une quantité ;
- *  - « À faire chiffrer » : ce que le fournisseur chiffre pour la mesure du devis ;
- *  - « Hypothèses » : une ligne repliée, modifiable d'un geste ;
- *  - « Valider la liste ».
+ * LA CARTE DU QUANTITATIF (chat, référentiel §21) : les articles à commander
+ * rangés par ouvrage (« Couverture en ardoises · 200 m² »), ce que le
+ * fournisseur chiffrera, une ligne d'hypothèses modifiable d'un geste, puis
+ * « Envoyer au fournisseur ». Jamais de quantité demandée à l'artisan.
  */
-export function PurchaseList({
+export function QuantityCard({
   takeoff,
   editable,
   pending,
-  handlers,
-  onValidate,
-  onShowLines,
+  onAnswer,
 }: {
   takeoff: Takeoff;
   editable: boolean;
   pending: boolean;
-  handlers: DecisionHandlers;
-  onValidate: () => void;
-  onShowLines: () => void;
+  onAnswer: DecisionHandlers["onAnswer"];
 }) {
   const p = takeoff.purchase;
-  const questions = takeoff.view.decisions;
-  const materials = takeoff.lines.filter((l) => l.kind !== "labor").length;
+  const byKey = new Map(p.toBuy.map((b) => [b.key, b]));
+  const caption = "text-[13px] font-extrabold tracking-[0.04em] text-muted uppercase";
   return (
-    <>
-      <div className="flex flex-col gap-1">
-        <h2 className="text-[20px] font-extrabold">Votre liste d&apos;achats</h2>
-        {p.understood.length > 0 ? (
-          <p className="text-[15px] text-muted">
-            <span className="font-semibold">J&apos;ai compris :</span> {p.understood.join(" · ")}
-          </p>
-        ) : null}
-      </div>
-
-      {questions.map((d) => (
-        <DecisionCard key={d.key} decision={d} lines={takeoff.lines} editable={editable} pending={pending} handlers={handlers} />
-      ))}
-
-      <Card className="flex flex-col px-4 py-2">
-        <h3 className="flex min-h-11 items-center gap-2 text-[15px] font-extrabold">
-          <CircleCheck size={20} className="text-ok" aria-hidden="true" />À acheter
-        </h3>
-        {p.toBuy.length === 0 ? (
-          <p className="pb-3 text-sm text-muted">Rien à acheter pour l&apos;instant.</p>
-        ) : (
-          <ul aria-label="À acheter" className="flex flex-col divide-y divide-line">
-            {p.toBuy.map((b) => (
-              <BuyRow key={b.key} item={b} takeoff={takeoff} />
-            ))}
-          </ul>
-        )}
-      </Card>
-
-      {p.toQuote.length > 0 ? (
-        <Card className="flex flex-col px-4 py-2">
-          <h3 className="flex min-h-11 items-center gap-2 text-[15px] font-extrabold">
-            <Pencil size={18} className="text-muted" aria-hidden="true" />À faire chiffrer par le fournisseur
+    <section aria-label="Quantitatif" className="flex flex-col overflow-hidden rounded-[20px] bg-surface shadow-card">
+      <h2 className="px-4 pt-4 pb-1 font-display text-[22px] font-extrabold">À commander</h2>
+      {p.toBuy.length === 0 ? <p className="px-4 pb-3 text-sm text-muted">Rien à commander pour l&apos;instant.</p> : null}
+      {p.groups.map((g) => (
+        <div key={g.key} className="flex flex-col border-b border-line px-4 py-2">
+          <h3 className={`${caption} pt-1`}>
+            {g.label}
+            {g.measure ? ` · ${g.measure}` : ""}
           </h3>
-          <ul aria-label="À faire chiffrer par le fournisseur" className="flex flex-col divide-y divide-line">
+          <ul aria-label={g.label} className="flex flex-col divide-y divide-line">
+            {g.itemKeys.map((k) => {
+              const item = byKey.get(k);
+              return item ? <BuyRow key={k} item={item} takeoff={takeoff} /> : null;
+            })}
+          </ul>
+        </div>
+      ))}
+      {p.toQuote.length > 0 ? (
+        <div className="flex flex-col gap-1 bg-warn-bg px-4 py-3">
+          <h3 className={`${caption} text-warn`}>Le fournisseur chiffrera</h3>
+          <ul aria-label="Le fournisseur chiffrera" className="flex flex-col gap-1">
             {p.toQuote.map((q) => (
-              <li key={q.key} className="flex flex-col py-2.5">
-                <span className="text-[15px] leading-snug font-bold">
-                  {shortName(q.label)} <span className="font-normal text-muted">· {q.measure}</span>
-                </span>
-                <span className="text-sm text-muted">{q.reason}</span>
+              <li key={q.key} className="text-[15px] leading-snug">
+                <span className="font-bold">{shortName(q.label)}</span>
+                {q.measure ? <span className="text-muted"> · {q.measure}</span> : null}
               </li>
             ))}
           </ul>
-        </Card>
+        </div>
       ) : null}
-
-      {p.assumptions.length > 0 ? <Assumptions assumptions={p.assumptions} editable={editable} pending={pending} onAnswer={handlers.onAnswer} /> : null}
-
-      {editable && takeoff.status === "draft" ? (
-        p.canValidate ? (
-          <Card className="flex flex-col gap-3 p-5">
-            <p className="flex items-center gap-2 text-[20px] font-extrabold">
-              <CircleCheck size={24} className="text-ok" aria-hidden="true" />
-              Votre liste est prête
-            </p>
-            <p className="text-[15px] text-muted">
-              {p.toBuy.length} article{p.toBuy.length > 1 ? "s" : ""} à demander aux fournisseurs
-              {p.toQuote.length > 0 ? `, ${p.toQuote.length} à faire chiffrer` : ""}.
-            </p>
-            <Button pending={pending} onClick={onValidate}>
-              <Check size={18} aria-hidden="true" />
-              Valider la liste
-            </Button>
-          </Card>
-        ) : (
-          <p className="flex items-center gap-2 text-[15px] font-semibold text-warn">
-            <AlertTriangle size={18} aria-hidden="true" />
-            Répondez aux questions ci-dessus pour valider la liste.
-          </p>
-        )
-      ) : null}
-
-      <button type="button" onClick={onShowLines} className="inline-flex min-h-11 items-center justify-center gap-1.5 self-center text-sm font-bold text-accent-text">
-        Voir le devis lu ({materials} ligne{materials > 1 ? "s" : ""})
-      </button>
-    </>
+      {p.assumptions.length > 0 ? <Assumptions assumptions={p.assumptions} editable={editable} pending={pending} onAnswer={onAnswer} /> : null}
+    </section>
   );
 }
 
@@ -156,7 +104,7 @@ function Assumptions({ assumptions, editable, pending, onAnswer }: { assumptions
   const [open, setOpen] = useState(false);
   const text = assumptions.map((a) => `${a.label.toLowerCase()} ${withUnit(a.value, a.unit)}`).join(" · ");
   return (
-    <section aria-label="Hypothèses" className="rounded-2xl bg-surface px-4 py-3 shadow-card">
+    <section aria-label="Hypothèses" className="px-4 py-2">
       <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="flex min-h-11 w-full items-start gap-2 text-left text-sm">
         <ChevronDown size={16} aria-hidden="true" className={`mt-1 shrink-0 ${open ? "rotate-180" : ""}`} />
         <span>

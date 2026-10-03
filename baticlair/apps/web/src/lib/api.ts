@@ -247,6 +247,8 @@ export interface TakeoffPurchase {
   /** « Couverture en ardoises au crochet sur liteaux : 200 m² »… */
   understood: string[];
   toBuy: PurchaseItem[];
+  /** « À acheter » rangé par ouvrage (« Couverture en ardoises… · 200 m² »), pour la carte du quantitatif. */
+  groups: { key: string; label: string; measure: string | null; itemKeys: string[] }[];
   toQuote: { key: string; label: string; measure: string; reason: string; lineIds: string[] }[];
   assumptions: PurchaseAssumption[];
   canValidate: boolean;

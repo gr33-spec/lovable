@@ -2,6 +2,7 @@
 
 import { FileUp, Loader2, Mail, MoreHorizontal, Plus, Send } from "lucide-react";
 import { useCallback, useId, useRef, useState } from "react";
+import { AssistantMessage, Say } from "@/components/chat";
 import { DemoAnswer, isDemoSupplier } from "@/components/demo";
 import { CompareQuotes, OfferLines, offerFacts, ProjectComparison } from "@/components/project-offers";
 import { SupplierForm } from "@/components/supplier-form";
@@ -73,17 +74,13 @@ export function ProjectPriceRequests({ projectId, archived, canCreate }: { proje
   if (!request) {
     if (archived || !canCreate) return null;
     return (
-      <section
-        id="fournisseurs"
-        aria-labelledby="price-request-title"
-        className="scroll-mt-4 flex flex-col gap-3 rounded-[26px] bg-[radial-gradient(130%_100%_at_100%_0%,var(--color-accent-glow)_0%,transparent_55%)] bg-ink p-4.5 text-white shadow-[0_18px_40px_rgba(14,17,22,0.22)]"
-      >
-        <span className="text-xs font-extrabold tracking-[0.04em] text-accent-on-dark">PROCHAINE ÉTAPE</span>
-        <h2 id="price-request-title" className="font-display text-[22px] leading-tight font-extrabold tracking-[-0.02em]">
-          Demander les prix aux fournisseurs
-        </h2>
-        <p className="text-sm text-[#c9ced6]">Cochez les fournisseurs : chacun recevra la liste validée, prête à envoyer depuis votre messagerie.</p>
-        <NewRequest projectId={projectId} onCreated={replace} />
+      <section id="fournisseurs" aria-labelledby="price-request-title" className="scroll-mt-4">
+        <AssistantMessage>
+          <h2 id="price-request-title" className="text-base leading-relaxed font-semibold">
+            À qui j&apos;envoie la liste ?
+          </h2>
+          <NewRequest projectId={projectId} onCreated={replace} />
+        </AssistantMessage>
       </section>
     );
   }
@@ -95,6 +92,13 @@ export function ProjectPriceRequests({ projectId, archived, canCreate }: { proje
 
   return (
     <section id="fournisseurs" aria-label="Fournisseurs" className="flex scroll-mt-4 flex-col gap-3">
+      <AssistantMessage>
+        <Say>
+          {request.recipients.some((r) => r.status === "to_send")
+            ? "La demande est prête. Envoyez-la à chaque fournisseur :"
+            : "Demande envoyée. Ajoutez ici le devis de chaque fournisseur quand il répond."}
+        </Say>
+      </AssistantMessage>
       {!archived && unread > 0 && offers.data ? (
         <CompareQuotes
           requestId={request.id}
@@ -230,8 +234,8 @@ function NewRequest({ projectId, onCreated }: { projectId: string; onCreated: (r
 
   return (
     <div className="flex flex-col gap-3">
-      <SupplierPicker selected={selected} onToggle={toggle} dark />
-      <details className="rounded-2xl bg-white/8 p-3 text-sm">
+      <SupplierPicker selected={selected} onToggle={toggle} dark={false} />
+      <details className="rounded-2xl bg-surface p-3 text-sm shadow-card">
         <summary className="cursor-pointer font-bold">Ajouter un message ou une date de réponse (facultatif)</summary>
         <div className="mt-3 flex flex-col gap-3">
           <label htmlFor={`${id}-message`} className="font-bold">

@@ -52,10 +52,23 @@ export interface ToQuoteItem {
   lineIds: string[];
 }
 
+/** Les articles d'un même ouvrage, pour la carte du quantitatif (« Couverture ardoises · 200 m² »). */
+export interface PurchaseGroup {
+  /** L'ouvrage du référentiel, ou « other » (articles écrits tels quels dans le devis, hors ouvrage connu). */
+  key: string;
+  label: string;
+  /** La mesure du devis (« 200 m² », « 17 m ») ; null si l'ouvrage n'en a pas. */
+  measure: string | null;
+  /** Clés des articles de « À acheter », dans leur ordre. */
+  itemKeys: string[];
+}
+
 export interface PurchaseView {
   /** « Couverture en ardoises au crochet sur liteaux : 200 m² », « 6 jouées de lucarnes »… */
   understood: string[];
   toBuy: PurchaseItem[];
+  /** « À acheter » rangé par ouvrage : chaque article dans un seul groupe. */
+  groups: PurchaseGroup[];
   toQuote: ToQuoteItem[];
   assumptions: Assumption[];
   /** Ce qui attend l'artisan (une phrase, des boutons). */
@@ -145,6 +158,38 @@ function aggregate(needs: readonly OwnedNeed[], ouvrages: readonly OuvrageLevels
     });
   }
   return items;
+}
+
+const shortWork = (label: string) => label.replace(/\s*\(.*\)$/, "");
+
+/** Range chaque article sous l'ouvrage d'où il vient (le premier, s'il sert à plusieurs). */
+function groupsOf(toBuy: readonly PurchaseItem[], needs: readonly OwnedNeed[], view: ArtisanView, plan: QuotePlan, ref: Referential): PurchaseGroup[] {
+  const groups: PurchaseGroup[] = [];
+  const workOfLine = (lineId: string) => {
+    const planned = plan.lines.find((l) => l.ref === lineId);
+    return planned?.status === "planned" ? planned.workItemId : undefined;
+  };
+  const measureOf = (workId: string) => {
+    for (const o of view.ouvrages) {
+      if (o.role !== "measure" || workOfLine(o.lineId) !== workId) continue;
+      const m = [o.read.quantity, o.read.unit].filter(Boolean).join(" ");
+      if (m) return m;
+    }
+    return null;
+  };
+  for (const item of toBuy) {
+    const workId = needs.find((n) => item.needIds.includes(n.needId))?.workItemId ?? (item.kind === "direct" ? workOfLine(item.lineIds[0] ?? "") : undefined);
+    const work = workId ? ref.workItems.find((w) => w.id === workId) : undefined;
+    const key = work?.id ?? "other";
+    let group = groups.find((g) => g.key === key);
+    if (!group) {
+      group = { key, label: work ? shortWork(work.label) : "Autres articles du devis", measure: work ? measureOf(work.id) : null, itemKeys: [] };
+      groups.push(group);
+    }
+    group.itemKeys.push(item.key);
+  }
+  // Les articles hors ouvrage connu ferment la carte.
+  return [...groups.filter((g) => g.key !== "other"), ...groups.filter((g) => g.key === "other")];
 }
 
 /** La phrase « J'ai compris » : chaque ouvrage avec sa mesure telle qu'écrite, puis les ouvrages comptés. */
@@ -246,5 +291,6 @@ export function purchaseView(
   // Les questions : celles de l'écran (lignes douteuses, ambiguïtés, calcul), jamais une information.
   const questions = view.decisions;
   const canValidate = questions.every((q) => q.lineIds.length === 0) && toBuy.every((b) => b.state === "ready");
-  return { understood: understood(view, link.plan, link.ref), toBuy, toQuote, assumptions, questions, canValidate };
+  const groups = groupsOf(toBuy, engine.needs, view, link.plan, link.ref);
+  return { understood: understood(view, link.plan, link.ref), toBuy, groups, toQuote, assumptions, questions, canValidate };
 }
