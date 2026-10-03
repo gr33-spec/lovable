@@ -1223,3 +1223,389 @@ Les fiches produit Point.P (ex. ardoise Cupa Excellence 32×22, réf. 1727232 : 
 ### 33.5 Pour les autres tiroirs (à venir)
 
 Batiprix (bordereau de prix du bâtiment, payant) décompose chaque ouvrage en matériaux et temps : source la plus rapide pour amorcer maçonnerie, plâtrerie, électricité, plomberie. Les catalogues techniques fabricants (Placo, Knauf, Isover, Legrand, Nicoll) jouent le même rôle qu'Edilians ici.
+
+## 34. Table officielle ardoise Cupa : recouvrement → pureau, ardoises/m², crochet, liteaux
+
+Source : Cupa Pizarras, FAQ « Pureau et nombre d'ardoises au m² », mise à jour septembre 2026 (https://www.cupapizarras.com/fr/centre-ressources/faqs/pureau-ardoises-au-m2/). Cette table **remplace** le tableau approximatif de la section 3 et devient la donnée de référence de `referentiels/couverture/regles.json` pour la pose au crochet. Le recouvrement R vient toujours du tableau pente × région × rampant (section 25.2, à saisir depuis le manuel CAP ou le DTU 40.11) ; cette table donne le reste.
+
+**Formules Cupa** (à coder telles quelles) :
+
+- Pureau P = (H − R) / 2
+- Ardoises/m² = 1 / \[ P × (L + Ø crochet) \], Ø crochet = 1 mm (inox 2,7 mm pour l'app : utiliser 0,0027 m en zone littorale, l'écart est < 1 %)
+- ml de liteaux/m² = 1 / P
+- Longueur de crochet = R + 1 cm environ (R 100 → 11 cm, R 90 → 10, R 80 → 9, R 70 → 8)
+
+Exemple Cupa : 32×22 au pureau 114 mm → 1 / (0,114 × 0,221) = 39,3 ardoises/m².
+
+**Table (R en mm, format en cm, P en mm, N/m², crochet en cm, liteaux en ml/m²)**
+
+| R | Format | P | N/m² | Crochet | Liteaux |
+| --- | --- | --- | --- | --- | --- |
+| 153 | 50×25 | 173,5 | 22,7 | 16 | 5,76 |
+| 153 | 46×30 | 153,5 | 21,4 | 16 | 6,51 |
+| 153 | 46×25 | 153,5 | 25,6 | 16 | 6,51 |
+| 147 | 50×25 | 176,5 | 22,3 | 15 | 5,67 |
+| 147 | 46×30 | 156,5 | 21,0 | 15 | 6,39 |
+| 147 | 46×25 | 156,5 | 25,1 | 15 | 6,39 |
+| 142 | 50×25 | 179 | 22,0 | 15 | 5,60 |
+| 142 | 46×30 | 159 | 20,6 | 15 | 6,29 |
+| 142 | 46×25 | 159 | 24,7 | 15 | 6,29 |
+| 137 | 50×25 | 181,5 | 21,7 | 14 | 5,50 |
+| 137 | 46×30 | 161,5 | 20,3 | 14 | 6,19 |
+| 137 | 46×25 | 161,5 | 24,3 | 14 | 6,19 |
+| 133 | 50×25 | 183,5 | 21,4 | 14 | 5,45 |
+| 133 | 46×30 | 163,5 | 20,1 | 14 | 6,12 |
+| 133 | 46×25 | 163,5 | 24,0 | 14 | 6,12 |
+| 133 | 40×25 | 133,5 | 29,4 | 14 | 7,49 |
+| 133 | 40×22 | 133,5 | 33,4 | 14 | 7,49 |
+| 130 | 50×25 | 185 | 21,3 | 14 | 5,40 |
+| 130 | 46×30 | 165 | 19,9 | 14 | 6,06 |
+| 130 | 46×25 | 165 | 23,8 | 14 | 6,06 |
+| 130 | 40×25 | 135 | 29,1 | 14 | 7,41 |
+| 130 | 40×22 | 135 | 33,1 | 14 | 7,41 |
+| 130 | 40×20 | 135 | 36,3 | 14 | 7,41 |
+| 127 | 40×25 | 136,5 | 28,8 | 13 | 7,33 |
+| 127 | 40×22 | 136,5 | 32,7 | 13 | 7,32 |
+| 127 | 40×20 | 136,5 | 35,9 | 13 | 7,33 |
+| 123 | 40×25 | 138,5 | 28,4 | 13 | 7,22 |
+| 123 | 40×22 | 138,5 | 32,2 | 13 | 7,22 |
+| 123 | 40×20 | 138,5 | 35,3 | 13 | 7,22 |
+| 119 | 40×25 | 140,5 | 28,0 | 13 | 7,12 |
+| 119 | 40×22 | 140,5 | 31,8 | 13 | 7,11 |
+| 119 | 40×20 | 140,5 | 34,8 | 13 | 7,12 |
+| 117 | 40×25 | 141,5 | 27,8 | 12 | 7,08 |
+| 117 | 40×22 | 141,5 | 31,5 | 12 | 7,06 |
+| 117 | 40×20 | 141,5 | 34,6 | 12 | 7,08 |
+| 117 | 35×25 | 116,5 | 33,9 | 12 | 8,58 |
+| 117 | 35×22 | 116,5 | 38,5 | 12 | 8,58 |
+| 116 | 40×22 | 142 | 31,4 | 12 | 7,04 |
+| 116 | 35×25 | 117 | 33,6 | 12 | 8,55 |
+| 116 | 35×22 | 117 | 38,1 | 12 | 8,55 |
+| 113 | 40×25 | 143,5 | 27,4 | 12 | 6,97 |
+| 113 | 40×22 | 143,5 | 31,1 | 12 | 6,95 |
+| 113 | 40×20 | 143,5 | 34,1 | 12 | 6,97 |
+| 113 | 35×25 | 118,5 | 33,2 | 12 | 8,44 |
+| 113 | 35×22 | 118,5 | 37,6 | 12 | 8,44 |
+| 113 | 35×20 | 118,5 | 41,4 | 12 | 8,44 |
+| 110 | 40×25 | 145 | 27,1 | 12 | 6,90 |
+| 110 | 40×22 | 145 | 30,8 | 12 | 6,90 |
+| 110 | 40×20 | 145 | 33,8 | 12 | 6,90 |
+| 110 | 35×25 | 120 | 32,8 | 12 | 8,33 |
+| 110 | 35×22 | 120 | 37,2 | 12 | 8,33 |
+| 110 | 35×20 | 120 | 40,8 | 12 | 8,33 |
+| 110 | 33×23 | 110 | 38,8 | 12 | 9,09 |
+| 107 | 40×22 | 146,5 | 30,6 | 11 | 6,80 |
+| 107 | 40×20 | 146,5 | 33,6 | 11 | 6,83 |
+| 107 | 35×25 | 121,5 | 32,5 | 11 | 8,23 |
+| 107 | 35×22 | 121,5 | 36,9 | 11 | 8,23 |
+| 107 | 35×20 | 121,5 | 40,5 | 11 | 8,23 |
+| 107 | 33×23 | 111,5 | 38,4 | 11 | 8,97 |
+| 103 | 40×22 | 148,5 | 30,2 | 11 | 6,73 |
+| 103 | 40×20 | 148,5 | 33,1 | 11 | 6,73 |
+| 103 | 35×25 | 123,5 | 32,0 | 11 | 8,10 |
+| 103 | 35×22 | 123,5 | 36,3 | 11 | 8,10 |
+| 103 | 35×20 | 123,5 | 39,9 | 11 | 8,10 |
+| 103 | 33×23 | 113,5 | 37,8 | 11 | 8,81 |
+| 103 | 32×22 | 108,5 | 41,3 | 11 | 9,22 |
+| 100 | 40×22 | 150 | 29,9 | 11 | 6,66 |
+| 100 | 40×20 | 150 | 32,8 | 11 | 6,67 |
+| 100 | 35×25 | 125 | 31,6 | 11 | 8,00 |
+| 100 | 35×22 | 125 | 35,9 | 11 | 8,00 |
+| 100 | 35×20 | 125 | 39,4 | 11 | 8,00 |
+| 100 | 33×23 | 115 | 37,3 | 11 | 8,70 |
+| 100 | 32×22 | 110 | 40,7 | 11 | 9,09 |
+| 100 | 30×22 | 100 | 44,8 | 11 | 10,00 |
+| 100 | 30×20 | 100 | 49,2 | 11 | 10,00 |
+| 100 | 30×18 | 100 | 54,6 | 11 | 10,00 |
+| 97 | 40×22 | 151,5 | 29,6 | 10 | 6,60 |
+| 97 | 40×20 | 151,5 | 32,5 | 10 | 6,60 |
+| 97 | 35×25 | 126,5 | 31,2 | 10 | 7,90 |
+| 97 | 35×22 | 126,5 | 35,4 | 10 | 7,90 |
+| 97 | 35×20 | 126,5 | 38,9 | 10 | 7,90 |
+| 97 | 33×23 | 116,5 | 36,8 | 10 | 8,58 |
+| 97 | 32×22 | 111,5 | 40,2 | 10 | 8,97 |
+| 97 | 30×22 | 101,5 | 44,1 | 10 | 9,85 |
+| 97 | 30×20 | 101,5 | 48,5 | 10 | 9,85 |
+| 97 | 30×18 | 101,5 | 53,8 | 10 | 9,85 |
+| 94 | 40×22 | 153 | 29,3 | 10 | 6,54 |
+| 94 | 40×20 | 153 | 32,1 | 10 | 6,54 |
+| 94 | 35×25 | 128 | 30,8 | 10 | 7,80 |
+| 94 | 35×22 | 128 | 35,0 | 10 | 7,80 |
+| 94 | 35×20 | 128 | 38,5 | 10 | 7,80 |
+| 94 | 33×23 | 118 | 36,3 | 10 | 8,47 |
+| 94 | 32×22 | 113 | 39,6 | 10 | 8,85 |
+| 94 | 30×22 | 103 | 43,5 | 10 | 9,71 |
+| 94 | 30×20 | 103 | 47,8 | 10 | 9,71 |
+| 94 | 30×18 | 103 | 53,0 | 10 | 9,71 |
+| 92 | 40×22 | 154 | 29,1 | 10 | 6,50 |
+| 92 | 40×20 | 154 | 31,9 | 10 | 6,49 |
+| 92 | 35×25 | 129 | 30,6 | 10 | 7,75 |
+| 92 | 35×22 | 129 | 34,7 | 10 | 7,75 |
+| 92 | 35×20 | 129 | 38,1 | 10 | 7,75 |
+| 92 | 33×23 | 119 | 36,0 | 10 | 8,40 |
+| 92 | 32×22 | 114 | 39,3 | 10 | 8,77 |
+| 92 | 30×22 | 104 | 43,1 | 10 | 9,62 |
+| 92 | 30×20 | 104 | 47,3 | 10 | 9,62 |
+| 92 | 30×18 | 104 | 52,5 | 10 | 9,62 |
+| 89 | 35×25 | 130,5 | 30,2 | 10 | 7,66 |
+| 89 | 35×22 | 130,5 | 34,3 | 10 | 7,66 |
+| 89 | 35×20 | 130,5 | 37,7 | 10 | 7,66 |
+| 89 | 33×23 | 120,5 | 35,6 | 10 | 8,30 |
+| 89 | 32×22 | 115,5 | 38,8 | 10 | 8,66 |
+| 89 | 30×22 | 105,5 | 42,5 | 10 | 9,48 |
+| 89 | 30×20 | 105,5 | 46,6 | 10 | 9,48 |
+| 89 | 30×18 | 105,5 | 51,7 | 10 | 9,48 |
+| 89 | 27×18 | 90,5 | 60,3 | 10 | 11,05 |
+| 89 | 27×16 | 90,5 | 67,7 | 10 | 11,05 |
+| 87 | 35×20 | 131,5 | 37,5 | 9 | 7,60 |
+| 87 | 33×23 | 121,5 | 35,3 | 9 | 8,23 |
+| 87 | 32×22 | 116,5 | 38,4 | 9 | 8,58 |
+| 87 | 30×22 | 106,5 | 42,1 | 9 | 9,39 |
+| 87 | 30×20 | 106,5 | 46,2 | 9 | 9,39 |
+| 87 | 30×18 | 106,5 | 51,3 | 9 | 9,39 |
+| 87 | 27×18 | 91,5 | 59,7 | 9 | 10,93 |
+| 87 | 27×16 | 91,5 | 67,0 | 9 | 10,93 |
+| 83 | 32×22 | 118,5 | 37,8 | 9 | 8,44 |
+| 83 | 30×22 | 108,5 | 41,3 | 9 | 9,22 |
+| 83 | 30×20 | 108,5 | 45,4 | 9 | 9,22 |
+| 83 | 30×18 | 108,5 | 50,3 | 9 | 9,22 |
+| 83 | 27×18 | 93,5 | 58,4 | 9 | 10,70 |
+| 83 | 27×16 | 93,5 | 65,6 | 9 | 10,70 |
+| 83 | 25×18 | 83,5 | 65,4 | 9 | 11,98 |
+| 83 | 25×15 | 83,5 | 78,2 | 9 | 11,98 |
+| 80 | 32×22 | 120 | 37,3 | 9 | 8,33 |
+| 80 | 30×22 | 110 | 40,7 | 9 | 9,09 |
+| 80 | 30×20 | 110 | 44,7 | 9 | 9,09 |
+| 80 | 30×18 | 110 | 49,6 | 9 | 9,09 |
+| 80 | 27×18 | 95 | 57,5 | 9 | 10,53 |
+| 80 | 27×16 | 95 | 64,5 | 9 | 10,53 |
+| 80 | 25×18 | 85 | 64,2 | 9 | 11,76 |
+| 80 | 25×15 | 85 | 76,8 | 9 | 11,76 |
+| 77 | 32×22 | 121,5 | 36,9 | 8 | 8,23 |
+| 77 | 30×22 | 111,5 | 40,2 | 8 | 8,97 |
+| 77 | 30×20 | 111,5 | 44,1 | 8 | 8,97 |
+| 77 | 30×18 | 111,5 | 49,0 | 8 | 8,97 |
+| 77 | 27×18 | 96,5 | 56,6 | 8 | 10,36 |
+| 77 | 27×16 | 96,5 | 63,5 | 8 | 10,36 |
+| 77 | 25×18 | 86,5 | 63,1 | 8 | 11,56 |
+| 77 | 25×15 | 86,5 | 75,5 | 8 | 11,56 |
+| 73 | 32×22 | 123,5 | 36,3 | 8 | 8,10 |
+| 73 | 30×22 | 113,5 | 39,5 | 8 | 8,81 |
+| 73 | 30×20 | 113,5 | 43,4 | 8 | 8,81 |
+| 73 | 30×18 | 113,5 | 48,1 | 8 | 8,81 |
+| 73 | 27×18 | 98,5 | 55,4 | 8 | 10,15 |
+| 73 | 27×16 | 98,5 | 62,2 | 8 | 10,15 |
+| 73 | 25×18 | 88,5 | 61,7 | 8 | 11,30 |
+| 73 | 25×15 | 88,5 | 73,8 | 8 | 11,30 |
+| 73 | 22×16 | 73,5 | 83,4 | 8 | 13,60 |
+| 69 | 32×22 | 125,5 | 35,7 | 8 | 7,97 |
+| 69 | 30×22 | 115,5 | 38,8 | 8 | 8,66 |
+| 69 | 30×20 | 115,5 | 42,6 | 8 | 8,66 |
+| 69 | 30×18 | 115,5 | 47,3 | 8 | 8,66 |
+| 69 | 27×18 | 100,5 | 54,3 | 8 | 9,95 |
+| 69 | 27×16 | 100,5 | 61,0 | 8 | 9,95 |
+| 69 | 25×18 | 90,5 | 60,3 | 8 | 11,05 |
+| 69 | 25×15 | 90,5 | 72,2 | 8 | 11,05 |
+| 69 | 22×16 | 75,5 | 81,2 | 8 | 13,25 |
+| 67 | 30×20 | 116,5 | 42,2 | 7 | 8,58 |
+| 67 | 30×18 | 116,5 | 46,9 | 7 | 8,58 |
+| 67 | 27×18 | 101,5 | 53,8 | 7 | 9,85 |
+| 67 | 27×16 | 101,5 | 60,4 | 7 | 9,85 |
+| 67 | 25×18 | 91,5 | 59,7 | 7 | 10,93 |
+| 67 | 25×15 | 91,5 | 71,4 | 7 | 10,93 |
+| 67 | 22×16 | 76,5 | 80,1 | 7 | 13,07 |
+| 65 | 30×20 | 117,5 | 41,9 | 7 | 8,51 |
+| 65 | 30×18 | 117,5 | 46,5 | 7 | 8,51 |
+| 65 | 27×18 | 102,5 | 53,3 | 7 | 9,77 |
+| 65 | 27×16 | 102,5 | 59,8 | 7 | 9,77 |
+| 65 | 25×18 | 92,5 | 59,0 | 7 | 10,81 |
+| 65 | 25×15 | 92,5 | 70,6 | 7 | 10,81 |
+| 65 | 22×16 | 77,5 | 79,1 | 7 | 12,90 |
+| 63 | 30×20 | 118,5 | 41,5 | 7 | 8,44 |
+| 63 | 30×18 | 118,5 | 46,1 | 7 | 8,44 |
+| 63 | 27×18 | 103,5 | 52,7 | 7 | 9,66 |
+| 63 | 27×16 | 103,5 | 59,2 | 7 | 9,66 |
+| 63 | 25×18 | 93,5 | 58,4 | 7 | 10,70 |
+| 63 | 25×15 | 93,5 | 69,9 | 7 | 10,70 |
+| 63 | 22×16 | 78,5 | 78,1 | 7 | 12,74 |
+| 60 | 30×20 | 120 | 41,0 | 7 | 8,33 |
+| 60 | 30×18 | 120 | 45,5 | 7 | 8,33 |
+| 60 | 27×18 | 105 | 52,0 | 7 | 9,52 |
+| 60 | 27×16 | 105 | 58,4 | 7 | 9,52 |
+| 60 | 25×18 | 95 | 57,5 | 7 | 10,53 |
+| 60 | 25×15 | 95 | 68,7 | 7 | 10,53 |
+| 60 | 22×16 | 80 | 76,6 | 7 | 12,50 |
+
+**Consignes Claude Code** : porter cette table dans `regles.json` sous `ardoise_crochet.table_cupa` (clé = R + format) ; quand le R calculé n'est pas dans la table, interpoler avec les formules ci-dessus, jamais prendre la ligne voisine. Un R hors des bornes du format (ex. 32×22 sous 69 ou au-dessus de 103) = format non admissible pour cette pente/région → proposer le format voisin. Les anciens chiffres de la section 3 (ex. 32×22 R100 = 41,3) sont remplacés par ceux-ci (40,7) ; la différence vient du diamètre du crochet dans la formule Cupa.
+
+## 35. Fiches produits tuiles Edilians (données fabricant, catalogue 2024)
+
+Source : Edilians, « Documentation tuiles à emboîtement grand moule faiblement galbées 2024 » (https://edilians.com/media/wysiwyg/Encyclopedie/documentation-tuile-fag-edilians-2024.pdf), « Tuiles canal » (https://edilians.com/media/wysiwyg/Encyclopedie/canal-tuiles-edilians.pdf), fiche Médiane Plus Gélis (2020), fiche Beauvoise. Ces fiches alimentent `materiaux.json` telles quelles. Le nombre au m² dépend du pureau réel (variable) : l'app prend le **pureau maxi** par défaut (moins de tuiles) sauf en zone 3 / site exposé / rampant long où elle prend le pureau mini, et affiche le choix comme hypothèse.
+
+### 35.1 Tuiles à emboîtement grand moule (DTU 40.21)
+
+| Modèle (réf.) | L×l hors tout mm | Largeur utile | Pureau mm | Nb/m² | Liteaux ml/m² (mini / maxi) | Poids u / m² | Palette | Pose | Galbe | Rive indiv. | Faîtière |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| HP 10 Huguenot (205) | 460×306 | 268 | 310-376 | 9,9-12 | 3,22 / 2,66 | 4,3 kg / 43 | 240 | joints croisés, double emb. | G0 | 2,7/ml (rabat 205.72/73) | 710 angulaire 3/ml ; 716-717 2,5/ml |
+| PV 10 Huguenot (214) | 460×306 | 268 | 310-376 | 9,9-12 | 3,22 / 2,66 | 4,3 / 43 | 240 | joints droits ou croisés | G0 | 2,7/ml | idem |
+| Alpha 10 Ste Foy (200) | 455×310 | 270 | 330-370 | 10-11,2 | 3,00 / 2,70 | 4,43 / 46,5 | 240 | croisés, double | G0 | 2,7/ml (200.41/42) | 700/706 3/ml ; 702/715 2,5/ml |
+| Double HP 20 Huguenot (209) | 330×460 | 418 | 225-250 | 9,5-10,6 | 4,44 / 4,00 | 4,5 / 43 | 240 | croisés au quart | G0 | 4/ml (209.41/42) | 710 3/ml ; 716-717 2,5/ml |
+| HP 13 Évolutive Huguenot (226) | 437×258 | 215 | 280-350 | 13,3-16,6 | 3,57 / 2,85 | 3,7 / 49,2 | 300 | croisés, double | G0 | 2,9/ml (PV13 215.41/42) | idem |
+| Artoise Huguenot (220) | 321×426 | 389 | 264 fixe | 10 | 3,78 | 4,3 / 43 | 240 | droits ou croisés | G1 | 3,8/ml (306.43/44) | 717 2,5/ml ; 724 3/ml |
+| Delta 10 Ste Foy (202) | 450×275 | 238 | 350-390 | 10,8-12 | 2,86 / 2,56 | 3,6 / 39,6 | 240 | croisés, simple emb. | G1 | 2,6/ml (202.41/42) | 706 3/ml ; 702/715 2,5/ml |
+| Diamant Huguenot (219) | 450×304 | 260 | 380 fixe | 10 | 2,63 | 4,3 / 43 | 240 | croisés | G1 | 2,7/ml (219.43/44) | 710 3/ml |
+| Double Panne S Huguenot (223) | 339×423 | 378 | 275 fixe | 10 | 3,63 | 4,3 / 43 | 210 | droits ou croisés, simple | G1 | 3,7/ml (323.41/42) | 717 2,5/ml ; 722 ondulée 3/ml ; 757 arêtier 3/ml |
+| H 10 Huguenot (203) | 465×304 | 259 | 312-388 | 10-12,4 | 3,20 / 2,58 | 4,3 / 43 | 240 | joints droits, double | G1 | 2,7/ml (203.72/73) | 710 3/ml ; 716-717 2,5/ml |
+| H 14 Huguenot (204) | 437×258 | 215 | 360 fixe | 13 | 2,78 | 3,2 / 41,6 | 300 | droits ou croisés | G1 | 2,8/ml (PV13 215.70/71) | 716-717 2,5/ml |
+| Jura 10 Jacob (207) | 455×315 | 272 | 340-378 | 9,7-10,8 | 2,94 / 2,64 | 4,3 / 43 | 240 | droits, double | G1 | 2,7/ml (200.41/42) | 700/706 3/ml ; 702/715/717 2,5/ml |
+| Losangée Huguenot (218) | 437×258 | 216 | 350-364 | 12,7-13,6 | 2,94 / 2,75 | 3,5 / 45,5 | 300 | droits ou croisés | G1 | 2,7/ml (215.41/42) | 716-717 2,5/ml |
+| Losangée Ste Foy (228) | 455×275 | 228 | 330-380 | 11,5-13,3 | 3,03 / 2,63 | 3,7 / 42,6-49,2 | 240 | croisés | G1 | 2,7/ml (200.41/42) | 702/715 2,5/ml ; 706 3/ml |
+| Marseille Poudenx (208) | 445×257 | 220 | 317-370 | 12,3-14,3 | 3,15 / 2,70 | 3,2 / 40 | 240 | croisés | G1 | 2,7/ml (208.48/49) | 208.150 angulaire 2,3/ml ; 716 2,5/ml |
+| Panne H2 Huguenot (210) | 432×255 | 197 | 360 fixe | 14 | 2,78 | 3,2 / 44,8 | 288 | joints droits | G1 | 2,8/ml (210.40/41, 210.70/71) | 717 2,5/ml ; 724 3/ml |
+| Provinciale Ste Foy (212) | 407×247 | 220 | 290-330 | 13,8-15,7 | 3,45 / 3,03 | 3,3 / 46,2 | 300 | croisés, simple | G1 | rive universelle 1051 3/ml | — |
+| Médiane Plus Gélis (101+) | 453×294 | 215 | 360-376 | 11,3-13,6 (12 bloquée) | 2,78 / 2,66 | 3,8 / 43,7 | 180 | joints droits, double, fortement galbée | G2 | 2,7/ml (101.41/42) | 707 2,5/ml ; 708 pureau variable 2,5-3/ml ; closoir Casson 8,1/ml |
+
+Accessoires communs : rive universelle 1050/1051 3/ml ; grande rive Patrimoine 1048 2,5/ml ; about de rive 1070-1073 1 par extrémité ; faîtière 1/2 rond 717 2,5/ml ; faîtière angulaire 710 3/ml ; arêtier 758 2,5/ml ; about d'arêtier 1 par arêtier ; rencontre porte-poinçon 1 par intersection ; poinçon 1 par rencontre ; tuile de ventilation (19 à 50 cm² selon modèle, tuile à douille Ø 126/160, lanterne bi-section 259 cm²) ; crochet Harpon GM (grand moule) ou PM ; closoir SHARK+ 90 mm.
+
+### 35.2 Petit moule et plates (extraits)
+
+| Modèle | L×l | Larg. utile | Pureau | Nb/m² | Liteaux ml/m² | Poids | Palette | DTU |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Beauvoise Huguenot (petit moule à pureau plat) | 322×235 | 200 | 242-248 | 20,2-20,7 | 4,08 | 2,2 kg / 45,1 | 480 | 40.211 |
+
+Plates 16×38, Alsace, Bourgogne, 17×27 : à saisir depuis l'Encyclopédie 2024 pp. 224-248 (lien section 33.1). Fixation plate : 2 clous, vis inox ou crochets par tuile, pas de porte-à-faux (DTU 40.23).
+
+### 35.3 Tuiles canal Poudenx (DTU 40.22)
+
+Nb/m² donné **pour le couvert seul : multiplier par 2 pour couvert + courant** (règle Edilians). Le recouvrement R dépend de la pente et de la zone (tableau 35.4). Largeur utile variable selon l'écartement de pose (200-230 ou 230-260 mm).
+
+| Modèle (réf. couvert / courant à tenons) | Longueur | Cornets grand/petit | Nb/m² couvert à R 140/150/160/170 | Liteaux ml/m² | Poids | Palette |
+| --- | --- | --- | --- | --- | --- | --- |
+| Canal 50 (414 / 454), 50 Réabilis (421), 50 Restauration (418) | 500 | 210-220 / 150 | 10,3 / 11,1 / 11,8 / 12,6 | 2,78 / 2,86 / 2,94 / 3,03 | 2,5-2,7 kg | 225 (414), 200 (454, 421, 418) |
+| Canal Gironde 50 (406 / 456), Quintescia (413) | 492 | 180 / 142 | 12,4 / 12,7 / 13,1 / 13,5 | 2,83 / 2,92 / 3,01 / 3,10 | 2,0-2,1 kg | 336 (406, 413), 384 (456) |
+| Canal Gironde à blocage (409 / 459), DTA | 492 | 180 / 142 | 12,7 (R 150 fixe) | 2,92 | 2,1 kg | 336 / 384 ; pose liteau ou support continu |
+| Canal Lyonnaise 40 (401 / 451), Restorial (412) | 400 | 215-220 / 160 | 14,2 / 14,8 / 15,4 / 16,1 | 3,85 / 4,00 / 4,17 / 4,35 | 2,1-2,2 kg | 500 (401, 412), 320 (451) |
+| Canal Charentaise (405 / 455) | 400 | 180 / 142 | 16,7 / 17,4 / 18,1 / 18,9 | 3,85 / 4,00 / 4,17 / 4,35 | 1,6-1,7 kg | 600 (405), 384 (455) |
+| Canal Charentaise à blocage (410 / 460), DTA | 400 | 180 / 142 | 17,4 (R 150 fixe) | 4,00 | 1,7-1,8 kg | 600 / 384 |
+
+Accessoires canal : faîtière sans emboîtement 727 ou pureau variable 708, 2,5 à 3/ml ; bardelis « S » 1052/1053 2,7/ml (rives, pose scellée pour le 20×30) ; canal sablière + 1/2 tuile 4,4/ml d'égout ; chatière canal 42 cm² ; closoir SHARK+ 140 mm ; écran AERO 2.
+
+### 35.4 Pentes minimales admissibles (extraits DTU 40.21 / 40.22 reproduits par Edilians, en % ; zone 1 < 200 m, zone 2 200-500 m, zone 3 > 500 m ; site protégé / normal / exposé)
+
+**Famille A — grand moule faiblement galbée à pureau plat, double emboîtement (HP10, PV10, Alpha 10, Double HP20, HP13)** : sans écran 45/50/55 (protégé), 50/55/65 (normal), 65/75/85 (exposé) ; avec écran 40/45/45, 45/45/55, 55/65/75 (Alpha 10 avec écran : 35/35/40, 35/35/40, 55/65/75).
+
+**Famille B — grand moule à relief, sans colonne de rampant (Artoise, Diamant, Double Panne S, H14, Jura 10 sans écran, Losangée Ste Foy)** : sans écran 35/35/50, 40/50/60, 60/70/80 ; avec écran 30/30/45, 35/45/50, 50/60/70.
+
+**Famille C — grand moule avec colonnes de rampant A (≤ 6,5 m) / B (6,5-9,5 m) / C (9,5-12 m) (Delta 10, H10, Losangée Huguenot, Marseille, Panne H2, Médiane Plus Gélis, Jura 10 avec écran)** :
+
+|  | Zone 1 A/B/C | Zone 2 A/B/C | Zone 3 A/B/C |
+| --- | --- | --- | --- |
+| Sans écran, protégé et normal | 25/28/32 | 27/32/35 | 30/36/40 |
+| Sans écran, exposé | 33/35/42 | 37/39/45 | 40/43/50 |
+| Avec écran, protégé | 19/22/23 | 21/24/26 | 23/26/30 |
+| Avec écran, normal | 21/24/27 | 23/27/30 | 26/31/34 |
+| Avec écran, exposé | 28/30/36 | 32/33/39 | 34/37/43 |
+
+(Losangée Huguenot protégé sans écran : 25/26/27, 25/28/30, 27/30/35.)
+
+**Canal (DTU 40.22), sans écran, pente mini et recouvrement imposé** : zone 1 protégé 24 % R 140, normal 27 % R 150, exposé 30 % R 160 ; zone 2 : 27 % R 150, 30 % R 160, 33 % R 170 ; zone 3 : 30 % R 150, 33 % R 160, 35 % R 170. Au-delà de 12 m de projection horizontale : hotline fabricant (l'app bloque et le dit).
+
+Règle app : la famille vient de `materiaux.json` (champ `famille_pente`) ; la pente du chantier en degrés est convertie en % pour la comparaison ; si pente < mini sans écran mais ≥ mini avec écran, l'app ajoute l'écran de sous-toiture et l'affiche comme hypothèse ; si < mini avec écran, alerte et proposition d'un autre modèle.
+
+## 36. Zinc joint debout : données VMZINC officielles (dossier technique DTU 40.41)
+
+Source : VMZINC / Umicore, « Joint debout, couverture froide ventilée, dossier technique » (https://www.soluzinc.com/documents/1570113828\_Dossier-technique-JDB.pdf) et guide Joint debout toiture nov. 2025 (section 33.3). Ces valeurs **remplacent** les ratios de la section 7 pour le joint debout.
+
+### 36.1 Poids et largeurs
+
+| Épaisseur | Poids zinc posé (joints compris) | Avec volige 18 mm |
+| --- | --- | --- |
+| 0,65 mm | 5,5 kg/m² | 14,5 kg/m² |
+| 0,70 mm | 6 kg/m² | 15 kg/m² |
+| 0,80 mm | 7 kg/m² | 16 kg/m² |
+
+Largeur de bobine → entraxe des joints : 500 → 430 mm ; 650 → 580 mm. Largeur autorisée selon zone de vent NV65 : zones 1 et 2 tous sites 650 ou 500 ; zone 3 protégé/normal 650 ou 500, zone 3 exposé 500 ; zone 4 tous sites 500. Pente > 173 % (bardage) : 500 maxi et 0,70 mini. Dilatation 0,0022 mm/m/°C.
+
+### 36.2 Pattes de fixation par m² (pattes classiques, selon longueur de rampant)
+
+| Rampant (m) | Bobine 500 : coulissantes / fixes par m² | Bobine 650 : coulissantes / fixes par m² |
+| --- | --- | --- |
+| 0,50 à 1,50 | 7,10 / 2,40 | 5,20 / 1,80 |
+| 1,50 à 2,00 | 6,30 / 3,20 | 4,70 / 2,30 |
+| 2,00 à 3,50 | 4,70 / 3,70 | 3,50 / 2,90 |
+| 3,50 à 5,50 | 5,20 / 2,90 | 3,80 / 2,20 |
+| 5,50 à 7,50 | 5,70 / 1,90 | 4,20 / 1,40 |
+| 7,50 à 10,50 | 6,10 / 1,50 | 4,50 / 1,10 |
+| 10,50 à 13,00 | 6,40 / 1,00 | 4,70 / 0,80 |
+| 13,00 à 15,00 | 6,80 / 0,90 | 5,10 / 0,70 |
+
+Fixation des pattes : support 12 mm → vis Ø 4 L 30 ; 15 mm → vis 4×30 ou pointe annelée 2,8×25 ; 18 mm → pointe annelée 2,5×28. 2 fixations par patte (à vérifier sur le modèle de patte). Pattes monovis (DTA 5.1/18-2556) : moins de pattes, se référer au guide monovis.
+
+### 36.3 Longueur maximale des feuilles selon pente et zone
+
+| Pente | Double agrafure (zones 1 / 2 / 3) | Ressaut (toutes zones) |
+| --- | --- | --- |
+| 5 à 10 % | — | 15 m |
+| 10 à 20 % | 10 / 10 / 15 m | 15 m |
+| 20 à 60 % | 10 / 10 / 13 m | 13 m |
+| 60 à 173 % | 10 m | 10 m |
+| > 173 % | 6 m | 6 m |
+
+Pente minimale : ressaut 5 % ; double agrafure 180 mm : 20 % (25 % zone 3) ; double agrafure 250 mm : 10 % (15 % zones 2-3). Au-delà de la longueur maxi : jonction transversale (ressaut ou double agrafure) à compter en ml de largeur de pan, 1 par tranche.
+
+### 36.4 Support bois massif
+
+Entraxe maxi des appuis (charge 150 daN/m²) : volige 12 mm → 45 cm ; 15 mm → 75 cm ; frise 18 mm → 100 cm ; planche 22 mm → 120 cm ; 25-32 mm → 120 cm. Fixation : volige 12 → pointe annelée 2,5×40 ou vis 4×40 ; 15 et 18 → 2,5×50 / 4×50 ; 22 → 2,8×50 ; 27 → 2,8×60. 2 fixations par appui si largeur ≤ 105 mm, 3 si ≥ 108 mm. Bois autorisés : sapin, épicéa, pin sylvestre, peuplier ; **interdits** (pH < 5) : chêne, châtaignier, mélèze, red cedar, douglas. Aucun feutre entre zinc et support sauf produit sous avis technique. Contact admis : aluminium, plomb, acier galvanisé, inox, cuivre étamé ; interdit : cuivre nu, fer et acier non protégés.
+
+### 36.5 Ventilation
+
+Combles perdus (chatières) : section = surface projetée / 5000. Isolant sous rampant (ventilation linéaire égout + faîtage) : section = surface projetée / 3000, répartie à égalité bas et haut. Ventilation de rive à rive admise si distance entre pignons ≤ 12 m. Finitions VMZINC en pied et en tête (languette rabattue, coulisseau, faîtage VMZ 941) assurent 76 cm²/ml.
+
+### 36.6 Règles app
+
+- Largeur 500 imposée dès zone de vent 3 exposé ou zone 4 : tout le littoral breton. `defauts.json` : `largeur_zinc_mm` = 500 si `zone_vent ≥ 3 et exposé` ou `zone_vent = 4`, sinon 650.
+- Nombre de bacs = largeur du pan ÷ entraxe (0,43 ou 0,58) arrondi sup. ; ml de bac = nb × longueur de rampant ; kg = m² de pan × 5,5 (0,65) ; bobines = kg ÷ poids bobine du négoce.
+- Pattes = m² × (coulissantes + fixes) de la ligne de rampant du tableau 36.2 ; conditionnement carton négoce.
+- Si rampant > longueur maxi du tableau 36.3 : ajouter une jonction transversale et le dire.
+- Support : ml de volige = m² ÷ largeur de volige × 1,05 ; pointes = nb appuis × 2 ou 3.
+
+## 37. État du référentiel au 3 octobre 2026 et consigne finale pour Claude Code
+
+**Données désormais sourcées fabricant ou organisme, sans marqueur « à vérifier »** : table ardoise Cupa complète (34) ; 18 modèles de tuiles Edilians grand moule + Beauvoise + 6 familles canal avec pentes minimales DTU 40.21/40.22 par zone et site (35) ; zinc joint debout VMZINC : poids, largeurs par zone de vent, pattes/m² par rampant, longueurs maxi, support, ventilation (36) ; plus-values points singuliers et crochets du manuel CAP (25) ; régions et matériaux dominants (26).
+
+**Reste marqué « à vérifier » ou à compléter**, par ordre d'importance : tableau recouvrement ardoise pente × région × rampant du DTU 40.11 (seul le point de contrôle 45°/région I/R 75 est sûr) ; régions DTU 40.11 par département ; plates Edilians 16×38 et 17×27 ; modèles BMI (Marseille, Plein Ciel, Nobilée, Losangée) et Terreal (Giverny, Elysée, Romane) ; fixation des tuiles par zone (28.3) ; ratios 25.7 ; conditionnements négoce (33.4).
+
+**Consigne Claude Code** : lorsque les sections 34, 35 et 36 contredisent les sections 3, 5 et 7, ce sont 34-36 qui font foi ; reporter les anciennes valeurs dans `CHANGELOG.md` du référentiel couverture avec la mention « remplacé par source fabricant ». Les sections 3, 5 et 7 restent utiles pour les matériaux que 34-36 ne couvrent pas encore (fibres-ciment, béton, modèles non listés) et sont alors chargées avec `confiance: "estimation"`.
+
+## 38. API partenaires : le moteur comme service (API first)
+
+**Décision.** Le quantitatif est exposé par une seule porte d'entrée interne, utilisée par l'app mobile ET, plus tard, par des partenaires (logiciels de devis type Tolteck, Abi, Rappidos, négoces). Le chat de la section 21 n'est qu'un client de cette porte. Rien dans le moteur ne sait s'il est appelé par l'app ou par un partenaire.
+
+### 38.1 Contrat
+
+- `POST /v1/quantitatifs` : entrée = PDF ou texte du devis + contexte (département, métier déclaré, surcharges de l'artisan) ; sortie immédiate = identifiant de tâche (traitement asynchrone, file d'attente du bloquant B3).
+- `GET /v1/quantitatifs/{id}` ou webhook : état `en_cours` / `questions` / `pret` / `erreur`. En état `questions`, la réponse contient les questions de `questions.json` (texte, boutons, valeur par défaut, sensibilité) ; le partenaire les pose dans son interface et renvoie les réponses sur `POST /v1/quantitatifs/{id}/reponses`.
+- Réponse `pret` : lignes avec identifiant stable, libellé normalisé, quantité, unité de commande, conditionnement, hypothèses, score de confiance, `metier` et `version_referentiel`.
+- `POST /v1/quantitatifs/{id}/corrections` : mêmes corrections que dans le chat, pour nourrir l'apprentissage (section 23).
+
+### 38.2 Sécurité et exploitation
+
+- Une clé API par partenaire, révocable, avec quota et limite de débit (réutilise B2).
+- Isolation des données par partenaire et par artisan final ; un partenaire ne voit jamais les chantiers d'un autre.
+- Compteur d'appels par partenaire pour la facturation à l'usage ; coût IA mesuré par appel (section 23.2).
+- Versionnage de l'API (`/v1`) indépendant du versionnage des référentiels.
+- Documentation OpenAPI générée depuis le code, exemples en français.
+
+### 38.3 Consigne Claude Code
+
+Le plan v3 doit montrer cette porte d'entrée interne dès maintenant, et le chat mobile doit l'appeler au lieu d'appeler le moteur directement. L'exposition publique (clés, quotas, doc) est hors MVP mais ne doit demander aucune refonte le jour où on l'ouvre.
+
+## 39. Compréhension et modification du quantitatif (complète la section 21.3)
+
+Le quantitatif doit être compris et corrigé en quelques secondes par un artisan qui n'a jamais vu l'app. Trois règles, à respecter ligne par ligne.
+
+1. **Chaque ligne s'explique en une phrase**, affichée d'un tap sous la ligne : « 8 500 ardoises = 200 m² × 40,7 ardoises/m² (32×22, R 100) + 5 % de perte, arrondi à 17 palettes de 500 ». La phrase est générée depuis les `hypotheses_a_afficher` de la règle (section 19), jamais rédigée à la main.
+2. **Chaque élément de la phrase est un bouton.** Taper sur « 40,7/m² » ouvre le choix du format ou du recouvrement ; sur « 5 % », un curseur ; sur « 200 m² », la surface. La même chose se dit au micro (« mets 8 % de perte »). Seule la ligne concernée se recalcule, les autres restent figées, et l'app dit en une ligne ce qui a changé.
+3. **Trois actions par ligne, pas plus** : modifier, retirer (« j'en ai en stock », la ligne reste visible barrée pour le bon de commande), ajouter une ligne libre. Une correction devient une habitude de l'artisan (section 23.1) après confirmation en un tap : « Toujours 8 % de perte ? Oui / Juste cette fois ».
+
+Règles d'affichage : une couleur discrète par niveau de confiance (mesure du devis / hypothèse par défaut / estimation) ; le total par ouvrage en tête de groupe ; aucune abréviation technique sans son libellé en clair (« R 100 » affiché « recouvrement 100 mm »). Test d'acceptation : une personne hors BTP doit pouvoir expliquer à voix haute d'où vient n'importe quelle ligne et la modifier sans aide.

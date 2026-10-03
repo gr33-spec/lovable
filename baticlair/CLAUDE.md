@@ -15,7 +15,9 @@
 - les points singuliers et petites fournitures (section 25), les régions et matériaux dominants (section 26) ;
 - le gabarit universel multi-métiers, à lire en premier (section 27) ; les règles de pose (section 28) ;
 - le vocabulaire des devis (section 29), les cas de test (section 30), le plan de complétion (section 31) ;
-- les schémas des fichiers de référentiel (section 32) et les sources officielles (section 33).
+- les schémas des fichiers de référentiel (section 32) et les sources officielles (section 33) ;
+- les données fabricant qui font foi sur les sections 3, 5 et 7 : ardoise Cupa (section 34), tuiles Edilians et pentes DTU (section 35), zinc VMZINC (section 36) ; anciennes valeurs dans `referentiels/couverture/CHANGELOG.md` ;
+- l'état du référentiel (section 37), l'API partenaires, API first (section 38), la compréhension et la modification du quantitatif ligne par ligne (section 39).
 
 Avant de toucher au moteur, aux règles ou aux écrans, lire la section concernée. Tout chiffre codé doit citer sa section ou sa source ; un chiffre sans source est une hypothèse à faire valider par l'artisan, jamais une quantité affichée comme certaine.
 
