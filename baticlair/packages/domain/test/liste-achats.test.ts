@@ -111,8 +111,8 @@ describe("liste d'achats : devis ardoises (200 m², jouées, cheminée)", () => 
     const v = read(ARDOISES_LUCARNES_LINES);
     expect(v.questions.map((q) => q.key).sort()).toEqual(["engine:param:nb_descentes", "role:ligne 5"]);
     expect(v.toBuy.map((b) => [short(b.label), b.quantity])).toEqual([
-      ["Ardoises 30×22", "9 313 pièces"],
-      ["Crochets d'ardoise", "9 047 pièces"],
+      ["Ardoises 30×22", "9 271 pièces"],
+      ["Crochets d'ardoise", "9 457 pièces"],
       ["Liteaux 18×40", "2 049 ml"],
       ["Liteaux 27×40", "350 ml"],
       ["Écran HPV", "3 rouleaux"],
@@ -126,7 +126,7 @@ describe("liste d'achats : devis ardoises (200 m², jouées, cheminée)", () => 
     expect(v.toBuy.some((b) => /Faîtières/.test(b.label))).toBe(false);
     // Les naissances attendent la réponse « combien de descentes » : une question, pas un article à faire chiffrer.
     expect(v.toQuote.map((q) => short(q.label))).toEqual(["Entourage de cheminée zinc et solin"]);
-    expect(v.assumptions.map((a) => a.key)).toEqual(["param:pente", "param:zone", "param:longueur_rampant", "derived:recouvrement", "param:pureau", "product:liteau", "product:contre_liteau", "param:entraxe_supports"]);
+    expect(v.assumptions.map((a) => a.key)).toEqual(["param:pente", "param:zone", "param:longueur_rampant", "derived:recouvrement", "param:pureau", "param:diametre_crochet", "product:liteau", "product:contre_liteau", "param:entraxe_supports"]);
     // Tant que « 6 » n'est pas tranché, rien ne part.
     expect(v.canValidate).toBe(false);
   });
@@ -148,9 +148,9 @@ describe("liste d'achats : devis ardoises (200 m², jouées, cheminée)", () => 
       ["Autres articles du devis", null, 1],
     ]);
     expect(v.groups.flatMap((g) => g.itemKeys).sort()).toEqual(v.toBuy.map((b) => b.key).sort());
-    // Zone intérieure : moins de recouvrement, donc moins d'ardoises (8 678) et des crochets de gouttière tous les 50 cm.
+    // Zone intérieure : moins de recouvrement, donc moins d'ardoises (8 547, table Cupa à R 80) et des crochets de gouttière tous les 50 cm.
     const inland = read(ARDOISES_LUCARNES_LINES, { "role:ligne 5": "measure", "param:nb_descentes": { value: "2", unit: "u" }, "param:zone": { value: "1", unit: "u" } });
-    expect(inland.toBuy.find((b) => b.label === "Ardoises 30×22")).toMatchObject({ quantity: "8 678 pièces" });
+    expect(inland.toBuy.find((b) => b.label === "Ardoises 30×22")).toMatchObject({ quantity: "8 547 pièces" });
     expect(inland.toBuy.find((b) => b.label === "Crochets de gouttière")).toMatchObject({ quantity: "34 pièces" });
   });
 

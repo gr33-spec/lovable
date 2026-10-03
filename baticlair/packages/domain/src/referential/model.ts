@@ -186,6 +186,13 @@ export interface ParamDef {
   default?: ParamDefault;
   /** Réponses proposées en boutons (l'artisan ne tape rien) : « Faible (30 %) », « Moyenne (45 %) »… */
   choices?: { label: string; value: string }[];
+  /**
+   * Valeur approchée faute de table officielle (la région ardoise prise égale à la zone climatique
+   * du département) : dite « estimation » à l'artisan, avec cette raison.
+   */
+  estimate?: string;
+  /** Façon de dire une valeur dans l'explication (« 3 » → « III » pour une région ardoise) ; le calcul garde la valeur. */
+  display?: Record<string, string>;
 }
 
 /**
@@ -213,6 +220,23 @@ export interface LookupTable extends Provenance {
   axes: { param: string; thresholds: string[] }[];
   /** values[i][j] : i = ligne du premier axe, j = colonne du second (une seule colonne sans second axe). */
   values: string[][];
+  note?: string;
+}
+
+/**
+ * TABLE DE POINTS d'un fabricant (Cupa, §34) : une valeur pour une combinaison EXACTE de données
+ * (format de l'ardoise et recouvrement). Elle fait foi ; hors table seulement, `otherwise` calcule
+ * (interpolation par la formule du fabricant), et c'est dit. Citée « points.nom ».
+ */
+export interface PointTable extends Provenance {
+  label: string;
+  unit: string;
+  /** Données comparées à l'égalité, dans l'unité où la table les écrit (« ardoise.longueur » en cm). */
+  keys: { variable: string; unit: string }[];
+  /** Une ligne = les valeurs des clés, puis la valeur. */
+  rows: string[][];
+  /** Hors table : cette formule, de même unité. */
+  otherwise: string;
   note?: string;
 }
 
@@ -247,7 +271,11 @@ export interface CountedWork {
 export interface NeedRule extends Provenance {
   id: string;
   slot: string;
-  /** Formule (voir expression.ts) : paramètres, « slot.caracteristique », « regle.constante ». */
+  /**
+   * Formule (voir expression.ts) : paramètres, « slot.caracteristique », « regle.constante », et
+   * « commande.<besoin> » : la quantité d'un besoin PRÉCÉDENT du même ouvrage, après sa marge et
+   * arrondie à l'unité (un crochet par ardoise COMMANDÉE, pas par ardoise posée).
+   */
   formula: string;
   /** Unité du résultat (contrôlée contre la formule au chargement). */
   unit: string;
@@ -281,6 +309,8 @@ export interface WorkItemType {
   derived?: DerivedRule[];
   /** Tables (recouvrement selon pente et zone), citées « table.nom ». */
   tables?: Record<string, LookupTable>;
+  /** Tables de points de fabricant (valeur exacte, formule hors table), citées « points.nom ». */
+  points?: Record<string, PointTable>;
   needs: NeedRule[];
 }
 

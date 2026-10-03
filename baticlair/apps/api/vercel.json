@@ -1,5 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "regions": ["fra1"],
-  "buildCommand": "pnpm run vercel-build"
+  "regions": [
+    "fra1"
+  ],
+  "buildCommand": "pnpm run vercel-build",
+  "crons": [
+    {
+      "path": "/v1/internal/purge-inactive",
+      "schedule": "17 3 * * *"
+    }
+  ]
 }

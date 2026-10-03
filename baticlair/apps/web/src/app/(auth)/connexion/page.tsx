@@ -63,6 +63,11 @@ export default function ConnexionPage() {
           Créer un compte
         </Link>
       </p>
+      <p className="text-center text-sm">
+        <Link href="/confidentialite" className="font-semibold text-muted underline">
+          Confidentialité
+        </Link>
+      </p>
     </>
   );
 }

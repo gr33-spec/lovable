@@ -28,12 +28,15 @@ model User {
   image         String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  /// Dernière visite (au jour près) : les données sont effacées 3 ans après (page Confidentialité).
+  lastSeenAt    DateTime @default(now())
 
   sessions    Session[]
   accounts    Account[]
   memberships Membership[]
   projects    Project[]    @relation("ProjectCreatedBy")
 
+  @@index([lastSeenAt])
   @@map("user")
 }
 
@@ -125,6 +128,7 @@ model Company {
   offers        SupplierOffer[]
   preferences   CompanyPreference[]
   corrections   CorrectionEvent[]
+  quantitatifs  Quantitatif[]
 
   @@map("company")
 }
@@ -174,6 +178,8 @@ model Project {
   createdBy     User?          @relation("ProjectCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   documents     Document[]
   priceRequests PriceRequest[]
+
+  quantitatifs   Quantitatif[]
 
   @@index([companyId, status, lastActivityAt(sort: Desc), id(sort: Desc)])
   // Index de recherche plein texte sans accents (pg_trgm + unaccent) :
@@ -428,8 +434,13 @@ model Takeoff {
   id            String        @id @default(uuid(7)) @db.Uuid
   companyId     String        @db.Uuid
   projectId     String        @db.Uuid
-  documentId    String        @unique @db.Uuid
+  /// Nul pour un quantitatif envoyé en lignes par un partenaire (pas de document).
+  documentId    String?       @unique @db.Uuid
   analysisId    String?       @db.Uuid
+  /// pdf (devis lu par l'IA) | lignes (envoyées par un partenaire, §38).
+  source        String        @default("pdf")
+  /// Version du référentiel du calcul (§27.1.6, §32.5).
+  referentialVersion String?
   trade         String
   status        TakeoffStatus @default(draft)
   /// Prompt et modèle ayant produit la proposition (traçabilité).
@@ -446,7 +457,7 @@ model Takeoff {
   validatedById String?
 
   company  Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  document Document      @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  document Document?     @relation(fields: [documentId], references: [id], onDelete: Cascade)
   lines    TakeoffLine[]
 
   @@index([companyId, projectId])
@@ -461,11 +472,13 @@ model TakeoffLine {
   quantityRaw String?
   unitRaw     String?
   reference   String?
+  /// Prix unitaire tel qu'envoyé par un partenaire (« 38,50 ») ; gardé, jamais utilisé pour calculer.
+  priceRaw    String?
   /// Références « page:ligne » du texte du devis qui justifient la ligne.
   sourceRefs  Json      @default("[]")
   /// Pages lues sur image (pas de texte numéroté à citer).
   sourcePages Json      @default("[]")
-  /// ai = proposée par l'IA ; manual = ajoutée par l'artisan.
+  /// ai = proposée par l'IA ; manual = ajoutée par l'artisan ; partner = envoyée par un partenaire (§38).
   origin      String    @default("ai")
   /// Modifiée par l'artisan après la proposition de l'IA.
   edited      Boolean   @default(false)
@@ -713,4 +726,25 @@ model ApiRateLimit {
 
   @@index([expiresAt])
   @@map("api_rate_limit")
+}
+
+/// Porte d'entrée /v1/quantitatifs (§38) : ce que reçoit l'appelant (app ou partenaire), relié au
+/// devis lu (PDF) ou à la liste créée depuis des lignes.
+model Quantitatif {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  companyId  String   @db.Uuid
+  projectId  String   @db.Uuid
+  /// pdf | lignes
+  source     String
+  documentId String?  @db.Uuid
+  takeoffId  String?  @db.Uuid
+  /// Référence de l'appelant (numéro de devis du partenaire), rendue telle quelle.
+  reference  String?
+  createdAt  DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, createdAt])
+  @@map("quantitatif")
 }

@@ -92,3 +92,37 @@ describe("RGPD : mes données", () => {
     expect((await second.agent.get("/v1/projects").set("x-company-id", companyId)).body.items).toHaveLength(1);
   });
 });
+
+describe("conservation : 3 ans après la dernière connexion", () => {
+  it("un compte sans visite depuis plus de 3 ans est effacé ; un compte actif ne l'est pas", async () => {
+    const old = await fullCompany("vieux@example.fr");
+    await fullCompany("actif@example.fr");
+    const fourYearsAgo = new Date();
+    fourYearsAgo.setFullYear(fourYearsAgo.getFullYear() - 4);
+    await ctx.prisma.user.updateMany({ where: { email: "vieux@example.fr" }, data: { lastSeenAt: fourYearsAgo } });
+
+    const { AccountData } = await import("../src/modules/privacy/infrastructure/account-data.js");
+    const result = await new AccountData(ctx.prisma).purgeInactive();
+    expect(result).toEqual({ usersDeleted: 1 });
+    expect(await ctx.prisma.user.count({ where: { email: "vieux@example.fr" } })).toBe(0);
+    expect(await ctx.prisma.company.count({ where: { id: old.companyId } })).toBe(0);
+    expect(await ctx.prisma.user.count({ where: { email: "actif@example.fr" } })).toBe(1);
+  });
+
+  it("la tâche de purge est fermée sans le secret de la tâche planifiée", async () => {
+    const res = await request(ctx.app.getHttpServer()).get("/v1/internal/purge-inactive");
+    expect(res.status).toBe(403);
+    const wrong = await request(ctx.app.getHttpServer()).get("/v1/internal/purge-inactive").set("authorization", "Bearer nimportequoi");
+    expect(wrong.status).toBe(403);
+  });
+
+  it("chaque visite met à jour la date de dernière connexion (au plus une fois par jour)", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "visite@example.fr", "Toitures Martin");
+    const twoDaysAgo = new Date(Date.now() - 2 * 24 * 3600 * 1000);
+    await ctx.prisma.user.updateMany({ where: { email: "visite@example.fr" }, data: { lastSeenAt: twoDaysAgo } });
+    await agent.get("/v1/me").expect(200);
+    await new Promise((r) => setTimeout(r, 100));
+    const user = await ctx.prisma.user.findUniqueOrThrow({ where: { email: "visite@example.fr" } });
+    expect(user.lastSeenAt.getTime()).toBeGreaterThan(twoDaysAgo.getTime());
+  });
+});

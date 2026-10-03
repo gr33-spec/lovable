@@ -88,8 +88,9 @@ export function reasoningOf(takeoff: Takeoff): React.ReactNode[] {
   if (zone) {
     steps.push(
       <>
-        Pas de code postal : je prends la <strong>zone {zone.value}</strong>
-        {zone.value === "3" ? " (bord de mer, le plus prudent)" : ""}.
+        {/* « région ardoise III » pour l'ardoise, « zone climatique 3 » pour les tuiles. */}
+        Pas de code postal : je prends la <strong>{zone.label.toLowerCase()} {zone.value}</strong>
+        {zone.value === "3" || zone.value === "III" ? " (bord de mer, le plus prudent)" : ""}.
       </>,
     );
   }

@@ -2,7 +2,7 @@ import type { LineRole } from "@baticlair/domain";
 import type { TenantContext } from "../../tenancy/index.js";
 
 export type TakeoffStatus = "draft" | "validated";
-export type LineOrigin = "ai" | "manual";
+export type LineOrigin = "ai" | "manual" | "partner";
 
 export interface LineFields {
   designation: string;
@@ -18,6 +18,10 @@ export interface NewTakeoffLine extends LineFields {
   section: string[];
   /** Doute exprimé par l'IA sur la ligne, montré tel quel à l'artisan. */
   aiDoubt: string | null;
+  /** Prix unitaire envoyé par un partenaire, gardé tel quel (jamais utilisé pour calculer). */
+  priceRaw?: string | null;
+  /** Qui a écrit la ligne : l'IA (défaut) ou un partenaire. */
+  origin?: LineOrigin;
 }
 
 export interface TakeoffLineRecord extends NewTakeoffLine {
@@ -34,7 +38,11 @@ export interface TakeoffLineRecord extends NewTakeoffLine {
 export interface TakeoffRecord {
   id: string;
   projectId: string;
-  documentId: string;
+  /** Nul pour une liste envoyée en lignes par un partenaire. */
+  documentId: string | null;
+  source: "pdf" | "lignes";
+  /** Version du référentiel enregistrée à la création (§27.1.6). */
+  referentialVersion: string | null;
   trade: string;
   status: TakeoffStatus;
   promptId: string;
@@ -50,7 +58,9 @@ export interface TakeoffRecord {
 
 export interface NewTakeoff {
   projectId: string;
-  documentId: string;
+  documentId: string | null;
+  source?: "pdf" | "lignes";
+  referentialVersion: string;
   analysisId: string | null;
   trade: string;
   promptId: string;

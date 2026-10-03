@@ -9,6 +9,7 @@ import { OffersModule } from "./modules/offers/index.js";
 import { PriceRequestsModule } from "./modules/price-requests/index.js";
 import { PrivacyModule } from "./modules/privacy/privacy.module.js";
 import { ProjectsModule } from "./modules/projects/index.js";
+import { QuantitatifsModule } from "./modules/quantitatifs/quantitatifs.module.js";
 import { SuppliersModule } from "./modules/suppliers/index.js";
 import { TakeoffModule } from "./modules/takeoff/index.js";
 import { TenancyModule } from "./modules/tenancy/index.js";
@@ -38,6 +39,7 @@ import { LoggingModule } from "./platform/logging/logging.module.js";
     BillingModule,
     HealthModule,
     PrivacyModule,
+    QuantitatifsModule,
   ],
 })
 export class AppModule {}

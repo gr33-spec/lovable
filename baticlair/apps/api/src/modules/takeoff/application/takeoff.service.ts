@@ -3,6 +3,7 @@ import {
   artisanView,
   assessTakeoffLine,
   climateZone,
+  isCoastal,
   computeWithAnswers,
   postalCodeIn,
   purchaseView,
@@ -205,8 +206,12 @@ export class TakeoffService {
   /** La lecture du devis client du chantier : en cours, échouée, ou rien (pas commencée, ou liste prête). */
   async readingState(tenant: TenantContext, projectId: string): Promise<ReadingState | null> {
     const quote = (await this.documents.listByProject(tenant, projectId)).find((d) => d.purpose === "client_quote");
-    if (!quote) return null;
-    const analysis = await this.meter.current(tenant.companyId, quote.id);
+    return quote ? this.readingStateOf(tenant, quote.id) : null;
+  }
+
+  /** La lecture d'un devis précis (porte /v1/quantitatifs) : en cours, échouée, ou rien. */
+  async readingStateOf(tenant: TenantContext, documentId: string): Promise<ReadingState | null> {
+    const analysis = await this.meter.current(tenant.companyId, documentId);
     if (!analysis || analysis.status === "completed") return null;
     if (analysis.status === "started") return this.stale(analysis.startedAt) ? { status: "failed", reason: "interrupted" } : { status: "reading", reason: null };
     return { status: "failed", reason: "analysis_failed" };
@@ -309,6 +314,7 @@ export class TakeoffService {
       projectId: doc.projectId,
       documentId,
       analysisId,
+      referentialVersion: ROOFING_REFERENTIAL.version,
       trade: doc.trade,
       promptId: TAKEOFF_PROMPT.id,
       promptVersion: TAKEOFF_PROMPT.version,
@@ -327,6 +333,50 @@ export class TakeoffService {
     });
     await this.meter.complete(analysisId);
     return this.review(tenant, takeoff);
+  }
+
+  /**
+   * Quantitatif à partir de lignes envoyées par un partenaire (§38) : pas de PDF, pas d'IA, rien de
+   * décompté ; le même calcul que pour un devis lu. Le prix suit la ligne, il ne sert à aucun calcul.
+   */
+  async fromLines(
+    tenant: TenantContext,
+    projectId: string,
+    trade: string,
+    lines: readonly { designation: string; quantity: string | null; unit: string | null; price: string | null }[],
+  ): Promise<ReviewedTakeoff> {
+    assertCanWrite(tenant);
+    const takeoff = await this.takeoffs.create(tenant, {
+      projectId,
+      documentId: null,
+      source: "lignes",
+      referentialVersion: ROOFING_REFERENTIAL.version,
+      analysisId: null,
+      trade,
+      promptId: "partenaire",
+      promptVersion: 0,
+      model: "aucun",
+      notes: [],
+      lines: lines.map((l) => ({
+        designation: l.designation.trim(),
+        quantityRaw: l.quantity?.trim() || null,
+        unitRaw: l.unit?.trim() || null,
+        reference: null,
+        sourceRefs: [],
+        sourcePages: [],
+        section: [],
+        aiDoubt: null,
+        priceRaw: l.price?.trim() || null,
+        origin: "partner",
+      })),
+    });
+    return this.review(tenant, takeoff);
+  }
+
+  /** Le quantitatif d'un devis déposé, s'il est prêt. */
+  async forDocument(tenant: TenantContext, documentId: string): Promise<ReviewedTakeoff | null> {
+    const takeoff = await this.takeoffs.findByDocument(tenant, documentId);
+    return takeoff ? this.review(tenant, takeoff) : null;
   }
 
   async forProject(tenant: TenantContext, projectId: string): Promise<ReviewedTakeoff | null> {
@@ -410,7 +460,7 @@ export class TakeoffService {
     after: ReviewedTakeoff,
   ): Promise<void> {
     const line = (before ?? after).takeoff.lines.find((l) => l.id === lineId);
-    const source = line && line.sourceRefs.length > 0 ? await this.aiInput.sourceLines(tenant, after.takeoff.documentId) : new Map<string, string>();
+    const source = line && line.sourceRefs.length > 0 && after.takeoff.documentId ? await this.aiInput.sourceLines(tenant, after.takeoff.documentId) : new Map<string, string>();
     await this.journal.record(tenant, {
       projectId: after.takeoff.projectId,
       takeoffId: after.takeoff.id,
@@ -529,7 +579,7 @@ export class TakeoffService {
   private async review(tenant: TenantContext, record: TakeoffRecord): Promise<ReviewedTakeoff> {
     let takeoff = record;
     const profile = tradeProfile(takeoff.trade);
-    const source = await this.aiInput.sourceLines(tenant, takeoff.documentId);
+    const source = takeoff.documentId ? await this.aiInput.sourceLines(tenant, takeoff.documentId) : new Map<string, string>();
     const { validation: read } = reviewExtractedTakeoff(
       takeoff.lines.map((l: TakeoffLineRecord) => ({
         id: l.id,
@@ -540,7 +590,8 @@ export class TakeoffService {
         sourceRefs: l.sourceRefs,
         sourcePages: l.sourcePages,
         section: l.section,
-        enteredByArtisan: l.origin === "manual" || l.edited,
+        // Une ligne de l'artisan ou d'un partenaire est sa propre source : rien à retrouver dans un document.
+        enteredByArtisan: l.origin !== "ai" || l.edited,
         aiDoubt: l.aiDoubt,
         confirmedByArtisan: l.confirmed,
       })),
@@ -556,12 +607,16 @@ export class TakeoffService {
       unit: l.unitRaw,
       section: l.section,
       confirmed: l.confirmed,
-      enteredByArtisan: l.origin === "manual" || l.edited,
+      enteredByArtisan: l.origin !== "ai" || l.edited,
     }));
     // La zone climatique vient du code postal du chantier (jamais demandée) ; le devis l'emporte s'il l'écrit.
     const address = (await this.reading.projectAddress?.(tenant, takeoff.projectId)) ?? null;
     const zone = climateZone(postalCodeIn(address));
     const extraFacts: SiteFact[] = zone ? [{ key: "zone", value: String(zone), unit: "u", evidence: `Code postal du chantier (${postalCodeIn(address)})`, origin: "document" }] : [];
+    // Département littoral : crochet d'ardoise inox 2,7 mm d'office (Cupa, §34).
+    if (isCoastal(postalCodeIn(address))) {
+      extraFacts.push({ key: "diametre_crochet", value: "2.7", unit: "mm", evidence: `Département littoral (${postalCodeIn(address)}) : crochet inox 2,7 mm`, origin: "document" });
+    }
     const plan = planQuote(lines.map((l) => ({ ref: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, section: l.section })), ROOFING_REFERENTIAL, profile, undefined, extraFacts);
     // Niveau 1 : le rôle de chaque quantité (mesure d'ouvrage ou à commander), proposé par le code
     // et ENREGISTRÉ avec la ligne ; une mesure ne devient jamais une quantité d'achat.

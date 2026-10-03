@@ -77,6 +77,13 @@ export default function InscriptionPage() {
         <Button type="submit" pending={pending} className="mt-2">
           Créer mon compte
         </Button>
+        <p className="text-center text-sm text-muted">
+          En créant un compte, vous acceptez notre{" "}
+          <Link href="/confidentialite" className="font-semibold underline">
+            politique de confidentialité
+          </Link>
+          .
+        </p>
       </form>
       <p className="text-center text-[15px]">
         Déjà un compte ?{" "}

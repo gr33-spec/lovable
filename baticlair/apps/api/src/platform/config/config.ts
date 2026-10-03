@@ -87,6 +87,8 @@ const envSchema = z
     /** Alertes de production (B5) : webhook (Slack, Discord, ntfy…) et/ou e-mail. Vide : pas d'alerte. */
     ALERT_WEBHOOK_URL: z.url().optional(),
     ALERT_EMAIL: z.email().optional(),
+    /** Secret des tâches planifiées Vercel (purge des comptes inactifs) : Vercel l'envoie en « Bearer ». */
+    CRON_SECRET: z.string().min(16).optional(),
     READING_ANSWER_WITHIN_MS: z.coerce.number().int().positive().max(60_000).default(8000),
   })
   .superRefine((env, ctx) => {
@@ -147,6 +149,7 @@ export interface AppConfig {
   billing: { plans: Plan[]; activationCodes: Record<string, string> };
   rateLimit: { enabled: boolean };
   alerts: { webhookUrl?: string; email?: string };
+  cronSecret?: string;
   ai: {
     provider: "anthropic" | "disabled" | "fake";
     apiKey?: string;
@@ -204,6 +207,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       .filter((x) => x.length > 0),
     billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES) },
     rateLimit: { enabled: e.RATE_LIMIT === "on" },
+    ...(e.CRON_SECRET ? { cronSecret: e.CRON_SECRET } : {}),
     alerts: { ...(e.ALERT_WEBHOOK_URL ? { webhookUrl: e.ALERT_WEBHOOK_URL } : {}), ...(e.ALERT_EMAIL ? { email: e.ALERT_EMAIL } : {}) },
     ai: {
       provider: e.AI_PROVIDER ?? (e.ANTHROPIC_API_KEY ? "anthropic" : "disabled"),
