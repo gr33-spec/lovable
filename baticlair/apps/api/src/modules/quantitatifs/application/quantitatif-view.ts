@@ -13,8 +13,11 @@ export interface Morceau {
   cle?: string;
   valeur?: string;
   unite?: string;
-  /** devis = lu dans le devis ; hypothese = valeur par défaut (à confirmer) ; referentiel = donnée sourcée ; artisan = choisie. */
-  confiance: "devis" | "hypothese" | "referentiel" | "artisan";
+  /**
+   * devis = lu dans le devis (ou déduit de l'adresse) ; hypothese = valeur par défaut (à confirmer) ;
+   * referentiel = donnée sourcée ; artisan = choisie ; estimation = approchée faute de table officielle.
+   */
+  confiance: "devis" | "hypothese" | "referentiel" | "artisan" | "estimation";
 }
 
 const METIER: Record<string, string> = { roofing: "couverture" };
@@ -24,7 +27,7 @@ const confianceOf = (origin: TraceLine["origin"]): Morceau["confiance"] =>
   origin === "devis" ? "devis" : origin === "assumption" ? "hypothese" : origin === "company" || origin === "project" ? "artisan" : "referentiel";
 
 /** Ce qui compte pour l'artisan en plus des hypothèses : la marge ou la perte (les intermédiaires du calcul restent dans la trace). */
-const PARLANT = /^(marge|perte)/i;
+const PARLANT = /^(marge|perte)|\((table|formule) /i;
 
 /**
  * Libellé → clé de chaque valeur réglable du chantier (pente, rampant…) : une valeur déjà choisie
@@ -45,9 +48,9 @@ function explication(quantite: string | null, trace: readonly TraceLine[], assum
     const hyp = assumptions.find((a) => a.label === t.label);
     const utile = t.origin !== "referential" || PARLANT.test(t.label) || Boolean(hyp);
     if (!utile) continue;
-    const unit = !t.unit || t.unit === "u" ? "" : t.unit === "°" ? "°" : ` ${t.unit === "m2" ? "m²" : t.unit}`;
+    const unit = !t.unit || t.unit === "u" ? "" : t.unit === "°" ? "°" : ` ${t.unit.replace(/^u\//, "/").replace("m2", "m²")}`;
     // « région ardoise III » : la valeur dite par le référentiel ; `valeur` garde celle du calcul (à renvoyer).
-    const texte = `${t.label.toLowerCase()} ${t.shown ?? t.value}${unit}`;
+    const texte = `${t.label.charAt(0).toLowerCase()}${t.label.slice(1)} ${t.shown ?? t.value}${unit}${t.estimation ? " (estimation)" : ""}`;
     if (seen.has(texte)) continue;
     seen.add(texte);
     morceaux.push({
@@ -56,7 +59,7 @@ function explication(quantite: string | null, trace: readonly TraceLine[], assum
       ...(hyp?.key.startsWith("param:") ? { cle: hyp.key } : PARAM_KEYS.has(t.label) ? { cle: PARAM_KEYS.get(t.label)! } : {}),
       valeur: t.value,
       ...(t.unit && t.unit !== "u" ? { unite: t.unit } : {}),
-      confiance: confianceOf(t.origin),
+      confiance: t.estimation ? "estimation" : confianceOf(t.origin),
     });
   }
   return { phrase: `${quantite ?? "?"} = ${morceaux.map((m) => m.texte).join(" · ")}`, morceaux };

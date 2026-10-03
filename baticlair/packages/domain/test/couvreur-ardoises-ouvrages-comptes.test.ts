@@ -107,9 +107,10 @@ describe("couverture en ardoises au crochet : chaque composant détaillé", () =
     const ardoises = ouvrage("a1").needs.find((n) => n.slot === "ardoise")!;
     const crochets = ouvrage("a1").needs.find((n) => n.slot === "crochet")!;
     const liteaux = ouvrage("a2").needs.find((n) => n.slot === "liteau")!;
-    // 200 / (0,11 × 0,221) = 8 227,07 ardoises + 5 % = 8 638,42 (8 639) ; crochets 8 639 × 1,02 = 8 811,78 ; 200 / 0,11 = 1 818,18 ml + 5 % = 1 909,09.
-    expect(ardoises.need).toEqual({ value: "8638.42", unit: "u" });
-    expect(crochets.need).toEqual({ value: "8811.78", unit: "u" });
+    // Pureau 110 mm sur 30×22 = recouvrement posé 80 mm : ligne de la table Cupa (40,7/m²) → 8 140 + 5 % = 8 547 ;
+    // crochets 8 547 × 1,02 = 8 717,94 ; 200 / 0,11 = 1 818,18 ml + 5 % = 1 909,09.
+    expect(ardoises.need).toEqual({ value: "8547", unit: "u" });
+    expect(crochets.need).toEqual({ value: "8717.94", unit: "u" });
     expect(liteaux.need).toEqual({ value: "1909.09", unit: "ml" });
     expect(ardoises.assumptions.some((a) => a.key === "param:pureau" || a.key === "derived:recouvrement")).toBe(false);
     for (const n of [ardoises, crochets, liteaux]) expect(n).toMatchObject({ provisional: false });

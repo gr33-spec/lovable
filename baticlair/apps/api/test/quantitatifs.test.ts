@@ -90,10 +90,10 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
 
     // §39 : une phrase, chaque hypothèse modifiable porte sa clé.
     expect(ardoises.explication.phrase).toBe(
-      "9 200 pièces = surface de toiture 200 m² · pente du toit 45° · région ardoise III · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet 2,7 mm · marge recommandée 5 %",
+      "9 200 pièces = surface de toiture 200 m² · pente du toit 45° · région ardoise III (estimation) · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet 2,7 mm · ardoises au m² (formule Cupa Pizarras, hors table) 43,81 /m² · marge recommandée 5 %",
     );
     expect(ardoises.explication.phrase).not.toMatch(/zone climatique/);
-    expect(ardoises.explication.morceaux).toContainEqual({ texte: "région ardoise III", cle: "param:zone", valeur: "3", confiance: "devis" });
+    expect(ardoises.explication.morceaux).toContainEqual({ texte: "région ardoise III (estimation)", cle: "param:zone", valeur: "3", confiance: "estimation" });
     expect(ardoises.explication.morceaux).toContainEqual(expect.objectContaining({ texte: "diamètre du crochet 2,7 mm", cle: "param:diametre_crochet", valeur: "2,7" }));
     expect(ardoises.explication.morceaux).toContainEqual({ texte: "pente du toit 45°", cle: "param:pente", valeur: "45", unite: "°", confiance: "hypothese" });
     expect(ardoises.explication.morceaux).toContainEqual(expect.objectContaining({ texte: "surface de toiture 200 m²", confiance: "devis" }));
@@ -137,6 +137,10 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
     // La gouttière ne dépend pas de la pente.
     const gouttiere = (b: { lignes: Ligne[] }) => b.lignes.find((l) => l.libelle.toLowerCase().includes("gouttière"));
     expect(gouttiere(res.body)?.quantite).toBe(gouttiere(before)?.quantite);
+    // 40° en région III : recouvrement 100 mm, ligne de la table Cupa (44,8/m²), qui fait foi.
+    const table = await agent.post(`/v1/quantitatifs/${before.id}/corrections`).send({ action: "modifier", cle: "param:pente", valeur: "40" });
+    expect(ligne(table.body, "Ardoises 30×22").quantite).toBe(9408);
+    expect(ligne(table.body, "Ardoises 30×22").explication.phrase).toMatch(/ardoises au m² \(table Cupa Pizarras\) 44,8 \/m²/);
     // Une valeur choisie reste modifiable : retour à 45°, retour aux 9 200 ardoises.
     const back = await agent.post(`/v1/quantitatifs/${before.id}/corrections`).send({ action: "modifier", cle: "param:pente", valeur: "45" });
     expect(ligne(back.body, "Ardoises 30×22").quantite).toBe(9200);

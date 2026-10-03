@@ -1,6 +1,21 @@
 # Référentiel couverture — CHANGELOG
 
-## Version roofing-2026.10.03-11 (appliquée dans le moteur)
+## Version roofing-2026.10.03-12 (appliquée dans le moteur)
+
+Décision du fondateur : **la table Cupa (§34) fait foi** pour tous les formats et recouvrements qu'elle couvre ; la formule Cupa ne sert qu'hors table.
+
+| Élément | -11 | -12 |
+|---|---|---|
+| Ardoises au m² | formule Cupa partout | **table Cupa (194 lignes du §34)**, lue sur le recouvrement posé (hauteur − 2 × pureau) ; formule Cupa seulement hors table, dite « hors table » |
+| Diamètre du crochet | change toujours le nombre | toujours affiché et modifiable ; ne change le nombre que hors table |
+| 200 m², 30×22, 40°, région III (R 100) | 9 050 + 5 % | **44,8/m² → 9 408** |
+| 200 m², 30×22, 45°, région I (R 80) | 8 639 | **40,7/m² → 8 547** |
+| 200 m², 30×22, 45°, région III (R 95, hors table) | 9 271 / 9 200 à Brest | inchangé (formule) |
+| Région ardoise | — | marquée **« estimation »** dans l'explication (zone climatique du département, en attendant la liste du DTU 40.11) |
+
+Pas encore traité : un recouvrement hors des bornes d'un format (ex. 30×22 au-delà de R 100) devrait rendre le format « non admissible » et proposer le voisin (§34) ; aujourd'hui la formule calcule quand même.
+
+## Version roofing-2026.10.03-11
 
 Demandé par le fondateur avant la fusion de la porte `/v1/quantitatifs` :
 

@@ -133,6 +133,11 @@ export function checkReferential(ref: Referential): string[] {
         if (!t) throw new Error(`table inconnue « ${attr} »`);
         return parseRefUnit(t.unit).dim;
       }
+      if (head === "points") {
+        const t = w.points?.[attr];
+        if (!t) throw new Error(`table de points inconnue « ${attr} »`);
+        return parseRefUnit(t.unit).dim;
+      }
       if (head === "commande") {
         const n = w.needs.find((x) => x.id === attr);
         if (!n) throw new Error(`besoin inconnu « ${attr} »`);
@@ -148,6 +153,25 @@ export function checkReferential(ref: Referential): string[] {
       if (!def) throw new Error(`caractéristique inconnue « ${name} »`);
       return parseRefUnit(def.unit).dim;
     };
+    for (const [k, t] of Object.entries(w.points ?? {})) {
+      const tw = `${where} table de points ${k}`;
+      provenance(tw, t);
+      const own = unitDim(tw, t.unit);
+      try {
+        for (const key of t.keys) {
+          const d = dimOf(key.variable);
+          if (!sameDim(d, parseRefUnit(key.unit).dim)) err(tw, `clé ${key.variable} écrite en ${key.unit} : autre dimension`);
+        }
+        const d = inferDim(parseFormula(t.otherwise), dimOf);
+        if (own && !sameDim(d, own)) err(tw, `la formule hors table donne ${dimLabel(d)}, pas des ${t.unit}`);
+      } catch (e) {
+        err(tw, (e as Error).message);
+      }
+      if (t.rows.length === 0) err(tw, "table vide");
+      if (t.rows.some((r) => r.length !== t.keys.length + 1 || r.some((x) => !/^-?\d+(\.\d+)?$/.test(x)))) err(tw, `il faut ${t.keys.length + 1} valeurs décimales par ligne`);
+      const seen = new Set(t.rows.map((r) => r.slice(0, -1).join("|")));
+      if (seen.size !== t.rows.length) err(tw, "deux lignes pour la même combinaison");
+    }
     for (const p of w.params) {
       const own = paramDims.get(p.key);
       for (const bound of p.range ? [p.range.min, p.range.max] : []) {

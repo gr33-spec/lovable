@@ -157,8 +157,8 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 | Article | Quantité | Repère |
 |---|---|---|
-| Ardoises 30×22 | 8 639 pièces |  |
-| Crochets d'ardoise | 8 812 pièces |  |
+| Ardoises 30×22 | 8 547 pièces |  |
+| Crochets d'ardoise | 8 718 pièces |  |
 | Liteaux 18×40 | 1 910 ml | ≈ 39 bottes de 50 ml |
 | Liteaux 27×40 | 350 ml | ≈ 7 bottes de 50 ml |
 | Écran HPV | 3 rouleaux | 214,29 m² |

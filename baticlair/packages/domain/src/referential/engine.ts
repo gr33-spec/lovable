@@ -1,6 +1,6 @@
 import { Decimal } from "../shared/decimal.js";
 import { evaluateInterval, FormulaError, formulaVariables, parseFormula, type IntervalValue } from "./expression.js";
-import type { Fact, LookupTable, NeedRule, ParamDef, Product, Referential, SellingUnit, Source, WorkItemType } from "./model.js";
+import type { Fact, LookupTable, NeedRule, ParamDef, PointTable, Product, Referential, SellingUnit, Source, WorkItemType } from "./model.js";
 import { parseRefUnit, sameDim, isAngleUnit, percentSlopeToDegrees } from "./units.js";
 
 /**
@@ -120,6 +120,8 @@ export interface TraceLine {
   from: string;
   /** La valeur telle qu'on la dit (« III » pour la région ardoise 3), quand elle diffère de `value`. */
   shown?: string;
+  /** Valeur approchée faute de table officielle (dite « estimation »). */
+  estimation?: boolean;
   verified: boolean;
   url?: string;
 }
@@ -245,13 +247,20 @@ export function requiredInputs(ref: Referential, workItemId: string, needId: str
       const derived = work.derived?.find((d) => d.key === v);
       const table = v.startsWith("table.") ? work.tables?.[v.slice("table.".length)] : undefined;
       const other = v.startsWith("commande.") ? work.needs.find((n) => n.id === v.slice("commande.".length)) : undefined;
-      const more = derived || other ? formulaVariables(parseFormula((derived ?? other)!.formula)) : table ? table.axes.map((a) => a.param) : [];
+      const pts = v.startsWith("points.") ? work.points?.[v.slice("points.".length)] : undefined;
+      const more = derived || other
+        ? formulaVariables(parseFormula((derived ?? other)!.formula))
+        : table
+          ? table.axes.map((a) => a.param)
+          : pts
+            ? [...pts.keys.map((k) => k.variable), ...formulaVariables(parseFormula(pts.otherwise))]
+            : [];
       for (const m of more) if (!vars.has(m)) (vars.add(m), (grew = true));
     }
   }
   // Les bornes d'un paramètre utilisé (pureau entre mini et maxi de la fiche) font partie des données requises.
   for (const p of work.params) if (vars.has(p.key) && p.range) [p.range.min, p.range.max].forEach((v) => vars.add(v));
-  const isSpec = (v: string) => v.includes(".") && !v.startsWith("regle.") && !v.startsWith("table.") && !v.startsWith("commande.");
+  const isSpec = (v: string) => v.includes(".") && !v.startsWith("regle.") && !v.startsWith("table.") && !v.startsWith("commande.") && !v.startsWith("points.");
   const slotKeys = new Set([rule.slot, ...[...vars].filter(isSpec).map((v) => v.split(".")[0]!)]);
   return {
     products: work.slots.filter((s) => slotKeys.has(s.key)).map((s) => ({ slot: s.key, label: s.label })),
@@ -496,6 +505,11 @@ function computeNeed(
           if (!table) throw new Stop({ status: "unknown", reason: `Table absente du référentiel : ${attr}.`, missing: gap({ kind: "constant", label: attr.replace(/_/g, " "), attribute: attr }) });
           return useTable(attr, table);
         }
+        if (head === "points") {
+          const pts = work.points?.[attr];
+          if (!pts) throw new Stop({ status: "unknown", reason: `Table absente du référentiel : ${attr}.`, missing: gap({ kind: "constant", label: attr.replace(/_/g, " "), attribute: attr }) });
+          return usePoints(pts);
+        }
         if (head === "commande") {
           const other = earlier.get(attr)?.result;
           const exactOther = earlier.get(attr)?.exact;
@@ -592,6 +606,7 @@ function computeNeed(
         value: read.value.replace(".", ","),
         unit: read.unit,
         ...displayed(def, read.value),
+        ...(def.estimate ? { estimation: true } : {}),
         from: given.evidence ?? (given.origin === "devis" ? "Devis" : "Votre réponse"),
         origin: given.origin === "devis" ? "devis" : "project",
         verified: true,
@@ -619,9 +634,41 @@ function computeNeed(
       const shown = (x: Decimal) => fr(x.dividedBy(expected.factor));
       const value = isPoint(v) ? shown(v.lo) : `${shown(v.lo)} à ${shown(v.hi)}`;
       const prov = provenanceLine(d, sources);
-      trace.push({ label: def.label, value, unit: def.unit, ...displayed(def, d.value), from: `Hypothèse${d.note ? ` : ${d.note}` : ""} (${prov.from})`, verified: prov.verified, ...(prov.url ? { url: prov.url } : {}), origin: "assumption" });
+      trace.push({ label: def.label, value, unit: def.unit, ...displayed(def, d.value), ...(def.estimate ? { estimation: true } : {}), from: `Hypothèse${d.note ? ` : ${d.note}` : ""} (${prov.from})`, verified: prov.verified, ...(prov.url ? { url: prov.url } : {}), origin: "assumption" });
       assume({ key: `param:${def.key}`, label: def.label, value: displayed(def, d.value).shown ?? value, unit: def.unit, ...(d.note ? { note: d.note } : {}), ...(def.choices ? { choices: def.choices } : {}) });
       return v;
+    }
+    /**
+     * Table de points du fabricant : la valeur de la ligne EXACTE (format, recouvrement) ; sinon la formule
+     * du fabricant (interpolation), dite comme telle. Les données de la formule sont toujours évaluées,
+     * pour rester affichées et modifiables (le diamètre du crochet).
+     */
+    function usePoints(pts: PointTable): IntervalValue {
+      if (pts.verification.status !== "verified") {
+        if (pts.verification.status === "deprecated" || !options.acceptDraft) {
+          throw new Stop({ status: "unknown", reason: "Règle de calcul en attente de vérification.", missing: gap({ kind: "rule", label: `Table : ${pts.label.toLowerCase()}`, sourceId: pts.source }) });
+        }
+        provisional = true;
+      }
+      const unit = parseRefUnit(pts.unit);
+      const keys = pts.keys.map((k) => ({ v: valueOf(k.variable), factor: parseRefUnit(k.unit).factor }));
+      const formula = evaluateInterval(parseFormula(pts.otherwise), valueOf);
+      const shown = (x: Decimal) => fr(x.dividedBy(unit.factor));
+      const exact = keys.every((k) => isPoint(k.v));
+      const row = exact ? pts.rows.find((r) => keys.every((k, i) => k.v.lo.dividedBy(k.factor).minus(new Decimal(r[i]!)).abs().lessThan("0.000001"))) : undefined;
+      if (row) {
+        const value = new Decimal(row[keys.length]!);
+        trace.push({ label: `${pts.label} (table ${sources.get(pts.source)?.publisher ?? "du fabricant"})`, value: fr(value), unit: pts.unit, origin: "referential", ...provenanceLine(pts, sources) });
+        return point(value.times(unit.factor), unit.dim);
+      }
+      trace.push({
+        label: `${pts.label} (formule ${sources.get(pts.source)?.publisher ?? "du fabricant"}, hors table)`,
+        value: isPoint(formula) ? shown(formula.lo) : `${shown(formula.lo)} à ${shown(formula.hi)}`,
+        unit: pts.unit,
+        origin: "referential",
+        ...provenanceLine(pts, sources),
+      });
+      return formula;
     }
     /** Table : la cellule des plus grands seuils atteints ; une entrée hors table arrête le calcul (rien n'est deviné). */
     function useTable(name: string, table: LookupTable): IntervalValue {

@@ -42,8 +42,8 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
   it("une réponse de l'artisan remplace l'hypothèse, et seulement elle", () => {
     const r = computeWorkItem(ROOFING_REFERENTIAL, { ...ARDOISE, params: { ...ARDOISE.params, pente: { value: "100", unit: "%", origin: "artisan" }, zone: { value: "1", unit: "u", origin: "artisan" } } });
     const ardoises = need(r, "ardoises");
-    // Pente 100 % (une ancienne réponse en %) = 45°, zone 1 : recouvrement 80 mm → pureau (300 − 80) / 2 = 110 mm → 200 / (0,11 × 0,221) = 8 227,07 + 5 %.
-    expect(ardoises.quantity).toEqual({ value: "8638.42", unit: "u" });
+    // Pente 100 % (une ancienne réponse en %) = 45°, zone 1 : recouvrement 80 mm, dans la table Cupa : 40,7/m² × 200 = 8 140 + 5 %.
+    expect(ardoises.quantity).toEqual({ value: "8547", unit: "u" });
     expect(ardoises.assumptions.map((a) => a.key)).toEqual(["param:longueur_rampant", "derived:recouvrement", "param:pureau", "param:diametre_crochet"]);
     expect(ardoises.trace.find((t) => t.label === "Pente du toit")).toMatchObject({ origin: "project", value: "45", unit: "°" });
   });
@@ -84,12 +84,12 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
 
   it("pertes du référentiel du fondateur : ardoise 5 %, crochets 2 %, tuile 3 %, liteaux 5 %, dites dans le calcul", () => {
     const r = computeWorkItem(ROOFING_REFERENTIAL, { ...ARDOISE, params: { ...ARDOISE.params, pureau: { value: "10", unit: "cm", origin: "artisan" } } });
-    // Cupa (§34) : 200 / (0,10 × 0,221) = 9 049,77 ardoises (45,2/m² ; la table Cupa donne 44,8 pour R 100, pureau 100 mm).
-    expect(need(r, "ardoises").trace.find((t) => t.label === "Besoin calculé")!.value).toBe("9 049,77");
-    expect(need(r, "ardoises")).toMatchObject({ quantity: { value: "9502.26" }, purchase: { order: { count: "9503" } } });
+    // Pureau 100 mm sur 30×22 = recouvrement 100 mm : la table Cupa fait foi (44,8/m²) → 8 960 ardoises.
+    expect(need(r, "ardoises").trace.find((t) => t.label === "Besoin calculé")!.value).toBe("8 960");
+    expect(need(r, "ardoises")).toMatchObject({ quantity: { value: "9408" }, purchase: { order: { count: "9408" } } });
     expect(need(r, "ardoises").trace.find((t) => t.label === "Marge recommandée")).toMatchObject({ value: "5", unit: "%" });
-    // Crochets = ardoises commandées (9 503) × 1,02 = 9 693,06.
-    expect(need(r, "crochets-ardoise")).toMatchObject({ quantity: { value: "9693.06" }, purchase: { order: { count: "9694" } } });
+    // Crochets = ardoises commandées (9 408) × 1,02 = 9 596,16.
+    expect(need(r, "crochets-ardoise")).toMatchObject({ quantity: { value: "9596.16" }, purchase: { order: { count: "9597" } } });
     expect(need(r, "liteaux-ardoise")).toMatchObject({ quantity: { value: "2100" } });
   });
 

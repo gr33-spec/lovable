@@ -47,8 +47,8 @@ Réponses :
 
 `explication` (§39) contient :
 
-- `phrase` : par exemple « 9 200 pièces = surface de toiture 200 m² · pente du toit 45° · région ardoise III · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet 2,7 mm · marge recommandée 5 % ».
-- `morceaux` : chaque élément de la phrase, avec sa `confiance` (`devis`, `hypothese`, `referentiel` ou `artisan`). Un morceau qui porte une `cle` est modifiable.
+- `phrase` : par exemple « 9 200 pièces = surface de toiture 200 m² · pente du toit 45° · région ardoise III (estimation) · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet 2,7 mm · ardoises au m² (formule Cupa Pizarras, hors table) 43,81 /m² · marge recommandée 5 % ».
+- `morceaux` : chaque élément de la phrase, avec sa `confiance` (`devis`, `hypothese`, `referentiel`, `artisan` ou `estimation`). Un morceau qui porte une `cle` est modifiable.
 
 ## Répondre — `POST /v1/quantitatifs/{id}/reponses`
 

@@ -148,9 +148,9 @@ describe("liste d'achats : devis ardoises (200 m², jouées, cheminée)", () => 
       ["Autres articles du devis", null, 1],
     ]);
     expect(v.groups.flatMap((g) => g.itemKeys).sort()).toEqual(v.toBuy.map((b) => b.key).sort());
-    // Zone intérieure : moins de recouvrement, donc moins d'ardoises (8 639) et des crochets de gouttière tous les 50 cm.
+    // Zone intérieure : moins de recouvrement, donc moins d'ardoises (8 547, table Cupa à R 80) et des crochets de gouttière tous les 50 cm.
     const inland = read(ARDOISES_LUCARNES_LINES, { "role:ligne 5": "measure", "param:nb_descentes": { value: "2", unit: "u" }, "param:zone": { value: "1", unit: "u" } });
-    expect(inland.toBuy.find((b) => b.label === "Ardoises 30×22")).toMatchObject({ quantity: "8 639 pièces" });
+    expect(inland.toBuy.find((b) => b.label === "Ardoises 30×22")).toMatchObject({ quantity: "8 547 pièces" });
     expect(inland.toBuy.find((b) => b.label === "Crochets de gouttière")).toMatchObject({ quantity: "34 pièces" });
   });
 
