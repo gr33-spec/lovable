@@ -28,7 +28,6 @@ export default function ChantierPage() {
 
   return (
     <>
-      <BackButton fallback="/chantiers" />
       {editing ? (
         <EditForm project={project} onDone={(p) => { if (p) setProject(p); setEditing(false); }} />
       ) : (
@@ -67,9 +66,11 @@ function Header({ project, onEdit, onChange }: { project: Project; onEdit: () =>
 
   const item = "flex min-h-11 w-full items-center text-left text-sm font-bold";
   return (
-    <header className="flex flex-col gap-2">
-      <div className="flex items-start justify-between gap-3">
-        <h1 className="font-display text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em]">{project.name}</h1>
+    // En-tête d'une conversation : retour, nom du chantier, menu ; le client et l'adresse en petit dessous.
+    <header className="flex flex-col gap-1">
+      <div className="flex items-center gap-2">
+        <BackButton fallback="/chantiers" compact />
+        <h1 className="min-w-0 grow truncate font-display text-[22px] leading-tight font-extrabold tracking-[-0.02em]">{project.name}</h1>
         <button
           type="button"
           onClick={() => setMenu(!menu)}
@@ -96,16 +97,16 @@ function Header({ project, onEdit, onChange }: { project: Project; onEdit: () =>
         </ul>
       ) : null}
       {error ? <ErrorNotice error={error} /> : null}
-      <div className="flex flex-wrap items-center gap-2 text-sm text-muted">
-        {done ? <Badge tone="ok">{fr.status.archived}</Badge> : <Badge>{fr.status.active}</Badge>}
-        <span>{project.clientName ?? "Client non renseigné"}</span>
+      <div className="flex flex-wrap items-center gap-x-3 pl-13 text-sm text-muted">
+        {done ? <Badge tone="ok">{fr.status.archived}</Badge> : null}
+        {project.clientName ? <span>{project.clientName}</span> : null}
+        {mapsUrl ? (
+          <a href={mapsUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 min-w-0 items-center gap-1 font-semibold text-accent-text">
+            <MapPin size={14} aria-hidden="true" className="shrink-0" />
+            <span className="truncate">{project.address}</span>
+          </a>
+        ) : null}
       </div>
-      {mapsUrl ? (
-        <a href={mapsUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 self-start text-sm font-bold text-accent-text">
-          <MapPin size={16} aria-hidden="true" />
-          {project.address}
-        </a>
-      ) : null}
     </header>
   );
 }
@@ -134,6 +135,7 @@ function EditForm({ project, onDone }: { project: Project; onDone: (p: Project |
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-4">
+      <BackButton fallback="/chantiers" />
       {error ? <ErrorNotice error={error} /> : null}
       <Field id="name" label="Nom du chantier" value={values.name} onChange={(e) => setValues({ ...values, name: e.target.value })} required autoFocus />
       <Field id="clientName" label="Client" value={values.clientName} onChange={(e) => setValues({ ...values, clientName: e.target.value })} />

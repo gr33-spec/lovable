@@ -20,6 +20,8 @@ const items = [
 export function AppNav() {
   const pathname = usePathname();
   const [left, right] = [items.slice(0, 2), items.slice(2)];
+  // Le chat d'un chantier se lit en plein écran sur téléphone (référentiel §21) : le menu laisse la place à la barre de message.
+  const inChat = /^\/chantiers\/(?!nouveau$)[^/]+$/.test(pathname);
 
   const link = (item: (typeof items)[number]) => {
     const active = item.match(pathname);
@@ -43,7 +45,7 @@ export function AppNav() {
     <>
       <nav
         aria-label="Navigation principale"
-        className="fixed inset-x-2 bottom-3 z-30 grid grid-cols-[1fr_1fr_64px_1fr_1fr] items-center rounded-[28px] bg-ink p-1 shadow-float lg:inset-x-auto lg:top-4 lg:bottom-4 lg:left-4 lg:flex lg:w-60 lg:flex-col lg:items-stretch lg:gap-1 lg:p-3"
+        className={`${inChat ? "max-lg:hidden " : ""}fixed inset-x-2 bottom-3 z-30 grid grid-cols-[1fr_1fr_64px_1fr_1fr] items-center rounded-[28px] bg-ink p-1 shadow-float lg:inset-x-auto lg:top-4 lg:bottom-4 lg:left-4 lg:flex lg:w-60 lg:flex-col lg:items-stretch lg:gap-1 lg:p-3`}
       >
         <span className="hidden px-3 pt-2 pb-4 font-display text-xl font-extrabold text-white lg:block">BatiClair</span>
         {left.map(link)}

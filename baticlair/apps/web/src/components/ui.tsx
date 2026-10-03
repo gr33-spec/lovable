@@ -116,8 +116,15 @@ export function PageTitle({ children }: { children: React.ReactNode }) {
 }
 
 /** Retour : suit l'historique réel, sinon remonte au parent logique. */
-export function BackButton({ fallback, label = fr.actions.back }: { fallback: string; label?: string }) {
+export function BackButton({ fallback, label = fr.actions.back, compact = false }: { fallback: string; label?: string; compact?: boolean }) {
   const back = useBack(fallback);
+  if (compact) {
+    return (
+      <button type="button" onClick={back} aria-label={label} className="flex size-11 shrink-0 items-center justify-center rounded-full bg-surface shadow-card">
+        <ChevronLeft size={20} aria-hidden="true" />
+      </button>
+    );
+  }
   return (
     <button
       type="button"

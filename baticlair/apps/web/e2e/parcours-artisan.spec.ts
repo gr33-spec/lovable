@@ -208,7 +208,7 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
   await page.getByLabel("Choisir le devis (PDF)").setInputFiles(fixture("devis-client-couvreur.pdf"));
   await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
   // Déposé : BatiClair lit le devis tout seul, sans appui de plus, et dit ce qu'il a compris.
-  await expect(page.getByRole("button", { name: /^Devis lu · \d+ étapes$/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Ce que j'ai compris" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Préparer la liste de matériaux" })).toHaveCount(0);
   await expect(page.getByText(/page lue|pages lues/)).toHaveCount(0);
   await expect(page.getByText("PROCHAINE ÉTAPE", { exact: true })).toHaveCount(0);
@@ -441,7 +441,7 @@ test("plusieurs articles inconnus, sans unité : UNE décision les règle tous, 
   await signUp(page);
   await createProject(page, "Piscine Le Goff", "M. Le Goff", "2 rue des Dunes, Carnac");
   await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
-  await expect(page.getByRole("button", { name: /^Devis lu ·/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Ce que j'ai compris" })).toBeVisible();
 
   // L'artisan ajoute trois articles d'un autre métier, sans unité (comme sur un devis de pisciniste).
   await page.getByRole("button", { name: /^Voir le devis lu/ }).click();
@@ -481,7 +481,7 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
   await expect(page.getByText("devis-client-demo.pdf")).toBeVisible();
 
   await page.getByRole("button", { name: "Lire le devis" }).click();
-  await expect(page.getByRole("button", { name: /^Devis lu ·/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Ce que j'ai compris" })).toBeVisible();
   await confirmDoubts(page);
   await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
   await expect(page.getByText(/^Liste validée · \d+ articles$/)).toBeVisible();
