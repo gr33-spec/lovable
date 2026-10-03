@@ -140,6 +140,14 @@ describe("liste d'achats : devis ardoises (200 m², jouées, cheminée)", () => 
       ["Entourage de cheminée zinc et solin", "2 unités"],
     ]);
     expect(v.canValidate).toBe(true);
+    // La carte du quantitatif : chaque article sous son ouvrage, avec la mesure du devis.
+    expect(v.groups.map((g) => [g.label, g.measure, g.itemKeys.length])).toEqual([
+      ["Couverture en ardoises au crochet sur liteaux", "200 m²", 5],
+      ["Faîtage en bande zinc", "17 m", 2],
+      ["Gouttière", "17 m", 3],
+      ["Autres articles du devis", null, 1],
+    ]);
+    expect(v.groups.flatMap((g) => g.itemKeys).sort()).toEqual(v.toBuy.map((b) => b.key).sort());
     // Zone intérieure : moins de recouvrement, donc moins d'ardoises (8 678) et des crochets de gouttière tous les 50 cm.
     const inland = read(ARDOISES_LUCARNES_LINES, { "role:ligne 5": "measure", "param:nb_descentes": { value: "2", unit: "u" }, "param:zone": { value: "1", unit: "u" } });
     expect(inland.toBuy.find((b) => b.label === "Ardoises 30×22")).toMatchObject({ quantity: "8 678 pièces" });

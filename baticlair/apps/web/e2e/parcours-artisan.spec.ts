@@ -39,6 +39,22 @@ async function confirmDoubts(page: Page) {
   }
 }
 
+/** Les questions arrivent une à une : l'artisan répond aux précédentes jusqu'à voir celle-ci. */
+async function answerUntil(page: Page, name: string) {
+  for (let i = 0; i < 30; i++) {
+    const card = page.getByRole("region", { name: /^À régler : / }).first();
+    await expect(card).toBeVisible();
+    if (await page.getByRole("region", { name }).isVisible()) return;
+    const current = (await card.getAttribute("aria-label"))!;
+    const yes = card.getByRole("button", { name: /^(C'est bon|Oui)/ }).first();
+    const skip = card.getByRole("button", { name: "Je ne sais pas" });
+    if (await yes.isVisible()) await yes.click();
+    else if (await skip.isVisible()) await skip.click();
+    else await card.getByRole("button").first().click();
+    await expect(page.getByRole("region", { name: current, exact: true })).toHaveCount(0);
+  }
+}
+
 async function createProject(page: Page, name: string, client: string, address: string) {
   await page.goto("/chantiers/nouveau");
   await page.getByLabel("Nom du chantier").fill(name);
@@ -62,10 +78,9 @@ test("un artisan crée son compte et son premier chantier depuis le +", async ({
   await page.getByLabel("Adresse du chantier (facultatif)").fill("12 rue des Ardoisiers, Vannes");
   await page.getByRole("button", { name: "Créer le chantier" }).click();
   await expect(page.getByRole("heading", { name: "Toiture Dupont" })).toBeVisible();
-  await expect(page.getByText("PROCHAINE ÉTAPE")).toBeVisible();
-  // Le fil du chantier montre où on en est et quoi faire ensuite.
-  const progress = page.getByRole("navigation", { name: "Avancement du chantier" });
-  await expect(progress.getByRole("link", { name: "Ajouter le devis client" })).toBeVisible();
+  // Le chat du chantier : une seule invitation, déposer le devis ; plus de barre en 5 étapes.
+  await expect(page.getByRole("heading", { name: /^Déposez le devis de votre client/ })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Avancement du chantier" })).toHaveCount(0);
 
   // Retour depuis la fiche : on revient à l'accueil (d'où l'on venait), pas au formulaire.
   await page.getByRole("button", { name: "Retour" }).click();
@@ -192,8 +207,9 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
   // Devis client : 3 pages (tableau, page scannée, conditions générales).
   await page.getByLabel("Choisir le devis (PDF)").setInputFiles(fixture("devis-client-couvreur.pdf"));
   await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
-  // Une seule chose à faire ensuite, sans détail technique.
-  await expect(page.getByRole("button", { name: "Préparer la liste de matériaux" })).toBeVisible();
+  // Déposé : BatiClair lit le devis tout seul, sans appui de plus, et dit ce qu'il a compris.
+  await expect(page.getByRole("button", { name: /^Devis lu · \d+ étapes$/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Préparer la liste de matériaux" })).toHaveCount(0);
   await expect(page.getByText(/page lue|pages lues/)).toHaveCount(0);
   await expect(page.getByText("PROCHAINE ÉTAPE", { exact: true })).toHaveCount(0);
 
@@ -226,17 +242,14 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
 
-  // IA simulée en test (AI_PROVIDER=fake) : même parcours, aucun appel payant.
-  await page.getByRole("button", { name: "Préparer la liste de matériaux" }).click();
+  // IA simulée en test (AI_PROVIDER=fake) : même parcours, aucun appel payant. La lecture part seule.
+  // Ce que BatiClair a compris, déplié juste après la lecture.
+  await expect(page.getByRole("list", { name: "Ce que BatiClair a compris" })).toBeVisible();
+  await expect(page.getByText(/^J'ai lu les \d+ lignes du devis\.$/)).toBeVisible();
 
-  // En haut : la liste d'achats ; dessous, seulement les questions utiles.
-  await expect(page.getByRole("heading", { name: "Votre liste d'achats" })).toBeVisible();
-  await expect(page.getByRole("list", { name: "À acheter" })).toBeVisible();
-  // Le devis client tient désormais sur une ligne.
-  await expect(page.getByRole("button", { name: "Ouvrir devis-client-couvreur.pdf" })).toBeVisible();
-
-  // Les crochets vendus en paquets : l'IA hésite, l'artisan précise en pièces.
+  // Les crochets vendus en paquets : l'IA hésite, l'artisan précise en pièces (les questions arrivent une à une).
   const crochets = page.getByRole("region", { name: "À régler : Crochet inox ardoise 100 mm" });
+  await answerUntil(page, "À régler : Crochet inox ardoise 100 mm");
   await expect(crochets.getByText("Combien de pièces par paquet ?")).toBeVisible();
   await crochets.getByRole("button", { name: "Corriger Crochet inox ardoise 100 mm" }).click();
   await page.getByLabel("Quantité").fill("200");
@@ -245,7 +258,9 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   // Corrigée en pièces, la ligne n'a plus de doute : la carte disparaît d'elle-même.
   await expect(crochets).toHaveCount(0);
   await confirmDoubts(page);
-  await expect(page.getByText("Votre liste est prête")).toBeVisible();
+  // Les réponses restent dans le fil, comme des messages.
+  await expect(page.getByText("Voici votre quantitatif.")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Quantitatif" })).toBeVisible();
 
   // La preuve à un appui, sur l'article lui-même.
   await page.getByRole("button", { name: "Voir le calcul : Tuile romane canal rouge 12,5 u/m²" }).click();
@@ -263,11 +278,19 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await page.getByRole("button", { name: "Retirer Closoir ventilé" }).click();
   await page.getByRole("button", { name: "Oui, retirer" }).click();
   await expect(page.getByText("Closoir ventilé")).toHaveCount(0);
-  await page.getByRole("button", { name: "Revenir à la liste d'achats" }).click();
+  await page.getByRole("button", { name: "Revenir au quantitatif" }).click();
 
   await confirmDoubts(page);
-  await expect(page.getByText("Votre liste est prête")).toBeVisible();
-  await page.getByRole("button", { name: "Valider la liste" }).click();
+  await expect(page.getByText("Voici votre quantitatif.")).toBeVisible();
+  // Écrire au lieu d'appuyer : BatiClair comprend la pente, la zone, la surface ; le reste, il le dit.
+  const message = page.getByLabel("Message à BatiClair");
+  await message.fill("mets 30° de pente");
+  await page.getByRole("button", { name: "Envoyer", exact: true }).click();
+  await expect(page.getByText(/^C'est noté : Pente 30°\./)).toBeVisible();
+  await message.fill("livraison mardi");
+  await page.getByRole("button", { name: "Envoyer", exact: true }).click();
+  await expect(page.getByText(/^Je comprends pour l'instant la pente/)).toBeVisible();
+  await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
   await expect(page.getByText("Liste validée · 6 articles")).toBeVisible();
 
   // La liste validée est conservée.
@@ -279,7 +302,9 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await page.getByRole("button", { name: "Corriger Tuile romane canal rouge 12,5 u/m²" }).click();
   await page.getByLabel("Quantité").fill("1 300");
   await page.getByRole("button", { name: "Enregistrer" }).click();
-  await page.getByRole("button", { name: "Valider la liste" }).click();
+  await page.getByRole("button", { name: "Revenir au quantitatif" }).click();
+  await confirmDoubts(page);
+  await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
   await expect(page.getByText("Liste validée · 6 articles")).toBeVisible();
 });
 
@@ -307,19 +332,17 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   // Chantier, devis client, liste validée.
   await createProject(page, "Toiture Garnier", "M. Garnier", "5 rue du Port, Vannes");
   await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
-  await page.getByRole("button", { name: "Préparer la liste de matériaux" }).click();
   await page.getByRole("button", { name: "Voir le devis lu (6 lignes)" }).click();
   await page.getByRole("button", { name: "Corriger Crochet inox ardoise 100 mm" }).click();
   await page.getByLabel("Quantité").fill("200");
   await page.getByLabel("Unité").fill("u");
   await page.getByRole("button", { name: "Enregistrer" }).click();
+  await page.getByRole("button", { name: "Revenir au quantitatif" }).click();
   await confirmDoubts(page);
-  await page.getByRole("button", { name: "Valider la liste" }).click();
+  await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
 
-  // Prochaine étape : choisir les fournisseurs, dont un créé sur place.
-  const progress = page.getByRole("navigation", { name: "Avancement du chantier" });
-  await expect(progress.getByRole("link", { name: "Envoyer les demandes" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Demander les prix aux fournisseurs" })).toBeVisible();
+  // BatiClair demande à qui envoyer : choisir les fournisseurs, dont un créé sur place.
+  await expect(page.getByRole("heading", { name: "À qui j'envoie la liste ?" })).toBeVisible();
   await page.getByRole("checkbox", { name: /Point.P Vannes/ }).check();
   await page.getByRole("button", { name: "Nouveau fournisseur" }).click();
   await page.getByLabel("Société").fill("Tuiles & Co");
@@ -353,7 +376,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await menu(pointp, "Voir l'e-mail");
   await expect(pointp.getByText("Objet :")).toBeVisible();
   await expect(pointp.getByText(/Bonjour Paul,/)).toBeVisible();
-  await expect(progress.getByRole("link", { name: "Envoyer les demandes" })).toBeVisible();
+  await expect(page.getByText("La demande est prête. Envoyez-la à chaque fournisseur :")).toBeVisible();
   // Pour tester sans attendre, un devis fictif peut être simulé (dans le menu).
   await pointp.getByRole("button", { name: /^Plus d'actions/ }).click();
   await expect(pointp.getByRole("menuitem", { name: "Test : simuler un devis fictif" })).toBeVisible();
@@ -363,7 +386,6 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await pointp.getByLabel("Ajouter son devis (PDF ou photos)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
   await expect(pointp.getByText("Devis reçu")).toBeVisible();
   await expect(pointp.getByText("Prêt à comparer")).toBeVisible();
-  await expect(progress.getByText("1/2")).toBeVisible();
   await page.reload();
   await expect(pointp.getByText("Devis reçu")).toBeVisible();
   // Un seul devis : on peut déjà le voir, ou attendre l'autre.
@@ -381,7 +403,6 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await expect(tuiles.getByRole("alert")).toContainText("soit un PDF, soit des photos");
   await tuiles.getByLabel("Ajouter son devis (PDF ou photos)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-2.pdf"));
   await expect(tuiles.getByText("Devis reçu")).toBeVisible();
-  await expect(progress.getByRole("link", { name: "Comparer les offres" })).toBeVisible();
 
   // L'action de l'étape : « Comparer ». BatiClair lit les devis (simulé en test), rapproche et calcule tout.
   await expect(page.getByText("2 offres reçues")).toBeVisible();
@@ -410,13 +431,11 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await expect(tuilesOffer.getByText(/Total estimé avec l'article manquant : 2\s724,40\s€/)).toBeVisible();
   await expect(tuilesOffer.getByText(/Livraison 60,00\s€/)).toBeVisible();
   await expect(tuilesOffer.getByText(/moins cher/i)).toHaveCount(0);
-  await expect(progress.getByRole("link", { name: "Choisir un fournisseur" })).toBeVisible();
 
   // « Retenir cette offre » : un geste, compris tout de suite.
   await offers.first().getByRole("button", { name: "Retenir cette offre" }).click();
   await expect(compare.getByRole("heading", { name: "Offre retenue" })).toBeVisible();
   await expect(offers.first().getByText("✓ Offre retenue")).toBeVisible();
-  await expect(progress.getByText("Fournisseur choisi ✓")).toBeVisible();
 
   // Tout est conservé.
   await page.reload();
@@ -428,8 +447,7 @@ test("plusieurs articles inconnus, sans unité : UNE décision les règle tous, 
   await signUp(page);
   await createProject(page, "Piscine Le Goff", "M. Le Goff", "2 rue des Dunes, Carnac");
   await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
-  await page.getByRole("button", { name: "Préparer la liste de matériaux" }).click();
-  await expect(page.getByRole("heading", { name: "Votre liste d'achats" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Devis lu ·/ })).toBeVisible();
 
   // L'artisan ajoute trois articles d'un autre métier, sans unité (comme sur un devis de pisciniste).
   await page.getByRole("button", { name: /^Voir le devis lu/ }).click();
@@ -440,21 +458,23 @@ test("plusieurs articles inconnus, sans unité : UNE décision les règle tous, 
     await page.getByRole("button", { name: "Ajouter", exact: true }).click();
     await expect(page.getByText(designation!)).toBeVisible();
   }
-  await page.getByRole("button", { name: "Revenir à la liste d'achats" }).click();
+  await page.getByRole("button", { name: "Revenir au quantitatif" }).click();
 
   // Une seule carte pour les trois, jamais trois alertes identiques.
   const group = page.getByRole("region", { name: "À régler : Articles que BatiClair ne connaît pas encore" });
+  await answerUntil(page, "À régler : Articles que BatiClair ne connaît pas encore");
   await expect(group).toHaveCount(1);
   await expect(group.getByText(/^3 articles que BatiClair ne connaît pas encore, dont 3 sans unité/)).toBeVisible();
   // Recharger la page ne règle rien à la place de l'artisan.
   await page.reload();
+  await answerUntil(page, "À régler : Articles que BatiClair ne connaît pas encore");
   await expect(group).toHaveCount(1);
-  await expect(page.getByRole("button", { name: "Valider la liste" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Envoyer au fournisseur" })).toHaveCount(0);
 
   await group.getByRole("button", { name: "Oui, tels qu'écrits" }).click();
   await expect(group).toHaveCount(0);
   await confirmDoubts(page);
-  await expect(page.getByText("Votre liste est prête")).toBeVisible();
+  await expect(page.getByText("Voici votre quantitatif.")).toBeVisible();
   // Gardés tels qu'écrits, à la pièce : la preuve dit que c'est un choix pour ce chantier.
   await page.getByRole("button", { name: "Voir le calcul : Skimmer pour piscine liner" }).click();
   await expect(page.getByText("Article gardé tel qu'écrit pour ce chantier.")).toBeVisible();
@@ -466,10 +486,10 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
   await expect(page.getByRole("heading", { name: "Démo – Toiture Martin" })).toBeVisible();
   await expect(page.getByText("devis-client-demo.pdf")).toBeVisible();
 
-  await page.getByRole("button", { name: "Préparer la liste de matériaux" }).click();
-  await expect(page.getByRole("heading", { name: "Votre liste d'achats" })).toBeVisible();
+  await page.getByRole("button", { name: "Lire le devis" }).click();
+  await expect(page.getByRole("button", { name: /^Devis lu ·/ })).toBeVisible();
   await confirmDoubts(page);
-  await page.getByRole("button", { name: "Valider la liste" }).click();
+  await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
   await expect(page.getByText(/^Liste validée · \d+ articles$/)).toBeVisible();
 
   for (const name of ["Tuilerie de l'Ouest (démo)", "Négoce Breizh (démo)", "Matériaux Atlantique (démo)"]) {
@@ -478,7 +498,6 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
   await page.getByRole("button", { name: "Préparer les 3 e-mails" }).click();
   await expect(page.getByRole("list", { name: "Vos fournisseurs" })).toBeVisible();
 
-  const progress = page.getByRole("navigation", { name: "Avancement du chantier" });
   const cards = page.getByRole("list", { name: "Vos fournisseurs" }).getByRole("listitem");
   for (const name of ["Tuilerie de l'Ouest", "Négoce Breizh", "Matériaux Atlantique"]) {
     const card = cards.filter({ hasText: name });
@@ -493,7 +512,6 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
   const compare = page.locator("section#comparer");
   await expect(compare.getByRole("button", { name: "Retenir cette offre" }).first()).toBeVisible();
   await expect(compare.getByText("⚠️ 1 article manquant")).toBeVisible();
-  await expect(progress.getByRole("link", { name: "Choisir un fournisseur" })).toBeVisible();
 });
 
 test("accueil : la prochaine action de chaque chantier, puis l'essai et les formules", async ({ page }) => {

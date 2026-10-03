@@ -34,7 +34,7 @@ export default function ChantierPage() {
       ) : (
         <Header project={project} onEdit={() => setEditing(true)} onChange={setProject} />
       )}
-      <ProjectProgressProvider projectId={project.id} archived={project.status === "archived"}>
+      <ProjectProgressProvider projectId={project.id} archived={project.status === "archived"} bar={false}>
         <ProjectDocuments projectId={project.id} archived={project.status === "archived"} />
       </ProjectProgressProvider>
     </>

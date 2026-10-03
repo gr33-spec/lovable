@@ -50,6 +50,18 @@ body {
   outline-offset: 2px;
 }
 
+/* Chat : chaque étape du raisonnement apparaît en douceur. */
+@keyframes bc-step {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

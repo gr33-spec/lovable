@@ -1,10 +1,11 @@
 "use client";
 
-import { Check, CircleCheck, HelpCircle, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
-import { useCallback, useId, useState } from "react";
+import { Check, CircleCheck, HelpCircle, Pencil, Plus, Send, Sparkles, Trash2 } from "lucide-react";
+import { Fragment, useCallback, useEffect, useId, useRef, useState } from "react";
+import { AssistantMessage, ChatInput, parseCommand, ReasoningSteps, Say, ThinkingSteps, UserBubble } from "@/components/chat";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
-import { PurchaseList } from "@/components/purchase-list";
-import { type DecisionHandlers } from "@/components/takeoff-view";
+import { QuantityCard } from "@/components/purchase-list";
+import { DecisionCard, type DecisionHandlers } from "@/components/takeoff-view";
 import { useProgressRefresh } from "@/components/project-progress";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, type ProjectDocument, type Takeoff, type TakeoffLine } from "@/lib/api";
@@ -18,23 +19,31 @@ export function canPrepareTakeoff(doc: ProjectDocument): boolean {
 
 const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? "s" : ""}`;
 
+/** « 45° » collé, « 60 cm » espacé, rien pour les pièces. */
+const withUnit = (value: string, unit: string) => (!unit || unit === "u" ? value : unit === "°" ? `${value}°` : `${value} ${unit === "m2" ? "m²" : unit}`);
+
+type Said = { id: number; text: string; reply: string | null };
+
 /**
- * La LISTE D'ACHATS tirée du devis client : les articles et leurs quantités,
- * ce qui reste à faire chiffrer, les hypothèses (une ligne), et seulement les
- * questions qui changent la commande. Le devis lu reste à un appui (« Voir le
- * devis lu ») pour corriger une ligne.
+ * LE CHAT DU CHANTIER, après le dépôt du devis (référentiel §21) :
+ *  1. BatiClair lit le devis, étapes visibles ;
+ *  2. il dit ce qu'il a compris (ouvrages, mesures, hypothèses : pente 45°, zone 3) ;
+ *  3. UNE question à la fois, seulement si elle change la commande, toujours à boutons ;
+ *  4. la carte du quantitatif, rangée par ouvrage, hypothèses modifiables ;
+ *  5. « Envoyer au fournisseur ».
+ * Jamais de quantité demandée à l'artisan. Le devis lu reste à un appui pour corriger une ligne.
  */
 export function ProjectTakeoff({
   projectId,
   clientQuote,
-  quoteCard,
   archived,
+  autoStart,
 }: {
   projectId: string;
   clientQuote: ProjectDocument | null;
-  /** Carte du devis client : complète tant que la liste n'existe pas, sur une ligne ensuite. */
-  quoteCard: (compact: boolean) => React.ReactNode;
   archived: boolean;
+  /** Devis tout juste déposé : la lecture part d'elle-même. */
+  autoStart: boolean;
 }) {
   const fetchTakeoff = useCallback(
     (signal: AbortSignal) =>
@@ -45,18 +54,21 @@ export function ProjectTakeoff({
   const [pending, setPending] = useState(false);
   const [actionError, setActionError] = useState<ApiError | null>(null);
   const [showList, setShowList] = useState(false);
+  const [fresh, setFresh] = useState(false);
+  const [said, setSaid] = useState<Said[]>([]);
+  const started = useRef(false);
   const refreshProgress = useProgressRefresh();
+  const readable = clientQuote ? canPrepareTakeoff(clientQuote) : false;
 
-  if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
-  if (!data) return <Spinner />;
+  const update = useCallback(
+    (t: Takeoff) => {
+      setData((prev) => (prev ? { ...prev, takeoff: t } : prev));
+      refreshProgress();
+    },
+    [setData, refreshProgress],
+  );
 
-  const takeoff = data.takeoff;
-  const update = (t: Takeoff) => {
-    setData({ ...data, takeoff: t });
-    refreshProgress();
-  };
-
-  async function run<T>(action: () => Promise<T>, onDone: (value: T) => void) {
+  const run = useCallback(async <T,>(action: () => Promise<T>, onDone: (value: T) => void) => {
     setPending(true);
     setActionError(null);
     try {
@@ -66,29 +78,59 @@ export function ProjectTakeoff({
     } finally {
       setPending(false);
     }
-  }
+  }, []);
+
+  const prepare = useCallback(() => {
+    if (!clientQuote) return;
+    void run(
+      () => api<Takeoff>(`/v1/documents/${encodeURIComponent(clientQuote.id)}/takeoff`, { method: "POST" }),
+      (t) => {
+        setFresh(true);
+        update(t);
+      },
+    );
+  }, [clientQuote, run, update]);
+
+  // Devis tout juste déposé : on lit sans attendre un appui de plus.
+  useEffect(() => {
+    if (!autoStart || started.current || !data || data.takeoff || !data.aiAvailable || !readable || archived) return;
+    started.current = true;
+    prepare();
+  }, [autoStart, data, readable, archived, prepare]);
+
+  if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
+  if (!data) return <Spinner />;
+
+  const takeoff = data.takeoff;
 
   if (!takeoff) {
-    if (!clientQuote) return null;
-    const readable = canPrepareTakeoff(clientQuote);
+    if (!clientQuote || !readable) return null;
+    if (!data.aiAvailable) {
+      return (
+        <AssistantMessage>
+          <Say>La lecture automatique n&apos;est pas encore activée sur votre compte.</Say>
+        </AssistantMessage>
+      );
+    }
     return (
       <section id="materiaux" aria-label="Liste de matériaux" className="flex scroll-mt-4 flex-col gap-3">
-        {quoteCard(false)}
-        {!data.aiAvailable ? (
-          <p className="text-sm text-muted">Cette fonction n&apos;est pas encore activée sur votre compte.</p>
-        ) : !readable ? null : (
-          <>
-            {actionError ? <ErrorNotice error={actionError} /> : null}
-            <Button
-              pending={pending}
-              disabled={archived}
-              onClick={() => void run(() => api<Takeoff>(`/v1/documents/${encodeURIComponent(clientQuote.id)}/takeoff`, { method: "POST" }), update)}
-            >
-              <Sparkles size={18} aria-hidden="true" />
-              {pending ? "Préparation de la liste… (jusqu'à une minute)" : "Préparer la liste de matériaux"}
-            </Button>
-          </>
-        )}
+        <AssistantMessage>
+          {pending ? (
+            <>
+              <Say>Je regarde votre devis (jusqu&apos;à une minute).</Say>
+              <ThinkingSteps />
+            </>
+          ) : (
+            <>
+              <Say>Je lis votre devis et je vous sors la liste des matériaux à commander.</Say>
+              {actionError ? <ErrorNotice error={actionError} /> : null}
+              <Button disabled={archived} onClick={prepare}>
+                <Sparkles size={18} aria-hidden="true" />
+                {actionError ? "Réessayer" : "Lire le devis"}
+              </Button>
+            </>
+          )}
+        </AssistantMessage>
       </section>
     );
   }
@@ -100,14 +142,31 @@ export function ProjectTakeoff({
   const editable = !archived;
   const call = (path: string, method: "POST" | "PATCH" | "DELETE", body?: unknown) =>
     run(() => api<Takeoff>(path, { method, ...(body !== undefined ? { body } : {}) }), update);
+  const remember = (text: string, reply: string | null = null) => setSaid((prev) => [...prev, { id: prev.length, text, reply }]);
   const lineActions = (line: TakeoffLine) => ({
     onSave: (fields: LineFieldsInput) => call(`/v1/takeoff-lines/${line.id}`, "PATCH", fields),
     onDelete: () => call(`/v1/takeoff-lines/${line.id}`, "DELETE"),
     onConfirm: () => call(`/v1/takeoff-lines/${line.id}/confirm`, "POST"),
   });
+  // Chaque réponse de l'artisan s'affiche dans le fil, comme un message.
+  const answerLabel = (key: string, value: string | { value: string; unit: string } | null): string => {
+    if (value === null) return "Je ne sais pas";
+    const raw = typeof value === "string" ? value : value.value;
+    const options = [...takeoff.view.decisions.map((d) => d.question), ...takeoff.purchase.assumptions.map((a) => ({ key: a.key, options: a.choices }))];
+    const option = options.find((q) => q && (q.key === key || `engine:${q.key}` === key || q.key === `engine:${key}`))?.options.find((o) => o.value === raw);
+    if (option) return option.label;
+    if (typeof value === "string") return value === "" ? "Aucun de ces modèles" : value;
+    return withUnit(value.value, value.unit);
+  };
   const handlers: DecisionHandlers = {
-    onDecide: (d) => call(`/v1/takeoffs/${takeoff.id}/decisions`, "POST", { action: d.primary?.action, lineIds: d.lineIds, pieceLineIds: d.pieceLineIds }),
-    onAnswer: (key, value) => call(`/v1/takeoffs/${takeoff.id}/answers`, "POST", { key, value }),
+    onDecide: (d) => {
+      if (d.primary) remember(d.primary.label);
+      return call(`/v1/takeoffs/${takeoff.id}/decisions`, "POST", { action: d.primary?.action, lineIds: d.lineIds, pieceLineIds: d.pieceLineIds });
+    },
+    onAnswer: (key, value) => {
+      remember(answerLabel(key, value));
+      return call(`/v1/takeoffs/${takeoff.id}/answers`, "POST", { key, value });
+    },
     onSaveLine: (lineId, fields) => call(`/v1/takeoff-lines/${lineId}`, "PATCH", fields),
     onDeleteLine: (lineId) => call(`/v1/takeoff-lines/${lineId}`, "DELETE"),
   };
@@ -115,7 +174,19 @@ export function ProjectTakeoff({
     setShowList(false);
     void call(`/v1/takeoffs/${takeoff.id}/validate`, "POST");
   };
-  const linkStyle = "inline-flex min-h-11 items-center justify-center gap-1.5 self-center text-sm font-bold text-accent-text";
+  const typed = (text: string) => {
+    const command = parseCommand(text);
+    if (!command) {
+      remember(text, "Je comprends pour l'instant la pente (« 30° »), la zone (« zone 1 ») et la surface (« 120 m² »). Pour le reste, utilisez les boutons.");
+      return;
+    }
+    // Honnête : si la valeur ne sert à aucun calcul de ce devis, on le dit plutôt que « recalculé ».
+    const used = takeoff.purchase.assumptions.some((a) => a.key === command.key) || takeoff.view.decisions.some((d) => d.question?.key === command.key || d.question?.key === `engine:${command.key}`);
+    remember(text, used ? `C'est noté : ${command.said}. J'ai recalculé.` : `C'est noté : ${command.said}. Ça ne change rien à cette commande.`);
+    void call(`/v1/takeoffs/${takeoff.id}/answers`, "POST", { key: command.key, value: command.value });
+  };
+  const linkStyle = "inline-flex min-h-11 items-center justify-center gap-1.5 self-start text-sm font-bold text-accent-text";
+  const decisions = takeoff.view.decisions;
 
   let body: React.ReactNode;
   if (showList) {
@@ -140,19 +211,37 @@ export function ProjectTakeoff({
             </ul>
           </details>
         ) : null}
-        {draft && editable && takeoff.purchase.canValidate ? (
-          <Button pending={pending} onClick={validate}>
-            <Check size={18} aria-hidden="true" />
-            Valider la liste
-          </Button>
-        ) : null}
         <button type="button" onClick={() => setShowList(false)} className={linkStyle}>
-          Revenir à la liste d&apos;achats
+          Revenir au quantitatif
+        </button>
+      </>
+    );
+  } else if (draft && decisions.length > 0) {
+    body = (
+      <>
+        <Say>{decisions.length === 1 ? "Une seule chose change la commande :" : `Encore ${decisions.length} questions, une à la fois :`}</Say>
+        <DecisionCard key={decisions[0]!.key} decision={decisions[0]!} lines={takeoff.lines} editable={editable} pending={pending} handlers={handlers} />
+        <button type="button" onClick={() => setShowList(true)} className={linkStyle}>
+          Voir le devis lu ({plural(materials.length, "ligne")})
         </button>
       </>
     );
   } else if (draft) {
-    body = <PurchaseList takeoff={takeoff} editable={editable} pending={pending} handlers={handlers} onValidate={validate} onShowLines={() => setShowList(true)} />;
+    body = (
+      <>
+        <Say>Voici votre quantitatif.</Say>
+        <QuantityCard takeoff={takeoff} editable={editable} pending={pending} onAnswer={handlers.onAnswer} />
+        {editable && takeoff.purchase.canValidate ? (
+          <Button pending={pending} onClick={validate}>
+            <Send size={18} aria-hidden="true" />
+            Envoyer au fournisseur
+          </Button>
+        ) : null}
+        <button type="button" onClick={() => setShowList(true)} className={linkStyle}>
+          Voir le devis lu ({plural(materials.length, "ligne")})
+        </button>
+      </>
+    );
   } else {
     body = (
       <DoneLine
@@ -166,12 +255,27 @@ export function ProjectTakeoff({
 
   return (
     <>
-      {quoteCard(true)}
+      <AssistantMessage>
+        <ReasoningSteps takeoff={takeoff} fresh={fresh} />
+      </AssistantMessage>
+      {said.map((m) => (
+        <Fragment key={m.id}>
+          <UserBubble>{m.text}</UserBubble>
+          {m.reply ? (
+            <AssistantMessage>
+              <Say>{m.reply}</Say>
+            </AssistantMessage>
+          ) : null}
+        </Fragment>
+      ))}
       <section id="materiaux" aria-label="Liste de matériaux" className="flex scroll-mt-4 flex-col gap-3">
-        {actionError ? <ErrorNotice error={actionError} /> : null}
-        {body}
+        <AssistantMessage>
+          {actionError ? <ErrorNotice error={actionError} /> : null}
+          {body}
+        </AssistantMessage>
       </section>
       <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} />
+      {draft && editable ? <ChatInput onSend={typed} disabled={pending} placeholder="« Mets 30° de pente », « zone 1 »…" /> : null}
     </>
   );
 }
