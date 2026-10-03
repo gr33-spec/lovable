@@ -213,23 +213,23 @@ describe("une réponse recalcule tout ce qui en dépend (règles vérifiées)", 
   const REF = verified(ROOFING_REFERENTIAL);
   const lines = toLines(D2026_015_LINES);
 
-  it("confirmer la tuile HP10 débloque tuiles ET liteaux ; la question n'est jamais reposée sous une autre forme", () => {
+  it("confirmer la tuile HP10 est la SEULE question : tuiles et liteaux se calculent ensuite avec l'hypothèse de pureau, dite", () => {
     const first = view(lines, "roofing", {}, REF);
     const tuile = first.decisions.find((d) => d.key === "engine:product:tuile")!;
     expect(tuile).toMatchObject({ title: "Tuiles", primary: { label: "Oui, c'est bien celui-ci" } });
     expect(first.decisions.filter((d) => d.question?.key === "product:tuile")).toHaveLength(1);
 
     const second = view(lines, "roofing", { "product:tuile": "edilians-hp10-huguenot" }, REF);
-    expect(second.decisions.some((d) => d.key === "engine:product:tuile")).toBe(false);
-    // Une seule question reste pour tuiles ET liteaux : le pureau, avec son effet sur la commande.
-    const pureau = second.decisions.find((d) => d.key === "engine:param:pureau")!;
-    expect(pureau).toMatchObject({ state: "missing", primary: { label: "Renseigner" } });
-    expect(pureau.text).toMatch(/Cela change la commande : de 1 191 à 1 445 pièces selon la réponse\./);
+    expect(second.decisions.filter((d) => d.key.startsWith("engine:"))).toEqual([]);
+    const need = (id: string) => second.items.find((i) => i.kind === "need" && i.id === id)!;
+    expect([need("tuiles").state, need("liteaux").state]).toEqual(["verified", "verified"]);
+    // Le pureau n'est pas demandé : hypothèse du référentiel (pureau mini en zone littorale), dite et modifiable.
+    expect(need("tuiles").need!.assumptions.map((a) => a.key)).toEqual(expect.arrayContaining(["param:pureau", "param:zone"]));
 
     const third = view(lines, "roofing", { "product:tuile": "edilians-hp10-huguenot", "param:pureau": { value: "34.3", unit: "cm" } }, REF);
-    const state = (id: string) => third.items.find((i) => i.kind === "need" && i.id === id)?.state;
-    expect([state("tuiles"), state("liteaux")]).toEqual(["verified", "verified"]);
-    expect(third.decisions.some((d) => d.key === "engine:param:pureau")).toBe(false);
+    const tuiles = third.items.find((i) => i.kind === "need" && i.id === "tuiles")!;
+    expect(tuiles.need!.assumptions.some((a) => a.key === "param:pureau")).toBe(false);
+    expect(tuiles.quantity).toBe("1345 pièces");
   });
 
   it("un article que le devis donne déjà en quantité d'achat ne déclenche aucune question de calcul", () => {

@@ -134,7 +134,8 @@ describe("banc d'essai : le pont devis → moteur retrouve la lecture faite à l
       ["ligne 2", "couverture-tuiles-emboitement", "contre_liteau", []],
       ["ligne 3", "couverture-tuiles-emboitement", "liteau", ["tuile"]],
       ["ligne 4", "couverture-tuiles-emboitement", "tuile", []],
-      ["ligne 5", "not_covered"],
+      // Les rives (tuiles de rive) appartiennent à la couverture ; « pour la finition des rives » cite la tuile posée.
+      ["ligne 5", "couverture-tuiles-emboitement", "rive", ["tuile"]],
       ["ligne 6", "faitage", "faitiere", ["closoir", "fixation_faitiere"]],
       ["ligne 7", "gouttiere", "profil", ["crochet", "naissance"]],
       ["ligne 8", "descente", "tube", ["coude", "collier"]],
@@ -147,6 +148,7 @@ describe("banc d'essai : le pont devis → moteur retrouve la lecture faite à l
     expect(input("couverture-tuiles-emboitement").params).toEqual({
       surface: { value: "120", unit: "m2", origin: "devis", evidence: "Devis, ligne 1, Devis, ligne 2, Devis, ligne 3, Devis, ligne 4" },
       entraxe_supports: { value: "90", unit: "cm", origin: "devis", evidence: "Devis, ligne 1 (« entraxe »)" },
+      longueur_rives: { value: "24", unit: "m", origin: "devis", evidence: "Devis, ligne 5" },
     });
     expect(input("descente").params).toEqual({
       nb_descentes: { value: "2", unit: "u", origin: "devis", evidence: "Devis, ligne 8" },
@@ -214,6 +216,18 @@ const STEPS: { name: string; scores: Record<string, { a: number; b: number; erro
       Piscine: { a: 0, b: 0, errors: 0 },
       "D-2026-011": { a: 15, b: 9, errors: 0 },
       "D-2026-015": { a: 9, b: 2, errors: 0 },
+    },
+  },
+  {
+    // Référentiel du fondateur : hypothèses par défaut (pente, zone, rampant, entraxe), tableau de recouvrement,
+    // pertes, pièces par défaut. Plus de question sur le pureau : 7 lignes sur 10 ont leur commande, 1 question (le modèle lu).
+    name: "4. Liste d'achats : hypothèses par défaut, pertes, pièces par défaut (2026-10-03)",
+    scores: {
+      Morellec: { a: 122, b: 19, errors: 12 },
+      Lézardrieux: { a: 18, b: 1, errors: 0 },
+      Piscine: { a: 0, b: 0, errors: 0 },
+      "D-2026-011": { a: 15, b: 9, errors: 0 },
+      "D-2026-015": { a: 9, b: 7, errors: 0 },
     },
   },
 ];

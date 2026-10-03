@@ -25,6 +25,7 @@ import {
   type TakeoffLineInput,
   type WorkItemInput,
 } from "../src/index.js";
+import { sansHypotheses } from "./support/sans-hypotheses.js";
 
 /**
  * CONFIANCE ✓ / ⚠ / ? ET MÉMOIRE DE L'ENTREPRISE (PD-045).
@@ -51,7 +52,8 @@ function allVerified(ref: Referential): Referential {
   };
 }
 
-const REF = allVerified(ROOFING_REFERENTIAL);
+// Mécanique de la confiance SANS les hypothèses par défaut du référentiel (elles sont prouvées à part).
+const REF = allVerified(sansHypotheses(ROOFING_REFERENTIAL));
 const ROOF: WorkItemInput = {
   workItemId: "couverture-tuiles-emboitement",
   params: {

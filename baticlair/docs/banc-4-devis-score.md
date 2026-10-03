@@ -26,8 +26,8 @@ Référence couverture :
 
 | Devis | Lignes matériaux | A — Compréhension | B — Quantitatif exact | Besoins identifiés | Questions | Inconnus | Erreurs | Lignes envoyées (avant → après regroupement) |
 |---|---|---|---|---|---|---|---|---|
-| D-2026-015 — couverture (référence) | 10 | **90 %** (9) | **20 %** (2) | 7 | 4 | 3 | 0 | 10 → 10 |
-| **Total** | **10** | **90 %** (9) | **20 %** (2) | 7 | 4 | 3 | 0 | 10 → 10 |
+| D-2026-015 — couverture (référence) | 10 | **90 %** (9) | **70 %** (7) | 9 | 1 | 1 | 0 | 10 → 10 |
+| **Total** | **10** | **90 %** (9) | **70 %** (7) | 9 | 1 | 1 | 0 | 10 → 10 |
 
 ## Ce que verrait l'artisan (lecture seule, avant toute réponse)
 
@@ -65,6 +65,11 @@ Chaque devis doit garder au moins ses scores A et B de l'étape précédente, sa
 | 3. Règles de couverture validées par le fondateur (2026-10-02) | Piscine | 0 | 0 | 0 |
 | 3. Règles de couverture validées par le fondateur (2026-10-02) | D-2026-011 | 15 | 9 | 0 |
 | 3. Règles de couverture validées par le fondateur (2026-10-02) | D-2026-015 | 9 | 2 | 0 |
+| 4. Liste d'achats : hypothèses par défaut, pertes, pièces par défaut (2026-10-03) | Morellec | 122 | 19 | 12 |
+| 4. Liste d'achats : hypothèses par défaut, pertes, pièces par défaut (2026-10-03) | Lézardrieux | 18 | 1 | 0 |
+| 4. Liste d'achats : hypothèses par défaut, pertes, pièces par défaut (2026-10-03) | Piscine | 0 | 0 | 0 |
+| 4. Liste d'achats : hypothèses par défaut, pertes, pièces par défaut (2026-10-03) | D-2026-011 | 15 | 9 | 0 |
+| 4. Liste d'achats : hypothèses par défaut, pertes, pièces par défaut (2026-10-03) | D-2026-015 | 9 | 7 | 0 |
 
 ## Ce qu'il faudrait savoir décomposer (score B)
 
@@ -79,15 +84,12 @@ Chaque devis doit garder au moins ses scores A et B de l'étape précédente, sa
 | Carrelage, faïence | 3 | D-2026-011 | Carrelage sol grès cérame 40x40 gris anthracite - Fourniture |
 | Tube, tuyau | 2 | Morellec | TUBE PER PRE GAINE 10X12 BLEU |
 | Isolant | 2 | Lézardrieux | Mise en place d'une isolation thermique en doublages Typolog |
-| Liteau et contre-liteau | 2 | D-2026-015 | Contre-lattage en liteaux 27x40 (Fourniture & Pose) - Fourni |
-| Accessoire de couverture (faîtière, arêtier, rive, chatière, sortie) | 2 | D-2026-015 | Rives de toit (Fourniture & Pose) - Fourniture et pose de tu |
 | Ossature (rail, montant, fourrure) | 1 | Lézardrieux | Cloison séparative d'appartements SAD120 duo'tech 25. Cloiso |
 | Ragréage, primaire | 1 | D-2026-011 | Ragréage du sol - Application d'une couche de ragréage fibré |
 | Peinture, laque, lasure | 1 | D-2026-011 | Peinture plafond salle de bain - Fourniture peinture spécial |
-| Écran sous-toiture / pare-pluie | 1 | D-2026-015 | Écran de sous-toiture respirant (Fourniture & Pose) - Fourni |
+| Liteau et contre-liteau | 1 | D-2026-015 | Lattage en liteaux 27x40 pour tuiles HP10 (Fourniture & Pose |
 | Tuile | 1 | D-2026-015 | Couverture en tuiles terre cuite HP10 rouge (Fourniture & Po |
-| Gouttière | 1 | D-2026-015 | Gouttière PVC de 25 sable (Fourniture & Pose) - Fourniture e |
-| Descente d'eaux pluviales | 1 | D-2026-015 | Descente d'eau pluviale PVC Ø80 avec coudes (Fourniture & Po |
+| Accessoire de couverture (faîtière, arêtier, rive, chatière, sortie) | 1 | D-2026-015 | Rives de toit (Fourniture & Pose) - Fourniture et pose de tu |
 
 ## Erreurs restantes
 
@@ -115,9 +117,6 @@ Chaque devis doit garder au moins ses scores A et B de l'étape précédente, sa
 ### D-2026-015 — couverture (référence)
 
 - J'ai identifié : Tuiles HP10. C'est bien ce modèle ?
-- À quel pureau posez-vous ces tuiles ?
-- Quel produit pour : écran sous-toiture ?
-- Quel produit pour : faîtières ?
 
 ## Détail
 
@@ -412,14 +411,14 @@ Chaque devis doit garder au moins ses scores A et B de l'étape précédente, sa
 
 | Réf. | Désignation | Qté | Vérité | BatiClair a lu | Niveau atteint | Erreur |
 |---|---|---|---|---|---|---|
-| ligne 1 | Écran de sous-toiture respirant (Fourniture & Pose) - Fourniture et pose d'un éc | 120 m² | ouvrage à convertir | matériau (underlay), ouvrage | besoin identifié |  |
-| ligne 2 | Contre-lattage en liteaux 27x40 (Fourniture & Pose) - Fourniture et pose de cont | 120 m² | ouvrage à convertir | matériau (batten), ouvrage | besoin identifié |  |
+| ligne 1 | Écran de sous-toiture respirant (Fourniture & Pose) - Fourniture et pose d'un éc | 120 m² | ouvrage à convertir | matériau (underlay), ouvrage | quantité certaine |  |
+| ligne 2 | Contre-lattage en liteaux 27x40 (Fourniture & Pose) - Fourniture et pose de cont | 120 m² | ouvrage à convertir | matériau (batten), ouvrage | quantité certaine |  |
 | ligne 3 | Lattage en liteaux 27x40 pour tuiles HP10 (Fourniture & Pose) - Fourniture et po | 120 m² | ouvrage à convertir | matériau (batten), ouvrage | besoin identifié |  |
 | ligne 4 | Couverture en tuiles terre cuite HP10 rouge (Fourniture & Pose) - Fourniture et  | 120 m² | ouvrage à convertir | matériau (roof_tile), ouvrage | besoin identifié |  |
-| ligne 5 | Rives de toit (Fourniture & Pose) - Fourniture et pose de tuiles de rive pour la | 24 m | ouvrage à convertir | matériau (roof_accessory), ouvrage | compris |  |
-| ligne 6 | Faîtage (Fourniture & Pose) - Fourniture et pose de faîtières ventilées avec clo | 10 m | ouvrage à convertir | matériau (roof_accessory), ouvrage | besoin identifié |  |
-| ligne 7 | Gouttière PVC de 25 sable (Fourniture & Pose) - Fourniture et pose de gouttières | 20 m | article principal + accessoires | matériau (gutter), ouvrage | — |  |
-| ligne 8 | Descente d'eau pluviale PVC Ø80 avec coudes (Fourniture & Pose) - Fourniture et  | 2 unités | ouvrage à convertir | matériau (downpipe), ouvrage | compris |  |
+| ligne 5 | Rives de toit (Fourniture & Pose) - Fourniture et pose de tuiles de rive pour la | 24 m | ouvrage à convertir | matériau (roof_accessory), ouvrage | besoin identifié |  |
+| ligne 6 | Faîtage (Fourniture & Pose) - Fourniture et pose de faîtières ventilées avec clo | 10 m | ouvrage à convertir | matériau (roof_accessory), ouvrage | quantité certaine |  |
+| ligne 7 | Gouttière PVC de 25 sable (Fourniture & Pose) - Fourniture et pose de gouttières | 20 m | article principal + accessoires | matériau (gutter), ouvrage | quantité certaine |  |
+| ligne 8 | Descente d'eau pluviale PVC Ø80 avec coudes (Fourniture & Pose) - Fourniture et  | 2 unités | ouvrage à convertir | matériau (downpipe), ouvrage | quantité certaine |  |
 | ligne 9 | Chatières de ventilation (Fourniture & Pose) - Fourniture et pose de tuiles chat | 10 unités | achat direct | matériau (roof_accessory), achat | quantité certaine |  |
 | ligne 10 | Sortie de toit Poujoulat (Fourniture & Pose) - Fourniture et pose d'une sortie d | 1 unité | achat direct | matériau (roof_accessory), achat | quantité certaine |  |
 

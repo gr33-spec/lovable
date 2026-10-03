@@ -197,39 +197,44 @@ describe("cas de référence D-2026-015 : contexte chantier et questions", () =>
     expect(params.pente).toBeUndefined();
   });
 
-  it("pour un artisan, avant toute réponse : seul ce que le devis permet est calculé (contre-liteaux), rien de provisoire", () => {
+  it("pour un artisan, avant toute réponse : tout ce que le devis et les hypothèses permettent est calculé, rien de provisoire", () => {
     const r = run(products);
-    // Entraxe lu sur la ligne de l'écran (90 cm) : 120 / 0,9 = 133,33 ml, sans rien demander.
-    expect(byNeed(r.needs, "contre-liteaux")).toMatchObject({ status: "calculated", provisional: false, quantity: { value: "133.33", unit: "ml" } });
-    // Pureau non écrit (« pureau adapté ») : tuiles et liteaux attendent la réponse, aucun chiffre deviné.
-    for (const id of ["tuiles", "liteaux"]) expect(byNeed(r.needs, id).quantity ?? byNeed(r.needs, id).quantityRange).toBeUndefined();
+    // Entraxe lu sur la ligne de l'écran (90 cm) : 120 / 0,9 = 133,33 ml + 5 % = 140 ml, sans rien demander.
+    expect(byNeed(r.needs, "contre-liteaux")).toMatchObject({ status: "calculated", provisional: false, quantity: { value: "140", unit: "ml" } });
+    // Modèle reconnu par son appellation (« type HP10 ») : à confirmer avant de compter les tuiles.
+    expect(byNeed(r.needs, "tuiles")).toMatchObject({ status: "question", question: { kind: "confirm_product" } });
+    // Pureau non écrit (« pureau adapté ») : hypothèse du référentiel (pureau mini en zone littorale), dite.
+    expect(byNeed(r.needs, "liteaux")).toMatchObject({ status: "calculated", quantity: { value: "406.45", unit: "ml" } });
+    expect(byNeed(r.needs, "liteaux").assumptions.map((a) => a.key)).toEqual(["param:zone", "param:pente", "param:pureau"]);
   });
 
-  it("règles validées : 2 questions seulement (modèle, pureau), +1 au tout premier chantier (écran)", () => {
+  it("UNE question seulement (confirmer le modèle lu), puis tout se calcule ; la réponse de l'artisan remplace l'hypothèse", () => {
     let r = run(products);
     expect(r.nextQuestion).toMatchObject({ kind: "confirm_product", text: "J'ai identifié : Tuiles HP10. C'est bien ce modèle ?" });
     const confirmed = { ...products, tuile: { productId: "edilians-hp10-huguenot", origin: "artisan" } as SlotChoice };
 
     r = run(confirmed);
-    expect(r.nextQuestion).toMatchObject({ key: "param:pureau", impact: "De 1 191 à 1 445 pièces selon la réponse." });
-    // L'entraxe des contre-lattes n'est PAS demandé : il est sur la ligne de l'écran (90 cm).
-    expect(byNeed(r.needs, "contre-liteaux")).toMatchObject({ status: "calculated", quantity: { value: "133.33", unit: "ml" } });
-    // Aucun conditionnement de liteau saisi (dépend du négoce) : les ml sont certains, la conversion attend.
-    expect(byNeed(r.needs, "contre-liteaux").purchaseUnavailable).toMatch(/Conditionnement à confirmer/);
+    expect(r.nextQuestion).toBeNull();
+    expect(r.needs.map((n) => [n.needId, n.quantity?.value, n.purchase?.order.count, n.purchase?.order.unit.many])).toEqual([
+      // Pureau mini (31 cm) : 120 / (0,268 × 0,31) = 1 444,44 + 3 % = 1 487,72.
+      ["tuiles", "1487.72", "1488", "pièces"],
+      ["liteaux", "406.45", "407", "ml"],
+      ["contre-liteaux", "140", "140", "ml"],
+      // Pente 45 % par défaut : 128,57 m² → 2 rouleaux de l'écran par défaut.
+      ["ecran", "128.57", "2", "rouleaux"],
+    ]);
 
-    r = run(confirmed, { pureau: { value: "34.3", unit: "cm" } });
-    expect(r.nextQuestion).toMatchObject({ kind: "choose_product", key: "product:ecran" });
-
-    // Dès le deuxième chantier, l'écran habituel de l'entreprise répond.
+    // Le pureau répondu par l'artisan remplace l'hypothèse ; l'écran habituel de l'entreprise remplace l'écran par défaut.
     r = run(confirmed, { pureau: { value: "34.3", unit: "cm" } }, { products: { ecran: "soprema-sop-ecran-hpv-r2-150x50" } });
     expect(r.nextQuestion).toBeNull();
-    expect(r.needs.map((n) => [n.needId, n.quantity?.value ?? `${n.quantityRange?.min}–${n.quantityRange?.max}`, n.purchase?.order.count, n.purchase?.order.unit.many])).toEqual([
-      ["tuiles", "1305.43", "1306", "pièces"],
-      ["liteaux", "349.85", undefined, undefined],
-      ["contre-liteaux", "133.33", undefined, undefined],
-      // La pente n'est jamais demandée : 2 rouleaux quelle qu'elle soit.
-      ["ecran", "128.57–138.46", "2", "rouleaux"],
+    expect(r.needs.map((n) => [n.needId, n.quantity?.value, n.purchase?.order.count, n.purchase?.order.unit.many])).toEqual([
+      ["tuiles", "1344.59", "1345", "pièces"],
+      ["liteaux", "367.35", "368", "ml"],
+      ["contre-liteaux", "140", "140", "ml"],
+      ["ecran", "128.57", "2", "rouleaux"],
     ]);
+    expect(byNeed(r.needs, "tuiles").assumptions).toEqual([]);
+    expect(byNeed(r.needs, "ecran").productOrigin).toBe("preference");
     expect(byNeed(r.needs, "contre-liteaux").trace).toContainEqual(
       expect.objectContaining({ label: "Entraxe des chevrons ou fermettes", value: "90", from: "Devis, ligne 1 (« fermettes d'entraxe 90 cm »)" }),
     );
@@ -277,14 +282,14 @@ describe("cas de référence D-2026-015 : chantier complet avec ouvrages compos�
     expect(identifyProducts(line("ligne 6").designation, ROOFING_REFERENTIAL, "ridge_tile").candidates).toEqual([]);
   });
 
-  it("quatre questions seulement, chacune pour un calcul que BatiClair sait terminer", () => {
+  it("une seule question sur tout le chantier : confirmer le modèle de tuile lu", () => {
     const r = computeChantier(ROOFING_REFERENTIAL, inputs());
-    // Modèle de tuile, pureau, écran, faîtière : rien d'autre (crochets, coudes, colliers n'ont pas de règle : aucune question inutile).
-    expect(r.questionsPending).toEqual(["product:tuile", "param:pureau", "product:ecran", "product:faitiere"]);
-    // Si l'artisan confirme le modèle 710 : 10 m × 3 pièces/ml (Edilians, vérifié) = 30 faîtières, calcul certain.
+    expect(r.questionsPending).toEqual(["product:tuile"]);
+    // Faîtière par défaut : 10 m × 2,9 pièces/ml = 29 ; si l'artisan choisit le modèle 710 : 10 m × 3 pièces/ml (Edilians) = 30.
+    expect(need(r, "faitieres")).toMatchObject({ status: "calculated", purchase: { order: { count: "29" } }, productOrigin: "default" });
     const answered = computeChantier(ROOFING_REFERENTIAL, inputs({ faitiere: "edilians-faitiere-angulaire-710" }));
     expect(need(answered, "faitieres")).toMatchObject({ status: "calculated", quantity: { value: "30" }, purchase: { order: { count: "30" } }, provisional: false });
-    expect(answered.questionsPending).toEqual(["product:tuile", "param:pureau", "product:ecran"]);
+    expect(answered.questionsPending).toEqual(["product:tuile"]);
   });
 
   it("règles validées : ce qui se calcule, ce qui reste à confirmer, ce qui est impossible", () => {
@@ -298,28 +303,23 @@ describe("cas de référence D-2026-015 : chantier complet avec ouvrages compos�
       const n = need(r, id);
       return [n.status, n.quantity?.value ?? (n.quantityRange ? `${n.quantityRange.min}–${n.quantityRange.max}` : null), n.purchase?.order.count ?? null];
     };
-    expect(row("tuiles")).toEqual(["calculated", "1305.43", "1306"]);
-    expect(row("liteaux")).toEqual(["calculated", "349.85", null]);
-    expect(row("contre-liteaux")).toEqual(["calculated", "133.33", null]);
-    expect(row("ecran")).toEqual(["calculated", "128.57–138.46", "2"]);
+    expect(row("tuiles")).toEqual(["calculated", "1344.59", "1345"]);
+    expect(row("liteaux")).toEqual(["calculated", "367.35", "368"]);
+    expect(row("contre-liteaux")).toEqual(["calculated", "140", "140"]);
+    expect(row("ecran")).toEqual(["calculated", "128.57", "2"]);
     expect(row("faitieres")).toEqual(["calculated", "30", "30"]);
-    // Besoin certain d'après le devis, produit pas encore identifié : la conversion attend.
-    for (const [id, qty] of [["closoir", "10"], ["profil", "20"], ["naissances", "2"], ["tubes", "8"]] as const) {
-      expect(row(id)).toEqual(["calculated", qty, null]);
-      expect(need(r, id).purchaseUnavailable).toMatch(/Produit à identifier/);
-    }
-    // Crochets de gouttière, coudes, colliers : aucune règle validée → « à préciser », sans chiffre ni question.
-    for (const id of ["crochets", "coudes", "colliers"]) expect(need(r, id)).toMatchObject({ status: "unknown", reason: "Règle de calcul en attente de vérification." });
+    expect(row("crochets-faitiere")).toEqual(["calculated", "30", "30"]);
+    expect(row("abouts")).toEqual(["calculated", "2", "2"]);
+    // Pièces par défaut (modèle à préciser par le fournisseur) : la quantité est certaine, en unités de commande.
+    expect(row("closoir")).toEqual(["calculated", "10", "2"]);
+    expect(row("profil")).toEqual(["calculated", "20", "5"]);
+    expect(row("naissances")).toEqual(["calculated", "2", "2"]);
+    expect(row("tubes")).toEqual(["calculated", "8", "8"]);
+    // Crochets de gouttière (zone littorale : tous les 40 cm), coudes (2 par descente), colliers (tous les 1,8 m + 1).
+    expect(row("crochets")).toEqual(["calculated", "50", "50"]);
+    expect(row("coudes")).toEqual(["calculated", "4", "4"]);
+    expect(row("colliers")).toEqual(["calculated", "8", "8"]);
     expect(r.questionsPending).toEqual([]);
-    // Écran du validateur (brouillon accepté) : impossible sans la fiche du système, et « 2 jeux de coudes » reste ambigu.
-    const v = computeChantier(
-      ROOFING_REFERENTIAL,
-      inputs({ tuileOk: true, pureau: "34.3", faitiere: "edilians-faitiere-angulaire-710", ecran: "soprema-sop-ecran-hpv-r2-150x50" }),
-      { acceptDraft: true },
-    );
-    expect(need(v, "crochets")).toMatchObject({ status: "unknown", reason: "Calcul impossible sans les données du produit (Crochets)." });
-    expect(need(v, "colliers")).toMatchObject({ status: "unknown", reason: "Calcul impossible sans les données du produit (Colliers)." });
-    expect(v.questionsPending).toEqual(["param:coudes_par_descente"]);
   });
 });
 
@@ -349,22 +349,20 @@ describe("cas de référence D-2026-015 : la liste d'achat vue par l'artisan", (
         { workItemId: "faitage", params: params("faitage"), products: {}, mentioned: ["faitiere", "closoir"] },
         { workItemId: "descente", params: params("descente"), products: {}, mentioned: ["tube", "coude", "collier"] },
       ],
-      { acceptDraft: true },
     );
     const rows = purchaseList(r.workItems, { tuile: ["rouge"], tube: ["PVC", "Ø80", "sable"] });
     const view = (id: string) => {
       const x = rows.find((row) => row.needId === id)!;
       return [x.label, x.state, x.quantity ?? null, x.detail ?? null];
     };
-    expect(view("tuiles")).toEqual(["Tuiles HP10 rouge", "ready", "1 306 pièces", "≈ 6 palettes"]);
-    // Conditionnement de liteau non saisi (dépend du négoce) : les ml, et ce qui reste à confirmer.
-    expect(view("liteaux")).toEqual(["Liteaux 27×40", "ready", "349,85 ml", "conditionnement à confirmer"]);
-    expect(view("ecran")).toEqual(["Écran HPV", "ready", "2 rouleaux", "donnée inconnue sans effet sur la commande"]);
-    // Besoin certain, produit pas encore identifié : la quantité est dite, la conversion reste à confirmer.
-    expect(view("tubes")).toEqual(["Tubes de descente PVC Ø80 sable", "ready", "8 ml", "conditionnement à confirmer"]);
-    // Il manque le modèle de faîtière : une question, pas de chiffre.
-    expect(view("faitieres")).toEqual(["Faîtières", "question", null, null]);
-    // Impossible sans la fiche du fabricant : BatiClair le dit, en une phrase.
-    expect(view("colliers")).toEqual(["Colliers", "unknown", null, "Calcul impossible sans les données du produit (Colliers)."]);
+    expect(view("tuiles")).toEqual(["Tuiles HP10 rouge", "ready", "1 345 pièces", "≈ 6 palettes"]);
+    // Liteaux au mètre, avec l'ordre de grandeur en bottes.
+    expect(view("liteaux")).toEqual(["Liteaux 27×40", "ready", "368 ml", "≈ 8 bottes de 50 ml"]);
+    expect(view("ecran")).toEqual(["Écran HPV", "ready", "2 rouleaux", "128,57 m²"]);
+    // Pièces par défaut (modèle à préciser par le fournisseur) : quantité certaine, caractéristiques du devis conservées.
+    expect(view("tubes")).toEqual(["Tubes de descente PVC Ø80 sable", "ready", "8 ml", null]);
+    expect(view("faitieres")).toEqual(["Faîtières", "ready", "29 pièces", null]);
+    expect(view("colliers")).toEqual(["Colliers", "ready", "8 pièces", null]);
+    expect(rows.every((x) => x.state === "ready")).toBe(true);
   });
 });

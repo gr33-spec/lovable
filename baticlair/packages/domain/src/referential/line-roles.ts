@@ -91,7 +91,7 @@ export function proposeLineRoles(lines: readonly RoleLine[], plan: QuotePlan, va
         continue;
       }
       const unit = LINE_UNITS[v.unit];
-      const param = work && unit ? work.params.find((p) => p.fromLineQuantity && sameDim(parseRefUnit(p.unit).dim, parseRefUnit(unit).dim)) : undefined;
+      const param = work && unit ? work.params.find((p) => p.fromLineQuantity && (!p.forSlots || p.forSlots.includes(planned.slot)) && sameDim(parseRefUnit(p.unit).dim, parseRefUnit(unit).dim)) : undefined;
       if (param && !line?.reference?.trim()) {
         roles.set(v.lineId, { role: "measure", why: `La quantité est la ${param.label.toLowerCase()} de l'ouvrage.` });
         continue;

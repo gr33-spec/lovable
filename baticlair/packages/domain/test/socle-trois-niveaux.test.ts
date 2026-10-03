@@ -97,18 +97,20 @@ describe("niveau 2 : le besoin, dans SA propre unité", () => {
     expect(liteaux.missing).toMatch(/en attente de vérification/);
   });
 
-  it("sans pureau, le besoin en liteaux reste « à calculer » : rien n'est deviné", () => {
+  it("sans pureau écrit : l'hypothèse du référentiel (pureau mini en zone littorale) calcule les liteaux, et le dit", () => {
     const liteaux = read().ouvrage("ligne 3").needs.find((n) => n.slot === "liteau")!;
-    expect(liteaux).toMatchObject({ need: null, order: null });
+    // 120 / 0,31 = 387,10 ml + 5 % = 406,45 ml.
+    expect(liteaux.need).toEqual({ value: "406.45", unit: "ml" });
+    expect(liteaux.assumptions.map((a) => a.key)).toEqual(expect.arrayContaining(["param:pureau", "param:zone"]));
   });
 
-  it("règle validée : un besoin en mètres de liteaux, distinct de la surface, jamais provisoire", () => {
+  it("règle validée, pureau répondu : un besoin en mètres de liteaux, distinct de la surface, jamais provisoire", () => {
     const liteaux = read(ANSWERS).ouvrage("ligne 3").needs.find((n) => n.slot === "liteau")!;
-    expect(liteaux.need).toEqual({ value: "349.85", unit: "ml" });
+    // 120 / 0,343 = 349,85 ml + 5 % de chutes = 367,35 ml, commandés au mètre.
+    expect(liteaux.need).toEqual({ value: "367.35", unit: "ml" });
     expect(liteaux.provisional).toBe(false);
-    // Longueur vendue du liteau non sourcée : rien à commander, le fournisseur précise.
-    expect(liteaux.order).toBeNull();
-    expect(liteaux.missing).toMatch(/[Cc]onditionnement/);
+    expect(liteaux.order).toMatchObject({ count: "368", unit: { many: "ml" } });
+    expect(liteaux.assumptions.some((a) => a.key === "param:pureau")).toBe(false);
   });
 });
 
@@ -136,31 +138,45 @@ describe("niveau 3 : à commander, jamais avant que le besoin ne soit établi", 
 });
 
 describe("ouvrages composés", () => {
-  it("2 descentes de 4 m avec coudes et colliers = 2 ouvrages à décomposer, pas 2 articles à commander", () => {
-    const { ouvrage, view } = read();
+  it("2 descentes de 4 m avec coudes et colliers = 2 ouvrages décomposés : 8 m de tube, 4 coudes, 8 colliers", () => {
+    const { ouvrage } = read();
     const descente = ouvrage("ligne 8");
     expect(descente.role).toBe("measure");
     expect(descente.direct).toBeNull();
-    expect(descente.needs.map((n) => n.slot).sort()).toEqual(["collier", "coude", "tube"]);
-    expect(descente.state).not.toBe("verified");
-    expect(view.items.find((i) => i.id === "ligne 8")!.state).not.toBe("verified");
+    const q = (slot: string) => descente.needs.find((n) => n.slot === slot)!;
+    expect(q("tube").need).toEqual({ value: "8", unit: "ml" });
+    // « 2 jeux de coudes » n'est pas un nombre : hypothèse 2 coudes par descente (un dévoiement), dite.
+    expect(q("coude")).toMatchObject({ need: { value: "4", unit: "u" }, assumptions: expect.arrayContaining([expect.objectContaining({ key: "param:coudes_par_descente" })]) });
+    // Un collier tous les 1,8 m plus un : 2 × (3 + 1).
+    expect(q("collier").need).toEqual({ value: "8", unit: "u" });
+    expect(descente.state).toBe("verified");
   });
 
-  it("20 m de gouttière « crochets et naissances compris » : pas de ✓ tant que ses besoins ne sont pas établis, accessoires visibles", () => {
-    const { ouvrage, view } = read();
+  it("20 m de gouttière « crochets et naissances compris » : profil, crochets et naissances calculés, accessoires visibles", () => {
+    const { ouvrage } = read();
     const gouttiere = ouvrage("ligne 7");
     expect(gouttiere.role).toBe("measure");
     expect(gouttiere.direct).toBeNull();
     expect(gouttiere.needs.map((n) => n.slot).sort()).toEqual(["crochet", "naissance", "profil"]);
     for (const slot of ["crochet", "naissance"]) expect(gouttiere.needs.find((n) => n.slot === slot)!.origin).toBe("explicit");
-    expect(gouttiere.state).not.toBe("verified");
-    expect(view.items.find((i) => i.id === "ligne 7")!.state).not.toBe("verified");
+    const q = (slot: string) => gouttiere.needs.find((n) => n.slot === slot)!;
+    expect(q("profil").order).toMatchObject({ count: "5", unit: { many: "longueurs de 4 m" } });
+    // Zone littorale par défaut : un crochet tous les 40 cm.
+    expect(q("crochet").need).toEqual({ value: "50", unit: "u" });
+    expect(q("naissance").need).toEqual({ value: "2", unit: "u" });
+    expect(gouttiere.state).toBe("verified");
   });
 
-  it("faîtage : le closoir et les fixations cités restent visibles, même sans quantité", () => {
+  it("faîtage : faîtières, closoir, crochets de faîtière et abouts, tous calculés avec les pièces par défaut", () => {
     const faitage = read().ouvrage("ligne 6");
-    expect(faitage.needs.map((n) => n.slot)).toEqual(expect.arrayContaining(["faitiere", "closoir", "fixation_faitiere"]));
-    expect(faitage.state).not.toBe("verified");
+    expect(faitage.needs.map((n) => n.slot).sort()).toEqual(["about", "closoir", "faitiere", "fixation_faitiere"]);
+    const q = (slot: string) => faitage.needs.find((n) => n.slot === slot)!;
+    // 10 m × 2,9 pièces/ml = 29 faîtières (modèle à préciser par le fournisseur), autant de crochets, 2 abouts, 2 rouleaux de closoir.
+    expect(q("faitiere").order).toMatchObject({ count: "29" });
+    expect(q("fixation_faitiere").order).toMatchObject({ count: "29" });
+    expect(q("about").order).toMatchObject({ count: "2" });
+    expect(q("closoir").order).toMatchObject({ count: "2", unit: { many: "rouleaux de 5 m" } });
+    expect(faitage.state).toBe("verified");
   });
 
   it("une quantité d'article écrite reste à commander telle quelle (chatières, sortie de toit)", () => {
@@ -200,8 +216,8 @@ describe("rapport : D-2026-015 en trois niveaux", () => {
       "# D-2026-015 en trois niveaux : lu dans le devis → il faut → à commander",
       "",
       "Fichier GÉNÉRÉ par `packages/domain/test/socle-trois-niveaux.test.ts` : ne pas modifier à la main.",
-      "Valeurs réellement produites par BatiClair. Règles de couverture validées par le fondateur (couvreur)",
-      "le 2026-10-02 ; ce qui n'a pas de règle sourcée reste « à calculer » ou « à préciser ».",
+      "Valeurs réellement produites par BatiClair. Règles, hypothèses par défaut (pente 45 %, zone littorale, rampant ≤ 5,5 m,",
+      "entraxe 60 cm) et pertes : référentiel du fondateur (couvreur), 2026-10-03. Ce qui n'a pas de règle reste « à faire chiffrer ».",
       "",
       table("1. Sans réponse de l'artisan (ce que voit l'application à l'ouverture)", {}, false),
       table("2. Après les réponses de l'artisan (modèle de tuile, pureau 34,3 cm, écran)", ANSWERS, false),

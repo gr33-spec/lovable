@@ -1,4 +1,4 @@
-import { computeChantier, type CompanyPreferences, type EngineOptions, type NeedResult, type Question } from "../referential/engine.js";
+import { computeChantier, type Assumption, type CompanyPreferences, type EngineOptions, type NeedResult, type Question } from "../referential/engine.js";
 import type { Referential } from "../referential/model.js";
 import type { LineRole } from "../referential/line-roles.js";
 import type { QuotePlan } from "../referential/plan.js";
@@ -98,6 +98,8 @@ export interface NeedLevels {
   provisional: boolean;
   /** Produit d'usage quand le devis ne le précise pas (pratique déclarée, à confirmer). */
   usual: string | null;
+  /** Hypothèses par défaut utilisées par le calcul (dites à l'artisan, modifiables). */
+  assumptions: Assumption[];
   state: TrustState;
 }
 
@@ -184,6 +186,7 @@ function needLevels(n: OwnedNeed, all: readonly NeedResult[], usual: { text: str
     provisional: calculated && n.provisional,
     // Le produit d'usage n'est dit que si le devis n'en nomme aucun.
     usual: named ? null : (usual?.text ?? null),
+    assumptions: n.assumptions,
     state: a.state,
   };
 }
@@ -396,7 +399,7 @@ export function artisanView(
           // Seulement un composant que le calcul ne connaît pas du tout : un besoin calculé ailleurs
           // (« pour tuiles HP10 » sur la ligne des liteaux) appartient déjà à sa propre ligne.
           if (!slot || needs.some((n) => n.slot === key) || engine.needs.some((n) => n.workItemId === work!.id && n.slot === key)) continue;
-          needs.push({ needId: `${work!.id}/${key}`, slot: key, label: slot.label, origin: "explicit", need: null, needRange: null, order: null, missing: "Pas encore de règle de calcul dans BatiClair.", provisional: false, usual: slot.usual?.text ?? null, state: "missing" });
+          needs.push({ needId: `${work!.id}/${key}`, slot: key, label: slot.label, origin: "explicit", need: null, needRange: null, order: null, missing: "Pas encore de règle de calcul dans BatiClair.", provisional: false, usual: slot.usual?.text ?? null, assumptions: [], state: "missing" });
         }
       }
       const direct = v.basis === "purchase" && role !== "undetermined" && line.quantity && line.unit && needs.length === 0 ? { quantity: line.quantity, unit: line.unit } : null;
@@ -468,10 +471,17 @@ export function computeWithAnswers(
   given: ReadonlySet<string> = new Set(),
 ): { needs: (NeedResult & { workItemId: string })[]; questions: Question[]; declined: string[] } {
   const declined = new Set(Object.entries(answers).filter(([, v]) => v === null).map(([k]) => k));
+  // Un ouvrage dont TOUTES les lignes sont déjà des quantités d'achat (« 42 faîtières ») n'a rien à calculer :
+  // le devis a fait le travail, BatiClair ne lui ajoute ni besoin ni question.
+  const allGiven = (workItemId: string) => {
+    const planned = plan.lines.filter((l): l is Extract<QuotePlan["lines"][number], { status: "planned" }> => l.status === "planned" && l.workItemId === workItemId);
+    return planned.length > 0 && planned.every((l) => given.has(`${workItemId}/${l.slot}`));
+  };
   const inputs = plan.inputs.map((input) => {
     const work = ref.workItems.find((w) => w.id === input.workItemId)!;
     const products = { ...input.products };
     const params = { ...input.params };
+    const declinedSlots = [...declined].filter((k) => k.startsWith("product:")).map((k) => k.slice("product:".length)).filter((s) => work.slots.some((x) => x.key === s));
     const prefs = { products: { ...(preferences.products ?? {}) }, proposals: { ...(preferences.proposals ?? {}) }, ...(preferences.waste ? { waste: preferences.waste } : {}) };
     for (const [key, answer] of Object.entries(answers)) {
       const [kind, name] = key.split(":") as [string, string];
@@ -491,11 +501,13 @@ export function computeWithAnswers(
         params[name] = { ...answer, origin: "artisan" };
       }
     }
-    return { ...input, products, params, preferences: prefs };
+    return { ...input, products, params, preferences: prefs, ...(declinedSlots.length > 0 ? { declined: declinedSlots } : {}) };
   });
   const result = computeChantier(ref, inputs, options);
   // Chaque besoin garde son ouvrage : il sera rattaché à la ligne du devis dont il provient.
-  const needs = result.workItems.flatMap((w) => w.needs.filter((n) => !given.has(`${w.workItemId}/${n.slot}`)).map((n) => ({ ...n, workItemId: w.workItemId })));
+  const needs = result.workItems
+    .filter((w) => !allGiven(w.workItemId))
+    .flatMap((w) => w.needs.filter((n) => !given.has(`${w.workItemId}/${n.slot}`)).map((n) => ({ ...n, workItemId: w.workItemId })));
   const seen = new Set<string>();
   const questions: Question[] = [];
   for (const n of needs) {

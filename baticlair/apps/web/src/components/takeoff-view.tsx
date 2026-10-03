@@ -17,6 +17,7 @@ const ORIGIN_LABEL: Record<Origin, string> = {
   referential: "donnée vérifiée BatiClair",
   company: "habitude de votre entreprise",
   project: "choisi pour ce chantier",
+  assumption: "hypothèse, modifiable",
 };
 
 const CRITERION_LABEL: Record<ProofCriterion["key"], string> = {
@@ -157,6 +158,23 @@ function DecisionButtons({
   const id = useId();
   const [value, setValue] = useState("");
   const q = d.question;
+  if (q?.kind === "param" && q.options.length > 0) {
+    // Une question à boutons (« Combien de descentes ? 1 · 2 · 3 · 4 ») : l'artisan ne tape rien, et peut passer.
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-2 gap-2">
+          {q.options.map((o) => (
+            <button key={o.value} type="button" disabled={pending} onClick={() => void handlers.onAnswer(q.key, { value: o.value, unit: q.unit ?? "" })} className={`${bigButton} bg-accent text-white`}>
+              {o.label}
+            </button>
+          ))}
+        </div>
+        <button type="button" disabled={pending} onClick={() => void handlers.onAnswer(q.key, null)} className={`${bigButton} bg-ground text-ink`}>
+          Je ne sais pas
+        </button>
+      </div>
+    );
+  }
   if (q?.kind === "param") {
     return (
       <form

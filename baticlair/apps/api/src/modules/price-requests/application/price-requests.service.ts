@@ -1,7 +1,8 @@
-import { groupIdenticalLines, isWorkQuantity, lineKind, parseUnit, tradeProfile } from "@baticlair/domain";
+import { groupIdenticalLines, parseUnit, type PurchaseView } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { DocumentsService } from "../../documents/index.js";
 import type { SupplierRepository } from "../../suppliers/index.js";
+import type { RequestedLine } from "./price-request-email.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { priceRequestEmail } from "./price-request-email.js";
 import type { PriceRequestRecord, PriceRequestRepository, RecipientStatus } from "./price-request.repository.js";
@@ -21,6 +22,8 @@ export class PriceRequestsService {
     private readonly requests: PriceRequestRepository,
     private readonly suppliers: SupplierRepository,
     private readonly documents: DocumentsService,
+    /** La liste d'achats du quantitatif validé (calculée par le moteur), par identifiant de quantitatif. */
+    private readonly purchaseList: (tenant: TenantContext, takeoffId: string) => Promise<PurchaseView>,
   ) {}
 
   async create(
@@ -38,22 +41,40 @@ export class PriceRequestsService {
       throw validationFailed("Validate the materials list first", {
         reason: "takeoff_not_validated",
       });
-    const profile = tradeProfile(takeoff.trade);
-    // Les prestations (pose, dépose…) ne se commandent pas : elles ne partent pas chez le fournisseur.
-    const sent = takeoff.lines.flatMap((l) => {
-      const { kind, family } = lineKind(l.designation, profile);
-      if (kind === "labor") return [];
-      // Mesure d'ouvrage (« liteaux 120 m² », « 2 descentes ») : demandée comme telle, jamais comme une
-      // quantité d'achat. Le rôle enregistré avec la ligne fait foi ; à défaut, la famille et l'unité.
-      const measure = l.role ? l.role === "measure" : kind === "material" && isWorkQuantity(family, parseUnit(l.unit));
-      return [{ designation: l.designation, quantity: l.quantity, unit: l.unit, reference: l.reference, section: l.section, ...(measure ? { basis: "work" as const } : {}) }];
+    // Ce qui part chez le fournisseur, c'est LA LISTE D'ACHATS : les articles calculés par BatiClair dans leur
+    // unité de commande, les quantités écrites telles quelles dans le devis, et ce qui reste à faire chiffrer
+    // pour la mesure du devis. Jamais une mesure d'ouvrage présentée comme une quantité d'article.
+    const purchase = await this.purchaseList(tenant, takeoff.id);
+    const byId = new Map(takeoff.lines.map((l) => [l.id, l]));
+    const computed: RequestedLine[] = purchase.toBuy
+      .filter((b) => b.kind === "computed")
+      .map((b) => {
+        // « 5 longueurs de 4 m » : l'unité de commande que le fournisseur ne lit pas comme une unité reste dans l'intitulé.
+        const known = b.order && parseUnit(b.order.unit) !== null;
+        return {
+          designation: known || !b.order ? b.label : `${b.label} (${b.order.unit})`,
+          quantity: b.order?.count ?? null,
+          unit: b.order ? (known ? b.order.unit : "u") : null,
+          reference: null,
+        };
+      });
+    const direct = purchase.toBuy
+      .filter((b) => b.kind === "direct")
+      .map((b) => {
+        const line = b.lineIds[0] ? byId.get(b.lineIds[0]) : undefined;
+        return { designation: line?.designation ?? b.label, quantity: line?.quantity ?? null, unit: line?.unit ?? null, reference: line?.reference ?? null, section: line?.section ?? [] };
+      });
+    const toQuote: RequestedLine[] = purchase.toQuote.map((q) => {
+      const line = q.lineIds[0] ? byId.get(q.lineIds[0]) : undefined;
+      return { designation: line?.designation ?? q.label, quantity: line?.quantity ?? null, unit: line?.unit ?? null, reference: line?.reference ?? null, basis: "work" as const };
     });
     // Le même article répété pièce par pièce part en une seule ligne, avec le total et ses titres communs.
-    const lines = groupIdenticalLines(sent).map(({ mergedFrom, section, ...l }) => ({
+    const grouped = groupIdenticalLines(direct).map(({ mergedFrom, section, ...l }) => ({
       ...l,
       ...(section.length > 0 ? { section } : {}),
       ...(mergedFrom > 1 ? { mergedFrom } : {}),
     }));
+    const lines: RequestedLine[] = [...computed, ...grouped, ...toQuote];
     if (lines.length === 0) throw validationFailed("Nothing to order", { reason: "no_material" });
     const supplierIds = await this.checkSuppliers(tenant, input.supplierIds);
     const created = await this.requests.create(tenant, {

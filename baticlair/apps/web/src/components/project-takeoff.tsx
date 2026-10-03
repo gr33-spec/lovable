@@ -3,7 +3,8 @@
 import { Check, CircleCheck, HelpCircle, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { useCallback, useId, useState } from "react";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
-import { DecisionCard, MeasuresNote, ReadyList, TrustHeader, type DecisionHandlers } from "@/components/takeoff-view";
+import { PurchaseList } from "@/components/purchase-list";
+import { type DecisionHandlers } from "@/components/takeoff-view";
 import { useProgressRefresh } from "@/components/project-progress";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, type ProjectDocument, type Takeoff, type TakeoffLine } from "@/lib/api";
@@ -18,10 +19,10 @@ export function canPrepareTakeoff(doc: ProjectDocument): boolean {
 const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? "s" : ""}`;
 
 /**
- * Liste de matériaux tirée du devis client. L'artisan ne voit que les
- * DÉCISIONS utiles (une réponse règle toutes les lignes concernées) ; ce qui
- * est prêt reste replié, la preuve derrière « Voir le calcul ». Le détail
- * complet reste à un appui (« Voir toute la liste »).
+ * La LISTE D'ACHATS tirée du devis client : les articles et leurs quantités,
+ * ce qui reste à faire chiffrer, les hypothèses (une ligne), et seulement les
+ * questions qui changent la commande. Le devis lu reste à un appui (« Voir le
+ * devis lu ») pour corriger une ligne.
  */
 export function ProjectTakeoff({
   projectId,
@@ -94,6 +95,7 @@ export function ProjectTakeoff({
 
   const draft = takeoff.status === "draft";
   const materials = takeoff.lines.filter((l) => l.kind !== "labor");
+  const articles = takeoff.purchase.toBuy.length;
   const labor = takeoff.lines.filter((l) => l.kind === "labor");
   const editable = !archived;
   const call = (path: string, method: "POST" | "PATCH" | "DELETE", body?: unknown) =>
@@ -103,7 +105,6 @@ export function ProjectTakeoff({
     onDelete: () => call(`/v1/takeoff-lines/${line.id}`, "DELETE"),
     onConfirm: () => call(`/v1/takeoff-lines/${line.id}/confirm`, "POST"),
   });
-  const view = takeoff.view;
   const handlers: DecisionHandlers = {
     onDecide: (d) => call(`/v1/takeoffs/${takeoff.id}/decisions`, "POST", { action: d.primary?.action, lineIds: d.lineIds, pieceLineIds: d.pieceLineIds }),
     onAnswer: (key, value) => call(`/v1/takeoffs/${takeoff.id}/answers`, "POST", { key, value }),
@@ -139,51 +140,23 @@ export function ProjectTakeoff({
             </ul>
           </details>
         ) : null}
-        {draft && editable && view.decisions.every((d) => d.lineIds.length === 0) ? (
+        {draft && editable && takeoff.purchase.canValidate ? (
           <Button pending={pending} onClick={validate}>
             <Check size={18} aria-hidden="true" />
             Valider la liste
           </Button>
         ) : null}
         <button type="button" onClick={() => setShowList(false)} className={linkStyle}>
-          Fermer la liste
+          Revenir à la liste d&apos;achats
         </button>
       </>
     );
   } else if (draft) {
-    // Les décisions qui touchent des lignes du devis bloquent l'envoi ; les questions du calcul, non
-    // (sans réponse, l'ouvrage part simplement pour sa mesure).
-    const blocking = view.decisions.filter((d) => d.lineIds.length > 0).length;
-    body = (
-      <>
-        <TrustHeader counts={view.counts} />
-        {view.decisions.map((d) => (
-          <DecisionCard key={d.key} decision={d} lines={takeoff.lines} editable={editable} pending={pending} handlers={handlers} />
-        ))}
-        {view.measures ? <MeasuresNote measures={view.measures} items={view.items} ouvrages={view.ouvrages ?? []} /> : null}
-        <ReadyList items={view.items} onAnswer={handlers.onAnswer} editable={editable} />
-        {editable && blocking === 0 ? (
-          <Card className="flex flex-col gap-3 p-5">
-            <p className="flex items-center gap-2 text-[20px] font-extrabold">
-              <CircleCheck size={24} className="text-ok" aria-hidden="true" />
-              Votre liste est prête
-            </p>
-            <p className="text-[15px] text-muted">{plural(materials.length, "article")} à demander aux fournisseurs.</p>
-            <Button pending={pending} onClick={validate}>
-              <Check size={18} aria-hidden="true" />
-              Valider la liste
-            </Button>
-          </Card>
-        ) : null}
-        <button type="button" onClick={() => setShowList(true)} className={linkStyle}>
-          Voir toute la liste ({materials.length})
-        </button>
-      </>
-    );
+    body = <PurchaseList takeoff={takeoff} editable={editable} pending={pending} handlers={handlers} onValidate={validate} onShowLines={() => setShowList(true)} />;
   } else {
     body = (
       <DoneLine
-        label={`Liste validée · ${plural(materials.length, "article")}`}
+        label={`Liste validée · ${plural(articles, "article")}`}
         action="Voir"
         actionLabel="Voir ou corriger la liste"
         onAction={() => setShowList(true)}

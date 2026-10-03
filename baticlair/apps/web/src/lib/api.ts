@@ -216,10 +216,44 @@ export interface Takeoff {
   lines: TakeoffLine[];
   /** Ce que voit l'artisan : compteurs, décisions à prendre, éléments prêts et leur preuve. */
   view: TakeoffView;
+  /** LA LISTE D'ACHATS : à acheter, à faire chiffrer, hypothèses, et si elle peut partir. */
+  purchase: TakeoffPurchase;
 }
 
-/** D'où vient un élément : lu dans le devis, BatiClair (vérifié), votre entreprise, choisi pour ce chantier. */
-export type Origin = "devis" | "referential" | "company" | "project";
+export interface PurchaseItem {
+  key: string;
+  label: string;
+  /** « 1 488 pièces », « 547 ml », « 2 rouleaux » ; null si la quantité n'est pas établie. */
+  quantity: string | null;
+  /** « ≈ 7 palettes », ou le besoin dans son unité (« 128,57 m² »). */
+  approx: string | null;
+  kind: "computed" | "direct";
+  needIds: string[];
+  lineIds: string[];
+  state: "ready" | "to_confirm";
+  assumptionKeys: string[];
+}
+
+export interface PurchaseAssumption {
+  key: string;
+  label: string;
+  value: string;
+  unit: string;
+  note: string | null;
+  choices: { label: string; value: string }[];
+}
+
+export interface TakeoffPurchase {
+  /** « Couverture en ardoises au crochet sur liteaux : 200 m² »… */
+  understood: string[];
+  toBuy: PurchaseItem[];
+  toQuote: { key: string; label: string; measure: string; reason: string; lineIds: string[] }[];
+  assumptions: PurchaseAssumption[];
+  canValidate: boolean;
+}
+
+/** D'où vient un élément : lu dans le devis, BatiClair (vérifié), votre entreprise, choisi pour ce chantier, hypothèse par défaut. */
+export type Origin = "devis" | "referential" | "company" | "project" | "assumption";
 
 export interface TakeoffDecision {
   key: string;
@@ -236,6 +270,8 @@ export interface TakeoffDecision {
     unit: string | null;
     hint: string | null;
     options: { label: string; value: string }[];
+    /** Ce que la réponse change (« De 1 191 à 1 445 pièces selon la réponse. »). */
+    impact: string | null;
   } | null;
 }
 

@@ -82,28 +82,35 @@ describe("ouvrages comptés : jamais un nombre d'articles", () => {
 });
 
 describe("couverture en ardoises au crochet : chaque composant détaillé", () => {
-  it("ardoises, crochets d'ardoise, liteaux 18×40 par défaut : visibles même avant tout calcul, rien de deviné sans pureau", () => {
+  it("dès l'ouverture, sans rien demander : ardoises, crochets et liteaux 18×40 calculés avec les hypothèses du référentiel, dites", () => {
     const { ouvrage } = read();
     const couverture = ouvrage("a1");
     expect(couverture.role).toBe("measure");
-    expect(couverture.needs.map((n) => n.slot)).toEqual(expect.arrayContaining(["ardoise", "crochet"]));
+    const ardoises = couverture.needs.find((n) => n.slot === "ardoise")!;
+    const crochets = couverture.needs.find((n) => n.slot === "crochet")!;
     const liteaux = ouvrage("a2").needs.find((n) => n.slot === "liteau")!;
-    // Le devis ne précise pas la section : 18×40 par défaut, annoncé comme tel.
+    // Pente 45 %, zone 3, rampant ≤ 5,5 m → recouvrement 130 mm → pureau (300 − 130) / 2 = 85 mm.
+    // 200 / (0,22 × 0,085) = 10 695,19 ardoises + 5 % = 11 229,95 ; crochets + 2 % = 10 909,09 ; 200 / 0,085 = 2 352,94 ml + 5 % = 2 470,59 ml.
+    expect(ardoises.need).toEqual({ value: "11229.95", unit: "u" });
+    expect(crochets.need).toEqual({ value: "10909.09", unit: "u" });
+    expect(liteaux.need).toEqual({ value: "2470.59", unit: "ml" });
+    expect(ardoises.assumptions.map((a) => `${a.key}=${a.value}`)).toEqual(["param:pente=45", "param:zone=3", "param:longueur_rampant=5,5", "derived:recouvrement=130", "param:pureau=8,5"]);
+    // Le devis ne précise pas la section : 18×40 par défaut, dit comme hypothèse (modifiable).
     expect(liteaux.label).toBe("Liteaux 18×40");
-    expect(liteaux.usual).toMatch(/18×40 par défaut.*ne la précise pas/);
-    // Pureau inconnu : aucune quantité inventée.
-    for (const o of [couverture, ouvrage("a2")]) for (const n of o.needs) expect(n).toMatchObject({ need: null, provisional: false });
+    expect(liteaux.assumptions).toContainEqual(expect.objectContaining({ key: "product:liteau", value: "Liteaux 18×40", note: expect.stringMatching(/18×40 par défaut/) }));
+    for (const n of [ardoises, crochets, liteaux]) expect(n).toMatchObject({ provisional: false, state: "verified" });
   });
 
-  it("pureau donné : ardoises, crochets et liteaux calculés pour l'artisan (règles validées), jamais provisoires", () => {
+  it("pureau donné par l'artisan : il remplace l'hypothèse, les pertes restent", () => {
     const { ouvrage } = read({ "param:pureau": { value: "11", unit: "cm" } });
     const ardoises = ouvrage("a1").needs.find((n) => n.slot === "ardoise")!;
     const crochets = ouvrage("a1").needs.find((n) => n.slot === "crochet")!;
     const liteaux = ouvrage("a2").needs.find((n) => n.slot === "liteau")!;
-    // 200 / (0,22 × 0,11) = 8 264,46 ardoises ; un crochet par ardoise ; 200 / 0,11 = 1 818,18 m.
-    expect(ardoises.need).toEqual({ value: "8264.46", unit: "u" });
-    expect(crochets.need).toEqual({ value: "8264.46", unit: "u" });
-    expect(liteaux.need).toEqual({ value: "1818.18", unit: "ml" });
+    // 200 / (0,22 × 0,11) = 8 264,46 ardoises + 5 % = 8 677,69 ; crochets + 2 % = 8 429,75 ; 200 / 0,11 = 1 818,18 ml + 5 % = 1 909,09.
+    expect(ardoises.need).toEqual({ value: "8677.69", unit: "u" });
+    expect(crochets.need).toEqual({ value: "8429.75", unit: "u" });
+    expect(liteaux.need).toEqual({ value: "1909.09", unit: "ml" });
+    expect(ardoises.assumptions.some((a) => a.key === "param:pureau" || a.key === "derived:recouvrement")).toBe(false);
     for (const n of [ardoises, crochets, liteaux]) expect(n).toMatchObject({ provisional: false });
   });
 

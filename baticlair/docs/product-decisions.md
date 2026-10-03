@@ -634,3 +634,46 @@ Validée par le fondateur après l'audit simplicité / coût. Principe inchangé
   sur un devis de tuiles était lu comme une ardoise et faisait demander un
   modèle d'ardoise. Le vocabulaire « crochet … ardoise » désigne désormais un
   crochet d'ardoise.
+
+### PD-048 — La liste d'achats : hypothèses par défaut, zéro question inutile (2026-10-03)
+
+- **Règle produit** (fondateur) : l'artisan dépose son devis, BatiClair sort la liste
+  d'achats. « Un enfant de 10 ans doit pouvoir l'utiliser. » Une mesure du devis
+  (« 200 m² ») sert au calcul et à la phrase « J'ai compris », jamais présentée
+  comme une quantité d'article.
+- **Hypothèses par défaut** (référentiel du fondateur, `trade_practice`) : pente
+  45 %, zone climatique déduite du code postal (sinon bord de mer), rampant
+  ≤ 5,5 m, entraxe 60 cm, 2 coudes par descente, pureau de l'ardoise déduit du
+  tableau de recouvrement, pureau de la tuile mini ou maxi du fabricant. Chacune est
+  tracée comme hypothèse, dite sur UNE ligne repliée, modifiable d'un geste (boutons).
+- **Pièces par défaut** (produits génériques « modèle à préciser ») : liteaux 18×40
+  pour l'ardoise, 27×40 pour la tuile et les contre-liteaux, faîtière, closoir,
+  crochets, abouts, écran HPV, gouttière en longueurs de 4 m, naissances, tubes,
+  coudes, colliers, bande de faîtage zinc. Le fournisseur propose la marque. Une
+  hypothèse de produit n'est dite que s'il existe un vrai choix (18×40 ou 27×40).
+- **Questions** : seulement si rien ne permet de calculer et que la réponse change
+  la commande (modèle de tuile lu par appellation, « 6 : ardoises ou jouées ? »,
+  nombre de descentes). Toujours des boutons, et « Je ne sais pas » : l'article
+  passe alors « à faire chiffrer », la liste n'est jamais bloquée.
+- **Ce qui part au fournisseur** : la liste d'achats (articles calculés dans leur
+  unité de commande, quantités écrites telles quelles, « à faire chiffrer » pour la
+  mesure du devis), plus jamais une mesure d'ouvrage.
+- **Pertes** : ardoise 5 %, crochets d'ardoise 2 %, tuile 3 %, liteaux 5 %, bande
+  zinc 5 % (référentiel du fondateur), appliquées avant l'arrondi au conditionnement.
+- **Moteur** : hypothèses (valeur ou formule), tables à deux entrées
+  (`table.recouvrement`), valeurs intermédiaires (`recouvrement`), besoins
+  conditionnels (`requires`), produits par défaut, donnée de ligne restreinte à son
+  emplacement (`forSlots` : « 480 ml » de liteaux n'est pas une longueur de rives).
+  Le contrôle d'intégrité vérifie tout cela au chargement.
+- **Cas trouvés en route, devenus tests** : un faîtage ZINC ne donne jamais des
+  faîtières en terre cuite ; « 480 ml » sur une ligne de liteaux reste une quantité
+  de liteaux ; une ligne gardée sans unité ne disparaît jamais de la demande.
+- **Ce qui reste sans règle** (« à faire chiffrer ») : jouées de lucarne,
+  entourages de cheminée, solins, noues, rives d'ardoise, chatières au m².
+- **Résultat** : `docs/liste-achats-vrais-devis.md` (les deux vrais devis du
+  fondateur), banc d'essai étape 4 (D-2026-015 : 7 lignes sur 10 avec leur
+  commande, 1 question). Chiffres à sourcer : `docs/ratios-a-valider.md`.
+- **Pas fait dans ce lot** : le prompt IA reste en v7 (lignes du devis). La
+  compréhension en ouvrages vient du code (vocabulaire du référentiel) ; une v8 qui
+  renvoie aussi les ouvrages et les données du chantier (pente, rampant, nombre de
+  descentes) se fera sur de vrais devis, avec la clé API.

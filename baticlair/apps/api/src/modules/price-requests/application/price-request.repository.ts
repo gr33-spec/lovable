@@ -35,7 +35,7 @@ export interface ValidatedTakeoff {
   id: string;
   trade: string;
   /** Lignes validées, avec le rôle de leur quantité (mesure d'ouvrage ou à commander). */
-  lines: (RequestedLine & { role: "measure" | "purchase" | "undetermined" | null })[];
+  lines: (RequestedLine & { id: string; role: "measure" | "purchase" | "undetermined" | null })[];
 }
 
 export interface Sender {
