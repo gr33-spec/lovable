@@ -672,8 +672,12 @@ function computeNeed(
       return formula;
     }
     /**
-     * Bornes du fabricant (§34) : un recouvrement hors de la plage d'un format le rend non admis. Les
-     * formats proposés sont ceux dont la plage contient ce recouvrement, du plus proche au plus éloigné.
+     * Bornes du fabricant (§34) : un recouvrement hors de la plage d'un format. Les formats admis sont
+     * ceux dont la plage contient ce recouvrement, du plus proche au plus éloigné.
+     *  - Format écrit sur le devis (ou choisi par l'artisan) : on le GARDE toujours. La formule calcule,
+     *    la ligne est marquée « estimation, recouvrement hors table », et le format voisin est un conseil
+     *    (hypothèse à boutons), jamais une question bloquante.
+     *  - Format venu d'une habitude ou d'un défaut : UNE question à boutons, le voisin « conseillé » d'abord.
      */
     function checkAdmissible(pts: PointTable, values: Decimal[]): void {
       const last = values.length - 1;
@@ -686,7 +690,9 @@ function computeNeed(
       if (!range || (target.greaterThanOrEqualTo(range.min) && target.lessThanOrEqualTo(range.max))) return;
       const slotKey = pts.admissible!.slot;
       const slotDef = work.slots.find((x) => x.key === slotKey)!;
-      const current = productFor(slotKey)?.product;
+      const chosen = productFor(slotKey);
+      const current = chosen?.product;
+      const fromQuote = chosen?.choice.origin === "devis" || chosen?.choice.origin === "artisan";
       const lead = pts.keys.slice(0, last);
       // Valeurs des premières clés pour un autre produit (« ardoise.longueur » en cm).
       const leadOf = (p: Product): Decimal[] | null => {
@@ -715,7 +721,20 @@ function computeNeed(
       const name = current?.shortLabel ?? slotDef.label;
       const variable = pts.keys[last]!.variable;
       const what = (work.derived?.find((d) => d.key === variable)?.label ?? work.params.find((p) => p.key === variable)?.label ?? variable.replace(/_/g, " ")).toLowerCase();
-      const reason = `${name} non admis ici : ${what} ${fr(target, 0)} ${unit}, ${bound} pour ce format (${sources.get(pts.source)?.publisher ?? "fabricant"}).`;
+      const publisher = sources.get(pts.source)?.publisher ?? "fabricant";
+      const plage = `${what} ${fr(target, 0)} ${unit}, ${bound} pour ce format (${publisher})`;
+      const options = candidates.map((c, i) => ({ label: i === 0 ? `${c.p.shortLabel} (conseillé)` : c.p.shortLabel, value: c.p.id }));
+      if (fromQuote && current) {
+        // Le devis fait foi : calcul par la formule, dit comme estimation ; le voisin n'est qu'un conseil.
+        const conseil = candidates[0] ? ` Format conseillé : ${candidates[0].p.shortLabel}.` : "";
+        const texte = `${what.charAt(0).toUpperCase()}${what.slice(1)} ${fr(target, 0)} ${unit} hors table ${publisher} (${bound} pour ce format).${conseil}`;
+        trace.push({ label: "Estimation", value: texte, unit: "", from: `Format écrit sur le devis, gardé`, origin: "referential", estimation: true, verified: true, ...(provenanceLine(pts, sources).url ? { url: provenanceLine(pts, sources).url } : {}) });
+        if (options.length > 0) {
+          assume({ key: `product:${slotKey}`, label: slotDef.label, value: current.shortLabel, unit: "", note: `Recouvrement hors table ${publisher} pour ce format.${conseil}`, choices: [{ label: `${current.shortLabel} (devis)`, value: current.id }, ...options] });
+        }
+        return;
+      }
+      const reason = `${name} non admis ici : ${plage}.`;
       trace.push({ label: "Format non admis", value: reason, unit: "", origin: "referential", ...provenanceLine(pts, sources) });
       if (candidates.length === 0) throw new Stop({ status: "unknown", reason });
       throw new Stop({
@@ -724,7 +743,7 @@ function computeNeed(
           key: `product:${slotKey}`,
           kind: "choose_product",
           text: `${reason} Quel format ?`,
-          options: candidates.map((c, i) => ({ label: i === 0 ? `${c.p.shortLabel} (conseillé)` : c.p.shortLabel, value: c.p.id })),
+          options,
         },
       });
     }

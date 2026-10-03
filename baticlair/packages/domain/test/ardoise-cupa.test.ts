@@ -93,18 +93,42 @@ describe("table Cupa (§34) : elle fait foi, la formule ne sert que hors table",
     expect(work.points!.ardoises_m2!.rows).toEqual(fromDoc);
   });
 
-  it("format non admis (30×22 à 30°, région III : recouvrement 120 mm, maximum Cupa 100 mm) : UNE question, le 40×22 conseillé", () => {
+  it("format écrit sur le devis, hors plage Cupa (30×22 à 30°, région III : R 120, maximum 100) : gardé, calculé par la formule, dit « estimation », le 40×22 en conseil", () => {
     const r = at("30", "3");
+    const ardoises = need(r, "ardoises");
+    // Pas de question bloquante : le devis fait foi sur le format.
+    expect(ardoises.status).toBe("calculated");
+    expect(ardoises.question).toBeUndefined();
+    expect(ardoises.trace).toContainEqual(expect.objectContaining({ label: "Ardoises au m² (formule Cupa Pizarras, hors table)" }));
+    const estimation = ardoises.trace.find((t) => t.label === "Estimation")!;
+    expect(estimation).toMatchObject({ estimation: true, from: "Format écrit sur le devis, gardé" });
+    expect(estimation.value).toBe("Recouvrement posé 120 mm hors table Cupa Pizarras (au-delà du maximum de 100 mm pour ce format). Format conseillé : Ardoises 40×22.");
+    // Le conseil : une hypothèse à boutons, le devis en premier, puis les formats admis du plus proche au plus éloigné.
+    const conseil = ardoises.assumptions.find((a) => a.key === "product:ardoise")!;
+    expect(conseil).toMatchObject({ value: "Ardoises 30×22", note: expect.stringMatching(/Format conseillé : Ardoises 40×22\./) });
+    expect(conseil.choices!.slice(0, 2)).toEqual([
+      { label: "Ardoises 30×22 (devis)", value: "ardoise-30x22" },
+      { label: "Ardoises 40×22 (conseillé)", value: "ardoise-40x22" },
+    ]);
+    // Les crochets suivent.
+    expect(order(r, "crochets-ardoise")).toBeGreaterThanOrEqual(order(r, "ardoises"));
+  });
+
+  it("format venu d'une habitude de l'entreprise (le devis ne le précise pas), hors plage : UNE question à boutons, le 40×22 conseillé", () => {
+    const r = computeWorkItem(ROOFING_REFERENTIAL, {
+      ...input({ pente: { value: "30", unit: "°", origin: "artisan" }, zone: { value: "3", unit: "u", origin: "artisan" } }),
+      products: {},
+      preferences: { products: { ardoise: "ardoise-30x22" } },
+    });
     const ardoises = need(r, "ardoises");
     expect(ardoises).toMatchObject({ status: "question", question: { key: "product:ardoise", kind: "choose_product" } });
     expect(ardoises.question!.text).toBe("Ardoises 30×22 non admis ici : recouvrement posé 120 mm, au-delà du maximum de 100 mm pour ce format (Cupa Pizarras). Quel format ?");
     expect(ardoises.question!.options![0]).toEqual({ label: "Ardoises 40×22 (conseillé)", value: "ardoise-40x22" });
     // Les crochets attendent la même réponse ; rien n'est inventé entre-temps.
     expect(need(r, "crochets-ardoise")).toMatchObject({ status: "question", question: { key: "product:ardoise" } });
-    // Avec le format conseillé, tout se calcule.
-    const ok = at("30", "3", "1", "ardoise-40x22");
-    expect(need(ok, "ardoises").status).toBe("calculated");
-    expect(order(ok, "crochets-ardoise")).toBeGreaterThanOrEqual(order(ok, "ardoises"));
+    // L'artisan choisit : plus de question, et son choix est gardé même hors plage.
+    const chosen = computeWorkItem(ROOFING_REFERENTIAL, { ...input({ pente: { value: "30", unit: "°", origin: "artisan" }, zone: { value: "3", unit: "u", origin: "artisan" } }), products: { ardoise: { productId: "ardoise-30x22", origin: "artisan" } } });
+    expect(need(chosen, "ardoises").status).toBe("calculated");
   });
 
   it("dans les bornes, aucune question de format (30×22 de 69 à 100 mm)", () => {

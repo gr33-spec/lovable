@@ -1,13 +1,17 @@
 # Référentiel couverture — CHANGELOG
 
-## Version roofing-2026.10.03-13 (appliquée dans le moteur)
+## Version roofing-2026.10.03-14 (appliquée dans le moteur)
 
-**Format non admissible (§34)** : un recouvrement hors des bornes Cupa d'un format (32×22 : 69 à 103 mm ; 30×22 : 69 à 100 mm…) rend ce format non admis. Rien n'est calculé pour les ardoises et les crochets ; UNE question à boutons propose les formats dont la plage contient ce recouvrement, le plus proche d'abord, marqué « conseillé ».
+**Recouvrement hors des bornes Cupa d'un format (§34)** — 32×22 : 69 à 103 mm ; 30×22 : 69 à 100 mm… Règle du fondateur :
 
-| Cas | Avant | Maintenant |
-|---|---|---|
-| 32×22, 45°, région III, rampant 6 m (R 105) — exemple du §3 | 8 840 ardoises (formule) | non admis → 33×23 (conseillé), 35×22, 35×25, 40×22 |
-| 30×22, 30°, région III (R 120) | calculé par la formule | non admis → 40×22 (conseillé)… |
+- **Le devis nomme le format (ou l'artisan l'a choisi) : on le garde toujours.** La formule Cupa calcule, la ligne est marquée « estimation, recouvrement hors table Cupa », et le format voisin (plage la plus proche qui admet ce recouvrement) est proposé en conseil : une hypothèse à boutons, jamais une question bloquante.
+- **Le format ne vient pas du devis** (habitude de l'entreprise, défaut) : UNE question à boutons, le voisin « conseillé » en premier.
+
+| Cas | Résultat |
+|---|---|
+| 32×22, 45°, région III, rampant 6 m (R 105) — exemple du §3, format du devis | 8 840 ardoises, « estimation » ; conseil : 33×23, puis 35×22, 35×25, 40×22 |
+| 30×22, 30°, région III (R 120), format du devis | calculé par la formule, « estimation » ; conseil : 40×22 |
+| même cas, format venu d'une habitude | question : « Ardoises 30×22 non admis ici : … Quel format ? », 40×22 (conseillé) en premier |
 
 ## Version roofing-2026.10.03-12
 

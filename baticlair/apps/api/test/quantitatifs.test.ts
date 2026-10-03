@@ -54,7 +54,7 @@ const RAPPIDOS = {
   ],
 };
 
-type Ligne = { id: string; libelle: string; quantite: number | null; unite: string | null; prix?: string; explication: { phrase: string; morceaux: { cle?: string; valeur?: string; confiance: string }[] } };
+type Ligne = { id: string; libelle: string; quantite: number | null; unite: string | null; prix?: string; estimation?: string; explication: { phrase: string; morceaux: { cle?: string; valeur?: string; confiance: string }[] } };
 const ligne = (body: { lignes: Ligne[] }, libelle: string) => body.lignes.find((l) => l.libelle === libelle)!;
 
 async function pdfQuote(agent: Agent, extra: Record<string, string> = {}) {
@@ -137,12 +137,23 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
     // La gouttière ne dépend pas de la pente.
     const gouttiere = (b: { lignes: Ligne[] }) => b.lignes.find((l) => l.libelle.toLowerCase().includes("gouttière"));
     expect(gouttiere(res.body)?.quantite).toBe(gouttiere(before)?.quantite);
-    // 30° en région III : recouvrement 120 mm, au-delà du maximum Cupa du 30×22 (100 mm) → le format est
-    // remis en question (boutons, le 40×22 conseillé) au lieu d'un nombre d'ardoises faux.
+    // 30° en région III : recouvrement 120 mm, au-delà du maximum Cupa du 30×22 (100 mm). Le devis fait foi
+    // sur le format : calcul par la formule, ligne marquée « estimation », le 40×22 proposé en conseil, pas en question.
     const steep = await agent.post(`/v1/quantitatifs/${before.id}/corrections`).send({ action: "modifier", cle: "param:pente", valeur: "30" });
-    expect(steep.body.lignes.some((l: Ligne) => l.libelle === "Ardoises 30×22")).toBe(false);
-    const format = steep.body.questions.find((q: { texte: string }) => /non admis/.test(q.texte));
-    expect(format.boutons[0]).toEqual({ label: "Ardoises 40×22 (conseillé)", valeur: "ardoise-40x22" });
+    const estimated = ligne(steep.body, "Ardoises 30×22");
+    expect(estimated.quantite).toBeGreaterThan(9200);
+    expect(estimated.estimation).toBe("Recouvrement posé 120 mm hors table Cupa Pizarras (au-delà du maximum de 100 mm pour ce format). Format conseillé : Ardoises 40×22.");
+    expect(estimated.explication.morceaux).toContainEqual({ texte: "estimation : recouvrement posé 120 mm hors table Cupa Pizarras (au-delà du maximum de 100 mm pour ce format). Format conseillé : Ardoises 40×22.", confiance: "estimation" });
+    expect(steep.body.questions.some((q: { texte: string }) => /non admis|Quel format/.test(q.texte))).toBe(false);
+    const conseil = steep.body.hypotheses.find((h: { cle: string }) => h.cle === "product:ardoise");
+    expect(conseil.choix.slice(0, 2)).toEqual([
+      { label: "Ardoises 30×22 (devis)", value: "ardoise-30x22" },
+      { label: "Ardoises 40×22 (conseillé)", value: "ardoise-40x22" },
+    ]);
+    // Un tap sur le conseil : le format change, plus d'estimation.
+    const switched = await agent.post(`/v1/quantitatifs/${before.id}/reponses`).send({ reponses: [{ question: "product:ardoise", valeur: "ardoise-40x22" }] });
+    expect(ligne(switched.body, "Ardoises 40×22").estimation).toBeUndefined();
+    await agent.post(`/v1/quantitatifs/${before.id}/reponses`).send({ reponses: [{ question: "product:ardoise", valeur: "ardoise-30x22" }] });
     // 40° en région III : recouvrement 100 mm, ligne de la table Cupa (44,8/m²), qui fait foi.
     const table = await agent.post(`/v1/quantitatifs/${before.id}/corrections`).send({ action: "modifier", cle: "param:pente", valeur: "40" });
     expect(ligne(table.body, "Ardoises 30×22").quantite).toBe(9408);

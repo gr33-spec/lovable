@@ -40,7 +40,7 @@ Réponses :
 | `compris` | ce que BatiClair a compris du devis, en une phrase par ouvrage |
 | `devis` | les lignes telles que reçues, avec leur prix |
 | `questions` | 4 au plus une fois le plafond en place (plan v3, étape 3) : `id`, `texte`, `boutons` [{label, valeur}], `je_ne_sais_pas`, `saisie_libre`, `unite`. Jamais une quantité. |
-| `lignes` | à commander : `id` stable, `libelle`, `quantite`, `unite`, `conditionnement`, `ouvrage`, `origine` (calcul ou devis), `a_confirmer`, `explication` |
+| `lignes` | à commander : `id` stable, `libelle`, `quantite`, `unite`, `conditionnement`, `ouvrage`, `origine` (calcul ou devis), `a_confirmer`, `estimation` (présent quand le chiffre est approché, avec la raison et le format conseillé), `explication` |
 | `a_chiffrer` | ce que le fournisseur doit proposer (modèle non choisi) |
 | `hypotheses` | les valeurs par défaut utilisées (pente 45°…), avec leurs choix |
 | `peut_partir` | la liste peut être envoyée au fournisseur |

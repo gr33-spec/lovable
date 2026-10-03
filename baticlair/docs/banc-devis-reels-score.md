@@ -1,7 +1,7 @@
 # Banc d'essai — vrais devis : tableau de score
 
 Fichier GÉNÉRÉ par `packages/domain/test/banc-devis-reels.test.ts` : ne pas modifier à la main.
-Référentiel : roofing-2026.10.03-13.
+Référentiel : roofing-2026.10.03-14.
 
 Une ligne « commande connue » a toutes ses quantités à commander ; « besoin connu » a ses quantités
 (ml, m², pièces) mais pas encore l'unité de vente vérifiée. Les questions comptent celles qui sont

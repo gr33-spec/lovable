@@ -45,6 +45,11 @@ function explication(quantite: string | null, trace: readonly TraceLine[], assum
   const morceaux: Morceau[] = [];
   for (const t of trace) {
     if (t.value === "" || t.label.toLowerCase() === "produit" || /^contenu/i.test(t.label)) continue;
+    // « Estimation : recouvrement 120 mm hors table Cupa… » : un morceau à part entière, sans valeur ni unité.
+    if (t.label === "Estimation") {
+      morceaux.push({ texte: `estimation : ${t.value.charAt(0).toLowerCase()}${t.value.slice(1)}`, confiance: "estimation" });
+      continue;
+    }
     const hyp = assumptions.find((a) => a.label === t.label);
     const utile = t.origin !== "referential" || PARLANT.test(t.label) || Boolean(hyp);
     if (!utile) continue;
@@ -87,6 +92,8 @@ export function quantitatifView(
       // Le prix d'une ligne de devis est celui de l'ouvrage (85 €/m² de couverture), pas d'un article calculé.
       ...(b.kind !== "computed" && line?.priceRaw ? { prix: line.priceRaw } : {}),
       hypotheses: b.assumptionKeys,
+      /** Chiffre approché (recouvrement hors table du fabricant…) : pourquoi, en une phrase ; sinon absent. */
+      ...(need?.trace.some((t) => t.label === "Estimation") ? { estimation: need.trace.filter((t) => t.label === "Estimation").map((t) => t.value).join(" ") } : {}),
       explication: need
         ? explication(b.quantity, need.trace, purchase.assumptions)
         : { phrase: `${b.quantity ?? "?"} = repris tel quel du devis`, morceaux: [{ texte: "repris tel quel du devis", confiance: "devis" as const }] },

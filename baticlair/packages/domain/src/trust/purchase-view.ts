@@ -309,7 +309,8 @@ export function purchaseView(
     const work = link.ref.workItems.find((w) => w.id === n.workItemId);
     for (const a of n.assumptions) {
       if (assumptions.some((x) => x.key === a.key)) continue;
-      if (a.key.startsWith("product:")) {
+      // Un produit par défaut sans vraie alternative n'est pas une hypothèse ; un conseil de format (choix explicites) en est une.
+      if (a.key.startsWith("product:") && !a.choices?.length) {
         const family = work?.slots.find((s) => s.key === a.key.slice("product:".length))?.family;
         if (link.ref.products.filter((p) => p.family === family && p.generic).length < 2) continue;
       }
