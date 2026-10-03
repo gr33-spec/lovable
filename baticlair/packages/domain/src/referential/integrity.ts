@@ -133,6 +133,11 @@ export function checkReferential(ref: Referential): string[] {
         if (!t) throw new Error(`table inconnue « ${attr} »`);
         return parseRefUnit(t.unit).dim;
       }
+      if (head === "commande") {
+        const n = w.needs.find((x) => x.id === attr);
+        if (!n) throw new Error(`besoin inconnu « ${attr} »`);
+        return parseRefUnit(n.unit).dim;
+      }
       if (head === "regle") {
         const c = w.constants[attr];
         if (!c) throw new Error(`constante inconnue « ${attr} »`);
@@ -198,6 +203,10 @@ export function checkReferential(ref: Referential): string[] {
       try {
         const expr = parseFormula(n.formula);
         formulaVariables(expr).forEach(dimOf);
+        for (const v of formulaVariables(expr).filter((x) => x.startsWith("commande."))) {
+          const cited = v.slice("commande.".length);
+          if (cited === n.id || !needIds.has(cited)) err(nw, `« ${v} » : le besoin cité doit être calculé AVANT celui-ci`);
+        }
         const dim = inferDim(expr, dimOf);
         if (expected && !sameDim(dim, expected)) err(nw, `la formule donne ${dimLabel(dim)}, pas des ${n.unit}`);
       } catch (e) {

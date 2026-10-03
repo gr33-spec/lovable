@@ -49,9 +49,10 @@ const short = (d: string) => d.replace(/\s*\((?:fourniture\s*(?:&|et)\s*pose|f\.
 
 const one = (designation: string, quantity: string | null, unit: string | null) => read([{ ref: "1", designation, quantity, unit } as unknown as BenchLine]);
 const bought = (v: PurchaseView) => Object.fromEntries(v.toBuy.map((b) => [b.label, b.quantity]));
+// Formule Cupa (§34), crochet 1 mm : 9 271 ardoises ; crochets = ardoises commandées × 1,02.
 const COMPLETE = {
-  "Ardoises 30×22": "9 313 pièces",
-  "Crochets d'ardoise": "9 047 pièces",
+  "Ardoises 30×22": "9 271 pièces",
+  "Crochets d'ardoise": "9 457 pièces",
   "Liteaux 18×40": "2 049 ml",
 };
 
@@ -68,21 +69,22 @@ describe("jamais de quantité demandée à l'artisan", () => {
     // Hypothèses dites, en tête la pente (45°) et la zone (3).
     expect(v.assumptions.slice(0, 2).map((a) => [a.key, a.value, a.unit])).toEqual([
       ["param:pente", "45", "°"],
-      ["param:zone", "3", "u"],
+      ["param:zone", "III", "u"],
     ]);
     expect(v.canValidate).toBe(true);
   });
 
   it("autres formats du référentiel (§3) : 32×22 calculé comme 30×22", () => {
-    expect(bought(one("Ardoises naturelles 32x22 pose au crochet", "200", "m²"))).toMatchObject({ "Ardoises 32×22": "8 485 pièces", "Crochets d'ardoise": "8 243 pièces" });
+    expect(bought(one("Ardoises naturelles 32x22 pose au crochet", "200", "m²"))).toMatchObject({ "Ardoises 32×22": "8 447 pièces", "Crochets d'ardoise": "8 616 pièces" });
   });
 
   it("exemple complet du référentiel (§3) : 200 m², 32×22, 45°, zone 3, rampant 6 m → 8 460 ardoises théoriques, 1 950 ml de liteaux", () => {
     const v = read([{ ref: "1", designation: "Ardoises 32x22 crochets compris", quantity: "200", unit: "m2" } as unknown as BenchLine], {
       "param:longueur_rampant": { value: "6", unit: "m" },
     });
-    // R = 95 + 10 = 105 mm → pureau 107,5 mm → 200 / (0,22 × 0,1075) = 8 456,7 (le référentiel arrondit à 8 460) ; + 5 % de perte.
-    expect(bought(v)["Ardoises 32×22"]).toBe("8 880 pièces");
+    // R = 95 + 10 = 105 mm → pureau 107,5 mm → Cupa : 200 / (0,1075 × 0,221) = 8 418,4 ; + 5 % de perte = 8 839,3.
+    expect(bought(v)["Ardoises 32×22"]).toBe("8 840 pièces");
+    expect(bought(v)["Crochets d'ardoise"]).toBe("9 017 pièces");
     // Liteaux : 200 / 0,1075 = 1 860,5 ml + 5 % = 1 953,5 → 1 954 ml (référentiel : 1 950 ml, 39 bottes).
     expect(bought(v)["Liteaux 18×40"]).toBe("1 954 ml");
   });
@@ -139,6 +141,6 @@ describe("doutes de calcul de l'IA : jamais posés à l'artisan", () => {
     expect(v.questions.map((q) => q.key).sort()).toEqual(["engine:param:nb_descentes", "role:ligne 5"]);
     expect(JSON.stringify(v.questions)).not.toMatch(/linéaires|combien d'ardoises|faîtières/);
     // Les liteaux sont calculés en mètres linéaires par BatiClair, pas demandés.
-    expect(bought(v)).toMatchObject({ "Liteaux 18×40": "2 049 ml", "Ardoises 30×22": "9 313 pièces" });
+    expect(bought(v)).toMatchObject({ "Liteaux 18×40": "2 049 ml", "Ardoises 30×22": "9 271 pièces" });
   });
 });

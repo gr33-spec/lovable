@@ -115,6 +115,29 @@ const ZONE_PARAM: ParamDef = {
     { label: "Bord de mer, ou plus de 500 m", value: "3" },
   ],
 };
+/**
+ * Région ardoise (DTU 40.11, I / II / III, §26) : elle fixe le recouvrement. Même valeur que la zone
+ * climatique tant que la table par département des régions ardoise n'est pas saisie (§37, « à vérifier ») ;
+ * dite « région ardoise III », pas « zone 3 » (découpage des tuiles).
+ */
+const REGION_ARDOISE_PARAM: ParamDef = {
+  ...ZONE_PARAM,
+  label: "Région ardoise",
+  display: { "1": "I", "2": "II", "3": "III" },
+};
+/** Diamètre du crochet dans la formule Cupa (§34) : 1 mm, inox 2,7 mm sur un département littoral (posé d'office). */
+const DIAMETRE_CROCHET_PARAM: ParamDef = {
+  key: "diametre_crochet",
+  label: "Diamètre du crochet",
+  unit: "mm",
+  kind: "site_data",
+  question: "Quel crochet ?",
+  default: { value: "1", source: "cupa-pureau-ardoises-m2", verification: FOUNDER_DOC, version: 1, note: "crochet courant ; inox 2,7 mm en bord de mer" },
+  choices: [
+    { label: "Courant (1 mm)", value: "1" },
+    { label: "Inox 2,7 mm (bord de mer)", value: "2.7" },
+  ],
+};
 const ENTRAXE_PARAM: ParamDef = {
   key: "entraxe_supports",
   label: "Entraxe des chevrons ou fermettes",
@@ -174,7 +197,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.03-10",
+  version: "roofing-2026.10.03-11",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -244,6 +267,15 @@ export const ROOFING_REFERENTIAL: Referential = {
       documentRef: "Document « Référentiel quantitatif couverture-étanchéité », rédigé par le fondateur, 2026-10-03",
       retrievedAt: "2026-10-03",
       note: "Formules, tableau de recouvrement de l'ardoise (pente × zone), pertes, conditionnements courants, hypothèses par défaut. Les chiffres qu'il cite comme « valeurs courantes des DTU et fiches fabricants » restent à retrouver dans un document public : jusque-là, ils valent comme pratique validée par le fondateur (docs/ratios-a-valider.md).",
+    },
+    {
+      id: "cupa-pureau-ardoises-m2",
+      kind: "manufacturer",
+      title: "Cupa Pizarras, FAQ « Pureau et nombre d'ardoises au m² »",
+      publisher: "Cupa Pizarras",
+      url: "https://www.cupapizarras.com/fr/centre-ressources/faqs/pureau-ardoises-au-m2/",
+      retrievedAt: "2026-10-03",
+      note: "Mise à jour septembre 2026 (référentiel du fondateur, §34) : ardoises/m² = 1 / [pureau × (largeur + Ø crochet)], Ø 1 mm, inox 2,7 mm en zone littorale.",
     },
     {
       id: "negoce-liteau-27x40",
@@ -587,7 +619,8 @@ export const ROOFING_REFERENTIAL: Referential = {
         },
         ENTRAXE_PARAM,
         PENTE_PARAM,
-        ZONE_PARAM,
+        REGION_ARDOISE_PARAM,
+        DIAMETRE_CROCHET_PARAM,
         {
           key: "longueur_rampant",
           label: "Longueur du rampant",
@@ -661,21 +694,23 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "ardoises",
           slot: "ardoise",
-          formula: "surface / (ardoise.largeur * pureau)",
+          // Formule Cupa (§34) : le diamètre du crochet s'ajoute à la largeur (32×22 R100 : 40,7/m², et non 41,3).
+          formula: "surface / (pureau * (ardoise.largeur + diametre_crochet))",
           unit: "u",
           core: true,
           exclusions: "Hors ardoises de rive, doublis à l'égout, coupes en noue et en arêtier (la perte de 5 % couvre casse et coupes de rive d'un pan simple).",
-          source: "baticlair-geometrie-ardoise",
-          verification: FOUNDER_VALIDATED,
+          source: "cupa-pureau-ardoises-m2",
+          verification: FOUNDER_DOC,
           version: 1,
         },
         {
           id: "crochets-ardoise",
           slot: "crochet",
-          formula: "surface / (ardoise.largeur * pureau)",
+          // « Commander crochets = ardoises × 1,02 » : les ardoises COMMANDÉES (après leur marge), puis +2 %.
+          formula: "commande.ardoises",
           unit: "u",
           core: true,
-          exclusions: "Un crochet par ardoise, +2 % (référentiel du fondateur) ; hors ardoises de rive et doublis.",
+          exclusions: "Un crochet par ardoise commandée, +2 % (référentiel du fondateur) : jamais moins de crochets que d'ardoises.",
           source: "baticlair-geometrie-ardoise",
           verification: FOUNDER_VALIDATED,
           version: 1,

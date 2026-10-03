@@ -90,11 +90,12 @@ describe("couverture en ardoises au crochet : chaque composant détaillé", () =
     const crochets = couverture.needs.find((n) => n.slot === "crochet")!;
     const liteaux = ouvrage("a2").needs.find((n) => n.slot === "liteau")!;
     // Pente 45°, zone 3, rampant ≤ 5,5 m → recouvrement 95 mm → pureau (300 − 95) / 2 = 102,5 mm.
-    // 200 / (0,22 × 0,1025) = 8 869,18 ardoises + 5 % = 9 312,64 ; crochets + 2 % = 9 046,56 ; 200 / 0,1025 = 1 951,22 ml + 5 % = 2 048,78 ml.
-    expect(ardoises.need).toEqual({ value: "9312.64", unit: "u" });
-    expect(crochets.need).toEqual({ value: "9046.56", unit: "u" });
+    // Formule Cupa (§34), crochet 1 mm : 200 / (0,1025 × 0,221) = 8 829,05 ardoises + 5 % = 9 270,50, soit 9 271 commandées ;
+    // crochets = 9 271 × 1,02 = 9 456,42 ; 200 / 0,1025 = 1 951,22 ml + 5 % = 2 048,78 ml.
+    expect(ardoises.need).toEqual({ value: "9270.5", unit: "u" });
+    expect(crochets.need).toEqual({ value: "9456.42", unit: "u" });
     expect(liteaux.need).toEqual({ value: "2048.78", unit: "ml" });
-    expect(ardoises.assumptions.map((a) => `${a.key}=${a.value}`)).toEqual(["param:pente=45", "param:zone=3", "param:longueur_rampant=5,5", "derived:recouvrement=95", "param:pureau=10,25"]);
+    expect(ardoises.assumptions.map((a) => `${a.key}=${a.value}`)).toEqual(["param:pente=45", "param:zone=III", "param:longueur_rampant=5,5", "derived:recouvrement=95", "param:pureau=10,25", "param:diametre_crochet=1"]);
     // Le devis ne précise pas la section : 18×40 par défaut, dit comme hypothèse (modifiable).
     expect(liteaux.label).toBe("Liteaux 18×40");
     expect(liteaux.assumptions).toContainEqual(expect.objectContaining({ key: "product:liteau", value: "Liteaux 18×40", note: expect.stringMatching(/18×40 par défaut/) }));
@@ -106,9 +107,9 @@ describe("couverture en ardoises au crochet : chaque composant détaillé", () =
     const ardoises = ouvrage("a1").needs.find((n) => n.slot === "ardoise")!;
     const crochets = ouvrage("a1").needs.find((n) => n.slot === "crochet")!;
     const liteaux = ouvrage("a2").needs.find((n) => n.slot === "liteau")!;
-    // 200 / (0,22 × 0,11) = 8 264,46 ardoises + 5 % = 8 677,69 ; crochets + 2 % = 8 429,75 ; 200 / 0,11 = 1 818,18 ml + 5 % = 1 909,09.
-    expect(ardoises.need).toEqual({ value: "8677.69", unit: "u" });
-    expect(crochets.need).toEqual({ value: "8429.75", unit: "u" });
+    // 200 / (0,11 × 0,221) = 8 227,07 ardoises + 5 % = 8 638,42 (8 639) ; crochets 8 639 × 1,02 = 8 811,78 ; 200 / 0,11 = 1 818,18 ml + 5 % = 1 909,09.
+    expect(ardoises.need).toEqual({ value: "8638.42", unit: "u" });
+    expect(crochets.need).toEqual({ value: "8811.78", unit: "u" });
     expect(liteaux.need).toEqual({ value: "1909.09", unit: "ml" });
     expect(ardoises.assumptions.some((a) => a.key === "param:pureau" || a.key === "derived:recouvrement")).toBe(false);
     for (const n of [ardoises, crochets, liteaux]) expect(n).toMatchObject({ provisional: false });

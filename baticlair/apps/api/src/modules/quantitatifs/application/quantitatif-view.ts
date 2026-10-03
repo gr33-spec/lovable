@@ -46,7 +46,8 @@ function explication(quantite: string | null, trace: readonly TraceLine[], assum
     const utile = t.origin !== "referential" || PARLANT.test(t.label) || Boolean(hyp);
     if (!utile) continue;
     const unit = !t.unit || t.unit === "u" ? "" : t.unit === "°" ? "°" : ` ${t.unit === "m2" ? "m²" : t.unit}`;
-    const texte = `${t.label.toLowerCase()} ${t.value}${unit}`;
+    // « région ardoise III » : la valeur dite par le référentiel ; `valeur` garde celle du calcul (à renvoyer).
+    const texte = `${t.label.toLowerCase()} ${t.shown ?? t.value}${unit}`;
     if (seen.has(texte)) continue;
     seen.add(texte);
     morceaux.push({

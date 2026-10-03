@@ -72,9 +72,15 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
     expect(res.body.version_referentiel).toMatch(/^roofing-/);
     expect(res.body.compris).toEqual(["Couverture en ardoises au crochet sur liteaux : 200 m²", "Gouttière : 24 ml"]);
 
-    // 200 m² en 30×22, 45° par défaut, zone 3 (Brest) : 9 313 ardoises (avant la migration Cupa, §34).
+    // 200 m² en 30×22, 45° par défaut, région ardoise III, Brest = département littoral → crochet inox 2,7 mm :
+    // formule Cupa (§34) 200 / (0,1025 × 0,2227) = 8 761,65 + 5 % = 9 200 ardoises.
     const ardoises = ligne(res.body, "Ardoises 30×22");
-    expect(ardoises).toMatchObject({ quantite: 9313, unite: "pièces", origine: "calcul" });
+    expect(ardoises).toMatchObject({ quantite: 9200, unite: "pièces", origine: "calcul" });
+    // Jamais moins de crochets que d'ardoises : 9 200 commandées × 1,02 = 9 384.
+    const crochets = ligne(res.body, "Crochets d'ardoise");
+    expect(crochets.quantite).toBe(9384);
+    expect(crochets.quantite!).toBeGreaterThanOrEqual(ardoises.quantite!);
+    expect(crochets.explication.phrase).toMatch(/^9 384 pièces = ardoises après marge 9 200 · marge recommandée 2 %$/);
     // Le prix de la ligne de devis (85 €/m² de couverture) n'est pas celui d'une ardoise.
     expect(ardoises.prix).toBeUndefined();
     expect(res.body.devis).toEqual([
@@ -83,7 +89,12 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
     ]);
 
     // §39 : une phrase, chaque hypothèse modifiable porte sa clé.
-    expect(ardoises.explication.phrase).toMatch(/^9 313 pièces = surface de toiture 200 m² · pente du toit 45° · .*marge recommandée 5 %$/);
+    expect(ardoises.explication.phrase).toBe(
+      "9 200 pièces = surface de toiture 200 m² · pente du toit 45° · région ardoise III · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet 2,7 mm · marge recommandée 5 %",
+    );
+    expect(ardoises.explication.phrase).not.toMatch(/zone climatique/);
+    expect(ardoises.explication.morceaux).toContainEqual({ texte: "région ardoise III", cle: "param:zone", valeur: "3", confiance: "devis" });
+    expect(ardoises.explication.morceaux).toContainEqual(expect.objectContaining({ texte: "diamètre du crochet 2,7 mm", cle: "param:diametre_crochet", valeur: "2,7" }));
     expect(ardoises.explication.morceaux).toContainEqual({ texte: "pente du toit 45°", cle: "param:pente", valeur: "45", unite: "°", confiance: "hypothese" });
     expect(ardoises.explication.morceaux).toContainEqual(expect.objectContaining({ texte: "surface de toiture 200 m²", confiance: "devis" }));
     expect(res.body.hypotheses).toContainEqual(expect.objectContaining({ cle: "param:pente", valeur: "45" }));
@@ -120,15 +131,17 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
     const res = await agent.post(`/v1/quantitatifs/${before.id}/corrections`).send({ action: "modifier", cle: "param:pente", valeur: "30" });
     expect(res.status).toBe(201);
     const ardoises = ligne(res.body, "Ardoises 30×22");
-    expect(ardoises.quantite).not.toBe(9313);
+    expect(ardoises.quantite).not.toBe(9200);
     expect(ardoises.explication.morceaux).toContainEqual(expect.objectContaining({ cle: "param:pente", valeur: "30", confiance: "artisan" }));
     expect(ligne(res.body, "Ardoises 30×22").id).toBe(ligne(before, "Ardoises 30×22").id);
     // La gouttière ne dépend pas de la pente.
     const gouttiere = (b: { lignes: Ligne[] }) => b.lignes.find((l) => l.libelle.toLowerCase().includes("gouttière"));
     expect(gouttiere(res.body)?.quantite).toBe(gouttiere(before)?.quantite);
-    // Une valeur choisie reste modifiable : retour à 45°, retour aux 9 313 ardoises.
+    // Une valeur choisie reste modifiable : retour à 45°, retour aux 9 200 ardoises.
     const back = await agent.post(`/v1/quantitatifs/${before.id}/corrections`).send({ action: "modifier", cle: "param:pente", valeur: "45" });
-    expect(ligne(back.body, "Ardoises 30×22").quantite).toBe(9313);
+    expect(ligne(back.body, "Ardoises 30×22").quantite).toBe(9200);
+    // Les crochets suivent toujours les ardoises corrigées.
+    for (const b of [res.body, back.body]) expect(ligne(b, "Crochets d'ardoise").quantite!).toBeGreaterThanOrEqual(ligne(b, "Ardoises 30×22").quantite!);
     // Une valeur qui n'existe pas n'est pas modifiable.
     expect((await agent.post(`/v1/quantitatifs/${before.id}/corrections`).send({ action: "modifier", cle: "param:inconnu", valeur: "3" })).status).toBe(400);
   });
@@ -151,6 +164,15 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
     expect((await agent.post("/v1/quantitatifs").send({ lignes: Array(501).fill(RAPPIDOS.lignes[0]) })).status).toBe(400);
     expect((await agent.post("/v1/quantitatifs").send({ ...RAPPIDOS, projetId: "pas-un-id" })).status).toBe(400);
     expect((await agent.get("/v1/projects")).body.items).toHaveLength(0);
+  });
+
+  it("hors littoral (Grenoble) : crochet courant 1 mm, 9 271 ardoises, toujours au moins autant de crochets", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
+    const res = await agent.post("/v1/quantitatifs").send({ ...RAPPIDOS, adresse: "38000 Grenoble" });
+    const ardoises = ligne(res.body, "Ardoises 30×22");
+    expect(ardoises.quantite).toBe(9271);
+    expect(ardoises.explication.phrase).toMatch(/diamètre du crochet 1 mm/);
+    expect(ligne(res.body, "Crochets d'ardoise").quantite).toBe(9457);
   });
 
   it("range le quantitatif dans un chantier existant", async () => {

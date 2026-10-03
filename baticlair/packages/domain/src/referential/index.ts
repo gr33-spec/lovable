@@ -12,4 +12,4 @@ export { scoreQuote, type QuoteScore, type LineOutcome, type Answer } from "./sc
 export { documentationNeeds, type DocumentationNeed } from "./documentation.js";
 export { mergeReferentials, type ReferentialLayer, type ReferentialProvider } from "./layers.js";
 export { applyLineRoles, proposeLineRoles, type LineRole, type RoleLine, type RoleProposal } from "./line-roles.js";
-export { climateZone, departmentOf, postalCodeIn } from "./zone.js";
+export { climateZone, departmentOf, isCoastal, postalCodeIn } from "./zone.js";

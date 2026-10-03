@@ -3,6 +3,7 @@ import {
   artisanView,
   assessTakeoffLine,
   climateZone,
+  isCoastal,
   computeWithAnswers,
   postalCodeIn,
   purchaseView,
@@ -612,6 +613,10 @@ export class TakeoffService {
     const address = (await this.reading.projectAddress?.(tenant, takeoff.projectId)) ?? null;
     const zone = climateZone(postalCodeIn(address));
     const extraFacts: SiteFact[] = zone ? [{ key: "zone", value: String(zone), unit: "u", evidence: `Code postal du chantier (${postalCodeIn(address)})`, origin: "document" }] : [];
+    // Département littoral : crochet d'ardoise inox 2,7 mm d'office (Cupa, §34).
+    if (isCoastal(postalCodeIn(address))) {
+      extraFacts.push({ key: "diametre_crochet", value: "2.7", unit: "mm", evidence: `Département littoral (${postalCodeIn(address)}) : crochet inox 2,7 mm`, origin: "document" });
+    }
     const plan = planQuote(lines.map((l) => ({ ref: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, section: l.section })), ROOFING_REFERENTIAL, profile, undefined, extraFacts);
     // Niveau 1 : le rôle de chaque quantité (mesure d'ouvrage ou à commander), proposé par le code
     // et ENREGISTRÉ avec la ligne ; une mesure ne devient jamais une quantité d'achat.

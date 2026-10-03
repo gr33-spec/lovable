@@ -186,6 +186,8 @@ export interface ParamDef {
   default?: ParamDefault;
   /** Réponses proposées en boutons (l'artisan ne tape rien) : « Faible (30 %) », « Moyenne (45 %) »… */
   choices?: { label: string; value: string }[];
+  /** Façon de dire une valeur dans l'explication (« 3 » → « III » pour une région ardoise) ; le calcul garde la valeur. */
+  display?: Record<string, string>;
 }
 
 /**
@@ -247,7 +249,11 @@ export interface CountedWork {
 export interface NeedRule extends Provenance {
   id: string;
   slot: string;
-  /** Formule (voir expression.ts) : paramètres, « slot.caracteristique », « regle.constante ». */
+  /**
+   * Formule (voir expression.ts) : paramètres, « slot.caracteristique », « regle.constante », et
+   * « commande.<besoin> » : la quantité d'un besoin PRÉCÉDENT du même ouvrage, après sa marge et
+   * arrondie à l'unité (un crochet par ardoise COMMANDÉE, pas par ardoise posée).
+   */
   formula: string;
   /** Unité du résultat (contrôlée contre la formule au chargement). */
   unit: string;

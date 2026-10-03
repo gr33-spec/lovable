@@ -118,6 +118,8 @@ export interface TraceLine {
   origin?: Origin;
   /** Provenance lisible : « Devis, ligne 4 », « Fiche Edilians (vérifiée le 02/10/2026) ». */
   from: string;
+  /** La valeur telle qu'on la dit (« III » pour la région ardoise 3), quand elle diffère de `value`. */
+  shown?: string;
   verified: boolean;
   url?: string;
 }
@@ -242,13 +244,14 @@ export function requiredInputs(ref: Referential, workItemId: string, needId: str
     for (const v of [...vars]) {
       const derived = work.derived?.find((d) => d.key === v);
       const table = v.startsWith("table.") ? work.tables?.[v.slice("table.".length)] : undefined;
-      const more = derived ? formulaVariables(parseFormula(derived.formula)) : table ? table.axes.map((a) => a.param) : [];
+      const other = v.startsWith("commande.") ? work.needs.find((n) => n.id === v.slice("commande.".length)) : undefined;
+      const more = derived || other ? formulaVariables(parseFormula((derived ?? other)!.formula)) : table ? table.axes.map((a) => a.param) : [];
       for (const m of more) if (!vars.has(m)) (vars.add(m), (grew = true));
     }
   }
   // Les bornes d'un paramètre utilisé (pureau entre mini et maxi de la fiche) font partie des données requises.
   for (const p of work.params) if (vars.has(p.key) && p.range) [p.range.min, p.range.max].forEach((v) => vars.add(v));
-  const isSpec = (v: string) => v.includes(".") && !v.startsWith("regle.") && !v.startsWith("table.");
+  const isSpec = (v: string) => v.includes(".") && !v.startsWith("regle.") && !v.startsWith("table.") && !v.startsWith("commande.");
   const slotKeys = new Set([rule.slot, ...[...vars].filter(isSpec).map((v) => v.split(".")[0]!)]);
   return {
     products: work.slots.filter((s) => slotKeys.has(s.key)).map((s) => ({ slot: s.key, label: s.label })),
@@ -271,7 +274,16 @@ export function computeWorkItem(ref: Referential, input: WorkItemInput, options:
   const sources = new Map(ref.sources.map((s) => [s.id, s]));
   // Un besoin qui exige une donnée que rien ne donne (ni devis, ni réponse, ni hypothèse) n'existe pas pour ce chantier.
   const known = (key: string) => input.params[key] !== undefined || work.params.find((p) => p.key === key)?.default !== undefined;
-  const needs = work.needs.filter((rule) => (rule.requires ?? []).every(known)).map((rule) => computeNeed(ref, work, rule, input, sources, options));
+  // Dans l'ordre : un besoin peut partir de la commande d'un besoin précédent (« commande.ardoises »).
+  const done = new Map<string, Earlier>();
+  const needs = work.needs
+    .filter((rule) => (rule.requires ?? []).every(known))
+    .map((rule) => {
+      let exact: IntervalValue | undefined;
+      const result = computeNeed(ref, work, rule, input, sources, options, done, (v) => (exact = v));
+      done.set(rule.id, { result, ...(exact ? { exact } : {}) });
+      return result;
+    });
   // La question qui débloque le plus de besoins demandés par le devis (à égalité : la première).
   const asked = needs.filter((n) => n.question && n.origin !== "suggested").map((n) => n.question!);
   const count = (key: string) => asked.filter((q) => q.key === key).length;
@@ -305,6 +317,15 @@ function provenanceLine(p: { source: string; verification: { status: string; ver
 }
 
 const point = (value: Decimal, dim: IntervalValue["dim"]): IntervalValue => ({ lo: value, hi: value, dim });
+/** Un besoin déjà calculé de l'ouvrage, et sa valeur exacte après marge (pour « commande.<besoin> »). */
+type Earlier = { result: NeedResult; exact?: IntervalValue };
+
+/** « III » pour la région ardoise 3 : la valeur dite, quand le référentiel en donne une. */
+const displayed = (def: ParamDef, raw: string | undefined): { shown?: string } => {
+  if (!def.display || raw === undefined) return {};
+  const hit = Object.entries(def.display).find(([k]) => /^-?\d+(\.\d+)?$/.test(raw) && new Decimal(k).equals(new Decimal(raw)));
+  return hit ? { shown: hit[1] } : {};
+};
 const isPoint = (v: IntervalValue) => v.lo.equals(v.hi);
 
 function computeNeed(
@@ -314,6 +335,9 @@ function computeNeed(
   input: WorkItemInput,
   sources: Map<string, Source>,
   options: EngineOptions,
+  earlier: ReadonlyMap<string, Earlier> = new Map(),
+  /** Reçoit le besoin exact après marge (dans l'unité du besoin), pour un besoin suivant qui en part. */
+  onNeed: (need: IntervalValue) => void = () => {},
 ): NeedResult {
   const slot = work.slots.find((s) => s.key === rule.slot)!;
   let preferenceIgnored: string | undefined;
@@ -472,6 +496,27 @@ function computeNeed(
           if (!table) throw new Stop({ status: "unknown", reason: `Table absente du référentiel : ${attr}.`, missing: gap({ kind: "constant", label: attr.replace(/_/g, " "), attribute: attr }) });
           return useTable(attr, table);
         }
+        if (head === "commande") {
+          const other = earlier.get(attr)?.result;
+          const exactOther = earlier.get(attr)?.exact;
+          const otherRule = work.needs.find((n) => n.id === attr);
+          if (!other || !otherRule) throw new Stop({ status: "unknown", reason: `Calcul impossible : il part d'un autre besoin non calculé (${attr}).` });
+          // Les ardoises attendent une réponse : les crochets aussi, avec la même question.
+          if (other.status === "question" && other.question) throw new Stop({ status: "question", question: other.question });
+          if (other.status !== "calculated" || !exactOther) throw new Stop({ status: "unknown", reason: `Calcul impossible tant que « ${other.slotLabel.toLowerCase()} » n'est pas calculé.` });
+          const unit = parseRefUnit(otherRule.unit);
+          // La valeur exacte, arrondie à l'unité comme la commande (jamais la valeur affichée, arrondie au centième).
+          const lo = exactOther.lo.ceil();
+          const hi = exactOther.hi.ceil();
+          trace.push({
+            label: `${other.slotLabel} après marge`,
+            value: lo.equals(hi) ? fr(lo, 0) : `${fr(lo, 0)} à ${fr(hi, 0)}`,
+            unit: otherRule.unit,
+            from: "Calcul ci-dessus",
+            verified: true,
+          });
+          return { lo: lo.times(unit.factor), hi: hi.times(unit.factor), dim: unit.dim };
+        }
         if (head === "regle") {
           const fact = work.constants[attr];
           if (!fact) throw new Stop({ status: "unknown", reason: `Constante absente du référentiel : ${attr}.`, missing: gap({ kind: "constant", label: attr.replace(/_/g, " "), attribute: attr }) });
@@ -546,6 +591,7 @@ function computeNeed(
         label: def.label,
         value: read.value.replace(".", ","),
         unit: read.unit,
+        ...displayed(def, read.value),
         from: given.evidence ?? (given.origin === "devis" ? "Devis" : "Votre réponse"),
         origin: given.origin === "devis" ? "devis" : "project",
         verified: true,
@@ -573,8 +619,8 @@ function computeNeed(
       const shown = (x: Decimal) => fr(x.dividedBy(expected.factor));
       const value = isPoint(v) ? shown(v.lo) : `${shown(v.lo)} à ${shown(v.hi)}`;
       const prov = provenanceLine(d, sources);
-      trace.push({ label: def.label, value, unit: def.unit, from: `Hypothèse${d.note ? ` : ${d.note}` : ""} (${prov.from})`, verified: prov.verified, ...(prov.url ? { url: prov.url } : {}), origin: "assumption" });
-      assume({ key: `param:${def.key}`, label: def.label, value, unit: def.unit, ...(d.note ? { note: d.note } : {}), ...(def.choices ? { choices: def.choices } : {}) });
+      trace.push({ label: def.label, value, unit: def.unit, ...displayed(def, d.value), from: `Hypothèse${d.note ? ` : ${d.note}` : ""} (${prov.from})`, verified: prov.verified, ...(prov.url ? { url: prov.url } : {}), origin: "assumption" });
+      assume({ key: `param:${def.key}`, label: def.label, value: displayed(def, d.value).shown ?? value, unit: def.unit, ...(d.note ? { note: d.note } : {}), ...(def.choices ? { choices: def.choices } : {}) });
       return v;
     }
     /** Table : la cellule des plus grands seuils atteints ; une entrée hors table arrête le calcul (rien n'est deviné). */
@@ -646,6 +692,7 @@ function computeNeed(
       factor = new Decimal(wasteRule.rate).dividedBy(100).plus(1);
     }
     const need: IntervalValue = { lo: raw.lo.dividedBy(needUnit.factor).times(factor), hi: raw.hi.dividedBy(needUnit.factor).times(factor), dim: raw.dim };
+    onNeed(need);
     const exact = missing.length === 0;
     trace.push({
       label: "Besoin calculé",

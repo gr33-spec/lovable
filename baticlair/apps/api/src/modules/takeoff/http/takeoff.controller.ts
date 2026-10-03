@@ -94,7 +94,7 @@ function viewDto(view: ArtisanView) {
             formula: i.need.formula ?? null,
             exclusions: i.need.exclusions ?? null,
             productOrigin: i.need.productOrigin ?? null,
-            trace: i.need.trace.map((t) => ({ label: t.label, value: t.value, unit: t.unit, from: t.from, origin: t.origin ?? null, url: t.url ?? null })),
+            trace: i.need.trace.map((t) => ({ label: t.label, value: t.shown ?? t.value, unit: t.unit, from: t.from, origin: t.origin ?? null, url: t.url ?? null })),
           }
         : null,
     })),
