@@ -18,7 +18,7 @@ Avant de toucher au moteur, aux règles ou aux écrans, lire la section concern�
 ## Règles produit non négociables
 
 - Aucune quantité inventée : l'IA lit une fois, le code déterministe calcule ensuite.
-- Pente inconnue → 45 % par défaut, affichée comme hypothèse modifiable.
+- La pente est en degrés partout, jamais en % (un % lu dans un devis est converti). Pente inconnue → 45° par défaut, affichée comme hypothèse, boutons 30° / 35° / 45° / autre.
 - Une surface en m² dans un devis de couvreur est une surface de toiture.
 - Une mesure du devis n'est jamais présentée comme une quantité d'article.
 - On ne pose une question que si le doute est réel et change la commande ; boutons + « Je ne sais pas ».

@@ -14,8 +14,8 @@ Ce qui ne l'est pas : la lecture des PDF (librairie vulnérable, lecture faite d
 
 ### Les 5 choses à faire d'abord
 
-1. **Mettre à jour `pdfjs-dist` et désactiver l'exécution de code dans les PDF** (B1) — S.
-2. **Limiter le débit** sur connexion, inscription, upload et lecture IA (B2) — S.
+1. ~~**Mettre à jour `pdfjs-dist` et désactiver l'exécution de code dans les PDF** (B1) — S.~~ Fait le 3 octobre.
+2. ~~**Limiter le débit** sur connexion, inscription, upload et lecture IA (B2) — S.~~ Fait le 3 octobre.
 3. **Sortir la lecture IA de la requête HTTP** : file d'attente + statut interrogé par l'écran, sinon les devis de 30 pages scannées tombent en timeout (B3) — M.
 4. **Suppression de compte et export des données** (RGPD) + page « Confidentialité » (B4) — M.
 5. **Alerte en cas d'erreur en prod** (Sentry ou équivalent) + contrôle que les sauvegardes Neon sont actives (B5, M1) — S.
