@@ -1,3 +1,4 @@
+import { waitUntil } from "@vercel/functions";
 import { Module } from "@nestjs/common";
 import type { AppConfig } from "../../platform/config/config.js";
 import { PrismaService } from "../../platform/database/prisma.service.js";
@@ -62,6 +63,9 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
           {
             maxAnalysisMicroUsd: Math.round((Number(config.aiCost.analysisMaxEur) / Number(config.aiCost.usdToEur)) * 1_000_000),
             onStats: (stats) => logger.info({ reading: stats }, "takeoff: lecture du devis"),
+            // Sur Vercel, la lecture d'un gros devis continue après la réponse (sinon la fonction s'arrête).
+            keepAlive: (work) => waitUntil(work),
+            answerWithinMs: config.ai.answerWithinMs,
             isValidator: async (tenant) => {
               if (config.referentialValidators.length === 0) return false;
               const user = await prisma.user.findUnique({ where: { id: tenant.userId }, select: { email: true } });

@@ -202,6 +202,12 @@ export interface TakeoffLine {
   issues: TakeoffIssue[];
 }
 
+/** Lecture du devis client encore sur le serveur (gros devis) : en cours, ou échouée (on peut relancer). */
+export interface ReadingState {
+  status: "reading" | "failed";
+  reason: string | null;
+}
+
 export interface Takeoff {
   id: string;
   projectId: string;

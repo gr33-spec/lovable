@@ -69,6 +69,11 @@ export class AnalysisMeter {
     return this.analyses.saveReadingStats(analysisId, stats);
   }
 
+  /** L'analyse d'un document, telle qu'elle est (en cours, réussie, échouée), ou null. */
+  current(companyId: string, documentId: string): Promise<AnalysisRecord | null> {
+    return this.analyses.findByDocument(companyId, documentId);
+  }
+
   fail(analysisId: string): Promise<AnalysisRecord> {
     return this.analyses.fail(analysisId, this.now());
   }

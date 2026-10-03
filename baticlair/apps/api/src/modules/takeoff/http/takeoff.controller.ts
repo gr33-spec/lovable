@@ -1,6 +1,7 @@
+import type { Response } from "express";
 import { Throttle } from "@nestjs/throttler";
 import { HOURLY } from "../../../platform/http/rate-limit.module.js";
-import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch, Post, Res, UseGuards } from "@nestjs/common";
 import { z } from "zod";
 import { ZodPipe } from "../../../platform/http/zod.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
@@ -177,15 +178,22 @@ export class TakeoffController {
   /** Lance la lecture du devis client par l'IA (ou renvoie la liste déjà préparée, sans nouveau coût). */
   @Throttle({ default: HOURLY(30) })
   @Post("documents/:id/takeoff")
-  @HttpCode(201)
-  async extract(@Tenant() tenant: TenantContext, @Param("id") id: string) {
-    return toDto(await this.takeoffs.extract(tenant, id));
+  async extract(@Tenant() tenant: TenantContext, @Param("id") id: string, @Res({ passthrough: true }) res: Response) {
+    // Liste prête dans le délai : 201 et la liste. Lecture longue : 202, elle continue (audit B3).
+    const started = await this.takeoffs.start(tenant, id);
+    if (started.state === "reading") {
+      res.status(202);
+      return { reading: { status: "reading", reason: null } };
+    }
+    res.status(201);
+    return toDto(started.result);
   }
 
   @Get("projects/:projectId/takeoff")
   async forProject(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string) {
     const result = await this.takeoffs.forProject(tenant, projectId);
-    return { takeoff: result ? toDto(result) : null, aiAvailable: this.takeoffs.aiAvailable };
+    const reading = result ? null : await this.takeoffs.readingState(tenant, projectId);
+    return { takeoff: result ? toDto(result) : null, aiAvailable: this.takeoffs.aiAvailable, reading };
   }
 
   @Patch("takeoff-lines/:id")

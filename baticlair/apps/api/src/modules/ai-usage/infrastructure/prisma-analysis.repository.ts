@@ -13,6 +13,7 @@ const FIELDS = {
   billable: true,
   billingMonth: true,
   costMicroUsd: true,
+  startedAt: true,
 } as const;
 
 export class PrismaAnalysisRepository implements AnalysisRepository {
@@ -36,7 +37,7 @@ export class PrismaAnalysisRepository implements AnalysisRepository {
   }
 
   restart(id: string, userId: string | null): Promise<AnalysisRecord> {
-    return this.prisma.aiAnalysis.update({ where: { id }, data: { status: "started", userId, completedAt: null }, select: FIELDS });
+    return this.prisma.aiAnalysis.update({ where: { id }, data: { status: "started", userId, completedAt: null, startedAt: new Date() }, select: FIELDS });
   }
 
   async complete(id: string, billingMonth: string, at: Date, billable = true): Promise<AnalysisRecord> {
