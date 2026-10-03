@@ -285,8 +285,26 @@ export function computeWorkItem(ref: Referential, input: WorkItemInput, options:
   const known = (key: string) => input.params[key] !== undefined || work.params.find((p) => p.key === key)?.default !== undefined;
   // Dans l'ordre : un besoin peut partir de la commande d'un besoin précédent (« commande.ardoises »).
   const done = new Map<string, Earlier>();
+  // Condition d'existence d'un besoin (« faconnage < 2 ») : jugée sur les données connues (réponse, devis,
+  // hypothèse fixe) ; une donnée encore inconnue laisse le besoin exister, et il posera sa question.
+  const applies = (rule: NeedRule): boolean => {
+    if (!rule.when) return true;
+    const expr = parseFormula(rule.when);
+    const values = new Map<string, IntervalValue>();
+    for (const name of formulaVariables(expr)) {
+      const def = work.params.find((p) => p.key === name);
+      if (!def) throw new FormulaError(`Condition du besoin ${rule.id} : variable inconnue ${name}`);
+      const factor = parseRefUnit(def.unit);
+      const given = input.params[name];
+      const raw = given ? given.value : def.default?.value;
+      if (raw === undefined) return true;
+      values.set(name, point(new Decimal(raw).times(given ? parseRefUnit(given.unit).factor : factor.factor), factor.dim));
+    }
+    const v = evaluateInterval(expr, (name) => values.get(name)!);
+    return !v.lo.isZero();
+  };
   const needs = work.needs
-    .filter((rule) => (rule.requires ?? []).every(known))
+    .filter((rule) => (rule.requires ?? []).every(known) && applies(rule))
     .map((rule) => {
       let exact: IntervalValue | undefined;
       const result = computeNeed(ref, work, rule, input, sources, options, done, (v) => (exact = v));
@@ -655,6 +673,7 @@ function computeNeed(
       const formula = evaluateInterval(parseFormula(pts.otherwise), valueOf);
       const shown = (x: Decimal) => fr(x.dividedBy(unit.factor));
       const exact = keys.every((k) => isPoint(k.v));
+      if (exact && pts.admissible) checkAdmissible(pts, keys.map((k) => k.v.lo.dividedBy(k.factor)));
       const row = exact ? pts.rows.find((r) => keys.every((k, i) => k.v.lo.dividedBy(k.factor).minus(new Decimal(r[i]!)).abs().lessThan("0.000001"))) : undefined;
       if (row) {
         const value = new Decimal(row[keys.length]!);
@@ -669,6 +688,82 @@ function computeNeed(
         ...provenanceLine(pts, sources),
       });
       return formula;
+    }
+    /**
+     * Bornes du fabricant (§34) : un recouvrement hors de la plage d'un format. Les formats admis sont
+     * ceux dont la plage contient ce recouvrement, du plus proche au plus éloigné.
+     *  - Format écrit sur le devis (ou choisi par l'artisan) : on le GARDE toujours. La formule calcule,
+     *    la ligne est marquée « estimation, recouvrement hors table », et le format voisin est un conseil
+     *    (hypothèse à boutons), jamais une question bloquante.
+     *  - Format venu d'une habitude ou d'un défaut : UNE question à boutons, le voisin « conseillé » d'abord.
+     */
+    function checkAdmissible(pts: PointTable, values: Decimal[]): void {
+      const last = values.length - 1;
+      const target = values[last]!;
+      const rangeOf = (lead: Decimal[]) => {
+        const rs = pts.rows.filter((r) => lead.every((v, i) => v.minus(new Decimal(r[i]!)).abs().lessThan("0.000001"))).map((r) => new Decimal(r[last]!));
+        return rs.length ? { min: Decimal.min(...rs), max: Decimal.max(...rs) } : null;
+      };
+      const range = rangeOf(values.slice(0, last));
+      if (!range || (target.greaterThanOrEqualTo(range.min) && target.lessThanOrEqualTo(range.max))) return;
+      const slotKey = pts.admissible!.slot;
+      const slotDef = work.slots.find((x) => x.key === slotKey)!;
+      const chosen = productFor(slotKey);
+      const current = chosen?.product;
+      const fromQuote = chosen?.choice.origin === "devis" || chosen?.choice.origin === "artisan";
+      const lead = pts.keys.slice(0, last);
+      // Valeurs des premières clés pour un autre produit (« ardoise.longueur » en cm).
+      const leadOf = (p: Product): Decimal[] | null => {
+        const out: Decimal[] = [];
+        for (const k of lead) {
+          const [head, attr] = k.variable.split(".");
+          const fact = head === slotKey && attr ? p.attributes[attr] : undefined;
+          if (!fact) return null;
+          out.push(new Decimal(fact.value).times(parseRefUnit(fact.unit).factor).dividedBy(parseRefUnit(k.unit).factor));
+        }
+        return out;
+      };
+      const here = values.slice(0, last);
+      const candidates = ref.products
+        .filter((p) => p.family === slotDef.family && p.id !== current?.id)
+        .map((p) => ({ p, lead: leadOf(p) }))
+        .filter((c): c is { p: Product; lead: Decimal[] } => {
+          if (!c.lead) return false;
+          const r = rangeOf(c.lead);
+          return !!r && target.greaterThanOrEqualTo(r.min) && target.lessThanOrEqualTo(r.max);
+        })
+        .map((c) => ({ ...c, distance: c.lead.reduce((sum, v, i) => sum.plus(v.minus(here[i]!).abs()), new Decimal(0)) }))
+        .sort((a, b) => a.distance.comparedTo(b.distance));
+      const unit = pts.keys[last]!.unit;
+      const bound = target.lessThan(range.min) ? `sous le minimum de ${fr(range.min, 0)} ${unit}` : `au-delà du maximum de ${fr(range.max, 0)} ${unit}`;
+      const name = current?.shortLabel ?? slotDef.label;
+      const variable = pts.keys[last]!.variable;
+      const what = (work.derived?.find((d) => d.key === variable)?.label ?? work.params.find((p) => p.key === variable)?.label ?? variable.replace(/_/g, " ")).toLowerCase();
+      const publisher = sources.get(pts.source)?.publisher ?? "fabricant";
+      const plage = `${what} ${fr(target, 0)} ${unit}, ${bound} pour ce format (${publisher})`;
+      const options = candidates.map((c, i) => ({ label: i === 0 ? `${c.p.shortLabel} (conseillé)` : c.p.shortLabel, value: c.p.id }));
+      if (fromQuote && current) {
+        // Le devis fait foi : calcul par la formule, dit comme estimation ; le voisin n'est qu'un conseil.
+        const conseil = candidates[0] ? ` Format conseillé : ${candidates[0].p.shortLabel}.` : "";
+        const texte = `${what.charAt(0).toUpperCase()}${what.slice(1)} ${fr(target, 0)} ${unit} hors table ${publisher} (${bound} pour ce format).${conseil}`;
+        trace.push({ label: "Estimation", value: texte, unit: "", from: `Format écrit sur le devis, gardé`, origin: "referential", estimation: true, verified: true, ...(provenanceLine(pts, sources).url ? { url: provenanceLine(pts, sources).url } : {}) });
+        if (options.length > 0) {
+          assume({ key: `product:${slotKey}`, label: slotDef.label, value: current.shortLabel, unit: "", note: `Recouvrement hors table ${publisher} pour ce format.${conseil}`, choices: [{ label: `${current.shortLabel} (devis)`, value: current.id }, ...options] });
+        }
+        return;
+      }
+      const reason = `${name} non admis ici : ${plage}.`;
+      trace.push({ label: "Format non admis", value: reason, unit: "", origin: "referential", ...provenanceLine(pts, sources) });
+      if (candidates.length === 0) throw new Stop({ status: "unknown", reason });
+      throw new Stop({
+        status: "question",
+        question: {
+          key: `product:${slotKey}`,
+          kind: "choose_product",
+          text: `${reason} Quel format ?`,
+          options,
+        },
+      });
     }
     /** Table : la cellule des plus grands seuils atteints ; une entrée hors table arrête le calcul (rien n'est deviné). */
     function useTable(name: string, table: LookupTable): IntervalValue {
@@ -713,6 +808,11 @@ function computeNeed(
       const shown = (x: Decimal) => fr(x.dividedBy(unit.factor));
       trace.push({ label: table.label, value: isPoint(v) ? shown(v.lo) : `${shown(v.lo)} à ${shown(v.hi)}`, unit: table.unit, origin: "referential", ...provenanceLine(table, sources) });
       return v;
+    }
+    // Condition d'existence encore indécise (« faconnage » sans réponse) : sa question, avant tout calcul.
+    if (rule.when) {
+      const w = evaluateInterval(parseFormula(rule.when), valueOf);
+      if (!isPoint(w) && missing[0]) throw new Stop({ status: "question", question: missing[0].question });
     }
     const raw = evaluateInterval(expr, valueOf);
 

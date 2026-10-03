@@ -10,11 +10,14 @@ import {
   Param,
   Patch,
   Post,
+  Res,
+  StreamableFile,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
 import { FilesInterceptor } from "@nestjs/platform-express";
+import type { Response } from "express";
 import { memoryStorage } from "multer";
 import { z } from "zod";
 import { validationFailed } from "../../../platform/errors/domain-error.js";
@@ -25,6 +28,7 @@ import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js"
 import { PriceRequestsService, type PriceRequestView } from "../application/price-requests.service.js";
 
 const supplierIds = z.array(z.string()).min(1).max(20);
+const settingsBody = z.object({ attachQuoteDetail: z.boolean() });
 const createBody = z.object({
   supplierIds,
   message: z
@@ -59,6 +63,9 @@ export function toDto(r: PriceRequestView) {
     createdAt: r.createdAt.toISOString(),
     classifiedAt: r.classifiedAt?.toISOString() ?? null,
     retainedSupplierIds: r.retainedSupplierIds,
+    packet: r.packet
+      ? { entreprise: r.packet.entreprise, chantier: r.packet.chantier, articles: r.packet.articles, a_chiffrer: r.packet.a_chiffrer, resume: r.packet.resume, joindre_detail: r.packet.joindre_detail }
+      : null,
     recipients: r.recipients.map((x) => ({
       id: x.id,
       supplier: x.supplier,
@@ -77,6 +84,35 @@ export class PriceRequestsController {
     @Inject(PriceRequestsService)
     private readonly requests: PriceRequestsService,
   ) {}
+
+  /** Réglages des envois (§42.2) : la case « Joindre le détail du chantier », mémorisée par entreprise. */
+  @Get("price-requests/settings")
+  async settings(@Tenant() tenant: TenantContext) {
+    return { ...(await this.requests.settings(tenant)), deliversEmail: this.requests.deliversEmail };
+  }
+
+  @Patch("price-requests/settings")
+  async setSettings(@Tenant() tenant: TenantContext, @Body(new ZodPipe(settingsBody)) body: z.infer<typeof settingsBody>) {
+    return { ...(await this.requests.setSettings(tenant, body)), deliversEmail: this.requests.deliversEmail };
+  }
+
+  /** Le PDF de la commande (§43.1) : les mêmes trois blocs que le mail, pour imprimer ou transmettre au magasin. */
+  @Get("price-requests/:id/commande.pdf")
+  async pdf(@Tenant() tenant: TenantContext, @Param("id") id: string, @Res({ passthrough: true }) res: Response) {
+    const pdf = await this.requests.pdf(tenant, id);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${pdf.filename}"`);
+    res.setHeader("Cache-Control", "private, no-store");
+    return new StreamableFile(pdf.bytes);
+  }
+
+  /** Envoi par le serveur (§43) : corps en trois blocs, PDF joint, puis « envoyée ». */
+  @Throttle({ default: HOURLY(60) })
+  @Post("price-request-recipients/:id/send")
+  @HttpCode(200)
+  async send(@Tenant() tenant: TenantContext, @Param("id") id: string) {
+    return toDto(await this.requests.send(tenant, id));
+  }
 
   @Get("projects/:projectId/price-requests")
   async list(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string) {

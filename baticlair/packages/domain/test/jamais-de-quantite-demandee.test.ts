@@ -78,15 +78,19 @@ describe("jamais de quantité demandée à l'artisan", () => {
     expect(bought(one("Ardoises naturelles 32x22 pose au crochet", "200", "m²"))).toMatchObject({ "Ardoises 32×22": "8 447 pièces", "Crochets d'ardoise": "8 616 pièces" });
   });
 
-  it("exemple complet du référentiel (§3) : 200 m², 32×22, 45°, zone 3, rampant 6 m → 8 460 ardoises théoriques, 1 950 ml de liteaux", () => {
+  it("exemple du §3 (32×22, 45°, région III, rampant 6 m) : recouvrement 105 mm, au-delà du maximum Cupa (103 mm) → le devis fait foi, 8 840 ardoises en estimation, le 33×23 conseillé", () => {
     const v = read([{ ref: "1", designation: "Ardoises 32x22 crochets compris", quantity: "200", unit: "m2" } as unknown as BenchLine], {
       "param:longueur_rampant": { value: "6", unit: "m" },
     });
-    // R = 95 + 10 = 105 mm → pureau 107,5 mm → Cupa : 200 / (0,1075 × 0,221) = 8 418,4 ; + 5 % de perte = 8 839,3.
+    // R = 95 + 10 = 105 mm ; formule Cupa : 200 / (0,1075 × 0,221) = 8 418,4 ; + 5 % = 8 839,3. Aucune question.
     expect(bought(v)["Ardoises 32×22"]).toBe("8 840 pièces");
     expect(bought(v)["Crochets d'ardoise"]).toBe("9 017 pièces");
-    // Liteaux : 200 / 0,1075 = 1 860,5 ml + 5 % = 1 953,5 → 1 954 ml (référentiel : 1 950 ml, 39 bottes).
-    expect(bought(v)["Liteaux 18×40"]).toBe("1 954 ml");
+    expect(v.questions.some((d) => d.question?.key === "product:ardoise")).toBe(false);
+    // Le conseil (33×23, la plage Cupa la plus proche qui admet 105 mm) : une hypothèse à boutons, pas une question.
+    const conseil = v.assumptions.find((a) => a.key === "product:ardoise")!;
+    expect(conseil.value).toBe("Ardoises 32×22");
+    expect(conseil.choices!.map((c) => c.label)).toEqual(["Ardoises 32×22 (devis)", "Ardoises 33×23 (conseillé)", "Ardoises 35×22", "Ardoises 35×25", "Ardoises 40×22"]);
+    expect(v.canValidate).toBe(true);
   });
 
   it("surface vraiment absente (1 forfait, rien d'écrit) : UNE question, à boutons, jamais « quelle quantité ? »", () => {

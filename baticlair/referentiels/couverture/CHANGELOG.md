@@ -1,6 +1,26 @@
 # Référentiel couverture — CHANGELOG
 
-## Version roofing-2026.10.03-12 (appliquée dans le moteur)
+## Version roofing-2026.10.03-15 (appliquée dans le moteur) — référentiel 41 sections
+
+- **Joint debout (§7, §36)** : nouvel ouvrage `couverture-zinc-joint-debout`. Question d'ouverture (§40.2) : « Tu façonnes tes bacs toi-même, ou tu les commandes façonnés ? » ; « je façonne » → zinc en bobine en **kg** (5,5 / 6 / 7 kg/m² selon 0,65 / 0,70 / 0,80 mm, VMZINC 36.1), largeur 500 mm en bord de mer, 650 ailleurs ; « commandé façonné » → **bacs** = largeur du pan (surface ÷ rampant) ÷ entraxe (430 / 580 mm), à la longueur du rampant. Pattes par m² selon le rampant (tableau 36.2, fixes + coulissantes). Voliges sapin 18 mm = m² × 1,05 (§7). La question est posée par chantier : la mémoire des habitudes ne couvre pas encore les réponses, seulement les produits.
+- **Test du fournisseur (§40, verrou §41.3)** : une ligne du devis en m², en ml de métal sans largeur ni épaisseur, en « lot », « forfait » ou « ensemble » ne part plus en commande : elle va chez « Le fournisseur chiffrera » avec sa mesure et la raison. Les panneaux et rouleaux (volige, OSB, écran, isolant) restent admis au m².
+- **Questions (§41)** : plus de maximum ; la règle devient « une question si la réponse change une quantité de plus de 3 %, une unité ou un matériau ». Le tri par sensibilité reste à faire : aujourd'hui, toute donnée manquante est demandée.
+- **Moteur** : condition d'existence d'un besoin (`when`), emplacement de mesure seule (`measureOnly`), surcharges de libellé et de quantité par l'artisan (§41.4).
+
+## Version roofing-2026.10.03-14 (appliquée dans le moteur)
+
+**Recouvrement hors des bornes Cupa d'un format (§34)** — 32×22 : 69 à 103 mm ; 30×22 : 69 à 100 mm… Règle du fondateur :
+
+- **Le devis nomme le format (ou l'artisan l'a choisi) : on le garde toujours.** La formule Cupa calcule, la ligne est marquée « estimation, recouvrement hors table Cupa », et le format voisin (plage la plus proche qui admet ce recouvrement) est proposé en conseil : une hypothèse à boutons, jamais une question bloquante.
+- **Le format ne vient pas du devis** (habitude de l'entreprise, défaut) : UNE question à boutons, le voisin « conseillé » en premier.
+
+| Cas | Résultat |
+|---|---|
+| 32×22, 45°, région III, rampant 6 m (R 105) — exemple du §3, format du devis | 8 840 ardoises, « estimation » ; conseil : 33×23, puis 35×22, 35×25, 40×22 |
+| 30×22, 30°, région III (R 120), format du devis | calculé par la formule, « estimation » ; conseil : 40×22 |
+| même cas, format venu d'une habitude | question : « Ardoises 30×22 non admis ici : … Quel format ? », 40×22 (conseillé) en premier |
+
+## Version roofing-2026.10.03-12
 
 Décision du fondateur : **la table Cupa (§34) fait foi** pour tous les formats et recouvrements qu'elle couvre ; la formule Cupa ne sert qu'hors table.
 
@@ -12,8 +32,6 @@ Décision du fondateur : **la table Cupa (§34) fait foi** pour tous les formats
 | 200 m², 30×22, 45°, région I (R 80) | 8 639 | **40,7/m² → 8 547** |
 | 200 m², 30×22, 45°, région III (R 95, hors table) | 9 271 / 9 200 à Brest | inchangé (formule) |
 | Région ardoise | — | marquée **« estimation »** dans l'explication (zone climatique du département, en attendant la liste du DTU 40.11) |
-
-Pas encore traité : un recouvrement hors des bornes d'un format (ex. 30×22 au-delà de R 100) devrait rendre le format « non admissible » et proposer le voisin (§34) ; aujourd'hui la formule calcule quand même.
 
 ## Version roofing-2026.10.03-11
 

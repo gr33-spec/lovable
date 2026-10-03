@@ -29,7 +29,13 @@ export class ResendEmailSender implements TransactionalEmailSender, EmailCapabil
     const res = await this.fetchImpl("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${this.apiKey}`, "content-type": "application/json" },
-      body: JSON.stringify({ from: this.from, to: [email.to], subject: email.subject, text: email.text }),
+      body: JSON.stringify({
+        from: this.from,
+        to: [email.to],
+        subject: email.subject,
+        text: email.text,
+        ...(email.attachments?.length ? { attachments: email.attachments.map((a) => ({ filename: a.filename, content: a.contentBase64, content_type: a.contentType })) } : {}),
+      }),
       signal: AbortSignal.timeout(10_000),
     });
     if (!res.ok) {

@@ -1,9 +1,10 @@
 "use client";
 
-import { AlertTriangle, ChevronDown } from "lucide-react";
+import { AlertTriangle, ChevronDown, Pencil } from "lucide-react";
 import { useId, useState } from "react";
 import { Proof, type DecisionHandlers } from "@/components/takeoff-view";
 import { Button } from "@/components/ui";
+import { parseQuantity } from "@/lib/labels";
 import type { PurchaseAssumption, PurchaseItem, Takeoff } from "@/lib/api";
 import { shortName } from "@/lib/labels";
 
@@ -13,16 +14,25 @@ import { shortName } from "@/lib/labels";
  * fournisseur chiffrera, une ligne d'hypothèses modifiable d'un geste, puis
  * « Envoyer au fournisseur ». Jamais de quantité demandée à l'artisan.
  */
+/** Ce que l'artisan réécrit sur une ligne (§41.4) : le texte lui-même, et la quantité avec son unité. */
+export interface ItemEdit {
+  libelle: string;
+  quantite: string | null;
+  unite: string | null;
+}
+
 export function QuantityCard({
   takeoff,
   editable,
   pending,
   onAnswer,
+  onEditItem,
 }: {
   takeoff: Takeoff;
   editable: boolean;
   pending: boolean;
   onAnswer: DecisionHandlers["onAnswer"];
+  onEditItem?: (item: PurchaseItem, edit: ItemEdit) => Promise<void>;
 }) {
   const p = takeoff.purchase;
   const byKey = new Map(p.toBuy.map((b) => [b.key, b]));
@@ -40,7 +50,7 @@ export function QuantityCard({
           <ul aria-label={g.label} className="flex flex-col divide-y divide-line">
             {g.itemKeys.map((k) => {
               const item = byKey.get(k);
-              return item ? <BuyRow key={k} item={item} takeoff={takeoff} /> : null;
+              return item ? <BuyRow key={k} item={item} takeoff={takeoff} editable={editable} pending={pending} onEdit={onEditItem} /> : null;
             })}
           </ul>
         </div>
@@ -63,9 +73,22 @@ export function QuantityCard({
   );
 }
 
-/** Un article à acheter : nom, quantité, et le calcul à un appui. */
-function BuyRow({ item, takeoff }: { item: PurchaseItem; takeoff: Takeoff }) {
+/** Un article à acheter : nom, quantité, le calcul à un appui, et le crayon pour tout réécrire (§41.4). */
+function BuyRow({
+  item,
+  takeoff,
+  editable,
+  pending,
+  onEdit,
+}: {
+  item: PurchaseItem;
+  takeoff: Takeoff;
+  editable: boolean;
+  pending: boolean;
+  onEdit?: (item: PurchaseItem, edit: ItemEdit) => Promise<void>;
+}) {
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
   const proofs = takeoff.view.items.filter((i) => (item.kind === "computed" ? i.kind === "need" && item.needIds.includes(i.id) : i.kind === "line" && item.lineIds.includes(i.id)));
   const name = item.kind === "direct" ? shortName(item.label) : item.label;
   // Une ligne = l'article à gauche, sa quantité à droite ; un appui sur la ligne montre le calcul.
@@ -80,17 +103,81 @@ function BuyRow({ item, takeoff }: { item: PurchaseItem; takeoff: Takeoff }) {
       {proofs.length > 0 ? <ChevronDown size={16} aria-hidden="true" className={`mt-1 shrink-0 text-subtle ${open ? "rotate-180" : ""}`} /> : null}
     </>
   );
+  const edit = editable && onEdit;
   return (
     <li className="flex flex-col gap-1.5 py-2">
-      {proofs.length > 0 ? (
-        <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label={`Voir le calcul : ${item.label}`} className="flex min-h-11 w-full items-start gap-3 text-left">
-          {row}
-        </button>
-      ) : (
-        <div className="flex min-h-11 items-start gap-3">{row}</div>
-      )}
+      <div className="flex items-start gap-1">
+        {proofs.length > 0 ? (
+          <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label={`Voir le calcul : ${item.label}`} className="flex min-h-11 w-full min-w-0 items-start gap-3 text-left">
+            {row}
+          </button>
+        ) : (
+          <div className="flex min-h-11 w-full min-w-0 items-start gap-3">{row}</div>
+        )}
+        {edit ? (
+          <button type="button" onClick={() => setEditing(!editing)} aria-label={`Modifier : ${item.label}`} aria-expanded={editing} className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-xl text-accent-text">
+            <Pencil size={18} aria-hidden="true" />
+          </button>
+        ) : null}
+      </div>
+      {item.edited?.length ? <p className="text-[13px] text-muted">Réécrit par vous : {item.edited.map((e) => (e === "label" ? "le libellé" : "la quantité")).join(" et ")}.</p> : null}
+      {editing && edit ? (
+        <ItemForm
+          item={item}
+          pending={pending}
+          onCancel={() => setEditing(false)}
+          onSave={async (e) => {
+            await onEdit(item, e);
+            setEditing(false);
+          }}
+        />
+      ) : null}
       {open ? proofs.map((i) => <Proof key={`${i.kind}:${i.id}`} item={i} />) : null}
     </li>
+  );
+}
+
+/** Le texte et la quantité d'une ligne, tels que l'artisan veut les voir partir chez le fournisseur. */
+function ItemForm({ item, pending, onSave, onCancel }: { item: PurchaseItem; pending: boolean; onSave: (e: ItemEdit) => Promise<void>; onCancel: () => void }) {
+  const id = useId();
+  const parsed = item.quantity ? parseQuantity(item.quantity) : null;
+  const [libelle, setLibelle] = useState(item.label);
+  const [quantite, setQuantite] = useState(parsed?.quantity ?? "");
+  const [unite, setUnite] = useState(parsed?.unit ?? "");
+  const input = "min-h-12 w-full rounded-2xl bg-ground px-3 text-base";
+  return (
+    <form
+      aria-label={`Modifier : ${item.label}`}
+      className="flex flex-col gap-2 rounded-2xl bg-ground/60 p-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!libelle.trim()) return;
+        void onSave({ libelle: libelle.trim(), quantite: quantite.trim() || null, unite: unite.trim() || null });
+      }}
+    >
+      <label htmlFor={`${id}-l`} className="flex flex-col gap-1 text-sm font-bold">
+        Désignation
+        <input id={`${id}-l`} className={input} value={libelle} onChange={(e) => setLibelle(e.target.value)} />
+      </label>
+      <div className="grid grid-cols-2 gap-2">
+        <label htmlFor={`${id}-q`} className="flex flex-col gap-1 text-sm font-bold">
+          Quantité
+          <input id={`${id}-q`} className={input} inputMode="decimal" value={quantite} onChange={(e) => setQuantite(e.target.value)} />
+        </label>
+        <label htmlFor={`${id}-u`} className="flex flex-col gap-1 text-sm font-bold">
+          Unité
+          <input id={`${id}-u`} className={input} value={unite} onChange={(e) => setUnite(e.target.value)} placeholder="pièces, ml, kg…" />
+        </label>
+      </div>
+      <div className="flex gap-2">
+        <Button type="submit" pending={pending}>
+          Enregistrer
+        </Button>
+        <Button type="button" variant="secondary" onClick={onCancel}>
+          Annuler
+        </Button>
+      </div>
+    </form>
   );
 }
 

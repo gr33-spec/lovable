@@ -39,8 +39,8 @@ Réponses :
 | `metier`, `version_referentiel` | le métier (`couverture`) et la version des règles utilisée pour ce calcul |
 | `compris` | ce que BatiClair a compris du devis, en une phrase par ouvrage |
 | `devis` | les lignes telles que reçues, avec leur prix |
-| `questions` | 4 au plus une fois le plafond en place (plan v3, étape 3) : `id`, `texte`, `boutons` [{label, valeur}], `je_ne_sais_pas`, `saisie_libre`, `unite`. Jamais une quantité. |
-| `lignes` | à commander : `id` stable, `libelle`, `quantite`, `unite`, `conditionnement`, `ouvrage`, `origine` (calcul ou devis), `a_confirmer`, `explication` |
+| `questions` | une à la fois côté écran, sans maximum (§41) : `id`, `texte`, `boutons` [{label, valeur}], `je_ne_sais_pas`, `saisie_libre`, `unite`. Jamais une quantité. |
+| `lignes` | à commander : `id` stable, `libelle`, `quantite`, `unite`, `conditionnement`, `ouvrage`, `origine` (calcul ou devis), `a_confirmer`, `estimation` (présent quand le chiffre est approché, avec la raison et le format conseillé), `explication` |
 | `a_chiffrer` | ce que le fournisseur doit proposer (modèle non choisi) |
 | `hypotheses` | les valeurs par défaut utilisées (pente 45°…), avec leurs choix |
 | `peut_partir` | la liste peut être envoyée au fournisseur |
@@ -64,4 +64,23 @@ Réponses :
 - Changer une valeur : `{ "action": "modifier", "cle": "param:pente", "valeur": "30" }`. Seules les lignes qui en dépendent sont recalculées.
 - Ajouter une ligne : `{ "action": "ajouter", "ligne": { "libelle": "Chatière", "quantite": "4", "unite": "u", "prix": null } }`.
 
+- Lignes du quantitatif (champ `lignes`, §41.4) : `{ "action": "renommer", "id": "<ligne>", "libelle": "…" }` et `{ "action": "fixer_quantite", "id": "<ligne>", "quantite": "9000", "unite": "pièces" }`. Une ligne reprise du devis corrige la ligne du devis ; une ligne calculée garde son calcul derrière, et `modifie` dit ce qui a été réécrit.
+- Lignes du devis (champ `devis`) :
+  - `{ "action": "modifier_ligne", "id": "<ligne>", "ligne": { "libelle": "…", "quantite": "200", "unite": "u" } }` ;
+  - `{ "action": "retirer", "id": "<ligne>" }` ;
+  - `{ "action": "confirmer", "id": "<ligne>" }` (ligne douteuse gardée telle quelle).
+
 La réponse est toujours le quantitatif complet, à jour.
+
+## Valider — `POST /v1/quantitatifs/{id}/validation`
+
+L'artisan valide la liste (`valide: true`) : elle peut partir en demande de prix. `POST …/reouverture` la rouvre pour la corriger.
+
+## L'appli (le chat du chantier)
+
+Le chat n'appelle que cette porte :
+
+- **Devis déjà déposé sur le chantier** : `POST /v1/quantitatifs` avec `{ "documentId": "…" }`. Déjà lu : rien n'est relu ni décompté.
+- **Retrouver le quantitatif d'un chantier** : `GET /v1/quantitatifs?projetId=…` → `{ items: [le plus récent], ia_disponible }`.
+- **`?ecran=1`** sur toutes les routes : ajoute `ecran`, le détail de l'écran de l'appli (lignes lues, décisions, preuves du calcul). Un partenaire n'en a pas besoin.
+- **Réponse directe à une valeur du calcul** : `{ "question": "param:pente", "valeur": "40", "unite": "°" }` (ou `product:…`, `role:<ligne>`).

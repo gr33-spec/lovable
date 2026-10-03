@@ -1,3 +1,4 @@
+import type { SupplierPacket } from "./supplier-packet.js";
 import type { TenantContext } from "../../tenancy/index.js";
 import type { RequestedLine } from "./price-request-email.js";
 
@@ -29,6 +30,8 @@ export interface PriceRequestRecord {
   classifiedAt: Date | null;
   retainedSupplierIds: string[];
   recipients: RecipientRecord[];
+  /** §43 : les trois blocs envoyés au fournisseur, figés avec la demande (null pour une demande d'avant). */
+  packet: SupplierPacket | null;
 }
 
 export interface ValidatedTakeoff {
@@ -57,8 +60,12 @@ export interface PriceRequestRepository {
       message: string | null;
       dueDate: Date | null;
       supplierIds: string[];
+      packet: SupplierPacket;
     },
   ): Promise<PriceRequestRecord>;
+  /** Case « Joindre le détail du chantier » (§42.2), mémorisée par entreprise. */
+  attachQuoteDetail(tenant: TenantContext): Promise<boolean>;
+  setAttachQuoteDetail(tenant: TenantContext, value: boolean): Promise<void>;
   addRecipients(tenant: TenantContext, requestId: string, supplierIds: string[]): Promise<void>;
   listByProject(tenant: TenantContext, projectId: string): Promise<PriceRequestRecord[]>;
   findById(tenant: TenantContext, id: string): Promise<PriceRequestRecord | null>;

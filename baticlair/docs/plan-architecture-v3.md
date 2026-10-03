@@ -35,7 +35,7 @@ Partenaires ──┼─▶ /v1/quantitatifs ─▶ moteur générique ─▶ re
 - **Les fichiers JSON sont vérifiés au chargement** par un schéma JSON (§19, §32) et par le contrôle d'intégrité actuel (unités, formules, sources). Un référentiel invalide ne se charge pas.
 - **Le moteur actuel est gardé** (formules à unités, tables, hypothèses, pertes, conditionnements, traces). Seule change sa source : il lit des JSON au lieu de TypeScript.
 - **Version figée par chantier** : chaque quantitatif enregistre `{ metier, version }` et se recalcule avec sa version d'origine. Aujourd'hui, il est recalculé avec les règles du jour : **à corriger**.
-- **4 questions au maximum**, choisies par sensibilité supérieure à 5 % et par ordre de priorité. Aujourd'hui, le nombre n'est pas plafonné : **à corriger**.
+- **Les questions** (§41, qui remplace « 4 au maximum ») : une question se pose si sa réponse change une quantité commandée de plus de 3 %, une unité de commande ou un matériau ; une à la fois, dans l'ordre du levier le plus gros, sans maximum. Aujourd'hui, toute donnée manquante est demandée : le tri par sensibilité reste **à faire**.
 - **Données de confiance** : tout ce qui vient des §34-36 est sourcé fabricant. Les valeurs « à vérifier DTU » et les anciennes §3, 5 et 7 (`confiance: "estimation"`) apparaissent dans les hypothèses avec « à confirmer ».
 
 **Le métier écrit en dur dans le code aujourd'hui, et où il partira :**
@@ -61,10 +61,10 @@ Ce qui reste dans le moteur, parce que c'est commun à tous les métiers : unit�
 2. **Schémas JSON** des 7 fichiers métier et des 3 fichiers communs, avec un test qui vérifie qu'un fichier faux est refusé.
 3. **Migration de la couverture** avec les données §34-36 :
    - tous les tests au vert ;
-   - version figée et 4 questions au maximum en place ;
+   - version figée et tri des questions par sensibilité (3 %) en place ;
    - CHANGELOG commencé (`referentiels/couverture/CHANGELOG.md`).
 4. **`platrerie/` minimal** : une cloison 72/48 (plaques, rails, montants) avec un test, qui doit tourner **sans toucher au moteur**. Si une seule ligne de moteur change, l'architecture n'est pas validée et je te le dis.
-5. **Ensuite seulement** : le chat de la section 21, avec une maquette avant le code.
+5. **Ensuite seulement** : le chat de la section 21, avec une maquette avant le code. Le **prompt B** (§41.2) sera branché mot pour mot à cette étape, comme couche de dialogue au-dessus du moteur (qui garde la décision des questions et tous les chiffres) ; ses règles déterministes (une question à la fois, boutons, « (habituel) », ordre du levier, pas de maximum) s'appliquent dès maintenant à l'écran.
 
 ## 5. Ce que les données fabricant changent, et trois points à trancher
 

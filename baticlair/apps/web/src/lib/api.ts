@@ -208,6 +208,19 @@ export interface ReadingState {
   reason: string | null;
 }
 
+/**
+ * Le quantitatif de la porte /v1/quantitatifs (§38) : le même objet pour l'appli et les partenaires.
+ * `ecran` (demandé avec `?ecran=1`) : le détail de l'écran de l'appli.
+ */
+export interface Quantitatif {
+  id: string;
+  projetId: string;
+  etat: "en_cours" | "questions" | "pret" | "erreur";
+  erreur?: { raison: string };
+  valide?: boolean;
+  ecran?: Takeoff;
+}
+
 export interface Takeoff {
   id: string;
   projectId: string;
@@ -238,6 +251,8 @@ export interface PurchaseItem {
   lineIds: string[];
   state: "ready" | "to_confirm";
   assumptionKeys: string[];
+  /** Réécrit par l'artisan (§41.4). */
+  edited: ("label" | "quantity")[];
 }
 
 export interface PurchaseAssumption {
@@ -377,6 +392,13 @@ export interface PriceRequest {
   classifiedAt: string | null;
   retainedSupplierIds: string[];
   recipients: PriceRequestRecipient[];
+  /** §43 : les trois blocs envoyés au fournisseur (mail et PDF) ; absent pour une demande d'avant. */
+  packet: { entreprise: string; chantier: string; articles: string[]; a_chiffrer: string[]; resume: string[]; joindre_detail: boolean } | null;
+}
+
+/** Réglages des envois fournisseur (§42.2), par entreprise. */
+export interface PriceRequestSettings {
+  attachQuoteDetail: boolean;
 }
 
 export type OfferLineKind = "main" | "substitution" | "variant" | "option" | "fee" | "deposit" | "info";

@@ -237,6 +237,12 @@ export interface PointTable extends Provenance {
   rows: string[][];
   /** Hors table : cette formule, de même unité. */
   otherwise: string;
+  /**
+   * Bornes du fabricant : pour un produit donné (les premières clés), la dernière clé doit rester entre
+   * le plus petit et le plus grand de ses lignes (32×22 : recouvrement 69 à 103 mm). Au-delà, le produit
+   * de cet emplacement n'est pas admis : UNE question, avec les produits admis, le plus proche d'abord.
+   */
+  admissible?: { slot: string };
   note?: string;
 }
 
@@ -254,6 +260,8 @@ export interface Slot {
    * Elle s'efface dès que le devis nomme un produit.
    */
   usual?: { text: string; source: string; productShort?: string; productId?: string };
+  /** La ligne du devis donne une MESURE (« 91 m² de joint debout ») ; rien ne se commande sous ce nom. */
+  measureOnly?: true;
 }
 
 /**
@@ -293,6 +301,11 @@ export interface NeedRule extends Provenance {
    * sans question ni « inconnu ».
    */
   requires?: string[];
+  /**
+   * Condition d'existence (« faconnage < 2 ») : le besoin n'existe que si elle est vraie. Tant que
+   * ses données ne sont pas connues, le besoin existe et pose sa question (« tu façonnes ? »).
+   */
+  when?: string;
 }
 
 export interface WorkItemType {

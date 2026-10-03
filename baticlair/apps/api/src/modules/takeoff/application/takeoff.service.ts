@@ -1,5 +1,6 @@
 import {
   applyLineRoles,
+  applyPurchaseOverrides,
   artisanView,
   assessTakeoffLine,
   climateZone,
@@ -320,11 +321,14 @@ export class TakeoffService {
       promptVersion: TAKEOFF_PROMPT.version,
       model: success.model,
       notes: success.output.notes,
+      context: success.output.context ?? null,
       lines: success.output.lines.map((l) => ({
         designation: l.designation.trim(),
         quantityRaw: l.quantity?.trim() || null,
         unitRaw: l.unit?.trim() || null,
         reference: l.reference?.trim() || null,
+        material: l.material ?? null,
+        dimensions: l.dimensions ?? null,
         sourceRefs: l.sourceRefs,
         sourcePages: l.sourcePages,
         section: l.section.map((t) => t.trim()).filter((t) => t.length > 0),
@@ -643,7 +647,8 @@ export class TakeoffService {
         : { needs: [], questions: [], declined: [] };
     const reviewed = { takeoff, validation, roles: new Map([...proposals].map(([id, p]) => [id, { ...p, role: roles.get(id) ?? p.role }])) };
     const view = artisanView(lines, validation, engine, { plan, roles, ref: ROOFING_REFERENTIAL, asks });
-    return { ...reviewed, view, purchase: purchaseView(view, engine, { plan, roles, ref: ROOFING_REFERENTIAL, validation }) };
+    // § 41.4 : les mots de l'artisan (libellé, quantité réécrits d'un tap) remplacent ceux de BatiClair.
+    return { ...reviewed, view, purchase: applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref: ROOFING_REFERENTIAL, validation }), takeoff.answers) };
   }
 
   /**
@@ -714,9 +719,16 @@ export class TakeoffService {
   }
 
   /** Ce que l'IA sait du métier : son nom et ses familles de matériaux habituelles (vocabulaire). */
-  private tradeHints(trade: string): { tradeLabel: string; materialFamilies: string[] } {
+  private tradeHints(trade: string): { tradeLabel: string; materialFamilies: string[]; workItems: { id: string; label: string; synonyms: string[] }[] } {
     const profile = tradeProfile(trade);
-    return { tradeLabel: profile.label, materialFamilies: profile.families.map((f) => f.label) };
+    // « RÉFÉRENTIEL CHARGÉ » du prompt A (§41.1) : les ouvrages du métier et leurs synonymes (mots des familles qui les déclenchent).
+    const ref = profile.id.split(",").includes(ROOFING_REFERENTIAL.trade) ? ROOFING_REFERENTIAL : null;
+    const workItems = (ref?.workItems ?? []).map((w) => ({
+      id: w.id,
+      label: w.label,
+      synonyms: [...new Set(w.triggers.flatMap((t) => ref!.families.find((f) => f.code === t)?.keywords ?? []))],
+    }));
+    return { tradeLabel: profile.label, materialFamilies: profile.families.map((f) => f.label), workItems };
   }
 
   private async record(

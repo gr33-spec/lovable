@@ -167,6 +167,7 @@ export function checkReferential(ref: Referential): string[] {
       } catch (e) {
         err(tw, (e as Error).message);
       }
+      if (t.admissible && !w.slots.some((x) => x.key === t.admissible!.slot)) err(tw, `emplacement inconnu « ${t.admissible.slot} »`);
       if (t.rows.length === 0) err(tw, "table vide");
       if (t.rows.some((r) => r.length !== t.keys.length + 1 || r.some((x) => !/^-?\d+(\.\d+)?$/.test(x)))) err(tw, `il faut ${t.keys.length + 1} valeurs décimales par ligne`);
       const seen = new Set(t.rows.map((r) => r.slice(0, -1).join("|")));
@@ -223,6 +224,13 @@ export function checkReferential(ref: Referential): string[] {
       provenance(nw, n);
       if (!w.slots.some((s) => s.key === n.slot)) err(nw, `emplacement inconnu « ${n.slot} »`);
       for (const r of n.requires ?? []) if (!paramDims.has(r)) err(nw, `donnée requise inconnue « ${r} »`);
+      if (n.when) {
+        try {
+          for (const v of formulaVariables(parseFormula(n.when))) if (!paramDims.has(v)) err(nw, `condition « ${n.when} » : seule une donnée de l'ouvrage peut y figurer (« ${v} »)`);
+        } catch (e) {
+          err(nw, `condition : ${(e as Error).message}`);
+        }
+      }
       const expected = unitDim(nw, n.unit);
       try {
         const expr = parseFormula(n.formula);

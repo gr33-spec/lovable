@@ -250,10 +250,11 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
     const s = await agent.post("/v1/suppliers").send({ name: "Point.P", email: "devis@pointp.fr" });
     const created = await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [s.body.id] }).expect(201);
     const body = created.body.recipients[0].email.body as string;
-    expect(body).toMatch(/Tuiles HP10 rouge : 1488 pièces/);
+    // §43.5 : une ligne par article, au format « article : quantité de commande ».
+    expect(body).toMatch(/Tuiles HP10 rouge : 1 488 pièces/);
     expect(body).toMatch(/Tubes de descente.*: 8 ml/);
     expect(body).toMatch(/Coudes : 4 pièces/);
-    expect(body).toMatch(/Gouttière.*longueurs de 4 m.*: 5 u/);
+    expect(body).toMatch(/Gouttière.*: 5 longueurs de 4 m/);
     expect(body).toMatch(/Chatières.*: 10 unités$/m);
     expect(body).not.toMatch(/quantité à calculer/);
   });
@@ -301,8 +302,9 @@ describe("ouvrages comptés : « 6 unités » de jouées n'est jamais 6 ardoises
     await agent.post(`/v1/takeoffs/${takeoffId}/validate`).expect(200);
     const s = await agent.post("/v1/suppliers").send({ name: "Point.P", email: "devis@pointp.fr" });
     const body = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [s.body.id] }).expect(201)).body.recipients[0].email.body as string;
-    expect(body).toMatch(/Ardoises pour jouées de lucarnes : pour 6 unités d'ouvrage \(quantité à calculer\)/);
-    expect(body).toMatch(/Entourage de cheminée.*: pour 2 unités d'ouvrage \(quantité à calculer\)/);
+    // §43.5 : ce que le fournisseur chiffre lui-même, avec la mesure du devis et la raison.
+    expect(body).toMatch(/À CHIFFRER PAR VOS SOINS\n(?:.*\n)*?Ardoises pour jouées de lucarnes · 6 unités — /);
+    expect(body).toMatch(/Entourage de cheminée.* · 2 unités — /);
     expect(body).toMatch(/Chatières de ventilation : 12 unités/);
     const events = await ctx.app.get(CorrectionJournal).list(await tenantOf(companyId), { projectId });
     expect(events.some((e) => e.action === "answer" && e.after?.designation === question.question!.key)).toBe(true);

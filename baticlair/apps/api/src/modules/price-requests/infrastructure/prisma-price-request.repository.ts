@@ -2,6 +2,7 @@ import type { PrismaService } from "../../../platform/database/prisma.service.js
 import { isUuid } from "../../../platform/validation/ids.js";
 import type { TenantContext } from "../../tenancy/index.js";
 import type { RequestedLine } from "../application/price-request-email.js";
+import type { SupplierPacket } from "../application/supplier-packet.js";
 import type {
   PriceRequestRecord,
   PriceRequestRepository,
@@ -33,6 +34,7 @@ interface Row {
   projectId: string;
   takeoffId: string;
   lines: unknown;
+  packet: unknown;
   message: string | null;
   dueDate: Date | null;
   createdAt: Date;
@@ -69,12 +71,37 @@ function lines(value: unknown): RequestedLine[] {
   });
 }
 
+/** Le contenu fournisseur tel qu'enregistré ; une forme inattendue vaut « pas de contenu ». */
+function packet(value: unknown): SupplierPacket | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const p = value as Record<string, unknown>;
+  const strings = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
+  if (typeof p.entreprise !== "string" || typeof p.chantier !== "string" || typeof p.date !== "string") return null;
+  return {
+    entreprise: p.entreprise,
+    chantier: p.chantier,
+    commune: typeof p.commune === "string" ? p.commune : null,
+    date: p.date,
+    articles: strings(p.articles),
+    a_chiffrer: strings(p.a_chiffrer),
+    resume: strings(p.resume),
+    detail: Array.isArray(p.detail)
+      ? p.detail
+          .filter((d): d is Record<string, unknown> => !!d && typeof d === "object")
+          .map((d) => ({ libelle: typeof d.libelle === "string" ? d.libelle : "", mesure: typeof d.mesure === "string" ? d.mesure : null, precisions: strings(d.precisions) }))
+      : [],
+    joindre_detail: p.joindre_detail !== false,
+    question_lien: typeof p.question_lien === "string" ? p.question_lien : null,
+  };
+}
+
 function toRecord(row: Row): PriceRequestRecord {
   return {
     id: row.id,
     projectId: row.projectId,
     takeoffId: row.takeoffId,
     lines: lines(row.lines),
+    packet: packet(row.packet),
     message: row.message,
     dueDate: row.dueDate,
     createdAt: row.createdAt,
@@ -153,6 +180,7 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
       message: string | null;
       dueDate: Date | null;
       supplierIds: string[];
+      packet: SupplierPacket;
     },
   ): Promise<PriceRequestRecord> {
     const row = await this.prisma.$transaction(async (tx) => {
@@ -162,6 +190,7 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
           projectId: data.projectId,
           takeoffId: data.takeoffId,
           lines: data.lines.map((l) => ({ ...l })),
+          packet: JSON.parse(JSON.stringify(data.packet)) as object,
           message: data.message,
           dueDate: data.dueDate,
           createdById: tenant.userId,
@@ -265,5 +294,14 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
       where: { id, companyId: tenant.companyId },
       data: retainedSupplierIds ? { classifiedAt: new Date(), retainedSupplierIds } : { classifiedAt: null, retainedSupplierIds: [] },
     });
+  }
+
+  async attachQuoteDetail(tenant: TenantContext): Promise<boolean> {
+    const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { attachQuoteDetail: true } });
+    return c?.attachQuoteDetail ?? true;
+  }
+
+  async setAttachQuoteDetail(tenant: TenantContext, value: boolean): Promise<void> {
+    await this.prisma.company.update({ where: { id: tenant.companyId }, data: { attachQuoteDetail: value } });
   }
 }

@@ -22,6 +22,9 @@ export interface NewTakeoffLine extends LineFields {
   priceRaw?: string | null;
   /** Qui a écrit la ligne : l'IA (défaut) ou un partenaire. */
   origin?: LineOrigin;
+  /** Prompt A (§41.1) : matériau et format nommés, dimensions lues ; gardés pour l'annexe fournisseur (§42). */
+  material?: string | null;
+  dimensions?: Record<string, string> | null;
 }
 
 export interface TakeoffLineRecord extends NewTakeoffLine {
@@ -49,6 +52,8 @@ export interface TakeoffRecord {
   promptVersion: number;
   model: string;
   notes: string[];
+  /** En-tête et notes du devis lus par l'IA (§41.1), ou null. */
+  context: Record<string, string> | null;
   /** Réponses aux questions du calcul pour ce chantier : produit, valeur, « aucun » (null), « pas celui-ci » (""). */
   answers: Record<string, string | { value: string; unit: string } | null>;
   createdAt: Date;
@@ -68,6 +73,8 @@ export interface NewTakeoff {
   model: string;
   notes: string[];
   lines: NewTakeoffLine[];
+  /** En-tête et notes du devis (adresse, type de bâtiment, neuf/rénovation…), §41.1 règle 4. */
+  context?: Record<string, string> | null;
 }
 
 export interface TakeoffRepository {
