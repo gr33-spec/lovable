@@ -95,9 +95,47 @@ function readLabelled(normalized: string, label: string): { value: string; unit:
   return { value: m[1]!.replace(",", "."), unit: TEXT_UNITS[m[2]!]! };
 }
 
+/** Une valeur lue par le prompt A (« 35° », « 5,50 m », « 45 % », « 0,65 mm ») → valeur et unité du référentiel. */
+function readDimension(raw: string): { value: string; unit: string } | null {
+  const m = /^\s*(\d{1,3}(?:[ .]\d{3})+(?:,\d+)?|\d+(?:[.,]\d+)?)\s*(mm|cm|ml|m²|m2|m|%|°|degres|degre|deg)\s*$/i.exec(normalizeText(raw).replace(/\s+/g, " "));
+  if (!m) return null;
+  const unit = /^deg/.test(m[2]!.toLowerCase()) ? "°" : TEXT_UNITS[m[2]!.toLowerCase()];
+  if (!unit) return null;
+  return { value: m[1]!.replace(/[ .](?=\d{3})/g, "").replace(",", "."), unit };
+}
+
 /**
- * @param extraFacts données du chantier connues hors du devis (zone climatique déduite du
- *   code postal de l'adresse) : elles complètent le contexte, le devis l'emporte s'il les écrit.
+ * Ce que le prompt A (§41.1) a lu en plus du texte : les dimensions de chaque ligne ({ pente: "35°",
+ * rampant: "5,50 m" }) et le contexte du devis (en-tête, notes). Chaque donnée dont le nom est celui
+ * d'un paramètre d'ouvrage (sa clé ou un de ses mots du devis) devient un fait du chantier, preuve à
+ * l'appui ; une pente en % est convertie en degrés. Ces faits valent moins que le texte lu par le code
+ * (ils complètent, jamais ne contredisent) et plus que les hypothèses par défaut : la pente lue par
+ * l'IA n'est plus une question à 45°.
+ */
+export function factsFromReading(ref: Referential, lines: readonly { ref: string; dimensions?: Record<string, string> | null }[], context?: Record<string, string> | null): SiteFact[] {
+  const params = ref.workItems.flatMap((w) => w.params);
+  const facts: SiteFact[] = [];
+  const add = (name: string, raw: string, evidence: string) => {
+    const found = readDimension(raw);
+    if (!found) return;
+    const n = normalizeText(name);
+    for (const p of params) {
+      if (normalizeText(p.key.replace(/_/g, " ")) !== n && !(p.textLabels ?? []).some((l) => normalizeText(l) === n)) continue;
+      if (!sameDimUnit(p.unit, found.unit)) continue;
+      const asRef = isAngleUnit(p.unit) && found.unit === "%" ? { value: percentSlopeToDegrees(new Decimal(found.value)).toString(), unit: p.unit } : found;
+      if (facts.some((f) => f.key === p.key && f.value === asRef.value && f.unit === asRef.unit)) continue;
+      facts.push({ key: p.key, ...asRef, evidence: `${evidence} (« ${name} : ${raw.trim()} »)`, origin: "devis" });
+    }
+  };
+  for (const line of lines) for (const [name, raw] of Object.entries(line.dimensions ?? {})) if (typeof raw === "string") add(name, raw, `Devis, ${line.ref}`);
+  for (const [name, raw] of Object.entries(context ?? {})) if (typeof raw === "string") add(name, raw, "Devis, en-tête");
+  return facts;
+}
+
+/**
+ * @param extraFacts données du chantier connues hors du texte des lignes (zone climatique déduite du
+ *   code postal de l'adresse, dimensions lues par le prompt A) : elles complètent le contexte, le
+ *   texte du devis l'emporte s'il les écrit. Deux valeurs différentes entre elles font un conflit, donc une question.
  */
 export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradeProfile, preferences?: CompanyPreferences, extraFacts: readonly SiteFact[] = []): QuotePlan {
   // Le vocabulaire d'un référentiel ne vaut que pour SON métier : dans un devis de plombier,
@@ -200,7 +238,8 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
   }
 
   // Une donnée hors devis (zone) ne vaut que si le devis ne la donne pas : jamais de conflit avec lui.
-  for (const f of extraFacts) if (!facts.some((x) => x.key === f.key)) facts.push(f);
+  const inText = new Set(facts.map((f) => f.key));
+  for (const f of extraFacts) if (!inText.has(f.key)) facts.push(f);
   const context: ChantierContext = { facts };
   const conflicts: string[] = [];
   const inputs: WorkItemInput[] = active

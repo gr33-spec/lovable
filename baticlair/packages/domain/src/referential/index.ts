@@ -7,7 +7,7 @@ export { checkReferential } from "./integrity.js";
 export { ROOFING_REFERENTIAL } from "./data/roofing.js";
 export { paramsFromContext, type ChantierContext, type SiteFact, type ContextConflict } from "./context.js";
 export { purchaseList, type PurchaseRow } from "./purchase-list.js";
-export { planQuote, type QuoteLine, type QuotePlan, type LinePlan } from "./plan.js";
+export { planQuote, factsFromReading, type QuoteLine, type QuotePlan, type LinePlan } from "./plan.js";
 export { scoreQuote, type QuoteScore, type LineOutcome, type Answer } from "./scorecard.js";
 export { documentationNeeds, type DocumentationNeed } from "./documentation.js";
 export { mergeReferentials, type ReferentialLayer, type ReferentialProvider } from "./layers.js";

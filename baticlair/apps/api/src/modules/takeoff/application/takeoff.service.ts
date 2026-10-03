@@ -5,6 +5,7 @@ import {
   assessTakeoffLine,
   climateZone,
   isCoastal,
+  factsFromReading,
   computeWithAnswers,
   postalCodeIn,
   purchaseView,
@@ -621,6 +622,9 @@ export class TakeoffService {
     if (isCoastal(postalCodeIn(address))) {
       extraFacts.push({ key: "diametre_crochet", value: "2.7", unit: "mm", evidence: `Département littoral (${postalCodeIn(address)}) : crochet inox 2,7 mm`, origin: "document" });
     }
+    // Prompt A (§41.1) : la pente, le rampant, l'épaisseur lus par l'IA dans la ligne ou l'en-tête entrent dans
+    // le calcul (après le texte lu par le code, avant les hypothèses par défaut).
+    extraFacts.push(...factsFromReading(ROOFING_REFERENTIAL, takeoff.lines.map((l) => ({ ref: l.id, dimensions: l.dimensions })), takeoff.context));
     const plan = planQuote(lines.map((l) => ({ ref: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, section: l.section })), ROOFING_REFERENTIAL, profile, undefined, extraFacts);
     // Niveau 1 : le rôle de chaque quantité (mesure d'ouvrage ou à commander), proposé par le code
     // et ENREGISTRÉ avec la ligne ; une mesure ne devient jamais une quantité d'achat.

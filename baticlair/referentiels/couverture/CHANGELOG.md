@@ -1,5 +1,13 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.03-16 — le fournisseur chiffre en dernier recours
+
+- **Modèle refusé** (« aucun de ces modèles ») : le moteur calcule quand même avec le produit générique de la famille, étiqueté « modèle à préciser » ; le fournisseur met sa marque. Avant : la ligne partait « à chiffrer ». Exemple D-2026-015 : 29 faîtières (modèle à préciser) + 29 crochets, plus rien à chiffrer.
+- **Bandes zinc au ml** (nouvel ouvrage `bandes-zinc`, famille `zinc_strip` : bande de ventilation, de solin, de rive, d'égout, couvre-joint, bavette) : question « développé ? » (100 / 250 / 330 / 400 mm, §36.4) et « tu façonnes ? ». Façonné : ml × 1,1 ÷ 1,9 → bandes de 2 m (§7, §36.4). Je façonne : ml × 1,1 × développé × 4,7 kg/m² (0,65 ; 5,04 en 0,70 ; 5,76 en 0,80 : 7,2 kg/m² par mm) en bobine, réunis avec le zinc du joint debout. Avant : « du métal au mètre sans largeur ni épaisseur », à chiffrer.
+- **Abergement de cheminée** (nouvel ouvrage `abergement-cheminee`, famille `chimney_flashing` : entourage, abergement, solin de cheminée) : question « périmètre d'une cheminée ? » (2 / 3 / 4 / 5 m), puis périmètre × 1,3 en zinc développé 33 cm (§7) en bandes de 2 m ou en kg, et bande porte-solin au périmètre (longueurs de 2 m). Avant : « pas encore de règle », à chiffrer.
+- Une ligne dont l'emplacement est « mesure seulement » (joint debout, abergement) a son rôle « mesure » d'office : plus de question « 2 : entourages à commander ou cheminées ? ».
+- Les dimensions lues par le prompt A (pente, rampant, épaisseur, développé, périmètre… dans la ligne ou l'en-tête) entrent dans le calcul comme faits du chantier, après le texte lu par le code et avant les hypothèses par défaut ; une pente en % est convertie en degrés.
+
 ## Version roofing-2026.10.03-15 (appliquée dans le moteur) — référentiel 41 sections
 
 - **Joint debout (§7, §36)** : nouvel ouvrage `couverture-zinc-joint-debout`. Question d'ouverture (§40.2) : « Tu façonnes tes bacs toi-même, ou tu les commandes façonnés ? » ; « je façonne » → zinc en bobine en **kg** (5,5 / 6 / 7 kg/m² selon 0,65 / 0,70 / 0,80 mm, VMZINC 36.1), largeur 500 mm en bord de mer, 650 ailleurs ; « commandé façonné » → **bacs** = largeur du pan (surface ÷ rampant) ÷ entraxe (430 / 580 mm), à la longueur du rampant. Pattes par m² selon le rampant (tableau 36.2, fixes + coulissantes). Voliges sapin 18 mm = m² × 1,05 (§7). La question est posée par chantier : la mémoire des habitudes ne couvre pas encore les réponses, seulement les produits.

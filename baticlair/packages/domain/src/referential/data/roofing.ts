@@ -403,6 +403,54 @@ const EPAISSEUR_ZINC_PARAM: ParamDef = {
     { label: "0,80 mm", value: "0.8" },
   ],
 };
+/** Même clé « faconnage » que le joint debout : une seule réponse, et une seule habitude, pour tout le métal façonné. */
+const FACONNAGE_BANDES_PARAM: ParamDef = {
+  ...FACONNAGE_PARAM,
+  question: "Tu façonnes tes bandes zinc toi-même, ou tu les commandes façonnées ?",
+  hint: "Bobine de zinc en kg si tu façonnes ; bandes façonnées en longueurs de 2 m sinon.",
+  choices: [
+    { label: "Je façonne (bobine)", value: "1" },
+    { label: "Je commande façonné (bandes 2 m)", value: "2" },
+  ],
+};
+/**
+ * Développé d'une bande zinc (§36.4) : 100 mm (solin à biseau, couvre-joint), 250 à 400 mm (rive), 200 à 330 mm
+ * (faîtage). Pas de défaut : le développé change le poids et la pièce, on demande (ce n'est pas une quantité).
+ */
+const DEVELOPPE_PARAM: ParamDef = {
+  key: "developpe",
+  label: "Développé de la bande",
+  unit: "mm",
+  kind: "site_data",
+  question: "Développé de la bande zinc ?",
+  textLabels: ["developpe", "dev", "dev."],
+  choices: [
+    { label: "100 mm (solin, couvre-joint)", value: "100" },
+    { label: "250 mm", value: "250" },
+    { label: "330 mm", value: "330" },
+    { label: "400 mm", value: "400" },
+  ],
+};
+/** Poids d'une bande zinc plate : 4,7 kg/m² en 0,65 mm (§7) ; 7,2 kg/m² par mm d'épaisseur pour 0,70 et 0,80 (masse volumique du zinc). */
+const ZINC_PLAT_CONSTANTS = {
+  poids_plat_065: condition("4.7", "kg/m2", F, FOUNDER_DOC, "« kg ≈ m² dév. × 4,7 (ép. 0,65) » (§7)."),
+  poids_plat_070: condition("5.04", "kg/m2", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (7,2 kg/m² par mm, masse volumique du zinc)" }),
+  poids_plat_080: condition("5.76", "kg/m2", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (7,2 kg/m² par mm, masse volumique du zinc)" }),
+  seuil_070: condition("0.7", "mm", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }),
+  seuil_080: condition("0.8", "mm", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }),
+  longueur_utile: condition("1.9", "m", F, FOUNDER_DOC, "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."),
+  marge_bandes: condition("1.1", "u", F, FOUNDER_DOC, "« Solin / abergement : ml × 1,1 » (§7)."),
+};
+const POIDS_PLAT_DERIVED = {
+  key: "poids_zinc_plat",
+  label: "Poids du zinc (bande plate)",
+  unit: "kg/m2",
+  formula: "si(epaisseur_zinc >= regle.seuil_080, regle.poids_plat_080, si(epaisseur_zinc >= regle.seuil_070, regle.poids_plat_070, regle.poids_plat_065))",
+  shown: true,
+  source: F,
+  verification: FOUNDER_DOC,
+  version: 1,
+};
 const ENTRAXE_PARAM: ParamDef = {
   key: "entraxe_supports",
   label: "Entraxe des chevrons ou fermettes",
@@ -462,7 +510,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.03-15",
+  version: "roofing-2026.10.03-16",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -578,6 +626,18 @@ export const ROOFING_REFERENTIAL: Referential = {
     { code: "standing_seam", label: "Couverture zinc joint debout", needUnit: "m2", attributes: [], keyAttributes: [], keywords: ["joint debout", "couverture zinc", "zinc a joint debout", "jdb"] },
     { code: "zinc_coil", label: "Bobine de zinc", needUnit: "kg", attributes: [], keyAttributes: [], keywords: ["bobine de zinc", "bobine zinc", "zinc en bobine"] },
     { code: "zinc_panel", label: "Bac joint debout", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["bac joint debout", "bac zinc", "bacs zinc"] },
+    // Bandes zinc au ml (§7, §36.4) : solin, rive, égout, ventilation, couvre-joint. Jamais commandées en « ml de zinc » nu.
+    {
+      code: "zinc_strip",
+      label: "Bande zinc façonnée",
+      needUnit: "u",
+      attributes: [],
+      keyAttributes: [],
+      keywords: ["bande de ventilation", "bande zinc", "bande en zinc", "bande de solin", "bande solin", "bande de rive zinc", "bande d'egout", "bande egout", "couvre-joint zinc", "bavette zinc", "bande porte-solin"],
+    },
+    { code: "solin_support", label: "Bande porte-solin", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["porte-solin", "porte solin"] },
+    // Abergement (entourage de cheminée) : un ouvrage compté, converti en bandes zinc façonnées ou en bobine (§7 « Abergement de cheminée »).
+    { code: "chimney_flashing", label: "Abergement de cheminée", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["abergement", "entourage de cheminee", "entourage cheminee", "solin de cheminee", "habillage de cheminee"] },
     { code: "sheathing", label: "Volige", needUnit: "m2", attributes: [], keyAttributes: [], keywords: ["volige", "voligeage", "planche de volige"] },
     { code: "verge_tile", label: "Tuile de rive", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["tuile de rive", "rive"] },
     { code: "gutter", label: "Gouttière (profil)", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["gouttiere"] },
@@ -776,6 +836,8 @@ export const ROOFING_REFERENTIAL: Referential = {
       sellingUnits: [{ id: "kg", label: { one: "kg", many: "kg" }, contains: packaging("1", "kg", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }), primary: true }],
     }),
     generic("bac-joint-debout-standard", "zinc_panel", "Bac joint debout zinc naturel, façonné à la longueur du rampant (largeur utile 430 ou 580 mm)", "Bacs joint debout zinc"),
+    generic("bande-zinc-faconnee-standard", "zinc_strip", "Bande zinc façonnée, longueurs de 2 m (développé et épaisseur du chantier)", "Bandes zinc façonnées 2 m"),
+    generic("porte-solin-standard", "solin_support", "Bande porte-solin, longueurs de 2 m", "Bandes porte-solin 2 m"),
     generic("volige-sapin-standard", "sheathing", "Volige sapin traité 18 mm", "Voliges sapin 18 mm", {
       sellingUnits: [{ id: "m2", label: { one: "m²", many: "m²" }, contains: packaging("1", "m2", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }), primary: true }],
     }),
@@ -1139,6 +1201,131 @@ export const ROOFING_REFERENTIAL: Referential = {
           formula: "longueur_faitage * regle.pattes_par_metre",
           unit: "u",
           core: true,
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+      ],
+    },
+    {
+      id: "bandes-zinc",
+      trade: "roofing",
+      label: "Bandes zinc (solin, rive, égout, ventilation, couvre-joint)",
+      triggers: ["zinc_strip"],
+      params: [
+        { key: "longueur_bande", label: "Longueur de bande", unit: "m", kind: "site_data", question: "Longueur de bande zinc ?", fromLineQuantity: true },
+        DEVELOPPE_PARAM,
+        FACONNAGE_BANDES_PARAM,
+        EPAISSEUR_ZINC_PARAM,
+      ],
+      slots: [
+        { key: "bande", family: "zinc_strip", label: "Bandes zinc façonnées", usual: { text: "Bandes façonnées par le fournisseur, longueurs de 2 m (§36.4).", source: F, productId: "bande-zinc-faconnee-standard" } },
+        { key: "bobine", family: "zinc_coil", label: "Zinc en bobine", usual: { text: "Zinc naturel en bobine, vendu au kg.", source: F, productId: "bobine-zinc-standard" } },
+      ],
+      constants: ZINC_PLAT_CONSTANTS,
+      derived: [
+        POIDS_PLAT_DERIVED,
+        { key: "ml_zinc", label: "Longueur de zinc, marge comprise", unit: "m", formula: "longueur_bande * regle.marge_bandes", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
+      ],
+      needs: [
+        {
+          id: "bandes-faconnees",
+          slot: "bande",
+          when: "faconnage >= 2",
+          formula: "arrondi_sup(ml_zinc / regle.longueur_utile)",
+          unit: "u",
+          core: true,
+          exclusions: "Longueurs de 2 m, recouvrement 10 cm entre éléments ; fixations à part.",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "bobine-bandes",
+          slot: "bobine",
+          when: "faconnage < 2",
+          formula: "ml_zinc * developpe * poids_zinc_plat",
+          unit: "kg",
+          core: true,
+          exclusions: "Zinc plat, développé × longueur ; les plis ne consomment pas de matière.",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+      ],
+    },
+    {
+      id: "abergement-cheminee",
+      trade: "roofing",
+      label: "Abergement de cheminée (zinc + porte-solin)",
+      triggers: ["chimney_flashing"],
+      params: [
+        { key: "nb_cheminees", label: "Nombre de cheminées", unit: "u", kind: "site_data", question: "Combien de cheminées ?", fromLineQuantity: true },
+        {
+          key: "perimetre_cheminee",
+          label: "Périmètre d'une cheminée",
+          unit: "m",
+          kind: "site_data",
+          question: "Périmètre d'une cheminée (les 4 côtés) ?",
+          textLabels: ["perimetre"],
+          choices: [
+            { label: "2 m", value: "2" },
+            { label: "3 m", value: "3" },
+            { label: "4 m", value: "4" },
+            { label: "5 m", value: "5" },
+          ],
+        },
+        FACONNAGE_BANDES_PARAM,
+        EPAISSEUR_ZINC_PARAM,
+      ],
+      slots: [
+        { key: "abergement", family: "chimney_flashing", label: "Abergement de cheminée", measureOnly: true },
+        { key: "bande", family: "zinc_strip", label: "Bandes zinc façonnées (dév. 330 mm)", usual: { text: "Bandes façonnées par le fournisseur, longueurs de 2 m, développé 33 cm (§7).", source: F, productId: "bande-zinc-faconnee-standard" } },
+        { key: "bobine", family: "zinc_coil", label: "Zinc en bobine", usual: { text: "Zinc naturel en bobine, vendu au kg.", source: F, productId: "bobine-zinc-standard" } },
+        { key: "porte_solin", family: "solin_support", label: "Bandes porte-solin", keywords: ["solin", "porte-solin"], usual: { text: "Bande porte-solin au périmètre, longueurs de 2 m (§7).", source: F, productId: "porte-solin-standard" } },
+      ],
+      constants: {
+        ...ZINC_PLAT_CONSTANTS,
+        coef_abergement: condition("1.3", "u", F, FOUNDER_DOC, "« périmètre cheminée × 1,3 en ml de zinc » (§7)."),
+        developpe_abergement: condition("330", "mm", F, FOUNDER_DOC, "« dév. 33 à 40 cm » (§7) : 33 cm retenu."),
+      },
+      derived: [
+        POIDS_PLAT_DERIVED,
+        { key: "ml_zinc", label: "Longueur de zinc façonné", unit: "m", formula: "nb_cheminees * perimetre_cheminee * regle.coef_abergement", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
+        { key: "ml_solin", label: "Longueur de solin", unit: "m", formula: "nb_cheminees * perimetre_cheminee", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
+      ],
+      needs: [
+        {
+          id: "bandes-abergement",
+          slot: "bande",
+          when: "faconnage >= 2",
+          formula: "arrondi_sup(ml_zinc / regle.longueur_utile)",
+          unit: "u",
+          core: true,
+          exclusions: "Quatre côtés, développé 33 cm ; longueurs de 2 m, recouvrement 10 cm.",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "bobine-abergement",
+          slot: "bobine",
+          when: "faconnage < 2",
+          formula: "ml_zinc * regle.developpe_abergement * poids_zinc_plat",
+          unit: "kg",
+          core: true,
+          exclusions: "Zinc plat, développé 33 cm × longueur.",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "porte-solin-abergement",
+          slot: "porte_solin",
+          formula: "arrondi_sup(ml_solin / regle.longueur_utile)",
+          unit: "u",
+          core: true,
+          exclusions: "Bande porte-solin au périmètre ; vis et chevilles à part (3 par ml, §7).",
           source: F,
           verification: FOUNDER_DOC,
           version: 1,

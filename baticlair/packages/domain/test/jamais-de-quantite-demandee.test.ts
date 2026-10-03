@@ -140,9 +140,9 @@ describe("doutes de calcul de l'IA : jamais posés à l'artisan", () => {
     return purchaseView(view, engine, { plan, roles, ref: ROOFING_REFERENTIAL, validation });
   }
 
-  it("le devis ardoises du fondateur, doutes de l'IA compris : 2 questions seulement, aucune de quantité", () => {
+  it("le devis ardoises du fondateur, doutes de l'IA compris : 4 questions (façonnage, périmètre de cheminée, descentes, 6 jouées ?), aucune de quantité", () => {
     const v = readWithDoubts();
-    expect(v.questions.map((q) => q.key).sort()).toEqual(["engine:param:nb_descentes", "role:ligne 5"]);
+    expect(v.questions.map((q) => q.key).sort()).toEqual(["engine:param:faconnage", "engine:param:nb_descentes", "engine:param:perimetre_cheminee", "role:ligne 5"]);
     expect(JSON.stringify(v.questions)).not.toMatch(/linéaires|combien d'ardoises|faîtières/);
     // Les liteaux sont calculés en mètres linéaires par BatiClair, pas demandés.
     expect(bought(v)).toMatchObject({ "Liteaux 18×40": "2 049 ml", "Ardoises 30×22": "9 271 pièces" });

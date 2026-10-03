@@ -182,7 +182,8 @@ export interface NeedResult {
   /** Hypothèses par défaut utilisées (dites à l'artisan, modifiables). */
   assumptions: Assumption[];
   /** D'où vient le produit retenu : écrit au devis, reconnu par appellation, choisi pour le chantier, préférence de l'entreprise, par défaut. */
-  productOrigin?: "devis" | "alias" | "artisan" | "preference" | "proposal" | "default";
+  /** « declined » : aucun des modèles proposés ne convenait ; le générique compte, le fournisseur met sa marque. */
+  productOrigin?: "devis" | "alias" | "artisan" | "preference" | "proposal" | "default" | "declined";
   /** Préférence de l'entreprise écartée (produit absent, autre famille…) : la vérification normale a repris. */
   preferenceIgnored?: string;
   formula?: string;
@@ -368,7 +369,7 @@ function computeNeed(
 ): NeedResult {
   const slot = work.slots.find((s) => s.key === rule.slot)!;
   let preferenceIgnored: string | undefined;
-  const productFor = (slotKey: string): { product: Product; choice: SlotChoice | { origin: "preference" | "proposal" | "default" } } | undefined => {
+  const productFor = (slotKey: string): { product: Product; choice: SlotChoice | { origin: "preference" | "proposal" | "default" | "declined" } } | undefined => {
     const chosen = input.products[slotKey];
     if (chosen) {
       const p = ref.products.find((x) => x.id === chosen.productId);
@@ -391,9 +392,14 @@ function computeNeed(
       }
     }
     // Rien de nommé, pas d'habitude : le produit par défaut du référentiel (pratique validée), dit comme hypothèse.
-    // Sauf si l'artisan a répondu « aucun de ces modèles » : le besoin reste à faire chiffrer.
-    const usual = slotDef?.usual?.productId && !input.declined?.includes(slotKey) ? ref.products.find((x) => x.id === slotDef.usual!.productId) : undefined;
-    if (usual && usual.family === family) return { product: usual, choice: { origin: "default" } };
+    // L'artisan a répondu « aucun de ces modèles » : le moteur calcule QUAND MÊME avec le générique de la famille
+    // (« modèle à préciser » : le fournisseur met sa marque), au lieu de renvoyer la ligne à chiffrer. Le fournisseur
+    // ne chiffre que ce que le référentiel ne sait pas compter.
+    const usual = slotDef?.usual?.productId ? ref.products.find((x) => x.id === slotDef.usual!.productId) : undefined;
+    if (usual && usual.family === family) {
+      if (!input.declined?.includes(slotKey)) return { product: usual, choice: { origin: "default" } };
+      if (usual.generic) return { product: usual, choice: { origin: "declined" } };
+    }
     return undefined;
   };
   const resolved = productFor(slot.key);
@@ -409,7 +415,7 @@ function computeNeed(
     needId: rule.id,
     slot: slot.key,
     family: slot.family,
-    label: product?.shortLabel ?? slot.label,
+    label: product ? (resolved?.choice.origin === "declined" ? `${product.shortLabel} (modèle à préciser)` : product.shortLabel) : slot.label,
     slotLabel: slot.label,
     origin,
     ...(resolved ? { productOrigin: resolved.choice.origin } : {}),
@@ -498,6 +504,9 @@ function computeNeed(
         const usual = slot.usual!;
         trace.push({ label: "Produit", value: product.shortLabel, unit: "", from: `Par défaut : ${usual.text}`, origin: "assumption", verified: true });
         assume({ key: `product:${slot.key}`, label: slot.label, value: product.shortLabel, unit: "", note: usual.text });
+      } else if (o === "declined") {
+        // Pas d'hypothèse à re-poser : l'artisan a déjà dit qu'aucun modèle proposé ne convenait.
+        trace.push({ label: "Produit", value: `${product.shortLabel} (modèle à préciser)`, unit: "", from: "Aucun des modèles proposés ne convient : le fournisseur propose le sien pour cette quantité", origin: "project", verified: true });
       } else {
         trace.push({
           label: "Produit",

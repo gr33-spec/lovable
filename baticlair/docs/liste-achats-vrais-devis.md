@@ -94,10 +94,12 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 ### À l'ouverture
 
-**J'ai compris :** Couverture en ardoises au crochet sur liteaux : 200 m² · Gouttière : 17 m · Faîtage en bande zinc : 17 m · Entourage de cheminée zinc et solin : 2 unités
+**J'ai compris :** Couverture en ardoises au crochet sur liteaux : 200 m² · Gouttière : 17 m · Faîtage en bande zinc : 17 m · Abergement de cheminée : 2 unités
 
 **Questions :**
 
+- Tu façonnes tes bandes zinc toi-même, ou tu les commandes façonnées ? → [Je façonne (bobine)] [Je commande façonné (bandes 2 m)]
+- Périmètre d'une cheminée (les 4 côtés) ? → [2 m] [3 m] [4 m] [5 m]
 - Combien de descentes pour cette gouttière ? → [1] [2] [3] [4]
 - 6 : c'est le nombre d'ardoises à commander, ou le nombre de jouées ? → [6 ardoises à commander] [6 jouées (matériaux à calculer)]
 
@@ -116,15 +118,16 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Crochets de gouttière | 43 pièces |  |
 | Chatières de ventilation | 12 pièces |  |
 
-**À faire chiffrer par le fournisseur :**
-
-- Entourage de cheminée zinc et solin : 2 unités — Solin, abergement : pas encore de règle de calcul dans BatiClair.
-
 **Hypothèses (modifiables) :** pente du toit 45° · région ardoise III · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet 1 mm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm
 
 ### Après « 6 jouées » et « 2 descentes »
 
-**J'ai compris :** Couverture en ardoises au crochet sur liteaux : 200 m² · Gouttière : 17 m · Faîtage en bande zinc : 17 m · Entourage de cheminée zinc et solin : 2 unités
+**J'ai compris :** Couverture en ardoises au crochet sur liteaux : 200 m² · Gouttière : 17 m · Faîtage en bande zinc : 17 m · Abergement de cheminée : 2 unités
+
+**Questions :**
+
+- Tu façonnes tes bandes zinc toi-même, ou tu les commandes façonnées ? → [Je façonne (bobine)] [Je commande façonné (bandes 2 m)]
+- Périmètre d'une cheminée (les 4 côtés) ? → [2 m] [3 m] [4 m] [5 m]
 
 **À acheter :**
 
@@ -145,13 +148,17 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 **À faire chiffrer par le fournisseur :**
 
 - Ardoises pour jouées de lucarnes : 6 unités — BatiClair ne sait pas encore calculer les matériaux de cet ouvrage.
-- Entourage de cheminée zinc et solin : 2 unités — Solin, abergement : pas encore de règle de calcul dans BatiClair.
 
 **Hypothèses (modifiables) :** pente du toit 45° · région ardoise III · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet 1 mm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm
 
 ### Si l'artisan dit « intérieur des terres »
 
-**J'ai compris :** Couverture en ardoises au crochet sur liteaux : 200 m² · Gouttière : 17 m · Faîtage en bande zinc : 17 m · Entourage de cheminée zinc et solin : 2 unités
+**J'ai compris :** Couverture en ardoises au crochet sur liteaux : 200 m² · Gouttière : 17 m · Faîtage en bande zinc : 17 m · Abergement de cheminée : 2 unités
+
+**Questions :**
+
+- Tu façonnes tes bandes zinc toi-même, ou tu les commandes façonnées ? → [Je façonne (bobine)] [Je commande façonné (bandes 2 m)]
+- Périmètre d'une cheminée (les 4 côtés) ? → [2 m] [3 m] [4 m] [5 m]
 
 **À acheter :**
 
@@ -172,6 +179,5 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 **À faire chiffrer par le fournisseur :**
 
 - Ardoises pour jouées de lucarnes : 6 unités — BatiClair ne sait pas encore calculer les matériaux de cet ouvrage.
-- Entourage de cheminée zinc et solin : 2 unités — Solin, abergement : pas encore de règle de calcul dans BatiClair.
 
 **Hypothèses (modifiables) :** pente du toit 45° · longueur du rampant 5,5 m · recouvrement 80 mm · pureau 11 cm · diamètre du crochet 1 mm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm

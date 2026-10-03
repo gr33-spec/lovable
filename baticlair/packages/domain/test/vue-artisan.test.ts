@@ -239,10 +239,12 @@ describe("une réponse recalcule tout ce qui en dépend (règles vérifiées)", 
     expect(v.items.filter((i) => i.kind === "need")).toEqual([]);
   });
 
-  it("« aucun de ces produits » arrête la question sans inventer de calcul", () => {
+  it("« aucun de ces produits » arrête la question ; le générique compte quand même, « modèle à préciser »", () => {
     const v = view(lines, "roofing", { "product:faitiere": null }, REF);
     expect(v.decisions.some((d) => d.question?.key === "product:faitiere")).toBe(false);
-    expect(v.items.some((i) => i.kind === "need" && i.id === "faitieres")).toBe(false);
+    const item = v.items.find((i) => i.kind === "need" && i.id === "faitieres");
+    expect(item).toBeDefined();
+    expect(JSON.stringify(item)).toMatch(/modèle à préciser/);
   });
 
   it("« pas celui-ci » écarte le produit lu pour ce chantier et redemande", () => {

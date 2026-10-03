@@ -60,13 +60,14 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
     expect(at("5", "1")).toMatchObject({ status: "unknown" });
   });
 
-  it("produit par défaut (liteaux 18×40, crochets, écran) : dit comme hypothèse ; « aucun de ces modèles » le retire", () => {
+  it("produit par défaut (liteaux 18×40, crochets, écran) : dit comme hypothèse ; « aucun de ces modèles » → le générique compte, « modèle à préciser »", () => {
     const r = computeWorkItem(ROOFING_REFERENTIAL, ARDOISE);
     expect(need(r, "liteaux-ardoise")).toMatchObject({ label: "Liteaux 18×40", productOrigin: "default" });
     expect(need(r, "liteaux-ardoise").assumptions).toContainEqual(expect.objectContaining({ key: "product:liteau", value: "Liteaux 18×40" }));
     const declined = computeWorkItem(ROOFING_REFERENTIAL, { ...ARDOISE, declined: ["ecran"] });
-    // Écran refusé : rien n'est inventé, le besoin attend un produit (question à boutons).
-    expect(need(declined, "ecran-ardoise")).toMatchObject({ status: "question", question: { kind: "choose_product" } });
+    // Écran refusé : le moteur calcule quand même avec le générique (le fournisseur met sa marque), sans re-poser l'hypothèse.
+    expect(need(declined, "ecran-ardoise")).toMatchObject({ status: "calculated", productOrigin: "declined", label: "Écran HPV (modèle à préciser)" });
+    expect(need(declined, "ecran-ardoise").assumptions.some((a) => a.key === "product:ecran")).toBe(false);
   });
 
   it("un besoin qui exige une donnée absente (tuiles de rive sans longueur de rives) n'existe pas : ni chiffre, ni question", () => {

@@ -64,6 +64,15 @@ export function proposeLineRoles(lines: readonly RoleLine[], plan: QuotePlan, va
       roles.set(v.lineId, { role: "measure", why: "La quantité mesure l'ouvrage (surface, longueur ou nombre d'ouvrages), pas un matériau." });
       continue;
     }
+    // La ligne désigne un emplacement « mesure seulement » (joint debout en m², abergement à l'unité) :
+    // sa quantité mesure l'ouvrage, le moteur en déduit ce qui se commande. Aucune question.
+    if (planned?.status === "planned") {
+      const slot = ref.workItems.find((w) => w.id === planned.workItemId)?.slots.find((s) => s.key === planned.slot);
+      if (slot?.measureOnly) {
+        roles.set(v.lineId, { role: "measure", why: `La quantité mesure l'ouvrage (${slot.label.toLowerCase()}) ; ce qui se commande en découle.` });
+        continue;
+      }
+    }
     // Ouvrage compté à l'unité (« 2 entourages de cheminée », « ardoises pour 6 jouées ») : jamais un nombre d'articles.
     const counted = v.unit === "U" && line?.designation ? countedWork(line.designation, ref) : null;
     if (counted) {
