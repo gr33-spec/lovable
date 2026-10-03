@@ -32,6 +32,11 @@ function LoginForm() {
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
+      {params.get("compte") === "supprime" ? (
+        <p role="status" className="rounded-2xl bg-surface p-3 text-sm font-semibold shadow-card">
+          Votre compte et toutes ses données ont été supprimés.
+        </p>
+      ) : null}
       {error ? <ErrorNotice error={error} /> : null}
       <Field id="email" name="email" type="email" label="E-mail" autoComplete="email" inputMode="email" required />
       <Field id="password" name="password" type="password" label="Mot de passe" autoComplete="current-password" required />

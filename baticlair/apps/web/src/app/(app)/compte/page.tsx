@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { PlanSummary } from "@/components/paywall";
 import { TradePicker } from "@/components/trade-picker";
 import { BackButton, Badge, Button, Card, ErrorNotice, PageTitle } from "@/components/ui";
@@ -93,7 +93,89 @@ export default function ComptePage() {
       <Button variant="secondary" pending={leaving} onClick={() => void signOut()}>
         Se déconnecter
       </Button>
+      <MyData onDeleted={() => router.replace("/connexion?compte=supprime")} />
     </>
+  );
+}
+
+/**
+ * Mes données (RGPD) : les emporter (un fichier), ou tout effacer. La suppression demande de
+ * taper SUPPRIMER : rien ne part sur un appui distrait.
+ */
+function MyData({ onDeleted }: { onDeleted: () => void }) {
+  const id = useId();
+  const [exporting, setExporting] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [word, setWord] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState<ApiError | null>(null);
+
+  async function download() {
+    setExporting(true);
+    setError(null);
+    try {
+      const data = await api<unknown>("/v1/me/export");
+      const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `baticlair-mes-donnees-${new Date().toISOString().slice(0, 10)}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  async function remove() {
+    setDeleting(true);
+    setError(null);
+    try {
+      await api("/v1/me", { method: "DELETE", body: { confirm: word.trim().toUpperCase() } });
+      onDeleted();
+    } catch (e) {
+      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+      setDeleting(false);
+    }
+  }
+
+  return (
+    <Card className="flex flex-col gap-3 p-4">
+      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">MES DONNÉES</h2>
+      {error ? <ErrorNotice error={error} /> : null}
+      <Button variant="secondary" pending={exporting} onClick={() => void download()}>
+        Télécharger mes données
+      </Button>
+      {confirming ? (
+        <div role="group" aria-label="Confirmer la suppression du compte" className="flex flex-col gap-3 rounded-2xl bg-danger-bg p-3">
+          <p className="text-sm font-semibold">
+            Tout sera effacé : vos chantiers, vos devis, vos listes, vos fournisseurs. C&apos;est définitif. Téléchargez vos données avant si vous voulez les garder.
+          </p>
+          <label htmlFor={id} className="flex flex-col gap-1 text-sm font-bold">
+            Tapez SUPPRIMER pour confirmer
+            <input id={id} value={word} onChange={(e) => setWord(e.target.value)} autoComplete="off" className="min-h-12 rounded-2xl bg-surface px-3 text-base" />
+          </label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={deleting || word.trim().toUpperCase() !== "SUPPRIMER"}
+              onClick={() => void remove()}
+              className="inline-flex min-h-11 items-center rounded-xl bg-danger px-4 text-sm font-extrabold text-white disabled:opacity-50"
+            >
+              {deleting ? "Suppression…" : "Supprimer définitivement"}
+            </button>
+            <button type="button" onClick={() => setConfirming(false)} className="inline-flex min-h-11 items-center px-4 text-sm font-bold">
+              Annuler
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button type="button" onClick={() => setConfirming(true)} className="inline-flex min-h-11 items-center self-start text-sm font-bold text-danger">
+          Supprimer mon compte
+        </button>
+      )}
+    </Card>
   );
 }
 
