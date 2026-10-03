@@ -12,6 +12,7 @@ export type ErrorCode =
   | "conflict"
   | "request_in_progress"
   | "payload_too_large"
+  | "too_many_requests"
   | "unreadable_document"
   | "analysis_quota_reached"
   | "plan_limit_reached"

@@ -16,6 +16,8 @@ export default defineConfig({
       EMAIL_PROVIDER: "capture",
       AI_PROVIDER: "fake",
       LOG_LEVEL: "silent",
+      // Les tests enchaînent des centaines de requêtes depuis une même adresse ; rate-limit.test.ts rétablit la vraie limite.
+      RATE_LIMIT: "off",
       API_PUBLIC_URL: "http://localhost:4000",
       WEB_APP_URL: "http://localhost:3000",
       // Les tests métier créent librement des chantiers ; billing.test.ts vérifie les vraies limites.

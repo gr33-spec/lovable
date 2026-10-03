@@ -22,6 +22,8 @@ const apiEnv = {
     { key: "pro", label: "Pro", projectLimit: 30, period: "month", priceEurMonth: 79, offered: true },
   ]),
   LOG_LEVEL: "warn",
+  // 26 parcours créent chacun un compte et une entreprise depuis la même adresse : la limite de débit (5 entreprises/h) les bloquerait ; elle a son propre test API.
+  RATE_LIMIT: "off",
 };
 
 export default defineConfig({

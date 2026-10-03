@@ -62,7 +62,7 @@ function render(title: string, v: PurchaseView): string {
     out.push("");
   }
   if (v.assumptions.length > 0) {
-    out.push(`**Hypothèses (modifiables) :** ${v.assumptions.map((a) => `${a.label.toLowerCase()} ${a.value}${a.unit === "u" ? "" : ` ${a.unit}`}`).join(" · ")}`, "");
+    out.push(`**Hypothèses (modifiables) :** ${v.assumptions.map((a) => `${a.label.toLowerCase()} ${a.value}${a.unit === "u" ? "" : a.unit === "°" ? "°" : ` ${a.unit}`}`).join(" · ")}`, "");
   }
   return out.join("\n");
 }
@@ -111,9 +111,9 @@ describe("liste d'achats : devis ardoises (200 m², jouées, cheminée)", () => 
     const v = read(ARDOISES_LUCARNES_LINES);
     expect(v.questions.map((q) => q.key).sort()).toEqual(["engine:param:nb_descentes", "role:ligne 5"]);
     expect(v.toBuy.map((b) => [short(b.label), b.quantity])).toEqual([
-      ["Ardoises 30×22", "11 230 pièces"],
-      ["Crochets d'ardoise", "10 910 pièces"],
-      ["Liteaux 18×40", "2 471 ml"],
+      ["Ardoises 30×22", "9 313 pièces"],
+      ["Crochets d'ardoise", "9 047 pièces"],
+      ["Liteaux 18×40", "2 049 ml"],
       ["Liteaux 27×40", "350 ml"],
       ["Écran HPV", "3 rouleaux"],
       ["Faîtage zinc (bande)", "6 longueurs de 3 m"],
@@ -140,9 +140,9 @@ describe("liste d'achats : devis ardoises (200 m², jouées, cheminée)", () => 
       ["Entourage de cheminée zinc et solin", "2 unités"],
     ]);
     expect(v.canValidate).toBe(true);
-    // Zone intérieure : moins de recouvrement, donc moins d'ardoises (10 048) et des crochets de gouttière tous les 50 cm.
+    // Zone intérieure : moins de recouvrement, donc moins d'ardoises (8 678) et des crochets de gouttière tous les 50 cm.
     const inland = read(ARDOISES_LUCARNES_LINES, { "role:ligne 5": "measure", "param:nb_descentes": { value: "2", unit: "u" }, "param:zone": { value: "1", unit: "u" } });
-    expect(inland.toBuy.find((b) => b.label === "Ardoises 30×22")).toMatchObject({ quantity: "10 048 pièces" });
+    expect(inland.toBuy.find((b) => b.label === "Ardoises 30×22")).toMatchObject({ quantity: "8 678 pièces" });
     expect(inland.toBuy.find((b) => b.label === "Crochets de gouttière")).toMatchObject({ quantity: "34 pièces" });
   });
 

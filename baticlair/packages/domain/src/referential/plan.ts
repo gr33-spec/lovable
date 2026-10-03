@@ -1,3 +1,4 @@
+import { Decimal } from "../shared/decimal.js";
 import { keyCharacteristics } from "../takeoff/characteristics.js";
 import { validateTakeoffLine } from "../takeoff/validation.js";
 import { keywordPosition, normalizeText, type TradeProfile } from "../trades/trade-profile.js";
@@ -6,7 +7,7 @@ import { paramsFromContext } from "./context.js";
 import type { CompanyPreferences, SlotChoice, WorkItemInput } from "./engine.js";
 import type { ProductFamily, Referential, Slot, WorkItemType } from "./model.js";
 import { identifyProducts } from "./resolve.js";
-import { parseRefUnit, sameDim } from "./units.js";
+import { parseRefUnit, sameDim, isAngleUnit, percentSlopeToDegrees } from "./units.js";
 
 /**
  * DU DEVIS AU MOTEUR : chaque ligne du devis client est rattachée, sans
@@ -71,14 +72,14 @@ const slotWords = (ref: Referential, slot: Slot) => [...(slot.keywords ?? []), .
 
 /** Unités de ligne de devis → unités du référentiel. */
 export const LINE_UNITS: Record<string, string> = { U: "u", M: "m", ML: "m", M2: "m2", M3: "m3", KG: "kg", T: "t" };
-const TEXT_UNITS: Record<string, string> = { mm: "mm", cm: "cm", m: "m", ml: "m", m2: "m2", "m²": "m2", "%": "%" };
+const TEXT_UNITS: Record<string, string> = { mm: "mm", cm: "cm", m: "m", ml: "m", m2: "m2", "m²": "m2", "%": "%", "°": "°" };
 
 /** « entraxe 90 cm », « hauteur : 4m », « pureau de 34,3 cm » → valeur et unité, seulement si elles sont écrites. */
 function readLabelled(normalized: string, label: string): { value: string; unit: string } | null {
   const pos = keywordPosition(normalized, label);
   if (pos < 0) return null;
   const after = normalized.slice(pos + normalizeText(label).length);
-  const m = /^[a-z]{0,2}\s*(?:de |d |: |:|= |a )?\s*(\d+(?:[.,]\d+)?)\s*(mm|cm|ml|m²|m2|m|%)(?![a-z0-9])/.exec(after);
+  const m = /^[a-z]{0,2}\s*(?:de |d |: |:|= |a )?\s*(\d+(?:[.,]\d+)?)\s*(mm|cm|ml|m²|m2|m|%|°)(?![a-z0-9])/.exec(after);
   if (!m) return null;
   return { value: m[1]!.replace(",", "."), unit: TEXT_UNITS[m[2]!]! };
 }
@@ -164,7 +165,10 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
     for (const p of work.params) {
       for (const label of p.textLabels ?? []) {
         const found = readLabelled(text, label);
-        if (found && sameDimUnit(p.unit, found.unit)) facts.push({ key: p.key, ...found, evidence: `Devis, ${line.ref} (« ${label} »)`, origin: "devis" });
+        if (!found || !sameDimUnit(p.unit, found.unit)) continue;
+        // « pente 45 % » dans un devis : gardée en degrés, l'unité de la pente partout dans BatiClair.
+        const asRef = isAngleUnit(p.unit) && found.unit === "%" ? { value: percentSlopeToDegrees(new Decimal(found.value)).toString(), unit: p.unit } : found;
+        facts.push({ key: p.key, ...asRef, evidence: `Devis, ${line.ref} (« ${label} »)`, origin: "devis" });
       }
     }
     const chars = productCharacteristics(ref, work, slot, line.designation);

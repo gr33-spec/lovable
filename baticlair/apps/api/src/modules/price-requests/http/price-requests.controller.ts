@@ -1,3 +1,5 @@
+import { Throttle } from "@nestjs/throttler";
+import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import {
   Body,
   Controller,
@@ -123,6 +125,7 @@ export class PriceRequestsController {
   }
 
   /** Devis reçu du fournisseur, déposé à la main : un PDF, ou des photos (une par page). */
+  @Throttle({ default: HOURLY(30) })
   @Post("price-request-recipients/:id/quote")
   @HttpCode(201)
   @UseInterceptors(

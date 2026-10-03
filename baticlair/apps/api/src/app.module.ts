@@ -14,6 +14,7 @@ import { TenancyModule } from "./modules/tenancy/index.js";
 import { ConfigModule } from "./platform/config/config.module.js";
 import { DatabaseModule } from "./platform/database/database.module.js";
 import { EmailModule } from "./platform/email/email.module.js";
+import { RateLimitModule } from "./platform/http/rate-limit.module.js";
 import { LoggingModule } from "./platform/logging/logging.module.js";
 
 @Module({
@@ -21,6 +22,7 @@ import { LoggingModule } from "./platform/logging/logging.module.js";
     ConfigModule,
     LoggingModule,
     DatabaseModule,
+    RateLimitModule,
     EmailModule,
     IdentityModule,
     TenancyModule,

@@ -66,11 +66,11 @@ describe("pont devis → moteur : formulations variées", () => {
     const p = plan([L("a", "Couverture tuiles HP10, pureau de 34,5 cm, pente 45 %", "100", "m2"), L("b", "Liteaux 27x40 pureau adapté", "100", "m2")]);
     expect(p.inputs[0]!.params).toMatchObject({
       pureau: { value: "34.5", unit: "cm", evidence: "Devis, a (« pureau »)" },
-      pente: { value: "45", unit: "%" },
+      // « 45 % » écrit dans le devis : converti en degrés (atan 0,45 = 24,2°), la pente est en degrés partout.
+      pente: { value: "24.2", unit: "°" },
       surface: { value: "100", unit: "m2" },
     });
-    // Pente en degrés : non convertie (aucune hypothèse), donc non lue.
-    expect(plan([L("a", "Couverture tuiles HP10 pente 35°", "100", "m2")]).inputs[0]!.params.pente).toBeUndefined();
+    expect(plan([L("a", "Couverture tuiles HP10 pente 35°", "100", "m2")]).inputs[0]!.params.pente).toMatchObject({ value: "35", unit: "°" });
   });
 
   it("deux valeurs différentes pour la même donnée : une question de cohérence, jamais un choix silencieux", () => {

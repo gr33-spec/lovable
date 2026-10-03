@@ -28,6 +28,9 @@ const SYMBOLS: Record<string, RefUnit> = {
   "1": { factor: new Decimal(1), dim: NONE },
   u: { factor: new Decimal(1), dim: NONE },
   "%": { factor: new Decimal("0.01"), dim: NONE },
+  // Angle en degrés (pente de toit) : un nombre pur, jamais converti en % par simple facteur (voir percentSlopeToDegrees).
+  "°": { factor: new Decimal(1), dim: NONE },
+  deg: { factor: new Decimal(1), dim: NONE },
   mm: { factor: new Decimal("0.001"), dim: { L: 1, M: 0 } },
   cm: { factor: new Decimal("0.01"), dim: { L: 1, M: 0 } },
   m: { factor: new Decimal(1), dim: { L: 1, M: 0 } },
@@ -72,4 +75,15 @@ export function parseRefUnit(text: string): RefUnit {
   if (den === undefined) return top;
   const bottom = symbol(den);
   return { factor: top.factor.dividedBy(bottom.factor), dim: mulDim(top.dim, bottom.dim, -1) };
+}
+
+/** « ° » ou « deg » : une pente en degrés. */
+export function isAngleUnit(unit: string): boolean {
+  const key = unit.trim().toLowerCase();
+  return key === "°" || key === "deg";
+}
+
+/** Une pente écrite en % (tangente × 100) devient des degrés : atan(p / 100) × 180 / π, au dixième de degré. */
+export function percentSlopeToDegrees(percent: Decimal): Decimal {
+  return Decimal.atan(percent.dividedBy(100)).times(180).dividedBy(Decimal.acos(-1)).toDecimalPlaces(1);
 }

@@ -1,7 +1,7 @@
 import { Decimal } from "../shared/decimal.js";
 import { evaluateInterval, FormulaError, formulaVariables, parseFormula, type IntervalValue } from "./expression.js";
 import type { Fact, LookupTable, NeedRule, ParamDef, Product, Referential, SellingUnit, Source, WorkItemType } from "./model.js";
-import { parseRefUnit, sameDim } from "./units.js";
+import { parseRefUnit, sameDim, isAngleUnit, percentSlopeToDegrees } from "./units.js";
 
 /**
  * Moteur de quantitatif : ouvrage du devis → besoins matériaux → lignes
@@ -525,9 +525,11 @@ function computeNeed(
         }
         return bounds ? { lo: bounds.min.lo, hi: bounds.max.hi, dim: expected.dim } : { lo: new Decimal(-Infinity), hi: new Decimal(Infinity), dim: expected.dim };
       }
-      const unit = parseRefUnit(given.unit);
+      // Une pente donnée en % (devis, ancienne réponse) est lue en degrés : la pente est en degrés partout.
+      const read = isAngleUnit(def.unit) && given.unit.trim() === "%" ? { value: percentSlopeToDegrees(new Decimal(given.value)).toString(), unit: def.unit } : given;
+      const unit = parseRefUnit(read.unit);
       if (!sameDim(unit.dim, expected.dim)) throw new Stop({ status: "unknown", reason: `${def.label} : unité « ${given.unit} » incompatible (attendu ${def.unit}).` });
-      const value = new Decimal(given.value).times(unit.factor);
+      const value = new Decimal(read.value).times(unit.factor);
       if (bounds && (value.lessThan(bounds.min.lo) || value.greaterThan(bounds.max.hi))) {
         throw new Stop({
           status: "question",
@@ -542,8 +544,8 @@ function computeNeed(
       }
       trace.push({
         label: def.label,
-        value: given.value.replace(".", ","),
-        unit: given.unit,
+        value: read.value.replace(".", ","),
+        unit: read.unit,
         from: given.evidence ?? (given.origin === "devis" ? "Devis" : "Votre réponse"),
         origin: given.origin === "devis" ? "devis" : "project",
         verified: true,

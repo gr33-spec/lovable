@@ -1,3 +1,5 @@
+import { Throttle } from "@nestjs/throttler";
+import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import { Body, Controller, Get, HttpCode, Inject, Patch, Post, UseGuards } from "@nestjs/common";
 import { TRADES } from "@baticlair/domain";
 import { z } from "zod";
@@ -27,6 +29,7 @@ export class MeController {
     };
   }
 
+  @Throttle({ default: HOURLY(5) })
   @Post("companies")
   @HttpCode(201)
   @Idempotent()

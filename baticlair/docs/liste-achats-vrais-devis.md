@@ -34,7 +34,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Chatières de ventilation | 10 unités |  |
 | Sortie de toit Poujoulat | 1 unité |  |
 
-**Hypothèses (modifiables) :** zone climatique 3 · pente du toit 45 % · pureau 31 cm · coudes par descente 2
+**Hypothèses (modifiables) :** zone climatique 3 · pente du toit 45° · pureau 31 cm · coudes par descente 2
 
 ### Après « oui, c'est bien ce modèle »
 
@@ -61,7 +61,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Chatières de ventilation | 10 unités |  |
 | Sortie de toit Poujoulat | 1 unité |  |
 
-**Hypothèses (modifiables) :** zone climatique 3 · pente du toit 45 % · pureau 31 cm · coudes par descente 2
+**Hypothèses (modifiables) :** zone climatique 3 · pente du toit 45° · pureau 31 cm · coudes par descente 2
 
 ### Si l'artisan précise le pureau (34,3 cm)
 
@@ -88,7 +88,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Chatières de ventilation | 10 unités |  |
 | Sortie de toit Poujoulat | 1 unité |  |
 
-**Hypothèses (modifiables) :** pente du toit 45 % · zone climatique 3 · coudes par descente 2
+**Hypothèses (modifiables) :** pente du toit 45° · zone climatique 3 · coudes par descente 2
 
 ## Devis ardoises — 200 m², jouées de lucarnes, cheminée
 
@@ -105,9 +105,9 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 | Article | Quantité | Repère |
 |---|---|---|
-| Ardoises 30×22 | 11 230 pièces |  |
-| Crochets d'ardoise | 10 910 pièces |  |
-| Liteaux 18×40 | 2 471 ml | ≈ 50 bottes de 50 ml |
+| Ardoises 30×22 | 9 313 pièces |  |
+| Crochets d'ardoise | 9 047 pièces |  |
+| Liteaux 18×40 | 2 049 ml | ≈ 41 bottes de 50 ml |
 | Liteaux 27×40 | 350 ml | ≈ 7 bottes de 50 ml |
 | Écran HPV | 3 rouleaux | 214,29 m² |
 | Faîtage zinc (bande) | 6 longueurs de 3 m | 17,85 ml |
@@ -120,7 +120,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 - Entourage de cheminée zinc et solin : 2 unités — Solin, abergement : pas encore de règle de calcul dans BatiClair.
 
-**Hypothèses (modifiables) :** pente du toit 45 % · zone climatique 3 · longueur du rampant 5,5 m · recouvrement 130 mm · pureau 8,5 cm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm
+**Hypothèses (modifiables) :** pente du toit 45° · zone climatique 3 · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm
 
 ### Après « 6 jouées » et « 2 descentes »
 
@@ -130,9 +130,9 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 | Article | Quantité | Repère |
 |---|---|---|
-| Ardoises 30×22 | 11 230 pièces |  |
-| Crochets d'ardoise | 10 910 pièces |  |
-| Liteaux 18×40 | 2 471 ml | ≈ 50 bottes de 50 ml |
+| Ardoises 30×22 | 9 313 pièces |  |
+| Crochets d'ardoise | 9 047 pièces |  |
+| Liteaux 18×40 | 2 049 ml | ≈ 41 bottes de 50 ml |
 | Liteaux 27×40 | 350 ml | ≈ 7 bottes de 50 ml |
 | Écran HPV | 3 rouleaux | 214,29 m² |
 | Faîtage zinc (bande) | 6 longueurs de 3 m | 17,85 ml |
@@ -147,7 +147,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 - Ardoises pour jouées de lucarnes : 6 unités — BatiClair ne sait pas encore calculer les matériaux de cet ouvrage.
 - Entourage de cheminée zinc et solin : 2 unités — Solin, abergement : pas encore de règle de calcul dans BatiClair.
 
-**Hypothèses (modifiables) :** pente du toit 45 % · zone climatique 3 · longueur du rampant 5,5 m · recouvrement 130 mm · pureau 8,5 cm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm
+**Hypothèses (modifiables) :** pente du toit 45° · zone climatique 3 · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm
 
 ### Si l'artisan dit « intérieur des terres »
 
@@ -157,9 +157,9 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 | Article | Quantité | Repère |
 |---|---|---|
-| Ardoises 30×22 | 10 048 pièces |  |
-| Crochets d'ardoise | 9 761 pièces |  |
-| Liteaux 18×40 | 2 211 ml | ≈ 45 bottes de 50 ml |
+| Ardoises 30×22 | 8 678 pièces |  |
+| Crochets d'ardoise | 8 430 pièces |  |
+| Liteaux 18×40 | 1 910 ml | ≈ 39 bottes de 50 ml |
 | Liteaux 27×40 | 350 ml | ≈ 7 bottes de 50 ml |
 | Écran HPV | 3 rouleaux | 214,29 m² |
 | Faîtage zinc (bande) | 6 longueurs de 3 m | 17,85 ml |
@@ -174,4 +174,4 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 - Ardoises pour jouées de lucarnes : 6 unités — BatiClair ne sait pas encore calculer les matériaux de cet ouvrage.
 - Entourage de cheminée zinc et solin : 2 unités — Solin, abergement : pas encore de règle de calcul dans BatiClair.
 
-**Hypothèses (modifiables) :** pente du toit 45 % · longueur du rampant 5,5 m · recouvrement 110 mm · pureau 9,5 cm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm
+**Hypothèses (modifiables) :** pente du toit 45° · longueur du rampant 5,5 m · recouvrement 80 mm · pureau 11 cm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm

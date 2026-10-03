@@ -1,6 +1,6 @@
 # Plan d'architecture v2 — une page, avant tout code
 
-Répond au mandat de la section 22 du référentiel (`docs/referentiel-couverture.md`). Rien n'est codé tant que le fondateur n'a pas dit « ok ».
+Répond au mandat de la section 22 du référentiel (`docs/referentiel-couverture.md`). **Validé par le fondateur le 3 octobre 2026**, avec un changement : les questions par sensibilité passent avant le prompt v8. Décisions du même jour : PR #121 fusionnée sans lancement public ; bêta fermée de 10 couvreurs dès les 5 correctifs bloquants ; la pente est en degrés partout (boutons 30° / 35° / 45° / autre).
 
 ## Ce qu'on garde (ça marche, c'est testé)
 
@@ -41,8 +41,8 @@ Répond au mandat de la section 22 du référentiel (`docs/referentiel-couvertur
 | 0 | Correctifs bloquants de l'audit (B1–B5) | 1 sem | — |
 | 1 | Bêta fermée : 10 couvreurs, écran actuel, observation | 2 sem (en parallèle) | 0 |
 | 2 | Référentiels en JSON + schéma + README par métier | 1 sem | — |
-| 3 | Prompt v8 (ouvrages + données chantier), passé sur les vrais devis | 1,5 sem | 2, clé API |
-| 4 | Questions par sensibilité | 0,5 sem | 3 |
+| 3 | Questions par sensibilité (décision du fondateur : avant le prompt v8) | 0,5 sem | 2 |
+| 4 | Prompt v8 (ouvrages + données chantier), passé sur les vrais devis | 1,5 sem | 3, clé API |
 | 5 | Parcours conversationnel + bon de commande PDF | 1,5 sem | 4 |
 | 6 | Préférences apprises | 1 sem | 5 |
 | 7 | Lancement public couvreurs | — | 1 à 6 |

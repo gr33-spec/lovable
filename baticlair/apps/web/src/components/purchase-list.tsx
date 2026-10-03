@@ -146,9 +146,15 @@ function BuyRow({ item, takeoff }: { item: PurchaseItem; takeoff: Takeoff }) {
 }
 
 /** Les hypothèses par défaut, sur une ligne repliée ; chacune se change d'un appui. */
+/** « 45° » collé, « 60 cm » espacé, « 3 » pour les pièces. */
+function withUnit(value: string, unit: string): string {
+  if (!unit || unit === "u") return value;
+  return unit === "°" ? `${value}°` : `${value} ${unit}`;
+}
+
 function Assumptions({ assumptions, editable, pending, onAnswer }: { assumptions: PurchaseAssumption[]; editable: boolean; pending: boolean; onAnswer: DecisionHandlers["onAnswer"] }) {
   const [open, setOpen] = useState(false);
-  const text = assumptions.map((a) => `${a.label.toLowerCase()} ${a.value}${a.unit && a.unit !== "u" ? ` ${a.unit}` : ""}`).join(" · ");
+  const text = assumptions.map((a) => `${a.label.toLowerCase()} ${withUnit(a.value, a.unit)}`).join(" · ");
   return (
     <section aria-label="Hypothèses" className="rounded-2xl bg-surface px-4 py-3 shadow-card">
       <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="flex min-h-11 w-full items-start gap-2 text-left text-sm">
@@ -177,8 +183,7 @@ function AssumptionRow({ a, editable, pending, onAnswer }: { a: PurchaseAssumpti
   return (
     <li className="flex flex-col gap-2 py-2.5">
       <p className="text-sm">
-        <span className="font-bold">{a.label}</span> : {a.value}
-        {unit ? ` ${unit}` : ""}
+        <span className="font-bold">{a.label}</span> : {withUnit(a.value, a.unit)}
         {a.note ? <span className="text-muted"> — {a.note}</span> : null}
       </p>
       {!editable ? null : a.choices.length > 0 ? (
