@@ -1,0 +1,96 @@
+import { describe, expect, it } from "vitest";
+import {
+  applyLineRoles,
+  artisanView,
+  computeWithAnswers,
+  planQuote,
+  proposeLineRoles,
+  purchaseView,
+  ROOFING_REFERENTIAL,
+  slotsGivenByQuote,
+  tradeProfile,
+  validateTakeoff,
+  type EngineAnswer,
+  type LineRole,
+  type PurchaseView,
+} from "../src/index.js";
+import type { BenchLine } from "./devis-reels/truth.js";
+
+/**
+ * RÈGLE DU FONDATEUR (2026-10-03) : l'app ne demande JAMAIS une quantité à l'artisan.
+ * « Ardoises 30×22, 200 m², crochets compris » → ardoises, crochets, liteaux calculés avec
+ * les hypothèses par défaut (pente 45°, zone 3), dites et modifiables. Si une donnée
+ * manque vraiment : UNE question courte, avec des boutons de valeur.
+ */
+function read(bench: BenchLine[], answers: Record<string, EngineAnswer> = {}): PurchaseView {
+  const profile = tradeProfile("roofing");
+  const lines = bench.map((l) => ({ ref: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit }));
+  const raw = validateTakeoff(lines.map((l) => ({ id: l.ref, designation: l.designation, quantityRaw: l.quantity, unitRaw: l.unit, source: "client_quote" as const })), profile);
+  const plan = planQuote(lines, ROOFING_REFERENTIAL, profile);
+  const proposals = proposeLineRoles(lines, plan, raw, ROOFING_REFERENTIAL);
+  const roles = new Map<string, LineRole>([...proposals].map(([k, v]) => [k, v.role]));
+  for (const [key, value] of Object.entries(answers)) if (key.startsWith("role:") && (value === "measure" || value === "purchase")) roles.set(key.slice(5), value);
+  const asks = new Map([...proposals].filter(([id, p]) => p.ask && roles.get(id) === "undetermined").map(([k, p]) => [k, p.ask!]));
+  const validation = applyLineRoles(raw, roles);
+  const engine = computeWithAnswers(ROOFING_REFERENTIAL, plan, answers, {}, {}, slotsGivenByQuote(plan, validation));
+  const view = artisanView(
+    lines.map((l) => ({ id: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: false, enteredByArtisan: false })),
+    validation,
+    engine,
+    { plan, roles, ref: ROOFING_REFERENTIAL, asks },
+  );
+  return purchaseView(view, engine, { plan, roles, ref: ROOFING_REFERENTIAL, validation });
+}
+
+const short = (d: string) => d.replace(/\s*\((?:fourniture\s*(?:&|et)\s*pose|f\.?\s*(?:&|et)\s*p\.?|fourniture)\)/gi, "").split(/\s[-–—]\s/)[0]!.trim();
+
+
+const one = (designation: string, quantity: string | null, unit: string | null) => read([{ ref: "1", designation, quantity, unit } as unknown as BenchLine]);
+const bought = (v: PurchaseView) => Object.fromEntries(v.toBuy.map((b) => [b.label, b.quantity]));
+const COMPLETE = {
+  "Ardoises 30×22": "9 313 pièces",
+  "Crochets d'ardoise": "9 047 pièces",
+  "Liteaux 18×40": "2 049 ml",
+};
+
+describe("jamais de quantité demandée à l'artisan", () => {
+  it.each([
+    ["Ardoises 30×22, 200 m², crochets compris", "200", "m2"],
+    ["Couverture ardoises 30x22 crochets compris", "200", "m²"],
+    ["Fourniture et pose ardoises 30x22 sur 200 m2", "1", "ens"],
+    ["Couverture en ardoises 30 x 22, crochets compris, 200 m²", "1", "forfait"],
+  ])("« %s » (%s %s) : tout est calculé, aucune question", (designation, quantity, unit) => {
+    const v = one(designation, quantity, unit);
+    expect(v.questions).toEqual([]);
+    expect(bought(v)).toMatchObject(COMPLETE);
+    // Hypothèses dites, en tête la pente (45°) et la zone (3).
+    expect(v.assumptions.slice(0, 2).map((a) => [a.key, a.value, a.unit])).toEqual([
+      ["param:pente", "45", "°"],
+      ["param:zone", "3", "u"],
+    ]);
+    expect(v.canValidate).toBe(true);
+  });
+
+  it("autres formats du référentiel (§3) : 32×22 calculé comme 30×22", () => {
+    expect(bought(one("Ardoises naturelles 32x22 pose au crochet", "200", "m²"))).toMatchObject({ "Ardoises 32×22": "8 485 pièces", "Crochets d'ardoise": "8 243 pièces" });
+  });
+
+  it("exemple complet du référentiel (§3) : 200 m², 32×22, 45°, zone 3, rampant 6 m → 8 460 ardoises théoriques, 1 950 ml de liteaux", () => {
+    const v = read([{ ref: "1", designation: "Ardoises 32x22 crochets compris", quantity: "200", unit: "m2" } as unknown as BenchLine], {
+      "param:longueur_rampant": { value: "6", unit: "m" },
+    });
+    // R = 95 + 10 = 105 mm → pureau 107,5 mm → 200 / (0,22 × 0,1075) = 8 456,7 (le référentiel arrondit à 8 460) ; + 5 % de perte.
+    expect(bought(v)["Ardoises 32×22"]).toBe("8 880 pièces");
+    // Liteaux : 200 / 0,1075 = 1 860,5 ml + 5 % = 1 953,5 → 1 954 ml (référentiel : 1 950 ml, 39 bottes).
+    expect(bought(v)["Liteaux 18×40"]).toBe("1 954 ml");
+  });
+
+  it("surface vraiment absente (1 forfait, rien d'écrit) : UNE question, à boutons, jamais « quelle quantité ? »", () => {
+    const v = one("Ardoises 30×22 crochets compris", "1", "forfait");
+    expect(v.questions).toHaveLength(1);
+    expect(v.questions[0]).toMatchObject({ text: "Surface du toit ?", question: { options: [{ label: "50 m²" }, { label: "100 m²" }, { label: "150 m²" }, { label: "200 m²" }] } });
+    expect(JSON.stringify(v.questions)).not.toMatch(/quantit/i);
+    // Réponse d'un geste → la liste complète.
+    expect(bought(read([{ ref: "1", designation: "Ardoises 30×22 crochets compris", quantity: "1", unit: "forfait" } as unknown as BenchLine], { "param:surface": { value: "200", unit: "m2" } }))).toMatchObject(COMPLETE);
+  });
+});

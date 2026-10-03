@@ -1,6 +1,6 @@
 # Plan d'architecture v2 — une page, avant tout code
 
-Répond au mandat de la section 22 du référentiel (`docs/referentiel-couverture.md`). **Validé par le fondateur le 3 octobre 2026**, avec un changement : les questions par sensibilité passent avant le prompt v8. Décisions du même jour : PR #121 fusionnée sans lancement public ; bêta fermée de 10 couvreurs dès les 5 correctifs bloquants ; la pente est en degrés partout (boutons 30° / 35° / 45° / autre).
+Répond au mandat de la section 22 du référentiel (`docs/referentiel-couverture.md`). **Validé par le fondateur le 3 octobre 2026**, avec deux changements : les questions par sensibilité passent avant le prompt v8 ; le parcours conversationnel (chat) passe en premier, avant les référentiels JSON (fondateur, 3 octobre). Décisions du même jour : PR #121 fusionnée sans lancement public ; bêta fermée de 10 couvreurs dès les 5 correctifs bloquants ; la pente est en degrés partout (boutons 30° / 35° / 45° / autre).
 
 ## Ce qu'on garde (ça marche, c'est testé)
 
@@ -38,14 +38,14 @@ Répond au mandat de la section 22 du référentiel (`docs/referentiel-couvertur
 
 | # | Chantier | Durée | Dépend de |
 |---|---|---|---|
-| 0 | Correctifs bloquants de l'audit (B1–B5) | 1 sem | — |
-| 1 | Bêta fermée : 10 couvreurs, écran actuel, observation | 2 sem (en parallèle) | 0 |
-| 2 | Référentiels en JSON + schéma + README par métier | 1 sem | — |
-| 3 | Questions par sensibilité (décision du fondateur : avant le prompt v8) | 0,5 sem | 2 |
+| 0 | Correctifs bloquants de l'audit (B1–B5 ; B1 et B2 faits) | 1 sem | — |
+| 1 | **Parcours conversationnel** (§21) : nouveau chantier → dépôt du devis → chat plein écran (étapes de réflexion visibles, une question courte à la fois, carte quantitatif par ouvrage) → envoi fournisseur. Remplace l'écran en 5 étapes et les cartes « À confirmer ». Maquette validée d'abord. | 1,5 sem | maquette |
+| 2 | Bêta fermée : 10 couvreurs, sur le chat | 2 sem (en parallèle) | 0, 1 |
+| 3 | Questions par sensibilité | 0,5 sem | 1 |
 | 4 | Prompt v8 (ouvrages + données chantier), passé sur les vrais devis | 1,5 sem | 3, clé API |
-| 5 | Parcours conversationnel + bon de commande PDF | 1,5 sem | 4 |
-| 6 | Préférences apprises | 1 sem | 5 |
-| 7 | Lancement public couvreurs | — | 1 à 6 |
+| 5 | Référentiels en JSON + schéma + README par métier | 1 sem | — |
+| 6 | Bon de commande PDF + préférences apprises | 1,5 sem | 1 |
+| 7 | Lancement public couvreurs | — | 0 à 6 |
 
 Total : ~7 semaines de développement, lancement public couvreurs mi-novembre si la bêta ne révèle rien de gros.
 

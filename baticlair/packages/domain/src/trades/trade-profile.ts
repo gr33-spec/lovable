@@ -92,6 +92,8 @@ export function normalizeText(raw: string): string {
     // Ligatures : « main d'œuvre » = « main d'oeuvre ».
     .replace(/œ/g, "oe")
     .replace(/æ/g, "ae")
+    // Formats : « 30×22 » = « 30x22 ».
+    .replace(/[×✕]/g, "x")
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .replace(/[’'`-]/g, " ")

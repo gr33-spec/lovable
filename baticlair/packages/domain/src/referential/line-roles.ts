@@ -83,6 +83,15 @@ export function proposeLineRoles(lines: readonly RoleLine[], plan: QuotePlan, va
       }
       continue;
     }
+    if (planned?.status === "planned" && v.unit === "FORFAIT") {
+      roles.set(v.lineId, { role: "measure", why: "La ligne décrit l'ouvrage au forfait : rien ne se commande « au forfait »." });
+      continue;
+    }
+    if (planned?.status === "planned" && planned.measureInText) {
+      const m = planned.measureInText;
+      roles.set(v.lineId, { role: "measure", why: `La mesure de l'ouvrage est écrite dans le texte (${m.value.replace(".", ",")} ${m.unit === "m2" ? "m²" : m.unit}) : la quantité de la ligne ne se commande pas.` });
+      continue;
+    }
     if (planned?.status === "planned") {
       const work = ref.workItems.find((w) => w.id === planned.workItemId);
       if (work && planned.mentions.length > 0) {
@@ -120,7 +129,8 @@ export function applyLineRoles(validation: TakeoffValidation, roles: ReadonlyMap
     lines: validation.lines.map((v) => {
       const role = roles.get(v.lineId);
       if (role === "measure" && v.basis !== "work") {
-        return { ...v, basis: "work", issues: [...v.issues.filter((i) => i.code !== "WORK_QUANTITY"), MEASURE_ISSUE] };
+        // Une mesure n'a pas d'« unité inhabituelle » : 1 forfait de couverture décrit l'ouvrage, il ne se commande pas.
+        return { ...v, basis: "work", issues: [...v.issues.filter((i) => i.code !== "WORK_QUANTITY" && i.code !== "UNIT_UNUSUAL_FOR_FAMILY"), MEASURE_ISSUE] };
       }
       // Ambiguïté tranchable (« 6 : ardoises ou jouées ? ») : tant que l'artisan n'a pas répondu, ce n'est
       // PAS une quantité d'achat (ni ✓, ni emplacement « déjà donné » qui effacerait un calcul).

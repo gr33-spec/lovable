@@ -129,7 +129,21 @@ const ENTRAXE_PARAM: ParamDef = {
     { label: "90 cm (fermettes)", value: "90" },
   ],
 };
-const SURFACE_PARAM: ParamDef = { key: "surface", label: "Surface de toiture", unit: "m2", kind: "site_data", question: "Quelle surface de toiture ?", fromLineQuantity: true };
+// Jamais « quelle quantité ? » : si le devis ne donne pas la surface, une question courte à boutons (« autre » = saisie).
+const SURFACE_PARAM: ParamDef = {
+  key: "surface",
+  label: "Surface de toiture",
+  unit: "m2",
+  kind: "site_data",
+  question: "Surface du toit ?",
+  fromLineQuantity: true,
+  choices: [
+    { label: "50 m²", value: "50" },
+    { label: "100 m²", value: "100" },
+    { label: "150 m²", value: "150" },
+    { label: "200 m²", value: "200" },
+  ],
+};
 const USUAL_LITEAU_TUILE = { text: "Liteaux 27×40 pour la tuile (section courante).", source: F, productShort: "Liteaux 27×40", productId: "liteau-sapin-27x40" };
 const USUAL_CONTRE_LITEAU = { text: "Contre-liteaux 27×40 sur chevrons (section courante).", source: F, productShort: "Liteaux 27×40", productId: "liteau-sapin-27x40" };
 const USUAL_ECRAN = { text: "Écran HPV courant en rouleau de 1,5 × 50 m (75 m²).", source: F, productId: "ecran-hpv-standard" };
@@ -139,6 +153,24 @@ const ECRAN_CONSTANTS = {
   recouvrement_forte_pente: condition("0.10", "m", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED, "Pente supérieure au seuil."),
 };
 const ECRAN_FORMULA = "surface * ecran.largeur_rouleau / (ecran.largeur_rouleau - si(pente <= regle.seuil_pente_ecran, regle.recouvrement_faible_pente, regle.recouvrement_forte_pente))";
+
+/** Formats d'ardoise naturelle (hauteur × largeur, cm) du tableau du référentiel du fondateur (§3). */
+const SLATE_FORMATS: [number, number][] = [[40, 25], [40, 22], [35, 25], [35, 22], [33, 23], [32, 22], [30, 22], [30, 20], [30, 18]];
+function slate(h: number, l: number): Product {
+  return {
+    id: `ardoise-${h}x${l}`,
+    family: "roof_slate",
+    label: `Ardoise ${h} × ${l} cm`,
+    shortLabel: `Ardoises ${h}×${l}`,
+    aliases: [`${h}x${l}`, `${h} x ${l}`, `${h}*${l}`],
+    generic: true,
+    attributes: {
+      longueur: spec((h / 100).toFixed(2), "m", "format-ardoise", FOUNDER_VALIDATED),
+      largeur: spec((l / 100).toFixed(2), "m", "format-ardoise", FOUNDER_VALIDATED),
+    },
+    sellingUnits: [{ id: "piece", label: { one: "pièce", many: "pièces" }, contains: ONE_PIECE, primary: true }],
+  };
+}
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
@@ -367,19 +399,9 @@ export const ROOFING_REFERENTIAL: Referential = {
       },
       sellingUnits: BATTEN_UNITS,
     },
-    {
-      id: "ardoise-30x22",
-      family: "roof_slate",
-      label: "Ardoise 30 × 22 cm",
-      shortLabel: "Ardoises 30×22",
-      aliases: ["30x22", "30 x 22", "30*22"],
-      generic: true,
-      attributes: {
-        longueur: spec("0.30", "m", "format-ardoise", FOUNDER_VALIDATED),
-        largeur: spec("0.22", "m", "format-ardoise", FOUNDER_VALIDATED),
-      },
-      sellingUnits: [{ id: "piece", label: { one: "pièce", many: "pièces" }, contains: ONE_PIECE, primary: true }],
-    },
+    // Formats d'ardoise naturelle du référentiel (§3, tableau par format). Les petits formats (27, 25, 22 cm)
+    // n'y sont pas : leur recouvrement de référence est plus faible que celui du tableau pente × zone.
+    ...SLATE_FORMATS.map(([h, l]) => slate(h, l)),
     {
       id: "soprema-sop-ecran-hpv-r2-150x50",
       family: "underlay",
