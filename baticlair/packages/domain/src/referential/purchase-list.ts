@@ -1,6 +1,6 @@
 import { slotCharacteristicsKey } from "./plan.js";
 import { Decimal } from "../shared/decimal.js";
-import type { NeedResult, Question, TraceLine, WorkItemResult } from "./engine.js";
+import { DEVIS_MARK, withoutDevisMark, type NeedResult, type Question, type TraceLine, type WorkItemResult } from "./engine.js";
 
 /**
  * La liste d'achat telle que l'artisan la voit : une ligne = un nom court,
@@ -50,7 +50,12 @@ function row(workItemId: string, n: NeedResult, characteristics: string[], sameP
   const name = sameProductTwice && !norm(n.label).startsWith(norm(n.slotLabel)) ? `${n.slotLabel} (${n.label})` : n.label;
   // Une caractéristique déjà dans le nom (« 27×40 », « HP10 ») n'est pas répétée.
   const extra = characteristics.filter((c) => !norm(name).includes(norm(c)));
-  const label = extra.length > 0 ? `${name} ${extra.join(" ")}` : name;
+  // Une désignation calculée dit où vont les caractéristiques du devis (« Tubes de descente {devis} Ø80 »).
+  const label = n.labelWithQuote
+    ? withoutDevisMark(n.labelWithQuote.replace(DEVIS_MARK, extra.join(" ")))
+    : extra.length > 0
+      ? `${name} ${extra.join(" ")}`
+      : name;
   const base = { needId: n.needId, workItemId, label, toConfirm: n.origin === "suggested", provisional: n.provisional, trace: n.trace };
   if (n.status === "question") return { ...base, state: "question", ...(n.question ? { question: n.question } : {}) };
   if (n.status === "unknown") return { ...base, state: "unknown", detail: n.reason ?? "Information manquante." };

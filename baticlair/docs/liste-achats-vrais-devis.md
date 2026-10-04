@@ -13,6 +13,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 **Questions :**
 
 - Sortie de toit : quel diamètre ? → [Ø 80] [Ø 100] [Ø 125] [Ø 150] [Ø 180] [VMC]
+- Crochets de gouttière : sur les chevrons ou en façade (bandeau) ? → [Sur les chevrons] [En façade (bandeau)]
 - Sortie de toit : conduit de fumée ou ventilation ? → [Conduit de fumée] [Ventilation]
 - J'ai identifié : Tuiles HP10. C'est bien ce modèle ? → [Oui] [Modifier]
 
@@ -21,18 +22,17 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Article | Quantité | Repère |
 |---|---|---|
 | Liteaux 27×40 | 547 ml | ≈ 12 bottes de 50 ml |
-| Écran HPV | 2 rouleaux | 128,57 m² |
+| Écran HPV, rouleau 1,50 × 50 m | 2 rouleaux | 128,57 m² |
 | Tuiles de rive | 78 pièces |  |
 | Faîtières | 29 pièces |  |
 | Closoir | 2 rouleaux de 5 m | 10 ml à couvrir |
 | Crochets de faîtière | 29 pièces |  |
 | Abouts de faîtage | 2 pièces |  |
-| Gouttière PVC sable demi-ronde | 5 longueurs de 4 m | 20 ml à couvrir |
-| Crochets de gouttière | 50 pièces |  |
-| Naissances | 2 pièces |  |
-| Tubes de descente Ø80 PVC sable | 8 ml |  |
-| Coudes | 4 pièces |  |
-| Colliers | 8 pièces |  |
+| Gouttière PVC sable demi-ronde dév. 25 | 5 longueurs de 4 m | 20 ml à couvrir |
+| Naissances PVC sable demi-ronde dév. 25 Ø80 | 2 pièces |  |
+| Tubes de descente PVC sable Ø80 | 8 ml |  |
+| Coudes de descente PVC sable Ø80 | 4 pièces |  |
+| Colliers de descente Ø80 | 8 pièces |  |
 | Chatières de ventilation | 10 pièces |  |
 
 **Hypothèses (modifiables) :** zone climatique 3 · pente du toit 45° · pureau 31 cm · tuiles de rive Tuiles de rive  · coudes par descente 2
@@ -44,6 +44,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 **Questions :**
 
 - Sortie de toit : quel diamètre ? → [Ø 80] [Ø 100] [Ø 125] [Ø 150] [Ø 180] [VMC]
+- Crochets de gouttière : sur les chevrons ou en façade (bandeau) ? → [Sur les chevrons] [En façade (bandeau)]
 - Sortie de toit : conduit de fumée ou ventilation ? → [Conduit de fumée] [Ventilation]
 
 **À acheter :**
@@ -52,18 +53,17 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 |---|---|---|
 | Tuiles HP10 rouge | 1 488 pièces | ≈ 7 palettes |
 | Liteaux 27×40 | 547 ml | ≈ 12 bottes de 50 ml |
-| Écran HPV | 2 rouleaux | 128,57 m² |
+| Écran HPV, rouleau 1,50 × 50 m | 2 rouleaux | 128,57 m² |
 | Tuiles de rive | 78 pièces |  |
 | Faîtières | 29 pièces |  |
 | Closoir | 2 rouleaux de 5 m | 10 ml à couvrir |
 | Crochets de faîtière | 29 pièces |  |
 | Abouts de faîtage | 2 pièces |  |
-| Gouttière PVC sable demi-ronde | 5 longueurs de 4 m | 20 ml à couvrir |
-| Crochets de gouttière | 50 pièces |  |
-| Naissances | 2 pièces |  |
-| Tubes de descente Ø80 PVC sable | 8 ml |  |
-| Coudes | 4 pièces |  |
-| Colliers | 8 pièces |  |
+| Gouttière PVC sable demi-ronde dév. 25 | 5 longueurs de 4 m | 20 ml à couvrir |
+| Naissances PVC sable demi-ronde dév. 25 Ø80 | 2 pièces |  |
+| Tubes de descente PVC sable Ø80 | 8 ml |  |
+| Coudes de descente PVC sable Ø80 | 4 pièces |  |
+| Colliers de descente Ø80 | 8 pièces |  |
 | Chatières de ventilation | 10 pièces |  |
 
 **Hypothèses (modifiables) :** zone climatique 3 · pente du toit 45° · pureau 31 cm · tuiles de rive Tuiles de rive  · coudes par descente 2
@@ -75,6 +75,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 **Questions :**
 
 - Sortie de toit : quel diamètre ? → [Ø 80] [Ø 100] [Ø 125] [Ø 150] [Ø 180] [VMC]
+- Crochets de gouttière : sur les chevrons ou en façade (bandeau) ? → [Sur les chevrons] [En façade (bandeau)]
 - Sortie de toit : conduit de fumée ou ventilation ? → [Conduit de fumée] [Ventilation]
 
 **À acheter :**
@@ -83,18 +84,17 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 |---|---|---|
 | Tuiles HP10 rouge | 1 345 pièces | ≈ 6 palettes |
 | Liteaux 27×40 | 508 ml | ≈ 11 bottes de 50 ml |
-| Écran HPV | 2 rouleaux | 128,57 m² |
+| Écran HPV, rouleau 1,50 × 50 m | 2 rouleaux | 128,57 m² |
 | Tuiles de rive | 70 pièces |  |
 | Faîtières | 29 pièces |  |
 | Closoir | 2 rouleaux de 5 m | 10 ml à couvrir |
 | Crochets de faîtière | 29 pièces |  |
 | Abouts de faîtage | 2 pièces |  |
-| Gouttière PVC sable demi-ronde | 5 longueurs de 4 m | 20 ml à couvrir |
-| Crochets de gouttière | 50 pièces |  |
-| Naissances | 2 pièces |  |
-| Tubes de descente Ø80 PVC sable | 8 ml |  |
-| Coudes | 4 pièces |  |
-| Colliers | 8 pièces |  |
+| Gouttière PVC sable demi-ronde dév. 25 | 5 longueurs de 4 m | 20 ml à couvrir |
+| Naissances PVC sable demi-ronde dév. 25 Ø80 | 2 pièces |  |
+| Tubes de descente PVC sable Ø80 | 8 ml |  |
+| Coudes de descente PVC sable Ø80 | 4 pièces |  |
+| Colliers de descente Ø80 | 8 pièces |  |
 | Chatières de ventilation | 10 pièces |  |
 
 **Hypothèses (modifiables) :** pente du toit 45° · tuiles de rive Tuiles de rive  · zone climatique 3 · coudes par descente 2
@@ -107,8 +107,10 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 **Questions :**
 
+- Développé de la bande zinc ? → [100 mm (solin, couvre-joint)] [250 mm] [330 mm] [400 mm]
 - Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 - Périmètre d'une cheminée (les 4 côtés) ? → [2 m] [3 m] [4 m] [5 m]
+- Descentes en Ø 80 ou en Ø 100 ? → [Ø 80] [Ø 100] [Ø 120]
 - Combien de descentes pour cette gouttière ? → [1] [2] [3] [4]
 - 6 : c'est le nombre d'ardoises à commander, ou le nombre de jouées ? → [6 ardoises à commander] [6 jouées (matériaux à calculer)]
 
@@ -116,18 +118,17 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 | Article | Quantité | Repère |
 |---|---|---|
-| Ardoises 30×22 | 9 271 pièces |  |
-| Crochets d'ardoise | 9 457 pièces |  |
+| Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces |  |
+| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces |  |
 | Liteaux 18×40 | 2 049 ml | ≈ 41 bottes de 50 ml |
 | Liteaux 27×40 | 350 ml | ≈ 7 bottes de 50 ml |
-| Écran HPV | 3 rouleaux | 214,29 m² |
-| Faîtage zinc (bande) | 6 longueurs de 3 m |  |
+| Écran HPV, rouleau 1,50 × 50 m | 3 rouleaux | 214,29 m² |
 | Pattes de fixation | 51 pièces |  |
-| Gouttière zinc | 5 longueurs de 4 m | 17 ml à couvrir |
-| Crochets de gouttière | 43 pièces |  |
+| Gouttière zinc dév. 25 | 5 longueurs de 4 m | 17 ml à couvrir |
+| Crochets de gouttière bandeau dév. 25 | 43 pièces |  |
 | Chatières de ventilation | 12 pièces |  |
 
-**Hypothèses (modifiables) :** pente du toit 45° · région ardoise III · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet 1 mm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm
+**Hypothèses (modifiables) :** pente du toit 45° · région ardoise III · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet standard mm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm · aspect du zinc zinc naturel
 
 ### Après « 6 jouées » et « 2 descentes »
 
@@ -135,30 +136,30 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 **Questions :**
 
+- Développé de la bande zinc ? → [100 mm (solin, couvre-joint)] [250 mm] [330 mm] [400 mm]
 - Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 - Périmètre d'une cheminée (les 4 côtés) ? → [2 m] [3 m] [4 m] [5 m]
+- Descentes en Ø 80 ou en Ø 100 ? → [Ø 80] [Ø 100] [Ø 120]
 
 **À acheter :**
 
 | Article | Quantité | Repère |
 |---|---|---|
-| Ardoises 30×22 | 9 271 pièces |  |
-| Crochets d'ardoise | 9 457 pièces |  |
+| Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces |  |
+| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces |  |
 | Liteaux 18×40 | 2 049 ml | ≈ 41 bottes de 50 ml |
 | Liteaux 27×40 | 350 ml | ≈ 7 bottes de 50 ml |
-| Écran HPV | 3 rouleaux | 214,29 m² |
-| Faîtage zinc (bande) | 6 longueurs de 3 m |  |
+| Écran HPV, rouleau 1,50 × 50 m | 3 rouleaux | 214,29 m² |
 | Pattes de fixation | 51 pièces |  |
-| Gouttière zinc | 5 longueurs de 4 m | 17 ml à couvrir |
-| Crochets de gouttière | 43 pièces |  |
-| Naissances | 2 pièces |  |
+| Gouttière zinc dév. 25 | 5 longueurs de 4 m | 17 ml à couvrir |
+| Crochets de gouttière bandeau dév. 25 | 43 pièces |  |
 | Chatières de ventilation | 12 pièces |  |
 
 **À faire chiffrer par le fournisseur :**
 
 - Ardoises pour jouées de lucarnes : 6 unités — BatiClair ne sait pas encore calculer les matériaux de cet ouvrage.
 
-**Hypothèses (modifiables) :** pente du toit 45° · région ardoise III · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet 1 mm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm
+**Hypothèses (modifiables) :** pente du toit 45° · région ardoise III · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet standard mm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm · aspect du zinc zinc naturel
 
 ### Si l'artisan dit « intérieur des terres »
 
@@ -166,27 +167,27 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 **Questions :**
 
+- Développé de la bande zinc ? → [100 mm (solin, couvre-joint)] [250 mm] [330 mm] [400 mm]
 - Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 - Périmètre d'une cheminée (les 4 côtés) ? → [2 m] [3 m] [4 m] [5 m]
+- Descentes en Ø 80 ou en Ø 100 ? → [Ø 80] [Ø 100] [Ø 120]
 
 **À acheter :**
 
 | Article | Quantité | Repère |
 |---|---|---|
-| Ardoises 30×22 | 8 547 pièces |  |
-| Crochets d'ardoise | 8 718 pièces |  |
+| Ardoises naturelles Espagne 1er choix 30×22 | 8 547 pièces |  |
+| Crochets d'ardoise inox standard, longueur 9 cm | 8 718 pièces |  |
 | Liteaux 18×40 | 1 910 ml | ≈ 39 bottes de 50 ml |
 | Liteaux 27×40 | 350 ml | ≈ 7 bottes de 50 ml |
-| Écran HPV | 3 rouleaux | 214,29 m² |
-| Faîtage zinc (bande) | 6 longueurs de 3 m |  |
+| Écran HPV, rouleau 1,50 × 50 m | 3 rouleaux | 214,29 m² |
 | Pattes de fixation | 51 pièces |  |
-| Gouttière zinc | 5 longueurs de 4 m | 17 ml à couvrir |
-| Crochets de gouttière | 34 pièces |  |
-| Naissances | 2 pièces |  |
+| Gouttière zinc dév. 25 | 5 longueurs de 4 m | 17 ml à couvrir |
+| Crochets de gouttière bandeau dév. 25 | 34 pièces |  |
 | Chatières de ventilation | 12 pièces |  |
 
 **À faire chiffrer par le fournisseur :**
 
 - Ardoises pour jouées de lucarnes : 6 unités — BatiClair ne sait pas encore calculer les matériaux de cet ouvrage.
 
-**Hypothèses (modifiables) :** pente du toit 45° · longueur du rampant 5,5 m · recouvrement 80 mm · pureau 11 cm · diamètre du crochet 1 mm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm
+**Hypothèses (modifiables) :** pente du toit 45° · longueur du rampant 5,5 m · recouvrement 80 mm · pureau 11 cm · diamètre du crochet standard mm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm · aspect du zinc zinc naturel

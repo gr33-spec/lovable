@@ -34,7 +34,7 @@ describe("joint debout : la question de façonnage, puis des lignes que le fourn
       "Pattes coulissantes joint debout": "519 pièces",
       "Pattes fixes joint debout": "173 pièces",
       "Pointes annelées 2,5 × 28 mm": "1 384 pièces",
-      "Voliges sapin 18 mm": "96 m²",
+      "Voliges sapin 18×200 mm traité": "96 m²",
     });
     expect(bought(v)["Pattes de fixation"]).toBeUndefined();
   });
@@ -42,24 +42,24 @@ describe("joint debout : la question de façonnage, puis des lignes que le fourn
   it("« je façonne » : de la bobine au mètre linéaire, jamais au kg : 39 bacs × (5,5 m + 15 cm de surlongueur) = 221 ml de bobine 500 mm en bord de mer", () => {
     const v = readQuote(DEVIS, { "param:faconnage": { value: "1", unit: "u" } });
     expect(v.questions.filter((d) => d.question?.key === "param:faconnage")).toEqual([]);
-    expect(bought(v)["Zinc naturel en bobine 500 mm"]).toBe("221 ml");
+    expect(bought(v)["Bobine zinc naturel 0,65 mm, largeur 500 mm"]).toBe("221 ml");
     expect(JSON.stringify(v.toBuy)).not.toMatch(/\bkg\b/);
     expect(bought(v)["Bacs joint debout zinc"]).toBeUndefined();
     expect(v.assumptions.map((a) => `${a.key}=${a.value}`)).toEqual(expect.arrayContaining(["param:epaisseur_zinc=0,65", "derived:largeur_bobine=500", "param:zone=3"]));
     // 0,70 mm : la longueur ne change pas ; l'épaisseur part dans « Le chantier en bref ».
     const thick = readQuote(DEVIS, { "param:faconnage": { value: "1", unit: "u" }, "param:epaisseur_zinc": { value: "0.7", unit: "mm" } });
-    expect(bought(thick)["Zinc naturel en bobine 500 mm"]).toBe("221 ml");
+    expect(bought(thick)["Bobine zinc naturel 0,70 mm, largeur 500 mm"]).toBe("221 ml");
     expect(v.canValidate).toBe(true); // le voligeage du devis est reconnu (§7) : plus rien à confirmer
   });
 
   it("« je commande façonné » : des bacs à la longueur du rampant (91 m² / 5,5 m = 16,5 m de pan ÷ 0,43 = 39 bacs)", () => {
     const v = readQuote(DEVIS, { "param:faconnage": { value: "2", unit: "u" } });
-    expect(bought(v)["Bacs joint debout zinc"]).toBe("39 pièces");
-    expect(bought(v)["Zinc naturel en bobine 500 mm"]).toBeUndefined();
+    expect(bought(v)["Bacs joint debout zinc naturel 0,65 mm"]).toBe("39 pièces");
+    expect(bought(v)["Bobine zinc naturel 0,65 mm, largeur 500 mm"]).toBeUndefined();
     expect(v.assumptions.map((a) => `${a.key}=${a.value}`)).toEqual(expect.arrayContaining(["param:longueur_rampant=5,5", "derived:entraxe_joints=430"]));
     // Intérieur des terres : bobine 650, entraxe 580 → 16,5 / 0,58 = 29 bacs ; pattes 91 × 4,20 = 383 coulissantes, 91 × 1,40 = 128 fixes.
     const inland = readQuote(DEVIS, { "param:faconnage": { value: "2", unit: "u" }, "param:zone": { value: "1", unit: "u" } });
-    expect(bought(inland)).toMatchObject({ "Bacs joint debout zinc": "29 pièces", "Pattes coulissantes joint debout": "383 pièces", "Pattes fixes joint debout": "128 pièces" });
+    expect(bought(inland)).toMatchObject({ "Bacs joint debout zinc naturel 0,65 mm": "29 pièces", "Pattes coulissantes joint debout": "383 pièces", "Pattes fixes joint debout": "128 pièces" });
   });
 
   it("chaque ligne commandée passe le test du fournisseur", () => {

@@ -14,6 +14,7 @@ import {
   type OuvrageLevels,
   type Referential,
 } from "../src/index.js";
+import { HABITUDES_BANC } from "./support/habitudes.js";
 import { drafted } from "./support/brouillon.js";
 import { D2026_015_LINES } from "./devis-reels/d2026-015.js";
 
@@ -35,7 +36,7 @@ function read(answers: Record<string, EngineAnswer> = {}, acceptDraft = false, r
   const proposals = proposeLineRoles(D2026_015_LINES.map((l) => ({ ref: l.ref })), plan, raw, ref);
   const roles = new Map<string, LineRole>([...proposals].map(([k, v]) => [k, v.role]));
   const validation = applyLineRoles(raw, roles);
-  const engine = computeWithAnswers(ref, plan, answers, {}, { acceptDraft }, slotsGivenByQuote(plan, validation));
+  const engine = computeWithAnswers(ref, plan, answers, HABITUDES_BANC, { acceptDraft }, slotsGivenByQuote(plan, validation));
   const lines = D2026_015_LINES.map((l) => ({ id: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: false, enteredByArtisan: false }));
   const view = artisanView(lines, validation, engine, { plan, roles, ref });
   return { proposals, roles, validation, view, ouvrage: (ref: string) => view.ouvrages.find((o) => o.lineId === ref)! };
@@ -153,7 +154,8 @@ describe("ouvrages composés", () => {
   });
 
   it("20 m de gouttière « crochets et naissances compris » : profil, crochets et naissances calculés, accessoires visibles", () => {
-    const { ouvrage } = read();
+    // La pose des crochets n'est pas au devis : le comptoir la demande (§47.8) ; ici, en façade.
+    const { ouvrage } = read({ "param:fixation_crochet": { value: "2", unit: "u" } });
     const gouttiere = ouvrage("ligne 7");
     expect(gouttiere.role).toBe("measure");
     expect(gouttiere.direct).toBeNull();

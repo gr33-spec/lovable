@@ -28,5 +28,13 @@
     "10 devis réels de maisons neuves et leurs bons de commande.",
     "Liste H2c et table départementale (arrêté du 4 août 2021).",
     "Doublage collé 10+80 à 10+120 : mortier adhésif par m² (Placo, Knauf, Siniat)."
-  ]
+  ],
+  "questions_comptoir": {
+    "regle": "§47.8 : seules les questions qu'un vendeur de comptoir du négoce poserait pour chiffrer ; le reste est une hypothèse dite et modifiable. Liste de travail, non activée, à faire relire par un vendeur.",
+    "questions": [
+      "Chaque lot pose les questions de son métier (voir les tiroirs des lots)."
+    ],
+    "jamais_demande": [],
+    "date": "2026-10-04"
+  }
 }

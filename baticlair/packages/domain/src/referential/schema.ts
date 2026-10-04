@@ -58,13 +58,14 @@ const param = z.object({
   fromLineQuantity: z.boolean().optional(),
   forSlots: z.array(str).optional(),
   textLabels: z.array(str).optional(),
-  default: z.object({ ...provenance, value: z.string().optional(), formula: z.string().optional() }).optional(),
+  default: z.object({ ...provenance, value: z.string().optional(), formula: z.string().optional(), unlessText: z.array(str).optional() }).optional(),
   choices: z.array(choice).optional(),
   estimate: z.string().optional(),
   display: z.record(str, str).optional(),
   withinChoices: z.boolean().optional(),
   textValues: z.array(z.object({ value: str, keywords: z.array(str).min(1) })).optional(),
   fromWorks: z.array(z.object({ value: str, workItems: z.array(str).min(1) })).optional(),
+  onlyFromPrincipal: z.literal(true).optional(),
 });
 const derived = z.object({ ...provenance, key: str, label: str, unit: str, formula: str, shown: z.boolean().optional() });
 const table = z.object({ ...provenance, label: str, unit: str, axes: z.array(z.object({ param: str, thresholds: z.array(str).min(1) })).min(1), values: z.array(z.array(str).min(1)).min(1) });
@@ -76,8 +77,9 @@ const slot = z.object({
   keywords: z.array(str).optional(),
   usual: z.object({ text: str, source: str, productShort: z.string().optional(), productId: z.string().optional() }).optional(),
   measureOnly: z.literal(true).optional(),
+  charsFrom: z.string().optional(),
 });
-const need = z.object({ ...provenance, id: str, slot: str, formula: str, unit: str, core: z.boolean(), exclusions: z.string().optional(), precision: z.string().optional(), precisionRequires: z.array(str).optional(), designation: z.string().optional(), requires: z.array(str).optional(), when: z.string().optional() });
+const need = z.object({ ...provenance, id: str, slot: str, formula: str, unit: str, core: z.boolean(), exclusions: z.string().optional(), precision: z.string().optional(), precisionRequires: z.array(str).optional(), designation: z.string().optional(), offer: z.object({ unlessQuoteSays: z.array(str).optional() }).optional(), requires: z.array(str).optional(), when: z.string().optional() });
 const workItem = z.object({
   id: str,
   trade: str,

@@ -75,5 +75,19 @@
     "Regards béton (Stradal, Bonna Sabla) : éléments et poids.",
     "Seuil de livraison en vrac (8 t) et charge utile d'un 8 × 4 (≈ 19 t).",
     "Cahiers des charges Enedis / Orange / GRDF pour les fourreaux."
-  ]
+  ],
+  "questions_comptoir": {
+    "regle": "§47.8 : seules les questions qu'un vendeur de comptoir du négoce poserait pour chiffrer ; le reste est une hypothèse dite et modifiable. Liste de travail, non activée, à faire relire par un vendeur.",
+    "questions": [
+      "Granulats : GNT 0/31,5, 0/20, sable 0/4 ? en vrac (tonnes) ou en big-bag ?",
+      "Tube : PVC CR8 ou CR4 ? quel diamètre ?",
+      "Fosse : quel volume, béton ou polyéthylène ?",
+      "Livraison : camion 8×4 ou porteur ?"
+    ],
+    "jamais_demande": [
+      "densité du matériau",
+      "foisonnement"
+    ],
+    "date": "2026-10-04"
+  }
 }

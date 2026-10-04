@@ -15,6 +15,7 @@ import {
   type LineRole,
   type PurchaseView,
 } from "../src/index.js";
+import { HABITUDES_BANC } from "./support/habitudes.js";
 import { ARDOISES_LUCARNES_LINES } from "./devis-reels/ardoises-lucarnes.js";
 import type { BenchLine } from "./devis-reels/truth.js";
 
@@ -34,7 +35,7 @@ function read(bench: BenchLine[], answers: Record<string, EngineAnswer> = {}): P
   for (const [key, value] of Object.entries(answers)) if (key.startsWith("role:") && (value === "measure" || value === "purchase")) roles.set(key.slice(5), value);
   const asks = new Map([...proposals].filter(([id, p]) => p.ask && roles.get(id) === "undetermined").map(([k, p]) => [k, p.ask!]));
   const validation = applyLineRoles(raw, roles);
-  const engine = computeWithAnswers(ROOFING_REFERENTIAL, plan, answers, {}, {}, slotsGivenByQuote(plan, validation));
+  const engine = computeWithAnswers(ROOFING_REFERENTIAL, plan, answers, HABITUDES_BANC, {}, slotsGivenByQuote(plan, validation));
   const view = artisanView(
     lines.map((l) => ({ id: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: false, enteredByArtisan: false })),
     validation,
@@ -51,8 +52,8 @@ const one = (designation: string, quantity: string | null, unit: string | null) 
 const bought = (v: PurchaseView) => Object.fromEntries(v.toBuy.map((b) => [b.label, b.quantity]));
 // Formule Cupa (§34), crochet 1 mm : 9 271 ardoises ; crochets = ardoises commandées × 1,02.
 const COMPLETE = {
-  "Ardoises 30×22": "9 271 pièces",
-  "Crochets d'ardoise": "9 457 pièces",
+  "Ardoises naturelles Espagne 1er choix 30×22": "9 271 pièces",
+  "Crochets d'ardoise inox standard, longueur 11 cm": "9 457 pièces",
   "Liteaux 18×40": "2 049 ml",
 };
 
@@ -75,7 +76,7 @@ describe("jamais de quantité demandée à l'artisan", () => {
   });
 
   it("autres formats du référentiel (§3) : 32×22 calculé comme 30×22", () => {
-    expect(bought(one("Ardoises naturelles 32x22 pose au crochet", "200", "m²"))).toMatchObject({ "Ardoises 32×22": "8 447 pièces", "Crochets d'ardoise": "8 616 pièces" });
+    expect(bought(one("Ardoises naturelles 32x22 pose au crochet", "200", "m²"))).toMatchObject({ "Ardoises naturelles Espagne 1er choix 32×22": "8 447 pièces", "Crochets d'ardoise inox standard, longueur 11 cm": "8 616 pièces" });
   });
 
   it("exemple du §3 (32×22, 45°, région III, rampant 6 m) : recouvrement 105 mm, au-delà du maximum Cupa (103 mm) → le devis fait foi, 8 840 ardoises en estimation, le 33×23 conseillé", () => {
@@ -83,8 +84,8 @@ describe("jamais de quantité demandée à l'artisan", () => {
       "param:longueur_rampant": { value: "6", unit: "m" },
     });
     // R = 95 + 10 = 105 mm ; formule Cupa : 200 / (0,1075 × 0,221) = 8 418,4 ; + 5 % = 8 839,3. Aucune question.
-    expect(bought(v)["Ardoises 32×22"]).toBe("8 840 pièces");
-    expect(bought(v)["Crochets d'ardoise"]).toBe("9 017 pièces");
+    expect(bought(v)["Ardoises naturelles Espagne 1er choix 32×22"]).toBe("8 840 pièces");
+    expect(bought(v)["Crochets d'ardoise inox standard, longueur 12 cm"]).toBe("9 017 pièces");
     expect(v.questions.some((d) => d.question?.key === "product:ardoise")).toBe(false);
     // Le conseil (33×23, la plage Cupa la plus proche qui admet 105 mm) : une hypothèse à boutons, pas une question.
     const conseil = v.assumptions.find((a) => a.key === "product:ardoise")!;
@@ -130,7 +131,7 @@ describe("doutes de calcul de l'IA : jamais posés à l'artisan", () => {
     for (const [key, value] of Object.entries(answers)) if (key.startsWith("role:") && (value === "measure" || value === "purchase")) roles.set(key.slice(5), value);
     const asks = new Map([...proposals].filter(([id, p]) => p.ask && roles.get(id) === "undetermined").map(([k, p]) => [k, p.ask!]));
     const validation = applyLineRoles(raw, roles);
-    const engine = computeWithAnswers(ROOFING_REFERENTIAL, plan, answers, {}, {}, slotsGivenByQuote(plan, validation));
+    const engine = computeWithAnswers(ROOFING_REFERENTIAL, plan, answers, HABITUDES_BANC, {}, slotsGivenByQuote(plan, validation));
     const view = artisanView(
       lines.map((l) => ({ id: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: false, enteredByArtisan: false })),
       validation,
@@ -140,11 +141,18 @@ describe("doutes de calcul de l'IA : jamais posés à l'artisan", () => {
     return purchaseView(view, engine, { plan, roles, ref: ROOFING_REFERENTIAL, validation });
   }
 
-  it("le devis ardoises du fondateur, doutes de l'IA compris : 4 questions (façonnage, périmètre de cheminée, descentes, 6 jouées ?), aucune de quantité", () => {
+  it("le devis ardoises du fondateur, doutes de l'IA compris : les questions du comptoir (façonnage, développé, périmètre de cheminée, descentes et leur Ø, 6 jouées ?), aucune de quantité", () => {
     const v = readWithDoubts();
-    expect(v.questions.map((q) => q.key).sort()).toEqual(["engine:param:faconnage", "engine:param:nb_descentes", "engine:param:perimetre_cheminee", "role:ligne 5"]);
+    expect(v.questions.map((q) => q.key).sort()).toEqual([
+      "engine:param:developpe",
+      "engine:param:diametre_descente",
+      "engine:param:faconnage",
+      "engine:param:nb_descentes",
+      "engine:param:perimetre_cheminee",
+      "role:ligne 5",
+    ]);
     expect(JSON.stringify(v.questions)).not.toMatch(/linéaires|combien d'ardoises|faîtières/);
     // Les liteaux sont calculés en mètres linéaires par BatiClair, pas demandés.
-    expect(bought(v)).toMatchObject({ "Liteaux 18×40": "2 049 ml", "Ardoises 30×22": "9 271 pièces" });
+    expect(bought(v)).toMatchObject({ "Liteaux 18×40": "2 049 ml", "Ardoises naturelles Espagne 1er choix 30×22": "9 271 pièces" });
   });
 });

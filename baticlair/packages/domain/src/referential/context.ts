@@ -53,7 +53,12 @@ function baseValue(f: SiteFact): { value: Decimal; dim: ReturnType<typeof parseR
  * valeur certaine (toutes les preuves sont citées) ; des documents qui
  * divergent donnent un conflit, donc une question.
  */
-export function paramsFromContext(context: ChantierContext, work: WorkItemType): { params: Record<string, ParamValue>; conflicts: ContextConflict[] } {
+export function paramsFromContext(
+  context: ChantierContext,
+  work: WorkItemType,
+  /** Ouvrages principaux du chantier (la couverture) : seuls à prêter une donnée « onlyFromPrincipal » (l'aspect du zinc). */
+  principal: ReadonlySet<string> = new Set(),
+): { params: Record<string, ParamValue>; conflicts: ContextConflict[] } {
   const params: Record<string, ParamValue> = {};
   const conflicts: ContextConflict[] = [];
   for (const def of work.params) {
@@ -61,7 +66,9 @@ export function paramsFromContext(context: ChantierContext, work: WorkItemType):
     // (le nombre de descentes écrit sur la ligne « descente » sert à la gouttière ; la surface du garage, pas aux ardoises).
     const all = context.facts.filter((f) => f.key === def.key);
     const own = all.filter((f) => f.workItemId === work.id);
-    const facts = [...all.filter((f) => !f.workItemId), ...(own.length > 0 ? own : all.filter((f) => f.workItemId && f.workItemId !== work.id))];
+    // L'aspect du zinc d'une bande ne fait pas celui de la couverture ; celui de la couverture fait celui de ses bandes.
+    const lent = all.filter((f) => f.workItemId && f.workItemId !== work.id && (!def.onlyFromPrincipal || principal.has(f.workItemId)));
+    const facts = [...all.filter((f) => !f.workItemId), ...(own.length > 0 ? own : lent)];
     if (facts.length === 0) continue;
     const answer = facts.filter((f) => f.origin === "artisan").at(-1);
     if (answer) {

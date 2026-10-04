@@ -538,11 +538,15 @@ export function computeWithAnswers(
   const seenKeys = new Set(questions.map((q) => q.key));
   for (let round = 0; round < 2; round++) {
     const frontier = [...questions, ...discovered].filter((q) => q.options && q.options.length > 0 && q.options.length <= 8);
+    // Les autres questions ouvertes prises à leur première réponse : une question cachée derrière DEUX réponses
+    // (le diamètre des descentes, derrière le développé ET le nombre de descentes) se découvre aussi.
+    let base = inputs;
+    for (const q of frontier) if (q.options![0]?.value) base = withAnswer(ref, base, q, q.options![0]!.value) ?? base;
     let added = false;
     for (const q of frontier) {
       for (const o of q.options!) {
         if (!o.value) continue;
-        const probe = withAnswer(ref, inputs, q, o.value);
+        const probe = withAnswer(ref, base, q, o.value);
         if (!probe) continue;
         for (const next of run(probe).questions) {
           if (seenKeys.has(next.key)) continue;

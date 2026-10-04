@@ -48,5 +48,18 @@
     "Cornière Stil CR2 : botte.",
     "Dalle 1 200 × 600 : carton.",
     "Enduit prêt à l'emploi : seau de 20 ou 25 kg."
-  ]
+  ],
+  "questions_comptoir": {
+    "regle": "§47.8 : seules les questions qu'un vendeur de comptoir du négoce poserait pour chiffrer ; le reste est une hypothèse dite et modifiable. Liste de travail, non activée, à faire relire par un vendeur.",
+    "questions": [
+      "Dalles : quel modèle (Rockfon, Armstrong…), format 600×600 ou 1200×600, bord A ou E ?",
+      "Ossature : T24 ou T15, blanche ?",
+      "Suspentes : quelle hauteur de plénum ?"
+    ],
+    "jamais_demande": [
+      "nombre de suspentes au m²",
+      "pertes"
+    ],
+    "date": "2026-10-04"
+  }
 }

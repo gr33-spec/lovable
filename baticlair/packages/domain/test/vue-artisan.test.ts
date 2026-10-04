@@ -14,6 +14,7 @@ import {
   type Referential,
   type ViewLine,
 } from "../src/index.js";
+import { HABITUDES_BANC } from "./support/habitudes.js";
 import { D2026_011_LINES } from "./devis-reels/d2026-011.js";
 import { D2026_015_LINES } from "./devis-reels/d2026-015.js";
 import { MORELLEC_LINES } from "./devis-reels/electricite-plomberie-morellec.js";
@@ -40,7 +41,7 @@ function view(lines: Line[], trade: string, answers: Record<string, EngineAnswer
     profile,
   );
   const plan = planQuote(lines.map((l) => ({ ref: l.id, ...l })), ref, profile);
-  const engine = computeWithAnswers(ref, plan, answers, {}, {}, slotsGivenByQuote(plan, validation));
+  const engine = computeWithAnswers(ref, plan, answers, HABITUDES_BANC, {}, slotsGivenByQuote(plan, validation));
   return artisanView(lines, validation, engine);
 }
 

@@ -173,6 +173,11 @@ export interface ParamDefault extends Provenance {
   formula?: string;
   /** Pourquoi, en mots d'artisan (« Pente moyenne d'une toiture »). */
   note?: string;
+  /**
+   * Le devis nomme la chose sans la préciser (« zinc prépatiné » : quartz ou anthra ?) : l'hypothèse ne vaut plus,
+   * on demande (règle du comptoir, §47.8). Mots cherchés dans les lignes de l'ouvrage.
+   */
+  unlessText?: string[];
 }
 
 /** Paramètre d'un ouvrage : lu dans le devis, supposé par défaut, ou demandé à l'artisan. */
@@ -222,6 +227,8 @@ export interface ParamDef {
    * zinc ; ardoises ou tuiles → embase plomb). Deux valeurs possibles dans le même devis : rien n'est déduit, on demande.
    */
   fromWorks?: { value: string; workItems: string[] }[];
+  /** Lue sur un autre ouvrage seulement si c'est un ouvrage principal (l'aspect du zinc de la couverture, pas d'une bande). */
+  onlyFromPrincipal?: true;
 }
 
 /**
@@ -291,6 +298,11 @@ export interface Slot {
   usual?: { text: string; source: string; productShort?: string; productId?: string };
   /** La ligne du devis donne une MESURE (« 91 m² de joint debout ») ; rien ne se commande sous ce nom. */
   measureOnly?: true;
+  /**
+   * Les caractéristiques lues sur un autre emplacement du même ouvrage suivent celui-ci (la naissance prend la matière
+   * et la forme de la gouttière : « zinc demi-ronde »).
+   */
+  charsFrom?: string;
 }
 
 /**
@@ -340,6 +352,12 @@ export interface NeedRule extends Provenance {
    * {epaisseur|mm#} » → « Bobineau 500 × 17 m, 0,65 ») : même écriture que la précision.
    */
   designation?: string;
+  /**
+   * Besoin hors cœur (core: false) proposé dans « On ajoute ? » (§45.8) comme un consommable, Oui / Non d'un tap :
+   * l'égout et le faîtage du joint debout (le comptoir ne demande pas « on les ajoute ? », §47.8). Sauf si une ligne
+   * du devis cite déjà l'un de ces mots (la bande d'égout est au devis).
+   */
+  offer?: { unlessQuoteSays?: string[] };
   /**
    * Besoin qui n'existe que si ces données sont connues (« tuiles de rive »
    * seulement si le devis donne une longueur de rives) : sinon il est omis,

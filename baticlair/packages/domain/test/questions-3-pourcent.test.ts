@@ -14,7 +14,9 @@ const ZINC = [
 describe("tri des questions par levier", () => {
   it("le façonnage (change l'unité : kg ou pièces) passe avant le nombre de descentes (quelques naissances)", () => {
     const v = readQuote(ZINC);
-    expect(v.questions.map((q) => q.question?.key ?? q.key)).toEqual(["param:faconnage", "param:egout_faitage", "param:nb_descentes"]);
+    // Le façonnage (une unité) d'abord, puis ce qui change l'ARTICLE au comptoir (développé, pose des crochets,
+    // diamètre des descentes, §47.8), enfin le nombre de descentes (quelques naissances). Plus d'« égout et faîtage ? ».
+    expect(v.questions.map((q) => q.question?.key ?? q.key)).toEqual(["param:faconnage", "param:developpe_gouttiere", "param:fixation_crochet", "param:diametre_descente", "param:nb_descentes"]);
     expect(QUESTION_THRESHOLD).toBe(0.03);
   });
 });
@@ -37,7 +39,8 @@ describe("une question dont toutes les réponses donnent la même commande (à 3
           },
     ),
   };
-  const lines = [{ ref: "g", designation: "Gouttière zinc demi-ronde", quantity: "13", unit: "ml" }];
+  // Développé, pose des crochets et diamètre lus au devis : seules restent les questions de quantité.
+  const lines = [{ ref: "g", designation: "Gouttière zinc demi-ronde dév. 33 sur bandeau, descentes Ø80", quantity: "13", unit: "ml" }];
   const profile = tradeProfile("roofing");
 
   it("« serrage » (1 % d'écart) : pas de question, la première réponse vaut hypothèse dite ; « descentes » (naissances 1 à 4) : question", () => {

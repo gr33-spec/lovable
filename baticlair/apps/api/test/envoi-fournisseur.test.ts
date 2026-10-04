@@ -27,8 +27,8 @@ async function chantierPret(agent: Agent) {
       reference: "Dupont — réfection toiture",
       adresse: "12 rue de Siam, 29200 Brest",
       lignes: [
-        { libelle: "Couverture en ardoises naturelles 30x22 posées au crochet", quantite: "200", unite: "m²", prix: "85,00" },
-        { libelle: "Gouttière zinc demi-ronde 25", quantite: 24, unite: "ml", prix: "42" },
+        { libelle: "Couverture en ardoises naturelles d'Espagne 1er choix 30x22 posées au crochet", quantite: "200", unite: "m²", prix: "85,00" },
+        { libelle: "Gouttière zinc demi-ronde 25, crochets bandeau, descentes Ø80", quantite: 24, unite: "ml", prix: "42" },
         { libelle: "Chatière de ventilation", quantite: "4", unite: "u", prix: "19,90" },
       ],
     })
@@ -54,14 +54,14 @@ describe("envoi fournisseur : un document, aucun prix", () => {
     expect(packet).toMatchObject({ entreprise: "Toitures Martin", chantier: "Dupont — réfection toiture", joindre_detail: true });
     // Bloc 1 : les lignes prêtes à charger (ardoises, crochets, liteaux, gouttière…), jamais une mesure en m².
     expect(packet.articles).toEqual(
-      expect.arrayContaining([expect.stringMatching(/^Ardoises 30×22 : 9 200 pièces/), expect.stringMatching(/^Crochets d'ardoise : 9 384 pièces/), expect.stringMatching(/^Chatière de ventilation : 4 u/)]),
+      expect.arrayContaining([expect.stringMatching(/^Ardoises naturelles Espagne 1er choix 30×22 : 9 200 pièces/), expect.stringMatching(/^Crochets d'ardoise inox Ø 2,7, longueur 11 cm : 9 384 pièces/), expect.stringMatching(/^Chatière de ventilation : 4 u/)]),
     );
     for (const a of packet.articles) expect(a).not.toMatch(/ : [\d\s,.]+ m²/);
     // Le chantier en bref : des faits (8 au plus), les réponses de l'artisan (2 descentes), jamais la pente par défaut.
     expect(packet.resume.length).toBeLessThanOrEqual(8);
     expect(packet.resume).toContain("2 descentes");
     expect(packet.resume.join(" ")).not.toMatch(/\bpente \d/);
-    expect(packet.detail[0]).toMatchObject({ libelle: "Couverture en ardoises naturelles 30x22 posées au crochet", mesure: "200 m²" });
+    expect(packet.detail[0]).toMatchObject({ libelle: "Couverture en ardoises naturelles d'Espagne 1er choix 30x22 posées au crochet", mesure: "200 m²" });
 
     const email = res.body.recipients[0].email;
     expect(email.subject).toBe("Demande de devis · Toitures Martin · chantier Dupont — réfection toiture (Brest)");

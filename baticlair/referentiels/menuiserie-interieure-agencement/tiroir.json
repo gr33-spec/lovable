@@ -17,8 +17,14 @@
       "unite": "m de cordon",
       "statut": "contradiction",
       "sources": [
-        { "url": "https://diy.bostik.com/sites/default/files/2026-01/Bostik-Fixation-Plinthes-Multi-Materiaux-technical-data-sheet-ok.pdf", "date": "2026-10-04" },
-        { "url": "https://www.castorama.fr/mastic-colle-fixation-plinthe-bostik-310-ml/3549212488109_CAFR.prd", "date": "2026-10-04" }
+        {
+          "url": "https://diy.bostik.com/sites/default/files/2026-01/Bostik-Fixation-Plinthes-Multi-Materiaux-technical-data-sheet-ok.pdf",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.castorama.fr/mastic-colle-fixation-plinthe-bostik-310-ml/3549212488109_CAFR.prd",
+          "date": "2026-10-04"
+        }
       ],
       "ecart": "15 m de cordon : 15 ml de plinthe avec un cordon, 7,5 ml avec deux. Le référentiel (10 ml, 6 ml) se situe entre les deux ; le nombre de cordons par hauteur de plinthe reste à valider."
     },
@@ -30,9 +36,18 @@
       "unite": "clips/m²",
       "statut": "contradiction",
       "sources": [
-        { "url": "https://lunawood.com/fr/produits/boite-dinstallation-luna-profix-3/", "date": "2026-10-04" },
-        { "url": "https://attachments.mistermateriaux.com/WPC-Crochet-pour-lambris-PVC.pdf", "date": "2026-10-04" },
-        { "url": "https://www.mr-bricolage.fr/clip-inox-bardage-lambris-100-pieces.html", "date": "2026-10-04" }
+        {
+          "url": "https://lunawood.com/fr/produits/boite-dinstallation-luna-profix-3/",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://attachments.mistermateriaux.com/WPC-Crochet-pour-lambris-PVC.pdf",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.mr-bricolage.fr/clip-inox-bardage-lambris-100-pieces.html",
+          "date": "2026-10-04"
+        }
       ],
       "ecart": "De 3 à 30 clips/m² selon le système : le chiffre dépend de la largeur de lame (1 clip par lame et par tasseau). 20/m² au référentiel correspond à une lame d'environ 10 cm sur tasseaux à 50 cm."
     }
@@ -43,5 +58,19 @@
     "Grilles Sogal / Kazed : nombre de vantaux par largeur de baie.",
     "Rendement de débit en agencement (75 %), charnières par hauteur de porte.",
     "Mousse PU : 1 bombe pour 4 blocs-portes (voir aussi menuiserie : 24 à 30 m par bombe annoncés par Soudal)."
-  ]
+  ],
+  "questions_comptoir": {
+    "regle": "§47.8 : seules les questions qu'un vendeur de comptoir du négoce poserait pour chiffrer ; le reste est une hypothèse dite et modifiable. Liste de travail, non activée, à faire relire par un vendeur.",
+    "questions": [
+      "Bloc-porte : largeur de passage (63, 73, 83, 93) et épaisseur de cloison (huisserie 72 ou 98) ?",
+      "Poussant droit ou gauche ?",
+      "Porte : isoplane, postformée, vitrée ?",
+      "Parquet : contrecollé ou stratifié, quelle référence et quel décor ?"
+    ],
+    "jamais_demande": [
+      "sous-couche au m²",
+      "pertes de pose"
+    ],
+    "date": "2026-10-04"
+  }
 }

@@ -11,7 +11,11 @@ import { sansHypotheses } from "./support/sans-hypotheses.js";
 const need = (r: ReturnType<typeof computeWorkItem>, id: string) => r.needs.find((n) => n.needId === id)!;
 const ARDOISE: WorkItemInput = {
   workItemId: "couverture-ardoises-crochet",
-  params: { surface: { value: "200", unit: "m2", origin: "devis", evidence: "Devis, ligne 2" } },
+  // La qualité d'ardoise (question du comptoir, §47.8) est une habitude de l'entreprise, pas une hypothèse.
+  params: {
+    surface: { value: "200", unit: "m2", origin: "devis", evidence: "Devis, ligne 2" },
+    qualite_ardoise: { value: "1", unit: "u", origin: "artisan", evidence: "Habitude de votre entreprise" },
+  },
   products: { ardoise: { productId: "ardoise-30x22", origin: "devis" } },
   mentioned: ["ardoise", "liteau"],
 };
@@ -66,7 +70,7 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
     expect(need(r, "liteaux-ardoise").assumptions).toContainEqual(expect.objectContaining({ key: "product:liteau", value: "Liteaux 18×40" }));
     const declined = computeWorkItem(ROOFING_REFERENTIAL, { ...ARDOISE, declined: ["ecran"] });
     // Écran refusé : le moteur calcule quand même avec le générique (le fournisseur met sa marque), sans re-poser l'hypothèse.
-    expect(need(declined, "ecran-ardoise")).toMatchObject({ status: "calculated", productOrigin: "declined", label: "Écran HPV (modèle à préciser)" });
+    expect(need(declined, "ecran-ardoise")).toMatchObject({ status: "calculated", productOrigin: "declined", label: "Écran HPV, rouleau 1,50 × 50 m (modèle à préciser)" });
     expect(need(declined, "ecran-ardoise").assumptions.some((a) => a.key === "product:ecran")).toBe(false);
   });
 

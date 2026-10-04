@@ -275,6 +275,7 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
   const products = new Map<string, Map<string, SlotChoice | "conflict">>();
   const mentioned = new Map<string, Set<string>>();
   const characteristicsBySlot: Record<string, string[]> = {};
+  const askInstead = new Map<string, Set<string>>();
 
   for (const { line, v, text, family } of read) {
     if (v.kind === "labor") {
@@ -369,9 +370,20 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
         if (kw) facts.push({ key: p.key, value: tv.value, unit: p.unit, evidence: `Devis, ${line.ref} (« ${kw} »)`, origin: "devis", workItemId: work.id });
       }
     }
+    // Règle du comptoir (§47.8) : le devis nomme la chose sans la préciser (« zinc prépatiné », sans teinte) :
+    // l'hypothèse par défaut ne vaut plus, on demande.
+    for (const p of work.params) {
+      const vague = p.default?.unlessText?.some((k) => keywordPosition(text, k) >= 0);
+      if (vague && !facts.some((f) => f.key === p.key && f.workItemId === work.id && f.evidence.startsWith(`Devis, ${line.ref} `))) {
+        askInstead.set(work.id, new Set([...(askInstead.get(work.id) ?? []), p.key]));
+      }
+    }
     const chars = productCharacteristics(ref, work, slot, line.designation);
-    const charKey = slotCharacteristicsKey(work.id, slot.key);
-    if (chars.length > 0) characteristicsBySlot[charKey] = [...new Set([...(characteristicsBySlot[charKey] ?? []), ...chars])];
+    // La naissance prend la matière et la forme de la gouttière (« charsFrom ») : un emplacement suit l'autre.
+    for (const key of [slot.key, ...work.slots.filter((s) => s.charsFrom === slot.key).map((s) => s.key)]) {
+      const charKey = slotCharacteristicsKey(work.id, key);
+      if (chars.length > 0) characteristicsBySlot[charKey] = [...new Set([...(characteristicsBySlot[charKey] ?? []), ...chars])];
+    }
     plans.push({ ref: line.ref, status: "planned", workItemId: work.id, slot: slot.key, mentions, characteristics: chars, ...(measureInText ? { measureInText } : {}) });
   }
 
@@ -409,7 +421,7 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
   const inputs: WorkItemInput[] = active
     .filter((w) => mentioned.has(w.id))
     .map((w: WorkItemType) => {
-      const { params, conflicts: c } = paramsFromContext(context, w);
+      const { params, conflicts: c } = paramsFromContext(context, w, new Set(active.filter((x) => x.section === "principal").map((x) => x.id)));
       c.forEach((x) => {
         const def = w.params.find((p) => p.key === x.key);
         conflicts.push(`${def?.label ?? x.key} : ${x.facts.map((f) => `${f.value} ${f.unit} (${f.evidence})`).join(" / ")}`);
@@ -422,6 +434,7 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
         products: Object.fromEntries(chosen),
         mentioned: [...mentioned.get(w.id)!],
         ...(preferences ? { preferences } : {}),
+        ...(askInstead.has(w.id) ? { askInstead: [...askInstead.get(w.id)!] } : {}),
       };
     });
   return { lines: plans, inputs, context, characteristicsBySlot, conflicts: [...new Set(conflicts)], contradictions };
@@ -442,6 +455,8 @@ function productCharacteristics(ref: Referential, work: WorkItemType, slot: Slot
     const n = normalizeText(c);
     if (/^(avec|comprenant) /.test(n) || / compris$/.test(n)) return false;
     if (work.params.some((p) => (p.textLabels ?? []).some((label) => readLabelled(n, label)))) return false;
+    // « Ø80 » sur la ligne de gouttière : le diamètre des descentes (une donnée de l'ouvrage), pas la gouttière.
+    if (work.params.some((p) => (p.textValues ?? []).some((tv) => tv.keywords.some((k) => normalizeText(k) === n)))) return false;
     const products = identifyProducts(c, ref).candidates;
     return !(products.length > 0 && products.every((x) => x.product.family !== slot.family));
   });

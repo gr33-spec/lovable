@@ -12,7 +12,7 @@ describe("une ligne de voligeage se calcule", () => {
     const plan = planQuote([LIGNE], ROOFING_REFERENTIAL, tradeProfile("roofing"));
     expect(plan.lines[0]).toMatchObject({ status: "planned", workItemId: "voligeage", slot: "volige" });
     const v = readQuote([LIGNE]);
-    expect(v.toBuy.map((b) => `${b.label} : ${b.quantity}`)).toEqual(["Voliges sapin 18 mm : 96 m²"]);
+    expect(v.toBuy.map((b) => `${b.label} : ${b.quantity}`)).toEqual(["Voliges sapin 18×200 mm traité : 96 m²"]);
     expect(v.toQuote).toEqual([]);
     expect(v.questions).toEqual([]);
   });

@@ -16,6 +16,7 @@ import {
   type PurchaseView,
   type SiteFact,
 } from "../../src/index.js";
+import { HABITUDES_BANC } from "./habitudes.js";
 
 export interface QuoteLineInput {
   ref: string;
@@ -25,7 +26,7 @@ export interface QuoteLineInput {
 }
 
 /** Tout le parcours d'un devis de couvreur jusqu'à la liste d'achats, comme le fait l'API (sans IA). */
-export function readQuote(bench: readonly QuoteLineInput[], answers: Record<string, EngineAnswer> = {}, extraFacts: readonly SiteFact[] = [], preferences: CompanyPreferences = {}): PurchaseView {
+export function readQuote(bench: readonly QuoteLineInput[], answers: Record<string, EngineAnswer> = {}, extraFacts: readonly SiteFact[] = [], preferences: CompanyPreferences = HABITUDES_BANC): PurchaseView {
   const profile = tradeProfile("roofing");
   const lines = bench.map((l) => ({ ref: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit }));
   const raw = validateTakeoff(lines.map((l) => ({ id: l.ref, designation: l.designation, quantityRaw: l.quantity, unitRaw: l.unit, source: "client_quote" as const })), profile);

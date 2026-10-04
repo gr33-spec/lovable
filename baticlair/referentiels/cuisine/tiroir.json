@@ -33,5 +33,18 @@
     "Boîtes de chevilles, vis, équerres (Fischer, Spit, Würth).",
     "Kits fournis par les fabricants de meubles (pieds, suspensions).",
     "Plans sur mesure : épaisseurs et découpes (Cosentino)."
-  ]
+  ],
+  "questions_comptoir": {
+    "regle": "§47.8 : seules les questions qu'un vendeur de comptoir du négoce poserait pour chiffrer ; le reste est une hypothèse dite et modifiable. Liste de travail, non activée, à faire relire par un vendeur.",
+    "questions": [
+      "Meubles : quel fabricant et quelle gamme ? façades (référence, coloris) ?",
+      "Plan de travail : stratifié 38 mm ou autre, longueur, décor ?",
+      "Électroménager : références exactes ?"
+    ],
+    "jamais_demande": [
+      "nombre de pieds par meuble",
+      "quincaillerie au module"
+    ],
+    "date": "2026-10-04"
+  }
 }

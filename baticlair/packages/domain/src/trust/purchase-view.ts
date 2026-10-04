@@ -1,5 +1,5 @@
 import { Decimal } from "../shared/decimal.js";
-import type { Assumption, NeedResult, Question } from "../referential/engine.js";
+import { DEVIS_MARK, withoutDevisMark, type Assumption, type NeedResult, type Question } from "../referential/engine.js";
 import type { LineRole } from "../referential/line-roles.js";
 import type { Referential } from "../referential/model.js";
 import { slotCharacteristicsKey, type QuotePlan } from "../referential/plan.js";
@@ -295,7 +295,7 @@ type OwnedNeed = NeedResult & { workItemId?: string };
 
 const norm = (t: string) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 /** Matières et coloris qui changent l'article chez le fournisseur ; un adjectif de pose (« respirant ») n'en est pas un. */
-const MATERIAL_WORDS = new Set(["pvc", "zinc", "cuivre", "inox", "alu", "aluminium", "galva", "acier", "sapin", "bois", "rouge", "sable", "brun", "noir", "gris", "anthracite", "ocre", "naturel", "naturelle"]);
+const MATERIAL_WORDS = new Set(["pvc", "zinc", "cuivre", "inox", "alu", "aluminium", "galva", "acier", "sapin", "bois", "rouge", "sable", "brun", "noir", "gris", "anthracite", "ocre", "naturel", "naturelle", "traite", "traitee", "traites", "traitees"]);
 /** Les vraies matières (pas les coloris) : un article n'en porte jamais deux (« Voliges sapin … zinc » est faux). */
 const MATERIALS_ONLY = new Set(["pvc", "zinc", "cuivre", "inox", "alu", "aluminium", "galva", "galvanise", "acier", "sapin", "bois", "douglas", "chene", "beton", "terre cuite"]);
 const materialsIn = (text: string): string[] => {
@@ -306,6 +306,8 @@ const materialsIn = (text: string): string[] => {
 /** Une caractéristique digne de suivre l'article : un chiffre (Ø80, 25), un trait d'union (demi-ronde), ou une matière. */
 function keepCharacteristic(c: string): boolean {
   const n = norm(c);
+  // Une section en mm (« 18×200 mm » de la volige, « 27×40 mm » du liteau) : l'article au comptoir.
+  if (/^\d+\s*[×x*]\s*\d+\s*mm$/.test(n)) return true;
   // « 2×10 m », « 4 m » : une quantité ou une dimension d'ouvrage, pas une caractéristique de l'article.
   if (/\d\s*[×x*]\s*\d/.test(n) || /^\d+(?:[.,]\d+)?\s*(?:m|ml|m2|cm|mm)$/.test(n)) return false;
   return /\d/.test(n) || n.includes("-") || n.split(" ").some((w) => MATERIAL_WORDS.has(w));
@@ -401,9 +403,21 @@ function aggregate(
       return own.length === 0 && cited.length === 1;
     });
     const precision = [...new Set(group.map((n) => n.precision).filter((p): p is string => !!p))].join(" ; ");
+    // La section du devis remplace l'épaisseur seule de l'article (« Voliges sapin 18 mm » + « 18×200 mm » →
+    // « Voliges sapin 18×200 mm ») : le comptoir lit une seule dimension.
+    // Une désignation calculée dit où vont les caractéristiques du devis (« Gouttière {devis} dév. 33 » →
+    // « Gouttière zinc demi-ronde dév. 33 ») ; sinon elles suivent le nom.
+    const slotted = first.labelWithQuote;
+    let label = slotted ? withoutDevisMark(slotted) : first.label;
+    const rest = extras.filter((c) => {
+      const m = /^(\d+)\s*[×x*]\s*\d+\s*mm$/.exec(c);
+      if (!m || !new RegExp(`(^|\\s)${m[1]} mm\\b`).test(label)) return true;
+      label = label.replace(new RegExp(`(^|\\s)${m[1]} mm\\b`), `$1${c.replace(/\s*mm$/, " mm")}`);
+      return false;
+    });
     items.push({
       key,
-      label: extras.length > 0 ? `${first.label} ${extras.join(" ")}` : first.label,
+      label: slotted ? withoutDevisMark(slotted.replace(DEVIS_MARK, rest.join(" "))) : rest.length > 0 ? `${label} ${rest.join(" ")}` : label,
       quantity,
       order,
       approx,
@@ -492,8 +506,11 @@ export function purchaseView(
     consumableFamilies,
   );
   // §45.8 : les consommables suggérés (besoins non « cœur » d'une famille consommable), réunis par article comme le reste.
+  // Un besoin « à proposer » (égout et faîtage du joint debout, §47.8) rejoint le bloc, sauf si le devis le cite déjà.
+  const quoteText = view.ouvrages.map((o) => norm(o.designation)).join(" | ");
+  const offerable = (n: (typeof engine.needs)[number]) => !!n.offer && !(n.offer.unlessQuoteSays ?? []).some((w) => quoteText.includes(norm(w)));
   const offered = aggregate(
-    engine.needs.filter((n) => consumableFamilies.has(n.family)),
+    engine.needs.filter((n) => consumableFamilies.has(n.family) || offerable(n)),
     view.ouvrages,
     link.plan.characteristicsBySlot,
     consumableFamilies,

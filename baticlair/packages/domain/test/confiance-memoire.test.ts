@@ -169,7 +169,7 @@ describe("fiche d'un besoin calculé : origines séparées, jamais mélangées",
     const ecran = assessNeed(need(input, "ecran"));
     expect([tuiles.state, ecran.state]).toEqual(["verified", "verified"]);
     expect(tuiles.criteria.find((c) => c.key === "product")).toMatchObject({ origin: "project" });
-    expect(ecran.criteria.find((c) => c.key === "product")).toMatchObject({ origin: "company", detail: "Écran HPV (Préférence de votre entreprise)" });
+    expect(ecran.criteria.find((c) => c.key === "product")).toMatchObject({ origin: "company", detail: "Écran HPV Soprema R2, rouleau 1,50 × 50 m (Préférence de votre entreprise)" });
     // Les caractéristiques restent celles du référentiel : une préférence n'est jamais une donnée fabricant.
     expect(ecran.criteria.find((c) => c.key === "manufacturer_data")).toMatchObject({ origin: "referential" });
     // Données du chantier : lue dans le devis (surface) ou répondue pour ce chantier (pureau), chacune avec son origine.
@@ -187,7 +187,7 @@ describe("fiche d'un besoin calculé : origines séparées, jamais mélangées",
 
   it("préférence à reconfirmer : une question, jamais un ✓ silencieux", () => {
     const n = need({ ...ROOF, preferences: { proposals: { ecran: "soprema-sop-ecran-hpv-r2-150x50" } } }, "ecran");
-    expect(n.question).toMatchObject({ kind: "confirm_product", text: "Écran sous-toiture habituel de votre entreprise : Écran HPV. On le garde pour ce chantier ?" });
+    expect(n.question).toMatchObject({ kind: "confirm_product", text: "Écran sous-toiture habituel de votre entreprise : Écran HPV Soprema R2, rouleau 1,50 × 50 m. On le garde pour ce chantier ?" });
     expect(assessNeed(n)).toMatchObject({ state: "to_confirm" });
   });
 

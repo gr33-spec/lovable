@@ -17,8 +17,14 @@
       "unite": "m/aérosol",
       "statut": "contradiction",
       "sources": [
-        { "url": "https://content.ostermann.eu/webcontent/content/mamdata/PDF_Daten/Technische_Merkblaetter/Soudal/710-Soudafoam-Gun_B2/710-Soudafoam-Gun_B2-TM-fr.pdf", "date": "2026-10-04" },
-        { "url": "https://gobert.groupegobert.com/ressources/images/articles/Fiches_techniques/SOUD FT 101069.pdf", "date": "2026-10-04" }
+        {
+          "url": "https://content.ostermann.eu/webcontent/content/mamdata/PDF_Daten/Technische_Merkblaetter/Soudal/710-Soudafoam-Gun_B2/710-Soudafoam-Gun_B2-TM-fr.pdf",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://gobert.groupegobert.com/ressources/images/articles/Fiches_techniques/SOUD FT 101069.pdf",
+          "date": "2026-10-04"
+        }
       ],
       "ecart": "Le fabricant annonce 24 à 30 m (essai de laboratoire) ; le référentiel retient 15 m (rendement chantier). Écart × 2, à faire trancher par un poseur."
     },
@@ -30,8 +36,14 @@
       "unite": "m/cartouche",
       "statut": "source",
       "sources": [
-        { "url": "https://www.mariusaurenti.com/wp-content/uploads/PDF/Joint-colle-MS-Polymer-FT120324.pdf", "date": "2026-10-04" },
-        { "url": "https://medias.descours-cabaud.com/d180001/medias/docus/278/BD_68594073_Mastic_Colle_MS_Polymeres_Blanc_FT_XHANDER.pdf", "date": "2026-10-04" }
+        {
+          "url": "https://www.mariusaurenti.com/wp-content/uploads/PDF/Joint-colle-MS-Polymer-FT120324.pdf",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://medias.descours-cabaud.com/d180001/medias/docus/278/BD_68594073_Mastic_Colle_MS_Polymeres_Blanc_FT_XHANDER.pdf",
+          "date": "2026-10-04"
+        }
       ],
       "ecart": "≈ 6 m (calcul fabricant) contre 5,2 m au référentiel (≈ 10 % de pertes) : cohérent."
     },
@@ -43,8 +55,14 @@
       "unite": "sachet",
       "statut": "source",
       "sources": [
-        { "url": "https://www.leroymerlin.fr/produits/lot-de-240-cales-fourchette-repliables-pose-fenetres-82354376.html", "date": "2026-10-04" },
-        { "url": "https://www.bricozor.com/cale-menuiserie/", "date": "2026-10-04" }
+        {
+          "url": "https://www.leroymerlin.fr/produits/lot-de-240-cales-fourchette-repliables-pose-fenetres-82354376.html",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.bricozor.com/cale-menuiserie/",
+          "date": "2026-10-04"
+        }
       ],
       "ecart": "Le contenu existe ; le ratio « 1 sachet pour 8 menuiseries » reste à valider."
     },
@@ -56,9 +74,18 @@
       "unite": "m²/unité",
       "statut": "source",
       "sources": [
-        { "url": "https://www.castorama.fr/sous-couche-pour-sol-stratifie-volden-ep-2-2mm-15m-/5063022038890_CAFR.prd", "date": "2026-10-04" },
-        { "url": "https://www.bricodepot.fr/p/5063022038418/sous-couche-2-mm-20-m-l-2000cm-x-l-100cm", "date": "2026-10-04" },
-        { "url": "https://www.bricoman.fr/produits/dalle-sous-couche-parquet-fibre-de-bois-ep-4-mm-pqt-de-7-52-m2-fsc-mixte-90319295.html", "date": "2026-10-04" }
+        {
+          "url": "https://www.castorama.fr/sous-couche-pour-sol-stratifie-volden-ep-2-2mm-15m-/5063022038890_CAFR.prd",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.bricodepot.fr/p/5063022038418/sous-couche-2-mm-20-m-l-2000cm-x-l-100cm",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.bricoman.fr/produits/dalle-sous-couche-parquet-fibre-de-bois-ep-4-mm-pqt-de-7-52-m2-fsc-mixte-90319295.html",
+          "date": "2026-10-04"
+        }
       ]
     },
     {
@@ -68,7 +95,12 @@
       "valeur": "200 µm (DTU 51.11, DTU 65.14) ; Sécurifilm : rouleaux 28 × 6 m ou 56 × 3 m (≈ 168 m²)",
       "unite": "rouleau",
       "statut": "contradiction",
-      "sources": [{ "url": "https://www.batiproduits.com/amp/fiche/produits/feuille-souple-d-etancheite-transparente-en-pol-p69114428.html", "date": "2026-10-04" }],
+      "sources": [
+        {
+          "url": "https://www.batiproduits.com/amp/fiche/produits/feuille-souple-d-etancheite-transparente-en-pol-p69114428.html",
+          "date": "2026-10-04"
+        }
+      ],
       "ecart": "Le format 2 × 25 m n'a pas été retrouvé ; les rouleaux pro font ≈ 170 m². Un format plus petit existe en GSB (film 16 m², Mr.Bricolage)."
     },
     {
@@ -79,8 +111,15 @@
       "unite": "kg/m²",
       "statut": "source",
       "sources": [
-        { "url": "https://media.trenois.com/static/colle-parquet-ms20_soa064_fiche-technique.pdf", "date": "2026-10-04", "note": "MS-20 Plus" },
-        { "url": "https://www.batiproduits.com/amp/fiche/produits/colle-ms-polymeres-spatulable-pour-parquets-tar-p69107668.html", "date": "2026-10-04" }
+        {
+          "url": "https://media.trenois.com/static/colle-parquet-ms20_soa064_fiche-technique.pdf",
+          "date": "2026-10-04",
+          "note": "MS-20 Plus"
+        },
+        {
+          "url": "https://www.batiproduits.com/amp/fiche/produits/colle-ms-polymeres-spatulable-pour-parquets-tar-p69107668.html",
+          "date": "2026-10-04"
+        }
       ],
       "ecart": "1 kg/m² au référentiel = bas de la fourchette fabricant (1 à 1,4)."
     },
@@ -92,8 +131,14 @@
       "unite": "m",
       "statut": "contradiction",
       "sources": [
-        { "url": "https://www.bricomarche.com/p/plinthe-arrondie-mdf-revetu-blanc-10x70-l.2.40m/3428350061996", "date": "2026-10-04" },
-        { "url": "https://www.bricomarche.com/p/plinthe-mdf-brut-8x70mm-l.2.20m/3760137537158", "date": "2026-10-04" }
+        {
+          "url": "https://www.bricomarche.com/p/plinthe-arrondie-mdf-revetu-blanc-10x70-l.2.40m/3428350061996",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.bricomarche.com/p/plinthe-mdf-brut-8x70mm-l.2.20m/3760137537158",
+          "date": "2026-10-04"
+        }
       ],
       "ecart": "2,20 m existe à côté de 2,40 m : la longueur dépend de l'article ; 2,50 m non trouvé."
     },
@@ -105,8 +150,14 @@
       "unite": "m",
       "statut": "contradiction",
       "sources": [
-        { "url": "https://www.bricoman.fr/produits/barre-de-seuil-aluminium-chene-auto-adhesif-l-93-x-l-2-70-cm-fario-1502571.html", "date": "2026-10-04" },
-        { "url": "https://www.castorama.fr/barre-de-seuil-en-aluminium-decor-bois-goodhome-37-x-930-mm-decor-200/3663602530275_CAFR.prd", "date": "2026-10-04" }
+        {
+          "url": "https://www.bricoman.fr/produits/barre-de-seuil-aluminium-chene-auto-adhesif-l-93-x-l-2-70-cm-fario-1502571.html",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.castorama.fr/barre-de-seuil-en-aluminium-decor-bois-goodhome-37-x-930-mm-decor-200/3663602530275_CAFR.prd",
+          "date": "2026-10-04"
+        }
       ],
       "ecart": "Le « 2,70 » du référentiel est la largeur (2,70 cm), pas une longueur de 2,70 m. Longueur commerciale : 0,93 m."
     }
@@ -117,5 +168,20 @@
     "Pattes de fixation : sachet de 10 ou boîte de 50.",
     "Habillages PVC : longueur de barre (3 m supposé).",
     "Tapées et pattes livrées par le fabricant : propre à chaque fabricant."
-  ]
+  ],
+  "questions_comptoir": {
+    "regle": "§47.8 : seules les questions qu'un vendeur de comptoir du négoce poserait pour chiffrer ; le reste est une hypothèse dite et modifiable. Liste de travail, non activée, à faire relire par un vendeur.",
+    "questions": [
+      "Fenêtre : PVC, alu ou bois ? dimensions tableau (L × H) ?",
+      "Ouverture : française, oscillo-battante, coulissante ? sens ?",
+      "Vitrage : 4/16/4 standard ou phonique, retardateur d'effraction ?",
+      "Teinte intérieure et extérieure ?",
+      "Pose : neuf (applique, tunnel) ou rénovation ? épaisseur du doublage ?"
+    ],
+    "jamais_demande": [
+      "mousse et mastic au mètre",
+      "cales"
+    ],
+    "date": "2026-10-04"
+  }
 }

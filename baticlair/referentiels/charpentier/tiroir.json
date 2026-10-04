@@ -53,5 +53,18 @@
     "NF DTU 31.1 et 31.3 : textes payants.",
     "Traitement de charpente : rendement d'une fiche fabricant officielle.",
     "Sabots et étriers Simpson : conditionnement."
-  ]
+  ],
+  "questions_comptoir": {
+    "regle": "§47.8 : seules les questions qu'un vendeur de comptoir du négoce poserait pour chiffrer ; le reste est une hypothèse dite et modifiable. Liste de travail, non activée, à faire relire par un vendeur.",
+    "questions": [
+      "Bois : quelle essence (sapin, douglas) et quel traitement (classe 2 ou 3) ?",
+      "Sections et longueurs (chevrons 63×75 en 5 m…) ?",
+      "Connecteurs : quelle référence (Simpson) ?"
+    ],
+    "jamais_demande": [
+      "entraxe des chevrons",
+      "pertes de coupe"
+    ],
+    "date": "2026-10-04"
+  }
 }

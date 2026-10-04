@@ -12,6 +12,7 @@ import {
   type EngineAnswer,
   type LineRole,
 } from "../src/index.js";
+import { HABITUDES_BANC } from "./support/habitudes.js";
 
 /**
  * COUVREUR — ARDOISES ET OUVRAGES COMPTÉS (2026-10-02). Deux risques réels
@@ -40,7 +41,7 @@ function read(answers: Record<string, EngineAnswer> = {}, acceptDraft = false, l
   }
   const asks = new Map([...proposals].filter(([, p]) => p.ask).map(([k, p]) => [k, p.ask!]));
   const validation = applyLineRoles(raw, roles);
-  const engine = computeWithAnswers(ROOFING_REFERENTIAL, plan, answers, {}, { acceptDraft }, slotsGivenByQuote(plan, validation));
+  const engine = computeWithAnswers(ROOFING_REFERENTIAL, plan, answers, HABITUDES_BANC, { acceptDraft }, slotsGivenByQuote(plan, validation));
   const view = artisanView(
     lines.map((l) => ({ id: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: false, enteredByArtisan: false })),
     validation,
@@ -95,7 +96,7 @@ describe("couverture en ardoises au crochet : chaque composant détaillé", () =
     expect(ardoises.need).toEqual({ value: "9270.5", unit: "u" });
     expect(crochets.need).toEqual({ value: "9456.42", unit: "u" });
     expect(liteaux.need).toEqual({ value: "2048.78", unit: "ml" });
-    expect(ardoises.assumptions.map((a) => `${a.key}=${a.value}`)).toEqual(["param:pente=45", "param:zone=III", "param:longueur_rampant=5,5", "derived:recouvrement=95", "param:pureau=10,25", "param:diametre_crochet=1"]);
+    expect(ardoises.assumptions.map((a) => `${a.key}=${a.value}`)).toEqual(["param:pente=45", "param:zone=III", "param:longueur_rampant=5,5", "derived:recouvrement=95", "param:pureau=10,25", "param:diametre_crochet=standard"]);
     // Le devis ne précise pas la section : 18×40 par défaut, dit comme hypothèse (modifiable).
     expect(liteaux.label).toBe("Liteaux 18×40");
     expect(liteaux.assumptions).toContainEqual(expect.objectContaining({ key: "product:liteau", value: "Liteaux 18×40", note: expect.stringMatching(/18×40 par défaut/) }));
