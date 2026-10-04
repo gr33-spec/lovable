@@ -704,6 +704,11 @@ test("RGPD : l'artisan télécharge ses données, puis supprime son compte (en t
   await page.getByRole("button", { name: "Télécharger mes données" }).click();
   expect((await download).suggestedFilename()).toMatch(/^baticlair-mes-donnees-\d{4}-\d{2}-\d{2}\.json$/);
 
+  // Des essais au hasard ne restent pas des habitudes : on efface ce que BatiClair a appris, les chantiers restent.
+  await page.getByRole("button", { name: "Effacer ce que BatiClair a appris" }).click();
+  await page.getByRole("button", { name: "Oui, tout effacer" }).click();
+  await expect(page.getByText("C'est effacé. Les prochains chantiers reposeront les questions.")).toBeVisible();
+
   await page.getByRole("button", { name: "Supprimer mon compte" }).click();
   const confirm = page.getByRole("button", { name: "Supprimer définitivement" });
   await expect(confirm).toBeDisabled();
