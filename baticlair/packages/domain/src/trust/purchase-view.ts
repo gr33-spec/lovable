@@ -30,8 +30,14 @@ export interface PurchaseItem {
   quantity: string | null;
   /** La même quantité, brute, pour la demande de prix : nombre et unité de commande (« 1488 », « pièces »). */
   order: { count: string; unit: string } | null;
-  /** Ordre de grandeur (« ≈ 50 bottes de 50 ml »), ou le besoin dans son unité quand l'unité de commande diffère (« 128,57 m² »). */
+  /**
+   * Ordre de grandeur (« ≈ 50 bottes de 50 ml »), ou le besoin dans son unité quand l'unité de commande diffère
+   * (« 128,57 m² ») ; une longueur dit ce qu'elle couvre (« 13 ml à couvrir », §45.3) : jamais « soit 13 ml »,
+   * 4 longueurs de 4 m font 16 ml achetés (§45.5).
+   */
   approx: string | null;
+  /** Colonne « précision » de la demande de devis (§45.3) : l'usage, la position ; absent si rien d'utile au comptoir. */
+  precision?: string;
   /** « computed » : calculé par BatiClair ; « direct » : quantité écrite telle quelle dans le devis. */
   kind: "computed" | "direct";
   /** Besoins réunis dans cette ligne (« voir le calcul »), et lignes du devis dont elle provient. */
@@ -188,9 +194,19 @@ function aggregate(needs: readonly OwnedNeed[], ouvrages: readonly OuvrageLevels
       const approxUnits = group.map((n) => n.purchase?.approx[0] ?? null);
       if (approxUnits.every((a) => a && a.unit.many === approxUnits[0]!.unit.many)) {
         approx = `≈ ${unitText(approxUnits.reduce((sum, a) => sum.plus(a!.count), new Decimal(0)), approxUnits[0]!.unit)}`;
-      } else if (sameNeedUnit && quantities[0] && orders[0].unit.many !== (UNIT_LABEL[quantities[0].unit]?.many ?? quantities[0].unit)) {
+      } else if (
+        sameNeedUnit &&
+        quantities[0] &&
+        quantities[0].unit !== "u" &&
+        !group.some((n) => n.precision) &&
+        !(["ml", "m"].includes(quantities[0].unit) && orders[0].unit.many === "ml") &&
+        orders[0].unit.many !== (UNIT_LABEL[quantities[0].unit]?.many ?? quantities[0].unit)
+      ) {
+        // Une pièce reste une pièce (« 8 longueurs de 2 m », pas « (8 pièces) ») ; une précision de la règle dit déjà ce
+        // qui est couvert (« 13 ml de faîtage à couvrir ») ; sinon une longueur dit ce qu'elle couvre (§45.3).
         const need = quantities.reduce((sum, q) => sum.plus(q!.value), new Decimal(0));
         approx = unitText(need, UNIT_LABEL[quantities[0].unit] ?? { one: quantities[0].unit, many: quantities[0].unit });
+        if (quantities[0].unit === "ml" || quantities[0].unit === "m") approx += " à couvrir";
       }
     } else if (sameNeedUnit && quantities[0]) {
       // Conditionnement pas encore connu : le besoin dans son unité, le fournisseur convertit.
@@ -214,12 +230,14 @@ function aggregate(needs: readonly OwnedNeed[], ouvrages: readonly OuvrageLevels
       if (m.length === 0) return true;
       return own.length === 0 && cited.length === 1;
     });
+    const precision = [...new Set(group.map((n) => n.precision).filter((p): p is string => !!p))].join(" ; ");
     items.push({
       key,
       label: extras.length > 0 ? `${first.label} ${extras.join(" ")}` : first.label,
       quantity,
       order,
       approx,
+      ...(precision ? { precision } : {}),
       kind: "computed",
       needIds: group.map((n) => n.needId),
       lineIds: [...new Set(group.flatMap(owner))],

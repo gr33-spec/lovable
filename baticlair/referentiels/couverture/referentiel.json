@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.04-19",
+  "version": "roofing-2026.10.04-20",
   "trade": "roofing",
   "sources": [
     {
@@ -186,6 +186,52 @@
       "keywords": [
         "patte de fixation",
         "patte zinc"
+      ]
+    },
+    {
+      "code": "seam_clip_sliding",
+      "label": "Patte coulissante de joint debout",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "patte coulissante",
+        "pattes coulissantes"
+      ]
+    },
+    {
+      "code": "seam_clip_fixed",
+      "label": "Patte fixe de joint debout",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "patte fixe",
+        "pattes fixes"
+      ]
+    },
+    {
+      "code": "eaves_strip",
+      "label": "Bande d'égout zinc",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "bande d'egout",
+        "bande egout"
+      ]
+    },
+    {
+      "code": "clip_fixing",
+      "label": "Fixation de patte",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "pointe annelee",
+        "pointes annelees",
+        "vis de patte",
+        "fixation de patte"
       ]
     },
     {
@@ -2892,6 +2938,130 @@
       ]
     },
     {
+      "id": "patte-coulissante-joint-debout",
+      "family": "seam_clip_sliding",
+      "label": "Patte coulissante pour joint debout (largeur de bobine du chantier)",
+      "shortLabel": "Pattes coulissantes joint debout",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "patte-fixe-joint-debout",
+      "family": "seam_clip_fixed",
+      "label": "Patte fixe pour joint debout (largeur de bobine du chantier)",
+      "shortLabel": "Pattes fixes joint debout",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "pointe-annelee-2-5x28",
+      "family": "clip_fixing",
+      "label": "Pointe annelée 2,5 × 28 mm pour patte sur volige 18 mm",
+      "shortLabel": "Pointes annelées 2,5 × 28 mm",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "bande-egout-zinc-330",
+      "family": "eaves_strip",
+      "label": "Bande d'égout zinc à ourlet, développé 33 cm, longueurs de 2 m (épaisseur du chantier)",
+      "shortLabel": "Bandes d'égout zinc dév. 33 cm",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "longueur",
+          "label": {
+            "one": "longueur de 2 m",
+            "many": "longueurs de 2 m"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
       "id": "bobine-zinc-standard",
       "family": "zinc_coil",
       "label": "Zinc naturel en bobine largeur 650 mm, au mètre linéaire (épaisseur du chantier)",
@@ -3050,16 +3220,16 @@
       "id": "bande-zinc-faconnee-standard",
       "family": "zinc_strip",
       "label": "Bande zinc façonnée, longueurs de 2 m (développé et épaisseur du chantier)",
-      "shortLabel": "Bandes zinc façonnées 2 m",
+      "shortLabel": "Bandes zinc façonnées",
       "aliases": [],
       "generic": true,
       "attributes": {},
       "sellingUnits": [
         {
-          "id": "piece",
+          "id": "longueur",
           "label": {
-            "one": "pièce",
-            "many": "pièces"
+            "one": "longueur de 2 m",
+            "many": "longueurs de 2 m"
           },
           "contains": {
             "kind": "packaging",
@@ -5854,6 +6024,7 @@
           "unit": "ml",
           "core": true,
           "exclusions": "Recouvrements des longueurs couverts par la perte de 5 %.",
+          "precision": "{longueur_faitage|ml} de faîtage à couvrir",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -6155,6 +6326,7 @@
           "unit": "u",
           "core": true,
           "exclusions": "Longueurs de 2 m, recouvrement 10 cm entre éléments ; fixations à part.",
+          "precision": "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -6172,6 +6344,7 @@
           "unit": "u",
           "core": true,
           "exclusions": "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2) ; chutes non réemployées.",
+          "precision": "pour façonner {longueur_bande|ml} de bande, développé {developpe|cm}",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -6540,6 +6713,7 @@
           "unit": "u",
           "core": true,
           "exclusions": "Zinc plat, développé 33 cm × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",
+          "precision": "pour façonner l'abergement de cheminée, développé 33 cm",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -6750,6 +6924,38 @@
               "value": "3"
             }
           ]
+        },
+        {
+          "key": "egout_faitage",
+          "label": "Égout et faîtage du zinc",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Bandes d'égout et de faîtage du zinc : on les ajoute à la liste ?",
+          "hint": "Si le devis les cite déjà sur une autre ligne, réponds « Déjà au devis ».",
+          "choices": [
+            {
+              "label": "Égout et faîtage",
+              "value": "3"
+            },
+            {
+              "label": "Faîtage seulement",
+              "value": "2"
+            },
+            {
+              "label": "Égout seulement",
+              "value": "1"
+            },
+            {
+              "label": "Déjà au devis",
+              "value": "0"
+            }
+          ],
+          "display": {
+            "0": "déjà au devis",
+            "1": "égout seulement",
+            "2": "faîtage seulement",
+            "3": "égout et faîtage"
+          }
         }
       ],
       "slots": [
@@ -6797,16 +7003,68 @@
           }
         },
         {
-          "key": "patte",
-          "family": "zinc_clip",
-          "label": "Pattes de fixation",
+          "key": "patte_coulissante",
+          "family": "seam_clip_sliding",
+          "label": "Pattes coulissantes",
           "keywords": [
-            "patte"
+            "coulissante",
+            "coulissantes"
           ],
           "usual": {
-            "text": "Pattes fixes et coulissantes, selon le rampant (VMZINC 36.2).",
+            "text": "Pattes coulissantes, selon le rampant (VMZINC 36.2).",
             "source": "vmzinc-joint-debout",
-            "productId": "patte-zinc-standard"
+            "productId": "patte-coulissante-joint-debout"
+          }
+        },
+        {
+          "key": "patte_fixe",
+          "family": "seam_clip_fixed",
+          "label": "Pattes fixes",
+          "keywords": [
+            "patte fixe",
+            "pattes fixes"
+          ],
+          "usual": {
+            "text": "Pattes fixes, selon le rampant (VMZINC 36.2).",
+            "source": "vmzinc-joint-debout",
+            "productId": "patte-fixe-joint-debout"
+          }
+        },
+        {
+          "key": "fixation_patte",
+          "family": "clip_fixing",
+          "label": "Fixations des pattes",
+          "keywords": [
+            "pointe",
+            "pointes"
+          ],
+          "usual": {
+            "text": "Pointes annelées 2,5 × 28 mm sur volige 18 mm, 2 par patte (VMZINC 36.2).",
+            "source": "vmzinc-joint-debout",
+            "productId": "pointe-annelee-2-5x28"
+          }
+        },
+        {
+          "key": "egout",
+          "family": "eaves_strip",
+          "label": "Bandes d'égout",
+          "keywords": [
+            "egout"
+          ],
+          "usual": {
+            "text": "Bande d'égout à ourlet, développé 33 cm, longueurs de 2 m (§7).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "bande-egout-zinc-330"
+          }
+        },
+        {
+          "key": "faitage",
+          "family": "zinc_ridge",
+          "label": "Faîtage zinc",
+          "usual": {
+            "text": "Bande de faîtage zinc en longueurs de 3 m (§7).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "bande-faitage-zinc-standard"
           }
         },
         {
@@ -6968,53 +7226,11 @@
           },
           "version": 1,
           "note": "« bacs profilés à longueur (max 10 à 15 m) » (§7) : 10 m retenu."
-        }
-      },
-      "tables": {
-        "pattes_500": {
-          "label": "Pattes par m² (bobine 500)",
-          "unit": "u/m2",
-          "axes": [
-            {
-              "param": "longueur_rampant",
-              "thresholds": [
-                "0",
-                "1.5",
-                "2",
-                "3.5",
-                "5.5",
-                "7.5",
-                "10.5",
-                "13"
-              ]
-            }
-          ],
-          "values": [
-            [
-              "9.5"
-            ],
-            [
-              "9.5"
-            ],
-            [
-              "8.4"
-            ],
-            [
-              "8.1"
-            ],
-            [
-              "7.6"
-            ],
-            [
-              "7.6"
-            ],
-            [
-              "7.4"
-            ],
-            [
-              "7.7"
-            ]
-          ],
+        },
+        "fixations_par_patte": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "u",
           "source": "vmzinc-joint-debout",
           "verification": {
             "status": "verified",
@@ -7023,10 +7239,40 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1,
-          "note": "7,10 + 2,40 ; 6,30 + 3,20 ; 4,70 + 3,70 ; 5,20 + 2,90 ; 5,70 + 1,90 ; 6,10 + 1,50 ; 6,40 + 1,00 ; 6,80 + 0,90."
+          "note": "« 2 fixations par patte » (§36.2)."
         },
-        "pattes_650": {
-          "label": "Pattes par m² (bobine 650)",
+        "coef_egout_faitage": {
+          "kind": "installation_condition",
+          "value": "1.05",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« ml égout × 1,05 », « ml faîtage × 1,05 » (§7)."
+        },
+        "longueur_utile_bande": {
+          "kind": "installation_condition",
+          "value": "1.9",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Bandes de 2 m, recouvrement 10 cm (§25.2)."
+        }
+      },
+      "tables": {
+        "coulissantes_500": {
+          "label": "Pattes coulissantes par m² (bobine 500)",
           "unit": "u/m2",
           "axes": [
             {
@@ -7045,28 +7291,28 @@
           ],
           "values": [
             [
-              "7"
+              "7.1"
             ],
             [
-              "7"
+              "6.3"
+            ],
+            [
+              "4.7"
+            ],
+            [
+              "5.2"
+            ],
+            [
+              "5.7"
+            ],
+            [
+              "6.1"
             ],
             [
               "6.4"
             ],
             [
-              "6"
-            ],
-            [
-              "5.6"
-            ],
-            [
-              "5.6"
-            ],
-            [
-              "5.5"
-            ],
-            [
-              "5.8"
+              "6.8"
             ]
           ],
           "source": "vmzinc-joint-debout",
@@ -7076,8 +7322,166 @@
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
-          "version": 1,
-          "note": "5,20 + 1,80 ; 4,70 + 2,30 ; 3,50 + 2,90 ; 3,80 + 2,20 ; 4,20 + 1,40 ; 4,50 + 1,10 ; 4,70 + 0,80 ; 5,10 + 0,70."
+          "version": 1
+        },
+        "fixes_500": {
+          "label": "Pattes fixes par m² (bobine 500)",
+          "unit": "u/m2",
+          "axes": [
+            {
+              "param": "longueur_rampant",
+              "thresholds": [
+                "0",
+                "1.5",
+                "2",
+                "3.5",
+                "5.5",
+                "7.5",
+                "10.5",
+                "13"
+              ]
+            }
+          ],
+          "values": [
+            [
+              "2.4"
+            ],
+            [
+              "3.2"
+            ],
+            [
+              "3.7"
+            ],
+            [
+              "2.9"
+            ],
+            [
+              "1.9"
+            ],
+            [
+              "1.5"
+            ],
+            [
+              "1"
+            ],
+            [
+              "0.9"
+            ]
+          ],
+          "source": "vmzinc-joint-debout",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "coulissantes_650": {
+          "label": "Pattes coulissantes par m² (bobine 650)",
+          "unit": "u/m2",
+          "axes": [
+            {
+              "param": "longueur_rampant",
+              "thresholds": [
+                "0",
+                "1.5",
+                "2",
+                "3.5",
+                "5.5",
+                "7.5",
+                "10.5",
+                "13"
+              ]
+            }
+          ],
+          "values": [
+            [
+              "5.2"
+            ],
+            [
+              "4.7"
+            ],
+            [
+              "3.5"
+            ],
+            [
+              "3.8"
+            ],
+            [
+              "4.2"
+            ],
+            [
+              "4.5"
+            ],
+            [
+              "4.7"
+            ],
+            [
+              "5.1"
+            ]
+          ],
+          "source": "vmzinc-joint-debout",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "fixes_650": {
+          "label": "Pattes fixes par m² (bobine 650)",
+          "unit": "u/m2",
+          "axes": [
+            {
+              "param": "longueur_rampant",
+              "thresholds": [
+                "0",
+                "1.5",
+                "2",
+                "3.5",
+                "5.5",
+                "7.5",
+                "10.5",
+                "13"
+              ]
+            }
+          ],
+          "values": [
+            [
+              "1.8"
+            ],
+            [
+              "2.3"
+            ],
+            [
+              "2.9"
+            ],
+            [
+              "2.2"
+            ],
+            [
+              "1.4"
+            ],
+            [
+              "1.1"
+            ],
+            [
+              "0.8"
+            ],
+            [
+              "0.7"
+            ]
+          ],
+          "source": "vmzinc-joint-debout",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
         }
       },
       "derived": [
@@ -7142,10 +7546,24 @@
           "version": 1
         },
         {
-          "key": "pattes_m2",
-          "label": "Pattes par m²",
+          "key": "coulissantes_m2",
+          "label": "Pattes coulissantes par m²",
           "unit": "u/m2",
-          "formula": "si(largeur_bobine <= regle.largeur_littoral, table.pattes_500, table.pattes_650)",
+          "formula": "si(largeur_bobine <= regle.largeur_littoral, table.coulissantes_500, table.coulissantes_650)",
+          "source": "vmzinc-joint-debout",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "key": "fixes_m2",
+          "label": "Pattes fixes par m²",
+          "unit": "u/m2",
+          "formula": "si(largeur_bobine <= regle.largeur_littoral, table.fixes_500, table.fixes_650)",
           "source": "vmzinc-joint-debout",
           "verification": {
             "status": "verified",
@@ -7209,13 +7627,84 @@
           "version": 1
         },
         {
-          "id": "pattes-joint-debout",
-          "slot": "patte",
-          "formula": "surface * pattes_m2",
+          "id": "pattes_coulissantes",
+          "slot": "patte_coulissante",
+          "formula": "surface * coulissantes_m2",
           "unit": "u",
           "core": true,
-          "exclusions": "Pattes classiques, fixes et coulissantes réunies (VMZINC 36.2) ; les pattes monovis demandent moins.",
+          "exclusions": "Pattes classiques (VMZINC 36.2) ; les pattes monovis demandent moins.",
+          "precision": "pour bobine {largeur_bobine|mm}",
           "source": "vmzinc-joint-debout",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "pattes_fixes",
+          "slot": "patte_fixe",
+          "formula": "surface * fixes_m2",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Pattes classiques (VMZINC 36.2) ; les pattes monovis demandent moins.",
+          "precision": "pour bobine {largeur_bobine|mm}, zone fixe de chaque bac",
+          "source": "vmzinc-joint-debout",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "fixations-pattes-joint-debout",
+          "slot": "fixation_patte",
+          "formula": "(commande.pattes_coulissantes + commande.pattes_fixes) * regle.fixations_par_patte",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Deux fixations par patte, à vérifier sur le modèle de patte (VMZINC 36.2) ; volige 18 mm.",
+          "precision": "2 par patte, sur volige 18 mm",
+          "source": "vmzinc-joint-debout",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "egout-joint-debout",
+          "slot": "egout",
+          "when": "si(egout_faitage < 0.5, 0, si(egout_faitage < 1.5, 1, si(egout_faitage > 2.5, 1, 0)))",
+          "formula": "arrondi_sup(largeur_pan * regle.coef_egout_faitage / regle.longueur_utile_bande)",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Égout sur toute la largeur du pan ; longueurs de 2 m, recouvrement 10 cm.",
+          "precision": "{largeur_pan|ml} d'égout à couvrir",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "faitage-joint-debout",
+          "slot": "faitage",
+          "when": "si(egout_faitage >= 2, 1, 0)",
+          "formula": "largeur_pan * regle.coef_egout_faitage",
+          "unit": "ml",
+          "core": true,
+          "exclusions": "Un faîtage de la largeur du pan (monopente, ou un seul pan) ; deux pans qui se rejoignent n'en font qu'un : corrige la quantité d'un tap.",
+          "precision": "{largeur_pan|ml} de faîtage à couvrir",
+          "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
             "verifiedAt": "2026-10-03",

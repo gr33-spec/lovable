@@ -22,10 +22,10 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Écran HPV | 2 rouleaux | 128,57 m² |
 | Tuiles de rive | 78 pièces |  |
 | Faîtières | 29 pièces |  |
-| Closoir | 2 rouleaux de 5 m | 10 ml |
+| Closoir | 2 rouleaux de 5 m | 10 ml à couvrir |
 | Crochets de faîtière | 29 pièces |  |
 | Abouts de faîtage | 2 pièces |  |
-| Gouttière PVC sable demi-ronde | 5 longueurs de 4 m | 20 ml |
+| Gouttière PVC sable demi-ronde | 5 longueurs de 4 m | 20 ml à couvrir |
 | Crochets de gouttière | 50 pièces |  |
 | Naissances | 2 pièces |  |
 | Tubes de descente Ø80 PVC sable | 8 ml |  |
@@ -49,10 +49,10 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Écran HPV | 2 rouleaux | 128,57 m² |
 | Tuiles de rive | 78 pièces |  |
 | Faîtières | 29 pièces |  |
-| Closoir | 2 rouleaux de 5 m | 10 ml |
+| Closoir | 2 rouleaux de 5 m | 10 ml à couvrir |
 | Crochets de faîtière | 29 pièces |  |
 | Abouts de faîtage | 2 pièces |  |
-| Gouttière PVC sable demi-ronde | 5 longueurs de 4 m | 20 ml |
+| Gouttière PVC sable demi-ronde | 5 longueurs de 4 m | 20 ml à couvrir |
 | Crochets de gouttière | 50 pièces |  |
 | Naissances | 2 pièces |  |
 | Tubes de descente Ø80 PVC sable | 8 ml |  |
@@ -76,10 +76,10 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Écran HPV | 2 rouleaux | 128,57 m² |
 | Tuiles de rive | 70 pièces |  |
 | Faîtières | 29 pièces |  |
-| Closoir | 2 rouleaux de 5 m | 10 ml |
+| Closoir | 2 rouleaux de 5 m | 10 ml à couvrir |
 | Crochets de faîtière | 29 pièces |  |
 | Abouts de faîtage | 2 pièces |  |
-| Gouttière PVC sable demi-ronde | 5 longueurs de 4 m | 20 ml |
+| Gouttière PVC sable demi-ronde | 5 longueurs de 4 m | 20 ml à couvrir |
 | Crochets de gouttière | 50 pièces |  |
 | Naissances | 2 pièces |  |
 | Tubes de descente Ø80 PVC sable | 8 ml |  |
@@ -112,9 +112,9 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Liteaux 18×40 | 2 049 ml | ≈ 41 bottes de 50 ml |
 | Liteaux 27×40 | 350 ml | ≈ 7 bottes de 50 ml |
 | Écran HPV | 3 rouleaux | 214,29 m² |
-| Faîtage zinc (bande) | 6 longueurs de 3 m | 17,85 ml |
+| Faîtage zinc (bande) | 6 longueurs de 3 m |  |
 | Pattes de fixation | 51 pièces |  |
-| Gouttière zinc | 5 longueurs de 4 m | 17 ml |
+| Gouttière zinc | 5 longueurs de 4 m | 17 ml à couvrir |
 | Crochets de gouttière | 43 pièces |  |
 | Chatières de ventilation | 12 pièces |  |
 
@@ -138,9 +138,9 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Liteaux 18×40 | 2 049 ml | ≈ 41 bottes de 50 ml |
 | Liteaux 27×40 | 350 ml | ≈ 7 bottes de 50 ml |
 | Écran HPV | 3 rouleaux | 214,29 m² |
-| Faîtage zinc (bande) | 6 longueurs de 3 m | 17,85 ml |
+| Faîtage zinc (bande) | 6 longueurs de 3 m |  |
 | Pattes de fixation | 51 pièces |  |
-| Gouttière zinc | 5 longueurs de 4 m | 17 ml |
+| Gouttière zinc | 5 longueurs de 4 m | 17 ml à couvrir |
 | Crochets de gouttière | 43 pièces |  |
 | Naissances | 2 pièces |  |
 | Chatières de ventilation | 12 pièces |  |
@@ -169,9 +169,9 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Liteaux 18×40 | 1 910 ml | ≈ 39 bottes de 50 ml |
 | Liteaux 27×40 | 350 ml | ≈ 7 bottes de 50 ml |
 | Écran HPV | 3 rouleaux | 214,29 m² |
-| Faîtage zinc (bande) | 6 longueurs de 3 m | 17,85 ml |
+| Faîtage zinc (bande) | 6 longueurs de 3 m |  |
 | Pattes de fixation | 51 pièces |  |
-| Gouttière zinc | 5 longueurs de 4 m | 17 ml |
+| Gouttière zinc | 5 longueurs de 4 m | 17 ml à couvrir |
 | Crochets de gouttière | 34 pièces |  |
 | Naissances | 2 pièces |  |
 | Chatières de ventilation | 12 pièces |  |

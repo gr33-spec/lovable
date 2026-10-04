@@ -1,5 +1,14 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.04-20 — chantier Test (§45.5) : ce que le comptoir sert
+
+- **Pattes du joint debout** : deux lignes, **pattes coulissantes** et **pattes fixes**, au lieu d'une somme (VMZINC 36.2, tableaux séparés par largeur de bobine). Chantier Test, 91 m², rampant 7 m, bobine 500 : 91 × 5,70 = **519 coulissantes**, 91 × 1,90 = **173 fixes**. Plus une troisième ligne, les **pointes annelées 2,5 × 28 mm** (volige 18 mm), 2 par patte (§36.2) : **1 384 pièces**. Familles `seam_clip_sliding`, `seam_clip_fixed`, `clip_fixing`.
+- **Égout et faîtage du joint debout** : question à boutons « Égout et faîtage / Faîtage seulement / Égout seulement / Déjà au devis » (`egout_faitage`, sans défaut : le devis les cite souvent sur une autre ligne). Égout : largeur du pan × 1,05 ÷ 1,9 m utile → bandes d'égout à ourlet développé 33 cm en **longueurs de 2 m** (§7) ; faîtage : largeur du pan × 1,05 en longueurs de 3 m.
+- **Bandes zinc façonnées** : dites en **longueurs de 2 m** (« 8 longueurs de 2 m »), plus en « pièces ».
+- **Précision par ligne** (champ `precision` d'un besoin, §45.3) : ce qui sert au comptoir, avec les valeurs du chantier (« pour façonner 13 ml de bande, développé 33 cm », « pour bobine 500 mm, zone fixe de chaque bac », « 2 par patte, sur volige 18 mm »). Une feuille 2 × 1 m porte toujours son usage (§45.5).
+- **Longueurs** : quand la longueur achetée diffère de la longueur à couvrir, les deux sont écrites : « 4 longueurs de 4 m (13 ml à couvrir) » ; jamais « soit 13 ml » (§45.5).
+- Un composant dont la règle existe mais que la réponse écarte (bandes façonnées quand l'artisan façonne) ne part plus « à chiffrer » avec « pas encore de règle ».
+
 ## roofing-2026.10.04-19 — bobine de zinc au mètre linéaire, jamais au kg
 
 - **Joint debout, « je façonne »** (retour du fondateur) : la bobine se commande au **mètre linéaire**, plus en kg. Une bande par bac, à la longueur du rampant : nombre de bacs (largeur du pan ÷ largeur utile 430 ou 580 mm) × rampant. 91 m², rampant 5,5 m, bord de mer : 39 × 5,5 = **215 ml de bobine 500 mm** (avant : 501 kg). Rampant 12 m profilé sur place : 18 × 12 = 216 ml. La largeur est écrite sur la ligne (deux articles : bobine 500 mm en bord de mer, 650 mm ailleurs) ; l'épaisseur reste dite et part dans « Le chantier en bref ». Les poids VMZINC (5,5 / 6 / 7 kg/m²) ne servent plus au calcul.

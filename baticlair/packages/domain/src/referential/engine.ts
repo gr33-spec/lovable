@@ -193,6 +193,8 @@ export interface NeedResult {
   preferenceIgnored?: string;
   formula?: string;
   exclusions?: string;
+  /** Colonne « précision » de la demande de devis (§45.3). */
+  precision?: string;
   trace: TraceLine[];
 }
 
@@ -908,8 +910,28 @@ function computeNeed(
       // La donnée manque, mais aucune de ses valeurs possibles ne change la commande : pas de question.
       for (const m of missing) trace.push({ label: m.label, value: "inconnue", unit: "", from: "Sans effet sur la commande", verified: true });
     }
+    // Précision au comptoir (§45.3) : « {longueur_bande|m} » s'écrit avec la valeur du chantier ; une valeur
+    // inconnue ou en fourchette retire la précision plutôt que d'écrire un chiffre douteux.
+    let precision: string | undefined;
+    if (rule.precision && exact) {
+      const traceLen = trace.length;
+      const missingLen = missing.length;
+      try {
+        precision = rule.precision.replace(/\{([\w.]+)(?:\|([^}]+))?\}/g, (_, name: string, unitText?: string) => {
+          const v = valueOf(name);
+          if (!isPoint(v) || !v.lo.isFinite()) throw new Error("précision incalculable");
+          const u = unitText ? parseRefUnit(unitText) : null;
+          return `${fr(u ? v.lo.dividedBy(u.factor) : v.lo)}${unitText ? ` ${unitText.replace("m2", "m²")}` : ""}`;
+        });
+      } catch {
+        precision = undefined;
+      }
+      trace.splice(traceLen);
+      missing.splice(missingLen);
+    }
     return {
       ...base,
+      ...(precision !== undefined ? { precision } : {}),
       status: "calculated",
       ...(exact
         ? { quantity: { value: need.lo.toDecimalPlaces(2).toFixed(), unit: rule.unit } }

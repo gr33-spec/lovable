@@ -72,7 +72,7 @@ const slot = z.object({
   usual: z.object({ text: str, source: str, productShort: z.string().optional(), productId: z.string().optional() }).optional(),
   measureOnly: z.literal(true).optional(),
 });
-const need = z.object({ ...provenance, id: str, slot: str, formula: str, unit: str, core: z.boolean(), exclusions: z.string().optional(), requires: z.array(str).optional(), when: z.string().optional() });
+const need = z.object({ ...provenance, id: str, slot: str, formula: str, unit: str, core: z.boolean(), exclusions: z.string().optional(), precision: z.string().optional(), requires: z.array(str).optional(), when: z.string().optional() });
 const workItem = z.object({
   id: str,
   trade: str,
