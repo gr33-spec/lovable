@@ -2,6 +2,13 @@
 
 La seule porte du calcul : l'appli (chat) et les partenaires (Rappidos en premier) y passent. Aujourd'hui, l'accès se fait avec la session d'un compte artisan ; la clé par partenaire (avec quota) viendra ensuite, sans changer les routes.
 
+## S'authentifier — clé API partenaire
+
+- L'appli passe par la session ; un partenaire (Rappidos…) passe par une **clé API** : en-tête `X-Api-Key: bc_…`, sans cookie ni `x-company-id` (la clé porte son entreprise).
+- La clé se crée dans l'appli (Compte → « Clés API partenaire »), ou par `POST /v1/partner-keys` `{ "nom": "Rappidos", "quotaMensuel": 500 }` ; elle n'est montrée qu'une fois. `GET /v1/partner-keys` liste les clés (préfixe, quota, utilisées ce mois) ; `DELETE /v1/partner-keys/{id}` la révoque. Ces trois routes exigent une session : une clé ne gère pas les clés.
+- **Quota** : `quotaMensuel` quantitatifs créés par mois civil et par clé. Au-delà : `429 too_many_requests` avec `{ quota, utilises }`. Les lectures (`GET`) ne comptent pas. La limitation de débit par adresse s'applique en plus.
+- Une clé révoquée ou inconnue : `401 unauthenticated`.
+
 ## Déposer un devis — `POST /v1/quantitatifs`
 
 Deux formes, au choix :

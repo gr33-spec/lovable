@@ -6,6 +6,7 @@ import { DocumentsModule } from "./modules/documents/index.js";
 import { HealthModule } from "./modules/health/health.module.js";
 import { IdentityModule } from "./modules/identity/index.js";
 import { OffersModule } from "./modules/offers/index.js";
+import { PartnersModule } from "./modules/partners/partners.module.js";
 import { PriceRequestsModule } from "./modules/price-requests/index.js";
 import { PrivacyModule } from "./modules/privacy/privacy.module.js";
 import { ProjectsModule } from "./modules/projects/index.js";
@@ -40,6 +41,7 @@ import { LoggingModule } from "./platform/logging/logging.module.js";
     HealthModule,
     PrivacyModule,
     QuantitatifsModule,
+    PartnersModule,
   ],
 })
 export class AppModule {}

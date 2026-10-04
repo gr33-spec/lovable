@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Inject, Param, Post, Put, Query, Res, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Inject, Param, Post, Put, Query, Req, Res, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Throttle } from "@nestjs/throttler";
 import type { Response } from "express";
@@ -7,6 +7,7 @@ import { z } from "zod";
 import { validationFailed } from "../../../platform/errors/domain-error.js";
 import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
+import type { RequestWithUser } from "../../identity/index.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
 import { QuantitatifsService } from "../application/quantitatifs.service.js";
 
@@ -87,8 +88,9 @@ export class QuantitatifsController {
     @Body(new ZodPipe(entree)) body: z.infer<typeof entree>,
     @Query(new ZodPipe(rendu)) query: z.infer<typeof rendu>,
     @Res({ passthrough: true }) res: Response,
+    @Req() req: RequestWithUser,
   ) {
-    const ctx = { projetId: body.projetId, reference: body.reference, adresse: body.adresse, infos: body.infos };
+    const ctx = { projetId: body.projetId, reference: body.reference, adresse: body.adresse, infos: body.infos, apiKey: req.apiKey ? { id: req.apiKey.id, monthlyQuota: req.apiKey.monthlyQuota } : undefined };
     const r = { ecran: query.ecran === "1" };
     if ([file, body.lignes, body.documentId].filter(Boolean).length > 1) throw validationFailed("Send one quote: a PDF, lines or a documentId", [{ path: "lignes", message: "several quotes sent" }]);
     let result;

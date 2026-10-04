@@ -19,7 +19,7 @@ Partenaires ──┼─▶ /v1/quantitatifs ─▶ moteur générique ─▶ re
 
 - **Réponse `pret`** : lignes avec identifiant stable, libellé normalisé, quantité, unité de commande, conditionnement, hypothèses, confiance, `metier` et `version_referentiel`.
 - **Le chat n'appelle que ces routes.** Les routes actuelles (`/documents/:id/takeoff`, `/takeoffs/:id/answers`…) deviennent des alias, puis disparaissent.
-- **Hors MVP mais prévu sans refonte** : une clé par partenaire, avec quota (même mécanisme que la limitation de débit B2), isolation des données par partenaire, documentation OpenAPI.
+- **Clé par partenaire avec quota : fait le 2026-10-04** (`X-Api-Key`, quota mensuel de quantitatifs par clé, révocation, création dans Compte ; `apps/api/test/partner-keys.test.ts`). Reste prévu sans refonte : isolation des données par partenaire (aujourd'hui une clé = une entreprise), documentation OpenAPI.
 
 ## 2. Chaque ligne s'explique en une phrase modifiable (§39)
 

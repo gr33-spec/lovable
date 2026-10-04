@@ -16,7 +16,8 @@ export class TenantGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<RequestWithTenant>();
     if (!req.user) return false; // SessionGuard (global) s'exécute avant.
-    const requested = req.header(COMPANY_HEADER);
+    // Une clé API partenaire porte son entreprise : l'auteur de la clé doit encore en être membre.
+    const requested = req.apiKey ? req.apiKey.companyId : req.header(COMPANY_HEADER);
     req.tenant = await this.tenancy.resolveTenant(req.user.userId, requested || undefined);
     enrichRequestContext({ companyId: req.tenant.companyId });
     return true;

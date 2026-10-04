@@ -47,6 +47,10 @@ Avant de toucher au moteur, aux règles ou aux écrans, lire la section concern�
 - Version figée par chantier : l'API enregistre l'instantané du référentiel à sa version (`referential_snapshot`) et recalcule chaque quantitatif avec SA version ; jamais les règles du jour. Test : `apps/api/test/version-figee.test.ts`.
 - Un second métier existe : `PLATRERIE_REFERENTIAL` (cloison 72/48), calculé par le même moteur sans changement ; ses chiffres non sourcés sont en brouillon. Toute donnée hors référentiel du fondateur reste `draft` tant qu'un professionnel ne l'a pas validée.
 
+## Partenaires
+
+- Clé API partenaire (`X-Api-Key: bc_…`, module `partners`) : une clé par intégration, hachée en base, montrée une seule fois, rattachée à l'entreprise et à son auteur ; quota mensuel de quantitatifs créés (429 au-delà, les lectures ne comptent pas) ; révocation immédiate ; une clé ne gère jamais les clés. Test : `apps/api/test/partner-keys.test.ts`. Notice : `docs/api-quantitatifs.md`.
+
 ## Commandes utiles
 
 - `pnpm --filter @baticlair/domain build` (l'API importe `dist`)

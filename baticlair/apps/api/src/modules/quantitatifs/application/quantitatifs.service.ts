@@ -23,6 +23,8 @@ export interface Contexte {
   adresse?: string | undefined;
   /** Infos chantier facultatives : texte libre de l'artisan (mesures nommées, contexte). Remplace la note du chantier. */
   infos?: string | undefined;
+  /** Clé API partenaire à l'origine de l'appel : le quantitatif lui est compté (quota mensuel). */
+  apiKey?: { id: string; monthlyQuota: number } | undefined;
 }
 
 /** `ecran` : l'appli reçoit en plus le détail de son écran (lignes lues, décisions, preuves). */
@@ -61,7 +63,20 @@ export class QuantitatifsService {
     return this.takeoffs.aiAvailable;
   }
 
+  /**
+   * Quota d'une clé API partenaire : tant de quantitatifs créés par mois civil. Au-delà, 429 ; les lectures ne
+   * comptent pas. Vérifié avant toute création (chantier, document, lecture IA).
+   */
+  private async assertQuota(tenant: TenantContext, ctx: Contexte): Promise<void> {
+    if (!ctx.apiKey) return;
+    const now = new Date();
+    const since = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const used = await this.prisma.quantitatif.count({ where: { companyId: tenant.companyId, apiKeyId: ctx.apiKey.id, createdAt: { gte: since } } });
+    if (used >= ctx.apiKey.monthlyQuota) throw new DomainError("too_many_requests", "Partner API key monthly quota reached", { quota: ctx.apiKey.monthlyQuota, utilises: used });
+  }
+
   async fromPdf(tenant: TenantContext, file: { name: string; bytes: Uint8Array }, ctx: Contexte, rendu: Rendu = {}) {
+    await this.assertQuota(tenant, ctx);
     const projectId = await this.project(tenant, ctx);
     const upload = await this.documents.upload(tenant, projectId, { purpose: "client_quote", fileName: file.name, bytes: file.bytes }).catch(async (error: unknown) => {
       // Pas un PDF : le chantier créé pour ce devis ne doit pas rester vide.
@@ -70,7 +85,7 @@ export class QuantitatifsService {
     });
     const { document } = upload;
     const row = await this.prisma.quantitatif.create({
-      data: { companyId: tenant.companyId, projectId, source: "pdf", documentId: document.id, reference: ctx.reference ?? null },
+      data: { companyId: tenant.companyId, projectId, source: "pdf", documentId: document.id, reference: ctx.reference ?? null, apiKeyId: ctx.apiKey?.id ?? null },
     });
     // Fichier illisible (pas un devis, protégé…) : erreur tout de suite, sans dépenser une lecture.
     const unreadable = document.status === "failed" && document.processing?.status === "failed" && document.processing.errorCode !== "read_failed";
@@ -81,6 +96,7 @@ export class QuantitatifsService {
   /** Un devis déjà déposé sur le chantier (le chat de l'appli) : même quantitatif s'il existe, lecture sinon. */
   async fromDocument(tenant: TenantContext, documentId: string, ctx: Contexte, rendu: Rendu = {}) {
     assertCanWrite(tenant);
+    await this.assertQuota(tenant, ctx);
     if (!/^[0-9a-f-]{36}$/i.test(documentId)) throw notFound("Document");
     const { document } = await this.documents.get(tenant, documentId);
     if (ctx.projetId && ctx.projetId !== document.projectId) throw validationFailed("Document of another project", [{ path: "documentId", message: "not in projetId" }]);
@@ -88,7 +104,7 @@ export class QuantitatifsService {
     const row =
       existing ??
       (await this.prisma.quantitatif.create({
-        data: { companyId: tenant.companyId, projectId: document.projectId, source: "pdf", documentId, reference: ctx.reference ?? null },
+        data: { companyId: tenant.companyId, projectId: document.projectId, source: "pdf", documentId, reference: ctx.reference ?? null, apiKeyId: ctx.apiKey?.id ?? null },
       }));
     // Déjà lu : rien n'est relu ni décompté. Lecture en cours : elle n'est pas relancée.
     await this.takeoffs.start(tenant, documentId);
@@ -96,6 +112,7 @@ export class QuantitatifsService {
   }
 
   async fromLines(tenant: TenantContext, lignes: readonly LigneEntree[], ctx: Contexte, rendu: Rendu = {}) {
+    await this.assertQuota(tenant, ctx);
     const projectId = await this.project(tenant, ctx);
     const trade = tenant.trades[0] ?? "roofing";
     const reviewed = await this.takeoffs.fromLines(
@@ -105,7 +122,7 @@ export class QuantitatifsService {
       lignes.map((l) => ({ designation: l.libelle, quantity: l.quantite, unit: l.unite, price: l.prix })),
     );
     const row = await this.prisma.quantitatif.create({
-      data: { companyId: tenant.companyId, projectId, source: "lignes", takeoffId: reviewed.takeoff.id, reference: ctx.reference ?? null },
+      data: { companyId: tenant.companyId, projectId, source: "lignes", takeoffId: reviewed.takeoff.id, reference: ctx.reference ?? null, apiKeyId: ctx.apiKey?.id ?? null },
     });
     return this.view(row, reviewed, rendu);
   }
