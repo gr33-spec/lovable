@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, CircleCheck, FileDown, HelpCircle, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, ChevronRight, CircleCheck, FileDown, FileText, HelpCircle, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AssistantMessage, ChatInput, parseCommand, ReasoningSteps, Say, ThinkingSteps, UserBubble } from "@/components/chat";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
@@ -19,7 +19,6 @@ export function canPrepareTakeoff(doc: ProjectDocument): boolean {
   return doc.status === "read" || doc.reading?.errorCode === "read_failed";
 }
 
-const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? "s" : ""}`;
 
 /** « 45° » collé, « 60 cm » espacé, rien pour les pièces. */
 const withUnit = (value: string, unit: string) => (!unit || unit === "u" ? value : unit === "°" ? `${value}°` : `${value} ${unit === "m2" ? "m²" : unit}`);
@@ -62,7 +61,8 @@ export function ProjectTakeoff({
   }, [raw]);
   const [pending, setPending] = useState(false);
   const [actionError, setActionError] = useState<ApiError | null>(null);
-  const [showList, setShowList] = useState(false);
+  // Le devis lu, ligne par ligne : fermé, ouvert pour corriger, ou ouvert directement sur « ajouter un article ».
+  const [showList, setShowList] = useState<false | "corriger" | "ajouter">(false);
   const [sendSignal, setSendSignal] = useState(0);
   const [sent, setSent] = useState(false);
   const [fresh, setFresh] = useState(false);
@@ -256,17 +256,26 @@ export function ProjectTakeoff({
     remember(text, used ? `C'est noté : ${command.said}. J'ai recalculé.` : `C'est noté : ${command.said}. Ça ne change rien à la liste.`);
     void answer(command.key, command.value);
   };
-  const linkStyle = "inline-flex min-h-11 items-center justify-center gap-1.5 self-start text-sm font-bold text-accent-text";
   let body: React.ReactNode;
   if (showList) {
     body = (
       <>
+        <section aria-labelledby="devis-lu-titre" className="flex flex-col gap-1">
+          <button type="button" onClick={() => setShowList(false)} className="-ml-1 inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-bold text-accent-text">
+            <ArrowLeft size={18} aria-hidden="true" />
+            Revenir à la liste des fournitures
+          </button>
+          <h2 id="devis-lu-titre" className="font-display text-[22px] font-extrabold tracking-[-0.02em]">
+            Le devis du client, ligne par ligne
+          </h2>
+          <p className="text-[15px] leading-snug text-muted">Une ligne mal lue ? Corrigez-la ici : la liste des fournitures se recalcule toute seule.</p>
+        </section>
         <Card className="flex flex-col divide-y divide-line px-4 py-1">
           {materials.map((line) => (
             <ListRow key={line.id} line={line} editable={editable} pending={pending} {...lineActions(line)} />
           ))}
         </Card>
-        {editable ? <AddLine pending={pending} onAdd={(fields) => call("corrections", { action: "ajouter", ligne: ligne(fields) })} /> : null}
+        {editable ? <AddLine startOpen={showList === "ajouter"} pending={pending} onAdd={(fields) => call("corrections", { action: "ajouter", ligne: ligne(fields) })} /> : null}
         {labor.length > 0 || takeoff.notes.length > 0 ? (
           <details className="rounded-2xl bg-surface p-4 text-sm shadow-card">
             <summary className="cursor-pointer font-bold">Lignes mises de côté</summary>
@@ -280,9 +289,10 @@ export function ProjectTakeoff({
             </ul>
           </details>
         ) : null}
-        <button type="button" onClick={() => setShowList(false)} className={linkStyle}>
-          Revenir au quantitatif
-        </button>
+        <Button variant="secondary" onClick={() => setShowList(false)}>
+          <ArrowLeft size={18} aria-hidden="true" />
+          Revenir à la liste des fournitures
+        </Button>
       </>
     );
   } else {
@@ -306,18 +316,27 @@ export function ProjectTakeoff({
           sketches={quantitatif?.infos?.croquis ?? []}
           sketchHandlers={{ onAttach: attachSketch, onDetach: detachSketch }}
         />
-        <div className="flex flex-wrap gap-x-4">
-          <button type="button" onClick={() => setShowList(true)} className={linkStyle}>
-            Voir le devis lu ({plural(materials.length, "ligne")})
-          </button>
-          {/* §21.3 « Exporter la liste en PDF » : le même document que celui du fournisseur. */}
-          {!draft ? (
-            <a href={`/v1/projects/${encodeURIComponent(projectId)}/demande-de-devis.pdf`} target="_blank" rel="noreferrer" className={linkStyle}>
-              <FileDown size={18} aria-hidden="true" />
-              Exporter la liste en PDF
-            </a>
+        {/* Ce qu'on peut encore faire sur la liste : des actions dites en clair, jamais un lien qu'on ne comprend pas. */}
+        <nav aria-label="Autres actions sur la liste" className="flex flex-col divide-y divide-line overflow-hidden rounded-[20px] bg-surface shadow-card">
+          {editable ? (
+            <ActionRow icon={<Plus size={20} aria-hidden="true" />} title="Ajouter un article oublié" text="Une fourniture que le devis ne cite pas." onClick={() => setShowList("ajouter")} />
           ) : null}
-        </div>
+          <ActionRow
+            icon={<FileText size={20} aria-hidden="true" />}
+            title="Corriger le devis lu"
+            text={`${materials.length} ${materials.length > 1 ? "lignes lues" : "ligne lue"} dans le devis du client. Une ligne mal lue ? Corrigez-la.`}
+            onClick={() => setShowList("corriger")}
+          />
+          {/* §21.3 : le même document que celui du fournisseur. */}
+          {!draft ? (
+            <ActionRow
+              icon={<FileDown size={20} aria-hidden="true" />}
+              title="Télécharger la liste en PDF"
+              text="Le document que reçoit le fournisseur, sans prix."
+              href={`/v1/projects/${encodeURIComponent(projectId)}/demande-de-devis.pdf`}
+            />
+          ) : null}
+        </nav>
       </>
     );
   }
@@ -454,8 +473,32 @@ function DeleteConfirm({ pending, onDelete, onCancel }: { pending: boolean; onDe
   );
 }
 
-function AddLine({ pending, onAdd }: { pending: boolean; onAdd: (fields: LineFieldsInput) => Promise<void> }) {
-  const [open, setOpen] = useState(false);
+/** Une action sous la liste : une icône, ce qu'elle fait en clair, et pourquoi on s'en servirait. */
+function ActionRow({ icon, title, text, onClick, href }: { icon: React.ReactNode; title: string; text: string; onClick?: () => void; href?: string }) {
+  const inner = (
+    <>
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#eeedff] text-[#4a37d6]">{icon}</span>
+      <span className="flex min-w-0 grow flex-col">
+        <span className="text-[15px] font-extrabold">{title}</span>
+        <span className="text-[13px] leading-snug text-muted">{text}</span>
+      </span>
+      <ChevronRight size={18} aria-hidden="true" className="shrink-0 text-subtle" />
+    </>
+  );
+  const className = "flex min-h-16 items-center gap-3 px-4 py-3 text-left active:bg-ground";
+  return href ? (
+    <a href={href} target="_blank" rel="noreferrer" aria-label={title} className={className}>
+      {inner}
+    </a>
+  ) : (
+    <button type="button" onClick={onClick} aria-label={title} className={className}>
+      {inner}
+    </button>
+  );
+}
+
+function AddLine({ pending, onAdd, startOpen = false }: { pending: boolean; onAdd: (fields: LineFieldsInput) => Promise<void>; startOpen?: boolean }) {
+  const [open, setOpen] = useState(startOpen);
   if (!open) {
     return (
       <Button variant="secondary" onClick={() => setOpen(true)}>
