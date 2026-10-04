@@ -186,7 +186,10 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
   const read = lines.map((line) => {
     const v = validateTakeoffLine({ id: line.ref, designation: line.designation, quantityRaw: line.quantity, unitRaw: line.unit, source: "client_quote" }, profile);
     const text = normalizeText(line.designation);
-    return { line, v, text, family: v.kind === "labor" ? null : earliest(text, families) };
+    const general = v.kind === "labor" ? null : earliest(text, families);
+    // « Tuiles (… tuiles canal …) » : la famille générale lue en premier est précisée par une famille plus précise nommée ensuite.
+    const precise = general ? ref.families.find((f) => f.refines === general && (f.keywords ?? []).some((k) => keywordPosition(text, k) >= 0)) : undefined;
+    return { line, v, text, family: precise?.code ?? general };
   });
 
   // 1. Les ouvrages présents : ceux qu'une ligne déclenche.

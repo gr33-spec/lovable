@@ -1,5 +1,12 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.04-17 — retour du fondateur : tuiles canal, zinc en feuilles, toutes les questions d'un coup
+
+- **Tuiles canal** (famille `roof_tile_canal`, source Edilians « canal-tuiles-edilians.pdf ») : une ligne « tuiles canal » n'est plus lue comme une tuile à emboîtement (avant : HP 10 proposée). Une famille peut en affiner une autre (`refines`) : le mot le plus précis de la ligne l'emporte. Modèle à préciser → question à boutons (Canal 50, Gironde 50, Lyonnaise 40, Charentaise…) ; recouvrement R140 à R170 demandé d'emblée (sauf tuiles à blocage, recouvrement fixe). Tuiles = surface × nombre au m² du fabricant (couvert + courant), liteaux au m², bardelis 2,7 au ml de rive. Exemple : Gironde 50, R150, 100 m² → 2 540 tuiles, 307 ml de liteaux.
+- **Zinc façonné sur place** (bandes, solins, abergements) : en **feuilles de 2 × 1 m** (2 m², §25.2), plus en kg. Bandes : arrondi sup (ml × développé ÷ 2 m²) ; abergement : périmètre × 0,33 ÷ 2 m². Le joint debout reste en bobine au kg (VMZINC). Le bobineau n'est pas modélisé (pas de donnée).
+- **Gouttières et descentes** : jamais de question de façonnage (pièces commandées toutes faites).
+- **Questions** : le moteur découvre d'avance les questions qui suivent une réponse (il essaie chaque réponse possible) ; l'écran les pose toutes d'un coup, une seule validation.
+
 ## roofing-2026.10.03-16 — le fournisseur chiffre en dernier recours
 
 - **Modèle refusé** (« aucun de ces modèles ») : le moteur calcule quand même avec le produit générique de la famille, étiqueté « modèle à préciser » ; le fournisseur met sa marque. Avant : la ligne partait « à chiffrer ». Exemple D-2026-015 : 29 faîtières (modèle à préciser) + 29 crochets, plus rien à chiffrer.

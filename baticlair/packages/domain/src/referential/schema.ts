@@ -29,6 +29,7 @@ const family = z.object({
   attributes: z.array(z.object({ key: str, label: str, unit: str })),
   keyAttributes: z.array(str),
   keywords: z.array(str).optional(),
+  refines: z.string().optional(),
 });
 const sellingUnit = z.object({ id: str, label: z.object({ one: str, many: str }), contains: fact, primary: z.boolean().optional() });
 const product = z.object({

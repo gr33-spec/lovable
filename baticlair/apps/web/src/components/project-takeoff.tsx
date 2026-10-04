@@ -4,6 +4,7 @@ import { Check, CircleCheck, HelpCircle, Pencil, Plus, Send, Sparkles, Trash2 } 
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AssistantMessage, ChatInput, parseCommand, ReasoningSteps, Say, ThinkingSteps, UserBubble } from "@/components/chat";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
+import { QuestionsForm, type FormAnswer } from "@/components/questions-form";
 import { QuantityCard, type ItemEdit } from "@/components/purchase-list";
 import { SiteNotes } from "@/components/site-notes";
 import { DecisionCard, type DecisionHandlers } from "@/components/takeoff-view";
@@ -232,6 +233,20 @@ export function ProjectTakeoff({
   };
   const linkStyle = "inline-flex min-h-11 items-center justify-center gap-1.5 self-start text-sm font-bold text-accent-text";
   const decisions = takeoff.view.decisions;
+  // Toutes les questions d'un coup (§41, retour du fondateur) : un seul envoi, par paquets de 20 (limite de la porte).
+  const asked = decisions.filter((d) => d.question && d.question.options.length > 0).length;
+  const formKey = decisions.map((d) => d.key).join("|");
+  const submitAll = (answers: FormAnswer[]) => {
+    if (answers.length === 0) return;
+    remember(`${plural(answers.length, "réponse")} envoyée${answers.length > 1 ? "s" : ""}`);
+    void run(async () => {
+      let last: Quantitatif | null = null;
+      for (let i = 0; i < answers.length; i += 20) {
+        last = await api<Quantitatif>(`/v1/quantitatifs/${qid}/reponses?ecran=1`, { method: "POST", body: { reponses: answers.slice(i, i + 20) } });
+      }
+      return last!;
+    }, update);
+  };
 
   let body: React.ReactNode;
   if (showList) {
@@ -264,8 +279,13 @@ export function ProjectTakeoff({
   } else if (draft && decisions.length > 0) {
     body = (
       <>
-        <Say>{decisions.length === 1 ? "Une seule chose change la commande :" : `Encore ${decisions.length} questions, une à la fois :`}</Say>
-        <DecisionCard key={decisions[0]!.key} decision={decisions[0]!} lines={takeoff.lines} editable={editable} pending={pending} handlers={handlers} />
+        <Say>{asked > 0 ? "Répondez à tout d'un coup, je calcule ensuite :" : "Il me reste à confirmer :"}</Say>
+        {asked > 0 ? <QuestionsForm key={formKey} decisions={decisions} assumptions={takeoff.purchase.assumptions} pending={pending} disabled={!editable} onSubmit={submitAll} /> : null}
+        {decisions
+          .filter((d) => !d.question || d.question.options.length === 0)
+          .map((d) => (
+            <DecisionCard key={d.key} decision={d} lines={takeoff.lines} editable={editable} pending={pending} handlers={handlers} />
+          ))}
         <button type="button" onClick={() => setShowList(true)} className={linkStyle}>
           Voir le devis lu ({plural(materials.length, "ligne")})
         </button>

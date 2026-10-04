@@ -24,9 +24,32 @@ async function signUp(page: Page) {
   return email;
 }
 
-/** Chaque question : l'artisan accepte la proposition (« C'est bon », « Oui… ») ou passe (« Je ne sais pas »). */
+/**
+ * Toutes les questions d'un coup : dans le formulaire, l'artisan tape la première réponse de chaque question encore
+ * ouverte puis valide une fois. Renvoie vrai s'il a validé un formulaire.
+ */
+async function fillForm(page: Page): Promise<boolean> {
+  const form = page.getByRole("region", { name: "Questions sur le chantier" });
+  if (!(await form.isVisible())) return false;
+  const before = await form.innerText();
+  for (const group of await form.getByRole("group").all()) {
+    if ((await group.locator('button[aria-pressed="true"]').count()) === 0) await group.getByRole("button").first().click();
+  }
+  await form.getByRole("button", { name: "Valider et calculer" }).click();
+  // Fini quand le formulaire a disparu, ou qu'il revient (boutons actifs) avec d'autres questions.
+  const state = async () => {
+    if (!(await form.isVisible())) return "";
+    if (await form.getByRole("group").first().getByRole("button").first().isDisabled()) return before;
+    return form.innerText();
+  };
+  await expect.poll(state, { timeout: 15_000 }).not.toBe(before);
+  return true;
+}
+
+/** Chaque question : l'artisan remplit le formulaire, puis accepte chaque proposition restante (« C'est bon », « Oui… ») ou passe. */
 async function confirmDoubts(page: Page) {
   for (let i = 0; i < 30; i++) {
+    if (await fillForm(page)) continue;
     const card = page.getByRole("region", { name: /^À régler : / }).first();
     if (!(await card.isVisible())) return;
     const name = (await card.getAttribute("aria-label"))!;
@@ -39,12 +62,13 @@ async function confirmDoubts(page: Page) {
   }
 }
 
-/** Les questions arrivent une à une : l'artisan répond aux précédentes jusqu'à voir celle-ci. */
+/** L'artisan répond (formulaire puis cartes) jusqu'à voir cette carte. */
 async function answerUntil(page: Page, name: string) {
   for (let i = 0; i < 30; i++) {
-    const card = page.getByRole("region", { name: /^À régler : / }).first();
-    await expect(card).toBeVisible();
+    await expect(page.getByRole("region", { name: /^(À régler : |Questions sur le chantier$)/ }).first()).toBeVisible();
     if (await page.getByRole("region", { name }).isVisible()) return;
+    if (await fillForm(page)) continue;
+    const card = page.getByRole("region", { name: /^À régler : / }).first();
     const current = (await card.getAttribute("aria-label"))!;
     const yes = card.getByRole("button", { name: /^(C'est bon|Oui)/ }).first();
     const skip = card.getByRole("button", { name: "Je ne sais pas" });
