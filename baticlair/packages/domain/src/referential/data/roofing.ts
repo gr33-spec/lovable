@@ -675,7 +675,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     { code: "seam_clip_fixed", label: "Patte fixe de joint debout", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["patte fixe", "pattes fixes"] },
     // Bande d'égout à ourlet du joint debout (§7).
     { code: "eaves_strip", label: "Bande d'égout zinc", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["bande d'egout", "bande egout"] },
-    { code: "clip_fixing", label: "Fixation de patte", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["pointe annelee", "pointes annelees", "vis de patte", "fixation de patte"] },
+    { code: "clip_fixing", label: "Fixation de patte", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["pointe annelee", "pointes annelees", "vis de patte", "fixation de patte"], consumable: true },
     // Joint debout (§7, §36) : la ligne du devis est une SURFACE ; ce qui se commande, ce sont des bobines (au mètre linéaire) ou des bacs.
     { code: "standing_seam", label: "Couverture zinc joint debout", needUnit: "m2", attributes: [], keyAttributes: [], keywords: ["joint debout", "couverture zinc", "zinc a joint debout", "jdb"] },
     { code: "zinc_coil", label: "Bobine de zinc", needUnit: "m", attributes: [], keyAttributes: [], keywords: ["bobine de zinc", "bobine zinc", "zinc en bobine"] },

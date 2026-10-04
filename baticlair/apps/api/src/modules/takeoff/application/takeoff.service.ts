@@ -40,6 +40,9 @@ import {
   type LineValidation,
   type TakeoffIssue,
   type TakeoffValidation,
+  siteBrief,
+  communeOf,
+  type SiteBrief,
 } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { AiUsageRecorder, AnalysisMeter } from "../../ai-usage/index.js";
@@ -173,6 +176,8 @@ export interface ReviewedTakeoff {
    * part au fournisseur tant qu'elle l'est (clés des données : « pente »…).
    */
   openContradictions: readonly string[];
+  /** Le chantier en bref (§45.3) : les faits confirmés seulement, jamais une hypothèse de l'app. */
+  brief: SiteBrief;
 }
 
 
@@ -711,7 +716,15 @@ export class TakeoffService {
     const reviewed = { takeoff: kept, validation, roles: new Map([...proposals].map(([id, p]) => [id, { ...p, role: roles.get(id) ?? p.role }])), excluded, openContradictions };
     const view = artisanView(lines, validation, engine, { plan, roles, ref, asks });
     // § 41.4 : les mots de l'artisan (libellé, quantité réécrits d'un tap) remplacent ceux de BatiClair.
-    return { ...reviewed, view, purchase: applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref, validation }), takeoff.answers) };
+    const brief = siteBrief({
+      ref,
+      plan,
+      answers: takeoff.answers,
+      lines: takeoff.lines.map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantityRaw, unit: l.unitRaw, material: l.material ?? null })),
+      context: takeoff.context ?? {},
+      ville: communeOf(address),
+    });
+    return { ...reviewed, view, brief, purchase: applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref, validation }), takeoff.answers) };
   }
 
   /**

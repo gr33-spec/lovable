@@ -119,6 +119,14 @@ model Company {
   trades               String[] @default([])
   /// §42.2 : joindre le « Détail du chantier (sans prix) » aux envois fournisseur (case mémorisée).
   attachQuoteDetail    Boolean  @default(true)
+  /// §45.3 : coordonnées de l'en-tête de la demande de devis et de la signature du mail (§45.2). Jamais saisies à l'envoi.
+  address              String?
+  siret                String?
+  phone                String?
+  contactEmail         String?
+  /// Logo (PNG ou JPEG, 500 Ko au plus), à gauche de l'en-tête du PDF ; absent : le nom de l'entreprise en gros.
+  logo                 Bytes?
+  logoType             String?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 

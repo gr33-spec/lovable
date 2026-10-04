@@ -232,7 +232,8 @@
         "pointes annelees",
         "vis de patte",
         "fixation de patte"
-      ]
+      ],
+      "consumable": true
     },
     {
       "code": "standing_seam",

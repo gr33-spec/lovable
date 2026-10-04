@@ -92,7 +92,7 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase, exclude
     // §44.2 : la ligne retirée par une phrase de la note est dite à l'artisan, avec sa phrase.
     notes: [
       ...artisanNotes(takeoff.notes),
-      ...takeoff.lines.filter((l) => excluded?.has(l.id)).map((l) => `${l.designation} : exclu par vous (« ${excluded!.get(l.id)} »), rien à commander.`),
+      ...takeoff.lines.filter((l) => excluded?.has(l.id)).map((l) => `${l.designation} : exclu par vous (« ${excluded!.get(l.id)} »), rien à chiffrer.`),
     ],
     createdAt: takeoff.createdAt.toISOString(),
     validatedAt: takeoff.validatedAt?.toISOString() ?? null,

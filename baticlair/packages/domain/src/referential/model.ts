@@ -118,6 +118,11 @@ export interface ProductFamily {
    * c'est elle qui compte. Du vocabulaire, jamais un réglage pour un devis.
    */
   refines?: string;
+  /**
+   * Consommable (pointes, vis, mastic, bande à joint) : rangé en fin de « Fournitures à chiffrer », dans le groupe
+   * « consommables » (§45.3 « du gros au petit, consommables en dernier »).
+   */
+  consumable?: boolean;
 }
 
 /** Façon de vendre un produit : à la pièce, à la longueur de 4 m, au rouleau… */

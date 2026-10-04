@@ -99,6 +99,30 @@ function packet(value: unknown): SupplierPacket | null {
             .map((c) => ({ article: String(c.article ?? ""), id: String(c.id), nom: String(c.nom ?? ""), commentaire: typeof c.commentaire === "string" ? c.commentaire : null })),
         }
       : {}),
+    // §45 : le tableau des fournitures, la phrase et la signature du mail, la référence du chantier.
+    ...(Array.isArray(p.fournitures)
+      ? {
+          fournitures: p.fournitures
+            .filter((f): f is Record<string, unknown> => !!f && typeof f === "object")
+            .map((f) => ({
+              designation: typeof f.designation === "string" ? f.designation : "",
+              quantite: typeof f.quantite === "string" ? f.quantite : "",
+              precision: typeof f.precision === "string" ? f.precision : null,
+              ...(f.consommable === true ? { consommable: true } : {}),
+            })),
+        }
+      : {}),
+    ...(typeof p.phrase === "string" ? { phrase: p.phrase } : {}),
+    ...(p.expediteur && typeof p.expediteur === "object"
+      ? (() => {
+          const e = p.expediteur as Record<string, unknown>;
+          const str = (v: unknown) => (typeof v === "string" ? v : null);
+          return { expediteur: { nom: str(e.nom) ?? "", adresse: str(e.adresse), siret: str(e.siret), telephone: str(e.telephone), email: str(e.email) } };
+        })()
+      : {}),
+    ...(typeof p.reference === "string" ? { reference: p.reference } : {}),
+    ...(typeof p.message === "string" ? { message: p.message } : {}),
+    ...(typeof p.echeance === "string" ? { echeance: p.echeance } : {}),
   };
 }
 
@@ -171,21 +195,27 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
     const [company, user, project] = await Promise.all([
       this.prisma.company.findUnique({
         where: { id: tenant.companyId },
-        select: { name: true },
+        select: { name: true, address: true, siret: true, phone: true, contactEmail: true, logo: true, logoType: true },
       }),
       this.prisma.user.findUnique({
         where: { id: tenant.userId },
-        select: { name: true },
+        select: { name: true, email: true },
       }),
       isUuid(projectId)
         ? this.prisma.project.findFirst({
             where: { id: projectId, companyId: tenant.companyId },
-            select: { name: true, address: true, siteNotes: true },
+            select: { id: true, name: true, address: true, siteNotes: true },
           })
         : Promise.resolve(null),
     ]);
     if (!company || !project) return null;
-    return { companyName: company.name, senderName: user?.name ?? "", project };
+    return {
+      companyName: company.name,
+      senderName: user?.name ?? "",
+      project,
+      company: { address: company.address, siret: company.siret, phone: company.phone, email: company.contactEmail ?? user?.email ?? null },
+      logo: company.logo && company.logoType ? { bytes: new Uint8Array(company.logo), type: company.logoType } : null,
+    };
   }
 
   async create(

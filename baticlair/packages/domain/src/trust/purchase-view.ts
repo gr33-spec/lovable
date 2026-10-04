@@ -38,6 +38,8 @@ export interface PurchaseItem {
   approx: string | null;
   /** Colonne « précision » de la demande de devis (§45.3) : l'usage, la position ; absent si rien d'utile au comptoir. */
   precision?: string;
+  /** Consommable (famille marquée telle) : en fin de « Fournitures à chiffrer » (§45.3). */
+  consumable?: boolean;
   /** « computed » : calculé par BatiClair ; « direct » : quantité écrite telle quelle dans le devis. */
   kind: "computed" | "direct";
   /** Besoins réunis dans cette ligne (« voir le calcul »), et lignes du devis dont elle provient. */
@@ -168,7 +170,7 @@ export function supplierTest(designation: string, unit: string | null): string |
 }
 
 /** Regroupe les besoins d'un même article (même produit) sur tout le chantier. */
-function aggregate(needs: readonly OwnedNeed[], ouvrages: readonly OuvrageLevels[], characteristicsBySlot: Record<string, string[]>): PurchaseItem[] {
+function aggregate(needs: readonly OwnedNeed[], ouvrages: readonly OuvrageLevels[], characteristicsBySlot: Record<string, string[]>, consumables: ReadonlySet<string> = new Set()): PurchaseItem[] {
   const groups = new Map<string, OwnedNeed[]>();
   for (const n of needs) {
     if (n.status !== "calculated" || n.origin === "suggested") continue;
@@ -238,6 +240,7 @@ function aggregate(needs: readonly OwnedNeed[], ouvrages: readonly OuvrageLevels
       order,
       approx,
       ...(precision ? { precision } : {}),
+      ...(consumables.has(first.family) ? { consumable: true } : {}),
       kind: "computed",
       needIds: group.map((n) => n.needId),
       lineIds: [...new Set(group.flatMap(owner))],
@@ -310,6 +313,7 @@ export function purchaseView(
     engine.needs.filter((n) => !(n.question && engine.declined?.includes(n.question.key))),
     view.ouvrages,
     link.plan.characteristicsBySlot,
+    new Set(link.ref.families.filter((f) => f.consumable).map((f) => f.code)),
   );
   const failedSupplierTest: ToQuoteItem[] = [];
   // Quantités écrites telles quelles dans le devis (chatières, sortie de toit) : à acheter, sans calcul.

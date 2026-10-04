@@ -250,8 +250,8 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
     await agent.post(`/v1/takeoffs/${takeoffId}/validate`).expect(200);
     const s = await agent.post("/v1/suppliers").send({ name: "Point.P", email: "devis@pointp.fr" });
     const created = await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [s.body.id] }).expect(201);
-    const body = created.body.recipients[0].email.body as string;
-    // §43.5 : une ligne par article, au format « article : quantité de commande ».
+    // §45.3 : une ligne par article dans « Fournitures à chiffrer », au format « article : quantité de vente ».
+    const body = (created.body.packet.articles as string[]).join("\n");
     expect(body).toMatch(/Tuiles HP10 rouge : 1 488 pièces/);
     expect(body).toMatch(/Tubes de descente.*: 8 ml/);
     expect(body).toMatch(/Coudes : 4 pièces/);
@@ -302,12 +302,12 @@ describe("ouvrages comptés : « 6 unités » de jouées n'est jamais 6 ardoises
 
     await agent.post(`/v1/takeoffs/${takeoffId}/validate`).expect(200);
     const s = await agent.post("/v1/suppliers").send({ name: "Point.P", email: "devis@pointp.fr" });
-    const body = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [s.body.id] }).expect(201)).body.recipients[0].email.body as string;
-    // §43.5 : ce que le fournisseur chiffre lui-même, avec la mesure du devis et la raison.
-    expect(body).toMatch(/À CHIFFRER PAR VOS SOINS\n(?:.*\n)*?Ardoises pour jouées de lucarnes · 6 unités — /);
-    // L'entourage de cheminée n'est plus « à chiffrer » : il attend ses réponses (façonnage, périmètre), puis se calcule (§7).
-    expect(body).not.toMatch(/Entourage de cheminée.* · 2 unités — /);
-    expect(body).toMatch(/Chatières de ventilation : 12 unités/);
+    const packet = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [s.body.id] }).expect(201)).body.packet;
+    // §45.3 bloc 3 « À préciser avec vous » : la ligne du devis, sa mesure, et une demande simple (jamais la cuisine interne).
+    expect(packet.a_chiffrer).toContain("Ardoises pour jouées de lucarnes · 6 unités : merci de proposer ce que vous avez");
+    // L'entourage de cheminée n'est plus « à préciser » : il attend ses réponses (façonnage, périmètre), puis se calcule (§7).
+    expect(packet.a_chiffrer.join("\n")).not.toMatch(/Entourage de cheminée/);
+    expect(packet.articles.join("\n")).toMatch(/Chatières de ventilation : 12 unités/);
     const events = await ctx.app.get(CorrectionJournal).list(await tenantOf(companyId), { projectId });
     expect(events.some((e) => e.action === "answer" && e.after?.designation === question.question!.key)).toBe(true);
   });

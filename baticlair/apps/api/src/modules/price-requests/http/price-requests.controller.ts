@@ -10,6 +10,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Res,
   StreamableFile,
   UploadedFiles,
@@ -26,6 +27,7 @@ import { ZodPipe } from "../../../platform/http/zod.js";
 import { assembleQuote } from "../../documents/index.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
 import { PriceRequestsService, type PriceRequestView } from "../application/price-requests.service.js";
+import { packetDocument } from "../application/supplier-packet.js";
 
 const supplierIds = z.array(z.string()).min(1).max(20);
 const settingsBody = z.object({ attachQuoteDetail: z.boolean() });
@@ -43,6 +45,7 @@ const createBody = z.object({
     .transform((v) => (v ? new Date(`${v}T00:00:00Z`) : null)),
 });
 const addBody = z.object({ supplierIds });
+const previewBody = createBody.omit({ supplierIds: true }).extend({ destinataire: z.string().trim().max(200).nullish() });
 const statusBody = z.object({
   status: z.enum(["to_send", "sent", "declined"]),
 });
@@ -64,8 +67,20 @@ export function toDto(r: PriceRequestView) {
     classifiedAt: r.classifiedAt?.toISOString() ?? null,
     retainedSupplierIds: r.retainedSupplierIds,
     packet: r.packet
-      ? { entreprise: r.packet.entreprise, chantier: r.packet.chantier, articles: r.packet.articles, a_chiffrer: r.packet.a_chiffrer, resume: r.packet.resume, joindre_detail: r.packet.joindre_detail, croquis: r.packet.croquis ?? [] }
+      ? {
+          entreprise: r.packet.entreprise,
+          chantier: r.packet.chantier,
+          articles: r.packet.articles,
+          a_chiffrer: r.packet.a_chiffrer,
+          resume: r.packet.resume,
+          detail: r.packet.joindre_detail ? r.packet.detail : [],
+          joindre_detail: r.packet.joindre_detail,
+          croquis: r.packet.croquis ?? [],
+          fournitures: r.packet.fournitures ?? [],
+        }
       : null,
+    /** Le document tel que le fournisseur le reçoit (§45.3), pour l'afficher sans le PDF. */
+    document: r.packet ? packetDocument(r.packet) : null,
     recipients: r.recipients.map((x) => ({
       id: x.id,
       supplier: x.supplier,
@@ -96,17 +111,20 @@ export class PriceRequestsController {
     return { ...(await this.requests.setSettings(tenant, body)), deliversEmail: this.requests.deliversEmail };
   }
 
-  /** Le PDF de la commande (§43.1) : les mêmes trois blocs que le mail, pour imprimer ou transmettre au magasin. */
-  @Get("price-requests/:id/commande.pdf")
-  async pdf(@Tenant() tenant: TenantContext, @Param("id") id: string, @Res({ passthrough: true }) res: Response) {
-    const pdf = await this.requests.pdf(tenant, id);
+  /**
+   * Le PDF « Demande de devis » (§45.3) d'une demande, pour imprimer ou transmettre au magasin ; `destinataire` = id du
+   * destinataire pour son exemplaire. L'ancien chemin `commande.pdf` reste servi (liens déjà partagés).
+   */
+  @Get(["price-requests/:id/demande-de-devis.pdf", "price-requests/:id/commande.pdf"])
+  async pdf(@Tenant() tenant: TenantContext, @Param("id") id: string, @Query("destinataire") recipientId: string | undefined, @Res({ passthrough: true }) res: Response) {
+    const pdf = await this.requests.pdf(tenant, id, recipientId);
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="${pdf.filename}"`);
     res.setHeader("Cache-Control", "private, no-store");
     return new StreamableFile(pdf.bytes);
   }
 
-  /** Envoi par le serveur (§43) : corps en trois blocs, PDF joint, puis « envoyée ». */
+  /** Envoi par le serveur (§45) : le mail court, le PDF « Demande de devis » joint, puis « envoyée ». */
   @Throttle({ default: HOURLY(60) })
   @Post("price-request-recipients/:id/send")
   @HttpCode(200)
@@ -114,8 +132,8 @@ export class PriceRequestsController {
     return toDto(await this.requests.send(tenant, id));
   }
 
-  /** « Exporter PDF » (§21.3) : la liste validée du chantier, même PDF que celui du fournisseur, aucun prix. */
-  @Get("projects/:projectId/commande.pdf")
+  /** « Exporter la liste en PDF » (§21.3, §45.9) : la liste validée du chantier, même PDF que celui du fournisseur, aucun prix. */
+  @Get(["projects/:projectId/demande-de-devis.pdf", "projects/:projectId/commande.pdf"])
   async exportPdf(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string, @Res({ passthrough: true }) res: Response) {
     const pdf = await this.requests.exportPdf(tenant, projectId);
     res.setHeader("Content-Type", "application/pdf");
@@ -129,6 +147,13 @@ export class PriceRequestsController {
     return {
       items: (await this.requests.listForProject(tenant, projectId)).map(toDto),
     };
+  }
+
+  /** L'aperçu avant envoi (§45.9) : le document tel que le fournisseur le recevra, l'objet et le mail. Rien ne part. */
+  @Post("projects/:projectId/price-requests/preview")
+  @HttpCode(200)
+  async preview(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string, @Body(new ZodPipe(previewBody)) body: z.infer<typeof previewBody>) {
+    return this.requests.preview(tenant, projectId, { message: body.message ?? null, dueDate: body.dueDate ?? null, destinataire: body.destinataire ?? null });
   }
 
   @Post("projects/:projectId/price-requests")

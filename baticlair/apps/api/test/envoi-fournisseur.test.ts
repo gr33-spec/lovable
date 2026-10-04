@@ -1,12 +1,12 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { pdfPageCount } from "../src/modules/documents/index.js";
-import { packetLines, packetPdf, packetText, priceLeak, type SupplierPacket } from "../src/modules/price-requests/application/supplier-packet.js";
+import { packetDocument, packetDocumentLines, packetMail, packetPdf, priceLeak, type SupplierPacket } from "../src/modules/price-requests/application/supplier-packet.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
 
 /**
- * L'ENVOI AU FOURNISSEUR (référentiel §42, §43) : un seul contenu en trois blocs, assemblé sans IA ;
- * le corps du mail et le PDF joint en sont deux rendus. Aucun prix n'y apparaît, même quand le
- * devis en contient (lignes Rappidos avec leurs prix). Le test refuse tout prix.
+ * L'ENVOI AU FOURNISSEUR (référentiel §42, §43, §45) : une demande de devis assemblée sans IA ; un mail court et un
+ * PDF structuré, rendus d'un seul document. Aucun prix n'y apparaît, même quand le devis en contient (lignes Rappidos
+ * avec leurs prix). Le test refuse tout prix. La forme exacte du §45 : test/demande-de-devis-45.test.ts.
  */
 let ctx: TestContext;
 beforeAll(async () => {
@@ -44,8 +44,8 @@ async function chantierPret(agent: Agent) {
   return { projectId: q.projetId as string, supplierId: supplier.id as string };
 }
 
-describe("envoi fournisseur : un contenu, trois blocs, aucun prix", () => {
-  it("la demande porte les trois blocs ; le mail prêt en est le texte, et il ne contient aucun prix", async () => {
+describe("envoi fournisseur : un document, aucun prix", () => {
+  it("la demande porte les blocs du §45.3 ; le mail court n'en contient aucun prix", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const { projectId, supplierId } = await chantierPret(agent);
     const res = await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId], message: "Livraison sur chantier possible ?", dueDate: "2026-10-15" });
@@ -57,24 +57,23 @@ describe("envoi fournisseur : un contenu, trois blocs, aucun prix", () => {
       expect.arrayContaining([expect.stringMatching(/^Ardoises 30×22 : 9 200 pièces/), expect.stringMatching(/^Crochets d'ardoise : 9 384 pièces/), expect.stringMatching(/^Chatière de ventilation : 4 u/)]),
     );
     for (const a of packet.articles) expect(a).not.toMatch(/ : [\d\s,.]+ m²/);
-    // Bloc 2 : le chantier en bref, avec les réponses de l'artisan, en 5 lignes au plus.
-    expect(packet.resume.length).toBeLessThanOrEqual(7);
-    expect(packet.resume.join(" ")).toMatch(/pente du toit 45°/);
-    expect(packet.resume.join(" ")).toMatch(/nombre de descentes 2/);
-    expect(packet.resume).toContain("Réponse souhaitée avant le 15 octobre 2026");
-    expect(packet.resume).toContain("Livraison sur chantier possible ?");
+    // Le chantier en bref : des faits (8 au plus), les réponses de l'artisan (2 descentes), jamais la pente par défaut.
+    expect(packet.resume.length).toBeLessThanOrEqual(8);
+    expect(packet.resume).toContain("2 descentes");
+    expect(packet.resume.join(" ")).not.toMatch(/\bpente \d/);
+    expect(packet.detail[0]).toMatchObject({ libelle: "Couverture en ardoises naturelles 30x22 posées au crochet", mesure: "200 m²" });
 
     const email = res.body.recipients[0].email;
-    expect(email.subject).toBe("Commande – Dupont — réfection toiture – Toitures Martin");
-    expect(email.body).toMatch(/^COMMANDE : Toitures Martin · chantier Dupont — réfection toiture · Brest · \d+ \S+ 2026\n\nÀ COMMANDER\n/);
-    expect(email.body).toMatch(/\nLE CHANTIER EN BREF\n/);
-    expect(email.body).toMatch(/\nDÉTAIL DU DEVIS \(sans prix\)\nCouverture en ardoises naturelles 30x22 posées au crochet · 200 m²\n/);
+    expect(email.subject).toBe("Demande de devis · Toitures Martin · chantier Dupont — réfection toiture (Brest)");
+    expect(email.body).toMatch(/^Bonjour,\n\nJe vous envoie la liste des fournitures pour un chantier de couverture en ardoises au crochet sur liteaux à Brest : 200 m²/);
+    expect(email.body).toContain("Livraison sur chantier possible ?");
+    expect(email.body).toContain("Pouvez-vous me chiffrer l'ensemble avant le 15 octobre ? PS : si besoin, le détail du devis est en pièce jointe.");
     // Le test du §42.2 et du §43.5 : rien du devis chiffré ne passe (85,00 €, 42, 19,90…).
     expect(priceLeak(email.body)).toBeNull();
     expect(email.body).not.toMatch(/85,00|19,90/);
   });
 
-  it("le serveur envoie le mail avec le PDF joint, puis la demande est « envoyée » ; mail et PDF ont le même contenu", async () => {
+  it("le serveur envoie le mail avec le PDF joint, puis la demande est « envoyée »", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const { projectId, supplierId } = await chantierPret(agent);
     const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] })).body;
@@ -89,36 +88,36 @@ describe("envoi fournisseur : un contenu, trois blocs, aucun prix", () => {
     expect(mail.subject).toBe(recipient.email.subject);
     expect(mail.text).toBe(recipient.email.body);
     expect(mail.attachments).toHaveLength(1);
-    expect(mail.attachments![0]).toMatchObject({ filename: "commande-dupont-refection-toiture.pdf", contentType: "application/pdf" });
+    expect(mail.attachments![0]).toMatchObject({ filename: "demande-de-devis-dupont-refection-toiture.pdf", contentType: "application/pdf" });
     const pdf = Buffer.from(mail.attachments![0]!.contentBase64, "base64");
     expect(pdf.subarray(0, 5).toString()).toBe("%PDF-");
     expect(await pdfPageCount(pdf)).toBeGreaterThanOrEqual(1);
 
     // Le même PDF se télécharge depuis l'app (pour imprimer ou transmettre au magasin).
-    const download = await agent.get(`/v1/price-requests/${created.id}/commande.pdf`);
+    const download = await agent.get(`/v1/price-requests/${created.id}/demande-de-devis.pdf`);
     expect(download.status).toBe(200);
     expect(download.headers["content-type"]).toMatch(/application\/pdf/);
-    expect(download.headers["content-disposition"]).toContain("commande-dupont-refection-toiture.pdf");
+    expect(download.headers["content-disposition"]).toContain("demande-de-devis-dupont-refection-toiture.pdf");
   });
 
   it("« Exporter PDF » (§21.3) : la liste validée, avant tout envoi, rendue par le même générateur, sans prix ; refusé avant validation et pour une autre entreprise", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "export@example.fr", "Toitures Martin");
     const { projectId, supplierId } = await chantierPret(agent);
-    const pdf = await agent.get(`/v1/projects/${projectId}/commande.pdf`).buffer(true);
+    const pdf = await agent.get(`/v1/projects/${projectId}/demande-de-devis.pdf`).buffer(true);
     expect(pdf.status).toBe(200);
     expect(pdf.headers["content-type"]).toMatch(/application\/pdf/);
-    expect(pdf.headers["content-disposition"]).toContain("commande-dupont-refection-toiture.pdf");
+    expect(pdf.headers["content-disposition"]).toContain("demande-de-devis-dupont-refection-toiture.pdf");
     expect((pdf.body as Buffer).subarray(0, 5).toString()).toBe("%PDF-");
     // Même contenu que le PDF joint à la demande (un seul générateur) : même taille à la date près.
     const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] })).body;
-    const sent = await agent.get(`/v1/price-requests/${created.id}/commande.pdf`).buffer(true);
+    const sent = await agent.get(`/v1/price-requests/${created.id}/demande-de-devis.pdf`).buffer(true);
     expect(Math.abs((sent.body as Buffer).length - (pdf.body as Buffer).length)).toBeLessThan(64);
     // Une autre entreprise ne lit pas ce chantier.
     const other = await signUpWithCompany(ctx.app, "intrus@example.fr", "Toitures Le Gall");
-    expect((await other.agent.get(`/v1/projects/${projectId}/commande.pdf`)).status).not.toBe(200);
+    expect((await other.agent.get(`/v1/projects/${projectId}/demande-de-devis.pdf`)).status).not.toBe(200);
     // Un chantier sans liste validée : refus clair, pas un PDF vide.
     const vide = (await agent.post("/v1/projects").send({ name: "Chantier vide" })).body;
-    const refused = await agent.get(`/v1/projects/${vide.id}/commande.pdf`);
+    const refused = await agent.get(`/v1/projects/${vide.id}/demande-de-devis.pdf`);
     expect(refused.status).toBe(400);
     expect(JSON.stringify(refused.body)).toContain("takeoff_not_validated");
   });
@@ -130,7 +129,7 @@ describe("envoi fournisseur : un contenu, trois blocs, aucun prix", () => {
     const quantitatif = Array.isArray(q.items) ? q.items[0] : q;
     const gouttiere = quantitatif.ecran.purchase.toBuy.find((b: { label: string }) => /^Gouttière/.test(b.label));
     expect(gouttiere).toBeTruthy();
-    const avant = await pdfPageCount((await agent.get(`/v1/projects/${projectId}/commande.pdf`).buffer(true)).body as Buffer);
+    const avant = await pdfPageCount((await agent.get(`/v1/projects/${projectId}/demande-de-devis.pdf`).buffer(true)).body as Buffer);
     // PNG minimal (1 × 1 px).
     const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64");
     const res = await agent
@@ -147,23 +146,22 @@ describe("envoi fournisseur : un contenu, trois blocs, aucun prix", () => {
 
     const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] })).body;
     expect(created.packet.croquis).toEqual([{ article: gouttiere.label, id: res.body.id, nom: "couvertine.png", commentaire: "Couvertine dév. 330, 2 plis, longueurs de 2 m" }]);
-    const body: string = created.recipients[0].email.body;
-    expect(body).toContain(`${gouttiere.label} : `);
-    expect(body).toMatch(/— croquis joint\n/);
-    expect(body).toContain(`CROQUIS JOINTS (en fin de document)\n${gouttiere.label} · couvertine.png · Couvertine dév. 330, 2 plis, longueurs de 2 m`);
-    expect(priceLeak(body)).toBeNull();
+    // La ligne de l'article dit « croquis joint » dans sa précision ; le document liste les croquis joints.
+    expect(created.packet.fournitures.find((f: { designation: string }) => f.designation === gouttiere.label).precision).toMatch(/croquis joint/);
+    expect(created.document.croquis).toEqual([{ article: gouttiere.label, nom: "couvertine.png", commentaire: "Couvertine dév. 330, 2 plis, longueurs de 2 m" }]);
+    expect(priceLeak(created.recipients[0].email.body)).toBeNull();
     // Le PDF a une page de plus pour le croquis ; le mail joint le PDF et le croquis d'origine.
-    const pdf = await agent.get(`/v1/price-requests/${created.id}/commande.pdf`).buffer(true);
+    const pdf = await agent.get(`/v1/price-requests/${created.id}/demande-de-devis.pdf`).buffer(true);
     expect(await pdfPageCount(pdf.body as Buffer)).toBe(avant + 1);
     await agent.post(`/v1/price-request-recipients/${created.recipients[0].id}/send`).expect(200);
     const mail = ctx.emails.lastTo("devis@pointp.fr")!;
     expect(mail.attachments!.map((a) => [a.filename, a.contentType])).toEqual([
-      ["commande-dupont-refection-toiture.pdf", "application/pdf"],
+      ["demande-de-devis-dupont-refection-toiture.pdf", "application/pdf"],
       ["couvertine.png", "image/png"],
     ]);
   });
 
-  it("case « Joindre le détail du chantier » : cochée par défaut, mémorisée par entreprise, et le bloc 3 disparaît si elle est décochée", async () => {
+  it("case « Joindre le détail du devis » : cochée par défaut, mémorisée par entreprise, et le bloc du détail disparaît si elle est décochée", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     expect((await agent.get("/v1/price-requests/settings")).body).toEqual({ attachQuoteDetail: true, deliversEmail: true });
     expect((await agent.patch("/v1/price-requests/settings").send({ attachQuoteDetail: false })).body.attachQuoteDetail).toBe(false);
@@ -171,7 +169,8 @@ describe("envoi fournisseur : un contenu, trois blocs, aucun prix", () => {
     const { projectId, supplierId } = await chantierPret(agent);
     const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] })).body;
     expect(created.packet.joindre_detail).toBe(false);
-    expect(created.recipients[0].email.body).not.toMatch(/DÉTAIL DU DEVIS/);
+    expect(created.document.blocs.map((b: { titre: string }) => b.titre)).not.toContain("Détail du devis (sans prix)");
+    expect(created.recipients[0].email.body).not.toMatch(/PS/);
     // L'autre entreprise garde la valeur par défaut.
     const other = await signUpWithCompany(ctx.app, "b@example.fr", "Toitures Le Gall");
     expect((await other.agent.get("/v1/price-requests/settings")).body.attachQuoteDetail).toBe(true);
@@ -187,7 +186,7 @@ describe("envoi fournisseur : un contenu, trois blocs, aucun prix", () => {
     expect(priceLeak("prix unitaire 1,12")).toMatch(/prix/i);
   });
 
-  it("le PDF est produit depuis les mêmes lignes que le mail, même avec des caractères que la police ne connaît pas", async () => {
+  it("le PDF est produit depuis le document, même avec des caractères que la police ne connaît pas", async () => {
     const packet: SupplierPacket = {
       entreprise: "Toitures Martin",
       chantier: "Toiture Dupont",
@@ -200,8 +199,9 @@ describe("envoi fournisseur : un contenu, trois blocs, aucun prix", () => {
       joindre_detail: true,
       question_lien: null,
     };
-    const lines = packetLines(packet).map((l) => l.text);
-    expect(packetText(packet)).toBe(lines.join("\n"));
+    // Une demande d'avant le §45 (articles en texte) se rend encore : le tableau se reconstruit.
+    expect(packetDocumentLines(packetDocument(packet))).toContain("Ardoises 30×22 | 9 200 pièces, soit ≈ 12 palettes | ");
+    expect(packetMail(packet)).toMatch(/^Bonjour,\n\nJe vous envoie la liste des fournitures pour le chantier Toiture Dupont à Brest\./);
     const pdf = await packetPdf(packet);
     expect(Buffer.from(pdf.subarray(0, 5)).toString()).toBe("%PDF-");
     expect(await pdfPageCount(pdf)).toBe(1);
