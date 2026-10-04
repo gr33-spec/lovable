@@ -328,6 +328,13 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   const liste = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(liste.getByText(/^\d+ fournitures · tout est prêt$/)).toBeVisible();
   await expect(liste.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
+  // Retirer une ligne : une corbeille sur chaque ligne, « Annuler » pendant 3 s.
+  const corbeille = liste.getByRole("button", { name: /^Retirer : / }).first();
+  const retiree = (await corbeille.getAttribute("aria-label"))!;
+  await corbeille.click();
+  await expect(page.getByRole("status").filter({ hasText: "Retiré de la liste" })).toBeVisible();
+  await page.getByRole("status").getByRole("button", { name: "Annuler" }).click();
+  await expect(liste.getByRole("button", { name: retiree, exact: true })).toHaveCount(1);
 
   // La preuve à un appui, sur l'article lui-même.
   await page.getByRole("button", { name: "Voir la ligne du devis : Tuile romane canal rouge 12,5 u/m²" }).click();

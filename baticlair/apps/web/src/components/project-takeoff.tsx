@@ -242,8 +242,10 @@ export function ProjectTakeoff({
   // Mettre une ligne de côté : un article de la liste sort de la liste (la liste validée le reste) ; une ligne du devis
   // à préciser avec le fournisseur est retirée.
   const setAside = async (row: ScreenRow) => {
-    if (row.itemKey) await call("corrections", { action: "retirer_article", id: row.itemKey });
-    else if (row.lineIds[0]) await call("corrections", { action: "retirer", id: row.lineIds[0] });
+    // Un article recopié tel quel du devis (« line:<ligne> ») se retire avec sa ligne : sinon son doute reviendrait.
+    if (row.itemKey && !row.itemKey.startsWith("line:")) await call("corrections", { action: "retirer_article", id: row.itemKey });
+    // Une ligne qui attend une réponse (ou qu'aucun article ne porte) : on retire la ou les lignes du devis d'où elle vient.
+    else for (const id of row.lineIds) await call("corrections", { action: "retirer", id });
   };
   const typed = (text: string) => {
     const command = parseCommand(text);

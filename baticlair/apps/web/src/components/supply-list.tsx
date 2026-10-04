@@ -15,7 +15,7 @@ import { doubtText, shortName } from "@/lib/labels";
  *    bas de l'écran ; gris = à préciser avec le fournisseur, la ligne part telle quelle ;
  *  - en haut, « 11 fournitures · 2 à vérifier » ; en bas, UN gros bouton : « Vérifier les 2 lignes » tant qu'il reste
  *    de l'orange, sinon « Envoyer au fournisseur » ;
- *  - crayon pour modifier, glisser vers la gauche pour mettre de côté (« Annuler » pendant 3 s) ; « Voir le calcul »
+ *  - crayon pour modifier, corbeille (ou glisser vers la gauche) pour retirer (« Annuler » pendant 3 s) ; « Voir le calcul »
  *    en tout petit.
  */
 export function SupplyList({
@@ -58,21 +58,39 @@ export function SupplyList({
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => void (timer.current && clearTimeout(timer.current)), []);
 
-  const hidden = (r: ScreenRow) => aside?.key === r.key;
+  const [removing, setRemoving] = useState<string[]>([]);
+  const hidden = (r: ScreenRow) => aside?.key === r.key || removing.includes(r.key);
   const rows = screen.groups.flatMap((g) => g.rows).filter((r) => !hidden(r));
   const toCheck = rows.filter((r) => r.status === "check");
   const labelOf = (r: ScreenRow) =>
     r.itemKey ? (items.get(r.itemKey)?.kind === "direct" ? shortName(items.get(r.itemKey)!.label) : (items.get(r.itemKey)?.label ?? "")) : r.quoteKey ? shortName(quotes.get(r.quoteKey)?.label ?? "") : (r.pending?.label ?? "");
 
+  // Retirer une ligne : cachée tout de suite, « Annuler » pendant 3 s, puis retirée pour de bon. Retirer une autre ligne
+  // pendant ces 3 s retire aussitôt la précédente (elle ne revient jamais en silence).
+  const current = useRef<ScreenRow | null>(null);
+  const queue = useRef<Promise<void>>(Promise.resolve());
+  const commit = (r: ScreenRow) => {
+    setRemoving((keys) => [...keys, r.key]);
+    // Un retrait après l'autre : la dernière réponse du serveur les contient tous.
+    queue.current = queue.current
+      .then(() => onSetAside(r))
+      .catch(() => undefined)
+      .finally(() => setRemoving((keys) => keys.filter((k) => k !== r.key)));
+  };
   const putAside = (r: ScreenRow) => {
     if (timer.current) clearTimeout(timer.current);
+    if (current.current && current.current.key !== r.key) commit(current.current);
+    current.current = r;
     setAside(r);
     timer.current = setTimeout(() => {
-      void onSetAside(r).finally(() => setAside(null));
+      current.current = null;
+      setAside(null);
+      commit(r);
     }, 3000);
   };
   const undo = () => {
     if (timer.current) clearTimeout(timer.current);
+    current.current = null;
     setAside(null);
   };
   const verify = () => {
@@ -162,7 +180,7 @@ export function SupplyList({
 
       {aside ? (
         <div role="status" className="fixed inset-x-4 bottom-[max(96px,calc(env(safe-area-inset-bottom)+96px))] z-40 mx-auto flex max-w-xl items-center justify-between gap-3 rounded-2xl bg-ink px-4 py-3 text-white shadow-card">
-          <span className="min-w-0 truncate text-sm font-bold">Mis de côté : {labelOf(aside)}</span>
+          <span className="min-w-0 truncate text-sm font-bold">Retiré de la liste : {labelOf(aside)}</span>
           <button type="button" onClick={undo} className="inline-flex min-h-11 shrink-0 items-center px-2 text-sm font-extrabold text-[#9db8ff]">
             Annuler
           </button>
@@ -234,8 +252,9 @@ function Row({
         ? "À préciser avec le fournisseur"
         : ([item?.approx, item?.precision].filter(Boolean).join(" · ") || null);
   const dot = DOT[row.status];
-  // Glisser vers la gauche met la ligne de côté (une ligne qui attend une réponse n'a rien à mettre de côté).
-  const swipable = editable && !row.pending;
+  // Toute ligne se retire d'un geste : la corbeille (visible) ou un glissement vers la gauche, « Annuler » pendant 3 s.
+  const removable = editable && (row.itemKey !== undefined || row.lineIds.length > 0);
+  const swipable = removable;
   const onPointerDown = (e: React.PointerEvent) => {
     if (!swipable) return;
     start.current = { x: e.clientX, y: e.clientY };
@@ -267,7 +286,7 @@ function Row({
     <li id={`ligne-${row.key}`} className="relative flex scroll-mt-24 flex-col gap-1 overflow-hidden py-2">
       {dx < 0 ? (
         <span aria-hidden="true" className="absolute inset-y-0 right-0 flex items-center rounded-xl bg-danger px-4 text-sm font-extrabold text-white">
-          Mettre de côté
+          Retirer
         </span>
       ) : null}
       <div
@@ -288,6 +307,11 @@ function Row({
         {editable && item ? (
           <button type="button" onClick={() => setEditing(!editing)} aria-label={`Modifier : ${label}`} aria-expanded={editing} className="-mr-2 inline-flex min-h-11 min-w-10 shrink-0 items-center justify-center rounded-xl text-subtle active:text-accent-text">
             <Pencil size={16} aria-hidden="true" />
+          </button>
+        ) : null}
+        {removable ? (
+          <button type="button" onClick={onSetAside} aria-label={`Retirer : ${label}`} className="-mr-2 inline-flex min-h-11 min-w-10 shrink-0 items-center justify-center rounded-xl text-subtle active:text-danger">
+            <Trash2 size={16} aria-hidden="true" />
           </button>
         ) : null}
       </div>
@@ -333,7 +357,7 @@ function Row({
             }}
             className="inline-flex min-h-11 items-center self-start text-sm font-bold text-danger"
           >
-            Mettre de côté
+            Retirer de la liste
           </button>
         </div>
       ) : null}
