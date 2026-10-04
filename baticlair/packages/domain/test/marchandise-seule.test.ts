@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { withoutLabour } from "../src/index.js";
+import { withoutLabour, writtenNumber } from "../src/index.js";
 import { readQuote } from "./support/read-quote.js";
 import { D2026_015_LINES } from "./devis-reels/d2026-015.js";
 
@@ -22,5 +22,31 @@ describe("marchandise seule : jamais de pose dans ce que voit l'artisan ou le fo
   it("D-2026-015 : aucune ligne de la liste ne parle de pose", () => {
     const v = readQuote(D2026_015_LINES, { "product:tuile": "edilians-hp10-huguenot" });
     for (const label of [...v.toBuy.map((b) => b.label), ...v.toQuote.map((q) => q.label)]) expect(label).not.toMatch(/\bpose\b|F\s*&\s*P/i);
+  });
+});
+
+/** « Erreur aussi de voir des 000 dans les unités » (fondateur, 2026-10-04) : « 30,000 » imprimé par le devis se lit « 30 ». */
+describe("quantité recopiée du devis : sans zéros inutiles", () => {
+  it.each([
+    ["30,000", "30"],
+    ["530,000", "530"],
+    ["3,500", "3,5"],
+    ["12,75", "12,75"],
+    ["1 200,00", "1 200"],
+    ["30.00", "30"],
+    ["1.200", "1.200"],
+    ["42", "42"],
+    ["env. 30", "env. 30"],
+  ])("%s → %s", (raw, expected) => expect(writtenNumber(raw)).toBe(expected));
+
+  it("la liste montre « 30 pièces », jamais « 30,000 pièces »", () => {
+    const v = readQuote([
+      { ref: "1", designation: "Trappe d'accès isolée 60 x 60", quantity: "30,000", unit: "u" },
+      { ref: "2", designation: "Bande armée pour angles saillants", quantity: "530,000", unit: "ml" },
+    ]);
+    const shown = JSON.stringify(v);
+    expect(shown).toContain('"30 pièces"');
+    expect(shown).toContain('"530 ml"');
+    expect(shown).not.toMatch(/\d,0+\b/);
   });
 });

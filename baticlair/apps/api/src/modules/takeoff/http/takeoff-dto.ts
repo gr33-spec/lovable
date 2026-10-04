@@ -1,4 +1,4 @@
-import { withoutLabour } from "@baticlair/domain";
+import { withoutLabour, writtenNumber } from "@baticlair/domain";
 import type { ArtisanView, PurchaseView } from "@baticlair/domain";
 import { artisanNotes } from "../../../platform/ai/artisan-notes.js";
 import type { ReviewedTakeoff } from "../application/takeoff.service.js";
@@ -129,7 +129,8 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase, exclude
         designation: l.designation,
         // Ce que l'écran montre : la marchandise seule, sans « (Fourniture et pose) » (retour du fondateur, 2026-10-04).
         article: withoutLabour(l.designation),
-        quantity: l.quantityRaw,
+        // « 30,000 » tel qu'imprimé par le logiciel du devis : « 30 ».
+        quantity: l.quantityRaw && writtenNumber(l.quantityRaw),
         unit: l.unitRaw,
         reference: l.reference,
         sourceRefs: l.sourceRefs,

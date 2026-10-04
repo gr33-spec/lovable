@@ -26,3 +26,17 @@ export function withoutLabour(designation: string): string {
   if (!text) return designation.trim();
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
+
+/**
+ * Une quantité recopiée du devis telle que le logiciel du devis l'imprime : « 30,000 » (trois décimales), « 530,00 ».
+ * Les zéros après la virgule ne disent rien : « 30 », « 530 », « 3,5 » (retour du fondateur, 2026-10-04). Une
+ * virgule est décimale (devis français) ; un point suivi de trois chiffres (« 1.200 ») peut être un millier : gardé tel
+ * quel. Le calcul lit la valeur, jamais ce texte.
+ */
+export function writtenNumber(raw: string): string {
+  const text = raw.trim();
+  const m = /^(\d{1,3}(?:[   ]\d{3})*|\d+)(?:,(\d+)|\.(\d{1,2}|\d{4,}))$/.exec(text);
+  if (!m) return text;
+  const decimals = (m[2] ?? m[3]!).replace(/0+$/, "");
+  return decimals ? `${m[1]},${decimals}` : m[1]!;
+}

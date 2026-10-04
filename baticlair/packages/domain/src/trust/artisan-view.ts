@@ -3,7 +3,7 @@ import type { Referential } from "../referential/model.js";
 import type { LineRole } from "../referential/line-roles.js";
 import type { QuotePlan } from "../referential/plan.js";
 import type { TakeoffValidation } from "../takeoff/validation.js";
-import { withoutLabour } from "./marchandise.js";
+import { withoutLabour, writtenNumber } from "./marchandise.js";
 import { assessNeed, assessTakeoffLine, type Assessment, type TrustState } from "./assessment.js";
 
 /**
@@ -313,7 +313,7 @@ export function artisanView(
             ],
           }
         : assessed;
-    items.push({ kind: "line", id: line.id, label: line.designation, quantity: [line.quantity, line.unit].filter(Boolean).join(" ") || null, state: a.state, reason: a.reason, assessment: a });
+    items.push({ kind: "line", id: line.id, label: line.designation, quantity: [line.quantity && writtenNumber(line.quantity), line.unit].filter(Boolean).join(" ") || null, state: a.state, reason: a.reason, assessment: a });
     if (a.state === "verified") continue;
 
     const open = openCauses(a);
@@ -406,7 +406,7 @@ export function artisanView(
           needs.push({ needId: `${work!.id}/${key}`, slot: key, label: slot.label, origin: "explicit", need: null, needRange: null, order: null, missing: "Pas encore calculé : le fournisseur proposera pour la mesure du devis.", provisional: false, usual: slot.usual?.text ?? null, assumptions: [], state: "missing" });
         }
       }
-      const direct = v.basis === "purchase" && role !== "undetermined" && line.quantity && line.unit && needs.length === 0 ? { quantity: line.quantity, unit: line.unit } : null;
+      const direct = v.basis === "purchase" && role !== "undetermined" && line.quantity && line.unit && needs.length === 0 ? { quantity: writtenNumber(line.quantity), unit: line.unit } : null;
       const planned = link.plan.lines.find((l) => l.ref === item.id);
       const pending =
         v.basis === "work" && needs.length === 0
@@ -418,7 +418,7 @@ export function artisanView(
         lineId: item.id,
         designation: line.designation,
         role,
-        read: { quantity: line.quantity, unit: line.unit },
+        read: { quantity: line.quantity && writtenNumber(line.quantity), unit: line.unit },
         needs,
         direct,
         pending,
