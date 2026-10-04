@@ -395,11 +395,14 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   // La liste validée est conservée.
   await page.reload();
   await expect(page.getByText(/^\d+ fournitures · liste validée$/)).toBeVisible();
-  // « Télécharger la liste en PDF » (§21.3) : la demande de devis se télécharge depuis le chat, avec la session de l'artisan.
-  const exportLink = page.getByRole("link", { name: "Télécharger la liste en PDF" });
-  const pdf = await page.request.get((await exportLink.getAttribute("href"))!);
-  expect(pdf.status()).toBe(200);
-  expect(pdf.headers()["content-type"]).toMatch(/application\/pdf/);
+  // « Voir la liste en PDF » (§21.3) : la demande de devis s'ouvre DANS l'app, avec « Fermer », « Télécharger » (et
+  // « Partager » sur téléphone) : on ne reste jamais coincé dans un PDF (retour du fondateur, 2026-10-04).
+  await page.getByRole("button", { name: "Voir la liste en PDF" }).click();
+  const viewer = page.getByRole("dialog", { name: "Liste des fournitures" });
+  await expect(viewer.getByRole("link", { name: "Télécharger" })).toHaveAttribute("download", "demande-de-devis.pdf");
+  await expect(viewer.locator("iframe")).toBeVisible();
+  await viewer.getByRole("button", { name: "Fermer le document" }).click();
+  await expect(viewer).toHaveCount(0);
 
   // Une correction du devis lu reste possible après validation : la liste est à valider à nouveau.
   await page.getByRole("button", { name: "Corriger le devis lu" }).click();
@@ -486,7 +489,11 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   // §45 : « Envoyer » de l'aperçu a envoyé la demande de devis à chacun, le PDF joint.
   await expect(pointp.getByText("En attente", { exact: true })).toBeVisible();
   await expect(tuiles.getByText("En attente", { exact: true })).toBeVisible();
-  await expect(pointp.getByRole("link", { name: "Télécharger la demande de devis (PDF)" })).toHaveAttribute("href", /\/demande-de-devis\.pdf$/);
+  await pointp.getByRole("button", { name: "Voir la demande de devis (PDF)" }).click();
+  const demande = page.getByRole("dialog", { name: "Demande de devis" });
+  await expect(demande.getByRole("link", { name: "Télécharger" })).toHaveAttribute("download", "demande-de-devis.pdf");
+  await demande.getByRole("button", { name: "Fermer le document" }).click();
+  await expect(demande).toHaveCount(0);
   // L'e-mail se relit mot pour mot : le contenu en trois blocs, sans un prix.
   await menu(pointp, "Voir l'e-mail");
   await expect(pointp.getByText("Objet :")).toBeVisible();

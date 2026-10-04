@@ -115,7 +115,7 @@ function DocumentCard({ doc, compact, onRemoved }: { doc: ProjectDocument; compa
 
   async function open() {
     setOpening(true);
-    await openDocument(doc.id);
+    await openDocument(doc.id, doc.name, doc.name);
     setOpening(false);
   }
 

@@ -12,6 +12,7 @@ import { useProgressRefresh } from "@/components/project-progress";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, type ProjectDocument, type PurchaseItem, type Quantitatif, type ReadingState, type ScreenRow, type TakeoffLine } from "@/lib/api";
 import { parseQuantity, shortName } from "@/lib/labels";
+import { openFile } from "@/lib/open-document";
 import { useResource } from "@/lib/use-resource";
 
 /** Le devis client peut être lu par l'IA : texte lu, ou lecture locale en panne (l'IA lit alors le PDF). */
@@ -333,9 +334,9 @@ export function ProjectTakeoff({
           {!draft ? (
             <ActionRow
               icon={<FileDown size={20} aria-hidden="true" />}
-              title="Télécharger la liste en PDF"
-              text="Le document que reçoit le fournisseur, sans prix."
-              href={`/v1/projects/${encodeURIComponent(projectId)}/demande-de-devis.pdf`}
+              title="Voir la liste en PDF"
+              text="Le document que reçoit le fournisseur, sans prix : à télécharger ou à partager."
+              onClick={() => openFile({ url: `/v1/projects/${encodeURIComponent(projectId)}/demande-de-devis.pdf`, title: "Liste des fournitures", fileName: "demande-de-devis.pdf" })}
             />
           ) : null}
         </nav>
@@ -476,25 +477,15 @@ function DeleteConfirm({ pending, onDelete, onCancel }: { pending: boolean; onDe
 }
 
 /** Une action sous la liste : une icône, ce qu'elle fait en clair, et pourquoi on s'en servirait. */
-function ActionRow({ icon, title, text, onClick, href }: { icon: React.ReactNode; title: string; text: string; onClick?: () => void; href?: string }) {
-  const inner = (
-    <>
+function ActionRow({ icon, title, text, onClick }: { icon: React.ReactNode; title: string; text: string; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} aria-label={title} className="flex min-h-16 items-center gap-3 px-4 py-3 text-left active:bg-ground">
       <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#eeedff] text-[#4a37d6]">{icon}</span>
       <span className="flex min-w-0 grow flex-col">
         <span className="text-[15px] font-extrabold">{title}</span>
         <span className="text-[13px] leading-snug text-muted">{text}</span>
       </span>
       <ChevronRight size={18} aria-hidden="true" className="shrink-0 text-subtle" />
-    </>
-  );
-  const className = "flex min-h-16 items-center gap-3 px-4 py-3 text-left active:bg-ground";
-  return href ? (
-    <a href={href} target="_blank" rel="noreferrer" aria-label={title} className={className}>
-      {inner}
-    </a>
-  ) : (
-    <button type="button" onClick={onClick} aria-label={title} className={className}>
-      {inner}
     </button>
   );
 }

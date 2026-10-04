@@ -229,7 +229,7 @@ function BuyRow({
         <ul aria-label={`Croquis joints : ${item.label}`} className="flex flex-wrap gap-2">
           {sketches.map((sk) => (
             <li key={sk.id} className="flex max-w-full items-center gap-1 rounded-xl bg-[#eeedff] pl-2.5 text-[13px] font-bold text-[#4a37d6]">
-              <button type="button" onClick={() => void openDocument(sk.id)} className="flex min-h-9 min-w-0 items-center gap-1.5 text-left">
+              <button type="button" onClick={() => void openDocument(sk.id, sk.nom, sk.nom)} className="flex min-h-9 min-w-0 items-center gap-1.5 text-left">
                 <Paperclip size={14} aria-hidden="true" className="shrink-0" />
                 <span className="truncate">{sk.commentaire ? `${sk.nom} · ${sk.commentaire}` : sk.nom}</span>
               </button>

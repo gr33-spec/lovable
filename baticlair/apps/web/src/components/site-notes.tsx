@@ -3,6 +3,7 @@
 import { Camera, ChevronDown, Loader2, Plus } from "lucide-react";
 import { useId, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
+import { openDocument } from "@/lib/open-document";
 import { api, ApiError, type ItemSketch } from "@/lib/api";
 
 export interface SiteInfos {
@@ -158,9 +159,9 @@ export function SiteNotes({
               <ul className="flex flex-wrap gap-2 text-sm">
                 {siteSketches.map((c) => (
                   <li key={c.id}>
-                    <a href={`/v1/documents/${encodeURIComponent(c.id)}/file`} target="_blank" rel="noreferrer" className="font-semibold text-accent-text underline">
+                    <button type="button" onClick={() => void openDocument(c.id, c.nom, c.nom)} className="min-h-9 font-semibold text-accent-text underline">
                       {c.nom}
-                    </a>
+                    </button>
                   </li>
                 ))}
               </ul>
