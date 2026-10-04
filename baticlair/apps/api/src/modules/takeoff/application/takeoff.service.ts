@@ -42,6 +42,9 @@ import {
   type TakeoffValidation,
   siteBrief,
   communeOf,
+  METIER_NAMES,
+  MAX_SUGGESTIONS,
+  tradeIdOf,
   type SiteBrief,
 } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
@@ -90,7 +93,24 @@ export interface ReadingOptions {
   onReadingFailed?: (reason: string) => void;
   /** Garde la lecture en vie après la réponse (Vercel : waitUntil). Par défaut : elle continue seule. */
   keepAlive?: (work: Promise<unknown>) => void;
+  /** §45.8 : la mémoire des consommables de l'entreprise (« On ajoute ? »). */
+  consumables?: ConsumableHabits;
 }
+
+/**
+ * §45.8 : ce que l'entreprise a fait des suggestions. Refusée trois chantiers d'affilée : plus proposée ; une ligne
+ * ajoutée à la main sur deux chantiers différents devient une suggestion.
+ */
+export interface ConsumableHabits {
+  hidden(tenant: TenantContext): Promise<Set<string>>;
+  manual(tenant: TenantContext): Promise<{ key: string; designation: string; quantity: string | null; unit: string | null }[]>;
+  answered(tenant: TenantContext, entry: { key: string; designation: string; accepted: boolean; projectId: string }): Promise<void>;
+  addedByHand(tenant: TenantContext, entry: { designation: string; quantity: string | null; unit: string | null; projectId: string }): Promise<void>;
+}
+
+/** Clé d'une ligne ajoutée à la main (« Bâche de protection 4 × 5 m » → « manual:bache de protection 4 x 5 m »). */
+export const manualKey = (designation: string) =>
+  `manual:${designation.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/×/g, "x").replace(/\s+/g, " ").trim()}`;
 
 /** Une lecture « en cours » depuis plus longtemps a été interrompue (fonction coupée) : elle compte comme échouée. */
 export const STALE_READING_MS = 6 * 60 * 1000;
@@ -458,13 +478,16 @@ export class TakeoffService {
     return after;
   }
 
-  async addLine(tenant: TenantContext, takeoffId: string, fields: LineFields): Promise<ReviewedTakeoff> {
-    const takeoff = await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
+  async addLine(tenant: TenantContext, takeoffId: string, fields: LineFields, options: { keepStatus?: boolean } = {}): Promise<ReviewedTakeoff> {
+    // « + Ajouter une ligne » de l'aperçu (§45.9) : une ligne de l'artisan, sans doute ; la liste validée le reste.
+    const takeoff = options.keepStatus ? await this.itemEditable(tenant, await this.takeoffs.findById(tenant, takeoffId)) : await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
     const known = new Set(takeoff.lines.map((l) => l.id));
     await this.takeoffs.addLine(tenant, takeoff.id, fields);
     const after = await this.reload(tenant, takeoff.id);
     const added = after.takeoff.lines.find((l) => !known.has(l.id));
     if (added) await this.recordGesture(tenant, "add", added.id, null, after);
+    // §45.8 : une ligne ajoutée à la main sur deux chantiers devient une suggestion.
+    if (added) await this.reading.consumables?.addedByHand(tenant, { designation: added.designation, quantity: added.quantityRaw, unit: added.unitRaw, projectId: takeoff.projectId });
     return after;
   }
 
@@ -545,9 +568,83 @@ export class TakeoffService {
    * Réponse à une question du calcul, pour CE chantier : elle sert à tous les
    * ouvrages qui en dépendent, et la question n'est plus reposée.
    */
+  /**
+   * §45.6 : les sept champs d'une entrée du journal (métier, département, matériau, quantité calculée, quantité corrigée,
+   * règle utilisée, version du référentiel). Aucun ratio ne bouge : c'est la matière de l'export mensuel, pas une règle.
+   */
+  private async journalFacts(
+    tenant: TenantContext,
+    takeoff: TakeoffRecord,
+    item: { materiau: string; calculee: string | null; corrigee: string | null; regle: string },
+  ): Promise<Record<string, string | null>> {
+    const address = (await this.reading.projectAddress?.(tenant, takeoff.projectId)) ?? null;
+    const cp = postalCodeIn(address);
+    return {
+      metier: METIER_NAMES[tradeIdOf(takeoff.trade)] ?? takeoff.trade,
+      departement: cp ? (cp.startsWith("97") ? cp.slice(0, 3) : cp.slice(0, 2)) : null,
+      materiau: item.materiau,
+      quantite_calculee: item.calculee,
+      quantite_corrigee: item.corrigee,
+      regle: item.regle,
+      version_referentiel: takeoff.referentialVersion ?? referentialFor(takeoff.trade)?.version ?? null,
+    };
+  }
+
   async answer(tenant: TenantContext, takeoffId: string, key: string, value: EngineAnswer): Promise<ReviewedTakeoff> {
-    const takeoff = await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
+    // Une correction d'article (§41.4, §45.8, §45.9 : depuis l'aperçu avant envoi) ne lève aucun doute : la liste validée le reste.
+    const itemOnly = /^(quantite|libelle|precision|retire|ajout):/.test(key);
+    const takeoff = itemOnly ? await this.itemEditable(tenant, await this.takeoffs.findById(tenant, takeoffId)) : await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
     const previous = takeoff.answers[key];
+    // §45.8 : « On ajoute ? » — Oui / Non d'un tap, mémorisé pour l'entreprise.
+    if (key.startsWith("ajout:")) {
+      const itemKey = key.slice("ajout:".length);
+      if (value !== "oui" && value !== "non") throw validationFailed("Answer oui or non", { reason: "invalid_answer" });
+      const offered = (await this.review(tenant, takeoff)).purchase.suggestions.find((s) => s.key === itemKey);
+      const designation = offered?.label ?? itemKey;
+      await this.reading.consumables?.answered(tenant, { key: itemKey, designation, accepted: value === "oui", projectId: takeoff.projectId });
+      // Une ligne habituelle de l'entreprise (ajoutée à la main ailleurs) devient une vraie ligne de ce chantier.
+      if (itemKey.startsWith("manual:") && value === "oui" && offered) {
+        return this.addLine(tenant, takeoff.id, { designation: offered.label, quantityRaw: offered.order?.count ?? null, unitRaw: offered.order?.unit ?? null, reference: null }, { keepStatus: true });
+      }
+      await this.takeoffs.setAnswer(tenant, takeoff.id, key, value);
+      return this.reload(tenant, takeoff.id);
+    }
+    // §45.6 : une correction d'un tap sur un article calculé (quantité, désignation) va au journal avec ses sept champs ;
+    // la « quantité calculée » est celle du moteur, avant toute correction de l'artisan sur cet article.
+    const corrected = /^(quantite|libelle|precision|retire):(.+)$/.exec(key);
+    if (corrected) {
+      const itemKey = corrected[2]!;
+      if (corrected[1] === "retire" && value !== "oui" && value !== null) throw validationFailed("Answer oui", { reason: "invalid_answer" });
+      const answers = { ...takeoff.answers };
+      for (const k of ["quantite", "libelle", "precision", "retire"]) delete answers[`${k}:${itemKey}`];
+      const engine = (await this.review(tenant, { ...takeoff, answers })).purchase.toBuy.find((b) => b.key === itemKey);
+      await this.takeoffs.setAnswer(tenant, takeoff.id, key, value);
+      const after = await this.reload(tenant, takeoff.id);
+      const now = after.purchase.toBuy.find((b) => b.key === itemKey);
+      if (engine) {
+        await this.journal.record(tenant, {
+          projectId: takeoff.projectId,
+          takeoffId: takeoff.id,
+          takeoffLineId: null,
+          action: "correct",
+          before: { designation: engine.label, quantity: engine.quantity, unit: engine.order?.unit ?? null, reference: null },
+          after: { designation: now?.label ?? engine.label, quantity: now?.quantity ?? engine.quantity, unit: now?.order?.unit ?? null, reference: null },
+          documentExcerpt: [],
+          context: {
+            trade: takeoff.trade,
+            promptVersion: takeoff.promptVersion,
+            ...(await this.journalFacts(tenant, takeoff, {
+              materiau: engine.label,
+              calculee: engine.quantity,
+              // Retirée d'un tap (croix de l'aperçu) : corrigée à zéro.
+              corrigee: now ? now.quantity : "0",
+              regle: engine.needIds.join(" + ") || itemKey,
+            })),
+          },
+        });
+      }
+      return after;
+    }
     await this.takeoffs.setAnswer(tenant, takeoff.id, key, value);
     // Mémoire de l'entreprise : un produit choisi, ou une réponse d'habitude (« je façonne », épaisseur du zinc),
     // compte pour SON entreprise ; établie au deuxième chantier différent, elle n'est plus demandée (dite, modifiable).
@@ -599,6 +696,20 @@ export class TakeoffService {
       throw validationFailed("Decisions remain", { reason: "decisions_remaining", count: open });
     }
     await this.takeoffs.setStatus(tenant, takeoff.id, "validated");
+    // §45.6 : chaque ligne tombée en « à préciser avec vous » est journalisée, avec la raison.
+    for (const q of purchase.toQuote) {
+      await this.journal.record(tenant, {
+        projectId: takeoff.projectId,
+        takeoffId: takeoff.id,
+        takeoffLineId: q.lineIds[0] ?? null,
+        action: "to_quote",
+        before: { designation: q.label, quantity: q.measure || null, unit: null, reference: null },
+        after: null,
+        documentExcerpt: [],
+        reason: q.reason,
+        context: { trade: takeoff.trade, ...(await this.journalFacts(tenant, takeoff, { materiau: q.label, calculee: null, corrigee: null, regle: q.key })) },
+      });
+    }
     return this.reload(tenant, takeoff.id);
   }
 
@@ -614,6 +725,13 @@ export class TakeoffService {
    * Toute modification d'une liste validée la rouvre : l'artisan la valide à
    * nouveau. Les demandes de prix déjà préparées gardent leur copie figée.
    */
+  /** Une correction d'article : la liste reste dans son état (validée ou non). */
+  private async itemEditable(tenant: TenantContext, takeoff: TakeoffRecord | null): Promise<TakeoffRecord> {
+    assertCanWrite(tenant);
+    if (!takeoff) throw notFound("Takeoff");
+    return takeoff;
+  }
+
   private async editable(tenant: TenantContext, takeoff: TakeoffRecord | null): Promise<TakeoffRecord> {
     assertCanWrite(tenant);
     if (!takeoff) throw notFound("Takeoff");
@@ -715,6 +833,10 @@ export class TakeoffService {
     const openContradictions = plan.contradictions.map((c) => c.key).filter((k) => engine.questions.some((q) => q.key === `param:${k}`));
     const reviewed = { takeoff: kept, validation, roles: new Map([...proposals].map(([id, p]) => [id, { ...p, role: roles.get(id) ?? p.role }])), excluded, openContradictions };
     const view = artisanView(lines, validation, engine, { plan, roles, ref, asks });
+    // §45.8 : « On ajoute ? » — les réponses de ce chantier, et ce que l'entreprise ne veut plus voir.
+    const said = (v: string) => new Set(Object.entries(takeoff.answers).filter(([k, a]) => k.startsWith("ajout:") && a === v).map(([k]) => k.slice("ajout:".length)));
+    const hidden = (await this.reading.consumables?.hidden(tenant)) ?? new Set<string>();
+    const consumables = { accepted: said("oui"), refused: said("non"), hidden };
     // § 41.4 : les mots de l'artisan (libellé, quantité réécrits d'un tap) remplacent ceux de BatiClair.
     const brief = siteBrief({
       ref,
@@ -724,7 +846,27 @@ export class TakeoffService {
       context: takeoff.context ?? {},
       ville: communeOf(address),
     });
-    return { ...reviewed, view, brief, purchase: applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref, validation }), takeoff.answers) };
+    const purchase = applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref, validation, consumables }), takeoff.answers);
+    // Une ligne que l'entreprise ajoute à la main d'un chantier à l'autre est proposée aussi, si le devis ne l'a pas déjà.
+    const present = new Set(takeoff.lines.map((l) => manualKey(l.designation)));
+    for (const m of (await this.reading.consumables?.manual(tenant)) ?? []) {
+      if (purchase.suggestions.length >= MAX_SUGGESTIONS) break;
+      if (present.has(m.key) || consumables.refused.has(m.key) || hidden.has(m.key)) continue;
+      purchase.suggestions.push({
+        key: m.key,
+        label: m.designation,
+        quantity: [m.quantity, m.unit].filter(Boolean).join(" ") || null,
+        order: m.quantity ? { count: m.quantity, unit: m.unit ?? "u" } : null,
+        approx: null,
+        kind: "direct",
+        needIds: [],
+        lineIds: [],
+        state: "ready",
+        assumptionKeys: [],
+        consumable: true,
+      });
+    }
+    return { ...reviewed, view, brief, purchase };
   }
 
   /**

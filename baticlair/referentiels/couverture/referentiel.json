@@ -222,6 +222,22 @@
       ]
     },
     {
+      "code": "sealant",
+      "label": "Mastic, silicone",
+      "needUnit": "ml",
+      "attributes": [],
+      "keyAttributes": [],
+      "consumable": true
+    },
+    {
+      "code": "strip_screw",
+      "label": "Vis de bande",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "consumable": true
+    },
+    {
       "code": "clip_fixing",
       "label": "Fixation de patte",
       "needUnit": "u",
@@ -3026,6 +3042,72 @@
               "verifiedBy": "BatiClair (définition)"
             },
             "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "cartouche-silicone-zinc",
+      "family": "sealant",
+      "label": "Cartouche de silicone neutre (ou mastic PU) compatible zinc",
+      "shortLabel": "Cartouches de silicone zinc",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "cartouche",
+          "label": {
+            "one": "cartouche",
+            "many": "cartouches"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "8",
+            "unit": "m",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "« 1 cartouche par 8 ml de joint » (§25.6)."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "vis-inox-4x40",
+      "family": "strip_screw",
+      "label": "Vis inox 4 × 40 mm pour bandes zinc",
+      "shortLabel": "Vis inox 4 × 40",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "boite",
+          "label": {
+            "one": "boîte de 200",
+            "many": "boîtes de 200"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "200",
+            "unit": "u",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "« Vis inox 4 × 40 : 1 boîte de 200 » (§45.8)."
           },
           "primary": true
         }
@@ -6178,6 +6260,26 @@
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "feuille-zinc-2x1"
           }
+        },
+        {
+          "key": "mastic",
+          "family": "sealant",
+          "label": "Silicone ou mastic",
+          "usual": {
+            "text": "Silicone neutre compatible zinc, 1 cartouche par 8 ml de joint (§25.6).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "cartouche-silicone-zinc"
+          }
+        },
+        {
+          "key": "vis",
+          "family": "strip_screw",
+          "label": "Vis de bandes",
+          "usual": {
+            "text": "Vis inox 4 × 40, 4 par mètre (§25.5).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "vis-inox-4x40"
+          }
         }
       ],
       "constants": {
@@ -6284,6 +6386,20 @@
           },
           "version": 1,
           "note": "« Solin / abergement : ml × 1,1 » (§7)."
+        },
+        "vis_par_ml": {
+          "kind": "installation_condition",
+          "value": "4",
+          "unit": "u/m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« Vis autoforeuses bandes de rive alu/zinc : 4/ml » (§25.5)."
         }
       },
       "derived": [
@@ -6346,6 +6462,40 @@
           "core": true,
           "exclusions": "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2) ; chutes non réemployées.",
           "precision": "pour façonner {longueur_bande|ml} de bande, développé {developpe|cm}",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "mastic-bandes",
+          "slot": "mastic",
+          "formula": "longueur_bande",
+          "unit": "ml",
+          "core": false,
+          "exclusions": "Un joint sur toute la longueur des bandes (solins, couvertines) ; 1 cartouche par 8 ml.",
+          "precision": "pour {longueur_bande|ml} de joint",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "vis-bandes",
+          "slot": "vis",
+          "formula": "longueur_bande * regle.vis_par_ml",
+          "unit": "u",
+          "core": false,
+          "exclusions": "4 vis par mètre de bande (§25.5).",
+          "precision": "4 par mètre, {longueur_bande|ml} de bande",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",

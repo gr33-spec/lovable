@@ -176,6 +176,165 @@ describe("§45.7 — la demande de devis du chantier Test", () => {
   });
 });
 
+/** Le chantier Test avant validation (réponses données), avec son quantitatif côté écran. */
+async function chantierOuvert(agent: Agent, reference = "Test") {
+  const q = (await agent.post("/v1/quantitatifs").send({ reference, adresse: "18 rue de Siam, 29200 Brest", lignes: CHANTIER_TEST })).body;
+  await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: Object.entries(REPONSES).map(([question, valeur]) => ({ question, valeur })) });
+  const takeoff = (await agent.get(`/v1/projects/${q.projetId}/takeoff`)).body.takeoff;
+  return { quantitatifId: q.id as string, projectId: q.projetId as string, takeoff };
+}
+
+describe("§45.6 — journal des corrections", () => {
+  it("7. une correction d'un tap crée une entrée de journal avec les sept champs", async () => {
+    const agent = await compteBatiInvest();
+    const { takeoff, projectId } = await chantierOuvert(agent);
+    const pattes = takeoff.purchase.toBuy.find((b: { label: string }) => b.label.startsWith("Pattes coulissantes"));
+    expect(pattes.quantity).toBe("519 pièces");
+    const after = (await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `quantite:${pattes.key}`, value: { value: "550", unit: "pièces" } }).expect(200)).body;
+    expect(after.purchase.toBuy.find((b: { key: string }) => b.key === pattes.key).quantity).toBe("550 pièces");
+    const events = await ctx.prisma.correctionEvent.findMany({ where: { projectId, action: "correct" } });
+    expect(events).toHaveLength(1);
+    expect(events[0]!.context).toMatchObject({
+      metier: "couverture",
+      departement: "29",
+      materiau: "Pattes coulissantes joint debout",
+      quantite_calculee: "519 pièces",
+      quantite_corrigee: "550 pièces",
+      regle: "pattes_coulissantes",
+      version_referentiel: expect.stringMatching(/^roofing-/),
+    });
+    // Une deuxième correction garde la quantité CALCULÉE par le moteur, pas la précédente correction.
+    await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `quantite:${pattes.key}`, value: { value: "560", unit: "pièces" } }).expect(200);
+    const second = await ctx.prisma.correctionEvent.findMany({ where: { projectId, action: "correct" }, orderBy: { createdAt: "asc" } });
+    expect(second[1]!.context).toMatchObject({ quantite_calculee: "519 pièces", quantite_corrigee: "560 pièces" });
+  });
+
+  it("une ligne tombée en « à préciser avec vous » est journalisée avec sa raison ; l'export mensuel par règle est réservé au fondateur", async () => {
+    const agent = await compteBatiInvest();
+    const q = (await agent.post("/v1/quantitatifs").send({ reference: "Lucarnes", adresse: "29200 Brest", lignes: [...CHANTIER_TEST, { libelle: "Jouées de lucarnes en zinc", quantite: "2", unite: "u" }] })).body;
+    await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: Object.entries(REPONSES).map(([question, valeur]) => ({ question, valeur })) });
+    let current = (await agent.get(`/v1/quantitatifs/${q.id}`)).body;
+    for (let i = 0; i < 10 && current.questions.length > 0; i++) {
+      const question = current.questions[0];
+      current = (await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: [{ question: question.id, valeur: question.boutons[0]?.valeur ?? "ok" }] })).body;
+    }
+    await agent.post(`/v1/quantitatifs/${q.id}/validation`).expect(200);
+    const events = await ctx.prisma.correctionEvent.findMany({ where: { projectId: q.projetId, action: "to_quote" } });
+    expect(events.length).toBeGreaterThanOrEqual(1);
+    expect(events[0]!.reason).toBeTruthy();
+    expect(Object.keys(events[0]!.context as object)).toEqual(expect.arrayContaining(["metier", "departement", "materiau", "quantite_calculee", "quantite_corrigee", "regle", "version_referentiel"]));
+    // L'export : refusé à un artisan qui n'est pas validateur du référentiel.
+    expect((await agent.get("/v1/corrections/export.csv?mois=2026-10")).status).toBe(403);
+  });
+});
+
+describe("§45.8 — « On ajoute ? »", () => {
+  it("8. sur le chantier Test, le bloc propose des cartouches de silicone zinc et des vis inox, avec une quantité ; « Oui » les met en fin de liste", async () => {
+    const agent = await compteBatiInvest();
+    const { takeoff } = await chantierOuvert(agent);
+    const suggestions = takeoff.purchase.suggestions as { key: string; label: string; quantity: string }[];
+    expect(suggestions.map((s) => `${s.label} : ${s.quantity}`)).toEqual(["Cartouches de silicone zinc : 2 cartouches", "Vis inox 4 × 40 : 1 boîte de 200"]);
+    expect(suggestions.length).toBeLessThanOrEqual(8);
+    const silicone = suggestions[0]!;
+    // Un tap sur la quantité la modifie ; « Oui » l'ajoute aux fournitures, dans les consommables.
+    await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `quantite:${silicone.key}`, value: { value: "3", unit: "cartouches" } }).expect(200);
+    const oui = (await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `ajout:${silicone.key}`, value: "oui" }).expect(200)).body;
+    expect(oui.purchase.toBuy.find((b: { key: string }) => b.key === silicone.key)).toMatchObject({ quantity: "3 cartouches", consumable: true });
+    expect(oui.purchase.suggestions.map((s: { key: string }) => s.key)).not.toContain(silicone.key);
+    // « Non » : nulle part.
+    const vis = suggestions[1]!;
+    const non = (await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `ajout:${vis.key}`, value: "non" }).expect(200)).body;
+    expect(non.purchase.suggestions).toEqual([]);
+    expect(non.purchase.toBuy.map((b: { key: string }) => b.key)).not.toContain(vis.key);
+    expect((await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `ajout:${vis.key}`, value: "peut-être" })).status).toBe(400);
+  });
+
+  it("9. un consommable refusé trois fois par le même artisan n'est plus proposé la quatrième fois ; une ligne ajoutée à la main deux fois devient une suggestion", async () => {
+    const agent = await compteBatiInvest();
+    for (const n of [1, 2, 3]) {
+      const { takeoff } = await chantierOuvert(agent, `Refus ${n}`);
+      const vis = takeoff.purchase.suggestions.find((s: { label: string }) => s.label.startsWith("Vis inox"));
+      expect(vis).toBeTruthy();
+      await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `ajout:${vis.key}`, value: "non" }).expect(200);
+      // Deux « non » sur le même chantier comptent pour un.
+      await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `ajout:${vis.key}`, value: "non" }).expect(200);
+      // Une bâche ajoutée à la main sur les deux premiers chantiers.
+      if (n <= 2) await agent.post(`/v1/takeoffs/${takeoff.id}/lines`).send({ designation: "Bâche de protection 4 × 5 m", quantity: "1", unit: "u" }).expect(201);
+    }
+    const { takeoff } = await chantierOuvert(agent, "Quatrième");
+    const labels = takeoff.purchase.suggestions.map((s: { label: string }) => s.label);
+    expect(labels).not.toContain("Vis inox 4 × 40");
+    expect(labels).toContain("Cartouches de silicone zinc");
+    expect(labels).toContain("Bâche de protection 4 × 5 m");
+    // « Oui » sur la bâche : une vraie ligne du chantier.
+    const bache = takeoff.purchase.suggestions.find((s: { label: string }) => s.label.startsWith("Bâche"));
+    const after = (await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `ajout:${bache.key}`, value: "oui" }).expect(200)).body;
+    expect(after.lines.some((l: { designation: string }) => l.designation === "Bâche de protection 4 × 5 m")).toBe(true);
+    expect(after.purchase.suggestions.map((s: { label: string }) => s.label)).not.toContain("Bâche de protection 4 × 5 m");
+    // Une autre entreprise garde ses suggestions.
+    const other = await signUp(ctx.app, "autre@example.fr", "Autre");
+    await other.post("/v1/companies").send({ name: "Autre zinc", trades: ["roofing"] }).expect(201);
+    const theirs = await chantierOuvert(other, "Ailleurs");
+    expect(theirs.takeoff.purchase.suggestions.map((s: { label: string }) => s.label)).toContain("Vis inox 4 × 40");
+  });
+});
+
+describe("§45.9 — l'aperçu avant envoi", () => {
+  it("10. l'aperçu est identique, ligne pour ligne, au PDF reçu par le fournisseur", async () => {
+    const agent = await compteBatiInvest();
+    const { projectId, supplierId } = await chantierTest(agent);
+    const preview = (await agent.post(`/v1/projects/${projectId}/price-requests/preview`).send({ destinataire: "Point.P Brest" }).expect(200)).body;
+    const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] }).expect(201)).body;
+    await agent.post(`/v1/price-request-recipients/${created.recipients[0].id}/send`).expect(200);
+    const mail = ctx.emails.lastTo("devis@pointp-brest.fr")!;
+    // Le même mail, le même document.
+    expect([mail.subject, mail.text]).toEqual([preview.subject, preview.mail]);
+    expect(created.document.blocs).toEqual(preview.document.blocs);
+    // Chaque ligne de l'aperçu est dans le PDF joint, dans le même ordre (le PDF coupe les longues lignes : espaces réunis).
+    const pdf = (await pdfText(Buffer.from(mail.attachments![0]!.contentBase64, "base64"))).replace(/\s+/g, " ");
+    let at = 0;
+    for (const b of preview.document.blocs as { titre: string; numero: number; kind: string; lignes: (string | { designation: string; quantite: string; precision: string | null })[] }[]) {
+      const texts = [`${b.numero}. ${b.titre}`, ...b.lignes.flatMap((l) => (typeof l === "string" ? [l] : [l.designation, l.quantite, ...(l.precision ? [l.precision] : [])]))];
+      for (const t of texts) {
+        const i = pdf.indexOf(t.replace(/\s+/g, " "), at);
+        expect(i, t).toBeGreaterThanOrEqual(0);
+        at = i;
+      }
+    }
+    for (const t of [...preview.document.entete.coordonnees, preview.document.entete.chantier, "Point.P Brest"]) expect(pdf).toContain(t);
+  });
+
+  it("11. une ligne modifiée dans l'aperçu est modifiée dans la liste, une entrée de journal est créée, et la liste reste validée", async () => {
+    const agent = await compteBatiInvest();
+    const { projectId } = await chantierTest(agent);
+    const takeoff = (await agent.get(`/v1/projects/${projectId}/takeoff`)).body.takeoff;
+    expect(takeoff.status).toBe("validated");
+    const gouttiere = takeoff.purchase.toBuy.find((b: { label: string }) => b.label.startsWith("Gouttière"));
+    // L'aperçu passe par le même chemin que la correction d'un tap : quantité, désignation, précision, croix.
+    await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `quantite:${gouttiere.key}`, value: { value: "5", unit: "longueurs de 4 m" } }).expect(200);
+    await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `precision:${gouttiere.key}`, value: "demi-ronde 33, naissances à souder" }).expect(200);
+    const crochets = takeoff.purchase.toBuy.find((b: { label: string }) => b.label.startsWith("Crochets"));
+    await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `retire:${crochets.key}`, value: "oui" }).expect(200);
+    const added = (await agent.post(`/v1/takeoffs/${takeoff.id}/lines`).send({ designation: "Chevilles à frapper 6 × 40 mm", quantity: "2", unit: "u", depuisApercu: true }).expect(201)).body;
+    expect(added.status).toBe("validated");
+    // La liste elle-même a changé…
+    const list = (await agent.get(`/v1/projects/${projectId}/takeoff`)).body.takeoff;
+    expect(list.status).toBe("validated");
+    expect(list.purchase.toBuy.find((b: { key: string }) => b.key === gouttiere.key)).toMatchObject({ quantity: "5 longueurs de 4 m", precision: "demi-ronde 33, naissances à souder" });
+    expect(list.purchase.toBuy.map((b: { key: string }) => b.key)).not.toContain(crochets.key);
+    // … et l'aperçu la montre telle quelle.
+    const preview = (await agent.post(`/v1/projects/${projectId}/price-requests/preview`).send({}).expect(200)).body;
+    const rows = preview.document.blocs.find((b: { titre: string }) => b.titre === "Fournitures à chiffrer").lignes;
+    expect(rows).toContainEqual({ designation: "Gouttière zinc demi-ronde", quantite: "5 longueurs de 4 m", precision: "demi-ronde 33, naissances à souder" });
+    expect(rows.map((r: { designation: string }) => r.designation)).not.toContain("Crochets de gouttière");
+    expect(rows.map((r: { designation: string }) => r.designation)).toContain("Chevilles à frapper 6 × 40 mm");
+    // Le journal : une entrée par correction, avec les sept champs.
+    const events = await ctx.prisma.correctionEvent.findMany({ where: { projectId, action: "correct" }, orderBy: { createdAt: "asc" } });
+    expect(events.map((e) => (e.context as Record<string, unknown>).quantite_corrigee)).toEqual(["5 longueurs de 4 m", "5 longueurs de 4 m", "0"]);
+    expect(events[0]!.context).toMatchObject({ materiau: "Gouttière zinc demi-ronde", quantite_calculee: "4 longueurs de 4 m", regle: "profil" });
+  });
+});
+
 describe("compte de l'entreprise (§45.2, §45.3)", () => {
   it("coordonnées et logo : un SIRET a 14 chiffres, le logo est un PNG ou un JPEG, rien n'est obligatoire", async () => {
     const agent = await signUp(ctx.app, "c@example.fr", "Claire");

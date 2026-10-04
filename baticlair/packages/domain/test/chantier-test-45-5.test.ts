@@ -60,6 +60,15 @@ describe("chantier Test : les corrections du §45.5", () => {
     expect(line(v, "Naissances")).toBeUndefined();
   });
 
+  it("§45.8 « On ajoute ? » : silicone zinc et vis inox proposés avec une quantité, jamais ajoutés d'office ; une ligne « mastic » du devis reste la sienne", () => {
+    const v = readQuote(TEST, REPONSES);
+    expect(v.suggestions.map((s) => `${s.label} : ${s.quantity}`)).toEqual(["Cartouches de silicone zinc : 2 cartouches", "Vis inox 4 × 40 : 1 boîte de 200"]);
+    expect(v.toBuy.map((b) => b.label)).not.toContain("Cartouches de silicone zinc");
+    const avecMastic = readQuote([...TEST, { ref: "5", designation: "Mastic colle polyuréthane 310 ml", quantity: "2", unit: "u" }], REPONSES);
+    expect(avecMastic.toBuy.map((b) => `${b.label} : ${b.quantity}`)).toContain("Mastic colle polyuréthane 310 ml : 2 pièces");
+    expect(line(avecMastic, "Feuilles zinc 2 × 1 m")?.quantity).toBe("3 pièces");
+  });
+
   it("toutes les réponses données : plus de question, rien à chiffrer, chaque ligne passe le test du fournisseur", () => {
     const v = readQuote(TEST, REPONSES);
     expect(v.questions).toEqual([]);

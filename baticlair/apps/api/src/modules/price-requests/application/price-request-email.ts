@@ -101,7 +101,7 @@ export function supplierLineLabel(designation: string): string {
   const title = purchaseLabel(titlePart ?? designation);
   const description = rest.join(" - ");
   // « 27x40 » et « 27×40 » s'écrivent pareil ici.
-  const norm = (t: string) => normalizeText(t.replace(/×/g, "x"));
+  const norm = (t: string) => normalizeText(t.replace(/×/g, "x")).replace(/(\d)\s*x\s*(\d)/g, "$1x$2");
   const has = (text: string, piece: string) => {
     const words = norm(piece).split(" ").filter((w) => w.length > 2 || /\d/.test(w));
     const hay = norm(text);

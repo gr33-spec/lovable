@@ -19,7 +19,11 @@ export type CorrectionAction =
   /** Réponse à une question de BatiClair (produit, donnée de chantier). */
   | "answer"
   /** Préférence de l'entreprise réglée, remplacée ou abandonnée. */
-  | "preference";
+  | "preference"
+  /** §45.6 : quantité ou désignation d'un article CALCULÉ corrigée d'un tap (la règle a peut-être tort). */
+  | "correct"
+  /** §45.6 : ligne tombée en « à préciser avec vous » (pas de règle, modèle non choisi), avec la raison. */
+  | "to_quote";
 
 export type CorrectionCause =
   /** Quantité, unité ou désignation mal lue dans le document. */
@@ -72,6 +76,7 @@ export function classifyCorrection(c: CorrectionInput): CorrectionCause | null {
   if (c.action === "add") return "missed_line";
   if (c.action === "delete") return "not_to_order";
   if (c.action === "preference") return "company_preference";
+  if (c.action === "correct" || c.action === "to_quote") return "rule";
   if (c.action === "answer") return c.after?.reference || c.after?.designation !== c.before?.designation ? "product" : "site_data";
   const b = c.before;
   const a = c.after;

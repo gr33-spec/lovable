@@ -675,6 +675,10 @@ export const ROOFING_REFERENTIAL: Referential = {
     { code: "seam_clip_fixed", label: "Patte fixe de joint debout", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["patte fixe", "pattes fixes"] },
     // Bande d'égout à ourlet du joint debout (§7).
     { code: "eaves_strip", label: "Bande d'égout zinc", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["bande d'egout", "bande egout"] },
+    // §45.8 : consommables SUGGÉRÉS (« On ajoute ? »), jamais ajoutés d'office : l'artisan répond oui ou non d'un tap.
+    // Sans mots-clés : une ligne « mastic » du devis reste une ligne du devis, jamais rattachée à un ouvrage par eux.
+    { code: "sealant", label: "Mastic, silicone", needUnit: "ml", attributes: [], keyAttributes: [], consumable: true },
+    { code: "strip_screw", label: "Vis de bande", needUnit: "u", attributes: [], keyAttributes: [], consumable: true },
     { code: "clip_fixing", label: "Fixation de patte", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["pointe annelee", "pointes annelees", "vis de patte", "fixation de patte"], consumable: true },
     // Joint debout (§7, §36) : la ligne du devis est une SURFACE ; ce qui se commande, ce sont des bobines (au mètre linéaire) ou des bacs.
     { code: "standing_seam", label: "Couverture zinc joint debout", needUnit: "m2", attributes: [], keyAttributes: [], keywords: ["joint debout", "couverture zinc", "zinc a joint debout", "jdb"] },
@@ -1027,6 +1031,14 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("patte-fixe-joint-debout", "seam_clip_fixed", "Patte fixe pour joint debout (largeur de bobine du chantier)", "Pattes fixes joint debout"),
     // §36.2 : « 18 mm → pointe annelée 2,5×28 » (volige 18 mm, §7).
     generic("pointe-annelee-2-5x28", "clip_fixing", "Pointe annelée 2,5 × 28 mm pour patte sur volige 18 mm", "Pointes annelées 2,5 × 28 mm"),
+    // §25.6 : « Mastic PU / silicone neutre : 1 cartouche par 8 ml de joint (solins, couvertines, pénétrations) ».
+    generic("cartouche-silicone-zinc", "sealant", "Cartouche de silicone neutre (ou mastic PU) compatible zinc", "Cartouches de silicone zinc", {
+      sellingUnits: [{ id: "cartouche", label: { one: "cartouche", many: "cartouches" }, contains: packaging("8", "m", F, FOUNDER_DOC, "« 1 cartouche par 8 ml de joint » (§25.6)."), primary: true }],
+    }),
+    // §25.5 : « Vis autoforeuses bandes de rive alu/zinc : 4/ml » ; la boîte de 200 : exemple du fondateur (§45.8).
+    generic("vis-inox-4x40", "strip_screw", "Vis inox 4 × 40 mm pour bandes zinc", "Vis inox 4 × 40", {
+      sellingUnits: [{ id: "boite", label: { one: "boîte de 200", many: "boîtes de 200" }, contains: packaging("200", "u", F, FOUNDER_DOC, "« Vis inox 4 × 40 : 1 boîte de 200 » (§45.8)."), primary: true }],
+    }),
     // §7 : bande d'égout + ourlet, développé 25 à 33 cm, bandes de 2 m (33 cm retenu, comme les abergements).
     generic("bande-egout-zinc-330", "eaves_strip", "Bande d'égout zinc à ourlet, développé 33 cm, longueurs de 2 m (épaisseur du chantier)", "Bandes d'égout zinc dév. 33 cm", {
       sellingUnits: [{ id: "longueur", label: { one: "longueur de 2 m", many: "longueurs de 2 m" }, contains: ONE_PIECE, primary: true }],
@@ -1513,8 +1525,10 @@ export const ROOFING_REFERENTIAL: Referential = {
       slots: [
         { key: "bande", family: "zinc_strip", label: "Bandes zinc façonnées", usual: { text: "Bandes façonnées par le fournisseur, longueurs de 2 m (§36.4).", source: F, productId: "bande-zinc-faconnee-standard" } },
         { key: "feuille", family: "zinc_sheet", label: "Feuilles zinc 2 × 1 m", usual: { text: "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).", source: F, productId: "feuille-zinc-2x1" } },
+        { key: "mastic", family: "sealant", label: "Silicone ou mastic", usual: { text: "Silicone neutre compatible zinc, 1 cartouche par 8 ml de joint (§25.6).", source: F, productId: "cartouche-silicone-zinc" } },
+        { key: "vis", family: "strip_screw", label: "Vis de bandes", usual: { text: "Vis inox 4 × 40, 4 par mètre (§25.5).", source: F, productId: "vis-inox-4x40" } },
       ],
-      constants: ZINC_PLAT_CONSTANTS,
+      constants: { ...ZINC_PLAT_CONSTANTS, vis_par_ml: condition("4", "u/m", F, FOUNDER_DOC, "« Vis autoforeuses bandes de rive alu/zinc : 4/ml » (§25.5).") },
       derived: [
         POIDS_PLAT_DERIVED,
         { key: "ml_zinc", label: "Longueur de zinc, marge comprise", unit: "m", formula: "longueur_bande * regle.marge_bandes", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
@@ -1543,6 +1557,31 @@ export const ROOFING_REFERENTIAL: Referential = {
           exclusions: "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2) ; chutes non réemployées.",
           // §45.5 : une feuille dont on ne sait pas à quoi elle sert n'a rien à faire dans la liste.
           precision: "pour façonner {longueur_bande|ml} de bande, développé {developpe|cm}",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        // §45.8 : suggérés (« On ajoute ? »), jamais d'office : non « cœur » de l'ouvrage.
+        {
+          id: "mastic-bandes",
+          slot: "mastic",
+          formula: "longueur_bande",
+          unit: "ml",
+          core: false,
+          exclusions: "Un joint sur toute la longueur des bandes (solins, couvertines) ; 1 cartouche par 8 ml.",
+          precision: "pour {longueur_bande|ml} de joint",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "vis-bandes",
+          slot: "vis",
+          formula: "longueur_bande * regle.vis_par_ml",
+          unit: "u",
+          core: false,
+          exclusions: "4 vis par mètre de bande (§25.5).",
+          precision: "4 par mètre, {longueur_bande|ml} de bande",
           source: F,
           verification: FOUNDER_DOC,
           version: 1,

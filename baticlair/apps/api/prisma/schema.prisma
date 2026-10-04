@@ -142,6 +142,7 @@ model Company {
   offers        SupplierOffer[]
   preferences   CompanyPreference[]
   corrections   CorrectionEvent[]
+  consumableHabits ConsumableHabit[]
   quantitatifs  Quantitatif[]
 
   @@map("company")
@@ -813,4 +814,25 @@ model PartnerApiKey {
 
   @@index([companyId])
   @@map("partner_api_key")
+}
+
+/// §45.8 : les consommables suggérés (« On ajoute ? ») et les lignes ajoutées à la main, par entreprise.
+/// Refusé trois chantiers d'affilée : plus proposé ; ajouté à la main sur deux chantiers : devient une suggestion.
+model ConsumableHabit {
+  companyId           String   @db.Uuid
+  /// Clé de l'article suggéré (« product:Cartouches de silicone zinc ») ou « manual:<désignation normalisée> ».
+  key                 String
+  designation         String
+  refusedInARow       Int      @default(0)
+  lastRefusedProject  String?  @db.Uuid
+  /// Chantiers où l'artisan a ajouté cette ligne à la main.
+  manualProjects      String[] @default([])
+  lastQuantity        String?
+  lastUnit            String?
+  updatedAt           DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@id([companyId, key])
+  @@map("consumable_habit")
 }

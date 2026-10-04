@@ -34,14 +34,16 @@ const answerBody = z
   .object({
     // « role:<ligne> » : l'artisan tranche une ambiguïté (« 6 : ardoises ou jouées ? »).
     // « libelle:<ligne> » et « quantite:<ligne> » : l'artisan réécrit une ligne du quantitatif (§41.4).
-    key: z.string().regex(/^(?:(?:product|param):[a-z0-9_]{1,40}|role:[0-9a-f-]{36}|(?:libelle|quantite):.{1,200})$/),
+    // « ajout:<article> » : « On ajoute ? » (§45.8), oui ou non. « precision:<article> », « retire:<article> » : l'aperçu (§45.9).
+    key: z.string().regex(/^(?:(?:product|param):[a-z0-9_]{1,40}|role:[0-9a-f-]{36}|(?:libelle|quantite|ajout|precision|retire):.{1,200})$/),
     value: z.union([
       z.string().trim().max(120),
-      z.object({ value: z.string().trim().regex(/^\d+(?:[.,]\d+)?$/), unit: z.string().trim().min(1).max(10) }),
+      z.object({ value: z.string().trim().regex(/^\d+(?:[.,]\d+)?$/), unit: z.string().trim().min(1).max(30) }),
       z.null(),
     ]),
   })
-  .refine((b) => !b.key.startsWith("role:") || b.value === "measure" || b.value === "purchase", { message: "role answer must be measure or purchase" });
+  .refine((b) => !b.key.startsWith("role:") || b.value === "measure" || b.value === "purchase", { message: "role answer must be measure or purchase" })
+  .refine((b) => !b.key.startsWith("ajout:") || b.value === "oui" || b.value === "non", { message: "ajout answer must be oui or non" });
 
 const fields = (b: z.infer<typeof lineBody>) => ({
   designation: b.designation,
@@ -95,8 +97,13 @@ export class TakeoffController {
 
   @Post("takeoffs/:id/lines")
   @HttpCode(201)
-  async addLine(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(lineBody)) body: z.infer<typeof lineBody>) {
-    return toDto(await this.takeoffs.addLine(tenant, id, fields(body)));
+  async addLine(
+    @Tenant() tenant: TenantContext,
+    @Param("id") id: string,
+    @Body(new ZodPipe(lineBody.extend({ depuisApercu: z.boolean().optional() }))) body: z.infer<typeof lineBody> & { depuisApercu?: boolean },
+  ) {
+    // « + Ajouter une ligne » de l'aperçu avant envoi (§45.9) : la liste validée le reste.
+    return toDto(await this.takeoffs.addLine(tenant, id, fields(body), { keepStatus: body.depuisApercu === true }));
   }
 
   /** Une décision qui règle plusieurs lignes en un geste (« Oui, à la pièce », « Oui, tels qu'écrits »). */

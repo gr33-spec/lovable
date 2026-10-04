@@ -13,7 +13,7 @@ import { CompanyMemory, CorrectionJournal, LearningModule } from "../learning/in
 import { TenancyModule } from "../tenancy/index.js";
 import { TAKEOFF_EXTRACTOR, type TakeoffExtractor } from "./application/takeoff-extractor.js";
 import { TAKEOFF_REPOSITORY, type TakeoffRepository } from "./application/takeoff.repository.js";
-import { TakeoffService } from "./application/takeoff.service.js";
+import { manualKey, TakeoffService } from "./application/takeoff.service.js";
 import { TakeoffController } from "./http/takeoff.controller.js";
 import { AnthropicTakeoffExtractor } from "./infrastructure/anthropic-takeoff-extractor.js";
 import { FakeTakeoffExtractor } from "./infrastructure/fake-takeoff-extractor.js";
@@ -79,6 +79,35 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             projectAddress: async (tenant, projectId) => {
               const project = await prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { address: true } });
               return project?.address ?? null;
+            },
+            // §45.8 : la mémoire des consommables de chaque entreprise.
+            consumables: {
+              hidden: async (tenant) =>
+                new Set((await prisma.consumableHabit.findMany({ where: { companyId: tenant.companyId, refusedInARow: { gte: 3 } }, select: { key: true } })).map((h) => h.key)),
+              manual: async (tenant) =>
+                (await prisma.consumableHabit.findMany({ where: { companyId: tenant.companyId, key: { startsWith: "manual:" }, refusedInARow: { lt: 3 } }, orderBy: { updatedAt: "desc" } }))
+                  .filter((h) => h.manualProjects.length >= 2)
+                  .map((h) => ({ key: h.key, designation: h.designation, quantity: h.lastQuantity, unit: h.lastUnit })),
+              answered: async (tenant, e) => {
+                const current = await prisma.consumableHabit.findUnique({ where: { companyId_key: { companyId: tenant.companyId, key: e.key } } });
+                // Refusé « trois fois d'affilée » : trois chantiers, pas trois taps sur le même.
+                const refused = e.accepted ? 0 : current?.lastRefusedProject === e.projectId ? current.refusedInARow : (current?.refusedInARow ?? 0) + 1;
+                await prisma.consumableHabit.upsert({
+                  where: { companyId_key: { companyId: tenant.companyId, key: e.key } },
+                  create: { companyId: tenant.companyId, key: e.key, designation: e.designation, refusedInARow: refused, lastRefusedProject: e.accepted ? null : e.projectId },
+                  update: { refusedInARow: refused, lastRefusedProject: e.accepted ? null : e.projectId },
+                });
+              },
+              addedByHand: async (tenant, e) => {
+                const key = manualKey(e.designation);
+                const current = await prisma.consumableHabit.findUnique({ where: { companyId_key: { companyId: tenant.companyId, key } } });
+                const projects = [...new Set([...(current?.manualProjects ?? []), e.projectId])];
+                await prisma.consumableHabit.upsert({
+                  where: { companyId_key: { companyId: tenant.companyId, key } },
+                  create: { companyId: tenant.companyId, key, designation: e.designation, manualProjects: projects, lastQuantity: e.quantity, lastUnit: e.unit },
+                  update: { designation: e.designation, manualProjects: projects, lastQuantity: e.quantity, lastUnit: e.unit, refusedInARow: 0 },
+                });
+              },
             },
             projectNotes: async (tenant, projectId) => {
               const project = await prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { siteNotes: true } });
