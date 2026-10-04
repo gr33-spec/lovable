@@ -1,0 +1,253 @@
+{
+  "metier": {
+    "code": "electricite",
+    "nom": "Électricité (NF C 15-100) : points, circuits, tableau",
+    "version": "0.2.0-recherche",
+    "maturite": "alpha",
+    "active": false,
+    "referentiel": "docs/referentiels/electricien.md",
+    "note": "Le document reçu s'arrête au chapitre 10 : pas de chapitres 11 et 13. Les points « à vérifier » ont été relevés dans les chapitres 2, 4, 5, 6 et 9."
+  },
+  "valeurs": [
+    {
+      "id": "gaine_prefilee_3g15_d16_poids",
+      "libelle": "Gaine ICTA préfilée 3G1,5 Ø16, couronne de 100 m : poids",
+      "avant": "≈ 10 kg (à vérifier)",
+      "valeur": "10,6 kg la couronne de 100 m (Profiflex)",
+      "unite": "kg",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.bricomarche.com/p/gaine-icta-prefilee-diametre-16-mm-3g1.5-mm2-100-m/8027788371131",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.123elec.com/gaine-electrique-icta-prefilee-3g1-5-n-b-vj-d16-profiflex-couronne-de-100m.html",
+          "date": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "id": "gaine_prefilee_navette",
+      "libelle": "Gaine préfilée 3 × 1,5 orange/orange/rouge (navette) : conditionnement",
+      "avant": "couronne 100 m (à vérifier)",
+      "valeur": "couronne de 100 m, Ø16 (Profiflex O/O/R)",
+      "unite": "m",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.123elec.com/gaine-electrique-icta-prefilee-3g1-5-d16-o-o-r-couronne-de-100m.html",
+          "date": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "id": "fil_h07vu_25_poids",
+      "libelle": "Fil H07V-U 2,5 mm² : poids",
+      "avant": "≈ 29 kg/km (à vérifier)",
+      "valeur": "3,05 kg la couronne de 100 m (Electraline) ; 30 kg/km (fiche négoce)",
+      "unite": "kg/km",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.mr-bricolage.fr/cable-d-installation-h07v-u-1x25-100m-noir-electraline.html",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.balitrand.fr/product/export_pdf/code_article/501.030",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "29 au référentiel, 30 à 30,5 trouvés : écart < 5 %, sans effet sur la commande (vendu à la couronne)."
+    },
+    {
+      "id": "cable_r2v_3g15_conditionnement",
+      "libelle": "Câble U-1000 R2V 3G1,5 : conditionnements",
+      "avant": "couronne 50 ou 100 m, touret 500 m (à vérifier)",
+      "valeur": "Nexans : couronnes de 50 m et 100 m, tourets de 300 m (Mobiway) et 500 m",
+      "unite": "m",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.123elec.com/cables-gaines-conduits/cables-electriques/cables-electriques-rigides-ro2v.html",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.rexel.fr/frx/c/M2_080201",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Un touret de 300 m existe en plus de ceux du référentiel."
+    },
+    {
+      "id": "cable_r2v_3g6_coupe",
+      "libelle": "Câble R2V 3G6 : vente",
+      "avant": "mètre à la coupe (à vérifier par négoce)",
+      "valeur": "vendu au mètre, coupé à la commande (Nexans chez 123elec, Domomat, GSB)",
+      "unite": "m",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.123elec.com/cable-electrique-r2v-3g6-m-b-vj-nexans-prix-au-metre.html",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.domomat.com/14131-cable-r2v-3g6mm-au-metre-fils-et-cables-generiques-filr2v3g6tgl.html",
+          "date": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "id": "gaine_icta_nue",
+      "libelle": "Gaine ICTA nue avec tire-fil : couronnes",
+      "avant": "Ø16/20/25 en 100 m, Ø25 souvent 50 m (à vérifier)",
+      "valeur": "Ø16 : 100 m ; Ø20 : 50 m et 100 m ; Ø25 : 50 m et 100 m (avec tire-fil)",
+      "unite": "m",
+      "statut": "contradiction",
+      "sources": [
+        {
+          "url": "https://www.123elec.com/gaine-electrique-icta-d16-profiflex-couronne-de-100m.html",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.mr-bricolage.fr/Cagnes/travaux/electricite/gaines-et-cables-electriques/gaines-electriques-icta.html",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Ø20 et Ø25 existent en 50 m ET en 100 m : le défaut « 100 m » du référentiel tient chez 123elec, le 50 m domine en GSB. Garder les deux, le fournisseur choisit."
+    },
+    {
+      "id": "gaine_tpc_d40",
+      "libelle": "Gaine TPC rouge Ø40 : couronne",
+      "avant": "25 ou 50 m (à vérifier)",
+      "valeur": "couronne de 25 m avec tire-fil et manchon (Fitt) ; grillage avertisseur rouge à 0,20 m au-dessus du câble",
+      "unite": "m",
+      "statut": "a_verifier",
+      "sources": [
+        {
+          "url": "https://www.castorama.fr/gaine-pour-reseaux-enterres-rouge-40-mm-x-25-m-fitt/3396049012546_CAFR.prd",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_2338.pdf",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "25 m confirmé ; 50 m non retrouvé dans les extraits. Largeur et longueur du rouleau de grillage avertisseur non trouvées."
+    },
+    {
+      "id": "cable_vdi_grade2tv",
+      "libelle": "Câble VDI grade 2TV 4 paires : conditionnement",
+      "avant": "couronne 100 m ou carton 305 m (à vérifier)",
+      "valeur": "couronne de 100 m (4,6 kg), tourets de 500 m, 1 000 m, 4 000 m",
+      "unite": "m",
+      "statut": "contradiction",
+      "sources": [
+        {
+          "url": "https://assets.legrand.com/pim/NP-FT-GT/S000101279FR-00.pdf",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.acome.com/fr/pdf_produit?id=876",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Le carton de 305 m (1 000 pieds) est un format Cat6 ; en grade 2TV, les fiches donnent 100 m puis tourets de 500 m. Garder les deux selon le câble."
+    },
+    {
+      "id": "boite_batibox_carton",
+      "libelle": "Boîte cloison sèche Batibox 1 poste : conditionnement",
+      "avant": "carton de 25 à 50 (à vérifier)",
+      "valeur": "Legrand vend aussi un distributeur de 100 boîtes (P50) ; cartons de 30 ou 100 selon la référence",
+      "unite": "pièces/carton",
+      "statut": "contradiction",
+      "sources": [
+        {
+          "url": "https://www.legrand.fr/pro/catalogue/distributeur-de-100-boites-pour-cloisons-seches-batibox-profondeur-50mm",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.legrand.fr/pro/catalogue/batibox?page=6",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Le carton de l'article 080041 n'est pas confirmé ; 30 et 100 trouvés pour d'autres Batibox. La règle « carton si ≥ 80 % » reste sans chiffre fiable."
+    },
+    {
+      "id": "moulure_barre",
+      "libelle": "Moulure DLPlus : longueur de barre et colisage",
+      "avant": "2 m ou 2,1 m (à vérifier par gamme)",
+      "valeur": "2,10 m ; colis de 60 barres (20 × 12,5), 30 (32 × 16), 24 (40 × 16), 16 (60 × 20)",
+      "unite": "m",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.legrand.fr/pro/catalogue/moulure-dlplus-20x125mm-1-compartiment-longueur-21m-blanc",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.legrand.fr/pro/catalogue/moulure-dlplus-60x20mm-3-compartiments-longueur-21m-blanc",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "2,1 m confirmé chez Legrand ; le 2 m d'autres marques n'a pas été cherché."
+    },
+    {
+      "id": "id_largeur",
+      "libelle": "Interrupteur différentiel 40 A 30 mA : largeur",
+      "avant": "2 modules (à vérifier par fabricant)",
+      "valeur": "2 modules (Legrand DX3 411611 type AC ; 411617 type A)",
+      "unite": "modules",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.123elec.com/legrand-interrupteur-differentiel-dx3-40a-30ma-type-ac.html",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.123elec.com/gamme-materiel-electrique/disjoncteurs-interrupteurs-differentiels-modules/disjoncteurs-differentiels-mod-legrand/interrupteurs-differentiels-legrand/legrand-interrupteur-differentiel-dx3-40a-30ma-type-a.html",
+          "date": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "id": "peigne_13m",
+      "libelle": "Peigne d'alimentation phase + neutre 13 modules",
+      "avant": "1 par rangée (à vérifier)",
+      "valeur": "Legrand 404926 : 13 modules, 220 mm, pas 17,5 mm, 63 A, sécable",
+      "unite": "pièce",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.legrand.fr/pro/catalogue/peigne-dalimentation-universel-phase-neutre-hx3-horizontale-1p-longueur-13-modules",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Le format est sourcé ; « 1 par rangée » est une règle de pose à valider par un électricien."
+    },
+    {
+      "id": "wago_221_413",
+      "libelle": "Bornes Wago 221-413 : boîte",
+      "avant": "boîte de 50 (à valider)",
+      "valeur": "unité de vente 50 pièces",
+      "unite": "pièces/boîte",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://tbs-online.de/de/en/pid.1144.1639/agid.167757.166780.48291/atid.108933/ecm.at/Connection-terminals-Wago-type-221-413-PU-50-pieces.html",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Le conditionnement est sourcé ; « 3 par point lumineux » reste à valider."
+    }
+  ],
+  "introuvable": [
+    "Gaine préfilée 3 × 2,5 + 1 × 1,5 Ø20 (chauffage) : poids et couronne non confirmés.",
+    "Grillage avertisseur rouge : largeur (20 cm) et rouleau (25 ou 100 m).",
+    "Nombre minimal de circuits spécialisés (3 ou 4) dans la NF C 15-100 de 2024 : texte non lu.",
+    "Profondeur de pose d'une liaison enterrée (≈ 0,50 m) : texte non lu.",
+    "Ratios de chantier : 0,6 de partage des moulures, 5 fixations par barre, 1 collier par 0,5 m, plâtre 0,3 kg par boîte et 0,5 kg par mètre de saignée, Wago 221-415 par boîte de dérivation.",
+    "Câble de terre 16 mm² : 5 m par défaut.",
+    "Boîtes multipostes, boîte maçonnerie, boîte DCL, douille DCL : conditionnements."
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "metier": "electricite",
+  "ouvrages": {
+    "prise_16a": { "expressions": ["pc 16a", "prise 2p+t", "socle de prise", "prise de courant", "pc"] },
+    "prise_double": { "expressions": ["prise double", "bloc 2 prises", "pc double"] },
+    "prise_cuisine_pdt": { "expressions": ["prise plan de travail", "pc cuisine"] },
+    "point_lumineux": { "expressions": ["point lumineux", "pl", "point de centre", "dcl", "applique"] },
+    "spot": { "expressions": ["spot encastré", "spot led", "downlight"] },
+    "commande_sa": { "expressions": ["interrupteur sa", "simple allumage", "inter"] },
+    "commande_vv": { "expressions": ["va-et-vient", "vv", "2 commandes"] },
+    "commande_tele": { "expressions": ["télérupteur", "bouton poussoir", "bp"] },
+    "circuit_specialise": { "expressions": ["circuit spécialisé", "cs", "ligne dédiée", "prise ll", "prise lv", "prise sl", "prise four", "congélateur"] },
+    "circuit_cuisson": { "expressions": ["plaque de cuisson", "cuisinière", "32a"] },
+    "circuit_chauffage": { "expressions": ["radiateur électrique", "convecteur", "fil pilote"], "exclusions": ["radiateur eau chaude", "pac"] },
+    "chauffe_eau": { "expressions": ["chauffe-eau électrique", "cumulus", "ce"], "renvoi": "plomberie" },
+    "vmc": { "expressions": ["alimentation vmc", "circuit vmc"], "renvoi": "chauffage-ventilation" },
+    "volet_roulant": { "expressions": ["volet électrique", "alimentation vr", "inter de volet"], "renvoi": "menuiserie" },
+    "prise_rj45": { "expressions": ["rj45", "prise réseau", "prise com", "vdi", "grade 2tv"] },
+    "prise_tv": { "expressions": ["prise tv", "tv/sat", "coaxial"] },
+    "tableau": { "expressions": ["tableau électrique", "tgbt", "tableau de répartition", "coffret 3 rangées", "interrupteur différentiel", "disjoncteur"] },
+    "gtl": { "expressions": ["gtl", "gaine technique logement", "etel"] },
+    "terre": { "expressions": ["prise de terre", "piquet de terre", "barrette de coupure"] },
+    "irve": { "expressions": ["borne de recharge", "irve", "green'up", "wallbox"] },
+    "exterieur": { "expressions": ["prise extérieure", "éclairage jardin", "alimentation portail", "gaine tpc"] }
+  },
+  "renvois": {
+    "raccordement chauffe-eau, ballon thermodynamique (partie hydraulique)": "plomberie",
+    "caisson vmc, bouches, gaines de ventilation": "chauffage-ventilation",
+    "panneaux photovoltaïques, onduleur": "couvreur-photovoltaique",
+    "tranchée": "terrassier"
+  },
+  "note": "« DB » (disjoncteur de branchement) est fourni par Enedis : jamais commandé. « PC » = prise de courant."
+}
