@@ -1,0 +1,33 @@
+{
+  "metier": {
+    "code": "pavage-dallage-exterieur",
+    "nom": "Pavage, dallage extérieur, bordures",
+    "version": "0.2.0-recherche",
+    "maturite": "alpha",
+    "active": false,
+    "referentiel": "docs/referentiels/pavage-dallage-exterieur.md"
+  },
+  "valeurs": [
+    {
+      "id": "bordure_t2",
+      "libelle": "Bordure T2 (voir terrassier)",
+      "avant": "pièce de 1 m",
+      "valeur": "voir referentiels/terrassier/tiroir.json (bordure_t2) : ≈ 81 kg, 18 ou 24 par palette",
+      "unite": "kg/pièce",
+      "statut": "contradiction",
+      "sources": [
+        {
+          "url": "https://www.hellopro.fr/bordure-t2-2000585-6057533-produit.html",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Même article que le terrassier."
+    }
+  ],
+  "introuvable": [
+    "Pavés Alkern Parabloc, Campus, Opus : m² par palette et poids de palette (pages Point.P non lisibles par le proxy).",
+    "Pavés granit 9 × 9 et Luserne : pièces par m² et vente à la tonne.",
+    "Densité du sable de lit de pose (1,6) et des gravillons (1,5) : voir maçonnerie (1,4 contre 1,6 déjà en contradiction).",
+    "Rendement d'un sac de béton prêt de 35 kg."
+  ]
+}

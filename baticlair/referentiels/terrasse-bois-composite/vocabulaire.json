@@ -1,0 +1,99 @@
+{
+ "metier": "terrasse-bois-composite",
+ "ouvrages": {
+  "platelage_bois": {
+   "expressions": [
+    "fourniture et pose lames pin classe 4",
+    "platelage ipé",
+    "deck bois",
+    "lames 27×145",
+    "terrasse douglas",
+    "terrasse exotique"
+   ]
+  },
+  "platelage_composite": {
+   "expressions": [
+    "lames composite",
+    "bois composite",
+    "silvadec",
+    "fiberon",
+    "trex",
+    "upm profi",
+    "lame alvéolaire/pleine",
+    "wpc"
+   ]
+  },
+  "ossature_lambourdes": {
+   "expressions": [
+    "structure",
+    "lambourdage",
+    "lambourdes 45×70",
+    "ossature",
+    "solivage léger",
+    "double lambourdage"
+   ]
+  },
+  "ossature_solives": {
+   "expressions": [
+    "solivage",
+    "poutres",
+    "structure porteuse",
+    "terrasse surélevée",
+    "sur pilotis"
+   ]
+  },
+  "appuis_plots_reglables": {
+   "expressions": [
+    "plots réglables",
+    "plots pvc",
+    "plots jouplast/buzon",
+    "sur plots"
+   ]
+  },
+  "appuis_plots_beton": {
+   "expressions": [
+    "plots béton",
+    "dés béton",
+    "parpaings",
+    "massifs"
+   ]
+  },
+  "appuis_vis_fondation": {
+   "expressions": [
+    "pieux vissés",
+    "vis de fondation",
+    "krinner"
+   ]
+  },
+  "appuis_dalle": {
+   "expressions": [
+    "sur dalle existante",
+    "sur chape",
+    "sur béton"
+   ]
+  },
+  "preparation_sol": {
+   "expressions": [
+    "préparation du sol",
+    "décaissement",
+    "feutre",
+    "géotextile",
+    "anti-racines",
+    "lit de gravier"
+   ]
+  },
+  "garde_corps": {
+   "expressions": [
+    "garde-corps",
+    "rambarde",
+    "balustrade"
+   ]
+  }
+ },
+ "note": "Extrait du chapitre 3 de terrasse-bois-composite.md (expressions entre guillemets du document).",
+ "renvois": {
+  "plots béton, dalle": "maconnerie",
+  "dalles sur plots en pierre ou grès": "pavage-dallage-exterieur",
+  "bardage": "bardage"
+ }
+}

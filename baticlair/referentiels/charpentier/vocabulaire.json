@@ -1,0 +1,111 @@
+{
+ "metier": "charpentier",
+ "ouvrages": {
+  "CH-01": {
+   "expressions": [
+    "charpente traditionnelle",
+    "pannes et chevrons",
+    "charpente bois massif"
+   ]
+  },
+  "CH-02": {
+   "expressions": [
+    "fermes",
+    "entrait",
+    "poinçon",
+    "ferme latine",
+    "ferme à entrait retroussé"
+   ]
+  },
+  "CH-03": {
+   "expressions": [
+    "fermettes",
+    "charpente industrielle",
+    "fermes en w",
+    "fermettes industrialisées"
+   ]
+  },
+  "CH-04": {
+   "expressions": [
+    "croupe",
+    "arêtier",
+    "noue",
+    "empannons",
+    "toiture 4 pans"
+   ]
+  },
+  "CH-05": {
+   "expressions": [
+    "chevêtre",
+    "trémie",
+    "velux",
+    "sortie de cheminée"
+   ]
+  },
+  "CH-06": {
+   "expressions": [
+    "lucarne",
+    "chien assis",
+    "jacobine",
+    "outeau"
+   ]
+  },
+  "CH-07": {
+   "expressions": [
+    "solivage",
+    "plancher bois",
+    "aménagement de combles",
+    "solives"
+   ]
+  },
+  "CH-08": {
+   "expressions": [
+    "carport",
+    "auvent",
+    "abri voiture",
+    "pergola",
+    "préau"
+   ]
+  },
+  "CH-09": {
+   "expressions": [
+    "planches de rive",
+    "bandeau",
+    "débord de toit"
+   ]
+  },
+  "CH-10": {
+   "expressions": [
+    "remplacement",
+    "renfort",
+    "moisage",
+    "doublage",
+    "reprise de charpente",
+    "à l'identique"
+   ]
+  },
+  "CH-11": {
+   "expressions": [
+    "traitement",
+    "insecticide",
+    "fongicide",
+    "capricornes",
+    "termites",
+    "injection"
+   ]
+  },
+  "CH-12": {
+   "expressions": [
+    "dépose",
+    "démolition charpente",
+    "évacuation"
+   ]
+  }
+ },
+ "note": "Extrait du chapitre 3 de charpentier.md (expressions entre guillemets du document).",
+ "renvois": {
+  "couverture, liteaux, écran": "couverture",
+  "ossature bois, bardage": "bardage",
+  "traitement de charpente seul": "charpentier"
+ }
+}

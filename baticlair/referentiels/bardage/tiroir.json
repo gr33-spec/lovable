@@ -1,0 +1,109 @@
+{
+  "metier": {
+    "code": "bardage",
+    "nom": "Bardage (bois, fibres-ciment, panneaux, PVC, métal) et ITE sous bardage",
+    "version": "0.2.0-recherche",
+    "maturite": "alpha",
+    "active": false,
+    "referentiel": "docs/referentiels/poseur-de-bardage.md",
+    "note": "Le document reçu s'arrête au chapitre 5 : pas de chapitres 11 et 13. Une seule source bardage reçue alors que la consigne en annonçait deux : rien à fusionner."
+  },
+  "valeurs": [
+    {
+      "id": "douglas_21x130",
+      "libelle": "Bardage douglas 21 × 130/132 : largeur utile et botte",
+      "avant": "largeur utile ≈ 120 mm (à vérifier par profil) ; botte de 4 lames",
+      "valeur": "21 × 132 : bottes de 5 lames, 32 bottes et 160 lames par palette",
+      "unite": "lames/botte",
+      "statut": "contradiction",
+      "sources": [
+        {
+          "url": "https://www.chausson.fr/media/article-document/273073",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.batiproduits.com/fiche/produits/lames-de-bardage-en-douglas-massif-de-4-m-de-long-p457460278.html",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Botte de 5 (fiche négoce) contre 4 au référentiel. Largeur utile du 21 × 130 non trouvée."
+    },
+    {
+      "id": "meleze_21x132",
+      "libelle": "Bardage mélèze 21 × 132 : largeur et botte",
+      "avant": "largeur utile à vérifier ; botte de 5 lames",
+      "valeur": "21 × 145 hors tout, 132 utiles ; 3 m et 4 m ; bottes de 5, 210 lames par palette",
+      "unite": "mm utiles",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/jKqnnPCzWMDPI61XOMrV.pdf",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.batiproduits.com/fiche/produits/bardage-en-meleze-ou-douglas-bardage-mezzo-p69066713.html",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "« 132 » est la largeur utile (145 hors tout) : 1 / (4 × 0,132) = 1,9 lame de 4 m par m²."
+    },
+    {
+      "id": "cedral_click_clips",
+      "libelle": "Cedral Click : clips par m²",
+      "avant": "kit de 250 clips + 260 vis ; densité au m² à vérifier",
+      "valeur": "1 boîte de 250 clips ≈ 21 m² (≈ 12 clips/m²), 7 clips par lame à 500 mm d'entraxe ≈ 35 lames",
+      "unite": "clips/m²",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://media.cedral.world/pi782334/original/13446572/cedral-facade_fiche_clip-et-vis-click.pdf",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://insulationgo.co.uk/cedral-click-cladding-weatherboard-system-clips-screws-stainless-steel-box-250-screw-clip/",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Le second lien est un revendeur britannique (lame de 3,60 m) ; la fiche Cedral France est à relire pour confirmer les 21 m²."
+    },
+    {
+      "id": "pare_pluie_bardage",
+      "libelle": "Pare-pluie de bardage jointif : rouleau",
+      "avant": "1,50 × 50 m (à vérifier par marque)",
+      "valeur": "1,50 × 50 m = 75 m² (Delta-Fassade 50, écran HPV 120 g/m²) ; 8 jours d'exposition aux UV au plus",
+      "unite": "m²/rouleau",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.doerken.com/ch/fr/content/preview/21012/file/Fiche%20technique%20DELTA-FASSADE%2050%20%28PLUS%29.pdf",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1609401.pdf",
+          "date": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "id": "pointes_bardage",
+      "libelle": "Fixation de lames bois sur tasseaux",
+      "avant": "1 fixation tous les 50 à 60 cm (à vérifier)",
+      "valeur": "2 pointes annelées inox par lame et par tasseau ; ≈ 25 pointes/m² à 65 cm d'entraxe ; tasseau 27 mm, entraxe ≤ 65 cm",
+      "unite": "pointes/m²",
+      "statut": "a_verifier",
+      "sources": [
+        {
+          "url": "https://cdn.chausson.fr/catalog-document/a9ee1aa0-85ac-4733-a46c-1f61c3680926/guide-fr-de-pose-sivalbp-21.pdf",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Valeur lue dans un extrait du guide de pose Sivalbp, sans tableau complet. « 50 à 60 cm » au référentiel vise la fixation des tasseaux au mur, pas des lames."
+    }
+  ],
+  "introuvable": [
+    "Tasseaux 27 × 40 : longueurs (2,4 / 3 / 4 m) et bottes.",
+    "Fixation des tasseaux sur maçonnerie : cheville et vis par support.",
+    "Fixations de tôle acier par m² (≈ 8 à 12).",
+    "Pertes par type de bardage (10 %, 12 %, 8 %, 15 %) : pratique à valider par un poseur."
+  ]
+}

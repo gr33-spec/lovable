@@ -1,0 +1,114 @@
+{
+  "metier": {
+    "code": "facade",
+    "nom": "Façade : enduits, ITE sous enduit, revêtements, imperméabilité",
+    "version": "0.2.0-recherche",
+    "maturite": "alpha",
+    "active": false,
+    "referentiel": "docs/referentiels/facadier.md"
+  },
+  "valeurs": [
+    {
+      "id": "monocouche_conso",
+      "libelle": "Monocouche weber.pral F : consommation",
+      "avant": "27 kg/m² gratté, 23,5 taloché (milieu de fourchette, à valider)",
+      "valeur": "gratté 27 kg/m² ; taloché, rustique, lissé, jeté 23 kg/m² ; sac 25 kg, palette 48 sacs (1 200 kg)",
+      "unite": "kg/m²",
+      "statut": "contradiction",
+      "sources": [
+        {
+          "url": "https://www.lamaisonsaintgobain.fr/innovation-produit/enduit-de-facade-monocouche-traditionnel-weberpral-f",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1800673.pdf",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Gratté 27 confirmé. Taloché : 23 chez Weber contre 23,5 au référentiel (≈ 2 %, sous le seuil de 3 %)."
+    },
+    {
+      "id": "rail_depart_ite",
+      "libelle": "Rail de départ ITE aluminium : barre et colis",
+      "avant": "barre 2,5 m (à vérifier, parfois 2 m) ; cheville tous les 30 cm",
+      "valeur": "barre de 2,50 m, largeur 20 à 300 mm ; ≈ 9 chevilles par barre ; colis de 10 (20 à 100 mm) ou de 4 (110 à 300 mm) ; éclisse PVC de 3 mm entre barres",
+      "unite": "m",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://bigmat.fr/wp-content/uploads/2024/08/2210.pdf",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.cmesmat.fr/maconnerie/facades/profiles-baguettes/3416855-rail-de-depart-en-aluminium-long-2-5m-x-larg-40mm.html",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "9 chevilles pour 2,5 m = une tous les 28 cm : cohérent avec les 30 cm du référentiel. Le 2 m n'a pas été retrouvé."
+    },
+    {
+      "id": "corniere_angle_ite",
+      "libelle": "Cornière d'angle PVC entoilée ITE : barre",
+      "avant": "barre 2,5 m (à vérifier)",
+      "valeur": "barre de 2,5 m, PVC-U perforé, maille 4 × 4, recouvrement de 10 cm avec le treillis",
+      "unite": "m",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.bigmat.fr/wp-content/uploads/2024/08/1017-1019-1022-1023-1028.pdf",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_959349.pdf",
+          "date": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "id": "treillis_ite",
+      "libelle": "Treillis d'armature ITE : rouleau et recouvrement",
+      "avant": "1,1 m²/m² ; rouleaux de 50 m² (format à vérifier)",
+      "valeur": "rouleau de 1 × 50 m (50 m²), maille 4 × 4 ; recouvrement 10 cm, 20 cm aux angles (Weber Strikotherm, Keim, Sievert)",
+      "unite": "m²/rouleau",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.strikolith.com/files/strikolith/2026-04/Strikotherm_Glasvezelweefsel_Fijn_fr.pdf",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://keim.com/documents/fr-FR/723/TM_Treillis_d_Armature_4x4_FR-FR_01.pdf",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Recouvrement 10 cm sur 1 m de large = 1,10 m²/m² : le ratio du référentiel est confirmé par calcul."
+    },
+    {
+      "id": "laine_roche_ite",
+      "libelle": "Laine de roche ITE Rockwool Ecorock : colis",
+      "avant": "à vérifier (Rockwool Ecorock / Knauf)",
+      "valeur": "1 200 × 600 mm ; 50 mm : 6 panneaux, 4,32 m² par colis ; 300 mm : 1 panneau, 0,72 m² ; Duo (double densité) et Mono",
+      "unite": "m²/colis",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://rockwool.com/siteassets/rw-f/telechargements/fiches-produits/rockwool_fp_ecorock_duo.pdf",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://bigmat.fr/wp-content/uploads/2024/08/rockwool_fp_ecorock_mono.pdf",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Colisage des épaisseurs intermédiaires (100 à 200 mm) dans la fiche, non lu dans l'extrait."
+    }
+  ],
+  "introuvable": [
+    "Chevillage ITE par zone de vent et hauteur (CPT 3035 V3) : texte CSTB non lu ; 7 / 10 chevilles/m² restent à vérifier.",
+    "Colis PSE blanc par épaisseur hors Hirsch Cellomur (déjà sourcé dans le référentiel).",
+    "Armature I4 (voile non tissé) : format du rouleau.",
+    "Tollens Hydro Façade : seau de 15 L pour cette référence.",
+    "Épaisseurs de l'enduit chaux 3 couches (NF DTU 26.1) : texte non lu.",
+    "Ratios de chantier : pertes 5 % / 8 %, 1 fenêtre pour 12 m², tableaux de 0,20 m, antimousse S/5 L, hydrofuge S/3 L, polyane 4 × 25 m pour 150 m²."
+  ]
+}

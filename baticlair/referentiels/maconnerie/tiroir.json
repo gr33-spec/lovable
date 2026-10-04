@@ -1,0 +1,254 @@
+{
+  "metier": {
+    "code": "maconnerie",
+    "nom": "Maçonnerie - gros œuvre",
+    "version": "1.1.0-recherche",
+    "maturite": "alpha",
+    "active": false,
+    "referentiel": "docs/referentiels/maconnerie.md",
+    "axes_de_variation": { "geographie": "fort", "epoque_bati": "moyen", "type_batiment": "moyen", "neuf_renovation": "fort", "gamme": "faible" }
+  },
+  "valeurs": [
+    {
+      "id": "ciment_sac_35_palette",
+      "libelle": "Ciment CEM II/B 32,5, sac de 35 kg : sacs par palette",
+      "avant": "palette 40 sacs (à vérifier)",
+      "valeur": 42,
+      "unite": "sacs/palette (1,47 t, 7 couches de 6)",
+      "statut": "source",
+      "sources": [
+        { "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_705063.pdf", "date": "2026-10-04" },
+        { "url": "https://www.eqiom.com/sites/default/files/2025-03/fiche-produit-multi-usages.pdf", "date": "2026-10-04" }
+      ],
+      "ecart": "Le référentiel disait 40 sacs ; les fiches disent 42. Le sac de 25 kg existe en palette de 64 (1,6 t)."
+    },
+    {
+      "id": "ciment_sac_25_palette",
+      "libelle": "Ciment CEM II/B 32,5, sac de 25 kg : sacs par palette",
+      "avant": "non renseigné",
+      "valeur": 64,
+      "unite": "sacs/palette (1,6 t)",
+      "statut": "source",
+      "sources": [{ "url": "https://www.eqiom.com/sites/default/files/2025-03/fiche-produit-multi-usages.pdf", "date": "2026-10-04" }]
+    },
+    {
+      "id": "chaux_nhl35_sac",
+      "libelle": "Chaux hydraulique naturelle NHL 3,5 (Saint-Astier Chaux pure blanche) : sac et palette",
+      "avant": "sac 35 kg (à vérifier)",
+      "valeur": "sac 35 kg, 45 sacs par palette (1,575 t) ; existe aussi en sac de 25 kg",
+      "unite": "sac",
+      "statut": "source",
+      "sources": [
+        { "url": "https://www.batiweb.com/produit-btp/chaux-pure-blanche-lc-nhl-3-5-chaux-hydraulique-naturelle-pure-sac-de-35-kg-341855", "date": "2026-10-04" },
+        { "url": "https://www.batiproduits.com/amp/fiche/produits/chaux-pure-blanche-lc-nhl-3-5-chaux-hydr-p358979015.html", "date": "2026-10-04", "note": "version sac de 25 kg" }
+      ]
+    },
+    {
+      "id": "mortier_chantier_blocs_20",
+      "libelle": "Mortier fait sur chantier, mur en blocs creux de 20 : volume par m²",
+      "avant": "18 L/m² (à valider)",
+      "valeur": null,
+      "unite": "L/m²",
+      "statut": "contradiction",
+      "sources": [
+        { "url": "https://www.vpi.vicat.fr/content/download/11500/96933/version/8/file/FT+MORTIER+PRO+300+_+06.2023.pdf", "date": "2026-10-04", "note": "mortier prêt à gâcher : 35 kg/m² de mur (joints horizontaux), + 23 kg/m² de joints verticaux" },
+        { "url": "https://cdn.chausson.fr/catalog-document/7d220cc2-1dcd-4fa4-90b0-93a8cf6f6bdd/sacamat-ft-mortier-20professionnel-2025kg.pdf", "date": "2026-10-04", "note": "25 kg de mortier sec = 0,5 m² de parpaings 20×20×50 ; 1 sac de 25 kg = 13 L de mortier, soit ≈ 26 L/m²" }
+      ],
+      "ecart": "Le référentiel retient 18 L/m² ; Vicat 35 kg/m² (≈ 18 L/m² si 1 sac de 35 kg donne ≈ 18 L) ; la fiche Sacamat conduit à ≈ 26 L/m². Écart de 45 % non tranché : à faire trancher par un maçon (ratio 2)."
+    },
+    {
+      "id": "mortier_montage_dosage",
+      "libelle": "Mortier de montage fait sur chantier : dosage par m³",
+      "avant": "ciment 350 kg/m³ ; sable ≈ 1 m³ (≈ 1,5 t)",
+      "valeur": "350 kg de ciment + 1 000 kg de sable 0/4 + ≈ 175 L d'eau par m³ ; règle de terrain 1 volume de ciment pour 3 de sable",
+      "unite": "par m³ de mortier",
+      "statut": "contradiction",
+      "sources": [{ "url": "https://travail-industrie.com/outils/calculateur-dosage-mortier", "date": "2026-10-04" }],
+      "ecart": "Le référentiel compte ≈ 1,5 t de sable par m³ de mortier, la source 1,0 t. Source secondaire (calculateur), pas une fiche fabricant."
+    },
+    {
+      "id": "beton_350_granulats",
+      "libelle": "Béton fait au sac de ciment, dosé à 350 kg/m³ : sable et gravier",
+      "avant": "sable 0,40 m³ + gravier 0,80 m³ (à valider)",
+      "valeur": "sable 400 L (≈ 750 kg) + gravier 800 L (≈ 1 150 kg) + eau 175 L",
+      "unite": "par m³ de béton",
+      "statut": "source",
+      "sources": [{ "url": "https://www.forumconstruire.com/guides/guide-guide-beton/dosage-beton.php", "date": "2026-10-04", "note": "guide de dosage, source secondaire" }],
+      "ecart": "Concorde avec le référentiel ; source secondaire, à confirmer par une fiche cimentier."
+    },
+    {
+      "id": "bloc_bancher_20",
+      "libelle": "Bloc à bancher de 20 (20 × 20 × 50) : poids, palette, béton de remplissage",
+      "avant": "≈ 18 kg, ≈ 60 par palette (à vérifier)",
+      "valeur": "19 kg ; 60 blocs par palette (48 courants + 12 fermés) ; ≈ 115 L de béton par m² de mur",
+      "unite": "kg, u/palette, L/m²",
+      "statut": "source",
+      "sources": [{ "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1220740.pdf", "date": "2026-10-04", "note": "bloc à bancher MBR 20 rectifié" }],
+      "ecart": "Le remplissage de 115 L/m² vient d'un modèle comparable dans les mêmes résultats ; à confirmer sur la fiche du bloc retenu."
+    },
+    {
+      "id": "brique_creuse_20_maconner",
+      "libelle": "Brique creuse traditionnelle à maçonner 20 × 20 × 50",
+      "avant": "10 u/m², ≈ 15 kg (à vérifier)",
+      "valeur": "12,5 kg ; 9,2 u/m² ; 80 par palette (Terreal BCR02, Lasbordes)",
+      "unite": "kg, u/m², u/palette",
+      "statut": "source",
+      "sources": [{ "url": "https://www.cmesmat.fr/maconnerie/briques/briques-creuses/3888706-calibric-angle-universel-20x31-4x50-sur-palette-recyclable-terreal-1-lasbordes.html", "date": "2026-10-04" }],
+      "ecart": "Le référentiel supposait 10 u/m² et 15 kg ; la fiche Terreal donne 9,2 u/m² et 12,5 kg."
+    },
+    {
+      "id": "brique_parement_u_m2",
+      "libelle": "Brique de parement 22 × 10,5 × 6,5 : briques par m²",
+      "avant": "≈ 60 par paroi de 10,5 (à vérifier)",
+      "valeur": "58 à 63 u/m² (joint courant) ; Wienerberger Terre Lisse : 76 u/m² à joint nul, 62 à 68 u/m² avec joints de 10 à 15 mm",
+      "unite": "u/m²",
+      "statut": "source",
+      "sources": [{ "url": "https://www.batiproduits.com/amp/fiche/produits/brique-de-facade-a-parement-fini-lisse-brique-p69314143.html", "date": "2026-10-04" }]
+    },
+    {
+      "id": "mortier_joint_mince_porotherm",
+      "libelle": "Mortier joint mince Porotherm : sac et consommation",
+      "avant": "sac 25 kg (à vérifier)",
+      "valeur": "sac de 25 kg ; 1,4 kg/m²/mm ; R25 à joint de 1 mm : ≈ 2,1 kg/m², ≈ 0,5 sac par palette",
+      "unite": "sac 25 kg",
+      "statut": "source",
+      "sources": [
+        { "url": "https://cdn.chausson.fr/catalog-document/18798d1e-e071-4308-8eea-cf429fddc737/fiche-produit-porotherm-r25.pdf", "date": "2026-10-04" },
+        { "url": "https://documentacion.generadordeprecios.info/documentaciontecnica/wienerberger/wienerb_poro_r25.pdf", "date": "2026-10-04" }
+      ]
+    },
+    {
+      "id": "mortier_colle_ytong_palette",
+      "libelle": "Mortier-colle Ytong Fix I, sac de 25 kg : sacs par palette",
+      "avant": "(à vérifier)",
+      "valeur": 40,
+      "unite": "sacs/palette",
+      "statut": "source",
+      "sources": [{ "url": "https://www.batiproduits.com/amp/fiche/produits/ytong-fix-i-mortier-colle-pour-murs-p444362637.html", "date": "2026-10-04" }]
+    },
+    {
+      "id": "sable_masse_volumique",
+      "libelle": "Sable 0/4 sec : masse volumique en vrac",
+      "avant": "≈ 1,6 t/m³ (à vérifier)",
+      "valeur": null,
+      "unite": "t/m³",
+      "statut": "contradiction",
+      "sources": [
+        { "url": "https://macalculatriceenligne.com/construction/calcul-m3-sable-tonne/", "date": "2026-10-04", "note": "1,4 t/m³ sec (1,4 à 1,5), jusqu'à 2,0 t/m³ mouillé" },
+        { "url": "https://www.synonyme-du-mot.com/les-articles/quel-est-le-volume-dune-tonne-de-sable", "date": "2026-10-04", "note": "1,6 t/m³" }
+      ],
+      "ecart": "1,4 contre 1,6 t/m³ selon la source ; aucune fiche carrière trouvée. Big-bag : de 1 à 1,5 t selon l'humidité, aussi en ½ m³ (Bricomarché)."
+    },
+    {
+      "id": "herisson_densite",
+      "libelle": "Hérisson 20/40 : épaisseur et masse volumique",
+      "avant": "20 cm, 1,6 t/m³ (à valider)",
+      "valeur": "épaisseur ≈ 20 cm (Cemex) ; big-bag 1 m³ de 20/40 = 1 500 kg, soit 1,5 t/m³",
+      "unite": "cm, t/m³",
+      "statut": "contradiction",
+      "sources": [
+        { "url": "https://www.cemex.fr/fiches-techniques/cailloux-de-drainage", "date": "2026-10-04", "note": "hérisson 20/40 ou 40/63 sur environ 20 cm" },
+        { "url": "https://www.castorama.fr/bigbag-cailloux-pour-beton-leger-et-isolant-20-40-1-m-/3454976607997_CAFR.prd", "date": "2026-10-04", "note": "1 m³ = 1 500 kg" }
+      ],
+      "ecart": "Épaisseur confirmée ; masse 1,5 t/m³ contre 1,6 au référentiel (≈ 6 %)."
+    },
+    {
+      "id": "polyane_rouleau",
+      "libelle": "Film polyéthylène sous dallage 150 µm : rouleau",
+      "avant": "rouleau 4 × 25 m = 100 m² (à vérifier)",
+      "valeur": "rouleau 4 × 25 m (100 m²) ; aussi 6 × 25 m et 4 × 30 m ; 150 µm minimum (DTU 13.3, 26.2, 51.2)",
+      "unite": "rouleau",
+      "statut": "source",
+      "sources": [
+        { "url": "https://www.bricodepot.fr/p/3585150014437/rouleau-de-film-sous-dallage-tri-couche-150-microns-4-x-25-m", "date": "2026-10-04" },
+        { "url": "https://www.bricomarche.com/p/film-d-etancheite-sous-dalle-polyethylene-6x25m/3396041120003", "date": "2026-10-04" }
+      ]
+    },
+    {
+      "id": "chainage_prefa_element",
+      "libelle": "Armature de chaînage préfabriquée 4 HA10 : longueur d'élément",
+      "avant": "élément 6 m (à vérifier)",
+      "valeur": "6 m ; cadres HA5 tous les 15 cm ; sections 8 × 12 ou 15 × 15",
+      "unite": "élément",
+      "statut": "source",
+      "sources": [{ "url": "https://www.balitrand.fr/product/export_pdf/code_article/015.850", "date": "2026-10-04" }]
+    },
+    {
+      "id": "chainage_recouvrement",
+      "libelle": "Recouvrement des armatures de chaînage",
+      "avant": "0,50 m (à valider)",
+      "valeur": "50 diamètres, soit 50 cm en HA10",
+      "unite": "m",
+      "statut": "source",
+      "sources": [{ "url": "https://www.forumconstruire.com/construire/topic-205274.php", "date": "2026-10-04", "note": "forum, source faible" }],
+      "ecart": "Concorde ; source faible (forum), à confirmer sur le NF DTU 20.1 ou l'Eurocode 2."
+    },
+    {
+      "id": "treillis_recouvrement",
+      "libelle": "Treillis soudé : recouvrement et surface utile",
+      "avant": "ST25C 6,00 × 2,40 : 11,8 m² utiles (à valider)",
+      "valeur": "recouvrement d'au moins une maille (15 cm) dans le sens de pose ; ADETS ST25CS 3,00 × 2,40 : recouvrement 450 mm, utile 2,55 × 1,95 = 4,97 m²",
+      "unite": "m²",
+      "statut": "contradiction",
+      "sources": [{ "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1772770.pdf", "date": "2026-10-04" }],
+      "ecart": "Avec un recouvrement de 450 mm dans les deux sens (ADETS), un 6,00 × 2,40 donne 5,55 × 1,95 = 10,8 m² utiles ; avec une maille (15 cm), 5,85 × 2,25 = 13,2 m². Le référentiel retient 11,8 m² entre les deux."
+    },
+    {
+      "id": "hydrofuge_dosage",
+      "libelle": "Hydrofuge de masse : dose par sac de ciment",
+      "avant": "1 L par sac de 35 kg (à vérifier)",
+      "valeur": "0,5 L par sac de 25 à 35 kg (Sika SikaCem Hydrofuge) ; dose de 0,5 L",
+      "unite": "L/sac",
+      "statut": "contradiction",
+      "sources": [{ "url": "https://media.weldom.fr/v2/media/catalog/product/doc_qualite/ims/IMS_8034849.pdf", "date": "2026-10-04" }],
+      "ecart": "La fiche Sika donne la moitié du référentiel : 0,5 L par sac au lieu de 1 L."
+    },
+    {
+      "id": "cales_beton_m2",
+      "libelle": "Cales à béton sous treillis : nombre par m² et sachet",
+      "avant": "4 par m² (à valider) ; sachet de 100 (à vérifier)",
+      "valeur": "0,8 à 1,5 cale/m² selon la rigidité de l'armature ; 3/m² sans cahier des charges ; sachets de 100",
+      "unite": "u/m²",
+      "statut": "contradiction",
+      "sources": [
+        { "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/2000023795097-rRiylqcV4I.pdf", "date": "2026-10-04" },
+        { "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1861152.pdf", "date": "2026-10-04" }
+      ],
+      "ecart": "Le référentiel retient 4/m² ; les fiches donnent 3/m² au plus. Sachet de 100 confirmé."
+    },
+    {
+      "id": "bpe_minimum",
+      "libelle": "Béton prêt à l'emploi : minimum de livraison",
+      "avant": "1 m³ (à vérifier selon centrale)",
+      "valeur": "2 à 3 m³ minimum chez certaines centrales, d'autres livrent moins avec une majoration « petite quantité » ; au-delà de 3 m³ la toupie s'impose",
+      "unite": "m³",
+      "statut": "contradiction",
+      "sources": [
+        { "url": "https://conseils.hellopro.fr/faut-il-internaliser-les-petites-quantites-de-beton-ou-rester-dependant-des-livraisons-externes-4929.html", "date": "2026-10-04" },
+        { "url": "https://betons.heidelbergmaterials.fr/sites/default/files/2024-06/2024_CGV_Unibeton_0.pdf", "date": "2026-10-04", "note": "CGV d'une centrale : majoration petite quantité" }
+      ],
+      "ecart": "Le seuil de 1 m³ du référentiel est bas : le minimum varie de 1 à 3 m³ selon la centrale. À régler par fournisseur."
+    },
+    {
+      "id": "hors_gel_profondeur",
+      "libelle": "Profondeur hors gel des fondations",
+      "avant": "50 cm, jusqu'à 90 cm et plus (à vérifier par département)",
+      "valeur": "zone 1 (gel faible) 50 cm ; zone 2 80 cm ; zone 3 (montagne) 100 cm ; + 5 cm par tranche de 200 m au-dessus de 150 m d'altitude",
+      "unite": "cm",
+      "statut": "source",
+      "sources": [
+        { "url": "https://www.obat.fr/blog/profondeur-hors-gel-calcul/", "date": "2026-10-04" },
+        { "url": "https://www.capeb.fr/www/capeb/media//herault/document/calepin%20-%20fondations%20MI.pdf", "date": "2026-10-04" }
+      ],
+      "ecart": "Le NF DTU 13.1 (2019) remplace le DTU 13.11 cité au référentiel. La carte par département reste à saisir."
+    }
+  ],
+  "introuvable": [
+    "Bloc creux de 20 : nombre de blocs par palette autre que 60 ou 70 selon l'usine (pas de chiffre négoce unique).",
+    "Treillis PAF / AF : surface utile retenue par les négoces.",
+    "Huile de décoffrage : rendement par m² (aucune fiche trouvée).",
+    "Baguettes d'angle d'enduit : longueur de barre (2,50 ou 3 m) non tranchée.",
+    "Grilles de ventilation de vide sanitaire : 1 tous les 4 m, aucune source réglementaire trouvée.",
+    "Part d'ouvertures dans une façade brute (15 %) : aucune source."
+  ]
+}

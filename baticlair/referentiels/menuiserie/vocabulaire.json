@@ -1,0 +1,18 @@
+{
+  "metier": "menuiserie",
+  "ouvrages": {
+    "fen_neuf_applique_int": { "expressions": ["fenêtre", "fenêtre pvc", "fenêtre alu", "ouvrant à la française", "oscillo-battant", "châssis", "porte-fenêtre", "pose en applique", "pose neuf", "tapée"] },
+    "fen_reno_dormant": { "expressions": ["pose en rénovation", "pose sur dormant existant", "pose réno"] },
+    "fen_depose_totale": { "expressions": ["dépose totale", "dépose complète", "pose en tunnel", "pose en feuillure"] },
+    "baie_coulissante": { "expressions": ["baie coulissante", "coulissant 2 rails", "galandage alu"] },
+    "porte_entree": { "expressions": ["porte d'entrée", "porte de service"] },
+    "volet_roulant_reno": { "expressions": ["volet roulant", "vr réno", "vr monobloc"] },
+    "volet_roulant_bloc_baie": { "expressions": ["vr intégré", "bloc-baie", "coffre tunnel"] },
+    "volet_battant": { "expressions": ["volets battants", "persiennes", "volets à barres et écharpes", "volets niçois"] },
+    "porte_garage": { "expressions": ["porte de garage", "porte sectionnelle", "porte enroulable", "porte basculante"] },
+    "parquet_flottant": { "expressions": ["parquet flottant", "contrecollé clipsable", "stratifié"] },
+    "parquet_colle": { "expressions": ["parquet collé"] },
+    "parquet_cloue": { "expressions": ["parquet cloué", "parquet massif sur lambourdes"] }
+  },
+  "renvois": { "bloc-porte intérieur, plinthes, lambris, placards": "menuiserie-interieure-agencement", "terrasse bois": "terrasse-bois-composite" }
+}

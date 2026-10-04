@@ -1,0 +1,32 @@
+{
+  "metier": "plomberie",
+  "ouvrages": {
+    "alimentation_ef_ec": { "expressions": ["alimentation", "distribution ef/ec", "multicouche", "per gainé", "nourrice", "pieuvre", "collecteur sanitaire", "efs", "ecs"], "anciens_codes": ["PL-01", "PL-11"] },
+    "alimentation_generale": { "expressions": ["alimentation générale", "depuis compteur", "vanne générale", "réducteur de pression"], "anciens_codes": ["PL-12"] },
+    "evacuation_eu_ev": { "expressions": ["évacuation", "évacuations pvc", "eu/ev", "eaux usées", "eaux vannes", "tout-à-l'égout"], "anciens_codes": ["PL-02"] },
+    "chute": { "expressions": ["chute", "colonne ev", "tampon de visite", "ventilation primaire", "clapet aérateur"], "anciens_codes": ["PL-13"] },
+    "wc": { "expressions": ["wc à poser", "wc au sol", "cuvette", "pipe wc", "manchon wc"], "anciens_codes": ["PL-03"] },
+    "wc_suspendu": { "expressions": ["wc suspendu", "bâti-support", "bâti autoportant", "geberit", "grohe rapid", "plaque de commande"], "anciens_codes": ["PL-04"] },
+    "lavabo": { "expressions": ["lavabo", "vasque", "lave-mains", "bidet", "meuble vasque"], "anciens_codes": ["PL-05"] },
+    "douche": { "expressions": ["receveur", "douche à l'italienne", "douche de plain-pied", "caniveau de douche", "colonne de douche", "paroi de douche"], "anciens_codes": ["PL-06"] },
+    "baignoire": { "expressions": ["baignoire", "vidage", "tablier de baignoire", "bain-douche"], "anciens_codes": ["PL-07"] },
+    "evier_lv": { "expressions": ["évier", "lave-vaisselle", "robinet lv"], "anciens_codes": ["PL-08"] },
+    "lave_linge": { "expressions": ["lave-linge", "robinet machine", "attente machine"], "anciens_codes": ["PL-09"] },
+    "production_ecs": { "expressions": ["chauffe-eau", "cumulus", "ballon", "cet", "thermodynamique", "groupe de sécurité"], "anciens_codes": ["PL-10"] },
+    "robinet_exterieur": { "expressions": ["robinet extérieur", "robinet de puisage", "hors-gel"], "anciens_codes": ["PL-15"] },
+    "depose_reprise": { "expressions": ["dépose", "remplacement plomb", "reprise sur existant"], "anciens_codes": ["PL-14"] },
+    "generateur_chauffage": { "expressions": ["chaudière gaz", "chaudière condensation", "chaudière fioul"], "exclusions": ["pac air/eau", "pompe à chaleur"], "renvoi_si_exclusion": "chauffage-ventilation" },
+    "fumisterie": { "expressions": ["ventouse", "sortie toiture chaudière", "conduit 3ce", "tubage"] },
+    "emetteur_radiateur": { "expressions": ["radiateur acier", "type 22", "sèche-serviettes eau chaude", "robinet thermostatique", "té de réglage"] },
+    "distribution_chauffage": { "expressions": ["réseau chauffage", "bitube", "monotube", "collecteur chauffage"] },
+    "plancher_chauffant": { "expressions": ["plancher chauffant", "pcbt", "plancher rafraîchissant"] },
+    "gaz": { "expressions": ["alimentation gaz", "robinet de coupure gaz", "flexible gaz", "roai"] }
+  },
+  "renvois": {
+    "natte d'étanchéité, forme de pente de douche": "carrelage",
+    "pompe à chaleur, vmc, climatisation": "chauffage-ventilation",
+    "radiateur électrique, alimentation électrique du chauffe-eau": "electricite",
+    "gouttières, descentes, eaux pluviales": "couverture"
+  },
+  "note": "Fusion des vocabulaires de plomberie.md (codes PL-01 à PL-15, gardés en anciens_codes) et de plombier-chauffagiste.md (codes en clair, retenus)."
+}

@@ -1,0 +1,52 @@
+{
+  "metier": {
+    "code": "plafonds-suspendus",
+    "nom": "Plafonds suspendus (plaques sur ossature, dalles sur T24)",
+    "version": "0.2.0-recherche",
+    "maturite": "alpha",
+    "active": false,
+    "referentiel": "docs/referentiels/plafonds-suspendus.md"
+  },
+  "valeurs": [
+    {
+      "id": "rockfon_carton_600",
+      "libelle": "Dalle Rockfon 600 × 600 : carton",
+      "avant": "carton de 16 dalles = 5,76 m² (Tropic 15 mm, fiche UK)",
+      "valeur": "Tropic E15 600 × 600 × 15 : 16 dalles = 5,76 m² ; Arctic 600 × 600 × 15 : carton de 11,52 m² (32 dalles)",
+      "unite": "m²/carton",
+      "statut": "contradiction",
+      "sources": [
+        {
+          "url": "https://www.ccfltd.co.uk/Rockfon-Tropic-E15S8-600-x-600-x-15mm/p/564118",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://adammateriaux.be/en/rockfon-arctic-600x600x15mm-090-a15-24-rockwool-rf-carton-1152m2-594",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Le carton dépend de la gamme (16 ou 32 dalles) : à prendre par référence."
+    },
+    {
+      "id": "ttpc_bande_placomarine",
+      "libelle": "Vis TTPC, bande à joint, Placomarine (voir plâtrerie)",
+      "avant": "boîte 1 000 ; rouleau 150 m × 52 mm ; pile Placomarine (à vérifier)",
+      "valeur": "voir referentiels/platrerie-isolation/tiroir.json : vis TTPC boîte de 1 000, bande 150 m × 52 mm, Placomarine pile de 50",
+      "unite": "—",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.placo.fr/comment-creer-un-plafond-suspendu-sur-ossature-suspentes-et-fourrures",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Mêmes articles que la plâtrerie : sourcés une seule fois."
+    }
+  ],
+  "introuvable": [
+    "Suspentes : boîtes de 50 ou 100 par référence.",
+    "Cornière Stil CR2 : botte.",
+    "Dalle 1 200 × 600 : carton.",
+    "Enduit prêt à l'emploi : seau de 20 ou 25 kg."
+  ]
+}

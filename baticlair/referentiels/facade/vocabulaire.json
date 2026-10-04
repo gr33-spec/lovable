@@ -1,0 +1,17 @@
+{
+  "metier": "facade",
+  "ouvrages": {
+    "enduit_monocouche": { "expressions": ["monocouche", "oc1", "oc2", "oc3", "enduit gratté", "enduit taloché", "enduit de façade", "projection mécanique"] },
+    "enduit_chaux": { "expressions": ["enduit chaux", "chaux nhl", "gobetis", "corps d'enduit", "enduit 3 couches", "rejointoiement", "pierre vue"] },
+    "ite_enduit_mince": { "expressions": ["ite", "isolation par l'extérieur", "etics", "pse", "polystyrène graphité", "sous-enduit armé", "ite sous enduit"], "exclusions": ["sous bardage"] },
+    "rpe_finition": { "expressions": ["rpe", "crépi", "revêtement plastique épais", "enduit organique", "finition siloxane", "enduit silicate"] },
+    "peinture_facade": { "expressions": ["peinture façade", "pliolite", "siloxane", "d2", "d3"] },
+    "impermeabilite_i1_i4": { "expressions": ["i1", "i2", "i3", "i4", "imperméabilité", "film semi-épais", "entoilage"] },
+    "nettoyage_traitement": { "expressions": ["nettoyage haute pression", "démoussage", "antimousse", "fongicide", "algicide", "hydrofuge façade"] },
+    "reparation_support": { "expressions": ["piquage", "dégrossissage", "reprise enduit", "traitement des aciers", "épaufrures", "réparation béton"] },
+    "traitement_fissures": { "expressions": ["fissures", "microfissures", "pontage", "bande d'entoilage"] },
+    "habillage_appuis_profiles": { "expressions": ["appui", "bavette alu", "profilé de départ", "baguette d'angle", "joint de dilatation"] }
+  },
+  "renvois": { "ite sous bardage, bardage": "bardage", "couvertine d'acrotère": "couverture", "peinture intérieure": "peinture", "échafaudage": "hors tiroir (location)" },
+  "note": "« crépi » désigne souvent un monocouche dans les devis : ambigu entre enduit_monocouche et rpe_finition, à trancher par question."
+}

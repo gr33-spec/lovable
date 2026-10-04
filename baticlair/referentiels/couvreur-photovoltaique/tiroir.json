@@ -1,0 +1,37 @@
+{
+  "metier": {
+    "code": "couvreur-photovoltaique",
+    "nom": "Photovoltaïque en toiture (surimposition)",
+    "version": "0.2.0-recherche",
+    "maturite": "alpha",
+    "active": false,
+    "referentiel": "docs/referentiels/couvreur-photovoltaique.md"
+  },
+  "valeurs": [
+    {
+      "id": "k2_singlerail",
+      "libelle": "Rail K2 SingleRail 36 : longueur et colisage",
+      "avant": "longueur de rail à vérifier",
+      "valeur": "SingleRail 36 : 4,40 m (3,39 kg), aussi 2,40 m et 4,80 m ; vente par 20, colis de 100 ; référence 4,40 m remplacée par 2004393",
+      "unite": "m",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://catalogue.k2-systems.com/singlerail-36/2003222",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.123elec.com/k2-systems-rail-de-fixation-2-4m-singlerail-36-2003458.html",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Le rail 4,40 m d'origine est arrêté : la référence de remplacement est à reprendre dans le catalogue."
+    }
+  ],
+  "introuvable": [
+    "Crochets K2 (SingleHook 3S, 4S, FlatTile, Slate) : conditionnement par boîte.",
+    "Brides K2 MC / EC : sachets.",
+    "Jeu entre modules (0,02 m) selon la bride.",
+    "Notice des modules Jinko 425 : longueur de câble et connecteurs."
+  ]
+}

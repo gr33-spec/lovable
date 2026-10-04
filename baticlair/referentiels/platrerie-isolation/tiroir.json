@@ -1,0 +1,178 @@
+{
+  "metier": {
+    "code": "platrerie-isolation",
+    "nom": "Plâtrerie - isolation intérieure (cloisons, doublages, plafonds, combles)",
+    "version": "0.2.0-recherche",
+    "maturite": "alpha",
+    "active": false,
+    "referentiels": ["docs/referentiels/platrerie-isolation.md", "docs/referentiels/isolation.md", "docs/referentiels/isolation-des-combles.md"],
+    "axes_de_variation": { "geographie": "faible", "epoque_bati": "moyen", "type_batiment": "moyen", "neuf_renovation": "fort", "gamme": "moyen" },
+    "note": "Le moteur porte déjà un référentiel plâtrerie minimal (PLATRERIE_REFERENTIAL, cloison 72/48, brouillon) : ce tiroir ne le modifie pas."
+  },
+  "fusion": {
+    "de": ["platrerie-isolation", "isolation", "isolation-des-combles"],
+    "regle": "Un seul tiroir : les ouvrages des trois documents sont mis en commun (CLO, DBL-COL, DBL-MON, DBL-APP, PLF-SUS, PLF-RAM, ISO-SOU, ISO-ROU, COF, plus ITE sous enduit, ITE sous bardage et sous-face de plancher bas du document « isolation »). L'ITE renvoie au tiroir façade, l'ITE sous bardage au tiroir bardage.",
+    "ecarts_entre_documents": [
+      {
+        "sujet": "Comblissimo, sacs pour 100 m²",
+        "platrerie-isolation": "R5 16, R6 19, R7 22, R8 25, R10 31 (dépliant arrondi)",
+        "isolation et isolation-des-combles": "R5 15,4, R6 18,5, R7 21,6, R8 24,7, R10 30,8",
+        "tranche": "non ; la fiche Isover consultée confirme la seconde série (voir valeur comblissimo_table)"
+      },
+      {
+        "sujet": "Rouleau de rampant par défaut",
+        "isolation-des-combles": "Isoconfort 32 revêtu kraft 200 mm, R 6,25, 2,64 m²/rouleau",
+        "isolation": "Isoconfort 35 revêtu kraft 220 mm, R 6,25, 3,36 m²/rouleau",
+        "tranche": "non ; deux produits Isover réels, à choisir par l'artisan"
+      },
+      {
+        "sujet": "Ouate de cellulose",
+        "isolation-des-combles": "Igloo Ouattitude 10 kg : 88 sacs/100 m² à R 7",
+        "isolation": "Soprema Thermacell Cristal 10 kg : 70 sacs/100 m² à R 7",
+        "tranche": "non ; deux produits, deux tables ACERMI"
+      },
+      {
+        "sujet": "Suspentes F530 par m² de plafond",
+        "platrerie-isolation": "1,8 (ratio Placo) ou 1,56 (solution plancher bois)",
+        "tranche": "non"
+      }
+    ]
+  },
+  "valeurs": [
+    {
+      "id": "vis_ttpc25_boite",
+      "libelle": "Vis TTPC 25 : boîte et consommation",
+      "avant": "boîte de 1 000 (Placo : 1 500 existe) ; 10 à 30 vis/m² selon l'ouvrage",
+      "valeur": "boîte de 1 000 ; Semin annonce 14 vis/m² et 4 par ml",
+      "unite": "vis",
+      "statut": "contradiction",
+      "sources": [{ "url": "https://www.bricoman.fr/produits/vis-auto-perceuse-semin-pour-fixation-des-plaques-de-platre-sur-ossature-interieur-25-mm-x-3-5-mm-boite-de-1000-pieces-90349155.html", "date": "2026-10-04" }],
+      "ecart": "Boîte de 1 000 confirmée. 14 vis/m² (Semin, sans dire l'ouvrage) contre 10 (plafond, Placo), 11 (doublage), 15 (plafond suspendu), 22 à 30 (cloison) dans les référentiels."
+    },
+    {
+      "id": "bande_joint_rouleau",
+      "libelle": "Bande à joint papier Placo : rouleau et consommation",
+      "avant": "rouleau 150 m ; 52 mm (à vérifier) ; ≈ 1 rouleau pour 100 m²",
+      "valeur": "rouleau de 150 m, largeur 52 mm, papier 140 g/m² ; consommation moyenne 1,4 ml/m² ; carton de 10 rouleaux, 49 cartons par palette",
+      "unite": "rouleau",
+      "statut": "source",
+      "sources": [
+        { "url": "https://www.bricomarche.com/p/bande-a-joint-papier-150m/3496250212763", "date": "2026-10-04" },
+        { "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3496250212763-70gYhIjPy4.pdf", "date": "2026-10-04" }
+      ]
+    },
+    {
+      "id": "enduit_pret_emploi",
+      "libelle": "Enduit à joint prêt à l'emploi (Placomix) : seau et consommation",
+      "avant": "seau 25 kg (à vérifier, 20 et 25 kg selon gamme) ; 0,47 kg/m²",
+      "valeur": "Placomix seau 25 kg : 470 g/m² minimum ; Placomix Pro seau 22 kg : 525 g/m² (≈ 45 m² par seau) ; Pro Allégé seau 17 kg",
+      "unite": "kg/m²",
+      "statut": "source",
+      "sources": [
+        { "url": "https://www.bricomarche.com/p/enduit-a-joint-a-sechage-pate-placomix-25kg/3496250007819", "date": "2026-10-04" },
+        { "url": "https://www.placo.fr/documents/fiche-technique/fichetechnique-placomix-pro-seau-22kg.pdf", "date": "2026-10-04" }
+      ],
+      "ecart": "Le seau de 20 kg cité au référentiel n'existe pas dans les fiches trouvées : 25, 22 ou 17 kg."
+    },
+    {
+      "id": "comblissimo_table",
+      "libelle": "Comblissimo (laine de verre soufflée) : sacs minimum pour 100 m²",
+      "avant": "deux tables différentes selon le document (voir fusion)",
+      "valeur": { "R5": 15.4, "R8": 24.7, "R10": 30.8, "R14": 43.2, "sac_kg": 17.3, "sacs_par_palette": 36 },
+      "unite": "sacs/100 m²",
+      "statut": "source",
+      "sources": [
+        { "url": "https://www.isover.fr/download-documents/fiche-technique/fichetechnique-comblissimo.pdf", "date": "2026-10-04" },
+        { "url": "https://www.isover.fr/documents/acermi/07-d-018-474-26-certif-comblissimo.pdf", "date": "2026-10-04", "note": "certificat ACERMI 07/D/18/474" }
+      ],
+      "ecart": "Confirme la table des documents « isolation » et « isolation des combles » ; le dépliant arrondi du document « plâtrerie-isolation » (16 / 19 / 25 / 31) est plus ancien."
+    },
+    {
+      "id": "ibr_nu",
+      "libelle": "Isover IBR nu (2e couche croisée en combles perdus) : références",
+      "avant": "références IBR nu à vérifier ; couple par défaut 160 kraft + 120 nu pour R 7",
+      "valeur": "IBR nu 100 mm : R 2,5, 1,20 × 8,00 m (9,6 m²) ; IBR nu 200 mm : R 5,0, 1,20 × 4,50 m (5,4 m²) ; Isover propose 200 + 100 mm pour R 7,5 ; λ 0,040",
+      "unite": "rouleau",
+      "statut": "contradiction",
+      "sources": [{ "url": "https://www.isover.fr/documents/fiche-technique/fichetechnique-ibr-nu.pdf", "date": "2026-10-04", "note": "fiche Isover du 25/03/26" }],
+      "ecart": "Le couple 160 + 120 mm du référentiel n'existe pas en IBR nu 120 mm dans la fiche trouvée ; Isover conseille 200 + 100 mm (R 7,5)."
+    },
+    {
+      "id": "integra2_boite",
+      "libelle": "Suspente Intégra 2 : boîte et nombre par m²",
+      "avant": "boîte de 50 (à vérifier) ; 2,5/m² (2 à 3)",
+      "valeur": "boîtes de 50 en grande surface, 53 annoncées par la fiche ; 1,5 à 3 suspentes/m²",
+      "unite": "suspentes",
+      "statut": "contradiction",
+      "sources": [
+        { "url": "https://www.batiproduits.com/amp/fiche/produits/suspente-pour-fixation-de-systeme-isolant-en-comb-p68891958.html", "date": "2026-10-04", "note": "boîte de 53, 1,5 à 3/m²" },
+        { "url": "https://www.leroymerlin.fr/produits/boite-de-50-suspentes-integra2-160-200mm-pour-combles-amenages-plafonds-isover-68273373.html", "date": "2026-10-04", "note": "boîte de 50" }
+      ],
+      "ecart": "53 ou 50 par boîte selon la source ; fourchette 1,5 à 3/m² (le référentiel retient 2,5)."
+    },
+    {
+      "id": "placomarine_pile",
+      "libelle": "Placomarine BA13 (hydro H1) : pile et poids",
+      "avant": "pile à vérifier ; ≈ 10 kg/m²",
+      "valeur": "10 kg/m² ; pile de 50 plaques en 2,50 / 2,60 / 2,70 / 2,80 / 3,00 m ; plaque 2,50 m = 29,7 kg",
+      "unite": "plaques/pile",
+      "statut": "source",
+      "sources": [{ "url": "https://particuliers.placo.fr/documents/fiche-produit/ficheproduit-placomarine-ba-13.pdf", "date": "2026-10-04" }]
+    },
+    {
+      "id": "cheville_rail",
+      "libelle": "Fixation des rails : cheville à frapper",
+      "avant": "1 tous les 0,60 m ; boîte de 100 (à vérifier)",
+      "valeur": "chevilles à frapper Ø 6 × 40 mm en boîte de 100",
+      "unite": "boîte",
+      "statut": "source",
+      "sources": [{ "url": "https://www.bricodepot.fr/p/5059340428406/cheville-longue-a-frapper-6x40mm-nylon-acier-100pcs-pour-beton-brique-pierre", "date": "2026-10-04" }]
+    },
+    {
+      "id": "univercell_table",
+      "libelle": "Ouate Soprema UniverCell+ : sac, palette, sacs pour 100 m²",
+      "avant": "12,5 kg, 30 sacs/palette (selon Batiproduits) ; table à saisir",
+      "valeur": "sac de 12,5 kg ; 30 sacs par palette ; en soufflage (23 kg/m³) de 19 sacs/100 m² à R 2 jusqu'à 82 sacs/100 m² à R 9",
+      "unite": "sacs/100 m²",
+      "statut": "source",
+      "sources": [{ "url": "https://shop.adammateriaux.be/storage/products/4455/doc/fiche-technique-univercell-fr.pdf", "date": "2026-10-04" }],
+      "ecart": "Lignes intermédiaires de la table (R 5 à R 8) non lues dans l'extrait."
+    },
+    {
+      "id": "piges_soufflage",
+      "libelle": "Piges de repérage en soufflage",
+      "avant": "4 pour 100 m² (AQC) ; 1 pour 15 m² (à vérifier, document plâtrerie-isolation)",
+      "valeur": "4 piges minimum pour 100 m², graduation visible depuis la trappe",
+      "unite": "u",
+      "statut": "contradiction",
+      "sources": [{ "url": "https://cdn.chausson.fr/catalog-document/ab790469-d4c5-4e90-bf2d-dbf01f70983f/guide-bonnes-pratiques-soufflage-en-combles-ecima.pdf", "date": "2026-10-04", "note": "guide ECIMA" }],
+      "ecart": "Le guide confirme 4/100 m² (1 pour 25 m²) ; le document plâtrerie-isolation proposait 1 pour 15 m²."
+    },
+    {
+      "id": "supafil_table",
+      "libelle": "Knauf Supafil Loft 045 : table au-delà de R 8,5",
+      "avant": "R 9 et plus tronqués",
+      "valeur": null,
+      "unite": "sacs/100 m²",
+      "statut": "a_verifier",
+      "sources": [{ "url": "https://acermi.com/en/certified-insulation-products/certificate/04-d-016-378-27/", "date": "2026-10-04", "note": "certificat trouvé, lignes R 9 et plus non lisibles dans l'extrait" }]
+    },
+    {
+      "id": "montant_m70",
+      "libelle": "Montant Stil M70 : longueurs et poids",
+      "avant": "comme M48, à vérifier",
+      "valeur": null,
+      "unite": "barre",
+      "statut": "a_verifier",
+      "sources": [{ "url": "https://www.placo.fr/documents/fiche-technique/ficheproduit-montant-hydrostil-m-70-500h.pdf", "date": "2026-10-04", "note": "seul Hydrostil+ M70 trouvé : 0,73 kg/ml ; M100 en 2,49 / 2,59 / 2,99 / 3,99 m" }]
+    }
+  ],
+  "introuvable": [
+    "Montants Stil M70 et M90 standard : longueurs et poids (seuls Hydrostil M70 et M100 trouvés).",
+    "Appuis Optima 2 : 2/m² (Isover) contre ≈ 0,7/m² par la géométrie, non tranché.",
+    "Hauteur limite d'une contre-cloison M48 simple à 0,60 m.",
+    "Seuil d'entraxe 0,40 m en pièce carrelée (carreaux > 1 600 cm²).",
+    "Coefficients de chevêtre de fenêtre et de renfort de charge lourde.",
+    "Mastic de membrane : rendement par cartouche (6 ml calculés, aucune fiche)."
+  ]
+}
