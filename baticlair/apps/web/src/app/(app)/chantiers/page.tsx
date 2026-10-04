@@ -135,7 +135,7 @@ function ChantiersList() {
           <p className="text-[13px] text-muted" aria-live="polite">
             {searching ? `Résultats pour « ${q} »${filter === "tous" ? " (en cours et terminés)" : ""}` : "Le dernier travaillé en premier"}
           </p>
-          <ProjectList projects={items} />
+          <ProjectList projects={items} show={API_STATUS[filter] as "active" | "archived" | "all"} />
           {cursor ? (
             <Button variant="secondary" pending={loadingMore} onClick={() => void loadMore()}>
               {fr.actions.loadMore}

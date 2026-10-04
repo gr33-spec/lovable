@@ -85,7 +85,7 @@ export function SiteNotes({
   const count = (infos?.texte ? 1 : 0) + (infos?.croquis.length ?? 0);
   return (
     <section aria-label="Informations sur le chantier" className="flex flex-col gap-3">
-      <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="flex min-h-11 items-center gap-2 self-start text-sm font-bold text-accent-text">
+      <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="flex min-h-11 items-center gap-2 self-start text-left text-sm font-bold text-accent-text">
         {open ? <ChevronDown size={18} aria-hidden="true" /> : <Plus size={18} aria-hidden="true" />}
         {count > 0 ? `Informations sur le chantier (${count})` : "Ajouter des informations sur le chantier (facultatif)"}
       </button>

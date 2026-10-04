@@ -39,11 +39,18 @@ export function QuantityCard({
   const caption = "text-sm font-bold text-muted";
   return (
     <section aria-label="Quantitatif" className="flex flex-col overflow-hidden rounded-[20px] bg-surface shadow-card">
-      <h2 className="px-4 pt-4 pb-1 font-display text-[22px] font-extrabold">À commander</h2>
+      <div className="flex items-baseline justify-between gap-3 px-4 pt-4 pb-2">
+        <h2 className="font-display text-[24px] font-extrabold tracking-[-0.02em]">À commander</h2>
+        {p.toBuy.length > 0 ? (
+          <span className="rounded-full bg-accent/10 px-2.5 py-1 text-[13px] font-extrabold text-accent-text">
+            {p.toBuy.length} article{p.toBuy.length > 1 ? "s" : ""}
+          </span>
+        ) : null}
+      </div>
       {p.toBuy.length === 0 ? <p className="px-4 pb-3 text-sm text-muted">Rien à commander pour l&apos;instant.</p> : null}
       {p.groups.map((g) => (
-        <div key={g.key} className="flex flex-col border-b border-line px-4 py-2">
-          <h3 className={`${caption} pt-1`}>
+        <div key={g.key} className="flex flex-col border-t border-line px-4 pt-3 pb-1">
+          <h3 className="text-[12px] font-extrabold tracking-[0.06em] text-muted uppercase">
             {g.label}
             {g.measure ? ` · ${g.measure}` : ""}
           </h3>
@@ -95,28 +102,30 @@ function BuyRow({
   const row = (
     <>
       {item.state === "to_confirm" ? <AlertTriangle size={18} className="mt-0.5 shrink-0 text-warn" aria-label="à confirmer" /> : null}
-      <span className="min-w-0 grow text-[15px] leading-snug">{name}</span>
-      <span className="flex shrink-0 flex-col items-end text-right">
-        <span className="text-[15px] font-extrabold whitespace-nowrap">{item.quantity ?? "à préciser"}</span>
-        {item.approx ? <span className="text-[13px] whitespace-nowrap text-muted">{item.approx}</span> : null}
+      <span className="flex min-w-0 grow flex-col gap-0.5">
+        <span className="text-[15px] leading-snug font-semibold">{name}</span>
+        {proofs.length > 0 ? <span className="text-[12px] font-semibold text-subtle">{open ? "Masquer le calcul" : "Voir le calcul"}</span> : null}
       </span>
-      {proofs.length > 0 ? <ChevronDown size={16} aria-hidden="true" className={`mt-1 shrink-0 text-subtle ${open ? "rotate-180" : ""}`} /> : null}
+      <span className="flex shrink-0 flex-col items-end text-right">
+        <span className="text-[16px] font-extrabold whitespace-nowrap tabular-nums">{item.quantity ?? "à préciser"}</span>
+        {item.approx ? <span className="text-[12px] whitespace-nowrap text-muted">{item.approx}</span> : null}
+      </span>
     </>
   );
   const edit = editable && onEdit;
   return (
-    <li className="flex flex-col gap-1.5 py-2">
-      <div className="flex items-start gap-1">
+    <li className="flex flex-col gap-1.5 py-2.5">
+      <div className="flex items-start gap-0.5">
         {proofs.length > 0 ? (
-          <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label={`Voir le calcul : ${item.label}`} className="flex min-h-11 w-full min-w-0 items-start gap-3 text-left">
+          <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label={`Voir le calcul : ${item.label}`} className="flex min-h-11 w-full min-w-0 items-start gap-3 rounded-xl text-left active:bg-ground/60">
             {row}
           </button>
         ) : (
           <div className="flex min-h-11 w-full min-w-0 items-start gap-3">{row}</div>
         )}
         {edit ? (
-          <button type="button" onClick={() => setEditing(!editing)} aria-label={`Modifier : ${item.label}`} aria-expanded={editing} className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-xl text-accent-text">
-            <Pencil size={18} aria-hidden="true" />
+          <button type="button" onClick={() => setEditing(!editing)} aria-label={`Modifier : ${item.label}`} aria-expanded={editing} className="-mr-2 inline-flex min-h-11 min-w-10 shrink-0 items-center justify-center rounded-xl text-subtle active:text-accent-text">
+            <Pencil size={17} aria-hidden="true" />
           </button>
         ) : null}
       </div>

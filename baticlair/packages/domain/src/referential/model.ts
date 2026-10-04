@@ -112,6 +112,12 @@ export interface ProductFamily {
    * dans la ligne nomme l'ouvrage (« Gouttière… crochets compris » = gouttière).
    */
   keywords?: string[];
+  /**
+   * Famille plus précise qu'une autre (« tuile canal » précise « tuile ») : si la ligne est rattachée à la
+   * famille générale mais nomme quelque part celle-ci (« Tuiles (fourniture et pose de tuiles canal…) »),
+   * c'est elle qui compte. Du vocabulaire, jamais un réglage pour un devis.
+   */
+  refines?: string;
 }
 
 /** Façon de vendre un produit : à la pièce, à la longueur de 4 m, au rouleau… */

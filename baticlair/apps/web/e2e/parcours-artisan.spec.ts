@@ -24,9 +24,32 @@ async function signUp(page: Page) {
   return email;
 }
 
-/** Chaque question : l'artisan accepte la proposition (« C'est bon », « Oui… ») ou passe (« Je ne sais pas »). */
+/**
+ * Toutes les questions d'un coup : dans le formulaire, l'artisan tape la première réponse de chaque question encore
+ * ouverte puis valide une fois. Renvoie vrai s'il a validé un formulaire.
+ */
+async function fillForm(page: Page): Promise<boolean> {
+  const form = page.getByRole("region", { name: "Questions sur le chantier" });
+  if (!(await form.isVisible())) return false;
+  const before = await form.innerText();
+  for (const group of await form.getByRole("group").all()) {
+    if ((await group.locator('button[aria-pressed="true"]').count()) === 0) await group.getByRole("button").first().click();
+  }
+  await form.getByRole("button", { name: "Valider et calculer" }).click();
+  // Fini quand le formulaire a disparu, ou qu'il revient (boutons actifs) avec d'autres questions.
+  const state = async () => {
+    if (!(await form.isVisible())) return "";
+    if (await form.getByRole("group").first().getByRole("button").first().isDisabled()) return before;
+    return form.innerText();
+  };
+  await expect.poll(state, { timeout: 15_000 }).not.toBe(before);
+  return true;
+}
+
+/** Chaque question : l'artisan remplit le formulaire, puis accepte chaque proposition restante (« C'est bon », « Oui… ») ou passe. */
 async function confirmDoubts(page: Page) {
   for (let i = 0; i < 30; i++) {
+    if (await fillForm(page)) continue;
     const card = page.getByRole("region", { name: /^À régler : / }).first();
     if (!(await card.isVisible())) return;
     const name = (await card.getAttribute("aria-label"))!;
@@ -39,12 +62,13 @@ async function confirmDoubts(page: Page) {
   }
 }
 
-/** Les questions arrivent une à une : l'artisan répond aux précédentes jusqu'à voir celle-ci. */
+/** L'artisan répond (formulaire puis cartes) jusqu'à voir cette carte. */
 async function answerUntil(page: Page, name: string) {
   for (let i = 0; i < 30; i++) {
-    const card = page.getByRole("region", { name: /^À régler : / }).first();
-    await expect(card).toBeVisible();
+    await expect(page.getByRole("region", { name: /^(À régler : |Questions sur le chantier$)/ }).first()).toBeVisible();
     if (await page.getByRole("region", { name }).isVisible()) return;
+    if (await fillForm(page)) continue;
+    const card = page.getByRole("region", { name: /^À régler : / }).first();
     const current = (await card.getAttribute("aria-label"))!;
     const yes = card.getByRole("button", { name: /^(C'est bon|Oui)/ }).first();
     const skip = card.getByRole("button", { name: "Je ne sais pas" });
@@ -133,6 +157,53 @@ test("marquer terminé retire le chantier des « En cours » sans le perdre", as
   await page.getByRole("searchbox").fill("lefevre");
   await expect(page.getByRole("link", { name: /Bardage Lefèvre/ })).toBeVisible();
   await expect(page.getByRole("button", { name: "Tous" })).toHaveAttribute("aria-pressed", "true");
+});
+
+/** Glisse une ligne de la liste vers la gauche, du bout du doigt (souris en test), sur `ratio` de sa largeur. */
+async function swipeLeft(page: Page, name: RegExp, ratio: number) {
+  const box = (await page.getByRole("link", { name }).boundingBox())!;
+  const y = box.y + box.height / 2;
+  await page.mouse.move(box.x + box.width - 10, y);
+  await page.mouse.down();
+  for (let i = 1; i <= 10; i++) await page.mouse.move(box.x + box.width - 10 - (box.width * ratio * i) / 10, y);
+  await page.mouse.up();
+}
+
+test("glisser un chantier vers la gauche le range dans Terminés, et « Annuler » le remet", async ({ page }) => {
+  await signUp(page);
+  await createProject(page, "Toiture Le Bris", "M. Le Bris", "Quimper");
+  await createProject(page, "Zinguerie Morvan", "Mme Morvan", "Brest");
+  await page.goto("/chantiers");
+  const bris = page.getByRole("link", { name: /Toiture Le Bris/ });
+  await expect(bris).toBeVisible();
+
+  // Petit glissement : le bouton « Terminé » apparaît, le chantier ne s'ouvre pas.
+  await swipeLeft(page, /Toiture Le Bris/, 0.3);
+  await expect(page).toHaveURL(/\/chantiers$/);
+  await page.getByRole("button", { name: "Marquer terminé : Toiture Le Bris" }).click();
+  await expect(bris).toHaveCount(0);
+  await expect(page.getByRole("status").filter({ hasText: "Rangé dans Terminés" })).toBeVisible();
+  await page.getByRole("button", { name: "Annuler" }).click();
+  await expect(bris).toBeVisible();
+
+  // Long glissement : rangé d'un geste. Rien n'est perdu : il est dans « Terminés », d'où on le reprend.
+  await swipeLeft(page, /Toiture Le Bris/, 0.8);
+  await expect(bris).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /Zinguerie Morvan/ })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("link", { name: /Zinguerie Morvan/ })).toBeVisible();
+  await expect(bris).toHaveCount(0);
+  await page.getByRole("button", { name: "Terminés" }).click();
+  await expect(bris).toBeVisible();
+  await page.getByRole("button", { name: "Reprendre : Toiture Le Bris" }).focus();
+  await page.keyboard.press("Enter");
+  await expect(bris).toHaveCount(0);
+  await page.getByRole("button", { name: "En cours" }).click();
+  await expect(bris).toBeVisible();
+
+  // Un simple appui ouvre toujours le chantier.
+  await bris.click();
+  await expect(page.getByRole("heading", { name: "Toiture Le Bris" })).toBeVisible();
 });
 
 test("un double appui sur « Créer » ne crée qu'un chantier", async ({ page }) => {

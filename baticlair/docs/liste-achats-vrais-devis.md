@@ -34,7 +34,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Chatières de ventilation | 10 pièces |  |
 | Sortie de toit Poujoulat | 1 pièce |  |
 
-**Hypothèses (modifiables) :** zone climatique 3 · pente du toit 45° · pureau 31 cm · coudes par descente 2
+**Hypothèses (modifiables) :** zone climatique 3 · pente du toit 45° · pureau 31 cm · tuiles de rive Tuiles de rive  · coudes par descente 2
 
 ### Après « oui, c'est bien ce modèle »
 
@@ -61,7 +61,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Chatières de ventilation | 10 pièces |  |
 | Sortie de toit Poujoulat | 1 pièce |  |
 
-**Hypothèses (modifiables) :** zone climatique 3 · pente du toit 45° · pureau 31 cm · coudes par descente 2
+**Hypothèses (modifiables) :** zone climatique 3 · pente du toit 45° · pureau 31 cm · tuiles de rive Tuiles de rive  · coudes par descente 2
 
 ### Si l'artisan précise le pureau (34,3 cm)
 
@@ -88,7 +88,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Chatières de ventilation | 10 pièces |  |
 | Sortie de toit Poujoulat | 1 pièce |  |
 
-**Hypothèses (modifiables) :** pente du toit 45° · zone climatique 3 · coudes par descente 2
+**Hypothèses (modifiables) :** pente du toit 45° · tuiles de rive Tuiles de rive  · zone climatique 3 · coudes par descente 2
 
 ## Devis ardoises — 200 m², jouées de lucarnes, cheminée
 
@@ -98,7 +98,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 **Questions :**
 
-- Tu façonnes tes bandes zinc toi-même, ou tu les commandes façonnées ? → [Je façonne (bobine)] [Je commande façonné (bandes 2 m)]
+- Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ? → [Je façonne (feuilles 2 × 1 m)] [Je commande façonné]
 - Combien de descentes pour cette gouttière ? → [1] [2] [3] [4]
 - Périmètre d'une cheminée (les 4 côtés) ? → [2 m] [3 m] [4 m] [5 m]
 - 6 : c'est le nombre d'ardoises à commander, ou le nombre de jouées ? → [6 ardoises à commander] [6 jouées (matériaux à calculer)]
@@ -126,7 +126,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 **Questions :**
 
-- Tu façonnes tes bandes zinc toi-même, ou tu les commandes façonnées ? → [Je façonne (bobine)] [Je commande façonné (bandes 2 m)]
+- Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ? → [Je façonne (feuilles 2 × 1 m)] [Je commande façonné]
 - Périmètre d'une cheminée (les 4 côtés) ? → [2 m] [3 m] [4 m] [5 m]
 
 **À acheter :**
@@ -157,7 +157,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 **Questions :**
 
-- Tu façonnes tes bandes zinc toi-même, ou tu les commandes façonnées ? → [Je façonne (bobine)] [Je commande façonné (bandes 2 m)]
+- Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ? → [Je façonne (feuilles 2 × 1 m)] [Je commande façonné]
 - Périmètre d'une cheminée (les 4 côtés) ? → [2 m] [3 m] [4 m] [5 m]
 
 **À acheter :**

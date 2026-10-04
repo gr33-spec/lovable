@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.03-16",
+  "version": "roofing-2026.10.04-17",
   "trade": "roofing",
   "sources": [
     {
@@ -8,6 +8,15 @@
       "kind": "definition",
       "title": "Définition",
       "retrievedAt": "2026-10-01"
+    },
+    {
+      "id": "edilians-canal",
+      "kind": "manufacturer",
+      "title": "Tuiles canal Poudenx (Edilians)",
+      "publisher": "Edilians",
+      "url": "https://edilians.com/media/wysiwyg/Encyclopedie/canal-tuiles-edilians.pdf",
+      "note": "Nombres au m² (couvert seul) et liteaux au m² par recouvrement, relevés par le fondateur (référentiel §35.3).",
+      "retrievedAt": "2026-10-04"
     },
     {
       "id": "edilians-hp10",
@@ -237,6 +246,17 @@
       ]
     },
     {
+      "code": "zinc_sheet",
+      "label": "Feuille de zinc",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "feuille de zinc",
+        "feuille zinc"
+      ]
+    },
+    {
       "code": "solin_support",
       "label": "Bande porte-solin",
       "needUnit": "u",
@@ -388,6 +408,63 @@
       ],
       "keywords": [
         "tuile"
+      ]
+    },
+    {
+      "code": "roof_tile_canal",
+      "label": "Tuile canal",
+      "needUnit": "u",
+      "refines": "roof_tile",
+      "attributes": [
+        {
+          "key": "nb_r140",
+          "label": "Tuiles couvert au m² à R 140",
+          "unit": "u/m2"
+        },
+        {
+          "key": "nb_r150",
+          "label": "Tuiles couvert au m² à R 150",
+          "unit": "u/m2"
+        },
+        {
+          "key": "nb_r160",
+          "label": "Tuiles couvert au m² à R 160",
+          "unit": "u/m2"
+        },
+        {
+          "key": "nb_r170",
+          "label": "Tuiles couvert au m² à R 170",
+          "unit": "u/m2"
+        },
+        {
+          "key": "lit_r140",
+          "label": "Liteaux au m² à R 140",
+          "unit": "m/m2"
+        },
+        {
+          "key": "lit_r150",
+          "label": "Liteaux au m² à R 150",
+          "unit": "m/m2"
+        },
+        {
+          "key": "lit_r160",
+          "label": "Liteaux au m² à R 160",
+          "unit": "m/m2"
+        },
+        {
+          "key": "lit_r170",
+          "label": "Liteaux au m² à R 170",
+          "unit": "m/m2"
+        }
+      ],
+      "keyAttributes": [],
+      "keywords": [
+        "tuile canal",
+        "tuiles canal",
+        "canal gironde",
+        "canal charentaise",
+        "canal lyonnaise",
+        "canal 50"
       ]
     },
     {
@@ -1438,6 +1515,851 @@
       ]
     },
     {
+      "id": "edilians-canal-50",
+      "family": "roof_tile_canal",
+      "label": "Tuile canal 50 Poudenx, réf. 414 / 454 (Edilians)",
+      "shortLabel": "Tuiles canal 50",
+      "manufacturer": "Edilians",
+      "aliases": [
+        "canal 50",
+        "canal 50 reabilis",
+        "canal 50 restauration"
+      ],
+      "attributes": {
+        "nb_r140": {
+          "kind": "manufacturer_spec",
+          "value": "10.3",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "nb_r150": {
+          "kind": "manufacturer_spec",
+          "value": "11.1",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "nb_r160": {
+          "kind": "manufacturer_spec",
+          "value": "11.8",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "nb_r170": {
+          "kind": "manufacturer_spec",
+          "value": "12.6",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r140": {
+          "kind": "manufacturer_spec",
+          "value": "2.78",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r150": {
+          "kind": "manufacturer_spec",
+          "value": "2.86",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r160": {
+          "kind": "manufacturer_spec",
+          "value": "2.94",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r170": {
+          "kind": "manufacturer_spec",
+          "value": "3.03",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      },
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "edilians-canal-gironde-50",
+      "family": "roof_tile_canal",
+      "label": "Tuile Canal Gironde 50 Poudenx, réf. 406 / 456 (Edilians)",
+      "shortLabel": "Tuiles Canal Gironde 50",
+      "manufacturer": "Edilians",
+      "aliases": [
+        "canal gironde",
+        "canal gironde 50",
+        "quintescia"
+      ],
+      "attributes": {
+        "nb_r140": {
+          "kind": "manufacturer_spec",
+          "value": "12.4",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "nb_r150": {
+          "kind": "manufacturer_spec",
+          "value": "12.7",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "nb_r160": {
+          "kind": "manufacturer_spec",
+          "value": "13.1",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "nb_r170": {
+          "kind": "manufacturer_spec",
+          "value": "13.5",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r140": {
+          "kind": "manufacturer_spec",
+          "value": "2.83",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r150": {
+          "kind": "manufacturer_spec",
+          "value": "2.92",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r160": {
+          "kind": "manufacturer_spec",
+          "value": "3.01",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r170": {
+          "kind": "manufacturer_spec",
+          "value": "3.10",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      },
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "edilians-canal-gironde-blocage",
+      "family": "roof_tile_canal",
+      "label": "Tuile Canal Gironde à blocage Poudenx, réf. 409 / 459 (Edilians)",
+      "shortLabel": "Tuiles Canal Gironde à blocage",
+      "manufacturer": "Edilians",
+      "aliases": [
+        "canal gironde a blocage",
+        "gironde a blocage"
+      ],
+      "attributes": {
+        "nb_r140": {
+          "kind": "manufacturer_spec",
+          "value": "12.7",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Recouvrement fixe 150 mm (tuile à blocage)."
+        },
+        "nb_r150": {
+          "kind": "manufacturer_spec",
+          "value": "12.7",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Recouvrement fixe 150 mm (tuile à blocage)."
+        },
+        "nb_r160": {
+          "kind": "manufacturer_spec",
+          "value": "12.7",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Recouvrement fixe 150 mm (tuile à blocage)."
+        },
+        "nb_r170": {
+          "kind": "manufacturer_spec",
+          "value": "12.7",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Recouvrement fixe 150 mm (tuile à blocage)."
+        },
+        "lit_r140": {
+          "kind": "manufacturer_spec",
+          "value": "2.92",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r150": {
+          "kind": "manufacturer_spec",
+          "value": "2.92",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r160": {
+          "kind": "manufacturer_spec",
+          "value": "2.92",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r170": {
+          "kind": "manufacturer_spec",
+          "value": "2.92",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      },
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "edilians-canal-lyonnaise-40",
+      "family": "roof_tile_canal",
+      "label": "Tuile Canal Lyonnaise 40 Poudenx, réf. 401 / 451 (Edilians)",
+      "shortLabel": "Tuiles Canal Lyonnaise 40",
+      "manufacturer": "Edilians",
+      "aliases": [
+        "canal lyonnaise",
+        "lyonnaise 40",
+        "restorial"
+      ],
+      "attributes": {
+        "nb_r140": {
+          "kind": "manufacturer_spec",
+          "value": "14.2",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "nb_r150": {
+          "kind": "manufacturer_spec",
+          "value": "14.8",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "nb_r160": {
+          "kind": "manufacturer_spec",
+          "value": "15.4",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "nb_r170": {
+          "kind": "manufacturer_spec",
+          "value": "16.1",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r140": {
+          "kind": "manufacturer_spec",
+          "value": "3.85",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r150": {
+          "kind": "manufacturer_spec",
+          "value": "4.00",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r160": {
+          "kind": "manufacturer_spec",
+          "value": "4.17",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r170": {
+          "kind": "manufacturer_spec",
+          "value": "4.35",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      },
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "edilians-canal-charentaise",
+      "family": "roof_tile_canal",
+      "label": "Tuile Canal Charentaise Poudenx, réf. 405 / 455 (Edilians)",
+      "shortLabel": "Tuiles Canal Charentaise",
+      "manufacturer": "Edilians",
+      "aliases": [
+        "canal charentaise",
+        "charentaise"
+      ],
+      "attributes": {
+        "nb_r140": {
+          "kind": "manufacturer_spec",
+          "value": "16.7",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "nb_r150": {
+          "kind": "manufacturer_spec",
+          "value": "17.4",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "nb_r160": {
+          "kind": "manufacturer_spec",
+          "value": "18.1",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "nb_r170": {
+          "kind": "manufacturer_spec",
+          "value": "18.9",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r140": {
+          "kind": "manufacturer_spec",
+          "value": "3.85",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r150": {
+          "kind": "manufacturer_spec",
+          "value": "4.00",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r160": {
+          "kind": "manufacturer_spec",
+          "value": "4.17",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r170": {
+          "kind": "manufacturer_spec",
+          "value": "4.35",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      },
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "edilians-canal-charentaise-blocage",
+      "family": "roof_tile_canal",
+      "label": "Tuile Canal Charentaise à blocage Poudenx, réf. 410 / 460 (Edilians)",
+      "shortLabel": "Tuiles Canal Charentaise à blocage",
+      "manufacturer": "Edilians",
+      "aliases": [
+        "canal charentaise a blocage",
+        "charentaise a blocage"
+      ],
+      "attributes": {
+        "nb_r140": {
+          "kind": "manufacturer_spec",
+          "value": "17.4",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Recouvrement fixe 150 mm (tuile à blocage)."
+        },
+        "nb_r150": {
+          "kind": "manufacturer_spec",
+          "value": "17.4",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Recouvrement fixe 150 mm (tuile à blocage)."
+        },
+        "nb_r160": {
+          "kind": "manufacturer_spec",
+          "value": "17.4",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Recouvrement fixe 150 mm (tuile à blocage)."
+        },
+        "nb_r170": {
+          "kind": "manufacturer_spec",
+          "value": "17.4",
+          "unit": "u/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Recouvrement fixe 150 mm (tuile à blocage)."
+        },
+        "lit_r140": {
+          "kind": "manufacturer_spec",
+          "value": "4.00",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r150": {
+          "kind": "manufacturer_spec",
+          "value": "4.00",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r160": {
+          "kind": "manufacturer_spec",
+          "value": "4.00",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "lit_r170": {
+          "kind": "manufacturer_spec",
+          "value": "4.00",
+          "unit": "m/m2",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      },
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
       "id": "edilians-faitiere-angulaire-710",
       "family": "ridge_tile",
       "label": "Faîtière/arêtier angulaire à emboîtement réf. 710 (Edilians)",
@@ -2005,6 +2927,68 @@
       "family": "zinc_panel",
       "label": "Bac joint debout zinc naturel, façonné à la longueur du rampant (largeur utile 430 ou 580 mm)",
       "shortLabel": "Bacs joint debout zinc",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "bardelis-standard",
+      "family": "verge_tile",
+      "label": "Bardelis (tuile de rive canal), modèle de la tuile posée",
+      "shortLabel": "Bardelis",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "feuille-zinc-2x1",
+      "family": "zinc_sheet",
+      "label": "Feuille zinc naturel 2 × 1 m (épaisseur du chantier)",
+      "shortLabel": "Feuilles zinc 2 × 1 m",
       "aliases": [],
       "generic": true,
       "attributes": {},
@@ -2603,6 +3587,242 @@
           ],
           "exclusions": "Une tuile de rive par rang, sur la longueur totale des rives du devis (gauche et droite) ; hors abouts.",
           "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      ]
+    },
+    {
+      "id": "couverture-tuiles-canal",
+      "trade": "roofing",
+      "label": "Couverture en tuiles canal",
+      "triggers": [
+        "roof_tile_canal"
+      ],
+      "params": [
+        {
+          "key": "surface",
+          "label": "Surface de toiture",
+          "unit": "m2",
+          "kind": "site_data",
+          "question": "Surface du toit ?",
+          "fromLineQuantity": true,
+          "choices": [
+            {
+              "label": "50 m²",
+              "value": "50"
+            },
+            {
+              "label": "100 m²",
+              "value": "100"
+            },
+            {
+              "label": "150 m²",
+              "value": "150"
+            },
+            {
+              "label": "200 m²",
+              "value": "200"
+            }
+          ]
+        },
+        {
+          "key": "recouvrement_canal",
+          "label": "Recouvrement des tuiles canal",
+          "unit": "mm",
+          "kind": "site_data",
+          "question": "Recouvrement des tuiles canal ?",
+          "hint": "Il dépend de la pente et de la zone (DTU 40.22) ; sans effet pour une tuile à blocage (150 mm fixe).",
+          "textLabels": [
+            "recouvrement"
+          ],
+          "choices": [
+            {
+              "label": "140 mm",
+              "value": "140"
+            },
+            {
+              "label": "150 mm",
+              "value": "150"
+            },
+            {
+              "label": "160 mm",
+              "value": "160"
+            },
+            {
+              "label": "170 mm",
+              "value": "170"
+            }
+          ]
+        },
+        {
+          "key": "longueur_rives",
+          "label": "Longueur de rives",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Longueur totale des rives ?",
+          "fromLineQuantity": true,
+          "forSlots": [
+            "rive"
+          ]
+        }
+      ],
+      "slots": [
+        {
+          "key": "tuile",
+          "family": "roof_tile_canal",
+          "label": "Tuiles canal"
+        },
+        {
+          "key": "liteau",
+          "family": "batten",
+          "label": "Liteaux",
+          "keywords": [
+            "lattage",
+            "liteau",
+            "latte",
+            "liteaunage"
+          ],
+          "usual": {
+            "text": "Liteaux 27×40 pour la tuile (section courante).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productShort": "Liteaux 27×40",
+            "productId": "liteau-sapin-27x40"
+          }
+        },
+        {
+          "key": "rive",
+          "family": "verge_tile",
+          "label": "Bardelis (rives)",
+          "keywords": [
+            "rive",
+            "bardelis"
+          ],
+          "usual": {
+            "text": "Bardelis du modèle de tuile, 2,7 au ml (Edilians, §35.3).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "bardelis-standard"
+          }
+        }
+      ],
+      "constants": {
+        "couvert_et_courant": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "u",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« multiplier par 2 pour couvert + courant » (règle Edilians, §35.3)."
+        },
+        "r150": {
+          "kind": "installation_condition",
+          "value": "150",
+          "unit": "mm",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "r160": {
+          "kind": "installation_condition",
+          "value": "160",
+          "unit": "mm",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "r170": {
+          "kind": "installation_condition",
+          "value": "170",
+          "unit": "mm",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "bardelis_par_ml": {
+          "kind": "installation_condition",
+          "value": "2.7",
+          "unit": "u/m",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« bardelis S 2,7/ml » (§35.3)."
+        }
+      },
+      "needs": [
+        {
+          "id": "tuiles-canal",
+          "slot": "tuile",
+          "formula": "surface * regle.couvert_et_courant * si(recouvrement_canal >= regle.r170, tuile.nb_r170, si(recouvrement_canal >= regle.r160, tuile.nb_r160, si(recouvrement_canal >= regle.r150, tuile.nb_r150, tuile.nb_r140)))",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Couvert et courant ; hors faîtières, bardelis de rive et tuiles d'égout (comptés à part).",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "liteaux-canal",
+          "slot": "liteau",
+          "formula": "surface * si(recouvrement_canal >= regle.r170, tuile.lit_r170, si(recouvrement_canal >= regle.r160, tuile.lit_r160, si(recouvrement_canal >= regle.r150, tuile.lit_r150, tuile.lit_r140)))",
+          "unit": "ml",
+          "core": false,
+          "exclusions": "Pose sur liteaux seulement (la tuile canal se pose aussi sur plaques support) ; hors liteau d'égout doublé.",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "bardelis",
+          "slot": "rive",
+          "formula": "longueur_rives * regle.bardelis_par_ml",
+          "unit": "u",
+          "core": true,
+          "requires": [
+            "longueur_rives"
+          ],
+          "exclusions": "Rives gauche et droite du devis ; mortier de scellement à part.",
+          "source": "edilians-canal",
           "verification": {
             "status": "verified",
             "verifiedAt": "2026-10-03",
@@ -4680,15 +5900,15 @@
           "label": "Façonnage",
           "unit": "u",
           "kind": "artisan_preference",
-          "question": "Tu façonnes tes bandes zinc toi-même, ou tu les commandes façonnées ?",
-          "hint": "Bobine de zinc en kg si tu façonnes ; bandes façonnées en longueurs de 2 m sinon.",
+          "question": "Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ?",
+          "hint": "Je façonne : feuilles de zinc 2 × 1 m. Commandé façonné : bandes en longueurs de 2 m. Gouttières et descentes ne sont pas concernées.",
           "choices": [
             {
-              "label": "Je façonne (bobine)",
+              "label": "Je façonne (feuilles 2 × 1 m)",
               "value": "1"
             },
             {
-              "label": "Je commande façonné (bandes 2 m)",
+              "label": "Je commande façonné",
               "value": "2"
             }
           ],
@@ -4747,13 +5967,13 @@
           }
         },
         {
-          "key": "bobine",
-          "family": "zinc_coil",
-          "label": "Zinc en bobine",
+          "key": "feuille",
+          "family": "zinc_sheet",
+          "label": "Feuilles zinc 2 × 1 m",
           "usual": {
-            "text": "Zinc naturel en bobine, vendu au kg.",
+            "text": "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).",
             "source": "fondateur-referentiel-2026-10-03",
-            "productId": "bobine-zinc-standard"
+            "productId": "feuille-zinc-2x1"
           }
         }
       ],
@@ -4834,6 +6054,20 @@
           "version": 1,
           "note": "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."
         },
+        "surface_feuille": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m2",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« feuilles = (ml ÷ 2 m) × (développé ÷ 1 000) arrondi sup. » (§25.2), feuille de 2 × 1 m."
+        },
         "marge_bandes": {
           "kind": "installation_condition",
           "value": "1.1",
@@ -4900,13 +6134,13 @@
           "version": 1
         },
         {
-          "id": "bobine-bandes",
-          "slot": "bobine",
+          "id": "feuilles-bandes",
+          "slot": "feuille",
           "when": "faconnage < 2",
-          "formula": "ml_zinc * developpe * poids_zinc_plat",
-          "unit": "kg",
+          "formula": "arrondi_sup(ml_zinc * developpe / regle.surface_feuille)",
+          "unit": "u",
           "core": true,
-          "exclusions": "Zinc plat, développé × longueur ; les plis ne consomment pas de matière.",
+          "exclusions": "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2) ; chutes non réemployées.",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -4971,15 +6205,15 @@
           "label": "Façonnage",
           "unit": "u",
           "kind": "artisan_preference",
-          "question": "Tu façonnes tes bandes zinc toi-même, ou tu les commandes façonnées ?",
-          "hint": "Bobine de zinc en kg si tu façonnes ; bandes façonnées en longueurs de 2 m sinon.",
+          "question": "Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ?",
+          "hint": "Je façonne : feuilles de zinc 2 × 1 m. Commandé façonné : bandes en longueurs de 2 m. Gouttières et descentes ne sont pas concernées.",
           "choices": [
             {
-              "label": "Je façonne (bobine)",
+              "label": "Je façonne (feuilles 2 × 1 m)",
               "value": "1"
             },
             {
-              "label": "Je commande façonné (bandes 2 m)",
+              "label": "Je commande façonné",
               "value": "2"
             }
           ],
@@ -5044,13 +6278,13 @@
           }
         },
         {
-          "key": "bobine",
-          "family": "zinc_coil",
-          "label": "Zinc en bobine",
+          "key": "feuille",
+          "family": "zinc_sheet",
+          "label": "Feuilles zinc 2 × 1 m",
           "usual": {
-            "text": "Zinc naturel en bobine, vendu au kg.",
+            "text": "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).",
             "source": "fondateur-referentiel-2026-10-03",
-            "productId": "bobine-zinc-standard"
+            "productId": "feuille-zinc-2x1"
           }
         },
         {
@@ -5144,6 +6378,20 @@
           },
           "version": 1,
           "note": "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."
+        },
+        "surface_feuille": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m2",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« feuilles = (ml ÷ 2 m) × (développé ÷ 1 000) arrondi sup. » (§25.2), feuille de 2 × 1 m."
         },
         "marge_bandes": {
           "kind": "installation_condition",
@@ -5254,13 +6502,13 @@
           "version": 1
         },
         {
-          "id": "bobine-abergement",
-          "slot": "bobine",
+          "id": "feuilles-abergement",
+          "slot": "feuille",
           "when": "faconnage < 2",
-          "formula": "ml_zinc * regle.developpe_abergement * poids_zinc_plat",
-          "unit": "kg",
+          "formula": "arrondi_sup(ml_zinc * regle.developpe_abergement / regle.surface_feuille)",
+          "unit": "u",
           "core": true,
-          "exclusions": "Zinc plat, développé 33 cm × longueur.",
+          "exclusions": "Zinc plat, développé 33 cm × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",

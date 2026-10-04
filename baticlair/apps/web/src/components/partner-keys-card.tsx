@@ -59,7 +59,7 @@ export function PartnerKeysCard() {
   }
 
   return (
-    <Card>
+    <Card className="flex flex-col gap-3 p-4">
       <div className="flex items-center gap-2">
         <KeyRound size={20} aria-hidden="true" className="text-accent-text" />
         <h2 className="text-base font-bold">Clés API partenaire</h2>
@@ -96,7 +96,7 @@ export function PartnerKeysCard() {
       ) : null}
       {actionError ? <ErrorNotice error={actionError} /> : null}
       <div className="flex flex-wrap items-end gap-2">
-        <label className="flex grow flex-col gap-1 text-sm font-semibold">
+        <label className="flex min-w-0 grow basis-40 flex-col gap-1 text-sm font-semibold">
           Nom de l&apos;intégration
           <input value={name} onChange={(e) => setName(e.target.value)} maxLength={80} placeholder="Rappidos" className="min-h-11 rounded-2xl border border-line bg-surface px-3 text-base font-normal" />
         </label>

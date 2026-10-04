@@ -526,6 +526,31 @@ export function computeWithAnswers(
     return { needs, questions };
   };
   let { needs, questions } = run(inputs);
+  // TOUTES LES QUESTIONS D'UN COUP (retour du fondateur, 2026-10-04) : une question à boutons en cache parfois d'autres
+  // (le modèle de tuile canal, puis son recouvrement ; le façonnage, puis le développé). On rejoue le calcul avec
+  // chaque réponse possible et on ajoute les questions qui apparaissent, pour que l'artisan réponde à tout en une fois.
+  // Une réponse donnée plus tard qui rend une question inutile est simplement ignorée par le calcul.
+  const discovered: Question[] = [];
+  const seenKeys = new Set(questions.map((q) => q.key));
+  for (let round = 0; round < 2; round++) {
+    const frontier = [...questions, ...discovered].filter((q) => q.options && q.options.length > 0 && q.options.length <= 8);
+    let added = false;
+    for (const q of frontier) {
+      for (const o of q.options!) {
+        if (!o.value) continue;
+        const probe = withAnswer(ref, inputs, q, o.value);
+        if (!probe) continue;
+        for (const next of run(probe).questions) {
+          if (seenKeys.has(next.key)) continue;
+          seenKeys.add(next.key);
+          discovered.push(next);
+          added = true;
+        }
+      }
+    }
+    if (!added) break;
+  }
+  questions = [...questions, ...discovered];
   // Deux sources qui ne disent pas la même chose (devis ≠ en-tête lu, devis ≠ croquis), sans réponse de l'artisan :
   // une question avec les deux valeurs en boutons, et rien ne part pour cet ouvrage tant qu'elle est ouverte.
   for (const c of plan.contradictions) {
@@ -560,6 +585,20 @@ export function computeWithAnswers(
   for (const c of plan.contradictions) if (!levers.has(`param:${c.key}`)) levers.set(`param:${c.key}`, Number.POSITIVE_INFINITY);
   questions = [...questions].sort((a, b) => (levers.get(b.key) ?? 0) - (levers.get(a.key) ?? 0));
   return { needs, questions, declined: [...declined] };
+}
+
+/** Les entrées du calcul avec une réponse possible à une question (produit ou donnée), pour voir ce qu'elle entraîne. */
+function withAnswer(ref: Referential, inputs: WorkItemInput[], q: Question, value: string): WorkItemInput[] | null {
+  const [kind, name] = q.key.split(":") as [string, string];
+  if (kind === "product") {
+    return inputs.map((i) => (ref.workItems.find((w) => w.id === i.workItemId)?.slots.some((s) => s.key === name) ? { ...i, products: { ...i.products, [name]: { productId: value, origin: "artisan" as const } } } : i));
+  }
+  if (kind === "param") {
+    const def = ref.workItems.flatMap((w) => w.params).find((p) => p.key === name);
+    if (!def) return null;
+    return inputs.map((i) => (ref.workItems.find((w) => w.id === i.workItemId)?.params.some((p) => p.key === name) ? { ...i, params: { ...i.params, [name]: { value, unit: def.unit, origin: "artisan" as const, evidence: "Réponse possible" } } } : i));
+  }
+  return null;
 }
 
 /** Au-delà de cet écart relatif entre deux réponses possibles, la question mérite d'être posée (§41). */
