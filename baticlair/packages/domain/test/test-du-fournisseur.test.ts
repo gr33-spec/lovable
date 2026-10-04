@@ -50,12 +50,12 @@ describe("test du fournisseur : chaque ligne « À commander » se charge dans l
     expect(faconne.toBuy.find((b) => b.label.startsWith("Bandes zinc façonnées"))).toMatchObject({ quantity: "8 pièces" });
     expect(faconne.toQuote).toEqual([]);
     // Je façonne : le développé devient nécessaire (question), puis des FEUILLES de 2 × 1 m (§25.2), jamais du zinc au kg
-    // pour une bande : 14,3 m × 0,10 m / 2 m² = 0,72 → 1 feuille. Le joint debout, lui, reste en bobine au kg (VMZINC).
+    // pour une bande : 14,3 m × 0,10 m / 2 m² = 0,72 → 1 feuille. Le joint debout, lui, part en bobine au mètre linéaire, largeur écrite (jamais au kg).
     const sansDeveloppe = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "1", unit: "u" } });
     expect(sansDeveloppe.questions.map((q) => q.question?.key ?? q.key)).toContain("param:developpe");
     const surPlace = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "1", unit: "u" }, "param:developpe": { value: "100", unit: "mm" } });
     expect(surPlace.toBuy.find((b) => b.needIds.includes("feuilles-bandes"))).toMatchObject({ label: "Feuilles zinc 2 × 1 m", quantity: "1 pièce" });
-    expect(surPlace.toBuy.find((b) => b.needIds.includes("zinc-bobines"))?.order?.unit).toBe("kg");
+    expect(surPlace.toBuy.find((b) => b.needIds.some((id) => id.startsWith("zinc-bobines")))?.order?.unit).toBe("ml");
   });
 
   it("unités refusées en sortie : m², ml de métal nu, lot, forfait, ensemble ; admises : pièces, rouleaux, ml avec dimensions", () => {

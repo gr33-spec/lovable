@@ -1,5 +1,9 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.04-19 — bobine de zinc au mètre linéaire, jamais au kg
+
+- **Joint debout, « je façonne »** (retour du fondateur) : la bobine se commande au **mètre linéaire**, plus en kg. Une bande par bac, à la longueur du rampant : nombre de bacs (largeur du pan ÷ largeur utile 430 ou 580 mm) × rampant. 91 m², rampant 5,5 m, bord de mer : 39 × 5,5 = **215 ml de bobine 500 mm** (avant : 501 kg). Rampant 12 m profilé sur place : 18 × 12 = 216 ml. La largeur est écrite sur la ligne (deux articles : bobine 500 mm en bord de mer, 650 mm ailleurs) ; l'épaisseur reste dite et part dans « Le chantier en bref ». Les poids VMZINC (5,5 / 6 / 7 kg/m²) ne servent plus au calcul.
+
 ## roofing-2026.10.04-18 — voligeage seul
 
 - **Voligeage** (nouvel ouvrage `voligeage`, famille `sheathing`) : une ligne « Voligeage en sapin traité 18×200 mm, 91 m² » ne reste plus « article inconnu » : 91 m² × 1,05 = 96 m² de voliges sapin 18 mm (§7 « Support voligeage : m² rampant × 1,05 »). Sous un zinc à joint debout, la volige reste à l'ouvrage zinc (un seul article). « voligeage » ajouté au vocabulaire du couvreur.

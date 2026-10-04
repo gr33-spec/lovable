@@ -373,7 +373,7 @@ const RAMPANT_PARAM: ParamDef = {
 };
 /**
  * Métal façonné (§40.2, §41.2) : « tu façonnes toi-même ou tu commandes façonné ? ». La réponse change
- * tout : bobines en kg d'un côté, pièces aux dimensions de l'autre. Pas de défaut : on demande.
+ * tout : bobines au mètre linéaire d'un côté, pièces aux dimensions de l'autre. Pas de défaut : on demande.
  */
 const FACONNAGE_PARAM: ParamDef = {
   key: "faconnage",
@@ -381,7 +381,7 @@ const FACONNAGE_PARAM: ParamDef = {
   unit: "u",
   kind: "artisan_preference",
   question: "Tu façonnes tes bacs toi-même, ou tu les commandes façonnés ?",
-  hint: "Bobines de zinc en kg si tu façonnes ; bacs à la longueur du rampant sinon.",
+  hint: "Bobine de zinc au mètre linéaire si tu façonnes ; bacs à la longueur du rampant sinon.",
   choices: [
     { label: "Je façonne (bobines)", value: "1" },
     { label: "Je commande façonné (bacs)", value: "2" },
@@ -390,7 +390,7 @@ const FACONNAGE_PARAM: ParamDef = {
 };
 /**
  * Rampant de plus de 10 m en bacs (§7 : « bacs profilés à longueur (max 10 à 15 m) ») : soit la bobine est
- * profilée sur place (zinc au kg), soit les bacs viennent en plusieurs longueurs. Pas de défaut : on demande.
+ * profilée sur place (bobine au mètre linéaire), soit les bacs viennent en plusieurs longueurs. Pas de défaut : on demande.
  */
 const BACS_LONGS_PARAM: ParamDef = {
   key: "bacs_longs",
@@ -398,7 +398,7 @@ const BACS_LONGS_PARAM: ParamDef = {
   unit: "u",
   kind: "artisan_preference",
   question: "Rampant de plus de 10 m : bobine profilée sur place, ou bacs en plusieurs longueurs ?",
-  hint: "Profilée sur place : zinc en bobine au kg. Plusieurs longueurs : un bac tous les 10 m, avec jonction transversale.",
+  hint: "Profilée sur place : zinc en bobine au mètre linéaire. Plusieurs longueurs : un bac tous les 10 m, avec jonction transversale.",
   choices: [
     { label: "Bobine profilée sur place", value: "1" },
     { label: "Bacs en plusieurs longueurs", value: "2" },
@@ -528,7 +528,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.04-18",
+  version: "roofing-2026.10.04-19",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -649,9 +649,9 @@ export const ROOFING_REFERENTIAL: Referential = {
     // Un faîtage EN ZINC est une bande, jamais des faîtières en terre cuite : le mot « zinc » le départage.
     { code: "zinc_ridge", label: "Faîtage zinc (bande)", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["faitage zinc", "faitage en zinc", "faitiere zinc", "faitiere en zinc", "bande de faitage zinc", "bande de faitage"] },
     { code: "zinc_clip", label: "Patte de fixation zinc", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["patte de fixation", "patte zinc"] },
-    // Joint debout (§7, §36) : la ligne du devis est une SURFACE ; ce qui se commande, ce sont des bobines (kg) ou des bacs.
+    // Joint debout (§7, §36) : la ligne du devis est une SURFACE ; ce qui se commande, ce sont des bobines (au mètre linéaire) ou des bacs.
     { code: "standing_seam", label: "Couverture zinc joint debout", needUnit: "m2", attributes: [], keyAttributes: [], keywords: ["joint debout", "couverture zinc", "zinc a joint debout", "jdb"] },
-    { code: "zinc_coil", label: "Bobine de zinc", needUnit: "kg", attributes: [], keyAttributes: [], keywords: ["bobine de zinc", "bobine zinc", "zinc en bobine"] },
+    { code: "zinc_coil", label: "Bobine de zinc", needUnit: "m", attributes: [], keyAttributes: [], keywords: ["bobine de zinc", "bobine zinc", "zinc en bobine"] },
     { code: "zinc_panel", label: "Bac joint debout", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["bac joint debout", "bac zinc", "bacs zinc"] },
     // Bandes zinc au ml (§7, §36.4) : solin, rive, égout, ventilation, couvre-joint. Jamais commandées en « ml de zinc » nu.
     {
@@ -995,9 +995,13 @@ export const ROOFING_REFERENTIAL: Referential = {
       sellingUnits: [{ id: "longueur", label: { one: "longueur de 3 m", many: "longueurs de 3 m" }, contains: packaging("3", "m", F, FOUNDER_DOC), primary: true }],
     }),
     generic("patte-zinc-standard", "zinc_clip", "Patte de fixation pour bande zinc", "Pattes de fixation"),
-    generic("bobine-zinc-standard", "zinc_coil", "Zinc naturel en bobine (largeur 500 ou 650 mm, épaisseur selon le chantier)", "Zinc naturel en bobine", {
-      sellingUnits: [{ id: "kg", label: { one: "kg", many: "kg" }, contains: packaging("1", "kg", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }), primary: true }],
-    }),
+    // Retour du fondateur (2026-10-04) : une bobine de zinc se commande au MÈTRE LINÉAIRE, jamais au kg ; la largeur
+    // (500 mm en bord de mer, 650 mm ailleurs) et l'épaisseur partent avec la ligne, dans « Le chantier en bref ».
+    ...(["650", "500"] as const).map((w) =>
+      generic(w === "650" ? "bobine-zinc-standard" : "bobine-zinc-500", "zinc_coil", `Zinc naturel en bobine largeur ${w} mm, au mètre linéaire (épaisseur du chantier)`, `Zinc naturel en bobine ${w} mm`, {
+        sellingUnits: [{ id: "ml", label: { one: "ml", many: "ml" }, contains: packaging("1", "m", "definition", { status: "verified", verifiedAt: "2026-10-04", verifiedBy: "BatiClair (définition)" }), primary: true }],
+      }),
+    ),
     generic("bac-joint-debout-standard", "zinc_panel", "Bac joint debout zinc naturel, façonné à la longueur du rampant (largeur utile 430 ou 580 mm)", "Bacs joint debout zinc"),
     generic("bardelis-standard", "verge_tile", "Bardelis (tuile de rive canal), modèle de la tuile posée", "Bardelis"),
     // Zinc façonné sur place (§25.2) : feuilles de 2 × 1 m, épaisseur du chantier ; jamais au kg pour un abergement ou une bande.
@@ -1588,7 +1592,8 @@ export const ROOFING_REFERENTIAL: Referential = {
       params: [SURFACE_PARAM, FACONNAGE_PARAM, EPAISSEUR_ZINC_PARAM, RAMPANT_PARAM, BACS_LONGS_PARAM, ZONE_PARAM],
       slots: [
         { key: "couverture", family: "standing_seam", label: "Couverture zinc joint debout", measureOnly: true },
-        { key: "bobine", family: "zinc_coil", label: "Zinc en bobine", usual: { text: "Zinc naturel en bobine, largeur 650 mm (500 mm en bord de mer), vendu au kg.", source: F, productId: "bobine-zinc-standard" } },
+        { key: "bobine", family: "zinc_coil", label: "Zinc en bobine", keywords: ["bobine"], usual: { text: "Zinc naturel en bobine largeur 650 mm, commandé au mètre linéaire.", source: "vmzinc-joint-debout", productId: "bobine-zinc-standard" } },
+        { key: "bobine_littoral", family: "zinc_coil", label: "Zinc en bobine (bord de mer)", keywords: ["bord de mer", "littoral"], usual: { text: "Bord de mer : zinc naturel en bobine largeur 500 mm, commandé au mètre linéaire (VMZINC).", source: "vmzinc-joint-debout", productId: "bobine-zinc-500" } },
         { key: "bac", family: "zinc_panel", label: "Bacs joint debout", usual: { text: "Bacs façonnés par le fournisseur à la longueur du rampant.", source: F, productId: "bac-joint-debout-standard" } },
         { key: "patte", family: "zinc_clip", label: "Pattes de fixation", keywords: ["patte"], usual: { text: "Pattes fixes et coulissantes, selon le rampant (VMZINC 36.2).", source: "vmzinc-joint-debout", productId: "patte-zinc-standard" } },
         { key: "volige", family: "sheathing", label: "Voliges", keywords: ["volige"], usual: { text: "Volige sapin 18 mm sous le zinc (§7).", source: F, productId: "volige-sapin-standard" } },
@@ -1641,11 +1646,30 @@ export const ROOFING_REFERENTIAL: Referential = {
           id: "zinc-bobines",
           slot: "bobine",
           // Je façonne ; ou bien je commande façonné mais le rampant dépasse 10 m et je profile la bobine sur place.
-          when: "si(faconnage < 2, 1, si(longueur_rampant > regle.rampant_max_bac, si(bacs_longs < 2, 1, 0), 0))",
-          formula: "surface * poids_zinc",
-          unit: "kg",
+          when: "si(zone >= regle.zone_littorale, 0, si(faconnage < 2, 1, si(longueur_rampant > regle.rampant_max_bac, si(bacs_longs < 2, 1, 0), 0)))",
+          // Une bande de bobine par bac, à la longueur du rampant : nombre de bacs (largeur du pan ÷ largeur utile) × rampant.
+          // L'épaisseur ne change pas la longueur mais l'article : le facteur 1 la garde dans le calcul, donc dite
+          // (hypothèse modifiable) et transmise au fournisseur dans « Le chantier en bref ».
+          formula: "arrondi_sup(largeur_pan / entraxe_joints) * longueur_rampant * si(epaisseur_zinc >= regle.seuil_070, 1, 1)",
+          unit: "m",
           core: true,
-          exclusions: "Zinc posé joints compris (VMZINC) ; hors bandes d'égout, de rive, de faîtage et de noue, comptées à part.",
+          exclusions: "Une longueur de rampant par bac, sans surlongueur de pliage en égout et en faîtage ; hors bandes d'égout, de rive, de faîtage et de noue, comptées à part.",
+          source: "vmzinc-joint-debout",
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "zinc-bobines-littoral",
+          slot: "bobine_littoral",
+          // Je façonne ; ou bien je commande façonné mais le rampant dépasse 10 m et je profile la bobine sur place.
+          when: "si(zone >= regle.zone_littorale, si(faconnage < 2, 1, si(longueur_rampant > regle.rampant_max_bac, si(bacs_longs < 2, 1, 0), 0)), 0)",
+          // Une bande de bobine par bac, à la longueur du rampant : nombre de bacs (largeur du pan ÷ largeur utile) × rampant.
+          // L'épaisseur ne change pas la longueur mais l'article : le facteur 1 la garde dans le calcul, donc dite
+          // (hypothèse modifiable) et transmise au fournisseur dans « Le chantier en bref ».
+          formula: "arrondi_sup(largeur_pan / entraxe_joints) * longueur_rampant * si(epaisseur_zinc >= regle.seuil_070, 1, 1)",
+          unit: "m",
+          core: true,
+          exclusions: "Une longueur de rampant par bac, sans surlongueur de pliage en égout et en faîtage ; hors bandes d'égout, de rive, de faîtage et de noue, comptées à part.",
           source: "vmzinc-joint-debout",
           verification: FOUNDER_DOC,
           version: 1,

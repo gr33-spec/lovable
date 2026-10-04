@@ -153,7 +153,7 @@ describe("envoi fournisseur : un contenu, trois blocs, aucun prix", () => {
       chantier: "Toiture Dupont",
       commune: "Brest",
       date: "2026-10-03",
-      articles: ["Ardoises 30×22 : 9 200 pièces, soit ≈ 12 palettes", "Zinc naturel en bobine : 501 kg"],
+      articles: ["Ardoises 30×22 : 9 200 pièces, soit ≈ 12 palettes", "Zinc naturel en bobine 500 mm : 215 ml"],
       a_chiffrer: [],
       resume: ["pente du toit 45° · région ardoise III · je façonne"],
       detail: [{ libelle: "Couverture ardoises", mesure: "200 m²", precisions: ["ardoise 30×22"] }],
