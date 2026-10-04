@@ -351,6 +351,24 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
         facts.push({ key: p.key, ...asRef, evidence: `Devis, ${line.ref} (« ${label} »)`, origin: "devis" });
       }
     }
+    for (const p of work.params) {
+      // « Ø 150 » sans unité : lu seulement si 150 est une des réponses proposées (un bouton), jamais deviné.
+      if (p.choices && !facts.some((f) => f.key === p.key && f.workItemId === work.id)) {
+        for (const label of p.textLabels ?? []) {
+          const pos = keywordPosition(text, label);
+          if (pos < 0 || readLabelled(text, label)) continue;
+          const m = /^[a-z]{0,2}\s*(?:de |: |:|= )?\s*(\d+)(?![\d,.]|\s*(?:mm|cm|ml|m2|m²|m|%|°)(?![a-z0-9]))/.exec(text.slice(pos + normalizeText(label).length));
+          if (m && p.choices.some((c) => c.value === m[1])) {
+            facts.push({ key: p.key, value: m[1]!, unit: p.unit, evidence: `Devis, ${line.ref} (« ${label} ${m[1]} »)`, origin: "devis", workItemId: work.id });
+            break;
+          }
+        }
+      }
+      for (const tv of p.textValues ?? []) {
+        const kw = tv.keywords.find((k) => keywordPosition(text, k) >= 0);
+        if (kw) facts.push({ key: p.key, value: tv.value, unit: p.unit, evidence: `Devis, ${line.ref} (« ${kw} »)`, origin: "devis", workItemId: work.id });
+      }
+    }
     const chars = productCharacteristics(ref, work, slot, line.designation);
     const charKey = slotCharacteristicsKey(work.id, slot.key);
     if (chars.length > 0) characteristicsBySlot[charKey] = [...new Set([...(characteristicsBySlot[charKey] ?? []), ...chars])];
@@ -373,6 +391,17 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
   for (const f of extraFacts) {
     if (f.origin !== "artisan" && fromText.some((x) => x.key === f.key && sameAs(x, f))) continue;
     facts.push(f);
+  }
+  // Une donnée lue sur les AUTRES ouvrages du devis (la couverture sous une sortie de toit) : une seule valeur possible, sinon on demande.
+  for (const w of active.filter((x) => mentioned.has(x.id))) {
+    for (const p of w.params) {
+      if (!p.fromWorks || facts.some((f) => f.key === p.key && f.workItemId === w.id)) continue;
+      const hits = p.fromWorks.filter((fw) => fw.workItems.some((id) => mentioned.has(id)));
+      const values = [...new Set(hits.map((h) => h.value))];
+      if (values.length !== 1) continue;
+      const by = active.find((x) => hits[0]!.workItems.includes(x.id) && mentioned.has(x.id))!;
+      facts.push({ key: p.key, value: values[0]!, unit: p.unit, evidence: `Devis : ${by.label.replace(/\s*\(.*\)$/, "").toLowerCase()}`, origin: "devis", workItemId: w.id });
+    }
   }
   const context: ChantierContext = { facts };
   const conflicts: string[] = [];

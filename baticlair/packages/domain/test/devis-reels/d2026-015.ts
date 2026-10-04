@@ -88,7 +88,8 @@ export const D2026_015_LINES: BenchLine[] = [
       "Sortie de toit Poujoulat (Fourniture & Pose) - Fourniture et pose d'une sortie de toit complète de marque Poujoulat avec solin d'étanchéité adapté à la tuile HP10",
     quantity: "1",
     unit: "unité",
-    truth: "D",
-    note: "Modèle et diamètre Poujoulat non écrits.",
+    // Réponse du fondateur (2026-10-04) : une sortie = une embase (ou platine zinc), un chapeau, une collerette si fumée.
+    truth: "C",
+    note: "Modèle et diamètre Poujoulat non écrits ; une sortie de toit se décompose en embase, chapeau et, pour la fumée, collerette.",
   },
 ];

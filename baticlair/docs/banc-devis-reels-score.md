@@ -1,7 +1,7 @@
 # Banc d'essai — vrais devis : tableau de score
 
 Fichier GÉNÉRÉ par `packages/domain/test/banc-devis-reels.test.ts` : ne pas modifier à la main.
-Référentiel : roofing-2026.10.04-22.
+Référentiel : roofing-2026.10.04-23.
 
 Une ligne « commande connue » a toutes ses quantités à commander ; « besoin connu » a ses quantités
 (ml, m², pièces) mais pas encore l'unité de vente vérifiée. Les questions comptent celles qui sont
@@ -11,13 +11,13 @@ posées, celles où aucune proposition ne convient et celles restées sans répo
 
 | Devis | Lignes matériaux | Commande connue | Besoin connu (conditionnement à confirmer) | Attend une réponse | Ne sait pas encore | Ouvrage pas encore couvert | Questions |
 |---|---|---|---|---|---|---|---|
-| D-2026-015 | 10 | 8 | 0 | 0 | 0 | 2 | 1 |
+| D-2026-015 | 10 | 8 | 0 | 1 | 0 | 1 | 2 |
 
 ### Si les règles en attente étaient validées (écran du validateur)
 
 | Devis | Lignes matériaux | Commande connue | Besoin connu (conditionnement à confirmer) | Attend une réponse | Ne sait pas encore | Ouvrage pas encore couvert | Questions |
 |---|---|---|---|---|---|---|---|
-| D-2026-015 | 10 | 8 | 0 | 0 | 0 | 2 | 1 |
+| D-2026-015 | 10 | 8 | 0 | 1 | 0 | 1 | 2 |
 
 ## Détail par devis
 
@@ -36,16 +36,16 @@ Origine : Devis client d'une entreprise de couverture, transmis par le fondateur
 | ligne 7 | commande connue | commande connue |
 | ligne 8 | commande connue | commande connue |
 | ligne 9 | ouvrage pas encore couvert | ouvrage pas encore couvert — Tuile chatière : pas encore de règle de calcul dans BatiClair. |
-| ligne 10 | ouvrage pas encore couvert | ouvrage pas encore couvert — Sortie de toit : pas encore de règle de calcul dans BatiClair. |
+| ligne 10 | attend une réponse | attend une réponse |
 
 Questions (règles validées) :
 
 - posée : « J'ai identifié : Tuiles HP10. C'est bien ce modèle ? » — Le devis écrit « tuiles … type HP10 » : l'artisan confirme le modèle.
+- sans réponse connue : « Sortie de toit : quel diamètre ? »
 
 À documenter pour aller plus loin (règles validées) :
 
 - Tuile chatière — ouvrage à couvrir (ligne 9) — Exemples réels de cet ouvrage + documentation des produits utilisés.
-- Sortie de toit — ouvrage à couvrir (ligne 10) — Exemples réels de cet ouvrage + documentation des produits utilisés.
 
 À documenter aujourd'hui (règles en attente) :
 

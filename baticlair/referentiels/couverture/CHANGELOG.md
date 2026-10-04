@@ -1,5 +1,11 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.04-23 — sortie de toit décomposée, longueurs expliquées
+
+- **Sortie de toit** (nouvel ouvrage `sortie-de-toit`, réponse du fondateur) : une sortie = une **embase plomb** (ardoise, tuile) ou une **platine zinc soudée** (zinc), au diamètre du conduit, plus un **chapeau** ; une **collerette d'étanchéité** (solin) seulement pour un conduit de fumée. Questions à boutons : diamètre Ø 80 / 100 / 125 / 150 / 180 ou VMC, puis conduit de fumée ou ventilation. La couverture se lit sur les autres ouvrages du devis (zinc à joint debout → platine ; ardoises ou tuiles → embase), sinon sur la ligne (« tuile HP10 »), sinon on demande. « VMC », « poêle », « fumée », « ventilation », « Ø 150 » écrits dans la ligne sont lus. Le diamètre part en précision (« Ø 150 », « VMC »). La ligne du devis n'est plus un article tel quel : D-2026-015 « Sortie de toit Poujoulat » devient embase + chapeau (+ collerette si fumée), après deux questions.
+- **Précisions des longueurs** (même esprit que « 4 longueurs de 4 m (13 ml à couvrir) ») : bobine « 31 bacs × 7,15 m », liteaux « lattage 120 m², une file tous les 31 cm », contre-liteaux « contre-lattage 120 m², une file tous les 90 cm », tubes de descente « 2 descentes × 4 m ».
+- Moteur (générique, sans changement de règle) : une donnée peut se lire par un mot de la ligne (`textValues`) ou sur les autres ouvrages du devis (`fromWorks`) ; une donnée qui change l'ARTICLE sans changer la quantité est demandée (`precisionRequires`) ; une précision écrit une donnée comme elle se dit (`display`, « Ø 150 »).
+
 ## roofing-2026.10.04-22 — surlongueur de bobine, bâche fournie
 
 - **Surlongueur de bobine** (réponse du fondateur) : **15 cm par bac** (10 en égout, 5 en faîtage), ajoutés au rampant avant de multiplier par le nombre de bacs. Chantier Test, 91 m², rampant 7 m, bobine 500 : 31 × 7,15 = **222 ml** (avant : 217 ml). 91 m², rampant 5,5 m : 39 × 5,65 = **221 ml** (avant : 215 ml).

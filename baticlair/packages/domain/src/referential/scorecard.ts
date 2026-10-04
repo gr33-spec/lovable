@@ -108,7 +108,9 @@ export function scoreQuote(
     if (l.status === "not_material") return { ref: l.ref, outcome: "not_material" as const, needs: [] };
     if (l.status === "not_covered") return { ref: l.ref, outcome: "not_covered" as const, needs: [], reason: l.reason };
     const slots = [l.slot, ...l.mentions];
-    const needs = result.workItems.find((w) => w.workItemId === l.workItemId)!.needs.filter((n) => slots.includes(n.slot));
+    // La ligne qui ne fait que MESURER l'ouvrage (« 1 sortie de toit ») porte tous ses besoins (embase, chapeau…).
+    const measureOnly = ref.workItems.find((w) => w.id === l.workItemId)?.slots.find((s) => s.key === l.slot)?.measureOnly;
+    const needs = result.workItems.find((w) => w.workItemId === l.workItemId)!.needs.filter((n) => measureOnly || slots.includes(n.slot));
     const worst = needs.reduce<keyof typeof RANK>((acc, n) => (RANK[needOutcome(n)] > RANK[acc] ? needOutcome(n) : acc), "order");
     const reason = needs.find((n) => needOutcome(n) === worst && n.reason)?.reason;
     return { ref: l.ref, outcome: needs.length === 0 ? ("unknown" as const) : worst, needs: needs.map((n) => n.needId), ...(reason ? { reason } : {}) };

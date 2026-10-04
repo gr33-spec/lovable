@@ -71,8 +71,8 @@ function render(title: string, v: PurchaseView): string {
 describe("liste d'achats : D-2026-015 (tuiles HP10, 120 m²)", () => {
   it("à l'ouverture : une question (le modèle lu), et déjà presque tout à acheter", () => {
     const v = read(D2026_015_LINES);
-    // Le devis ne dit pas le diamètre de la sortie de toit : une question à boutons (réponse du fondateur, 2026-10-04).
-    expect(v.questions.map((q) => q.key)).toEqual(["engine:product:tuile", "precise:ligne 10"]);
+    // La sortie de toit est un ouvrage (réponse du fondateur, 2026-10-04) : le devis ne dit ni le diamètre ni l'usage.
+    expect(v.questions.map((q) => q.key)).toEqual(["engine:param:diametre_sortie", "engine:param:usage_sortie", "engine:product:tuile"]);
     expect(v.toBuy.map((b) => [short(b.label), b.quantity])).toEqual([
       ["Liteaux 27×40", "547 ml"],
       ["Écran HPV", "2 rouleaux"],
@@ -88,16 +88,19 @@ describe("liste d'achats : D-2026-015 (tuiles HP10, 120 m²)", () => {
       ["Coudes", "4 pièces"],
       ["Colliers", "8 pièces"],
       ["Chatières de ventilation", "10 pièces"],
-      ["Sortie de toit Poujoulat", "1 pièce"],
     ]);
     expect(v.toQuote).toEqual([]);
-    expect(v.canValidate).toBe(false);
-    expect(read(D2026_015_LINES, { "precise:ligne 10": "Ø 150" }).canValidate).toBe(true);
+    const sortie = read(D2026_015_LINES, { "param:diametre_sortie": { value: "150", unit: "mm" }, "param:usage_sortie": { value: "1", unit: "u" } });
+    expect(sortie.toBuy.filter((b) => /sortie|collerette/i.test(b.label)).map((b) => [b.label, b.quantity, b.precision])).toEqual([
+      ["Embase plomb de sortie de toit", "1 pièce", "Ø 150, pour ardoise ou tuile"],
+      ["Chapeau de sortie de toit", "1 pièce", "Ø 150"],
+      ["Collerette d'étanchéité", "1 pièce", "Ø 150, solin du conduit de fumée"],
+    ]);
   });
 
   it("après « oui, c'est bien ce modèle » : 1 488 tuiles avec le pureau mini (zone littorale), 1 345 si l'artisan donne 34,3 cm", () => {
     const v = read(D2026_015_LINES, { "product:tuile": "edilians-hp10-huguenot" });
-    expect(v.questions.map((q) => q.key)).toEqual(["precise:ligne 10"]);
+    expect(v.questions.map((q) => q.key)).toEqual(["engine:param:diametre_sortie", "engine:param:usage_sortie"]);
     expect(v.toBuy.find((b) => b.needIds.includes("tuiles"))).toMatchObject({ quantity: "1 488 pièces", approx: "≈ 7 palettes" });
     expect(v.assumptions.map((a) => a.key)).toEqual(expect.arrayContaining(["param:zone", "param:pente", "param:pureau"]));
     const precise = read(D2026_015_LINES, { "product:tuile": "edilians-hp10-huguenot", "param:pureau": { value: "34.3", unit: "cm" } });

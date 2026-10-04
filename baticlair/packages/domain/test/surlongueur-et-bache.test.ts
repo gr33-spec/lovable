@@ -19,6 +19,18 @@ describe("surlongueur de bobine et bâche", () => {
   it("chantier Test, je façonne : 31 bacs × (7 m + 15 cm) = 222 ml de bobine 500 mm (avant : 217 ml)", () => {
     const v = readQuote(TEST, { "param:faconnage": u("1"), "param:egout_faitage": u("4") });
     expect(bobine(v)?.quantity).toBe("222 ml");
+    // Ce qui se calcule en longueurs dit d'où vient la longueur (retour du fondateur, 2026-10-04).
+    expect(bobine(v)?.precision).toBe("31 bacs × 7,15 m");
+  });
+
+  it("liteaux et tubes de descente disent aussi d'où vient leur longueur", () => {
+    const v = readQuote([
+      { ref: "1", designation: "Couverture en ardoises naturelles 30x22 posées au crochet", quantity: "200", unit: "m²" },
+      { ref: "2", designation: "Descente d'eau pluviale zinc Ø80 hauteur 4 m", quantity: "2", unit: "u" },
+    ], {});
+    expect(v.toBuy.find((b) => b.label.startsWith("Liteaux 18"))?.precision).toBe("lattage 200 m², une file tous les 10,25 cm");
+    expect(v.toBuy.find((b) => b.label.startsWith("Liteaux 27"))?.precision).toBe("contre-lattage 200 m², une file tous les 60 cm");
+    expect(v.toBuy.find((b) => /tube/i.test(b.label))?.precision).toBe("2 descentes × 4 m");
   });
 
   it("la surlongueur s'ajoute avant de multiplier : 39 bacs × (5,5 + 0,15) = 220,35 → 221 ml", () => {
