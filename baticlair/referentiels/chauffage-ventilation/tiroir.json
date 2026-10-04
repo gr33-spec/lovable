@@ -1,0 +1,162 @@
+{
+  "metier": {
+    "code": "chauffage-ventilation",
+    "nom": "Chauffage (PAC, climatisation, poêle) et ventilation (VMC)",
+    "version": "0.2.0-recherche",
+    "maturite": "alpha",
+    "active": false,
+    "referentiel": [
+      "docs/referentiels/chauffage-pac-ventilation.md",
+      "docs/referentiels/ventilation-vmc.md"
+    ]
+  },
+  "fusion": {
+    "documents": [
+      "chauffage-pac-ventilation.md (14 chapitres)",
+      "ventilation-vmc.md (14 chapitres)"
+    ],
+    "ecarts_entre_documents": [
+      "Gaine par bouche : 5 m + 10 % (chauffage-pac-ventilation.md) contre 1 filet de 6 m sans raboutage (ventilation-vmc.md). Même commande (1 filet de 6 m par bouche) tant que la distance reste sous 5,5 m.",
+      "Découpage des VMC : 2 ouvrages (simple / double flux) contre 4 (auto, hygro A, hygro B, double flux). Le découpage fin est retenu, car le kit commandé change.",
+      "Plancher chauffant, radiateurs, chaudière : présents aussi dans plombier-chauffagiste.md, donc dans le tiroir plomberie."
+    ]
+  },
+  "valeurs": [
+    {
+      "id": "gaine_vmc_filet",
+      "libelle": "Gaine VMC souple isolée Ø80 : longueur",
+      "avant": "1 filet de 6 m par bouche (à valider) ; filets de 3 m ?",
+      "valeur": "filet de 6 m, isolant laine de verre 25 mm, Ø ext. 105 mm (Aldes Algaine 11091619, Strulik) ; lots de 4",
+      "unite": "m",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.123elec.com/aldes-gaine-vmc-isolee-souple-en-pvc-l6m-d80mm-algaine-11091619.html",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.123elec.com/strulik-gaine-vmc-isolee-souple-en-pvc-l6m-d80mm-str61008006.html",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Le filet de 6 m est confirmé ; un filet de 3 m n'a pas été trouvé. chauffage-pac-ventilation.md compte 5 m + 10 % par bouche : 5,5 m, donc 1 filet de 6 m aussi."
+    },
+    {
+      "id": "kit_hygrocosy_412292",
+      "libelle": "Kit VMC Atlantic Hygrocosy 412292 : composition",
+      "avant": "3 bouches à piles ou 2 ? (sources contradictoires)",
+      "valeur": "3 bouches à piles (2 piles LR6 par bouche, non fournies), extensible à 6 sanitaires ; montage hygro A ou B",
+      "unite": "bouches",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.domomat.com/30409-kit-vmc-hygrocosy-simple-flux-hygroreglable-231mh-22db-avec-3-bouches-a-piles-atlantic-412292.html",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.quincaillerie-angles.fr/pdf-product/view/index/id/354401/",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "3 bouches tranché par deux sources. Piles LR6 à commander en plus (6 pour 3 bouches). Le bouton poussoir 420931 n'est pas cité dans les extraits."
+    },
+    {
+      "id": "adhesif_alu_vmc",
+      "libelle": "Adhésif aluminium VMC : rouleau",
+      "avant": "1 rouleau par chantier (à valider)",
+      "valeur": "rouleau de 50 m × 50 mm (Aldes RAA 11091013, Vortice, Acomat) ; 10 m chez Unelvent",
+      "unite": "m",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.domomat.com/10224-bande-adhesive-raa-50m-aldes-11091013.html",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.bricozor.com/bande-aluminium-adhesive.html",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Le format est sourcé ; « 1 rouleau par chantier » reste à valider (50 m couvrent largement une maison)."
+    },
+    {
+      "id": "liaison_frigo_couronne",
+      "libelle": "Liaison frigorifique cuivre isolée : couronnes",
+      "avant": "+10 % et +1 m sur la distance, couronnes (à valider)",
+      "valeur": "couronnes de 3 à 50 m ; kits bitubes prêts de 2 à 20 m ; isolant PE 6 à 10 mm",
+      "unite": "m",
+      "statut": "a_verifier",
+      "sources": [
+        {
+          "url": "https://climaled.fr/liaisons-frigorifiques-cuivre-isole-3-8-50-mt",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.richardson.fr/files/richardson/technical_document/6fd/459810_fiche_technique_liais.pdf",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Les formats existent ; la marge de 10 % + 1 m est une pratique à faire valider par un frigoriste."
+    },
+    {
+      "id": "liaison_frigo_diametres",
+      "libelle": "Diamètres de liaison par puissance de split",
+      "avant": "1/4-3/8 jusqu'à 3,5 kW ; 1/4-1/2 de 5 à 7 kW (à valider)",
+      "valeur": "1/4-3/8 pour les splits de 2,5 et 3,5 kW (Weinmann-Schanz)",
+      "unite": "pouces",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://weinmann-schanz.de/de/en/Heating/New-in-Range/Heat-generators-tanks/Refrigerant-line-1-4-and-3-8-for-Air-conditioning-devices-sid2670324.html",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "La tranche 5-7 kW en 1/4-1/2 dépend du modèle : notice fabricant à lire unité par unité."
+    },
+    {
+      "id": "bande_peripherique",
+      "libelle": "Plancher chauffant : bande périphérique",
+      "avant": "rouleau 50 m (à vérifier) ; 4 × √S × 1,25 par pièce sans plan",
+      "valeur": "25 m (8 × 150 mm, Roth BL 25, Finimetal avec bavette) ; 50 m (5 × 150 mm Finimetal ; 8 × 220 mm Roth BL 50)",
+      "unite": "m/rouleau",
+      "statut": "contradiction",
+      "sources": [
+        {
+          "url": "https://professionnels.roth-france.fr/documents/650b0387c7736.pdf",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.domomat.com/55588-bande-peripherique-pourtour-simple-ep5mm-h150mm-50ml-finimetal-bandes.html",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.domomat.com/55592-bande-peripherique-avec-bavette-ep8mm-h150mm-25ml-finimetal-bandesbav.html",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "25 m et 50 m coexistent selon l'épaisseur et la bavette : le rouleau de 50 m du référentiel n'est vrai que pour la bande simple de 5 mm."
+    },
+    {
+      "id": "pc_plaque_plots",
+      "libelle": "Plancher chauffant : plaque à plots",
+      "avant": "1,2 m² (voir plomberie)",
+      "valeur": "voir referentiels/plomberie/tiroir.json (pc_plaque_plots) : 1 200 × 1 000 mm, 1,18 m² utiles",
+      "unite": "m²/plaque",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://dam.giacomini.com/fr.giacomini.com/product_documentations/datasheets/R885DB.pdf",
+          "date": "2026-10-04"
+        }
+      ]
+    }
+  ],
+  "introuvable": [
+    "Débord de conduit au-dessus du faîtage (NF DTU 24.1) : texte non lu.",
+    "Charge de fluide préchargée et grammes par mètre en plus, par modèle (Atlantic, Daikin, Mitsubishi, Panasonic, Hitachi) : notices non lisibles par le proxy.",
+    "Colliers de gaine VMC : sachets ; bouton poussoir Atlantic 420931.",
+    "Hygro B : 1 ou 2 entrées d'air au séjour selon la gamme.",
+    "Double flux : 1 conduit Ø90 par 30 m³/h (Aldes, Zehnder).",
+    "Ratios de chantier : distance groupe ↔ intérieur 5 m, plancher 90 % de la surface, pas 15 / 10 cm, collecteur à 6 m, 2 × 8 m de tube par radiateur, colliers tous les 0,8 m."
+  ]
+}
