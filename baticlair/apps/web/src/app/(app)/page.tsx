@@ -25,7 +25,7 @@ export default function AccueilPage() {
   const fetchRecent = useCallback((signal: AbortSignal) => api<ProjectPage>("/v1/projects?limit=3", { signal }), []);
   const { data: recent, error, reload } = useResource(fetchRecent);
   const fetchNext = useCallback((signal: AbortSignal) => api<{ items: NextAction[] }>("/v1/next-actions", { signal }), []);
-  const { data: next } = useResource(fetchNext);
+  const { data: next, reload: reloadNext } = useResource(fetchNext);
   const { data: billing } = useBilling();
 
   const firstName = me.user.name.split(" ")[0] ?? me.user.name;
@@ -115,7 +115,17 @@ export default function AccueilPage() {
         </div>
         {error ? <ErrorNotice error={error} onRetry={reload} /> : null}
         {recent === null && !error ? <Spinner /> : null}
-        {recent && recent.items.length > 0 ? <ProjectList projects={recent.items} /> : null}
+        {/* Toujours montée : le bandeau « Annuler » survit au dernier chantier rangé. */}
+        {recent ? (
+          <ProjectList
+            projects={recent.items}
+            show="active"
+            onChanged={() => {
+              reload();
+              reloadNext();
+            }}
+          />
+        ) : null}
         {recent && recent.items.length === 0 ? (
           <p className="rounded-3xl bg-surface p-4 text-[15px] text-muted shadow-card">Aucun chantier pour l&apos;instant. Touchez « + » pour en créer un.</p>
         ) : null}

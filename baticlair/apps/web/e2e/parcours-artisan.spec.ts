@@ -159,6 +159,53 @@ test("marquer terminé retire le chantier des « En cours » sans le perdre", as
   await expect(page.getByRole("button", { name: "Tous" })).toHaveAttribute("aria-pressed", "true");
 });
 
+/** Glisse une ligne de la liste vers la gauche, du bout du doigt (souris en test), sur `ratio` de sa largeur. */
+async function swipeLeft(page: Page, name: RegExp, ratio: number) {
+  const box = (await page.getByRole("link", { name }).boundingBox())!;
+  const y = box.y + box.height / 2;
+  await page.mouse.move(box.x + box.width - 10, y);
+  await page.mouse.down();
+  for (let i = 1; i <= 10; i++) await page.mouse.move(box.x + box.width - 10 - (box.width * ratio * i) / 10, y);
+  await page.mouse.up();
+}
+
+test("glisser un chantier vers la gauche le range dans Terminés, et « Annuler » le remet", async ({ page }) => {
+  await signUp(page);
+  await createProject(page, "Toiture Le Bris", "M. Le Bris", "Quimper");
+  await createProject(page, "Zinguerie Morvan", "Mme Morvan", "Brest");
+  await page.goto("/chantiers");
+  const bris = page.getByRole("link", { name: /Toiture Le Bris/ });
+  await expect(bris).toBeVisible();
+
+  // Petit glissement : le bouton « Terminé » apparaît, le chantier ne s'ouvre pas.
+  await swipeLeft(page, /Toiture Le Bris/, 0.3);
+  await expect(page).toHaveURL(/\/chantiers$/);
+  await page.getByRole("button", { name: "Marquer terminé : Toiture Le Bris" }).click();
+  await expect(bris).toHaveCount(0);
+  await expect(page.getByRole("status").filter({ hasText: "Rangé dans Terminés" })).toBeVisible();
+  await page.getByRole("button", { name: "Annuler" }).click();
+  await expect(bris).toBeVisible();
+
+  // Long glissement : rangé d'un geste. Rien n'est perdu : il est dans « Terminés », d'où on le reprend.
+  await swipeLeft(page, /Toiture Le Bris/, 0.8);
+  await expect(bris).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /Zinguerie Morvan/ })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("link", { name: /Zinguerie Morvan/ })).toBeVisible();
+  await expect(bris).toHaveCount(0);
+  await page.getByRole("button", { name: "Terminés" }).click();
+  await expect(bris).toBeVisible();
+  await page.getByRole("button", { name: "Reprendre : Toiture Le Bris" }).focus();
+  await page.keyboard.press("Enter");
+  await expect(bris).toHaveCount(0);
+  await page.getByRole("button", { name: "En cours" }).click();
+  await expect(bris).toBeVisible();
+
+  // Un simple appui ouvre toujours le chantier.
+  await bris.click();
+  await expect(page.getByRole("heading", { name: "Toiture Le Bris" })).toBeVisible();
+});
+
 test("un double appui sur « Créer » ne crée qu'un chantier", async ({ page }) => {
   await signUp(page);
   await page.goto("/chantiers/nouveau");
