@@ -1,5 +1,5 @@
 import { AnthropicDocumentReader } from "../../../platform/ai/anthropic-document-reader.js";
-import { scopeInstruction, TAKEOFF_PROMPT, takeoffSystemPrompt } from "../application/prompt.js";
+import { scopeInstruction, siteNotesInstruction, TAKEOFF_PROMPT, takeoffSystemPrompt } from "../application/prompt.js";
 import {
   decodeExtraction,
   extractionWireSchema,
@@ -21,12 +21,13 @@ export class AnthropicTakeoffExtractor implements TakeoffExtractor {
   }
 
   async extract(request: ExtractionRequest): Promise<ExtractionAttempt> {
+    const extra = [request.scope ? scopeInstruction(request.scope.pages) : null, siteNotesInstruction(request.siteNotes)].filter(Boolean).join("\n\n");
     const attempt = await this.reader.read({
       system: takeoffSystemPrompt(request.tradeLabel, request.materialFamilies, request.workItems ?? []),
       schema: extractionWireSchema,
       document: request,
       documentName: "devis",
-      ...(request.scope ? { extra: scopeInstruction(request.scope.pages) } : {}),
+      ...(extra ? { extra } : {}),
       tag: `${TAKEOFF_PROMPT.id}-v${TAKEOFF_PROMPT.version}`,
     });
     return { ...attempt, output: attempt.output ? decodeExtraction(attempt.output) : null };

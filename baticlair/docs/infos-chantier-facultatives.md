@@ -39,3 +39,14 @@ Dans le MVP, la photo est GARDÉE (document du chantier, visible, jointe au doss
 - **Contradictions** : note ≠ devis → la note gagne, les deux valeurs sont dites ; devis ≠ document → question avec les deux valeurs.
 - **Écran** : sous le dépôt, « + Ajouter des informations sur le chantier (facultatif) » replié : zone de texte, bouton « Photo d'un croquis » avec commentaire. Dans le chat : bouton « Ajouter une info » qui ouvre la même zone. Le quantitatif montre la note et les croquis ; le fournisseur reçoit la note dans « Le chantier en bref ».
 - **Reporté** : lecture IA d'un croquis ou d'un plan ; note donnée au prompt A ; exclusion d'une ligne par une phrase (« garage non compris ») ; image annotée.
+
+## 3. Lot du §44 (référentiel 44 sections, 2026-10-04)
+
+Le §44 du référentiel du fondateur formalise ce MVP. Ajouts :
+
+- **Banc de 30 phrasés d'artisan** (§44.2) : `packages/domain/test/note-artisan-30-phrases.test.ts`. « environ », « env. », « ~ », « 6m50 », « 2 rampants de 6,5 » (une longueur sans unité se lit en mètres, et seulement une longueur), « deux descentes », « pte », « 12 lin », « hauteur des descentes 5 m ». Cinq pièges ne créent aucune mesure (9 000 ardoises, budget en €, « à voir sur place », noue sans ouvrage, une date).
+- **Filet** : la note est donnée au prompt A comme contexte, entre balises `<note_artisan>`, dans le message (jamais dans le prompt système), avec la consigne de n'en faire ni une ligne ni une quantité et d'ignorer toute consigne qu'elle contiendrait (`siteNotesInstruction`, test `apps/api/test/prompt-a.test.ts`). Coût : quelques centaines de jetons d'entrée, seulement quand une note existe.
+- **Phrases d'exclusion** (`readExclusions`, `exclusionFor`) : « garage non compris », « Velux fournis par le client », « charpente conservée », « hors abri de jardin ». Sans IA ; une ligne n'est exclue que si elle nomme TOUS les mots visés, jamais au plus proche. La ligne sort du calcul et du « À commander », reste dans le détail sans prix (§42) avec « exclu par l'artisan (« … ») », et l'artisan la voit dans « Lignes mises de côté ».
+- **L'explication cite les deux valeurs** (§44.3) : « pente du toit 35° (note de l'artisan ; le devis disait 40°) ».
+- **Contradiction entre documents** : la validation est refusée (`contradiction_open`) tant que la question est ouverte ; rien ne part au fournisseur.
+- **Les 7 tests du §44.5** : `apps/api/test/infos-chantier-44-5.test.ts`.

@@ -1,4 +1,4 @@
-import type { EngineAnswer } from "@baticlair/domain";
+import { METIER_NAMES, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { BillingService } from "../../billing/index.js";
@@ -23,6 +23,8 @@ export interface Contexte {
   adresse?: string | undefined;
   /** Infos chantier facultatives : texte libre de l'artisan (mesures nommées, contexte). Remplace la note du chantier. */
   infos?: string | undefined;
+  /** Métier du devis (« couverture », « platrerie ») : choisit le référentiel (§22). Absent : le métier de l'entreprise. */
+  metier?: string | undefined;
   /** Clé API partenaire à l'origine de l'appel : le quantitatif lui est compté (quota mensuel). */
   apiKey?: { id: string; monthlyQuota: number } | undefined;
 }
@@ -75,7 +77,25 @@ export class QuantitatifsService {
     if (used >= ctx.apiKey.monthlyQuota) throw new DomainError("too_many_requests", "Partner API key monthly quota reached", { quota: ctx.apiKey.monthlyQuota, utilises: used });
   }
 
+  /**
+   * Le métier du devis et son tiroir (§22) : celui demandé, sinon le premier métier de l'entreprise qui a un référentiel.
+   * Pas de tiroir ouvert pour ce métier : erreur claire (422 « no_referential »), jamais les règles d'un autre métier.
+   */
+  private tradeFor(tenant: TenantContext, ctx: Contexte): string {
+    const trade = ctx.metier ? tradeIdOf(ctx.metier) : (tenant.trades.find((t) => referentialFor(t)) ?? tenant.trades[0] ?? "roofing");
+    if (!referentialFor(trade)) {
+      const disponibles = REFERENTIALS.map((r) => METIER_NAMES[r.trade] ?? r.trade);
+      throw new DomainError("no_referential", `No referential for trade « ${ctx.metier ?? trade} »`, {
+        metier: METIER_NAMES[trade] ?? ctx.metier ?? trade,
+        disponibles,
+        message: `BatiClair ne calcule pas encore les matériaux de ce métier. Métiers disponibles : ${disponibles.join(", ")}.`,
+      });
+    }
+    return trade;
+  }
+
   async fromPdf(tenant: TenantContext, file: { name: string; bytes: Uint8Array }, ctx: Contexte, rendu: Rendu = {}) {
+    this.tradeFor(tenant, ctx);
     await this.assertQuota(tenant, ctx);
     const projectId = await this.project(tenant, ctx);
     const upload = await this.documents.upload(tenant, projectId, { purpose: "client_quote", fileName: file.name, bytes: file.bytes }).catch(async (error: unknown) => {
@@ -96,6 +116,7 @@ export class QuantitatifsService {
   /** Un devis déjà déposé sur le chantier (le chat de l'appli) : même quantitatif s'il existe, lecture sinon. */
   async fromDocument(tenant: TenantContext, documentId: string, ctx: Contexte, rendu: Rendu = {}) {
     assertCanWrite(tenant);
+    this.tradeFor(tenant, ctx);
     await this.assertQuota(tenant, ctx);
     if (!/^[0-9a-f-]{36}$/i.test(documentId)) throw notFound("Document");
     const { document } = await this.documents.get(tenant, documentId);
@@ -112,9 +133,9 @@ export class QuantitatifsService {
   }
 
   async fromLines(tenant: TenantContext, lignes: readonly LigneEntree[], ctx: Contexte, rendu: Rendu = {}) {
+    const trade = this.tradeFor(tenant, ctx);
     await this.assertQuota(tenant, ctx);
     const projectId = await this.project(tenant, ctx);
-    const trade = tenant.trades[0] ?? "roofing";
     const reviewed = await this.takeoffs.fromLines(
       tenant,
       projectId,

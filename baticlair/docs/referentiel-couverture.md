@@ -1747,3 +1747,130 @@ Le moteur contrôle chaque ligne du quantitatif avant affichage, indépendamment
 ### 41.4 Ce que l'artisan peut modifier sur l'écran quantitatif
 
 Tout, d'un tap ou à la voix : la quantité, l'unité, la désignation (le texte lui-même), chaque hypothèse de la phrase d'explication, et retirer ou ajouter une ligne. Il ne doit exister aucun texte affiché sur le quantitatif qui ne soit pas modifiable. Test de recette : une personne hors BTP doit réussir à changer la désignation d'une ligne sans aide.
+
+## 42. Annexe fournisseur : le devis sans les prix
+
+À l'envoi du quantitatif, l'app joint une annexe générée depuis l'extraction du prompt A (41.1) : les lignes du devis **sans aucun prix** (ni unitaire, ni total, ni TVA, ni remise), avec ce qui aide le négoce à lever un doute sans rappeler l'artisan.
+
+### 42.1 Contenu de l'annexe
+
+- En-tête : nom de l'entreprise, nom du chantier, commune, type de bâtiment, neuf/rénovation.
+- Une ligne par ouvrage du devis : libellé tel qu'écrit, quantité et unité du devis (ex. « 200 m² »), matériau et format nommés, dimensions lues (pente, rampant, longueurs).
+- Les réponses de l'artisan aux questions du chat (pente, façonnage, nombre de descentes...), présentées comme « précisions chantier ».
+- Les lignes hors\_quantitatif (déplacement, nettoyage, main-d'œuvre) n'apparaissent pas.
+- Aucun prix, aucun montant, aucune marge, aucun nom de client particulier.
+
+### 42.2 Règles
+
+- L'annexe est un document séparé du quantitatif, intitulé « Détail du chantier (sans prix) », joint au même envoi.
+- Case « Joindre le détail du chantier » sur l'écran d'envoi, cochée par défaut, mémorisée par entreprise.
+- Test de sortie : une recherche du symbole € ou de tout nombre à deux décimales suivi d'une devise dans l'annexe doit échouer.
+- Même format pour tous les métiers : généré depuis l'extraction, aucun champ codé pour la couverture.
+
+## 43. Le PDF envoyé au fournisseur et le lien « une question ? »
+
+### 43.1 Un seul PDF, trois blocs (MVP)
+
+L'envoi par mail au fournisseur contient **un seul PDF**, léger, sans mise en page coûteuse, généré par le serveur à partir des données déjà présentes (quantitatif + extraction + réponses du chat). Trois blocs, dans cet ordre :
+
+1. **Le quantitatif** : les lignes au format 40.4, prêtes à charger. Nom de l'entreprise, nom du chantier, commune, date. Pas de prix.
+2. **Résumé du chantier** : 3 à 5 lignes générées depuis le contexte et les réponses de l'artisan : type de bâtiment, neuf/rénovation, pente, rampant, façonnage, points singuliers. C'est ce qui évite au négoce de rappeler.
+3. **Détail du devis sans prix** : la section 42 telle quelle. Le mail d'envoi reste court : « Bonjour, voici la commande pour le chantier X. Le PDF ci-joint détaille tout. » Rien d'autre dans le corps du mail, tout est dans le PDF.
+
+### 43.2 Le lien « une question ? » (après MVP)
+
+En bas du PDF et du mail : « Une question sur cette commande ? Écrivez-la ici : {lien} ». Le lien ouvre une page web simple, sans compte ni mot de passe, propre à ce chantier (jeton unique, valable 30 jours). Le négoce tape sa question (texte, ou photo), elle arrive dans le chat du chantier côté artisan avec une notification. L'artisan répond depuis l'app, la réponse part par mail au négoce. Fil conservé sur le chantier.
+
+- Zéro coût IA : c'est de la messagerie, pas de modèle appelé.
+- Le même mécanisme servira plus tard à recevoir le devis fournisseur en réponse (analyse comparative, hors MVP).
+
+### 43.3 Ordre de réalisation
+
+1. PDF trois blocs et envoi mail (MVP).
+2. Lien « une question ? » et notification (v3.1).
+
+### 43.4 Notifications : demandées au premier envoi
+
+L'autorisation de notifications n'est pas demandée à l'installation (l'artisan refuse par réflexe) mais **au premier envoi fournisseur**, juste après le tap « Envoyer » : un petit écran « Active tes notifications pour être prévenu dès que ton fournisseur te répond ou te pose une question », avec un bouton « Activer » et un lien discret « Plus tard ». Si refus, on repropose au troisième envoi, puis plus jamais ; un réglage dans Compte permet de l'activer à tout moment.
+
+Ce que notifie l'app, dans l'ordre d'arrivée : question du fournisseur (43.2), réponse ou devis fournisseur reçu, lecture d'un devis terminée quand l'artisan a quitté l'app pendant la lecture.
+
+Les réponses fournisseur arrivent dans le chat du chantier ; l'artisan les lit et les analyse lui-même. L'analyse comparative automatique reste hors MVP.
+
+### 43.5 Le mail et le PDF ont le même contenu
+
+Le corps du mail n'est pas une phrase d'accompagnement : il contient **les trois blocs en texte structuré**, lisibles sur un téléphone sans ouvrir la pièce jointe. Le PDF reprend exactement la même chose, pour imprimer ou transmettre au magasin. Un seul générateur produit les deux à partir des mêmes données.
+
+Structure du mail (ordre fixe, titres en majuscules, une ligne par article, pas de tableau HTML) :
+
+```
+COMMANDE : {entreprise} · chantier {nom} · {commune} · {date}
+
+À COMMANDER
+9 200 ardoises Cupa 30×22, soit 12 palettes de 800
+9 384 crochets inox 2,7 mm, longueur 110 mm
+18 bacs joint debout zinc naturel 0,7 mm, long. 5,50 m, larg. utile 430 mm
+...
+
+LE CHANTIER EN BREF
+Rénovation, maison individuelle, pente 45°, rampant 5,50 m
+Bacs façonnés par le fournisseur · 2 descentes · 1 noue
+
+DÉTAIL DU DEVIS (sans prix)
+Couverture ardoises 30×22 · 200 m²
+Gouttière zinc demi-ronde · 24 ml
+...
+
+Une question sur cette commande ? {lien, à partir de la v3.1}
+```
+
+Coût : aucun appel IA, le mail et le PDF sont assemblés depuis des données déjà calculées. Les tests vérifient qu'aucun prix n'apparaît ni dans le mail ni dans le PDF.
+
+## 44. Infos chantier facultatives (note, mesures, croquis)
+
+**Principe.** Le devis suffit à lancer BatiClair. Rien d'autre n'est obligatoire. Mais sous le dépôt du devis, un bloc replié « + Ajouter des informations sur le chantier (facultatif) » permet à l'artisan de donner du contexte, des mesures ou des documents. Chaque mesure donnée par l'artisan remplace une question du chat ou une hypothèse par défaut : c'est une ligne de moins que le fournisseur contestera. Le même bouton « ajouter une info » reste accessible pendant le chat et depuis le quantitatif.
+
+### 44.1 Ce que l'artisan peut ajouter
+
+- Une zone de texte libre, sans formulaire. Il écrit comme il parlerait à celui qui prépare sa commande : « Réfection complète. 2 Velux conservés. Noue 12 m. Rampants 2 × 6,50 m. Pente 42°. La petite toiture du garage n'est pas comprise. »
+- Des photos du chantier, une photo de croquis fait à la main, un plan photographié, avec un commentaire qui explique ce qu'on regarde : « Les deux traits rouges sont les rampants, 6,50 m chacun. »
+- Plus tard : plan PDF, image annotée, autres sources ou API de métrés.
+
+### 44.2 Lecture de la note : sans IA
+
+- Seule une mesure nommée et non ambiguë devient un fait du chantier (noue 12 m, rampant 6,50 m, pente 42°, 2 descentes, 2 Velux). Le reste est du contexte, transmis tel quel dans « Le chantier en bref » au fournisseur.
+- La lecture est déterministe, zéro appel IA. Elle doit supporter les phrasés d'artisan : « environ », « \~ », « 6m50 », « 2 rampants de 6,5 », « deux descentes », abréviations courantes (ml, lin, pte). Un banc de 30 phrasés fait partie des tests.
+- Filet : la note est aussi donnée au prompt A comme contexte, pour qu'une formulation inattendue ne soit pas perdue.
+- Une phrase d'exclusion retire une ligne du quantitatif et l'inscrit dans le détail sans prix avec la mention « exclu par l'artisan » : « garage non compris », « Velux fournis par le client », « charpente conservée ».
+- Pas d'analyseur automatique de plans. La photo est conservée et jointe au dossier, son commentaire est lu. La lecture IA d'une cote sur un croquis attendra de vrais croquis d'artisans pour être testée.
+
+### 44.3 Hiérarchie des sources et contradictions
+
+1. Mesure écrite par l'artisan : donnée forte, elle gagne sur le devis. L'explication du calcul cite les deux valeurs (« rampant 6,50 m, note de l'artisan ; le devis disait 6 m »).
+2. Ligne du devis : fait foi tant que l'artisan n'a rien écrit.
+3. Cote lisible sur un document (en-tête lu par l'IA, croquis) : exploitable avec son origine. Si elle contredit le devis, question au chat avec les deux valeurs en boutons, et rien ne part au fournisseur tant qu'elle est ouverte.
+4. Information seulement supposée depuis une photo : contexte, jamais transformée en mesure.
+5. Impossible à déterminer : on n'invente rien, on demande.
+
+Aucune valeur n'écrase une autre en silence. Toute donnée utilisée dans un calcul garde sa provenance (devis, note artisan, document, référentiel, réponse au chat) et l'écran « Pourquoi cette quantité ? » l'affiche.
+
+### 44.4 Ce que ça ne doit jamais devenir
+
+- Pas un formulaire à quinze champs techniques.
+- Pas une étape obligatoire : si l'artisan dépose seulement son devis, BatiClair produit le meilleur quantitatif fiable possible.
+- Pas un questionnaire après analyse : les questions du chat restent celles qui changent une quantité de plus de 3 %, une unité ou un matériau, comme au §41.
+- Pas d'appel IA ajouté pour le texte ; un seul appel vision par photo, uniquement quand le commentaire ne suffit pas, et jamais pour deviner une mesure.
+
+### 44.5 Tests
+
+- Devis seul : même résultat qu'avant, aucune question en plus.
+- Devis + note « Pente 35°. Rampant 6 m. 2 descentes » : aucune question, recouvrement recalculé, ligne marquée estimation si le format sort de la table Cupa.
+- Note contredisant le devis : la note gagne, les deux valeurs apparaissent dans l'explication.
+- Document contredisant le devis : question posée, envoi fournisseur bloqué tant qu'elle est ouverte.
+- Phrase d'exclusion : la ligne disparaît du « À commander » et apparaît dans le détail sans prix avec la mention.
+- Banc de 30 phrasés d'artisan : chaque mesure attendue est trouvée, aucune fausse mesure n'est créée.
+- La note transmise au fournisseur ne contient jamais de prix (même test qu'au §43).
+
+### 44.6 Reporté, à décider après les premiers devis réels
+
+Lecture IA d'une cote sur croquis, plans PDF, image annotée, API de métrés externes.

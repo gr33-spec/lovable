@@ -83,7 +83,12 @@ export function buildPacket(
     .map((l) => ({
       libelle: l.designation,
       mesure: [l.quantityRaw, l.unitRaw].filter(Boolean).join(" ") || null,
-      precisions: [...(l.material ? [l.material] : []), ...Object.entries(l.dimensions ?? {}).map(([k, v]) => `${k} ${v}`)],
+      precisions: [
+        ...(l.material ? [l.material] : []),
+        ...Object.entries(l.dimensions ?? {}).map(([k, v]) => `${k} ${v}`),
+        // §44.2 : la ligne visée par une phrase de la note reste au détail, marquée, et ne part pas en commande.
+        ...(reviewed.excluded?.has(l.id) ? [`exclu par l'artisan (« ${reviewed.excluded.get(l.id)} »)`] : []),
+      ],
     }));
   return {
     entreprise: sender.companyName,

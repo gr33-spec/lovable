@@ -28,6 +28,7 @@ const errorMessages: Record<string, string> = {
   request_in_progress: "C'est en cours d'enregistrement, patientez une seconde.",
   payload_too_large: "C'est trop volumineux pour être envoyé.",
   unreadable_document: "Ce fichier ne peut pas être lu.",
+  no_referential: "BatiClair ne calcule pas encore les matériaux de ce métier. Aujourd'hui : couverture et plâtrerie (cloisons).",
   analysis_quota_reached: "Vous avez atteint la limite de votre formule ce mois-ci. Vos chantiers en cours restent consultables.",
   ai_unavailable: "Cette fonction n'est pas encore activée sur votre compte.",
   analysis_failed: "Ce devis n'a pas pu être lu. Réessayez dans un instant.",

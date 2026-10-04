@@ -14,6 +14,8 @@ export type ErrorCode =
   | "payload_too_large"
   | "too_many_requests"
   | "unreadable_document"
+  /** Le métier n'a pas de référentiel (pas de tiroir ouvert, §22) : rien n'est calculé avec les règles d'un autre métier. */
+  | "no_referential"
   | "analysis_quota_reached"
   | "plan_limit_reached"
   | "ai_unavailable"

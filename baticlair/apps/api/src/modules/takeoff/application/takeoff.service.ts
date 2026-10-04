@@ -7,6 +7,8 @@ import {
   isCoastal,
   factsFromReading,
   readSiteNotes,
+  readExclusions,
+  exclusionFor,
   type Referential,
   computeWithAnswers,
   postalCodeIn,
@@ -21,6 +23,8 @@ import {
   splitChunk,
   reviewExtractedTakeoff,
   ROOFING_REFERENTIAL,
+  REFERENTIALS,
+  referentialFor,
   slotsGivenByQuote,
   tradeProfile,
   type ArtisanView,
@@ -159,6 +163,16 @@ export interface ReviewedTakeoff {
   view: ArtisanView;
   /** LA LISTE D'ACHATS : à acheter, à faire chiffrer, hypothèses, questions. */
   purchase: PurchaseView;
+  /**
+   * Lignes exclues par une phrase de la note (§44.2, « garage non compris ») : hors du calcul et du « À commander »,
+   * gardées dans le détail sans prix avec la mention « exclu par l'artisan ». Ligne → phrase citée.
+   */
+  excluded: ReadonlyMap<string, string>;
+  /**
+   * Deux sources qui se contredisent (§44.3 : devis et document) et dont la question est encore ouverte : rien ne
+   * part au fournisseur tant qu'elle l'est (clés des données : « pente »…).
+   */
+  openContradictions: readonly string[];
 }
 
 
@@ -321,12 +335,14 @@ export class TakeoffService {
     );
     const success = { model: read.model, output };
 
-    await this.reading.referentials?.ensure(ROOFING_REFERENTIAL);
+    // Le référentiel du métier du devis (§22 : un métier = un tiroir), figé avec le quantitatif.
+    const ref = referentialFor(doc.trade);
+    if (ref) await this.reading.referentials?.ensure(ref);
     const takeoff = await this.takeoffs.create(tenant, {
       projectId: doc.projectId,
       documentId,
       analysisId,
-      referentialVersion: ROOFING_REFERENTIAL.version,
+      referentialVersion: ref?.version ?? null,
       trade: doc.trade,
       promptId: TAKEOFF_PROMPT.id,
       promptVersion: TAKEOFF_PROMPT.version,
@@ -361,12 +377,13 @@ export class TakeoffService {
     lines: readonly { designation: string; quantity: string | null; unit: string | null; price: string | null }[],
   ): Promise<ReviewedTakeoff> {
     assertCanWrite(tenant);
-    await this.reading.referentials?.ensure(ROOFING_REFERENTIAL);
+    const ref = referentialFor(trade);
+    if (ref) await this.reading.referentials?.ensure(ref);
     const takeoff = await this.takeoffs.create(tenant, {
       projectId,
       documentId: null,
       source: "lignes",
-      referentialVersion: ROOFING_REFERENTIAL.version,
+      referentialVersion: ref?.version ?? null,
       analysisId: null,
       trade,
       promptId: "partenaire",
@@ -534,7 +551,7 @@ export class TakeoffService {
       await this.memory.recordChoice(tenant, { kind: "product", key: `slot:${name}`, value, projectId: takeoff.projectId });
     }
     if (kind === "param" && value && typeof value === "object") {
-      const def = ROOFING_REFERENTIAL.workItems.flatMap((w) => w.params).find((p) => p.key === name);
+      const def = REFERENTIALS.flatMap((r) => r.workItems.flatMap((w) => w.params)).find((p) => p.key === name);
       if (def?.kind === "artisan_preference") await this.memory.recordChoice(tenant, { kind: "param", key: `param:${name}`, value: value.value, projectId: takeoff.projectId });
     }
     const after = await this.reload(tenant, takeoff.id);
@@ -559,7 +576,11 @@ export class TakeoffService {
    */
   async validate(tenant: TenantContext, takeoffId: string): Promise<ReviewedTakeoff> {
     const takeoff = await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
-    const { validation, purchase } = await this.review(tenant, takeoff);
+    const { validation, purchase, openContradictions } = await this.review(tenant, takeoff);
+    // §44.3 : deux documents qui se contredisent font une question ; rien ne part au fournisseur tant qu'elle est ouverte.
+    if (openContradictions.length > 0) {
+      throw validationFailed("A contradiction between documents is still open", { reason: "contradiction_open", count: openContradictions.length });
+    }
     if (validation.counts.blocking > 0) {
       throw validationFailed("Blocking issues remain", { reason: "blocking_issues", count: validation.counts.blocking });
     }
@@ -603,7 +624,15 @@ export class TakeoffService {
 
   /** Relecture déterministe, recalculée à chaque lecture (règles métier à jour). */
   private async review(tenant: TenantContext, record: TakeoffRecord): Promise<ReviewedTakeoff> {
-    let takeoff = record;
+    // §44.2 : une phrase d'exclusion de la note (« garage non compris ») retire la ligne qui la nomme du calcul.
+    const notes = (await this.reading.projectNotes?.(tenant, record.projectId)) ?? null;
+    const exclusions = readExclusions(notes);
+    const excluded = new Map<string, string>();
+    for (const l of record.lines) {
+      const e = exclusionFor(l.designation, exclusions);
+      if (e) excluded.set(l.id, e.phrase);
+    }
+    let takeoff = excluded.size > 0 ? { ...record, lines: record.lines.filter((l) => !excluded.has(l.id)) } : record;
     const profile = tradeProfile(takeoff.trade);
     const source = takeoff.documentId ? await this.aiInput.sourceLines(tenant, takeoff.documentId) : new Map<string, string>();
     const { validation: read } = reviewExtractedTakeoff(
@@ -636,7 +665,9 @@ export class TakeoffService {
       enteredByArtisan: l.origin !== "ai" || l.edited,
     }));
     // Version figée : les règles de la version enregistrée avec le quantitatif, jamais celles du jour.
-    const ref = (takeoff.referentialVersion && takeoff.referentialVersion !== ROOFING_REFERENTIAL.version ? await this.reading.referentials?.load(takeoff.referentialVersion) : null) ?? ROOFING_REFERENTIAL;
+    // Le tiroir du métier ; un métier sans tiroir ne calcule rien (le plan ne couvre pas son métier), jamais avec les règles du couvreur.
+    const current = referentialFor(takeoff.trade) ?? ROOFING_REFERENTIAL;
+    const ref = (takeoff.referentialVersion && takeoff.referentialVersion !== current.version ? await this.reading.referentials?.load(takeoff.referentialVersion) : null) ?? current;
     // La zone climatique vient du code postal du chantier (jamais demandée) ; le devis l'emporte s'il l'écrit.
     const address = (await this.reading.projectAddress?.(tenant, takeoff.projectId)) ?? null;
     const zone = climateZone(postalCodeIn(address));
@@ -649,7 +680,7 @@ export class TakeoffService {
     // le calcul (après le texte lu par le code, avant les hypothèses par défaut).
     extraFacts.push(...factsFromReading(ref, takeoff.lines.map((l) => ({ ref: l.id, dimensions: l.dimensions })), takeoff.context));
     // Infos chantier facultatives : les mesures nommées de la note de l'artisan passent devant le devis (l'explication dit les deux).
-    extraFacts.push(...readSiteNotes(ref, (await this.reading.projectNotes?.(tenant, takeoff.projectId)) ?? null));
+    extraFacts.push(...readSiteNotes(ref, notes));
     const plan = planQuote(lines.map((l) => ({ ref: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, section: l.section })), ref, profile, undefined, extraFacts);
     // Niveau 1 : le rôle de chaque quantité (mesure d'ouvrage ou à commander), proposé par le code
     // et ENREGISTRÉ avec la ligne ; une mesure ne devient jamais une quantité d'achat.
@@ -674,7 +705,10 @@ export class TakeoffService {
       plan.inputs.length > 0
         ? computeWithAnswers(ref, plan, takeoff.answers, await this.memory.forEngine(tenant), { acceptDraft }, slotsGivenByQuote(plan, validation))
         : { needs: [], questions: [], declined: [] };
-    const reviewed = { takeoff, validation, roles: new Map([...proposals].map(([id, p]) => [id, { ...p, role: roles.get(id) ?? p.role }])) };
+    // Le quantitatif renvoyé garde TOUTES ses lignes (les exclues aussi, pour le détail sans prix) ; seul le calcul les ignore.
+    const kept = excluded.size > 0 ? { ...takeoff, lines: record.lines.map((l) => takeoff.lines.find((x) => x.id === l.id) ?? l) } : takeoff;
+    const openContradictions = plan.contradictions.map((c) => c.key).filter((k) => engine.questions.some((q) => q.key === `param:${k}`));
+    const reviewed = { takeoff: kept, validation, roles: new Map([...proposals].map(([id, p]) => [id, { ...p, role: roles.get(id) ?? p.role }])), excluded, openContradictions };
     const view = artisanView(lines, validation, engine, { plan, roles, ref, asks });
     // § 41.4 : les mots de l'artisan (libellé, quantité réécrits d'un tap) remplacent ceux de BatiClair.
     return { ...reviewed, view, purchase: applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref, validation }), takeoff.answers) };
@@ -696,7 +730,9 @@ export class TakeoffService {
   ): Promise<{ ok: true; model: string; parts: ChunkParts } | ChunkFailure> {
     if (!this.extractor || chunks.length === 0) return { ok: false, reason: "nothing_to_read" };
     const extractor = this.extractor;
-    const hints = this.tradeHints(doc.trade);
+    // §44.2 filet : la note de l'artisan accompagne la lecture IA, comme contexte.
+    const siteNotes = doc.projectId ? ((await this.reading.projectNotes?.(tenant, doc.projectId)) ?? null) : null;
+    const hints = { ...this.tradeHints(doc.trade), ...(siteNotes ? { siteNotes } : {}) };
     const allPages = prepared.pages.length;
     const maxCalls = Math.max(policy.maxCallsPerAnalysis, chunks.length);
     let calls = 0;
@@ -751,7 +787,7 @@ export class TakeoffService {
   private tradeHints(trade: string): { tradeLabel: string; materialFamilies: string[]; workItems: { id: string; label: string; synonyms: string[] }[] } {
     const profile = tradeProfile(trade);
     // « RÉFÉRENTIEL CHARGÉ » du prompt A (§41.1) : les ouvrages du métier et leurs synonymes (mots des familles qui les déclenchent).
-    const ref = profile.id.split(",").includes(ROOFING_REFERENTIAL.trade) ? ROOFING_REFERENTIAL : null;
+    const ref = referentialFor(profile.id);
     const workItems = (ref?.workItems ?? []).map((w) => ({
       id: w.id,
       label: w.label,
