@@ -5,6 +5,7 @@ import type { Referential } from "../referential/model.js";
 import { slotCharacteristicsKey, type QuotePlan } from "../referential/plan.js";
 import type { TakeoffValidation } from "../takeoff/validation.js";
 import type { ArtisanView, Decision, OuvrageLevels } from "./artisan-view.js";
+import { withoutLabour } from "./marchandise.js";
 
 /**
  * LA LISTE D'ACHATS : ce que l'artisan voit, et rien d'autre.
@@ -465,7 +466,7 @@ function understood(view: ArtisanView, plan: QuotePlan, ref: Referential): strin
       seen.add(work.id);
       out.push(`${work.label.replace(/\s*\(.*\)$/, "")} : ${measure}`);
     } else {
-      out.push(`${o.designation} : ${measure}`);
+      out.push(`${withoutLabour(o.designation)} : ${measure}`);
     }
   }
   return out;
@@ -516,12 +517,13 @@ export function purchaseView(
     // Le test du fournisseur (§40) : une mesure n'est jamais une commande.
     const refused = supplierTest(o.designation, o.read.unit);
     if (refused) {
-      failedSupplierTest.push({ key: `line:${o.lineId}`, label: o.designation, measure: [o.read.quantity, o.read.unit].filter(Boolean).join(" "), reason: refused, lineIds: [o.lineId] });
+      failedSupplierTest.push({ key: `line:${o.lineId}`, label: withoutLabour(o.designation), measure: [o.read.quantity, o.read.unit].filter(Boolean).join(" "), reason: refused, lineIds: [o.lineId] });
       continue;
     }
     toBuy.push({
       key: `line:${o.lineId}`,
-      label: o.designation,
+      // Marchandise seule : la ligne du devis perd ses mentions de pose (« (Fourniture et pose) »).
+      label: withoutLabour(o.designation),
       quantity: written?.text ?? null,
       order: o.read.quantity ? { count: o.read.quantity, unit: written!.unit } : null,
       approx: null,
@@ -540,14 +542,14 @@ export function purchaseView(
     const owner = planned.find((l) => l.slot === n.slot) ?? planned.find((l) => l.mentions.includes(n.slot)) ?? planned[0];
     const o = owner ? view.ouvrages.find((x) => x.lineId === owner.ref) : undefined;
     const measure = o ? [o.read.quantity, o.read.unit].filter(Boolean).join(" ") : "";
-    toQuote.push({ key: `need:${n.needId}`, label: o ? `${n.slotLabel} (${o.designation})` : n.slotLabel, measure, reason: "Aucun modèle choisi : le fournisseur propose et chiffre.", lineIds: o ? [o.lineId] : [] });
+    toQuote.push({ key: `need:${n.needId}`, label: o ? `${n.slotLabel} (${withoutLabour(o.designation)})` : n.slotLabel, measure, reason: "Aucun modèle choisi : le fournisseur propose et chiffre.", lineIds: o ? [o.lineId] : [] });
   }
   for (const o of view.ouvrages) {
     const measure = [o.read.quantity, o.read.unit].filter(Boolean).join(" ");
     // Une ambiguïté encore ouverte (« 6 : ardoises ou jouées ? ») est une question, pas un article à faire chiffrer.
     if (link.roles.get(o.lineId) === "undetermined") continue;
     if (o.pending) {
-      if (!toQuote.some((q) => q.key === `line:${o.lineId}`)) toQuote.push({ key: `line:${o.lineId}`, label: o.designation, measure, reason: o.pending, lineIds: [o.lineId] });
+      if (!toQuote.some((q) => q.key === `line:${o.lineId}`)) toQuote.push({ key: `line:${o.lineId}`, label: withoutLabour(o.designation), measure, reason: o.pending, lineIds: [o.lineId] });
       continue;
     }
     // Un composant cité sans règle, ou un besoin que BatiClair ne sait pas établir : le fournisseur chiffre pour la mesure.
@@ -557,7 +559,7 @@ export function purchaseView(
       if (toBuy.some((b) => b.needIds.includes(n.needId))) continue;
       const computed = engine.needs.find((x) => x.needId === n.needId);
       if (computed?.status === "question" && computed.question && !engine.declined?.includes(computed.question.key)) continue;
-      toQuote.push({ key: `need:${n.needId}`, label: `${n.label} (${o.designation})`, measure, reason: n.missing ?? "À faire chiffrer.", lineIds: [o.lineId] });
+      toQuote.push({ key: `need:${n.needId}`, label: `${n.label} (${withoutLabour(o.designation)})`, measure, reason: n.missing ?? "À faire chiffrer.", lineIds: [o.lineId] });
     }
   }
   // Les hypothèses dites à l'artisan : les données (pente, zone, pureau…), et un produit par défaut seulement

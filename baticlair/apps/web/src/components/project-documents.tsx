@@ -6,6 +6,7 @@ import { SiteNotes } from "@/components/site-notes";
 import { ProjectTakeoff } from "@/components/project-takeoff";
 import { ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, MAX_DOCUMENT_BYTES, type DocumentPurpose, type ProjectDocument } from "@/lib/api";
+import { attachFile } from "@/lib/upload";
 import { unreadableMessage } from "@/lib/fr";
 import { openDocument } from "@/lib/open-document";
 import { useProgressRefresh } from "@/components/project-progress";
@@ -115,7 +116,7 @@ function DocumentCard({ doc, compact, onRemoved }: { doc: ProjectDocument; compa
 
   async function open() {
     setOpening(true);
-    await openDocument(doc.id);
+    await openDocument(doc.id, doc.name, doc.name);
     setOpening(false);
   }
 
@@ -192,6 +193,7 @@ function DocumentCard({ doc, compact, onRemoved }: { doc: ProjectDocument; compa
             type="button"
             onClick={() => void open()}
             disabled={opening}
+            aria-label={`Ouvrir ${doc.name}`}
             className="inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-accent-text disabled:opacity-60"
           >
             {opening ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : null}
@@ -239,7 +241,7 @@ function UploadButton({
     try {
       const form = new FormData();
       form.append("purpose", purpose);
-      form.append("file", file, file.name);
+      await attachFile(form, file);
       onAdded(await api<ProjectDocument>(`/v1/projects/${encodeURIComponent(projectId)}/documents`, { method: "POST", body: form }));
     } catch (e) {
       setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));

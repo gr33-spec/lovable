@@ -8,8 +8,9 @@ import { NotificationsPrompt } from "@/components/notifications-prompt";
 import { CompareQuotes, OfferLines, offerFacts, ProjectComparison } from "@/components/project-offers";
 import { SupplierForm } from "@/components/supplier-form";
 import { Badge, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
+import { attachFile } from "@/lib/upload";
 import { api, ApiError, MAX_DOCUMENT_BYTES, newActionKey, type Offer, type PriceRequest, type PriceRequestRecipient, type PriceRequestSettings, type Supplier } from "@/lib/api";
-import { openDocument } from "@/lib/open-document";
+import { openDocument, openFile } from "@/lib/open-document";
 import { isPhoto, MAX_QUOTE_PHOTOS, preparePhotos } from "@/lib/photos";
 import { useProgressRefresh } from "@/components/project-progress";
 import { QuotePreviewScreen } from "@/components/quote-preview";
@@ -528,7 +529,7 @@ function RecipientCard({
 
   const items: { label: string; onSelect: () => void }[] = [];
   if (r.email) items.push({ label: panel === "email" ? "Masquer l'e-mail" : "Voir l'e-mail", onSelect: () => toggle("email") });
-  if (r.document) items.push({ label: "Ouvrir son devis", onSelect: () => void openDocument(r.document!.id) });
+  if (r.document) items.push({ label: "Ouvrir son devis", onSelect: () => void openDocument(r.document!.id, r.document!.name, r.document!.name) });
   if (offer) items.push({ label: panel === "lines" ? "Masquer les lignes" : "Voir les lignes de son devis", onSelect: () => toggle("lines") });
   if (!archived) {
     if (r.status === "to_send") {
@@ -613,9 +614,13 @@ function RecipientCard({
         )
       ) : null}
       {!archived && request.packet ? (
-        <a href={`/v1/price-requests/${encodeURIComponent(request.id)}/demande-de-devis.pdf`} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-bold text-accent-text">
-          Télécharger la demande de devis (PDF)
-        </a>
+        <button
+          type="button"
+          onClick={() => openFile({ url: `/v1/price-requests/${encodeURIComponent(request.id)}/demande-de-devis.pdf`, title: "Demande de devis", fileName: "demande-de-devis.pdf" })}
+          className="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-bold text-accent-text"
+        >
+          Voir la demande de devis (PDF)
+        </button>
       ) : null}
       {!archived && !r.document && ((!demo && r.status === "sent") || panel === "upload") ? (
         <QuoteUpload recipientId={r.id} onChange={onChange} />
@@ -650,7 +655,8 @@ function QuoteUpload({ recipientId, onChange }: { recipientId: string; onChange:
     setPending(true);
     try {
       const form = new FormData();
-      for (const file of photos.length > 0 ? await preparePhotos(photos) : files) form.append("file", file, file.name);
+      if (photos.length > 0) for (const file of await preparePhotos(photos)) form.append("file", file, file.name);
+      else await attachFile(form, files[0]!);
       onChange(await api<PriceRequest>(`/v1/price-request-recipients/${recipientId}/quote`, { method: "POST", body: form }));
     } catch (e) {
       setError(toError(e));

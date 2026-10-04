@@ -9,6 +9,7 @@ import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
 import type { RequestWithUser } from "../../identity/index.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
+import { chunkedFields, UploadParts } from "../../documents/index.js";
 import { QuantitatifsService } from "../application/quantitatifs.service.js";
 
 type LigneRecue = { libelle: string; quantite?: string | null; unite?: string | null; prix?: string | null; reference?: string | null };
@@ -184,6 +185,7 @@ const croquisBody = z.object({
   commentaire: z.string().trim().max(1000).optional(),
   /** Croquis d'UN article de la liste (sa clé) : joint à cette ligne de la commande, jamais mêlé à la note du chantier. */
   article: z.string().trim().min(1).max(200).optional(),
+  ...chunkedFields,
 });
 
 /**
@@ -193,7 +195,10 @@ const croquisBody = z.object({
 @Controller("v1/projects/:projetId/infos")
 @UseGuards(TenantGuard)
 export class InfosChantierController {
-  constructor(@Inject(QuantitatifsService) private readonly quantitatifs: QuantitatifsService) {}
+  constructor(
+    @Inject(QuantitatifsService) private readonly quantitatifs: QuantitatifsService,
+    @Inject(UploadParts) private readonly uploads: UploadParts,
+  ) {}
 
   /** La note, remplacée telle que tapée (null pour l'effacer). */
   @Put()
@@ -213,9 +218,8 @@ export class InfosChantierController {
     @Body(new ZodPipe(croquisBody)) body: z.infer<typeof croquisBody>,
     @Res({ passthrough: true }) res: Response,
   ) {
-    if (!file) throw validationFailed("Missing file", [{ path: "file", message: "required" }]);
-    const bytes = new Uint8Array(file.buffer.buffer, file.buffer.byteOffset, file.buffer.byteLength);
-    const r = await this.quantitatifs.addSketch(tenant, projetId, { name: Buffer.from(file.originalname, "latin1").toString("utf8"), bytes }, body.commentaire, body.article);
+    const received = await this.uploads.fileOf(tenant, file, body);
+    const r = await this.quantitatifs.addSketch(tenant, projetId, received, body.commentaire, body.article);
     res.status(201);
     return r;
   }

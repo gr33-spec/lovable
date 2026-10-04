@@ -143,6 +143,7 @@ model Company {
   preferences   CompanyPreference[]
   corrections   CorrectionEvent[]
   consumableHabits ConsumableHabit[]
+  uploadParts   UploadPart[]
   quantitatifs  Quantitatif[]
 
   @@map("company")
@@ -835,4 +836,20 @@ model ConsumableHabit {
 
   @@id([companyId, key])
   @@map("consumable_habit")
+}
+
+/// Fichier envoyé en morceaux (l'hébergeur refuse une requête de plus de 4,5 Mo) : chaque morceau attend ici que le
+/// dernier arrive, puis le fichier est recollé, déposé et ses morceaux effacés. Les morceaux oubliés partent sous 24 h.
+model UploadPart {
+  uploadId  String   @db.Uuid
+  index     Int
+  companyId String   @db.Uuid
+  bytes     Bytes
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@id([uploadId, index])
+  @@index([createdAt])
+  @@map("upload_part")
 }

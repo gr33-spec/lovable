@@ -35,7 +35,8 @@ export function doubtText(message: string): string {
 
 /** « 9 200 pièces » → { quantity: "9 200", unit: "pièces" } ; « 6 longueurs de 4 m » → { "6", "longueurs de 4 m" }. */
 export function parseQuantity(text: string): { quantity: string; unit: string } | null {
-  const m = /^([\d\s.,]+?)\s*([^\d].*)?$/.exec(text.trim());
+  // Le nombre entier, séparateurs compris (« 30,000 », « 9 200 ») : il finit par un chiffre.
+  const m = /^(\d(?:[\d\s.,]*\d)?)\s*(.*)$/.exec(text.trim());
   if (!m) return null;
   return { quantity: m[1]!.trim(), unit: (m[2] ?? "").trim() };
 }

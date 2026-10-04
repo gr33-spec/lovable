@@ -3,6 +3,7 @@ import type { Referential } from "../referential/model.js";
 import type { LineRole } from "../referential/line-roles.js";
 import type { QuotePlan } from "../referential/plan.js";
 import type { TakeoffValidation } from "../takeoff/validation.js";
+import { withoutLabour, writtenNumber } from "./marchandise.js";
 import { assessNeed, assessTakeoffLine, type Assessment, type TrustState } from "./assessment.js";
 
 /**
@@ -210,7 +211,7 @@ function openCauses(a: Assessment): { cause: string; detail: string; state: "to_
 function groupDecision(kind: "unknown" | "units", lines: ViewLine[], unitlessIds: ReadonlySet<string>): Decision {
   const n = lines.length;
   const ids = lines.map((l) => l.id);
-  const one = n === 1 ? lines[0]!.designation : null;
+  const one = n === 1 ? withoutLabour(lines[0]!.designation) : null;
   const pieceLineIds = ids.filter((id) => unitlessIds.has(id));
   const unitless = pieceLineIds.length;
   if (kind === "unknown") {
@@ -312,7 +313,7 @@ export function artisanView(
             ],
           }
         : assessed;
-    items.push({ kind: "line", id: line.id, label: line.designation, quantity: [line.quantity, line.unit].filter(Boolean).join(" ") || null, state: a.state, reason: a.reason, assessment: a });
+    items.push({ kind: "line", id: line.id, label: line.designation, quantity: [line.quantity && writtenNumber(line.quantity), line.unit].filter(Boolean).join(" ") || null, state: a.state, reason: a.reason, assessment: a });
     if (a.state === "verified") continue;
 
     const open = openCauses(a);
@@ -326,7 +327,7 @@ export function artisanView(
       decisions.push({
         key: `role:${line.id}`,
         state: "to_confirm",
-        title: line.designation,
+        title: withoutLabour(line.designation),
         text: ask.text,
         lineIds: [line.id],
         primary: { action: "answer", label: "Choisir" },
@@ -340,7 +341,7 @@ export function artisanView(
       decisions.push({
         key: `line:${line.id}`,
         state: missing ? "missing" : "to_confirm",
-        title: line.designation,
+        title: withoutLabour(line.designation),
         text: (missing ?? own[0]!).detail,
         lineIds: [line.id],
         primary: missing ? { action: "edit", label: "Renseigner" } : { action: "keep", label: "C'est bon" },
@@ -355,7 +356,7 @@ export function artisanView(
     decisions.push({
       key: `duplicate:${ids.join(",")}`,
       state: "to_confirm",
-      title: lines.find((l) => l.id === ids[0])?.designation ?? "Lignes identiques",
+      title: withoutLabour(lines.find((l) => l.id === ids[0])?.designation ?? "Lignes identiques"),
       text: "Deux lignes identiques se suivent : ce sont bien deux quantités à commander ?",
       lineIds: ids,
       primary: { action: "keep", label: "Oui, garder les deux" },
@@ -405,7 +406,7 @@ export function artisanView(
           needs.push({ needId: `${work!.id}/${key}`, slot: key, label: slot.label, origin: "explicit", need: null, needRange: null, order: null, missing: "Pas encore calculé : le fournisseur proposera pour la mesure du devis.", provisional: false, usual: slot.usual?.text ?? null, assumptions: [], state: "missing" });
         }
       }
-      const direct = v.basis === "purchase" && role !== "undetermined" && line.quantity && line.unit && needs.length === 0 ? { quantity: line.quantity, unit: line.unit } : null;
+      const direct = v.basis === "purchase" && role !== "undetermined" && line.quantity && line.unit && needs.length === 0 ? { quantity: writtenNumber(line.quantity), unit: line.unit } : null;
       const planned = link.plan.lines.find((l) => l.ref === item.id);
       const pending =
         v.basis === "work" && needs.length === 0
@@ -417,7 +418,7 @@ export function artisanView(
         lineId: item.id,
         designation: line.designation,
         role,
-        read: { quantity: line.quantity, unit: line.unit },
+        read: { quantity: line.quantity && writtenNumber(line.quantity), unit: line.unit },
         needs,
         direct,
         pending,

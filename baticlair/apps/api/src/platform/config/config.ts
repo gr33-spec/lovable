@@ -36,11 +36,11 @@ const envSchema = z
     /** Expéditeur, ex. « BatiClair <bonjour@mondomaine.fr> » (domaine vérifié chez Resend). */
     EMAIL_FROM: z.string().min(3).optional(),
     /**
-     * Taille maximale d'un document déposé. 4 Mo par défaut : c'est sous la
-     * limite d'une requête vers une fonction Vercel (4,5 Mo). Un devis
-     * généré par un logiciel pèse rarement plus de 1 Mo.
+     * Taille maximale d'un document déposé : 20 Mo par défaut (un devis scanné).
+     * Au-delà de 4 Mo, le navigateur l'envoie en morceaux (`UploadParts`) :
+     * une requête vers une fonction Vercel ne dépasse pas 4,5 Mo.
      */
-    DOCUMENT_MAX_BYTES: z.coerce.number().int().positive().max(50_000_000).default(4_000_000),
+    DOCUMENT_MAX_BYTES: z.coerce.number().int().positive().max(50_000_000).default(20_000_000),
     DOCUMENT_MAX_PAGES: z.coerce.number().int().positive().max(600).default(60),
     /** Taux de conversion utilisé pour AFFICHER les coûts IA en euros (les coûts sont stockés en dollars). */
     AI_USD_TO_EUR: z.string().regex(/^\d+(\.\d+)?$/).default("0.92"),

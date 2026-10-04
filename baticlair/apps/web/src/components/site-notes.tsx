@@ -3,14 +3,16 @@
 import { Camera, ChevronDown, Loader2, Plus } from "lucide-react";
 import { useId, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
-import { api, ApiError, type ItemSketch } from "@/lib/api";
+import { openDocument } from "@/lib/open-document";
+import { api, ApiError, MAX_DOCUMENT_BYTES, type ItemSketch } from "@/lib/api";
+import { attachFile } from "@/lib/upload";
 
 export interface SiteInfos {
   texte: string | null;
   croquis: ItemSketch[];
 }
 
-const MAX_SKETCH_BYTES = 15 * 1024 * 1024;
+const MAX_SKETCH_BYTES = MAX_DOCUMENT_BYTES;
 
 /**
  * INFOS CHANTIER FACULTATIVES (docs/infos-chantier-facultatives.md). Le devis suffit ; si l'artisan connaît des
@@ -68,8 +70,8 @@ export function SiteNotes({
     setPending(true);
     try {
       const form = new FormData();
-      form.append("file", file, file.name);
       if (comment.trim()) form.append("commentaire", comment.trim());
+      await attachFile(form, file);
       await api<{ id: string; nom: string }>(`/v1/projects/${encodeURIComponent(projectId)}/infos/croquis`, { method: "POST", body: form });
       setComment("");
       setSaved(true);
@@ -158,9 +160,9 @@ export function SiteNotes({
               <ul className="flex flex-wrap gap-2 text-sm">
                 {siteSketches.map((c) => (
                   <li key={c.id}>
-                    <a href={`/v1/documents/${encodeURIComponent(c.id)}/file`} target="_blank" rel="noreferrer" className="font-semibold text-accent-text underline">
+                    <button type="button" onClick={() => void openDocument(c.id, c.nom, c.nom)} className="min-h-9 font-semibold text-accent-text underline">
                       {c.nom}
-                    </a>
+                    </button>
                   </li>
                 ))}
               </ul>

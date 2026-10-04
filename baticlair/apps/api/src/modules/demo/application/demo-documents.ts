@@ -41,15 +41,16 @@ export interface DemoLine {
 }
 
 /** Le devis client du chantier de démonstration (couverture). */
+// Un devis client tel qu'un couvreur l'écrit : des ouvrages mesurés (m², ml), pas des quantités d'articles. BatiClair
+// en tire toute la liste sans une question (retour du fondateur, 2026-10-04 : « un exemple potable, peu ou rien à
+// modifier ») : ardoises, crochets, liteaux, écran, embase et chapeau, gouttière, descentes.
 const CLIENT_ROWS: [string, string, string, string][] = [
   ["Dépose de la couverture existante et évacuation", "85", "m²", "18,00"],
-  ["Fourniture et pose tuile romane canal rouge 12,5 u/m² (réf. TUI-RC12)", "1 250", "u", "2,10"],
-  ["Fourniture et pose faîtière ronde à emboîtement (réf. FAI-R)", "42", "u", "9,80"],
-  ["Liteau sapin traité classe 2 27x38 (réf. LIT-2738)", "480", "ml", "1,40"],
-  ["Écran sous-toiture HPV 1,5x50 m (réf. ECR-HPV)", "4", "rouleau", "165,00"],
-  ["Crochet inox ardoise 100 mm", "2", "paquet", "38,00"],
-  ["Fourniture et pose gouttière zinc demi-ronde dév. 33 (réf. GOU-ZN33)", "36", "ml", "32,00"],
-  ["Fourniture et pose descente zinc diamètre 80", "12", "ml", "28,00"],
+  ["Couverture en ardoises naturelles 32x22 posées au crochet, pente 40°", "85", "m²", "98,00"],
+  ["Écran de sous-toiture HPV", "85", "m²", "14,00"],
+  ["Sortie de toit de ventilation Ø 125 mm", "1", "u", "320,00"],
+  ["Gouttière zinc demi-ronde développé 33", "12", "ml", "48,00"],
+  ["Descente zinc diamètre 80, hauteur 5 m", "2", "u", "210,00"],
   ["Échafaudage de pied : location et montage", "1", "forfait", "950,00"],
 ];
 

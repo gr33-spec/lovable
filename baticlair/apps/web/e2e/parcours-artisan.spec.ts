@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
@@ -302,6 +303,24 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
   await expect(page.getByText("devis-client-couvreur.pdf")).toHaveCount(0);
   await page.getByLabel("Choisir le devis (PDF)").setInputFiles(fixture("devis-client-couvreur.pdf"));
   await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
+
+  // Un devis scanné de 7 Mo (au-delà des 4,5 Mo d'une requête chez l'hébergeur) part en morceaux, et se rouvre entier.
+  await page.getByRole("button", { name: "Supprimer devis-client-couvreur.pdf" }).click();
+  await page.getByRole("button", { name: "Oui, supprimer" }).click();
+  await expect(page.getByText("devis-client-couvreur.pdf")).toHaveCount(0);
+  const heavy = Buffer.concat([fs.readFileSync(fixture("devis-client-couvreur.pdf")), Buffer.from(`\n%${"x".repeat(7_000_000)}\n`)]);
+  const parts: string[] = [];
+  page.on("request", (r) => r.url().includes("/v1/uploads/") && parts.push(r.url()));
+  await page.getByLabel("Choisir le devis (PDF)").setInputFiles({ name: "devis-scanne.pdf", mimeType: "application/pdf", buffer: heavy });
+  await expect(page.getByText("devis-scanne.pdf")).toBeVisible();
+  expect(parts).toHaveLength(3);
+  await expect(page.getByRole("alert").filter({ hasText: /volumineux|Introuvable/ })).toHaveCount(0);
+  await page.getByRole("button", { name: "Ouvrir devis-scanne.pdf" }).click();
+  const viewer = page.getByRole("dialog", { name: "devis-scanne.pdf" });
+  await expect(viewer.getByRole("link", { name: "Télécharger" })).toBeVisible();
+  const size = await viewer.locator("iframe").evaluate(async (frame) => (await (await fetch((frame as HTMLIFrameElement).src)).blob()).size);
+  expect(size).toBe(heavy.byteLength);
+  await viewer.getByRole("button", { name: "Fermer le document" }).click();
 });
 
 test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et la valide", async ({ page }) => {
@@ -328,6 +347,13 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   const liste = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(liste.getByText(/^\d+ fournitures · tout est prêt$/)).toBeVisible();
   await expect(liste.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
+  // Retirer une ligne : une corbeille sur chaque ligne, « Annuler » pendant 3 s.
+  const corbeille = liste.getByRole("button", { name: /^Retirer : / }).first();
+  const retiree = (await corbeille.getAttribute("aria-label"))!;
+  await corbeille.click();
+  await expect(page.getByRole("status").filter({ hasText: "Retiré de la liste" })).toBeVisible();
+  await page.getByRole("status").getByRole("button", { name: "Annuler" }).click();
+  await expect(liste.getByRole("button", { name: retiree, exact: true })).toHaveCount(1);
 
   // La preuve à un appui, sur l'article lui-même.
   await page.getByRole("button", { name: "Voir la ligne du devis : Tuile romane canal rouge 12,5 u/m²" }).click();
@@ -355,7 +381,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await expect(joints).toHaveCount(0);
 
   // Le devis lu reste à un appui : noms courts, ajout et retrait d'une ligne.
-  await page.getByRole("button", { name: "Voir le devis lu (6 lignes)" }).click();
+  await page.getByRole("button", { name: "Corriger le devis lu" }).click();
   await expect(page.getByText("Tuile romane canal rouge 12,5 u/m²")).toBeVisible();
   await page.getByRole("button", { name: "Ajouter une ligne" }).click();
   await page.getByLabel("Désignation").fill("Closoir ventilé");
@@ -366,7 +392,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await page.getByRole("button", { name: "Retirer Closoir ventilé" }).click();
   await page.getByRole("button", { name: "Oui, retirer" }).click();
   await expect(page.getByText("Closoir ventilé")).toHaveCount(0);
-  await page.getByRole("button", { name: "Revenir au quantitatif" }).click();
+  await page.getByRole("button", { name: "Revenir à la liste des fournitures" }).last().click();
 
   await confirmDoubts(page);
   // Écrire au lieu d'appuyer : BatiClair comprend la pente, la zone, la surface ; le reste, il le dit.
@@ -388,18 +414,21 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   // La liste validée est conservée.
   await page.reload();
   await expect(page.getByText(/^\d+ fournitures · liste validée$/)).toBeVisible();
-  // « Exporter la liste en PDF » (§21.3) : la demande de devis se télécharge depuis le chat, avec la session de l'artisan.
-  const exportLink = page.getByRole("link", { name: "Exporter la liste en PDF" });
-  const pdf = await page.request.get((await exportLink.getAttribute("href"))!);
-  expect(pdf.status()).toBe(200);
-  expect(pdf.headers()["content-type"]).toMatch(/application\/pdf/);
+  // « Voir la liste en PDF » (§21.3) : la demande de devis s'ouvre DANS l'app, avec « Fermer », « Télécharger » (et
+  // « Partager » sur téléphone) : on ne reste jamais coincé dans un PDF (retour du fondateur, 2026-10-04).
+  await page.getByRole("button", { name: "Voir la liste en PDF" }).click();
+  const viewer = page.getByRole("dialog", { name: "Liste des fournitures" });
+  await expect(viewer.getByRole("link", { name: "Télécharger" })).toHaveAttribute("download", "demande-de-devis.pdf");
+  await expect(viewer.locator("iframe")).toBeVisible();
+  await viewer.getByRole("button", { name: "Fermer le document" }).click();
+  await expect(viewer).toHaveCount(0);
 
   // Une correction du devis lu reste possible après validation : la liste est à valider à nouveau.
-  await page.getByRole("button", { name: /^Voir le devis lu/ }).click();
+  await page.getByRole("button", { name: "Corriger le devis lu" }).click();
   await page.getByRole("button", { name: "Corriger Tuile romane canal rouge 12,5 u/m²" }).click();
   await page.getByLabel("Quantité").fill("1 300");
   await page.getByRole("button", { name: "Enregistrer" }).click();
-  await page.getByRole("button", { name: "Revenir au quantitatif" }).click();
+  await page.getByRole("button", { name: "Revenir à la liste des fournitures" }).last().click();
   await confirmDoubts(page);
   await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
   await expect(page.getByRole("dialog", { name: "Aperçu de la demande de devis" })).toBeVisible();
@@ -432,12 +461,12 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await createProject(page, "Toiture Garnier", "M. Garnier", "5 rue du Port, Vannes");
   await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await page.getByRole("button", { name: "Lire le devis" }).click();
-  await page.getByRole("button", { name: "Voir le devis lu (6 lignes)" }).click();
+  await page.getByRole("button", { name: "Corriger le devis lu" }).click();
   await page.getByRole("button", { name: "Corriger Crochet inox ardoise 100 mm" }).click();
   await page.getByLabel("Quantité").fill("200");
   await page.getByLabel("Unité").fill("u");
   await page.getByRole("button", { name: "Enregistrer" }).click();
-  await page.getByRole("button", { name: "Revenir au quantitatif" }).click();
+  await page.getByRole("button", { name: "Revenir à la liste des fournitures" }).last().click();
   await confirmDoubts(page);
   // §45.9 : « Envoyer au fournisseur » ouvre l'aperçu, le document tel que le fournisseur le recevra ; on y choisit
   // les fournisseurs (dont un créé sur place) et une ligne s'y corrige d'un tap.
@@ -479,7 +508,11 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   // §45 : « Envoyer » de l'aperçu a envoyé la demande de devis à chacun, le PDF joint.
   await expect(pointp.getByText("En attente", { exact: true })).toBeVisible();
   await expect(tuiles.getByText("En attente", { exact: true })).toBeVisible();
-  await expect(pointp.getByRole("link", { name: "Télécharger la demande de devis (PDF)" })).toHaveAttribute("href", /\/demande-de-devis\.pdf$/);
+  await pointp.getByRole("button", { name: "Voir la demande de devis (PDF)" }).click();
+  const demande = page.getByRole("dialog", { name: "Demande de devis" });
+  await expect(demande.getByRole("link", { name: "Télécharger" })).toHaveAttribute("download", "demande-de-devis.pdf");
+  await demande.getByRole("button", { name: "Fermer le document" }).click();
+  await expect(demande).toHaveCount(0);
   // L'e-mail se relit mot pour mot : le contenu en trois blocs, sans un prix.
   await menu(pointp, "Voir l'e-mail");
   await expect(pointp.getByText("Objet :")).toBeVisible();
@@ -564,7 +597,7 @@ test("plusieurs articles inconnus, sans unité : UNE décision les règle tous, 
   await expect(page.getByRole("button", { name: "Ce que j'ai compris" })).toBeVisible();
 
   // L'artisan ajoute trois articles d'un autre métier, sans unité (comme sur un devis de pisciniste).
-  await page.getByRole("button", { name: /^Voir le devis lu/ }).click();
+  await page.getByRole("button", { name: "Corriger le devis lu" }).click();
   for (const [designation, quantity] of [["Skimmer pour piscine liner", "1"], ["Buse de refoulement", "2"], ["Prise balai", "1"]]) {
     await page.getByRole("button", { name: "Ajouter une ligne" }).click();
     await page.getByLabel("Désignation").fill(designation!);
@@ -572,7 +605,7 @@ test("plusieurs articles inconnus, sans unité : UNE décision les règle tous, 
     await page.getByRole("button", { name: "Ajouter", exact: true }).click();
     await expect(page.getByText(designation!)).toBeVisible();
   }
-  await page.getByRole("button", { name: "Revenir au quantitatif" }).click();
+  await page.getByRole("button", { name: "Revenir à la liste des fournitures" }).last().click();
 
   // Une seule carte pour les trois, jamais trois alertes identiques.
   const group = page.getByRole("region", { name: "À régler : Articles que BatiClair ne connaît pas encore" });
@@ -601,7 +634,11 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
 
   await page.getByRole("button", { name: "Lire le devis" }).click();
   await expect(page.getByRole("button", { name: "Ce que j'ai compris" })).toBeVisible();
-  await confirmDoubts(page);
+  // Un exemple « potable » (retour du fondateur, 2026-10-04) : la liste est prête dès la lecture, rien à vérifier.
+  const demoList = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(demoList.getByText(/^\d+ fournitures · tout est prêt$/)).toBeVisible();
+  await expect(demoList.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
+  await expect(demoList.getByText("Embase plomb de sortie de toit")).toBeVisible();
   await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
   const apercu = page.getByRole("dialog", { name: "Aperçu de la demande de devis" });
   for (const name of ["Tuilerie de l'Ouest (démo)", "Négoce Breizh (démo)", "Matériaux Atlantique (démo)"]) {

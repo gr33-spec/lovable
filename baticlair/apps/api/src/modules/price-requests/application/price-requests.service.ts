@@ -1,4 +1,4 @@
-import { briefFacts, briefSentence, communeOf, groupIdenticalLines, parseUnit } from "@baticlair/domain";
+import { briefFacts, briefSentence, communeOf, groupIdenticalLines, parseUnit, withoutLabour, writtenNumber } from "@baticlair/domain";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { DocumentsService } from "../../documents/index.js";
@@ -98,8 +98,9 @@ export function buildPacket(
   const detail = takeoff.lines
     .filter((l) => kinds.get(l.id) !== "labor")
     .map((l) => ({
-      libelle: l.designation,
-      mesure: [l.quantityRaw, l.unitRaw].filter(Boolean).join(" ") || null,
+      // Marchandise seule : pas de « (Fourniture et pose) » chez le fournisseur.
+      libelle: withoutLabour(l.designation),
+      mesure: [l.quantityRaw && writtenNumber(l.quantityRaw), l.unitRaw].filter(Boolean).join(" ") || null,
       precisions: [
         ...(l.material ? [l.material] : []),
         ...Object.entries(l.dimensions ?? {}).map(([k, v]) => `${k} ${v}`),
@@ -256,11 +257,11 @@ export class PriceRequestsService {
       .filter((b) => b.kind === "direct")
       .map((b) => {
         const line = b.lineIds[0] ? byId.get(b.lineIds[0]) : undefined;
-        return { designation: line?.designation ?? b.label, quantity: line?.quantity ?? null, unit: line?.unit ?? null, reference: line?.reference ?? null, section: line?.section ?? [] };
+        return { designation: line?.designation ?? b.label, quantity: line?.quantity ? writtenNumber(line.quantity) : null, unit: line?.unit ?? null, reference: line?.reference ?? null, section: line?.section ?? [] };
       });
     const toQuote: RequestedLine[] = purchase.toQuote.map((q) => {
       const line = q.lineIds[0] ? byId.get(q.lineIds[0]) : undefined;
-      return { designation: line?.designation ?? q.label, quantity: line?.quantity ?? null, unit: line?.unit ?? null, reference: line?.reference ?? null, basis: "work" as const };
+      return { designation: line?.designation ?? q.label, quantity: line?.quantity ? writtenNumber(line.quantity) : null, unit: line?.unit ?? null, reference: line?.reference ?? null, basis: "work" as const };
     });
     // Le même article répété pièce par pièce part en une seule ligne, avec le total et ses titres communs.
     const grouped = groupIdenticalLines(direct).map(({ mergedFrom, section, ...l }) => ({
