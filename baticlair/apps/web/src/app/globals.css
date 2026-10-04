@@ -9,6 +9,9 @@
  * - danger (rouge) : erreur ;
  * - blanc et gris clair : fonds.
  * Pour changer la teinte de la marque, ne modifier que les 4 jetons accent.
+ * Touches 2026 (retour du fondateur, maquette « radar ») : l'action principale porte le dégradé
+ * bleu → violet → rose → orange (`bg-cta`, halo `shadow-cta`) ; les cartes héros, le dégradé nuit → violet
+ * (`bg-hero`). Un titre peut mêler la police d'affichage et un italique à empattement (`font-serif italic`).
  * Contrastes : accent / blanc 7,8:1 ; accent-text / blanc 9,3:1 ;
  * accent-on-dark / ink 10,6:1.
  */
@@ -31,12 +34,36 @@
   --color-danger: #b3360f;
   --font-sans: "Plus Jakarta Sans Variable", system-ui, sans-serif;
   --font-display: "Bricolage Grotesque Variable", "Plus Jakarta Sans Variable", system-ui, sans-serif;
+  --font-serif: "Instrument Serif", Georgia, serif;
+  --color-violet: #6b46ff;
+  --color-pink: #ff3d8b;
   --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.05), 0 8px 24px rgba(16, 24, 40, 0.06);
   --shadow-float: 0 14px 30px rgba(14, 17, 22, 0.28);
 }
 
 html {
   -webkit-text-size-adjust: 100%;
+}
+
+/* L'action principale : un dégradé vif, lisible en blanc (texte posé sur le bleu et le violet). */
+@utility bg-cta {
+  background-image: linear-gradient(100deg, #2b55ff 0%, #5b45ff 38%, #b23dd8 66%, #ff4d7a 88%, #ff7a3d 100%);
+}
+@utility shadow-cta {
+  box-shadow:
+    0 10px 24px -8px rgba(107, 70, 255, 0.55),
+    0 4px 10px -4px rgba(255, 77, 122, 0.45);
+}
+/* La carte héros : nuit profonde, une lueur violette en haut à droite. */
+@utility bg-hero {
+  background-image:
+    radial-gradient(120% 90% at 100% 0%, rgba(140, 90, 255, 0.55) 0%, transparent 55%),
+    radial-gradient(90% 70% at 0% 100%, rgba(43, 85, 255, 0.35) 0%, transparent 60%),
+    linear-gradient(160deg, #0b1033 0%, #1a1550 55%, #2a1466 100%);
+}
+/* L'onglet actif du menu : bleu → violet. */
+@utility bg-nav-active {
+  background-image: linear-gradient(110deg, #2b55ff 0%, #6b46ff 100%);
 }
 
 body {

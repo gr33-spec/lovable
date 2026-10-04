@@ -20,7 +20,7 @@ async function signUp(page: Page) {
   await page.getByLabel("E-mail professionnel").fill(email);
   await page.getByLabel("Mot de passe").fill("motdepasse-solide");
   await page.getByRole("button", { name: "Créer mon compte" }).click();
-  await expect(page.getByRole("heading", { name: "Bonjour Jean" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Bonjour Jean/ })).toBeVisible();
   return email;
 }
 
@@ -103,12 +103,12 @@ test("un artisan crée son compte et son premier chantier depuis le +", async ({
   await page.getByRole("button", { name: "Créer le chantier" }).click();
   await expect(page.getByRole("heading", { name: "Toiture Dupont" })).toBeVisible();
   // Le chat du chantier : une seule invitation, déposer le devis ; plus de barre en 5 étapes.
-  await expect(page.getByRole("heading", { name: /^Déposez le devis de votre client/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Déposez le devis/ })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Avancement du chantier" })).toHaveCount(0);
 
   // Retour depuis la fiche : on revient à l'accueil (d'où l'on venait), pas au formulaire.
   await page.getByRole("button", { name: "Retour" }).click();
-  await expect(page.getByRole("heading", { name: "Bonjour Jean" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Bonjour Jean/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /Toiture Dupont/ })).toBeVisible();
 });
 

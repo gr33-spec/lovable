@@ -78,9 +78,11 @@ export default function AccueilPage() {
           <input id="home-search" name="q" type="search" enterKeyHint="search" placeholder="Chantier, client, adresse…" className="min-h-12 grow bg-transparent text-base outline-none placeholder:text-muted" />
         </div>
       </form>
-      <h1 className="mt-1.5 font-display text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em]">Bonjour {firstName}</h1>
+      <h1 className="mt-1.5 font-display text-[34px] leading-[1.02] font-extrabold tracking-[-0.03em]">
+        Bonjour {firstName}, <span className="font-serif text-[38px] font-normal tracking-normal italic">on avance&nbsp;?</span>
+      </h1>
 
-      <section aria-labelledby="todo-title" className="flex flex-col gap-1 rounded-[28px] bg-[radial-gradient(130%_90%_at_100%_0%,var(--color-accent-glow)_0%,transparent_55%)] bg-ink px-4 pt-4.5 pb-2.5 text-white shadow-[0_18px_40px_rgba(14,17,22,0.22)]">
+      <section aria-labelledby="todo-title" className="flex flex-col gap-1 rounded-[28px] bg-hero px-4 pt-4.5 pb-2.5 text-white shadow-[0_24px_48px_-16px_rgba(26,21,80,0.6)]">
         <h2 id="todo-title" className="pb-1.5 font-display text-[22px] font-extrabold tracking-[-0.02em]">
           {(recent === null || next === null) && !error ? "À faire" : todo.length === 0 ? "Tout est à jour" : `${todo.length} action${todo.length > 1 ? "s" : ""} à faire`}
         </h2>
@@ -98,7 +100,7 @@ export default function AccueilPage() {
                   {t.text ? <span className="text-[13px] text-[#c9ced6]">{t.text}</span> : null}
                 </span>
               </span>
-              <Link href={t.href} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-accent px-3.5 text-[15px] font-extrabold">
+              <Link href={t.href} className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-cta px-3.5 text-[15px] font-extrabold shadow-cta">
                 {t.action}
               </Link>
             </div>
