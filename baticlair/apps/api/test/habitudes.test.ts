@@ -34,7 +34,7 @@ describe("« je façonne » : apprise à la deuxième confirmation, plus jamais 
     const third = (await agent.post("/v1/quantitatifs").send({ ...JOINT_DEBOUT, reference: "Chantier 3" })).body as Q;
     expect(third.questions.map((x) => x.id)).not.toContain("engine:param:faconnage");
     const bobine = third.lignes.find((l) => /bobine/i.test(l.libelle))!;
-    expect(bobine).toMatchObject({ libelle: "Zinc naturel en bobine 500 mm", quantite: 215, unite: "ml" });
+    expect(bobine).toMatchObject({ libelle: "Zinc naturel en bobine 500 mm", quantite: 221, unite: "ml" });
     expect(bobine.explication.morceaux).toContainEqual(expect.objectContaining({ cle: "param:faconnage", confiance: "artisan" }));
     // Un autre chantier peut toujours dire autre chose : la réponse du chantier passe devant l'habitude.
     const res = await agent.post(`/v1/quantitatifs/${third.id}/reponses`).send({ reponses: [{ question: "param:faconnage", valeur: "2", unite: "u" }] });

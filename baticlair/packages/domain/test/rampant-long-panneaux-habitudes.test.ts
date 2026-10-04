@@ -27,16 +27,16 @@ describe("3) joint debout : rampant de plus de 10 m", () => {
     const bacs = readQuote(JOINT_DEBOUT, A({ faconnage: "2", longueur_rampant: "12", bacs_longs: "2" }));
     expect(bacs.toBuy.find((b) => b.needIds.includes("zinc-bacs"))?.quantity).toBe("36 pièces");
     expect(bacs.toBuy.some((b) => b.needIds.some((id) => id.startsWith("zinc-bobines")))).toBe(false);
-    // Profilée sur place : 18 bacs × 12 m = 216 ml de bobine, et pas de bacs.
+    // Profilée sur place : 18 bacs × (12 m + 15 cm de surlongueur) = 219 ml de bobine, et pas de bacs.
     const bobine = readQuote(JOINT_DEBOUT, A({ faconnage: "2", longueur_rampant: "12", bacs_longs: "1" }));
-    expect(bobine.toBuy.find((b) => b.needIds.some((id) => id.startsWith("zinc-bobines")))?.quantity).toBe("216 ml");
+    expect(bobine.toBuy.find((b) => b.needIds.some((id) => id.startsWith("zinc-bobines")))?.quantity).toBe("219 ml");
     expect(bobine.toBuy.some((b) => b.needIds.includes("zinc-bacs"))).toBe(false);
   });
 
   it("je façonne : jamais la question « bacs longs », même à 12 m", () => {
     const v = readQuote(JOINT_DEBOUT, A({ faconnage: "1", longueur_rampant: "12" }));
     expect(v.questions.map((q) => q.question?.key)).not.toContain("param:bacs_longs");
-    expect(v.toBuy.find((b) => b.needIds.some((id) => id.startsWith("zinc-bobines")))?.quantity).toBe("216 ml");
+    expect(v.toBuy.find((b) => b.needIds.some((id) => id.startsWith("zinc-bobines")))?.quantity).toBe("219 ml");
   });
 });
 
@@ -66,7 +66,7 @@ describe("5) habitude « je façonne » : apprise à la deuxième confirmation",
     expect(enginePreferences(m, now).params).toEqual({ faconnage: "1" });
     const v = readQuote(JOINT_DEBOUT, {}, [], enginePreferences(m, now));
     expect(v.questions.map((q) => q.question?.key)).not.toContain("param:faconnage");
-    expect(v.toBuy.find((b) => b.needIds.some((id) => id.startsWith("zinc-bobines")))?.quantity).toBe("215 ml");
+    expect(v.toBuy.find((b) => b.needIds.some((id) => id.startsWith("zinc-bobines")))?.quantity).toBe("221 ml");
     // La réponse de CE chantier passe devant l'habitude.
     expect(readQuote(JOINT_DEBOUT, A({ faconnage: "2" }), [], enginePreferences(m, now)).toBuy.find((b) => b.needIds.includes("zinc-bacs"))?.quantity).toBe("39 pièces");
   });

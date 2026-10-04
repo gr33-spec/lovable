@@ -11,6 +11,14 @@ import type { MaterialFamily, TradeProfile } from "./trade-profile.js";
  * gouttière » n'est pas un crochet d'ardoise).
  */
 const FAMILIES: MaterialFamily[] = [
+  // Réponse du fondateur (2026-10-04) : « Bâche de protection : fourniture, elle part au fournisseur. »
+  {
+    code: "tarpaulin",
+    label: "Bâche de protection",
+    keywords: ["bache", "baches"],
+    allowedUnits: ["U", "M2", "ROULEAU"],
+    plausibleMax: { U: 20, M2: 1000, ROULEAU: 20 },
+  },
   {
     code: "roof_window",
     label: "Fenêtre de toit",
@@ -200,7 +208,7 @@ export const ROOFING_PROFILE: TradeProfile = {
   id: "roofing",
   label: "Couverture",
   families: FAMILIES,
-  laborKeywords: [...COMMON_LABOR, "demoussage", "bache", "traitement"],
+  laborKeywords: [...COMMON_LABOR, "demoussage", "traitement"],
   supplyKeywords: COMMON_SUPPLY,
   companionRules: [
     {

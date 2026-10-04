@@ -39,16 +39,16 @@ describe("joint debout : la question de façonnage, puis des lignes que le fourn
     expect(bought(v)["Pattes de fixation"]).toBeUndefined();
   });
 
-  it("« je façonne » : de la bobine au mètre linéaire, jamais au kg : 39 bacs × 5,5 m = 215 ml de bobine 500 mm en bord de mer", () => {
+  it("« je façonne » : de la bobine au mètre linéaire, jamais au kg : 39 bacs × (5,5 m + 15 cm de surlongueur) = 221 ml de bobine 500 mm en bord de mer", () => {
     const v = readQuote(DEVIS, { "param:faconnage": { value: "1", unit: "u" } });
     expect(v.questions.filter((d) => d.question?.key === "param:faconnage")).toEqual([]);
-    expect(bought(v)["Zinc naturel en bobine 500 mm"]).toBe("215 ml");
+    expect(bought(v)["Zinc naturel en bobine 500 mm"]).toBe("221 ml");
     expect(JSON.stringify(v.toBuy)).not.toMatch(/\bkg\b/);
     expect(bought(v)["Bacs joint debout zinc"]).toBeUndefined();
     expect(v.assumptions.map((a) => `${a.key}=${a.value}`)).toEqual(expect.arrayContaining(["param:epaisseur_zinc=0,65", "derived:largeur_bobine=500", "param:zone=3"]));
     // 0,70 mm : la longueur ne change pas ; l'épaisseur part dans « Le chantier en bref ».
     const thick = readQuote(DEVIS, { "param:faconnage": { value: "1", unit: "u" }, "param:epaisseur_zinc": { value: "0.7", unit: "mm" } });
-    expect(bought(thick)["Zinc naturel en bobine 500 mm"]).toBe("215 ml");
+    expect(bought(thick)["Zinc naturel en bobine 500 mm"]).toBe("221 ml");
     expect(v.canValidate).toBe(true); // le voligeage du devis est reconnu (§7) : plus rien à confirmer
   });
 
