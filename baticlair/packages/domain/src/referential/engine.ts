@@ -897,6 +897,10 @@ function computeNeed(
     const purchaseUnavailable = converted && "pending" in converted ? converted.pending : undefined;
     const purchaseMissing = converted && "pending" in converted && converted.missing ? { ...converted.missing, workItemId: work.id, slot: slot.key, family: slot.family } : undefined;
     const purchase = converted && "pending" in converted ? null : converted;
+    // Une donnée qui change l'ARTICLE (le diamètre) sans changer la quantité : demandée quand même.
+    for (const name of rule.precisionRequires ?? []) valueOf(name);
+    const required = missing.find((m) => rule.precisionRequires?.includes(m.key));
+    if (required) throw new Stop({ status: "question", question: required.question });
     if (!exact) {
       const decided = purchase && purchase.orderLo.equals(purchase.orderHi) && purchase.orderLo.isFinite();
       if (!decided) {
@@ -920,6 +924,10 @@ function computeNeed(
         precision = rule.precision.replace(/\{([\w.]+)(?:\|([^}]+))?\}/g, (_, name: string, unitText?: string) => {
           const v = valueOf(name);
           if (!isPoint(v) || !v.lo.isFinite()) throw new Error("précision incalculable");
+          // Sans unité, une donnée qui a sa façon d'être dite (« 150 » → « Ø 150 », « 0 » → « VMC ») s'écrit ainsi.
+          const def = unitText ? undefined : work.params.find((p) => p.key === name);
+          const shown = def?.display?.[v.lo.dividedBy(parseRefUnit(def.unit).factor).toFixed()];
+          if (shown !== undefined) return shown;
           const u = unitText ? parseRefUnit(unitText) : null;
           return `${fr(u ? v.lo.dividedBy(u.factor) : v.lo)}${unitText ? ` ${unitText.replace("m2", "m²")}` : ""}`;
         });

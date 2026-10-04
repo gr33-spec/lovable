@@ -220,7 +220,8 @@ describe("une réponse recalcule tout ce qui en dépend (règles vérifiées)", 
     expect(first.decisions.filter((d) => d.question?.key === "product:tuile")).toHaveLength(1);
 
     const second = view(lines, "roofing", { "product:tuile": "edilians-hp10-huguenot" }, REF);
-    expect(second.decisions.filter((d) => d.key.startsWith("engine:"))).toEqual([]);
+    // (La sortie de toit pose ses propres questions : diamètre, fumée ou ventilation.)
+    expect(second.decisions.filter((d) => d.key.startsWith("engine:") && !/_sortie$/.test(d.key))).toEqual([]);
     const need = (id: string) => second.items.find((i) => i.kind === "need" && i.id === id)!;
     expect([need("tuiles").state, need("liteaux").state]).toEqual(["verified", "verified"]);
     // Le pureau n'est pas demandé : hypothèse du référentiel (pureau mini en zone littorale), dite et modifiable.

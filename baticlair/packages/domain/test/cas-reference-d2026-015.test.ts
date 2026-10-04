@@ -131,7 +131,8 @@ describe("cas de référence D-2026-015 : lecture des lignes", () => {
       ["ligne 8", "material", "downpipe"],
       ["ligne 9", "material", "roof_accessory"],
       // Faiblesse trouvée (corrigée) : « … avec solin d'étanchéité » classait la sortie de toit en zinguerie.
-      ["ligne 10", "material", "roof_accessory"],
+      // Sortie de toit : sa propre famille, un ouvrage compté (réponse du fondateur, 2026-10-04).
+      ["ligne 10", "material", "roof_outlet"],
     ]);
   });
 
@@ -146,7 +147,7 @@ describe("cas de référence D-2026-015 : lecture des lignes", () => {
       ["ligne 7", "purchase"], // la gouttière s'achète au mètre (barres) ; ses accessoires restent à calculer
       ["ligne 8", "purchase"], // FRONTIÈRE : « 2 ensembles » = 2 descentes complètes, pas 2 pièces
       ["ligne 9", "purchase"], // 10 chatières : une vraie quantité de pièces
-      ["ligne 10", "purchase"], // 1 sortie de toit : une vraie quantité (modèle à préciser)
+      ["ligne 10", "work"], // 1 sortie de toit = 1 ouvrage : embase ou platine, chapeau, collerette pour la fumée
     ]);
   });
 

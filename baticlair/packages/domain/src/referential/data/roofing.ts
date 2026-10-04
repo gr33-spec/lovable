@@ -20,6 +20,8 @@ import type { Fact, ParamDef, Product, Provenance, Referential } from "../model.
  * calculer et que la réponse change la commande.
  */
 const DRAFT = { status: "draft" } as const;
+/** Réponses du fondateur aux partiels (2026-10-04). */
+const FOUNDER_REPLY = { status: "verified", verifiedAt: "2026-10-04", verifiedBy: "Fondateur (couvreur)" } as const;
 /** Référentiel quantitatif couverture écrit par le fondateur (couvreur), validé par lui le 2026-10-03. */
 const FOUNDER_DOC = {
   status: "verified",
@@ -548,7 +550,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.04-22",
+  version: "roofing-2026.10.04-23",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -619,6 +621,14 @@ export const ROOFING_REFERENTIAL: Referential = {
       title: "Format commercial d'une ardoise « L × l » (en cm), écrit dans le devis",
       retrievedAt: "2026-10-02",
       note: "Convention « longueur × largeur » (30×22 = 30 cm de long, 22 cm de large), confirmée par le fondateur le 2026-10-02.",
+    },
+    {
+      id: "fondateur-reponses-2026-10-04",
+      kind: "trade_practice",
+      title: "Réponses du fondateur (couvreur) aux partiels du référentiel",
+      documentRef: "Message du fondateur dans la conversation de travail, 2026-10-04 (réponses aux partiels : sortie de toit, bobineau, surlongueur, bâche)",
+      retrievedAt: "2026-10-04",
+      note: "Sortie de toit : une embase par sortie adaptée à la couverture (plomb pour ardoise et tuile, platine zinc soudée pour zinc), au diamètre du conduit, plus un chapeau ; collerette d'étanchéité seulement pour un conduit de fumée. Surlongueur de bobine 15 cm par bac. Bâche : fourniture. Bobineau : largeurs 500, 650, 1 000 mm, longueurs 17, 21, 31 m (40 m en 500), épaisseurs 0,65 (défaut), 0,70, 0,80.",
     },
     {
       id: "fondateur-referentiel-2026-10-03",
@@ -799,29 +809,12 @@ export const ROOFING_REFERENTIAL: Referential = {
     // Familles de VOCABULAIRE seulement (aucun produit ni règle encore) : elles évitent qu'une
     // « tuile chatière » ou un « solin adapté à la tuile HP10 » soit pris pour une tuile.
     { code: "vent_tile", label: "Tuile chatière", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["chatiere", "tuile chatiere", "tuile de ventilation"] },
-    {
-      code: "roof_outlet",
-      label: "Sortie de toit",
-      needUnit: "u",
-      attributes: [],
-      keyAttributes: [],
-      keywords: ["sortie de toit"],
-      // Réponse du fondateur (2026-10-04) : « boutons Ø 80 / 100 / 125 / 150 / 180 ou VMC ». La ligne du devis reste telle
-      // qu'écrite (marque, modèle) ; le diamètre part dans la précision.
-      ask: {
-        question: "Sortie de toit : quel diamètre ?",
-        hint: "Le fournisseur en a besoin pour chiffrer la bonne sortie.",
-        choices: [
-          { label: "Ø 80", value: "Ø 80" },
-          { label: "Ø 100", value: "Ø 100" },
-          { label: "Ø 125", value: "Ø 125" },
-          { label: "Ø 150", value: "Ø 150" },
-          { label: "Ø 180", value: "Ø 180" },
-          { label: "VMC", value: "VMC" },
-        ],
-        answered: "ø|\\bdiam|\\bvmc\\b|\\b(80|100|125|150|180) ?mm\\b",
-      },
-    },
+    // Sortie de toit : un ouvrage compté (réponse du fondateur, 2026-10-04) ; la ligne du devis en est la mesure.
+    { code: "roof_outlet", label: "Sortie de toit", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["sortie de toit"] },
+    { code: "outlet_base", label: "Embase de sortie de toit (plomb)", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "outlet_plate", label: "Platine zinc de sortie de toit", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "outlet_cap", label: "Chapeau de sortie de toit", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "outlet_collar", label: "Collerette d'étanchéité de conduit de fumée", needUnit: "u", attributes: [], keyAttributes: [] },
     { code: "hip", label: "Arêtier", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["aretier"] },
     { code: "valley", label: "Noue", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["noue"] },
     { code: "flashing", label: "Solin, abergement", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["solin", "abergement"] },
@@ -1049,6 +1042,10 @@ export const ROOFING_REFERENTIAL: Referential = {
     }),
     generic("patte-zinc-standard", "zinc_clip", "Patte de fixation pour bande zinc", "Pattes de fixation"),
     // §45.5 : pattes fixes et pattes coulissantes sont deux articles au comptoir, les pointes un troisième.
+    generic("embase-plomb-sortie", "outlet_base", "Embase plomb pour sortie de toit, au diamètre du conduit", "Embase plomb de sortie de toit"),
+    generic("platine-zinc-sortie", "outlet_plate", "Platine zinc soudée pour sortie de toit, au diamètre du conduit", "Platine zinc de sortie de toit"),
+    generic("chapeau-sortie", "outlet_cap", "Chapeau de sortie de toit, au diamètre du conduit", "Chapeau de sortie de toit"),
+    generic("collerette-sortie", "outlet_collar", "Collerette d'étanchéité (solin) pour conduit de fumée", "Collerette d'étanchéité"),
     generic("patte-coulissante-joint-debout", "seam_clip_sliding", "Patte coulissante pour joint debout (largeur de bobine du chantier)", "Pattes coulissantes joint debout"),
     generic("patte-fixe-joint-debout", "seam_clip_fixed", "Patte fixe pour joint debout (largeur de bobine du chantier)", "Pattes fixes joint debout"),
     // §36.2 : « 18 mm → pointe annelée 2,5×28 » (volige 18 mm, §7).
@@ -1157,6 +1154,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           slot: "liteau",
           formula: "surface / pureau",
           unit: "ml",
+          precision: "lattage {surface|m2}, une file tous les {pureau|cm}",
           core: true,
           exclusions: "Hors doublage du liteau d'égout et liteaux de faîtage.",
           source: "baticlair-geometrie-couverture",
@@ -1168,6 +1166,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           slot: "contre_liteau",
           formula: "surface / entraxe_supports",
           unit: "ml",
+          precision: "contre-lattage {surface|m2}, une file tous les {entraxe_supports|cm}",
           core: true,
           exclusions: "Une file par chevron ou fermette ; suppose un entraxe régulier sur toute la surface.",
           source: "baticlair-geometrie-couverture",
@@ -1407,6 +1406,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           slot: "liteau",
           formula: "surface / pureau",
           unit: "ml",
+          precision: "lattage {surface|m2}, une file tous les {pureau|cm}",
           core: true,
           exclusions: "Une file par rang ; hors doublis à l'égout et liteaux de faîtage.",
           source: "baticlair-geometrie-ardoise",
@@ -1418,6 +1418,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           slot: "contre_liteau",
           formula: "surface / entraxe_supports",
           unit: "ml",
+          precision: "contre-lattage {surface|m2}, une file tous les {entraxe_supports|cm}",
           core: true,
           exclusions: "Une file par chevron ; suppose un entraxe régulier.",
           source: "baticlair-geometrie-couverture",
@@ -1693,6 +1694,144 @@ export const ROOFING_REFERENTIAL: Referential = {
       ],
     },
     {
+      // Réponse du fondateur (2026-10-04) : « une embase par sortie, adaptée à la couverture (embase plomb pour ardoise et
+      // tuile, platine zinc soudée pour zinc), au diamètre du conduit, plus un chapeau. Collerette d'étanchéité seulement
+      // pour un conduit de fumée (solin). Question à boutons Ø 80 / 100 / 125 / 150 / 180 ou VMC, plus fumée / ventilation. »
+      id: "sortie-de-toit",
+      trade: "roofing",
+      section: "singulier",
+      label: "Sortie de toit",
+      triggers: ["roof_outlet"],
+      params: [
+        { key: "nb_sorties", label: "Nombre de sorties de toit", unit: "u", kind: "site_data", question: "Combien de sorties de toit ?", fromLineQuantity: true },
+        {
+          key: "diametre_sortie",
+          label: "Diamètre du conduit",
+          unit: "mm",
+          kind: "site_data",
+          question: "Sortie de toit : quel diamètre ?",
+          hint: "Le fournisseur en a besoin pour chiffrer la bonne embase et le bon chapeau.",
+          textLabels: ["diametre", "diam", "ø"],
+          textValues: [{ value: "0", keywords: ["vmc"] }],
+          choices: [
+            { label: "Ø 80", value: "80" },
+            { label: "Ø 100", value: "100" },
+            { label: "Ø 125", value: "125" },
+            { label: "Ø 150", value: "150" },
+            { label: "Ø 180", value: "180" },
+            { label: "VMC", value: "0" },
+          ],
+          display: { "80": "Ø 80", "100": "Ø 100", "125": "Ø 125", "150": "Ø 150", "180": "Ø 180", "0": "VMC" },
+        },
+        {
+          key: "usage_sortie",
+          label: "Usage du conduit",
+          unit: "u",
+          kind: "site_data",
+          question: "Sortie de toit : conduit de fumée ou ventilation ?",
+          hint: "Un conduit de fumée demande une collerette d'étanchéité (solin).",
+          textValues: [
+            { value: "1", keywords: ["fumee", "conduit de fumee", "poele", "insert", "chaudiere"] },
+            { value: "2", keywords: ["ventilation", "extraction", "aeration"] },
+          ],
+          choices: [
+            { label: "Conduit de fumée", value: "1" },
+            { label: "Ventilation", value: "2" },
+          ],
+          display: { "1": "conduit de fumée", "2": "ventilation" },
+        },
+        {
+          key: "support_sortie",
+          label: "Couverture autour de la sortie",
+          unit: "u",
+          kind: "site_data",
+          question: "Sortie de toit : sur quelle couverture ?",
+          textValues: [
+            { value: "1", keywords: ["ardoise", "ardoises", "tuile", "tuiles"] },
+            { value: "2", keywords: ["zinc"] },
+          ],
+          fromWorks: [
+            { value: "2", workItems: ["couverture-zinc-joint-debout"] },
+            { value: "1", workItems: ["couverture-tuiles-emboitement", "couverture-tuiles-canal", "couverture-ardoises-crochet"] },
+          ],
+          choices: [
+            { label: "Ardoise ou tuile", value: "1" },
+            { label: "Zinc", value: "2" },
+          ],
+          display: { "1": "ardoise ou tuile", "2": "zinc" },
+        },
+      ],
+      slots: [
+        { key: "sortie", family: "roof_outlet", label: "Sortie de toit", measureOnly: true },
+        { key: "embase", family: "outlet_base", label: "Embase plomb", usual: { text: "Embase plomb au diamètre du conduit, pour ardoise et tuile.", source: "fondateur-reponses-2026-10-04", productId: "embase-plomb-sortie" } },
+        { key: "platine", family: "outlet_plate", label: "Platine zinc soudée", usual: { text: "Platine zinc soudée au diamètre du conduit, pour couverture zinc.", source: "fondateur-reponses-2026-10-04", productId: "platine-zinc-sortie" } },
+        { key: "chapeau", family: "outlet_cap", label: "Chapeau", usual: { text: "Un chapeau par sortie, au diamètre du conduit.", source: "fondateur-reponses-2026-10-04", productId: "chapeau-sortie" } },
+        { key: "collerette", family: "outlet_collar", label: "Collerette d'étanchéité", usual: { text: "Collerette d'étanchéité (solin), seulement pour un conduit de fumée.", source: "fondateur-reponses-2026-10-04", productId: "collerette-sortie" } },
+      ],
+      constants: {
+        // « VMC » se répond 0 mm : une sortie VMC n'a pas de collerette.
+        vmc: condition("0", "mm", "definition", { status: "verified", verifiedAt: "2026-10-04", verifiedBy: "BatiClair (définition)" }),
+      },
+      needs: [
+        {
+          id: "embase-sortie",
+          slot: "embase",
+          when: "support_sortie < 2",
+          formula: "nb_sorties",
+          unit: "u",
+          core: true,
+          exclusions: "Une embase par sortie, au diamètre du conduit.",
+          precision: "{diametre_sortie}, pour ardoise ou tuile",
+          precisionRequires: ["diametre_sortie"],
+          source: "fondateur-reponses-2026-10-04",
+          verification: FOUNDER_REPLY,
+          version: 1,
+        },
+        {
+          id: "platine-sortie",
+          slot: "platine",
+          when: "support_sortie >= 2",
+          formula: "nb_sorties",
+          unit: "u",
+          core: true,
+          exclusions: "Une platine zinc soudée par sortie, au diamètre du conduit.",
+          precision: "{diametre_sortie}, soudée sur la couverture zinc",
+          precisionRequires: ["diametre_sortie"],
+          source: "fondateur-reponses-2026-10-04",
+          verification: FOUNDER_REPLY,
+          version: 1,
+        },
+        {
+          id: "chapeau-sortie",
+          slot: "chapeau",
+          formula: "nb_sorties",
+          unit: "u",
+          core: true,
+          exclusions: "Un chapeau par sortie.",
+          precision: "{diametre_sortie}",
+          precisionRequires: ["diametre_sortie"],
+          source: "fondateur-reponses-2026-10-04",
+          verification: FOUNDER_REPLY,
+          version: 1,
+        },
+        {
+          id: "collerette-sortie",
+          slot: "collerette",
+          // Seulement pour un conduit de fumée ; une sortie VMC n'en a pas.
+          when: "si(diametre_sortie > regle.vmc, si(usage_sortie < 2, 1, 0), 0)",
+          formula: "nb_sorties",
+          unit: "u",
+          core: true,
+          exclusions: "Une collerette par conduit de fumée ; aucune pour une ventilation.",
+          precision: "{diametre_sortie}, solin du conduit de fumée",
+          precisionRequires: ["diametre_sortie"],
+          source: "fondateur-reponses-2026-10-04",
+          verification: FOUNDER_REPLY,
+          version: 1,
+        },
+      ],
+    },
+    {
       id: "couverture-zinc-joint-debout",
       trade: "roofing",
       section: "principal",
@@ -1773,6 +1912,8 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "entraxe_joints", label: "Largeur utile du bac (entraxe des joints)", unit: "mm", formula: "si(zone >= regle.zone_littorale, regle.entraxe_littoral, regle.entraxe_courant)", shown: true, source: "vmzinc-joint-debout", verification: FOUNDER_DOC, version: 1 },
         { key: "poids_zinc", label: "Poids du zinc posé", unit: "kg/m2", formula: "si(epaisseur_zinc >= regle.seuil_080, regle.poids_080, si(epaisseur_zinc >= regle.seuil_070, regle.poids_070, regle.poids_065))", shown: true, source: "vmzinc-joint-debout", verification: FOUNDER_DOC, version: 1 },
         { key: "largeur_pan", label: "Largeur du pan", unit: "m", formula: "surface / longueur_rampant", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
+        { key: "nb_bacs", label: "Nombre de bacs", unit: "u", formula: "arrondi_sup(largeur_pan / entraxe_joints)", source: "vmzinc-joint-debout", verification: FOUNDER_DOC, version: 1 },
+        { key: "longueur_bac", label: "Longueur de bobine par bac", unit: "m", formula: "longueur_rampant + regle.surlongueur_bac", source: F, verification: FOUNDER_REPLY, version: 1 },
         { key: "coulissantes_m2", label: "Pattes coulissantes par m²", unit: "u/m2", formula: "si(largeur_bobine <= regle.largeur_littoral, table.coulissantes_500, table.coulissantes_650)", source: "vmzinc-joint-debout", verification: FOUNDER_DOC, version: 1 },
         { key: "fixes_m2", label: "Pattes fixes par m²", unit: "u/m2", formula: "si(largeur_bobine <= regle.largeur_littoral, table.fixes_500, table.fixes_650)", source: "vmzinc-joint-debout", verification: FOUNDER_DOC, version: 1 },
       ],
@@ -1785,10 +1926,12 @@ export const ROOFING_REFERENTIAL: Referential = {
           // Une bande de bobine par bac : nombre de bacs (largeur du pan ÷ largeur utile) × (rampant + 15 cm de surlongueur).
           // L'épaisseur ne change pas la longueur mais l'article : le facteur 1 la garde dans le calcul, donc dite
           // (hypothèse modifiable) et transmise au fournisseur dans « Le chantier en bref ».
-          formula: "arrondi_sup(largeur_pan / entraxe_joints) * (longueur_rampant + regle.surlongueur_bac) * si(epaisseur_zinc >= regle.seuil_070, 1, 1)",
+          formula: "nb_bacs * longueur_bac * si(epaisseur_zinc >= regle.seuil_070, 1, 1)",
           unit: "m",
           core: true,
           exclusions: "Une longueur de rampant par bac plus 15 cm de surlongueur (10 en égout, 5 en faîtage) ; hors bandes d'égout, de rive, de faîtage et de noue, comptées à part.",
+          // Ce qui se calcule en longueurs dit d'où vient la longueur (retour du fondateur, 2026-10-04).
+          precision: "{nb_bacs} bacs × {longueur_bac|m}",
           source: "vmzinc-joint-debout",
           verification: FOUNDER_DOC,
           version: 1,
@@ -1801,10 +1944,12 @@ export const ROOFING_REFERENTIAL: Referential = {
           // Une bande de bobine par bac : nombre de bacs (largeur du pan ÷ largeur utile) × (rampant + 15 cm de surlongueur).
           // L'épaisseur ne change pas la longueur mais l'article : le facteur 1 la garde dans le calcul, donc dite
           // (hypothèse modifiable) et transmise au fournisseur dans « Le chantier en bref ».
-          formula: "arrondi_sup(largeur_pan / entraxe_joints) * (longueur_rampant + regle.surlongueur_bac) * si(epaisseur_zinc >= regle.seuil_070, 1, 1)",
+          formula: "nb_bacs * longueur_bac * si(epaisseur_zinc >= regle.seuil_070, 1, 1)",
           unit: "m",
           core: true,
           exclusions: "Une longueur de rampant par bac plus 15 cm de surlongueur (10 en égout, 5 en faîtage) ; hors bandes d'égout, de rive, de faîtage et de noue, comptées à part.",
+          // Ce qui se calcule en longueurs dit d'où vient la longueur (retour du fondateur, 2026-10-04).
+          precision: "{nb_bacs} bacs × {longueur_bac|m}",
           source: "vmzinc-joint-debout",
           verification: FOUNDER_DOC,
           version: 1,
@@ -2006,6 +2151,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           slot: "tube",
           formula: "nb_descentes * hauteur_descente",
           unit: "ml",
+          precision: "{nb_descentes} descentes × {hauteur_descente|m}",
           core: true,
           exclusions: "Hauteur du devis, sans déduire les coudes ni ajouter de dauphin.",
           source: "baticlair-pratique-accessoires",

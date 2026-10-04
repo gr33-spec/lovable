@@ -122,15 +122,17 @@ Information (pas une décision) : 5 ouvrages mesurés (m², ml…) : les matéri
 
 ## D-2026-015 — couverture
 
-**À l'arrivée** : ✓ 12 prêts · ⚠ 1 à confirmer · ? 6 information manquante
+**À l'arrivée** : ✓ 11 prêts · ⚠ 1 à confirmer · ? 10 information manquante
 
-**Décisions à prendre : 1**
+**Décisions à prendre : 3**
 
+- ? **Sortie de toit : quel diamètre** — Sortie de toit : quel diamètre ?
+- ? **Sortie de toit : conduit de fumée ou ventilation** — Sortie de toit : conduit de fumée ou ventilation ?
 - ⚠ **Tuiles** — J'ai identifié : Tuiles HP10. C'est bien ce modèle ?
 
-Information (pas une décision) : 6 ouvrages mesurés (m², ml…) : les matériaux en sont calculés quand une règle existe ; ce qui reste « à préciser » sera demandé aux fournisseurs pour la mesure du devis.
+Information (pas une décision) : 7 ouvrages mesurés (m², ml…) : les matériaux en sont calculés quand une règle existe ; ce qui reste « à préciser » sera demandé aux fournisseurs pour la mesure du devis.
 
-**Après 1 réponse** : ✓ 12 prêts · ⚠ 0 à confirmer · ? 6 information manquante
+**Après 2 réponses** : ✓ 11 prêts · ⚠ 0 à confirmer · ? 7 information manquante
 
 **Liste envoyée aux fournisseurs : 10 lignes** (10 lignes du devis regroupées)
 
@@ -143,4 +145,4 @@ Information (pas une décision) : 6 ouvrages mesurés (m², ml…) : les matéri
 - Gouttière PVC de 25 sable (Fourniture & Pose) - Fourniture et pose de  : 20 m
 - Descente d'eau pluviale PVC Ø80 avec coudes (Fourniture & Pose) - Four : 2 unités
 - Chatières de ventilation (Fourniture & Pose) - Fourniture et pose de t : 10 unités
-- Sortie de toit Poujoulat (Fourniture & Pose) - Fourniture et pose d'un : 1 unité
+- Sortie de toit Poujoulat (Fourniture & Pose) - Fourniture et pose d'un : pour 1 unité (quantité à calculer)

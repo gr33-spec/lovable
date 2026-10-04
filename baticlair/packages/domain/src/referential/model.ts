@@ -210,6 +210,13 @@ export interface ParamDef {
   estimate?: string;
   /** Façon de dire une valeur dans l'explication (« 3 » → « III » pour une région ardoise) ; le calcul garde la valeur. */
   display?: Record<string, string>;
+  /** Un mot de la ligne de l'ouvrage donne la valeur (« VMC » → 0, « fumée » → 1) : lu dans le devis, jamais deviné. */
+  textValues?: { value: string; keywords: string[] }[];
+  /**
+   * La valeur se lit sur les AUTRES ouvrages du devis (« embase adaptée à la couverture » : zinc à joint debout → platine
+   * zinc ; ardoises ou tuiles → embase plomb). Deux valeurs possibles dans le même devis : rien n'est déduit, on demande.
+   */
+  fromWorks?: { value: string; workItems: string[] }[];
 }
 
 /**
@@ -318,6 +325,11 @@ export interface NeedRule extends Provenance {
    * Une ligne dont on ne sait pas à quoi elle sert porte son usage ici (§45.5).
    */
   precision?: string;
+  /**
+   * Données sans lesquelles la précision ne s'écrit pas et que le fournisseur ne peut pas deviner (le diamètre d'une
+   * sortie de toit) : demandées même si elles ne changent aucune quantité — elles changent l'article.
+   */
+  precisionRequires?: string[];
   /**
    * Besoin qui n'existe que si ces données sont connues (« tuiles de rive »
    * seulement si le devis donne une longueur de rives) : sinon il est omis,

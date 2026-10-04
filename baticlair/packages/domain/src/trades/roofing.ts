@@ -11,6 +11,17 @@ import type { MaterialFamily, TradeProfile } from "./trade-profile.js";
  * gouttière » n'est pas un crochet d'ardoise).
  */
 const FAMILIES: MaterialFamily[] = [
+  // Sortie de toit : « 1 sortie de toit » compte des OUVRAGES, décomposés en embase ou platine, chapeau et collerette
+  // (réponse du fondateur, 2026-10-04).
+  {
+    code: "roof_outlet",
+    label: "Sortie de toit",
+    keywords: ["sortie de toit", "sorties de toit"],
+    countOfWork: true,
+    allowedUnits: ["U"],
+    wholeUnits: true,
+    plausibleMax: { U: 20 },
+  },
   // Réponse du fondateur (2026-10-04) : « Bâche de protection : fourniture, elle part au fournisseur. »
   {
     code: "tarpaulin",
@@ -108,7 +119,6 @@ const FAMILIES: MaterialFamily[] = [
       "tuile de rive",
       "tuile chatiere",
       "tuile faitiere",
-      "sortie de toit",
       "lanterne",
       "rencontre",
       "fronton",

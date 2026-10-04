@@ -60,7 +60,7 @@ describe("niveau 1 : ce que dit le devis", () => {
       "ligne 7": "measure",
       "ligne 8": "measure",
       "ligne 9": "purchase",
-      "ligne 10": "purchase",
+      "ligne 10": "measure",
     });
     expect(proposals.get("ligne 7")!.why).toMatch(/crochets.*naissances.*compris/i);
     expect(proposals.get("ligne 8")!.why).toMatch(/ouvrage/);
@@ -179,10 +179,11 @@ describe("ouvrages composés", () => {
     expect(faitage.state).toBe("verified");
   });
 
-  it("une quantité d'article écrite reste à commander telle quelle (chatières, sortie de toit)", () => {
+  it("une quantité d'article écrite reste à commander telle quelle (chatières) ; une sortie de toit est un ouvrage compté", () => {
     const { ouvrage } = read();
     expect(ouvrage("ligne 9")).toMatchObject({ role: "purchase", direct: { quantity: "10", unit: "unités" }, needs: [], state: "verified" });
-    expect(ouvrage("ligne 10")).toMatchObject({ role: "purchase", direct: { quantity: "1", unit: "unité" }, needs: [], state: "verified" });
+    // Réponse du fondateur (2026-10-04) : embase ou platine, chapeau, collerette pour la fumée.
+    expect(ouvrage("ligne 10")).toMatchObject({ role: "measure", direct: null });
   });
 });
 

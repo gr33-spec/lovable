@@ -8,12 +8,13 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 ### À l'ouverture
 
-**J'ai compris :** Couverture en tuiles à emboîtement sur liteaux : 120 m² · Faîtage : 10 m · Gouttière : 20 m · Descente d'eau pluviale : 2 unités
+**J'ai compris :** Couverture en tuiles à emboîtement sur liteaux : 120 m² · Faîtage : 10 m · Gouttière : 20 m · Descente d'eau pluviale : 2 unités · Sortie de toit : 1 unité
 
 **Questions :**
 
-- J'ai identifié : Tuiles HP10. C'est bien ce modèle ? → [Oui] [Modifier]
 - Sortie de toit : quel diamètre ? → [Ø 80] [Ø 100] [Ø 125] [Ø 150] [Ø 180] [VMC]
+- Sortie de toit : conduit de fumée ou ventilation ? → [Conduit de fumée] [Ventilation]
+- J'ai identifié : Tuiles HP10. C'est bien ce modèle ? → [Oui] [Modifier]
 
 **À acheter :**
 
@@ -33,17 +34,17 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Coudes | 4 pièces |  |
 | Colliers | 8 pièces |  |
 | Chatières de ventilation | 10 pièces |  |
-| Sortie de toit Poujoulat | 1 pièce |  |
 
 **Hypothèses (modifiables) :** zone climatique 3 · pente du toit 45° · pureau 31 cm · tuiles de rive Tuiles de rive  · coudes par descente 2
 
 ### Après « oui, c'est bien ce modèle »
 
-**J'ai compris :** Couverture en tuiles à emboîtement sur liteaux : 120 m² · Faîtage : 10 m · Gouttière : 20 m · Descente d'eau pluviale : 2 unités
+**J'ai compris :** Couverture en tuiles à emboîtement sur liteaux : 120 m² · Faîtage : 10 m · Gouttière : 20 m · Descente d'eau pluviale : 2 unités · Sortie de toit : 1 unité
 
 **Questions :**
 
 - Sortie de toit : quel diamètre ? → [Ø 80] [Ø 100] [Ø 125] [Ø 150] [Ø 180] [VMC]
+- Sortie de toit : conduit de fumée ou ventilation ? → [Conduit de fumée] [Ventilation]
 
 **À acheter :**
 
@@ -64,17 +65,17 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Coudes | 4 pièces |  |
 | Colliers | 8 pièces |  |
 | Chatières de ventilation | 10 pièces |  |
-| Sortie de toit Poujoulat | 1 pièce |  |
 
 **Hypothèses (modifiables) :** zone climatique 3 · pente du toit 45° · pureau 31 cm · tuiles de rive Tuiles de rive  · coudes par descente 2
 
 ### Si l'artisan précise le pureau (34,3 cm)
 
-**J'ai compris :** Couverture en tuiles à emboîtement sur liteaux : 120 m² · Faîtage : 10 m · Gouttière : 20 m · Descente d'eau pluviale : 2 unités
+**J'ai compris :** Couverture en tuiles à emboîtement sur liteaux : 120 m² · Faîtage : 10 m · Gouttière : 20 m · Descente d'eau pluviale : 2 unités · Sortie de toit : 1 unité
 
 **Questions :**
 
 - Sortie de toit : quel diamètre ? → [Ø 80] [Ø 100] [Ø 125] [Ø 150] [Ø 180] [VMC]
+- Sortie de toit : conduit de fumée ou ventilation ? → [Conduit de fumée] [Ventilation]
 
 **À acheter :**
 
@@ -95,7 +96,6 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Coudes | 4 pièces |  |
 | Colliers | 8 pièces |  |
 | Chatières de ventilation | 10 pièces |  |
-| Sortie de toit Poujoulat | 1 pièce |  |
 
 **Hypothèses (modifiables) :** pente du toit 45° · tuiles de rive Tuiles de rive  · zone climatique 3 · coudes par descente 2
 

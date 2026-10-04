@@ -140,7 +140,7 @@ describe("banc d'essai : le pont devis → moteur retrouve la lecture faite à l
       ["ligne 7", "gouttiere", "profil", ["crochet", "naissance"]],
       ["ligne 8", "descente", "tube", ["coude", "collier"]],
       ["ligne 9", "not_covered"],
-      ["ligne 10", "not_covered"],
+      ["ligne 10", "sortie-de-toit", "sortie", []],
     ]);
   });
 
@@ -232,6 +232,16 @@ const STEPS: { name: string; scores: Record<string, { a: number; b: number; erro
   },
 ];
 
+/**
+ * Lignes « certaines » qui ne l'étaient pas : le fondateur a redéfini l'article (réponse écrite), la ligne attend
+ * désormais une réponse avant d'être commandable. Une exception par ligne, nommée, jamais une baisse silencieuse.
+ */
+const REDEFINED_BY_FOUNDER: Record<string, { b: number; why: string }> = {
+  // 2026-10-04 : « Sortie de toit : une embase par sortie, adaptée à la couverture, au diamètre du conduit, plus un
+  // chapeau ; collerette pour un conduit de fumée. » La ligne 10 partait sans diamètre ; elle attend Ø et usage.
+  "D-2026-015": { b: 1, why: "sortie de toit décomposée (embase, chapeau, collerette) : diamètre et usage demandés" },
+};
+
 describe("banc d'essai : 4 devis de métiers différents (score « après »)", () => {
   const cases = [
     ["Morellec — électricité + plomberie (scanné)", MORELLEC_LINES, "electrical,plumbing"],
@@ -308,7 +318,8 @@ describe("banc d'essai : 4 devis de métiers différents (score « après »)", 
       for (const step of STEPS) {
         const before = step.scores[key];
         if (!before) continue;
-        expect({ step: step.name, devis: key, a: e.understood >= before.a, b: e.certain >= before.b, errors: e.errors <= before.errors }).toEqual({
+        const redefined = REDEFINED_BY_FOUNDER[key]?.b ?? 0;
+        expect({ step: step.name, devis: key, a: e.understood >= before.a, b: e.certain >= before.b - redefined, errors: e.errors <= before.errors }).toEqual({
           step: step.name,
           devis: key,
           a: true,

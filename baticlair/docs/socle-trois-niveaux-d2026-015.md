@@ -17,7 +17,7 @@ entraxe 60 cm) et pertes : référentiel du fondateur (couvreur), 2026-10-03. Ce
 | ligne 7 — Gouttière PVC de 25 sable | 20 m (mesure de l'ouvrage) | Gouttière : 20 ml ; Crochets de gouttière : 50 pièce(s) ; Naissances : 2 pièce(s) | Gouttière : 5 longueurs de 4 m ; Crochets de gouttière : 50 pièces ; Naissances : 2 pièces | ✓ |
 | ligne 8 — Descente d'eau pluviale PVC Ø80 avec coudes | 2 unités (mesure de l'ouvrage) | Tubes de descente : 8 ml ; Coudes : 4 pièce(s) ; Colliers : 8 pièce(s) | Tubes de descente : 8 ml ; Coudes : 4 pièces ; Colliers : 8 pièces | ✓ |
 | ligne 9 — Chatières de ventilation | 10 unités (à commander tel quel) | 10 unités (tel quel) | 10 unités | ✓ |
-| ligne 10 — Sortie de toit Poujoulat | 1 unité (à commander tel quel) | 1 unité (tel quel) | 1 unité | ✓ |
+| ligne 10 — Sortie de toit Poujoulat | 1 unité (mesure de l'ouvrage) | Embase plomb de sortie de toit : à calculer ; Chapeau de sortie de toit : à calculer ; Collerette d'étanchéité : à calculer | Embase plomb de sortie de toit : à préciser ; Chapeau de sortie de toit : à préciser ; Collerette d'étanchéité : à préciser | ? |
 
 ### 2. Après les réponses de l'artisan (modèle de tuile, pureau 34,3 cm, écran)
 
@@ -32,4 +32,4 @@ entraxe 60 cm) et pertes : référentiel du fondateur (couvreur), 2026-10-03. Ce
 | ligne 7 — Gouttière PVC de 25 sable | 20 m (mesure de l'ouvrage) | Gouttière : 20 ml ; Crochets de gouttière : 50 pièce(s) ; Naissances : 2 pièce(s) | Gouttière : 5 longueurs de 4 m ; Crochets de gouttière : 50 pièces ; Naissances : 2 pièces | ✓ |
 | ligne 8 — Descente d'eau pluviale PVC Ø80 avec coudes | 2 unités (mesure de l'ouvrage) | Tubes de descente : 8 ml ; Coudes : 4 pièce(s) ; Colliers : 8 pièce(s) | Tubes de descente : 8 ml ; Coudes : 4 pièces ; Colliers : 8 pièces | ✓ |
 | ligne 9 — Chatières de ventilation | 10 unités (à commander tel quel) | 10 unités (tel quel) | 10 unités | ✓ |
-| ligne 10 — Sortie de toit Poujoulat | 1 unité (à commander tel quel) | 1 unité (tel quel) | 1 unité | ✓ |
+| ligne 10 — Sortie de toit Poujoulat | 1 unité (mesure de l'ouvrage) | Embase plomb de sortie de toit : à calculer ; Chapeau de sortie de toit : à calculer ; Collerette d'étanchéité : à calculer | Embase plomb de sortie de toit : à préciser ; Chapeau de sortie de toit : à préciser ; Collerette d'étanchéité : à préciser | ? |
