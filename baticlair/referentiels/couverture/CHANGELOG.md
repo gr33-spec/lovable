@@ -1,5 +1,9 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.04-18 — voligeage seul
+
+- **Voligeage** (nouvel ouvrage `voligeage`, famille `sheathing`) : une ligne « Voligeage en sapin traité 18×200 mm, 91 m² » ne reste plus « article inconnu » : 91 m² × 1,05 = 96 m² de voliges sapin 18 mm (§7 « Support voligeage : m² rampant × 1,05 »). Sous un zinc à joint debout, la volige reste à l'ouvrage zinc (un seul article). « voligeage » ajouté au vocabulaire du couvreur.
+
 ## roofing-2026.10.04-17 — retour du fondateur : tuiles canal, zinc en feuilles, toutes les questions d'un coup
 
 - **Tuiles canal** (famille `roof_tile_canal`, source Edilians « canal-tuiles-edilians.pdf ») : une ligne « tuiles canal » n'est plus lue comme une tuile à emboîtement (avant : HP 10 proposée). Une famille peut en affiner une autre (`refines`) : le mot le plus précis de la ligne l'emporte. Modèle à préciser → question à boutons (Canal 50, Gironde 50, Lyonnaise 40, Charentaise…) ; recouvrement R140 à R170 demandé d'emblée (sauf tuiles à blocage, recouvrement fixe). Tuiles = surface × nombre au m² du fabricant (couvert + courant), liteaux au m², bardelis 2,7 au ml de rive. Exemple : Gironde 50, R150, 100 m² → 2 540 tuiles, 307 ml de liteaux.

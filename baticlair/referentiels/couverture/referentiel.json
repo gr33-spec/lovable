@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.04-17",
+  "version": "roofing-2026.10.04-18",
   "trade": "roofing",
   "sources": [
     {
@@ -7535,6 +7535,79 @@
           "unit": "u",
           "core": true,
           "exclusions": "Un collier tous les 1,8 m plus un par descente.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      ]
+    },
+    {
+      "id": "voligeage",
+      "trade": "roofing",
+      "label": "Voligeage (voliges ou panneaux)",
+      "triggers": [
+        "sheathing"
+      ],
+      "params": [
+        {
+          "key": "surface",
+          "label": "Surface de toiture",
+          "unit": "m2",
+          "kind": "site_data",
+          "question": "Surface du toit ?",
+          "fromLineQuantity": true,
+          "choices": [
+            {
+              "label": "50 m²",
+              "value": "50"
+            },
+            {
+              "label": "100 m²",
+              "value": "100"
+            },
+            {
+              "label": "150 m²",
+              "value": "150"
+            },
+            {
+              "label": "200 m²",
+              "value": "200"
+            }
+          ]
+        }
+      ],
+      "slots": [
+        {
+          "key": "volige",
+          "family": "sheathing",
+          "label": "Voliges",
+          "keywords": [
+            "volige",
+            "voligeage",
+            "osb",
+            "contreplaque"
+          ],
+          "usual": {
+            "text": "Volige sapin 18 mm (§7).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "volige-sapin-standard"
+          }
+        }
+      ],
+      "constants": {},
+      "needs": [
+        {
+          "id": "voliges",
+          "slot": "volige",
+          "formula": "surface",
+          "unit": "m2",
+          "core": true,
+          "exclusions": "Surface du devis ; la perte de 5 % (§7, « m² rampant × 1,05 ») s'ajoute.",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",

@@ -41,7 +41,7 @@ describe("joint debout : la question de façonnage, puis des lignes que le fourn
     // 0,70 mm : 6 kg/m².
     const thick = readQuote(DEVIS, { "param:faconnage": { value: "1", unit: "u" }, "param:epaisseur_zinc": { value: "0.7", unit: "mm" } });
     expect(bought(thick)["Zinc naturel en bobine"]).toBe("546 kg");
-    expect(v.canValidate).toBe(false); // le voligeage du devis reste à confirmer (article inconnu)
+    expect(v.canValidate).toBe(true); // le voligeage du devis est reconnu (§7) : plus rien à confirmer
   });
 
   it("« je commande façonné » : des bacs à la longueur du rampant (91 m² / 5,5 m = 16,5 m de pan ÷ 0,43 = 39 bacs)", () => {

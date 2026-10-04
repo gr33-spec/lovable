@@ -528,7 +528,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.04-17",
+  version: "roofing-2026.10.04-18",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -1816,6 +1816,30 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Un collier tous les 1,8 m plus un par descente.",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+      ],
+    },
+    {
+      // Une ligne « voligeage » seule (sous ardoises, tuiles ou bac) : §7 « Support voligeage : m² rampant × 1,05 ».
+      // Placé en DERNIER : dans un devis de zinc à joint debout, la volige reste à l'ouvrage zinc (pas de double compte).
+      id: "voligeage",
+      trade: "roofing",
+      label: "Voligeage (voliges ou panneaux)",
+      triggers: ["sheathing"],
+      params: [SURFACE_PARAM],
+      slots: [{ key: "volige", family: "sheathing", label: "Voliges", keywords: ["volige", "voligeage", "osb", "contreplaque"], usual: { text: "Volige sapin 18 mm (§7).", source: F, productId: "volige-sapin-standard" } }],
+      constants: {},
+      needs: [
+        {
+          id: "voliges",
+          slot: "volige",
+          formula: "surface",
+          unit: "m2",
+          core: true,
+          exclusions: "Surface du devis ; la perte de 5 % (§7, « m² rampant × 1,05 ») s'ajoute.",
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
