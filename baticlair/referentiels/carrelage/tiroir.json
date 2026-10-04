@@ -1,0 +1,165 @@
+{
+  "metier": {
+    "code": "carrelage",
+    "nom": "Carrelage - revêtements durs",
+    "version": "0.2.0-recherche",
+    "maturite": "alpha",
+    "active": false,
+    "referentiel": "docs/referentiels/carrelage.md",
+    "axes_de_variation": { "geographie": "faible", "epoque_bati": "moyen", "type_batiment": "faible", "neuf_renovation": "fort", "gamme": "fort" }
+  },
+  "valeurs": [
+    {
+      "id": "carton_30x60",
+      "libelle": "Grès cérame 30 × 60 : m² par carton",
+      "avant": "1,44 m² (à vérifier), 8 pièces",
+      "valeur": null,
+      "unite": "m²/carton",
+      "statut": "contradiction",
+      "sources": [
+        { "url": "https://www.castorama.fr/carrelage-sol-gris-30-x-60-cm-smooth/3663602676942_CAFR.prd", "date": "2026-10-04", "note": "un modèle : 1,44 m² par carton ; carton de 24 à 27 kg" },
+        { "url": "https://www.asdecarreaux.com/37528-sintra-grip-iron-30x60-108-m.html", "date": "2026-10-04", "note": "un autre : 1,08 m² par carton" },
+        { "url": "https://www.bricomarche.com/p/30x60-eterna-grigio/8023806075807", "date": "2026-10-04", "note": "un autre : 1,63 m²" }
+      ],
+      "ecart": "1,08 / 1,44 / 1,63 m² selon le produit : il n'y a pas de valeur par format, seule la référence fait foi (règle 2 du référentiel confirmée)."
+    },
+    {
+      "id": "carton_45x45",
+      "libelle": "Grès cérame 45 × 45 : m² par carton",
+      "avant": "1,62 m² (à vérifier), 8 pièces",
+      "valeur": 1.62,
+      "unite": "m²/carton",
+      "statut": "contradiction",
+      "sources": [
+        { "url": "https://www.bricodepot.fr/p/8016609015224/carrelage-de-sol-interieur-larix-gris", "date": "2026-10-04", "note": "1,62 m²" },
+        { "url": "https://www.castorama.fr/carrelage-sol-et-mur-rodas-beige-45-x-45-cm/8435609343180_CAFR.prd", "date": "2026-10-04", "note": "1,42 m²" },
+        { "url": "https://www.bricodepot.fr/p/5059340434056/carrelage-de-sol-interieur-allison-perla", "date": "2026-10-04", "note": "45,2 × 45,2 : 1,22 m²" }
+      ],
+      "ecart": "1,62 m² est courant mais 1,42 et 1,22 existent : défaut affiché, jamais certain."
+    },
+    {
+      "id": "carton_faience_25x40",
+      "libelle": "Faïence 25 × 40 : m² par carton",
+      "avant": "1,00 à 1,50 m² (à vérifier)",
+      "valeur": 1.5,
+      "unite": "m²/carton",
+      "statut": "source",
+      "sources": [{ "url": "https://www.bricodepot.fr/p/5036581064297/carrelage-mural-alexandrina-blanc-casse-l-25-x-l-40-cm", "date": "2026-10-04", "note": "six gammes 25 × 40 en carton de 1,5 m²" }]
+    },
+    {
+      "id": "carton_dalle_ext_20mm",
+      "libelle": "Dalle grès cérame extérieure 60 × 60 × 20 mm : carton et poids",
+      "avant": "0,72 m², 2 pièces, ≈ 45 kg/m² (à vérifier)",
+      "valeur": "0,72 m² (2 dalles) ; ≈ 50 kg/m² ; carton ≈ 32 kg",
+      "unite": "m²/carton",
+      "statut": "source",
+      "sources": [
+        { "url": "https://www.castorama.fr/mkp/carrelage-dalle-ext-rieur-antid-rapant-effet-b-ton-moderne-60x60-cm-factor-volcano-20-mm-vendu-par-boite-de-0-72m2-/3701358144114_CAFR.prd", "date": "2026-10-04" },
+        { "url": "https://www.bricocash.fr/p/dalle-quenos-grey-60x60-0.70m2/bte/5902115738364", "date": "2026-10-04", "note": "carton emballé 31,85 kg" }
+      ],
+      "ecart": "Poids 50 kg/m² contre 45 au référentiel."
+    },
+    {
+      "id": "mosaique_boite",
+      "libelle": "Mosaïque sur trame 30 × 30 : plaques par m² et par boîte",
+      "avant": "boîte de 10 ou 11 plaques (à vérifier)",
+      "valeur": "11 plaques/m² en 30,5 × 30,5 ; 12 plaques/m² en 30 × 30 ; boîtes de 5 plaques ou d'1 m² selon le modèle",
+      "unite": "plaques",
+      "statut": "contradiction",
+      "sources": [
+        { "url": "https://www.bricomarche.com/p/mosaique-4.8x4.8-tennessee-nb-3704/3700820202239", "date": "2026-10-04" },
+        { "url": "https://www.fnac.com/mp52150772/Carrelage-de-mosaique-Boite-de-1m-Plaque-mosaique-mur-et-sol-en-marbre-naturel-coloris-rose-mat-30-x-30-cm-PEGANE/w-4", "date": "2026-10-04" }
+      ],
+      "ecart": "Le contenu de la boîte change selon le fabricant (5 plaques, 1 m², 10 ou 11) : à lire sur la référence."
+    },
+    {
+      "id": "plinthe_carton",
+      "libelle": "Plinthe 8 × 60 : pièces par carton",
+      "avant": "12 à 20 pièces (à vérifier)",
+      "valeur": "lots de 4 ou 5 pièces (2,4 à 3 ml) en grande surface ; aussi à la pièce",
+      "unite": "pièces",
+      "statut": "contradiction",
+      "sources": [
+        { "url": "https://www.castorama.fr/5-plinthes-carrelage-district-gris-clair-l-8-x-l-60-cm/8429991979232_CAFR.prd", "date": "2026-10-04", "note": "lot de 5" },
+        { "url": "https://www.leroymerlin.fr/produits/lot-de-4-plinthes-carrelage-living-marron-ht-x-l-60-cm-ep-9-5-mm-88581467.html", "date": "2026-10-04", "note": "lot de 4" }
+      ],
+      "ecart": "Le référentiel supposait des cartons de 12 à 20 ; les négoces grand public vendent par 4, 5 ou à la pièce. Aucun carton négoce pro trouvé : commander en pièces."
+    },
+    {
+      "id": "colle_pate_d2",
+      "libelle": "Colle carrelage en pâte D2 (mur) : seau et consommation",
+      "avant": "seau 5, 15 ou 25 kg (à vérifier)",
+      "valeur": "seau de 25 kg ; simple encollage 3 kg/m² (peigne V6) ; double encollage 4,5 (U6) à 5 kg/m² (U9)",
+      "unite": "kg/m²",
+      "statut": "source",
+      "sources": [
+        { "url": "https://www.vpi.vicat.fr/content/download/45012/417532/version/10/file/FT+COLLIPATE+CLASSIC+V510_06.2026.pdf", "date": "2026-10-04" },
+        { "url": "https://diy.bostik.com/sites/default/files/2021-02/Bostik-diy-Fr-fiche-technique-colle-carrelage-pate-sol-mur-D2T-30112320-tds.pdf", "date": "2026-10-04" }
+      ]
+    },
+    {
+      "id": "silicone_rendement",
+      "libelle": "Silicone sanitaire : mètres de joint par cartouche",
+      "avant": "≈ 12 ml pour un cordon 6 × 6 mm (à vérifier)",
+      "valeur": "≈ 12 ml par cartouche de 300 ml en joint de 5 × 5 mm",
+      "unite": "ml/cartouche",
+      "statut": "contradiction",
+      "sources": [{ "url": "https://media.hornbach.nl/hb/technicaldatasheet/as.152462881.pdf", "date": "2026-10-04" }],
+      "ecart": "La fiche donne 12 ml pour un joint de 5 × 5 ; en 6 × 6 le rendement tombe à ≈ 8 ml (calcul 300 ml ÷ 36 mm²). Le référentiel mélange les deux."
+    },
+    {
+      "id": "croisillons_sachet",
+      "libelle": "Croisillons et clips de calage : sachet",
+      "avant": "sachet 100 à 1 000 pièces ; clips 100 ou 250 (à vérifier)",
+      "valeur": "croisillons autonivelants en sachets de 100, 200 ou 250 pièces",
+      "unite": "pièces/sachet",
+      "statut": "source",
+      "sources": [
+        { "url": "https://www.mr-bricolage.fr/100-croisillons-pour-systeme-autonivelant-2mm-i-pavilift.html", "date": "2026-10-04" },
+        { "url": "https://www.bricomarche.com/c/revetements-de-sol-et-mur/carrelage/accessoires-outils-de-pose-et-decoupe/131280", "date": "2026-10-04" }
+      ]
+    },
+    {
+      "id": "spec_hauteur_douche",
+      "libelle": "SPEC en douche : hauteur protégée",
+      "avant": "2,00 m (à vérifier CPT)",
+      "valeur": "sols et murs jusqu'à 2 m de hauteur dans la zone de douche (classement EB+ privatif minimum)",
+      "unite": "m",
+      "statut": "source",
+      "sources": [
+        { "url": "https://www.smabtp.fr/sma/upload/docs/application/pdf/2024-11/fp12_-_carrelage_colle_dans_les_douches_zero_ressaut_espace_de_douche_cloisonne_et_receveur_fini.pdf", "date": "2026-10-04", "note": "fiche pathologie SMA BTP" },
+        { "url": "https://abctravaux.org/etancheite-douche-italienne/", "date": "2026-10-04" }
+      ],
+      "ecart": "Concorde ; le texte CPT lui-même n'a pas été lu."
+    },
+    {
+      "id": "colle_sous_natte",
+      "libelle": "Mortier-colle sous natte de désolidarisation : consommation",
+      "avant": "1,5 kg/m² (à vérifier)",
+      "valeur": "un sac de 22,7 kg pour 13,9 à 18,6 m² de natte, soit ≈ 1,2 à 1,6 kg/m² ; peigne 3 × 3 ou 4 × 4 mm",
+      "unite": "kg/m²",
+      "statut": "source",
+      "sources": [
+        { "url": "https://app.schluter.com/schluter-us/en_US/faq/ditra-ditraxl-how-much-thin-set-mortar", "date": "2026-10-04", "note": "Schlüter (États-Unis), converti des pieds carrés" },
+        { "url": "https://www.batiproduits.com/amp/fiche/produits/desolidarisation-sous-carrelage-en-renovation-in-p69084143.html", "date": "2026-10-04", "note": "peigne 3 × 3 ou 4 × 4" }
+      ]
+    },
+    {
+      "id": "primaire_universel",
+      "libelle": "Primaire avant carrelage (weber.prim universel) : consommation et pot",
+      "avant": "100 à 200 g/m² ; conditionnement à vérifier",
+      "valeur": "100 à 125 g/m² sous carrelage ; pot de 1 kg",
+      "unite": "g/m²",
+      "statut": "source",
+      "sources": [{ "url": "https://www.batiweb.com/produit-btp/primaire-sable-a-sechage-rapide-weberprim-universel-350257", "date": "2026-10-04" }]
+    }
+  ],
+  "introuvable": [
+    "weber.prim AD (primaire sur ancien carrelage) : consommation et conditionnement absents des extraits.",
+    "Pertes de coupe par type de pose (5 à 18 %) : usages de métier, aucune source.",
+    "Liste des départements en zone de gel pour l'extérieur.",
+    "Pose scellée DTU 52.1 : épaisseur et dosage du mortier de pose.",
+    "Disques diamant par chantier.",
+    "Carton 33 × 33, métro 7,5 × 15 et 10 × 20 : aucune valeur commune trouvée (propre à chaque référence)."
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "metier": "platrerie-isolation",
+  "ouvrages": {
+    "CLO": { "expressions": ["cloison 72/48", "cloison placo", "cloison de distribution", "cloison 98/48", "cloison 100/70", "placostil", "ba13", "plaque de plâtre", "placo"] },
+    "CLO-ALV": { "expressions": ["cloison alvéolaire", "placopan"] },
+    "DBL-COL": { "expressions": ["doublage collé", "complexe de doublage", "10+80", "13+100", "13+120", "doublissimo", "placomur", "labelrock"] },
+    "DBL-MON": { "expressions": ["contre-cloison", "doublage sur ossature", "doublage m48", "doublage autoportant"] },
+    "DBL-APP": { "expressions": ["doublage optima", "doublage sur appuis", "fourrures f530 en mur"] },
+    "PLF-SUS": { "expressions": ["faux plafond", "plafond suspendu", "plafond f530", "plafond placo"] },
+    "PLF-RAM": { "expressions": ["rampants", "sous toiture", "combles aménagés", "sous chevrons", "entre chevrons", "intégra", "isoconfort"] },
+    "ISO-SOU": { "expressions": ["laine soufflée", "soufflage", "laine en vrac", "ouate soufflée", "combles perdus", "comblissimo", "supafil", "jetrock"] },
+    "ISO-ROU": { "expressions": ["laine déroulée", "rouleaux en combles", "ibr", "2 couches croisées"] },
+    "COF": { "expressions": ["coffrage", "caisson", "soffite", "habillage poutre", "gaine technique"] },
+    "SOUS-FACE": { "expressions": ["plafond de cave", "vide sanitaire", "plancher bas", "sous dalle", "fibraroc", "fibrastyroc"] },
+    "MEMBRANE": { "expressions": ["pare-vapeur", "frein-vapeur", "membrane", "vario"] }
+  },
+  "renvois": { "ite sous enduit": "facade", "ite sous bardage": "bardage", "sarking": "couverture", "plafond dalles 60x60": "plafonds-suspendus" }
+}

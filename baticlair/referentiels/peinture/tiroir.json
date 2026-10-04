@@ -1,0 +1,104 @@
+{
+  "metier": {
+    "code": "peinture",
+    "nom": "Peinture - revêtements muraux - ravalement",
+    "version": "1.1.0-recherche",
+    "maturite": "beta",
+    "active": false,
+    "referentiel": "docs/referentiels/peintre.md",
+    "axes_de_variation": { "geographie": "faible", "epoque_bati": "moyen", "type_batiment": "faible", "neuf_renovation": "fort", "gamme": "fort" }
+  },
+  "valeurs": [
+    {
+      "id": "antirouille_rendement",
+      "libelle": "Primaire antirouille (métaux ferreux) : rendement et pots",
+      "avant": "≈ 8 à 10 m²/L, retenu 8 ; pots 0,5 à 2,5 L (à vérifier)",
+      "valeur": "8 à 11 m²/L par couche selon l'application (10 à 11 courant) ; pots de 1 L et 3 L (aérosol 400 mL)",
+      "unite": "m²/L",
+      "statut": "contradiction",
+      "sources": [
+        { "url": "https://documents.cromology.com/download/fiche_technique/TBA_TOMETA/1/Toll+M%25C3%25A9taux+Antirouille-fiche_technique.pdf", "date": "2026-10-04", "note": "Tollens Toll Métaux Antirouille" },
+        { "url": "https://www.zolpan.fr/download/fiche_technique/zol_primairepah_15125_964/1/Primaire+PAH-fiche_technique.pdf", "date": "2026-10-04", "note": "Zolpan Primaire PAH" },
+        { "url": "https://ressource-peintures.com/wp-content/uploads/2024/04/916_Primaire-Antirouille.pdf", "date": "2026-10-04" }
+      ],
+      "ecart": "Rendement retenu 8 au référentiel (bas de fourchette, prudent) contre 10 à 11 courant ; pots 1 L / 3 L et non 0,5 / 2,5 L."
+    },
+    {
+      "id": "impermeabilite_i_consommation",
+      "libelle": "Revêtement d'imperméabilité I1 à I4 : consommation par couche",
+      "avant": "par fiche système, à saisir ; seau 15 à 25 kg (à vérifier)",
+      "valeur": "Tollens Tol Flex / Flexane : couche intermédiaire 0,40 (I4) à 0,50 kg/m² (I3) ; finition talochée 1,6 kg/m² (GM) ou 2,2 kg/m² (GG). Zolpan Imperio 3D (I1 à I4 en mono-produit) : seau de 16 L",
+      "unite": "kg/m²",
+      "statut": "source",
+      "sources": [
+        { "url": "https://www.tollens.com/download/fiche_technique/TBA_TOFLIN/1/Tol-Flex+Interm%C3%A9diaire-fiche_technique.pdf", "date": "2026-10-04" },
+        { "url": "https://www.tollens.com/download/fiche_technique/TBA_TOXAGM/1/Tol+Flexane+Taloch%25C3%25A9+GM-fiche_technique.pdf", "date": "2026-10-04" },
+        { "url": "https://documents.cromology.com/download/fiche_technique/zol_imperio3d_18837_18837/1/Imperio+3D-fiche_technique.pdf", "date": "2026-10-04" }
+      ],
+      "ecart": "Les consommations restent propres à chaque système : le calcul FACADE_IMPER peut s'appuyer sur ces deux systèmes, pas sur une valeur générique."
+    },
+    {
+      "id": "antimousse_rendement",
+      "libelle": "Anti-mousse façade : rendement et bidons",
+      "avant": "4 m²/L, 1 passe ; bidons 5 et 20 L (à vérifier)",
+      "valeur": "3 à 5 m²/L (5 m²/L courant) ; bidons 1, 5, 20 ou 30 L",
+      "unite": "m²/L",
+      "statut": "contradiction",
+      "sources": [
+        { "url": "https://www.batiproduits.com/amp/fiche/produits/antimousse-pour-toiture-murs-et-facades-p68906838.html", "date": "2026-10-04", "note": "Algimouss : 1, 5, 30 L" },
+        { "url": "https://www.bricomarche.com/p/anti-verdissure-3-20-litres/3183941200313", "date": "2026-10-04", "note": "bidon 20 L" }
+      ],
+      "ecart": "Le référentiel retient 4 m²/L ; les fiches donnent 3 à 5 (5 le plus souvent)."
+    },
+    {
+      "id": "colle_papier_intisse",
+      "libelle": "Colle papier peint intissé prête à l'emploi : consommation et seau",
+      "avant": "≈ 0,20 kg/m² (à vérifier)",
+      "valeur": "150 à 200 g/m² ; seaux de 5 et 10 kg",
+      "unite": "kg/m²",
+      "statut": "source",
+      "sources": [
+        { "url": "https://www.bostik.com/files/live/sites/shared_bostik/files/import-belgium/colle-intiss_-be-fr2.pdf", "date": "2026-10-04" },
+        { "url": "https://www.hubo.be/fr/p/hubo-colle-a-papier-peint-intisse-10kg/978604/", "date": "2026-10-04" }
+      ]
+    },
+    {
+      "id": "toile_verre_peinture",
+      "libelle": "Peinture sur toile de verre : consommation de la 1re couche",
+      "avant": "coefficient support 0,75 (1re couche) ou 0,85 sur 2 couches (à vérifier)",
+      "valeur": "350 à 500 g/m² de peinture acrylique en 1re couche ; colle 150 à 250 g/m² ; rouleau de 50 m (≈ 140 g/m²)",
+      "unite": "g/m²",
+      "statut": "contradiction",
+      "sources": [{ "url": "https://eu.adfors.com/sites/hps-mac3-adfors-eu/files/assetbank_media/ADFORS-Wallcovering-Novelio-TDS-N0101M-FR-216865.pdf", "date": "2026-10-04", "note": "Adfors Novelio" }],
+      "ecart": "350 à 500 g/m² avec une peinture de densité ≈ 1,4 donne 2,8 à 4 m²/L, très loin de 10 × 0,75 = 7,5 m²/L au référentiel : la 1re couche sur toile consomme environ deux fois plus que prévu."
+    },
+    {
+      "id": "bache_protection",
+      "libelle": "Film de protection : rouleau",
+      "avant": "rouleau 4 × 25 m ≈ 100 m² (à vérifier)",
+      "valeur": "rouleaux de 4 × 25 m (100 m², film 7 µm) et 3 × 25 m (75 m², 50 µm)",
+      "unite": "rouleau",
+      "statut": "source",
+      "sources": [
+        { "url": "https://www.kaufland.fr/product/501368700/", "date": "2026-10-04" },
+        { "url": "https://www.hellopro.fr/bache-peinture-3x25-m-50-microns-protection-75-m-translucide-3x25-m-tecplast-transparent-3663936035118-2011352-13054957-produit.html", "date": "2026-10-04" }
+      ]
+    },
+    {
+      "id": "ruban_masquage",
+      "libelle": "Ruban de masquage : longueur de rouleau",
+      "avant": "rouleau 50 m",
+      "valeur": "50 m × 50 mm (tesa Economy) ; papier de masquage adhésif 90 cm × 22,5 m",
+      "unite": "m",
+      "statut": "source",
+      "sources": [{ "url": "https://www.bruneau.lu/en/catalog/tools-for-painter/196105946o-jmbpr?page=3", "date": "2026-10-04" }]
+    }
+  ],
+  "introuvable": [
+    "Table finition × fond du NF DTU 59.1 (passes d'enduit, couches d'impression) : texte payant, non lu.",
+    "Coefficients de métré des points singuliers (porte 4,5 m², radiateur, persienne) : aucune source.",
+    "Fixateur de façade 8 m²/L, lessive 1 kg/40 m², révision d'enduit 0,15 kg/m², rebouchage 0,05 kg/m² : rien trouvé.",
+    "Densité de Practi Velours, formats des laques Elyopur.",
+    "Pertes airless 20 %, rouleau 5 % : usages, aucune source."
+  ]
+}
