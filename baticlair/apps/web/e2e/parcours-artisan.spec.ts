@@ -608,7 +608,11 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
 
   await page.getByRole("button", { name: "Lire le devis" }).click();
   await expect(page.getByRole("button", { name: "Ce que j'ai compris" })).toBeVisible();
-  await confirmDoubts(page);
+  // Un exemple « potable » (retour du fondateur, 2026-10-04) : la liste est prête dès la lecture, rien à vérifier.
+  const demoList = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(demoList.getByText(/^\d+ fournitures · tout est prêt$/)).toBeVisible();
+  await expect(demoList.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
+  await expect(demoList.getByText("Embase plomb de sortie de toit")).toBeVisible();
   await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
   const apercu = page.getByRole("dialog", { name: "Aperçu de la demande de devis" });
   for (const name of ["Tuilerie de l'Ouest (démo)", "Négoce Breizh (démo)", "Matériaux Atlantique (démo)"]) {
