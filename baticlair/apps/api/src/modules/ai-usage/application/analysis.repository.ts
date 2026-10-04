@@ -1,5 +1,5 @@
 export type AnalysisStatus = "started" | "completed" | "failed";
-export type AnalysisKind = "client_quote" | "supplier_quote";
+export type AnalysisKind = "client_quote" | "supplier_quote" | "sketch";
 
 export interface AnalysisRecord {
   id: string;

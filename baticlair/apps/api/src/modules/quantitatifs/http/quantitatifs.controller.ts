@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Inject, Param, Post, Query, Res, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Inject, Param, Post, Put, Query, Res, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Throttle } from "@nestjs/throttler";
 import type { Response } from "express";
@@ -39,6 +39,8 @@ const contexte = {
   projetId: z.string().uuid().optional(),
   reference: z.string().trim().max(200).optional(),
   adresse: z.string().trim().max(300).optional(),
+  /** Infos chantier facultatives (texte libre) : mesures nommées et contexte, lues sans IA. */
+  infos: z.string().trim().max(4000).optional(),
 };
 
 /**
@@ -86,7 +88,7 @@ export class QuantitatifsController {
     @Query(new ZodPipe(rendu)) query: z.infer<typeof rendu>,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const ctx = { projetId: body.projetId, reference: body.reference, adresse: body.adresse };
+    const ctx = { projetId: body.projetId, reference: body.reference, adresse: body.adresse, infos: body.infos };
     const r = { ecran: query.ecran === "1" };
     if ([file, body.lignes, body.documentId].filter(Boolean).length > 1) throw validationFailed("Send one quote: a PDF, lines or a documentId", [{ path: "lignes", message: "several quotes sent" }]);
     let result;
@@ -166,5 +168,43 @@ export class QuantitatifsController {
   @HttpCode(200)
   async reopen(@Tenant() tenant: TenantContext, @Param("id") id: string, @Query(new ZodPipe(rendu)) query: z.infer<typeof rendu>) {
     return this.quantitatifs.reopen(tenant, id, { ecran: query.ecran === "1" });
+  }
+}
+
+const infosBody = z.object({ texte: z.string().trim().max(4000).nullable() });
+const croquisBody = z.object({ commentaire: z.string().trim().max(1000).optional() });
+
+/**
+ * INFOS CHANTIER FACULTATIVES (docs/infos-chantier-facultatives.md) : la note de l'artisan et ses croquis vivent sur le
+ * CHANTIER, pas sur un quantitatif ; chaque calcul les relit. Rien n'est obligatoire : le devis suffit.
+ */
+@Controller("v1/projects/:projetId/infos")
+@UseGuards(TenantGuard)
+export class InfosChantierController {
+  constructor(@Inject(QuantitatifsService) private readonly quantitatifs: QuantitatifsService) {}
+
+  /** La note, remplacée telle que tapée (null pour l'effacer). */
+  @Put()
+  @HttpCode(204)
+  async set(@Tenant() tenant: TenantContext, @Param("projetId") projetId: string, @Body(new ZodPipe(infosBody)) body: z.infer<typeof infosBody>): Promise<void> {
+    await this.quantitatifs.setNotes(tenant, projetId, body.texte);
+  }
+
+  /** Une photo de croquis (JPEG, PNG, WebP ou PDF) et son commentaire : la photo est gardée, le commentaire rejoint la note. */
+  @Throttle({ default: HOURLY(30) })
+  @Post("croquis")
+  @UseInterceptors(FileInterceptor("file", { storage: memoryStorage(), limits: { fileSize: HARD_MAX_UPLOAD_BYTES, files: 1 } }))
+  async sketch(
+    @Tenant() tenant: TenantContext,
+    @Param("projetId") projetId: string,
+    @UploadedFile() file: UploadedPdf | undefined,
+    @Body(new ZodPipe(croquisBody)) body: z.infer<typeof croquisBody>,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    if (!file) throw validationFailed("Missing file", [{ path: "file", message: "required" }]);
+    const bytes = new Uint8Array(file.buffer.buffer, file.buffer.byteOffset, file.buffer.byteLength);
+    const r = await this.quantitatifs.addSketch(tenant, projetId, { name: Buffer.from(file.originalname, "latin1").toString("utf8"), bytes }, body.commentaire);
+    res.status(201);
+    return r;
   }
 }

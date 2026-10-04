@@ -52,8 +52,13 @@ export interface QuotePlan {
   context: ChantierContext;
   /** Caractéristiques du devis par emplacement, pour le nom des lignes d'achat. */
   characteristicsBySlot: Record<string, string[]>;
-  /** Questions de cohérence (deux valeurs différentes pour la même donnée). */
+  /** Questions de cohérence (deux valeurs différentes pour la même donnée), en phrases. */
   conflicts: string[];
+  /**
+   * Les mêmes, structurées : deux sources (devis, en-tête lu, croquis) qui ne disent pas la même chose, sans
+   * réponse de l'artisan. Jamais tranchées en silence : une question avec les deux valeurs en boutons.
+   */
+  contradictions: { workItemId: string; key: string; label: string; unit: string; facts: { value: string; unit: string; evidence: string }[] }[];
 }
 
 /** Le mot le plus tôt dans la ligne nomme l'ouvrage ; à égalité, l'expression la plus longue (« tuile de rive » > « tuile »). */
@@ -129,6 +134,42 @@ export function factsFromReading(ref: Referential, lines: readonly { ref: string
   };
   for (const line of lines) for (const [name, raw] of Object.entries(line.dimensions ?? {})) if (typeof raw === "string") add(name, raw, `Devis, ${line.ref}`);
   for (const [name, raw] of Object.entries(context ?? {})) if (typeof raw === "string") add(name, raw, "Devis, en-tête");
+  return facts;
+}
+
+/**
+ * LA NOTE DE L'ARTISAN (infos chantier facultatives) : du texte libre tapé au dépôt ou dans le chat, ou le
+ * commentaire d'un croquis. Seule une mesure NOMMÉE et non ambiguë devient un fait (« Pente 42° », « Rampants
+ * 2 × 6,50 m », « 2 descentes ») ; le reste est du contexte, gardé tel quel, jamais transformé en mesure.
+ * Chaque fait porte sa preuve (la phrase) et l'origine « artisan » : il passe devant le texte du devis.
+ */
+export function readSiteNotes(ref: Referential, notes: string | null | undefined, evidencePrefix = "Votre note"): SiteFact[] {
+  if (!notes?.trim()) return [];
+  const facts: SiteFact[] = [];
+  const params = ref.workItems.flatMap((w) => w.params).filter((p) => p.textLabels?.length);
+  const sentences = notes
+    .split(/\n|[.;!?](?=\s|$)/)
+    .map((x) => x.trim())
+    .filter(Boolean);
+  for (const sentence of sentences) {
+    // « 2 × 6,50 m » : deux pans de 6,50 m, la mesure est la seconde valeur.
+    const normalized = normalizeText(sentence).replace(/\b(\d+)\s*[x×]\s*(\d+(?:[.,]\d+)?)/g, "$2");
+    for (const p of params) {
+      for (const label of p.textLabels ?? []) {
+        let found = readLabelled(normalized, label);
+        // Un nombre d'ouvrages écrit avant son nom (« 2 descentes », « 1 cheminée ») : seulement pour une donnée comptée.
+        if (!found && parseRefUnit(p.unit).dim.L === 0 && parseRefUnit(p.unit).dim.M === 0 && p.unit === "u") {
+          const m = new RegExp(`(?:^|[^0-9,.])(\\d+)\\s+${normalizeText(label)}(?:s|x)?(?![a-z0-9])`).exec(normalized);
+          if (m) found = { value: m[1]!, unit: "u" };
+        }
+        if (!found || !sameDimUnit(p.unit, found.unit)) continue;
+        const asRef = isAngleUnit(p.unit) && found.unit === "%" ? { value: percentSlopeToDegrees(new Decimal(found.value)).toString(), unit: p.unit } : found;
+        if (facts.some((f) => f.key === p.key)) continue;
+        facts.push({ key: p.key, ...asRef, evidence: `${evidencePrefix} (« ${sentence} »)`, origin: "artisan" });
+        break;
+      }
+    }
+  }
   return facts;
 }
 
@@ -237,16 +278,35 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
     plans.push({ ref: line.ref, status: "planned", workItemId: work.id, slot: slot.key, mentions, characteristics: chars, ...(measureInText ? { measureInText } : {}) });
   }
 
-  // Une donnée hors devis (zone) ne vaut que si le devis ne la donne pas : jamais de conflit avec lui.
-  const inText = new Set(facts.map((f) => f.key));
-  for (const f of extraFacts) if (!inText.has(f.key)) facts.push(f);
+  // Une donnée hors texte des lignes (code postal, en-tête lu par l'IA, croquis) complète le devis ; si elle le
+  // CONTREDIT, les deux restent et font une question (jamais tranchée en silence). La note de l'artisan, elle,
+  // entre toujours : elle passe devant le devis, et l'explication dit les deux.
+  const sameAs = (a: SiteFact, b: SiteFact) => {
+    try {
+      const ua = parseRefUnit(a.unit);
+      const ub = parseRefUnit(b.unit);
+      return sameDim(ua.dim, ub.dim) && new Decimal(a.value).times(ua.factor).equals(new Decimal(b.value).times(ub.factor));
+    } catch {
+      return a.value === b.value;
+    }
+  };
+  const fromText = [...facts];
+  for (const f of extraFacts) {
+    if (f.origin !== "artisan" && fromText.some((x) => x.key === f.key && sameAs(x, f))) continue;
+    facts.push(f);
+  }
   const context: ChantierContext = { facts };
   const conflicts: string[] = [];
+  const contradictions: QuotePlan["contradictions"] = [];
   const inputs: WorkItemInput[] = active
     .filter((w) => mentioned.has(w.id))
     .map((w: WorkItemType) => {
       const { params, conflicts: c } = paramsFromContext(context, w);
-      c.forEach((x) => conflicts.push(`${w.params.find((p) => p.key === x.key)?.label ?? x.key} : ${x.facts.map((f) => `${f.value} ${f.unit} (${f.evidence})`).join(" / ")}`));
+      c.forEach((x) => {
+        const def = w.params.find((p) => p.key === x.key);
+        conflicts.push(`${def?.label ?? x.key} : ${x.facts.map((f) => `${f.value} ${f.unit} (${f.evidence})`).join(" / ")}`);
+        contradictions.push({ workItemId: w.id, key: x.key, label: def?.label ?? x.key, unit: def?.unit ?? x.facts[0]!.unit, facts: x.facts.map((f) => ({ value: f.value, unit: f.unit, evidence: f.evidence })) });
+      });
       const chosen = [...(products.get(w.id) ?? new Map()).entries()].filter((e): e is [string, SlotChoice] => e[1] !== "conflict");
       return {
         workItemId: w.id,
@@ -256,7 +316,7 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
         ...(preferences ? { preferences } : {}),
       };
     });
-  return { lines: plans, inputs, context, characteristicsBySlot, conflicts: [...new Set(conflicts)] };
+  return { lines: plans, inputs, context, characteristicsBySlot, conflicts: [...new Set(conflicts)], contradictions };
 }
 
 /**

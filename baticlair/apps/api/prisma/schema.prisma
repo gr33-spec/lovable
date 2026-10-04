@@ -168,6 +168,8 @@ model Project {
   name           String
   clientName     String?
   address        String?
+  /// Infos chantier facultatives : la note de l'artisan (texte libre, commentaires de croquis). Lue à chaque calcul.
+  siteNotes      String?
   status         ProjectStatus @default(active)
   /// Chantier de démonstration : ne compte jamais dans la formule.
   demo           Boolean       @default(false)
@@ -200,6 +202,8 @@ model Project {
 enum DocumentPurpose {
   client_quote
   supplier_quote
+  /// Croquis, photo ou plan du chantier déposé par l'artisan (infos chantier facultatives) : gardé, pas lu par l'IA.
+  sketch
 }
 
 enum DocumentStatus {

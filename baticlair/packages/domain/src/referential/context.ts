@@ -56,7 +56,14 @@ export function paramsFromContext(context: ChantierContext, work: WorkItemType):
     if (facts.length === 0) continue;
     const answer = facts.filter((f) => f.origin === "artisan").at(-1);
     if (answer) {
-      params[def.key] = { value: answer.value, unit: answer.unit, origin: "artisan", evidence: answer.evidence };
+      // L'artisan l'emporte ; si un document disait autre chose, l'explication le dit aussi (rien n'est effacé).
+      const a = baseValue(answer);
+      const others = facts.filter((f) => f.origin !== "artisan" && f !== answer).filter((f) => {
+        const b = baseValue(f);
+        return !a || !b || !sameDim(a.dim, b.dim) || !a.value.equals(b.value);
+      });
+      const said = others.map((f) => `${f.evidence} : ${f.value} ${f.unit}`);
+      params[def.key] = { value: answer.value, unit: answer.unit, origin: "artisan", evidence: said.length > 0 ? `${answer.evidence} ; ${said.join(" ; ")}` : answer.evidence };
       continue;
     }
     const expected = parseRefUnit(def.unit).dim;

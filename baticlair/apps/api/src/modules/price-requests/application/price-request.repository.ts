@@ -44,7 +44,7 @@ export interface ValidatedTakeoff {
 export interface Sender {
   companyName: string;
   senderName: string;
-  project: { name: string; address: string | null };
+  project: { name: string; address: string | null; siteNotes: string | null };
 }
 
 export interface PriceRequestRepository {

@@ -3,6 +3,7 @@
 import { CircleCheck, FileUp, Loader2 } from "lucide-react";
 import { useCallback, useId, useRef, useState } from "react";
 import { AssistantMessage } from "@/components/chat";
+import { SiteNotes } from "@/components/site-notes";
 import { ProjectTakeoff } from "@/components/project-takeoff";
 import { ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, MAX_DOCUMENT_BYTES, type DocumentPurpose, type ProjectDocument } from "@/lib/api";
@@ -14,6 +15,7 @@ import { useResource } from "@/lib/use-resource";
 const PURPOSE_LABEL: Record<DocumentPurpose, string> = {
   client_quote: "Devis client",
   supplier_quote: "Devis fournisseur",
+  sketch: "Croquis du chantier",
 };
 
 /**
@@ -65,6 +67,7 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
               Déposez le devis de votre client : je vous sors la liste des matériaux à commander.
             </h2>
             <UploadButton projectId={projectId} purpose="client_quote" label="Choisir le devis (PDF)" tone="dark" onAdded={added} />
+            <SiteNotes projectId={projectId} infos={null} disabled={false} onSaved={() => undefined} />
           </AssistantMessage>
         </section>
       )}

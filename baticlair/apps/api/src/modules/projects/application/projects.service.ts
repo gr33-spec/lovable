@@ -14,6 +14,8 @@ export interface UpdateProjectInput {
   name?: string | undefined;
   clientName?: string | null | undefined;
   address?: string | null | undefined;
+  /** La note chantier, telle que tapée (null pour l'effacer) ; 4 000 caractères au plus. */
+  siteNotes?: string | null | undefined;
   status?: ProjectStatus | undefined;
 }
 
@@ -51,6 +53,7 @@ export class ProjectsService {
     if (input.name !== undefined) patch.name = normalizeProjectName(input.name);
     if (input.clientName !== undefined) patch.clientName = normalizeOptionalText(input.clientName, "clientName");
     if (input.address !== undefined) patch.address = normalizeOptionalText(input.address, "address");
+    if (input.siteNotes !== undefined) patch.siteNotes = input.siteNotes?.trim() ? input.siteNotes.trim().slice(0, 4000) : null;
     if (input.status !== undefined) patch.status = input.status;
     const project = await this.projects.update(tenant, id, patch);
     if (!project) throw notFound("Project");

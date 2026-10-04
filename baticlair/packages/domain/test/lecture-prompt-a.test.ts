@@ -49,11 +49,14 @@ describe("dans le calcul : la pente lue par l'IA n'est plus une hypothèse à 45
     expect(ardoises35.assumptionKeys).not.toContain("param:pente");
   });
 
-  it("le texte de la ligne l'emporte sur la lecture de l'IA ; deux lectures différentes font une question, pas un choix en silence", () => {
+  it("texte de la ligne et lecture de l'IA : d'accord → une seule valeur ; en désaccord → une question, jamais un choix en silence", () => {
     const profile = tradeProfile("roofing");
-    const withText = planQuote([{ ...ARDOISES[0]!, designation: `${ARDOISES[0]!.designation}, pente 40°` }], ROOFING_REFERENTIAL, profile, undefined, read({ pente: "35°" }));
-    expect(withText.inputs[0]!.params.pente).toMatchObject({ value: "40", unit: "°" });
-    expect(withText.conflicts).toEqual([]);
+    const agree = planQuote([{ ...ARDOISES[0]!, designation: `${ARDOISES[0]!.designation}, pente 40°` }], ROOFING_REFERENTIAL, profile, undefined, read({ pente: "40°" }));
+    expect(agree.inputs[0]!.params.pente).toMatchObject({ value: "40", unit: "°" });
+    expect(agree.conflicts).toEqual([]);
+    const disagree = planQuote([{ ...ARDOISES[0]!, designation: `${ARDOISES[0]!.designation}, pente 40°` }], ROOFING_REFERENTIAL, profile, undefined, read({ pente: "35°" }));
+    expect(disagree.inputs[0]!.params.pente).toBeUndefined();
+    expect(disagree.contradictions).toHaveLength(1);
     const twoReadings = planQuote(ARDOISES, ROOFING_REFERENTIAL, profile, undefined, factsFromReading(ROOFING_REFERENTIAL, [{ ref: "1", dimensions: { pente: "35°" } }], { pente: "30°" }));
     expect(twoReadings.inputs[0]!.params.pente).toBeUndefined();
     expect(twoReadings.conflicts).toHaveLength(1);

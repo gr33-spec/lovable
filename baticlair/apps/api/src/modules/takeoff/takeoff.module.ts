@@ -78,6 +78,10 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
               const project = await prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { address: true } });
               return project?.address ?? null;
             },
+            projectNotes: async (tenant, projectId) => {
+              const project = await prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { siteNotes: true } });
+              return project?.siteNotes ?? null;
+            },
           },
         ),
       inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, TAKEOFF_EXTRACTOR, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService, ALERTER],

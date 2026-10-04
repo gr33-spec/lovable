@@ -1140,7 +1140,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       trade: "roofing",
       label: "Faîtage (faîtières, closoir, abouts, fixations)",
       triggers: ["ridge_tile"],
-      params: [{ key: "longueur_faitage", label: "Longueur du faîtage", unit: "m", kind: "site_data", question: "Longueur du faîtage ?", fromLineQuantity: true }],
+      params: [{ key: "longueur_faitage", label: "Longueur du faîtage", unit: "m", kind: "site_data", question: "Longueur du faîtage ?", fromLineQuantity: true, textLabels: ["faitage"] }],
       slots: [
         { key: "faitiere", family: "ridge_tile", label: "Faîtières", usual: { text: "Faîtière courante (40 à 42 cm) : le modèle suit la tuile ou l'ardoise posée.", source: F, productId: "faitiere-standard" } },
         { key: "closoir", family: "ridge_closure", label: "Closoir", usual: { text: "Closoir ventilé en rouleau de 5 m.", source: F, productId: "closoir-standard-5m" } },
@@ -1203,7 +1203,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       trade: "roofing",
       label: "Faîtage en bande zinc",
       triggers: ["zinc_ridge"],
-      params: [{ key: "longueur_faitage", label: "Longueur du faîtage", unit: "m", kind: "site_data", question: "Longueur du faîtage ?", fromLineQuantity: true }],
+      params: [{ key: "longueur_faitage", label: "Longueur du faîtage", unit: "m", kind: "site_data", question: "Longueur du faîtage ?", fromLineQuantity: true, textLabels: ["faitage"] }],
       slots: [
         { key: "bande", family: "zinc_ridge", label: "Faîtage zinc (bande)", usual: { text: "Bande zinc en longueurs de 3 m (développé 25 à 33 cm).", source: F, productId: "bande-faitage-zinc-standard" } },
         { key: "patte", family: "zinc_clip", label: "Pattes de fixation", keywords: ["patte"], usual: { text: "Trois pattes par mètre.", source: F, productId: "patte-zinc-standard" } },
@@ -1286,14 +1286,14 @@ export const ROOFING_REFERENTIAL: Referential = {
       label: "Abergement de cheminée (zinc + porte-solin)",
       triggers: ["chimney_flashing"],
       params: [
-        { key: "nb_cheminees", label: "Nombre de cheminées", unit: "u", kind: "site_data", question: "Combien de cheminées ?", fromLineQuantity: true },
+        { key: "nb_cheminees", label: "Nombre de cheminées", unit: "u", kind: "site_data", question: "Combien de cheminées ?", fromLineQuantity: true, textLabels: ["cheminee"] },
         {
           key: "perimetre_cheminee",
           label: "Périmètre d'une cheminée",
           unit: "m",
           kind: "site_data",
           question: "Périmètre d'une cheminée (les 4 côtés) ?",
-          textLabels: ["perimetre"],
+          textLabels: ["perimetre", "perimetre de cheminee"],
           choices: [
             { label: "2 m", value: "2" },
             { label: "3 m", value: "3" },
@@ -1471,13 +1471,14 @@ export const ROOFING_REFERENTIAL: Referential = {
       label: "Gouttière (profil, crochets, naissances)",
       triggers: ["gutter"],
       params: [
-        { key: "longueur_gouttiere", label: "Longueur de gouttière", unit: "m", kind: "site_data", question: "Longueur de gouttière ?", fromLineQuantity: true },
+        { key: "longueur_gouttiere", label: "Longueur de gouttière", unit: "m", kind: "site_data", question: "Longueur de gouttière ?", fromLineQuantity: true, textLabels: ["gouttiere", "egout"] },
         {
           key: "nb_descentes",
           label: "Nombre de descentes",
           unit: "u",
           kind: "site_data",
           question: "Combien de descentes pour cette gouttière ?",
+          textLabels: ["descente"],
           choices: [
             { label: "1", value: "1" },
             { label: "2", value: "2" },

@@ -526,6 +526,21 @@ export function computeWithAnswers(
     return { needs, questions };
   };
   let { needs, questions } = run(inputs);
+  // Deux sources qui ne disent pas la même chose (devis ≠ en-tête lu, devis ≠ croquis), sans réponse de l'artisan :
+  // une question avec les deux valeurs en boutons, et rien ne part pour cet ouvrage tant qu'elle est ouverte.
+  for (const c of plan.contradictions) {
+    const key = `param:${c.key}`;
+    if (answers[key] !== undefined || questions.some((q) => q.key === key)) continue;
+    const seen = new Set<string>();
+    const options = c.facts.filter((f) => !seen.has(f.value) && seen.add(f.value)).map((f) => ({ label: `${f.value.replace(".", ",")} ${f.unit} (${f.evidence})`, value: f.value }));
+    const question: Question = { key, kind: "param", text: `${c.label} : ${options.map((o) => o.label).join(", ou ")} ?`, unit: c.unit, options };
+    questions.unshift(question);
+    needs = needs.map((n) => {
+      if (n.workItemId !== c.workItemId || n.status !== "calculated") return n;
+      const { quantity: _q, purchase: _p, ...rest } = n;
+      return { ...rest, status: "question" as const, question };
+    });
+  }
   // § 41 : une question ne se pose que si sa réponse change une quantité commandée de plus de 3 %, une unité ou un
   // matériau ; les questions restantes se posent dans l'ordre du levier le plus gros. Pour chaque question à boutons,
   // le calcul est rejoué avec chaque réponse possible.
@@ -542,6 +557,7 @@ export function computeWithAnswers(
       questions = again.questions;
     } else levers.set(q.key, lever.spread);
   }
+  for (const c of plan.contradictions) if (!levers.has(`param:${c.key}`)) levers.set(`param:${c.key}`, Number.POSITIVE_INFINITY);
   questions = [...questions].sort((a, b) => (levers.get(b.key) ?? 0) - (levers.get(a.key) ?? 0));
   return { needs, questions, declined: [...declined] };
 }

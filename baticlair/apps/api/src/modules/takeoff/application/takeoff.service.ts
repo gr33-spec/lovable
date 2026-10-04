@@ -6,6 +6,7 @@ import {
   climateZone,
   isCoastal,
   factsFromReading,
+  readSiteNotes,
   computeWithAnswers,
   postalCodeIn,
   purchaseView,
@@ -59,6 +60,8 @@ export interface ReadingOptions {
   isValidator?: (tenant: TenantContext) => Promise<boolean>;
   /** Adresse du chantier (code postal → zone climatique), sans rien demander à l'artisan. */
   projectAddress?: (tenant: TenantContext, projectId: string) => Promise<string | null>;
+  /** Infos chantier facultatives : la note de l'artisan (texte libre, commentaires de croquis), lue à chaque calcul. */
+  projectNotes?: (tenant: TenantContext, projectId: string) => Promise<string | null>;
   /** Mesures de chaque lecture (journal du serveur), en plus de leur enregistrement avec l'analyse. */
   onStats?: (stats: ReadingStats) => void;
   policy?: ExtractionPolicy;
@@ -635,6 +638,8 @@ export class TakeoffService {
     // Prompt A (§41.1) : la pente, le rampant, l'épaisseur lus par l'IA dans la ligne ou l'en-tête entrent dans
     // le calcul (après le texte lu par le code, avant les hypothèses par défaut).
     extraFacts.push(...factsFromReading(ROOFING_REFERENTIAL, takeoff.lines.map((l) => ({ ref: l.id, dimensions: l.dimensions })), takeoff.context));
+    // Infos chantier facultatives : les mesures nommées de la note de l'artisan passent devant le devis (l'explication dit les deux).
+    extraFacts.push(...readSiteNotes(ROOFING_REFERENTIAL, (await this.reading.projectNotes?.(tenant, takeoff.projectId)) ?? null));
     const plan = planQuote(lines.map((l) => ({ ref: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, section: l.section })), ROOFING_REFERENTIAL, profile, undefined, extraFacts);
     // Niveau 1 : le rôle de chaque quantité (mesure d'ouvrage ou à commander), proposé par le code
     // et ENREGISTRÉ avec la ligne ; une mesure ne devient jamais une quantité d'achat.

@@ -21,6 +21,8 @@ export interface Contexte {
   reference?: string | undefined;
   /** Adresse ou code postal du chantier : la zone climatique en dépend (jamais demandée). */
   adresse?: string | undefined;
+  /** Infos chantier facultatives : texte libre de l'artisan (mesures nommées, contexte). Remplace la note du chantier. */
+  infos?: string | undefined;
 }
 
 /** `ecran` : l'appli reçoit en plus le détail de son écran (lignes lues, décisions, preuves). */
@@ -38,7 +40,7 @@ export type Correction =
   | { action: "renommer"; id: string; libelle: string }
   | { action: "fixer_quantite"; id: string; quantite: string; unite: string };
 
-type Row = { id: string; projectId: string; source: string; documentId: string | null; takeoffId: string | null; reference: string | null };
+type Row = { id: string; companyId: string; projectId: string; source: string; documentId: string | null; takeoffId: string | null; reference: string | null };
 
 /**
  * LA PORTE D'ENTRÉE (§38) : l'app et les partenaires (Rappidos d'abord) passent tous ici. Trois
@@ -245,6 +247,12 @@ export class QuantitatifsService {
 
   private async project(tenant: TenantContext, ctx: Contexte): Promise<string> {
     assertCanWrite(tenant);
+    const id = await this.projectId(tenant, ctx);
+    if (ctx.infos !== undefined) await this.projects.update(tenant, id, { siteNotes: ctx.infos });
+    return id;
+  }
+
+  private async projectId(tenant: TenantContext, ctx: Contexte): Promise<string> {
     if (ctx.projetId) {
       const project = await this.projects.get(tenant, ctx.projetId).catch(() => null);
       if (!project) throw notFound("Project");
@@ -282,7 +290,34 @@ export class QuantitatifsService {
     return { id: row.id, reference: row.reference, projetId: row.projectId, source: row.source === "lignes" ? ("lignes" as const) : ("pdf" as const) };
   }
 
-  private view(row: Row, reviewed: ReviewedTakeoff, rendu: Rendu) {
-    return { ...quantitatifView(this.base(row), reviewed), ...(rendu.ecran ? { ecran: takeoffDto(reviewed) } : {}) };
+  private async view(row: Row, reviewed: ReviewedTakeoff, rendu: Rendu) {
+    // Les infos chantier (note, croquis) voyagent avec le quantitatif : l'artisan voit ce qui a servi au calcul.
+    const [project, croquis] = await Promise.all([
+      this.prisma.project.findFirst({ where: { id: row.projectId, companyId: row.companyId }, select: { siteNotes: true } }),
+      this.prisma.document.findMany({ where: { projectId: row.projectId, companyId: row.companyId, purpose: "sketch" }, select: { id: true, originalName: true, createdAt: true }, orderBy: { createdAt: "asc" } }),
+    ]);
+    return {
+      ...quantitatifView(this.base(row), reviewed),
+      infos: { texte: project?.siteNotes ?? null, croquis: croquis.map((c) => ({ id: c.id, nom: c.originalName })) },
+      ...(rendu.ecran ? { ecran: takeoffDto(reviewed) } : {}),
+    };
+  }
+
+  /** Infos chantier facultatives : la note, remplacée telle que tapée (null pour l'effacer). */
+  async setNotes(tenant: TenantContext, projectId: string, texte: string | null) {
+    await this.projects.get(tenant, projectId);
+    await this.projects.update(tenant, projectId, { siteNotes: texte });
+  }
+
+  /**
+   * Un croquis (photo, PDF) avec son commentaire : la photo est gardée telle quelle, jamais lue par l'IA
+   * (docs/infos-chantier-facultatives.md) ; le commentaire rejoint la note, précédé de « Croquis : ».
+   */
+  async addSketch(tenant: TenantContext, projectId: string, file: { name: string; bytes: Uint8Array }, commentaire: string | undefined) {
+    const project = await this.projects.get(tenant, projectId);
+    const doc = await this.documents.storeSketch(tenant, projectId, { fileName: file.name, bytes: file.bytes });
+    const line = commentaire?.trim() ? `Croquis (${doc.originalName}) : ${commentaire.trim()}` : null;
+    if (line) await this.projects.update(tenant, projectId, { siteNotes: [project.siteNotes?.trim(), line].filter(Boolean).join("\n") });
+    return { id: doc.id, nom: doc.originalName };
   }
 }

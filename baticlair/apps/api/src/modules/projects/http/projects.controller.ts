@@ -21,6 +21,7 @@ const updateBody = z
     name: z.string(),
     clientName: z.string().nullable(),
     address: z.string().nullable(),
+    siteNotes: z.string().max(4000).nullable(),
     status: z.enum(["active", "archived"]),
   })
   .partial()
@@ -55,6 +56,7 @@ function toDto(p: Project) {
     name: p.name,
     clientName: p.clientName,
     address: p.address,
+    siteNotes: p.siteNotes,
     status: p.status,
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),

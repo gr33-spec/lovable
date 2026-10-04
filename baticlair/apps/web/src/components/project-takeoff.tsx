@@ -5,6 +5,7 @@ import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } fr
 import { AssistantMessage, ChatInput, parseCommand, ReasoningSteps, Say, ThinkingSteps, UserBubble } from "@/components/chat";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { QuantityCard, type ItemEdit } from "@/components/purchase-list";
+import { SiteNotes } from "@/components/site-notes";
 import { DecisionCard, type DecisionHandlers } from "@/components/takeoff-view";
 import { useProgressRefresh } from "@/components/project-progress";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
@@ -149,6 +150,7 @@ export function ProjectTakeoff({
                 <Sparkles size={18} aria-hidden="true" />
                 {actionError || failed ? "Réessayer" : "Lire le devis"}
               </Button>
+              <SiteNotes projectId={projectId} infos={quantitatif?.infos ?? null} disabled={archived} onSaved={reload} />
             </>
           )}
         </AssistantMessage>
@@ -318,7 +320,12 @@ export function ProjectTakeoff({
         </AssistantMessage>
       </section>
       <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} />
-      {draft && editable ? <ChatInput onSend={typed} disabled={pending} placeholder="« Mets 30° de pente », « zone 1 »…" /> : null}
+      {draft && editable ? (
+        <>
+          <SiteNotes projectId={projectId} infos={quantitatif?.infos ?? null} disabled={pending} onSaved={reload} />
+          <ChatInput onSend={typed} disabled={pending} placeholder="« Mets 30° de pente », « zone 1 »…" />
+        </>
+      ) : null}
     </>
   );
 }

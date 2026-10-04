@@ -11,7 +11,7 @@ import {
 } from "@baticlair/domain";
 import { DomainError, notFound } from "../../../platform/errors/domain-error.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
-import { cleanFileName, looksLikePdf, PIPELINE_VERSION, type DocumentPurpose, type UnreadableReason } from "../domain/document.js";
+import { cleanFileName, imageMimeType, looksLikePdf, PIPELINE_VERSION, type DocumentPurpose, type UnreadableReason } from "../domain/document.js";
 import type { DocumentRepository, DocumentWithProcessing, PageRecord } from "./document.repository.js";
 import { PdfReadError, type PdfReader } from "./pdf-reader.js";
 
@@ -88,6 +88,31 @@ export class DocumentsService {
     const doc = await this.documents.findById(tenant, created.id);
     if (!doc) throw notFound("Document");
     return { document: doc, duplicate: false };
+  }
+
+  /**
+   * Croquis, photo ou plan du chantier (infos chantier facultatives) : gardé tel quel, jamais lu par l'IA ni par le
+   * pipeline PDF. Image (JPEG, PNG, WebP) ou PDF, reconnu à ses octets. Un même fichier n'est pas stocké deux fois.
+   */
+  async storeSketch(tenant: TenantContext, projectId: string, input: { fileName: string; bytes: Uint8Array }): Promise<{ id: string; originalName: string; duplicate: boolean }> {
+    assertCanWrite(tenant);
+    if (!(await this.documents.projectExists(tenant, projectId))) throw notFound("Project");
+    if (input.bytes.byteLength === 0) throw unreadable("empty", "Empty file");
+    if (input.bytes.byteLength > this.limits.maxBytes) throw new DomainError("payload_too_large", "Document too large", { maxBytes: this.limits.maxBytes });
+    const mimeType = imageMimeType(input.bytes) ?? (looksLikePdf(input.bytes) ? "application/pdf" : null);
+    if (!mimeType) throw unreadable("not_pdf", "Not an image or a PDF");
+    const sha256 = createHash("sha256").update(input.bytes).digest("hex");
+    const existing = await this.documents.findByHash(tenant, projectId, sha256);
+    if (existing) {
+      const doc = await this.documents.findById(tenant, existing.id);
+      if (doc) return { id: doc.id, originalName: doc.originalName, duplicate: true };
+    }
+    const created = await this.documents.create(
+      tenant,
+      { projectId, purpose: "sketch", trade: tradeKey(tenant.trades), originalName: cleanFileName(input.fileName), mimeType, sizeBytes: input.bytes.byteLength, sha256 },
+      input.bytes,
+    );
+    return { id: created.id, originalName: created.originalName, duplicate: false };
   }
 
   /** Lecture locale : jamais d'erreur remontée à l'artisan, le résultat est enregistré (réussi ou non). */
