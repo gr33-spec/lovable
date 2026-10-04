@@ -78,7 +78,7 @@ function viewDto(view: ArtisanView) {
   };
 }
 
-export function takeoffDto({ takeoff, validation, view, roles, purchase }: ReviewedTakeoff) {
+export function takeoffDto({ takeoff, validation, view, roles, purchase, excluded }: ReviewedTakeoff) {
   const byId = new Map(validation.lines.map((v) => [v.lineId, v]));
   return {
     id: takeoff.id,
@@ -89,7 +89,11 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase }: Revie
     purchase: purchaseDto(purchase),
     model: takeoff.model,
     promptVersion: takeoff.promptVersion,
-    notes: artisanNotes(takeoff.notes),
+    // §44.2 : la ligne retirée par une phrase de la note est dite à l'artisan, avec sa phrase.
+    notes: [
+      ...artisanNotes(takeoff.notes),
+      ...takeoff.lines.filter((l) => excluded?.has(l.id)).map((l) => `${l.designation} : exclu par vous (« ${excluded!.get(l.id)} »), rien à commander.`),
+    ],
     createdAt: takeoff.createdAt.toISOString(),
     validatedAt: takeoff.validatedAt?.toISOString() ?? null,
     counts: validation.counts,

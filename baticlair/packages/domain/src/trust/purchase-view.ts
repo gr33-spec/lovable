@@ -2,7 +2,7 @@ import { Decimal } from "../shared/decimal.js";
 import type { Assumption, NeedResult, Question } from "../referential/engine.js";
 import type { LineRole } from "../referential/line-roles.js";
 import type { Referential } from "../referential/model.js";
-import type { QuotePlan } from "../referential/plan.js";
+import { slotCharacteristicsKey, type QuotePlan } from "../referential/plan.js";
 import type { TakeoffValidation } from "../takeoff/validation.js";
 import type { ArtisanView, Decision, OuvrageLevels } from "./artisan-view.js";
 
@@ -126,6 +126,13 @@ type OwnedNeed = NeedResult & { workItemId?: string };
 const norm = (t: string) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 /** Matières et coloris qui changent l'article chez le fournisseur ; un adjectif de pose (« respirant ») n'en est pas un. */
 const MATERIAL_WORDS = new Set(["pvc", "zinc", "cuivre", "inox", "alu", "aluminium", "galva", "acier", "sapin", "bois", "rouge", "sable", "brun", "noir", "gris", "anthracite", "ocre", "naturel", "naturelle"]);
+/** Les vraies matières (pas les coloris) : un article n'en porte jamais deux (« Voliges sapin … zinc » est faux). */
+const MATERIALS_ONLY = new Set(["pvc", "zinc", "cuivre", "inox", "alu", "aluminium", "galva", "galvanise", "acier", "sapin", "bois", "douglas", "chene", "beton", "terre cuite"]);
+const materialsIn = (text: string): string[] => {
+  const n = ` ${norm(text).replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ")} `;
+  return [...MATERIALS_ONLY].filter((m) => n.includes(` ${m} `));
+};
+
 /** Une caractéristique digne de suivre l'article : un chiffre (Ø80, 25), un trait d'union (demi-ronde), ou une matière. */
 function keepCharacteristic(c: string): boolean {
   const n = norm(c);
@@ -193,7 +200,20 @@ function aggregate(needs: readonly OwnedNeed[], ouvrages: readonly OuvrageLevels
       order = { count: need.toDecimalPlaces(2).toFixed(), unit: unit.many };
     }
     // Les caractéristiques du devis (coloris, matière, diamètre) suivent l'article jusqu'au fournisseur.
-    const extras = [...new Set(group.flatMap((n) => characteristicsBySlot[n.slot] ?? []))].filter((c) => keepCharacteristic(c) && !norm(first.label).includes(norm(c)));
+    // Les caractéristiques du devis suivent l'article, mais une matière seulement si elle est la sienne : la ligne
+    // « voligeage sapin sous zinc » ne fait pas de la volige un article en zinc. L'article qui a déjà sa matière n'en
+    // prend pas une autre ; sans matière, il n'en prend une que si la ligne n'en cite qu'une (jamais deviner entre deux).
+    // Sans ouvrage connu (calcul appelé hors computeWithAnswers) : les caractéristiques de cet emplacement, tous ouvrages.
+    const charsOf = (n: OwnedNeed) =>
+      n.workItemId ? (characteristicsBySlot[slotCharacteristicsKey(n.workItemId, n.slot)] ?? []) : Object.entries(characteristicsBySlot).flatMap(([k, v]) => (k.endsWith(`/${n.slot}`) ? v : []));
+    const raw = [...new Set(group.flatMap(charsOf))].filter((c) => keepCharacteristic(c) && !norm(first.label).includes(norm(c)));
+    const own = materialsIn(first.label);
+    const cited = [...new Set(raw.flatMap(materialsIn))];
+    const extras = raw.filter((c) => {
+      const m = materialsIn(c);
+      if (m.length === 0) return true;
+      return own.length === 0 && cited.length === 1;
+    });
     items.push({
       key,
       label: extras.length > 0 ? `${first.label} ${extras.join(" ")}` : first.label,

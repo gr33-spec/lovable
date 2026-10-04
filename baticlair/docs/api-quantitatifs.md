@@ -29,7 +29,8 @@ Deux formes, au choix :
 
 - `quantite` et `prix` : un nombre ou un texte (« 1 250,50 ») ; `null` s'ils sont absents. Entre 1 et 500 lignes.
 - `adresse` (ou code postal) : elle donne la zone climatique, qui n'est jamais demandée à l'artisan.
-- `infos` (facultatif, 4 000 caractères) : les informations sur le chantier, écrites comme on les dirait (« Pente 42°. Rampants 2 × 6,50 m. Les Velux sont conservés. »). Seules les mesures nommées entrent dans le calcul (pente, rampant, faîtage, gouttière, descentes, cheminées, périmètre, épaisseur, développé) ; elles passent devant le devis et l'explication cite les deux ; le reste est gardé et transmis au fournisseur dans « Le chantier en bref ». Sans IA. Voir `docs/infos-chantier-facultatives.md`.
+- `infos` (facultatif, 4 000 caractères) : les informations sur le chantier, écrites comme on les dirait (« Pente 42°. Rampants 2 × 6,50 m. Les Velux sont conservés. »). Seules les mesures nommées entrent dans le calcul (pente, rampant, faîtage, gouttière, descentes, cheminées, périmètre, épaisseur, développé) ; elles passent devant le devis et l'explication cite les deux ; le reste est gardé et transmis au fournisseur dans « Le chantier en bref ». Sans IA. Une phrase d'exclusion (« garage non compris », « Velux fournis par le client ») retire du « À commander » la ligne qui en nomme tous les mots ; elle reste au détail sans prix, « exclu par l'artisan ». Voir `docs/infos-chantier-facultatives.md`.
+- `metier` (facultatif) : `couverture` ou `platrerie` ; choisit le référentiel. Absent : le métier de l'entreprise. Un métier sans référentiel répond `422` `{ "error": { "code": "no_referential", "details": { "metier", "disponibles": ["couverture", "platrerie"], "message" } } }` ; rien n'est créé ni décompté.
 
 ### Infos chantier après coup
 

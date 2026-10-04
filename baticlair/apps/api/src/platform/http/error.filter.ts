@@ -18,6 +18,7 @@ const STATUS: Record<ErrorCode, number> = {
   payload_too_large: 413,
   too_many_requests: 429,
   unreadable_document: 422,
+  no_referential: 422,
   analysis_quota_reached: 402,
   plan_limit_reached: 402,
   ai_unavailable: 503,

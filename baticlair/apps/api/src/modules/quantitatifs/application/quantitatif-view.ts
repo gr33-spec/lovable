@@ -1,4 +1,4 @@
-import { ROOFING_REFERENTIAL, type Assumption, type TraceLine } from "@baticlair/domain";
+import { METIER_NAMES, ROOFING_REFERENTIAL, type Assumption, type TraceLine } from "@baticlair/domain";
 import type { ReviewedTakeoff } from "../../takeoff/index.js";
 
 /**
@@ -20,7 +20,7 @@ export interface Morceau {
   confiance: "devis" | "hypothese" | "referentiel" | "artisan" | "estimation";
 }
 
-const METIER: Record<string, string> = { roofing: "couverture" };
+const METIER: Record<string, string> = METIER_NAMES;
 export const metierOf = (trade: string) => METIER[trade] ?? trade;
 
 const confianceOf = (origin: TraceLine["origin"]): Morceau["confiance"] =>
@@ -55,7 +55,10 @@ function explication(quantite: string | null, trace: readonly TraceLine[], assum
     if (!utile) continue;
     const unit = !t.unit || t.unit === "u" ? "" : t.unit === "°" ? "°" : ` ${t.unit.replace(/^u\//, "/").replace("m2", "m²")}`;
     // « région ardoise III » : la valeur dite par le référentiel ; `valeur` garde celle du calcul (à renvoyer).
-    const texte = `${t.label.charAt(0).toLowerCase()}${t.label.slice(1)} ${t.shown ?? t.value}${unit}${t.estimation ? " (estimation)" : ""}`;
+    // §44.3 : la note de l'artisan gagne sur le devis, et l'explication cite les deux (« note de l'artisan ; le devis disait 40° »).
+    const others = t.origin === "project" && t.from ? t.from.split(" ; ").slice(1).map((x) => x.split(" : ").pop()!.replace(/\s*°$/, "°").trim()).filter(Boolean) : [];
+    const cite = others.length > 0 ? ` (note de l'artisan ; le devis disait ${others.join(", ")})` : "";
+    const texte = `${t.label.charAt(0).toLowerCase()}${t.label.slice(1)} ${t.shown ?? t.value}${unit}${t.estimation ? " (estimation)" : ""}${cite}`;
     if (seen.has(texte)) continue;
     seen.add(texte);
     morceaux.push({

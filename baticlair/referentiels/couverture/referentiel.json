@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.04-17",
+  "version": "roofing-2026.10.04-19",
   "trade": "roofing",
   "sources": [
     {
@@ -204,7 +204,7 @@
     {
       "code": "zinc_coil",
       "label": "Bobine de zinc",
-      "needUnit": "kg",
+      "needUnit": "m",
       "attributes": [],
       "keyAttributes": [],
       "keywords": [
@@ -2894,26 +2894,57 @@
     {
       "id": "bobine-zinc-standard",
       "family": "zinc_coil",
-      "label": "Zinc naturel en bobine (largeur 500 ou 650 mm, épaisseur selon le chantier)",
-      "shortLabel": "Zinc naturel en bobine",
+      "label": "Zinc naturel en bobine largeur 650 mm, au mètre linéaire (épaisseur du chantier)",
+      "shortLabel": "Zinc naturel en bobine 650 mm",
       "aliases": [],
       "generic": true,
       "attributes": {},
       "sellingUnits": [
         {
-          "id": "kg",
+          "id": "ml",
           "label": {
-            "one": "kg",
-            "many": "kg"
+            "one": "ml",
+            "many": "ml"
           },
           "contains": {
             "kind": "packaging",
             "value": "1",
-            "unit": "kg",
+            "unit": "m",
             "source": "definition",
             "verification": {
               "status": "verified",
-              "verifiedAt": "2026-10-03",
+              "verifiedAt": "2026-10-04",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "bobine-zinc-500",
+      "family": "zinc_coil",
+      "label": "Zinc naturel en bobine largeur 500 mm, au mètre linéaire (épaisseur du chantier)",
+      "shortLabel": "Zinc naturel en bobine 500 mm",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "ml",
+          "label": {
+            "one": "ml",
+            "many": "ml"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "m",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-04",
               "verifiedBy": "BatiClair (définition)"
             },
             "version": 1
@@ -6576,7 +6607,7 @@
           "unit": "u",
           "kind": "artisan_preference",
           "question": "Tu façonnes tes bacs toi-même, ou tu les commandes façonnés ?",
-          "hint": "Bobines de zinc en kg si tu façonnes ; bacs à la longueur du rampant sinon.",
+          "hint": "Bobine de zinc au mètre linéaire si tu façonnes ; bacs à la longueur du rampant sinon.",
           "choices": [
             {
               "label": "Je façonne (bobines)",
@@ -6671,7 +6702,7 @@
           "unit": "u",
           "kind": "artisan_preference",
           "question": "Rampant de plus de 10 m : bobine profilée sur place, ou bacs en plusieurs longueurs ?",
-          "hint": "Profilée sur place : zinc en bobine au kg. Plusieurs longueurs : un bac tous les 10 m, avec jonction transversale.",
+          "hint": "Profilée sur place : zinc en bobine au mètre linéaire. Plusieurs longueurs : un bac tous les 10 m, avec jonction transversale.",
           "choices": [
             {
               "label": "Bobine profilée sur place",
@@ -6732,10 +6763,27 @@
           "key": "bobine",
           "family": "zinc_coil",
           "label": "Zinc en bobine",
+          "keywords": [
+            "bobine"
+          ],
           "usual": {
-            "text": "Zinc naturel en bobine, largeur 650 mm (500 mm en bord de mer), vendu au kg.",
-            "source": "fondateur-referentiel-2026-10-03",
+            "text": "Zinc naturel en bobine largeur 650 mm, commandé au mètre linéaire.",
+            "source": "vmzinc-joint-debout",
             "productId": "bobine-zinc-standard"
+          }
+        },
+        {
+          "key": "bobine_littoral",
+          "family": "zinc_coil",
+          "label": "Zinc en bobine (bord de mer)",
+          "keywords": [
+            "bord de mer",
+            "littoral"
+          ],
+          "usual": {
+            "text": "Bord de mer : zinc naturel en bobine largeur 500 mm, commandé au mètre linéaire (VMZINC).",
+            "source": "vmzinc-joint-debout",
+            "productId": "bobine-zinc-500"
           }
         },
         {
@@ -7112,11 +7160,28 @@
         {
           "id": "zinc-bobines",
           "slot": "bobine",
-          "when": "si(faconnage < 2, 1, si(longueur_rampant > regle.rampant_max_bac, si(bacs_longs < 2, 1, 0), 0))",
-          "formula": "surface * poids_zinc",
-          "unit": "kg",
+          "when": "si(zone >= regle.zone_littorale, 0, si(faconnage < 2, 1, si(longueur_rampant > regle.rampant_max_bac, si(bacs_longs < 2, 1, 0), 0)))",
+          "formula": "arrondi_sup(largeur_pan / entraxe_joints) * longueur_rampant * si(epaisseur_zinc >= regle.seuil_070, 1, 1)",
+          "unit": "m",
           "core": true,
-          "exclusions": "Zinc posé joints compris (VMZINC) ; hors bandes d'égout, de rive, de faîtage et de noue, comptées à part.",
+          "exclusions": "Une longueur de rampant par bac, sans surlongueur de pliage en égout et en faîtage ; hors bandes d'égout, de rive, de faîtage et de noue, comptées à part.",
+          "source": "vmzinc-joint-debout",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "zinc-bobines-littoral",
+          "slot": "bobine_littoral",
+          "when": "si(zone >= regle.zone_littorale, si(faconnage < 2, 1, si(longueur_rampant > regle.rampant_max_bac, si(bacs_longs < 2, 1, 0), 0)), 0)",
+          "formula": "arrondi_sup(largeur_pan / entraxe_joints) * longueur_rampant * si(epaisseur_zinc >= regle.seuil_070, 1, 1)",
+          "unit": "m",
+          "core": true,
+          "exclusions": "Une longueur de rampant par bac, sans surlongueur de pliage en égout et en faîtage ; hors bandes d'égout, de rive, de faîtage et de noue, comptées à part.",
           "source": "vmzinc-joint-debout",
           "verification": {
             "status": "verified",
@@ -7535,6 +7600,79 @@
           "unit": "u",
           "core": true,
           "exclusions": "Un collier tous les 1,8 m plus un par descente.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      ]
+    },
+    {
+      "id": "voligeage",
+      "trade": "roofing",
+      "label": "Voligeage (voliges ou panneaux)",
+      "triggers": [
+        "sheathing"
+      ],
+      "params": [
+        {
+          "key": "surface",
+          "label": "Surface de toiture",
+          "unit": "m2",
+          "kind": "site_data",
+          "question": "Surface du toit ?",
+          "fromLineQuantity": true,
+          "choices": [
+            {
+              "label": "50 m²",
+              "value": "50"
+            },
+            {
+              "label": "100 m²",
+              "value": "100"
+            },
+            {
+              "label": "150 m²",
+              "value": "150"
+            },
+            {
+              "label": "200 m²",
+              "value": "200"
+            }
+          ]
+        }
+      ],
+      "slots": [
+        {
+          "key": "volige",
+          "family": "sheathing",
+          "label": "Voliges",
+          "keywords": [
+            "volige",
+            "voligeage",
+            "osb",
+            "contreplaque"
+          ],
+          "usual": {
+            "text": "Volige sapin 18 mm (§7).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "volige-sapin-standard"
+          }
+        }
+      ],
+      "constants": {},
+      "needs": [
+        {
+          "id": "voliges",
+          "slot": "volige",
+          "formula": "surface",
+          "unit": "m2",
+          "core": true,
+          "exclusions": "Surface du devis ; la perte de 5 % (§7, « m² rampant × 1,05 ») s'ajoute.",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",

@@ -42,6 +42,8 @@ const contexte = {
   adresse: z.string().trim().max(300).optional(),
   /** Infos chantier facultatives (texte libre) : mesures nommées et contexte, lues sans IA. */
   infos: z.string().trim().max(4000).optional(),
+  /** Métier du devis (« couverture », « platrerie ») : choisit le référentiel. Absent : le métier de l'entreprise. */
+  metier: z.string().trim().max(40).optional(),
 };
 
 /**
@@ -90,7 +92,7 @@ export class QuantitatifsController {
     @Res({ passthrough: true }) res: Response,
     @Req() req: RequestWithUser,
   ) {
-    const ctx = { projetId: body.projetId, reference: body.reference, adresse: body.adresse, infos: body.infos, apiKey: req.apiKey ? { id: req.apiKey.id, monthlyQuota: req.apiKey.monthlyQuota } : undefined };
+    const ctx = { projetId: body.projetId, reference: body.reference, adresse: body.adresse, infos: body.infos, metier: body.metier, apiKey: req.apiKey ? { id: req.apiKey.id, monthlyQuota: req.apiKey.monthlyQuota } : undefined };
     const r = { ecran: query.ecran === "1" };
     if ([file, body.lignes, body.documentId].filter(Boolean).length > 1) throw validationFailed("Send one quote: a PDF, lines or a documentId", [{ path: "lignes", message: "several quotes sent" }]);
     let result;

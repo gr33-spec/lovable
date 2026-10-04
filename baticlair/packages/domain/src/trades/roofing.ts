@@ -137,7 +137,7 @@ const FAMILIES: MaterialFamily[] = [
   {
     code: "sarking_board",
     label: "Volige et panneaux de support",
-    keywords: ["volige", "planche", "osb", "contreplaque", "panneau ctbx", "ctbx"],
+    keywords: ["volige", "voligeage", "planche", "osb", "contreplaque", "panneau ctbx", "ctbx"],
     allowedUnits: ["M2", "ML", "M", "BOTTE", "PAQUET", "U"],
     plausibleMax: { M2: 3000, ML: 10000, U: 2000 },
   },

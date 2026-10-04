@@ -51,6 +51,7 @@ export interface QuotePlan {
   inputs: WorkItemInput[];
   context: ChantierContext;
   /** Caractéristiques du devis par emplacement, pour le nom des lignes d'achat. */
+  /** Caractéristiques lues dans les lignes, par emplacement d'UN ouvrage (clé « ouvrage/emplacement ») : les crochets de la gouttière ne prêtent rien aux crochets d'ardoise. */
   characteristicsBySlot: Record<string, string[]>;
   /** Questions de cohérence (deux valeurs différentes pour la même donnée), en phrases. */
   conflicts: string[];
@@ -137,6 +138,29 @@ export function factsFromReading(ref: Referential, lines: readonly { ref: string
   return facts;
 }
 
+const NUMBER_WORDS: Record<string, string> = { un: "1", une: "1", deux: "2", trois: "3", quatre: "4", cinq: "5", six: "6", sept: "7", huit: "8", neuf: "9", dix: "10" };
+
+/**
+ * Les phrasés d'artisan (§44.2, banc de 30 phrasés) ramenés à la forme lue par le code : « pte » = pente ; « environ »,
+ * « env », « ~ », « ≈ » s'effacent (la valeur reste celle écrite) ; « 6m50 » = 6,50 m ; « 38 degrés » = 38° ;
+ * « 12 lin » = 12 ml ; « deux descentes » = 2 descentes ; « hauteur des descentes 5 m » = hauteur 5 m ;
+ * « 2 × 6,50 m » (deux pans) = 6,50 m.
+ */
+function artisanPhrasing(normalized: string): string {
+  return normalized
+    .replace(/\bpte\b/g, "pente")
+    .replace(/[~≈]/g, " ")
+    .replace(/\b(environ|env|approx|approximativement|a peu pres)\b/g, " ")
+    .replace(/(\d+)\s*m\s*(\d{2})(?![0-9])/g, "$1,$2 m")
+    .replace(/(\d)\s*(degres|degre|deg)\b/g, "$1°")
+    .replace(/(\d)\s*(lin|lineaires?|m lineaires?|metres lineaires?)\b/g, "$1 ml")
+    .replace(/\b(un|une|deux|trois|quatre|cinq|six|sept|huit|neuf|dix)\s+(?=[a-z])/g, (_, w: string) => `${NUMBER_WORDS[w]} `)
+    .replace(/\b(des|du|de la|de l)\s+[a-z]+\s+(?=\d)/g, "")
+    .replace(/\b(\d+)\s*[x×]\s*(\d+(?:[.,]\d+)?)/g, "$2")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 /**
  * LA NOTE DE L'ARTISAN (infos chantier facultatives) : du texte libre tapé au dépôt ou dans le chat, ou le
  * commentaire d'un croquis. Seule une mesure NOMMÉE et non ambiguë devient un fait (« Pente 42° », « Rampants
@@ -147,16 +171,23 @@ export function readSiteNotes(ref: Referential, notes: string | null | undefined
   if (!notes?.trim()) return [];
   const facts: SiteFact[] = [];
   const params = ref.workItems.flatMap((w) => w.params).filter((p) => p.textLabels?.length);
+  // Le point d'une abréviation (« ép. », « env. », « dév. ») ne coupe pas la phrase.
   const sentences = notes
+    .replace(/(^|[^\p{L}])(ép|ep|env|dév|dev|approx|pte)\./giu, "$1$2")
     .split(/\n|[.;!?](?=\s|$)/)
     .map((x) => x.trim())
     .filter(Boolean);
   for (const sentence of sentences) {
-    // « 2 × 6,50 m » : deux pans de 6,50 m, la mesure est la seconde valeur.
-    const normalized = normalizeText(sentence).replace(/\b(\d+)\s*[x×]\s*(\d+(?:[.,]\d+)?)/g, "$2");
+    const normalized = artisanPhrasing(normalizeText(sentence));
     for (const p of params) {
       for (const label of p.textLabels ?? []) {
         let found = readLabelled(normalized, label);
+        // « 2 rampants de 6,5 » : une longueur écrite sans unité après son nom se lit en mètres (et seulement une longueur).
+        if (!found && p.unit === "m") {
+          const pos = keywordPosition(normalized, label);
+          const m = pos < 0 ? null : /^[a-z]{0,2}\s*(?:de |: |:|= )?\s*(\d+(?:[.,]\d+)?)(?![0-9a-z°%,.])/.exec(normalized.slice(pos + normalizeText(label).length));
+          if (m) found = { value: m[1]!.replace(",", "."), unit: "m" };
+        }
         // Un nombre d'ouvrages écrit avant son nom (« 2 descentes », « 1 cheminée ») : seulement pour une donnée comptée.
         if (!found && parseRefUnit(p.unit).dim.L === 0 && parseRefUnit(p.unit).dim.M === 0 && p.unit === "u") {
           const m = new RegExp(`(?:^|[^0-9,.])(\\d+)\\s+${normalizeText(label)}(?:s|x)?(?![a-z0-9])`).exec(normalized);
@@ -171,6 +202,50 @@ export function readSiteNotes(ref: Referential, notes: string | null | undefined
     }
   }
   return facts;
+}
+
+/** Une phrase d'exclusion de la note (§44.2) : ce qu'elle vise (mots significatifs) et la phrase, citée telle quelle. */
+export interface SiteExclusion {
+  words: string[];
+  phrase: string;
+}
+
+// Mots qui ne désignent pas un ouvrage précis : « la petite toiture du garage » vise le garage, pas « toiture ».
+const EXCLUSION_STOPWORDS = new Set(
+  "le la les l un une des du de d au aux et ou a en sur pour par avec sans ce cette ces son sa ses leur leurs mon ma mes est sont n ne pas plus deja tout tous toute toutes petite petit grande grand partie parties toiture toitures couverture travaux ouvrage ouvrages client clients fourni fournis fournie fournies conserve conserves conservee conservees non compris comprise compris comprises exclu exclus exclue exclues hors sauf garder garde gardes gardee gardees existant existants existante existantes ancien anciens ancienne anciennes".split(" "),
+);
+
+/**
+ * LES PHRASES D'EXCLUSION de la note (§44.2) : « garage non compris », « Velux fournis par le client », « charpente
+ * conservée », « hors abri de jardin ». Sans IA : le déclencheur est un des tournures ci-dessous, la cible est faite
+ * des mots significatifs de la même phrase. Une ligne du devis qui nomme TOUS ces mots est exclue (jamais devinée
+ * au plus proche) ; elle reste dans le détail sans prix, avec la mention « exclu par l'artisan ».
+ */
+export function readExclusions(notes: string | null | undefined): SiteExclusion[] {
+  if (!notes?.trim()) return [];
+  const out: SiteExclusion[] = [];
+  const triggers =
+    /\b(?:n est pas compris|ne sont pas compris|pas compris|non compris|non inclus|pas inclus|fournis? par le client|fournies? par le client|fournis? par client|conserves?|conservees?|a conserver|on garde|exclus?|exclues?)(?:es?|s)?\b|\b(?:hors|sauf)\s+/;
+  for (const raw of notes.split(/\n|[.;!?](?=\s|$)/).map((x) => x.trim()).filter(Boolean)) {
+    for (const part of raw.split(/,/).map((x) => x.trim()).filter(Boolean)) {
+      const n = normalizeText(part).replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+      if (!triggers.test(n)) continue;
+      const words = n
+        .replace(triggers, " ")
+        .split(" ")
+        .filter((w) => w.length >= 3 && !/^\d/.test(w) && !EXCLUSION_STOPWORDS.has(w))
+        // Pluriel simple ramené au singulier : « Velux » reste « velux », « charpentes » → « charpente ».
+        .map((w) => (w.length > 4 && /[^s]s$/.test(w) ? w.slice(0, -1) : w));
+      if (words.length > 0 && words.length <= 3) out.push({ words, phrase: part });
+    }
+  }
+  return out;
+}
+
+/** La phrase d'exclusion qui vise cette ligne du devis (tous ses mots y sont), ou null. */
+export function exclusionFor(designation: string, exclusions: readonly SiteExclusion[]): SiteExclusion | null {
+  const text = ` ${normalizeText(designation).replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ")} `;
+  return exclusions.find((e) => e.words.every((w) => new RegExp(` ${w}(?:s|x)? `).test(text))) ?? null;
 }
 
 /**
@@ -254,7 +329,7 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
     let measureInText: { value: string; unit: string } | undefined;
     if (unit && v.quantity && fromQuantity.some((p) => sameDimUnit(p.unit, unit))) {
       for (const p of fromQuantity.filter((x) => sameDimUnit(x.unit, unit))) {
-        facts.push({ key: p.key, value: v.quantity.toFixed(), unit, evidence: `Devis, ${line.ref}`, origin: "devis" });
+        facts.push({ key: p.key, value: v.quantity.toFixed(), unit, evidence: `Devis, ${line.ref}`, origin: "devis", workItemId: work.id });
       }
     } else {
       // Quantité en forfait, ensemble ou absente, mais « 200 m² » écrit dans la désignation : c'est la
@@ -264,7 +339,7 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
         const found = measuresInText(text).filter((m) => sameDimUnit(p.unit, m.unit));
         if (found.length !== 1) continue;
         measureInText = found[0]!;
-        facts.push({ key: p.key, ...found[0]!, evidence: `Devis, ${line.ref} (« ${found[0]!.value.replace(".", ",")} ${found[0]!.unit === "m2" ? "m²" : found[0]!.unit} » dans le texte)`, origin: "devis" });
+        facts.push({ key: p.key, ...found[0]!, evidence: `Devis, ${line.ref} (« ${found[0]!.value.replace(".", ",")} ${found[0]!.unit === "m2" ? "m²" : found[0]!.unit} » dans le texte)`, origin: "devis", workItemId: work.id });
       }
     }
     for (const p of work.params) {
@@ -277,7 +352,8 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
       }
     }
     const chars = productCharacteristics(ref, work, slot, line.designation);
-    if (chars.length > 0) characteristicsBySlot[slot.key] = [...new Set([...(characteristicsBySlot[slot.key] ?? []), ...chars])];
+    const charKey = slotCharacteristicsKey(work.id, slot.key);
+    if (chars.length > 0) characteristicsBySlot[charKey] = [...new Set([...(characteristicsBySlot[charKey] ?? []), ...chars])];
     plans.push({ ref: line.ref, status: "planned", workItemId: work.id, slot: slot.key, mentions, characteristics: chars, ...(measureInText ? { measureInText } : {}) });
   }
 
@@ -329,6 +405,9 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
  * famille (« pour tuiles HP10 » sur une ligne de liteaux), un composant
  * cité (« crochets et naissances compris » devient ses propres lignes).
  */
+/** La clé des caractéristiques d'un emplacement : propre à l'ouvrage (deux ouvrages ont chacun leurs « crochets »). */
+export const slotCharacteristicsKey = (workItemId: string, slot: string) => `${workItemId}/${slot}`;
+
 function productCharacteristics(ref: Referential, work: WorkItemType, slot: Slot, designation: string): string[] {
   return keyCharacteristics(designation).filter((c) => {
     const n = normalizeText(c);

@@ -371,6 +371,11 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   // La liste validée est conservée.
   await page.reload();
   await expect(page.getByText("Liste validée · 6 articles")).toBeVisible();
+  // « Exporter PDF » (§21.3) : le PDF de la commande se télécharge depuis le chat, avec la session de l'artisan.
+  const exportLink = page.getByRole("link", { name: "Exporter la liste en PDF" });
+  const pdf = await page.request.get((await exportLink.getAttribute("href"))!);
+  expect(pdf.status()).toBe(200);
+  expect(pdf.headers()["content-type"]).toMatch(/application\/pdf/);
 
   // Une correction reste possible après validation : la liste est à valider à nouveau.
   await page.getByRole("button", { name: "Voir ou corriger la liste" }).click();

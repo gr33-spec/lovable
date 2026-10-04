@@ -314,6 +314,7 @@ function InlineLineForm({
   onCancel: () => void;
 }) {
   const id = useId();
+  const [designation, setDesignation] = useState(line.designation);
   const [quantity, setQuantity] = useState(line.quantity ?? "");
   const [unit, setUnit] = useState(line.unit ?? "");
   const input = "min-h-12 w-full rounded-2xl bg-ground px-3 text-base";
@@ -322,9 +323,15 @@ function InlineLineForm({
       className="flex flex-col gap-3"
       onSubmit={(e) => {
         e.preventDefault();
-        void onSubmit({ designation: line.designation, quantity: quantity.trim() || null, unit: unit.trim() || null, reference: line.reference });
+        if (!designation.trim()) return;
+        void onSubmit({ designation: designation.trim(), quantity: quantity.trim() || null, unit: unit.trim() || null, reference: line.reference });
       }}
     >
+      {/* Tout se réécrit d'un tap (§41.4) : la désignation aussi, pas seulement la quantité. */}
+      <label htmlFor={`${id}-d`} className="flex flex-col gap-1 text-sm font-bold">
+        Désignation
+        <textarea id={`${id}-d`} rows={2} className={`${input} py-3 leading-snug`} value={designation} onChange={(e) => setDesignation(e.target.value)} />
+      </label>
       <div className="grid grid-cols-2 gap-3">
         <label htmlFor={`${id}-q`} className="flex flex-col gap-1 text-sm font-bold">
           Quantité

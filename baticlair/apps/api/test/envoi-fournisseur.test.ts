@@ -101,6 +101,28 @@ describe("envoi fournisseur : un contenu, trois blocs, aucun prix", () => {
     expect(download.headers["content-disposition"]).toContain("commande-dupont-refection-toiture.pdf");
   });
 
+  it("« Exporter PDF » (§21.3) : la liste validée, avant tout envoi, rendue par le même générateur, sans prix ; refusé avant validation et pour une autre entreprise", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "export@example.fr", "Toitures Martin");
+    const { projectId, supplierId } = await chantierPret(agent);
+    const pdf = await agent.get(`/v1/projects/${projectId}/commande.pdf`).buffer(true);
+    expect(pdf.status).toBe(200);
+    expect(pdf.headers["content-type"]).toMatch(/application\/pdf/);
+    expect(pdf.headers["content-disposition"]).toContain("commande-dupont-refection-toiture.pdf");
+    expect((pdf.body as Buffer).subarray(0, 5).toString()).toBe("%PDF-");
+    // Même contenu que le PDF joint à la demande (un seul générateur) : même taille à la date près.
+    const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] })).body;
+    const sent = await agent.get(`/v1/price-requests/${created.id}/commande.pdf`).buffer(true);
+    expect(Math.abs((sent.body as Buffer).length - (pdf.body as Buffer).length)).toBeLessThan(64);
+    // Une autre entreprise ne lit pas ce chantier.
+    const other = await signUpWithCompany(ctx.app, "intrus@example.fr", "Toitures Le Gall");
+    expect((await other.agent.get(`/v1/projects/${projectId}/commande.pdf`)).status).not.toBe(200);
+    // Un chantier sans liste validée : refus clair, pas un PDF vide.
+    const vide = (await agent.post("/v1/projects").send({ name: "Chantier vide" })).body;
+    const refused = await agent.get(`/v1/projects/${vide.id}/commande.pdf`);
+    expect(refused.status).toBe(400);
+    expect(JSON.stringify(refused.body)).toContain("takeoff_not_validated");
+  });
+
   it("case « Joindre le détail du chantier » : cochée par défaut, mémorisée par entreprise, et le bloc 3 disparaît si elle est décochée", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     expect((await agent.get("/v1/price-requests/settings")).body).toEqual({ attachQuoteDetail: true, deliversEmail: true });
@@ -131,7 +153,7 @@ describe("envoi fournisseur : un contenu, trois blocs, aucun prix", () => {
       chantier: "Toiture Dupont",
       commune: "Brest",
       date: "2026-10-03",
-      articles: ["Ardoises 30×22 : 9 200 pièces, soit ≈ 12 palettes", "Zinc naturel en bobine : 501 kg"],
+      articles: ["Ardoises 30×22 : 9 200 pièces, soit ≈ 12 palettes", "Zinc naturel en bobine 500 mm : 215 ml"],
       a_chiffrer: [],
       resume: ["pente du toit 45° · région ardoise III · je façonne"],
       detail: [{ libelle: "Couverture ardoises", mesure: "200 m²", precisions: ["ardoise 30×22"] }],

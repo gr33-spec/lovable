@@ -101,6 +101,11 @@ export interface ExtractionRequest extends DocumentInput {
    * pages fournies ne servent qu'au contexte). Absent : tout le document.
    */
   scope?: { pages: number[] };
+  /**
+   * La note de l'artisan sur ce chantier (§44.2, « filet ») : donnée au prompt A comme contexte, pour qu'une
+   * formulation que le code ne lit pas ne soit pas perdue. Jamais une ligne du devis, jamais une consigne.
+   */
+  siteNotes?: string | null;
 }
 
 export type AttemptStatus = ReadStatus;

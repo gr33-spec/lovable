@@ -350,7 +350,7 @@ describe("cas de référence D-2026-015 : la liste d'achat vue par l'artisan", (
         { workItemId: "descente", params: params("descente"), products: {}, mentioned: ["tube", "coude", "collier"] },
       ],
     );
-    const rows = purchaseList(r.workItems, { tuile: ["rouge"], tube: ["PVC", "Ø80", "sable"] });
+    const rows = purchaseList(r.workItems, { "couverture-tuiles-emboitement/tuile": ["rouge"], "descente/tube": ["PVC", "Ø80", "sable"] });
     const view = (id: string) => {
       const x = rows.find((row) => row.needId === id)!;
       return [x.label, x.state, x.quantity ?? null, x.detail ?? null];

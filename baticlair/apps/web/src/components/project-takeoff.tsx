@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, CircleCheck, HelpCircle, Pencil, Plus, Send, Sparkles, Trash2 } from "lucide-react";
+import { Check, CircleCheck, FileDown, HelpCircle, Pencil, Plus, Send, Sparkles, Trash2 } from "lucide-react";
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AssistantMessage, ChatInput, parseCommand, ReasoningSteps, Say, ThinkingSteps, UserBubble } from "@/components/chat";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
@@ -312,12 +312,19 @@ export function ProjectTakeoff({
     );
   } else {
     body = (
-      <DoneLine
-        label={`Liste validée · ${plural(articles, "article")}`}
-        action="Voir"
-        actionLabel="Voir ou corriger la liste"
-        onAction={() => setShowList(true)}
-      />
+      <>
+        <DoneLine
+          label={`Liste validée · ${plural(articles, "article")}`}
+          action="Voir"
+          actionLabel="Voir ou corriger la liste"
+          onAction={() => setShowList(true)}
+        />
+        {/* §21.3 « Exporter PDF » : le même PDF que celui du fournisseur, pour l'imprimer ou le donner au comptoir. */}
+        <a href={`/v1/projects/${encodeURIComponent(projectId)}/commande.pdf`} target="_blank" rel="noreferrer" className={linkStyle}>
+          <FileDown size={18} aria-hidden="true" />
+          Exporter la liste en PDF
+        </a>
+      </>
     );
   }
 

@@ -21,6 +21,11 @@ export interface SiteFact {
   /** Preuve : « Devis, ligne 5 », « Plan, cartouche ». */
   evidence: string;
   origin: "devis" | "document" | "artisan";
+  /**
+   * L'ouvrage dont une ligne a donné cette quantité : 200 m² d'ardoises et 20 m² de tuiles au garage sont deux
+   * surfaces, pas une contradiction. Absent : une donnée du chantier entier (pente, note, code postal).
+   */
+  workItemId?: string;
 }
 
 export interface ChantierContext {
@@ -52,7 +57,11 @@ export function paramsFromContext(context: ChantierContext, work: WorkItemType):
   const params: Record<string, ParamValue> = {};
   const conflicts: ContextConflict[] = [];
   for (const def of work.params) {
-    const facts = context.facts.filter((f) => f.key === def.key);
+    // Une quantité de ligne vaut d'abord pour son ouvrage ; un autre ouvrage ne la reprend que s'il n'a rien lu lui-même
+    // (le nombre de descentes écrit sur la ligne « descente » sert à la gouttière ; la surface du garage, pas aux ardoises).
+    const all = context.facts.filter((f) => f.key === def.key);
+    const own = all.filter((f) => f.workItemId === work.id);
+    const facts = [...all.filter((f) => !f.workItemId), ...(own.length > 0 ? own : all.filter((f) => f.workItemId && f.workItemId !== work.id))];
     if (facts.length === 0) continue;
     const answer = facts.filter((f) => f.origin === "artisan").at(-1);
     if (answer) {

@@ -65,7 +65,8 @@ export interface NewTakeoff {
   projectId: string;
   documentId: string | null;
   source?: "pdf" | "lignes";
-  referentialVersion: string;
+  /** Version du référentiel du métier ; null quand le métier n'a pas de tiroir (rien n'est calculé). */
+  referentialVersion: string | null;
   analysisId: string | null;
   trade: string;
   promptId: string;
