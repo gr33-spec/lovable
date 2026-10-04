@@ -30,8 +30,16 @@ export interface PurchaseItem {
   quantity: string | null;
   /** La même quantité, brute, pour la demande de prix : nombre et unité de commande (« 1488 », « pièces »). */
   order: { count: string; unit: string } | null;
-  /** Ordre de grandeur (« ≈ 50 bottes de 50 ml »), ou le besoin dans son unité quand l'unité de commande diffère (« 128,57 m² »). */
+  /**
+   * Ordre de grandeur (« ≈ 50 bottes de 50 ml »), ou le besoin dans son unité quand l'unité de commande diffère
+   * (« 128,57 m² ») ; une longueur dit ce qu'elle couvre (« 13 ml à couvrir », §45.3) : jamais « soit 13 ml »,
+   * 4 longueurs de 4 m font 16 ml achetés (§45.5).
+   */
   approx: string | null;
+  /** Colonne « précision » de la demande de devis (§45.3) : l'usage, la position ; absent si rien d'utile au comptoir. */
+  precision?: string;
+  /** Consommable (famille marquée telle) : en fin de « Fournitures à chiffrer » (§45.3). */
+  consumable?: boolean;
   /** « computed » : calculé par BatiClair ; « direct » : quantité écrite telle quelle dans le devis. */
   kind: "computed" | "direct";
   /** Besoins réunis dans cette ligne (« voir le calcul »), et lignes du devis dont elle provient. */
@@ -41,8 +49,8 @@ export interface PurchaseItem {
   state: "ready" | "to_confirm";
   /** Hypothèses dont cette ligne dépend. */
   assumptionKeys: string[];
-  /** Ce que l'artisan a réécrit lui-même sur cette ligne (§41.4) : le libellé, la quantité. */
-  edited?: ("label" | "quantity")[];
+  /** Ce que l'artisan a réécrit lui-même sur cette ligne (§41.4, §45.9) : le libellé, la quantité, la précision. */
+  edited?: ("label" | "quantity" | "precision")[];
 }
 
 export interface ToQuoteItem {
@@ -75,9 +83,167 @@ export interface PurchaseView {
   assumptions: Assumption[];
   /** Ce qui attend l'artisan (une phrase, des boutons). */
   questions: Decision[];
+  /**
+   * §45.8 « On ajoute ? » : les consommables que le devis ne cite pas, avec une quantité déjà proposée (Oui / Non d'un
+   * tap, quantité modifiable). Jamais plus de huit ; vide = le bloc n'apparaît pas. Un « Oui » les fait passer en fin
+   * de « Fournitures à chiffrer » (groupe consommables) ; un « Non » les fait disparaître.
+   */
+  suggestions: PurchaseItem[];
   /** Rien de bloquant : la liste peut partir aux fournisseurs. */
   canValidate: boolean;
+  /** L'écran unique « la liste des fournitures » (retour du fondateur, 2026-10-04). */
+  screen: SupplyScreen;
 }
+
+/**
+ * UNE LIGNE DE LA LISTE DES FOURNITURES, avec son point de couleur (retour du fondateur, 2026-10-04, « un enfant de
+ * 10 ans s'en sort ») : vert = sûr, rien à faire ; orange = à vérifier, un tap ouvre SA question ; gris = à préciser
+ * avec le fournisseur, la ligne part telle quelle. Les textes viennent de l'article (« toBuy ») ou de la ligne à
+ * préciser (« toQuote ») désignés par leur clé ; une ligne qui attend une réponse porte son propre nom.
+ */
+export interface ScreenRow {
+  key: string;
+  status: "ok" | "check" | "supplier";
+  /** Article de « toBuy » (vert, ou orange quand la ligne reprise du devis est à confirmer). */
+  itemKey?: string;
+  /** Ligne de « toQuote » (gris). */
+  quoteKey?: string;
+  /** Ce qui attend une réponse avant d'être calculé (« Zinc en bobine ou bacs joint debout »). */
+  pending?: { label: string; quantity: string | null };
+  /** La décision (clé de « questions ») qu'un tap ouvre ; une réponse fait passer la ligne au vert. */
+  decisionKey?: string;
+  /** Lignes du devis d'où vient la ligne (le croquis, le devis lu). */
+  lineIds: string[];
+}
+
+export interface ScreenGroup {
+  /** L'ouvrage (« couverture-zinc-joint-debout »), « other » ou « consommables ». */
+  key: string;
+  label: string;
+  measure: string | null;
+  kind: "principal" | "singulier" | "evacuation" | "autres" | "consommables";
+  rows: ScreenRow[];
+}
+
+export interface SupplyScreen {
+  /** Ordre : ouvrage principal, points singuliers, évacuation, autres articles du devis, consommables (§45.8). */
+  groups: ScreenGroup[];
+  /** « 11 fournitures · 2 à vérifier ». */
+  total: number;
+  toCheck: number;
+}
+
+const KIND_ORDER: ScreenGroup["kind"][] = ["principal", "singulier", "evacuation", "autres", "consommables"];
+
+/** La liste des fournitures, ligne par ligne, chacune avec sa couleur et, si elle est orange, sa question. */
+function supplyScreen(
+  toBuy: readonly PurchaseItem[],
+  toQuote: readonly ToQuoteItem[],
+  decisions: readonly Decision[],
+  engine: { needs: readonly OwnedNeed[]; declined?: readonly string[] },
+  view: ArtisanView,
+  plan: QuotePlan,
+  ref: Referential,
+): SupplyScreen {
+  const groups = new Map<string, ScreenGroup>();
+  const workOfLine = (lineId: string | undefined) => {
+    const planned = lineId ? plan.lines.find((l) => l.ref === lineId) : undefined;
+    return planned?.status === "planned" ? planned.workItemId : undefined;
+  };
+  const measureOf = (workId: string) => {
+    for (const o of view.ouvrages) {
+      if (o.role !== "measure" || workOfLine(o.lineId) !== workId) continue;
+      const m = [o.read.quantity, o.read.unit].filter(Boolean).join(" ");
+      if (m) return m;
+    }
+    return null;
+  };
+  const groupOf = (workId: string | undefined, consumable = false): ScreenGroup => {
+    const work = workId ? ref.workItems.find((w) => w.id === workId) : undefined;
+    const key = consumable ? "consommables" : (work?.id ?? "other");
+    let g = groups.get(key);
+    if (!g) {
+      g = consumable
+        ? { key, label: "Consommables", measure: null, kind: "consommables", rows: [] }
+        : work
+          ? { key, label: shortWork(work.label), measure: measureOf(work.id), kind: work.section ?? "singulier", rows: [] }
+          : { key, label: "Autres articles du devis", measure: null, kind: "autres", rows: [] };
+      groups.set(key, g);
+    }
+    return g;
+  };
+  const decisionFor = (lineIds: readonly string[]) => decisions.find((d) => d.lineIds.some((id) => lineIds.includes(id)));
+  const used = new Set<string>();
+
+  for (const item of toBuy) {
+    const workId = engine.needs.find((n) => item.needIds.includes(n.needId))?.workItemId ?? (item.kind === "direct" ? workOfLine(item.lineIds[0]) : undefined);
+    const check = item.state === "to_confirm";
+    const decision = check ? decisionFor(item.lineIds) : undefined;
+    if (decision) used.add(decision.key);
+    groupOf(workId, item.consumable === true).rows.push({
+      key: `item:${item.key}`,
+      status: check ? "check" : "ok",
+      itemKey: item.key,
+      ...(decision ? { decisionKey: decision.key } : {}),
+      lineIds: item.lineIds,
+    });
+  }
+  // Ce qui attend une réponse : une ligne orange par ouvrage et par question (« bobine ou bacs » : une ligne, une question).
+  const waiting = new Map<string, { workId: string | undefined; questionKey: string; labels: string[]; lineIds: string[] }>();
+  for (const n of engine.needs) {
+    if (n.status !== "question" || !n.question || n.origin === "suggested" || engine.declined?.includes(n.question.key)) continue;
+    const id = `${n.workItemId ?? "?"}|${n.question.key}`;
+    const w = waiting.get(id) ?? { workId: n.workItemId, questionKey: n.question.key, labels: [], lineIds: [] };
+    if (!w.labels.includes(n.label)) w.labels.push(n.label);
+    for (const o of view.ouvrages) if (o.needs.some((x) => x.needId === n.needId) && !w.lineIds.includes(o.lineId)) w.lineIds.push(o.lineId);
+    waiting.set(id, w);
+  }
+  for (const [id, w] of waiting) {
+    const decision = decisions.find((d) => d.question?.key === w.questionKey || d.key === `engine:${w.questionKey}`);
+    if (decision) used.add(decision.key);
+    groupOf(w.workId).rows.push({
+      key: `pending:${id}`,
+      status: "check",
+      pending: { label: w.labels.length > 2 ? `${w.labels.slice(0, 2).join(", ")}…` : w.labels.join(" ou "), quantity: null },
+      ...(decision ? { decisionKey: decision.key } : {}),
+      lineIds: w.lineIds,
+    });
+  }
+  for (const q of toQuote) {
+    // Un article inconnu à confirmer reste orange tant que l'artisan ne l'a pas vu ; ensuite il part tel quel (gris).
+    const decision = decisionFor(q.lineIds);
+    if (decision) used.add(decision.key);
+    groupOf(workOfLine(q.lineIds[0])).rows.push({
+      key: `quote:${q.key}`,
+      status: decision ? "check" : "supplier",
+      quoteKey: q.key,
+      ...(decision ? { decisionKey: decision.key } : {}),
+      lineIds: q.lineIds,
+    });
+  }
+  // Une question découverte d'avance (le développé, qui suit « je façonne ») : rangée sous l'ouvrage qui la pose.
+  const plannedWorks = [...new Set(plan.lines.flatMap((l) => (l.status === "planned" ? [l.workItemId] : [])))];
+  const workOfQuestion = (d: Decision) => {
+    const param = d.question?.key.startsWith("param:") ? d.question.key.slice("param:".length) : null;
+    return param ? plannedWorks.find((id) => ref.workItems.find((w) => w.id === id)?.params.some((p) => p.key === param)) : undefined;
+  };
+  // Une décision qu'aucune ligne ne porte encore (ambiguïté d'une mesure, article sans unité) : sa propre ligne orange.
+  for (const d of decisions) {
+    if (used.has(d.key)) continue;
+    const line = view.ouvrages.find((o) => d.lineIds.includes(o.lineId));
+    const quantity = line ? [line.read.quantity, line.read.unit].filter(Boolean).join(" ") || null : null;
+    const workId = workOfLine(d.lineIds[0]) ?? workOfQuestion(d);
+    // Une question découverte d'avance pour un ouvrage déjà orange attend son tour : elle viendra après la réponse en cours.
+    if (d.key.startsWith("engine:") && d.lineIds.length === 0 && workId && groups.get(workId)?.rows.some((r) => r.status === "check")) continue;
+    groupOf(workId).rows.push({ key: `decision:${d.key}`, status: "check", pending: { label: d.title, quantity }, decisionKey: d.key, lineIds: d.lineIds });
+  }
+  const ordered = [...groups.values()].sort((a, b) => KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind));
+  const rows = ordered.flatMap((g) => g.rows);
+  return { groups: ordered, total: rows.length, toCheck: rows.filter((r) => r.status === "check").length };
+}
+
+/** §45.8 : jamais plus de huit suggestions. */
+export const MAX_SUGGESTIONS = 8;
 
 /** « 1305.43 » → « 1 305,43 ». */
 const fr = (value: string | Decimal) => {
@@ -155,17 +321,23 @@ export function supplierTest(designation: string, unit: string | null): string |
   const d = norm(designation);
   // Les panneaux et rouleaux se vendent au m² (volige, OSB, écran, isolant) : le fournisseur sait les charger.
   if (/^(m2|m²)$/.test(u) && SHEET_WORDS.test(d)) return null;
-  if (/^(m2|m²)$/.test(u)) return "Une surface en m² ne se charge pas dans un camion : il faut des pièces aux dimensions. Pas encore de règle de calcul pour cet ouvrage.";
+  if (/^(m2|m²)$/.test(u)) return "Une surface en m² ne se charge pas dans un camion : il faut des pièces aux dimensions. Le fournisseur proposera pour cette mesure.";
   if (/^(lot|lots|forfait|forfaits|ft|ens|ensembles?|selon besoin)$/.test(u)) return `« ${unit!.trim()} » n'est pas une unité de commande : le fournisseur ne sait pas quoi charger.`;
   if (/^(ml|m)$/.test(u) && METAL_WORDS.test(d) && !DIMENSION.test(d)) return "Du métal au mètre sans largeur ni épaisseur : le fournisseur ne sait pas quoi charger.";
   return null;
 }
 
 /** Regroupe les besoins d'un même article (même produit) sur tout le chantier. */
-function aggregate(needs: readonly OwnedNeed[], ouvrages: readonly OuvrageLevels[], characteristicsBySlot: Record<string, string[]>): PurchaseItem[] {
+function aggregate(
+  needs: readonly OwnedNeed[],
+  ouvrages: readonly OuvrageLevels[],
+  characteristicsBySlot: Record<string, string[]>,
+  consumables: ReadonlySet<string> = new Set(),
+  suggested = false,
+): PurchaseItem[] {
   const groups = new Map<string, OwnedNeed[]>();
   for (const n of needs) {
-    if (n.status !== "calculated" || n.origin === "suggested") continue;
+    if (n.status !== "calculated" || (n.origin === "suggested") !== suggested) continue;
     // Un produit nommé réunit ses besoins ; un emplacement sans produit reste à part (on ne mélange pas deux inconnus).
     const key = named(n) ? `product:${n.label}` : `${n.workItemId ?? "?"}/${n.slot}`;
     groups.set(key, [...(groups.get(key) ?? []), n]);
@@ -188,9 +360,19 @@ function aggregate(needs: readonly OwnedNeed[], ouvrages: readonly OuvrageLevels
       const approxUnits = group.map((n) => n.purchase?.approx[0] ?? null);
       if (approxUnits.every((a) => a && a.unit.many === approxUnits[0]!.unit.many)) {
         approx = `≈ ${unitText(approxUnits.reduce((sum, a) => sum.plus(a!.count), new Decimal(0)), approxUnits[0]!.unit)}`;
-      } else if (sameNeedUnit && quantities[0] && orders[0].unit.many !== (UNIT_LABEL[quantities[0].unit]?.many ?? quantities[0].unit)) {
+      } else if (
+        sameNeedUnit &&
+        quantities[0] &&
+        quantities[0].unit !== "u" &&
+        !group.some((n) => n.precision) &&
+        !(["ml", "m"].includes(quantities[0].unit) && orders[0].unit.many === "ml") &&
+        orders[0].unit.many !== (UNIT_LABEL[quantities[0].unit]?.many ?? quantities[0].unit)
+      ) {
+        // Une pièce reste une pièce (« 8 longueurs de 2 m », pas « (8 pièces) ») ; une précision de la règle dit déjà ce
+        // qui est couvert (« 13 ml de faîtage à couvrir ») ; sinon une longueur dit ce qu'elle couvre (§45.3).
         const need = quantities.reduce((sum, q) => sum.plus(q!.value), new Decimal(0));
         approx = unitText(need, UNIT_LABEL[quantities[0].unit] ?? { one: quantities[0].unit, many: quantities[0].unit });
+        if (quantities[0].unit === "ml" || quantities[0].unit === "m") approx += " à couvrir";
       }
     } else if (sameNeedUnit && quantities[0]) {
       // Conditionnement pas encore connu : le besoin dans son unité, le fournisseur convertit.
@@ -214,12 +396,15 @@ function aggregate(needs: readonly OwnedNeed[], ouvrages: readonly OuvrageLevels
       if (m.length === 0) return true;
       return own.length === 0 && cited.length === 1;
     });
+    const precision = [...new Set(group.map((n) => n.precision).filter((p): p is string => !!p))].join(" ; ");
     items.push({
       key,
       label: extras.length > 0 ? `${first.label} ${extras.join(" ")}` : first.label,
       quantity,
       order,
       approx,
+      ...(precision ? { precision } : {}),
+      ...(consumables.has(first.family) ? { consumable: true } : {}),
       kind: "computed",
       needIds: group.map((n) => n.needId),
       lineIds: [...new Set(group.flatMap(owner))],
@@ -286,13 +471,35 @@ function understood(view: ArtisanView, plan: QuotePlan, ref: Referential): strin
 export function purchaseView(
   view: ArtisanView,
   engine: { needs: readonly OwnedNeed[]; questions: readonly Question[]; declined?: readonly string[] },
-  link: { plan: QuotePlan; roles: ReadonlyMap<string, LineRole>; ref: Referential; validation: TakeoffValidation },
+  link: {
+    plan: QuotePlan;
+    roles: ReadonlyMap<string, LineRole>;
+    ref: Referential;
+    validation: TakeoffValidation;
+    /** §45.8 : réponses de l'artisan sur ce chantier (clé de l'article suggéré), et ce que l'entreprise ne veut plus voir. */
+    consumables?: { accepted?: ReadonlySet<string>; refused?: ReadonlySet<string>; hidden?: ReadonlySet<string> };
+  },
 ): PurchaseView {
+  const consumableFamilies = new Set(link.ref.families.filter((f) => f.consumable).map((f) => f.code));
   const toBuy = aggregate(
     engine.needs.filter((n) => !(n.question && engine.declined?.includes(n.question.key))),
     view.ouvrages,
     link.plan.characteristicsBySlot,
+    consumableFamilies,
   );
+  // §45.8 : les consommables suggérés (besoins non « cœur » d'une famille consommable), réunis par article comme le reste.
+  const offered = aggregate(
+    engine.needs.filter((n) => consumableFamilies.has(n.family)),
+    view.ouvrages,
+    link.plan.characteristicsBySlot,
+    consumableFamilies,
+    true,
+  ).filter((s) => s.quantity && !toBuy.some((b) => b.label === s.label));
+  const accepted = offered.filter((s) => link.consumables?.accepted?.has(s.key));
+  toBuy.push(...accepted.map((s) => ({ ...s, consumable: true })));
+  const suggestions = offered
+    .filter((s) => !link.consumables?.accepted?.has(s.key) && !link.consumables?.refused?.has(s.key) && !link.consumables?.hidden?.has(s.key))
+    .slice(0, MAX_SUGGESTIONS);
   const failedSupplierTest: ToQuoteItem[] = [];
   // Quantités écrites telles quelles dans le devis (chatières, sortie de toit) : à acheter, sans calcul.
   // Une ligne sans unité ou sans quantité y figure aussi, à confirmer : elle ne disparaît jamais en silence.
@@ -370,7 +577,8 @@ export function purchaseView(
   const questions = view.decisions;
   const canValidate = questions.every((q) => q.lineIds.length === 0) && toBuy.every((b) => b.state === "ready");
   const groups = groupsOf(toBuy, engine.needs, view, link.plan, link.ref);
-  return { understood: understood(view, link.plan, link.ref), toBuy, groups, toQuote, assumptions, questions, canValidate };
+  const screen = supplyScreen(toBuy, toQuote, questions, engine, view, link.plan, link.ref);
+  return { understood: understood(view, link.plan, link.ref), toBuy, groups, toQuote, assumptions, questions, suggestions, canValidate, screen };
 }
 
 /**
@@ -379,11 +587,18 @@ export function purchaseView(
  * reste visible derrière, marqué « fixé par vous ».
  */
 export function applyPurchaseOverrides(purchase: PurchaseView, answers: Record<string, string | { value: string; unit: string } | null>): PurchaseView {
-  const toBuy = purchase.toBuy.map((item) => {
+  const override = (item: PurchaseItem): PurchaseItem => {
     const label = answers[`libelle:${item.key}`];
     const quantity = answers[`quantite:${item.key}`];
+    const precision = answers[`precision:${item.key}`];
     const edited: NonNullable<PurchaseItem["edited"]> = [];
     let out = item;
+    // §45.9 : la précision se réécrit d'un tap dans l'aperçu (vide = plus de précision).
+    if (typeof precision === "string") {
+      const { precision: _old, ...rest } = out;
+      out = precision.trim() ? { ...rest, precision: precision.trim() } : rest;
+      edited.push("precision");
+    }
     if (typeof label === "string" && label.trim()) {
       out = { ...out, label: label.trim() };
       edited.push("label");
@@ -394,6 +609,16 @@ export function applyPurchaseOverrides(purchase: PurchaseView, answers: Record<s
       edited.push("quantity");
     }
     return edited.length > 0 ? { ...out, edited } : item;
-  });
-  return { ...purchase, toBuy };
+  };
+  // §45.9 : la croix de l'aperçu retire l'article de la liste (« retire:<clé> »).
+  const kept = (item: PurchaseItem) => answers[`retire:${item.key}`] !== "oui";
+  // Une suggestion (§45.8) se corrige d'un tap comme une ligne de la liste. Une ligne retirée quitte aussi l'écran.
+  const toBuy = purchase.toBuy.filter(kept).map(override);
+  const present = new Set(toBuy.map((b) => b.key));
+  const groups = purchase.screen.groups
+    .map((g) => ({ ...g, rows: g.rows.filter((r) => !r.itemKey || present.has(r.itemKey)) }))
+    .filter((g) => g.rows.length > 0);
+  const rows = groups.flatMap((g) => g.rows);
+  const screen = { groups, total: rows.length, toCheck: rows.filter((r) => r.status === "check").length };
+  return { ...purchase, toBuy, suggestions: purchase.suggestions.map(override), screen };
 }

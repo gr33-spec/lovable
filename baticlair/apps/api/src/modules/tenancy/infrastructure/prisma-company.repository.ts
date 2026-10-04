@@ -1,8 +1,35 @@
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
-import type { CompanyMembershipView, CompanyRepository } from "../application/company.repository.js";
+import type { CompanyMembershipView, CompanyProfile, CompanyRepository } from "../application/company.repository.js";
 
 export class PrismaCompanyRepository implements CompanyRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  async profile(companyId: string): Promise<CompanyProfile | null> {
+    const c = await this.prisma.company.findUnique({
+      where: { id: companyId },
+      select: { name: true, address: true, siret: true, phone: true, contactEmail: true, logoType: true },
+    });
+    return c ? { name: c.name, address: c.address, siret: c.siret, phone: c.phone, email: c.contactEmail, hasLogo: !!c.logoType } : null;
+  }
+
+  async setProfile(companyId: string, p: Omit<CompanyProfile, "hasLogo">): Promise<void> {
+    await this.prisma.company.update({
+      where: { id: companyId },
+      data: { name: p.name, address: p.address, siret: p.siret, phone: p.phone, contactEmail: p.email },
+    });
+  }
+
+  async logo(companyId: string): Promise<{ bytes: Uint8Array; type: string } | null> {
+    const c = await this.prisma.company.findUnique({ where: { id: companyId }, select: { logo: true, logoType: true } });
+    return c?.logo && c.logoType ? { bytes: new Uint8Array(c.logo), type: c.logoType } : null;
+  }
+
+  async setLogo(companyId: string, logo: { bytes: Uint8Array; type: string } | null): Promise<void> {
+    await this.prisma.company.update({
+      where: { id: companyId },
+      data: logo ? { logo: Buffer.from(logo.bytes), logoType: logo.type } : { logo: null, logoType: null },
+    });
+  }
 
   async createWithOwner(name: string, ownerUserId: string, trades: string[]): Promise<CompanyMembershipView> {
     const company = await this.prisma.company.create({

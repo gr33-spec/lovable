@@ -1,4 +1,4 @@
-import { groupIdenticalLines, parseUnit, ROOFING_REFERENTIAL } from "@baticlair/domain";
+import { briefFacts, briefSentence, communeOf, groupIdenticalLines, parseUnit } from "@baticlair/domain";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { DocumentsService } from "../../documents/index.js";
@@ -8,7 +8,7 @@ import type { RequestedLine } from "./price-request-email.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { priceRequestEmail, requestedQuantityText, supplierLineLabel } from "./price-request-email.js";
 import type { PriceRequestRecord, PriceRequestRepository, RecipientStatus } from "./price-request.repository.js";
-import { packetPdf, packetSubject, packetText, priceLeak, type SupplierPacket } from "./supplier-packet.js";
+import { packetDocument, packetMail, packetPdf, packetSubject, priceLeak, type PacketDocument, type PacketSender, type PacketSupply, type SketchFile, type SupplierPacket } from "./supplier-packet.js";
 
 export interface PriceRequestView extends PriceRequestRecord {
   /** E-mail prêt à envoyer, par destinataire : le texte des trois blocs (§43.5). */
@@ -17,65 +17,82 @@ export interface PriceRequestView extends PriceRequestRecord {
 
 /** La date du jour, AAAA-MM-JJ, en heure de Paris. */
 const today = (now: Date) => now.toLocaleDateString("fr-CA", { timeZone: "Europe/Paris" });
-
-/** La commune d'une adresse de chantier (« 3 impasse des Lilas, 22500 Paimpol » → « Paimpol »). */
-function communeOf(address: string | null): string | null {
-  if (!address) return null;
-  const m = /\b\d{5}\s+([^,;\n]+)/.exec(address);
-  const text = (m?.[1] ?? address.split(",").pop() ?? "").trim();
-  return text ? text.replace(/^\d{5}\s*/, "").trim() || null : null;
-}
+const fileName = (chantier: string) =>
+  `demande-de-devis-${chantier.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase() || "chantier"}.pdf`;
+/** Référence courte du chantier (§45.3), stable : la fin de son identifiant. */
+export const shortReference = (projectId: string) => `CH-${projectId.replace(/-/g, "").slice(-6).toUpperCase()}`;
 
 /**
- * LES TROIS BLOCS (§42, §43), assemblés depuis le quantitatif, la lecture du devis et les réponses
+ * LA DEMANDE DE DEVIS (§42, §43, §45), assemblée depuis le quantitatif, la lecture du devis et les réponses
  * de l'artisan. Aucun prix n'entre ici : les montants du devis client ne sont jamais lus.
  */
 export function buildPacket(
   reviewed: ReviewedTakeoff,
-  sender: { companyName: string; projectName: string; projectAddress: string | null; projectNotes?: string | null },
+  sender: {
+    companyName: string;
+    projectName: string;
+    projectAddress: string | null;
+    projectId?: string;
+    projectNotes?: string | null;
+    /** Coordonnées du compte (§45.2 signature, §45.3 en-tête). */
+    profile?: PacketSender;
+  },
   options: { date: string; joindreDetail: boolean; message: string | null; dueDate: Date | null },
   /** Les lignes reprises du devis telles qu'elles partent (identiques réunies, §43.5 : une ligne par article). */
   direct: readonly RequestedLine[],
+  /** Croquis rattachés aux articles (clé de l'article) : la ligne dit « croquis joint », le PDF les montre. */
+  sketches: readonly { id: string; nom: string; itemKey: string; note: string | null }[] = [],
 ): SupplierPacket {
   const { purchase, takeoff, validation } = reviewed;
-  const articles = [
-    ...purchase.toBuy.filter((b) => b.kind === "computed").map((b) => `${b.label} : ${b.quantity ?? "quantité à préciser"}${b.approx ? `, soit ${b.approx}` : ""}`),
-    ...direct.map((l) => `${supplierLineLabel(l.designation)}${l.reference ? ` (réf. ${l.reference})` : ""} : ${requestedQuantityText(l)}`),
+  // Un croquis suit l'article de la liste : par sa clé (article calculé), ou par la ligne du devis reprise telle quelle.
+  const keyed = new Map<string, string>();
+  for (const b of purchase.toBuy) keyed.set(b.key, b.kind === "computed" ? b.label : supplierLineLabel(takeoff.lines.find((l) => b.lineIds.includes(l.id))?.designation ?? b.label));
+  const croquis = sketches.filter((s) => keyed.has(s.itemKey)).map((s) => ({ article: keyed.get(s.itemKey)!, id: s.id, nom: s.nom, commentaire: s.note }));
+  const withSketch = new Set(croquis.map((c) => c.article));
+  const precision = (label: string, own?: string | null) => [own, withSketch.has(label) ? "croquis joint" : null].filter(Boolean).join(" ; ") || null;
+  // §45.3 bloc 2 : désignation · quantité dans l'unité de vente (et la longueur à couvrir quand elle diffère) · précision.
+  const fournitures: PacketSupply[] = [
+    ...purchase.toBuy
+      .filter((b) => b.kind === "computed")
+      // Le matériau principal d'abord : dans l'ordre des lignes du devis d'où viennent les articles (§45.3).
+      .map((b, i) => ({ b, i, at: Math.min(...b.lineIds.map((id) => takeoff.lines.findIndex((l) => l.id === id)).filter((x) => x >= 0), Number.MAX_SAFE_INTEGER) }))
+      .sort((x, y) => x.at - y.at || x.i - y.i)
+      .map(({ b }) => ({
+        designation: b.label,
+        quantite: `${b.quantity ?? "quantité à préciser"}${b.approx ? ` (${b.approx})` : ""}`,
+        precision: precision(b.label, b.precision),
+        ...(b.consumable ? { consommable: true } : {}),
+        cle: b.key,
+      })),
+    ...direct.map((l) => {
+      const item = purchase.toBuy.find((b) => b.kind === "direct" && takeoff.lines.some((t) => b.lineIds.includes(t.id) && t.designation === l.designation));
+      return {
+        designation: `${supplierLineLabel(l.designation)}${l.reference ? ` (réf. ${l.reference})` : ""}`,
+        quantite: requestedQuantityText(l),
+        precision: precision(supplierLineLabel(l.designation), item?.precision),
+        ...(item ? { cle: item.key } : {}),
+      };
+    }),
   ];
-  const a_chiffrer = purchase.toQuote.map((q) => `${supplierLineLabel(q.label)}${q.measure ? ` · ${q.measure}` : ""} — ${q.reason}`);
-  // Le chantier en bref : le contexte lu dans le devis, puis les réponses et hypothèses du calcul, 3 par ligne, 5 lignes au plus.
-  const facts: string[] = [];
-  for (const [k, v] of Object.entries(takeoff.context ?? {})) if (v.trim() && !/adresse|client|nom/i.test(k)) facts.push(v.trim());
-  // Les réponses de l'artisan (§42.1, « précisions chantier ») : pente, façonnage, nombre de descentes, modèle choisi…
-  // TODO plan v3, étape 3 : les libellés viendront du dossier du métier, pas du référentiel couverture en dur.
-  const params = ROOFING_REFERENTIAL.workItems.flatMap((w) => w.params);
-  for (const [key, value] of Object.entries(takeoff.answers)) {
-    if (value === null || value === "") continue;
-    if (key.startsWith("param:") && typeof value === "object") {
-      const def = params.find((d) => d.key === key.slice("param:".length));
-      if (!def) continue;
-      const shown = def.display?.[value.value] ?? value.value.replace(".", ",");
-      const unit = !value.unit || value.unit === "u" ? "" : value.unit === "°" ? "°" : ` ${value.unit.replace("m2", "m²")}`;
-      facts.push(`${def.label.toLowerCase()} ${shown}${unit}`);
-    } else if (key.startsWith("product:") && typeof value === "string") {
-      const product = ROOFING_REFERENTIAL.products.find((x) => x.id === value);
-      if (product) facts.push(product.shortLabel);
-    }
-  }
-  for (const a of purchase.assumptions) {
-    if (!a.key.startsWith("param:") && !a.key.startsWith("derived:")) continue;
-    const unit = !a.unit || a.unit === "u" ? "" : a.unit === "°" ? "°" : ` ${a.unit.replace("m2", "m²")}`;
-    facts.push(`${a.label.toLowerCase()} ${a.value}${unit}`);
-  }
-  const resume: string[] = [];
-  for (let i = 0; i < facts.length && resume.length < 5; i += 3) resume.push(facts.slice(i, i + 3).join(" · "));
-  // Infos chantier de l'artisan (note, commentaires de croquis) : telles qu'écrites, 3 lignes au plus, jamais une ligne qui parle de prix.
-  for (const line of (sender.projectNotes ?? "").split("\n").map((l) => l.trim()).filter(Boolean).slice(0, 3)) {
-    if (!priceLeak(line)) resume.push(line);
-  }
-  const dateFr = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Paris" });
-  if (options.dueDate) resume.push(`Réponse souhaitée avant le ${dateFr(options.dueDate)}`);
-  if (options.message?.trim()) resume.push(options.message.trim());
+  const articles = fournitures.map((f) => `${f.designation} : ${f.quantite}${f.precision ? ` (${f.precision})` : ""}`);
+  // §45.3 bloc 3 : la ligne du devis avec sa mesure, et une demande simple. Jamais la cuisine interne.
+  const a_chiffrer = purchase.toQuote.map((q) => {
+    const line = q.lineIds[0] ? takeoff.lines.find((l) => l.id === q.lineIds[0]) : undefined;
+    return `${supplierLineLabel(line?.designation ?? q.label)}${q.measure ? ` · ${q.measure}` : ""} : merci de proposer ce que vous avez`;
+  });
+  // §45.3 bloc 1 : 5 à 8 faits confirmés (jamais une hypothèse de l'app tant que l'artisan ne l'a pas confirmée).
+  const brief = { ...reviewed.brief, ville: reviewed.brief.ville ?? communeOf(sender.projectAddress) };
+  // La note de l'artisan (§44 : « accès par la cour ») : telle qu'écrite, deux lignes au plus, jamais une ligne qui parle
+  // de prix ni une ligne de mesures (déjà lues comme faits). Elle passe avant les derniers faits, la ville ferme le bloc.
+  const notes = (sender.projectNotes ?? "")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l && !priceLeak(l) && !/\d/.test(l))
+    .slice(0, 2);
+  const facts = briefFacts(brief);
+  const where = brief.ville || brief.situation ? facts.slice(-1) : [];
+  const resume = [...facts.slice(0, facts.length - where.length).slice(0, 8 - where.length - notes.length), ...notes, ...where];
+  const dateFr = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" });
   // Le devis sans les prix (§42) : une ligne par ouvrage, la main-d'œuvre seule exclue, jamais le prix.
   const kinds = new Map(validation.lines.map((l) => [l.lineId, l.kind]));
   const detail = takeoff.lines
@@ -86,14 +103,14 @@ export function buildPacket(
       precisions: [
         ...(l.material ? [l.material] : []),
         ...Object.entries(l.dimensions ?? {}).map(([k, v]) => `${k} ${v}`),
-        // §44.2 : la ligne visée par une phrase de la note reste au détail, marquée, et ne part pas en commande.
+        // §44.2 : la ligne visée par une phrase de la note reste au détail, marquée, et ne part pas dans la demande.
         ...(reviewed.excluded?.has(l.id) ? [`exclu par l'artisan (« ${reviewed.excluded.get(l.id)} »)`] : []),
       ],
     }));
   return {
     entreprise: sender.companyName,
     chantier: sender.projectName,
-    commune: communeOf(sender.projectAddress),
+    commune: brief.ville,
     date: options.date,
     articles,
     a_chiffrer,
@@ -101,6 +118,13 @@ export function buildPacket(
     detail,
     joindre_detail: options.joindreDetail,
     question_lien: null,
+    ...(croquis.length > 0 ? { croquis } : {}),
+    fournitures,
+    phrase: briefSentence(brief),
+    expediteur: sender.profile ?? { nom: "", adresse: null, siret: null, telephone: null, email: null },
+    ...(sender.projectId ? { reference: shortReference(sender.projectId) } : {}),
+    message: options.message?.trim() || null,
+    echeance: options.dueDate ? dateFr(options.dueDate) : null,
   };
 }
 
@@ -135,12 +159,24 @@ export class PriceRequestsService {
     return { attachQuoteDetail: settings.attachQuoteDetail };
   }
 
-  /** Le PDF de la commande (§43.1) : les mêmes trois blocs que le mail. */
-  async pdf(tenant: TenantContext, requestId: string): Promise<{ filename: string; bytes: Uint8Array }> {
+  /** Le PDF « Demande de devis » (§45.3) d'une demande : au nom d'un destinataire quand il est donné. */
+  async pdf(tenant: TenantContext, requestId: string, recipientId?: string): Promise<{ filename: string; bytes: Uint8Array }> {
     const request = await this.requests.findById(tenant, requestId);
     if (!request?.packet) throw notFound("PriceRequest");
-    const name = request.packet.chantier.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase() || "chantier";
-    return { filename: `commande-${name}.pdf`, bytes: await packetPdf(request.packet) };
+    const recipient = recipientId ? request.recipients.find((r) => r.id === recipientId) : undefined;
+    const sender = await this.requests.sender(tenant, request.projectId);
+    const bytes = await packetPdf(request.packet, await this.sketchFiles(tenant, request.packet), { logo: sender?.logo ?? null, destinataire: recipient?.supplier.name ?? null });
+    return { filename: fileName(request.packet.chantier), bytes };
+  }
+
+  /** Les fichiers des croquis d'une commande (relus au rendu ; un croquis supprimé depuis est simplement absent). */
+  private async sketchFiles(tenant: TenantContext, packet: SupplierPacket): Promise<SketchFile[]> {
+    const files: SketchFile[] = [];
+    for (const c of packet.croquis ?? []) {
+      const content = await this.documents.content(tenant, c.id).catch(() => null);
+      if (content) files.push({ id: c.id, mimeType: content.mimeType, bytes: content.bytes });
+    }
+    return files;
   }
 
   /**
@@ -154,28 +190,44 @@ export class PriceRequestsService {
     if (!request) throw notFound("PriceRequestRecipient");
     const recipient = request.recipients.find((r) => r.id === recipientId)!;
     if (!request.packet) throw new DomainError("conflict", "This request predates the supplier packet", { reason: "no_packet" });
-    const pdf = await this.pdf(tenant, request.id);
+    const pdf = await this.pdf(tenant, request.id, recipientId);
     await this.mailer.send({
       to: recipient.supplier.email,
       subject: packetSubject(request.packet),
-      text: packetText(request.packet),
-      attachments: [{ filename: pdf.filename, contentType: "application/pdf", contentBase64: Buffer.from(pdf.bytes).toString("base64") }],
+      text: packetMail(request.packet),
+      // Le PDF « Demande de devis » (les blocs + les croquis en pages), puis chaque croquis d'origine, pour le zoom.
+      attachments: [
+        { filename: pdf.filename, contentType: "application/pdf", contentBase64: Buffer.from(pdf.bytes).toString("base64") },
+        ...(await this.sketchFiles(tenant, request.packet)).map((f) => ({
+          filename: request.packet!.croquis?.find((c) => c.id === f.id)?.nom ?? "croquis",
+          contentType: f.mimeType,
+          contentBase64: Buffer.from(f.bytes).toString("base64"),
+        })),
+      ],
     });
     await this.requests.setStatus(tenant, recipientId, "sent");
     return this.reload(tenant, request.id);
   }
 
   /**
-   * « Exporter PDF » (§21.3) : la liste validée, rendue par LE MÊME générateur que le PDF envoyé au fournisseur
-   * (§43 : un seul générateur, trois blocs, aucun prix) ; pour l'imprimer ou la donner au comptoir.
+   * « Exporter la liste en PDF » (§21.3, §45.9) : la liste validée, rendue par LE MÊME générateur que le PDF envoyé au
+   * fournisseur (un seul générateur, une seule mise en page, aucun prix) ; pour l'imprimer ou la donner au comptoir.
    */
   async exportPdf(tenant: TenantContext, projectId: string): Promise<{ filename: string; bytes: Uint8Array }> {
-    const { packet } = await this.order(tenant, projectId, { message: null, dueDate: null });
-    const name = packet.chantier.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase() || "chantier";
-    return { filename: `commande-${name}.pdf`, bytes: await packetPdf(packet) };
+    const { packet, logo } = await this.order(tenant, projectId, { message: null, dueDate: null });
+    return { filename: fileName(packet.chantier), bytes: await packetPdf(packet, await this.sketchFiles(tenant, packet), { logo }) };
   }
 
-  /** Ce qui part chez le fournisseur : les lignes de la demande et les trois blocs (§43), depuis la liste validée. */
+  /**
+   * L'APERÇU AVANT ENVOI (§45.9) : le document exactement comme le fournisseur le recevra (même générateur que le PDF),
+   * l'objet et le mail. Rien ne part tant que l'artisan n'a pas appuyé sur « Envoyer ».
+   */
+  async preview(tenant: TenantContext, projectId: string, input: { message: string | null; dueDate: Date | null; destinataire?: string | null }): Promise<{ subject: string; mail: string; document: PacketDocument; hasLogo: boolean }> {
+    const { packet, logo } = await this.order(tenant, projectId, input);
+    return { subject: packetSubject(packet), mail: packetMail(packet), document: packetDocument(packet, { destinataire: input.destinataire ?? null }), hasLogo: !!logo };
+  }
+
+  /** Ce qui part chez le fournisseur : les lignes de la demande et le document (§45), depuis la liste validée. */
   private async order(tenant: TenantContext, projectId: string, input: { message: string | null; dueDate: Date | null }) {
     const takeoff = await this.requests.validatedTakeoff(tenant, projectId);
     if (!takeoff)
@@ -222,11 +274,25 @@ export class PriceRequestsService {
     const sender = await this.requests.sender(tenant, projectId);
     const packet = buildPacket(
       reviewed,
-      { companyName: sender?.companyName ?? "", projectName: sender?.project.name ?? "", projectAddress: sender?.project.address ?? null, projectNotes: sender?.project.siteNotes ?? null },
+      {
+        companyName: sender?.companyName ?? "",
+        projectName: sender?.project.name ?? "",
+        projectAddress: sender?.project.address ?? null,
+        projectId: sender?.project.id ?? projectId,
+        projectNotes: sender?.project.siteNotes ?? null,
+        profile: {
+          nom: sender?.senderName ?? "",
+          adresse: sender?.company.address ?? null,
+          siret: sender?.company.siret ?? null,
+          telephone: sender?.company.phone ?? null,
+          email: sender?.company.email ?? null,
+        },
+      },
       { date: today(this.clock()), joindreDetail: await this.requests.attachQuoteDetail(tenant), message: input.message, dueDate: input.dueDate },
       grouped,
+      await this.requests.itemSketches(tenant, projectId),
     );
-    return { takeoff, lines, packet };
+    return { takeoff, lines, packet, logo: sender?.logo ?? null };
   }
 
   async create(
@@ -356,9 +422,9 @@ export class PriceRequestsService {
     const sender = await this.requests.sender(tenant, request.projectId);
     const emails = new Map<string, { subject: string; body: string }>();
     for (const r of request.recipients) {
-      // Depuis §43 : le texte des trois blocs ; les demandes d'avant gardent leur ancien e-mail.
+      // Depuis §45 : le mail court, la liste est dans le PDF joint ; les demandes d'avant §43 gardent leur ancien e-mail.
       if (request.packet) {
-        emails.set(r.id, { subject: packetSubject(request.packet), body: packetText(request.packet) });
+        emails.set(r.id, { subject: packetSubject(request.packet), body: packetMail(request.packet) });
         continue;
       }
       emails.set(

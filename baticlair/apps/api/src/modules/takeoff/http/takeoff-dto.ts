@@ -7,14 +7,35 @@ import type { ReviewedTakeoff } from "../application/takeoff.service.js";
  * mesure, et pour chaque élément sa PREUVE (« Voir le calcul ») — critères et
  * origines, calcul détaillé pour un besoin calculé. Aucun pourcentage.
  */
+function item(b: PurchaseView["toBuy"][number]) {
+  return {
+    key: b.key,
+    label: b.label,
+    quantity: b.quantity,
+    approx: b.approx,
+    precision: b.precision ?? null,
+    consumable: b.consumable ?? false,
+    kind: b.kind,
+    needIds: b.needIds,
+    lineIds: b.lineIds,
+    state: b.state,
+    assumptionKeys: b.assumptionKeys,
+    edited: b.edited ?? [],
+  };
+}
+
 function purchaseDto(p: PurchaseView) {
   return {
     understood: p.understood,
-    toBuy: p.toBuy.map((b) => ({ key: b.key, label: b.label, quantity: b.quantity, approx: b.approx, kind: b.kind, needIds: b.needIds, lineIds: b.lineIds, state: b.state, assumptionKeys: b.assumptionKeys, edited: b.edited ?? [] })),
+    toBuy: p.toBuy.map(item),
+    /** §45.8 « On ajoute ? » : Oui / Non d'un tap (réponse « ajout:<clé> »), au plus huit. */
+    suggestions: p.suggestions.map(item),
     groups: p.groups.map((g) => ({ key: g.key, label: g.label, measure: g.measure, itemKeys: g.itemKeys })),
     toQuote: p.toQuote.map((q) => ({ key: q.key, label: q.label, measure: q.measure, reason: q.reason, lineIds: q.lineIds })),
     assumptions: p.assumptions.map((a) => ({ key: a.key, label: a.label, value: a.value, unit: a.unit, note: a.note ?? null, choices: a.choices ?? [] })),
     canValidate: p.canValidate,
+    /** L'écran unique « liste des fournitures » : groupes ordonnés, lignes vert / orange / gris, et le compte. */
+    screen: p.screen,
   };
 }
 
@@ -92,7 +113,7 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase, exclude
     // §44.2 : la ligne retirée par une phrase de la note est dite à l'artisan, avec sa phrase.
     notes: [
       ...artisanNotes(takeoff.notes),
-      ...takeoff.lines.filter((l) => excluded?.has(l.id)).map((l) => `${l.designation} : exclu par vous (« ${excluded!.get(l.id)} »), rien à commander.`),
+      ...takeoff.lines.filter((l) => excluded?.has(l.id)).map((l) => `${l.designation} : exclu par vous (« ${excluded!.get(l.id)} »), rien à chiffrer.`),
     ],
     createdAt: takeoff.createdAt.toISOString(),
     validatedAt: takeoff.validatedAt?.toISOString() ?? null,

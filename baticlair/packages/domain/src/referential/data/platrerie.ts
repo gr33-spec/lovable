@@ -35,9 +35,9 @@ export const PLATRERIE_REFERENTIAL: Referential = {
     { code: "plasterboard", label: "Plaque de plâtre", needUnit: "u", attributes: [{ key: "surface", label: "Surface d'une plaque", unit: "m2" }], keyAttributes: [], keywords: ["plaque de platre", "ba13", "ba 13", "placo"] },
     { code: "rail_48", label: "Rail 48", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["rail"] },
     { code: "stud_48", label: "Montant 48", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["montant"] },
-    { code: "board_screw", label: "Vis à plaque", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["vis a plaque", "vis ttpc", "vis placo"] },
-    { code: "joint_tape", label: "Bande à joint", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["bande a joint", "bande joint"] },
-    { code: "joint_compound", label: "Enduit à joint", needUnit: "kg", attributes: [], keyAttributes: [], keywords: ["enduit a joint", "enduit"] },
+    { code: "board_screw", label: "Vis à plaque", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["vis a plaque", "vis ttpc", "vis placo"], consumable: true },
+    { code: "joint_tape", label: "Bande à joint", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["bande a joint", "bande joint"], consumable: true },
+    { code: "joint_compound", label: "Enduit à joint", needUnit: "kg", attributes: [], keyAttributes: [], keywords: ["enduit a joint", "enduit"], consumable: true },
   ],
   products: [
     generic("ba13-standard", "plasterboard", "Plaque de plâtre BA13, 1,20 × 2,50 m (3 m²), marque à préciser", "Plaques BA13 1,20 × 2,50", {
@@ -72,6 +72,7 @@ export const PLATRERIE_REFERENTIAL: Referential = {
     {
       id: "cloison-72-48",
       trade: "drywall",
+      section: "principal",
       label: "Cloison 72/48 (plaques BA13, rails, montants, vis, bande, enduit)",
       triggers: ["partition_72_48"],
       params: [

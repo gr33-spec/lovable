@@ -3,11 +3,11 @@
 import { Camera, ChevronDown, Loader2, Plus } from "lucide-react";
 import { useId, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
-import { api, ApiError } from "@/lib/api";
+import { api, ApiError, type ItemSketch } from "@/lib/api";
 
 export interface SiteInfos {
   texte: string | null;
-  croquis: { id: string; nom: string }[];
+  croquis: ItemSketch[];
 }
 
 const MAX_SKETCH_BYTES = 15 * 1024 * 1024;
@@ -82,12 +82,19 @@ export function SiteNotes({
     }
   }
 
-  const count = (infos?.texte ? 1 : 0) + (infos?.croquis.length ?? 0);
+  // Les croquis d'un article vivent sous leur ligne de la liste ; ici, seulement ceux du chantier entier.
+  const siteSketches = (infos?.croquis ?? []).filter((c) => !c.article);
+  const count = (infos?.texte ? 1 : 0) + siteSketches.length;
   return (
     <section aria-label="Informations sur le chantier" className="flex flex-col gap-3">
-      <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="flex min-h-11 items-center gap-2 self-start text-left text-sm font-bold text-accent-text">
-        {open ? <ChevronDown size={18} aria-hidden="true" /> : <Plus size={18} aria-hidden="true" />}
-        {count > 0 ? `Informations sur le chantier (${count})` : "Ajouter des informations sur le chantier (facultatif)"}
+      <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="flex min-h-14 w-full items-center gap-3 rounded-2xl bg-surface px-4 text-left text-[15px] font-bold text-ink shadow-card">
+        <span aria-hidden="true" className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#eeedff] text-[#5b45ff]">
+          {open ? <ChevronDown size={18} /> : <Plus size={18} strokeWidth={2.6} />}
+        </span>
+        <span className="flex min-w-0 flex-col py-2">
+          <span>{count > 0 ? `Informations sur le chantier (${count})` : "Ajouter des informations sur le chantier"}</span>
+          {count > 0 ? null : <span className="text-[13px] font-semibold text-muted">Facultatif : mesures, photo d&apos;un croquis…</span>}
+        </span>
       </button>
       {open ? (
         <div className="flex flex-col gap-3 rounded-[20px] bg-surface p-4 shadow-card">
@@ -147,9 +154,9 @@ export function SiteNotes({
               {pending ? <Loader2 size={18} className="animate-spin" aria-hidden="true" /> : <Camera size={18} aria-hidden="true" />}
               Photo d&apos;un croquis ou d&apos;un plan
             </label>
-            {infos?.croquis.length ? (
+            {siteSketches.length ? (
               <ul className="flex flex-wrap gap-2 text-sm">
-                {infos.croquis.map((c) => (
+                {siteSketches.map((c) => (
                   <li key={c.id}>
                     <a href={`/v1/documents/${encodeURIComponent(c.id)}/file`} target="_blank" rel="noreferrer" className="font-semibold text-accent-text underline">
                       {c.nom}

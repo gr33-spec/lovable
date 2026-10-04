@@ -36,13 +36,17 @@ export interface Rendu {
 
 export type Correction =
   | { action: "modifier"; cle: string; valeur: string; unite?: string | undefined }
-  | { action: "ajouter"; ligne: LigneEntree }
-  | { action: "modifier_ligne"; id: string; ligne: LigneEntree }
+  | { action: "ajouter"; ligne: LigneEntree; depuisApercu?: boolean }
+  | { action: "modifier_ligne"; id: string; ligne: LigneEntree; depuisApercu?: boolean }
   | { action: "retirer"; id: string }
   | { action: "confirmer"; id: string }
   // § 41.4 : une ligne du quantitatif (champ `lignes`) réécrite par l'artisan.
   | { action: "renommer"; id: string; libelle: string }
-  | { action: "fixer_quantite"; id: string; quantite: string; unite: string };
+  | { action: "fixer_quantite"; id: string; quantite: string; unite: string }
+  // §45.9 : précision et croix de l'aperçu ; §45.8 : « On ajoute ? ».
+  | { action: "preciser"; id: string; precision: string }
+  | { action: "retirer_article"; id: string }
+  | { action: "suggestion"; id: string; reponse: "oui" | "non" };
 
 type Row = { id: string; companyId: string; projectId: string; source: string; documentId: string | null; takeoffId: string | null; reference: string | null };
 
@@ -232,16 +236,30 @@ export class QuantitatifsService {
     };
     switch (correction.action) {
       case "ajouter":
-        return this.view(row, await this.takeoffs.addLine(tenant, reviewed.takeoff.id, fields(correction.ligne)), rendu);
+        return this.view(row, await this.takeoffs.addLine(tenant, reviewed.takeoff.id, fields(correction.ligne), { keepStatus: correction.depuisApercu === true }), rendu);
+      case "preciser":
+      case "retirer_article": {
+        if (!reviewed.purchase.toBuy.some((b) => b.key === correction.id)) throw notFound("Line");
+        const after =
+          correction.action === "preciser"
+            ? await this.takeoffs.answer(tenant, reviewed.takeoff.id, `precision:${correction.id}`, correction.precision)
+            : await this.takeoffs.answer(tenant, reviewed.takeoff.id, `retire:${correction.id}`, "oui");
+        return this.view(row, after, rendu);
+      }
+      case "suggestion": {
+        if (!reviewed.purchase.suggestions.some((s) => s.key === correction.id)) throw notFound("Line");
+        return this.view(row, await this.takeoffs.answer(tenant, reviewed.takeoff.id, `ajout:${correction.id}`, correction.reponse), rendu);
+      }
       case "modifier_ligne":
-        return this.view(row, await this.takeoffs.updateLine(tenant, line(correction.id), fields(correction.ligne)), rendu);
+        return this.view(row, await this.takeoffs.updateLine(tenant, line(correction.id), fields(correction.ligne), { keepStatus: correction.depuisApercu === true }), rendu);
       case "retirer":
         return this.view(row, await this.takeoffs.deleteLine(tenant, line(correction.id)), rendu);
       case "confirmer":
         return this.view(row, await this.takeoffs.confirmLine(tenant, line(correction.id)), rendu);
       case "renommer":
       case "fixer_quantite": {
-        if (!reviewed.purchase.toBuy.some((b) => b.key === correction.id)) throw notFound("Line");
+        // Une suggestion (§45.8) se corrige comme une ligne de la liste.
+        if (!reviewed.purchase.toBuy.some((b) => b.key === correction.id) && !reviewed.purchase.suggestions.some((s) => s.key === correction.id)) throw notFound("Line");
         // Une ligne reprise du devis : c'est la ligne du devis qu'on corrige. Une ligne calculée : les mots de l'artisan passent devant.
         const direct = correction.id.startsWith("line:") ? reviewed.takeoff.lines.find((l) => l.id === correction.id.slice("line:".length)) : undefined;
         if (direct) {
@@ -332,11 +350,12 @@ export class QuantitatifsService {
     // Les infos chantier (note, croquis) voyagent avec le quantitatif : l'artisan voit ce qui a servi au calcul.
     const [project, croquis] = await Promise.all([
       this.prisma.project.findFirst({ where: { id: row.projectId, companyId: row.companyId }, select: { siteNotes: true } }),
-      this.prisma.document.findMany({ where: { projectId: row.projectId, companyId: row.companyId, purpose: "sketch" }, select: { id: true, originalName: true, createdAt: true }, orderBy: { createdAt: "asc" } }),
+      this.prisma.document.findMany({ where: { projectId: row.projectId, companyId: row.companyId, purpose: "sketch" }, select: { id: true, originalName: true, itemKey: true, note: true, createdAt: true }, orderBy: { createdAt: "asc" } }),
     ]);
     return {
       ...quantitatifView(this.base(row), reviewed),
-      infos: { texte: project?.siteNotes ?? null, croquis: croquis.map((c) => ({ id: c.id, nom: c.originalName })) },
+      // Un croquis du chantier, ou celui d'un article (« article » : la clé de la ligne de la liste, avec la précision de l'artisan).
+      infos: { texte: project?.siteNotes ?? null, croquis: croquis.map((c) => ({ id: c.id, nom: c.originalName, ...(c.itemKey ? { article: c.itemKey, commentaire: c.note } : {}) })) },
       ...(rendu.ecran ? { ecran: takeoffDto(reviewed) } : {}),
     };
   }
@@ -351,8 +370,14 @@ export class QuantitatifsService {
    * Un croquis (photo, PDF) avec son commentaire : la photo est gardée telle quelle, jamais lue par l'IA
    * (docs/infos-chantier-facultatives.md) ; le commentaire rejoint la note, précédé de « Croquis : ».
    */
-  async addSketch(tenant: TenantContext, projectId: string, file: { name: string; bytes: Uint8Array }, commentaire: string | undefined) {
+  async addSketch(tenant: TenantContext, projectId: string, file: { name: string; bytes: Uint8Array }, commentaire: string | undefined, article?: string) {
     const project = await this.projects.get(tenant, projectId);
+    // Le croquis d'un article (dimensions d'une couvertine…) reste à sa ligne : sa précision ne devient jamais une
+    // mesure du chantier (« dév. 330 » sur une couvertine ne règle pas le développé de toutes les bandes).
+    if (article) {
+      const doc = await this.documents.storeSketch(tenant, projectId, { fileName: file.name, bytes: file.bytes, itemKey: article, note: commentaire ?? null });
+      return { id: doc.id, nom: doc.originalName, article, commentaire: commentaire?.trim() || null };
+    }
     const doc = await this.documents.storeSketch(tenant, projectId, { fileName: file.name, bytes: file.bytes });
     const line = commentaire?.trim() ? `Croquis (${doc.originalName}) : ${commentaire.trim()}` : null;
     if (line) await this.projects.update(tenant, projectId, { siteNotes: [project.siteNotes?.trim(), line].filter(Boolean).join("\n") });

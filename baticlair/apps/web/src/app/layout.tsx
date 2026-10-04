@@ -1,5 +1,7 @@
 import "@fontsource-variable/plus-jakarta-sans";
 import "@fontsource-variable/bricolage-grotesque";
+import "@fontsource/instrument-serif/latin-400.css";
+import "@fontsource/instrument-serif/latin-400-italic.css";
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 
@@ -13,6 +15,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // Plein écran sur iPhone : la barre du bas et le bouton principal respectent la zone du geste (safe-area).
+  viewportFit: "cover",
   themeColor: "#f3f4f6",
 };
 

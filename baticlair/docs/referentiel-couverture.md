@@ -1874,3 +1874,142 @@ Aucune valeur n'écrase une autre en silence. Toute donnée utilisée dans un ca
 ### 44.6 Reporté, à décider après les premiers devis réels
 
 Lecture IA d'une cote sur croquis, plans PDF, image annotée, API de métrés externes.
+
+## 45. Mail fournisseur et dossier PDF « Demande de devis »
+
+Cette section remplace la forme du mail décrite en 43 : le mail devient court, et tout le contenu (quantitatif, chantier en bref, détail du devis sans prix) part dans un seul document PDF structuré, avec le logo et les coordonnées de l'entreprise de l'artisan. Le fond du 43 (trois blocs, aucun prix, lien « une question ? » en v3.1) ne change pas.
+
+### 45.1 Principe
+
+- Ce que reçoit le fournisseur est une **demande de devis**, jamais une commande. Le mot « commande » et ses dérivés n'apparaissent nulle part, ni dans l'objet, ni dans le mail, ni dans le PDF.
+- Le mail est court, poli, et lisible en dix secondes sur un téléphone. Le PDF porte tout le reste.
+- Tout ce qui est écrit doit pouvoir être lu par un vendeur de comptoir sans rappeler l'artisan.
+- Rien de la cuisine interne ne sort : pas de « référentiel », pas de « règle de calcul », pas de « BatiClair ne sait pas », pas de paramètres de calcul (zone climatique, poids posé, marge comprise).
+
+### 45.2 Le mail, gabarit de référence
+
+Seuls le résumé du chantier, la signature et la présence du PS changent d'un envoi à l'autre. La structure est fixe.
+
+> **Objet :** Demande de devis · Bati invest · chantier Test (Brest)
+>
+> Bonjour,
+>
+> Je vous envoie la liste des fournitures pour un chantier de couverture zinc à joint debout à Brest : 91 m² en monopente, rampant 7 m, largeur 13 m, zinc prépatiné gris quartz 0,65 mm, pose sur voligeage.
+>
+> Pouvez-vous me chiffrer l'ensemble ? PS : si besoin, le détail du devis est en pièce jointe.
+>
+> Merci d'avance, bonne journée,
+>
+> Greg Bati invest · 06 xx xx xx xx · greg@batiinvest.fr
+
+Règles :
+
+- L'objet suit toujours le modèle « Demande de devis · \[entreprise\] · \[nom du chantier\] (\[ville\]) ».
+- La première phrase résume le chantier en une ligne à partir du devis : métier, ouvrage principal, surface, dimensions connues, matériau, ville. Elle s'adapte au métier (une cloison de 40 m² en plâtrerie ne se décrit pas comme une toiture).
+- Le PS n'apparaît que si l'annexe « détail du devis sans prix » est jointe (case du 42 cochée).
+- La signature vient du compte de l'artisan : prénom ou nom, entreprise, téléphone, mail. Jamais à saisir au moment de l'envoi.
+- Le mail n'embarque pas la liste : elle est dans le PDF joint. Si le fournisseur n'ouvre pas les pièces jointes, il a quand même compris de quoi il s'agit.
+
+### 45.3 Le document PDF « Demande de devis »
+
+Un seul PDF, portrait, une à trois pages, généré par le serveur à l'envoi. Structure fixe :
+
+**En-tête** (toutes les pages)
+
+- Logo de l'entreprise de l'artisan à gauche (celui du compte ; si absent, le nom de l'entreprise en gros).
+- Coordonnées de l'entreprise : nom, adresse, SIRET, téléphone, mail.
+- À droite : « Demande de devis », nom du chantier, ville, date d'envoi, référence courte du chantier.
+
+**Bloc destinataire**
+
+- Nom du fournisseur ou de l'agence, tel que choisi par l'artisan dans l'app.
+
+**1. Le chantier en bref**
+
+- Cinq à huit faits, pas plus, ceux qui servent le fournisseur : ouvrage, surface, pente, rampant, largeur, matériau et épaisseur, nombre de descentes, ville et situation (bord de mer, montagne).
+- Chaque fait est un fait ou une réponse de l'artisan. Une hypothèse de l'app (par exemple « 2 descentes » que le devis ne mentionne pas) ne figure ici que si l'artisan l'a confirmée ; sinon c'est une question posée avant l'envoi.
+
+**2. Fournitures à chiffrer**
+
+- Tableau à trois colonnes : désignation · quantité · précision.
+- La désignation est complète et commandable telle quelle : matériau, dimension ou développé, épaisseur, couleur ou finition quand elle compte.
+- La quantité est dans l'unité de vente (pièces, longueurs de x m, ml, m² pour les panneaux et rouleaux admis en 41.3, palettes si connu). Quand une longueur à couvrir diffère de la longueur achetée, les deux sont écrites : « 4 longueurs de 4 m (13 ml à couvrir) ».
+- La précision porte l'information utile au comptoir : « pour façonnage naissances », « fixes sur le tiers haut », « bord de mer ».
+- Ordre : du gros au petit, matériau principal en premier, consommables en dernier.
+
+**3. À préciser avec vous**
+
+- Les lignes que l'app n'a pas pu quantifier (41.3, dernier recours) ou pour lesquelles le devis ne donne pas le détail. Chaque ligne cite le devis avec sa longueur ou sa surface et termine par une demande simple : « merci de proposer ce que vous avez ».
+- Le bloc disparaît entièrement s'il est vide.
+
+**4. Détail du devis (sans prix)**
+
+- L'annexe du 42, telle quelle : lignes du devis, quantités, dimensions, matériaux, réponses du chat, sans aucun prix ni total. Les lignes exclues par l'artisan (44.2) restent visibles avec la mention « exclu par l'artisan ».
+- Absente si la case du 42 est décochée.
+
+**Pied de page** (toutes les pages)
+
+- « Une question sur ce chantier ? » suivi du téléphone et du mail de l'artisan (le lien vers l'app arrive en v3.1, 43.3).
+- Numéro de page, et en petit « Généré avec BatiClair ».
+
+### 45.4 Vocabulaire
+
+| Interdit | À la place |
+| --- | --- |
+| Commande, à commander, bon de commande | Demande de devis, fournitures à chiffrer |
+| À chiffrer par vos soins | À préciser avec vous |
+| Pas encore de règle de calcul dans BatiClair, référentiel, moteur | (rien : on écrit la ligne du devis et sa mesure) |
+| Zone climatique, poids posé, longueur marge comprise, largeur de bobine en paramètre | (dans la désignation de la ligne si utile, sinon rien) |
+| Un mail sans « Bonjour » ni formule de fin | Toujours « Bonjour, » et « Merci d'avance, bonne journée, » |
+
+### 45.5 Règles de contenu
+
+- Un chiffre faux dans le PDF vaut un chiffre faux au comptoir : « 4 longueurs de 4 m, soit 13 ml » est interdit, c'est 16 ml achetés pour 13 ml à couvrir.
+- Les pièces d'un même ouvrage sont séparées quand le fournisseur les sert séparément : pattes fixes et pattes coulissantes, vis à part.
+- Une ligne dont on ne sait pas à quoi elle sert (« feuilles zinc 2 × 1 m : 2 pièces ») porte son usage dans la précision ou n'existe pas.
+- Les blocs vides disparaissent, jamais de « néant » ni de ligne vide.
+- Aucun champ à remplir à la main nulle part dans le mail ni dans le PDF.
+
+### 45.6 Journal des corrections (pour l'amélioration continue, 23)
+
+- Chaque modification d'un tap par l'artisan (quantité ou désignation) est enregistrée avec son contexte : métier, département, matériau, quantité calculée, quantité corrigée, règle du référentiel utilisée, version du référentiel (plan v3).
+- Chaque ligne tombée en « à préciser avec vous » est enregistrée de la même façon, avec la raison.
+- Rien n'est automatique : aucun ratio ne bouge sans validation de Greg. Un export mensuel par règle (nombre de corrections, écart moyen) suffit pour commencer. L'écran admin viendra avec le dashboard de la commercialisation.
+
+### 45.7 Tests permanents
+
+1. Le mail du chantier Test (zinc joint debout 91 m², Brest) sort exactement avec la structure du 45.2 ; aucune occurrence de « commande », « commander », « référentiel », « BatiClair » dans le corps du mail.
+2. Le PDF du même chantier contient les quatre blocs dans l'ordre, le logo et les coordonnées du compte, et aucun prix.
+3. Un chantier sans ligne « à préciser » ne montre pas le bloc 3.
+4. Case du 42 décochée : pas de bloc 4, pas de PS dans le mail.
+5. Gouttière 13 ml : la ligne dit « 4 longueurs de 4 m (13 ml à couvrir) », jamais « soit 13 ml ».
+6. Une hypothèse non confirmée (descentes absentes du devis) ne figure pas dans « Le chantier en bref » tant que l'artisan n'a pas répondu.
+7. Une correction d'un tap crée une entrée de journal avec les sept champs du 45.6.
+
+### 45.8 Suggestions de quincaillerie et consommables (oui / non)
+
+Le quantitatif ne sera jamais parfait sur les petites fournitures : le devis ne les cite pas, l'artisan les prend au comptoir. L'app les **suggère**, l'artisan répond d'un tap.
+
+- Chaque ouvrage du référentiel porte une liste de consommables associés (25 pour la couverture : pointes, vis inox, crochets, cartouches de silicone ou de mastic, bandes d'étanchéité, étain et décapant pour le zinc, colle, mortier, bâche de protection). Pour les autres métiers, chaque tiroir a la sienne (27).
+- Après le calcul et avant l'envoi, un bloc « On ajoute ? » montre ces lignes avec une quantité déjà proposée (par exemple « Cartouches de silicone zinc : 3 », « Vis inox 4 × 40 : 1 boîte de 200 ») et deux boutons : **Oui** / **Non**. Un tap sur la quantité la modifie.
+- Les réponses sont mémorisées par artisan : un consommable refusé trois fois d'affilée n'est plus proposé pour cet artisan ; un consommable ajouté à la main deux fois devient une suggestion.
+- Les lignes acceptées rejoignent « Fournitures à chiffrer » (45.3), dans le groupe « consommables » en fin de liste. Les refusées n'apparaissent nulle part.
+- Jamais plus de huit suggestions. Si l'app n'a rien de pertinent, le bloc n'apparaît pas.
+- Le bloc n'est pas un formulaire : pas de champ vide, pas d'obligation, un tap par ligne.
+
+### 45.9 Aperçu modifiable avant envoi
+
+Avant que le mail parte, l'artisan voit **le document exactement comme le fournisseur le recevra**, et peut le corriger sur place.
+
+- Le bouton « Envoyer au fournisseur » ouvre d'abord l'aperçu du PDF (45.3) en plein écran, lisible sur téléphone, avec le logo et les coordonnées.
+- Chaque ligne de l'aperçu est modifiable d'un tap : désignation, quantité, précision, et une croix pour la retirer. Un bouton « + Ajouter une ligne » en bas du tableau. Le résumé du chantier et le mail d'accompagnement sont modifiables de la même façon.
+- Toute modification repasse par le même chemin que les corrections d'un tap (journal 45.6) : l'aperçu n'est pas une copie, c'est la liste elle-même affichée autrement.
+- En bas de l'aperçu : « Envoyer » (gros) et « Revenir à la liste » (petit). L'envoi n'a lieu qu'après ce bouton.
+- Ce même aperçu sert pour « Exporter la liste en PDF » : un seul générateur, une seule mise en page.
+
+### 45.10 Tests permanents (suite)
+
+8. Sur le chantier Test, le bloc « On ajoute ? » propose des cartouches de silicone zinc et des vis inox, avec une quantité, et deux boutons par ligne.
+9. Un consommable refusé trois fois par le même artisan n'est plus proposé la quatrième fois.
+10. L'aperçu affiché avant l'envoi est identique, ligne pour ligne, au PDF reçu par le fournisseur.
+11. Une ligne modifiée dans l'aperçu est modifiée dans la liste, et une entrée de journal est créée.

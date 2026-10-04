@@ -1,12 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { NotificationsCard } from "@/components/notifications-card";
 import { PartnerKeysCard } from "@/components/partner-keys-card";
 import { PlanSummary } from "@/components/paywall";
 import { TradePicker } from "@/components/trade-picker";
-import { BackButton, Badge, Button, Card, ErrorNotice, PageTitle } from "@/components/ui";
+import { BackButton, Badge, Button, Card, ErrorNotice, Field, PageTitle } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/session";
 
@@ -91,6 +91,7 @@ export default function ComptePage() {
           <span className="text-[15px] font-bold">{company?.name}</span>
         )}
       </Card>
+      {company && company.role !== "viewer" ? <CompanyProfileCard signatureName={me.user.name} /> : null}
       {company && company.role !== "viewer" ? <TradesCard initial={company.trades} /> : null}
       <NotificationsCard />
       <PartnerKeysCard />
@@ -230,6 +231,132 @@ function TradesCard({ initial }: { initial: string[] }) {
       {changed ? (
         <Button variant="secondary" pending={pending} onClick={() => void save()}>
           Enregistrer mes métiers
+        </Button>
+      ) : null}
+    </Card>
+  );
+}
+
+interface CompanyProfile {
+  name: string;
+  address: string | null;
+  siret: string | null;
+  phone: string | null;
+  email: string | null;
+  hasLogo: boolean;
+}
+
+/**
+ * §45.2, §45.3 : les coordonnées et le logo de l'entreprise. Ils font l'en-tête de la demande de devis et la
+ * signature du mail ; rien n'est à saisir au moment de l'envoi. Rien n'est obligatoire.
+ */
+function CompanyProfileCard({ signatureName }: { signatureName: string }) {
+  const { refresh } = useSession();
+  const [profile, setProfile] = useState<CompanyProfile | null>(null);
+  const [draft, setDraft] = useState({ name: "", address: "", siret: "", phone: "", email: "" });
+  const [pending, setPending] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [logoVersion, setLogoVersion] = useState(0);
+  const [error, setError] = useState<ApiError | null>(null);
+  const ids = { name: useId(), address: useId(), siret: useId(), phone: useId(), email: useId(), logo: useId() };
+
+  useEffect(() => {
+    void api<CompanyProfile>("/v1/company/profile").then((p) => {
+      setProfile(p);
+      setDraft({ name: p.name, address: p.address ?? "", siret: p.siret ?? "", phone: p.phone ?? "", email: p.email ?? "" });
+    });
+  }, []);
+  if (!profile) return null;
+  const changed = draft.name !== profile.name || draft.address !== (profile.address ?? "") || draft.siret !== (profile.siret ?? "") || draft.phone !== (profile.phone ?? "") || draft.email !== (profile.email ?? "");
+  const set = (key: keyof typeof draft) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDraft({ ...draft, [key]: e.target.value });
+    setSaved(false);
+  };
+
+  async function save() {
+    setPending(true);
+    setError(null);
+    try {
+      const p = await api<CompanyProfile>("/v1/company/profile", { method: "PATCH", body: { name: draft.name, address: draft.address || null, siret: draft.siret || null, phone: draft.phone || null, email: draft.email || null } });
+      setProfile(p);
+      setDraft({ name: p.name, address: p.address ?? "", siret: p.siret ?? "", phone: p.phone ?? "", email: p.email ?? "" });
+      setSaved(true);
+      refresh();
+    } catch (e) {
+      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function uploadLogo(file: File | undefined) {
+    if (!file) return;
+    setError(null);
+    const form = new FormData();
+    form.append("file", file);
+    try {
+      setProfile(await api<CompanyProfile>("/v1/company/logo", { method: "PUT", body: form }));
+      setLogoVersion((v) => v + 1);
+    } catch (e) {
+      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+    }
+  }
+
+  async function removeLogo() {
+    setError(null);
+    try {
+      setProfile(await api<CompanyProfile>("/v1/company/logo", { method: "DELETE" }));
+    } catch (e) {
+      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+    }
+  }
+
+  const signature = [[signatureName, profile.name].filter(Boolean).join(" "), profile.phone, profile.email].filter(Boolean).join(" · ");
+  return (
+    <Card className="flex flex-col gap-3 p-4">
+      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">VOS DEMANDES DE DEVIS</h2>
+      <p className="text-sm text-muted">En tête du PDF envoyé au fournisseur, et en signature du mail.</p>
+      <div className="flex items-center gap-3">
+        <div className="flex h-16 w-28 items-center justify-center overflow-hidden rounded-2xl bg-ground">
+          {profile.hasLogo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={`/v1/company/logo?v=${logoVersion}`} alt="Logo de l'entreprise" className="max-h-16 max-w-28 object-contain" />
+          ) : (
+            <span className="px-2 text-center text-xs font-bold text-muted">Pas de logo</span>
+          )}
+        </div>
+        <div className="flex flex-col items-start gap-1">
+          <label htmlFor={ids.logo} className="inline-flex min-h-11 cursor-pointer items-center text-sm font-bold text-accent-text">
+            {profile.hasLogo ? "Changer le logo" : "Ajouter le logo"}
+          </label>
+          <input id={ids.logo} type="file" accept="image/png,image/jpeg" className="sr-only" onChange={(e) => void uploadLogo(e.target.files?.[0])} />
+          {profile.hasLogo ? (
+            <button type="button" onClick={() => void removeLogo()} className="inline-flex min-h-9 items-center text-sm font-bold text-muted">
+              Retirer
+            </button>
+          ) : (
+            <span className="text-xs text-muted">PNG ou JPEG, 500 Ko au plus</span>
+          )}
+        </div>
+      </div>
+      <Field id={ids.name} label="Nom de l'entreprise" value={draft.name} onChange={set("name")} autoComplete="organization" />
+      <Field id={ids.address} label="Adresse" value={draft.address} onChange={set("address")} autoComplete="street-address" placeholder="4 rue de Siam, 29200 Brest" />
+      <Field id={ids.siret} label="SIRET" value={draft.siret} onChange={set("siret")} inputMode="numeric" placeholder="14 chiffres" />
+      <Field id={ids.phone} label="Téléphone" value={draft.phone} onChange={set("phone")} type="tel" autoComplete="tel" />
+      <Field id={ids.email} label="E-mail" value={draft.email} onChange={set("email")} type="email" autoComplete="email" />
+      <p className="rounded-2xl bg-ground px-3 py-2 text-sm">
+        <span className="font-bold">Signature : </span>
+        {signature}
+      </p>
+      {error ? <ErrorNotice error={error} /> : null}
+      {saved && !changed ? (
+        <p role="status" className="text-sm font-semibold text-ok">
+          Coordonnées enregistrées.
+        </p>
+      ) : null}
+      {changed ? (
+        <Button pending={pending} onClick={() => void save()}>
+          Enregistrer
         </Button>
       ) : null}
     </Card>

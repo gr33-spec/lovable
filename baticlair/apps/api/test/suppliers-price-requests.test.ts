@@ -164,7 +164,7 @@ describe("demandes de prix", () => {
     expect(prises).toEqual([expect.objectContaining({ quantity: "5", mergedFrom: 2 })]);
     expect(created.body.lines.filter((l: { designation: string }) => l.designation === "Accessoires de raccordement")).toHaveLength(2);
     // §43.5 : une ligne par article, les lignes identiques réunies.
-    expect(created.body.recipients[0].email.body).toContain("\nPrise 2P+T 16 A : 5 u\n");
+    expect(created.body.packet.articles).toContain("Prise 2P+T 16 A : 5 u");
   });
 
   it("prépare un e-mail par fournisseur avec la liste validée, puis suit l'envoi et la réception du devis", async () => {
@@ -186,12 +186,12 @@ describe("demandes de prix", () => {
       status: "to_send",
       supplier: { name: "Point.P", email: "contact@pointp.fr" },
     });
-    // §43.5 : le corps du mail est le contenu en trois blocs, pas une lettre.
-    expect(first.email.subject).toBe("Commande – Toiture Dupont – Toitures Martin");
-    expect(first.email.body).toMatch(/^COMMANDE : Toitures Martin · chantier Toiture Dupont · Vannes · /);
-    expect(first.email.body).toContain("\nTuile romane canal rouge 12,5 u/m² (réf. TUI-RC12) : 1 250 u\n");
+    // §45.2 : une demande de devis, un mail court ; la liste est dans le PDF joint.
+    expect(first.email.subject).toBe("Demande de devis · Toitures Martin · chantier Toiture Dupont (Vannes)");
+    expect(first.email.body).toMatch(/^Bonjour,\n\nJe vous envoie la liste des fournitures pour /);
+    expect(created.body.packet.articles).toContain("Tuile romane canal rouge 12,5 u/m² (réf. TUI-RC12) : 1 250 u");
     expect(first.email.body).toContain("Livraison sur chantier possible ?");
-    expect(first.email.body).toContain("Réponse souhaitée avant le 15 octobre 2026");
+    expect(first.email.body).toContain("Pouvez-vous me chiffrer l'ensemble avant le 15 octobre ?");
 
     const sent = await agent.patch(`/v1/price-request-recipients/${first.id}`).send({ status: "sent" });
     expect(sent.body.recipients[0]).toMatchObject({ status: "sent" });

@@ -1,11 +1,13 @@
 "use client";
 
-import { AlertTriangle, ChevronDown, Pencil } from "lucide-react";
+import { AlertTriangle, ChevronDown, Loader2, Paperclip, Pencil, X } from "lucide-react";
 import { useId, useState } from "react";
 import { Proof, type DecisionHandlers } from "@/components/takeoff-view";
 import { Button } from "@/components/ui";
 import { parseQuantity } from "@/lib/labels";
-import type { PurchaseAssumption, PurchaseItem, Takeoff } from "@/lib/api";
+import { ApiError, type ItemSketch, type PurchaseAssumption, type PurchaseItem, type Takeoff } from "@/lib/api";
+import { openDocument } from "@/lib/open-document";
+import { ErrorNotice } from "@/components/ui";
 import { shortName } from "@/lib/labels";
 
 /**
@@ -27,12 +29,22 @@ export function QuantityCard({
   pending,
   onAnswer,
   onEditItem,
+  onSuggestion,
+  sketches = [],
+  onAttach,
+  onDetach,
 }: {
   takeoff: Takeoff;
   editable: boolean;
   pending: boolean;
   onAnswer: DecisionHandlers["onAnswer"];
   onEditItem?: (item: PurchaseItem, edit: ItemEdit) => Promise<void>;
+  /** §45.8 « On ajoute ? » : Oui / Non d'un tap. */
+  onSuggestion?: (item: PurchaseItem, answer: "oui" | "non") => Promise<void>;
+  /** Croquis rattachés aux articles (clé de l'article) : visibles sous la ligne, joints à la commande. */
+  sketches?: readonly ItemSketch[];
+  onAttach?: SketchHandlers["onAttach"];
+  onDetach?: SketchHandlers["onDetach"];
 }) {
   const p = takeoff.purchase;
   const byKey = new Map(p.toBuy.map((b) => [b.key, b]));
@@ -40,14 +52,14 @@ export function QuantityCard({
   return (
     <section aria-label="Quantitatif" className="flex flex-col overflow-hidden rounded-[20px] bg-surface shadow-card">
       <div className="flex items-baseline justify-between gap-3 px-4 pt-4 pb-2">
-        <h2 className="font-display text-[24px] font-extrabold tracking-[-0.02em]">À commander</h2>
+        <h2 className="font-display text-[24px] font-extrabold tracking-[-0.02em]">Fournitures à chiffrer</h2>
         {p.toBuy.length > 0 ? (
           <span className="rounded-full bg-accent/10 px-2.5 py-1 text-[13px] font-extrabold text-accent-text">
             {p.toBuy.length} article{p.toBuy.length > 1 ? "s" : ""}
           </span>
         ) : null}
       </div>
-      {p.toBuy.length === 0 ? <p className="px-4 pb-3 text-sm text-muted">Rien à commander pour l&apos;instant.</p> : null}
+      {p.toBuy.length === 0 ? <p className="px-4 pb-3 text-sm text-muted">Aucune fourniture à chiffrer pour l&apos;instant.</p> : null}
       {p.groups.map((g) => (
         <div key={g.key} className="flex flex-col border-t border-line px-4 pt-3 pb-1">
           <h3 className="text-[12px] font-extrabold tracking-[0.06em] text-muted uppercase">
@@ -57,15 +69,27 @@ export function QuantityCard({
           <ul aria-label={g.label} className="flex flex-col divide-y divide-line">
             {g.itemKeys.map((k) => {
               const item = byKey.get(k);
-              return item ? <BuyRow key={k} item={item} takeoff={takeoff} editable={editable} pending={pending} onEdit={onEditItem} /> : null;
+              return item ? (
+                <BuyRow
+                  key={k}
+                  item={item}
+                  takeoff={takeoff}
+                  editable={editable}
+                  pending={pending}
+                  onEdit={onEditItem}
+                  sketches={sketches.filter((x) => x.article === item.key)}
+                  {...(onAttach && onDetach ? { sketchHandlers: { onAttach, onDetach } } : {})}
+                />
+              ) : null;
             })}
           </ul>
         </div>
       ))}
+      {editable && onSuggestion && (p.suggestions ?? []).length > 0 ? <Suggestions items={p.suggestions} pending={pending} onAnswer={onSuggestion} onEdit={onEditItem} /> : null}
       {p.toQuote.length > 0 ? (
         <div className="flex flex-col gap-1 bg-warn-bg px-4 py-3">
-          <h3 className={`${caption} text-warn`}>Le fournisseur chiffrera</h3>
-          <ul aria-label="Le fournisseur chiffrera" className="flex flex-col gap-1">
+          <h3 className={`${caption} text-warn`}>À préciser avec le fournisseur</h3>
+          <ul aria-label="À préciser avec le fournisseur" className="flex flex-col gap-1">
             {p.toQuote.map((q) => (
               <li key={q.key} className="text-[15px] leading-snug">
                 <span className="font-bold">{shortName(q.label)}</span>
@@ -80,19 +104,89 @@ export function QuantityCard({
   );
 }
 
-/** Un article à acheter : nom, quantité, le calcul à un appui, et le crayon pour tout réécrire (§41.4). */
+/**
+ * §45.8 « ON AJOUTE ? » : les consommables que le devis ne cite pas, avec une quantité déjà proposée. Un tap sur
+ * Oui ou Non, un tap sur la quantité pour la changer. Pas un formulaire : rien d'obligatoire.
+ */
+export function Suggestions({
+  items,
+  pending,
+  onAnswer,
+  onEdit,
+}: {
+  items: PurchaseItem[];
+  pending: boolean;
+  onAnswer: (item: PurchaseItem, answer: "oui" | "non") => Promise<void>;
+  onEdit?: ((item: PurchaseItem, edit: ItemEdit) => Promise<void>) | undefined;
+}) {
+  const [editing, setEditing] = useState<string | null>(null);
+  return (
+    <section aria-label="On ajoute ?" className="flex flex-col gap-1 border-t border-line bg-ground/50 px-4 py-3">
+      <h3 className="text-[12px] font-extrabold tracking-[0.06em] text-muted uppercase">On ajoute ?</h3>
+      <ul className="flex flex-col divide-y divide-line">
+        {items.map((s) => (
+          <li key={s.key} className="flex flex-col gap-2 py-2.5">
+            <div className="flex items-center gap-2">
+              <span className="flex min-w-0 grow flex-col">
+                <span className="text-[15px] leading-snug font-semibold">{s.label}</span>
+                {s.precision ? <span className="text-[13px] text-muted">{s.precision}</span> : null}
+              </span>
+              {onEdit ? (
+                <button type="button" onClick={() => setEditing(editing === s.key ? null : s.key)} aria-label={`Changer la quantité : ${s.label}`} className="inline-flex min-h-11 shrink-0 items-center rounded-xl px-2 text-[15px] font-extrabold whitespace-nowrap tabular-nums underline decoration-dotted underline-offset-4">
+                  {s.quantity}
+                </button>
+              ) : (
+                <span className="shrink-0 text-[15px] font-extrabold whitespace-nowrap tabular-nums">{s.quantity}</span>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <button type="button" disabled={pending} onClick={() => void onAnswer(s, "oui")} aria-label={`Oui, ajouter ${s.label}`} className="inline-flex min-h-11 grow items-center justify-center rounded-xl bg-cta text-[15px] font-extrabold text-white shadow-cta disabled:opacity-60">
+                Oui
+              </button>
+              <button type="button" disabled={pending} onClick={() => void onAnswer(s, "non")} aria-label={`Non, pas de ${s.label}`} className="inline-flex min-h-11 grow items-center justify-center rounded-xl bg-surface text-[15px] font-extrabold shadow-card disabled:opacity-60">
+                Non
+              </button>
+            </div>
+            {editing === s.key && onEdit ? (
+              <ItemForm
+                item={s}
+                pending={pending}
+                onCancel={() => setEditing(null)}
+                onSave={async (e) => {
+                  await onEdit(s, e);
+                  setEditing(null);
+                }}
+              />
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+export interface SketchHandlers {
+  onAttach: (itemKey: string, file: File, commentaire: string) => Promise<void>;
+  onDetach: (sketchId: string) => Promise<void>;
+}
+
+/** Un article à acheter : nom, quantité, le calcul à un appui, et le crayon pour tout réécrire (§41.4) ou joindre un croquis. */
 function BuyRow({
   item,
   takeoff,
   editable,
   pending,
   onEdit,
+  sketches,
+  sketchHandlers,
 }: {
   item: PurchaseItem;
   takeoff: Takeoff;
   editable: boolean;
   pending: boolean;
   onEdit?: (item: PurchaseItem, edit: ItemEdit) => Promise<void>;
+  sketches: readonly ItemSketch[];
+  sketchHandlers?: SketchHandlers;
 }) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -104,6 +198,7 @@ function BuyRow({
       {item.state === "to_confirm" ? <AlertTriangle size={18} className="mt-0.5 shrink-0 text-warn" aria-label="à confirmer" /> : null}
       <span className="flex min-w-0 grow flex-col gap-0.5">
         <span className="text-[15px] leading-snug font-semibold">{name}</span>
+        {item.precision ? <span className="text-[13px] leading-snug text-muted">{item.precision}</span> : null}
         {proofs.length > 0 ? <span className="text-[12px] font-semibold text-subtle">{open ? "Masquer le calcul" : "Voir le calcul"}</span> : null}
       </span>
       <span className="flex shrink-0 flex-col items-end text-right">
@@ -129,10 +224,28 @@ function BuyRow({
           </button>
         ) : null}
       </div>
-      {item.edited?.length ? <p className="text-[13px] text-muted">Réécrit par vous : {item.edited.map((e) => (e === "label" ? "le libellé" : "la quantité")).join(" et ")}.</p> : null}
+      {item.edited?.length ? <p className="text-[13px] text-muted">Réécrit par vous : {item.edited.map((e) => (e === "label" ? "le libellé" : e === "quantity" ? "la quantité" : "la précision")).join(" et ")}.</p> : null}
+      {sketches.length > 0 ? (
+        <ul aria-label={`Croquis joints : ${item.label}`} className="flex flex-wrap gap-2">
+          {sketches.map((sk) => (
+            <li key={sk.id} className="flex max-w-full items-center gap-1 rounded-xl bg-[#eeedff] pl-2.5 text-[13px] font-bold text-[#4a37d6]">
+              <button type="button" onClick={() => void openDocument(sk.id)} className="flex min-h-9 min-w-0 items-center gap-1.5 text-left">
+                <Paperclip size={14} aria-hidden="true" className="shrink-0" />
+                <span className="truncate">{sk.commentaire ? `${sk.nom} · ${sk.commentaire}` : sk.nom}</span>
+              </button>
+              {editable && sketchHandlers ? (
+                <button type="button" disabled={pending} onClick={() => void sketchHandlers.onDetach(sk.id)} aria-label={`Retirer le croquis ${sk.nom}`} className="flex size-9 shrink-0 items-center justify-center text-[#4a37d6]/70">
+                  <X size={14} aria-hidden="true" />
+                </button>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : null}
       {editing && edit ? (
         <ItemForm
           item={item}
+          {...(sketchHandlers ? { onAttach: (file: File, commentaire: string) => sketchHandlers.onAttach(item.key, file, commentaire) } : {})}
           pending={pending}
           onCancel={() => setEditing(false)}
           onSave={async (e) => {
@@ -147,7 +260,19 @@ function BuyRow({
 }
 
 /** Le texte et la quantité d'une ligne, tels que l'artisan veut les voir partir chez le fournisseur. */
-function ItemForm({ item, pending, onSave, onCancel }: { item: PurchaseItem; pending: boolean; onSave: (e: ItemEdit) => Promise<void>; onCancel: () => void }) {
+export function ItemForm({
+  item,
+  pending,
+  onSave,
+  onCancel,
+  onAttach,
+}: {
+  item: PurchaseItem;
+  pending: boolean;
+  onSave: (e: ItemEdit) => Promise<void>;
+  onCancel: () => void;
+  onAttach?: (file: File, commentaire: string) => Promise<void>;
+}) {
   const id = useId();
   const parsed = item.quantity ? parseQuantity(item.quantity) : null;
   const [libelle, setLibelle] = useState(item.label);
@@ -178,6 +303,7 @@ function ItemForm({ item, pending, onSave, onCancel }: { item: PurchaseItem; pen
           <input id={`${id}-u`} className={input} value={unite} onChange={(e) => setUnite(e.target.value)} placeholder="pièces, ml, kg…" />
         </label>
       </div>
+      {onAttach ? <SketchPicker label={item.label} onAttach={onAttach} /> : null}
       <div className="flex gap-2">
         <Button type="submit" pending={pending}>
           Enregistrer
@@ -190,6 +316,57 @@ function ItemForm({ item, pending, onSave, onCancel }: { item: PurchaseItem; pen
   );
 }
 
+/**
+ * Joindre un croquis à l'article (couvertine, habillage, bande façonnée…) : une photo ou un PDF, et une précision
+ * facultative. Il part avec la commande (PDF et mail) ; jamais lu par l'IA, jamais une mesure de calcul.
+ */
+function SketchPicker({ label, onAttach }: { label: string; onAttach: (file: File, commentaire: string) => Promise<void> }) {
+  const id = useId();
+  const [commentaire, setCommentaire] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<ApiError | null>(null);
+  return (
+    <div className="flex flex-col gap-2 rounded-2xl border border-dashed border-[#c9c2ff] bg-white p-3">
+      <p className="text-sm font-bold">Croquis ou photo (facultatif)</p>
+      <input
+        aria-label={`Précision du croquis : ${label}`}
+        className="min-h-11 w-full rounded-xl bg-ground px-3 text-[15px]"
+        value={commentaire}
+        onChange={(e) => setCommentaire(e.target.value)}
+        placeholder="Ex. dév. 330, 2 plis, longueurs de 2 m"
+        maxLength={1000}
+      />
+      {error ? <ErrorNotice error={error} /> : null}
+      <input
+        id={id}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,application/pdf"
+        className="sr-only"
+        disabled={busy}
+        onChange={async (e) => {
+          const file = e.target.files?.[0];
+          e.target.value = "";
+          if (!file) return;
+          setBusy(true);
+          setError(null);
+          try {
+            await onAttach(file, commentaire.trim());
+            setCommentaire("");
+          } catch (err) {
+            setError(err instanceof ApiError ? err : new ApiError("internal_error", 500));
+          } finally {
+            setBusy(false);
+          }
+        }}
+      />
+      <label htmlFor={id} className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#eeedff] px-3 text-sm font-extrabold text-[#4a37d6] ${busy ? "pointer-events-none opacity-60" : ""}`}>
+        {busy ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Paperclip size={16} aria-hidden="true" />}
+        {busy ? "Envoi du croquis…" : "Joindre une photo ou un PDF"}
+      </label>
+    </div>
+  );
+}
+
 /** Les hypothèses par défaut, sur une ligne repliée ; chacune se change d'un appui. */
 /** « 45° » collé, « 60 cm » espacé, « 3 » pour les pièces. */
 function withUnit(value: string, unit: string): string {
@@ -197,7 +374,7 @@ function withUnit(value: string, unit: string): string {
   return unit === "°" ? `${value}°` : `${value} ${unit}`;
 }
 
-function Assumptions({ assumptions, editable, pending, onAnswer }: { assumptions: PurchaseAssumption[]; editable: boolean; pending: boolean; onAnswer: DecisionHandlers["onAnswer"] }) {
+export function Assumptions({ assumptions, editable, pending, onAnswer }: { assumptions: PurchaseAssumption[]; editable: boolean; pending: boolean; onAnswer: DecisionHandlers["onAnswer"] }) {
   const [open, setOpen] = useState(false);
   const text = assumptions.map((a) => `${a.label.toLowerCase()} ${withUnit(a.value, a.unit)}`).join(" · ");
   return (

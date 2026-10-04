@@ -86,8 +86,8 @@ describe("§44.5 — infos chantier facultatives", () => {
     await agent.post(`/v1/quantitatifs/${q.id}/validation`).expect(200);
     const supplier = (await agent.post("/v1/suppliers").send({ name: "Négoce Breizh", email: "negoce@example.fr" })).body;
     const created = (await agent.post(`/v1/projects/${q.projetId}/price-requests`).send({ supplierIds: [supplier.id] })).body;
-    // Le détail sans prix est le bloc 3 du mail (§43) : la ligne y est, avec la mention.
-    const body: string = created.recipients[0].email.body;
+    // Le détail sans prix est le bloc 4 du PDF (§45.3) : la ligne y est, avec la mention.
+    const body = (created.packet.detail as { libelle: string; mesure: string | null; precisions: string[] }[]).map((d) => [d.libelle, d.mesure, ...d.precisions].filter(Boolean).join(" · ")).join("\n");
     expect(body).toContain("Couverture du garage en tuiles mécaniques · 20 m² · exclu par l'artisan (« Garage non compris »)");
     expect(created.packet.articles.join("\n")).not.toMatch(/[Tt]uile/);
   });

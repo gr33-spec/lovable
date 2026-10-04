@@ -44,13 +44,19 @@ export interface ValidatedTakeoff {
 export interface Sender {
   companyName: string;
   senderName: string;
-  project: { name: string; address: string | null; siteNotes: string | null };
+  project: { id: string; name: string; address: string | null; siteNotes: string | null };
+  /** Coordonnées du compte (§45.2, §45.3) ; e-mail de l'artisan à défaut d'un e-mail d'entreprise. */
+  company: { address: string | null; siret: string | null; phone: string | null; email: string | null };
+  /** Logo du compte (PNG ou JPEG), lu au rendu du PDF. */
+  logo: { bytes: Uint8Array; type: string } | null;
 }
 
 export interface PriceRequestRepository {
   /** Dernière liste de matériaux VALIDÉE du chantier. */
   validatedTakeoff(tenant: TenantContext, projectId: string): Promise<ValidatedTakeoff | null>;
   sender(tenant: TenantContext, projectId: string): Promise<Sender | null>;
+  /** Les croquis rattachés à un article de la liste (clé de l'article), avec la précision de l'artisan. */
+  itemSketches(tenant: TenantContext, projectId: string): Promise<{ id: string; nom: string; itemKey: string; note: string | null }[]>;
   create(
     tenant: TenantContext,
     data: {

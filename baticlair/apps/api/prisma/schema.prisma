@@ -119,6 +119,14 @@ model Company {
   trades               String[] @default([])
   /// §42.2 : joindre le « Détail du chantier (sans prix) » aux envois fournisseur (case mémorisée).
   attachQuoteDetail    Boolean  @default(true)
+  /// §45.3 : coordonnées de l'en-tête de la demande de devis et de la signature du mail (§45.2). Jamais saisies à l'envoi.
+  address              String?
+  siret                String?
+  phone                String?
+  contactEmail         String?
+  /// Logo (PNG ou JPEG, 500 Ko au plus), à gauche de l'en-tête du PDF ; absent : le nom de l'entreprise en gros.
+  logo                 Bytes?
+  logoType             String?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
@@ -134,6 +142,7 @@ model Company {
   offers        SupplierOffer[]
   preferences   CompanyPreference[]
   corrections   CorrectionEvent[]
+  consumableHabits ConsumableHabit[]
   quantitatifs  Quantitatif[]
 
   @@map("company")
@@ -231,6 +240,10 @@ model Document {
   pageCount    Int?
   status       DocumentStatus  @default(stored)
   uploadedById String?
+  /// Croquis d'un article : la clé de l'article dans la liste d'achats (null : croquis du chantier entier).
+  itemKey      String?
+  /// Précision de l'artisan sur ce croquis (« dév. 330, 2 plis ») : transmise telle quelle, jamais lue par l'IA.
+  note         String?
   createdAt    DateTime        @default(now())
 
   company     Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
@@ -801,4 +814,25 @@ model PartnerApiKey {
 
   @@index([companyId])
   @@map("partner_api_key")
+}
+
+/// §45.8 : les consommables suggérés (« On ajoute ? ») et les lignes ajoutées à la main, par entreprise.
+/// Refusé trois chantiers d'affilée : plus proposé ; ajouté à la main sur deux chantiers : devient une suggestion.
+model ConsumableHabit {
+  companyId           String   @db.Uuid
+  /// Clé de l'article suggéré (« product:Cartouches de silicone zinc ») ou « manual:<désignation normalisée> ».
+  key                 String
+  designation         String
+  refusedInARow       Int      @default(0)
+  lastRefusedProject  String?  @db.Uuid
+  /// Chantiers où l'artisan a ajouté cette ligne à la main.
+  manualProjects      String[] @default([])
+  lastQuantity        String?
+  lastUnit            String?
+  updatedAt           DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@id([companyId, key])
+  @@map("consumable_habit")
 }

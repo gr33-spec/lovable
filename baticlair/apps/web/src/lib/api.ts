@@ -112,6 +112,14 @@ export interface Me {
 
 export type ProjectStatus = "active" | "archived";
 
+/** Un croquis déposé : du chantier entier, ou d'un article de la liste (« article » : sa clé), avec la précision de l'artisan. */
+export interface ItemSketch {
+  id: string;
+  nom: string;
+  article?: string;
+  commentaire?: string | null;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -221,7 +229,7 @@ export interface Quantitatif {
   erreur?: { raison: string };
   valide?: boolean;
   /** Infos chantier facultatives qui ont servi au calcul : la note, et les croquis déposés. */
-  infos?: { texte: string | null; croquis: { id: string; nom: string }[] };
+  infos?: { texte: string | null; croquis: ItemSketch[] };
   ecran?: Takeoff;
 }
 
@@ -248,15 +256,19 @@ export interface PurchaseItem {
   label: string;
   /** « 1 488 pièces », « 547 ml », « 2 rouleaux » ; null si la quantité n'est pas établie. */
   quantity: string | null;
-  /** « ≈ 7 palettes », ou le besoin dans son unité (« 128,57 m² »). */
+  /** « ≈ 7 palettes », ou ce que la longueur couvre (« 13 ml à couvrir »). */
   approx: string | null;
+  /** Ce qui sert au comptoir (« pour façonner 13 ml de bande, développé 33 cm »), §45.3. */
+  precision: string | null;
+  /** Consommable : en fin de « Fournitures à chiffrer » (§45.3). */
+  consumable: boolean;
   kind: "computed" | "direct";
   needIds: string[];
   lineIds: string[];
   state: "ready" | "to_confirm";
   assumptionKeys: string[];
   /** Réécrit par l'artisan (§41.4). */
-  edited: ("label" | "quantity")[];
+  edited: ("label" | "quantity" | "precision")[];
 }
 
 export interface PurchaseAssumption {
@@ -276,7 +288,50 @@ export interface TakeoffPurchase {
   groups: { key: string; label: string; measure: string | null; itemKeys: string[] }[];
   toQuote: { key: string; label: string; measure: string; reason: string; lineIds: string[] }[];
   assumptions: PurchaseAssumption[];
+  /** §45.8 « On ajoute ? » : consommables proposés, Oui / Non d'un tap, au plus huit. */
+  suggestions: PurchaseItem[];
   canValidate: boolean;
+  /** L'écran unique « liste des fournitures » : chaque ligne vert / orange / gris, dans l'ordre des groupes. */
+  screen: SupplyScreen;
+}
+
+export interface ScreenRow {
+  key: string;
+  /** ok = vert, rien à faire ; check = orange, un tap ouvre sa question ; supplier = gris, à préciser avec le fournisseur. */
+  status: "ok" | "check" | "supplier";
+  itemKey?: string;
+  quoteKey?: string;
+  pending?: { label: string; quantity: string | null };
+  decisionKey?: string;
+  lineIds: string[];
+}
+export interface SupplyScreen {
+  groups: { key: string; label: string; measure: string | null; kind: "principal" | "singulier" | "evacuation" | "autres" | "consommables"; rows: ScreenRow[] }[];
+  total: number;
+  toCheck: number;
+}
+
+/** §45.3 : le document « Demande de devis », tel que le fournisseur le reçoit (aperçu = PDF). */
+export interface SupplyRow {
+  designation: string;
+  quantite: string;
+  precision: string | null;
+  consommable?: boolean;
+  /** Clé de l'article dans la liste : l'aperçu corrige la liste elle-même (§45.9). */
+  cle?: string;
+}
+export interface PacketDocument {
+  entete: { entreprise: string; coordonnees: string[]; titre: string; chantier: string; ville: string | null; date: string; reference: string | null };
+  destinataire: string | null;
+  blocs: ({ numero: number; titre: string; kind: "list"; lignes: string[] } | { numero: number; titre: string; kind: "table"; colonnes: [string, string, string]; lignes: SupplyRow[] })[];
+  croquis: { article: string; nom: string; commentaire: string | null }[];
+  pied: { question: string | null; mention: string };
+}
+export interface QuotePreview {
+  subject: string;
+  mail: string;
+  document: PacketDocument;
+  hasLogo: boolean;
 }
 
 /** D'où vient un élément : lu dans le devis, BatiClair (vérifié), votre entreprise, choisi pour ce chantier, hypothèse par défaut. */

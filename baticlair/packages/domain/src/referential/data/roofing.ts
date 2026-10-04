@@ -421,6 +421,26 @@ const EPAISSEUR_ZINC_PARAM: ParamDef = {
   ],
 };
 /** Même clé « faconnage » que le joint debout : une seule réponse, et une seule habitude, pour tout le métal façonné. */
+/**
+ * Égout et faîtage d'une couverture à joint debout (§7 : « Bande d'égout + ourlet (dév. 25 à 33 cm) : ml égout × 1,05,
+ * bande 2 ou 3 m » ; « Faîtage : ml faîtage × 1,05 »). Le devis les cite souvent à part (« bande zinc d'égout 13 ml ») :
+ * on demande plutôt que de compter deux fois (§45.5, retour du fondateur). Pas de défaut.
+ */
+const EGOUT_FAITAGE_PARAM: ParamDef = {
+  key: "egout_faitage",
+  label: "Égout et faîtage du zinc",
+  unit: "u",
+  kind: "site_data",
+  question: "Bandes d'égout et de faîtage du zinc : on les ajoute à la liste ?",
+  hint: "Si le devis les cite déjà sur une autre ligne, réponds « Déjà au devis ».",
+  choices: [
+    { label: "Égout et faîtage", value: "3" },
+    { label: "Faîtage seulement", value: "2" },
+    { label: "Égout seulement", value: "1" },
+    { label: "Déjà au devis", value: "0" },
+  ],
+  display: { "0": "déjà au devis", "1": "égout seulement", "2": "faîtage seulement", "3": "égout et faîtage" },
+};
 const FACONNAGE_BANDES_PARAM: ParamDef = {
   ...FACONNAGE_PARAM,
   question: "Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ?",
@@ -528,7 +548,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.04-19",
+  version: "roofing-2026.10.04-20",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -649,6 +669,17 @@ export const ROOFING_REFERENTIAL: Referential = {
     // Un faîtage EN ZINC est une bande, jamais des faîtières en terre cuite : le mot « zinc » le départage.
     { code: "zinc_ridge", label: "Faîtage zinc (bande)", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["faitage zinc", "faitage en zinc", "faitiere zinc", "faitiere en zinc", "bande de faitage zinc", "bande de faitage"] },
     { code: "zinc_clip", label: "Patte de fixation zinc", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["patte de fixation", "patte zinc"] },
+    // §36.2 : les pattes se fixent à part (2 fixations par patte) ; le fournisseur sert les pointes séparément (§45.5).
+    // Joint debout : pattes coulissantes et pattes fixes, deux articles distincts au comptoir (§45.5).
+    { code: "seam_clip_sliding", label: "Patte coulissante de joint debout", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["patte coulissante", "pattes coulissantes"] },
+    { code: "seam_clip_fixed", label: "Patte fixe de joint debout", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["patte fixe", "pattes fixes"] },
+    // Bande d'égout à ourlet du joint debout (§7).
+    { code: "eaves_strip", label: "Bande d'égout zinc", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["bande d'egout", "bande egout"] },
+    // §45.8 : consommables SUGGÉRÉS (« On ajoute ? »), jamais ajoutés d'office : l'artisan répond oui ou non d'un tap.
+    // Sans mots-clés : une ligne « mastic » du devis reste une ligne du devis, jamais rattachée à un ouvrage par eux.
+    { code: "sealant", label: "Mastic, silicone", needUnit: "ml", attributes: [], keyAttributes: [], consumable: true },
+    { code: "strip_screw", label: "Vis de bande", needUnit: "u", attributes: [], keyAttributes: [], consumable: true },
+    { code: "clip_fixing", label: "Fixation de patte", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["pointe annelee", "pointes annelees", "vis de patte", "fixation de patte"], consumable: true },
     // Joint debout (§7, §36) : la ligne du devis est une SURFACE ; ce qui se commande, ce sont des bobines (au mètre linéaire) ou des bacs.
     { code: "standing_seam", label: "Couverture zinc joint debout", needUnit: "m2", attributes: [], keyAttributes: [], keywords: ["joint debout", "couverture zinc", "zinc a joint debout", "jdb"] },
     { code: "zinc_coil", label: "Bobine de zinc", needUnit: "m", attributes: [], keyAttributes: [], keywords: ["bobine de zinc", "bobine zinc", "zinc en bobine"] },
@@ -995,6 +1026,23 @@ export const ROOFING_REFERENTIAL: Referential = {
       sellingUnits: [{ id: "longueur", label: { one: "longueur de 3 m", many: "longueurs de 3 m" }, contains: packaging("3", "m", F, FOUNDER_DOC), primary: true }],
     }),
     generic("patte-zinc-standard", "zinc_clip", "Patte de fixation pour bande zinc", "Pattes de fixation"),
+    // §45.5 : pattes fixes et pattes coulissantes sont deux articles au comptoir, les pointes un troisième.
+    generic("patte-coulissante-joint-debout", "seam_clip_sliding", "Patte coulissante pour joint debout (largeur de bobine du chantier)", "Pattes coulissantes joint debout"),
+    generic("patte-fixe-joint-debout", "seam_clip_fixed", "Patte fixe pour joint debout (largeur de bobine du chantier)", "Pattes fixes joint debout"),
+    // §36.2 : « 18 mm → pointe annelée 2,5×28 » (volige 18 mm, §7).
+    generic("pointe-annelee-2-5x28", "clip_fixing", "Pointe annelée 2,5 × 28 mm pour patte sur volige 18 mm", "Pointes annelées 2,5 × 28 mm"),
+    // §25.6 : « Mastic PU / silicone neutre : 1 cartouche par 8 ml de joint (solins, couvertines, pénétrations) ».
+    generic("cartouche-silicone-zinc", "sealant", "Cartouche de silicone neutre (ou mastic PU) compatible zinc", "Cartouches de silicone zinc", {
+      sellingUnits: [{ id: "cartouche", label: { one: "cartouche", many: "cartouches" }, contains: packaging("8", "m", F, FOUNDER_DOC, "« 1 cartouche par 8 ml de joint » (§25.6)."), primary: true }],
+    }),
+    // §25.5 : « Vis autoforeuses bandes de rive alu/zinc : 4/ml » ; la boîte de 200 : exemple du fondateur (§45.8).
+    generic("vis-inox-4x40", "strip_screw", "Vis inox 4 × 40 mm pour bandes zinc", "Vis inox 4 × 40", {
+      sellingUnits: [{ id: "boite", label: { one: "boîte de 200", many: "boîtes de 200" }, contains: packaging("200", "u", F, FOUNDER_DOC, "« Vis inox 4 × 40 : 1 boîte de 200 » (§45.8)."), primary: true }],
+    }),
+    // §7 : bande d'égout + ourlet, développé 25 à 33 cm, bandes de 2 m (33 cm retenu, comme les abergements).
+    generic("bande-egout-zinc-330", "eaves_strip", "Bande d'égout zinc à ourlet, développé 33 cm, longueurs de 2 m (épaisseur du chantier)", "Bandes d'égout zinc dév. 33 cm", {
+      sellingUnits: [{ id: "longueur", label: { one: "longueur de 2 m", many: "longueurs de 2 m" }, contains: ONE_PIECE, primary: true }],
+    }),
     // Retour du fondateur (2026-10-04) : une bobine de zinc se commande au MÈTRE LINÉAIRE, jamais au kg ; la largeur
     // (500 mm en bord de mer, 650 mm ailleurs) et l'épaisseur partent avec la ligne, dans « Le chantier en bref ».
     ...(["650", "500"] as const).map((w) =>
@@ -1006,7 +1054,10 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("bardelis-standard", "verge_tile", "Bardelis (tuile de rive canal), modèle de la tuile posée", "Bardelis"),
     // Zinc façonné sur place (§25.2) : feuilles de 2 × 1 m, épaisseur du chantier ; jamais au kg pour un abergement ou une bande.
     generic("feuille-zinc-2x1", "zinc_sheet", "Feuille zinc naturel 2 × 1 m (épaisseur du chantier)", "Feuilles zinc 2 × 1 m"),
-    generic("bande-zinc-faconnee-standard", "zinc_strip", "Bande zinc façonnée, longueurs de 2 m (développé et épaisseur du chantier)", "Bandes zinc façonnées 2 m"),
+    // Retour du fondateur (§45.5) : une bande zinc se sert en longueurs de 2 m, dites comme telles (« 8 longueurs de 2 m »).
+    generic("bande-zinc-faconnee-standard", "zinc_strip", "Bande zinc façonnée, longueurs de 2 m (développé et épaisseur du chantier)", "Bandes zinc façonnées", {
+      sellingUnits: [{ id: "longueur", label: { one: "longueur de 2 m", many: "longueurs de 2 m" }, contains: ONE_PIECE, primary: true }],
+    }),
     generic("porte-solin-standard", "solin_support", "Bande porte-solin, longueurs de 2 m", "Bandes porte-solin 2 m"),
     // §7 : « Panneaux OSB 3 / contreplaqué CTBX : m² × 1,05 / surface panneau (2,50 × 1,25 = 3,125 m²) ». Le m² est
     // admis pour un panneau (§40.3) ; le nombre de panneaux est donné à côté dès que le conditionnement est connu.
@@ -1026,6 +1077,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     {
       id: "couverture-tuiles-emboitement",
       trade: "roofing",
+      section: "principal",
       label: "Couverture en tuiles à emboîtement sur liteaux",
       triggers: ["roof_tile"],
       params: [
@@ -1129,6 +1181,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     {
       id: "couverture-tuiles-canal",
       trade: "roofing",
+      section: "principal",
       label: "Couverture en tuiles canal",
       triggers: ["roof_tile_canal"],
       params: [
@@ -1202,6 +1255,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     {
       id: "couverture-ardoises-crochet",
       trade: "roofing",
+      section: "principal",
       label: "Couverture en ardoises au crochet sur liteaux",
       triggers: ["roof_slate"],
       params: [
@@ -1443,6 +1497,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "ml",
           core: true,
           exclusions: "Recouvrements des longueurs couverts par la perte de 5 %.",
+          precision: "{longueur_faitage|ml} de faîtage à couvrir",
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
@@ -1473,8 +1528,10 @@ export const ROOFING_REFERENTIAL: Referential = {
       slots: [
         { key: "bande", family: "zinc_strip", label: "Bandes zinc façonnées", usual: { text: "Bandes façonnées par le fournisseur, longueurs de 2 m (§36.4).", source: F, productId: "bande-zinc-faconnee-standard" } },
         { key: "feuille", family: "zinc_sheet", label: "Feuilles zinc 2 × 1 m", usual: { text: "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).", source: F, productId: "feuille-zinc-2x1" } },
+        { key: "mastic", family: "sealant", label: "Silicone ou mastic", usual: { text: "Silicone neutre compatible zinc, 1 cartouche par 8 ml de joint (§25.6).", source: F, productId: "cartouche-silicone-zinc" } },
+        { key: "vis", family: "strip_screw", label: "Vis de bandes", usual: { text: "Vis inox 4 × 40, 4 par mètre (§25.5).", source: F, productId: "vis-inox-4x40" } },
       ],
-      constants: ZINC_PLAT_CONSTANTS,
+      constants: { ...ZINC_PLAT_CONSTANTS, vis_par_ml: condition("4", "u/m", F, FOUNDER_DOC, "« Vis autoforeuses bandes de rive alu/zinc : 4/ml » (§25.5).") },
       derived: [
         POIDS_PLAT_DERIVED,
         { key: "ml_zinc", label: "Longueur de zinc, marge comprise", unit: "m", formula: "longueur_bande * regle.marge_bandes", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
@@ -1488,6 +1545,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Longueurs de 2 m, recouvrement 10 cm entre éléments ; fixations à part.",
+          precision: "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
@@ -1500,6 +1558,33 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2) ; chutes non réemployées.",
+          // §45.5 : une feuille dont on ne sait pas à quoi elle sert n'a rien à faire dans la liste.
+          precision: "pour façonner {longueur_bande|ml} de bande, développé {developpe|cm}",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        // §45.8 : suggérés (« On ajoute ? »), jamais d'office : non « cœur » de l'ouvrage.
+        {
+          id: "mastic-bandes",
+          slot: "mastic",
+          formula: "longueur_bande",
+          unit: "ml",
+          core: false,
+          exclusions: "Un joint sur toute la longueur des bandes (solins, couvertines) ; 1 cartouche par 8 ml.",
+          precision: "pour {longueur_bande|ml} de joint",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "vis-bandes",
+          slot: "vis",
+          formula: "longueur_bande * regle.vis_par_ml",
+          unit: "u",
+          core: false,
+          exclusions: "4 vis par mètre de bande (§25.5).",
+          precision: "4 par mètre, {longueur_bande|ml} de bande",
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
@@ -1567,6 +1652,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Zinc plat, développé 33 cm × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",
+          precision: "pour façonner l'abergement de cheminée, développé 33 cm",
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
@@ -1587,15 +1673,21 @@ export const ROOFING_REFERENTIAL: Referential = {
     {
       id: "couverture-zinc-joint-debout",
       trade: "roofing",
+      section: "principal",
       label: "Couverture zinc à joint debout",
       triggers: ["standing_seam"],
-      params: [SURFACE_PARAM, FACONNAGE_PARAM, EPAISSEUR_ZINC_PARAM, RAMPANT_PARAM, BACS_LONGS_PARAM, ZONE_PARAM],
+      params: [SURFACE_PARAM, FACONNAGE_PARAM, EPAISSEUR_ZINC_PARAM, RAMPANT_PARAM, BACS_LONGS_PARAM, ZONE_PARAM, EGOUT_FAITAGE_PARAM],
       slots: [
         { key: "couverture", family: "standing_seam", label: "Couverture zinc joint debout", measureOnly: true },
         { key: "bobine", family: "zinc_coil", label: "Zinc en bobine", keywords: ["bobine"], usual: { text: "Zinc naturel en bobine largeur 650 mm, commandé au mètre linéaire.", source: "vmzinc-joint-debout", productId: "bobine-zinc-standard" } },
         { key: "bobine_littoral", family: "zinc_coil", label: "Zinc en bobine (bord de mer)", keywords: ["bord de mer", "littoral"], usual: { text: "Bord de mer : zinc naturel en bobine largeur 500 mm, commandé au mètre linéaire (VMZINC).", source: "vmzinc-joint-debout", productId: "bobine-zinc-500" } },
         { key: "bac", family: "zinc_panel", label: "Bacs joint debout", usual: { text: "Bacs façonnés par le fournisseur à la longueur du rampant.", source: F, productId: "bac-joint-debout-standard" } },
-        { key: "patte", family: "zinc_clip", label: "Pattes de fixation", keywords: ["patte"], usual: { text: "Pattes fixes et coulissantes, selon le rampant (VMZINC 36.2).", source: "vmzinc-joint-debout", productId: "patte-zinc-standard" } },
+        // §45.5 : pattes coulissantes, pattes fixes et pointes sont trois lignes (le fournisseur les sert séparément).
+        { key: "patte_coulissante", family: "seam_clip_sliding", label: "Pattes coulissantes", keywords: ["coulissante", "coulissantes"], usual: { text: "Pattes coulissantes, selon le rampant (VMZINC 36.2).", source: "vmzinc-joint-debout", productId: "patte-coulissante-joint-debout" } },
+        { key: "patte_fixe", family: "seam_clip_fixed", label: "Pattes fixes", keywords: ["patte fixe", "pattes fixes"], usual: { text: "Pattes fixes, selon le rampant (VMZINC 36.2).", source: "vmzinc-joint-debout", productId: "patte-fixe-joint-debout" } },
+        { key: "fixation_patte", family: "clip_fixing", label: "Fixations des pattes", keywords: ["pointe", "pointes"], usual: { text: "Pointes annelées 2,5 × 28 mm sur volige 18 mm, 2 par patte (VMZINC 36.2).", source: "vmzinc-joint-debout", productId: "pointe-annelee-2-5x28" } },
+        { key: "egout", family: "eaves_strip", label: "Bandes d'égout", keywords: ["egout"], usual: { text: "Bande d'égout à ourlet, développé 33 cm, longueurs de 2 m (§7).", source: F, productId: "bande-egout-zinc-330" } },
+        { key: "faitage", family: "zinc_ridge", label: "Faîtage zinc", usual: { text: "Bande de faîtage zinc en longueurs de 3 m (§7).", source: F, productId: "bande-faitage-zinc-standard" } },
         { key: "volige", family: "sheathing", label: "Voliges", keywords: ["volige"], usual: { text: "Volige sapin 18 mm sous le zinc (§7).", source: F, productId: "volige-sapin-standard" } },
       ],
       constants: {
@@ -1610,28 +1702,47 @@ export const ROOFING_REFERENTIAL: Referential = {
         seuil_070: condition("0.7", "mm", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }),
         seuil_080: condition("0.8", "mm", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }),
         rampant_max_bac: condition("10", "m", F, FOUNDER_DOC, "« bacs profilés à longueur (max 10 à 15 m) » (§7) : 10 m retenu."),
+        fixations_par_patte: condition("2", "u", "vmzinc-joint-debout", FOUNDER_DOC, "« 2 fixations par patte » (§36.2)."),
+        coef_egout_faitage: condition("1.05", "u", F, FOUNDER_DOC, "« ml égout × 1,05 », « ml faîtage × 1,05 » (§7)."),
+        longueur_utile_bande: condition("1.9", "m", F, FOUNDER_DOC, "Bandes de 2 m, recouvrement 10 cm (§25.2)."),
       },
       tables: {
-        // VMZINC 36.2 : pattes coulissantes + fixes par m², selon le rampant (lignes 0,5-1,5 … 13-15 m).
-        pattes_500: {
-          label: "Pattes par m² (bobine 500)",
+        // VMZINC 36.2 : pattes coulissantes et fixes par m², selon le rampant (lignes 0,5-1,5 … 13-15 m), comptées à part (§45.5).
+        coulissantes_500: {
+          label: "Pattes coulissantes par m² (bobine 500)",
           unit: "u/m2",
           axes: [{ param: "longueur_rampant", thresholds: ["0", "1.5", "2", "3.5", "5.5", "7.5", "10.5", "13"] }],
-          values: [["9.5"], ["9.5"], ["8.4"], ["8.1"], ["7.6"], ["7.6"], ["7.4"], ["7.7"]],
+          values: [["7.1"], ["6.3"], ["4.7"], ["5.2"], ["5.7"], ["6.1"], ["6.4"], ["6.8"]],
           source: "vmzinc-joint-debout",
           verification: FOUNDER_DOC,
           version: 1,
-          note: "7,10 + 2,40 ; 6,30 + 3,20 ; 4,70 + 3,70 ; 5,20 + 2,90 ; 5,70 + 1,90 ; 6,10 + 1,50 ; 6,40 + 1,00 ; 6,80 + 0,90.",
         },
-        pattes_650: {
-          label: "Pattes par m² (bobine 650)",
+        fixes_500: {
+          label: "Pattes fixes par m² (bobine 500)",
           unit: "u/m2",
           axes: [{ param: "longueur_rampant", thresholds: ["0", "1.5", "2", "3.5", "5.5", "7.5", "10.5", "13"] }],
-          values: [["7"], ["7"], ["6.4"], ["6"], ["5.6"], ["5.6"], ["5.5"], ["5.8"]],
+          values: [["2.4"], ["3.2"], ["3.7"], ["2.9"], ["1.9"], ["1.5"], ["1"], ["0.9"]],
           source: "vmzinc-joint-debout",
           verification: FOUNDER_DOC,
           version: 1,
-          note: "5,20 + 1,80 ; 4,70 + 2,30 ; 3,50 + 2,90 ; 3,80 + 2,20 ; 4,20 + 1,40 ; 4,50 + 1,10 ; 4,70 + 0,80 ; 5,10 + 0,70.",
+        },
+        coulissantes_650: {
+          label: "Pattes coulissantes par m² (bobine 650)",
+          unit: "u/m2",
+          axes: [{ param: "longueur_rampant", thresholds: ["0", "1.5", "2", "3.5", "5.5", "7.5", "10.5", "13"] }],
+          values: [["5.2"], ["4.7"], ["3.5"], ["3.8"], ["4.2"], ["4.5"], ["4.7"], ["5.1"]],
+          source: "vmzinc-joint-debout",
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        fixes_650: {
+          label: "Pattes fixes par m² (bobine 650)",
+          unit: "u/m2",
+          axes: [{ param: "longueur_rampant", thresholds: ["0", "1.5", "2", "3.5", "5.5", "7.5", "10.5", "13"] }],
+          values: [["1.8"], ["2.3"], ["2.9"], ["2.2"], ["1.4"], ["1.1"], ["0.8"], ["0.7"]],
+          source: "vmzinc-joint-debout",
+          verification: FOUNDER_DOC,
+          version: 1,
         },
       },
       derived: [
@@ -1639,7 +1750,8 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "entraxe_joints", label: "Largeur utile du bac (entraxe des joints)", unit: "mm", formula: "si(zone >= regle.zone_littorale, regle.entraxe_littoral, regle.entraxe_courant)", shown: true, source: "vmzinc-joint-debout", verification: FOUNDER_DOC, version: 1 },
         { key: "poids_zinc", label: "Poids du zinc posé", unit: "kg/m2", formula: "si(epaisseur_zinc >= regle.seuil_080, regle.poids_080, si(epaisseur_zinc >= regle.seuil_070, regle.poids_070, regle.poids_065))", shown: true, source: "vmzinc-joint-debout", verification: FOUNDER_DOC, version: 1 },
         { key: "largeur_pan", label: "Largeur du pan", unit: "m", formula: "surface / longueur_rampant", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
-        { key: "pattes_m2", label: "Pattes par m²", unit: "u/m2", formula: "si(largeur_bobine <= regle.largeur_littoral, table.pattes_500, table.pattes_650)", source: "vmzinc-joint-debout", verification: FOUNDER_DOC, version: 1 },
+        { key: "coulissantes_m2", label: "Pattes coulissantes par m²", unit: "u/m2", formula: "si(largeur_bobine <= regle.largeur_littoral, table.coulissantes_500, table.coulissantes_650)", source: "vmzinc-joint-debout", verification: FOUNDER_DOC, version: 1 },
+        { key: "fixes_m2", label: "Pattes fixes par m²", unit: "u/m2", formula: "si(largeur_bobine <= regle.largeur_littoral, table.fixes_500, table.fixes_650)", source: "vmzinc-joint-debout", verification: FOUNDER_DOC, version: 1 },
       ],
       needs: [
         {
@@ -1688,13 +1800,66 @@ export const ROOFING_REFERENTIAL: Referential = {
           version: 1,
         },
         {
-          id: "pattes-joint-debout",
-          slot: "patte",
-          formula: "surface * pattes_m2",
+          id: "pattes_coulissantes",
+          slot: "patte_coulissante",
+          formula: "surface * coulissantes_m2",
           unit: "u",
           core: true,
-          exclusions: "Pattes classiques, fixes et coulissantes réunies (VMZINC 36.2) ; les pattes monovis demandent moins.",
+          exclusions: "Pattes classiques (VMZINC 36.2) ; les pattes monovis demandent moins.",
+          precision: "pour bobine {largeur_bobine|mm}",
           source: "vmzinc-joint-debout",
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "pattes_fixes",
+          slot: "patte_fixe",
+          formula: "surface * fixes_m2",
+          unit: "u",
+          core: true,
+          exclusions: "Pattes classiques (VMZINC 36.2) ; les pattes monovis demandent moins.",
+          precision: "pour bobine {largeur_bobine|mm}, zone fixe de chaque bac",
+          source: "vmzinc-joint-debout",
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "fixations-pattes-joint-debout",
+          slot: "fixation_patte",
+          formula: "(commande.pattes_coulissantes + commande.pattes_fixes) * regle.fixations_par_patte",
+          unit: "u",
+          core: true,
+          exclusions: "Deux fixations par patte, à vérifier sur le modèle de patte (VMZINC 36.2) ; volige 18 mm.",
+          precision: "2 par patte, sur volige 18 mm",
+          source: "vmzinc-joint-debout",
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "egout-joint-debout",
+          slot: "egout",
+          // 1 = égout seulement, 3 = égout et faîtage (0 = déjà au devis, 2 = faîtage seulement).
+          when: "si(egout_faitage < 0.5, 0, si(egout_faitage < 1.5, 1, si(egout_faitage > 2.5, 1, 0)))",
+          formula: "arrondi_sup(largeur_pan * regle.coef_egout_faitage / regle.longueur_utile_bande)",
+          unit: "u",
+          core: true,
+          exclusions: "Égout sur toute la largeur du pan ; longueurs de 2 m, recouvrement 10 cm.",
+          precision: "{largeur_pan|ml} d'égout à couvrir",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "faitage-joint-debout",
+          slot: "faitage",
+          // 2 = faîtage seulement, 3 = égout et faîtage.
+          when: "si(egout_faitage >= 2, 1, 0)",
+          formula: "largeur_pan * regle.coef_egout_faitage",
+          unit: "ml",
+          core: true,
+          exclusions: "Un faîtage de la largeur du pan (monopente, ou un seul pan) ; deux pans qui se rejoignent n'en font qu'un : corrige la quantité d'un tap.",
+          precision: "{largeur_pan|ml} de faîtage à couvrir",
+          source: F,
           verification: FOUNDER_DOC,
           version: 1,
         },
@@ -1714,6 +1879,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     {
       id: "gouttiere",
       trade: "roofing",
+      section: "evacuation",
       label: "Gouttière (profil, crochets, naissances)",
       triggers: ["gutter"],
       params: [
@@ -1783,6 +1949,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     {
       id: "descente",
       trade: "roofing",
+      section: "evacuation",
       label: "Descente d'eau pluviale (tubes, coudes, colliers)",
       triggers: ["downpipe"],
       params: [
@@ -1851,6 +2018,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       // Placé en DERNIER : dans un devis de zinc à joint debout, la volige reste à l'ouvrage zinc (pas de double compte).
       id: "voligeage",
       trade: "roofing",
+      section: "principal",
       label: "Voligeage (voliges ou panneaux)",
       triggers: ["sheathing"],
       params: [SURFACE_PARAM],

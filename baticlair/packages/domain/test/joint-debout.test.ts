@@ -28,8 +28,15 @@ describe("joint debout : la question de façonnage, puis des lignes que le fourn
     });
     for (const d of v.questions) expect(d.text).not.toMatch(/quelle quantité|combien de m²|combien de kg/i);
     expect(bought(v)["Couverture zinc joint debout"]).toBeUndefined();
-    // Le reste se calcule déjà : pattes (91 × 7,6, rampant 5,5 m, zone 3) et voliges (91 × 1,05).
-    expect(bought(v)).toMatchObject({ "Pattes de fixation": "692 pièces", "Voliges sapin 18 mm": "96 m²" });
+    // Le reste se calcule déjà : pattes (VMZINC 36.2, rampant 5,5 m, bobine 500 : 91 × 5,70 coulissantes + 91 × 1,90
+    // fixes, deux lignes, §45.5), 2 pointes par patte, et voliges (91 × 1,05).
+    expect(bought(v)).toMatchObject({
+      "Pattes coulissantes joint debout": "519 pièces",
+      "Pattes fixes joint debout": "173 pièces",
+      "Pointes annelées 2,5 × 28 mm": "1 384 pièces",
+      "Voliges sapin 18 mm": "96 m²",
+    });
+    expect(bought(v)["Pattes de fixation"]).toBeUndefined();
   });
 
   it("« je façonne » : de la bobine au mètre linéaire, jamais au kg : 39 bacs × 5,5 m = 215 ml de bobine 500 mm en bord de mer", () => {
@@ -50,9 +57,9 @@ describe("joint debout : la question de façonnage, puis des lignes que le fourn
     expect(bought(v)["Bacs joint debout zinc"]).toBe("39 pièces");
     expect(bought(v)["Zinc naturel en bobine 500 mm"]).toBeUndefined();
     expect(v.assumptions.map((a) => `${a.key}=${a.value}`)).toEqual(expect.arrayContaining(["param:longueur_rampant=5,5", "derived:entraxe_joints=430"]));
-    // Intérieur des terres : bobine 650, entraxe 580 → 16,5 / 0,58 = 29 bacs ; pattes 91 × 5,6 = 510.
+    // Intérieur des terres : bobine 650, entraxe 580 → 16,5 / 0,58 = 29 bacs ; pattes 91 × 4,20 = 383 coulissantes, 91 × 1,40 = 128 fixes.
     const inland = readQuote(DEVIS, { "param:faconnage": { value: "2", unit: "u" }, "param:zone": { value: "1", unit: "u" } });
-    expect(bought(inland)).toMatchObject({ "Bacs joint debout zinc": "29 pièces", "Pattes de fixation": "510 pièces" });
+    expect(bought(inland)).toMatchObject({ "Bacs joint debout zinc": "29 pièces", "Pattes coulissantes joint debout": "383 pièces", "Pattes fixes joint debout": "128 pièces" });
   });
 
   it("chaque ligne commandée passe le test du fournisseur", () => {

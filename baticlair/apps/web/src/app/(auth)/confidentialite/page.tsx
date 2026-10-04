@@ -15,7 +15,7 @@ export default function ConfidentialitePage() {
     <article className="flex flex-col gap-5">
       <PageTitle>Confidentialité</PageTitle>
       <p className={p}>
-        BatiClair lit les devis de vos clients pour vous sortir la liste des matériaux à commander. Voici ce que nous gardons, pourquoi, combien de temps, et
+        BatiClair lit les devis de vos clients pour vous sortir la liste des fournitures à chiffrer. Voici ce que nous gardons, pourquoi, combien de temps, et
         comment le récupérer ou l&apos;effacer.
       </p>
 

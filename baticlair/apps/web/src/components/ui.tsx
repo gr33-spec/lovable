@@ -14,8 +14,8 @@ import { useBack } from "@/lib/history";
 type ButtonVariant = "primary" | "accent" | "secondary" | "ghost";
 
 const buttonClasses: Record<ButtonVariant, string> = {
-  // Action principale : la couleur de la marque (jeton accent).
-  primary: "bg-accent text-white",
+  // Action principale : le dégradé de la marque, avec son halo (touches 2026, maquette « radar »).
+  primary: "bg-cta text-white shadow-cta",
   accent: "bg-accent text-white",
   secondary: "bg-surface text-ink shadow-card",
   ghost: "bg-transparent text-accent-text",

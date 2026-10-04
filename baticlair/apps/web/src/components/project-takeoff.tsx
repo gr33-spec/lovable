@@ -1,16 +1,16 @@
 "use client";
 
-import { Check, CircleCheck, FileDown, HelpCircle, Pencil, Plus, Send, Sparkles, Trash2 } from "lucide-react";
+import { Check, CircleCheck, FileDown, HelpCircle, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AssistantMessage, ChatInput, parseCommand, ReasoningSteps, Say, ThinkingSteps, UserBubble } from "@/components/chat";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
-import { QuestionsForm, type FormAnswer } from "@/components/questions-form";
-import { QuantityCard, type ItemEdit } from "@/components/purchase-list";
+import { type ItemEdit } from "@/components/purchase-list";
+import { SupplyList } from "@/components/supply-list";
 import { SiteNotes } from "@/components/site-notes";
-import { DecisionCard, type DecisionHandlers } from "@/components/takeoff-view";
+import { type DecisionHandlers } from "@/components/takeoff-view";
 import { useProgressRefresh } from "@/components/project-progress";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
-import { api, ApiError, type ProjectDocument, type PurchaseItem, type Quantitatif, type ReadingState, type TakeoffLine } from "@/lib/api";
+import { api, ApiError, type ProjectDocument, type PurchaseItem, type Quantitatif, type ReadingState, type ScreenRow, type TakeoffLine } from "@/lib/api";
 import { parseQuantity, shortName } from "@/lib/labels";
 import { useResource } from "@/lib/use-resource";
 
@@ -63,6 +63,7 @@ export function ProjectTakeoff({
   const [pending, setPending] = useState(false);
   const [actionError, setActionError] = useState<ApiError | null>(null);
   const [showList, setShowList] = useState(false);
+  const [sendSignal, setSendSignal] = useState(0);
   const [fresh, setFresh] = useState(false);
   const [said, setSaid] = useState<Said[]>([]);
   const started = useRef(false);
@@ -141,17 +142,22 @@ export function ProjectTakeoff({
             </>
           ) : (
             <>
+              {/* Retour du fondateur (2026-10-04) : la lecture ne part plus d'elle-même ; l'artisan a le temps
+                  d'ajouter ses infos chantier (elles accompagnent la lecture), puis il lance d'un appui. */}
               <Say>
                 {failed
                   ? "Je n'ai pas réussi à lire ce devis jusqu'au bout (coupure ou panne de mon côté). Rien ne vous est décompté : on réessaie ?"
-                  : "Je lis votre devis et je vous sors la liste des matériaux à commander."}
+                  : "Devis bien reçu. Ajoutez des infos sur le chantier si vous voulez, puis lancez la lecture."}
               </Say>
               {actionError ? <ErrorNotice error={actionError} /> : null}
-              <Button disabled={archived} onClick={prepare}>
-                <Sparkles size={18} aria-hidden="true" />
-                {actionError || failed ? "Réessayer" : "Lire le devis"}
-              </Button>
               <SiteNotes projectId={projectId} infos={quantitatif?.infos ?? null} disabled={archived} onSaved={reload} />
+              <div className="h-20 lg:hidden" aria-hidden="true" />
+              <div className="fixed inset-x-4 bottom-[max(16px,env(safe-area-inset-bottom))] z-20 mx-auto max-w-2xl lg:static lg:inset-auto lg:mx-0">
+                <Button className="min-h-15 w-full text-[17px]" disabled={archived} onClick={prepare}>
+                  <Sparkles size={18} aria-hidden="true" />
+                  {actionError || failed ? "Réessayer" : "Lire le devis"}
+                </Button>
+              </div>
             </>
           )}
         </AssistantMessage>
@@ -161,7 +167,6 @@ export function ProjectTakeoff({
 
   const draft = takeoff.status === "draft";
   const materials = takeoff.lines.filter((l) => l.kind !== "labor");
-  const articles = takeoff.purchase.toBuy.length;
   const labor = takeoff.lines.filter((l) => l.kind === "labor");
   const editable = !archived;
   // Toutes les actions passent par la porte : réponses, corrections, validation.
@@ -216,9 +221,28 @@ export function ProjectTakeoff({
       await call("corrections", { action: "fixer_quantite", id: item.key, quantite: e.quantite.replace(/\s/g, ""), unite: e.unite });
     }
   };
-  const validate = () => {
+  // Un croquis par article (couvertine, habillage…) : joint à la ligne, il part avec la commande ; la liste se relit ensuite.
+  const attachSketch = async (itemKey: string, file: File, commentaire: string) => {
+    const form = new FormData();
+    form.append("article", itemKey);
+    if (commentaire) form.append("commentaire", commentaire);
+    form.append("file", file, file.name);
+    await api(`/v1/projects/${encodeURIComponent(projectId)}/infos/croquis`, { method: "POST", body: form });
+    reload();
+  };
+  const detachSketch = (sketchId: string) =>
+    run(() => api<null>(`/v1/documents/${encodeURIComponent(sketchId)}`, { method: "DELETE" }), () => reload());
+  // « Envoyer au fournisseur » : la liste est validée (si elle ne l'est pas encore), puis l'aperçu s'ouvre (§45.9).
+  const send = () => {
     setShowList(false);
-    void call("validation");
+    if (draft) void call("validation").then(() => setSendSignal((n) => n + 1));
+    else setSendSignal((n) => n + 1);
+  };
+  // Mettre une ligne de côté : un article de la liste sort de la liste (la liste validée le reste) ; une ligne du devis
+  // à préciser avec le fournisseur est retirée.
+  const setAside = async (row: ScreenRow) => {
+    if (row.itemKey) await call("corrections", { action: "retirer_article", id: row.itemKey });
+    else if (row.lineIds[0]) await call("corrections", { action: "retirer", id: row.lineIds[0] });
   };
   const typed = (text: string) => {
     const command = parseCommand(text);
@@ -228,26 +252,10 @@ export function ProjectTakeoff({
     }
     // Honnête : si la valeur ne sert à aucun calcul de ce devis, on le dit plutôt que « recalculé ».
     const used = takeoff.purchase.assumptions.some((a) => a.key === command.key) || takeoff.view.decisions.some((d) => d.question?.key === command.key || d.question?.key === `engine:${command.key}`);
-    remember(text, used ? `C'est noté : ${command.said}. J'ai recalculé.` : `C'est noté : ${command.said}. Ça ne change rien à cette commande.`);
+    remember(text, used ? `C'est noté : ${command.said}. J'ai recalculé.` : `C'est noté : ${command.said}. Ça ne change rien à la liste.`);
     void answer(command.key, command.value);
   };
   const linkStyle = "inline-flex min-h-11 items-center justify-center gap-1.5 self-start text-sm font-bold text-accent-text";
-  const decisions = takeoff.view.decisions;
-  // Toutes les questions d'un coup (§41, retour du fondateur) : un seul envoi, par paquets de 20 (limite de la porte).
-  const asked = decisions.filter((d) => d.question && d.question.options.length > 0).length;
-  const formKey = decisions.map((d) => d.key).join("|");
-  const submitAll = (answers: FormAnswer[]) => {
-    if (answers.length === 0) return;
-    remember(`${plural(answers.length, "réponse")} envoyée${answers.length > 1 ? "s" : ""}`);
-    void run(async () => {
-      let last: Quantitatif | null = null;
-      for (let i = 0; i < answers.length; i += 20) {
-        last = await api<Quantitatif>(`/v1/quantitatifs/${qid}/reponses?ecran=1`, { method: "POST", body: { reponses: answers.slice(i, i + 20) } });
-      }
-      return last!;
-    }, update);
-  };
-
   let body: React.ReactNode;
   if (showList) {
     body = (
@@ -263,7 +271,7 @@ export function ProjectTakeoff({
             <summary className="cursor-pointer font-bold">Lignes mises de côté</summary>
             <ul className="mt-2 flex list-disc flex-col gap-1 pl-5 text-muted">
               {labor.map((l) => (
-                <li key={l.id}>{shortName(l.designation)} (main-d&apos;œuvre, rien à commander)</li>
+                <li key={l.id}>{shortName(l.designation)} (main-d&apos;œuvre, rien à chiffrer)</li>
               ))}
               {takeoff.notes.map((n) => (
                 <li key={n}>{n}</li>
@@ -276,54 +284,38 @@ export function ProjectTakeoff({
         </button>
       </>
     );
-  } else if (draft && decisions.length > 0) {
-    body = (
-      <>
-        {asked > 0 ? null : <Say>Il me reste à confirmer :</Say>}
-        {asked > 0 ? <QuestionsForm key={formKey} decisions={decisions} assumptions={takeoff.purchase.assumptions} pending={pending} disabled={!editable} onSubmit={submitAll} /> : null}
-        {decisions
-          .filter((d) => !d.question || d.question.options.length === 0)
-          .map((d) => (
-            <DecisionCard key={d.key} decision={d} lines={takeoff.lines} editable={editable} pending={pending} handlers={handlers} />
-          ))}
-        <button type="button" onClick={() => setShowList(true)} className={linkStyle}>
-          Voir le devis lu ({plural(materials.length, "ligne")})
-        </button>
-      </>
-    );
-  } else if (draft) {
-    body = (
-      <>
-        <Say>Voici votre quantitatif.</Say>
-        <QuantityCard takeoff={takeoff} editable={editable} pending={pending} onAnswer={handlers.onAnswer} onEditItem={editItem} />
-        {editable && takeoff.purchase.canValidate ? (
-          // Sous le pouce pendant qu'on relit la liste, juste au-dessus de la barre de message.
-          <div className="sticky bottom-[84px] z-10 lg:bottom-[92px]">
-            <Button className="w-full shadow-[0_10px_24px_var(--color-accent-glow)]" pending={pending} onClick={validate}>
-              <Send size={18} aria-hidden="true" />
-              Envoyer au fournisseur
-            </Button>
-          </div>
-        ) : null}
-        <button type="button" onClick={() => setShowList(true)} className={linkStyle}>
-          Voir le devis lu ({plural(materials.length, "ligne")})
-        </button>
-      </>
-    );
   } else {
+    // UN SEUL ÉCRAN : la liste des fournitures, une couleur par ligne (retour du fondateur, 2026-10-04).
     body = (
       <>
-        <DoneLine
-          label={`Liste validée · ${plural(articles, "article")}`}
-          action="Voir"
-          actionLabel="Voir ou corriger la liste"
-          onAction={() => setShowList(true)}
+        <SupplyList
+          takeoff={takeoff}
+          editable={editable}
+          pending={pending}
+          handlers={handlers}
+          onEditItem={editItem}
+          onSetAside={setAside}
+          onSuggestion={async (item, reponse) => {
+            remember(reponse === "oui" ? `Oui, ajoute ${item.label.toLowerCase()}` : `Non, pas de ${item.label.toLowerCase()}`);
+            await call("corrections", { action: "suggestion", id: item.key, reponse });
+          }}
+          onSend={send}
+          validated={!draft}
+          sketches={quantitatif?.infos?.croquis ?? []}
+          sketchHandlers={{ onAttach: attachSketch, onDetach: detachSketch }}
         />
-        {/* §21.3 « Exporter PDF » : le même PDF que celui du fournisseur, pour l'imprimer ou le donner au comptoir. */}
-        <a href={`/v1/projects/${encodeURIComponent(projectId)}/commande.pdf`} target="_blank" rel="noreferrer" className={linkStyle}>
-          <FileDown size={18} aria-hidden="true" />
-          Exporter la liste en PDF
-        </a>
+        <div className="flex flex-wrap gap-x-4">
+          <button type="button" onClick={() => setShowList(true)} className={linkStyle}>
+            Voir le devis lu ({plural(materials.length, "ligne")})
+          </button>
+          {/* §21.3 « Exporter la liste en PDF » : le même document que celui du fournisseur. */}
+          {!draft ? (
+            <a href={`/v1/projects/${encodeURIComponent(projectId)}/demande-de-devis.pdf`} target="_blank" rel="noreferrer" className={linkStyle}>
+              <FileDown size={18} aria-hidden="true" />
+              Exporter la liste en PDF
+            </a>
+          ) : null}
+        </div>
       </>
     );
   }
@@ -349,7 +341,7 @@ export function ProjectTakeoff({
           {body}
         </AssistantMessage>
       </section>
-      <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} />
+      <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} onListChanged={reload} openSignal={sendSignal} />
       {draft && editable ? (
         <>
           <SiteNotes projectId={projectId} infos={quantitatif?.infos ?? null} disabled={pending} onSaved={reload} />

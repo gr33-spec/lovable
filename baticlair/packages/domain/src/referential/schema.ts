@@ -30,6 +30,7 @@ const family = z.object({
   keyAttributes: z.array(str),
   keywords: z.array(str).optional(),
   refines: z.string().optional(),
+  consumable: z.boolean().optional(),
 });
 const sellingUnit = z.object({ id: str, label: z.object({ one: str, many: str }), contains: fact, primary: z.boolean().optional() });
 const product = z.object({
@@ -72,11 +73,12 @@ const slot = z.object({
   usual: z.object({ text: str, source: str, productShort: z.string().optional(), productId: z.string().optional() }).optional(),
   measureOnly: z.literal(true).optional(),
 });
-const need = z.object({ ...provenance, id: str, slot: str, formula: str, unit: str, core: z.boolean(), exclusions: z.string().optional(), requires: z.array(str).optional(), when: z.string().optional() });
+const need = z.object({ ...provenance, id: str, slot: str, formula: str, unit: str, core: z.boolean(), exclusions: z.string().optional(), precision: z.string().optional(), requires: z.array(str).optional(), when: z.string().optional() });
 const workItem = z.object({
   id: str,
   trade: str,
   label: str,
+  section: z.enum(["principal", "singulier", "evacuation"]).optional(),
   triggers: z.array(str).min(1),
   params: z.array(param),
   slots: z.array(slot).min(1),

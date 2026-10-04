@@ -14,7 +14,7 @@ const ZINC = [
 describe("tri des questions par levier", () => {
   it("le façonnage (change l'unité : kg ou pièces) passe avant le nombre de descentes (quelques naissances)", () => {
     const v = readQuote(ZINC);
-    expect(v.questions.map((q) => q.question?.key ?? q.key)).toEqual(["param:faconnage", "param:nb_descentes"]);
+    expect(v.questions.map((q) => q.question?.key ?? q.key)).toEqual(["param:faconnage", "param:egout_faitage", "param:nb_descentes"]);
     expect(QUESTION_THRESHOLD).toBe(0.03);
   });
 });

@@ -118,6 +118,11 @@ export interface ProductFamily {
    * c'est elle qui compte. Du vocabulaire, jamais un réglage pour un devis.
    */
   refines?: string;
+  /**
+   * Consommable (pointes, vis, mastic, bande à joint) : rangé en fin de « Fournitures à chiffrer », dans le groupe
+   * « consommables » (§45.3 « du gros au petit, consommables en dernier »).
+   */
+  consumable?: boolean;
 }
 
 /** Façon de vendre un produit : à la pièce, à la longueur de 4 m, au rouleau… */
@@ -302,6 +307,12 @@ export interface NeedRule extends Provenance {
   /** Ce que la règle ne compte pas (dit à l'artisan dans « Voir le calcul »). */
   exclusions?: string;
   /**
+   * Ce qui sert au comptoir (§45.3, colonne « précision ») : l'usage de la pièce
+   * (« pour façonner la bande d'égout »), une position (« zone fixe de chaque bac »).
+   * Une ligne dont on ne sait pas à quoi elle sert porte son usage ici (§45.5).
+   */
+  precision?: string;
+  /**
    * Besoin qui n'existe que si ces données sont connues (« tuiles de rive »
    * seulement si le devis donne une longueur de rives) : sinon il est omis,
    * sans question ni « inconnu ».
@@ -318,6 +329,11 @@ export interface WorkItemType {
   id: string;
   trade: string;
   label: string;
+  /**
+   * Rang de l'ouvrage dans la liste des fournitures (retour du fondateur, 2026-10-04) : l'ouvrage principal, puis
+   * les points singuliers, puis l'évacuation des eaux ; les consommables ferment la liste. Absent : point singulier.
+   */
+  section?: "principal" | "singulier" | "evacuation";
   /** Familles du devis qui signalent cet ouvrage. */
   triggers: string[];
   params: ParamDef[];
