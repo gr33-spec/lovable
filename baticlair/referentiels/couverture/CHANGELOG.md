@@ -1,5 +1,11 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.04-24 — bobineau au-delà de 6 ml
+
+- **Bobineau** (réponse du fondateur) : pour les bandes façonnées sur place (égout, rive, faîtage, noue, solin, abergement), au-delà de **6 ml** un bobineau remplace les feuilles 2 × 1 m. Largeurs 500, 650, 1 000 mm ; longueurs 17, 21, 31 m (40 m en 500) ; épaisseur du chantier (0,65 par défaut, 0,70, 0,80). Vendu à la pièce, désignation « Bobineau 500 × 17 m, 0,65 ». Choix : la plus petite largeur qui contient le développé, la plus courte longueur qui couvre le zinc à façonner (marge 10 % comprise) ; au-delà, plusieurs bobineaux de la plus grande longueur. Chantier Test : 13 ml de bande d'égout → **1 bobineau 500 × 17 m, 0,65** (avant : 3 feuilles 2 × 1 m).
+- Le développé n'est plus demandé quand il ne change pas l'article (un bobineau de 500 mm contient tous les développés proposés) ; il l'est toujours pour les feuilles et pour une bande **commandée façonnée** (elle se fabrique à son développé).
+- Moteur (générique) : désignation calculée d'un article (`designation`, même écriture que la précision) ; une donnée à boutons peut être bornée à ses réponses tant qu'elle n'est pas répondue (`withinChoices`) ; la règle des 3 % ne remplace jamais par une hypothèse une donnée exigée par une précision (`precisionRequires`) ; une précision s'écrit dès que ses propres valeurs sont sûres.
+
 ## roofing-2026.10.04-23 — sortie de toit décomposée, longueurs expliquées
 
 - **Sortie de toit** (nouvel ouvrage `sortie-de-toit`, réponse du fondateur) : une sortie = une **embase plomb** (ardoise, tuile) ou une **platine zinc soudée** (zinc), au diamètre du conduit, plus un **chapeau** ; une **collerette d'étanchéité** (solin) seulement pour un conduit de fumée. Questions à boutons : diamètre Ø 80 / 100 / 125 / 150 / 180 ou VMC, puis conduit de fumée ou ventilation. La couverture se lit sur les autres ouvrages du devis (zinc à joint debout → platine ; ardoises ou tuiles → embase), sinon sur la ligne (« tuile HP10 »), sinon on demande. « VMC », « poêle », « fumée », « ventilation », « Ø 150 » écrits dans la ligne sont lus. Le diamètre part en précision (« Ø 150 », « VMC »). La ligne du devis n'est plus un article tel quel : D-2026-015 « Sortie de toit Poujoulat » devient embase + chapeau (+ collerette si fumée), après deux questions.

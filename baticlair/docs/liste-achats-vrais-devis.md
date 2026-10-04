@@ -107,9 +107,9 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 **Questions :**
 
-- Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ? → [Je façonne (feuilles 2 × 1 m)] [Je commande façonné]
-- Combien de descentes pour cette gouttière ? → [1] [2] [3] [4]
+- Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 - Périmètre d'une cheminée (les 4 côtés) ? → [2 m] [3 m] [4 m] [5 m]
+- Combien de descentes pour cette gouttière ? → [1] [2] [3] [4]
 - 6 : c'est le nombre d'ardoises à commander, ou le nombre de jouées ? → [6 ardoises à commander] [6 jouées (matériaux à calculer)]
 
 **À acheter :**
@@ -135,7 +135,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 **Questions :**
 
-- Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ? → [Je façonne (feuilles 2 × 1 m)] [Je commande façonné]
+- Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 - Périmètre d'une cheminée (les 4 côtés) ? → [2 m] [3 m] [4 m] [5 m]
 
 **À acheter :**
@@ -166,7 +166,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 **Questions :**
 
-- Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ? → [Je façonne (feuilles 2 × 1 m)] [Je commande façonné]
+- Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 - Périmètre d'une cheminée (les 4 côtés) ? → [2 m] [3 m] [4 m] [5 m]
 
 **À acheter :**

@@ -42,19 +42,22 @@ describe("test du fournisseur : chaque ligne « À commander » se charge dans l
 
   it("une ligne qui échoue au test ne part pas, mais elle n'empêche pas d'envoyer le reste", () => {
     const v = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" } });
-    // Restent, posées d'un coup : UNE question de façonnage pour tout le métal, et le développé de la bande (qu'elle
-    // soit façonnée sur place ou commandée façonnée). Le voligeage est reconnu (§7), plus « article inconnu ».
+    // Restent, posées d'un coup : UNE question de façonnage pour tout le métal, égout / faîtage, et le développé (une
+    // bande commandée façonnée se fabrique à son développé ; façonnée sur place au-delà de 6 ml, un bobineau de 500 mm
+    // suffit et la réponse est simplement ignorée). Le voligeage est reconnu (§7), plus « article inconnu ».
     expect(v.questions.map((q) => q.question?.key ?? q.key).sort()).toEqual(["param:developpe", "param:egout_faitage", "param:faconnage"]);
+    const surPlaceLong = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "1", unit: "u" } });
+    expect(surPlaceLong.questions.map((q) => q.question?.key ?? q.key)).not.toContain("param:developpe");
+    const commande = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "2", unit: "u" } });
+    expect(commande.questions.map((q) => q.question?.key ?? q.key)).toContain("param:developpe");
     // Façonné : 13 ml × 1,1 = 14,3 m → 8 longueurs de 2 m (recouvrement 10 cm, §45.5) ; rien à faire chiffrer.
-    const faconne = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "2", unit: "u" } });
+    const faconne = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "2", unit: "u" }, "param:developpe": { value: "100", unit: "mm" } });
     expect(faconne.toBuy.find((b) => b.label.startsWith("Bandes zinc façonnées"))).toMatchObject({ quantity: "8 longueurs de 2 m" });
     expect(faconne.toQuote).toEqual([]);
-    // Je façonne : le développé devient nécessaire (question), puis des FEUILLES de 2 × 1 m (§25.2), jamais du zinc au kg
-    // pour une bande : 14,3 m × 0,10 m / 2 m² = 0,72 → 1 feuille. Le joint debout, lui, part en bobine au mètre linéaire, largeur écrite (jamais au kg).
-    const sansDeveloppe = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "1", unit: "u" } });
-    expect(sansDeveloppe.questions.map((q) => q.question?.key ?? q.key)).toContain("param:developpe");
-    const surPlace = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "1", unit: "u" }, "param:developpe": { value: "100", unit: "mm" } });
-    expect(surPlace.toBuy.find((b) => b.needIds.includes("feuilles-bandes"))).toMatchObject({ label: "Feuilles zinc 2 × 1 m", quantity: "1 pièce" });
+    // Je façonne 13 ml (plus de 6 ml) : un BOBINEAU, jamais du zinc au kg (réponse du fondateur, 2026-10-04) : 14,3 m de
+    // zinc → bobineau 500 × 17 m. Le joint debout, lui, part en bobine au mètre linéaire, largeur écrite (jamais au kg).
+    const surPlace = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "1", unit: "u" } });
+    expect(surPlace.toBuy.find((b) => b.needIds.includes("bobineau-bandes"))).toMatchObject({ label: "Bobineau 500 × 17 m, 0,65", quantity: "1 pièce" });
     expect(surPlace.toBuy.find((b) => b.needIds.some((id) => id.startsWith("zinc-bobines")))?.order?.unit).toBe("ml");
   });
 

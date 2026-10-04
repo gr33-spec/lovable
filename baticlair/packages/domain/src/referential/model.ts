@@ -210,6 +210,11 @@ export interface ParamDef {
   estimate?: string;
   /** Façon de dire une valeur dans l'explication (« 3 » → « III » pour une région ardoise) ; le calcul garde la valeur. */
   display?: Record<string, string>;
+  /**
+   * Pas encore répondue, la donnée est l'une de ses réponses proposées (le développé : 100 à 400 mm), pas n'importe
+   * quelle valeur : ce qui ne dépend pas de laquelle (un bobineau de 500 mm) se calcule sans la demander.
+   */
+  withinChoices?: boolean;
   /** Un mot de la ligne de l'ouvrage donne la valeur (« VMC » → 0, « fumée » → 1) : lu dans le devis, jamais deviné. */
   textValues?: { value: string; keywords: string[] }[];
   /**
@@ -330,6 +335,11 @@ export interface NeedRule extends Provenance {
    * sortie de toit) : demandées même si elles ne changent aucune quantité — elles changent l'article.
    */
   precisionRequires?: string[];
+  /**
+   * Désignation calculée de l'article, à la place du nom du produit générique (« Bobineau {largeur|mm#} × {longueur|m},
+   * {epaisseur|mm#} » → « Bobineau 500 × 17 m, 0,65 ») : même écriture que la précision.
+   */
+  designation?: string;
   /**
    * Besoin qui n'existe que si ces données sont connues (« tuiles de rive »
    * seulement si le devis donne une longueur de rives) : sinon il est omis,

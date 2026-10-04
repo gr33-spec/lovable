@@ -32,7 +32,7 @@ describe("la liste des fournitures, une couleur par ligne", () => {
     expect(check.map((r) => [label(v, r), r.decisionKey])).toEqual([
       ["Zinc naturel en bobine 500 mm ou Bacs joint debout zinc", "engine:param:faconnage"],
       ["Bandes d'égout zinc dév. 33 cm ou Faîtage zinc (bande)", "engine:param:egout_faitage"],
-      ["Bandes zinc façonnées ou Feuilles zinc 2 × 1 m", "engine:param:faconnage"],
+      ["Bandes zinc façonnées ou Bobineau zinc", "engine:param:faconnage"],
       ["Naissances", "engine:param:nb_descentes"],
       ["Jouées de lucarnes", "group:unknown"],
     ]);
@@ -42,10 +42,10 @@ describe("la liste des fournitures, une couleur par ligne", () => {
   });
 
   it("une réponse fait passer ses lignes au vert ; la question suivante d'un ouvrage (le développé) vient après", () => {
+    // Je façonne, 13 ml : un bobineau de 500 mm, le développé n'y change rien (il n'est pas demandé).
     const apres = readQuote(TEST, { "param:faconnage": u("1") });
     expect(rows(apres).filter((r) => r.status === "check").map((r) => [label(apres, r), r.decisionKey])).toEqual([
       ["Bandes d'égout zinc dév. 33 cm ou Faîtage zinc (bande)", "engine:param:egout_faitage"],
-      ["Feuilles zinc 2 × 1 m", "engine:param:developpe"],
       ["Naissances", "engine:param:nb_descentes"],
       ["Jouées de lucarnes", "group:unknown"],
     ]);

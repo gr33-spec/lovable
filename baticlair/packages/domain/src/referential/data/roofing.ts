@@ -22,6 +22,7 @@ import type { Fact, ParamDef, Product, Provenance, Referential } from "../model.
 const DRAFT = { status: "draft" } as const;
 /** Réponses du fondateur aux partiels (2026-10-04). */
 const FOUNDER_REPLY = { status: "verified", verifiedAt: "2026-10-04", verifiedBy: "Fondateur (couvreur)" } as const;
+const FR_REPLY = "fondateur-reponses-2026-10-04";
 /** Référentiel quantitatif couverture écrit par le fondateur (couvreur), validé par lui le 2026-10-03. */
 const FOUNDER_DOC = {
   status: "verified",
@@ -421,6 +422,8 @@ const EPAISSEUR_ZINC_PARAM: ParamDef = {
     { label: "0,70 mm", value: "0.7" },
     { label: "0,80 mm", value: "0.8" },
   ],
+  // Écrite comme au comptoir dans une désignation (« bobineau 650 × 31 m, 0,65 »).
+  display: { "0.65": "0,65", "0.7": "0,70", "0.8": "0,80" },
 };
 /** Même clé « faconnage » que le joint debout : une seule réponse, et une seule habitude, pour tout le métal façonné. */
 /**
@@ -446,9 +449,9 @@ const EGOUT_FAITAGE_PARAM: ParamDef = {
 const FACONNAGE_BANDES_PARAM: ParamDef = {
   ...FACONNAGE_PARAM,
   question: "Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ?",
-  hint: "Je façonne : feuilles de zinc 2 × 1 m. Commandé façonné : bandes en longueurs de 2 m. Gouttières et descentes ne sont pas concernées.",
+  hint: "Je façonne : feuilles de zinc 2 × 1 m, bobineau au-delà de 6 ml. Commandé façonné : bandes en longueurs de 2 m. Gouttières et descentes ne sont pas concernées.",
   choices: [
-    { label: "Je façonne (feuilles 2 × 1 m)", value: "1" },
+    { label: "Je façonne (feuilles ou bobineau)", value: "1" },
     { label: "Je commande façonné", value: "2" },
   ],
 };
@@ -463,6 +466,7 @@ const DEVELOPPE_PARAM: ParamDef = {
   kind: "site_data",
   question: "Développé de la bande zinc ?",
   textLabels: ["developpe", "dev", "dev."],
+  withinChoices: true,
   choices: [
     { label: "100 mm (solin, couvre-joint)", value: "100" },
     { label: "250 mm", value: "250" },
@@ -480,7 +484,42 @@ const ZINC_PLAT_CONSTANTS = {
   longueur_utile: condition("1.9", "m", F, FOUNDER_DOC, "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."),
   surface_feuille: condition("2", "m2", F, FOUNDER_DOC, "« feuilles = (ml ÷ 2 m) × (développé ÷ 1 000) arrondi sup. » (§25.2), feuille de 2 × 1 m."),
   marge_bandes: condition("1.1", "u", F, FOUNDER_DOC, "« Solin / abergement : ml × 1,1 » (§7)."),
+  // Réponse du fondateur (2026-10-04) : « Bobineau : largeurs 500, 650 et 1 000 mm ; longueurs 17, 21, 31 m (40 m en
+  // 500) ; épaisseurs 0,65 par défaut, 0,70 et 0,80. Je le prends pour les bandes façonnées à la place des feuilles
+  // 2 × 1 m dès que la longueur dépasse 6 ml. »
+  seuil_bobineau: condition("6", "m", FR_REPLY, FOUNDER_REPLY, "Au-delà de 6 ml de bande : bobineau au lieu de feuilles 2 × 1 m."),
+  bobineau_500: condition("500", "mm", FR_REPLY, FOUNDER_REPLY),
+  bobineau_650: condition("650", "mm", FR_REPLY, FOUNDER_REPLY),
+  bobineau_1000: condition("1000", "mm", FR_REPLY, FOUNDER_REPLY),
+  bobineau_17: condition("17", "m", FR_REPLY, FOUNDER_REPLY),
+  bobineau_21: condition("21", "m", FR_REPLY, FOUNDER_REPLY),
+  bobineau_31: condition("31", "m", FR_REPLY, FOUNDER_REPLY),
+  bobineau_40: condition("40", "m", FR_REPLY, FOUNDER_REPLY, "40 m seulement en largeur 500."),
 };
+/**
+ * Le bobineau qui suffit : la plus petite largeur qui contient le développé, puis la plus courte longueur qui couvre
+ * le zinc à façonner (40 m seulement en 500) ; au-delà, plusieurs bobineaux de la plus grande longueur.
+ */
+const bobineauDerived = (developpe: string) => [
+  {
+    key: "largeur_bobineau",
+    label: "Largeur du bobineau",
+    unit: "mm",
+    formula: `si(${developpe} <= regle.bobineau_500, regle.bobineau_500, si(${developpe} <= regle.bobineau_650, regle.bobineau_650, regle.bobineau_1000))`,
+    source: FR_REPLY,
+    verification: FOUNDER_REPLY,
+    version: 1,
+  },
+  {
+    key: "longueur_bobineau",
+    label: "Longueur du bobineau",
+    unit: "m",
+    formula: "si(ml_zinc <= regle.bobineau_17, regle.bobineau_17, si(ml_zinc <= regle.bobineau_21, regle.bobineau_21, si(ml_zinc <= regle.bobineau_31, regle.bobineau_31, si(largeur_bobineau <= regle.bobineau_500, regle.bobineau_40, regle.bobineau_31))))",
+    source: FR_REPLY,
+    verification: FOUNDER_REPLY,
+    version: 1,
+  },
+];
 const POIDS_PLAT_DERIVED = {
   key: "poids_zinc_plat",
   label: "Poids du zinc (bande plate)",
@@ -550,7 +589,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.04-23",
+  version: "roofing-2026.10.04-24",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -704,6 +743,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       keywords: ["bande de ventilation", "bande zinc", "bande en zinc", "bande de solin", "bande solin", "bande de rive zinc", "bande d'egout", "bande egout", "couvre-joint zinc", "bavette zinc", "bande porte-solin"],
     },
     { code: "zinc_sheet", label: "Feuille de zinc", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["feuille de zinc", "feuille zinc"] },
+    { code: "zinc_narrow_coil", label: "Bobineau de zinc", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["bobineau"] },
     { code: "solin_support", label: "Bande porte-solin", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["porte-solin", "porte solin"] },
     // Abergement (entourage de cheminée) : un ouvrage compté, converti en bandes zinc façonnées ou en bobine (§7 « Abergement de cheminée »).
     { code: "chimney_flashing", label: "Abergement de cheminée", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["abergement", "entourage de cheminee", "entourage cheminee", "solin de cheminee", "habillage de cheminee"] },
@@ -1073,6 +1113,8 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("bardelis-standard", "verge_tile", "Bardelis (tuile de rive canal), modèle de la tuile posée", "Bardelis"),
     // Zinc façonné sur place (§25.2) : feuilles de 2 × 1 m, épaisseur du chantier ; jamais au kg pour un abergement ou une bande.
     generic("feuille-zinc-2x1", "zinc_sheet", "Feuille zinc naturel 2 × 1 m (épaisseur du chantier)", "Feuilles zinc 2 × 1 m"),
+    // Réponse du fondateur (2026-10-04) : bobineau vendu à la pièce, désignation « bobineau 650 × 31 m, 0,65 ».
+    generic("bobineau-zinc", "zinc_narrow_coil", "Bobineau de zinc naturel (largeur, longueur et épaisseur du chantier)", "Bobineau zinc"),
     // Retour du fondateur (§45.5) : une bande zinc se sert en longueurs de 2 m, dites comme telles (« 8 longueurs de 2 m »).
     generic("bande-zinc-faconnee-standard", "zinc_strip", "Bande zinc façonnée, longueurs de 2 m (développé et épaisseur du chantier)", "Bandes zinc façonnées", {
       sellingUnits: [{ id: "longueur", label: { one: "longueur de 2 m", many: "longueurs de 2 m" }, contains: ONE_PIECE, primary: true }],
@@ -1551,6 +1593,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       slots: [
         { key: "bande", family: "zinc_strip", label: "Bandes zinc façonnées", usual: { text: "Bandes façonnées par le fournisseur, longueurs de 2 m (§36.4).", source: F, productId: "bande-zinc-faconnee-standard" } },
         { key: "feuille", family: "zinc_sheet", label: "Feuilles zinc 2 × 1 m", usual: { text: "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).", source: F, productId: "feuille-zinc-2x1" } },
+        { key: "bobineau", family: "zinc_narrow_coil", label: "Bobineau zinc", usual: { text: "Bobineau de zinc au-delà de 6 ml de bande (réponse du fondateur).", source: FR_REPLY, productId: "bobineau-zinc" } },
         { key: "mastic", family: "sealant", label: "Silicone ou mastic", usual: { text: "Silicone neutre compatible zinc, 1 cartouche par 8 ml de joint (§25.6).", source: F, productId: "cartouche-silicone-zinc" } },
         { key: "vis", family: "strip_screw", label: "Vis de bandes", usual: { text: "Vis inox 4 × 40, 4 par mètre (§25.5).", source: F, productId: "vis-inox-4x40" } },
       ],
@@ -1558,6 +1601,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       derived: [
         POIDS_PLAT_DERIVED,
         { key: "ml_zinc", label: "Longueur de zinc, marge comprise", unit: "m", formula: "longueur_bande * regle.marge_bandes", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
+        ...bobineauDerived("developpe"),
       ],
       needs: [
         {
@@ -1569,6 +1613,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: true,
           exclusions: "Longueurs de 2 m, recouvrement 10 cm entre éléments ; fixations à part.",
           precision: "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
+          // Une bande commandée façonnée se fabrique à son développé : le fournisseur ne peut pas le deviner.
+          precisionRequires: ["developpe"],
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
@@ -1576,7 +1622,8 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "feuilles-bandes",
           slot: "feuille",
-          when: "faconnage < 2",
+          // Je façonne, et 6 ml au plus : feuilles 2 × 1 m ; au-delà, un bobineau (réponse du fondateur, 2026-10-04).
+          when: "si(faconnage < 2, si(longueur_bande > regle.seuil_bobineau, 0, 1), 0)",
           formula: "arrondi_sup(ml_zinc * developpe / regle.surface_feuille)",
           unit: "u",
           core: true,
@@ -1585,6 +1632,21 @@ export const ROOFING_REFERENTIAL: Referential = {
           precision: "pour façonner {longueur_bande|ml} de bande, développé {developpe|cm}",
           source: F,
           verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "bobineau-bandes",
+          slot: "bobineau",
+          when: "si(faconnage < 2, si(longueur_bande > regle.seuil_bobineau, 1, 0), 0)",
+          formula: "arrondi_sup(ml_zinc / longueur_bobineau)",
+          unit: "u",
+          core: true,
+          exclusions: "La plus petite largeur qui contient le développé, la plus courte longueur qui couvre la bande (marge comprise).",
+          designation: "Bobineau {largeur_bobineau|mm#} × {longueur_bobineau|m}, {epaisseur_zinc}",
+          // Le développé ne change pas le bobineau tant qu'il tient dans 500 mm : il n'est pas demandé pour lui.
+          precision: "pour façonner {longueur_bande|ml} de bande",
+          source: FR_REPLY,
+          verification: FOUNDER_REPLY,
           version: 1,
         },
         // §45.8 : suggérés (« On ajoute ? »), jamais d'office : non « cœur » de l'ouvrage.
@@ -1642,6 +1704,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "abergement", family: "chimney_flashing", label: "Abergement de cheminée", measureOnly: true },
         { key: "bande", family: "zinc_strip", label: "Bandes zinc façonnées (dév. 330 mm)", usual: { text: "Bandes façonnées par le fournisseur, longueurs de 2 m, développé 33 cm (§7).", source: F, productId: "bande-zinc-faconnee-standard" } },
         { key: "feuille", family: "zinc_sheet", label: "Feuilles zinc 2 × 1 m", usual: { text: "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).", source: F, productId: "feuille-zinc-2x1" } },
+        { key: "bobineau", family: "zinc_narrow_coil", label: "Bobineau zinc", usual: { text: "Bobineau de zinc au-delà de 6 ml de zinc (réponse du fondateur).", source: FR_REPLY, productId: "bobineau-zinc" } },
         { key: "porte_solin", family: "solin_support", label: "Bandes porte-solin", keywords: ["solin", "porte-solin"], usual: { text: "Bande porte-solin au périmètre, longueurs de 2 m (§7).", source: F, productId: "porte-solin-standard" } },
       ],
       constants: {
@@ -1653,6 +1716,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         POIDS_PLAT_DERIVED,
         { key: "ml_zinc", label: "Longueur de zinc façonné", unit: "m", formula: "nb_cheminees * perimetre_cheminee * regle.coef_abergement", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
         { key: "ml_solin", label: "Longueur de solin", unit: "m", formula: "nb_cheminees * perimetre_cheminee", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
+        ...bobineauDerived("regle.developpe_abergement"),
       ],
       needs: [
         {
@@ -1670,7 +1734,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "feuilles-abergement",
           slot: "feuille",
-          when: "faconnage < 2",
+          when: "si(faconnage < 2, si(nb_cheminees * perimetre_cheminee * regle.coef_abergement > regle.seuil_bobineau, 0, 1), 0)",
           formula: "arrondi_sup(ml_zinc * regle.developpe_abergement / regle.surface_feuille)",
           unit: "u",
           core: true,
@@ -1678,6 +1742,20 @@ export const ROOFING_REFERENTIAL: Referential = {
           precision: "pour façonner l'abergement de cheminée, développé 33 cm",
           source: F,
           verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "bobineau-abergement",
+          slot: "bobineau",
+          when: "si(faconnage < 2, si(nb_cheminees * perimetre_cheminee * regle.coef_abergement > regle.seuil_bobineau, 1, 0), 0)",
+          formula: "arrondi_sup(ml_zinc / longueur_bobineau)",
+          unit: "u",
+          core: true,
+          exclusions: "Développé 33 cm ; la plus courte longueur de bobineau qui couvre le zinc de l'abergement.",
+          designation: "Bobineau {largeur_bobineau|mm#} × {longueur_bobineau|m}, {epaisseur_zinc}",
+          precision: "pour façonner {ml_zinc|ml} d'abergement, développé 33 cm",
+          source: FR_REPLY,
+          verification: FOUNDER_REPLY,
           version: 1,
         },
         {
@@ -1763,10 +1841,10 @@ export const ROOFING_REFERENTIAL: Referential = {
       ],
       slots: [
         { key: "sortie", family: "roof_outlet", label: "Sortie de toit", measureOnly: true },
-        { key: "embase", family: "outlet_base", label: "Embase plomb", usual: { text: "Embase plomb au diamètre du conduit, pour ardoise et tuile.", source: "fondateur-reponses-2026-10-04", productId: "embase-plomb-sortie" } },
-        { key: "platine", family: "outlet_plate", label: "Platine zinc soudée", usual: { text: "Platine zinc soudée au diamètre du conduit, pour couverture zinc.", source: "fondateur-reponses-2026-10-04", productId: "platine-zinc-sortie" } },
-        { key: "chapeau", family: "outlet_cap", label: "Chapeau", usual: { text: "Un chapeau par sortie, au diamètre du conduit.", source: "fondateur-reponses-2026-10-04", productId: "chapeau-sortie" } },
-        { key: "collerette", family: "outlet_collar", label: "Collerette d'étanchéité", usual: { text: "Collerette d'étanchéité (solin), seulement pour un conduit de fumée.", source: "fondateur-reponses-2026-10-04", productId: "collerette-sortie" } },
+        { key: "embase", family: "outlet_base", label: "Embase plomb", usual: { text: "Embase plomb au diamètre du conduit, pour ardoise et tuile.", source: FR_REPLY, productId: "embase-plomb-sortie" } },
+        { key: "platine", family: "outlet_plate", label: "Platine zinc soudée", usual: { text: "Platine zinc soudée au diamètre du conduit, pour couverture zinc.", source: FR_REPLY, productId: "platine-zinc-sortie" } },
+        { key: "chapeau", family: "outlet_cap", label: "Chapeau", usual: { text: "Un chapeau par sortie, au diamètre du conduit.", source: FR_REPLY, productId: "chapeau-sortie" } },
+        { key: "collerette", family: "outlet_collar", label: "Collerette d'étanchéité", usual: { text: "Collerette d'étanchéité (solin), seulement pour un conduit de fumée.", source: FR_REPLY, productId: "collerette-sortie" } },
       ],
       constants: {
         // « VMC » se répond 0 mm : une sortie VMC n'a pas de collerette.
@@ -1783,7 +1861,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           exclusions: "Une embase par sortie, au diamètre du conduit.",
           precision: "{diametre_sortie}, pour ardoise ou tuile",
           precisionRequires: ["diametre_sortie"],
-          source: "fondateur-reponses-2026-10-04",
+          source: FR_REPLY,
           verification: FOUNDER_REPLY,
           version: 1,
         },
@@ -1797,7 +1875,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           exclusions: "Une platine zinc soudée par sortie, au diamètre du conduit.",
           precision: "{diametre_sortie}, soudée sur la couverture zinc",
           precisionRequires: ["diametre_sortie"],
-          source: "fondateur-reponses-2026-10-04",
+          source: FR_REPLY,
           verification: FOUNDER_REPLY,
           version: 1,
         },
@@ -1810,7 +1888,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           exclusions: "Un chapeau par sortie.",
           precision: "{diametre_sortie}",
           precisionRequires: ["diametre_sortie"],
-          source: "fondateur-reponses-2026-10-04",
+          source: FR_REPLY,
           verification: FOUNDER_REPLY,
           version: 1,
         },
@@ -1825,7 +1903,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           exclusions: "Une collerette par conduit de fumée ; aucune pour une ventilation.",
           precision: "{diametre_sortie}, solin du conduit de fumée",
           precisionRequires: ["diametre_sortie"],
-          source: "fondateur-reponses-2026-10-04",
+          source: FR_REPLY,
           verification: FOUNDER_REPLY,
           version: 1,
         },
