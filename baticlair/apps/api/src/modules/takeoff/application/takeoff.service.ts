@@ -450,8 +450,10 @@ export class TakeoffService {
   // Chaque geste de l'artisan est journalisé avec l'AVANT (ce que BatiClair avait compris et
   // montré) et l'APRÈS. Le journal ne touche ni la liste ni le référentiel (PD-045).
 
-  async updateLine(tenant: TenantContext, lineId: string, fields: LineFields): Promise<ReviewedTakeoff> {
-    const takeoff = await this.editable(tenant, await this.takeoffs.findByLine(tenant, lineId));
+  async updateLine(tenant: TenantContext, lineId: string, fields: LineFields, options: { keepStatus?: boolean } = {}): Promise<ReviewedTakeoff> {
+    // Depuis l'aperçu avant envoi (§45.9), la ligne de l'artisan ne lève aucun doute : la liste validée le reste.
+    const found = await this.takeoffs.findByLine(tenant, lineId);
+    const takeoff = options.keepStatus ? await this.itemEditable(tenant, found) : await this.editable(tenant, found);
     const before = await this.review(tenant, takeoff);
     await this.takeoffs.updateLine(tenant, lineId, fields);
     const after = await this.reload(tenant, takeoff.id);
@@ -536,6 +538,18 @@ export class TakeoffService {
         promptId: after.takeoff.promptId,
         promptVersion: after.takeoff.promptVersion,
         model: after.takeoff.model,
+        // §45.6 : une ligne du devis corrigée d'un tap porte aussi les sept champs (règle : la ligne elle-même).
+        ...(action === "edit" && line
+          ? await this.journalFacts(tenant, after.takeoff, {
+              materiau: line.designation,
+              calculee: [line.quantityRaw, line.unitRaw].filter(Boolean).join(" ") || null,
+              corrigee: (() => {
+                const now = after.takeoff.lines.find((l) => l.id === lineId);
+                return now ? [now.quantityRaw, now.unitRaw].filter(Boolean).join(" ") || null : null;
+              })(),
+              regle: "ligne du devis",
+            })
+          : {}),
       },
     });
   }

@@ -29,6 +29,7 @@ export function QuantityCard({
   pending,
   onAnswer,
   onEditItem,
+  onSuggestion,
   sketches = [],
   onAttach,
   onDetach,
@@ -38,6 +39,8 @@ export function QuantityCard({
   pending: boolean;
   onAnswer: DecisionHandlers["onAnswer"];
   onEditItem?: (item: PurchaseItem, edit: ItemEdit) => Promise<void>;
+  /** §45.8 « On ajoute ? » : Oui / Non d'un tap. */
+  onSuggestion?: (item: PurchaseItem, answer: "oui" | "non") => Promise<void>;
   /** Croquis rattachés aux articles (clé de l'article) : visibles sous la ligne, joints à la commande. */
   sketches?: readonly ItemSketch[];
   onAttach?: SketchHandlers["onAttach"];
@@ -49,14 +52,14 @@ export function QuantityCard({
   return (
     <section aria-label="Quantitatif" className="flex flex-col overflow-hidden rounded-[20px] bg-surface shadow-card">
       <div className="flex items-baseline justify-between gap-3 px-4 pt-4 pb-2">
-        <h2 className="font-display text-[24px] font-extrabold tracking-[-0.02em]">À commander</h2>
+        <h2 className="font-display text-[24px] font-extrabold tracking-[-0.02em]">Fournitures à chiffrer</h2>
         {p.toBuy.length > 0 ? (
           <span className="rounded-full bg-accent/10 px-2.5 py-1 text-[13px] font-extrabold text-accent-text">
             {p.toBuy.length} article{p.toBuy.length > 1 ? "s" : ""}
           </span>
         ) : null}
       </div>
-      {p.toBuy.length === 0 ? <p className="px-4 pb-3 text-sm text-muted">Rien à commander pour l&apos;instant.</p> : null}
+      {p.toBuy.length === 0 ? <p className="px-4 pb-3 text-sm text-muted">Aucune fourniture à chiffrer pour l&apos;instant.</p> : null}
       {p.groups.map((g) => (
         <div key={g.key} className="flex flex-col border-t border-line px-4 pt-3 pb-1">
           <h3 className="text-[12px] font-extrabold tracking-[0.06em] text-muted uppercase">
@@ -82,10 +85,11 @@ export function QuantityCard({
           </ul>
         </div>
       ))}
+      {editable && onSuggestion && (p.suggestions ?? []).length > 0 ? <Suggestions items={p.suggestions} pending={pending} onAnswer={onSuggestion} onEdit={onEditItem} /> : null}
       {p.toQuote.length > 0 ? (
         <div className="flex flex-col gap-1 bg-warn-bg px-4 py-3">
-          <h3 className={`${caption} text-warn`}>Le fournisseur chiffrera</h3>
-          <ul aria-label="Le fournisseur chiffrera" className="flex flex-col gap-1">
+          <h3 className={`${caption} text-warn`}>À préciser avec le fournisseur</h3>
+          <ul aria-label="À préciser avec le fournisseur" className="flex flex-col gap-1">
             {p.toQuote.map((q) => (
               <li key={q.key} className="text-[15px] leading-snug">
                 <span className="font-bold">{shortName(q.label)}</span>
@@ -96,6 +100,67 @@ export function QuantityCard({
         </div>
       ) : null}
       {p.assumptions.length > 0 ? <Assumptions assumptions={p.assumptions} editable={editable} pending={pending} onAnswer={onAnswer} /> : null}
+    </section>
+  );
+}
+
+/**
+ * §45.8 « ON AJOUTE ? » : les consommables que le devis ne cite pas, avec une quantité déjà proposée. Un tap sur
+ * Oui ou Non, un tap sur la quantité pour la changer. Pas un formulaire : rien d'obligatoire.
+ */
+function Suggestions({
+  items,
+  pending,
+  onAnswer,
+  onEdit,
+}: {
+  items: PurchaseItem[];
+  pending: boolean;
+  onAnswer: (item: PurchaseItem, answer: "oui" | "non") => Promise<void>;
+  onEdit?: ((item: PurchaseItem, edit: ItemEdit) => Promise<void>) | undefined;
+}) {
+  const [editing, setEditing] = useState<string | null>(null);
+  return (
+    <section aria-label="On ajoute ?" className="flex flex-col gap-1 border-t border-line bg-ground/50 px-4 py-3">
+      <h3 className="text-[12px] font-extrabold tracking-[0.06em] text-muted uppercase">On ajoute ?</h3>
+      <ul className="flex flex-col divide-y divide-line">
+        {items.map((s) => (
+          <li key={s.key} className="flex flex-col gap-2 py-2.5">
+            <div className="flex items-center gap-2">
+              <span className="flex min-w-0 grow flex-col">
+                <span className="text-[15px] leading-snug font-semibold">{s.label}</span>
+                {s.precision ? <span className="text-[13px] text-muted">{s.precision}</span> : null}
+              </span>
+              {onEdit ? (
+                <button type="button" onClick={() => setEditing(editing === s.key ? null : s.key)} aria-label={`Changer la quantité : ${s.label}`} className="inline-flex min-h-11 shrink-0 items-center rounded-xl px-2 text-[15px] font-extrabold whitespace-nowrap tabular-nums underline decoration-dotted underline-offset-4">
+                  {s.quantity}
+                </button>
+              ) : (
+                <span className="shrink-0 text-[15px] font-extrabold whitespace-nowrap tabular-nums">{s.quantity}</span>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <button type="button" disabled={pending} onClick={() => void onAnswer(s, "oui")} aria-label={`Oui, ajouter ${s.label}`} className="inline-flex min-h-11 grow items-center justify-center rounded-xl bg-cta text-[15px] font-extrabold text-white shadow-cta disabled:opacity-60">
+                Oui
+              </button>
+              <button type="button" disabled={pending} onClick={() => void onAnswer(s, "non")} aria-label={`Non, pas de ${s.label}`} className="inline-flex min-h-11 grow items-center justify-center rounded-xl bg-surface text-[15px] font-extrabold shadow-card disabled:opacity-60">
+                Non
+              </button>
+            </div>
+            {editing === s.key && onEdit ? (
+              <ItemForm
+                item={s}
+                pending={pending}
+                onCancel={() => setEditing(null)}
+                onSave={async (e) => {
+                  await onEdit(s, e);
+                  setEditing(null);
+                }}
+              />
+            ) : null}
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
@@ -133,6 +198,7 @@ function BuyRow({
       {item.state === "to_confirm" ? <AlertTriangle size={18} className="mt-0.5 shrink-0 text-warn" aria-label="à confirmer" /> : null}
       <span className="flex min-w-0 grow flex-col gap-0.5">
         <span className="text-[15px] leading-snug font-semibold">{name}</span>
+        {item.precision ? <span className="text-[13px] leading-snug text-muted">{item.precision}</span> : null}
         {proofs.length > 0 ? <span className="text-[12px] font-semibold text-subtle">{open ? "Masquer le calcul" : "Voir le calcul"}</span> : null}
       </span>
       <span className="flex shrink-0 flex-col items-end text-right">
@@ -158,7 +224,7 @@ function BuyRow({
           </button>
         ) : null}
       </div>
-      {item.edited?.length ? <p className="text-[13px] text-muted">Réécrit par vous : {item.edited.map((e) => (e === "label" ? "le libellé" : "la quantité")).join(" et ")}.</p> : null}
+      {item.edited?.length ? <p className="text-[13px] text-muted">Réécrit par vous : {item.edited.map((e) => (e === "label" ? "le libellé" : e === "quantity" ? "la quantité" : "la précision")).join(" et ")}.</p> : null}
       {sketches.length > 0 ? (
         <ul aria-label={`Croquis joints : ${item.label}`} className="flex flex-wrap gap-2">
           {sketches.map((sk) => (

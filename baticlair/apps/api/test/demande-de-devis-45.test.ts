@@ -325,7 +325,7 @@ describe("§45.9 — l'aperçu avant envoi", () => {
     // … et l'aperçu la montre telle quelle.
     const preview = (await agent.post(`/v1/projects/${projectId}/price-requests/preview`).send({}).expect(200)).body;
     const rows = preview.document.blocs.find((b: { titre: string }) => b.titre === "Fournitures à chiffrer").lignes;
-    expect(rows).toContainEqual({ designation: "Gouttière zinc demi-ronde", quantite: "5 longueurs de 4 m", precision: "demi-ronde 33, naissances à souder" });
+    expect(rows).toContainEqual({ designation: "Gouttière zinc demi-ronde", quantite: "5 longueurs de 4 m", precision: "demi-ronde 33, naissances à souder", cle: gouttiere.key });
     expect(rows.map((r: { designation: string }) => r.designation)).not.toContain("Crochets de gouttière");
     expect(rows.map((r: { designation: string }) => r.designation)).toContain("Chevilles à frapper 6 × 40 mm");
     // Le journal : une entrée par correction, avec les sept champs.

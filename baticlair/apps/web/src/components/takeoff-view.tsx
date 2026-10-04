@@ -376,7 +376,7 @@ export function Proof({ item }: { item: TakeoffViewItem }) {
           .filter((p) => p.key === "packaging")
           .map((p, i) => (
             <li key={`p${i}`}>
-              <strong>Commande</strong> : {p.detail}
+              <strong>Quantité de vente</strong> : {p.detail}
               {p.comparisonRisk ? <span className="text-muted"> — à surveiller en comparant les offres</span> : null}
             </li>
           ))}
@@ -392,7 +392,7 @@ export function Proof({ item }: { item: TakeoffViewItem }) {
           <li key={i}>
             <strong>{CRITERION_LABEL[p.key]}</strong> : {p.detail}
             {p.origin ? <span className="text-muted"> ({ORIGIN_LABEL[p.origin]})</span> : null}
-            {p.status === "no_effect" ? <span className="text-muted"> — sans effet sur la commande</span> : null}
+            {p.status === "no_effect" ? <span className="text-muted"> — sans effet sur la liste</span> : null}
             {p.status === "supplier" && p.comparisonRisk ? <span className="text-muted"> — à surveiller en comparant les offres</span> : null}
           </li>
         ))}
@@ -479,7 +479,7 @@ export function MeasuresNote({ measures, items, ouvrages = [] }: { measures: Non
                       Il faut : {n.label} —{" "}
                       {n.need ? `${frNumber(n.need.value)} ${needUnit(n.need.unit)}` : <span className="font-semibold text-warn">à calculer</span>}
                       {n.need && n.provisional ? <span className="font-semibold text-warn"> (provisoire, règle à valider)</span> : null}
-                      {n.order ? ` · à commander : ${n.order.count} ${Number(n.order.count) > 1 ? n.order.unit.many : n.order.unit.one}${n.provisional ? " (provisoire)" : ""}` : null}
+                      {n.order ? ` · à chiffrer : ${n.order.count} ${Number(n.order.count) > 1 ? n.order.unit.many : n.order.unit.one}${n.provisional ? " (provisoire)" : ""}` : null}
                       {n.usual ? <span className="block text-xs">{n.usual}</span> : null}
                     </span>
                   ))}

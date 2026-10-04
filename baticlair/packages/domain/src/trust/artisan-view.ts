@@ -402,7 +402,7 @@ export function artisanView(
           // feuilles 2 × 1 m le remplacent) n'est pas « sans règle » : il n'a rien à faire chiffrer.
           if (!slot || slot.measureOnly || needs.some((n) => n.slot === key) || engine.needs.some((n) => n.workItemId === work!.id && n.slot === key)) continue;
           if (work!.needs.some((r) => r.slot === key && r.when) && engine.needs.some((n) => n.workItemId === work!.id)) continue;
-          needs.push({ needId: `${work!.id}/${key}`, slot: key, label: slot.label, origin: "explicit", need: null, needRange: null, order: null, missing: "Pas encore de règle de calcul dans BatiClair.", provisional: false, usual: slot.usual?.text ?? null, assumptions: [], state: "missing" });
+          needs.push({ needId: `${work!.id}/${key}`, slot: key, label: slot.label, origin: "explicit", need: null, needRange: null, order: null, missing: "Pas encore calculé : le fournisseur proposera pour la mesure du devis.", provisional: false, usual: slot.usual?.text ?? null, assumptions: [], state: "missing" });
         }
       }
       const direct = v.basis === "purchase" && role !== "undetermined" && line.quantity && line.unit && needs.length === 0 ? { quantity: line.quantity, unit: line.unit } : null;

@@ -36,13 +36,17 @@ export interface Rendu {
 
 export type Correction =
   | { action: "modifier"; cle: string; valeur: string; unite?: string | undefined }
-  | { action: "ajouter"; ligne: LigneEntree }
-  | { action: "modifier_ligne"; id: string; ligne: LigneEntree }
+  | { action: "ajouter"; ligne: LigneEntree; depuisApercu?: boolean }
+  | { action: "modifier_ligne"; id: string; ligne: LigneEntree; depuisApercu?: boolean }
   | { action: "retirer"; id: string }
   | { action: "confirmer"; id: string }
   // § 41.4 : une ligne du quantitatif (champ `lignes`) réécrite par l'artisan.
   | { action: "renommer"; id: string; libelle: string }
-  | { action: "fixer_quantite"; id: string; quantite: string; unite: string };
+  | { action: "fixer_quantite"; id: string; quantite: string; unite: string }
+  // §45.9 : précision et croix de l'aperçu ; §45.8 : « On ajoute ? ».
+  | { action: "preciser"; id: string; precision: string }
+  | { action: "retirer_article"; id: string }
+  | { action: "suggestion"; id: string; reponse: "oui" | "non" };
 
 type Row = { id: string; companyId: string; projectId: string; source: string; documentId: string | null; takeoffId: string | null; reference: string | null };
 
@@ -232,16 +236,30 @@ export class QuantitatifsService {
     };
     switch (correction.action) {
       case "ajouter":
-        return this.view(row, await this.takeoffs.addLine(tenant, reviewed.takeoff.id, fields(correction.ligne)), rendu);
+        return this.view(row, await this.takeoffs.addLine(tenant, reviewed.takeoff.id, fields(correction.ligne), { keepStatus: correction.depuisApercu === true }), rendu);
+      case "preciser":
+      case "retirer_article": {
+        if (!reviewed.purchase.toBuy.some((b) => b.key === correction.id)) throw notFound("Line");
+        const after =
+          correction.action === "preciser"
+            ? await this.takeoffs.answer(tenant, reviewed.takeoff.id, `precision:${correction.id}`, correction.precision)
+            : await this.takeoffs.answer(tenant, reviewed.takeoff.id, `retire:${correction.id}`, "oui");
+        return this.view(row, after, rendu);
+      }
+      case "suggestion": {
+        if (!reviewed.purchase.suggestions.some((s) => s.key === correction.id)) throw notFound("Line");
+        return this.view(row, await this.takeoffs.answer(tenant, reviewed.takeoff.id, `ajout:${correction.id}`, correction.reponse), rendu);
+      }
       case "modifier_ligne":
-        return this.view(row, await this.takeoffs.updateLine(tenant, line(correction.id), fields(correction.ligne)), rendu);
+        return this.view(row, await this.takeoffs.updateLine(tenant, line(correction.id), fields(correction.ligne), { keepStatus: correction.depuisApercu === true }), rendu);
       case "retirer":
         return this.view(row, await this.takeoffs.deleteLine(tenant, line(correction.id)), rendu);
       case "confirmer":
         return this.view(row, await this.takeoffs.confirmLine(tenant, line(correction.id)), rendu);
       case "renommer":
       case "fixer_quantite": {
-        if (!reviewed.purchase.toBuy.some((b) => b.key === correction.id)) throw notFound("Line");
+        // Une suggestion (§45.8) se corrige comme une ligne de la liste.
+        if (!reviewed.purchase.toBuy.some((b) => b.key === correction.id) && !reviewed.purchase.suggestions.some((s) => s.key === correction.id)) throw notFound("Line");
         // Une ligne reprise du devis : c'est la ligne du devis qu'on corrige. Une ligne calculée : les mots de l'artisan passent devant.
         const direct = correction.id.startsWith("line:") ? reviewed.takeoff.lines.find((l) => l.id === correction.id.slice("line:".length)) : undefined;
         if (direct) {

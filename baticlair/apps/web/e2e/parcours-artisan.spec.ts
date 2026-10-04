@@ -388,7 +388,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   // La liste validée est conservée.
   await page.reload();
   await expect(page.getByText("Liste validée · 6 articles")).toBeVisible();
-  // « Exporter PDF » (§21.3) : le PDF de la commande se télécharge depuis le chat, avec la session de l'artisan.
+  // « Exporter la liste en PDF » (§21.3) : la demande de devis se télécharge depuis le chat, avec la session de l'artisan.
   const exportLink = page.getByRole("link", { name: "Exporter la liste en PDF" });
   const pdf = await page.request.get((await exportLink.getAttribute("href"))!);
   expect(pdf.status()).toBe(200);
@@ -406,6 +406,8 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
 });
 
 test("un couvreur demande les prix à ses fournisseurs et range leurs devis", async ({ page }) => {
+  // Parcours long (aperçu avant envoi, deux devis, comparaison) : le temps de la machine, pas un défaut.
+  test.slow();
   await signUp(page);
 
   // Carnet de fournisseurs : « Nouveau fournisseur » vit dans sa page.
@@ -447,8 +449,24 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await page.getByLabel("E-mail pour les demandes de prix").fill("devis@tuiles.fr");
   await page.getByRole("button", { name: "Ajouter", exact: true }).click();
   await expect(page.getByRole("checkbox", { name: /Tuiles & Co/ })).toBeChecked();
-  await page.getByRole("button", { name: "Préparer les 2 e-mails" }).click();
+  // §45.9 : rien ne part sans l'aperçu, le document tel que le fournisseur le recevra ; une ligne s'y corrige d'un tap.
+  await page.getByRole("button", { name: "Voir la demande de devis" }).click();
+  const apercu = page.getByRole("dialog", { name: "Aperçu de la demande de devis" });
+  await expect(apercu.getByRole("article", { name: "Demande de devis" })).toBeVisible();
+  await expect(apercu.getByRole("heading", { name: "2. Fournitures à chiffrer" })).toBeVisible();
+  await expect(apercu.getByText(/^Bonjour,/)).toBeVisible();
+  await expect(apercu.getByText(/command/i)).toHaveCount(0);
+  await apercu.getByRole("button", { name: /^Modifier : Gouttière/ }).click();
+  await apercu.getByLabel("Précision").fill("pour façonnage naissances");
+  await apercu.getByRole("button", { name: "Enregistrer" }).click();
+  await expect(apercu.getByText("pour façonnage naissances")).toBeVisible();
+  await apercu.getByRole("button", { name: "Envoyer", exact: true }).click();
   await expect(page.getByRole("list", { name: "Vos fournisseurs" })).toBeVisible();
+  // § 43.4 : juste après le premier envoi, et jamais avant, l'écran des notifications ; « Plus tard » le referme.
+  const prompt = page.getByRole("dialog", { name: "Activer les notifications" });
+  await expect(prompt).toBeVisible();
+  await prompt.getByRole("button", { name: "Plus tard" }).click();
+  await expect(prompt).toHaveCount(0);
 
   // Rechargement à chaque étape : rien ne se perd.
   await page.reload();
@@ -460,24 +478,17 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
     await card.getByRole("button", { name: /^Plus d'actions/ }).click();
     await card.getByRole("menuitem", { name: item }).click();
   };
-  await expect(pointp.getByText("À envoyer")).toBeVisible();
-  // § 43 : une seule action à l'écran : le serveur envoie le mail en trois blocs, avec le PDF de la commande joint.
-  await expect(pointp.getByRole("link", { name: "Télécharger le PDF de la commande" })).toHaveAttribute("href", /\/commande\.pdf$/);
-  await pointp.getByRole("button", { name: "Envoyer à Point.P Vannes" }).click();
-  await expect(pointp.getByText("Envoyé, avec le PDF de la commande.")).toBeVisible();
+  // §45 : « Envoyer » de l'aperçu a envoyé la demande de devis à chacun, le PDF joint.
   await expect(pointp.getByText("En attente", { exact: true })).toBeVisible();
-  // § 43.4 : juste après le premier envoi, et jamais avant, l'écran des notifications ; « Plus tard » le referme.
-  const prompt = page.getByRole("dialog", { name: "Activer les notifications" });
-  await expect(prompt).toBeVisible();
-  await prompt.getByRole("button", { name: "Plus tard" }).click();
-  await expect(prompt).toHaveCount(0);
+  await expect(tuiles.getByText("En attente", { exact: true })).toBeVisible();
+  await expect(pointp.getByRole("link", { name: "Télécharger la demande de devis (PDF)" })).toHaveAttribute("href", /\/demande-de-devis\.pdf$/);
   // L'e-mail se relit mot pour mot : le contenu en trois blocs, sans un prix.
   await menu(pointp, "Voir l'e-mail");
   await expect(pointp.getByText("Objet :")).toBeVisible();
-  await expect(pointp.getByText(/^COMMANDE : /)).toBeVisible();
-  await expect(pointp.getByText(/À COMMANDER/)).toBeVisible();
+  await expect(pointp.getByText(/^Bonjour,/)).toBeVisible();
+  await expect(pointp.getByText(/command/i)).toHaveCount(0);
   await expect(pointp.getByText(/€/)).toHaveCount(0);
-  await expect(page.getByText("La demande est prête. Envoyez-la à chaque fournisseur :")).toBeVisible();
+  await expect(page.getByText("Demande envoyée. Ajoutez ici le devis de chaque fournisseur quand il répond.")).toBeVisible();
   // Pour tester sans attendre, un devis fictif peut être simulé (dans le menu).
   await pointp.getByRole("button", { name: /^Plus d'actions/ }).click();
   await expect(pointp.getByRole("menuitem", { name: "Test : simuler un devis fictif" })).toBeVisible();
@@ -493,7 +504,6 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await expect(page.getByRole("button", { name: "Voir l'offre reçue" })).toBeVisible();
 
   // Le même PDF ne peut pas aller chez un second fournisseur.
-  await menu(tuiles, "Déjà envoyé");
   await tuiles.getByLabel("Ajouter son devis (PDF ou photos)").setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
   await expect(tuiles.getByRole("alert")).toContainText("déjà rangé chez un autre fournisseur");
   // Un devis peut aussi arriver en photos (une par page), mais jamais mélangées à un PDF.
@@ -597,7 +607,8 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
   for (const name of ["Tuilerie de l'Ouest (démo)", "Négoce Breizh (démo)", "Matériaux Atlantique (démo)"]) {
     await page.getByRole("checkbox", { name: new RegExp(name.replace(/[()]/g, "\\$&")) }).check();
   }
-  await page.getByRole("button", { name: "Préparer les 3 e-mails" }).click();
+  await page.getByRole("button", { name: "Voir la demande de devis" }).click();
+  await page.getByRole("dialog", { name: "Aperçu de la demande de devis" }).getByRole("button", { name: "Envoyer", exact: true }).click();
   await expect(page.getByRole("list", { name: "Vos fournisseurs" })).toBeVisible();
 
   const cards = page.getByRole("list", { name: "Vos fournisseurs" }).getByRole("listitem");

@@ -14,6 +14,8 @@ export interface PacketSupply {
   precision: string | null;
   /** En fin de tableau, groupe « consommables » (§45.3, §45.8). */
   consommable?: boolean;
+  /** Clé de l'article dans la liste : l'aperçu (§45.9) corrige la liste elle-même. Jamais imprimée. */
+  cle?: string;
 }
 
 /** L'en-tête et la signature : les coordonnées du compte, jamais saisies à l'envoi (§45.2, §45.3). */

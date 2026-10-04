@@ -1,7 +1,7 @@
 "use client";
 
 import { FileUp, Loader2, Mail, MoreHorizontal, Plus, Send } from "lucide-react";
-import { useCallback, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { AssistantMessage, Say } from "@/components/chat";
 import { DemoAnswer, isDemoSupplier } from "@/components/demo";
 import { NotificationsPrompt } from "@/components/notifications-prompt";
@@ -12,6 +12,7 @@ import { api, ApiError, MAX_DOCUMENT_BYTES, newActionKey, type Offer, type Price
 import { openDocument } from "@/lib/open-document";
 import { isPhoto, MAX_QUOTE_PHOTOS, preparePhotos } from "@/lib/photos";
 import { useProgressRefresh } from "@/components/project-progress";
+import { QuotePreviewScreen } from "@/components/quote-preview";
 import { useResource } from "@/lib/use-resource";
 
 
@@ -31,7 +32,20 @@ function mailtoHref(r: PriceRequestRecipient): string {
  * choisir les fournisseurs, envoyer l'e-mail préparé depuis sa messagerie,
  * puis déposer le devis reçu de chacun (PDF ou photos).
  */
-export function ProjectPriceRequests({ projectId, archived, canCreate }: { projectId: string; archived: boolean; canCreate: boolean }) {
+export function ProjectPriceRequests({
+  projectId,
+  archived,
+  canCreate,
+  quantitatifId,
+  onListChanged,
+}: {
+  projectId: string;
+  archived: boolean;
+  canCreate: boolean;
+  /** §45.9 : l'aperçu corrige la liste elle-même (par le quantitatif). */
+  quantitatifId?: string | null;
+  onListChanged?: () => void;
+}) {
   const fetchRequests = useCallback(
     (signal: AbortSignal) => api<{ items: PriceRequest[] }>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests`, { signal }),
     [projectId],
@@ -85,7 +99,14 @@ export function ProjectPriceRequests({ projectId, archived, canCreate }: { proje
           <h2 id="price-request-title" className="text-base leading-relaxed font-semibold">
             À qui j&apos;envoie la liste ?
           </h2>
-          <NewRequest projectId={projectId} onCreated={replace} />
+          <NewRequest
+            projectId={projectId}
+            quantitatifId={quantitatifId ?? null}
+            deliversEmail={deliversEmail}
+            onListChanged={onListChanged}
+            onSent={() => setSentCount((n) => n + 1)}
+            onCreated={replace}
+          />
         </AssistantMessage>
       </section>
     );
@@ -148,15 +169,21 @@ function SupplierPicker({
   selected,
   onToggle,
   dark,
+  onNames,
 }: {
   exclude?: string[];
   selected: Set<string>;
   onToggle: (id: string, on: boolean) => void;
   dark: boolean;
+  /** Les noms des fournisseurs (le destinataire de l'aperçu, §45.3). */
+  onNames?: (names: Map<string, string>) => void;
 }) {
   const fetchSuppliers = useCallback((signal: AbortSignal) => api<{ items: Supplier[] }>("/v1/suppliers", { signal }), []);
   const { data, setData, error, reload } = useResource(fetchSuppliers);
   const [creating, setCreating] = useState(false);
+  useEffect(() => {
+    if (data && onNames) onNames(new Map(data.items.map((s) => [s.id, s.name])));
+  }, [data, onNames]);
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
@@ -207,8 +234,24 @@ function SupplierPicker({
   );
 }
 
-function NewRequest({ projectId, onCreated }: { projectId: string; onCreated: (r: PriceRequest) => void }) {
+function NewRequest({
+  projectId,
+  quantitatifId,
+  deliversEmail,
+  onListChanged,
+  onSent,
+  onCreated,
+}: {
+  projectId: string;
+  quantitatifId: string | null;
+  deliversEmail: boolean;
+  onListChanged?: (() => void) | undefined;
+  onSent: () => void;
+  onCreated: (r: PriceRequest) => void;
+}) {
   const id = useId();
+  const [previewing, setPreviewing] = useState(false);
+  const [supplierNames, setSupplierNames] = useState<Map<string, string>>(new Map());
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [message, setMessage] = useState("");
   const [dueDate, setDueDate] = useState("");
@@ -232,17 +275,22 @@ function NewRequest({ projectId, onCreated }: { projectId: string; onCreated: (r
       return next;
     });
 
+  // §45.9 : « Envoyer » de l'aperçu crée la demande et, quand le serveur envoie les mails, l'envoie à chacun.
   async function create() {
     setPending(true);
     setError(null);
     try {
-      onCreated(
-        await api<PriceRequest>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests`, {
-          method: "POST",
-          body: { supplierIds: [...selected], message: message || null, dueDate: dueDate || null },
-          idempotencyKey: key.current,
-        }),
-      );
+      let request = await api<PriceRequest>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests`, {
+        method: "POST",
+        body: { supplierIds: [...selected], message: message || null, dueDate: dueDate || null },
+        idempotencyKey: key.current,
+      });
+      if (deliversEmail) {
+        for (const r of request.recipients) request = await api<PriceRequest>(`/v1/price-request-recipients/${r.id}/send`, { method: "POST" });
+        onSent();
+      }
+      setPreviewing(false);
+      onCreated(request);
     } catch (e) {
       setError(toError(e));
       setPending(false);
@@ -251,7 +299,7 @@ function NewRequest({ projectId, onCreated }: { projectId: string; onCreated: (r
 
   return (
     <div className="flex flex-col gap-3">
-      <SupplierPicker selected={selected} onToggle={toggle} dark={false} />
+      <SupplierPicker selected={selected} onToggle={toggle} dark={false} onNames={setSupplierNames} />
       <details className="rounded-2xl bg-surface p-3 text-sm shadow-card">
         <summary className="cursor-pointer font-bold">Ajouter un message ou une date de réponse (facultatif)</summary>
         <label className="flex min-h-11 items-center gap-3 text-sm">
@@ -283,12 +331,25 @@ function NewRequest({ projectId, onCreated }: { projectId: string; onCreated: (r
         </div>
       </details>
       {error ? <ErrorNotice error={error} /> : null}
-      <Button variant="accent" pending={pending} disabled={selected.size === 0} onClick={() => void create()}>
+      {/* §45.9 : rien ne part sans l'aperçu ; il s'ouvre en plein écran, la liste s'y corrige d'un tap. */}
+      <Button variant="accent" pending={pending} disabled={selected.size === 0} onClick={() => (quantitatifId ? setPreviewing(true) : void create())}>
         <Mail size={18} aria-hidden="true" />
-        {selected.size === 0
-          ? "Cochez au moins un fournisseur"
-          : `Préparer ${selected.size > 1 ? `les ${selected.size} e-mails` : "l'e-mail"}`}
+        {selected.size === 0 ? "Cochez au moins un fournisseur" : "Voir la demande de devis"}
       </Button>
+      {previewing && quantitatifId ? (
+        <QuotePreviewScreen
+          projectId={projectId}
+          quantitatifId={quantitatifId}
+          destinataire={selected.size === 1 ? (supplierNames.get([...selected][0]!) ?? null) : null}
+          message={message}
+          dueDate={dueDate}
+          onMessage={setMessage}
+          sending={pending}
+          onSend={() => void create()}
+          onClose={() => setPreviewing(false)}
+          {...(onListChanged ? { onListChanged } : {})}
+        />
+      ) : null}
     </div>
   );
 }
@@ -408,7 +469,7 @@ function RecipientCard({
   const send = () =>
     run(async () => {
       onChange(await api<PriceRequest>(`/v1/price-request-recipients/${r.id}/send`, { method: "POST" }));
-      setNotice("Envoyé, avec le PDF de la commande.");
+      setNotice("Envoyé, avec la demande de devis en PDF.");
       onSent();
     });
 
@@ -534,8 +595,8 @@ function RecipientCard({
         )
       ) : null}
       {!archived && request.packet ? (
-        <a href={`/v1/price-requests/${encodeURIComponent(request.id)}/commande.pdf`} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-bold text-accent-text">
-          Télécharger le PDF de la commande
+        <a href={`/v1/price-requests/${encodeURIComponent(request.id)}/demande-de-devis.pdf`} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-bold text-accent-text">
+          Télécharger la demande de devis (PDF)
         </a>
       ) : null}
       {!archived && !r.document && ((!demo && r.status === "sent") || panel === "upload") ? (

@@ -62,12 +62,17 @@ export function buildPacket(
         quantite: `${b.quantity ?? "quantité à préciser"}${b.approx ? ` (${b.approx})` : ""}`,
         precision: precision(b.label, b.precision),
         ...(b.consumable ? { consommable: true } : {}),
+        cle: b.key,
       })),
-    ...direct.map((l) => ({
-      designation: `${supplierLineLabel(l.designation)}${l.reference ? ` (réf. ${l.reference})` : ""}`,
-      quantite: requestedQuantityText(l),
-      precision: precision(supplierLineLabel(l.designation)),
-    })),
+    ...direct.map((l) => {
+      const item = purchase.toBuy.find((b) => b.kind === "direct" && takeoff.lines.some((t) => b.lineIds.includes(t.id) && t.designation === l.designation));
+      return {
+        designation: `${supplierLineLabel(l.designation)}${l.reference ? ` (réf. ${l.reference})` : ""}`,
+        quantite: requestedQuantityText(l),
+        precision: precision(supplierLineLabel(l.designation), item?.precision),
+        ...(item ? { cle: item.key } : {}),
+      };
+    }),
   ];
   const articles = fournitures.map((f) => `${f.designation} : ${f.quantite}${f.precision ? ` (${f.precision})` : ""}`);
   // §45.3 bloc 3 : la ligne du devis avec sa mesure, et une demande simple. Jamais la cuisine interne.

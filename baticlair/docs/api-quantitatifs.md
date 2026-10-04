@@ -81,6 +81,14 @@ Réponses :
 - Ajouter une ligne : `{ "action": "ajouter", "ligne": { "libelle": "Chatière", "quantite": "4", "unite": "u", "prix": null } }`.
 
 - Lignes du quantitatif (champ `lignes`, §41.4) : `{ "action": "renommer", "id": "<ligne>", "libelle": "…" }` et `{ "action": "fixer_quantite", "id": "<ligne>", "quantite": "9000", "unite": "pièces" }`. Une ligne reprise du devis corrige la ligne du devis ; une ligne calculée garde son calcul derrière, et `modifie` dit ce qui a été réécrit.
+- Aperçu avant envoi (§45.9) : `{ "action": "preciser", "id": "<ligne>", "precision": "pour façonnage naissances" }`, `{ "action": "retirer_article", "id": "<ligne>" }`, et `depuis_apercu: true` sur `ajouter` / `modifier_ligne` : la liste validée le reste. Chaque correction va au journal avec ses sept champs (§45.6).
+- « On ajoute ? » (§45.8) : `{ "action": "suggestion", "id": "<suggestion>", "reponse": "oui" | "non" }`. Les suggestions (au plus huit) sont dans `ecran.purchase.suggestions` ; un « oui » les met en fin de « Fournitures à chiffrer », un « non » les retire. Refusée trois chantiers d'affilée : plus proposée à l'entreprise.
+
+## La demande de devis (§45)
+
+- `POST /v1/projects/{projetId}/price-requests/preview` `{ "message"?, "dueDate"?, "destinataire"? }` : l'objet, le mail court et le document (`document`) exactement comme le fournisseur les recevra ; rien ne part.
+- `GET /v1/projects/{projetId}/demande-de-devis.pdf` : la liste validée en PDF « Demande de devis » (même générateur). `GET /v1/price-requests/{id}/demande-de-devis.pdf?destinataire=<id>` : l'exemplaire d'un destinataire. Les anciens chemins `commande.pdf` restent servis.
+- Coordonnées de l'en-tête et de la signature : `GET|PATCH /v1/company/profile` (`name`, `address`, `siret` à 14 chiffres, `phone`, `email`), logo `PUT|GET|DELETE /v1/company/logo` (PNG ou JPEG, 500 Ko au plus).
 - Lignes du devis (champ `devis`) :
   - `{ "action": "modifier_ligne", "id": "<ligne>", "ligne": { "libelle": "…", "quantite": "200", "unite": "u" } }` ;
   - `{ "action": "retirer", "id": "<ligne>" }` ;

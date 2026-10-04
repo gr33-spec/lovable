@@ -62,14 +62,18 @@ const reponses = z.object({
 
 const correction = z.discriminatedUnion("action", [
   z.object({ action: z.literal("modifier"), cle: z.string().min(1).max(200), valeur: z.string().trim().min(1).max(60), unite: z.string().max(20).optional() }),
-  z.object({ action: z.literal("ajouter"), ligne }),
+  z.object({ action: z.literal("ajouter"), ligne, depuis_apercu: z.boolean().optional() }),
   // Les lignes du devis (champ `devis`) : corriger ce qui a été lu, retirer, ou garder une ligne douteuse.
-  z.object({ action: z.literal("modifier_ligne"), id: z.string().uuid(), ligne }),
+  z.object({ action: z.literal("modifier_ligne"), id: z.string().uuid(), ligne, depuis_apercu: z.boolean().optional() }),
   z.object({ action: z.literal("retirer"), id: z.string().uuid() }),
   z.object({ action: z.literal("confirmer"), id: z.string().uuid() }),
   // Les lignes du quantitatif (champ `lignes`), réécrites d'un tap (§41.4).
   z.object({ action: z.literal("renommer"), id: z.string().min(1).max(200), libelle: z.string().trim().min(1).max(300) }),
   z.object({ action: z.literal("fixer_quantite"), id: z.string().min(1).max(200), quantite: z.string().trim().regex(/^\d+(?:[.,]\d+)?$/), unite: z.string().trim().min(1).max(30) }),
+  // §45.9 l'aperçu avant envoi : la précision d'une ligne, la croix ; §45.8 « On ajoute ? » : oui ou non.
+  z.object({ action: z.literal("preciser"), id: z.string().min(1).max(200), precision: z.string().trim().max(200) }),
+  z.object({ action: z.literal("retirer_article"), id: z.string().min(1).max(200) }),
+  z.object({ action: z.literal("suggestion"), id: z.string().min(1).max(200), reponse: z.enum(["oui", "non"]) }),
 ]);
 
 /**
@@ -153,9 +157,9 @@ export class QuantitatifsController {
   ) {
     const c =
       body.action === "ajouter"
-        ? { action: "ajouter" as const, ligne: ligneEntree(body.ligne) }
+        ? { action: "ajouter" as const, ligne: ligneEntree(body.ligne), depuisApercu: body.depuis_apercu === true }
         : body.action === "modifier_ligne"
-          ? { action: "modifier_ligne" as const, id: body.id, ligne: ligneEntree(body.ligne) }
+          ? { action: "modifier_ligne" as const, id: body.id, ligne: ligneEntree(body.ligne), depuisApercu: body.depuis_apercu === true }
           : body;
     return this.quantitatifs.correct(tenant, id, c, { ecran: query.ecran === "1" });
   }

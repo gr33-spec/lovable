@@ -244,7 +244,7 @@ export function ProjectTakeoff({
     }
     // Honnête : si la valeur ne sert à aucun calcul de ce devis, on le dit plutôt que « recalculé ».
     const used = takeoff.purchase.assumptions.some((a) => a.key === command.key) || takeoff.view.decisions.some((d) => d.question?.key === command.key || d.question?.key === `engine:${command.key}`);
-    remember(text, used ? `C'est noté : ${command.said}. J'ai recalculé.` : `C'est noté : ${command.said}. Ça ne change rien à cette commande.`);
+    remember(text, used ? `C'est noté : ${command.said}. J'ai recalculé.` : `C'est noté : ${command.said}. Ça ne change rien à la liste.`);
     void answer(command.key, command.value);
   };
   const linkStyle = "inline-flex min-h-11 items-center justify-center gap-1.5 self-start text-sm font-bold text-accent-text";
@@ -279,7 +279,7 @@ export function ProjectTakeoff({
             <summary className="cursor-pointer font-bold">Lignes mises de côté</summary>
             <ul className="mt-2 flex list-disc flex-col gap-1 pl-5 text-muted">
               {labor.map((l) => (
-                <li key={l.id}>{shortName(l.designation)} (main-d&apos;œuvre, rien à commander)</li>
+                <li key={l.id}>{shortName(l.designation)} (main-d&apos;œuvre, rien à chiffrer)</li>
               ))}
               {takeoff.notes.map((n) => (
                 <li key={n}>{n}</li>
@@ -317,6 +317,10 @@ export function ProjectTakeoff({
           pending={pending}
           onAnswer={handlers.onAnswer}
           onEditItem={editItem}
+          onSuggestion={async (item, reponse) => {
+            remember(reponse === "oui" ? `Oui, ajoute ${item.label.toLowerCase()}` : `Non, pas de ${item.label.toLowerCase()}`);
+            await call("corrections", { action: "suggestion", id: item.key, reponse });
+          }}
           sketches={quantitatif?.infos?.croquis ?? []}
           onAttach={attachSketch}
           onDetach={detachSketch}
@@ -345,7 +349,7 @@ export function ProjectTakeoff({
           onAction={() => setShowList(true)}
         />
         {/* §21.3 « Exporter PDF » : le même PDF que celui du fournisseur, pour l'imprimer ou le donner au comptoir. */}
-        <a href={`/v1/projects/${encodeURIComponent(projectId)}/commande.pdf`} target="_blank" rel="noreferrer" className={linkStyle}>
+        <a href={`/v1/projects/${encodeURIComponent(projectId)}/demande-de-devis.pdf`} target="_blank" rel="noreferrer" className={linkStyle}>
           <FileDown size={18} aria-hidden="true" />
           Exporter la liste en PDF
         </a>
@@ -374,7 +378,7 @@ export function ProjectTakeoff({
           {body}
         </AssistantMessage>
       </section>
-      <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} />
+      <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} onListChanged={reload} />
       {draft && editable ? (
         <>
           <SiteNotes projectId={projectId} infos={quantitatif?.infos ?? null} disabled={pending} onSaved={reload} />

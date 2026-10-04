@@ -46,7 +46,7 @@ function Step({ done, children, delay = 0 }: { done: boolean; children: React.Re
 }
 
 /** Pendant la lecture (jusqu'à une minute) : les étapes s'affichent au fil du travail, la dernière reste en cours. */
-const READING_STEPS = ["J'ouvre le devis.", "Je lis les lignes une à une.", "Je reconnais les ouvrages : couverture, faîtage, gouttières…", "Je calcule les quantités à commander."];
+const READING_STEPS = ["J'ouvre le devis.", "Je lis les lignes une à une.", "Je reconnais les ouvrages : couverture, faîtage, gouttières…", "Je calcule les fournitures, aux unités du fournisseur."];
 
 export function ThinkingSteps() {
   const [shown, setShown] = useState(1);
@@ -97,7 +97,7 @@ export function reasoningOf(takeoff: Takeoff): React.ReactNode[] {
   }
   steps.push(
     <>
-      J&apos;ai calculé <strong>{plural(p.toBuy.length, "article")}</strong> à commander.
+      J&apos;ai calculé <strong>{plural(p.toBuy.length, "fourniture")}</strong> à chiffrer.
     </>,
   );
   return steps;

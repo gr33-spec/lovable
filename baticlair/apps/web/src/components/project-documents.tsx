@@ -67,8 +67,8 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
             <ol className="mt-5 flex flex-col gap-3">
               {[
                 ["Je lis votre devis", "PDF, même scanné, sans rien ressaisir."],
-                ["Quelques questions d'un coup", "Seulement celles qui changent la commande."],
-                ["La liste prête à commander", "Aux unités du fournisseur, à envoyer d'un tap."],
+                ["Quelques questions d'un coup", "Seulement celles qui changent la liste."],
+                ["La liste prête à chiffrer", "Aux unités du fournisseur, à envoyer d'un tap."],
               ].map(([title, text], i) => (
                 <li key={title} className="flex items-start gap-3">
                   <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-[14px] font-extrabold backdrop-blur">

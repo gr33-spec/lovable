@@ -109,6 +109,7 @@ function packet(value: unknown): SupplierPacket | null {
               quantite: typeof f.quantite === "string" ? f.quantite : "",
               precision: typeof f.precision === "string" ? f.precision : null,
               ...(f.consommable === true ? { consommable: true } : {}),
+              ...(typeof f.cle === "string" ? { cle: f.cle } : {}),
             })),
         }
       : {}),
