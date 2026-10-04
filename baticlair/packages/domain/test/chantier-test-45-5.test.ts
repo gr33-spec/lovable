@@ -49,9 +49,10 @@ describe("chantier Test : les corrections du §45.5", () => {
     expect(line(rien, "Faîtage zinc")).toBeUndefined();
   });
 
-  it("feuilles 2 × 1 m : toujours avec leur usage", () => {
-    const f = line(readQuote(TEST, REPONSES), "Feuilles zinc 2 × 1 m")!;
-    expect(f).toMatchObject({ quantity: "3 pièces", precision: "pour façonner 13 ml de bande, développé 33 cm" });
+  it("bande de 13 ml façonnée sur place : un bobineau (plus de 6 ml), toujours avec son usage", () => {
+    const f = line(readQuote(TEST, REPONSES), "Bobineau")!;
+    expect(f).toMatchObject({ label: "Bobineau 500 × 17 m, 0,65", quantity: "1 pièce", precision: "pour façonner 13 ml de bande" });
+    expect(line(readQuote(TEST, REPONSES), "Feuilles zinc 2 × 1 m")).toBeUndefined();
   });
 
   it("descentes absentes du devis : une question, jamais une quantité d'office", () => {
@@ -66,7 +67,7 @@ describe("chantier Test : les corrections du §45.5", () => {
     expect(v.toBuy.map((b) => b.label)).not.toContain("Cartouches de silicone zinc");
     const avecMastic = readQuote([...TEST, { ref: "5", designation: "Mastic colle polyuréthane 310 ml", quantity: "2", unit: "u" }], REPONSES);
     expect(avecMastic.toBuy.map((b) => `${b.label} : ${b.quantity}`)).toContain("Mastic colle polyuréthane 310 ml : 2 pièces");
-    expect(line(avecMastic, "Feuilles zinc 2 × 1 m")?.quantity).toBe("3 pièces");
+    expect(line(avecMastic, "Bobineau")?.quantity).toBe("1 pièce");
   });
 
   it("toutes les réponses données : plus de question, rien à chiffrer, chaque ligne passe le test du fournisseur", () => {

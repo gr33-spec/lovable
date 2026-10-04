@@ -112,7 +112,8 @@ describe("§45.7 — la demande de devis du chantier Test", () => {
     expect(text).toMatch(/Gouttière zinc demi-ronde\s+4 longueurs de 4 m \(13\s+ml à couvrir\)/);
     expect(text).toMatch(/Pattes coulissantes joint debout\s+519 pièces/);
     expect(text).toMatch(/Pattes fixes joint debout\s+173 pièces/);
-    expect(text).toMatch(/Feuilles zinc 2 × 1 m\s+3 pièces\s+pour façonner 13 ml de\s+bande, développé 33 cm/);
+    // Bande de 13 ml façonnée sur place : un bobineau au-delà de 6 ml (réponse du fondateur, 2026-10-04).
+    expect(text).toMatch(/Bobineau 500 × 17 m, 0,65\s+1 pièce\s+pour façonner 13 ml de\s*bande/);
   });
 
   it("3. un chantier sans ligne « à préciser » n'a pas de bloc 3 ; un chantier qui en a une le montre, avec « merci de proposer ce que vous avez »", async () => {

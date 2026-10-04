@@ -629,7 +629,11 @@ function computeNeed(
             question: { key: `param:${name}`, kind: "param", text: def.question, unit: def.unit, ...(def.hint ? { hint: def.hint } : {}), ...(def.choices ? { options: def.choices } : {}) },
           });
         }
-        return bounds ? { lo: bounds.min.lo, hi: bounds.max.hi, dim: expected.dim } : { lo: new Decimal(-Infinity), hi: new Decimal(Infinity), dim: expected.dim };
+        if (bounds) return { lo: bounds.min.lo, hi: bounds.max.hi, dim: expected.dim };
+        // Une donnée à boutons, pas encore répondue : l'une de ses réponses proposées, pas n'importe quelle valeur.
+        const options = def.withinChoices ? (def.choices ?? []).map((c) => new Decimal(c.value).times(expected.factor)) : [];
+        if (options.length > 0) return { lo: Decimal.min(...options), hi: Decimal.max(...options), dim: expected.dim };
+        return { lo: new Decimal(-Infinity), hi: new Decimal(Infinity), dim: expected.dim };
       }
       // Une pente donnée en % (devis, ancienne réponse) est lue en degrés : la pente est en degrés partout.
       const read = isAngleUnit(def.unit) && given.unit.trim() === "%" ? { value: percentSlopeToDegrees(new Decimal(given.value)).toString(), unit: def.unit } : given;
@@ -915,30 +919,39 @@ function computeNeed(
       for (const m of missing) trace.push({ label: m.label, value: "inconnue", unit: "", from: "Sans effet sur la commande", verified: true });
     }
     // Précision au comptoir (§45.3) : « {longueur_bande|m} » s'écrit avec la valeur du chantier ; une valeur
-    // inconnue ou en fourchette retire la précision plutôt que d'écrire un chiffre douteux.
-    let precision: string | undefined;
-    if (rule.precision && exact) {
+    // inconnue ou en fourchette retire la précision plutôt que d'écrire un chiffre douteux. « {x|mm#} » : le nombre
+    // seul, dans cette unité (« bobineau 500 × 17 m »).
+    const render = (template: string): string | undefined => {
       const traceLen = trace.length;
       const missingLen = missing.length;
       try {
-        precision = rule.precision.replace(/\{([\w.]+)(?:\|([^}]+))?\}/g, (_, name: string, unitText?: string) => {
+        return template.replace(/\{([\w.]+)(?:\|([^}]+))?\}/g, (_, name: string, unitSpec?: string) => {
           const v = valueOf(name);
           if (!isPoint(v) || !v.lo.isFinite()) throw new Error("précision incalculable");
+          const bare = unitSpec?.endsWith("#") ?? false;
+          const unitText = bare ? unitSpec!.slice(0, -1) : unitSpec;
           // Sans unité, une donnée qui a sa façon d'être dite (« 150 » → « Ø 150 », « 0 » → « VMC ») s'écrit ainsi.
           const def = unitText ? undefined : work.params.find((p) => p.key === name);
           const shown = def?.display?.[v.lo.dividedBy(parseRefUnit(def.unit).factor).toFixed()];
           if (shown !== undefined) return shown;
           const u = unitText ? parseRefUnit(unitText) : null;
-          return `${fr(u ? v.lo.dividedBy(u.factor) : v.lo)}${unitText ? ` ${unitText.replace("m2", "m²")}` : ""}`;
+          return `${fr(u ? v.lo.dividedBy(u.factor) : v.lo)}${unitText && !bare ? ` ${unitText.replace("m2", "m²")}` : ""}`;
         });
       } catch {
-        precision = undefined;
+        return undefined;
+      } finally {
+        trace.splice(traceLen);
+        missing.splice(missingLen);
       }
-      trace.splice(traceLen);
-      missing.splice(missingLen);
-    }
+    };
+    // Une précision s'écrit dès que SES valeurs sont connues et sûres (jamais une fourchette).
+    const precision = rule.precision ? render(rule.precision) : undefined;
+    // Une désignation calculée (« Bobineau 500 × 17 m, 0,65 ») remplace le nom du produit générique.
+    // Elle s'écrit dès que SES données sont connues (le développé inconnu ne change pas un bobineau de 500 mm).
+    const designation = rule.designation ? render(rule.designation) : undefined;
     return {
       ...base,
+      ...(designation !== undefined ? { label: designation } : {}),
       ...(precision !== undefined ? { precision } : {}),
       status: "calculated",
       ...(exact

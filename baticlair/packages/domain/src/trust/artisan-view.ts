@@ -623,6 +623,10 @@ function questionLever(
   const name = q.key.slice("param:".length);
   const def = ref.workItems.flatMap((w) => w.params).find((p) => p.key === name);
   if (!def) return null;
+  // Une donnée qui change l'ARTICLE sans changer la quantité (le diamètre d'une sortie de toit, le développé d'une
+  // bande commandée façonnée) : demandée tant qu'un besoin encore possible en a besoin pour sa précision.
+  const rules = new Map(ref.workItems.flatMap((w) => w.needs.map((r) => [`${w.id}/${r.id}`, r] as const)));
+  if (run(inputs).needs.some((n) => rules.get(`${n.workItemId}/${n.needId}`)?.precisionRequires?.includes(name))) return { spread: Number.POSITIVE_INFINITY, option: null };
   const withParam = (ins: WorkItemInput[], key: string, unit: string, value: string, evidence: string): WorkItemInput[] =>
     ins.map((i) => (ref.workItems.find((w) => w.id === i.workItemId)?.params.some((p) => p.key === key) ? { ...i, params: { ...i.params, [key]: { value, unit, origin: "artisan" as const, evidence } } } : i));
   // Les autres questions à boutons encore ouvertes sont provisoirement prises à leur première réponse : le levier

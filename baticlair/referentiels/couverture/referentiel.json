@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.04-23",
+  "version": "roofing-2026.10.04-24",
   "trade": "roofing",
   "sources": [
     {
@@ -325,6 +325,16 @@
       "keywords": [
         "feuille de zinc",
         "feuille zinc"
+      ]
+    },
+    {
+      "code": "zinc_narrow_coil",
+      "label": "Bobineau de zinc",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "bobineau"
       ]
     },
     {
@@ -3460,6 +3470,37 @@
       ]
     },
     {
+      "id": "bobineau-zinc",
+      "family": "zinc_narrow_coil",
+      "label": "Bobineau de zinc naturel (largeur, longueur et épaisseur du chantier)",
+      "shortLabel": "Bobineau zinc",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
       "id": "bande-zinc-faconnee-standard",
       "family": "zinc_strip",
       "label": "Bande zinc façonnée, longueurs de 2 m (développé et épaisseur du chantier)",
@@ -6328,6 +6369,7 @@
             "dev",
             "dev."
           ],
+          "withinChoices": true,
           "choices": [
             {
               "label": "100 mm (solin, couvre-joint)",
@@ -6353,10 +6395,10 @@
           "unit": "u",
           "kind": "artisan_preference",
           "question": "Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ?",
-          "hint": "Je façonne : feuilles de zinc 2 × 1 m. Commandé façonné : bandes en longueurs de 2 m. Gouttières et descentes ne sont pas concernées.",
+          "hint": "Je façonne : feuilles de zinc 2 × 1 m, bobineau au-delà de 6 ml. Commandé façonné : bandes en longueurs de 2 m. Gouttières et descentes ne sont pas concernées.",
           "choices": [
             {
-              "label": "Je façonne (feuilles 2 × 1 m)",
+              "label": "Je façonne (feuilles ou bobineau)",
               "value": "1"
             },
             {
@@ -6404,7 +6446,12 @@
               "label": "0,80 mm",
               "value": "0.8"
             }
-          ]
+          ],
+          "display": {
+            "0.65": "0,65",
+            "0.7": "0,70",
+            "0.8": "0,80"
+          }
         }
       ],
       "slots": [
@@ -6426,6 +6473,16 @@
             "text": "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "feuille-zinc-2x1"
+          }
+        },
+        {
+          "key": "bobineau",
+          "family": "zinc_narrow_coil",
+          "label": "Bobineau zinc",
+          "usual": {
+            "text": "Bobineau de zinc au-delà de 6 ml de bande (réponse du fondateur).",
+            "source": "fondateur-reponses-2026-10-04",
+            "productId": "bobineau-zinc"
           }
         },
         {
@@ -6554,6 +6611,104 @@
           "version": 1,
           "note": "« Solin / abergement : ml × 1,1 » (§7)."
         },
+        "seuil_bobineau": {
+          "kind": "installation_condition",
+          "value": "6",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1,
+          "note": "Au-delà de 6 ml de bande : bobineau au lieu de feuilles 2 × 1 m."
+        },
+        "bobineau_500": {
+          "kind": "installation_condition",
+          "value": "500",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_650": {
+          "kind": "installation_condition",
+          "value": "650",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_1000": {
+          "kind": "installation_condition",
+          "value": "1000",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_17": {
+          "kind": "installation_condition",
+          "value": "17",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_21": {
+          "kind": "installation_condition",
+          "value": "21",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_31": {
+          "kind": "installation_condition",
+          "value": "31",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_40": {
+          "kind": "installation_condition",
+          "value": "40",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1,
+          "note": "40 m seulement en largeur 500."
+        },
         "vis_par_ml": {
           "kind": "installation_condition",
           "value": "4",
@@ -6599,6 +6754,32 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1
+        },
+        {
+          "key": "largeur_bobineau",
+          "label": "Largeur du bobineau",
+          "unit": "mm",
+          "formula": "si(developpe <= regle.bobineau_500, regle.bobineau_500, si(developpe <= regle.bobineau_650, regle.bobineau_650, regle.bobineau_1000))",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        {
+          "key": "longueur_bobineau",
+          "label": "Longueur du bobineau",
+          "unit": "m",
+          "formula": "si(ml_zinc <= regle.bobineau_17, regle.bobineau_17, si(ml_zinc <= regle.bobineau_21, regle.bobineau_21, si(ml_zinc <= regle.bobineau_31, regle.bobineau_31, si(largeur_bobineau <= regle.bobineau_500, regle.bobineau_40, regle.bobineau_31))))",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
         }
       ],
       "needs": [
@@ -6611,6 +6792,9 @@
           "core": true,
           "exclusions": "Longueurs de 2 m, recouvrement 10 cm entre éléments ; fixations à part.",
           "precision": "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
+          "precisionRequires": [
+            "developpe"
+          ],
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -6623,7 +6807,7 @@
         {
           "id": "feuilles-bandes",
           "slot": "feuille",
-          "when": "faconnage < 2",
+          "when": "si(faconnage < 2, si(longueur_bande > regle.seuil_bobineau, 0, 1), 0)",
           "formula": "arrondi_sup(ml_zinc * developpe / regle.surface_feuille)",
           "unit": "u",
           "core": true,
@@ -6635,6 +6819,24 @@
             "verifiedAt": "2026-10-03",
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "bobineau-bandes",
+          "slot": "bobineau",
+          "when": "si(faconnage < 2, si(longueur_bande > regle.seuil_bobineau, 1, 0), 0)",
+          "formula": "arrondi_sup(ml_zinc / longueur_bobineau)",
+          "unit": "u",
+          "core": true,
+          "exclusions": "La plus petite largeur qui contient le développé, la plus courte longueur qui couvre la bande (marge comprise).",
+          "designation": "Bobineau {largeur_bobineau|mm#} × {longueur_bobineau|m}, {epaisseur_zinc}",
+          "precision": "pour façonner {longueur_bande|ml} de bande",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
           },
           "version": 1
         },
@@ -6728,10 +6930,10 @@
           "unit": "u",
           "kind": "artisan_preference",
           "question": "Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ?",
-          "hint": "Je façonne : feuilles de zinc 2 × 1 m. Commandé façonné : bandes en longueurs de 2 m. Gouttières et descentes ne sont pas concernées.",
+          "hint": "Je façonne : feuilles de zinc 2 × 1 m, bobineau au-delà de 6 ml. Commandé façonné : bandes en longueurs de 2 m. Gouttières et descentes ne sont pas concernées.",
           "choices": [
             {
-              "label": "Je façonne (feuilles 2 × 1 m)",
+              "label": "Je façonne (feuilles ou bobineau)",
               "value": "1"
             },
             {
@@ -6779,7 +6981,12 @@
               "label": "0,80 mm",
               "value": "0.8"
             }
-          ]
+          ],
+          "display": {
+            "0.65": "0,65",
+            "0.7": "0,70",
+            "0.8": "0,80"
+          }
         }
       ],
       "slots": [
@@ -6807,6 +7014,16 @@
             "text": "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "feuille-zinc-2x1"
+          }
+        },
+        {
+          "key": "bobineau",
+          "family": "zinc_narrow_coil",
+          "label": "Bobineau zinc",
+          "usual": {
+            "text": "Bobineau de zinc au-delà de 6 ml de zinc (réponse du fondateur).",
+            "source": "fondateur-reponses-2026-10-04",
+            "productId": "bobineau-zinc"
           }
         },
         {
@@ -6929,6 +7146,104 @@
           "version": 1,
           "note": "« Solin / abergement : ml × 1,1 » (§7)."
         },
+        "seuil_bobineau": {
+          "kind": "installation_condition",
+          "value": "6",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1,
+          "note": "Au-delà de 6 ml de bande : bobineau au lieu de feuilles 2 × 1 m."
+        },
+        "bobineau_500": {
+          "kind": "installation_condition",
+          "value": "500",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_650": {
+          "kind": "installation_condition",
+          "value": "650",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_1000": {
+          "kind": "installation_condition",
+          "value": "1000",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_17": {
+          "kind": "installation_condition",
+          "value": "17",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_21": {
+          "kind": "installation_condition",
+          "value": "21",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_31": {
+          "kind": "installation_condition",
+          "value": "31",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_40": {
+          "kind": "installation_condition",
+          "value": "40",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1,
+          "note": "40 m seulement en largeur 500."
+        },
         "coef_abergement": {
           "kind": "installation_condition",
           "value": "1.3",
@@ -7003,6 +7318,32 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1
+        },
+        {
+          "key": "largeur_bobineau",
+          "label": "Largeur du bobineau",
+          "unit": "mm",
+          "formula": "si(regle.developpe_abergement <= regle.bobineau_500, regle.bobineau_500, si(regle.developpe_abergement <= regle.bobineau_650, regle.bobineau_650, regle.bobineau_1000))",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        {
+          "key": "longueur_bobineau",
+          "label": "Longueur du bobineau",
+          "unit": "m",
+          "formula": "si(ml_zinc <= regle.bobineau_17, regle.bobineau_17, si(ml_zinc <= regle.bobineau_21, regle.bobineau_21, si(ml_zinc <= regle.bobineau_31, regle.bobineau_31, si(largeur_bobineau <= regle.bobineau_500, regle.bobineau_40, regle.bobineau_31))))",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
         }
       ],
       "needs": [
@@ -7026,7 +7367,7 @@
         {
           "id": "feuilles-abergement",
           "slot": "feuille",
-          "when": "faconnage < 2",
+          "when": "si(faconnage < 2, si(nb_cheminees * perimetre_cheminee * regle.coef_abergement > regle.seuil_bobineau, 0, 1), 0)",
           "formula": "arrondi_sup(ml_zinc * regle.developpe_abergement / regle.surface_feuille)",
           "unit": "u",
           "core": true,
@@ -7038,6 +7379,24 @@
             "verifiedAt": "2026-10-03",
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "bobineau-abergement",
+          "slot": "bobineau",
+          "when": "si(faconnage < 2, si(nb_cheminees * perimetre_cheminee * regle.coef_abergement > regle.seuil_bobineau, 1, 0), 0)",
+          "formula": "arrondi_sup(ml_zinc / longueur_bobineau)",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Développé 33 cm ; la plus courte longueur de bobineau qui couvre le zinc de l'abergement.",
+          "designation": "Bobineau {largeur_bobineau|mm#} × {longueur_bobineau|m}, {epaisseur_zinc}",
+          "precision": "pour façonner {ml_zinc|ml} d'abergement, développé 33 cm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
           },
           "version": 1
         },
@@ -7464,7 +7823,12 @@
               "label": "0,80 mm",
               "value": "0.8"
             }
-          ]
+          ],
+          "display": {
+            "0.65": "0,65",
+            "0.7": "0,70",
+            "0.8": "0,80"
+          }
         },
         {
           "key": "longueur_rampant",
