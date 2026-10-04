@@ -31,6 +31,7 @@ const family = z.object({
   keywords: z.array(str).optional(),
   refines: z.string().optional(),
   consumable: z.boolean().optional(),
+  ask: z.object({ question: str, hint: z.string().optional(), choices: z.array(z.object({ label: str, value: str })), answered: str }).optional(),
 });
 const sellingUnit = z.object({ id: str, label: z.object({ one: str, many: str }), contains: fact, primary: z.boolean().optional() });
 const product = z.object({

@@ -13,6 +13,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 **Questions :**
 
 - J'ai identifié : Tuiles HP10. C'est bien ce modèle ? → [Oui] [Modifier]
+- Sortie de toit : quel diamètre ? → [Ø 80] [Ø 100] [Ø 125] [Ø 150] [Ø 180] [VMC]
 
 **À acheter :**
 
@@ -40,6 +41,10 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 **J'ai compris :** Couverture en tuiles à emboîtement sur liteaux : 120 m² · Faîtage : 10 m · Gouttière : 20 m · Descente d'eau pluviale : 2 unités
 
+**Questions :**
+
+- Sortie de toit : quel diamètre ? → [Ø 80] [Ø 100] [Ø 125] [Ø 150] [Ø 180] [VMC]
+
 **À acheter :**
 
 | Article | Quantité | Repère |
@@ -66,6 +71,10 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 ### Si l'artisan précise le pureau (34,3 cm)
 
 **J'ai compris :** Couverture en tuiles à emboîtement sur liteaux : 120 m² · Faîtage : 10 m · Gouttière : 20 m · Descente d'eau pluviale : 2 unités
+
+**Questions :**
+
+- Sortie de toit : quel diamètre ? → [Ø 80] [Ø 100] [Ø 125] [Ø 150] [Ø 180] [VMC]
 
 **À acheter :**
 

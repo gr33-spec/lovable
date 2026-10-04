@@ -302,7 +302,7 @@ function ConcernedLine({ line, editable, pending, handlers }: { line: TakeoffLin
   );
 }
 
-function InlineLineForm({
+export function InlineLineForm({
   line,
   pending,
   onSubmit,
@@ -330,7 +330,7 @@ function InlineLineForm({
       {/* Tout se réécrit d'un tap (§41.4) : la désignation aussi, pas seulement la quantité. */}
       <label htmlFor={`${id}-d`} className="flex flex-col gap-1 text-sm font-bold">
         Désignation
-        <textarea id={`${id}-d`} rows={2} className={`${input} py-3 leading-snug`} value={designation} onChange={(e) => setDesignation(e.target.value)} />
+        <textarea id={`${id}-d`} rows={3} className={`${input} py-3 leading-snug`} value={designation} onChange={(e) => setDesignation(e.target.value)} />
       </label>
       <div className="grid grid-cols-2 gap-3">
         <label htmlFor={`${id}-q`} className="flex flex-col gap-1 text-sm font-bold">

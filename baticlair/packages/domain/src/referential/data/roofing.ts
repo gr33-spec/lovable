@@ -548,7 +548,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.04-20",
+  version: "roofing-2026.10.04-21",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -799,7 +799,29 @@ export const ROOFING_REFERENTIAL: Referential = {
     // Familles de VOCABULAIRE seulement (aucun produit ni règle encore) : elles évitent qu'une
     // « tuile chatière » ou un « solin adapté à la tuile HP10 » soit pris pour une tuile.
     { code: "vent_tile", label: "Tuile chatière", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["chatiere", "tuile chatiere", "tuile de ventilation"] },
-    { code: "roof_outlet", label: "Sortie de toit", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["sortie de toit"] },
+    {
+      code: "roof_outlet",
+      label: "Sortie de toit",
+      needUnit: "u",
+      attributes: [],
+      keyAttributes: [],
+      keywords: ["sortie de toit"],
+      // Réponse du fondateur (2026-10-04) : « boutons Ø 80 / 100 / 125 / 150 / 180 ou VMC ». La ligne du devis reste telle
+      // qu'écrite (marque, modèle) ; le diamètre part dans la précision.
+      ask: {
+        question: "Sortie de toit : quel diamètre ?",
+        hint: "Le fournisseur en a besoin pour chiffrer la bonne sortie.",
+        choices: [
+          { label: "Ø 80", value: "Ø 80" },
+          { label: "Ø 100", value: "Ø 100" },
+          { label: "Ø 125", value: "Ø 125" },
+          { label: "Ø 150", value: "Ø 150" },
+          { label: "Ø 180", value: "Ø 180" },
+          { label: "VMC", value: "VMC" },
+        ],
+        answered: "ø|\\bdiam|\\bvmc\\b|\\b(80|100|125|150|180) ?mm\\b",
+      },
+    },
     { code: "hip", label: "Arêtier", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["aretier"] },
     { code: "valley", label: "Noue", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["noue"] },
     { code: "flashing", label: "Solin, abergement", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["solin", "abergement"] },

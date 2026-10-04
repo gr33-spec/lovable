@@ -1,5 +1,10 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.04-21 — sortie de toit : le diamètre à boutons
+
+- **Sortie de toit** (famille `roof_outlet`, réponse du fondateur : « boutons Ø 80 / 100 / 125 / 150 / 180 ou VMC ») : la ligne reste telle qu'écrite (marque, modèle) ; quand elle ne dit pas le diamètre (ni « Ø », ni « diamètre », ni « VMC », ni « 80/100/125/150/180 mm »), elle est orange avec une question à six boutons. La réponse part dans la colonne « précision » (« Ø 150 ») ; « Je ne sais pas » : la ligne part telle quelle, à préciser avec le fournisseur (gris). Nouveau champ de famille `ask` (question, boutons, expression « déjà dit »).
+- Collerette, bobineau, surlongueur de bobine : en attente des valeurs du fondateur, rien d'inventé.
+
 ## roofing-2026.10.04-20 — chantier Test (§45.5) : ce que le comptoir sert
 
 - **Pattes du joint debout** : deux lignes, **pattes coulissantes** et **pattes fixes**, au lieu d'une somme (VMZINC 36.2, tableaux séparés par largeur de bobine). Chantier Test, 91 m², rampant 7 m, bobine 500 : 91 × 5,70 = **519 coulissantes**, 91 × 1,90 = **173 fixes**. Plus une troisième ligne, les **pointes annelées 2,5 × 28 mm** (volige 18 mm), 2 par patte (§36.2) : **1 384 pièces**. Familles `seam_clip_sliding`, `seam_clip_fixed`, `clip_fixing`.

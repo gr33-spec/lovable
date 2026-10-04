@@ -330,7 +330,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await expect(liste.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
 
   // La preuve à un appui, sur l'article lui-même.
-  await page.getByRole("button", { name: "Voir le calcul : Tuile romane canal rouge 12,5 u/m²" }).click();
+  await page.getByRole("button", { name: "Voir la ligne du devis : Tuile romane canal rouge 12,5 u/m²" }).click();
   await expect(page.getByText("(lu dans le devis)").first()).toBeVisible();
 
   // § 41.4 : la désignation d'une ligne se réécrit d'un tap, sans aide (test de recette : une personne hors BTP).
@@ -340,7 +340,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await edit.getByRole("button", { name: "Enregistrer" }).click();
   // Une ligne réécrite repasse par « C'est bon » (ligne modifiée = à confirmer), puis la carte la montre sous son nouveau nom.
   await confirmDoubts(page);
-  await expect(page.getByRole("button", { name: /^(Voir|Masquer) le calcul : Tuile romane canal rouge 12,5 u\/m² Toit principal$/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^(Voir|Masquer) la ligne du devis : Tuile romane canal rouge 12,5 u\/m² Toit principal$/ })).toBeVisible();
 
   // Un croquis sur la ligne (couvertine, habillage…) : le crayon permet de joindre une photo avec une précision ; elle
   // reste sous l'article, et se retire d'un appui.
@@ -487,6 +487,10 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await expect(pointp.getByText(/command/i)).toHaveCount(0);
   await expect(pointp.getByText(/€/)).toHaveCount(0);
   await expect(page.getByText("Demande envoyée. Ajoutez ici le devis de chaque fournisseur quand il répond.")).toBeVisible();
+  // La demande est partie : le gros bouton de la liste ne propose plus un premier envoi.
+  const liste = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(liste.getByRole("button", { name: "Voir la demande envoyée" })).toBeVisible();
+  await expect(liste.getByRole("button", { name: "Envoyer au fournisseur" })).toHaveCount(0);
   // Pour tester sans attendre, un devis fictif peut être simulé (dans le menu).
   await pointp.getByRole("button", { name: /^Plus d'actions/ }).click();
   await expect(pointp.getByRole("menuitem", { name: "Test : simuler un devis fictif" })).toBeVisible();
@@ -585,7 +589,7 @@ test("plusieurs articles inconnus, sans unité : UNE décision les règle tous, 
   await expect(group).toHaveCount(0);
   await confirmDoubts(page);
   // Gardés tels qu'écrits, à la pièce : la preuve dit que c'est un choix pour ce chantier.
-  await page.getByRole("button", { name: "Voir le calcul : Skimmer pour piscine liner" }).click();
+  await page.getByRole("button", { name: "Voir la ligne du devis : Skimmer pour piscine liner" }).click();
   await expect(page.getByText("Article gardé tel qu'écrit pour ce chantier.")).toBeVisible();
 });
 

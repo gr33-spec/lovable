@@ -123,6 +123,12 @@ export interface ProductFamily {
    * « consommables » (§45.3 « du gros au petit, consommables en dernier »).
    */
   consumable?: boolean;
+  /**
+   * Une précision que le fournisseur ne peut pas deviner et que la ligne du devis ne donne pas (le diamètre d'une
+   * sortie de toit) : une question à boutons sur la ligne, la réponse part dans la colonne « précision ». `answered` :
+   * expression (texte sans accents, en minuscules) qui dit que la ligne la donne déjà.
+   */
+  ask?: { question: string; hint?: string; choices: { label: string; value: string }[]; answered: string };
 }
 
 /** Façon de vendre un produit : à la pièce, à la longueur de 4 m, au rouleau… */

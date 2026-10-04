@@ -39,6 +39,7 @@ export function ProjectPriceRequests({
   quantitatifId,
   onListChanged,
   openSignal = 0,
+  onSentChange,
 }: {
   projectId: string;
   archived: boolean;
@@ -48,6 +49,8 @@ export function ProjectPriceRequests({
   onListChanged?: () => void;
   /** « Envoyer au fournisseur » de la liste : ouvre l'aperçu (ou montre les fournisseurs si la demande est partie). */
   openSignal?: number;
+  /** La demande est-elle déjà partie ? La liste le dit sur son gros bouton. */
+  onSentChange?: (sent: boolean) => void;
 }) {
   const fetchRequests = useCallback(
     (signal: AbortSignal) => api<{ items: PriceRequest[] }>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests`, { signal }),
@@ -71,6 +74,10 @@ export function ProjectPriceRequests({
     [requestId],
   );
   const offers = useResource(fetchOffers);
+  const sent = Boolean(data?.items[0]);
+  useEffect(() => {
+    if (data) onSentChange?.(sent);
+  }, [data, sent, onSentChange]);
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;

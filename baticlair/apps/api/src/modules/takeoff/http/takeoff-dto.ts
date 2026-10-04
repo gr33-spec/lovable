@@ -106,7 +106,8 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase, exclude
     projectId: takeoff.projectId,
     documentId: takeoff.documentId,
     status: takeoff.status,
-    view: viewDto(view),
+    // Les décisions de l'écran : celles de la vue, plus les précisions à boutons de la liste (diamètre d'une sortie de toit).
+    view: viewDto({ ...view, decisions: purchase.questions }),
     purchase: purchaseDto(purchase),
     model: takeoff.model,
     promptVersion: takeoff.promptVersion,

@@ -5,6 +5,7 @@ import {
   planQuote,
   proposeLineRoles,
   purchaseView,
+  applyPurchaseOverrides,
   ROOFING_REFERENTIAL,
   slotsGivenByQuote,
   tradeProfile,
@@ -41,5 +42,5 @@ export function readQuote(bench: readonly QuoteLineInput[], answers: Record<stri
     engine,
     { plan, roles, ref: ROOFING_REFERENTIAL, asks },
   );
-  return purchaseView(view, engine, { plan, roles, ref: ROOFING_REFERENTIAL, validation });
+  return applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref: ROOFING_REFERENTIAL, validation }), answers);
 }

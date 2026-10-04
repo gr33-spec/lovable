@@ -14,6 +14,13 @@ export function shortName(designation: string): string {
   // « Isolation plafond 300mm - Fourniture de rouleaux… » : la partie avant le tiret suffit.
   const dash = text.search(/\s[-–—]\s/);
   if (dash >= 8) text = text.slice(0, dash);
+  // « Façonnage sortie d'extraction zinc (Ø 100 mm) Façonnage et raccordement… » : le titre et sa description collés ;
+  // le titre s'arrête à la parenthèse suivie d'une nouvelle phrase.
+  // « Tuiles chatières de ventilation Fourniture et pose de tuiles chatières… » : la mention du devis client au milieu.
+  const pose = /\s(?:fourniture\s*(?:&|et)\s*pose|fourniture\s+de|pose\s+de)\b/i.exec(text);
+  if (pose && pose.index >= 8) text = text.slice(0, pose.index);
+  const glued = text.length > 50 ? /\)\s+(?=\p{Lu})/u.exec(text) : null;
+  if (glued && glued.index >= 8) text = text.slice(0, glued.index + 1);
   text = text.replace(/\s*\(réf\.?[^)]*\)/gi, "").replace(/\s+/g, " ").trim();
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
