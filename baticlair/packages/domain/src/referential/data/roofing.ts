@@ -1077,6 +1077,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     {
       id: "couverture-tuiles-emboitement",
       trade: "roofing",
+      section: "principal",
       label: "Couverture en tuiles à emboîtement sur liteaux",
       triggers: ["roof_tile"],
       params: [
@@ -1180,6 +1181,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     {
       id: "couverture-tuiles-canal",
       trade: "roofing",
+      section: "principal",
       label: "Couverture en tuiles canal",
       triggers: ["roof_tile_canal"],
       params: [
@@ -1253,6 +1255,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     {
       id: "couverture-ardoises-crochet",
       trade: "roofing",
+      section: "principal",
       label: "Couverture en ardoises au crochet sur liteaux",
       triggers: ["roof_slate"],
       params: [
@@ -1670,6 +1673,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     {
       id: "couverture-zinc-joint-debout",
       trade: "roofing",
+      section: "principal",
       label: "Couverture zinc à joint debout",
       triggers: ["standing_seam"],
       params: [SURFACE_PARAM, FACONNAGE_PARAM, EPAISSEUR_ZINC_PARAM, RAMPANT_PARAM, BACS_LONGS_PARAM, ZONE_PARAM, EGOUT_FAITAGE_PARAM],
@@ -1875,6 +1879,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     {
       id: "gouttiere",
       trade: "roofing",
+      section: "evacuation",
       label: "Gouttière (profil, crochets, naissances)",
       triggers: ["gutter"],
       params: [
@@ -1944,6 +1949,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     {
       id: "descente",
       trade: "roofing",
+      section: "evacuation",
       label: "Descente d'eau pluviale (tubes, coudes, colliers)",
       triggers: ["downpipe"],
       params: [
@@ -2012,6 +2018,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       // Placé en DERNIER : dans un devis de zinc à joint debout, la volige reste à l'ouvrage zinc (pas de double compte).
       id: "voligeage",
       trade: "roofing",
+      section: "principal",
       label: "Voligeage (voliges ou panneaux)",
       triggers: ["sheathing"],
       params: [SURFACE_PARAM],

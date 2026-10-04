@@ -38,6 +38,7 @@ export function ProjectPriceRequests({
   canCreate,
   quantitatifId,
   onListChanged,
+  openSignal = 0,
 }: {
   projectId: string;
   archived: boolean;
@@ -45,6 +46,8 @@ export function ProjectPriceRequests({
   /** §45.9 : l'aperçu corrige la liste elle-même (par le quantitatif). */
   quantitatifId?: string | null;
   onListChanged?: () => void;
+  /** « Envoyer au fournisseur » de la liste : ouvre l'aperçu (ou montre les fournisseurs si la demande est partie). */
+  openSignal?: number;
 }) {
   const fetchRequests = useCallback(
     (signal: AbortSignal) => api<{ items: PriceRequest[] }>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests`, { signal }),
@@ -73,6 +76,7 @@ export function ProjectPriceRequests({
   if (!data) return <Spinner />;
 
   const request = data.items[0] ?? null;
+  if (request && openSignal > 0) requestAnimationFrame(() => document.getElementById("fournisseurs")?.scrollIntoView({ behavior: "smooth", block: "start" }));
   const offerOf = (recipientId: string) => offers.data?.items.find((o) => o.recipientId === recipientId) ?? null;
   const offerChanged = (offer: Offer) => {
     const items = (offers.data?.items ?? []).filter((o) => o.recipientId !== offer.recipientId);
@@ -100,6 +104,8 @@ export function ProjectPriceRequests({
             À qui j&apos;envoie la liste ?
           </h2>
           <NewRequest
+            key={openSignal}
+            openAtStart={openSignal > 0}
             projectId={projectId}
             quantitatifId={quantitatifId ?? null}
             deliversEmail={deliversEmail}
@@ -235,6 +241,7 @@ function SupplierPicker({
 }
 
 function NewRequest({
+  openAtStart,
   projectId,
   quantitatifId,
   deliversEmail,
@@ -242,6 +249,7 @@ function NewRequest({
   onSent,
   onCreated,
 }: {
+  openAtStart: boolean;
   projectId: string;
   quantitatifId: string | null;
   deliversEmail: boolean;
@@ -250,7 +258,7 @@ function NewRequest({
   onCreated: (r: PriceRequest) => void;
 }) {
   const id = useId();
-  const [previewing, setPreviewing] = useState(false);
+  const [previewing, setPreviewing] = useState(openAtStart && quantitatifId !== null);
   const [supplierNames, setSupplierNames] = useState<Map<string, string>>(new Map());
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [message, setMessage] = useState("");
@@ -344,6 +352,9 @@ function NewRequest({
           message={message}
           dueDate={dueDate}
           onMessage={setMessage}
+          // Les fournisseurs se choisissent dans l'aperçu même : rien ne part sans un destinataire.
+          top={<SupplierPicker selected={selected} onToggle={toggle} dark={false} onNames={setSupplierNames} />}
+          canSend={selected.size > 0}
           sending={pending}
           onSend={() => void create()}
           onClose={() => setPreviewing(false)}

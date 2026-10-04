@@ -24,58 +24,54 @@ async function signUp(page: Page) {
   return email;
 }
 
+/** La question ouverte en bas de l'écran : « C'est bon » / « Oui… » s'il y en a, sinon le premier bouton de réponse. */
+async function answerSheet(page: Page) {
+  const sheet = page.getByRole("dialog", { name: /^Question : / });
+  const name = (await sheet.getAttribute("aria-label"))!;
+  const yes = sheet.getByRole("button", { name: /^(C'est bon|Oui)/ }).first();
+  const input = sheet.getByRole("textbox");
+  if (await yes.isVisible()) await yes.click();
+  else if (await input.isVisible()) {
+    await input.fill("2");
+    await sheet.getByRole("button", { name: "Valider" }).click();
+  } else await sheet.locator("button:not([aria-label])").first().click();
+  await expect(page.getByRole("dialog", { name, exact: true })).toHaveCount(0, { timeout: 15_000 });
+}
+
 /**
- * Toutes les questions d'un coup : dans le formulaire, l'artisan tape la première réponse de chaque question encore
- * ouverte puis valide une fois. Renvoie vrai s'il a validé un formulaire.
+ * LA LISTE DES FOURNITURES : tant qu'il reste de l'orange, l'artisan touche « Vérifier… », répond à la question qui
+ * s'ouvre en bas, et recommence ; fini quand le gros bouton dit « Envoyer au fournisseur ».
  */
-async function fillForm(page: Page): Promise<boolean> {
-  const form = page.getByRole("region", { name: "Questions sur le chantier" });
-  if (!(await form.isVisible())) return false;
-  const before = await form.innerText();
-  for (const group of await form.getByRole("group").all()) {
-    if ((await group.locator('button[aria-pressed="true"]').count()) === 0) await group.getByRole("button").first().click();
-  }
-  await form.getByRole("button", { name: "Valider et calculer" }).click();
-  // Fini quand le formulaire a disparu, ou qu'il revient (boutons actifs) avec d'autres questions.
-  const state = async () => {
-    if (!(await form.isVisible())) return "";
-    if (await form.getByRole("group").first().getByRole("button").first().isDisabled()) return before;
-    return form.innerText();
-  };
-  await expect.poll(state, { timeout: 15_000 }).not.toBe(before);
-  return true;
-}
-
-/** Chaque question : l'artisan remplit le formulaire, puis accepte chaque proposition restante (« C'est bon », « Oui… ») ou passe. */
 async function confirmDoubts(page: Page) {
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
   for (let i = 0; i < 30; i++) {
-    if (await fillForm(page)) continue;
-    const card = page.getByRole("region", { name: /^À régler : / }).first();
-    if (!(await card.isVisible())) return;
-    const name = (await card.getAttribute("aria-label"))!;
-    const yes = card.getByRole("button", { name: /^(C'est bon|Oui)/ }).first();
-    const skip = card.getByRole("button", { name: "Je ne sais pas" });
-    if (await yes.isVisible()) await yes.click();
-    else if (await skip.isVisible()) await skip.click();
-    else await card.getByRole("button").first().click();
-    await expect(page.getByRole("region", { name, exact: true })).toHaveCount(0);
+    if (await page.getByRole("dialog", { name: /^Question : / }).isVisible()) {
+      await answerSheet(page);
+      continue;
+    }
+    await expect(list).toBeVisible();
+    const verify = list.getByRole("button", { name: /^Vérifier (la ligne|les \d+ lignes)$/ });
+    if (!(await verify.isVisible())) {
+      await expect(list.getByRole("button", { name: "Envoyer au fournisseur" })).toBeVisible();
+      return;
+    }
+    await verify.click();
+    await expect(page.getByRole("dialog", { name: /^Question : / })).toBeVisible();
+    await answerSheet(page);
   }
 }
 
-/** L'artisan répond (formulaire puis cartes) jusqu'à voir cette carte. */
+/** L'artisan vérifie les lignes orange une à une jusqu'à voir cette carte dans la question ouverte (qui reste ouverte). */
 async function answerUntil(page: Page, name: string) {
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
   for (let i = 0; i < 30; i++) {
-    await expect(page.getByRole("region", { name: /^(À régler : |Questions sur le chantier$)/ }).first()).toBeVisible();
-    if (await page.getByRole("region", { name }).isVisible()) return;
-    if (await fillForm(page)) continue;
-    const card = page.getByRole("region", { name: /^À régler : / }).first();
-    const current = (await card.getAttribute("aria-label"))!;
-    const yes = card.getByRole("button", { name: /^(C'est bon|Oui)/ }).first();
-    const skip = card.getByRole("button", { name: "Je ne sais pas" });
-    if (await yes.isVisible()) await yes.click();
-    else if (await skip.isVisible()) await skip.click();
-    else await card.getByRole("button").first().click();
-    await expect(page.getByRole("region", { name: current, exact: true })).toHaveCount(0);
+    const sheet = page.getByRole("dialog", { name: /^Question : / });
+    if (!(await sheet.isVisible())) {
+      await list.getByRole("button", { name: /^Vérifier (la ligne|les \d+ lignes)$/ }).click();
+      await expect(sheet).toBeVisible();
+    }
+    if (await sheet.getByRole("region", { name }).isVisible()) return;
+    await answerSheet(page);
   }
 }
 
@@ -328,9 +324,10 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await expect(page.getByText("Chiffre peu lisible : 2 ou 3 paquets ?")).toBeVisible();
   await expect(page.getByText(/combien par paquet|pièces par paquet/i)).toHaveCount(0);
   await confirmDoubts(page);
-  // Les réponses restent dans le fil, comme des messages.
-  await expect(page.getByText("Voici votre quantitatif.")).toBeVisible();
-  await expect(page.getByRole("region", { name: "Quantitatif" })).toBeVisible();
+  // UN SEUL ÉCRAN : la liste des fournitures, tout est vert ou gris, le gros bouton dit « Envoyer au fournisseur ».
+  const liste = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(liste.getByText(/^\d+ fournitures · tout est prêt$/)).toBeVisible();
+  await expect(liste.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
 
   // La preuve à un appui, sur l'article lui-même.
   await page.getByRole("button", { name: "Voir le calcul : Tuile romane canal rouge 12,5 u/m²" }).click();
@@ -343,8 +340,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await edit.getByRole("button", { name: "Enregistrer" }).click();
   // Une ligne réécrite repasse par « C'est bon » (ligne modifiée = à confirmer), puis la carte la montre sous son nouveau nom.
   await confirmDoubts(page);
-  await expect(page.getByText("Voici votre quantitatif.")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Voir le calcul : Tuile romane canal rouge 12,5 u/m² Toit principal" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^(Voir|Masquer) le calcul : Tuile romane canal rouge 12,5 u\/m² Toit principal$/ })).toBeVisible();
 
   // Un croquis sur la ligne (couvertine, habillage…) : le crayon permet de joindre une photo avec une précision ; elle
   // reste sous l'article, et se retire d'un appui.
@@ -373,7 +369,6 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await page.getByRole("button", { name: "Revenir au quantitatif" }).click();
 
   await confirmDoubts(page);
-  await expect(page.getByText("Voici votre quantitatif.")).toBeVisible();
   // Écrire au lieu d'appuyer : BatiClair comprend la pente, la zone, la surface ; le reste, il le dit.
   const message = page.getByLabel("Message à BatiClair");
   await message.fill("mets 30° de pente");
@@ -382,27 +377,32 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await message.fill("livraison mardi");
   await page.getByRole("button", { name: "Envoyer", exact: true }).click();
   await expect(page.getByText(/^Je comprends pour l'instant la pente/)).toBeVisible();
+  // « Envoyer au fournisseur » valide la liste et ouvre l'aperçu (§45.9) ; « Revenir à la liste » le referme.
   await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
-  await expect(page.getByText("Liste validée · 6 articles")).toBeVisible();
+  const apercu = page.getByRole("dialog", { name: "Aperçu de la demande de devis" });
+  await expect(apercu.getByRole("article", { name: "Demande de devis" })).toBeVisible();
+  await expect(apercu.getByRole("button", { name: "Choisissez un fournisseur" })).toBeDisabled();
+  await apercu.getByRole("button", { name: "Revenir à la liste" }).click();
+  await expect(apercu).toHaveCount(0);
 
   // La liste validée est conservée.
   await page.reload();
-  await expect(page.getByText("Liste validée · 6 articles")).toBeVisible();
+  await expect(page.getByText(/^\d+ fournitures · liste validée$/)).toBeVisible();
   // « Exporter la liste en PDF » (§21.3) : la demande de devis se télécharge depuis le chat, avec la session de l'artisan.
   const exportLink = page.getByRole("link", { name: "Exporter la liste en PDF" });
   const pdf = await page.request.get((await exportLink.getAttribute("href"))!);
   expect(pdf.status()).toBe(200);
   expect(pdf.headers()["content-type"]).toMatch(/application\/pdf/);
 
-  // Une correction reste possible après validation : la liste est à valider à nouveau.
-  await page.getByRole("button", { name: "Voir ou corriger la liste" }).click();
+  // Une correction du devis lu reste possible après validation : la liste est à valider à nouveau.
+  await page.getByRole("button", { name: /^Voir le devis lu/ }).click();
   await page.getByRole("button", { name: "Corriger Tuile romane canal rouge 12,5 u/m²" }).click();
   await page.getByLabel("Quantité").fill("1 300");
   await page.getByRole("button", { name: "Enregistrer" }).click();
   await page.getByRole("button", { name: "Revenir au quantitatif" }).click();
   await confirmDoubts(page);
   await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
-  await expect(page.getByText("Liste validée · 6 articles")).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Aperçu de la demande de devis" })).toBeVisible();
 });
 
 test("un couvreur demande les prix à ses fournisseurs et range leurs devis", async ({ page }) => {
@@ -439,19 +439,17 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await page.getByRole("button", { name: "Enregistrer" }).click();
   await page.getByRole("button", { name: "Revenir au quantitatif" }).click();
   await confirmDoubts(page);
+  // §45.9 : « Envoyer au fournisseur » ouvre l'aperçu, le document tel que le fournisseur le recevra ; on y choisit
+  // les fournisseurs (dont un créé sur place) et une ligne s'y corrige d'un tap.
   await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
-
-  // BatiClair demande à qui envoyer : choisir les fournisseurs, dont un créé sur place.
-  await expect(page.getByRole("heading", { name: "À qui j'envoie la liste ?" })).toBeVisible();
-  await page.getByRole("checkbox", { name: /Point.P Vannes/ }).check();
-  await page.getByRole("button", { name: "Nouveau fournisseur" }).click();
-  await page.getByLabel("Société").fill("Tuiles & Co");
-  await page.getByLabel("E-mail pour les demandes de prix").fill("devis@tuiles.fr");
-  await page.getByRole("button", { name: "Ajouter", exact: true }).click();
-  await expect(page.getByRole("checkbox", { name: /Tuiles & Co/ })).toBeChecked();
-  // §45.9 : rien ne part sans l'aperçu, le document tel que le fournisseur le recevra ; une ligne s'y corrige d'un tap.
-  await page.getByRole("button", { name: "Voir la demande de devis" }).click();
   const apercu = page.getByRole("dialog", { name: "Aperçu de la demande de devis" });
+  await expect(apercu.getByRole("heading", { name: "À QUI J'ENVOIE ?" })).toBeVisible();
+  await apercu.getByRole("checkbox", { name: /Point.P Vannes/ }).check();
+  await apercu.getByRole("button", { name: "Nouveau fournisseur" }).click();
+  await apercu.getByLabel("Société").fill("Tuiles & Co");
+  await apercu.getByLabel("E-mail pour les demandes de prix").fill("devis@tuiles.fr");
+  await apercu.getByRole("button", { name: "Ajouter", exact: true }).click();
+  await expect(apercu.getByRole("checkbox", { name: /Tuiles & Co/ })).toBeChecked();
   await expect(apercu.getByRole("article", { name: "Demande de devis" })).toBeVisible();
   await expect(apercu.getByRole("heading", { name: "2. Fournitures à chiffrer" })).toBeVisible();
   await expect(apercu.getByText(/^Bonjour,/)).toBeVisible();
@@ -586,7 +584,6 @@ test("plusieurs articles inconnus, sans unité : UNE décision les règle tous, 
   await group.getByRole("button", { name: "Oui, tels qu'écrits" }).click();
   await expect(group).toHaveCount(0);
   await confirmDoubts(page);
-  await expect(page.getByText("Voici votre quantitatif.")).toBeVisible();
   // Gardés tels qu'écrits, à la pièce : la preuve dit que c'est un choix pour ce chantier.
   await page.getByRole("button", { name: "Voir le calcul : Skimmer pour piscine liner" }).click();
   await expect(page.getByText("Article gardé tel qu'écrit pour ce chantier.")).toBeVisible();
@@ -602,13 +599,11 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
   await expect(page.getByRole("button", { name: "Ce que j'ai compris" })).toBeVisible();
   await confirmDoubts(page);
   await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
-  await expect(page.getByText(/^Liste validée · \d+ articles$/)).toBeVisible();
-
+  const apercu = page.getByRole("dialog", { name: "Aperçu de la demande de devis" });
   for (const name of ["Tuilerie de l'Ouest (démo)", "Négoce Breizh (démo)", "Matériaux Atlantique (démo)"]) {
-    await page.getByRole("checkbox", { name: new RegExp(name.replace(/[()]/g, "\\$&")) }).check();
+    await apercu.getByRole("checkbox", { name: new RegExp(name.replace(/[()]/g, "\\$&")) }).check();
   }
-  await page.getByRole("button", { name: "Voir la demande de devis" }).click();
-  await page.getByRole("dialog", { name: "Aperçu de la demande de devis" }).getByRole("button", { name: "Envoyer", exact: true }).click();
+  await apercu.getByRole("button", { name: "Envoyer", exact: true }).click();
   await expect(page.getByRole("list", { name: "Vos fournisseurs" })).toBeVisible();
 
   const cards = page.getByRole("list", { name: "Vos fournisseurs" }).getByRole("listitem");

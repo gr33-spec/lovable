@@ -24,7 +24,12 @@ export function QuotePreviewScreen({
   onSend,
   onClose,
   onListChanged,
+  top,
+  canSend = true,
 }: {
+  /** Ce qui se règle avant l'envoi, en haut de l'aperçu (le choix des fournisseurs). */
+  top?: React.ReactNode;
+  canSend?: boolean;
   projectId: string;
   quantitatifId: string;
   destinataire: string | null;
@@ -111,6 +116,12 @@ export function QuotePreviewScreen({
           <Spinner />
         ) : (
           <div className="mx-auto flex max-w-2xl flex-col gap-4">
+            {top ? (
+              <section aria-label="À qui envoyer" className="flex flex-col gap-2">
+                <h2 className="text-sm font-extrabold tracking-[0.04em] text-muted">À QUI J&apos;ENVOIE ?</h2>
+                {top}
+              </section>
+            ) : null}
             {/* Le mail court (§45.2) : l'objet, le texte ; le mot de l'artisan se réécrit ici. */}
             <section aria-label="Le mail" className="flex flex-col gap-2 rounded-2xl bg-surface p-4 shadow-card">
               <p className="text-[13px] text-muted">
@@ -229,9 +240,9 @@ export function QuotePreviewScreen({
         )}
       </div>
       <div className="fixed inset-x-0 bottom-0 flex flex-col items-center gap-1 bg-ground/95 px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur">
-        <Button className="min-h-14 w-full max-w-2xl text-[17px]" pending={sending} disabled={!preview || busy} onClick={onSend}>
+        <Button className="min-h-14 w-full max-w-2xl text-[17px]" pending={sending} disabled={!preview || busy || !canSend} onClick={onSend}>
           <Send size={18} aria-hidden="true" />
-          Envoyer
+          {canSend ? "Envoyer" : "Choisissez un fournisseur"}
         </Button>
         <button type="button" onClick={onClose} className="inline-flex min-h-11 items-center text-sm font-bold text-muted">
           Revenir à la liste

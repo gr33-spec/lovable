@@ -1,16 +1,16 @@
 "use client";
 
-import { Check, CircleCheck, FileDown, HelpCircle, Pencil, Plus, Send, Sparkles, Trash2 } from "lucide-react";
+import { Check, CircleCheck, FileDown, HelpCircle, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AssistantMessage, ChatInput, parseCommand, ReasoningSteps, Say, ThinkingSteps, UserBubble } from "@/components/chat";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
-import { QuestionsForm, type FormAnswer } from "@/components/questions-form";
-import { QuantityCard, type ItemEdit } from "@/components/purchase-list";
+import { type ItemEdit } from "@/components/purchase-list";
+import { SupplyList } from "@/components/supply-list";
 import { SiteNotes } from "@/components/site-notes";
-import { DecisionCard, type DecisionHandlers } from "@/components/takeoff-view";
+import { type DecisionHandlers } from "@/components/takeoff-view";
 import { useProgressRefresh } from "@/components/project-progress";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
-import { api, ApiError, type ProjectDocument, type PurchaseItem, type Quantitatif, type ReadingState, type TakeoffLine } from "@/lib/api";
+import { api, ApiError, type ProjectDocument, type PurchaseItem, type Quantitatif, type ReadingState, type ScreenRow, type TakeoffLine } from "@/lib/api";
 import { parseQuantity, shortName } from "@/lib/labels";
 import { useResource } from "@/lib/use-resource";
 
@@ -63,6 +63,7 @@ export function ProjectTakeoff({
   const [pending, setPending] = useState(false);
   const [actionError, setActionError] = useState<ApiError | null>(null);
   const [showList, setShowList] = useState(false);
+  const [sendSignal, setSendSignal] = useState(0);
   const [fresh, setFresh] = useState(false);
   const [said, setSaid] = useState<Said[]>([]);
   const started = useRef(false);
@@ -166,7 +167,6 @@ export function ProjectTakeoff({
 
   const draft = takeoff.status === "draft";
   const materials = takeoff.lines.filter((l) => l.kind !== "labor");
-  const articles = takeoff.purchase.toBuy.length;
   const labor = takeoff.lines.filter((l) => l.kind === "labor");
   const editable = !archived;
   // Toutes les actions passent par la porte : réponses, corrections, validation.
@@ -232,9 +232,17 @@ export function ProjectTakeoff({
   };
   const detachSketch = (sketchId: string) =>
     run(() => api<null>(`/v1/documents/${encodeURIComponent(sketchId)}`, { method: "DELETE" }), () => reload());
-  const validate = () => {
+  // « Envoyer au fournisseur » : la liste est validée (si elle ne l'est pas encore), puis l'aperçu s'ouvre (§45.9).
+  const send = () => {
     setShowList(false);
-    void call("validation");
+    if (draft) void call("validation").then(() => setSendSignal((n) => n + 1));
+    else setSendSignal((n) => n + 1);
+  };
+  // Mettre une ligne de côté : un article de la liste sort de la liste (la liste validée le reste) ; une ligne du devis
+  // à préciser avec le fournisseur est retirée.
+  const setAside = async (row: ScreenRow) => {
+    if (row.itemKey) await call("corrections", { action: "retirer_article", id: row.itemKey });
+    else if (row.lineIds[0]) await call("corrections", { action: "retirer", id: row.lineIds[0] });
   };
   const typed = (text: string) => {
     const command = parseCommand(text);
@@ -248,22 +256,6 @@ export function ProjectTakeoff({
     void answer(command.key, command.value);
   };
   const linkStyle = "inline-flex min-h-11 items-center justify-center gap-1.5 self-start text-sm font-bold text-accent-text";
-  const decisions = takeoff.view.decisions;
-  // Toutes les questions d'un coup (§41, retour du fondateur) : un seul envoi, par paquets de 20 (limite de la porte).
-  const asked = decisions.filter((d) => d.question && d.question.options.length > 0).length;
-  const formKey = decisions.map((d) => d.key).join("|");
-  const submitAll = (answers: FormAnswer[]) => {
-    if (answers.length === 0) return;
-    remember(`${plural(answers.length, "réponse")} envoyée${answers.length > 1 ? "s" : ""}`);
-    void run(async () => {
-      let last: Quantitatif | null = null;
-      for (let i = 0; i < answers.length; i += 20) {
-        last = await api<Quantitatif>(`/v1/quantitatifs/${qid}/reponses?ecran=1`, { method: "POST", body: { reponses: answers.slice(i, i + 20) } });
-      }
-      return last!;
-    }, update);
-  };
-
   let body: React.ReactNode;
   if (showList) {
     body = (
@@ -292,67 +284,38 @@ export function ProjectTakeoff({
         </button>
       </>
     );
-  } else if (draft && decisions.length > 0) {
+  } else {
+    // UN SEUL ÉCRAN : la liste des fournitures, une couleur par ligne (retour du fondateur, 2026-10-04).
     body = (
       <>
-        {asked > 0 ? null : <Say>Il me reste à confirmer :</Say>}
-        {asked > 0 ? <QuestionsForm key={formKey} decisions={decisions} assumptions={takeoff.purchase.assumptions} pending={pending} disabled={!editable} onSubmit={submitAll} /> : null}
-        {decisions
-          .filter((d) => !d.question || d.question.options.length === 0)
-          .map((d) => (
-            <DecisionCard key={d.key} decision={d} lines={takeoff.lines} editable={editable} pending={pending} handlers={handlers} />
-          ))}
-        <button type="button" onClick={() => setShowList(true)} className={linkStyle}>
-          Voir le devis lu ({plural(materials.length, "ligne")})
-        </button>
-      </>
-    );
-  } else if (draft) {
-    body = (
-      <>
-        <Say>Voici votre quantitatif.</Say>
-        <QuantityCard
+        <SupplyList
           takeoff={takeoff}
           editable={editable}
           pending={pending}
-          onAnswer={handlers.onAnswer}
+          handlers={handlers}
           onEditItem={editItem}
+          onSetAside={setAside}
           onSuggestion={async (item, reponse) => {
             remember(reponse === "oui" ? `Oui, ajoute ${item.label.toLowerCase()}` : `Non, pas de ${item.label.toLowerCase()}`);
             await call("corrections", { action: "suggestion", id: item.key, reponse });
           }}
+          onSend={send}
+          validated={!draft}
           sketches={quantitatif?.infos?.croquis ?? []}
-          onAttach={attachSketch}
-          onDetach={detachSketch}
+          sketchHandlers={{ onAttach: attachSketch, onDetach: detachSketch }}
         />
-        {editable && takeoff.purchase.canValidate ? (
-          // Sous le pouce pendant qu'on relit la liste, juste au-dessus de la barre de message.
-          <div className="sticky bottom-[84px] z-10 lg:bottom-[92px]">
-            <Button className="w-full shadow-[0_10px_24px_var(--color-accent-glow)]" pending={pending} onClick={validate}>
-              <Send size={18} aria-hidden="true" />
-              Envoyer au fournisseur
-            </Button>
-          </div>
-        ) : null}
-        <button type="button" onClick={() => setShowList(true)} className={linkStyle}>
-          Voir le devis lu ({plural(materials.length, "ligne")})
-        </button>
-      </>
-    );
-  } else {
-    body = (
-      <>
-        <DoneLine
-          label={`Liste validée · ${plural(articles, "article")}`}
-          action="Voir"
-          actionLabel="Voir ou corriger la liste"
-          onAction={() => setShowList(true)}
-        />
-        {/* §21.3 « Exporter PDF » : le même PDF que celui du fournisseur, pour l'imprimer ou le donner au comptoir. */}
-        <a href={`/v1/projects/${encodeURIComponent(projectId)}/demande-de-devis.pdf`} target="_blank" rel="noreferrer" className={linkStyle}>
-          <FileDown size={18} aria-hidden="true" />
-          Exporter la liste en PDF
-        </a>
+        <div className="flex flex-wrap gap-x-4">
+          <button type="button" onClick={() => setShowList(true)} className={linkStyle}>
+            Voir le devis lu ({plural(materials.length, "ligne")})
+          </button>
+          {/* §21.3 « Exporter la liste en PDF » : le même document que celui du fournisseur. */}
+          {!draft ? (
+            <a href={`/v1/projects/${encodeURIComponent(projectId)}/demande-de-devis.pdf`} target="_blank" rel="noreferrer" className={linkStyle}>
+              <FileDown size={18} aria-hidden="true" />
+              Exporter la liste en PDF
+            </a>
+          ) : null}
+        </div>
       </>
     );
   }
@@ -378,7 +341,7 @@ export function ProjectTakeoff({
           {body}
         </AssistantMessage>
       </section>
-      <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} onListChanged={reload} />
+      <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} onListChanged={reload} openSignal={sendSignal} />
       {draft && editable ? (
         <>
           <SiteNotes projectId={projectId} infos={quantitatif?.infos ?? null} disabled={pending} onSaved={reload} />

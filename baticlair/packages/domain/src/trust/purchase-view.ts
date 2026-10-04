@@ -91,6 +91,155 @@ export interface PurchaseView {
   suggestions: PurchaseItem[];
   /** Rien de bloquant : la liste peut partir aux fournisseurs. */
   canValidate: boolean;
+  /** L'écran unique « la liste des fournitures » (retour du fondateur, 2026-10-04). */
+  screen: SupplyScreen;
+}
+
+/**
+ * UNE LIGNE DE LA LISTE DES FOURNITURES, avec son point de couleur (retour du fondateur, 2026-10-04, « un enfant de
+ * 10 ans s'en sort ») : vert = sûr, rien à faire ; orange = à vérifier, un tap ouvre SA question ; gris = à préciser
+ * avec le fournisseur, la ligne part telle quelle. Les textes viennent de l'article (« toBuy ») ou de la ligne à
+ * préciser (« toQuote ») désignés par leur clé ; une ligne qui attend une réponse porte son propre nom.
+ */
+export interface ScreenRow {
+  key: string;
+  status: "ok" | "check" | "supplier";
+  /** Article de « toBuy » (vert, ou orange quand la ligne reprise du devis est à confirmer). */
+  itemKey?: string;
+  /** Ligne de « toQuote » (gris). */
+  quoteKey?: string;
+  /** Ce qui attend une réponse avant d'être calculé (« Zinc en bobine ou bacs joint debout »). */
+  pending?: { label: string; quantity: string | null };
+  /** La décision (clé de « questions ») qu'un tap ouvre ; une réponse fait passer la ligne au vert. */
+  decisionKey?: string;
+  /** Lignes du devis d'où vient la ligne (le croquis, le devis lu). */
+  lineIds: string[];
+}
+
+export interface ScreenGroup {
+  /** L'ouvrage (« couverture-zinc-joint-debout »), « other » ou « consommables ». */
+  key: string;
+  label: string;
+  measure: string | null;
+  kind: "principal" | "singulier" | "evacuation" | "autres" | "consommables";
+  rows: ScreenRow[];
+}
+
+export interface SupplyScreen {
+  /** Ordre : ouvrage principal, points singuliers, évacuation, autres articles du devis, consommables (§45.8). */
+  groups: ScreenGroup[];
+  /** « 11 fournitures · 2 à vérifier ». */
+  total: number;
+  toCheck: number;
+}
+
+const KIND_ORDER: ScreenGroup["kind"][] = ["principal", "singulier", "evacuation", "autres", "consommables"];
+
+/** La liste des fournitures, ligne par ligne, chacune avec sa couleur et, si elle est orange, sa question. */
+function supplyScreen(
+  toBuy: readonly PurchaseItem[],
+  toQuote: readonly ToQuoteItem[],
+  decisions: readonly Decision[],
+  engine: { needs: readonly OwnedNeed[]; declined?: readonly string[] },
+  view: ArtisanView,
+  plan: QuotePlan,
+  ref: Referential,
+): SupplyScreen {
+  const groups = new Map<string, ScreenGroup>();
+  const workOfLine = (lineId: string | undefined) => {
+    const planned = lineId ? plan.lines.find((l) => l.ref === lineId) : undefined;
+    return planned?.status === "planned" ? planned.workItemId : undefined;
+  };
+  const measureOf = (workId: string) => {
+    for (const o of view.ouvrages) {
+      if (o.role !== "measure" || workOfLine(o.lineId) !== workId) continue;
+      const m = [o.read.quantity, o.read.unit].filter(Boolean).join(" ");
+      if (m) return m;
+    }
+    return null;
+  };
+  const groupOf = (workId: string | undefined, consumable = false): ScreenGroup => {
+    const work = workId ? ref.workItems.find((w) => w.id === workId) : undefined;
+    const key = consumable ? "consommables" : (work?.id ?? "other");
+    let g = groups.get(key);
+    if (!g) {
+      g = consumable
+        ? { key, label: "Consommables", measure: null, kind: "consommables", rows: [] }
+        : work
+          ? { key, label: shortWork(work.label), measure: measureOf(work.id), kind: work.section ?? "singulier", rows: [] }
+          : { key, label: "Autres articles du devis", measure: null, kind: "autres", rows: [] };
+      groups.set(key, g);
+    }
+    return g;
+  };
+  const decisionFor = (lineIds: readonly string[]) => decisions.find((d) => d.lineIds.some((id) => lineIds.includes(id)));
+  const used = new Set<string>();
+
+  for (const item of toBuy) {
+    const workId = engine.needs.find((n) => item.needIds.includes(n.needId))?.workItemId ?? (item.kind === "direct" ? workOfLine(item.lineIds[0]) : undefined);
+    const check = item.state === "to_confirm";
+    const decision = check ? decisionFor(item.lineIds) : undefined;
+    if (decision) used.add(decision.key);
+    groupOf(workId, item.consumable === true).rows.push({
+      key: `item:${item.key}`,
+      status: check ? "check" : "ok",
+      itemKey: item.key,
+      ...(decision ? { decisionKey: decision.key } : {}),
+      lineIds: item.lineIds,
+    });
+  }
+  // Ce qui attend une réponse : une ligne orange par ouvrage et par question (« bobine ou bacs » : une ligne, une question).
+  const waiting = new Map<string, { workId: string | undefined; questionKey: string; labels: string[]; lineIds: string[] }>();
+  for (const n of engine.needs) {
+    if (n.status !== "question" || !n.question || n.origin === "suggested" || engine.declined?.includes(n.question.key)) continue;
+    const id = `${n.workItemId ?? "?"}|${n.question.key}`;
+    const w = waiting.get(id) ?? { workId: n.workItemId, questionKey: n.question.key, labels: [], lineIds: [] };
+    if (!w.labels.includes(n.label)) w.labels.push(n.label);
+    for (const o of view.ouvrages) if (o.needs.some((x) => x.needId === n.needId) && !w.lineIds.includes(o.lineId)) w.lineIds.push(o.lineId);
+    waiting.set(id, w);
+  }
+  for (const [id, w] of waiting) {
+    const decision = decisions.find((d) => d.question?.key === w.questionKey || d.key === `engine:${w.questionKey}`);
+    if (decision) used.add(decision.key);
+    groupOf(w.workId).rows.push({
+      key: `pending:${id}`,
+      status: "check",
+      pending: { label: w.labels.length > 2 ? `${w.labels.slice(0, 2).join(", ")}…` : w.labels.join(" ou "), quantity: null },
+      ...(decision ? { decisionKey: decision.key } : {}),
+      lineIds: w.lineIds,
+    });
+  }
+  for (const q of toQuote) {
+    // Un article inconnu à confirmer reste orange tant que l'artisan ne l'a pas vu ; ensuite il part tel quel (gris).
+    const decision = decisionFor(q.lineIds);
+    if (decision) used.add(decision.key);
+    groupOf(workOfLine(q.lineIds[0])).rows.push({
+      key: `quote:${q.key}`,
+      status: decision ? "check" : "supplier",
+      quoteKey: q.key,
+      ...(decision ? { decisionKey: decision.key } : {}),
+      lineIds: q.lineIds,
+    });
+  }
+  // Une question découverte d'avance (le développé, qui suit « je façonne ») : rangée sous l'ouvrage qui la pose.
+  const plannedWorks = [...new Set(plan.lines.flatMap((l) => (l.status === "planned" ? [l.workItemId] : [])))];
+  const workOfQuestion = (d: Decision) => {
+    const param = d.question?.key.startsWith("param:") ? d.question.key.slice("param:".length) : null;
+    return param ? plannedWorks.find((id) => ref.workItems.find((w) => w.id === id)?.params.some((p) => p.key === param)) : undefined;
+  };
+  // Une décision qu'aucune ligne ne porte encore (ambiguïté d'une mesure, article sans unité) : sa propre ligne orange.
+  for (const d of decisions) {
+    if (used.has(d.key)) continue;
+    const line = view.ouvrages.find((o) => d.lineIds.includes(o.lineId));
+    const quantity = line ? [line.read.quantity, line.read.unit].filter(Boolean).join(" ") || null : null;
+    const workId = workOfLine(d.lineIds[0]) ?? workOfQuestion(d);
+    // Une question découverte d'avance pour un ouvrage déjà orange attend son tour : elle viendra après la réponse en cours.
+    if (d.key.startsWith("engine:") && d.lineIds.length === 0 && workId && groups.get(workId)?.rows.some((r) => r.status === "check")) continue;
+    groupOf(workId).rows.push({ key: `decision:${d.key}`, status: "check", pending: { label: d.title, quantity }, decisionKey: d.key, lineIds: d.lineIds });
+  }
+  const ordered = [...groups.values()].sort((a, b) => KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind));
+  const rows = ordered.flatMap((g) => g.rows);
+  return { groups: ordered, total: rows.length, toCheck: rows.filter((r) => r.status === "check").length };
 }
 
 /** §45.8 : jamais plus de huit suggestions. */
@@ -428,7 +577,8 @@ export function purchaseView(
   const questions = view.decisions;
   const canValidate = questions.every((q) => q.lineIds.length === 0) && toBuy.every((b) => b.state === "ready");
   const groups = groupsOf(toBuy, engine.needs, view, link.plan, link.ref);
-  return { understood: understood(view, link.plan, link.ref), toBuy, groups, toQuote, assumptions, questions, suggestions, canValidate };
+  const screen = supplyScreen(toBuy, toQuote, questions, engine, view, link.plan, link.ref);
+  return { understood: understood(view, link.plan, link.ref), toBuy, groups, toQuote, assumptions, questions, suggestions, canValidate, screen };
 }
 
 /**
@@ -462,6 +612,13 @@ export function applyPurchaseOverrides(purchase: PurchaseView, answers: Record<s
   };
   // §45.9 : la croix de l'aperçu retire l'article de la liste (« retire:<clé> »).
   const kept = (item: PurchaseItem) => answers[`retire:${item.key}`] !== "oui";
-  // Une suggestion (§45.8) se corrige d'un tap comme une ligne de la liste.
-  return { ...purchase, toBuy: purchase.toBuy.filter(kept).map(override), suggestions: purchase.suggestions.map(override) };
+  // Une suggestion (§45.8) se corrige d'un tap comme une ligne de la liste. Une ligne retirée quitte aussi l'écran.
+  const toBuy = purchase.toBuy.filter(kept).map(override);
+  const present = new Set(toBuy.map((b) => b.key));
+  const groups = purchase.screen.groups
+    .map((g) => ({ ...g, rows: g.rows.filter((r) => !r.itemKey || present.has(r.itemKey)) }))
+    .filter((g) => g.rows.length > 0);
+  const rows = groups.flatMap((g) => g.rows);
+  const screen = { groups, total: rows.length, toCheck: rows.filter((r) => r.status === "check").length };
+  return { ...purchase, toBuy, suggestions: purchase.suggestions.map(override), screen };
 }

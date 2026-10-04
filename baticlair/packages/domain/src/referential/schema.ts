@@ -78,6 +78,7 @@ const workItem = z.object({
   id: str,
   trade: str,
   label: str,
+  section: z.enum(["principal", "singulier", "evacuation"]).optional(),
   triggers: z.array(str).min(1),
   params: z.array(param),
   slots: z.array(slot).min(1),

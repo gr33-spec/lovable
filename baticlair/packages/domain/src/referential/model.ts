@@ -329,6 +329,11 @@ export interface WorkItemType {
   id: string;
   trade: string;
   label: string;
+  /**
+   * Rang de l'ouvrage dans la liste des fournitures (retour du fondateur, 2026-10-04) : l'ouvrage principal, puis
+   * les points singuliers, puis l'évacuation des eaux ; les consommables ferment la liste. Absent : point singulier.
+   */
+  section?: "principal" | "singulier" | "evacuation";
   /** Familles du devis qui signalent cet ouvrage. */
   triggers: string[];
   params: ParamDef[];

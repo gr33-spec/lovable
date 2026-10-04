@@ -291,6 +291,24 @@ export interface TakeoffPurchase {
   /** §45.8 « On ajoute ? » : consommables proposés, Oui / Non d'un tap, au plus huit. */
   suggestions: PurchaseItem[];
   canValidate: boolean;
+  /** L'écran unique « liste des fournitures » : chaque ligne vert / orange / gris, dans l'ordre des groupes. */
+  screen: SupplyScreen;
+}
+
+export interface ScreenRow {
+  key: string;
+  /** ok = vert, rien à faire ; check = orange, un tap ouvre sa question ; supplier = gris, à préciser avec le fournisseur. */
+  status: "ok" | "check" | "supplier";
+  itemKey?: string;
+  quoteKey?: string;
+  pending?: { label: string; quantity: string | null };
+  decisionKey?: string;
+  lineIds: string[];
+}
+export interface SupplyScreen {
+  groups: { key: string; label: string; measure: string | null; kind: "principal" | "singulier" | "evacuation" | "autres" | "consommables"; rows: ScreenRow[] }[];
+  total: number;
+  toCheck: number;
 }
 
 /** §45.3 : le document « Demande de devis », tel que le fournisseur le reçoit (aperçu = PDF). */

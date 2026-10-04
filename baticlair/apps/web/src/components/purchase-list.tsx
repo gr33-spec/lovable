@@ -108,7 +108,7 @@ export function QuantityCard({
  * §45.8 « ON AJOUTE ? » : les consommables que le devis ne cite pas, avec une quantité déjà proposée. Un tap sur
  * Oui ou Non, un tap sur la quantité pour la changer. Pas un formulaire : rien d'obligatoire.
  */
-function Suggestions({
+export function Suggestions({
   items,
   pending,
   onAnswer,
@@ -260,7 +260,7 @@ function BuyRow({
 }
 
 /** Le texte et la quantité d'une ligne, tels que l'artisan veut les voir partir chez le fournisseur. */
-function ItemForm({
+export function ItemForm({
   item,
   pending,
   onSave,
@@ -374,7 +374,7 @@ function withUnit(value: string, unit: string): string {
   return unit === "°" ? `${value}°` : `${value} ${unit}`;
 }
 
-function Assumptions({ assumptions, editable, pending, onAnswer }: { assumptions: PurchaseAssumption[]; editable: boolean; pending: boolean; onAnswer: DecisionHandlers["onAnswer"] }) {
+export function Assumptions({ assumptions, editable, pending, onAnswer }: { assumptions: PurchaseAssumption[]; editable: boolean; pending: boolean; onAnswer: DecisionHandlers["onAnswer"] }) {
   const [open, setOpen] = useState(false);
   const text = assumptions.map((a) => `${a.label.toLowerCase()} ${withUnit(a.value, a.unit)}`).join(" · ");
   return (

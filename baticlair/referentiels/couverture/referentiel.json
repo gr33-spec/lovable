@@ -3487,6 +3487,7 @@
     {
       "id": "couverture-tuiles-emboitement",
       "trade": "roofing",
+      "section": "principal",
       "label": "Couverture en tuiles à emboîtement sur liteaux",
       "triggers": [
         "roof_tile"
@@ -3884,6 +3885,7 @@
     {
       "id": "couverture-tuiles-canal",
       "trade": "roofing",
+      "section": "principal",
       "label": "Couverture en tuiles canal",
       "triggers": [
         "roof_tile_canal"
@@ -4120,6 +4122,7 @@
     {
       "id": "couverture-ardoises-crochet",
       "trade": "roofing",
+      "section": "principal",
       "label": "Couverture en ardoises au crochet sur liteaux",
       "triggers": [
         "roof_slate"
@@ -6895,6 +6898,7 @@
     {
       "id": "couverture-zinc-joint-debout",
       "trade": "roofing",
+      "section": "principal",
       "label": "Couverture zinc à joint debout",
       "triggers": [
         "standing_seam"
@@ -7885,6 +7889,7 @@
     {
       "id": "gouttiere",
       "trade": "roofing",
+      "section": "evacuation",
       "label": "Gouttière (profil, crochets, naissances)",
       "triggers": [
         "gutter"
@@ -8095,6 +8100,7 @@
     {
       "id": "descente",
       "trade": "roofing",
+      "section": "evacuation",
       "label": "Descente d'eau pluviale (tubes, coudes, colliers)",
       "triggers": [
         "downpipe"
@@ -8254,6 +8260,7 @@
     {
       "id": "voligeage",
       "trade": "roofing",
+      "section": "principal",
       "label": "Voligeage (voliges ou panneaux)",
       "triggers": [
         "sheathing"

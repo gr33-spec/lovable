@@ -34,6 +34,8 @@ function purchaseDto(p: PurchaseView) {
     toQuote: p.toQuote.map((q) => ({ key: q.key, label: q.label, measure: q.measure, reason: q.reason, lineIds: q.lineIds })),
     assumptions: p.assumptions.map((a) => ({ key: a.key, label: a.label, value: a.value, unit: a.unit, note: a.note ?? null, choices: a.choices ?? [] })),
     canValidate: p.canValidate,
+    /** L'écran unique « liste des fournitures » : groupes ordonnés, lignes vert / orange / gris, et le compte. */
+    screen: p.screen,
   };
 }
 

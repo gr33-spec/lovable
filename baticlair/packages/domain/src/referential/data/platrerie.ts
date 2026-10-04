@@ -72,6 +72,7 @@ export const PLATRERIE_REFERENTIAL: Referential = {
     {
       id: "cloison-72-48",
       trade: "drywall",
+      section: "principal",
       label: "Cloison 72/48 (plaques BA13, rails, montants, vis, bande, enduit)",
       triggers: ["partition_72_48"],
       params: [
