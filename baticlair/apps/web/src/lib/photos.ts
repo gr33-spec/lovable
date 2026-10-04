@@ -1,4 +1,4 @@
-import { ApiError, MAX_DOCUMENT_BYTES } from "@/lib/api";
+import { ApiError, MAX_REQUEST_BYTES } from "@/lib/api";
 
 /** Un devis photographié page par page : 10 pages au plus. */
 export const MAX_QUOTE_PHOTOS = 10;
@@ -46,7 +46,7 @@ const LEVELS = [
 export async function preparePhotos(files: File[]): Promise<File[]> {
   const images = await Promise.all(files.map(loadImage));
   // La conversion en PDF côté serveur ajoute un peu de poids : on garde une marge.
-  const budget = MAX_DOCUMENT_BYTES * 0.95;
+  const budget = MAX_REQUEST_BYTES * 0.95;
   for (const level of LEVELS) {
     const blobs = await Promise.all(images.map((img) => toJpeg(img, level.maxSide, level.quality)));
     if (blobs.reduce((sum, b) => sum + b.size, 0) <= budget) {

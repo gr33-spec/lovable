@@ -12,12 +12,14 @@ import { DocumentsController } from "./http/documents.controller.js";
 import { extractPdfPages, pdfPageCount } from "./infrastructure/pdf-pages.js";
 import { PdfJsPdfReader } from "./infrastructure/pdfjs-pdf-reader.js";
 import { PrismaDocumentRepository } from "./infrastructure/prisma-document.repository.js";
+import { UploadParts } from "./infrastructure/upload-parts.js";
 
 @Module({
   imports: [TenancyModule],
   controllers: [DocumentsController],
   providers: [
     { provide: DOCUMENT_REPOSITORY, useFactory: (p: PrismaService) => new PrismaDocumentRepository(p), inject: [PrismaService] },
+    { provide: UploadParts, useFactory: (p: PrismaService) => new UploadParts(p), inject: [PrismaService] },
     { provide: PDF_READER, useFactory: () => new PdfJsPdfReader() },
     {
       provide: DocumentAiInput,
@@ -34,6 +36,6 @@ import { PrismaDocumentRepository } from "./infrastructure/prisma-document.repos
       inject: [DOCUMENT_REPOSITORY, PDF_READER, CONFIG, LOGGER],
     },
   ],
-  exports: [DOCUMENT_REPOSITORY, DocumentsService, DocumentAiInput],
+  exports: [DOCUMENT_REPOSITORY, DocumentsService, DocumentAiInput, UploadParts],
 })
 export class DocumentsModule {}

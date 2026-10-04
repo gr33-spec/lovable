@@ -8,6 +8,7 @@ import { NotificationsPrompt } from "@/components/notifications-prompt";
 import { CompareQuotes, OfferLines, offerFacts, ProjectComparison } from "@/components/project-offers";
 import { SupplierForm } from "@/components/supplier-form";
 import { Badge, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
+import { attachFile } from "@/lib/upload";
 import { api, ApiError, MAX_DOCUMENT_BYTES, newActionKey, type Offer, type PriceRequest, type PriceRequestRecipient, type PriceRequestSettings, type Supplier } from "@/lib/api";
 import { openDocument, openFile } from "@/lib/open-document";
 import { isPhoto, MAX_QUOTE_PHOTOS, preparePhotos } from "@/lib/photos";
@@ -654,7 +655,8 @@ function QuoteUpload({ recipientId, onChange }: { recipientId: string; onChange:
     setPending(true);
     try {
       const form = new FormData();
-      for (const file of photos.length > 0 ? await preparePhotos(photos) : files) form.append("file", file, file.name);
+      if (photos.length > 0) for (const file of await preparePhotos(photos)) form.append("file", file, file.name);
+      else await attachFile(form, files[0]!);
       onChange(await api<PriceRequest>(`/v1/price-request-recipients/${recipientId}/quote`, { method: "POST", body: form }));
     } catch (e) {
       setError(toError(e));

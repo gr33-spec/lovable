@@ -11,6 +11,7 @@ import { type DecisionHandlers } from "@/components/takeoff-view";
 import { useProgressRefresh } from "@/components/project-progress";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, type ProjectDocument, type PurchaseItem, type Quantitatif, type ReadingState, type ScreenRow, type TakeoffLine } from "@/lib/api";
+import { attachFile } from "@/lib/upload";
 import { parseQuantity, shortName } from "@/lib/labels";
 import { openFile } from "@/lib/open-document";
 import { useResource } from "@/lib/use-resource";
@@ -228,7 +229,7 @@ export function ProjectTakeoff({
     const form = new FormData();
     form.append("article", itemKey);
     if (commentaire) form.append("commentaire", commentaire);
-    form.append("file", file, file.name);
+    await attachFile(form, file);
     await api(`/v1/projects/${encodeURIComponent(projectId)}/infos/croquis`, { method: "POST", body: form });
     reload();
   };

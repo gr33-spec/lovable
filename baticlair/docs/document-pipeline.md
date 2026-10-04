@@ -29,8 +29,10 @@ Seul l'étage d'entrée diffère.
 
 Réalisé, sans IA : étapes 1 à 5 et 7, en ligne dans la requête de dépôt
 (lecture de quelques centaines de millisecondes) — PDF uniquement,
-**4 Mo maximum** (`DOCUMENT_MAX_BYTES`, limite d'une requête vers une
-fonction Vercel), 60 pages maximum, stockage en base (`document_blob`)
+**20 Mo maximum** (`DOCUMENT_MAX_BYTES` ; au-delà de 4 Mo, le navigateur
+envoie le fichier en morceaux de 3 Mo, recollés par `UploadParts`, car une
+requête vers une fonction Vercel ne dépasse pas 4,5 Mo ; le fichier se relit
+de même par plages `Range`), 60 pages maximum, stockage en base (`document_blob`)
 derrière un port. Un PDF illisible est conservé et marqué `failed` avec
 son motif (`encrypted`, `corrupted`, `too_many_pages`). Photos, file de
 jobs et stockage objet : plus tard. Voir `couts-ia.md`.

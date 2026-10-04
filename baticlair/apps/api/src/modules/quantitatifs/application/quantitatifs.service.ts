@@ -160,6 +160,8 @@ export class QuantitatifsService {
     if (!/^[0-9a-f-]{36}$/i.test(projectId)) throw notFound("Project");
     await this.projects.get(tenant, projectId);
     let row = await this.prisma.quantitatif.findFirst({ where: { companyId: tenant.companyId, projectId }, orderBy: { createdAt: "desc" } });
+    // Le devis lu a été retiré (puis un autre déposé) : sa liste n'existe plus, le chantier repart de zéro.
+    if (row && !(await this.alive(row))) row = null;
     const latest = await this.takeoffs.forProject(tenant, projectId);
     if (latest && (!row || (row.takeoffId !== latest.takeoff.id && row.documentId !== latest.takeoff.documentId))) {
       row = await this.prisma.quantitatif.create({
@@ -340,6 +342,12 @@ export class QuantitatifsService {
     const reviewed = await this.takeoffs.forDocument(tenant, row.documentId);
     if (reviewed) await this.prisma.quantitatif.update({ where: { id: row.id }, data: { takeoffId: reviewed.takeoff.id } });
     return reviewed;
+  }
+
+  private async alive(row: Row): Promise<boolean> {
+    if (row.takeoffId) return (await this.prisma.takeoff.count({ where: { id: row.takeoffId } })) > 0;
+    if (row.documentId) return (await this.prisma.document.count({ where: { id: row.documentId } })) > 0;
+    return true;
   }
 
   private base(row: Row) {

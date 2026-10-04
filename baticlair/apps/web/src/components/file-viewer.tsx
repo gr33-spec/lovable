@@ -7,6 +7,25 @@ import { OPEN_FILE_EVENT, type OpenFileRequest } from "@/lib/open-document";
 
 type Loaded = OpenFileRequest & { objectUrl: string; file: File };
 
+/** Une réponse de l'API ne dépasse pas 4,5 Mo chez l'hébergeur : un gros fichier se relit par plages de 3 Mo. */
+const RANGE_BYTES = 3_000_000;
+
+async function fetchWhole(url: string, headers: Record<string, string>): Promise<Blob> {
+  const get = async (start: number) => {
+    const res = await fetch(url, { headers: { ...headers, range: `bytes=${start}-${start + RANGE_BYTES - 1}` }, credentials: "same-origin" });
+    if (!res.ok) throw new Error(String(res.status));
+    return res;
+  };
+  const first = await get(0);
+  const total = Number(/\/(\d+)$/.exec(first.headers.get("content-range") ?? "")?.[1]);
+  // 200 : le fichier entier d'un coup (document généré, petit fichier).
+  if (first.status !== 206 || !total) return first.blob();
+  const type = first.headers.get("content-type") ?? "";
+  const pieces: Blob[] = [await first.blob()];
+  for (let at = RANGE_BYTES; at < total; at += RANGE_BYTES) pieces.push(await (await get(at)).blob());
+  return new Blob(pieces, { type });
+}
+
 /**
  * L'AFFICHEUR DE DOCUMENTS : le PDF ou la photo s'ouvre par-dessus l'écran, avec une barre qui ne disparaît jamais :
  * « Fermer » en haut, « Partager » (Mail, WhatsApp, Fichiers… : la feuille de partage du téléphone) et « Télécharger »
@@ -46,10 +65,8 @@ export function FileViewer() {
     const headers: Record<string, string> = {};
     const companyId = getActiveCompanyId();
     if (companyId) headers["x-company-id"] = companyId;
-    fetch(request.url, { headers, credentials: "same-origin" })
-      .then(async (res) => {
-        if (!res.ok) throw new Error(String(res.status));
-        const blob = await res.blob();
+    fetchWhole(request.url, headers)
+      .then((blob) => {
         if (cancelled) return;
         const file = new File([blob], request.fileName, { type: blob.type || "application/pdf" });
         setLoaded({ ...request, objectUrl: URL.createObjectURL(file), file });

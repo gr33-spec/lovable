@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
@@ -302,6 +303,24 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
   await expect(page.getByText("devis-client-couvreur.pdf")).toHaveCount(0);
   await page.getByLabel("Choisir le devis (PDF)").setInputFiles(fixture("devis-client-couvreur.pdf"));
   await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
+
+  // Un devis scanné de 7 Mo (au-delà des 4,5 Mo d'une requête chez l'hébergeur) part en morceaux, et se rouvre entier.
+  await page.getByRole("button", { name: "Supprimer devis-client-couvreur.pdf" }).click();
+  await page.getByRole("button", { name: "Oui, supprimer" }).click();
+  await expect(page.getByText("devis-client-couvreur.pdf")).toHaveCount(0);
+  const heavy = Buffer.concat([fs.readFileSync(fixture("devis-client-couvreur.pdf")), Buffer.from(`\n%${"x".repeat(7_000_000)}\n`)]);
+  const parts: string[] = [];
+  page.on("request", (r) => r.url().includes("/v1/uploads/") && parts.push(r.url()));
+  await page.getByLabel("Choisir le devis (PDF)").setInputFiles({ name: "devis-scanne.pdf", mimeType: "application/pdf", buffer: heavy });
+  await expect(page.getByText("devis-scanne.pdf")).toBeVisible();
+  expect(parts).toHaveLength(3);
+  await expect(page.getByRole("alert").filter({ hasText: /volumineux|Introuvable/ })).toHaveCount(0);
+  await page.getByRole("button", { name: "Ouvrir devis-scanne.pdf" }).click();
+  const viewer = page.getByRole("dialog", { name: "devis-scanne.pdf" });
+  await expect(viewer.getByRole("link", { name: "Télécharger" })).toBeVisible();
+  const size = await viewer.locator("iframe").evaluate(async (frame) => (await (await fetch((frame as HTMLIFrameElement).src)).blob()).size);
+  expect(size).toBe(heavy.byteLength);
+  await viewer.getByRole("button", { name: "Fermer le document" }).click();
 });
 
 test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et la valide", async ({ page }) => {
