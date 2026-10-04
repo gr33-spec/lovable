@@ -8,7 +8,7 @@ import type { RequestedLine } from "./price-request-email.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { priceRequestEmail, requestedQuantityText, supplierLineLabel } from "./price-request-email.js";
 import type { PriceRequestRecord, PriceRequestRepository, RecipientStatus } from "./price-request.repository.js";
-import { packetPdf, packetSubject, packetText, type SupplierPacket } from "./supplier-packet.js";
+import { packetPdf, packetSubject, packetText, priceLeak, type SupplierPacket } from "./supplier-packet.js";
 
 export interface PriceRequestView extends PriceRequestRecord {
   /** E-mail prêt à envoyer, par destinataire : le texte des trois blocs (§43.5). */
@@ -32,7 +32,7 @@ function communeOf(address: string | null): string | null {
  */
 export function buildPacket(
   reviewed: ReviewedTakeoff,
-  sender: { companyName: string; projectName: string; projectAddress: string | null },
+  sender: { companyName: string; projectName: string; projectAddress: string | null; projectNotes?: string | null },
   options: { date: string; joindreDetail: boolean; message: string | null; dueDate: Date | null },
   /** Les lignes reprises du devis telles qu'elles partent (identiques réunies, §43.5 : une ligne par article). */
   direct: readonly RequestedLine[],
@@ -69,6 +69,10 @@ export function buildPacket(
   }
   const resume: string[] = [];
   for (let i = 0; i < facts.length && resume.length < 5; i += 3) resume.push(facts.slice(i, i + 3).join(" · "));
+  // Infos chantier de l'artisan (note, commentaires de croquis) : telles qu'écrites, 3 lignes au plus, jamais une ligne qui parle de prix.
+  for (const line of (sender.projectNotes ?? "").split("\n").map((l) => l.trim()).filter(Boolean).slice(0, 3)) {
+    if (!priceLeak(line)) resume.push(line);
+  }
   const dateFr = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Paris" });
   if (options.dueDate) resume.push(`Réponse souhaitée avant le ${dateFr(options.dueDate)}`);
   if (options.message?.trim()) resume.push(options.message.trim());
@@ -212,7 +216,7 @@ export class PriceRequestsService {
     const sender = await this.requests.sender(tenant, projectId);
     const packet = buildPacket(
       reviewed,
-      { companyName: sender?.companyName ?? "", projectName: sender?.project.name ?? "", projectAddress: sender?.project.address ?? null },
+      { companyName: sender?.companyName ?? "", projectName: sender?.project.name ?? "", projectAddress: sender?.project.address ?? null, projectNotes: sender?.project.siteNotes ?? null },
       { date: today(this.clock()), joindreDetail: await this.requests.attachQuoteDetail(tenant), message: input.message, dueDate: input.dueDate },
       grouped,
     );

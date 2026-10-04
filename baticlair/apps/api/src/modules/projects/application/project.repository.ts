@@ -5,6 +5,8 @@ export interface NewProject {
   name: string;
   clientName: string | null;
   address: string | null;
+  /** Infos chantier facultatives (note de l'artisan), ou null. */
+  siteNotes?: string | null;
   /** Chantier de démonstration : ne compte pas dans la formule. */
   demo?: boolean;
 }

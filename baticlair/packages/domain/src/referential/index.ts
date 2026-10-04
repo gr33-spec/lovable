@@ -4,10 +4,12 @@ export { parseFormula, formulaVariables, FormulaError, type Expr } from "./expre
 export { computeChantier, computeWorkItem, requiredInputs, type RequiredInputs, type MissingData, type Origin, type WorkItemInput, type WorkItemResult, type NeedResult, type Question, type TraceLine, type Assumption, type ParamValue, type SlotChoice, type EngineOptions, type CompanyPreferences } from "./engine.js";
 export { identifyProducts, type Identification } from "./resolve.js";
 export { checkReferential } from "./integrity.js";
+export { referentialSchema, validateReferential, loadReferential, ReferentialFileError } from "./schema.js";
 export { ROOFING_REFERENTIAL } from "./data/roofing.js";
+export { PLATRERIE_REFERENTIAL } from "./data/platrerie.js";
 export { paramsFromContext, type ChantierContext, type SiteFact, type ContextConflict } from "./context.js";
 export { purchaseList, type PurchaseRow } from "./purchase-list.js";
-export { planQuote, type QuoteLine, type QuotePlan, type LinePlan } from "./plan.js";
+export { planQuote, factsFromReading, readSiteNotes, type QuoteLine, type QuotePlan, type LinePlan } from "./plan.js";
 export { scoreQuote, type QuoteScore, type LineOutcome, type Answer } from "./scorecard.js";
 export { documentationNeeds, type DocumentationNeed } from "./documentation.js";
 export { mergeReferentials, type ReferentialLayer, type ReferentialProvider } from "./layers.js";

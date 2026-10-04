@@ -137,7 +137,7 @@ describe("une information manquante ne devient jamais ✓ en fermant l'écran", 
 });
 
 describe("questions du calcul : une réponse, une seule fois, et la preuve", () => {
-  it("couverture : « aucun de ces modèles » retire la pièce par défaut, l'article passe « à faire chiffrer », la réponse est journalisée", async () => {
+  it("couverture : « aucun de ces modèles » retire l'hypothèse, le générique compte quand même (modèle à préciser), la réponse est journalisée", async () => {
     const { agent, companyId } = await signUpWithCompany(ctx.app, "c@example.fr", "Toitures Martin");
     const { projectId, takeoffId, view, purchase } = await projectWith(agent, D2026_015_LINES);
     // Aucune question sur la faîtière : la pièce par défaut (29 pour 10 m) est dans la liste d'achats.
@@ -147,8 +147,9 @@ describe("questions du calcul : une réponse, une seule fois, et la preuve", () 
     const after = answered.view as View;
     const afterPurchase = answered.purchase as Purchase;
     expect(after.decisions.some((d) => d.question?.key === "product:faitiere")).toBe(false);
-    expect(afterPurchase.toBuy.some((b) => b.needIds.includes("faitieres"))).toBe(false);
-    expect(afterPurchase.toQuote.some((q) => q.key === "need:faitieres")).toBe(true);
+    // Le fournisseur chiffre en dernier recours : les 29 faîtières restent comptées, « modèle à préciser » par lui.
+    expect(afterPurchase.toBuy.find((b) => b.needIds.includes("faitieres"))).toMatchObject({ quantity: "29 pièces", label: expect.stringMatching(/modèle à préciser/) });
+    expect(afterPurchase.toQuote.some((q) => q.key === "need:faitieres")).toBe(false);
     const events = await ctx.app.get(CorrectionJournal).list(await tenantOf(companyId), { projectId });
     expect(events.filter((e) => e.action === "answer")).toEqual([expect.objectContaining({ after: expect.objectContaining({ designation: "product:faitiere", reference: "aucun" }) })]);
   });
@@ -304,7 +305,8 @@ describe("ouvrages comptés : « 6 unités » de jouées n'est jamais 6 ardoises
     const body = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [s.body.id] }).expect(201)).body.recipients[0].email.body as string;
     // §43.5 : ce que le fournisseur chiffre lui-même, avec la mesure du devis et la raison.
     expect(body).toMatch(/À CHIFFRER PAR VOS SOINS\n(?:.*\n)*?Ardoises pour jouées de lucarnes · 6 unités — /);
-    expect(body).toMatch(/Entourage de cheminée.* · 2 unités — /);
+    // L'entourage de cheminée n'est plus « à chiffrer » : il attend ses réponses (façonnage, périmètre), puis se calcule (§7).
+    expect(body).not.toMatch(/Entourage de cheminée.* · 2 unités — /);
     expect(body).toMatch(/Chatières de ventilation : 12 unités/);
     const events = await ctx.app.get(CorrectionJournal).list(await tenantOf(companyId), { projectId });
     expect(events.some((e) => e.action === "answer" && e.after?.designation === question.question!.key)).toBe(true);

@@ -2,7 +2,7 @@
  * Documents déposés dans un chantier (devis client, devis fournisseurs).
  * Voir docs/document-pipeline.md.
  */
-export type DocumentPurpose = "client_quote" | "supplier_quote";
+export type DocumentPurpose = "client_quote" | "supplier_quote" | "sketch";
 export type DocumentStatus = "stored" | "read" | "failed";
 export type PageRoute = "text" | "vision" | "skip";
 
@@ -29,6 +29,14 @@ export function cleanFileName(raw: string | undefined): string {
   // eslint-disable-next-line no-control-regex
   const cleaned = base.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 200);
   return cleaned.length > 0 ? cleaned : "document.pdf";
+}
+
+/** Une image (JPEG, PNG, WebP) se reconnaît à ses premiers octets, jamais à son extension. */
+export function imageMimeType(bytes: Uint8Array): "image/jpeg" | "image/png" | "image/webp" | null {
+  if (bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "image/jpeg";
+  if (bytes.length > 8 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return "image/png";
+  if (bytes.length > 12 && Buffer.from(bytes.subarray(0, 4)).toString("latin1") === "RIFF" && Buffer.from(bytes.subarray(8, 12)).toString("latin1") === "WEBP") return "image/webp";
+  return null;
 }
 
 export interface PdfPageContent {

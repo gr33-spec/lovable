@@ -53,7 +53,7 @@ export class PrismaProjectRepository implements ProjectRepository {
     }
 
     const rows = await this.prisma.$queryRaw<Project[]>`
-      SELECT "id", "companyId", "name", "clientName", "address", "status",
+      SELECT "id", "companyId", "name", "clientName", "address", "siteNotes", "status",
              "createdAt", "updatedAt", "lastActivityAt"
       FROM "project"
       WHERE ${Prisma.join(conditions, " AND ")}

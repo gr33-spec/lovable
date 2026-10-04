@@ -226,7 +226,10 @@ export function checkReferential(ref: Referential): string[] {
       for (const r of n.requires ?? []) if (!paramDims.has(r)) err(nw, `donnée requise inconnue « ${r} »`);
       if (n.when) {
         try {
-          for (const v of formulaVariables(parseFormula(n.when))) if (!paramDims.has(v)) err(nw, `condition « ${n.when} » : seule une donnée de l'ouvrage peut y figurer (« ${v} »)`);
+          for (const v of formulaVariables(parseFormula(n.when))) {
+            const constant = v.startsWith("regle.") && w.constants?.[v.slice("regle.".length)] !== undefined;
+            if (!paramDims.has(v) && !constant) err(nw, `condition « ${n.when} » : seule une donnée ou une constante de l'ouvrage peut y figurer (« ${v} »)`);
+          }
         } catch (e) {
           err(nw, `condition : ${(e as Error).message}`);
         }

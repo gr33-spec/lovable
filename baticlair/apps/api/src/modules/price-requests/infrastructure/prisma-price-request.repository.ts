@@ -163,7 +163,7 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
       isUuid(projectId)
         ? this.prisma.project.findFirst({
             where: { id: projectId, companyId: tenant.companyId },
-            select: { name: true, address: true },
+            select: { name: true, address: true, siteNotes: true },
           })
         : Promise.resolve(null),
     ]);

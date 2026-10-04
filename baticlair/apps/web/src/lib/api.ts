@@ -42,7 +42,7 @@ export function setActiveCompanyId(id: string | null): void {
 }
 
 export interface RequestOptions {
-  method?: "GET" | "POST" | "PATCH" | "DELETE";
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   /** Objet envoyé en JSON, ou formulaire (envoi de fichier). */
   body?: unknown;
   /**
@@ -117,6 +117,8 @@ export interface Project {
   name: string;
   clientName: string | null;
   address: string | null;
+  /** Infos chantier facultatives : la note de l'artisan, ou null. */
+  siteNotes: string | null;
   status: ProjectStatus;
   createdAt: string;
   updatedAt: string;
@@ -128,7 +130,7 @@ export interface ProjectPage {
   nextCursor: string | null;
 }
 
-export type DocumentPurpose = "client_quote" | "supplier_quote";
+export type DocumentPurpose = "client_quote" | "supplier_quote" | "sketch";
 
 export interface ProjectDocument {
   id: string;
@@ -218,6 +220,8 @@ export interface Quantitatif {
   etat: "en_cours" | "questions" | "pret" | "erreur";
   erreur?: { raison: string };
   valide?: boolean;
+  /** Infos chantier facultatives qui ont servi au calcul : la note, et les croquis déposés. */
+  infos?: { texte: string | null; croquis: { id: string; nom: string }[] };
   ecran?: Takeoff;
 }
 

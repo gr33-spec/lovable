@@ -2,6 +2,13 @@
 
 La seule porte du calcul : l'appli (chat) et les partenaires (Rappidos en premier) y passent. Aujourd'hui, l'accès se fait avec la session d'un compte artisan ; la clé par partenaire (avec quota) viendra ensuite, sans changer les routes.
 
+## S'authentifier — clé API partenaire
+
+- L'appli passe par la session ; un partenaire (Rappidos…) passe par une **clé API** : en-tête `X-Api-Key: bc_…`, sans cookie ni `x-company-id` (la clé porte son entreprise).
+- La clé se crée dans l'appli (Compte → « Clés API partenaire »), ou par `POST /v1/partner-keys` `{ "nom": "Rappidos", "quotaMensuel": 500 }` ; elle n'est montrée qu'une fois. `GET /v1/partner-keys` liste les clés (préfixe, quota, utilisées ce mois) ; `DELETE /v1/partner-keys/{id}` la révoque. Ces trois routes exigent une session : une clé ne gère pas les clés.
+- **Quota** : `quotaMensuel` quantitatifs créés par mois civil et par clé. Au-delà : `429 too_many_requests` avec `{ quota, utilises }`. Les lectures (`GET`) ne comptent pas. La limitation de débit par adresse s'applique en plus.
+- Une clé révoquée ou inconnue : `401 unauthenticated`.
+
 ## Déposer un devis — `POST /v1/quantitatifs`
 
 Deux formes, au choix :
@@ -22,6 +29,14 @@ Deux formes, au choix :
 
 - `quantite` et `prix` : un nombre ou un texte (« 1 250,50 ») ; `null` s'ils sont absents. Entre 1 et 500 lignes.
 - `adresse` (ou code postal) : elle donne la zone climatique, qui n'est jamais demandée à l'artisan.
+- `infos` (facultatif, 4 000 caractères) : les informations sur le chantier, écrites comme on les dirait (« Pente 42°. Rampants 2 × 6,50 m. Les Velux sont conservés. »). Seules les mesures nommées entrent dans le calcul (pente, rampant, faîtage, gouttière, descentes, cheminées, périmètre, épaisseur, développé) ; elles passent devant le devis et l'explication cite les deux ; le reste est gardé et transmis au fournisseur dans « Le chantier en bref ». Sans IA. Voir `docs/infos-chantier-facultatives.md`.
+
+### Infos chantier après coup
+
+- `PUT /v1/projects/{projetId}/infos` `{ "texte": "Pente 35°" | null }` : remplace la note du chantier ; le quantitatif se recalcule au prochain `GET`.
+- `POST /v1/projects/{projetId}/infos/croquis` (multipart : `file` image JPEG/PNG/WebP ou PDF, `commentaire` facultatif) : la photo est gardée telle quelle (jamais lue par l'IA), le commentaire rejoint la note (« Croquis (nom) : … »). Réponse `201 { id, nom }`.
+- Le quantitatif rend `infos: { texte, croquis: [{ id, nom }] }`.
+- Deux sources qui se contredisent (la ligne du devis dit 40°, son en-tête 35°) donnent une question `engine:param:<clé>` avec les deux valeurs en boutons ; la note de l'artisan tranche sans question.
 - Sans `projetId`, un chantier est créé, nommé avec la `reference`.
 
 Réponses :

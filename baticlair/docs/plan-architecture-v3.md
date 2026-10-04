@@ -19,7 +19,7 @@ Partenaires ──┼─▶ /v1/quantitatifs ─▶ moteur générique ─▶ re
 
 - **Réponse `pret`** : lignes avec identifiant stable, libellé normalisé, quantité, unité de commande, conditionnement, hypothèses, confiance, `metier` et `version_referentiel`.
 - **Le chat n'appelle que ces routes.** Les routes actuelles (`/documents/:id/takeoff`, `/takeoffs/:id/answers`…) deviennent des alias, puis disparaissent.
-- **Hors MVP mais prévu sans refonte** : une clé par partenaire, avec quota (même mécanisme que la limitation de débit B2), isolation des données par partenaire, documentation OpenAPI.
+- **Clé par partenaire avec quota : fait le 2026-10-04** (`X-Api-Key`, quota mensuel de quantitatifs par clé, révocation, création dans Compte ; `apps/api/test/partner-keys.test.ts`). Reste prévu sans refonte : isolation des données par partenaire (aujourd'hui une clé = une entreprise), documentation OpenAPI.
 
 ## 2. Chaque ligne s'explique en une phrase modifiable (§39)
 
@@ -32,9 +32,9 @@ Partenaires ──┼─▶ /v1/quantitatifs ─▶ moteur générique ─▶ re
 
 ## 3. Le moteur sans métier dedans (§27)
 
-- **Les fichiers JSON sont vérifiés au chargement** par un schéma JSON (§19, §32) et par le contrôle d'intégrité actuel (unités, formules, sources). Un référentiel invalide ne se charge pas.
+- **Les fichiers JSON sont vérifiés au chargement** par un schéma (§19, §32 ; `packages/domain/src/referential/schema.ts`, zod) et par le contrôle d'intégrité actuel (unités, formules, sources). Un référentiel invalide ne se charge pas (`loadReferential`, erreur avec le chemin de chaque faute). **Fait le 2026-10-04** ; la couverture est exportée en `referentiels/couverture/referentiel.json`, tenu à jour par un test ; la source de vérité reste `roofing.ts` jusqu'à la bascule.
 - **Le moteur actuel est gardé** (formules à unités, tables, hypothèses, pertes, conditionnements, traces). Seule change sa source : il lit des JSON au lieu de TypeScript.
-- **Version figée par chantier** : chaque quantitatif enregistre `{ metier, version }` et se recalcule avec sa version d'origine. Aujourd'hui, il est recalculé avec les règles du jour : **à corriger**.
+- **Version figée par chantier** : chaque quantitatif enregistre `{ metier, version }` et se recalcule avec sa version d'origine. **Fait le 2026-10-04** : l'instantané du référentiel est écrit en base (`referential_snapshot`) à la première rencontre d'une version, relu et revalidé par le schéma à chaque calcul ; un instantané abîmé laisse la place au référentiel du jour (`apps/api/test/version-figee.test.ts`).
 - **Les questions** (§41, qui remplace « 4 au maximum ») : une question se pose si sa réponse change une quantité commandée de plus de 3 %, une unité de commande ou un matériau ; une à la fois, dans l'ordre du levier le plus gros, sans maximum. Aujourd'hui, toute donnée manquante est demandée : le tri par sensibilité reste **à faire**.
 - **Données de confiance** : tout ce qui vient des §34-36 est sourcé fabricant. Les valeurs « à vérifier DTU » et les anciennes §3, 5 et 7 (`confiance: "estimation"`) apparaissent dans les hypothèses avec « à confirmer ».
 
@@ -63,7 +63,7 @@ Ce qui reste dans le moteur, parce que c'est commun à tous les métiers : unit�
    - tous les tests au vert ;
    - version figée et tri des questions par sensibilité (3 %) en place ;
    - CHANGELOG commencé (`referentiels/couverture/CHANGELOG.md`).
-4. **`platrerie/` minimal** : une cloison 72/48 (plaques, rails, montants) avec un test, qui doit tourner **sans toucher au moteur**. Si une seule ligne de moteur change, l'architecture n'est pas validée et je te le dis.
+4. **`platrerie/` minimal** : une cloison 72/48 (plaques, rails, montants) avec un test, qui doit tourner **sans toucher au moteur**. Si une seule ligne de moteur change, l'architecture n'est pas validée et je te le dis. **Fait le 2026-10-04** (`packages/domain/src/referential/data/platrerie.ts`, test `platrerie.test.ts`) : aucune ligne de moteur changée ; plaques, vis, bande et enduit viennent du §16 du fondateur ; rails, montants, hauteur et entraxe sont des chiffres d'usage **en brouillon** (visibles du seul validateur) tant qu'un plaquiste ne les a pas validés. L'API ne choisit pas encore le référentiel selon le métier : couverture seulement.
 5. **Ensuite seulement** : le chat de la section 21, avec une maquette avant le code. Le **prompt B** (§41.2) sera branché mot pour mot à cette étape, comme couche de dialogue au-dessus du moteur (qui garde la décision des questions et tous les chiffres) ; ses règles déterministes (une question à la fois, boutons, « (habituel) », ordre du levier, pas de maximum) s'appliquent dès maintenant à l'écran.
 
 ## 5. Ce que les données fabricant changent, et trois points à trancher

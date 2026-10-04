@@ -123,6 +123,7 @@ model Company {
   updatedAt            DateTime @updatedAt
 
   memberships   Membership[]
+  partnerKeys   PartnerApiKey[]
   projects      Project[]
   documents     Document[]
   aiExecutions  AiExecution[]
@@ -168,6 +169,8 @@ model Project {
   name           String
   clientName     String?
   address        String?
+  /// Infos chantier facultatives : la note de l'artisan (texte libre, commentaires de croquis). Lue à chaque calcul.
+  siteNotes      String?
   status         ProjectStatus @default(active)
   /// Chantier de démonstration : ne compte jamais dans la formule.
   demo           Boolean       @default(false)
@@ -200,6 +203,8 @@ model Project {
 enum DocumentPurpose {
   client_quote
   supplier_quote
+  /// Croquis, photo ou plan du chantier déposé par l'artisan (infos chantier facultatives) : gardé, pas lu par l'IA.
+  sketch
 }
 
 enum DocumentStatus {
@@ -746,6 +751,8 @@ model Quantitatif {
   id         String   @id @default(uuid(7)) @db.Uuid
   companyId  String   @db.Uuid
   projectId  String   @db.Uuid
+  /// Clé API partenaire qui a créé ce quantitatif (quota mensuel par clé), nulle pour l'appli.
+  apiKeyId   String?  @db.Uuid
   /// pdf | lignes
   source     String
   documentId String?  @db.Uuid
@@ -759,4 +766,39 @@ model Quantitatif {
 
   @@index([companyId, createdAt])
   @@map("quantitatif")
+}
+
+/// Version figée par chantier (plan v3 §3) : le référentiel tel qu'il était quand le quantitatif a été créé, pour
+/// le recalculer avec SES règles, jamais celles du jour. Une ligne par version rencontrée.
+model ReferentialSnapshot {
+  trade     String
+  version   String   @id
+  data      Json
+  createdAt DateTime @default(now())
+
+  @@map("referential_snapshot")
+}
+
+/// Clé API d'un partenaire (Rappidos…) : une clé par intégration, rattachée à une entreprise, avec un quota
+/// mensuel de quantitatifs créés. La clé n'est stockée que hachée ; elle n'est montrée qu'à sa création.
+model PartnerApiKey {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  companyId    String    @db.Uuid
+  /// Qui l'a créée : la clé agit en son nom (droits de son adhésion).
+  createdById  String
+  name         String
+  /// Les premiers caractères, pour la reconnaître dans la liste (« bc_7f3a… »).
+  prefix       String
+  /// SHA-256 de la clé complète.
+  hash         String    @unique
+  /// Quantitatifs créés par mois civil avec cette clé, au plus.
+  monthlyQuota Int
+  createdAt    DateTime  @default(now())
+  lastUsedAt   DateTime?
+  revokedAt    DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@map("partner_api_key")
 }

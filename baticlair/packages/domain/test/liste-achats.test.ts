@@ -107,9 +107,9 @@ describe("liste d'achats : D-2026-015 (tuiles HP10, 120 m²)", () => {
 });
 
 describe("liste d'achats : devis ardoises (200 m², jouées, cheminée)", () => {
-  it("à l'ouverture : deux questions seulement (6 : ardoises ou jouées ? combien de descentes ?), le reste calculé", () => {
+  it("à l'ouverture : quatre questions (façonnage, périmètre de cheminée, descentes, 6 : ardoises ou jouées ?), le reste calculé", () => {
     const v = read(ARDOISES_LUCARNES_LINES);
-    expect(v.questions.map((q) => q.key).sort()).toEqual(["engine:param:nb_descentes", "role:ligne 5"]);
+    expect(v.questions.map((q) => q.key).sort()).toEqual(["engine:param:faconnage", "engine:param:nb_descentes", "engine:param:perimetre_cheminee", "role:ligne 5"]);
     expect(v.toBuy.map((b) => [short(b.label), b.quantity])).toEqual([
       ["Ardoises 30×22", "9 271 pièces"],
       ["Crochets d'ardoise", "9 457 pièces"],
@@ -124,26 +124,34 @@ describe("liste d'achats : devis ardoises (200 m², jouées, cheminée)", () => 
     ]);
     // Un faîtage ZINC ne donne jamais des faîtières en terre cuite.
     expect(v.toBuy.some((b) => /Faîtières/.test(b.label))).toBe(false);
-    // Les naissances attendent la réponse « combien de descentes » : une question, pas un article à faire chiffrer.
-    expect(v.toQuote.map((q) => short(q.label))).toEqual(["Entourage de cheminée zinc et solin"]);
+    // Les naissances attendent « combien de descentes », l'abergement attend le périmètre : des questions, rien à faire chiffrer.
+    expect(v.toQuote).toEqual([]);
     expect(v.assumptions.map((a) => a.key)).toEqual(["param:pente", "param:zone", "param:longueur_rampant", "derived:recouvrement", "param:pureau", "param:diametre_crochet", "product:liteau", "product:contre_liteau", "param:entraxe_supports"]);
     // Tant que « 6 » n'est pas tranché, rien ne part.
     expect(v.canValidate).toBe(false);
   });
 
   it("après les réponses (6 jouées, 2 descentes) : les jouées partent à faire chiffrer, les naissances se comptent", () => {
-    const v = read(ARDOISES_LUCARNES_LINES, { "role:ligne 5": "measure", "param:nb_descentes": { value: "2", unit: "u" } });
+    const v = read(ARDOISES_LUCARNES_LINES, {
+      "role:ligne 5": "measure",
+      "param:nb_descentes": { value: "2", unit: "u" },
+      "param:faconnage": { value: "2", unit: "u" },
+      "param:perimetre_cheminee": { value: "3", unit: "m" },
+    });
     expect(v.questions).toEqual([]);
     expect(v.toBuy.find((b) => b.label === "Naissances")).toMatchObject({ quantity: "2 pièces" });
+    // Abergement (§7) : 2 cheminées × 3 m × 1,3 = 7,8 m de zinc façonné → 5 bandes de 2 m ; porte-solin 6 m → 4 bandes.
+    expect(v.toBuy.find((b) => b.label.startsWith("Bandes zinc façonnées"))).toMatchObject({ quantity: "5 pièces" });
+    expect(v.toBuy.find((b) => b.label.startsWith("Bandes porte-solin"))).toMatchObject({ quantity: "4 pièces" });
     expect(v.toQuote.map((q) => [short(q.label), q.measure])).toEqual([
       ["Ardoises pour jouées de lucarnes", "6 unités"],
-      ["Entourage de cheminée zinc et solin", "2 unités"],
     ]);
     expect(v.canValidate).toBe(true);
     // La carte du quantitatif : chaque article sous son ouvrage, avec la mesure du devis.
     expect(v.groups.map((g) => [g.label, g.measure, g.itemKeys.length])).toEqual([
       ["Couverture en ardoises au crochet sur liteaux", "200 m²", 5],
       ["Faîtage en bande zinc", "17 m", 2],
+      ["Abergement de cheminée", "2 unités", 2],
       ["Gouttière", "17 m", 3],
       ["Autres articles du devis", null, 1],
     ]);

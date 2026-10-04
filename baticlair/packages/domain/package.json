@@ -10,7 +10,9 @@
       "default": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
@@ -18,7 +20,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "decimal.js": "^10.6.0"
+    "decimal.js": "^10.6.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "typescript": "5.9.3",

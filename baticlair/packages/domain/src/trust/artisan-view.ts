@@ -1,4 +1,4 @@
-import { computeChantier, type Assumption, type CompanyPreferences, type EngineOptions, type NeedResult, type Question } from "../referential/engine.js";
+import { computeChantier, type Assumption, type CompanyPreferences, type EngineOptions, type NeedResult, type Question, type WorkItemInput } from "../referential/engine.js";
 import type { Referential } from "../referential/model.js";
 import type { LineRole } from "../referential/line-roles.js";
 import type { QuotePlan } from "../referential/plan.js";
@@ -477,7 +477,7 @@ export function computeWithAnswers(
     const planned = plan.lines.filter((l): l is Extract<QuotePlan["lines"][number], { status: "planned" }> => l.status === "planned" && l.workItemId === workItemId);
     return planned.length > 0 && planned.every((l) => given.has(`${workItemId}/${l.slot}`));
   };
-  const inputs = plan.inputs.map((input) => {
+  const inputs: WorkItemInput[] = plan.inputs.map((input) => {
     const work = ref.workItems.find((w) => w.id === input.workItemId)!;
     const products = { ...input.products };
     const params = { ...input.params };
@@ -501,19 +501,127 @@ export function computeWithAnswers(
         params[name] = { ...answer, origin: "artisan" };
       }
     }
+    // Habitude établie de l'entreprise (« je façonne », apprise sur deux chantiers) : vaut réponse quand ce
+    // chantier n'en a pas donné d'autre ; dite comme telle dans le calcul, modifiable d'un tap.
+    for (const def of work.params) {
+      const habit = preferences.params?.[def.key];
+      if (def.kind !== "artisan_preference" || !habit || params[def.key] || answers[`param:${def.key}`] !== undefined) continue;
+      params[def.key] = { value: habit, unit: def.unit, origin: "artisan", evidence: "Habitude de votre entreprise" };
+    }
     return { ...input, products, params, preferences: prefs, ...(declinedSlots.length > 0 ? { declined: declinedSlots } : {}) };
   });
-  const result = computeChantier(ref, inputs, options);
-  // Chaque besoin garde son ouvrage : il sera rattaché à la ligne du devis dont il provient.
-  const needs = result.workItems
-    .filter((w) => !allGiven(w.workItemId))
-    .flatMap((w) => w.needs.filter((n) => !given.has(`${w.workItemId}/${n.slot}`)).map((n) => ({ ...n, workItemId: w.workItemId })));
-  const seen = new Set<string>();
-  const questions: Question[] = [];
-  for (const n of needs) {
-    if (!n.question || n.origin === "suggested" || declined.has(n.question.key) || seen.has(n.question.key)) continue;
-    seen.add(n.question.key);
-    questions.push(n.question);
+  const run = (ins: WorkItemInput[]) => {
+    const result = computeChantier(ref, ins, options);
+    // Chaque besoin garde son ouvrage : il sera rattaché à la ligne du devis dont il provient.
+    const needs = result.workItems
+      .filter((w) => !allGiven(w.workItemId))
+      .flatMap((w) => w.needs.filter((n) => !given.has(`${w.workItemId}/${n.slot}`)).map((n) => ({ ...n, workItemId: w.workItemId })));
+    const seen = new Set<string>();
+    const questions: Question[] = [];
+    for (const n of needs) {
+      if (!n.question || n.origin === "suggested" || declined.has(n.question.key) || seen.has(n.question.key)) continue;
+      seen.add(n.question.key);
+      questions.push(n.question);
+    }
+    return { needs, questions };
+  };
+  let { needs, questions } = run(inputs);
+  // Deux sources qui ne disent pas la même chose (devis ≠ en-tête lu, devis ≠ croquis), sans réponse de l'artisan :
+  // une question avec les deux valeurs en boutons, et rien ne part pour cet ouvrage tant qu'elle est ouverte.
+  for (const c of plan.contradictions) {
+    const key = `param:${c.key}`;
+    if (answers[key] !== undefined || questions.some((q) => q.key === key)) continue;
+    const seen = new Set<string>();
+    const options = c.facts.filter((f) => !seen.has(f.value) && seen.add(f.value)).map((f) => ({ label: `${f.value.replace(".", ",")} ${f.unit} (${f.evidence})`, value: f.value }));
+    const question: Question = { key, kind: "param", text: `${c.label} : ${options.map((o) => o.label).join(", ou ")} ?`, unit: c.unit, options };
+    questions.unshift(question);
+    needs = needs.map((n) => {
+      if (n.workItemId !== c.workItemId || n.status !== "calculated") return n;
+      const { quantity: _q, purchase: _p, ...rest } = n;
+      return { ...rest, status: "question" as const, question };
+    });
   }
+  // § 41 : une question ne se pose que si sa réponse change une quantité commandée de plus de 3 %, une unité ou un
+  // matériau ; les questions restantes se posent dans l'ordre du levier le plus gros. Pour chaque question à boutons,
+  // le calcul est rejoué avec chaque réponse possible.
+  const levers = new Map<string, number>();
+  let current = inputs;
+  for (const q of [...questions]) {
+    const lever = questionLever(ref, current, q, questions.filter((x) => x !== q), run);
+    if (lever === null) continue;
+    if (lever.spread <= QUESTION_THRESHOLD && lever.option) {
+      // Toutes les réponses donnent la même commande (à 3 % près) : la première vaut hypothèse, dite et modifiable.
+      current = lever.option.inputs;
+      const again = run(current);
+      needs = again.needs.map((n) => (n.question ? n : { ...n, assumptions: [...n.assumptions, lever.option!.assumption] }));
+      questions = again.questions;
+    } else levers.set(q.key, lever.spread);
+  }
+  for (const c of plan.contradictions) if (!levers.has(`param:${c.key}`)) levers.set(`param:${c.key}`, Number.POSITIVE_INFINITY);
+  questions = [...questions].sort((a, b) => (levers.get(b.key) ?? 0) - (levers.get(a.key) ?? 0));
   return { needs, questions, declined: [...declined] };
+}
+
+/** Au-delà de cet écart relatif entre deux réponses possibles, la question mérite d'être posée (§41). */
+export const QUESTION_THRESHOLD = 0.03;
+
+/**
+ * Le levier d'une question à boutons : le plus grand écart relatif de quantité commandée entre deux réponses,
+ * ou l'infini si une réponse change une unité, un article ou le nombre d'articles. Null si la question n'est pas
+ * un paramètre à boutons (produit à confirmer, format…) ou si une réponse laisse encore un calcul en attente.
+ */
+function questionLever(
+  ref: Referential,
+  inputs: WorkItemInput[],
+  q: Question,
+  others: readonly Question[],
+  run: (ins: WorkItemInput[]) => { needs: (NeedResult & { workItemId: string })[]; questions: Question[] },
+): { spread: number; option: { inputs: WorkItemInput[]; assumption: Assumption } | null } | null {
+  if (q.kind !== "param" || !q.options || q.options.length < 2) return null;
+  const name = q.key.slice("param:".length);
+  const def = ref.workItems.flatMap((w) => w.params).find((p) => p.key === name);
+  if (!def) return null;
+  const withParam = (ins: WorkItemInput[], key: string, unit: string, value: string, evidence: string): WorkItemInput[] =>
+    ins.map((i) => (ref.workItems.find((w) => w.id === i.workItemId)?.params.some((p) => p.key === key) ? { ...i, params: { ...i.params, [key]: { value, unit, origin: "artisan" as const, evidence } } } : i));
+  // Les autres questions à boutons encore ouvertes sont provisoirement prises à leur première réponse : le levier
+  // de CETTE question se mesure toutes choses égales par ailleurs (elles ne sont pas répondues pour autant).
+  let base = inputs;
+  for (const o of others) {
+    const k = o.kind === "param" && o.options?.[0] ? o.key.slice("param:".length) : null;
+    const d = k ? ref.workItems.flatMap((w) => w.params).find((p) => p.key === k) : undefined;
+    if (k && d) base = withParam(base, k, d.unit, o.options![0]!.value, "Réponse possible");
+  }
+  const outcomes = q.options.map((o) => {
+    const ins = withParam(base, name, def.unit, o.value, "Réponse possible");
+    const { needs } = run(ins);
+    // Un calcul encore en attente d'une autre réponse : le levier ne se mesure pas, la question se pose.
+    if (needs.some((n) => n.status === "question")) return null;
+    const orders = new Map(needs.filter((n) => n.status === "calculated" && n.purchase).map((n) => [n.needId, { count: Number(n.purchase!.order.count), unit: n.purchase!.order.unit.many, label: n.label }]));
+    return { ins, orders };
+  });
+  const settled = outcomes.filter((o): o is NonNullable<typeof o> => o !== null);
+  if (settled.length !== outcomes.length) return { spread: Number.POSITIVE_INFINITY, option: null };
+  const first = settled[0]!;
+  let spread = 0;
+  for (const o of settled.slice(1)) {
+    const keys = new Set([...first.orders.keys(), ...o.orders.keys()]);
+    for (const k of keys) {
+      const a = first.orders.get(k);
+      const b = o.orders.get(k);
+      if (!a || !b || a.unit !== b.unit || a.label !== b.label) return { spread: Number.POSITIVE_INFINITY, option: null };
+      const base = Math.min(a.count, b.count);
+      spread = Math.max(spread, base === 0 ? (a.count === b.count ? 0 : Number.POSITIVE_INFINITY) : Math.abs(a.count - b.count) / base);
+    }
+  }
+  const chosen = q.options[0]!;
+  const chosenInputs = withParam(inputs, name, def.unit, chosen.value, "Toutes les réponses donnent la même commande");
+  const assumption: Assumption = {
+    key: q.key,
+    label: def.label,
+    value: def.display?.[chosen.value] ?? chosen.label,
+    unit: def.unit,
+    note: "Toutes les réponses donnent la même commande (à 3 % près) : la première est retenue.",
+    choices: q.options,
+  };
+  return { spread, option: { inputs: chosenInputs, assumption } };
 }

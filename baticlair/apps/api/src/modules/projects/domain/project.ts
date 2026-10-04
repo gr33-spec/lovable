@@ -8,6 +8,8 @@ export interface Project {
   name: string;
   clientName: string | null;
   address: string | null;
+  /** Infos chantier facultatives : note de l'artisan (texte libre + commentaires de croquis), ou null. */
+  siteNotes: string | null;
   status: ProjectStatus;
   createdAt: Date;
   updatedAt: Date;

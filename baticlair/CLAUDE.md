@@ -31,10 +31,25 @@ Avant de toucher au moteur, aux règles ou aux écrans, lire la section concern�
 - Une mesure du devis n'est jamais présentée comme une quantité d'article.
 - L'app ne demande JAMAIS une quantité à l'artisan : elle calcule avec les hypothèses par défaut et les dit. Une question se pose si sa réponse change une quantité commandée de plus de 3 %, change une unité de commande ou change un matériau : courte, à boutons, une à la fois, dans l'ordre du levier le plus gros, et il n'y a pas de maximum (section 41 ; elle remplace « 4 questions au plus »). Jamais « quelle quantité ? ». Test permanent : `packages/domain/test/jamais-de-quantite-demandee.test.ts`.
 - Le test du fournisseur (section 40) : chaque ligne « À commander » doit pouvoir être chargée dans le camion sans rappeler l'artisan. Jamais de m² pour ce qui se pose en éléments, jamais de ml de métal sans largeur ni épaisseur, jamais « lot », « forfait », « ensemble » : le moteur le verrouille (41.3), test permanent `packages/domain/test/test-du-fournisseur.test.ts`.
-- Tout métal façonné (joint debout, gouttières, noues, faîtages, rives) : la question « tu façonnes toi-même ou tu commandes façonné ? » ; bobines en kg d'un côté, pièces aux dimensions de l'autre.
+- Tout métal façonné (joint debout, bandes zinc, abergements, gouttières, noues, faîtages, rives) : la question « tu façonnes toi-même ou tu commandes façonné ? » (clé unique `faconnage`) ; bobines en kg d'un côté, pièces aux dimensions de l'autre.
+- « Le fournisseur chiffrera » est le DERNIER recours : le moteur tente d'abord (question à boutons, générique « modèle à préciser » si l'artisan refuse les modèles proposés). N'y tombent que les ouvrages sans règle (jouées de lucarnes) et les lignes hors métier. Test permanent : `packages/domain/test/dernier-recours.test.ts`.
+- Règle des 3 % (§41) appliquée par le moteur : pour chaque question à boutons, le calcul est rejoué avec chaque réponse ; si toutes donnent la même commande à 3 % près (mêmes unités, mêmes articles), la première vaut hypothèse dite et modifiable, la question n'est pas posée ; sinon les questions se posent dans l'ordre du levier le plus gros (`computeWithAnswers`, test `packages/domain/test/questions-3-pourcent.test.ts`).
+- Habitudes d'entreprise : un produit choisi ou une réponse d'habitude (`kind: "artisan_preference"` : façonnage, épaisseur du zinc, bacs longs) est mémorisé à chaque réponse ; établi au 2e chantier différent, il n'est plus demandé (dit « Habitude de votre entreprise », modifiable d'un tap) ; un choix contraire le fait reproposer. Tests : `packages/domain/test/rampant-long-panneaux-habitudes.test.ts`, `apps/api/test/habitudes.test.ts`.
+- Infos chantier facultatives (`docs/infos-chantier-facultatives.md`) : la note de l'artisan (chantier, `siteNotes`) et les commentaires de croquis sont lus sans IA (`readSiteNotes`) ; une mesure nommée passe devant le devis et l'explication cite les deux ; deux documents qui se contredisent font une question à deux valeurs (`plan.contradictions`), jamais un choix en silence ; la photo d'un croquis est gardée (`purpose: "sketch"`), jamais lue par l'IA. Rien n'est obligatoire. Tests : `packages/domain/test/infos-chantier.test.ts`, `apps/api/test/infos-chantier.test.ts`.
+- Les dimensions lues par l'IA (prompt A : pente, rampant, épaisseur, en ligne ou en en-tête) entrent dans le calcul (`factsFromReading`), après le texte lu par le code, avant les hypothèses par défaut. Test : `packages/domain/test/lecture-prompt-a.test.ts`.
 - Aucun texte affiché sur le quantitatif qui ne soit pas modifiable d'un tap : désignation, quantité, unité, chaque hypothèse (41.4).
 - Pas de correction spécifique à un devis : chaque cas devient un test permanent.
 - Pas de contenu DTU protégé recopié ; pas de chiffre fabricant non sourcé.
+
+## Référentiels : forme, version, métiers
+
+- Un référentiel est une donnée : il passe par `validateReferential` (schéma zod, `schema.ts`) puis `checkReferential` avant le moteur ; `loadReferential` refuse un fichier faux avec le chemin de la faute. Test : `packages/domain/test/schema-referentiel.test.ts`, qui tient aussi à jour `referentiels/couverture/referentiel.json` (export de `roofing.ts`, qui reste la source de vérité).
+- Version figée par chantier : l'API enregistre l'instantané du référentiel à sa version (`referential_snapshot`) et recalcule chaque quantitatif avec SA version ; jamais les règles du jour. Test : `apps/api/test/version-figee.test.ts`.
+- Un second métier existe : `PLATRERIE_REFERENTIAL` (cloison 72/48), calculé par le même moteur sans changement ; ses chiffres non sourcés sont en brouillon. Toute donnée hors référentiel du fondateur reste `draft` tant qu'un professionnel ne l'a pas validée.
+
+## Partenaires
+
+- Clé API partenaire (`X-Api-Key: bc_…`, module `partners`) : une clé par intégration, hachée en base, montrée une seule fois, rattachée à l'entreprise et à son auteur ; quota mensuel de quantitatifs créés (429 au-delà, les lectures ne comptent pas) ; révocation immédiate ; une clé ne gère jamais les clés. Test : `apps/api/test/partner-keys.test.ts`. Notice : `docs/api-quantitatifs.md`.
 
 ## Commandes utiles
 

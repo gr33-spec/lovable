@@ -4,7 +4,7 @@ import { TAKEOFF_EXTRACTOR } from "../src/modules/takeoff/application/takeoff-ex
 import { FakeTakeoffExtractor } from "../src/modules/takeoff/infrastructure/fake-takeoff-extractor.js";
 import { loadConfig, type AppConfig } from "../src/platform/config/config.js";
 import { CONFIG } from "../src/platform/tokens.js";
-import { makePdf } from "./support/pdf-fixtures.js";
+import { makePdf, type FixtureRow } from "./support/pdf-fixtures.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
 
 /**
@@ -217,6 +217,21 @@ describe("POST /v1/quantitatifs en PDF", () => {
     expect(res.body.lignes.length).toBeGreaterThan(0);
     for (const l of res.body.lignes as Ligne[]) expect(l.explication.phrase).toMatch(/ = /);
     expect((await agent.get(`/v1/quantitatifs/${res.body.id}`)).body).toEqual(res.body);
+  });
+
+  it("la pente lue par l'IA dans l'en-tête (prompt A, contexte) entre dans le calcul : plus d'hypothèse 45°", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
+    const rows: FixtureRow[] = [["ARD-3022", "Ardoises naturelles 30x22 au crochet", "200 m²", "85,00", "17 000,00"]];
+    const pdf = await makePdf(["devis"], rows, "Total HT 17 000,00", "DEVIS N° 2026-119 – Toitures Martin  ·  Pente 35° · rampant 5,50 m");
+    const res = await agent.post("/v1/quantitatifs").field("adresse", "29200 Brest").attach("file", Buffer.from(pdf), { filename: "devis.pdf", contentType: "application/pdf" });
+    expect(res.status).toBe(201);
+    const ardoises = ligne(res.body, "Ardoises 30×22");
+    // À 35° le recouvrement passe de 95 à 105 mm (région III, §34) : plus d'ardoises qu'à 45°, sans question posée.
+    expect(ardoises.quantite).toBeGreaterThan(9200);
+    expect(ardoises.explication.morceaux).toContainEqual({ texte: "pente du toit 35°", cle: "param:pente", valeur: "35", unite: "°", confiance: "devis" });
+    expect(ardoises.explication.morceaux).toContainEqual(expect.objectContaining({ cle: "param:longueur_rampant", valeur: "5,50", unite: "m", confiance: "devis" }));
+    expect(res.body.hypotheses).not.toContainEqual(expect.objectContaining({ cle: "param:pente" }));
+    expect(res.body.questions).not.toContainEqual(expect.objectContaining({ cle: "param:pente" }));
   });
 
   it("lecture longue : 202 « en_cours », puis le quantitatif quand la lecture finit", async () => {

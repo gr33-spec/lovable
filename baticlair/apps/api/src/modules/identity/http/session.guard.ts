@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { type CanActivate, type ExecutionContext, Inject, Injectable, SetMetadata } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import type { Request } from "express";
@@ -15,7 +16,19 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 /** Marque une route comme accessible sans session (ex. santé). */
 export const Public = () => SetMetadata(IS_PUBLIC, true);
 
-export type RequestWithUser = Request & { user?: AuthenticatedUser };
+/** Clé API partenaire qui a authentifié la requête (jamais une session) : son entreprise et son quota. */
+export interface ApiKeyContext {
+  id: string;
+  companyId: string;
+  monthlyQuota: number;
+}
+
+export type RequestWithUser = Request & { user?: AuthenticatedUser; apiKey?: ApiKeyContext };
+
+export const API_KEY_HEADER = "x-api-key";
+
+/** Une clé « bc_… » n'est stockée que hachée : la comparaison se fait sur l'empreinte. */
+export const hashApiKey = (key: string) => createHash("sha256").update(key).digest("hex");
 
 /**
  * Garde global : toute route exige une session valide, sauf `@Public()`.
@@ -49,6 +62,17 @@ export class SessionGuard implements CanActivate {
     if (isPublic) return true;
 
     const req = context.switchToHttp().getRequest<RequestWithUser>();
+    // Clé API partenaire (plan v3 §1) : elle vaut pour l'entreprise qui l'a créée, au nom de son auteur.
+    const apiKey = req.header(API_KEY_HEADER);
+    if (apiKey) {
+      const key = await this.prisma.partnerApiKey.findUnique({ where: { hash: hashApiKey(apiKey.trim()) }, select: { id: true, companyId: true, createdById: true, name: true, monthlyQuota: true, revokedAt: true } });
+      if (!key || key.revokedAt) throw new DomainError("unauthenticated", "Unknown or revoked API key");
+      req.user = { userId: key.createdById, email: "", name: `Clé API ${key.name}`, emailVerified: true };
+      req.apiKey = { id: key.id, companyId: key.companyId, monthlyQuota: key.monthlyQuota };
+      enrichRequestContext({ userId: key.createdById });
+      void this.prisma.partnerApiKey.update({ where: { id: key.id }, data: { lastUsedAt: new Date() } }).catch(() => undefined);
+      return true;
+    }
     const session = await this.auth.api.getSession({ headers: fromNodeHeaders(req.headers) });
     if (!session) throw new DomainError("unauthenticated", "A valid session is required");
 

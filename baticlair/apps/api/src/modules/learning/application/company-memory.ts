@@ -90,9 +90,9 @@ export class CompanyMemory {
     return resolvePreference(await this.store.list(tenant, { kind, key }), { kind, key }, this.clock(), this.policies);
   }
 
-  /** Produits habituels prêts pour le moteur : établis (sans question) ou seulement proposés. */
+  /** Produits habituels (établis sans question, ou seulement proposés) et réponses d'habitude établies, prêts pour le moteur. */
   async forEngine(tenant: TenantContext) {
-    return enginePreferences(await this.store.list(tenant, { kind: "product" }), this.clock(), this.policies);
+    return enginePreferences(await this.store.list(tenant), this.clock(), this.policies);
   }
 
   list(tenant: TenantContext): Promise<CompanyPreference[]> {

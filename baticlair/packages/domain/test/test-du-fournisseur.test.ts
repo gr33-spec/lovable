@@ -27,11 +27,11 @@ describe("test du fournisseur : chaque ligne « À commander » se charge dans l
     expect(labels).not.toContain("Couverture zinc joint debout");
     expect(labels).not.toContain("Bande de ventilation en Z en zinc quartz");
     expect(labels).not.toContain("Voligeage en sapin traité 18×200 mm");
-    const quote = Object.fromEntries(v.toQuote.map((q) => [q.label, q]));
-    expect(quote["Bande de ventilation en Z en zinc quartz"]).toMatchObject({ measure: "13 ml", reason: expect.stringMatching(/sans largeur ni épaisseur/) });
+    // La bande zinc au ml n'est plus « à chiffrer » : le moteur tente d'abord (développé ? façonnage ?), ce sont des questions.
+    expect(v.toQuote).toEqual([]);
+    expect(v.questions.map((q) => q.question?.key ?? q.key)).toContain("param:faconnage");
     // Le voligeage est un composant du joint debout : calculé (91 m² × 1,05), vendu au m² de planche.
     expect(v.toBuy.find((b) => b.label === "Voliges sapin 18 mm")?.quantity).toBe("96 m²");
-    expect(quote["Couverture zinc joint debout"]).toBeUndefined(); // c'est une question de façonnage, pas un article à chiffrer
     // La gouttière, elle, a une règle : des longueurs de 4 m, des crochets, des naissances.
     expect(labels.some((l) => /gouttière/i.test(l))).toBe(true);
     // Un forfait n'est jamais commandé (main-d'œuvre), et une ligne n'est jamais à la fois commandée et à chiffrer.
@@ -42,10 +42,20 @@ describe("test du fournisseur : chaque ligne « À commander » se charge dans l
 
   it("une ligne qui échoue au test ne part pas, mais elle n'empêche pas d'envoyer le reste", () => {
     const v = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" } });
-    // Restent : la question de façonnage du joint debout, et la bande de ventilation (article inconnu, à confirmer).
+    // Restent : le voligeage écrit en mots inconnus (article à confirmer) et UNE question de façonnage pour tout le métal.
     expect(v.questions.map((q) => q.question?.key ?? q.key).sort()).toEqual(["group:unknown", "param:faconnage"]);
-    // La bande en ml de zinc nu n'est pas une question de calcul : elle est chez « Le fournisseur chiffrera ».
-    expect(v.toQuote.map((q) => q.label)).toContain("Bande de ventilation en Z en zinc quartz");
+    // Façonné : 13 ml × 1,1 = 14,3 m → 8 bandes de 2 m (recouvrement 10 cm) ; rien à faire chiffrer.
+    const faconne = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "2", unit: "u" } });
+    expect(faconne.toBuy.find((b) => b.label.startsWith("Bandes zinc façonnées"))).toMatchObject({ quantity: "8 pièces" });
+    expect(faconne.toQuote).toEqual([]);
+    // Je façonne : le développé devient nécessaire (question), puis 14,3 m × 0,10 m × 4,7 kg/m² = 6,72 kg de bobine,
+    // réunis avec le zinc du joint debout (même article).
+    const sansDeveloppe = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "1", unit: "u" } });
+    expect(sansDeveloppe.questions.map((q) => q.question?.key ?? q.key)).toContain("param:developpe");
+    const bobine = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "1", unit: "u" }, "param:developpe": { value: "100", unit: "mm" } });
+    const zinc = bobine.toBuy.find((b) => b.needIds.includes("bobine-bandes"))!;
+    expect(zinc.needIds).toContain("zinc-bobines");
+    expect(zinc.order?.unit).toBe("kg");
   });
 
   it("unités refusées en sortie : m², ml de métal nu, lot, forfait, ensemble ; admises : pièces, rouleaux, ml avec dimensions", () => {

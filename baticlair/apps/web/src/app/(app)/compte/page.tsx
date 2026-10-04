@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 import { NotificationsCard } from "@/components/notifications-card";
+import { PartnerKeysCard } from "@/components/partner-keys-card";
 import { PlanSummary } from "@/components/paywall";
 import { TradePicker } from "@/components/trade-picker";
 import { BackButton, Badge, Button, Card, ErrorNotice, PageTitle } from "@/components/ui";
@@ -92,6 +93,7 @@ export default function ComptePage() {
       </Card>
       {company && company.role !== "viewer" ? <TradesCard initial={company.trades} /> : null}
       <NotificationsCard />
+      <PartnerKeysCard />
       <Button variant="secondary" pending={leaving} onClick={() => void signOut()}>
         Se déconnecter
       </Button>

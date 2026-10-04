@@ -65,6 +65,11 @@ export interface CompanyPreferences {
   proposals?: Record<string, string>;
   /** Marge habituelle (« 5 » = 5 %), par produit ou par famille. */
   waste?: Record<string, string>;
+  /**
+   * Habitude ÉTABLIE sur un paramètre d'entreprise (« faconnage » = « 1 » : je façonne), apprise à la
+   * deuxième confirmation sur deux chantiers différents : la question n'est plus posée, l'habitude est dite.
+   */
+  params?: Record<string, string>;
 }
 
 export interface WorkItemInput {
@@ -182,7 +187,8 @@ export interface NeedResult {
   /** Hypothèses par défaut utilisées (dites à l'artisan, modifiables). */
   assumptions: Assumption[];
   /** D'où vient le produit retenu : écrit au devis, reconnu par appellation, choisi pour le chantier, préférence de l'entreprise, par défaut. */
-  productOrigin?: "devis" | "alias" | "artisan" | "preference" | "proposal" | "default";
+  /** « declined » : aucun des modèles proposés ne convenait ; le générique compte, le fournisseur met sa marque. */
+  productOrigin?: "devis" | "alias" | "artisan" | "preference" | "proposal" | "default" | "declined";
   /** Préférence de l'entreprise écartée (produit absent, autre famille…) : la vérification normale a repris. */
   preferenceIgnored?: string;
   formula?: string;
@@ -292,16 +298,29 @@ export function computeWorkItem(ref: Referential, input: WorkItemInput, options:
     const expr = parseFormula(rule.when);
     const values = new Map<string, IntervalValue>();
     for (const name of formulaVariables(expr)) {
+      // Une constante sourcée de l'ouvrage (« regle.rampant_max_bac ») : un seuil de la condition.
+      if (name.startsWith("regle.")) {
+        const c = work.constants?.[name.slice("regle.".length)];
+        if (!c) throw new FormulaError(`Condition du besoin ${rule.id} : constante inconnue ${name}`);
+        const u = parseRefUnit(c.unit);
+        values.set(name, point(new Decimal(c.value).times(u.factor), u.dim));
+        continue;
+      }
       const def = work.params.find((p) => p.key === name);
       if (!def) throw new FormulaError(`Condition du besoin ${rule.id} : variable inconnue ${name}`);
       const factor = parseRefUnit(def.unit);
       const given = input.params[name];
       const raw = given ? given.value : def.default?.value;
-      if (raw === undefined) return true;
+      // Donnée inconnue : toutes les valeurs restent possibles ; le besoin existe si la condition PEUT être vraie
+      // (il posera alors sa question), et n'existe pas si elle est fausse quoi qu'il arrive.
+      if (raw === undefined) {
+        values.set(name, { lo: new Decimal(-Infinity), hi: new Decimal(Infinity), dim: factor.dim });
+        continue;
+      }
       values.set(name, point(new Decimal(raw).times(given ? parseRefUnit(given.unit).factor : factor.factor), factor.dim));
     }
     const v = evaluateInterval(expr, (name) => values.get(name)!);
-    return !v.lo.isZero();
+    return !v.hi.isZero();
   };
   const needs = work.needs
     .filter((rule) => (rule.requires ?? []).every(known) && applies(rule))
@@ -368,7 +387,7 @@ function computeNeed(
 ): NeedResult {
   const slot = work.slots.find((s) => s.key === rule.slot)!;
   let preferenceIgnored: string | undefined;
-  const productFor = (slotKey: string): { product: Product; choice: SlotChoice | { origin: "preference" | "proposal" | "default" } } | undefined => {
+  const productFor = (slotKey: string): { product: Product; choice: SlotChoice | { origin: "preference" | "proposal" | "default" | "declined" } } | undefined => {
     const chosen = input.products[slotKey];
     if (chosen) {
       const p = ref.products.find((x) => x.id === chosen.productId);
@@ -391,9 +410,14 @@ function computeNeed(
       }
     }
     // Rien de nommé, pas d'habitude : le produit par défaut du référentiel (pratique validée), dit comme hypothèse.
-    // Sauf si l'artisan a répondu « aucun de ces modèles » : le besoin reste à faire chiffrer.
-    const usual = slotDef?.usual?.productId && !input.declined?.includes(slotKey) ? ref.products.find((x) => x.id === slotDef.usual!.productId) : undefined;
-    if (usual && usual.family === family) return { product: usual, choice: { origin: "default" } };
+    // L'artisan a répondu « aucun de ces modèles » : le moteur calcule QUAND MÊME avec le générique de la famille
+    // (« modèle à préciser » : le fournisseur met sa marque), au lieu de renvoyer la ligne à chiffrer. Le fournisseur
+    // ne chiffre que ce que le référentiel ne sait pas compter.
+    const usual = slotDef?.usual?.productId ? ref.products.find((x) => x.id === slotDef.usual!.productId) : undefined;
+    if (usual && usual.family === family) {
+      if (!input.declined?.includes(slotKey)) return { product: usual, choice: { origin: "default" } };
+      if (usual.generic) return { product: usual, choice: { origin: "declined" } };
+    }
     return undefined;
   };
   const resolved = productFor(slot.key);
@@ -409,7 +433,7 @@ function computeNeed(
     needId: rule.id,
     slot: slot.key,
     family: slot.family,
-    label: product?.shortLabel ?? slot.label,
+    label: product ? (resolved?.choice.origin === "declined" ? `${product.shortLabel} (modèle à préciser)` : product.shortLabel) : slot.label,
     slotLabel: slot.label,
     origin,
     ...(resolved ? { productOrigin: resolved.choice.origin } : {}),
@@ -498,6 +522,9 @@ function computeNeed(
         const usual = slot.usual!;
         trace.push({ label: "Produit", value: product.shortLabel, unit: "", from: `Par défaut : ${usual.text}`, origin: "assumption", verified: true });
         assume({ key: `product:${slot.key}`, label: slot.label, value: product.shortLabel, unit: "", note: usual.text });
+      } else if (o === "declined") {
+        // Pas d'hypothèse à re-poser : l'artisan a déjà dit qu'aucun modèle proposé ne convenait.
+        trace.push({ label: "Produit", value: `${product.shortLabel} (modèle à préciser)`, unit: "", from: "Aucun des modèles proposés ne convient : le fournisseur propose le sien pour cette quantité", origin: "project", verified: true });
       } else {
         trace.push({
           label: "Produit",
@@ -811,8 +838,12 @@ function computeNeed(
     }
     // Condition d'existence encore indécise (« faconnage » sans réponse) : sa question, avant tout calcul.
     if (rule.when) {
+      // La condition tranchée, une donnée inconnue qu'elle a rencontrée sans en avoir besoin (« bacs longs » quand
+      // le rampant fait 5,5 m) n'est pas un manque : elle ne doit ni s'afficher « inconnue » ni devenir une question.
+      const missingBefore = missing.length;
       const w = evaluateInterval(parseFormula(rule.when), valueOf);
       if (!isPoint(w) && missing[0]) throw new Stop({ status: "question", question: missing[0].question });
+      missing.splice(missingBefore);
     }
     const raw = evaluateInterval(expr, valueOf);
 
