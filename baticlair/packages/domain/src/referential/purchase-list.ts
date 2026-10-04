@@ -1,3 +1,4 @@
+import { slotCharacteristicsKey } from "./plan.js";
 import { Decimal } from "../shared/decimal.js";
 import type { NeedResult, Question, TraceLine, WorkItemResult } from "./engine.js";
 
@@ -80,5 +81,5 @@ function row(workItemId: string, n: NeedResult, characteristics: string[], sameP
 export function purchaseList(workItems: WorkItemResult[], characteristicsBySlot: Record<string, string[]> = {}): PurchaseRow[] {
   const needs = workItems.flatMap((w) => w.needs.map((n) => ({ w, n })));
   const twice = (n: NeedResult) => needs.filter((x) => x.n.label === n.label).length > 1;
-  return needs.map(({ w, n }) => row(w.workItemId, n, characteristicsBySlot[n.slot] ?? [], twice(n)));
+  return needs.map(({ w, n }) => row(w.workItemId, n, characteristicsBySlot[slotCharacteristicsKey(w.workItemId, n.slot)] ?? [], twice(n)));
 }

@@ -51,6 +51,7 @@ export interface QuotePlan {
   inputs: WorkItemInput[];
   context: ChantierContext;
   /** Caractéristiques du devis par emplacement, pour le nom des lignes d'achat. */
+  /** Caractéristiques lues dans les lignes, par emplacement d'UN ouvrage (clé « ouvrage/emplacement ») : les crochets de la gouttière ne prêtent rien aux crochets d'ardoise. */
   characteristicsBySlot: Record<string, string[]>;
   /** Questions de cohérence (deux valeurs différentes pour la même donnée), en phrases. */
   conflicts: string[];
@@ -351,7 +352,8 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
       }
     }
     const chars = productCharacteristics(ref, work, slot, line.designation);
-    if (chars.length > 0) characteristicsBySlot[slot.key] = [...new Set([...(characteristicsBySlot[slot.key] ?? []), ...chars])];
+    const charKey = slotCharacteristicsKey(work.id, slot.key);
+    if (chars.length > 0) characteristicsBySlot[charKey] = [...new Set([...(characteristicsBySlot[charKey] ?? []), ...chars])];
     plans.push({ ref: line.ref, status: "planned", workItemId: work.id, slot: slot.key, mentions, characteristics: chars, ...(measureInText ? { measureInText } : {}) });
   }
 
@@ -403,6 +405,9 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
  * famille (« pour tuiles HP10 » sur une ligne de liteaux), un composant
  * cité (« crochets et naissances compris » devient ses propres lignes).
  */
+/** La clé des caractéristiques d'un emplacement : propre à l'ouvrage (deux ouvrages ont chacun leurs « crochets »). */
+export const slotCharacteristicsKey = (workItemId: string, slot: string) => `${workItemId}/${slot}`;
+
 function productCharacteristics(ref: Referential, work: WorkItemType, slot: Slot, designation: string): string[] {
   return keyCharacteristics(designation).filter((c) => {
     const n = normalizeText(c);

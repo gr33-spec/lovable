@@ -41,6 +41,7 @@ Avant de toucher au moteur, aux règles ou aux écrans, lire la section concern�
 - Les dimensions lues par l'IA (prompt A : pente, rampant, épaisseur, en ligne ou en en-tête) entrent dans le calcul (`factsFromReading`), après le texte lu par le code, avant les hypothèses par défaut. Test : `packages/domain/test/lecture-prompt-a.test.ts`.
 - Aucun texte affiché sur le quantitatif qui ne soit pas modifiable d'un tap : désignation, quantité, unité, chaque hypothèse (41.4).
 - Une quantité de ligne vaut d'abord pour l'ouvrage de sa ligne (`SiteFact.workItemId`) : 200 m² d'ardoises et 20 m² de tuiles au garage sont deux surfaces, jamais une contradiction ; un autre ouvrage ne la reprend que s'il n'a rien lu lui-même (descentes → gouttière). Test : `packages/domain/test/deux-toitures.test.ts`.
+- Une désignation, une matière : une matière citée par la ligne (« voligeage sapin sous zinc ») ne suit l'article que si c'est la sienne ; un article qui a déjà sa matière n'en prend jamais une autre, et sans matière il n'en prend une que si la ligne n'en cite qu'une. Les caractéristiques d'un emplacement sont propres à son ouvrage (clé « ouvrage/emplacement »). Test : `packages/domain/test/designation-une-matiere.test.ts`.
 - Pas de correction spécifique à un devis : chaque cas devient un test permanent.
 - Pas de contenu DTU protégé recopié ; pas de chiffre fabricant non sourcé.
 
