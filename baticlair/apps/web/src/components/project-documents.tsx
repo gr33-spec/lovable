@@ -29,8 +29,6 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
   );
   const { data, setData, error, reload } = useResource(fetchDocs);
   const [notice, setNotice] = useState<string | null>(null);
-  // Devis déposé à l'instant : la lecture part d'elle-même (un rechargement ne relance rien).
-  const [justAdded, setJustAdded] = useState<string | null>(null);
   const refreshProgress = useProgressRefresh();
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
@@ -41,7 +39,6 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
 
   function added(doc: ProjectDocument) {
     setNotice(doc.duplicate ? "Ce devis était déjà dans ce chantier : rien n'a été ajouté." : null);
-    if (!doc.duplicate) setJustAdded(doc.id);
     setData({ items: [doc, ...docs.filter((d) => d.id !== doc.id)] });
     refreshProgress();
   }
@@ -102,7 +99,7 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
         </p>
       ) : null}
 
-      <ProjectTakeoff key={quote?.id ?? "none"} projectId={projectId} clientQuote={quote} archived={archived} autoStart={quote !== null && justAdded === quote.id} />
+      <ProjectTakeoff key={quote?.id ?? "none"} projectId={projectId} clientQuote={quote} archived={archived} autoStart={false} />
     </div>
   );
 }

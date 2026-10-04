@@ -141,17 +141,22 @@ export function ProjectTakeoff({
             </>
           ) : (
             <>
+              {/* Retour du fondateur (2026-10-04) : la lecture ne part plus d'elle-même ; l'artisan a le temps
+                  d'ajouter ses infos chantier (elles accompagnent la lecture), puis il lance d'un appui. */}
               <Say>
                 {failed
                   ? "Je n'ai pas réussi à lire ce devis jusqu'au bout (coupure ou panne de mon côté). Rien ne vous est décompté : on réessaie ?"
-                  : "Je lis votre devis et je vous sors la liste des matériaux à commander."}
+                  : "Devis bien reçu. Ajoutez des infos sur le chantier si vous voulez, puis lancez la lecture."}
               </Say>
               {actionError ? <ErrorNotice error={actionError} /> : null}
-              <Button disabled={archived} onClick={prepare}>
-                <Sparkles size={18} aria-hidden="true" />
-                {actionError || failed ? "Réessayer" : "Lire le devis"}
-              </Button>
               <SiteNotes projectId={projectId} infos={quantitatif?.infos ?? null} disabled={archived} onSaved={reload} />
+              <div className="h-20 lg:hidden" aria-hidden="true" />
+              <div className="fixed inset-x-4 bottom-[max(16px,env(safe-area-inset-bottom))] z-20 mx-auto max-w-2xl lg:static lg:inset-auto lg:mx-0">
+                <Button className="min-h-15 w-full text-[17px]" disabled={archived} onClick={prepare}>
+                  <Sparkles size={18} aria-hidden="true" />
+                  {actionError || failed ? "Réessayer" : "Lire le devis"}
+                </Button>
+              </div>
             </>
           )}
         </AssistantMessage>

@@ -278,7 +278,8 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
   // Devis client : 3 pages (tableau, page scannée, conditions générales).
   await page.getByLabel("Choisir le devis (PDF)").setInputFiles(fixture("devis-client-couvreur.pdf"));
   await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
-  // Déposé : BatiClair lit le devis tout seul, sans appui de plus, et dit ce qu'il a compris.
+  // Déposé : l'artisan peut ajouter ses infos, puis lance la lecture d'un appui ; BatiClair dit ce qu'il a compris.
+  await page.getByRole("button", { name: "Lire le devis" }).click();
   await expect(page.getByRole("button", { name: "Ce que j'ai compris" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Préparer la liste de matériaux" })).toHaveCount(0);
   await expect(page.getByText(/page lue|pages lues/)).toHaveCount(0);
@@ -313,7 +314,11 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
 
-  // IA simulée en test (AI_PROVIDER=fake) : même parcours, aucun appel payant. La lecture part seule.
+  // La lecture ne part pas d'elle-même : l'artisan a le temps d'ajouter ses infos chantier, puis il lance.
+  await expect(page.getByText("Devis bien reçu. Ajoutez des infos sur le chantier si vous voulez, puis lancez la lecture.")).toBeVisible();
+  await expect(page.getByRole("list", { name: "Ce que BatiClair a compris" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Lire le devis" }).click();
+  // IA simulée en test (AI_PROVIDER=fake) : même parcours, aucun appel payant.
   // Ce que BatiClair a compris, déplié juste après la lecture.
   await expect(page.getByRole("list", { name: "Ce que BatiClair a compris" })).toBeVisible();
   await expect(page.getByText(/^J'ai lu les \d+ lignes du devis\.$/)).toBeVisible();
@@ -412,6 +417,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   // Chantier, devis client, liste validée.
   await createProject(page, "Toiture Garnier", "M. Garnier", "5 rue du Port, Vannes");
   await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByRole("button", { name: "Lire le devis" }).click();
   await page.getByRole("button", { name: "Voir le devis lu (6 lignes)" }).click();
   await page.getByRole("button", { name: "Corriger Crochet inox ardoise 100 mm" }).click();
   await page.getByLabel("Quantité").fill("200");
@@ -530,6 +536,7 @@ test("plusieurs articles inconnus, sans unité : UNE décision les règle tous, 
   await signUp(page);
   await createProject(page, "Piscine Le Goff", "M. Le Goff", "2 rue des Dunes, Carnac");
   await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByRole("button", { name: "Lire le devis" }).click();
   await expect(page.getByRole("button", { name: "Ce que j'ai compris" })).toBeVisible();
 
   // L'artisan ajoute trois articles d'un autre métier, sans unité (comme sur un devis de pisciniste).
