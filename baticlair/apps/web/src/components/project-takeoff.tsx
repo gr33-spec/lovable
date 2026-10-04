@@ -64,6 +64,7 @@ export function ProjectTakeoff({
   const [actionError, setActionError] = useState<ApiError | null>(null);
   const [showList, setShowList] = useState(false);
   const [sendSignal, setSendSignal] = useState(0);
+  const [sent, setSent] = useState(false);
   const [fresh, setFresh] = useState(false);
   const [said, setSaid] = useState<Said[]>([]);
   const started = useRef(false);
@@ -301,6 +302,7 @@ export function ProjectTakeoff({
           }}
           onSend={send}
           validated={!draft}
+          sent={sent}
           sketches={quantitatif?.infos?.croquis ?? []}
           sketchHandlers={{ onAttach: attachSketch, onDetach: detachSketch }}
         />
@@ -341,7 +343,7 @@ export function ProjectTakeoff({
           {body}
         </AssistantMessage>
       </section>
-      <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} onListChanged={reload} openSignal={sendSignal} />
+      <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} onListChanged={reload} openSignal={sendSignal} onSentChange={setSent} />
       {draft && editable ? (
         <>
           <SiteNotes projectId={projectId} infos={quantitatif?.infos ?? null} disabled={pending} onSaved={reload} />

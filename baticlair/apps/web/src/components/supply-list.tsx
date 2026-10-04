@@ -30,7 +30,10 @@ export function SupplyList({
   sketches = [],
   sketchHandlers,
   validated = false,
+  sent = false,
 }: {
+  /** La demande est déjà partie : le gros bouton mène aux fournisseurs, il ne propose plus un premier envoi. */
+  sent?: boolean;
   /** Liste déjà validée (elle peut partir) : dit en haut, et « Envoyer » ouvre directement l'aperçu. */
   validated?: boolean;
   takeoff: Takeoff;
@@ -85,7 +88,10 @@ export function SupplyList({
   const consumables = screen.groups.some((g) => g.kind === "consommables");
 
   return (
-    <section aria-label="Liste des fournitures" className="flex flex-col overflow-hidden rounded-[20px] bg-surface shadow-card">
+    // La barre du gros bouton est HORS de la carte : collée au-dessus de la barre de chat, elle ne laisse jamais de blanc
+    // dans la carte quand on arrive au bas de la liste.
+    <section aria-label="Liste des fournitures" className="flex flex-col">
+      <div className="flex flex-col overflow-hidden rounded-[20px] bg-surface pb-2 shadow-card">
       <div className="flex flex-col gap-0.5 px-4 pt-4 pb-2">
         <h2 className="font-display text-[24px] font-extrabold tracking-[-0.02em]">Fournitures à chiffrer</h2>
         <p className="text-[15px] font-bold text-muted" aria-live="polite">
@@ -131,12 +137,19 @@ export function SupplyList({
       })}
       {!consumables && editable && p.suggestions.length > 0 ? <Suggestions items={p.suggestions} pending={pending} onAnswer={onSuggestion} onEdit={onEditItem} /> : null}
       {p.assumptions.length > 0 ? <Assumptions assumptions={p.assumptions} editable={editable} pending={pending} onAnswer={handlers.onAnswer} /> : null}
+      </div>
 
       {editable ? (
-        <div className="sticky bottom-[84px] z-10 px-4 pt-2 pb-3 lg:bottom-[92px]">
+        // Un fondu sous le bouton : le texte de la liste ne passe jamais sous lui en se lisant mal.
+        <div className="sticky bottom-[68px] z-10 -mt-4 bg-gradient-to-t from-ground from-60% to-transparent pt-8 pb-5 lg:bottom-[70px]">
           {toCheck.length > 0 ? (
             <Button className="w-full" variant="accent" onClick={verify}>
               Vérifier {toCheck.length > 1 ? `les ${toCheck.length} lignes` : "la ligne"}
+            </Button>
+          ) : sent ? (
+            <Button className="w-full" variant="secondary" onClick={onSend}>
+              <Send size={18} aria-hidden="true" />
+              Voir la demande envoyée
             </Button>
           ) : (
             <Button className="w-full shadow-[0_10px_24px_var(--color-accent-glow)]" pending={pending} onClick={onSend}>
@@ -211,6 +224,8 @@ function Row({
   const item = row.itemKey ? takeoff.purchase.toBuy.find((b) => b.key === row.itemKey) : undefined;
   const quote = row.quoteKey ? takeoff.purchase.toQuote.find((q) => q.key === row.quoteKey) : undefined;
   const proofs = item ? takeoff.view.items.filter((i) => (item.kind === "computed" ? i.kind === "need" && item.needIds.includes(i.id) : i.kind === "line" && item.lineIds.includes(i.id))) : [];
+  // Une ligne reprise du devis n'a pas de calcul : on montre d'où elle vient.
+  const what = item?.kind === "direct" ? "la ligne du devis" : "le calcul";
   const quantity = item?.quantity ?? quote?.measure ?? row.pending?.quantity ?? null;
   const sub =
     row.status === "check"
@@ -242,7 +257,7 @@ function Row({
     <>
       <span className={`mt-1.5 size-3 shrink-0 rounded-full ${dot.className}`} role="img" aria-label={dot.label} />
       <span className="flex min-w-0 grow flex-col gap-0.5">
-        <span className="text-[15px] leading-snug font-semibold">{label}</span>
+        <span className="line-clamp-2 text-[15px] leading-snug font-semibold">{label}</span>
         {sub ? <span className={`text-[13px] leading-snug ${row.status === "check" ? "font-bold text-warn" : "text-muted"}`}>{sub}</span> : null}
       </span>
       <span className="shrink-0 text-right text-[16px] font-extrabold whitespace-nowrap tabular-nums">{quantity ?? ""}</span>
@@ -277,8 +292,8 @@ function Row({
         ) : null}
       </div>
       {proofs.length > 0 && !editing ? (
-        <button type="button" onClick={() => setProof(!proof)} aria-expanded={proof} aria-label={`${proof ? "Masquer" : "Voir"} le calcul : ${label}`} className="ml-6 inline-flex min-h-6 items-center self-start text-[11px] font-semibold text-subtle">
-          {proof ? "Masquer le calcul" : "Voir le calcul"}
+        <button type="button" onClick={() => setProof(!proof)} aria-expanded={proof} aria-label={`${proof ? "Masquer" : "Voir"} ${what} : ${label}`} className="ml-6 inline-flex min-h-6 items-center self-start text-[11px] font-semibold text-subtle">
+          {proof ? `Masquer ${what}` : `Voir ${what}`}
         </button>
       ) : null}
       {sketches.length > 0 ? (
