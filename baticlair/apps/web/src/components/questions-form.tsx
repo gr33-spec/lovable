@@ -84,24 +84,34 @@ export function QuestionsForm({
     onSubmit(answers);
   };
 
+  const answered = required - missing;
   return (
-    <section aria-label="Questions sur le chantier" className="flex flex-col gap-4 rounded-3xl bg-surface p-5 shadow-card">
-      <div className="flex flex-col gap-1">
-        <p className="text-[20px] leading-tight font-extrabold">
-          {required > 0 ? `${required} question${required > 1 ? "s" : ""} pour une commande exacte` : "Vérifiez mes valeurs"}
+    <section aria-label="Questions sur le chantier" className="flex flex-col rounded-[24px] bg-surface shadow-card">
+      <div className="flex flex-col gap-2 px-4 pt-4 pb-3">
+        <p className="font-display text-[22px] leading-tight font-extrabold tracking-[-0.01em]">
+          {required > 0 ? `${required} question${required > 1 ? "s" : ""}, et c'est calculé` : "Vérifiez mes valeurs"}
         </p>
-        <p className="text-[15px] text-muted">Répondez à tout d&apos;un coup. Les cases déjà cochées sont mes valeurs par défaut : changez-les si besoin.</p>
+        <p className="text-[15px] leading-snug text-muted">Les cases bleues sont mes valeurs par défaut : touchez seulement ce qui est faux.</p>
+        {required > 1 ? (
+          <div aria-hidden="true" className="mt-1 h-1.5 overflow-hidden rounded-full bg-ground">
+            <div className="h-full rounded-full bg-accent transition-[width] duration-300" style={{ width: `${(answered / required) * 100}%` }} />
+          </div>
+        ) : null}
       </div>
-      {rows.map((r) => {
+      {rows.map((r, i) => {
         const current = value(r);
+        const done = !!current;
         return (
-          <fieldset key={r.key} className="flex flex-col gap-2 border-t border-line pt-4">
+          <fieldset key={r.key} className="flex flex-col gap-2.5 border-t border-line px-4 py-4">
             <legend className="sr-only">{r.title}</legend>
-            <p aria-hidden="true" className="text-[17px] leading-snug font-extrabold">
-              {r.title}
-            </p>
-            {r.hint ? <p className="text-sm text-muted">{r.hint}</p> : null}
-            <div className="flex flex-wrap gap-2" role="group" aria-label={r.title}>
+            <div aria-hidden="true" className="flex items-start gap-2.5">
+              <span className={`mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full text-[13px] font-extrabold ${done ? "bg-accent text-white" : "bg-ground text-muted"}`}>
+                {done ? <Check size={14} strokeWidth={3} /> : i + 1}
+              </span>
+              <p className="text-[17px] leading-snug font-extrabold">{r.title}</p>
+            </div>
+            {r.hint ? <p className="pl-8.5 text-sm leading-snug text-muted">{r.hint}</p> : null}
+            <div className="flex flex-wrap gap-2 pl-8.5" role="group" aria-label={r.title}>
               {r.options.map((o) => {
                 const on = current === o.value;
                 return (
@@ -111,9 +121,9 @@ export function QuestionsForm({
                     aria-pressed={on}
                     disabled={disabled || pending}
                     onClick={() => setPicked((p) => ({ ...p, [r.key]: o.value }))}
-                    className={`inline-flex min-h-12 items-center gap-1.5 rounded-2xl border-2 px-4 text-base font-extrabold ${on ? "border-accent bg-accent text-white" : "border-line bg-surface text-ink"}`}
+                    className={`inline-flex min-h-12 items-center gap-1.5 rounded-2xl px-4 text-left text-[15px] leading-tight font-extrabold transition-colors active:scale-[0.97] ${on ? "bg-accent text-white shadow-[0_4px_12px_var(--color-accent-glow)]" : "bg-ground text-ink"}`}
                   >
-                    {on ? <Check size={16} strokeWidth={3} aria-hidden="true" /> : null}
+                    {on ? <Check size={16} strokeWidth={3} aria-hidden="true" className="shrink-0" /> : null}
                     {o.label}
                   </button>
                 );
@@ -124,7 +134,7 @@ export function QuestionsForm({
                   aria-pressed={current === SKIP}
                   disabled={disabled || pending}
                   onClick={() => setPicked((p) => ({ ...p, [r.key]: SKIP }))}
-                  className={`inline-flex min-h-12 items-center rounded-2xl px-3 text-sm font-bold ${current === SKIP ? "bg-ground text-ink underline" : "text-muted"}`}
+                  className={`inline-flex min-h-12 items-center rounded-2xl px-3 text-sm font-bold ${current === SKIP ? "bg-ink text-white" : "text-muted underline underline-offset-2"}`}
                 >
                   Je ne sais pas
                 </button>
@@ -133,9 +143,12 @@ export function QuestionsForm({
           </fieldset>
         );
       })}
-      <Button pending={pending} disabled={disabled || missing > 0} onClick={submit}>
-        {missing > 0 ? `Encore ${missing} réponse${missing > 1 ? "s" : ""}` : "Valider et calculer"}
-      </Button>
+      {/* Le bouton reste sous le pouce pendant qu'on fait défiler les questions, juste au-dessus de la barre de message. */}
+      <div className="sticky bottom-[84px] z-10 rounded-b-[24px] border-t border-line bg-surface px-4 pt-3 pb-4 lg:bottom-[92px]">
+        <Button className="w-full" pending={pending} disabled={disabled || missing > 0} onClick={submit}>
+          {missing > 0 ? `Encore ${missing} réponse${missing > 1 ? "s" : ""}` : "Valider et calculer"}
+        </Button>
+      </div>
     </section>
   );
 }

@@ -279,7 +279,7 @@ export function ProjectTakeoff({
   } else if (draft && decisions.length > 0) {
     body = (
       <>
-        <Say>{asked > 0 ? "Répondez à tout d'un coup, je calcule ensuite :" : "Il me reste à confirmer :"}</Say>
+        {asked > 0 ? null : <Say>Il me reste à confirmer :</Say>}
         {asked > 0 ? <QuestionsForm key={formKey} decisions={decisions} assumptions={takeoff.purchase.assumptions} pending={pending} disabled={!editable} onSubmit={submitAll} /> : null}
         {decisions
           .filter((d) => !d.question || d.question.options.length === 0)
@@ -297,10 +297,13 @@ export function ProjectTakeoff({
         <Say>Voici votre quantitatif.</Say>
         <QuantityCard takeoff={takeoff} editable={editable} pending={pending} onAnswer={handlers.onAnswer} onEditItem={editItem} />
         {editable && takeoff.purchase.canValidate ? (
-          <Button pending={pending} onClick={validate}>
-            <Send size={18} aria-hidden="true" />
-            Envoyer au fournisseur
-          </Button>
+          // Sous le pouce pendant qu'on relit la liste, juste au-dessus de la barre de message.
+          <div className="sticky bottom-[84px] z-10 lg:bottom-[92px]">
+            <Button className="w-full shadow-[0_10px_24px_var(--color-accent-glow)]" pending={pending} onClick={validate}>
+              <Send size={18} aria-hidden="true" />
+              Envoyer au fournisseur
+            </Button>
+          </div>
         ) : null}
         <button type="button" onClick={() => setShowList(true)} className={linkStyle}>
           Voir le devis lu ({plural(materials.length, "ligne")})
