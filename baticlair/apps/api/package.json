@@ -14,7 +14,8 @@
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
-    "vercel-build": "pnpm --filter @baticlair/domain build && prisma generate && prisma migrate deploy && tsc -p tsconfig.build.json"
+    "vercel-build": "pnpm --filter @baticlair/domain build && prisma generate && pnpm run migrate:deploy && tsc -p tsconfig.build.json",
+    "migrate:deploy": "prisma migrate deploy || (sleep 20 && prisma migrate deploy) || (sleep 40 && prisma migrate deploy)"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.129.0",

@@ -1,5 +1,11 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.04-25 — la règle du comptoir (§47.8)
+
+- **Questions** : seulement celles que le vendeur du négoce poserait pour chiffrer. Nouvelles : développé de gouttière (25 / 28 / 33 / 40), crochets sur chevrons ou bandeau, descentes Ø 80 / 100, qualité d'ardoise (habitude d'entreprise), teinte du zinc quand le devis dit « prépatiné » sans la dire. Chacune est lue au devis quand il l'écrit. Supprimée : « égout et faîtage, on les ajoute ? » (les deux bandes passent dans « On ajoute ? », sauf si le devis les cite).
+- **Désignations** comme au comptoir : aspect et épaisseur du zinc (« Bobine Quartz-Zinc 0,65 mm, largeur 500 mm »), développé et Ø (« Naissances zinc demi-ronde dév. 33 Ø80 »), pose des crochets, qualité d'ardoise, longueur des crochets d'ardoise (recouvrement + 1 cm, Cupa §34), section et traitement des voliges.
+- Compte rendu : `docs/lot-comptoir.md`.
+
 ## roofing-2026.10.04-24 — bobineau au-delà de 6 ml
 
 - **Bobineau** (réponse du fondateur) : pour les bandes façonnées sur place (égout, rive, faîtage, noue, solin, abergement), au-delà de **6 ml** un bobineau remplace les feuilles 2 × 1 m. Largeurs 500, 650, 1 000 mm ; longueurs 17, 21, 31 m (40 m en 500) ; épaisseur du chantier (0,65 par défaut, 0,70, 0,80). Vendu à la pièce, désignation « Bobineau 500 × 17 m, 0,65 ». Choix : la plus petite largeur qui contient le développé, la plus courte longueur qui couvre le zinc à façonner (marge 10 % comprise) ; au-delà, plusieurs bobineaux de la plus grande longueur. Chantier Test : 13 ml de bande d'égout → **1 bobineau 500 × 17 m, 0,65** (avant : 3 feuilles 2 × 1 m).

@@ -3,6 +3,7 @@ import { PrismaService } from "../../platform/database/prisma.service.js";
 import { COMPANY_MEMORY_STORE, CompanyMemory, type CompanyMemoryStore } from "./application/company-memory.js";
 import { CORRECTION_JOURNAL_STORE, CorrectionJournal, type CorrectionJournalStore } from "./application/correction-journal.js";
 import { CorrectionsController } from "./http/corrections.controller.js";
+import { MemoryController } from "./http/memory.controller.js";
 import { PrismaCompanyMemoryStore, PrismaCorrectionJournalStore } from "./infrastructure/prisma-learning.js";
 import { TenancyModule } from "../tenancy/index.js";
 
@@ -13,7 +14,7 @@ import { TenancyModule } from "../tenancy/index.js";
  */
 @Module({
   imports: [TenancyModule],
-  controllers: [CorrectionsController],
+  controllers: [CorrectionsController, MemoryController],
   providers: [
     { provide: CORRECTION_JOURNAL_STORE, useFactory: (p: PrismaService) => new PrismaCorrectionJournalStore(p), inject: [PrismaService] },
     { provide: COMPANY_MEMORY_STORE, useFactory: (p: PrismaService) => new PrismaCompanyMemoryStore(p), inject: [PrismaService] },

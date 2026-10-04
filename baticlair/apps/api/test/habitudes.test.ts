@@ -52,3 +52,24 @@ describe("« je façonne » : apprise à la deuxième confirmation, plus jamais 
     expect(next.questions.map((x) => x.id)).toContain("engine:param:faconnage");
   });
 });
+
+describe("« Effacer ce que BatiClair a appris » : des essais au hasard ne restent pas des habitudes", () => {
+  it("après effacement, la question revient ; les chantiers restent ; une autre entreprise garde ses habitudes", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Zinguerie Le Goff");
+    const other = await signUpWithCompany(ctx.app, "b@example.fr", "Couverture Kerjean");
+    for (const a of [agent, other.agent]) {
+      for (const n of [1, 2]) {
+        const q = (await a.post("/v1/quantitatifs").send({ ...JOINT_DEBOUT, reference: `Chantier ${n}` })).body as Q;
+        await a.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: [{ question: "engine:param:faconnage", valeur: "1" }] });
+      }
+    }
+    const res = await agent.delete("/v1/memoire");
+    expect(res.status).toBe(200);
+    expect(res.body.habitudes).toBeGreaterThan(0);
+    const again = (await agent.post("/v1/quantitatifs").send({ ...JOINT_DEBOUT, reference: "Chantier 3" })).body as Q;
+    expect(again.questions.map((x) => x.id)).toContain("engine:param:faconnage");
+    expect(await ctx.prisma.quantitatif.count()).toBeGreaterThanOrEqual(5);
+    const theirs = (await other.agent.post("/v1/quantitatifs").send({ ...JOINT_DEBOUT, reference: "Chantier 3" })).body as Q;
+    expect(theirs.questions.map((x) => x.id)).not.toContain("engine:param:faconnage");
+  });
+});

@@ -6,7 +6,15 @@ import { NotificationsCard } from "@/components/notifications-card";
 import { PartnerKeysCard } from "@/components/partner-keys-card";
 import { PlanSummary } from "@/components/paywall";
 import { TradePicker } from "@/components/trade-picker";
-import { BackButton, Badge, Button, Card, ErrorNotice, Field, PageTitle } from "@/components/ui";
+import {
+  BackButton,
+  Badge,
+  Button,
+  Card,
+  ErrorNotice,
+  Field,
+  PageTitle,
+} from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/session";
 
@@ -22,7 +30,10 @@ export default function ComptePage() {
     setSending(true);
     setError(null);
     try {
-      await api("/v1/auth/send-verification-email", { method: "POST", body: { email: me.user.email, callbackURL: "/" } });
+      await api("/v1/auth/send-verification-email", {
+        method: "POST",
+        body: { email: me.user.email, callbackURL: "/" },
+      });
       setSent(true);
     } catch (e) {
       setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
@@ -60,20 +71,32 @@ export default function ComptePage() {
                 E-mail envoyé. Ouvrez le lien qu&apos;il contient.
               </p>
             ) : (
-              <Button variant="secondary" pending={sending} onClick={() => void resendVerification()}>
+              <Button
+                variant="secondary"
+                pending={sending}
+                onClick={() => void resendVerification()}
+              >
                 Renvoyer l&apos;e-mail de confirmation
               </Button>
             )}
           </div>
         ) : (
-          <p className="text-sm text-muted">La confirmation par e-mail sera activée prochainement.</p>
+          <p className="text-sm text-muted">
+            La confirmation par e-mail sera activée prochainement.
+          </p>
         )}
       </Card>
       <PlanSummary />
       <Card className="flex flex-col gap-2 p-4">
-        <span className="text-xs font-extrabold tracking-[0.04em] text-muted">ENTREPRISE</span>
+        <span className="text-xs font-extrabold tracking-[0.04em] text-muted">
+          ENTREPRISE
+        </span>
         {me.companies.length > 1 ? (
-          <div role="radiogroup" aria-label="Entreprise active" className="flex flex-col gap-2">
+          <div
+            role="radiogroup"
+            aria-label="Entreprise active"
+            className="flex flex-col gap-2"
+          >
             {me.companies.map((c) => (
               <button
                 key={c.id}
@@ -91,11 +114,20 @@ export default function ComptePage() {
           <span className="text-[15px] font-bold">{company?.name}</span>
         )}
       </Card>
-      {company && company.role !== "viewer" ? <CompanyProfileCard signatureName={me.user.name} /> : null}
-      {company && company.role !== "viewer" ? <TradesCard initial={company.trades} /> : null}
+      {company && company.role !== "viewer" ? (
+        <CompanyProfileCard signatureName={me.user.name} />
+      ) : null}
+      {company && company.role !== "viewer" ? (
+        <TradesCard initial={company.trades} />
+      ) : null}
       <NotificationsCard />
       <PartnerKeysCard />
-      <Button variant="secondary" pending={leaving} onClick={() => void signOut()}>
+      {company && company.role !== "viewer" ? <MemoryCard /> : null}
+      <Button
+        variant="secondary"
+        pending={leaving}
+        onClick={() => void signOut()}
+      >
         Se déconnecter
       </Button>
       <MyData onDeleted={() => router.replace("/connexion?compte=supprime")} />
@@ -120,7 +152,9 @@ function MyData({ onDeleted }: { onDeleted: () => void }) {
     setError(null);
     try {
       const data = await api<unknown>("/v1/me/export");
-      const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+      const url = URL.createObjectURL(
+        new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }),
+      );
       const link = document.createElement("a");
       link.href = url;
       link.download = `baticlair-mes-donnees-${new Date().toISOString().slice(0, 10)}.json`;
@@ -137,7 +171,10 @@ function MyData({ onDeleted }: { onDeleted: () => void }) {
     setDeleting(true);
     setError(null);
     try {
-      await api("/v1/me", { method: "DELETE", body: { confirm: word.trim().toUpperCase() } });
+      await api("/v1/me", {
+        method: "DELETE",
+        body: { confirm: word.trim().toUpperCase() },
+      });
       onDeleted();
     } catch (e) {
       setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
@@ -147,22 +184,43 @@ function MyData({ onDeleted }: { onDeleted: () => void }) {
 
   return (
     <Card className="flex flex-col gap-3 p-4">
-      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">MES DONNÉES</h2>
+      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">
+        MES DONNÉES
+      </h2>
       {error ? <ErrorNotice error={error} /> : null}
-      <Button variant="secondary" pending={exporting} onClick={() => void download()}>
+      <Button
+        variant="secondary"
+        pending={exporting}
+        onClick={() => void download()}
+      >
         Télécharger mes données
       </Button>
-      <a href="/confidentialite" className="inline-flex min-h-11 items-center self-start text-sm font-bold text-accent-text">
+      <a
+        href="/confidentialite"
+        className="inline-flex min-h-11 items-center self-start text-sm font-bold text-accent-text"
+      >
         Ce que BatiClair garde, et combien de temps
       </a>
       {confirming ? (
-        <div role="group" aria-label="Confirmer la suppression du compte" className="flex flex-col gap-3 rounded-2xl bg-danger-bg p-3">
+        <div
+          role="group"
+          aria-label="Confirmer la suppression du compte"
+          className="flex flex-col gap-3 rounded-2xl bg-danger-bg p-3"
+        >
           <p className="text-sm font-semibold">
-            Tout sera effacé : vos chantiers, vos devis, vos listes, vos fournisseurs. C&apos;est définitif. Téléchargez vos données avant si vous voulez les garder.
+            Tout sera effacé : vos chantiers, vos devis, vos listes, vos
+            fournisseurs. C&apos;est définitif. Téléchargez vos données avant si
+            vous voulez les garder.
           </p>
           <label htmlFor={id} className="flex flex-col gap-1 text-sm font-bold">
             Tapez SUPPRIMER pour confirmer
-            <input id={id} value={word} onChange={(e) => setWord(e.target.value)} autoComplete="off" className="min-h-12 rounded-2xl bg-surface px-3 text-base" />
+            <input
+              id={id}
+              value={word}
+              onChange={(e) => setWord(e.target.value)}
+              autoComplete="off"
+              className="min-h-12 rounded-2xl bg-surface px-3 text-base"
+            />
           </label>
           <div className="flex gap-2">
             <button
@@ -173,14 +231,95 @@ function MyData({ onDeleted }: { onDeleted: () => void }) {
             >
               {deleting ? "Suppression…" : "Supprimer définitivement"}
             </button>
-            <button type="button" onClick={() => setConfirming(false)} className="inline-flex min-h-11 items-center px-4 text-sm font-bold">
+            <button
+              type="button"
+              onClick={() => setConfirming(false)}
+              className="inline-flex min-h-11 items-center px-4 text-sm font-bold"
+            >
               Annuler
             </button>
           </div>
         </div>
       ) : (
-        <button type="button" onClick={() => setConfirming(true)} className="inline-flex min-h-11 items-center self-start text-sm font-bold text-danger">
+        <button
+          type="button"
+          onClick={() => setConfirming(true)}
+          className="inline-flex min-h-11 items-center self-start text-sm font-bold text-danger"
+        >
           Supprimer mon compte
+        </button>
+      )}
+    </Card>
+  );
+}
+
+/** Des essais faits au hasard ne doivent pas devenir des habitudes : on repart de zéro, les chantiers restent. */
+function MemoryCard() {
+  const [confirming, setConfirming] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState<ApiError | null>(null);
+
+  async function forget() {
+    setPending(true);
+    setError(null);
+    try {
+      await api("/v1/memoire", { method: "DELETE" });
+      setDone(true);
+      setConfirming(false);
+    } catch (e) {
+      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <Card className="flex flex-col gap-3 p-4">
+      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">
+        CE QUE BATICLAIR A APPRIS
+      </h2>
+      <p className="text-sm text-muted">
+        Vos habitudes (« je façonne », la qualité d&apos;ardoise…), les ajouts
+        refusés et vos corrections. Vos chantiers restent tels quels.
+      </p>
+      {error ? <ErrorNotice error={error} /> : null}
+      {done ? (
+        <p role="status" className="text-sm font-bold text-ok">
+          C&apos;est effacé. Les prochains chantiers reposeront les questions.
+        </p>
+      ) : null}
+      {confirming ? (
+        <div
+          role="group"
+          aria-label="Confirmer l'effacement"
+          className="flex gap-2"
+        >
+          <Button
+            variant="secondary"
+            pending={pending}
+            onClick={() => void forget()}
+          >
+            Oui, tout effacer
+          </Button>
+          <button
+            type="button"
+            onClick={() => setConfirming(false)}
+            className="inline-flex min-h-11 items-center px-4 text-sm font-bold"
+          >
+            Annuler
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => {
+            setDone(false);
+            setConfirming(true);
+          }}
+          className="inline-flex min-h-11 items-center self-start text-sm font-bold text-accent-text"
+        >
+          Effacer ce que BatiClair a appris
         </button>
       )}
     </Card>
@@ -200,7 +339,10 @@ function TradesCard({ initial }: { initial: string[] }) {
     setPending(true);
     setError(null);
     try {
-      const res = await api<{ trades: string[] }>("/v1/company/trades", { method: "PATCH", body: { trades } });
+      const res = await api<{ trades: string[] }>("/v1/company/trades", {
+        method: "PATCH",
+        body: { trades },
+      });
       setTrades(res.trades);
       setSaved(true);
       refresh();
@@ -221,7 +363,10 @@ function TradesCard({ initial }: { initial: string[] }) {
           setSaved(false);
         }}
       />
-      <p className="text-sm text-muted">BatiClair s&apos;en sert pour mieux lire vos devis. S&apos;applique aux prochains devis déposés.</p>
+      <p className="text-sm text-muted">
+        BatiClair s&apos;en sert pour mieux lire vos devis. S&apos;applique aux
+        prochains devis déposés.
+      </p>
       {error ? <ErrorNotice error={error} /> : null}
       {saved && !changed ? (
         <p role="status" className="text-sm font-semibold text-ok">
@@ -229,7 +374,11 @@ function TradesCard({ initial }: { initial: string[] }) {
         </p>
       ) : null}
       {changed ? (
-        <Button variant="secondary" pending={pending} onClick={() => void save()}>
+        <Button
+          variant="secondary"
+          pending={pending}
+          onClick={() => void save()}
+        >
           Enregistrer mes métiers
         </Button>
       ) : null}
@@ -253,33 +402,73 @@ interface CompanyProfile {
 function CompanyProfileCard({ signatureName }: { signatureName: string }) {
   const { refresh } = useSession();
   const [profile, setProfile] = useState<CompanyProfile | null>(null);
-  const [draft, setDraft] = useState({ name: "", address: "", siret: "", phone: "", email: "" });
+  const [draft, setDraft] = useState({
+    name: "",
+    address: "",
+    siret: "",
+    phone: "",
+    email: "",
+  });
   const [pending, setPending] = useState(false);
   const [saved, setSaved] = useState(false);
   const [logoVersion, setLogoVersion] = useState(0);
   const [error, setError] = useState<ApiError | null>(null);
-  const ids = { name: useId(), address: useId(), siret: useId(), phone: useId(), email: useId(), logo: useId() };
+  const ids = {
+    name: useId(),
+    address: useId(),
+    siret: useId(),
+    phone: useId(),
+    email: useId(),
+    logo: useId(),
+  };
 
   useEffect(() => {
     void api<CompanyProfile>("/v1/company/profile").then((p) => {
       setProfile(p);
-      setDraft({ name: p.name, address: p.address ?? "", siret: p.siret ?? "", phone: p.phone ?? "", email: p.email ?? "" });
+      setDraft({
+        name: p.name,
+        address: p.address ?? "",
+        siret: p.siret ?? "",
+        phone: p.phone ?? "",
+        email: p.email ?? "",
+      });
     });
   }, []);
   if (!profile) return null;
-  const changed = draft.name !== profile.name || draft.address !== (profile.address ?? "") || draft.siret !== (profile.siret ?? "") || draft.phone !== (profile.phone ?? "") || draft.email !== (profile.email ?? "");
-  const set = (key: keyof typeof draft) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDraft({ ...draft, [key]: e.target.value });
-    setSaved(false);
-  };
+  const changed =
+    draft.name !== profile.name ||
+    draft.address !== (profile.address ?? "") ||
+    draft.siret !== (profile.siret ?? "") ||
+    draft.phone !== (profile.phone ?? "") ||
+    draft.email !== (profile.email ?? "");
+  const set =
+    (key: keyof typeof draft) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setDraft({ ...draft, [key]: e.target.value });
+      setSaved(false);
+    };
 
   async function save() {
     setPending(true);
     setError(null);
     try {
-      const p = await api<CompanyProfile>("/v1/company/profile", { method: "PATCH", body: { name: draft.name, address: draft.address || null, siret: draft.siret || null, phone: draft.phone || null, email: draft.email || null } });
+      const p = await api<CompanyProfile>("/v1/company/profile", {
+        method: "PATCH",
+        body: {
+          name: draft.name,
+          address: draft.address || null,
+          siret: draft.siret || null,
+          phone: draft.phone || null,
+          email: draft.email || null,
+        },
+      });
       setProfile(p);
-      setDraft({ name: p.name, address: p.address ?? "", siret: p.siret ?? "", phone: p.phone ?? "", email: p.email ?? "" });
+      setDraft({
+        name: p.name,
+        address: p.address ?? "",
+        siret: p.siret ?? "",
+        phone: p.phone ?? "",
+        email: p.email ?? "",
+      });
       setSaved(true);
       refresh();
     } catch (e) {
@@ -295,7 +484,12 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
     const form = new FormData();
     form.append("file", file);
     try {
-      setProfile(await api<CompanyProfile>("/v1/company/logo", { method: "PUT", body: form }));
+      setProfile(
+        await api<CompanyProfile>("/v1/company/logo", {
+          method: "PUT",
+          body: form,
+        }),
+      );
       setLogoVersion((v) => v + 1);
     } catch (e) {
       setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
@@ -305,45 +499,112 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
   async function removeLogo() {
     setError(null);
     try {
-      setProfile(await api<CompanyProfile>("/v1/company/logo", { method: "DELETE" }));
+      setProfile(
+        await api<CompanyProfile>("/v1/company/logo", { method: "DELETE" }),
+      );
     } catch (e) {
       setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
     }
   }
 
-  const signature = [[signatureName, profile.name].filter(Boolean).join(" "), profile.phone, profile.email].filter(Boolean).join(" · ");
+  const signature = [
+    [signatureName, profile.name].filter(Boolean).join(" "),
+    profile.phone,
+    profile.email,
+  ]
+    .filter(Boolean)
+    .join(" · ");
   return (
     <Card className="flex flex-col gap-3 p-4">
-      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">VOS DEMANDES DE DEVIS</h2>
-      <p className="text-sm text-muted">En tête du PDF envoyé au fournisseur, et en signature du mail.</p>
+      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">
+        VOS DEMANDES DE DEVIS
+      </h2>
+      <p className="text-sm text-muted">
+        En tête du PDF envoyé au fournisseur, et en signature du mail.
+      </p>
       <div className="flex items-center gap-3">
         <div className="flex h-16 w-28 items-center justify-center overflow-hidden rounded-2xl bg-ground">
           {profile.hasLogo ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={`/v1/company/logo?v=${logoVersion}`} alt="Logo de l'entreprise" className="max-h-16 max-w-28 object-contain" />
+            <img
+              src={`/v1/company/logo?v=${logoVersion}`}
+              alt="Logo de l'entreprise"
+              className="max-h-16 max-w-28 object-contain"
+            />
           ) : (
-            <span className="px-2 text-center text-xs font-bold text-muted">Pas de logo</span>
+            <span className="px-2 text-center text-xs font-bold text-muted">
+              Pas de logo
+            </span>
           )}
         </div>
         <div className="flex flex-col items-start gap-1">
-          <label htmlFor={ids.logo} className="inline-flex min-h-11 cursor-pointer items-center text-sm font-bold text-accent-text">
+          <label
+            htmlFor={ids.logo}
+            className="inline-flex min-h-11 cursor-pointer items-center text-sm font-bold text-accent-text"
+          >
             {profile.hasLogo ? "Changer le logo" : "Ajouter le logo"}
           </label>
-          <input id={ids.logo} type="file" accept="image/png,image/jpeg" className="sr-only" onChange={(e) => void uploadLogo(e.target.files?.[0])} />
+          <input
+            id={ids.logo}
+            type="file"
+            accept="image/png,image/jpeg"
+            className="sr-only"
+            onChange={(e) => void uploadLogo(e.target.files?.[0])}
+          />
           {profile.hasLogo ? (
-            <button type="button" onClick={() => void removeLogo()} className="inline-flex min-h-9 items-center text-sm font-bold text-muted">
+            <button
+              type="button"
+              onClick={() => void removeLogo()}
+              className="inline-flex min-h-9 items-center text-sm font-bold text-muted"
+            >
               Retirer
             </button>
           ) : (
-            <span className="text-xs text-muted">PNG ou JPEG, 500 Ko au plus</span>
+            <span className="text-xs text-muted">
+              PNG ou JPEG, 500 Ko au plus
+            </span>
           )}
         </div>
       </div>
-      <Field id={ids.name} label="Nom de l'entreprise" value={draft.name} onChange={set("name")} autoComplete="organization" />
-      <Field id={ids.address} label="Adresse" value={draft.address} onChange={set("address")} autoComplete="street-address" placeholder="4 rue de Siam, 29200 Brest" />
-      <Field id={ids.siret} label="SIRET" value={draft.siret} onChange={set("siret")} inputMode="numeric" placeholder="14 chiffres" />
-      <Field id={ids.phone} label="Téléphone" value={draft.phone} onChange={set("phone")} type="tel" autoComplete="tel" />
-      <Field id={ids.email} label="E-mail" value={draft.email} onChange={set("email")} type="email" autoComplete="email" />
+      <Field
+        id={ids.name}
+        label="Nom de l'entreprise"
+        value={draft.name}
+        onChange={set("name")}
+        autoComplete="organization"
+      />
+      <Field
+        id={ids.address}
+        label="Adresse"
+        value={draft.address}
+        onChange={set("address")}
+        autoComplete="street-address"
+        placeholder="4 rue de Siam, 29200 Brest"
+      />
+      <Field
+        id={ids.siret}
+        label="SIRET"
+        value={draft.siret}
+        onChange={set("siret")}
+        inputMode="numeric"
+        placeholder="14 chiffres"
+      />
+      <Field
+        id={ids.phone}
+        label="Téléphone"
+        value={draft.phone}
+        onChange={set("phone")}
+        type="tel"
+        autoComplete="tel"
+      />
+      <Field
+        id={ids.email}
+        label="E-mail"
+        value={draft.email}
+        onChange={set("email")}
+        type="email"
+        autoComplete="email"
+      />
       <p className="rounded-2xl bg-ground px-3 py-2 text-sm">
         <span className="font-bold">Signature : </span>
         {signature}
