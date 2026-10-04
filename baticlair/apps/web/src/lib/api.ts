@@ -189,6 +189,8 @@ export interface TakeoffLine {
   id: string;
   position: number;
   designation: string;
+  /** La marchandise seule, à montrer (sans « (Fourniture et pose) ») ; `designation` reste ce que l'on modifie. */
+  article?: string;
   quantity: string | null;
   unit: string | null;
   reference: string | null;

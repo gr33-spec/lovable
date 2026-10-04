@@ -425,7 +425,7 @@ function ListRow({ line, editable, pending, onSave, onDelete, onConfirm }: { lin
           <CircleCheck size={18} className="shrink-0 text-ok" aria-label="vérifiée" />
         )}
         <span className="min-w-0 grow">
-          <span className="line-clamp-2 text-[15px] leading-snug font-bold">{shortName(line.designation)}</span>
+          <span className="line-clamp-2 text-[15px] leading-snug font-bold">{shortName(line.article ?? line.designation)}</span>
           <span className="text-sm text-muted">
             {line.basis === "work" ? "Lu dans le devis : " : ""}
             {line.quantity ?? "?"} {line.unit ?? ""}

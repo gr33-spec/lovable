@@ -98,7 +98,7 @@ Information (pas une décision) : 16 ouvrages mesurés (m², ml…) : les matér
 
 **Décisions à prendre : 1**
 
-- ⚠ **Spots LED encastrables pour douche (x3) - Fourniture de 3 sp** — La désignation indique « x3 » : combien d'articles commander au total ?
+- ⚠ **Spots LED encastrables pour douche (x3) - 3 spots LED encast** — La désignation indique « x3 » : combien d'articles commander au total ?
 
 Information (pas une décision) : 5 ouvrages mesurés (m², ml…) : les matériaux en sont calculés quand une règle existe ; ce qui reste « à préciser » sera demandé aux fournisseurs pour la mesure du devis.
 

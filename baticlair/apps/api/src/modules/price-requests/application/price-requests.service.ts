@@ -1,4 +1,4 @@
-import { briefFacts, briefSentence, communeOf, groupIdenticalLines, parseUnit } from "@baticlair/domain";
+import { briefFacts, briefSentence, communeOf, groupIdenticalLines, parseUnit, withoutLabour } from "@baticlair/domain";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { DocumentsService } from "../../documents/index.js";
@@ -98,7 +98,8 @@ export function buildPacket(
   const detail = takeoff.lines
     .filter((l) => kinds.get(l.id) !== "labor")
     .map((l) => ({
-      libelle: l.designation,
+      // Marchandise seule : pas de « (Fourniture et pose) » chez le fournisseur.
+      libelle: withoutLabour(l.designation),
       mesure: [l.quantityRaw, l.unitRaw].filter(Boolean).join(" ") || null,
       precisions: [
         ...(l.material ? [l.material] : []),

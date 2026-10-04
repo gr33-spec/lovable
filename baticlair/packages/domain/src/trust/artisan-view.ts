@@ -3,6 +3,7 @@ import type { Referential } from "../referential/model.js";
 import type { LineRole } from "../referential/line-roles.js";
 import type { QuotePlan } from "../referential/plan.js";
 import type { TakeoffValidation } from "../takeoff/validation.js";
+import { withoutLabour } from "./marchandise.js";
 import { assessNeed, assessTakeoffLine, type Assessment, type TrustState } from "./assessment.js";
 
 /**
@@ -210,7 +211,7 @@ function openCauses(a: Assessment): { cause: string; detail: string; state: "to_
 function groupDecision(kind: "unknown" | "units", lines: ViewLine[], unitlessIds: ReadonlySet<string>): Decision {
   const n = lines.length;
   const ids = lines.map((l) => l.id);
-  const one = n === 1 ? lines[0]!.designation : null;
+  const one = n === 1 ? withoutLabour(lines[0]!.designation) : null;
   const pieceLineIds = ids.filter((id) => unitlessIds.has(id));
   const unitless = pieceLineIds.length;
   if (kind === "unknown") {
@@ -326,7 +327,7 @@ export function artisanView(
       decisions.push({
         key: `role:${line.id}`,
         state: "to_confirm",
-        title: line.designation,
+        title: withoutLabour(line.designation),
         text: ask.text,
         lineIds: [line.id],
         primary: { action: "answer", label: "Choisir" },
@@ -340,7 +341,7 @@ export function artisanView(
       decisions.push({
         key: `line:${line.id}`,
         state: missing ? "missing" : "to_confirm",
-        title: line.designation,
+        title: withoutLabour(line.designation),
         text: (missing ?? own[0]!).detail,
         lineIds: [line.id],
         primary: missing ? { action: "edit", label: "Renseigner" } : { action: "keep", label: "C'est bon" },
@@ -355,7 +356,7 @@ export function artisanView(
     decisions.push({
       key: `duplicate:${ids.join(",")}`,
       state: "to_confirm",
-      title: lines.find((l) => l.id === ids[0])?.designation ?? "Lignes identiques",
+      title: withoutLabour(lines.find((l) => l.id === ids[0])?.designation ?? "Lignes identiques"),
       text: "Deux lignes identiques se suivent : ce sont bien deux quantités à commander ?",
       lineIds: ids,
       primary: { action: "keep", label: "Oui, garder les deux" },

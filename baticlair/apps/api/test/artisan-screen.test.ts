@@ -268,6 +268,8 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
     expect(body).toMatch(/Gouttière.*: 5 longueurs de 4 m/);
     expect(body).toMatch(/Chatières.*: 10 unités$/m);
     expect(body).not.toMatch(/quantité à calculer/);
+    // Marchandise seule (retour du fondateur, 2026-10-04) : ni la liste ni le détail du devis ne parlent de pose.
+    expect(JSON.stringify(created.body.packet)).not.toMatch(/\bpose\b|F\s*&\s*P\b/i);
   });
 
   it("après modèle et pureau : 1 345 tuiles (+3 %) et 367,35 ml de liteaux (+5 %) calculés, sans nouvel appel IA", async () => {

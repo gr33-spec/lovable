@@ -283,7 +283,7 @@ function ConcernedLine({ line, editable, pending, handlers }: { line: TakeoffLin
   return (
     <li className="flex items-center gap-2 py-1.5">
       <span className="min-w-0 grow">
-        <span className="line-clamp-1 font-semibold">{shortName(line.designation)}</span>
+        <span className="line-clamp-1 font-semibold">{shortName(line.article ?? line.designation)}</span>
         <span className="text-muted">
           {line.quantity ?? "?"} {line.unit ?? "(sans unité)"}
         </span>

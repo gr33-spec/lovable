@@ -496,9 +496,9 @@ function SheetDecision({ decision: d, lines, pending, handlers }: { decision: Ta
             <p className="min-w-0 text-[16px] leading-snug font-extrabold">{title}</p>
             <span className="shrink-0 rounded-full bg-surface px-3 py-1 text-[15px] font-extrabold whitespace-nowrap tabular-nums shadow-sm">{qty(single)}</span>
           </div>
-          {single.designation.trim() !== title ? (
+          {(single.article ?? single.designation).trim() !== title ? (
             <>
-              <p className={`text-[14px] leading-snug text-muted ${full ? "" : "line-clamp-2"}`}>{single.designation}</p>
+              <p className={`text-[14px] leading-snug text-muted ${full ? "" : "line-clamp-2"}`}>{single.article ?? single.designation}</p>
               <button type="button" onClick={() => setFull(!full)} aria-expanded={full} className="inline-flex min-h-9 items-center self-start text-[13px] font-bold text-accent-text">
                 {full ? "Réduire" : "Lire tout"}
               </button>
@@ -509,7 +509,7 @@ function SheetDecision({ decision: d, lines, pending, handlers }: { decision: Ta
         <ul className="flex flex-col divide-y divide-line rounded-2xl bg-ground px-4">
           {concerned.slice(0, full ? undefined : 4).map((l) => (
             <li key={l.id} className="flex items-center justify-between gap-3 py-2.5">
-              <span className="line-clamp-1 min-w-0 text-[15px] font-semibold">{shortName(l.designation)}</span>
+              <span className="line-clamp-1 min-w-0 text-[15px] font-semibold">{shortName(l.article ?? l.designation)}</span>
               <span className="shrink-0 text-[14px] font-extrabold text-muted tabular-nums">{qty(l)}</span>
             </li>
           ))}
