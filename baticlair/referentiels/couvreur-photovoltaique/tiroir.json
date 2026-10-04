@@ -33,5 +33,19 @@
     "Brides K2 MC / EC : sachets.",
     "Jeu entre modules (0,02 m) selon la bride.",
     "Notice des modules Jinko 425 : longueur de câble et connecteurs."
-  ]
+  ],
+  "questions_comptoir": {
+    "regle": "§47.8 : seules les questions qu'un vendeur de comptoir du négoce poserait pour chiffrer ; le reste est une hypothèse dite et modifiable. Liste de travail, non activée, à faire relire par un vendeur.",
+    "questions": [
+      "Modules : quelle marque et quelle puissance (Wc) ? full black ?",
+      "Intégration ou surimposition ? sur tuile, ardoise ou bac acier ?",
+      "Onduleur : micro-onduleurs ou string ?",
+      "Rails : quelle marque de système (K2, Renusol…) ?"
+    ],
+    "jamais_demande": [
+      "nombre de crochets par rail",
+      "jeu entre modules"
+    ],
+    "date": "2026-10-04"
+  }
 }

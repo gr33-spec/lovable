@@ -157,6 +157,8 @@ describe("questions du calcul : une réponse, une seule fois, et la preuve", () 
   it("aucune donnée non vérifiée ne devient établie à l'écran", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "c@example.fr", "Toitures Martin");
     const { takeoffId } = await projectWith(agent, D2026_015_LINES);
+    // La pose des crochets de gouttière : une question du comptoir (§47.8), répondue ici (en façade).
+    await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "param:fixation_crochet", value: { value: "2", unit: "u" } }).expect(200);
     const view = (await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "product:faitiere", value: "edilians-faitiere-angulaire-710" }).expect(200)).body.view as View;
     const needs = view.items.filter((i) => i.kind === "need");
     // Chaque ✓ vient d'une règle VALIDÉE ; crochets de gouttière, coudes et colliers (sans règle validée) ne produisent rien.
@@ -238,8 +240,9 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
 
   it("2 descentes deviennent 8 m de tube, 4 coudes et 8 colliers ; 20 m de gouttière deviennent 5 longueurs, 50 crochets, 2 naissances — et c'est cette liste qui part au fournisseur", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "c@example.fr", "Toitures Martin");
-    const { view, takeoffId, projectId } = await projectWith(agent, D2026_015_LINES);
-    const v = view as View & { ouvrages: Ouvrage[] };
+    const { takeoffId, projectId } = await projectWith(agent, D2026_015_LINES);
+    // La pose des crochets de gouttière n'est pas au devis : le comptoir la demande (§47.8).
+    const v = (await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "param:fixation_crochet", value: { value: "2", unit: "u" } }).expect(200)).body.view as View & { ouvrages: Ouvrage[] };
     const descente = ouvrage(v, "Descente");
     expect(descente).toMatchObject({ role: "measure", direct: null, state: "verified" });
     expect(descente.needs.map((n) => [n.slot, n.need?.value]).sort()).toEqual([["collier", "8"], ["coude", "4"], ["tube", "8"]]);
@@ -264,7 +267,7 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
     const body = (created.body.packet.articles as string[]).join("\n");
     expect(body).toMatch(/Tuiles HP10 rouge : 1 488 pièces/);
     expect(body).toMatch(/Tubes de descente.*: 8 ml/);
-    expect(body).toMatch(/Coudes : 4 pièces/);
+    expect(body).toMatch(/Coudes de descente PVC sable Ø80 : 4 pièces/);
     expect(body).toMatch(/Gouttière.*: 5 longueurs de 4 m/);
     expect(body).toMatch(/Chatières.*: 10 unités$/m);
     expect(body).not.toMatch(/quantité à calculer/);
@@ -277,6 +280,7 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
     const { takeoffId, projectId } = await projectWith(agent, D2026_015_LINES);
     const before = await ctx.prisma.aiExecution.count();
     await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "product:tuile", value: "edilians-hp10-huguenot" }).expect(200);
+    await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "param:fixation_crochet", value: { value: "2", unit: "u" } }).expect(200);
     const after = (await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "param:pureau", value: { value: "34.3", unit: "cm" } }).expect(200)).body.view as View & { ouvrages: Ouvrage[] };
     await getView(agent, projectId);
     expect(await ctx.prisma.aiExecution.count()).toBe(before);

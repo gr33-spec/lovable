@@ -13,12 +13,20 @@ const TEST = [
   { ref: "4", designation: "Gouttière zinc demi-ronde", quantity: "13", unit: "ml" },
 ];
 const u = (value: string, unit = "u") => ({ value, unit });
-const REPONSES = { "param:faconnage": u("1"), "param:egout_faitage": u("2"), "param:nb_descentes": u("2"), "param:developpe": u("330", "mm") };
+// Les réponses de Greg : il façonne, 2 descentes en Ø 80, développé 33 cm (bande et gouttière), crochets bandeau.
+const REPONSES = {
+  "param:faconnage": u("1"),
+  "param:nb_descentes": u("2"),
+  "param:developpe": u("330", "mm"),
+  "param:developpe_gouttiere": u("33", "cm"),
+  "param:fixation_crochet": u("2"),
+  "param:diametre_descente": u("80", "mm"),
+};
 const line = (v: ReturnType<typeof readQuote>, label: string) => v.toBuy.find((b) => b.label.startsWith(label));
 
 describe("chantier Test : les corrections du §45.5", () => {
   it("gouttière 13 ml : « 4 longueurs de 4 m (13 ml à couvrir) », jamais « soit 13 ml »", () => {
-    const g = line(readQuote(TEST, REPONSES), "Gouttière")!;
+    const g = line(readQuote(TEST, REPONSES), "Gouttière zinc demi-ronde dév. 33")!;
     expect(`${g.quantity} (${g.approx})`).toBe("4 longueurs de 4 m (13 ml à couvrir)");
     expect(JSON.stringify(g)).not.toMatch(/soit/);
   });
@@ -33,37 +41,41 @@ describe("chantier Test : les corrections du §45.5", () => {
 
   it("bandes zinc commandées façonnées : en longueurs de 2 m, avec ce qu'elles couvrent", () => {
     const v = readQuote(TEST, { ...REPONSES, "param:faconnage": u("2") });
-    expect(line(v, "Bandes zinc façonnées")).toMatchObject({ quantity: "8 longueurs de 2 m", precision: "13 ml à couvrir, développé 33 cm" });
+    expect(line(v, "Bandes façonnées Quartz-Zinc 0,65 mm")).toMatchObject({ quantity: "8 longueurs de 2 m", precision: "13 ml à couvrir, développé 33 cm" });
   });
 
-  it("égout et faîtage : une question à boutons, jamais comptés d'office", () => {
-    const sans = readQuote(TEST, { "param:faconnage": u("1"), "param:nb_descentes": u("2"), "param:developpe": u("330", "mm") });
-    const q = sans.questions.find((d) => d.question?.key === "param:egout_faitage")!;
-    expect(q.question?.options?.map((o) => o.label)).toEqual(["Égout et faîtage", "Faîtage seulement", "Égout seulement", "Déjà au devis"]);
-    expect(line(sans, "Bandes d'égout")).toBeUndefined();
-    const tout = readQuote(TEST, { ...REPONSES, "param:egout_faitage": u("3") });
-    expect(line(tout, "Bandes d'égout zinc dév. 33 cm")).toMatchObject({ quantity: "8 longueurs de 2 m", precision: "13 ml d'égout à couvrir" });
-    expect(line(tout, "Faîtage zinc")).toMatchObject({ quantity: "5 longueurs de 3 m", precision: "13 ml de faîtage à couvrir" });
-    const rien = readQuote(TEST, { ...REPONSES, "param:egout_faitage": u("0") });
-    expect(line(rien, "Bandes d'égout")).toBeUndefined();
-    expect(line(rien, "Faîtage zinc")).toBeUndefined();
+  it("égout et faîtage (§47.8) : jamais une question, proposés dans « On ajoute ? » ; l'égout déjà au devis n'est pas reproposé", () => {
+    const v = readQuote(TEST, REPONSES);
+    expect(v.questions.map((d) => d.question?.key)).not.toContain("param:egout_faitage");
+    // Le devis cite la bande d'égout : seul le faîtage est proposé, avec le zinc du chantier.
+    expect(v.suggestions.map((s) => `${s.label} : ${s.quantity}`)).toContain("Faîtage Quartz-Zinc 0,65 mm, bande dév. 33 cm : 5 longueurs de 3 m");
+    expect(v.suggestions.map((s) => s.label).some((l) => l.startsWith("Bandes d'égout"))).toBe(false);
+    expect(line(v, "Faîtage")).toBeUndefined();
+    // Sans ligne d'égout au devis : l'égout est proposé aussi.
+    const sansEgout = readQuote(TEST.filter((l) => l.ref !== "3"), REPONSES);
+    expect(sansEgout.suggestions.map((s) => `${s.label} : ${s.quantity}`)).toContain("Bandes d'égout Quartz-Zinc 0,65 mm, dév. 33 cm : 8 longueurs de 2 m");
   });
 
   it("bande de 13 ml façonnée sur place : un bobineau (plus de 6 ml), toujours avec son usage", () => {
     const f = line(readQuote(TEST, REPONSES), "Bobineau")!;
-    expect(f).toMatchObject({ label: "Bobineau 500 × 17 m, 0,65", quantity: "1 pièce", precision: "pour façonner 13 ml de bande" });
+    expect(f).toMatchObject({ label: "Bobineau Quartz-Zinc 500 × 17 m, 0,65", quantity: "1 pièce", precision: "pour façonner 13 ml de bande" });
     expect(line(readQuote(TEST, REPONSES), "Feuilles zinc 2 × 1 m")).toBeUndefined();
   });
 
   it("descentes absentes du devis : une question, jamais une quantité d'office", () => {
-    const v = readQuote(TEST, { "param:faconnage": u("1"), "param:egout_faitage": u("2"), "param:developpe": u("330", "mm") });
+    const { "param:nb_descentes": _n, ...sansDescentes } = REPONSES;
+    const v = readQuote(TEST, sansDescentes);
     expect(v.questions.map((d) => d.question?.key)).toContain("param:nb_descentes");
     expect(line(v, "Naissances")).toBeUndefined();
   });
 
   it("§45.8 « On ajoute ? » : silicone zinc et vis inox proposés avec une quantité, jamais ajoutés d'office ; une ligne « mastic » du devis reste la sienne", () => {
     const v = readQuote(TEST, REPONSES);
-    expect(v.suggestions.map((s) => `${s.label} : ${s.quantity}`)).toEqual(["Cartouches de silicone zinc : 2 cartouches", "Vis inox 4 × 40 : 1 boîte de 200"]);
+    expect(v.suggestions.map((s) => `${s.label} : ${s.quantity}`)).toEqual([
+      "Cartouches de silicone zinc : 2 cartouches",
+      "Vis inox 4 × 40 : 1 boîte de 200",
+      "Faîtage Quartz-Zinc 0,65 mm, bande dév. 33 cm : 5 longueurs de 3 m",
+    ]);
     expect(v.toBuy.map((b) => b.label)).not.toContain("Cartouches de silicone zinc");
     const avecMastic = readQuote([...TEST, { ref: "5", designation: "Mastic colle polyuréthane 310 ml", quantity: "2", unit: "u" }], REPONSES);
     expect(avecMastic.toBuy.map((b) => `${b.label} : ${b.quantity}`)).toContain("Mastic colle polyuréthane 310 ml : 2 pièces");

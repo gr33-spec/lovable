@@ -1563,7 +1563,7 @@
       "id": "soprema-sop-ecran-hpv-r2-150x50",
       "family": "underlay",
       "label": "SOP'ÉCRAN HPV R2, rouleau 1,50 × 50 m (Soprema)",
-      "shortLabel": "Écran HPV",
+      "shortLabel": "Écran HPV Soprema R2, rouleau 1,50 × 50 m",
       "manufacturer": "Soprema",
       "aliases": [
         "sop ecran",
@@ -2663,7 +2663,7 @@
       "id": "ecran-hpv-standard",
       "family": "underlay",
       "label": "Écran de sous-toiture HPV, rouleau 1,5 × 50 m (modèle à préciser)",
-      "shortLabel": "Écran HPV",
+      "shortLabel": "Écran HPV, rouleau 1,50 × 50 m",
       "aliases": [],
       "generic": true,
       "attributes": {
@@ -3317,8 +3317,8 @@
     {
       "id": "bobine-zinc-standard",
       "family": "zinc_coil",
-      "label": "Zinc naturel en bobine largeur 650 mm, au mètre linéaire (épaisseur du chantier)",
-      "shortLabel": "Zinc naturel en bobine 650 mm",
+      "label": "Zinc en bobine largeur 650 mm, au mètre linéaire (aspect et épaisseur du chantier)",
+      "shortLabel": "Zinc en bobine 650 mm",
       "aliases": [],
       "generic": true,
       "attributes": {},
@@ -3348,8 +3348,8 @@
     {
       "id": "bobine-zinc-500",
       "family": "zinc_coil",
-      "label": "Zinc naturel en bobine largeur 500 mm, au mètre linéaire (épaisseur du chantier)",
-      "shortLabel": "Zinc naturel en bobine 500 mm",
+      "label": "Zinc en bobine largeur 500 mm, au mètre linéaire (aspect et épaisseur du chantier)",
+      "shortLabel": "Zinc en bobine 500 mm",
       "aliases": [],
       "generic": true,
       "attributes": {},
@@ -4518,7 +4518,50 @@
               "label": "Inox 2,7 mm (bord de mer)",
               "value": "2.7"
             }
-          ]
+          ],
+          "display": {
+            "1": "standard",
+            "2.7": "Ø 2,7"
+          }
+        },
+        {
+          "key": "qualite_ardoise",
+          "label": "Qualité de l'ardoise",
+          "unit": "u",
+          "kind": "artisan_preference",
+          "question": "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+          "choices": [
+            {
+              "label": "Espagne 1er choix",
+              "value": "1"
+            },
+            {
+              "label": "Ardoise NF (type Cupa)",
+              "value": "2"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "cupa",
+                "nf",
+                "marque nf"
+              ]
+            },
+            {
+              "value": "1",
+              "keywords": [
+                "espagne",
+                "1er choix",
+                "premier choix"
+              ]
+            }
+          ],
+          "display": {
+            "1": "Espagne 1er choix",
+            "2": "NF (type Cupa)"
+          }
         },
         {
           "key": "longueur_rampant",
@@ -4714,6 +4757,34 @@
           },
           "version": 1,
           "note": "Recouvrement arrondi aux 5 mm supérieurs."
+        },
+        "marge_crochet": {
+          "kind": "installation_condition",
+          "value": "10",
+          "unit": "mm",
+          "source": "cupa-pureau-ardoises-m2",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« Longueur de crochet = R + 1 cm environ » (Cupa, §34)."
+        },
+        "pas_crochet": {
+          "kind": "installation_condition",
+          "value": "10",
+          "unit": "mm",
+          "source": "cupa-pureau-ardoises-m2",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Crochets vendus de centimètre en centimètre (R 100 → 11 cm, R 90 → 10)."
         }
       },
       "points": {
@@ -5999,6 +6070,20 @@
           "version": 1
         },
         {
+          "key": "longueur_crochet",
+          "label": "Longueur de crochet",
+          "unit": "mm",
+          "formula": "arrondi_sup((recouvrement_pose + regle.marge_crochet) / regle.pas_crochet) * regle.pas_crochet",
+          "source": "cupa-pureau-ardoises-m2",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
           "key": "recouvrement",
           "label": "Recouvrement",
           "unit": "mm",
@@ -6022,6 +6107,10 @@
           "unit": "u",
           "core": true,
           "exclusions": "Hors ardoises de rive, doublis à l'égout, coupes en noue et en arêtier (la perte de 5 % couvre casse et coupes de rive d'un pan simple).",
+          "designation": "Ardoises naturelles {qualite_ardoise} {ardoise.longueur|cm#}×{ardoise.largeur|cm#}",
+          "precisionRequires": [
+            "qualite_ardoise"
+          ],
           "source": "cupa-pureau-ardoises-m2",
           "verification": {
             "status": "verified",
@@ -6038,6 +6127,7 @@
           "unit": "u",
           "core": true,
           "exclusions": "Un crochet par ardoise commandée, +2 % (référentiel du fondateur) : jamais moins de crochets que d'ardoises.",
+          "designation": "Crochets d'ardoise inox {diametre_crochet}, longueur {longueur_crochet|cm}",
           "source": "baticlair-geometrie-ardoise",
           "verification": {
             "status": "verified",
@@ -6265,6 +6355,155 @@
           "textLabels": [
             "faitage"
           ]
+        },
+        {
+          "key": "developpe",
+          "label": "Développé de la bande",
+          "unit": "mm",
+          "kind": "site_data",
+          "question": "Développé de la bande zinc ?",
+          "textLabels": [
+            "developpe",
+            "dev",
+            "dev."
+          ],
+          "withinChoices": true,
+          "choices": [
+            {
+              "label": "100 mm (solin, couvre-joint)",
+              "value": "100"
+            },
+            {
+              "label": "250 mm",
+              "value": "250"
+            },
+            {
+              "label": "330 mm",
+              "value": "330"
+            },
+            {
+              "label": "400 mm",
+              "value": "400"
+            }
+          ]
+        },
+        {
+          "key": "epaisseur_zinc",
+          "label": "Épaisseur du zinc",
+          "unit": "mm",
+          "kind": "artisan_preference",
+          "question": "Épaisseur du zinc ?",
+          "textLabels": [
+            "epaisseur",
+            "ep"
+          ],
+          "default": {
+            "value": "0.65",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "0,65 mm standard (§7)"
+          },
+          "choices": [
+            {
+              "label": "0,65 mm",
+              "value": "0.65"
+            },
+            {
+              "label": "0,70 mm",
+              "value": "0.7"
+            },
+            {
+              "label": "0,80 mm",
+              "value": "0.8"
+            }
+          ],
+          "display": {
+            "0.65": "0,65",
+            "0.7": "0,70",
+            "0.8": "0,80"
+          }
+        },
+        {
+          "key": "aspect_zinc",
+          "label": "Aspect du zinc",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Zinc prépatiné : Quartz-Zinc (gris) ou Anthra-Zinc (noir) ?",
+          "hint": "Le devis dit « prépatiné » sans la teinte : le comptoir sert l'un ou l'autre.",
+          "default": {
+            "value": "1",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "zinc naturel : le devis ne dit pas prépatiné",
+            "unlessText": [
+              "prepatine",
+              "pre patine",
+              "pre-patine"
+            ]
+          },
+          "choices": [
+            {
+              "label": "Zinc naturel",
+              "value": "1"
+            },
+            {
+              "label": "Quartz-Zinc (prépatiné gris)",
+              "value": "2"
+            },
+            {
+              "label": "Anthra-Zinc (prépatiné noir)",
+              "value": "3"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "quartz",
+                "quartz zinc",
+                "quartz-zinc"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "anthra",
+                "anthra zinc",
+                "anthra-zinc"
+              ]
+            },
+            {
+              "value": "4",
+              "keywords": [
+                "pigmento"
+              ]
+            },
+            {
+              "value": "1",
+              "keywords": [
+                "zinc naturel"
+              ]
+            }
+          ],
+          "display": {
+            "1": "zinc naturel",
+            "2": "Quartz-Zinc",
+            "3": "Anthra-Zinc",
+            "4": "Pigmento"
+          },
+          "onlyFromPrincipal": true
         }
       ],
       "slots": [
@@ -6316,6 +6555,11 @@
           "core": true,
           "exclusions": "Recouvrements des longueurs couverts par la perte de 5 %.",
           "precision": "{longueur_faitage|ml} de faîtage à couvrir",
+          "designation": "Faîtage {aspect_zinc} {epaisseur_zinc} mm, bande dév. {developpe|cm}",
+          "precisionRequires": [
+            "developpe",
+            "aspect_zinc"
+          ],
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -6452,6 +6696,82 @@
             "0.7": "0,70",
             "0.8": "0,80"
           }
+        },
+        {
+          "key": "aspect_zinc",
+          "label": "Aspect du zinc",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Zinc prépatiné : Quartz-Zinc (gris) ou Anthra-Zinc (noir) ?",
+          "hint": "Le devis dit « prépatiné » sans la teinte : le comptoir sert l'un ou l'autre.",
+          "default": {
+            "value": "1",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "zinc naturel : le devis ne dit pas prépatiné",
+            "unlessText": [
+              "prepatine",
+              "pre patine",
+              "pre-patine"
+            ]
+          },
+          "choices": [
+            {
+              "label": "Zinc naturel",
+              "value": "1"
+            },
+            {
+              "label": "Quartz-Zinc (prépatiné gris)",
+              "value": "2"
+            },
+            {
+              "label": "Anthra-Zinc (prépatiné noir)",
+              "value": "3"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "quartz",
+                "quartz zinc",
+                "quartz-zinc"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "anthra",
+                "anthra zinc",
+                "anthra-zinc"
+              ]
+            },
+            {
+              "value": "4",
+              "keywords": [
+                "pigmento"
+              ]
+            },
+            {
+              "value": "1",
+              "keywords": [
+                "zinc naturel"
+              ]
+            }
+          ],
+          "display": {
+            "1": "zinc naturel",
+            "2": "Quartz-Zinc",
+            "3": "Anthra-Zinc",
+            "4": "Pigmento"
+          },
+          "onlyFromPrincipal": true
         }
       ],
       "slots": [
@@ -6792,8 +7112,10 @@
           "core": true,
           "exclusions": "Longueurs de 2 m, recouvrement 10 cm entre éléments ; fixations à part.",
           "precision": "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
+          "designation": "Bandes façonnées {aspect_zinc} {epaisseur_zinc} mm",
           "precisionRequires": [
-            "developpe"
+            "developpe",
+            "aspect_zinc"
           ],
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
@@ -6813,6 +7135,10 @@
           "core": true,
           "exclusions": "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2) ; chutes non réemployées.",
           "precision": "pour façonner {longueur_bande|ml} de bande, développé {developpe|cm}",
+          "designation": "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
+          "precisionRequires": [
+            "aspect_zinc"
+          ],
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -6830,7 +7156,10 @@
           "unit": "u",
           "core": true,
           "exclusions": "La plus petite largeur qui contient le développé, la plus courte longueur qui couvre la bande (marge comprise).",
-          "designation": "Bobineau {largeur_bobineau|mm#} × {longueur_bobineau|m}, {epaisseur_zinc}",
+          "designation": "Bobineau {aspect_zinc} {largeur_bobineau|mm#} × {longueur_bobineau|m}, {epaisseur_zinc}",
+          "precisionRequires": [
+            "aspect_zinc"
+          ],
           "precision": "pour façonner {longueur_bande|ml} de bande",
           "source": "fondateur-reponses-2026-10-04",
           "verification": {
@@ -6987,6 +7316,82 @@
             "0.7": "0,70",
             "0.8": "0,80"
           }
+        },
+        {
+          "key": "aspect_zinc",
+          "label": "Aspect du zinc",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Zinc prépatiné : Quartz-Zinc (gris) ou Anthra-Zinc (noir) ?",
+          "hint": "Le devis dit « prépatiné » sans la teinte : le comptoir sert l'un ou l'autre.",
+          "default": {
+            "value": "1",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "zinc naturel : le devis ne dit pas prépatiné",
+            "unlessText": [
+              "prepatine",
+              "pre patine",
+              "pre-patine"
+            ]
+          },
+          "choices": [
+            {
+              "label": "Zinc naturel",
+              "value": "1"
+            },
+            {
+              "label": "Quartz-Zinc (prépatiné gris)",
+              "value": "2"
+            },
+            {
+              "label": "Anthra-Zinc (prépatiné noir)",
+              "value": "3"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "quartz",
+                "quartz zinc",
+                "quartz-zinc"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "anthra",
+                "anthra zinc",
+                "anthra-zinc"
+              ]
+            },
+            {
+              "value": "4",
+              "keywords": [
+                "pigmento"
+              ]
+            },
+            {
+              "value": "1",
+              "keywords": [
+                "zinc naturel"
+              ]
+            }
+          ],
+          "display": {
+            "1": "zinc naturel",
+            "2": "Quartz-Zinc",
+            "3": "Anthra-Zinc",
+            "4": "Pigmento"
+          },
+          "onlyFromPrincipal": true
         }
       ],
       "slots": [
@@ -7355,6 +7760,10 @@
           "unit": "u",
           "core": true,
           "exclusions": "Quatre côtés, développé 33 cm ; longueurs de 2 m, recouvrement 10 cm.",
+          "designation": "Bandes façonnées {aspect_zinc} {epaisseur_zinc} mm, dév. 33 cm",
+          "precisionRequires": [
+            "aspect_zinc"
+          ],
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -7373,6 +7782,10 @@
           "core": true,
           "exclusions": "Zinc plat, développé 33 cm × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",
           "precision": "pour façonner l'abergement de cheminée, développé 33 cm",
+          "designation": "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
+          "precisionRequires": [
+            "aspect_zinc"
+          ],
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -7390,7 +7803,10 @@
           "unit": "u",
           "core": true,
           "exclusions": "Développé 33 cm ; la plus courte longueur de bobineau qui couvre le zinc de l'abergement.",
-          "designation": "Bobineau {largeur_bobineau|mm#} × {longueur_bobineau|m}, {epaisseur_zinc}",
+          "designation": "Bobineau {aspect_zinc} {largeur_bobineau|mm#} × {longueur_bobineau|m}, {epaisseur_zinc}",
+          "precisionRequires": [
+            "aspect_zinc"
+          ],
           "precision": "pour façonner {ml_zinc|ml} d'abergement, développé 33 cm",
           "source": "fondateur-reponses-2026-10-04",
           "verification": {
@@ -7831,6 +8247,82 @@
           }
         },
         {
+          "key": "aspect_zinc",
+          "label": "Aspect du zinc",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Zinc prépatiné : Quartz-Zinc (gris) ou Anthra-Zinc (noir) ?",
+          "hint": "Le devis dit « prépatiné » sans la teinte : le comptoir sert l'un ou l'autre.",
+          "default": {
+            "value": "1",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "zinc naturel : le devis ne dit pas prépatiné",
+            "unlessText": [
+              "prepatine",
+              "pre patine",
+              "pre-patine"
+            ]
+          },
+          "choices": [
+            {
+              "label": "Zinc naturel",
+              "value": "1"
+            },
+            {
+              "label": "Quartz-Zinc (prépatiné gris)",
+              "value": "2"
+            },
+            {
+              "label": "Anthra-Zinc (prépatiné noir)",
+              "value": "3"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "quartz",
+                "quartz zinc",
+                "quartz-zinc"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "anthra",
+                "anthra zinc",
+                "anthra-zinc"
+              ]
+            },
+            {
+              "value": "4",
+              "keywords": [
+                "pigmento"
+              ]
+            },
+            {
+              "value": "1",
+              "keywords": [
+                "zinc naturel"
+              ]
+            }
+          ],
+          "display": {
+            "1": "zinc naturel",
+            "2": "Quartz-Zinc",
+            "3": "Anthra-Zinc",
+            "4": "Pigmento"
+          },
+          "onlyFromPrincipal": true
+        },
+        {
           "key": "longueur_rampant",
           "label": "Longueur du rampant",
           "unit": "m",
@@ -7920,38 +8412,6 @@
               "value": "3"
             }
           ]
-        },
-        {
-          "key": "egout_faitage",
-          "label": "Égout et faîtage du zinc",
-          "unit": "u",
-          "kind": "site_data",
-          "question": "Bandes d'égout et de faîtage du zinc : on les ajoute à la liste ?",
-          "hint": "Si le devis les cite déjà sur une autre ligne, réponds « Déjà au devis ».",
-          "choices": [
-            {
-              "label": "Égout et faîtage",
-              "value": "3"
-            },
-            {
-              "label": "Faîtage seulement",
-              "value": "2"
-            },
-            {
-              "label": "Égout seulement",
-              "value": "1"
-            },
-            {
-              "label": "Déjà au devis",
-              "value": "0"
-            }
-          ],
-          "display": {
-            "0": "déjà au devis",
-            "1": "égout seulement",
-            "2": "faîtage seulement",
-            "3": "égout et faîtage"
-          }
         }
       ],
       "slots": [
@@ -7969,7 +8429,7 @@
             "bobine"
           ],
           "usual": {
-            "text": "Zinc naturel en bobine largeur 650 mm, commandé au mètre linéaire.",
+            "text": "Zinc en bobine largeur 650 mm (naturel ou prépatiné selon le devis), commandé au mètre linéaire.",
             "source": "vmzinc-joint-debout",
             "productId": "bobine-zinc-standard"
           }
@@ -7983,7 +8443,7 @@
             "littoral"
           ],
           "usual": {
-            "text": "Bord de mer : zinc naturel en bobine largeur 500 mm, commandé au mètre linéaire (VMZINC).",
+            "text": "Bord de mer : zinc en bobine largeur 500 mm, commandé au mètre linéaire (VMZINC).",
             "source": "vmzinc-joint-debout",
             "productId": "bobine-zinc-500"
           }
@@ -8620,6 +9080,10 @@
           "core": true,
           "exclusions": "Une longueur de rampant par bac plus 15 cm de surlongueur (10 en égout, 5 en faîtage) ; hors bandes d'égout, de rive, de faîtage et de noue, comptées à part.",
           "precision": "{nb_bacs} bacs × {longueur_bac|m}",
+          "designation": "Bobine {aspect_zinc} {epaisseur_zinc} mm, largeur {largeur_bobine|mm}",
+          "precisionRequires": [
+            "aspect_zinc"
+          ],
           "source": "vmzinc-joint-debout",
           "verification": {
             "status": "verified",
@@ -8638,6 +9102,10 @@
           "core": true,
           "exclusions": "Une longueur de rampant par bac plus 15 cm de surlongueur (10 en égout, 5 en faîtage) ; hors bandes d'égout, de rive, de faîtage et de noue, comptées à part.",
           "precision": "{nb_bacs} bacs × {longueur_bac|m}",
+          "designation": "Bobine {aspect_zinc} {epaisseur_zinc} mm, largeur {largeur_bobine|mm}",
+          "precisionRequires": [
+            "aspect_zinc"
+          ],
           "source": "vmzinc-joint-debout",
           "verification": {
             "status": "verified",
@@ -8655,6 +9123,10 @@
           "unit": "u",
           "core": true,
           "exclusions": "Un pan rectangulaire ; chaque bac fait la longueur du rampant, ou 10 m au plus avec jonction transversale au-delà. Hors bandes d'égout, de rive, de faîtage et de noue.",
+          "designation": "Bacs joint debout {aspect_zinc} {epaisseur_zinc} mm",
+          "precisionRequires": [
+            "aspect_zinc"
+          ],
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -8718,10 +9190,15 @@
         {
           "id": "egout-joint-debout",
           "slot": "egout",
-          "when": "si(egout_faitage < 0.5, 0, si(egout_faitage < 1.5, 1, si(egout_faitage > 2.5, 1, 0)))",
           "formula": "arrondi_sup(largeur_pan * regle.coef_egout_faitage / regle.longueur_utile_bande)",
           "unit": "u",
-          "core": true,
+          "core": false,
+          "offer": {
+            "unlessQuoteSays": [
+              "egout"
+            ]
+          },
+          "designation": "Bandes d'égout {aspect_zinc} {epaisseur_zinc} mm, dév. 33 cm",
           "exclusions": "Égout sur toute la largeur du pan ; longueurs de 2 m, recouvrement 10 cm.",
           "precision": "{largeur_pan|ml} d'égout à couvrir",
           "source": "fondateur-referentiel-2026-10-03",
@@ -8736,10 +9213,15 @@
         {
           "id": "faitage-joint-debout",
           "slot": "faitage",
-          "when": "si(egout_faitage >= 2, 1, 0)",
+          "core": false,
+          "offer": {
+            "unlessQuoteSays": [
+              "faitage"
+            ]
+          },
+          "designation": "Faîtage {aspect_zinc} {epaisseur_zinc} mm, bande dév. 33 cm",
           "formula": "largeur_pan * regle.coef_egout_faitage",
           "unit": "ml",
-          "core": true,
           "exclusions": "Un faîtage de la largeur du pan (monopente, ou un seul pan) ; deux pans qui se rejoignent n'en font qu'un : corrige la quantité d'un tap.",
           "precision": "{largeur_pan|ml} de faîtage à couvrir",
           "source": "fondateur-referentiel-2026-10-03",
@@ -8816,6 +9298,36 @@
               "label": "4",
               "value": "4"
             }
+          ],
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "1 descente",
+                "une descente"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "2 descentes",
+                "deux descentes"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "3 descentes",
+                "trois descentes"
+              ]
+            },
+            {
+              "value": "4",
+              "keywords": [
+                "4 descentes",
+                "quatre descentes"
+              ]
+            }
           ]
         },
         {
@@ -8850,6 +9362,194 @@
               "value": "3"
             }
           ]
+        },
+        {
+          "key": "developpe_gouttiere",
+          "label": "Développé de la gouttière",
+          "unit": "cm",
+          "kind": "site_data",
+          "question": "Gouttière de 25, de 28, de 33 ou de 40 ?",
+          "hint": "Le développé : la largeur de la feuille avant façonnage.",
+          "choices": [
+            {
+              "label": "De 25",
+              "value": "25"
+            },
+            {
+              "label": "De 28",
+              "value": "28"
+            },
+            {
+              "label": "De 33",
+              "value": "33"
+            },
+            {
+              "label": "De 40",
+              "value": "40"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "25",
+              "keywords": [
+                "demi ronde 25",
+                "demi-ronde 25",
+                "nantaise 25",
+                "gouttiere 25",
+                "gouttiere de 25",
+                "dev 25",
+                "dev. 25",
+                "developpe 25",
+                "developpe 250",
+                "dev 250",
+                "de 25"
+              ]
+            },
+            {
+              "value": "28",
+              "keywords": [
+                "demi ronde 28",
+                "demi-ronde 28",
+                "nantaise 28",
+                "gouttiere 28",
+                "gouttiere de 28",
+                "dev 28",
+                "dev. 28",
+                "developpe 28",
+                "developpe 285",
+                "dev 285",
+                "de 28"
+              ]
+            },
+            {
+              "value": "33",
+              "keywords": [
+                "demi ronde 33",
+                "demi-ronde 33",
+                "nantaise 33",
+                "gouttiere 33",
+                "gouttiere de 33",
+                "dev 33",
+                "dev. 33",
+                "developpe 33",
+                "developpe 330",
+                "developpe 333",
+                "dev 333",
+                "dev 330",
+                "de 33"
+              ]
+            },
+            {
+              "value": "40",
+              "keywords": [
+                "demi ronde 40",
+                "demi-ronde 40",
+                "nantaise 40",
+                "gouttiere 40",
+                "gouttiere de 40",
+                "dev 40",
+                "dev. 40",
+                "developpe 40",
+                "developpe 400",
+                "dev 400",
+                "de 40"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "fixation_crochet",
+          "label": "Pose des crochets de gouttière",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?",
+          "choices": [
+            {
+              "label": "Sur les chevrons",
+              "value": "1"
+            },
+            {
+              "label": "En façade (bandeau)",
+              "value": "2"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "bandeau",
+                "planche de rive",
+                "en facade"
+              ]
+            },
+            {
+              "value": "1",
+              "keywords": [
+                "sur chevron",
+                "sur chevrons"
+              ]
+            }
+          ],
+          "display": {
+            "1": "sur chevron",
+            "2": "bandeau"
+          }
+        },
+        {
+          "key": "diametre_descente",
+          "label": "Diamètre des descentes",
+          "unit": "mm",
+          "kind": "site_data",
+          "question": "Descentes en Ø 80 ou en Ø 100 ?",
+          "hint": "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 130 m².",
+          "choices": [
+            {
+              "label": "Ø 80",
+              "value": "80"
+            },
+            {
+              "label": "Ø 100",
+              "value": "100"
+            },
+            {
+              "label": "Ø 120",
+              "value": "120"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "80",
+              "keywords": [
+                "ø80",
+                "ø 80",
+                "diametre 80",
+                "descente 80",
+                "descente de 80",
+                "descentes de 80"
+              ]
+            },
+            {
+              "value": "100",
+              "keywords": [
+                "ø100",
+                "ø 100",
+                "diametre 100",
+                "descente 100",
+                "descente de 100",
+                "descentes de 100"
+              ]
+            },
+            {
+              "value": "120",
+              "keywords": [
+                "ø120",
+                "ø 120",
+                "diametre 120",
+                "descente 120",
+                "descente de 120"
+              ]
+            }
+          ]
         }
       ],
       "slots": [
@@ -8880,6 +9580,7 @@
           "key": "naissance",
           "family": "gutter_outlet",
           "label": "Naissances",
+          "charsFrom": "profil",
           "usual": {
             "text": "Une naissance par descente.",
             "source": "fondateur-referentiel-2026-10-03",
@@ -8937,6 +9638,10 @@
           "unit": "ml",
           "core": true,
           "exclusions": "Hors recouvrements ou jonctions propres au système.",
+          "designation": "Gouttière {devis} dév. {developpe_gouttiere|cm#}",
+          "precisionRequires": [
+            "developpe_gouttiere"
+          ],
           "source": "baticlair-pratique-accessoires",
           "verification": {
             "status": "verified",
@@ -8953,6 +9658,11 @@
           "unit": "u",
           "core": true,
           "exclusions": "Hors le crochet supplémentaire en bout de chaque ligne de gouttière.",
+          "designation": "Crochets de gouttière {fixation_crochet} dév. {developpe_gouttiere|cm#}",
+          "precisionRequires": [
+            "fixation_crochet",
+            "developpe_gouttiere"
+          ],
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -8969,6 +9679,11 @@
           "unit": "u",
           "core": true,
           "exclusions": "Une naissance par descente.",
+          "designation": "Naissances {devis} dév. {developpe_gouttiere|cm#} Ø{diametre_descente|mm#}",
+          "precisionRequires": [
+            "developpe_gouttiere",
+            "diametre_descente"
+          ],
           "source": "baticlair-pratique-accessoires",
           "verification": {
             "status": "verified",
@@ -8996,6 +9711,62 @@
           "kind": "site_data",
           "question": "Combien de descentes ?",
           "fromLineQuantity": true
+        },
+        {
+          "key": "diametre_descente",
+          "label": "Diamètre des descentes",
+          "unit": "mm",
+          "kind": "site_data",
+          "question": "Descentes en Ø 80 ou en Ø 100 ?",
+          "hint": "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 130 m².",
+          "choices": [
+            {
+              "label": "Ø 80",
+              "value": "80"
+            },
+            {
+              "label": "Ø 100",
+              "value": "100"
+            },
+            {
+              "label": "Ø 120",
+              "value": "120"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "80",
+              "keywords": [
+                "ø80",
+                "ø 80",
+                "diametre 80",
+                "descente 80",
+                "descente de 80",
+                "descentes de 80"
+              ]
+            },
+            {
+              "value": "100",
+              "keywords": [
+                "ø100",
+                "ø 100",
+                "diametre 100",
+                "descente 100",
+                "descente de 100",
+                "descentes de 100"
+              ]
+            },
+            {
+              "value": "120",
+              "keywords": [
+                "ø120",
+                "ø 120",
+                "diametre 120",
+                "descente 120",
+                "descente de 120"
+              ]
+            }
+          ]
         },
         {
           "key": "hauteur_descente",
@@ -9056,6 +9827,7 @@
           "key": "coude",
           "family": "downpipe_elbow",
           "label": "Coudes",
+          "charsFrom": "tube",
           "usual": {
             "text": "Coudes du même système que la descente.",
             "source": "fondateur-referentiel-2026-10-03",
@@ -9096,6 +9868,10 @@
           "formula": "nb_descentes * hauteur_descente",
           "unit": "ml",
           "precision": "{nb_descentes} descentes × {hauteur_descente|m}",
+          "designation": "Tubes de descente {devis} Ø{diametre_descente|mm#}",
+          "precisionRequires": [
+            "diametre_descente"
+          ],
           "core": true,
           "exclusions": "Hauteur du devis, sans déduire les coudes ni ajouter de dauphin.",
           "source": "baticlair-pratique-accessoires",
@@ -9114,6 +9890,10 @@
           "unit": "u",
           "core": true,
           "exclusions": "Hors dauphin ou bague de pied.",
+          "designation": "Coudes de descente {devis} Ø{diametre_descente|mm#}",
+          "precisionRequires": [
+            "diametre_descente"
+          ],
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -9130,6 +9910,10 @@
           "unit": "u",
           "core": true,
           "exclusions": "Un collier tous les 1,8 m plus un par descente.",
+          "designation": "Colliers de descente Ø{diametre_descente|mm#}",
+          "precisionRequires": [
+            "diametre_descente"
+          ],
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",

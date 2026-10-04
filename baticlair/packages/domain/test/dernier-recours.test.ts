@@ -46,7 +46,7 @@ describe("bandes zinc au ml (§36.4) : jamais « ml de zinc » nu", () => {
   it("je façonne, 6 ml au plus : des feuilles de zinc 2 × 1 m, jamais du zinc au kg (§25.2) : 5,5 m × 0,25 m / 2 m² = 0,69 → 1 feuille", () => {
     const r = computeWorkItem(ROOFING_REFERENTIAL, input({ faconnage: "1", developpe: "250", longueur_bande: "5" }));
     expect(order(r, "feuilles-bandes")).toBe(1);
-    expect(need(r, "feuilles-bandes").label).toBe("Feuilles zinc 2 × 1 m");
+    expect(need(r, "feuilles-bandes").label).toBe("Feuilles zinc naturel 2 × 1 m, 0,65 mm");
     expect(r.needs.some((n) => n.purchase?.order.unit.many === "kg")).toBe(false);
   });
 
@@ -54,7 +54,7 @@ describe("bandes zinc au ml (§36.4) : jamais « ml de zinc » nu", () => {
     const r = computeWorkItem(ROOFING_REFERENTIAL, input({ faconnage: "1", developpe: "250" }));
     expect(r.needs.find((n) => n.needId === "feuilles-bandes")).toBeUndefined();
     expect(order(r, "bobineau-bandes")).toBe(1);
-    expect(need(r, "bobineau-bandes").label).toBe("Bobineau 500 × 31 m, 0,65");
+    expect(need(r, "bobineau-bandes").label).toBe("Bobineau zinc naturel 500 × 31 m, 0,65");
   });
 
   it("sans façonnage connu : une question, pas « à chiffrer » ; le développé n'est demandé que pour les feuilles", () => {
@@ -97,6 +97,6 @@ describe("abergement de cheminée (§7) : un ouvrage compté devient des bandes 
     // Façonné sur place, 7,8 m de zinc (plus de 6 ml) : un bobineau 500 × 17 m (réponse du fondateur, 2026-10-04).
     expect(bobine.needs.find((n) => n.needId === "feuilles-abergement")).toBeUndefined();
     expect(order(bobine, "bobineau-abergement")).toBe(1);
-    expect(need(bobine, "bobineau-abergement").label).toBe("Bobineau 500 × 17 m, 0,65");
+    expect(need(bobine, "bobineau-abergement").label).toBe("Bobineau zinc naturel 500 × 17 m, 0,65");
   });
 });

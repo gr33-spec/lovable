@@ -158,5 +158,19 @@
     "Hygro B : 1 ou 2 entrées d'air au séjour selon la gamme.",
     "Double flux : 1 conduit Ø90 par 30 m³/h (Aldes, Zehnder).",
     "Ratios de chantier : distance groupe ↔ intérieur 5 m, plancher 90 % de la surface, pas 15 / 10 cm, collecteur à 6 m, 2 × 8 m de tube par radiateur, colliers tous les 0,8 m."
-  ]
+  ],
+  "questions_comptoir": {
+    "regle": "§47.8 : seules les questions qu'un vendeur de comptoir du négoce poserait pour chiffrer ; le reste est une hypothèse dite et modifiable. Liste de travail, non activée, à faire relire par un vendeur.",
+    "questions": [
+      "PAC ou split : quelle marque, quelle puissance (kW), mono ou multisplit ?",
+      "Liaisons frigorifiques : quels diamètres (1/4-3/8, 1/4-1/2) et quelle longueur de couronne ?",
+      "VMC : autoréglable, hygro A ou hygro B, simple ou double flux ? combien de sanitaires ?",
+      "Gaines VMC : isolées ou non, Ø80 ou Ø125 ?"
+    ],
+    "jamais_demande": [
+      "mètres de gaine par bouche",
+      "marge sur la liaison"
+    ],
+    "date": "2026-10-04"
+  }
 }

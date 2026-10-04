@@ -2013,3 +2013,98 @@ Avant que le mail parte, l'artisan voit **le document exactement comme le fourni
 9. Un consommable refusé trois fois par le même artisan n'est plus proposé la quatrième fois.
 10. L'aperçu affiché avant l'envoi est identique, ligne pour ligne, au PDF reçu par le fournisseur.
 11. Une ligne modifiée dans l'aperçu est modifiée dans la liste, et une entrée de journal est créée.
+
+## 46. L'écran du quantitatif : une seule liste, trois couleurs
+
+Cette section remplace l'organisation de l'écran décrite en 21 et 41.4 (formulaire de questions, cartes « À régler », page séparée du devis lu). Le principe « un enfant de 10 ans s'en sort » se traduit par un seul écran, où chaque ligne dit elle-même ce que l'artisan doit faire.
+
+### 46.1 Un seul écran : la liste des fournitures
+
+- Chaque ligne porte un point de couleur à gauche.
+  - **Vert** : sûr, rien à faire.
+  - **Orange** : à vérifier. La sous-ligne dit « À vérifier : touchez la ligne ». Un tap ouvre sa question en bas de l'écran (boutons, ou champ court + Valider). La réponse recalcule et la ligne passe au vert. Une question qui dépend d'une autre arrive au tour suivant, sur la même ligne.
+  - **Gris** : « À préciser avec le fournisseur », l'app ne sait pas chiffrer, la ligne part telle quelle (41.3, dernier recours).
+- Une ligne qui attend une réponse porte le nom de ce qu'elle deviendra (« Zinc en bobine ou bacs joint debout »).
+- En haut : « 11 fournitures · 2 à vérifier », puis « tout est prêt ».
+- En bas, un seul gros bouton : « Vérifier les 2 lignes » tant qu'il reste de l'orange (il descend à la première ligne orange et ouvre sa question) ; « Envoyer au fournisseur » quand tout est vert ou gris, qui valide la liste et ouvre l'aperçu (45.9). Les fournisseurs se choisissent en haut de l'aperçu ; sans fournisseur coché, le bouton dit « Choisissez un fournisseur ».
+
+### 46.2 Chaque ligne
+
+- Désignation, quantité en unité de vente, sous-ligne grise facultative (« 13 ml à couvrir », précision, bottes).
+- Crayon pour modifier désignation, quantité, unité, avec le croquis.
+- Glisser vers la gauche met la ligne de côté, « Annuler » affiché 3 secondes ; le même choix existe dans le crayon. Jamais de suppression définitive.
+- « Voir le calcul » reste, en tout petit.
+
+### 46.3 Ordre des groupes
+
+Ouvrage principal (couvertures, voligeage), points singuliers, évacuation (gouttière, descente), autres articles du devis, consommables (avec le bloc « On ajoute ? » du 45.8). Le rang de chaque ouvrage est noté dans le référentiel du métier.
+
+### 46.4 Ce qui n'est pas sur l'écran principal
+
+- Plus de formulaire de questions séparé, plus de cartes « À régler », plus de message « Voici votre quantitatif », plus de page séparée du devis lu ni de « Revenir au quantitatif », plus de statut « matériaux à calculer » une fois le calcul fait.
+- En petit sous la liste : « Voir le devis lu » (corriger la lecture), « Exporter la liste en PDF », la ligne « Hypothèses » repliée (chacune modifiable d'un tap). Cible : les regrouper sous un seul lien « Détails et réglages » si les trois liens encombrent sur téléphone.
+- « Ajouter des informations sur le chantier (facultatif) » et la barre de message restent en bas.
+
+### 46.5 Tests permanents
+
+1. Chantier de Brest sans note : deux lignes orange, bouton « Vérifier les 2 lignes », compteur « 2 à vérifier ».
+2. Après réponse aux deux questions : plus d'orange, bouton « Envoyer au fournisseur », compteur « tout est prêt ».
+3. Une ligne grise n'empêche pas l'envoi.
+4. Glisser une ligne la met dans « Lignes mises de côté », « Annuler » la remet.
+5. Aucun mot « commande » à l'écran (45.4).
+
+## 47. Peaufiner le quantitatif : cinq couches qui se corrigent
+
+Un quantitatif « au top » n'est pas un calcul parfait du premier coup, c'est un calcul qui s'améliore à chaque chantier sans que l'artisan ait à le demander. Cinq couches, de la plus sûre à la plus humaine ; chacune ne fait qu'une chose et laisse la précédente intacte.
+
+### 47.1 Couche 1 : le moteur et les tiroirs (déterministe)
+
+- Le moteur applique les règles du tiroir (DTU, tables fabricant, conditionnements). Aucune IA dans le calcul.
+- Chaque ratio porte un statut : **sourcé** (lien fabricant ou DTU), **validé** (confirmé par des artisans, 47.4) ou **à vérifier**. Le statut suit la ligne jusqu'à l'écran.
+- Tous les tiroirs remplis sont ouverts à tous les comptes. Pas de mode brouillon : la couleur fait le travail.
+
+### 47.2 Couche 2 : la relecture IA (second regard, jamais la main)
+
+- Après le calcul et avant l'affichage, l'IA reçoit le devis lu, la liste calculée, les hypothèses et le référentiel du métier en consigne.
+- Elle renvoie du JSON, rien d'autre : lignes douteuses (raison en une phrase), fournitures manquantes (avec la quantité proposée), incohérences entre lignes (crochets sans ardoises, descentes sans naissances).
+- Une ligne signalée passe en orange avec sa raison ; une fourniture manquante arrive dans « On ajoute ? » (45.8). **L'IA ne change jamais un chiffre.**
+- Trois signalements maximum par chantier. Petit modèle, moins d'un centime par chantier. Chaque signalement est journalisé avec la réponse de l'artisan (confirmé, corrigé, ignoré) pour mesurer son taux de faux positifs ; au-dessus de 50 % d'ignorés sur un type de signalement, ce type est coupé.
+
+### 47.3 Couche 3 : l'artisan, d'un tap (46)
+
+- Une ligne orange dit pourquoi : question ouverte, ratio à vérifier (« Quantité à confirmer : colle 4 kg/m² »), ou signalement IA.
+- « C'est bon » la passe au vert ; un tap sur le chiffre la corrige ; glisser la met de côté.
+- L'envoi au fournisseur attend que tout soit vert ou gris. Pas d'exception.
+
+### 47.4 Couche 4 : le journal et la validation automatique (45.6)
+
+- Chaque confirmation, correction, mise de côté et ajout manuel est enregistré avec métier, département, matériau, règle, version du tiroir, quantité calculée et quantité finale.
+- Un ratio « à vérifier » confirmé tel quel par trois artisans différents passe **validé** et sort vert ensuite.
+- Un ratio corrigé dans le même sens par trois artisans différents (écart > 3 %) remonte dans l'export mensuel avec l'écart moyen ; Greg tranche, le tiroir change de version. Rien ne bouge seul.
+- Un consommable ajouté à la main deux fois devient une suggestion (45.8).
+
+### 47.5 Couche 5 : la réalité (devis réels et retour fournisseur)
+
+- Banc de devis réels : chaque devis anonymisé avec la commande réellement passée devient un cas de test permanent ; un tiroir passe « bêta » à 5 cas dans la tolérance, « validé » à 10.
+- Retour fournisseur : quand le négoce répond au mail, l'artisan peut dire en un tap « commandé tel quel » ou « modifié » ; si modifié, il colle ou photographie le bon de commande, et les écarts entrent au journal comme des corrections.
+- Ces deux sources pèsent plus que tout le reste : une correction venue d'une commande réelle vaut trois confirmations d'écran.
+
+### 47.6 Ce que ça ne doit pas devenir
+
+- Pas d'IA qui écrit une quantité.
+- Pas de ratio qui change sans trace ni sans Greg.
+- Pas plus de trois oranges IA par chantier, et jamais d'orange sans raison lisible.
+- Pas de bridage par métier : la couleur remplace le verrou.
+
+### 47.7 Tests permanents
+
+1. Un ratio « à vérifier » produit une ligne orange avec la mention « Quantité à confirmer » et la règle ; « C'est bon » la passe au vert et crée une entrée de journal.
+2. La relecture IA ne modifie aucune quantité, même si sa réponse en propose une.
+3. Plus de trois signalements IA : seuls les trois premiers s'affichent.
+4. Trois confirmations du même ratio par trois comptes différents le passent « validé » ; deux confirmations par le même compte ne comptent qu'une fois.
+5. Une correction venue d'un bon de commande fournisseur est marquée comme telle dans le journal.
+6. Chantier de Brest : aucune ligne orange IA quand la liste est complète et cohérente (test anti-faux positif).
+
+### 47.8 La règle du comptoir
+
+Toute question posée à l'artisan, par le moteur comme par l'IA, doit être une question que le vendeur de comptoir du négoce lui poserait pour savoir quoi chiffrer : pente, modèle et teinte de tuile, diamètre du conduit, longueur de lame, largeur de bobine, fixes ou coulissantes, bois ou PVC. Elle est formulée avec les mots du comptoir, jamais avec les nôtres. Tout ce que le comptoir ne demanderait pas (zone climatique, entraxe, taux de perte, hauteur de pureau) n'est jamais une question : c'est un défaut appliqué et affiché dans les hypothèses, modifiable d'un tap. Test permanent : pour chaque question du catalogue, un relecteur doit pouvoir répondre « oui, Point.P me le demanderait » ; sinon la question est supprimée.

@@ -105,5 +105,19 @@
     "Fixation des tasseaux sur maçonnerie : cheville et vis par support.",
     "Fixations de tôle acier par m² (≈ 8 à 12).",
     "Pertes par type de bardage (10 %, 12 %, 8 %, 15 %) : pratique à valider par un poseur."
-  ]
+  ],
+  "questions_comptoir": {
+    "regle": "§47.8 : seules les questions qu'un vendeur de comptoir du négoce poserait pour chiffrer ; le reste est une hypothèse dite et modifiable. Liste de travail, non activée, à faire relire par un vendeur.",
+    "questions": [
+      "Bardage : quelle essence ou quel matériau (douglas, mélèze, fibres-ciment, composite) et quel profil ?",
+      "Lame : section et longueur (3 m, 4 m) ? finition brute, saturée, prégrisée ?",
+      "Pose : horizontale ou verticale ? claire-voie ou jointive ?",
+      "Fixation : pointes inox ou clips ?"
+    ],
+    "jamais_demande": [
+      "pertes de coupe",
+      "lames au m²"
+    ],
+    "date": "2026-10-04"
+  }
 }

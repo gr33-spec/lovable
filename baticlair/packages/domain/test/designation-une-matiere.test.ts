@@ -27,7 +27,9 @@ describe("jamais deux matières dans une désignation", () => {
   });
 
   it("une gouttière sans matière prend celle de sa ligne (PVC) : la règle n'efface pas une vraie précision", () => {
-    expect(labels(readQuote([{ ref: "1", designation: "Gouttière demi-ronde PVC sable", quantity: "20", unit: "ml" }])).join(" ")).toMatch(/PVC/);
+    const pvc = readQuote([{ ref: "1", designation: "Gouttière demi-ronde PVC sable", quantity: "20", unit: "ml" }], { "param:developpe_gouttiere": { value: "25", unit: "cm" } });
+    expect(labels(pvc).join(" ")).toMatch(/PVC/);
+    expect(labels(pvc)).toContain("Gouttière PVC sable demi-ronde dév. 25");
   });
 
   it("les « crochets » d'un ouvrage ne prêtent rien à ceux d'un autre : crochets d'ardoise jamais « zinc »", () => {

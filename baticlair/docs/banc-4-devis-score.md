@@ -26,8 +26,8 @@ Référence couverture :
 
 | Devis | Lignes matériaux | A — Compréhension | B — Quantitatif exact | Besoins identifiés | Questions | Inconnus | Erreurs | Lignes envoyées (avant → après regroupement) |
 |---|---|---|---|---|---|---|---|---|
-| D-2026-015 — couverture (référence) | 10 | **90 %** (9) | **60 %** (6) | 9 | 2 | 1 | 0 | 10 → 10 |
-| **Total** | **10** | **90 %** (9) | **60 %** (6) | 9 | 2 | 1 | 0 | 10 → 10 |
+| D-2026-015 — couverture (référence) | 10 | **90 %** (9) | **50 %** (5) | 9 | 3 | 1 | 0 | 10 → 10 |
+| **Total** | **10** | **90 %** (9) | **50 %** (5) | 9 | 3 | 1 | 0 | 10 → 10 |
 
 ## Ce que verrait l'artisan (lecture seule, avant toute réponse)
 
@@ -90,6 +90,7 @@ Chaque devis doit garder au moins ses scores A et B de l'étape précédente, sa
 | Liteau et contre-liteau | 1 | D-2026-015 | Lattage en liteaux 27x40 pour tuiles HP10 (Fourniture & Pose |
 | Tuile | 1 | D-2026-015 | Couverture en tuiles terre cuite HP10 rouge (Fourniture & Po |
 | Accessoire de couverture (faîtière, arêtier, rive, chatière, sortie) | 1 | D-2026-015 | Rives de toit (Fourniture & Pose) - Fourniture et pose de tu |
+| Gouttière | 1 | D-2026-015 | Gouttière PVC de 25 sable (Fourniture & Pose) - Fourniture e |
 | Sortie de toit | 1 | D-2026-015 | Sortie de toit Poujoulat (Fourniture & Pose) - Fourniture et |
 
 ## Erreurs restantes
@@ -119,6 +120,7 @@ Chaque devis doit garder au moins ses scores A et B de l'étape précédente, sa
 
 - Sortie de toit : quel diamètre ?
 - J'ai identifié : Tuiles HP10. C'est bien ce modèle ?
+- Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?
 
 ## Détail
 
@@ -419,7 +421,7 @@ Chaque devis doit garder au moins ses scores A et B de l'étape précédente, sa
 | ligne 4 | Couverture en tuiles terre cuite HP10 rouge (Fourniture & Pose) - Fourniture et  | 120 m² | ouvrage à convertir | matériau (roof_tile), ouvrage | besoin identifié |  |
 | ligne 5 | Rives de toit (Fourniture & Pose) - Fourniture et pose de tuiles de rive pour la | 24 m | ouvrage à convertir | matériau (roof_accessory), ouvrage | besoin identifié |  |
 | ligne 6 | Faîtage (Fourniture & Pose) - Fourniture et pose de faîtières ventilées avec clo | 10 m | ouvrage à convertir | matériau (roof_accessory), ouvrage | quantité certaine |  |
-| ligne 7 | Gouttière PVC de 25 sable (Fourniture & Pose) - Fourniture et pose de gouttières | 20 m | article principal + accessoires | matériau (gutter), ouvrage | quantité certaine |  |
+| ligne 7 | Gouttière PVC de 25 sable (Fourniture & Pose) - Fourniture et pose de gouttières | 20 m | article principal + accessoires | matériau (gutter), ouvrage | — |  |
 | ligne 8 | Descente d'eau pluviale PVC Ø80 avec coudes (Fourniture & Pose) - Fourniture et  | 2 unités | ouvrage à convertir | matériau (downpipe), ouvrage | quantité certaine |  |
 | ligne 9 | Chatières de ventilation (Fourniture & Pose) - Fourniture et pose de tuiles chat | 10 unités | achat direct | matériau (roof_accessory), achat | quantité certaine |  |
 | ligne 10 | Sortie de toit Poujoulat (Fourniture & Pose) - Fourniture et pose d'une sortie d | 1 unité | ouvrage à convertir | matériau (roof_outlet), ouvrage | besoin identifié |  |

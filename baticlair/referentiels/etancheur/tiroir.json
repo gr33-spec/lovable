@@ -53,5 +53,18 @@
     "Résine SEL (Alsan, Sikalastic, Kemper) : consommations.",
     "Végétalisé : drainage, filtre, substrat.",
     "Couvertines et bandes de solin : longueurs ; vis : boîtes."
-  ]
+  ],
+  "questions_comptoir": {
+    "regle": "§47.8 : seules les questions qu'un vendeur de comptoir du négoce poserait pour chiffrer ; le reste est une hypothèse dite et modifiable. Liste de travail, non activée, à faire relire par un vendeur.",
+    "questions": [
+      "Membrane : bitume SBS, PVC ou EPDM ? autoprotégée ou sous protection ?",
+      "Isolant : PIR, laine de roche ou PSE ? épaisseur ?",
+      "Accessoires : EEP, crapaudines, couvertines : quel diamètre, quelle longueur ?"
+    ],
+    "jamais_demande": [
+      "recouvrements",
+      "consommation d'EIF au m²"
+    ],
+    "date": "2026-10-04"
+  }
 }

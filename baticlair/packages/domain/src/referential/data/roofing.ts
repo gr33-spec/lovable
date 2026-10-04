@@ -358,6 +358,8 @@ const DIAMETRE_CROCHET_PARAM: ParamDef = {
     { label: "Courant (1 mm)", value: "1" },
     { label: "Inox 2,7 mm (bord de mer)", value: "2.7" },
   ],
+  // Dans une désignation : « crochets d'ardoise inox standard » ou « inox Ø 2,7 mm ».
+  display: { "1": "standard", "2.7": "Ø 2,7" },
 };
 /** Rampant : jusqu'à 5,5 m par défaut (référentiel du fondateur), partagé par l'ardoise et le joint debout. */
 const RAMPANT_PARAM: ParamDef = {
@@ -427,24 +429,109 @@ const EPAISSEUR_ZINC_PARAM: ParamDef = {
 };
 /** Même clé « faconnage » que le joint debout : une seule réponse, et une seule habitude, pour tout le métal façonné. */
 /**
- * Égout et faîtage d'une couverture à joint debout (§7 : « Bande d'égout + ourlet (dév. 25 à 33 cm) : ml égout × 1,05,
- * bande 2 ou 3 m » ; « Faîtage : ml faîtage × 1,05 »). Le devis les cite souvent à part (« bande zinc d'égout 13 ml ») :
- * on demande plutôt que de compter deux fois (§45.5, retour du fondateur). Pas de défaut.
+ * RÈGLE DU COMPTOIR (§47.8) : une question n'existe que si le vendeur du négoce la poserait pour chiffrer. Les données
+ * ci-dessous changent l'ARTICLE servi au comptoir (teinte du zinc, développé et sortie de la gouttière, crochets) :
+ * lues dans le devis, sinon une hypothèse dite, sinon demandées avec les mots du comptoir.
  */
-const EGOUT_FAITAGE_PARAM: ParamDef = {
-  key: "egout_faitage",
-  label: "Égout et faîtage du zinc",
+/** Aspect du zinc : naturel quand le devis ne dit rien ; « prépatiné » sans teinte → on demande (quartz ou anthra). */
+const ASPECT_ZINC_PARAM: ParamDef = {
+  key: "aspect_zinc",
+  label: "Aspect du zinc",
   unit: "u",
   kind: "site_data",
-  question: "Bandes d'égout et de faîtage du zinc : on les ajoute à la liste ?",
-  hint: "Si le devis les cite déjà sur une autre ligne, réponds « Déjà au devis ».",
+  question: "Zinc prépatiné : Quartz-Zinc (gris) ou Anthra-Zinc (noir) ?",
+  hint: "Le devis dit « prépatiné » sans la teinte : le comptoir sert l'un ou l'autre.",
+  default: { value: "1", source: F, verification: FOUNDER_DOC, version: 1, note: "zinc naturel : le devis ne dit pas prépatiné", unlessText: ["prepatine", "pre patine", "pre-patine"] },
   choices: [
-    { label: "Égout et faîtage", value: "3" },
-    { label: "Faîtage seulement", value: "2" },
-    { label: "Égout seulement", value: "1" },
-    { label: "Déjà au devis", value: "0" },
+    { label: "Zinc naturel", value: "1" },
+    { label: "Quartz-Zinc (prépatiné gris)", value: "2" },
+    { label: "Anthra-Zinc (prépatiné noir)", value: "3" },
   ],
-  display: { "0": "déjà au devis", "1": "égout seulement", "2": "faîtage seulement", "3": "égout et faîtage" },
+  textValues: [
+    { value: "2", keywords: ["quartz", "quartz zinc", "quartz-zinc"] },
+    { value: "3", keywords: ["anthra", "anthra zinc", "anthra-zinc"] },
+    { value: "4", keywords: ["pigmento"] },
+    { value: "1", keywords: ["zinc naturel"] },
+  ],
+  display: { "1": "zinc naturel", "2": "Quartz-Zinc", "3": "Anthra-Zinc", "4": "Pigmento" },
+  onlyFromPrincipal: true,
+};
+/** Développé de la gouttière : le comptoir sert « de 25 », « de 33 »… (dév. 250 / 285 / 333 / 400, §11). */
+const DEVELOPPE_GOUTTIERE_PARAM: ParamDef = {
+  key: "developpe_gouttiere",
+  label: "Développé de la gouttière",
+  unit: "cm",
+  kind: "site_data",
+  question: "Gouttière de 25, de 28, de 33 ou de 40 ?",
+  hint: "Le développé : la largeur de la feuille avant façonnage.",
+  choices: [
+    { label: "De 25", value: "25" },
+    { label: "De 28", value: "28" },
+    { label: "De 33", value: "33" },
+    { label: "De 40", value: "40" },
+  ],
+  textValues: [
+    { value: "25", keywords: ["demi ronde 25", "demi-ronde 25", "nantaise 25", "gouttiere 25", "gouttiere de 25", "dev 25", "dev. 25", "developpe 25", "developpe 250", "dev 250", "de 25"] },
+    { value: "28", keywords: ["demi ronde 28", "demi-ronde 28", "nantaise 28", "gouttiere 28", "gouttiere de 28", "dev 28", "dev. 28", "developpe 28", "developpe 285", "dev 285", "de 28"] },
+    { value: "33", keywords: ["demi ronde 33", "demi-ronde 33", "nantaise 33", "gouttiere 33", "gouttiere de 33", "dev 33", "dev. 33", "developpe 33", "developpe 330", "developpe 333", "dev 333", "dev 330", "de 33"] },
+    { value: "40", keywords: ["demi ronde 40", "demi-ronde 40", "nantaise 40", "gouttiere 40", "gouttiere de 40", "dev 40", "dev. 40", "developpe 40", "developpe 400", "dev 400", "de 40"] },
+  ],
+};
+/** Crochets de gouttière : sur les chevrons, ou vissés en façade (« crochet bandeau ») : deux articles au comptoir. */
+const FIXATION_CROCHET_PARAM: ParamDef = {
+  key: "fixation_crochet",
+  label: "Pose des crochets de gouttière",
+  unit: "u",
+  kind: "site_data",
+  question: "Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?",
+  choices: [
+    { label: "Sur les chevrons", value: "1" },
+    { label: "En façade (bandeau)", value: "2" },
+  ],
+  textValues: [
+    { value: "2", keywords: ["bandeau", "planche de rive", "en facade"] },
+    { value: "1", keywords: ["sur chevron", "sur chevrons"] },
+  ],
+  display: { "1": "sur chevron", "2": "bandeau" },
+};
+/** Diamètre des descentes : Ø 80 jusqu'à ≈ 70 m² de toit par descente, Ø 100 jusqu'à ≈ 130 m² (§11). */
+const DIAMETRE_DESCENTE_PARAM: ParamDef = {
+  key: "diametre_descente",
+  label: "Diamètre des descentes",
+  unit: "mm",
+  kind: "site_data",
+  question: "Descentes en Ø 80 ou en Ø 100 ?",
+  hint: "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 130 m².",
+  choices: [
+    { label: "Ø 80", value: "80" },
+    { label: "Ø 100", value: "100" },
+    { label: "Ø 120", value: "120" },
+  ],
+  textValues: [
+    { value: "80", keywords: ["ø80", "ø 80", "diametre 80", "descente 80", "descente de 80", "descentes de 80"] },
+    { value: "100", keywords: ["ø100", "ø 100", "diametre 100", "descente 100", "descente de 100", "descentes de 100"] },
+    { value: "120", keywords: ["ø120", "ø 120", "diametre 120", "descente 120", "descente de 120"] },
+  ],
+};
+/**
+ * Qualité de l'ardoise naturelle : le comptoir ne chiffre pas « ardoise 30×22 » sans elle (le prix va du simple au
+ * double). Habitude d'entreprise : demandée une fois, retenue ensuite (§41, habitudes).
+ */
+const QUALITE_ARDOISE_PARAM: ParamDef = {
+  key: "qualite_ardoise",
+  label: "Qualité de l'ardoise",
+  unit: "u",
+  kind: "artisan_preference",
+  question: "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+  choices: [
+    { label: "Espagne 1er choix", value: "1" },
+    { label: "Ardoise NF (type Cupa)", value: "2" },
+  ],
+  textValues: [
+    { value: "2", keywords: ["cupa", "nf", "marque nf"] },
+    { value: "1", keywords: ["espagne", "1er choix", "premier choix"] },
+  ],
+  display: { "1": "Espagne 1er choix", "2": "NF (type Cupa)" },
 };
 const FACONNAGE_BANDES_PARAM: ParamDef = {
   ...FACONNAGE_PARAM,
@@ -911,7 +998,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       id: "soprema-sop-ecran-hpv-r2-150x50",
       family: "underlay",
       label: "SOP'ÉCRAN HPV R2, rouleau 1,50 × 50 m (Soprema)",
-      shortLabel: "Écran HPV",
+      shortLabel: "Écran HPV Soprema R2, rouleau 1,50 × 50 m",
       manufacturer: "Soprema",
       // Uniquement des appellations de MARQUE : « écran HPV » ou « membrane respirante » désignent la famille,
       // pas ce produit (le devis ne dit pas quel rouleau, donc BatiClair demande).
@@ -1057,7 +1144,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     }),
     generic("crochet-faitiere-standard", "ridge_fixing", "Crochet de faîtière à sec (modèle à préciser)", "Crochets de faîtière"),
     generic("about-faitage-standard", "ridge_end", "About de faîtage (modèle à préciser)", "Abouts de faîtage"),
-    generic("ecran-hpv-standard", "underlay", "Écran de sous-toiture HPV, rouleau 1,5 × 50 m (modèle à préciser)", "Écran HPV", {
+    generic("ecran-hpv-standard", "underlay", "Écran de sous-toiture HPV, rouleau 1,5 × 50 m (modèle à préciser)", "Écran HPV, rouleau 1,50 × 50 m", {
       attributes: {
         largeur_rouleau: spec("1.5", "m", F, FOUNDER_DOC),
         longueur_rouleau: spec("50", "m", F, FOUNDER_DOC),
@@ -1105,7 +1192,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     // Retour du fondateur (2026-10-04) : une bobine de zinc se commande au MÈTRE LINÉAIRE, jamais au kg ; la largeur
     // (500 mm en bord de mer, 650 mm ailleurs) et l'épaisseur partent avec la ligne, dans « Le chantier en bref ».
     ...(["650", "500"] as const).map((w) =>
-      generic(w === "650" ? "bobine-zinc-standard" : "bobine-zinc-500", "zinc_coil", `Zinc naturel en bobine largeur ${w} mm, au mètre linéaire (épaisseur du chantier)`, `Zinc naturel en bobine ${w} mm`, {
+      generic(w === "650" ? "bobine-zinc-standard" : "bobine-zinc-500", "zinc_coil", `Zinc en bobine largeur ${w} mm, au mètre linéaire (aspect et épaisseur du chantier)`, `Zinc en bobine ${w} mm`, {
         sellingUnits: [{ id: "ml", label: { one: "ml", many: "ml" }, contains: packaging("1", "m", "definition", { status: "verified", verifiedAt: "2026-10-04", verifiedBy: "BatiClair (définition)" }), primary: true }],
       }),
     ),
@@ -1338,6 +1425,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         PENTE_PARAM,
         REGION_ARDOISE_PARAM,
         DIAMETRE_CROCHET_PARAM,
+        QUALITE_ARDOISE_PARAM,
         {
           key: "longueur_rampant",
           label: "Longueur du rampant",
@@ -1372,6 +1460,8 @@ export const ROOFING_REFERENTIAL: Referential = {
         supplement_rampant: condition("10", "mm", F, FOUNDER_DOC),
         supplement_nul: condition("0", "mm", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }),
         pas_recouvrement: condition("5", "mm", F, FOUNDER_DOC, "Recouvrement arrondi aux 5 mm supérieurs."),
+        marge_crochet: condition("10", "mm", "cupa-pureau-ardoises-m2", FOUNDER_DOC, "« Longueur de crochet = R + 1 cm environ » (Cupa, §34)."),
+        pas_crochet: condition("10", "mm", "cupa-pureau-ardoises-m2", FOUNDER_DOC, "Crochets vendus de centimètre en centimètre (R 100 → 11 cm, R 90 → 10)."),
       },
       points: { ardoises_m2: CUPA_ARDOISES_M2 },
       tables: {
@@ -1408,6 +1498,15 @@ export const ROOFING_REFERENTIAL: Referential = {
           version: 1,
         },
         {
+          key: "longueur_crochet",
+          label: "Longueur de crochet",
+          unit: "mm",
+          formula: "arrondi_sup((recouvrement_pose + regle.marge_crochet) / regle.pas_crochet) * regle.pas_crochet",
+          source: "cupa-pureau-ardoises-m2",
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
           key: "recouvrement",
           label: "Recouvrement",
           unit: "mm",
@@ -1427,6 +1526,9 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Hors ardoises de rive, doublis à l'égout, coupes en noue et en arêtier (la perte de 5 % couvre casse et coupes de rive d'un pan simple).",
+          // Le comptoir ne chiffre pas une ardoise sans sa qualité (§47.8) ; le format suit l'ardoise du devis.
+          designation: "Ardoises naturelles {qualite_ardoise} {ardoise.longueur|cm#}×{ardoise.largeur|cm#}",
+          precisionRequires: ["qualite_ardoise"],
           source: "cupa-pureau-ardoises-m2",
           verification: FOUNDER_DOC,
           version: 1,
@@ -1439,6 +1541,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Un crochet par ardoise commandée, +2 % (référentiel du fondateur) : jamais moins de crochets que d'ardoises.",
+          // Le comptoir sert un crochet à sa longueur (Cupa, §34 : recouvrement + 1 cm) et à son diamètre.
+          designation: "Crochets d'ardoise inox {diametre_crochet}, longueur {longueur_crochet|cm}",
           source: "baticlair-geometrie-ardoise",
           verification: FOUNDER_VALIDATED,
           version: 1,
@@ -1548,7 +1652,12 @@ export const ROOFING_REFERENTIAL: Referential = {
       trade: "roofing",
       label: "Faîtage en bande zinc",
       triggers: ["zinc_ridge"],
-      params: [{ key: "longueur_faitage", label: "Longueur du faîtage", unit: "m", kind: "site_data", question: "Longueur du faîtage ?", fromLineQuantity: true, textLabels: ["faitage"] }],
+      params: [
+        { key: "longueur_faitage", label: "Longueur du faîtage", unit: "m", kind: "site_data", question: "Longueur du faîtage ?", fromLineQuantity: true, textLabels: ["faitage"] },
+        DEVELOPPE_PARAM,
+        EPAISSEUR_ZINC_PARAM,
+        ASPECT_ZINC_PARAM,
+      ],
       slots: [
         { key: "bande", family: "zinc_ridge", label: "Faîtage zinc (bande)", usual: { text: "Bande zinc en longueurs de 3 m (développé 25 à 33 cm).", source: F, productId: "bande-faitage-zinc-standard" } },
         { key: "patte", family: "zinc_clip", label: "Pattes de fixation", keywords: ["patte"], usual: { text: "Trois pattes par mètre.", source: F, productId: "patte-zinc-standard" } },
@@ -1563,6 +1672,9 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: true,
           exclusions: "Recouvrements des longueurs couverts par la perte de 5 %.",
           precision: "{longueur_faitage|ml} de faîtage à couvrir",
+          // Le comptoir sert une bande à un développé (§7 : « dév. 25 à 33 cm ») : il ne le devine pas.
+          designation: "Faîtage {aspect_zinc} {epaisseur_zinc} mm, bande dév. {developpe|cm}",
+          precisionRequires: ["developpe", "aspect_zinc"],
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
@@ -1589,6 +1701,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         DEVELOPPE_PARAM,
         FACONNAGE_BANDES_PARAM,
         EPAISSEUR_ZINC_PARAM,
+        ASPECT_ZINC_PARAM,
       ],
       slots: [
         { key: "bande", family: "zinc_strip", label: "Bandes zinc façonnées", usual: { text: "Bandes façonnées par le fournisseur, longueurs de 2 m (§36.4).", source: F, productId: "bande-zinc-faconnee-standard" } },
@@ -1613,8 +1726,9 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: true,
           exclusions: "Longueurs de 2 m, recouvrement 10 cm entre éléments ; fixations à part.",
           precision: "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
+          designation: "Bandes façonnées {aspect_zinc} {epaisseur_zinc} mm",
           // Une bande commandée façonnée se fabrique à son développé : le fournisseur ne peut pas le deviner.
-          precisionRequires: ["developpe"],
+          precisionRequires: ["developpe", "aspect_zinc"],
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
@@ -1630,6 +1744,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           exclusions: "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2) ; chutes non réemployées.",
           // §45.5 : une feuille dont on ne sait pas à quoi elle sert n'a rien à faire dans la liste.
           precision: "pour façonner {longueur_bande|ml} de bande, développé {developpe|cm}",
+          designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
+          precisionRequires: ["aspect_zinc"],
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
@@ -1642,7 +1758,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "La plus petite largeur qui contient le développé, la plus courte longueur qui couvre la bande (marge comprise).",
-          designation: "Bobineau {largeur_bobineau|mm#} × {longueur_bobineau|m}, {epaisseur_zinc}",
+          designation: "Bobineau {aspect_zinc} {largeur_bobineau|mm#} × {longueur_bobineau|m}, {epaisseur_zinc}",
+          precisionRequires: ["aspect_zinc"],
           // Le développé ne change pas le bobineau tant qu'il tient dans 500 mm : il n'est pas demandé pour lui.
           precision: "pour façonner {longueur_bande|ml} de bande",
           source: FR_REPLY,
@@ -1699,6 +1816,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         },
         FACONNAGE_BANDES_PARAM,
         EPAISSEUR_ZINC_PARAM,
+        ASPECT_ZINC_PARAM,
       ],
       slots: [
         { key: "abergement", family: "chimney_flashing", label: "Abergement de cheminée", measureOnly: true },
@@ -1727,6 +1845,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Quatre côtés, développé 33 cm ; longueurs de 2 m, recouvrement 10 cm.",
+          designation: "Bandes façonnées {aspect_zinc} {epaisseur_zinc} mm, dév. 33 cm",
+          precisionRequires: ["aspect_zinc"],
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
@@ -1740,6 +1860,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: true,
           exclusions: "Zinc plat, développé 33 cm × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",
           precision: "pour façonner l'abergement de cheminée, développé 33 cm",
+          designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
+          precisionRequires: ["aspect_zinc"],
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
@@ -1752,7 +1874,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Développé 33 cm ; la plus courte longueur de bobineau qui couvre le zinc de l'abergement.",
-          designation: "Bobineau {largeur_bobineau|mm#} × {longueur_bobineau|m}, {epaisseur_zinc}",
+          designation: "Bobineau {aspect_zinc} {largeur_bobineau|mm#} × {longueur_bobineau|m}, {epaisseur_zinc}",
+          precisionRequires: ["aspect_zinc"],
           precision: "pour façonner {ml_zinc|ml} d'abergement, développé 33 cm",
           source: FR_REPLY,
           verification: FOUNDER_REPLY,
@@ -1915,11 +2038,11 @@ export const ROOFING_REFERENTIAL: Referential = {
       section: "principal",
       label: "Couverture zinc à joint debout",
       triggers: ["standing_seam"],
-      params: [SURFACE_PARAM, FACONNAGE_PARAM, EPAISSEUR_ZINC_PARAM, RAMPANT_PARAM, BACS_LONGS_PARAM, ZONE_PARAM, EGOUT_FAITAGE_PARAM],
+      params: [SURFACE_PARAM, FACONNAGE_PARAM, EPAISSEUR_ZINC_PARAM, ASPECT_ZINC_PARAM, RAMPANT_PARAM, BACS_LONGS_PARAM, ZONE_PARAM],
       slots: [
         { key: "couverture", family: "standing_seam", label: "Couverture zinc joint debout", measureOnly: true },
-        { key: "bobine", family: "zinc_coil", label: "Zinc en bobine", keywords: ["bobine"], usual: { text: "Zinc naturel en bobine largeur 650 mm, commandé au mètre linéaire.", source: "vmzinc-joint-debout", productId: "bobine-zinc-standard" } },
-        { key: "bobine_littoral", family: "zinc_coil", label: "Zinc en bobine (bord de mer)", keywords: ["bord de mer", "littoral"], usual: { text: "Bord de mer : zinc naturel en bobine largeur 500 mm, commandé au mètre linéaire (VMZINC).", source: "vmzinc-joint-debout", productId: "bobine-zinc-500" } },
+        { key: "bobine", family: "zinc_coil", label: "Zinc en bobine", keywords: ["bobine"], usual: { text: "Zinc en bobine largeur 650 mm (naturel ou prépatiné selon le devis), commandé au mètre linéaire.", source: "vmzinc-joint-debout", productId: "bobine-zinc-standard" } },
+        { key: "bobine_littoral", family: "zinc_coil", label: "Zinc en bobine (bord de mer)", keywords: ["bord de mer", "littoral"], usual: { text: "Bord de mer : zinc en bobine largeur 500 mm, commandé au mètre linéaire (VMZINC).", source: "vmzinc-joint-debout", productId: "bobine-zinc-500" } },
         { key: "bac", family: "zinc_panel", label: "Bacs joint debout", usual: { text: "Bacs façonnés par le fournisseur à la longueur du rampant.", source: F, productId: "bac-joint-debout-standard" } },
         // §45.5 : pattes coulissantes, pattes fixes et pointes sont trois lignes (le fournisseur les sert séparément).
         { key: "patte_coulissante", family: "seam_clip_sliding", label: "Pattes coulissantes", keywords: ["coulissante", "coulissantes"], usual: { text: "Pattes coulissantes, selon le rampant (VMZINC 36.2).", source: "vmzinc-joint-debout", productId: "patte-coulissante-joint-debout" } },
@@ -2010,6 +2133,9 @@ export const ROOFING_REFERENTIAL: Referential = {
           exclusions: "Une longueur de rampant par bac plus 15 cm de surlongueur (10 en égout, 5 en faîtage) ; hors bandes d'égout, de rive, de faîtage et de noue, comptées à part.",
           // Ce qui se calcule en longueurs dit d'où vient la longueur (retour du fondateur, 2026-10-04).
           precision: "{nb_bacs} bacs × {longueur_bac|m}",
+          // Comme au comptoir : « Bobine Quartz-Zinc 0,65 mm, largeur 500 mm » (aspect lu au devis, épaisseur, largeur).
+          designation: "Bobine {aspect_zinc} {epaisseur_zinc} mm, largeur {largeur_bobine|mm}",
+          precisionRequires: ["aspect_zinc"],
           source: "vmzinc-joint-debout",
           verification: FOUNDER_DOC,
           version: 1,
@@ -2028,6 +2154,9 @@ export const ROOFING_REFERENTIAL: Referential = {
           exclusions: "Une longueur de rampant par bac plus 15 cm de surlongueur (10 en égout, 5 en faîtage) ; hors bandes d'égout, de rive, de faîtage et de noue, comptées à part.",
           // Ce qui se calcule en longueurs dit d'où vient la longueur (retour du fondateur, 2026-10-04).
           precision: "{nb_bacs} bacs × {longueur_bac|m}",
+          // Comme au comptoir : « Bobine Quartz-Zinc 0,65 mm, largeur 500 mm » (aspect lu au devis, épaisseur, largeur).
+          designation: "Bobine {aspect_zinc} {epaisseur_zinc} mm, largeur {largeur_bobine|mm}",
+          precisionRequires: ["aspect_zinc"],
           source: "vmzinc-joint-debout",
           verification: FOUNDER_DOC,
           version: 1,
@@ -2041,6 +2170,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Un pan rectangulaire ; chaque bac fait la longueur du rampant, ou 10 m au plus avec jonction transversale au-delà. Hors bandes d'égout, de rive, de faîtage et de noue.",
+          designation: "Bacs joint debout {aspect_zinc} {epaisseur_zinc} mm",
+          precisionRequires: ["aspect_zinc"],
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
@@ -2084,11 +2215,13 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "egout-joint-debout",
           slot: "egout",
-          // 1 = égout seulement, 3 = égout et faîtage (0 = déjà au devis, 2 = faîtage seulement).
-          when: "si(egout_faitage < 0.5, 0, si(egout_faitage < 1.5, 1, si(egout_faitage > 2.5, 1, 0)))",
+          // Règle du comptoir (§47.8) : « on les ajoute ? » n'est pas une question de vendeur. Proposé dans
+          // « On ajoute ? » (§45.8), sauf si le devis cite déjà l'égout.
           formula: "arrondi_sup(largeur_pan * regle.coef_egout_faitage / regle.longueur_utile_bande)",
           unit: "u",
-          core: true,
+          core: false,
+          offer: { unlessQuoteSays: ["egout"] },
+          designation: "Bandes d'égout {aspect_zinc} {epaisseur_zinc} mm, dév. 33 cm",
           exclusions: "Égout sur toute la largeur du pan ; longueurs de 2 m, recouvrement 10 cm.",
           precision: "{largeur_pan|ml} d'égout à couvrir",
           source: F,
@@ -2098,11 +2231,13 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "faitage-joint-debout",
           slot: "faitage",
-          // 2 = faîtage seulement, 3 = égout et faîtage.
-          when: "si(egout_faitage >= 2, 1, 0)",
+          // Comme l'égout : proposé dans « On ajoute ? », sauf si le devis cite déjà le faîtage. Développé 33 cm, le
+          // haut de la fourchette du §7 (« dév. 25 à 33 cm »), comme la bande d'égout.
+          core: false,
+          offer: { unlessQuoteSays: ["faitage"] },
+          designation: "Faîtage {aspect_zinc} {epaisseur_zinc} mm, bande dév. 33 cm",
           formula: "largeur_pan * regle.coef_egout_faitage",
           unit: "ml",
-          core: true,
           exclusions: "Un faîtage de la largeur du pan (monopente, ou un seul pan) ; deux pans qui se rejoignent n'en font qu'un : corrige la quantité d'un tap.",
           precision: "{largeur_pan|ml} de faîtage à couvrir",
           source: F,
@@ -2143,13 +2278,23 @@ export const ROOFING_REFERENTIAL: Referential = {
             { label: "3", value: "3" },
             { label: "4", value: "4" },
           ],
+          // « avec 2 descentes Ø80 » : le nombre écrit avant le mot.
+          textValues: [
+            { value: "1", keywords: ["1 descente", "une descente"] },
+            { value: "2", keywords: ["2 descentes", "deux descentes"] },
+            { value: "3", keywords: ["3 descentes", "trois descentes"] },
+            { value: "4", keywords: ["4 descentes", "quatre descentes"] },
+          ],
         },
         ZONE_PARAM,
+        DEVELOPPE_GOUTTIERE_PARAM,
+        FIXATION_CROCHET_PARAM,
+        DIAMETRE_DESCENTE_PARAM,
       ],
       slots: [
         { key: "profil", family: "gutter", label: "Gouttière", usual: { text: "Longueurs de 4 m ; le profil (demi-ronde de 25, de 33…) suit le devis.", source: F, productId: "gouttiere-standard-4m" } },
         { key: "crochet", family: "gutter_hook", label: "Crochets", keywords: ["crochet"], usual: { text: "Un crochet tous les 50 cm (40 cm en bord de mer).", source: F, productId: "crochet-gouttiere-standard" } },
-        { key: "naissance", family: "gutter_outlet", label: "Naissances", usual: { text: "Une naissance par descente.", source: F, productId: "naissance-standard" } },
+        { key: "naissance", family: "gutter_outlet", label: "Naissances", charsFrom: "profil", usual: { text: "Une naissance par descente.", source: F, productId: "naissance-standard" } },
       ],
       constants: {
         espacement_crochet: condition("0.5", "m", F, FOUNDER_DOC),
@@ -2164,6 +2309,9 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "ml",
           core: true,
           exclusions: "Hors recouvrements ou jonctions propres au système.",
+          // Comme au comptoir : « Gouttière zinc demi-ronde dév. 33 » ; le développé, il ne le devine pas.
+          designation: "Gouttière {devis} dév. {developpe_gouttiere|cm#}",
+          precisionRequires: ["developpe_gouttiere"],
           source: "baticlair-pratique-accessoires",
           verification: FOUNDER_VALIDATED,
           version: 1,
@@ -2175,6 +2323,9 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Hors le crochet supplémentaire en bout de chaque ligne de gouttière.",
+          // Deux articles au comptoir : crochet sur chevron ou crochet bandeau, au développé de la gouttière.
+          designation: "Crochets de gouttière {fixation_crochet} dév. {developpe_gouttiere|cm#}",
+          precisionRequires: ["fixation_crochet", "developpe_gouttiere"],
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
@@ -2186,6 +2337,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Une naissance par descente.",
+          designation: "Naissances {devis} dév. {developpe_gouttiere|cm#} Ø{diametre_descente|mm#}",
+          precisionRequires: ["developpe_gouttiere", "diametre_descente"],
           source: "baticlair-pratique-accessoires",
           verification: FOUNDER_VALIDATED,
           version: 1,
@@ -2200,6 +2353,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       triggers: ["downpipe"],
       params: [
         { key: "nb_descentes", label: "Nombre de descentes", unit: "u", kind: "site_data", question: "Combien de descentes ?", fromLineQuantity: true },
+        DIAMETRE_DESCENTE_PARAM,
         { key: "hauteur_descente", label: "Hauteur d'une descente", unit: "m", kind: "site_data", question: "Hauteur d'une descente ?", textLabels: ["hauteur"] },
         {
           key: "coudes_par_descente",
@@ -2217,7 +2371,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       ],
       slots: [
         { key: "tube", family: "downpipe", label: "Tubes de descente", usual: { text: "Le diamètre et la matière suivent le devis.", source: F, productId: "tube-descente-standard" } },
-        { key: "coude", family: "downpipe_elbow", label: "Coudes", usual: { text: "Coudes du même système que la descente.", source: F, productId: "coude-descente-standard" } },
+        { key: "coude", family: "downpipe_elbow", label: "Coudes", charsFrom: "tube", usual: { text: "Coudes du même système que la descente.", source: F, productId: "coude-descente-standard" } },
         { key: "collier", family: "downpipe_clamp", label: "Colliers", usual: { text: "Un collier tous les 1,8 m, plus un.", source: F, productId: "collier-descente-standard" } },
       ],
       constants: {
@@ -2230,6 +2384,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           formula: "nb_descentes * hauteur_descente",
           unit: "ml",
           precision: "{nb_descentes} descentes × {hauteur_descente|m}",
+          designation: "Tubes de descente {devis} Ø{diametre_descente|mm#}",
+          precisionRequires: ["diametre_descente"],
           core: true,
           exclusions: "Hauteur du devis, sans déduire les coudes ni ajouter de dauphin.",
           source: "baticlair-pratique-accessoires",
@@ -2243,6 +2399,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Hors dauphin ou bague de pied.",
+          designation: "Coudes de descente {devis} Ø{diametre_descente|mm#}",
+          precisionRequires: ["diametre_descente"],
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
@@ -2254,6 +2412,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Un collier tous les 1,8 m plus un par descente.",
+          designation: "Colliers de descente Ø{diametre_descente|mm#}",
+          precisionRequires: ["diametre_descente"],
           source: F,
           verification: FOUNDER_DOC,
           version: 1,

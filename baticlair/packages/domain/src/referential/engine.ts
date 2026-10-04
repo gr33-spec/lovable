@@ -3,6 +3,10 @@ import { evaluateInterval, FormulaError, formulaVariables, parseFormula, type In
 import type { Fact, LookupTable, NeedRule, ParamDef, PointTable, Product, Referential, SellingUnit, Source, WorkItemType } from "./model.js";
 import { parseRefUnit, sameDim, isAngleUnit, percentSlopeToDegrees } from "./units.js";
 
+/** Place des caractéristiques du devis dans une désignation calculée (« Gouttière {devis} dév. 33 »). */
+export const DEVIS_MARK = "\u241F";
+export const withoutDevisMark = (label: string): string => label.replace(DEVIS_MARK, "").replace(/\s{2,}/g, " ").trim();
+
 /**
  * Moteur de quantitatif : ouvrage du devis → besoins matériaux → lignes
  * d'achat. Tout nombre vient d'ici, calculé à partir de données sourcées et
@@ -81,6 +85,8 @@ export interface WorkItemInput {
   preferences?: CompanyPreferences;
   /** Emplacements où l'artisan a dit « aucun de ces modèles » : ni produit lu, ni produit par défaut. */
   declined?: string[];
+  /** Données dont l'hypothèse ne vaut pas : le devis les nomme sans les préciser (« zinc prépatiné »), on demande. */
+  askInstead?: string[];
 }
 
 export interface EngineOptions {
@@ -165,6 +171,10 @@ export interface NeedResult {
   slotLabel: string;
   /** « explicit » : cité par le devis ; « deduced » : cœur de l'ouvrage ; « suggested » : à confirmer. */
   origin: "explicit" | "deduced" | "suggested";
+  /** Proposé dans « On ajoute ? » (§45.8) quand il n'est que suggéré. */
+  offer?: NeedRule["offer"];
+  /** La désignation avec la place (DEVIS_MARK) des caractéristiques lues au devis. */
+  labelWithQuote?: string;
   status: "calculated" | "question" | "unknown";
   /** Besoin exact, marge comprise, dans l'unité du besoin (arrondi au centième). */
   quantity?: { value: string; unit: string };
@@ -290,7 +300,8 @@ export function computeWorkItem(ref: Referential, input: WorkItemInput, options:
   if (!work) throw new Error(`Ouvrage inconnu du référentiel : ${input.workItemId}`);
   const sources = new Map(ref.sources.map((s) => [s.id, s]));
   // Un besoin qui exige une donnée que rien ne donne (ni devis, ni réponse, ni hypothèse) n'existe pas pour ce chantier.
-  const known = (key: string) => input.params[key] !== undefined || work.params.find((p) => p.key === key)?.default !== undefined;
+  const defaultOf = (def: ParamDef | undefined) => (def && !input.askInstead?.includes(def.key) ? def.default : undefined);
+  const known = (key: string) => input.params[key] !== undefined || defaultOf(work.params.find((p) => p.key === key)) !== undefined;
   // Dans l'ordre : un besoin peut partir de la commande d'un besoin précédent (« commande.ardoises »).
   const done = new Map<string, Earlier>();
   // Condition d'existence d'un besoin (« faconnage < 2 ») : jugée sur les données connues (réponse, devis,
@@ -312,7 +323,7 @@ export function computeWorkItem(ref: Referential, input: WorkItemInput, options:
       if (!def) throw new FormulaError(`Condition du besoin ${rule.id} : variable inconnue ${name}`);
       const factor = parseRefUnit(def.unit);
       const given = input.params[name];
-      const raw = given ? given.value : def.default?.value;
+      const raw = given ? given.value : defaultOf(def)?.value;
       // Donnée inconnue : toutes les valeurs restent possibles ; le besoin existe si la condition PEUT être vraie
       // (il posera alors sa question), et n'existe pas si elle est fausse quoi qu'il arrive.
       if (raw === undefined) {
@@ -438,6 +449,7 @@ function computeNeed(
     label: product ? (resolved?.choice.origin === "declined" ? `${product.shortLabel} (modèle à préciser)` : product.shortLabel) : slot.label,
     slotLabel: slot.label,
     origin,
+    ...(rule.offer ? { offer: rule.offer } : {}),
     ...(resolved ? { productOrigin: resolved.choice.origin } : {}),
     ...(preferenceIgnored ? { preferenceIgnored } : {}),
     formula: rule.formula,
@@ -620,7 +632,7 @@ function computeNeed(
       const expected = parseRefUnit(def.unit);
       const bounds = def.range ? { min: valueOf(def.range.min), max: valueOf(def.range.max) } : null;
       const given = input.params[name];
-      if (!given && def.default) return useDefault(def, def.default, expected);
+      if (!given && def.default && !input.askInstead?.includes(name)) return useDefault(def, def.default, expected);
       if (!given) {
         if (!missing.some((m) => m.key === name)) {
           missing.push({
@@ -901,10 +913,6 @@ function computeNeed(
     const purchaseUnavailable = converted && "pending" in converted ? converted.pending : undefined;
     const purchaseMissing = converted && "pending" in converted && converted.missing ? { ...converted.missing, workItemId: work.id, slot: slot.key, family: slot.family } : undefined;
     const purchase = converted && "pending" in converted ? null : converted;
-    // Une donnée qui change l'ARTICLE (le diamètre) sans changer la quantité : demandée quand même.
-    for (const name of rule.precisionRequires ?? []) valueOf(name);
-    const required = missing.find((m) => rule.precisionRequires?.includes(m.key));
-    if (required) throw new Stop({ status: "question", question: required.question });
     if (!exact) {
       const decided = purchase && purchase.orderLo.equals(purchase.orderHi) && purchase.orderLo.isFinite();
       if (!decided) {
@@ -918,6 +926,12 @@ function computeNeed(
       // La donnée manque, mais aucune de ses valeurs possibles ne change la commande : pas de question.
       for (const m of missing) trace.push({ label: m.label, value: "inconnue", unit: "", from: "Sans effet sur la commande", verified: true });
     }
+    // Une donnée qui change l'ARTICLE (le diamètre, le développé) sans changer la quantité : demandée quand même,
+    // après celles qui changent la quantité (les questions qu'elle cache se découvrent en rejouant ses réponses).
+    for (const name of rule.precisionRequires ?? []) valueOf(name);
+    const required = missing.find((m) => rule.precisionRequires?.includes(m.key));
+    // Sans produit, pas d'article à préciser : le produit à identifier passe d'abord (enrichissement progressif).
+    if (required && product) throw new Stop({ status: "question", question: required.question });
     // Précision au comptoir (§45.3) : « {longueur_bande|m} » s'écrit avec la valeur du chantier ; une valeur
     // inconnue ou en fourchette retire la précision plutôt que d'écrire un chiffre douteux. « {x|mm#} » : le nombre
     // seul, dans cette unité (« bobineau 500 × 17 m »).
@@ -926,6 +940,8 @@ function computeNeed(
       const missingLen = missing.length;
       try {
         return template.replace(/\{([\w.]+)(?:\|([^}]+))?\}/g, (_, name: string, unitSpec?: string) => {
+          // « {devis} » : la place des caractéristiques lues au devis (« zinc demi-ronde »), remplie à la liste d'achats.
+          if (name === "devis") return DEVIS_MARK;
           const v = valueOf(name);
           if (!isPoint(v) || !v.lo.isFinite()) throw new Error("précision incalculable");
           const bare = unitSpec?.endsWith("#") ?? false;
@@ -949,9 +965,11 @@ function computeNeed(
     // Une désignation calculée (« Bobineau 500 × 17 m, 0,65 ») remplace le nom du produit générique.
     // Elle s'écrit dès que SES données sont connues (le développé inconnu ne change pas un bobineau de 500 mm).
     const designation = rule.designation ? render(rule.designation) : undefined;
+    const withQuote = designation?.includes(DEVIS_MARK) ? designation : undefined;
     return {
       ...base,
-      ...(designation !== undefined ? { label: designation } : {}),
+      ...(designation !== undefined ? { label: withoutDevisMark(designation) } : {}),
+      ...(withQuote ? { labelWithQuote: withQuote } : {}),
       ...(precision !== undefined ? { precision } : {}),
       status: "calculated",
       ...(exact

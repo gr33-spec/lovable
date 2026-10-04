@@ -251,10 +251,13 @@ describe("cas de référence D-2026-015 : chantier complet avec ouvrages compos�
     { key: "nb_descentes", value: "2", unit: "u", evidence: "Devis, ligne 8 (2 ensembles)", origin: "devis" },
     { key: "hauteur_descente", value: "4", unit: "m", evidence: "Devis, ligne 8", origin: "devis" },
     // « 2 jeux de coudes » n'est PAS un nombre de coudes : aucun fait « coudes_par_descente ».
+    // Ce que le comptoir demande (§47.8), lu au devis : « gouttière de 25 », « descente Ø80 ».
+    { key: "developpe_gouttiere", value: "25", unit: "cm", evidence: "Devis, ligne 7 (« de 25 »)", origin: "devis" },
+    { key: "diametre_descente", value: "80", unit: "mm", evidence: "Devis, ligne 8 (« Ø80 »)", origin: "devis" },
   ];
   const work = (id: string) => ROOFING_REFERENTIAL.workItems.find((w) => w.id === id)!;
   const p = (id: string) => paramsFromContext({ facts }, work(id)).params;
-  type Answers = { tuileOk?: boolean; pureau?: string; faitiere?: string; ecran?: string };
+  type Answers = { tuileOk?: boolean; pureau?: string; faitiere?: string; ecran?: string; crochets?: string };
   const inputs = (a: Answers = {}) => [
     {
       workItemId: "couverture-tuiles-emboitement",
@@ -273,7 +276,12 @@ describe("cas de référence D-2026-015 : chantier complet avec ouvrages compos�
       products: a.faitiere ? { faitiere: { productId: a.faitiere, origin: "artisan" as const } } : {},
       mentioned: ["faitiere", "closoir", "fixation_faitiere"],
     },
-    { workItemId: "gouttiere", params: p("gouttiere"), products: {}, mentioned: ["profil", "crochet", "naissance"] },
+    {
+      workItemId: "gouttiere",
+      params: { ...p("gouttiere"), ...(a.crochets ? { fixation_crochet: { value: a.crochets, unit: "u", origin: "artisan" as const } } : {}) },
+      products: {},
+      mentioned: ["profil", "crochet", "naissance"],
+    },
     { workItemId: "descente", params: p("descente"), products: {}, mentioned: ["tube", "coude", "collier"] },
   ];
   const all = (r: ReturnType<typeof computeChantier>) => r.workItems.flatMap((w) => w.needs);
@@ -283,20 +291,20 @@ describe("cas de référence D-2026-015 : chantier complet avec ouvrages compos�
     expect(identifyProducts(line("ligne 6").designation, ROOFING_REFERENTIAL, "ridge_tile").candidates).toEqual([]);
   });
 
-  it("une seule question sur tout le chantier : confirmer le modèle de tuile lu", () => {
+  it("deux questions sur tout le chantier : confirmer le modèle de tuile lu, et la pose des crochets de gouttière (le comptoir la demande, §47.8)", () => {
     const r = computeChantier(ROOFING_REFERENTIAL, inputs());
-    expect(r.questionsPending).toEqual(["product:tuile"]);
+    expect(r.questionsPending).toEqual(["product:tuile", "param:fixation_crochet"]);
     // Faîtière par défaut : 10 m × 2,9 pièces/ml = 29 ; si l'artisan choisit le modèle 710 : 10 m × 3 pièces/ml (Edilians) = 30.
     expect(need(r, "faitieres")).toMatchObject({ status: "calculated", purchase: { order: { count: "29" } }, productOrigin: "default" });
     const answered = computeChantier(ROOFING_REFERENTIAL, inputs({ faitiere: "edilians-faitiere-angulaire-710" }));
     expect(need(answered, "faitieres")).toMatchObject({ status: "calculated", quantity: { value: "30" }, purchase: { order: { count: "30" } }, provisional: false });
-    expect(answered.questionsPending).toEqual(["product:tuile"]);
+    expect(answered.questionsPending).toEqual(["product:tuile", "param:fixation_crochet"]);
   });
 
   it("règles validées : ce qui se calcule, ce qui reste à confirmer, ce qui est impossible", () => {
     const r = computeChantier(
       ROOFING_REFERENTIAL,
-      inputs({ tuileOk: true, pureau: "34.3", faitiere: "edilians-faitiere-angulaire-710", ecran: "soprema-sop-ecran-hpv-r2-150x50" }),
+      inputs({ tuileOk: true, pureau: "34.3", faitiere: "edilians-faitiere-angulaire-710", ecran: "soprema-sop-ecran-hpv-r2-150x50", crochets: "2" }),
     );
     // Calculé pour l'artisan lui-même : aucun besoin provisoire.
     expect(all(r).filter((n) => n.provisional)).toEqual([]);
@@ -331,6 +339,7 @@ describe("cas de référence D-2026-015 : la liste d'achat vue par l'artisan", (
       { key: "longueur_faitage", value: "10", unit: "m", evidence: "Devis, ligne 6", origin: "devis" },
       { key: "nb_descentes", value: "2", unit: "u", evidence: "Devis, ligne 8", origin: "devis" },
       { key: "hauteur_descente", value: "4", unit: "m", evidence: "Devis, ligne 8", origin: "devis" },
+      { key: "diametre_descente", value: "80", unit: "mm", evidence: "Devis, ligne 8 (« Ø80 »)", origin: "devis" },
     ];
     const params = (id: string) => paramsFromContext({ facts }, ROOFING_REFERENTIAL.workItems.find((w) => w.id === id)!).params;
     const r = computeChantier(
@@ -359,11 +368,11 @@ describe("cas de référence D-2026-015 : la liste d'achat vue par l'artisan", (
     expect(view("tuiles")).toEqual(["Tuiles HP10 rouge", "ready", "1 345 pièces", "≈ 6 palettes"]);
     // Liteaux au mètre, avec l'ordre de grandeur en bottes.
     expect(view("liteaux")).toEqual(["Liteaux 27×40", "ready", "368 ml", "≈ 8 bottes de 50 ml"]);
-    expect(view("ecran")).toEqual(["Écran HPV", "ready", "2 rouleaux", "128,57 m²"]);
+    expect(view("ecran")).toEqual(["Écran HPV Soprema R2, rouleau 1,50 × 50 m", "ready", "2 rouleaux", "128,57 m²"]);
     // Pièces par défaut (modèle à préciser par le fournisseur) : quantité certaine, caractéristiques du devis conservées.
-    expect(view("tubes")).toEqual(["Tubes de descente PVC Ø80 sable", "ready", "8 ml", null]);
+    expect(view("tubes")).toEqual(["Tubes de descente PVC sable Ø80", "ready", "8 ml", null]);
     expect(view("faitieres")).toEqual(["Faîtières", "ready", "29 pièces", null]);
-    expect(view("colliers")).toEqual(["Colliers", "ready", "8 pièces", null]);
+    expect(view("colliers")).toEqual(["Colliers de descente Ø80", "ready", "8 pièces", null]);
     expect(rows.every((x) => x.state === "ready")).toBe(true);
   });
 });

@@ -27,8 +27,18 @@ export const CHANTIER_TEST = [
   { libelle: "Bande zinc d'égout", quantite: "13", unite: "ml", prix: "45,00" },
   { libelle: "Gouttière zinc demi-ronde", quantite: "13", unite: "ml", prix: "52,00" },
 ];
-/** Les réponses de Greg sur le chantier Test : il façonne, le faîtage à ajouter (égout au devis), 2 descentes, développé 33 cm. */
-const REPONSES: Record<string, string> = { "engine:param:faconnage": "1", "engine:param:egout_faitage": "2", "engine:param:nb_descentes": "2", "engine:param:developpe": "330" };
+/**
+ * Les réponses de Greg sur le chantier Test (les questions du comptoir, §47.8) : il façonne, 2 descentes en Ø 80,
+ * développé 33 cm (bande et gouttière), crochets de gouttière en façade (bandeau).
+ */
+const REPONSES: Record<string, string> = {
+  "engine:param:faconnage": "1",
+  "engine:param:nb_descentes": "2",
+  "engine:param:developpe_gouttiere": "33",
+  "engine:param:fixation_crochet": "2",
+  "engine:param:diametre_descente": "80",
+  "engine:param:developpe": "330",
+};
 
 export async function compteBatiInvest(): Promise<Agent> {
   const agent = await signUp(ctx.app, "greg@batiinvest.fr", "Greg");
@@ -109,11 +119,11 @@ describe("§45.7 — la demande de devis du chantier Test", () => {
     expect(text).not.toMatch(/142|38,00|45,00|52,00/);
     expect(text).not.toMatch(/command/i);
     // Les lignes du chantier Test (§45.5).
-    expect(text).toMatch(/Gouttière zinc demi-ronde\s+4 longueurs de 4 m \(13\s+ml à couvrir\)/);
+    expect(text).toMatch(/Gouttière zinc demi-ronde dév\. 33\s+4 longueurs de 4 m \(13\s+ml à couvrir\)/);
     expect(text).toMatch(/Pattes coulissantes joint debout\s+519 pièces/);
     expect(text).toMatch(/Pattes fixes joint debout\s+173 pièces/);
     // Bande de 13 ml façonnée sur place : un bobineau au-delà de 6 ml (réponse du fondateur, 2026-10-04).
-    expect(text).toMatch(/Bobineau 500 × 17 m, 0,65\s+1 pièce\s+pour façonner 13 ml de\s*bande/);
+    expect(text).toMatch(/Bobineau Quartz-Zinc 500 × 17 m, 0,65\s+1 pièce\s+pour façonner 13 ml de\s*bande/);
   });
 
   it("3. un chantier sans ligne « à préciser » n'a pas de bloc 3 ; un chantier qui en a une le montre, avec « merci de proposer ce que vous avez »", async () => {
@@ -234,7 +244,12 @@ describe("§45.8 — « On ajoute ? »", () => {
     const agent = await compteBatiInvest();
     const { takeoff } = await chantierOuvert(agent);
     const suggestions = takeoff.purchase.suggestions as { key: string; label: string; quantity: string }[];
-    expect(suggestions.map((s) => `${s.label} : ${s.quantity}`)).toEqual(["Cartouches de silicone zinc : 2 cartouches", "Vis inox 4 × 40 : 1 boîte de 200"]);
+    // Le faîtage (§47.8 : « on l'ajoute ? » n'est pas une question de comptoir) est proposé ici aussi.
+    expect(suggestions.map((s) => `${s.label} : ${s.quantity}`)).toEqual([
+      "Cartouches de silicone zinc : 2 cartouches",
+      "Vis inox 4 × 40 : 1 boîte de 200",
+      "Faîtage Quartz-Zinc 0,65 mm, bande dév. 33 cm : 5 longueurs de 3 m",
+    ]);
     expect(suggestions.length).toBeLessThanOrEqual(8);
     const silicone = suggestions[0]!;
     // Un tap sur la quantité la modifie ; « Oui » l'ajoute aux fournitures, dans les consommables.
@@ -245,7 +260,7 @@ describe("§45.8 — « On ajoute ? »", () => {
     // « Non » : nulle part.
     const vis = suggestions[1]!;
     const non = (await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `ajout:${vis.key}`, value: "non" }).expect(200)).body;
-    expect(non.purchase.suggestions).toEqual([]);
+    expect(non.purchase.suggestions.map((s: { label: string }) => s.label)).toEqual(["Faîtage Quartz-Zinc 0,65 mm, bande dév. 33 cm"]);
     expect(non.purchase.toBuy.map((b: { key: string }) => b.key)).not.toContain(vis.key);
     expect((await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `ajout:${vis.key}`, value: "peut-être" })).status).toBe(400);
   });
@@ -326,13 +341,13 @@ describe("§45.9 — l'aperçu avant envoi", () => {
     // … et l'aperçu la montre telle quelle.
     const preview = (await agent.post(`/v1/projects/${projectId}/price-requests/preview`).send({}).expect(200)).body;
     const rows = preview.document.blocs.find((b: { titre: string }) => b.titre === "Fournitures à chiffrer").lignes;
-    expect(rows).toContainEqual({ designation: "Gouttière zinc demi-ronde", quantite: "5 longueurs de 4 m", precision: "demi-ronde 33, naissances à souder", cle: gouttiere.key });
-    expect(rows.map((r: { designation: string }) => r.designation)).not.toContain("Crochets de gouttière");
+    expect(rows).toContainEqual({ designation: "Gouttière zinc demi-ronde dév. 33", quantite: "5 longueurs de 4 m", precision: "demi-ronde 33, naissances à souder", cle: gouttiere.key });
+    expect(rows.map((r: { designation: string }) => r.designation)).not.toContain("Crochets de gouttière bandeau dév. 33");
     expect(rows.map((r: { designation: string }) => r.designation)).toContain("Chevilles à frapper 6 × 40 mm");
     // Le journal : une entrée par correction, avec les sept champs.
     const events = await ctx.prisma.correctionEvent.findMany({ where: { projectId, action: "correct" }, orderBy: { createdAt: "asc" } });
     expect(events.map((e) => (e.context as Record<string, unknown>).quantite_corrigee)).toEqual(["5 longueurs de 4 m", "5 longueurs de 4 m", "0"]);
-    expect(events[0]!.context).toMatchObject({ materiau: "Gouttière zinc demi-ronde", quantite_calculee: "4 longueurs de 4 m", regle: "profil" });
+    expect(events[0]!.context).toMatchObject({ materiau: "Gouttière zinc demi-ronde dév. 33", quantite_calculee: "4 longueurs de 4 m", regle: "profil" });
   });
 });
 

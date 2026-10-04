@@ -249,5 +249,19 @@
     "Ratios de chantier : 0,6 de partage des moulures, 5 fixations par barre, 1 collier par 0,5 m, plâtre 0,3 kg par boîte et 0,5 kg par mètre de saignée, Wago 221-415 par boîte de dérivation.",
     "Câble de terre 16 mm² : 5 m par défaut.",
     "Boîtes multipostes, boîte maçonnerie, boîte DCL, douille DCL : conditionnements."
-  ]
+  ],
+  "questions_comptoir": {
+    "regle": "§47.8 : seules les questions qu'un vendeur de comptoir du négoce poserait pour chiffrer ; le reste est une hypothèse dite et modifiable. Liste de travail, non activée, à faire relire par un vendeur.",
+    "questions": [
+      "Appareillage : quelle gamme (Céliane, Odace, Dooxie…) et quelle couleur ?",
+      "Tableau : combien de rangées ? pré-équipé ou à monter ?",
+      "Gaine préfilée ou fil sous moulure ?",
+      "Interrupteurs différentiels type AC ou type A ?"
+    ],
+    "jamais_demande": [
+      "mètres de gaine par point",
+      "nombre de boîtes"
+    ],
+    "date": "2026-10-04"
+  }
 }

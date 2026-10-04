@@ -110,5 +110,20 @@
     "Tollens Hydro Façade : seau de 15 L pour cette référence.",
     "Épaisseurs de l'enduit chaux 3 couches (NF DTU 26.1) : texte non lu.",
     "Ratios de chantier : pertes 5 % / 8 %, 1 fenêtre pour 12 m², tableaux de 0,20 m, antimousse S/5 L, hydrofuge S/3 L, polyane 4 × 25 m pour 150 m²."
-  ]
+  ],
+  "questions_comptoir": {
+    "regle": "§47.8 : seules les questions qu'un vendeur de comptoir du négoce poserait pour chiffrer ; le reste est une hypothèse dite et modifiable. Liste de travail, non activée, à faire relire par un vendeur.",
+    "questions": [
+      "Enduit : quelle marque et quelle teinte (référence nuancier) ? finition grattée, talochée, écrasée ?",
+      "ITE : PSE blanc ou graphité, ou laine de roche ? épaisseur ?",
+      "Peinture façade : quelle gamme (D2, D3, pliolite, siloxane) et quelle teinte ?",
+      "Profilés de départ : largeur = épaisseur d'isolant ?"
+    ],
+    "jamais_demande": [
+      "consommation au m²",
+      "pertes",
+      "nombre de chevilles au m²"
+    ],
+    "date": "2026-10-04"
+  }
 }

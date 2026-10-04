@@ -38,5 +38,19 @@
     "Géotextile 100-150 g/m² : rouleaux 1 × 25, 2 × 25, 4 × 25 m.",
     "Douglas 27 × 145 : autres longueurs que 3 m, poids au mètre.",
     "Classe 4 = pin autoclave dans 95 % des devis : pratique à valider."
-  ]
+  ],
+  "questions_comptoir": {
+    "regle": "§47.8 : seules les questions qu'un vendeur de comptoir du négoce poserait pour chiffrer ; le reste est une hypothèse dite et modifiable. Liste de travail, non activée, à faire relire par un vendeur.",
+    "questions": [
+      "Lames : quelle essence ou quel composite, section et longueur ?",
+      "Lambourdes : section et longueur ? classe 4 ?",
+      "Fixation : vis inox ou clips (système de la lame) ?",
+      "Plots réglables : hauteur ?"
+    ],
+    "jamais_demande": [
+      "entraxe des lambourdes",
+      "pertes"
+    ],
+    "date": "2026-10-04"
+  }
 }

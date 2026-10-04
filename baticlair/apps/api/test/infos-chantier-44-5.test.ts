@@ -21,14 +21,14 @@ beforeEach(async () => {
 });
 
 const LIGNES = [
-  { libelle: "Couverture en ardoises naturelles 30x22 posées au crochet", quantite: "200", unite: "m²" },
-  { libelle: "Gouttière demi-ronde zinc développé 33", quantite: "24", unite: "ml" },
+  { libelle: "Couverture en ardoises naturelles d'Espagne 1er choix 30x22 posées au crochet", quantite: "200", unite: "m²" },
+  { libelle: "Gouttière demi-ronde zinc développé 33, crochets bandeau, descentes Ø80", quantite: "24", unite: "ml" },
 ];
 const BREST = { adresse: "12 rue de Siam, 29200 Brest", lignes: LIGNES };
 type Morceau = { texte: string; cle?: string; valeur?: string; confiance: string };
 type Ligne = { libelle: string; quantite: number | null; explication: { morceaux: Morceau[] } };
 type Q = { id: string; projetId: string; questions: { id: string; texte: string; boutons: { label: string; valeur: string }[] }[]; lignes: Ligne[]; hypotheses: { cle: string }[] };
-const ardoises = (q: Q) => q.lignes.find((l) => l.libelle === "Ardoises 30×22");
+const ardoises = (q: Q) => q.lignes.find((l) => l.libelle === "Ardoises naturelles Espagne 1er choix 30×22");
 const ids = (q: Q) => q.questions.map((x) => x.id).sort();
 
 describe("§44.5 — infos chantier facultatives", () => {

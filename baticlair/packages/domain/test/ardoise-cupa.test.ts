@@ -12,7 +12,8 @@ const need = (r: ReturnType<typeof computeWorkItem>, id: string) => r.needs.find
 const order = (r: ReturnType<typeof computeWorkItem>, id: string) => Number(need(r, id).purchase?.order.count);
 const input = (params: WorkItemInput["params"] = {}, format = "ardoise-30x22", waste?: Record<string, string>): WorkItemInput => ({
   workItemId: "couverture-ardoises-crochet",
-  params: { surface: { value: "200", unit: "m2", origin: "devis", evidence: "Devis, ligne 1" }, ...params },
+  // La qualité de l'ardoise (question du comptoir, §47.8) : habitude de l'entreprise.
+  params: { surface: { value: "200", unit: "m2", origin: "devis", evidence: "Devis, ligne 1" }, qualite_ardoise: { value: "1", unit: "u", origin: "artisan", evidence: "Habitude de votre entreprise" }, ...params },
   products: { ardoise: { productId: format, origin: "devis" } },
   mentioned: ["ardoise"],
   ...(waste ? { preferences: { waste } } : {}),

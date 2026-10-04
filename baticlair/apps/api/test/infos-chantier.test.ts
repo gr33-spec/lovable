@@ -20,10 +20,10 @@ beforeEach(async () => {
   await resetDatabase(ctx.prisma);
 });
 
-const BREST = { adresse: "12 rue de Siam, 29200 Brest", lignes: [{ libelle: "Couverture en ardoises naturelles 30x22 posées au crochet", quantite: "200", unite: "m²" }] };
+const BREST = { adresse: "12 rue de Siam, 29200 Brest", lignes: [{ libelle: "Couverture en ardoises naturelles d'Espagne 1er choix 30x22 posées au crochet", quantite: "200", unite: "m²" }] };
 type Ligne = { libelle: string; quantite: number | null; explication: { morceaux: { texte: string; cle?: string; valeur?: string; confiance: string }[] } };
 type Q = { id: string; projetId: string; questions: { id: string; texte: string; boutons: { label: string; valeur: string }[] }[]; lignes: Ligne[]; hypotheses: { cle: string }[]; infos: { texte: string | null; croquis: { id: string; nom: string }[] } };
-const ardoises = (q: Q) => q.lignes.find((l) => l.libelle === "Ardoises 30×22")!;
+const ardoises = (q: Q) => q.lignes.find((l) => l.libelle === "Ardoises naturelles Espagne 1er choix 30×22")!;
 // PNG minimal (1 × 1 pixel) : reconnu à ses octets, jamais à son nom.
 const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64");
 
@@ -85,7 +85,7 @@ describe("la note de l'artisan entre dans le calcul", () => {
 describe("deux documents qui se contredisent : une question avec les deux valeurs", () => {
   it("la ligne dit « pente 40° », l'en-tête lu par l'IA dit « Pente 35° » : question à deux boutons, ardoises en attente ; la note de l'artisan tranche", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
-    const rows: FixtureRow[] = [["ARD", "Ardoises 30x22 au crochet, pente 40°", "200 m²", "85,00", "17 000,00"]];
+    const rows: FixtureRow[] = [["ARD", "Ardoises Espagne 30x22, pente 40°", "200 m²", "85,00", "17 000,00"]];
     const pdf = await makePdf(["devis"], rows, "Total HT 17 000,00", "DEVIS N° 2026-120 – Toitures Martin  ·  Pente 35°");
     const res = await agent.post("/v1/quantitatifs").field("adresse", "29200 Brest").attach("file", Buffer.from(pdf), { filename: "devis.pdf", contentType: "application/pdf" });
     expect(res.status).toBe(201);
@@ -93,7 +93,7 @@ describe("deux documents qui se contredisent : une question avec les deux valeur
     const question = q.questions.find((x) => x.id === "engine:param:pente")!;
     expect(question.boutons.map((b) => b.valeur)).toEqual(["40", "35"]);
     expect(question.texte).toMatch(/^Pente du toit : 40 ° \(Devis, .*\), ou 35 ° \(Devis, en-tête .*\) \?$/);
-    expect(q.lignes.find((l) => l.libelle === "Ardoises 30×22")).toBeUndefined();
+    expect(q.lignes.find((l) => l.libelle === "Ardoises naturelles Espagne 1er choix 30×22")).toBeUndefined();
     // L'artisan écrit la pente : sa note passe devant les deux, l'explication cite ce que disait le devis.
     await agent.put(`/v1/projects/${q.projetId}/infos`).send({ texte: "Pente 42°" });
     const after = (await agent.get(`/v1/quantitatifs/${q.id}`)).body as Q;

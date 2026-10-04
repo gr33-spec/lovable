@@ -29,5 +29,18 @@
     "Pavés granit 9 × 9 et Luserne : pièces par m² et vente à la tonne.",
     "Densité du sable de lit de pose (1,6) et des gravillons (1,5) : voir maçonnerie (1,4 contre 1,6 déjà en contradiction).",
     "Rendement d'un sac de béton prêt de 35 kg."
-  ]
+  ],
+  "questions_comptoir": {
+    "regle": "§47.8 : seules les questions qu'un vendeur de comptoir du négoce poserait pour chiffrer ; le reste est une hypothèse dite et modifiable. Liste de travail, non activée, à faire relire par un vendeur.",
+    "questions": [
+      "Pavé ou dalle : quel modèle, format et coloris ? épaisseur (6 ou 8 cm pour un accès voiture) ?",
+      "Bordures : quel type (P1, T1, T2) ?",
+      "Lit de pose : sable ou gravillon ? en big-bag ou en vrac ?"
+    ],
+    "jamais_demande": [
+      "épaisseur de lit de pose",
+      "pertes"
+    ],
+    "date": "2026-10-04"
+  }
 }

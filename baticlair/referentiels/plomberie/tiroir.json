@@ -149,5 +149,21 @@
     "Gaine annelée de plomberie : couronnes 25 / 50 / 100 m.",
     "Ratios de chantier (chapitre 11) : distances nourrice → appareil, 0,5 m de remontée, 2 coudes + 1 culotte par appareil, pertes 10 % / 5 %, décapant 1 L pour 100 assemblages. Ils relèvent d'un plombier, pas d'une fiche.",
     "Kit ventouse : longueur de base (≈ 1 m) par marque."
-  ]
+  ],
+  "questions_comptoir": {
+    "regle": "§47.8 : seules les questions qu'un vendeur de comptoir du négoce poserait pour chiffrer ; le reste est une hypothèse dite et modifiable. Liste de travail, non activée, à faire relire par un vendeur.",
+    "questions": [
+      "Tube : multicouche, PER ou cuivre ? quel diamètre (16, 20, 26) ?",
+      "Raccords : à sertir (quel profil : TH, U, B) ou à visser ?",
+      "Évacuation : PVC Ø32, 40, 50, 100 ?",
+      "Appareils : référence exacte ou gamme (WC suspendu, receveur, mitigeur) ?",
+      "Chauffe-eau : capacité, vertical ou horizontal, électrique ou thermodynamique ?"
+    ],
+    "jamais_demande": [
+      "mètres de tube par appareil",
+      "coudes par appareil",
+      "colle au litre"
+    ],
+    "date": "2026-10-04"
+  }
 }

@@ -153,6 +153,8 @@ describe("banc d'essai : le pont devis → moteur retrouve la lecture faite à l
     expect(input("descente").params).toEqual({
       nb_descentes: { value: "2", unit: "u", origin: "devis", evidence: "Devis, ligne 8" },
       hauteur_descente: { value: "4", unit: "m", origin: "devis", evidence: "Devis, ligne 8 (« hauteur »)" },
+      // Le diamètre des descentes, demandé par le comptoir (§47.8), est écrit au devis.
+      diametre_descente: { value: "80", unit: "mm", origin: "devis", evidence: "Devis, ligne 8 (« ø80 »)" },
     });
     // « 2 jeux de coudes » n'est pas un nombre de coudes par descente : rien n'est lu.
     expect(input("descente").params.coudes_par_descente).toBeUndefined();
@@ -174,7 +176,7 @@ describe("banc d'essai : le pont devis → moteur retrouve la lecture faite à l
     expect(label("tuiles")).toBe("Tuiles HP10 terre cuite rouge grand moule");
     expect(label("liteaux")).toBe("Liteaux 27×40");
     expect(label("contre-liteaux")).toBe("Contre-liteaux (Liteaux 27×40)");
-    expect(label("tubes")).toBe("Tubes de descente Ø80 PVC sable");
+    expect(label("tubes")).toBe("Tubes de descente PVC sable Ø80");
   });
 });
 
@@ -239,7 +241,9 @@ const STEPS: { name: string; scores: Record<string, { a: number; b: number; erro
 const REDEFINED_BY_FOUNDER: Record<string, { b: number; why: string }> = {
   // 2026-10-04 : « Sortie de toit : une embase par sortie, adaptée à la couverture, au diamètre du conduit, plus un
   // chapeau ; collerette pour un conduit de fumée. » La ligne 10 partait sans diamètre ; elle attend Ø et usage.
-  "D-2026-015": { b: 1, why: "sortie de toit décomposée (embase, chapeau, collerette) : diamètre et usage demandés" },
+  // 2026-10-04, règle du comptoir (§47.8) : « toute question est une question que le vendeur du négoce poserait ».
+  // La gouttière (ligne 7) attend la pose de ses crochets (sur chevrons ou bandeau), que le devis ne dit pas.
+  "D-2026-015": { b: 2, why: "sortie de toit décomposée (diamètre, usage) ; crochets de gouttière : pose demandée par le comptoir" },
 };
 
 describe("banc d'essai : 4 devis de métiers différents (score « après »)", () => {

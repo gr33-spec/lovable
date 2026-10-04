@@ -19,9 +19,9 @@ beforeEach(async () => {
   await ctx.prisma.referentialSnapshot.deleteMany();
 });
 
-const BREST = { adresse: "29200 Brest", lignes: [{ libelle: "Couverture en ardoises naturelles 30x22 posées au crochet", quantite: "200", unite: "m²" }] };
+const BREST = { adresse: "29200 Brest", lignes: [{ libelle: "Couverture en ardoises naturelles d'Espagne 1er choix 30x22 posées au crochet", quantite: "200", unite: "m²" }] };
 type Q = { id: string; version_referentiel: string; lignes: { libelle: string; quantite: number | null }[] };
-const ardoises = (q: Q) => q.lignes.find((l) => l.libelle === "Ardoises 30×22")!.quantite;
+const ardoises = (q: Q) => q.lignes.find((l) => l.libelle === "Ardoises naturelles Espagne 1er choix 30×22")!.quantite;
 
 describe("le quantitatif garde sa version de référentiel", () => {
   it("à la création, la version du jour est enregistrée avec son instantané", async () => {

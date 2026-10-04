@@ -53,7 +53,8 @@ function explication(quantite: string | null, trace: readonly TraceLine[], assum
     const hyp = assumptions.find((a) => a.label === t.label);
     const utile = t.origin !== "referential" || PARLANT.test(t.label) || Boolean(hyp);
     if (!utile) continue;
-    const unit = !t.unit || t.unit === "u" ? "" : t.unit === "°" ? "°" : ` ${t.unit.replace(/^u\//, "/").replace("m2", "m²")}`;
+    // Une valeur dite en mots (« crochet standard ») ne prend pas d'unité ; « Ø 2,7 » la garde (« Ø 2,7 mm »).
+    const unit = !t.unit || t.unit === "u" || (t.shown && !/\d/.test(t.shown)) ? "" : t.unit === "°" ? "°" : ` ${t.unit.replace(/^u\//, "/").replace("m2", "m²")}`;
     // « région ardoise III » : la valeur dite par le référentiel ; `valeur` garde celle du calcul (à renvoyer).
     // §44.3 : la note de l'artisan gagne sur le devis, et l'explication cite les deux (« note de l'artisan ; le devis disait 40° »).
     const others = t.origin === "project" && t.from ? t.from.split(" ; ").slice(1).map((x) => x.split(" : ").pop()!.replace(/\s*°$/, "°").trim()).filter(Boolean) : [];

@@ -14,6 +14,14 @@ const TEST = [
   { ref: "5", designation: "Jouées de lucarnes", quantity: "2", unit: "u" },
 ];
 const u = (value: string, unit = "u") => ({ value, unit });
+const TOUT = {
+  "param:faconnage": u("1"),
+  "param:nb_descentes": u("2"),
+  "param:developpe": u("330", "mm"),
+  "param:developpe_gouttiere": u("33", "cm"),
+  "param:fixation_crochet": u("2"),
+  "param:diametre_descente": u("80", "mm"),
+};
 type V = ReturnType<typeof readQuote>;
 const rows = (v: V) => v.screen.groups.flatMap((g) => g.rows);
 const label = (v: V, r: ReturnType<typeof rows>[number]) =>
@@ -29,33 +37,37 @@ describe("la liste des fournitures, une couleur par ligne", () => {
   it("à l'ouverture : chaque question est une ligne orange de son ouvrage, avec sa décision ; le compte en haut", () => {
     const v = readQuote(TEST);
     const check = rows(v).filter((r) => r.status === "check");
+    // Règle du comptoir (§47.8) : la gouttière sans développé, les crochets sans pose, les naissances sans nombre ne se
+    // chiffrent pas ; « égout et faîtage, on les ajoute ? » n'est plus une question (bloc « On ajoute ? »).
     expect(check.map((r) => [label(v, r), r.decisionKey])).toEqual([
-      ["Zinc naturel en bobine 500 mm ou Bacs joint debout zinc", "engine:param:faconnage"],
-      ["Bandes d'égout zinc dév. 33 cm ou Faîtage zinc (bande)", "engine:param:egout_faitage"],
+      ["Zinc en bobine 500 mm ou Bacs joint debout zinc", "engine:param:faconnage"],
       ["Bandes zinc façonnées ou Bobineau zinc", "engine:param:faconnage"],
+      ["Gouttière", "engine:param:developpe_gouttiere"],
+      ["Crochets de gouttière", "engine:param:fixation_crochet"],
       ["Naissances", "engine:param:nb_descentes"],
       ["Jouées de lucarnes", "group:unknown"],
     ]);
     // Chaque ligne orange ouvre une vraie question de l'écran.
     for (const r of check) expect(v.questions.map((d) => d.key)).toContain(r.decisionKey);
-    expect(v.screen).toMatchObject({ total: rows(v).length, toCheck: 5 });
+    expect(v.screen).toMatchObject({ total: rows(v).length, toCheck: 6 });
   });
 
   it("une réponse fait passer ses lignes au vert ; la question suivante d'un ouvrage (le développé) vient après", () => {
     // Je façonne, 13 ml : un bobineau de 500 mm, le développé n'y change rien (il n'est pas demandé).
     const apres = readQuote(TEST, { "param:faconnage": u("1") });
     expect(rows(apres).filter((r) => r.status === "check").map((r) => [label(apres, r), r.decisionKey])).toEqual([
-      ["Bandes d'égout zinc dév. 33 cm ou Faîtage zinc (bande)", "engine:param:egout_faitage"],
+      ["Gouttière", "engine:param:developpe_gouttiere"],
+      ["Crochets de gouttière", "engine:param:fixation_crochet"],
       ["Naissances", "engine:param:nb_descentes"],
       ["Jouées de lucarnes", "group:unknown"],
     ]);
-    const tout = readQuote(TEST, { "param:faconnage": u("1"), "param:egout_faitage": u("2"), "param:nb_descentes": u("2"), "param:developpe": u("330", "mm") });
+    const tout = readQuote(TEST, TOUT);
     expect(rows(tout).filter((r) => r.status === "check").map((r) => label(tout, r))).toEqual(["Jouées de lucarnes"]);
-    expect(rows(tout).filter((r) => r.status === "ok").map((r) => label(tout, r))).toContain("Zinc naturel en bobine 500 mm");
+    expect(rows(tout).filter((r) => r.status === "ok").map((r) => label(tout, r))).toContain("Bobine Quartz-Zinc 0,65 mm, largeur 500 mm");
   });
 
   it("gris : à préciser avec le fournisseur, la ligne part telle quelle ; les consommables ferment la liste", () => {
-    const tout = readQuote(TEST, { "param:faconnage": u("1"), "param:egout_faitage": u("2"), "param:nb_descentes": u("2"), "param:developpe": u("330", "mm") });
+    const tout = readQuote(TEST, TOUT);
     const sansDoute = readQuote(TEST.slice(0, 4).concat([{ ref: "5", designation: "Chatière de ventilation", quantity: "4", unit: "u" }]), {});
     expect(rows(sansDoute).every((r) => r.status !== "supplier" || r.quoteKey)).toBe(true);
     const last = tout.screen.groups.at(-1)!;

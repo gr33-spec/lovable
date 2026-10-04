@@ -33,5 +33,18 @@
     "Grillage avertisseur : longueur de rouleau.",
     "Colliers de prise en charge disponibles.",
     "Exigence anti-retour (NF EN 1717) pour l'arrosage enterré."
-  ]
+  ],
+  "questions_comptoir": {
+    "regle": "§47.8 : seules les questions qu'un vendeur de comptoir du négoce poserait pour chiffrer ; le reste est une hypothèse dite et modifiable. Liste de travail, non activée, à faire relire par un vendeur.",
+    "questions": [
+      "Tube : PE 25 ou 32, PN 6 ou PN 10 ?",
+      "Arroseurs : tuyères ou turbines, quelle marque (Rain Bird, Hunter) ?",
+      "Programmateur : combien de stations, sur secteur ou à piles ?"
+    ],
+    "jamais_demande": [
+      "débit par secteur",
+      "mètres de tube par arroseur"
+    ],
+    "date": "2026-10-04"
+  }
 }
