@@ -1,0 +1,153 @@
+{
+  "metier": {
+    "code": "plomberie",
+    "nom": "Plomberie sanitaire et chauffage hydraulique",
+    "version": "0.2.0-recherche",
+    "maturite": "alpha",
+    "active": false,
+    "referentiel": [
+      "docs/referentiels/plomberie.md",
+      "docs/referentiels/plombier-chauffagiste.md"
+    ]
+  },
+  "fusion": {
+    "documents": [
+      "plomberie.md (14 chapitres, sanitaire)",
+      "plombier-chauffagiste.md (s'arrête au chapitre 5, sanitaire + chauffage)"
+    ],
+    "ecarts_entre_documents": [
+      "Colle PVC : plomberie.md donne la colle Griffon en pots de 250 / 500 ml / 1 L ; plombier-chauffagiste.md compare Xhander (Ø40 : 290 collages par litre) et Unecol (Ø40 : 1,1 L pour 100 collages, soit ≈ 90 collages par litre). Facteur 3 entre les deux fiches, non tranché.",
+      "PER nu : couronnes 25 / 50 / 240 m (plomberie.md) contre 120 / 240 m (plombier-chauffagiste.md, TRA 605). Les deux gardées : 25-50 m en GSB, 120-240 m en négoce.",
+      "Tronçon compteur → nourrice : multicouche 20×2 ou 26×3 (les deux documents) ; plombier-chauffagiste.md ajoute cuivre 18×1 ou 22×1 et PER 20×1,9. Aucun texte DTU lu.",
+      "Diamètres d'évacuation : identiques (Ø32 lavabo, Ø40 douche/évier, Ø100 WC), cohérents."
+    ]
+  },
+  "valeurs": [
+    {
+      "id": "multicouche_barre",
+      "libelle": "Tube multicouche en barre : longueur",
+      "avant": "barre 4 ou 5 m (à vérifier par marque) ; défaut moteur 4 m",
+      "valeur": "Henco Standard 16×2 : barres de 4 m et de 5 m ; RBM 1545 : barre 4 m",
+      "unite": "m",
+      "statut": "contradiction",
+      "sources": [
+        {
+          "url": "https://www.henco.be/en/STRAIGHT-LENGTH",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://rbm.eu/fr/produit/serie-1545",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Les deux longueurs existent selon la marque : garder 4 m par défaut et dire la longueur sur la ligne."
+    },
+    {
+      "id": "per_pregaine_couronne",
+      "libelle": "PER pré-gainé 16×1,5 (rouge ou bleu) : couronnes",
+      "avant": "100 m ; 25 et 50 m courants (à vérifier)",
+      "valeur": "couronnes de 25 m et 50 m (BetaPEX Comap, GSB) ; 100 m (Anjou Connectique P0216R100S)",
+      "unite": "m",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.cherchons.com/bricolage/plomberie/alimentation-en-eau/tuyau-de-plomberie/tube-per/tube-gaine-per.html",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.anjou-connectique.com/media/files/16527/p0216r100s-fiche-technique.pdf",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Extrait de comparateur pour 25 / 50 m : à recouper sur une fiche négoce (Cedeo, Richardson)."
+    },
+    {
+      "id": "cuivre_ecroui_barre",
+      "libelle": "Tube cuivre écroui : longueur de barre",
+      "avant": "4 m courant, 5 m chez Silmet (à vérifier selon négoce)",
+      "valeur": "barres de 4 m (Brico Dépôt 12/14, 14/16 ; Domomat 20/22) ; 1, 2 et 3 m en GSB ; 5 m chez Silmet",
+      "unite": "m",
+      "statut": "contradiction",
+      "sources": [
+        {
+          "url": "https://www.bricodepot.fr/p/8030261031798/tube-en-cuivre-ecroui-14-16-de-4-m",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.domomat.com/12524-tube-cuivre-ecroui-pour-chauffage-et-eau-chaude-sanitaire-2022-barre-de-4-metres-fils-et-cables-generiques-cuidd010209.html",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "4 m confirmé comme longueur courante ; 5 m reste une offre de fabricant. Le défaut moteur de 4 m tient."
+    },
+    {
+      "id": "teflon_rouleau",
+      "libelle": "Ruban PTFE (téflon) : rouleau",
+      "avant": "rouleau 12 m (à vérifier)",
+      "valeur": "rouleaux de 12 m en 12 mm ou 19 mm de large, 75 µm",
+      "unite": "m",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.bricomarche.com/p/rouleau-teflon-largeur-19-mm-longueur-12m/3330450511311",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.mr-bricolage.fr/ruban-teflon-12mmx12m-somatherm.html",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Le ratio « 1 rouleau par chantier + 1 par 10 raccords filetés » reste à valider."
+    },
+    {
+      "id": "silicone_sanitaire",
+      "libelle": "Silicone sanitaire : cartouche et rendement",
+      "avant": "cartouche 300 ml (à vérifier), 1 cartouche pour 2 appareils (à valider)",
+      "valeur": "cartouches de 280 ml ; ≈ 15 m de joint de 5 mm par cartouche",
+      "unite": "ml/cartouche",
+      "statut": "contradiction",
+      "sources": [
+        {
+          "url": "https://www.castorama.fr/joint-parfait-sanitaire-blanc-bostik-280ml/3549212490454_CAFR.prd",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.bricodepot.fr/p/5059340044507/joint-silicone-sanitaire-blanc-280-ml",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "280 ml en GSB contre 300 ml au référentiel. 15 m par cartouche couvre bien plus que 2 appareils (≈ 4 à 6 m par receveur ou baignoire) : le ratio du référentiel est prudent, à faire trancher."
+    },
+    {
+      "id": "pc_plaque_plots",
+      "libelle": "Plancher chauffant : plaque isolante à plots",
+      "avant": "1,2 m² (1 200 × 1 000 mm) (à vérifier)",
+      "valeur": "1 200 × 1 000 mm hors tout, 1 190 × 990 mm utiles (≈ 1,18 m² posés) chez Giacomini R885 et Fluxol ; Rothaflex 1 200 × 1 000",
+      "unite": "m²/plaque",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://dam.giacomini.com/fr.giacomini.com/product_documentations/datasheets/R885DB.pdf",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.richardson.fr/files/richardson/technical_document/0ca/319641_t0588q.pdf",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://medias.roth-france.fr/documents/5e905c587cc98.pdf",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Calcul en surface utile (1,18 m²) plutôt que 1,2 m² : 1,7 % d'écart, sous le seuil de 3 %."
+    }
+  ],
+  "introuvable": [
+    "Tableau 2 et figure 1 du DTU 60.11, espacement des colliers du DTU 60.33 : textes payants non lus.",
+    "Raccords à sertir : à la pièce ou en sachet chez Cedeo, Téréva, Frans Bonhomme, Richardson (pages négoce non lisibles par le proxy).",
+    "Bande périphérique de plancher chauffant : longueur de rouleau (50 m supposé).",
+    "Gaine annelée de plomberie : couronnes 25 / 50 / 100 m.",
+    "Ratios de chantier (chapitre 11) : distances nourrice → appareil, 0,5 m de remontée, 2 coudes + 1 culotte par appareil, pertes 10 % / 5 %, décapant 1 L pour 100 assemblages. Ils relèvent d'un plombier, pas d'une fiche.",
+    "Kit ventouse : longueur de base (≈ 1 m) par marque."
+  ]
+}
