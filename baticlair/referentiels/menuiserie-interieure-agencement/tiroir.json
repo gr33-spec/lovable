@@ -1,0 +1,47 @@
+{
+  "metier": {
+    "code": "menuiserie-interieure-agencement",
+    "nom": "Menuiserie intérieure - agencement (blocs-portes, plinthes, parquet, lambris, placards)",
+    "version": "0.2.0-recherche",
+    "maturite": "alpha",
+    "active": false,
+    "referentiel": "docs/referentiels/menuiserie-interieure-agencement.md",
+    "note": "Sous-couche, film, colle parquet, plinthes MDF et barre de seuil : voir referentiels/menuiserie/tiroir.json (mêmes articles)."
+  },
+  "valeurs": [
+    {
+      "id": "colle_plinthes",
+      "libelle": "Mastic-colle de fixation de plinthes : rendement d'une cartouche 310 ml",
+      "avant": "1 cartouche pour 10 ml de plinthe de 70 mm, 6 ml au-delà de 100 mm (à vérifier)",
+      "valeur": "≈ 15 m de cordon de 5 mm par cartouche (Bostik Fixation Plinthes)",
+      "unite": "m de cordon",
+      "statut": "contradiction",
+      "sources": [
+        { "url": "https://diy.bostik.com/sites/default/files/2026-01/Bostik-Fixation-Plinthes-Multi-Materiaux-technical-data-sheet-ok.pdf", "date": "2026-10-04" },
+        { "url": "https://www.castorama.fr/mastic-colle-fixation-plinthe-bostik-310-ml/3549212488109_CAFR.prd", "date": "2026-10-04" }
+      ],
+      "ecart": "15 m de cordon : 15 ml de plinthe avec un cordon, 7,5 ml avec deux. Le référentiel (10 ml, 6 ml) se situe entre les deux ; le nombre de cordons par hauteur de plinthe reste à valider."
+    },
+    {
+      "id": "lambris_clips",
+      "libelle": "Lambris : clips par m²",
+      "avant": "20 clips/m², tasseaux 27 × 40 à 50 cm (à vérifier)",
+      "valeur": "boîtes de 100 clips ; Luna Profix 3 : 1,6 clip par mètre de tasseau (≈ 3,2/m² à 50 cm) ; crochets de lambris PVC : 30/m² à 40 cm d'entraxe",
+      "unite": "clips/m²",
+      "statut": "contradiction",
+      "sources": [
+        { "url": "https://lunawood.com/fr/produits/boite-dinstallation-luna-profix-3/", "date": "2026-10-04" },
+        { "url": "https://attachments.mistermateriaux.com/WPC-Crochet-pour-lambris-PVC.pdf", "date": "2026-10-04" },
+        { "url": "https://www.mr-bricolage.fr/clip-inox-bardage-lambris-100-pieces.html", "date": "2026-10-04" }
+      ],
+      "ecart": "De 3 à 30 clips/m² selon le système : le chiffre dépend de la largeur de lame (1 clip par lame et par tasseau). 20/m² au référentiel correspond à une lame d'environ 10 cm sur tasseaux à 50 cm."
+    }
+  ],
+  "introuvable": [
+    "Correspondance épaisseur de cloison → huisserie (50, 72, 98) : aucune fiche négoce trouvée dans les extraits.",
+    "Fixation d'huisserie : 6 vis et chevilles par bloc (NF DTU 36.2 non lu).",
+    "Grilles Sogal / Kazed : nombre de vantaux par largeur de baie.",
+    "Rendement de débit en agencement (75 %), charnières par hauteur de porte.",
+    "Mousse PU : 1 bombe pour 4 blocs-portes (voir aussi menuiserie : 24 à 30 m par bombe annoncés par Soudal)."
+  ]
+}

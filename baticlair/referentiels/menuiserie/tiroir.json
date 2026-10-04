@@ -1,0 +1,121 @@
+{
+  "metier": {
+    "code": "menuiserie",
+    "nom": "Menuiserie extérieure - pose de fenêtres, portes, parquets",
+    "version": "0.2.0-recherche",
+    "maturite": "alpha",
+    "active": false,
+    "referentiel": "docs/referentiels/menuiserie.md",
+    "note": "Le parquet est traité aussi dans menuiserie-interieure-agencement : doublon partiel, non fusionné (pas dans la liste des fusions demandées). Les valeurs parquet communes sont portées une seule fois, ici."
+  },
+  "valeurs": [
+    {
+      "id": "mousse_pu_rendement",
+      "libelle": "Mousse PU pistolable 750 ml : mètres de joint par aérosol",
+      "avant": "15 m de joint par aérosol (≈ 3 fenêtres) (à valider)",
+      "valeur": "Soudal (méthode FEICA) : Soudafoam Gun ≈ 25 m de joint et 34 L ; Gun B2 ≈ 30 m et 45 L ; FR Gun ≈ 24 m et 43 L",
+      "unite": "m/aérosol",
+      "statut": "contradiction",
+      "sources": [
+        { "url": "https://content.ostermann.eu/webcontent/content/mamdata/PDF_Daten/Technische_Merkblaetter/Soudal/710-Soudafoam-Gun_B2/710-Soudafoam-Gun_B2-TM-fr.pdf", "date": "2026-10-04" },
+        { "url": "https://gobert.groupegobert.com/ressources/images/articles/Fiches_techniques/SOUD FT 101069.pdf", "date": "2026-10-04" }
+      ],
+      "ecart": "Le fabricant annonce 24 à 30 m (essai de laboratoire) ; le référentiel retient 15 m (rendement chantier). Écart × 2, à faire trancher par un poseur."
+    },
+    {
+      "id": "mastic_ms_10x5",
+      "libelle": "Mastic MS polymère 290 ml : mètres de joint 10 × 5 mm",
+      "avant": "5,2 m par cartouche (à valider)",
+      "valeur": "≈ 6 m par cartouche de 290 ml en 10 × 5 mm ; 12 m en 5 × 5 ; 10 m en 8 × 5",
+      "unite": "m/cartouche",
+      "statut": "source",
+      "sources": [
+        { "url": "https://www.mariusaurenti.com/wp-content/uploads/PDF/Joint-colle-MS-Polymer-FT120324.pdf", "date": "2026-10-04" },
+        { "url": "https://medias.descours-cabaud.com/d180001/medias/docus/278/BD_68594073_Mastic_Colle_MS_Polymeres_Blanc_FT_XHANDER.pdf", "date": "2026-10-04" }
+      ],
+      "ecart": "≈ 6 m (calcul fabricant) contre 5,2 m au référentiel (≈ 10 % de pertes) : cohérent."
+    },
+    {
+      "id": "cales_menuiserie",
+      "libelle": "Cales de pose de menuiserie : sachet",
+      "avant": "sachet assortiment 1 à 10 mm ; 1 sachet pour 8 menuiseries (à vérifier)",
+      "valeur": "assortiments de 50 (10 par épaisseur de 1 à 5 mm) ou de 500 (100 par épaisseur) ; lot de 240 cales fourchette",
+      "unite": "sachet",
+      "statut": "source",
+      "sources": [
+        { "url": "https://www.leroymerlin.fr/produits/lot-de-240-cales-fourchette-repliables-pose-fenetres-82354376.html", "date": "2026-10-04" },
+        { "url": "https://www.bricozor.com/cale-menuiserie/", "date": "2026-10-04" }
+      ],
+      "ecart": "Le contenu existe ; le ratio « 1 sachet pour 8 menuiseries » reste à valider."
+    },
+    {
+      "id": "sous_couche_parquet",
+      "libelle": "Sous-couche parquet : rouleau ou paquet",
+      "avant": "rouleau 10 à 15 m² ou paquet de 5 à 7 m² (à vérifier)",
+      "valeur": "rouleaux de 10, 15 et 20 m² (2 à 3 mm) ; panneaux fibre de bois en paquets de 6,99 m² (7 mm) ou 7,5 m² (4 mm)",
+      "unite": "m²/unité",
+      "statut": "source",
+      "sources": [
+        { "url": "https://www.castorama.fr/sous-couche-pour-sol-stratifie-volden-ep-2-2mm-15m-/5063022038890_CAFR.prd", "date": "2026-10-04" },
+        { "url": "https://www.bricodepot.fr/p/5063022038418/sous-couche-2-mm-20-m-l-2000cm-x-l-100cm", "date": "2026-10-04" },
+        { "url": "https://www.bricoman.fr/produits/dalle-sous-couche-parquet-fibre-de-bois-ep-4-mm-pqt-de-7-52-m2-fsc-mixte-90319295.html", "date": "2026-10-04" }
+      ]
+    },
+    {
+      "id": "film_pe_parquet",
+      "libelle": "Film polyéthylène sous parquet flottant : rouleau",
+      "avant": "rouleau 2 × 25 m (50 m²), 150 à 200 µm (à vérifier)",
+      "valeur": "200 µm (DTU 51.11, DTU 65.14) ; Sécurifilm : rouleaux 28 × 6 m ou 56 × 3 m (≈ 168 m²)",
+      "unite": "rouleau",
+      "statut": "contradiction",
+      "sources": [{ "url": "https://www.batiproduits.com/amp/fiche/produits/feuille-souple-d-etancheite-transparente-en-pol-p69114428.html", "date": "2026-10-04" }],
+      "ecart": "Le format 2 × 25 m n'a pas été retrouvé ; les rouleaux pro font ≈ 170 m². Un format plus petit existe en GSB (film 16 m², Mr.Bricolage)."
+    },
+    {
+      "id": "colle_parquet_ms",
+      "libelle": "Colle parquet MS polymère : seau et consommation",
+      "avant": "seau 15 ou 18 kg, ≈ 1 kg/m² (à vérifier)",
+      "valeur": "1 000 à 1 400 g/m² à la spatule B11 ; seaux de 15 à 16 kg",
+      "unite": "kg/m²",
+      "statut": "source",
+      "sources": [
+        { "url": "https://media.trenois.com/static/colle-parquet-ms20_soa064_fiche-technique.pdf", "date": "2026-10-04", "note": "MS-20 Plus" },
+        { "url": "https://www.batiproduits.com/amp/fiche/produits/colle-ms-polymeres-spatulable-pour-parquets-tar-p69107668.html", "date": "2026-10-04" }
+      ],
+      "ecart": "1 kg/m² au référentiel = bas de la fourchette fabricant (1 à 1,4)."
+    },
+    {
+      "id": "plinthe_mdf_longueur",
+      "libelle": "Plinthe MDF ou bois : longueur de barre",
+      "avant": "2,40 m (ou 2,50 m) (à vérifier)",
+      "valeur": "2,20 m et 2,40 m (hauteur 70 mm, 8 à 14 mm d'épaisseur) ; aucune barre de 2,50 m trouvée",
+      "unite": "m",
+      "statut": "contradiction",
+      "sources": [
+        { "url": "https://www.bricomarche.com/p/plinthe-arrondie-mdf-revetu-blanc-10x70-l.2.40m/3428350061996", "date": "2026-10-04" },
+        { "url": "https://www.bricomarche.com/p/plinthe-mdf-brut-8x70mm-l.2.20m/3760137537158", "date": "2026-10-04" }
+      ],
+      "ecart": "2,20 m existe à côté de 2,40 m : la longueur dépend de l'article ; 2,50 m non trouvé."
+    },
+    {
+      "id": "barre_seuil",
+      "libelle": "Barre de seuil / profil de transition : longueur",
+      "avant": "barre 0,93 m ou 2,70 m (à vérifier)",
+      "valeur": "0,93 m de long ; 2,70 cm (27 mm) ou 37 mm de large ; rattrape 0 à 6 mm",
+      "unite": "m",
+      "statut": "contradiction",
+      "sources": [
+        { "url": "https://www.bricoman.fr/produits/barre-de-seuil-aluminium-chene-auto-adhesif-l-93-x-l-2-70-cm-fario-1502571.html", "date": "2026-10-04" },
+        { "url": "https://www.castorama.fr/barre-de-seuil-en-aluminium-decor-bois-goodhome-37-x-930-mm-decor-200/3663602530275_CAFR.prd", "date": "2026-10-04" }
+      ],
+      "ecart": "Le « 2,70 » du référentiel est la largeur (2,70 cm), pas une longueur de 2,70 m. Longueur commerciale : 0,93 m."
+    }
+  ],
+  "introuvable": [
+    "Règle d'espacement des fixations en coulissant (0,30 ou 0,60 m) : texte NF DTU 36.5 non lu.",
+    "Compribande TP600 : section par défaut selon le jeu, à valider par un poseur.",
+    "Pattes de fixation : sachet de 10 ou boîte de 50.",
+    "Habillages PVC : longueur de barre (3 m supposé).",
+    "Tapées et pattes livrées par le fabricant : propre à chaque fabricant."
+  ]
+}
