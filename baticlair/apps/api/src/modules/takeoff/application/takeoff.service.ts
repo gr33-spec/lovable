@@ -7,6 +7,7 @@ import {
   isCoastal,
   factsFromReading,
   readSiteNotes,
+  type Referential,
   computeWithAnswers,
   postalCodeIn,
   purchaseView,
@@ -62,6 +63,11 @@ export interface ReadingOptions {
   projectAddress?: (tenant: TenantContext, projectId: string) => Promise<string | null>;
   /** Infos chantier facultatives : la note de l'artisan (texte libre, commentaires de croquis), lue à chaque calcul. */
   projectNotes?: (tenant: TenantContext, projectId: string) => Promise<string | null>;
+  /**
+   * Version figée par chantier (plan v3 §3) : le référentiel est enregistré à sa version quand le quantitatif naît,
+   * et chaque recalcul relit CETTE version. Sans ce port, le référentiel du jour sert (tests unitaires).
+   */
+  referentials?: { ensure(ref: Referential): Promise<void>; load(version: string): Promise<Referential | null> };
   /** Mesures de chaque lecture (journal du serveur), en plus de leur enregistrement avec l'analyse. */
   onStats?: (stats: ReadingStats) => void;
   policy?: ExtractionPolicy;
@@ -315,6 +321,7 @@ export class TakeoffService {
     );
     const success = { model: read.model, output };
 
+    await this.reading.referentials?.ensure(ROOFING_REFERENTIAL);
     const takeoff = await this.takeoffs.create(tenant, {
       projectId: doc.projectId,
       documentId,
@@ -354,6 +361,7 @@ export class TakeoffService {
     lines: readonly { designation: string; quantity: string | null; unit: string | null; price: string | null }[],
   ): Promise<ReviewedTakeoff> {
     assertCanWrite(tenant);
+    await this.reading.referentials?.ensure(ROOFING_REFERENTIAL);
     const takeoff = await this.takeoffs.create(tenant, {
       projectId,
       documentId: null,
@@ -627,6 +635,8 @@ export class TakeoffService {
       confirmed: l.confirmed,
       enteredByArtisan: l.origin !== "ai" || l.edited,
     }));
+    // Version figée : les règles de la version enregistrée avec le quantitatif, jamais celles du jour.
+    const ref = (takeoff.referentialVersion && takeoff.referentialVersion !== ROOFING_REFERENTIAL.version ? await this.reading.referentials?.load(takeoff.referentialVersion) : null) ?? ROOFING_REFERENTIAL;
     // La zone climatique vient du code postal du chantier (jamais demandée) ; le devis l'emporte s'il l'écrit.
     const address = (await this.reading.projectAddress?.(tenant, takeoff.projectId)) ?? null;
     const zone = climateZone(postalCodeIn(address));
@@ -637,13 +647,13 @@ export class TakeoffService {
     }
     // Prompt A (§41.1) : la pente, le rampant, l'épaisseur lus par l'IA dans la ligne ou l'en-tête entrent dans
     // le calcul (après le texte lu par le code, avant les hypothèses par défaut).
-    extraFacts.push(...factsFromReading(ROOFING_REFERENTIAL, takeoff.lines.map((l) => ({ ref: l.id, dimensions: l.dimensions })), takeoff.context));
+    extraFacts.push(...factsFromReading(ref, takeoff.lines.map((l) => ({ ref: l.id, dimensions: l.dimensions })), takeoff.context));
     // Infos chantier facultatives : les mesures nommées de la note de l'artisan passent devant le devis (l'explication dit les deux).
-    extraFacts.push(...readSiteNotes(ROOFING_REFERENTIAL, (await this.reading.projectNotes?.(tenant, takeoff.projectId)) ?? null));
-    const plan = planQuote(lines.map((l) => ({ ref: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, section: l.section })), ROOFING_REFERENTIAL, profile, undefined, extraFacts);
+    extraFacts.push(...readSiteNotes(ref, (await this.reading.projectNotes?.(tenant, takeoff.projectId)) ?? null));
+    const plan = planQuote(lines.map((l) => ({ ref: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, section: l.section })), ref, profile, undefined, extraFacts);
     // Niveau 1 : le rôle de chaque quantité (mesure d'ouvrage ou à commander), proposé par le code
     // et ENREGISTRÉ avec la ligne ; une mesure ne devient jamais une quantité d'achat.
-    const proposals = proposeLineRoles(takeoff.lines.map((l) => ({ ref: l.id, reference: l.reference, designation: l.designation })), plan, read, ROOFING_REFERENTIAL);
+    const proposals = proposeLineRoles(takeoff.lines.map((l) => ({ ref: l.id, reference: l.reference, designation: l.designation })), plan, read, ref);
     const roles = new Map<string, LineRole>([...proposals].map(([id, p]) => [id, p.role]));
     // L'artisan a tranché une ambiguïté (« 6 : ardoises ou jouées ? ») : sa réponse fait foi pour ce chantier.
     for (const [key, value] of Object.entries(takeoff.answers)) {
@@ -662,12 +672,12 @@ export class TakeoffService {
     const acceptDraft = (await this.reading.isValidator?.(tenant)) ?? false;
     const engine =
       plan.inputs.length > 0
-        ? computeWithAnswers(ROOFING_REFERENTIAL, plan, takeoff.answers, await this.memory.forEngine(tenant), { acceptDraft }, slotsGivenByQuote(plan, validation))
+        ? computeWithAnswers(ref, plan, takeoff.answers, await this.memory.forEngine(tenant), { acceptDraft }, slotsGivenByQuote(plan, validation))
         : { needs: [], questions: [], declined: [] };
     const reviewed = { takeoff, validation, roles: new Map([...proposals].map(([id, p]) => [id, { ...p, role: roles.get(id) ?? p.role }])) };
-    const view = artisanView(lines, validation, engine, { plan, roles, ref: ROOFING_REFERENTIAL, asks });
+    const view = artisanView(lines, validation, engine, { plan, roles, ref, asks });
     // § 41.4 : les mots de l'artisan (libellé, quantité réécrits d'un tap) remplacent ceux de BatiClair.
-    return { ...reviewed, view, purchase: applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref: ROOFING_REFERENTIAL, validation }), takeoff.answers) };
+    return { ...reviewed, view, purchase: applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref, validation }), takeoff.answers) };
   }
 
   /**

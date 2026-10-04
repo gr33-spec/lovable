@@ -41,6 +41,12 @@ Avant de toucher au moteur, aux règles ou aux écrans, lire la section concern�
 - Pas de correction spécifique à un devis : chaque cas devient un test permanent.
 - Pas de contenu DTU protégé recopié ; pas de chiffre fabricant non sourcé.
 
+## Référentiels : forme, version, métiers
+
+- Un référentiel est une donnée : il passe par `validateReferential` (schéma zod, `schema.ts`) puis `checkReferential` avant le moteur ; `loadReferential` refuse un fichier faux avec le chemin de la faute. Test : `packages/domain/test/schema-referentiel.test.ts`, qui tient aussi à jour `referentiels/couverture/referentiel.json` (export de `roofing.ts`, qui reste la source de vérité).
+- Version figée par chantier : l'API enregistre l'instantané du référentiel à sa version (`referential_snapshot`) et recalcule chaque quantitatif avec SA version ; jamais les règles du jour. Test : `apps/api/test/version-figee.test.ts`.
+- Un second métier existe : `PLATRERIE_REFERENTIAL` (cloison 72/48), calculé par le même moteur sans changement ; ses chiffres non sourcés sont en brouillon. Toute donnée hors référentiel du fondateur reste `draft` tant qu'un professionnel ne l'a pas validée.
+
 ## Commandes utiles
 
 - `pnpm --filter @baticlair/domain build` (l'API importe `dist`)

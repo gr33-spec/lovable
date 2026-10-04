@@ -1,6 +1,8 @@
 import { waitUntil } from "@vercel/functions";
 import type { Alerter } from "../../platform/alerts/alerter.js";
 import { Module } from "@nestjs/common";
+import { loadReferential } from "@baticlair/domain";
+import type { Prisma } from "../../generated/prisma/client.js";
 import type { AppConfig } from "../../platform/config/config.js";
 import { PrismaService } from "../../platform/database/prisma.service.js";
 import type { AppLogger } from "../../platform/logging/logger.js";
@@ -81,6 +83,23 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             projectNotes: async (tenant, projectId) => {
               const project = await prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { siteNotes: true } });
               return project?.siteNotes ?? null;
+            },
+            // Version figée par chantier : l'instantané est écrit à la première rencontre d'une version, relu ensuite
+            // et revalidé par le schéma (un instantané abîmé ne sert jamais : on retombe sur le référentiel du jour).
+            referentials: {
+              ensure: async (ref) => {
+                await prisma.referentialSnapshot.upsert({ where: { version: ref.version }, create: { trade: ref.trade, version: ref.version, data: ref as unknown as Prisma.InputJsonValue }, update: {} });
+              },
+              load: async (version) => {
+                const row = await prisma.referentialSnapshot.findUnique({ where: { version } });
+                if (!row) return null;
+                try {
+                  return loadReferential(row.data);
+                } catch (error) {
+                  logger.error({ err: error, version }, "takeoff: instantané de référentiel invalide, référentiel du jour utilisé");
+                  return null;
+                }
+              },
             },
           },
         ),

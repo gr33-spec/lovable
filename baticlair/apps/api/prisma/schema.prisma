@@ -764,3 +764,14 @@ model Quantitatif {
   @@index([companyId, createdAt])
   @@map("quantitatif")
 }
+
+/// Version figée par chantier (plan v3 §3) : le référentiel tel qu'il était quand le quantitatif a été créé, pour
+/// le recalculer avec SES règles, jamais celles du jour. Une ligne par version rencontrée.
+model ReferentialSnapshot {
+  trade     String
+  version   String   @id
+  data      Json
+  createdAt DateTime @default(now())
+
+  @@map("referential_snapshot")
+}
