@@ -1,0 +1,37 @@
+{
+  "metier": {
+    "code": "arrosage-automatique",
+    "nom": "Arrosage automatique enterré",
+    "version": "0.2.0-recherche",
+    "maturite": "alpha",
+    "active": false,
+    "referentiel": "docs/referentiels/arrosage-automatique.md"
+  },
+  "valeurs": [
+    {
+      "id": "tube_pe25",
+      "libelle": "Tube PE 25 d'arrosage : couronne",
+      "avant": "couronne du tube de déport et du réseau (à confirmer chez Frans Bonhomme, Chausson, Hydralians)",
+      "valeur": "PE 25 basse densité 6 bar : couronnes de 25, 50 et 100 m",
+      "unite": "m",
+      "statut": "a_verifier",
+      "sources": [
+        {
+          "url": "https://www.bricomarche.com/p/tube-polyethylene-bd-6-bars-d.25-couronne-50m/3396048125506",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://dvs-beregnung.de/tuyau-pe/tuyau-pe-25-mm-3/4::DVS-Beregnung_2__resistance-a-la-pression-pn-16-systeme-d-irrigation?qf=1",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Sources GSB et revendeur allemand ; négoce français non lu."
+    }
+  ],
+  "introuvable": [
+    "Sachets de connecteurs et crampons de goutte-à-goutte.",
+    "Grillage avertisseur : longueur de rouleau.",
+    "Colliers de prise en charge disponibles.",
+    "Exigence anti-retour (NF EN 1717) pour l'arrosage enterré."
+  ]
+}

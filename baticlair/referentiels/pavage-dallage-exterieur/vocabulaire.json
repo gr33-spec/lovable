@@ -1,0 +1,71 @@
+{
+ "metier": "pavage-dallage-exterieur",
+ "ouvrages": {
+  "pavage_souple": {
+   "expressions": [
+    "allée pavée",
+    "pavage",
+    "pavés autobloquants",
+    "pavés drainants",
+    "garage",
+    "voiture",
+    "stationnement",
+    "cour carrossable",
+    "accès garage",
+    "entrée de propriété",
+    "parking"
+   ]
+  },
+  "dallage_souple": {
+   "expressions": [
+    "terrasse en dalles",
+    "dallage extérieur",
+    "dalles gravillonnées",
+    "dalles pierre",
+    "scellé",
+    "sur chape",
+    "sur dalle béton"
+   ]
+  },
+  "dallage_plots": {
+   "expressions": [
+    "terrasse sur plots",
+    "dalles sur plots",
+    "toit-terrasse"
+   ]
+  },
+  "bordure": {
+   "expressions": [
+    "bordure p1",
+    "t1",
+    "t2",
+    "a2",
+    "cs1",
+    "bordurette",
+    "volige de rive",
+    "fil d'eau",
+    "caniveau cc1 / cs2",
+    "caniveau à grille"
+   ]
+  },
+  "pas_japonais": {
+   "expressions": [
+    "pas japonais",
+    "pas japonais dans gazon"
+   ]
+  },
+  "rejointoiement": {
+   "expressions": [
+    "rejointoiement",
+    "réfection des joints",
+    "sable polymère"
+   ]
+  }
+ },
+ "note": "Extrait du chapitre 3 de pavage-dallage-exterieur.md (expressions entre guillemets du document).",
+ "renvois": {
+  "décaissement, terrassement": "terrassier",
+  "terrasse bois": "terrasse-bois-composite",
+  "dalles sur étanchéité": "etancheur"
+ }
+}

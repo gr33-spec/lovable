@@ -1,0 +1,79 @@
+{
+  "metier": {
+    "code": "terrassier",
+    "nom": "Terrassement, VRD, assainissement non collectif",
+    "version": "0.2.0-recherche",
+    "maturite": "alpha",
+    "active": false,
+    "referentiel": "docs/referentiels/terrassier.md"
+  },
+  "valeurs": [
+    {
+      "id": "polyane_dallage",
+      "libelle": "Film polyéthylène sous dallage : rouleau",
+      "avant": "6 × 25 m (150 m²) ou 4 × 30 m (120 m²), 150 µm (à vérifier)",
+      "valeur": "6 × 25 m (150 m², 17 à 21 kg) et 4 × 30 m (120 m²) en 150 µm ; 4 × 25 m (100 m²) aussi",
+      "unite": "m²/rouleau",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.bricomarche.com/p/film-d-etancheite-sous-dalle-polyethylene-6x25m/3396041120003",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.bricocash.fr/p/film-d-etancheite-pe-haute-resistance-pour-sous-dalle-4x30m/3283460073389",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.bricodepot.fr/p/3585150014437/rouleau-de-film-sous-dallage-tri-couche-150-microns-4-x-25-m",
+          "date": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "id": "fosse_toutes_eaux",
+      "libelle": "Fosse toutes eaux : volume",
+      "avant": "3 000 L jusqu'à 5 pièces principales, +1 000 L par pièce en plus (NF DTU 64.1, à vérifier)",
+      "valeur": "3 m³ jusqu'à 5 pièces principales, +1 m³ par pièce supplémentaire",
+      "unite": "L",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://reseau-eau.educagri.fr/files/fichierRessource1_NF-DTU-64.1.pdf",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://ville-epernon.fr/wp-content/uploads/2025/01/Guide-de-lassainissement-non-collectif-ATD-28.pdf",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Règle confirmée par un extrait de la NF DTU 64.1 (ressource pédagogique) et un guide départemental."
+    },
+    {
+      "id": "bordure_t2",
+      "libelle": "Bordure béton T2 : poids et palette",
+      "avant": "pièce de 1 m (à vérifier)",
+      "valeur": "T2 15 × 25 × 100 : ≈ 81 kg, 18 par palette (1 458 kg) ; une autre fiche donne 24 par palette ; T2 basse 53 kg, 24 par palette ; P1 ≈ 36 kg",
+      "unite": "kg/pièce",
+      "statut": "contradiction",
+      "sources": [
+        {
+          "url": "https://www.hellopro.fr/bordure-t2-2000585-6057533-produit.html",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.hellopro.fr/bordure-p1-classe-u-b-2000585-6057664-produit.html",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "18 ou 24 bordures T2 par palette selon le fabricant : à fixer par fournisseur."
+    }
+  ],
+  "introuvable": [
+    "Densités de granulats par carrière et par région (Lafarge, Eiffage, Colas) : pages non lisibles.",
+    "Tableau d'épandage de la NF DTU 64.1 par perméabilité : texte payant.",
+    "Regards béton (Stradal, Bonna Sabla) : éléments et poids.",
+    "Seuil de livraison en vrac (8 t) et charge utile d'un 8 × 4 (≈ 19 t).",
+    "Cahiers des charges Enedis / Orange / GRDF pour les fourreaux."
+  ]
+}

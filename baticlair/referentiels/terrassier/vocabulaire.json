@@ -1,0 +1,106 @@
+{
+ "metier": "terrassier",
+ "ouvrages": {
+  "fouille_fondation": {
+   "expressions": [
+    "fouilles en rigole",
+    "fouilles de fondation",
+    "semelles filantes"
+   ]
+  },
+  "fouille_pleine_masse": {
+   "expressions": [
+    "fouille en pleine masse",
+    "déblais",
+    "sous-sol",
+    "décaissement"
+   ]
+  },
+  "plateforme_empierrement": {
+   "expressions": [
+    "empierrement",
+    "fond de forme",
+    "couche de forme",
+    "tout-venant",
+    "tv 0/80",
+    "gnt",
+    "grave",
+    "concassé",
+    "0/31,5",
+    "0/20",
+    "macadam"
+   ]
+  },
+  "tranchee_reseau_humide": {
+   "expressions": [
+    "eu",
+    "ep",
+    "ev",
+    "aep",
+    "branchement tout-à-l'égout",
+    "pvc 100",
+    "ø125",
+    "cr8",
+    "regard de branchement",
+    "boîte de branchement"
+   ]
+  },
+  "tranchee_reseau_sec": {
+   "expressions": [
+    "fourreau",
+    "gaine tpc",
+    "gaine rouge",
+    "tranchée edf / enedis",
+    "fourreau télécom / orange",
+    "gaine verte"
+   ]
+  },
+  "drainage_peripherique": {
+   "expressions": [
+    "drain",
+    "drainage périphérique",
+    "drain agricole",
+    "drain routier",
+    "drain ø100",
+    "regard de drainage"
+   ]
+  },
+  "anc_epandage": {
+   "expressions": [
+    "fosse toutes eaux",
+    "fte",
+    "épandage",
+    "tranchées d'épandage",
+    "filtre à sable",
+    "microstation",
+    "spanc",
+    "anc"
+   ]
+  },
+  "puisard_infiltration": {
+   "expressions": [
+    "puisard",
+    "puits perdu",
+    "puits d'infiltration",
+    "tranchée drainante",
+    "puits"
+   ]
+  },
+  "remblai_apport": {
+   "expressions": [
+    "remblai en sable",
+    "remblai gnt",
+    "apport de terre",
+    "terre végétale d'apport",
+    "remblai",
+    "apport"
+   ]
+  }
+ },
+ "note": "Extrait du chapitre 3 de terrassier.md (expressions entre guillemets du document).",
+ "renvois": {
+  "béton de fondation, dallage, hérisson (béton)": "maconnerie",
+  "pavés, bordures": "pavage-dallage-exterieur",
+  "gaine tpc et câble": "electricite"
+ }
+}

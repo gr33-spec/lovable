@@ -1,0 +1,32 @@
+{
+  "metier": {
+    "code": "constructeur-de-maisons-entreprise-generale",
+    "nom": "Constructeur de maisons / entreprise générale (routage par lot)",
+    "version": "0.2.0-recherche",
+    "maturite": "alpha",
+    "active": false,
+    "referentiel": "docs/referentiels/constructeur-de-maisons-entreprise-generale.md"
+  },
+  "valeurs": [
+    {
+      "id": "renvoi_lots",
+      "libelle": "Conditionnements du plan de complétion C4",
+      "avant": "vis, bande, montants, câble 3G6 / 3G10, tubes PVC, bande périphérique, pare-vapeur (à relever)",
+      "valeur": "portés par les tiroirs des lots : plâtrerie (vis TTPC, bande), électricité (R2V 3G6 à la coupe), plomberie (PVC), chauffage-ventilation (bande périphérique), terrassier (polyane)",
+      "unite": "—",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.123elec.com/cable-electrique-r2v-3g6-m-b-vj-nexans-prix-au-metre.html",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Aucune valeur propre au constructeur : rien n'est recopié, pour qu'une correction n'ait qu'un seul endroit."
+    }
+  ],
+  "introuvable": [
+    "10 devis réels de maisons neuves et leurs bons de commande.",
+    "Liste H2c et table départementale (arrêté du 4 août 2021).",
+    "Doublage collé 10+80 à 10+120 : mortier adhésif par m² (Placo, Knauf, Siniat)."
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "metier": {
+    "code": "terrasse-bois-composite",
+    "nom": "Terrasse bois et composite",
+    "version": "0.2.0-recherche",
+    "maturite": "alpha",
+    "active": false,
+    "referentiel": "docs/referentiels/terrasse-bois-composite.md"
+  },
+  "valeurs": [
+    {
+      "id": "saturateur",
+      "libelle": "Saturateur terrasse : rendement et pots",
+      "avant": "8 à 12 m²/L par couche, 2 couches sur bois neuf, pots 1 / 2,5 / 5 L (à vérifier)",
+      "valeur": "Blanchon : 6 à 8 m²/L ; Syntilor : 10 à 12 m²/L ; formulation générique : 4 m²/L en première saturation, 8 en entretien ; pots 0,75 / 2,5 / 3 / 5 L",
+      "unite": "m²/L",
+      "statut": "contradiction",
+      "sources": [
+        {
+          "url": "https://www.bricozor.com/saturateur-bois-terrasses-menuserie-exterieures-blanchon.html",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.castorama.fr/saturateur-terrasses-bardages-syntilor-mat-bois-grises-2-5l/3239918194052_CAFR.prd",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.batiproduits.com/amp/fiche/produits/protection-non-filmogene-pour-tous-types-de-bois-p69018998.html",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "De 4 à 12 m²/L selon le produit et la couche : la première couche sur bois neuf consomme 2 à 3 fois plus. Le 8-12 du référentiel est haut pour Blanchon."
+    }
+  ],
+  "introuvable": [
+    "Lambourdes pin classe 4 : longueurs négoce (2,40 / 3,00 / 4,00 / 4,80).",
+    "Lames composites hors marques citées (Fiberon, Trex, UPM, TimberTech) : longueurs, clips, entraxe.",
+    "Géotextile 100-150 g/m² : rouleaux 1 × 25, 2 × 25, 4 × 25 m.",
+    "Douglas 27 × 145 : autres longueurs que 3 m, poids au mètre.",
+    "Classe 4 = pin autoclave dans 95 % des devis : pratique à valider."
+  ]
+}

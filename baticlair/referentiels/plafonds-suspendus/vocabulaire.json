@@ -1,0 +1,68 @@
+{
+ "metier": "plafonds-suspendus",
+ "ouvrages": {
+  "plafond_plaque_simple": {
+   "expressions": [
+    "faux plafond placo",
+    "plafond ba13 sur ossature",
+    "plafond suspendu plaque de plâtre",
+    "placostil",
+    "faux plafond rail fourrure",
+    "plafond sous fermettes",
+    "plafond placo"
+   ]
+  },
+  "plafond_plaque_double": {
+   "expressions": [
+    "2 ba13",
+    "double peau",
+    "rei 30/60",
+    "coupe-feu 1 h",
+    "plafond phonique"
+   ]
+  },
+  "plafond_plaque_hydro": {
+   "expressions": [
+    "ba13 hydro",
+    "plaque verte",
+    "h1",
+    "placomarine",
+    "salle de bain",
+    "sde"
+   ]
+  },
+  "plafond_dalles_600": {
+   "expressions": [
+    "faux plafond dalles",
+    "plafond démontable",
+    "dalles 60×60",
+    "t24",
+    "dalles minérales",
+    "rockfon",
+    "armstrong",
+    "ecophon",
+    "tropic",
+    "artic",
+    "dalle led 60×60"
+   ]
+  },
+  "plafond_dalles_1200": {
+   "expressions": [
+    "dalles 120×60",
+    "1200×600"
+   ]
+  },
+  "plafond_ossature_seule": {
+   "expressions": [
+    "remplacement dalles",
+    "changement de dalles",
+    "reprise ossature"
+   ]
+  }
+ },
+ "note": "Extrait du chapitre 3 de plafonds-suspendus.md (expressions entre guillemets du document).",
+ "renvois": {
+  "cloisons, doublages": "platrerie-isolation",
+  "isolant en plénum": "platrerie-isolation"
+ }
+}

@@ -1,0 +1,37 @@
+{
+  "metier": {
+    "code": "cuisine",
+    "nom": "Cuisine : meubles, plans, crédence, finitions",
+    "version": "0.2.0-recherche",
+    "maturite": "alpha",
+    "active": false,
+    "referentiel": "docs/referentiels/cuisine.md"
+  },
+  "valeurs": [
+    {
+      "id": "plinthe_cuisine",
+      "libelle": "Plinthe de cuisine : longueur et hauteur",
+      "avant": "longueurs réelles à relever (catalogues)",
+      "valeur": "2,40 m (Delinia, GoodHome), 2,50 m en profil PVC ; hauteurs 10, 12 et 15 cm",
+      "unite": "m",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.castorama.fr/plinthe-de-cuisine-goodhome-alpinia-chene-h-15-cm-x-l-2-4-m-x-ep-16-mm/3663602640035_CAFR.prd",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.leroymerlin.fr/produits/plinthe-de-cuisine-profile-de-plinthe-en-pvc-l-2-5m-accessoires-2-cornieres-90-1-joint-fabrique-en-italie-couleur-plomb-h-150mm-87652777.html",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Longueurs GSB ; les cuisinistes (Schmidt, Mobalpa, Nobilia) ont leurs propres longueurs."
+    }
+  ],
+  "introuvable": [
+    "Crédences assorties : longueurs.",
+    "Boîtes de chevilles, vis, équerres (Fischer, Spit, Würth).",
+    "Kits fournis par les fabricants de meubles (pieds, suspensions).",
+    "Plans sur mesure : épaisseurs et découpes (Cosentino)."
+  ]
+}

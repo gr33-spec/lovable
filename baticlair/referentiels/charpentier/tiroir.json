@@ -1,0 +1,57 @@
+{
+  "metier": {
+    "code": "charpentier",
+    "nom": "Charpente bois traditionnelle et fermettes",
+    "version": "0.2.0-recherche",
+    "maturite": "alpha",
+    "active": false,
+    "referentiel": "docs/referentiels/charpentier.md"
+  },
+  "valeurs": [
+    {
+      "id": "abr105_pointes",
+      "libelle": "Équerre Simpson ABR105 : pointes",
+      "avant": "nombre de trous et pointes par modèle (à relever)",
+      "valeur": "24 pointes Ø5 par équerre (10 sur l'aile B, 14 sur l'aile C), pose en clouage total",
+      "unite": "pointes/équerre",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://www.eurabo.be/files/attachments/.6503/02FR_simpson_strongtie_ABR105_fiche_techn.pdf",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://medias.descours-cabaud.com/d180001/medias/docus/59/Simpson_ABR-Equerre-renforcee-105-70-90.pdf",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Boîte d'équerres non trouvée."
+    },
+    {
+      "id": "feuillard",
+      "libelle": "Feuillard perforé : rouleau",
+      "avant": "feuillard en rouleau (à relever)",
+      "valeur": "Simpson FP40/2 : 40 × 2 mm en 10, 25 ou 50 m ; 40 mm × 25 m en GSB (0,5 mm) ; 20 mm × 10 m",
+      "unite": "m/rouleau",
+      "statut": "source",
+      "sources": [
+        {
+          "url": "https://res.cloudinary.com/afdb/raw/upload/s--decPvHBi--/v1/documents/322870_feuillard_simpson_str.pdf",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://www.123elec.com/sedea-feuillard-en-acier-rouleau-de-25m-80095.html",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "L'épaisseur change tout (0,5 contre 2 mm) : la ligne doit la dire."
+    }
+  ],
+  "introuvable": [
+    "Sections et longueurs commerciales de chevrons, bastaings, madriers chez Point.P et Gedimat.",
+    "Table neige par commune et zone de vent par département.",
+    "NF DTU 31.1 et 31.3 : textes payants.",
+    "Traitement de charpente : rendement d'une fiche fabricant officielle.",
+    "Sabots et étriers Simpson : conditionnement."
+  ]
+}

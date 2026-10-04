@@ -1,0 +1,57 @@
+{
+  "metier": {
+    "code": "etancheur",
+    "nom": "Étanchéité de toitures-terrasses",
+    "version": "0.2.0-recherche",
+    "maturite": "alpha",
+    "active": false,
+    "referentiel": "docs/referentiels/etancheur.md"
+  },
+  "valeurs": [
+    {
+      "id": "membrane_sbs_rouleau",
+      "libelle": "Membrane bitume SBS : rouleau",
+      "avant": "formats négoce à lire (Point.P, Tanguy, Samse, Chausson)",
+      "valeur": "rouleaux de 1 × 6 m (Chape Alu Mammouth, GSB) et 1 × 10 m ; stockés debout, 2 palettes gerbées au plus",
+      "unite": "m²/rouleau",
+      "statut": "a_verifier",
+      "sources": [
+        {
+          "url": "https://www.bricomarche.com/p/couche-de-finition-alu-chape-alu-mammouth-sbs-6x1m/3434550871617",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://lotus.soprema.fr/www/reftechsop.nsf/($AllByUNID)/58BBBC69C36E7DD8C125886E003290AF/$File/TDS_WPBFR508.a.FR%20ALU%20CHAPE%20SBS%20ECO.pdf",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Formats lus dans des extraits ; le nombre de rouleaux par palette n'est pas confirmé."
+    },
+    {
+      "id": "colle_epdm",
+      "libelle": "Colle de contact EPDM (Firestone RubberCover BA-2012)",
+      "avant": "consommation à lire sur DTA",
+      "valeur": "jusqu'à 70 m² par bidon (BA-2012) ; spray de contact ≈ 3 m² annoncés pour un autre format",
+      "unite": "m²/bidon",
+      "statut": "contradiction",
+      "sources": [
+        {
+          "url": "https://adammateriaux.be/storage/products/729/guide-utilisation-ba-2012-fr.pdf",
+          "date": "2026-10-04"
+        },
+        {
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_991147.pdf",
+          "date": "2026-10-04"
+        }
+      ],
+      "ecart": "Les deux chiffres ne visent pas le même produit ; contenance du bidon à lire sur la fiche."
+    }
+  ],
+  "introuvable": [
+    "Pare-vapeur bitume soudable (Elastovap, Paravap) et colle d'isolant : fiches.",
+    "TPO/FPO, laine de roche, PSE, verre cellulaire : un produit leader chacun.",
+    "Résine SEL (Alsan, Sikalastic, Kemper) : consommations.",
+    "Végétalisé : drainage, filtre, substrat.",
+    "Couvertines et bandes de solin : longueurs ; vis : boîtes."
+  ]
+}
