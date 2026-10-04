@@ -1,5 +1,10 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.04-22 — surlongueur de bobine, bâche fournie
+
+- **Surlongueur de bobine** (réponse du fondateur) : **15 cm par bac** (10 en égout, 5 en faîtage), ajoutés au rampant avant de multiplier par le nombre de bacs. Chantier Test, 91 m², rampant 7 m, bobine 500 : 31 × 7,15 = **222 ml** (avant : 217 ml). 91 m², rampant 5,5 m : 39 × 5,65 = **221 ml** (avant : 215 ml).
+- **Bâche de protection** : une fourniture (famille `tarpaulin` du métier), elle part au fournisseur telle qu'écrite ; « bâche » n'est plus un mot de main d'œuvre.
+
 ## roofing-2026.10.04-21 — sortie de toit : le diamètre à boutons
 
 - **Sortie de toit** (famille `roof_outlet`, réponse du fondateur : « boutons Ø 80 / 100 / 125 / 150 / 180 ou VMC ») : la ligne reste telle qu'écrite (marque, modèle) ; quand elle ne dit pas le diamètre (ni « Ø », ni « diamètre », ni « VMC », ni « 80/100/125/150/180 mm »), elle est orange avec une question à six boutons. La réponse part dans la colonne « précision » (« Ø 150 ») ; « Je ne sais pas » : la ligne part telle quelle, à préciser avec le fournisseur (gris). Nouveau champ de famille `ask` (question, boutons, expression « déjà dit »).

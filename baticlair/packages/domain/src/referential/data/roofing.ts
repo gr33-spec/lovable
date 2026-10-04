@@ -548,7 +548,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.04-21",
+  version: "roofing-2026.10.04-22",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -1724,6 +1724,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         seuil_070: condition("0.7", "mm", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }),
         seuil_080: condition("0.8", "mm", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }),
         rampant_max_bac: condition("10", "m", F, FOUNDER_DOC, "« bacs profilés à longueur (max 10 à 15 m) » (§7) : 10 m retenu."),
+        surlongueur_bac: condition("0.15", "m", F, { status: "verified", verifiedAt: "2026-10-04", verifiedBy: "Fondateur (couvreur)" }, "« 15 cm par bac (10 en égout, 5 en faîtage), ajoutés au rampant avant de multiplier par le nombre de bacs » (réponse du fondateur, 2026-10-04)."),
         fixations_par_patte: condition("2", "u", "vmzinc-joint-debout", FOUNDER_DOC, "« 2 fixations par patte » (§36.2)."),
         coef_egout_faitage: condition("1.05", "u", F, FOUNDER_DOC, "« ml égout × 1,05 », « ml faîtage × 1,05 » (§7)."),
         longueur_utile_bande: condition("1.9", "m", F, FOUNDER_DOC, "Bandes de 2 m, recouvrement 10 cm (§25.2)."),
@@ -1781,13 +1782,13 @@ export const ROOFING_REFERENTIAL: Referential = {
           slot: "bobine",
           // Je façonne ; ou bien je commande façonné mais le rampant dépasse 10 m et je profile la bobine sur place.
           when: "si(zone >= regle.zone_littorale, 0, si(faconnage < 2, 1, si(longueur_rampant > regle.rampant_max_bac, si(bacs_longs < 2, 1, 0), 0)))",
-          // Une bande de bobine par bac, à la longueur du rampant : nombre de bacs (largeur du pan ÷ largeur utile) × rampant.
+          // Une bande de bobine par bac : nombre de bacs (largeur du pan ÷ largeur utile) × (rampant + 15 cm de surlongueur).
           // L'épaisseur ne change pas la longueur mais l'article : le facteur 1 la garde dans le calcul, donc dite
           // (hypothèse modifiable) et transmise au fournisseur dans « Le chantier en bref ».
-          formula: "arrondi_sup(largeur_pan / entraxe_joints) * longueur_rampant * si(epaisseur_zinc >= regle.seuil_070, 1, 1)",
+          formula: "arrondi_sup(largeur_pan / entraxe_joints) * (longueur_rampant + regle.surlongueur_bac) * si(epaisseur_zinc >= regle.seuil_070, 1, 1)",
           unit: "m",
           core: true,
-          exclusions: "Une longueur de rampant par bac, sans surlongueur de pliage en égout et en faîtage ; hors bandes d'égout, de rive, de faîtage et de noue, comptées à part.",
+          exclusions: "Une longueur de rampant par bac plus 15 cm de surlongueur (10 en égout, 5 en faîtage) ; hors bandes d'égout, de rive, de faîtage et de noue, comptées à part.",
           source: "vmzinc-joint-debout",
           verification: FOUNDER_DOC,
           version: 1,
@@ -1797,13 +1798,13 @@ export const ROOFING_REFERENTIAL: Referential = {
           slot: "bobine_littoral",
           // Je façonne ; ou bien je commande façonné mais le rampant dépasse 10 m et je profile la bobine sur place.
           when: "si(zone >= regle.zone_littorale, si(faconnage < 2, 1, si(longueur_rampant > regle.rampant_max_bac, si(bacs_longs < 2, 1, 0), 0)), 0)",
-          // Une bande de bobine par bac, à la longueur du rampant : nombre de bacs (largeur du pan ÷ largeur utile) × rampant.
+          // Une bande de bobine par bac : nombre de bacs (largeur du pan ÷ largeur utile) × (rampant + 15 cm de surlongueur).
           // L'épaisseur ne change pas la longueur mais l'article : le facteur 1 la garde dans le calcul, donc dite
           // (hypothèse modifiable) et transmise au fournisseur dans « Le chantier en bref ».
-          formula: "arrondi_sup(largeur_pan / entraxe_joints) * longueur_rampant * si(epaisseur_zinc >= regle.seuil_070, 1, 1)",
+          formula: "arrondi_sup(largeur_pan / entraxe_joints) * (longueur_rampant + regle.surlongueur_bac) * si(epaisseur_zinc >= regle.seuil_070, 1, 1)",
           unit: "m",
           core: true,
-          exclusions: "Une longueur de rampant par bac, sans surlongueur de pliage en égout et en faîtage ; hors bandes d'égout, de rive, de faîtage et de noue, comptées à part.",
+          exclusions: "Une longueur de rampant par bac plus 15 cm de surlongueur (10 en égout, 5 en faîtage) ; hors bandes d'égout, de rive, de faîtage et de noue, comptées à part.",
           source: "vmzinc-joint-debout",
           verification: FOUNDER_DOC,
           version: 1,

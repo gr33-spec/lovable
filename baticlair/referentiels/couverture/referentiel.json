@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.04-21",
+  "version": "roofing-2026.10.04-22",
   "trade": "roofing",
   "sources": [
     {
@@ -7413,6 +7413,19 @@
           "version": 1,
           "note": "« bacs profilés à longueur (max 10 à 15 m) » (§7) : 10 m retenu."
         },
+        "surlongueur_bac": {
+          "kind": "installation_condition",
+          "value": "0.15",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1,
+          "note": "« 15 cm par bac (10 en égout, 5 en faîtage), ajoutés au rampant avant de multiplier par le nombre de bacs » (réponse du fondateur, 2026-10-04)."
+        },
         "fixations_par_patte": {
           "kind": "installation_condition",
           "value": "2",
@@ -7765,10 +7778,10 @@
           "id": "zinc-bobines",
           "slot": "bobine",
           "when": "si(zone >= regle.zone_littorale, 0, si(faconnage < 2, 1, si(longueur_rampant > regle.rampant_max_bac, si(bacs_longs < 2, 1, 0), 0)))",
-          "formula": "arrondi_sup(largeur_pan / entraxe_joints) * longueur_rampant * si(epaisseur_zinc >= regle.seuil_070, 1, 1)",
+          "formula": "arrondi_sup(largeur_pan / entraxe_joints) * (longueur_rampant + regle.surlongueur_bac) * si(epaisseur_zinc >= regle.seuil_070, 1, 1)",
           "unit": "m",
           "core": true,
-          "exclusions": "Une longueur de rampant par bac, sans surlongueur de pliage en égout et en faîtage ; hors bandes d'égout, de rive, de faîtage et de noue, comptées à part.",
+          "exclusions": "Une longueur de rampant par bac plus 15 cm de surlongueur (10 en égout, 5 en faîtage) ; hors bandes d'égout, de rive, de faîtage et de noue, comptées à part.",
           "source": "vmzinc-joint-debout",
           "verification": {
             "status": "verified",
@@ -7782,10 +7795,10 @@
           "id": "zinc-bobines-littoral",
           "slot": "bobine_littoral",
           "when": "si(zone >= regle.zone_littorale, si(faconnage < 2, 1, si(longueur_rampant > regle.rampant_max_bac, si(bacs_longs < 2, 1, 0), 0)), 0)",
-          "formula": "arrondi_sup(largeur_pan / entraxe_joints) * longueur_rampant * si(epaisseur_zinc >= regle.seuil_070, 1, 1)",
+          "formula": "arrondi_sup(largeur_pan / entraxe_joints) * (longueur_rampant + regle.surlongueur_bac) * si(epaisseur_zinc >= regle.seuil_070, 1, 1)",
           "unit": "m",
           "core": true,
-          "exclusions": "Une longueur de rampant par bac, sans surlongueur de pliage en égout et en faîtage ; hors bandes d'égout, de rive, de faîtage et de noue, comptées à part.",
+          "exclusions": "Une longueur de rampant par bac plus 15 cm de surlongueur (10 en égout, 5 en faîtage) ; hors bandes d'égout, de rive, de faîtage et de noue, comptées à part.",
           "source": "vmzinc-joint-debout",
           "verification": {
             "status": "verified",
