@@ -123,6 +123,46 @@ describe("envoi fournisseur : un contenu, trois blocs, aucun prix", () => {
     expect(JSON.stringify(refused.body)).toContain("takeoff_not_validated");
   });
 
+  it("croquis d'un article (couvertine, habillage…) : joint à SA ligne, « croquis joint » dans la commande, en pages du PDF et en pièce jointe ; jamais dans la note du chantier", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "croquis@example.fr", "Toitures Martin");
+    const { projectId, supplierId } = await chantierPret(agent);
+    const q = (await agent.get(`/v1/quantitatifs?projetId=${projectId}&ecran=1`)).body;
+    const quantitatif = Array.isArray(q.items) ? q.items[0] : q;
+    const gouttiere = quantitatif.ecran.purchase.toBuy.find((b: { label: string }) => /^Gouttière/.test(b.label));
+    expect(gouttiere).toBeTruthy();
+    const avant = await pdfPageCount((await agent.get(`/v1/projects/${projectId}/commande.pdf`).buffer(true)).body as Buffer);
+    // PNG minimal (1 × 1 px).
+    const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64");
+    const res = await agent
+      .post(`/v1/projects/${projectId}/infos/croquis`)
+      .field("article", gouttiere.key)
+      .field("commentaire", "Couvertine dév. 330, 2 plis, longueurs de 2 m")
+      .attach("file", png, { filename: "couvertine.png", contentType: "image/png" });
+    expect(res.status).toBe(201);
+    expect(res.body).toMatchObject({ nom: "couvertine.png", article: gouttiere.key, commentaire: "Couvertine dév. 330, 2 plis, longueurs de 2 m" });
+    // La précision reste à l'article : la note du chantier n'est pas touchée (aucune mesure de chantier n'en sort).
+    const after = (await agent.get(`/v1/quantitatifs/${quantitatif.id}`)).body;
+    expect(after.infos.texte).toBeNull();
+    expect(after.infos.croquis).toContainEqual({ id: res.body.id, nom: "couvertine.png", article: gouttiere.key, commentaire: "Couvertine dév. 330, 2 plis, longueurs de 2 m" });
+
+    const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] })).body;
+    expect(created.packet.croquis).toEqual([{ article: gouttiere.label, id: res.body.id, nom: "couvertine.png", commentaire: "Couvertine dév. 330, 2 plis, longueurs de 2 m" }]);
+    const body: string = created.recipients[0].email.body;
+    expect(body).toContain(`${gouttiere.label} : `);
+    expect(body).toMatch(/— croquis joint\n/);
+    expect(body).toContain(`CROQUIS JOINTS (en fin de document)\n${gouttiere.label} · couvertine.png · Couvertine dév. 330, 2 plis, longueurs de 2 m`);
+    expect(priceLeak(body)).toBeNull();
+    // Le PDF a une page de plus pour le croquis ; le mail joint le PDF et le croquis d'origine.
+    const pdf = await agent.get(`/v1/price-requests/${created.id}/commande.pdf`).buffer(true);
+    expect(await pdfPageCount(pdf.body as Buffer)).toBe(avant + 1);
+    await agent.post(`/v1/price-request-recipients/${created.recipients[0].id}/send`).expect(200);
+    const mail = ctx.emails.lastTo("devis@pointp.fr")!;
+    expect(mail.attachments!.map((a) => [a.filename, a.contentType])).toEqual([
+      ["commande-dupont-refection-toiture.pdf", "application/pdf"],
+      ["couvertine.png", "image/png"],
+    ]);
+  });
+
   it("case « Joindre le détail du chantier » : cochée par défaut, mémorisée par entreprise, et le bloc 3 disparaît si elle est décochée", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     expect((await agent.get("/v1/price-requests/settings")).body).toEqual({ attachQuoteDetail: true, deliversEmail: true });

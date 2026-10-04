@@ -8,7 +8,7 @@ import type { RequestedLine } from "./price-request-email.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { priceRequestEmail, requestedQuantityText, supplierLineLabel } from "./price-request-email.js";
 import type { PriceRequestRecord, PriceRequestRepository, RecipientStatus } from "./price-request.repository.js";
-import { packetPdf, packetSubject, packetText, priceLeak, type SupplierPacket } from "./supplier-packet.js";
+import { packetPdf, packetSubject, packetText, priceLeak, type SketchFile, type SupplierPacket } from "./supplier-packet.js";
 
 export interface PriceRequestView extends PriceRequestRecord {
   /** E-mail prêt à envoyer, par destinataire : le texte des trois blocs (§43.5). */
@@ -36,11 +36,19 @@ export function buildPacket(
   options: { date: string; joindreDetail: boolean; message: string | null; dueDate: Date | null },
   /** Les lignes reprises du devis telles qu'elles partent (identiques réunies, §43.5 : une ligne par article). */
   direct: readonly RequestedLine[],
+  /** Croquis rattachés aux articles (clé de l'article) : la ligne dit « croquis joint », le PDF les montre. */
+  sketches: readonly { id: string; nom: string; itemKey: string; note: string | null }[] = [],
 ): SupplierPacket {
   const { purchase, takeoff, validation } = reviewed;
+  // Un croquis suit l'article de la liste : par sa clé (article calculé), ou par la ligne du devis reprise telle quelle.
+  const keyed = new Map<string, string>();
+  for (const b of purchase.toBuy) keyed.set(b.key, b.kind === "computed" ? b.label : supplierLineLabel(takeoff.lines.find((l) => b.lineIds.includes(l.id))?.designation ?? b.label));
+  const croquis = sketches.filter((s) => keyed.has(s.itemKey)).map((s) => ({ article: keyed.get(s.itemKey)!, id: s.id, nom: s.nom, commentaire: s.note }));
+  const withSketch = new Set(croquis.map((c) => c.article));
+  const joint = (label: string) => (withSketch.has(label) ? " — croquis joint" : "");
   const articles = [
-    ...purchase.toBuy.filter((b) => b.kind === "computed").map((b) => `${b.label} : ${b.quantity ?? "quantité à préciser"}${b.approx ? `, soit ${b.approx}` : ""}`),
-    ...direct.map((l) => `${supplierLineLabel(l.designation)}${l.reference ? ` (réf. ${l.reference})` : ""} : ${requestedQuantityText(l)}`),
+    ...purchase.toBuy.filter((b) => b.kind === "computed").map((b) => `${b.label} : ${b.quantity ?? "quantité à préciser"}${b.approx ? `, soit ${b.approx}` : ""}${joint(b.label)}`),
+    ...direct.map((l) => `${supplierLineLabel(l.designation)}${l.reference ? ` (réf. ${l.reference})` : ""} : ${requestedQuantityText(l)}${joint(supplierLineLabel(l.designation))}`),
   ];
   const a_chiffrer = purchase.toQuote.map((q) => `${supplierLineLabel(q.label)}${q.measure ? ` · ${q.measure}` : ""} — ${q.reason}`);
   // Le chantier en bref : le contexte lu dans le devis, puis les réponses et hypothèses du calcul, 3 par ligne, 5 lignes au plus.
@@ -101,6 +109,7 @@ export function buildPacket(
     detail,
     joindre_detail: options.joindreDetail,
     question_lien: null,
+    ...(croquis.length > 0 ? { croquis } : {}),
   };
 }
 
@@ -140,7 +149,17 @@ export class PriceRequestsService {
     const request = await this.requests.findById(tenant, requestId);
     if (!request?.packet) throw notFound("PriceRequest");
     const name = request.packet.chantier.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase() || "chantier";
-    return { filename: `commande-${name}.pdf`, bytes: await packetPdf(request.packet) };
+    return { filename: `commande-${name}.pdf`, bytes: await packetPdf(request.packet, await this.sketchFiles(tenant, request.packet)) };
+  }
+
+  /** Les fichiers des croquis d'une commande (relus au rendu ; un croquis supprimé depuis est simplement absent). */
+  private async sketchFiles(tenant: TenantContext, packet: SupplierPacket): Promise<SketchFile[]> {
+    const files: SketchFile[] = [];
+    for (const c of packet.croquis ?? []) {
+      const content = await this.documents.content(tenant, c.id).catch(() => null);
+      if (content) files.push({ id: c.id, mimeType: content.mimeType, bytes: content.bytes });
+    }
+    return files;
   }
 
   /**
@@ -159,7 +178,15 @@ export class PriceRequestsService {
       to: recipient.supplier.email,
       subject: packetSubject(request.packet),
       text: packetText(request.packet),
-      attachments: [{ filename: pdf.filename, contentType: "application/pdf", contentBase64: Buffer.from(pdf.bytes).toString("base64") }],
+      // Le PDF (trois blocs + les croquis en pages), puis chaque croquis d'origine, pour le zoom ou un format non affiché.
+      attachments: [
+        { filename: pdf.filename, contentType: "application/pdf", contentBase64: Buffer.from(pdf.bytes).toString("base64") },
+        ...(await this.sketchFiles(tenant, request.packet)).map((f) => ({
+          filename: request.packet!.croquis?.find((c) => c.id === f.id)?.nom ?? "croquis",
+          contentType: f.mimeType,
+          contentBase64: Buffer.from(f.bytes).toString("base64"),
+        })),
+      ],
     });
     await this.requests.setStatus(tenant, recipientId, "sent");
     return this.reload(tenant, request.id);
@@ -172,7 +199,7 @@ export class PriceRequestsService {
   async exportPdf(tenant: TenantContext, projectId: string): Promise<{ filename: string; bytes: Uint8Array }> {
     const { packet } = await this.order(tenant, projectId, { message: null, dueDate: null });
     const name = packet.chantier.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase() || "chantier";
-    return { filename: `commande-${name}.pdf`, bytes: await packetPdf(packet) };
+    return { filename: `commande-${name}.pdf`, bytes: await packetPdf(packet, await this.sketchFiles(tenant, packet)) };
   }
 
   /** Ce qui part chez le fournisseur : les lignes de la demande et les trois blocs (§43), depuis la liste validée. */
@@ -225,6 +252,7 @@ export class PriceRequestsService {
       { companyName: sender?.companyName ?? "", projectName: sender?.project.name ?? "", projectAddress: sender?.project.address ?? null, projectNotes: sender?.project.siteNotes ?? null },
       { date: today(this.clock()), joindreDetail: await this.requests.attachQuoteDetail(tenant), message: input.message, dueDate: input.dueDate },
       grouped,
+      await this.requests.itemSketches(tenant, projectId),
     );
     return { takeoff, lines, packet };
   }

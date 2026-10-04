@@ -346,6 +346,18 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await expect(page.getByText("Voici votre quantitatif.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Voir le calcul : Tuile romane canal rouge 12,5 u/m² Toit principal" })).toBeVisible();
 
+  // Un croquis sur la ligne (couvertine, habillage…) : le crayon permet de joindre une photo avec une précision ; elle
+  // reste sous l'article, et se retire d'un appui.
+  const tuile = "Tuile romane canal rouge 12,5 u/m² Toit principal";
+  await page.getByRole("button", { name: `Modifier : ${tuile}` }).click();
+  await page.getByLabel(`Précision du croquis : ${tuile}`).fill("Rive côté jardin, voir photo");
+  await page.getByLabel("Joindre une photo ou un PDF").setInputFiles({ name: "rive.png", mimeType: "image/png", buffer: PNG_1PX });
+  const joints = page.getByRole("list", { name: `Croquis joints : ${tuile}` });
+  await expect(joints.getByText("rive.png · Rive côté jardin, voir photo")).toBeVisible();
+  await page.getByRole("form", { name: `Modifier : ${tuile}` }).getByRole("button", { name: "Annuler" }).click();
+  await joints.getByRole("button", { name: "Retirer le croquis rive.png" }).click();
+  await expect(joints).toHaveCount(0);
+
   // Le devis lu reste à un appui : noms courts, ajout et retrait d'une ligne.
   await page.getByRole("button", { name: "Voir le devis lu (6 lignes)" }).click();
   await expect(page.getByText("Tuile romane canal rouge 12,5 u/m²")).toBeVisible();

@@ -332,11 +332,12 @@ export class QuantitatifsService {
     // Les infos chantier (note, croquis) voyagent avec le quantitatif : l'artisan voit ce qui a servi au calcul.
     const [project, croquis] = await Promise.all([
       this.prisma.project.findFirst({ where: { id: row.projectId, companyId: row.companyId }, select: { siteNotes: true } }),
-      this.prisma.document.findMany({ where: { projectId: row.projectId, companyId: row.companyId, purpose: "sketch" }, select: { id: true, originalName: true, createdAt: true }, orderBy: { createdAt: "asc" } }),
+      this.prisma.document.findMany({ where: { projectId: row.projectId, companyId: row.companyId, purpose: "sketch" }, select: { id: true, originalName: true, itemKey: true, note: true, createdAt: true }, orderBy: { createdAt: "asc" } }),
     ]);
     return {
       ...quantitatifView(this.base(row), reviewed),
-      infos: { texte: project?.siteNotes ?? null, croquis: croquis.map((c) => ({ id: c.id, nom: c.originalName })) },
+      // Un croquis du chantier, ou celui d'un article (« article » : la clé de la ligne de la liste, avec la précision de l'artisan).
+      infos: { texte: project?.siteNotes ?? null, croquis: croquis.map((c) => ({ id: c.id, nom: c.originalName, ...(c.itemKey ? { article: c.itemKey, commentaire: c.note } : {}) })) },
       ...(rendu.ecran ? { ecran: takeoffDto(reviewed) } : {}),
     };
   }
@@ -351,8 +352,14 @@ export class QuantitatifsService {
    * Un croquis (photo, PDF) avec son commentaire : la photo est gardée telle quelle, jamais lue par l'IA
    * (docs/infos-chantier-facultatives.md) ; le commentaire rejoint la note, précédé de « Croquis : ».
    */
-  async addSketch(tenant: TenantContext, projectId: string, file: { name: string; bytes: Uint8Array }, commentaire: string | undefined) {
+  async addSketch(tenant: TenantContext, projectId: string, file: { name: string; bytes: Uint8Array }, commentaire: string | undefined, article?: string) {
     const project = await this.projects.get(tenant, projectId);
+    // Le croquis d'un article (dimensions d'une couvertine…) reste à sa ligne : sa précision ne devient jamais une
+    // mesure du chantier (« dév. 330 » sur une couvertine ne règle pas le développé de toutes les bandes).
+    if (article) {
+      const doc = await this.documents.storeSketch(tenant, projectId, { fileName: file.name, bytes: file.bytes, itemKey: article, note: commentaire ?? null });
+      return { id: doc.id, nom: doc.originalName, article, commentaire: commentaire?.trim() || null };
+    }
     const doc = await this.documents.storeSketch(tenant, projectId, { fileName: file.name, bytes: file.bytes });
     const line = commentaire?.trim() ? `Croquis (${doc.originalName}) : ${commentaire.trim()}` : null;
     if (line) await this.projects.update(tenant, projectId, { siteNotes: [project.siteNotes?.trim(), line].filter(Boolean).join("\n") });

@@ -221,6 +221,17 @@ export function ProjectTakeoff({
       await call("corrections", { action: "fixer_quantite", id: item.key, quantite: e.quantite.replace(/\s/g, ""), unite: e.unite });
     }
   };
+  // Un croquis par article (couvertine, habillage…) : joint à la ligne, il part avec la commande ; la liste se relit ensuite.
+  const attachSketch = async (itemKey: string, file: File, commentaire: string) => {
+    const form = new FormData();
+    form.append("article", itemKey);
+    if (commentaire) form.append("commentaire", commentaire);
+    form.append("file", file, file.name);
+    await api(`/v1/projects/${encodeURIComponent(projectId)}/infos/croquis`, { method: "POST", body: form });
+    reload();
+  };
+  const detachSketch = (sketchId: string) =>
+    run(() => api<null>(`/v1/documents/${encodeURIComponent(sketchId)}`, { method: "DELETE" }), () => reload());
   const validate = () => {
     setShowList(false);
     void call("validation");
@@ -300,7 +311,16 @@ export function ProjectTakeoff({
     body = (
       <>
         <Say>Voici votre quantitatif.</Say>
-        <QuantityCard takeoff={takeoff} editable={editable} pending={pending} onAnswer={handlers.onAnswer} onEditItem={editItem} />
+        <QuantityCard
+          takeoff={takeoff}
+          editable={editable}
+          pending={pending}
+          onAnswer={handlers.onAnswer}
+          onEditItem={editItem}
+          sketches={quantitatif?.infos?.croquis ?? []}
+          onAttach={attachSketch}
+          onDetach={detachSketch}
+        />
         {editable && takeoff.purchase.canValidate ? (
           // Sous le pouce pendant qu'on relit la liste, juste au-dessus de la barre de message.
           <div className="sticky bottom-[84px] z-10 lg:bottom-[92px]">

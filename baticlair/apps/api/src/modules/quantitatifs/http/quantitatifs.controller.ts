@@ -176,7 +176,11 @@ export class QuantitatifsController {
 }
 
 const infosBody = z.object({ texte: z.string().trim().max(4000).nullable() });
-const croquisBody = z.object({ commentaire: z.string().trim().max(1000).optional() });
+const croquisBody = z.object({
+  commentaire: z.string().trim().max(1000).optional(),
+  /** Croquis d'UN article de la liste (sa clé) : joint à cette ligne de la commande, jamais mêlé à la note du chantier. */
+  article: z.string().trim().min(1).max(200).optional(),
+});
 
 /**
  * INFOS CHANTIER FACULTATIVES (docs/infos-chantier-facultatives.md) : la note de l'artisan et ses croquis vivent sur le
@@ -207,7 +211,7 @@ export class InfosChantierController {
   ) {
     if (!file) throw validationFailed("Missing file", [{ path: "file", message: "required" }]);
     const bytes = new Uint8Array(file.buffer.buffer, file.buffer.byteOffset, file.buffer.byteLength);
-    const r = await this.quantitatifs.addSketch(tenant, projetId, { name: Buffer.from(file.originalname, "latin1").toString("utf8"), bytes }, body.commentaire);
+    const r = await this.quantitatifs.addSketch(tenant, projetId, { name: Buffer.from(file.originalname, "latin1").toString("utf8"), bytes }, body.commentaire, body.article);
     res.status(201);
     return r;
   }

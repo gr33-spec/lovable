@@ -23,6 +23,15 @@ export interface SupplierPacket {
   joindre_detail: boolean;
   /** Lien « une question ? » (§43.2, v3.1) ; null tant qu'il n'existe pas. */
   question_lien: string | null;
+  /** Croquis joints à un article (dimensions d'une couvertine…) : rendus en pages du PDF, joints au mail. */
+  croquis?: { article: string; id: string; nom: string; commentaire: string | null }[];
+}
+
+/** Le fichier d'un croquis, lu au moment de rendre le PDF (jamais gardé dans la demande figée). */
+export interface SketchFile {
+  id: string;
+  mimeType: string;
+  bytes: Uint8Array;
 }
 
 const dateFr = (iso: string) => {
@@ -56,6 +65,10 @@ export function packetLines(p: SupplierPacket): { kind: "title" | "heading" | "l
     out.push({ kind: "blank", text: "" }, { kind: "heading", text: "DÉTAIL DU DEVIS (sans prix)" });
     if (p.detail.length === 0) out.push({ kind: "line", text: "(aucune ligne)" });
     for (const d of p.detail) out.push({ kind: "line", text: [d.libelle, ...(d.mesure ? [d.mesure] : []), ...d.precisions].join(" · ") });
+  }
+  if (p.croquis?.length) {
+    out.push({ kind: "blank", text: "" }, { kind: "heading", text: "CROQUIS JOINTS (en fin de document)" });
+    for (const c of p.croquis) out.push({ kind: "line", text: [c.article, c.nom, ...(c.commentaire ? [c.commentaire] : [])].join(" · ") });
   }
   if (p.question_lien) out.push({ kind: "blank", text: "" }, { kind: "line", text: `Une question sur cette commande ? Écrivez-la ici : ${p.question_lien}` });
   return out;
@@ -92,7 +105,7 @@ function pdfSafe(text: string): string {
 }
 
 /** Le PDF (§43.1) : léger, sans mise en page coûteuse, les mêmes lignes que le mail. */
-export async function packetPdf(p: SupplierPacket): Promise<Uint8Array> {
+export async function packetPdf(p: SupplierPacket, sketches: readonly SketchFile[] = []): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
   doc.setTitle(packetSubject(p));
   doc.setProducer("BatiClair");
@@ -138,5 +151,30 @@ export async function packetPdf(p: SupplierPacket): Promise<Uint8Array> {
   }
   if (y - 24 < margin) newPage();
   page.drawText(pdfSafe("Préparé avec BatiClair — aucun prix dans ce document."), { x: margin, y: margin - 20, size: 8, font: regular });
+  // Les croquis des articles, à la suite : une page par photo (titrée de l'article), les pages d'un PDF telles quelles.
+  for (const c of p.croquis ?? []) {
+    const file = sketches.find((s) => s.id === c.id);
+    if (!file) continue;
+    try {
+      if (file.mimeType === "application/pdf") {
+        const src = await PDFDocument.load(file.bytes, { ignoreEncryption: true });
+        for (const copied of await doc.copyPages(src, src.getPageIndices())) doc.addPage(copied);
+        continue;
+      }
+      const image = file.mimeType === "image/png" ? await doc.embedPng(file.bytes) : file.mimeType === "image/jpeg" ? await doc.embedJpg(file.bytes) : null;
+      newPage();
+      write(`CROQUIS — ${c.article}`, bold, 13, 2);
+      if (c.commentaire) write(c.commentaire, regular, 10.5, 4);
+      if (!image) {
+        write(`${c.nom} : format d'image joint au mail (non affichable dans ce PDF).`, regular, 10.5, 0);
+        continue;
+      }
+      const room = { w: width, h: y - margin };
+      const scale = Math.min(room.w / image.width, room.h / image.height, 1);
+      page.drawImage(image, { x: margin, y: y - image.height * scale, width: image.width * scale, height: image.height * scale });
+    } catch {
+      // Un fichier illisible ne bloque jamais la commande : il reste cité dans « CROQUIS JOINTS » et joint au mail.
+    }
+  }
   return doc.save();
 }

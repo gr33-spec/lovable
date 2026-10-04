@@ -1,11 +1,13 @@
 "use client";
 
-import { AlertTriangle, ChevronDown, Pencil } from "lucide-react";
+import { AlertTriangle, ChevronDown, Loader2, Paperclip, Pencil, X } from "lucide-react";
 import { useId, useState } from "react";
 import { Proof, type DecisionHandlers } from "@/components/takeoff-view";
 import { Button } from "@/components/ui";
 import { parseQuantity } from "@/lib/labels";
-import type { PurchaseAssumption, PurchaseItem, Takeoff } from "@/lib/api";
+import { ApiError, type ItemSketch, type PurchaseAssumption, type PurchaseItem, type Takeoff } from "@/lib/api";
+import { openDocument } from "@/lib/open-document";
+import { ErrorNotice } from "@/components/ui";
 import { shortName } from "@/lib/labels";
 
 /**
@@ -27,12 +29,19 @@ export function QuantityCard({
   pending,
   onAnswer,
   onEditItem,
+  sketches = [],
+  onAttach,
+  onDetach,
 }: {
   takeoff: Takeoff;
   editable: boolean;
   pending: boolean;
   onAnswer: DecisionHandlers["onAnswer"];
   onEditItem?: (item: PurchaseItem, edit: ItemEdit) => Promise<void>;
+  /** Croquis rattachés aux articles (clé de l'article) : visibles sous la ligne, joints à la commande. */
+  sketches?: readonly ItemSketch[];
+  onAttach?: SketchHandlers["onAttach"];
+  onDetach?: SketchHandlers["onDetach"];
 }) {
   const p = takeoff.purchase;
   const byKey = new Map(p.toBuy.map((b) => [b.key, b]));
@@ -57,7 +66,18 @@ export function QuantityCard({
           <ul aria-label={g.label} className="flex flex-col divide-y divide-line">
             {g.itemKeys.map((k) => {
               const item = byKey.get(k);
-              return item ? <BuyRow key={k} item={item} takeoff={takeoff} editable={editable} pending={pending} onEdit={onEditItem} /> : null;
+              return item ? (
+                <BuyRow
+                  key={k}
+                  item={item}
+                  takeoff={takeoff}
+                  editable={editable}
+                  pending={pending}
+                  onEdit={onEditItem}
+                  sketches={sketches.filter((x) => x.article === item.key)}
+                  {...(onAttach && onDetach ? { sketchHandlers: { onAttach, onDetach } } : {})}
+                />
+              ) : null;
             })}
           </ul>
         </div>
@@ -80,19 +100,28 @@ export function QuantityCard({
   );
 }
 
-/** Un article à acheter : nom, quantité, le calcul à un appui, et le crayon pour tout réécrire (§41.4). */
+export interface SketchHandlers {
+  onAttach: (itemKey: string, file: File, commentaire: string) => Promise<void>;
+  onDetach: (sketchId: string) => Promise<void>;
+}
+
+/** Un article à acheter : nom, quantité, le calcul à un appui, et le crayon pour tout réécrire (§41.4) ou joindre un croquis. */
 function BuyRow({
   item,
   takeoff,
   editable,
   pending,
   onEdit,
+  sketches,
+  sketchHandlers,
 }: {
   item: PurchaseItem;
   takeoff: Takeoff;
   editable: boolean;
   pending: boolean;
   onEdit?: (item: PurchaseItem, edit: ItemEdit) => Promise<void>;
+  sketches: readonly ItemSketch[];
+  sketchHandlers?: SketchHandlers;
 }) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -130,9 +159,27 @@ function BuyRow({
         ) : null}
       </div>
       {item.edited?.length ? <p className="text-[13px] text-muted">Réécrit par vous : {item.edited.map((e) => (e === "label" ? "le libellé" : "la quantité")).join(" et ")}.</p> : null}
+      {sketches.length > 0 ? (
+        <ul aria-label={`Croquis joints : ${item.label}`} className="flex flex-wrap gap-2">
+          {sketches.map((sk) => (
+            <li key={sk.id} className="flex max-w-full items-center gap-1 rounded-xl bg-[#eeedff] pl-2.5 text-[13px] font-bold text-[#4a37d6]">
+              <button type="button" onClick={() => void openDocument(sk.id)} className="flex min-h-9 min-w-0 items-center gap-1.5 text-left">
+                <Paperclip size={14} aria-hidden="true" className="shrink-0" />
+                <span className="truncate">{sk.commentaire ? `${sk.nom} · ${sk.commentaire}` : sk.nom}</span>
+              </button>
+              {editable && sketchHandlers ? (
+                <button type="button" disabled={pending} onClick={() => void sketchHandlers.onDetach(sk.id)} aria-label={`Retirer le croquis ${sk.nom}`} className="flex size-9 shrink-0 items-center justify-center text-[#4a37d6]/70">
+                  <X size={14} aria-hidden="true" />
+                </button>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : null}
       {editing && edit ? (
         <ItemForm
           item={item}
+          {...(sketchHandlers ? { onAttach: (file: File, commentaire: string) => sketchHandlers.onAttach(item.key, file, commentaire) } : {})}
           pending={pending}
           onCancel={() => setEditing(false)}
           onSave={async (e) => {
@@ -147,7 +194,19 @@ function BuyRow({
 }
 
 /** Le texte et la quantité d'une ligne, tels que l'artisan veut les voir partir chez le fournisseur. */
-function ItemForm({ item, pending, onSave, onCancel }: { item: PurchaseItem; pending: boolean; onSave: (e: ItemEdit) => Promise<void>; onCancel: () => void }) {
+function ItemForm({
+  item,
+  pending,
+  onSave,
+  onCancel,
+  onAttach,
+}: {
+  item: PurchaseItem;
+  pending: boolean;
+  onSave: (e: ItemEdit) => Promise<void>;
+  onCancel: () => void;
+  onAttach?: (file: File, commentaire: string) => Promise<void>;
+}) {
   const id = useId();
   const parsed = item.quantity ? parseQuantity(item.quantity) : null;
   const [libelle, setLibelle] = useState(item.label);
@@ -178,6 +237,7 @@ function ItemForm({ item, pending, onSave, onCancel }: { item: PurchaseItem; pen
           <input id={`${id}-u`} className={input} value={unite} onChange={(e) => setUnite(e.target.value)} placeholder="pièces, ml, kg…" />
         </label>
       </div>
+      {onAttach ? <SketchPicker label={item.label} onAttach={onAttach} /> : null}
       <div className="flex gap-2">
         <Button type="submit" pending={pending}>
           Enregistrer
@@ -187,6 +247,57 @@ function ItemForm({ item, pending, onSave, onCancel }: { item: PurchaseItem; pen
         </Button>
       </div>
     </form>
+  );
+}
+
+/**
+ * Joindre un croquis à l'article (couvertine, habillage, bande façonnée…) : une photo ou un PDF, et une précision
+ * facultative. Il part avec la commande (PDF et mail) ; jamais lu par l'IA, jamais une mesure de calcul.
+ */
+function SketchPicker({ label, onAttach }: { label: string; onAttach: (file: File, commentaire: string) => Promise<void> }) {
+  const id = useId();
+  const [commentaire, setCommentaire] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<ApiError | null>(null);
+  return (
+    <div className="flex flex-col gap-2 rounded-2xl border border-dashed border-[#c9c2ff] bg-white p-3">
+      <p className="text-sm font-bold">Croquis ou photo (facultatif)</p>
+      <input
+        aria-label={`Précision du croquis : ${label}`}
+        className="min-h-11 w-full rounded-xl bg-ground px-3 text-[15px]"
+        value={commentaire}
+        onChange={(e) => setCommentaire(e.target.value)}
+        placeholder="Ex. dév. 330, 2 plis, longueurs de 2 m"
+        maxLength={1000}
+      />
+      {error ? <ErrorNotice error={error} /> : null}
+      <input
+        id={id}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,application/pdf"
+        className="sr-only"
+        disabled={busy}
+        onChange={async (e) => {
+          const file = e.target.files?.[0];
+          e.target.value = "";
+          if (!file) return;
+          setBusy(true);
+          setError(null);
+          try {
+            await onAttach(file, commentaire.trim());
+            setCommentaire("");
+          } catch (err) {
+            setError(err instanceof ApiError ? err : new ApiError("internal_error", 500));
+          } finally {
+            setBusy(false);
+          }
+        }}
+      />
+      <label htmlFor={id} className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#eeedff] px-3 text-sm font-extrabold text-[#4a37d6] ${busy ? "pointer-events-none opacity-60" : ""}`}>
+        {busy ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Paperclip size={16} aria-hidden="true" />}
+        {busy ? "Envoi du croquis…" : "Joindre une photo ou un PDF"}
+      </label>
+    </div>
   );
 }
 

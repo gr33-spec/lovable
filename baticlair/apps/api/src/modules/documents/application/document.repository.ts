@@ -9,6 +9,9 @@ export interface NewDocument {
   mimeType: string;
   sizeBytes: number;
   sha256: string;
+  /** Croquis d'un article (clé de l'article dans la liste d'achats) et la précision de l'artisan. */
+  itemKey?: string | null;
+  note?: string | null;
 }
 
 export interface DocumentRecord extends NewDocument {

@@ -92,6 +92,13 @@ function packet(value: unknown): SupplierPacket | null {
       : [],
     joindre_detail: p.joindre_detail !== false,
     question_lien: typeof p.question_lien === "string" ? p.question_lien : null,
+    ...(Array.isArray(p.croquis) && p.croquis.length > 0
+      ? {
+          croquis: p.croquis
+            .filter((c): c is Record<string, unknown> => !!c && typeof c === "object" && typeof (c as Record<string, unknown>).id === "string")
+            .map((c) => ({ article: String(c.article ?? ""), id: String(c.id), nom: String(c.nom ?? ""), commentaire: typeof c.commentaire === "string" ? c.commentaire : null })),
+        }
+      : {}),
   };
 }
 
@@ -148,6 +155,16 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
         role: l.role === "measure" || l.role === "purchase" || l.role === "undetermined" ? l.role : null,
       })),
     };
+  }
+
+  async itemSketches(tenant: TenantContext, projectId: string): Promise<{ id: string; nom: string; itemKey: string; note: string | null }[]> {
+    if (!isUuid(projectId)) return [];
+    const rows = await this.prisma.document.findMany({
+      where: { projectId, companyId: tenant.companyId, purpose: "sketch", itemKey: { not: null } },
+      select: { id: true, originalName: true, itemKey: true, note: true },
+      orderBy: { createdAt: "asc" },
+    });
+    return rows.map((r) => ({ id: r.id, nom: r.originalName, itemKey: r.itemKey!, note: r.note }));
   }
 
   async sender(tenant: TenantContext, projectId: string): Promise<Sender | null> {

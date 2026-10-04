@@ -64,7 +64,7 @@ export function toDto(r: PriceRequestView) {
     classifiedAt: r.classifiedAt?.toISOString() ?? null,
     retainedSupplierIds: r.retainedSupplierIds,
     packet: r.packet
-      ? { entreprise: r.packet.entreprise, chantier: r.packet.chantier, articles: r.packet.articles, a_chiffrer: r.packet.a_chiffrer, resume: r.packet.resume, joindre_detail: r.packet.joindre_detail }
+      ? { entreprise: r.packet.entreprise, chantier: r.packet.chantier, articles: r.packet.articles, a_chiffrer: r.packet.a_chiffrer, resume: r.packet.resume, joindre_detail: r.packet.joindre_detail, croquis: r.packet.croquis ?? [] }
       : null,
     recipients: r.recipients.map((x) => ({
       id: x.id,

@@ -112,6 +112,14 @@ export interface Me {
 
 export type ProjectStatus = "active" | "archived";
 
+/** Un croquis déposé : du chantier entier, ou d'un article de la liste (« article » : sa clé), avec la précision de l'artisan. */
+export interface ItemSketch {
+  id: string;
+  nom: string;
+  article?: string;
+  commentaire?: string | null;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -221,7 +229,7 @@ export interface Quantitatif {
   erreur?: { raison: string };
   valide?: boolean;
   /** Infos chantier facultatives qui ont servi au calcul : la note, et les croquis déposés. */
-  infos?: { texte: string | null; croquis: { id: string; nom: string }[] };
+  infos?: { texte: string | null; croquis: ItemSketch[] };
   ecran?: Takeoff;
 }
 

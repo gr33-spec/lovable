@@ -3,11 +3,11 @@
 import { Camera, ChevronDown, Loader2, Plus } from "lucide-react";
 import { useId, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
-import { api, ApiError } from "@/lib/api";
+import { api, ApiError, type ItemSketch } from "@/lib/api";
 
 export interface SiteInfos {
   texte: string | null;
-  croquis: { id: string; nom: string }[];
+  croquis: ItemSketch[];
 }
 
 const MAX_SKETCH_BYTES = 15 * 1024 * 1024;
@@ -82,7 +82,9 @@ export function SiteNotes({
     }
   }
 
-  const count = (infos?.texte ? 1 : 0) + (infos?.croquis.length ?? 0);
+  // Les croquis d'un article vivent sous leur ligne de la liste ; ici, seulement ceux du chantier entier.
+  const siteSketches = (infos?.croquis ?? []).filter((c) => !c.article);
+  const count = (infos?.texte ? 1 : 0) + siteSketches.length;
   return (
     <section aria-label="Informations sur le chantier" className="flex flex-col gap-3">
       <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="flex min-h-14 w-full items-center gap-3 rounded-2xl bg-surface px-4 text-left text-[15px] font-bold text-ink shadow-card">
@@ -152,9 +154,9 @@ export function SiteNotes({
               {pending ? <Loader2 size={18} className="animate-spin" aria-hidden="true" /> : <Camera size={18} aria-hidden="true" />}
               Photo d&apos;un croquis ou d&apos;un plan
             </label>
-            {infos?.croquis.length ? (
+            {siteSketches.length ? (
               <ul className="flex flex-wrap gap-2 text-sm">
-                {infos.croquis.map((c) => (
+                {siteSketches.map((c) => (
                   <li key={c.id}>
                     <a href={`/v1/documents/${encodeURIComponent(c.id)}/file`} target="_blank" rel="noreferrer" className="font-semibold text-accent-text underline">
                       {c.nom}

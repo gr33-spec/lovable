@@ -35,7 +35,7 @@ Deux formes, au choix :
 ### Infos chantier après coup
 
 - `PUT /v1/projects/{projetId}/infos` `{ "texte": "Pente 35°" | null }` : remplace la note du chantier ; le quantitatif se recalcule au prochain `GET`.
-- `POST /v1/projects/{projetId}/infos/croquis` (multipart : `file` image JPEG/PNG/WebP ou PDF, `commentaire` facultatif) : la photo est gardée telle quelle (jamais lue par l'IA), le commentaire rejoint la note (« Croquis (nom) : … »). Réponse `201 { id, nom }`.
+- `POST /v1/projects/{projetId}/infos/croquis` (multipart : `file` image JPEG/PNG/WebP ou PDF, `commentaire` facultatif, `article` facultatif) : la photo est gardée telle quelle (jamais lue par l'IA). Sans `article`, le commentaire rejoint la note (« Croquis (nom) : … ») ; avec `article` (la clé d'un article de la liste, `ecran.purchase.toBuy[].key`), le croquis est rattaché à cette ligne, sa précision reste à l'article, et il part avec la commande (ligne « — croquis joint », pages du PDF, pièce jointe du mail). Réponse `201 { id, nom, article?, commentaire? }`.
 - Le quantitatif rend `infos: { texte, croquis: [{ id, nom }] }`.
 - Deux sources qui se contredisent (la ligne du devis dit 40°, son en-tête 35°) donnent une question `engine:param:<clé>` avec les deux valeurs en boutons ; la note de l'artisan tranche sans question.
 - Sans `projetId`, un chantier est créé, nommé avec la `reference`.

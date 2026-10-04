@@ -231,6 +231,10 @@ model Document {
   pageCount    Int?
   status       DocumentStatus  @default(stored)
   uploadedById String?
+  /// Croquis d'un article : la clé de l'article dans la liste d'achats (null : croquis du chantier entier).
+  itemKey      String?
+  /// Précision de l'artisan sur ce croquis (« dév. 330, 2 plis ») : transmise telle quelle, jamais lue par l'IA.
+  note         String?
   createdAt    DateTime        @default(now())
 
   company     Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)

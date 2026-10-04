@@ -51,6 +51,8 @@ export interface PriceRequestRepository {
   /** Dernière liste de matériaux VALIDÉE du chantier. */
   validatedTakeoff(tenant: TenantContext, projectId: string): Promise<ValidatedTakeoff | null>;
   sender(tenant: TenantContext, projectId: string): Promise<Sender | null>;
+  /** Les croquis rattachés à un article de la liste (clé de l'article), avec la précision de l'artisan. */
+  itemSketches(tenant: TenantContext, projectId: string): Promise<{ id: string; nom: string; itemKey: string; note: string | null }[]>;
   create(
     tenant: TenantContext,
     data: {
