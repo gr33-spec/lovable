@@ -114,6 +114,16 @@ export class PriceRequestsController {
     return toDto(await this.requests.send(tenant, id));
   }
 
+  /** « Exporter PDF » (§21.3) : la liste validée du chantier, même PDF que celui du fournisseur, aucun prix. */
+  @Get("projects/:projectId/commande.pdf")
+  async exportPdf(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string, @Res({ passthrough: true }) res: Response) {
+    const pdf = await this.requests.exportPdf(tenant, projectId);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${pdf.filename}"`);
+    res.setHeader("Cache-Control", "private, no-store");
+    return new StreamableFile(pdf.bytes);
+  }
+
   @Get("projects/:projectId/price-requests")
   async list(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string) {
     return {

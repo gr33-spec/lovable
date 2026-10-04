@@ -160,16 +160,18 @@ export class PriceRequestsService {
     return this.reload(tenant, request.id);
   }
 
-  async create(
-    tenant: TenantContext,
-    projectId: string,
-    input: {
-      supplierIds: string[];
-      message: string | null;
-      dueDate: Date | null;
-    },
-  ): Promise<PriceRequestView> {
-    assertCanWrite(tenant);
+  /**
+   * « Exporter PDF » (§21.3) : la liste validée, rendue par LE MÊME générateur que le PDF envoyé au fournisseur
+   * (§43 : un seul générateur, trois blocs, aucun prix) ; pour l'imprimer ou la donner au comptoir.
+   */
+  async exportPdf(tenant: TenantContext, projectId: string): Promise<{ filename: string; bytes: Uint8Array }> {
+    const { packet } = await this.order(tenant, projectId, { message: null, dueDate: null });
+    const name = packet.chantier.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase() || "chantier";
+    return { filename: `commande-${name}.pdf`, bytes: await packetPdf(packet) };
+  }
+
+  /** Ce qui part chez le fournisseur : les lignes de la demande et les trois blocs (§43), depuis la liste validée. */
+  private async order(tenant: TenantContext, projectId: string, input: { message: string | null; dueDate: Date | null }) {
     const takeoff = await this.requests.validatedTakeoff(tenant, projectId);
     if (!takeoff)
       throw validationFailed("Validate the materials list first", {
@@ -211,7 +213,6 @@ export class PriceRequestsService {
     }));
     const lines: RequestedLine[] = [...computed, ...grouped, ...toQuote];
     if (lines.length === 0) throw validationFailed("Nothing to order", { reason: "no_material" });
-    const supplierIds = await this.checkSuppliers(tenant, input.supplierIds);
     // §43 : les trois blocs, figés avec la demande (le mail et le PDF en sont deux rendus).
     const sender = await this.requests.sender(tenant, projectId);
     const packet = buildPacket(
@@ -220,6 +221,21 @@ export class PriceRequestsService {
       { date: today(this.clock()), joindreDetail: await this.requests.attachQuoteDetail(tenant), message: input.message, dueDate: input.dueDate },
       grouped,
     );
+    return { takeoff, lines, packet };
+  }
+
+  async create(
+    tenant: TenantContext,
+    projectId: string,
+    input: {
+      supplierIds: string[];
+      message: string | null;
+      dueDate: Date | null;
+    },
+  ): Promise<PriceRequestView> {
+    assertCanWrite(tenant);
+    const { takeoff, lines, packet } = await this.order(tenant, projectId, input);
+    const supplierIds = await this.checkSuppliers(tenant, input.supplierIds);
     const created = await this.requests.create(tenant, {
       projectId,
       takeoffId: takeoff.id,
