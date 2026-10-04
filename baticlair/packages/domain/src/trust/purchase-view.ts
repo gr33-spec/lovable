@@ -177,9 +177,12 @@ function supplyScreen(
 
   for (const item of toBuy) {
     const workId = engine.needs.find((n) => item.needIds.includes(n.needId))?.workItemId ?? (item.kind === "direct" ? workOfLine(item.lineIds[0]) : undefined);
-    const check = item.state === "to_confirm";
-    const decision = check ? decisionFor(item.lineIds) : undefined;
+    // La précision que le fournisseur ne peut pas deviner (diamètre d'une sortie de toit) : la ligne reste orange.
+    const precise = decisions.find((d) => d.key === `${PRECISE}${item.lineIds[0]}`);
+    const check = item.state === "to_confirm" || precise !== undefined;
+    const decision = item.state === "to_confirm" ? (decisionFor(item.lineIds) ?? precise) : precise;
     if (decision) used.add(decision.key);
+    if (precise) used.add(precise.key);
     groupOf(workId, item.consumable === true).rows.push({
       key: `item:${item.key}`,
       status: check ? "check" : "ok",
@@ -574,11 +577,46 @@ export function purchaseView(
     }
   }
   // Les questions : celles de l'écran (lignes douteuses, ambiguïtés, calcul), jamais une information.
-  const questions = view.decisions;
+  const questions = [...view.decisions, ...preciseQuestions(toBuy, link.validation, link.ref)];
   const canValidate = questions.every((q) => q.lineIds.length === 0) && toBuy.every((b) => b.state === "ready");
   const groups = groupsOf(toBuy, engine.needs, view, link.plan, link.ref);
   const screen = supplyScreen(toBuy, toQuote, questions, engine, view, link.plan, link.ref);
   return { understood: understood(view, link.plan, link.ref), toBuy, groups, toQuote, assumptions, questions, suggestions, canValidate, screen };
+}
+
+/** Clé de la question « précision » d'une ligne reprise du devis (« precise:<ligne> »). */
+const PRECISE = "precise:";
+const plain = (t: string) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+/**
+ * Une ligne reprise telle quelle du devis dont la famille demande une précision que le fournisseur ne peut pas deviner
+ * (« Sortie de toit Poujoulat » : quel diamètre ? réponse du fondateur, 2026-10-04) : une question à boutons sur la
+ * ligne. La désignation reste celle du devis (marque, modèle) ; la réponse part dans la colonne « précision ». Une ligne
+ * qui la donne déjà (« Ø 150 », « VMC ») ne demande rien.
+ */
+function preciseQuestions(toBuy: readonly PurchaseItem[], validation: TakeoffValidation, ref: Referential): Decision[] {
+  const out: Decision[] = [];
+  for (const item of toBuy) {
+    if (item.kind !== "direct") continue;
+    const lineId = item.lineIds[0]!;
+    if (validation.lines.find((l) => l.lineId === lineId)?.kind === "labor") continue;
+    // La famille se lit sur les mots du référentiel (« sortie de toit »), comme le plan lit une ligne.
+    const text = plain(item.label);
+    const ask = ref.families.find((f) => f.ask && f.keywords?.some((k) => new RegExp(`\\b${plain(k)}\\b`).test(text)))?.ask;
+    if (!ask || new RegExp(ask.answered).test(text)) continue;
+    const key = `${PRECISE}${lineId}`;
+    out.push({
+      key,
+      state: "missing",
+      title: item.label,
+      text: ask.question,
+      lineIds: [lineId],
+      primary: null,
+      secondary: [],
+      question: { key, kind: "choose", text: ask.question, ...(ask.hint ? { hint: ask.hint } : {}), options: ask.choices },
+    });
+  }
+  return out;
 }
 
 /**
@@ -610,15 +648,41 @@ export function applyPurchaseOverrides(purchase: PurchaseView, answers: Record<s
     }
     return edited.length > 0 ? { ...out, edited } : item;
   };
+  // La précision répondue d'un bouton (« Ø 150 ») part dans la colonne « précision », avant celle que l'artisan aurait écrite ;
+  // « Je ne sais pas » : la ligne part telle quelle, à préciser avec le fournisseur.
+  const answered = new Map<string, string | null>();
+  for (const q of purchase.questions) {
+    if (!q.key.startsWith(PRECISE) || !(q.key in answers)) continue;
+    const a = answers[q.key];
+    answered.set(q.lineIds[0]!, typeof a === "string" && a.trim() ? a.trim() : null);
+  }
+  const precised = (item: PurchaseItem): PurchaseItem => {
+    if (item.kind !== "direct" || !answered.has(item.lineIds[0]!)) return item;
+    const value = answered.get(item.lineIds[0]!);
+    if (!value || plain(item.precision ?? "").includes(plain(value))) return item;
+    return { ...item, precision: [value, item.precision].filter(Boolean).join(" · ") };
+  };
   // §45.9 : la croix de l'aperçu retire l'article de la liste (« retire:<clé> »).
   const kept = (item: PurchaseItem) => answers[`retire:${item.key}`] !== "oui";
   // Une suggestion (§45.8) se corrige d'un tap comme une ligne de la liste. Une ligne retirée quitte aussi l'écran.
-  const toBuy = purchase.toBuy.filter(kept).map(override);
+  const toBuy = purchase.toBuy.filter(kept).map(precised).map(override);
   const present = new Set(toBuy.map((b) => b.key));
+  const done = new Set([...answered.keys()].map((id) => `${PRECISE}${id}`));
+  const questions = purchase.questions.filter((q) => !done.has(q.key));
   const groups = purchase.screen.groups
-    .map((g) => ({ ...g, rows: g.rows.filter((r) => !r.itemKey || present.has(r.itemKey)) }))
+    .map((g) => ({
+      ...g,
+      rows: g.rows
+        .filter((r) => !r.itemKey || present.has(r.itemKey))
+        .map((r): ScreenRow => {
+          if (!r.decisionKey || !done.has(r.decisionKey)) return r;
+          const { decisionKey: _d, ...rest } = r;
+          return { ...rest, status: answered.get(r.lineIds[0]!) ? "ok" : "supplier" };
+        }),
+    }))
     .filter((g) => g.rows.length > 0);
   const rows = groups.flatMap((g) => g.rows);
   const screen = { groups, total: rows.length, toCheck: rows.filter((r) => r.status === "check").length };
-  return { ...purchase, toBuy, suggestions: purchase.suggestions.map(override), screen };
+  const canValidate = questions.every((q) => q.lineIds.length === 0) && toBuy.every((b) => b.state === "ready");
+  return { ...purchase, toBuy, questions, canValidate, suggestions: purchase.suggestions.map(override), screen };
 }

@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.04-20",
+  "version": "roofing-2026.10.04-21",
   "trade": "roofing",
   "sources": [
     {
@@ -647,7 +647,38 @@
       "keyAttributes": [],
       "keywords": [
         "sortie de toit"
-      ]
+      ],
+      "ask": {
+        "question": "Sortie de toit : quel diamètre ?",
+        "hint": "Le fournisseur en a besoin pour chiffrer la bonne sortie.",
+        "choices": [
+          {
+            "label": "Ø 80",
+            "value": "Ø 80"
+          },
+          {
+            "label": "Ø 100",
+            "value": "Ø 100"
+          },
+          {
+            "label": "Ø 125",
+            "value": "Ø 125"
+          },
+          {
+            "label": "Ø 150",
+            "value": "Ø 150"
+          },
+          {
+            "label": "Ø 180",
+            "value": "Ø 180"
+          },
+          {
+            "label": "VMC",
+            "value": "VMC"
+          }
+        ],
+        "answered": "ø|\\bdiam|\\bvmc\\b|\\b(80|100|125|150|180) ?mm\\b"
+      }
     },
     {
       "code": "hip",

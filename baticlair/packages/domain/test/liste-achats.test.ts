@@ -6,6 +6,7 @@ import {
   planQuote,
   proposeLineRoles,
   purchaseView,
+  applyPurchaseOverrides,
   ROOFING_REFERENTIAL,
   slotsGivenByQuote,
   tradeProfile,
@@ -41,7 +42,7 @@ function read(bench: BenchLine[], answers: Record<string, EngineAnswer> = {}): P
     engine,
     { plan, roles, ref: ROOFING_REFERENTIAL, asks },
   );
-  return purchaseView(view, engine, { plan, roles, ref: ROOFING_REFERENTIAL, validation });
+  return applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref: ROOFING_REFERENTIAL, validation }), answers);
 }
 
 const short = (d: string) => d.replace(/\s*\((?:fourniture\s*(?:&|et)\s*pose|f\.?\s*(?:&|et)\s*p\.?|fourniture)\)/gi, "").split(/\s[-–—]\s/)[0]!.trim();
@@ -70,7 +71,8 @@ function render(title: string, v: PurchaseView): string {
 describe("liste d'achats : D-2026-015 (tuiles HP10, 120 m²)", () => {
   it("à l'ouverture : une question (le modèle lu), et déjà presque tout à acheter", () => {
     const v = read(D2026_015_LINES);
-    expect(v.questions.map((q) => q.key)).toEqual(["engine:product:tuile"]);
+    // Le devis ne dit pas le diamètre de la sortie de toit : une question à boutons (réponse du fondateur, 2026-10-04).
+    expect(v.questions.map((q) => q.key)).toEqual(["engine:product:tuile", "precise:ligne 10"]);
     expect(v.toBuy.map((b) => [short(b.label), b.quantity])).toEqual([
       ["Liteaux 27×40", "547 ml"],
       ["Écran HPV", "2 rouleaux"],
@@ -89,12 +91,13 @@ describe("liste d'achats : D-2026-015 (tuiles HP10, 120 m²)", () => {
       ["Sortie de toit Poujoulat", "1 pièce"],
     ]);
     expect(v.toQuote).toEqual([]);
-    expect(v.canValidate).toBe(true);
+    expect(v.canValidate).toBe(false);
+    expect(read(D2026_015_LINES, { "precise:ligne 10": "Ø 150" }).canValidate).toBe(true);
   });
 
   it("après « oui, c'est bien ce modèle » : 1 488 tuiles avec le pureau mini (zone littorale), 1 345 si l'artisan donne 34,3 cm", () => {
     const v = read(D2026_015_LINES, { "product:tuile": "edilians-hp10-huguenot" });
-    expect(v.questions).toEqual([]);
+    expect(v.questions.map((q) => q.key)).toEqual(["precise:ligne 10"]);
     expect(v.toBuy.find((b) => b.needIds.includes("tuiles"))).toMatchObject({ quantity: "1 488 pièces", approx: "≈ 7 palettes" });
     expect(v.assumptions.map((a) => a.key)).toEqual(expect.arrayContaining(["param:zone", "param:pente", "param:pureau"]));
     const precise = read(D2026_015_LINES, { "product:tuile": "edilians-hp10-huguenot", "param:pureau": { value: "34.3", unit: "cm" } });

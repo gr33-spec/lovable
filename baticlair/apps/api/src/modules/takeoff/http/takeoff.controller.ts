@@ -35,7 +35,7 @@ const answerBody = z
     // « role:<ligne> » : l'artisan tranche une ambiguïté (« 6 : ardoises ou jouées ? »).
     // « libelle:<ligne> » et « quantite:<ligne> » : l'artisan réécrit une ligne du quantitatif (§41.4).
     // « ajout:<article> » : « On ajoute ? » (§45.8), oui ou non. « precision:<article> », « retire:<article> » : l'aperçu (§45.9).
-    key: z.string().regex(/^(?:(?:product|param):[a-z0-9_]{1,40}|role:[0-9a-f-]{36}|(?:libelle|quantite|ajout|precision|retire):.{1,200})$/),
+    key: z.string().regex(/^(?:(?:product|param):[a-z0-9_]{1,40}|role:[0-9a-f-]{36}|(?:libelle|quantite|ajout|precision|retire):.{1,200}|precise:[0-9a-f-]{36})$/),
     value: z.union([
       z.string().trim().max(120),
       z.object({ value: z.string().trim().regex(/^\d+(?:[.,]\d+)?$/), unit: z.string().trim().min(1).max(30) }),

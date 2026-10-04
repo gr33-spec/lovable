@@ -246,7 +246,12 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
     expect(gouttiere.needs.map((n) => [n.slot, n.need?.value]).sort()).toEqual([["crochet", "50"], ["naissance", "2"], ["profil", "20"]]);
 
     // Partie chez le fournisseur : la liste d'achats, jamais « 2 unités d'ouvrage ».
-    await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "product:tuile", value: "edilians-hp10-huguenot" }).expect(200);
+    const answered = await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "product:tuile", value: "edilians-hp10-huguenot" }).expect(200);
+    // Le devis ne dit pas le diamètre de la sortie de toit : une question à boutons, la réponse part en précision.
+    const diametre = (answered.body.view.decisions as { key: string }[]).find((d) => d.key.startsWith("precise:"))!;
+    await agent.post(`/v1/takeoffs/${takeoffId}/validate`).expect(400);
+    const precised = await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: diametre.key, value: "Ø 150" }).expect(200);
+    expect((precised.body.purchase.toBuy as { label: string; precision?: string | null }[]).find((b) => /sortie de toit/i.test(b.label))).toMatchObject({ precision: "Ø 150" });
     await agent.post(`/v1/takeoffs/${takeoffId}/validate`).expect(200);
     const s = await agent.post("/v1/suppliers").send({ name: "Point.P", email: "devis@pointp.fr" });
     const created = await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [s.body.id] }).expect(201);

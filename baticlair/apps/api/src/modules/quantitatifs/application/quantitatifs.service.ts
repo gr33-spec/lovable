@@ -209,7 +209,7 @@ export class QuantitatifsService {
         continue;
       }
       const key = q?.key ?? r.question.replace(/^engine:/, "");
-      if (!/^(?:(?:product|param):[a-z0-9_]{1,40}|role:[0-9a-f-]{36})$/.test(key)) throw validationFailed("Unknown question", [{ path: "question", message: r.question }]);
+      if (!/^(?:(?:product|param):[a-z0-9_]{1,40}|(?:role|precise):[0-9a-f-]{36})$/.test(key)) throw validationFailed("Unknown question", [{ path: "question", message: r.question }]);
       if (key.startsWith("role:") && r.valeur !== "measure" && r.valeur !== "purchase") throw validationFailed("Role answer must be measure or purchase", [{ path: "valeur", message: r.question }]);
       let value: EngineAnswer;
       if (r.valeur === null || !key.startsWith("param:")) value = r.valeur;
