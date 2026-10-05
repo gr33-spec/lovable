@@ -50,6 +50,8 @@ const statusBody = z.object({
 });
 const quoteBody = z.object(chunkedFields);
 const classifyBody = z.object({ classified: z.boolean(), retainedSupplierIds: z.array(z.string()).max(20).optional() });
+const orderBody = z.object({ supplierId: z.string(), outcome: z.enum(["as_is", "modified"]), text: z.string().max(20000).nullish() });
+const orderDocumentBody = z.object({ ...chunkedFields, supplierId: z.string() });
 
 /** Plafond technique de réception ; la limite métier est vérifiée par le service des documents. */
 const HARD_MAX_UPLOAD_BYTES = 50_000_000;
@@ -66,6 +68,8 @@ export function toDto(r: PriceRequestView) {
     createdAt: r.createdAt.toISOString(),
     classifiedAt: r.classifiedAt?.toISOString() ?? null,
     retainedSupplierIds: r.retainedSupplierIds,
+    /** §47.5 : « commandé tel quel » ou « modifié », et les écarts avec la liste envoyée. */
+    orderFeedback: r.orderFeedback,
     packet: r.packet
       ? {
           entreprise: r.packet.entreprise,
@@ -194,6 +198,34 @@ export class PriceRequestsController {
     @Body(new ZodPipe(statusBody)) body: z.infer<typeof statusBody>,
   ) {
     return toDto(await this.requests.setStatus(tenant, id, body.status));
+  }
+
+  /** §47.5 : « commandé tel quel » ou « modifié » (bon de commande collé), d'un tap. */
+  @Post("price-requests/:id/order")
+  @HttpCode(200)
+  async order(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(orderBody)) body: z.infer<typeof orderBody>) {
+    return toDto(await this.requests.recordOrder(tenant, id, body));
+  }
+
+  /** §47.5 : le bon de commande photographié (une photo par page) ou en PDF ; lu ensuite (« Lire le bon de commande »). */
+  @Throttle({ default: HOURLY(30) })
+  @Post("price-requests/:id/order/document")
+  @HttpCode(201)
+  @UseInterceptors(
+    FilesInterceptor("file", MAX_QUOTE_PHOTOS, {
+      storage: memoryStorage(),
+      limits: { fileSize: HARD_MAX_UPLOAD_BYTES, files: MAX_QUOTE_PHOTOS },
+    }),
+  )
+  async orderDocument(
+    @Tenant() tenant: TenantContext,
+    @Param("id") id: string,
+    @UploadedFiles() files: { originalname: string; buffer: Buffer }[] | undefined,
+    @Body(new ZodPipe(orderDocumentBody)) body: z.infer<typeof orderDocumentBody>,
+  ) {
+    const received = files?.length ? await Promise.all(files.map((file) => this.uploads.fileOf(tenant, file, {}))) : [await this.uploads.fileOf(tenant, undefined, body)];
+    const document = await assembleQuote(received.map((r) => ({ fileName: r.name, bytes: r.bytes })));
+    return toDto(await this.requests.attachOrderDocument(tenant, id, body.supplierId, document));
   }
 
   /** Devis reçu du fournisseur, déposé à la main : un PDF, ou des photos (une par page). */

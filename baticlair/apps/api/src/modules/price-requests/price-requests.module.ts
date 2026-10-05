@@ -23,7 +23,15 @@ import { PrismaPriceRequestRepository } from "./infrastructure/prisma-price-requ
     {
       provide: PriceRequestsService,
       useFactory: (r: PriceRequestRepository, s: SupplierRepository, d: DocumentsService, t: TakeoffService, mailer: TransactionalEmailSender & EmailCapability) =>
-        new PriceRequestsService(r, s, d, (tenant, takeoffId) => t.reviewed(tenant, takeoffId), mailer),
+        new PriceRequestsService(
+          r,
+          s,
+          d,
+          (tenant, takeoffId) => t.reviewed(tenant, takeoffId),
+          mailer,
+          undefined,
+          (tenant, takeoffId, order) => t.recordSupplierOrder(tenant, takeoffId, order),
+        ),
       inject: [PRICE_REQUEST_REPOSITORY, SUPPLIER_REPOSITORY, DocumentsService, TakeoffService, EMAIL_SENDER],
     },
   ],

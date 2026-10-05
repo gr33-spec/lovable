@@ -3,6 +3,8 @@ import {
   applyPurchaseOverrides,
   applyRuleConfirmations,
   RATIO,
+  ORDER_WEIGHT,
+  type OrderGap,
   artisanView,
   assessTakeoffLine,
   climateZone,
@@ -613,6 +615,54 @@ export class TakeoffService {
       regle: item.regle,
       version_referentiel: takeoff.referentialVersion ?? referentialFor(takeoff.trade)?.version ?? null,
     };
+  }
+
+  /**
+   * §47.5 RETOUR FOURNISSEUR : ce que l'artisan a réellement commandé, au journal. Chaque écart entre la liste envoyée
+   * et le bon de commande est une correction (« correct » : quantité calculée → quantité commandée, 0 pour une ligne
+   * retirée ; « add » : une ligne que la liste n'avait pas) ; une ligne commandée telle qu'envoyée est une confirmation.
+   * Toutes marquées « bon de commande », de poids 3 (« une correction venue d'une commande réelle vaut trois
+   * confirmations d'écran ») : l'export mensuel les compte à part. Aucun ratio ne bouge seul.
+   */
+  async recordSupplierOrder(
+    tenant: TenantContext,
+    takeoffId: string,
+    order: { priceRequestId: string; supplierId: string; outcome: "as_is" | "modified"; gaps: readonly OrderGap[] },
+  ): Promise<number> {
+    const takeoff = await this.takeoffs.findById(tenant, takeoffId);
+    if (!takeoff) throw notFound("Takeoff");
+    const items = (await this.review(tenant, takeoff)).purchase.toBuy;
+    let recorded = 0;
+    for (const g of order.gaps) {
+      const item = items.find((b) => g.designation === b.label || g.designation.startsWith(`${b.label} (`));
+      const action = g.kind === "added" ? "add" : g.kind === "same" ? "confirm" : "correct";
+      await this.journal.record(tenant, {
+        projectId: takeoff.projectId,
+        takeoffId: takeoff.id,
+        takeoffLineId: null,
+        action,
+        before: g.kind === "added" ? null : { designation: g.designation, quantity: g.sent, unit: g.unit, reference: null },
+        after: g.kind === "removed" ? null : { designation: g.designation, quantity: g.ordered, unit: g.unit, reference: null },
+        documentExcerpt: [],
+        context: {
+          trade: takeoff.trade,
+          source: "bon_de_commande",
+          poids: ORDER_WEIGHT,
+          commande: order.outcome === "as_is" ? "tel quel" : "modifiée",
+          demande: order.priceRequestId,
+          fournisseur: order.supplierId,
+          ecart_pct: g.gapPercent,
+          ...(await this.journalFacts(tenant, takeoff, {
+            materiau: g.designation,
+            calculee: g.sent,
+            corrigee: g.kind === "removed" ? "0" : g.ordered,
+            regle: item ? item.needIds.join(" + ") || item.key : "commande",
+          })),
+        },
+      });
+      recorded++;
+    }
+    return recorded;
   }
 
   async answer(tenant: TenantContext, takeoffId: string, key: string, value: EngineAnswer): Promise<ReviewedTakeoff> {

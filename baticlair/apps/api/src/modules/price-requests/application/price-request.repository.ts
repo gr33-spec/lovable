@@ -1,3 +1,4 @@
+import type { OrderGap } from "@baticlair/domain";
 import type { SupplierPacket } from "./supplier-packet.js";
 import type { TenantContext } from "../../tenancy/index.js";
 import type { RequestedLine } from "./price-request-email.js";
@@ -18,6 +19,22 @@ export interface RecipientRecord {
   document: { id: string; name: string; status: string } | null;
 }
 
+/**
+ * §47.5 retour fournisseur : ce que l'artisan a commandé chez le fournisseur retenu. « as_is » : la liste telle
+ * qu'envoyée ; « modified » : le bon de commande (collé, ou photographié puis lu), comparé ligne à ligne.
+ */
+export interface OrderFeedback {
+  supplierId: string;
+  outcome: "as_is" | "modified";
+  /** D'où viennent les lignes commandées : rien (tel quel), le texte collé, ou la photo lue (document). */
+  source: "none" | "text" | "document";
+  documentId?: string | null;
+  /** Une photo déposée attend sa lecture. */
+  pendingReading?: boolean;
+  gaps: OrderGap[];
+  at: string;
+}
+
 export interface PriceRequestRecord {
   id: string;
   projectId: string;
@@ -29,6 +46,8 @@ export interface PriceRequestRecord {
   /** « Classé » : l'artisan a fait son choix. */
   classifiedAt: Date | null;
   retainedSupplierIds: string[];
+  /** §47.5 : le retour du fournisseur retenu (null tant que l'artisan n'a rien dit). */
+  orderFeedback: OrderFeedback | null;
   recipients: RecipientRecord[];
   /** §43 : les trois blocs envoyés au fournisseur, figés avec la demande (null pour une demande d'avant). */
   packet: SupplierPacket | null;
@@ -83,6 +102,8 @@ export interface PriceRequestRepository {
   delete(tenant: TenantContext, id: string): Promise<boolean>;
   /** Classe la demande (fournisseurs retenus facultatifs) ; `null` la rouvre. */
   classify(tenant: TenantContext, id: string, retainedSupplierIds: string[] | null): Promise<void>;
+  /** §47.5 : le retour fournisseur (remplace le précédent). */
+  setOrderFeedback(tenant: TenantContext, id: string, feedback: OrderFeedback | null): Promise<void>;
 }
 
 export const PRICE_REQUEST_REPOSITORY = Symbol("PRICE_REQUEST_REPOSITORY");

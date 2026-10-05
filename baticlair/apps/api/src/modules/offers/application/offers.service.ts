@@ -1,4 +1,5 @@
 import {
+  type OrderedLine,
   compareOffers,
   computedTotalHT,
   tradeKey,
@@ -151,6 +152,41 @@ export class OffersService {
     });
     await this.meter.complete(analysisId, { billable });
     return { offer: this.view(offer, request), analysisId };
+  }
+
+  /**
+   * §47.5 : la photo (ou le PDF) du bon de commande, lue par l'IA comme un devis : les lignes telles qu'imprimées et la
+   * ligne demandée qu'elles reprennent. Rien n'est calculé ici : les écarts sont faits par le code (`orderGaps`).
+   */
+  async readOrderLines(tenant: TenantContext, requestId: string): Promise<OrderedLine[]> {
+    assertCanWrite(tenant);
+    const request = await this.requests.findById(tenant, requestId);
+    if (!request) throw notFound("PriceRequest");
+    const documentId = request.orderFeedback?.pendingReading ? request.orderFeedback.documentId : null;
+    if (!documentId) throw validationFailed("No order document waiting to be read", { reason: "no_order_document" });
+    if (!this.extractor) throw new DomainError("ai_unavailable", "AI reading is not configured");
+    const doc = await this.documents.findById(tenant, documentId);
+    if (!doc) throw notFound("Document");
+    const prepared = await this.aiInput.prepare(tenant, doc);
+    const begin = await this.meter.begin({ companyId: tenant.companyId, userId: tenant.userId, projectId: request.projectId, documentId: doc.id, kind: "supplier_quote" });
+    if (begin.status === "already_done") throw new DomainError("conflict", "Analysis already completed for this document");
+    const analysisId = begin.analysis.id;
+    const profile = tradeProfile(tradeKey(tenant.trades));
+    let success: OfferAttempt | null = null;
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS && !success; attempt++) {
+      const result = await this.extractor.extract({ ...prepared.input, tradeLabel: profile.label, requested: request.lines });
+      await this.record(tenant, request.projectId, doc.id, prepared, analysisId, attempt, result);
+      if (result.status === "success") success = result;
+      else if (result.status === "refused" || result.status === "timeout" || result.errorCode === "max_tokens") break;
+    }
+    if (!success?.output) {
+      await this.meter.fail(analysisId);
+      throw new DomainError("analysis_failed", "The AI could not read this order");
+    }
+    await this.meter.complete(analysisId, { billable: true });
+    return success.output.lines
+      .filter((l) => l.kind === "main" || l.kind === "substitution")
+      .map((l) => ({ designation: l.designation, quantity: l.quantity, unit: l.unit, requestIndex: l.requestLine !== null && l.requestLine >= 1 ? l.requestLine - 1 : null }));
   }
 
   /** Les devis déjà lus d'une demande de prix, par destinataire. */

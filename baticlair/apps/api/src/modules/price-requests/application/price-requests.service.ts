@@ -1,4 +1,4 @@
-import { briefFacts, briefSentence, communeOf, groupIdenticalLines, parseUnit, withoutLabour, writtenNumber } from "@baticlair/domain";
+import { briefFacts, briefSentence, communeOf, groupIdenticalLines, orderGaps, parseOrderText, parseUnit, withoutLabour, writtenNumber, type OrderGap, type OrderedLine } from "@baticlair/domain";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { DocumentsService } from "../../documents/index.js";
@@ -9,6 +9,14 @@ import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { priceRequestEmail, requestedQuantityText, supplierLineLabel } from "./price-request-email.js";
 import type { PriceRequestRecord, PriceRequestRepository, RecipientStatus } from "./price-request.repository.js";
 import { packetDocument, packetMail, packetPdf, packetSubject, priceLeak, type PacketDocument, type PacketSender, type PacketSupply, type SketchFile, type SupplierPacket } from "./supplier-packet.js";
+
+/** §47.5 : une commande passée chez le fournisseur retenu, telle qu'elle part au journal. */
+export interface SupplierOrder {
+  priceRequestId: string;
+  supplierId: string;
+  outcome: "as_is" | "modified";
+  gaps: OrderGap[];
+}
 
 export interface PriceRequestView extends PriceRequestRecord {
   /** E-mail prêt à envoyer, par destinataire : le texte des trois blocs (§43.5). */
@@ -143,6 +151,8 @@ export class PriceRequestsService {
     private readonly reviewedTakeoff: (tenant: TenantContext, takeoffId: string) => Promise<ReviewedTakeoff>,
     private readonly mailer: TransactionalEmailSender & { readonly deliversEmail: boolean },
     private readonly clock: () => Date = () => new Date(),
+    /** §47.5 : le retour fournisseur au journal des corrections (écarts marqués « bon de commande »). */
+    private readonly journalOrder: (tenant: TenantContext, takeoffId: string, order: SupplierOrder) => Promise<number> = async () => 0,
   ) {}
 
   /** Des e-mails partent-ils vraiment du serveur (sinon : messagerie de l'artisan + PDF à télécharger) ? */
@@ -377,6 +387,72 @@ export class PriceRequestsService {
       });
     await this.requests.attachDocument(tenant, recipientId, result.document.id);
     return this.reload(tenant, request.id);
+  }
+
+  /**
+   * §47.5 RETOUR FOURNISSEUR : d'un tap, « commandé tel quel » (chaque ligne envoyée confirmée) ou « modifié » avec le
+   * bon de commande collé (lu par le code, jamais par l'IA) ; les écarts vont au journal, marqués « bon de commande ».
+   * Une seule réponse par demande : le journal ne s'efface pas, une commande ne compte jamais deux fois.
+   */
+  async recordOrder(tenant: TenantContext, requestId: string, input: { supplierId: string; outcome: "as_is" | "modified"; text?: string | null }): Promise<PriceRequestView> {
+    assertCanWrite(tenant);
+    const request = await this.orderable(tenant, requestId, input.supplierId);
+    let gaps: OrderGap[];
+    if (input.outcome === "as_is") {
+      gaps = request.lines.map((l, index) => ({ kind: "same", index, designation: l.designation, sent: l.quantity, ordered: l.quantity, unit: l.unit, gapPercent: 0 }));
+    } else {
+      const ordered = parseOrderText(input.text ?? "");
+      if (ordered.length === 0) throw validationFailed("Paste the order lines, one per article, with their quantity", { reason: "order_unreadable" });
+      gaps = orderGaps(request.lines, ordered);
+    }
+    await this.journalOrder(tenant, request.takeoffId, { priceRequestId: request.id, supplierId: input.supplierId, outcome: input.outcome, gaps });
+    await this.requests.setOrderFeedback(tenant, request.id, {
+      supplierId: input.supplierId,
+      outcome: input.outcome,
+      source: input.outcome === "as_is" ? "none" : "text",
+      gaps,
+      at: this.clock().toISOString(),
+    });
+    return this.reload(tenant, request.id);
+  }
+
+  /** §47.5 : le bon de commande photographié (ou en PDF) : gardé, il attend sa lecture (« Lire le bon de commande »). */
+  async attachOrderDocument(tenant: TenantContext, requestId: string, supplierId: string, file: { fileName: string | undefined; bytes: Uint8Array }): Promise<PriceRequestView> {
+    assertCanWrite(tenant);
+    const request = await this.orderable(tenant, requestId, supplierId);
+    const result = await this.documents.upload(tenant, request.projectId, { purpose: "supplier_quote", ...file });
+    await this.requests.setOrderFeedback(tenant, request.id, {
+      supplierId,
+      outcome: "modified",
+      source: "document",
+      documentId: result.document.id,
+      pendingReading: true,
+      gaps: [],
+      at: this.clock().toISOString(),
+    });
+    return this.reload(tenant, request.id);
+  }
+
+  /** §47.5 : la lecture de la photo, faite par le module des devis : écarts calculés par le code, puis au journal. */
+  async completeOrderReading(tenant: TenantContext, requestId: string, ordered: OrderedLine[]): Promise<PriceRequestView> {
+    assertCanWrite(tenant);
+    const request = await this.requests.findById(tenant, requestId);
+    if (!request) throw notFound("PriceRequest");
+    const feedback = request.orderFeedback;
+    if (!feedback?.pendingReading) throw new DomainError("conflict", "No order document waiting to be read", { reason: "no_order_document" });
+    const gaps = orderGaps(request.lines, ordered);
+    await this.journalOrder(tenant, request.takeoffId, { priceRequestId: request.id, supplierId: feedback.supplierId, outcome: "modified", gaps });
+    await this.requests.setOrderFeedback(tenant, request.id, { ...feedback, pendingReading: false, gaps, at: this.clock().toISOString() });
+    return this.reload(tenant, request.id);
+  }
+
+  private async orderable(tenant: TenantContext, requestId: string, supplierId: string): Promise<PriceRequestRecord> {
+    const request = await this.requests.findById(tenant, requestId);
+    if (!request) throw notFound("PriceRequest");
+    if (!request.recipients.some((r) => r.supplier.id === supplierId)) throw validationFailed("Unknown supplier", { reason: "not_a_recipient" });
+    if (request.orderFeedback && !request.orderFeedback.pendingReading)
+      throw new DomainError("conflict", "The order was already recorded", { reason: "order_recorded" });
+    return request;
   }
 
   /**

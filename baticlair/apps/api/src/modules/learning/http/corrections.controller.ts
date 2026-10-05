@@ -40,26 +40,30 @@ export class CorrectionsController {
       where: { action: { in: ["correct", "to_quote"] }, createdAt: { gte: new Date(Date.UTC(y, m - 1, 1)), lt: new Date(Date.UTC(y, m, 1)) } },
       select: { action: true, context: true },
     });
-    const byRule = new Map<string, { metier: string; version: string; corrections: number; aPreciser: number; gaps: number[] }>();
+    // §47.5 : une correction venue d'un bon de commande (context.source) pèse trois confirmations d'écran (context.poids).
+    const byRule = new Map<string, { metier: string; version: string; corrections: number; bonsDeCommande: number; poids: number; aPreciser: number; gaps: number[] }>();
     for (const r of rows) {
       const c = (r.context ?? {}) as Record<string, unknown>;
       const regle = String(c.regle ?? "?");
       const key = `${c.metier ?? ""}|${regle}|${c.version_referentiel ?? ""}`;
-      const entry = byRule.get(key) ?? { metier: String(c.metier ?? ""), version: String(c.version_referentiel ?? ""), corrections: 0, aPreciser: 0, gaps: [] };
+      const entry = byRule.get(key) ?? { metier: String(c.metier ?? ""), version: String(c.version_referentiel ?? ""), corrections: 0, bonsDeCommande: 0, poids: 0, aPreciser: 0, gaps: [] };
       if (r.action === "to_quote") entry.aPreciser += 1;
       else {
         entry.corrections += 1;
+        const fromOrder = c.source === "bon_de_commande";
+        if (fromOrder) entry.bonsDeCommande += 1;
+        entry.poids += fromOrder && typeof c.poids === "number" ? c.poids : 1;
         const before = numberIn(c.quantite_calculee);
         const after = numberIn(c.quantite_corrigee);
         if (before && after !== null) entry.gaps.push(((after - before) / before) * 100);
       }
       byRule.set(key, entry);
     }
-    const lines = [["mois", "metier", "regle", "version_referentiel", "corrections", "a_preciser", "ecart_moyen_pct"].join(";")];
+    const lines = [["mois", "metier", "regle", "version_referentiel", "corrections", "dont_bons_de_commande", "poids", "a_preciser", "ecart_moyen_pct"].join(";")];
     for (const [key, e] of [...byRule].sort((a, b) => b[1].corrections + b[1].aPreciser - (a[1].corrections + a[1].aPreciser))) {
       const regle = key.split("|")[1]!;
       const mean = e.gaps.length > 0 ? Math.round((e.gaps.reduce((s, g) => s + g, 0) / e.gaps.length) * 10) / 10 : null;
-      lines.push([month, e.metier, regle, e.version, e.corrections, e.aPreciser, mean].map(csv).join(";"));
+      lines.push([month, e.metier, regle, e.version, e.corrections, e.bonsDeCommande, e.poids, e.aPreciser, mean].map(csv).join(";"));
     }
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
     res.setHeader("Content-Disposition", `attachment; filename="corrections-${month}.csv"`);

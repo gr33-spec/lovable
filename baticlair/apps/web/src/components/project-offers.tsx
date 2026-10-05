@@ -2,6 +2,7 @@
 
 import { Check, Sparkles } from "lucide-react";
 import { useCallback, useState } from "react";
+import { OrderFeedbackBox } from "@/components/order-feedback";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, type Comparison, type ComparisonItem, type ComparisonSupplier, type ItemFlag, type Offer, type OfferLine, type PriceRequest } from "@/lib/api";
 import { euros } from "@/lib/fr";
@@ -295,6 +296,7 @@ export function ProjectComparison({
                   </span>
                 </div>
                 {retained ? <span className="text-sm font-extrabold text-ok">✓ Offre retenue</span> : null}
+                {retained && !archived ? <OrderFeedbackBox request={request} supplierId={s.supplierId} supplierName={s.name} onRequestChange={onRequestChange} /> : null}
                 {!retained && isRef ? <span className="text-sm font-extrabold text-ok">{refLabel}</span> : null}
                 {gap !== null && gap > 0 ? (
                   <span className="text-sm font-bold text-muted">

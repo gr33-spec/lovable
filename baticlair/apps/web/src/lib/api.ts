@@ -449,6 +449,26 @@ export interface PriceRequestRecipient {
   email: { subject: string; body: string } | null;
 }
 
+export interface OrderGap {
+  kind: "same" | "changed" | "removed" | "added";
+  index: number | null;
+  designation: string;
+  sent: string | null;
+  ordered: string | null;
+  unit: string | null;
+  gapPercent: number | null;
+}
+
+export interface OrderFeedback {
+  supplierId: string;
+  outcome: "as_is" | "modified";
+  source: "none" | "text" | "document";
+  documentId?: string | null;
+  pendingReading?: boolean;
+  gaps: OrderGap[];
+  at: string;
+}
+
 export interface PriceRequest {
   id: string;
   projectId: string;
@@ -460,6 +480,8 @@ export interface PriceRequest {
   /** « Classé » : l'artisan a fait son choix (fournisseurs retenus facultatifs). */
   classifiedAt: string | null;
   retainedSupplierIds: string[];
+  /** §47.5 retour fournisseur : « commandé tel quel » ou « modifié », et les écarts avec la liste envoyée. */
+  orderFeedback?: OrderFeedback | null;
   recipients: PriceRequestRecipient[];
   /** §43 : les trois blocs envoyés au fournisseur (mail et PDF) ; absent pour une demande d'avant. */
   packet: { entreprise: string; chantier: string; articles: string[]; a_chiffrer: string[]; resume: string[]; joindre_detail: boolean } | null;
