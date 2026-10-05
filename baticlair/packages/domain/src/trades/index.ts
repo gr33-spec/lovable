@@ -2,17 +2,21 @@ import {
   CARPENTRY_PROFILE,
   CEILING_PROFILE,
   CLADDING_PROFILE,
+  DECKING_PROFILE,
   DRYWALL_PROFILE,
+  EARTHWORKS_PROFILE,
   ELECTRICAL_PROFILE,
   FACADE_PROFILE,
   FLOORING_PROFILE,
   HVAC_PROFILE,
   INTERIOR_JOINERY_PROFILE,
+  IRRIGATION_PROFILE,
   JOINERY_PROFILE,
   KITCHEN_PROFILE,
   MASONRY_PROFILE,
   OTHER_PROFILE,
   PAINTING_PROFILE,
+  PAVING_PROFILE,
   PLUMBING_PROFILE,
   SOLAR_PROFILE,
   TILING_PROFILE,
@@ -44,6 +48,11 @@ export const TRADES: readonly { id: string; label: string }[] = [
   { id: "interior_joinery", label: "Menuiserie intérieure, agencement" },
   { id: "kitchen", label: "Cuisine" },
   { id: "solar", label: "Photovoltaïque" },
+  { id: "decking", label: "Terrasse bois" },
+  { id: "paving", label: "Pavage, dallage extérieur" },
+  { id: "earthworks", label: "Terrassement, VRD" },
+  { id: "irrigation", label: "Arrosage automatique" },
+  { id: "general", label: "Constructeur, entreprise générale" },
   { id: "other", label: "Autre métier" },
 ];
 
@@ -66,6 +75,39 @@ export const TRADE_PROFILES: Readonly<Record<string, TradeProfile>> = {
   interior_joinery: INTERIOR_JOINERY_PROFILE,
   kitchen: KITCHEN_PROFILE,
   solar: SOLAR_PROFILE,
+  decking: DECKING_PROFILE,
+  paving: PAVING_PROFILE,
+  earthworks: EARTHWORKS_PROFILE,
+  irrigation: IRRIGATION_PROFILE,
+  // Constructeur, entreprise générale : le vocabulaire de tous les lots (le devis passe par chacun d'eux).
+  general: {
+    ...mergeProfiles([
+      MASONRY_PROFILE,
+      EARTHWORKS_PROFILE,
+      CARPENTRY_PROFILE,
+      ROOFING_PROFILE,
+      WATERPROOFING_PROFILE,
+      JOINERY_PROFILE,
+      DRYWALL_PROFILE,
+      CEILING_PROFILE,
+      ELECTRICAL_PROFILE,
+      PLUMBING_PROFILE,
+      HVAC_PROFILE,
+      TILING_PROFILE,
+      PAINTING_PROFILE,
+      INTERIOR_JOINERY_PROFILE,
+      KITCHEN_PROFILE,
+      FACADE_PROFILE,
+      CLADDING_PROFILE,
+      SOLAR_PROFILE,
+      DECKING_PROFILE,
+      PAVING_PROFILE,
+      IRRIGATION_PROFILE,
+      FLOORING_PROFILE,
+    ]),
+    id: "general",
+    label: "Constructeur, entreprise générale",
+  },
   other: OTHER_PROFILE,
 };
 
@@ -100,7 +142,9 @@ export function tradeProfile(key: string): TradeProfile {
   return merged;
 }
 
-const union = (lists: readonly (readonly string[])[]): string[] => [...new Set(lists.flat())];
+function union(lists: readonly (readonly string[])[]): string[] {
+  return [...new Set(lists.flat())];
+}
 
 function mergeProfiles(profiles: readonly TradeProfile[]): TradeProfile {
   const seen = new Set<string>();
