@@ -101,6 +101,8 @@ test("un artisan crée son compte et son premier chantier depuis le +", async ({
   await expect(page.getByRole("heading", { name: "Toiture Dupont" })).toBeVisible();
   // Le chat du chantier : une seule invitation, déposer le devis ; plus de barre en 5 étapes.
   await expect(page.getByRole("heading", { name: /^Déposez le devis/ })).toBeVisible();
+  // Premier écran court (retour du fondateur, 2026-10-05) : les infos chantier n'arrivent qu'avec le devis.
+  await expect(page.getByRole("button", { name: /Ajouter des informations sur le chantier/ })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Avancement du chantier" })).toHaveCount(0);
 
   // Retour depuis la fiche : on revient à l'accueil (d'où l'on venait), pas au formulaire.
@@ -275,6 +277,7 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
   // Devis client : 3 pages (tableau, page scannée, conditions générales).
   await page.getByLabel("Choisir le devis (PDF)").setInputFiles(fixture("devis-client-couvreur.pdf"));
   await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Ajouter des informations sur le chantier\s*Facultatif, mais aide à la précision/ })).toBeVisible();
   // Déposé : l'artisan peut ajouter ses infos, puis lance la lecture d'un appui ; BatiClair dit ce qu'il a compris.
   await page.getByRole("button", { name: "Lire le devis" }).click();
   await expect(page.getByRole("button", { name: "Ce que j'ai compris" })).toBeVisible();

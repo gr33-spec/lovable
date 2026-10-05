@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleCheck, FileUp, Loader2, Sparkles } from "lucide-react";
+import { CircleCheck, FileUp, Loader2 } from "lucide-react";
 import { useCallback, useId, useRef, useState } from "react";
 import { SiteNotes } from "@/components/site-notes";
 import { ProjectTakeoff } from "@/components/project-takeoff";
@@ -30,6 +30,7 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
   );
   const { data, setData, error, reload } = useResource(fetchDocs);
   const [notice, setNotice] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const refreshProgress = useProgressRefresh();
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
@@ -59,37 +60,17 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
         </div>
       ) : archived ? null : (
         <section id="devis" aria-labelledby="next-step" className="flex scroll-mt-4 flex-col gap-3 pb-24 lg:pb-0">
-          {/* La carte héros dit ce qui va se passer ; l'action principale est en bas, sous le pouce. */}
-          <div className="relative overflow-hidden rounded-[28px] bg-hero p-5 pb-6 text-white shadow-[0_24px_48px_-16px_rgba(26,21,80,0.6)]">
-            <p className="text-[12px] font-extrabold tracking-[0.14em] text-white/65 uppercase">Nouveau chantier</p>
-            <h2 id="next-step" className="mt-2 font-display text-[30px] leading-[1.05] font-extrabold tracking-[-0.02em]">
-              Déposez le devis, <span className="font-serif text-[34px] font-normal tracking-normal italic">je fais la liste.</span>
+          {/* Retour du fondateur (2026-10-05) : un premier écran court, le devis d'abord. Les infos chantier
+              (facultatives) n'apparaissent qu'une fois le devis en route. */}
+          <div className="rounded-[28px] bg-hero p-5 text-white shadow-[0_24px_48px_-16px_rgba(26,21,80,0.6)]">
+            <h2 id="next-step" className="font-display text-[26px] leading-[1.1] font-extrabold tracking-[-0.02em]">
+              Déposez le devis, <span className="font-serif text-[29px] font-normal tracking-normal italic">je fais la liste.</span>
             </h2>
-            <ol className="mt-5 flex flex-col gap-3">
-              {[
-                ["Je lis votre devis", "PDF, même scanné, sans rien ressaisir."],
-                ["Quelques questions d'un coup", "Seulement celles qui changent la liste."],
-                ["La liste prête à chiffrer", "Aux unités du fournisseur, à envoyer d'un tap."],
-              ].map(([title, text], i) => (
-                <li key={title} className="flex items-start gap-3">
-                  <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-[14px] font-extrabold backdrop-blur">
-                    {i + 1}
-                  </span>
-                  <span className="flex flex-col">
-                    <span className="text-[16px] leading-snug font-bold">{title}</span>
-                    <span className="text-[13px] leading-snug text-white/70">{text}</span>
-                  </span>
-                </li>
-              ))}
-            </ol>
-            <p className="mt-5 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[13px] font-bold">
-              <Sparkles size={14} aria-hidden="true" />
-              Environ 1 minute · aucune quantité à saisir
-            </p>
+            <p className="mt-2 text-[14px] leading-snug text-white/75">Un PDF, même scanné. Aucune quantité à saisir.</p>
           </div>
-          <SiteNotes projectId={projectId} infos={null} disabled={false} onSaved={() => undefined} />
+          {uploading ? <SiteNotes projectId={projectId} infos={null} disabled={false} onSaved={() => undefined} /> : null}
           <div className="fixed inset-x-4 bottom-[max(16px,env(safe-area-inset-bottom))] z-20 mx-auto max-w-2xl lg:static lg:inset-auto lg:mx-0">
-            <UploadButton projectId={projectId} purpose="client_quote" label="Choisir le devis (PDF)" tone="cta" onAdded={added} />
+            <UploadButton projectId={projectId} purpose="client_quote" label="Choisir le devis (PDF)" tone="cta" onAdded={added} onPending={setUploading} />
           </div>
         </section>
       )}
@@ -219,12 +200,15 @@ function UploadButton({
   label,
   tone,
   onAdded,
+  onPending,
 }: {
   projectId: string;
   purpose: DocumentPurpose;
   label: string;
   tone: "cta" | "dark" | "light";
   onAdded: (doc: ProjectDocument) => void;
+  /** Le dépôt commence ou s'arrête. */
+  onPending?: (pending: boolean) => void;
 }) {
   const inputId = useId();
   const input = useRef<HTMLInputElement>(null);
@@ -238,6 +222,7 @@ function UploadButton({
       return;
     }
     setPending(true);
+    onPending?.(true);
     try {
       const form = new FormData();
       form.append("purpose", purpose);
@@ -247,6 +232,7 @@ function UploadButton({
       setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
     } finally {
       setPending(false);
+      onPending?.(false);
       if (input.current) input.current.value = "";
     }
   }

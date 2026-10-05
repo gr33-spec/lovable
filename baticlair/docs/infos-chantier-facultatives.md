@@ -50,3 +50,7 @@ Le §44 du référentiel du fondateur formalise ce MVP. Ajouts :
 - **L'explication cite les deux valeurs** (§44.3) : « pente du toit 35° (note de l'artisan ; le devis disait 40°) ».
 - **Contradiction entre documents** : la validation est refusée (`contradiction_open`) tant que la question est ouverte ; rien ne part au fournisseur.
 - **Les 7 tests du §44.5** : `apps/api/test/infos-chantier-44-5.test.ts`.
+
+## Retour du fondateur (2026-10-05) : premier écran court
+
+Le premier écran d'un chantier ne montre que le dépôt du devis (« Déposez le devis, je fais la liste. », une phrase, le bouton). Le bouton « Ajouter des informations sur le chantier — Facultatif, mais aide à la précision » apparaît dès que le devis commence à charger, et reste là pendant la lecture. Les étapes de lecture sont neutres (« Je reconnais les ouvrages du devis. ») : elles valent pour tous les métiers.

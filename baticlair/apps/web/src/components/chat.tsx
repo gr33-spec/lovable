@@ -46,7 +46,7 @@ function Step({ done, children, delay = 0 }: { done: boolean; children: React.Re
 }
 
 /** Pendant la lecture (jusqu'à une minute) : les étapes s'affichent au fil du travail, la dernière reste en cours. */
-const READING_STEPS = ["J'ouvre le devis.", "Je lis les lignes une à une.", "Je reconnais les ouvrages : couverture, faîtage, gouttières…", "Je calcule les fournitures, aux unités du fournisseur."];
+const READING_STEPS = ["J'ouvre le devis.", "Je lis les lignes une à une.", "Je reconnais les ouvrages du devis.", "Je calcule les fournitures, aux unités du fournisseur."];
 
 export function ThinkingSteps() {
   const [shown, setShown] = useState(1);
