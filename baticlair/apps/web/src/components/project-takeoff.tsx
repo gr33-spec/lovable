@@ -215,6 +215,10 @@ export function ProjectTakeoff({
       if (d.primary) remember(d.primary.label);
       return call("reponses", { reponses: [{ question: d.key, valeur: "ok" }] });
     },
+    onDecideMany: (ds) => {
+      remember(`C'est bon pour ${ds.length > 1 ? `les ${ds.length} lignes` : "la ligne"}`);
+      return call("reponses", { reponses: ds.map((d) => ({ question: d.key, valeur: "ok" })) });
+    },
     onAnswer: (key, value) => {
       remember(answerLabel(key, value));
       return answer(key, value);
