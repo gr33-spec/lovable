@@ -50,6 +50,8 @@ const COMPTOIR: Record<string, string> = {
   feutre_bac: "« avec ou sans anti-condensation ? »",
   teinte_fc: "« bleu-noir ou noir ? »",
   dauphin: "« un dauphin en pied ? » (réponse du fondateur, 2026-10-05)",
+  longueur_plomb: "les mètres de bande de plomb",
+  developpe_cuivre: "« ta bande cuivre, en quel développé ? »",
 };
 /** Ce que le comptoir ne demande jamais : une hypothèse, dite et modifiable d'un tap. */
 const JAMAIS: readonly string[] = ["zone", "entraxe_supports", "pureau", "pente", "longueur_rampant", "epaisseur_zinc", "diametre_crochet", "coudes_par_descente"];

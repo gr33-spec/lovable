@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.05-32",
+  "version": "roofing-2026.10.05-33",
   "trade": "roofing",
   "sources": [
     {
@@ -855,6 +855,49 @@
       ],
       "dominant": true,
       "warning": "Amiante : le retrait se fait par une entreprise certifiée (SS3), après un repérage avant travaux et un plan de retrait déclaré un mois avant le chantier. BatiClair ne compte aucun matériau pour ce poste : il part tel qu'écrit (§18)."
+    },
+    {
+      "code": "lead_strip",
+      "label": "Bande de plomb",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "plomb",
+        "bande de plomb",
+        "bandes de plomb",
+        "bavette plomb",
+        "solin plomb"
+      ]
+    },
+    {
+      "code": "copper_strip",
+      "label": "Bande cuivre",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "cuivre",
+        "bande cuivre",
+        "bandes cuivre",
+        "bande de cuivre",
+        "solin cuivre",
+        "couvertine cuivre"
+      ]
+    },
+    {
+      "code": "copper_sheet",
+      "label": "Feuille de cuivre",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "copper_coil",
+      "label": "Bobine de cuivre",
+      "needUnit": "m",
+      "attributes": [],
+      "keyAttributes": []
     },
     {
       "code": "steel_tray",
@@ -3677,6 +3720,130 @@
             "verification": {
               "status": "verified",
               "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "plomb-rouleau",
+      "family": "lead_strip",
+      "label": "Plomb laminé en rouleau (largeur et épaisseur du chantier)",
+      "shortLabel": "Plomb en rouleau",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "rouleau",
+          "label": {
+            "one": "rouleau",
+            "many": "rouleaux"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "bande-cuivre-faconnee",
+      "family": "copper_strip",
+      "label": "Bande cuivre façonnée, longueurs de 2 m (développé et épaisseur du chantier)",
+      "shortLabel": "Bandes cuivre façonnées",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "longueur",
+          "label": {
+            "one": "longueur de 2 m",
+            "many": "longueurs de 2 m"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "feuille-cuivre-2x1",
+      "family": "copper_sheet",
+      "label": "Feuille de cuivre 2 × 1 m (épaisseur du chantier)",
+      "shortLabel": "Feuilles cuivre 2 × 1 m",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "bobine-cuivre",
+      "family": "copper_coil",
+      "label": "Cuivre en bobine, au mètre linéaire (largeur et épaisseur du chantier)",
+      "shortLabel": "Cuivre en bobine",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "ml",
+          "label": {
+            "one": "ml",
+            "many": "ml"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "m",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
               "verifiedBy": "BatiClair (définition)"
             },
             "version": 1
@@ -10313,6 +10480,561 @@
           "core": false,
           "exclusions": "4 vis par mètre de bande (§25.5).",
           "precision": "4 par mètre, {longueur_bande|ml} de bande",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      ]
+    },
+    {
+      "id": "bandes-plomb",
+      "trade": "roofing",
+      "label": "Bandes de plomb (rouleaux)",
+      "triggers": [
+        "lead_strip"
+      ],
+      "params": [
+        {
+          "key": "longueur_plomb",
+          "label": "Longueur de bande de plomb",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Longueur de bande de plomb ?",
+          "fromLineQuantity": true
+        },
+        {
+          "key": "largeur_plomb",
+          "label": "Largeur de la bande de plomb",
+          "unit": "cm",
+          "kind": "site_data",
+          "question": "Plomb : bande de quelle largeur ?",
+          "textLabels": [
+            "largeur",
+            "bande de",
+            "laize"
+          ],
+          "default": {
+            "value": "30",
+            "source": "fondateur-reponses-2026-10-05",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-05",
+              "verifiedBy": "Fondateur (couvreur)"
+            },
+            "version": 1,
+            "note": "bande de 30 cm"
+          },
+          "choices": [
+            {
+              "label": "20 cm",
+              "value": "20"
+            },
+            {
+              "label": "30 cm",
+              "value": "30"
+            },
+            {
+              "label": "40 cm",
+              "value": "40"
+            },
+            {
+              "label": "50 cm",
+              "value": "50"
+            }
+          ]
+        },
+        {
+          "key": "epaisseur_plomb",
+          "label": "Épaisseur du plomb",
+          "unit": "mm",
+          "kind": "site_data",
+          "question": "Plomb : 1,5, 2 ou 2,5 mm ?",
+          "textValues": [
+            {
+              "value": "1.5",
+              "keywords": [
+                "1,5 mm",
+                "1.5 mm",
+                "1,5mm"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "2 mm",
+                "2mm"
+              ]
+            },
+            {
+              "value": "2.5",
+              "keywords": [
+                "2,5 mm",
+                "2.5 mm",
+                "2,5mm"
+              ]
+            }
+          ],
+          "default": {
+            "value": "1.5",
+            "source": "fondateur-reponses-2026-10-05",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-05",
+              "verifiedBy": "Fondateur (couvreur)"
+            },
+            "version": 1,
+            "note": "plomb 1,5 mm"
+          },
+          "choices": [
+            {
+              "label": "1,5 mm",
+              "value": "1.5"
+            },
+            {
+              "label": "2 mm",
+              "value": "2"
+            },
+            {
+              "label": "2,5 mm",
+              "value": "2.5"
+            }
+          ],
+          "display": {
+            "2": "2",
+            "1.5": "1,5",
+            "2.5": "2,5"
+          }
+        }
+      ],
+      "slots": [
+        {
+          "key": "plomb",
+          "family": "lead_strip",
+          "label": "Plomb en rouleau",
+          "usual": {
+            "text": "Plomb laminé en rouleau (§12).",
+            "source": "fondateur-reponses-2026-10-05",
+            "productId": "plomb-rouleau"
+          }
+        }
+      ],
+      "constants": {
+        "marge_plomb": {
+          "kind": "installation_condition",
+          "value": "1.1",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« ml × 1,1 » (§12)."
+        },
+        "rouleau_plomb": {
+          "kind": "installation_condition",
+          "value": "6",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "draft",
+            "note": "§12 : rouleaux de 3 à 6 m ; 6 m retenus, à confirmer."
+          },
+          "version": 1,
+          "label": "rouleau de plomb de {v}"
+        }
+      },
+      "needs": [
+        {
+          "id": "rouleaux-plomb",
+          "slot": "plomb",
+          "formula": "arrondi_sup(longueur_plomb * regle.marge_plomb / regle.rouleau_plomb)",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Bande à la longueur du devis, + 10 % de recouvrements et de façon.",
+          "designation": "Plomb laminé {epaisseur_plomb} mm, rouleau largeur {largeur_plomb|cm#} cm × 6 m",
+          "precision": "{longueur_plomb|ml} de bande",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      ]
+    },
+    {
+      "id": "bandes-cuivre",
+      "trade": "roofing",
+      "label": "Bandes cuivre (façonnées, feuilles ou bobine)",
+      "triggers": [
+        "copper_strip"
+      ],
+      "params": [
+        {
+          "key": "longueur_bande",
+          "label": "Longueur de bande",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Longueur de bande cuivre ?",
+          "fromLineQuantity": true
+        },
+        {
+          "key": "developpe_cuivre",
+          "label": "Développé de la bande cuivre",
+          "unit": "mm",
+          "kind": "site_data",
+          "question": "Développé de la bande cuivre ?",
+          "textLabels": [
+            "developpe",
+            "dev",
+            "dev."
+          ],
+          "withinChoices": true,
+          "textValues": [
+            {
+              "value": "100",
+              "keywords": [
+                "dev 10",
+                "dev. 10",
+                "developpe 10"
+              ]
+            },
+            {
+              "value": "250",
+              "keywords": [
+                "dev 25",
+                "dev. 25",
+                "developpe 25"
+              ]
+            },
+            {
+              "value": "330",
+              "keywords": [
+                "dev 33",
+                "dev. 33",
+                "developpe 33"
+              ]
+            },
+            {
+              "value": "400",
+              "keywords": [
+                "dev 40",
+                "dev. 40",
+                "developpe 40"
+              ]
+            }
+          ],
+          "choices": [
+            {
+              "label": "100 mm (solin, couvre-joint)",
+              "value": "100"
+            },
+            {
+              "label": "250 mm",
+              "value": "250"
+            },
+            {
+              "label": "330 mm",
+              "value": "330"
+            },
+            {
+              "label": "400 mm",
+              "value": "400"
+            }
+          ]
+        },
+        {
+          "key": "faconnage",
+          "label": "Façonnage",
+          "unit": "u",
+          "kind": "artisan_preference",
+          "question": "Bandes cuivre : tu les façonnes toi-même ou tu les commandes façonnées ?",
+          "hint": "Je façonne : feuilles de cuivre 2 × 1 m, bobine au mètre au-delà de 6 ml. Commandées façonnées : longueurs de 2 m.",
+          "choices": [
+            {
+              "label": "Je façonne (feuilles ou bobine)",
+              "value": "1"
+            },
+            {
+              "label": "Je commande façonné",
+              "value": "2"
+            }
+          ],
+          "display": {
+            "1": "je façonne",
+            "2": "commandé façonné"
+          }
+        },
+        {
+          "key": "epaisseur_cuivre",
+          "label": "Épaisseur du cuivre",
+          "unit": "mm",
+          "kind": "site_data",
+          "question": "Cuivre : 0,6 ou 0,7 mm ?",
+          "textValues": [
+            {
+              "value": "0.6",
+              "keywords": [
+                "0,6 mm",
+                "0.6 mm",
+                "0,60 mm"
+              ]
+            },
+            {
+              "value": "0.7",
+              "keywords": [
+                "0,7 mm",
+                "0.7 mm",
+                "0,70 mm"
+              ]
+            }
+          ],
+          "default": {
+            "value": "0.6",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "cuivre 0,6 mm (§12)"
+          },
+          "choices": [
+            {
+              "label": "0,6 mm",
+              "value": "0.6"
+            },
+            {
+              "label": "0,7 mm",
+              "value": "0.7"
+            }
+          ],
+          "display": {
+            "0.6": "0,6",
+            "0.7": "0,7"
+          }
+        }
+      ],
+      "slots": [
+        {
+          "key": "bande",
+          "family": "copper_strip",
+          "label": "Bandes cuivre façonnées",
+          "usual": {
+            "text": "Bandes façonnées par le fournisseur, longueurs de 2 m (comme le zinc).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "bande-cuivre-faconnee"
+          }
+        },
+        {
+          "key": "feuille",
+          "family": "copper_sheet",
+          "label": "Feuilles cuivre 2 × 1 m",
+          "usual": {
+            "text": "Feuilles de cuivre 2 × 1 m, façonnées sur place.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "feuille-cuivre-2x1"
+          }
+        },
+        {
+          "key": "bobine",
+          "family": "copper_coil",
+          "label": "Cuivre en bobine",
+          "usual": {
+            "text": "Cuivre en bobine au mètre au-delà de 6 ml.",
+            "source": "fondateur-reponses-2026-10-04",
+            "productId": "bobine-cuivre"
+          }
+        }
+      ],
+      "constants": {
+        "marge_bandes": {
+          "kind": "installation_condition",
+          "value": "1.1",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« ml × 1,1 » (§7, §12)."
+        },
+        "longueur_utile": {
+          "kind": "installation_condition",
+          "value": "1.9",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Bandes de 2 m, recouvrement 10 cm (comme le zinc, §36.4)."
+        },
+        "surface_feuille": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m2",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Feuille de 2 × 1 m (comme le zinc, §25.2)."
+        },
+        "seuil_bobine": {
+          "kind": "installation_condition",
+          "value": "6",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1,
+          "note": "Au-delà de 6 ml : bobine au lieu de feuilles (comme le zinc)."
+        },
+        "cuivre_500": {
+          "kind": "installation_condition",
+          "value": "500",
+          "unit": "mm",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "draft",
+            "note": "Largeurs courantes du cuivre en bobine : 500, 600, 670 mm, à confirmer."
+          },
+          "version": 1,
+          "label": "bobine de cuivre de {v}"
+        },
+        "cuivre_600": {
+          "kind": "installation_condition",
+          "value": "600",
+          "unit": "mm",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "draft",
+            "note": "Largeurs courantes du cuivre en bobine : 500, 600, 670 mm, à confirmer."
+          },
+          "version": 1,
+          "label": "bobine de cuivre de {v}"
+        },
+        "cuivre_670": {
+          "kind": "installation_condition",
+          "value": "670",
+          "unit": "mm",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "draft",
+            "note": "Largeurs courantes du cuivre en bobine : 500, 600, 670 mm, à confirmer."
+          },
+          "version": 1,
+          "label": "bobine de cuivre de {v}"
+        }
+      },
+      "derived": [
+        {
+          "key": "ml_cuivre",
+          "label": "Longueur de cuivre, marge comprise",
+          "unit": "m",
+          "formula": "longueur_bande * regle.marge_bandes",
+          "shown": true,
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "key": "largeur_bobine_cuivre",
+          "label": "Largeur de la bobine de cuivre",
+          "unit": "mm",
+          "formula": "si(developpe_cuivre <= regle.cuivre_500, regle.cuivre_500, si(developpe_cuivre <= regle.cuivre_600, regle.cuivre_600, regle.cuivre_670))",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      ],
+      "needs": [
+        {
+          "id": "bandes-cuivre-faconnees",
+          "slot": "bande",
+          "when": "faconnage >= 2",
+          "formula": "arrondi_sup(ml_cuivre / regle.longueur_utile)",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Longueurs de 2 m, recouvrement 10 cm entre éléments.",
+          "precision": "{longueur_bande|ml} à couvrir, développé {developpe_cuivre|cm}",
+          "designation": "Bandes cuivre façonnées {epaisseur_cuivre} mm",
+          "precisionRequires": [
+            "developpe_cuivre"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "feuilles-cuivre",
+          "slot": "feuille",
+          "when": "si(faconnage < 2, si(longueur_bande > regle.seuil_bobine, 0, 1), 0)",
+          "formula": "arrondi_sup(ml_cuivre * developpe_cuivre / regle.surface_feuille)",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Cuivre plat, développé × longueur, découpé dans des feuilles de 2 × 1 m.",
+          "precision": "pour façonner {longueur_bande|ml} de bande, développé {developpe_cuivre|cm}",
+          "designation": "Feuilles cuivre 2 × 1 m, {epaisseur_cuivre} mm",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "bobine-cuivre",
+          "slot": "bobine",
+          "when": "si(faconnage < 2, si(longueur_bande > regle.seuil_bobine, 1, 0), 0)",
+          "formula": "ml_cuivre",
+          "unit": "m",
+          "core": true,
+          "exclusions": "La plus petite largeur qui contient le développé ; la longueur de bande, marge comprise.",
+          "precision": "pour façonner {longueur_bande|ml} de bande",
+          "designation": "Cuivre en bobine largeur {largeur_bobine_cuivre|mm#} mm, {epaisseur_cuivre} mm",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",

@@ -1,7 +1,7 @@
 # État des 47 sections du référentiel couverture
 
-Mis à jour le 2026-10-05, après le lot couverture (points 1 à 6) et le retour fournisseur (§47.5).
-Section → fait / partiel / pas fait → ce qui manque. **26 faites, 19 partielles, 2 pas faites** (avant le lot : 24 / 16 / 7).
+Mis à jour le 2026-10-05, après le lot couverture (points 1 à 8) et le retour fournisseur (§47.5).
+Section → fait / partiel / pas fait → ce qui manque. **27 faites, 19 partielles, 1 pas faite** (avant le lot : 24 / 16 / 7).
 
 | § | Section | État | Ce qui manque |
 | --- | --- | --- | --- |
@@ -16,10 +16,10 @@ Section → fait / partiel / pas fait → ce qui manque. **26 faites, 19 partiel
 | 9 | Étanchéité toitures-terrasses | Partiel | Calculée par le tiroir étanchéité, pas depuis un devis de couvreur ; relevés et EEP à revoir avec le fondateur. |
 | 10 | Dépose, moyens, consommables | Partiel | Consommables dans « On ajoute ? » ; dépose, benne et échafaudage non traités. |
 | 11 | Fenêtres de toit, lucarnes | Partiel (lot, point 2) | Fait : la fenêtre telle qu'écrite et son raccord (tuiles, ardoises, tuiles plates, à la taille). Manquent : kit d'isolation, collerette pare-vapeur, chevêtre, raccord combiné des fenêtres jumelées, lucarnes et jouées. |
-| 12 | Plomb, cuivre | Pas fait | Seule l'embase plomb de sortie de toit existe. |
+| 12 | Plomb, cuivre | **Partiel** (point 8) | Fait : bande de plomb en rouleaux (largeur lue sinon 30 cm, 1,5 mm), cuivre comme le zinc. Manquent : abergement en plomb, noquets, plomb au kg, cuivre à joint debout ; rouleau de 6 m et largeurs du cuivre à confirmer. |
 | 13 | Bardeaux, toiture végétalisée | Pas fait | Rien. |
 | 14 | Sécurité et accès | **Partiel** (lot, point 6) | Fait : crochets de sécurité et de service, échelle, ligne de vie, ancrages reconnus et partis tels qu'écrits. Manquent : les règles de quantité (1 crochet tous les 3 m de faîtage, ancrages tous les 10 m…). |
-| 15 | Gouttières PVC et alu | **Partiel** (lot, point 3) | Fait : longueurs, crochets, jonctions, talons, angles, naissances, dilatation, teinte. Manquent : descentes PVC en longueurs de 2,8 ou 4 m (aujourd'hui au mètre), dauphin, manchon de dilatation de descente. |
+| 15 | Gouttières PVC et alu | **Fait** (points 3 et 7) | Gouttières : longueurs, crochets, jonctions, talons, angles, naissances, dilatation, teinte. Descentes PVC et zinc en longueurs de 4 m (2 m si dit), coudes, colliers tous les 2 m, dauphin du comptoir. Reste : manchon de dilatation de descente. |
 | 16 | Isolation des combles | Partiel | Combles soufflés par le tiroir plâtrerie ; isolant sous rampant vendu par le couvreur à tester sur un vrai devis. |
 | 17 | Bardage, rives, façade | Partiel | Tiroirs bardage et façade ; habillages de rive d'un devis de couvreur non calculés. |
 | 18 | Désamiantage | **Partiel** (lot, point 6) | Fait : reconnu (l'emporte sur tout autre mot), parti tel qu'écrit, avertissement à l'artisan. Manquent : tonnage, palettes, big bags, jours d'EPI (chiffrés par un tiers). |

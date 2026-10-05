@@ -1,5 +1,13 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.05-33 — plomb et cuivre (§12, réponse du fondateur)
+
+- **Plomb** (nouvel ouvrage `bandes-plomb`, famille `lead_strip` : « plomb », « bavette plomb », « solin plomb ») : bande commandée **en rouleaux**, largeur lue au devis (« largeur 40 cm »), sinon **30 cm** ; épaisseur **1,5 mm** par défaut (« 2 mm », « 2,5 mm » lus) ; ml × 1,1 (§12). La longueur du rouleau (§12 : 3 à 6 m) est prise à 6 m et reste **à confirmer** : la ligne sort orange, « Quantité à confirmer : rouleau de plomb de 6 m ».
+- **Cuivre** (nouvel ouvrage `bandes-cuivre`, famille `copper_strip`) : comme le zinc, avec ses largeurs. Commandé façonné : bandes en longueurs de 2 m ; façonné sur place : feuilles 2 × 1 m jusqu'à 6 ml, **bobine au mètre** au-delà, à la plus petite largeur qui contient le développé (500, 600, 670 mm, **à confirmer**) ; 0,6 mm par défaut (§12). Son développé a sa propre clé : une bande zinc du même devis garde le sien.
+- Les épaisseurs du plomb et du cuivre ne se lisent que sur leurs propres valeurs (« ép. 0,65 mm » reste celle du zinc).
+- Pas encore : abergement de cheminée en plomb (calculé en zinc), noquets, plomb au kg, cuivre à joint debout.
+- Compte rendu : `docs/lot-couverture/point-8.md`. Tableau de Brest inchangé.
+
 ## roofing-2026.10.05-32 — descentes en longueurs (réponse du fondateur)
 
 - **Tubes de descente** PVC et zinc en **longueurs de 4 m** (2 m si le devis le dit : « en longueurs de 2 m »), par descente la hauteur en longueurs entières : « Tubes de descente zinc Ø100, longueur 4 m : 4 pièces » pour 2 descentes de 5 m (avant : 10 ml).
