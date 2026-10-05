@@ -1,5 +1,11 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.05-29 — bac acier (§8)
+
+- **Couverture bac acier** (nouvel ouvrage `couverture-bac-acier`, famille `steel_tray` : « bac acier », « tôle nervurée », « panneau sandwich ») : jamais de m² en sortie. **Plaques à la longueur du rampant + 5 cm de débord**, une par rampant, autant par pan que la largeur du pan (surface ÷ pans ÷ rampant) compte de largeurs utiles de 1,00 m ; **vis** autoperceuses avec rondelle EPDM, 7 par m² + 3 par mètre de rive, en boîtes de 100 ; **closoirs** mousse en bas et en haut de chaque plaque ; **faîtières** en longueurs de 2 m (largeur d'un pan ÷ 2, + 1), pas de faîtière en monopente.
+- Questions du comptoir, chacune lue au devis quand il l'écrit : la **longueur des plaques** (« rampant 6 m » ; même clé que le rampant de l'ardoise, où elle reste une hypothèse), la **teinte** (RAL 7016, 7022, 8012, 9005), le **feutre anti-condensation** (simple peau seulement). Panneau sandwich lu (« sandwich »), deux pans par défaut (« monopente » lu).
+- Compte rendu : `docs/lot-couverture/point-4.md`. Tableau de Brest inchangé.
+
 ## roofing-2026.10.05-28 — gouttières PVC et aluminium (§15)
 
 - **Gouttière PVC ou alu** (nouvel ouvrage `gouttiere-pvc-alu`, famille `gutter_plastic` qui précise `gutter` : le mot « PVC » ou « alu » n'importe où dans la ligne) : mêmes règles que le zinc, avec les pièces du §15. **Longueurs de 4 m** ; **crochets** tous les 50 cm (40 en bord de mer) plus un en bout de chaque ligne ; **jonctions** entre longueurs ; **2 talons par ligne** ; **un angle par angle** (« Combien d'angles sur cette gouttière ? » si le devis ne le dit pas) ; **une naissance par descente** ; **joint de dilatation** PVC tous les 12 m de ligne. « Longueur : 2 x 10 m » = deux lignes (deux fois les talons, jonctions par ligne).
