@@ -57,6 +57,9 @@ export function SupplyList({
   const quotes = new Map(p.toQuote.map((q) => [q.key, q]));
   const decisions = new Map(takeoff.view.decisions.map((d) => [d.key, d]));
   const [asking, setAsking] = useState<ScreenRow | null>(null);
+  // Une réponse donnée (ou une ligne retirée) : la question suivante s'ouvre d'elle-même, jusqu'à la dernière ligne
+  // orange (retour du fondateur, 2026-10-05).
+  const [chain, setChain] = useState(false);
   const [aside, setAside] = useState<ScreenRow | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => void (timer.current && clearTimeout(timer.current)), []);
@@ -103,9 +106,14 @@ export function SupplyList({
     setAsking(first);
   };
 
-  // La question ouverte n'existe plus (réponse donnée, ligne passée au vert) : la feuille se ferme d'elle-même.
-  const open = asking && rows.some((r) => r.key === asking.key && r.status === "check") ? asking : null;
+  // La question ouverte n'existe plus (réponse donnée, ligne passée au vert) : la feuille se ferme d'elle-même, ou, quand
+  // l'artisan enchaîne, passe à la ligne orange suivante jusqu'à la dernière.
+  const stillOpen = asking && rows.some((r) => r.key === asking.key && r.status === "check") ? asking : null;
+  const nextToCheck = toCheck[0] ?? null;
+  if (chain && !pending && !stillOpen && !nextToCheck) setChain(false);
+  const open = stillOpen ?? (chain && !pending ? nextToCheck : null);
   const decision = open?.decisionKey ? decisions.get(open.decisionKey) : undefined;
+  const removableRow = (r: ScreenRow) => editable && (r.itemKey !== undefined || r.lineIds.length > 0);
   // Deux blocs titrés seulement quand il y a les deux : une liste toute prête n'a pas besoin de titre.
   const split = rows.some((r) => r.status === "check") && rows.some((r) => r.status !== "check");
 
@@ -206,7 +214,7 @@ export function SupplyList({
       ) : null}
 
       {aside ? (
-        <div role="status" className="fixed inset-x-4 bottom-[max(96px,calc(env(safe-area-inset-bottom)+96px))] z-40 mx-auto flex max-w-xl items-center justify-between gap-3 rounded-2xl bg-ink px-4 py-3 text-white shadow-card">
+        <div role="status" className={`fixed inset-x-4 z-[60] mx-auto flex max-w-xl items-center justify-between gap-3 rounded-2xl bg-ink px-4 py-3 text-white shadow-card ${open ? "top-4" : "bottom-[max(96px,calc(env(safe-area-inset-bottom)+96px))]"}`}>
           <span className="min-w-0 truncate text-sm font-bold">Retiré de la liste : {labelOf(aside)}</span>
           <button type="button" onClick={undo} className="inline-flex min-h-11 shrink-0 items-center px-2 text-sm font-extrabold text-[#9db8ff]">
             Annuler
@@ -222,11 +230,20 @@ export function SupplyList({
           pending={pending}
           handlers={handlers}
           onEditItem={onEditItem}
-          onClose={() => setAsking(null)}
-          onNext={() => {
-            // Après la réponse, la ligne orange suivante s'ouvre d'elle-même si l'artisan enchaîne.
+          onClose={() => {
             setAsking(null);
+            setChain(false);
           }}
+          {...(removableRow(open)
+            ? {
+                onRemove: () => {
+                  putAside(open);
+                  setAsking(null);
+                  setChain(true);
+                },
+              }
+            : {})}
+          onNext={() => setChain(true)}
         />
       ) : null}
     </section>
@@ -539,6 +556,7 @@ function QuestionSheet({
   onEditItem,
   onClose,
   onNext,
+  onRemove,
 }: {
   title: string;
   decision: TakeoffDecision | undefined;
@@ -548,6 +566,8 @@ function QuestionSheet({
   onEditItem: (item: PurchaseItem, edit: ItemEdit) => Promise<void>;
   onClose: () => void;
   onNext: () => void;
+  /** Retirer la ligne de la liste (« Annuler » pendant 3 s), puis la question suivante. */
+  onRemove?: () => void;
 }) {
   const ratioItem = decision?.key.startsWith(RATIO) ? takeoff.purchase.toBuy.find((b) => b.key === decision.key.slice(RATIO.length)) : undefined;
   const id = useId();
@@ -577,9 +597,16 @@ function QuestionSheet({
           <span className="inline-flex items-center gap-1.5 rounded-full bg-warn/12 px-3 py-1 text-[13px] font-extrabold text-warn">
             <span className="size-2 rounded-full bg-warn" aria-hidden="true" />À vérifier
           </span>
-          <button type="button" onClick={onClose} aria-label="Fermer" className="-mr-2 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted active:bg-ground">
-            <X size={22} aria-hidden="true" />
-          </button>
+          <span className="-mr-2 flex items-center gap-1">
+            {onRemove ? (
+              <button type="button" onClick={onRemove} aria-label={`Retirer de la liste : ${title}`} className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted active:bg-ground active:text-danger">
+                <Trash2 size={20} aria-hidden="true" />
+              </button>
+            ) : null}
+            <button type="button" onClick={onClose} aria-label="Fermer" className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted active:bg-ground">
+              <X size={22} aria-hidden="true" />
+            </button>
+          </span>
         </div>
         {!decision ? (
           <p className="text-[15px]">Cette ligne attend une information du devis. Corrigez-la avec le crayon.</p>
