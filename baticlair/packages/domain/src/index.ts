@@ -20,6 +20,7 @@ export * from "./referential/index.js";
 export { keyCharacteristics, suppliedObject } from "./takeoff/characteristics.js";
 export { groupIdenticalLines, type GroupableLine, type GroupedLine } from "./takeoff/grouping.js";
 export { articleScope, isPlaceTitle } from "./takeoff/sections.js";
+export { disagreementDoubt, reconcileReadings, SINGLE_READ_DOUBT, type ReadLine, type Reconciled } from "./takeoff/double-reading.js";
 export { isUnitTitle, siteUnits, type SiteUnit, type SiteUnitItem, type SiteUnitLine, type SiteUnits } from "./takeoff/site-units.js";
 export * from "./trust/assessment.js";
 export * from "./trust/preferences.js";

@@ -67,8 +67,13 @@ const envSchema = z
      */
     AI_PROVIDER: z.enum(["anthropic", "disabled", "fake"]).optional(),
     ANTHROPIC_API_KEY: z.string().min(1).optional(),
-    /** Modèle d'extraction (audit des coûts : Sonnet 5.5, évalué contre Haiku à l'étape D). */
-    AI_EXTRACTION_MODEL: z.string().min(1).default("claude-sonnet-5-5"),
+    /**
+     * Modèle de lecture des devis. Décision du fondateur (2026-10-05) : l'IA la plus puissante d'abord, pour des
+     * quantitatifs fiables ; on redescendra en puissance quand les tiroirs seront bien entraînés.
+     */
+    AI_EXTRACTION_MODEL: z.string().min(1).default("claude-opus-5-5"),
+    /** Double lecture du devis (deux lectures comparées par le code) : `on` par défaut, `off` pour revenir à une seule. */
+    AI_DOUBLE_READING: z.enum(["on", "off"]).default("on"),
     AI_EXTRACTION_EFFORT: z.enum(["low", "medium", "high", "xhigh", "max"]).default("high"),
     GOOGLE_CLIENT_ID: z.string().min(1).optional(),
     GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
@@ -154,6 +159,7 @@ export interface AppConfig {
     provider: "anthropic" | "disabled" | "fake";
     apiKey?: string;
     extractionModel: string;
+    doubleReading: boolean;
     effort: "low" | "medium" | "high" | "xhigh" | "max";
     /** Délai de réponse d'une lecture avant de passer en arrière-plan (ms). */
     answerWithinMs: number;
@@ -213,6 +219,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       provider: e.AI_PROVIDER ?? (e.ANTHROPIC_API_KEY ? "anthropic" : "disabled"),
       ...(e.ANTHROPIC_API_KEY ? { apiKey: e.ANTHROPIC_API_KEY } : {}),
       extractionModel: e.AI_EXTRACTION_MODEL,
+      doubleReading: e.AI_DOUBLE_READING === "on",
       effort: e.AI_EXTRACTION_EFFORT,
       answerWithinMs: e.READING_ANSWER_WITHIN_MS,
     },
