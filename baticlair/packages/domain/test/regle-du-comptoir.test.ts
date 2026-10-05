@@ -48,6 +48,7 @@ const COMPTOIR: Record<string, string> = {
   longueur_rampant: "« tes plaques font quelle longueur ? » (bac acier seulement)",
   teinte_bac: "« quel RAL ? »",
   feutre_bac: "« avec ou sans anti-condensation ? »",
+  teinte_fc: "« bleu-noir ou noir ? »",
 };
 /** Ce que le comptoir ne demande jamais : une hypothèse, dite et modifiable d'un tap. */
 const JAMAIS: readonly string[] = ["zone", "entraxe_supports", "pureau", "pente", "longueur_rampant", "epaisseur_zinc", "diametre_crochet", "coudes_par_descente"];

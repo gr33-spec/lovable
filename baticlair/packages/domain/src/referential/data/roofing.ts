@@ -863,6 +863,25 @@ const PANS_BAC_PARAM: ParamDef = {
     { value: "2", keywords: ["2 pans", "deux pans", "double pente", "bipente"] },
   ],
 };
+/** Teinte de l'ardoise fibres-ciment : le comptoir ne la sert pas sans elle. */
+const TEINTE_FC_PARAM: ParamDef = {
+  key: "teinte_fc",
+  label: "Teinte de l'ardoise fibres-ciment",
+  unit: "u",
+  kind: "site_data",
+  question: "Ardoises fibres-ciment : bleu-noir, noir ou brun ?",
+  choices: [
+    { label: "Bleu-noir", value: "1" },
+    { label: "Noir", value: "2" },
+    { label: "Brun", value: "3" },
+  ],
+  textValues: [
+    { value: "1", keywords: ["bleu noir", "bleu-noir", "bleue noire"] },
+    { value: "2", keywords: ["noire", "noires", "teinte noir", "coloris noir"] },
+    { value: "3", keywords: ["brun", "brune", "brunes"] },
+  ],
+  display: { "1": "bleu-noir", "2": "noir", "3": "brun" },
+};
 /** Poids d'une bande zinc plate : 4,7 kg/m² en 0,65 mm (§7) ; 7,2 kg/m² par mm d'épaisseur pour 0,70 et 0,80 (masse volumique du zinc). */
 const ZINC_PLAT_CONSTANTS = {
   poids_plat_065: condition("4.7", "kg/m2", F, FOUNDER_DOC, "« kg ≈ m² dév. × 4,7 (ép. 0,65) » (§7)."),
@@ -978,7 +997,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.05-29",
+  version: "roofing-2026.10.05-30",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -1229,6 +1248,23 @@ export const ROOFING_REFERENTIAL: Referential = {
       keyAttributes: ["largeur", "longueur"],
       keywords: ["ardoise"],
     },
+    // §4 : l'ardoise fibres-ciment précise « ardoise » ; même calcul, ses formats, ses clous et ses crochets d'antivent.
+    {
+      code: "roof_slate_fc",
+      label: "Ardoise fibres-ciment",
+      needUnit: "u",
+      refines: "roof_slate",
+      attributes: [
+        { key: "largeur", label: "Largeur", unit: "m" },
+        { key: "longueur", label: "Longueur", unit: "m" },
+        { key: "ardoises_par_m2", label: "Ardoises au m²", unit: "u/m2" },
+        { key: "liteaux_par_m2", label: "Liteaux au m²", unit: "m/m2" },
+      ],
+      keyAttributes: ["largeur", "longueur"],
+      keywords: ["fibres ciment", "fibre ciment", "fibres-ciment", "fibre-ciment", "fibrociment", "fibro ciment", "fibro-ciment", "artificielle", "artificielles", "eternit"],
+    },
+    { code: "slate_nail", label: "Clou d'ardoise", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "slate_wind_hook", label: "Crochet d'antivent", needUnit: "u", attributes: [], keyAttributes: [] },
     { code: "slate_hook", label: "Crochet d'ardoise", needUnit: "u", attributes: [], keyAttributes: [], keywords: [
         "crochet d ardoise",
         "crochet ardoise",
@@ -1500,6 +1536,29 @@ export const ROOFING_REFERENTIAL: Referential = {
       },
       sellingUnits: [{ id: "rouleau", label: { one: "rouleau", many: "rouleaux" }, contains: packaging("75", "m2", F, FOUNDER_DOC, "1,5 × 50 m = 75 m²."), primary: true }],
     }),
+    // §4 : formats, recouvrement courant 100 mm, ardoises et liteaux au m² du référentiel du fondateur.
+    ...([
+      [40, 24, "27.8", "6.67"],
+      [40, 27, "24.7", "6.67"],
+      [60, 30, "13.3", "4"],
+      [60, 40, "10", "4"],
+    ] as const).map(([h, l, parM2, liteaux]): Product => ({
+      id: `ardoise-fc-${h}x${l}`,
+      family: "roof_slate_fc",
+      label: `Ardoise fibres-ciment ${h} × ${l} cm`,
+      shortLabel: `Ardoises fibres-ciment ${h}×${l}`,
+      aliases: [`${h}x${l}`, `${h} x ${l}`, `${h}*${l}`, `${h} × ${l}`, `${h}×${l}`],
+      generic: true,
+      attributes: {
+        longueur: spec((h / 100).toFixed(2), "m", F, FOUNDER_DOC),
+        largeur: spec((l / 100).toFixed(2), "m", F, FOUNDER_DOC),
+        ardoises_par_m2: spec(parM2, "u/m2", F, FOUNDER_DOC, "Recouvrement courant 100 mm (§4)."),
+        liteaux_par_m2: spec(liteaux, "m/m2", F, FOUNDER_DOC, "Une file par pureau (§4)."),
+      },
+      sellingUnits: BY_PIECE,
+    })),
+    generic("clou-ardoise-fc", "slate_nail", "Clou inox pour ardoise fibres-ciment", "Clous inox d'ardoise"),
+    generic("antivent-ardoise-fc", "slate_wind_hook", "Crochet d'antivent inox pour ardoise fibres-ciment", "Crochets d'antivent"),
     generic("crochet-ardoise-standard", "slate_hook", "Crochet d'ardoise inox (longueur = pureau + 10 à 20 mm)", "Crochets d'ardoise"),
     generic("tuile-rive-standard", "verge_tile", "Tuile de rive (modèle de la tuile)", "Tuiles de rive"),
     generic("gouttiere-standard-4m", "gutter", "Gouttière, longueurs de 4 m (profil à préciser)", "Gouttière", {
@@ -1938,6 +1997,87 @@ export const ROOFING_REFERENTIAL: Referential = {
           exclusions: "Une file par rang ; hors doublis à l'égout et liteaux de faîtage.",
           source: "baticlair-geometrie-ardoise",
           verification: FOUNDER_VALIDATED,
+          version: 1,
+        },
+        {
+          id: "contre-liteaux-ardoise",
+          slot: "contre_liteau",
+          formula: "surface / entraxe_supports",
+          unit: "ml",
+          precision: "contre-lattage {surface|m2}, une file tous les {entraxe_supports|cm}",
+          core: true,
+          exclusions: "Une file par chevron ; suppose un entraxe régulier.",
+          source: "baticlair-geometrie-couverture",
+          verification: FOUNDER_VALIDATED,
+          version: 1,
+        },
+        {
+          id: "ecran-ardoise",
+          slot: "ecran",
+          formula: ECRAN_FORMULA,
+          unit: "m2",
+          core: true,
+          exclusions: "Hors recouvrements en bout de rouleau, relevés et chutes.",
+          source: "baticlair-geometrie-couverture",
+          verification: FOUNDER_VALIDATED,
+          version: 1,
+        },
+      ],
+    },
+    {
+      // §4 : « Mêmes formules que l'ardoise naturelle, avec des formats et recouvrements propres » ; « clous = 2,1 ×
+      // ardoises, antivents = 1,05 × ardoises ». Liteaux, contre-liteaux et écran : les règles de l'ardoise naturelle.
+      id: "couverture-ardoises-fibres-ciment",
+      trade: "roofing",
+      section: "principal",
+      label: "Couverture en ardoises fibres-ciment sur liteaux",
+      triggers: ["roof_slate_fc"],
+      params: [SURFACE_PARAM, TEINTE_FC_PARAM, ENTRAXE_PARAM, PENTE_PARAM],
+      slots: [
+        { key: "ardoise", family: "roof_slate_fc", label: "Ardoises fibres-ciment", ask: "Ardoises fibres-ciment : 40 × 24, 40 × 27, 60 × 30 ou 60 × 40 ?" },
+        { key: "clou", family: "slate_nail", label: "Clous", usual: { text: "Deux clous inox par ardoise (§4).", source: F, productId: "clou-ardoise-fc" } },
+        { key: "antivent", family: "slate_wind_hook", label: "Crochets d'antivent", keywords: ["antivent", "crochet"], usual: { text: "Un crochet d'antivent par ardoise (§4).", source: F, productId: "antivent-ardoise-fc" } },
+        {
+          key: "liteau",
+          family: "batten",
+          label: "Liteaux",
+          keywords: ["lattage", "liteau", "latte"],
+          usual: { text: "Section 18×40 par défaut, comme l'ardoise naturelle.", source: "fondateur-pratique-2026-10-02", productShort: "Liteaux 18×40", productId: "liteau-sapin-18x40" },
+        },
+        { key: "contre_liteau", family: "batten", label: "Contre-liteaux", keywords: ["contre lattage", "contre latte", "contre liteau"], usual: USUAL_CONTRE_LITEAU },
+        { key: "ecran", family: "underlay", label: "Écran sous-toiture", usual: USUAL_ECRAN },
+      ],
+      constants: {
+        ...ECRAN_CONSTANTS,
+        clous_par_ardoise: condition("2.1", "u", F, FOUNDER_DOC, "« commander clous = 2,1 × ardoises » (§4)."),
+        antivents_par_ardoise: condition("1.05", "u", F, FOUNDER_DOC, "« antivents = 1,05 × ardoises » (§4)."),
+      },
+      needs: [
+        {
+          id: "ardoises",
+          slot: "ardoise",
+          formula: "surface * ardoise.ardoises_par_m2",
+          unit: "u",
+          core: true,
+          exclusions: "Recouvrement courant 100 mm ; hors rives, doublis et coupes de noue (la perte de 5 % couvre un pan simple).",
+          designation: "Ardoises fibres-ciment {teinte_fc} {ardoise.longueur|cm#}×{ardoise.largeur|cm#}",
+          precisionRequires: ["teinte_fc"],
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        { id: "clous", slot: "clou", formula: "commande.ardoises * regle.clous_par_ardoise", unit: "u", core: true, exclusions: "Deux clous par ardoise commandée, + 5 %.", source: F, verification: FOUNDER_DOC, version: 1 },
+        { id: "antivents", slot: "antivent", formula: "commande.ardoises * regle.antivents_par_ardoise", unit: "u", core: true, exclusions: "Un crochet d'antivent par ardoise commandée, + 5 %.", source: F, verification: FOUNDER_DOC, version: 1 },
+        {
+          id: "liteaux-ardoise",
+          slot: "liteau",
+          formula: "surface * ardoise.liteaux_par_m2",
+          unit: "ml",
+          precision: "lattage {surface|m2}",
+          core: true,
+          exclusions: "Une file par rang (§4) ; hors doublis à l'égout et liteaux de faîtage.",
+          source: F,
+          verification: FOUNDER_DOC,
           version: 1,
         },
         {
@@ -3308,6 +3448,7 @@ export const ROOFING_REFERENTIAL: Referential = {
   wasteRules: [
     // Pertes du référentiel du fondateur (pan simple) : appliquées après le calcul, avant l'arrondi au conditionnement.
     { family: "roof_slate", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Casse et coupes de rive, pans rectangulaires simples." },
+    { family: "roof_slate_fc", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Comme l'ardoise naturelle (§4 : « mêmes formules »)." },
     { family: "slate_hook", rate: "2", source: F, verification: FOUNDER_DOC, version: 1, note: "« Commander crochets = ardoises × 1,02 »." },
     { family: "roof_tile", rate: "3", source: F, verification: FOUNDER_DOC, version: 1, note: "Tuiles mécaniques." },
     { family: "batten", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Chutes de liteaux et contre-liteaux." },
