@@ -12,5 +12,6 @@
     "deploymentEnabled": {
       "claude/**": false
     }
-  }
+  },
+  "ignoreCommand": "case \"$VERCEL_URL\" in *-greg-2412.vercel.app) echo \"Compte greg-2412 : pas de mise en ligne (seul gr33-spec sert BatiClair)\"; exit 0;; *) exit 1;; esac"
 }
