@@ -1,7 +1,7 @@
 import { waitUntil } from "@vercel/functions";
 import type { Alerter } from "../../platform/alerts/alerter.js";
 import { Module } from "@nestjs/common";
-import { loadReferential, ruleValidatedBy } from "@baticlair/domain";
+import { DEFAULT_EXTRACTION_POLICY, loadReferential, ruleValidatedBy } from "@baticlair/domain";
 import type { Prisma } from "../../generated/prisma/client.js";
 import type { AppConfig } from "../../platform/config/config.js";
 import { PrismaService } from "../../platform/database/prisma.service.js";
@@ -66,6 +66,9 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
           (error) => logger.error({ err: error }, "takeoff: coût IA non enregistré"),
           {
             maxAnalysisMicroUsd: Math.round((Number(config.aiCost.analysisMaxEur) / Number(config.aiCost.usdToEur)) * 1_000_000),
+            // Le modèle de lecture choisi (Opus par défaut) sert aussi à l'estimation du coût avant lecture.
+            policy: { ...DEFAULT_EXTRACTION_POLICY, textModel: config.ai.extractionModel, visionModel: config.ai.extractionModel },
+            doubleReading: config.ai.doubleReading && config.ai.provider === "anthropic",
             onStats: (stats) => logger.info({ reading: stats }, "takeoff: lecture du devis"),
             // Sur Vercel, la lecture d'un gros devis continue après la réponse (sinon la fonction s'arrête).
             keepAlive: (work) => waitUntil(work),

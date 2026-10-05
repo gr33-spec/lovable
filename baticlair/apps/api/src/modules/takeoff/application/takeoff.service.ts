@@ -1,4 +1,5 @@
 import {
+  reconcileReadings,
   applyLineRoles,
   applyPurchaseOverrides,
   applyRuleConfirmations,
@@ -85,6 +86,11 @@ export interface ReadingOptions {
   /** Mesures de chaque lecture (journal du serveur), en plus de leur enregistrement avec l'analyse. */
   onStats?: (stats: ReadingStats) => void;
   policy?: ExtractionPolicy;
+  /**
+   * DOUBLE LECTURE (décision du fondateur, 2026-10-05) : le devis est lu deux fois, indépendamment, et le code compare
+   * (`reconcileReadings`) : d'accord = sûr, désaccord ou ligne vue une seule fois = orange avec les deux valeurs.
+   */
+  doubleReading?: boolean;
   /** Coût estimé au-delà duquel un document n'est pas un devis normal (micro-dollars). */
   maxAnalysisMicroUsd?: number;
   now?: () => Date;
@@ -151,6 +157,8 @@ export const DEFAULT_MAX_ANALYSIS_MICRO_USD = 3_000_000;
 export interface ReadingStats {
   version: 1;
   outcome: "completed" | "failed";
+  /** Double lecture : lignes lues pareil, en désaccord, vues par une seule lecture. */
+  doubleReading?: { agreed: number; disagreed: number; single: number };
   failure?: string;
   strategy: "single" | "split";
   /** « text » : PDF texte ; « scan » : pages en image (scan, photos) ; « mixed » : les deux. */
@@ -183,6 +191,12 @@ interface CallTally {
 }
 
 type ChunkParts = { chunk: ReadingChunk; output: ExtractionOutput }[];
+
+/** Les lignes d'une lecture, ses blocs réunis (comme la première lecture). */
+function linesOf(parts: ChunkParts): ExtractionOutput["lines"] {
+  const whole = parts.length === 1 && parts[0]!.chunk.context.length === 0;
+  return whole ? parts[0]!.output.lines : mergeChunkLines(parts.map((p) => ({ chunk: p.chunk, lines: p.output.lines }))).lines;
+}
 type ChunkFailure = { ok: false; reason: string };
 type ChunkResult = { ok: true; parts: ChunkParts } | ChunkFailure;
 
@@ -334,12 +348,27 @@ export class TakeoffService {
     const documentId = doc.id;
     const started = Date.now();
     const tally: CallTally = { calls: 0, outcomes: {}, splits: 0, tokens: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, costMicroUsd: 0 };
-    const read = await this.readPlan(tenant, doc, prepared, analysisId, plan.chunks, policy, tally);
+    const second: CallTally = { calls: 0, outcomes: {}, splits: 0, tokens: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, costMicroUsd: 0 };
+    // Les deux lectures partent ensemble : la double lecture n'allonge pas l'attente.
+    const [read, reread] = await Promise.all([
+      this.readPlan(tenant, doc, prepared, analysisId, plan.chunks, policy, tally),
+      this.reading.doubleReading ? this.readPlan(tenant, doc, prepared, analysisId, plan.chunks, policy, second, 100) : Promise.resolve(null),
+    ]);
+    tally.calls += second.calls;
+    tally.splits += second.splits;
+    for (const [k, n] of Object.entries(second.outcomes)) tally.outcomes[k] = (tally.outcomes[k] ?? 0) + n;
+    tally.tokens.input += second.tokens.input;
+    tally.tokens.output += second.tokens.output;
+    tally.tokens.cacheRead += second.tokens.cacheRead;
+    tally.tokens.cacheWrite += second.tokens.cacheWrite;
+    tally.costMicroUsd += second.costMicroUsd;
     const pages = {
       text: prepared.pages.filter((p) => p.route === "text").length,
       scan: prepared.pages.filter((p) => p.route === "vision").length,
     };
-    const stats = (extra: Pick<ReadingStats, "outcome" | "linesBeforeMerge" | "linesAfterMerge" | "droppedOutsideBlock" | "droppedDuplicates" | "scanBoundaryRisks"> & { failure?: string }): ReadingStats => ({
+    const stats = (
+      extra: Pick<ReadingStats, "outcome" | "linesBeforeMerge" | "linesAfterMerge" | "droppedOutsideBlock" | "droppedDuplicates" | "scanBoundaryRisks" | "doubleReading"> & { failure?: string },
+    ): ReadingStats => ({
       version: 1,
       ...extra,
       strategy: plan.strategy,
@@ -362,7 +391,11 @@ export class TakeoffService {
     const blocks = read.parts.map((p) => ({ chunk: p.chunk, lines: p.output.lines }));
     const whole = read.parts.length === 1 && read.parts[0]!.chunk.context.length === 0;
     const merged = whole ? { lines: read.parts[0]!.output.lines, droppedOutsideBlock: 0, droppedDuplicates: 0 } : mergeChunkLines(blocks);
-    const output: ExtractionOutput = whole ? read.parts[0]!.output : { lines: merged.lines, notes: [...new Set(read.parts.flatMap((p) => p.output.notes))] };
+    const first: ExtractionOutput = whole ? read.parts[0]!.output : { lines: merged.lines, notes: [...new Set(read.parts.flatMap((p) => p.output.notes))] };
+    // La seconde lecture ne sert qu'à vérifier la première ; si elle échoue, la première reste (jamais de lecture perdue).
+    const check = reread && reread.ok ? linesOf(reread.parts) : null;
+    const compared = check ? reconcileReadings(first.lines, check) : null;
+    const output: ExtractionOutput = compared ? { ...first, lines: compared.lines } : first;
     await this.saveStats(
       analysisId,
       stats({
@@ -372,6 +405,7 @@ export class TakeoffService {
         droppedOutsideBlock: merged.droppedOutsideBlock,
         droppedDuplicates: merged.droppedDuplicates,
         scanBoundaryRisks: whole ? [] : scanBoundaryRisks(blocks, new Set(prepared.pages.filter((p) => p.route === "vision").map((p) => p.pageNumber!))),
+        ...(compared ? { doubleReading: { agreed: compared.agreed, disagreed: compared.disagreed, single: compared.single } } : {}),
       }),
     );
     const success = { model: read.model, output };
@@ -989,6 +1023,8 @@ export class TakeoffService {
     chunks: readonly ReadingChunk[],
     policy: ExtractionPolicy,
     tally: CallTally,
+    /** Numérotation des appels de la seconde lecture (101, 102…), pour les distinguer dans le journal des coûts. */
+    attemptOffset = 0,
   ): Promise<{ ok: true; model: string; parts: ChunkParts } | ChunkFailure> {
     if (!this.extractor || chunks.length === 0) return { ok: false, reason: "nothing_to_read" };
     const extractor = this.extractor;
@@ -1019,7 +1055,7 @@ export class TakeoffService {
         tally.tokens.cacheRead += result.usage.cacheReadTokens ?? 0;
         tally.tokens.cacheWrite += (result.usage.cacheWrite5mTokens ?? 0) + (result.usage.cacheWrite1hTokens ?? 0);
         // Valeur lue APRÈS l'attente : les blocs lus en parallèle ajoutent chacun leur coût.
-        const cost = await this.record(tenant, doc, pages, prepared.processingId, analysisId, call, result);
+        const cost = await this.record(tenant, doc, pages, prepared.processingId, analysisId, call + attemptOffset, result);
         tally.costMicroUsd += cost;
         if (result.status === "success" && result.output) {
           model = result.model;
