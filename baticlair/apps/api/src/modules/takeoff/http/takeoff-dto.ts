@@ -1,4 +1,4 @@
-import { withoutLabour, writtenNumber } from "@baticlair/domain";
+import { siteUnits, withoutLabour, writtenNumber } from "@baticlair/domain";
 import type { ArtisanView, PurchaseView } from "@baticlair/domain";
 import { artisanNotes } from "../../../platform/ai/artisan-notes.js";
 import type { ReviewedTakeoff } from "../application/takeoff.service.js";
@@ -121,6 +121,12 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase, exclude
     ],
     createdAt: takeoff.createdAt.toISOString(),
     validatedAt: takeoff.validatedAt?.toISOString() ?? null,
+    // Le chantier rangé par logement (titres du devis) ; null sans au moins deux logements. Main-d'œuvre exclue.
+    logements: siteUnits(
+      takeoff.lines
+        .filter((l) => byId.get(l.id)?.kind !== "labor" && !excluded?.has(l.id))
+        .map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantityRaw && writtenNumber(l.quantityRaw), unit: l.unitRaw, section: l.section })),
+    ),
     counts: validation.counts,
     issues: validation.issues.map((i) => ({ code: i.code, severity: i.severity, message: i.message, lineIds: i.lineIds ?? [] })),
     lines: takeoff.lines.map((l) => {
