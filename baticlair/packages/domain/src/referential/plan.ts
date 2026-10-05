@@ -60,6 +60,8 @@ export interface QuotePlan {
    * réponse de l'artisan. Jamais tranchées en silence : une question avec les deux valeurs en boutons.
    */
   contradictions: { workItemId: string; key: string; label: string; unit: string; facts: { value: string; unit: string; evidence: string }[] }[];
+  /** Ce que l'artisan doit savoir (l'amiante, §18), dès qu'une ligne la nomme, même une ligne de main-d'œuvre. */
+  warnings?: string[];
 }
 
 /** Le mot le plus tôt dans la ligne nomme l'ouvrage ; à égalité, l'expression la plus longue (« tuile de rive » > « tuile »). */
@@ -263,7 +265,8 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
   const read = lines.map((line) => {
     const v = validateTakeoffLine({ id: line.ref, designation: line.designation, quantityRaw: line.quantity, unitRaw: line.unit, source: "client_quote" }, profile, designations);
     const text = normalizeText(line.designation);
-    const general = v.kind === "labor" ? null : earliest(text, families);
+    const dominant = !covered ? undefined : ref.families.find((f) => f.dominant && (f.keywords ?? []).some((k) => keywordPosition(text, k) >= 0))?.code;
+    const general = v.kind === "labor" ? null : (dominant ?? earliest(text, families));
     // « Tuiles (… tuiles canal …) » : la famille générale lue en premier est précisée par une famille plus précise nommée ensuite.
     const precise = general ? ref.families.find((f) => f.refines === general && (f.keywords ?? []).some((k) => keywordPosition(text, k) >= 0)) : undefined;
     return { line, v, text, family: precise?.code ?? general };
@@ -439,7 +442,8 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
         ...(askInstead.has(w.id) ? { askInstead: [...askInstead.get(w.id)!] } : {}),
       };
     });
-  return { lines: plans, inputs, context, characteristicsBySlot, conflicts: [...new Set(conflicts)], contradictions };
+  const warnings = !covered ? [] : [...new Set(ref.families.filter((f) => f.warning && read.some((r) => (f.keywords ?? []).some((k) => keywordPosition(r.text, k) >= 0))).map((f) => f.warning!))];
+  return { lines: plans, inputs, context, characteristicsBySlot, conflicts: [...new Set(conflicts)], contradictions, ...(warnings.length ? { warnings } : {}) };
 }
 
 /**

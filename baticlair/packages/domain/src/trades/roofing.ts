@@ -11,6 +11,41 @@ import type { MaterialFamily, TradeProfile } from "./trade-profile.js";
  * gouttière » n'est pas un crochet d'ardoise).
  */
 const FAMILIES: MaterialFamily[] = [
+  // §18 : le désamiantage est un poste confié à une entreprise certifiée, jamais du ciment ni une ardoise (« plaques
+  // fibres-ciment amiantées ») : en tête, il l'emporte.
+  {
+    code: "asbestos_removal",
+    label: "Désamiantage",
+    keywords: ["desamiantage", "amiante", "amiantee", "amiantees", "amiante ciment"],
+    allowedUnits: ["M2", "U", "FORFAIT", "T"],
+    plausibleMax: { M2: 5000, U: 50, T: 200 },
+  },
+  // §14 : sécurité définitive et accès ; « crochet de sécurité » n'est pas un crochet d'ardoise.
+  {
+    code: "roof_safety",
+    label: "Sécurité et accès (crochets de sécurité, échelle, ligne de vie)",
+    keywords: [
+      "crochet de securite",
+      "crochets de securite",
+      "crochet de service",
+      "crochets de service",
+      "crochet d'echelle",
+      "crochets d'echelle",
+      "echelle de toit",
+      "echelles de toit",
+      "echelle de couvreur",
+      "ligne de vie",
+      "lignes de vie",
+      "point d'ancrage",
+      "points d'ancrage",
+      "garde corps",
+      "garde-corps",
+      "passerelle",
+      "chemin de circulation",
+    ],
+    allowedUnits: ["U", "ML", "M"],
+    plausibleMax: { U: 200, ML: 500, M: 500 },
+  },
   // Sortie de toit : « 1 sortie de toit » compte des OUVRAGES, décomposés en embase ou platine, chapeau et collerette
   // (réponse du fondateur, 2026-10-04).
   {

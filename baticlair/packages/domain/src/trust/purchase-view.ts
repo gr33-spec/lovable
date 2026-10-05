@@ -98,6 +98,8 @@ export interface PurchaseView {
   canValidate: boolean;
   /** L'écran unique « la liste des fournitures » (retour du fondateur, 2026-10-04). */
   screen: SupplyScreen;
+  /** Ce que l'artisan doit savoir (l'amiante, §18) : dit en haut de la liste, jamais envoyé au fournisseur. */
+  warnings: string[];
 }
 
 /**
@@ -335,6 +337,9 @@ export function supplierTest(designation: string, unit: string | null): string |
   const d = norm(designation);
   // Les panneaux et rouleaux se vendent au m² (volige, OSB, écran, isolant) : le fournisseur sait les charger.
   if (/^(m2|m²)$/.test(u) && SHEET_WORDS.test(d)) return null;
+  // Un poste confié à une entreprise certifiée (désamiantage, §18) ou un système vendu à sa longueur (ligne de vie,
+  // §14) : le fournisseur le chiffre tel qu'écrit.
+  if (/\b(desamiantage|amiante|amiantees?|ligne de vie|lignes de vie)\b/.test(d)) return null;
   if (/^(m2|m²)$/.test(u)) return "Une surface en m² ne se charge pas dans un camion : il faut des pièces aux dimensions. Le fournisseur proposera pour cette mesure.";
   if (/^(lot|lots|forfait|forfaits|ft|ens|ensembles?|selon besoin)$/.test(u)) return `« ${unit!.trim()} » n'est pas une unité de commande : le fournisseur ne sait pas quoi charger.`;
   if (/^(ml|m)$/.test(u) && METAL_WORDS.test(d) && !DIMENSION.test(d)) return "Du métal au mètre sans largeur ni épaisseur : le fournisseur ne sait pas quoi charger.";
@@ -612,7 +617,9 @@ export function purchaseView(
   const canValidate = sendable(toBuy, toQuote, questions);
   const groups = groupsOf(toBuy, engine.needs, view, link.plan, link.ref);
   const screen = supplyScreen(toBuy, toQuote, questions, engine, view, link.plan, link.ref);
-  return { understood: understood(view, link.plan, link.ref), toBuy, groups, toQuote, assumptions, questions, suggestions, canValidate, screen };
+  // Une famille qui avertit (l'amiante) : lue par le plan sur toutes les lignes, même de main-d'œuvre.
+  const warnings = link.plan.warnings ?? [];
+  return { understood: understood(view, link.plan, link.ref), toBuy, groups, toQuote, assumptions, questions, suggestions, canValidate, screen, warnings };
 }
 
 /** Clé de la question « précision » d'une ligne reprise du devis (« precise:<ligne> »). */

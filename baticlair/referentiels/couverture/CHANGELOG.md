@@ -1,5 +1,12 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.05-31 — sécurité et accès (§14), désamiantage (§18)
+
+- **Sécurité et accès** (famille `roof_safety`) : crochets de sécurité, crochets de service, crochets d'échelle, échelle de toit, ligne de vie, points d'ancrage, garde-corps, passerelle. Reconnus, ils partent **tels que le devis les écrit** (modèle, norme, longueur), sans calcul ni question. Une ligne de vie à sa longueur passe le test du fournisseur (un système vendu à la longueur).
+- **Désamiantage** (famille `asbestos_removal`, `dominant` : elle l'emporte sur tout autre mot de la ligne ; « plaques fibres-ciment amiantées » n'est jamais une ardoise) : la ligne part telle qu'écrite (poste chiffré par une entreprise certifiée), et un **avertissement** est dit à l'artisan en haut de la liste, même pour une ligne de dépose : « Amiante : le retrait se fait par une entreprise certifiée (SS3), après un repérage avant travaux… ». L'avertissement ne part jamais au fournisseur.
+- Moteur (générique) : une famille peut être `dominant` et porter un `warning` (lu par le plan sur toutes les lignes, `PurchaseView.warnings`) ; le profil couvreur reconnaît ces lignes avant « crochet » et « ciment ».
+- Compte rendu : `docs/lot-couverture/point-6.md`. Tableau de Brest inchangé.
+
 ## roofing-2026.10.05-30 — ardoise fibres-ciment (§4)
 
 - **Ardoises fibres-ciment** (nouvel ouvrage `couverture-ardoises-fibres-ciment`, famille `roof_slate_fc` qui précise `roof_slate` : « fibres-ciment », « fibro-ciment », « artificielles », « Eternit ») : le calcul de l'ardoise naturelle avec les formats du §4, recouvrement courant 100 mm : 40 × 24 (27,8/m², liteaux 6,67 ml/m²), 40 × 27 (24,7/m², 6,67), 60 × 30 (13,3/m², 4,0), 60 × 40 (10/m², 4,0), + 5 % de perte. Ses fixations : **clous inox** = 2,1 × ardoises commandées, **crochets d'antivent** = 1,05 × ardoises (jamais de crochets d'ardoise naturelle) ; liteaux, contre-liteaux et écran comme l'ardoise naturelle.
