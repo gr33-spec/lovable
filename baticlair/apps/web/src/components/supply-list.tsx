@@ -296,7 +296,9 @@ function Row({
     <>
       <span className={`mt-1.5 size-3 shrink-0 rounded-full ${dot.className}`} role="img" aria-label={dot.label} />
       <span className="flex min-w-0 grow flex-col gap-0.5">
-        <span className={`text-[15px] leading-snug font-semibold ${open ? "" : "line-clamp-2"}`}>{label}</span>
+        {/* La désignation entière : c'est ce que le comptoir lit (jamais coupée). Sur téléphone, la quantité passe dessous. */}
+        <span className="text-[15px] leading-snug font-semibold">{label}</span>
+        {quantity ? <span className="text-[16px] font-extrabold tabular-nums sm:hidden">{quantity}</span> : null}
         {sub ? <span className={`text-[13px] leading-snug ${row.status === "check" ? "font-bold text-warn" : "text-muted"}`}>{sub}</span> : null}
         {sketches.length > 0 && !open ? (
           <span className="inline-flex items-center gap-1 text-[12px] font-bold text-[#4a37d6]">
@@ -305,7 +307,7 @@ function Row({
           </span>
         ) : null}
       </span>
-      <span className="shrink-0 text-right text-[16px] font-extrabold whitespace-nowrap tabular-nums">{quantity ?? ""}</span>
+      <span className="shrink-0 text-right text-[16px] font-extrabold whitespace-nowrap tabular-nums max-sm:hidden">{quantity ?? ""}</span>
       {opens ? (
         open ? (
           <X size={18} className="mt-0.5 shrink-0 text-accent-text" aria-hidden="true" />
