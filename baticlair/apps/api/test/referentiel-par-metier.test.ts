@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { PLATRERIE_REFERENTIAL, ROOFING_REFERENTIAL } from "@baticlair/domain";
+import { CARRELAGE_REFERENTIAL, MACONNERIE_REFERENTIAL, PEINTURE_REFERENTIAL, PLATRERIE_REFERENTIAL, ROOFING_REFERENTIAL } from "@baticlair/domain";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
 /**
@@ -47,11 +47,27 @@ describe("la porte choisit le référentiel selon le métier", () => {
     expect(((await roofer.agent.post("/v1/quantitatifs").send({ ...CLOISON, metier: "platrerie" })).body as Q).metier).toBe("platrerie");
   });
 
+  it("lot B, paquet 1 : carrelage, peinture, maçonnerie ont leur tiroir ; chaque ligne calculée sort avec son chiffre, orange si sa règle est à confirmer", async () => {
+    const cas = [
+      { trade: "tiling", metier: "carrelage", ref: CARRELAGE_REFERENTIAL, ligne: { libelle: "Carrelage sol grès cérame 60x60 rectifié", quantite: "42", unite: "m²" }, article: /60×60/ },
+      { trade: "painting", metier: "peinture", ref: PEINTURE_REFERENTIAL, ligne: { libelle: "Peinture plafonds mate, impression + 2 couches", quantite: "85", unite: "m²" }, article: /[Pp]einture/ },
+      { trade: "masonry", metier: "maconnerie", ref: MACONNERIE_REFERENTIAL, ligne: { libelle: "Chape ciment 5 cm", quantite: "35", unite: "m²" }, article: /[Cc]hape/ },
+    ];
+    for (const c of cas) {
+      const { agent } = await signUpWithCompany(ctx.app, `${c.trade}@example.fr`, `Entreprise ${c.metier}`, [c.trade]);
+      const q = (await agent.post("/v1/quantitatifs").send({ lignes: [c.ligne] })).body as Q;
+      expect(q, c.metier).toMatchObject({ metier: c.metier, version_referentiel: c.ref.version });
+      const l = q.lignes.find((x) => c.article.test(x.libelle))!;
+      expect(l.quantite, c.metier).toBeGreaterThan(0);
+      if (l.a_confirmer) expect(l.raison).toMatch(/^Quantité à confirmer : \S/);
+    }
+  });
+
   it("un métier sans tiroir : 422 « no_referential », message clair, rien de créé", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "e@example.fr", "Élec Bretagne", ["electrical"]);
     const res = await agent.post("/v1/quantitatifs").send({ lignes: [{ libelle: "Tableau électrique 2 rangées", quantite: "1", unite: "u" }] });
     expect(res.status).toBe(422);
-    expect(res.body.error).toMatchObject({ code: "no_referential", details: { metier: "electrical", disponibles: ["couverture", "platrerie"] } });
+    expect(res.body.error).toMatchObject({ code: "no_referential", details: { metier: "electrical", disponibles: ["couverture", "platrerie", "carrelage", "peinture", "maconnerie"] } });
     expect(JSON.stringify(res.body)).toContain("couverture, platrerie");
     expect(await ctx.prisma.quantitatif.count()).toBe(0);
     // Même chose quand un couvreur demande un métier sans tiroir.

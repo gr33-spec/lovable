@@ -296,6 +296,8 @@ export interface Slot {
   label: string;
   /** Départage deux emplacements d'une même famille (« contre-lattage » ≠ « lattage »). */
   keywords?: string[];
+  /** La question du comptoir quand le devis ne nomme pas le produit (« Parpaings de 20, de 15 ou de 10 ? »). */
+  ask?: string;
   /**
    * Produit par défaut quand le devis ne le précise pas (« liteaux 18×40 pour
    * l'ardoise », « faîtière standard ») : une pratique validée et sourcée,

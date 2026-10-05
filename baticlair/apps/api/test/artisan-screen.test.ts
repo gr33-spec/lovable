@@ -125,7 +125,8 @@ describe("une information manquante ne devient jamais ✓ en fermant l'écran", 
     expect(view.measures?.lineIds.length).toBeGreaterThan(10);
     // Revenir sur l'écran sans rien faire ne change rien.
     expect(await getView(agent, projectId)).toEqual(view);
-    for (const d of view.decisions.filter((x) => x.primary?.action === "keep" || x.primary?.action === "pieces")) {
+    // Les « Quantité à confirmer » (§47.3, sans ligne du devis) se répondent par « C'est bon » (réponse), pas ici.
+    for (const d of view.decisions.filter((x) => x.lineIds.length > 0 && (x.primary?.action === "keep" || x.primary?.action === "pieces"))) {
       await agent.post(`/v1/takeoffs/${takeoffId}/decisions`).send({ action: d.primary!.action, lineIds: d.lineIds, pieceLineIds: d.pieceLineIds }).expect(200);
     }
     const after = await getView(agent, projectId);

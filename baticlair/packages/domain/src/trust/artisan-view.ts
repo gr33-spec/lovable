@@ -408,8 +408,21 @@ export function artisanView(
       }
       const direct = v.basis === "purchase" && role !== "undetermined" && line.quantity && line.unit && needs.length === 0 ? { quantity: writtenNumber(line.quantity), unit: line.unit } : null;
       const planned = link.plan.lines.find((l) => l.ref === item.id);
+      // Une deuxième ligne du même ouvrage (« peinture plafonds » après « peinture murs ») : sa surface s'ajoute au calcul
+      // de l'ouvrage, porté par la première ; elle n'a rien à faire chiffrer à part.
+      const counted =
+        planned?.status === "planned" &&
+        link.ref.workItems.find((w) => w.id === planned.workItemId)?.slots.find((x) => x.key === planned.slot)?.measureOnly === true &&
+        link.plan.lines.some(
+          (l) =>
+            l.ref !== item.id &&
+            l.status === "planned" &&
+            l.workItemId === planned.workItemId &&
+            l.slot === planned.slot &&
+            (owned.get(l.ref)?.length ?? 0) > 0,
+        );
       const pending =
-        v.basis === "work" && needs.length === 0
+        v.basis === "work" && needs.length === 0 && !counted
           ? planned && planned.status === "not_covered"
             ? planned.reason
             : "BatiClair ne sait pas encore calculer les matériaux de cet ouvrage."

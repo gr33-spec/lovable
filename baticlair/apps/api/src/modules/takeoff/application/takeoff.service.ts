@@ -701,7 +701,8 @@ export class TakeoffService {
       await this.memory.recordChoice(tenant, { kind: "product", key: `slot:${name}`, value, projectId: takeoff.projectId });
     }
     if (kind === "param" && value && typeof value === "object") {
-      const def = REFERENTIALS.flatMap((r) => r.workItems.flatMap((w) => w.params)).find((p) => p.key === name);
+      const own = referentialFor(takeoff.trade);
+      const def = [...(own ? [own] : []), ...REFERENTIALS].flatMap((r) => r.workItems.flatMap((w) => w.params)).find((p) => p.key === name);
       if (def?.kind === "artisan_preference") await this.memory.recordChoice(tenant, { kind: "param", key: `param:${name}`, value: value.value, projectId: takeoff.projectId });
     }
     const after = await this.reload(tenant, takeoff.id);

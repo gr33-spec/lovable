@@ -265,6 +265,8 @@ const UNIT_LABEL: Record<string, { one: string; many: string }> = {
   ml: { one: "ml", many: "ml" },
   m: { one: "m", many: "m" },
   m2: { one: "m²", many: "m²" },
+  kg: { one: "kg", many: "kg" },
+  l: { one: "L", many: "L" },
 };
 /** Unités telles qu'écrites dans les devis (« u », « rlx », « paquet ») → leur nom en français, au singulier et au pluriel. */
 const WRITTEN_UNITS: [RegExp, { one: string; many: string }][] = [
@@ -724,7 +726,7 @@ export const RATIO = "ratio:";
 export function toConfirmText(rules: readonly RuleToConfirm[]): string {
   // Les règles chiffrées d'abord (« 2 rails par cloison », « longueur de 3 m ») ; le nom seul d'un calcul n'est dit qu'à défaut.
   // Une règle sans nom (le calcul lui-même) n'est pas dite : sa valeur l'est par les règles chiffrées qu'il emploie.
-  const said = rules.filter((r) => r.text);
+  const said = rules.filter((r, i) => r.text && rules.findIndex((x) => x.text === r.text) === i);
   return said.length > 0 ? `Quantité à confirmer : ${said.map((r) => (r.conflict ? `${r.text} (sources en désaccord)` : r.text)).join(", ")}` : "Quantité à confirmer";
 }
 

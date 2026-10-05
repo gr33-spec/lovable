@@ -1,4 +1,7 @@
 import type { Referential } from "./model.js";
+import { CARRELAGE_REFERENTIAL } from "./data/carrelage.js";
+import { MACONNERIE_REFERENTIAL } from "./data/maconnerie.js";
+import { PEINTURE_REFERENTIAL } from "./data/peinture.js";
 import { PLATRERIE_REFERENTIAL } from "./data/platrerie.js";
 import { ROOFING_REFERENTIAL } from "./data/roofing.js";
 
@@ -7,10 +10,16 @@ import { ROOFING_REFERENTIAL } from "./data/roofing.js";
  * métier que BatiClair sait calculer. Un métier absent d'ici n'a pas de tiroir : on le dit, on ne calcule jamais
  * un devis d'électricien avec les règles du couvreur.
  */
-export const REFERENTIALS: readonly Referential[] = [ROOFING_REFERENTIAL, PLATRERIE_REFERENTIAL];
+export const REFERENTIALS: readonly Referential[] = [ROOFING_REFERENTIAL, PLATRERIE_REFERENTIAL, CARRELAGE_REFERENTIAL, PEINTURE_REFERENTIAL, MACONNERIE_REFERENTIAL];
 
 /** Nom du métier tel que l'API le montre (« couverture », « platrerie ») ; les deux formes sont acceptées en entrée. */
-export const METIER_NAMES: Readonly<Record<string, string>> = { roofing: "couverture", drywall: "platrerie" };
+export const METIER_NAMES: Readonly<Record<string, string>> = {
+  roofing: "couverture",
+  drywall: "platrerie",
+  tiling: "carrelage",
+  painting: "peinture",
+  masonry: "maconnerie",
+};
 
 /** « couverture », « roofing », « Plâtrerie », « drywall » → l'identifiant du métier (« roofing », « drywall »). */
 export function tradeIdOf(metier: string): string {
