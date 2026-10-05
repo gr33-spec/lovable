@@ -420,20 +420,19 @@ function ListRow({ line, editable, pending, onSave, onDelete, onConfirm }: { lin
   return (
     <div className="flex flex-col gap-2 py-2.5">
       <div className="flex items-center gap-3">
-        {/* Jamais de coche verte sur une mesure d'ouvrage ou une quantité ambiguë : rien n'y est encore à commander. */}
+        {/* Jamais de coche verte sur une mesure d'ouvrage ou une quantité ambiguë : rien n'y est à commander tel quel. Pas
+            de « ? » non plus : la ligne est juste, ses matériaux sont dans la liste des fournitures (retour du fondateur). */}
         {doubt ? (
           <HelpCircle size={18} className="shrink-0 text-warn" aria-label="à vérifier" />
         ) : line.basis === "work" || line.role === "undetermined" ? (
-          <HelpCircle size={18} className="shrink-0 text-muted" aria-label="matériaux à calculer" />
+          <span className="size-[18px] shrink-0" aria-hidden="true" />
         ) : (
           <CircleCheck size={18} className="shrink-0 text-ok" aria-label="vérifiée" />
         )}
         <span className="min-w-0 grow">
           <span className="line-clamp-2 text-[15px] leading-snug font-bold">{shortName(line.article ?? line.designation)}</span>
           <span className="text-sm text-muted">
-            {line.basis === "work" ? "Lu dans le devis : " : ""}
             {line.quantity ?? "?"} {line.unit ?? ""}
-            {line.basis === "work" ? <span className="font-semibold text-warn"> · matériaux à calculer</span> : null}
             {/* Où la ligne se trouve dans le devis (logement, pièce) : pour s'y retrouver d'un coup d'œil. */}
             {line.section?.length ? <span> · {line.section.slice(-2).join(" › ")}</span> : null}
           </span>
