@@ -17,5 +17,9 @@ export const TRADES: readonly { id: string; label: string }[] = [
   { id: "waterproofing", label: "Étanchéité" },
   { id: "cladding", label: "Bardage" },
   { id: "facade", label: "Façade, ravalement" },
+  { id: "ceiling", label: "Plafonds suspendus" },
+  { id: "interior_joinery", label: "Menuiserie intérieure, agencement" },
+  { id: "kitchen", label: "Cuisine" },
+  { id: "solar", label: "Photovoltaïque" },
   { id: "other", label: "Autre métier" },
 ];

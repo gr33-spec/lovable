@@ -209,4 +209,29 @@ export const FACADE_PROFILE = light("facade", "Façade, ravalement, ITE", [
   f("fac_paint", "Peinture de façade", ["peinture facade", "d2", "d3", "pliolite", "siloxane", "hydrofuge"], AREA_OF_WORK),
 ], ["echafaudage", "nettoyage haute pression", "lavage"]);
 
+export const CEILING_PROFILE = light("ceiling", "Plafonds suspendus", [
+  f("ceil_tile", "Dalle de plafond", ["dalle", "dalles", "faux plafond", "plafond suspendu", "plafond demontable", "rockfon", "armstrong"], AREA_OF_WORK),
+  f("ceil_grid", "Ossature T24", ["t24", "t15", "porteur", "entretoise", "corniere", "suspente"]),
+]);
+
+export const INTERIOR_JOINERY_PROFILE = light("interior_joinery", "Menuiserie intérieure, agencement", [
+  f("ij_door", "Bloc-porte", ["bloc porte", "porte interieure", "huisserie", "porte de distribution", "porte coulissante"]),
+  f("ij_trim", "Plinthe, moulure", ["plinthe", "plinthes", "moulure", "baguette", "quart de rond"]),
+  f("ij_panel", "Lambris, habillage", ["lambris", "habillage", "parement bois"], AREA_OF_WORK),
+  f("ij_storage", "Placard, dressing", ["placard", "dressing", "facade de placard", "etagere"]),
+]);
+
+export const KITCHEN_PROFILE = light("kitchen", "Cuisine", [
+  f("kit_unit", "Meuble de cuisine", ["meuble bas", "meubles bas", "meuble haut", "meubles hauts", "colonne", "caisson", "facade"]),
+  f("kit_worktop", "Plan de travail, crédence", ["plan de travail", "credence"]),
+  f("kit_appliance", "Électroménager", ["four", "plaque", "hotte", "lave vaisselle", "refrigerateur", "evier", "mitigeur"]),
+  f("kit_trim", "Plinthe, fileur", ["plinthe", "fileur", "joue"]),
+]);
+
+export const SOLAR_PROFILE = light("solar", "Photovoltaïque", [
+  f("pv_module", "Module photovoltaïque", ["panneau photovoltaique", "panneaux photovoltaiques", "panneau solaire", "panneaux solaires", "module", "modules"]),
+  f("pv_mounting", "Rail, crochet, bride", ["rail", "crochet", "bride", "k2", "renusol"]),
+  f("pv_electric", "Onduleur, câble solaire", ["onduleur", "micro onduleur", "cable solaire", "coffret ac", "coffret dc"]),
+], ["mise en service", "consuel", "raccordement enedis"]);
+
 export const OTHER_PROFILE = light("other", "Autre métier", []);
