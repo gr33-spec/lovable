@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.05-30",
+  "version": "roofing-2026.10.05-31",
   "trade": "roofing",
   "sources": [
     {
@@ -793,6 +793,49 @@
       "needUnit": "u",
       "attributes": [],
       "keyAttributes": []
+    },
+    {
+      "code": "roof_safety",
+      "label": "Sécurité et accès (crochets de sécurité, échelle de toit, ligne de vie)",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "crochet de securite",
+        "crochets de securite",
+        "crochet de service",
+        "crochets de service",
+        "crochet d'echelle",
+        "crochets d'echelle",
+        "echelle de toit",
+        "echelles de toit",
+        "echelle de couvreur",
+        "ligne de vie",
+        "lignes de vie",
+        "point d'ancrage",
+        "points d'ancrage",
+        "garde corps",
+        "garde-corps",
+        "passerelle",
+        "chemin de circulation"
+      ]
+    },
+    {
+      "code": "asbestos_removal",
+      "label": "Désamiantage",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "desamiantage",
+        "amiante",
+        "amiantee",
+        "amiantees",
+        "amiante ciment",
+        "amiante-ciment"
+      ],
+      "dominant": true,
+      "warning": "Amiante : le retrait se fait par une entreprise certifiée (SS3), après un repérage avant travaux et un plan de retrait déclaré un mois avant le chantier. BatiClair ne compte aucun matériau pour ce poste : il part tel qu'écrit (§18)."
     },
     {
       "code": "steel_tray",

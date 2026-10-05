@@ -136,6 +136,13 @@ export interface ProductFamily {
    * expression (texte sans accents, en minuscules) qui dit que la ligne la donne déjà.
    */
   ask?: { question: string; hint?: string; choices: { label: string; value: string }[]; answered: string };
+  /**
+   * Famille qui l'emporte dès qu'un de ses mots est dans la ligne, où qu'il soit (« Désamiantage de plaques
+   * fibres-ciment » : du désamiantage, jamais une ardoise fibres-ciment).
+   */
+  dominant?: true;
+  /** Ce que l'artisan doit savoir quand le devis la cite (l'amiante, §18) : dit en haut de la liste, jamais au fournisseur. */
+  warning?: string;
 }
 
 /** Façon de vendre un produit : à la pièce, à la longueur de 4 m, au rouleau… */

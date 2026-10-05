@@ -37,6 +37,8 @@ function purchaseDto(p: PurchaseView) {
     canValidate: p.canValidate,
     /** L'écran unique « liste des fournitures » : groupes ordonnés, lignes vert / orange / gris, et le compte. */
     screen: p.screen,
+    /** Ce que l'artisan doit savoir (l'amiante, §18) : dit en haut de la liste, jamais envoyé au fournisseur. */
+    warnings: p.warnings,
   };
 }
 

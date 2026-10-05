@@ -41,6 +41,7 @@ export function screenReport(v: PurchaseView): string[] {
   const item = (key?: string) => v.toBuy.find((b) => b.key === key);
   const n = (k: number, one: string, many: string) => `${k} ${k > 1 ? many : one}`;
   const out = [`**À l'ouverture : ${n(c.vert, "verte", "vertes")} · ${c.orange} orange · ${n(c.gris, "grise", "grises")}.**`, ""];
+  for (const w of v.warnings) out.push(`> Avertissement : ${w}`, "");
   const asked = v.questions.filter((d) => !d.key.startsWith(RATIO));
   out.push(asked.length ? "Questions du comptoir :" : "Questions du comptoir : aucune.");
   for (const d of asked)

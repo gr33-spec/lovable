@@ -299,6 +299,8 @@ export interface TakeoffPurchase {
   canValidate: boolean;
   /** L'écran unique « liste des fournitures » : chaque ligne vert / orange / gris, dans l'ordre des groupes. */
   screen: SupplyScreen;
+  /** Ce que l'artisan doit savoir (l'amiante, §18) : dit en haut de la liste, jamais envoyé au fournisseur. */
+  warnings?: string[];
 }
 
 export interface ScreenRow {

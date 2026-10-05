@@ -997,7 +997,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.05-30",
+  version: "roofing-2026.10.05-31",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -1287,6 +1287,46 @@ export const ROOFING_REFERENTIAL: Referential = {
     { code: "outlet_cap", label: "Chapeau de sortie de toit", needUnit: "u", attributes: [], keyAttributes: [] },
     { code: "outlet_collar", label: "Collerette d'étanchéité de conduit de fumée", needUnit: "u", attributes: [], keyAttributes: [] },
     // §5 : « Arêtier (même pièce que faîtière en général) : ml arêtier / 0,35 ≈ 2,9 pièces/ml » ; en zinc, une bande (§3).
+    // §14 : sécurité définitive et accès ; reconnus, ils partent tels que le devis les écrit (modèle, norme, longueur).
+    {
+      code: "roof_safety",
+      label: "Sécurité et accès (crochets de sécurité, échelle de toit, ligne de vie)",
+      needUnit: "u",
+      attributes: [],
+      keyAttributes: [],
+      keywords: [
+        "crochet de securite",
+        "crochets de securite",
+        "crochet de service",
+        "crochets de service",
+        "crochet d'echelle",
+        "crochets d'echelle",
+        "echelle de toit",
+        "echelles de toit",
+        "echelle de couvreur",
+        "ligne de vie",
+        "lignes de vie",
+        "point d'ancrage",
+        "points d'ancrage",
+        "garde corps",
+        "garde-corps",
+        "passerelle",
+        "chemin de circulation",
+      ],
+    },
+    // §18 : un couvreur sans certification SS3 ne retire pas l'amiante ; le poste part tel qu'écrit, chiffré par un tiers,
+    // et l'artisan est averti. Il l'emporte sur toute autre famille de la ligne (« plaques fibres-ciment amiantées »).
+    {
+      code: "asbestos_removal",
+      label: "Désamiantage",
+      needUnit: "u",
+      attributes: [],
+      keyAttributes: [],
+      keywords: ["desamiantage", "amiante", "amiantee", "amiantees", "amiante ciment", "amiante-ciment"],
+      dominant: true,
+      warning:
+        "Amiante : le retrait se fait par une entreprise certifiée (SS3), après un repérage avant travaux et un plan de retrait déclaré un mois avant le chantier. BatiClair ne compte aucun matériau pour ce poste : il part tel qu'écrit (§18).",
+    },
     // §8 : bac acier, commandé en plaques à longueur (jamais en m²), vis, closoirs, faîtière.
     {
       code: "steel_tray",

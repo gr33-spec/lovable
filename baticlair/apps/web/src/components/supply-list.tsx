@@ -121,6 +121,12 @@ export function SupplyList({
           )}
         </p>
       </div>
+      {/* §18 : l'amiante se dit à l'artisan, en haut de la liste ; rien de cela ne part au fournisseur. */}
+      {(p.warnings ?? []).map((w) => (
+        <p key={w} role="note" className="mx-4 mb-2 rounded-2xl bg-warn-bg px-3 py-2 text-[14px] font-bold text-warn">
+          {w}
+        </p>
+      ))}
       {screen.groups.map((g) => {
         const visible = g.rows.filter((r) => !hidden(r));
         if (visible.length === 0 && !(g.kind === "consommables" && editable && p.suggestions.length > 0)) return null;
