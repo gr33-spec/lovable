@@ -1,5 +1,5 @@
 import { Decimal } from "../shared/decimal.js";
-import { DEVIS_MARK, withoutDevisMark, type Assumption, type NeedResult, type Question } from "../referential/engine.js";
+import { DEVIS_MARK, withoutDevisMark, type Assumption, type NeedResult, type Question, type RuleToConfirm } from "../referential/engine.js";
 import type { LineRole } from "../referential/line-roles.js";
 import type { Referential } from "../referential/model.js";
 import { slotCharacteristicsKey, type QuotePlan } from "../referential/plan.js";
@@ -52,6 +52,10 @@ export interface PurchaseItem {
   assumptionKeys: string[];
   /** Ce que l'artisan a réécrit lui-même sur cette ligne (§41.4, §45.9) : le libellé, la quantité, la précision. */
   edited?: ("label" | "quantity" | "precision")[];
+  /** §47.1 : les règles « à vérifier » dont dépend la quantité (toutes, validées comprises ; le tri se fait à l'écran). */
+  rules?: RuleToConfirm[];
+  /** §47.3 : les règles encore à confirmer sur ce chantier : la ligne est orange, « Quantité à confirmer : … ». */
+  toConfirm?: RuleToConfirm[];
 }
 
 export interface ToQuoteItem {
@@ -113,6 +117,8 @@ export interface ScreenRow {
   pending?: { label: string; quantity: string | null };
   /** La décision (clé de « questions ») qu'un tap ouvre ; une réponse fait passer la ligne au vert. */
   decisionKey?: string;
+  /** La raison d'une ligne orange, en une ligne (« Quantité à confirmer : colle 4 kg/m² ») ; sinon « À vérifier ». */
+  reason?: string;
   /** Lignes du devis d'où vient la ligne (le croquis, le devis lu). */
   lineIds: string[];
 }
@@ -428,6 +434,10 @@ function aggregate(
       lineIds: [...new Set(group.flatMap(owner))],
       state: "ready",
       assumptionKeys: [...new Set(group.flatMap((n) => n.assumptions.map((a) => a.key)))],
+      ...(() => {
+        const rules = group.flatMap((n) => n.toConfirm ?? []).filter((r, i, all) => all.findIndex((x) => x.key === r.key) === i);
+        return rules.length > 0 ? { rules } : {};
+      })(),
     });
   }
   return items;
@@ -704,4 +714,56 @@ export function applyPurchaseOverrides(purchase: PurchaseView, answers: Record<s
   const screen = { groups, total: rows.length, toCheck: rows.filter((r) => r.status === "check").length };
   const canValidate = questions.every((q) => q.lineIds.length === 0) && toBuy.every((b) => b.state === "ready");
   return { ...purchase, toBuy, questions, canValidate, suggestions: purchase.suggestions.map(override), screen };
+}
+
+
+/** Clé de la confirmation d'une quantité calculée avec une règle « à vérifier » (§47.3). */
+export const RATIO = "ratio:";
+
+/** « Quantité à confirmer : colle 4 kg/m², pertes 10 % » (§47.3). */
+export function toConfirmText(rules: readonly RuleToConfirm[]): string {
+  // Les règles chiffrées d'abord (« 2 rails par cloison », « longueur de 3 m ») ; le nom seul d'un calcul n'est dit qu'à défaut.
+  // Une règle sans nom (le calcul lui-même) n'est pas dite : sa valeur l'est par les règles chiffrées qu'il emploie.
+  const said = rules.filter((r) => r.text);
+  return said.length > 0 ? `Quantité à confirmer : ${said.map((r) => (r.conflict ? `${r.text} (sources en désaccord)` : r.text)).join(", ")}` : "Quantité à confirmer";
+}
+
+/**
+ * §47.1, §47.3, §47.4 : une ligne calculée avec une règle « à vérifier » (ou que les sources contredisent) sort ORANGE,
+ * avec son chiffre et « Quantité à confirmer : [règle] ». « C'est bon » (réponse « ratio:<article> ») la passe au vert ;
+ * corriger la quantité aussi (le chiffre de l'artisan remplace le calcul). Une règle confirmée par trois artisans
+ * différents est VALIDÉE (`validated`) : elle sort verte partout. L'envoi attend que tout soit vert ou gris.
+ */
+export function applyRuleConfirmations(
+  purchase: PurchaseView,
+  answers: Record<string, string | { value: string; unit: string } | null>,
+  validated: ReadonlySet<string> = new Set(),
+): PurchaseView {
+  const decisions: Decision[] = [];
+  const toBuy = purchase.toBuy.map((item): PurchaseItem => {
+    const pending = (item.rules ?? []).filter((r) => !validated.has(r.key));
+    if (pending.length === 0 || `${RATIO}${item.key}` in answers || item.edited?.includes("quantity")) return item;
+    decisions.push({
+      key: `${RATIO}${item.key}`,
+      state: "to_confirm",
+      title: item.label,
+      text: toConfirmText(pending),
+      lineIds: [],
+      primary: { action: "keep", label: "C'est bon" },
+      secondary: ["edit"],
+    });
+    return { ...item, toConfirm: pending };
+  });
+  if (decisions.length === 0) return { ...purchase, toBuy };
+  const byItem = new Map(decisions.map((d) => [d.key.slice(RATIO.length), d]));
+  const groups = purchase.screen.groups.map((g) => ({
+    ...g,
+    rows: g.rows.map((r): ScreenRow => {
+      const d = r.itemKey && r.status === "ok" ? byItem.get(r.itemKey) : undefined;
+      return d ? { ...r, status: "check", decisionKey: d.key, reason: d.text } : r;
+    }),
+  }));
+  const rows = groups.flatMap((g) => g.rows);
+  const screen = { groups, total: rows.length, toCheck: rows.filter((r) => r.status === "check").length };
+  return { ...purchase, toBuy, questions: [...purchase.questions, ...decisions], canValidate: false, screen };
 }

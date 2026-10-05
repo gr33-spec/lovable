@@ -127,6 +127,8 @@ export interface Project {
   address: string | null;
   /** Infos chantier facultatives : la note de l'artisan, ou null. */
   siteNotes: string | null;
+  /** Métier du chantier (choisi à la création), ou null : celui de l'entreprise. */
+  trade?: string | null;
   status: ProjectStatus;
   createdAt: string;
   updatedAt: string;
@@ -307,6 +309,8 @@ export interface ScreenRow {
   quoteKey?: string;
   pending?: { label: string; quantity: string | null };
   decisionKey?: string;
+  /** La raison d'une ligne orange (« Quantité à confirmer : colle 4 kg/m² »), sinon « À vérifier ». */
+  reason?: string;
   lineIds: string[];
 }
 export interface SupplyScreen {

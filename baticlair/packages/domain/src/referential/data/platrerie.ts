@@ -16,7 +16,10 @@ const DRAFT = { status: "draft", note: "Chiffre d'usage de plaquiste, pas encore
 const DEFINITION = { status: "verified", verifiedAt: "2026-10-04", verifiedBy: "BatiClair (définition)" } as const;
 
 const fact = (kind: Fact["kind"], value: string, unit: string, source: string, verification: Provenance["verification"], note?: string): Fact => ({ kind, value, unit, source, verification, version: 1, ...(note ? { note } : {}) });
-const condition = (value: string, unit: string, verification: Provenance["verification"], note?: string) => fact("installation_condition", value, unit, verification === DRAFT ? "usage-plaquiste" : F, verification, note);
+const condition = (value: string, unit: string, verification: Provenance["verification"], note?: string, label?: string) => ({
+  ...fact("installation_condition", value, unit, verification === DRAFT ? "usage-plaquiste" : F, verification, note),
+  ...(label ? { label } : {}),
+});
 const ONE_PIECE = fact("packaging", "1", "u", "definition", DEFINITION);
 const byPiece: Product["sellingUnits"] = [{ id: "piece", label: { one: "pièce", many: "pièces" }, contains: ONE_PIECE, primary: true }];
 const generic = (id: string, family: string, label: string, shortLabel: string, extra: Partial<Product> = {}): Product => ({ id, family, label, shortLabel, aliases: [], generic: true, attributes: {}, sellingUnits: byPiece, ...extra });
@@ -120,8 +123,8 @@ export const PLATRERIE_REFERENTIAL: Referential = {
         vis_par_m2: condition("15", "u/m2", FOUNDER_DOC, "« vis 15/m² » (§16)."),
         bande_par_m2: condition("2", "ml/m2", FOUNDER_DOC, "« bande à joint 2 ml/m² » (§16)."),
         enduit_par_m2: condition("0.4", "kg/m2", FOUNDER_DOC, "« enduit 0,4 kg/m² » (§16)."),
-        rails_par_cloison: condition("2", "u", DRAFT, "Un rail en haut, un en bas."),
-        montant_de_depart: condition("1", "u", DRAFT, "Le montant de départ, en plus d'un par entraxe."),
+        rails_par_cloison: condition("2", "u", DRAFT, "Un rail en haut, un en bas.", "{v} rails par cloison (haut et bas)"),
+        montant_de_depart: condition("1", "u", DRAFT, "Le montant de départ, en plus d'un par entraxe.", "1 montant par entraxe + {v} de départ"),
       },
       derived: [
         { key: "surface_plaques", label: "Surface de plaques (deux faces)", unit: "m2", formula: "surface * regle.faces", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },

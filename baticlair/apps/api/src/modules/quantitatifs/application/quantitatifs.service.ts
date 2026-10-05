@@ -1,4 +1,4 @@
-import { METIER_NAMES, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer } from "@baticlair/domain";
+import { METIER_NAMES, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { BillingService } from "../../billing/index.js";
@@ -203,6 +203,12 @@ export class QuantitatifsService {
     for (const r of reponses) {
       const decision = reviewed.purchase.questions.find((d) => d.key === r.question);
       const q = decision?.question;
+      // §47.3 : « C'est bon » sur une quantité calculée avec une règle « à vérifier ».
+      if (decision && decision.key.startsWith(RATIO)) {
+        if (r.valeur !== "ok") throw validationFailed("This question takes « ok »", [{ path: "valeur", message: r.question }]);
+        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, decision.key, "ok");
+        continue;
+      }
       if (decision && !q) {
         if (r.valeur !== "ok" || !decision.primary || (decision.primary.action !== "keep" && decision.primary.action !== "pieces")) {
           throw validationFailed("This question takes « ok »", [{ path: "valeur", message: r.question }]);

@@ -1,6 +1,8 @@
 import {
   applyLineRoles,
   applyPurchaseOverrides,
+  applyRuleConfirmations,
+  RATIO,
   artisanView,
   assessTakeoffLine,
   climateZone,
@@ -95,6 +97,15 @@ export interface ReadingOptions {
   keepAlive?: (work: Promise<unknown>) => void;
   /** §45.8 : la mémoire des consommables de l'entreprise (« On ajoute ? »). */
   consumables?: ConsumableHabits;
+  /** §47.4 : les règles « à vérifier » confirmées par les artisans ; trois entreprises différentes les valident. */
+  rules?: RuleConfirmations;
+}
+
+/** §47.4 : « C'est bon » sur une ligne orange confirme ses règles pour l'entreprise ; trois entreprises → validée. */
+export interface RuleConfirmations {
+  /** Parmi ces règles, celles que trois entreprises différentes ont confirmées. */
+  validated(keys: readonly string[]): Promise<Set<string>>;
+  confirm(tenant: TenantContext, keys: readonly string[]): Promise<void>;
 }
 
 /**
@@ -659,6 +670,29 @@ export class TakeoffService {
       }
       return after;
     }
+    // §47.3 / §47.4 : « C'est bon » sur une quantité calculée avec une règle « à vérifier » : la ligne passe au vert,
+    // chaque règle est confirmée pour l'entreprise (trois entreprises différentes la valident), et tout va au journal.
+    if (key.startsWith(RATIO)) {
+      const itemKey = key.slice(RATIO.length);
+      const item = (await this.review(tenant, takeoff)).purchase.toBuy.find((b) => b.key === itemKey);
+      const rules = item?.toConfirm ?? [];
+      await this.takeoffs.setAnswer(tenant, takeoff.id, key, "ok");
+      if (rules.length > 0) await this.reading.rules?.confirm(tenant, rules.map((r) => r.key));
+      await this.journal.record(tenant, {
+        projectId: takeoff.projectId,
+        takeoffId: takeoff.id,
+        takeoffLineId: null,
+        action: "confirm",
+        before: item ? { designation: item.label, quantity: item.quantity, unit: item.order?.unit ?? null, reference: null } : null,
+        after: item ? { designation: item.label, quantity: item.quantity, unit: item.order?.unit ?? null, reference: null } : null,
+        documentExcerpt: [],
+        context: {
+          trade: takeoff.trade,
+          ...(await this.journalFacts(tenant, takeoff, { materiau: item?.label ?? itemKey, calculee: item?.quantity ?? null, corrigee: item?.quantity ?? null, regle: rules.map((r) => r.key).join(" + ") || itemKey })),
+        },
+      });
+      return this.reload(tenant, takeoff.id);
+    }
     await this.takeoffs.setAnswer(tenant, takeoff.id, key, value);
     // Mémoire de l'entreprise : un produit choisi, ou une réponse d'habitude (« je façonne », épaisseur du zinc),
     // compte pour SON entreprise ; établie au deuxième chantier différent, elle n'est plus demandée (dite, modifiable).
@@ -835,9 +869,9 @@ export class TakeoffService {
       takeoff = { ...takeoff, lines: takeoff.lines.map((l) => (changed.has(l.id) ? { ...l, role: changed.get(l.id)! } : l)) };
     }
     const validation = applyLineRoles(read, roles);
-    // Mode validateur (fondateur) : les calculs des règles EN BROUILLON sont montrés, marqués « provisoire »,
-    // jamais ✓ et jamais envoyés au fournisseur (la demande de prix ne reprend que les lignes du devis).
-    const acceptDraft = (await this.reading.isValidator?.(tenant)) ?? false;
+    // §47.1 : pas de mode brouillon, la couleur fait le travail. Une règle « à vérifier » calcule, et la ligne sort orange
+    // « Quantité à confirmer : … » jusqu'au « C'est bon » de l'artisan (ou à sa validation par trois artisans, §47.4).
+    const acceptDraft = true;
     const engine =
       plan.inputs.length > 0
         ? computeWithAnswers(ref, plan, takeoff.answers, await this.memory.forEngine(tenant), { acceptDraft }, slotsGivenByQuote(plan, validation))
@@ -860,7 +894,10 @@ export class TakeoffService {
       context: takeoff.context ?? {},
       ville: communeOf(address),
     });
-    const purchase = applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref, validation, consumables }), takeoff.answers);
+    const overridden = applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref, validation, consumables }), takeoff.answers);
+    const ruleKeys = [...new Set(overridden.toBuy.flatMap((b) => (b.rules ?? []).map((r) => r.key)))];
+    const validatedRules = ruleKeys.length > 0 ? ((await this.reading.rules?.validated(ruleKeys)) ?? new Set<string>()) : new Set<string>();
+    const purchase = applyRuleConfirmations(overridden, takeoff.answers, validatedRules);
     // Une ligne que l'entreprise ajoute à la main d'un chantier à l'autre est proposée aussi, si le devis ne l'a pas déjà.
     const present = new Set(takeoff.lines.map((l) => manualKey(l.designation)));
     for (const m of (await this.reading.consumables?.manual(tenant)) ?? []) {

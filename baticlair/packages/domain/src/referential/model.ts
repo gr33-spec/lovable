@@ -63,6 +63,8 @@ export interface Provenance {
   /** Incrémentée à chaque changement de la valeur. */
   version: number;
   note?: string;
+  /** §47.1 : les sources se contredisent (statut « contradiction » du tiroir) ; la valeur retenue reste à confirmer. */
+  conflict?: string;
 }
 
 /**
@@ -87,6 +89,11 @@ export interface Fact extends Provenance {
   value: string;
   /** Unité du référentiel (« m », « m2 », « u/m2 », « % »). */
   unit: string;
+  /**
+   * Le nom de la règle en un mot, pour « Quantité à confirmer : colle 4 kg/m² » (§47.3) ; « {v} » y place la valeur et
+   * son unité (« {v} rails par cloison » → « 2 rails par cloison »).
+   */
+  label?: string;
 }
 
 /** Caractéristique attendue pour les produits d'une famille. */
@@ -320,6 +327,8 @@ export interface CountedWork {
 export interface NeedRule extends Provenance {
   id: string;
   slot: string;
+  /** Le nom de la règle en un mot, quand elle est « à vérifier » (§47.3 : « Quantité à confirmer : montants 1 par 60 cm »). */
+  short?: string;
   /**
    * Formule (voir expression.ts) : paramètres, « slot.caracteristique », « regle.constante », et
    * « commande.<besoin> » : la quantité d'un besoin PRÉCÉDENT du même ouvrage, après sa marge et

@@ -10,8 +10,8 @@ import type { Referential } from "./model.js";
  */
 const str = z.string().min(1);
 const verification = z.object({ status: z.enum(["draft", "verified", "deprecated"]), verifiedAt: z.string().optional(), verifiedBy: z.string().optional(), note: z.string().optional() });
-const provenance = { source: str, verification, version: z.number().int().min(1), note: z.string().optional() };
-const fact = z.object({ ...provenance, kind: z.enum(["manufacturer_spec", "installation_condition", "packaging"]), value: str, unit: str });
+const provenance = { source: str, verification, version: z.number().int().min(1), note: z.string().optional(), conflict: z.string().optional() };
+const fact = z.object({ ...provenance, kind: z.enum(["manufacturer_spec", "installation_condition", "packaging"]), value: str, unit: str, label: z.string().optional() });
 const source = z.object({
   id: str,
   kind: z.enum(["manufacturer", "standard", "baticlair_rule", "retailer", "definition", "trade_practice", "other"]),
@@ -79,7 +79,7 @@ const slot = z.object({
   measureOnly: z.literal(true).optional(),
   charsFrom: z.string().optional(),
 });
-const need = z.object({ ...provenance, id: str, slot: str, formula: str, unit: str, core: z.boolean(), exclusions: z.string().optional(), precision: z.string().optional(), precisionRequires: z.array(str).optional(), designation: z.string().optional(), offer: z.object({ unlessQuoteSays: z.array(str).optional() }).optional(), requires: z.array(str).optional(), when: z.string().optional() });
+const need = z.object({ ...provenance, id: str, slot: str, short: z.string().optional(), formula: str, unit: str, core: z.boolean(), exclusions: z.string().optional(), precision: z.string().optional(), precisionRequires: z.array(str).optional(), designation: z.string().optional(), offer: z.object({ unlessQuoteSays: z.array(str).optional() }).optional(), requires: z.array(str).optional(), when: z.string().optional() });
 const workItem = z.object({
   id: str,
   trade: str,

@@ -10,6 +10,8 @@ export interface Project {
   address: string | null;
   /** Infos chantier facultatives : note de l'artisan (texte libre + commentaires de croquis), ou null. */
   siteNotes: string | null;
+  /** Métier du chantier (choisi à la création), ou null : celui de l'entreprise. */
+  trade: string | null;
   status: ProjectStatus;
   createdAt: Date;
   updatedAt: Date;

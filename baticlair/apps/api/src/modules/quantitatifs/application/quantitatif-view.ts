@@ -1,4 +1,4 @@
-import { METIER_NAMES, ROOFING_REFERENTIAL, type Assumption, type TraceLine } from "@baticlair/domain";
+import { METIER_NAMES, ROOFING_REFERENTIAL, toConfirmText, type Assumption, type TraceLine } from "@baticlair/domain";
 import type { ReviewedTakeoff } from "../../takeoff/index.js";
 
 /**
@@ -92,7 +92,9 @@ export function quantitatifView(
       conditionnement: b.approx,
       ouvrage: groupOf.get(b.key) ?? null,
       origine: b.kind === "computed" ? "calcul" : "devis",
-      a_confirmer: b.state === "to_confirm",
+      a_confirmer: b.state === "to_confirm" || Boolean(b.toConfirm?.length),
+      /** §47.3 : calculée avec une règle « à vérifier » : « Quantité à confirmer : colle 4 kg/m² » ; « C'est bon » la passe au vert. */
+      ...(b.toConfirm?.length ? { raison: toConfirmText(b.toConfirm) } : {}),
       // Le prix d'une ligne de devis est celui de l'ouvrage (85 €/m² de couverture), pas d'un article calculé.
       ...(b.kind !== "computed" && line?.priceRaw ? { prix: line.priceRaw } : {}),
       hypotheses: b.assumptionKeys,

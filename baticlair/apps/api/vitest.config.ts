@@ -15,7 +15,7 @@ export default defineConfig({
       AUTH_SECRET: "test-secret-test-secret-test-secret-000",
       EMAIL_PROVIDER: "capture",
       AI_PROVIDER: "fake",
-      LOG_LEVEL: "silent",
+      LOG_LEVEL: process.env.TEST_LOG_LEVEL ?? "silent",
       // Les tests enchaînent des centaines de requêtes depuis une même adresse ; rate-limit.test.ts rétablit la vraie limite.
       RATE_LIMIT: "off",
       API_PUBLIC_URL: "http://localhost:4000",

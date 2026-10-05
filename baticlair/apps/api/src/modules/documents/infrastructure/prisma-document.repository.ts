@@ -61,6 +61,11 @@ const WITH_LATEST_PROCESSING = {
 export class PrismaDocumentRepository implements DocumentRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async projectTrade(tenant: TenantContext, projectId: string): Promise<string | null> {
+    if (!isUuid(projectId)) return null;
+    return (await this.prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { trade: true } }))?.trade ?? null;
+  }
+
   async projectExists(tenant: TenantContext, projectId: string): Promise<boolean> {
     if (!isUuid(projectId)) return false;
     const count = await this.prisma.project.count({ where: { id: projectId, companyId: tenant.companyId } });

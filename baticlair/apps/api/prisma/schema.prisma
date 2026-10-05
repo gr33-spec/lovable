@@ -21,15 +21,15 @@ datasource db {
 // ---------------------------------------------------------------------------
 
 model User {
-  id            String   @id
-  name          String
-  email         String   @unique
-  emailVerified Boolean  @default(false)
-  image         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                       String    @id
+  name                     String
+  email                    String    @unique
+  emailVerified            Boolean   @default(false)
+  image                    String?
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
   /// Dernière visite (au jour près) : les données sont effacées 3 ans après (page Confidentialité).
-  lastSeenAt    DateTime @default(now())
+  lastSeenAt               DateTime  @default(now())
   /// §43.4 : nombre de fois où l'activation des notifications a été proposée (1er envoi, puis 3e), et activation.
   notificationsPromptCount Int       @default(0)
   notificationsEnabledAt   DateTime?
@@ -104,21 +104,21 @@ enum MembershipRole {
 }
 
 model Company {
-  id                   String   @id @default(uuid(7)) @db.Uuid
+  id                   String    @id @default(uuid(7)) @db.Uuid
   name                 String
   /// Palier d'abonnement : nombre d'analyses de documents incluses par mois.
   /// Nul = pas de plafond (période d'essai, tant que les paliers ne sont pas fixés).
   monthlyAnalysisLimit Int?
   /// Formule (catalogue dans la config : trial, solo, pro…). « trial » à l'inscription.
-  plan                 String   @default("trial")
+  plan                 String    @default("trial")
   planActivatedAt      DateTime?
   /// Formule demandée depuis l'écran des formules (en attendant le paiement en ligne).
   requestedPlan        String?
   requestedPlanAt      DateTime?
   /// Métiers de l'entreprise (profils de lecture, PD-033). Vide = « autre métier ».
-  trades               String[] @default([])
+  trades               String[]  @default([])
   /// §42.2 : joindre le « Détail du chantier (sans prix) » aux envois fournisseur (case mémorisée).
-  attachQuoteDetail    Boolean  @default(true)
+  attachQuoteDetail    Boolean   @default(true)
   /// §45.3 : coordonnées de l'en-tête de la demande de devis et de la signature du mail (§45.2). Jamais saisies à l'envoi.
   address              String?
   siret                String?
@@ -127,24 +127,25 @@ model Company {
   /// Logo (PNG ou JPEG, 500 Ko au plus), à gauche de l'en-tête du PDF ; absent : le nom de l'entreprise en gros.
   logo                 Bytes?
   logoType             String?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
-  memberships   Membership[]
-  partnerKeys   PartnerApiKey[]
-  projects      Project[]
-  documents     Document[]
-  aiExecutions  AiExecution[]
-  takeoffs      Takeoff[]
-  aiAnalyses    AiAnalysis[]
-  suppliers     Supplier[]
-  priceRequests PriceRequest[]
-  offers        SupplierOffer[]
-  preferences   CompanyPreference[]
-  corrections   CorrectionEvent[]
-  consumableHabits ConsumableHabit[]
-  uploadParts   UploadPart[]
-  quantitatifs  Quantitatif[]
+  memberships       Membership[]
+  partnerKeys       PartnerApiKey[]
+  projects          Project[]
+  documents         Document[]
+  aiExecutions      AiExecution[]
+  takeoffs          Takeoff[]
+  aiAnalyses        AiAnalysis[]
+  suppliers         Supplier[]
+  priceRequests     PriceRequest[]
+  offers            SupplierOffer[]
+  preferences       CompanyPreference[]
+  corrections       CorrectionEvent[]
+  consumableHabits  ConsumableHabit[]
+  uploadParts       UploadPart[]
+  quantitatifs      Quantitatif[]
+  ruleConfirmations RuleConfirmation[]
 
   @@map("company")
 }
@@ -181,6 +182,8 @@ model Project {
   address        String?
   /// Infos chantier facultatives : la note de l'artisan (texte libre, commentaires de croquis). Lue à chaque calcul.
   siteNotes      String?
+  /// Métier du chantier, choisi à la création quand le devis ne le dit pas (« roofing », « tiling »…) ; null = celui de l'entreprise.
+  trade          String?
   status         ProjectStatus @default(active)
   /// Chantier de démonstration : ne compte jamais dans la formule.
   demo           Boolean       @default(false)
@@ -197,7 +200,7 @@ model Project {
   documents     Document[]
   priceRequests PriceRequest[]
 
-  quantitatifs   Quantitatif[]
+  quantitatifs Quantitatif[]
 
   @@index([companyId, status, lastActivityAt(sort: Desc), id(sort: Desc)])
   // Index de recherche plein texte sans accents (pg_trgm + unaccent) :
@@ -455,32 +458,32 @@ enum TakeoffStatus {
 /// Quantitatif (liste de matériaux) tiré d'un devis client. Toujours relu
 /// par l'artisan avant usage (PD-026) ; chaque ligne garde sa preuve.
 model Takeoff {
-  id            String        @id @default(uuid(7)) @db.Uuid
-  companyId     String        @db.Uuid
-  projectId     String        @db.Uuid
+  id                 String        @id @default(uuid(7)) @db.Uuid
+  companyId          String        @db.Uuid
+  projectId          String        @db.Uuid
   /// Nul pour un quantitatif envoyé en lignes par un partenaire (pas de document).
-  documentId    String?       @unique @db.Uuid
-  analysisId    String?       @db.Uuid
+  documentId         String?       @unique @db.Uuid
+  analysisId         String?       @db.Uuid
   /// pdf (devis lu par l'IA) | lignes (envoyées par un partenaire, §38).
-  source        String        @default("pdf")
+  source             String        @default("pdf")
   /// Version du référentiel du calcul (§27.1.6, §32.5).
   referentialVersion String?
-  trade         String
-  status        TakeoffStatus @default(draft)
+  trade              String
+  status             TakeoffStatus @default(draft)
   /// Prompt et modèle ayant produit la proposition (traçabilité).
-  promptId      String
-  promptVersion Int
-  model         String
+  promptId           String
+  promptVersion      Int
+  model              String
   /// Remarques de l'IA sur le document (page illisible, ligne ambiguë…).
-  notes         Json          @default("[]")
+  notes              Json          @default("[]")
   /// Réponses de l'artisan aux questions du calcul, pour CE chantier (« product:tuile », « param:pureau »).
-  answers       Json          @default("{}")
+  answers            Json          @default("{}")
   /// En-tête et notes du devis lus par l'IA (adresse, type de bâtiment, neuf/rénovation, pente…), §41.1.
-  context       Json?
-  createdById   String?
-  createdAt     DateTime      @default(now())
-  validatedAt   DateTime?
-  validatedById String?
+  context            Json?
+  createdById        String?
+  createdAt          DateTime      @default(now())
+  validatedAt        DateTime?
+  validatedById      String?
 
   company  Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   document Document?     @relation(fields: [documentId], references: [id], onDelete: Cascade)
@@ -741,8 +744,8 @@ model CorrectionEvent {
 
 /// Compteurs de Better Auth (connexion, inscription, mot de passe oublié), par adresse IP et chemin.
 model RateLimit {
-  id          String  @id
-  key         String  @unique
+  id          String @id
+  key         String @unique
   count       Int
   lastRequest BigInt
 
@@ -819,18 +822,34 @@ model PartnerApiKey {
 
 /// §45.8 : les consommables suggérés (« On ajoute ? ») et les lignes ajoutées à la main, par entreprise.
 /// Refusé trois chantiers d'affilée : plus proposé ; ajouté à la main sur deux chantiers : devient une suggestion.
+/// §47.4 : une règle « à vérifier » confirmée telle quelle par une entreprise (« C'est bon » sur une ligne orange). Trois
+/// entreprises différentes la valident : elle sort verte partout. Une entreprise ne compte qu'une fois par règle.
+model RuleConfirmation {
+  companyId String   @db.Uuid
+  /// « <référentiel>/<ouvrage>/<règle>=<valeur> » : une autre valeur est une autre règle.
+  ruleKey   String
+  userId    String?
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@id([companyId, ruleKey])
+  @@index([ruleKey])
+  @@map("rule_confirmation")
+}
+
 model ConsumableHabit {
-  companyId           String   @db.Uuid
+  companyId          String   @db.Uuid
   /// Clé de l'article suggéré (« product:Cartouches de silicone zinc ») ou « manual:<désignation normalisée> ».
-  key                 String
-  designation         String
-  refusedInARow       Int      @default(0)
-  lastRefusedProject  String?  @db.Uuid
+  key                String
+  designation        String
+  refusedInARow      Int      @default(0)
+  lastRefusedProject String?  @db.Uuid
   /// Chantiers où l'artisan a ajouté cette ligne à la main.
-  manualProjects      String[] @default([])
-  lastQuantity        String?
-  lastUnit            String?
-  updatedAt           DateTime @updatedAt
+  manualProjects     String[] @default([])
+  lastQuantity       String?
+  lastUnit           String?
+  updatedAt          DateTime @updatedAt
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 

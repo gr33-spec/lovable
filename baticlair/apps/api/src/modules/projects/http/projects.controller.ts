@@ -14,6 +14,8 @@ const createBody = z.object({
   name: z.string(),
   clientName: z.string().nullish(),
   address: z.string().nullish(),
+  /** Métier du chantier, quand le devis ne le dit pas (« tiling ») ; absent : celui de l'entreprise. */
+  trade: z.string().max(40).nullish(),
 });
 
 const updateBody = z
@@ -57,6 +59,7 @@ function toDto(p: Project) {
     clientName: p.clientName,
     address: p.address,
     siteNotes: p.siteNotes,
+    trade: p.trade,
     status: p.status,
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
@@ -78,7 +81,7 @@ export class ProjectsController {
   async create(@Tenant() tenant: TenantContext, @Body(new ZodPipe(createBody)) body: z.infer<typeof createBody>) {
     // La formule limite les nouveaux chantiers ; jamais un chantier déjà commencé.
     await this.billing.assertCanCreateProject(tenant);
-    return toDto(await this.projects.create(tenant, { name: body.name, clientName: body.clientName, address: body.address }));
+    return toDto(await this.projects.create(tenant, { name: body.name, clientName: body.clientName, address: body.address, trade: body.trade }));
   }
 
   @Get()
