@@ -5,7 +5,7 @@ const line = (designation: string, quantityRaw: string, unitRaw: string) => ({ i
 
 describe("un moteur, des profils métier (données)", () => {
   it("chaque métier proposé a son profil", () => {
-    expect(TRADES).toHaveLength(11);
+    expect(TRADES).toHaveLength(15);
     for (const t of TRADES) expect(TRADE_PROFILES[t.id]?.id).toBe(t.id);
   });
 
