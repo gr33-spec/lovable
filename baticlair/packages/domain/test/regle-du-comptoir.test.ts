@@ -40,6 +40,9 @@ const COMPTOIR: Record<string, string> = {
   developpe_aretier: "« bande de 25 ou de 33 ? »",
   nb_fenetres: "le nombre de fenêtres de toit",
   raccord_couverture: "« raccord pour tuiles ou pour ardoises ? »",
+  matiere_gouttiere: "« PVC ou alu ? » (toujours lu : c'est lui qui choisit l'ouvrage)",
+  teinte_gouttiere: "« grise, blanche ou sable ? »",
+  nb_angles: "« combien d'angles ? »",
 };
 /** Ce que le comptoir ne demande jamais : une hypothèse, dite et modifiable d'un tap. */
 const JAMAIS: readonly string[] = ["zone", "entraxe_supports", "pureau", "pente", "longueur_rampant", "epaisseur_zinc", "diametre_crochet", "coudes_par_descente"];

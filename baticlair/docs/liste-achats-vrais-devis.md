@@ -8,12 +8,13 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 ### À l'ouverture
 
-**J'ai compris :** Couverture en tuiles à emboîtement sur liteaux : 120 m² · Faîtage : 10 m · Gouttière : 20 m · Descente d'eau pluviale : 2 unités · Sortie de toit : 1 unité
+**J'ai compris :** Couverture en tuiles à emboîtement sur liteaux : 120 m² · Faîtage : 10 m · Gouttière PVC ou alu : 20 m · Descente d'eau pluviale : 2 unités · Sortie de toit : 1 unité
 
 **Questions :**
 
 - Sortie de toit : quel diamètre ? → [Ø 80] [Ø 100] [Ø 125] [Ø 150] [Ø 180] [VMC]
 - Crochets de gouttière : sur les chevrons ou en façade (bandeau) ? → [Sur les chevrons] [En façade (bandeau)]
+- Combien d'angles sur cette gouttière ? → [Aucun] [1] [2] [3]
 - Sortie de toit : conduit de fumée ou ventilation ? → [Conduit de fumée] [Ventilation]
 - J'ai identifié : Tuiles HP10. C'est bien ce modèle ? → [Oui] [Modifier]
 
@@ -28,8 +29,10 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Closoir | 2 rouleaux de 5 m | 10 ml à couvrir |
 | Crochets de faîtière | 29 pièces |  |
 | Abouts de faîtage | 2 pièces |  |
-| Gouttière PVC sable demi-ronde dév. 25 | 5 longueurs de 4 m | 20 ml à couvrir |
-| Naissances PVC sable demi-ronde dév. 25 Ø80 | 2 pièces |  |
+| Gouttière PVC demi-ronde sable de 25 | 5 longueurs de 4 m | 20 ml à couvrir |
+| Jonctions de gouttière PVC sable de 25 | 4 pièces |  |
+| Talons de gouttière PVC sable de 25 | 4 pièces |  |
+| Naissances PVC demi-ronde sable de 25 Ø80 | 2 pièces |  |
 | Tubes de descente PVC sable Ø80 | 8 ml |  |
 | Coudes de descente PVC sable Ø80 | 4 pièces |  |
 | Colliers de descente Ø80 | 8 pièces |  |
@@ -39,12 +42,13 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 ### Après « oui, c'est bien ce modèle »
 
-**J'ai compris :** Couverture en tuiles à emboîtement sur liteaux : 120 m² · Faîtage : 10 m · Gouttière : 20 m · Descente d'eau pluviale : 2 unités · Sortie de toit : 1 unité
+**J'ai compris :** Couverture en tuiles à emboîtement sur liteaux : 120 m² · Faîtage : 10 m · Gouttière PVC ou alu : 20 m · Descente d'eau pluviale : 2 unités · Sortie de toit : 1 unité
 
 **Questions :**
 
 - Sortie de toit : quel diamètre ? → [Ø 80] [Ø 100] [Ø 125] [Ø 150] [Ø 180] [VMC]
 - Crochets de gouttière : sur les chevrons ou en façade (bandeau) ? → [Sur les chevrons] [En façade (bandeau)]
+- Combien d'angles sur cette gouttière ? → [Aucun] [1] [2] [3]
 - Sortie de toit : conduit de fumée ou ventilation ? → [Conduit de fumée] [Ventilation]
 
 **À acheter :**
@@ -59,8 +63,10 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Closoir | 2 rouleaux de 5 m | 10 ml à couvrir |
 | Crochets de faîtière | 29 pièces |  |
 | Abouts de faîtage | 2 pièces |  |
-| Gouttière PVC sable demi-ronde dév. 25 | 5 longueurs de 4 m | 20 ml à couvrir |
-| Naissances PVC sable demi-ronde dév. 25 Ø80 | 2 pièces |  |
+| Gouttière PVC demi-ronde sable de 25 | 5 longueurs de 4 m | 20 ml à couvrir |
+| Jonctions de gouttière PVC sable de 25 | 4 pièces |  |
+| Talons de gouttière PVC sable de 25 | 4 pièces |  |
+| Naissances PVC demi-ronde sable de 25 Ø80 | 2 pièces |  |
 | Tubes de descente PVC sable Ø80 | 8 ml |  |
 | Coudes de descente PVC sable Ø80 | 4 pièces |  |
 | Colliers de descente Ø80 | 8 pièces |  |
@@ -70,12 +76,13 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 ### Si l'artisan précise le pureau (34,3 cm)
 
-**J'ai compris :** Couverture en tuiles à emboîtement sur liteaux : 120 m² · Faîtage : 10 m · Gouttière : 20 m · Descente d'eau pluviale : 2 unités · Sortie de toit : 1 unité
+**J'ai compris :** Couverture en tuiles à emboîtement sur liteaux : 120 m² · Faîtage : 10 m · Gouttière PVC ou alu : 20 m · Descente d'eau pluviale : 2 unités · Sortie de toit : 1 unité
 
 **Questions :**
 
 - Sortie de toit : quel diamètre ? → [Ø 80] [Ø 100] [Ø 125] [Ø 150] [Ø 180] [VMC]
 - Crochets de gouttière : sur les chevrons ou en façade (bandeau) ? → [Sur les chevrons] [En façade (bandeau)]
+- Combien d'angles sur cette gouttière ? → [Aucun] [1] [2] [3]
 - Sortie de toit : conduit de fumée ou ventilation ? → [Conduit de fumée] [Ventilation]
 
 **À acheter :**
@@ -90,8 +97,10 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Closoir | 2 rouleaux de 5 m | 10 ml à couvrir |
 | Crochets de faîtière | 29 pièces |  |
 | Abouts de faîtage | 2 pièces |  |
-| Gouttière PVC sable demi-ronde dév. 25 | 5 longueurs de 4 m | 20 ml à couvrir |
-| Naissances PVC sable demi-ronde dév. 25 Ø80 | 2 pièces |  |
+| Gouttière PVC demi-ronde sable de 25 | 5 longueurs de 4 m | 20 ml à couvrir |
+| Jonctions de gouttière PVC sable de 25 | 4 pièces |  |
+| Talons de gouttière PVC sable de 25 | 4 pièces |  |
+| Naissances PVC demi-ronde sable de 25 Ø80 | 2 pièces |  |
 | Tubes de descente PVC sable Ø80 | 8 ml |  |
 | Coudes de descente PVC sable Ø80 | 4 pièces |  |
 | Colliers de descente Ø80 | 8 pièces |  |

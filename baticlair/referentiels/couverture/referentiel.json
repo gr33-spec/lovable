@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.05-27",
+  "version": "roofing-2026.10.05-28",
   "trade": "roofing",
   "sources": [
     {
@@ -399,6 +399,47 @@
       "keywords": [
         "gouttiere"
       ]
+    },
+    {
+      "code": "gutter_plastic",
+      "label": "Gouttière PVC ou aluminium",
+      "needUnit": "ml",
+      "attributes": [],
+      "keyAttributes": [],
+      "refines": "gutter",
+      "keywords": [
+        "pvc",
+        "alu",
+        "aluminium"
+      ]
+    },
+    {
+      "code": "gutter_joint",
+      "label": "Jonction de gouttière",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "gutter_end",
+      "label": "Talon de gouttière",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "gutter_angle",
+      "label": "Angle de gouttière",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "gutter_expansion",
+      "label": "Joint de dilatation de gouttière",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
     },
     {
       "code": "gutter_hook",
@@ -2882,6 +2923,163 @@
               "verifiedAt": "2026-10-03",
               "verifiedBy": "Fondateur (couvreur)",
               "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "gouttiere-pvc-alu-4m",
+      "family": "gutter_plastic",
+      "label": "Gouttière PVC ou aluminium, longueurs de 4 m (profil et teinte à préciser)",
+      "shortLabel": "Gouttière PVC / alu",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "longueur",
+          "label": {
+            "one": "longueur de 4 m",
+            "many": "longueurs de 4 m"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "4",
+            "unit": "m",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "« longueur 4 m » (§15)."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "jonction-gouttiere",
+      "family": "gutter_joint",
+      "label": "Jonction de gouttière (système de la gouttière)",
+      "shortLabel": "Jonctions de gouttière",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "talon-gouttiere",
+      "family": "gutter_end",
+      "label": "Talon (fond) de gouttière (système de la gouttière)",
+      "shortLabel": "Talons de gouttière",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "angle-gouttiere",
+      "family": "gutter_angle",
+      "label": "Angle de gouttière 90° (système de la gouttière)",
+      "shortLabel": "Angles de gouttière",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "dilatation-gouttiere",
+      "family": "gutter_expansion",
+      "label": "Joint de dilatation de gouttière PVC",
+      "shortLabel": "Joints de dilatation",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
             },
             "version": 1
           },
@@ -11153,6 +11351,10 @@
                 "nantaise 25",
                 "gouttiere 25",
                 "gouttiere de 25",
+                "pvc 25",
+                "pvc de 25",
+                "alu 25",
+                "alu de 25",
                 "dev 25",
                 "dev. 25",
                 "developpe 25",
@@ -11169,6 +11371,10 @@
                 "nantaise 28",
                 "gouttiere 28",
                 "gouttiere de 28",
+                "pvc 28",
+                "pvc de 28",
+                "alu 28",
+                "alu de 28",
                 "dev 28",
                 "dev. 28",
                 "developpe 28",
@@ -11185,6 +11391,10 @@
                 "nantaise 33",
                 "gouttiere 33",
                 "gouttiere de 33",
+                "pvc 33",
+                "pvc de 33",
+                "alu 33",
+                "alu de 33",
                 "dev 33",
                 "dev. 33",
                 "developpe 33",
@@ -11203,6 +11413,10 @@
                 "nantaise 40",
                 "gouttiere 40",
                 "gouttiere de 40",
+                "pvc 40",
+                "pvc de 40",
+                "alu 40",
+                "alu de 40",
                 "dev 40",
                 "dev. 40",
                 "developpe 40",
@@ -11446,6 +11660,855 @@
             "verifiedAt": "2026-10-02",
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Validée sur présentation de la formule et d'un exemple chiffré (D-2026-015)."
+          },
+          "version": 1
+        }
+      ]
+    },
+    {
+      "id": "gouttiere-pvc-alu",
+      "trade": "roofing",
+      "section": "evacuation",
+      "label": "Gouttière PVC ou alu (longueurs, crochets, jonctions, talons, angles, naissances)",
+      "triggers": [
+        "gutter_plastic"
+      ],
+      "params": [
+        {
+          "key": "longueur_gouttiere",
+          "label": "Longueur de gouttière",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Longueur de gouttière ?",
+          "fromLineQuantity": true,
+          "textLabels": [
+            "gouttiere",
+            "egout"
+          ]
+        },
+        {
+          "key": "nb_descentes",
+          "label": "Nombre de descentes",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Combien de descentes pour cette gouttière ?",
+          "textLabels": [
+            "descente"
+          ],
+          "choices": [
+            {
+              "label": "1",
+              "value": "1"
+            },
+            {
+              "label": "2",
+              "value": "2"
+            },
+            {
+              "label": "3",
+              "value": "3"
+            },
+            {
+              "label": "4",
+              "value": "4"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "1 descente",
+                "une descente"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "2 descentes",
+                "deux descentes"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "3 descentes",
+                "trois descentes"
+              ]
+            },
+            {
+              "value": "4",
+              "keywords": [
+                "4 descentes",
+                "quatre descentes"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "matiere_gouttiere",
+          "label": "Matière de la gouttière",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Gouttière en PVC ou en aluminium ?",
+          "choices": [
+            {
+              "label": "PVC",
+              "value": "1"
+            },
+            {
+              "label": "Aluminium",
+              "value": "2"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "pvc"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "alu",
+                "aluminium"
+              ]
+            }
+          ],
+          "display": {
+            "1": "PVC",
+            "2": "alu"
+          }
+        },
+        {
+          "key": "teinte_gouttiere",
+          "label": "Teinte de la gouttière",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Gouttière : grise, blanche, sable, brune ou anthracite ?",
+          "choices": [
+            {
+              "label": "Grise",
+              "value": "1"
+            },
+            {
+              "label": "Blanche",
+              "value": "2"
+            },
+            {
+              "label": "Sable",
+              "value": "3"
+            },
+            {
+              "label": "Brune",
+              "value": "4"
+            },
+            {
+              "label": "Anthracite",
+              "value": "5"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "grise",
+                "grises",
+                "gris clair"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "blanc",
+                "blanche",
+                "blanches"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "sable"
+              ]
+            },
+            {
+              "value": "4",
+              "keywords": [
+                "brun",
+                "brune",
+                "marron"
+              ]
+            },
+            {
+              "value": "5",
+              "keywords": [
+                "anthracite",
+                "7016"
+              ]
+            }
+          ],
+          "display": {
+            "1": "grise",
+            "2": "blanche",
+            "3": "sable",
+            "4": "brune",
+            "5": "anthracite"
+          }
+        },
+        {
+          "key": "nb_lignes",
+          "label": "Lignes de gouttière",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Combien de lignes de gouttière ?",
+          "default": {
+            "value": "1",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "une ligne de gouttière"
+          },
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "2 x",
+                "2 ×",
+                "2 lignes",
+                "deux lignes",
+                "2 pans",
+                "deux pans",
+                "2 faces",
+                "deux faces"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "3 x",
+                "3 ×",
+                "3 lignes",
+                "trois lignes"
+              ]
+            },
+            {
+              "value": "4",
+              "keywords": [
+                "4 x",
+                "4 ×",
+                "4 lignes",
+                "quatre lignes"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "nb_angles",
+          "label": "Angles de la gouttière",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Combien d'angles sur cette gouttière ?",
+          "choices": [
+            {
+              "label": "Aucun",
+              "value": "0"
+            },
+            {
+              "label": "1",
+              "value": "1"
+            },
+            {
+              "label": "2",
+              "value": "2"
+            },
+            {
+              "label": "3",
+              "value": "3"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "0",
+              "keywords": [
+                "sans angle",
+                "ligne droite"
+              ]
+            },
+            {
+              "value": "1",
+              "keywords": [
+                "1 angle",
+                "un angle"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "2 angles",
+                "deux angles"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "3 angles",
+                "trois angles"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "zone",
+          "label": "Zone climatique",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Le chantier est plutôt…",
+          "default": {
+            "value": "3",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "bord de mer ou montagne (zone 3), à défaut de code postal"
+          },
+          "choices": [
+            {
+              "label": "Intérieur des terres",
+              "value": "1"
+            },
+            {
+              "label": "À 20–40 km de la mer, ou 200–500 m d'altitude",
+              "value": "2"
+            },
+            {
+              "label": "Bord de mer, ou plus de 500 m",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "key": "developpe_gouttiere",
+          "label": "Développé de la gouttière",
+          "unit": "cm",
+          "kind": "site_data",
+          "question": "Gouttière de 25, de 28, de 33 ou de 40 ?",
+          "hint": "Le développé : la largeur de la feuille avant façonnage.",
+          "choices": [
+            {
+              "label": "De 25",
+              "value": "25"
+            },
+            {
+              "label": "De 28",
+              "value": "28"
+            },
+            {
+              "label": "De 33",
+              "value": "33"
+            },
+            {
+              "label": "De 40",
+              "value": "40"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "25",
+              "keywords": [
+                "demi ronde 25",
+                "demi-ronde 25",
+                "nantaise 25",
+                "gouttiere 25",
+                "gouttiere de 25",
+                "pvc 25",
+                "pvc de 25",
+                "alu 25",
+                "alu de 25",
+                "dev 25",
+                "dev. 25",
+                "developpe 25",
+                "developpe 250",
+                "dev 250",
+                "de 25"
+              ]
+            },
+            {
+              "value": "28",
+              "keywords": [
+                "demi ronde 28",
+                "demi-ronde 28",
+                "nantaise 28",
+                "gouttiere 28",
+                "gouttiere de 28",
+                "pvc 28",
+                "pvc de 28",
+                "alu 28",
+                "alu de 28",
+                "dev 28",
+                "dev. 28",
+                "developpe 28",
+                "developpe 285",
+                "dev 285",
+                "de 28"
+              ]
+            },
+            {
+              "value": "33",
+              "keywords": [
+                "demi ronde 33",
+                "demi-ronde 33",
+                "nantaise 33",
+                "gouttiere 33",
+                "gouttiere de 33",
+                "pvc 33",
+                "pvc de 33",
+                "alu 33",
+                "alu de 33",
+                "dev 33",
+                "dev. 33",
+                "developpe 33",
+                "developpe 330",
+                "developpe 333",
+                "dev 333",
+                "dev 330",
+                "de 33"
+              ]
+            },
+            {
+              "value": "40",
+              "keywords": [
+                "demi ronde 40",
+                "demi-ronde 40",
+                "nantaise 40",
+                "gouttiere 40",
+                "gouttiere de 40",
+                "pvc 40",
+                "pvc de 40",
+                "alu 40",
+                "alu de 40",
+                "dev 40",
+                "dev. 40",
+                "developpe 40",
+                "developpe 400",
+                "dev 400",
+                "de 40"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "fixation_crochet",
+          "label": "Pose des crochets de gouttière",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?",
+          "choices": [
+            {
+              "label": "Sur les chevrons",
+              "value": "1"
+            },
+            {
+              "label": "En façade (bandeau)",
+              "value": "2"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "bandeau",
+                "planche de rive",
+                "en facade"
+              ]
+            },
+            {
+              "value": "1",
+              "keywords": [
+                "sur chevron",
+                "sur chevrons"
+              ]
+            }
+          ],
+          "display": {
+            "1": "sur chevron",
+            "2": "bandeau"
+          }
+        },
+        {
+          "key": "diametre_descente",
+          "label": "Diamètre des descentes",
+          "unit": "mm",
+          "kind": "site_data",
+          "question": "Descentes en Ø 80 ou en Ø 100 ?",
+          "hint": "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 130 m².",
+          "choices": [
+            {
+              "label": "Ø 80",
+              "value": "80"
+            },
+            {
+              "label": "Ø 100",
+              "value": "100"
+            },
+            {
+              "label": "Ø 120",
+              "value": "120"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "80",
+              "keywords": [
+                "ø80",
+                "ø 80",
+                "diametre 80",
+                "descente 80",
+                "descente de 80",
+                "descentes de 80"
+              ]
+            },
+            {
+              "value": "100",
+              "keywords": [
+                "ø100",
+                "ø 100",
+                "diametre 100",
+                "descente 100",
+                "descente de 100",
+                "descentes de 100"
+              ]
+            },
+            {
+              "value": "120",
+              "keywords": [
+                "ø120",
+                "ø 120",
+                "diametre 120",
+                "descente 120",
+                "descente de 120"
+              ]
+            }
+          ]
+        }
+      ],
+      "slots": [
+        {
+          "key": "profil",
+          "family": "gutter_plastic",
+          "label": "Gouttière",
+          "usual": {
+            "text": "Longueurs de 4 m (§15).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "gouttiere-pvc-alu-4m"
+          }
+        },
+        {
+          "key": "crochet",
+          "family": "gutter_hook",
+          "label": "Crochets",
+          "keywords": [
+            "crochet"
+          ],
+          "usual": {
+            "text": "Un crochet tous les 50 cm (40 cm en bord de mer), plus un en bout (§15).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "crochet-gouttiere-standard"
+          }
+        },
+        {
+          "key": "jonction",
+          "family": "gutter_joint",
+          "label": "Jonctions",
+          "usual": {
+            "text": "Une jonction entre deux longueurs (§15).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "jonction-gouttiere"
+          }
+        },
+        {
+          "key": "talon",
+          "family": "gutter_end",
+          "label": "Talons",
+          "usual": {
+            "text": "Deux talons par ligne droite (§15).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "talon-gouttiere"
+          }
+        },
+        {
+          "key": "angle",
+          "family": "gutter_angle",
+          "label": "Angles",
+          "usual": {
+            "text": "Un angle par angle de façade (§15).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "angle-gouttiere"
+          }
+        },
+        {
+          "key": "naissance",
+          "family": "gutter_outlet",
+          "label": "Naissances",
+          "charsFrom": "profil",
+          "usual": {
+            "text": "Une naissance par descente.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "naissance-standard"
+          }
+        },
+        {
+          "key": "dilatation",
+          "family": "gutter_expansion",
+          "label": "Joints de dilatation",
+          "usual": {
+            "text": "Un joint de dilatation tous les 12 m de ligne droite en PVC (§15).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "dilatation-gouttiere"
+          }
+        }
+      ],
+      "constants": {
+        "espacement_crochet": {
+          "kind": "installation_condition",
+          "value": "0.5",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« 1 tous les 50 cm » (§15)."
+        },
+        "espacement_crochet_littoral": {
+          "kind": "installation_condition",
+          "value": "0.4",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« 40 cm en zone 3 » (§15)."
+        },
+        "zone_littorale": {
+          "kind": "installation_condition",
+          "value": "3",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "longueur_profil": {
+          "kind": "installation_condition",
+          "value": "4",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« longueur 4 m » (§15)."
+        },
+        "talons_par_ligne": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« 2 talons par ligne droite » (§15)."
+        },
+        "dilatation_tous_les": {
+          "kind": "installation_condition",
+          "value": "12",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« Joints de dilatation PVC : 1 tous les 12 m de ligne droite » (§15)."
+        }
+      },
+      "needs": [
+        {
+          "id": "profil",
+          "slot": "profil",
+          "formula": "longueur_gouttiere",
+          "unit": "ml",
+          "core": true,
+          "designation": "Gouttière {matiere_gouttiere} {devis} {teinte_gouttiere} de {developpe_gouttiere|cm#}",
+          "precisionRequires": [
+            "developpe_gouttiere",
+            "teinte_gouttiere"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "crochets",
+          "slot": "crochet",
+          "formula": "arrondi_sup(longueur_gouttiere / si(zone >= regle.zone_littorale, regle.espacement_crochet_littoral, regle.espacement_crochet)) + nb_lignes",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un crochet en bout de chaque ligne compris.",
+          "designation": "Crochets de gouttière {matiere_gouttiere} {fixation_crochet} de {developpe_gouttiere|cm#}",
+          "precisionRequires": [
+            "fixation_crochet",
+            "developpe_gouttiere"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "jonctions",
+          "slot": "jonction",
+          "when": "longueur_gouttiere > regle.longueur_profil * nb_lignes",
+          "formula": "nb_lignes * (arrondi_sup(longueur_gouttiere / nb_lignes / regle.longueur_profil) - 1)",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une jonction entre deux longueurs de 4 m, sur chaque ligne.",
+          "designation": "Jonctions de gouttière {matiere_gouttiere} {teinte_gouttiere} de {developpe_gouttiere|cm#}",
+          "precisionRequires": [
+            "developpe_gouttiere",
+            "teinte_gouttiere"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "talons",
+          "slot": "talon",
+          "formula": "regle.talons_par_ligne * nb_lignes",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Deux talons par ligne droite (une ligne finissant en angle n'en a qu'un : à corriger d'un tap).",
+          "designation": "Talons de gouttière {matiere_gouttiere} {teinte_gouttiere} de {developpe_gouttiere|cm#}",
+          "precisionRequires": [
+            "developpe_gouttiere",
+            "teinte_gouttiere"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "angles",
+          "slot": "angle",
+          "when": "nb_angles > 0",
+          "formula": "nb_angles",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Angles extérieurs à 90° ; un angle intérieur se corrige d'un tap.",
+          "designation": "Angles extérieurs 90° {matiere_gouttiere} {teinte_gouttiere} de {developpe_gouttiere|cm#}",
+          "precisionRequires": [
+            "developpe_gouttiere",
+            "teinte_gouttiere"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "naissances",
+          "slot": "naissance",
+          "formula": "nb_descentes",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une naissance par descente.",
+          "designation": "Naissances {matiere_gouttiere} {devis} {teinte_gouttiere} de {developpe_gouttiere|cm#} Ø{diametre_descente|mm#}",
+          "precisionRequires": [
+            "developpe_gouttiere",
+            "diametre_descente",
+            "teinte_gouttiere"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "dilatation",
+          "slot": "dilatation",
+          "when": "si(matiere_gouttiere < 2, si(longueur_gouttiere / nb_lignes > regle.dilatation_tous_les, 1, 0), 0)",
+          "formula": "nb_lignes * (arrondi_sup(longueur_gouttiere / nb_lignes / regle.dilatation_tous_les) - 1)",
+          "unit": "u",
+          "core": true,
+          "exclusions": "PVC seulement : un joint tous les 12 m de ligne droite.",
+          "designation": "Joints de dilatation de gouttière PVC {teinte_gouttiere} de {developpe_gouttiere|cm#}",
+          "precisionRequires": [
+            "developpe_gouttiere",
+            "teinte_gouttiere"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1
         }

@@ -1,7 +1,7 @@
 # Banc d'essai — vrais devis : tableau de score
 
 Fichier GÉNÉRÉ par `packages/domain/test/banc-devis-reels.test.ts` : ne pas modifier à la main.
-Référentiel : roofing-2026.10.05-27.
+Référentiel : roofing-2026.10.05-28.
 
 Une ligne « commande connue » a toutes ses quantités à commander ; « besoin connu » a ses quantités
 (ml, m², pièces) mais pas encore l'unité de vente vérifiée. Les questions comptent celles qui sont
@@ -11,13 +11,13 @@ posées, celles où aucune proposition ne convient et celles restées sans répo
 
 | Devis | Lignes matériaux | Commande connue | Besoin connu (conditionnement à confirmer) | Attend une réponse | Ne sait pas encore | Ouvrage pas encore couvert | Questions |
 |---|---|---|---|---|---|---|---|
-| D-2026-015 | 10 | 7 | 0 | 2 | 0 | 1 | 3 |
+| D-2026-015 | 10 | 7 | 0 | 2 | 0 | 1 | 4 |
 
 ### Si les règles en attente étaient validées (écran du validateur)
 
 | Devis | Lignes matériaux | Commande connue | Besoin connu (conditionnement à confirmer) | Attend une réponse | Ne sait pas encore | Ouvrage pas encore couvert | Questions |
 |---|---|---|---|---|---|---|---|
-| D-2026-015 | 10 | 7 | 0 | 2 | 0 | 1 | 3 |
+| D-2026-015 | 10 | 7 | 0 | 2 | 0 | 1 | 4 |
 
 ## Détail par devis
 
@@ -43,6 +43,7 @@ Questions (règles validées) :
 - posée : « J'ai identifié : Tuiles HP10. C'est bien ce modèle ? » — Le devis écrit « tuiles … type HP10 » : l'artisan confirme le modèle.
 - sans réponse connue : « Sortie de toit : quel diamètre ? »
 - sans réponse connue : « Crochets de gouttière : sur les chevrons ou en façade (bandeau) ? »
+- sans réponse connue : « Combien d'angles sur cette gouttière ? »
 
 À documenter pour aller plus loin (règles validées) :
 
