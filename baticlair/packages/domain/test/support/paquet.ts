@@ -25,7 +25,21 @@ const run = (p: Metier) => answerAll((answers) => readTradeQuote(p.ref, p.bench,
  * tableau de Brest compris : il casse si l'un d'eux bouge.
  */
 export function describePaquet(numero: number, titre: string, paquet: readonly Metier[]): void {
-  describe(`lot B, paquet ${numero} : ${paquet.length} métiers branchés sur le moteur`, () => {
+  describeLot({
+    suite: `lot B, paquet ${numero} : ${paquet.length} métiers branchés sur le moteur`,
+    titre: `Lot B, paquet ${numero} : ${titre}`,
+    fichier: `lot-b/paquet-${numero}.md`,
+    test: `lot-b-paquet-${numero}.test.ts`,
+    colonne: "Métier",
+    intro: "Pour chaque métier : le devis de test, l'écran à l'ouverture (lignes vertes, orange, grises, questions du comptoir),",
+    paquet,
+  });
+}
+
+/** La même suite et le même compte rendu pour un lot quelconque (lot B, lot couverture) : `docs/<fichier>`. */
+export function describeLot(lot: { suite: string; titre: string; fichier: string; test: string; colonne: string; intro: string; paquet: readonly Metier[] }): void {
+  const { paquet } = lot;
+  describe(lot.suite, () => {
     for (const p of paquet) {
       describe(p.nom, () => {
         it("son tiroir est ouvert, juste, et trouvé par son nom", () => {
@@ -55,16 +69,16 @@ export function describePaquet(numero: number, titre: string, paquet: readonly M
       });
     }
 
-    it(`le compte rendu du paquet (docs/lot-b/paquet-${numero}.md)`, async () => {
+    it(`le compte rendu (docs/${lot.fichier})`, async () => {
       const out = [
-        `# Lot B, paquet ${numero} : ${titre}`,
+        `# ${lot.titre}`,
         "",
-        `Écrit par \`packages/domain/test/lot-b-paquet-${numero}.test.ts\` : ce fichier change seulement si le calcul change.`,
+        `Écrit par \`packages/domain/test/${lot.test}\` : ce fichier change seulement si le calcul change.`,
         "",
-        "Pour chaque métier : le devis de test, l'écran à l'ouverture (lignes vertes, orange, grises, questions du comptoir),",
+        lot.intro,
         "puis le PDF que lit le vendeur une fois les questions répondues (premier bouton) et chaque « C'est bon » donné.",
         "",
-        "| Métier | Vertes | Orange | Grises | Questions |",
+        `| ${lot.colonne} | Vertes | Orange | Grises | Questions |`,
         "| --- | --- | --- | --- | --- |",
         ...paquet.map((p) => `| ${p.nom} | ${p.couleurs.vert} | ${p.couleurs.orange} | ${p.couleurs.gris} | ${p.questions.length} |`),
         "",
@@ -74,7 +88,7 @@ export function describePaquet(numero: number, titre: string, paquet: readonly M
         out.push(`## ${p.nom}`, "", ...benchReport(p.bench), ...screenReport(first), ...pdfReport(last));
       }
       out.push("## Le tableau de Brest (couverture), inchangé", "", brestTable(), "");
-      await expect(out.join("\n")).toMatchFileSnapshot(`../../../docs/lot-b/paquet-${numero}.md`);
+      await expect(out.join("\n")).toMatchFileSnapshot(`../../../docs/${lot.fichier}`);
     });
   });
 }

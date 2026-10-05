@@ -35,7 +35,7 @@ const BANC: [note: string, attendu: Record<string, string>][] = [
   // Pièges : du contexte, jamais une mesure.
   ["Prévoir 9 000 ardoises, budget 12 000 €", {}],
   ["Rampant à voir sur place", {}],
-  ["Noue 12 m, 2 Velux conservés", {}],
+  ["Noue 12 m, 2 Velux conservés", { longueur_noue: "12 m" }],
   ["Le client veut une pente douce", {}],
   ["Devis du 12/03, chantier en mai", {}],
 ];

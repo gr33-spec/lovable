@@ -554,11 +554,109 @@ const DEVELOPPE_PARAM: ParamDef = {
   question: "Développé de la bande zinc ?",
   textLabels: ["developpe", "dev", "dev."],
   withinChoices: true,
+  // « dév. 33 » : le devis écrit le développé en centimètres, comme le comptoir (« bande de 33 »).
+  textValues: [
+    { value: "100", keywords: ["dev 10", "dev. 10", "developpe 10"] },
+    { value: "250", keywords: ["dev 25", "dev. 25", "developpe 25"] },
+    { value: "330", keywords: ["dev 33", "dev. 33", "developpe 33"] },
+    { value: "400", keywords: ["dev 40", "dev. 40", "developpe 40"] },
+  ],
   choices: [
     { label: "100 mm (solin, couvre-joint)", value: "100" },
     { label: "250 mm", value: "250" },
     { label: "330 mm", value: "330" },
     { label: "400 mm", value: "400" },
+  ],
+};
+/** Même clé « faconnage » : une réponse vaut pour tout le métal façonné ; la question dit la noue quand c'est elle. */
+const FACONNAGE_NOUE_PARAM: ParamDef = {
+  ...FACONNAGE_BANDES_PARAM,
+  question: "Noue zinc : tu la façonnes toi-même ou tu la commandes façonnée ?",
+  hint: "Je façonne : feuilles de zinc 2 × 1 m, bobineau au-delà de 6 ml. Commandée façonnée : noue en longueurs de 2 m.",
+};
+/**
+ * Développé de la noue (§3 : 50 à 60 cm ; §7 : 50 à 66 cm ; §25.2 : noue préformée de 500 mm). Lu au devis ; sinon la
+ * noue préformée de 50, dite et modifiable : c'est celle que le comptoir sert sans rien demander.
+ */
+const DEVELOPPE_NOUE_PARAM: ParamDef = {
+  key: "developpe_noue",
+  label: "Développé de la noue",
+  unit: "mm",
+  kind: "site_data",
+  question: "Noue de 50 ou de 66 ?",
+  hint: "Le développé : la largeur de la feuille avant façonnage.",
+  default: { value: "500", source: F, verification: FOUNDER_DOC, version: 1, note: "noue préformée de 50 (§25.2)" },
+  choices: [
+    { label: "De 50", value: "500" },
+    { label: "De 66", value: "660" },
+  ],
+  textValues: [
+    { value: "500", keywords: ["dev 50", "dev. 50", "developpe 50", "developpe 500", "dev 500", "noue de 50", "noue 50"] },
+    { value: "600", keywords: ["dev 60", "dev. 60", "developpe 60", "developpe 600", "dev 600", "noue de 60", "noue 60"] },
+    { value: "660", keywords: ["dev 66", "dev. 66", "developpe 66", "developpe 660", "dev 660", "noue de 66", "noue 66", "encaissee"] },
+  ],
+};
+/**
+ * Arêtier en tuiles (arêtières, la pièce de la faîtière) ou en bande zinc (§3, §5) : deux articles au comptoir. Lu dans
+ * la ligne ; sur un toit de tuiles, des arêtières ; sinon on demande, avec les mots du comptoir.
+ */
+const ARETIER_PARAM: ParamDef = {
+  key: "aretier_matiere",
+  label: "Arêtier",
+  unit: "u",
+  kind: "site_data",
+  question: "Arêtier en tuiles (arêtières) ou en bande zinc ?",
+  choices: [
+    { label: "En tuiles (arêtières)", value: "1" },
+    { label: "En bande zinc", value: "2" },
+  ],
+  textValues: [
+    { value: "2", keywords: ["zinc"] },
+    { value: "1", keywords: ["aretiere", "aretieres", "tuile", "tuiles", "terre cuite", "scelle", "a sec"] },
+  ],
+  // Sur un toit d'ardoises, l'arêtier acheté est une bande zinc (§3, §4 : « presque toujours en zinc ») : l'arêtier fermé
+  // en ardoises se taille dans les ardoises de la surface.
+  fromWorks: [
+    { value: "1", workItems: ["couverture-tuiles-emboitement", "couverture-tuiles-canal"] },
+    { value: "2", workItems: ["couverture-ardoises-crochet", "couverture-zinc-joint-debout"] },
+  ],
+  display: { "1": "en tuiles", "2": "en zinc" },
+};
+/** Arêtier zinc : « bande zinc dév. 25 à 33 cm » (§3) ; le comptoir sert « de 25 » ou « de 33 », il ne le devine pas. */
+const DEVELOPPE_ARETIER_PARAM: ParamDef = {
+  key: "developpe_aretier",
+  label: "Développé de l'arêtier zinc",
+  unit: "mm",
+  kind: "site_data",
+  question: "Arêtier zinc : bande de 25 ou de 33 ?",
+  hint: "Le développé : la largeur de la feuille avant façonnage.",
+  choices: [
+    { label: "De 25", value: "250" },
+    { label: "De 33", value: "330" },
+  ],
+  textValues: [
+    { value: "250", keywords: ["dev 25", "dev. 25", "developpe 25", "developpe 250", "dev 250", "de 25"] },
+    { value: "330", keywords: ["dev 33", "dev. 33", "developpe 33", "developpe 330", "dev 330", "de 33"] },
+  ],
+};
+/** Abouts d'arêtier : « 1 par arêtier » (§5) ; le nombre d'arêtiers se lit au devis, sinon le comptoir le demande. */
+const NB_ARETIERS_PARAM: ParamDef = {
+  key: "nb_aretiers",
+  label: "Nombre d'arêtiers",
+  unit: "u",
+  kind: "site_data",
+  question: "Combien d'arêtiers sur ce toit ?",
+  hint: "Un about par arêtier.",
+  choices: [
+    { label: "1", value: "1" },
+    { label: "2", value: "2" },
+    { label: "4", value: "4" },
+  ],
+  textValues: [
+    { value: "1", keywords: ["1 aretier", "un aretier"] },
+    { value: "2", keywords: ["2 aretiers", "deux aretiers"] },
+    { value: "3", keywords: ["3 aretiers", "trois aretiers"] },
+    { value: "4", keywords: ["4 aretiers", "quatre aretiers", "4 pans", "quatre pans"] },
   ],
 };
 /** Poids d'une bande zinc plate : 4,7 kg/m² en 0,65 mm (§7) ; 7,2 kg/m² par mm d'épaisseur pour 0,70 et 0,80 (masse volumique du zinc). */
@@ -676,7 +774,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.04-25",
+  version: "roofing-2026.10.05-26",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -942,8 +1040,15 @@ export const ROOFING_REFERENTIAL: Referential = {
     { code: "outlet_plate", label: "Platine zinc de sortie de toit", needUnit: "u", attributes: [], keyAttributes: [] },
     { code: "outlet_cap", label: "Chapeau de sortie de toit", needUnit: "u", attributes: [], keyAttributes: [] },
     { code: "outlet_collar", label: "Collerette d'étanchéité de conduit de fumée", needUnit: "u", attributes: [], keyAttributes: [] },
-    { code: "hip", label: "Arêtier", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["aretier"] },
-    { code: "valley", label: "Noue", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["noue"] },
+    // §5 : « Arêtier (même pièce que faîtière en général) : ml arêtier / 0,35 ≈ 2,9 pièces/ml » ; en zinc, une bande (§3).
+    { code: "hip", label: "Arêtier", needUnit: "u", attributes: [{ key: "pieces_par_ml", label: "Pièces au mètre", unit: "u/m" }], keyAttributes: [], keywords: ["aretier", "aretiers", "aretiere", "aretieres"] },
+    // §3 : « Arêtier ou faîtage en zinc : bande zinc dév. 25 à 33 cm, longueurs 3 m ». Un article à part de la bande de faîtage.
+    { code: "hip_closure", label: "Closoir d'arêtier", needUnit: "ml", attributes: [], keyAttributes: [] },
+    { code: "hip_fixing", label: "Crochet d'arêtier", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "hip_end", label: "About d'arêtier", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "hip_strip", label: "Arêtier zinc (bande)", needUnit: "ml", attributes: [], keyAttributes: [] },
+    // §7, §25.2 : noue zinc, commandée façonnée (longueurs de 2 m) ou façonnée sur place (feuilles, bobineau).
+    { code: "valley", label: "Noue", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["noue", "noues"] },
     { code: "flashing", label: "Solin, abergement", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["solin", "abergement"] },
     { code: "roof_window", label: "Fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["fenetre de toit", "velux"] },
   ],
@@ -1168,6 +1273,22 @@ export const ROOFING_REFERENTIAL: Referential = {
       sellingUnits: [{ id: "longueur", label: { one: "longueur de 3 m", many: "longueurs de 3 m" }, contains: packaging("3", "m", F, FOUNDER_DOC), primary: true }],
     }),
     generic("patte-zinc-standard", "zinc_clip", "Patte de fixation pour bande zinc", "Pattes de fixation"),
+    // §5 : l'arêtier est en général la même pièce que la faîtière (≈ 2,9 pièces/ml), son closoir fait 23 cm de large.
+    generic("aretiere-standard", "hip", "Arêtier 40 à 42 cm, recouvrement 5 à 7 cm (modèle de la tuile posée)", "Arêtiers", {
+      attributes: { pieces_par_ml: spec("2.9", "u/m", F, FOUNDER_DOC, "« ml arêtier / 0,35 ≈ 2,9 pièces/ml » (§5).") },
+    }),
+    generic("closoir-aretier-5m", "hip_closure", "Closoir ventilé d'arêtier, largeur 23 cm, rouleau de 5 m", "Closoir d'arêtier", {
+      sellingUnits: [{ id: "rouleau", label: { one: "rouleau de 5 m", many: "rouleaux de 5 m" }, contains: packaging("5", "m", F, FOUNDER_DOC, "« arêtier : largeur 23 cm », rouleau de 5 m (§5)."), primary: true }],
+    }),
+    generic("crochet-aretier-standard", "hip_fixing", "Crochet d'arêtier à sec (modèle de l'arêtier)", "Crochets d'arêtier"),
+    generic("bande-aretier-zinc-standard", "hip_strip", "Bande d'arêtier zinc, développé 25 à 33 cm, longueurs de 3 m", "Arêtier zinc (bande)", {
+      sellingUnits: [{ id: "longueur", label: { one: "longueur de 3 m", many: "longueurs de 3 m" }, contains: packaging("3", "m", F, FOUNDER_DOC), primary: true }],
+    }),
+    generic("about-aretier-standard", "hip_end", "About d'arêtier (modèle de la tuile posée)", "Abouts d'arêtier"),
+    // §25.2 : « Noue préformée : développé 500 mm, L 2 m ou 3 m ; recouvrement 150 mm → longueur utile 1,85 m pour 2 m ».
+    generic("noue-zinc-faconnee", "valley", "Noue zinc façonnée, longueurs de 2 m (développé et épaisseur du chantier)", "Noues zinc façonnées", {
+      sellingUnits: [{ id: "longueur", label: { one: "longueur de 2 m", many: "longueurs de 2 m" }, contains: ONE_PIECE, primary: true }],
+    }),
     // §45.5 : pattes fixes et pattes coulissantes sont deux articles au comptoir, les pointes un troisième.
     generic("embase-plomb-sortie", "outlet_base", "Embase plomb pour sortie de toit, au diamètre du conduit", "Embase plomb de sortie de toit"),
     generic("platine-zinc-sortie", "outlet_plate", "Platine zinc soudée pour sortie de toit, au diamètre du conduit", "Platine zinc de sortie de toit"),
@@ -1683,6 +1804,183 @@ export const ROOFING_REFERENTIAL: Referential = {
           id: "pattes-faitage-zinc",
           slot: "patte",
           formula: "longueur_faitage * regle.pattes_par_metre",
+          unit: "u",
+          core: true,
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+      ],
+    },
+    {
+      // §7 « Noue : ml noue × 1,05, dév. 50 à 66 cm » ; §25.2 noue préformée (longueur utile 1,85 m pour 2 m). Comme les
+      // bandes : commandée façonnée en longueurs de 2 m, ou façonnée sur place (feuilles 2 × 1 m, bobineau au-delà de 6 ml).
+      id: "noue",
+      trade: "roofing",
+      label: "Noue zinc (façonnée ou à façonner)",
+      triggers: ["valley"],
+      params: [
+        { key: "longueur_noue", label: "Longueur de noue", unit: "m", kind: "site_data", question: "Longueur de noue ?", fromLineQuantity: true, textLabels: ["noue"] },
+        DEVELOPPE_NOUE_PARAM,
+        FACONNAGE_NOUE_PARAM,
+        EPAISSEUR_ZINC_PARAM,
+        ASPECT_ZINC_PARAM,
+      ],
+      slots: [
+        { key: "noue", family: "valley", label: "Noues zinc façonnées", usual: { text: "Noue façonnée en longueurs de 2 m, recouvrement 15 cm (§25.2).", source: F, productId: "noue-zinc-faconnee" } },
+        { key: "feuille", family: "zinc_sheet", label: "Feuilles zinc 2 × 1 m", usual: { text: "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).", source: F, productId: "feuille-zinc-2x1" } },
+        { key: "bobineau", family: "zinc_narrow_coil", label: "Bobineau zinc", usual: { text: "Bobineau de zinc au-delà de 6 ml (réponse du fondateur).", source: FR_REPLY, productId: "bobineau-zinc" } },
+      ],
+      constants: {
+        ...ZINC_PLAT_CONSTANTS,
+        marge_noue: condition("1.05", "u", F, FOUNDER_DOC, "« ml noue × 1,05 » (§7)."),
+        longueur_utile_noue: condition("1.85", "m", F, FOUNDER_DOC, "« recouvrement 150 mm entre éléments → longueur utile 1,85 m pour 2 m » (§25.2)."),
+      },
+      derived: [
+        { key: "ml_zinc", label: "Longueur de zinc, marge comprise", unit: "m", formula: "longueur_noue * regle.marge_noue", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
+        ...bobineauDerived("developpe_noue"),
+      ],
+      needs: [
+        {
+          id: "noues-faconnees",
+          slot: "noue",
+          when: "faconnage >= 2",
+          formula: "arrondi_sup(longueur_noue / regle.longueur_utile_noue)",
+          unit: "u",
+          core: true,
+          exclusions: "Longueurs de 2 m, recouvrement 15 cm entre éléments (§25.2).",
+          precision: "{longueur_noue|ml} de noue à couvrir",
+          designation: "Noues {aspect_zinc} {epaisseur_zinc} mm, dév. {developpe_noue|cm#}",
+          precisionRequires: ["aspect_zinc"],
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "feuilles-noue",
+          slot: "feuille",
+          when: "si(faconnage < 2, si(longueur_noue > regle.seuil_bobineau, 0, 1), 0)",
+          formula: "arrondi_sup(ml_zinc * developpe_noue / regle.surface_feuille)",
+          unit: "u",
+          core: true,
+          exclusions: "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",
+          precision: "pour façonner {longueur_noue|ml} de noue, dév. {developpe_noue|cm#}",
+          designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
+          precisionRequires: ["aspect_zinc"],
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "bobineau-noue",
+          slot: "bobineau",
+          when: "si(faconnage < 2, si(longueur_noue > regle.seuil_bobineau, 1, 0), 0)",
+          formula: "arrondi_sup(ml_zinc / longueur_bobineau)",
+          unit: "u",
+          core: true,
+          exclusions: "La plus petite largeur qui contient le développé, la plus courte longueur qui couvre la noue (marge comprise).",
+          designation: "Bobineau {aspect_zinc} {largeur_bobineau|mm#} × {longueur_bobineau|m}, {epaisseur_zinc}",
+          precisionRequires: ["aspect_zinc"],
+          precision: "pour façonner {longueur_noue|ml} de noue, dév. {developpe_noue|cm#}",
+          source: FR_REPLY,
+          verification: FOUNDER_REPLY,
+          version: 1,
+        },
+      ],
+    },
+    {
+      // §5 : arêtières (≈ 2,9 pièces/ml), un about par arêtier, closoir d'arêtier de 23 cm, un crochet par pièce à sec ;
+      // §3 : en zinc, bande dév. 25 à 33 cm en longueurs de 3 m, ml × 1,05, pattes 3/ml.
+      id: "aretier",
+      trade: "roofing",
+      label: "Arêtier (arêtières et closoir, ou bande zinc)",
+      triggers: ["hip"],
+      params: [
+        { key: "longueur_aretier", label: "Longueur d'arêtier", unit: "m", kind: "site_data", question: "Longueur d'arêtier ?", fromLineQuantity: true, textLabels: ["aretier", "aretiers"] },
+        ARETIER_PARAM,
+        NB_ARETIERS_PARAM,
+        DEVELOPPE_ARETIER_PARAM,
+        EPAISSEUR_ZINC_PARAM,
+        ASPECT_ZINC_PARAM,
+      ],
+      slots: [
+        { key: "aretiere", family: "hip", label: "Arêtiers", usual: { text: "Arêtier courant (40 à 42 cm) : le modèle suit la tuile posée.", source: F, productId: "aretiere-standard" } },
+        { key: "closoir", family: "hip_closure", label: "Closoir d'arêtier", usual: { text: "Closoir ventilé d'arêtier, 23 cm, rouleau de 5 m (§5).", source: F, productId: "closoir-aretier-5m" } },
+        { key: "crochet", family: "hip_fixing", label: "Crochets d'arêtier", keywords: ["crochet"], usual: { text: "Pose à sec : un crochet par arêtier (§5).", source: F, productId: "crochet-aretier-standard" } },
+        { key: "about", family: "hip_end", label: "Abouts d'arêtier", usual: { text: "Un about par arêtier (§5).", source: F, productId: "about-aretier-standard" } },
+        { key: "bande", family: "hip_strip", label: "Arêtier zinc (bande)", usual: { text: "Bande zinc en longueurs de 3 m (développé 25 à 33 cm, §3).", source: F, productId: "bande-aretier-zinc-standard" } },
+        { key: "patte", family: "zinc_clip", label: "Pattes de fixation", keywords: ["patte"], usual: { text: "Trois pattes par mètre (§3).", source: F, productId: "patte-zinc-standard" } },
+      ],
+      constants: { pattes_par_metre: condition("3", "u/m", F, FOUNDER_DOC, "« pattes de fixation 3/ml » (§3).") },
+      needs: [
+        {
+          id: "aretieres",
+          slot: "aretiere",
+          when: "aretier_matiere < 2",
+          formula: "longueur_aretier * aretiere.pieces_par_ml",
+          unit: "u",
+          core: true,
+          exclusions: "Hors abouts (comptés à part) et rencontres avec le faîtage.",
+          source: "definition",
+          verification: { status: "verified", verifiedAt: "2026-10-01", verifiedBy: "BatiClair (définition d'un ratio au mètre)" },
+          version: 1,
+        },
+        {
+          id: "closoir-aretier",
+          slot: "closoir",
+          when: "aretier_matiere < 2",
+          formula: "longueur_aretier",
+          unit: "ml",
+          core: true,
+          exclusions: "Closoir sur toute la longueur de l'arêtier.",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "crochets-aretier",
+          slot: "crochet",
+          when: "aretier_matiere < 2",
+          formula: "longueur_aretier * aretiere.pieces_par_ml",
+          unit: "u",
+          core: true,
+          exclusions: "Un crochet par arêtier posé à sec.",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "abouts-aretier",
+          slot: "about",
+          when: "aretier_matiere < 2",
+          formula: "nb_aretiers",
+          unit: "u",
+          core: true,
+          exclusions: "Un about par arêtier (§5).",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "bande-aretier-zinc",
+          slot: "bande",
+          when: "aretier_matiere >= 2",
+          formula: "longueur_aretier",
+          unit: "ml",
+          core: true,
+          exclusions: "Recouvrements des longueurs couverts par la perte de 5 %.",
+          precision: "{longueur_aretier|ml} d'arêtier à couvrir",
+          designation: "Arêtier {aspect_zinc} {epaisseur_zinc} mm, bande dév. {developpe_aretier|cm#}",
+          precisionRequires: ["developpe_aretier", "aspect_zinc"],
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "pattes-aretier-zinc",
+          slot: "patte",
+          when: "aretier_matiere >= 2",
+          formula: "longueur_aretier * regle.pattes_par_metre",
           unit: "u",
           core: true,
           source: F,
@@ -2453,6 +2751,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     { family: "roof_tile", rate: "3", source: F, verification: FOUNDER_DOC, version: 1, note: "Tuiles mécaniques." },
     { family: "batten", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Chutes de liteaux et contre-liteaux." },
     { family: "zinc_ridge", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Recouvrements des bandes de 3 m." },
+    { family: "hip_strip", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "« Zinc en bande (faîtage, noue, rive) : 5 % » (§2), arêtier « ml × 1,05 » (§3)." },
     { family: "sheathing", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "« Support voligeage : m² rampant × 1,05 » (§7)." },
   ],
   // Ouvrages que les devis de couverture comptent à l'unité (vocabulaire seulement).
