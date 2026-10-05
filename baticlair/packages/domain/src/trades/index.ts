@@ -1,16 +1,20 @@
 import {
   CARPENTRY_PROFILE,
+  CEILING_PROFILE,
   CLADDING_PROFILE,
   DRYWALL_PROFILE,
   ELECTRICAL_PROFILE,
   FACADE_PROFILE,
   FLOORING_PROFILE,
   HVAC_PROFILE,
+  INTERIOR_JOINERY_PROFILE,
   JOINERY_PROFILE,
+  KITCHEN_PROFILE,
   MASONRY_PROFILE,
   OTHER_PROFILE,
   PAINTING_PROFILE,
   PLUMBING_PROFILE,
+  SOLAR_PROFILE,
   TILING_PROFILE,
   WATERPROOFING_PROFILE,
 } from "./light-profiles.js";
@@ -36,6 +40,10 @@ export const TRADES: readonly { id: string; label: string }[] = [
   { id: "waterproofing", label: "Étanchéité" },
   { id: "cladding", label: "Bardage" },
   { id: "facade", label: "Façade, ravalement" },
+  { id: "ceiling", label: "Plafonds suspendus" },
+  { id: "interior_joinery", label: "Menuiserie intérieure, agencement" },
+  { id: "kitchen", label: "Cuisine" },
+  { id: "solar", label: "Photovoltaïque" },
   { id: "other", label: "Autre métier" },
 ];
 
@@ -54,6 +62,10 @@ export const TRADE_PROFILES: Readonly<Record<string, TradeProfile>> = {
   waterproofing: WATERPROOFING_PROFILE,
   cladding: CLADDING_PROFILE,
   facade: FACADE_PROFILE,
+  ceiling: CEILING_PROFILE,
+  interior_joinery: INTERIOR_JOINERY_PROFILE,
+  kitchen: KITCHEN_PROFILE,
+  solar: SOLAR_PROFILE,
   other: OTHER_PROFILE,
 };
 
