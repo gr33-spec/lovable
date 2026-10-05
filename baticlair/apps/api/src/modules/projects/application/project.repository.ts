@@ -9,6 +9,8 @@ export interface NewProject {
   siteNotes?: string | null;
   /** Chantier de démonstration : ne compte pas dans la formule. */
   demo?: boolean;
+  /** Métier du chantier, ou null : celui de l'entreprise. */
+  trade?: string | null;
 }
 
 export type ProjectPatch = Partial<Omit<NewProject, "demo"> & { status: ProjectStatus }>;

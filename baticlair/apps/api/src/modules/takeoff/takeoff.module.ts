@@ -80,6 +80,24 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
               const project = await prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { address: true } });
               return project?.address ?? null;
             },
+            // §47.4 : une entreprise ne compte qu'une fois par règle ; trois entreprises différentes la valident.
+            rules: {
+              validated: async (keys) =>
+                new Set(
+                  (await prisma.ruleConfirmation.groupBy({ by: ["ruleKey"], where: { ruleKey: { in: [...keys] } }, _count: { companyId: true } }))
+                    .filter((g) => g._count.companyId >= 3)
+                    .map((g) => g.ruleKey),
+                ),
+              confirm: async (tenant, keys) => {
+                for (const ruleKey of keys) {
+                  await prisma.ruleConfirmation.upsert({
+                    where: { companyId_ruleKey: { companyId: tenant.companyId, ruleKey } },
+                    create: { companyId: tenant.companyId, ruleKey, userId: tenant.userId },
+                    update: {},
+                  });
+                }
+              },
+            },
             // §45.8 : la mémoire des consommables de chaque entreprise.
             consumables: {
               hidden: async (tenant) =>

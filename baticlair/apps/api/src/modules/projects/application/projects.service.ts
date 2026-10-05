@@ -1,3 +1,4 @@
+import { TRADE_PROFILES } from "@baticlair/domain";
 import { notFound } from "../../../platform/errors/domain-error.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { normalizeOptionalText, normalizeProjectName, type Project, type ProjectStatus } from "../domain/project.js";
@@ -8,6 +9,8 @@ export interface CreateProjectInput {
   clientName?: string | null | undefined;
   address?: string | null | undefined;
   demo?: boolean | undefined;
+  /** Métier du chantier (identifiant de TRADES) ; inconnu ou absent : celui de l'entreprise. */
+  trade?: string | null | undefined;
 }
 
 export interface UpdateProjectInput {
@@ -29,6 +32,7 @@ export class ProjectsService {
       clientName: normalizeOptionalText(input.clientName, "clientName"),
       address: normalizeOptionalText(input.address, "address"),
       demo: input.demo === true,
+      trade: input.trade && input.trade in TRADE_PROFILES && input.trade !== "other" ? input.trade : null,
     });
   }
 

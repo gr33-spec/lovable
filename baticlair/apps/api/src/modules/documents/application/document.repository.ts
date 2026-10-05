@@ -69,6 +69,8 @@ export interface DocumentWithProcessing extends DocumentRecord {
 
 export interface DocumentRepository {
   projectExists(tenant: TenantContext, projectId: string): Promise<boolean>;
+  /** Le métier choisi pour ce chantier à sa création, ou null (celui de l'entreprise). */
+  projectTrade?(tenant: TenantContext, projectId: string): Promise<string | null>;
   findByHash(tenant: TenantContext, projectId: string, sha256: string): Promise<DocumentRecord | null>;
   /** Enregistre le document et son contenu, et marque l'activité du chantier. */
   create(tenant: TenantContext, data: NewDocument, bytes: Uint8Array): Promise<DocumentRecord>;

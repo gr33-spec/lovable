@@ -4,7 +4,7 @@ Oct 3, 2026 · @Greg
 
 ## 1. Règle d'or et architecture
 
-Une surface n'est jamais une unité de commande. Le devis se mesure en m² et en ml ; la commande fournisseur se passe en unités, bottes, rouleaux, barres, seaux, cartons. Entre les deux il faut une couche de conversion métier, et c'est elle qui manque aujourd'hui.
+Une surface n'est jamais une unité de commande. Le devis se mesure en m² et en ml ; la commande fournisseur se passe en unités, bottes, rouleaux, barres, seaux, cartons. Entre les deux il faut une couche de conversion métier : c'est le moteur de BatiClair, le même pour tous les métiers, et chaque métier lui apporte ses règles dans un tiroir (§27). Ce document contient les règles communes à tous les métiers (§1, §21 et suivants) et le tiroir couverture-étanchéité (§2 à §20, §34) ; les autres métiers ont chacun leur document au même format. L'exemple ci-dessous est en ardoise, mais 40 m² de cloison → 30 plaques de BA13 + 1 200 vis + 160 ml de bande suit exactement le même chemin.
 
 Chaque ligne de devis passe par trois étapes :
 

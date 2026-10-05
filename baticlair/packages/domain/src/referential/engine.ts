@@ -1,6 +1,6 @@
 import { Decimal } from "../shared/decimal.js";
 import { evaluateInterval, FormulaError, formulaVariables, parseFormula, type IntervalValue } from "./expression.js";
-import type { Fact, LookupTable, NeedRule, ParamDef, PointTable, Product, Referential, SellingUnit, Source, WorkItemType } from "./model.js";
+import type { Fact, LookupTable, NeedRule, ParamDef, PointTable, Product, Provenance, Referential, SellingUnit, Source, WorkItemType } from "./model.js";
 import { parseRefUnit, sameDim, isAngleUnit, percentSlopeToDegrees } from "./units.js";
 
 /** Place des caractéristiques du devis dans une désignation calculée (« Gouttière {devis} dév. 33 »). */
@@ -161,6 +161,21 @@ export interface PurchaseQuantity {
   unit: { one: string; many: string };
 }
 
+export interface RuleToConfirm {
+  key: string;
+  text: string;
+  /** Les sources se contredisent (§47.1, statut « contradiction » du tiroir). */
+  conflict?: boolean;
+}
+
+/** Libellé d'un conditionnement dans le calcul : « Contenu : 1 longueur de 3 m ». */
+const CONTENT = "Contenu : 1 ";
+
+/** « kg/m2 » → « kg/m² », « u/m2 » → « /m² », « u » → «  ». */
+function unitWords(unit: string): string {
+  return unit.replace(/^u\//, "/").replace(/^u$/, "").replace(/m2/g, "m²").replace(/m3/g, "m³");
+}
+
 export interface NeedResult {
   needId: string;
   slot: string;
@@ -194,6 +209,12 @@ export interface NeedResult {
   missing?: MissingData;
   /** Calcul fait avec au moins une donnée en brouillon (option acceptDraft). */
   provisional: boolean;
+  /**
+   * §47.1 / §47.3 : les règles « à vérifier » (ou en désaccord entre sources) dont dépend la quantité, chacune en un mot
+   * (« colle 4 kg/m² ») : la ligne sort orange, « Quantité à confirmer », jusqu'au « C'est bon » de l'artisan ou à la
+   * validation de la règle par trois artisans différents. `key` est stable tant que la valeur ne change pas.
+   */
+  toConfirm?: RuleToConfirm[];
   /** Hypothèses par défaut utilisées (dites à l'artisan, modifiables). */
   assumptions: Assumption[];
   /** D'où vient le produit retenu : écrit au devis, reconnu par appellation, choisi pour le chantier, préférence de l'entreprise, par défaut. */
@@ -442,6 +463,13 @@ function computeNeed(
     if (!assumptions.some((x) => x.key === a.key)) assumptions.push(a);
   };
   let provisional = false;
+  const toConfirm: RuleToConfirm[] = [];
+  /** Une règle non vérifiée entre dans le calcul : la ligne le dira (« Quantité à confirmer : … »). */
+  const unverified = (key: string, text: string, p: Provenance) => {
+    provisional = true;
+    const full = `${ref.id}/${work.id}/${key}`;
+    if (!toConfirm.some((t) => t.key === full)) toConfirm.push({ key: full, text, ...(p.conflict ? { conflict: true } : {}) });
+  };
   const base = {
     needId: rule.id,
     slot: slot.key,
@@ -461,9 +489,12 @@ function computeNeed(
   const useFact = (label: string, fact: Fact, missing: Omit<MissingData, "workItemId" | "slot" | "family" | "label" | "sourceId">): IntervalValue => {
     const blocked = (reason: string) => new Stop({ status: "unknown", reason, missing: gap({ ...missing, label, sourceId: fact.source }) });
     if (fact.verification.status === "deprecated") throw blocked(`Donnée retirée du référentiel : ${label}.`);
-    if (fact.verification.status === "draft") {
+    if (fact.verification.status === "draft" || fact.conflict) {
       if (!options.acceptDraft) throw blocked(`Donnée en attente de vérification : ${label} (${sources.get(fact.source)?.title ?? fact.source}).`);
-      provisional = true;
+      // Un conditionnement se dit par son nom (« longueur de 3 m »), une règle par son nom et sa valeur (« colle 4 kg/m² »).
+      const value = `${fact.value.replace(".", ",")} ${unitWords(fact.unit)}`.trim();
+      const text = label.startsWith(CONTENT) ? label.slice(CONTENT.length) : fact.label?.includes("{v}") ? fact.label.replace("{v}", value) : `${fact.label ?? label} ${value}`;
+      unverified(`${label}=${fact.value}`, text, fact);
     }
     const unit = parseRefUnit(fact.unit);
     trace.push({ label, value: fact.value.replace(".", ","), unit: fact.unit, origin: "referential", ...provenanceLine(fact, sources) });
@@ -480,7 +511,7 @@ function computeNeed(
           missing: gap({ kind: "rule", label: `Règle de calcul : ${slot.label.toLowerCase()}`, sourceId: rule.source }),
         });
       }
-      provisional = true;
+      unverified(`besoin.${rule.id}`, rule.short ?? "", rule);
     }
 
     // 1. Le produit : écrit sur le devis, confirmé, ou habituel ; sinon UNE question.
@@ -616,7 +647,7 @@ function computeNeed(
           if (derived.verification.status === "deprecated" || !options.acceptDraft) {
             throw new Stop({ status: "unknown", reason: "Règle de calcul en attente de vérification.", missing: gap({ kind: "rule", label: `Règle : ${derived.label.toLowerCase()}`, sourceId: derived.source }) });
           }
-          provisional = true;
+          unverified(`calcul.${derived.key}`, "", derived);
         }
         const unit = parseRefUnit(derived.unit);
         const v = evaluateInterval(parseFormula(derived.formula), valueOf);
@@ -711,7 +742,7 @@ function computeNeed(
         if (pts.verification.status === "deprecated" || !options.acceptDraft) {
           throw new Stop({ status: "unknown", reason: "Règle de calcul en attente de vérification.", missing: gap({ kind: "rule", label: `Table : ${pts.label.toLowerCase()}`, sourceId: pts.source }) });
         }
-        provisional = true;
+        unverified(`table.${pts.label}`, pts.label.toLowerCase(), pts);
       }
       const unit = parseRefUnit(pts.unit);
       const keys = pts.keys.map((k) => ({ v: valueOf(k.variable), factor: parseRefUnit(k.unit).factor }));
@@ -816,7 +847,7 @@ function computeNeed(
         if (table.verification.status === "deprecated" || !options.acceptDraft) {
           throw new Stop({ status: "unknown", reason: "Règle de calcul en attente de vérification.", missing: gap({ kind: "rule", label: `Table : ${table.label.toLowerCase()}`, sourceId: table.source }) });
         }
-        provisional = true;
+        unverified(`table.${name}`, table.label.toLowerCase(), table);
       }
       const unit = parseRefUnit(table.unit);
       const inputs = table.axes.map((axis) => {
@@ -884,7 +915,7 @@ function computeNeed(
     if (companyRate !== undefined) {
       factor = new Decimal(companyRate).dividedBy(100).plus(1);
     } else if (wasteRule) {
-      if (wasteRule.verification.status === "draft") provisional = true;
+      if (wasteRule.verification.status === "draft" || wasteRule.conflict) unverified(`pertes.${slot.family}=${wasteRule.rate}`, `pertes ${wasteRule.rate.replace(".", ",")} %`, wasteRule);
       factor = new Decimal(wasteRule.rate).dividedBy(100).plus(1);
     }
     const need: IntervalValue = { lo: raw.lo.dividedBy(needUnit.factor).times(factor), hi: raw.hi.dividedBy(needUnit.factor).times(factor), dim: raw.dim };
@@ -979,12 +1010,13 @@ function computeNeed(
       ...(purchaseUnavailable ? { purchaseUnavailable } : {}),
       ...(purchaseMissing ? { missing: purchaseMissing } : {}),
       provisional,
+      ...(toConfirm.length ? { toConfirm } : {}),
       assumptions,
       trace,
     };
   } catch (e) {
     if (!(e instanceof Stop)) throw e;
-    return { ...base, ...e.outcome, provisional, assumptions, trace };
+    return { ...base, ...e.outcome, provisional, ...(toConfirm.length ? { toConfirm } : {}), assumptions, trace };
   }
 }
 
@@ -1003,7 +1035,7 @@ function toPurchase(
   const lo = need.lo.times(needUnit.factor);
   const hi = need.hi.times(needUnit.factor);
   const counts = (su: SellingUnit) => {
-    const content = useFact(`Contenu : 1 ${su.label.one}`, su.contains);
+    const content = useFact(`${CONTENT}${su.label.one}`, su.contains);
     if (!sameDim(content.dim, needUnit.dim) || content.lo.isZero()) return null;
     // Arrondi au supérieur après avoir effacé le bruit décimal (333,333… × 1,05 vaut 350, pas 351).
     const whole = (x: Decimal) => x.dividedBy(content.lo).toDecimalPlaces(6).ceil();
@@ -1029,6 +1061,8 @@ function toPurchase(
     .filter((s) => s !== primary)
     .flatMap((s) => {
       try {
+        // Un ordre de grandeur ne vient que d'un conditionnement vérifié : il ne rend jamais une ligne orange.
+        if (s.contains.verification.status !== "verified" || s.contains.conflict) return [];
         const c = counts(s);
         return c && c.lo.equals(c.hi) ? [{ count: c.lo.toFixed(), unit: s.label }] : [];
       } catch (e) {

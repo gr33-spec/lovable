@@ -7,7 +7,7 @@ import { Assumptions, EDIT_FIELD, EDIT_PANEL, ItemForm, Suggestions, type ItemEd
 import { InlineLineForm, Proof, type DecisionHandlers } from "@/components/takeoff-view";
 import { Button } from "@/components/ui";
 import type { ItemSketch, PurchaseItem, ScreenRow, Takeoff, TakeoffDecision } from "@/lib/api";
-import { doubtText, shortName } from "@/lib/labels";
+import { doubtText, parseQuantity, shortName } from "@/lib/labels";
 
 /**
  * UN SEUL ÉCRAN : LA LISTE DES FOURNITURES (retour du fondateur, 2026-10-04, « un enfant de 10 ans s'en sort »).
@@ -195,6 +195,7 @@ export function SupplyList({
           takeoff={takeoff}
           pending={pending}
           handlers={handlers}
+          onEditItem={onEditItem}
           onClose={() => setAsking(null)}
           onNext={() => {
             // Après la réponse, la ligne orange suivante s'ouvre d'elle-même si l'artisan enchaîne.
@@ -257,7 +258,7 @@ function Row({
   const quantity = item?.quantity ?? quote?.measure ?? row.pending?.quantity ?? null;
   const sub =
     row.status === "check"
-      ? "À vérifier : touchez la ligne"
+      ? (row.reason ?? "À vérifier : touchez la ligne")
       : row.status === "supplier"
         ? "À préciser avec le fournisseur"
         : ([item?.approx, item?.precision].filter(Boolean).join(" · ") || null);
@@ -502,6 +503,7 @@ function QuestionSheet({
   takeoff,
   pending,
   handlers,
+  onEditItem,
   onClose,
   onNext,
 }: {
@@ -510,9 +512,11 @@ function QuestionSheet({
   takeoff: Takeoff;
   pending: boolean;
   handlers: DecisionHandlers;
+  onEditItem: (item: PurchaseItem, edit: ItemEdit) => Promise<void>;
   onClose: () => void;
   onNext: () => void;
 }) {
+  const ratioItem = decision?.key.startsWith(RATIO) ? takeoff.purchase.toBuy.find((b) => b.key === decision.key.slice(RATIO.length)) : undefined;
   const id = useId();
   const [value, setValue] = useState("");
   const q = decision?.question;
@@ -546,6 +550,20 @@ function QuestionSheet({
         </div>
         {!decision ? (
           <p className="text-[15px]">Cette ligne attend une information du devis. Corrigez-la avec le crayon.</p>
+        ) : ratioItem ? (
+          <RatioSheet
+            decision={decision}
+            item={ratioItem}
+            pending={pending}
+            onConfirm={async () => {
+              await handlers.onDecide(decision);
+              onNext();
+            }}
+            onCorrect={async (e) => {
+              await onEditItem(ratioItem, e);
+              onNext();
+            }}
+          />
         ) : q && options.length > 0 ? (
           <>
             <div className="flex flex-col gap-1">
@@ -592,6 +610,93 @@ function QuestionSheet({
         )}
       </div>
     </div>
+  );
+}
+
+/** Clé d'une quantité calculée avec une règle « à vérifier » (§47.3). */
+const RATIO = "ratio:";
+
+/**
+ * §47.3 : une quantité calculée avec une règle « à vérifier » : le chiffre en grand, la règle en une ligne, « C'est bon »
+ * la passe au vert ; un tap sur le chiffre la corrige (le chiffre de l'artisan remplace le calcul, et va au journal).
+ */
+function RatioSheet({
+  decision: d,
+  item,
+  pending,
+  onConfirm,
+  onCorrect,
+}: {
+  decision: TakeoffDecision;
+  item: PurchaseItem;
+  pending: boolean;
+  onConfirm: () => Promise<void>;
+  onCorrect: (e: ItemEdit) => Promise<void>;
+}) {
+  const id = useId();
+  const [editing, setEditing] = useState(false);
+  const parsed = item.quantity ? parseQuantity(item.quantity) : null;
+  const [quantite, setQuantite] = useState(parsed?.quantity ?? "");
+  const [unite, setUnite] = useState(parsed?.unit ?? "");
+  return (
+    <section aria-label={`À confirmer : ${item.label}`} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1">
+        <p className="text-sm font-bold text-muted">{item.label}</p>
+        {editing ? (
+          <form
+            className="flex flex-col gap-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const v = quantite.trim().replace(",", ".");
+              if (/^\d+(?:\.\d+)?$/.test(v)) void onCorrect({ libelle: item.label, quantite: v, unite: unite.trim() || null });
+            }}
+          >
+            <div className="grid grid-cols-2 gap-2">
+              <label htmlFor={`${id}-q`} className="flex flex-col gap-1 text-sm font-bold">
+                Quantité
+                <input id={`${id}-q`} inputMode="decimal" autoFocus value={quantite} onChange={(e) => setQuantite(e.target.value)} className={EDIT_FIELD} />
+              </label>
+              <label htmlFor={`${id}-u`} className="flex flex-col gap-1 text-sm font-bold">
+                Unité
+                <input id={`${id}-u`} value={unite} onChange={(e) => setUnite(e.target.value)} className={EDIT_FIELD} />
+              </label>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button type="submit" pending={pending}>
+                Enregistrer
+              </Button>
+              <Button type="button" variant="secondary" onClick={() => setEditing(false)}>
+                Annuler
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            aria-label={`Corriger la quantité : ${item.quantity ?? ""}`}
+            className="inline-flex items-center gap-2 self-start rounded-xl text-left text-[30px] leading-tight font-extrabold tracking-[-0.02em] tabular-nums underline decoration-line decoration-dotted underline-offset-[6px]"
+          >
+            {item.quantity}
+            <Pencil size={18} aria-hidden="true" className="text-subtle" />
+          </button>
+        )}
+        <p className="text-[15px] leading-snug font-semibold text-warn">{d.text}</p>
+        {item.approx ? <p className="text-[13px] text-muted">{item.approx}</p> : null}
+      </div>
+      {editing ? null : (
+        <div className="flex flex-col gap-2">
+          <Button pending={pending} onClick={() => void onConfirm()} aria-label={`C'est bon : ${item.label}`}>
+            <Check size={20} aria-hidden="true" />
+            C&apos;est bon
+          </Button>
+          <Button variant="secondary" onClick={() => setEditing(true)}>
+            <Pencil size={18} aria-hidden="true" />
+            Corriger le chiffre
+          </Button>
+        </div>
+      )}
+    </section>
   );
 }
 

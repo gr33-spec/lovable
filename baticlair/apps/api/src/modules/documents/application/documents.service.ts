@@ -68,8 +68,8 @@ export class DocumentsService {
       if (doc) return { document: doc, duplicate: true };
     }
 
-    // Métiers de l'entreprise au moment du dépôt : ils choisissent le profil de lecture (PD-033).
-    const trade = tradeKey(tenant.trades);
+    // Le métier choisi pour le chantier ; sinon ceux de l'entreprise au moment du dépôt : ils choisissent la lecture et le tiroir (PD-033).
+    const trade = (await this.documents.projectTrade?.(tenant, projectId)) ?? tradeKey(tenant.trades);
     const created = await this.documents.create(
       tenant,
       {
