@@ -169,7 +169,17 @@ export const JOINERY_PROFILE = light("joinery", "Menuiserie", [
   f("join_panel", "Bois, panneau", ["tasseau", "planche", "contreplaque", "mdf", "osb", "agglomere", "panneau", "lambris"]),
   f("join_stair", "Escalier, garde-corps, placard", ["escalier", "garde corps", "main courante", "placard", "dressing"]),
   f("join_sealing", "Mousse, joint, mastic", ["mousse", "compribande", "silicone", "mastic"]),
+  // Le menuisier pose aussi les sols bois (docs/referentiels/menuiserie.md, périmètre v1).
+  f("join_floor", "Parquet, stratifié, plinthe", ["parquet", "stratifie", "plinthe", "plinthes", "sous couche"], AREA_OF_WORK),
 ], ["ajustage", "calfeutrement"]);
 
 /** « Autre métier » : le socle commun seul, sans famille de matériaux. */
+export const HVAC_PROFILE = light("hvac", "Chauffage, ventilation (PAC, VMC, clim)", [
+  VENTILATION,
+  f("hvac_split", "Climatisation, PAC air/air", ["climatisation", "climatiseur", "split", "monosplit", "multisplit", "pac air/air", "unite interieure", "unite exterieure"]),
+  f("hvac_heatpump", "PAC air/eau, chaudière", ["pompe a chaleur", "pac air/eau", "chaudiere", "ballon thermodynamique"]),
+  f("hvac_line", "Liaison frigorifique, goulotte", ["liaison frigorifique", "liaisons frigorifiques", "goulotte", "support mural"]),
+  f("hvac_emitter", "Radiateur, plancher chauffant", ["radiateur", "plancher chauffant", "collecteur", "seche serviette"]),
+], ["mise en service", "tirage au vide", "recharge"]);
+
 export const OTHER_PROFILE = light("other", "Autre métier", []);

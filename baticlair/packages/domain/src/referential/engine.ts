@@ -173,7 +173,8 @@ const CONTENT = "Contenu : 1 ";
 
 /** « kg/m2 » → « kg/m² », « u/m2 » → « /m² », « u » → «  ». */
 function unitWords(unit: string): string {
-  return unit.replace(/^u\//, "/").replace(/^u$/, "").replace(/m2/g, "m²").replace(/m3/g, "m³");
+  // « par pièce » se dit dans le nom de la règle (« 8 m de gaine par prise ») : « m/u » s'écrit « m ».
+  return unit.replace(/\/u$/, "").replace(/^u\//, "/").replace(/^u$/, "").replace(/m2/g, "m²").replace(/m3/g, "m³");
 }
 
 export interface NeedResult {
@@ -492,7 +493,9 @@ function computeNeed(
     if (fact.verification.status === "draft" || fact.conflict) {
       if (!options.acceptDraft) throw blocked(`Donnée en attente de vérification : ${label} (${sources.get(fact.source)?.title ?? fact.source}).`);
       // Un conditionnement se dit par son nom (« longueur de 3 m »), une règle par son nom et sa valeur (« colle 4 kg/m² »).
-      const value = `${fact.value.replace(".", ",")} ${unitWords(fact.unit)}`.trim();
+      // « 6,7 m de tube par m² » : quand le nom dit « par … », la valeur ne garde que son unité du dessus (« m », pas « m/m² »).
+      const shownUnit = fact.label?.includes(" par ") ? fact.unit.split("/")[0]! : fact.unit;
+      const value = `${fact.value.replace(".", ",")} ${unitWords(shownUnit)}`.trim();
       // Un nom de règle avec « {v} » y place la valeur ; un nom sans « {v} » se suffit (« colle +5 % de reste »).
       const text = label.startsWith(CONTENT) ? label.slice(CONTENT.length) : fact.label !== undefined ? fact.label.replace("{v}", value) : `${label} ${value}`;
       unverified(`${label}=${fact.value}`, text, fact);

@@ -12,5 +12,6 @@ export const TRADES: readonly { id: string; label: string }[] = [
   { id: "electrical", label: "Électricité" },
   { id: "plumbing", label: "Plomberie, chauffage" },
   { id: "joinery", label: "Menuiserie" },
+  { id: "hvac", label: "Chauffage, ventilation" },
   { id: "other", label: "Autre métier" },
 ];

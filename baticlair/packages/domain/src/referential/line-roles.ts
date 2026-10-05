@@ -68,6 +68,10 @@ export function proposeLineRoles(lines: readonly RoleLine[], plan: QuotePlan, va
     // sa quantité mesure l'ouvrage, le moteur en déduit ce qui se commande. Aucune question.
     if (planned?.status === "planned") {
       const slot = ref.workItems.find((w) => w.id === planned.workItemId)?.slots.find((s) => s.key === planned.slot);
+      if (slot?.measureOnly && slot.orderedAsWritten) {
+        roles.set(v.lineId, { role: "purchase", why: `L'article se commande tel qu'écrit ; son nombre compte aussi l'ouvrage (${slot.label.toLowerCase()}) pour les fournitures de pose.` });
+        continue;
+      }
       if (slot?.measureOnly) {
         roles.set(v.lineId, { role: "measure", why: `La quantité mesure l'ouvrage (${slot.label.toLowerCase()}) ; ce qui se commande en découle.` });
         continue;

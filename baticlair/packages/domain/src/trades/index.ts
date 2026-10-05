@@ -2,6 +2,7 @@ import {
   DRYWALL_PROFILE,
   ELECTRICAL_PROFILE,
   FLOORING_PROFILE,
+  HVAC_PROFILE,
   JOINERY_PROFILE,
   MASONRY_PROFILE,
   OTHER_PROFILE,
@@ -26,6 +27,7 @@ export const TRADES: readonly { id: string; label: string }[] = [
   { id: "electrical", label: "Électricité" },
   { id: "plumbing", label: "Plomberie, chauffage" },
   { id: "joinery", label: "Menuiserie" },
+  { id: "hvac", label: "Chauffage, ventilation" },
   { id: "other", label: "Autre métier" },
 ];
 
@@ -39,6 +41,7 @@ export const TRADE_PROFILES: Readonly<Record<string, TradeProfile>> = {
   electrical: ELECTRICAL_PROFILE,
   plumbing: PLUMBING_PROFILE,
   joinery: JOINERY_PROFILE,
+  hvac: HVAC_PROFILE,
   other: OTHER_PROFILE,
 };
 
