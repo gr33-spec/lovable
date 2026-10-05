@@ -10,6 +10,7 @@ import { attachFile } from "@/lib/upload";
 import { unreadableMessage } from "@/lib/fr";
 import { openDocument } from "@/lib/open-document";
 import { useProgressRefresh } from "@/components/project-progress";
+import { useListPage } from "@/lib/list-page";
 import { useResource } from "@/lib/use-resource";
 
 const PURPOSE_LABEL: Record<DocumentPurpose, string> = {
@@ -32,6 +33,8 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
   const [notice, setNotice] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const refreshProgress = useProgressRefresh();
+  // Sur la page des fournitures, le devis déposé et les avis du chantier s'effacent : la liste seule.
+  const [listPage] = useListPage();
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
@@ -55,7 +58,7 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
   return (
     <div className="flex flex-col gap-4">
       {quote ? (
-        <div className="w-[80%] self-end">
+        <div className={`w-[80%] self-end ${listPage ? "hidden" : ""}`}>
           <DocumentCard doc={quote} compact={false} onRemoved={removed} />
         </div>
       ) : archived ? null : (
@@ -75,7 +78,7 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
         </section>
       )}
 
-      {notice ? (
+      {notice && !listPage ? (
         <p role="status" className="rounded-2xl bg-surface p-3 text-sm font-semibold shadow-card">
           {notice}
         </p>

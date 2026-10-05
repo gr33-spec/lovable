@@ -39,11 +39,27 @@ async function answerSheet(page: Page) {
   await expect(page.getByRole("dialog", { name, exact: true })).toHaveCount(0, { timeout: 15_000 });
 }
 
+/** La page des fournitures (`?vue=fournitures`) : ouverte d'elle-même à l'arrivée des matériaux, sinon d'un appui sur le chantier. */
+async function openList(page: Page) {
+  const listPage = page.getByRole("region", { name: "Page des fournitures" });
+  await expect(page.getByRole("region", { name: /^(Page des fournitures|Liste de matériaux)$/ }).first()).toBeVisible();
+  if (await listPage.isVisible()) return;
+  await page.getByRole("region", { name: "Liste de matériaux" }).getByRole("button").first().click();
+  await expect(listPage).toBeVisible();
+}
+
+/** Retour au fil du chantier (ce que BatiClair a compris, la barre de message, les fournisseurs). */
+async function backToSite(page: Page) {
+  await page.getByRole("region", { name: "Page des fournitures" }).getByRole("button", { name: "Retour au chantier" }).click();
+  await expect(page.getByRole("region", { name: "Page des fournitures" })).toHaveCount(0);
+}
+
 /**
  * LA LISTE DES FOURNITURES : tant qu'il reste de l'orange, l'artisan touche « Vérifier… », répond à la question qui
  * s'ouvre en bas, et recommence ; fini quand le gros bouton dit « Envoyer au fournisseur ».
  */
 async function confirmDoubts(page: Page) {
+  if (!(await page.getByRole("dialog", { name: /^Question : / }).isVisible())) await openList(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   for (let i = 0; i < 30; i++) {
     if (await page.getByRole("dialog", { name: /^Question : / }).isVisible()) {
@@ -64,6 +80,7 @@ async function confirmDoubts(page: Page) {
 
 /** L'artisan vérifie les lignes orange une à une jusqu'à voir cette carte dans la question ouverte (qui reste ouverte). */
 async function answerUntil(page: Page, name: string) {
+  if (!(await page.getByRole("dialog", { name: /^Question : / }).isVisible())) await openList(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   for (let i = 0; i < 30; i++) {
     const sheet = page.getByRole("dialog", { name: /^Question : / });
@@ -280,6 +297,9 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
   await expect(page.getByRole("button", { name: /Ajouter des informations sur le chantier\s*Facultatif, mais aide à la précision/ })).toBeVisible();
   // Déposé : l'artisan peut ajouter ses infos, puis lance la lecture d'un appui ; BatiClair dit ce qu'il a compris.
   await page.getByRole("button", { name: "Lire le devis" }).click();
+  // Les matériaux arrivent : leur page s'ouvre (retour du fondateur, 2026-10-05) ; « Retour au chantier » ramène au fil.
+  await expect(page).toHaveURL(/vue=fournitures/);
+  await backToSite(page);
   await expect(page.getByRole("button", { name: "Ce que j'ai compris" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Préparer la liste de matériaux" })).toHaveCount(0);
   await expect(page.getByText(/page lue|pages lues/)).toHaveCount(0);
@@ -339,6 +359,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   // IA simulée en test (AI_PROVIDER=fake) : même parcours, aucun appel payant.
   // Ce que BatiClair a compris : replié (la liste d'abord), déplié d'un appui.
   await expect(page.getByRole("list", { name: "Ce que BatiClair a compris" })).toHaveCount(0);
+  await backToSite(page);
   await page.getByRole("button", { name: "Ce que j'ai compris" }).click();
   await expect(page.getByRole("list", { name: "Ce que BatiClair a compris" })).toBeVisible();
   await expect(page.getByText(/^J'ai lu les \d+ lignes du devis\.$/)).toBeVisible();
@@ -402,6 +423,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
 
   await confirmDoubts(page);
   // Écrire au lieu d'appuyer : BatiClair comprend la pente, la zone, la surface ; le reste, il le dit.
+  await backToSite(page);
   const message = page.getByLabel("Message à BatiClair");
   await message.fill("mets 30° de pente");
   await page.getByRole("button", { name: "Envoyer", exact: true }).click();
@@ -410,6 +432,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await page.getByRole("button", { name: "Envoyer", exact: true }).click();
   await expect(page.getByText(/^Je comprends pour l'instant la pente/)).toBeVisible();
   // « Envoyer au fournisseur » valide la liste et ouvre l'aperçu (§45.9) ; « Revenir à la liste » le referme.
+  await openList(page);
   await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
   const apercu = page.getByRole("dialog", { name: "Aperçu de la demande de devis" });
   await expect(apercu.getByRole("article", { name: "Demande de devis" })).toBeVisible();
@@ -419,6 +442,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
 
   // La liste validée est conservée.
   await page.reload();
+  await openList(page);
   await expect(page.getByText(/^\d+ fournitures · liste validée$/)).toBeVisible();
   // « Voir la liste en PDF » (§21.3) : la demande de devis s'ouvre DANS l'app, avec « Fermer », « Télécharger » (et
   // « Partager » sur téléphone) : on ne reste jamais coincé dans un PDF (retour du fondateur, 2026-10-04).
@@ -537,6 +561,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   const liste = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(liste.getByRole("button", { name: "Voir la demande envoyée" })).toBeVisible();
   await expect(liste.getByRole("button", { name: "Envoyer au fournisseur" })).toHaveCount(0);
+  await backToSite(page);
   // Pour tester sans attendre, un devis fictif peut être simulé (dans le menu).
   await pointp.getByRole("button", { name: /^Plus d'actions/ }).click();
   await expect(pointp.getByRole("menuitem", { name: "Test : simuler un devis fictif" })).toBeVisible();
@@ -615,7 +640,7 @@ test("plusieurs articles inconnus, sans unité : UNE décision les règle tous, 
   await createProject(page, "Piscine Le Goff", "M. Le Goff", "2 rue des Dunes, Carnac");
   await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await page.getByRole("button", { name: "Lire le devis" }).click();
-  await expect(page.getByRole("button", { name: "Ce que j'ai compris" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Page des fournitures" })).toBeVisible();
 
   // L'artisan ajoute trois articles d'un autre métier, sans unité (comme sur un devis de pisciniste).
   await page.getByRole("button", { name: "Corriger le devis lu" }).click();
@@ -655,7 +680,7 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
   await expect(page.getByText("devis-client-demo.pdf")).toBeVisible();
 
   await page.getByRole("button", { name: "Lire le devis" }).click();
-  await expect(page.getByRole("button", { name: "Ce que j'ai compris" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Page des fournitures" })).toBeVisible();
   // Un exemple « potable » (retour du fondateur, 2026-10-04) : la liste est prête dès la lecture, rien à vérifier.
   const demoList = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(demoList.getByText(/^\d+ fournitures · tout est prêt$/)).toBeVisible();

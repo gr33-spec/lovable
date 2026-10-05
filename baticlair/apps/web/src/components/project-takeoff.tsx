@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Check, ChevronDown, ChevronRight, CircleCheck, FileDown, FileText, HelpCircle, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, ChevronRight, CircleCheck, FileDown, FileText, HelpCircle, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AssistantMessage, ChatInput, parseCommand, ReasoningSteps, Say, ThinkingSteps, UserBubble } from "@/components/chat";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
@@ -14,6 +14,7 @@ import { api, ApiError, type ProjectDocument, type PurchaseItem, type Quantitati
 import { attachFile } from "@/lib/upload";
 import { parseQuantity, shortName } from "@/lib/labels";
 import { openFile } from "@/lib/open-document";
+import { useListPage } from "@/lib/list-page";
 import { useResource } from "@/lib/use-resource";
 
 /** Le devis client peut être lu par l'IA : texte lu, ou lecture locale en panne (l'IA lit alors le PDF). */
@@ -67,8 +68,10 @@ export function ProjectTakeoff({
   const [showList, setShowList] = useState<false | "corriger" | "ajouter">(false);
   const [sendSignal, setSendSignal] = useState(0);
   const [sent, setSent] = useState(false);
-  // Après l'envoi, la liste se replie (une ligne) et les réponses des fournisseurs passent en haut (retour du fondateur, 2026-10-05).
-  const [listOpen, setListOpen] = useState(false);
+  // La liste a sa page (`?vue=fournitures`) ; sur le chantier, elle tient en une ligne. Après l'envoi, les réponses des
+  // fournisseurs passent en haut du chantier (retour du fondateur, 2026-10-05).
+  const [page, setPage] = useListPage();
+  const autoOpened = useRef(false);
   const [fresh, setFresh] = useState(false);
   const [said, setSaid] = useState<Said[]>([]);
   const started = useRef(false);
@@ -121,6 +124,14 @@ export function ProjectTakeoff({
     started.current = true;
     prepare();
   }, [autoStart, data, readable, archived, prepare]);
+
+  // Les matériaux arrivent (lecture lancée ici) : la page des fournitures s'ouvre d'elle-même.
+  const arrived = fresh && Boolean(data?.takeoff);
+  useEffect(() => {
+    if (!arrived || autoOpened.current) return;
+    autoOpened.current = true;
+    setPage(true);
+  }, [arrived, setPage]);
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
@@ -242,6 +253,7 @@ export function ProjectTakeoff({
   // « Envoyer au fournisseur » : la liste est validée (si elle ne l'est pas encore), puis l'aperçu s'ouvre (§45.9).
   const send = () => {
     setShowList(false);
+    setPage(false);
     if (draft) void call("validation").then(() => setSendSignal((n) => n + 1));
     else setSendSignal((n) => n + 1);
   };
@@ -319,6 +331,7 @@ export function ProjectTakeoff({
             await call("corrections", { action: "suggestion", id: item.key, reponse });
           }}
           onSend={send}
+          docked={false}
           validated={!draft}
           sent={sent}
           sketches={quantitatif?.infos?.croquis ?? []}
@@ -349,60 +362,76 @@ export function ProjectTakeoff({
     );
   }
 
+  // Le résumé de la liste, sur le chantier : de quoi savoir où l'on en est et ouvrir la page des fournitures.
+  const screenRows = takeoff.purchase.screen.groups.flatMap((g) => g.rows);
+  const checkCount = screenRows.filter((r) => r.status === "check").length;
+
   return (
     <>
-      <AssistantMessage>
-        <ReasoningSteps takeoff={takeoff} fresh={fresh} />
-      </AssistantMessage>
-      {said.map((m) => (
-        <Fragment key={m.id}>
-          <UserBubble>{m.text}</UserBubble>
-          {m.reply ? (
-            <AssistantMessage>
-              <Say>{m.reply}</Say>
-            </AssistantMessage>
-          ) : null}
-        </Fragment>
-      ))}
-      {/* Même place dans l'arbre avant et après l'envoi (pas de rechargement) : seul l'ordre d'affichage change. */}
-      <div className="flex flex-col gap-3">
-        <section id="materiaux" aria-label="Liste de matériaux" className="flex scroll-mt-4 flex-col gap-3">
-          {sent && !listOpen ? (
+      {page ? (
+        // LA PAGE DES FOURNITURES (retour du fondateur, 2026-10-05) : la liste seule, sans le fil du chat.
+        <section aria-label="Page des fournitures" className="flex flex-col gap-3">
+          <button type="button" onClick={() => setPage(false)} className="-ml-1 inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-bold text-accent-text">
+            <ArrowLeft size={18} aria-hidden="true" />
+            Retour au chantier
+          </button>
+          {actionError ? <ErrorNotice error={actionError} /> : null}
+          {body}
+        </section>
+      ) : null}
+      {/* Le fil du chantier reste monté sous la page (l'aperçu d'envoi s'y ouvre) : il est seulement caché. */}
+      <div className={page ? "hidden" : "contents"}>
+        <AssistantMessage>
+          <ReasoningSteps takeoff={takeoff} fresh={fresh} />
+        </AssistantMessage>
+        {said.map((m) => (
+          <Fragment key={m.id}>
+            <UserBubble>{m.text}</UserBubble>
+            {m.reply ? (
+              <AssistantMessage>
+                <Say>{m.reply}</Say>
+              </AssistantMessage>
+            ) : null}
+          </Fragment>
+        ))}
+        {/* Même place dans l'arbre avant et après l'envoi (pas de rechargement) : seul l'ordre d'affichage change. */}
+        <div className="flex flex-col gap-3">
+          <section id="materiaux" aria-label="Liste de matériaux" className="flex scroll-mt-4 flex-col gap-3">
             <button
               type="button"
-              onClick={() => setListOpen(true)}
-              aria-expanded={false}
+              onClick={() => setPage(true)}
               className="flex min-h-14 w-full items-center gap-3 rounded-[20px] bg-surface px-4 py-3 text-left shadow-card active:bg-ground"
             >
-              <CircleCheck size={22} className="shrink-0 text-ok" aria-hidden="true" />
+              {sent || checkCount === 0 ? (
+                <CircleCheck size={22} className="shrink-0 text-ok" aria-hidden="true" />
+              ) : (
+                <span className="flex size-[22px] shrink-0 items-center justify-center" aria-hidden="true">
+                  <span className="size-3 rounded-full bg-warn" />
+                </span>
+              )}
               <span className="flex min-w-0 flex-1 flex-col">
-                <span className="font-bold">Liste des fournitures envoyée</span>
-                <span className="text-[13px] text-muted">Appuyez pour la revoir ou la modifier.</span>
+                <span className="font-bold">{sent ? "Liste des fournitures envoyée" : "Fournitures à chiffrer"}</span>
+                <span className="text-[13px] text-muted">
+                  {sent
+                    ? "Appuyez pour la revoir ou la modifier."
+                    : `${screenRows.length} fourniture${screenRows.length > 1 ? "s" : ""} · ${checkCount > 0 ? `${checkCount} à vérifier` : "tout est prêt"}`}
+                </span>
               </span>
-              <ChevronDown size={20} className="shrink-0 text-muted" aria-hidden="true" />
+              <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
             </button>
-          ) : (
-            <AssistantMessage>
-              {actionError ? <ErrorNotice error={actionError} /> : null}
-              {body}
-              {sent ? (
-                <Button variant="secondary" onClick={() => setListOpen(false)}>
-                  Replier la liste
-                </Button>
-              ) : null}
-            </AssistantMessage>
-          )}
-        </section>
-        <div className={sent ? "order-first" : undefined}>
-          <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} onListChanged={reload} openSignal={sendSignal} onSentChange={setSent} />
+            {actionError && !page ? <ErrorNotice error={actionError} /> : null}
+          </section>
+          <div className={sent ? "order-first" : undefined}>
+            <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} onListChanged={reload} openSignal={sendSignal} onSentChange={setSent} />
+          </div>
         </div>
+        {draft && editable ? (
+          <>
+            <SiteNotes projectId={projectId} infos={quantitatif?.infos ?? null} disabled={pending} onSaved={reload} />
+            <ChatInput onSend={typed} disabled={pending} placeholder="« Mets 30° de pente », « zone 1 »…" />
+          </>
+        ) : null}
       </div>
-      {draft && editable ? (
-        <>
-          <SiteNotes projectId={projectId} infos={quantitatif?.infos ?? null} disabled={pending} onSaved={reload} />
-          <ChatInput onSend={typed} disabled={pending} placeholder="« Mets 30° de pente », « zone 1 »…" />
-        </>
-      ) : null}
     </>
   );
 }

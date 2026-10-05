@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronDown, ChevronRight, Paperclip, Pencil, Send, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, Paperclip, Pencil, Send, Trash2, X } from "lucide-react";
 import { openDocument } from "@/lib/open-document";
 import { useEffect, useId, useRef, useState } from "react";
 import { Assumptions, EDIT_FIELD, EDIT_PANEL, ItemForm, Suggestions, type ItemEdit, type SketchHandlers } from "@/components/purchase-list";
@@ -31,7 +31,10 @@ export function SupplyList({
   sketchHandlers,
   validated = false,
   sent = false,
+  docked = true,
 }: {
+  /** Une barre de chat est en bas de l'écran : le gros bouton se pose au-dessus d'elle. Sur la page des fournitures, non. */
+  docked?: boolean;
   /** La demande est déjà partie : le gros bouton mène aux fournisseurs, il ne propose plus un premier envoi. */
   sent?: boolean;
   /** Liste déjà validée (elle peut partir) : dit en haut, et « Envoyer » ouvre directement l'aperçu. */
@@ -103,16 +106,17 @@ export function SupplyList({
   // La question ouverte n'existe plus (réponse donnée, ligne passée au vert) : la feuille se ferme d'elle-même.
   const open = asking && rows.some((r) => r.key === asking.key && r.status === "check") ? asking : null;
   const decision = open?.decisionKey ? decisions.get(open.decisionKey) : undefined;
-  const consumables = screen.groups.some((g) => g.kind === "consommables");
+  // Deux blocs titrés seulement quand il y a les deux : une liste toute prête n'a pas besoin de titre.
+  const split = rows.some((r) => r.status === "check") && rows.some((r) => r.status !== "check");
 
   return (
     // La barre du gros bouton est HORS de la carte : collée au-dessus de la barre de chat, elle ne laisse jamais de blanc
     // dans la carte quand on arrive au bas de la liste.
     <section aria-label="Liste des fournitures" className="flex flex-col">
       <div className="flex flex-col overflow-hidden rounded-[20px] bg-surface pb-2 shadow-card">
-      <div className="flex flex-col gap-0.5 px-4 pt-4 pb-2">
-        <h2 className="font-display text-[24px] font-extrabold tracking-[-0.02em]">Fournitures à chiffrer</h2>
-        <p className="text-[15px] font-bold text-muted" aria-live="polite">
+      <div className="flex flex-col px-4 pt-3 pb-2">
+        <h2 className="font-display text-[20px] font-extrabold tracking-[-0.02em]">Fournitures à chiffrer</h2>
+        <p className="text-[14px] font-bold text-muted" aria-live="polite">
           {rows.length} fourniture{rows.length > 1 ? "s" : ""}
           {toCheck.length > 0 ? (
             <span className="text-warn"> · {toCheck.length} à vérifier</span>
@@ -127,46 +131,62 @@ export function SupplyList({
           {w}
         </p>
       ))}
-      {screen.groups.map((g) => {
-        const visible = g.rows.filter((r) => !hidden(r));
-        if (visible.length === 0 && !(g.kind === "consommables" && editable && p.suggestions.length > 0)) return null;
+      {/* Ce qui est prêt d'abord, ce qui reste à vérifier ensuite (retour du fondateur, 2026-10-05) ; dans chaque bloc,
+          les lignes restent rangées par ouvrage. */}
+      {BLOCKS.map((b) => {
+        const groups = screen.groups
+          .map((g) => ({ g, visible: g.rows.filter((r) => !hidden(r) && b.statuses.includes(r.status)) }))
+          .filter(({ visible }) => visible.length > 0);
+        const count = groups.reduce((n, { visible }) => n + visible.length, 0);
+        if (count === 0) return null;
         return (
-          <div key={g.key} className="flex flex-col border-t border-line px-4 pt-3 pb-1">
-            <h3 className="text-[12px] font-extrabold tracking-[0.06em] text-muted uppercase">
-              {g.label}
-              {g.measure ? ` · ${g.measure}` : ""}
-            </h3>
-            <ul aria-label={g.label} className="flex flex-col divide-y divide-line">
-              {visible.map((r) => (
-                <Row
-                  key={r.key}
-                  row={r}
-                  takeoff={takeoff}
-                  label={labelOf(r)}
-                  editable={editable}
-                  pending={pending}
-                  handlers={handlers}
-                  onAsk={() => setAsking(r)}
-                  onEdit={onEditItem}
-                  onSetAside={() => putAside(r)}
-                  sketches={sketches.filter((s) => r.itemKey && s.article === r.itemKey)}
-                  {...(sketchHandlers ? { sketchHandlers } : {})}
-                />
-              ))}
-            </ul>
-            {g.kind === "consommables" && editable && p.suggestions.length > 0 ? (
-              <Suggestions items={p.suggestions} pending={pending} onAnswer={onSuggestion} onEdit={onEditItem} />
+          <div key={b.key} className="flex flex-col border-t border-line">
+            {split ? (
+              <h3 className={`flex items-center gap-2 px-4 pt-2.5 text-[13px] font-extrabold ${b.key === "check" ? "text-warn" : "text-ok"}`}>
+                <span className={`size-2 rounded-full ${b.key === "check" ? "bg-warn" : "bg-ok"}`} aria-hidden="true" />
+                {b.label} ({count})
+              </h3>
             ) : null}
+            {groups.map(({ g, visible }) => (
+              <div key={g.key} className="flex flex-col px-4 pt-2">
+                <p className="text-[11px] font-extrabold tracking-[0.06em] text-subtle uppercase">
+                  {g.label}
+                  {g.measure ? ` · ${g.measure}` : ""}
+                </p>
+                <ul aria-label={g.label} className="flex flex-col divide-y divide-line">
+                  {visible.map((r) => (
+                    <Row
+                      key={r.key}
+                      row={r}
+                      takeoff={takeoff}
+                      label={labelOf(r)}
+                      editable={editable}
+                      pending={pending}
+                      handlers={handlers}
+                      onAsk={() => setAsking(r)}
+                      onEdit={onEditItem}
+                      onSetAside={() => putAside(r)}
+                      sketches={sketches.filter((s) => r.itemKey && s.article === r.itemKey)}
+                      {...(sketchHandlers ? { sketchHandlers } : {})}
+                    />
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         );
       })}
-      {!consumables && editable && p.suggestions.length > 0 ? <Suggestions items={p.suggestions} pending={pending} onAnswer={onSuggestion} onEdit={onEditItem} /> : null}
+      {editable && p.suggestions.length > 0 ? (
+        <div className="border-t border-line px-4 pt-2">
+          <Suggestions items={p.suggestions} pending={pending} onAnswer={onSuggestion} onEdit={onEditItem} />
+        </div>
+      ) : null}
       {p.assumptions.length > 0 ? <Assumptions assumptions={p.assumptions} editable={editable} pending={pending} onAnswer={handlers.onAnswer} /> : null}
       </div>
 
       {editable ? (
         // Un fondu sous le bouton : le texte de la liste ne passe jamais sous lui en se lisant mal.
-        <div className="sticky bottom-[68px] z-10 -mt-4 bg-gradient-to-t from-ground from-60% to-transparent pt-8 pb-5 lg:bottom-[70px]">
+        <div className={`sticky z-10 -mt-4 bg-gradient-to-t from-ground from-60% to-transparent pt-8 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(16px,env(safe-area-inset-bottom))]"}`}>
           {toCheck.length > 0 ? (
             <Button className="w-full" variant="accent" onClick={verify}>
               Vérifier {toCheck.length > 1 ? `les ${toCheck.length} lignes` : "la ligne"}
@@ -212,6 +232,11 @@ export function SupplyList({
     </section>
   );
 }
+
+const BLOCKS: { key: string; label: string; statuses: ScreenRow["status"][] }[] = [
+  { key: "ready", label: "Prêt", statuses: ["ok", "supplier"] },
+  { key: "check", label: "À vérifier", statuses: ["check"] },
+];
 
 const DOT: Record<ScreenRow["status"], { className: string; label: string }> = {
   ok: { className: "bg-ok", label: "sûr" },
@@ -298,35 +323,35 @@ function Row({
       }
     : undefined;
 
+  // L'indispensable pour valider (retour du fondateur, 2026-10-05) : le point, la désignation entière, la quantité ;
+  // dessous, sur une ligne, ce qui reste à faire (orange) ou la précision utile. Le reste est dans la fiche.
   const body = (
     <>
-      <span className={`mt-1.5 size-3 shrink-0 rounded-full ${dot.className}`} role="img" aria-label={dot.label} />
-      <span className="flex min-w-0 grow flex-col gap-0.5">
+      <span className={`mt-[6px] size-2.5 shrink-0 rounded-full ${dot.className}`} role="img" aria-label={dot.label} />
+      <span className="flex min-w-0 grow flex-col">
         {/* La désignation entière : c'est ce que le comptoir lit (jamais coupée). Sur téléphone, la quantité passe dessous. */}
-        <span className="text-[15px] leading-snug font-semibold">{label}</span>
-        {quantity ? <span className="text-[16px] font-extrabold tabular-nums sm:hidden">{quantity}</span> : null}
-        {sub ? <span className={`text-[13px] leading-snug ${row.status === "check" ? "font-bold text-warn" : "text-muted"}`}>{sub}</span> : null}
-        {sketches.length > 0 && !open ? (
-          <span className="inline-flex items-center gap-1 text-[12px] font-bold text-[#4a37d6]">
-            <Paperclip size={12} aria-hidden="true" />
-            {sketches.length} croquis
+        <span className="text-[14px] leading-snug font-semibold">{label}</span>
+        {quantity || sub || sketches.length > 0 ? (
+          <span className="flex min-w-0 items-baseline gap-1.5 text-[13px] leading-snug">
+            {quantity ? <span className="shrink-0 text-[14px] font-extrabold tabular-nums sm:hidden">{quantity}</span> : null}
+            {sub ? <span className={`min-w-0 ${row.status === "check" ? "line-clamp-2 font-bold text-warn" : "truncate text-muted"}`}>{sub}</span> : null}
+            {sketches.length > 0 && !open ? (
+              <span className="inline-flex shrink-0 items-center gap-1 text-[12px] font-bold text-[#4a37d6]">
+                <Paperclip size={12} aria-hidden="true" />
+                {sketches.length}
+              </span>
+            ) : null}
           </span>
         ) : null}
       </span>
-      <span className="shrink-0 text-right text-[16px] font-extrabold whitespace-nowrap tabular-nums max-sm:hidden">{quantity ?? ""}</span>
-      {opens ? (
-        open ? (
-          <X size={18} className="mt-0.5 shrink-0 text-accent-text" aria-hidden="true" />
-        ) : (
-          <ChevronRight size={18} className="mt-0.5 shrink-0 text-subtle" aria-hidden="true" />
-        )
-      ) : null}
+      <span className="shrink-0 text-right text-[15px] font-extrabold whitespace-nowrap tabular-nums max-sm:hidden">{quantity ?? ""}</span>
+      {open ? <X size={18} className="mt-0.5 shrink-0 text-accent-text" aria-hidden="true" /> : null}
     </>
   );
   return (
     <li
       id={`ligne-${row.key}`}
-      className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden py-2 transition-colors ${open ? "-mx-2 my-1 rounded-2xl bg-[#eef2ff] px-2 pb-2" : ""}`}
+      className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden py-1.5 transition-colors ${open ? "-mx-2 my-1 rounded-2xl bg-[#eef2ff] px-2 pb-2" : ""}`}
     >
       {dx < 0 ? (
         <span aria-hidden="true" className="absolute inset-y-0 right-0 flex items-center rounded-xl bg-danger px-4 text-sm font-extrabold text-white">
@@ -351,12 +376,12 @@ function Row({
             }}
             aria-expanded={row.status === "check" ? undefined : open}
             aria-label={row.status === "check" ? `À vérifier : ${label}` : `${open ? "Fermer" : "Modifier"} : ${label}`}
-            className="flex min-h-11 w-full min-w-0 items-start gap-3 rounded-xl text-left active:bg-ground/60"
+            className="flex min-h-11 w-full min-w-0 items-start gap-2.5 rounded-xl text-left active:bg-ground/60"
           >
             {body}
           </button>
         ) : (
-          <div className="flex min-h-11 w-full min-w-0 items-start gap-3">{body}</div>
+          <div className="flex min-h-11 w-full min-w-0 items-start gap-2.5">{body}</div>
         )}
       </div>
       {open ? (
