@@ -247,7 +247,12 @@ function supplyScreen(
     const workId = workOfLine(d.lineIds[0]) ?? workOfQuestion(d);
     // Une question découverte d'avance pour un ouvrage déjà orange attend son tour : elle viendra après la réponse en cours.
     if (d.key.startsWith("engine:") && d.lineIds.length === 0 && workId && groups.get(workId)?.rows.some((r) => r.status === "check")) continue;
-    groupOf(workId).rows.push({ key: `decision:${d.key}`, status: "check", pending: { label: d.title, quantity }, decisionKey: d.key, lineIds: d.lineIds });
+    // Le doute d'une MESURE d'ouvrage (« Liteaux pour ardoises 200 m² » mal lue ?) n'est jamais un article : les
+    // articles de l'ouvrage sont déjà calculés dans leur unité (liteaux en ml). La ligne dit la mesure, sous l'ouvrage
+    // (retour du fondateur, 2026-10-05 : « pourquoi j'ai plusieurs fois les liteaux ? jamais en m² »).
+    const measure = d.key.startsWith("line:") && line !== undefined && line.needs.length > 0 && workId !== undefined;
+    const label = measure ? "Mesure lue dans le devis" : d.title;
+    groupOf(workId).rows.push({ key: `decision:${d.key}`, status: "check", pending: { label, quantity }, decisionKey: d.key, lineIds: d.lineIds });
   }
   const ordered = [...groups.values()].sort((a, b) => KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind));
   const rows = ordered.flatMap((g) => g.rows);
