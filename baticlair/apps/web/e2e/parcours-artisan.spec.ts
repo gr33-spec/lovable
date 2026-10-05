@@ -593,10 +593,18 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await expect(compare.getByRole("heading", { name: "Offre retenue" })).toBeVisible();
   await expect(offers.first().getByText("✓ Offre retenue")).toBeVisible();
 
+  // §47.5 retour fournisseur : la commande passée, d'un tap ; « modifié » : le bon de commande collé.
+  await expect(offers.first().getByText(/Vous avez commandé chez .* : tel quel \?/)).toBeVisible();
+  await offers.first().getByRole("button", { name: "Modifié" }).click();
+  await offers.first().getByLabel(/Collez votre bon de commande/).fill("Tuile romane canal rouge : 1 200 u");
+  await offers.first().getByRole("button", { name: "Enregistrer la commande" }).click();
+  await expect(offers.first().getByText(/✓ Commande notée : \d+ écarts? avec la liste/)).toBeVisible();
+
   // Tout est conservé.
   await page.reload();
   await expect(pointp.getByText("6/6 articles chiffrés")).toBeVisible();
   await expect(page.locator("section#comparer").getByText("✓ Offre retenue")).toBeVisible();
+  await expect(page.locator("section#comparer").getByText(/✓ Commande notée/)).toBeVisible();
 });
 
 test("plusieurs articles inconnus, sans unité : UNE décision les règle tous, rien n'est ✓ en fermant l'écran", async ({ page }) => {

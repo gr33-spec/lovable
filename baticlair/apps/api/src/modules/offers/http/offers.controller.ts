@@ -8,6 +8,7 @@ import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js"
 import { decimalText, percentToRate, toSupplierOffer } from "../application/offer-mapping.js";
 import type { OfferLineFields } from "../application/offer.repository.js";
 import { OffersService, type ComparisonView, type OfferView } from "../application/offers.service.js";
+import { PriceRequestsService, priceRequestDto } from "../../price-requests/index.js";
 
 const money = (m: Money | null | undefined): string | null => (m ? m.roundToCents().amount.toFixed(2) : null);
 const cents = (decimal: string | null): string | null => (decimal ? money(Money.of(decimal)) : null);
@@ -131,7 +132,19 @@ function comparisonDto({ request, suppliers, result }: ComparisonView) {
 @Controller("v1")
 @UseGuards(TenantGuard)
 export class OffersController {
-  constructor(@Inject(OffersService) private readonly offers: OffersService) {}
+  constructor(
+    @Inject(OffersService) private readonly offers: OffersService,
+    @Inject(PriceRequestsService) private readonly requests: PriceRequestsService,
+  ) {}
+
+  /** §47.5 : « Lire le bon de commande » photographié : l'IA lit les lignes, le code fait les écarts et le journal. */
+  @Throttle({ default: HOURLY(30) })
+  @Post("price-requests/:id/order/analysis")
+  @HttpCode(201)
+  async readOrder(@Tenant() tenant: TenantContext, @Param("id") id: string) {
+    const lines = await this.offers.readOrderLines(tenant, id);
+    return priceRequestDto(await this.requests.completeOrderReading(tenant, id, lines));
+  }
 
   /** Lit le devis reçu d'un fournisseur par l'IA (1 analyse), ou renvoie la lecture déjà faite. */
   @Throttle({ default: HOURLY(30) })

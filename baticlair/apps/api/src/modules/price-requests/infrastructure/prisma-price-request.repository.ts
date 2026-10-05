@@ -1,9 +1,11 @@
+import { Prisma } from "../../../generated/prisma/client.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { isUuid } from "../../../platform/validation/ids.js";
 import type { TenantContext } from "../../tenancy/index.js";
 import type { RequestedLine } from "../application/price-request-email.js";
 import type { SupplierPacket } from "../application/supplier-packet.js";
 import type {
+  OrderFeedback,
   PriceRequestRecord,
   PriceRequestRepository,
   RecipientStatus,
@@ -40,6 +42,7 @@ interface Row {
   createdAt: Date;
   classifiedAt: Date | null;
   retainedSupplierIds: string[];
+  orderFeedback?: unknown;
   recipients: {
     id: string;
     status: RecipientStatus;
@@ -139,6 +142,7 @@ function toRecord(row: Row): PriceRequestRecord {
     createdAt: row.createdAt,
     classifiedAt: row.classifiedAt,
     retainedSupplierIds: row.retainedSupplierIds,
+    orderFeedback: (row.orderFeedback ?? null) as OrderFeedback | null,
     recipients: row.recipients.map((r) => ({
       id: r.id,
       supplier: r.supplier,
@@ -341,6 +345,13 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
     await this.prisma.priceRequest.updateMany({
       where: { id, companyId: tenant.companyId },
       data: retainedSupplierIds ? { classifiedAt: new Date(), retainedSupplierIds } : { classifiedAt: null, retainedSupplierIds: [] },
+    });
+  }
+
+  async setOrderFeedback(tenant: TenantContext, id: string, feedback: OrderFeedback | null): Promise<void> {
+    await this.prisma.priceRequest.updateMany({
+      where: { id, companyId: tenant.companyId },
+      data: { orderFeedback: feedback ? (feedback as unknown as Prisma.InputJsonValue) : Prisma.DbNull },
     });
   }
 

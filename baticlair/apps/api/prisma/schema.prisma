@@ -575,6 +575,9 @@ model PriceRequest {
   /// « Classé » : l'artisan a fait son choix (fournisseurs retenus facultatifs).
   classifiedAt        DateTime?
   retainedSupplierIds String[]  @default([])
+  /// §47.5 retour fournisseur : « commandé tel quel » ou « modifié » (bon de commande collé ou photographié), et les
+  /// écarts avec la liste envoyée ; ils sont aussi au journal des corrections, marqués « bon de commande ».
+  orderFeedback       Json?
 
   company    Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
   project    Project                 @relation(fields: [projectId], references: [id], onDelete: Cascade)
