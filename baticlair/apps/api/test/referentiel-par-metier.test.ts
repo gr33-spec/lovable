@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { CARRELAGE_REFERENTIAL, MACONNERIE_REFERENTIAL, PEINTURE_REFERENTIAL, PLATRERIE_REFERENTIAL, ROOFING_REFERENTIAL } from "@baticlair/domain";
+import { CARRELAGE_REFERENTIAL, MACONNERIE_REFERENTIAL, METIER_NAMES, PEINTURE_REFERENTIAL, PLATRERIE_REFERENTIAL, REFERENTIALS, ROOFING_REFERENTIAL } from "@baticlair/domain";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
 /**
@@ -79,7 +79,8 @@ describe("la porte choisit le référentiel selon le métier", () => {
       code: "no_referential",
       details: {
         metier: "flooring",
-        disponibles: ["couverture", "platrerie", "carrelage", "peinture", "maconnerie", "electricite", "plomberie", "menuiserie", "chauffage-ventilation"],
+        // Tous les tiroirs ouverts, dans l'ordre du registre (le lot B en ajoute par paquets).
+        disponibles: REFERENTIALS.map((r) => METIER_NAMES[r.trade]),
       },
     });
     expect(JSON.stringify(res.body)).toContain("couverture, platrerie");

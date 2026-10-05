@@ -1,6 +1,9 @@
 import {
+  CARPENTRY_PROFILE,
+  CLADDING_PROFILE,
   DRYWALL_PROFILE,
   ELECTRICAL_PROFILE,
+  FACADE_PROFILE,
   FLOORING_PROFILE,
   HVAC_PROFILE,
   JOINERY_PROFILE,
@@ -9,6 +12,7 @@ import {
   PAINTING_PROFILE,
   PLUMBING_PROFILE,
   TILING_PROFILE,
+  WATERPROOFING_PROFILE,
 } from "./light-profiles.js";
 import { ROOFING_PROFILE } from "./roofing.js";
 import type { TradeProfile } from "./trade-profile.js";
@@ -28,6 +32,10 @@ export const TRADES: readonly { id: string; label: string }[] = [
   { id: "plumbing", label: "Plomberie, chauffage" },
   { id: "joinery", label: "Menuiserie" },
   { id: "hvac", label: "Chauffage, ventilation" },
+  { id: "carpentry", label: "Charpente" },
+  { id: "waterproofing", label: "Étanchéité" },
+  { id: "cladding", label: "Bardage" },
+  { id: "facade", label: "Façade, ravalement" },
   { id: "other", label: "Autre métier" },
 ];
 
@@ -42,6 +50,10 @@ export const TRADE_PROFILES: Readonly<Record<string, TradeProfile>> = {
   plumbing: PLUMBING_PROFILE,
   joinery: JOINERY_PROFILE,
   hvac: HVAC_PROFILE,
+  carpentry: CARPENTRY_PROFILE,
+  waterproofing: WATERPROOFING_PROFILE,
+  cladding: CLADDING_PROFILE,
+  facade: FACADE_PROFILE,
   other: OTHER_PROFILE,
 };
 

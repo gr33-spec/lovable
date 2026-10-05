@@ -182,4 +182,31 @@ export const HVAC_PROFILE = light("hvac", "Chauffage, ventilation (PAC, VMC, cli
   f("hvac_emitter", "Radiateur, plancher chauffant", ["radiateur", "plancher chauffant", "collecteur", "seche serviette"]),
 ], ["mise en service", "tirage au vide", "recharge"]);
 
+export const CARPENTRY_PROFILE = light("carpentry", "Charpente", [
+  f("carp_timber", "Bois de charpente", ["chevron", "chevrons", "panne", "sabliere", "faitage", "madrier", "bastaing", "solive", "poutre", "fermette", "fermettes", "charpente", "planche de rive", "bandeau", "arbaletrier", "entrait"], AREA_OF_WORK),
+  f("carp_connector", "Connecteur, quincaillerie", ["equerre", "sabot", "feuillard", "connecteur", "tire fond", "boulon", "pointe torsadee"]),
+  f("carp_treatment", "Traitement des bois", ["traitement", "insecticide", "fongicide"], AREA_OF_WORK),
+], ["levage", "grutage", "depose de charpente"]);
+
+export const WATERPROOFING_PROFILE = light("waterproofing", "Étanchéité (toiture-terrasse)", [
+  f("wp_membrane", "Membrane d'étanchéité", ["etancheite", "membrane", "bitume", "sbs", "bicouche", "monocouche", "epdm", "pvc", "tpo", "autoprotegee", "toiture terrasse"], AREA_OF_WORK),
+  f("wp_insulation", "Isolant de toiture-terrasse", ["pir", "polyurethane", "laine de roche", "pse", "verre cellulaire", "isolant"], AREA_OF_WORK),
+  f("wp_accessory", "EEP, crapaudine, couvertine", ["eep", "entree d eau pluviale", "crapaudine", "couvertine", "trop plein", "acrotere", "releve"]),
+  f("wp_primer", "Primaire, colle", ["eif", "primaire", "colle"], AREA_OF_WORK),
+]);
+
+export const CLADDING_PROFILE = light("cladding", "Bardage", [
+  f("clad_board", "Lame de bardage", ["bardage", "clin", "lame", "claire voie", "douglas", "meleze", "red cedar", "fibres ciment", "composite"], AREA_OF_WORK),
+  f("clad_frame", "Tasseau, ossature", ["tasseau", "tasseaux", "chevron", "liteau"]),
+  f("clad_membrane", "Pare-pluie", ["pare pluie", "ecran", "pare-pluie"], AREA_OF_WORK),
+  f("clad_fixing", "Pointe, clip, vis", ["pointe", "pointes", "clip", "clips", "vis inox"]),
+]);
+
+export const FACADE_PROFILE = light("facade", "Façade, ravalement, ITE", [
+  f("fac_render", "Enduit de façade", ["enduit", "monocouche", "crepi", "gobetis", "sous enduit", "ravalement"], AREA_OF_WORK),
+  f("fac_ite", "Isolation par l'extérieur", ["ite", "isolation thermique par l exterieur", "isolation par l exterieur", "etics", "polystyrene", "pse", "laine de roche", "isolant"], AREA_OF_WORK),
+  f("fac_profile", "Rail, cornière, treillis", ["rail de depart", "corniere", "treillis", "profile", "baguette d angle"]),
+  f("fac_paint", "Peinture de façade", ["peinture facade", "d2", "d3", "pliolite", "siloxane", "hydrofuge"], AREA_OF_WORK),
+], ["echafaudage", "nettoyage haute pression", "lavage"]);
+
 export const OTHER_PROFILE = light("other", "Autre métier", []);
