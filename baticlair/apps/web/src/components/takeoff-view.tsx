@@ -46,6 +46,8 @@ export function TrustHeader({ counts }: { counts: TakeoffView["counts"] }) {
 
 export interface DecisionHandlers {
   onDecide: (d: TakeoffDecision) => Promise<void>;
+  /** « Tout est bon » : plusieurs lignes qui n'attendent qu'une confirmation, en un envoi. */
+  onDecideMany?: (ds: readonly TakeoffDecision[]) => Promise<void>;
   onAnswer: (key: string, value: string | { value: string; unit: string } | null) => Promise<void>;
   onSaveLine: (lineId: string, fields: { designation: string; quantity: string | null; unit: string | null; reference: string | null }) => Promise<void>;
   onDeleteLine: (lineId: string) => Promise<void>;

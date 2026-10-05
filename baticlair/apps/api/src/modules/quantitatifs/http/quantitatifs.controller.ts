@@ -58,7 +58,8 @@ const reponses = z.object({
   reponses: z
     .array(z.object({ question: z.string().min(1).max(200), valeur: z.string().trim().max(120).nullable(), unite: z.string().max(20).optional() }))
     .min(1)
-    .max(20),
+    // « Tout est bon » : toutes les lignes qui n'attendent qu'une confirmation, en un envoi (gros devis : 180 lignes).
+    .max(500),
 });
 
 const correction = z.discriminatedUnion("action", [

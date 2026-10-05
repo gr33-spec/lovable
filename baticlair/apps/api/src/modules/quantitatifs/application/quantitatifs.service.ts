@@ -200,7 +200,23 @@ export class QuantitatifsService {
   async answer(tenant: TenantContext, id: string, reponses: readonly { question: string; valeur: string | null; unite?: string | undefined }[], rendu: Rendu = {}) {
     const row = await this.row(tenant, id);
     let reviewed = await this.ready(tenant, row);
+    // « Tout est bon » : les lignes gardées telles qu'écrites (ou comptées à la pièce) se confirment en une fois, avec
+    // une entrée au journal par ligne, au lieu d'un recalcul par ligne.
+    const together = reponses.filter((r) => {
+      const d = reviewed.purchase.questions.find((x) => x.key === r.question);
+      return r.valeur === "ok" && d !== undefined && !d.question && !d.key.startsWith(RATIO) && (d.primary?.action === "keep" || d.primary?.action === "pieces");
+    });
+    if (together.length > 1) {
+      const decisions = together.map((r) => reviewed.purchase.questions.find((x) => x.key === r.question)!);
+      for (const action of ["keep", "pieces"] as const) {
+        const own = decisions.filter((d) => d.primary!.action === action);
+        if (own.length === 0) continue;
+        reviewed = await this.takeoffs.decide(tenant, reviewed.takeoff.id, { action, lineIds: own.flatMap((d) => d.lineIds), pieceLineIds: own.flatMap((d) => d.pieceLineIds ?? []) });
+      }
+    }
+    const done = new Set(together.length > 1 ? together.map((r) => r.question) : []);
     for (const r of reponses) {
+      if (done.has(r.question)) continue;
       const decision = reviewed.purchase.questions.find((d) => d.key === r.question);
       const q = decision?.question;
       // §47.3 : « C'est bon » sur une quantité calculée avec une règle « à vérifier ».

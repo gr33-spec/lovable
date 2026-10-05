@@ -113,6 +113,19 @@ export function SupplyList({
   if (chain && !pending && !stillOpen && !nextToCheck) setChain(false);
   const open = stillOpen ?? (chain && !pending ? nextToCheck : null);
   const decision = open?.decisionKey ? decisions.get(open.decisionKey) : undefined;
+  // « Tout est bon » (retour du fondateur, 2026-10-05 : « 182 lignes à corriger, c'est hyper long ») : les lignes
+  // orange qui n'attendent qu'une confirmation (garder telle qu'écrite, compter à la pièce, ratio à confirmer) se règlent
+  // d'un appui ; seules les vraies questions (un choix à faire) restent une par une.
+  const simple = [
+    ...new Map(
+      toCheck
+        .map((r) => (r.decisionKey ? decisions.get(r.decisionKey) : undefined))
+        .filter((d): d is TakeoffDecision => d !== undefined && !d.question?.options?.length && (d.key.startsWith(RATIO) || d.primary?.action === "keep" || d.primary?.action === "pieces"))
+        .map((d) => [d.key, d]),
+    ).values(),
+  ];
+  const simpleRows = toCheck.filter((r) => r.decisionKey && simple.some((d) => d.key === r.decisionKey)).length;
+  const [confirmAll, setConfirmAll] = useState(false);
   const removableRow = (r: ScreenRow) => editable && (r.itemKey !== undefined || r.lineIds.length > 0);
   // Deux blocs titrés seulement quand il y a les deux : une liste toute prête n'a pas besoin de titre.
   const split = rows.some((r) => r.status === "check") && rows.some((r) => r.status !== "check");
@@ -154,6 +167,41 @@ export function SupplyList({
                 <span className={`size-2 rounded-full ${b.key === "check" ? "bg-warn" : "bg-ok"}`} aria-hidden="true" />
                 {b.label} ({count})
               </h3>
+            ) : null}
+            {b.key === "check" && editable && handlers.onDecideMany && simpleRows >= 2 ? (
+              <div className="mx-4 mt-2 flex flex-col gap-2 rounded-2xl bg-warn-bg p-3">
+                {confirmAll ? (
+                  <>
+                    <p className="text-[14px] font-bold">
+                      Garder les {simpleRows} lignes telles qu&apos;elles sont ? Les questions à choix restent à faire.
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        pending={pending}
+                        onClick={async () => {
+                          await handlers.onDecideMany!(simple);
+                          setConfirmAll(false);
+                        }}
+                      >
+                        Oui, tout est bon
+                      </Button>
+                      <Button variant="secondary" onClick={() => setConfirmAll(false)}>
+                        Annuler
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-[14px] leading-snug font-semibold">
+                      {simpleRows} lignes n&apos;attendent qu&apos;un « C&apos;est bon » : relisez-les d&apos;un coup d&apos;œil.
+                    </p>
+                    <Button variant="secondary" onClick={() => setConfirmAll(true)}>
+                      <Check size={18} aria-hidden="true" />
+                      Tout est bon ({simpleRows})
+                    </Button>
+                  </>
+                )}
+              </div>
             ) : null}
             {groups.map(({ g, visible }) => (
               <div key={g.key} className="flex flex-col gap-1 px-4 pt-3">
