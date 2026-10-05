@@ -234,4 +234,27 @@ export const SOLAR_PROFILE = light("solar", "Photovoltaïque", [
   f("pv_electric", "Onduleur, câble solaire", ["onduleur", "micro onduleur", "cable solaire", "coffret ac", "coffret dc"]),
 ], ["mise en service", "consuel", "raccordement enedis"]);
 
+export const DECKING_PROFILE = light("decking", "Terrasse bois", [
+  f("deck_board", "Lame de terrasse", ["terrasse", "lame", "lames", "platelage", "pin classe 4", "ipe", "composite"], AREA_OF_WORK),
+  f("deck_frame", "Lambourde, plot", ["lambourde", "lambourdes", "plot", "plots", "dalle gravillonnee"]),
+  f("deck_finish", "Vis, saturateur", ["vis inox", "saturateur", "huile"], AREA_OF_WORK),
+]);
+
+export const PAVING_PROFILE = light("paving", "Pavage, dallage extérieur", [
+  f("pav_paver", "Pavé, dalle extérieure", ["pave", "paves", "pavage", "dalle exterieure", "dalles exterieures"], AREA_OF_WORK),
+  f("pav_kerb", "Bordure", ["bordure", "bordures", "bordurette", "caniveau"]),
+  f("pav_bed", "Sable, lit de pose", ["sable", "lit de pose", "gravillon"], AREA_OF_WORK),
+]);
+
+export const EARTHWORKS_PROFILE = light("earthworks", "Terrassement, VRD", [
+  f("ew_aggregate", "Grave, tout-venant", ["gnt", "grave", "tout venant", "couche de forme", "empierrement", "herisson", "remblai"], AREA_OF_WORK),
+  f("ew_film", "Film, géotextile", ["polyane", "film polyethylene", "geotextile"], AREA_OF_WORK),
+  f("ew_sanitation", "Assainissement", ["fosse toutes eaux", "fosse septique", "microstation", "regard", "tuyau cr8", "epandage"]),
+], ["terrassement", "decapage", "deblai", "evacuation des terres", "fouille"]);
+
+export const IRRIGATION_PROFILE = light("irrigation", "Arrosage automatique", [
+  f("irr_network", "Arrosage, tube PE", ["arrosage", "tube pe", "goutte a goutte", "pelouse"], AREA_OF_WORK),
+  f("irr_head", "Arroseur, électrovanne", ["tuyere", "turbine", "arroseur", "electrovanne", "programmateur", "regard de vannes"]),
+]);
+
 export const OTHER_PROFILE = light("other", "Autre métier", []);
