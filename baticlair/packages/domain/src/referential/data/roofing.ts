@@ -776,6 +776,93 @@ const NB_ANGLES_PARAM: ParamDef = {
     { value: "3", keywords: ["3 angles", "trois angles"] },
   ],
 };
+/**
+ * Bac acier (§8) : simple peau ou panneau sandwich, lu dans la ligne (« sandwich ») ; la teinte et le feutre
+ * anti-condensation sont ce que le comptoir demande ; la longueur des plaques est celle du rampant (+ 5 cm de débord).
+ */
+const TYPE_BAC_PARAM: ParamDef = {
+  key: "type_bac",
+  label: "Bac acier",
+  unit: "u",
+  kind: "site_data",
+  question: "Bac acier simple peau ou panneau sandwich ?",
+  default: { value: "1", source: F, verification: FOUNDER_DOC, version: 1, note: "simple peau : le devis ne dit pas sandwich" },
+  choices: [
+    { label: "Simple peau", value: "1" },
+    { label: "Panneau sandwich", value: "2" },
+  ],
+  textValues: [{ value: "2", keywords: ["sandwich", "isole", "isolant"] }],
+  display: { "1": "simple peau", "2": "panneau sandwich" },
+};
+const TEINTE_BAC_PARAM: ParamDef = {
+  key: "teinte_bac",
+  label: "Teinte du bac acier",
+  unit: "u",
+  kind: "site_data",
+  question: "Bac acier : quelle teinte ?",
+  choices: [
+    { label: "Gris anthracite (RAL 7016)", value: "7016" },
+    { label: "Gris ardoise (RAL 7022)", value: "7022" },
+    { label: "Rouge tuile (RAL 8012)", value: "8012" },
+    { label: "Noir (RAL 9005)", value: "9005" },
+  ],
+  textValues: [
+    { value: "7016", keywords: ["7016", "anthracite"] },
+    { value: "7022", keywords: ["7022", "gris ardoise"] },
+    { value: "8012", keywords: ["8012", "rouge tuile", "tuile rouge"] },
+    { value: "9005", keywords: ["9005", "noir"] },
+  ],
+  display: { "7016": "RAL 7016", "7022": "RAL 7022", "8012": "RAL 8012", "9005": "RAL 9005" },
+};
+const FEUTRE_BAC_PARAM: ParamDef = {
+  key: "feutre_bac",
+  label: "Feutre anti-condensation",
+  unit: "u",
+  kind: "site_data",
+  question: "Bac acier : avec ou sans feutre anti-condensation ?",
+  choices: [
+    { label: "Avec feutre", value: "1" },
+    { label: "Sans feutre", value: "2" },
+  ],
+  textValues: [
+    { value: "2", keywords: ["sans feutre", "sans anti condensation", "sans anticondensation"] },
+    { value: "1", keywords: ["anti condensation", "anticondensation", "anti-condensation", "avec feutre", "feutre"] },
+  ],
+  display: { "1": "avec feutre anti-condensation", "2": "sans feutre" },
+};
+// Même clé que le rampant de l'ardoise (la note « rampant 6 m » vaut pour les deux) ; ici sans hypothèse : la plaque de
+// bac se fabrique à cette longueur, le comptoir la demande (§47.8).
+const LONGUEUR_PLAQUES_PARAM: ParamDef = {
+  key: "longueur_rampant",
+  label: "Longueur de rampant (plaques)",
+  unit: "m",
+  kind: "site_data",
+  question: "Bac acier : longueur du rampant (longueur des plaques) ?",
+  hint: "Les plaques se commandent à la longueur du rampant, débord de 5 cm compris.",
+  textLabels: ["rampant", "rampants", "longueur des plaques"],
+  choices: [
+    { label: "4 m", value: "4" },
+    { label: "5 m", value: "5" },
+    { label: "6 m", value: "6" },
+    { label: "7 m", value: "7" },
+  ],
+};
+const PANS_BAC_PARAM: ParamDef = {
+  key: "nb_pans",
+  label: "Pans",
+  unit: "u",
+  kind: "site_data",
+  question: "Toit à un pan ou à deux pans ?",
+  default: { value: "2", source: F, verification: FOUNDER_DOC, version: 1, note: "deux pans, un faîtage" },
+  choices: [
+    { label: "Un pan (monopente)", value: "1" },
+    { label: "Deux pans", value: "2" },
+  ],
+  textValues: [
+    { value: "1", keywords: ["monopente", "mono pente", "1 pan", "un pan", "appentis"] },
+    { value: "2", keywords: ["2 pans", "deux pans", "double pente", "bipente"] },
+  ],
+};
 /** Poids d'une bande zinc plate : 4,7 kg/m² en 0,65 mm (§7) ; 7,2 kg/m² par mm d'épaisseur pour 0,70 et 0,80 (masse volumique du zinc). */
 const ZINC_PLAT_CONSTANTS = {
   poids_plat_065: condition("4.7", "kg/m2", F, FOUNDER_DOC, "« kg ≈ m² dév. × 4,7 (ép. 0,65) » (§7)."),
@@ -891,7 +978,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.05-28",
+  version: "roofing-2026.10.05-29",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -1164,6 +1251,19 @@ export const ROOFING_REFERENTIAL: Referential = {
     { code: "outlet_cap", label: "Chapeau de sortie de toit", needUnit: "u", attributes: [], keyAttributes: [] },
     { code: "outlet_collar", label: "Collerette d'étanchéité de conduit de fumée", needUnit: "u", attributes: [], keyAttributes: [] },
     // §5 : « Arêtier (même pièce que faîtière en général) : ml arêtier / 0,35 ≈ 2,9 pièces/ml » ; en zinc, une bande (§3).
+    // §8 : bac acier, commandé en plaques à longueur (jamais en m²), vis, closoirs, faîtière.
+    {
+      code: "steel_tray",
+      label: "Couverture bac acier",
+      needUnit: "m2",
+      attributes: [],
+      keyAttributes: [],
+      keywords: ["bac acier", "bacs acier", "bacs aciers", "tole nervuree", "toles nervurees", "panneau sandwich", "panneaux sandwich", "bac sec", "couverture acier"],
+    },
+    { code: "steel_sheet", label: "Plaque bac acier", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "steel_screw", label: "Vis de bac acier", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "steel_closure", label: "Closoir de bac acier", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "steel_ridge", label: "Faîtière de bac acier", needUnit: "u", attributes: [], keyAttributes: [] },
     { code: "hip", label: "Arêtier", needUnit: "u", attributes: [{ key: "pieces_par_ml", label: "Pièces au mètre", unit: "u/m" }], keyAttributes: [], keywords: ["aretier", "aretiers", "aretiere", "aretieres"] },
     // §3 : « Arêtier ou faîtage en zinc : bande zinc dév. 25 à 33 cm, longueurs 3 m ». Un article à part de la bande de faîtage.
     { code: "hip_closure", label: "Closoir d'arêtier", needUnit: "ml", attributes: [], keyAttributes: [] },
@@ -1411,6 +1511,13 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("gouttiere-pvc-alu-4m", "gutter_plastic", "Gouttière PVC ou aluminium, longueurs de 4 m (profil et teinte à préciser)", "Gouttière PVC / alu", {
       sellingUnits: [{ id: "longueur", label: { one: "longueur de 4 m", many: "longueurs de 4 m" }, contains: packaging("4", "m", F, FOUNDER_DOC, "« longueur 4 m » (§15)."), primary: true }],
     }),
+    // §8 : « plaque à longueur » ; vis autoperceuses avec rondelle EPDM en boîtes de 100 ; closoirs mousse ; faîtière 2 m.
+    generic("plaque-bac-acier", "steel_sheet", "Plaque bac acier à la longueur du rampant (type, teinte et largeur utile du chantier)", "Plaques bac acier"),
+    generic("vis-bac-acier", "steel_screw", "Vis autoperceuses avec rondelle EPDM pour bac acier, boîte de 100", "Vis de bac acier", {
+      sellingUnits: [{ id: "boite", label: { one: "boîte de 100", many: "boîtes de 100" }, contains: packaging("100", "u", F, FOUNDER_DOC, "« boîte de 100 » (§8)."), primary: true }],
+    }),
+    generic("closoir-bac-acier", "steel_closure", "Closoir mousse profilé au bac acier", "Closoirs mousse"),
+    generic("faitiere-bac-acier", "steel_ridge", "Faîtière de bac acier, longueur 2 m (teinte du bac)", "Faîtières bac acier"),
     generic("jonction-gouttiere", "gutter_joint", "Jonction de gouttière (système de la gouttière)", "Jonctions de gouttière"),
     generic("talon-gouttiere", "gutter_end", "Talon (fond) de gouttière (système de la gouttière)", "Talons de gouttière"),
     generic("angle-gouttiere", "gutter_angle", "Angle de gouttière 90° (système de la gouttière)", "Angles de gouttière"),
@@ -2735,6 +2842,108 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "m2",
           core: true,
           exclusions: "Support bois massif (§36.4) ; la marge de 5 % couvre les chutes. Pointes à part.",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+      ],
+    },
+    {
+      // §8 : « nb = largeur pan / 1,00 arrondi sup. × nb de plaques par rampant ; longueur = rampant + 5 cm de débord » ;
+      // la largeur des pans se déduit de la surface et du rampant. Vis 7/m² + 3/ml de rive ; closoirs 1 en bas et 1 en
+      // haut par plaque ; faîtière « ml / 2 arrondi sup., +1 ».
+      id: "couverture-bac-acier",
+      trade: "roofing",
+      section: "principal",
+      label: "Couverture bac acier (plaques à longueur, vis, closoirs, faîtière)",
+      triggers: ["steel_tray"],
+      params: [SURFACE_PARAM, LONGUEUR_PLAQUES_PARAM, TYPE_BAC_PARAM, TEINTE_BAC_PARAM, FEUTRE_BAC_PARAM, PANS_BAC_PARAM],
+      slots: [
+        { key: "couverture", family: "steel_tray", label: "Bac acier", measureOnly: true },
+        { key: "plaque", family: "steel_sheet", label: "Plaques bac acier", usual: { text: "Bac de largeur utile 1,00 m, une plaque par rampant (§8).", source: F, productId: "plaque-bac-acier" } },
+        { key: "vis", family: "steel_screw", label: "Vis", usual: { text: "Vis autoperceuses avec rondelle EPDM (§8).", source: F, productId: "vis-bac-acier" } },
+        { key: "closoir", family: "steel_closure", label: "Closoirs", usual: { text: "Closoirs mousse profilés, en bas et en haut de chaque plaque (§8).", source: F, productId: "closoir-bac-acier" } },
+        { key: "faitiere", family: "steel_ridge", label: "Faîtières", usual: { text: "Faîtière de bac en longueurs de 2 m (§8).", source: F, productId: "faitiere-bac-acier" } },
+      ],
+      constants: {
+        largeur_utile: condition("1", "m", F, FOUNDER_DOC, "« Largeur utile courante 1,00 m (bac 1000) » (§8)."),
+        debord: condition("0.05", "m", F, FOUNDER_DOC, "« longueur = rampant + 5 cm de débord » (§8)."),
+        vis_par_m2: condition("7", "u/m2", F, FOUNDER_DOC, "« m² × 7 » (§8)."),
+        vis_par_ml_rive: condition("3", "u/m", F, FOUNDER_DOC, "« + ml rives × 3 » (§8)."),
+        closoirs_par_plaque: condition("2", "u", F, FOUNDER_DOC, "« 1 par plaque en bas, 1 par plaque en haut » (§8)."),
+        faitiere: condition("2", "m", F, FOUNDER_DOC, "« ml / 2 ou 3 arrondi sup., +1 » (§8), longueurs de 2 m."),
+      },
+      derived: [
+        { key: "longueur_commande", label: "Longueur des plaques commandées", unit: "m", formula: "longueur_rampant + regle.debord", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
+        { key: "largeur_pan", label: "Largeur d'un pan", unit: "m", formula: "surface / nb_pans / longueur_rampant", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
+      ],
+      needs: [
+        {
+          id: "plaques",
+          slot: "plaque",
+          when: "type_bac < 2",
+          formula: "nb_pans * arrondi_sup(largeur_pan / regle.largeur_utile)",
+          unit: "u",
+          core: true,
+          exclusions: "Une plaque par rampant (jusqu'à 12 m) ; au-delà, deux longueurs avec recouvrement de 15 à 20 cm.",
+          designation: "Plaques bac acier simple peau {teinte_bac} {feutre_bac}, longueur {longueur_commande|m}",
+          precision: "{surface|m2} de toiture, largeur utile 1,00 m",
+          precisionRequires: ["teinte_bac", "feutre_bac"],
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          // Le panneau sandwich est isolé : pas de feutre anti-condensation à demander (§8, « option intégrée au bac »).
+          id: "panneaux-sandwich",
+          slot: "plaque",
+          when: "type_bac >= 2",
+          formula: "nb_pans * arrondi_sup(largeur_pan / regle.largeur_utile)",
+          unit: "u",
+          core: true,
+          exclusions: "Un panneau par rampant (jusqu'à 12 m).",
+          designation: "Panneaux sandwich {teinte_bac}, longueur {longueur_commande|m}",
+          precision: "{surface|m2} de toiture, largeur utile 1,00 m",
+          precisionRequires: ["teinte_bac"],
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "vis",
+          slot: "vis",
+          formula: "arrondi_sup(surface * regle.vis_par_m2 + nb_pans * 2 * longueur_rampant * regle.vis_par_ml_rive)",
+          unit: "u",
+          core: true,
+          exclusions: "7 vis par m² et 3 par mètre de rive (deux rives par pan).",
+          designation: "Vis autoperceuses bac acier avec rondelle EPDM",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "closoirs",
+          slot: "closoir",
+          formula: "nb_pans * arrondi_sup(largeur_pan / regle.largeur_utile) * regle.closoirs_par_plaque",
+          unit: "u",
+          core: true,
+          exclusions: "Un closoir en bas et un en haut de chaque plaque.",
+          designation: "Closoirs mousse profilés au bac acier",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "faitieres",
+          slot: "faitiere",
+          when: "nb_pans >= 2",
+          formula: "arrondi_sup(largeur_pan / regle.faitiere) + 1",
+          unit: "u",
+          core: true,
+          exclusions: "Faîtage de la largeur d'un pan, longueurs de 2 m, une de plus pour les recouvrements.",
+          designation: "Faîtières bac acier {teinte_bac}, longueur 2 m",
+          precision: "{largeur_pan|ml} de faîtage",
+          precisionRequires: ["teinte_bac"],
           source: F,
           verification: FOUNDER_DOC,
           version: 1,

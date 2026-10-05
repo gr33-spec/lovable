@@ -43,6 +43,11 @@ const COMPTOIR: Record<string, string> = {
   matiere_gouttiere: "« PVC ou alu ? » (toujours lu : c'est lui qui choisit l'ouvrage)",
   teinte_gouttiere: "« grise, blanche ou sable ? »",
   nb_angles: "« combien d'angles ? »",
+  // Jamais demandée pour l'ardoise ou la tuile (hypothèse dite, ci-dessous) ; pour le bac acier, c'est la longueur des
+  // plaques fabriquées : le comptoir ne la devine pas.
+  longueur_rampant: "« tes plaques font quelle longueur ? » (bac acier seulement)",
+  teinte_bac: "« quel RAL ? »",
+  feutre_bac: "« avec ou sans anti-condensation ? »",
 };
 /** Ce que le comptoir ne demande jamais : une hypothèse, dite et modifiable d'un tap. */
 const JAMAIS: readonly string[] = ["zone", "entraxe_supports", "pureau", "pente", "longueur_rampant", "epaisseur_zinc", "diametre_crochet", "coudes_par_descente"];

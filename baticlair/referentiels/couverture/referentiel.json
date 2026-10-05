@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.05-28",
+  "version": "roofing-2026.10.05-29",
   "trade": "roofing",
   "sources": [
     {
@@ -732,6 +732,52 @@
     {
       "code": "outlet_collar",
       "label": "Collerette d'étanchéité de conduit de fumée",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "steel_tray",
+      "label": "Couverture bac acier",
+      "needUnit": "m2",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "bac acier",
+        "bacs acier",
+        "bacs aciers",
+        "tole nervuree",
+        "toles nervurees",
+        "panneau sandwich",
+        "panneaux sandwich",
+        "bac sec",
+        "couverture acier"
+      ]
+    },
+    {
+      "code": "steel_sheet",
+      "label": "Plaque bac acier",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "steel_screw",
+      "label": "Vis de bac acier",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "steel_closure",
+      "label": "Closoir de bac acier",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "steel_ridge",
+      "label": "Faîtière de bac acier",
       "needUnit": "u",
       "attributes": [],
       "keyAttributes": []
@@ -2958,6 +3004,132 @@
             },
             "version": 1,
             "note": "« longueur 4 m » (§15)."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "plaque-bac-acier",
+      "family": "steel_sheet",
+      "label": "Plaque bac acier à la longueur du rampant (type, teinte et largeur utile du chantier)",
+      "shortLabel": "Plaques bac acier",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "vis-bac-acier",
+      "family": "steel_screw",
+      "label": "Vis autoperceuses avec rondelle EPDM pour bac acier, boîte de 100",
+      "shortLabel": "Vis de bac acier",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "boite",
+          "label": {
+            "one": "boîte de 100",
+            "many": "boîtes de 100"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "100",
+            "unit": "u",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "« boîte de 100 » (§8)."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "closoir-bac-acier",
+      "family": "steel_closure",
+      "label": "Closoir mousse profilé au bac acier",
+      "shortLabel": "Closoirs mousse",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "faitiere-bac-acier",
+      "family": "steel_ridge",
+      "label": "Faîtière de bac acier, longueur 2 m (teinte du bac)",
+      "shortLabel": "Faîtières bac acier",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
           },
           "primary": true
         }
@@ -11194,6 +11366,539 @@
           "unit": "m2",
           "core": true,
           "exclusions": "Support bois massif (§36.4) ; la marge de 5 % couvre les chutes. Pointes à part.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      ]
+    },
+    {
+      "id": "couverture-bac-acier",
+      "trade": "roofing",
+      "section": "principal",
+      "label": "Couverture bac acier (plaques à longueur, vis, closoirs, faîtière)",
+      "triggers": [
+        "steel_tray"
+      ],
+      "params": [
+        {
+          "key": "surface",
+          "label": "Surface de toiture",
+          "unit": "m2",
+          "kind": "site_data",
+          "question": "Surface du toit ?",
+          "fromLineQuantity": true,
+          "choices": [
+            {
+              "label": "50 m²",
+              "value": "50"
+            },
+            {
+              "label": "100 m²",
+              "value": "100"
+            },
+            {
+              "label": "150 m²",
+              "value": "150"
+            },
+            {
+              "label": "200 m²",
+              "value": "200"
+            }
+          ]
+        },
+        {
+          "key": "longueur_rampant",
+          "label": "Longueur de rampant (plaques)",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Bac acier : longueur du rampant (longueur des plaques) ?",
+          "hint": "Les plaques se commandent à la longueur du rampant, débord de 5 cm compris.",
+          "textLabels": [
+            "rampant",
+            "rampants",
+            "longueur des plaques"
+          ],
+          "choices": [
+            {
+              "label": "4 m",
+              "value": "4"
+            },
+            {
+              "label": "5 m",
+              "value": "5"
+            },
+            {
+              "label": "6 m",
+              "value": "6"
+            },
+            {
+              "label": "7 m",
+              "value": "7"
+            }
+          ]
+        },
+        {
+          "key": "type_bac",
+          "label": "Bac acier",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Bac acier simple peau ou panneau sandwich ?",
+          "default": {
+            "value": "1",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "simple peau : le devis ne dit pas sandwich"
+          },
+          "choices": [
+            {
+              "label": "Simple peau",
+              "value": "1"
+            },
+            {
+              "label": "Panneau sandwich",
+              "value": "2"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "sandwich",
+                "isole",
+                "isolant"
+              ]
+            }
+          ],
+          "display": {
+            "1": "simple peau",
+            "2": "panneau sandwich"
+          }
+        },
+        {
+          "key": "teinte_bac",
+          "label": "Teinte du bac acier",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Bac acier : quelle teinte ?",
+          "choices": [
+            {
+              "label": "Gris anthracite (RAL 7016)",
+              "value": "7016"
+            },
+            {
+              "label": "Gris ardoise (RAL 7022)",
+              "value": "7022"
+            },
+            {
+              "label": "Rouge tuile (RAL 8012)",
+              "value": "8012"
+            },
+            {
+              "label": "Noir (RAL 9005)",
+              "value": "9005"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "7016",
+              "keywords": [
+                "7016",
+                "anthracite"
+              ]
+            },
+            {
+              "value": "7022",
+              "keywords": [
+                "7022",
+                "gris ardoise"
+              ]
+            },
+            {
+              "value": "8012",
+              "keywords": [
+                "8012",
+                "rouge tuile",
+                "tuile rouge"
+              ]
+            },
+            {
+              "value": "9005",
+              "keywords": [
+                "9005",
+                "noir"
+              ]
+            }
+          ],
+          "display": {
+            "7016": "RAL 7016",
+            "7022": "RAL 7022",
+            "8012": "RAL 8012",
+            "9005": "RAL 9005"
+          }
+        },
+        {
+          "key": "feutre_bac",
+          "label": "Feutre anti-condensation",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Bac acier : avec ou sans feutre anti-condensation ?",
+          "choices": [
+            {
+              "label": "Avec feutre",
+              "value": "1"
+            },
+            {
+              "label": "Sans feutre",
+              "value": "2"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "sans feutre",
+                "sans anti condensation",
+                "sans anticondensation"
+              ]
+            },
+            {
+              "value": "1",
+              "keywords": [
+                "anti condensation",
+                "anticondensation",
+                "anti-condensation",
+                "avec feutre",
+                "feutre"
+              ]
+            }
+          ],
+          "display": {
+            "1": "avec feutre anti-condensation",
+            "2": "sans feutre"
+          }
+        },
+        {
+          "key": "nb_pans",
+          "label": "Pans",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Toit à un pan ou à deux pans ?",
+          "default": {
+            "value": "2",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "deux pans, un faîtage"
+          },
+          "choices": [
+            {
+              "label": "Un pan (monopente)",
+              "value": "1"
+            },
+            {
+              "label": "Deux pans",
+              "value": "2"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "monopente",
+                "mono pente",
+                "1 pan",
+                "un pan",
+                "appentis"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "2 pans",
+                "deux pans",
+                "double pente",
+                "bipente"
+              ]
+            }
+          ]
+        }
+      ],
+      "slots": [
+        {
+          "key": "couverture",
+          "family": "steel_tray",
+          "label": "Bac acier",
+          "measureOnly": true
+        },
+        {
+          "key": "plaque",
+          "family": "steel_sheet",
+          "label": "Plaques bac acier",
+          "usual": {
+            "text": "Bac de largeur utile 1,00 m, une plaque par rampant (§8).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "plaque-bac-acier"
+          }
+        },
+        {
+          "key": "vis",
+          "family": "steel_screw",
+          "label": "Vis",
+          "usual": {
+            "text": "Vis autoperceuses avec rondelle EPDM (§8).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "vis-bac-acier"
+          }
+        },
+        {
+          "key": "closoir",
+          "family": "steel_closure",
+          "label": "Closoirs",
+          "usual": {
+            "text": "Closoirs mousse profilés, en bas et en haut de chaque plaque (§8).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "closoir-bac-acier"
+          }
+        },
+        {
+          "key": "faitiere",
+          "family": "steel_ridge",
+          "label": "Faîtières",
+          "usual": {
+            "text": "Faîtière de bac en longueurs de 2 m (§8).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "faitiere-bac-acier"
+          }
+        }
+      ],
+      "constants": {
+        "largeur_utile": {
+          "kind": "installation_condition",
+          "value": "1",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« Largeur utile courante 1,00 m (bac 1000) » (§8)."
+        },
+        "debord": {
+          "kind": "installation_condition",
+          "value": "0.05",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« longueur = rampant + 5 cm de débord » (§8)."
+        },
+        "vis_par_m2": {
+          "kind": "installation_condition",
+          "value": "7",
+          "unit": "u/m2",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« m² × 7 » (§8)."
+        },
+        "vis_par_ml_rive": {
+          "kind": "installation_condition",
+          "value": "3",
+          "unit": "u/m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« + ml rives × 3 » (§8)."
+        },
+        "closoirs_par_plaque": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« 1 par plaque en bas, 1 par plaque en haut » (§8)."
+        },
+        "faitiere": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« ml / 2 ou 3 arrondi sup., +1 » (§8), longueurs de 2 m."
+        }
+      },
+      "derived": [
+        {
+          "key": "longueur_commande",
+          "label": "Longueur des plaques commandées",
+          "unit": "m",
+          "formula": "longueur_rampant + regle.debord",
+          "shown": true,
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "key": "largeur_pan",
+          "label": "Largeur d'un pan",
+          "unit": "m",
+          "formula": "surface / nb_pans / longueur_rampant",
+          "shown": true,
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      ],
+      "needs": [
+        {
+          "id": "plaques",
+          "slot": "plaque",
+          "when": "type_bac < 2",
+          "formula": "nb_pans * arrondi_sup(largeur_pan / regle.largeur_utile)",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une plaque par rampant (jusqu'à 12 m) ; au-delà, deux longueurs avec recouvrement de 15 à 20 cm.",
+          "designation": "Plaques bac acier simple peau {teinte_bac} {feutre_bac}, longueur {longueur_commande|m}",
+          "precision": "{surface|m2} de toiture, largeur utile 1,00 m",
+          "precisionRequires": [
+            "teinte_bac",
+            "feutre_bac"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "panneaux-sandwich",
+          "slot": "plaque",
+          "when": "type_bac >= 2",
+          "formula": "nb_pans * arrondi_sup(largeur_pan / regle.largeur_utile)",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un panneau par rampant (jusqu'à 12 m).",
+          "designation": "Panneaux sandwich {teinte_bac}, longueur {longueur_commande|m}",
+          "precision": "{surface|m2} de toiture, largeur utile 1,00 m",
+          "precisionRequires": [
+            "teinte_bac"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "vis",
+          "slot": "vis",
+          "formula": "arrondi_sup(surface * regle.vis_par_m2 + nb_pans * 2 * longueur_rampant * regle.vis_par_ml_rive)",
+          "unit": "u",
+          "core": true,
+          "exclusions": "7 vis par m² et 3 par mètre de rive (deux rives par pan).",
+          "designation": "Vis autoperceuses bac acier avec rondelle EPDM",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "closoirs",
+          "slot": "closoir",
+          "formula": "nb_pans * arrondi_sup(largeur_pan / regle.largeur_utile) * regle.closoirs_par_plaque",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un closoir en bas et un en haut de chaque plaque.",
+          "designation": "Closoirs mousse profilés au bac acier",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "faitieres",
+          "slot": "faitiere",
+          "when": "nb_pans >= 2",
+          "formula": "arrondi_sup(largeur_pan / regle.faitiere) + 1",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Faîtage de la largeur d'un pan, longueurs de 2 m, une de plus pour les recouvrements.",
+          "designation": "Faîtières bac acier {teinte_bac}, longueur 2 m",
+          "precision": "{largeur_pan|ml} de faîtage",
+          "precisionRequires": [
+            "teinte_bac"
+          ],
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
