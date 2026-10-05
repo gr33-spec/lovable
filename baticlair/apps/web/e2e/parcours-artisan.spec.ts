@@ -523,7 +523,14 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await expect(pointp.getByText(/command/i)).toHaveCount(0);
   await expect(pointp.getByText(/€/)).toHaveCount(0);
   await expect(page.getByText("Demande envoyée. Ajoutez ici le devis de chaque fournisseur quand il répond.")).toBeVisible();
-  // La demande est partie : le gros bouton de la liste ne propose plus un premier envoi.
+  // La demande est partie : la liste se replie en une ligne, les réponses des fournisseurs passent au-dessus
+  // (retour du fondateur, 2026-10-05) ; un appui la rouvre.
+  const repliee = page.getByRole("button", { name: /Liste des fournitures envoyée/ });
+  await expect(repliee).toBeVisible();
+  const [haut, bas] = await Promise.all([pointp.boundingBox(), repliee.boundingBox()]);
+  expect(haut!.y).toBeLessThan(bas!.y);
+  await repliee.click();
+  // Le gros bouton de la liste ne propose plus un premier envoi.
   const liste = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(liste.getByRole("button", { name: "Voir la demande envoyée" })).toBeVisible();
   await expect(liste.getByRole("button", { name: "Envoyer au fournisseur" })).toHaveCount(0);
