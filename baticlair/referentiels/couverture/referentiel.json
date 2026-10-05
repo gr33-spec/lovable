@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.05-29",
+  "version": "roofing-2026.10.05-30",
   "trade": "roofing",
   "sources": [
     {
@@ -668,6 +668,64 @@
       "keywords": [
         "ardoise"
       ]
+    },
+    {
+      "code": "roof_slate_fc",
+      "label": "Ardoise fibres-ciment",
+      "needUnit": "u",
+      "refines": "roof_slate",
+      "attributes": [
+        {
+          "key": "largeur",
+          "label": "Largeur",
+          "unit": "m"
+        },
+        {
+          "key": "longueur",
+          "label": "Longueur",
+          "unit": "m"
+        },
+        {
+          "key": "ardoises_par_m2",
+          "label": "Ardoises au m²",
+          "unit": "u/m2"
+        },
+        {
+          "key": "liteaux_par_m2",
+          "label": "Liteaux au m²",
+          "unit": "m/m2"
+        }
+      ],
+      "keyAttributes": [
+        "largeur",
+        "longueur"
+      ],
+      "keywords": [
+        "fibres ciment",
+        "fibre ciment",
+        "fibres-ciment",
+        "fibre-ciment",
+        "fibrociment",
+        "fibro ciment",
+        "fibro-ciment",
+        "artificielle",
+        "artificielles",
+        "eternit"
+      ]
+    },
+    {
+      "code": "slate_nail",
+      "label": "Clou d'ardoise",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "slate_wind_hook",
+      "label": "Crochet d'antivent",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
     },
     {
       "code": "slate_hook",
@@ -2877,6 +2935,436 @@
             },
             "version": 1,
             "note": "1,5 × 50 m = 75 m²."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "ardoise-fc-40x24",
+      "family": "roof_slate_fc",
+      "label": "Ardoise fibres-ciment 40 × 24 cm",
+      "shortLabel": "Ardoises fibres-ciment 40×24",
+      "aliases": [
+        "40x24",
+        "40 x 24",
+        "40*24",
+        "40 × 24",
+        "40×24"
+      ],
+      "generic": true,
+      "attributes": {
+        "longueur": {
+          "kind": "manufacturer_spec",
+          "value": "0.40",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "largeur": {
+          "kind": "manufacturer_spec",
+          "value": "0.24",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "ardoises_par_m2": {
+          "kind": "manufacturer_spec",
+          "value": "27.8",
+          "unit": "u/m2",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Recouvrement courant 100 mm (§4)."
+        },
+        "liteaux_par_m2": {
+          "kind": "manufacturer_spec",
+          "value": "6.67",
+          "unit": "m/m2",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Une file par pureau (§4)."
+        }
+      },
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "ardoise-fc-40x27",
+      "family": "roof_slate_fc",
+      "label": "Ardoise fibres-ciment 40 × 27 cm",
+      "shortLabel": "Ardoises fibres-ciment 40×27",
+      "aliases": [
+        "40x27",
+        "40 x 27",
+        "40*27",
+        "40 × 27",
+        "40×27"
+      ],
+      "generic": true,
+      "attributes": {
+        "longueur": {
+          "kind": "manufacturer_spec",
+          "value": "0.40",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "largeur": {
+          "kind": "manufacturer_spec",
+          "value": "0.27",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "ardoises_par_m2": {
+          "kind": "manufacturer_spec",
+          "value": "24.7",
+          "unit": "u/m2",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Recouvrement courant 100 mm (§4)."
+        },
+        "liteaux_par_m2": {
+          "kind": "manufacturer_spec",
+          "value": "6.67",
+          "unit": "m/m2",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Une file par pureau (§4)."
+        }
+      },
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "ardoise-fc-60x30",
+      "family": "roof_slate_fc",
+      "label": "Ardoise fibres-ciment 60 × 30 cm",
+      "shortLabel": "Ardoises fibres-ciment 60×30",
+      "aliases": [
+        "60x30",
+        "60 x 30",
+        "60*30",
+        "60 × 30",
+        "60×30"
+      ],
+      "generic": true,
+      "attributes": {
+        "longueur": {
+          "kind": "manufacturer_spec",
+          "value": "0.60",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "largeur": {
+          "kind": "manufacturer_spec",
+          "value": "0.30",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "ardoises_par_m2": {
+          "kind": "manufacturer_spec",
+          "value": "13.3",
+          "unit": "u/m2",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Recouvrement courant 100 mm (§4)."
+        },
+        "liteaux_par_m2": {
+          "kind": "manufacturer_spec",
+          "value": "4",
+          "unit": "m/m2",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Une file par pureau (§4)."
+        }
+      },
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "ardoise-fc-60x40",
+      "family": "roof_slate_fc",
+      "label": "Ardoise fibres-ciment 60 × 40 cm",
+      "shortLabel": "Ardoises fibres-ciment 60×40",
+      "aliases": [
+        "60x40",
+        "60 x 40",
+        "60*40",
+        "60 × 40",
+        "60×40"
+      ],
+      "generic": true,
+      "attributes": {
+        "longueur": {
+          "kind": "manufacturer_spec",
+          "value": "0.60",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "largeur": {
+          "kind": "manufacturer_spec",
+          "value": "0.40",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        "ardoises_par_m2": {
+          "kind": "manufacturer_spec",
+          "value": "10",
+          "unit": "u/m2",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Recouvrement courant 100 mm (§4)."
+        },
+        "liteaux_par_m2": {
+          "kind": "manufacturer_spec",
+          "value": "4",
+          "unit": "m/m2",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Une file par pureau (§4)."
+        }
+      },
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "clou-ardoise-fc",
+      "family": "slate_nail",
+      "label": "Clou inox pour ardoise fibres-ciment",
+      "shortLabel": "Clous inox d'ardoise",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "antivent-ardoise-fc",
+      "family": "slate_wind_hook",
+      "label": "Crochet d'antivent inox pour ardoise fibres-ciment",
+      "shortLabel": "Crochets d'antivent",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
           },
           "primary": true
         }
@@ -6832,6 +7320,418 @@
             "verifiedAt": "2026-10-02",
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Validée sur présentation de la formule et d'un exemple chiffré (D-2026-015)."
+          },
+          "version": 1
+        },
+        {
+          "id": "contre-liteaux-ardoise",
+          "slot": "contre_liteau",
+          "formula": "surface / entraxe_supports",
+          "unit": "ml",
+          "precision": "contre-lattage {surface|m2}, une file tous les {entraxe_supports|cm}",
+          "core": true,
+          "exclusions": "Une file par chevron ; suppose un entraxe régulier.",
+          "source": "baticlair-geometrie-couverture",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-02",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Validée sur présentation de la formule et d'un exemple chiffré (D-2026-015)."
+          },
+          "version": 1
+        },
+        {
+          "id": "ecran-ardoise",
+          "slot": "ecran",
+          "formula": "surface * ecran.largeur_rouleau / (ecran.largeur_rouleau - si(pente <= regle.seuil_pente_ecran, regle.recouvrement_faible_pente, regle.recouvrement_forte_pente))",
+          "unit": "m2",
+          "core": true,
+          "exclusions": "Hors recouvrements en bout de rouleau, relevés et chutes.",
+          "source": "baticlair-geometrie-couverture",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-02",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Validée sur présentation de la formule et d'un exemple chiffré (D-2026-015)."
+          },
+          "version": 1
+        }
+      ]
+    },
+    {
+      "id": "couverture-ardoises-fibres-ciment",
+      "trade": "roofing",
+      "section": "principal",
+      "label": "Couverture en ardoises fibres-ciment sur liteaux",
+      "triggers": [
+        "roof_slate_fc"
+      ],
+      "params": [
+        {
+          "key": "surface",
+          "label": "Surface de toiture",
+          "unit": "m2",
+          "kind": "site_data",
+          "question": "Surface du toit ?",
+          "fromLineQuantity": true,
+          "choices": [
+            {
+              "label": "50 m²",
+              "value": "50"
+            },
+            {
+              "label": "100 m²",
+              "value": "100"
+            },
+            {
+              "label": "150 m²",
+              "value": "150"
+            },
+            {
+              "label": "200 m²",
+              "value": "200"
+            }
+          ]
+        },
+        {
+          "key": "teinte_fc",
+          "label": "Teinte de l'ardoise fibres-ciment",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Ardoises fibres-ciment : bleu-noir, noir ou brun ?",
+          "choices": [
+            {
+              "label": "Bleu-noir",
+              "value": "1"
+            },
+            {
+              "label": "Noir",
+              "value": "2"
+            },
+            {
+              "label": "Brun",
+              "value": "3"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "bleu noir",
+                "bleu-noir",
+                "bleue noire"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "noire",
+                "noires",
+                "teinte noir",
+                "coloris noir"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "brun",
+                "brune",
+                "brunes"
+              ]
+            }
+          ],
+          "display": {
+            "1": "bleu-noir",
+            "2": "noir",
+            "3": "brun"
+          }
+        },
+        {
+          "key": "entraxe_supports",
+          "label": "Entraxe des chevrons ou fermettes",
+          "unit": "cm",
+          "kind": "site_data",
+          "question": "Entraxe des chevrons (ou fermettes) ?",
+          "textLabels": [
+            "entraxe"
+          ],
+          "default": {
+            "value": "60",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "entraxe courant en rénovation"
+          },
+          "choices": [
+            {
+              "label": "45 cm",
+              "value": "45"
+            },
+            {
+              "label": "60 cm",
+              "value": "60"
+            },
+            {
+              "label": "90 cm (fermettes)",
+              "value": "90"
+            }
+          ]
+        },
+        {
+          "key": "pente",
+          "label": "Pente du toit",
+          "unit": "°",
+          "kind": "site_data",
+          "question": "Pente du toit ?",
+          "textLabels": [
+            "pente"
+          ],
+          "default": {
+            "value": "45",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "pente moyenne d'une toiture"
+          },
+          "choices": [
+            {
+              "label": "30°",
+              "value": "30"
+            },
+            {
+              "label": "35°",
+              "value": "35"
+            },
+            {
+              "label": "45°",
+              "value": "45"
+            }
+          ]
+        }
+      ],
+      "slots": [
+        {
+          "key": "ardoise",
+          "family": "roof_slate_fc",
+          "label": "Ardoises fibres-ciment",
+          "ask": "Ardoises fibres-ciment : 40 × 24, 40 × 27, 60 × 30 ou 60 × 40 ?"
+        },
+        {
+          "key": "clou",
+          "family": "slate_nail",
+          "label": "Clous",
+          "usual": {
+            "text": "Deux clous inox par ardoise (§4).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "clou-ardoise-fc"
+          }
+        },
+        {
+          "key": "antivent",
+          "family": "slate_wind_hook",
+          "label": "Crochets d'antivent",
+          "keywords": [
+            "antivent",
+            "crochet"
+          ],
+          "usual": {
+            "text": "Un crochet d'antivent par ardoise (§4).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "antivent-ardoise-fc"
+          }
+        },
+        {
+          "key": "liteau",
+          "family": "batten",
+          "label": "Liteaux",
+          "keywords": [
+            "lattage",
+            "liteau",
+            "latte"
+          ],
+          "usual": {
+            "text": "Section 18×40 par défaut, comme l'ardoise naturelle.",
+            "source": "fondateur-pratique-2026-10-02",
+            "productShort": "Liteaux 18×40",
+            "productId": "liteau-sapin-18x40"
+          }
+        },
+        {
+          "key": "contre_liteau",
+          "family": "batten",
+          "label": "Contre-liteaux",
+          "keywords": [
+            "contre lattage",
+            "contre latte",
+            "contre liteau"
+          ],
+          "usual": {
+            "text": "Contre-liteaux 27×40 sur chevrons (section courante).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productShort": "Liteaux 27×40",
+            "productId": "liteau-sapin-27x40"
+          }
+        },
+        {
+          "key": "ecran",
+          "family": "underlay",
+          "label": "Écran sous-toiture",
+          "usual": {
+            "text": "Écran HPV courant en rouleau de 1,5 × 50 m (75 m²).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "ecran-hpv-standard"
+          }
+        }
+      ],
+      "constants": {
+        "seuil_pente_ecran": {
+          "kind": "installation_condition",
+          "value": "16.7",
+          "unit": "°",
+          "source": "soprema-sop-ecran-hpv-r2",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-01",
+            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
+            "note": "Page et version exactes à compléter à réception du PDF."
+          },
+          "version": 1,
+          "note": "Fiche Soprema : « pente ≤ 30 % », soit 16,7°."
+        },
+        "recouvrement_faible_pente": {
+          "kind": "installation_condition",
+          "value": "0.20",
+          "unit": "m",
+          "source": "soprema-sop-ecran-hpv-r2",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-01",
+            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
+            "note": "Page et version exactes à compléter à réception du PDF."
+          },
+          "version": 1,
+          "note": "Pente inférieure OU ÉGALE au seuil (« ≤ 30 % », 16,7°)."
+        },
+        "recouvrement_forte_pente": {
+          "kind": "installation_condition",
+          "value": "0.10",
+          "unit": "m",
+          "source": "soprema-sop-ecran-hpv-r2",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-01",
+            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
+            "note": "Page et version exactes à compléter à réception du PDF."
+          },
+          "version": 1,
+          "note": "Pente supérieure au seuil."
+        },
+        "clous_par_ardoise": {
+          "kind": "installation_condition",
+          "value": "2.1",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« commander clous = 2,1 × ardoises » (§4)."
+        },
+        "antivents_par_ardoise": {
+          "kind": "installation_condition",
+          "value": "1.05",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« antivents = 1,05 × ardoises » (§4)."
+        }
+      },
+      "needs": [
+        {
+          "id": "ardoises",
+          "slot": "ardoise",
+          "formula": "surface * ardoise.ardoises_par_m2",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Recouvrement courant 100 mm ; hors rives, doublis et coupes de noue (la perte de 5 % couvre un pan simple).",
+          "designation": "Ardoises fibres-ciment {teinte_fc} {ardoise.longueur|cm#}×{ardoise.largeur|cm#}",
+          "precisionRequires": [
+            "teinte_fc"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "clous",
+          "slot": "clou",
+          "formula": "commande.ardoises * regle.clous_par_ardoise",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Deux clous par ardoise commandée, + 5 %.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "antivents",
+          "slot": "antivent",
+          "formula": "commande.ardoises * regle.antivents_par_ardoise",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un crochet d'antivent par ardoise commandée, + 5 %.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "liteaux-ardoise",
+          "slot": "liteau",
+          "formula": "surface * ardoise.liteaux_par_m2",
+          "unit": "ml",
+          "precision": "lattage {surface|m2}",
+          "core": true,
+          "exclusions": "Une file par rang (§4) ; hors doublis à l'égout et liteaux de faîtage.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1
         },
@@ -13537,6 +14437,19 @@
       },
       "version": 1,
       "note": "Casse et coupes de rive, pans rectangulaires simples."
+    },
+    {
+      "family": "roof_slate_fc",
+      "rate": "5",
+      "source": "fondateur-referentiel-2026-10-03",
+      "verification": {
+        "status": "verified",
+        "verifiedAt": "2026-10-03",
+        "verifiedBy": "Fondateur (couvreur)",
+        "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+      },
+      "version": 1,
+      "note": "Comme l'ardoise naturelle (§4 : « mêmes formules »)."
     },
     {
       "family": "slate_hook",
