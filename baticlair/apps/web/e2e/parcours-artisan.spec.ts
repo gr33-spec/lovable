@@ -367,6 +367,8 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   // Les crochets en paquets : seul un doute de LECTURE est posé (« 2 ou 3 ? »), jamais « combien par paquet ».
   await answerUntil(page, "À régler : Crochet inox ardoise 100 mm");
   await expect(page.getByText("Chiffre peu lisible : 2 ou 3 paquets ?")).toBeVisible();
+  // La poubelle est dans la question : retirer la ligne sans quitter l'enchaînement (retour du fondateur, 2026-10-05).
+  await expect(page.getByRole("dialog", { name: /^Question : / }).getByRole("button", { name: /^Retirer de la liste : / })).toBeVisible();
   await expect(page.getByText(/combien par paquet|pièces par paquet/i)).toHaveCount(0);
   await confirmDoubts(page);
   // UN SEUL ÉCRAN : la liste des fournitures, tout est vert ou gris, le gros bouton dit « Envoyer au fournisseur ».
