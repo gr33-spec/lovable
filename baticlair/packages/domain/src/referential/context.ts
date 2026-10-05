@@ -26,6 +26,11 @@ export interface SiteFact {
    * surfaces, pas une contradiction. Absent : une donnée du chantier entier (pente, note, code postal).
    */
   workItemId?: string;
+  /**
+   * Donnée lue sur une ligne qui EST l'ouvrage (« Peinture murs séjour 85 m² ») : plusieurs lignes du même ouvrage
+   * (une par pièce) sont des surfaces différentes, qui s'additionnent ; ce n'est pas une contradiction (lot B).
+   */
+  fromMeasureLine?: true;
 }
 
 export interface ChantierContext {
@@ -89,6 +94,19 @@ export function paramsFromContext(
     });
     if (usable.length === 0) continue;
     const first = baseValue(usable[0]!)!;
+    // Plusieurs lignes du même ouvrage, une par pièce ou par façade : leurs surfaces s'additionnent.
+    const lines = usable.filter((f) => f.fromMeasureLine && f.workItemId === work.id && f.origin === "devis");
+    if (def.fromLineQuantity && lines.length >= 2 && lines.length === usable.length) {
+      const total = lines.reduce((sum, f) => sum.plus(baseValue(f)!.value), new Decimal(0));
+      const factor = parseRefUnit(usable[0]!.unit).factor;
+      params[def.key] = {
+        value: total.dividedBy(factor).toFixed(),
+        unit: usable[0]!.unit,
+        origin: "devis",
+        evidence: lines.map((f) => `${f.evidence} (${f.value.replace(".", ",")} ${f.unit === "m2" ? "m²" : f.unit})`).join(" + "),
+      };
+      continue;
+    }
     if (usable.every((f) => baseValue(f)!.value.equals(first.value))) {
       params[def.key] = { value: usable[0]!.value, unit: usable[0]!.unit, origin: "devis", evidence: usable.map((f) => f.evidence).join(", ") };
     } else {

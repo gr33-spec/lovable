@@ -37,6 +37,8 @@ const SYMBOLS: Record<string, RefUnit> = {
   ml: { factor: new Decimal(1), dim: { L: 1, M: 0 } },
   m2: { factor: new Decimal(1), dim: { L: 2, M: 0 } },
   m3: { factor: new Decimal(1), dim: { L: 3, M: 0 } },
+  // Le litre des peintures et des bidons (lot B) : 1 l = 0,001 m³.
+  l: { factor: new Decimal("0.001"), dim: { L: 3, M: 0 } },
   kg: { factor: new Decimal(1), dim: { L: 0, M: 1 } },
   t: { factor: new Decimal(1000), dim: { L: 0, M: 1 } },
 };

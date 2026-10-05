@@ -110,7 +110,7 @@ export function checkReferential(ref: Referential): string[] {
       unitDim(tw, t.unit);
       if (t.axes.length < 1 || t.axes.length > 2) err(tw, "une table a une ou deux entrées");
       for (const a of t.axes) {
-        if (!paramDims.has(a.param)) err(tw, `entrée inconnue « ${a.param} »`);
+        if (!paramDims.has(a.param) && !(w.derived ?? []).some((d) => d.key === a.param)) err(tw, `entrée inconnue « ${a.param} »`);
         if (a.thresholds.length === 0 || a.thresholds.some((x) => !/^-?\d+(\.\d+)?$/.test(x))) err(tw, "seuils non décimaux ou absents");
         if (a.thresholds.some((x, i) => i > 0 && Number(x) <= Number(a.thresholds[i - 1]))) err(tw, "seuils non croissants");
       }

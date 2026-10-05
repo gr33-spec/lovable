@@ -50,6 +50,7 @@ export const MASONRY_PROFILE = light("masonry", "Maçonnerie", [
   f("masonry_lintel", "Linteau, poutrelle, hourdis", ["linteau", "poutrelle", "hourdis", "entrevous", "predalle"]),
   f("masonry_block", "Parpaing, bloc, brique", ["parpaing", "bloc beton", "agglo", "brique", "monomur", "carreau de platre"], AREA_OF_WORK),
   f("masonry_rebar", "Acier, treillis, armature", ["treillis soude", "fer a beton", "armature", "chainage", "rond a beton", "etrier"]),
+  f("masonry_foundation", "Fondation, dallage, chape", ["semelle", "fondation", "dallage", "chape", "radier", "longrine"]),
   f("masonry_binder", "Ciment, mortier, béton", ["ciment", "mortier", "chaux", "beton", "enduit", "adjuvant"]),
   f("masonry_aggregate", "Sable, gravier, granulat", ["sable", "gravier", "gravillon", "granulat", "tout venant", "grave"]),
   f("masonry_formwork", "Coffrage, étai", ["coffrage", "banche", "etai", "planche de coffrage"]),
@@ -57,7 +58,7 @@ export const MASONRY_PROFILE = light("masonry", "Maçonnerie", [
 ], ["terrassement", "fouille", "demolition"]);
 
 export const DRYWALL_PROFILE = light("drywall", "Plâtrerie, isolation", [
-  f("drywall_board", "Plaque de plâtre", ["plaque de platre", "ba13", "ba 13", "ba18", "placo", "fermacell", "plaque hydro", "ppm", "hydrofuge"], AREA_OF_WORK),
+  f("drywall_board", "Plaque de plâtre", ["plaque de platre", "ba13", "ba 13", "ba18", "placo", "fermacell", "plaque hydro", "ppm", "hydrofuge", "doublage", "doublissimo", "complexe isolant"], AREA_OF_WORK),
   f("drywall_frame", "Ossature (rail, montant, fourrure)", ["rail", "montant", "fourrure", "suspente", "corniere", "entretoise"], AREA_OF_WORK),
   f(
     "drywall_insulation",

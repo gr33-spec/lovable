@@ -75,6 +75,7 @@ const slot = z.object({
   family: str,
   label: str,
   keywords: z.array(str).optional(),
+  ask: z.string().optional(),
   usual: z.object({ text: str, source: str, productShort: z.string().optional(), productId: z.string().optional() }).optional(),
   measureOnly: z.literal(true).optional(),
   charsFrom: z.string().optional(),

@@ -493,7 +493,8 @@ function computeNeed(
       if (!options.acceptDraft) throw blocked(`Donnée en attente de vérification : ${label} (${sources.get(fact.source)?.title ?? fact.source}).`);
       // Un conditionnement se dit par son nom (« longueur de 3 m »), une règle par son nom et sa valeur (« colle 4 kg/m² »).
       const value = `${fact.value.replace(".", ",")} ${unitWords(fact.unit)}`.trim();
-      const text = label.startsWith(CONTENT) ? label.slice(CONTENT.length) : fact.label?.includes("{v}") ? fact.label.replace("{v}", value) : `${fact.label ?? label} ${value}`;
+      // Un nom de règle avec « {v} » y place la valeur ; un nom sans « {v} » se suffit (« colle +5 % de reste »).
+      const text = label.startsWith(CONTENT) ? label.slice(CONTENT.length) : fact.label !== undefined ? fact.label.replace("{v}", value) : `${label} ${value}`;
       unverified(`${label}=${fact.value}`, text, fact);
     }
     const unit = parseRefUnit(fact.unit);
@@ -528,7 +529,7 @@ function computeNeed(
         question: {
           key: `product:${slot.key}`,
           kind: "choose_product",
-          text: `Quel produit pour : ${slot.label.toLowerCase()} ?`,
+          text: slot.ask ?? `Quel produit pour : ${slot.label.toLowerCase()} ?`,
           options: candidates.map((p) => ({ label: p.shortLabel, value: p.id })),
         },
       });
@@ -847,11 +848,11 @@ function computeNeed(
         if (table.verification.status === "deprecated" || !options.acceptDraft) {
           throw new Stop({ status: "unknown", reason: "Règle de calcul en attente de vérification.", missing: gap({ kind: "rule", label: `Table : ${table.label.toLowerCase()}`, sourceId: table.source }) });
         }
-        unverified(`table.${name}`, table.label.toLowerCase(), table);
       }
       const unit = parseRefUnit(table.unit);
       const inputs = table.axes.map((axis) => {
-        const def = work.params.find((p) => p.key === axis.param);
+        // Une entrée de table : une donnée de l'ouvrage, ou une valeur calculée (le côté du carreau).
+        const def = work.params.find((p) => p.key === axis.param) ?? work.derived?.find((d) => d.key === axis.param);
         if (!def) throw new FormulaError(`Table ${name} : paramètre inconnu ${axis.param}`);
         const v = valueOf(axis.param);
         const factor = parseRefUnit(def.unit).factor;
@@ -869,7 +870,7 @@ function computeNeed(
       const his = inputs.map((i) => index(i.axis, i.hi));
       if (his.some((i) => i < 0)) {
         const which = inputs[his.findIndex((i) => i < 0)]!;
-        const def = work.params.find((p) => p.key === which.axis.param)!;
+        const def = (work.params.find((p) => p.key === which.axis.param) ?? work.derived?.find((d) => d.key === which.axis.param))!;
         throw new Stop({ status: "unknown", reason: `${def.label} trop faible pour cet ouvrage (minimum ${which.axis.thresholds[0]} ${def.unit}).` });
       }
       // Entrées connues à un intervalle près : toutes les cellules entre les deux coins restent possibles.
@@ -882,6 +883,13 @@ function computeNeed(
       if (los.some((i) => i < 0)) candidates.push(new Decimal(-Infinity));
       const v: IntervalValue = { lo: Decimal.min(...candidates).times(unit.factor), hi: Decimal.max(...candidates).times(unit.factor), dim: unit.dim };
       const shown = (x: Decimal) => fr(x.dividedBy(unit.factor));
+      // Une table « à vérifier » se dit avec la valeur qu'elle a donnée (« pertes de coupe 8 % »).
+      if (table.verification.status !== "verified" || table.conflict)
+        unverified(
+          `table.${name}=${shown(v.lo)}`,
+          `${table.label} ${isPoint(v) ? shown(v.lo) : `${shown(v.lo)} à ${shown(v.hi)}`} ${unitWords(table.unit)}`.trim(),
+          table,
+        );
       trace.push({ label: table.label, value: isPoint(v) ? shown(v.lo) : `${shown(v.lo)} à ${shown(v.hi)}`, unit: table.unit, origin: "referential", ...provenanceLine(table, sources) });
       return v;
     }

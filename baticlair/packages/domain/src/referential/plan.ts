@@ -330,7 +330,7 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
     let measureInText: { value: string; unit: string } | undefined;
     if (unit && v.quantity && fromQuantity.some((p) => sameDimUnit(p.unit, unit))) {
       for (const p of fromQuantity.filter((x) => sameDimUnit(x.unit, unit))) {
-        facts.push({ key: p.key, value: v.quantity.toFixed(), unit, evidence: `Devis, ${line.ref}`, origin: "devis", workItemId: work.id });
+        facts.push({ key: p.key, value: v.quantity.toFixed(), unit, evidence: `Devis, ${line.ref}`, origin: "devis", workItemId: work.id, ...(slot.measureOnly ? { fromMeasureLine: true as const } : {}) });
       }
     } else {
       // Quantité en forfait, ensemble ou absente, mais « 200 m² » écrit dans la désignation : c'est la
