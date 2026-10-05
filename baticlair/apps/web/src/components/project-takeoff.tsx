@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Check, ChevronRight, CircleCheck, FileDown, FileText, HelpCircle, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, ChevronDown, ChevronRight, CircleCheck, FileDown, FileText, HelpCircle, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AssistantMessage, ChatInput, parseCommand, ReasoningSteps, Say, ThinkingSteps, UserBubble } from "@/components/chat";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
@@ -67,6 +67,8 @@ export function ProjectTakeoff({
   const [showList, setShowList] = useState<false | "corriger" | "ajouter">(false);
   const [sendSignal, setSendSignal] = useState(0);
   const [sent, setSent] = useState(false);
+  // Après l'envoi, la liste se replie (une ligne) et les réponses des fournisseurs passent en haut (retour du fondateur, 2026-10-05).
+  const [listOpen, setListOpen] = useState(false);
   const [fresh, setFresh] = useState(false);
   const [said, setSaid] = useState<Said[]>([]);
   const started = useRef(false);
@@ -360,13 +362,39 @@ export function ProjectTakeoff({
           ) : null}
         </Fragment>
       ))}
-      <section id="materiaux" aria-label="Liste de matériaux" className="flex scroll-mt-4 flex-col gap-3">
-        <AssistantMessage>
-          {actionError ? <ErrorNotice error={actionError} /> : null}
-          {body}
-        </AssistantMessage>
-      </section>
-      <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} onListChanged={reload} openSignal={sendSignal} onSentChange={setSent} />
+      {/* Même place dans l'arbre avant et après l'envoi (pas de rechargement) : seul l'ordre d'affichage change. */}
+      <div className="flex flex-col gap-3">
+        <section id="materiaux" aria-label="Liste de matériaux" className="flex scroll-mt-4 flex-col gap-3">
+          {sent && !listOpen ? (
+            <button
+              type="button"
+              onClick={() => setListOpen(true)}
+              aria-expanded={false}
+              className="flex min-h-14 w-full items-center gap-3 rounded-[20px] bg-surface px-4 py-3 text-left shadow-card active:bg-ground"
+            >
+              <CircleCheck size={22} className="shrink-0 text-ok" aria-hidden="true" />
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="font-bold">Liste des fournitures envoyée</span>
+                <span className="text-[13px] text-muted">Appuyez pour la revoir ou la modifier.</span>
+              </span>
+              <ChevronDown size={20} className="shrink-0 text-muted" aria-hidden="true" />
+            </button>
+          ) : (
+            <AssistantMessage>
+              {actionError ? <ErrorNotice error={actionError} /> : null}
+              {body}
+              {sent ? (
+                <Button variant="secondary" onClick={() => setListOpen(false)}>
+                  Replier la liste
+                </Button>
+              ) : null}
+            </AssistantMessage>
+          )}
+        </section>
+        <div className={sent ? "order-first" : undefined}>
+          <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} onListChanged={reload} openSignal={sendSignal} onSentChange={setSent} />
+        </div>
+      </div>
       {draft && editable ? (
         <>
           <SiteNotes projectId={projectId} infos={quantitatif?.infos ?? null} disabled={pending} onSaved={reload} />

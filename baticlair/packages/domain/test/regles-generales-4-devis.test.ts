@@ -28,8 +28,10 @@ describe("matériau ou main-d'œuvre : c'est la tête de la ligne qui décide", 
     expect(read("tiling", "Ragréage autolissant P3, application en 5 mm", "20", "m²").kind).toBe("material");
   });
 
-  it("une prestation en tête reste une prestation, même si elle cite un matériau", () => {
-    expect(read("tiling", "Pose de faïence 20x60 avec joints gris", "12", "m²").kind).toBe("labor");
+  it("une prestation en tête reste une prestation, même si elle cite un matériau ; « Pose » seul ne retire jamais le matériau", () => {
+    // Retour du fondateur (2026-10-05) : « Pose de faïence » se commande ; « pose seule » ou « hors fourniture » non.
+    expect(read("tiling", "Pose de faïence 20x60 avec joints gris", "12", "m²").kind).toBe("material");
+    expect(read("tiling", "Pose seule de faïence 20x60 avec joints gris", "12", "m²").kind).toBe("labor");
     expect(read("painting", "Application de lasure sur volets", "8", "m²").kind).toBe("labor");
     expect(read("electrical", "Installation et raccordement des prises", "1", "u").kind).toBe("labor");
     expect(read("electrical", "Mesure d'isolement de l'installation", "1", "u").kind).toBe("labor");
@@ -39,9 +41,10 @@ describe("matériau ou main-d'œuvre : c'est la tête de la ligne qui décide", 
     // « autre métier » : aucune famille connue. « posé » en fin de texte ≠ ligne de pose.
     expect(read("other", "Abri de jardin 2x3 m, prix posé").kind).toBe("unknown");
     expect(read("other", "Coffret de commande, protection par différentiel").kind).toBe("unknown");
-    expect(read("other", "Pose et réglage de l'abri").kind).toBe("labor");
+    // « Pose » ne fait plus une prestation (retour du fondateur, 2026-10-05) : sans article connu, la ligne est à préciser.
+    expect(read("other", "Pose et réglage de l'abri").kind).toBe("unknown");
     // Un code article en tête ne cache pas la prestation qui suit.
-    expect(read("other", "MO12 Pose et réglage de l'abri").kind).toBe("labor");
+    expect(read("other", "MO12 Dépose et évacuation de l'abri").kind).toBe("labor");
   });
 });
 

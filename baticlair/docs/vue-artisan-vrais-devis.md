@@ -39,18 +39,18 @@ Information (pas une décision) : 30 ouvrages mesurés (m², ml…) : les matér
 
 ## Lézardrieux — plâtrerie
 
-**À l'arrivée** : ✓ 2 prêts · ⚠ 6 à confirmer · ? 16 information manquante
+**À l'arrivée** : ✓ 2 prêts · ⚠ 5 à confirmer · ? 16 information manquante
 
 **Décisions à prendre : 2**
 
-- ⚠ **Articles que BatiClair ne connaît pas encore** — 6 articles que BatiClair ne connaît pas encore, dont 1 sans unité. Les demander aux fournisseurs tels qu'écrits, à la pièce quand l'unité manque ? _(6 lignes en une fois)_
+- ⚠ **Articles que BatiClair ne connaît pas encore** — 5 articles que BatiClair ne connaît pas encore, dont 1 sans unité. Les demander aux fournisseurs tels qu'écrits, à la pièce quand l'unité manque ? _(5 lignes en une fois)_
 - ⚠ **CEE Prime versée sous forme de remise financée par Hellio So** — Unité « F » non reconnue : précisez-la.
 
 Information (pas une décision) : 16 ouvrages mesurés (m², ml…) : les matériaux en sont calculés quand une règle existe ; ce qui reste « à préciser » sera demandé aux fournisseurs pour la mesure du devis.
 
-**Après 1 réponse** : ✓ 8 prêts · ⚠ 0 à confirmer · ? 16 information manquante
+**Après 1 réponse** : ✓ 7 prêts · ⚠ 0 à confirmer · ? 16 information manquante
 
-**Liste envoyée aux fournisseurs : 24 lignes** (24 lignes du devis regroupées)
+**Liste envoyée aux fournisseurs : 23 lignes** (23 lignes du devis regroupées)
 
 - Doublage Placostil en BA13 sur ossature métallique 48mm double, y comp : pour 776,100 M2 (quantité à calculer)
 - Mise en place d'une isolation thermique en doublages Typologie du chan : pour 776,100 M2 (quantité à calculer)
@@ -64,7 +64,7 @@ Information (pas une décision) : 16 ouvrages mesurés (m², ml…) : les matér
 - Plus value PPM pour pièces humides. : pour 116,500 M2 (quantité à calculer)
 - Plafond Placostil en BA13 standard, sur fourrures F530 espacées tous l : pour 390,000 M2 (quantité à calculer)
 - Plafond Placostil en BA13 standard, sur fourrures F530 espacées tous l : pour 314,230 M2 (quantité à calculer)
-- … et 12 autres
+- … et 11 autres
 
 ## Piscine
 
