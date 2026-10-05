@@ -103,11 +103,14 @@ export interface ReadingOptions {
   rules?: RuleConfirmations;
 }
 
-/** §47.4 : « C'est bon » sur une ligne orange confirme ses règles pour l'entreprise ; trois entreprises → validée. */
+/**
+ * §47.4 / §47.5 : « C'est bon » sur une ligne orange (écran) ou une ligne commandée telle quelle (bon de commande)
+ * confirme ses règles pour l'entreprise ; validée selon `ruleValidatedBy` (3 écrans, 2 bons, ou 1 bon + 1 autre).
+ */
 export interface RuleConfirmations {
-  /** Parmi ces règles, celles que trois entreprises différentes ont confirmées. */
+  /** Parmi ces règles, celles qui sont validées. */
   validated(keys: readonly string[]): Promise<Set<string>>;
-  confirm(tenant: TenantContext, keys: readonly string[]): Promise<void>;
+  confirm(tenant: TenantContext, keys: readonly string[], source?: "screen" | "order"): Promise<void>;
 }
 
 /**
@@ -636,6 +639,8 @@ export class TakeoffService {
     for (const g of order.gaps) {
       const item = items.find((b) => g.designation === b.label || g.designation.startsWith(`${b.label} (`));
       const action = g.kind === "added" ? "add" : g.kind === "same" ? "confirm" : "correct";
+      // Une ligne commandée telle qu'envoyée confirme ses règles « à vérifier », avec la preuve d'un bon de commande.
+      if (g.kind === "same" && item?.rules?.length) await this.reading.rules?.confirm(tenant, item.rules.map((r) => r.key), "order");
       await this.journal.record(tenant, {
         projectId: takeoff.projectId,
         takeoffId: takeoff.id,

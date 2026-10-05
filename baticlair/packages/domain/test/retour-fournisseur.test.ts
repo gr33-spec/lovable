@@ -57,3 +57,14 @@ describe("retour fournisseur (§47.5) : le bon de commande comparé à la liste 
     expect(gaps.filter((g) => g.kind === "removed")).toHaveLength(3);
   });
 });
+
+describe("§47.4 / §47.5 : quand une règle « à vérifier » passe validée (réponse du fondateur)", () => {
+  it("3 écrans, ou 2 bons de commande, ou 1 bon + 1 autre entreprise ; un bon seul ne valide jamais", async () => {
+    const { ruleValidatedBy } = await import("../src/index.js");
+    expect(ruleValidatedBy({ screen: 3, order: 0 })).toBe(true);
+    expect(ruleValidatedBy({ screen: 2, order: 0 })).toBe(false);
+    expect(ruleValidatedBy({ screen: 0, order: 2 })).toBe(true);
+    expect(ruleValidatedBy({ screen: 1, order: 1 })).toBe(true);
+    expect(ruleValidatedBy({ screen: 0, order: 1 })).toBe(false);
+  });
+});

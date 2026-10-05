@@ -53,9 +53,9 @@ Section → fait / partiel / pas fait → ce qui manque. **26 faites, 19 partiel
 | 46 | Écran en trois couleurs | Fait | — |
 | 47 | Cinq couches de correction | Partiel | **47.5 fait** : « commandé tel quel » / « modifié », bon collé ou photographié, écarts au journal marqués « bon de commande », poids 3 dans l'export. Manquent : 47.2 (relecture IA) et le banc « 5 cas → bêta, 10 → validé » par tiroir. |
 
-## À trancher par le fondateur (§47.5)
+## Tranché par le fondateur (2026-10-05)
 
-« Une correction venue d'une commande réelle vaut trois confirmations d'écran » : le poids 3 est écrit au journal et
-compté dans l'export mensuel (`dont_bons_de_commande`, `poids`). Il ne valide PAS seul une règle « à vérifier » : la
-validation automatique reste « trois entreprises différentes » (§47.4, test 4). Faut-il qu'un bon de commande d'une
-seule entreprise compte pour trois ? Rien ne bouge sans réponse.
+Un bon de commande d'une seule entreprise ne valide pas une règle. Une règle « à vérifier » passe validée avec trois
+confirmations d'écran de trois entreprises différentes, OU deux bons de commande de deux entreprises différentes, OU un
+bon de commande plus une confirmation d'une autre entreprise (`ruleValidatedBy`). Le poids 3 reste dans l'export, pour
+voir les bons de commande en premier.
