@@ -10,7 +10,7 @@ type Loaded = OpenFileRequest & { objectUrl: string; file: File };
 /** Une réponse de l'API ne dépasse pas 4,5 Mo chez l'hébergeur : un gros fichier se relit par plages de 3 Mo. */
 const RANGE_BYTES = 3_000_000;
 
-async function fetchWhole(url: string, headers: Record<string, string>): Promise<Blob> {
+export async function fetchWhole(url: string, headers: Record<string, string>): Promise<Blob> {
   const get = async (start: number) => {
     const res = await fetch(url, { headers: { ...headers, range: `bytes=${start}-${start + RANGE_BYTES - 1}` }, credentials: "same-origin" });
     if (!res.ok) throw new Error(String(res.status));

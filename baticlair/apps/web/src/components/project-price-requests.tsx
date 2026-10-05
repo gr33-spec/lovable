@@ -9,7 +9,8 @@ import { CompareQuotes, OfferLines, offerFacts, ProjectComparison } from "@/comp
 import { SupplierForm } from "@/components/supplier-form";
 import { Badge, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { attachFile } from "@/lib/upload";
-import { api, ApiError, MAX_DOCUMENT_BYTES, newActionKey, type Offer, type PriceRequest, type PriceRequestRecipient, type PriceRequestSettings, type Supplier } from "@/lib/api";
+import { fetchWhole } from "@/components/file-viewer";
+import { api, ApiError, getActiveCompanyId, MAX_DOCUMENT_BYTES, newActionKey, type Offer, type PriceRequest, type PriceRequestRecipient, type PriceRequestSettings, type Supplier } from "@/lib/api";
 import { openDocument, openFile } from "@/lib/open-document";
 import { isPhoto, MAX_QUOTE_PHOTOS, preparePhotos } from "@/lib/photos";
 import { useProgressRefresh } from "@/components/project-progress";
@@ -26,6 +27,45 @@ function mailtoHref(r: PriceRequestRecipient): string {
   if (!r.email) return `mailto:${r.supplier.email}`;
   const body = r.email.body.replace(/\r?\n/g, "\r\n");
   return `mailto:${r.supplier.email}?subject=${encodeURIComponent(r.email.subject)}&body=${encodeURIComponent(body)}`;
+}
+
+/** L'exemplaire PDF de la demande de devis au nom d'un destinataire, prêt à joindre. */
+async function demandePdf(requestId: string, recipientId: string): Promise<File> {
+  const headers: Record<string, string> = {};
+  const companyId = getActiveCompanyId();
+  if (companyId) headers["x-company-id"] = companyId;
+  const blob = await fetchWhole(`/v1/price-requests/${encodeURIComponent(requestId)}/demande-de-devis.pdf?destinataire=${encodeURIComponent(recipientId)}`, headers);
+  return new File([blob], "demande-de-devis.pdf", { type: "application/pdf" });
+}
+
+/**
+ * Sans service d'envoi côté serveur, le mail part de la messagerie de l'artisan, ET LE PDF AVEC (retour du fondateur,
+ * 2026-10-05) : un lien « mailto » ne sait pas joindre un fichier. Sur téléphone, la feuille de partage ouvre Mail avec le
+ * PDF déjà joint et le texte (l'adresse est copiée, à coller dans « À ») ; sur ordinateur, le PDF se télécharge et la
+ * messagerie s'ouvre, remplie.
+ */
+async function sendWithOwnMail(r: PriceRequestRecipient, pdf: File): Promise<"shared" | "downloaded" | "cancelled"> {
+  const touch = typeof window !== "undefined" && window.matchMedia?.("(pointer: coarse)").matches;
+  if (touch && typeof navigator.canShare === "function" && navigator.canShare({ files: [pdf] })) {
+    await navigator.clipboard?.writeText(r.supplier.email).catch(() => undefined);
+    try {
+      await navigator.share({ files: [pdf], title: r.email?.subject ?? "Demande de devis", text: r.email?.body ?? "" });
+      return "shared";
+    } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") return "cancelled";
+      throw e;
+    }
+  }
+  const url = URL.createObjectURL(pdf);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = pdf.name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  window.location.href = mailtoHref(r);
+  return "downloaded";
 }
 
 /**
@@ -491,6 +531,32 @@ function RecipientCard({
       setNotice("Envoyé, avec la demande de devis en PDF.");
       onSent();
     });
+  // Le PDF est préparé dès que la carte s'affiche : le partage doit partir au moment même de l'appui (téléphone).
+  const manual = !deliversEmail && !archived && !demo && r.status === "to_send" && !!request.packet;
+  const [pdf, setPdf] = useState<File | null>(null);
+  useEffect(() => {
+    if (!manual) return;
+    let cancelled = false;
+    demandePdf(request.id, r.id)
+      .then((f) => !cancelled && setPdf(f))
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [manual, request.id, r.id]);
+  const sendOwn = () =>
+    run(async () => {
+      const file = pdf ?? (await demandePdf(request.id, r.id));
+      const how = await sendWithOwnMail(r, file);
+      if (how === "cancelled") return;
+      onChange(await api<PriceRequest>(`/v1/price-request-recipients/${r.id}`, { method: "PATCH", body: { status: "sent" } }));
+      setNotice(
+        how === "shared"
+          ? `PDF joint. L'adresse ${r.supplier.email} est copiée : collez-la dans « À » si Mail ne l'a pas remplie.`
+          : "Le PDF « demande-de-devis.pdf » est téléchargé : glissez-le dans l'e-mail qui vient de s'ouvrir.",
+      );
+      onSent();
+    });
 
   async function run(action: () => Promise<void>) {
     setMenu(false);
@@ -603,14 +669,11 @@ function RecipientCard({
             Envoyer à {r.supplier.name}
           </Button>
         ) : (
-          <a
-            href={mailtoHref(r)}
-            onClick={() => void setStatus("sent")}
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-accent px-5 text-base font-extrabold text-white"
-          >
+          // Depuis la messagerie de l'artisan, le PDF joint (partage sur téléphone, téléchargement sur ordinateur).
+          <Button pending={pending} onClick={() => void sendOwn()}>
             <Send size={18} aria-hidden="true" />
-            Envoyer l&apos;e-mail
-          </a>
+            Envoyer l&apos;e-mail avec le PDF
+          </Button>
         )
       ) : null}
       {!archived && request.packet ? (
