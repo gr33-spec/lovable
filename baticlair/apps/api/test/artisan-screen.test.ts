@@ -317,6 +317,21 @@ describe("ouvrages comptés : « 6 unités » de jouées n'est jamais 6 ardoises
     // Une réponse hors des deux lectures est refusée.
     expect((await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: question.question!.key, value: "autre" })).status).toBe(400);
 
+    // Les questions de la cheminée (façonnage, périmètre) restent ouvertes : rien ne part encore (retour du fondateur,
+    // 2026-10-05 : une liste avec une question ouverte ne part pas, dans aucun métier).
+    let open = answered.view.decisions.filter((d: { question?: { key: string } | null }) => d.question);
+    expect(open.length).toBeGreaterThan(0);
+    expect((await agent.post(`/v1/takeoffs/${takeoffId}/validate`)).status).toBe(400);
+    // L'artisan répond à tout (premier bouton), puis la liste part.
+    for (let round = 0; round < 6 && open.length > 0; round++) {
+      let body = answered;
+      for (const d of open as { question: { key: string; kind: string; unit?: string; options?: { value: string }[] } }[]) {
+        const first = d.question.options?.[0]?.value ?? "1";
+        const value = d.question.kind === "param" ? { value: first, unit: d.question.unit ?? "u" } : first;
+        body = (await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: d.question.key, value }).expect(200)).body;
+      }
+      open = body.view.decisions.filter((d: { question?: unknown }) => d.question);
+    }
     await agent.post(`/v1/takeoffs/${takeoffId}/validate`).expect(200);
     const s = await agent.post("/v1/suppliers").send({ name: "Point.P", email: "devis@pointp.fr" });
     const packet = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [s.body.id] }).expect(201)).body.packet;

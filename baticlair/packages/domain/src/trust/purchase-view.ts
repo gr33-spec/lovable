@@ -609,7 +609,7 @@ export function purchaseView(
   }
   // Les questions : celles de l'écran (lignes douteuses, ambiguïtés, calcul), jamais une information.
   const questions = [...view.decisions, ...preciseQuestions(toBuy, link.validation, link.ref)];
-  const canValidate = questions.every((q) => q.lineIds.length === 0) && toBuy.every((b) => b.state === "ready");
+  const canValidate = sendable(toBuy, toQuote, questions);
   const groups = groupsOf(toBuy, engine.needs, view, link.plan, link.ref);
   const screen = supplyScreen(toBuy, toQuote, questions, engine, view, link.plan, link.ref);
   return { understood: understood(view, link.plan, link.ref), toBuy, groups, toQuote, assumptions, questions, suggestions, canValidate, screen };
@@ -714,13 +714,22 @@ export function applyPurchaseOverrides(purchase: PurchaseView, answers: Record<s
     .filter((g) => g.rows.length > 0);
   const rows = groups.flatMap((g) => g.rows);
   const screen = { groups, total: rows.length, toCheck: rows.filter((r) => r.status === "check").length };
-  const canValidate = questions.every((q) => q.lineIds.length === 0) && toBuy.every((b) => b.state === "ready");
+  const canValidate = sendable(toBuy, purchase.toQuote, questions);
   return { ...purchase, toBuy, questions, canValidate, suggestions: purchase.suggestions.map(override), screen };
 }
 
 
 /** Clé de la confirmation d'une quantité calculée avec une règle « à vérifier » (§47.3). */
 export const RATIO = "ratio:";
+
+/**
+ * La liste peut partir : elle n'est pas vide, aucune question n'est ouverte (ligne douteuse ou question du calcul),
+ * chaque ligne est prête. Dans tous les métiers (retour du fondateur, 2026-10-05). Les « Quantité à confirmer »
+ * bloquent à part (`applyRuleConfirmations`).
+ */
+function sendable(toBuy: readonly PurchaseItem[], toQuote: readonly ToQuoteItem[], questions: readonly Decision[]): boolean {
+  return toBuy.length + toQuote.length > 0 && questions.every((q) => q.lineIds.length === 0 && !q.question) && toBuy.every((b) => b.state === "ready");
+}
 
 /** « Quantité à confirmer : colle 4 kg/m², pertes 10 % » (§47.3). */
 export function toConfirmText(rules: readonly RuleToConfirm[]): string {

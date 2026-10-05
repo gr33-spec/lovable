@@ -258,8 +258,9 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
   // « coude PVC » n'est pas un coude de descente de gouttière.
   const covered = profile.id.split(",").includes(ref.trade);
   const families = covered ? ref.families.filter((f) => f.keywords?.length).map((f) => ({ item: f.code, keywords: f.keywords! })) : [];
+  const designations = lines.map((l) => l.designation);
   const read = lines.map((line) => {
-    const v = validateTakeoffLine({ id: line.ref, designation: line.designation, quantityRaw: line.quantity, unitRaw: line.unit, source: "client_quote" }, profile);
+    const v = validateTakeoffLine({ id: line.ref, designation: line.designation, quantityRaw: line.quantity, unitRaw: line.unit, source: "client_quote" }, profile, designations);
     const text = normalizeText(line.designation);
     const general = v.kind === "labor" ? null : earliest(text, families);
     // « Tuiles (… tuiles canal …) » : la famille générale lue en premier est précisée par une famille plus précise nommée ensuite.

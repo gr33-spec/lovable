@@ -17,10 +17,10 @@ identiques (un lieu différent ne change pas l'article ; une marque ou un lot di
 | Devis | Lignes matériaux | A — Compréhension | B — Quantitatif exact | Besoins identifiés | Questions | Inconnus | Erreurs | Lignes envoyées (avant → après regroupement) |
 |---|---|---|---|---|---|---|---|---|
 | Morellec — électricité + plomberie (scanné) | 152 | **80 %** (122) | **13 %** (19) | 73 | 2 | 79 | 12 | 155 → 71 |
-| Lézardrieux — plâtrerie, isolation | 21 | **86 %** (18) | **5 %** (1) | 2 | 0 | 19 | 0 | 24 → 24 |
+| Lézardrieux — plâtrerie, isolation | 21 | **86 %** (18) | **5 %** (1) | 2 | 0 | 19 | 0 | 23 → 23 |
 | Piscine | 34 | **0 %** (0) | **0 %** (0) | 0 | 1 | 34 | 0 | 37 → 37 |
 | D-2026-011 — salle de bain | 15 | **100 %** (15) | **60 %** (9) | 10 | 1 | 5 | 0 | 15 → 15 |
-| **Total** | **222** | **70 %** (155) | **13 %** (29) | 85 | 4 | 137 | 12 | 231 → 147 |
+| **Total** | **222** | **70 %** (155) | **13 %** (29) | 85 | 4 | 137 | 12 | 230 → 146 |
 
 Référence couverture :
 
@@ -38,7 +38,7 @@ ne sait pas encore convertir : elles partent au fournisseur comme mesure, jamais
 | Devis | ✓ Vérifié | ⚠ À confirmer | ? Information manquante |
 |---|---|---|---|
 | Morellec — électricité + plomberie (scanné) | 80 | 44 | 31 |
-| Lézardrieux — plâtrerie, isolation | 2 | 6 | 16 |
+| Lézardrieux — plâtrerie, isolation | 2 | 5 | 16 |
 | Piscine | 0 | 37 | 0 |
 | D-2026-011 — salle de bain | 9 | 1 | 5 |
 | D-2026-015 — couverture (référence) | 1 | 0 | 9 |
@@ -320,7 +320,7 @@ Chaque devis doit garder au moins ses scores A et B de l'étape précédente, sa
 | l019 | Pose des portes dans murs intérieurs maçonnés | 7,000 U | main-d'œuvre | main-d'œuvre | ok |  |
 | l020 | Fourniture d'une trappe isolée | 3,000 U | achat direct | non reconnu | — |  |
 | l021 | Bande armée pour angles saillants. | 530,000 ML | achat direct | matériau (drywall_finish), achat | besoin identifié |  |
-| l022 | Pose des portes dans cloisons de distribution (fourniture par le lot menuiseries | 30,000 U | main-d'œuvre | non reconnu | ok |  |
+| l022 | Pose des portes dans cloisons de distribution (fourniture par le lot menuiseries | 30,000 U | main-d'œuvre | main-d'œuvre | ok |  |
 | l023 | Renfort avec un parement en plaque de type HABITO hydrofuge de chez placo (ou éq | 20,000 U | ouvrage à convertir | matériau (drywall_board), ouvrage | compris |  |
 | l024 | Prise en charge du chantier, approvisionnement EN CENTRE VILLE AVEC RETOURNEUR,  | 10,000 ENS | main-d'œuvre | non reconnu | ok |  |
 | l025 | CEE Prime versée sous forme de remise financée par Hellio Solutions (ex LEVEBVRE | 1,000 F | information | non reconnu | ok |  |

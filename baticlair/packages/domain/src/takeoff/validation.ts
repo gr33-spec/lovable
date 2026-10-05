@@ -3,6 +3,7 @@ import type { PackagingSpec } from "../quantity/quantity.js";
 import { dimensionOf, parseUnit, type UnitCode } from "../quantity/unit.js";
 import { Decimal } from "../shared/decimal.js";
 import { containsKeyword, keywordPosition, normalizeText, type MaterialFamily, type TradeProfile } from "../trades/trade-profile.js";
+import { LABOR_ONLY } from "../trades/common.js";
 import { articleScope } from "./sections.js";
 
 /**
@@ -163,9 +164,11 @@ function headPosition(text: string): number {
  * ligne (« Pose plomberie »), jamais perdu au milieu d'une description
  * (« … prix liner posé », « … protection par différentiel »).
  */
-export function lineKind(designation: string, profile: TradeProfile): { kind: LineKind; family: MaterialFamily | null } {
+export function lineKind(designation: string, profile: TradeProfile, others: readonly string[] = []): { kind: LineKind; family: MaterialFamily | null } {
   const text = normalizeText(designation);
   const family = classifyMaterial(designation, profile);
+  if (LABOR_ONLY.some((k) => containsKeyword(text, k))) return { kind: "labor", family: null };
+  if (poseOfSuppliedArticle(designation, others)) return { kind: "labor", family: null };
   const isSupply = profile.supplyKeywords.some((k) => containsKeyword(text, k));
   const laborAt = firstPosition(text, profile.laborKeywords);
   if (!isSupply && laborAt !== Infinity) {
@@ -175,6 +178,38 @@ export function lineKind(designation: string, profile: TradeProfile): { kind: Li
   }
   if (family) return { kind: "material", family };
   return { kind: "unknown", family: null };
+}
+
+const TRADE_WORDS = new Set(["plomberie", "electricite", "maconnerie", "menuiserie", "chauffage", "ventilation", "filtration", "zinguerie"]);
+const POSE_STOP = new Set(["de", "des", "du", "d", "l", "la", "le", "les", "un", "une", "et", "en", "a", "au", "aux", "sur", "dans", "pour", "par", "y", "compris"]);
+const words = (text: string) =>
+  normalizeText(text)
+    .replace(/[^a-z0-9 ]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w && !/^\d/.test(w))
+    .map((w) => w.replace(/[sx]$/, ""));
+const isPoseHead = (designation: string) => {
+  const w = words(designation).filter((x) => !/^[a-z]*\d/.test(x));
+  return w[0] === "pose";
+};
+
+/**
+ * « Pose X » ne retire jamais le matériau (retour du fondateur, 2026-10-05) : « Pose de tuiles », « Pose toile de
+ * verre » se calculent. Une seule exception, pour ne jamais commander deux fois : quand une AUTRE ligne du même devis
+ * fournit déjà X (« Feutre piscine 43 m² » puis « Pose feutre piscine 43 m² »), la ligne de pose est sa main-d'œuvre.
+ * X = le premier mot qui suit « pose » (hors articles) ; le pluriel ne compte pas (« portes » = « porte »).
+ */
+export function poseOfSuppliedArticle(designation: string, others: readonly string[]): boolean {
+  if (!isPoseHead(designation)) return false;
+  const all = words(designation);
+  const object = all.slice(all.indexOf("pose") + 1).find((w) => !POSE_STOP.has(w) && w !== "pose" && w.length > 2);
+  if (!object) return false;
+  // « Pose plomberie et filtration » : la pose d'un corps d'état, pas d'un article ; rien à commander sur cette ligne.
+  if (TRADE_WORDS.has(object)) return true;
+  const self = normalizeText(designation);
+  // Lettres seules, pour un PDF qui sépare les lettres (« N AGE A CON TR E COU R AN T » = « nage à contre-courant »).
+  const letters = (t: string) => normalizeText(t).replace(/[^a-z]/g, "");
+  return others.some((o) => normalizeText(o) !== self && !isPoseHead(o) && (words(o).some((w) => w === object || w.replace(/^bloc/, "") === object) || (object.length > 3 && letters(o).includes(object))));
 }
 
 /**
@@ -254,9 +289,9 @@ export function designationMultiplier(designation: string): string | null {
   return null;
 }
 
-export function validateTakeoffLine(line: TakeoffLineInput, profile: TradeProfile): LineValidation {
+export function validateTakeoffLine(line: TakeoffLineInput, profile: TradeProfile, others: readonly string[] = []): LineValidation {
   const issues: TakeoffIssue[] = [];
-  const { kind, family } = lineKind(line.designation, profile);
+  const { kind, family } = lineKind(line.designation, profile, others);
   const hinted = !line.unitRaw?.trim() && kind !== "labor" ? unitFromText(line.designation) : null;
   const unit = hinted?.unit ?? parseUnit(line.unitRaw);
   const quantity = parseFrenchQuantity(line.quantityRaw);
@@ -355,7 +390,8 @@ export function validateTakeoffLine(line: TakeoffLineInput, profile: TradeProfil
 
 /** Validation de l'ensemble du quantitatif : chaque ligne, puis doublons et oublis fréquents du métier. */
 export function validateTakeoff(lines: readonly TakeoffLineInput[], profile: TradeProfile): TakeoffValidation {
-  const validated = lines.map((l) => validateTakeoffLine(l, profile));
+  const designations = lines.map((l) => l.designation);
+  const validated = lines.map((l) => validateTakeoffLine(l, profile, designations));
   const issues: TakeoffIssue[] = [];
 
   // Doublons : même désignation normalisée, même unité. Deux lignes qui se SUIVENT avec la même

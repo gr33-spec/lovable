@@ -63,6 +63,14 @@ describe("la porte choisit le référentiel selon le métier", () => {
     }
   });
 
+  it("rien ne part vide ni avec une question ouverte, dans aucun métier", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "pe@example.fr", "Peintures Le Bihan", ["painting"]);
+    // La finition et l'impression ne sont pas dites : deux questions du comptoir, aucune ligne calculée encore.
+    const q = (await agent.post("/v1/quantitatifs").send({ lignes: [{ libelle: "Peinture murs séjour, 2 couches", quantite: "85", unite: "m²" }] })).body as Q & { peut_partir: boolean; questions: unknown[] };
+    expect(q.questions.length).toBeGreaterThan(0);
+    expect(q.peut_partir).toBe(false);
+  });
+
   it("un métier sans tiroir : 422 « no_referential », message clair, rien de créé", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "e@example.fr", "Élec Bretagne", ["electrical"]);
     const res = await agent.post("/v1/quantitatifs").send({ lignes: [{ libelle: "Tableau électrique 2 rangées", quantite: "1", unite: "u" }] });

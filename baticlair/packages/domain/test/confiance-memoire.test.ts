@@ -158,7 +158,9 @@ describe("fiche d'une ligne du quantitatif (lecture du devis)", () => {
   });
 
   it("une prestation n'est pas un élément de la liste", () => {
-    expect(assess("tiling", [L("Pose de faïence", "12", "m²")])[0]).toBeNull();
+    // La faïence est fournie par la ligne d'avant : « Pose de faïence » en est la main-d'œuvre.
+    expect(assess("tiling", [L("Faïence 20x60", "12", "m²"), L("Pose de faïence", "12", "m²")])[1]).toBeNull();
+    expect(assess("tiling", [L("Dépose de l'ancienne faïence", "12", "m²")])[0]).toBeNull();
   });
 });
 
