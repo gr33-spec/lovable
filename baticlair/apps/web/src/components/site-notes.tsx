@@ -95,7 +95,7 @@ export function SiteNotes({
         </span>
         <span className="flex min-w-0 flex-col py-2">
           <span>{count > 0 ? `Informations sur le chantier (${count})` : "Ajouter des informations sur le chantier"}</span>
-          {count > 0 ? null : <span className="text-[13px] font-semibold text-muted">Facultatif : mesures, photo d&apos;un croquis…</span>}
+          {count > 0 ? null : <span className="text-[13px] font-semibold text-muted">Facultatif, mais aide à la précision</span>}
         </span>
       </button>
       {open ? (

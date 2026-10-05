@@ -144,6 +144,8 @@ export function ProjectTakeoff({
             <>
               <Say>Je regarde votre devis (jusqu&apos;à une minute).</Say>
               <ThinkingSteps />
+              {/* Les infos chantier restent à portée pendant la lecture : elles entrent au calcul. */}
+              <SiteNotes projectId={projectId} infos={quantitatif?.infos ?? null} disabled={archived} onSaved={reload} />
             </>
           ) : (
             <>
