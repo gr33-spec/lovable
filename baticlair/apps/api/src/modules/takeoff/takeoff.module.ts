@@ -1,7 +1,7 @@
 import { waitUntil } from "@vercel/functions";
 import type { Alerter } from "../../platform/alerts/alerter.js";
 import { Module } from "@nestjs/common";
-import { loadReferential } from "@baticlair/domain";
+import { loadReferential, ruleValidatedBy } from "@baticlair/domain";
 import type { Prisma } from "../../generated/prisma/client.js";
 import type { AppConfig } from "../../platform/config/config.js";
 import { PrismaService } from "../../platform/database/prisma.service.js";
@@ -80,20 +80,27 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
               const project = await prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { address: true } });
               return project?.address ?? null;
             },
-            // §47.4 : une entreprise ne compte qu'une fois par règle ; trois entreprises différentes la valident.
+            // §47.4 / §47.5 : une entreprise ne compte qu'une fois par règle, sous sa preuve la plus forte (bon de commande
+            // > écran) ; validée par 3 écrans, 2 bons de commande, ou 1 bon + 1 autre entreprise (`ruleValidatedBy`).
             rules: {
-              validated: async (keys) =>
-                new Set(
-                  (await prisma.ruleConfirmation.groupBy({ by: ["ruleKey"], where: { ruleKey: { in: [...keys] } }, _count: { companyId: true } }))
-                    .filter((g) => g._count.companyId >= 3)
-                    .map((g) => g.ruleKey),
-                ),
-              confirm: async (tenant, keys) => {
+              validated: async (keys) => {
+                const rows = await prisma.ruleConfirmation.findMany({ where: { ruleKey: { in: [...keys] } }, select: { ruleKey: true, source: true } });
+                const counts = new Map<string, { screen: number; order: number }>();
+                for (const r of rows) {
+                  const c = counts.get(r.ruleKey) ?? { screen: 0, order: 0 };
+                  if (r.source === "order") c.order += 1;
+                  else c.screen += 1;
+                  counts.set(r.ruleKey, c);
+                }
+                return new Set([...counts].filter(([, c]) => ruleValidatedBy(c)).map(([k]) => k));
+              },
+              confirm: async (tenant, keys, source = "screen") => {
                 for (const ruleKey of keys) {
                   await prisma.ruleConfirmation.upsert({
                     where: { companyId_ruleKey: { companyId: tenant.companyId, ruleKey } },
-                    create: { companyId: tenant.companyId, ruleKey, userId: tenant.userId },
-                    update: {},
+                    create: { companyId: tenant.companyId, ruleKey, userId: tenant.userId, source },
+                    // Un bon de commande renforce une confirmation d'écran ; l'inverse ne l'affaiblit jamais.
+                    update: source === "order" ? { source } : {},
                   });
                 }
               },

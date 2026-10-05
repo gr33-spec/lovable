@@ -831,6 +831,8 @@ model RuleConfirmation {
   companyId String   @db.Uuid
   /// « <référentiel>/<ouvrage>/<règle>=<valeur> » : une autre valeur est une autre règle.
   ruleKey   String
+  /// « screen » : « C'est bon » à l'écran ; « order » : ligne commandée telle quelle (bon de commande, §47.5), la preuve la plus forte.
+  source    String   @default("screen")
   userId    String?
   createdAt DateTime @default(now())
 

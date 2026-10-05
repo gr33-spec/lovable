@@ -747,6 +747,16 @@ export function toConfirmText(rules: readonly RuleToConfirm[]): string {
 }
 
 /**
+ * §47.4 et §47.5 : quand une règle « à vérifier » passe VALIDÉE (réponse du fondateur, 2026-10-05). Une entreprise ne
+ * compte qu'une fois par règle, sous sa preuve la plus forte (un bon de commande l'emporte sur l'écran). Validée par
+ * trois confirmations d'écran de trois entreprises différentes, OU deux bons de commande de deux entreprises
+ * différentes, OU un bon de commande plus une confirmation d'une autre entreprise. Un bon de commande seul ne valide pas.
+ */
+export function ruleValidatedBy(companies: { screen: number; order: number }): boolean {
+  return companies.screen >= 3 || companies.order >= 2 || (companies.order >= 1 && companies.screen >= 1);
+}
+
+/**
  * §47.1, §47.3, §47.4 : une ligne calculée avec une règle « à vérifier » (ou que les sources contredisent) sort ORANGE,
  * avec son chiffre et « Quantité à confirmer : [règle] ». « C'est bon » (réponse « ratio:<article> ») la passe au vert ;
  * corriger la quantité aussi (le chiffre de l'artisan remplace le calcul). Une règle confirmée par trois artisans

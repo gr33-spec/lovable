@@ -59,3 +59,38 @@ describe("§47 : la ligne « Quantité à confirmer »", () => {
     expect(rails((await agent.post("/v1/quantitatifs").send(CLOISON)).body as Q).a_confirmer).toBe(false);
   });
 });
+
+describe("§47.4 / §47.5 : un bon de commande pèse plus, mais ne valide jamais seul (réponse du fondateur, 2026-10-05)", () => {
+  /** Une entreprise qui dit « C'est bon » à l'écran ; avec `commande`, elle commande ensuite la liste telle quelle. */
+  const company = async (email: string, name: string, commande: boolean) => {
+    const { agent } = await signUpWithCompany(ctx.app, email, name, ["drywall"]);
+    let q = (await agent.post("/v1/quantitatifs").send(CLOISON)).body as Q & { projetId: string };
+    for (let i = 0; i < 12 && q.questions.length > 0; i++) {
+      const question = q.questions[0]!;
+      q = (await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: [{ question: question.id, valeur: question.boutons[0]?.valeur ?? "ok" }] })).body;
+    }
+    if (!commande) return;
+    await agent.post(`/v1/quantitatifs/${q.id}/validation`).expect(200);
+    const supplier = (await agent.post("/v1/suppliers").send({ name: "Négoce", email: `devis-${email}` })).body;
+    const request = (await agent.post(`/v1/projects/${q.projetId}/price-requests`).send({ supplierIds: [supplier.id] }).expect(201)).body;
+    await agent.post(`/v1/price-requests/${request.id}/order`).send({ supplierId: supplier.id, outcome: "as_is" }).expect(200);
+  };
+  const orangeForNewcomer = async (email: string) => {
+    const { agent } = await signUpWithCompany(ctx.app, email, `Nouveau ${email}`, ["drywall"]);
+    return rails((await agent.post("/v1/quantitatifs").send(CLOISON)).body as Q).a_confirmer;
+  };
+
+  it("un bon de commande d'une seule entreprise ne valide pas ; plus une confirmation d'une autre entreprise, si", async () => {
+    await company("a@example.fr", "Plâtres A", true);
+    expect(await ctx.prisma.ruleConfirmation.count({ where: { source: "order" } })).toBeGreaterThan(0);
+    expect(await orangeForNewcomer("x@example.fr")).toBe(true);
+    await company("b@example.fr", "Plâtres B", false);
+    expect(await orangeForNewcomer("y@example.fr")).toBe(false);
+  });
+
+  it("deux bons de commande de deux entreprises différentes valident", async () => {
+    await company("a@example.fr", "Plâtres A", true);
+    await company("b@example.fr", "Plâtres B", true);
+    expect(await orangeForNewcomer("y@example.fr")).toBe(false);
+  });
+});
