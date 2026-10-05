@@ -323,14 +323,8 @@ export function ProjectTakeoff({
         {/* Ce qu'on peut encore faire sur la liste : des actions dites en clair, jamais un lien qu'on ne comprend pas. */}
         <nav aria-label="Autres actions sur la liste" className="flex flex-col divide-y divide-line overflow-hidden rounded-[20px] bg-surface shadow-card">
           {editable ? (
-            <ActionRow icon={<Plus size={20} aria-hidden="true" />} title="Ajouter un article oublié" text="Une fourniture que le devis ne cite pas." onClick={() => setShowList("ajouter")} />
+            <ActionRow icon={<Plus size={20} aria-hidden="true" />} title="Ajouter un article" text="Une fourniture que le devis ne cite pas." onClick={() => setShowList("ajouter")} />
           ) : null}
-          <ActionRow
-            icon={<FileText size={20} aria-hidden="true" />}
-            title="Corriger le devis lu"
-            text={`${materials.length} ${materials.length > 1 ? "lignes lues" : "ligne lue"} dans le devis du client. Une ligne mal lue ? Corrigez-la.`}
-            onClick={() => setShowList("corriger")}
-          />
           {/* §21.3 : le même document que celui du fournisseur. */}
           {!draft ? (
             <ActionRow
@@ -341,6 +335,12 @@ export function ProjectTakeoff({
             />
           ) : null}
         </nav>
+        {/* Rare : une surface ou une longueur mal lue dans le devis. Un lien discret, plus une carte (toutes les lignes de
+            la liste se modifient d'un appui). */}
+        <button type="button" onClick={() => setShowList("corriger")} className="inline-flex min-h-11 items-center gap-1.5 self-center text-[13px] font-bold text-muted">
+          <FileText size={15} aria-hidden="true" />
+          Une mesure mal lue ? Corriger le devis lu
+        </button>
       </>
     );
   }

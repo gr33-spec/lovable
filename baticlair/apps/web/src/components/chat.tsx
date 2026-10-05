@@ -105,7 +105,8 @@ export function reasoningOf(takeoff: Takeoff): React.ReactNode[] {
 
 /** Le raisonnement : déplié juste après la lecture, replié ensuite (« Ce que j'ai compris »). */
 export function ReasoningSteps({ takeoff, fresh }: { takeoff: Takeoff; fresh: boolean }) {
-  const [open, setOpen] = useState(fresh);
+  // Replié, même juste après la lecture : la liste des fournitures d'abord (retour du fondateur, « on s'y perd »).
+  const [open, setOpen] = useState(false);
   const steps = reasoningOf(takeoff);
   return (
     <div className="flex flex-col gap-2">

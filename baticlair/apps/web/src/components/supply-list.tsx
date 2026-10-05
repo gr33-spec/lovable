@@ -1,9 +1,9 @@
 "use client";
 
-import { Check, Paperclip, Pencil, Send, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, Paperclip, Pencil, Send, Trash2, X } from "lucide-react";
 import { openDocument } from "@/lib/open-document";
 import { useEffect, useId, useRef, useState } from "react";
-import { Assumptions, ItemForm, Suggestions, type ItemEdit, type SketchHandlers } from "@/components/purchase-list";
+import { Assumptions, EDIT_FIELD, EDIT_PANEL, ItemForm, Suggestions, type ItemEdit, type SketchHandlers } from "@/components/purchase-list";
 import { InlineLineForm, Proof, type DecisionHandlers } from "@/components/takeoff-view";
 import { Button } from "@/components/ui";
 import type { ItemSketch, PurchaseItem, ScreenRow, Takeoff, TakeoffDecision } from "@/lib/api";
@@ -139,6 +139,7 @@ export function SupplyList({
                   label={labelOf(r)}
                   editable={editable}
                   pending={pending}
+                  handlers={handlers}
                   onAsk={() => setAsking(r)}
                   onEdit={onEditItem}
                   onSetAside={() => putAside(r)}
@@ -211,13 +212,18 @@ const DOT: Record<ScreenRow["status"], { className: string; label: string }> = {
   supplier: { className: "bg-[#b8bcc6]", label: "à préciser avec le fournisseur" },
 };
 
-/** Une ligne : le point, la désignation, la quantité en unité de vente, une sous-ligne grise facultative. */
+/**
+ * Une ligne : le point, la désignation, la quantité, une sous-ligne grise facultative. UN SEUL GESTE (retour du
+ * fondateur, 2026-10-05, « on s'y perd ») : toucher la ligne ouvre sa fiche, où tout se trouve (modifier, croquis, calcul,
+ * retirer). Une ligne orange ouvre sa question. Toutes les lignes se modifient, grises comprises. Glisser à gauche retire.
+ */
 function Row({
   row,
   takeoff,
   label,
   editable,
   pending,
+  handlers,
   onAsk,
   onEdit,
   onSetAside,
@@ -229,18 +235,22 @@ function Row({
   label: string;
   editable: boolean;
   pending: boolean;
+  handlers: DecisionHandlers;
   onAsk: () => void;
   onEdit: (item: PurchaseItem, edit: ItemEdit) => Promise<void>;
   onSetAside: () => void;
   sketches: readonly ItemSketch[];
   sketchHandlers?: SketchHandlers;
 }) {
-  const [editing, setEditing] = useState(false);
+  const [open, setOpen] = useState(false);
   const [proof, setProof] = useState(false);
   const [dx, setDx] = useState(0);
   const start = useRef<{ x: number; y: number } | null>(null);
+  // Un glissement n'est pas un appui : il n'ouvre pas la fiche.
+  const swiped = useRef(false);
   const item = row.itemKey ? takeoff.purchase.toBuy.find((b) => b.key === row.itemKey) : undefined;
   const quote = row.quoteKey ? takeoff.purchase.toQuote.find((q) => q.key === row.quoteKey) : undefined;
+  const lines = row.lineIds.map((id) => takeoff.lines.find((l) => l.id === id)).filter((l): l is Takeoff["lines"][number] => Boolean(l));
   const proofs = item ? takeoff.view.items.filter((i) => (item.kind === "computed" ? i.kind === "need" && item.needIds.includes(i.id) : i.kind === "line" && item.lineIds.includes(i.id))) : [];
   // Une ligne reprise du devis n'a pas de calcul : on montre d'où elle vient.
   const what = item?.kind === "direct" ? "la ligne du devis" : "le calcul";
@@ -252,17 +262,20 @@ function Row({
         ? "À préciser avec le fournisseur"
         : ([item?.approx, item?.precision].filter(Boolean).join(" · ") || null);
   const dot = DOT[row.status];
-  // Toute ligne se retire d'un geste : la corbeille (visible) ou un glissement vers la gauche, « Annuler » pendant 3 s.
   const removable = editable && (row.itemKey !== undefined || row.lineIds.length > 0);
-  const swipable = removable;
+  // Ce que la fiche peut montrer : l'article, sinon les lignes du devis ; sinon, en lecture seule, le calcul.
+  const canEdit = editable && (item !== undefined || lines.length > 0);
+  const opens = row.status === "check" ? editable : canEdit || proofs.length > 0;
   const onPointerDown = (e: React.PointerEvent) => {
-    if (!swipable) return;
+    swiped.current = false;
+    if (!removable || open) return;
     start.current = { x: e.clientX, y: e.clientY };
   };
   const onPointerMove = (e: React.PointerEvent) => {
     if (!start.current) return;
     const x = e.clientX - start.current.x;
     if (Math.abs(e.clientY - start.current.y) > Math.abs(x)) return;
+    if (x < -8) swiped.current = true;
     setDx(Math.min(0, x));
   };
   const onPointerEnd = () => {
@@ -271,21 +284,40 @@ function Row({
     if (dx < -90) onSetAside();
     setDx(0);
   };
+  const remove = removable
+    ? () => {
+        setOpen(false);
+        onSetAside();
+      }
+    : undefined;
 
   const body = (
     <>
       <span className={`mt-1.5 size-3 shrink-0 rounded-full ${dot.className}`} role="img" aria-label={dot.label} />
       <span className="flex min-w-0 grow flex-col gap-0.5">
-        <span className="line-clamp-2 text-[15px] leading-snug font-semibold">{label}</span>
+        <span className={`text-[15px] leading-snug font-semibold ${open ? "" : "line-clamp-2"}`}>{label}</span>
         {sub ? <span className={`text-[13px] leading-snug ${row.status === "check" ? "font-bold text-warn" : "text-muted"}`}>{sub}</span> : null}
+        {sketches.length > 0 && !open ? (
+          <span className="inline-flex items-center gap-1 text-[12px] font-bold text-[#4a37d6]">
+            <Paperclip size={12} aria-hidden="true" />
+            {sketches.length} croquis
+          </span>
+        ) : null}
       </span>
       <span className="shrink-0 text-right text-[16px] font-extrabold whitespace-nowrap tabular-nums">{quantity ?? ""}</span>
+      {opens ? (
+        open ? (
+          <X size={18} className="mt-0.5 shrink-0 text-accent-text" aria-hidden="true" />
+        ) : (
+          <ChevronRight size={18} className="mt-0.5 shrink-0 text-subtle" aria-hidden="true" />
+        )
+      ) : null}
     </>
   );
   return (
     <li
       id={`ligne-${row.key}`}
-      className={`relative flex scroll-mt-24 flex-col gap-1 overflow-hidden py-2 transition-colors ${editing ? "-mx-2 my-1 rounded-2xl bg-[#eef2ff] px-2 pb-2" : ""}`}
+      className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden py-2 transition-colors ${open ? "-mx-2 my-1 rounded-2xl bg-[#eef2ff] px-2 pb-2" : ""}`}
     >
       {dx < 0 ? (
         <span aria-hidden="true" className="absolute inset-y-0 right-0 flex items-center rounded-xl bg-danger px-4 text-sm font-extrabold text-white">
@@ -293,81 +325,155 @@ function Row({
         </span>
       ) : null}
       <div
-        className={`relative flex items-start gap-1 ${editing ? "" : "bg-surface"}`}
+        className={`relative ${open ? "" : "bg-surface"}`}
         style={{ transform: dx ? `translateX(${dx}px)` : undefined, touchAction: "pan-y" }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerEnd}
         onPointerCancel={onPointerEnd}
       >
-        {row.status === "check" ? (
-          <button type="button" onClick={onAsk} aria-label={`À vérifier : ${label}`} className="flex min-h-11 w-full min-w-0 items-start gap-3 rounded-xl text-left active:bg-ground/60">
+        {opens ? (
+          <button
+            type="button"
+            onClick={() => {
+              if (swiped.current) return void (swiped.current = false);
+              if (row.status === "check") onAsk();
+              else setOpen(!open);
+            }}
+            aria-expanded={row.status === "check" ? undefined : open}
+            aria-label={row.status === "check" ? `À vérifier : ${label}` : `${open ? "Fermer" : "Modifier"} : ${label}`}
+            className="flex min-h-11 w-full min-w-0 items-start gap-3 rounded-xl text-left active:bg-ground/60"
+          >
             {body}
           </button>
         ) : (
           <div className="flex min-h-11 w-full min-w-0 items-start gap-3">{body}</div>
         )}
-        {editable && item ? (
-          <button
-            type="button"
-            onClick={() => setEditing(!editing)}
-            aria-label={editing ? `Fermer : ${label}` : `Modifier : ${label}`}
-            aria-expanded={editing}
-            className={`-mr-2 inline-flex min-h-11 min-w-10 shrink-0 items-center justify-center rounded-xl ${editing ? "text-accent-text" : "text-subtle active:text-accent-text"}`}
-          >
-            {editing ? <X size={18} aria-hidden="true" /> : <Pencil size={16} aria-hidden="true" />}
-          </button>
-        ) : null}
-        {removable && !editing ? (
-          <button type="button" onClick={onSetAside} aria-label={`Retirer : ${label}`} className="-mr-2 inline-flex min-h-11 min-w-10 shrink-0 items-center justify-center rounded-xl text-subtle active:text-danger">
-            <Trash2 size={16} aria-hidden="true" />
-          </button>
-        ) : null}
       </div>
-      {proofs.length > 0 && !editing ? (
-        <button type="button" onClick={() => setProof(!proof)} aria-expanded={proof} aria-label={`${proof ? "Masquer" : "Voir"} ${what} : ${label}`} className="ml-6 inline-flex min-h-6 items-center self-start text-[11px] font-semibold text-subtle">
-          {proof ? `Masquer ${what}` : `Voir ${what}`}
+      {open ? (
+        <>
+          {sketches.length > 0 ? (
+            <ul aria-label={`Croquis joints : ${label}`} className="flex flex-wrap gap-2">
+              {sketches.map((sk) => (
+                <li key={sk.id} className="flex max-w-full items-center gap-1 rounded-xl bg-surface pl-2.5 text-[13px] font-bold text-[#4a37d6]">
+                  <button type="button" onClick={() => void openDocument(sk.id, sk.nom, sk.nom)} className="flex min-h-9 min-w-0 items-center gap-1.5 text-left">
+                    <Paperclip size={14} aria-hidden="true" className="shrink-0" />
+                    <span className="truncate">{sk.commentaire ? `${sk.nom} · ${sk.commentaire}` : sk.nom}</span>
+                  </button>
+                  {editable && sketchHandlers ? (
+                    <button type="button" disabled={pending} onClick={() => void sketchHandlers.onDetach(sk.id)} aria-label={`Retirer le croquis ${sk.nom}`} className="flex size-9 shrink-0 items-center justify-center text-[#4a37d6]/70">
+                      <X size={14} aria-hidden="true" />
+                    </button>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {canEdit && item ? (
+            <ItemForm
+              item={item}
+              pending={pending}
+              {...(sketchHandlers ? { onAttach: (file: File, commentaire: string) => sketchHandlers.onAttach(item.key, file, commentaire) } : {})}
+              onCancel={() => setOpen(false)}
+              onSave={async (e) => {
+                await onEdit(item, e);
+                setOpen(false);
+              }}
+              {...(remove ? { onRemove: remove } : {})}
+            />
+          ) : canEdit ? (
+            lines.map((l, i) => (
+              <LinePanel
+                key={l.id}
+                line={l}
+                pending={pending}
+                onCancel={() => setOpen(false)}
+                onSave={async (f) => {
+                  await handlers.onSaveLine(l.id, f);
+                  setOpen(false);
+                }}
+                {...(remove && i === lines.length - 1 ? { onRemove: remove } : {})}
+              />
+            ))
+          ) : null}
+          {proofs.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              <button type="button" onClick={() => setProof(!proof)} aria-expanded={proof} aria-label={`${proof ? "Masquer" : "Voir"} ${what} : ${label}`} className="inline-flex min-h-9 items-center gap-1 self-start text-[13px] font-bold text-accent-text">
+                <ChevronDown size={16} aria-hidden="true" className={proof ? "rotate-180" : ""} />
+                {proof ? `Masquer ${what}` : `Voir ${what}`}
+              </button>
+              {proof ? proofs.map((i) => <Proof key={`${i.kind}:${i.id}`} item={i} />) : null}
+            </div>
+          ) : null}
+        </>
+      ) : null}
+    </li>
+  );
+}
+
+/** La fiche d'une ligne grise (reprise du devis, à préciser avec le fournisseur) : même panneau que pour un article. */
+function LinePanel({
+  line,
+  pending,
+  onSave,
+  onCancel,
+  onRemove,
+}: {
+  line: Takeoff["lines"][number];
+  pending: boolean;
+  onSave: (f: { designation: string; quantity: string | null; unit: string | null; reference: string | null }) => Promise<void>;
+  onCancel: () => void;
+  onRemove?: () => void;
+}) {
+  const id = useId();
+  const ref = useRef<HTMLFormElement>(null);
+  const [designation, setDesignation] = useState(line.article ?? line.designation);
+  const [quantity, setQuantity] = useState(line.quantity ?? "");
+  const [unit, setUnit] = useState(line.unit ?? "");
+  useEffect(() => {
+    ref.current?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+  }, []);
+  return (
+    <form
+      ref={ref}
+      aria-label={`Modifier : ${shortName(line.article ?? line.designation)}`}
+      className={EDIT_PANEL}
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!designation.trim()) return;
+        void onSave({ designation: designation.trim(), quantity: quantity.trim() || null, unit: unit.trim() || null, reference: line.reference });
+      }}
+    >
+      <p className="text-[12px] font-extrabold tracking-[0.04em] text-accent-text">MODIFIER L&apos;ARTICLE</p>
+      <label htmlFor={`${id}-d`} className="flex flex-col gap-1 text-sm font-bold">
+        Désignation
+        <textarea id={`${id}-d`} rows={2} className={`${EDIT_FIELD} py-3 leading-snug`} value={designation} onChange={(e) => setDesignation(e.target.value)} />
+      </label>
+      <div className="grid grid-cols-2 gap-2">
+        <label htmlFor={`${id}-q`} className="flex flex-col gap-1 text-sm font-bold">
+          Quantité
+          <input id={`${id}-q`} className={EDIT_FIELD} inputMode="decimal" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
+        </label>
+        <label htmlFor={`${id}-u`} className="flex flex-col gap-1 text-sm font-bold">
+          Unité
+          <input id={`${id}-u`} className={EDIT_FIELD} value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="m², pièces, ml…" />
+        </label>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <Button type="submit" pending={pending}>
+          Enregistrer
+        </Button>
+        <Button type="button" variant="secondary" onClick={onCancel}>
+          Annuler
+        </Button>
+      </div>
+      {onRemove ? (
+        <button type="button" onClick={onRemove} className="-mb-1 inline-flex min-h-11 items-center justify-center gap-1.5 border-t border-line pt-2 text-sm font-bold text-danger">
+          <Trash2 size={16} aria-hidden="true" />
+          Retirer de la liste
         </button>
       ) : null}
-      {sketches.length > 0 ? (
-        <ul aria-label={`Croquis joints : ${label}`} className="ml-6 flex flex-wrap gap-2">
-          {sketches.map((sk) => (
-            <li key={sk.id} className="flex max-w-full items-center gap-1 rounded-xl bg-[#eeedff] pl-2.5 text-[13px] font-bold text-[#4a37d6]">
-              <button type="button" onClick={() => void openDocument(sk.id, sk.nom, sk.nom)} className="flex min-h-9 min-w-0 items-center gap-1.5 text-left">
-                <Paperclip size={14} aria-hidden="true" className="shrink-0" />
-                <span className="truncate">{sk.commentaire ? `${sk.nom} · ${sk.commentaire}` : sk.nom}</span>
-              </button>
-              {editable && sketchHandlers ? (
-                <button type="button" disabled={pending} onClick={() => void sketchHandlers.onDetach(sk.id)} aria-label={`Retirer le croquis ${sk.nom}`} className="flex size-9 shrink-0 items-center justify-center text-[#4a37d6]/70">
-                  <X size={14} aria-hidden="true" />
-                </button>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      {editing && item ? (
-        <ItemForm
-          item={item}
-          pending={pending}
-          {...(sketchHandlers ? { onAttach: (file: File, commentaire: string) => sketchHandlers.onAttach(item.key, file, commentaire) } : {})}
-          onCancel={() => setEditing(false)}
-          onSave={async (e) => {
-            await onEdit(item, e);
-            setEditing(false);
-          }}
-          {...(removable
-            ? {
-                onRemove: () => {
-                  setEditing(false);
-                  onSetAside();
-                },
-              }
-            : {})}
-        />
-      ) : null}
-      {proof ? proofs.map((i) => <Proof key={`${i.kind}:${i.id}`} item={i} />) : null}
-    </li>
+    </form>
   );
 }
 
