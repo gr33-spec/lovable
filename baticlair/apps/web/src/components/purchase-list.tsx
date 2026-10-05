@@ -265,6 +265,11 @@ function BuyRow({
   );
 }
 
+/** La fiche qui s'ouvre sous une ligne : un panneau blanc bordé, des champs au contour net (mêmes pour toutes les lignes). */
+export const EDIT_PANEL = "flex scroll-mb-52 flex-col gap-3 rounded-2xl bg-surface p-4 shadow-card ring-1 ring-accent/25";
+export const EDIT_FIELD =
+  "min-h-12 w-full rounded-xl border border-[#d5d9e0] bg-surface px-3 text-base font-normal outline-none transition-colors placeholder:text-subtle focus:border-accent focus:ring-2 focus:ring-accent/20";
+
 /** Le texte et la quantité d'une ligne, tels que l'artisan veut les voir partir chez le fournisseur. */
 export function ItemForm({
   item,
@@ -291,13 +296,12 @@ export function ItemForm({
   useEffect(() => {
     ref.current?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
   }, []);
-  const input =
-    "min-h-12 w-full rounded-xl border border-[#d5d9e0] bg-surface px-3 text-base font-normal outline-none transition-colors placeholder:text-subtle focus:border-accent focus:ring-2 focus:ring-accent/20";
+  const input = EDIT_FIELD;
   return (
     <form
       ref={ref}
       aria-label={`Modifier : ${item.label}`}
-      className="flex scroll-mb-52 flex-col gap-3 rounded-2xl bg-surface p-4 shadow-card ring-1 ring-accent/25"
+      className={EDIT_PANEL}
       onSubmit={(e) => {
         e.preventDefault();
         if (!libelle.trim()) return;
@@ -403,9 +407,13 @@ export function Assumptions({ assumptions, editable, pending, onAnswer }: { assu
     <section aria-label="Hypothèses" className="px-4 py-2">
       <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="flex min-h-11 w-full items-start gap-2 text-left text-sm">
         <ChevronDown size={16} aria-hidden="true" className={`mt-1 shrink-0 ${open ? "rotate-180" : ""}`} />
-        <span>
-          <span className="font-extrabold">Hypothèses :</span> <span className="text-muted">{text}</span>
-          {editable ? <span className="font-bold text-accent-text"> — modifier</span> : null}
+        <span className="flex min-w-0 flex-col gap-0.5">
+          <span>
+            <span className="font-extrabold">Hypothèses</span>
+            {editable ? <span className="font-bold text-accent-text"> · modifier</span> : null}
+          </span>
+          {/* Deux lignes au plus, repliées : le détail s'ouvre d'un appui (retour du fondateur, « on s'y perd »). */}
+          {open ? null : <span className="line-clamp-2 text-muted">{text}</span>}
         </span>
       </button>
       {open ? (

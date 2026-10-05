@@ -334,7 +334,9 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await expect(page.getByRole("list", { name: "Ce que BatiClair a compris" })).toHaveCount(0);
   await page.getByRole("button", { name: "Lire le devis" }).click();
   // IA simulée en test (AI_PROVIDER=fake) : même parcours, aucun appel payant.
-  // Ce que BatiClair a compris, déplié juste après la lecture.
+  // Ce que BatiClair a compris : replié (la liste d'abord), déplié d'un appui.
+  await expect(page.getByRole("list", { name: "Ce que BatiClair a compris" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Ce que j'ai compris" }).click();
   await expect(page.getByRole("list", { name: "Ce que BatiClair a compris" })).toBeVisible();
   await expect(page.getByText(/^J'ai lu les \d+ lignes du devis\.$/)).toBeVisible();
 
@@ -347,26 +349,27 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   const liste = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(liste.getByText(/^\d+ fournitures · tout est prêt$/)).toBeVisible();
   await expect(liste.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
-  // Retirer une ligne : une corbeille sur chaque ligne, « Annuler » pendant 3 s.
-  const corbeille = liste.getByRole("button", { name: /^Retirer : / }).first();
-  const retiree = (await corbeille.getAttribute("aria-label"))!;
-  await corbeille.click();
+  // Un seul geste par ligne : la toucher ouvre sa fiche, où l'on retire (« Annuler » pendant 3 s).
+  const premiere = liste.getByRole("button", { name: /^Modifier : / }).first();
+  const retiree = (await premiere.getAttribute("aria-label"))!;
+  await premiere.click();
+  await liste.getByRole("button", { name: "Retirer de la liste" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Retiré de la liste" })).toBeVisible();
   await page.getByRole("status").getByRole("button", { name: "Annuler" }).click();
   await expect(liste.getByRole("button", { name: retiree, exact: true })).toHaveCount(1);
 
-  // La preuve à un appui, sur l'article lui-même.
+  // La preuve dans la fiche de l'article.
+  await page.getByRole("button", { name: "Modifier : Tuile romane canal rouge 12,5 u/m²" }).click();
   await page.getByRole("button", { name: "Voir la ligne du devis : Tuile romane canal rouge 12,5 u/m²" }).click();
   await expect(page.getByText("(lu dans le devis)").first()).toBeVisible();
 
   // § 41.4 : la désignation d'une ligne se réécrit d'un tap, sans aide (test de recette : une personne hors BTP).
-  await page.getByRole("button", { name: "Modifier : Tuile romane canal rouge 12,5 u/m²" }).click();
   const edit = page.getByRole("form", { name: "Modifier : Tuile romane canal rouge 12,5 u/m²" });
   await edit.getByLabel("Désignation").fill("Tuile romane canal rouge 12,5 u/m² Toit principal");
   await edit.getByRole("button", { name: "Enregistrer" }).click();
   // Une ligne réécrite repasse par « C'est bon » (ligne modifiée = à confirmer), puis la carte la montre sous son nouveau nom.
   await confirmDoubts(page);
-  await expect(page.getByRole("button", { name: /^(Voir|Masquer) la ligne du devis : Tuile romane canal rouge 12,5 u\/m² Toit principal$/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Modifier : Tuile romane canal rouge 12,5 u/m² Toit principal", exact: true })).toBeVisible();
 
   // Un croquis sur la ligne (couvertine, habillage…) : le crayon permet de joindre une photo avec une précision ; elle
   // reste sous l'article, et se retire d'un appui.
@@ -376,9 +379,9 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await page.getByLabel("Joindre une photo ou un PDF").setInputFiles({ name: "rive.png", mimeType: "image/png", buffer: PNG_1PX });
   const joints = page.getByRole("list", { name: `Croquis joints : ${tuile}` });
   await expect(joints.getByText("rive.png · Rive côté jardin, voir photo")).toBeVisible();
-  await page.getByRole("form", { name: `Modifier : ${tuile}` }).getByRole("button", { name: "Annuler" }).click();
   await joints.getByRole("button", { name: "Retirer le croquis rive.png" }).click();
   await expect(joints).toHaveCount(0);
+  await page.getByRole("form", { name: `Modifier : ${tuile}` }).getByRole("button", { name: "Annuler" }).click();
 
   // Le devis lu reste à un appui : noms courts, ajout et retrait d'une ligne.
   await page.getByRole("button", { name: "Corriger le devis lu" }).click();
@@ -622,6 +625,7 @@ test("plusieurs articles inconnus, sans unité : UNE décision les règle tous, 
   await expect(group).toHaveCount(0);
   await confirmDoubts(page);
   // Gardés tels qu'écrits, à la pièce : la preuve dit que c'est un choix pour ce chantier.
+  await page.getByRole("button", { name: "Modifier : Skimmer pour piscine liner" }).click();
   await page.getByRole("button", { name: "Voir la ligne du devis : Skimmer pour piscine liner" }).click();
   await expect(page.getByText("Article gardé tel qu'écrit pour ce chantier.")).toBeVisible();
 });
