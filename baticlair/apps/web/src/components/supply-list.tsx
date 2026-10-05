@@ -156,12 +156,12 @@ export function SupplyList({
               </h3>
             ) : null}
             {groups.map(({ g, visible }) => (
-              <div key={g.key} className="flex flex-col px-4 pt-2">
+              <div key={g.key} className="flex flex-col gap-1 px-4 pt-3">
                 <p className="text-[11px] font-extrabold tracking-[0.06em] text-subtle uppercase">
                   {g.label}
                   {g.measure ? ` · ${g.measure}` : ""}
                 </p>
-                <ul aria-label={g.label} className="flex flex-col divide-y divide-line">
+                <ul aria-label={g.label} className="flex flex-col divide-y divide-ink/15 border-y border-ink/15">
                   {visible.map((r) => (
                     <Row
                       key={r.key}
@@ -368,7 +368,7 @@ function Row({
   return (
     <li
       id={`ligne-${row.key}`}
-      className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden py-1.5 transition-colors ${open ? "-mx-2 my-1 rounded-2xl bg-[#eef2ff] px-2 pb-2" : ""}`}
+      className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden py-2 transition-colors ${open ? "-mx-2 my-1 rounded-2xl bg-[#eef2ff] px-2 pb-2" : ""}`}
     >
       {dx < 0 ? (
         <span aria-hidden="true" className="absolute inset-y-0 right-0 flex items-center rounded-xl bg-danger px-4 text-sm font-extrabold text-white">
