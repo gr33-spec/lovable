@@ -15,6 +15,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 - Sortie de toit : quel diamètre ? → [Ø 80] [Ø 100] [Ø 125] [Ø 150] [Ø 180] [VMC]
 - Crochets de gouttière : sur les chevrons ou en façade (bandeau) ? → [Sur les chevrons] [En façade (bandeau)]
 - Combien d'angles sur cette gouttière ? → [Aucun] [1] [2] [3]
+- Un dauphin en pied de chaque descente ? → [Oui] [Non]
 - Sortie de toit : conduit de fumée ou ventilation ? → [Conduit de fumée] [Ventilation]
 - J'ai identifié : Tuiles HP10. C'est bien ce modèle ? → [Oui] [Modifier]
 
@@ -33,12 +34,12 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Jonctions de gouttière PVC sable de 25 | 4 pièces |  |
 | Talons de gouttière PVC sable de 25 | 4 pièces |  |
 | Naissances PVC demi-ronde sable de 25 Ø80 | 2 pièces |  |
-| Tubes de descente PVC sable Ø80 | 8 ml |  |
+| Tubes de descente PVC sable Ø80, longueur 4 m | 2 pièces |  |
 | Coudes de descente PVC sable Ø80 | 4 pièces |  |
-| Colliers de descente Ø80 | 8 pièces |  |
+| Colliers de descente Ø80 | 6 pièces |  |
 | Chatières de ventilation | 10 pièces |  |
 
-**Hypothèses (modifiables) :** zone climatique 3 · pente du toit 45° · pureau 31 cm · tuiles de rive Tuiles de rive  · coudes par descente 2
+**Hypothèses (modifiables) :** zone climatique 3 · pente du toit 45° · pureau 31 cm · tuiles de rive Tuiles de rive  · longueur des tubes 4 m · coudes par descente 2
 
 ### Après « oui, c'est bien ce modèle »
 
@@ -49,6 +50,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 - Sortie de toit : quel diamètre ? → [Ø 80] [Ø 100] [Ø 125] [Ø 150] [Ø 180] [VMC]
 - Crochets de gouttière : sur les chevrons ou en façade (bandeau) ? → [Sur les chevrons] [En façade (bandeau)]
 - Combien d'angles sur cette gouttière ? → [Aucun] [1] [2] [3]
+- Un dauphin en pied de chaque descente ? → [Oui] [Non]
 - Sortie de toit : conduit de fumée ou ventilation ? → [Conduit de fumée] [Ventilation]
 
 **À acheter :**
@@ -67,12 +69,12 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Jonctions de gouttière PVC sable de 25 | 4 pièces |  |
 | Talons de gouttière PVC sable de 25 | 4 pièces |  |
 | Naissances PVC demi-ronde sable de 25 Ø80 | 2 pièces |  |
-| Tubes de descente PVC sable Ø80 | 8 ml |  |
+| Tubes de descente PVC sable Ø80, longueur 4 m | 2 pièces |  |
 | Coudes de descente PVC sable Ø80 | 4 pièces |  |
-| Colliers de descente Ø80 | 8 pièces |  |
+| Colliers de descente Ø80 | 6 pièces |  |
 | Chatières de ventilation | 10 pièces |  |
 
-**Hypothèses (modifiables) :** zone climatique 3 · pente du toit 45° · pureau 31 cm · tuiles de rive Tuiles de rive  · coudes par descente 2
+**Hypothèses (modifiables) :** zone climatique 3 · pente du toit 45° · pureau 31 cm · tuiles de rive Tuiles de rive  · longueur des tubes 4 m · coudes par descente 2
 
 ### Si l'artisan précise le pureau (34,3 cm)
 
@@ -83,6 +85,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 - Sortie de toit : quel diamètre ? → [Ø 80] [Ø 100] [Ø 125] [Ø 150] [Ø 180] [VMC]
 - Crochets de gouttière : sur les chevrons ou en façade (bandeau) ? → [Sur les chevrons] [En façade (bandeau)]
 - Combien d'angles sur cette gouttière ? → [Aucun] [1] [2] [3]
+- Un dauphin en pied de chaque descente ? → [Oui] [Non]
 - Sortie de toit : conduit de fumée ou ventilation ? → [Conduit de fumée] [Ventilation]
 
 **À acheter :**
@@ -101,12 +104,12 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Jonctions de gouttière PVC sable de 25 | 4 pièces |  |
 | Talons de gouttière PVC sable de 25 | 4 pièces |  |
 | Naissances PVC demi-ronde sable de 25 Ø80 | 2 pièces |  |
-| Tubes de descente PVC sable Ø80 | 8 ml |  |
+| Tubes de descente PVC sable Ø80, longueur 4 m | 2 pièces |  |
 | Coudes de descente PVC sable Ø80 | 4 pièces |  |
-| Colliers de descente Ø80 | 8 pièces |  |
+| Colliers de descente Ø80 | 6 pièces |  |
 | Chatières de ventilation | 10 pièces |  |
 
-**Hypothèses (modifiables) :** pente du toit 45° · tuiles de rive Tuiles de rive  · zone climatique 3 · coudes par descente 2
+**Hypothèses (modifiables) :** pente du toit 45° · tuiles de rive Tuiles de rive  · zone climatique 3 · longueur des tubes 4 m · coudes par descente 2
 
 ## Devis ardoises — 200 m², jouées de lucarnes, cheminée
 

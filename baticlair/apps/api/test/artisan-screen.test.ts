@@ -239,15 +239,17 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
     expect(purchase.understood[0]).toBe("Couverture en tuiles à emboîtement sur liteaux : 120 m²");
   });
 
-  it("2 descentes deviennent 8 m de tube, 4 coudes et 8 colliers ; 20 m de gouttière PVC (2 x 10 m) deviennent 5 longueurs, 52 crochets, 4 jonctions, 4 talons, 2 naissances — et c'est cette liste qui part au fournisseur", async () => {
+  it("2 descentes deviennent 2 longueurs de 4 m, 4 coudes et 6 colliers ; 20 m de gouttière PVC (2 x 10 m) deviennent 5 longueurs, 52 crochets, 4 jonctions, 4 talons, 2 naissances — et c'est cette liste qui part au fournisseur", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "c@example.fr", "Toitures Martin");
     const { takeoffId, projectId } = await projectWith(agent, D2026_015_LINES);
     // La pose des crochets et les angles de gouttière ne sont pas au devis : le comptoir les demande (§47.8, §15).
     await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "param:nb_angles", value: { value: "0", unit: "u" } }).expect(200);
+    // Le dauphin non plus (réponse du fondateur, 2026-10-05) : ici, sans.
+    await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "param:dauphin", value: { value: "0", unit: "u" } }).expect(200);
     const v = (await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "param:fixation_crochet", value: { value: "2", unit: "u" } }).expect(200)).body.view as View & { ouvrages: Ouvrage[] };
     const descente = ouvrage(v, "Descente");
     expect(descente).toMatchObject({ role: "measure", direct: null, state: "verified" });
-    expect(descente.needs.map((n) => [n.slot, n.need?.value]).sort()).toEqual([["collier", "8"], ["coude", "4"], ["tube", "8"]]);
+    expect(descente.needs.map((n) => [n.slot, n.need?.value]).sort()).toEqual([["collier", "6"], ["coude", "4"], ["tube", "2"]]);
     const gouttiere = ouvrage(v, "Gouttière");
     expect(gouttiere.needs.map((n) => [n.slot, n.need?.value]).sort()).toEqual([["crochet", "52"], ["jonction", "4"], ["naissance", "2"], ["profil", "20"], ["talon", "4"]]);
 
@@ -268,7 +270,7 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
     // §45.3 : une ligne par article dans « Fournitures à chiffrer », au format « article : quantité de vente ».
     const body = (created.body.packet.articles as string[]).join("\n");
     expect(body).toMatch(/Tuiles HP10 rouge : 1 488 pièces/);
-    expect(body).toMatch(/Tubes de descente.*: 8 ml/);
+    expect(body).toMatch(/Tubes de descente.*longueur 4 m : 2 pièces/);
     expect(body).toMatch(/Coudes de descente PVC sable Ø80 : 4 pièces/);
     expect(body).toMatch(/Gouttière.*: 5 longueurs de 4 m/);
     expect(body).toMatch(/Chatières.*: 10 unités$/m);
@@ -284,6 +286,7 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
     await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "product:tuile", value: "edilians-hp10-huguenot" }).expect(200);
     await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "param:fixation_crochet", value: { value: "2", unit: "u" } }).expect(200);
     await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "param:nb_angles", value: { value: "0", unit: "u" } }).expect(200);
+    await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "param:dauphin", value: { value: "0", unit: "u" } }).expect(200);
     const after = (await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "param:pureau", value: { value: "34.3", unit: "cm" } }).expect(200)).body.view as View & { ouvrages: Ouvrage[] };
     await getView(agent, projectId);
     expect(await ctx.prisma.aiExecution.count()).toBe(before);

@@ -7,8 +7,8 @@ puis le PDF que lit le vendeur une fois les questions répondues (premier bouton
 
 | Devis de test | Vertes | Orange | Grises | Questions |
 | --- | --- | --- | --- | --- |
-| Gouttière PVC grise, deux descentes | 8 | 2 | 0 | 2 |
-| Gouttière alu anthracite sans développé | 3 | 2 | 0 | 2 |
+| Gouttière PVC grise, deux descentes | 8 | 3 | 0 | 3 |
+| Gouttière alu anthracite sans développé | 3 | 3 | 0 | 3 |
 
 ## Gouttière PVC grise, deux descentes
 
@@ -19,16 +19,18 @@ Devis de test :
 | 1 | Gouttière PVC demi-ronde 25 grise avec 2 descentes | 18 ml |
 | 2 | Descente PVC Ø80 grise, hauteur 5 m | 2 u |
 
-**À l'ouverture : 8 vertes · 2 orange · 0 grise.**
+**À l'ouverture : 8 vertes · 3 orange · 0 grise.**
 
 Questions du comptoir :
 - Crochets de gouttière : sur les chevrons ou en façade (bandeau) ? (Sur les chevrons / En façade (bandeau))
 - Combien d'angles sur cette gouttière ? (Aucun / 1 / 2 / 3)
+- Un dauphin en pied de chaque descente ? (Oui / Non)
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
 | Crochets de gouttière | — | attend une réponse à une question |
 | Angles de gouttière | — | attend une réponse à une question |
+| Dauphins | — | attend une réponse à une question |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -40,9 +42,10 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Talons de gouttière PVC grise de 25 | 2 pièces |  | chiffrable |
 | Naissances PVC demi-ronde grise de 25 Ø80 | 2 pièces |  | chiffrable |
 | Joints de dilatation de gouttière PVC grise de 25 | 1 pièce |  | chiffrable |
-| Tubes de descente PVC gris Ø80 | 10 ml | 2 descentes × 5 m | chiffrable |
+| Tubes de descente PVC gris Ø80, longueur 4 m | 4 pièces | 2 descentes × 5 m | chiffrable |
 | Coudes de descente PVC gris Ø80 | 4 pièces |  | chiffrable |
 | Colliers de descente Ø80 | 8 pièces |  | chiffrable |
+| Dauphins Ø80, 1 m | 2 pièces |  | chiffrable |
 
 ## Gouttière alu anthracite sans développé
 
@@ -53,14 +56,16 @@ Devis de test :
 | 1 | Gouttière aluminium laqué anthracite, 2 angles | 11 ml |
 | 2 | Descente alu Ø80, hauteur 5 m | 1 u |
 
-**À l'ouverture : 3 vertes · 2 orange · 0 grise.**
+**À l'ouverture : 3 vertes · 3 orange · 0 grise.**
 
 Questions du comptoir :
 - Gouttière de 25, de 28, de 33 ou de 40 ? (De 25 / De 28 / De 33 / De 40)
 - Crochets de gouttière : sur les chevrons ou en façade (bandeau) ? (Sur les chevrons / En façade (bandeau))
+- Un dauphin en pied de chaque descente ? (Oui / Non)
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
+| Dauphins | — | attend une réponse à une question |
 | Gouttière PVC / alu, Jonctions de gouttière… | — | attend une réponse à une question |
 | Crochets de gouttière | — | attend une réponse à une question |
 
@@ -74,9 +79,10 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Talons de gouttière alu anthracite de 25 | 2 pièces |  | chiffrable |
 | Angles extérieurs 90° alu anthracite de 25 | 2 pièces |  | chiffrable |
 | Naissances alu anthracite de 25 Ø80 | 1 pièce |  | chiffrable |
-| Tubes de descente alu Ø80 | 5 ml | 1 descentes × 5 m | chiffrable |
+| Tubes de descente alu Ø80, longueur 4 m | 2 pièces | 1 descentes × 5 m | chiffrable |
 | Coudes de descente alu Ø80 | 2 pièces |  | chiffrable |
 | Colliers de descente Ø80 | 4 pièces |  | chiffrable |
+| Dauphins Ø80, 1 m | 1 pièce |  | chiffrable |
 
 ## Le tableau de Brest (couverture), inchangé
 
