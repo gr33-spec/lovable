@@ -176,7 +176,7 @@ describe("banc d'essai : le pont devis → moteur retrouve la lecture faite à l
     expect(label("tuiles")).toBe("Tuiles HP10 terre cuite rouge grand moule");
     expect(label("liteaux")).toBe("Liteaux 27×40");
     expect(label("contre-liteaux")).toBe("Contre-liteaux (Liteaux 27×40)");
-    expect(label("tubes")).toBe("Tubes de descente PVC sable Ø80");
+    expect(label("tubes")).toBe("Tubes de descente PVC sable Ø80, longueur 4 m");
   });
 });
 

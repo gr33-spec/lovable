@@ -19,8 +19,8 @@ const CAS: Metier[] = [
       { ref: "1", designation: "Gouttière PVC demi-ronde 25 grise avec 2 descentes", quantity: "18", unit: "ml" },
       { ref: "2", designation: "Descente PVC Ø80 grise, hauteur 5 m", quantity: "2", unit: "u" },
     ],
-    questions: ["Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?", "Combien d'angles sur cette gouttière ?"],
-    couleurs: { vert: 8, orange: 2, gris: 0 },
+    questions: ["Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?", "Combien d'angles sur cette gouttière ?", "Un dauphin en pied de chaque descente ?"],
+    couleurs: { vert: 8, orange: 3, gris: 0 },
   },
   {
     nom: "Gouttière alu anthracite sans développé",
@@ -30,8 +30,8 @@ const CAS: Metier[] = [
       { ref: "1", designation: "Gouttière aluminium laqué anthracite, 2 angles", quantity: "11", unit: "ml" },
       { ref: "2", designation: "Descente alu Ø80, hauteur 5 m", quantity: "1", unit: "u" },
     ],
-    questions: ["Gouttière de 25, de 28, de 33 ou de 40 ?", "Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?"],
-    couleurs: { vert: 3, orange: 2, gris: 0 },
+    questions: ["Gouttière de 25, de 28, de 33 ou de 40 ?", "Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?", "Un dauphin en pied de chaque descente ?"],
+    couleurs: { vert: 3, orange: 3, gris: 0 },
   },
 ];
 

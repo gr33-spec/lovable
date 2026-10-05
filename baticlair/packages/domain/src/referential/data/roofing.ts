@@ -23,6 +23,9 @@ const DRAFT = { status: "draft" } as const;
 /** Réponses du fondateur aux partiels (2026-10-04). */
 const FOUNDER_REPLY = { status: "verified", verifiedAt: "2026-10-04", verifiedBy: "Fondateur (couvreur)" } as const;
 const FR_REPLY = "fondateur-reponses-2026-10-04";
+/** Réponses du fondateur du 2026-10-05 (descentes, plomb, cuivre). */
+const FR_REPLY_DESCENTES = "fondateur-reponses-2026-10-05";
+const FOUNDER_REPLY_DESCENTES = { status: "verified", verifiedAt: "2026-10-05", verifiedBy: "Fondateur (couvreur)" } as const;
 /** Référentiel quantitatif couverture écrit par le fondateur (couvreur), validé par lui le 2026-10-03. */
 const FOUNDER_DOC = {
   status: "verified",
@@ -997,7 +1000,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.05-31",
+  version: "roofing-2026.10.05-32",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -1076,6 +1079,14 @@ export const ROOFING_REFERENTIAL: Referential = {
       documentRef: "Message du fondateur dans la conversation de travail, 2026-10-04 (réponses aux partiels : sortie de toit, bobineau, surlongueur, bâche)",
       retrievedAt: "2026-10-04",
       note: "Sortie de toit : une embase par sortie adaptée à la couverture (plomb pour ardoise et tuile, platine zinc soudée pour zinc), au diamètre du conduit, plus un chapeau ; collerette d'étanchéité seulement pour un conduit de fumée. Surlongueur de bobine 15 cm par bac. Bâche : fourniture. Bobineau : largeurs 500, 650, 1 000 mm, longueurs 17, 21, 31 m (40 m en 500), épaisseurs 0,65 (défaut), 0,70, 0,80.",
+    },
+    {
+      id: "fondateur-reponses-2026-10-05",
+      kind: "trade_practice",
+      title: "Réponses du fondateur (couvreur) aux partiels du référentiel",
+      documentRef: "Message du fondateur dans la conversation de travail, 2026-10-05 (descentes en longueurs, colliers, dauphin ; plomb et cuivre)",
+      retrievedAt: "2026-10-05",
+      note: "Descentes PVC et zinc en longueurs de 4 m (2 m si le devis le dit), 2 coudes par descente par défaut, colliers tous les 2 m, dauphin : question du comptoir. Plomb en rouleaux, largeur lue sinon 30 cm, épaisseur 1,5 mm par défaut. Cuivre : comme le zinc, avec ses propres largeurs.",
     },
     {
       id: "fondateur-referentiel-2026-10-03",
@@ -1173,7 +1184,8 @@ export const ROOFING_REFERENTIAL: Referential = {
       keywords: ["crochet de gouttiere"],
     },
     { code: "gutter_outlet", label: "Naissance", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["naissance"] },
-    { code: "downpipe", label: "Tube de descente", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["descente", "tuyau de descente"] },
+    { code: "downpipe", label: "Tube de descente", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["descente", "tuyau de descente"] },
+    { code: "downpipe_shoe", label: "Dauphin", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["dauphin", "dauphins"] },
     { code: "downpipe_elbow", label: "Coude de descente", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["coude"] },
     {
       code: "downpipe_clamp",
@@ -1623,9 +1635,9 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("dilatation-gouttiere", "gutter_expansion", "Joint de dilatation de gouttière PVC", "Joints de dilatation"),
     generic("crochet-gouttiere-standard", "gutter_hook", "Crochet de gouttière (modèle à préciser)", "Crochets de gouttière"),
     generic("naissance-standard", "gutter_outlet", "Naissance de gouttière (modèle à préciser)", "Naissances"),
-    generic("tube-descente-standard", "downpipe", "Tube de descente (modèle à préciser)", "Tubes de descente", {
-      sellingUnits: [{ id: "ml", label: { one: "ml", many: "ml" }, contains: ONE_METRE, primary: true }],
-    }),
+    // Réponse du fondateur (2026-10-05) : tubes de descente PVC et zinc en longueurs de 4 m (2 m si le devis le dit).
+    generic("tube-descente-standard", "downpipe", "Tube de descente (longueur du chantier)", "Tubes de descente"),
+    generic("dauphin-standard", "downpipe_shoe", "Dauphin de pied de descente, 1 m", "Dauphins"),
     generic("coude-descente-standard", "downpipe_elbow", "Coude de descente (modèle à préciser)", "Coudes"),
     generic("bande-faitage-zinc-standard", "zinc_ridge", "Bande de faîtage zinc, développé 25 à 33 cm, longueurs de 3 m", "Faîtage zinc (bande)", {
       sellingUnits: [{ id: "longueur", label: { one: "longueur de 3 m", many: "longueurs de 3 m" }, contains: packaging("3", "m", F, FOUNDER_DOC), primary: true }],
@@ -3395,6 +3407,37 @@ export const ROOFING_REFERENTIAL: Referential = {
         DIAMETRE_DESCENTE_PARAM,
         { key: "hauteur_descente", label: "Hauteur d'une descente", unit: "m", kind: "site_data", question: "Hauteur d'une descente ?", textLabels: ["hauteur"] },
         {
+          key: "longueur_tube",
+          label: "Longueur des tubes",
+          unit: "m",
+          kind: "site_data",
+          question: "Tubes de descente en longueurs de 4 m ou de 2 m ?",
+          default: { value: "4", source: FR_REPLY_DESCENTES, verification: FOUNDER_REPLY_DESCENTES, version: 1, note: "longueurs de 4 m" },
+          choices: [
+            { label: "4 m", value: "4" },
+            { label: "2 m", value: "2" },
+          ],
+          textValues: [{ value: "2", keywords: ["longueur de 2 m", "longueurs de 2 m", "tube de 2 m", "tubes de 2 m", "en 2 m", "barres de 2 m"] }],
+        },
+        {
+          key: "dauphin",
+          label: "Dauphin",
+          unit: "u",
+          kind: "site_data",
+          question: "Un dauphin en pied de chaque descente ?",
+          hint: "Le dauphin protège le bas de la descente (fonte ou acier, 1 m).",
+          choices: [
+            { label: "Oui", value: "1" },
+            { label: "Non", value: "0" },
+          ],
+          // « sans dauphin » contient « dauphin » : le « oui » ne se lit qu'avec ses propres mots.
+          textValues: [
+            { value: "0", keywords: ["sans dauphin", "sans dauphins", "pas de dauphin"] },
+            { value: "1", keywords: ["avec dauphin", "avec dauphins", "et dauphin", "et dauphins", "+ dauphin", "dauphin fonte", "dauphins fonte", "dauphin acier", "dauphins acier"] },
+          ],
+          display: { "0": "sans dauphin", "1": "avec dauphin" },
+        },
+        {
           key: "coudes_par_descente",
           label: "Coudes par descente",
           unit: "u",
@@ -3411,24 +3454,25 @@ export const ROOFING_REFERENTIAL: Referential = {
       slots: [
         { key: "tube", family: "downpipe", label: "Tubes de descente", usual: { text: "Le diamètre et la matière suivent le devis.", source: F, productId: "tube-descente-standard" } },
         { key: "coude", family: "downpipe_elbow", label: "Coudes", charsFrom: "tube", usual: { text: "Coudes du même système que la descente.", source: F, productId: "coude-descente-standard" } },
-        { key: "collier", family: "downpipe_clamp", label: "Colliers", usual: { text: "Un collier tous les 1,8 m, plus un.", source: F, productId: "collier-descente-standard" } },
+        { key: "collier", family: "downpipe_clamp", label: "Colliers", usual: { text: "Un collier tous les 2 m, plus un.", source: FR_REPLY_DESCENTES, productId: "collier-descente-standard" } },
+        { key: "dauphin", family: "downpipe_shoe", label: "Dauphins", usual: { text: "Un dauphin par descente, 1 m (§15).", source: F, productId: "dauphin-standard" } },
       ],
       constants: {
-        espacement_collier: condition("1.8", "m", F, FOUNDER_DOC, "Un collier tous les 1,5 à 2 m."),
+        espacement_collier: condition("2", "m", FR_REPLY_DESCENTES, FOUNDER_REPLY_DESCENTES, "« colliers tous les 2 m » (réponse du fondateur, 2026-10-05)."),
       },
       needs: [
         {
           id: "tubes",
           slot: "tube",
-          formula: "nb_descentes * hauteur_descente",
-          unit: "ml",
+          formula: "nb_descentes * arrondi_sup(hauteur_descente / longueur_tube)",
+          unit: "u",
           precision: "{nb_descentes} descentes × {hauteur_descente|m}",
-          designation: "Tubes de descente {devis} Ø{diametre_descente|mm#}",
+          designation: "Tubes de descente {devis} Ø{diametre_descente|mm#}, longueur {longueur_tube|m}",
           precisionRequires: ["diametre_descente"],
           core: true,
-          exclusions: "Hauteur du devis, sans déduire les coudes ni ajouter de dauphin.",
-          source: "baticlair-pratique-accessoires",
-          verification: FOUNDER_VALIDATED,
+          exclusions: "Par descente, la hauteur du devis en longueurs entières, sans déduire les coudes ni le dauphin.",
+          source: FR_REPLY_DESCENTES,
+          verification: FOUNDER_REPLY_DESCENTES,
           version: 1,
         },
         {
@@ -3450,8 +3494,22 @@ export const ROOFING_REFERENTIAL: Referential = {
           formula: "nb_descentes * (arrondi_sup(hauteur_descente / regle.espacement_collier) + 1)",
           unit: "u",
           core: true,
-          exclusions: "Un collier tous les 1,8 m plus un par descente.",
+          exclusions: "Un collier tous les 2 m plus un par descente.",
           designation: "Colliers de descente Ø{diametre_descente|mm#}",
+          precisionRequires: ["diametre_descente"],
+          source: FR_REPLY_DESCENTES,
+          verification: FOUNDER_REPLY_DESCENTES,
+          version: 1,
+        },
+        {
+          id: "dauphins",
+          slot: "dauphin",
+          when: "dauphin >= 1",
+          formula: "nb_descentes",
+          unit: "u",
+          core: true,
+          exclusions: "Un dauphin d'1 m par descente (§15).",
+          designation: "Dauphins Ø{diametre_descente|mm#}, 1 m",
           precisionRequires: ["diametre_descente"],
           source: F,
           verification: FOUNDER_DOC,

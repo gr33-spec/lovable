@@ -293,12 +293,12 @@ describe("cas de référence D-2026-015 : chantier complet avec ouvrages compos�
 
   it("deux questions sur tout le chantier : confirmer le modèle de tuile lu, et la pose des crochets de gouttière (le comptoir la demande, §47.8)", () => {
     const r = computeChantier(ROOFING_REFERENTIAL, inputs());
-    expect(r.questionsPending).toEqual(["product:tuile", "param:fixation_crochet"]);
+    expect(r.questionsPending).toEqual(["product:tuile", "param:fixation_crochet", "param:dauphin"]);
     // Faîtière par défaut : 10 m × 2,9 pièces/ml = 29 ; si l'artisan choisit le modèle 710 : 10 m × 3 pièces/ml (Edilians) = 30.
     expect(need(r, "faitieres")).toMatchObject({ status: "calculated", purchase: { order: { count: "29" } }, productOrigin: "default" });
     const answered = computeChantier(ROOFING_REFERENTIAL, inputs({ faitiere: "edilians-faitiere-angulaire-710" }));
     expect(need(answered, "faitieres")).toMatchObject({ status: "calculated", quantity: { value: "30" }, purchase: { order: { count: "30" } }, provisional: false });
-    expect(answered.questionsPending).toEqual(["product:tuile", "param:fixation_crochet"]);
+    expect(answered.questionsPending).toEqual(["product:tuile", "param:fixation_crochet", "param:dauphin"]);
   });
 
   it("règles validées : ce qui se calcule, ce qui reste à confirmer, ce qui est impossible", () => {
@@ -323,12 +323,14 @@ describe("cas de référence D-2026-015 : chantier complet avec ouvrages compos�
     expect(row("closoir")).toEqual(["calculated", "10", "2"]);
     expect(row("profil")).toEqual(["calculated", "20", "5"]);
     expect(row("naissances")).toEqual(["calculated", "2", "2"]);
-    expect(row("tubes")).toEqual(["calculated", "8", "8"]);
+    // Réponse du fondateur (2026-10-05) : tubes en longueurs de 4 m, colliers tous les 2 m (+ 1).
+    expect(row("tubes")).toEqual(["calculated", "2", "2"]);
     // Crochets de gouttière (zone littorale : tous les 40 cm), coudes (2 par descente), colliers (tous les 1,8 m + 1).
     expect(row("crochets")).toEqual(["calculated", "50", "50"]);
     expect(row("coudes")).toEqual(["calculated", "4", "4"]);
-    expect(row("colliers")).toEqual(["calculated", "8", "8"]);
-    expect(r.questionsPending).toEqual([]);
+    expect(row("colliers")).toEqual(["calculated", "6", "6"]);
+    // Le dauphin n'est pas au devis : le comptoir le demande (réponse du fondateur, 2026-10-05).
+    expect(r.questionsPending).toEqual(["param:dauphin"]);
   });
 });
 
@@ -357,7 +359,7 @@ describe("cas de référence D-2026-015 : la liste d'achat vue par l'artisan", (
           preferences: { products: { ecran: "soprema-sop-ecran-hpv-r2-150x50" } },
         },
         { workItemId: "faitage", params: params("faitage"), products: {}, mentioned: ["faitiere", "closoir"] },
-        { workItemId: "descente", params: params("descente"), products: {}, mentioned: ["tube", "coude", "collier"] },
+        { workItemId: "descente", params: { ...params("descente"), dauphin: { value: "0", unit: "u", origin: "artisan" } }, products: {}, mentioned: ["tube", "coude", "collier"] },
       ],
     );
     const rows = purchaseList(r.workItems, { "couverture-tuiles-emboitement/tuile": ["rouge"], "descente/tube": ["PVC", "Ø80", "sable"] });
@@ -370,9 +372,9 @@ describe("cas de référence D-2026-015 : la liste d'achat vue par l'artisan", (
     expect(view("liteaux")).toEqual(["Liteaux 27×40", "ready", "368 ml", "≈ 8 bottes de 50 ml"]);
     expect(view("ecran")).toEqual(["Écran HPV Soprema R2, rouleau 1,50 × 50 m", "ready", "2 rouleaux", "128,57 m²"]);
     // Pièces par défaut (modèle à préciser par le fournisseur) : quantité certaine, caractéristiques du devis conservées.
-    expect(view("tubes")).toEqual(["Tubes de descente PVC sable Ø80", "ready", "8 ml", null]);
+    expect(view("tubes")).toEqual(["Tubes de descente PVC sable Ø80, longueur 4 m", "ready", "2 pièces", null]);
     expect(view("faitieres")).toEqual(["Faîtières", "ready", "29 pièces", null]);
-    expect(view("colliers")).toEqual(["Colliers de descente Ø80", "ready", "8 pièces", null]);
+    expect(view("colliers")).toEqual(["Colliers de descente Ø80", "ready", "6 pièces", null]);
     expect(rows.every((x) => x.state === "ready")).toBe(true);
   });
 });

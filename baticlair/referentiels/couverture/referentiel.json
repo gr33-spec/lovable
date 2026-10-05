@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.05-31",
+  "version": "roofing-2026.10.05-32",
   "trade": "roofing",
   "sources": [
     {
@@ -84,6 +84,14 @@
       "documentRef": "Message du fondateur dans la conversation de travail, 2026-10-04 (réponses aux partiels : sortie de toit, bobineau, surlongueur, bâche)",
       "retrievedAt": "2026-10-04",
       "note": "Sortie de toit : une embase par sortie adaptée à la couverture (plomb pour ardoise et tuile, platine zinc soudée pour zinc), au diamètre du conduit, plus un chapeau ; collerette d'étanchéité seulement pour un conduit de fumée. Surlongueur de bobine 15 cm par bac. Bâche : fourniture. Bobineau : largeurs 500, 650, 1 000 mm, longueurs 17, 21, 31 m (40 m en 500), épaisseurs 0,65 (défaut), 0,70, 0,80."
+    },
+    {
+      "id": "fondateur-reponses-2026-10-05",
+      "kind": "trade_practice",
+      "title": "Réponses du fondateur (couvreur) aux partiels du référentiel",
+      "documentRef": "Message du fondateur dans la conversation de travail, 2026-10-05 (descentes en longueurs, colliers, dauphin ; plomb et cuivre)",
+      "retrievedAt": "2026-10-05",
+      "note": "Descentes PVC et zinc en longueurs de 4 m (2 m si le devis le dit), 2 coudes par descente par défaut, colliers tous les 2 m, dauphin : question du comptoir. Plomb en rouleaux, largeur lue sinon 30 cm, épaisseur 1,5 mm par défaut. Cuivre : comme le zinc, avec ses propres largeurs."
     },
     {
       "id": "fondateur-referentiel-2026-10-03",
@@ -470,12 +478,23 @@
     {
       "code": "downpipe",
       "label": "Tube de descente",
-      "needUnit": "ml",
+      "needUnit": "u",
       "attributes": [],
       "keyAttributes": [],
       "keywords": [
         "descente",
         "tuyau de descente"
+      ]
+    },
+    {
+      "code": "downpipe_shoe",
+      "label": "Dauphin",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "dauphin",
+        "dauphins"
       ]
     },
     {
@@ -3855,26 +3874,57 @@
     {
       "id": "tube-descente-standard",
       "family": "downpipe",
-      "label": "Tube de descente (modèle à préciser)",
+      "label": "Tube de descente (longueur du chantier)",
       "shortLabel": "Tubes de descente",
       "aliases": [],
       "generic": true,
       "attributes": {},
       "sellingUnits": [
         {
-          "id": "ml",
+          "id": "piece",
           "label": {
-            "one": "ml",
-            "many": "ml"
+            "one": "pièce",
+            "many": "pièces"
           },
           "contains": {
             "kind": "packaging",
             "value": "1",
-            "unit": "m",
+            "unit": "u",
             "source": "definition",
             "verification": {
               "status": "verified",
-              "verifiedAt": "2026-10-03",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "dauphin-standard",
+      "family": "downpipe_shoe",
+      "label": "Dauphin de pied de descente, 1 m",
+      "shortLabel": "Dauphins",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
               "verifiedBy": "BatiClair (définition)"
             },
             "version": 1
@@ -14246,6 +14296,93 @@
           ]
         },
         {
+          "key": "longueur_tube",
+          "label": "Longueur des tubes",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Tubes de descente en longueurs de 4 m ou de 2 m ?",
+          "default": {
+            "value": "4",
+            "source": "fondateur-reponses-2026-10-05",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-05",
+              "verifiedBy": "Fondateur (couvreur)"
+            },
+            "version": 1,
+            "note": "longueurs de 4 m"
+          },
+          "choices": [
+            {
+              "label": "4 m",
+              "value": "4"
+            },
+            {
+              "label": "2 m",
+              "value": "2"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "longueur de 2 m",
+                "longueurs de 2 m",
+                "tube de 2 m",
+                "tubes de 2 m",
+                "en 2 m",
+                "barres de 2 m"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "dauphin",
+          "label": "Dauphin",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Un dauphin en pied de chaque descente ?",
+          "hint": "Le dauphin protège le bas de la descente (fonte ou acier, 1 m).",
+          "choices": [
+            {
+              "label": "Oui",
+              "value": "1"
+            },
+            {
+              "label": "Non",
+              "value": "0"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "0",
+              "keywords": [
+                "sans dauphin",
+                "sans dauphins",
+                "pas de dauphin"
+              ]
+            },
+            {
+              "value": "1",
+              "keywords": [
+                "avec dauphin",
+                "avec dauphins",
+                "et dauphin",
+                "et dauphins",
+                "+ dauphin",
+                "dauphin fonte",
+                "dauphins fonte",
+                "dauphin acier",
+                "dauphins acier"
+              ]
+            }
+          ],
+          "display": {
+            "0": "sans dauphin",
+            "1": "avec dauphin"
+          }
+        },
+        {
           "key": "coudes_par_descente",
           "label": "Coudes par descente",
           "unit": "u",
@@ -14306,47 +14443,55 @@
           "family": "downpipe_clamp",
           "label": "Colliers",
           "usual": {
-            "text": "Un collier tous les 1,8 m, plus un.",
-            "source": "fondateur-referentiel-2026-10-03",
+            "text": "Un collier tous les 2 m, plus un.",
+            "source": "fondateur-reponses-2026-10-05",
             "productId": "collier-descente-standard"
+          }
+        },
+        {
+          "key": "dauphin",
+          "family": "downpipe_shoe",
+          "label": "Dauphins",
+          "usual": {
+            "text": "Un dauphin par descente, 1 m (§15).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "dauphin-standard"
           }
         }
       ],
       "constants": {
         "espacement_collier": {
           "kind": "installation_condition",
-          "value": "1.8",
+          "value": "2",
           "unit": "m",
-          "source": "fondateur-referentiel-2026-10-03",
+          "source": "fondateur-reponses-2026-10-05",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            "verifiedAt": "2026-10-05",
+            "verifiedBy": "Fondateur (couvreur)"
           },
           "version": 1,
-          "note": "Un collier tous les 1,5 à 2 m."
+          "note": "« colliers tous les 2 m » (réponse du fondateur, 2026-10-05)."
         }
       },
       "needs": [
         {
           "id": "tubes",
           "slot": "tube",
-          "formula": "nb_descentes * hauteur_descente",
-          "unit": "ml",
+          "formula": "nb_descentes * arrondi_sup(hauteur_descente / longueur_tube)",
+          "unit": "u",
           "precision": "{nb_descentes} descentes × {hauteur_descente|m}",
-          "designation": "Tubes de descente {devis} Ø{diametre_descente|mm#}",
+          "designation": "Tubes de descente {devis} Ø{diametre_descente|mm#}, longueur {longueur_tube|m}",
           "precisionRequires": [
             "diametre_descente"
           ],
           "core": true,
-          "exclusions": "Hauteur du devis, sans déduire les coudes ni ajouter de dauphin.",
-          "source": "baticlair-pratique-accessoires",
+          "exclusions": "Par descente, la hauteur du devis en longueurs entières, sans déduire les coudes ni le dauphin.",
+          "source": "fondateur-reponses-2026-10-05",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-02",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Validée sur présentation de la formule et d'un exemple chiffré (D-2026-015)."
+            "verifiedAt": "2026-10-05",
+            "verifiedBy": "Fondateur (couvreur)"
           },
           "version": 1
         },
@@ -14376,8 +14521,28 @@
           "formula": "nb_descentes * (arrondi_sup(hauteur_descente / regle.espacement_collier) + 1)",
           "unit": "u",
           "core": true,
-          "exclusions": "Un collier tous les 1,8 m plus un par descente.",
+          "exclusions": "Un collier tous les 2 m plus un par descente.",
           "designation": "Colliers de descente Ø{diametre_descente|mm#}",
+          "precisionRequires": [
+            "diametre_descente"
+          ],
+          "source": "fondateur-reponses-2026-10-05",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-05",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        {
+          "id": "dauphins",
+          "slot": "dauphin",
+          "when": "dauphin >= 1",
+          "formula": "nb_descentes",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un dauphin d'1 m par descente (§15).",
+          "designation": "Dauphins Ø{diametre_descente|mm#}, 1 m",
           "precisionRequires": [
             "diametre_descente"
           ],

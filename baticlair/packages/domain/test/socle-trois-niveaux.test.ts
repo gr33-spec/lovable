@@ -139,17 +139,18 @@ describe("niveau 3 : à commander, jamais avant que le besoin ne soit établi", 
 });
 
 describe("ouvrages composés", () => {
-  it("2 descentes de 4 m avec coudes et colliers = 2 ouvrages décomposés : 8 m de tube, 4 coudes, 8 colliers", () => {
-    const { ouvrage } = read();
+  it("2 descentes de 4 m avec coudes et colliers = 2 ouvrages décomposés : 2 longueurs de 4 m, 4 coudes, 6 colliers", () => {
+    // Le dauphin, question du comptoir (réponse du fondateur, 2026-10-05) : ici, sans.
+    const { ouvrage } = read({ "param:dauphin": { value: "0", unit: "u" } });
     const descente = ouvrage("ligne 8");
     expect(descente.role).toBe("measure");
     expect(descente.direct).toBeNull();
     const q = (slot: string) => descente.needs.find((n) => n.slot === slot)!;
-    expect(q("tube").need).toEqual({ value: "8", unit: "ml" });
+    expect(q("tube").need).toEqual({ value: "2", unit: "u" });
     // « 2 jeux de coudes » n'est pas un nombre : hypothèse 2 coudes par descente (un dévoiement), dite.
     expect(q("coude")).toMatchObject({ need: { value: "4", unit: "u" }, assumptions: expect.arrayContaining([expect.objectContaining({ key: "param:coudes_par_descente" })]) });
-    // Un collier tous les 1,8 m plus un : 2 × (3 + 1).
-    expect(q("collier").need).toEqual({ value: "8", unit: "u" });
+    // Un collier tous les 2 m plus un (réponse du fondateur, 2026-10-05) : 2 × (2 + 1).
+    expect(q("collier").need).toEqual({ value: "6", unit: "u" });
     expect(descente.state).toBe("verified");
   });
 

@@ -1,5 +1,13 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.05-32 — descentes en longueurs (réponse du fondateur)
+
+- **Tubes de descente** PVC et zinc en **longueurs de 4 m** (2 m si le devis le dit : « en longueurs de 2 m »), par descente la hauteur en longueurs entières : « Tubes de descente zinc Ø100, longueur 4 m : 4 pièces » pour 2 descentes de 5 m (avant : 10 ml).
+- **Coudes** : 2 par descente par défaut (inchangé). **Colliers** : un tous les 2 m plus un (avant : 1,8 m).
+- **Dauphin** : question du comptoir, « Un dauphin en pied de chaque descente ? » ; lu au devis (« avec dauphin », « dauphin fonte », « sans dauphin »). Oui : un dauphin d'1 m par descente (§15).
+- D-2026-015 (2 descentes PVC de 4 m) : 2 longueurs de 4 m (avant 8 ml), 6 colliers (avant 8), une question de plus (le dauphin). Devis de démonstration : « sans dauphin » écrit, toujours aucune question.
+- Compte rendu : `docs/lot-couverture/point-7.md`. Tableau de Brest inchangé.
+
 ## roofing-2026.10.05-31 — sécurité et accès (§14), désamiantage (§18)
 
 - **Sécurité et accès** (famille `roof_safety`) : crochets de sécurité, crochets de service, crochets d'échelle, échelle de toit, ligne de vie, points d'ancrage, garde-corps, passerelle. Reconnus, ils partent **tels que le devis les écrit** (modèle, norme, longueur), sans calcul ni question. Une ligne de vie à sa longueur passe le test du fournisseur (un système vendu à la longueur).
