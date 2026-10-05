@@ -239,16 +239,17 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
     expect(purchase.understood[0]).toBe("Couverture en tuiles à emboîtement sur liteaux : 120 m²");
   });
 
-  it("2 descentes deviennent 8 m de tube, 4 coudes et 8 colliers ; 20 m de gouttière deviennent 5 longueurs, 50 crochets, 2 naissances — et c'est cette liste qui part au fournisseur", async () => {
+  it("2 descentes deviennent 8 m de tube, 4 coudes et 8 colliers ; 20 m de gouttière PVC (2 x 10 m) deviennent 5 longueurs, 52 crochets, 4 jonctions, 4 talons, 2 naissances — et c'est cette liste qui part au fournisseur", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "c@example.fr", "Toitures Martin");
     const { takeoffId, projectId } = await projectWith(agent, D2026_015_LINES);
-    // La pose des crochets de gouttière n'est pas au devis : le comptoir la demande (§47.8).
+    // La pose des crochets et les angles de gouttière ne sont pas au devis : le comptoir les demande (§47.8, §15).
+    await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "param:nb_angles", value: { value: "0", unit: "u" } }).expect(200);
     const v = (await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "param:fixation_crochet", value: { value: "2", unit: "u" } }).expect(200)).body.view as View & { ouvrages: Ouvrage[] };
     const descente = ouvrage(v, "Descente");
     expect(descente).toMatchObject({ role: "measure", direct: null, state: "verified" });
     expect(descente.needs.map((n) => [n.slot, n.need?.value]).sort()).toEqual([["collier", "8"], ["coude", "4"], ["tube", "8"]]);
     const gouttiere = ouvrage(v, "Gouttière");
-    expect(gouttiere.needs.map((n) => [n.slot, n.need?.value]).sort()).toEqual([["crochet", "50"], ["naissance", "2"], ["profil", "20"]]);
+    expect(gouttiere.needs.map((n) => [n.slot, n.need?.value]).sort()).toEqual([["crochet", "52"], ["jonction", "4"], ["naissance", "2"], ["profil", "20"], ["talon", "4"]]);
 
     // Partie chez le fournisseur : la liste d'achats, jamais « 2 unités d'ouvrage ».
     const answered = await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "product:tuile", value: "edilians-hp10-huguenot" }).expect(200);
@@ -282,6 +283,7 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
     const before = await ctx.prisma.aiExecution.count();
     await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "product:tuile", value: "edilians-hp10-huguenot" }).expect(200);
     await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "param:fixation_crochet", value: { value: "2", unit: "u" } }).expect(200);
+    await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "param:nb_angles", value: { value: "0", unit: "u" } }).expect(200);
     const after = (await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "param:pureau", value: { value: "34.3", unit: "cm" } }).expect(200)).body.view as View & { ouvrages: Ouvrage[] };
     await getView(agent, projectId);
     expect(await ctx.prisma.aiExecution.count()).toBe(before);

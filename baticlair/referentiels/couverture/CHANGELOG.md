@@ -1,5 +1,14 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.05-28 — gouttières PVC et aluminium (§15)
+
+- **Gouttière PVC ou alu** (nouvel ouvrage `gouttiere-pvc-alu`, famille `gutter_plastic` qui précise `gutter` : le mot « PVC » ou « alu » n'importe où dans la ligne) : mêmes règles que le zinc, avec les pièces du §15. **Longueurs de 4 m** ; **crochets** tous les 50 cm (40 en bord de mer) plus un en bout de chaque ligne ; **jonctions** entre longueurs ; **2 talons par ligne** ; **un angle par angle** (« Combien d'angles sur cette gouttière ? » si le devis ne le dit pas) ; **une naissance par descente** ; **joint de dilatation** PVC tous les 12 m de ligne. « Longueur : 2 x 10 m » = deux lignes (deux fois les talons, jonctions par ligne).
+- La matière et la **teinte** se lisent dans la ligne (grise, blanche, sable, brune, anthracite), sinon le comptoir demande la teinte ; désignations comme au comptoir : « Gouttière PVC demi-ronde sable de 25 », « Talons de gouttière PVC sable de 25 ».
+- D-2026-015 (gouttière PVC sable 2 × 10 m) : + 4 jonctions, + 4 talons, une question de plus (les angles).
+- La gouttière **zinc ne change pas** (Brest inchangé).
+- Test du fournisseur : un tube « Ø80 » au mètre (alu, zinc) n'est plus pris pour du métal sans dimension.
+- Compte rendu : `docs/lot-couverture/point-3.md`.
+
 ## roofing-2026.10.05-27 — fenêtres de toit (§11)
 
 - **Fenêtre de toit** (nouvel ouvrage `fenetre-de-toit`, famille `roof_window`) : la fenêtre part **telle que le devis l'écrit** (marque, modèle, taille) et compte l'ouvrage. Sans taille dans la ligne (ni « 78x98 », ni référence « MK04 »), la question du comptoir se pose sur la ligne : « Fenêtre de toit : quelle taille ? » (55 × 78, 78 × 98, 78 × 118, 114 × 118 ou saisie) ; la réponse part en précision.

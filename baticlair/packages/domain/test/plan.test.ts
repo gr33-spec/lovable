@@ -92,7 +92,7 @@ describe("enrichissement progressif", () => {
     // Sans produit par défaut (référentiel du fondateur retiré) : ce qu'il faudrait documenter est listé précisément.
     const bare = sansHypotheses(ROOFING_REFERENTIAL);
     // (Sans hypothèse, la zone est demandée pour les crochets : répondue ici.)
-    const s = scoreQuote([L("a", "Gouttière PVC demi-ronde 25 sable, crochets compris", "12", "ml")], bare, PROFILE, { acceptDraft: true, answers: { "param:zone": { value: "1", unit: "u" } } });
+    const s = scoreQuote([L("a", "Gouttière zinc demi-ronde 25, crochets compris", "12", "ml")], bare, PROFILE, { acceptDraft: true, answers: { "param:zone": { value: "1", unit: "u" } } });
     expect(documentationNeeds(bare, s.plan, s.workItems).map((d) => [d.kind, d.title, d.lines])).toEqual([
       ["product", "Gouttière — produit à identifier", ["a"]],
       ["product", "Crochets — produit à identifier", ["a"]],

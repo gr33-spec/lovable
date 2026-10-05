@@ -329,7 +329,7 @@ function keepCharacteristic(c: string): boolean {
  */
 const METAL_WORDS = /\b(zinc|cuivre|alu|aluminium|inox|acier|galva|galvanise|plomb|tole|metal)\b/;
 const SHEET_WORDS = /\b(voliges?|voligeage|osb|contreplaques?|panneaux?|ecrans?|membranes?|pare[ -]?(?:pluie|vapeur)|isolant|laine|frein[ -]?vapeur|epdm|feutre)\b/;
-const DIMENSION = /\d\s*(?:mm|cm)\b|\bd[ée]v\.?\s*\d|d[ée]velopp|\bø|\bdiam|\blargeur\b|\bep\.?\s*\d|\bepaisseur\b|\d\s*[×x]\s*\d/;
+const DIMENSION = /\d\s*(?:mm|cm)\b|\bd[ée]v\.?\s*\d|d[ée]velopp|ø\s*\d|\bdiam|\blargeur\b|\bep\.?\s*\d|\bepaisseur\b|\d\s*[×x]\s*\d/;
 export function supplierTest(designation: string, unit: string | null): string | null {
   const u = (unit ?? "").trim().toLowerCase().replace("²", "2");
   const d = norm(designation);

@@ -154,17 +154,20 @@ describe("ouvrages composés", () => {
   });
 
   it("20 m de gouttière « crochets et naissances compris » : profil, crochets et naissances calculés, accessoires visibles", () => {
-    // La pose des crochets n'est pas au devis : le comptoir la demande (§47.8) ; ici, en façade.
-    const { ouvrage } = read({ "param:fixation_crochet": { value: "2", unit: "u" } });
+    // La pose des crochets et les angles ne sont pas au devis : le comptoir les demande (§47.8) ; ici, en façade, sans angle.
+    const { ouvrage } = read({ "param:fixation_crochet": { value: "2", unit: "u" }, "param:nb_angles": { value: "0", unit: "u" } });
     const gouttiere = ouvrage("ligne 7");
     expect(gouttiere.role).toBe("measure");
     expect(gouttiere.direct).toBeNull();
-    expect(gouttiere.needs.map((n) => n.slot).sort()).toEqual(["crochet", "naissance", "profil"]);
+    // Gouttière PVC (§15) : jonctions et talons en plus ; « 2 x 10 m » = deux lignes, aucune au-delà de 12 m (pas de joint de dilatation).
+    expect(gouttiere.needs.map((n) => n.slot).sort()).toEqual(["crochet", "jonction", "naissance", "profil", "talon"]);
     for (const slot of ["crochet", "naissance"]) expect(gouttiere.needs.find((n) => n.slot === slot)!.origin).toBe("explicit");
     const q = (slot: string) => gouttiere.needs.find((n) => n.slot === slot)!;
     expect(q("profil").order).toMatchObject({ count: "5", unit: { many: "longueurs de 4 m" } });
-    // Zone littorale par défaut : un crochet tous les 40 cm.
-    expect(q("crochet").need).toEqual({ value: "50", unit: "u" });
+    // Zone littorale par défaut : un crochet tous les 40 cm, plus un en bout de chaque ligne.
+    expect(q("crochet").need).toEqual({ value: "52", unit: "u" });
+    expect(q("jonction").need).toEqual({ value: "4", unit: "u" });
+    expect(q("talon").need).toEqual({ value: "4", unit: "u" });
     expect(q("naissance").need).toEqual({ value: "2", unit: "u" });
     expect(gouttiere.state).toBe("verified");
   });

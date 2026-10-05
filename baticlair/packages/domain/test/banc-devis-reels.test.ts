@@ -137,7 +137,7 @@ describe("banc d'essai : le pont devis → moteur retrouve la lecture faite à l
       // Les rives (tuiles de rive) appartiennent à la couverture ; « pour la finition des rives » cite la tuile posée.
       ["ligne 5", "couverture-tuiles-emboitement", "rive", ["tuile"]],
       ["ligne 6", "faitage", "faitiere", ["closoir", "fixation_faitiere"]],
-      ["ligne 7", "gouttiere", "profil", ["crochet", "naissance"]],
+      ["ligne 7", "gouttiere-pvc-alu", "profil", ["crochet", "naissance"]],
       ["ligne 8", "descente", "tube", ["coude", "collier"]],
       ["ligne 9", "not_covered"],
       ["ligne 10", "sortie-de-toit", "sortie", []],

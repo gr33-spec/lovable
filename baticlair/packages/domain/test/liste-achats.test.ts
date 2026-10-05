@@ -74,7 +74,7 @@ describe("liste d'achats : D-2026-015 (tuiles HP10, 120 m²)", () => {
     const v = read(D2026_015_LINES);
     // La sortie de toit est un ouvrage (réponse du fondateur, 2026-10-04) : le devis ne dit ni le diamètre ni l'usage.
     // Le comptoir demande aussi la pose des crochets de gouttière (§47.8) ; « gouttière de 25 » et « Ø80 » sont au devis.
-    expect(v.questions.map((q) => q.key)).toEqual(["engine:param:diametre_sortie", "engine:param:fixation_crochet", "engine:param:usage_sortie", "engine:product:tuile"]);
+    expect(v.questions.map((q) => q.key)).toEqual(["engine:param:diametre_sortie", "engine:param:fixation_crochet", "engine:param:nb_angles", "engine:param:usage_sortie", "engine:product:tuile"]);
     expect(v.toBuy.map((b) => [short(b.label), b.quantity])).toEqual([
       ["Liteaux 27×40", "547 ml"],
       ["Écran HPV, rouleau 1,50 × 50 m", "2 rouleaux"],
@@ -83,8 +83,11 @@ describe("liste d'achats : D-2026-015 (tuiles HP10, 120 m²)", () => {
       ["Closoir", "2 rouleaux de 5 m"],
       ["Crochets de faîtière", "29 pièces"],
       ["Abouts de faîtage", "2 pièces"],
-      ["Gouttière PVC sable demi-ronde dév. 25", "5 longueurs de 4 m"],
-      ["Naissances PVC sable demi-ronde dév. 25 Ø80", "2 pièces"],
+      ["Gouttière PVC demi-ronde sable de 25", "5 longueurs de 4 m"],
+      // §15 : « 2 x 10 m », deux lignes de gouttière PVC : une jonction entre deux longueurs, deux talons par ligne.
+      ["Jonctions de gouttière PVC sable de 25", "4 pièces"],
+      ["Talons de gouttière PVC sable de 25", "4 pièces"],
+      ["Naissances PVC demi-ronde sable de 25 Ø80", "2 pièces"],
       ["Tubes de descente PVC sable Ø80", "8 ml"],
       ["Coudes de descente PVC sable Ø80", "4 pièces"],
       ["Colliers de descente Ø80", "8 pièces"],
@@ -101,7 +104,7 @@ describe("liste d'achats : D-2026-015 (tuiles HP10, 120 m²)", () => {
 
   it("après « oui, c'est bien ce modèle » : 1 488 tuiles avec le pureau mini (zone littorale), 1 345 si l'artisan donne 34,3 cm", () => {
     const v = read(D2026_015_LINES, { "product:tuile": "edilians-hp10-huguenot" });
-    expect(v.questions.map((q) => q.key)).toEqual(["engine:param:diametre_sortie", "engine:param:fixation_crochet", "engine:param:usage_sortie"]);
+    expect(v.questions.map((q) => q.key)).toEqual(["engine:param:diametre_sortie", "engine:param:fixation_crochet", "engine:param:nb_angles", "engine:param:usage_sortie"]);
     expect(v.toBuy.find((b) => b.needIds.includes("tuiles"))).toMatchObject({ quantity: "1 488 pièces", approx: "≈ 7 palettes" });
     expect(v.assumptions.map((a) => a.key)).toEqual(expect.arrayContaining(["param:zone", "param:pente", "param:pureau"]));
     const precise = read(D2026_015_LINES, { "product:tuile": "edilians-hp10-huguenot", "param:pureau": { value: "34.3", unit: "cm" } });
