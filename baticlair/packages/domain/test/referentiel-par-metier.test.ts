@@ -11,13 +11,13 @@ describe("referentialFor : le tiroir du métier", () => {
     expect(tradeIdOf("Platrerie")).toBe("drywall");
   });
   it("un métier sans tiroir : null, jamais le couvreur", () => {
-    expect(referentialFor("electrical")).toBeNull();
+    expect(referentialFor("flooring")).toBeNull();
     expect(referentialFor("other")).toBeNull();
     expect(referentialFor("")).toBeNull();
     expect(referentialFor(null)).toBeNull();
   });
   it("multi-métiers : le premier qui a un tiroir", () => {
-    expect(referentialFor("electrical,drywall")).toBe(PLATRERIE_REFERENTIAL);
+    expect(referentialFor("flooring,drywall")).toBe(PLATRERIE_REFERENTIAL);
     expect(referentialFor("roofing,drywall")).toBe(ROOFING_REFERENTIAL);
   });
 });

@@ -406,8 +406,12 @@ export function artisanView(
           needs.push({ needId: `${work!.id}/${key}`, slot: key, label: slot.label, origin: "explicit", need: null, needRange: null, order: null, missing: "Pas encore calculé : le fournisseur proposera pour la mesure du devis.", provisional: false, usual: slot.usual?.text ?? null, assumptions: [], state: "missing" });
         }
       }
-      const direct = v.basis === "purchase" && role !== "undetermined" && line.quantity && line.unit && needs.length === 0 ? { quantity: writtenNumber(line.quantity), unit: line.unit } : null;
       const planned = link.plan.lines.find((l) => l.ref === item.id);
+      // « Fenêtre PVC 120×125 » : commandée telle qu'écrite, ET elle compte l'ouvrage pour la mousse et le mastic.
+      const asWritten =
+        planned?.status === "planned" && link.ref.workItems.find((w) => w.id === planned.workItemId)?.slots.find((x) => x.key === planned.slot)?.orderedAsWritten === true;
+      const direct =
+        v.basis === "purchase" && role !== "undetermined" && line.quantity && line.unit && (needs.length === 0 || asWritten) ? { quantity: writtenNumber(line.quantity), unit: line.unit } : null;
       // Une deuxième ligne du même ouvrage (« peinture plafonds » après « peinture murs ») : sa surface s'ajoute au calcul
       // de l'ouvrage, porté par la première ; elle n'a rien à faire chiffrer à part.
       const counted =
@@ -492,7 +496,9 @@ export function computeWithAnswers(
   // le devis a fait le travail, BatiClair ne lui ajoute ni besoin ni question.
   const allGiven = (workItemId: string) => {
     const planned = plan.lines.filter((l): l is Extract<QuotePlan["lines"][number], { status: "planned" }> => l.status === "planned" && l.workItemId === workItemId);
-    return planned.length > 0 && planned.every((l) => given.has(`${workItemId}/${l.slot}`));
+    // Une ligne commandée telle qu'écrite qui compte aussi l'ouvrage (« 4 fenêtres ») laisse calculer ses fournitures de pose.
+    const counts = (l: (typeof planned)[number]) => ref.workItems.find((w) => w.id === workItemId)?.slots.find((s) => s.key === l.slot)?.measureOnly === true;
+    return planned.length > 0 && planned.every((l) => given.has(`${workItemId}/${l.slot}`) && !counts(l));
   };
   const inputs: WorkItemInput[] = plan.inputs.map((input) => {
     const work = ref.workItems.find((w) => w.id === input.workItemId)!;

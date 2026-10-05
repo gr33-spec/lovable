@@ -308,6 +308,11 @@ export interface Slot {
   /** La ligne du devis donne une MESURE (« 91 m² de joint debout ») ; rien ne se commande sous ce nom. */
   measureOnly?: true;
   /**
+   * Avec `measureOnly` : la ligne part AUSSI telle qu'écrite au devis (« Fenêtre PVC 2 vantaux 120×125 » : la menuiserie
+   * se commande comme le devis la décrit), et son nombre compte l'ouvrage pour les fournitures de pose (mousse, mastic).
+   */
+  orderedAsWritten?: true;
+  /**
    * Les caractéristiques lues sur un autre emplacement du même ouvrage suivent celui-ci (la naissance prend la matière
    * et la forme de la gouttière : « zinc demi-ronde »).
    */
