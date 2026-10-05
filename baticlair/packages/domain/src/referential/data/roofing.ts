@@ -1,4 +1,5 @@
 import type { Fact, ParamDef, Product, Provenance, Referential } from "../model.js";
+import { rule, todo } from "./kit.js";
 
 /**
  * Référentiel COUVERTURE.
@@ -885,6 +886,72 @@ const TEINTE_FC_PARAM: ParamDef = {
   ],
   display: { "1": "bleu-noir", "2": "noir", "3": "brun" },
 };
+/** §12 : largeur de la bande de plomb, lue au devis (« largeur 40 cm », « bande de 33 ») ; sinon 30 cm (réponse du fondateur). */
+const LARGEUR_PLOMB_PARAM: ParamDef = {
+  key: "largeur_plomb",
+  label: "Largeur de la bande de plomb",
+  unit: "cm",
+  kind: "site_data",
+  question: "Plomb : bande de quelle largeur ?",
+  textLabels: ["largeur", "bande de", "laize"],
+  default: { value: "30", source: FR_REPLY_DESCENTES, verification: FOUNDER_REPLY_DESCENTES, version: 1, note: "bande de 30 cm" },
+  choices: [
+    { label: "20 cm", value: "20" },
+    { label: "30 cm", value: "30" },
+    { label: "40 cm", value: "40" },
+    { label: "50 cm", value: "50" },
+  ],
+};
+/** §12 : plomb 1,5 / 2 / 2,5 mm (17 / 22,7 / 28,4 kg/m²) ; 1,5 mm par défaut (réponse du fondateur). */
+const EPAISSEUR_PLOMB_PARAM: ParamDef = {
+  key: "epaisseur_plomb",
+  label: "Épaisseur du plomb",
+  unit: "mm",
+  kind: "site_data",
+  question: "Plomb : 1,5, 2 ou 2,5 mm ?",
+  // Ses propres valeurs seulement : « ép. 0,65 mm » d'une note est l'épaisseur du zinc, jamais celle du plomb.
+  textValues: [
+    { value: "1.5", keywords: ["1,5 mm", "1.5 mm", "1,5mm"] },
+    { value: "2", keywords: ["2 mm", "2mm"] },
+    { value: "2.5", keywords: ["2,5 mm", "2.5 mm", "2,5mm"] },
+  ],
+  default: { value: "1.5", source: FR_REPLY_DESCENTES, verification: FOUNDER_REPLY_DESCENTES, version: 1, note: "plomb 1,5 mm" },
+  choices: [
+    { label: "1,5 mm", value: "1.5" },
+    { label: "2 mm", value: "2" },
+    { label: "2,5 mm", value: "2.5" },
+  ],
+  display: { "1.5": "1,5", "2": "2", "2.5": "2,5" },
+};
+/** Le développé d'une bande cuivre : la même lecture que le zinc, sa propre clé (une bande zinc et une bande cuivre du même devis n'ont pas forcément le même). */
+const DEVELOPPE_CUIVRE_PARAM: ParamDef = { ...DEVELOPPE_PARAM, key: "developpe_cuivre", label: "Développé de la bande cuivre", question: "Développé de la bande cuivre ?" };
+const FACONNAGE_CUIVRE_PARAM: ParamDef = {
+  ...FACONNAGE_BANDES_PARAM,
+  question: "Bandes cuivre : tu les façonnes toi-même ou tu les commandes façonnées ?",
+  choices: [
+    { label: "Je façonne (feuilles ou bobine)", value: "1" },
+    { label: "Je commande façonné", value: "2" },
+  ],
+  hint: "Je façonne : feuilles de cuivre 2 × 1 m, bobine au mètre au-delà de 6 ml. Commandées façonnées : longueurs de 2 m.",
+};
+/** §12 : cuivre 0,6 mm (5,4 kg/m²) par défaut. */
+const EPAISSEUR_CUIVRE_PARAM: ParamDef = {
+  key: "epaisseur_cuivre",
+  label: "Épaisseur du cuivre",
+  unit: "mm",
+  kind: "site_data",
+  question: "Cuivre : 0,6 ou 0,7 mm ?",
+  textValues: [
+    { value: "0.6", keywords: ["0,6 mm", "0.6 mm", "0,60 mm"] },
+    { value: "0.7", keywords: ["0,7 mm", "0.7 mm", "0,70 mm"] },
+  ],
+  default: { value: "0.6", source: F, verification: FOUNDER_DOC, version: 1, note: "cuivre 0,6 mm (§12)" },
+  choices: [
+    { label: "0,6 mm", value: "0.6" },
+    { label: "0,7 mm", value: "0.7" },
+  ],
+  display: { "0.6": "0,6", "0.7": "0,7" },
+};
 /** Poids d'une bande zinc plate : 4,7 kg/m² en 0,65 mm (§7) ; 7,2 kg/m² par mm d'épaisseur pour 0,70 et 0,80 (masse volumique du zinc). */
 const ZINC_PLAT_CONSTANTS = {
   poids_plat_065: condition("4.7", "kg/m2", F, FOUNDER_DOC, "« kg ≈ m² dév. × 4,7 (ép. 0,65) » (§7)."),
@@ -1000,7 +1067,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.05-32",
+  version: "roofing-2026.10.05-33",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -1339,6 +1406,11 @@ export const ROOFING_REFERENTIAL: Referential = {
       warning:
         "Amiante : le retrait se fait par une entreprise certifiée (SS3), après un repérage avant travaux et un plan de retrait déclaré un mois avant le chantier. BatiClair ne compte aucun matériau pour ce poste : il part tel qu'écrit (§18).",
     },
+    // §12 : plomb en bande (bavettes, solins), commandé en rouleaux ; cuivre en bande, comme le zinc.
+    { code: "lead_strip", label: "Bande de plomb", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["plomb", "bande de plomb", "bandes de plomb", "bavette plomb", "solin plomb"] },
+    { code: "copper_strip", label: "Bande cuivre", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["cuivre", "bande cuivre", "bandes cuivre", "bande de cuivre", "solin cuivre", "couvertine cuivre"] },
+    { code: "copper_sheet", label: "Feuille de cuivre", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "copper_coil", label: "Bobine de cuivre", needUnit: "m", attributes: [], keyAttributes: [] },
     // §8 : bac acier, commandé en plaques à longueur (jamais en m²), vis, closoirs, faîtière.
     {
       code: "steel_tray",
@@ -1629,6 +1701,17 @@ export const ROOFING_REFERENTIAL: Referential = {
     }),
     generic("closoir-bac-acier", "steel_closure", "Closoir mousse profilé au bac acier", "Closoirs mousse"),
     generic("faitiere-bac-acier", "steel_ridge", "Faîtière de bac acier, longueur 2 m (teinte du bac)", "Faîtières bac acier"),
+    // §12 : plomb laminé en rouleaux ; cuivre « comme le zinc » : bandes façonnées de 2 m, feuilles 2 × 1 m, bobine au mètre.
+    generic("plomb-rouleau", "lead_strip", "Plomb laminé en rouleau (largeur et épaisseur du chantier)", "Plomb en rouleau", {
+      sellingUnits: [{ id: "rouleau", label: { one: "rouleau", many: "rouleaux" }, contains: ONE_PIECE, primary: true }],
+    }),
+    generic("bande-cuivre-faconnee", "copper_strip", "Bande cuivre façonnée, longueurs de 2 m (développé et épaisseur du chantier)", "Bandes cuivre façonnées", {
+      sellingUnits: [{ id: "longueur", label: { one: "longueur de 2 m", many: "longueurs de 2 m" }, contains: ONE_PIECE, primary: true }],
+    }),
+    generic("feuille-cuivre-2x1", "copper_sheet", "Feuille de cuivre 2 × 1 m (épaisseur du chantier)", "Feuilles cuivre 2 × 1 m"),
+    generic("bobine-cuivre", "copper_coil", "Cuivre en bobine, au mètre linéaire (largeur et épaisseur du chantier)", "Cuivre en bobine", {
+      sellingUnits: [{ id: "ml", label: { one: "ml", many: "ml" }, contains: ONE_METRE, primary: true }],
+    }),
     generic("jonction-gouttiere", "gutter_joint", "Jonction de gouttière (système de la gouttière)", "Jonctions de gouttière"),
     generic("talon-gouttiere", "gutter_end", "Talon (fond) de gouttière (système de la gouttière)", "Talons de gouttière"),
     generic("angle-gouttiere", "gutter_angle", "Angle de gouttière 90° (système de la gouttière)", "Angles de gouttière"),
@@ -2570,6 +2653,125 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: false,
           exclusions: "4 vis par mètre de bande (§25.5).",
           precision: "4 par mètre, {longueur_bande|ml} de bande",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+      ],
+    },
+    {
+      // §12 : « Bavettes et solins plomb : ml × 1,1 » ; commandé en rouleaux (réponse du fondateur), largeur lue sinon
+      // 30 cm, épaisseur 1,5 mm par défaut. La longueur du rouleau (§12 : « 3 à 6 m ») reste à confirmer.
+      id: "bandes-plomb",
+      trade: "roofing",
+      label: "Bandes de plomb (rouleaux)",
+      triggers: ["lead_strip"],
+      params: [
+        { key: "longueur_plomb", label: "Longueur de bande de plomb", unit: "m", kind: "site_data", question: "Longueur de bande de plomb ?", fromLineQuantity: true },
+        LARGEUR_PLOMB_PARAM,
+        EPAISSEUR_PLOMB_PARAM,
+      ],
+      slots: [{ key: "plomb", family: "lead_strip", label: "Plomb en rouleau", usual: { text: "Plomb laminé en rouleau (§12).", source: FR_REPLY_DESCENTES, productId: "plomb-rouleau" } }],
+      constants: {
+        marge_plomb: condition("1.1", "u", F, FOUNDER_DOC, "« ml × 1,1 » (§12)."),
+        rouleau_plomb: rule("6", "m", F, todo("§12 : rouleaux de 3 à 6 m ; 6 m retenus, à confirmer."), "rouleau de plomb de {v}"),
+      },
+      needs: [
+        {
+          id: "rouleaux-plomb",
+          slot: "plomb",
+          formula: "arrondi_sup(longueur_plomb * regle.marge_plomb / regle.rouleau_plomb)",
+          unit: "u",
+          core: true,
+          exclusions: "Bande à la longueur du devis, + 10 % de recouvrements et de façon.",
+          designation: "Plomb laminé {epaisseur_plomb} mm, rouleau largeur {largeur_plomb|cm#} cm × 6 m",
+          precision: "{longueur_plomb|ml} de bande",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+      ],
+    },
+    {
+      // §12 : « Cuivre en bande (0,6 mm) : mêmes règles que le zinc (section 7) ». Commandé façonné : longueurs de 2 m ;
+      // façonné sur place : feuilles 2 × 1 m jusqu'à 6 ml, bobine au mètre au-delà, à la largeur du cuivre qui contient
+      // le développé (largeurs courantes 500, 600, 670 mm : à confirmer).
+      id: "bandes-cuivre",
+      trade: "roofing",
+      label: "Bandes cuivre (façonnées, feuilles ou bobine)",
+      triggers: ["copper_strip"],
+      params: [
+        { key: "longueur_bande", label: "Longueur de bande", unit: "m", kind: "site_data", question: "Longueur de bande cuivre ?", fromLineQuantity: true },
+        DEVELOPPE_CUIVRE_PARAM,
+        FACONNAGE_CUIVRE_PARAM,
+        EPAISSEUR_CUIVRE_PARAM,
+      ],
+      slots: [
+        { key: "bande", family: "copper_strip", label: "Bandes cuivre façonnées", usual: { text: "Bandes façonnées par le fournisseur, longueurs de 2 m (comme le zinc).", source: F, productId: "bande-cuivre-faconnee" } },
+        { key: "feuille", family: "copper_sheet", label: "Feuilles cuivre 2 × 1 m", usual: { text: "Feuilles de cuivre 2 × 1 m, façonnées sur place.", source: F, productId: "feuille-cuivre-2x1" } },
+        { key: "bobine", family: "copper_coil", label: "Cuivre en bobine", usual: { text: "Cuivre en bobine au mètre au-delà de 6 ml.", source: FR_REPLY, productId: "bobine-cuivre" } },
+      ],
+      constants: {
+        marge_bandes: condition("1.1", "u", F, FOUNDER_DOC, "« ml × 1,1 » (§7, §12)."),
+        longueur_utile: condition("1.9", "m", F, FOUNDER_DOC, "Bandes de 2 m, recouvrement 10 cm (comme le zinc, §36.4)."),
+        surface_feuille: condition("2", "m2", F, FOUNDER_DOC, "Feuille de 2 × 1 m (comme le zinc, §25.2)."),
+        seuil_bobine: condition("6", "m", FR_REPLY, FOUNDER_REPLY, "Au-delà de 6 ml : bobine au lieu de feuilles (comme le zinc)."),
+        cuivre_500: rule("500", "mm", F, todo("Largeurs courantes du cuivre en bobine : 500, 600, 670 mm, à confirmer."), "bobine de cuivre de {v}"),
+        cuivre_600: rule("600", "mm", F, todo("Largeurs courantes du cuivre en bobine : 500, 600, 670 mm, à confirmer."), "bobine de cuivre de {v}"),
+        cuivre_670: rule("670", "mm", F, todo("Largeurs courantes du cuivre en bobine : 500, 600, 670 mm, à confirmer."), "bobine de cuivre de {v}"),
+      },
+      derived: [
+        { key: "ml_cuivre", label: "Longueur de cuivre, marge comprise", unit: "m", formula: "longueur_bande * regle.marge_bandes", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
+        {
+          key: "largeur_bobine_cuivre",
+          label: "Largeur de la bobine de cuivre",
+          unit: "mm",
+          formula: "si(developpe_cuivre <= regle.cuivre_500, regle.cuivre_500, si(developpe_cuivre <= regle.cuivre_600, regle.cuivre_600, regle.cuivre_670))",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+      ],
+      needs: [
+        {
+          id: "bandes-cuivre-faconnees",
+          slot: "bande",
+          when: "faconnage >= 2",
+          formula: "arrondi_sup(ml_cuivre / regle.longueur_utile)",
+          unit: "u",
+          core: true,
+          exclusions: "Longueurs de 2 m, recouvrement 10 cm entre éléments.",
+          precision: "{longueur_bande|ml} à couvrir, développé {developpe_cuivre|cm}",
+          designation: "Bandes cuivre façonnées {epaisseur_cuivre} mm",
+          precisionRequires: ["developpe_cuivre"],
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "feuilles-cuivre",
+          slot: "feuille",
+          when: "si(faconnage < 2, si(longueur_bande > regle.seuil_bobine, 0, 1), 0)",
+          formula: "arrondi_sup(ml_cuivre * developpe_cuivre / regle.surface_feuille)",
+          unit: "u",
+          core: true,
+          exclusions: "Cuivre plat, développé × longueur, découpé dans des feuilles de 2 × 1 m.",
+          precision: "pour façonner {longueur_bande|ml} de bande, développé {developpe_cuivre|cm}",
+          designation: "Feuilles cuivre 2 × 1 m, {epaisseur_cuivre} mm",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "bobine-cuivre",
+          slot: "bobine",
+          when: "si(faconnage < 2, si(longueur_bande > regle.seuil_bobine, 1, 0), 0)",
+          formula: "ml_cuivre",
+          unit: "m",
+          core: true,
+          exclusions: "La plus petite largeur qui contient le développé ; la longueur de bande, marge comprise.",
+          precision: "pour façonner {longueur_bande|ml} de bande",
+          designation: "Cuivre en bobine largeur {largeur_bobine_cuivre|mm#} mm, {epaisseur_cuivre} mm",
           source: F,
           verification: FOUNDER_DOC,
           version: 1,

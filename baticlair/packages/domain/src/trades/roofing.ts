@@ -136,7 +136,7 @@ const FAMILIES: MaterialFamily[] = [
   {
     code: "flashing",
     label: "Zinguerie (bande, noue, solin, abergement)",
-    keywords: ["bande de rive", "bande de solin", "solin", "abergement", "noue", "zinc", "habillage", "couvertine", "bavette"],
+    keywords: ["bande de rive", "bande de solin", "solin", "abergement", "noue", "zinc", "cuivre", "plomb", "habillage", "couvertine", "bavette"],
     allowedUnits: ["ML", "M", "M2", "KG", "U", "FORFAIT"],
     plausibleMax: { ML: 1000, M: 1000, M2: 500, KG: 5000 },
   },
