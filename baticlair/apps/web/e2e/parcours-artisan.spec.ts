@@ -768,3 +768,22 @@ test("RGPD : l'artisan télécharge ses données, puis supprime son compte (en t
   await page.goto("/");
   await expect(page).toHaveURL(/\/connexion/);
 });
+
+test("plusieurs logements : le chantier rangé par logement, puis le total à commander", async ({ page }) => {
+  await signUp(page);
+  await createProject(page, "Résidence Les Pins", "SCI Les Pins", "4 allée des Pins, Vannes");
+  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-electricien-logements.pdf"));
+  await page.getByRole("button", { name: "Lire le devis" }).click();
+  // D'abord par logement (retour du fondateur, 2026-10-05) : les identiques regroupés, chacun avec ses quantités du devis.
+  await expect(page.getByRole("tab", { name: "Par logement (3)" })).toHaveAttribute("aria-selected", "true");
+  const vue = page.getByRole("region", { name: "Le chantier par logement" });
+  const identiques = vue.getByRole("article", { name: "2 logements identiques" });
+  await expect(identiques.getByText("× 2")).toBeVisible();
+  await expect(identiques.getByText("Logement 1, Logement 2")).toBeVisible();
+  await expect(identiques.getByRole("listitem").filter({ hasText: "Prise 2P+T 16 A" })).toContainText("9");
+  await expect(vue.getByRole("article", { name: "Logement 3" }).getByRole("listitem").filter({ hasText: "Prise 2P+T 16 A" })).toContainText("6");
+  // Puis le total, regroupé pour le fournisseur.
+  await vue.getByRole("button", { name: "Voir le total à commander" }).click();
+  await expect(page.getByRole("tab", { name: "Total à commander" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible();
+});

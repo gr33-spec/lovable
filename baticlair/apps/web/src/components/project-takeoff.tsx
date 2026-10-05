@@ -5,6 +5,7 @@ import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } fr
 import { AssistantMessage, ChatInput, parseCommand, ReasoningSteps, Say, ThinkingSteps, UserBubble } from "@/components/chat";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { type ItemEdit } from "@/components/purchase-list";
+import { SiteUnitsView } from "@/components/site-units-view";
 import { SupplyList } from "@/components/supply-list";
 import { SiteNotes } from "@/components/site-notes";
 import { type DecisionHandlers } from "@/components/takeoff-view";
@@ -72,6 +73,8 @@ export function ProjectTakeoff({
   // fournisseurs passent en haut du chantier (retour du fondateur, 2026-10-05).
   const [page, setPage] = useListPage();
   const autoOpened = useRef(false);
+  // Un chantier de plusieurs logements s'ouvre « par logement » ; le total à commander est à l'onglet d'à côté.
+  const [unitsView, setUnitsView] = useState(true);
   const [fresh, setFresh] = useState(false);
   const [said, setSaid] = useState<Said[]>([]);
   const started = useRef(false);
@@ -184,6 +187,7 @@ export function ProjectTakeoff({
   }
 
   const draft = takeoff.status === "draft";
+  const units = takeoff.logements ?? null;
   const materials = takeoff.lines.filter((l) => l.kind !== "labor");
   const labor = takeoff.lines.filter((l) => l.kind === "labor");
   const editable = !archived;
@@ -319,6 +323,16 @@ export function ProjectTakeoff({
         </Button>
       </>
     );
+  } else if (units && unitsView) {
+    body = (
+      <SiteUnitsView
+        data={units}
+        onTotal={() => {
+          setUnitsView(false);
+          window.scrollTo({ top: 0 });
+        }}
+      />
+    );
   } else {
     // UN SEUL ÉCRAN : la liste des fournitures, une couleur par ligne (retour du fondateur, 2026-10-04).
     body = (
@@ -380,6 +394,28 @@ export function ProjectTakeoff({
             Retour au chantier
           </button>
           {actionError ? <ErrorNotice error={actionError} /> : null}
+          {units && !showList ? (
+            // D'abord le chantier rangé par logement, puis le total regroupé pour le fournisseur.
+            <div role="tablist" aria-label="Vue de la liste" className="grid grid-cols-2 gap-1 rounded-2xl bg-surface p-1 shadow-card">
+              {(
+                [
+                  [true, `Par logement (${units.count})`],
+                  [false, "Total à commander"],
+                ] as const
+              ).map(([v, label]) => (
+                <button
+                  key={label}
+                  type="button"
+                  role="tab"
+                  aria-selected={unitsView === v}
+                  onClick={() => setUnitsView(v)}
+                  className={`min-h-11 rounded-xl px-3 text-[14px] font-extrabold ${unitsView === v ? "bg-ink text-surface" : "text-muted"}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          ) : null}
           {body}
         </section>
       ) : null}

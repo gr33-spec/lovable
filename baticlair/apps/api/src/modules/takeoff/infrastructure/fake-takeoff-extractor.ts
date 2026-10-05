@@ -30,6 +30,15 @@ export class FakeTakeoffExtractor implements TakeoffExtractor {
       const m = /^\[(\d+:\d+)\]\s(.*)$/.exec(raw);
       if (m && !fakeRows(m[0]!).length) Object.assign(context, fakeDimensions(m[2]!));
     }
+    // Règle simulée des titres : « Logement 2 », « Appartement B3 » sur une ligne sans quantité range les lignes qui suivent.
+    const sectionOf = new Map<string, string[]>();
+    let current: string[] = [];
+    for (const raw of request.numberedText.split("\n")) {
+      const m = /^\[(\d+:\d+)\]\s(.*)$/.exec(raw);
+      if (!m) continue;
+      if (fakeRows(raw).length) sectionOf.set(m[1]!, current);
+      else if (/^(?:logement|appartement)\s+\S+$/i.test(m[2]!.trim())) current = [m[2]!.trim()];
+    }
     const lines: NonNullable<ExtractionAttempt["output"]>["lines"] = fakeRows(request.numberedText)
       .filter((row) => row.index >= 1)
       // Bloc d'un gros devis : seulement les lignes de ses pages (les autres sont du contexte).
@@ -44,7 +53,7 @@ export class FakeTakeoffExtractor implements TakeoffExtractor {
         // Règle simulée : un conditionnement sans contenu indiqué est un doute.
         // Le seul doute qu'une lecture pose désormais : un doute de LECTURE (prompt v8).
         doubt: parseUnit(row.unit) === "PAQUET" ? "Chiffre peu lisible : 2 ou 3 paquets ?" : null,
-        section: [],
+        section: sectionOf.get(row.ref) ?? [],
         dimensions: row.cols.slice(row.index + 2).reduce<Record<string, string> | null>((acc, col) => {
           const d = fakeDimensions(col);
           return Object.keys(d).length > 0 ? { ...(acc ?? {}), ...d } : acc;

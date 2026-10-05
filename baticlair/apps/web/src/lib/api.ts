@@ -255,6 +255,22 @@ export interface Takeoff {
   view: TakeoffView;
   /** LA LISTE D'ACHATS : à acheter, à faire chiffrer, hypothèses, et si elle peut partir. */
   purchase: TakeoffPurchase;
+  /** Le chantier rangé par logement (titres du devis) ; absent ou null sans au moins deux logements. */
+  logements?: SiteUnits | null;
+}
+
+export interface SiteUnitItem {
+  designation: string;
+  quantity: string | null;
+  unit: string | null;
+  lineIds: string[];
+}
+
+export interface SiteUnits {
+  /** Un groupe = un logement, ou plusieurs logements identiques. */
+  units: { key: string; labels: string[]; items: SiteUnitItem[] }[];
+  count: number;
+  other: SiteUnitItem[];
 }
 
 export interface PurchaseItem {
