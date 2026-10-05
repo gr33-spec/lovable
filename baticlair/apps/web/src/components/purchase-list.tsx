@@ -1,7 +1,7 @@
 "use client";
 
-import { AlertTriangle, ChevronDown, Loader2, Paperclip, Pencil, X } from "lucide-react";
-import { useId, useState } from "react";
+import { AlertTriangle, ChevronDown, Loader2, Paperclip, Pencil, Trash2, X } from "lucide-react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Proof, type DecisionHandlers } from "@/components/takeoff-view";
 import { Button } from "@/components/ui";
 import { parseQuantity } from "@/lib/labels";
@@ -209,7 +209,7 @@ function BuyRow({
   );
   const edit = editable && onEdit;
   return (
-    <li className="flex flex-col gap-1.5 py-2.5">
+    <li className={`flex flex-col gap-1.5 py-2.5 transition-colors ${editing ? "-mx-2 my-1 rounded-2xl bg-[#eef2ff] px-2" : ""}`}>
       <div className="flex items-start gap-0.5">
         {proofs.length > 0 ? (
           <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label={`Voir le calcul : ${item.label}`} className="flex min-h-11 w-full min-w-0 items-start gap-3 rounded-xl text-left active:bg-ground/60">
@@ -219,8 +219,14 @@ function BuyRow({
           <div className="flex min-h-11 w-full min-w-0 items-start gap-3">{row}</div>
         )}
         {edit ? (
-          <button type="button" onClick={() => setEditing(!editing)} aria-label={`Modifier : ${item.label}`} aria-expanded={editing} className="-mr-2 inline-flex min-h-11 min-w-10 shrink-0 items-center justify-center rounded-xl text-subtle active:text-accent-text">
-            <Pencil size={17} aria-hidden="true" />
+          <button
+            type="button"
+            onClick={() => setEditing(!editing)}
+            aria-label={editing ? `Fermer : ${item.label}` : `Modifier : ${item.label}`}
+            aria-expanded={editing}
+            className={`-mr-2 inline-flex min-h-11 min-w-10 shrink-0 items-center justify-center rounded-xl ${editing ? "text-accent-text" : "text-subtle active:text-accent-text"}`}
+          >
+            {editing ? <X size={18} aria-hidden="true" /> : <Pencil size={17} aria-hidden="true" />}
           </button>
         ) : null}
       </div>
@@ -266,29 +272,39 @@ export function ItemForm({
   onSave,
   onCancel,
   onAttach,
+  onRemove,
 }: {
   item: PurchaseItem;
   pending: boolean;
   onSave: (e: ItemEdit) => Promise<void>;
   onCancel: () => void;
   onAttach?: (file: File, commentaire: string) => Promise<void>;
+  onRemove?: () => void;
 }) {
   const id = useId();
+  const ref = useRef<HTMLFormElement>(null);
   const parsed = item.quantity ? parseQuantity(item.quantity) : null;
   const [libelle, setLibelle] = useState(item.label);
   const [quantite, setQuantite] = useState(parsed?.quantity ?? "");
   const [unite, setUnite] = useState(parsed?.unit ?? "");
-  const input = "min-h-12 w-full rounded-2xl bg-ground px-3 text-base";
+  // La fiche s'ouvre sous la ligne : on la fait venir à l'écran, sans ouvrir le clavier tout seul.
+  useEffect(() => {
+    ref.current?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+  }, []);
+  const input =
+    "min-h-12 w-full rounded-xl border border-[#d5d9e0] bg-surface px-3 text-base font-normal outline-none transition-colors placeholder:text-subtle focus:border-accent focus:ring-2 focus:ring-accent/20";
   return (
     <form
+      ref={ref}
       aria-label={`Modifier : ${item.label}`}
-      className="flex flex-col gap-2 rounded-2xl bg-ground/60 p-3"
+      className="flex scroll-mb-52 flex-col gap-3 rounded-2xl bg-surface p-4 shadow-card ring-1 ring-accent/25"
       onSubmit={(e) => {
         e.preventDefault();
         if (!libelle.trim()) return;
         void onSave({ libelle: libelle.trim(), quantite: quantite.trim() || null, unite: unite.trim() || null });
       }}
     >
+      <p className="text-[12px] font-extrabold tracking-[0.04em] text-accent-text">MODIFIER L&apos;ARTICLE</p>
       <label htmlFor={`${id}-l`} className="flex flex-col gap-1 text-sm font-bold">
         Désignation
         <input id={`${id}-l`} className={input} value={libelle} onChange={(e) => setLibelle(e.target.value)} />
@@ -304,7 +320,7 @@ export function ItemForm({
         </label>
       </div>
       {onAttach ? <SketchPicker label={item.label} onAttach={onAttach} /> : null}
-      <div className="flex gap-2">
+      <div className="grid grid-cols-2 gap-2">
         <Button type="submit" pending={pending}>
           Enregistrer
         </Button>
@@ -312,6 +328,12 @@ export function ItemForm({
           Annuler
         </Button>
       </div>
+      {onRemove ? (
+        <button type="button" onClick={onRemove} className="-mb-1 inline-flex min-h-11 items-center justify-center gap-1.5 border-t border-line pt-2 text-sm font-bold text-danger">
+          <Trash2 size={16} aria-hidden="true" />
+          Retirer de la liste
+        </button>
+      ) : null}
     </form>
   );
 }
