@@ -33,6 +33,11 @@ const COMPTOIR: Record<string, string> = {
   diametre_descente: "« descente de 80 ou de 100 ? »",
   hauteur_descente: "les mètres de tube",
   qualite_ardoise: "« quelle ardoise ? » (habitude de l'entreprise, demandée une fois)",
+  longueur_noue: "les mètres de noue",
+  longueur_aretier: "les mètres d'arêtier",
+  aretier_matiere: "« arêtier en tuiles ou en zinc ? » quand le devis ne le dit pas",
+  nb_aretiers: "le nombre d'abouts d'arêtier",
+  developpe_aretier: "« bande de 25 ou de 33 ? »",
 };
 /** Ce que le comptoir ne demande jamais : une hypothèse, dite et modifiable d'un tap. */
 const JAMAIS: readonly string[] = ["zone", "entraxe_supports", "pureau", "pente", "longueur_rampant", "epaisseur_zinc", "diametre_crochet", "coudes_par_descente"];

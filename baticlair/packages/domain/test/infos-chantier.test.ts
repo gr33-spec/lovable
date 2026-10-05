@@ -22,10 +22,11 @@ describe("readSiteNotes : seules les mesures nommées deviennent des faits", () 
         expect.objectContaining({ key: "longueur_faitage", value: "9", unit: "m" }),
         expect.objectContaining({ key: "pente", value: "42", unit: "°" }),
         expect.objectContaining({ key: "nb_descentes", value: "2", unit: "u" }),
+        // La noue a son ouvrage (§7) : « Noue : 12 ml » est une mesure nommée (§44, « noue 12 m »).
+        expect.objectContaining({ key: "longueur_noue", value: "12", unit: "m" }),
       ]),
     );
-    // La noue n'a pas d'ouvrage : rien n'est inventé. « 9 000 ardoises » n'est pas une donnée d'ouvrage non plus.
-    expect(facts.some((f) => /noue/i.test(f.evidence))).toBe(false);
+    // « 9 000 ardoises » n'est pas une donnée d'ouvrage.
     expect(readSiteNotes(ROOFING_REFERENTIAL, "Prévoir 9 000 ardoises. C'est pentu.")).toEqual([]);
     expect(readSiteNotes(ROOFING_REFERENTIAL, "Pente 100 %")).toContainEqual(expect.objectContaining({ key: "pente", value: "45", unit: "°" }));
     expect(readSiteNotes(ROOFING_REFERENTIAL, "")).toEqual([]);

@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.04-25",
+  "version": "roofing-2026.10.05-26",
   "trade": "roofing",
   "sources": [
     {
@@ -698,21 +698,59 @@
     {
       "code": "hip",
       "label": "Arêtier",
-      "needUnit": "ml",
-      "attributes": [],
+      "needUnit": "u",
+      "attributes": [
+        {
+          "key": "pieces_par_ml",
+          "label": "Pièces au mètre",
+          "unit": "u/m"
+        }
+      ],
       "keyAttributes": [],
       "keywords": [
-        "aretier"
+        "aretier",
+        "aretiers",
+        "aretiere",
+        "aretieres"
       ]
+    },
+    {
+      "code": "hip_closure",
+      "label": "Closoir d'arêtier",
+      "needUnit": "ml",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "hip_fixing",
+      "label": "Crochet d'arêtier",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "hip_end",
+      "label": "About d'arêtier",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "hip_strip",
+      "label": "Arêtier zinc (bande)",
+      "needUnit": "ml",
+      "attributes": [],
+      "keyAttributes": []
     },
     {
       "code": "valley",
       "label": "Noue",
-      "needUnit": "ml",
+      "needUnit": "u",
       "attributes": [],
       "keyAttributes": [],
       "keywords": [
-        "noue"
+        "noue",
+        "noues"
       ]
     },
     {
@@ -2983,6 +3021,210 @@
           "label": {
             "one": "pièce",
             "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "aretiere-standard",
+      "family": "hip",
+      "label": "Arêtier 40 à 42 cm, recouvrement 5 à 7 cm (modèle de la tuile posée)",
+      "shortLabel": "Arêtiers",
+      "aliases": [],
+      "generic": true,
+      "attributes": {
+        "pieces_par_ml": {
+          "kind": "manufacturer_spec",
+          "value": "2.9",
+          "unit": "u/m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« ml arêtier / 0,35 ≈ 2,9 pièces/ml » (§5)."
+        }
+      },
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "closoir-aretier-5m",
+      "family": "hip_closure",
+      "label": "Closoir ventilé d'arêtier, largeur 23 cm, rouleau de 5 m",
+      "shortLabel": "Closoir d'arêtier",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "rouleau",
+          "label": {
+            "one": "rouleau de 5 m",
+            "many": "rouleaux de 5 m"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "5",
+            "unit": "m",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "« arêtier : largeur 23 cm », rouleau de 5 m (§5)."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "crochet-aretier-standard",
+      "family": "hip_fixing",
+      "label": "Crochet d'arêtier à sec (modèle de l'arêtier)",
+      "shortLabel": "Crochets d'arêtier",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "bande-aretier-zinc-standard",
+      "family": "hip_strip",
+      "label": "Bande d'arêtier zinc, développé 25 à 33 cm, longueurs de 3 m",
+      "shortLabel": "Arêtier zinc (bande)",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "longueur",
+          "label": {
+            "one": "longueur de 3 m",
+            "many": "longueurs de 3 m"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "3",
+            "unit": "m",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "about-aretier-standard",
+      "family": "hip_end",
+      "label": "About d'arêtier (modèle de la tuile posée)",
+      "shortLabel": "Abouts d'arêtier",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "noue-zinc-faconnee",
+      "family": "valley",
+      "label": "Noue zinc façonnée, longueurs de 2 m (développé et épaisseur du chantier)",
+      "shortLabel": "Noues zinc façonnées",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "longueur",
+          "label": {
+            "one": "longueur de 2 m",
+            "many": "longueurs de 2 m"
           },
           "contains": {
             "kind": "packaging",
@@ -6368,6 +6610,40 @@
             "dev."
           ],
           "withinChoices": true,
+          "textValues": [
+            {
+              "value": "100",
+              "keywords": [
+                "dev 10",
+                "dev. 10",
+                "developpe 10"
+              ]
+            },
+            {
+              "value": "250",
+              "keywords": [
+                "dev 25",
+                "dev. 25",
+                "developpe 25"
+              ]
+            },
+            {
+              "value": "330",
+              "keywords": [
+                "dev 33",
+                "dev. 33",
+                "developpe 33"
+              ]
+            },
+            {
+              "value": "400",
+              "keywords": [
+                "dev 40",
+                "dev. 40",
+                "developpe 40"
+              ]
+            }
+          ],
           "choices": [
             {
               "label": "100 mm (solin, couvre-joint)",
@@ -6587,6 +6863,1095 @@
       ]
     },
     {
+      "id": "noue",
+      "trade": "roofing",
+      "label": "Noue zinc (façonnée ou à façonner)",
+      "triggers": [
+        "valley"
+      ],
+      "params": [
+        {
+          "key": "longueur_noue",
+          "label": "Longueur de noue",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Longueur de noue ?",
+          "fromLineQuantity": true,
+          "textLabels": [
+            "noue"
+          ]
+        },
+        {
+          "key": "developpe_noue",
+          "label": "Développé de la noue",
+          "unit": "mm",
+          "kind": "site_data",
+          "question": "Noue de 50 ou de 66 ?",
+          "hint": "Le développé : la largeur de la feuille avant façonnage.",
+          "default": {
+            "value": "500",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "noue préformée de 50 (§25.2)"
+          },
+          "choices": [
+            {
+              "label": "De 50",
+              "value": "500"
+            },
+            {
+              "label": "De 66",
+              "value": "660"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "500",
+              "keywords": [
+                "dev 50",
+                "dev. 50",
+                "developpe 50",
+                "developpe 500",
+                "dev 500",
+                "noue de 50",
+                "noue 50"
+              ]
+            },
+            {
+              "value": "600",
+              "keywords": [
+                "dev 60",
+                "dev. 60",
+                "developpe 60",
+                "developpe 600",
+                "dev 600",
+                "noue de 60",
+                "noue 60"
+              ]
+            },
+            {
+              "value": "660",
+              "keywords": [
+                "dev 66",
+                "dev. 66",
+                "developpe 66",
+                "developpe 660",
+                "dev 660",
+                "noue de 66",
+                "noue 66",
+                "encaissee"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "faconnage",
+          "label": "Façonnage",
+          "unit": "u",
+          "kind": "artisan_preference",
+          "question": "Noue zinc : tu la façonnes toi-même ou tu la commandes façonnée ?",
+          "hint": "Je façonne : feuilles de zinc 2 × 1 m, bobineau au-delà de 6 ml. Commandée façonnée : noue en longueurs de 2 m.",
+          "choices": [
+            {
+              "label": "Je façonne (feuilles ou bobineau)",
+              "value": "1"
+            },
+            {
+              "label": "Je commande façonné",
+              "value": "2"
+            }
+          ],
+          "display": {
+            "1": "je façonne",
+            "2": "commandé façonné"
+          }
+        },
+        {
+          "key": "epaisseur_zinc",
+          "label": "Épaisseur du zinc",
+          "unit": "mm",
+          "kind": "artisan_preference",
+          "question": "Épaisseur du zinc ?",
+          "textLabels": [
+            "epaisseur",
+            "ep"
+          ],
+          "default": {
+            "value": "0.65",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "0,65 mm standard (§7)"
+          },
+          "choices": [
+            {
+              "label": "0,65 mm",
+              "value": "0.65"
+            },
+            {
+              "label": "0,70 mm",
+              "value": "0.7"
+            },
+            {
+              "label": "0,80 mm",
+              "value": "0.8"
+            }
+          ],
+          "display": {
+            "0.65": "0,65",
+            "0.7": "0,70",
+            "0.8": "0,80"
+          }
+        },
+        {
+          "key": "aspect_zinc",
+          "label": "Aspect du zinc",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Zinc prépatiné : Quartz-Zinc (gris) ou Anthra-Zinc (noir) ?",
+          "hint": "Le devis dit « prépatiné » sans la teinte : le comptoir sert l'un ou l'autre.",
+          "default": {
+            "value": "1",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "zinc naturel : le devis ne dit pas prépatiné",
+            "unlessText": [
+              "prepatine",
+              "pre patine",
+              "pre-patine"
+            ]
+          },
+          "choices": [
+            {
+              "label": "Zinc naturel",
+              "value": "1"
+            },
+            {
+              "label": "Quartz-Zinc (prépatiné gris)",
+              "value": "2"
+            },
+            {
+              "label": "Anthra-Zinc (prépatiné noir)",
+              "value": "3"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "quartz",
+                "quartz zinc",
+                "quartz-zinc"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "anthra",
+                "anthra zinc",
+                "anthra-zinc"
+              ]
+            },
+            {
+              "value": "4",
+              "keywords": [
+                "pigmento"
+              ]
+            },
+            {
+              "value": "1",
+              "keywords": [
+                "zinc naturel"
+              ]
+            }
+          ],
+          "display": {
+            "1": "zinc naturel",
+            "2": "Quartz-Zinc",
+            "3": "Anthra-Zinc",
+            "4": "Pigmento"
+          },
+          "onlyFromPrincipal": true
+        }
+      ],
+      "slots": [
+        {
+          "key": "noue",
+          "family": "valley",
+          "label": "Noues zinc façonnées",
+          "usual": {
+            "text": "Noue façonnée en longueurs de 2 m, recouvrement 15 cm (§25.2).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "noue-zinc-faconnee"
+          }
+        },
+        {
+          "key": "feuille",
+          "family": "zinc_sheet",
+          "label": "Feuilles zinc 2 × 1 m",
+          "usual": {
+            "text": "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "feuille-zinc-2x1"
+          }
+        },
+        {
+          "key": "bobineau",
+          "family": "zinc_narrow_coil",
+          "label": "Bobineau zinc",
+          "usual": {
+            "text": "Bobineau de zinc au-delà de 6 ml (réponse du fondateur).",
+            "source": "fondateur-reponses-2026-10-04",
+            "productId": "bobineau-zinc"
+          }
+        }
+      ],
+      "constants": {
+        "poids_plat_065": {
+          "kind": "installation_condition",
+          "value": "4.7",
+          "unit": "kg/m2",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« kg ≈ m² dév. × 4,7 (ép. 0,65) » (§7)."
+        },
+        "poids_plat_070": {
+          "kind": "installation_condition",
+          "value": "5.04",
+          "unit": "kg/m2",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (7,2 kg/m² par mm, masse volumique du zinc)"
+          },
+          "version": 1
+        },
+        "poids_plat_080": {
+          "kind": "installation_condition",
+          "value": "5.76",
+          "unit": "kg/m2",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (7,2 kg/m² par mm, masse volumique du zinc)"
+          },
+          "version": 1
+        },
+        "seuil_070": {
+          "kind": "installation_condition",
+          "value": "0.7",
+          "unit": "mm",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (définition)"
+          },
+          "version": 1
+        },
+        "seuil_080": {
+          "kind": "installation_condition",
+          "value": "0.8",
+          "unit": "mm",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (définition)"
+          },
+          "version": 1
+        },
+        "longueur_utile": {
+          "kind": "installation_condition",
+          "value": "1.9",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."
+        },
+        "surface_feuille": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m2",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« feuilles = (ml ÷ 2 m) × (développé ÷ 1 000) arrondi sup. » (§25.2), feuille de 2 × 1 m."
+        },
+        "marge_bandes": {
+          "kind": "installation_condition",
+          "value": "1.1",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« Solin / abergement : ml × 1,1 » (§7)."
+        },
+        "seuil_bobineau": {
+          "kind": "installation_condition",
+          "value": "6",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1,
+          "note": "Au-delà de 6 ml de bande : bobineau au lieu de feuilles 2 × 1 m."
+        },
+        "bobineau_500": {
+          "kind": "installation_condition",
+          "value": "500",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_650": {
+          "kind": "installation_condition",
+          "value": "650",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_1000": {
+          "kind": "installation_condition",
+          "value": "1000",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_17": {
+          "kind": "installation_condition",
+          "value": "17",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_21": {
+          "kind": "installation_condition",
+          "value": "21",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_31": {
+          "kind": "installation_condition",
+          "value": "31",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_40": {
+          "kind": "installation_condition",
+          "value": "40",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1,
+          "note": "40 m seulement en largeur 500."
+        },
+        "marge_noue": {
+          "kind": "installation_condition",
+          "value": "1.05",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« ml noue × 1,05 » (§7)."
+        },
+        "longueur_utile_noue": {
+          "kind": "installation_condition",
+          "value": "1.85",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« recouvrement 150 mm entre éléments → longueur utile 1,85 m pour 2 m » (§25.2)."
+        }
+      },
+      "derived": [
+        {
+          "key": "ml_zinc",
+          "label": "Longueur de zinc, marge comprise",
+          "unit": "m",
+          "formula": "longueur_noue * regle.marge_noue",
+          "shown": true,
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "key": "largeur_bobineau",
+          "label": "Largeur du bobineau",
+          "unit": "mm",
+          "formula": "si(developpe_noue <= regle.bobineau_500, regle.bobineau_500, si(developpe_noue <= regle.bobineau_650, regle.bobineau_650, regle.bobineau_1000))",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        {
+          "key": "longueur_bobineau",
+          "label": "Longueur du bobineau",
+          "unit": "m",
+          "formula": "si(ml_zinc <= regle.bobineau_17, regle.bobineau_17, si(ml_zinc <= regle.bobineau_21, regle.bobineau_21, si(ml_zinc <= regle.bobineau_31, regle.bobineau_31, si(largeur_bobineau <= regle.bobineau_500, regle.bobineau_40, regle.bobineau_31))))",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        }
+      ],
+      "needs": [
+        {
+          "id": "noues-faconnees",
+          "slot": "noue",
+          "when": "faconnage >= 2",
+          "formula": "arrondi_sup(longueur_noue / regle.longueur_utile_noue)",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Longueurs de 2 m, recouvrement 15 cm entre éléments (§25.2).",
+          "precision": "{longueur_noue|ml} de noue à couvrir",
+          "designation": "Noues {aspect_zinc} {epaisseur_zinc} mm, dév. {developpe_noue|cm#}",
+          "precisionRequires": [
+            "aspect_zinc"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "feuilles-noue",
+          "slot": "feuille",
+          "when": "si(faconnage < 2, si(longueur_noue > regle.seuil_bobineau, 0, 1), 0)",
+          "formula": "arrondi_sup(ml_zinc * developpe_noue / regle.surface_feuille)",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",
+          "precision": "pour façonner {longueur_noue|ml} de noue, dév. {developpe_noue|cm#}",
+          "designation": "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
+          "precisionRequires": [
+            "aspect_zinc"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "bobineau-noue",
+          "slot": "bobineau",
+          "when": "si(faconnage < 2, si(longueur_noue > regle.seuil_bobineau, 1, 0), 0)",
+          "formula": "arrondi_sup(ml_zinc / longueur_bobineau)",
+          "unit": "u",
+          "core": true,
+          "exclusions": "La plus petite largeur qui contient le développé, la plus courte longueur qui couvre la noue (marge comprise).",
+          "designation": "Bobineau {aspect_zinc} {largeur_bobineau|mm#} × {longueur_bobineau|m}, {epaisseur_zinc}",
+          "precisionRequires": [
+            "aspect_zinc"
+          ],
+          "precision": "pour façonner {longueur_noue|ml} de noue, dév. {developpe_noue|cm#}",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        }
+      ]
+    },
+    {
+      "id": "aretier",
+      "trade": "roofing",
+      "label": "Arêtier (arêtières et closoir, ou bande zinc)",
+      "triggers": [
+        "hip"
+      ],
+      "params": [
+        {
+          "key": "longueur_aretier",
+          "label": "Longueur d'arêtier",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Longueur d'arêtier ?",
+          "fromLineQuantity": true,
+          "textLabels": [
+            "aretier",
+            "aretiers"
+          ]
+        },
+        {
+          "key": "aretier_matiere",
+          "label": "Arêtier",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Arêtier en tuiles (arêtières) ou en bande zinc ?",
+          "choices": [
+            {
+              "label": "En tuiles (arêtières)",
+              "value": "1"
+            },
+            {
+              "label": "En bande zinc",
+              "value": "2"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "zinc"
+              ]
+            },
+            {
+              "value": "1",
+              "keywords": [
+                "aretiere",
+                "aretieres",
+                "tuile",
+                "tuiles",
+                "terre cuite",
+                "scelle",
+                "a sec"
+              ]
+            }
+          ],
+          "fromWorks": [
+            {
+              "value": "1",
+              "workItems": [
+                "couverture-tuiles-emboitement",
+                "couverture-tuiles-canal"
+              ]
+            },
+            {
+              "value": "2",
+              "workItems": [
+                "couverture-ardoises-crochet",
+                "couverture-zinc-joint-debout"
+              ]
+            }
+          ],
+          "display": {
+            "1": "en tuiles",
+            "2": "en zinc"
+          }
+        },
+        {
+          "key": "nb_aretiers",
+          "label": "Nombre d'arêtiers",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Combien d'arêtiers sur ce toit ?",
+          "hint": "Un about par arêtier.",
+          "choices": [
+            {
+              "label": "1",
+              "value": "1"
+            },
+            {
+              "label": "2",
+              "value": "2"
+            },
+            {
+              "label": "4",
+              "value": "4"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "1 aretier",
+                "un aretier"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "2 aretiers",
+                "deux aretiers"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "3 aretiers",
+                "trois aretiers"
+              ]
+            },
+            {
+              "value": "4",
+              "keywords": [
+                "4 aretiers",
+                "quatre aretiers",
+                "4 pans",
+                "quatre pans"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "developpe_aretier",
+          "label": "Développé de l'arêtier zinc",
+          "unit": "mm",
+          "kind": "site_data",
+          "question": "Arêtier zinc : bande de 25 ou de 33 ?",
+          "hint": "Le développé : la largeur de la feuille avant façonnage.",
+          "choices": [
+            {
+              "label": "De 25",
+              "value": "250"
+            },
+            {
+              "label": "De 33",
+              "value": "330"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "250",
+              "keywords": [
+                "dev 25",
+                "dev. 25",
+                "developpe 25",
+                "developpe 250",
+                "dev 250",
+                "de 25"
+              ]
+            },
+            {
+              "value": "330",
+              "keywords": [
+                "dev 33",
+                "dev. 33",
+                "developpe 33",
+                "developpe 330",
+                "dev 330",
+                "de 33"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "epaisseur_zinc",
+          "label": "Épaisseur du zinc",
+          "unit": "mm",
+          "kind": "artisan_preference",
+          "question": "Épaisseur du zinc ?",
+          "textLabels": [
+            "epaisseur",
+            "ep"
+          ],
+          "default": {
+            "value": "0.65",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "0,65 mm standard (§7)"
+          },
+          "choices": [
+            {
+              "label": "0,65 mm",
+              "value": "0.65"
+            },
+            {
+              "label": "0,70 mm",
+              "value": "0.7"
+            },
+            {
+              "label": "0,80 mm",
+              "value": "0.8"
+            }
+          ],
+          "display": {
+            "0.65": "0,65",
+            "0.7": "0,70",
+            "0.8": "0,80"
+          }
+        },
+        {
+          "key": "aspect_zinc",
+          "label": "Aspect du zinc",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Zinc prépatiné : Quartz-Zinc (gris) ou Anthra-Zinc (noir) ?",
+          "hint": "Le devis dit « prépatiné » sans la teinte : le comptoir sert l'un ou l'autre.",
+          "default": {
+            "value": "1",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "zinc naturel : le devis ne dit pas prépatiné",
+            "unlessText": [
+              "prepatine",
+              "pre patine",
+              "pre-patine"
+            ]
+          },
+          "choices": [
+            {
+              "label": "Zinc naturel",
+              "value": "1"
+            },
+            {
+              "label": "Quartz-Zinc (prépatiné gris)",
+              "value": "2"
+            },
+            {
+              "label": "Anthra-Zinc (prépatiné noir)",
+              "value": "3"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "quartz",
+                "quartz zinc",
+                "quartz-zinc"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "anthra",
+                "anthra zinc",
+                "anthra-zinc"
+              ]
+            },
+            {
+              "value": "4",
+              "keywords": [
+                "pigmento"
+              ]
+            },
+            {
+              "value": "1",
+              "keywords": [
+                "zinc naturel"
+              ]
+            }
+          ],
+          "display": {
+            "1": "zinc naturel",
+            "2": "Quartz-Zinc",
+            "3": "Anthra-Zinc",
+            "4": "Pigmento"
+          },
+          "onlyFromPrincipal": true
+        }
+      ],
+      "slots": [
+        {
+          "key": "aretiere",
+          "family": "hip",
+          "label": "Arêtiers",
+          "usual": {
+            "text": "Arêtier courant (40 à 42 cm) : le modèle suit la tuile posée.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "aretiere-standard"
+          }
+        },
+        {
+          "key": "closoir",
+          "family": "hip_closure",
+          "label": "Closoir d'arêtier",
+          "usual": {
+            "text": "Closoir ventilé d'arêtier, 23 cm, rouleau de 5 m (§5).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "closoir-aretier-5m"
+          }
+        },
+        {
+          "key": "crochet",
+          "family": "hip_fixing",
+          "label": "Crochets d'arêtier",
+          "keywords": [
+            "crochet"
+          ],
+          "usual": {
+            "text": "Pose à sec : un crochet par arêtier (§5).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "crochet-aretier-standard"
+          }
+        },
+        {
+          "key": "about",
+          "family": "hip_end",
+          "label": "Abouts d'arêtier",
+          "usual": {
+            "text": "Un about par arêtier (§5).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "about-aretier-standard"
+          }
+        },
+        {
+          "key": "bande",
+          "family": "hip_strip",
+          "label": "Arêtier zinc (bande)",
+          "usual": {
+            "text": "Bande zinc en longueurs de 3 m (développé 25 à 33 cm, §3).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "bande-aretier-zinc-standard"
+          }
+        },
+        {
+          "key": "patte",
+          "family": "zinc_clip",
+          "label": "Pattes de fixation",
+          "keywords": [
+            "patte"
+          ],
+          "usual": {
+            "text": "Trois pattes par mètre (§3).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "patte-zinc-standard"
+          }
+        }
+      ],
+      "constants": {
+        "pattes_par_metre": {
+          "kind": "installation_condition",
+          "value": "3",
+          "unit": "u/m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« pattes de fixation 3/ml » (§3)."
+        }
+      },
+      "needs": [
+        {
+          "id": "aretieres",
+          "slot": "aretiere",
+          "when": "aretier_matiere < 2",
+          "formula": "longueur_aretier * aretiere.pieces_par_ml",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Hors abouts (comptés à part) et rencontres avec le faîtage.",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-01",
+            "verifiedBy": "BatiClair (définition d'un ratio au mètre)"
+          },
+          "version": 1
+        },
+        {
+          "id": "closoir-aretier",
+          "slot": "closoir",
+          "when": "aretier_matiere < 2",
+          "formula": "longueur_aretier",
+          "unit": "ml",
+          "core": true,
+          "exclusions": "Closoir sur toute la longueur de l'arêtier.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "crochets-aretier",
+          "slot": "crochet",
+          "when": "aretier_matiere < 2",
+          "formula": "longueur_aretier * aretiere.pieces_par_ml",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un crochet par arêtier posé à sec.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "abouts-aretier",
+          "slot": "about",
+          "when": "aretier_matiere < 2",
+          "formula": "nb_aretiers",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un about par arêtier (§5).",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "bande-aretier-zinc",
+          "slot": "bande",
+          "when": "aretier_matiere >= 2",
+          "formula": "longueur_aretier",
+          "unit": "ml",
+          "core": true,
+          "exclusions": "Recouvrements des longueurs couverts par la perte de 5 %.",
+          "precision": "{longueur_aretier|ml} d'arêtier à couvrir",
+          "designation": "Arêtier {aspect_zinc} {epaisseur_zinc} mm, bande dév. {developpe_aretier|cm#}",
+          "precisionRequires": [
+            "developpe_aretier",
+            "aspect_zinc"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "pattes-aretier-zinc",
+          "slot": "patte",
+          "when": "aretier_matiere >= 2",
+          "formula": "longueur_aretier * regle.pattes_par_metre",
+          "unit": "u",
+          "core": true,
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      ]
+    },
+    {
       "id": "bandes-zinc",
       "trade": "roofing",
       "label": "Bandes zinc (solin, rive, égout, ventilation, couvre-joint)",
@@ -6614,6 +7979,40 @@
             "dev."
           ],
           "withinChoices": true,
+          "textValues": [
+            {
+              "value": "100",
+              "keywords": [
+                "dev 10",
+                "dev. 10",
+                "developpe 10"
+              ]
+            },
+            {
+              "value": "250",
+              "keywords": [
+                "dev 25",
+                "dev. 25",
+                "developpe 25"
+              ]
+            },
+            {
+              "value": "330",
+              "keywords": [
+                "dev 33",
+                "dev. 33",
+                "developpe 33"
+              ]
+            },
+            {
+              "value": "400",
+              "keywords": [
+                "dev 40",
+                "dev. 40",
+                "developpe 40"
+              ]
+            }
+          ],
           "choices": [
             {
               "label": "100 mm (solin, couvre-joint)",
@@ -10065,6 +11464,19 @@
       },
       "version": 1,
       "note": "Recouvrements des bandes de 3 m."
+    },
+    {
+      "family": "hip_strip",
+      "rate": "5",
+      "source": "fondateur-referentiel-2026-10-03",
+      "verification": {
+        "status": "verified",
+        "verifiedAt": "2026-10-03",
+        "verifiedBy": "Fondateur (couvreur)",
+        "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+      },
+      "version": 1,
+      "note": "« Zinc en bande (faîtage, noue, rive) : 5 % » (§2), arêtier « ml × 1,05 » (§3)."
     },
     {
       "family": "sheathing",

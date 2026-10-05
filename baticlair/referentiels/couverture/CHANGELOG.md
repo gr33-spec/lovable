@@ -1,5 +1,12 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.05-26 — noues et arêtiers (§3, §5, §7, §25.2)
+
+- **Noue zinc** (nouvel ouvrage `noue`, famille `valley`) : même règle que les bandes. Commandée façonnée : noues en **longueurs de 2 m**, longueur utile 1,85 m (recouvrement 15 cm, §25.2). Façonnée sur place : feuilles 2 × 1 m jusqu'à 6 ml, bobineau au-delà (zinc = ml × 1,05, §7). Développé lu au devis (« dév. 50 / 60 / 66 », « encaissée » → 66), sinon la noue préformée de 50, dite et modifiable. Question du comptoir : « Noue zinc : tu la façonnes toi-même ou tu la commandes façonnée ? » (même clé `faconnage` que tout le métal façonné).
+- **Arêtier** (nouvel ouvrage `aretier`, famille `hip`) : en tuiles, **arêtiers** à 2,9 pièces/ml (§5), **closoir d'arêtier** de 23 cm en rouleaux de 5 m, un **crochet** par arêtier posé à sec, un **about** par arêtier ; en zinc, **bande d'arêtier** dév. 25 ou 33 en longueurs de 3 m (ml × 1,05) et **3 pattes par mètre** (§3). La matière se lit dans la ligne (« zinc », « arêtières »), sinon sur la couverture du devis (tuiles → arêtières ; ardoises ou zinc → bande zinc), sinon le comptoir demande « Arêtier en tuiles (arêtières) ou en bande zinc ? ». Le nombre d'arêtiers se lit (« 4 pans », « 2 arêtiers »), sinon « Combien d'arêtiers sur ce toit ? » (les abouts).
+- **Développé écrit en centimètres** (« Faîtage zinc dév. 33 », « Bande zinc dév. 25 ») : lu pour les bandes et le faîtage zinc ; la question « Développé de la bande zinc ? » n'est plus posée quand le devis le dit.
+- Compte rendu : `docs/lot-couverture/point-1.md`. Tableau de Brest inchangé.
+
 ## roofing-2026.10.04-25 — la règle du comptoir (§47.8)
 
 - **Questions** : seulement celles que le vendeur du négoce poserait pour chiffrer. Nouvelles : développé de gouttière (25 / 28 / 33 / 40), crochets sur chevrons ou bandeau, descentes Ø 80 / 100, qualité d'ardoise (habitude d'entreprise), teinte du zinc quand le devis dit « prépatiné » sans la dire. Chacune est lue au devis quand il l'écrit. Supprimée : « égout et faîtage, on les ajoute ? » (les deux bandes passent dans « On ajoute ? », sauf si le devis les cite).
