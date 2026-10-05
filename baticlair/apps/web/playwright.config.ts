@@ -12,7 +12,7 @@ const apiEnv = {
   AUTH_SECRET: "e2e-secret-e2e-secret-e2e-secret-0000",
   API_PUBLIC_URL: "http://localhost:3000",
   WEB_APP_URL: "http://localhost:3000",
-  EMAIL_PROVIDER: "console",
+  EMAIL_PROVIDER: process.env.E2E_EMAIL_PROVIDER ?? "console",
   AI_PROVIDER: "fake",
   PLAN_ACTIVATION_CODES: "E2E-SOLO-CODE:solo",
   // Les parcours vérifient la limite de l'essai (3 chantiers), comme à l'ouverture ; en bêta, l'essai est sans limite.
