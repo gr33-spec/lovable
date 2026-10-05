@@ -52,7 +52,7 @@ export function screenReport(v: PurchaseView): string[] {
     for (const r of orange) {
       const b = item(r.itemKey);
       out.push(
-        `| ${cell(b?.label ?? r.pending?.label)} | ${cell(b?.quantity ?? r.pending?.quantity ?? "—")} | ${cell(r.reason ?? (r.pending ? "attend une réponse à une question" : "À vérifier"))} |`,
+        `| ${cell(b?.label ?? r.pending?.label)} | ${cell(b?.quantity ?? r.pending?.quantity ?? "—")} | ${cell(r.reason ?? (r.pending || r.decisionKey ? "attend une réponse à une question" : "À vérifier"))} |`,
       );
     }
     out.push("");
