@@ -46,6 +46,17 @@ describe("pont devis → moteur : formulations variées", () => {
     ).toEqual(["a:couverture-tuiles-emboitement/tuile", "b:couverture-tuiles-emboitement/rive", "c:noue/noue", "d:abergement-cheminee/abergement", "e:fenetre-de-toit/fenetre", "f:not_covered"]);
   });
 
+  it("une famille qui en précise une autre ne se lit jamais seule : « alu » n'est pas une gouttière, « fibres-ciment » pas une ardoise", () => {
+    expect(
+      where([
+        L("a", "Bande de rive alu laqué", "12", "ml"),
+        L("b", "Échelle de toit aluminium", "1", "u"),
+        L("c", "Plaques fibres-ciment ondulées", "40", "m2"),
+        L("d", "Gouttière demi-ronde alu", "10", "ml"),
+      ]),
+    ).toEqual(["a:not_covered", "b:not_covered", "c:not_covered", "d:gouttiere-pvc-alu/profil"]);
+  });
+
   it("« 480 ml » sur une ligne de liteaux est une quantité de liteaux, jamais une longueur de rives (cas trouvé sur le devis de démonstration)", () => {
     const p = plan([L("a", "Fourniture et pose tuile romane canal rouge", "1250", "u"), L("b", "Liteau sapin traité classe 2 27x38", "480", "ml"), L("c", "Rives de toit, tuiles de rive", "24", "m")]);
     expect(p.inputs[0]!.params.longueur_rives).toMatchObject({ value: "24", evidence: "Devis, c" });

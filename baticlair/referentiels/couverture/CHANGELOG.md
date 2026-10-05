@@ -5,6 +5,7 @@
 - **Ardoises fibres-ciment** (nouvel ouvrage `couverture-ardoises-fibres-ciment`, famille `roof_slate_fc` qui précise `roof_slate` : « fibres-ciment », « fibro-ciment », « artificielles », « Eternit ») : le calcul de l'ardoise naturelle avec les formats du §4, recouvrement courant 100 mm : 40 × 24 (27,8/m², liteaux 6,67 ml/m²), 40 × 27 (24,7/m², 6,67), 60 × 30 (13,3/m², 4,0), 60 × 40 (10/m², 4,0), + 5 % de perte. Ses fixations : **clous inox** = 2,1 × ardoises commandées, **crochets d'antivent** = 1,05 × ardoises (jamais de crochets d'ardoise naturelle) ; liteaux, contre-liteaux et écran comme l'ardoise naturelle.
 - Questions du comptoir, lues au devis quand il les écrit : le **format** et la **teinte** (bleu-noir, noir, brun).
 - L'ardoise naturelle ne change pas (Brest inchangé). Compte rendu : `docs/lot-couverture/point-5.md`.
+- Correctif du point 3 : une famille qui en précise une autre (« PVC », « alu », « fibres-ciment ») ne se lit plus seule. « Bande de rive alu » ou « Échelle de toit aluminium » ne deviennent plus des gouttières, « Plaques fibres-ciment » n'est plus une ardoise.
 
 ## roofing-2026.10.05-29 — bac acier (§8)
 

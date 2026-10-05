@@ -257,7 +257,8 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
   // Le vocabulaire d'un référentiel ne vaut que pour SON métier : dans un devis de plombier,
   // « coude PVC » n'est pas un coude de descente de gouttière.
   const covered = profile.id.split(",").includes(ref.trade);
-  const families = covered ? ref.families.filter((f) => f.keywords?.length).map((f) => ({ item: f.code, keywords: f.keywords! })) : [];
+  // Une famille qui en précise une autre (« gouttière » → « PVC ») ne se lit qu'après elle : « alu » seul n'est pas une gouttière.
+  const families = covered ? ref.families.filter((f) => f.keywords?.length && !f.refines).map((f) => ({ item: f.code, keywords: f.keywords! })) : [];
   const designations = lines.map((l) => l.designation);
   const read = lines.map((line) => {
     const v = validateTakeoffLine({ id: line.ref, designation: line.designation, quantityRaw: line.quantity, unitRaw: line.unit, source: "client_quote" }, profile, designations);
