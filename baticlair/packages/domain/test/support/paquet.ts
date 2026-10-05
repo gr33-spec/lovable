@@ -52,7 +52,7 @@ export function describeLot(lot: { suite: string; titre: string; fichier: string
           const { first } = run(p);
           expect(first.questions.filter((d) => !d.key.startsWith(RATIO)).map((d) => d.question?.text ?? d.text)).toEqual(p.questions);
           expect(colours(first)).toEqual(p.couleurs);
-          for (const r of first.screen.groups.flatMap((g) => g.rows).filter((x) => x.status === "check" && !x.pending)) {
+          for (const r of first.screen.groups.flatMap((g) => g.rows).filter((x) => x.status === "check" && !x.pending && !x.decisionKey)) {
             expect(r.reason, r.itemKey).toMatch(/^Quantité à confirmer : \S/);
           }
         });

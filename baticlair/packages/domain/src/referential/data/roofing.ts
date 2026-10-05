@@ -659,6 +659,63 @@ const NB_ARETIERS_PARAM: ParamDef = {
     { value: "4", keywords: ["4 aretiers", "quatre aretiers", "4 pans", "quatre pans"] },
   ],
 };
+/**
+ * Raccord d'étanchéité d'une fenêtre de toit (§11) : un article par couverture au comptoir. Lu dans la ligne ou sur la
+ * couverture du devis ; sinon demandé avec les mots du comptoir.
+ */
+const RACCORD_COUVERTURE_PARAM: ParamDef = {
+  key: "raccord_couverture",
+  label: "Raccord de la fenêtre de toit",
+  unit: "u",
+  kind: "site_data",
+  question: "Raccord de fenêtre de toit : pour tuiles, pour ardoises ou pour tuiles plates ?",
+  choices: [
+    { label: "Pour tuiles (mécaniques, canal)", value: "1" },
+    { label: "Pour ardoises", value: "2" },
+    { label: "Pour tuiles plates", value: "3" },
+  ],
+  textValues: [
+    { value: "3", keywords: ["tuile plate", "tuiles plates", "petit moule"] },
+    { value: "2", keywords: ["ardoise", "ardoises", "pour materiau plat"] },
+    { value: "1", keywords: ["tuile mecanique", "tuiles mecaniques", "pour tuiles", "pour tuile", "tuile a emboitement", "tuiles a emboitement", "tuiles canal", "tuile canal"] },
+  ],
+  fromWorks: [
+    { value: "1", workItems: ["couverture-tuiles-emboitement", "couverture-tuiles-canal"] },
+    { value: "2", workItems: ["couverture-ardoises-crochet"] },
+  ],
+  display: { "1": "pour tuiles", "2": "pour ardoises", "3": "pour tuiles plates" },
+};
+/**
+ * Taille de la fenêtre (§11 : « dimensions nominales ex. 78×98, 78×118, 114×118 ») : lue dans la ligne, en cm ou par la
+ * référence du fabricant (codes de taille Velux : MK04 = 78 × 98…). Sinon le raccord est « à la taille de la fenêtre » :
+ * la taille est demandée une fois, sur la ligne de la fenêtre (question du comptoir), et le vendeur assortit le raccord.
+ */
+const FENETRES: [string, string, string[]][] = [
+  ["5578", "55 × 78", ["ck02"]],
+  ["5598", "55 × 98", ["ck04"]],
+  ["66118", "66 × 118", ["fk06"]],
+  ["7898", "78 × 98", ["mk04"]],
+  ["78118", "78 × 118", ["mk06"]],
+  ["78140", "78 × 140", ["mk08"]],
+  ["94118", "94 × 118", ["pk06"]],
+  ["94140", "94 × 140", ["pk08"]],
+  ["114118", "114 × 118", ["sk06"]],
+  ["114140", "114 × 140", ["sk08"]],
+  ["13498", "134 × 98", ["uk04"]],
+];
+const TAILLE_FENETRE_PARAM: ParamDef = {
+  key: "taille_fenetre",
+  label: "Taille de la fenêtre de toit",
+  unit: "u",
+  kind: "site_data",
+  question: "Fenêtre de toit : quelle taille ?",
+  default: { value: "0", source: F, verification: FOUNDER_DOC, version: 1, note: "le raccord suit la taille de la fenêtre commandée" },
+  textValues: FENETRES.map(([value, text, codes]) => {
+    const [l, h] = text.split(" × ");
+    return { value, keywords: [`${l}x${h}`, `${l} x ${h}`, `${l}*${h}`, `${l} × ${h}`, `${l}×${h}`, ...codes] };
+  }),
+  display: { "0": "à la taille de la fenêtre de toit", ...Object.fromEntries(FENETRES.map(([value, text]) => [value, `fenêtre ${text}`])) },
+};
 /** Poids d'une bande zinc plate : 4,7 kg/m² en 0,65 mm (§7) ; 7,2 kg/m² par mm d'épaisseur pour 0,70 et 0,80 (masse volumique du zinc). */
 const ZINC_PLAT_CONSTANTS = {
   poids_plat_065: condition("4.7", "kg/m2", F, FOUNDER_DOC, "« kg ≈ m² dév. × 4,7 (ép. 0,65) » (§7)."),
@@ -774,7 +831,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.05-26",
+  version: "roofing-2026.10.05-27",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -1050,7 +1107,28 @@ export const ROOFING_REFERENTIAL: Referential = {
     // §7, §25.2 : noue zinc, commandée façonnée (longueurs de 2 m) ou façonnée sur place (feuilles, bobineau).
     { code: "valley", label: "Noue", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["noue", "noues"] },
     { code: "flashing", label: "Solin, abergement", needUnit: "ml", attributes: [], keyAttributes: [], keywords: ["solin", "abergement"] },
-    { code: "roof_window", label: "Fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["fenetre de toit", "velux"] },
+    // §11 : la fenêtre se commande telle que le devis l'écrit ; sans sa taille, le comptoir la demande (réponse en précision).
+    {
+      code: "roof_window",
+      label: "Fenêtre de toit",
+      needUnit: "u",
+      attributes: [],
+      keyAttributes: [],
+      keywords: ["fenetre de toit", "fenetres de toit", "velux", "chassis de toit", "fenetre de toiture", "fenetres de toiture"],
+      ask: {
+        question: "Fenêtre de toit : quelle taille ?",
+        hint: "La référence du fabricant (MK04, SK06…) ou la taille en cm.",
+        choices: [
+          { label: "55 × 78", value: "55 × 78" },
+          { label: "78 × 98", value: "78 × 98" },
+          { label: "78 × 118", value: "78 × 118" },
+          { label: "114 × 118", value: "114 × 118" },
+        ],
+        answered: "\\b\\d{2,3} ?[x×*] ?\\d{2,3}\\b|\\b[a-z]k ?\\d{2}\\b",
+      },
+    },
+    // §11 : « Raccord d'étanchéité : 1 par fenêtre ; type tuile (ondulée, pureau > 45 mm), ardoise ou matériau plat ».
+    { code: "roof_window_flashing", label: "Raccord d'étanchéité de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["raccord d'etancheite", "raccord etancheite"] },
   ],
   products: [
     {
@@ -1284,6 +1362,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("bande-aretier-zinc-standard", "hip_strip", "Bande d'arêtier zinc, développé 25 à 33 cm, longueurs de 3 m", "Arêtier zinc (bande)", {
       sellingUnits: [{ id: "longueur", label: { one: "longueur de 3 m", many: "longueurs de 3 m" }, contains: packaging("3", "m", F, FOUNDER_DOC), primary: true }],
     }),
+    generic("raccord-fenetre-toit", "roof_window_flashing", "Raccord d'étanchéité de fenêtre de toit, adapté à la couverture et à la taille de la fenêtre", "Raccords d'étanchéité"),
     generic("about-aretier-standard", "hip_end", "About d'arêtier (modèle de la tuile posée)", "Abouts d'arêtier"),
     // §25.2 : « Noue préformée : développé 500 mm, L 2 m ou 3 m ; recouvrement 150 mm → longueur utile 1,85 m pour 2 m ».
     generic("noue-zinc-faconnee", "valley", "Noue zinc façonnée, longueurs de 2 m (développé et épaisseur du chantier)", "Noues zinc façonnées", {
@@ -1983,6 +2062,39 @@ export const ROOFING_REFERENTIAL: Referential = {
           formula: "longueur_aretier * regle.pattes_par_metre",
           unit: "u",
           core: true,
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+      ],
+    },
+    {
+      // §11 : la fenêtre telle que le devis l'écrit (marque, taille), plus un raccord d'étanchéité par fenêtre, adapté à la
+      // couverture (tuiles, ardoises, tuiles plates) et à la taille de la fenêtre.
+      id: "fenetre-de-toit",
+      trade: "roofing",
+      label: "Fenêtre de toit (fenêtre et raccord d'étanchéité)",
+      triggers: ["roof_window"],
+      params: [
+        { key: "nb_fenetres", label: "Nombre de fenêtres de toit", unit: "u", kind: "site_data", question: "Combien de fenêtres de toit ?", fromLineQuantity: true },
+        RACCORD_COUVERTURE_PARAM,
+        TAILLE_FENETRE_PARAM,
+      ],
+      slots: [
+        { key: "fenetre", family: "roof_window", label: "Fenêtres de toit", measureOnly: true, orderedAsWritten: true },
+        { key: "raccord", family: "roof_window_flashing", label: "Raccords d'étanchéité", usual: { text: "Un raccord par fenêtre, adapté à la couverture (§11).", source: F, productId: "raccord-fenetre-toit" } },
+      ],
+      constants: {},
+      needs: [
+        {
+          id: "raccords",
+          slot: "raccord",
+          formula: "nb_fenetres",
+          unit: "u",
+          core: true,
+          exclusions: "Un raccord par fenêtre ; fenêtres jumelées : un raccord combiné par groupe, à corriger d'un tap.",
+          designation: "Raccords d'étanchéité {raccord_couverture}, {taille_fenetre}",
+          precisionRequires: ["raccord_couverture"],
           source: F,
           verification: FOUNDER_DOC,
           version: 1,

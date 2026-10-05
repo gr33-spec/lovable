@@ -33,7 +33,7 @@ describe("pont devis → moteur : formulations variées", () => {
     ]);
   });
 
-  it("ne rattache jamais au plus proche : les rives suivent la couverture ; l'abergement et la noue ont leur ouvrage ; fenêtre de toit, chatière restent non couvertes", () => {
+  it("ne rattache jamais au plus proche : les rives suivent la couverture ; l'abergement, la noue et la fenêtre de toit ont leur ouvrage ; la chatière reste non couverte", () => {
     expect(
       where([
         L("a", "Couverture tuiles HP10", "60", "m2"),
@@ -43,7 +43,7 @@ describe("pont devis → moteur : formulations variées", () => {
         L("e", "Fenêtre de toit 78x98 avec raccord pour tuiles", "1", "u"),
         L("f", "Tuiles chatières HP10", "4", "u"),
       ]),
-    ).toEqual(["a:couverture-tuiles-emboitement/tuile", "b:couverture-tuiles-emboitement/rive", "c:noue/noue", "d:abergement-cheminee/abergement", "e:not_covered", "f:not_covered"]);
+    ).toEqual(["a:couverture-tuiles-emboitement/tuile", "b:couverture-tuiles-emboitement/rive", "c:noue/noue", "d:abergement-cheminee/abergement", "e:fenetre-de-toit/fenetre", "f:not_covered"]);
   });
 
   it("« 480 ml » sur une ligne de liteaux est une quantité de liteaux, jamais une longueur de rives (cas trouvé sur le devis de démonstration)", () => {

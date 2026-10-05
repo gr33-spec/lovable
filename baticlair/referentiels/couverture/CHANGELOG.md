@@ -1,5 +1,12 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.05-27 — fenêtres de toit (§11)
+
+- **Fenêtre de toit** (nouvel ouvrage `fenetre-de-toit`, famille `roof_window`) : la fenêtre part **telle que le devis l'écrit** (marque, modèle, taille) et compte l'ouvrage. Sans taille dans la ligne (ni « 78x98 », ni référence « MK04 »), la question du comptoir se pose sur la ligne : « Fenêtre de toit : quelle taille ? » (55 × 78, 78 × 98, 78 × 118, 114 × 118 ou saisie) ; la réponse part en précision.
+- **Raccord d'étanchéité** : un par fenêtre, **pour tuiles**, **pour ardoises** ou **pour tuiles plates**, à la taille lue (« Raccords d'étanchéité pour tuiles, fenêtre 78 × 98 »), sinon « à la taille de la fenêtre de toit ». La couverture se lit dans la ligne, puis sur la couverture du devis ; sinon « Raccord de fenêtre de toit : pour tuiles, pour ardoises ou pour tuiles plates ? ». Codes de taille Velux lus (CK02 à UK08).
+- Pas encore : kit d'isolation, collerette pare-vapeur, chevêtre, raccords combinés de fenêtres jumelées (un raccord par fenêtre, à corriger d'un tap).
+- Compte rendu : `docs/lot-couverture/point-2.md`. Tableau de Brest inchangé.
+
 ## roofing-2026.10.05-26 — noues et arêtiers (§3, §5, §7, §25.2)
 
 - **Noue zinc** (nouvel ouvrage `noue`, famille `valley`) : même règle que les bandes. Commandée façonnée : noues en **longueurs de 2 m**, longueur utile 1,85 m (recouvrement 15 cm, §25.2). Façonnée sur place : feuilles 2 × 1 m jusqu'à 6 ml, bobineau au-delà (zinc = ml × 1,05, §7). Développé lu au devis (« dév. 50 / 60 / 66 », « encaissée » → 66), sinon la noue préformée de 50, dite et modifiable. Question du comptoir : « Noue zinc : tu la façonnes toi-même ou tu la commandes façonnée ? » (même clé `faconnage` que tout le métal façonné).

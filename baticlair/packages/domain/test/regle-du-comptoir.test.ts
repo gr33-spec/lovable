@@ -38,6 +38,8 @@ const COMPTOIR: Record<string, string> = {
   aretier_matiere: "« arêtier en tuiles ou en zinc ? » quand le devis ne le dit pas",
   nb_aretiers: "le nombre d'abouts d'arêtier",
   developpe_aretier: "« bande de 25 ou de 33 ? »",
+  nb_fenetres: "le nombre de fenêtres de toit",
+  raccord_couverture: "« raccord pour tuiles ou pour ardoises ? »",
 };
 /** Ce que le comptoir ne demande jamais : une hypothèse, dite et modifiable d'un tap. */
 const JAMAIS: readonly string[] = ["zone", "entraxe_supports", "pureau", "pente", "longueur_rampant", "epaisseur_zinc", "diametre_crochet", "coudes_par_descente"];

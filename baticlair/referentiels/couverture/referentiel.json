@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.05-26",
+  "version": "roofing-2026.10.05-27",
   "trade": "roofing",
   "sources": [
     {
@@ -772,7 +772,45 @@
       "keyAttributes": [],
       "keywords": [
         "fenetre de toit",
-        "velux"
+        "fenetres de toit",
+        "velux",
+        "chassis de toit",
+        "fenetre de toiture",
+        "fenetres de toiture"
+      ],
+      "ask": {
+        "question": "Fenêtre de toit : quelle taille ?",
+        "hint": "La référence du fabricant (MK04, SK06…) ou la taille en cm.",
+        "choices": [
+          {
+            "label": "55 × 78",
+            "value": "55 × 78"
+          },
+          {
+            "label": "78 × 98",
+            "value": "78 × 98"
+          },
+          {
+            "label": "78 × 118",
+            "value": "78 × 118"
+          },
+          {
+            "label": "114 × 118",
+            "value": "114 × 118"
+          }
+        ],
+        "answered": "\\b\\d{2,3} ?[x×*] ?\\d{2,3}\\b|\\b[a-z]k ?\\d{2}\\b"
+      }
+    },
+    {
+      "code": "roof_window_flashing",
+      "label": "Raccord d'étanchéité de fenêtre de toit",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "raccord d'etancheite",
+        "raccord etancheite"
       ]
     }
   ],
@@ -3173,6 +3211,37 @@
               "verifiedAt": "2026-10-03",
               "verifiedBy": "Fondateur (couvreur)",
               "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "raccord-fenetre-toit",
+      "family": "roof_window_flashing",
+      "label": "Raccord d'étanchéité de fenêtre de toit, adapté à la couverture et à la taille de la fenêtre",
+      "shortLabel": "Raccords d'étanchéité",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
             },
             "version": 1
           },
@@ -7940,6 +8009,294 @@
           "formula": "longueur_aretier * regle.pattes_par_metre",
           "unit": "u",
           "core": true,
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      ]
+    },
+    {
+      "id": "fenetre-de-toit",
+      "trade": "roofing",
+      "label": "Fenêtre de toit (fenêtre et raccord d'étanchéité)",
+      "triggers": [
+        "roof_window"
+      ],
+      "params": [
+        {
+          "key": "nb_fenetres",
+          "label": "Nombre de fenêtres de toit",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Combien de fenêtres de toit ?",
+          "fromLineQuantity": true
+        },
+        {
+          "key": "raccord_couverture",
+          "label": "Raccord de la fenêtre de toit",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Raccord de fenêtre de toit : pour tuiles, pour ardoises ou pour tuiles plates ?",
+          "choices": [
+            {
+              "label": "Pour tuiles (mécaniques, canal)",
+              "value": "1"
+            },
+            {
+              "label": "Pour ardoises",
+              "value": "2"
+            },
+            {
+              "label": "Pour tuiles plates",
+              "value": "3"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "3",
+              "keywords": [
+                "tuile plate",
+                "tuiles plates",
+                "petit moule"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "ardoise",
+                "ardoises",
+                "pour materiau plat"
+              ]
+            },
+            {
+              "value": "1",
+              "keywords": [
+                "tuile mecanique",
+                "tuiles mecaniques",
+                "pour tuiles",
+                "pour tuile",
+                "tuile a emboitement",
+                "tuiles a emboitement",
+                "tuiles canal",
+                "tuile canal"
+              ]
+            }
+          ],
+          "fromWorks": [
+            {
+              "value": "1",
+              "workItems": [
+                "couverture-tuiles-emboitement",
+                "couverture-tuiles-canal"
+              ]
+            },
+            {
+              "value": "2",
+              "workItems": [
+                "couverture-ardoises-crochet"
+              ]
+            }
+          ],
+          "display": {
+            "1": "pour tuiles",
+            "2": "pour ardoises",
+            "3": "pour tuiles plates"
+          }
+        },
+        {
+          "key": "taille_fenetre",
+          "label": "Taille de la fenêtre de toit",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Fenêtre de toit : quelle taille ?",
+          "default": {
+            "value": "0",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "le raccord suit la taille de la fenêtre commandée"
+          },
+          "textValues": [
+            {
+              "value": "5578",
+              "keywords": [
+                "55x78",
+                "55 x 78",
+                "55*78",
+                "55 × 78",
+                "55×78",
+                "ck02"
+              ]
+            },
+            {
+              "value": "5598",
+              "keywords": [
+                "55x98",
+                "55 x 98",
+                "55*98",
+                "55 × 98",
+                "55×98",
+                "ck04"
+              ]
+            },
+            {
+              "value": "66118",
+              "keywords": [
+                "66x118",
+                "66 x 118",
+                "66*118",
+                "66 × 118",
+                "66×118",
+                "fk06"
+              ]
+            },
+            {
+              "value": "7898",
+              "keywords": [
+                "78x98",
+                "78 x 98",
+                "78*98",
+                "78 × 98",
+                "78×98",
+                "mk04"
+              ]
+            },
+            {
+              "value": "78118",
+              "keywords": [
+                "78x118",
+                "78 x 118",
+                "78*118",
+                "78 × 118",
+                "78×118",
+                "mk06"
+              ]
+            },
+            {
+              "value": "78140",
+              "keywords": [
+                "78x140",
+                "78 x 140",
+                "78*140",
+                "78 × 140",
+                "78×140",
+                "mk08"
+              ]
+            },
+            {
+              "value": "94118",
+              "keywords": [
+                "94x118",
+                "94 x 118",
+                "94*118",
+                "94 × 118",
+                "94×118",
+                "pk06"
+              ]
+            },
+            {
+              "value": "94140",
+              "keywords": [
+                "94x140",
+                "94 x 140",
+                "94*140",
+                "94 × 140",
+                "94×140",
+                "pk08"
+              ]
+            },
+            {
+              "value": "114118",
+              "keywords": [
+                "114x118",
+                "114 x 118",
+                "114*118",
+                "114 × 118",
+                "114×118",
+                "sk06"
+              ]
+            },
+            {
+              "value": "114140",
+              "keywords": [
+                "114x140",
+                "114 x 140",
+                "114*140",
+                "114 × 140",
+                "114×140",
+                "sk08"
+              ]
+            },
+            {
+              "value": "13498",
+              "keywords": [
+                "134x98",
+                "134 x 98",
+                "134*98",
+                "134 × 98",
+                "134×98",
+                "uk04"
+              ]
+            }
+          ],
+          "display": {
+            "0": "à la taille de la fenêtre de toit",
+            "5578": "fenêtre 55 × 78",
+            "5598": "fenêtre 55 × 98",
+            "7898": "fenêtre 78 × 98",
+            "13498": "fenêtre 134 × 98",
+            "66118": "fenêtre 66 × 118",
+            "78118": "fenêtre 78 × 118",
+            "78140": "fenêtre 78 × 140",
+            "94118": "fenêtre 94 × 118",
+            "94140": "fenêtre 94 × 140",
+            "114118": "fenêtre 114 × 118",
+            "114140": "fenêtre 114 × 140"
+          }
+        }
+      ],
+      "slots": [
+        {
+          "key": "fenetre",
+          "family": "roof_window",
+          "label": "Fenêtres de toit",
+          "measureOnly": true,
+          "orderedAsWritten": true
+        },
+        {
+          "key": "raccord",
+          "family": "roof_window_flashing",
+          "label": "Raccords d'étanchéité",
+          "usual": {
+            "text": "Un raccord par fenêtre, adapté à la couverture (§11).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "raccord-fenetre-toit"
+          }
+        }
+      ],
+      "constants": {},
+      "needs": [
+        {
+          "id": "raccords",
+          "slot": "raccord",
+          "formula": "nb_fenetres",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un raccord par fenêtre ; fenêtres jumelées : un raccord combiné par groupe, à corriger d'un tap.",
+          "designation": "Raccords d'étanchéité {raccord_couverture}, {taille_fenetre}",
+          "precisionRequires": [
+            "raccord_couverture"
+          ],
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
