@@ -283,14 +283,17 @@ function Row({
     </>
   );
   return (
-    <li id={`ligne-${row.key}`} className="relative flex scroll-mt-24 flex-col gap-1 overflow-hidden py-2">
+    <li
+      id={`ligne-${row.key}`}
+      className={`relative flex scroll-mt-24 flex-col gap-1 overflow-hidden py-2 transition-colors ${editing ? "-mx-2 my-1 rounded-2xl bg-[#eef2ff] px-2 pb-2" : ""}`}
+    >
       {dx < 0 ? (
         <span aria-hidden="true" className="absolute inset-y-0 right-0 flex items-center rounded-xl bg-danger px-4 text-sm font-extrabold text-white">
           Retirer
         </span>
       ) : null}
       <div
-        className="relative flex items-start gap-1 bg-surface"
+        className={`relative flex items-start gap-1 ${editing ? "" : "bg-surface"}`}
         style={{ transform: dx ? `translateX(${dx}px)` : undefined, touchAction: "pan-y" }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -305,11 +308,17 @@ function Row({
           <div className="flex min-h-11 w-full min-w-0 items-start gap-3">{body}</div>
         )}
         {editable && item ? (
-          <button type="button" onClick={() => setEditing(!editing)} aria-label={`Modifier : ${label}`} aria-expanded={editing} className="-mr-2 inline-flex min-h-11 min-w-10 shrink-0 items-center justify-center rounded-xl text-subtle active:text-accent-text">
-            <Pencil size={16} aria-hidden="true" />
+          <button
+            type="button"
+            onClick={() => setEditing(!editing)}
+            aria-label={editing ? `Fermer : ${label}` : `Modifier : ${label}`}
+            aria-expanded={editing}
+            className={`-mr-2 inline-flex min-h-11 min-w-10 shrink-0 items-center justify-center rounded-xl ${editing ? "text-accent-text" : "text-subtle active:text-accent-text"}`}
+          >
+            {editing ? <X size={18} aria-hidden="true" /> : <Pencil size={16} aria-hidden="true" />}
           </button>
         ) : null}
-        {removable ? (
+        {removable && !editing ? (
           <button type="button" onClick={onSetAside} aria-label={`Retirer : ${label}`} className="-mr-2 inline-flex min-h-11 min-w-10 shrink-0 items-center justify-center rounded-xl text-subtle active:text-danger">
             <Trash2 size={16} aria-hidden="true" />
           </button>
@@ -338,28 +347,24 @@ function Row({
         </ul>
       ) : null}
       {editing && item ? (
-        <div className="flex flex-col gap-2">
-          <ItemForm
-            item={item}
-            pending={pending}
-            {...(sketchHandlers ? { onAttach: (file: File, commentaire: string) => sketchHandlers.onAttach(item.key, file, commentaire) } : {})}
-            onCancel={() => setEditing(false)}
-            onSave={async (e) => {
-              await onEdit(item, e);
-              setEditing(false);
-            }}
-          />
-          <button
-            type="button"
-            onClick={() => {
-              setEditing(false);
-              onSetAside();
-            }}
-            className="inline-flex min-h-11 items-center self-start text-sm font-bold text-danger"
-          >
-            Retirer de la liste
-          </button>
-        </div>
+        <ItemForm
+          item={item}
+          pending={pending}
+          {...(sketchHandlers ? { onAttach: (file: File, commentaire: string) => sketchHandlers.onAttach(item.key, file, commentaire) } : {})}
+          onCancel={() => setEditing(false)}
+          onSave={async (e) => {
+            await onEdit(item, e);
+            setEditing(false);
+          }}
+          {...(removable
+            ? {
+                onRemove: () => {
+                  setEditing(false);
+                  onSetAside();
+                },
+              }
+            : {})}
+        />
       ) : null}
       {proof ? proofs.map((i) => <Proof key={`${i.kind}:${i.id}`} item={i} />) : null}
     </li>
