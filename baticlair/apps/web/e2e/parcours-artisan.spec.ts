@@ -861,8 +861,9 @@ test("§48.4 : questions au bouton seulement, avant le calcul ; puis la voix sur
   await expect(voix.getByLabel("Ce que j'entends")).toContainText("enlève l'écran");
   await voix.getByRole("button", { name: "Terminer" }).click();
   const fait = page.getByRole("status", { name: "Ce que j'ai modifié" });
-  await expect(fait.getByText(/Retiré :.*Écran HPV/)).toBeVisible();
-  await expect(fait.getByText(/Ajouté :.*Silicone · 2 cartouches/)).toBeVisible();
+  // Le texte entier du résumé : en cas d'échec, le message dit ce qui a été compris.
+  await expect(fait).toContainText(/Retiré :.*Écran HPV/);
+  await expect(fait).toContainText("Ajouté : Silicone · 2 cartouches");
   await expect(list.getByText(/^Silicone$/)).toBeVisible();
   await expect(list.getByRole("button", { name: /Écran HPV/ })).toHaveCount(0);
   // La main reste : plus / moins, crayon, corbeille.
