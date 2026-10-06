@@ -72,6 +72,8 @@ const calculBody = z.object({
     .array(z.object({ id: z.string().min(1).max(200), reponse: z.enum(["oui", "non"]) }))
     .max(50)
     .optional(),
+  // « Déjà sur place » (dépose / repose, §48.2) : les articles à retirer de la liste.
+  retraits: z.array(z.string().min(1).max(200)).max(50).optional(),
 });
 
 const correction = z.discriminatedUnion("action", [
@@ -172,7 +174,7 @@ export class QuantitatifsController {
     @Query(new ZodPipe(rendu)) query: z.infer<typeof rendu>,
   ) {
     const list = (body.reponses ?? []).map((x) => ({ question: x.question, valeur: x.valeur ?? null, unite: x.unite }));
-    return this.quantitatifs.calculate(tenant, id, list, { ecran: query.ecran === "1" }, body.ajouts ?? []);
+    return this.quantitatifs.calculate(tenant, id, list, { ecran: query.ecran === "1" }, body.ajouts ?? [], body.retraits ?? []);
   }
 
   @Throttle({ default: HOURLY(300) })

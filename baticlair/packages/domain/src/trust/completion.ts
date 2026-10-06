@@ -15,6 +15,11 @@ import type { PurchaseView } from "./purchase-view.js";
  */
 export const AI_ADDITION = "ia-ajout:";
 export const AI_DOUBT = "ia-doute:";
+/**
+ * §48.4 : une question laissée sans réponse est close au calcul (plus aucune question après la liste) ; la ligne qui
+ * attendait cette information sort ORANGE « Info manquante », levée d'un « C'est bon » (elle part telle quelle).
+ */
+export const MISSING_INFO = "manque:";
 
 /** Ce que rend l'IA (repères du dossier : L = ligne du devis, A = article, F = à préciser avec le fournisseur). */
 export interface CompletionWire {

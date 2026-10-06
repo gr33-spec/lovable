@@ -1,10 +1,9 @@
 "use client";
 
-import { Bell, Check, Coffee, FileUp, Keyboard, Loader2, Mic, Pencil, SendHorizontal, Sparkles } from "lucide-react";
+import { Bell, Check, Coffee, FileUp, Loader2, Pencil, Sparkles } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
 import type { ApiError, Takeoff } from "@/lib/api";
-import { matchAnswers, type VoiceQuestion } from "@/lib/voice-answers";
 
 /*
  * LE PARCOURS (§48, retour du fondateur, 2026-10-06) : zéro saisie, un écran par étape, un ton direct et cool.
@@ -260,29 +259,55 @@ export function CalculScreen() {
 
 // ——— 3. Les questions de comptoir ———
 
-type QuestionKind = "decision" | "habit" | "ajout";
+/**
+ * §48.2 / §48.4 : TOUT ce qui manque pour calculer se demande ICI, en une fois, AU BOUTON (ni texte ni micro sur cet
+ * écran). Après la sortie de la liste, plus aucune question : ce qui reste sans réponse est clos au calcul et la ligne
+ * sort orange. Cinq familles :
+ *  - « ce que le devis ne dit pas » : les questions du calcul (format, développé, façonnage pièce par pièce…) ;
+ *  - « comme d'habitude ? » : les habitudes établies de l'entreprise ;
+ *  - « je pars sur… » : les hypothèses du calcul (rampant, pente, liteaux…), la valeur prise par défaut est marquée ;
+ *  - « déjà sur place ? » : liteaux, écran, voliges d'un ouvrage en dépose / repose ;
+ *  - « quincaillerie et consommables » : on les ajoute ? (seuls ceux validés ici entrent dans la liste).
+ */
+type QuestionKind = "decision" | "habit" | "assumption" | "onsite" | "ajout";
 
-interface CounterQuestion extends VoiceQuestion {
+interface CounterQuestion {
+  key: string;
   kind: QuestionKind;
+  text: string;
+  options: { label: string; value: string }[];
+  unit: string | null;
   /** De quoi parle la question (la ligne du devis), en petit au-dessus. */
   about: string | null;
   hint: string | null;
-  /** Une valeur à dire, en chiffres (« 35 » °), au lieu de boutons. */
+  /** Une valeur sans boutons proposés : elle se règle au plus / moins (jamais au clavier). */
   numeric: boolean;
-  /** « Comme d'habitude » : la réponse habituelle de l'entreprise. */
+  /** La valeur prise sans réponse (hypothèse dite, habitude) : marquée sur son bouton. */
   usual: string | null;
 }
 
 export interface CounterAnswers {
   reponses: { question: string; valeur: string; unite?: string }[];
   ajouts: { id: string; reponse: "oui" | "non" }[];
+  retraits?: string[];
 }
 
-type Given = { value: string; label: string; via: "tap" | "voix" | "habitude" };
+type Given = { value: string; label: string };
 
-/** Les questions de comptoir d'un quantitatif lu : du calcul, des habitudes, et « On ajoute ? ». */
+const SECTIONS: { kind: QuestionKind; title: string; text: string | null }[] = [
+  { kind: "decision", title: "Ce que le devis ne dit pas", text: null },
+  { kind: "habit", title: "Comme d'habitude ?", text: "Ta réponse habituelle est déjà cochée : touche pour la changer sur ce chantier." },
+  { kind: "assumption", title: "Je pars sur ces valeurs", text: "Marquées « par défaut » : touche une autre réponse si ton chantier est différent." },
+  { kind: "onsite", title: "Dépose / repose : déjà sur place ?", text: "Ce qui est déjà sur le toit ne part pas dans la commande." },
+  { kind: "ajout", title: "Quincaillerie et consommables : on les ajoute ?", text: "Seuls ceux que tu valides ici entrent dans la liste." },
+];
+
+const ONSITE = /\b(liteaux?|contre-?liteaux?|[ée]cran|pare-?pluie|hpv|voliges?|voligeage)\b/i;
+const REWORK = /\b(d[ée]pose|repose|r[ée]fection|r[ée]novation|reprise)\b/i;
+
+/** Les questions de comptoir d'un quantitatif lu, rangées par famille. */
 export function counterQuestions(takeoff: Takeoff): CounterQuestion[] {
-  const fromDecisions: CounterQuestion[] = takeoff.view.decisions
+  const decisions: CounterQuestion[] = takeoff.view.decisions
     .filter((d) => d.question)
     .map((d) => {
       const q = d.question!;
@@ -299,21 +324,40 @@ export function counterQuestions(takeoff: Takeoff): CounterQuestion[] {
         usual: null,
       };
     });
-  const habits: CounterQuestion[] = (takeoff.habits ?? []).map((h) => ({
-    key: h.key,
-    kind: "habit",
-    text: h.question,
-    options: h.options,
-    unit: h.unit,
-    about: null,
-    hint: null,
-    numeric: false,
-    usual: h.value,
-  }));
+  const asked = new Set(decisions.map((d) => d.key.replace(/^engine:/, "")));
+  const habits: CounterQuestion[] = (takeoff.habits ?? []).map((h) => ({ key: h.key, kind: "habit", text: h.question, options: h.options, unit: h.unit, about: null, hint: null, numeric: false, usual: h.value }));
+  for (const h of habits) asked.add(h.key);
+  // Les hypothèses à boutons (param ou produit) : « je pars sur 5,5 m de rampant », la valeur prise est marquée.
+  const assumptions: CounterQuestion[] = takeoff.purchase.assumptions
+    .filter((a) => /^(param|product):/.test(a.key) && a.choices.length > 1 && !asked.has(a.key))
+    .map((a) => {
+      const usual = a.choices.find((c) => c.label === a.value || c.value === a.value || c.label.startsWith(a.value))?.value ?? null;
+      return { key: a.key, kind: "assumption", text: `${a.label} ?`, options: a.choices, unit: a.key.startsWith("param:") ? a.unit : null, about: null, hint: a.note, numeric: false, usual };
+    });
+  // §48.2 : en dépose / repose, ce qui sert de support est peut-être déjà sur place.
+  const rework = takeoff.lines.some((l) => REWORK.test(l.designation));
+  const onsite: CounterQuestion[] = rework
+    ? takeoff.purchase.toBuy
+        .filter((b) => ONSITE.test(b.label))
+        .map((b) => ({
+          key: `onsite:${b.key}`,
+          kind: "onsite",
+          text: `${b.label} : à fournir, ou déjà sur place ?`,
+          options: [
+            { label: "À fournir", value: "fournir" },
+            { label: "Déjà sur place", value: "place" },
+          ],
+          unit: null,
+          about: null,
+          hint: b.quantity,
+          numeric: false,
+          usual: null,
+        }))
+    : [];
   const ajouts: CounterQuestion[] = takeoff.purchase.suggestions.map((s) => ({
     key: `ajout:${s.key}`,
     kind: "ajout",
-    text: `On ajoute : ${s.label}${s.quantity ? ` (${s.quantity})` : ""} ?`,
+    text: `${s.label}${s.quantity ? ` (${s.quantity})` : ""}`,
     options: [
       { label: "Oui", value: "oui" },
       { label: "Non", value: "non" },
@@ -324,44 +368,27 @@ export function counterQuestions(takeoff: Takeoff): CounterQuestion[] {
     numeric: false,
     usual: null,
   }));
-  return [...fromDecisions, ...habits, ...ajouts];
+  return [...decisions, ...habits, ...assumptions, ...onsite, ...ajouts];
 }
 
-/** Ce qui part au calcul : les réponses données ; une question laissée sans réponse ne part pas (sa ligne sera orange). */
+/** Ce qui part au calcul : seulement ce que l'artisan a touché (une hypothèse non touchée garde sa valeur dite). */
 export function counterAnswers(questions: readonly CounterQuestion[], given: Readonly<Record<string, Given>>): CounterAnswers {
-  const out: CounterAnswers = { reponses: [], ajouts: [] };
+  const out: Required<CounterAnswers> = { reponses: [], ajouts: [], retraits: [] };
   for (const q of questions) {
     const g = given[q.key];
     if (!g) continue;
     if (q.kind === "ajout") out.ajouts.push({ id: q.key.slice("ajout:".length), reponse: g.value === "oui" ? "oui" : "non" });
-    else if (q.numeric || q.kind === "habit") out.reponses.push({ question: q.key, valeur: g.value, unite: q.unit ?? "u" });
+    else if (q.kind === "onsite") {
+      if (g.value === "place") out.retraits.push(q.key.slice("onsite:".length));
+    } else if (q.unit !== null && (q.numeric || q.kind === "habit" || (q.kind === "assumption" && q.key.startsWith("param:")))) out.reponses.push({ question: q.key, valeur: g.value, unite: q.unit || "u" });
     else out.reponses.push({ question: q.key, valeur: g.value });
   }
   return out;
 }
 
-type Recognition = {
-  lang: string;
-  interimResults: boolean;
-  continuous: boolean;
-  onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal?: boolean }> }) => void) | null;
-  onend: (() => void) | null;
-  onerror: ((e: { error?: string }) => void) | null;
-  start: () => void;
-  stop: () => void;
-};
+/** Ce qui compte comme « sans réponse » : les questions du calcul et les « déjà sur place ? » (le reste a sa valeur dite). */
+const needsAnswer = (q: CounterQuestion) => q.kind === "decision" || q.kind === "onsite";
 
-function speechRecognition(): (new () => Recognition) | null {
-  if (typeof window === "undefined") return null;
-  const w = window as unknown as { SpeechRecognition?: new () => Recognition; webkitSpeechRecognition?: new () => Recognition };
-  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
-}
-
-/**
- * TOUTES LES QUESTIONS D'UN COUP, AVANT LE CALCUL, seulement sur ce que le devis ne dit pas. Trois façons de répondre :
- * toucher une réponse, l'écrire en bas, ou la dire au micro (chaque morceau dit est relié à sa question, cochée). Une
- * question sans réponse ne bloque rien : sa ligne sortira orange. Jamais de deuxième vague après le calcul.
- */
 export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void }) {
   const questions = useMemo(() => counterQuestions(takeoff), [takeoff]);
   const [given, setGiven] = useState<Record<string, Given>>(() => {
@@ -370,12 +397,10 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
     for (const q of questions) {
       if (q.kind !== "habit" || q.usual === null) continue;
       const o = q.options.find((x) => x.value === q.usual);
-      if (o) start[q.key] = { value: o.value, label: o.label, via: "habitude" };
+      if (o) start[q.key] = { value: o.value, label: o.label };
     }
     return start;
   });
-  const [heard, setHeard] = useState<{ text: string; matched: number } | null>(null);
-  const answered = questions.filter((q) => given[q.key]).length;
   const set = (key: string, g: Given | null) =>
     setGiven((prev) => {
       const next = { ...prev };
@@ -383,11 +408,10 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
       else delete next[key];
       return next;
     });
-  const understand = (text: string) => {
-    const matches = matchAnswers(text, questions);
-    setGiven((prev) => ({ ...prev, ...Object.fromEntries(matches.map((m) => [m.key, { value: m.value, label: m.label, via: "voix" as const }])) }));
-    setHeard({ text, matched: matches.length });
-  };
+  const required = questions.filter(needsAnswer);
+  const open = required.filter((q) => !given[q.key]).length;
+  // Le numéro de chaque question, dans l'ordre des familles affichées.
+  const numbers = new Map(SECTIONS.flatMap((sec) => questions.filter((q) => q.kind === sec.kind)).map((q, i) => [q.key, i + 1]));
 
   return (
     <section aria-labelledby="questions-titre" className="flex flex-col gap-3">
@@ -395,227 +419,118 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
         <h2 id="questions-titre" className="font-display text-[22px] leading-tight font-extrabold tracking-[-0.02em]">
           J&apos;ai quelques questions pour éviter les allers-retours avec ton fournisseur.
         </h2>
-        <p className="text-[14px] leading-snug text-white/75">Touche, écris ou dis tes réponses d&apos;un trait. Pas de réponse ? La ligne sortira en orange, on la verra ensemble.</p>
-        <p aria-live="polite" className="mt-1 inline-flex items-center gap-1.5 self-start rounded-full bg-white/12 px-3 py-1 text-[13px] font-extrabold">
-          <Check size={14} strokeWidth={3} aria-hidden="true" />
-          {answered} sur {questions.length} renseignée{answered > 1 ? "s" : ""}
-        </p>
+        <p className="text-[14px] leading-snug text-white/75">Tout se règle ici, d&apos;un appui. Après, plus de question : ce qui reste sans réponse sortira en orange dans la liste.</p>
+        {required.length > 0 ? (
+          <p aria-live="polite" className="mt-1 inline-flex items-center gap-1.5 self-start rounded-full bg-white/12 px-3 py-1 text-[13px] font-extrabold">
+            <Check size={14} strokeWidth={3} aria-hidden="true" />
+            {required.length - open} sur {required.length} renseignée{required.length - open > 1 ? "s" : ""}
+          </p>
+        ) : null}
       </div>
       {error ? <ErrorNotice error={error} /> : null}
-      <ol aria-label="Questions de comptoir" className="flex flex-col gap-2.5">
-        {questions.map((q, i) => (
-          <QuestionCard key={q.key} index={i + 1} question={q} given={given[q.key] ?? null} onChange={(g) => set(q.key, g)} />
-        ))}
-      </ol>
-      {heard ? (
-        <p role="status" className="rounded-2xl bg-surface px-4 py-3 text-[14px] leading-snug shadow-card">
-          <span className="font-bold">J&apos;ai entendu : </span>« {heard.text} »
-          <span className={`mt-1 block font-bold ${heard.matched > 0 ? "text-ok" : "text-warn"}`}>
-            {heard.matched > 0 ? `${heard.matched} réponse${heard.matched > 1 ? "s" : ""} cochée${heard.matched > 1 ? "s" : ""}.` : "Je n'ai relié aucune réponse : dis le sujet avec la réponse (« zinc 0,65 », « pente 35 degrés »)."}
-          </span>
-        </p>
-      ) : null}
-      <div className="h-44 lg:hidden" aria-hidden="true" />
-      <AnswerDock
-        pending={pending}
-        onText={understand}
-        onSubmit={() => onSubmit(counterAnswers(questions, given))}
-        submitLabel={answered < questions.length ? `Calculer ma liste (${questions.length - answered} en orange)` : "Calculer ma liste"}
-      />
+      {SECTIONS.map((section) => {
+        const list = questions.filter((q) => q.kind === section.kind);
+        if (list.length === 0) return null;
+        const ajouts = section.kind === "ajout";
+        return (
+          <section key={section.kind} aria-label={section.title} className="flex flex-col gap-2.5">
+            <div className="flex items-end justify-between gap-3 px-1 pt-2">
+              <span className="flex flex-col">
+                <h3 className="font-display text-[17px] font-extrabold tracking-[-0.01em]">{section.title}</h3>
+                {section.text ? <span className="text-[13px] leading-snug text-muted">{section.text}</span> : null}
+              </span>
+              {ajouts && list.length > 1 ? (
+                <button
+                  type="button"
+                  onClick={() => setGiven((prev) => ({ ...prev, ...Object.fromEntries(list.map((q) => [q.key, { value: "oui", label: "Oui" }])) }))}
+                  className="inline-flex min-h-11 shrink-0 items-center rounded-xl bg-surface px-3 text-sm font-extrabold shadow-card"
+                >
+                  Tout oui
+                </button>
+              ) : null}
+            </div>
+            <ol className="flex flex-col gap-2.5">
+              {list.map((q) => (
+                <QuestionCard key={q.key} index={numbers.get(q.key) ?? 0} question={q} given={given[q.key] ?? null} onChange={(g) => set(q.key, g)} />
+              ))}
+            </ol>
+          </section>
+        );
+      })}
+      <div className="h-24 lg:hidden" aria-hidden="true" />
+      <div className="fixed inset-x-0 bottom-0 z-30 bg-gradient-to-t from-ground from-70% to-transparent px-4 pt-6 pb-[max(14px,env(safe-area-inset-bottom))] lg:sticky lg:inset-auto lg:px-0">
+        <div className="mx-auto max-w-2xl">
+          <Button className="w-full" pending={pending} onClick={() => onSubmit(counterAnswers(questions, given))}>
+            <Sparkles size={18} aria-hidden="true" />
+            {open > 0 ? `Calculer ma liste (${open} sans réponse)` : "Calculer ma liste"}
+          </Button>
+        </div>
+      </div>
     </section>
   );
 }
 
+/** Le pas du plus / moins d'une valeur à régler (jamais au clavier). */
+const stepOf = (unit: string | null) => (unit === "°" ? 5 : unit === "mm" ? 10 : unit === "cm" ? 5 : unit === "m" || unit === "ml" ? 0.5 : 1);
+
 function QuestionCard({ index, question: q, given, onChange }: { index: number; question: CounterQuestion; given: Given | null; onChange: (g: Given | null) => void }) {
   const id = useId();
-  const [value, setValue] = useState(given?.value ?? "");
   const unitLabel = q.unit && q.unit !== "u" ? (q.unit === "m2" ? "m²" : q.unit) : "";
+  const shown = (n: number) => `${String(n).replace(".", ",")}${unitLabel ? (unitLabel === "°" ? "°" : ` ${unitLabel}`) : ""}`;
+  const bump = (d: number) => {
+    const current = given ? Number(given.value) : 0;
+    const next = Math.max(0, Math.round((current + d) * 100) / 100);
+    onChange(next > 0 ? { value: String(next), label: shown(next) } : null);
+  };
   return (
-    <li className={`flex flex-col gap-2.5 rounded-[20px] p-4 shadow-card transition ${given ? "bg-surface ring-2 ring-ok/50" : "bg-surface"}`}>
+    <li className={`flex flex-col gap-2.5 rounded-[20px] bg-surface p-4 shadow-card transition ${given ? "ring-2 ring-ok/50" : ""}`}>
       <div className="flex items-start gap-2.5">
-        <span
-          aria-hidden="true"
-          className={`flex size-7 shrink-0 items-center justify-center rounded-full text-[13px] font-extrabold ${given ? "bg-ok text-white" : "bg-ground text-muted"}`}
-        >
+        <span aria-hidden="true" className={`flex size-7 shrink-0 items-center justify-center rounded-full text-[13px] font-extrabold ${given ? "bg-ok text-white" : "bg-ground text-muted"}`}>
           {given ? <Check size={16} strokeWidth={3} /> : index}
         </span>
         <span className="flex min-w-0 grow flex-col gap-0.5">
-          {q.kind === "habit" ? <span className="text-[12px] font-extrabold tracking-[0.04em] text-[#6b46ff] uppercase">Comme d&apos;habitude ?</span> : null}
           {q.about ? <span className="line-clamp-1 text-[13px] font-bold text-muted">{q.about}</span> : null}
           <span id={`${id}-q`} className="text-[16px] leading-snug font-extrabold">
             {q.text}
           </span>
           {q.hint ? <span className="text-[13px] leading-snug text-muted">{q.hint}</span> : null}
-          {given?.via === "voix" ? <span className="text-[12px] font-bold text-ok">Réponse entendue : {given.label}</span> : null}
         </span>
       </div>
       {q.numeric ? (
-        <form
-          className="flex items-center gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            const v = value.trim().replace(",", ".");
-            if (/^\d+(?:\.\d+)?$/.test(v)) onChange({ value: v, label: `${v.replace(".", ",")}${unitLabel ? ` ${unitLabel}` : ""}`, via: "tap" });
-          }}
-        >
-          <span className="flex min-h-12 grow items-center gap-2 rounded-2xl border-2 border-line bg-ground px-3 focus-within:border-accent">
-            <input
-              aria-labelledby={`${id}-q`}
-              inputMode="decimal"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              onBlur={(e) => e.currentTarget.form?.requestSubmit()}
-              className="min-h-11 w-full bg-transparent text-[18px] font-extrabold outline-none"
-            />
-            {unitLabel ? <span className="text-base font-bold text-muted">{unitLabel}</span> : null}
-          </span>
-          <button type="submit" className="inline-flex min-h-12 items-center rounded-2xl bg-ink px-4 text-sm font-extrabold text-white">
-            OK
+        <div role="group" aria-labelledby={`${id}-q`} className="flex items-center justify-center gap-4">
+          <button type="button" onClick={() => bump(-stepOf(q.unit))} disabled={!given} aria-label="Moins" className="flex size-12 items-center justify-center rounded-full bg-ground text-[24px] font-extrabold active:scale-95 disabled:opacity-40">
+            −
           </button>
-        </form>
+          <span className="min-w-[5rem] text-center text-[22px] font-extrabold tabular-nums" aria-live="polite">
+            {given ? given.label : "?"}
+          </span>
+          <button type="button" onClick={() => bump(stepOf(q.unit))} aria-label="Plus" className="flex size-12 items-center justify-center rounded-full bg-ground text-[24px] font-extrabold active:scale-95">
+            +
+          </button>
+        </div>
       ) : (
         <div role="group" aria-labelledby={`${id}-q`} className={`grid gap-2 ${q.options.length <= 2 || q.options.every((o) => o.label.length <= 14) ? "grid-cols-2" : "grid-cols-1"}`}>
           {q.options.map((o) => {
             const on = given?.value === o.value;
+            const usual = !given && q.usual === o.value;
             return (
               <button
                 key={o.value || "aucun"}
                 type="button"
                 aria-pressed={on}
-                onClick={() => onChange(on ? null : { value: o.value, label: o.label, via: "tap" })}
-                className={`inline-flex min-h-12 items-center justify-center rounded-2xl border-2 px-3 text-center text-[15px] leading-tight font-extrabold transition active:scale-[0.98] ${
-                  on ? "border-accent bg-accent text-white" : "border-line bg-surface text-ink"
+                onClick={() => onChange(on ? null : { value: o.value, label: o.label })}
+                className={`inline-flex min-h-12 flex-col items-center justify-center rounded-2xl border-2 px-3 py-1.5 text-center text-[15px] leading-tight font-extrabold transition active:scale-[0.98] ${
+                  on ? "border-accent bg-accent text-white" : usual ? "border-accent/50 bg-[#eef2ff] text-ink" : "border-line bg-surface text-ink"
                 }`}
               >
                 {o.label}
+                {usual ? <span className="text-[11px] font-bold text-accent-text">par défaut</span> : null}
               </button>
             );
           })}
         </div>
       )}
     </li>
-  );
-}
-
-/**
- * Le bas de l'écran : le MICRO bien visible, le champ pour écrire, et « Calculer ma liste ». Sans dictée dans le
- * navigateur, le micro ouvre le champ (la dictée du clavier du téléphone fait le reste).
- */
-function AnswerDock({ pending, onText, onSubmit, submitLabel }: { pending: boolean; onText: (text: string) => void; onSubmit: () => void; submitLabel: string }) {
-  const id = useId();
-  const [text, setText] = useState("");
-  const [listening, setListening] = useState(false);
-  const [typing, setTyping] = useState(false);
-  const [micError, setMicError] = useState<string | null>(null);
-  const canDictate = useSyncExternalStore(noSubscription, () => speechRecognition() !== null, () => false);
-  const recognition = useRef<Recognition | null>(null);
-  const field = useRef<HTMLInputElement>(null);
-  const said = useRef("");
-
-  function dictate() {
-    setMicError(null);
-    const Ctor = speechRecognition();
-    if (!Ctor) {
-      setTyping(true);
-      setTimeout(() => field.current?.focus(), 0);
-      return;
-    }
-    if (listening) {
-      recognition.current?.stop();
-      return;
-    }
-    const r = new Ctor();
-    r.lang = "fr-FR";
-    r.interimResults = false;
-    r.continuous = true;
-    said.current = "";
-    r.onresult = (e) => {
-      said.current = Array.from(e.results)
-        .map((x) => x[0]?.transcript ?? "")
-        .join(". ");
-    };
-    r.onerror = (e) => setMicError(e.error === "not-allowed" ? "Le micro est bloqué : autorise-le dans les réglages du navigateur, ou écris ta réponse." : "Je n'ai pas bien entendu. Réessaie, ou écris ta réponse.");
-    r.onend = () => {
-      setListening(false);
-      if (said.current.trim()) onText(said.current.trim());
-    };
-    recognition.current = r;
-    setListening(true);
-    r.start();
-  }
-
-  return (
-    <div className="fixed inset-x-0 bottom-0 z-30 bg-gradient-to-t from-ground from-70% to-transparent px-4 pt-6 pb-[max(14px,env(safe-area-inset-bottom))] lg:sticky lg:inset-auto lg:px-0">
-      <div className="mx-auto flex max-w-2xl flex-col gap-2.5">
-        {micError ? (
-          <p role="alert" className="rounded-xl bg-warn-bg px-3 py-2 text-[13px] font-bold text-warn">
-            {micError}
-          </p>
-        ) : null}
-        {listening ? (
-          <p role="status" className="text-center text-[14px] font-extrabold text-[#c42a63]">
-            Je t&apos;écoute… dis tes réponses, puis touche le micro.
-          </p>
-        ) : null}
-        <div className="flex items-center gap-2.5">
-          <button
-            type="button"
-            onClick={dictate}
-            disabled={pending}
-            aria-label={listening ? "Arrêter et comprendre" : "Répondre à la voix"}
-            aria-pressed={listening}
-            className={`flex size-16 shrink-0 items-center justify-center rounded-full text-white transition active:scale-95 disabled:opacity-60 ${listening ? "bg-[#ff3d8b]" : "bg-cta shadow-cta"}`}
-            style={listening ? { animation: "bc-ring 1.2s ease-out infinite" } : undefined}
-          >
-            <Mic size={28} aria-hidden="true" />
-          </button>
-          {typing || !canDictate || text ? (
-            <form
-              className="flex min-w-0 grow items-center gap-1.5 rounded-[22px] bg-surface p-1.5 shadow-float"
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (!text.trim()) return;
-                onText(text.trim());
-                setText("");
-              }}
-            >
-              <label htmlFor={id} className="sr-only">
-                Écrire mes réponses
-              </label>
-              <input
-                ref={field}
-                id={id}
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="« je façonne, zinc 0,65, pente 35° »"
-                autoComplete="off"
-                enterKeyHint="send"
-                className="min-h-11 min-w-0 grow rounded-2xl bg-ground px-3 text-[15px] outline-none placeholder:text-subtle"
-              />
-              <button type="submit" disabled={!text.trim()} aria-label="Envoyer ma réponse" className="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent text-white disabled:opacity-40">
-                <SendHorizontal size={18} aria-hidden="true" />
-              </button>
-            </form>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                setTyping(true);
-                setTimeout(() => field.current?.focus(), 0);
-              }}
-              className="inline-flex min-h-14 min-w-0 grow items-center gap-2 rounded-[22px] bg-surface px-4 text-left text-[15px] font-bold text-muted shadow-float"
-            >
-              <Keyboard size={18} aria-hidden="true" className="shrink-0" />
-              <span className="truncate">Écrire mes réponses</span>
-            </button>
-          )}
-        </div>
-        <Button className="w-full" pending={pending} onClick={onSubmit}>
-          <Sparkles size={18} aria-hidden="true" />
-          {submitLabel}
-        </Button>
-      </div>
-    </div>
   );
 }
 
@@ -683,7 +598,7 @@ export function QuestionsStep({ takeoff, pending, error, onSubmit }: { takeoff: 
   useEffect(() => {
     if (!none || started.current) return;
     started.current = true;
-    onSubmit({ reponses: [], ajouts: [] });
+    onSubmit({ reponses: [], ajouts: [], retraits: [] });
   }, [none, onSubmit]);
   if (none) return error ? <ErrorNotice error={error} /> : <CalculScreen />;
   return <QuestionsScreen takeoff={takeoff} pending={pending} error={error} onSubmit={onSubmit} />;

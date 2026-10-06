@@ -84,7 +84,7 @@ beforeEach(async () => {
 
 type Row = { status: string; itemKey?: string; decisionKey?: string; reason?: string; pending?: { label: string; quantity: string | null } };
 type Decision = { key: string; primary: { label: string }; suggestion?: { label: string; quantity: string | null; unit: string | null } };
-type Ecran = { lines: { designation: string }[]; view: { decisions: Decision[] }; purchase: { toBuy: { key: string; label: string; quantity: string | null }[]; screen: { groups: { rows: Row[] }[] } } };
+type Ecran = { lines: { designation: string }[]; aiSuggestions: { key: string; label: string; quantity: string | null; unit: string | null; reason: string }[]; view: { decisions: Decision[] }; purchase: { toBuy: { key: string; label: string; quantity: string | null }[]; screen: { groups: { rows: Row[] }[] } } };
 
 describe("le prompt de l'appel n° 2", () => {
   it("le prompt B du §41.2 est branché mot pour mot, puis le contexte injecté et le mode un passage", () => {
@@ -126,20 +126,26 @@ describe("deux appels IA max : lecture + quantitatif", () => {
     const q = (await agent.get(`/v1/quantitatifs?projetId=${project.body.id}&ecran=1`)).body.items[0] as { id: string; ecran: Ecran };
     const rows = q.ecran.purchase.screen.groups.flatMap((g) => g.rows);
     const gouttiere = q.ecran.purchase.toBuy.find((b) => /Gouttière/.test(b.label))!;
-    // La règle du code passe d'abord (gouttière sans crochets) ; une fois levée, le doute de l'IA prend la ligne.
-    const forbidden = `interdit:gouttiere-sans-crochets:${gouttiere.key}`;
-    expect(rows.find((r) => r.itemKey === gouttiere.key)).toMatchObject({ status: "check", decisionKey: forbidden });
-    const lifted = (await agent.post(`/v1/quantitatifs/${q.id}/reponses?ecran=1`).send({ reponses: [{ question: forbidden, valeur: "ok" }] })).body as { ecran: Ecran };
-    expect(lifted.ecran.purchase.screen.groups.flatMap((g) => g.rows).find((r) => r.itemKey === gouttiere.key)).toMatchObject({ status: "check", decisionKey: `ia-doute:${gouttiere.key}`, reason: "Zinc naturel ou prépatiné ? Le comptoir doit le savoir." });
+    // Le doute de l'IA (avec son remplacement) colore la ligne de la gouttière.
+    expect(rows.find((r) => r.itemKey === gouttiere.key)).toMatchObject({ status: "check", decisionKey: `ia-doute:${gouttiere.key}`, reason: "Zinc naturel ou prépatiné ? Le comptoir doit le savoir." });
+    // §48.4 : plus aucune question après la sortie de la liste (celles laissées sans réponse sont closes au calcul).
+    expect(q.ecran.view.decisions.filter((d) => (d as { question?: unknown }).question)).toEqual([]);
+    // Une question laissée vide (la pose des crochets de gouttière…) ne disparaît pas : sa ligne sort orange « Info manquante ».
+    const manque = rows.filter((r) => r.decisionKey?.startsWith("manque:"));
+    expect(manque.length).toBeGreaterThan(0);
+    for (const r of manque) expect(r).toMatchObject({ status: "check", reason: expect.stringMatching(/^Info manquante : /) });
     expect(q.ecran.view.decisions.find((d) => d.key === `ia-doute:${gouttiere.key}`)!.suggestion).toEqual({ label: "Gouttière zinc naturel demi-ronde dév. 33", quantity: null, unit: null });
-    const add = rows.find((r) => r.pending?.label === "Mastic silicone neutre, cartouche 310 ml")!;
-    expect(add).toMatchObject({ status: "check", pending: { quantity: "2 cartouches" } });
-    expect(q.ecran.view.decisions.find((d) => d.key === add.decisionKey)!.primary.label).toBe("Oui, on l'ajoute");
+    // §48.4 « interdiction d'inventer » : l'ajout de l'IA n'est NI dans la liste NI une ligne orange : il attend, décoché,
+    // dans le bloc « Suggestions ».
+    expect(rows.some((r) => r.pending?.label === "Mastic silicone neutre, cartouche 310 ml")).toBe(false);
+    expect(q.ecran.view.decisions.some((d) => d.key.startsWith("ia-ajout:"))).toBe(false);
+    const add = q.ecran.aiSuggestions.find((a) => a.label === "Mastic silicone neutre, cartouche 310 ml")!;
+    expect(add).toMatchObject({ quantity: "2", unit: "cartouches", reason: "Étanchéité des raccords de la gouttière." });
 
-    // « Oui, on l'ajoute » : la ligne entre dans la liste, telle que proposée, au journal.
-    const after = (await agent.post(`/v1/quantitatifs/${q.id}/reponses?ecran=1`).send({ reponses: [{ question: add.decisionKey, valeur: "ok" }] })).body as { ecran: Ecran };
+    // Cochée par l'artisan : la ligne entre dans la liste, telle que proposée, au journal ; la suggestion disparaît.
+    const after = (await agent.post(`/v1/quantitatifs/${q.id}/reponses?ecran=1`).send({ reponses: [{ question: add.key, valeur: "ok" }] })).body as { ecran: Ecran };
     expect(after.ecran.lines.map((l) => l.designation)).toContain("Mastic silicone neutre, cartouche 310 ml");
-    expect(after.ecran.purchase.screen.groups.flatMap((g) => g.rows).some((r) => r.decisionKey === add.decisionKey)).toBe(false);
+    expect(after.ecran.aiSuggestions).toEqual([]);
     expect(await ctx.prisma.correctionEvent.count({ where: { action: "add" } })).toBe(1);
     expect(await ctx.prisma.aiExecution.count()).toBe(2);
   });

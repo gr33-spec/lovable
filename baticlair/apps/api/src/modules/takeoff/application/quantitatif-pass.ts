@@ -9,7 +9,7 @@ import type { ReadAttempt } from "../../../platform/ai/document-reader.js";
  * règles »). Le moteur a déjà calculé : l'appel complète (ajouts) et signale (doutes avec remplacement), sans questions
  * une par une, puisque les questions du moteur sont déjà à l'écran. Tout ce qu'il rend sort orange.
  */
-export const QUANTITATIF_PROMPT = { id: "takeoff_quantitatif", version: 1 } as const;
+export const QUANTITATIF_PROMPT = { id: "takeoff_quantitatif", version: 2 } as const;
 
 /** §41.2, prompt B, tel qu'écrit dans le référentiel du fondateur. */
 export const PROMPT_B_41_2 = `Tu es l'assistant quantitatif de {nom_entreprise}, {metier} à {ville}. Tu transformes son devis en liste de commande pour son fournisseur.
@@ -84,6 +84,9 @@ export const ONE_PASS_41 = [
   "- Tout doute sur un article de la liste (unité, désignation, quantité, article qui ne passerait pas au comptoir) va",
   "  dans `doutes` avec le repère de l'article, la raison en une phrase et une SUGGESTION DE REMPLACEMENT commandable",
   "  telle quelle (désignation, et quantité / unité si tu peux les justifier), ou null si tu n'en as pas.",
+  "- Tes `ajouts` ne sont JAMAIS mis d'office dans la liste : l'artisan les voit décochés, dans un bloc « Suggestions ».",
+  "  N'invente pas un article que le devis ne demande pas (un pare-pluie absent du devis n'est pas un ajout) : propose",
+  "  seulement ce qu'un ouvrage du devis exige pour être posé.",
   "- Rien sur ce qui est correct. Ne répète pas un article déjà dans la liste. Au plus 20 ajouts et 20 doutes.",
   "- Tu réponds uniquement par le JSON demandé.",
 ].join("\n");

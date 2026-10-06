@@ -40,8 +40,8 @@ describe("la liste des fournitures, une couleur par ligne", () => {
     // Règle du comptoir (§47.8) : la gouttière sans développé, les crochets sans pose, les naissances sans nombre ne se
     // chiffrent pas ; « égout et faîtage, on les ajoute ? » n'est plus une question (bloc « On ajoute ? »).
     expect(check.map((r) => [label(v, r), r.decisionKey])).toEqual([
-      ["Zinc en bobine 500 mm ou Bacs joint debout zinc", "engine:param:faconnage"],
-      ["Bandes zinc façonnées ou Bobineau zinc", "engine:param:faconnage"],
+      ["Zinc en bobine 500 mm ou Bacs joint debout zinc", "engine:param:faconnage@couverture-zinc-joint-debout"],
+      ["Bandes zinc façonnées ou Bobineau zinc", "engine:param:faconnage@bandes-zinc"],
       ["Gouttière", "engine:param:developpe_gouttiere"],
       ["Crochets de gouttière", "engine:param:fixation_crochet"],
       ["Naissances", "engine:param:nb_descentes"],
