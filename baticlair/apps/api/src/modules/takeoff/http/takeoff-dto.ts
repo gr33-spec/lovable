@@ -54,6 +54,7 @@ function viewDto(view: ArtisanView) {
       pieceLineIds: d.pieceLineIds ?? [],
       primary: d.primary,
       secondary: d.secondary,
+      suggestion: d.suggestion ?? null,
       question: d.question
         ? { key: d.question.key, kind: d.question.kind, unit: d.question.unit ?? null, hint: d.question.hint ?? null, options: d.question.options ?? [], impact: d.question.impact ?? null }
         : null,

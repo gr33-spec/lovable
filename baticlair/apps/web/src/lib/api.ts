@@ -372,6 +372,8 @@ export interface TakeoffDecision {
   pieceLineIds: string[];
   primary: { action: "pieces" | "keep" | "edit" | "answer" | "remove"; label: string } | null;
   secondary: ("pieces" | "keep" | "edit" | "answer" | "remove")[];
+  /** Ce que le comptoir propose à la place (doute de l'appel IA n° 2), ou l'article à ajouter. */
+  suggestion?: { label: string; quantity: string | null; unit: string | null } | null;
   question: {
     key: string;
     kind: "confirm_product" | "choose_product" | "param" | "choose";

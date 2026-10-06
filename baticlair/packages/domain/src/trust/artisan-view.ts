@@ -61,6 +61,11 @@ export interface Decision {
   secondary: DecisionAction[];
   /** Pour une question du calcul : la question du moteur (options, unité, impact). */
   question?: Question;
+  /**
+   * Ce que la vérification propose à la place (un interdit, un doute du quantitatif IA) ou en plus (un article à
+   * ajouter) : jamais appliqué sans l'appui de l'artisan.
+   */
+  suggestion?: { label: string; quantity: string | null; unit: string | null };
 }
 
 export interface ViewItem {
