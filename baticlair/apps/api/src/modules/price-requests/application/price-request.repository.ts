@@ -46,6 +46,8 @@ export interface PriceRequestRecord {
   /** « Classé » : l'artisan a fait son choix. */
   classifiedAt: Date | null;
   retainedSupplierIds: string[];
+  /** §48.5 : les articles envoyés à part (clés de la liste) ; vide = toute la liste. */
+  itemKeys: string[];
   /** §47.5 : le retour du fournisseur retenu (null tant que l'artisan n'a rien dit). */
   orderFeedback: OrderFeedback | null;
   recipients: RecipientRecord[];
@@ -71,8 +73,11 @@ export interface Sender {
 }
 
 export interface PriceRequestRepository {
-  /** Dernière liste de matériaux VALIDÉE du chantier. */
-  validatedTakeoff(tenant: TenantContext, projectId: string): Promise<ValidatedTakeoff | null>;
+  /**
+   * Dernière liste de matériaux VALIDÉE du chantier. `anyStatus` : la dernière liste, même pas encore validée (§48.5 :
+   * une sélection de lignes prêtes part sans attendre le reste de la liste).
+   */
+  validatedTakeoff(tenant: TenantContext, projectId: string, options?: { anyStatus?: boolean }): Promise<ValidatedTakeoff | null>;
   sender(tenant: TenantContext, projectId: string): Promise<Sender | null>;
   /** Les croquis rattachés à un article de la liste (clé de l'article), avec la précision de l'artisan. */
   itemSketches(tenant: TenantContext, projectId: string): Promise<{ id: string; nom: string; itemKey: string; note: string | null }[]>;
@@ -86,6 +91,7 @@ export interface PriceRequestRepository {
       dueDate: Date | null;
       supplierIds: string[];
       packet: SupplierPacket;
+      itemKeys?: string[];
     },
   ): Promise<PriceRequestRecord>;
   /** Case « Joindre le détail du chantier » (§42.2), mémorisée par entreprise. */

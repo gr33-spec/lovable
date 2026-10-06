@@ -80,6 +80,7 @@ export function ProjectPriceRequests({
   quantitatifId,
   onListChanged,
   openSignal = 0,
+  refreshSignal = 0,
   onSentChange,
   onPreviewClosed,
 }: {
@@ -91,6 +92,8 @@ export function ProjectPriceRequests({
   onListChanged?: () => void;
   /** « Envoyer au fournisseur » de la liste : ouvre l'aperçu (ou montre les fournisseurs si la demande est partie). */
   openSignal?: number;
+  /** §48.5 : une sélection vient de partir depuis la liste : on relit les demandes. */
+  refreshSignal?: number;
   /** La demande est-elle déjà partie ? La liste le dit sur son gros bouton. */
   onSentChange?: (sent: boolean) => void;
   /** « Revenir à la liste » de l'aperçu : la liste revient à l'écran (§48). */
@@ -101,13 +104,18 @@ export function ProjectPriceRequests({
     [projectId],
   );
   const { data, setData, error, reload } = useResource(fetchRequests);
+  useEffect(() => {
+    if (refreshSignal > 0) reload();
+  }, [refreshSignal, reload]);
+
   const refreshProgress = useProgressRefresh();
   // Des e-mails partent-ils du serveur (§43) ? Sinon, l'artisan envoie depuis sa messagerie.
   const fetchSettings = useCallback((signal: AbortSignal) => api<PriceRequestSettings & { deliversEmail: boolean }>("/v1/price-requests/settings", { signal }), []);
   const deliversEmail = useResource(fetchSettings).data?.deliversEmail ?? false;
   // § 43.4 : après un envoi (jamais avant), l'écran « Active tes notifications » peut se proposer.
   const [sentCount, setSentCount] = useState(0);
-  const requestId = data?.items[0]?.id ?? null;
+  // §48.5 : la demande du chantier est celle de TOUTE la liste ; les sélections envoyées à part se suivent à côté.
+  const requestId = data?.items.find((r) => !r.articles?.length)?.id ?? null;
   // Devis déjà lus, par destinataire ; `version` fait suivre la comparaison.
   const [version, setVersion] = useState(0);
   const fetchOffers = useCallback(
@@ -118,7 +126,9 @@ export function ProjectPriceRequests({
     [requestId],
   );
   const offers = useResource(fetchOffers);
-  const sent = Boolean(data?.items[0]);
+  const whole = (data?.items ?? []).filter((r) => !r.articles?.length);
+  const parts = (data?.items ?? []).filter((r) => (r.articles?.length ?? 0) > 0);
+  const sent = Boolean(whole[0]);
   useEffect(() => {
     if (data) onSentChange?.(sent);
   }, [data, sent, onSentChange]);
@@ -126,7 +136,7 @@ export function ProjectPriceRequests({
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
 
-  const request = data.items[0] ?? null;
+  const request = whole[0] ?? null;
   if (request && openSignal > 0) requestAnimationFrame(() => document.getElementById("fournisseurs")?.scrollIntoView({ behavior: "smooth", block: "start" }));
   const offerOf = (recipientId: string) => offers.data?.items.find((o) => o.recipientId === recipientId) ?? null;
   const offerChanged = (offer: Offer) => {
@@ -146,9 +156,39 @@ export function ProjectPriceRequests({
     refreshProgress();
   };
 
+  const partsBlock =
+    parts.length > 0 ? (
+      <section aria-label="Envoyé à part" className="flex flex-col gap-2">
+        <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">ENVOYÉ À PART</h2>
+        <ul className="flex flex-col gap-2">
+          {parts.flatMap((part) =>
+            part.recipients.map((r) => (
+              <li key={r.id} className="flex flex-col gap-1">
+                <p className="text-[13px] font-bold text-muted">
+                  {part.articles!.length} ligne{part.articles!.length > 1 ? "s" : ""} de la liste
+                </p>
+                <RecipientCard
+                  recipient={r}
+                  offer={null}
+                  request={part}
+                  archived={archived}
+                  deliversEmail={deliversEmail}
+                  onSent={() => setSentCount((n) => n + 1)}
+                  onChange={replace}
+                  onOfferChange={offerChanged}
+                  onReload={reloadAll}
+                />
+              </li>
+            )),
+          )}
+        </ul>
+      </section>
+    ) : null;
+
   if (!request) {
-    if (archived || !canCreate) return null;
+    if (archived || !canCreate) return partsBlock;
     return (
+      <>
       <section id="fournisseurs" aria-labelledby="price-request-title" className="scroll-mt-4">
         <AssistantMessage>
           <h2 id="price-request-title" className="text-base leading-relaxed font-semibold">
@@ -167,6 +207,8 @@ export function ProjectPriceRequests({
           />
         </AssistantMessage>
       </section>
+      {partsBlock}
+      </>
     );
   }
 
@@ -218,6 +260,7 @@ export function ProjectPriceRequests({
         ))}
       </ul>
       {!archived ? <AddRecipients request={request} onChange={replace} /> : null}
+      {partsBlock}
     </section>
   );
 }

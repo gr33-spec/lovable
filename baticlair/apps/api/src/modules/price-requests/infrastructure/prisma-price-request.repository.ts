@@ -42,6 +42,7 @@ interface Row {
   createdAt: Date;
   classifiedAt: Date | null;
   retainedSupplierIds: string[];
+  itemKeys: string[];
   orderFeedback?: unknown;
   recipients: {
     id: string;
@@ -142,6 +143,7 @@ function toRecord(row: Row): PriceRequestRecord {
     createdAt: row.createdAt,
     classifiedAt: row.classifiedAt,
     retainedSupplierIds: row.retainedSupplierIds,
+    itemKeys: row.itemKeys,
     orderFeedback: (row.orderFeedback ?? null) as OrderFeedback | null,
     recipients: row.recipients.map((r) => ({
       id: r.id,
@@ -163,11 +165,11 @@ function toRecord(row: Row): PriceRequestRecord {
 export class PrismaPriceRequestRepository implements PriceRequestRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async validatedTakeoff(tenant: TenantContext, projectId: string): Promise<ValidatedTakeoff | null> {
+  async validatedTakeoff(tenant: TenantContext, projectId: string, options: { anyStatus?: boolean } = {}): Promise<ValidatedTakeoff | null> {
     if (!isUuid(projectId)) return null;
     const row = await this.prisma.takeoff.findFirst({
-      where: { projectId, companyId: tenant.companyId, status: "validated" },
-      orderBy: { validatedAt: "desc" },
+      where: { projectId, companyId: tenant.companyId, ...(options.anyStatus ? {} : { status: "validated" }) },
+      orderBy: options.anyStatus ? { createdAt: "desc" } : { validatedAt: "desc" },
       include: { lines: { orderBy: { position: "asc" } } },
     });
     if (!row) return null;
@@ -233,6 +235,7 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
       dueDate: Date | null;
       supplierIds: string[];
       packet: SupplierPacket;
+      itemKeys?: string[];
     },
   ): Promise<PriceRequestRecord> {
     const row = await this.prisma.$transaction(async (tx) => {
@@ -245,6 +248,7 @@ export class PrismaPriceRequestRepository implements PriceRequestRepository {
           packet: JSON.parse(JSON.stringify(data.packet)) as object,
           message: data.message,
           dueDate: data.dueDate,
+          itemKeys: data.itemKeys ?? [],
           createdById: tenant.userId,
           recipients: {
             create: data.supplierIds.map((supplierId) => ({ supplierId })),

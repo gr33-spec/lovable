@@ -5,6 +5,7 @@ import { openDocument } from "@/lib/open-document";
 import { useEffect, useId, useRef, useState } from "react";
 import { EDIT_FIELD, EDIT_PANEL, ItemForm, type ItemEdit, type SketchHandlers } from "@/components/purchase-list";
 import { InlineLineForm, Proof, type DecisionHandlers } from "@/components/takeoff-view";
+import { SelectionBar, type SelectionSend } from "@/components/selection-send";
 import { Button } from "@/components/ui";
 import type { ItemSketch, PurchaseItem, ScreenRow, Takeoff, TakeoffDecision } from "@/lib/api";
 import { doubtText, parseQuantity, shortName } from "@/lib/labels";
@@ -32,7 +33,10 @@ export function SupplyList({
   validated = false,
   sent = false,
   docked = true,
+  selection,
 }: {
+  /** §48.5 : « Envoyer une sélection à un autre fournisseur » (absent : la fonction n'existe pas ici). */
+  selection?: SelectionSend;
   /** Une barre de chat est en bas de l'écran : le gros bouton se pose au-dessus d'elle. Sur la page des fournitures, non. */
   docked?: boolean;
   /** La demande est déjà partie : le gros bouton mène aux fournisseurs, il ne propose plus un premier envoi. */
@@ -65,6 +69,10 @@ export function SupplyList({
   useEffect(() => () => void (timer.current && clearTimeout(timer.current)), []);
 
   const [removing, setRemoving] = useState<string[]>([]);
+  // §48.5 : cases à cocher seulement après le petit bouton ; par défaut l'écran ne change pas.
+  const [selecting, setSelecting] = useState(false);
+  const [checked, setChecked] = useState<Set<string>>(new Set());
+  const articleOf = (r: ScreenRow) => r.itemKey ?? (r.quoteKey ? `quote:${r.quoteKey}` : null);
   const hidden = (r: ScreenRow) => aside?.key === r.key || removing.includes(r.key);
   const rows = screen.groups.flatMap((g) => g.rows).filter((r) => !hidden(r));
   const toCheck = rows.filter((r) => r.status === "check");
@@ -218,6 +226,24 @@ export function SupplyList({
                   {visible.map((r) => (
                     <Row
                       key={r.key}
+                      {...(selection && articleOf(r) && selection.sent.has(articleOf(r)!) ? { sentTo: selection.sent.get(articleOf(r)!)! } : {})}
+                      {...(selecting
+                        ? {
+                            selectMode: {
+                              checked: checked.has(articleOf(r) ?? ""),
+                              // Une ligne orange se vérifie d'abord ; une ligne sans article (question) ne part pas.
+                              disabled: !articleOf(r) || r.status === "check",
+                              onToggle: () =>
+                                setChecked((prev) => {
+                                  const next = new Set(prev);
+                                  const k = articleOf(r)!;
+                                  if (next.has(k)) next.delete(k);
+                                  else next.add(k);
+                                  return next;
+                                }),
+                            },
+                          }
+                        : {})}
                       row={r}
                       takeoff={takeoff}
                       label={labelOf(r)}
@@ -238,6 +264,20 @@ export function SupplyList({
         );
       })}
       {/* Retour du fondateur (2026-10-06) : plus de bloc « Hypothèses » sous la liste ; seules les suggestions restent. */}
+      {selection && !selecting && rows.length > 1 ? (
+        // §48.5 : discret, pour l'usage occasionnel (devis multi-lots) ; l'envoi normal ne change pas.
+        <button
+          type="button"
+          onClick={() => {
+            setChecked(new Set());
+            setSelecting(true);
+          }}
+          className="mx-4 mt-3 inline-flex min-h-10 items-center gap-1.5 self-start text-[13px] font-bold text-muted underline decoration-dotted underline-offset-4"
+        >
+          <Send size={14} aria-hidden="true" />
+          Envoyer une sélection à un autre fournisseur
+        </button>
+      ) : null}
       {editable ? (
         <SuggestionsBlock
           items={[
@@ -255,7 +295,19 @@ export function SupplyList({
       ) : null}
       </div>
 
-      {editable ? (
+      {selecting && selection ? (
+        <div className={`sticky z-10 -mt-4 bg-gradient-to-t from-ground from-60% to-transparent pt-8 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(16px,env(safe-area-inset-bottom))]"}`}>
+          <SelectionBar
+            count={checked.size}
+            onCancel={() => setSelecting(false)}
+            onSend={async (supplierId) => {
+              await selection.send([...checked], supplierId);
+              setSelecting(false);
+              setChecked(new Set());
+            }}
+          />
+        </div>
+      ) : editable ? (
         // Un fondu sous le bouton : le texte de la liste ne passe jamais sous lui en se lisant mal.
         <div className={`sticky z-10 -mt-4 bg-gradient-to-t from-ground from-60% to-transparent pt-8 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(16px,env(safe-area-inset-bottom))]"}`}>
           {toCheck.length > 0 ? (
@@ -431,7 +483,13 @@ function Row({
   onSetAside,
   sketches,
   sketchHandlers,
+  selectMode,
+  sentTo,
 }: {
+  /** §48.5 : mode sélection, une case à cocher à la place du point ; toucher la ligne la coche. */
+  selectMode?: { checked: boolean; disabled: boolean; onToggle: () => void };
+  /** §48.5 : déjà envoyée à part (gris « Envoyé · fournisseur »), toujours visible dans la liste. */
+  sentTo?: string;
   row: ScreenRow;
   takeoff: Takeoff;
   label: string;
@@ -457,13 +515,14 @@ function Row({
   // Une ligne reprise du devis n'a pas de calcul : on montre d'où elle vient.
   const what = item?.kind === "direct" ? "la ligne du devis" : "le calcul";
   const quantity = item?.quantity ?? quote?.measure ?? row.pending?.quantity ?? null;
-  const sub =
-    row.status === "check"
+  const sub = sentTo
+    ? `Envoyé · ${sentTo}`
+    : row.status === "check"
       ? (row.reason ?? "À vérifier : touchez la ligne")
       : row.status === "supplier"
         ? "À préciser avec le fournisseur"
         : ([item?.approx, item?.precision].filter(Boolean).join(" · ") || null);
-  const dot = DOT[row.status];
+  const dot = sentTo ? DOT.supplier : DOT[row.status];
   // §48 : une ligne orange se règle sur place, au plus / moins ; le crayon ouvre sa fiche (désignation, croquis).
   const parsed = item?.quantity ? parseQuantity(item.quantity) : null;
   const stepper = row.status === "check" && editable && item && parsed && Number.isFinite(toNumber(parsed.quantity)) ? { value: toNumber(parsed.quantity), unit: parsed.unit } : null;
@@ -510,7 +569,7 @@ function Row({
         {quantity || sub || sketches.length > 0 ? (
           <span className="flex min-w-0 items-baseline gap-1.5 text-[13px] leading-snug">
             {quantity && !stepper ? <span className="shrink-0 text-[14px] font-extrabold tabular-nums sm:hidden">{quantity}</span> : null}
-            {sub ? <span className={`min-w-0 ${row.status === "check" ? "line-clamp-2 font-bold text-warn" : "truncate text-muted"}`}>{sub}</span> : null}
+            {sub ? <span className={`min-w-0 ${sentTo ? "truncate font-bold text-muted" : row.status === "check" ? "line-clamp-2 font-bold text-warn" : "truncate text-muted"}`}>{sub}</span> : null}
             {sketches.length > 0 && !open ? (
               <span className="inline-flex shrink-0 items-center gap-1 text-[12px] font-bold text-[#4a37d6]">
                 <Paperclip size={12} aria-hidden="true" />
@@ -524,10 +583,37 @@ function Row({
       {open ? <X size={18} className="mt-0.5 shrink-0 text-accent-text" aria-hidden="true" /> : null}
     </>
   );
+  // §48.5 : en mode sélection, la ligne entière coche sa case ; rien d'autre ne s'ouvre.
+  if (selectMode) {
+    return (
+      <li
+        id={`ligne-${row.key}`}
+        className={`rounded-2xl border border-[#dde1e8] border-l-4 px-3 py-2 ${BORDER[sentTo ? "supplier" : row.status]} ${selectMode.checked ? "bg-[#eef2ff]" : "bg-surface"} ${selectMode.disabled ? "opacity-60" : ""}`}
+      >
+        <label className={`flex min-h-11 items-start gap-2.5 ${selectMode.disabled ? "" : "cursor-pointer"}`}>
+          <input
+            type="checkbox"
+            checked={selectMode.checked}
+            disabled={selectMode.disabled}
+            onChange={selectMode.onToggle}
+            aria-label={`Envoyer à part : ${label}`}
+            className="mt-0.5 size-5 shrink-0 accent-accent"
+          />
+          <span className="flex min-w-0 grow flex-col">
+            <span className="text-[14px] leading-snug font-semibold">{label}</span>
+            <span className="text-[13px] leading-snug text-muted">
+              {quantity ? <span className="font-extrabold text-ink tabular-nums">{quantity}</span> : null}
+              {row.status === "check" ? `${quantity ? " · " : ""}à vérifier d'abord` : sentTo ? `${quantity ? " · " : ""}Envoyé · ${sentTo}` : ""}
+            </span>
+          </span>
+        </label>
+      </li>
+    );
+  }
   return (
     <li
       id={`ligne-${row.key}`}
-      className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden rounded-2xl border border-[#dde1e8] border-l-4 px-3 py-2 shadow-[0_1px_3px_rgba(16,24,40,0.06)] transition-colors ${BORDER[row.status]} ${open ? "bg-[#eef2ff]" : "bg-surface"}`}
+      className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden rounded-2xl border border-[#dde1e8] border-l-4 px-3 py-2 shadow-[0_1px_3px_rgba(16,24,40,0.06)] transition-colors ${BORDER[sentTo ? "supplier" : row.status]} ${open ? "bg-[#eef2ff]" : "bg-surface"}`}
     >
       {dx < 0 ? (
         <span aria-hidden="true" className="absolute inset-y-0 right-0 flex items-center rounded-xl bg-danger px-4 text-sm font-extrabold text-white">
