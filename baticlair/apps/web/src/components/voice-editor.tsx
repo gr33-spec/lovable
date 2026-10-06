@@ -51,7 +51,13 @@ export function VoiceEditor({ items, pending, onApply }: { items: readonly Voice
   const ending = useRef<"apply" | "cancel" | null>(null);
   const field = useRef<HTMLTextAreaElement>(null);
 
+  /** Le texte montré à l'artisan pendant qu'il parle : c'est LUI qui part à « Terminer » (ce qu'il a lu, rien d'autre). */
+  const shownText = useRef("");
   const heard = () => [...finals.current, interim.current].map((x) => x.trim()).filter(Boolean).join(". ");
+  const spokenText = () => {
+    const now = heard();
+    return now.length >= shownText.current.length ? now : shownText.current;
+  };
 
   async function apply(spoken: string) {
     const edits = parseEdits(spoken, items);
@@ -84,7 +90,8 @@ export function VoiceEditor({ items, pending, onApply }: { items: readonly Voice
         } else now += `${now ? " " : ""}${t}`;
       }
       interim.current = now;
-      setLive(heard());
+      shownText.current = heard();
+      setLive(shownText.current);
     };
     r.onerror = (e) => {
       if (e.error === "no-speech" || e.error === "aborted") return;
@@ -105,7 +112,7 @@ export function VoiceEditor({ items, pending, onApply }: { items: readonly Voice
       ending.current = null;
       recognition.current = null;
       setListening(false);
-      const spoken = heard();
+      const spoken = spokenText();
       if (what === "apply" && spoken) void apply(spoken);
     };
     recognition.current = r;
@@ -121,6 +128,7 @@ export function VoiceEditor({ items, pending, onApply }: { items: readonly Voice
     }
     finals.current = [];
     interim.current = "";
+    shownText.current = "";
     ending.current = null;
     setLive("");
     setListening(true);
