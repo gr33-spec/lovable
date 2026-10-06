@@ -18,8 +18,9 @@ import { ARDOISES_LUCARNES_LINES } from "./devis-reels/ardoises-lucarnes.js";
 /**
  * UNE MESURE DOUTEUSE N'EST JAMAIS UN ARTICLE (retour du fondateur, 2026-10-05, devis ardoises 200 m² lu sur une
  * capture : « pourquoi j'ai plusieurs fois les liteaux ? On met en ml, jamais en m² »). Quand l'IA hésite sur une ligne
- * qui est la MESURE d'un ouvrage (« Liteaux bois pour ardoises 200 m² »), la ligne orange dit « Mesure lue dans le
- * devis · 200 m² » sous l'ouvrage ; elle ne reprend jamais le nom d'un article déjà calculé dans son unité.
+ * qui est la MESURE d'un ouvrage (« Liteaux bois pour ardoises 200 m² »), rien ne reprend le nom d'un article déjà
+ * calculé dans son unité ; et depuis le 2026-10-06 (« les mesures lues dans le devis on s'en fout »), la mesure ne fait
+ * plus de ligne orange du tout.
  */
 function screenWithDoubts(doubtful: readonly string[]) {
   const profile = tradeProfile("roofing");
@@ -44,16 +45,19 @@ function screenWithDoubts(doubtful: readonly string[]) {
   return purchaseView(view, engine, { plan, roles, ref: ROOFING_REFERENTIAL, validation });
 }
 
-describe("une mesure douteuse n'est jamais un article", () => {
-  it("« Liteaux bois pour ardoises 200 m² » mal lu : une ligne « Mesure lue dans le devis · 200 m² », les liteaux restent en ml", () => {
+describe("une mesure douteuse n'est jamais un article, ni une ligne à vérifier", () => {
+  it("« Liteaux bois pour ardoises 200 m² » mal lu : aucune ligne orange pour la mesure, les liteaux restent en ml", () => {
     const p = screenWithDoubts(["ligne 1", "ligne 4"]);
     const rows = p.screen.groups.flatMap((g) => g.rows.map((r) => ({ group: g.label, ...r })));
     const pending = rows.filter((r) => r.pending);
     // Aucune ligne orange ne reprend le nom de la ligne du devis avec sa mesure.
     expect(pending.map((r) => r.pending!.label)).not.toContain("Liteaux bois pour ardoises");
     expect(pending.map((r) => r.pending!.label)).not.toContain("Faîtage zinc");
-    const liteaux = pending.find((r) => r.lineIds.includes("ligne 1"))!;
-    expect(liteaux.pending).toEqual({ label: "Mesure lue dans le devis", quantity: "200 m²" });
+    // 2026-10-06 (« les mesures lues dans le devis on s'en fout ») : plus de ligne « Mesure lue dans le devis », ni de
+    // question qui retiendrait l'envoi ; la mesure se lit dans le titre de l'ouvrage.
+    expect(pending.map((r) => r.pending!.label)).not.toContain("Mesure lue dans le devis");
+    expect(pending.some((r) => r.lineIds.includes("ligne 1") && r.decisionKey?.startsWith("line:"))).toBe(false);
+    expect(p.questions.map((q) => q.key)).not.toContain("line:ligne 1");
     // Les liteaux calculés : en ml, jamais en m².
     const battens = p.toBuy.filter((b) => /liteau/i.test(b.label));
     expect(battens.length).toBeGreaterThan(0);

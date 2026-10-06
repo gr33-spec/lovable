@@ -247,16 +247,19 @@ function supplyScreen(
     const workId = workOfLine(d.lineIds[0]) ?? workOfQuestion(d);
     // Une question découverte d'avance pour un ouvrage déjà orange attend son tour : elle viendra après la réponse en cours.
     if (d.key.startsWith("engine:") && d.lineIds.length === 0 && workId && groups.get(workId)?.rows.some((r) => r.status === "check")) continue;
-    // Le doute d'une MESURE d'ouvrage (« Liteaux pour ardoises 200 m² » mal lue ?) n'est jamais un article : les
-    // articles de l'ouvrage sont déjà calculés dans leur unité (liteaux en ml). La ligne dit la mesure, sous l'ouvrage
-    // (retour du fondateur, 2026-10-05 : « pourquoi j'ai plusieurs fois les liteaux ? jamais en m² »).
-    const measure = d.key.startsWith("line:") && line !== undefined && line.needs.length > 0 && workId !== undefined;
-    const label = measure ? "Mesure lue dans le devis" : d.title;
-    groupOf(workId).rows.push({ key: `decision:${d.key}`, status: "check", pending: { label, quantity }, decisionKey: d.key, lineIds: d.lineIds });
+    groupOf(workId).rows.push({ key: `decision:${d.key}`, status: "check", pending: { label: d.title, quantity }, decisionKey: d.key, lineIds: d.lineIds });
   }
   const ordered = [...groups.values()].sort((a, b) => KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind));
   const rows = ordered.flatMap((g) => g.rows);
   return { groups: ordered, total: rows.length, toCheck: rows.filter((r) => r.status === "check").length };
+}
+
+/**
+ * Doute de lecture sur une ligne qui est la MESURE d'un ouvrage calculé (« Liteaux pour ardoises 200 m² ») : jamais un
+ * article (les liteaux sont en ml), et plus une question à l'écran (2026-10-06) : la mesure se lit dans le titre de l'ouvrage.
+ */
+function measureDoubt(d: Decision, view: ArtisanView): boolean {
+  return d.key.startsWith("line:") && view.ouvrages.some((o) => d.lineIds.includes(o.lineId) && o.needs.length > 0);
 }
 
 /** §45.8 : jamais plus de huit suggestions. */
@@ -618,7 +621,10 @@ export function purchaseView(
     }
   }
   // Les questions : celles de l'écran (lignes douteuses, ambiguïtés, calcul), jamais une information.
-  const questions = [...view.decisions, ...preciseQuestions(toBuy, link.validation, link.ref)];
+  // Le doute sur une MESURE d'ouvrage (« 48 m² », « 4 m ») dont les articles sont calculés n'est pas une question : la mesure
+  // est déjà dans le titre de l'ouvrage, l'artisan s'en moque (retour du fondateur, 2026-10-06 : « les mesures lues dans le
+  // devis on s'en fout »). Ni ligne orange, ni blocage de l'envoi.
+  const questions = [...view.decisions.filter((d) => !measureDoubt(d, view)), ...preciseQuestions(toBuy, link.validation, link.ref)];
   const canValidate = sendable(toBuy, toQuote, questions);
   const groups = groupsOf(toBuy, engine.needs, view, link.plan, link.ref);
   const screen = supplyScreen(toBuy, toQuote, questions, engine, view, link.plan, link.ref);
