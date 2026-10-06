@@ -40,6 +40,8 @@ export function VoiceEditor({ items, pending, onApply }: { items: readonly Voice
   const [busy, setBusy] = useState(false);
   const [micError, setMicError] = useState<string | null>(null);
   const [applied, setApplied] = useState<Applied[] | null>(null);
+  /** Ce qui a été entendu, dit dans le résumé : l'artisan voit ce que BatiClair a compris de sa phrase. */
+  const [said, setSaid] = useState("");
   const canDictate = useSyncExternalStore(noSubscription, () => speechRecognition() !== null, () => false);
   const recognition = useRef<Recognition | null>(null);
   /** Les morceaux définitifs, dans l'ordre ; et ce qui s'entend encore (provisoire). */
@@ -53,6 +55,7 @@ export function VoiceEditor({ items, pending, onApply }: { items: readonly Voice
 
   async function apply(spoken: string) {
     const edits = parseEdits(spoken, items);
+    setSaid(spoken);
     setBusy(true);
     const out: Applied[] = [];
     for (const edit of edits) out.push({ edit, ok: edit.kind === "unknown" ? false : await onApply(edit).catch(() => false) });
@@ -207,6 +210,7 @@ export function VoiceEditor({ items, pending, onApply }: { items: readonly Voice
       {applied ? (
         <div role="status" aria-label="Ce que j'ai modifié" className="flex flex-col gap-1.5 rounded-2xl bg-white p-3 text-ink">
           <p className="text-[13px] font-extrabold tracking-[0.04em] text-muted uppercase">Ce que j&apos;ai modifié</p>
+          {said ? <p className="text-[13px] leading-snug text-muted">Tu as dit : « {said} »</p> : null}
           {applied.length === 0 ? <p className="text-[14px]">Rien à modifier dans ce que j&apos;ai entendu.</p> : null}
           <ul className="flex flex-col gap-1">
             {applied.map(({ edit, ok }, i) => (
