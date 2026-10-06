@@ -41,6 +41,9 @@ function toRecord(row: Row): TakeoffRecord {
     notes: strings(row.notes),
     context: stringMap(row.context),
     completion: completionOf(row.completion),
+    calculStartedAt: row.calculStartedAt,
+    calculatedAt: row.calculatedAt,
+    analysisId: row.analysisId,
     answers: answers(row.answers),
     createdAt: row.createdAt,
     validatedAt: row.validatedAt,
@@ -136,6 +139,7 @@ export class PrismaTakeoffRepository implements TakeoffRepository {
         model: data.model,
         notes: data.notes,
         context: data.context ?? undefined,
+        ...(data.calculated ? { calculStartedAt: new Date(), calculatedAt: new Date() } : {}),
         createdById: tenant.userId,
         lines: {
           create: data.lines.map((l, i) => ({
@@ -176,6 +180,19 @@ export class PrismaTakeoffRepository implements TakeoffRepository {
 
   async setCompletion(tenant: TenantContext, id: string, completion: CompletionRecord): Promise<void> {
     await this.prisma.takeoff.updateMany({ where: { id, companyId: tenant.companyId }, data: { completion: JSON.parse(JSON.stringify(completion)) } });
+  }
+
+  async startCalcul(tenant: TenantContext, id: string, at: Date, staleBefore: Date): Promise<boolean> {
+    // Un seul départ : pas encore lancé, ou lancé il y a trop longtemps (coupure) et jamais fini.
+    const { count } = await this.prisma.takeoff.updateMany({
+      where: { id, companyId: tenant.companyId, calculatedAt: null, OR: [{ calculStartedAt: null }, { calculStartedAt: { lt: staleBefore } }] },
+      data: { calculStartedAt: at },
+    });
+    return count === 1;
+  }
+
+  async finishCalcul(tenant: TenantContext, id: string, at: Date): Promise<void> {
+    await this.prisma.takeoff.updateMany({ where: { id, companyId: tenant.companyId }, data: { calculatedAt: at } });
   }
 
   async setAnswer(tenant: TenantContext, id: string, key: string, value: string | { value: string; unit: string } | null): Promise<void> {

@@ -232,6 +232,8 @@ export interface Quantitatif {
   id: string;
   projetId: string;
   etat: "en_cours" | "questions" | "pret" | "erreur";
+  /** Parcours §48 : questions de comptoir (avant le calcul), calcul en cours, ou liste prête. */
+  phase?: "questions" | "calcul" | "resultat";
   erreur?: { raison: string };
   valide?: boolean;
   /** Infos chantier facultatives qui ont servi au calcul : la note, et les croquis déposés. */
@@ -240,6 +242,8 @@ export interface Quantitatif {
 }
 
 export interface Takeoff {
+  /** « Comme d'habitude ? » : les habitudes établies de l'entreprise appliquées à ce chantier. */
+  habits?: { key: string; question: string; unit: string; options: { label: string; value: string }[]; value: string }[];
   id: string;
   projectId: string;
   documentId: string | null;

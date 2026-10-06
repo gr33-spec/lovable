@@ -146,6 +146,10 @@ export function SupplyList({
           )}
         </p>
       </div>
+      {/* §48 : transparent et direct. L'IA peut se tromper, et elle le dit. */}
+      <p className="mx-4 mb-2 rounded-2xl bg-[#eeedff] px-3 py-2 text-[13px] leading-snug font-semibold text-[#3a2bb0]">
+        L&apos;IA peut se tromper, n&apos;hésite pas à peaufiner. Pense aussi à <strong>+5 % de coupes</strong> si besoin.
+      </p>
       {/* §18 : l'amiante se dit à l'artisan, en haut de la liste ; rien de cela ne part au fournisseur. */}
       {(p.warnings ?? []).map((w) => (
         <p key={w} role="note" className="mx-4 mb-2 rounded-2xl bg-warn-bg px-3 py-2 text-[14px] font-bold text-warn">
@@ -299,9 +303,51 @@ export function SupplyList({
 }
 
 const BLOCKS: { key: string; label: string; statuses: ScreenRow["status"][] }[] = [
-  { key: "ready", label: "Prêt", statuses: ["ok", "supplier"] },
+  { key: "ready", label: "C'est bon", statuses: ["ok", "supplier"] },
   { key: "check", label: "À vérifier", statuses: ["check"] },
 ];
+
+const toNumber = (q: string) => Number(q.replace(/\s/g, "").replace(",", "."));
+const shownNumber = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 2 });
+
+/**
+ * Plus / moins sur la quantité d'une ligne orange (§48) : chaque appui bouge d'une unité, la quantité part une seconde
+ * après le dernier appui (une seule correction au journal, pas une par appui).
+ */
+function Stepper({ label, value, unit, pending, onChange }: { label: string; value: number; unit: string; pending: boolean; onChange: (n: number) => Promise<void> }) {
+  const [n, setN] = useState(value);
+  const [seen, setSeen] = useState(value);
+  // La liste revient du serveur avec une autre quantité : elle remplace la nôtre.
+  if (value !== seen) {
+    setSeen(value);
+    setN(value);
+  }
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => void (timer.current && clearTimeout(timer.current)), []);
+  const bump = (d: number) => {
+    const next = Math.max(0, Math.round((n + d) * 100) / 100);
+    setN(next);
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => void onChange(next), 1000);
+  };
+  const btn = "flex size-9 items-center justify-center rounded-full bg-ground text-[19px] font-extrabold leading-none active:scale-90 disabled:opacity-40";
+  return (
+    <span role="group" aria-label={`Quantité : ${label}`} className="flex shrink-0 flex-col items-center gap-0.5 pt-0.5">
+      <span className="flex items-center gap-1">
+        <button type="button" className={btn} disabled={pending || n <= 0} onClick={() => bump(-1)} aria-label={`Moins : ${label}`}>
+          −
+        </button>
+        <span className="min-w-[2.6rem] text-center text-[15px] font-extrabold tabular-nums" aria-live="polite">
+          {shownNumber(n)}
+        </span>
+        <button type="button" className={btn} disabled={pending} onClick={() => bump(1)} aria-label={`Plus : ${label}`}>
+          +
+        </button>
+      </span>
+      {unit ? <span className="max-w-[7.5rem] truncate text-[11px] font-bold text-muted">{unit}</span> : null}
+    </span>
+  );
+}
 
 const DOT: Record<ScreenRow["status"], { className: string; label: string }> = {
   ok: { className: "bg-ok", label: "sûr" },
@@ -359,6 +405,12 @@ function Row({
         ? "À préciser avec le fournisseur"
         : ([item?.approx, item?.precision].filter(Boolean).join(" · ") || null);
   const dot = DOT[row.status];
+  // §48 : une ligne orange se règle sur place, au plus / moins ; le crayon ouvre sa fiche (désignation, croquis).
+  const parsed = item?.quantity ? parseQuantity(item.quantity) : null;
+  const stepper = row.status === "check" && editable && item && parsed && Number.isFinite(toNumber(parsed.quantity)) ? { value: toNumber(parsed.quantity), unit: parsed.unit } : null;
+  // Une pièce zinc commandée façonnée (bande, couvertine, noue…) peut partir avec son croquis (facultatif) ; jamais une
+  // gouttière ni une descente (jamais façonnées), ni une bobine ou une feuille.
+  const zincPiece = editable && item !== undefined && Boolean(sketchHandlers) && /\bzinc\b/i.test(item.label) && /\b(bandes?|couvertines?|noues?|solins?|abergements?|fa[iî]tages?|rives?|habillages?|bavettes?|chapeaux?|pi[eè]ces?)\b/i.test(item.label) && !/bobine|feuille|bobineau|goutti|descente|naissance|coude|collier/i.test(item.label);
   const removable = editable && (row.itemKey !== undefined || row.lineIds.length > 0);
   // Ce que la fiche peut montrer : l'article, sinon les lignes du devis ; sinon, en lecture seule, le calcul.
   const canEdit = editable && (item !== undefined || lines.length > 0);
@@ -398,7 +450,7 @@ function Row({
         <span className="text-[14px] leading-snug font-semibold">{label}</span>
         {quantity || sub || sketches.length > 0 ? (
           <span className="flex min-w-0 items-baseline gap-1.5 text-[13px] leading-snug">
-            {quantity ? <span className="shrink-0 text-[14px] font-extrabold tabular-nums sm:hidden">{quantity}</span> : null}
+            {quantity && !stepper ? <span className="shrink-0 text-[14px] font-extrabold tabular-nums sm:hidden">{quantity}</span> : null}
             {sub ? <span className={`min-w-0 ${row.status === "check" ? "line-clamp-2 font-bold text-warn" : "truncate text-muted"}`}>{sub}</span> : null}
             {sketches.length > 0 && !open ? (
               <span className="inline-flex shrink-0 items-center gap-1 text-[12px] font-bold text-[#4a37d6]">
@@ -409,7 +461,7 @@ function Row({
           </span>
         ) : null}
       </span>
-      <span className="shrink-0 text-right text-[15px] font-extrabold whitespace-nowrap tabular-nums max-sm:hidden">{quantity ?? ""}</span>
+      {stepper ? null : <span className="shrink-0 text-right text-[15px] font-extrabold whitespace-nowrap tabular-nums max-sm:hidden">{quantity ?? ""}</span>}
       {open ? <X size={18} className="mt-0.5 shrink-0 text-accent-text" aria-hidden="true" /> : null}
     </>
   );
@@ -432,6 +484,7 @@ function Row({
         onPointerCancel={onPointerEnd}
       >
         {opens ? (
+          <div className="flex items-start gap-1.5">
           <button
             type="button"
             onClick={() => {
@@ -445,9 +498,40 @@ function Row({
           >
             {body}
           </button>
+          {stepper ? (
+            <Stepper
+              label={label}
+              value={stepper.value}
+              unit={stepper.unit}
+              pending={pending}
+              onChange={(n) => onEdit(item!, { libelle: item!.label, quantite: String(n), unite: stepper.unit || null })}
+            />
+          ) : null}
+          {row.status === "check" && editable && item ? (
+            <button
+              type="button"
+              onClick={() => setOpen(!open)}
+              aria-expanded={open}
+              aria-label={`Modifier la désignation : ${label}`}
+              className="flex size-11 shrink-0 items-center justify-center rounded-full text-accent-text active:bg-ground"
+            >
+              <Pencil size={17} aria-hidden="true" />
+            </button>
+          ) : null}
+          </div>
         ) : (
           <div className="flex min-h-11 w-full min-w-0 items-start gap-2.5">{body}</div>
         )}
+        {zincPiece && sketches.length === 0 && !open ? (
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="ml-5 inline-flex min-h-9 items-center gap-1.5 text-[12px] font-bold text-[#4a37d6]"
+          >
+            <Paperclip size={13} aria-hidden="true" />
+            Ajouter un croquis (facultatif)
+          </button>
+        ) : null}
       </div>
       {open ? (
         <>

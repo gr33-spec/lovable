@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import { MapPin, MoreHorizontal } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
+import { EditableName } from "@/components/journey";
 import { ProjectDocuments } from "@/components/project-documents";
 import { ProjectProgressProvider } from "@/components/project-progress";
 import { Badge, BackButton, Button, ErrorNotice, Field, Spinner } from "@/components/ui";
@@ -34,7 +35,8 @@ export default function ChantierPage() {
         <Header project={project} onEdit={() => setEditing(true)} onChange={setProject} />
       )}
       <ProjectProgressProvider projectId={project.id} archived={project.status === "archived"} bar={false}>
-        <ProjectDocuments projectId={project.id} archived={project.status === "archived"} />
+        {/* La lecture donne son nom au chantier (« Chantier Dupont ») : l'en-tête se relit quand elle finit. */}
+        <ProjectDocuments projectId={project.id} archived={project.status === "archived"} onProjectChanged={reload} />
       </ProjectProgressProvider>
     </>
   );
@@ -70,7 +72,14 @@ function Header({ project, onEdit, onChange }: { project: Project; onEdit: () =>
     <header className="flex flex-col gap-1">
       <div className="flex items-center gap-2">
         <BackButton fallback="/chantiers" compact />
-        <h1 className="min-w-0 grow truncate font-display text-[22px] leading-tight font-extrabold tracking-[-0.02em]">{project.name}</h1>
+        {/* Le nom lu dans le devis, renommable d'un tap (§48). */}
+        <h1 className="flex min-w-0 grow font-display text-[22px] leading-tight font-extrabold tracking-[-0.02em]">
+          <EditableName
+            name={project.name}
+            className="min-h-11"
+            onSave={async (name) => onChange(await api<Project>(`/v1/projects/${project.id}`, { method: "PATCH", body: { name } }))}
+          />
+        </h1>
         <button
           type="button"
           onClick={() => setMenu(!menu)}

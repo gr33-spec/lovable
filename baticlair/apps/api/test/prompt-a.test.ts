@@ -11,7 +11,7 @@ describe("prompt A de lecture du devis (v9)", () => {
   ]);
 
   it("est la version 9, et reprend le texte du §41.1 tel quel", () => {
-    expect(TAKEOFF_PROMPT.version).toBe(9);
+    expect(TAKEOFF_PROMPT.version).toBe(10);
     for (const sentence of [
       "Tu lis le devis d'un artisan du bâtiment pour en extraire les ouvrages à quantifier. Tu ne calcules rien : tu structures.",
       "MÉTIER DE L'ARTISAN : Couverture",

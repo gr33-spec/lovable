@@ -2,12 +2,12 @@
 
 import { ArrowLeft, Check, ChevronRight, CircleCheck, FileDown, FileText, HelpCircle, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import { AssistantMessage, ChatInput, parseCommand, ReasoningSteps, Say, ThinkingSteps, UserBubble } from "@/components/chat";
+import { AssistantMessage, Say } from "@/components/chat";
+import { AnalysisScreen, CalculScreen, notifyReady, QuestionsStep, type CounterAnswers } from "@/components/journey";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { type ItemEdit } from "@/components/purchase-list";
 import { SiteUnitsView } from "@/components/site-units-view";
 import { SupplyList } from "@/components/supply-list";
-import { SiteNotes } from "@/components/site-notes";
 import { type DecisionHandlers } from "@/components/takeoff-view";
 import { useProgressRefresh } from "@/components/project-progress";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
@@ -24,11 +24,6 @@ export function canPrepareTakeoff(doc: ProjectDocument): boolean {
 }
 
 
-/** « 45° » collé, « 60 cm » espacé, rien pour les pièces. */
-const withUnit = (value: string, unit: string) => (!unit || unit === "u" ? value : unit === "°" ? `${value}°` : `${value} ${unit === "m2" ? "m²" : unit}`);
-
-type Said = { id: number; text: string; reply: string | null };
-
 /**
  * LE CHAT DU CHANTIER, après le dépôt du devis (référentiel §21) :
  *  1. BatiClair lit le devis, étapes visibles ;
@@ -43,12 +38,18 @@ export function ProjectTakeoff({
   clientQuote,
   archived,
   autoStart,
+  quoteCard = null,
+  onProjectChanged,
 }: {
   projectId: string;
   clientQuote: ProjectDocument | null;
   archived: boolean;
   /** Devis tout juste déposé : la lecture part d'elle-même. */
   autoStart: boolean;
+  /** Le devis déposé (ouvrir, retirer) : montré avec la liste, pas pendant les étapes. */
+  quoteCard?: React.ReactNode;
+  /** La lecture a nommé le chantier (« Chantier Dupont ») : l'en-tête se relit. */
+  onProjectChanged?: () => void;
 }) {
   // Le chat passe par la même porte que les partenaires (§38) : /v1/quantitatifs, avec le détail de l'écran.
   const fetchQuantitatif = useCallback(
@@ -76,7 +77,8 @@ export function ProjectTakeoff({
   // Un chantier de plusieurs logements s'ouvre « par logement » ; le total à commander est à l'onglet d'à côté.
   const [unitsView, setUnitsView] = useState(true);
   const [fresh, setFresh] = useState(false);
-  const [said, setSaid] = useState<Said[]>([]);
+  // Après « Envoyer au fournisseur » : l'aperçu d'envoi et les demandes passent devant la liste.
+  const [overview, setOverview] = useState(false);
   const started = useRef(false);
   const refreshProgress = useProgressRefresh();
   const readable = clientQuote ? canPrepareTakeoff(clientQuote) : false;
@@ -121,6 +123,27 @@ export function ProjectTakeoff({
     return () => clearInterval(t);
   }, [readingNow, reload]);
 
+  // §48 : le calcul (appel IA n° 2) tourne sur le serveur : on regarde toutes les 3 secondes s'il a fini.
+  const phase = quantitatif?.phase ?? "resultat";
+  const calculating = Boolean(data?.takeoff) && phase === "calcul";
+  useEffect(() => {
+    if (!calculating) return;
+    const t = setInterval(reload, 3000);
+    return () => clearInterval(t);
+  }, [calculating, reload]);
+  // Les étapes qui finissent pendant que l'artisan est ailleurs : on le prévient (et le nom lu du devis s'affiche).
+  const step = !data ? null : !data.takeoff ? "lecture" : phase;
+  const lastStep = useRef<string | null>(null);
+  useEffect(() => {
+    const before = lastStep.current;
+    lastStep.current = step;
+    if (before === "lecture" && step && step !== "lecture") {
+      onProjectChanged?.();
+      if (step === "questions") notifyReady("Ton devis est lu", "J'ai quelques questions pour toi avant de calculer.");
+    }
+    if (before === "calcul" && step === "resultat") notifyReady("Ta liste est prête", "Les matériaux sont calculés : il te reste à vérifier les lignes orange.");
+  }, [step, onProjectChanged]);
+
   // Devis tout juste déposé : on lit sans attendre un appui de plus.
   useEffect(() => {
     if (!autoStart || started.current || !data || data.takeoff || !data.aiAvailable || !readable || archived) return;
@@ -142,49 +165,44 @@ export function ProjectTakeoff({
   const takeoff = data.takeoff;
 
   if (!takeoff) {
-    if (!clientQuote || !readable) return null;
+    if (!clientQuote) return null;
+    // Un devis illisible : sa carte dit pourquoi (et permet de le retirer).
+    if (!readable) return clientQuote.status === "failed" ? <div className="flex flex-col gap-3">{quoteCard}</div> : <AnalysisScreen fileName={clientQuote.name} />;
     if (!data.aiAvailable) {
       return (
         <AssistantMessage>
-          <Say>La lecture automatique n&apos;est pas encore activée sur votre compte.</Say>
+          <Say>La lecture automatique n&apos;est pas encore activée sur ton compte.</Say>
         </AssistantMessage>
       );
     }
-    const failed = data.reading?.status === "failed";
+    const failed = data.reading?.status === "failed" && !pending;
+    if (!failed) return <AnalysisScreen fileName={clientQuote.name} />;
     return (
       <section id="materiaux" aria-label="Liste de matériaux" className="flex scroll-mt-4 flex-col gap-3">
-        <AssistantMessage>
-          {pending || readingNow ? (
-            <>
-              <Say>Je regarde votre devis (jusqu&apos;à une minute).</Say>
-              <ThinkingSteps />
-              {/* Les infos chantier restent à portée pendant la lecture : elles entrent au calcul. */}
-              <SiteNotes projectId={projectId} infos={quantitatif?.infos ?? null} disabled={archived} onSaved={reload} />
-            </>
-          ) : (
-            <>
-              {/* Retour du fondateur (2026-10-04) : la lecture ne part plus d'elle-même ; l'artisan a le temps
-                  d'ajouter ses infos chantier (elles accompagnent la lecture), puis il lance d'un appui. */}
-              <Say>
-                {failed
-                  ? "Je n'ai pas réussi à lire ce devis jusqu'au bout (coupure ou panne de mon côté). Rien ne vous est décompté : on réessaie ?"
-                  : "Devis bien reçu. Ajoutez des infos sur le chantier si vous voulez, puis lancez la lecture."}
-              </Say>
-              {actionError ? <ErrorNotice error={actionError} /> : null}
-              <SiteNotes projectId={projectId} infos={quantitatif?.infos ?? null} disabled={archived} onSaved={reload} />
-              <div className="h-20 lg:hidden" aria-hidden="true" />
-              <div className="fixed inset-x-4 bottom-[max(16px,env(safe-area-inset-bottom))] z-20 mx-auto max-w-2xl lg:static lg:inset-auto lg:mx-0">
-                <Button className="min-h-15 w-full text-[17px]" disabled={archived} onClick={prepare}>
-                  <Sparkles size={18} aria-hidden="true" />
-                  {actionError || failed ? "Réessayer" : "Lire le devis"}
-                </Button>
-              </div>
-            </>
-          )}
-        </AssistantMessage>
+        <div className="flex flex-col gap-3 rounded-[22px] bg-surface p-5 shadow-card">
+          <p className="text-[17px] leading-snug font-bold">Je n&apos;ai pas réussi à lire ce devis jusqu&apos;au bout (coupure ou panne de mon côté). Rien ne t&apos;est décompté : on réessaie ?</p>
+          {actionError ? <ErrorNotice error={actionError} /> : null}
+          <Button className="min-h-14 w-full text-[17px]" disabled={archived} onClick={prepare}>
+            <Sparkles size={18} aria-hidden="true" />
+            Réessayer
+          </Button>
+        </div>
+        {quoteCard}
       </section>
     );
   }
+
+  // §48 ÉTAPE 3 : les questions de comptoir, toutes d'un coup, AVANT le calcul. Puis ÉTAPE 4 : le calcul.
+  const qid0 = encodeURIComponent(quantitatif!.id);
+  const calculate = (answers: CounterAnswers) =>
+    run(() => api<Quantitatif>(`/v1/quantitatifs/${qid0}/calcul?ecran=1`, { method: "POST", body: answers }), (q) => {
+      setFresh(true);
+      update(q);
+    });
+  if (phase === "questions" && takeoff.status === "draft" && !archived) {
+    return <QuestionsStep takeoff={takeoff} pending={pending} error={actionError} onSubmit={calculate} />;
+  }
+  if (phase === "calcul") return <CalculScreen />;
 
   const draft = takeoff.status === "draft";
   const units = takeoff.logements ?? null;
@@ -198,33 +216,19 @@ export function ProjectTakeoff({
   const ligne = (f: LineFieldsInput) => ({ libelle: f.designation, quantite: f.quantity, unite: f.unit, reference: f.reference });
   const answer = (key: string, value: string | { value: string; unit: string } | null) =>
     call("reponses", { reponses: [value !== null && typeof value === "object" ? { question: key, valeur: value.value, unite: value.unit } : { question: key, valeur: value }] });
-  const remember = (text: string, reply: string | null = null) => setSaid((prev) => [...prev, { id: prev.length, text, reply }]);
   const lineActions = (line: TakeoffLine) => ({
     onSave: (fields: LineFieldsInput) => call("corrections", { action: "modifier_ligne", id: line.id, ligne: ligne(fields) }),
     onDelete: () => call("corrections", { action: "retirer", id: line.id }),
     onConfirm: () => call("corrections", { action: "confirmer", id: line.id }),
   });
-  // Chaque réponse de l'artisan s'affiche dans le fil, comme un message.
-  const answerLabel = (key: string, value: string | { value: string; unit: string } | null): string => {
-    if (value === null) return "Je ne sais pas";
-    const raw = typeof value === "string" ? value : value.value;
-    const options = [...takeoff.view.decisions.map((d) => d.question), ...takeoff.purchase.assumptions.map((a) => ({ key: a.key, options: a.choices }))];
-    const option = options.find((q) => q && (q.key === key || `engine:${q.key}` === key || q.key === `engine:${key}`))?.options.find((o) => o.value === raw);
-    if (option) return option.label;
-    if (typeof value === "string") return value === "" ? "Aucun de ces modèles" : value;
-    return withUnit(value.value, value.unit);
-  };
   const handlers: DecisionHandlers = {
     onDecide: (d) => {
-      if (d.primary) remember(d.primary.label);
       return call("reponses", { reponses: [{ question: d.key, valeur: "ok" }] });
     },
     onDecideMany: (ds) => {
-      remember(`C'est bon pour ${ds.length > 1 ? `les ${ds.length} lignes` : "la ligne"}`);
       return call("reponses", { reponses: ds.map((d) => ({ question: d.key, valeur: "ok" })) });
     },
     onAnswer: (key, value) => {
-      remember(answerLabel(key, value));
       return answer(key, value);
     },
     onSaveLine: (lineId, fields) => call("corrections", { action: "modifier_ligne", id: lineId, ligne: ligne(fields) }),
@@ -262,6 +266,7 @@ export function ProjectTakeoff({
   const send = () => {
     setShowList(false);
     setPage(false);
+    setOverview(true);
     if (draft) void call("validation").then(() => setSendSignal((n) => n + 1));
     else setSendSignal((n) => n + 1);
   };
@@ -272,17 +277,6 @@ export function ProjectTakeoff({
     if (row.itemKey && !row.itemKey.startsWith("line:")) await call("corrections", { action: "retirer_article", id: row.itemKey });
     // Une ligne qui attend une réponse (ou qu'aucun article ne porte) : on retire la ou les lignes du devis d'où elle vient.
     else for (const id of row.lineIds) await call("corrections", { action: "retirer", id });
-  };
-  const typed = (text: string) => {
-    const command = parseCommand(text);
-    if (!command) {
-      remember(text, "Je comprends pour l'instant la pente (« 30° »), la zone (« zone 1 ») et la surface (« 120 m² »). Pour le reste, utilisez les boutons.");
-      return;
-    }
-    // Honnête : si la valeur ne sert à aucun calcul de ce devis, on le dit plutôt que « recalculé ».
-    const used = takeoff.purchase.assumptions.some((a) => a.key === command.key) || takeoff.view.decisions.some((d) => d.question?.key === command.key || d.question?.key === `engine:${command.key}`);
-    remember(text, used ? `C'est noté : ${command.said}. J'ai recalculé.` : `C'est noté : ${command.said}. Ça ne change rien à la liste.`);
-    void answer(command.key, command.value);
   };
   let body: React.ReactNode;
   if (showList) {
@@ -345,7 +339,6 @@ export function ProjectTakeoff({
           onEditItem={editItem}
           onSetAside={setAside}
           onSuggestion={async (item, reponse) => {
-            remember(reponse === "oui" ? `Oui, ajoute ${item.label.toLowerCase()}` : `Non, pas de ${item.label.toLowerCase()}`);
             await call("corrections", { action: "suggestion", id: item.key, reponse });
           }}
           onSend={send}
@@ -384,15 +377,26 @@ export function ProjectTakeoff({
   const screenRows = takeoff.purchase.screen.groups.flatMap((g) => g.rows);
   const checkCount = screenRows.filter((r) => r.status === "check").length;
 
+  // §48 ÉTAPE 5 : la liste EST l'écran du chantier tant qu'elle n'est pas partie ; ensuite, les réponses des fournisseurs
+  // passent devant et la liste tient en une ligne.
+  const listShown = page || (!sent && !overview);
   return (
     <>
-      {page ? (
-        // LA PAGE DES FOURNITURES (retour du fondateur, 2026-10-05) : la liste seule, sans le fil du chat.
+      {listShown ? (
         <section aria-label="Page des fournitures" className="flex flex-col gap-3">
-          <button type="button" onClick={() => setPage(false)} className="-ml-1 inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-bold text-accent-text">
-            <ArrowLeft size={18} aria-hidden="true" />
-            Retour au chantier
-          </button>
+          {sent || overview ? (
+            <button
+              type="button"
+              onClick={() => {
+                setPage(false);
+                setOverview(true);
+              }}
+              className="-ml-1 inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-bold text-accent-text"
+            >
+              <ArrowLeft size={18} aria-hidden="true" />
+              Retour au chantier
+            </button>
+          ) : null}
           {actionError ? <ErrorNotice error={actionError} /> : null}
           {units && !showList ? (
             // D'abord le chantier rangé par logement, puis le total regroupé pour le fournisseur.
@@ -417,29 +421,19 @@ export function ProjectTakeoff({
             </div>
           ) : null}
           {body}
+          {quoteCard && !showList ? <div className="flex flex-col gap-1.5">{quoteCard}</div> : null}
         </section>
       ) : null}
-      {/* Le fil du chantier reste monté sous la page (l'aperçu d'envoi s'y ouvre) : il est seulement caché. */}
-      <div className={page ? "hidden" : "contents"}>
-        <AssistantMessage>
-          <ReasoningSteps takeoff={takeoff} fresh={fresh} />
-        </AssistantMessage>
-        {said.map((m) => (
-          <Fragment key={m.id}>
-            <UserBubble>{m.text}</UserBubble>
-            {m.reply ? (
-              <AssistantMessage>
-                <Say>{m.reply}</Say>
-              </AssistantMessage>
-            ) : null}
-          </Fragment>
-        ))}
-        {/* Même place dans l'arbre avant et après l'envoi (pas de rechargement) : seul l'ordre d'affichage change. */}
+      {/* Le chantier après l'envoi : reste monté sous la liste (l'aperçu d'envoi s'y ouvre), il est seulement caché. */}
+      <div className={listShown ? "hidden" : "contents"}>
         <div className="flex flex-col gap-3">
           <section id="materiaux" aria-label="Liste de matériaux" className="flex scroll-mt-4 flex-col gap-3">
             <button
               type="button"
-              onClick={() => setPage(true)}
+              onClick={() => {
+                setOverview(false);
+                setPage(true);
+              }}
               className="flex min-h-14 w-full items-center gap-3 rounded-[20px] bg-surface px-4 py-3 text-left shadow-card active:bg-ground"
             >
               {sent || checkCount === 0 ? (
@@ -453,24 +447,19 @@ export function ProjectTakeoff({
                 <span className="font-bold">{sent ? "Liste des fournitures envoyée" : "Fournitures à chiffrer"}</span>
                 <span className="text-[13px] text-muted">
                   {sent
-                    ? "Appuyez pour la revoir ou la modifier."
+                    ? "Touche pour la revoir ou la modifier."
                     : `${screenRows.length} fourniture${screenRows.length > 1 ? "s" : ""} · ${checkCount > 0 ? `${checkCount} à vérifier` : "tout est prêt"}`}
                 </span>
               </span>
               <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
             </button>
-            {actionError && !page ? <ErrorNotice error={actionError} /> : null}
+            {actionError && !listShown ? <ErrorNotice error={actionError} /> : null}
           </section>
           <div className={sent ? "order-first" : undefined}>
-            <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} onListChanged={reload} openSignal={sendSignal} onSentChange={setSent} />
+            <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} onListChanged={reload} openSignal={sendSignal} onSentChange={setSent} onPreviewClosed={() => setOverview(false)} />
           </div>
+          {listShown ? null : quoteCard}
         </div>
-        {draft && editable ? (
-          <>
-            <SiteNotes projectId={projectId} infos={quantitatif?.infos ?? null} disabled={pending} onSaved={reload} />
-            <ChatInput onSend={typed} disabled={pending} placeholder="« Mets 30° de pente », « zone 1 »…" />
-          </>
-        ) : null}
       </div>
     </>
   );

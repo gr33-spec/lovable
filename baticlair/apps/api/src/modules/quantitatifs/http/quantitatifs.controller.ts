@@ -62,6 +62,18 @@ const reponses = z.object({
     .max(500),
 });
 
+const calculBody = z.object({
+  reponses: z
+    .array(z.object({ question: z.string().min(1).max(200), valeur: z.string().trim().max(120).nullable(), unite: z.string().max(20).optional() }))
+    .max(200)
+    .optional(),
+  // « On ajoute ? » (quincaillerie, consommables) répondu sur le même écran : oui / non par article proposé.
+  ajouts: z
+    .array(z.object({ id: z.string().min(1).max(200), reponse: z.enum(["oui", "non"]) }))
+    .max(50)
+    .optional(),
+});
+
 const correction = z.discriminatedUnion("action", [
   z.object({ action: z.literal("modifier"), cle: z.string().min(1).max(200), valeur: z.string().trim().min(1).max(60), unite: z.string().max(20).optional() }),
   z.object({ action: z.literal("ajouter"), ligne, depuis_apercu: z.boolean().optional() }),
@@ -147,6 +159,20 @@ export class QuantitatifsController {
   ) {
     const list = body.reponses.map((x) => ({ question: x.question, valeur: x.valeur ?? null, unite: x.unite }));
     return this.quantitatifs.answer(tenant, id, list, { ecran: query.ecran === "1" });
+  }
+
+  /** §48 : les réponses aux questions de comptoir (facultatives), puis le calcul (moteur + appel IA n° 2). */
+  @Throttle({ default: HOURLY(300) })
+  @Post(":id/calcul")
+  @HttpCode(200)
+  async calculate(
+    @Tenant() tenant: TenantContext,
+    @Param("id") id: string,
+    @Body(new ZodPipe(calculBody)) body: z.infer<typeof calculBody>,
+    @Query(new ZodPipe(rendu)) query: z.infer<typeof rendu>,
+  ) {
+    const list = (body.reponses ?? []).map((x) => ({ question: x.question, valeur: x.valeur ?? null, unite: x.unite }));
+    return this.quantitatifs.calculate(tenant, id, list, { ecran: query.ecran === "1" }, body.ajouts ?? []);
   }
 
   @Throttle({ default: HOURLY(300) })

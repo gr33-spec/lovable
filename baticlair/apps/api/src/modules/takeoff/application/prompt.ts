@@ -6,7 +6,7 @@
  * contexte injecté (métier, ouvrages du référentiel) et le format technique de la réponse
  * (références de lignes, sections, noms courts), jamais une règle reformulée.
  */
-export const TAKEOFF_PROMPT = { id: "takeoff_extraction", version: 9 } as const;
+export const TAKEOFF_PROMPT = { id: "takeoff_extraction", version: 10 } as const;
 
 /** Un ouvrage du référentiel chargé, avec ses synonymes (« vocabulaire.json », §29). */
 export interface WorkItemHint {
@@ -49,7 +49,7 @@ Réponds avec un seul objet JSON :
   - confiance : "sur" ou "doute" ; doute : la raison du doute en une phrase, ou null ;
   - src : où se trouve la ligne : les références [page:ligne] exactes des lignes du texte qui la contiennent ; pour une ligne lue sur une page PDF, le numéro d'origine de la page (« 5 ») ;
   - sec : le numéro (à partir de 0) de la suite de titres dans « sections » sous laquelle se trouve la ligne, ou null.
-- contexte : adresse, type de bâtiment, neuf ou rénovation, pente, hauteur… lus dans l'en-tête et les notes (objet « donnée → valeur », null si rien).
+- contexte : client (nom du client tel qu'écrit, ex. « M. Dupont »), adresse du chantier, type de bâtiment, neuf ou rénovation, pente, hauteur… lus dans l'en-tête et les notes (objet « donnée → valeur », null si rien).
 - notes : en phrases courtes pour l'artisan, ce qui concerne tout le devis et qui compte pour ses achats (page illisible, tableau coupé, fourniture apportée par le client) ; jamais de nom de champ ni de référence [page:ligne] ; liste vide si rien.`;
 
 export function takeoffSystemPrompt(tradeLabel: string, materialFamilies: readonly string[] = [], workItems: readonly WorkItemHint[] = []): string {
