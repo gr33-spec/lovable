@@ -60,6 +60,13 @@ export interface PurchaseItem {
   toConfirm?: RuleToConfirm[];
   /** §49.2.5 « Info manquante » : les questions dont la réponse manque à cette ligne (elle est orange, un tap ouvre la question). */
   waitsOn?: string[];
+  /**
+   * §49.8 : ce qui règle la ligne SUR PLACE, d'un tap dans sa carte : la donnée qui manque ou la valeur par défaut à
+   * confirmer, avec ses boutons (« Développé ? 25 · 28 · 33 · 40 »).
+   */
+  asks?: { key: string; text: string; unit: string | null; options: { label: string; value: string }[] }[];
+  /** §49.8 : un écart entre le devis et le calcul, en deux boutons (« Garder 20 » / « Mettre 21 »). */
+  gap?: { written: string; computed: string; unit: string };
 }
 
 export interface ToQuoteItem {
@@ -647,7 +654,7 @@ export function purchaseView(
       needIds: [],
       lineIds: [o.lineId],
       state: item?.state === "verified" ? "ready" : "to_confirm",
-      ...(gap ? { rules: [gap] } : {}),
+      ...(gap ? { rules: [gap], ...(gapValues(gap, pieces?.unit ?? written?.unit ?? "") ? { gap: gapValues(gap, pieces?.unit ?? written?.unit ?? "")! } : {}) } : {}),
       assumptionKeys: [],
     });
   }
@@ -790,6 +797,21 @@ export function purchaseView(
     }
   }
   const questions = [...engineQuestions, ...counter];
+  // §49.8 : chaque ligne orange porte ses boutons (la donnée qui manque, le défaut à confirmer) pour se régler sur place.
+  const known = new Map<string, Question>();
+  for (const n of engine.needs) if (n.question) known.set(n.question.key, n.question);
+  for (const q of engine.questions) known.set(q.key, q);
+  for (const d of questions) if (d.question) known.set(d.question.key, d.question);
+  for (const [i, item] of toBuy.entries()) {
+    const asks = [
+      ...(item.waitsOn ?? []).map((k) => known.get(k)).filter((q): q is Question => !!q?.options?.length),
+      ...assumptions
+        .filter((a) => item.assumptionKeys.includes(a.key) && (item.rules ?? []).some((r) => r.key.startsWith("defaut:") && r.key.includes(a.key)) && (a.choices?.length ?? 0) > 1)
+        .map((a): Question => ({ key: a.key, kind: "param", text: a.label, unit: a.unit, options: a.choices! })),
+    ];
+    if (asks.length === 0) continue;
+    toBuy[i] = { ...item, asks: [...new Map(asks.map((q) => [q.key, { key: q.key, text: q.text.replace(/\s*\?$/, "").replace(/ Cela change la commande :.*$/, ""), unit: q.unit ?? null, options: q.options! }])).values()] };
+  }
   const canValidate = sendable(toBuy, toQuote, questions);
   const groups = groupsOf(toBuy, engine.needs, view, link.plan, link.ref);
   const screen = supplyScreen(toBuy, toQuote, questions, engine, view, link.plan, link.ref);
@@ -1089,6 +1111,12 @@ function withWrittenContext(item: PurchaseItem, needs: readonly OwnedNeed[], pla
   const included = text ? /\b(y compris [^).;]+)/i.exec(text)?.[1]?.trim() : undefined;
   if (included && !norm(out.precision ?? "").includes(norm(included))) out = { ...out, precision: [out.precision, included].filter(Boolean).join(" ; ") };
   return out;
+}
+
+/** « Le devis dit 20, le calcul donne 21 » → les deux valeurs, pour « Garder 20 » / « Mettre 21 » (§49.8). */
+function gapValues(gap: RuleToConfirm, unit: string): PurchaseItem["gap"] | null {
+  const m = /^Le devis dit ([\d  ,.]+?)(?: [^\d,]+)?, le calcul donne ([\d  ,.]+?)(?: [^\d(]+)?(?: \(|$)/.exec(gap.text);
+  return m ? { written: m[1]!.trim(), computed: m[2]!.trim(), unit } : null;
 }
 
 /** Clé de la confirmation d'une quantité calculée avec une règle « à vérifier » (§47.3). */

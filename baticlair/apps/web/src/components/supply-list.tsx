@@ -4,7 +4,7 @@ import { Check, ChevronDown, Paperclip, Pencil, Send, Trash2, X } from "lucide-r
 import { openDocument } from "@/lib/open-document";
 import { useEffect, useId, useRef, useState } from "react";
 import { EDIT_FIELD, EDIT_PANEL, ItemForm, type ItemEdit, type SketchHandlers } from "@/components/purchase-list";
-import { InlineLineForm, Proof, type DecisionHandlers } from "@/components/takeoff-view";
+import { Proof, type DecisionHandlers } from "@/components/takeoff-view";
 import { SelectionBar, type SelectionSend } from "@/components/selection-send";
 import { Button } from "@/components/ui";
 import type { ItemSketch, PurchaseItem, ScreenRow, Takeoff, TakeoffDecision } from "@/lib/api";
@@ -12,10 +12,11 @@ import { doubtText, parseQuantity, shortName } from "@/lib/labels";
 
 /**
  * UN SEUL ÉCRAN : LA LISTE DES FOURNITURES (retour du fondateur, 2026-10-04, « un enfant de 10 ans s'en sort »).
- *  - chaque ligne a un point de couleur : vert = sûr, rien à faire ; orange = à vérifier, un tap ouvre SA question en
- *    bas de l'écran ; gris = à préciser avec le fournisseur, la ligne part telle quelle ;
- *  - en haut, « 11 fournitures · 2 à vérifier » ; en bas, UN gros bouton : « Vérifier les 2 lignes » tant qu'il reste
- *    de l'orange, sinon « Envoyer au fournisseur » ;
+ *  - chaque ligne a un point de couleur : vert = sûr, rien à faire ; orange = à vérifier, et elle se RÈGLE DANS SA CARTE
+ *    (§49.8) : la raison en entier, les choix en boutons, « Garder 20 » / « Mettre 21 », « C'est bon » ; un geste, jamais
+ *    un autre écran ; gris = à préciser avec le fournisseur, la ligne part telle quelle ;
+ *  - en haut, « 11 fournitures · 2 à vérifier » et « Tout est bon » ; en bas, « Envoyer au fournisseur » quand tout est
+ *    vert ou gris ;
  *  - crayon pour modifier, corbeille (ou glisser vers la gauche) pour retirer (« Annuler » pendant 3 s) ; « Voir le calcul »
  *    en tout petit.
  */
@@ -60,10 +61,6 @@ export function SupplyList({
   const items = new Map(p.toBuy.map((b) => [b.key, b]));
   const quotes = new Map(p.toQuote.map((q) => [q.key, q]));
   const decisions = new Map(takeoff.view.decisions.map((d) => [d.key, d]));
-  const [asking, setAsking] = useState<ScreenRow | null>(null);
-  // Une réponse donnée (ou une ligne retirée) : la question suivante s'ouvre d'elle-même, jusqu'à la dernière ligne
-  // orange (retour du fondateur, 2026-10-05).
-  const [chain, setChain] = useState(false);
   const [aside, setAside] = useState<ScreenRow | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => void (timer.current && clearTimeout(timer.current)), []);
@@ -107,20 +104,6 @@ export function SupplyList({
     current.current = null;
     setAside(null);
   };
-  const verify = () => {
-    const first = toCheck[0];
-    if (!first) return;
-    document.getElementById(`ligne-${first.key}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
-    setAsking(first);
-  };
-
-  // La question ouverte n'existe plus (réponse donnée, ligne passée au vert) : la feuille se ferme d'elle-même, ou, quand
-  // l'artisan enchaîne, passe à la ligne orange suivante jusqu'à la dernière.
-  const stillOpen = asking && rows.some((r) => r.key === asking.key && r.status === "check") ? asking : null;
-  const nextToCheck = toCheck[0] ?? null;
-  if (chain && !pending && !stillOpen && !nextToCheck) setChain(false);
-  const open = stillOpen ?? (chain && !pending ? nextToCheck : null);
-  const decision = open?.decisionKey ? decisions.get(open.decisionKey) : undefined;
   // « Tout est bon » (retour du fondateur, 2026-10-05 : « 182 lignes à corriger, c'est hyper long ») : les lignes
   // orange qui n'attendent qu'une confirmation (garder telle qu'écrite, compter à la pièce, ratio à confirmer) se règlent
   // d'un appui ; seules les vraies questions (un choix à faire) restent une par une.
@@ -133,8 +116,7 @@ export function SupplyList({
     ).values(),
   ];
   const simpleRows = toCheck.filter((r) => r.decisionKey && simple.some((d) => d.key === r.decisionKey)).length;
-  const [confirmAll, setConfirmAll] = useState(false);
-  const removableRow = (r: ScreenRow) => editable && (r.itemKey !== undefined || r.lineIds.length > 0);
+
   // Deux blocs titrés seulement quand il y a les deux : une liste toute prête n'a pas besoin de titre.
   const split = rows.some((r) => r.status === "check") && rows.some((r) => r.status !== "check");
 
@@ -181,38 +163,15 @@ export function SupplyList({
               </h3>
             ) : null}
             {b.key === "check" && editable && handlers.onDecideMany && simpleRows >= 2 ? (
-              <div className="mx-4 mt-2 flex flex-col gap-2 rounded-2xl bg-warn-bg p-3">
-                {confirmAll ? (
-                  <>
-                    <p className="text-[14px] font-bold">
-                      Garder les {simpleRows} lignes telles qu&apos;elles sont ? Les questions à choix restent à faire.
-                    </p>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        pending={pending}
-                        onClick={async () => {
-                          await handlers.onDecideMany!(simple);
-                          setConfirmAll(false);
-                        }}
-                      >
-                        Oui, tout est bon
-                      </Button>
-                      <Button variant="secondary" onClick={() => setConfirmAll(false)}>
-                        Annuler
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-[14px] leading-snug font-semibold">
-                      {simpleRows} lignes n&apos;attendent qu&apos;un « C&apos;est bon » : relisez-les d&apos;un coup d&apos;œil.
-                    </p>
-                    <Button variant="secondary" onClick={() => setConfirmAll(true)}>
-                      <Check size={18} aria-hidden="true" />
-                      Tout est bon ({simpleRows})
-                    </Button>
-                  </>
-                )}
+              // §49.8 : « Tout est bon » en haut, un appui, pour tout valider d'un coup ; chaque carte garde le sien.
+              <div className="mx-4 mt-2 flex items-center justify-between gap-3 rounded-2xl bg-warn-bg p-3">
+                <p className="text-[14px] leading-snug font-semibold">
+                  {simpleRows} lignes n&apos;attendent qu&apos;un « C&apos;est bon ».
+                </p>
+                <Button className="shrink-0" variant="secondary" pending={pending} onClick={() => void handlers.onDecideMany!(simple)}>
+                  <Check size={18} aria-hidden="true" />
+                  Tout est bon ({simpleRows})
+                </Button>
               </div>
             ) : null}
             {groups.map(({ g, visible }) => (
@@ -250,7 +209,7 @@ export function SupplyList({
                       editable={editable}
                       pending={pending}
                       handlers={handlers}
-                      onAsk={() => setAsking(r)}
+                      decision={r.decisionKey ? decisions.get(r.decisionKey) : undefined}
                       onEdit={onEditItem}
                       onSetAside={() => putAside(r)}
                       sketches={sketches.filter((s) => r.itemKey && s.article === r.itemKey)}
@@ -311,9 +270,10 @@ export function SupplyList({
         // Un fondu sous le bouton : le texte de la liste ne passe jamais sous lui en se lisant mal.
         <div className={`sticky z-10 -mt-4 bg-gradient-to-t from-ground from-60% to-transparent pt-8 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(16px,env(safe-area-inset-bottom))]"}`}>
           {toCheck.length > 0 ? (
-            <Button className="w-full" variant="accent" onClick={verify}>
-              Vérifier {toCheck.length > 1 ? `les ${toCheck.length} lignes` : "la ligne"}
-            </Button>
+            // §49.8 : plus de bouton vers un autre écran ; la liste EST l'écran, chaque carte orange se règle sur place.
+            <p role="status" className="rounded-2xl bg-surface px-4 py-3 text-center text-[14px] font-bold text-warn shadow-card">
+              Encore {toCheck.length} ligne{toCheck.length > 1 ? "s" : ""} orange : règle-{toCheck.length > 1 ? "les" : "la"} dans la liste, d&apos;un geste.
+            </p>
           ) : sent ? (
             <Button className="w-full" variant="secondary" onClick={onSend}>
               <Send size={18} aria-hidden="true" />
@@ -329,7 +289,7 @@ export function SupplyList({
       ) : null}
 
       {aside ? (
-        <div role="status" className={`fixed inset-x-4 z-[60] mx-auto flex max-w-xl items-center justify-between gap-3 rounded-2xl bg-ink px-4 py-3 text-white shadow-card ${open ? "top-4" : "bottom-[max(96px,calc(env(safe-area-inset-bottom)+96px))]"}`}>
+        <div role="status" className={`fixed inset-x-4 z-[60] mx-auto flex max-w-xl items-center justify-between gap-3 rounded-2xl bg-ink px-4 py-3 text-white shadow-card bottom-[max(96px,calc(env(safe-area-inset-bottom)+96px))]`}>
           <span className="min-w-0 truncate text-sm font-bold">Retiré de la liste : {labelOf(aside)}</span>
           <button type="button" onClick={undo} className="inline-flex min-h-11 shrink-0 items-center px-2 text-sm font-extrabold text-[#9db8ff]">
             Annuler
@@ -337,30 +297,6 @@ export function SupplyList({
         </div>
       ) : null}
 
-      {open ? (
-        <QuestionSheet
-          title={labelOf(open)}
-          decision={decision}
-          takeoff={takeoff}
-          pending={pending}
-          handlers={handlers}
-          onEditItem={onEditItem}
-          onClose={() => {
-            setAsking(null);
-            setChain(false);
-          }}
-          {...(removableRow(open)
-            ? {
-                onRemove: () => {
-                  putAside(open);
-                  setAsking(null);
-                  setChain(true);
-                },
-              }
-            : {})}
-          onNext={() => setChain(true)}
-        />
-      ) : null}
     </section>
   );
 }
@@ -469,7 +405,7 @@ const DOT: Record<ScreenRow["status"], { className: string; label: string }> = {
 /**
  * Une ligne : le point, la désignation, la quantité, une sous-ligne grise facultative. UN SEUL GESTE (retour du
  * fondateur, 2026-10-05, « on s'y perd ») : toucher la ligne ouvre sa fiche, où tout se trouve (modifier, croquis, calcul,
- * retirer). Une ligne orange ouvre sa question. Toutes les lignes se modifient, grises comprises. Glisser à gauche retire.
+ * retirer). Une ligne orange se règle DANS SA CARTE (§49.8), sans autre écran. Toutes les lignes se modifient, grises comprises. Glisser à gauche retire.
  */
 function Row({
   row,
@@ -478,7 +414,7 @@ function Row({
   editable,
   pending,
   handlers,
-  onAsk,
+  decision,
   onEdit,
   onSetAside,
   sketches,
@@ -496,7 +432,8 @@ function Row({
   editable: boolean;
   pending: boolean;
   handlers: DecisionHandlers;
-  onAsk: () => void;
+  /** La remarque qui met la ligne en orange : elle se règle dans la carte (§49.8). */
+  decision?: TakeoffDecision | undefined;
   onEdit: (item: PurchaseItem, edit: ItemEdit) => Promise<void>;
   onSetAside: () => void;
   sketches: readonly ItemSketch[];
@@ -518,7 +455,8 @@ function Row({
   const sub = sentTo
     ? `Envoyé · ${sentTo}`
     : row.status === "check"
-      ? (row.reason ?? "À vérifier : touchez la ligne")
+      ? // §49.8 : la raison en entier, celle de la ligne, sinon celle de sa remarque.
+        (row.reason ?? (decision ? doubtText(decision.text) : null) ?? "À vérifier")
       : row.status === "supplier"
         ? "À préciser avec le fournisseur"
         : ([item?.approx, item?.precision].filter(Boolean).join(" · ") || null);
@@ -569,7 +507,7 @@ function Row({
         {quantity || sub || sketches.length > 0 ? (
           <span className="flex min-w-0 items-baseline gap-1.5 text-[13px] leading-snug">
             {quantity && !stepper ? <span className="shrink-0 text-[14px] font-extrabold tabular-nums sm:hidden">{quantity}</span> : null}
-            {sub ? <span className={`min-w-0 ${sentTo ? "truncate font-bold text-muted" : row.status === "check" ? "line-clamp-2 font-bold text-warn" : "truncate text-muted"}`}>{sub}</span> : null}
+            {sub ? <span className={`min-w-0 ${sentTo ? "truncate font-bold text-muted" : row.status === "check" ? "font-bold text-warn" : "truncate text-muted"}`}>{sub}</span> : null}
             {sketches.length > 0 && !open ? (
               <span className="inline-flex shrink-0 items-center gap-1 text-[12px] font-bold text-[#4a37d6]">
                 <Paperclip size={12} aria-hidden="true" />
@@ -634,11 +572,10 @@ function Row({
             type="button"
             onClick={() => {
               if (swiped.current) return void (swiped.current = false);
-              if (row.status === "check") onAsk();
-              else setOpen(!open);
+              setOpen(!open);
             }}
-            aria-expanded={row.status === "check" ? undefined : open}
-            aria-label={row.status === "check" ? `À vérifier : ${label}` : `${open ? "Fermer" : "Modifier"} : ${label}`}
+            aria-expanded={open}
+            aria-label={`${open ? "Fermer" : "Modifier"} : ${label}`}
             className="flex min-h-11 w-full min-w-0 items-start gap-2.5 rounded-xl text-left active:bg-ground/60"
           >
             {body}
@@ -651,17 +588,6 @@ function Row({
               pending={pending}
               onChange={(n) => onEdit(item!, { libelle: item!.label, quantite: String(n), unite: stepper.unit || null })}
             />
-          ) : null}
-          {row.status === "check" && editable && item ? (
-            <button
-              type="button"
-              onClick={() => setOpen(!open)}
-              aria-expanded={open}
-              aria-label={`Modifier la désignation : ${label}`}
-              className="flex size-11 shrink-0 items-center justify-center rounded-full text-accent-text active:bg-ground"
-            >
-              <Pencil size={17} aria-hidden="true" />
-            </button>
           ) : null}
           </div>
         ) : (
@@ -678,6 +604,9 @@ function Row({
           </button>
         ) : null}
       </div>
+      {row.status === "check" && editable && !open && !sentTo ? (
+        <CardActions label={label} decision={decision} item={item} pending={pending} handlers={handlers} onEdit={onEdit} onOpen={() => setOpen(true)} />
+      ) : null}
       {open ? (
         <>
           {sketches.length > 0 ? (
@@ -805,377 +734,135 @@ function LinePanel({
   );
 }
 
-/**
- * LA QUESTION D'UNE LIGNE ORANGE, en bas de l'écran : des boutons (ou un champ court), comme dans le chat. La réponse
- * recalcule la liste ; la ligne passe au vert et la feuille se referme.
- */
-/** Le titre de la question, en une phrase d'artisan, selon ce que la décision propose. */
-function headline(d: TakeoffDecision, many: number): string {
-  if (d.key.startsWith(AI_ADDITION)) return `On ajoute ${d.title} ?`;
-  if (d.key.startsWith(AI_DOUBT) || d.key.startsWith(FORBIDDEN) || d.key.startsWith(MISSING_INFO)) return d.title;
-  // Le doute est déjà une question (« Chiffre peu lisible : 2 ou 3 paquets ? ») : c'est elle qu'on pose.
-  if (doubtText(d.text).trim().endsWith("?")) return doubtText(d.text).trim();
-  if (d.primary?.action === "keep") return many > 1 ? `On garde ces ${many} lignes telles quelles ?` : "On garde cette ligne telle quelle ?";
-  if (d.primary?.action === "pieces") return many > 1 ? `On compte ces ${many} lignes à la pièce ?` : "On la compte à la pièce ?";
-  if (d.primary?.action === "edit" || d.state === "missing") return "Il manque une information";
-  return d.text;
-}
-
-/**
- * LA QUESTION EN BAS DE L'ÉCRAN (retour du fondateur, 2026-10-04 : « plus moderne et intuitif »). Une seule chose à
- * lire : la question en gros ; la ligne du devis dans une carte (texte replié, « Lire tout ») ; puis un geste par
- * bouton : garder, modifier, retirer. Jamais le même texte trois fois.
- */
-function QuestionSheet({
-  title,
-  decision,
-  takeoff,
-  pending,
-  handlers,
-  onEditItem,
-  onClose,
-  onNext,
-  onRemove,
-}: {
-  title: string;
-  decision: TakeoffDecision | undefined;
-  takeoff: Takeoff;
-  pending: boolean;
-  handlers: DecisionHandlers;
-  onEditItem: (item: PurchaseItem, edit: ItemEdit) => Promise<void>;
-  onClose: () => void;
-  onNext: () => void;
-  /** Retirer la ligne de la liste (« Annuler » pendant 3 s), puis la question suivante. */
-  onRemove?: () => void;
-}) {
-  const itemKey = decision ? checkedItemKey(decision.key) : null;
-  const ratioItem = itemKey ? takeoff.purchase.toBuy.find((b) => b.key === itemKey) : undefined;
-  const id = useId();
-  const [value, setValue] = useState("");
-  const q = decision?.question;
-  const options = q?.options ?? [];
-  const answer = async (v: string | { value: string; unit: string } | null) => {
-    if (!decision) return;
-    await handlers.onAnswer(decision.key, v);
-    onNext();
-  };
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
-  const engineQuestion = decision ? q?.key.startsWith("param:") || decision.key.startsWith("engine:") : false;
-  // « Je ne sais pas » : une question du calcul passe, une précision de ligne part au fournisseur telle quelle.
-  const canSkip = decision ? decision.key.startsWith("engine:") || decision.key.startsWith("precise:") : false;
-  const optionButton = "inline-flex min-h-14 items-center justify-center rounded-2xl border-2 border-line bg-surface px-4 text-base font-extrabold transition active:scale-[0.98] active:border-accent active:bg-accent/10 disabled:opacity-60";
-  return (
-    <div role="dialog" aria-modal="true" aria-label={`Question : ${title}`} className="fixed inset-x-0 bottom-0 z-50 flex justify-center">
-      <button type="button" aria-label="Fermer la question" onClick={onClose} className="fixed inset-0 -z-10 bg-ink/40 backdrop-blur-[2px]" />
-      <div className="flex max-h-[88vh] w-full max-w-2xl flex-col gap-4 overflow-y-auto rounded-t-[28px] bg-surface px-5 pt-2 pb-[max(20px,env(safe-area-inset-bottom))] shadow-card">
-        <span className="mx-auto h-1.5 w-10 shrink-0 rounded-full bg-line" aria-hidden="true" />
-        <div className="flex items-center justify-between gap-3">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-warn/12 px-3 py-1 text-[13px] font-extrabold text-warn">
-            <span className="size-2 rounded-full bg-warn" aria-hidden="true" />À vérifier
-          </span>
-          <span className="-mr-2 flex items-center gap-1">
-            {onRemove ? (
-              <button type="button" onClick={onRemove} aria-label={`Retirer de la liste : ${title}`} className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted active:bg-ground active:text-danger">
-                <Trash2 size={20} aria-hidden="true" />
-              </button>
-            ) : null}
-            <button type="button" onClick={onClose} aria-label="Fermer" className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted active:bg-ground">
-              <X size={22} aria-hidden="true" />
-            </button>
-          </span>
-        </div>
-        {!decision ? (
-          <p className="text-[15px]">Cette ligne attend une information du devis. Corrigez-la avec le crayon.</p>
-        ) : ratioItem ? (
-          <RatioSheet
-            decision={decision}
-            item={ratioItem}
-            pending={pending}
-            onConfirm={async () => {
-              await handlers.onDecide(decision);
-              onNext();
-            }}
-            onCorrect={async (e) => {
-              await onEditItem(ratioItem, e);
-              onNext();
-            }}
-            onReplace={async (e) => {
-              // La remarque est levée d'abord (au journal), puis l'article prend la désignation proposée.
-              await handlers.onDecide(decision);
-              await onEditItem(ratioItem, e);
-              onNext();
-            }}
-          />
-        ) : q && options.length > 0 ? (
-          <>
-            <div className="flex flex-col gap-1">
-              <p className="line-clamp-1 text-sm font-bold text-muted">{title}</p>
-              <p className="text-[22px] leading-tight font-extrabold tracking-[-0.01em]">{engineQuestion ? decision.text.replace(/ Cela change la commande :.*$/, "") : decision.text}</p>
-              {q.hint ? <p className="text-[15px] text-muted">{q.hint}</p> : null}
-            </div>
-            <div className={`grid gap-2 ${options.length > 3 && options.every((o) => o.label.length <= 12) ? "grid-cols-2" : "grid-cols-1"}`}>
-              {options.map((o) => (
-                <button key={o.value || "aucun"} type="button" disabled={pending} onClick={() => void answer(o.value)} className={optionButton}>
-                  {o.label}
-                </button>
-              ))}
-            </div>
-            {canSkip ? (
-              <button type="button" disabled={pending} onClick={() => void answer(null)} className="inline-flex min-h-11 items-center justify-center text-[15px] font-bold text-muted">
-                Je ne sais pas
-              </button>
-            ) : null}
-          </>
-        ) : q && q.kind === "param" ? (
-          <form
-            className="flex flex-col gap-3"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const v = value.trim().replace(",", ".");
-              if (/^\d+(?:\.\d+)?$/.test(v)) void answer({ value: v, unit: q.unit ?? "u" });
-            }}
-          >
-            <p className="line-clamp-1 text-sm font-bold text-muted">{title}</p>
-            <label htmlFor={id} className="text-[22px] leading-tight font-extrabold tracking-[-0.01em]">
-              {decision.text.replace(/ Cela change la commande :.*$/, "")}
-            </label>
-            <div className="flex items-center gap-2 rounded-2xl border-2 border-line bg-surface px-4 focus-within:border-accent">
-              <input id={id} inputMode="decimal" value={value} onChange={(e) => setValue(e.target.value)} className="min-h-14 w-full bg-transparent text-[20px] font-extrabold outline-none" autoFocus />
-              {q.unit && q.unit !== "u" ? <span className="text-base font-bold text-muted">{q.unit === "m2" ? "m²" : q.unit}</span> : null}
-            </div>
-            <Button type="submit" pending={pending}>
-              Valider
-            </Button>
-          </form>
-        ) : (
-          <SheetDecision decision={decision} lines={takeoff.lines} pending={pending} handlers={handlers} />
-        )}
-      </div>
-    </div>
-  );
-}
-
 /** Clé d'une quantité calculée avec une règle « à vérifier » (§47.3). */
 const RATIO = "ratio:";
-/** Interdits du code (aucune IA), doutes et ajouts de l'appel IA n° 2 : toujours orange, jamais verts d'office. */
-const FORBIDDEN = "interdit:";
-const AI_DOUBT = "ia-doute:";
+/** Ajout proposé par l'appel IA n° 2 : jamais vert d'office, il attend un oui ou un non. */
 const AI_ADDITION = "ia-ajout:";
-/** §48.4 : une information restée sans réponse aux questions : la ligne est orange, « C'est bon » la laisse partir telle quelle. */
-const MISSING_INFO = "manque:";
 
-/** L'article visé par une remarque posée sur un article (ratio, interdit, doute du comptoir). */
-function checkedItemKey(key: string): string | null {
-  if (key.startsWith(RATIO)) return key.slice(RATIO.length);
-  if (key.startsWith(AI_DOUBT)) return key.slice(AI_DOUBT.length);
-  // interdit:<règle>:<article>
-  if (key.startsWith(FORBIDDEN)) return key.slice(FORBIDDEN.length).replace(/^[^:]*:/, "");
-  return null;
-}
+/** Une quantité tapée par l'artisan, au format du serveur (« 1 234,5 » → « 1234.5 »). */
+const plainNumber = (q: string) => q.replace(/[\s  ]/g, "").replace(",", ".");
+const OPTION = "inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-line bg-surface px-3 text-[14px] font-extrabold transition active:scale-[0.97] active:border-accent active:bg-accent/10 disabled:opacity-60";
 
 /**
- * §47.3 : une quantité calculée avec une règle « à vérifier » : le chiffre en grand, la règle en une ligne, « C'est bon »
- * la passe au vert ; un tap sur le chiffre la corrige (le chiffre de l'artisan remplace le calcul, et va au journal).
+ * §49.8 : CE QUI RÈGLE UNE LIGNE ORANGE, DANS SA CARTE. Un geste, jamais un autre écran : les choix en boutons (un tap,
+ * la ligne se recalcule et passe au vert), un écart en deux boutons (« Garder 20 » / « Mettre 21 »), sinon « C'est bon ».
  */
-function RatioSheet({
+function CardActions({
+  label,
   decision: d,
   item,
   pending,
-  onConfirm,
-  onCorrect,
-  onReplace,
+  handlers,
+  onEdit,
+  onOpen,
 }: {
-  decision: TakeoffDecision;
-  item: PurchaseItem;
+  label: string;
+  decision: TakeoffDecision | undefined;
+  item: PurchaseItem | undefined;
   pending: boolean;
-  onConfirm: () => Promise<void>;
-  onCorrect: (e: ItemEdit) => Promise<void>;
-  onReplace: (e: ItemEdit) => Promise<void>;
+  handlers: DecisionHandlers;
+  onEdit: (item: PurchaseItem, edit: ItemEdit) => Promise<void>;
+  onOpen: () => void;
 }) {
   const id = useId();
-  const [editing, setEditing] = useState(false);
-  const parsed = item.quantity ? parseQuantity(item.quantity) : null;
-  const [quantite, setQuantite] = useState(parsed?.quantity ?? "");
-  const [unite, setUnite] = useState(parsed?.unit ?? "");
+  const [value, setValue] = useState("");
+  const q = d?.question;
+  // Une question encore ouverte (avant le calcul) répond à sa décision ; après, la ligne porte ses propres choix.
+  const asks: { key: string; text: string; unit: string | null; options: { label: string; value: string }[] }[] =
+    d && q?.options.length ? [{ key: d.key, text: d.text.replace(/ Cela change la commande :.*$/, "").replace(/\s*\?$/, ""), unit: null, options: q.options }] : (item?.asks ?? []);
+  const answer = (key: string, unit: string | null, v: string) => handlers.onAnswer(key, unit ? { value: v, unit } : v);
+  const gap = d && item?.gap ? item.gap : null;
+  const parsed = item?.quantity ? parseQuantity(item.quantity) : null;
+  const done = d && d.primary && d.primary.action !== "edit" && !d.key.startsWith(AI_ADDITION);
+  const btn = "min-h-11 flex-1 basis-[9rem]";
   return (
-    <section aria-label={`À confirmer : ${item.label}`} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <p className="text-sm font-bold text-muted">{item.label}</p>
-        {editing ? (
-          <form
-            className="flex flex-col gap-3"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const v = quantite.trim().replace(",", ".");
-              if (/^\d+(?:\.\d+)?$/.test(v)) void onCorrect({ libelle: item.label, quantite: v, unite: unite.trim() || null });
-            }}
-          >
-            <div className="grid grid-cols-2 gap-2">
-              <label htmlFor={`${id}-q`} className="flex flex-col gap-1 text-sm font-bold">
-                Quantité
-                <input id={`${id}-q`} inputMode="decimal" autoFocus value={quantite} onChange={(e) => setQuantite(e.target.value)} className={EDIT_FIELD} />
-              </label>
-              <label htmlFor={`${id}-u`} className="flex flex-col gap-1 text-sm font-bold">
-                Unité
-                <input id={`${id}-u`} value={unite} onChange={(e) => setUnite(e.target.value)} className={EDIT_FIELD} />
-              </label>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <Button type="submit" pending={pending}>
-                Enregistrer
-              </Button>
-              <Button type="button" variant="secondary" onClick={() => setEditing(false)}>
-                Annuler
-              </Button>
-            </div>
-          </form>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setEditing(true)}
-            aria-label={`Corriger la quantité : ${item.quantity ?? ""}`}
-            className="inline-flex items-center gap-2 self-start rounded-xl text-left text-[30px] leading-tight font-extrabold tracking-[-0.02em] tabular-nums underline decoration-line decoration-dotted underline-offset-[6px]"
-          >
-            {item.quantity}
-            <Pencil size={18} aria-hidden="true" className="text-subtle" />
-          </button>
-        )}
-        {d.key.startsWith(RATIO) ? null : <p className="text-[13px] font-extrabold tracking-wide text-muted uppercase">{d.title}</p>}
-        <p className="text-[15px] leading-snug font-semibold text-warn">{d.text}</p>
-        {item.approx ? <p className="text-[13px] text-muted">{item.approx}</p> : null}
-      </div>
-      {editing ? null : (
-        <div className="flex flex-col gap-2">
-          <Button pending={pending} onClick={() => void onConfirm()} aria-label={`C'est bon : ${item.label}`}>
-            <Check size={20} aria-hidden="true" />
-            C&apos;est bon
+    <div role="group" aria-label={`Régler : ${label}`} aria-busy={pending || undefined} className="flex flex-col gap-2 pl-5">
+      {asks.map((a) => (
+        <div key={a.key} role="group" aria-label={a.text} className="flex flex-col gap-1.5">
+          <p className="text-[13px] leading-snug font-bold">{a.text} ?</p>
+          <div className="flex flex-wrap gap-1.5">
+            {a.options.map((o) => (
+              <button key={o.value || "aucun"} type="button" disabled={pending} onClick={() => void answer(a.key, a.unit, o.value)} className={`${OPTION} grow`}>
+                {o.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+      {d && q && q.kind === "param" && q.options.length === 0 ? (
+        <form
+          className="flex items-center gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const v = plainNumber(value.trim());
+            if (/^\d+(?:\.\d+)?$/.test(v)) void handlers.onAnswer(d.key, { value: v, unit: q.unit ?? "u" });
+          }}
+        >
+          <label htmlFor={id} className="sr-only">
+            {d.text}
+          </label>
+          <span className="flex min-w-0 grow items-center gap-1 rounded-xl border-2 border-line bg-surface px-3 focus-within:border-accent">
+            <input id={id} inputMode="decimal" value={value} onChange={(e) => setValue(e.target.value)} className="min-h-10 w-full min-w-0 bg-transparent text-[15px] font-extrabold outline-none" />
+            {q.unit && q.unit !== "u" ? <span className="text-[13px] font-bold text-muted">{q.unit === "m2" ? "m²" : q.unit}</span> : null}
+          </span>
+          <Button type="submit" className="shrink-0" pending={pending}>
+            OK
           </Button>
-          {d.suggestion ? (
+        </form>
+      ) : null}
+      <div className="flex flex-wrap gap-1.5">
+        {gap && d && item ? (
+          <>
+            <Button className={btn} pending={pending} onClick={() => void handlers.onDecide(d)} aria-label={`Garder ${gap.written} : ${label}`}>
+              Garder {gap.written}
+            </Button>
             <Button
+              className={btn}
               variant="secondary"
               pending={pending}
-              onClick={() => void onReplace({ libelle: d.suggestion!.label, quantite: d.suggestion!.quantity ?? parsed?.quantity ?? null, unite: d.suggestion!.unit ?? parsed?.unit ?? null })}
+              onClick={() => void onEdit(item, { libelle: item.label, quantite: plainNumber(gap.computed), unite: parsed?.unit || gap.unit || null })}
+              aria-label={`Mettre ${gap.computed} : ${label}`}
             >
-              Remplacer par : {d.suggestion.label}
-              {d.suggestion.quantity ? ` (${[d.suggestion.quantity, d.suggestion.unit].filter(Boolean).join(" ")})` : ""}
+              Mettre {gap.computed}
             </Button>
-          ) : null}
-          <Button variant="secondary" onClick={() => setEditing(true)}>
-            <Pencil size={18} aria-hidden="true" />
-            Corriger le chiffre
+          </>
+        ) : done ? (
+          <Button className={btn} variant={asks.length > 0 ? "secondary" : "primary"} pending={pending} onClick={() => void handlers.onDecide(d)} aria-label={`C'est bon : ${label}`}>
+            <Check size={18} aria-hidden="true" />
+            C&apos;est bon
           </Button>
-        </div>
-      )}
-    </section>
-  );
-}
-
-/** Une ligne du devis à garder, modifier ou retirer : la question, la carte de la ligne, trois gestes. */
-function SheetDecision({ decision: d, lines, pending, handlers }: { decision: TakeoffDecision; lines: Takeoff["lines"]; pending: boolean; handlers: DecisionHandlers }) {
-  const [editing, setEditing] = useState(false);
-  const [full, setFull] = useState(false);
-  const [confirmRemove, setConfirmRemove] = useState(false);
-  const concerned = d.lineIds.map((id) => lines.find((l) => l.id === id)).filter((l): l is Takeoff["lines"][number] => Boolean(l));
-  const single = concerned.length === 1 ? concerned[0]! : null;
-  const title = single ? shortName(d.title) : d.title;
-  const explain = doubtText(d.text.replace(/^À ajouter \? /, ""));
-  const primary = d.primary && d.primary.action !== "edit" ? d.primary : null;
-  const canEdit = single && (d.primary?.action === "edit" || d.secondary.includes("edit"));
-  const qty = (l: Takeoff["lines"][number]) => (l.quantity ? `${l.quantity} ${l.unit ?? ""}`.trim() : "Quantité ?");
-
-  return (
-    <section aria-label={`À régler : ${title}`} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <h3 className="text-[22px] leading-tight font-extrabold tracking-[-0.01em]">{editing ? "Modifier la ligne" : headline(d, concerned.length)}</h3>
-        {!editing && explain && explain.trim() !== headline(d, concerned.length) ? <p className="text-[15px] leading-snug text-muted">{explain}</p> : null}
+        ) : null}
+        {d?.suggestion && item ? (
+          <Button
+            className={btn}
+            variant="secondary"
+            pending={pending}
+            onClick={async () => {
+              // La remarque est levée d'abord (au journal), puis l'article prend la désignation proposée.
+              await handlers.onDecide(d);
+              await onEdit(item, { libelle: d.suggestion!.label, quantite: d.suggestion!.quantity ?? parsed?.quantity ?? null, unite: d.suggestion!.unit ?? parsed?.unit ?? null });
+            }}
+          >
+            Remplacer par : {d.suggestion.label}
+          </Button>
+        ) : null}
+        {d?.key.startsWith(AI_ADDITION) ? (
+          <>
+            <Button className={btn} pending={pending} onClick={() => void handlers.onAnswer(d.key, "ok")}>
+              Oui, on l&apos;ajoute
+            </Button>
+            <Button className={btn} variant="secondary" pending={pending} onClick={() => void handlers.onAnswer(d.key, "non")}>
+              Non
+            </Button>
+          </>
+        ) : null}
+        {!d || d.primary?.action === "edit" ? (
+          <Button className={btn} variant={done ? "secondary" : "primary"} onClick={onOpen} aria-label={`Corriger : ${label}`}>
+            <Pencil size={18} aria-hidden="true" />
+            {d?.primary?.label ?? "Corriger"}
+          </Button>
+        ) : null}
       </div>
-
-      {editing && single ? (
-        <InlineLineForm
-          line={single}
-          pending={pending}
-          onCancel={() => setEditing(false)}
-          onSubmit={async (f) => {
-            await handlers.onSaveLine(single.id, f);
-            setEditing(false);
-          }}
-        />
-      ) : single ? (
-        <div className="flex flex-col gap-1 rounded-2xl bg-ground p-4">
-          <div className="flex items-start justify-between gap-3">
-            <p className="min-w-0 text-[16px] leading-snug font-extrabold">{title}</p>
-            <span className="shrink-0 rounded-full bg-surface px-3 py-1 text-[15px] font-extrabold whitespace-nowrap tabular-nums shadow-sm">{qty(single)}</span>
-          </div>
-          {(single.article ?? single.designation).trim() !== title ? (
-            <>
-              <p className={`text-[14px] leading-snug text-muted ${full ? "" : "line-clamp-2"}`}>{single.article ?? single.designation}</p>
-              <button type="button" onClick={() => setFull(!full)} aria-expanded={full} className="inline-flex min-h-9 items-center self-start text-[13px] font-bold text-accent-text">
-                {full ? "Réduire" : "Lire tout"}
-              </button>
-            </>
-          ) : null}
-        </div>
-      ) : concerned.length > 1 ? (
-        <ul className="flex flex-col divide-y divide-line rounded-2xl bg-ground px-4">
-          {concerned.slice(0, full ? undefined : 4).map((l) => (
-            <li key={l.id} className="flex items-center justify-between gap-3 py-2.5">
-              <span className="line-clamp-1 min-w-0 text-[15px] font-semibold">{shortName(l.article ?? l.designation)}</span>
-              <span className="shrink-0 text-[14px] font-extrabold text-muted tabular-nums">{qty(l)}</span>
-            </li>
-          ))}
-          {concerned.length > 4 ? (
-            <li>
-              <button type="button" onClick={() => setFull(!full)} className="inline-flex min-h-11 items-center text-[13px] font-bold text-accent-text">
-                {full ? "Réduire" : `Voir les ${concerned.length - 4} autres`}
-              </button>
-            </li>
-          ) : null}
-        </ul>
-      ) : null}
-
-      {editing ? null : (
-        <div className="flex flex-col gap-2">
-          {primary ? (
-            <Button pending={pending} onClick={() => void handlers.onDecide(d)} aria-label={single ? `${primary.label} : ${single.designation}` : primary.label}>
-              <Check size={20} aria-hidden="true" />
-              {primary.label}
-            </Button>
-          ) : null}
-          {d.key.startsWith(AI_ADDITION) ? (
-            <Button variant="secondary" pending={pending} onClick={() => void handlers.onAnswer(d.key, "non")}>
-              <X size={18} aria-hidden="true" />
-              Non, pas besoin
-            </Button>
-          ) : null}
-          {canEdit ? (
-            <Button variant={primary ? "secondary" : "primary"} onClick={() => setEditing(true)} aria-label={`Corriger ${single!.designation}`}>
-              <Pencil size={18} aria-hidden="true" />
-              {d.primary?.action === "edit" ? d.primary.label : "Modifier"}
-            </Button>
-          ) : null}
-          {d.secondary.includes("remove") && single ? (
-            confirmRemove ? (
-              <div role="group" aria-label="Confirmer le retrait" className="flex items-center justify-center gap-2">
-                <button type="button" disabled={pending} onClick={() => void handlers.onDeleteLine(single.id)} className="inline-flex min-h-11 items-center rounded-xl bg-danger px-4 text-sm font-extrabold text-white">
-                  Oui, retirer
-                </button>
-                <button type="button" onClick={() => setConfirmRemove(false)} className="inline-flex min-h-11 items-center px-4 text-sm font-bold">
-                  Annuler
-                </button>
-              </div>
-            ) : (
-              <button type="button" onClick={() => setConfirmRemove(true)} aria-label={`Retirer ${single.designation}`} className="inline-flex min-h-11 items-center justify-center gap-1.5 text-sm font-bold text-muted">
-                <Trash2 size={16} aria-hidden="true" />
-                Retirer de la liste
-              </button>
-            )
-          ) : null}
-        </div>
-      )}
-    </section>
+    </div>
   );
 }

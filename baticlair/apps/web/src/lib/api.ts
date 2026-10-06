@@ -297,6 +297,10 @@ export interface PurchaseItem {
   assumptionKeys: string[];
   /** Réécrit par l'artisan (§41.4). */
   edited: ("label" | "quantity" | "precision")[];
+  /** §49.8 : la donnée qui manque ou le défaut à confirmer, en boutons dans la carte (un tap règle la ligne). */
+  asks?: { key: string; text: string; unit: string | null; options: { label: string; value: string }[] }[];
+  /** §49.8 : un écart devis / calcul, « Garder 20 » / « Mettre 21 ». */
+  gap?: { written: string; computed: string; unit: string } | null;
 }
 
 export interface PurchaseAssumption {
