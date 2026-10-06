@@ -529,6 +529,8 @@ model TakeoffLine {
   /// Matériau et format nommés sur la ligne (« ardoise 32×22 »), et dimensions lues ({ pente: "35°" }), §41.1.
   material    String?
   dimensions  Json?
+  /// Lecture §41.1 (prompt A v12) : rôle, articles écrits, façonnage écrit, « manque » (questions de comptoir, §49.4).
+  reading     Json?
   /// Références « page:ligne » du texte du devis qui justifient la ligne.
   sourceRefs  Json      @default("[]")
   /// Pages lues sur image (pas de texte numéroté à citer).

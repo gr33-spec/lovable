@@ -17,7 +17,7 @@ const CAS: Metier[] = [
     metier: "couverture",
     bench: [{ ref: "1", designation: "Descente zinc Ø100, hauteur 5 m", quantity: "2", unit: "u" }],
     questions: [],
-    couleurs: { vert: 1, orange: 0, gris: 0 },
+    couleurs: { vert: 0, orange: 1, gris: 0 },
   },
   {
     nom: "Une descente PVC en longueurs de 2 m, avec dauphin",

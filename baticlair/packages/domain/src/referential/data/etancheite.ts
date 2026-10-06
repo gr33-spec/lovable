@@ -33,7 +33,7 @@ const EPAISSEUR: ParamDef = {
 
 export const ETANCHEITE_REFERENTIAL: Referential = {
   id: "etancheite",
-  version: "etancheite-2026.10.05-1",
+  version: "etancheite-2026.10.06-2",
   trade: "waterproofing",
   sources: [
     DEFINITION_SOURCE,
@@ -97,7 +97,7 @@ export const ETANCHEITE_REFERENTIAL: Referential = {
         { key: "eif", family: "primer_eif", label: "EIF", usual: { text: "EIF en bidon.", source: USAGE, productId: "eif-25" } },
         { key: "isolant", family: "roof_insulation", label: "Isolant", usual: { text: "PIR 1 200 × 1 000.", source: USAGE, productId: "pir-1200" } },
         { key: "sous_couche", family: "underlayer", label: "Sous-couche", usual: { text: "Sous-couche SBS en rouleau.", source: MAMMOUTH, productId: "sous-couche-10" } },
-        { key: "finition", family: "cap_sheet", label: "Couche autoprotégée", usual: { text: "Autoprotégée ardoisée en rouleau.", source: MAMMOUTH, productId: "autoprotegee-6" } },
+        { key: "finition", formOf: "terrasse", family: "cap_sheet", label: "Couche autoprotégée", usual: { text: "Autoprotégée ardoisée en rouleau.", source: MAMMOUTH, productId: "autoprotegee-6" } },
       ],
       constants: {
         eif_par_m2: rule("0.3", "kg/m2", USAGE, todo("200 à 300 g/m² sur béton (§5)."), "EIF {v}"),

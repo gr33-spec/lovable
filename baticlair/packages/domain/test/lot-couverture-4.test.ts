@@ -17,7 +17,7 @@ const CAS: Metier[] = [
     metier: "couverture",
     bench: [{ ref: "1", designation: "Couverture bac acier anti-condensation RAL 7016, rampant 6 m", quantity: "120", unit: "m²" }],
     questions: [],
-    couleurs: { vert: 1, orange: 0, gris: 0 },
+    couleurs: { vert: 0, orange: 1, gris: 0 },
   },
   {
     nom: "Bac acier monopente, rien d'écrit",

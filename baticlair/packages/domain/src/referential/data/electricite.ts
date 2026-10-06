@@ -76,7 +76,7 @@ const COURONNE_20 = packaging("100", "m", TIROIR, todo("Couronne de 100 m en 3G2
 
 export const ELECTRICITE_REFERENTIAL: Referential = {
   id: "electricite",
-  version: "electricite-2026.10.05-1",
+  version: "electricite-2026.10.06-2",
   trade: "electrical",
   sources: [
     DEFINITION_SOURCE,
@@ -165,7 +165,7 @@ export const ELECTRICITE_REFERENTIAL: Referential = {
       params: [lineQuantity("nombre", "Nombre de prises", "u", "Combien de prises ?"), GAMME],
       slots: [
         { key: "prises", family: "socket_work", label: "Prises", measureOnly: true },
-        { key: "prise", family: "socket", label: "Prises 2P+T", usual: { text: "Prise 2P+T 16 A complète.", source: USAGE, productId: "prise-16a" } },
+        { key: "prise", formOf: "prises", family: "socket", label: "Prises 2P+T", usual: { text: "Prise 2P+T 16 A complète.", source: USAGE, productId: "prise-16a" } },
         { key: "boite", family: "flush_box", label: "Boîtes d'encastrement", usual: { text: "Boîte cloison sèche 1 poste (la plus vendue).", source: USAGE, productId: "boite-cloison" } },
         { key: "gaine", family: "prewired_conduit", label: "Gaine préfilée 3G2,5", usual: { text: "Gaine préfilée 3G2,5 Ø20 pour les prises.", source: USAGE, productId: "gaine-3g25" } },
       ],
@@ -200,7 +200,7 @@ export const ELECTRICITE_REFERENTIAL: Referential = {
       slots: [
         { key: "points", family: "light_point_work", label: "Points lumineux", measureOnly: true },
         { key: "interrupteur", family: "switch", label: "Interrupteurs", usual: { text: "Interrupteur va-et-vient (sert aussi en simple allumage).", source: USAGE, productId: "interrupteur-vv" } },
-        { key: "dcl", family: "dcl", label: "DCL", usual: { text: "Boîte et douille DCL, obligatoires au point de centre (NF C 15-100).", source: USAGE, productId: "dcl" } },
+        { key: "dcl", formOf: "points", family: "dcl", label: "DCL", usual: { text: "Boîte et douille DCL, obligatoires au point de centre (NF C 15-100).", source: USAGE, productId: "dcl" } },
         { key: "boite", family: "flush_box", label: "Boîtes d'encastrement", usual: { text: "Boîte cloison sèche 1 poste pour l'interrupteur.", source: USAGE, productId: "boite-cloison" } },
         { key: "gaine", family: "prewired_conduit", label: "Gaine préfilée 3G1,5", usual: { text: "Gaine préfilée 3G1,5 Ø16 pour l'éclairage.", source: PROFIFLEX, productId: "gaine-3g15" } },
       ],
@@ -234,7 +234,7 @@ export const ELECTRICITE_REFERENTIAL: Referential = {
       params: [lineQuantity("nombre", "Nombre de tableaux", "u", "Combien de tableaux ?"), RANGEES, TYPE_ID],
       slots: [
         { key: "tableaux", family: "panel_work", label: "Tableau", measureOnly: true },
-        { key: "coffret", family: "panel", label: "Tableau", usual: { text: "Tableau nu, rangées de 13 modules.", source: USAGE, productId: "tableau" } },
+        { key: "coffret", formOf: "tableaux", family: "panel", label: "Tableau", usual: { text: "Tableau nu, rangées de 13 modules.", source: USAGE, productId: "tableau" } },
         { key: "id", family: "rcd", label: "Interrupteurs différentiels", usual: { text: "ID 40 A 30 mA, 2 modules.", source: LEGRAND_ID, productId: "id-40-30" } },
         { key: "peigne", family: "comb_bar", label: "Peignes", usual: { text: "Peigne phase + neutre 13 modules.", source: LEGRAND_PEIGNE, productId: "peigne-13" } },
       ],

@@ -49,7 +49,7 @@ describe("test du fournisseur : chaque ligne « À commander » se charge dans l
     // façonnée se fabrique à son développé ; façonnée sur place au-delà de 6 ml, un bobineau de 500 mm suffit et la
     // réponse est simplement ignorée), et ce que le comptoir demande pour la gouttière (§47.8). Plus « égout et
     // faîtage ? » (proposés dans « On ajoute ? »). Le voligeage est reconnu (§7), plus « article inconnu ».
-    expect(v.questions.map((q) => q.question?.key ?? q.key).sort()).toEqual(["param:developpe", "param:developpe_gouttiere", "param:diametre_descente", "param:faconnage@bandes-zinc", "param:faconnage@couverture-zinc-joint-debout"]);
+    expect(v.questions.map((q) => q.question?.key ?? q.key).sort()).toEqual(["param:consommables", "param:developpe", "param:developpe_gouttiere", "param:diametre_descente", "param:faconnage@bandes-zinc", "param:faconnage@couverture-zinc-joint-debout"]);
     // Une réponse pièce par pièce ne vaut que pour sa pièce : la bande est réglée, le joint debout reste à demander.
     const parPiece = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage@bandes-zinc": { value: "1", unit: "u" } });
     const restantes = parPiece.questions.map((q) => q.question?.key ?? q.key);

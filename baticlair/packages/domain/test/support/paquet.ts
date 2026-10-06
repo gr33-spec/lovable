@@ -50,6 +50,7 @@ export function describeLot(lot: { suite: string; titre: string; fichier: string
 
         it("à l'ouverture : les questions du comptoir et rien d'autre, chaque ligne orange dit sa règle", () => {
           const { first } = run(p);
+          if (process.env.ACT) console.log("ACT", JSON.stringify({ nom: p.nom, questions: first.questions.filter((d) => !d.key.startsWith(RATIO)).map((d) => d.question?.text ?? d.text), couleurs: colours(first) }));
           expect(first.questions.filter((d) => !d.key.startsWith(RATIO)).map((d) => d.question?.text ?? d.text)).toEqual(p.questions);
           expect(colours(first)).toEqual(p.couleurs);
           for (const r of first.screen.groups.flatMap((g) => g.rows).filter((x) => x.status === "check" && !x.pending && !x.decisionKey)) {

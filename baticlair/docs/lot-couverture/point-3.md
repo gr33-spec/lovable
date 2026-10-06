@@ -7,8 +7,8 @@ puis le PDF que lit le vendeur une fois les questions répondues (premier bouton
 
 | Devis de test | Vertes | Orange | Grises | Questions |
 | --- | --- | --- | --- | --- |
-| Gouttière PVC grise, deux descentes | 3 | 0 | 0 | 0 |
-| Gouttière alu anthracite sans développé | 1 | 1 | 0 | 1 |
+| Gouttière PVC grise, deux descentes | 2 | 1 | 0 | 0 |
+| Gouttière alu anthracite sans développé | 0 | 3 | 0 | 1 |
 
 ## Gouttière PVC grise, deux descentes
 
@@ -19,9 +19,13 @@ Devis de test :
 | 1 | Gouttière PVC demi-ronde 25 grise avec 2 descentes | 18 ml |
 | 2 | Descente PVC Ø80 grise, hauteur 5 m | 2 u |
 
-**À l'ouverture : 3 vertes · 0 orange · 0 grise.**
+**À l'ouverture : 2 vertes · 1 orange · 0 grise.**
 
 Questions du comptoir : aucune.
+
+| Ligne orange | Chiffre | Sous-ligne |
+| --- | --- | --- |
+| Tubes de descente PVC gris Ø80, longueur 4 m | 4 pièces | Valeur par défaut à confirmer : longueur des tubes 4 m |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -40,14 +44,16 @@ Devis de test :
 | 1 | Gouttière aluminium laqué anthracite, 2 angles | 11 ml |
 | 2 | Descente alu Ø80, hauteur 5 m | 1 u |
 
-**À l'ouverture : 1 verte · 1 orange · 0 grise.**
+**À l'ouverture : 0 verte · 3 orange · 0 grise.**
 
 Questions du comptoir :
 - Gouttière de 25, de 28, de 33 ou de 40 ? (De 25 / De 28 / De 33 / De 40)
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Gouttière PVC / alu ou Naissances | — | attend une réponse à une question |
+| Gouttière alu anthracite de ? | 3 longueurs de 4 m | Info manquante : développé de la gouttière |
+| Naissances alu anthracite de ? Ø80 | 1 pièce | Info manquante : développé de la gouttière |
+| Tubes de descente alu Ø80, longueur 4 m | 2 pièces | Valeur par défaut à confirmer : longueur des tubes 4 m |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -59,7 +65,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 ## Le tableau de Brest (couverture), inchangé
 
-**À l'ouverture : 1 verte · 2 orange · 0 grise.**
+**À l'ouverture : 1 verte · 3 orange · 0 grise.**
 
 Questions du comptoir :
 - Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ? (Espagne 1er choix / Ardoise NF (type Cupa))
@@ -68,14 +74,15 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Ardoises 30×22 ou Crochets d'ardoise | — | attend une réponse à une question |
-| Naissances | — | attend une réponse à une question |
+| Ardoises naturelles ? 30×22 | 9 271 pièces | Info manquante : qualité de l'ardoise. Valeur par défaut à confirmer : pente du toit 45° ; longueur du rampant 5,5 m ; diamètre du crochet standard |
+| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Info manquante : qualité de l'ardoise. Valeur par défaut à confirmer : diamètre du crochet standard ; pente du toit 45° ; longueur du rampant 5,5 m |
+| Naissances zinc demi-ronde | — | Info manquante : nombre de descentes |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces |  | chiffrable |
+| Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces | 200 m² × 44,15 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge | chiffrable |
 | Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02) | chiffrable |
 | Gouttière zinc demi-ronde dév. 33 | 6 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
 | Naissances zinc demi-ronde dév. 33 Ø80 | 1 pièce |  | chiffrable |

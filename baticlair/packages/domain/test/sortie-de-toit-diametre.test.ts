@@ -22,7 +22,13 @@ describe("sortie de toit : embase ou platine, chapeau, collerette pour la fumée
     const q = v.questions.find((d) => d.key === "engine:param:diametre_sortie")!;
     expect(q.question!.options!.map((o) => o.label)).toEqual(["Ø 80", "Ø 100", "Ø 125", "Ø 150", "Ø 180", "VMC"]);
     expect(v.questions.map((d) => d.key)).toContain("engine:param:usage_sortie");
-    expect(pieces(v)).toEqual([]);
+    // §49.2.5 : l'embase et le chapeau sortent quand même, orange « Info manquante » (le diamètre), jamais un Ø deviné.
+    expect(pieces(v)).toEqual([
+      ["Embase plomb de sortie de toit", "1 pièce", undefined],
+      ["Chapeau de sortie de toit", "1 pièce", undefined],
+    ]);
+    const rows = v.screen.groups.flatMap((g) => g.rows).filter((r) => v.toBuy.some((b) => b.key === r.itemKey && /embase|chapeau/i.test(b.label)));
+    for (const r of rows) expect(r).toMatchObject({ status: "check", reason: expect.stringMatching(/^Info manquante : diamètre/) });
   });
 
   it("ardoise, Ø 150, conduit de fumée : embase plomb, chapeau et collerette, le diamètre en précision", () => {

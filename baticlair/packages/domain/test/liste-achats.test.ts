@@ -76,19 +76,26 @@ describe("liste d'achats : D-2026-015 (tuiles HP10, 120 m²)", () => {
     // Le comptoir demande aussi la pose des crochets de gouttière (§47.8) ; « gouttière de 25 » et « Ø80 » sont au devis.
     // RÈGLE NUMÉRO UN : ni angles, ni dauphins, ni jonctions, ni talons, ni abouts (non écrits) : ni ligne, ni question.
     expect(v.questions.map((q) => q.key)).toEqual(["engine:param:diametre_sortie", "engine:param:fixation_crochet", "engine:param:usage_sortie", "engine:product:tuile"]);
+    // §49.1 : dans l'ordre du devis. §49.2.5 : ce qui attend une réponse sort quand même, orange « Info manquante » :
+    // la couverture (le modèle lu à confirmer : la mesure de 120 m² n'est jamais une quantité), les crochets de gouttière
+    // (« ? » : leur pose), l'embase et le chapeau (le diamètre).
     expect(v.toBuy.map((b) => [short(b.label), b.quantity])).toEqual([
-      ["Liteaux 27×40", "547 ml"],
       ["Écran HPV, rouleau 1,50 × 50 m", "2 rouleaux"],
+      ["Liteaux 27×40", "547 ml"],
+      ["Couverture en tuiles à emboîtement HP10 rouge", null],
       ["Tuiles de rive", "78 pièces"],
       ["Faîtières", "29 pièces"],
       ["Closoir", "2 rouleaux de 5 m"],
       ["Crochets de faîtière", "29 pièces"],
       ["Gouttière PVC demi-ronde sable de 25", "5 longueurs de 4 m"],
       ["Naissances PVC demi-ronde sable de 25 Ø80", "2 pièces"],
+      ["Crochets de gouttière PVC ? de 25", "52 pièces"],
       ["Tubes de descente PVC sable Ø80, longueur 4 m", "2 pièces"],
       ["Coudes de descente PVC sable Ø80", "4 pièces"],
       ["Colliers de descente Ø80", "6 pièces"],
       ["Chatières de ventilation", "10 pièces"],
+      ["Embase plomb de sortie de toit", "1 pièce"],
+      ["Chapeau de sortie de toit", "1 pièce"],
     ]);
     expect(v.toQuote).toEqual([]);
     const sortie = read(D2026_015_LINES, { "param:diametre_sortie": { value: "150", unit: "mm" }, "param:usage_sortie": { value: "1", unit: "u" } });
@@ -117,6 +124,7 @@ describe("liste d'achats : devis ardoises (200 m², jouées, cheminée)", () => 
   it("à l'ouverture : les questions du comptoir (façonnage, développé, périmètre de cheminée, descentes et leur Ø, 6 : ardoises ou jouées ?), le reste calculé", () => {
     const v = read(ARDOISES_LUCARNES_LINES);
     expect(v.questions.map((q) => q.key).sort()).toEqual([
+      "engine:param:consommables",
       "engine:param:developpe",
       "engine:param:diametre_descente",
       // §48.6 : « tu façonnes ? » pour chaque ouvrage zinc (abergement, faîtage), jamais une seule question.
@@ -128,10 +136,14 @@ describe("liste d'achats : devis ardoises (200 m², jouées, cheminée)", () => 
     ]);
     // RÈGLE NUMÉRO UN : seul ce que le devis écrit (liteaux, ardoises, gouttière et sa naissance, faîtage zinc, chatières).
     // Plus de crochets d'ardoise, contre-liteaux, écran, pattes ni crochets de gouttière : le devis n'en écrit pas.
+    // §49.2.5 : la naissance d'office attend « combien de descentes ? », le faîtage et l'abergement leur façonnage : orange.
     expect(v.toBuy.map((b) => [short(b.label), b.quantity])).toEqual([
-      ["Ardoises naturelles Espagne 1er choix 30×22", "9 271 pièces"],
       ["Liteaux 18×40", "2 049 ml"],
+      ["Ardoises naturelles Espagne 1er choix 30×22", "9 271 pièces"],
       ["Gouttière zinc dév. 25", "5 longueurs de 4 m"],
+      ["Naissances zinc", null],
+      ["Faîtage en bande zinc", "17 ml"],
+      ["Abergement de cheminée zinc", "2 pièces"],
       ["Chatières de ventilation", "12 pièces"],
     ]);
     // Un faîtage ZINC ne donne jamais des faîtières en terre cuite.
@@ -151,6 +163,7 @@ describe("liste d'achats : devis ardoises (200 m², jouées, cheminée)", () => 
       "param:perimetre_cheminee": { value: "3", unit: "m" },
       "param:developpe": { value: "250", unit: "mm" },
       "param:diametre_descente": { value: "80", unit: "mm" },
+      "param:consommables": { value: "0", unit: "u" },
     });
     expect(v.questions).toEqual([]);
     expect(v.toBuy.find((b) => b.label.startsWith("Naissances"))).toMatchObject({ label: "Naissances zinc dév. 25 Ø80", quantity: "2 pièces" });
@@ -164,9 +177,9 @@ describe("liste d'achats : devis ardoises (200 m², jouées, cheminée)", () => 
     // La carte du quantitatif : chaque article sous son ouvrage, avec la mesure du devis.
     expect(v.groups.map((g) => [g.label, g.measure, g.itemKeys.length])).toEqual([
       ["Couverture en ardoises au crochet", "200 m²", 2],
+      ["Gouttière", "17 m", 2],
       ["Faîtage en bande zinc", "17 m", 1],
       ["Abergement de cheminée", "2 unités", 2],
-      ["Gouttière", "17 m", 2],
       ["Autres articles du devis", null, 1],
     ]);
     expect(v.groups.flatMap((g) => g.itemKeys).sort()).toEqual(v.toBuy.map((b) => b.key).sort());

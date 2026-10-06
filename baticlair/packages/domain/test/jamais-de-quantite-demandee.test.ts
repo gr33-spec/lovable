@@ -145,6 +145,7 @@ describe("doutes de calcul de l'IA : jamais posés à l'artisan", () => {
   it("le devis ardoises du fondateur, doutes de l'IA compris : les questions du comptoir (façonnage, développé, périmètre de cheminée, descentes et leur Ø, 6 jouées ?), aucune de quantité", () => {
     const v = readWithDoubts();
     expect(v.questions.map((q) => q.key).sort()).toEqual([
+      "engine:param:consommables",
       "engine:param:developpe",
       "engine:param:diametre_descente",
       // §48.6 : une question « tu façonnes ? » par ouvrage de zinguerie, jamais une seule pour tout le zinc.

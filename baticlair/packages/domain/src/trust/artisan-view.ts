@@ -1,4 +1,4 @@
-import { computeChantier, type Assumption, type CompanyPreferences, type EngineOptions, type NeedResult, type Question, type WorkItemInput } from "../referential/engine.js";
+import { computeChantier, CONSUMABLES_KEY, type Assumption, type CompanyPreferences, type EngineOptions, type NeedResult, type Question, type WorkItemInput } from "../referential/engine.js";
 import type { Referential } from "../referential/model.js";
 import type { LineRole } from "../referential/line-roles.js";
 import type { QuotePlan } from "../referential/plan.js";
@@ -498,7 +498,14 @@ export function computeWithAnswers(
   options: EngineOptions = {},
   /** Emplacements déjà donnés comme achat par le devis (voir slotsGivenByQuote) : ni calcul montré, ni question. */
   given: ReadonlySet<string> = new Set(),
-): { needs: (NeedResult & { workItemId: string })[]; questions: Question[]; declined: string[]; checks: (NeedResult & { workItemId: string })[] } {
+): {
+  needs: (NeedResult & { workItemId: string })[];
+  questions: Question[];
+  declined: string[];
+  checks: (NeedResult & { workItemId: string })[];
+  /** §49.2.5 : les articles qui attendent une donnée, calculés sans elle (« ? » dans la désignation), pour « Info manquante ». */
+  unknowns: (NeedResult & { workItemId: string })[];
+} {
   const declined = new Set(Object.entries(answers).filter(([, v]) => v === null).map(([k]) => k));
   // Un ouvrage dont TOUTES les lignes sont déjà des quantités d'achat (« 42 faîtières ») n'a rien à calculer :
   // le devis a fait le travail, BatiClair ne lui ajoute ni besoin ni question.
@@ -552,6 +559,13 @@ export function computeWithAnswers(
       if (def.kind !== "artisan_preference" || !habit || params[def.key] || answers[`param:${def.key}`] !== undefined || answers[scopedKey(def.key, input.workItemId)] !== undefined) continue;
       params[def.key] = { value: habit, unit: def.unit, origin: "artisan", evidence: "Habitude de votre entreprise" };
     }
+    // §49.1 point 4 : la question consommables vaut pour tout le chantier ; l'habitude de l'artisan (« comme d'habitude ? »)
+    // vaut réponse tant que ce chantier n'en a pas donné d'autre.
+    const consumables = answers[`param:${CONSUMABLES_KEY}`];
+    const usualConsumables = preferences.params?.[CONSUMABLES_KEY];
+    if (consumables && typeof consumables !== "string") params[CONSUMABLES_KEY] = { ...consumables, origin: "artisan" };
+    else if (typeof consumables === "string" && consumables !== "") params[CONSUMABLES_KEY] = { value: consumables, unit: "u", origin: "artisan" };
+    else if (consumables === undefined && usualConsumables !== undefined) params[CONSUMABLES_KEY] = { value: usualConsumables, unit: "u", origin: "artisan", evidence: "Habitude de votre entreprise" };
     return { ...input, products, params, preferences: prefs, ...(declinedSlots.length > 0 ? { declined: declinedSlots } : {}) };
   });
   // Les données demandées pièce par pièce : seulement quand plusieurs ouvrages du devis en dépendent (sinon une question).
@@ -652,7 +666,24 @@ export function computeWithAnswers(
       : computeChantier(ref, current, { ...options, quantityOnly: true }).workItems.flatMap((w) =>
           w.needs.filter((n) => n.status === "calculated" && given.has(`${w.workItemId}/${n.slot}`)).map((n) => ({ ...n, workItemId: w.workItemId })),
         );
-  return { needs, questions, declined: [...declined], checks };
+  // §49.2.5 « Info manquante » : un article écrit qui attend une donnée (le développé de la gouttière) sort quand même,
+  // avec la quantité que le calcul sait donner sans elle et un « ? » à sa place dans la désignation (jamais devinée).
+  // Seulement une donnée qui ne change que l'ARTICLE (le développé, le diamètre) : une donnée qui change la quantité (la
+  // pente contredite, le façonnage) laisse la ligne écrite telle quelle, avec la quantité du devis.
+  // (Les crochets d'ardoise qui suivent les ardoises attendent la même donnée d'article : elle vaut pour l'ouvrage.)
+  const articleOnly = (n: (typeof needs)[number]) => {
+    const work = ref.workItems.find((w) => w.id === n.workItemId);
+    const m = /^param:([a-z0-9_]+)$/.exec(n.question?.key ?? "");
+    return !!m && (work?.needs ?? []).some((r) => (r.precisionRequires ?? []).includes(m[1]!));
+  };
+  const waiting = new Set(needs.filter((n) => n.status === "question" && !n.consumable && n.origin !== "suggested" && articleOnly(n)).map((n) => `${n.workItemId}/${n.needId}`));
+  const unknowns =
+    waiting.size === 0
+      ? []
+      : computeChantier(ref, current, { ...options, quantityOnly: true, blankUnknown: true }).workItems.flatMap((w) =>
+          w.needs.filter((n) => n.status === "calculated" && waiting.has(`${w.workItemId}/${n.needId}`)).map((n) => ({ ...n, workItemId: w.workItemId })),
+        );
+  return { needs, questions, declined: [...declined], checks, unknowns };
 }
 
 /** Les données qui se demandent ouvrage par ouvrage (§48.2, « zinc, pièce par pièce ») : la clé porte l'ouvrage. */

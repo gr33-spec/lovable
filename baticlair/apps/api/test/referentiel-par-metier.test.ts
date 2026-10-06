@@ -20,7 +20,8 @@ beforeEach(async () => {
 });
 
 type Q = { metier: string; version_referentiel: string; lignes: { libelle: string; quantite: number | null; a_confirmer: boolean; raison?: string }[]; a_chiffrer: { libelle: string; raison: string }[]; hypotheses: { cle: string }[] };
-const CLOISON = { lignes: [{ libelle: "Cloison 72/48 BA13 sur ossature", quantite: "40", unite: "m²" }] };
+// §49.1 : les rails et montants n'existent que s'ils sont écrits ; vis, bande et enduit sont des consommables (sur le « oui »).
+const CLOISON = { lignes: [{ libelle: "Cloison 72/48 BA13 sur ossature, rails et montants, hauteur 2,50 m", quantite: "40", unite: "m²" }] };
 
 describe("la porte choisit le référentiel selon le métier", () => {
   it("un couvreur : référentiel couverture, comme avant", async () => {
@@ -29,18 +30,19 @@ describe("la porte choisit le référentiel selon le métier", () => {
     expect(q).toMatchObject({ metier: "couverture", version_referentiel: ROOFING_REFERENTIAL.version });
   });
 
-  it("un plaquiste (ou « metier: platrerie ») : référentiel plâtrerie ; plaques, vis, bande, enduit calculés (§16), rails et montants « à vérifier », orange (§47.1)", async () => {
+  it("un plaquiste (ou « metier: platrerie ») : référentiel plâtrerie ; plaques calculées (§16), rails et montants écrits « à vérifier », orange (§47.1) ; vis, bande, enduit sur le « oui » consommables", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "p@example.fr", "Plâtres Le Gall", ["drywall"]);
     const q = (await agent.post("/v1/quantitatifs").send(CLOISON)).body as Q;
     expect(q).toMatchObject({ metier: "platrerie", version_referentiel: PLATRERIE_REFERENTIAL.version });
     const commande = q.lignes.map((l) => `${l.libelle} : ${l.quantite}`);
-    // 40 m² × 2 faces × 1,10 ÷ 3 m² (BA13 1,20 × 2,50) = 30 plaques ; 80 m² × 15 = 1 200 vis ; × 2 = 160 ml de bande ; × 0,4 = 32 kg d'enduit.
-    expect(commande).toEqual(expect.arrayContaining([expect.stringMatching(/BA13.* : 30$/), expect.stringMatching(/[Vv]is.* : 1200$/), expect.stringMatching(/[Bb]ande.* : 160$/), expect.stringMatching(/[Ee]nduit.* : 32$/)]));
+    // 40 m² × 2 faces × 1,10 ÷ 3 m² (BA13 1,20 × 2,50) = 30 plaques.
+    expect(commande).toEqual(expect.arrayContaining([expect.stringMatching(/BA13.* : 30$/)]));
+    expect(commande.filter((l) => /[Vv]is|[Bb]ande|[Ee]nduit/.test(l))).toEqual([]);
     // Rails, montants : chiffres d'usage non validés par un plaquiste → calculés, mais « Quantité à confirmer » (§47.1, §47.3).
     const rails = q.lignes.find((l) => /[Rr]ail/.test(l.libelle))!;
     const montants = q.lignes.find((l) => /[Mm]ontant/.test(l.libelle))!;
-    expect(rails).toMatchObject({ a_confirmer: true, raison: expect.stringMatching(/^Quantité à confirmer : /) });
-    expect(montants).toMatchObject({ a_confirmer: true, raison: expect.stringMatching(/^Quantité à confirmer : /) });
+    expect(rails).toMatchObject({ a_confirmer: true, raison: expect.stringMatching(/Quantité à confirmer : /) });
+    expect(montants).toMatchObject({ a_confirmer: true, raison: expect.stringMatching(/Quantité à confirmer : /) });
     expect(q.lignes.find((l) => /BA13/.test(l.libelle))).toMatchObject({ a_confirmer: false });
     // Un couvreur qui précise « metier: platrerie » obtient le même tiroir.
     const roofer = await signUpWithCompany(ctx.app, "r@example.fr", "Toitures Martin");
@@ -59,7 +61,7 @@ describe("la porte choisit le référentiel selon le métier", () => {
       expect(q, c.metier).toMatchObject({ metier: c.metier, version_referentiel: c.ref.version });
       const l = q.lignes.find((x) => c.article.test(x.libelle))!;
       expect(l.quantite, c.metier).toBeGreaterThan(0);
-      if (l.a_confirmer) expect(l.raison).toMatch(/^Quantité à confirmer : \S/);
+      if (l.a_confirmer) expect(l.raison).toMatch(/(Quantité|Valeur par défaut) à confirmer : \S/);
     }
   });
 

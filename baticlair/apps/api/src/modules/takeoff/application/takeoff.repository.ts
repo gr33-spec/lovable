@@ -1,4 +1,4 @@
-import type { CompletionRecord, LineRole } from "@baticlair/domain";
+import type { CompletionRecord, LineRole, QuoteLineReading } from "@baticlair/domain";
 import type { TenantContext } from "../../tenancy/index.js";
 
 export type TakeoffStatus = "draft" | "validated";
@@ -25,6 +25,8 @@ export interface NewTakeoffLine extends LineFields {
   /** Prompt A (§41.1) : matériau et format nommés, dimensions lues ; gardés pour l'annexe fournisseur (§42). */
   material?: string | null;
   dimensions?: Record<string, string> | null;
+  /** Prompt A v12 (§41.1 réécrit) : rôle, articles écrits, façonnage écrit, « manque » (questions de comptoir, §49.4). */
+  reading?: QuoteLineReading | null;
 }
 
 export interface TakeoffLineRecord extends NewTakeoffLine {

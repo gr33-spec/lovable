@@ -323,6 +323,7 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
   const facts: SiteFact[] = [];
   const products = new Map<string, Map<string, SlotChoice | "conflict">>();
   const mentioned = new Map<string, Set<string>>();
+  const cited = new Map<string, { slot: string; word: string; line: string }[]>();
   const characteristicsBySlot: Record<string, string[]> = {};
   const askInstead = new Map<string, Set<string>>();
   const quantities: { fact: SiteFact; slot: string; ref: string }[] = [];
@@ -332,6 +333,14 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
     if (v.kind === "labor") {
       // « Pose … pente 30° », « Façonnage et pose des bandes » : les données écrites valent pour l'ouvrage nommé.
       if (work) readWritten(work, line.ref, text, facts);
+      // §49.6 : « fixation … des tuyaux de descente » cite les colliers sans les chiffrer : ils sortent, orange.
+      for (const s of work?.slots ?? []) {
+        const word = (s.citedBy ?? []).find((k) => keywordPosition(text, k) >= 0);
+        if (!word || !work) continue;
+        const list = cited.get(work.id) ?? [];
+        if (!list.some((c) => c.slot === s.key)) list.push({ slot: s.key, word, line: line.ref });
+        cited.set(work.id, list);
+      }
       plans.push({ ref: line.ref, status: "not_material" });
       continue;
     }
@@ -483,6 +492,7 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
         params,
         products: Object.fromEntries(chosen),
         mentioned: [...mentioned.get(w.id)!],
+        ...(cited.has(w.id) ? { cited: cited.get(w.id)! } : {}),
         ...(preferences ? { preferences } : {}),
         ...(askInstead.has(w.id) ? { askInstead: [...askInstead.get(w.id)!] } : {}),
       };

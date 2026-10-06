@@ -348,10 +348,21 @@ export interface Slot {
    * dès que cet article est écrit au devis.
    */
   formOf?: string;
-  /** Accessoire indissociable de l'ouvrage écrit (la naissance d'une gouttière, §48.7) : seul article ajouté d'office. */
+  /**
+   * §49.1 point 3 : accessoire indissociable d'une ligne écrite, liste FERMÉE (une seule entrée aujourd'hui : la naissance
+   * d'une gouttière, §48.7). Toute nouvelle entrée est une décision du fondateur, écrite au §49.1.
+   */
   indissociable?: true;
-  /** La ligne écrite en mètres se commande en longueurs : « 2 descentes de 3 m » = 2 longueurs de 3 m (D-2026-020). */
-  piecesFrom?: { count: string; length: string };
+  /**
+   * La ligne écrite en mètres se commande en pièces : « 2 descentes de 3 m » = 2 tubes de 3 m (D-2026-020, §49.2.3).
+   * `piece` : le nom de la pièce au comptoir (« tube »), « longueur » sinon.
+   */
+  piecesFrom?: { count: string; length: string; piece?: { one: string; many: string } };
+  /**
+   * Mots d'une ligne de POSE qui citent cet article sans le chiffrer (« fixation » des descentes = les colliers) : il
+   * sort, calculé, mais orange (« le devis parle de fixation sans les chiffrer », §49.6).
+   */
+  citedBy?: string[];
 }
 
 /**
@@ -422,6 +433,18 @@ export interface NeedRule extends Provenance {
    * ses données ne sont pas connues, le besoin existe et pose sa question (« tu façonnes ? »).
    */
   when?: string;
+  /**
+   * §49.1 point 4 : consommable de pose (pointes, vis, pattes, étain, silicone). Il ne sort que si l'artisan a dit OUI à
+   * la question consommables, et seulement lié à une ligne écrite (`consumableFor` : l'emplacement qui doit être écrit ;
+   * sans lui, n'importe quel article écrit de l'ouvrage). Une famille marquée « consumable » l'est d'office.
+   */
+  consumable?: true;
+  consumableFor?: string;
+  /**
+   * Quantité ESTIMÉE (les feuilles d'un zinc façonné sur place, d'après le développé) : la ligne sort orange avec cette
+   * phrase (« ajuste selon ton façonnage », §49.6), jusqu'au « C'est bon » de l'artisan.
+   */
+  estimate?: string;
 }
 
 export interface WorkItemType {
@@ -486,8 +509,9 @@ export interface Referential {
   /** Ouvrages comptés à l'unité dans les devis (vocabulaire). */
   countedWorks?: CountedWork[];
   /**
-   * RÈGLE NUMÉRO UN : seuls les articles écrits au devis sortent (leur forme d'achat comprise), plus les accessoires
-   * indissociables. Aucun article « du métier » ajouté d'office, ni en vert, ni en orange, ni en suggestion.
+   * RÈGLE NUMÉRO UN (§49.1, tous les tiroirs, tous les métiers) : seuls les articles écrits au devis sortent (leur forme
+   * d'achat comprise), plus la naissance indissociable et les consommables acceptés. Absent : la règle s'applique.
+   * `false` : VALIDATION DU RÉFÉRENTIEL seulement (ses formules sur tous les articles), jamais pour un artisan.
    */
-  writtenOnly?: true;
+  writtenOnly?: boolean;
 }

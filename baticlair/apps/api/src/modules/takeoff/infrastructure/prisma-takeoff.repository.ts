@@ -1,4 +1,5 @@
-import type { CompletionRecord, LineRole } from "@baticlair/domain";
+import type { Prisma } from "../../../generated/prisma/client.js";
+import type { CompletionRecord, LineRole, QuoteLineReading } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { isUuid } from "../../../platform/validation/ids.js";
 import type { TenantContext } from "../../tenancy/index.js";
@@ -63,10 +64,30 @@ function toRecord(row: Row): TakeoffRecord {
       priceRaw: l.priceRaw,
       material: l.material,
       dimensions: stringMap(l.dimensions),
+      reading: readingOf(l.reading),
       confirmed: l.confirmedAt !== null,
       role: l.role === "measure" || l.role === "purchase" || l.role === "undetermined" ? l.role : null,
     })),
   };
+}
+
+/** La lecture §41.1 d'une ligne, relue depuis la base : ce qui n'a pas la bonne forme est ignoré. */
+function readingOf(value: unknown): QuoteLineReading | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const v = value as Record<string, unknown>;
+  const text = (x: unknown) => (typeof x === "string" && x.trim() ? x.trim() : null);
+  const role = ["fourniture", "pose", "fourniture_et_pose", "hors_quantitatif"].includes(String(v.role)) ? (v.role as QuoteLineReading["role"]) : null;
+  const faconnage = v.faconnage === "artisan" || v.faconnage === "fourni" ? v.faconnage : null;
+  const articles = Array.isArray(v.articles)
+    ? v.articles.flatMap((a) => {
+        if (!a || typeof a !== "object") return [];
+        const o = a as Record<string, unknown>;
+        const nom = text(o.nom);
+        return nom ? [{ nom, materiau: text(o.materiau), quantite: text(o.quantite), unite: text(o.unite), elements: text(o.elements) }] : [];
+      })
+    : [];
+  const manque = Array.isArray(v.manque) ? v.manque.flatMap((m) => (text(m) ? [text(m)!] : [])) : [];
+  return { role, articles, faconnage, manque };
 }
 
 /** Un objet « clé → texte » lu tel quel depuis la base ; tout le reste est ignoré. */
@@ -156,6 +177,7 @@ export class PrismaTakeoffRepository implements TakeoffRepository {
             origin: l.origin ?? "ai",
             material: l.material ?? null,
             dimensions: l.dimensions ?? undefined,
+            reading: l.reading ? (l.reading as unknown as Prisma.InputJsonValue) : undefined,
           })),
         },
       },

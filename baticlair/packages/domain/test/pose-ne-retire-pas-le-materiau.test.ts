@@ -10,9 +10,11 @@ import { readTradeQuote } from "./support/read-trade.js";
  * même devis (« Feutre piscine 43 m² » puis « Pose feutre piscine 43 m² »).
  */
 describe("« Pose » en début de ligne ne retire jamais le matériau", () => {
-  it("« Pose toile de verre » se calcule : toile et colle", () => {
+  it("« Pose toile de verre » se calcule : la toile ; sa colle seulement si le devis l'écrit (§49.1)", () => {
     const p = readTradeQuote(PEINTURE_REFERENTIAL, [{ ref: "1", designation: "Pose toile de verre", quantity: "30", unit: "m²" }]);
-    expect(p.toBuy.map((b) => b.label)).toEqual(expect.arrayContaining([expect.stringMatching(/^Toile de verre/), expect.stringMatching(/^Colle toile de verre/)]));
+    expect(p.toBuy.map((b) => b.label)).toEqual([expect.stringMatching(/^Toile de verre/)]);
+    const colle = readTradeQuote(PEINTURE_REFERENTIAL, [{ ref: "1", designation: "Pose toile de verre et colle", quantity: "30", unit: "m²" }]);
+    expect(colle.toBuy.map((b) => b.label)).toEqual(expect.arrayContaining([expect.stringMatching(/^Toile de verre/), expect.stringMatching(/^Colle toile de verre/)]));
   });
 
   it("« Pose de tuiles » se calcule : tuiles et liteaux", () => {

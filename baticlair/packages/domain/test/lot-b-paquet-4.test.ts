@@ -13,8 +13,8 @@ const PAQUET: Metier[] = [
     ref: PLAFONDS_SUSPENDUS_REFERENTIAL,
     metier: "plafonds-suspendus",
     bench: [{ ref: "1", designation: "Faux plafond démontable dalles minérales 600x600 sur ossature T24 blanche", quantity: "70", unit: "m²" }],
-    questions: ["Suspentes : quelle hauteur de plénum ?"],
-    couleurs: { vert: 0, orange: 5, gris: 0 },
+    questions: [],
+    couleurs: { vert: 0, orange: 1, gris: 0 },
   },
   {
     nom: "Menuiserie intérieure",
@@ -25,8 +25,8 @@ const PAQUET: Metier[] = [
       { ref: "2", designation: "Plinthes MDF blanches collées", quantity: "48", unit: "ml" },
       { ref: "3", designation: "Lambris sapin plafond chambre", quantity: "14", unit: "m²" },
     ],
-    questions: [],
-    couleurs: { vert: 1, orange: 6, gris: 0 },
+    questions: ["Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?"],
+    couleurs: { vert: 1, orange: 2, gris: 0 },
   },
   {
     nom: "Cuisine",
@@ -36,16 +36,16 @@ const PAQUET: Metier[] = [
       { ref: "1", designation: "Meubles bas Delinia ID façades Ruxe blanc mat", quantity: "6", unit: "u" },
       { ref: "2", designation: "Plan de travail stratifié 38 mm chêne", quantity: "3.6", unit: "ml" },
     ],
-    questions: [],
-    couleurs: { vert: 2, orange: 2, gris: 0 },
+    questions: ["Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?"],
+    couleurs: { vert: 2, orange: 0, gris: 0 },
   },
   {
     nom: "Photovoltaïque",
     ref: PHOTOVOLTAIQUE_REFERENTIAL,
     metier: "photovoltaique",
     bench: [{ ref: "1", designation: "Panneaux photovoltaïques 425 Wc full black en surimposition sur tuiles", quantity: "10", unit: "u" }],
-    questions: ["Onduleur : micro-onduleurs ou onduleur string ?"],
-    couleurs: { vert: 1, orange: 4, gris: 0 },
+    questions: [],
+    couleurs: { vert: 1, orange: 0, gris: 0 },
   },
 ];
 

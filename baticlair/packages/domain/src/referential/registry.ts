@@ -57,7 +57,7 @@ const LOTS: readonly Referential[] = [
  */
 export const CONSTRUCTEUR_REFERENTIAL: Referential = composeReferentials(
   "constructeur",
-  "constructeur-2026.10.05-1",
+  "constructeur-2026.10.06-2",
   "general",
   LOTS,
 );

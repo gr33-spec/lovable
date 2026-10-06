@@ -57,8 +57,9 @@ class Pass implements QuantitatifPass {
       usage: { inputTokens: 4000, outputTokens: 600 },
       status: "success",
       output: {
-        ajouts: [{ ouvrage: gouttiere, designation: "Mastic silicone neutre, cartouche 310 ml", quantite: "2", unite: "cartouches", raison: "Étanchéité des raccords de la gouttière." }],
-        doutes: [{ article: gouttiere, raison: "Zinc naturel ou prépatiné ? Le comptoir doit le savoir.", remplacement: { designation: "Gouttière zinc naturel demi-ronde dév. 33", quantite: null, unite: null } }],
+        // §41.2 : « ajouts » TOUJOURS vide ; ce que l'IA y mettrait quand même est ignoré.
+        ajouts: ["Mastic silicone neutre, cartouche 310 ml"],
+        doutes: [{ repere: gouttiere, raison: "Zinc naturel ou prépatiné ? Le comptoir doit le savoir.", proposition: "Gouttière zinc naturel demi-ronde dév. 33" }],
       },
       errorCode: null,
       durationMs: 1,
@@ -87,18 +88,15 @@ type Decision = { key: string; primary: { label: string }; suggestion?: { label:
 type Ecran = { lines: { designation: string }[]; aiSuggestions: { key: string; label: string; quantity: string | null; unit: string | null; reason: string }[]; view: { decisions: Decision[] }; purchase: { toBuy: { key: string; label: string; quantity: string | null }[]; screen: { groups: { rows: Row[] }[] } } };
 
 describe("le prompt de l'appel n° 2", () => {
-  it("le prompt B du §41.2 est branché mot pour mot, puis le contexte injecté et le mode un passage", () => {
+  it("le prompt B du §41.2 (réécrit) est branché mot pour mot, puis le référentiel chargé ; plus de bloc « MODE UN SEUL PASSAGE » ajouté", () => {
     const doc = readFileSync(new URL("../../../docs/referentiel-couverture.md", import.meta.url), "utf8");
     const b = doc.slice(doc.indexOf("### 41.2 Prompt B"), doc.indexOf("### 41.3")).split("```")[1]!.replace(/^\n|\n$/g, "");
     expect(PROMPT_B_41_2).toBe(b);
     const system = quantitatifSystem({ metier: "Couverture", entreprise: "Toitures Le Gall", ville: "Brest", referentiel: "- Gouttière : crochets" });
-    expect(system).toContain("Tu es l'assistant quantitatif de Toitures Le Gall, Couverture à Brest.");
-    expect(system).toMatch(/MODE UN SEUL PASSAGE/);
-    // RÈGLE NUMÉRO UN (fondateur, 2026-10-06) : prioritaire sur le prompt B, plus aucun ajout demandé à l'IA.
-    expect(system).toMatch(/RÈGLE NUMÉRO UN .*PRIORITAIRE SUR TOUT CE QUI PRÉCÈDE/);
-    expect(system).toContain("`ajouts` reste TOUJOURS une liste vide.");
-    expect(system.indexOf("RÈGLE NUMÉRO UN")).toBeGreaterThan(system.indexOf("Tu es l'assistant quantitatif"));
-    expect(system).not.toMatch(/DOIT comprendre ses fixations/);
+    expect(system).toContain("Tu es le vendeur de comptoir du négoce qui relit la demande de devis de Toitures Le Gall, Couverture à Brest, avant de la passer au magasin.");
+    expect(system).toContain("- ajouts : TOUJOURS une liste vide.");
+    expect(system).not.toMatch(/MODE UN SEUL PASSAGE|RÈGLE NUMÉRO UN|\{[a-z_]+\}/);
+    expect(system.endsWith("RÉFÉRENTIEL CHARGÉ :\n- Gouttière : crochets")).toBe(true);
   });
 });
 
@@ -135,9 +133,10 @@ describe("deux appels IA max : lecture + quantitatif", () => {
     // §48.4 : plus aucune question après la sortie de la liste (celles laissées sans réponse sont closes au calcul).
     expect(q.ecran.view.decisions.filter((d) => (d as { question?: unknown }).question)).toEqual([]);
     // Une question laissée vide (la pose des crochets de gouttière…) ne disparaît pas : sa ligne sort orange « Info manquante ».
-    const manque = rows.filter((r) => r.decisionKey?.startsWith("manque:"));
+    // §49.2.5 : elle part telle quelle d'un « C'est bon ».
+    const manque = rows.filter((r) => r.reason?.startsWith("Info manquante"));
     expect(manque.length).toBeGreaterThan(0);
-    for (const r of manque) expect(r).toMatchObject({ status: "check", reason: expect.stringMatching(/^Info manquante : /) });
+    for (const r of manque) expect(r).toMatchObject({ status: "check", decisionKey: expect.stringMatching(/^ratio:|^manque:/), reason: expect.stringMatching(/^Info manquante : /) });
     expect(q.ecran.view.decisions.find((d) => d.key === `ia-doute:${gouttiere.key}`)!.suggestion).toEqual({ label: "Gouttière zinc naturel demi-ronde dév. 33", quantity: null, unit: null });
     // RÈGLE NUMÉRO UN : l'ajout que l'IA rend malgré la consigne (un mastic que le devis n'écrit pas) n'est NI dans la
     // liste, NI une ligne orange, NI une suggestion.

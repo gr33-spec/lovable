@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.06-39",
+  "version": "roofing-2026.10.06-40",
   "writtenOnly": true,
   "trade": "roofing",
   "sources": [
@@ -242,6 +242,22 @@
       "code": "sealant",
       "label": "Mastic, silicone",
       "needUnit": "ml",
+      "attributes": [],
+      "keyAttributes": [],
+      "consumable": true
+    },
+    {
+      "code": "solder",
+      "label": "Étain à souder",
+      "needUnit": "kg",
+      "attributes": [],
+      "keyAttributes": [],
+      "consumable": true
+    },
+    {
+      "code": "flux",
+      "label": "Décapant zinc",
+      "needUnit": "u",
       "attributes": [],
       "keyAttributes": [],
       "consumable": true
@@ -4722,6 +4738,70 @@
       ]
     },
     {
+      "id": "baguette-etain-250",
+      "family": "solder",
+      "label": "Baguette d'étain 33 % pour soudure du zinc, 250 g",
+      "shortLabel": "Étain à souder en baguettes de 250 g",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "baguette",
+          "label": {
+            "one": "baguette de 250 g",
+            "many": "baguettes de 250 g"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "0.25",
+            "unit": "kg",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "« Baguette de soudure étain 33 %, 220-250 g » (§25.3)."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "decapant-zinc-250",
+      "family": "flux",
+      "label": "Décapant pour soudure du zinc, flacon de 250 ml",
+      "shortLabel": "Décapant zinc, flacon de 250 ml",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "flacon",
+          "label": {
+            "one": "flacon de 250 ml",
+            "many": "flacons de 250 ml"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
       "id": "vis-inox-4x40",
       "family": "strip_screw",
       "label": "Vis inox 4 × 40 mm pour bandes zinc",
@@ -7598,6 +7678,7 @@
           "core": true,
           "exclusions": "Hors ardoises de rive, doublis à l'égout, coupes en noue et en arêtier (la perte de 5 % couvre casse et coupes de rive d'un pan simple).",
           "designation": "Ardoises naturelles {qualite_ardoise} {ardoise.longueur|cm#}×{ardoise.largeur|cm#}",
+          "precision": "{surface|m2} × {points.ardoises_m2|u/m2#} ardoises/m² (crochet {longueur_crochet|cm}, pente {pente|°}) + {marge} de marge",
           "precisionRequires": [
             "qualite_ardoise"
           ],
@@ -8793,6 +8874,7 @@
           "core": true,
           "exclusions": "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
           "precision": "pour {longueur_faitage|ml} de faîtage : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
+          "estimate": "Estimation d'après le développé : ajuste selon ton façonnage",
           "designation": "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           "precisionRequires": [
             "aspect_zinc"
@@ -8812,6 +8894,7 @@
           "formula": "longueur_faitage * regle.pattes_par_metre",
           "unit": "u",
           "core": true,
+          "consumable": true,
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -9434,6 +9517,7 @@
           "core": true,
           "exclusions": "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",
           "precision": "pour {longueur_noue|ml} de noue : estimation d'après un développé de {developpe_noue|cm}, ajuste selon ton façonnage",
+          "estimate": "Estimation d'après le développé : ajuste selon ton façonnage",
           "designation": "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           "precisionRequires": [
             "aspect_zinc"
@@ -10195,8 +10279,7 @@
             "text": "Un raccord par fenêtre, adapté à la couverture (§11).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "raccord-fenetre-toit"
-          },
-          "indissociable": true
+          }
         }
       ],
       "constants": {},
@@ -10875,6 +10958,7 @@
           "core": true,
           "exclusions": "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2) ; chutes non réemployées.",
           "precision": "pour {longueur_bande|ml} de bande : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
+          "estimate": "Estimation d'après le développé : ajuste selon ton façonnage",
           "designation": "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           "precisionRequires": [
             "aspect_zinc"
@@ -11212,6 +11296,16 @@
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "ciment-sable-solin"
           }
+        },
+        {
+          "key": "mastic",
+          "family": "sealant",
+          "label": "Silicone ou mastic",
+          "usual": {
+            "text": "Silicone neutre compatible zinc, 1 cartouche par 8 ml de joint (§25.6).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "cartouche-silicone-zinc"
+          }
         }
       ],
       "constants": {
@@ -11508,6 +11602,7 @@
           "core": true,
           "exclusions": "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
           "precision": "pour {longueur_bande|ml} de porte-solin : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
+          "estimate": "Estimation d'après le développé : ajuste selon ton façonnage",
           "designation": "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           "precisionRequires": [
             "aspect_zinc"
@@ -11530,6 +11625,25 @@
           "exclusions": "Mortier du solin cité au devis ; quantité estimée, pas calculée.",
           "designation": "Ciment 35 kg + sable (mortier de solin)",
           "precision": "pour le solin au mortier de ciment",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "mastic-porte-solin",
+          "slot": "mastic",
+          "formula": "longueur_bande",
+          "unit": "ml",
+          "core": false,
+          "consumable": true,
+          "consumableFor": "porte_solin",
+          "exclusions": "Un joint sur toute la longueur du porte-solin ; 1 cartouche par 8 ml (§25.6).",
+          "precision": "pour {longueur_bande|ml} de joint de solin",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -15080,9 +15194,72 @@
             "productId": "naissance-standard"
           },
           "indissociable": true
+        },
+        {
+          "key": "etain",
+          "family": "solder",
+          "label": "Étain à souder",
+          "citedBy": [
+            "soudure",
+            "soudures",
+            "souder"
+          ],
+          "usual": {
+            "text": "Baguettes d'étain 33 % de 250 g (§25.3).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "baguette-etain-250"
+          }
+        },
+        {
+          "key": "decapant",
+          "family": "flux",
+          "label": "Décapant zinc",
+          "usual": {
+            "text": "Décapant pour zinc, flacon de 250 ml (§25.3).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "decapant-zinc-250"
+          }
         }
       ],
       "constants": {
+        "etain_par_jonction": {
+          "kind": "installation_condition",
+          "value": "0.015",
+          "unit": "kg",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "draft",
+            "note": "§2 et §25.3 : ≈ 15 g d'étain par jonction, à valider par un couvreur (§25.7)."
+          },
+          "version": 1,
+          "label": "étain {v} par jonction"
+        },
+        "longueur_barre_gouttiere": {
+          "kind": "installation_condition",
+          "value": "4",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Gouttière zinc en longueurs de 4 m (§25.2)."
+        },
+        "flacons_decapant": {
+          "kind": "installation_condition",
+          "value": "1",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "draft",
+            "note": "§25.3 : 1 flacon de 250 ml pour ≈ 40 ml de soudure, à valider (§25.7)."
+          },
+          "version": 1,
+          "label": "décapant {v} flacon pour les soudures"
+        },
         "espacement_crochet": {
           "kind": "installation_condition",
           "value": "0.5",
@@ -15201,6 +15378,44 @@
             "verifiedAt": "2026-10-02",
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Validée sur présentation de la formule et d'un exemple chiffré (D-2026-015)."
+          },
+          "version": 1
+        },
+        {
+          "id": "etain-gouttiere",
+          "slot": "etain",
+          "formula": "(arrondi_sup(longueur_gouttiere / regle.longueur_barre_gouttiere) - 1 + nb_descentes) * regle.etain_par_jonction",
+          "unit": "kg",
+          "core": false,
+          "consumable": true,
+          "consumableFor": "etain",
+          "exclusions": "Une jonction soudée par longueur de 4 m après la première, plus une par naissance.",
+          "precision": "pour les soudures de {longueur_gouttiere|ml} de gouttière",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "decapant-gouttiere",
+          "slot": "decapant",
+          "formula": "regle.flacons_decapant",
+          "unit": "u",
+          "core": false,
+          "consumable": true,
+          "consumableFor": "etain",
+          "exclusions": "Un flacon pour les soudures de la gouttière.",
+          "precision": "pour les soudures de la gouttière",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1
         }
@@ -16291,7 +16506,11 @@
           },
           "piecesFrom": {
             "count": "nb_descentes",
-            "length": "hauteur_descente"
+            "length": "hauteur_descente",
+            "piece": {
+              "one": "tube",
+              "many": "tubes"
+            }
           }
         },
         {
@@ -16309,6 +16528,10 @@
           "key": "collier",
           "family": "downpipe_clamp",
           "label": "Colliers",
+          "citedBy": [
+            "fixation",
+            "fixations"
+          ],
           "usual": {
             "text": "Un collier tous les 2 m, plus un.",
             "source": "fondateur-reponses-2026-10-05",

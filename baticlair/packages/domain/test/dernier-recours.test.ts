@@ -58,8 +58,10 @@ describe("bandes zinc au ml (§36.4) : jamais « ml de zinc » nu", () => {
 
   it("sans façonnage connu : une question, pas « à chiffrer » ; le développé est demandé pour estimer les feuilles", () => {
     const r = computeWorkItem(ROOFING_REFERENTIAL, input({}));
-    // Les deux formes de la bande attendent la réponse ; rien d'autre (règle numéro un : ni mastic ni vis non écrits).
-    expect(r.needs.map((n) => n.status)).toEqual(["question", "question"]);
+    // Les deux formes de la bande attendent la réponse ; rien d'autre (§49.1 : mastic et vis, consommables, attendent
+    // seulement la question consommables).
+    expect(r.needs.filter((n) => !n.consumable).map((n) => n.status)).toEqual(["question", "question"]);
+    expect(r.needs.filter((n) => n.consumable).map((n) => n.question?.key)).toEqual(["param:consommables", "param:consommables"]);
     expect(need(r, "bandes-faconnees").question?.key).toBe("param:faconnage");
     const feuilles = computeWorkItem(ROOFING_REFERENTIAL, input({ faconnage: "1", longueur_bande: "5" }));
     expect(need(feuilles, "feuilles-bandes").question?.key).toBe("param:developpe");

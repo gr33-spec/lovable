@@ -44,7 +44,7 @@ const BORDURE: ParamDef = {
 
 export const PAVAGE_REFERENTIAL: Referential = {
   id: "pavage",
-  version: "pavage-2026.10.05-1",
+  version: "pavage-2026.10.06-2",
   trade: "paving",
   sources: [
     DEFINITION_SOURCE,
@@ -85,7 +85,7 @@ export const PAVAGE_REFERENTIAL: Referential = {
       params: [lineQuantity("surface", "Surface pavée", "m2", "Surface à paver ?"), EPAISSEUR],
       slots: [
         { key: "allee", family: "paving_work", label: "Pavage", measureOnly: true },
-        { key: "paves", family: "paver", label: "Pavés", usual: { text: "Pavés béton en palette.", source: USAGE, productId: "paves-beton" } },
+        { key: "paves", formOf: "allee", family: "paver", label: "Pavés", usual: { text: "Pavés béton en palette.", source: USAGE, productId: "paves-beton" } },
         { key: "sable", family: "bedding_sand", label: "Sable de pose", usual: { text: "Sable 0/4 en big-bag.", source: USAGE, productId: "sable-04" } },
       ],
       constants: {
@@ -118,7 +118,7 @@ export const PAVAGE_REFERENTIAL: Referential = {
       params: [lineQuantity("longueur", "Longueur de bordure", "m", "Longueur de bordure ?"), BORDURE],
       slots: [
         { key: "bordures", family: "kerb_work", label: "Bordures", measureOnly: true },
-        { key: "bordure", family: "kerb", label: "Bordures", usual: { text: "Bordure béton de 1 m.", source: HELLOPRO, productId: "bordure" } },
+        { key: "bordure", formOf: "bordures", family: "kerb", label: "Bordures", usual: { text: "Bordure béton de 1 m.", source: HELLOPRO, productId: "bordure" } },
       ],
       constants: { piece: rule("1", "m", "definition", ok("Bordure de 1 m."), ""), perte: rule("1.05", "1", USAGE, todo("Coupes (§5)."), "bordures +5 %") },
       needs: [

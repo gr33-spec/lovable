@@ -4,6 +4,7 @@ import { PISCINE_LINES } from "../../../packages/domain/test/devis-reels/piscine
 import { LEZARDRIEUX_LINES } from "../../../packages/domain/test/devis-reels/platrerie-lezardrieux.js";
 import type { BenchLine } from "../../../packages/domain/test/devis-reels/truth.js";
 import { ROOFING_REFERENTIAL } from "@baticlair/domain";
+import { confirmRemaining } from "./support/confirm.js";
 import { CompanyMemory } from "../src/modules/learning/application/company-memory.js";
 import { CorrectionJournal } from "../src/modules/learning/application/correction-journal.js";
 import type { TenantContext } from "../src/modules/tenancy/index.js";
@@ -257,7 +258,7 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
     // Partie chez le fournisseur : la liste d'achats, jamais « 2 unités d'ouvrage ».
     const answered = await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "product:tuile", value: "edilians-hp10-huguenot" }).expect(200);
     // Le devis ne dit ni le diamètre ni l'usage de la sortie de toit : deux questions à boutons.
-    expect((answered.body.view.decisions as { key: string }[]).map((d) => d.key)).toEqual(["engine:param:diametre_sortie", "engine:param:usage_sortie"]);
+    expect((answered.body.view.decisions as { key: string; question?: unknown }[]).filter((d) => d.question).map((d) => d.key)).toEqual(["engine:param:diametre_sortie", "engine:param:usage_sortie"]);
     await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "param:diametre_sortie", value: { value: "150", unit: "mm" } }).expect(200);
     const precised = await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "param:usage_sortie", value: { value: "1", unit: "u" } }).expect(200);
     expect((precised.body.purchase.toBuy as { label: string; precision?: string | null }[]).filter((b) => /sortie|collerette/i.test(b.label)).map((b) => [b.label, b.precision])).toEqual([
@@ -265,6 +266,7 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
       ["Chapeau de sortie de toit", "Ø 150"],
       ["Collerette d'étanchéité", "Ø 150, solin du conduit de fumée"],
     ]);
+    await confirmRemaining(agent, projectId, takeoffId);
     await agent.post(`/v1/takeoffs/${takeoffId}/validate`).expect(200);
     const s = await agent.post("/v1/suppliers").send({ name: "Point.P", email: "devis@pointp.fr" });
     const created = await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [s.body.id] }).expect(201);
@@ -338,6 +340,7 @@ describe("ouvrages comptés : « 6 unités » de jouées n'est jamais 6 ardoises
       }
       open = body.view.decisions.filter((d: { question?: unknown }) => d.question);
     }
+    await confirmRemaining(agent, projectId, takeoffId);
     await agent.post(`/v1/takeoffs/${takeoffId}/validate`).expect(200);
     const s = await agent.post("/v1/suppliers").send({ name: "Point.P", email: "devis@pointp.fr" });
     const packet = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [s.body.id] }).expect(201)).body.packet;

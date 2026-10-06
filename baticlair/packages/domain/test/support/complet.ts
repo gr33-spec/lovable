@@ -7,7 +7,7 @@ import { readQuote, type QuoteLineInput } from "./read-quote.js";
  * colliers…), écrits au devis ou non. Une liste d'achats d'artisan, elle, suit la règle numéro un (`writtenOnly`) :
  * ces tests vérifient le calcul d'un article le jour où le devis l'écrit, pas qu'il sort d'office.
  */
-export const REFERENTIEL_COMPLET: Referential = (({ writtenOnly: _w, ...rest }) => rest)(ROOFING_REFERENTIAL);
+export const REFERENTIEL_COMPLET: Referential = { ...ROOFING_REFERENTIAL, writtenOnly: false };
 
 /** Le parcours complet, en mode validation du référentiel (tous les articles de chaque ouvrage). */
 export function readQuoteComplet(bench: readonly QuoteLineInput[], answers: Record<string, EngineAnswer> = {}, extraFacts: readonly SiteFact[] = [], preferences: CompanyPreferences = HABITUDES_BANC): PurchaseView {

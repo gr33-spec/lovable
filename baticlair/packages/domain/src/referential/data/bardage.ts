@@ -22,7 +22,7 @@ const lame = (id: string, label: string, short: string, utile: ReturnType<typeof
 
 export const BARDAGE_REFERENTIAL: Referential = {
   id: "bardage",
-  version: "bardage-2026.10.05-1",
+  version: "bardage-2026.10.06-2",
   trade: "cladding",
   sources: [
     DEFINITION_SOURCE,
@@ -116,7 +116,7 @@ export const BARDAGE_REFERENTIAL: Referential = {
       params: [lineQuantity("surface", "Surface de bardage", "m2", "Surface à barder ?")],
       slots: [
         { key: "bardage", family: "cladding_work", label: "Bardage", measureOnly: true },
-        { key: "lames", family: "cladding_board", label: "Lames", keywords: ["douglas", "meleze", "lame"], ask: "Bardage : douglas ou mélèze ?" },
+        { key: "lames", formOf: "bardage", family: "cladding_board", label: "Lames", keywords: ["douglas", "meleze", "lame"], ask: "Bardage : douglas ou mélèze ?" },
         { key: "pare_pluie", family: "rain_screen", label: "Pare-pluie", usual: { text: "Pare-pluie de bardage 75 m².", source: DELTA, productId: "pare-pluie-75" } },
         { key: "tasseaux", family: "batten", label: "Tasseaux", usual: { text: "Tasseaux 27 × 40 traités classe 3.", source: SIVALBP, productId: "tasseau-27x40" } },
         { key: "pointes", family: "cladding_nail", label: "Pointes inox", usual: { text: "Pointes annelées inox.", source: SIVALBP, productId: "pointes-inox" } },

@@ -37,7 +37,7 @@ const dalle = (id: string, label: string, short: string, carton: ReturnType<type
 
 export const PLAFONDS_SUSPENDUS_REFERENTIAL: Referential = {
   id: "plafonds-suspendus",
-  version: "plafonds-suspendus-2026.10.05-1",
+  version: "plafonds-suspendus-2026.10.06-2",
   trade: "ceiling",
   sources: [
     DEFINITION_SOURCE,
@@ -79,7 +79,7 @@ export const PLAFONDS_SUSPENDUS_REFERENTIAL: Referential = {
       params: [lineQuantity("surface", "Surface de plafond", "m2", "Surface de plafond ?"), PLENUM],
       slots: [
         { key: "plafond", family: "grid_ceiling_work", label: "Plafond", measureOnly: true },
-        { key: "dalles", family: "ceiling_tile", label: "Dalles", keywords: ["tropic", "arctic"], usual: { text: "Dalle minérale 600 × 600 bord A (type Rockfon Tropic), la plus courante.", source: ROCKFON, productId: "rockfon-tropic" } },
+        { key: "dalles", formOf: "plafond", family: "ceiling_tile", label: "Dalles", keywords: ["tropic", "arctic"], usual: { text: "Dalle minérale 600 × 600 bord A (type Rockfon Tropic), la plus courante.", source: ROCKFON, productId: "rockfon-tropic" } },
         { key: "porteurs", family: "main_runner", label: "Porteurs", usual: { text: "Porteurs T24 de 3,60 m.", source: USAGE, productId: "porteur-360" } },
         { key: "entretoises", family: "cross_tee", label: "Entretoises", usual: { text: "Entretoises T24 de 1,20 m.", source: USAGE, productId: "entretoise-120" } },
         { key: "rive", family: "wall_angle", label: "Cornières de rive", usual: { text: "Cornière 24 × 24 de 3 m.", source: USAGE, productId: "corniere-300" } },

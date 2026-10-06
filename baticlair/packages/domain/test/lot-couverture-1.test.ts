@@ -34,7 +34,7 @@ const CAS: Metier[] = [
       { ref: "3", designation: "Noue encaissée zinc", quantity: "4", unit: "ml" },
     ],
     questions: ["Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?", "Noue zinc : tu la façonnes toi-même ou tu la commandes façonnée ?"],
-    couleurs: { vert: 0, orange: 2, gris: 1 },
+    couleurs: { vert: 0, orange: 3, gris: 1 },
   },
 ];
 

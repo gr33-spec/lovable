@@ -20,7 +20,7 @@ const CAS: Metier[] = [
       { ref: "2", designation: "Fenêtre de toit Velux GGL MK04 tout confort", quantity: "2", unit: "u" },
     ],
     questions: ["J'ai identifié : Tuiles HP10. C'est bien ce modèle ?"],
-    couleurs: { vert: 2, orange: 1, gris: 0 },
+    couleurs: { vert: 1, orange: 1, gris: 0 },
   },
   {
     nom: "Ardoises et une fenêtre de toit sans taille",
@@ -31,7 +31,7 @@ const CAS: Metier[] = [
       { ref: "2", designation: "Fourniture et pose fenêtre de toit", quantity: "1", unit: "u" },
     ],
     questions: ["Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?", "Fenêtre de toit : quelle taille ?"],
-    couleurs: { vert: 1, orange: 2, gris: 0 },
+    couleurs: { vert: 0, orange: 3, gris: 0 },
   },
   {
     nom: "Une fenêtre de toit seule, sur tuiles plates",
@@ -39,7 +39,7 @@ const CAS: Metier[] = [
     metier: "couverture",
     bench: [{ ref: "1", designation: "Fenêtre de toit 114x118 sur tuiles plates", quantity: "1", unit: "u" }],
     questions: [],
-    couleurs: { vert: 2, orange: 0, gris: 0 },
+    couleurs: { vert: 1, orange: 0, gris: 0 },
   },
 ];
 
@@ -62,7 +62,7 @@ describe("fenêtres de toit : la fenêtre telle qu'écrite, son raccord adapté"
     const raccord = v.toBuy.find((b) => b.label.startsWith("Raccords"))!;
     expect(raccord.label).toBe("Raccords d'étanchéité pour tuiles, fenêtre 78 × 98");
     expect(raccord.quantity).toBe("2 pièces");
-    expect(v.toBuy.find((b) => b.kind === "direct")!.label).toBe("Fenêtre de toit Velux GGL MK04 tout confort");
+    expect(v.toBuy.find((b) => b.kind === "direct" && !b.key.startsWith("manque:"))!.label).toBe("Fenêtre de toit Velux GGL MK04 tout confort");
   });
 
   it("sans couverture au devis : « pour tuiles, pour ardoises ou pour tuiles plates ? » ; sans taille : la question du comptoir sur la ligne", () => {
@@ -73,9 +73,10 @@ describe("fenêtres de toit : la fenêtre telle qu'écrite, son raccord adapté"
       "precise:1": "78 × 118",
     });
     expect(answered.questions).toEqual([]);
+    // §49.1 : l'article écrit d'abord, puis ce qui le suit (le raccord, calculé en mode validation du référentiel).
     expect(answered.toBuy.map((b) => [b.label, b.precision ?? ""])).toEqual([
-      ["Raccords d'étanchéité pour ardoises, à la taille de la fenêtre de toit", ""],
       ["Fenêtre de toit", "78 × 118"],
+      ["Raccords d'étanchéité pour ardoises, à la taille de la fenêtre de toit", ""],
     ]);
   });
 });

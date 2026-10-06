@@ -71,7 +71,7 @@ const SECTION = assumed(
 
 export const CHARPENTE_REFERENTIAL: Referential = {
   id: "charpente",
-  version: "charpente-2026.10.05-1",
+  version: "charpente-2026.10.06-2",
   trade: "carpentry",
   sources: [
     DEFINITION_SOURCE,
@@ -108,7 +108,7 @@ export const CHARPENTE_REFERENTIAL: Referential = {
       ],
       slots: [
         { key: "toiture", family: "rafter_work", label: "Chevronnage", measureOnly: true },
-        { key: "chevrons", family: "rafter", label: "Chevrons", usual: { text: "Chevrons à la section du devis.", source: USAGE, productId: "chevron" } },
+        { key: "chevrons", formOf: "toiture", family: "rafter", label: "Chevrons", usual: { text: "Chevrons à la section du devis.", source: USAGE, productId: "chevron" } },
         { key: "pointes", family: "rafter_nail", label: "Pointes", usual: { text: "Pointes torsadées 3,4 × 90.", source: USAGE, productId: "pointes-torsadees" } },
       ],
       constants: {
@@ -149,7 +149,7 @@ export const CHARPENTE_REFERENTIAL: Referential = {
       params: [lineQuantity("longueur", "Longueur de rive", "m", "Longueur de rive ?")],
       slots: [
         { key: "rive", family: "fascia_work", label: "Rives", measureOnly: true },
-        { key: "planches", family: "fascia_board", label: "Planches de rive", usual: { text: "Planche 22 × 200 traitée, L 4 m.", source: USAGE, productId: "rive-22x200" } },
+        { key: "planches", formOf: "rive", family: "fascia_board", label: "Planches de rive", usual: { text: "Planche 22 × 200 traitée, L 4 m.", source: USAGE, productId: "rive-22x200" } },
       ],
       constants: {
         perte: rule("1.1", "1", USAGE, todo("Coupes d'onglet et aboutages (§5)."), "planches +10 % de coupe"),

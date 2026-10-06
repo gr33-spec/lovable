@@ -21,7 +21,7 @@ const PLINTHE = "plinthe-mdf-240";
 
 export const MENUISERIE_REFERENTIAL: Referential = {
   id: "menuiserie",
-  version: "menuiserie-2026.10.05-1",
+  version: "menuiserie-2026.10.06-2",
   trade: "joinery",
   sources: [
     DEFINITION_SOURCE,
@@ -164,7 +164,7 @@ export const MENUISERIE_REFERENTIAL: Referential = {
       params: [lineQuantity("surface", "Surface posée", "m2", "Surface à poser ?")],
       slots: [
         { key: "sol", family: "floating_floor_work", label: "Parquet flottant", measureOnly: true },
-        { key: "lames", family: "floor_boards", label: "Lames", usual: { text: "Stratifié en paquets de 1,914 m² (Quick-Step Compact).", source: QUICKSTEP, productId: "quickstep-compact" } },
+        { key: "lames", formOf: "sol", family: "floor_boards", label: "Lames", usual: { text: "Stratifié en paquets de 1,914 m² (Quick-Step Compact).", source: QUICKSTEP, productId: "quickstep-compact" } },
         { key: "sous_couche", family: "underlay", label: "Sous-couche", usual: { text: "Sous-couche 2,2 mm en rouleau de 15 m².", source: SOUS_COUCHE, productId: "sous-couche-15" } },
       ],
       constants: {
@@ -185,7 +185,7 @@ export const MENUISERIE_REFERENTIAL: Referential = {
       params: [lineQuantity("surface", "Surface posée", "m2", "Surface à poser ?")],
       slots: [
         { key: "sol", family: "glued_floor_work", label: "Parquet collé", measureOnly: true },
-        { key: "lames", family: "floor_boards", label: "Lames", usual: { text: "Lames en paquets entiers.", source: QUICKSTEP, productId: "quickstep-compact" } },
+        { key: "lames", formOf: "sol", family: "floor_boards", label: "Lames", usual: { text: "Lames en paquets entiers.", source: QUICKSTEP, productId: "quickstep-compact" } },
         { key: "colle", family: "floor_glue", label: "Colle", usual: { text: "Colle MS polymère en seau de 15 kg.", source: COLLE_MS, productId: "colle-ms-15" } },
       ],
       constants: {
@@ -205,7 +205,7 @@ export const MENUISERIE_REFERENTIAL: Referential = {
       params: [lineQuantity("longueur", "Longueur de plinthes", "m", "Longueur de plinthes ?")],
       slots: [
         { key: "plinthes", family: "skirting_work", label: "Plinthes", measureOnly: true },
-        { key: "plinthe", family: "skirting_board", label: "Plinthes", usual: { text: "Plinthe MDF 10 × 70 en barre de 2,40 m.", source: PLINTHE, productId: "plinthe-240" } },
+        { key: "plinthe", formOf: "plinthes", family: "skirting_board", label: "Plinthes", usual: { text: "Plinthe MDF 10 × 70 en barre de 2,40 m.", source: PLINTHE, productId: "plinthe-240" } },
       ],
       constants: { perte: rule("1.1", "1", USAGE, todo("Coupes d'angle et de porte (§5.3)."), "plinthes +10 % de coupe") },
       needs: [{ id: "plinthes", slot: "plinthe", formula: "arrondi_sup(longueur * regle.perte / plinthe.longueur)", unit: "u", core: true, source: USAGE, verification: ok(), version: 1 }],

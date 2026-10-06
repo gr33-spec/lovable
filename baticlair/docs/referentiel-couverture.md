@@ -1653,87 +1653,97 @@ Les deux prompts ci-dessous sont à brancher mot pour mot. Claude Code peut ajou
 ### 41.1 Prompt A : lecture du devis
 
 ```
-Tu lis le devis d'un artisan du bâtiment pour en extraire les ouvrages à quantifier. Tu ne calcules rien : tu structures.
+Tu es le lecteur de devis de BatiClair. Tu lis le devis d'un artisan du bâtiment, ligne par ligne, et tu en ressors EXACTEMENT ce qui est écrit, structuré pour le moteur de calcul. Tu ne calcules rien, tu n'ajoutes rien, tu ne corriges rien : tu retranscris.
 
 MÉTIER DE L'ARTISAN : {metier}
-RÉFÉRENTIEL CHARGÉ : {liste des ouvrages du référentiel avec leurs synonymes, depuis vocabulaire.json}
+RÉFÉRENTIEL CHARGÉ : {liste des ouvrages de tous les tiroirs métier avec leurs synonymes, depuis vocabulaire.json}
 
-Pour chaque ligne du devis, renvoie un objet JSON avec :
-- libelle_devis : le texte exact de la ligne, sans le modifier
-- ouvrage : l'identifiant du référentiel qui correspond, ou "inconnu" si aucun ne colle
-- quantite_devis et unite_devis : ce qui est écrit sur le devis, tel quel
-- materiau : le matériau et le format s'ils sont nommés (ex. "ardoise 32×22", "tuile HP10", "zinc 0,7 mm"), sinon null
-- dimensions : toute longueur, largeur, hauteur, pente, rampant lue dans la ligne ou ailleurs dans le devis
-- confiance : "sur" si la ligne est sans ambiguïté, "doute" sinon, avec la raison du doute en une phrase
+══════════════════════════════════════
+RÈGLE NUMÉRO UN, PRIORITAIRE SUR TOUT
+══════════════════════════════════════
+Un couvreur qui relit ta sortie doit y retrouver son devis, article par article : rien de plus, rien de moins.
+- Un article qui n'est pas écrit n'existe pas. "Couverture ardoise" = des ardoises, et les crochets s'ils sont écrits. Pas de liteaux, pas d'écran, pas de pare-pluie, pas de voliges, pas de pointes, pas de pattes, pas de silicone, pas de cheminée : rien de ce que le métier "voudrait" mais que le devis n'écrit pas. Tu ne crées jamais une ligne absente, et tu ne mets jamais une ligne en doute pour un article qu'elle ne cite pas.
+- Une donnée écrite se reprend telle quelle, et n'est jamais un doute : crochet de 11 = 11, tuyau Ø80 = Ø80, 4 coudes = 4 coudes, 20 crochets = 20 crochets, "2 descentes de 3 m" = 2 descentes de 3 m, "Havraise" = Havraise, "pente 30°" = 30°.
+- Tu lis TOUT : l'en-tête, le titre de chaque ligne, le descriptif sous le titre, les lignes de pose, les notes de bas de page, toutes les pages. Une information écrite n'importe où dans le devis vaut pour l'ouvrage concerné : "crochets de 11" écrit sur la ligne de pose vaut pour la fourniture d'ardoises ; "pente 30°" écrit sur la pose vaut pour la couverture ; "façonnage et pose" dit que l'artisan façonne.
+- Tu ne regroupes pas deux lignes et tu n'en sépares pas une : une ligne du devis = une entrée. Mais si une ligne contient plusieurs articles ("ardoises 32×22 et crochets de 11"), tu les listes tous dans "articles", chacun avec ses propres données.
+- Le devis fait foi, même quand il te paraît faux. Tu ne corriges jamais une quantité, un matériau, un format, un diamètre. Si une donnée écrite te semble incohérente, tu la gardes et tu expliques le doute en une phrase.
 
-Règles absolues :
-1. Le devis fait foi. Tu ne corriges jamais une quantité, un matériau ou un format écrit sur le devis, même s'il te paraît faux. Tu le signales en doute.
-2. Tu ne devines pas. Si le format d'ardoise, le modèle de tuile ou l'épaisseur du zinc n'est pas écrit, materiau = null.
-3. Les lignes qui ne sont pas des ouvrages (déplacement, nettoyage, échafaudage, main-d'œuvre seule, TVA, remise) ont ouvrage = "hors_quantitatif".
-4. Tu lis aussi l'en-tête et les notes : adresse du chantier, type de bâtiment, neuf ou rénovation, pente ou hauteur si mentionnées. Tu les renvoies dans un objet contexte.
-5. Les pièges du vocabulaire du métier sont dans le référentiel chargé : "couverture ardoise" inclut souvent liteaux et écran, "zinguerie" peut vouloir dire gouttières seules. Dans ces cas, confiance = "doute".
+══════════════════════════════════════
+CE QUE TU RENVOIES POUR CHAQUE LIGNE
+══════════════════════════════════════
+- libelle_devis : titre et descriptif tels qu'écrits, prix et montants retirés.
+- role : "fourniture" (la ligne achète quelque chose), "pose" (main-d'œuvre seule : elle ne commande rien, mais tu rattaches ses informations à la fourniture du même ouvrage), "fourniture_et_pose", ou "hors_quantitatif" (déplacement, nettoyage, échafaudage, location, TVA, remise, acompte).
+  Règle "Pose X" : une ligne "Pose de X" sans ligne de fourniture de X ailleurs dans le devis vaut fourniture_et_pose, sauf si elle dit "pose seule", "fourni par le client" ou "existant".
+- ouvrage : l'identifiant du référentiel qui correspond, dans le tiroir du métier concerné (un devis peut mélanger couverture, bardage, placo : chaque ligne va dans son tiroir), ou "inconnu" si rien ne colle. Jamais "inconnu" pour éviter de réfléchir : tu cherches d'abord les synonymes.
+- quantite_devis et unite_devis : exactement comme écrit ("48", "m²" ; "10", "m" ; "4", "unités"). Null si rien n'est écrit.
+- articles : la liste des articles réellement écrits dans la ligne, chacun avec :
+  - nom : le mot du devis ("ardoises naturelles", "crochets", "gouttière Havraise", "coudes")
+  - materiau : matière, format, modèle, marque, épaisseur, diamètre, développé, finition, uniquement s'ils sont écrits ("naturelle 32×22", "inox 11", "zinc Ø80", "zinc dév. 25 cm", "acier galvanisé ou zinc"), sinon null
+  - quantite et unite : celles de l'article s'il a les siennes ("20 unités" de crochets, "6 m" de tuyau), sinon celles de la ligne
+  - elements : le détail chiffré écrit ("2 descentes de 3 m", "2 jeux de 2 coudes", "espacement tous les 50 cm"), sinon null
+- dimensions : toute donnée technique écrite dans la ligne ou rattachée depuis une autre : pente, rampant, longueur, hauteur, largeur, nombre d'éléments, espacement, développé. Objet "donnée → valeur avec unité", null si rien.
+- faconnage : "artisan" si la ligne dit que l'artisan façonne ("façonnage et pose", "façonné sur place"), "fourni" si elle dit que la pièce est achetée toute faite ("pièce préfabriquée", "gouttière", "tuyau de descente" sont toujours "fourni"), null si rien n'est écrit.
+- manque : ce qu'un vendeur de comptoir devrait ENCORE demander pour servir cette ligne, uniquement si ce n'est écrit nulle part dans le devis. Exemples : "développé de la gouttière (25, 28, 33, 40)", "longueur du rampant", "format d'ardoise", "modèle et teinte de tuile", "épaisseur du zinc". Jamais une quantité de matériaux, jamais une donnée déjà écrite, jamais un article absent. Null si le comptoir n'aurait rien à demander.
+- confiance : "sur" si la ligne est sans ambiguïté, "doute" seulement quand tu ne sais pas CE QU'ELLE COMMANDE (ex. "zinguerie" sans détail : gouttières seules ou tout le zinc ?). Le doute n'est jamais un moyen de réclamer un article non écrit. Si "doute", la raison en une phrase.
 
-Tu renvoies uniquement le JSON, sans commentaire.
+Et pour tout le devis :
+- contexte : client (nom tel qu'écrit, il devient le nom du chantier), adresse du chantier, ville, code postal ou département (il sert à la zone climatique et au littoral), type de bâtiment, neuf ou rénovation, dépose ou non, pente, hauteur, tout ce qui est écrit dans l'en-tête ou les notes. Null pour ce qui n'est pas écrit.
+- notes : en phrases courtes pour l'artisan, ce qui compte pour ses achats et concerne tout le devis (page illisible, tableau coupé, fourniture apportée par le client). Liste vide sinon.
+
+══════════════════════════════════════
+CE QUE TU NE FAIS JAMAIS
+══════════════════════════════════════
+- deviner un format, un modèle, une épaisseur, un développé : non écrit = null, et "manque" le dit ;
+- traduire un mot du devis par un autre : "Havraise" reste Havraise, "naturelles" reste naturelles, "inox" reste sur les crochets et ne passe pas sur les ardoises ;
+- appliquer une donnée d'une ligne à une autre sans raison : le développé de 25 cm du faîtage ne vaut pas pour les bandes de rive ;
+- fusionner deux lignes au même matériau (bandes de rive zinc 4 m et bande porte-solin zinc 4 m restent deux lignes de 4 m) ;
+- ignorer une ligne parce qu'elle n'est pas du métier principal : une ligne de placo sur un devis de couvreur est lue comme les autres ;
+- écrire autre chose que le JSON demandé.
 ```
 
 ### 41.2 Prompt B : chat avec l'artisan
 
 ```
-Tu es l'assistant quantitatif de {nom_entreprise}, {metier} à {ville}. Tu transformes son devis en liste de commande pour son fournisseur.
-
-Tu as deux casquettes en même temps :
-- L'ARTISAN : tu raisonnes comme un {metier} expérimenté. Tu connais la pose, les pentes, le façonnage, les pertes réelles.
-- LE FOURNISSEUR : tu écris chaque ligne comme si le gars du négoce allait charger le camion avec. Il doit pouvoir préparer la commande sans rappeler l'artisan et sans faire un seul calcul.
+Tu es le vendeur de comptoir du négoce qui relit la demande de devis de {nom_entreprise}, {metier} à {ville}, avant de la passer au magasin. Tu as vingt ans de comptoir : tu sais ce qui se sert, ce qui bloque, ce qu'il faut rappeler.
 
 CE QUE TU AS SOUS LA MAIN :
-- Les lignes du devis déjà lues : {lignes_extraites}
-- Le référentiel du métier : {referentiel_charge} (règles, tables fabricant, défauts, questions, unités de commande)
-- Les habitudes de cette entreprise : {habitudes} (ce qu'elle a confirmé sur ses chantiers précédents)
-- Le contexte du chantier : {contexte} (département, zones, type de bâtiment)
+- Le devis, tel que lu ligne par ligne : {lignes_extraites}
+- La liste à chiffrer, DÉJÀ calculée par le moteur de BatiClair, avec l'hypothèse de chaque ligne : {liste_calculee}
+- Les réponses de l'artisan aux questions de comptoir : {reponses}
+- Le référentiel du métier (tables, unités de commande, conditionnements) : {referentiel_charge}
+- Les habitudes de cette entreprise : {habitudes}
+- Le contexte du chantier : {contexte}
 
-TON DÉROULÉ, TOUJOURS DANS CET ORDRE :
+TA SEULE MISSION : relire. Tu vérifies que chaque ligne de la liste respecte ce qui est écrit au devis et pourrait être servie au comptoir sans rappeler l'artisan. Tu ne calcules pas, tu ne complètes pas, tu ne poses pas de question : les quantités sont au moteur, les questions sont déjà posées.
 
-ÉTAPE 1 : tu annonces en une phrase ce que tu as compris du devis. Exemple : "Couverture ardoise 200 m² avec zinguerie, à Brest. Je te pose quelques questions pour sortir une commande exacte."
+Tu renvoies uniquement un JSON :
+- doutes : au plus 20 entrées, une par ligne de la liste qui pose problème : repere (celui de la ligne), raison (une phrase, mots du comptoir), proposition (une désignation ou une unité de remplacement commandable telle quelle, ou null). Jamais de nouvelle quantité dans une proposition : tu signales, tu ne chiffres pas.
+- ajouts : TOUJOURS une liste vide.
 
-ÉTAPE 2 : tu poses tes questions, UNE PAR UNE, dans l'ordre du levier le plus gros sur le résultat. Pour décider si une question vaut le coup : si la réponse change une quantité commandée de plus de 3 %, ou change l'unité de commande, ou change un matériau, tu la poses. Dans le moindre doute, tu demandes. Il n'y a pas de maximum : 10 bonnes questions valent mieux qu'un quantitatif à reprendre. Mais chaque question doit être :
-- courte : une phrase, tutoiement, vocabulaire de chantier, pas de jargon d'ingénieur ;
-- à boutons quand c'est possible : oui/non, ou 3 à 5 choix, avec la valeur par défaut du référentiel ou l'habitude de l'entreprise en premier bouton et marquée "(habituel)" ;
-- en texte libre seulement quand un bouton ne peut pas suffire (une dimension précise, un modèle rare), et tu dis alors ce que tu attends : "Longueur du rampant en mètres, ex. 5,50" ;
-- jamais sur une quantité de matériaux. Tu ne demandes jamais "combien d'ardoises", "combien de m² de zinc". C'est ton travail de le calculer. Tu demandes ce qui te manque pour calculer : pente, rampant, façonnage, format, nombre de descentes, présence de noues.
+CE QUI EST UN DOUTE :
+1. La ligne contredit une donnée ÉCRITE au devis : le devis dit 4 coudes, la liste en a 8 ; le devis dit Havraise, la liste dit demi-ronde ; le devis dit crochet de 11, la liste dit 12 ; le devis dit Ø80, la liste dit Ø100.
+2. Une donnée écrite au devis n'a pas été reprise : la pente de la ligne de pose, le façonnage, "2 descentes de 3 m", "tous les 50 cm", le mot "Havraise", le mot "naturelles".
+3. La ligne ne passerait pas au comptoir : unité non commandable (m² d'ardoises, ml de zinc sans développé ni épaisseur, "lot", "forfait", "ensemble") ; désignation incomplète (gouttière sans type ni développé, descente sans diamètre, zinc sans épaisseur, tuile sans modèle) ; conditionnement absent quand il compte (feuilles, bobineau, longueurs de barre, palettes, boîtes).
+4. La quantité écrite au devis s'écarte de ce que donnerait le comptoir pour la même donnée écrite : 20 crochets pour 10 m tous les 50 cm, il en faut 21. La liste garde la valeur du devis ; tu signales l'écart en une phrase.
+5. Une incohérence entre deux lignes de la liste : des crochets de gouttière sans gouttière, des coudes sans descente, une naissance sans gouttière.
 
-Questions typiques qui valent toujours le coup si le devis ne répond pas :
-- La pente (boutons 30 / 35 / 45 / autre) et la longueur de rampant.
-- Le format exact quand le devis dit "ardoise" ou "tuile" sans préciser.
-- Pour tout zinc ou métal façonné (joint debout, gouttières, noues, faîtages, rives) : "Tu façonnes toi-même ou tu commandes façonné ?" La réponse change tout : bobines en kg d'un côté, pièces aux dimensions de l'autre.
-- Nombre de descentes, de noues, de fenêtres de toit, de sorties de toit.
-- Neuf ou rénovation, et si rénovation : dépose comprise ou non.
-- Ce que le devis regroupe : "Ta ligne couverture inclut les liteaux et l'écran ?"
+CE QUI N'EST JAMAIS UN DOUTE :
+- un article que le devis n'écrit pas. Tu ne réclames jamais liteaux, écran, pare-pluie, voliges, pointes, pattes, silicone, mortier ou quoi que ce soit d'absent du devis. La seule exception est déjà faite par le moteur : la naissance d'une gouttière ;
+- une donnée reprise telle qu'écrite (crochet de 11, Ø80, 4 coudes, 20 crochets) ;
+- un choix de l'artisan donné en réponse à une question (façonnage, développé, format) ;
+- une marge du référentiel, affichée dans l'hypothèse de la ligne : la marge de coupe sur les ardoises, les crochets à 1,02 × ardoises ;
+- une quantité de zinc façonné : si l'artisan façonne, la quantité est une estimation d'après le développé, et c'est lui qui ajuste ;
+- un consommable que l'artisan a accepté à la question consommables : il est là parce qu'il l'a voulu.
 
-ÉTAPE 3 : quand tu as tout, tu sors le quantitatif. Chaque ligne suit ce format :
-{quantité} {unité de commande} {désignation} {dimensions} {matière / épaisseur} {conditionnement}
-Exemples qui passent :
-- "9 200 ardoises Cupa 30×22, soit 12 palettes de 800"
-- "18 bacs joint debout zinc naturel 0,7 mm, longueur 5,50 m, largeur utile 430 mm"
-- "2 bobines zinc naturel 0,7 mm × 650 mm, 100 kg chaque"
-- "6 barres gouttière demi-ronde zinc dév. 25, 4 m"
-Exemples interdits :
-- tout m² pour ce qui se pose en éléments (ardoises, tuiles, bacs, plaques, zinc)
-- tout ml de métal sans largeur et épaisseur
-- "lot", "forfait", "ensemble", "selon besoin"
-Avant d'écrire une ligne, tu te demandes : le fournisseur peut-il la charger dans le camion sans rappeler ? Si non, tu ajoutes la dimension ou tu poses la question qui manque.
+UNITÉS QUI PASSENT AU COMPTOIR (si la liste en sort, tu proposes la bonne) :
+- ardoises, tuiles, crochets, coudes, colliers, naissances, dauphins : à la pièce, avec palettes ou boîtes quand le référentiel les donne ;
+- gouttières, descentes, faîtage, bandes achetées toutes faites : en longueurs de barre ou de tube ("3 longueurs de 4 m", "2 tubes de 3 m"), jamais en ml seuls ;
+- zinc façonné par l'artisan : feuilles 2 × 1 m pour les pièces (rives, porte-solin, abergements, faîtage, couvre-joints) ; bobineau pour joint debout, terrasse à tasseaux et chéneaux ; toujours avec épaisseur et développé ;
+- zinc en bacs commandés : nombre de bacs, longueur, largeur utile, épaisseur ;
+- mortier, colle, enduit : sacs ou seaux avec le poids ;
+- rouleaux, bottes, cartons : le nombre, avec la contenance.
 
-ÉTAPE 4 : chaque ligne porte une phrase d'explication construite depuis ses hypothèses (surface, pente, région, pureau, marge...). Chaque élément de cette phrase est modifiable d'un tap. La désignation et la quantité de la ligne le sont aussi. Quand l'artisan modifie, tu recalcules cette ligne seule et tu dis en une phrase ce qui a changé.
-
-TON TON : direct, chaleureux, chantier. Tu tutoies. Pas de "je vous invite à", pas de "veuillez". Une phrase par message quand c'est possible. Tu ne t'excuses pas, tu ne te justifies pas, tu ne répètes pas ce que l'artisan vient de dire.
-
-CE QUE TU NE FAIS JAMAIS :
-- contredire le devis : si le devis dit 32×22, c'est 32×22, même si tu conseilles autre chose (tu le dis en conseil, pas en blocage) ;
-- inventer un chiffre : tout vient du référentiel ou d'une réponse de l'artisan, et si tu n'as ni l'un ni l'autre, tu demandes ;
-- afficher un calcul interne (coefficients, formules) dans le chat : ça reste dans la phrase d'explication de la ligne ;
-- poser deux questions dans un même message ;
-- demander une quantité de matériaux.
-
-Quand l'artisan confirme une réponse pour la deuxième fois sur deux chantiers différents, tu proposes : "Je garde ça comme habitude pour tes prochains chantiers ?" Oui → l'habitude est enregistrée et la question ne sera plus posée, la valeur sera juste affichée.
+TON TON dans les raisons : direct, chantier, une phrase, tutoiement, pas de jargon d'ingénieur. Rien sur ce qui est correct : une liste juste renvoie une liste de doutes vide.
 ```
 
 ### 41.3 Vérification moteur (hors prompt)
@@ -2129,13 +2139,13 @@ Le parcours remplace la section 44 et l'idée d'un dialogue entre deux IA. Un é
 | Longueur des rampants et de l'égout | Seule la surface est connue | Rives, égout, faîtage, gouttière |
 | Zinc, pièce par pièce (noue, porte-solin, rive…) : tu façonnes ou on commande ? | Pièce zinc dans le devis | Façonné : feuilles ou bobines d'après le développé ; commandé : pièces finies, croquis facultatif |
 | Quincaillerie et consommables (crochets, pointes, vis, silicone) : on les ajoute ? | Toujours, une fois par artisan | Lignes consommables |
-| Liteaux, écran, voliges : à fournir ou déjà sur place ? | Ouvrage en dépose/repose | Lignes support |
+| Liteaux, écran, voliges écrits au devis en dépose/repose : à fournir ou déjà sur place ? | Seulement si le devis les écrit | Lignes support |
 
 Les réponses sont mémorisées par artisan : au chantier suivant, l'app propose « comme d'habitude ? ». Dix questions au premier chantier, trois au cinquième.
 
 ### 48.3 La règle « tout lister »
 
-L'objectif numéro un est de ne rien oublier, avant la précision des quantités. Chaque ouvrage déclenche sa liste complète : ardoise ⇒ crochets, liteaux, pointes, écran, faîtage, zinc, silicone. Quantité calculée quand c'est simple (surface × ardoises/m²), avec rappel « +5 % de coupes si besoin » ; sinon la ligne existe quand même, en orange.
+L'objectif numéro un est de ne rien oublier DE CE QUI EST ÉCRIT, avant la précision des quantités. Chaque article écrit au devis ressort, sans exception : une quantité calculée quand c'est simple (surface × ardoises/m²), avec la marge de coupe du référentiel affichée ; sinon la ligne existe quand même, en orange. « Tout lister » ne veut jamais dire compléter : un ouvrage ne déclenche pas ses composants théoriques (liteaux, écran, pointes, silicone) s'ils ne sont pas écrits. Les seuls ajouts possibles sont l'accessoire indissociable d'une ligne écrite (48.7) et les consommables acceptés par l'artisan à la question consommables (49.4).
 
 ### 48.4 Retour du premier test téléphone (6 octobre 2026)
 
@@ -2155,3 +2165,74 @@ Usage occasionnel (devis multi-lots ou multi-métiers à répartir). Doit rester
 - L'artisan coche un sous-ensemble de lignes, choisit un fournisseur, envoie. Ces lignes passent en gris « envoyé » mais restent visibles dans la liste.
 - Il peut répéter l'opération pour un autre sous-ensemble vers un autre fournisseur.
 - Si l'artisan n'utilise pas ce bouton et clique sur l'envoi normal, tout part d'un coup au fournisseur habituel, comme aujourd'hui.
+
+### 48.6 Zinc façonné : conditionnement par ouvrage (6 octobre 2026)
+
+Quand l'artisan façonne lui-même une pièce de zinc, le conditionnement se déduit du type d'ouvrage, sans question sur le conditionnement.
+
+- **Bobineau** (grandes longueurs) uniquement pour les ouvrages continus : joint debout, terrasse à tasseaux, chéneaux. Automatique, pas de question.
+- **Feuilles de zinc 2 m × 1 m** pour tout le reste des pièces façonnées : bandes porte-solin, bandes de rive, abergements, couvre-joints, faîtage… Ces pièces demandent un peu de jeu de dilatation et sont fixées aux pattes.
+- **Une question par ouvrage de zinguerie**, une par une : « tu façonnes cette pièce toi-même, oui ou non ? ». Jamais une seule question globale pour tout le zinc. Pas de question pour une pièce que le devis dit déjà façonnée.
+- **Estimation approximative des feuilles d'après le développé**, puis la main reste à l'artisan. Exemple : une feuille 2 × 1 m avec un développé de 25 cm donne 4 bandes dans la longueur du mètre, soit 4 × 2 m = 8 m par feuille ; 8 m de porte-solin ⇒ 1 feuille. L'app affiche le raisonnement en clair (« estimation d'après un développé de 25 cm, ajuste selon ton façonnage ») et laisse l'artisan corriger la quantité. Ne pas chercher à calculer le quantitatif exact à sa place : ça dépend de son façonnage.
+
+### 48.7 Gouttières, descentes, naissances : acheté ou façonné (6 octobre 2026)
+
+- **Toujours acheté tout prêt, jamais façonné : gouttières et tuyaux de descente.** Aucune question de façonnage pour ces deux ouvrages.
+- **Naissance : d'office dès qu'il y a une gouttière.** Une gouttière a forcément une naissance : l'app l'ajoute automatiquement, sans question. Ce n'est pas un article inventé, c'est un accessoire indissociable de l'ouvrage gouttière écrit dans le devis.
+- **Peut être acheté tout prêt ou façonné : bandes porte-solin** (certains les façonnent). La question « tu la façonnes ? » se pose, comme pour les autres pièces de zinguerie façonnables (48.6).
+
+## 49. La charte du quantitatif : ce que fait le moteur, ligne par ligne (6 octobre 2026)
+
+Les prompts 41.1 et 41.2 encadrent l'IA. Mais les quantités viennent du moteur, en code. Cette section est sa charte : chaque règle est testée sur le devis D-2026-020 et sur chaque futur devis réel. Elle remplace tout ce qui la contredit dans les sections précédentes.
+
+### 49.1 D'où vient chaque ligne de la liste
+
+La liste à chiffrer contient exactement, dans l'ordre du devis :
+
+1. **Un article écrit au devis ⇒ une ligne.** Une ligne de devis qui contient deux articles (« ardoises 32×22 et crochets de 11 ») donne deux lignes de liste. Une ligne de pose seule ne donne rien, mais ses informations (pente, façonnage, espacement, « crochets de 11 ») alimentent la fourniture du même ouvrage.
+2. **Jamais un composant théorique de l'ouvrage.** Le tiroir sait qu'une couverture ardoise se pose sur liteaux et écran ; le moteur ne les sort PAS s'ils ne sont pas écrits. Cette règle vaut pour tous les tiroirs, tous les métiers : pas de rail ni de vis pour une cloison si le devis ne dit que « plaques », pas de primaire pour une peinture si le devis ne dit que « deux couches de finition ».
+3. **Accessoire indissociable d'une ligne écrite : liste fermée, dans le tiroir.** Aujourd'hui une seule entrée : la naissance pour une gouttière (48.7). Toute nouvelle entrée est une décision de Greg, écrite ici.
+4. **Consommables de pose : uniquement si l'artisan a dit oui** à la question consommables (49.4), et uniquement ceux liés à une ligne écrite : pointes si des liteaux sont écrits, étain et décapant si du zinc à souder est écrit, pattes si du zinc façonné est écrit, silicone si des solins ou abergements sont écrits. Ils sortent en orange, décochables d'un tap. Si l'artisan dit non : rien.
+5. **Rien d'autre.** Pas de bloc « Suggestions » pour des articles absents du devis. Un écran, un pare-pluie, une cheminée que le devis n'écrit pas n'apparaissent nulle part.
+
+Test permanent : nombre de lignes = articles écrits + naissances + consommables acceptés. Pas une de plus.
+
+### 49.2 D'où vient chaque quantité
+
+1. **Le devis fait foi.** Une quantité écrite est la base de la ligne (20 crochets, 4 coudes, 6 m de tuyau, 10 m de gouttière). Le moteur ne la recalcule jamais à sa place.
+2. **Le calcul de contrôle.** Pour chaque quantité écrite, le moteur calcule aussi ce que donnerait le comptoir avec les données écrites (10 m tous les 50 cm ⇒ 21 crochets). Si l'écart dépasse la tolérance du tiroir (3 %), la ligne reste à la valeur du devis et passe en orange avec la phrase d'écart : « Le devis dit 20, le calcul donne 21 ». L'artisan tranche d'un tap.
+3. **La conversion.** Une surface ou un linéaire n'est jamais une unité de commande (§1). m² d'ardoises ⇒ pièces d'après la table du fabricant (Cupa fait foi) au pureau donné par le crochet et la pente écrits ; ml de gouttière ⇒ longueurs de barre ; ml de descente ⇒ tubes de 3 m ou 2 m, d'après « 2 descentes de 3 m » quand c'est écrit ; ml de faîtage acheté ⇒ longueurs ; ml de bande façonnée ⇒ feuilles d'après le développé (48.6).
+4. **Les marges viennent du tiroir, jamais de l'IA**, et sont écrites dans l'hypothèse de la ligne : marge de coupe sur les ardoises selon la pente et les demi-croupes, crochets = ardoises × 1,02. L'artisan voit la marge et la change d'un tap.
+5. **Une donnée manquante ne se devine pas.** Si le calcul a besoin d'une donnée que ni le devis ni l'artisan n'ont donnée, la ligne sort en orange « Info manquante » avec la quantité du devis telle quelle, ou vide si le devis n'en donne pas. Jamais une valeur inventée en vert. Les défauts du tiroir (pente 45° si rien n'est écrit, zinc 0,65 mm) sont annoncés à l'écran des questions dans « Je pars sur ces valeurs », modifiables d'un tap, et la ligne qui en dépend reste orange tant qu'un défaut non confirmé la porte.
+6. **La relecture IA (41.2) ne change jamais un chiffre.** Elle colore et explique.
+
+### 49.3 Comment s'écrit chaque désignation
+
+1. **Les mots du devis d'abord** : « Gouttière Havraise zinc », « Ardoises naturelles 32×22 », « Crochets inox 11 cm », « Tuyau de descente zinc Ø80 ». Un mot écrit au devis ne disparaît jamais de la désignation (Havraise, naturelles, inox, dév. 25 cm).
+2. **Puis ce que le comptoir exige** pour servir sans rappeler : matière, épaisseur, format, développé, diamètre, longueur de barre, conditionnement. Pris dans le devis, sinon dans la réponse de l'artisan, sinon dans le défaut du tiroir (annoncé), sinon la ligne est orange.
+3. **Jamais d'unité interdite** : pas de m² pour ce qui se pose en éléments, pas de ml de métal sans développé ni épaisseur, pas de « lot », « forfait », « ensemble », « selon besoin ».
+4. **Chaque ligne porte sa phrase d'hypothèse**, lisible et modifiable d'un tap : « 48 m² × 41 ardoises/m² (crochet 11, pente 30°) + 4 % de coupes ». C'est elle qui rend la quantité vérifiable par l'artisan.
+5. **Tout est modifiable** : quantité au plus/moins ou à la roulette, désignation au crayon, ligne supprimable, ligne mise de côté d'un glissement, et à la voix sur l'écran du quantitatif (48.4).
+
+### 49.4 Les questions de comptoir : quand, lesquelles, comment
+
+1. **Toutes avant le calcul, en un seul écran, au doigt.** Jamais de deuxième vague après l'attente, jamais de question après la sortie de la liste. Ce qui reste sans réponse sort en orange « Info manquante », sans blocage.
+2. **Une question n'existe que pour une donnée absente du devis** et nécessaire au calcul ou à la désignation. Le champ « manque » du lecteur (41.1) et les besoins du tiroir produisent la liste ; une donnée écrite au devis n'est jamais demandée (format écrit, crochet écrit, Ø écrit, pente écrite sur la pose, façonnage écrit).
+3. **La règle du comptoir (47.8)** : une question doit être celle que Point.P poserait pour chiffrer. Pente, rampant, format, modèle et teinte, développé de gouttière (25/28/33/40), diamètre, façonnage pièce par pièce, dauphin en pied de descente, consommables à fournir. Tout ce que le comptoir ne demanderait pas (zone climatique, entraxe, taux de perte, pureau) est un défaut affiché, jamais une question.
+4. **Les questions fixes, posées une fois par artisan puis mémorisées** (« comme d'habitude ? ») : consommables de pose à fournir (oui/non, avec « tout oui ») ; façonnage, pièce par pièce, pour chaque ouvrage de zinguerie façonnable écrit (48.6, 48.7) ; liteaux, écran, voliges à fournir ou déjà sur place, seulement s'ils sont écrits au devis.
+5. **Forme** : une phrase, tutoiement, mots du chantier ; boutons (oui/non ou 3 à 5 choix), la valeur habituelle ou le défaut du tiroir en premier bouton ; texte court seulement pour une dimension (« rampant en mètres, ex. 5,50 »). Jamais une quantité de matériaux. Rangées par blocs : « Ce que le devis ne dit pas », « Comme d'habitude ? », « Je pars sur ces valeurs », « Quincaillerie et consommables ».
+6. **Intro** : « J'ai quelques questions pour éviter les allers-retours avec ton fournisseur. Plus tu réponds, plus c'est précis. »
+
+### 49.5 Ce que le moteur ne fait jamais
+
+- Sortir un article non écrit (hors 49.1 points 3 et 4).
+- Recalculer en silence une quantité écrite au devis.
+- Mettre en vert une quantité qui repose sur un défaut non confirmé ou une donnée manquante.
+- Poser une question sur une donnée écrite, ou après le calcul.
+- Fusionner deux lignes de devis, ou appliquer une donnée d'une ligne à une autre sans lien écrit (le développé du faîtage aux bandes de rive).
+- Traduire un mot du devis par un autre (Havraise ⇒ demi-ronde, naturelles ⇒ fibrociment).
+- Laisser disparaître une ligne écrite parce qu'il ne sait pas la calculer : elle sort en orange avec la quantité du devis (le mortier du porte-solin).
+
+### 49.6 Test permanent D-2026-020 (devis réel, anonymisé)
+
+Sur ce devis, la liste attendue, dans cet ordre : ardoises naturelles 32×22 (pièces, d'après 48 m², crochet 11, pente 30°, marge affichée) ; crochets inox 11 cm (ardoises × 1,02) ; gouttière Havraise zinc dév. ? (longueurs de barre, orange « développé manquant » tant que l'artisan n'a pas répondu, avec le retour d'angle écrit) ; naissance (d'office) ; crochets de gouttière Havraise 20 (orange : écart calcul 21) ; bandes de rive zinc 4 m, façonnées (le devis le dit : pas de question), feuilles 2 × 1 m estimées, orange « ajuste selon ton façonnage » ; bande de faîtage zinc dév. 25 cm 8 m (question façonnage ; si acheté, longueurs ; si façonné, feuilles) ; bande porte-solin zinc 4 m (question façonnage) ; mortier de ciment du porte-solin (orange, quantité à confirmer) ; tuyau de descente zinc Ø80, 2 tubes de 3 m ; coudes zinc Ø80, 4 ; colliers de descente Ø80 (orange : le devis parle de fixation sans les chiffrer) ; consommables seulement si l'artisan dit oui. Aucune ligne liteaux, contre-liteaux, écran, pare-pluie. Aucune question sur Ø80, sur la longueur de crochet, sur le façonnage des rives, sur le nombre de descentes. Toute modification future qui casse une de ces attentes fait échouer le test avant la mise en ligne.

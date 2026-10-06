@@ -20,7 +20,8 @@ beforeEach(async () => {
 
 type Ligne = { id: string; libelle: string; quantite: number | null; a_confirmer: boolean; raison?: string };
 type Q = { id: string; peut_partir: boolean; lignes: Ligne[]; questions: { id: string; texte: string; boutons: { label: string; valeur: string }[] }[] };
-const CLOISON = { lignes: [{ libelle: "Cloison 72/48 BA13 sur ossature", quantite: "40", unite: "m²" }] };
+// §49.1 : les rails n'existent que si le devis les écrit.
+const CLOISON = { lignes: [{ libelle: "Cloison 72/48 BA13 sur ossature, rails et montants, hauteur 2,50 m", quantite: "40", unite: "m²" }] };
 const rails = (q: Q) => q.lignes.find((l) => /[Rr]ail/.test(l.libelle))!;
 
 describe("§47 : la ligne « Quantité à confirmer »", () => {

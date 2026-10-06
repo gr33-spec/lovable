@@ -60,7 +60,7 @@ describe("liste de matériaux tirée du devis client (IA simulée)", () => {
 
     expect(await ctx.prisma.aiExecution.count()).toBe(1);
     const execution = await ctx.prisma.aiExecution.findFirstOrThrow();
-    expect(execution).toMatchObject({ task: "takeoff_extraction", promptId: "takeoff_extraction", promptVersion: 11, status: "success", pagesText: 1 });
+    expect(execution).toMatchObject({ task: "takeoff_extraction", promptId: "takeoff_extraction", promptVersion: 12, status: "success", pagesText: 1 });
     expect(execution.costMicroUsd).toBeGreaterThan(0n);
     const usage = await agent.get("/v1/ai-usage");
     expect(usage.body.analyses.used).toBe(1);
@@ -105,7 +105,7 @@ describe("liste de matériaux tirée du devis client (IA simulée)", () => {
     // « 42 faîtières » au devis, un autre nombre au calcul : la quantité du devis reste, orange avec l'écart, jusqu'au « C'est bon ».
     const view = (await agent.get(`/v1/projects/${draft.projectId}/takeoff`)).body.takeoff.view as { decisions: { key: string; text: string }[] };
     const gaps = view.decisions.filter((q) => q.key.startsWith("ratio:line:"));
-    expect(gaps.map((q) => q.text)).toEqual([expect.stringMatching(/^Quantité à confirmer : 42 au devis, \d+ calculés/)]);
+    expect(gaps.map((q) => q.text)).toEqual([expect.stringMatching(/^Le devis dit 42, le calcul donne \d+/)]);
     for (const q of gaps) await agent.post(`/v1/takeoffs/${draft.id}/answers`).send({ key: q.key, value: "ok" }).expect(200);
     const validated = await agent.post(`/v1/takeoffs/${draft.id}/validate`);
     expect(validated.status).toBe(200);

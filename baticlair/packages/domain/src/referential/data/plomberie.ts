@@ -58,7 +58,7 @@ const DIAMETRE_EVAC: ParamDef = {
 
 export const PLOMBERIE_REFERENTIAL: Referential = {
   id: "plomberie",
-  version: "plomberie-2026.10.05-1",
+  version: "plomberie-2026.10.06-2",
   trade: "plumbing",
   sources: [
     DEFINITION_SOURCE,
@@ -202,7 +202,7 @@ export const PLOMBERIE_REFERENTIAL: Referential = {
       ],
       slots: [
         { key: "alimentations", family: "supply_work", label: "Alimentations", measureOnly: true },
-        { key: "tube", family: "supply_pipe", label: "Tube d'alimentation", keywords: ["multicouche", "per", "tube"], ask: "Tube : multicouche ou PER ?" },
+        { key: "tube", formOf: "alimentations", family: "supply_pipe", label: "Tube d'alimentation", keywords: ["multicouche", "per", "tube"], ask: "Tube : multicouche ou PER ?" },
         { key: "raccords", family: "supply_fitting", label: "Raccords", usual: { text: "Raccords Ø16.", source: USAGE, productId: "raccords-16" } },
       ],
       constants: {
@@ -253,7 +253,7 @@ export const PLOMBERIE_REFERENTIAL: Referential = {
       ],
       slots: [
         { key: "evacuations", family: "drain_work", label: "Évacuations", measureOnly: true },
-        { key: "tube", family: "drain_pipe", label: "Tube PVC", usual: { text: "Tube PVC en barre de 4 m.", source: NICOLL, productId: "pvc-evac" } },
+        { key: "tube", formOf: "evacuations", family: "drain_pipe", label: "Tube PVC", usual: { text: "Tube PVC en barre de 4 m.", source: NICOLL, productId: "pvc-evac" } },
         { key: "coudes", family: "drain_elbow", label: "Coudes PVC", usual: { text: "Coudes 87°30.", source: USAGE, productId: "coude-pvc" } },
         { key: "colle", family: "pvc_glue", label: "Colle PVC", usual: { text: "Colle PVC en pot de 250 ml.", source: GRIFFON, productId: "colle-pvc-250" } },
       ],
@@ -301,7 +301,7 @@ export const PLOMBERIE_REFERENTIAL: Referential = {
       slots: [
         { key: "plancher", family: "floor_heating_work", label: "Plancher chauffant", measureOnly: true },
         { key: "plaques", family: "stud_panel", label: "Plaques à plots", usual: { text: "Plaque à plots 1 200 × 1 000.", source: GIACOMINI, productId: "plaque-plots" } },
-        { key: "tube", family: "heating_pipe", label: "Tube PER", usual: { text: "PER-BAO 16×2 en couronne.", source: USAGE, productId: "per-pc-240" } },
+        { key: "tube", formOf: "plancher", family: "heating_pipe", label: "Tube PER", usual: { text: "PER-BAO 16×2 en couronne.", source: USAGE, productId: "per-pc-240" } },
         { key: "bande", family: "edge_strip", label: "Bande périphérique", usual: { text: "Bande périphérique 8 × 150 mm.", source: TIROIR, productId: "bande-25" } },
       ],
       constants: {
