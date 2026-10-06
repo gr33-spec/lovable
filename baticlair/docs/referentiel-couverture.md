@@ -2108,3 +2108,31 @@ Un quantitatif « au top » n'est pas un calcul parfait du premier coup, c'est u
 ### 47.8 La règle du comptoir
 
 Toute question posée à l'artisan, par le moteur comme par l'IA, doit être une question que le vendeur de comptoir du négoce lui poserait pour savoir quoi chiffrer : pente, modèle et teinte de tuile, diamètre du conduit, longueur de lame, largeur de bobine, fixes ou coulissantes, bois ou PVC. Elle est formulée avec les mots du comptoir, jamais avec les nôtres. Tout ce que le comptoir ne demanderait pas (zone climatique, entraxe, taux de perte, hauteur de pureau) n'est jamais une question : c'est un défaut appliqué et affiché dans les hypothèses, modifiable d'un tap. Test permanent : pour chaque question du catalogue, un relecteur doit pouvoir répondre « oui, Point.P me le demanderait » ; sinon la question est supprimée.
+
+## 48. Le parcours BatiClair : cinq écrans, zéro saisie
+
+Le parcours remplace la section 44 et l'idée d'un dialogue entre deux IA. Un écran par étape, rien à taper à la main, ton transparent et cool : l'IA peut se tromper et le dit.
+
+### 48.1 Les cinq écrans
+
+1. **Dépose du devis.** Nouveau chantier = une seule action : déposer le PDF. Grande zone de dépôt, mini-animation d'un devis qui devient une liste de matériaux, phrase « Dépose ton devis, je te sors le quantitatif ». Pas de photo stock, pas de formulaire.
+2. **Analyse.** Visuel d'analyse dédié. Le nom du chantier est lu dans le devis (« Chantier Dupont »), sinon la ville, sinon « Nouveau chantier » ; renommable d'un tap. Plus de champ « ajouter des précisions ».
+3. **Questions de comptoir.** Toutes affichées d'un coup, uniquement sur ce que le devis ne dit pas. Intro : « J'ai quelques questions pour éviter les allers-retours avec ton fournisseur. » Réponse au doigt, au texte ou au micro (bien visible, transcription). En réponse vocale, chaque réponse est reliée à sa question et cochée ; ce qui reste vide sort en orange, sans blocage. Toutes les questions, affinage compris, se posent avant le calcul : jamais de deuxième vague après l'attente.
+4. **Calcul.** Moteur + IA qui complète (47). Au-delà de 10 s : animation, message fun (« Va boire un café, je te préviens quand c'est prêt ») et notification.
+5. **Résultat en deux blocs.** « C'est bon » tout vert d'abord, puis « À vérifier » en orange : quantité au plus/moins, désignation au crayon, croquis facultatif sur une pièce zinc commandée. Petit mot « L'IA peut se tromper, n'hésite pas à peaufiner ». Puis envoi au fournisseur.
+
+### 48.2 Les questions de comptoir
+
+| Question | Quand elle se pose | Ce qu'elle déclenche |
+| --- | --- | --- |
+| Format d'ardoise (32×22, 30×20…) | Format absent du devis | Ardoises/m², crochets |
+| Longueur des rampants et de l'égout | Seule la surface est connue | Rives, égout, faîtage, gouttière |
+| Zinc, pièce par pièce (noue, porte-solin, rive…) : tu façonnes ou on commande ? | Pièce zinc dans le devis | Façonné : feuilles ou bobines d'après le développé ; commandé : pièces finies, croquis facultatif |
+| Quincaillerie et consommables (crochets, pointes, vis, silicone) : on les ajoute ? | Toujours, une fois par artisan | Lignes consommables |
+| Liteaux, écran, voliges : à fournir ou déjà sur place ? | Ouvrage en dépose/repose | Lignes support |
+
+Les réponses sont mémorisées par artisan : au chantier suivant, l'app propose « comme d'habitude ? ». Dix questions au premier chantier, trois au cinquième.
+
+### 48.3 La règle « tout lister »
+
+L'objectif numéro un est de ne rien oublier, avant la précision des quantités. Chaque ouvrage déclenche sa liste complète : ardoise ⇒ crochets, liteaux, pointes, écran, faîtage, zinc, silicone. Quantité calculée quand c'est simple (surface × ardoises/m²), avec rappel « +5 % de coupes si besoin » ; sinon la ligne existe quand même, en orange.
