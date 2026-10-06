@@ -1,5 +1,11 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.06-34 — le devis fait foi : coudes et crochets (D-2026-020)
+
+- **Coudes** : « Tubes de descente (Coude zinc Ø80) — 4 unités » sont 4 coudes commandés tels quels (la parenthèse qui suit le titre nomme l'article). Le nombre de descentes ne vient plus que d'une ligne de tubes (`forSlots: ["tube"]`) ou de « 2 descentes » écrit (`textCount`) ; avant : 4 descentes, 8 coudes, 4 naissances, 4 dauphins.
+- **Longueur de crochet** : devenue une donnée de l'ouvrage, lue au devis (« crochet inox de 11 cm », « crochets d'ardoise … 110 mm » ; « Ø 2,7 mm » n'en est pas une), commandée telle quelle. Écrite, elle fixe le recouvrement (crochet − 1 cm, Cupa §34), donc le pureau et le nombre d'ardoises, crochets et liteaux. Non écrite : recouvrement + 1 cm, comme avant ; dite dans les hypothèses, modifiable.
+- Tableau de Brest inchangé. Test : `packages/domain/test/devis-d2026-020.test.ts`.
+
 ## roofing-2026.10.05-33 — plomb et cuivre (§12, réponse du fondateur)
 
 - **Plomb** (nouvel ouvrage `bandes-plomb`, famille `lead_strip` : « plomb », « bavette plomb », « solin plomb ») : bande commandée **en rouleaux**, largeur lue au devis (« largeur 40 cm »), sinon **30 cm** ; épaisseur **1,5 mm** par défaut (« 2 mm », « 2,5 mm » lus) ; ml × 1,1 (§12). La longueur du rouleau (§12 : 3 à 6 m) est prise à 6 m et reste **à confirmer** : la ligne sort orange, « Quantité à confirmer : rouleau de plomb de 6 m ».
