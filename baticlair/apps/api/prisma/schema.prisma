@@ -34,13 +34,30 @@ model User {
   notificationsPromptCount Int       @default(0)
   notificationsEnabledAt   DateTime?
 
-  sessions    Session[]
-  accounts    Account[]
-  memberships Membership[]
-  projects    Project[]    @relation("ProjectCreatedBy")
+  sessions          Session[]
+  accounts          Account[]
+  memberships       Membership[]
+  projects          Project[]          @relation("ProjectCreatedBy")
+  pushSubscriptions PushSubscription[]
 
   @@index([lastSeenAt])
   @@map("user")
+}
+
+/// §48 : « Va boire un café, je te préviens » : l'abonnement du téléphone (ou de l'ordinateur) aux notifications
+/// envoyées par le serveur (Web Push), pour prévenir même l'application fermée ou l'écran verrouillé.
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscription")
 }
 
 model Session {

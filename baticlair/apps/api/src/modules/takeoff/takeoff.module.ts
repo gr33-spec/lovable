@@ -6,7 +6,8 @@ import type { Prisma } from "../../generated/prisma/client.js";
 import type { AppConfig } from "../../platform/config/config.js";
 import { PrismaService } from "../../platform/database/prisma.service.js";
 import type { AppLogger } from "../../platform/logging/logger.js";
-import { CONFIG, LOGGER, ALERTER } from "../../platform/tokens.js";
+import { CONFIG, LOGGER, ALERTER, PUSH_SENDER } from "../../platform/tokens.js";
+import type { PushSender } from "../../platform/push/push.port.js";
 import { AiUsageModule, AiUsageRecorder, AnalysisMeter } from "../ai-usage/index.js";
 import { DOCUMENT_REPOSITORY, DocumentAiInput, DocumentsModule, type DocumentRepository } from "../documents/index.js";
 import { CompanyMemory, CorrectionJournal, LearningModule } from "../learning/index.js";
@@ -63,6 +64,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
         prisma: PrismaService,
         alerter: Alerter,
         quantitatif: QuantitatifPass | null,
+        push: PushSender,
       ) =>
         new TakeoffService(
           repo,
@@ -81,6 +83,19 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             ...(quantitatif ? { quantitatif } : {}),
             companyName: async (tenant) => (await prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true } }))?.name ?? null,
             onStats: (stats) => logger.info({ reading: stats }, "takeoff: lecture du devis"),
+            // §48 : « je te préviens quand c'est prêt » : une notification sur chaque appareil abonné de la personne qui
+            // a lancé la lecture ou le calcul (application fermée comprise) ; un abonnement disparu est oublié.
+            onReady: async (tenant, ready) => {
+              const devices = await prisma.pushSubscription.findMany({ where: { userId: tenant.userId } });
+              const message =
+                ready.step === "questions"
+                  ? { title: "Ton devis est lu", body: "J'ai quelques questions pour toi avant de calculer." }
+                  : { title: "Ta liste est prête", body: "Les matériaux sont calculés : il te reste à vérifier les lignes orange." };
+              for (const d of devices) {
+                const sent = await push.send(d, { ...message, url: `/chantiers/${ready.projectId}`, tag: `chantier-${ready.projectId}` });
+                if (sent === "gone") await prisma.pushSubscription.deleteMany({ where: { endpoint: d.endpoint } });
+              }
+            },
             // Sur Vercel, la lecture d'un gros devis continue après la réponse (sinon la fonction s'arrête).
             keepAlive: (work) => waitUntil(work),
             answerWithinMs: config.ai.answerWithinMs,
@@ -184,7 +199,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             },
           },
         ),
-      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, TAKEOFF_EXTRACTOR, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService, ALERTER, QUANTITATIF_PASS],
+      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, TAKEOFF_EXTRACTOR, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService, ALERTER, QUANTITATIF_PASS, PUSH_SENDER],
     },
   ],
   exports: [TakeoffService],

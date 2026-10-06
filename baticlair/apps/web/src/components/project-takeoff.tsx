@@ -138,10 +138,10 @@ export function ProjectTakeoff({
     lastStep.current = step;
     if (before === "lecture" && step && step !== "lecture") {
       onProjectChanged?.();
-      if (step === "questions") notifyReady("Ton devis est lu", "J'ai quelques questions pour toi avant de calculer.");
+      if (step === "questions") notifyReady("Ton devis est lu", "J'ai quelques questions pour toi avant de calculer.", `chantier-${projectId}`);
     }
-    if (before === "calcul" && step === "resultat") notifyReady("Ta liste est prête", "Les matériaux sont calculés : il te reste à vérifier les lignes orange.");
-  }, [step, onProjectChanged]);
+    if (before === "calcul" && step === "resultat") notifyReady("Ta liste est prête", "Les matériaux sont calculés : il te reste à vérifier les lignes orange.", `chantier-${projectId}`);
+  }, [step, onProjectChanged, projectId]);
 
   // Devis tout juste déposé : on lit sans attendre un appui de plus.
   useEffect(() => {
