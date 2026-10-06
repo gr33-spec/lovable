@@ -230,6 +230,8 @@ export interface ParamDef {
   textCount?: string[];
   /** Mots permis entre le mot qui annonce la donnée et sa valeur (« crochets inox de 11 cm » : 2). Par défaut : aucun. */
   labelGap?: number;
+  /** Un nombre écrit sans unité après le mot (« crochets de 11 ») se lit dans l'unité de la donnée (dans `textRange`). */
+  bareNumber?: true;
   /** Valeurs plausibles d'une lecture dans le texte, dans l'unité de la donnée : hors de là, ce n'est pas elle (« Ø 2,7 mm »). */
   textRange?: { min: string; max: string };
   /** Sans valeur lue ni répondue : cette hypothèse, dite et modifiable. Sans hypothèse : une question. */

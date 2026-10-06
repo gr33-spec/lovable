@@ -421,7 +421,7 @@ export function artisanView(
       // de l'ouvrage, porté par la première ; elle n'a rien à faire chiffrer à part.
       const counted =
         planned?.status === "planned" &&
-        link.ref.workItems.find((w) => w.id === planned.workItemId)?.slots.find((x) => x.key === planned.slot)?.measureOnly === true &&
+        (planned.adds === true || link.ref.workItems.find((w) => w.id === planned.workItemId)?.slots.find((x) => x.key === planned.slot)?.measureOnly === true) &&
         link.plan.lines.some(
           (l) =>
             l.ref !== item.id &&

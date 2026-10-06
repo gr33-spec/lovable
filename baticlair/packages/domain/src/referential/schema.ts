@@ -63,6 +63,7 @@ const param = z.object({
   textCount: z.array(str).optional(),
   labelGap: z.number().int().min(1).max(6).optional(),
   textRange: z.object({ min: str, max: str }).optional(),
+  bareNumber: z.literal(true).optional(),
   default: z.object({ ...provenance, value: z.string().optional(), formula: z.string().optional(), unlessText: z.array(str).optional(), whenGiven: z.object({ param: str, formula: str, note: str }).optional() }).optional(),
   choices: z.array(choice).optional(),
   estimate: z.string().optional(),

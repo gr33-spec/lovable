@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { planQuote, ROOFING_REFERENTIAL, tradeProfile, type SiteFact } from "../src/index.js";
+import { D2026_020_LINES } from "./devis-reels/d2026-020.js";
 import { readQuote } from "./support/read-quote.js";
 
 /**
@@ -73,5 +74,47 @@ describe("D-2026-020 : la longueur de crochet écrite au devis fait foi, et le r
   it("« Ø 2,7 mm » n'est pas une longueur de crochet", () => {
     const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet inox 2,7 mm")], {}, ZONE_1);
     expect(crochets(v)?.label).toMatch(/longueur 9 cm/);
+  });
+});
+
+/**
+ * Le VRAI devis D-2026-020, lignes de pose comprises (retour du fondateur, 2026-10-06 : « tu mets des crochets de 12 alors
+ * que dans le devis c'est bien indiqué crochet de 11 … ne pas poser des questions inutiles »). Tout ce que le devis écrit
+ * se retrouve dans la liste, et aucune question ne porte sur ce qu'il règle déjà.
+ */
+describe("D-2026-020 réel : le devis entier, lu jusqu'au bout", () => {
+  const v = readQuote(D2026_020_LINES, {}, ZONE_1);
+  const plan = planQuote(D2026_020_LINES, ROOFING_REFERENTIAL, tradeProfile("roofing"));
+  const label = (re: RegExp) => v.toBuy.find((b) => re.test(b.label));
+
+  it("crochets de 11, comme écrit (ligne de fourniture et ligne de pose d'accord) ; « inox » reste au crochet", () => {
+    expect(crochets(v)?.label).toBe("Crochets d'ardoise inox standard, longueur 11 cm");
+    expect(slates(v)?.label).toBe("Ardoises naturelles Espagne 1er choix 32×22");
+  });
+  it("la ligne de pose donne la pente (30°) sans rien commander", () => {
+    expect(plan.lines.find((l) => l.ref === "2")).toEqual({ ref: "2", status: "not_material" });
+    expect(plan.inputs.find((i) => i.workItemId === "couverture-ardoises-crochet")?.params.pente?.value).toBe("30");
+  });
+  it("gouttière Havraise : les 20 crochets du devis, sans relire la gouttière dans « crochets de gouttière »", () => {
+    expect(plan.lines.find((l) => l.ref === "4")).toMatchObject({ slot: "crochet", mentions: [] });
+    expect(label(/^Crochets de gouttière Havraise/)?.quantity).toBe("20 pièces");
+  });
+  it("descentes : 6 ml de tubes et 4 coudes tels qu'écrits, 6 colliers ; « dévoiement des descentes » ne cite pas les tubes", () => {
+    expect(plan.lines.find((l) => l.ref === "13")).toMatchObject({ slot: "coude", mentions: [] });
+    expect(label(/^Coude zinc/)?.quantity).toBe("4 pièces");
+    expect(label(/^Tuyau de descente/)?.quantity).toBe("6 ml");
+    expect(label(/^Colliers/)?.quantity).toBe("6 pièces");
+    expect(v.toQuote.map((q) => q.label).join(" ")).not.toMatch(/Tubes de descente/);
+  });
+  it("bandes de rive + bande porte-solin : 8 m de bande, façonnées par l'artisan (« Façonnage et pose »)", () => {
+    const bandes = plan.inputs.find((i) => i.workItemId === "bandes-zinc")!;
+    expect(bandes.params.longueur_bande?.value).toBe("8");
+    expect(bandes.params.faconnage?.value).toBe("1");
+    // Le développé du faîtage (25 cm) n'est pas celui des bandes de rive.
+    expect(bandes.params.developpe).toBeUndefined();
+    expect(v.toQuote).toEqual([]);
+  });
+  it("aucune question sur ce que le devis écrit ; restent les deux du comptoir que le devis ne règle pas", () => {
+    expect(v.questions.map((q) => q.key).sort()).toEqual(["engine:param:dauphin", "engine:param:developpe_gouttiere"]);
   });
 });

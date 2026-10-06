@@ -96,8 +96,9 @@ export function proposeLineRoles(lines: readonly RoleLine[], plan: QuotePlan, va
       }
       continue;
     }
-    if (planned?.status === "planned" && v.unit === "FORFAIT") {
-      roles.set(v.lineId, { role: "measure", why: "La ligne décrit l'ouvrage au forfait : rien ne se commande « au forfait »." });
+    // « Crochets d'ardoise inox 110 mm, 1 lot » : un lot ne dit pas combien d'articles ; le calcul les compte.
+    if (planned?.status === "planned" && (v.unit === "FORFAIT" || v.unit === "LOT")) {
+      roles.set(v.lineId, { role: "measure", why: v.unit === "LOT" ? "« Lot » ne dit pas combien d'articles commander : le calcul les compte." : "La ligne décrit l'ouvrage au forfait : rien ne se commande « au forfait »." });
       continue;
     }
     if (planned?.status === "planned" && planned.measureInText) {

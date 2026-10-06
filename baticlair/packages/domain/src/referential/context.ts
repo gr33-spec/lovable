@@ -73,7 +73,9 @@ export function paramsFromContext(
     const own = all.filter((f) => f.workItemId === work.id);
     // L'aspect du zinc d'une bande ne fait pas celui de la couverture ; celui de la couverture fait celui de ses bandes.
     const lent = all.filter((f) => f.workItemId && f.workItemId !== work.id && (!def.onlyFromPrincipal || principal.has(f.workItemId)));
-    const facts = [...all.filter((f) => !f.workItemId), ...(own.length > 0 ? own : lent)];
+    const kept = new Set(own.length > 0 ? own : lent);
+    // Dans l'ordre où elles sont venues : le devis d'abord, l'en-tête ou la note ensuite.
+    const facts = all.filter((f) => !f.workItemId || kept.has(f));
     if (facts.length === 0) continue;
     const answer = facts.filter((f) => f.origin === "artisan").at(-1);
     if (answer) {

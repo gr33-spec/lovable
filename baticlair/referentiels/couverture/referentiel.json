@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.06-36",
+  "version": "roofing-2026.10.06-37",
   "trade": "roofing",
   "sources": [
     {
@@ -317,6 +317,7 @@
         "bande de solin",
         "bande solin",
         "bande de rive zinc",
+        "bande de rive en zinc",
         "bande d'egout",
         "bande egout",
         "couvre-joint zinc",
@@ -5828,6 +5829,7 @@
             "min": "5",
             "max": "20"
           },
+          "bareNumber": true,
           "default": {
             "formula": "arrondi_sup((recouvrement_pose + regle.marge_crochet) / regle.pas_crochet) * regle.pas_crochet",
             "source": "cupa-pureau-ardoises-m2",
@@ -8226,6 +8228,7 @@
             "dev",
             "dev."
           ],
+          "onlyFromPrincipal": true,
           "withinChoices": true,
           "textValues": [
             {
@@ -8587,7 +8590,19 @@
           "display": {
             "1": "je façonne",
             "2": "commandé façonné"
-          }
+          },
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "faconnage et pose",
+                "faconnage des",
+                "faconnees sur place",
+                "faconne sur place",
+                "faconnage sur place"
+              ]
+            }
+          ]
         },
         {
           "key": "epaisseur_zinc",
@@ -9883,6 +9898,7 @@
             "dev",
             "dev."
           ],
+          "onlyFromPrincipal": true,
           "withinChoices": true,
           "textValues": [
             {
@@ -9957,7 +9973,19 @@
           "display": {
             "1": "je façonne",
             "2": "commandé façonné"
-          }
+          },
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "faconnage et pose",
+                "faconnage des",
+                "faconnees sur place",
+                "faconne sur place",
+                "faconnage sur place"
+              ]
+            }
+          ]
         },
         {
           "key": "epaisseur_zinc",
@@ -10717,6 +10745,7 @@
             "dev",
             "dev."
           ],
+          "onlyFromPrincipal": true,
           "withinChoices": true,
           "textValues": [
             {
@@ -10791,7 +10820,19 @@
           "display": {
             "1": "je façonne",
             "2": "commandé façonné"
-          }
+          },
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "faconnage et pose",
+                "faconnage des",
+                "faconnees sur place",
+                "faconne sur place",
+                "faconnage sur place"
+              ]
+            }
+          ]
         },
         {
           "key": "epaisseur_cuivre",
@@ -11132,7 +11173,19 @@
           "display": {
             "1": "je façonne",
             "2": "commandé façonné"
-          }
+          },
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "faconnage et pose",
+                "faconnage des",
+                "faconnees sur place",
+                "faconne sur place",
+                "faconnage sur place"
+              ]
+            }
+          ]
         },
         {
           "key": "epaisseur_zinc",

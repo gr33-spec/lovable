@@ -19,6 +19,9 @@ const QUALIFIERS = [
   "classe 2",
   "classe 3",
   "demi ronde",
+  "havraise",
+  "nantaise",
+  "mouluree",
   "cylindrique",
   "carree",
   "angulaire",
@@ -65,6 +68,7 @@ const DISPLAY: Record<string, string> = {
   exterieur: "extérieur",
   interieur: "intérieur",
   "demi ronde": "demi-ronde",
+  mouluree: "moulurée",
   carree: "carrée",
   "a emboitement": "à emboîtement",
 };
