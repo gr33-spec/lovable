@@ -598,6 +598,8 @@ model PriceRequest {
   /// « Classé » : l'artisan a fait son choix (fournisseurs retenus facultatifs).
   classifiedAt        DateTime?
   retainedSupplierIds String[]  @default([])
+  /// §48.5 « Envoyer une sélection à un autre fournisseur » : les articles de la liste envoyés (clés) ; vide = toute la liste.
+  itemKeys            String[]  @default([])
   /// §47.5 retour fournisseur : « commandé tel quel » ou « modifié » (bon de commande collé ou photographié), et les
   /// écarts avec la liste envoyée ; ils sont aussi au journal des corrections, marqués « bon de commande ».
   orderFeedback       Json?

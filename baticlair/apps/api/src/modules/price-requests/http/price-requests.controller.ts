@@ -42,6 +42,8 @@ const createBody = z.object({
     .date()
     .nullish()
     .transform((v) => (v ? new Date(`${v}T00:00:00Z`) : null)),
+  /** §48.5 : « Envoyer une sélection à un autre fournisseur » : les articles cochés (clés de la liste). */
+  articles: z.array(z.string().min(1).max(300)).min(1).max(500).optional(),
 });
 const addBody = z.object({ supplierIds });
 const previewBody = createBody.omit({ supplierIds: true }).extend({ destinataire: z.string().trim().max(200).nullish() });
@@ -68,6 +70,8 @@ export function toDto(r: PriceRequestView) {
     createdAt: r.createdAt.toISOString(),
     classifiedAt: r.classifiedAt?.toISOString() ?? null,
     retainedSupplierIds: r.retainedSupplierIds,
+    /** §48.5 : les articles de la liste envoyés à part ; vide = toute la liste. */
+    articles: r.itemKeys,
     /** §47.5 : « commandé tel quel » ou « modifié », et les écarts avec la liste envoyée. */
     orderFeedback: r.orderFeedback,
     packet: r.packet
@@ -169,7 +173,7 @@ export class PriceRequestsController {
     @Param("projectId") projectId: string,
     @Body(new ZodPipe(createBody)) body: z.infer<typeof createBody>,
   ) {
-    const input = { supplierIds: body.supplierIds, message: body.message ?? null, dueDate: body.dueDate ?? null };
+    const input = { supplierIds: body.supplierIds, message: body.message ?? null, dueDate: body.dueDate ?? null, ...(body.articles ? { articles: body.articles } : {}) };
     return toDto(await this.requests.create(tenant, projectId, input));
   }
 

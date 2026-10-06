@@ -3,6 +3,7 @@
 import { ArrowLeft, Check, ChevronRight, CircleCheck, FileDown, FileText, HelpCircle, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AssistantMessage, Say } from "@/components/chat";
+import { useSelectionSend } from "@/components/selection-send";
 import { AnalysisScreen, CalculScreen, notifyReady, QuestionsStep, type CounterAnswers } from "@/components/journey";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { type ItemEdit } from "@/components/purchase-list";
@@ -71,6 +72,9 @@ export function ProjectTakeoff({
   // Le devis lu, ligne par ligne : fermé, ouvert pour corriger, ou ouvert directement sur « ajouter un article ».
   const [showList, setShowList] = useState<false | "corriger" | "ajouter">(false);
   const [sendSignal, setSendSignal] = useState(0);
+  // §48.5 : « Envoyer une sélection à un autre fournisseur » ; une sélection partie fait relire les demandes.
+  const [requestsSignal, setRequestsSignal] = useState(0);
+  const selection = useSelectionSend(projectId, () => setRequestsSignal((n) => n + 1));
   const [sent, setSent] = useState(false);
   // La liste a sa page (`?vue=fournitures`) ; sur le chantier, elle tient en une ligne. Après l'envoi, les réponses des
   // fournisseurs passent en haut du chantier (retour du fondateur, 2026-10-05).
@@ -358,6 +362,7 @@ export function ProjectTakeoff({
           sent={sent}
           sketches={quantitatif?.infos?.croquis ?? []}
           sketchHandlers={{ onAttach: attachSketch, onDetach: detachSketch }}
+          {...(!archived ? { selection } : {})}
         />
         {/* Ce qu'on peut encore faire sur la liste : des actions dites en clair, jamais un lien qu'on ne comprend pas. */}
         <nav aria-label="Autres actions sur la liste" className="flex flex-col divide-y divide-line overflow-hidden rounded-[20px] bg-surface shadow-card">
@@ -467,7 +472,7 @@ export function ProjectTakeoff({
             {actionError && !listShown ? <ErrorNotice error={actionError} /> : null}
           </section>
           <div className={sent ? "order-first" : undefined}>
-            <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} onListChanged={reload} openSignal={sendSignal} onSentChange={setSent} onPreviewClosed={() => setOverview(false)} />
+            <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} onListChanged={reload} openSignal={sendSignal} refreshSignal={requestsSignal} onSentChange={setSent} onPreviewClosed={() => setOverview(false)} />
           </div>
           {listShown ? null : quoteCard}
         </div>

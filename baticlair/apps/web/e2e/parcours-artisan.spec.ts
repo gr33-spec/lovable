@@ -872,3 +872,60 @@ test("§48.4 : questions au bouton seulement, avant le calcul ; puis la voix sur
   await expect(page.getByRole("region", { name: /^J'ai quelques questions/ })).toHaveCount(0);
   await expect(page.getByRole("region", { name: "Liste des fournitures" }).getByText(/^Silicone$/)).toBeVisible();
 });
+
+test("§48.5 : envoyer une sélection à un autre fournisseur, discret, puis l'envoi normal inchangé", async ({ page }) => {
+  await signUp(page);
+  // Deux fournisseurs au carnet (par l'API : le carnet a son propre test).
+  for (const [name, email] of [
+    ["Point.P", "devis@pointp.fr"],
+    ["Tuiles & Co", "devis@tuiles.fr"],
+  ]) {
+    const ok = await page.evaluate(
+      async (body) => {
+        const companyId = localStorage.getItem("baticlair.companyId");
+        const res = await fetch("/v1/suppliers", {
+          method: "POST",
+          headers: { "content-type": "application/json", accept: "application/json", ...(companyId ? { "x-company-id": companyId } : {}) },
+          body: JSON.stringify(body),
+        });
+        return res.ok;
+      },
+      { name, email },
+    );
+    expect(ok).toBe(true);
+  }
+  await createProject(page, "Toiture Le Bihan", "M. Le Bihan", "3 quai Duguay-Trouin, Saint-Malo");
+  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await passQuestions(page);
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(list).toBeVisible();
+
+  // Par défaut, rien ne change : aucune case à cocher.
+  await expect(list.getByRole("checkbox")).toHaveCount(0);
+  await list.getByRole("button", { name: "Envoyer une sélection à un autre fournisseur" }).click();
+  const boxes = list.getByRole("checkbox", { name: /^Envoyer à part : / });
+  await expect(boxes.first()).toBeVisible();
+  // Deux lignes prêtes, vers Point.P.
+  const ready = boxes.and(page.locator(":enabled"));
+  await ready.nth(0).check();
+  await ready.nth(1).check();
+  const bar = page.getByRole("region", { name: "Envoyer la sélection" });
+  await expect(bar.getByText("2 lignes cochées")).toBeVisible();
+  await bar.getByLabel("Fournisseur").selectOption({ label: "Point.P" });
+  await bar.getByRole("button", { name: "Envoyer" }).click();
+  // Elles restent dans la liste, en gris « Envoyé », et les cases disparaissent.
+  await expect(list.getByText("Envoyé · Point.P")).toHaveCount(2);
+  await expect(list.getByRole("checkbox")).toHaveCount(0);
+
+  // Une autre sélection, vers un autre fournisseur.
+  await list.getByRole("button", { name: "Envoyer une sélection à un autre fournisseur" }).click();
+  await ready.nth(2).check();
+  await bar.getByLabel("Fournisseur").selectOption({ label: "Tuiles & Co" });
+  await bar.getByRole("button", { name: "Envoyer" }).click();
+  await expect(list.getByText("Envoyé · Tuiles & Co")).toHaveCount(1);
+  await expect(list.getByText("Envoyé · Point.P")).toHaveCount(2);
+
+  // L'envoi normal n'a pas bougé : toute la liste, d'un coup, au fournisseur habituel.
+  await expect(list.getByRole("button", { name: /^(Envoyer au fournisseur|Vérifier (la ligne|les \d+ lignes))$/ })).toBeVisible();
+  await expect(list.getByRole("button", { name: "Voir la demande envoyée" })).toHaveCount(0);
+});

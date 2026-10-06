@@ -2136,3 +2136,22 @@ Les réponses sont mémorisées par artisan : au chantier suivant, l'app propose
 ### 48.3 La règle « tout lister »
 
 L'objectif numéro un est de ne rien oublier, avant la précision des quantités. Chaque ouvrage déclenche sa liste complète : ardoise ⇒ crochets, liteaux, pointes, écran, faîtage, zinc, silicone. Quantité calculée quand c'est simple (surface × ardoises/m²), avec rappel « +5 % de coupes si besoin » ; sinon la ligne existe quand même, en orange.
+
+### 48.4 Retour du premier test téléphone (6 octobre 2026)
+
+Quatre règles ajoutées après le test du parcours sur iPhone.
+
+1. **L'écran des questions se répond uniquement au doigt.** Pas de saisie texte, pas de micro à cet endroit. Les questions sont plus nombreuses et plus pertinentes : tout ce qui manque pour calculer est demandé ici, en une seule fois (tableau 48.2). Plus aucune question après la sortie de la liste : si une information manque encore au calcul, la ligne sort en orange, point.
+2. **Interdiction d'inventer.** L'IA n'ajoute jamais un article absent du devis (exemple : du pare-pluie quand le devis n'en parle pas). Ce qu'elle juge utile mais non demandé va dans un petit bloc « Suggestions » séparé, décoché par défaut, en bas de la liste. Seuls les consommables validés par l'artisan aux questions (crochets, pointes, silicone…) entrent dans la liste.
+3. **La voix arrive sur l'écran du quantitatif**, liste sous les yeux. Un bouton micro bien visible avec une invitation claire : « Modifie ton quantitatif à la voix : dis-moi ce que tu enlèves, ce que tu ajoutes, ce que tu as oublié. » L'IA applique les changements ligne par ligne et montre ce qu'elle a modifié. Une zone texte reste possible à côté.
+4. **La main reste.** Plus/moins sur les quantités, crayon sur la désignation, suppression d'une ligne : exactement comme aujourd'hui. La voix s'ajoute, elle ne remplace rien.
+
+### 48.5 Envoi vers plusieurs fournisseurs (6 octobre 2026)
+
+Usage occasionnel (devis multi-lots ou multi-métiers à répartir). Doit rester discret : ne pas alourdir l'écran pour le cas par défaut.
+
+- Par défaut, l'écran du quantitatif ne change pas : pas de case à cocher visible.
+- Un petit bouton discret « Envoyer une sélection à un autre fournisseur » fait apparaître des cases à cocher sur chaque ligne.
+- L'artisan coche un sous-ensemble de lignes, choisit un fournisseur, envoie. Ces lignes passent en gris « envoyé » mais restent visibles dans la liste.
+- Il peut répéter l'opération pour un autre sous-ensemble vers un autre fournisseur.
+- Si l'artisan n'utilise pas ce bouton et clique sur l'envoi normal, tout part d'un coup au fournisseur habituel, comme aujourd'hui.

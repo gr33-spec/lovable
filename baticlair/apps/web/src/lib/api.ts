@@ -504,6 +504,8 @@ export interface PriceRequest {
   /** « Classé » : l'artisan a fait son choix (fournisseurs retenus facultatifs). */
   classifiedAt: string | null;
   retainedSupplierIds: string[];
+  /** §48.5 : les articles de la liste envoyés à part (« Envoyer une sélection… ») ; vide = toute la liste. */
+  articles?: string[];
   /** §47.5 retour fournisseur : « commandé tel quel » ou « modifié », et les écarts avec la liste envoyée. */
   orderFeedback?: OrderFeedback | null;
   recipients: PriceRequestRecipient[];

@@ -239,8 +239,10 @@ export class PriceRequestsService {
   }
 
   /** Ce qui part chez le fournisseur : les lignes de la demande et le document (§45), depuis la liste validée. */
-  private async order(tenant: TenantContext, projectId: string, input: { message: string | null; dueDate: Date | null }) {
-    const takeoff = await this.requests.validatedTakeoff(tenant, projectId);
+  private async order(tenant: TenantContext, projectId: string, input: { message: string | null; dueDate: Date | null; articles?: readonly string[] }) {
+    // §48.5 : une SÉLECTION part sans attendre que toute la liste soit validée (devis multi-lots) ; la liste entière, si.
+    const selection = input.articles && input.articles.length > 0 ? new Set(input.articles) : null;
+    const takeoff = await this.requests.validatedTakeoff(tenant, projectId, { anyStatus: selection !== null });
     if (!takeoff)
       throw validationFailed("Validate the materials list first", {
         reason: "takeoff_not_validated",
@@ -248,7 +250,18 @@ export class PriceRequestsService {
     // Ce qui part chez le fournisseur, c'est LA LISTE D'ACHATS : les articles calculés par BatiClair dans leur
     // unité de commande, les quantités écrites telles quelles dans le devis, et ce qui reste à faire chiffrer
     // pour la mesure du devis. Jamais une mesure d'ouvrage présentée comme une quantité d'article.
-    const reviewed = await this.reviewedTakeoff(tenant, takeoff.id);
+    const full = await this.reviewedTakeoff(tenant, takeoff.id);
+    // Une sélection : seulement ses articles (« quote:<clé> » pour une ligne à faire chiffrer), le reste du document suit.
+    const reviewed = selection
+      ? {
+          ...full,
+          purchase: {
+            ...full.purchase,
+            toBuy: full.purchase.toBuy.filter((b) => selection.has(b.key)),
+            toQuote: full.purchase.toQuote.filter((q) => selection.has(`quote:${q.key}`)),
+          },
+        }
+      : full;
     const purchase = reviewed.purchase;
     const byId = new Map(takeoff.lines.map((l) => [l.id, l]));
     const computed: RequestedLine[] = purchase.toBuy
@@ -313,6 +326,8 @@ export class PriceRequestsService {
       supplierIds: string[];
       message: string | null;
       dueDate: Date | null;
+      /** §48.5 : les articles choisis (clés de la liste) ; absent : toute la liste, comme toujours. */
+      articles?: string[];
     },
   ): Promise<PriceRequestView> {
     assertCanWrite(tenant);
@@ -326,6 +341,7 @@ export class PriceRequestsService {
       dueDate: input.dueDate,
       supplierIds,
       packet,
+      ...(input.articles && input.articles.length > 0 ? { itemKeys: [...new Set(input.articles)] } : {}),
     });
     return this.view(tenant, created);
   }
