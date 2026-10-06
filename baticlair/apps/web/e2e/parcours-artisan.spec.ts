@@ -792,14 +792,25 @@ test("§48.4 : questions au bouton seulement, avant le calcul ; puis la voix sur
       onresult: ((e: unknown) => void) | null = null;
       onend: (() => void) | null = null;
       onerror: ((e: unknown) => void) | null = null;
+      // Comme un iPhone : le micro se coupe après une pause, et les résultats repartent de zéro au redémarrage
+      // (avant : seul le dernier morceau restait, « Ok »). Il n'applique qu'au « Terminer ».
+      static starts = 0;
       start() {
+        FakeRecognition.starts += 1;
+        const n = FakeRecognition.starts;
         setTimeout(() => {
-          const said = [[{ transcript: "enlève l'écran" }], [{ transcript: "j'ai oublié 2 cartouches de silicone" }]];
-          this.onresult?.({ results: said });
-          this.onend?.();
+          const final = (transcript: string) => Object.assign([{ transcript }], { isFinal: true });
+          if (n === 1) {
+            this.onresult?.({ resultIndex: 0, results: [final("Ok alors enlève l'écran")] });
+            this.onend?.();
+          } else if (n === 2) {
+            this.onresult?.({ resultIndex: 0, results: [final("j'ai oublié 2 cartouches de silicone")] });
+          }
         }, 50);
       }
-      stop() {}
+      stop() {
+        setTimeout(() => this.onend?.(), 20);
+      }
     }
     const w = window as unknown as { SpeechRecognition: unknown; webkitSpeechRecognition: unknown };
     w.SpeechRecognition = FakeRecognition;
@@ -845,9 +856,14 @@ test("§48.4 : questions au bouton seulement, avant le calcul ; puis la voix sur
   const voix = page.getByRole("region", { name: "Modifier à la voix" });
   await expect(voix.getByText("Modifie ton quantitatif à la voix : dis-moi ce que tu enlèves, ce que tu ajoutes, ce que tu as oublié.")).toBeVisible();
   await voix.getByRole("button", { name: "Modifier à la voix" }).click();
+  // Le texte s'écrit pendant qu'il parle, la pause ne coupe rien ; « Terminer » modifie tout de suite.
+  await expect(voix.getByLabel("Ce que j'entends")).toContainText("j'ai oublié 2 cartouches de silicone");
+  await expect(voix.getByLabel("Ce que j'entends")).toContainText("enlève l'écran");
+  await voix.getByRole("button", { name: "Terminer" }).click();
   const fait = page.getByRole("status", { name: "Ce que j'ai modifié" });
-  await expect(fait.getByText(/Retiré :.*Écran HPV/)).toBeVisible();
-  await expect(fait.getByText(/Ajouté :.*Silicone · 2 cartouches/)).toBeVisible();
+  // Le texte entier du résumé : en cas d'échec, le message dit ce qui a été compris.
+  await expect(fait).toContainText(/Retiré :.*Écran HPV/);
+  await expect(fait).toContainText("Ajouté : Silicone · 2 cartouches");
   await expect(list.getByText(/^Silicone$/)).toBeVisible();
   await expect(list.getByRole("button", { name: /Écran HPV/ })).toHaveCount(0);
   // La main reste : plus / moins, crayon, corbeille.
