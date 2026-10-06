@@ -2,7 +2,8 @@ import { Decimal } from "../shared/decimal.js";
 import { DEVIS_MARK, withoutDevisMark, type Assumption, type NeedResult, type Question, type RuleToConfirm } from "../referential/engine.js";
 import type { LineRole } from "../referential/line-roles.js";
 import type { Referential } from "../referential/model.js";
-import { slotCharacteristicsKey, type QuotePlan } from "../referential/plan.js";
+import { LINE_UNITS, slotCharacteristicsKey, type QuotePlan } from "../referential/plan.js";
+import { parseRefUnit, sameDim } from "../referential/units.js";
 import type { TakeoffValidation } from "../takeoff/validation.js";
 import type { ArtisanView, Decision, OuvrageLevels } from "./artisan-view.js";
 import { withoutLabour } from "./marchandise.js";
@@ -513,7 +514,7 @@ function understood(view: ArtisanView, plan: QuotePlan, ref: Referential): strin
 
 export function purchaseView(
   view: ArtisanView,
-  engine: { needs: readonly OwnedNeed[]; questions: readonly Question[]; declined?: readonly string[] },
+  engine: { needs: readonly OwnedNeed[]; questions: readonly Question[]; declined?: readonly string[]; checks?: readonly OwnedNeed[] },
   link: {
     plan: QuotePlan;
     roles: ReadonlyMap<string, LineRole>;
@@ -562,6 +563,8 @@ export function purchaseView(
       failedSupplierTest.push({ key: `line:${o.lineId}`, label: withoutLabour(o.designation), measure: [o.read.quantity, o.read.unit].filter(Boolean).join(" "), reason: refused, lineIds: [o.lineId] });
       continue;
     }
+    // Une quantité écrite par l'artisan lui-même fait foi : seule celle du devis se compare au calcul.
+    const gap = o.byArtisan ? null : quantityGap(o.lineId, v, link.plan, engine.checks ?? []);
     toBuy.push({
       key: `line:${o.lineId}`,
       // Marchandise seule : la ligne du devis perd ses mentions de pose (« (Fourniture et pose) »).
@@ -573,6 +576,7 @@ export function purchaseView(
       needIds: [],
       lineIds: [o.lineId],
       state: item?.state === "verified" ? "ready" : "to_confirm",
+      ...(gap ? { rules: [gap] } : {}),
       assumptionKeys: [],
     });
   }
@@ -737,6 +741,33 @@ export function applyPurchaseOverrides(purchase: PurchaseView, answers: Record<s
 }
 
 
+/**
+ * Le devis écrit la quantité (« 20 crochets de gouttière ») : elle reste la base, mais elle est comparée au calcul. Un
+ * écart réel (plus de 3 %, et au moins une pièce) se dit sur la ligne, orange, jusqu'au « C'est bon » de l'artisan
+ * (retour du fondateur sur D-2026-020 : « 20 au devis, 21 calculés pour 10 m à 50 cm »).
+ */
+function quantityGap(lineId: string, v: TakeoffValidation["lines"][number], plan: QuotePlan, checks: readonly OwnedNeed[]): RuleToConfirm | null {
+  const planned = plan.lines.find((l) => l.ref === lineId);
+  if (planned?.status !== "planned" || !v.quantity || !v.unit || v.quantity.lessThanOrEqualTo(0)) return null;
+  const unit = LINE_UNITS[v.unit];
+  const need = checks.find((n) => n.workItemId === planned.workItemId && n.slot === planned.slot && n.quantity);
+  if (!unit || !need?.quantity) return null;
+  const written = parseRefUnit(unit);
+  const computed = parseRefUnit(need.quantity.unit);
+  if (!sameDim(written.dim, computed.dim)) return null;
+  let value = new Decimal(need.quantity.value).times(computed.factor).dividedBy(written.factor);
+  const count = unit === "u";
+  if (count) value = value.ceil();
+  const diff = value.minus(v.quantity).abs();
+  if (diff.dividedBy(v.quantity).lessThanOrEqualTo(0.03) || (count && diff.lessThan(1))) return null;
+  const said = (d: Decimal) => (count ? fr(d) : `${fr(d.toDecimalPlaces(2))} ${unit === "m2" ? "m²" : unit === "m" ? "ml" : unit}`);
+  return {
+    key: `ecart:${lineId}`,
+    text: `${said(v.quantity)} au devis, ${said(value)} ${count ? "calculés" : "calculé"}${need.basis ? ` ${need.basis}` : ""}`,
+    local: true,
+  };
+}
+
 /** Clé de la confirmation d'une quantité calculée avec une règle « à vérifier » (§47.3). */
 export const RATIO = "ratio:";
 
@@ -780,7 +811,7 @@ export function applyRuleConfirmations(
 ): PurchaseView {
   const decisions: Decision[] = [];
   const toBuy = purchase.toBuy.map((item): PurchaseItem => {
-    const pending = (item.rules ?? []).filter((r) => !validated.has(r.key));
+    const pending = (item.rules ?? []).filter((r) => r.local || !validated.has(r.key));
     if (pending.length === 0 || `${RATIO}${item.key}` in answers || item.edited?.includes("quantity")) return item;
     decisions.push({
       key: `${RATIO}${item.key}`,

@@ -135,7 +135,7 @@ describe("liste d'achats : devis ardoises (200 m², jouées, cheminée)", () => 
       ["Écran HPV, rouleau 1,50 × 50 m", "3 rouleaux"],
       ["Pattes de fixation", "51 pièces"],
       ["Gouttière zinc dév. 25", "5 longueurs de 4 m"],
-      ["Crochets de gouttière bandeau dév. 25", "43 pièces"],
+      ["Crochets de gouttière bandeau dév. 25", "44 pièces"],
       ["Chatières de ventilation", "12 pièces"],
     ]);
     // Un faîtage ZINC ne donne jamais des faîtières en terre cuite.
@@ -174,10 +174,10 @@ describe("liste d'achats : devis ardoises (200 m², jouées, cheminée)", () => 
       ["Autres articles du devis", null, 1],
     ]);
     expect(v.groups.flatMap((g) => g.itemKeys).sort()).toEqual(v.toBuy.map((b) => b.key).sort());
-    // Zone intérieure : moins de recouvrement, donc moins d'ardoises (8 547, table Cupa à R 80) et des crochets de gouttière tous les 50 cm.
+    // Zone intérieure : moins de recouvrement, donc moins d'ardoises (8 547, table Cupa à R 80) et des crochets de gouttière tous les 50 cm (+ 1 en bout).
     const inland = read(ARDOISES_LUCARNES_LINES, { "role:ligne 5": "measure", "param:nb_descentes": { value: "2", unit: "u" }, "param:zone": { value: "1", unit: "u" } });
     expect(inland.toBuy.find((b) => b.label === "Ardoises naturelles Espagne 1er choix 30×22")).toMatchObject({ quantity: "8 547 pièces" });
-    expect(inland.toBuy.find((b) => b.label === "Crochets de gouttière bandeau dév. 25")).toMatchObject({ quantity: "34 pièces" });
+    expect(inland.toBuy.find((b) => b.label === "Crochets de gouttière bandeau dév. 25")).toMatchObject({ quantity: "35 pièces" });
   });
 
   it("génère docs/liste-achats-vrais-devis.md", async () => {

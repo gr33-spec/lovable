@@ -1075,7 +1075,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.06-37",
+  version: "roofing-2026.10.06-38",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -1238,6 +1238,8 @@ export const ROOFING_REFERENTIAL: Referential = {
     },
     { code: "zinc_sheet", label: "Feuille de zinc", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["feuille de zinc", "feuille zinc"] },
     { code: "zinc_narrow_coil", label: "Bobineau de zinc", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["bobineau"] },
+    // Le mortier du solin (« bande porte-solin zinc et mortier ciment », D-2026-020) : jamais supprimé, estimé et à confirmer.
+    { code: "solin_mortar", label: "Mortier de solin", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["mortier"] },
     { code: "solin_support", label: "Bande porte-solin", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["porte-solin", "porte solin"] },
     // Abergement (entourage de cheminée) : un ouvrage compté, converti en bandes zinc façonnées ou en bobine (§7 « Abergement de cheminée »).
     { code: "chimney_flashing", label: "Abergement de cheminée", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["abergement", "entourage de cheminee", "entourage cheminee", "solin de cheminee", "habillage de cheminee"] },
@@ -1719,6 +1721,9 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("feuille-cuivre-2x1", "copper_sheet", "Feuille de cuivre 2 × 1 m (épaisseur du chantier)", "Feuilles cuivre 2 × 1 m"),
     generic("bobine-cuivre", "copper_coil", "Cuivre en bobine, au mètre linéaire (largeur et épaisseur du chantier)", "Cuivre en bobine", {
       sellingUnits: [{ id: "ml", label: { one: "ml", many: "ml" }, contains: ONE_METRE, primary: true }],
+    }),
+    generic("ciment-sable-solin", "solin_mortar", "Ciment 35 kg + sable, pour mortier de solin", "Ciment + sable (mortier de solin)", {
+      sellingUnits: [{ id: "sac", label: { one: "sac", many: "sacs" }, contains: ONE_PIECE, primary: true }],
     }),
     generic("jonction-gouttiere", "gutter_joint", "Jonction de gouttière (système de la gouttière)", "Jonctions de gouttière"),
     generic("talon-gouttiere", "gutter_end", "Talon (fond) de gouttière (système de la gouttière)", "Talons de gouttière"),
@@ -2602,8 +2607,14 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "bobineau", family: "zinc_narrow_coil", label: "Bobineau zinc", usual: { text: "Bobineau de zinc au-delà de 6 ml de bande (réponse du fondateur).", source: FR_REPLY, productId: "bobineau-zinc" } },
         { key: "mastic", family: "sealant", label: "Silicone ou mastic", usual: { text: "Silicone neutre compatible zinc, 1 cartouche par 8 ml de joint (§25.6).", source: F, productId: "cartouche-silicone-zinc" } },
         { key: "vis", family: "strip_screw", label: "Vis de bandes", usual: { text: "Vis inox 4 × 40, 4 par mètre (§25.5).", source: F, productId: "vis-inox-4x40" } },
+        { key: "mortier", family: "solin_mortar", label: "Mortier de solin", keywords: ["mortier"], usual: { text: "Ciment 35 kg + sable pour le solin (estimation du fondateur).", source: F, productId: "ciment-sable-solin" } },
       ],
-      constants: { ...ZINC_PLAT_CONSTANTS, vis_par_ml: condition("4", "u/m", F, FOUNDER_DOC, "« Vis autoforeuses bandes de rive alu/zinc : 4/ml » (§25.5).") },
+      constants: {
+        ...ZINC_PLAT_CONSTANTS,
+        vis_par_ml: condition("4", "u/m", F, FOUNDER_DOC, "« Vis autoforeuses bandes de rive alu/zinc : 4/ml » (§25.5)."),
+        // Retour du fondateur (2026-10-06) : « estimation indicative acceptable : 1 sac de ciment 35 kg + sable, à confirmer ».
+        sac_ciment_solin: rule("1", "u", F, todo("Estimation indicative du fondateur, à confirmer sur chaque chantier."), "estimation {v} sac de ciment 35 kg + sable"),
+      },
       derived: [
         POIDS_PLAT_DERIVED,
         { key: "ml_zinc", label: "Longueur de zinc, marge comprise", unit: "m", formula: "longueur_bande * regle.marge_bandes", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
@@ -2680,6 +2691,20 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: false,
           exclusions: "4 vis par mètre de bande (§25.5).",
           precision: "4 par mètre, {longueur_bande|ml} de bande",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        // Seulement quand le devis cite le mortier (non « cœur ») : la ligne sort orange, « Quantité à confirmer ».
+        {
+          id: "mortier-solin",
+          slot: "mortier",
+          formula: "regle.sac_ciment_solin",
+          unit: "u",
+          core: false,
+          exclusions: "Mortier du solin cité au devis ; quantité estimée, pas calculée.",
+          designation: "Ciment 35 kg + sable (mortier de solin)",
+          precision: "pour le solin au mortier de ciment",
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
@@ -3415,6 +3440,17 @@ export const ROOFING_REFERENTIAL: Referential = {
         espacement_crochet_littoral: condition("0.4", "m", F, FOUNDER_DOC, "Zone 3 (bord de mer)."),
         zone_littorale: condition("3", "u", F, FOUNDER_DOC),
       },
+      derived: [
+        {
+          key: "espacement_crochets",
+          label: "Espacement des crochets",
+          unit: "m",
+          formula: "si(zone >= regle.zone_littorale, regle.espacement_crochet_littoral, regle.espacement_crochet)",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+      ],
       needs: [
         {
           id: "profil",
@@ -3433,10 +3469,12 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "crochets",
           slot: "crochet",
-          formula: "longueur_gouttiere / si(zone >= regle.zone_littorale, regle.espacement_crochet_littoral, regle.espacement_crochet)",
+          // Un tous les 50 cm (40 en zone 3), plus un en bout (fondateur, D-2026-020 : « 21 calculés pour 10 m à 50 cm »).
+          formula: "arrondi_sup(longueur_gouttiere / espacement_crochets) + 1",
           unit: "u",
           core: true,
-          exclusions: "Hors le crochet supplémentaire en bout de chaque ligne de gouttière.",
+          exclusions: "Un crochet en bout de ligne compris (une seule ligne de gouttière).",
+          basis: "pour {longueur_gouttiere|ml} de gouttière, un tous les {espacement_crochets|cm} + 1 en bout",
           // Deux articles au comptoir : crochet sur chevron ou crochet bandeau, au développé de la gouttière.
           designation: "Crochets de gouttière {fixation_crochet} dév. {developpe_gouttiere|cm#}",
           precisionRequires: ["fixation_crochet", "developpe_gouttiere"],

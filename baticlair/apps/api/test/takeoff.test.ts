@@ -102,6 +102,11 @@ describe("liste de matériaux tirée du devis client (IA simulée)", () => {
     for (const l of current.lines.filter((x: { status: string }) => x.status === "to_verify")) {
       await agent.post(`/v1/takeoff-lines/${l.id}/confirm`).expect(200);
     }
+    // « 42 faîtières » au devis, un autre nombre au calcul : la quantité du devis reste, orange avec l'écart, jusqu'au « C'est bon ».
+    const view = (await agent.get(`/v1/projects/${draft.projectId}/takeoff`)).body.takeoff.view as { decisions: { key: string; text: string }[] };
+    const gaps = view.decisions.filter((q) => q.key.startsWith("ratio:line:"));
+    expect(gaps.map((q) => q.text)).toEqual([expect.stringMatching(/^Quantité à confirmer : 42 au devis, \d+ calculés/)]);
+    for (const q of gaps) await agent.post(`/v1/takeoffs/${draft.id}/answers`).send({ key: q.key, value: "ok" }).expect(200);
     const validated = await agent.post(`/v1/takeoffs/${draft.id}/validate`);
     expect(validated.status).toBe(200);
     expect(validated.body.status).toBe("validated");

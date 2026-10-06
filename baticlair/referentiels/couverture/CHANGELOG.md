@@ -1,5 +1,11 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.06-38 — le mortier reste, l'écart devis / calcul se dit (D-2026-020)
+
+- **Mortier de solin** (nouvelle famille `solin_mortar`, mot « mortier », emplacement `mortier` des bandes zinc) : cité au devis (« bande porte-solin zinc et mortier ciment »), il n'est plus jamais supprimé. Estimation du fondateur, à confirmer : « Ciment 35 kg + sable (mortier de solin) : 1 sac », ligne orange « Quantité à confirmer : estimation 1 sac de ciment 35 kg + sable ». Non cité, il n'apparaît pas.
+- **Quantité écrite comparée au calcul** : le devis reste la base (« 20 crochets de gouttière »), mais BatiClair calcule aussi l'article. Un écart réel (plus de 3 % et au moins une pièce) met la ligne en orange avec la note : « 20 au devis, 21 calculés pour 10 ml de gouttière, un tous les 50 cm + 1 en bout ». « C'est bon » garde la quantité du devis. L'écart est propre au chantier : il ne valide jamais une règle (§47.4).
+- **Crochets de gouttière zinc** : un tous les 50 cm (40 en zone 3) **plus un en bout de ligne** (avant : sans le crochet de bout), comme la gouttière PVC (§15).
+
 ## roofing-2026.10.06-37 — le vrai devis D-2026-020 lu jusqu'au bout
 
 - **Lignes de pose** (« Pose de couverture … pente 30° », « Façonnage et pose des bandes de rive ») : elles ne commandent toujours rien, mais ce qu'elles écrivent vaut pour l'ouvrage qu'elles nomment (pente, crochets, façonnage).

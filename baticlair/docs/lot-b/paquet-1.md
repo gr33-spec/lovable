@@ -203,6 +203,6 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Liteaux 27×40 | 350 ml (≈ 7 bottes de 50 ml) | contre-lattage 200 m², une file tous les 60 cm | chiffrable |
 | Écran HPV, rouleau 1,50 × 50 m | 3 rouleaux (214,29 m²) |  | chiffrable |
 | Gouttière zinc demi-ronde dév. 33 | 6 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
-| Crochets de gouttière sur chevron dév. 33 | 60 pièces |  | chiffrable |
+| Crochets de gouttière sur chevron dév. 33 | 61 pièces |  | chiffrable |
 | Naissances zinc demi-ronde dév. 33 Ø80 | 1 pièce |  | chiffrable |
 

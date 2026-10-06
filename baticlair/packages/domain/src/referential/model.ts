@@ -381,6 +381,8 @@ export interface NeedRule extends Provenance {
    * Une ligne dont on ne sait pas à quoi elle sert porte son usage ici (§45.5).
    */
   precision?: string;
+  /** Comment la quantité se compte, dit seulement quand le devis écrit une autre quantité (« pour 10 ml, un tous les 50 cm »). */
+  basis?: string;
   /**
    * Données sans lesquelles la précision ne s'écrit pas et que le fournisseur ne peut pas deviner (le diamètre d'une
    * sortie de toit) : demandées même si elles ne changent aucune quantité — elles changent l'article.
