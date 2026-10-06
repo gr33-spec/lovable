@@ -1,5 +1,9 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.06-36 — plus de crochet « 1 mm » à l'écran
+
+- Le choix du crochet se dit « Standard » ou « Inox Ø 2,7 mm (bord de mer) » ; « Courant (1 mm) » n'apparaît plus (retour du fondateur : un crochet de 1 mm n'existe pas). Le 1 mm reste le jeu de la formule Cupa (§34) dans le calcul : aucune quantité ne bouge.
+
 ## roofing-2026.10.06-35 — ce que le devis règle n'est plus demandé (D-2026-020, suite)
 
 - **Ø des descentes** lu après « diam. » ou « diamètre » (« diam. 80mm », « diamètre 100 ») : plus de question « Ø 80 ou Ø 100 ? » quand le devis l'écrit.

@@ -359,7 +359,9 @@ const DIAMETRE_CROCHET_PARAM: ParamDef = {
   question: "Quel crochet ?",
   default: { value: "1", source: "cupa-pureau-ardoises-m2", verification: FOUNDER_DOC, version: 1, note: "crochet courant ; inox 2,7 mm en bord de mer" },
   choices: [
-    { label: "Courant (1 mm)", value: "1" },
+    // Jamais « 1 mm » à l'écran (retour du fondateur, 2026-10-06 : « un crochet de 1 mm, ça n'existe pas ») : le 1 mm est le
+    // jeu de la formule Cupa (§34), pas un crochet que l'on commande.
+    { label: "Standard", value: "1" },
     { label: "Inox 2,7 mm (bord de mer)", value: "2.7" },
   ],
   // Dans une désignation : « crochets d'ardoise inox standard » ou « inox Ø 2,7 mm ».
@@ -1069,7 +1071,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.06-35",
+  version: "roofing-2026.10.06-36",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },

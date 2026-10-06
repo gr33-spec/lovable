@@ -28,6 +28,10 @@ async function signUp(page: Page) {
 /** La question ouverte en bas de l'écran : « C'est bon » / « Oui… » s'il y en a, sinon le premier bouton de réponse. */
 async function answerSheet(page: Page) {
   const sheet = page.getByRole("dialog", { name: /^Question : / });
+  // La réponse précédente s'enregistre encore (boutons « aria-busy ») : la fiche va changer ou se fermer. On attend
+  // qu'elle soit au repos, sinon le clic part sur un bouton désactivé qui disparaît (course vue en CI).
+  await expect(sheet.locator('[aria-busy="true"]')).toHaveCount(0, { timeout: 15_000 });
+  if (!(await sheet.isVisible())) return;
   const name = (await sheet.getAttribute("aria-label"))!;
   const yes = sheet.getByRole("button", { name: /^(C'est bon|Oui)/ }).first();
   const input = sheet.getByRole("textbox");
