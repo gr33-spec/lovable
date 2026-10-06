@@ -2,45 +2,43 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { DropZone } from "@/components/journey";
 import { Paywall, useBilling } from "@/components/paywall";
-import { BackButton, Button, ErrorNotice, Field, PageTitle } from "@/components/ui";
-import { api, ApiError, newActionKey, type Project } from "@/lib/api";
-import { useDraft } from "@/lib/draft";
+import { BackButton } from "@/components/ui";
+import { api, ApiError, MAX_DOCUMENT_BYTES, newActionKey, type Project, type ProjectDocument } from "@/lib/api";
+import { NEW_PROJECT_NAME } from "@/lib/project-name";
+import { attachFile } from "@/lib/upload";
 import { useSession } from "@/lib/session";
-import { TRADES } from "@/lib/trades";
 
+/**
+ * NOUVEAU CHANTIER = UNE SEULE ACTION : DÉPOSER LE PDF (parcours §48, étape 1). Le chantier se crée au dépôt, sous un
+ * nom d'attente ; la lecture lui donne le nom du client, l'adresse et le métier de l'entreprise. Rien à taper.
+ */
 export default function NouveauChantierPage() {
   const router = useRouter();
   const { company } = useSession();
-  const { values, setValues, clear } = useDraft("nouveau-chantier", { name: "", clientName: "", address: "", trade: "" });
-  // Le métier du chantier : celui de l'entreprise par défaut ; changé d'un appui quand le devis est d'un autre métier.
-  const companyTrade = company?.trades.find((t) => t !== "other") ?? "";
-  const trade = values.trade || companyTrade;
+  const billing = useBilling();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
-  // Une clé par formulaire : double appui ou nouvelle tentative = un seul chantier.
+  // Une clé par dépôt : double appui ou nouvelle tentative = un seul chantier.
   const key = useRef(newActionKey());
-  const billing = useBilling();
+  const project = useRef<Project | null>(null);
 
-  const fieldError = (path: string) =>
-    error?.details?.some((d) => d.path === path) ? (path === "name" ? "Donnez un nom au chantier." : "Texte trop long.") : undefined;
-
-  async function submit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
+  async function drop(file: File) {
     setError(null);
+    if (file.size > MAX_DOCUMENT_BYTES) return setError(new ApiError("payload_too_large", 413));
+    setPending(true);
     try {
-      const project = await api<Project>("/v1/projects", {
-        method: "POST",
-        body: { name: values.name, clientName: values.clientName || null, address: values.address || null, trade: trade || null },
-        idempotencyKey: key.current,
-      });
-      clear();
-      // replace : « Retour » depuis la fiche ramène à la liste, pas au formulaire.
-      router.replace(`/chantiers/${project.id}`);
+      const trade = company?.trades.find((t) => t !== "other") ?? null;
+      project.current ??= await api<Project>("/v1/projects", { method: "POST", body: { name: NEW_PROJECT_NAME, clientName: null, address: null, trade }, idempotencyKey: key.current });
+      const form = new FormData();
+      form.append("purpose", "client_quote");
+      await attachFile(form, file);
+      await api<ProjectDocument>(`/v1/projects/${encodeURIComponent(project.current.id)}/documents`, { method: "POST", body: form });
+      // replace : « Retour » depuis le chantier ramène à la liste des chantiers, pas au dépôt. La lecture part là-bas.
+      router.replace(`/chantiers/${project.current.id}`);
     } catch (e) {
       const err = e instanceof ApiError ? e : new ApiError("internal_error", 500);
-      // Limite de la formule atteinte : on montre les formules, sans perdre la saisie.
       if (err.code === "plan_limit_reached") billing.reload();
       else setError(err);
       setPending(false);
@@ -59,77 +57,7 @@ export default function NouveauChantierPage() {
   return (
     <>
       <BackButton fallback="/chantiers" />
-      <PageTitle>Nouveau chantier</PageTitle>
-      <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
-        {error && !error.details ? <ErrorNotice error={error} /> : null}
-        <Field
-          id="name"
-          label="Nom du chantier"
-          placeholder="ex. Toiture Dupont"
-          value={values.name}
-          onChange={(e) => setValues({ ...values, name: e.target.value })}
-          error={fieldError("name")}
-          required
-          autoFocus
-        />
-        <Field
-          id="clientName"
-          label="Client (facultatif)"
-          placeholder="ex. M. Dupont"
-          value={values.clientName}
-          onChange={(e) => setValues({ ...values, clientName: e.target.value })}
-          error={fieldError("clientName")}
-          autoComplete="off"
-        />
-        <Field
-          id="address"
-          label="Adresse du chantier (facultatif)"
-          placeholder="ex. 12 rue des Ardoisiers, Vannes"
-          value={values.address}
-          onChange={(e) => setValues({ ...values, address: e.target.value })}
-          error={fieldError("address")}
-          autoComplete="street-address"
-        />
-        <TradeChoice value={trade} onChange={(t) => setValues({ ...values, trade: t })} />
-        <Button type="submit" pending={pending} className="mt-2">
-          Créer le chantier
-        </Button>
-        <p className="text-center text-[13px] text-muted">Votre saisie est gardée si vous êtes interrompu.</p>
-      </form>
+      <DropZone onFile={(f) => void drop(f)} pending={pending} error={error} />
     </>
-  );
-}
-
-/** Métier du chantier : un appui (le devis ne le dit pas toujours). Les métiers de l'entreprise d'abord. */
-function TradeChoice({ value, onChange }: { value: string; onChange: (trade: string) => void }) {
-  const [all, setAll] = useState(false);
-  const { company } = useSession();
-  const mine = TRADES.filter((t) => t.id !== "other" && company?.trades.includes(t.id));
-  const shown = all || mine.length === 0 ? TRADES.filter((t) => t.id !== "other") : [...mine, ...TRADES.filter((t) => t.id === value && !mine.includes(t))];
-  return (
-    <fieldset className="flex flex-col gap-2">
-      <legend className="mb-1.5 text-sm font-bold">Métier du chantier</legend>
-      <div className="flex flex-wrap gap-2">
-        {shown.map((t) => {
-          const on = t.id === value;
-          return (
-            <button
-              key={t.id}
-              type="button"
-              aria-pressed={on}
-              onClick={() => onChange(t.id)}
-              className={`inline-flex min-h-11 items-center rounded-full px-4 text-sm font-bold transition ${on ? "bg-ink text-white" : "bg-surface text-ink shadow-card"}`}
-            >
-              {t.label}
-            </button>
-          );
-        })}
-        {!all && mine.length > 0 ? (
-          <button type="button" onClick={() => setAll(true)} className="inline-flex min-h-11 items-center px-2 text-sm font-bold text-accent-text">
-            Autre métier…
-          </button>
-        ) : null}
-      </div>
-    </fieldset>
   );
 }

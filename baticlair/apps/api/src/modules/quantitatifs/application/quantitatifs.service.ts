@@ -254,6 +254,25 @@ export class QuantitatifsService {
     return this.view(row, reviewed, rendu);
   }
 
+  /**
+   * PARCOURS §48 : les réponses aux questions de comptoir (toutes d'un coup, facultatives) puis le calcul. Une question
+   * laissée sans réponse ne bloque rien : sa ligne sort orange. Jamais de deuxième vague de questions après.
+   */
+  async calculate(
+    tenant: TenantContext,
+    id: string,
+    reponses: readonly { question: string; valeur: string | null; unite?: string | undefined }[],
+    rendu: Rendu = {},
+    ajouts: readonly { id: string; reponse: "oui" | "non" }[] = [],
+  ) {
+    const row = await this.row(tenant, id);
+    if (reponses.length > 0) await this.answer(tenant, id, reponses);
+    for (const a of ajouts) await this.correct(tenant, id, { action: "suggestion", id: a.id, reponse: a.reponse });
+    const reviewed = await this.ready(tenant, row);
+    await this.takeoffs.calculate(tenant, reviewed.takeoff.id);
+    return this.view(row, await this.takeoffs.reviewed(tenant, reviewed.takeoff.id), rendu);
+  }
+
   /** Corrections (§39) : changer une valeur (pente, zone, perte…), ajouter, modifier, retirer ou confirmer une ligne du devis. */
   async correct(tenant: TenantContext, id: string, correction: Correction, rendu: Rendu = {}) {
     const row = await this.row(tenant, id);
@@ -390,6 +409,8 @@ export class QuantitatifsService {
     ]);
     return {
       ...quantitatifView(this.base(row), reviewed),
+      // Parcours §48 : questions de comptoir (avant le calcul), calcul en cours (appel IA n° 2), ou liste prête.
+      phase: this.takeoffs.phaseOf(reviewed.takeoff),
       // Un croquis du chantier, ou celui d'un article (« article » : la clé de la ligne de la liste, avec la précision de l'artisan).
       infos: { texte: project?.siteNotes ?? null, croquis: croquis.map((c) => ({ id: c.id, nom: c.originalName, ...(c.itemKey ? { article: c.itemKey, commentaire: c.note } : {}) })) },
       ...(rendu.ecran ? { ecran: takeoffDto(reviewed) } : {}),

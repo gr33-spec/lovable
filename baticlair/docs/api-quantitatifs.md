@@ -75,6 +75,19 @@ Réponses :
 - `valeur: null` veut dire « je ne sais pas » : la valeur par défaut est gardée.
 - `"ok"` confirme une ligne reprise telle quelle.
 
+## Calculer — `POST /v1/quantitatifs/{id}/calcul`
+
+Parcours §48 : un devis lu attend ses questions de comptoir (`phase: "questions"`) ; le calcul complet (moteur + appel
+IA n° 2 qui propose fixations, scellements, étanchéité et consommables) part à cet appel, avec les réponses facultatives :
+
+```json
+{ "reponses": [{ "question": "engine:param:faconnage", "valeur": "2" }], "ajouts": [{ "id": "need:…", "reponse": "oui" }] }
+```
+
+Une question laissée sans réponse ne bloque rien : sa ligne sort orange. Réponse : le quantitatif, `phase` à
+`"resultat"` (liste prête) ou `"calcul"` (le calcul continue ; relire `GET /v1/quantitatifs/{id}`). Un second appel ne
+relance rien. Sans cet appel, la liste reste celle du moteur seul (toujours valable, sans les ajouts de l'IA).
+
 ## Corriger — `POST /v1/quantitatifs/{id}/corrections`
 
 - Changer une valeur : `{ "action": "modifier", "cle": "param:pente", "valeur": "30" }`. Seules les lignes qui en dépendent sont recalculées.

@@ -103,7 +103,7 @@ function viewDto(view: ArtisanView) {
   };
 }
 
-export function takeoffDto({ takeoff, validation, view, roles, purchase, excluded }: ReviewedTakeoff) {
+export function takeoffDto({ takeoff, validation, view, roles, purchase, excluded, habits }: ReviewedTakeoff) {
   const byId = new Map(validation.lines.map((v) => [v.lineId, v]));
   return {
     id: takeoff.id,
@@ -113,6 +113,8 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase, exclude
     // Les décisions de l'écran : celles de la vue, plus les précisions à boutons de la liste (diamètre d'une sortie de toit).
     view: viewDto({ ...view, decisions: purchase.questions }),
     purchase: purchaseDto(purchase),
+    // §48 : « Comme d'habitude ? » sur l'écran des questions.
+    habits: habits ?? [],
     model: takeoff.model,
     promptVersion: takeoff.promptVersion,
     // §44.2 : la ligne retirée par une phrase de la note est dite à l'artisan, avec sa phrase.

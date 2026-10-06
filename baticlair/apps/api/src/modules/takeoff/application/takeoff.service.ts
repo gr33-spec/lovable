@@ -59,6 +59,7 @@ import {
   MAX_SUGGESTIONS,
   tradeIdOf,
   type SiteBrief,
+  normalizeText,
 } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { AiUsageRecorder, AnalysisMeter } from "../../ai-usage/index.js";
@@ -103,6 +104,11 @@ export interface ReadingOptions {
   quantitatif?: QuantitatifPass;
   /** Le nom de l'entreprise, injecté dans le prompt B ({nom_entreprise}). */
   companyName?: (tenant: TenantContext) => Promise<string | null>;
+  /**
+   * Parcours §48 : le chantier créé par le seul dépôt du PDF prend le nom lu dans le devis (« Chantier Dupont »), et
+   * l'adresse ou le client s'ils sont vides. Jamais un nom que l'artisan a déjà donné.
+   */
+  nameProject?: (tenant: TenantContext, projectId: string, read: { client: string | null; address: string | null }) => Promise<void>;
   /** Coût estimé au-delà duquel un document n'est pas un devis normal (micro-dollars). */
   maxAnalysisMicroUsd?: number;
   now?: () => Date;
@@ -148,6 +154,18 @@ export const manualKey = (designation: string) =>
 
 /** Une lecture « en cours » depuis plus longtemps a été interrompue (fonction coupée) : elle compte comme échouée. */
 export const STALE_READING_MS = 6 * 60 * 1000;
+/** Un calcul (appel IA n° 2) commencé depuis plus longtemps a été coupé : il peut repartir. */
+export const STALE_CALCUL_MS = 3 * 60 * 1000;
+
+/**
+ * Le client et l'adresse lus dans l'en-tête du devis (prompt A, « contexte ») : clés libres, on prend la première qui
+ * ressemble (« client », « nom du client », « maître d'ouvrage » ; « adresse », « adresse du chantier »).
+ */
+export function quoteIdentity(context: Record<string, string> | null): { client: string | null; address: string | null } {
+  const entries = Object.entries(context ?? {}).map(([k, v]) => [normalizeText(k), String(v ?? "").trim()] as const).filter(([, v]) => v.length > 0 && v.length <= 160);
+  const pick = (re: RegExp) => entries.find(([k]) => re.test(k))?.[1] ?? null;
+  return { client: pick(/\b(client|maitre d.?ouvrage|proprietaire|destinataire)\b/), address: pick(/\badresse\b/) };
+}
 
 /** Où en est la lecture du devis client d'un chantier, tant que la liste n'existe pas. */
 export interface ReadingState {
@@ -232,6 +250,11 @@ export interface ReviewedTakeoff {
   openContradictions: readonly string[];
   /** Le chantier en bref (§45.3) : les faits confirmés seulement, jamais une hypothèse de l'app. */
   brief: SiteBrief;
+  /**
+   * Parcours §48 : les habitudes établies de l'entreprise appliquées à ce chantier (« je façonne »), reproposées sur
+   * l'écran des questions en « Comme d'habitude ? » ; un tap les confirme ou les change pour ce chantier.
+   */
+  habits: { key: string; question: string; unit: string; options: { label: string; value: string }[]; value: string }[];
 }
 
 
@@ -285,6 +308,49 @@ export class TakeoffService {
     const background = work.catch((error: unknown) => this.onRecordFailure(error));
     (this.reading.keepAlive ?? (() => {}))(background);
     return { state: "reading" };
+  }
+
+  /**
+   * PARCOURS §48, ÉTAPE 4 : les questions de comptoir sont répondues (ou laissées : ligne orange), le calcul part. Le
+   * moteur est instantané ; l'appel IA n° 2 complète (ajouts, doutes). Réponse rapide comme la lecture : la liste si elle
+   * est prête dans le délai, sinon « calcul en cours » (il continue, l'écran interroge). Un seul départ, jamais deux appels.
+   */
+  async calculate(tenant: TenantContext, takeoffId: string): Promise<{ state: "ready" | "calculating" }> {
+    const takeoff = await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
+    if (takeoff.calculatedAt) return { state: "ready" };
+    const now = (this.reading.now ?? (() => new Date()))();
+    const won = await this.takeoffs.startCalcul(tenant, takeoff.id, now, new Date(now.getTime() - STALE_CALCUL_MS));
+    if (!won) return { state: "calculating" };
+    const work = (async () => {
+      const pass = this.reading.quantitatif;
+      if (pass && takeoff.documentId && takeoff.analysisId) {
+        const doc = await this.documents.findById(tenant, takeoff.documentId);
+        if (doc) await this.completionPass(tenant, doc, doc.processing?.id ?? null, takeoff.analysisId, takeoff, pass);
+      }
+      await this.takeoffs.finishCalcul(tenant, takeoff.id, (this.reading.now ?? (() => new Date()))());
+    })();
+    const wait = this.reading.answerWithinMs ?? 8000;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<"later">((resolve) => {
+      timer = setTimeout(() => resolve("later"), wait);
+    });
+    try {
+      const first = await Promise.race([work.then(() => "done" as const), timeout]);
+      if (first === "done") return { state: "ready" };
+    } finally {
+      clearTimeout(timer);
+    }
+    (this.reading.keepAlive ?? (() => {}))(work.catch((error: unknown) => this.onRecordFailure(error)));
+    return { state: "calculating" };
+  }
+
+  /** Où en est le parcours d'un quantitatif : questions à poser, calcul en cours, ou liste prête. */
+  phaseOf(takeoff: TakeoffRecord): "questions" | "calcul" | "resultat" {
+    if (takeoff.calculatedAt) return "resultat";
+    if (!takeoff.calculStartedAt) return "questions";
+    const now = (this.reading.now ?? (() => new Date()))().getTime();
+    // Un calcul coupé (serveur arrêté) ne bloque jamais : il se relance au prochain appui.
+    return now - takeoff.calculStartedAt.getTime() > STALE_CALCUL_MS ? "questions" : "calcul";
   }
 
   /** La lecture du devis client du chantier : en cours, échouée, ou rien (pas commencée, ou liste prête). */
@@ -421,7 +487,8 @@ export class TakeoffService {
         aiDoubt: l.doubt?.trim() || null,
       })),
     });
-    if (this.reading.quantitatif) await this.completionPass(tenant, doc, prepared, analysisId, takeoff, this.reading.quantitatif);
+    // Parcours §48 : le nom du chantier vient du devis. Le calcul complet (appel IA n° 2) attend les questions de comptoir.
+    await this.reading.nameProject?.(tenant, doc.projectId, quoteIdentity(success.output.context ?? null)).catch((error: unknown) => this.onRecordFailure(error));
     await this.meter.complete(analysisId);
     return this.review(tenant, takeoff);
   }
@@ -446,6 +513,7 @@ export class TakeoffService {
       referentialVersion: ref?.version ?? null,
       analysisId: null,
       trade,
+      calculated: true,
       promptId: "partenaire",
       promptVersion: 0,
       model: "aucun",
@@ -974,9 +1042,10 @@ export class TakeoffService {
     // §47.1 : pas de mode brouillon, la couleur fait le travail. Une règle « à vérifier » calcule, et la ligne sort orange
     // « Quantité à confirmer : … » jusqu'au « C'est bon » de l'artisan (ou à sa validation par trois artisans, §47.4).
     const acceptDraft = true;
+    const preferences = await this.memory.forEngine(tenant);
     const engine =
       plan.inputs.length > 0
-        ? computeWithAnswers(ref, plan, takeoff.answers, await this.memory.forEngine(tenant), { acceptDraft }, slotsGivenByQuote(plan, validation))
+        ? computeWithAnswers(ref, plan, takeoff.answers, preferences, { acceptDraft }, slotsGivenByQuote(plan, validation))
         : { needs: [], questions: [], declined: [] };
     // Le quantitatif renvoyé garde TOUTES ses lignes (les exclues aussi, pour le détail sans prix) ; seul le calcul les ignore.
     const kept = excluded.size > 0 ? { ...takeoff, lines: record.lines.map((l) => takeoff.lines.find((x) => x.id === l.id) ?? l) } : takeoff;
@@ -1022,7 +1091,19 @@ export class TakeoffService {
         consumable: true,
       });
     }
-    return { ...reviewed, view, brief, purchase };
+    // « Comme d'habitude ? » : une habitude établie (paramètre d'entreprise) d'un ouvrage de ce devis, pas encore
+    // répondue sur ce chantier.
+    const used = new Set(plan.inputs.map((i) => i.workItemId));
+    const habits = [
+      ...new Map(
+        ref.workItems
+          .filter((w) => used.has(w.id))
+          .flatMap((w) => w.params)
+          .filter((d) => d.kind === "artisan_preference" && d.question && (d.choices?.length ?? 0) > 0 && preferences.params?.[d.key] !== undefined && takeoff.answers[`param:${d.key}`] === undefined)
+          .map((d) => [d.key, { key: `param:${d.key}`, question: d.question!, unit: d.unit, options: d.choices!.map((c) => ({ label: c.label, value: c.value })), value: preferences.params![d.key]! }]),
+      ).values(),
+    ];
+    return { ...reviewed, view, brief, purchase, habits };
   }
 
   /**
@@ -1102,7 +1183,7 @@ export class TakeoffService {
   private async completionPass(
     tenant: TenantContext,
     doc: DocumentWithProcessing,
-    prepared: Prepared,
+    processingId: string | null,
     analysisId: string,
     takeoff: TakeoffRecord,
     pass: QuantitatifPass,
@@ -1123,7 +1204,7 @@ export class TakeoffService {
         ville: communeOf(address),
         referentiel,
       });
-      await this.record(tenant, doc, { text: 0, vision: 0 }, prepared.processingId, analysisId, 50, result, QUANTITATIF_PROMPT);
+      await this.record(tenant, doc, { text: 0, vision: 0 }, processingId, analysisId, 50, result, QUANTITATIF_PROMPT);
       if (result.status === "success" && result.output) await this.takeoffs.setCompletion(tenant, takeoff.id, completionRecord(result.output, dossier));
     } catch (error) {
       // L'appel n° 2 complète ; sa panne ne fait jamais perdre la lecture ni le calcul.

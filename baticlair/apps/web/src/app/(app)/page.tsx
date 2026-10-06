@@ -48,7 +48,7 @@ export default function AccueilPage() {
     });
   }
   if (recent && recent.items.length === 0) {
-    todo.push({ key: "first", title: "Créez votre premier chantier", text: "Nom, client, adresse : 30 secondes.", href: "/chantiers/nouveau", action: "Créer", icon: <Warehouse size={20} aria-hidden="true" /> });
+    todo.push({ key: "first", title: "Créez votre premier chantier", text: "Dépose ton devis : le chantier se crée tout seul.", href: "/chantiers/nouveau", action: "Déposer", icon: <Warehouse size={20} aria-hidden="true" /> });
   }
   if (!me.user.emailVerified && features.email) {
     todo.push({ key: "email", title: "Confirmez votre adresse e-mail", text: "Nécessaire avant d'écrire à vos fournisseurs.", href: "/compte", action: "Voir", icon: <MailCheck size={20} aria-hidden="true" /> });

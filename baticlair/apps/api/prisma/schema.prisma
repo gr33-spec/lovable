@@ -482,6 +482,10 @@ model Takeoff {
   context            Json?
   /// Appel IA n° 2 (quantitatif en un passage, §41) : ajouts et doutes proposés, repères résolus ; null = pas d'appel.
   completion         Json?
+  /// Parcours (§48) : le calcul part après les questions de comptoir. Début et fin du calcul (moteur + appel IA n° 2) ;
+  /// les deux nuls = l'artisan n'a pas encore répondu aux questions.
+  calculStartedAt    DateTime?
+  calculatedAt       DateTime?
   createdById        String?
   createdAt          DateTime      @default(now())
   validatedAt        DateTime?

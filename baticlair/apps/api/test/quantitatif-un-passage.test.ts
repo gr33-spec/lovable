@@ -38,7 +38,7 @@ class OneReading implements TakeoffExtractor {
       model: "claude-opus-5-5",
       usage: { inputTokens: 5000, outputTokens: 800 },
       status: "success",
-      output: { lines: [line("1:3", "Gouttière zinc demi-ronde dév. 33", "20", "ml"), line("1:4", "Ardoises naturelles 32x22", "120", "m²")], notes: [], context: null },
+      output: { lines: [line("1:3", "Gouttière zinc demi-ronde dév. 33", "20", "ml"), line("1:4", "Ardoises naturelles 32x22", "120", "m²")], notes: [], context: { client: "M. et Mme DUPONT", adresse: "3 rue de Siam, 29200 Brest" } },
       errorCode: null,
       durationMs: 1,
     };
@@ -107,6 +107,15 @@ describe("deux appels IA max : lecture + quantitatif", () => {
       .field("purpose", "client_quote")
       .attach("file", Buffer.from(await makePdf(["devis"])), { filename: "devis.pdf", contentType: "application/pdf" });
     expect((await agent.post(`/v1/documents/${doc.body.id}/takeoff`)).status).toBe(201);
+    // §48 : la lecture seule d'abord ; les questions de comptoir avant le calcul ; l'appel n° 2 part avec « Calculer ».
+    const before = (await agent.get(`/v1/quantitatifs?projetId=${project.body.id}`)).body.items[0] as { id: string; phase: string };
+    expect(before.phase).toBe("questions");
+    expect(pass.inputs).toHaveLength(0);
+    const calcul = await agent.post(`/v1/quantitatifs/${before.id}/calcul`).send({ reponses: [] });
+    expect(calcul.status).toBe(200);
+    expect(calcul.body.phase).toBe("resultat");
+    // Un deuxième appui ne relance rien.
+    await agent.post(`/v1/quantitatifs/${before.id}/calcul`).send({});
     // Deux appels, pas un de plus.
     expect(reader.calls).toBe(1);
     expect(pass.inputs).toHaveLength(1);
@@ -133,5 +142,22 @@ describe("deux appels IA max : lecture + quantitatif", () => {
     expect(after.ecran.purchase.screen.groups.flatMap((g) => g.rows).some((r) => r.decisionKey === add.decisionKey)).toBe(false);
     expect(await ctx.prisma.correctionEvent.count({ where: { action: "add" } })).toBe(1);
     expect(await ctx.prisma.aiExecution.count()).toBe(2);
+  });
+});
+
+describe("nouveau chantier = déposer le PDF (§48)", () => {
+  it("le chantier né du dépôt prend le nom du client lu dans le devis, son adresse ; un nom donné n'est jamais remplacé", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "n@example.fr", "Toitures Le Gall");
+    const fresh = await agent.post("/v1/projects").send({ name: "Nouveau chantier" });
+    const named = await agent.post("/v1/projects").send({ name: "Toiture de la grange" });
+    for (const p of [fresh, named]) {
+      const doc = await agent
+        .post(`/v1/projects/${p.body.id}/documents`)
+        .field("purpose", "client_quote")
+        .attach("file", Buffer.from(await makePdf(["devis"])), { filename: "devis.pdf", contentType: "application/pdf" });
+      expect((await agent.post(`/v1/documents/${doc.body.id}/takeoff`)).status).toBe(201);
+    }
+    expect((await agent.get(`/v1/projects/${fresh.body.id}`)).body).toMatchObject({ name: "Chantier Dupont", clientName: "M. et Mme DUPONT", address: "3 rue de Siam, 29200 Brest" });
+    expect((await agent.get(`/v1/projects/${named.body.id}`)).body.name).toBe("Toiture de la grange");
   });
 });

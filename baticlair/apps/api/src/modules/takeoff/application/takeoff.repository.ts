@@ -56,6 +56,11 @@ export interface TakeoffRecord {
   context: Record<string, string> | null;
   /** Appel IA n° 2 : ajouts et doutes proposés (null : pas d'appel). */
   completion: CompletionRecord | null;
+  /** Parcours (§48) : calcul lancé après les questions, et terminé (null : pas encore). */
+  calculStartedAt: Date | null;
+  calculatedAt: Date | null;
+  /** L'analyse (lecture) d'où vient la liste ; le coût de l'appel n° 2 y est rattaché. */
+  analysisId: string | null;
   /** Réponses aux questions du calcul pour ce chantier : produit, valeur, « aucun » (null), « pas celui-ci » (""). */
   answers: Record<string, string | { value: string; unit: string } | null>;
   createdAt: Date;
@@ -78,6 +83,8 @@ export interface NewTakeoff {
   lines: NewTakeoffLine[];
   /** En-tête et notes du devis (adresse, type de bâtiment, neuf/rénovation…), §41.1 règle 4. */
   context?: Record<string, string> | null;
+  /** Déjà calculé à la création (lignes d'un partenaire : pas de questions, pas d'appel IA). */
+  calculated?: boolean;
 }
 
 export interface TakeoffRepository {
@@ -96,6 +103,9 @@ export interface TakeoffRepository {
   setAnswer(tenant: TenantContext, id: string, key: string, value: string | { value: string; unit: string } | null): Promise<void>;
   /** Enregistre ce que l'appel IA n° 2 propose (ajouts, doutes). */
   setCompletion(tenant: TenantContext, id: string, completion: CompletionRecord): Promise<void>;
+  /** Le calcul part (questions répondues) ou se termine. Le départ n'est pris qu'une fois (double appui). */
+  startCalcul(tenant: TenantContext, id: string, at: Date, staleBefore: Date): Promise<boolean>;
+  finishCalcul(tenant: TenantContext, id: string, at: Date): Promise<void>;
   /** Enregistre le rôle de la quantité de ces lignes (niveau 1 : mesure ou à commander). */
   setRoles(tenant: TenantContext, roles: ReadonlyMap<string, LineRole>): Promise<void>;
 }

@@ -31,3 +31,4 @@ export * from "./trust/marchandise.js";
 export * from "./trust/orange.js";
 export * from "./trust/forbidden.js";
 export * from "./trust/completion.js";
+export * from "./projects/site-name.js";

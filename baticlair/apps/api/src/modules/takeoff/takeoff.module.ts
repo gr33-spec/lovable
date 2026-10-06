@@ -1,7 +1,7 @@
 import { waitUntil } from "@vercel/functions";
 import type { Alerter } from "../../platform/alerts/alerter.js";
 import { Module } from "@nestjs/common";
-import { DEFAULT_EXTRACTION_POLICY, loadReferential, ruleValidatedBy } from "@baticlair/domain";
+import { communeOf, DEFAULT_EXTRACTION_POLICY, loadReferential, NEW_PROJECT_NAME, ruleValidatedBy, siteNameFromQuote } from "@baticlair/domain";
 import type { Prisma } from "../../generated/prisma/client.js";
 import type { AppConfig } from "../../platform/config/config.js";
 import { PrismaService } from "../../platform/database/prisma.service.js";
@@ -89,6 +89,19 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
               if (config.referentialValidators.length === 0) return false;
               const user = await prisma.user.findUnique({ where: { id: tenant.userId }, select: { email: true } });
               return !!user && config.referentialValidators.includes(user.email.toLowerCase());
+            },
+            // §48 : le chantier né du dépôt prend le nom lu dans le devis ; l'adresse et le client remplissent les vides.
+            nameProject: async (tenant, projectId, read) => {
+              const project = await prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { name: true, address: true, clientName: true } });
+              if (!project) return;
+              const address = project.address ?? read.address?.slice(0, 300) ?? null;
+              const name = project.name === NEW_PROJECT_NAME ? siteNameFromQuote({ client: read.client, commune: communeOf(address) }) : null;
+              const data = {
+                ...(name ? { name } : {}),
+                ...(!project.address && read.address ? { address: read.address.slice(0, 300) } : {}),
+                ...(!project.clientName && read.client ? { clientName: read.client.slice(0, 120) } : {}),
+              };
+              if (Object.keys(data).length > 0) await prisma.project.updateMany({ where: { id: projectId, companyId: tenant.companyId }, data });
             },
             projectAddress: async (tenant, projectId) => {
               const project = await prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { address: true } });

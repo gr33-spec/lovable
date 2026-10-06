@@ -1,8 +1,8 @@
 "use client";
 
-import { CircleCheck, FileUp, Loader2 } from "lucide-react";
-import { useCallback, useId, useRef, useState } from "react";
-import { SiteNotes } from "@/components/site-notes";
+import { CircleCheck, Loader2 } from "lucide-react";
+import { useCallback, useState } from "react";
+import { DropZone } from "@/components/journey";
 import { ProjectTakeoff } from "@/components/project-takeoff";
 import { ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, MAX_DOCUMENT_BYTES, type DocumentPurpose, type ProjectDocument } from "@/lib/api";
@@ -24,7 +24,7 @@ const PURPOSE_LABEL: Record<DocumentPurpose, string> = {
  * fournisseurs. Étape actuelle : dépôt et lecture automatique (sans IA) ;
  * l'extraction de la liste de matériaux arrive ensuite.
  */
-export function ProjectDocuments({ projectId, archived }: { projectId: string; archived: boolean }) {
+export function ProjectDocuments({ projectId, archived, onProjectChanged }: { projectId: string; archived: boolean; onProjectChanged?: () => void }) {
   const fetchDocs = useCallback(
     (signal: AbortSignal) => api<{ items: ProjectDocument[] }>(`/v1/projects/${encodeURIComponent(projectId)}/documents`, { signal }),
     [projectId],
@@ -32,9 +32,10 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
   const { data, setData, error, reload } = useResource(fetchDocs);
   const [notice, setNotice] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<ApiError | null>(null);
   const refreshProgress = useProgressRefresh();
   // Sur la page des fournitures, le devis déposé et les avis du chantier s'effacent : la liste seule.
-  const [listPage] = useListPage();
+  const [listPage, setListPage] = useListPage();
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
@@ -49,33 +50,36 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
   }
 
   function removed(id: string) {
+    // Le devis retiré emporte sa liste : on revient au dépôt (plus de page des fournitures).
+    setListPage(false);
     setNotice("Devis supprimé.");
     setData({ items: docs.filter((d) => d.id !== id) });
     refreshProgress();
   }
 
   const quote = clientQuotes[0] ?? null;
+  // §48 : sans devis, la seule action du chantier est de le déposer (même écran que « Nouveau chantier »).
+  async function drop(file: File) {
+    setUploadError(null);
+    if (file.size > MAX_DOCUMENT_BYTES) return setUploadError(new ApiError("payload_too_large", 413));
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append("purpose", "client_quote");
+      await attachFile(form, file);
+      added(await api<ProjectDocument>(`/v1/projects/${encodeURIComponent(projectId)}/documents`, { method: "POST", body: form }));
+    } catch (e) {
+      setUploadError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+    } finally {
+      setUploading(false);
+    }
+  }
   return (
     <div className="flex flex-col gap-4">
-      {quote ? (
-        <div className={`w-[80%] self-end ${listPage ? "hidden" : ""}`}>
-          <DocumentCard doc={quote} compact={false} onRemoved={removed} />
+      {quote || archived ? null : (
+        <div id="devis" className="scroll-mt-4">
+          <DropZone onFile={(f) => void drop(f)} pending={uploading} error={uploadError} />
         </div>
-      ) : archived ? null : (
-        <section id="devis" aria-labelledby="next-step" className="flex scroll-mt-4 flex-col gap-3 pb-24 lg:pb-0">
-          {/* Retour du fondateur (2026-10-05) : un premier écran court, le devis d'abord. Les infos chantier
-              (facultatives) n'apparaissent qu'une fois le devis en route. */}
-          <div className="rounded-[28px] bg-hero p-5 text-white shadow-[0_24px_48px_-16px_rgba(26,21,80,0.6)]">
-            <h2 id="next-step" className="font-display text-[26px] leading-[1.1] font-extrabold tracking-[-0.02em]">
-              Déposez le devis, <span className="font-serif text-[29px] font-normal tracking-normal italic">je fais la liste.</span>
-            </h2>
-            <p className="mt-2 text-[14px] leading-snug text-white/75">Un PDF, même scanné. Aucune quantité à saisir.</p>
-          </div>
-          {uploading ? <SiteNotes projectId={projectId} infos={null} disabled={false} onSaved={() => undefined} /> : null}
-          <div className="fixed inset-x-4 bottom-[max(16px,env(safe-area-inset-bottom))] z-20 mx-auto max-w-2xl lg:static lg:inset-auto lg:mx-0">
-            <UploadButton projectId={projectId} purpose="client_quote" label="Choisir le devis (PDF)" tone="cta" onAdded={added} onPending={setUploading} />
-          </div>
-        </section>
       )}
 
       {notice && !listPage ? (
@@ -84,7 +88,15 @@ export function ProjectDocuments({ projectId, archived }: { projectId: string; a
         </p>
       ) : null}
 
-      <ProjectTakeoff key={quote?.id ?? "none"} projectId={projectId} clientQuote={quote} archived={archived} autoStart={false} />
+      <ProjectTakeoff
+        key={quote?.id ?? "none"}
+        projectId={projectId}
+        clientQuote={quote}
+        archived={archived}
+        autoStart
+        {...(onProjectChanged ? { onProjectChanged } : {})}
+        quoteCard={quote ? <DocumentCard doc={quote} compact={false} onRemoved={removed} /> : null}
+      />
     </div>
   );
 }
@@ -196,76 +208,3 @@ function DocumentCard({ doc, compact, onRemoved }: { doc: ProjectDocument; compa
     </div>
   );
 }
-
-function UploadButton({
-  projectId,
-  purpose,
-  label,
-  tone,
-  onAdded,
-  onPending,
-}: {
-  projectId: string;
-  purpose: DocumentPurpose;
-  label: string;
-  tone: "cta" | "dark" | "light";
-  onAdded: (doc: ProjectDocument) => void;
-  /** Le dépôt commence ou s'arrête. */
-  onPending?: (pending: boolean) => void;
-}) {
-  const inputId = useId();
-  const input = useRef<HTMLInputElement>(null);
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<ApiError | null>(null);
-
-  async function send(file: File) {
-    setError(null);
-    if (file.size > MAX_DOCUMENT_BYTES) {
-      setError(new ApiError("payload_too_large", 413));
-      return;
-    }
-    setPending(true);
-    onPending?.(true);
-    try {
-      const form = new FormData();
-      form.append("purpose", purpose);
-      await attachFile(form, file);
-      onAdded(await api<ProjectDocument>(`/v1/projects/${encodeURIComponent(projectId)}/documents`, { method: "POST", body: form }));
-    } catch (e) {
-      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
-    } finally {
-      setPending(false);
-      onPending?.(false);
-      if (input.current) input.current.value = "";
-    }
-  }
-
-  const style = tone === "cta" ? "bg-cta text-white shadow-cta min-h-15 text-[17px]" : tone === "dark" ? "bg-accent text-white" : "bg-surface text-ink shadow-card";
-
-  return (
-    <div className="flex flex-col gap-2">
-      {error ? <ErrorNotice error={error} /> : null}
-      <input
-        ref={input}
-        id={inputId}
-        type="file"
-        accept="application/pdf,.pdf"
-        className="sr-only"
-        disabled={pending}
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) void send(file);
-        }}
-      />
-      <label
-        htmlFor={inputId}
-        aria-disabled={pending}
-        className={`inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl px-4 font-extrabold focus-within:ring-2 ${style} ${pending ? "pointer-events-none opacity-70" : ""}`}
-      >
-        {pending ? <Loader2 size={18} className="animate-spin" aria-hidden="true" /> : <FileUp size={18} aria-hidden="true" />}
-        {pending ? "Lecture du document…" : label}
-      </label>
-    </div>
-  );
-}
-

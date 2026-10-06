@@ -97,3 +97,38 @@ body {
     transition: none !important;
   }
 }
+
+/* Parcours §48 : un devis qui se transforme en liste de matériaux (écran de dépôt, analyse, calcul). */
+@keyframes bc-line-out {
+  0%, 8% { opacity: 1; transform: none; }
+  22%, 100% { opacity: 0.18; transform: translateX(10px); }
+}
+@keyframes bc-row-in {
+  0%, 14% { opacity: 0; transform: translateX(-14px) scale(0.96); }
+  28%, 88% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: none; }
+}
+@keyframes bc-check-pop {
+  0%, 26% { transform: scale(0); }
+  34% { transform: scale(1.25); }
+  40%, 100% { transform: scale(1); }
+}
+@keyframes bc-scan {
+  0% { transform: translateY(-10%); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(760%); opacity: 0; }
+}
+@keyframes bc-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes bc-ring {
+  0% { box-shadow: 0 0 0 0 rgba(255, 77, 122, 0.45); }
+  100% { box-shadow: 0 0 0 22px rgba(255, 77, 122, 0); }
+}
+@keyframes bc-steam {
+  0% { opacity: 0; transform: translateY(4px) scaleY(0.8); }
+  40% { opacity: 0.8; }
+  100% { opacity: 0; transform: translateY(-14px) scaleY(1.1); }
+}

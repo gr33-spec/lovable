@@ -81,6 +81,7 @@ export function ProjectPriceRequests({
   onListChanged,
   openSignal = 0,
   onSentChange,
+  onPreviewClosed,
 }: {
   projectId: string;
   archived: boolean;
@@ -92,6 +93,8 @@ export function ProjectPriceRequests({
   openSignal?: number;
   /** La demande est-elle déjà partie ? La liste le dit sur son gros bouton. */
   onSentChange?: (sent: boolean) => void;
+  /** « Revenir à la liste » de l'aperçu : la liste revient à l'écran (§48). */
+  onPreviewClosed?: () => void;
 }) {
   const fetchRequests = useCallback(
     (signal: AbortSignal) => api<{ items: PriceRequest[] }>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests`, { signal }),
@@ -154,6 +157,7 @@ export function ProjectPriceRequests({
           <NewRequest
             key={openSignal}
             openAtStart={openSignal > 0}
+            {...(onPreviewClosed ? { onPreviewClosed } : {})}
             projectId={projectId}
             quantitatifId={quantitatifId ?? null}
             deliversEmail={deliversEmail}
@@ -296,8 +300,10 @@ function NewRequest({
   onListChanged,
   onSent,
   onCreated,
+  onPreviewClosed,
 }: {
   openAtStart: boolean;
+  onPreviewClosed?: () => void;
   projectId: string;
   quantitatifId: string | null;
   deliversEmail: boolean;
@@ -405,7 +411,10 @@ function NewRequest({
           canSend={selected.size > 0}
           sending={pending}
           onSend={() => void create()}
-          onClose={() => setPreviewing(false)}
+          onClose={() => {
+            setPreviewing(false);
+            onPreviewClosed?.();
+          }}
           {...(onListChanged ? { onListChanged } : {})}
         />
       ) : null}
