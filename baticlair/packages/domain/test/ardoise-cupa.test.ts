@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { checkReferential, computeWorkItem, isCoastal, ROOFING_REFERENTIAL, type Referential, type WorkItemInput } from "../src/index.js";
+import { REFERENTIEL_COMPLET } from "./support/complet.js";
 
 /**
  * ARDOISE AU CROCHET, données fabricant (référentiel §34, Cupa) :
@@ -22,14 +23,14 @@ const littoral = { diametre_crochet: { value: "2.7", unit: "mm", origin: "devis"
 
 describe("formule Cupa (§34) : le diamètre du crochet compte", () => {
   it("200 m² en 30×22, 45°, région III, crochet 1 mm : 9 271 ardoises (et non plus 9 313)", () => {
-    const r = computeWorkItem(ROOFING_REFERENTIAL, input());
+    const r = computeWorkItem(REFERENTIEL_COMPLET, input());
     // Pureau (300 − 95) / 2 = 102,5 mm ; 200 / (0,1025 × 0,221) = 8 829,05 ; + 5 % = 9 270,50.
     expect(need(r, "ardoises").trace.find((t) => t.label === "Besoin calculé")?.value).toBe("8 829,05");
     expect(order(r, "ardoises")).toBe(9271);
   });
 
   it("département littoral (Brest) : crochet inox 2,7 mm, 9 200 ardoises", () => {
-    const r = computeWorkItem(ROOFING_REFERENTIAL, input(littoral));
+    const r = computeWorkItem(REFERENTIEL_COMPLET, input(littoral));
     // 200 / (0,1025 × 0,2227) = 8 761,65 ; + 5 % = 9 199,73.
     expect(order(r, "ardoises")).toBe(9200);
     // Crochets = 9 200 × 1,02 = 9 384.
@@ -38,13 +39,13 @@ describe("formule Cupa (§34) : le diamètre du crochet compte", () => {
   });
 
   it("la région ardoise se dit en chiffres romains : « région ardoise III », jamais « zone climatique 3 »", () => {
-    const r = computeWorkItem(ROOFING_REFERENTIAL, input());
+    const r = computeWorkItem(REFERENTIEL_COMPLET, input());
     const labels = need(r, "ardoises").trace.map((t) => t.label);
     expect(labels).toContain("Région ardoise");
     expect(labels).not.toContain("Zone climatique");
     expect(need(r, "ardoises").trace.find((t) => t.label === "Région ardoise")).toMatchObject({ value: "3", shown: "III" });
     expect(need(r, "ardoises").assumptions.find((a) => a.key === "param:zone")).toMatchObject({ label: "Région ardoise", value: "III" });
-    const r1 = computeWorkItem(ROOFING_REFERENTIAL, input({ zone: { value: "1", unit: "u", origin: "artisan" } }));
+    const r1 = computeWorkItem(REFERENTIEL_COMPLET, input({ zone: { value: "1", unit: "u", origin: "artisan" } }));
     expect(need(r1, "ardoises").trace.find((t) => t.label === "Région ardoise")).toMatchObject({ value: "1", shown: "I" });
   });
 });
@@ -52,7 +53,7 @@ describe("formule Cupa (§34) : le diamètre du crochet compte", () => {
 describe("table Cupa (§34) : elle fait foi, la formule ne sert que hors table", () => {
   const at = (pente: string, zone: string, diametre = "1", format = "ardoise-30x22") =>
     computeWorkItem(
-      ROOFING_REFERENTIAL,
+      REFERENTIEL_COMPLET,
       input({
         pente: { value: pente, unit: "°", origin: "artisan" },
         zone: { value: zone, unit: "u", origin: "artisan" },
@@ -89,7 +90,7 @@ describe("table Cupa (§34) : elle fait foi, la formule ne sert que hors table",
     const doc = readFileSync(new URL("../../../docs/referentiel-couverture.md", import.meta.url), "utf8");
     const section = doc.slice(doc.indexOf("## 34."), doc.indexOf("## 35."));
     const fromDoc = [...section.matchAll(/^\|\s*(\d+)\s*\|\s*(\d+)×(\d+)\s*\|\s*[\d,]+\s*\|\s*([\d,]+)\s*\|/gm)].map((m) => [m[2], m[3], m[1], m[4]!.replace(",", ".")]);
-    const work = ROOFING_REFERENTIAL.workItems.find((w) => w.id === "couverture-ardoises-crochet")!;
+    const work = REFERENTIEL_COMPLET.workItems.find((w) => w.id === "couverture-ardoises-crochet")!;
     expect(fromDoc).toHaveLength(194);
     expect(work.points!.ardoises_m2!.rows).toEqual(fromDoc);
   });
@@ -116,7 +117,7 @@ describe("table Cupa (§34) : elle fait foi, la formule ne sert que hors table",
   });
 
   it("format venu d'une habitude de l'entreprise (le devis ne le précise pas), hors plage : UNE question à boutons, le 40×22 conseillé", () => {
-    const r = computeWorkItem(ROOFING_REFERENTIAL, {
+    const r = computeWorkItem(REFERENTIEL_COMPLET, {
       ...input({ pente: { value: "30", unit: "°", origin: "artisan" }, zone: { value: "3", unit: "u", origin: "artisan" } }),
       products: {},
       preferences: { products: { ardoise: "ardoise-30x22" } },
@@ -128,7 +129,7 @@ describe("table Cupa (§34) : elle fait foi, la formule ne sert que hors table",
     // Les crochets attendent la même réponse ; rien n'est inventé entre-temps.
     expect(need(r, "crochets-ardoise")).toMatchObject({ status: "question", question: { key: "product:ardoise" } });
     // L'artisan choisit : plus de question, et son choix est gardé même hors plage.
-    const chosen = computeWorkItem(ROOFING_REFERENTIAL, { ...input({ pente: { value: "30", unit: "°", origin: "artisan" }, zone: { value: "3", unit: "u", origin: "artisan" } }), products: { ardoise: { productId: "ardoise-30x22", origin: "artisan" } } });
+    const chosen = computeWorkItem(REFERENTIEL_COMPLET, { ...input({ pente: { value: "30", unit: "°", origin: "artisan" }, zone: { value: "3", unit: "u", origin: "artisan" } }), products: { ardoise: { productId: "ardoise-30x22", origin: "artisan" } } });
     expect(need(chosen, "ardoises").status).toBe("calculated");
   });
 
@@ -142,7 +143,7 @@ describe("table Cupa (§34) : elle fait foi, la formule ne sert que hors table",
 });
 
 describe("jamais moins de crochets que d'ardoises", () => {
-  const formats = ROOFING_REFERENTIAL.products.filter((p) => p.family === "roof_slate").map((p) => p.id);
+  const formats = REFERENTIEL_COMPLET.products.filter((p) => p.family === "roof_slate").map((p) => p.id);
   const cases: { label: string; r: ReturnType<typeof computeWorkItem> }[] = [];
   for (const format of formats)
     for (const pente of ["25", "30", "35", "45", "60"])
@@ -154,7 +155,7 @@ describe("jamais moins de crochets que d'ardoises", () => {
               zone: { value: zone, unit: "u", origin: "artisan" as const },
               diametre_crochet: { value: diametre, unit: "mm", origin: "artisan" as const },
             };
-            cases.push({ label: `${format} ${pente}° région ${zone} Ø${diametre} marge ${JSON.stringify(waste ?? "référentiel")}`, r: computeWorkItem(ROOFING_REFERENTIAL, input(params, format, waste)) });
+            cases.push({ label: `${format} ${pente}° région ${zone} Ø${diametre} marge ${JSON.stringify(waste ?? "référentiel")}`, r: computeWorkItem(REFERENTIEL_COMPLET, input(params, format, waste)) });
           }
 
   it(`${cases.length} cas (formats, pentes, régions, crochets, marges de l'entreprise) : crochets ≥ ardoises, toujours`, () => {
@@ -168,19 +169,19 @@ describe("jamais moins de crochets que d'ardoises", () => {
 
   it("les crochets suivent les ardoises : une question sur les ardoises est aussi celle des crochets", () => {
     const sansSurface: WorkItemInput = { ...input(), params: {} };
-    const r = computeWorkItem(ROOFING_REFERENTIAL, sansSurface);
+    const r = computeWorkItem(REFERENTIEL_COMPLET, sansSurface);
     expect(need(r, "ardoises").status).toBe("question");
     expect(need(r, "crochets-ardoise")).toMatchObject({ status: "question", question: { key: need(r, "ardoises").question!.key } });
   });
 
   it("un besoin ne peut partir que d'un besoin calculé AVANT lui (contrôlé au chargement du référentiel)", () => {
-    const broken: Referential = structuredClone(ROOFING_REFERENTIAL);
+    const broken: Referential = structuredClone(REFERENTIEL_COMPLET);
     const work = broken.workItems.find((w) => w.id === "couverture-ardoises-crochet")!;
     // Les crochets passent avant les ardoises dont ils partent : refusé.
     const crochets = work.needs.find((n) => n.id === "crochets-ardoise")!;
     work.needs = [crochets, ...work.needs.filter((n) => n !== crochets)];
     expect(checkReferential(broken).join("\n")).toMatch(/commande\.ardoises.*AVANT/);
-    expect(checkReferential(ROOFING_REFERENTIAL)).toEqual([]);
+    expect(checkReferential(REFERENTIEL_COMPLET)).toEqual([]);
   });
 });
 

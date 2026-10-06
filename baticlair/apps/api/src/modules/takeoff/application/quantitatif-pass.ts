@@ -9,7 +9,7 @@ import type { ReadAttempt } from "../../../platform/ai/document-reader.js";
  * règles »). Le moteur a déjà calculé : l'appel complète (ajouts) et signale (doutes avec remplacement), sans questions
  * une par une, puisque les questions du moteur sont déjà à l'écran. Tout ce qu'il rend sort orange.
  */
-export const QUANTITATIF_PROMPT = { id: "takeoff_quantitatif", version: 2 } as const;
+export const QUANTITATIF_PROMPT = { id: "takeoff_quantitatif", version: 3 } as const;
 
 /** §41.2, prompt B, tel qu'écrit dans le référentiel du fondateur. */
 export const PROMPT_B_41_2 = `Tu es l'assistant quantitatif de {nom_entreprise}, {metier} à {ville}. Tu transformes son devis en liste de commande pour son fournisseur.
@@ -68,27 +68,24 @@ CE QUE TU NE FAIS JAMAIS :
 
 Quand l'artisan confirme une réponse pour la deuxième fois sur deux chantiers différents, tu proposes : "Je garde ça comme habitude pour tes prochains chantiers ?" Oui → l'habitude est enregistrée et la question ne sera plus posée, la valeur sera juste affichée.`;
 
-/** L'enrichissement décidé par le fondateur le 2026-10-06, et le mode « un seul passage ». */
+/** La règle numéro un (rien d'absent du devis) et le mode « un seul passage » : elle passe devant le prompt B. */
 export const ONE_PASS_41 = [
-  "MODE UN SEUL PASSAGE (décision du fondateur, 2026-10-06) :",
-  "- Tu es À LA FOIS couvreur (ou l'artisan du métier) ET vendeur au comptoir du négoce.",
-  "- Le moteur de BatiClair a DÉJÀ calculé la liste à commander avec le référentiel : elle t'est donnée (repères A…, F…).",
-  "  Tu ne recalcules pas ses quantités et tu ne poses pas de questions une par une : les questions du moteur sont déjà",
-  "  à l'écran de l'artisan.",
-  "- Chaque article doit être en UNITÉ DE VENTE commandable telle quelle au comptoir, jamais en m² sauf un article",
-  "  vendu au m² (écran, membrane, isolant, volige…).",
-  "- Pour CHAQUE ouvrage, la sortie DOIT comprendre ses fixations, scellements, étanchéité et consommables (vis, pattes,",
-  "  crochets, clous, pointes, ciment, mortier, silicone, mastic, bande d'étanchéité…). S'il en manque dans la liste,",
-  "  ajoute-les dans `ajouts` : désignation commandable, quantité et unité de vente si tu peux les justifier par le",
-  "  devis ou le référentiel, sinon quantité null ; la raison en une phrase ; le repère de l'ouvrage (A… ou L…).",
-  "- Tout doute sur un article de la liste (unité, désignation, quantité, article qui ne passerait pas au comptoir) va",
-  "  dans `doutes` avec le repère de l'article, la raison en une phrase et une SUGGESTION DE REMPLACEMENT commandable",
-  "  telle quelle (désignation, et quantité / unité si tu peux les justifier), ou null si tu n'en as pas.",
-  "- Tes `ajouts` ne sont JAMAIS mis d'office dans la liste : l'artisan les voit décochés, dans un bloc « Suggestions ».",
-  "  N'invente pas un article que le devis ne demande pas (un pare-pluie absent du devis n'est pas un ajout) : propose",
-  "  seulement ce qu'un ouvrage du devis exige pour être posé.",
-  "- Rien sur ce qui est correct. Ne répète pas un article déjà dans la liste. Au plus 20 ajouts et 20 doutes.",
-  "- Tu réponds uniquement par le JSON demandé.",
+  "RÈGLE NUMÉRO UN (fondateur, 2026-10-06), PRIORITAIRE SUR TOUT CE QUI PRÉCÈDE :",
+  "- BatiClair lit le devis ligne par ligne et retranscrit ce qui est écrit, avec les quantités. Tu comprends la ligne,",
+  "  tu ne recopies pas mot à mot, mais tu n'ajoutes JAMAIS un article absent du devis : ni fixation, ni consommable,",
+  "  ni support (pas d'écran sous-toiture, pas de liteaux, pas de pattes, pas de silicone… s'ils ne sont pas écrits).",
+  "- Seule exception, déjà faite par le moteur : l'accessoire indissociable d'une ligne écrite (la naissance d'une gouttière).",
+  "- `ajouts` reste TOUJOURS une liste vide.",
+  "",
+  "MODE UN SEUL PASSAGE :",
+  "- Le moteur de BatiClair a DÉJÀ calculé la liste à commander : elle t'est donnée (repères A…, F…). Tu ne recalcules",
+  "  pas ses quantités et tu ne poses pas de questions : les questions du moteur sont déjà à l'écran de l'artisan.",
+  "- Tu signales seulement un doute sur un article de la liste, dans `doutes` : une unité, une désignation ou une quantité",
+  "  qui contredit ce qui est ÉCRIT au devis, ou qui ne passerait pas au comptoir. Repère de l'article, raison en une",
+  "  phrase, et une suggestion de remplacement commandable telle quelle, ou null. Jamais un doute pour réclamer un",
+  "  article que le devis n'écrit pas.",
+  "- Une donnée écrite au devis (crochet de 11, tuyau Ø80, 2 descentes de 3 m) n'est jamais un doute.",
+  "- Rien sur ce qui est correct. Au plus 20 doutes. Tu réponds uniquement par le JSON demandé.",
 ].join("\n");
 
 export interface QuantitatifInput {

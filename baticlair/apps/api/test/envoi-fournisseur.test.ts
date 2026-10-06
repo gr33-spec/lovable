@@ -65,7 +65,7 @@ describe("envoi fournisseur : un document, aucun prix", () => {
 
     const email = res.body.recipients[0].email;
     expect(email.subject).toBe("Demande de devis · Toitures Martin · chantier Dupont — réfection toiture (Brest)");
-    expect(email.body).toMatch(/^Bonjour,\n\nJe vous envoie la liste des fournitures pour un chantier de couverture en ardoises au crochet sur liteaux à Brest : 200 m²/);
+    expect(email.body).toMatch(/^Bonjour,\n\nJe vous envoie la liste des fournitures pour un chantier de couverture en ardoises au crochet à Brest : 200 m²/);
     expect(email.body).toContain("Livraison sur chantier possible ?");
     expect(email.body).toContain("Pouvez-vous me chiffrer l'ensemble avant le 15 octobre ? PS : si besoin, le détail du devis est en pièce jointe.");
     // Le test du §42.2 et du §43.5 : rien du devis chiffré ne passe (85,00 €, 42, 19,90…).

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ROOFING_REFERENTIAL, supplierTest } from "../src/index.js";
 import { readQuote } from "./support/read-quote.js";
+import { REFERENTIEL_COMPLET, readQuoteComplet } from "./support/complet.js";
 
 /**
  * LA RÈGLE DU COMPTOIR (§47.8, retour du fondateur, 2026-10-04) : toute question posée à l'artisan est une question que
@@ -73,7 +74,7 @@ describe("la règle du comptoir (§47.8)", () => {
   it("le catalogue : chaque question est une question de comptoir ; « égout et faîtage, on les ajoute ? » n'en est plus une", () => {
     const asked = new Set<string>();
     const never = new Set<string>();
-    for (const w of ROOFING_REFERENTIAL.workItems) {
+    for (const w of REFERENTIEL_COMPLET.workItems) {
       for (const p of w.params) (p.default && !p.default.unlessText ? never : asked).add(p.key);
     }
     expect([...asked].filter((k) => !COMPTOIR[k])).toEqual([]);
@@ -83,7 +84,7 @@ describe("la règle du comptoir (§47.8)", () => {
   });
 
   it("chantier Test : avant, 4 questions dont « on les ajoute ? » ; après, les 6 questions du comptoir, et l'égout ou le faîtage dans « On ajoute ? »", () => {
-    const v = readQuote(TEST);
+    const v = readQuoteComplet(TEST);
     expect(keys(v)).toEqual([
       "param:developpe",
       "param:developpe_gouttiere",
@@ -98,7 +99,7 @@ describe("la règle du comptoir (§47.8)", () => {
   });
 
   it("chantier Test répondu : chaque ligne porte ce que le comptoir doit savoir (aspect, épaisseur, développé, Ø, pose)", () => {
-    const v = readQuote(TEST, {
+    const v = readQuoteComplet(TEST, {
       "param:faconnage": u("1"),
       "param:nb_descentes": u("2"),
       "param:developpe": u("330", "mm"),
@@ -108,7 +109,7 @@ describe("la règle du comptoir (§47.8)", () => {
     });
     expect(v.questions).toEqual([]);
     expect(v.toBuy.map((b) => b.label)).toEqual([
-      "Bobineau Quartz-Zinc 500 × 17 m, 0,65",
+      "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm", // §48.6 : feuilles 2 × 1 m, jamais de bobineau pour une bande
       "Bobine Quartz-Zinc 0,65 mm, largeur 500 mm",
       "Pattes coulissantes joint debout",
       "Pattes fixes joint debout",
@@ -122,10 +123,10 @@ describe("la règle du comptoir (§47.8)", () => {
   });
 
   it("chantier de Brest : la qualité d'ardoise, la pose des crochets, le Ø et le nombre de descentes ; le développé est lu au devis", () => {
-    const v = readQuote(BREST, {}, [], {});
+    const v = readQuoteComplet(BREST, {}, [], {});
     expect(keys(v)).toEqual(["param:diametre_descente", "param:fixation_crochet", "param:nb_descentes", "param:qualite_ardoise"]);
     // Un devis qui dit tout ne pose aucune question.
-    const complet = readQuote(
+    const complet = readQuoteComplet(
       [
         { ref: "1", designation: "Couverture en ardoises naturelles d'Espagne 1er choix 30x22 posées au crochet", quantity: "200", unit: "m²" },
         { ref: "2", designation: "Gouttière demi-ronde zinc développé 33, crochets bandeau, 2 descentes Ø80", quantity: "24", unit: "ml" },
@@ -141,7 +142,7 @@ describe("la règle du comptoir (§47.8)", () => {
   });
 
   it("l'aspect du zinc : lu au devis (quartz, anthra), naturel quand rien n'est dit (hypothèse), demandé quand le devis dit « prépatiné » sans la teinte", () => {
-    const zinc = (designation: string) => readQuote([{ ref: "1", designation, quantity: "91", unit: "m²" }], { "param:faconnage": u("1") });
+    const zinc = (designation: string) => readQuoteComplet([{ ref: "1", designation, quantity: "91", unit: "m²" }], { "param:faconnage": u("1") });
     expect(zinc("Couverture zinc joint debout anthra-zinc").toBuy[0]!.label).toBe("Bobine Anthra-Zinc 0,65 mm, largeur 500 mm");
     const nature = zinc("Couverture zinc joint debout");
     expect(nature.toBuy[0]!.label).toBe("Bobine zinc naturel 0,65 mm, largeur 500 mm");

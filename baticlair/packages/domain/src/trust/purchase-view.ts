@@ -80,7 +80,7 @@ export interface PurchaseGroup {
 }
 
 export interface PurchaseView {
-  /** « Couverture en ardoises au crochet sur liteaux : 200 m² », « 6 jouées de lucarnes »… */
+  /** « Couverture en ardoises au crochet : 200 m² », « 6 jouées de lucarnes »… */
   understood: string[];
   toBuy: PurchaseItem[];
   /** « À acheter » rangé par ouvrage : chaque article dans un seul groupe. */
@@ -329,8 +329,10 @@ function keepCharacteristic(c: string): boolean {
   if (/^\d+\s*[×x*]\s*\d+\s*mm$/.test(n)) return true;
   // « 2×10 m », « 4 m » : une quantité ou une dimension d'ouvrage, pas une caractéristique de l'article.
   if (/\d\s*[×x*]\s*\d/.test(n) || /^\d+(?:[.,]\d+)?\s*(?:m|ml|m2|cm|mm)$/.test(n)) return false;
-  return /\d/.test(n) || n.includes("-") || n.split(" ").some((w) => MATERIAL_WORDS.has(w));
+  return /\d/.test(n) || n.includes("-") || n.split(" ").some((w) => MATERIAL_WORDS.has(w) || PROFILE_WORDS.has(w));
 }
+/** Le profil écrit au devis change l'article au comptoir : « gouttière Havraise » n'est pas une demi-ronde (D-2026-020). */
+const PROFILE_WORDS = new Set(["havraise", "nantaise", "mouluree", "carree", "rectangulaire"]);
 
 /**
  * LE TEST DU FOURNISSEUR (§40, verrou moteur §41.3) : une ligne « À commander » doit pouvoir être
@@ -544,8 +546,10 @@ export function purchaseView(
   ).filter((s) => s.quantity && !toBuy.some((b) => b.label === s.label));
   const accepted = offered.filter((s) => link.consumables?.accepted?.has(s.key));
   toBuy.push(...accepted.map((s) => ({ ...s, consumable: true })));
-  const suggestions = offered
-    .filter((s) => !link.consumables?.accepted?.has(s.key) && !link.consumables?.refused?.has(s.key) && !link.consumables?.hidden?.has(s.key))
+  // RÈGLE NUMÉRO UN : rien d'absent du devis, pas même en suggestion.
+  const suggestions = link.ref.writtenOnly
+    ? []
+    : offered.filter((s) => !link.consumables?.accepted?.has(s.key) && !link.consumables?.refused?.has(s.key) && !link.consumables?.hidden?.has(s.key))
     .slice(0, MAX_SUGGESTIONS);
   const failedSupplierTest: ToQuoteItem[] = [];
   // Quantités écrites telles quelles dans le devis (chatières, sortie de toit) : à acheter, sans calcul.
@@ -565,12 +569,13 @@ export function purchaseView(
     }
     // Une quantité écrite par l'artisan lui-même fait foi : seule celle du devis se compare au calcul.
     const gap = o.byArtisan ? null : quantityGap(o.lineId, v, link.plan, engine.checks ?? []);
+    const pieces = o.byArtisan ? null : writtenPieces(o.lineId, v, link.plan, link.ref);
     toBuy.push({
       key: `line:${o.lineId}`,
       // Marchandise seule : la ligne du devis perd ses mentions de pose (« (Fourniture et pose) »).
       label: withoutLabour(o.designation),
-      quantity: written?.text ?? null,
-      order: o.read.quantity ? { count: o.read.quantity, unit: written!.unit } : null,
+      quantity: pieces ? `${pieces.count} ${pieces.unit}` : (written?.text ?? null),
+      order: pieces ?? (o.read.quantity ? { count: o.read.quantity, unit: written!.unit } : null),
       approx: null,
       kind: "direct",
       needIds: [],
@@ -740,6 +745,24 @@ export function applyPurchaseOverrides(purchase: PurchaseView, answers: Record<s
   return { ...purchase, toBuy, questions, canValidate, suggestions: purchase.suggestions.map(override), screen };
 }
 
+
+/**
+ * « Tuyau de descente … (2 descentes de 3 mètres), 6 m » : la longueur se commande en longueurs, telles que le devis les
+ * décrit (2 longueurs de 3 m), seulement quand le compte écrit tombe juste (D-2026-020).
+ */
+function writtenPieces(lineId: string, v: TakeoffValidation["lines"][number], plan: QuotePlan, ref: Referential): { count: string; unit: string } | null {
+  const planned = plan.lines.find((l) => l.ref === lineId);
+  if (planned?.status !== "planned" || !v.quantity || !v.unit || LINE_UNITS[v.unit] !== "m") return null;
+  const from = ref.workItems.find((w) => w.id === planned.workItemId)?.slots.find((s) => s.key === planned.slot)?.piecesFrom;
+  const params = plan.inputs.find((i) => i.workItemId === planned.workItemId)?.params;
+  const count = from && params?.[from.count];
+  const length = from && params?.[from.length];
+  if (!count || !length || count.origin !== "devis" || length.origin !== "devis" || !sameDim(parseRefUnit(length.unit).dim, parseRefUnit("m").dim)) return null;
+  const metres = new Decimal(length.value).times(parseRefUnit(length.unit).factor);
+  if (!metres.times(count.value).equals(v.quantity)) return null;
+  const n = new Decimal(count.value);
+  return { count: fr(n), unit: `${n.equals(1) ? "longueur" : "longueurs"} de ${fr(metres)} m` };
+}
 
 /**
  * Le devis écrit la quantité (« 20 crochets de gouttière ») : elle reste la base, mais elle est comparée au calcul. Un

@@ -50,28 +50,24 @@ describe("bandes zinc au ml (§36.4) : jamais « ml de zinc » nu", () => {
     expect(r.needs.some((n) => n.purchase?.order.unit.many === "kg")).toBe(false);
   });
 
-  it("je façonne, au-delà de 6 ml : un bobineau (réponse du fondateur) : 22 m → bobineau 500 × 31 m, 0,65", () => {
+  it("je façonne, 22 m : toujours des feuilles 2 × 1 m (§48.6, jamais de bobineau pour une bande), 8 m par feuille au développé de 25 cm → 3 feuilles", () => {
     const r = computeWorkItem(ROOFING_REFERENTIAL, input({ faconnage: "1", developpe: "250" }));
-    expect(r.needs.find((n) => n.needId === "feuilles-bandes")).toBeUndefined();
-    expect(order(r, "bobineau-bandes")).toBe(1);
-    expect(need(r, "bobineau-bandes").label).toBe("Bobineau zinc naturel 500 × 31 m, 0,65");
+    expect(order(r, "feuilles-bandes")).toBe(3);
+    expect(r.needs.some((n) => /bobineau/i.test(n.label))).toBe(false);
   });
 
-  it("sans façonnage connu : une question, pas « à chiffrer » ; le développé n'est demandé que pour les feuilles", () => {
+  it("sans façonnage connu : une question, pas « à chiffrer » ; le développé est demandé pour estimer les feuilles", () => {
     const r = computeWorkItem(ROOFING_REFERENTIAL, input({}));
-    // Les deux pièces attendent la réponse ; les consommables suggérés (§45.8, mastic et vis) se calculent déjà.
-    expect(r.needs.filter((n) => n.origin !== "suggested").map((n) => n.status)).toEqual(["question", "question"]);
+    // Les deux formes de la bande attendent la réponse ; rien d'autre (règle numéro un : ni mastic ni vis non écrits).
+    expect(r.needs.map((n) => n.status)).toEqual(["question", "question"]);
     expect(need(r, "bandes-faconnees").question?.key).toBe("param:faconnage");
     const feuilles = computeWorkItem(ROOFING_REFERENTIAL, input({ faconnage: "1", longueur_bande: "5" }));
     expect(need(feuilles, "feuilles-bandes").question?.key).toBe("param:developpe");
-    // Un bobineau de 500 mm contient tous les développés proposés : le développé n'est pas demandé pour lui.
-    const bobineau = computeWorkItem(ROOFING_REFERENTIAL, input({ faconnage: "1" }));
-    expect(need(bobineau, "bobineau-bandes").status).toBe("calculated");
   });
 });
 
 describe("abergement de cheminée (§7) : un ouvrage compté devient des bandes ou des feuilles de zinc", () => {
-  it("2 cheminées de 3 m : 7,8 m de zinc façonné → 5 bandes de 2 m dév. 33 cm ; 6 m de porte-solin → 4 bandes", () => {
+  it("2 cheminées de 3 m : 7,8 m de zinc → 5 bandes de 2 m dév. 33 cm ; 6 m de porte-solin → 4 bandes ; façonné sur place : 2 feuilles", () => {
     const r = computeWorkItem(ROOFING_REFERENTIAL, {
       workItemId: "abergement-cheminee",
       params: {
@@ -94,9 +90,8 @@ describe("abergement de cheminée (§7) : un ouvrage compté devient des bandes 
       products: {},
       mentioned: ["abergement"],
     });
-    // Façonné sur place, 7,8 m de zinc (plus de 6 ml) : un bobineau 500 × 17 m (réponse du fondateur, 2026-10-04).
-    expect(bobine.needs.find((n) => n.needId === "feuilles-abergement")).toBeUndefined();
-    expect(order(bobine, "bobineau-abergement")).toBe(1);
-    expect(need(bobine, "bobineau-abergement").label).toBe("Bobineau zinc naturel 500 × 17 m, 0,65");
+    // Façonné sur place (§48.6) : 7,8 m de zinc au développé de 33 cm, 3 bandes de 2 m par feuille → 2 feuilles 2 × 1 m.
+    expect(order(bobine, "feuilles-abergement")).toBe(2);
+    expect(bobine.needs.some((n) => /bobineau/i.test(n.label))).toBe(false);
   });
 });

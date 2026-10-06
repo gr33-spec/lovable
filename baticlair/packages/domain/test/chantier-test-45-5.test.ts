@@ -31,12 +31,9 @@ describe("chantier Test : les corrections du §45.5", () => {
     expect(JSON.stringify(g)).not.toMatch(/soit/);
   });
 
-  it("pattes fixes et pattes coulissantes en deux lignes, pointes à part (2 par patte)", () => {
+  it("RÈGLE NUMÉRO UN : ni pattes ni pointes, le devis n'en écrit pas (avant : 519 coulissantes, 173 fixes, 1 384 pointes d'office)", () => {
     const v = readQuote(TEST, REPONSES);
-    expect(line(v, "Pattes coulissantes")).toMatchObject({ quantity: "519 pièces", precision: "pour bobine 500 mm" });
-    expect(line(v, "Pattes fixes")).toMatchObject({ quantity: "173 pièces", precision: "pour bobine 500 mm, zone fixe de chaque bac" });
-    expect(line(v, "Pointes annelées 2,5 × 28 mm")).toMatchObject({ quantity: "1 384 pièces", precision: "2 par patte, sur volige 18 mm" });
-    expect(line(v, "Pattes de fixation")).toBeUndefined();
+    for (const absent of ["Pattes coulissantes", "Pattes fixes", "Pointes annelées", "Pattes de fixation"]) expect(line(v, absent)).toBeUndefined();
   });
 
   it("bandes zinc commandées façonnées : en longueurs de 2 m, avec ce qu'elles couvrent", () => {
@@ -44,22 +41,22 @@ describe("chantier Test : les corrections du §45.5", () => {
     expect(line(v, "Bandes façonnées Quartz-Zinc 0,65 mm")).toMatchObject({ quantity: "8 longueurs de 2 m", precision: "13 ml à couvrir, développé 33 cm" });
   });
 
-  it("égout et faîtage (§47.8) : jamais une question, proposés dans « On ajoute ? » ; l'égout déjà au devis n'est pas reproposé", () => {
+  it("égout et faîtage absents du devis : ni question, ni ligne, ni suggestion (règle numéro un)", () => {
     const v = readQuote(TEST, REPONSES);
     expect(v.questions.map((d) => d.question?.key)).not.toContain("param:egout_faitage");
-    // Le devis cite la bande d'égout : seul le faîtage est proposé, avec le zinc du chantier.
-    expect(v.suggestions.map((s) => `${s.label} : ${s.quantity}`)).toContain("Faîtage Quartz-Zinc 0,65 mm, bande dév. 33 cm : 5 longueurs de 3 m");
-    expect(v.suggestions.map((s) => s.label).some((l) => l.startsWith("Bandes d'égout"))).toBe(false);
+    expect(v.suggestions).toEqual([]);
     expect(line(v, "Faîtage")).toBeUndefined();
-    // Sans ligne d'égout au devis : l'égout est proposé aussi.
-    const sansEgout = readQuote(TEST.filter((l) => l.ref !== "3"), REPONSES);
-    expect(sansEgout.suggestions.map((s) => `${s.label} : ${s.quantity}`)).toContain("Bandes d'égout Quartz-Zinc 0,65 mm, dév. 33 cm : 8 longueurs de 2 m");
+    expect(readQuote(TEST.filter((l) => l.ref !== "3"), REPONSES).suggestions).toEqual([]);
   });
 
-  it("bande de 13 ml façonnée sur place : un bobineau (plus de 6 ml), toujours avec son usage", () => {
-    const f = line(readQuote(TEST, REPONSES), "Bobineau")!;
-    expect(f).toMatchObject({ label: "Bobineau Quartz-Zinc 500 × 17 m, 0,65", quantity: "1 pièce", precision: "pour façonner 13 ml de bande" });
-    expect(line(readQuote(TEST, REPONSES), "Feuilles zinc 2 × 1 m")).toBeUndefined();
+  it("bande de 13 ml façonnée sur place : des feuilles 2 × 1 m estimées d'après le développé (§48.6), jamais un bobineau", () => {
+    const v = readQuote(TEST, REPONSES);
+    expect(line(v, "Feuilles")).toMatchObject({
+      label: "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm",
+      quantity: "3 pièces",
+      precision: "pour 13 ml de bande : estimation d'après un développé de 33 cm, ajuste selon ton façonnage",
+    });
+    expect(line(v, "Bobineau")).toBeUndefined();
   });
 
   it("descentes absentes du devis : une question, jamais une quantité d'office", () => {
@@ -69,17 +66,13 @@ describe("chantier Test : les corrections du §45.5", () => {
     expect(line(v, "Naissances")).toBeUndefined();
   });
 
-  it("§45.8 « On ajoute ? » : silicone zinc et vis inox proposés avec une quantité, jamais ajoutés d'office ; une ligne « mastic » du devis reste la sienne", () => {
+  it("rien d'absent du devis, pas même en suggestion (ni silicone, ni vis) ; une ligne « mastic » du devis reste la sienne", () => {
     const v = readQuote(TEST, REPONSES);
-    expect(v.suggestions.map((s) => `${s.label} : ${s.quantity}`)).toEqual([
-      "Cartouches de silicone zinc : 2 cartouches",
-      "Vis inox 4 × 40 : 1 boîte de 200",
-      "Faîtage Quartz-Zinc 0,65 mm, bande dév. 33 cm : 5 longueurs de 3 m",
-    ]);
+    expect(v.suggestions).toEqual([]);
     expect(v.toBuy.map((b) => b.label)).not.toContain("Cartouches de silicone zinc");
     const avecMastic = readQuote([...TEST, { ref: "5", designation: "Mastic colle polyuréthane 310 ml", quantity: "2", unit: "u" }], REPONSES);
     expect(avecMastic.toBuy.map((b) => `${b.label} : ${b.quantity}`)).toContain("Mastic colle polyuréthane 310 ml : 2 pièces");
-    expect(line(avecMastic, "Bobineau")?.quantity).toBe("1 pièce");
+    expect(line(avecMastic, "Feuilles")?.quantity).toBe("3 pièces");
   });
 
   it("toutes les réponses données : plus de question, rien à chiffrer, chaque ligne passe le test du fournisseur", () => {

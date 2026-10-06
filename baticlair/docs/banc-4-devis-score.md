@@ -26,8 +26,8 @@ Référence couverture :
 
 | Devis | Lignes matériaux | A — Compréhension | B — Quantitatif exact | Besoins identifiés | Questions | Inconnus | Erreurs | Lignes envoyées (avant → après regroupement) |
 |---|---|---|---|---|---|---|---|---|
-| D-2026-015 — couverture (référence) | 10 | **90 %** (9) | **50 %** (5) | 9 | 5 | 1 | 0 | 10 → 10 |
-| **Total** | **10** | **90 %** (9) | **50 %** (5) | 9 | 5 | 1 | 0 | 10 → 10 |
+| D-2026-015 — couverture (référence) | 10 | **90 %** (9) | **50 %** (5) | 9 | 3 | 1 | 0 | 10 → 10 |
+| **Total** | **10** | **90 %** (9) | **50 %** (5) | 9 | 3 | 1 | 0 | 10 → 10 |
 
 ## Ce que verrait l'artisan (lecture seule, avant toute réponse)
 
@@ -121,8 +121,6 @@ Chaque devis doit garder au moins ses scores A et B de l'étape précédente, sa
 - Sortie de toit : quel diamètre ?
 - J'ai identifié : Tuiles HP10. C'est bien ce modèle ?
 - Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?
-- Combien d'angles sur cette gouttière ?
-- Un dauphin en pied de chaque descente ?
 
 ## Détail
 

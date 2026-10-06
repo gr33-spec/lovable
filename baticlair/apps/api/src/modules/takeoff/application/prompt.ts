@@ -6,7 +6,7 @@
  * contexte injecté (métier, ouvrages du référentiel) et le format technique de la réponse
  * (références de lignes, sections, noms courts), jamais une règle reformulée.
  */
-export const TAKEOFF_PROMPT = { id: "takeoff_extraction", version: 10 } as const;
+export const TAKEOFF_PROMPT = { id: "takeoff_extraction", version: 11 } as const;
 
 /** Un ouvrage du référentiel chargé, avec ses synonymes (« vocabulaire.json », §29). */
 export interface WorkItemHint {
@@ -52,6 +52,9 @@ Réponds avec un seul objet JSON :
 - contexte : client (nom du client tel qu'écrit, ex. « M. Dupont »), adresse du chantier, type de bâtiment, neuf ou rénovation, pente, hauteur… lus dans l'en-tête et les notes (objet « donnée → valeur », null si rien).
 - notes : en phrases courtes pour l'artisan, ce qui concerne tout le devis et qui compte pour ses achats (page illisible, tableau coupé, fourniture apportée par le client) ; jamais de nom de champ ni de référence [page:ligne] ; liste vide si rien.`;
 
+/** v11 : la règle numéro un du fondateur (2026-10-06), prioritaire sur la règle 5 du prompt A. */
+const RULE_ONE = `RÈGLE NUMÉRO UN (fondateur, prioritaire sur toute autre règle ci-dessus) : tu lis le devis ligne par ligne et tu retranscris ce qui est écrit, avec ses quantités. Tu comprends la ligne sans la recopier mot à mot, mais tu n'ajoutes jamais un article qu'elle n'écrit pas. Une ligne n'est jamais en doute pour un article qu'elle ne cite pas (« couverture ardoise » sans liteaux ni écran écrits : ce sont des ardoises, rien d'autre). Une donnée écrite (crochet de 11, tuyau Ø80, 2 descentes de 3 m) se reprend telle quelle, jamais en doute.`;
+
 export function takeoffSystemPrompt(tradeLabel: string, materialFamilies: readonly string[] = [], workItems: readonly WorkItemHint[] = []): string {
   const referentiel =
     workItems.length > 0
@@ -60,6 +63,8 @@ export function takeoffSystemPrompt(tradeLabel: string, materialFamilies: readon
         ? `aucun ouvrage à quantifier pour ce métier ; familles de matériaux habituelles : ${materialFamilies.join(" ; ")}`
         : "aucun ouvrage chargé pour ce métier";
   return `${PROMPT_A.replace("{metier}", tradeLabel).replace("{referentiel}", referentiel)}
+
+${RULE_ONE}
 
 ${TECHNICAL_FORMAT}`;
 }

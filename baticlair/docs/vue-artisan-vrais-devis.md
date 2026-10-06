@@ -122,7 +122,7 @@ Information (pas une décision) : 5 ouvrages mesurés (m², ml…) : les matéri
 
 ## D-2026-015 — couverture
 
-**À l'arrivée** : ✓ 11 prêts · ⚠ 1 à confirmer · ? 10 information manquante
+**À l'arrivée** : ✓ 10 prêts · ⚠ 1 à confirmer · ? 10 information manquante
 
 **Décisions à prendre : 3**
 
@@ -132,7 +132,7 @@ Information (pas une décision) : 5 ouvrages mesurés (m², ml…) : les matéri
 
 Information (pas une décision) : 7 ouvrages mesurés (m², ml…) : les matériaux en sont calculés quand une règle existe ; ce qui reste « à préciser » sera demandé aux fournisseurs pour la mesure du devis.
 
-**Après 2 réponses** : ✓ 11 prêts · ⚠ 0 à confirmer · ? 7 information manquante
+**Après 2 réponses** : ✓ 10 prêts · ⚠ 0 à confirmer · ? 7 information manquante
 
 **Liste envoyée aux fournisseurs : 10 lignes** (10 lignes du devis regroupées)
 

@@ -6,12 +6,15 @@ import { decodeExtraction, extractionWireSchema } from "../src/modules/takeoff/a
 /** PROMPT A (référentiel §41.1), branché mot pour mot : seules les accolades sont remplies, et le format technique est ajouté après. */
 describe("prompt A de lecture du devis (v9)", () => {
   const prompt = takeoffSystemPrompt("Couverture", ["Tuile", "Ardoise"], [
-    { id: "couverture-ardoises-crochet", label: "Couverture en ardoises au crochet sur liteaux", synonyms: ["ardoise"] },
+    { id: "couverture-ardoises-crochet", label: "Couverture en ardoises au crochet", synonyms: ["ardoise"] },
     { id: "couverture-zinc-joint-debout", label: "Couverture zinc à joint debout", synonyms: ["joint debout", "couverture zinc"] },
   ]);
 
-  it("est la version 9, et reprend le texte du §41.1 tel quel", () => {
-    expect(TAKEOFF_PROMPT.version).toBe(10);
+  it("est la version 11, reprend le texte du §41.1 tel quel, puis la règle numéro un du fondateur, prioritaire", () => {
+    expect(TAKEOFF_PROMPT.version).toBe(11);
+    expect(prompt).toContain("RÈGLE NUMÉRO UN (fondateur, prioritaire sur toute autre règle ci-dessus) : tu lis le devis ligne par ligne et tu retranscris ce qui est écrit, avec ses quantités.");
+    expect(prompt).toContain("Une ligne n'est jamais en doute pour un article qu'elle ne cite pas");
+    expect(prompt.indexOf("RÈGLE NUMÉRO UN")).toBeGreaterThan(prompt.indexOf("Tu renvoies uniquement le JSON"));
     for (const sentence of [
       "Tu lis le devis d'un artisan du bâtiment pour en extraire les ouvrages à quantifier. Tu ne calcules rien : tu structures.",
       "MÉTIER DE L'ARTISAN : Couverture",
@@ -24,7 +27,7 @@ describe("prompt A de lecture du devis (v9)", () => {
       expect(prompt).toContain(sentence);
     }
     // Le référentiel chargé : les ouvrages et leurs synonymes, injectés dans l'accolade.
-    expect(prompt).toContain("RÉFÉRENTIEL CHARGÉ : couverture-ardoises-crochet = Couverture en ardoises au crochet sur liteaux (synonymes : ardoise) ; couverture-zinc-joint-debout = Couverture zinc à joint debout (synonymes : joint debout, couverture zinc)");
+    expect(prompt).toContain("RÉFÉRENTIEL CHARGÉ : couverture-ardoises-crochet = Couverture en ardoises au crochet (synonymes : ardoise) ; couverture-zinc-joint-debout = Couverture zinc à joint debout (synonymes : joint debout, couverture zinc)");
     expect(prompt).not.toContain("{metier}");
     expect(prompt).not.toContain("{referentiel}");
     // Le format technique vient APRÈS les règles, et se présente comme du contexte injecté.

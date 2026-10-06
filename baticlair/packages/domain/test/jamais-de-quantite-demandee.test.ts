@@ -50,11 +50,11 @@ const short = (d: string) => d.replace(/\s*\((?:fourniture\s*(?:&|et)\s*pose|f\.
 
 const one = (designation: string, quantity: string | null, unit: string | null) => read([{ ref: "1", designation, quantity, unit } as unknown as BenchLine]);
 const bought = (v: PurchaseView) => Object.fromEntries(v.toBuy.map((b) => [b.label, b.quantity]));
-// Formule Cupa (§34), crochet 1 mm : 9 271 ardoises ; crochets = ardoises commandées × 1,02.
+// Formule Cupa (§34), crochet 1 mm : 9 271 ardoises ; crochets = ardoises commandées × 1,02. RÈGLE NUMÉRO UN : les
+// crochets sortent parce que la ligne les écrit (« crochets compris ») ; les liteaux, non écrits, ne sortent pas.
 const COMPLETE = {
   "Ardoises naturelles Espagne 1er choix 30×22": "9 271 pièces",
   "Crochets d'ardoise inox standard, longueur 11 cm": "9 457 pièces",
-  "Liteaux 18×40": "2 049 ml",
 };
 
 describe("jamais de quantité demandée à l'artisan", () => {
@@ -66,7 +66,8 @@ describe("jamais de quantité demandée à l'artisan", () => {
   ])("« %s » (%s %s) : tout est calculé, aucune question", (designation, quantity, unit) => {
     const v = one(designation, quantity, unit);
     expect(v.questions).toEqual([]);
-    expect(bought(v)).toMatchObject(COMPLETE);
+    // « Fourniture et pose ardoises » n'écrit pas de crochets : des ardoises, rien d'autre.
+    expect(bought(v)).toEqual(/crochet/i.test(designation) ? COMPLETE : { "Ardoises naturelles Espagne 1er choix 30×22": "9 271 pièces" });
     // Hypothèses dites, en tête la pente (45°) et la zone (3).
     expect(v.assumptions.slice(0, 2).map((a) => [a.key, a.value, a.unit])).toEqual([
       ["param:pente", "45", "°"],
@@ -100,7 +101,7 @@ describe("jamais de quantité demandée à l'artisan", () => {
     expect(v.questions[0]).toMatchObject({ text: "Surface du toit ?", question: { options: [{ label: "50 m²" }, { label: "100 m²" }, { label: "150 m²" }, { label: "200 m²" }] } });
     expect(JSON.stringify(v.questions)).not.toMatch(/quantit/i);
     // Réponse d'un geste → la liste complète.
-    expect(bought(read([{ ref: "1", designation: "Ardoises 30×22 crochets compris", quantity: "1", unit: "forfait" } as unknown as BenchLine], { "param:surface": { value: "200", unit: "m2" } }))).toMatchObject(COMPLETE);
+    expect(bought(read([{ ref: "1", designation: "Ardoises 30×22 crochets compris", quantity: "1", unit: "forfait" } as unknown as BenchLine], { "param:surface": { value: "200", unit: "m2" } }))).toEqual(COMPLETE);
   });
 });
 
@@ -146,7 +147,9 @@ describe("doutes de calcul de l'IA : jamais posés à l'artisan", () => {
     expect(v.questions.map((q) => q.key).sort()).toEqual([
       "engine:param:developpe",
       "engine:param:diametre_descente",
-      "engine:param:faconnage",
+      // §48.6 : une question « tu façonnes ? » par ouvrage de zinguerie, jamais une seule pour tout le zinc.
+      "engine:param:faconnage@abergement-cheminee",
+      "engine:param:faconnage@faitage-zinc",
       "engine:param:nb_descentes",
       "engine:param:perimetre_cheminee",
       "role:ligne 5",

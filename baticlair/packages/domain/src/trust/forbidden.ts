@@ -50,7 +50,11 @@ const COMPANIONS: Companion[] = [
   { rule: "bac-acier-sans-vis", main: /\bbacs? acier\b/, needs: /\bvis\b/, text: "Bac acier sans vis de fixation dans la liste.", suggestion: "Vis de fixation bac acier avec rondelle" },
 ];
 
-export function forbiddenFlags(purchase: PurchaseView): OrangeFlag[] {
+/**
+ * `writtenOnly` (règle numéro un, fondateur 2026-10-06) : un article absent du devis n'est jamais réclamé, pas même en
+ * orange ; seuls restent les interdits de forme (m², lot, métal sans dimension).
+ */
+export function forbiddenFlags(purchase: PurchaseView, writtenOnly = false): OrangeFlag[] {
   const flags: OrangeFlag[] = [];
   const flag = (rule: string, itemKey: string, title: string, text: string, suggestion?: string) =>
     flags.push({ key: `${FORBIDDEN}${rule}:${itemKey}`, itemKey, title, text, ...(suggestion ? { suggestion: { label: suggestion, quantity: null, unit: null } } : {}) });
@@ -64,7 +68,7 @@ export function forbiddenFlags(purchase: PurchaseView): OrangeFlag[] {
   }
   // Les articles qui ne partent jamais seuls : tout ce qui est dans la liste compte (à commander et à préciser).
   const everything = [...purchase.toBuy.map((b) => b.label), ...purchase.toQuote.map((q) => q.label)];
-  for (const c of COMPANIONS) {
+  for (const c of writtenOnly ? [] : COMPANIONS) {
     const main = purchase.toBuy.find((b) => has(b.label, c.main) && !(c.unless && has(b.label, c.unless)));
     if (!main || everything.some((l) => has(l, c.needs))) continue;
     flag(c.rule, main.key, main.label, `Interdit : ${c.text}`, c.suggestion);

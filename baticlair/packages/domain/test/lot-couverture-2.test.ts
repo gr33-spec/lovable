@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ROOFING_REFERENTIAL } from "../src/index.js";
 import { describeLot, type Metier } from "./support/paquet.js";
 import { readQuote } from "./support/read-quote.js";
+import { readQuoteComplet } from "./support/complet.js";
 
 /**
  * LOT COUVERTURE, POINT 2 : fenêtres de toit (§11). La fenêtre part telle que le devis l'écrit (marque, modèle, taille) ;
@@ -19,7 +20,7 @@ const CAS: Metier[] = [
       { ref: "2", designation: "Fenêtre de toit Velux GGL MK04 tout confort", quantity: "2", unit: "u" },
     ],
     questions: ["J'ai identifié : Tuiles HP10. C'est bien ce modèle ?"],
-    couleurs: { vert: 4, orange: 1, gris: 0 },
+    couleurs: { vert: 2, orange: 1, gris: 0 },
   },
   {
     nom: "Ardoises et une fenêtre de toit sans taille",
@@ -30,7 +31,7 @@ const CAS: Metier[] = [
       { ref: "2", designation: "Fourniture et pose fenêtre de toit", quantity: "1", unit: "u" },
     ],
     questions: ["Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?", "Fenêtre de toit : quelle taille ?"],
-    couleurs: { vert: 4, orange: 2, gris: 0 },
+    couleurs: { vert: 1, orange: 2, gris: 0 },
   },
   {
     nom: "Une fenêtre de toit seule, sur tuiles plates",
@@ -54,7 +55,7 @@ describeLot({
 
 describe("fenêtres de toit : la fenêtre telle qu'écrite, son raccord adapté", () => {
   it("un raccord par fenêtre, à la couverture du devis et à la taille lue (référence Velux comprise)", () => {
-    const v = readQuote([
+    const v = readQuoteComplet([
       { ref: "1", designation: "Couverture tuiles HP10 terre cuite", quantity: "120", unit: "m²" },
       { ref: "2", designation: "Fenêtre de toit Velux GGL MK04 tout confort", quantity: "2", unit: "u" },
     ]);
@@ -65,9 +66,9 @@ describe("fenêtres de toit : la fenêtre telle qu'écrite, son raccord adapté"
   });
 
   it("sans couverture au devis : « pour tuiles, pour ardoises ou pour tuiles plates ? » ; sans taille : la question du comptoir sur la ligne", () => {
-    const v = readQuote([{ ref: "1", designation: "Fenêtre de toit", quantity: "1", unit: "u" }]);
+    const v = readQuoteComplet([{ ref: "1", designation: "Fenêtre de toit", quantity: "1", unit: "u" }]);
     expect(v.questions.map((q) => q.question?.text)).toEqual(["Raccord de fenêtre de toit : pour tuiles, pour ardoises ou pour tuiles plates ?", "Fenêtre de toit : quelle taille ?"]);
-    const answered = readQuote([{ ref: "1", designation: "Fenêtre de toit", quantity: "1", unit: "u" }], {
+    const answered = readQuoteComplet([{ ref: "1", designation: "Fenêtre de toit", quantity: "1", unit: "u" }], {
       "param:raccord_couverture": { value: "2", unit: "u" },
       "precise:1": "78 × 118",
     });

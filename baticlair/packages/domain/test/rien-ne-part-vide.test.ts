@@ -21,12 +21,13 @@ describe("l'envoi attend une liste pleine et sans question", () => {
     expect(p.canValidate).toBe(false);
   });
 
-  it("couverture : Brest attend ses quatre réponses avant de partir", () => {
+  it("couverture : Brest attend ses trois réponses avant de partir (qualité d'ardoise, nombre et Ø des descentes de sa naissance)", () => {
     const brest = readQuote([
       { ref: "1", designation: "Couverture en ardoises naturelles 30x22 posées au crochet", quantity: "200", unit: "m²" },
       { ref: "2", designation: "Gouttière demi-ronde zinc développé 33", quantity: "24", unit: "ml" },
     ], {}, [], {});
-    expect(brest.questions.filter((q) => q.question)).toHaveLength(4);
+    // Règle numéro un : ni crochets de gouttière ni liteaux non écrits, donc plus leurs questions.
+    expect(brest.questions.filter((q) => q.question)).toHaveLength(3);
     expect(brest.canValidate).toBe(false);
   });
 });

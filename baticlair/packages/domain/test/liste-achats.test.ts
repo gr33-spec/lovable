@@ -74,7 +74,8 @@ describe("liste d'achats : D-2026-015 (tuiles HP10, 120 m²)", () => {
     const v = read(D2026_015_LINES);
     // La sortie de toit est un ouvrage (réponse du fondateur, 2026-10-04) : le devis ne dit ni le diamètre ni l'usage.
     // Le comptoir demande aussi la pose des crochets de gouttière (§47.8) ; « gouttière de 25 » et « Ø80 » sont au devis.
-    expect(v.questions.map((q) => q.key)).toEqual(["engine:param:diametre_sortie", "engine:param:fixation_crochet", "engine:param:nb_angles", "engine:param:dauphin", "engine:param:usage_sortie", "engine:product:tuile"]);
+    // RÈGLE NUMÉRO UN : ni angles, ni dauphins, ni jonctions, ni talons, ni abouts (non écrits) : ni ligne, ni question.
+    expect(v.questions.map((q) => q.key)).toEqual(["engine:param:diametre_sortie", "engine:param:fixation_crochet", "engine:param:usage_sortie", "engine:product:tuile"]);
     expect(v.toBuy.map((b) => [short(b.label), b.quantity])).toEqual([
       ["Liteaux 27×40", "547 ml"],
       ["Écran HPV, rouleau 1,50 × 50 m", "2 rouleaux"],
@@ -82,11 +83,7 @@ describe("liste d'achats : D-2026-015 (tuiles HP10, 120 m²)", () => {
       ["Faîtières", "29 pièces"],
       ["Closoir", "2 rouleaux de 5 m"],
       ["Crochets de faîtière", "29 pièces"],
-      ["Abouts de faîtage", "2 pièces"],
       ["Gouttière PVC demi-ronde sable de 25", "5 longueurs de 4 m"],
-      // §15 : « 2 x 10 m », deux lignes de gouttière PVC : une jonction entre deux longueurs, deux talons par ligne.
-      ["Jonctions de gouttière PVC sable de 25", "4 pièces"],
-      ["Talons de gouttière PVC sable de 25", "4 pièces"],
       ["Naissances PVC demi-ronde sable de 25 Ø80", "2 pièces"],
       ["Tubes de descente PVC sable Ø80, longueur 4 m", "2 pièces"],
       ["Coudes de descente PVC sable Ø80", "4 pièces"],
@@ -104,7 +101,7 @@ describe("liste d'achats : D-2026-015 (tuiles HP10, 120 m²)", () => {
 
   it("après « oui, c'est bien ce modèle » : 1 488 tuiles avec le pureau mini (zone littorale), 1 345 si l'artisan donne 34,3 cm", () => {
     const v = read(D2026_015_LINES, { "product:tuile": "edilians-hp10-huguenot" });
-    expect(v.questions.map((q) => q.key)).toEqual(["engine:param:diametre_sortie", "engine:param:fixation_crochet", "engine:param:nb_angles", "engine:param:dauphin", "engine:param:usage_sortie"]);
+    expect(v.questions.map((q) => q.key)).toEqual(["engine:param:diametre_sortie", "engine:param:fixation_crochet", "engine:param:usage_sortie"]);
     expect(v.toBuy.find((b) => b.needIds.includes("tuiles"))).toMatchObject({ quantity: "1 488 pièces", approx: "≈ 7 palettes" });
     expect(v.assumptions.map((a) => a.key)).toEqual(expect.arrayContaining(["param:zone", "param:pente", "param:pureau"]));
     const precise = read(D2026_015_LINES, { "product:tuile": "edilians-hp10-huguenot", "param:pureau": { value: "34.3", unit: "cm" } });
@@ -122,27 +119,26 @@ describe("liste d'achats : devis ardoises (200 m², jouées, cheminée)", () => 
     expect(v.questions.map((q) => q.key).sort()).toEqual([
       "engine:param:developpe",
       "engine:param:diametre_descente",
-      "engine:param:faconnage",
+      // §48.6 : « tu façonnes ? » pour chaque ouvrage zinc (abergement, faîtage), jamais une seule question.
+      "engine:param:faconnage@abergement-cheminee",
+      "engine:param:faconnage@faitage-zinc",
       "engine:param:nb_descentes",
       "engine:param:perimetre_cheminee",
       "role:ligne 5",
     ]);
+    // RÈGLE NUMÉRO UN : seul ce que le devis écrit (liteaux, ardoises, gouttière et sa naissance, faîtage zinc, chatières).
+    // Plus de crochets d'ardoise, contre-liteaux, écran, pattes ni crochets de gouttière : le devis n'en écrit pas.
     expect(v.toBuy.map((b) => [short(b.label), b.quantity])).toEqual([
       ["Ardoises naturelles Espagne 1er choix 30×22", "9 271 pièces"],
-      ["Crochets d'ardoise inox standard, longueur 11 cm", "9 457 pièces"],
       ["Liteaux 18×40", "2 049 ml"],
-      ["Liteaux 27×40", "350 ml"],
-      ["Écran HPV, rouleau 1,50 × 50 m", "3 rouleaux"],
-      ["Pattes de fixation", "51 pièces"],
       ["Gouttière zinc dév. 25", "5 longueurs de 4 m"],
-      ["Crochets de gouttière bandeau dév. 25", "44 pièces"],
       ["Chatières de ventilation", "12 pièces"],
     ]);
     // Un faîtage ZINC ne donne jamais des faîtières en terre cuite.
     expect(v.toBuy.some((b) => /Faîtières/.test(b.label))).toBe(false);
     // Les naissances attendent « combien de descentes », l'abergement attend le périmètre : des questions, rien à faire chiffrer.
     expect(v.toQuote).toEqual([]);
-    expect(v.assumptions.map((a) => a.key)).toEqual(["param:pente", "param:zone", "param:longueur_rampant", "derived:recouvrement", "param:pureau", "param:diametre_crochet", "param:longueur_crochet", "product:liteau", "product:contre_liteau", "param:entraxe_supports", "param:aspect_zinc"]);
+    expect(v.assumptions.map((a) => a.key)).toEqual(["param:pente", "param:zone", "param:longueur_rampant", "derived:recouvrement", "param:pureau", "param:diametre_crochet", "product:liteau"]);
     // Tant que « 6 » n'est pas tranché, rien ne part.
     expect(v.canValidate).toBe(false);
   });
@@ -167,17 +163,17 @@ describe("liste d'achats : devis ardoises (200 m², jouées, cheminée)", () => 
     expect(v.canValidate).toBe(true);
     // La carte du quantitatif : chaque article sous son ouvrage, avec la mesure du devis.
     expect(v.groups.map((g) => [g.label, g.measure, g.itemKeys.length])).toEqual([
-      ["Couverture en ardoises au crochet sur liteaux", "200 m²", 5],
-      ["Faîtage en bande zinc", "17 m", 2],
+      ["Couverture en ardoises au crochet", "200 m²", 2],
+      ["Faîtage en bande zinc", "17 m", 1],
       ["Abergement de cheminée", "2 unités", 2],
-      ["Gouttière", "17 m", 3],
+      ["Gouttière", "17 m", 2],
       ["Autres articles du devis", null, 1],
     ]);
     expect(v.groups.flatMap((g) => g.itemKeys).sort()).toEqual(v.toBuy.map((b) => b.key).sort());
-    // Zone intérieure : moins de recouvrement, donc moins d'ardoises (8 547, table Cupa à R 80) et des crochets de gouttière tous les 50 cm (+ 1 en bout).
+    // Zone intérieure : moins de recouvrement, donc moins d'ardoises (8 547, table Cupa à R 80) ; pas de crochets de gouttière, le devis n'en écrit pas.
     const inland = read(ARDOISES_LUCARNES_LINES, { "role:ligne 5": "measure", "param:nb_descentes": { value: "2", unit: "u" }, "param:zone": { value: "1", unit: "u" } });
     expect(inland.toBuy.find((b) => b.label === "Ardoises naturelles Espagne 1er choix 30×22")).toMatchObject({ quantity: "8 547 pièces" });
-    expect(inland.toBuy.find((b) => b.label === "Crochets de gouttière bandeau dév. 25")).toMatchObject({ quantity: "35 pièces" });
+    expect(inland.toBuy.find((b) => b.label.startsWith("Crochets de gouttière"))).toBeUndefined();
   });
 
   it("génère docs/liste-achats-vrais-devis.md", async () => {

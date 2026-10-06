@@ -1,5 +1,15 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.06-39 — RÈGLE NUMÉRO UN : rien d'absent du devis (fondateur, 2026-10-06)
+
+- **Règle numéro un** (`writtenOnly`) : BatiClair retranscrit ce que le devis écrit, avec ses quantités ; il n'ajoute jamais un article absent du devis, ni en vert, ni en orange, ni en suggestion. Un article sort seulement s'il est écrit dans une ligne, ou s'il en est la forme d'achat (`formOf` : feuilles 2 × 1 m d'une bande façonnée, bobines ou bacs d'un joint debout, plaques d'un bac acier, pièces d'une sortie de toit ou d'un abergement), ou s'il en est l'accessoire indissociable (`indissociable` : la naissance d'une gouttière, §48.7 ; le raccord d'une fenêtre de toit). Plus de liteaux, contre-liteaux, écran, pattes, pointes, colliers, dauphins, abouts, jonctions, talons, angles, vis, silicone… s'ils ne sont pas écrits ; plus de question à leur sujet. Les « On ajoute ? » et les interdits « X sans Y » sont coupés pour la couverture.
+- **§48.6 zinc façonné** : une question « tu façonnes ? » par ouvrage (faîtage zinc, bande porte-solin, bandes, noue, abergement), jamais prêtée d'une pièce à l'autre (`ownOnly`) ; aucune question quand le devis dit déjà le façonnage. Façonné sur place : **feuilles 2 × 1 m**, estimées d'après le développé (« 1 feuille de 1 m de large en bandes de développé, 2 m de long » : dév. 25 cm → 8 m par feuille), raisonnement dit en clair ; le bobineau est réservé au joint debout, terrasses et chéneaux (fin de la règle « bobineau au-delà de 6 ml »).
+- **Bande porte-solin** : ouvrage à part (`bande-porte-solin`), avec sa question de façonnage et son mortier écrit (orange, estimé).
+- **Tuyau de descente** écrit en mètres avec « N descentes de H m » : commandé en longueurs (« 2 longueurs de 3 m »).
+- **Crochets d'ardoise** : l'écart avec les ardoises (2 094 pour 2 052) est dit sur la ligne : un par ardoise + 2 % de casse (référentiel : crochets = ardoises × 1,02).
+- La gouttière garde son profil écrit (« Havraise ») dans sa désignation.
+- Le tableau de Brest et les comptes rendus des lots bougent en conséquence (articles non écrits retirés). Test : `packages/domain/test/devis-d2026-020.test.ts`.
+
 ## roofing-2026.10.06-38 — le mortier reste, l'écart devis / calcul se dit (D-2026-020)
 
 - **Mortier de solin** (nouvelle famille `solin_mortar`, mot « mortier », emplacement `mortier` des bandes zinc) : cité au devis (« bande porte-solin zinc et mortier ciment »), il n'est plus jamais supprimé. Estimation du fondateur, à confirmer : « Ciment 35 kg + sable (mortier de solin) : 1 sac », ligne orange « Quantité à confirmer : estimation 1 sac de ciment 35 kg + sable ». Non cité, il n'apparaît pas.

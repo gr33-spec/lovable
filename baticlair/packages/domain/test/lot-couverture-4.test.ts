@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ROOFING_REFERENTIAL } from "../src/index.js";
 import { describeLot, type Metier } from "./support/paquet.js";
 import { readQuote } from "./support/read-quote.js";
+import { readQuoteComplet } from "./support/complet.js";
 
 /**
  * LOT COUVERTURE, POINT 4 : bac acier (§8). Plaques à la longueur du rampant (+ 5 cm de débord), une par rampant,
@@ -16,7 +17,7 @@ const CAS: Metier[] = [
     metier: "couverture",
     bench: [{ ref: "1", designation: "Couverture bac acier anti-condensation RAL 7016, rampant 6 m", quantity: "120", unit: "m²" }],
     questions: [],
-    couleurs: { vert: 4, orange: 0, gris: 0 },
+    couleurs: { vert: 1, orange: 0, gris: 0 },
   },
   {
     nom: "Bac acier monopente, rien d'écrit",
@@ -40,7 +41,7 @@ describeLot({
 
 describe("bac acier : des plaques à longueur, jamais des m²", () => {
   it("120 m², rampant 6 m, deux pans : 20 plaques de 6,05 m, 912 vis, 40 closoirs, 6 faîtières", () => {
-    const v = readQuote([{ ref: "1", designation: "Couverture bac acier anti-condensation RAL 7016, rampant 6 m", quantity: "120", unit: "m²" }]);
+    const v = readQuoteComplet([{ ref: "1", designation: "Couverture bac acier anti-condensation RAL 7016, rampant 6 m", quantity: "120", unit: "m²" }]);
     expect(v.questions).toEqual([]);
     expect(v.toBuy.map((b) => [b.label, b.quantity])).toEqual([
       ["Plaques bac acier simple peau RAL 7016 avec feutre anti-condensation, longueur 6,05 m", "20 pièces"],
@@ -51,7 +52,7 @@ describe("bac acier : des plaques à longueur, jamais des m²", () => {
   });
 
   it("panneau sandwich lu dans la ligne : pas de feutre à demander ; monopente : pas de faîtière", () => {
-    const v = readQuote([{ ref: "1", designation: "Panneaux sandwich monopente RAL 9005, rampant 5 m", quantity: "50", unit: "m²" }]);
+    const v = readQuoteComplet([{ ref: "1", designation: "Panneaux sandwich monopente RAL 9005, rampant 5 m", quantity: "50", unit: "m²" }]);
     expect(v.questions).toEqual([]);
     expect(v.toBuy.map((b) => b.label)).toEqual([
       "Panneaux sandwich RAL 9005, longueur 5,05 m",

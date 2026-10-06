@@ -120,10 +120,10 @@ describe("§45.7 — la demande de devis du chantier Test", () => {
     expect(text).not.toMatch(/command/i);
     // Les lignes du chantier Test (§45.5).
     expect(text).toMatch(/Gouttière zinc demi-ronde dév\. 33\s+4 longueurs de 4 m \(13\s+ml à couvrir\)/);
-    expect(text).toMatch(/Pattes coulissantes joint debout\s+519 pièces/);
-    expect(text).toMatch(/Pattes fixes joint debout\s+173 pièces/);
-    // Bande de 13 ml façonnée sur place : un bobineau au-delà de 6 ml (réponse du fondateur, 2026-10-04).
-    expect(text).toMatch(/Bobineau Quartz-Zinc 500 × 17 m, 0,65\s+1 pièce\s+pour façonner 13 ml de\s*bande/);
+    // RÈGLE NUMÉRO UN : ni pattes ni pointes, le devis n'en écrit pas. Bande de 13 ml façonnée sur place : des feuilles
+    // 2 × 1 m estimées d'après le développé (§48.6), jamais un bobineau.
+    expect(text).not.toMatch(/Pattes|Pointes|Bobineau/);
+    expect(text).toMatch(/Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm\s+\d+ pièces?\s+pour 13 ml de bande/);
   });
 
   it("3. un chantier sans ligne « à préciser » n'a pas de bloc 3 ; un chantier qui en a une le montre, avec « merci de proposer ce que vous avez »", async () => {
@@ -199,25 +199,25 @@ describe("§45.6 — journal des corrections", () => {
   it("7. une correction d'un tap crée une entrée de journal avec les sept champs", async () => {
     const agent = await compteBatiInvest();
     const { takeoff, projectId } = await chantierOuvert(agent);
-    const pattes = takeoff.purchase.toBuy.find((b: { label: string }) => b.label.startsWith("Pattes coulissantes"));
-    expect(pattes.quantity).toBe("519 pièces");
-    const after = (await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `quantite:${pattes.key}`, value: { value: "550", unit: "pièces" } }).expect(200)).body;
-    expect(after.purchase.toBuy.find((b: { key: string }) => b.key === pattes.key).quantity).toBe("550 pièces");
+    const gouttiere = takeoff.purchase.toBuy.find((b: { label: string }) => b.label.startsWith("Gouttière zinc demi-ronde"));
+    expect(gouttiere.quantity).toBe("4 longueurs de 4 m");
+    const after = (await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `quantite:${gouttiere.key}`, value: { value: "5", unit: "longueurs de 4 m" } }).expect(200)).body;
+    expect(after.purchase.toBuy.find((b: { key: string }) => b.key === gouttiere.key).quantity).toBe("5 longueurs de 4 m");
     const events = await ctx.prisma.correctionEvent.findMany({ where: { projectId, action: "correct" } });
     expect(events).toHaveLength(1);
     expect(events[0]!.context).toMatchObject({
       metier: "couverture",
       departement: "29",
-      materiau: "Pattes coulissantes joint debout",
-      quantite_calculee: "519 pièces",
-      quantite_corrigee: "550 pièces",
-      regle: "pattes_coulissantes",
+      materiau: gouttiere.label,
+      quantite_calculee: "4 longueurs de 4 m",
+      quantite_corrigee: "5 longueurs de 4 m",
+      regle: "profil",
       version_referentiel: expect.stringMatching(/^roofing-/),
     });
     // Une deuxième correction garde la quantité CALCULÉE par le moteur, pas la précédente correction.
-    await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `quantite:${pattes.key}`, value: { value: "560", unit: "pièces" } }).expect(200);
+    await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `quantite:${gouttiere.key}`, value: { value: "6", unit: "longueurs de 4 m" } }).expect(200);
     const second = await ctx.prisma.correctionEvent.findMany({ where: { projectId, action: "correct" }, orderBy: { createdAt: "asc" } });
-    expect(second[1]!.context).toMatchObject({ quantite_calculee: "519 pièces", quantite_corrigee: "560 pièces" });
+    expect(second[1]!.context).toMatchObject({ quantite_calculee: "4 longueurs de 4 m", quantite_corrigee: "6 longueurs de 4 m" });
   });
 
   it("une ligne tombée en « à préciser avec vous » est journalisée avec sa raison ; l'export mensuel par règle est réservé au fondateur", async () => {
@@ -239,59 +239,23 @@ describe("§45.6 — journal des corrections", () => {
   });
 });
 
-describe("§45.8 — « On ajoute ? »", () => {
-  it("8. sur le chantier Test, le bloc propose des cartouches de silicone zinc et des vis inox, avec une quantité ; « Oui » les met en fin de liste", async () => {
+describe("§45.8 remplacé par la RÈGLE NUMÉRO UN (fondateur, 2026-10-06) : rien d'absent du devis, pas même en suggestion", () => {
+  it("8. sur le chantier Test, aucune suggestion (ni silicone, ni vis, ni faîtage) et rien d'absent du devis dans la liste", async () => {
     const agent = await compteBatiInvest();
     const { takeoff } = await chantierOuvert(agent);
-    const suggestions = takeoff.purchase.suggestions as { key: string; label: string; quantity: string }[];
-    // Le faîtage (§47.8 : « on l'ajoute ? » n'est pas une question de comptoir) est proposé ici aussi.
-    expect(suggestions.map((s) => `${s.label} : ${s.quantity}`)).toEqual([
-      "Cartouches de silicone zinc : 2 cartouches",
-      "Vis inox 4 × 40 : 1 boîte de 200",
-      "Faîtage Quartz-Zinc 0,65 mm, bande dév. 33 cm : 5 longueurs de 3 m",
-    ]);
-    expect(suggestions.length).toBeLessThanOrEqual(8);
-    const silicone = suggestions[0]!;
-    // Un tap sur la quantité la modifie ; « Oui » l'ajoute aux fournitures, dans les consommables.
-    await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `quantite:${silicone.key}`, value: { value: "3", unit: "cartouches" } }).expect(200);
-    const oui = (await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `ajout:${silicone.key}`, value: "oui" }).expect(200)).body;
-    expect(oui.purchase.toBuy.find((b: { key: string }) => b.key === silicone.key)).toMatchObject({ quantity: "3 cartouches", consumable: true });
-    expect(oui.purchase.suggestions.map((s: { key: string }) => s.key)).not.toContain(silicone.key);
-    // « Non » : nulle part.
-    const vis = suggestions[1]!;
-    const non = (await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `ajout:${vis.key}`, value: "non" }).expect(200)).body;
-    expect(non.purchase.suggestions.map((s: { label: string }) => s.label)).toEqual(["Faîtage Quartz-Zinc 0,65 mm, bande dév. 33 cm"]);
-    expect(non.purchase.toBuy.map((b: { key: string }) => b.key)).not.toContain(vis.key);
-    expect((await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `ajout:${vis.key}`, value: "peut-être" })).status).toBe(400);
+    expect(takeoff.purchase.suggestions).toEqual([]);
+    expect(takeoff.aiSuggestions).toEqual([]);
+    expect((takeoff.purchase.toBuy as { label: string }[]).map((b) => b.label).filter((l) => /silicone|vis inox|faîtage|pattes|pointes/i.test(l))).toEqual([]);
   });
 
-  it("9. un consommable refusé trois fois par le même artisan n'est plus proposé la quatrième fois ; une ligne ajoutée à la main deux fois devient une suggestion", async () => {
+  it("9. une ligne ajoutée à la main sur deux chantiers ne devient jamais une suggestion d'office", async () => {
     const agent = await compteBatiInvest();
-    for (const n of [1, 2, 3]) {
-      const { takeoff } = await chantierOuvert(agent, `Refus ${n}`);
-      const vis = takeoff.purchase.suggestions.find((s: { label: string }) => s.label.startsWith("Vis inox"));
-      expect(vis).toBeTruthy();
-      await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `ajout:${vis.key}`, value: "non" }).expect(200);
-      // Deux « non » sur le même chantier comptent pour un.
-      await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `ajout:${vis.key}`, value: "non" }).expect(200);
-      // Une bâche ajoutée à la main sur les deux premiers chantiers.
-      if (n <= 2) await agent.post(`/v1/takeoffs/${takeoff.id}/lines`).send({ designation: "Bâche de protection 4 × 5 m", quantity: "1", unit: "u" }).expect(201);
+    for (const n of [1, 2]) {
+      const { takeoff } = await chantierOuvert(agent, `Bâche ${n}`);
+      await agent.post(`/v1/takeoffs/${takeoff.id}/lines`).send({ designation: "Bâche de protection 4 × 5 m", quantity: "1", unit: "u" }).expect(201);
     }
-    const { takeoff } = await chantierOuvert(agent, "Quatrième");
-    const labels = takeoff.purchase.suggestions.map((s: { label: string }) => s.label);
-    expect(labels).not.toContain("Vis inox 4 × 40");
-    expect(labels).toContain("Cartouches de silicone zinc");
-    expect(labels).toContain("Bâche de protection 4 × 5 m");
-    // « Oui » sur la bâche : une vraie ligne du chantier.
-    const bache = takeoff.purchase.suggestions.find((s: { label: string }) => s.label.startsWith("Bâche"));
-    const after = (await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `ajout:${bache.key}`, value: "oui" }).expect(200)).body;
-    expect(after.lines.some((l: { designation: string }) => l.designation === "Bâche de protection 4 × 5 m")).toBe(true);
-    expect(after.purchase.suggestions.map((s: { label: string }) => s.label)).not.toContain("Bâche de protection 4 × 5 m");
-    // Une autre entreprise garde ses suggestions.
-    const other = await signUp(ctx.app, "autre@example.fr", "Autre");
-    await other.post("/v1/companies").send({ name: "Autre zinc", trades: ["roofing"] }).expect(201);
-    const theirs = await chantierOuvert(other, "Ailleurs");
-    expect(theirs.takeoff.purchase.suggestions.map((s: { label: string }) => s.label)).toContain("Vis inox 4 × 40");
+    const { takeoff } = await chantierOuvert(agent, "Troisième");
+    expect(takeoff.purchase.suggestions).toEqual([]);
   });
 });
 
@@ -329,20 +293,20 @@ describe("§45.9 — l'aperçu avant envoi", () => {
     // L'aperçu passe par le même chemin que la correction d'un tap : quantité, désignation, précision, croix.
     await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `quantite:${gouttiere.key}`, value: { value: "5", unit: "longueurs de 4 m" } }).expect(200);
     await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `precision:${gouttiere.key}`, value: "demi-ronde 33, naissances à souder" }).expect(200);
-    const crochets = takeoff.purchase.toBuy.find((b: { label: string }) => b.label.startsWith("Crochets"));
-    await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `retire:${crochets.key}`, value: "oui" }).expect(200);
+    const voliges = takeoff.purchase.toBuy.find((b: { label: string }) => b.label.startsWith("Voliges"));
+    await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `retire:${voliges.key}`, value: "oui" }).expect(200);
     const added = (await agent.post(`/v1/takeoffs/${takeoff.id}/lines`).send({ designation: "Chevilles à frapper 6 × 40 mm", quantity: "2", unit: "u", depuisApercu: true }).expect(201)).body;
     expect(added.status).toBe("validated");
     // La liste elle-même a changé…
     const list = (await agent.get(`/v1/projects/${projectId}/takeoff`)).body.takeoff;
     expect(list.status).toBe("validated");
     expect(list.purchase.toBuy.find((b: { key: string }) => b.key === gouttiere.key)).toMatchObject({ quantity: "5 longueurs de 4 m", precision: "demi-ronde 33, naissances à souder" });
-    expect(list.purchase.toBuy.map((b: { key: string }) => b.key)).not.toContain(crochets.key);
+    expect(list.purchase.toBuy.map((b: { key: string }) => b.key)).not.toContain(voliges.key);
     // … et l'aperçu la montre telle quelle.
     const preview = (await agent.post(`/v1/projects/${projectId}/price-requests/preview`).send({}).expect(200)).body;
     const rows = preview.document.blocs.find((b: { titre: string }) => b.titre === "Fournitures à chiffrer").lignes;
     expect(rows).toContainEqual({ designation: "Gouttière zinc demi-ronde dév. 33", quantite: "5 longueurs de 4 m", precision: "demi-ronde 33, naissances à souder", cle: gouttiere.key });
-    expect(rows.map((r: { designation: string }) => r.designation)).not.toContain("Crochets de gouttière bandeau dév. 33");
+    expect(rows.map((r: { designation: string }) => r.designation)).not.toContain(voliges.label);
     expect(rows.map((r: { designation: string }) => r.designation)).toContain("Chevilles à frapper 6 × 40 mm");
     // Le journal : une entrée par correction, avec les sept champs.
     const events = await ctx.prisma.correctionEvent.findMany({ where: { projectId, action: "correct" }, orderBy: { createdAt: "asc" } });

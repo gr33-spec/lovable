@@ -28,36 +28,35 @@ const label = (v: V, r: ReturnType<typeof rows>[number]) =>
   r.itemKey ? v.toBuy.find((b) => b.key === r.itemKey)!.label : r.quoteKey ? v.toQuote.find((q) => q.key === r.quoteKey)!.label : r.pending!.label;
 
 describe("la liste des fournitures, une couleur par ligne", () => {
-  it("groupes dans l'ordre : ouvrage principal, points singuliers, évacuation, autres, consommables", () => {
+  it("groupes dans l'ordre : ouvrage principal, points singuliers, évacuation, autres (consommables : seulement s'ils sont écrits)", () => {
     const v = readQuote(TEST);
-    expect(v.screen.groups.map((g) => g.kind)).toEqual(["principal", "singulier", "evacuation", "autres", "consommables"]);
+    expect(v.screen.groups.map((g) => g.kind)).toEqual(["principal", "singulier", "evacuation", "autres"]);
     expect(v.screen.groups[0]).toMatchObject({ label: "Couverture zinc à joint debout", measure: "91 m²" });
   });
 
   it("à l'ouverture : chaque question est une ligne orange de son ouvrage, avec sa décision ; le compte en haut", () => {
     const v = readQuote(TEST);
     const check = rows(v).filter((r) => r.status === "check");
-    // Règle du comptoir (§47.8) : la gouttière sans développé, les crochets sans pose, les naissances sans nombre ne se
-    // chiffrent pas ; « égout et faîtage, on les ajoute ? » n'est plus une question (bloc « On ajoute ? »).
+    // Règle du comptoir (§47.8) : la gouttière sans développé, les naissances sans nombre ne se chiffrent pas. RÈGLE NUMÉRO
+    // UN : pas de crochets de gouttière (non écrits), donc pas de question sur leur pose.
     expect(check.map((r) => [label(v, r), r.decisionKey])).toEqual([
       ["Zinc en bobine 500 mm ou Bacs joint debout zinc", "engine:param:faconnage@couverture-zinc-joint-debout"],
-      ["Bandes zinc façonnées ou Bobineau zinc", "engine:param:faconnage@bandes-zinc"],
+      ["Bandes zinc façonnées ou Feuilles zinc 2 × 1 m", "engine:param:faconnage@bandes-zinc"],
       ["Gouttière", "engine:param:developpe_gouttiere"],
-      ["Crochets de gouttière", "engine:param:fixation_crochet"],
       ["Naissances", "engine:param:nb_descentes"],
       ["Jouées de lucarnes", "group:unknown"],
     ]);
     // Chaque ligne orange ouvre une vraie question de l'écran.
     for (const r of check) expect(v.questions.map((d) => d.key)).toContain(r.decisionKey);
-    expect(v.screen).toMatchObject({ total: rows(v).length, toCheck: 6 });
+    expect(v.screen).toMatchObject({ total: rows(v).length, toCheck: 5 });
   });
 
   it("une réponse fait passer ses lignes au vert ; la question suivante d'un ouvrage (le développé) vient après", () => {
-    // Je façonne, 13 ml : un bobineau de 500 mm, le développé n'y change rien (il n'est pas demandé).
+    // Je façonne, 13 ml : des feuilles 2 × 1 m estimées d'après le développé (§48.6), qui vient alors.
     const apres = readQuote(TEST, { "param:faconnage": u("1") });
     expect(rows(apres).filter((r) => r.status === "check").map((r) => [label(apres, r), r.decisionKey])).toEqual([
+      ["Feuilles zinc 2 × 1 m", "engine:param:developpe"],
       ["Gouttière", "engine:param:developpe_gouttiere"],
-      ["Crochets de gouttière", "engine:param:fixation_crochet"],
       ["Naissances", "engine:param:nb_descentes"],
       ["Jouées de lucarnes", "group:unknown"],
     ]);
@@ -66,12 +65,11 @@ describe("la liste des fournitures, une couleur par ligne", () => {
     expect(rows(tout).filter((r) => r.status === "ok").map((r) => label(tout, r))).toContain("Bobine Quartz-Zinc 0,65 mm, largeur 500 mm");
   });
 
-  it("gris : à préciser avec le fournisseur, la ligne part telle quelle ; les consommables ferment la liste", () => {
+  it("gris : à préciser avec le fournisseur, la ligne part telle quelle ; aucun consommable ajouté d'office (règle numéro un)", () => {
     const tout = readQuote(TEST, TOUT);
     const sansDoute = readQuote(TEST.slice(0, 4).concat([{ ref: "5", designation: "Chatière de ventilation", quantity: "4", unit: "u" }]), {});
     expect(rows(sansDoute).every((r) => r.status !== "supplier" || r.quoteKey)).toBe(true);
-    const last = tout.screen.groups.at(-1)!;
-    expect(last).toMatchObject({ kind: "consommables", label: "Consommables" });
-    expect(last.rows.map((r) => label(tout, r))).toEqual(["Pointes annelées 2,5 × 28 mm"]);
+    expect(tout.screen.groups.map((g) => g.kind)).not.toContain("consommables");
+    expect(rows(tout).map((r) => label(tout, r))).not.toContain("Pointes annelées 2,5 × 28 mm");
   });
 });

@@ -68,7 +68,7 @@ const DISPLAY: Record<string, string> = {
   exterieur: "extérieur",
   interieur: "intérieur",
   "demi ronde": "demi-ronde",
-  mouluree: "moulurée",
+  mouluree: "moulurée", havraise: "Havraise", nantaise: "Nantaise",
   carree: "carrée",
   "a emboitement": "à emboîtement",
 };

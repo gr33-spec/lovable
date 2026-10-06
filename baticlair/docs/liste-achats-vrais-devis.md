@@ -8,14 +8,12 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 ### À l'ouverture
 
-**J'ai compris :** Couverture en tuiles à emboîtement sur liteaux : 120 m² · Faîtage : 10 m · Gouttière PVC ou alu : 20 m · Descente d'eau pluviale : 2 unités · Sortie de toit : 1 unité
+**J'ai compris :** Couverture en tuiles à emboîtement : 120 m² · Faîtage : 10 m · Gouttière PVC ou alu : 20 m · Descente d'eau pluviale : 2 unités · Sortie de toit : 1 unité
 
 **Questions :**
 
 - Sortie de toit : quel diamètre ? → [Ø 80] [Ø 100] [Ø 125] [Ø 150] [Ø 180] [VMC]
 - Crochets de gouttière : sur les chevrons ou en façade (bandeau) ? → [Sur les chevrons] [En façade (bandeau)]
-- Combien d'angles sur cette gouttière ? → [Aucun] [1] [2] [3]
-- Un dauphin en pied de chaque descente ? → [Oui] [Non]
 - Sortie de toit : conduit de fumée ou ventilation ? → [Conduit de fumée] [Ventilation]
 - J'ai identifié : Tuiles HP10. C'est bien ce modèle ? → [Oui] [Modifier]
 
@@ -29,10 +27,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Faîtières | 29 pièces |  |
 | Closoir | 2 rouleaux de 5 m | 10 ml à couvrir |
 | Crochets de faîtière | 29 pièces |  |
-| Abouts de faîtage | 2 pièces |  |
 | Gouttière PVC demi-ronde sable de 25 | 5 longueurs de 4 m | 20 ml à couvrir |
-| Jonctions de gouttière PVC sable de 25 | 4 pièces |  |
-| Talons de gouttière PVC sable de 25 | 4 pièces |  |
 | Naissances PVC demi-ronde sable de 25 Ø80 | 2 pièces |  |
 | Tubes de descente PVC sable Ø80, longueur 4 m | 2 pièces |  |
 | Coudes de descente PVC sable Ø80 | 4 pièces |  |
@@ -43,14 +38,12 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 ### Après « oui, c'est bien ce modèle »
 
-**J'ai compris :** Couverture en tuiles à emboîtement sur liteaux : 120 m² · Faîtage : 10 m · Gouttière PVC ou alu : 20 m · Descente d'eau pluviale : 2 unités · Sortie de toit : 1 unité
+**J'ai compris :** Couverture en tuiles à emboîtement : 120 m² · Faîtage : 10 m · Gouttière PVC ou alu : 20 m · Descente d'eau pluviale : 2 unités · Sortie de toit : 1 unité
 
 **Questions :**
 
 - Sortie de toit : quel diamètre ? → [Ø 80] [Ø 100] [Ø 125] [Ø 150] [Ø 180] [VMC]
 - Crochets de gouttière : sur les chevrons ou en façade (bandeau) ? → [Sur les chevrons] [En façade (bandeau)]
-- Combien d'angles sur cette gouttière ? → [Aucun] [1] [2] [3]
-- Un dauphin en pied de chaque descente ? → [Oui] [Non]
 - Sortie de toit : conduit de fumée ou ventilation ? → [Conduit de fumée] [Ventilation]
 
 **À acheter :**
@@ -64,10 +57,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Faîtières | 29 pièces |  |
 | Closoir | 2 rouleaux de 5 m | 10 ml à couvrir |
 | Crochets de faîtière | 29 pièces |  |
-| Abouts de faîtage | 2 pièces |  |
 | Gouttière PVC demi-ronde sable de 25 | 5 longueurs de 4 m | 20 ml à couvrir |
-| Jonctions de gouttière PVC sable de 25 | 4 pièces |  |
-| Talons de gouttière PVC sable de 25 | 4 pièces |  |
 | Naissances PVC demi-ronde sable de 25 Ø80 | 2 pièces |  |
 | Tubes de descente PVC sable Ø80, longueur 4 m | 2 pièces |  |
 | Coudes de descente PVC sable Ø80 | 4 pièces |  |
@@ -78,14 +68,12 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 ### Si l'artisan précise le pureau (34,3 cm)
 
-**J'ai compris :** Couverture en tuiles à emboîtement sur liteaux : 120 m² · Faîtage : 10 m · Gouttière PVC ou alu : 20 m · Descente d'eau pluviale : 2 unités · Sortie de toit : 1 unité
+**J'ai compris :** Couverture en tuiles à emboîtement : 120 m² · Faîtage : 10 m · Gouttière PVC ou alu : 20 m · Descente d'eau pluviale : 2 unités · Sortie de toit : 1 unité
 
 **Questions :**
 
 - Sortie de toit : quel diamètre ? → [Ø 80] [Ø 100] [Ø 125] [Ø 150] [Ø 180] [VMC]
 - Crochets de gouttière : sur les chevrons ou en façade (bandeau) ? → [Sur les chevrons] [En façade (bandeau)]
-- Combien d'angles sur cette gouttière ? → [Aucun] [1] [2] [3]
-- Un dauphin en pied de chaque descente ? → [Oui] [Non]
 - Sortie de toit : conduit de fumée ou ventilation ? → [Conduit de fumée] [Ventilation]
 
 **À acheter :**
@@ -99,10 +87,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Faîtières | 29 pièces |  |
 | Closoir | 2 rouleaux de 5 m | 10 ml à couvrir |
 | Crochets de faîtière | 29 pièces |  |
-| Abouts de faîtage | 2 pièces |  |
 | Gouttière PVC demi-ronde sable de 25 | 5 longueurs de 4 m | 20 ml à couvrir |
-| Jonctions de gouttière PVC sable de 25 | 4 pièces |  |
-| Talons de gouttière PVC sable de 25 | 4 pièces |  |
 | Naissances PVC demi-ronde sable de 25 Ø80 | 2 pièces |  |
 | Tubes de descente PVC sable Ø80, longueur 4 m | 2 pièces |  |
 | Coudes de descente PVC sable Ø80 | 4 pièces |  |
@@ -115,15 +100,16 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 ### À l'ouverture
 
-**J'ai compris :** Couverture en ardoises au crochet sur liteaux : 200 m² · Gouttière : 17 m · Faîtage en bande zinc : 17 m · Abergement de cheminée : 2 unités
+**J'ai compris :** Couverture en ardoises au crochet : 200 m² · Gouttière : 17 m · Faîtage en bande zinc : 17 m · Abergement de cheminée : 2 unités
 
 **Questions :**
 
-- Développé de la bande zinc ? → [100 mm (solin, couvre-joint)] [250 mm] [330 mm] [400 mm]
-- Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 - Périmètre d'une cheminée (les 4 côtés) ? → [2 m] [3 m] [4 m] [5 m]
-- Descentes en Ø 80 ou en Ø 100 ? → [Ø 80] [Ø 100] [Ø 120]
 - Combien de descentes pour cette gouttière ? → [1] [2] [3] [4]
+- Développé de la bande zinc ? Cela change la commande : de 1 à 5 pièces selon la réponse. → [100 mm (solin, couvre-joint)] [250 mm] [330 mm] [400 mm]
+- Descentes en Ø 80 ou en Ø 100 ? → [Ø 80] [Ø 100] [Ø 120]
+- Faîtage en bande zinc : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
+- Abergement de cheminée (zinc + porte-solin) : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 - 6 : c'est le nombre d'ardoises à commander, ou le nombre de jouées ? → [6 ardoises à commander] [6 jouées (matériaux à calculer)]
 
 **À acheter :**
@@ -131,75 +117,62 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Article | Quantité | Repère |
 |---|---|---|
 | Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces |  |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces |  |
 | Liteaux 18×40 | 2 049 ml | ≈ 41 bottes de 50 ml |
-| Liteaux 27×40 | 350 ml | ≈ 7 bottes de 50 ml |
-| Écran HPV, rouleau 1,50 × 50 m | 3 rouleaux | 214,29 m² |
-| Pattes de fixation | 51 pièces |  |
 | Gouttière zinc dév. 25 | 5 longueurs de 4 m | 17 ml à couvrir |
-| Crochets de gouttière bandeau dév. 25 | 44 pièces |  |
 | Chatières de ventilation | 12 pièces |  |
 
-**Hypothèses (modifiables) :** pente du toit 45° · région ardoise III · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet standard mm · longueur de crochet 11 cm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm · aspect du zinc zinc naturel
+**Hypothèses (modifiables) :** pente du toit 45° · région ardoise III · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet standard mm · liteaux Liteaux 18×40 
 
 ### Après « 6 jouées » et « 2 descentes »
 
-**J'ai compris :** Couverture en ardoises au crochet sur liteaux : 200 m² · Gouttière : 17 m · Faîtage en bande zinc : 17 m · Abergement de cheminée : 2 unités
+**J'ai compris :** Couverture en ardoises au crochet : 200 m² · Gouttière : 17 m · Faîtage en bande zinc : 17 m · Abergement de cheminée : 2 unités
 
 **Questions :**
 
-- Développé de la bande zinc ? → [100 mm (solin, couvre-joint)] [250 mm] [330 mm] [400 mm]
-- Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 - Périmètre d'une cheminée (les 4 côtés) ? → [2 m] [3 m] [4 m] [5 m]
 - Descentes en Ø 80 ou en Ø 100 ? → [Ø 80] [Ø 100] [Ø 120]
+- Développé de la bande zinc ? Cela change la commande : de 1 à 5 pièces selon la réponse. → [100 mm (solin, couvre-joint)] [250 mm] [330 mm] [400 mm]
+- Faîtage en bande zinc : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
+- Abergement de cheminée (zinc + porte-solin) : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 
 **À acheter :**
 
 | Article | Quantité | Repère |
 |---|---|---|
 | Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces |  |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces |  |
 | Liteaux 18×40 | 2 049 ml | ≈ 41 bottes de 50 ml |
-| Liteaux 27×40 | 350 ml | ≈ 7 bottes de 50 ml |
-| Écran HPV, rouleau 1,50 × 50 m | 3 rouleaux | 214,29 m² |
-| Pattes de fixation | 51 pièces |  |
 | Gouttière zinc dév. 25 | 5 longueurs de 4 m | 17 ml à couvrir |
-| Crochets de gouttière bandeau dév. 25 | 44 pièces |  |
 | Chatières de ventilation | 12 pièces |  |
 
 **À faire chiffrer par le fournisseur :**
 
 - Ardoises pour jouées de lucarnes : 6 unités — BatiClair ne sait pas encore calculer les matériaux de cet ouvrage.
 
-**Hypothèses (modifiables) :** pente du toit 45° · région ardoise III · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet standard mm · longueur de crochet 11 cm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm · aspect du zinc zinc naturel
+**Hypothèses (modifiables) :** pente du toit 45° · région ardoise III · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet standard mm · liteaux Liteaux 18×40 
 
 ### Si l'artisan dit « intérieur des terres »
 
-**J'ai compris :** Couverture en ardoises au crochet sur liteaux : 200 m² · Gouttière : 17 m · Faîtage en bande zinc : 17 m · Abergement de cheminée : 2 unités
+**J'ai compris :** Couverture en ardoises au crochet : 200 m² · Gouttière : 17 m · Faîtage en bande zinc : 17 m · Abergement de cheminée : 2 unités
 
 **Questions :**
 
-- Développé de la bande zinc ? → [100 mm (solin, couvre-joint)] [250 mm] [330 mm] [400 mm]
-- Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 - Périmètre d'une cheminée (les 4 côtés) ? → [2 m] [3 m] [4 m] [5 m]
 - Descentes en Ø 80 ou en Ø 100 ? → [Ø 80] [Ø 100] [Ø 120]
+- Développé de la bande zinc ? Cela change la commande : de 1 à 5 pièces selon la réponse. → [100 mm (solin, couvre-joint)] [250 mm] [330 mm] [400 mm]
+- Faîtage en bande zinc : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
+- Abergement de cheminée (zinc + porte-solin) : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 
 **À acheter :**
 
 | Article | Quantité | Repère |
 |---|---|---|
 | Ardoises naturelles Espagne 1er choix 30×22 | 8 547 pièces |  |
-| Crochets d'ardoise inox standard, longueur 9 cm | 8 718 pièces |  |
 | Liteaux 18×40 | 1 910 ml | ≈ 39 bottes de 50 ml |
-| Liteaux 27×40 | 350 ml | ≈ 7 bottes de 50 ml |
-| Écran HPV, rouleau 1,50 × 50 m | 3 rouleaux | 214,29 m² |
-| Pattes de fixation | 51 pièces |  |
 | Gouttière zinc dév. 25 | 5 longueurs de 4 m | 17 ml à couvrir |
-| Crochets de gouttière bandeau dév. 25 | 35 pièces |  |
 | Chatières de ventilation | 12 pièces |  |
 
 **À faire chiffrer par le fournisseur :**
 
 - Ardoises pour jouées de lucarnes : 6 unités — BatiClair ne sait pas encore calculer les matériaux de cet ouvrage.
 
-**Hypothèses (modifiables) :** pente du toit 45° · longueur du rampant 5,5 m · recouvrement 80 mm · pureau 11 cm · diamètre du crochet standard mm · longueur de crochet 9 cm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm · aspect du zinc zinc naturel
+**Hypothèses (modifiables) :** pente du toit 45° · longueur du rampant 5,5 m · recouvrement 80 mm · pureau 11 cm · diamètre du crochet standard mm · liteaux Liteaux 18×40 

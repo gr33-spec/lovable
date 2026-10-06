@@ -94,12 +94,16 @@ describe("le prompt de l'appel n° 2", () => {
     const system = quantitatifSystem({ metier: "Couverture", entreprise: "Toitures Le Gall", ville: "Brest", referentiel: "- Gouttière : crochets" });
     expect(system).toContain("Tu es l'assistant quantitatif de Toitures Le Gall, Couverture à Brest.");
     expect(system).toMatch(/MODE UN SEUL PASSAGE/);
-    expect(system).toMatch(/fixations, scellements, étanchéité et consommables/);
+    // RÈGLE NUMÉRO UN (fondateur, 2026-10-06) : prioritaire sur le prompt B, plus aucun ajout demandé à l'IA.
+    expect(system).toMatch(/RÈGLE NUMÉRO UN .*PRIORITAIRE SUR TOUT CE QUI PRÉCÈDE/);
+    expect(system).toContain("`ajouts` reste TOUJOURS une liste vide.");
+    expect(system.indexOf("RÈGLE NUMÉRO UN")).toBeGreaterThan(system.indexOf("Tu es l'assistant quantitatif"));
+    expect(system).not.toMatch(/DOIT comprendre ses fixations/);
   });
 });
 
 describe("deux appels IA max : lecture + quantitatif", () => {
-  it("ajouts et doutes en orange ; interdits du code en orange ; « Oui, on l'ajoute » fait entrer la ligne", async () => {
+  it("doutes en orange ; un « ajout » rendu malgré tout par l'IA n'apparaît nulle part (règle numéro un)", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "q@example.fr", "Toitures Le Gall");
     const project = await agent.post("/v1/projects").send({ name: "Chantier deux appels", address: "3 rue de Siam, 29200 Brest" });
     const doc = await agent
@@ -135,18 +139,12 @@ describe("deux appels IA max : lecture + quantitatif", () => {
     expect(manque.length).toBeGreaterThan(0);
     for (const r of manque) expect(r).toMatchObject({ status: "check", reason: expect.stringMatching(/^Info manquante : /) });
     expect(q.ecran.view.decisions.find((d) => d.key === `ia-doute:${gouttiere.key}`)!.suggestion).toEqual({ label: "Gouttière zinc naturel demi-ronde dév. 33", quantity: null, unit: null });
-    // §48.4 « interdiction d'inventer » : l'ajout de l'IA n'est NI dans la liste NI une ligne orange : il attend, décoché,
-    // dans le bloc « Suggestions ».
+    // RÈGLE NUMÉRO UN : l'ajout que l'IA rend malgré la consigne (un mastic que le devis n'écrit pas) n'est NI dans la
+    // liste, NI une ligne orange, NI une suggestion.
     expect(rows.some((r) => r.pending?.label === "Mastic silicone neutre, cartouche 310 ml")).toBe(false);
     expect(q.ecran.view.decisions.some((d) => d.key.startsWith("ia-ajout:"))).toBe(false);
-    const add = q.ecran.aiSuggestions.find((a) => a.label === "Mastic silicone neutre, cartouche 310 ml")!;
-    expect(add).toMatchObject({ quantity: "2", unit: "cartouches", reason: "Étanchéité des raccords de la gouttière." });
-
-    // Cochée par l'artisan : la ligne entre dans la liste, telle que proposée, au journal ; la suggestion disparaît.
-    const after = (await agent.post(`/v1/quantitatifs/${q.id}/reponses?ecran=1`).send({ reponses: [{ question: add.key, valeur: "ok" }] })).body as { ecran: Ecran };
-    expect(after.ecran.lines.map((l) => l.designation)).toContain("Mastic silicone neutre, cartouche 310 ml");
-    expect(after.ecran.aiSuggestions).toEqual([]);
-    expect(await ctx.prisma.correctionEvent.count({ where: { action: "add" } })).toBe(1);
+    expect(q.ecran.aiSuggestions).toEqual([]);
+    expect(q.ecran.purchase.toBuy.some((b) => /mastic/i.test(b.label))).toBe(false);
     expect(await ctx.prisma.aiExecution.count()).toBe(2);
   });
 });

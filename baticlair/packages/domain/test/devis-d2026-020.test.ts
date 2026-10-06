@@ -32,13 +32,13 @@ describe("D-2026-020 : les coudes du devis sont des coudes, pas des descentes", 
     const v = readQuote(LIGNES);
     expect(v.toBuy.filter((b) => /coude/i.test(b.label)).map((b) => b.quantity)).toEqual(["4 pièces"]);
   });
-  it("la descente entière se déduit du devis : Ø « diam. 80mm », hauteur « 2 descentes de 3 m », 6 colliers, 2 naissances ; aucune question qu'il règle déjà", () => {
+  it("la descente se lit au devis : Ø « diam. 80mm », hauteur « 2 descentes de 3 m », 2 naissances (indissociables de la gouttière) ; ni colliers ni question", () => {
     const v = readQuote([{ ref: "3", designation: "Gouttière zinc demi-ronde dév. 25 (Longueur : 10 m)", quantity: "10", unit: "m" }, ...LIGNES]);
     const keys = v.questions.map((q) => q.key);
     for (const k of ["engine:param:diametre_descente", "engine:param:hauteur_descente", "engine:param:nb_descentes"]) expect(keys).not.toContain(k);
     const qty = (re: RegExp) => v.toBuy.filter((b) => re.test(b.label)).map((b) => b.quantity);
-    // Avant : 12 colliers et 4 naissances (4 « descentes » lues dans les coudes).
-    expect(qty(/^Colliers/)).toEqual(["6 pièces"]);
+    // RÈGLE NUMÉRO UN : le devis n'écrit pas de colliers, ils ne sortent pas (avant : 12, puis 6, ajoutés d'office).
+    expect(qty(/^Colliers/)).toEqual([]);
     expect(qty(/^Naissances/)).toEqual(["2 pièces"]);
   });
   it("« (Fourniture & Pose) » ne nomme rien ; « avec coudes … (2 ensembles) » reste 2 descentes complètes", () => {
@@ -78,64 +78,131 @@ describe("D-2026-020 : la longueur de crochet écrite au devis fait foi, et le r
 });
 
 /**
- * Le VRAI devis D-2026-020, lignes de pose comprises (retour du fondateur, 2026-10-06 : « tu mets des crochets de 12 alors
- * que dans le devis c'est bien indiqué crochet de 11 … ne pas poser des questions inutiles »). Tout ce que le devis écrit
- * se retrouve dans la liste, et aucune question ne porte sur ce qu'il règle déjà.
+ * Le VRAI devis D-2026-020, lignes de pose comprises (retours du fondateur, 2026-10-06 : « tu mets des crochets de 12
+ * alors que dans le devis c'est bien indiqué crochet de 11 … ne pas poser des questions inutiles », puis la RÈGLE NUMÉRO
+ * UN : « BatiClair lit le devis ligne par ligne et retranscrit ce qui est écrit, avec les quantités … il n'ajoute jamais
+ * un article absent du devis : ni en vert, ni en orange, ni en suggestion »). Calcul comme l'API (règles « à vérifier »
+ * calculées, en orange).
  */
 describe("D-2026-020 réel : le devis entier, lu jusqu'au bout", () => {
-  // Comme l'API : une règle « à vérifier » calcule, et sa ligne sort orange (§47.1).
-  const v = applyRuleConfirmations(readQuote(D2026_020_LINES, {}, ZONE_1, undefined, { acceptDraft: true }), {});
+  const read = (answers: Record<string, unknown> = {}) => applyRuleConfirmations(readQuote(D2026_020_LINES, answers as never, ZONE_1, undefined, { acceptDraft: true }), answers as never);
+  const v = read();
   const plan = planQuote(D2026_020_LINES, ROOFING_REFERENTIAL, tradeProfile("roofing"));
-  const row = (itemKey: string) => v.screen.groups.flatMap((g) => g.rows).find((r) => r.itemKey === itemKey);
-  const label = (re: RegExp) => v.toBuy.find((b) => re.test(b.label));
+  const label = (re: RegExp, view = v) => view.toBuy.find((b) => re.test(b.label));
+  const row = (itemKey: string, view = v) => view.screen.groups.flatMap((g) => g.rows).find((r) => r.itemKey === itemKey);
+  const keys = (view = v) => view.questions.map((q) => q.key).sort();
+  const u = (value: string, unit = "u") => ({ value, unit });
+  // Toutes les réponses aux questions qui restent (artisan qui façonne tout, gouttière de 33).
+  const REPONSES = {
+    "param:developpe_gouttiere": u("330", "mm"),
+    "param:developpe": u("250", "mm"),
+    "param:faconnage@faitage-zinc": u("1"),
+    "param:faconnage@bande-porte-solin": u("1"),
+  };
+  const repondu = read(REPONSES);
 
-  it("crochets de 11, comme écrit (ligne de fourniture et ligne de pose d'accord) ; « inox » reste au crochet", () => {
+  it("RÈGLE NUMÉRO UN : aucun article absent du devis n'apparaît nulle part (vert, orange, gris, suggestion, question)", () => {
+    const ABSENTS = /liteau|[ée]cran|hpv|pare-?pluie|patte|collier|dauphin|\bvis\b|silicone|mastic|pointe|closoir|about|jonction|talon|angle|bobineau/i;
+    for (const view of [v, repondu]) {
+      const partout = [
+        ...view.toBuy.map((b) => b.label),
+        ...view.toQuote.map((q) => q.label),
+        ...view.suggestions.map((s) => s.label),
+        ...view.questions.map((q) => `${q.title} ${q.text}`),
+        ...view.screen.groups.flatMap((g) => g.rows).map((r) => r.pending?.label ?? ""),
+      ];
+      expect(partout.filter((t) => ABSENTS.test(t))).toEqual([]);
+      expect(view.suggestions).toEqual([]);
+    }
+    // Ce qui sort, une fois tout répondu : les articles écrits, leur forme d'achat (feuilles 2 × 1 m pour le zinc façonné)
+    // et la naissance, seul accessoire indissociable (§48.7). Rien d'autre.
+    expect(repondu.toBuy.map((b) => [b.label.split(" - ")[0], b.quantity])).toEqual([
+      ["Ardoises naturelles Espagne 1er choix 32×22", "2 052 pièces"],
+      ["Crochets d'ardoise inox standard, longueur 11 cm", "2 094 pièces"],
+      // Une feuille pour chaque pièce façonnée (rive 4 m, porte-solin 4 m, faîtage 8 m au développé de 25 cm : 8 m par
+      // feuille), réunies sur une ligne au comptoir ; chaque usage est dit dans la précision.
+      ["Feuilles zinc naturel 2 × 1 m, 0,65 mm", "3 pièces"],
+      ["Ciment 35 kg + sable (mortier de solin)", "1 sac"],
+      ["Gouttière zinc Havraise dév. 33", "3 longueurs de 4 m"],
+      ["Naissances zinc Havraise dév. 33 Ø80", "2 pièces"],
+      ["Crochets de gouttière Havraise", "20 pièces"],
+      ["Tuyau de descente zinc diam. 80mm", "2 longueurs de 3 m"],
+      ["Coude zinc diam. 80mm", "4 pièces"],
+    ]);
+    expect(repondu.toQuote).toEqual([]);
+    expect(label(/^Feuilles/, repondu)?.precision?.split(" ; ").map((p) => p.split(" :")[0])).toEqual(["pour 8 ml de faîtage", "pour 4 ml de bande", "pour 4 ml de porte-solin"]);
+  });
+
+  it("1. ni liteaux 18×40, ni contre-liteaux 27×40, ni écran HPV : le devis n'en écrit pas", () => {
+    expect(label(/Liteaux|Écran/)).toBeUndefined();
+  });
+
+  it("crochets de 11, comme écrit (fourniture et pose d'accord) ; « inox » reste au crochet ; la pente (30°) vient de la ligne de pose", () => {
     expect(crochets(v)?.label).toBe("Crochets d'ardoise inox standard, longueur 11 cm");
     expect(slates(v)?.label).toBe("Ardoises naturelles Espagne 1er choix 32×22");
-  });
-  it("la ligne de pose donne la pente (30°) sans rien commander", () => {
     expect(plan.lines.find((l) => l.ref === "2")).toEqual({ ref: "2", status: "not_material" });
     expect(plan.inputs.find((i) => i.workItemId === "couverture-ardoises-crochet")?.params.pente?.value).toBe("30");
   });
-  it("gouttière Havraise : les 20 crochets du devis, sans relire la gouttière dans « crochets de gouttière »", () => {
-    expect(plan.lines.find((l) => l.ref === "4")).toMatchObject({ slot: "crochet", mentions: [] });
-    expect(label(/^Crochets de gouttière Havraise/)?.quantity).toBe("20 pièces");
+
+  it("6. crochets d'ardoise : 2 094 pour 2 052 ardoises, l'écart justifié sur la ligne (un par ardoise + 2 % de casse, référentiel)", () => {
+    expect(slates(v)?.quantity).toBe("2 052 pièces");
+    expect(crochets(v)).toMatchObject({ quantity: "2 094 pièces", precision: "un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02)" });
   });
-  it("descentes : 6 ml de tubes et 4 coudes tels qu'écrits, 6 colliers ; « dévoiement des descentes » ne cite pas les tubes", () => {
-    expect(plan.lines.find((l) => l.ref === "13")).toMatchObject({ slot: "coude", mentions: [] });
-    expect(label(/^Coude zinc/)?.quantity).toBe("4 pièces");
-    expect(label(/^Tuyau de descente/)?.quantity).toBe("6 ml");
-    expect(label(/^Colliers/)?.quantity).toBe("6 pièces");
-    expect(v.toQuote.map((q) => q.label).join(" ")).not.toMatch(/Tubes de descente/);
+
+  it("7. aucune question sur ce que le devis écrit : ni Ø des descentes (Ø80), ni longueur de crochet (11), ni hauteur, ni nombre de descentes", () => {
+    for (const k of ["diametre_descente", "longueur_crochet", "hauteur_descente", "nb_descentes", "pente", "dauphin", "diametre_crochet"]) expect(keys()).not.toContain(`engine:param:${k}`);
   });
-  it("bandes de rive + bande porte-solin : 8 m de bande, façonnées par l'artisan (« Façonnage et pose »)", () => {
-    const bandes = plan.inputs.find((i) => i.workItemId === "bandes-zinc")!;
-    expect(bandes.params.longueur_bande?.value).toBe("8");
-    expect(bandes.params.faconnage?.value).toBe("1");
-    // Le développé du faîtage (25 cm) n'est pas celui des bandes de rive.
-    expect(bandes.params.developpe).toBeUndefined();
-    expect(v.toQuote).toEqual([]);
+
+  it("2. zinc pièce par pièce : une question par ouvrage (faîtage, porte-solin), aucune pour les bandes de rive que le devis dit façonnées", () => {
+    expect(keys().filter((k) => k.includes("faconnage"))).toEqual(["engine:param:faconnage@bande-porte-solin", "engine:param:faconnage@faitage-zinc"]);
+    expect(plan.inputs.find((i) => i.workItemId === "bandes-zinc")?.params.faconnage?.value).toBe("1");
+    // Restent seulement les vraies absences du devis : le développé de la gouttière Havraise, celui des bandes (pour le
+    // façonnage), et les « C'est bon » (mortier estimé, écart sur les crochets de gouttière).
+    expect(keys()).toEqual([
+      "engine:param:developpe",
+      "engine:param:developpe_gouttiere",
+      "engine:param:faconnage@bande-porte-solin",
+      "engine:param:faconnage@faitage-zinc",
+      "ratio:line:4",
+      "ratio:product:Ciment 35 kg + sable (mortier de solin)",
+    ]);
+    // Façonné sur place (§48.6) : feuilles 2 × 1 m d'après le développé, le raisonnement dit en clair.
+    expect(label(/^Feuilles/, repondu)?.precision).toMatch(/estimation d'après un développé de 25 cm, ajuste selon ton façonnage$/);
   });
-  it("aucune question sur ce que le devis écrit ; restent les deux du comptoir que le devis ne règle pas", () => {
-    expect(v.questions.filter((q) => q.key.startsWith("engine:")).map((q) => q.key).sort()).toEqual(["engine:param:dauphin", "engine:param:developpe_gouttiere"]);
-  });
-  it("le mortier de ciment de la ligne porte-solin reste dans la liste : 1 sac de 35 kg + sable, orange, à confirmer", () => {
+
+  it("3. le mortier de ciment de la ligne porte-solin apparaît, orange « Quantité à confirmer »", () => {
     const mortier = label(/^Ciment 35 kg \+ sable/)!;
     expect(mortier).toMatchObject({ quantity: "1 sac", lineIds: ["10"] });
     expect(row(mortier.key)).toMatchObject({ status: "check", reason: "Quantité à confirmer : estimation 1 sac de ciment 35 kg + sable" });
   });
-  it("quantité écrite comparée au calcul : 20 crochets gardés, orange avec l'écart (21 pour 10 m à 50 cm)", () => {
+
+  it("4. la gouttière garde « Havraise » dans sa désignation (et sa naissance aussi)", () => {
+    expect(label(/^Gouttière/, repondu)?.label).toBe("Gouttière zinc Havraise dév. 33");
+    expect(label(/^Naissances/, repondu)?.label).toBe("Naissances zinc Havraise dév. 33 Ø80");
+  });
+
+  it("5. tuyau de descente en longueurs : 2 longueurs de 3 m (« 2 descentes de 3 mètres »), pas 6 ml ; 4 coudes tels qu'écrits", () => {
+    expect(label(/^Tuyau de descente/)).toMatchObject({ quantity: "2 longueurs de 3 m", order: { count: "2", unit: "longueurs de 3 m" } });
+    expect(label(/^Coude zinc/)?.quantity).toBe("4 pièces");
+    expect(plan.lines.find((l) => l.ref === "13")).toMatchObject({ slot: "coude", mentions: [] });
+    for (const re of [/^Tuyau de descente/, /^Coude zinc/]) expect(row(label(re)!.key)?.status).toBe("ok");
+  });
+
+  it("quantité écrite comparée au calcul : 20 crochets de gouttière gardés, orange avec l'écart (21 pour 10 m à 50 cm)", () => {
     const crochetsGouttiere = label(/^Crochets de gouttière Havraise/)!;
     expect(crochetsGouttiere.quantity).toBe("20 pièces");
+    expect(plan.lines.find((l) => l.ref === "4")).toMatchObject({ slot: "crochet", mentions: [] });
     expect(row(crochetsGouttiere.key)).toMatchObject({
       status: "check",
       reason: "Quantité à confirmer : 20 au devis, 21 calculés pour 10 ml de gouttière, un tous les 50 cm + 1 en bout",
     });
-    // « C'est bon » : la quantité du devis part, la ligne passe au vert.
-    const ok = applyRuleConfirmations(readQuote(D2026_020_LINES, { [`ratio:${crochetsGouttiere.key}`]: "ok" }, ZONE_1, undefined, { acceptDraft: true }), { [`ratio:${crochetsGouttiere.key}`]: "ok" });
-    expect(ok.screen.groups.flatMap((g) => g.rows).find((r) => r.itemKey === crochetsGouttiere.key)?.status).toBe("ok");
+    const ok = read({ [`ratio:${crochetsGouttiere.key}`]: "ok" });
+    expect(row(crochetsGouttiere.key, ok)?.status).toBe("ok");
   });
-  it("sans écart, rien ne change : 6 ml de tubes et 4 coudes restent verts", () => {
-    for (const re of [/^Tuyau de descente/, /^Coude zinc/]) expect(row(label(re)!.key)?.status).toBe("ok");
+
+  it("répondu et confirmé : la liste peut partir", () => {
+    const tout = read({ ...REPONSES, "ratio:line:4": "ok", "ratio:product:Ciment 35 kg + sable (mortier de solin)": "ok" });
+    expect(tout.questions).toEqual([]);
+    expect(tout.canValidate).toBe(true);
   });
 });

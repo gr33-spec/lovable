@@ -72,7 +72,7 @@ export function paramsFromContext(
     const all = context.facts.filter((f) => f.key === def.key);
     const own = all.filter((f) => f.workItemId === work.id);
     // L'aspect du zinc d'une bande ne fait pas celui de la couverture ; celui de la couverture fait celui de ses bandes.
-    const lent = all.filter((f) => f.workItemId && f.workItemId !== work.id && (!def.onlyFromPrincipal || principal.has(f.workItemId)));
+    const lent = def.ownOnly ? [] : all.filter((f) => f.workItemId && f.workItemId !== work.id && (!def.onlyFromPrincipal || principal.has(f.workItemId)));
     const kept = new Set(own.length > 0 ? own : lent);
     // Dans l'ordre où elles sont venues : le devis d'abord, l'en-tête ou la note ensuite.
     const facts = all.filter((f) => !f.workItemId || kept.has(f));

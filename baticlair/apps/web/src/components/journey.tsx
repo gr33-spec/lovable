@@ -246,7 +246,7 @@ function WaitNote({ what }: { what: string }) {
 
 // ——— 4. Le calcul ———
 
-const CALCUL_STEPS = ["Je calcule les quantités avec tes réponses.", "Je passe derrière, côté comptoir : fixations, scellements, étanchéité, consommables.", "Je mets en orange tout ce qui mérite ton œil."];
+const CALCUL_STEPS = ["Je calcule les quantités avec tes réponses.", "Je repasse ligne par ligne : rien que ce qui est écrit dans ton devis.", "Je mets en orange tout ce qui mérite ton œil."];
 
 export function CalculScreen() {
   const [shown, setShown] = useState(1);

@@ -160,27 +160,24 @@ describe("ouvrages composés", () => {
     const gouttiere = ouvrage("ligne 7");
     expect(gouttiere.role).toBe("measure");
     expect(gouttiere.direct).toBeNull();
-    // Gouttière PVC (§15) : jonctions et talons en plus ; « 2 x 10 m » = deux lignes, aucune au-delà de 12 m (pas de joint de dilatation).
-    expect(gouttiere.needs.map((n) => n.slot).sort()).toEqual(["crochet", "jonction", "naissance", "profil", "talon"]);
+    // RÈGLE NUMÉRO UN : le devis écrit crochets et naissances, rien d'autre : ni jonctions ni talons d'office.
+    expect(gouttiere.needs.map((n) => n.slot).sort()).toEqual(["crochet", "naissance", "profil"]);
     for (const slot of ["crochet", "naissance"]) expect(gouttiere.needs.find((n) => n.slot === slot)!.origin).toBe("explicit");
     const q = (slot: string) => gouttiere.needs.find((n) => n.slot === slot)!;
     expect(q("profil").order).toMatchObject({ count: "5", unit: { many: "longueurs de 4 m" } });
     // Zone littorale par défaut : un crochet tous les 40 cm, plus un en bout de chaque ligne.
     expect(q("crochet").need).toEqual({ value: "52", unit: "u" });
-    expect(q("jonction").need).toEqual({ value: "4", unit: "u" });
-    expect(q("talon").need).toEqual({ value: "4", unit: "u" });
     expect(q("naissance").need).toEqual({ value: "2", unit: "u" });
     expect(gouttiere.state).toBe("verified");
   });
 
-  it("faîtage : faîtières, closoir, crochets de faîtière et abouts, tous calculés avec les pièces par défaut", () => {
+  it("faîtage : faîtières, closoir et crochets de faîtière écrits au devis, calculés ; pas d'abouts, le devis n'en écrit pas", () => {
     const faitage = read().ouvrage("ligne 6");
-    expect(faitage.needs.map((n) => n.slot).sort()).toEqual(["about", "closoir", "faitiere", "fixation_faitiere"]);
+    expect(faitage.needs.map((n) => n.slot).sort()).toEqual(["closoir", "faitiere", "fixation_faitiere"]);
     const q = (slot: string) => faitage.needs.find((n) => n.slot === slot)!;
-    // 10 m × 2,9 pièces/ml = 29 faîtières (modèle à préciser par le fournisseur), autant de crochets, 2 abouts, 2 rouleaux de closoir.
+    // 10 m × 2,9 pièces/ml = 29 faîtières (modèle à préciser par le fournisseur), autant de crochets, 2 rouleaux de closoir.
     expect(q("faitiere").order).toMatchObject({ count: "29" });
     expect(q("fixation_faitiere").order).toMatchObject({ count: "29" });
-    expect(q("about").order).toMatchObject({ count: "2" });
     expect(q("closoir").order).toMatchObject({ count: "2", unit: { many: "rouleaux de 5 m" } });
     expect(faitage.state).toBe("verified");
   });
