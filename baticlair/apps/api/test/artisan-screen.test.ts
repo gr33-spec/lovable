@@ -236,10 +236,10 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
     // La liste d'achats réunit lattage et contre-lattage en UNE ligne de liteaux 27×40, et dit ses hypothèses.
     expect(purchase.toBuy.find((b) => b.needIds.includes("liteaux"))).toMatchObject({ quantity: "547 ml", needIds: ["liteaux", "contre-liteaux"] });
     expect(purchase.assumptions.map((a) => a.key)).toEqual(expect.arrayContaining(["param:zone", "param:pente", "param:pureau"]));
-    expect(purchase.understood[0]).toBe("Couverture en tuiles à emboîtement sur liteaux : 120 m²");
+    expect(purchase.understood[0]).toBe("Couverture en tuiles à emboîtement : 120 m²");
   });
 
-  it("2 descentes deviennent 2 longueurs de 4 m, 4 coudes et 6 colliers ; 20 m de gouttière PVC (2 x 10 m) deviennent 5 longueurs, 52 crochets, 4 jonctions, 4 talons, 2 naissances — et c'est cette liste qui part au fournisseur", async () => {
+  it("2 descentes deviennent 2 longueurs de 4 m, 4 coudes et 6 colliers (écrits) ; 20 m de gouttière PVC (2 x 10 m) deviennent 5 longueurs, 52 crochets, 2 naissances, rien d'autre — et c'est cette liste qui part au fournisseur", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "c@example.fr", "Toitures Martin");
     const { takeoffId, projectId } = await projectWith(agent, D2026_015_LINES);
     // La pose des crochets et les angles de gouttière ne sont pas au devis : le comptoir les demande (§47.8, §15).
@@ -251,7 +251,8 @@ describe("socle en trois niveaux sur D-2026-015 : lu dans le devis → il faut �
     expect(descente).toMatchObject({ role: "measure", direct: null, state: "verified" });
     expect(descente.needs.map((n) => [n.slot, n.need?.value]).sort()).toEqual([["collier", "6"], ["coude", "4"], ["tube", "2"]]);
     const gouttiere = ouvrage(v, "Gouttière");
-    expect(gouttiere.needs.map((n) => [n.slot, n.need?.value]).sort()).toEqual([["crochet", "52"], ["jonction", "4"], ["naissance", "2"], ["profil", "20"], ["talon", "4"]]);
+    // RÈGLE NUMÉRO UN : le devis écrit « crochets et naissances compris », pas de jonctions ni de talons.
+    expect(gouttiere.needs.map((n) => [n.slot, n.need?.value]).sort()).toEqual([["crochet", "52"], ["naissance", "2"], ["profil", "20"]]);
 
     // Partie chez le fournisseur : la liste d'achats, jamais « 2 unités d'ouvrage ».
     const answered = await agent.post(`/v1/takeoffs/${takeoffId}/answers`).send({ key: "product:tuile", value: "edilians-hp10-huguenot" }).expect(200);

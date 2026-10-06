@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { REFERENTIEL_COMPLET } from "./support/complet.js";
 import {
   computeChantier,
   computeWorkItem,
@@ -293,17 +294,20 @@ describe("cas de référence D-2026-015 : chantier complet avec ouvrages compos�
 
   it("deux questions sur tout le chantier : confirmer le modèle de tuile lu, et la pose des crochets de gouttière (le comptoir la demande, §47.8)", () => {
     const r = computeChantier(ROOFING_REFERENTIAL, inputs());
-    expect(r.questionsPending).toEqual(["product:tuile", "param:fixation_crochet", "param:dauphin"]);
+    // RÈGLE NUMÉRO UN : le devis n'écrit pas de dauphin, donc ni ligne ni question (ni abouts de faîtage).
+    expect(r.questionsPending).toEqual(["product:tuile", "param:fixation_crochet"]);
+    expect(all(r).some((n) => n.needId === "dauphins" || n.needId === "abouts")).toBe(false);
     // Faîtière par défaut : 10 m × 2,9 pièces/ml = 29 ; si l'artisan choisit le modèle 710 : 10 m × 3 pièces/ml (Edilians) = 30.
     expect(need(r, "faitieres")).toMatchObject({ status: "calculated", purchase: { order: { count: "29" } }, productOrigin: "default" });
     const answered = computeChantier(ROOFING_REFERENTIAL, inputs({ faitiere: "edilians-faitiere-angulaire-710" }));
     expect(need(answered, "faitieres")).toMatchObject({ status: "calculated", quantity: { value: "30" }, purchase: { order: { count: "30" } }, provisional: false });
-    expect(answered.questionsPending).toEqual(["product:tuile", "param:fixation_crochet", "param:dauphin"]);
+    expect(answered.questionsPending).toEqual(["product:tuile", "param:fixation_crochet"]);
   });
 
+  // Validation des RÈGLES du référentiel (tous les articles de chaque ouvrage, écrits ou non) : abouts, dauphins compris.
   it("règles validées : ce qui se calcule, ce qui reste à confirmer, ce qui est impossible", () => {
     const r = computeChantier(
-      ROOFING_REFERENTIAL,
+      REFERENTIEL_COMPLET,
       inputs({ tuileOk: true, pureau: "34.3", faitiere: "edilians-faitiere-angulaire-710", ecran: "soprema-sop-ecran-hpv-r2-150x50", crochets: "2" }),
     );
     // Calculé pour l'artisan lui-même : aucun besoin provisoire.

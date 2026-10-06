@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { planQuote, ROOFING_REFERENTIAL, supplierTest, tradeProfile } from "../src/index.js";
 import { describeLot, type Metier } from "./support/paquet.js";
 import { readQuote } from "./support/read-quote.js";
+import { REFERENTIEL_COMPLET, readQuoteComplet } from "./support/complet.js";
 
 /**
  * LOT COUVERTURE, POINT 6 : sécurité définitive et accès (§14), désamiantage (§18). Les lignes sont reconnues (crochets
@@ -39,7 +40,7 @@ describeLot({
 
 describe("sécurité et amiante : reconnus, partis tels qu'écrits, l'amiante dite à l'artisan", () => {
   it("chaque ligne part telle qu'écrite, avec sa quantité, sans question", () => {
-    const v = readQuote(CAS[0]!.bench);
+    const v = readQuoteComplet(CAS[0]!.bench);
     expect(v.questions).toEqual([]);
     expect(v.toBuy.map((b) => [b.label, b.quantity, b.kind])).toEqual([
       ["Crochets de sécurité inox NF EN 517 type B", "4 pièces", "direct"],
@@ -51,9 +52,9 @@ describe("sécurité et amiante : reconnus, partis tels qu'écrits, l'amiante di
   });
 
   it("l'amiante l'emporte sur tout autre mot de la ligne, et avertit l'artisan, même sur une ligne de dépose", () => {
-    const plan = planQuote([{ ref: "1", designation: "Plaques fibres-ciment amiantées à déposer", quantity: "60", unit: "m2" }], ROOFING_REFERENTIAL, tradeProfile("roofing"));
+    const plan = planQuote([{ ref: "1", designation: "Plaques fibres-ciment amiantées à déposer", quantity: "60", unit: "m2" }], REFERENTIEL_COMPLET, tradeProfile("roofing"));
     expect(plan.lines[0]).not.toMatchObject({ status: "planned" });
-    const v = readQuote([
+    const v = readQuoteComplet([
       { ref: "1", designation: "Dépose de la couverture fibres-ciment amiantée", quantity: "60", unit: "m²" },
       { ref: "2", designation: "Couverture en ardoises naturelles 30x22 posées au crochet", quantity: "60", unit: "m²" },
     ]);
@@ -62,7 +63,7 @@ describe("sécurité et amiante : reconnus, partis tels qu'écrits, l'amiante di
     // L'avertissement ne part jamais au fournisseur : il n'est ni une ligne, ni une précision.
     expect(JSON.stringify(v.toBuy)).not.toMatch(/SS3/);
     // Sans amiante, aucun avertissement (Brest).
-    expect(readQuote([{ ref: "1", designation: "Couverture en ardoises naturelles 30x22 posées au crochet", quantity: "200", unit: "m²" }]).warnings).toEqual([]);
+    expect(readQuoteComplet([{ ref: "1", designation: "Couverture en ardoises naturelles 30x22 posées au crochet", quantity: "200", unit: "m²" }]).warnings).toEqual([]);
   });
 
   it("le test du fournisseur laisse passer la ligne de vie à sa longueur et le désamiantage au m²", () => {

@@ -1,6 +1,7 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.06-38",
+  "version": "roofing-2026.10.06-39",
+  "writtenOnly": true,
   "trade": "roofing",
   "sources": [
     {
@@ -321,8 +322,7 @@
         "bande d'egout",
         "bande egout",
         "couvre-joint zinc",
-        "bavette zinc",
-        "bande porte-solin"
+        "bavette zinc"
       ]
     },
     {
@@ -5160,7 +5160,7 @@
       "id": "couverture-tuiles-emboitement",
       "trade": "roofing",
       "section": "principal",
-      "label": "Couverture en tuiles à emboîtement sur liteaux",
+      "label": "Couverture en tuiles à emboîtement",
       "triggers": [
         "roof_tile"
       ],
@@ -5797,7 +5797,7 @@
       "id": "couverture-ardoises-crochet",
       "trade": "roofing",
       "section": "principal",
-      "label": "Couverture en ardoises au crochet sur liteaux",
+      "label": "Couverture en ardoises au crochet",
       "triggers": [
         "roof_slate"
       ],
@@ -7617,6 +7617,7 @@
           "unit": "u",
           "core": true,
           "exclusions": "Un crochet par ardoise commandée, +2 % (référentiel du fondateur) : jamais moins de crochets que d'ardoises.",
+          "precision": "un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02)",
           "designation": "Crochets d'ardoise inox {diametre_crochet}, longueur {longueur_crochet|cm}",
           "source": "baticlair-geometrie-ardoise",
           "verification": {
@@ -7683,7 +7684,7 @@
       "id": "couverture-ardoises-fibres-ciment",
       "trade": "roofing",
       "section": "principal",
-      "label": "Couverture en ardoises fibres-ciment sur liteaux",
+      "label": "Couverture en ardoises fibres-ciment",
       "triggers": [
         "roof_slate_fc"
       ],
@@ -8325,6 +8326,41 @@
           ]
         },
         {
+          "key": "faconnage",
+          "ownOnly": true,
+          "label": "Façonnage",
+          "unit": "u",
+          "kind": "artisan_preference",
+          "question": "Faîtage zinc : tu le façonnes toi-même ou tu le commandes façonné ?",
+          "hint": "Je façonne : feuilles de zinc 2 × 1 m, estimées d'après le développé. Commandé façonné : bandes de faîtage en longueurs de 3 m.",
+          "choices": [
+            {
+              "label": "Je façonne (feuilles ou bobineau)",
+              "value": "1"
+            },
+            {
+              "label": "Je commande façonné",
+              "value": "2"
+            }
+          ],
+          "display": {
+            "1": "je façonne",
+            "2": "commandé façonné"
+          },
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "faconnage et pose",
+                "faconnage des",
+                "faconnees sur place",
+                "faconne sur place",
+                "faconnage sur place"
+              ]
+            }
+          ]
+        },
+        {
           "key": "epaisseur_zinc",
           "label": "Épaisseur du zinc",
           "unit": "mm",
@@ -8466,9 +8502,250 @@
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "patte-zinc-standard"
           }
+        },
+        {
+          "key": "feuille",
+          "family": "zinc_sheet",
+          "label": "Feuilles zinc 2 × 1 m",
+          "usual": {
+            "text": "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§48.6).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "feuille-zinc-2x1"
+          },
+          "formOf": "bande"
         }
       ],
       "constants": {
+        "poids_plat_065": {
+          "kind": "installation_condition",
+          "value": "4.7",
+          "unit": "kg/m2",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« kg ≈ m² dév. × 4,7 (ép. 0,65) » (§7)."
+        },
+        "poids_plat_070": {
+          "kind": "installation_condition",
+          "value": "5.04",
+          "unit": "kg/m2",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (7,2 kg/m² par mm, masse volumique du zinc)"
+          },
+          "version": 1
+        },
+        "poids_plat_080": {
+          "kind": "installation_condition",
+          "value": "5.76",
+          "unit": "kg/m2",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (7,2 kg/m² par mm, masse volumique du zinc)"
+          },
+          "version": 1
+        },
+        "seuil_070": {
+          "kind": "installation_condition",
+          "value": "0.7",
+          "unit": "mm",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (définition)"
+          },
+          "version": 1
+        },
+        "seuil_080": {
+          "kind": "installation_condition",
+          "value": "0.8",
+          "unit": "mm",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (définition)"
+          },
+          "version": 1
+        },
+        "longueur_utile": {
+          "kind": "installation_condition",
+          "value": "1.9",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."
+        },
+        "longueur_feuille": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Feuille de zinc 2 × 1 m (§48.6)."
+        },
+        "largeur_feuille": {
+          "kind": "installation_condition",
+          "value": "1",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Feuille de zinc 2 × 1 m (§48.6)."
+        },
+        "surface_feuille": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m2",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« feuilles = (ml ÷ 2 m) × (développé ÷ 1 000) arrondi sup. » (§25.2), feuille de 2 × 1 m."
+        },
+        "marge_bandes": {
+          "kind": "installation_condition",
+          "value": "1.1",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« Solin / abergement : ml × 1,1 » (§7)."
+        },
+        "seuil_bobineau": {
+          "kind": "installation_condition",
+          "value": "6",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1,
+          "note": "Au-delà de 6 ml de bande : bobineau au lieu de feuilles 2 × 1 m."
+        },
+        "bobineau_500": {
+          "kind": "installation_condition",
+          "value": "500",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_650": {
+          "kind": "installation_condition",
+          "value": "650",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_1000": {
+          "kind": "installation_condition",
+          "value": "1000",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_17": {
+          "kind": "installation_condition",
+          "value": "17",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_21": {
+          "kind": "installation_condition",
+          "value": "21",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_31": {
+          "kind": "installation_condition",
+          "value": "31",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_40": {
+          "kind": "installation_condition",
+          "value": "40",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1,
+          "note": "40 m seulement en largeur 500."
+        },
         "pattes_par_metre": {
           "kind": "installation_condition",
           "value": "3",
@@ -8487,6 +8764,7 @@
         {
           "id": "bande-faitage-zinc",
           "slot": "bande",
+          "when": "faconnage >= 2",
           "formula": "longueur_faitage",
           "unit": "ml",
           "core": true,
@@ -8495,6 +8773,28 @@
           "designation": "Faîtage {aspect_zinc} {epaisseur_zinc} mm, bande dév. {developpe|cm}",
           "precisionRequires": [
             "developpe",
+            "aspect_zinc"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "feuilles-faitage-zinc",
+          "slot": "feuille",
+          "when": "faconnage < 2",
+          "formula": "arrondi_sup(longueur_faitage / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe))))",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
+          "precision": "pour {longueur_faitage|ml} de faîtage : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
+          "designation": "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
+          "precisionRequires": [
             "aspect_zinc"
           ],
           "source": "fondateur-referentiel-2026-10-03",
@@ -8613,6 +8913,7 @@
         },
         {
           "key": "faconnage",
+          "ownOnly": true,
           "label": "Façonnage",
           "unit": "u",
           "kind": "artisan_preference",
@@ -8783,7 +9084,8 @@
             "text": "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "feuille-zinc-2x1"
-          }
+          },
+          "formOf": "noue"
         },
         {
           "key": "bobineau",
@@ -8793,7 +9095,8 @@
             "text": "Bobineau de zinc au-delà de 6 ml (réponse du fondateur).",
             "source": "fondateur-reponses-2026-10-04",
             "productId": "bobineau-zinc"
-          }
+          },
+          "formOf": "noue"
         }
       ],
       "constants": {
@@ -8872,6 +9175,34 @@
           },
           "version": 1,
           "note": "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."
+        },
+        "longueur_feuille": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Feuille de zinc 2 × 1 m (§48.6)."
+        },
+        "largeur_feuille": {
+          "kind": "installation_condition",
+          "value": "1",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Feuille de zinc 2 × 1 m (§48.6)."
         },
         "surface_feuille": {
           "kind": "installation_condition",
@@ -9097,12 +9428,12 @@
         {
           "id": "feuilles-noue",
           "slot": "feuille",
-          "when": "si(faconnage < 2, si(longueur_noue > regle.seuil_bobineau, 0, 1), 0)",
-          "formula": "arrondi_sup(ml_zinc * developpe_noue / regle.surface_feuille)",
+          "when": "faconnage < 2",
+          "formula": "arrondi_sup(longueur_noue / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe_noue))))",
           "unit": "u",
           "core": true,
           "exclusions": "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",
-          "precision": "pour façonner {longueur_noue|ml} de noue, dév. {developpe_noue|cm#}",
+          "precision": "pour {longueur_noue|ml} de noue : estimation d'après un développé de {developpe_noue|cm}, ajuste selon ton façonnage",
           "designation": "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           "precisionRequires": [
             "aspect_zinc"
@@ -9113,27 +9444,6 @@
             "verifiedAt": "2026-10-03",
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
-          },
-          "version": 1
-        },
-        {
-          "id": "bobineau-noue",
-          "slot": "bobineau",
-          "when": "si(faconnage < 2, si(longueur_noue > regle.seuil_bobineau, 1, 0), 0)",
-          "formula": "arrondi_sup(ml_zinc / longueur_bobineau)",
-          "unit": "u",
-          "core": true,
-          "exclusions": "La plus petite largeur qui contient le développé, la plus courte longueur qui couvre la noue (marge comprise).",
-          "designation": "Bobineau {aspect_zinc} {largeur_bobineau|mm#} × {longueur_bobineau|m}, {epaisseur_zinc}",
-          "precisionRequires": [
-            "aspect_zinc"
-          ],
-          "precision": "pour façonner {longueur_noue|ml} de noue, dév. {developpe_noue|cm#}",
-          "source": "fondateur-reponses-2026-10-04",
-          "verification": {
-            "status": "verified",
-            "verifiedAt": "2026-10-04",
-            "verifiedBy": "Fondateur (couvreur)"
           },
           "version": 1
         }
@@ -9885,7 +10195,8 @@
             "text": "Un raccord par fenêtre, adapté à la couverture (§11).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "raccord-fenetre-toit"
-          }
+          },
+          "indissociable": true
         }
       ],
       "constants": {},
@@ -9996,6 +10307,7 @@
         },
         {
           "key": "faconnage",
+          "ownOnly": true,
           "label": "Façonnage",
           "unit": "u",
           "kind": "artisan_preference",
@@ -10166,7 +10478,8 @@
             "text": "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "feuille-zinc-2x1"
-          }
+          },
+          "formOf": "bande"
         },
         {
           "key": "bobineau",
@@ -10176,7 +10489,8 @@
             "text": "Bobineau de zinc au-delà de 6 ml de bande (réponse du fondateur).",
             "source": "fondateur-reponses-2026-10-04",
             "productId": "bobineau-zinc"
-          }
+          },
+          "formOf": "bande"
         },
         {
           "key": "mastic",
@@ -10288,6 +10602,34 @@
           },
           "version": 1,
           "note": "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."
+        },
+        "longueur_feuille": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Feuille de zinc 2 × 1 m (§48.6)."
+        },
+        "largeur_feuille": {
+          "kind": "installation_condition",
+          "value": "1",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Feuille de zinc 2 × 1 m (§48.6)."
         },
         "surface_feuille": {
           "kind": "installation_condition",
@@ -10527,12 +10869,12 @@
         {
           "id": "feuilles-bandes",
           "slot": "feuille",
-          "when": "si(faconnage < 2, si(longueur_bande > regle.seuil_bobineau, 0, 1), 0)",
-          "formula": "arrondi_sup(ml_zinc * developpe / regle.surface_feuille)",
+          "when": "faconnage < 2",
+          "formula": "arrondi_sup(longueur_bande / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe))))",
           "unit": "u",
           "core": true,
           "exclusions": "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2) ; chutes non réemployées.",
-          "precision": "pour façonner {longueur_bande|ml} de bande, développé {developpe|cm}",
+          "precision": "pour {longueur_bande|ml} de bande : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
           "designation": "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           "precisionRequires": [
             "aspect_zinc"
@@ -10543,27 +10885,6 @@
             "verifiedAt": "2026-10-03",
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
-          },
-          "version": 1
-        },
-        {
-          "id": "bobineau-bandes",
-          "slot": "bobineau",
-          "when": "si(faconnage < 2, si(longueur_bande > regle.seuil_bobineau, 1, 0), 0)",
-          "formula": "arrondi_sup(ml_zinc / longueur_bobineau)",
-          "unit": "u",
-          "core": true,
-          "exclusions": "La plus petite largeur qui contient le développé, la plus courte longueur qui couvre la bande (marge comprise).",
-          "designation": "Bobineau {aspect_zinc} {largeur_bobineau|mm#} × {longueur_bobineau|m}, {epaisseur_zinc}",
-          "precisionRequires": [
-            "aspect_zinc"
-          ],
-          "precision": "pour façonner {longueur_bande|ml} de bande",
-          "source": "fondateur-reponses-2026-10-04",
-          "verification": {
-            "status": "verified",
-            "verifiedAt": "2026-10-04",
-            "verifiedBy": "Fondateur (couvreur)"
           },
           "version": 1
         },
@@ -10603,6 +10924,605 @@
         },
         {
           "id": "mortier-solin",
+          "slot": "mortier",
+          "formula": "regle.sac_ciment_solin",
+          "unit": "u",
+          "core": false,
+          "exclusions": "Mortier du solin cité au devis ; quantité estimée, pas calculée.",
+          "designation": "Ciment 35 kg + sable (mortier de solin)",
+          "precision": "pour le solin au mortier de ciment",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      ]
+    },
+    {
+      "id": "bande-porte-solin",
+      "trade": "roofing",
+      "label": "Bande porte-solin zinc",
+      "triggers": [
+        "solin_support"
+      ],
+      "params": [
+        {
+          "key": "longueur_bande",
+          "label": "Longueur de bande",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Longueur de bande porte-solin ?",
+          "fromLineQuantity": true
+        },
+        {
+          "key": "developpe",
+          "label": "Développé de la bande",
+          "unit": "mm",
+          "kind": "site_data",
+          "question": "Développé de la bande zinc ?",
+          "textLabels": [
+            "developpe",
+            "dev",
+            "dev."
+          ],
+          "onlyFromPrincipal": true,
+          "withinChoices": true,
+          "textValues": [
+            {
+              "value": "100",
+              "keywords": [
+                "dev 10",
+                "dev. 10",
+                "developpe 10"
+              ]
+            },
+            {
+              "value": "250",
+              "keywords": [
+                "dev 25",
+                "dev. 25",
+                "developpe 25"
+              ]
+            },
+            {
+              "value": "330",
+              "keywords": [
+                "dev 33",
+                "dev. 33",
+                "developpe 33"
+              ]
+            },
+            {
+              "value": "400",
+              "keywords": [
+                "dev 40",
+                "dev. 40",
+                "developpe 40"
+              ]
+            }
+          ],
+          "choices": [
+            {
+              "label": "100 mm (solin, couvre-joint)",
+              "value": "100"
+            },
+            {
+              "label": "250 mm",
+              "value": "250"
+            },
+            {
+              "label": "330 mm",
+              "value": "330"
+            },
+            {
+              "label": "400 mm",
+              "value": "400"
+            }
+          ]
+        },
+        {
+          "key": "faconnage",
+          "ownOnly": true,
+          "label": "Façonnage",
+          "unit": "u",
+          "kind": "artisan_preference",
+          "question": "Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ?",
+          "hint": "Je façonne : feuilles de zinc 2 × 1 m, bobineau au-delà de 6 ml. Commandé façonné : bandes en longueurs de 2 m. Gouttières et descentes ne sont pas concernées.",
+          "choices": [
+            {
+              "label": "Je façonne (feuilles ou bobineau)",
+              "value": "1"
+            },
+            {
+              "label": "Je commande façonné",
+              "value": "2"
+            }
+          ],
+          "display": {
+            "1": "je façonne",
+            "2": "commandé façonné"
+          },
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "faconnage et pose",
+                "faconnage des",
+                "faconnees sur place",
+                "faconne sur place",
+                "faconnage sur place"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "epaisseur_zinc",
+          "label": "Épaisseur du zinc",
+          "unit": "mm",
+          "kind": "artisan_preference",
+          "question": "Épaisseur du zinc ?",
+          "textLabels": [
+            "epaisseur",
+            "ep"
+          ],
+          "default": {
+            "value": "0.65",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "0,65 mm standard (§7)"
+          },
+          "choices": [
+            {
+              "label": "0,65 mm",
+              "value": "0.65"
+            },
+            {
+              "label": "0,70 mm",
+              "value": "0.7"
+            },
+            {
+              "label": "0,80 mm",
+              "value": "0.8"
+            }
+          ],
+          "display": {
+            "0.65": "0,65",
+            "0.7": "0,70",
+            "0.8": "0,80"
+          }
+        },
+        {
+          "key": "aspect_zinc",
+          "label": "Aspect du zinc",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Zinc prépatiné : Quartz-Zinc (gris) ou Anthra-Zinc (noir) ?",
+          "hint": "Le devis dit « prépatiné » sans la teinte : le comptoir sert l'un ou l'autre.",
+          "default": {
+            "value": "1",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "zinc naturel : le devis ne dit pas prépatiné",
+            "unlessText": [
+              "prepatine",
+              "pre patine",
+              "pre-patine"
+            ]
+          },
+          "choices": [
+            {
+              "label": "Zinc naturel",
+              "value": "1"
+            },
+            {
+              "label": "Quartz-Zinc (prépatiné gris)",
+              "value": "2"
+            },
+            {
+              "label": "Anthra-Zinc (prépatiné noir)",
+              "value": "3"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "quartz",
+                "quartz zinc",
+                "quartz-zinc"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "anthra",
+                "anthra zinc",
+                "anthra-zinc"
+              ]
+            },
+            {
+              "value": "4",
+              "keywords": [
+                "pigmento"
+              ]
+            },
+            {
+              "value": "1",
+              "keywords": [
+                "zinc naturel"
+              ]
+            }
+          ],
+          "display": {
+            "1": "zinc naturel",
+            "2": "Quartz-Zinc",
+            "3": "Anthra-Zinc",
+            "4": "Pigmento"
+          },
+          "onlyFromPrincipal": true
+        }
+      ],
+      "slots": [
+        {
+          "key": "porte_solin",
+          "family": "solin_support",
+          "label": "Bandes porte-solin",
+          "usual": {
+            "text": "Bande porte-solin, longueurs de 2 m (§7).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "porte-solin-standard"
+          }
+        },
+        {
+          "key": "feuille",
+          "family": "zinc_sheet",
+          "label": "Feuilles zinc 2 × 1 m",
+          "usual": {
+            "text": "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "feuille-zinc-2x1"
+          },
+          "formOf": "porte_solin"
+        },
+        {
+          "key": "mortier",
+          "family": "solin_mortar",
+          "label": "Mortier de solin",
+          "keywords": [
+            "mortier"
+          ],
+          "usual": {
+            "text": "Ciment 35 kg + sable pour le solin (estimation du fondateur).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "ciment-sable-solin"
+          }
+        }
+      ],
+      "constants": {
+        "poids_plat_065": {
+          "kind": "installation_condition",
+          "value": "4.7",
+          "unit": "kg/m2",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« kg ≈ m² dév. × 4,7 (ép. 0,65) » (§7)."
+        },
+        "poids_plat_070": {
+          "kind": "installation_condition",
+          "value": "5.04",
+          "unit": "kg/m2",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (7,2 kg/m² par mm, masse volumique du zinc)"
+          },
+          "version": 1
+        },
+        "poids_plat_080": {
+          "kind": "installation_condition",
+          "value": "5.76",
+          "unit": "kg/m2",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (7,2 kg/m² par mm, masse volumique du zinc)"
+          },
+          "version": 1
+        },
+        "seuil_070": {
+          "kind": "installation_condition",
+          "value": "0.7",
+          "unit": "mm",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (définition)"
+          },
+          "version": 1
+        },
+        "seuil_080": {
+          "kind": "installation_condition",
+          "value": "0.8",
+          "unit": "mm",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (définition)"
+          },
+          "version": 1
+        },
+        "longueur_utile": {
+          "kind": "installation_condition",
+          "value": "1.9",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."
+        },
+        "longueur_feuille": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Feuille de zinc 2 × 1 m (§48.6)."
+        },
+        "largeur_feuille": {
+          "kind": "installation_condition",
+          "value": "1",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Feuille de zinc 2 × 1 m (§48.6)."
+        },
+        "surface_feuille": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m2",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« feuilles = (ml ÷ 2 m) × (développé ÷ 1 000) arrondi sup. » (§25.2), feuille de 2 × 1 m."
+        },
+        "marge_bandes": {
+          "kind": "installation_condition",
+          "value": "1.1",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« Solin / abergement : ml × 1,1 » (§7)."
+        },
+        "seuil_bobineau": {
+          "kind": "installation_condition",
+          "value": "6",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1,
+          "note": "Au-delà de 6 ml de bande : bobineau au lieu de feuilles 2 × 1 m."
+        },
+        "bobineau_500": {
+          "kind": "installation_condition",
+          "value": "500",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_650": {
+          "kind": "installation_condition",
+          "value": "650",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_1000": {
+          "kind": "installation_condition",
+          "value": "1000",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_17": {
+          "kind": "installation_condition",
+          "value": "17",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_21": {
+          "kind": "installation_condition",
+          "value": "21",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_31": {
+          "kind": "installation_condition",
+          "value": "31",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_40": {
+          "kind": "installation_condition",
+          "value": "40",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1,
+          "note": "40 m seulement en largeur 500."
+        },
+        "sac_ciment_solin": {
+          "kind": "installation_condition",
+          "value": "1",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "draft",
+            "note": "Estimation indicative du fondateur, à confirmer sur chaque chantier."
+          },
+          "version": 1,
+          "label": "estimation {v} sac de ciment 35 kg + sable"
+        }
+      },
+      "derived": [
+        {
+          "key": "ml_zinc",
+          "label": "Longueur de zinc, marge comprise",
+          "unit": "m",
+          "formula": "longueur_bande * regle.marge_bandes",
+          "shown": true,
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      ],
+      "needs": [
+        {
+          "id": "porte-solin-faconnees",
+          "slot": "porte_solin",
+          "when": "faconnage >= 2",
+          "formula": "arrondi_sup(ml_zinc / regle.longueur_utile)",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Longueurs de 2 m, recouvrement 10 cm entre éléments.",
+          "precision": "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
+          "designation": "Bandes porte-solin {aspect_zinc} {epaisseur_zinc} mm",
+          "precisionRequires": [
+            "developpe",
+            "aspect_zinc"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "feuilles-porte-solin",
+          "slot": "feuille",
+          "when": "faconnage < 2",
+          "formula": "arrondi_sup(longueur_bande / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe))))",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
+          "precision": "pour {longueur_bande|ml} de porte-solin : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
+          "designation": "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
+          "precisionRequires": [
+            "aspect_zinc"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "mortier-porte-solin",
           "slot": "mortier",
           "formula": "regle.sac_ciment_solin",
           "unit": "u",
@@ -10886,6 +11806,7 @@
         },
         {
           "key": "faconnage",
+          "ownOnly": true,
           "label": "Façonnage",
           "unit": "u",
           "kind": "artisan_preference",
@@ -10989,7 +11910,8 @@
             "text": "Feuilles de cuivre 2 × 1 m, façonnées sur place.",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "feuille-cuivre-2x1"
-          }
+          },
+          "formOf": "bande"
         },
         {
           "key": "bobine",
@@ -10999,7 +11921,8 @@
             "text": "Cuivre en bobine au mètre au-delà de 6 ml.",
             "source": "fondateur-reponses-2026-10-04",
             "productId": "bobine-cuivre"
-          }
+          },
+          "formOf": "bande"
         }
       ],
       "constants": {
@@ -11239,6 +12162,7 @@
         },
         {
           "key": "faconnage",
+          "ownOnly": true,
           "label": "Façonnage",
           "unit": "u",
           "kind": "artisan_preference",
@@ -11405,7 +12329,8 @@
             "text": "Bandes façonnées par le fournisseur, longueurs de 2 m, développé 33 cm (§7).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "bande-zinc-faconnee-standard"
-          }
+          },
+          "formOf": "abergement"
         },
         {
           "key": "feuille",
@@ -11415,7 +12340,8 @@
             "text": "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "feuille-zinc-2x1"
-          }
+          },
+          "formOf": "abergement"
         },
         {
           "key": "bobineau",
@@ -11425,7 +12351,8 @@
             "text": "Bobineau de zinc au-delà de 6 ml de zinc (réponse du fondateur).",
             "source": "fondateur-reponses-2026-10-04",
             "productId": "bobineau-zinc"
-          }
+          },
+          "formOf": "abergement"
         },
         {
           "key": "porte_solin",
@@ -11439,7 +12366,8 @@
             "text": "Bande porte-solin au périmètre, longueurs de 2 m (§7).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "porte-solin-standard"
-          }
+          },
+          "formOf": "abergement"
         }
       ],
       "constants": {
@@ -11518,6 +12446,34 @@
           },
           "version": 1,
           "note": "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."
+        },
+        "longueur_feuille": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Feuille de zinc 2 × 1 m (§48.6)."
+        },
+        "largeur_feuille": {
+          "kind": "installation_condition",
+          "value": "1",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Feuille de zinc 2 × 1 m (§48.6)."
         },
         "surface_feuille": {
           "kind": "installation_condition",
@@ -11772,8 +12728,8 @@
         {
           "id": "feuilles-abergement",
           "slot": "feuille",
-          "when": "si(faconnage < 2, si(nb_cheminees * perimetre_cheminee * regle.coef_abergement > regle.seuil_bobineau, 0, 1), 0)",
-          "formula": "arrondi_sup(ml_zinc * regle.developpe_abergement / regle.surface_feuille)",
+          "when": "faconnage < 2",
+          "formula": "arrondi_sup(ml_zinc / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / regle.developpe_abergement))))",
           "unit": "u",
           "core": true,
           "exclusions": "Zinc plat, développé 33 cm × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",
@@ -11788,27 +12744,6 @@
             "verifiedAt": "2026-10-03",
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
-          },
-          "version": 1
-        },
-        {
-          "id": "bobineau-abergement",
-          "slot": "bobineau",
-          "when": "si(faconnage < 2, si(nb_cheminees * perimetre_cheminee * regle.coef_abergement > regle.seuil_bobineau, 1, 0), 0)",
-          "formula": "arrondi_sup(ml_zinc / longueur_bobineau)",
-          "unit": "u",
-          "core": true,
-          "exclusions": "Développé 33 cm ; la plus courte longueur de bobineau qui couvre le zinc de l'abergement.",
-          "designation": "Bobineau {aspect_zinc} {largeur_bobineau|mm#} × {longueur_bobineau|m}, {epaisseur_zinc}",
-          "precisionRequires": [
-            "aspect_zinc"
-          ],
-          "precision": "pour façonner {ml_zinc|ml} d'abergement, développé 33 cm",
-          "source": "fondateur-reponses-2026-10-04",
-          "verification": {
-            "status": "verified",
-            "verifiedAt": "2026-10-04",
-            "verifiedBy": "Fondateur (couvreur)"
           },
           "version": 1
         },
@@ -12014,7 +12949,8 @@
             "text": "Embase plomb au diamètre du conduit, pour ardoise et tuile.",
             "source": "fondateur-reponses-2026-10-04",
             "productId": "embase-plomb-sortie"
-          }
+          },
+          "formOf": "sortie"
         },
         {
           "key": "platine",
@@ -12024,7 +12960,8 @@
             "text": "Platine zinc soudée au diamètre du conduit, pour couverture zinc.",
             "source": "fondateur-reponses-2026-10-04",
             "productId": "platine-zinc-sortie"
-          }
+          },
+          "formOf": "sortie"
         },
         {
           "key": "chapeau",
@@ -12034,7 +12971,8 @@
             "text": "Un chapeau par sortie, au diamètre du conduit.",
             "source": "fondateur-reponses-2026-10-04",
             "productId": "chapeau-sortie"
-          }
+          },
+          "formOf": "sortie"
         },
         {
           "key": "collerette",
@@ -12044,7 +12982,8 @@
             "text": "Collerette d'étanchéité (solin), seulement pour un conduit de fumée.",
             "source": "fondateur-reponses-2026-10-04",
             "productId": "collerette-sortie"
-          }
+          },
+          "formOf": "sortie"
         }
       ],
       "constants": {
@@ -12180,6 +13119,7 @@
         },
         {
           "key": "faconnage",
+          "ownOnly": true,
           "label": "Façonnage",
           "unit": "u",
           "kind": "artisan_preference",
@@ -12428,7 +13368,8 @@
             "text": "Zinc en bobine largeur 650 mm (naturel ou prépatiné selon le devis), commandé au mètre linéaire.",
             "source": "vmzinc-joint-debout",
             "productId": "bobine-zinc-standard"
-          }
+          },
+          "formOf": "couverture"
         },
         {
           "key": "bobine_littoral",
@@ -12442,7 +13383,8 @@
             "text": "Bord de mer : zinc en bobine largeur 500 mm, commandé au mètre linéaire (VMZINC).",
             "source": "vmzinc-joint-debout",
             "productId": "bobine-zinc-500"
-          }
+          },
+          "formOf": "couverture"
         },
         {
           "key": "bac",
@@ -12452,7 +13394,8 @@
             "text": "Bacs façonnés par le fournisseur à la longueur du rampant.",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "bac-joint-debout-standard"
-          }
+          },
+          "formOf": "couverture"
         },
         {
           "key": "patte_coulissante",
@@ -13525,7 +14468,8 @@
             "text": "Bac de largeur utile 1,00 m, une plaque par rampant (§8).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "plaque-bac-acier"
-          }
+          },
+          "formOf": "couverture"
         },
         {
           "key": "vis",
@@ -14134,7 +15078,8 @@
             "text": "Une naissance par descente.",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "naissance-standard"
-          }
+          },
+          "indissociable": true
         }
       ],
       "constants": {
@@ -14863,7 +15808,8 @@
             "text": "Une naissance par descente.",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "naissance-standard"
-          }
+          },
+          "indissociable": true
         },
         {
           "key": "dilatation",
@@ -15342,6 +16288,10 @@
             "text": "Le diamètre et la matière suivent le devis.",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "tube-descente-standard"
+          },
+          "piecesFrom": {
+            "count": "nb_descentes",
+            "length": "hauteur_descente"
           }
         },
         {

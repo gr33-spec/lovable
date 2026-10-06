@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { lineKind, tradeProfile } from "../src/index.js";
+import { readQuoteComplet } from "./support/complet.js";
 import { readQuote } from "./support/read-quote.js";
 
 /**
@@ -23,8 +24,8 @@ describe("surlongueur de bobine et bâche", () => {
     expect(bobine(v)?.precision).toBe("31 bacs × 7,15 m");
   });
 
-  it("liteaux et tubes de descente disent aussi d'où vient leur longueur", () => {
-    const v = readQuote([
+  it("liteaux et tubes de descente disent aussi d'où vient leur longueur (référentiel : tous les articles de l'ouvrage)", () => {
+    const v = readQuoteComplet([
       { ref: "1", designation: "Couverture en ardoises naturelles 30x22 posées au crochet", quantity: "200", unit: "m²" },
       { ref: "2", designation: "Descente d'eau pluviale zinc Ø80 hauteur 4 m", quantity: "2", unit: "u" },
     ], {});

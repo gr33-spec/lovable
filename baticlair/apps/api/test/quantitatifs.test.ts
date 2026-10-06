@@ -70,7 +70,7 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
     expect(res.status).toBe(201);
     expect(res.body).toMatchObject({ source: "lignes", metier: "couverture", reference: "Dupont — réfection toiture" });
     expect(res.body.version_referentiel).toMatch(/^roofing-/);
-    expect(res.body.compris).toEqual(["Couverture en ardoises au crochet sur liteaux : 200 m²", "Gouttière : 24 ml"]);
+    expect(res.body.compris).toEqual(["Couverture en ardoises au crochet : 200 m²", "Gouttière : 24 ml"]);
 
     // 200 m² en 30×22, 45° par défaut, région ardoise III, Brest = département littoral → crochet inox 2,7 mm :
     // formule Cupa (§34) 200 / (0,1025 × 0,2227) = 8 761,65 + 5 % = 9 200 ardoises.

@@ -68,7 +68,8 @@ describe("§47.5 — retour fournisseur", () => {
   it("« modifié » avec le bon collé : chaque écart est une correction au journal (§47.7, test 5) avec ses champs §45.6", async () => {
     const { agent, requestId, supplierId, lines, projectId } = await demande();
     const ardoises = lines.find((l) => /^Ardoises/.test(l.designation))!;
-    const liteaux = lines.find((l) => /^Liteaux 18/.test(l.designation))!;
+    // Règle numéro un : la liste ne porte que des articles écrits au devis ; on retire la dernière ligne autre que les ardoises.
+    const liteaux = [...lines].reverse().find((l) => l !== ardoises)!;
     const collé = [
       "BON DE COMMANDE n° 4512",
       `${ardoises.designation} : 9 000 pièces`,

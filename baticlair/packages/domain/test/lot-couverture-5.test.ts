@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ROOFING_REFERENTIAL } from "../src/index.js";
 import { describeLot, type Metier } from "./support/paquet.js";
 import { readQuote } from "./support/read-quote.js";
+import { readQuoteComplet } from "./support/complet.js";
 
 /**
  * LOT COUVERTURE, POINT 5 : ardoise fibres-ciment (§4). Le même calcul que l'ardoise naturelle (ardoises au m² du
@@ -17,7 +18,7 @@ const CAS: Metier[] = [
     metier: "couverture",
     bench: [{ ref: "1", designation: "Couverture en ardoises fibres-ciment 40x24 bleu-noir", quantity: "100", unit: "m²" }],
     questions: [],
-    couleurs: { vert: 6, orange: 0, gris: 0 },
+    couleurs: { vert: 1, orange: 0, gris: 0 },
   },
   {
     nom: "Ardoises fibro-ciment sans format ni teinte",
@@ -25,7 +26,7 @@ const CAS: Metier[] = [
     metier: "couverture",
     bench: [{ ref: "1", designation: "Couverture ardoises fibro-ciment", quantity: "80", unit: "m²" }],
     questions: ["Ardoises fibres-ciment : bleu-noir, noir ou brun ?", "Ardoises fibres-ciment : 40 × 24, 40 × 27, 60 × 30 ou 60 × 40 ?"],
-    couleurs: { vert: 2, orange: 1, gris: 1 },
+    couleurs: { vert: 0, orange: 1, gris: 0 },
   },
 ];
 
@@ -41,7 +42,7 @@ describeLot({
 
 describe("ardoise fibres-ciment : le moteur de l'ardoise, ses formats, ses clous et ses antivents", () => {
   it("100 m² de 40 × 24 : 2 919 ardoises (27,8/m² + 5 %), 6 130 clous (× 2,1), 3 065 antivents (× 1,05), 701 ml de liteaux (6,67/m² + 5 %)", () => {
-    const v = readQuote([{ ref: "1", designation: "Couverture en ardoises fibres-ciment 40x24 bleu-noir", quantity: "100", unit: "m²" }]);
+    const v = readQuoteComplet([{ ref: "1", designation: "Couverture en ardoises fibres-ciment 40x24 bleu-noir", quantity: "100", unit: "m²" }]);
     expect(v.questions).toEqual([]);
     expect(Object.fromEntries(v.toBuy.map((b) => [b.label, b.quantity]))).toMatchObject({
       "Ardoises fibres-ciment bleu-noir 40×24": "2 919 pièces",
@@ -52,12 +53,12 @@ describe("ardoise fibres-ciment : le moteur de l'ardoise, ses formats, ses clous
   });
 
   it("60 × 40 : 10 ardoises et 4 ml de liteaux au m² ; jamais de crochets d'ardoise naturelle", () => {
-    const v = readQuote([{ ref: "1", designation: "Ardoises fibres-ciment 60x40 noires", quantity: "50", unit: "m²" }]);
+    const v = readQuoteComplet([{ ref: "1", designation: "Ardoises fibres-ciment 60x40 noires", quantity: "50", unit: "m²" }]);
     const got = Object.fromEntries(v.toBuy.map((b) => [b.label, b.quantity]));
     expect(got["Ardoises fibres-ciment noir 60×40"]).toBe("525 pièces"); // 50 × 10 + 5 %
     expect(v.toBuy.some((b) => /Crochets d'ardoise/.test(b.label))).toBe(false);
     // Une ardoise naturelle reste une ardoise naturelle (Brest).
-    const naturelle = readQuote([{ ref: "1", designation: "Couverture en ardoises naturelles 30x22 posées au crochet", quantity: "200", unit: "m²" }]);
+    const naturelle = readQuoteComplet([{ ref: "1", designation: "Couverture en ardoises naturelles 30x22 posées au crochet", quantity: "200", unit: "m²" }]);
     expect(naturelle.toBuy.some((b) => /fibres-ciment|antivent/i.test(b.label))).toBe(false);
   });
 });

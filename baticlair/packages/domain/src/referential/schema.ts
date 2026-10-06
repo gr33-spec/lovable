@@ -72,6 +72,7 @@ const param = z.object({
   textValues: z.array(z.object({ value: str, keywords: z.array(str).min(1) })).optional(),
   fromWorks: z.array(z.object({ value: str, workItems: z.array(str).min(1) })).optional(),
   onlyFromPrincipal: z.literal(true).optional(),
+  ownOnly: z.literal(true).optional(),
 });
 const derived = z.object({ ...provenance, key: str, label: str, unit: str, formula: str, shown: z.boolean().optional() });
 const table = z.object({ ...provenance, label: str, unit: str, axes: z.array(z.object({ param: str, thresholds: z.array(str).min(1) })).min(1), values: z.array(z.array(str).min(1)).min(1) });
@@ -86,6 +87,9 @@ const slot = z.object({
   measureOnly: z.literal(true).optional(),
   orderedAsWritten: z.literal(true).optional(),
   charsFrom: z.string().optional(),
+  formOf: z.string().optional(),
+  indissociable: z.literal(true).optional(),
+  piecesFrom: z.object({ count: str, length: str }).optional(),
 });
 const need = z.object({ ...provenance, id: str, slot: str, short: z.string().optional(), formula: str, unit: str, core: z.boolean(), exclusions: z.string().optional(), precision: z.string().optional(), basis: z.string().optional(), precisionRequires: z.array(str).optional(), designation: z.string().optional(), offer: z.object({ unlessQuoteSays: z.array(str).optional() }).optional(), requires: z.array(str).optional(), when: z.string().optional() });
 const workItem = z.object({
@@ -115,6 +119,7 @@ export const referentialSchema = z.object({
   workItems: z.array(workItem).min(1),
   wasteRules: z.array(wasteRule),
   countedWorks: z.array(countedWork).optional(),
+  writtenOnly: z.literal(true).optional(),
 });
 
 export class ReferentialFileError extends Error {

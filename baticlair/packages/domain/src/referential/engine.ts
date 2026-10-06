@@ -96,6 +96,11 @@ export interface EngineOptions {
    * pour un artisan.
    */
   acceptDraft?: boolean;
+  /**
+   * Validation du RÉFÉRENTIEL seulement (ses formules, ses tables) : tous les articles de l'ouvrage, écrits ou non.
+   * Jamais pour un artisan : la règle numéro un (`writtenOnly`) vaut pour toute liste d'achats.
+   */
+  everyArticle?: boolean;
   /** La quantité seule (comparer au devis) : une donnée qui ne change que l'article (le développé) n'arrête pas le calcul. */
   quantityOnly?: boolean;
 }
@@ -363,8 +368,15 @@ export function computeWorkItem(ref: Referential, input: WorkItemInput, options:
     const v = evaluateInterval(expr, (name) => values.get(name)!);
     return !v.hi.isZero();
   };
+  // RÈGLE NUMÉRO UN : un article sort seulement s'il est écrit au devis (ou en est la forme d'achat), ou s'il en est
+  // l'accessoire indissociable. Rien « du métier » d'office : pas d'écran, pas de liteaux, pas de colliers non écrits.
+  const written = (rule: NeedRule): boolean => {
+    if (!ref.writtenOnly || options.everyArticle) return true;
+    const slot = work.slots.find((s) => s.key === rule.slot);
+    return !!slot && (input.mentioned.includes(slot.key) || slot.indissociable === true || (slot.formOf !== undefined && input.mentioned.includes(slot.formOf)));
+  };
   const needs = work.needs
-    .filter((rule) => (rule.requires ?? []).every(known) && applies(rule))
+    .filter((rule) => written(rule) && (rule.requires ?? []).every(known) && applies(rule))
     .map((rule) => {
       let exact: IntervalValue | undefined;
       const result = computeNeed(ref, work, rule, input, sources, options, done, (v) => (exact = v));

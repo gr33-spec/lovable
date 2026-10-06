@@ -784,7 +784,7 @@ test("plusieurs logements : le chantier rangé par logement, puis le total à co
   await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible();
 });
 
-test("§48.4 : questions au bouton seulement, avant le calcul ; puis la voix sur la liste ; les suggestions décochées", async ({ page }) => {
+test("§48.4 et règle numéro un : questions au bouton seulement, avant le calcul ; rien d'absent du devis ; puis la voix sur la liste", async ({ page }) => {
   // Un micro simulé : la dictée du navigateur « entend » une phrase, comme un artisan devant sa liste.
   await page.addInitScript(() => {
     class FakeRecognition {
@@ -803,7 +803,7 @@ test("§48.4 : questions au bouton seulement, avant le calcul ; puis la voix sur
         setTimeout(() => {
           const final = (transcript: string) => Object.assign([{ transcript }], { isFinal: true });
           if (n === 1) {
-            this.onresult?.({ resultIndex: 0, results: [final("Ok alors enlève l'écran")] });
+            this.onresult?.({ resultIndex: 0, results: [final("Ok alors enlève les ardoises")] });
             this.onend?.();
           } else if (n === 2) {
             this.onresult?.({ resultIndex: 0, results: [final("j'ai oublié 2 cartouches de silicone")] });
@@ -827,17 +827,15 @@ test("§48.4 : questions au bouton seulement, avant le calcul ; puis la voix sur
   await expect(questions).toBeVisible({ timeout: 60_000 });
   await expect(page.getByRole("button", { name: /voix/ })).toHaveCount(0);
   await expect(page.getByRole("textbox")).toHaveCount(0);
-  // Tout ce qui manque au calcul : ce que le devis ne dit pas, les valeurs prises par défaut, la quincaillerie.
+  // Tout ce qui manque au calcul : ce que le devis ne dit pas, les valeurs prises par défaut. RÈGLE NUMÉRO UN : jamais de
+  // « quincaillerie et consommables : on les ajoute ? », le devis n'en écrit pas.
   await expect(page.getByRole("region", { name: "Ce que le devis ne dit pas" })).toBeVisible();
   await expect(page.getByRole("region", { name: "Je pars sur ces valeurs" })).toBeVisible();
   await expect(page.getByText("par défaut").first()).toBeVisible();
-  await expect(page.getByRole("region", { name: "Quincaillerie et consommables : on les ajoute ?" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Quincaillerie et consommables : on les ajoute ?" })).toHaveCount(0);
   await questions.getByRole("button", { name: "Espagne 1er choix" }).click();
   await expect(questions.getByRole("button", { name: "Espagne 1er choix" })).toHaveAttribute("aria-pressed", "true");
   await questions.getByRole("button", { name: /Je commande façonné/ }).click();
-  // La quincaillerie : on répond à l'égout seulement ; le faîtage reste sans réponse.
-  const quincaillerie = page.getByRole("region", { name: "Quincaillerie et consommables : on les ajoute ?" });
-  await quincaillerie.getByRole("listitem").filter({ hasText: /égout/ }).getByRole("button", { name: "Oui" }).click();
   await page.getByRole("button", { name: /^Calculer ma liste/ }).click();
 
   const list = page.getByRole("region", { name: "Liste des fournitures" });
@@ -845,14 +843,10 @@ test("§48.4 : questions au bouton seulement, avant le calcul ; puis la voix sur
   // §48.4 : plus aucune question après la sortie de la liste.
   await expect(questions).toHaveCount(0);
   await expect(page.getByRole("dialog", { name: /^Question : / })).toHaveCount(0);
-  await expect(list.getByText(/égout/i).first()).toBeVisible();
-  // Le faîtage, pas demandé : il attend dans « Suggestions », décoché, hors de la liste.
-  const suggestions = list.getByRole("region", { name: "Suggestions" });
-  await expect(suggestions).toBeVisible();
-  const faitage = suggestions.getByRole("checkbox", { name: /Faîtage zinc/ });
-  await expect(faitage).not.toBeChecked();
-  await faitage.check();
-  await expect(list.getByRole("region", { name: "Suggestions" }).getByRole("checkbox", { name: /Faîtage zinc/ })).toHaveCount(0);
+  // RÈGLE NUMÉRO UN : ni suggestion, ni écran, ni liteaux, ni crochets que le devis n'écrit pas.
+  await expect(list.getByRole("region", { name: "Suggestions" })).toHaveCount(0);
+  await expect(list.getByText(/Écran|Liteaux|Pattes|Faîtage|égout/i)).toHaveCount(0);
+  await expect(list.getByRole("button", { name: /Ardoises naturelles/ }).first()).toBeVisible();
 
   // La voix arrive sur l'écran du quantitatif, la liste sous les yeux.
   const voix = page.getByRole("region", { name: "Modifier à la voix" });
@@ -860,14 +854,14 @@ test("§48.4 : questions au bouton seulement, avant le calcul ; puis la voix sur
   await voix.getByRole("button", { name: "Modifier à la voix" }).click();
   // Le texte s'écrit pendant qu'il parle, la pause ne coupe rien ; « Terminer » modifie tout de suite.
   await expect(voix.getByLabel("Ce que j'entends")).toContainText("j'ai oublié 2 cartouches de silicone");
-  await expect(voix.getByLabel("Ce que j'entends")).toContainText("enlève l'écran");
+  await expect(voix.getByLabel("Ce que j'entends")).toContainText("enlève les ardoises");
   await voix.getByRole("button", { name: "Terminer" }).click();
   const fait = page.getByRole("status", { name: "Ce que j'ai modifié" });
   // Le texte entier du résumé : en cas d'échec, le message dit ce qui a été compris.
-  await expect(fait).toContainText(/Retiré :.*Écran HPV/);
+  await expect(fait).toContainText(/Retiré :.*Ardoises/);
   await expect(fait).toContainText("Ajouté : Silicone · 2 cartouches");
   await expect(list.getByText(/^Silicone$/)).toBeVisible();
-  await expect(list.getByRole("button", { name: /Écran HPV/ })).toHaveCount(0);
+  await expect(list.getByRole("button", { name: /Ardoises naturelles/ })).toHaveCount(0);
   // La main reste : plus / moins, crayon, corbeille.
   await expect(list.getByText("L'IA peut se tromper, n'hésite pas à peaufiner.", { exact: false })).toBeVisible();
   await page.reload();

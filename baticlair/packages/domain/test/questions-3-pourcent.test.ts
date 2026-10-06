@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { computeWithAnswers, planQuote, QUESTION_THRESHOLD, ROOFING_REFERENTIAL, tradeProfile, type Referential } from "../src/index.js";
 import { readQuote } from "./support/read-quote.js";
+import { REFERENTIEL_COMPLET, readQuoteComplet } from "./support/complet.js";
 
 /**
  * § 41 : une question ne se pose que si sa réponse change une quantité commandée de plus de 3 %, une unité ou un
@@ -13,7 +14,7 @@ const ZINC = [
 
 describe("tri des questions par levier", () => {
   it("le façonnage (change l'unité : kg ou pièces) passe avant le nombre de descentes (quelques naissances)", () => {
-    const v = readQuote(ZINC);
+    const v = readQuoteComplet(ZINC);
     // Le façonnage (une unité) d'abord, puis ce qui change l'ARTICLE au comptoir (développé, pose des crochets,
     // diamètre des descentes, §47.8), enfin le nombre de descentes (quelques naissances). Plus d'« égout et faîtage ? ».
     expect(v.questions.map((q) => q.question?.key ?? q.key)).toEqual(["param:faconnage", "param:developpe_gouttiere", "param:fixation_crochet", "param:diametre_descente", "param:nb_descentes"]);
@@ -23,10 +24,10 @@ describe("tri des questions par levier", () => {
 
 describe("une question dont toutes les réponses donnent la même commande (à 3 % près) n'est pas posée", () => {
   /** Un ouvrage d'essai : la gouttière, avec un coefficient à boutons qui ne change les crochets que de 1 %. */
-  const gouttiere = ROOFING_REFERENTIAL.workItems.find((w) => w.id === "gouttiere")!;
+  const gouttiere = REFERENTIEL_COMPLET.workItems.find((w) => w.id === "gouttiere")!;
   const REF: Referential = {
-    ...ROOFING_REFERENTIAL,
-    workItems: ROOFING_REFERENTIAL.workItems.map((w) =>
+    ...REFERENTIEL_COMPLET,
+    workItems: REFERENTIEL_COMPLET.workItems.map((w) =>
       w.id !== "gouttiere"
         ? w
         : {

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { REFERENTIEL_COMPLET } from "./support/complet.js";
 import {
   checkReferential,
   classifyMaterial,
@@ -8,7 +9,6 @@ import {
   identifyProducts,
   paramsFromContext,
   parseFormula,
-  ROOFING_REFERENTIAL,
   type Fact,
   type Referential,
   type WorkItemInput,
@@ -77,22 +77,22 @@ describe("formules du référentiel (unités contrôlées)", () => {
 
 describe("référentiel couverture", () => {
   it("est cohérent : sources, unités, formules, appellations", () => {
-    expect(checkReferential(ROOFING_REFERENTIAL)).toEqual([]);
+    expect(checkReferential(REFERENTIEL_COMPLET)).toEqual([]);
   });
 
   it("règles de calcul validées par le fondateur : tracées (qui, quand) et calculées pour l'artisan", () => {
-    expect(ROOFING_REFERENTIAL.products[0]!.attributes.largeur_utile!.verification.status).toBe("verified");
-    for (const n of ROOFING_REFERENTIAL.workItems[0]!.needs) {
+    expect(REFERENTIEL_COMPLET.products[0]!.attributes.largeur_utile!.verification.status).toBe("verified");
+    for (const n of REFERENTIEL_COMPLET.workItems[0]!.needs) {
       expect(n.verification).toMatchObject({ status: "verified", verifiedBy: "Fondateur (couvreur)" });
       expect(n.verification.verifiedAt).toMatch(/^2026-10-0[23]$/);
     }
     // 1 305,43 tuiles + 3 % de perte (référentiel du fondateur) = 1 344,59.
-    const r = computeWorkItem(ROOFING_REFERENTIAL, CASE);
+    const r = computeWorkItem(REFERENTIEL_COMPLET, CASE);
     expect(need(r, "tuiles")).toMatchObject({ status: "calculated", provisional: false, quantity: { value: "1344.59" } });
   });
 
   it("une règle remise en brouillon ne donne aucun chiffre à un artisan", () => {
-    const r = computeWorkItem(drafted(ROOFING_REFERENTIAL), CASE);
+    const r = computeWorkItem(drafted(REFERENTIEL_COMPLET), CASE);
     for (const n of r.needs) {
       expect(n.status).toBe("unknown");
       expect(n.quantity).toBeUndefined();
@@ -103,7 +103,7 @@ describe("référentiel couverture", () => {
   it("les règles BatiClair redonnent les tableaux du fabricant (Edilians HP 10)", () => {
     // Fiche HP 10 : 3,22 / 2,91 / 2,66 ml de liteaux par m² aux pureaux 310 / 343 / 376 mm ; 9,9 à 12 tuiles/m².
     const r = (pureauCm: string) =>
-      computeWorkItem(allVerified(sansHypotheses(ROOFING_REFERENTIAL)), { ...CASE, params: { ...CASE.params, surface: { value: "1", unit: "m2", origin: "devis" }, pureau: { value: pureauCm, unit: "cm", origin: "artisan" } } });
+      computeWorkItem(allVerified(sansHypotheses(REFERENTIEL_COMPLET)), { ...CASE, params: { ...CASE.params, surface: { value: "1", unit: "m2", origin: "devis" }, pureau: { value: pureauCm, unit: "cm", origin: "artisan" } } });
     // Démonstration complète : docs/demonstration-regles-tuiles-liteaux.md.
     // La fiche donne 2 décimales (tronquées à 310 et 343 mm, arrondies à 376 mm) : écart toléré < 0,01 ml/m².
     const FICHE_LITEAUX = [["31", 3.22], ["34.3", 2.91], ["37.6", 2.66]] as const;
@@ -118,7 +118,7 @@ describe("référentiel couverture", () => {
   });
 
   it("range chaque donnée dans sa nature : fabricant, pose, chantier, artisan, conditionnement", () => {
-    const mixed: Referential = structuredClone(ROOFING_REFERENTIAL);
+    const mixed: Referential = structuredClone(REFERENTIEL_COMPLET);
     // Un conditionnement rangé comme caractéristique fabricant, une caractéristique rangée comme condition de pose.
     mixed.products[0]!.attributes.largeur_utile = { ...mixed.products[0]!.attributes.largeur_utile!, kind: "packaging" };
     mixed.workItems[0]!.constants.seuil_pente_ecran = { ...mixed.workItems[0]!.constants.seuil_pente_ecran!, kind: "manufacturer_spec" };
@@ -126,24 +126,24 @@ describe("référentiel couverture", () => {
     expect(errors.some((e) => e.includes("largeur_utile") && e.includes("nature « packaging » rangée comme « manufacturer_spec »"))).toBe(true);
     expect(errors.some((e) => e.includes("seuil_pente_ecran") && e.includes("condition de pose"))).toBe(true);
     // Le pureau retenu est une donnée du chantier, pas une caractéristique de la tuile.
-    expect(ROOFING_REFERENTIAL.workItems[0]!.params.find((p) => p.key === "pureau")?.kind).toBe("site_data");
+    expect(REFERENTIEL_COMPLET.workItems[0]!.params.find((p) => p.key === "pureau")?.kind).toBe("site_data");
   });
 
   it("chaque règle connaît exactement les données nécessaires pour être déterministe", () => {
-    const tuiles = requiredInputs(ROOFING_REFERENTIAL, "couverture-tuiles-emboitement", "tuiles");
+    const tuiles = requiredInputs(REFERENTIEL_COMPLET, "couverture-tuiles-emboitement", "tuiles");
     expect(tuiles.products.map((p) => p.slot)).toEqual(["tuile"]);
     expect(tuiles.params).toEqual([
       { key: "surface", label: "Surface de toiture", kind: "site_data" },
       { key: "pureau", label: "Pureau", kind: "site_data" },
     ]);
     expect(tuiles.manufacturerSpecs.map((s) => s.key).sort()).toEqual(["largeur_utile", "pureau_max", "pureau_min"]);
-    const ecran = requiredInputs(ROOFING_REFERENTIAL, "couverture-tuiles-emboitement", "ecran");
+    const ecran = requiredInputs(REFERENTIEL_COMPLET, "couverture-tuiles-emboitement", "ecran");
     expect(ecran.params.map((p) => p.key)).toEqual(["surface", "pente"]);
     expect(ecran.installationConditions.sort()).toEqual(["recouvrement_faible_pente", "recouvrement_forte_pente", "seuil_pente_ecran"]);
   });
 
   it("refuse une donnée incohérente plutôt que de la corriger", () => {
-    const broken: Referential = structuredClone(ROOFING_REFERENTIAL);
+    const broken: Referential = structuredClone(REFERENTIEL_COMPLET);
     broken.workItems[0]!.needs[1]!.unit = "m2"; // liteaux annoncés en m² alors que la formule donne des ml
     broken.products[0]!.attributes.largeur_utile = { ...broken.products[0]!.attributes.largeur_utile!, verification: { status: "verified" } };
     broken.products[1]!.attributes.epaisseur = { ...broken.products[1]!.attributes.epaisseur!, source: "inconnue" };
@@ -160,11 +160,11 @@ describe("référentiel couverture", () => {
 
 describe("moteur : ouvrage → besoins → achat", () => {
   // La mécanique du moteur se prouve SANS les hypothèses par défaut ni les pertes du référentiel du fondateur.
-  const ref = allVerified(sansHypotheses(ROOFING_REFERENTIAL));
+  const ref = allVerified(sansHypotheses(REFERENTIEL_COMPLET));
 
   it("calcule et explique : tuiles, liteaux, contre-liteaux, écran", () => {
     const r = computeWorkItem(ref, CASE);
-    expect(r.referentialVersion).toBe(ROOFING_REFERENTIAL.version);
+    expect(r.referentialVersion).toBe(REFERENTIEL_COMPLET.version);
 
     // 120 m² ÷ (0,268 m × 0,343 m) = 1 305,43 tuiles → 1 306 pièces.
     // 1 305,43 ÷ 240 par palette = 5,44 → ≈ 6 palettes (ordre de grandeur, la commande reste en pièces).
@@ -308,7 +308,7 @@ describe("moteur : ouvrage → besoins → achat", () => {
   });
 
   it("marque « provisoire » un calcul fait en brouillon (écran du validateur uniquement)", () => {
-    const r = computeWorkItem(drafted(ROOFING_REFERENTIAL), CASE, { acceptDraft: true });
+    const r = computeWorkItem(drafted(REFERENTIEL_COMPLET), CASE, { acceptDraft: true });
     expect(need(r, "tuiles")).toMatchObject({ status: "calculated", provisional: true, quantity: { value: "1344.59" } });
     // La caractéristique fabricant est vérifiée ; c'est la règle de calcul qui attend sa validation.
     expect(need(r, "tuiles").trace.find((t) => t.label.startsWith("Largeur utile"))).toMatchObject({ verified: true });
@@ -318,18 +318,18 @@ describe("moteur : ouvrage → besoins → achat", () => {
 
 describe("reconnaissance des appellations (devis client et fournisseurs)", () => {
   it("relie les appellations au produit, sans jamais prêter une marque à une description générique", () => {
-    const tile = identifyProducts("Couverture en tuiles HP10 rouge – 120 m²", ROOFING_REFERENTIAL);
+    const tile = identifyProducts("Couverture en tuiles HP10 rouge – 120 m²", REFERENTIEL_COMPLET);
     expect(tile.candidates.map((c) => c.product.id)).toEqual(["edilians-hp10-huguenot"]);
-    expect(identifyProducts("SOP'ÉCRAN HPV R2 1,50 x 50 m", ROOFING_REFERENTIAL, "underlay").candidates.map((c) => c.product.id)).toEqual([
+    expect(identifyProducts("SOP'ÉCRAN HPV R2 1,50 x 50 m", REFERENTIEL_COMPLET, "underlay").candidates.map((c) => c.product.id)).toEqual([
       "soprema-sop-ecran-hpv-r2-150x50",
     ]);
     // Cas trouvé par la simulation du devis 120 m² : « écran HPV » désigne la famille, pas le rouleau Soprema.
     for (const text of ["Écran HPV", "Membrane respirante sous-toiture", "Pare-pluie toiture haute perméance"]) {
-      expect(identifyProducts(text, ROOFING_REFERENTIAL, "underlay").candidates).toEqual([]);
+      expect(identifyProducts(text, REFERENTIEL_COMPLET, "underlay").candidates).toEqual([]);
       expect(classifyMaterial(text, tradeProfile("roofing"))?.code).toBe("underlay");
     }
-    expect(identifyProducts("Liteaux sapin 27 x 40", ROOFING_REFERENTIAL).candidates[0]?.product.shortLabel).toBe("Liteaux 27×40");
-    expect(identifyProducts("Tuile romane canal", ROOFING_REFERENTIAL).candidates).toEqual([]);
+    expect(identifyProducts("Liteaux sapin 27 x 40", REFERENTIEL_COMPLET).candidates[0]?.product.shortLabel).toBe("Liteaux 27×40");
+    expect(identifyProducts("Tuile romane canal", REFERENTIEL_COMPLET).candidates).toEqual([]);
   });
 });
 
@@ -352,7 +352,7 @@ describe("calcul sur intervalles (sûr : contient toujours toutes les valeurs po
 });
 
 describe("contexte chantier : une information trouvée n'importe où sert à tout l'ouvrage", () => {
-  const work = ROOFING_REFERENTIAL.workItems[0]!;
+  const work = REFERENTIEL_COMPLET.workItems[0]!;
   it("réunit les preuves concordantes, et signale les contradictions au lieu de choisir", () => {
     const { params, conflicts } = paramsFromContext(
       {

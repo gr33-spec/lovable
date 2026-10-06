@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ROOFING_REFERENTIAL, supplierTest } from "../src/index.js";
 import { describeLot, type Metier } from "./support/paquet.js";
 import { readQuote } from "./support/read-quote.js";
+import { readQuoteComplet } from "./support/complet.js";
 
 /**
  * LOT COUVERTURE, POINT 3 : gouttières PVC et aluminium (§15), mêmes règles que le zinc : longueurs de 4 m, crochets
@@ -19,8 +20,8 @@ const CAS: Metier[] = [
       { ref: "1", designation: "Gouttière PVC demi-ronde 25 grise avec 2 descentes", quantity: "18", unit: "ml" },
       { ref: "2", designation: "Descente PVC Ø80 grise, hauteur 5 m", quantity: "2", unit: "u" },
     ],
-    questions: ["Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?", "Combien d'angles sur cette gouttière ?", "Un dauphin en pied de chaque descente ?"],
-    couleurs: { vert: 8, orange: 3, gris: 0 },
+    questions: [],
+    couleurs: { vert: 3, orange: 0, gris: 0 },
   },
   {
     nom: "Gouttière alu anthracite sans développé",
@@ -30,8 +31,8 @@ const CAS: Metier[] = [
       { ref: "1", designation: "Gouttière aluminium laqué anthracite, 2 angles", quantity: "11", unit: "ml" },
       { ref: "2", designation: "Descente alu Ø80, hauteur 5 m", quantity: "1", unit: "u" },
     ],
-    questions: ["Gouttière de 25, de 28, de 33 ou de 40 ?", "Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?", "Un dauphin en pied de chaque descente ?"],
-    couleurs: { vert: 3, orange: 3, gris: 0 },
+    questions: ["Gouttière de 25, de 28, de 33 ou de 40 ?"],
+    couleurs: { vert: 1, orange: 1, gris: 0 },
   },
 ];
 
@@ -50,7 +51,7 @@ const got = (v: ReturnType<typeof readQuote>) => Object.fromEntries(v.toBuy.map(
 
 describe("gouttières PVC et alu : les règles du zinc, la matière lue dans la ligne", () => {
   it("PVC, 26 m d'une ligne, 1 angle : 7 longueurs, 6 jonctions, 2 talons, 1 angle, 1 naissance, 2 joints de dilatation", () => {
-    const v = readQuote([{ ref: "1", designation: "Gouttière PVC 33 blanche, 1 descente, 1 angle", quantity: "26", unit: "ml" }], {
+    const v = readQuoteComplet([{ ref: "1", designation: "Gouttière PVC 33 blanche, 1 descente, 1 angle", quantity: "26", unit: "ml" }], {
       "param:fixation_crochet": u("1"),
       "param:diametre_descente": u("100", "mm"),
       "param:zone": u("1"),
@@ -68,7 +69,7 @@ describe("gouttières PVC et alu : les règles du zinc, la matière lue dans la 
   });
 
   it("« 2 x 10 m » : deux lignes, deux fois les talons ; aucune ligne au-delà de 12 m, pas de joint de dilatation", () => {
-    const v = readQuote([{ ref: "1", designation: "Gouttière PVC de 25 sable (Longueur : 2 x 10 m), 2 descentes", quantity: "20", unit: "ml" }], {
+    const v = readQuoteComplet([{ ref: "1", designation: "Gouttière PVC de 25 sable (Longueur : 2 x 10 m), 2 descentes", quantity: "20", unit: "ml" }], {
       "param:fixation_crochet": u("1"),
       "param:diametre_descente": u("80", "mm"),
       "param:nb_angles": u("0"),
@@ -78,9 +79,9 @@ describe("gouttières PVC et alu : les règles du zinc, la matière lue dans la 
   });
 
   it("sans teinte, le comptoir la demande ; la gouttière zinc garde ses règles (pas de talon, pas de teinte)", () => {
-    const pvc = readQuote([{ ref: "1", designation: "Gouttière PVC de 25", quantity: "8", unit: "ml" }]);
+    const pvc = readQuoteComplet([{ ref: "1", designation: "Gouttière PVC de 25", quantity: "8", unit: "ml" }]);
     expect(pvc.questions.map((q) => q.question?.text)).toContain("Gouttière : grise, blanche, sable, brune ou anthracite ?");
-    const zinc = readQuote([{ ref: "1", designation: "Gouttière zinc demi-ronde de 25", quantity: "8", unit: "ml" }]);
+    const zinc = readQuoteComplet([{ ref: "1", designation: "Gouttière zinc demi-ronde de 25", quantity: "8", unit: "ml" }]);
     expect(zinc.questions.map((q) => q.question?.text)).not.toContain("Gouttière : grise, blanche, sable, brune ou anthracite ?");
   });
 

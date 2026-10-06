@@ -259,6 +259,8 @@ export interface ParamDef {
   fromWorks?: { value: string; workItems: string[] }[];
   /** Lue sur un autre ouvrage seulement si c'est un ouvrage principal (l'aspect du zinc de la couverture, pas d'une bande). */
   onlyFromPrincipal?: true;
+  /** Jamais prêtée par un autre ouvrage : « tu façonnes ? » se demande pièce par pièce (§48.6). */
+  ownOnly?: true;
 }
 
 /**
@@ -340,6 +342,16 @@ export interface Slot {
    * et la forme de la gouttière : « zinc demi-ronde »).
    */
   charsFrom?: string;
+  /**
+   * RÈGLE NUMÉRO UN (fondateur, 2026-10-06) : cet emplacement est une autre FORME de l'article écrit dans l'emplacement
+   * nommé (les feuilles 2 × 1 m d'une bande que l'artisan façonne, les bobines d'une couverture joint debout) : il existe
+   * dès que cet article est écrit au devis.
+   */
+  formOf?: string;
+  /** Accessoire indissociable de l'ouvrage écrit (la naissance d'une gouttière, §48.7) : seul article ajouté d'office. */
+  indissociable?: true;
+  /** La ligne écrite en mètres se commande en longueurs : « 2 descentes de 3 m » = 2 longueurs de 3 m (D-2026-020). */
+  piecesFrom?: { count: string; length: string };
 }
 
 /**
@@ -473,4 +485,9 @@ export interface Referential {
   wasteRules: WasteRule[];
   /** Ouvrages comptés à l'unité dans les devis (vocabulaire). */
   countedWorks?: CountedWork[];
+  /**
+   * RÈGLE NUMÉRO UN : seuls les articles écrits au devis sortent (leur forme d'achat comprise), plus les accessoires
+   * indissociables. Aucun article « du métier » ajouté d'office, ni en vert, ni en orange, ni en suggestion.
+   */
+  writtenOnly?: true;
 }

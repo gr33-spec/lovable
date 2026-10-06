@@ -1114,14 +1114,16 @@ export class TakeoffService {
         title: "Info manquante",
         text: `Info manquante : ${n.question!.text.replace(/ Cela change la commande :.*$/, "")} Vérifie-la avec ton fournisseur, ou corrige la ligne.`,
       }));
-    const flags = [...forbiddenFlags(confirmed), ...aiFlags.filter((f) => !f.key.startsWith(AI_ADDITION)), ...missing];
+    const flags = [...forbiddenFlags(confirmed, ref.writtenOnly === true), ...aiFlags.filter((f) => !f.key.startsWith(AI_ADDITION)), ...missing];
     const purchase = applyOrangeFlags(confirmed, flags, takeoff.answers);
-    const aiSuggestions = aiFlags
-      .filter((f) => f.key.startsWith(AI_ADDITION) && !(f.key in takeoff.answers) && f.suggestion)
+    // RÈGLE NUMÉRO UN : rien d'absent du devis, pas même en suggestion (ni de l'IA, ni des habitudes d'ajout).
+    const aiSuggestions = ref.writtenOnly
+      ? []
+      : aiFlags.filter((f) => f.key.startsWith(AI_ADDITION) && !(f.key in takeoff.answers) && f.suggestion)
       .map((f) => ({ key: f.key, label: f.suggestion!.label, quantity: f.suggestion!.quantity, unit: f.suggestion!.unit, reason: f.text.replace(/^À ajouter \? /, "") }));
     // Une ligne que l'entreprise ajoute à la main d'un chantier à l'autre est proposée aussi, si le devis ne l'a pas déjà.
     const present = new Set(takeoff.lines.map((l) => manualKey(l.designation)));
-    for (const m of (await this.reading.consumables?.manual(tenant)) ?? []) {
+    for (const m of ref.writtenOnly ? [] : ((await this.reading.consumables?.manual(tenant)) ?? [])) {
       if (purchase.suggestions.length >= MAX_SUGGESTIONS) break;
       if (present.has(m.key) || consumables.refused.has(m.key) || hidden.has(m.key)) continue;
       purchase.suggestions.push({
