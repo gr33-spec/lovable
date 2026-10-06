@@ -538,14 +538,15 @@ export function computeWithAnswers(
     // Habitude établie de l'entreprise (« je façonne », apprise sur deux chantiers) : vaut réponse quand ce
     // chantier n'en a pas donné d'autre ; dite comme telle dans le calcul, modifiable d'un tap.
     for (const def of work.params) {
-      const habit = preferences.params?.[def.key];
+      // L'habitude du lot (« la noue, je la façonne ») passe devant celle de toute la zinguerie.
+      const habit = preferences.params?.[`${def.key}@${input.workItemId}`] ?? preferences.params?.[def.key];
       if (def.kind !== "artisan_preference" || !habit || params[def.key] || answers[`param:${def.key}`] !== undefined || answers[scopedKey(def.key, input.workItemId)] !== undefined) continue;
       params[def.key] = { value: habit, unit: def.unit, origin: "artisan", evidence: "Habitude de votre entreprise" };
     }
     return { ...input, products, params, preferences: prefs, ...(declinedSlots.length > 0 ? { declined: declinedSlots } : {}) };
   });
   // Les données demandées pièce par pièce : seulement quand plusieurs ouvrages du devis en dépendent (sinon une question).
-  const piecewise = [...PER_PIECE].filter((key) => new Set(plan.inputs.filter((i) => ref.workItems.find((w) => w.id === i.workItemId)?.params.some((p) => `param:${p.key}` === key)).map((i) => i.workItemId)).size >= 2);
+  const piecewise = piecewiseParams(ref, plan);
   const run = (ins: WorkItemInput[]) => {
     const result = computeChantier(ref, ins, options);
     // Chaque besoin garde son ouvrage : il sera rattaché à la ligne du devis dont il provient.
@@ -555,7 +556,12 @@ export function computeWithAnswers(
     // §48.2 « zinc, pièce par pièce » : quand plusieurs ouvrages (noue, bandes, joint debout) demandent le façonnage,
     // la question se pose pour chacun, avec ses mots ; un seul ouvrage garde la question unique.
     for (const key of piecewise) {
-      for (const n of needs) if (n.question?.key === key) n.question = { ...n.question, key: scopedKey(key.slice("param:".length), n.workItemId) };
+      for (const n of needs) {
+        if (n.question?.key !== key) continue;
+        // Chaque lot dit son nom (deux lots peuvent partager la même phrase : bandes et abergement).
+        const lot = lotLabel(ref.workItems.find((w) => w.id === n.workItemId)?.label ?? "");
+        n.question = { ...n.question, key: scopedKey(key.slice("param:".length), n.workItemId), text: lot ? `${lot} : tu façonnes toi-même ou tu commandes façonné ?` : n.question.text };
+      }
     }
     const seen = new Set<string>();
     const questions: Question[] = [];
@@ -634,6 +640,14 @@ export function computeWithAnswers(
 
 /** Les données qui se demandent ouvrage par ouvrage (§48.2, « zinc, pièce par pièce ») : la clé porte l'ouvrage. */
 const PER_PIECE = new Set(["param:faconnage"]);
+/** Le nom d'un lot de zinguerie, tel que l'artisan le dit (« Noue zinc », « Bandes zinc (solin, rive, égout…) »). */
+export function lotLabel(label: string): string {
+  return label.replace(/\s*\([^)]*fa[cç]onn[^)]*\)/i, "").trim();
+}
+/** Les données posées lot par lot quand plusieurs ouvrages du devis en dépendent (§48.2, retour de Greg). */
+export function piecewiseParams(ref: Referential, plan: QuotePlan): string[] {
+  return [...PER_PIECE].filter((key) => new Set(plan.inputs.filter((i) => ref.workItems.find((w) => w.id === i.workItemId)?.params.some((p) => `param:${p.key}` === key)).map((i) => i.workItemId)).size >= 2);
+}
 /** « param:faconnage@noue » : la donnée « faconnage » de l'ouvrage « noue » seulement. */
 export const scopedKey = (name: string, workItemId: string) => `param:${name}@${workItemId}`;
 export function scopedParam(key: string): { name: string; workItemId: string } | null {
