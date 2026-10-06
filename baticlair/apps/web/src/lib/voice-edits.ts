@@ -73,11 +73,27 @@ const FILLER = new Set(["ok", "okay", "bon", "alors", "euh", "heu", "donc", "et"
 const stem = (w: string) => (w.length > 4 ? w.replace(/(es|s|x|e)$/, "") : w);
 const words = (t: string) => normalize(t).split(" ").filter((w) => w.length > 1 && !STOP.has(w) && !/^\d/.test(w));
 
+/** Le début d'une consigne : un verbe (« enlève », « mets », « j'ai oublié »…), accents ou pas. */
+const VERB_START = /(?:^|\s)((?:et\s+)?(?:enl[eè]ve|retire|supprime|vire|zappe|ajoute|rajoute|mets|mettre|passe|change|corrige|remplace|j['’]?\s?ai oubli[eé]|il manque|il (?:en )?faut|on n['’]?\s?a pas besoin|pas besoin|plus besoin))(?![\p{L}\d])/giu;
+
 export function segments(transcript: string): string[] {
-  return transcript
-    .split(/[.;!?\n]+|,(?!\d)|\bpuis\b|\bensuite\b|\bet (?=(?:tu |on |je )?(?:enleve|retire|supprime|vire|ajoute|rajoute|mets|passe|change|j ai oublie|il manque|il faut)\b)/i)
+  const pieces = transcript
+    .split(/[.;!?\n]+|,(?!\d)|\bpuis\b|\bensuite\b/i)
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
+  // Sans ponctuation (la dictée n'en met pas toujours) : « enlève l'écran j'ai oublié 2 cartouches » = deux consignes.
+  // On coupe devant chaque verbe qui suit déjà un verbe ; « les ardoises, mets-en 3 800 » reste une seule consigne.
+  const out: string[] = [];
+  for (const piece of pieces) {
+    const starts = [...piece.matchAll(VERB_START)].map((m) => m.index! + m[0].indexOf(m[1]!));
+    let from = 0;
+    for (const at of starts.slice(1)) {
+      out.push(piece.slice(from, at).trim());
+      from = at;
+    }
+    out.push(piece.slice(from).trim());
+  }
+  return out.filter((s) => s.length > 0);
 }
 
 /** « deux cent cinquante » → 250, « mille deux cents » → 1200, « quatre vingt » → 80. Null : pas un nombre dit en lettres. */

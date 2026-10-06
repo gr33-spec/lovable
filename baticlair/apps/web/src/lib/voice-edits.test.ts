@@ -87,3 +87,12 @@ test("« 3 rouleaux d'écran au lieu de 2 » : la quantité dite en premier", ()
   const [e] = parseEdits("il faut 3 rouleaux d'écran au lieu de 2", ITEMS);
   assert.deepEqual([e!.kind, (e as { itemKey: string }).itemKey, (e as { to: string }).to], ["set", "ecran", "3"]);
 });
+
+test("sans ponctuation (la dictée n'en met pas toujours) : un nouveau verbe, une nouvelle consigne", () => {
+  const edits = parseEdits("ok alors enlève l'écran j'ai oublié 2 cartouches de silicone et mets 3800 crochets", ITEMS);
+  assert.deepEqual(
+    edits.map((e) => e.kind),
+    ["remove", "add", "set"],
+  );
+  assert.equal((edits[1] as { label: string }).label, "Silicone");
+});
