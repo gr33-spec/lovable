@@ -8,11 +8,12 @@ type Recognition = {
   lang: string;
   interimResults: boolean;
   continuous: boolean;
-  onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+  onresult: ((e: { resultIndex: number; results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal?: boolean }> }) => void) | null;
   onend: (() => void) | null;
   onerror: ((e: { error?: string }) => void) | null;
   start: () => void;
   stop: () => void;
+  abort?: () => void;
 };
 
 function speechRecognition(): (new () => Recognition) | null {
@@ -26,22 +27,29 @@ const noSubscription = () => () => {};
 type Applied = { edit: VoiceEdit; ok: boolean };
 
 /**
- * §48.4 : LA VOIX SUR L'ÉCRAN DU QUANTITATIF, la liste sous les yeux. « Modifie ton quantitatif à la voix : dis-moi ce
- * que tu enlèves, ce que tu ajoutes, ce que tu as oublié. » Chaque morceau dit devient une modification de ligne,
- * appliquée tout de suite et montrée (« Ce que j'ai modifié »). Une zone de texte fait la même chose. La main reste :
- * plus / moins, crayon, corbeille, comme avant.
+ * §48.4 : LA VOIX SUR L'ÉCRAN DU QUANTITATIF, la liste sous les yeux. Retour de Greg (2026-10-06) : « je parle, je clique
+ * sur Terminer, ça modifie direct ». Le texte s'écrit pendant qu'il parle ; les silences ne coupent rien (le micro se
+ * relance seul, sur iPhone il s'arrête à chaque pause) ; « Terminer » applique tout de suite et montre « Ce que j'ai
+ * modifié ». Une zone de texte fait la même chose. La main reste : plus / moins, crayon, corbeille.
  */
 export function VoiceEditor({ items, pending, onApply }: { items: readonly VoiceItem[]; pending: boolean; onApply: (edit: Exclude<VoiceEdit, { kind: "unknown" }>) => Promise<boolean> }) {
   const id = useId();
   const [text, setText] = useState("");
   const [listening, setListening] = useState(false);
+  const [live, setLive] = useState("");
   const [busy, setBusy] = useState(false);
   const [micError, setMicError] = useState<string | null>(null);
   const [applied, setApplied] = useState<Applied[] | null>(null);
   const canDictate = useSyncExternalStore(noSubscription, () => speechRecognition() !== null, () => false);
   const recognition = useRef<Recognition | null>(null);
-  const said = useRef("");
+  /** Les morceaux définitifs, dans l'ordre ; et ce qui s'entend encore (provisoire). */
+  const finals = useRef<string[]>([]);
+  const interim = useRef("");
+  /** « Terminer » (appliquer) ou « Annuler » (rien) : sinon, une fin de micro est une pause, on relance. */
+  const ending = useRef<"apply" | "cancel" | null>(null);
   const field = useRef<HTMLTextAreaElement>(null);
+
+  const heard = () => [...finals.current, interim.current].map((x) => x.trim()).filter(Boolean).join(". ");
 
   async function apply(spoken: string) {
     const edits = parseEdits(spoken, items);
@@ -52,54 +60,118 @@ export function VoiceEditor({ items, pending, onApply }: { items: readonly Voice
     setBusy(false);
   }
 
-  function dictate() {
-    setMicError(null);
+  function listen() {
     const Ctor = speechRecognition();
-    if (!Ctor) {
-      field.current?.focus();
-      return;
-    }
-    if (listening) {
-      recognition.current?.stop();
-      return;
-    }
+    if (!Ctor) return;
     const r = new Ctor();
     r.lang = "fr-FR";
-    r.interimResults = false;
+    r.interimResults = true;
     r.continuous = true;
-    said.current = "";
     r.onresult = (e) => {
-      said.current = Array.from(e.results)
-        .map((x) => x[0]?.transcript ?? "")
-        .join(". ");
+      let now = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const res = e.results[i]!;
+        const t = (res[0]?.transcript ?? "").trim();
+        if (!t) continue;
+        if (res.isFinal) {
+          // iPhone : les résultats repartent de zéro après une pause, ou répètent la phrase en l'allongeant.
+          const last = finals.current[finals.current.length - 1];
+          if (last && (t === last || t.startsWith(last))) finals.current[finals.current.length - 1] = t;
+          else finals.current.push(t);
+        } else now += `${now ? " " : ""}${t}`;
+      }
+      interim.current = now;
+      setLive(heard());
     };
-    r.onerror = (e) => setMicError(e.error === "not-allowed" ? "Le micro est bloqué : autorise-le dans les réglages du téléphone, ou écris à côté." : "Je n'ai pas bien entendu. Réessaie, ou écris à côté.");
+    r.onerror = (e) => {
+      if (e.error === "no-speech" || e.error === "aborted") return;
+      ending.current = "cancel";
+      setMicError(e.error === "not-allowed" ? "Le micro est bloqué : autorise-le dans les réglages du téléphone, ou écris à côté." : "Je n'ai pas bien entendu. Réessaie, ou écris à côté.");
+    };
     r.onend = () => {
+      if (ending.current === null) {
+        // Une pause : le micro s'est coupé tout seul, on continue d'écouter.
+        try {
+          listen();
+          return;
+        } catch {
+          ending.current = "apply";
+        }
+      }
+      const what = ending.current;
+      ending.current = null;
+      recognition.current = null;
       setListening(false);
-      if (said.current.trim()) void apply(said.current.trim());
+      const spoken = heard();
+      if (what === "apply" && spoken) void apply(spoken);
     };
     recognition.current = r;
-    setListening(true);
     r.start();
   }
 
+  function startDictation() {
+    setMicError(null);
+    setApplied(null);
+    if (!speechRecognition()) {
+      field.current?.focus();
+      return;
+    }
+    finals.current = [];
+    interim.current = "";
+    ending.current = null;
+    setLive("");
+    setListening(true);
+    try {
+      listen();
+    } catch {
+      setListening(false);
+      setMicError("Le micro ne démarre pas. Écris à côté.");
+    }
+  }
+
+  function finish(how: "apply" | "cancel") {
+    ending.current = how;
+    const r = recognition.current;
+    if (!r) return;
+    if (how === "cancel" && r.abort) r.abort();
+    else r.stop();
+  }
+
   const disabled = pending || busy;
+  if (listening) {
+    return (
+      <section aria-label="Modifier à la voix" className="flex flex-col gap-3 rounded-[22px] bg-hero p-4 text-white shadow-[0_18px_40px_-16px_rgba(26,21,80,0.6)]">
+        <p className="flex items-center gap-2 text-[15px] font-extrabold">
+          <span aria-hidden="true" className="size-3 rounded-full bg-[#ff3d8b]" style={{ animation: "bc-ring 1.2s ease-out infinite" }} />
+          Je t&apos;écoute… parle normalement, puis touche « Terminer ».
+        </p>
+        <p aria-live="polite" aria-label="Ce que j'entends" className="min-h-20 rounded-2xl bg-white px-3 py-3 text-[16px] leading-snug text-ink">
+          {live || <span className="text-subtle">« enlève l&apos;écran, mets 40 crochets, j&apos;ai oublié 2 cartouches de silicone »</span>}
+        </p>
+        <button type="button" onClick={() => finish("apply")} className="flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-white text-[17px] font-extrabold text-accent-text active:scale-[0.98]">
+          <Check size={20} aria-hidden="true" />
+          Terminer
+        </button>
+        <button type="button" onClick={() => finish("cancel")} className="min-h-10 self-center text-[14px] font-bold text-white/80">
+          Annuler
+        </button>
+      </section>
+    );
+  }
   return (
     <section aria-label="Modifier à la voix" className="flex flex-col gap-3 rounded-[22px] bg-hero p-4 text-white shadow-[0_18px_40px_-16px_rgba(26,21,80,0.6)]">
       <div className="flex items-center gap-3">
         <button
           type="button"
-          onClick={dictate}
+          onClick={startDictation}
           disabled={disabled}
-          aria-label={listening ? "Arrêter et appliquer" : "Modifier à la voix"}
-          aria-pressed={listening}
-          className={`flex size-16 shrink-0 items-center justify-center rounded-full text-white transition active:scale-95 disabled:opacity-60 ${listening ? "bg-[#ff3d8b]" : "bg-cta shadow-cta"}`}
-          style={listening ? { animation: "bc-ring 1.2s ease-out infinite" } : undefined}
+          aria-label="Modifier à la voix"
+          className="flex size-16 shrink-0 items-center justify-center rounded-full bg-cta text-white shadow-cta transition active:scale-95 disabled:opacity-60"
         >
           <Mic size={28} aria-hidden="true" />
         </button>
         <p className="text-[15px] leading-snug font-bold">
-          {listening ? "Je t'écoute… touche le micro quand tu as fini." : "Modifie ton quantitatif à la voix : dis-moi ce que tu enlèves, ce que tu ajoutes, ce que tu as oublié."}
+          {busy ? "Je modifie ta liste…" : "Modifie ton quantitatif à la voix : dis-moi ce que tu enlèves, ce que tu ajoutes, ce que tu as oublié."}
         </p>
       </div>
       {micError ? (

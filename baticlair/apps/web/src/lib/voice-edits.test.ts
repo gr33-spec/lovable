@@ -55,3 +55,35 @@ test("deux lignes aussi proches l'une que l'autre : on ne choisit pas à la plac
   ];
   assert.equal(parseEdits("enlève la bande zinc", items)[0]!.kind, "unknown");
 });
+
+test("la parole telle qu'elle vient (retour de Greg, 2026-10-06) : le verbe n'importe où, des mots de remplissage, des nombres en lettres", () => {
+  const edits = parseEdits(
+    "Ok alors les liteaux c'est 500 mètres. On n'a pas besoin de l'écran. Euh, rajoute deux cent cinquante crochets. Et les ardoises, mets-en trois mille huit cents. Ok c'est tout.",
+    ITEMS,
+  );
+  assert.deepEqual(
+    edits.map((e) => (e.kind === "set" ? [e.kind, e.itemKey, e.to] : e.kind === "remove" ? [e.kind, e.itemKey] : [e.kind, e.heard])),
+    [
+      ["set", "liteaux", "500"],
+      ["remove", "ecran"],
+      ["set", "crochets", "3956"],
+      ["set", "ardoises", "3800"],
+    ],
+  );
+});
+
+test("« Ok » seul ne fait rien et ne dit pas « pas compris »", () => {
+  assert.deepEqual(parseEdits("Ok", ITEMS), []);
+  assert.deepEqual(parseEdits("ok c'est bon merci", ITEMS), []);
+});
+
+test("en retirer quelques-uns : « enlève 1 rouleau d'écran », « 6 crochets en moins »", () => {
+  const [a, b] = parseEdits("enlève 1 rouleau d'écran, 6 crochets en moins", ITEMS);
+  assert.deepEqual([a!.kind, (a as { to: string }).to], ["set", "1"]);
+  assert.deepEqual([b!.kind, (b as { to: string }).to], ["set", "3700"]);
+});
+
+test("« 3 rouleaux d'écran au lieu de 2 » : la quantité dite en premier", () => {
+  const [e] = parseEdits("il faut 3 rouleaux d'écran au lieu de 2", ITEMS);
+  assert.deepEqual([e!.kind, (e as { itemKey: string }).itemKey, (e as { to: string }).to], ["set", "ecran", "3"]);
+});
