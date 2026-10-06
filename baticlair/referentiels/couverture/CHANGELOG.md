@@ -1,5 +1,16 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.06-40 — §49, la charte du quantitatif (fondateur, 2026-10-06)
+
+Les prompts 41.1 (lecture, v12) et 41.2 (relecture, v4) sont branchés mot pour mot ; le §49 remplace tout ce qui le contredit.
+
+- **§49.1 D'où vient chaque ligne** : la règle numéro un vaut pour **tous les tiroirs, tous les métiers** (lot B compris : une cloison écrite, ce sont ses plaques ; rails, vis, bande, enduit seulement s'ils sont écrits). Une ligne par article écrit, **dans l'ordre du devis**, jamais fusionnée avec une autre ligne (les feuilles du faîtage, des rives et du porte-solin restent trois lignes). Accessoire indissociable : la **naissance seule** (le raccord de fenêtre de toit n'est plus ajouté d'office). Une ligne de pose qui cite un article sans le chiffrer (« fixation » des descentes) le fait sortir, calculé, orange (`citedBy`). Plus aucun bloc « Suggestions », plus aucun interdit « X sans Y ».
+- **§49.1 point 4 Consommables** : UNE question, « Consommables de pose : je les ajoute à la liste ? » (oui / non, mémorisable comme habitude). Oui : seulement ceux liés à une ligne écrite (vis et silicone des bandes, pattes du faîtage, silicone du porte-solin, **étain et décapant** quand la pose écrit des soudures), en orange, en fin de liste. Non : rien.
+- **§49.2 D'où vient chaque quantité** : la quantité écrite reste la base ; l'écart avec le calcul se dit « Le devis dit 20, le calcul donne 21 (…) ». Tuyau en **tubes** (« 2 tubes de 3 m »). Marge écrite dans la phrase d'hypothèse des ardoises (« 48 m² × 40,7 ardoises/m² (crochet 11 cm, pente 30°) + 5 % de marge »). Feuilles d'un zinc façonné : orange « ajuste selon ton façonnage ». Une valeur par défaut du tiroir non confirmée garde sa ligne orange.
+- **§49.2.5 Info manquante** : une ligne écrite qui attend une réponse ne disparaît plus : calculée sans la donnée, avec un « ? » à sa place (« Gouttière zinc Havraise dév. ? », 3 longueurs de 4 m), ou telle qu'écrite avec la quantité du devis (faîtage, porte-solin en attente du façonnage), orange « Info manquante : … ».
+- **§49.4 Questions** : celles du tiroir, plus le « manque » de la lecture (§41.1) quand le tiroir ne pose pas déjà la même ; jamais une question sur une donnée écrite.
+- Les tiroirs du lot B passent en `-2026.10.06-2` (article principal de chaque ouvrage mesuré). Test permanent : `packages/domain/test/devis-d2026-020.test.ts` (§49.6).
+
 ## roofing-2026.10.06-39 — RÈGLE NUMÉRO UN : rien d'absent du devis (fondateur, 2026-10-06)
 
 - **Règle numéro un** (`writtenOnly`) : BatiClair retranscrit ce que le devis écrit, avec ses quantités ; il n'ajoute jamais un article absent du devis, ni en vert, ni en orange, ni en suggestion. Un article sort seulement s'il est écrit dans une ligne, ou s'il en est la forme d'achat (`formOf` : feuilles 2 × 1 m d'une bande façonnée, bobines ou bacs d'un joint debout, plaques d'un bac acier, pièces d'une sortie de toit ou d'un abergement), ou s'il en est l'accessoire indissociable (`indissociable` : la naissance d'une gouttière, §48.7 ; le raccord d'une fenêtre de toit). Plus de liteaux, contre-liteaux, écran, pattes, pointes, colliers, dauphins, abouts, jonctions, talons, angles, vis, silicone… s'ils ne sont pas écrits ; plus de question à leur sujet. Les « On ajoute ? » et les interdits « X sans Y » sont coupés pour la couverture.

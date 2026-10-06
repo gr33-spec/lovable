@@ -827,12 +827,14 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   await expect(questions).toBeVisible({ timeout: 60_000 });
   await expect(page.getByRole("button", { name: /voix/ })).toHaveCount(0);
   await expect(page.getByRole("textbox")).toHaveCount(0);
-  // Tout ce qui manque au calcul : ce que le devis ne dit pas, les valeurs prises par défaut. RÈGLE NUMÉRO UN : jamais de
-  // « quincaillerie et consommables : on les ajoute ? », le devis n'en écrit pas.
+  // Tout ce qui manque au calcul : ce que le devis ne dit pas, les valeurs prises par défaut. §49.4 : les consommables ne
+  // sont jamais une liste d'articles proposés, seulement UNE question oui / non ; ici, non.
   await expect(page.getByRole("region", { name: "Ce que le devis ne dit pas" })).toBeVisible();
   await expect(page.getByRole("region", { name: "Je pars sur ces valeurs" })).toBeVisible();
   await expect(page.getByText("par défaut").first()).toBeVisible();
-  await expect(page.getByRole("region", { name: "Quincaillerie et consommables : on les ajoute ?" })).toHaveCount(0);
+  const consommables = page.getByRole("region", { name: "Quincaillerie et consommables : on les ajoute ?" });
+  await expect(consommables.getByText(/^Consommables de pose/)).toHaveCount(1);
+  await consommables.getByRole("button", { name: "Non", exact: true }).click();
   await questions.getByRole("button", { name: "Espagne 1er choix" }).click();
   await expect(questions.getByRole("button", { name: "Espagne 1er choix" })).toHaveAttribute("aria-pressed", "true");
   await questions.getByRole("button", { name: /Je commande façonné/ }).click();

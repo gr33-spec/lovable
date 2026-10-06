@@ -1,39 +1,78 @@
 import { describe, expect, it } from "vitest";
-import { siteNotesInstruction, takeoffSystemPrompt, TAKEOFF_PROMPT } from "../src/modules/takeoff/application/prompt.js";
+import { readFileSync } from "node:fs";
+import { PROMPT_A_41_1, siteNotesInstruction, takeoffSystemPrompt, TAKEOFF_PROMPT } from "../src/modules/takeoff/application/prompt.js";
 import { AnthropicTakeoffExtractor } from "../src/modules/takeoff/infrastructure/anthropic-takeoff-extractor.js";
 import { decodeExtraction, extractionWireSchema } from "../src/modules/takeoff/application/takeoff-extractor.js";
 
 /** PROMPT A (référentiel §41.1), branché mot pour mot : seules les accolades sont remplies, et le format technique est ajouté après. */
-describe("prompt A de lecture du devis (v9)", () => {
+describe("prompt A de lecture du devis (v12)", () => {
   const prompt = takeoffSystemPrompt("Couverture", ["Tuile", "Ardoise"], [
     { id: "couverture-ardoises-crochet", label: "Couverture en ardoises au crochet", synonyms: ["ardoise"] },
     { id: "couverture-zinc-joint-debout", label: "Couverture zinc à joint debout", synonyms: ["joint debout", "couverture zinc"] },
   ]);
 
-  it("est la version 11, reprend le texte du §41.1 tel quel, puis la règle numéro un du fondateur, prioritaire", () => {
-    expect(TAKEOFF_PROMPT.version).toBe(11);
-    expect(prompt).toContain("RÈGLE NUMÉRO UN (fondateur, prioritaire sur toute autre règle ci-dessus) : tu lis le devis ligne par ligne et tu retranscris ce qui est écrit, avec ses quantités.");
-    expect(prompt).toContain("Une ligne n'est jamais en doute pour un article qu'elle ne cite pas");
-    expect(prompt.indexOf("RÈGLE NUMÉRO UN")).toBeGreaterThan(prompt.indexOf("Tu renvoies uniquement le JSON"));
-    for (const sentence of [
-      "Tu lis le devis d'un artisan du bâtiment pour en extraire les ouvrages à quantifier. Tu ne calcules rien : tu structures.",
-      "MÉTIER DE L'ARTISAN : Couverture",
-      "1. Le devis fait foi. Tu ne corriges jamais une quantité, un matériau ou un format écrit sur le devis, même s'il te paraît faux. Tu le signales en doute.",
-      "2. Tu ne devines pas. Si le format d'ardoise, le modèle de tuile ou l'épaisseur du zinc n'est pas écrit, materiau = null.",
-      "3. Les lignes qui ne sont pas des ouvrages (déplacement, nettoyage, échafaudage, main-d'œuvre seule, TVA, remise) ont ouvrage = \"hors_quantitatif\".",
-      "5. Les pièges du vocabulaire du métier sont dans le référentiel chargé : \"couverture ardoise\" inclut souvent liteaux et écran, \"zinguerie\" peut vouloir dire gouttières seules. Dans ces cas, confiance = \"doute\".",
-      "Tu renvoies uniquement le JSON, sans commentaire.",
-    ]) {
-      expect(prompt).toContain(sentence);
-    }
-    // Le référentiel chargé : les ouvrages et leurs synonymes, injectés dans l'accolade.
-    expect(prompt).toContain("RÉFÉRENTIEL CHARGÉ : couverture-ardoises-crochet = Couverture en ardoises au crochet (synonymes : ardoise) ; couverture-zinc-joint-debout = Couverture zinc à joint debout (synonymes : joint debout, couverture zinc)");
-    expect(prompt).not.toContain("{metier}");
-    expect(prompt).not.toContain("{referentiel}");
-    // Le format technique vient APRÈS les règles, et se présente comme du contexte injecté.
-    expect(prompt.indexOf("FORMAT TECHNIQUE DE LA RÉPONSE (contexte injecté par BatiClair")).toBeGreaterThan(prompt.indexOf("Tu renvoies uniquement le JSON"));
-    // Jamais de question de calcul : seul un doute de lecture est demandé.
-    expect(prompt).not.toMatch(/combien de mètres linéaires|combien par paquet/);
+  it("est la version 12 : le §41.1 réécrit, mot pour mot (comparé au référentiel), puis le format technique ; plus de bloc « RÈGLE NUMÉRO UN » ajouté", () => {
+    expect(TAKEOFF_PROMPT.version).toBe(12);
+    const doc = readFileSync(new URL("../../../docs/referentiel-couverture.md", import.meta.url), "utf8");
+    const a = doc.slice(doc.indexOf("### 41.1 Prompt A"), doc.indexOf("### 41.2")).split("```")[1]!.replace(/^\n|\n$/g, "");
+    expect(PROMPT_A_41_1).toBe(a);
+    // Seuls les trous sont remplis : le métier, et les ouvrages du référentiel chargé avec leurs synonymes.
+    const filled = a
+      .replace("{metier}", "Couverture")
+      .replace("{liste des ouvrages de tous les tiroirs métier avec leurs synonymes, depuis vocabulaire.json}", "couverture-ardoises-crochet = Couverture en ardoises au crochet (synonymes : ardoise) ; couverture-zinc-joint-debout = Couverture zinc à joint debout (synonymes : joint debout, couverture zinc)");
+    expect(prompt.startsWith(filled)).toBe(true);
+    expect(prompt).not.toMatch(/\{metier\}|\{liste des ouvrages/);
+    // Le format technique vient APRÈS le texte du §41.1, comme du contexte injecté, et donne les noms courts des nouveaux champs.
+    const format = prompt.slice(filled.length);
+    expect(format.trimStart().startsWith("FORMAT TECHNIQUE DE LA RÉPONSE (contexte injecté par BatiClair")).toBe(true);
+    for (const field of ["role :", "articles :", "\"nom\", \"materiau\", \"quantite\", \"unite\", \"elements\"", "faconnage :", "manque :"]) expect(format).toContain(field);
+    // Le bloc ajouté autrefois en fin de prompt a disparu : la règle numéro un est DANS le §41.1.
+    expect(prompt.match(/RÈGLE NUMÉRO UN/g)).toHaveLength(1);
+    expect(prompt).not.toContain("(fondateur, prioritaire sur toute autre règle ci-dessus)");
+  });
+
+  it("une réponse v12 se décode : rôle, articles, façonnage et « manque » gardés avec la ligne ; « hors_quantitatif » n'est pas une ligne", () => {
+    const wire = extractionWireSchema.parse({
+      sections: [],
+      lignes: [
+        {
+          des: "Fourniture d'ardoises naturelles 32x22 et crochets de 11",
+          qte: "48",
+          unite: "m²",
+          ref: null,
+          src: ["1:004"],
+          sec: null,
+          role: "fourniture",
+          ouvrage: "couverture-ardoises-crochet",
+          materiau: "naturelle 32×22",
+          articles: [
+            { nom: "ardoises naturelles", materiau: "naturelle 32×22", quantite: "48", unite: "m²", elements: null },
+            { nom: "crochets", materiau: "inox 11", quantite: null, unite: null, elements: null },
+          ],
+          dimensions: null,
+          faconnage: null,
+          manque: [],
+          confiance: "sur",
+          doute: null,
+        },
+        { des: "Fourniture de gouttière Havraise en zinc", qte: "10", unite: "m", ref: null, src: ["1:006"], sec: null, role: "fourniture", ouvrage: "gouttiere", materiau: "zinc", articles: [{ nom: "gouttière Havraise", materiau: "zinc", quantite: "10", unite: "m", elements: null }], dimensions: null, faconnage: "fourni", manque: ["développé de la gouttière (25, 28, 33, 40)"], confiance: "sur", doute: null },
+        { des: "Déplacement", qte: "1", unite: "forfait", ref: null, src: ["1:012"], sec: null, role: "hors_quantitatif", ouvrage: "inconnu", materiau: null, articles: [], dimensions: null, faconnage: null, manque: null, confiance: "sur", doute: null },
+      ],
+      contexte: { client: "BATI INVEST" },
+      notes: [],
+    });
+    const out = decodeExtraction(wire);
+    expect(out.lines.map((l) => l.designation)).toEqual(["Fourniture d'ardoises naturelles 32x22 et crochets de 11", "Fourniture de gouttière Havraise en zinc"]);
+    expect(out.lines[0]!.reading).toEqual({
+      role: "fourniture",
+      articles: [
+        { nom: "ardoises naturelles", materiau: "naturelle 32×22", quantite: "48", unite: "m²", elements: null },
+        { nom: "crochets", materiau: "inox 11", quantite: null, unite: null, elements: null },
+      ],
+      faconnage: null,
+      manque: [],
+    });
+    expect(out.lines[1]!.reading).toMatchObject({ faconnage: "fourni", manque: ["développé de la gouttière (25, 28, 33, 40)"] });
   });
 
   it("une réponse v9 se décode : doute = confiance « doute » avec sa raison ; « hors_quantitatif » n'est pas une ligne à commander", () => {

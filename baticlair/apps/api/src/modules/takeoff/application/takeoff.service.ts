@@ -1,6 +1,7 @@
 import {
   AI_ADDITION,
   MISSING_INFO,
+  CONSUMABLES_KEY,
   AI_DOUBT,
   applyOrangeFlags,
   completionDossier,
@@ -501,6 +502,14 @@ export class TakeoffService {
         reference: l.reference?.trim() || null,
         material: l.material ?? null,
         dimensions: l.dimensions ?? null,
+        reading: l.reading
+          ? {
+              role: l.reading.role ?? null,
+              articles: l.reading.articles.map((a) => ({ nom: a.nom, materiau: a.materiau ?? null, quantite: a.quantite ?? null, unite: a.unite ?? null, elements: a.elements ?? null })),
+              faconnage: l.reading.faconnage ?? null,
+              manque: l.reading.manque,
+            }
+          : null,
         sourceRefs: l.sourceRefs,
         sourcePages: l.sourcePages,
         section: l.section.map((t) => t.trim()).filter((t) => t.length > 0),
@@ -902,7 +911,8 @@ export class TakeoffService {
       const own = referentialFor(takeoff.trade);
       const def = [...(own ? [own] : []), ...REFERENTIALS].flatMap((r) => r.workItems.flatMap((w) => w.params)).find((p) => p.key === name);
       // Une réponse pour UN lot (« param:faconnage@noue ») fait l'habitude de ce lot seulement (§48.2, lot par lot).
-      if (def?.kind === "artisan_preference") await this.memory.recordChoice(tenant, { kind: "param", key: `param:${scopedName}`, value: value.value, projectId: takeoff.projectId });
+      // §49.4 point 4 : la réponse consommables (oui / non) est une habitude de l'artisan, mémorisée comme les autres.
+      if (def?.kind === "artisan_preference" || name === CONSUMABLES_KEY) await this.memory.recordChoice(tenant, { kind: "param", key: `param:${scopedName}`, value: value.value, projectId: takeoff.projectId });
     }
     const after = await this.reload(tenant, takeoff.id);
     const text = (v: EngineAnswer | undefined) => (v === undefined ? null : v === null ? "aucun" : typeof v === "string" ? v : `${v.value} ${v.unit}`);
@@ -1095,7 +1105,9 @@ export class TakeoffService {
       context: takeoff.context ?? {},
       ville: communeOf(address),
     });
-    const overridden = applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref, validation, consumables }), takeoff.answers);
+    // §49.4 : le « manque » de chaque ligne (lecture §41.1) fait les questions du comptoir que le tiroir ne pose pas déjà.
+    const readings = new Map(takeoff.lines.flatMap((l) => (l.reading ? [[l.id, l.reading] as const] : [])));
+    const overridden = applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref, validation, consumables, readings }), takeoff.answers);
     const ruleKeys = [...new Set(overridden.toBuy.flatMap((b) => (b.rules ?? []).filter((r) => !r.local).map((r) => r.key)))];
     const validatedRules = ruleKeys.length > 0 ? ((await this.reading.rules?.validated(ruleKeys)) ?? new Set<string>()) : new Set<string>();
     const confirmed = applyRuleConfirmations(overridden, takeoff.answers, validatedRules);
@@ -1114,16 +1126,16 @@ export class TakeoffService {
         title: "Info manquante",
         text: `Info manquante : ${n.question!.text.replace(/ Cela change la commande :.*$/, "")} Vérifie-la avec ton fournisseur, ou corrige la ligne.`,
       }));
-    const flags = [...forbiddenFlags(confirmed, ref.writtenOnly === true), ...aiFlags.filter((f) => !f.key.startsWith(AI_ADDITION)), ...missing];
+    const flags = [...forbiddenFlags(confirmed), ...aiFlags.filter((f) => !f.key.startsWith(AI_ADDITION)), ...missing];
     const purchase = applyOrangeFlags(confirmed, flags, takeoff.answers);
     // RÈGLE NUMÉRO UN : rien d'absent du devis, pas même en suggestion (ni de l'IA, ni des habitudes d'ajout).
-    const aiSuggestions = ref.writtenOnly
+    const aiSuggestions = ref.writtenOnly !== false
       ? []
       : aiFlags.filter((f) => f.key.startsWith(AI_ADDITION) && !(f.key in takeoff.answers) && f.suggestion)
       .map((f) => ({ key: f.key, label: f.suggestion!.label, quantity: f.suggestion!.quantity, unit: f.suggestion!.unit, reason: f.text.replace(/^À ajouter \? /, "") }));
     // Une ligne que l'entreprise ajoute à la main d'un chantier à l'autre est proposée aussi, si le devis ne l'a pas déjà.
     const present = new Set(takeoff.lines.map((l) => manualKey(l.designation)));
-    for (const m of ref.writtenOnly ? [] : ((await this.reading.consumables?.manual(tenant)) ?? [])) {
+    for (const m of ref.writtenOnly !== false ? [] : ((await this.reading.consumables?.manual(tenant)) ?? [])) {
       if (purchase.suggestions.length >= MAX_SUGGESTIONS) break;
       if (present.has(m.key) || consumables.refused.has(m.key) || hidden.has(m.key)) continue;
       purchase.suggestions.push({

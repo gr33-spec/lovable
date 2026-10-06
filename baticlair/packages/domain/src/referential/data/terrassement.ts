@@ -34,7 +34,7 @@ const VOLUME: ParamDef = {
 
 export const TERRASSEMENT_REFERENTIAL: Referential = {
   id: "terrassement",
-  version: "terrassement-2026.10.05-1",
+  version: "terrassement-2026.10.06-2",
   trade: "earthworks",
   sources: [
     DEFINITION_SOURCE,
@@ -87,7 +87,7 @@ export const TERRASSEMENT_REFERENTIAL: Referential = {
       ],
       slots: [
         { key: "plateforme", family: "subbase_work", label: "Couche de forme", measureOnly: true },
-        { key: "gnt", family: "aggregate", label: "GNT", usual: { text: "GNT 0/31,5 en vrac.", source: USAGE, productId: "gnt-0-31" } },
+        { key: "gnt", formOf: "plateforme", family: "aggregate", label: "GNT", usual: { text: "GNT 0/31,5 en vrac.", source: USAGE, productId: "gnt-0-31" } },
       ],
       constants: {
         densite: rule("2000", "kg/m3", USAGE, todo("GNT compactée ≈ 2 t/m³ (§4)."), "GNT 2 t/m³ compactée"),
@@ -103,7 +103,7 @@ export const TERRASSEMENT_REFERENTIAL: Referential = {
       params: [lineQuantity("surface", "Surface", "m2", "Surface ?")],
       slots: [
         { key: "film_sol", family: "membrane_work", label: "Film", measureOnly: true },
-        { key: "film", family: "poly_film", label: "Film polyane", usual: { text: "Polyane 150 µm en rouleau 6 × 25 m.", source: POLYANE, productId: "polyane-150" } },
+        { key: "film", formOf: "film_sol", family: "poly_film", label: "Film polyane", usual: { text: "Polyane 150 µm en rouleau 6 × 25 m.", source: POLYANE, productId: "polyane-150" } },
       ],
       constants: { recouvrement: rule("1.2", "1", USAGE, todo("Recouvrements de 20 cm et remontées (§4)."), "film +20 % de recouvrements") },
       needs: [{ id: "film", slot: "film", formula: "surface * regle.recouvrement", unit: "m2", core: true, source: POLYANE, verification: ok(), version: 1 }],
@@ -116,7 +116,7 @@ export const TERRASSEMENT_REFERENTIAL: Referential = {
       params: [lineQuantity("nombre", "Nombre de fosses", "u", "Combien de fosses ?"), VOLUME],
       slots: [
         { key: "assainissement", family: "septic_work", label: "Assainissement", measureOnly: true },
-        { key: "fosse", family: "septic_tank", label: "Fosse", usual: { text: "Fosse polyéthylène.", source: DTU641, productId: "fosse" } },
+        { key: "fosse", formOf: "assainissement", family: "septic_tank", label: "Fosse", usual: { text: "Fosse polyéthylène.", source: DTU641, productId: "fosse" } },
       ],
       constants: {},
       needs: [

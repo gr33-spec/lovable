@@ -14,7 +14,7 @@ const LUNA = "luna-profix-3";
 
 export const MENUISERIE_INTERIEURE_REFERENTIAL: Referential = {
   id: "menuiserie-interieure",
-  version: "menuiserie-interieure-2026.10.05-1",
+  version: "menuiserie-interieure-2026.10.06-2",
   trade: "interior_joinery",
   sources: [
     DEFINITION_SOURCE,
@@ -90,7 +90,7 @@ export const MENUISERIE_INTERIEURE_REFERENTIAL: Referential = {
       params: [lineQuantity("longueur", "Longueur de plinthes", "m", "Longueur de plinthes ?")],
       slots: [
         { key: "plinthes", family: "skirting_work", label: "Plinthes", measureOnly: true },
-        { key: "plinthe", family: "skirting_board", label: "Plinthes", usual: { text: "Plinthe MDF 10 × 70, barre de 2,40 m.", source: USAGE, productId: "plinthe-240" } },
+        { key: "plinthe", formOf: "plinthes", family: "skirting_board", label: "Plinthes", usual: { text: "Plinthe MDF 10 × 70, barre de 2,40 m.", source: USAGE, productId: "plinthe-240" } },
         { key: "colle", family: "skirting_glue", label: "Mastic-colle", usual: { text: "Mastic-colle en cartouche.", source: BOSTIK, productId: "colle-plinthes" } },
       ],
       constants: { perte: rule("1.1", "1", USAGE, todo("Coupes d'angle et de porte (§5)."), "plinthes +10 % de coupe") },
@@ -107,7 +107,7 @@ export const MENUISERIE_INTERIEURE_REFERENTIAL: Referential = {
       params: [lineQuantity("surface", "Surface de lambris", "m2", "Surface de lambris ?")],
       slots: [
         { key: "lambris", family: "panelling_work", label: "Lambris", measureOnly: true },
-        { key: "lames", family: "panel_board", label: "Lames", usual: { text: "Lambris sapin en paquets.", source: USAGE, productId: "lambris-sapin" } },
+        { key: "lames", formOf: "lambris", family: "panel_board", label: "Lames", usual: { text: "Lambris sapin en paquets.", source: USAGE, productId: "lambris-sapin" } },
         { key: "clips", family: "panel_clip", label: "Clips", usual: { text: "Clips en boîte de 100.", source: LUNA, productId: "clips-100" } },
         { key: "tasseaux", family: "batten", label: "Tasseaux", usual: { text: "Tasseaux 27 × 40.", source: USAGE, productId: "tasseau-27x40" } },
       ],

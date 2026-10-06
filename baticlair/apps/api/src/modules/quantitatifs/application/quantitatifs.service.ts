@@ -245,7 +245,7 @@ export class QuantitatifsService {
         continue;
       }
       const key = q?.key ?? r.question.replace(/^engine:/, "");
-      if (!/^(?:product:[a-z0-9_]{1,40}|param:[a-z0-9_]{1,40}(?:@[a-z0-9_-]{1,60})?|(?:role|precise):[0-9a-f-]{36})$/.test(key)) throw validationFailed("Unknown question", [{ path: "question", message: r.question }]);
+      if (!/^(?:product:[a-z0-9_]{1,40}|param:[a-z0-9_]{1,40}(?:@[a-z0-9_-]{1,60})?|(?:role|precise):[0-9a-f-]{36}|comptoir:[0-9a-f-]{36}:\d{1,2})$/.test(key)) throw validationFailed("Unknown question", [{ path: "question", message: r.question }]);
       if (key.startsWith("role:") && r.valeur !== "measure" && r.valeur !== "purchase") throw validationFailed("Role answer must be measure or purchase", [{ path: "valeur", message: r.question }]);
       let value: EngineAnswer;
       if (r.valeur === null || !key.startsWith("param:")) value = r.valeur;
@@ -279,6 +279,16 @@ export class QuantitatifsService {
   ) {
     const row = await this.row(tenant, id);
     if (reponses.length > 0) await this.answer(tenant, id, reponses);
+    // §49.2.5 : les valeurs annoncées dans « Je pars sur ces valeurs » et gardées telles quelles sont CONFIRMÉES en lançant
+    // le calcul (elles ne gardent plus leur ligne orange) ; celles que l'artisan a changées ont déjà leur réponse.
+    const seen = await this.ready(tenant, row);
+    const plain = (t: string) => t.toLowerCase().replace(",", ".").trim();
+    const kept = seen.purchase.assumptions.flatMap((a) => {
+      if (!a.key.startsWith("param:") || (a.choices?.length ?? 0) < 2 || a.key in seen.takeoff.answers) return [];
+      const choice = a.choices!.find((c) => plain(c.label) === plain(a.value) || plain(c.value) === plain(a.value) || plain(c.label).startsWith(`${plain(a.value)} `));
+      return choice && /^\d+(?:[.,]\d+)?$/.test(choice.value) ? [{ question: a.key, valeur: choice.value, unite: a.unit }] : [];
+    });
+    if (kept.length > 0) await this.answer(tenant, id, kept);
     for (const a of ajouts) await this.correct(tenant, id, { action: "suggestion", id: a.id, reponse: a.reponse });
     // §48.2 « liteaux, écran, voliges : déjà sur place ? » (dépose / repose) : l'article sort de la liste.
     for (const itemKey of retraits) await this.correct(tenant, id, { action: "retirer_article", id: itemKey });

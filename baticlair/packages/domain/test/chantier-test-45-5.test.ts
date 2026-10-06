@@ -21,6 +21,8 @@ const REPONSES = {
   "param:developpe_gouttiere": u("33", "cm"),
   "param:fixation_crochet": u("2"),
   "param:diametre_descente": u("80", "mm"),
+  // §49.1 point 4 : l'artisan ne veut pas de consommables (sinon silicone et vis des bandes sortiraient, en orange).
+  "param:consommables": u("0"),
 };
 const line = (v: ReturnType<typeof readQuote>, label: string) => v.toBuy.find((b) => b.label.startsWith(label));
 
@@ -59,11 +61,11 @@ describe("chantier Test : les corrections du §45.5", () => {
     expect(line(v, "Bobineau")).toBeUndefined();
   });
 
-  it("descentes absentes du devis : une question, jamais une quantité d'office", () => {
+  it("descentes absentes du devis : une question, jamais une quantité d'office (la naissance sort vide, orange « Info manquante »)", () => {
     const { "param:nb_descentes": _n, ...sansDescentes } = REPONSES;
     const v = readQuote(TEST, sansDescentes);
     expect(v.questions.map((d) => d.question?.key)).toContain("param:nb_descentes");
-    expect(line(v, "Naissances")).toBeUndefined();
+    expect(line(v, "Naissances")).toMatchObject({ quantity: null, waitsOn: ["param:nb_descentes"] });
   });
 
   it("rien d'absent du devis, pas même en suggestion (ni silicone, ni vis) ; une ligne « mastic » du devis reste la sienne", () => {

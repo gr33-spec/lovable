@@ -1,6 +1,27 @@
 import { z } from "zod";
 import type { DocumentInput, ReadAttempt, ReadStatus } from "../../../platform/ai/document-reader.js";
 
+/** Un article écrit dans la ligne (§41.1 « articles ») : rien d'autre que ce qui est écrit. */
+const articleSchema = z.object({
+  nom: z.string(),
+  materiau: z.string().nullable().default(null),
+  quantite: z.string().nullable().default(null),
+  unite: z.string().nullable().default(null),
+  elements: z.string().nullable().default(null),
+});
+
+/**
+ * Ce que le prompt A (§41.1) dit de plus sur une ligne : son rôle (fourniture, pose…), les articles écrits, le
+ * façonnage écrit, et « manque » (ce que le comptoir demanderait encore, jamais une donnée écrite). Gardé avec la ligne.
+ */
+export const lineReadingSchema = z.object({
+  role: z.enum(["fourniture", "pose", "fourniture_et_pose", "hors_quantitatif"]).nullable(),
+  articles: z.array(articleSchema),
+  faconnage: z.enum(["artisan", "fourni"]).nullable(),
+  manque: z.array(z.string()),
+});
+export type LineReading = z.infer<typeof lineReadingSchema>;
+
 /** Réponse attendue de l'IA : des lignes qui citent le devis, jamais recopiées de mémoire. */
 export const extractionOutputSchema = z.object({
   lines: z.array(
@@ -19,6 +40,8 @@ export const extractionOutputSchema = z.object({
       workItem: z.string().optional(),
       material: z.string().nullable().optional(),
       dimensions: z.record(z.string(), z.string()).nullable().optional(),
+      /** Prompt A v12 (§41.1 réécrit) : rôle de la ligne, articles écrits, façonnage, ce que le comptoir demanderait encore. */
+      reading: lineReadingSchema.optional(),
     }),
   ),
   notes: z.array(z.string()),
@@ -52,6 +75,11 @@ export const extractionWireSchema = z.object({
       dimensions: z.record(z.string(), z.string()).nullable().default(null),
       /** « sur » ou « doute » (§41.1) ; absent dans une réponse à l'ancien format. */
       confiance: z.enum(["sur", "doute"]).nullable().default(null),
+      /** v12 (§41.1 réécrit) : absents dans une réponse à l'ancien format. */
+      role: z.enum(["fourniture", "pose", "fourniture_et_pose", "hors_quantitatif"]).nullable().default(null),
+      articles: z.array(articleSchema).nullable().default(null),
+      faconnage: z.enum(["artisan", "fourni"]).nullable().default(null),
+      manque: z.array(z.string()).nullable().default(null),
     }),
   ),
   notes: z.array(z.string()).default([]),
@@ -64,8 +92,9 @@ export type ExtractionWire = z.infer<typeof extractionWireSchema>;
 export function decodeExtraction(wire: ExtractionWire): ExtractionOutput {
   return {
     lines: wire.lignes
-      // Règle 3 du prompt A : déplacement, nettoyage, main-d'œuvre seule, TVA, remise ne sont pas des ouvrages à quantifier.
-      .filter((l) => l.ouvrage !== "hors_quantitatif")
+      // Déplacement, nettoyage, échafaudage, TVA, remise (rôle « hors_quantitatif » du §41.1) ne sont pas des ouvrages à
+      // quantifier. Une ligne de POSE est gardée : elle ne commande rien, mais ses données valent pour la fourniture.
+      .filter((l) => l.ouvrage !== "hors_quantitatif" && l.role !== "hors_quantitatif")
       .map((l) => {
         const refs = l.src.map((s) => s.trim()).filter((s) => s.length > 0);
         // Un doute (§41.1) est toujours accompagné de sa raison ; une raison sans « doute » annoncé compte aussi.
@@ -83,6 +112,16 @@ export function decodeExtraction(wire: ExtractionWire): ExtractionOutput {
           workItem: l.ouvrage?.trim() || "inconnu",
           material: l.materiau,
           dimensions: l.dimensions,
+          ...(l.role !== null || l.articles !== null || l.faconnage !== null || l.manque !== null
+            ? {
+                reading: {
+                  role: l.role,
+                  articles: l.articles ?? [],
+                  faconnage: l.faconnage,
+                  manque: (l.manque ?? []).map((m) => m.trim()).filter((m) => m.length > 0),
+                },
+              }
+            : {}),
         };
       }),
     notes: wire.notes,

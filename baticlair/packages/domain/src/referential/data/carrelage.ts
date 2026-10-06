@@ -247,6 +247,8 @@ const tileSlots = (measure: { key: string; family: string; label: string }) => [
   { ...measure, measureOnly: true as const },
   {
     key: "carreau",
+    // §49.1 : le carrelage écrit, ce sont ses carreaux ; colle et joints seulement s'ils sont écrits (ou sur le « oui »).
+    formOf: measure.key,
     family: "tile",
     label: "Carreaux",
     keywords: ["carreau", "carrelage", "gres", "faience"],
@@ -276,7 +278,7 @@ const tileSlots = (measure: { key: string; family: string; label: string }) => [
 
 export const CARRELAGE_REFERENTIAL: Referential = {
   id: "carrelage",
-  version: "carrelage-2026.10.05-1",
+  version: "carrelage-2026.10.06-2",
   trade: "tiling",
   sources: [
     DEFINITION_SOURCE,
@@ -462,7 +464,7 @@ export const CARRELAGE_REFERENTIAL: Referential = {
           measureOnly: true,
         },
         {
-          key: "plinthe",
+          key: "plinthe", formOf: "plinthes",
           family: "skirting_tile",
           label: "Plinthes carrelées",
           usual: {
@@ -501,7 +503,7 @@ export const CARRELAGE_REFERENTIAL: Referential = {
           measureOnly: true,
         },
         {
-          key: "spec",
+          key: "spec", formOf: "douche",
           family: "waterproofing_liquid",
           label: "SPEC liquide",
           usual: {
@@ -571,7 +573,7 @@ export const CARRELAGE_REFERENTIAL: Referential = {
           measureOnly: true,
         },
         {
-          key: "ragreage",
+          key: "ragreage", formOf: "ragreage_sol",
           family: "self_leveling",
           label: "Ragréage",
           usual: {

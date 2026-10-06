@@ -47,7 +47,7 @@ const STATIONS: ParamDef = {
 
 export const ARROSAGE_REFERENTIAL: Referential = {
   id: "arrosage",
-  version: "arrosage-2026.10.05-1",
+  version: "arrosage-2026.10.06-2",
   trade: "irrigation",
   sources: [
     DEFINITION_SOURCE,
@@ -84,7 +84,7 @@ export const ARROSAGE_REFERENTIAL: Referential = {
       slots: [
         { key: "pelouse", family: "irrigation_work", label: "Pelouse", measureOnly: true },
         { key: "tube", family: "pe_pipe", label: "Tube PE 25", usual: { text: "PE 25 en couronne de 50 m.", source: BRICOMARCHE, productId: "pe25-50" } },
-        { key: "arroseurs", family: "sprinkler", label: "Arroseurs", usual: { text: "Arroseurs escamotables.", source: USAGE, productId: "arroseur" } },
+        { key: "arroseurs", family: "sprinkler", label: "Arroseurs", keywords: ["arroseur", "tuyere", "turbine"], usual: { text: "Arroseurs escamotables.", source: USAGE, productId: "arroseur" } },
         { key: "vannes", family: "valve", label: "Électrovannes", usual: { text: "Électrovannes 24 V.", source: USAGE, productId: "electrovanne" } },
         { key: "programmateur", family: "controller", label: "Programmateur", usual: { text: "Programmateur sur secteur.", source: USAGE, productId: "programmateur" } },
       ],

@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
+import { confirmRemaining } from "./support/confirm.js";
 
 let ctx: TestContext;
 beforeAll(async () => {
@@ -33,6 +34,7 @@ describe("mode démo", () => {
     for (const line of takeoff.lines.filter((l: { status: string }) => l.status === "to_verify")) {
       await agent.post(`/v1/takeoff-lines/${line.id}/confirm`).expect(200);
     }
+    await confirmRemaining(agent, projectId, takeoff.id);
     await agent.post(`/v1/takeoffs/${takeoff.id}/validate`).expect(200);
 
     // Demande aux 3 fournisseurs fictifs ; chacun « répond » en un appui.
@@ -68,6 +70,7 @@ describe("mode démo", () => {
     for (const line of takeoff.lines.filter((l: { status: string }) => l.status === "to_verify")) {
       await a.agent.post(`/v1/takeoff-lines/${line.id}/confirm`).expect(200);
     }
+    await confirmRemaining(a.agent, projectId, takeoff.id);
     await a.agent.post(`/v1/takeoffs/${takeoff.id}/validate`).expect(200);
     const real = (await a.agent.post("/v1/suppliers").send({ name: "Point.P", email: "devis@pointp.fr" })).body;
     const request = (await a.agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [real.id] })).body;

@@ -13,8 +13,8 @@ const PAQUET: Metier[] = [
     ref: TERRASSE_BOIS_REFERENTIAL,
     metier: "terrasse-bois",
     bench: [{ ref: "1", designation: "Terrasse bois pin classe 4 sur lambourdes et plots réglables", quantity: "32", unit: "m²" }],
-    questions: ["Plots réglables : quelle hauteur ?"],
-    couleurs: { vert: 0, orange: 5, gris: 0 },
+    questions: ["Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?"],
+    couleurs: { vert: 0, orange: 1, gris: 0 },
   },
   {
     nom: "Pavage",
@@ -25,7 +25,7 @@ const PAQUET: Metier[] = [
       { ref: "2", designation: "Bordures béton T2", quantity: "28", unit: "ml" },
     ],
     questions: [],
-    couleurs: { vert: 0, orange: 3, gris: 0 },
+    couleurs: { vert: 0, orange: 2, gris: 0 },
   },
   {
     nom: "Terrassement",
@@ -45,7 +45,7 @@ const PAQUET: Metier[] = [
     metier: "arrosage",
     bench: [{ ref: "1", designation: "Arrosage automatique enterré de la pelouse, tuyères, 4 zones", quantity: "300", unit: "m²" }],
     questions: [],
-    couleurs: { vert: 1, orange: 3, gris: 0 },
+    couleurs: { vert: 0, orange: 1, gris: 0 },
   },
   {
     nom: "Constructeur, entreprise générale",
@@ -59,8 +59,8 @@ const PAQUET: Metier[] = [
       { ref: "5", designation: "Carrelage sol grès cérame 60x60 rectifié, pose droite", quantity: "75", unit: "m²" },
       { ref: "6", designation: "Peinture murs et plafonds mate, 2 couches", quantity: "260", unit: "m²" },
     ],
-    questions: ["Une couche d'impression : oui ou non ?"],
-    couleurs: { vert: 6, orange: 14, gris: 0 },
+    questions: ["Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?"],
+    couleurs: { vert: 2, orange: 4, gris: 0 },
   },
 ];
 

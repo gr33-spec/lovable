@@ -72,7 +72,7 @@ const LIAISON: ParamDef = {
 
 export const CHAUFFAGE_VENTILATION_REFERENTIAL: Referential = {
   id: "chauffage-ventilation",
-  version: "chauffage-ventilation-2026.10.05-1",
+  version: "chauffage-ventilation-2026.10.06-2",
   trade: "hvac",
   sources: [
     DEFINITION_SOURCE,
@@ -139,7 +139,7 @@ export const CHAUFFAGE_VENTILATION_REFERENTIAL: Referential = {
       params: [lineQuantity("nombre", "Nombre de VMC", "u", "Combien de VMC ?"), TYPE_VMC, SANITAIRES],
       slots: [
         { key: "vmcs", family: "vmc_work", label: "VMC", measureOnly: true },
-        { key: "kit", family: "vmc_kit", label: "Kit VMC", usual: { text: "Kit simple flux (type Atlantic Hygrocosy).", source: HYGROCOSY, productId: "kit-vmc" } },
+        { key: "kit", formOf: "vmcs", family: "vmc_kit", label: "Kit VMC", usual: { text: "Kit simple flux (type Atlantic Hygrocosy).", source: HYGROCOSY, productId: "kit-vmc" } },
         { key: "gaine_80", family: "vmc_duct_80", label: "Gaines Ø80", usual: { text: "Gaine isolée Ø80, filet de 6 m.", source: ALDES_GAINE, productId: "gaine-80" } },
         { key: "gaine_125", family: "vmc_duct_125", label: "Gaine Ø125", usual: { text: "Gaine isolée Ø125 pour la cuisine.", source: USAGE, productId: "gaine-125" } },
         { key: "adhesif", family: "alu_tape", label: "Adhésif aluminium", usual: { text: "Adhésif alu 50 m.", source: ALDES_ADHESIF, productId: "adhesif-alu" } },

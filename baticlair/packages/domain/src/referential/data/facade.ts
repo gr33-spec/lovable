@@ -55,7 +55,7 @@ const EPAISSEUR_ISOLANT: ParamDef = {
 
 export const FACADE_REFERENTIAL: Referential = {
   id: "facade",
-  version: "facade-2026.10.05-1",
+  version: "facade-2026.10.06-2",
   trade: "facade",
   sources: [
     DEFINITION_SOURCE,
@@ -129,7 +129,7 @@ export const FACADE_REFERENTIAL: Referential = {
       params: [lineQuantity("surface", "Surface enduite", "m2", "Surface à enduire ?"), FINITION],
       slots: [
         { key: "facade", family: "render_work", label: "Façade", measureOnly: true },
-        { key: "enduit", family: "render", label: "Enduit", usual: { text: "Monocouche OC2 en sac de 25 kg.", source: WEBER_PRAL, productId: "monocouche-25" } },
+        { key: "enduit", formOf: "facade", family: "render", label: "Enduit", usual: { text: "Monocouche OC2 en sac de 25 kg.", source: WEBER_PRAL, productId: "monocouche-25" } },
       ],
       constants: {
         perte: rule("1.05", "1", USAGE, todo("Reste en auge et projection (§5)."), "enduit +5 %"),
@@ -178,7 +178,7 @@ export const FACADE_REFERENTIAL: Referential = {
       ],
       slots: [
         { key: "facade", family: "ite_work", label: "ITE", measureOnly: true },
-        { key: "isolant", family: "ite_board", label: "Isolant", usual: { text: "Laine de roche ITE 1 200 × 600.", source: ECOROCK, productId: "ecorock" } },
+        { key: "isolant", formOf: "facade", family: "ite_board", label: "Isolant", usual: { text: "Laine de roche ITE 1 200 × 600.", source: ECOROCK, productId: "ecorock" } },
         { key: "mortier", family: "ite_mortar", label: "Mortier de collage et sous-enduit", usual: { text: "Mortier ITE en sac de 25 kg.", source: WEBER_THERM, productId: "therm-xm-25" } },
         { key: "treillis", family: "ite_mesh", label: "Treillis", usual: { text: "Treillis 4 × 4 en rouleau de 50 m².", source: STRIKOTHERM, productId: "treillis-50" } },
         { key: "rail", family: "start_rail", label: "Rail de départ", usual: { text: "Rail alu, barre de 2,50 m.", source: BIGMAT_RAIL, productId: "rail-depart" } },

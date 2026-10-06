@@ -18,8 +18,8 @@ const PAQUET: Metier[] = [
       { ref: "3", designation: "Point lumineux va-et-vient", quantity: "3", unit: "u" },
       { ref: "4", designation: "Tableau électrique 3 rangées", quantity: "1", unit: "u" },
     ],
-    questions: ["Appareillage : quelle gamme (Céliane, Odace, Dooxie…) ?", "Interrupteurs différentiels : type AC ou type A ?"],
-    couleurs: { vert: 4, orange: 5, gris: 0 },
+    questions: ["Appareillage : quelle gamme (Céliane, Odace, Dooxie…) ?"],
+    couleurs: { vert: 2, orange: 1, gris: 0 },
   },
   {
     nom: "Plomberie",
@@ -30,8 +30,8 @@ const PAQUET: Metier[] = [
       { ref: "2", designation: "Évacuations PVC Ø40 des appareils", quantity: "5", unit: "u" },
       { ref: "3", designation: "Plancher chauffant hydraulique rez-de-chaussée", quantity: "85", unit: "m²" },
     ],
-    questions: ["Raccords : à sertir (quel profil : TH, U, B) ou à visser ?"],
-    couleurs: { vert: 0, orange: 8, gris: 0 },
+    questions: ["Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?"],
+    couleurs: { vert: 0, orange: 3, gris: 0 },
   },
   {
     nom: "Menuiserie",
@@ -43,8 +43,8 @@ const PAQUET: Metier[] = [
       { ref: "3", designation: "Parquet flottant stratifié chêne naturel", quantity: "38", unit: "m²" },
       { ref: "4", designation: "Plinthes MDF blanches", quantity: "32", unit: "ml" },
     ],
-    questions: [],
-    couleurs: { vert: 3, orange: 5, gris: 0 },
+    questions: ["Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?"],
+    couleurs: { vert: 2, orange: 2, gris: 0 },
   },
   {
     nom: "Chauffage, ventilation",
@@ -54,8 +54,8 @@ const PAQUET: Metier[] = [
       { ref: "1", designation: "VMC simple flux hygroréglable, cuisine + 2 sanitaires", quantity: "1", unit: "u" },
       { ref: "2", designation: "Climatiseur mural monosplit 3,5 kW Daikin Perfera", quantity: "2", unit: "u" },
     ],
-    questions: ["VMC : autoréglable, hygro A ou hygro B ?"],
-    couleurs: { vert: 3, orange: 3, gris: 0 },
+    questions: ["VMC : autoréglable, hygro A ou hygro B ?", "Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?"],
+    couleurs: { vert: 1, orange: 1, gris: 0 },
   },
 ];
 

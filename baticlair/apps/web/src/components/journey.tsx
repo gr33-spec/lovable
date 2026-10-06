@@ -326,6 +326,9 @@ const SECTIONS: { kind: QuestionKind; title: string; text: string | null }[] = [
   { kind: "ajout", title: "Quincaillerie et consommables : on les ajoute ?", text: "Seuls ceux que tu valides ici entrent dans la liste." },
 ];
 
+/** La question consommables du moteur (§49.1 point 4). */
+const CONSUMABLES_KEY = "param:consommables";
+
 const ONSITE = /\b(liteaux?|contre-?liteaux?|[ée]cran|pare-?pluie|hpv|voliges?|voligeage)\b/i;
 const REWORK = /\b(d[ée]pose|repose|r[ée]fection|r[ée]novation|reprise)\b/i;
 
@@ -338,7 +341,8 @@ export function counterQuestions(takeoff: Takeoff): CounterQuestion[] {
       const engine = d.key.startsWith("engine:") || q.key.startsWith("param:");
       return {
         key: d.key,
-        kind: "decision",
+        // §49.4 : la question consommables (oui / non) a son bloc, « Quincaillerie et consommables ».
+        kind: q.key === CONSUMABLES_KEY ? "ajout" : "decision",
         text: engine ? d.text.replace(/ Cela change la commande :.*$/, "") : d.text,
         options: q.options,
         unit: q.unit,
@@ -355,7 +359,11 @@ export function counterQuestions(takeoff: Takeoff): CounterQuestion[] {
   const assumptions: CounterQuestion[] = takeoff.purchase.assumptions
     .filter((a) => /^(param|product):/.test(a.key) && a.choices.length > 1 && !asked.has(a.key))
     .map((a) => {
-      const usual = a.choices.find((c) => c.label === a.value || c.value === a.value || c.label.startsWith(a.value))?.value ?? null;
+      // La valeur dite (« 5,5 », « standard ») retrouvée parmi les boutons, quelle que soit sa graphie (§49.2.5 : elle part
+      // comme confirmée au calcul).
+      const plain = (t: string) => t.toLowerCase().replace(",", ".").trim();
+      const said = plain(a.value);
+      const usual = a.choices.find((c) => plain(c.label) === said || plain(c.value) === said || plain(c.label).startsWith(said) || plain(c.label).startsWith(`${said} `))?.value ?? null;
       return { key: a.key, kind: "assumption", text: `${a.label} ?`, options: a.choices, unit: a.key.startsWith("param:") ? a.unit : null, about: null, hint: a.note, numeric: false, usual };
     });
   // §48.2 : en dépose / repose, ce qui sert de support est peut-être déjà sur place.
@@ -395,13 +403,17 @@ export function counterQuestions(takeoff: Takeoff): CounterQuestion[] {
   return [...decisions, ...habits, ...assumptions, ...onsite, ...ajouts];
 }
 
-/** Ce qui part au calcul : seulement ce que l'artisan a touché (une hypothèse non touchée garde sa valeur dite). */
+/**
+ * Ce qui part au calcul : ce que l'artisan a touché, et les valeurs de « Je pars sur ces valeurs » qu'il a vues sans les
+ * changer : il les CONFIRME en lançant le calcul (§49.2.5 : une ligne reste orange tant qu'un défaut non confirmé la porte).
+ */
 export function counterAnswers(questions: readonly CounterQuestion[], given: Readonly<Record<string, Given>>): CounterAnswers {
   const out: Required<CounterAnswers> = { reponses: [], ajouts: [], retraits: [] };
   for (const q of questions) {
-    const g = given[q.key];
+    const g = given[q.key] ?? (q.kind === "assumption" && q.key.startsWith("param:") && q.usual !== null ? { value: q.usual, label: q.usual } : undefined);
     if (!g) continue;
-    if (q.kind === "ajout") out.ajouts.push({ id: q.key.slice("ajout:".length), reponse: g.value === "oui" ? "oui" : "non" });
+    if (q.kind === "ajout" && !q.key.startsWith("ajout:")) out.reponses.push({ question: q.key, valeur: g.value, unite: q.unit || "u" });
+    else if (q.kind === "ajout") out.ajouts.push({ id: q.key.slice("ajout:".length), reponse: g.value === "oui" ? "oui" : "non" });
     else if (q.kind === "onsite") {
       if (g.value === "place") out.retraits.push(q.key.slice("onsite:".length));
     } else if (q.unit !== null && (q.numeric || q.kind === "habit" || (q.kind === "assumption" && q.key.startsWith("param:")))) out.reponses.push({ question: q.key, valeur: g.value, unite: q.unit || "u" });

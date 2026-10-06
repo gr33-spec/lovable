@@ -44,24 +44,21 @@ describe("interdits par article", () => {
     expect(rules(view([item("Bouchon d'angle. Ensemble haut et bas.", "4", "pièces")]))).toEqual([]);
   });
 
-  it("les articles qui ne partent jamais seuls : ardoise sans crochets, tuile sans faîtage, joint debout sans pattes, gouttière sans crochets, bac acier sans vis", () => {
-    expect(rules(view([item("Ardoises naturelles 32x22", "9200", "pièces")]))).toEqual(["ardoise-sans-crochets"]);
-    expect(rules(view([item("Ardoises naturelles 32x22", "9200", "pièces"), item("Crochets d'ardoise inox", "9500", "pièces")]))).toEqual([]);
-    expect(rules(view([item("Tuiles romanes canal", "1250", "pièces")]))).toEqual(["tuile-sans-faitage"]);
-    // Le faîtage à préciser avec le fournisseur compte : rien à redire.
-    expect(rules(view([item("Tuiles romanes canal", "1250", "pièces")], ["Faîtage tuile ronde 12 ml"]))).toEqual([]);
-    expect(rules(view([item("Zinc joint debout en bobine 650 mm, 0,65 mm", "120", "ml")]))).toEqual(["joint-debout-sans-pattes"]);
-    expect(rules(view([item("Gouttière zinc demi-ronde dév. 33", "5", "longueurs de 4 m")]))).toEqual(["gouttiere-sans-crochets"]);
-    expect(rules(view([item("Bacs acier 1000 mm RAL 7016", "18", "pièces")]))).toEqual(["bac-acier-sans-vis"]);
+  it("§49.1 : un article absent du devis n'est jamais réclamé (ardoises sans crochets, tuiles sans faîtage, gouttière sans crochets…)", () => {
+    expect(rules(view([item("Ardoises naturelles 32x22", "9200", "pièces")]))).toEqual([]);
+    expect(rules(view([item("Tuiles romanes canal", "1250", "pièces")]))).toEqual([]);
+    expect(rules(view([item("Zinc joint debout en bobine 650 mm, 0,65 mm", "120", "ml")]))).toEqual([]);
+    expect(rules(view([item("Gouttière zinc demi-ronde dév. 33", "5", "longueurs de 4 m")]))).toEqual([]);
+    expect(rules(view([item("Bacs acier 1000 mm RAL 7016", "18", "pièces")]))).toEqual([]);
   });
 
-  it("à l'écran : la ligne passe orange avec la raison et l'article proposé ; « C'est bon » la lève", () => {
-    const v = view([item("Ardoises naturelles 32x22", "9200", "pièces")]);
+  it("à l'écran : la ligne passe orange avec la raison ; « C'est bon » la lève", () => {
+    const v = view([item("Ardoises naturelles 32x22", "200", "m²")]);
     const flags = forbiddenFlags(v);
     const shown = applyOrangeFlags(v, flags, {});
     const row = shown.screen.groups[0]!.rows[0]!;
-    expect(row).toMatchObject({ status: "check", decisionKey: flags[0]!.key, reason: "Interdit : Ardoises sans crochets ni clous dans la liste." });
-    expect(shown.questions[0]).toMatchObject({ primary: { label: "C'est bon" }, suggestion: { label: "Crochets d'ardoise inox" } });
+    expect(row).toMatchObject({ status: "check", decisionKey: flags[0]!.key, reason: "Interdit : vendu à la pièce, au ml ou en bobine, jamais au m². Le comptoir ne peut pas le charger tel quel." });
+    expect(shown.questions[0]).toMatchObject({ primary: { label: "C'est bon" } });
     expect(shown.canValidate).toBe(false);
     expect(applyOrangeFlags(v, flags, { [flags[0]!.key]: "ok" }).questions).toHaveLength(0);
   });

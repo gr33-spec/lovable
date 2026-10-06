@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
+import { confirmRemaining } from "./support/confirm.js";
 
 let ctx: TestContext;
 beforeAll(async () => {
@@ -32,6 +33,7 @@ describe("accueil : prochaine action de chaque chantier", () => {
     for (const line of takeoff.lines.filter((l: { status: string }) => l.status === "to_verify")) {
       await agent.post(`/v1/takeoff-lines/${line.id}/confirm`).expect(200);
     }
+    await confirmRemaining(agent, projectId, takeoff.id);
     await agent.post(`/v1/takeoffs/${takeoff.id}/validate`).expect(200);
     expect(await demo()).toMatchObject({ kind: "send_requests", label: "Envoyer les demandes" });
 

@@ -39,11 +39,13 @@ describe("la liste des fournitures, une couleur par ligne", () => {
     const check = rows(v).filter((r) => r.status === "check");
     // Règle du comptoir (§47.8) : la gouttière sans développé, les naissances sans nombre ne se chiffrent pas. RÈGLE NUMÉRO
     // UN : pas de crochets de gouttière (non écrits), donc pas de question sur leur pose.
+    // §49.2.5 : chaque ligne écrite qui attend une réponse sort quand même, orange « Info manquante » : telle qu'écrite
+    // quand rien ne se calcule sans la réponse (le façonnage), sinon calculée avec un « ? » (le développé).
     expect(check.map((r) => [label(v, r), r.decisionKey])).toEqual([
-      ["Zinc en bobine 500 mm ou Bacs joint debout zinc", "engine:param:faconnage@couverture-zinc-joint-debout"],
-      ["Bandes zinc façonnées ou Feuilles zinc 2 × 1 m", "engine:param:faconnage@bandes-zinc"],
-      ["Gouttière", "engine:param:developpe_gouttiere"],
-      ["Naissances", "engine:param:nb_descentes"],
+      ["Couverture zinc à joint debout gris", "engine:param:faconnage@couverture-zinc-joint-debout"],
+      ["Bandes zinc", "engine:param:faconnage@bandes-zinc"],
+      ["Gouttière zinc demi-ronde dév. ?", "engine:param:developpe_gouttiere"],
+      ["Naissances zinc demi-ronde", "engine:param:nb_descentes"],
       ["Jouées de lucarnes", "group:unknown"],
     ]);
     // Chaque ligne orange ouvre une vraie question de l'écran.
@@ -55,9 +57,9 @@ describe("la liste des fournitures, une couleur par ligne", () => {
     // Je façonne, 13 ml : des feuilles 2 × 1 m estimées d'après le développé (§48.6), qui vient alors.
     const apres = readQuote(TEST, { "param:faconnage": u("1") });
     expect(rows(apres).filter((r) => r.status === "check").map((r) => [label(apres, r), r.decisionKey])).toEqual([
-      ["Feuilles zinc 2 × 1 m", "engine:param:developpe"],
-      ["Gouttière", "engine:param:developpe_gouttiere"],
-      ["Naissances", "engine:param:nb_descentes"],
+      ["Bandes zinc", "engine:param:developpe"],
+      ["Gouttière zinc demi-ronde dév. ?", "engine:param:developpe_gouttiere"],
+      ["Naissances zinc demi-ronde", "engine:param:nb_descentes"],
       ["Jouées de lucarnes", "group:unknown"],
     ]);
     const tout = readQuote(TEST, TOUT);

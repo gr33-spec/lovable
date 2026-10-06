@@ -30,11 +30,13 @@ describe("joint debout : la question de façonnage, puis des lignes que le fourn
     expect(bought(v)["Couverture zinc joint debout"]).toBeUndefined();
     // RÈGLE NUMÉRO UN : seul ce que le devis écrit sort. Les voliges (ligne z3) se calculent déjà (91 × 1,05) ; pattes et
     // pointes, absentes du devis, ne sortent pas (avant : 519 coulissantes, 173 fixes, 1 384 pointes ajoutées d'office).
-    expect(bought(v)).toEqual({ "Voliges sapin 18×200 mm traité": "96 m²" });
+    // §49.2.5 : la couverture attend sa réponse (façonnage) : elle sort orange « Info manquante », sans quantité (jamais
+    // de m² au comptoir).
+    expect(bought(v)).toEqual({ "Couverture zinc à joint debout": null, "Voliges sapin 18×200 mm traité": "96 m²" });
   });
 
   it("« je façonne » : de la bobine au mètre linéaire, jamais au kg : 39 bacs × (5,5 m + 15 cm de surlongueur) = 221 ml de bobine 500 mm en bord de mer", () => {
-    const v = readQuote(DEVIS, { "param:faconnage": { value: "1", unit: "u" } });
+    const v = readQuote(DEVIS, { "param:faconnage": { value: "1", unit: "u" }, "param:consommables": { value: "0", unit: "u" } });
     expect(v.questions.filter((d) => d.question?.key === "param:faconnage")).toEqual([]);
     expect(bought(v)["Bobine zinc naturel 0,65 mm, largeur 500 mm"]).toBe("221 ml");
     expect(JSON.stringify(v.toBuy)).not.toMatch(/\bkg\b/);

@@ -1080,7 +1080,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.06-39",
+  version: "roofing-2026.10.06-40",
   writtenOnly: true,
   trade: "roofing",
   sources: [
@@ -1227,6 +1227,8 @@ export const ROOFING_REFERENTIAL: Referential = {
     // §45.8 : consommables SUGGÉRÉS (« On ajoute ? »), jamais ajoutés d'office : l'artisan répond oui ou non d'un tap.
     // Sans mots-clés : une ligne « mastic » du devis reste une ligne du devis, jamais rattachée à un ouvrage par eux.
     { code: "sealant", label: "Mastic, silicone", needUnit: "ml", attributes: [], keyAttributes: [], consumable: true },
+    { code: "solder", label: "Étain à souder", needUnit: "kg", attributes: [], keyAttributes: [], consumable: true },
+    { code: "flux", label: "Décapant zinc", needUnit: "u", attributes: [], keyAttributes: [], consumable: true },
     { code: "strip_screw", label: "Vis de bande", needUnit: "u", attributes: [], keyAttributes: [], consumable: true },
     { code: "clip_fixing", label: "Fixation de patte", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["pointe annelee", "pointes annelees", "vis de patte", "fixation de patte"], consumable: true },
     // Joint debout (§7, §36) : la ligne du devis est une SURFACE ; ce qui se commande, ce sont des bobines (au mètre linéaire) ou des bacs.
@@ -1775,6 +1777,13 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("cartouche-silicone-zinc", "sealant", "Cartouche de silicone neutre (ou mastic PU) compatible zinc", "Cartouches de silicone zinc", {
       sellingUnits: [{ id: "cartouche", label: { one: "cartouche", many: "cartouches" }, contains: packaging("8", "m", F, FOUNDER_DOC, "« 1 cartouche par 8 ml de joint » (§25.6)."), primary: true }],
     }),
+    // §25.3 : « Baguette de soudure étain 33 % (ou sans plomb SnZn), 220-250 g » ; « Décapant pour zinc : 1 flacon 250 ml ».
+    generic("baguette-etain-250", "solder", "Baguette d'étain 33 % pour soudure du zinc, 250 g", "Étain à souder en baguettes de 250 g", {
+      sellingUnits: [{ id: "baguette", label: { one: "baguette de 250 g", many: "baguettes de 250 g" }, contains: packaging("0.25", "kg", F, FOUNDER_DOC, "« Baguette de soudure étain 33 %, 220-250 g » (§25.3)."), primary: true }],
+    }),
+    generic("decapant-zinc-250", "flux", "Décapant pour soudure du zinc, flacon de 250 ml", "Décapant zinc, flacon de 250 ml", {
+      sellingUnits: [{ id: "flacon", label: { one: "flacon de 250 ml", many: "flacons de 250 ml" }, contains: ONE_PIECE, primary: true }],
+    }),
     // §25.5 : « Vis autoforeuses bandes de rive alu/zinc : 4/ml » ; la boîte de 200 : exemple du fondateur (§45.8).
     generic("vis-inox-4x40", "strip_screw", "Vis inox 4 × 40 mm pour bandes zinc", "Vis inox 4 × 40", {
       sellingUnits: [{ id: "boite", label: { one: "boîte de 200", many: "boîtes de 200" }, contains: packaging("200", "u", F, FOUNDER_DOC, "« Vis inox 4 × 40 : 1 boîte de 200 » (§45.8)."), primary: true }],
@@ -2141,6 +2150,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           exclusions: "Hors ardoises de rive, doublis à l'égout, coupes en noue et en arêtier (la perte de 5 % couvre casse et coupes de rive d'un pan simple).",
           // Le comptoir ne chiffre pas une ardoise sans sa qualité (§47.8) ; le format suit l'ardoise du devis.
           designation: "Ardoises naturelles {qualite_ardoise} {ardoise.longueur|cm#}×{ardoise.largeur|cm#}",
+          // §49.3.4 : la phrase d'hypothèse, la marge du tiroir écrite (§49.2.4).
+          precision: "{surface|m2} × {points.ardoises_m2|u/m2#} ardoises/m² (crochet {longueur_crochet|cm}, pente {pente|°}) + {marge} de marge",
           precisionRequires: ["qualite_ardoise"],
           source: "cupa-pureau-ardoises-m2",
           verification: FOUNDER_DOC,
@@ -2387,6 +2398,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: true,
           exclusions: "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
           precision: "pour {longueur_faitage|ml} de faîtage : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
+          estimate: "Estimation d'après le développé : ajuste selon ton façonnage",
           designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           precisionRequires: ["aspect_zinc"],
           source: F,
@@ -2399,6 +2411,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           formula: "longueur_faitage * regle.pattes_par_metre",
           unit: "u",
           core: true,
+          // §49.1 point 4 : « pattes si du zinc façonné est écrit », sur le « oui » consommables seulement.
+          consumable: true,
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
@@ -2459,6 +2473,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: true,
           exclusions: "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",
           precision: "pour {longueur_noue|ml} de noue : estimation d'après un développé de {developpe_noue|cm}, ajuste selon ton façonnage",
+          estimate: "Estimation d'après le développé : ajuste selon ton façonnage",
           designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           precisionRequires: ["aspect_zinc"],
           source: F,
@@ -2582,7 +2597,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       ],
       slots: [
         { key: "fenetre", family: "roof_window", label: "Fenêtres de toit", measureOnly: true, orderedAsWritten: true },
-        { key: "raccord", family: "roof_window_flashing", label: "Raccords d'étanchéité", usual: { text: "Un raccord par fenêtre, adapté à la couverture (§11).", source: F, productId: "raccord-fenetre-toit" }, indissociable: true },
+        { key: "raccord", family: "roof_window_flashing", label: "Raccords d'étanchéité", usual: { text: "Un raccord par fenêtre, adapté à la couverture (§11).", source: F, productId: "raccord-fenetre-toit" } },
       ],
       constants: {},
       needs: [
@@ -2660,6 +2675,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           exclusions: "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2) ; chutes non réemployées.",
           // §45.5 : une feuille dont on ne sait pas à quoi elle sert n'a rien à faire dans la liste.
           precision: "pour {longueur_bande|ml} de bande : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
+          estimate: "Estimation d'après le développé : ajuste selon ton façonnage",
           designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           precisionRequires: ["aspect_zinc"],
           source: F,
@@ -2725,6 +2741,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "porte_solin", family: "solin_support", label: "Bandes porte-solin", usual: { text: "Bande porte-solin, longueurs de 2 m (§7).", source: F, productId: "porte-solin-standard" } },
         { key: "feuille", family: "zinc_sheet", label: "Feuilles zinc 2 × 1 m", usual: { text: "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).", source: F, productId: "feuille-zinc-2x1" }, formOf: "porte_solin" },
         { key: "mortier", family: "solin_mortar", label: "Mortier de solin", keywords: ["mortier"], usual: { text: "Ciment 35 kg + sable pour le solin (estimation du fondateur).", source: F, productId: "ciment-sable-solin" } },
+        { key: "mastic", family: "sealant", label: "Silicone ou mastic", usual: { text: "Silicone neutre compatible zinc, 1 cartouche par 8 ml de joint (§25.6).", source: F, productId: "cartouche-silicone-zinc" } },
       ],
       constants: {
         ...ZINC_PLAT_CONSTANTS,
@@ -2756,6 +2773,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: true,
           exclusions: "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
           precision: "pour {longueur_bande|ml} de porte-solin : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
+          estimate: "Estimation d'après le développé : ajuste selon ton façonnage",
           designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           precisionRequires: ["aspect_zinc"],
           source: F,
@@ -2771,6 +2789,21 @@ export const ROOFING_REFERENTIAL: Referential = {
           exclusions: "Mortier du solin cité au devis ; quantité estimée, pas calculée.",
           designation: "Ciment 35 kg + sable (mortier de solin)",
           precision: "pour le solin au mortier de ciment",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        // §49.1 point 4 : « silicone si des solins ou abergements sont écrits », seulement sur le « oui » consommables.
+        {
+          id: "mastic-porte-solin",
+          slot: "mastic",
+          formula: "longueur_bande",
+          unit: "ml",
+          core: false,
+          consumable: true,
+          consumableFor: "porte_solin",
+          exclusions: "Un joint sur toute la longueur du porte-solin ; 1 cartouche par 8 ml (§25.6).",
+          precision: "pour {longueur_bande|ml} de joint de solin",
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
@@ -3485,8 +3518,15 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "profil", family: "gutter", label: "Gouttière", usual: { text: "Longueurs de 4 m ; le profil (demi-ronde de 25, de 33…) suit le devis.", source: F, productId: "gouttiere-standard-4m" } },
         { key: "crochet", family: "gutter_hook", label: "Crochets", keywords: ["crochet"], usual: { text: "Un crochet tous les 50 cm (40 cm en bord de mer).", source: F, productId: "crochet-gouttiere-standard" } },
         { key: "naissance", family: "gutter_outlet", label: "Naissances", charsFrom: "profil", usual: { text: "Une naissance par descente.", source: F, productId: "naissance-standard" }, indissociable: true },
+        // §49.1 point 4 : « étain et décapant si du zinc à souder est écrit » (« réalisation des soudures » à la pose).
+        { key: "etain", family: "solder", label: "Étain à souder", citedBy: ["soudure", "soudures", "souder"], usual: { text: "Baguettes d'étain 33 % de 250 g (§25.3).", source: F, productId: "baguette-etain-250" } },
+        { key: "decapant", family: "flux", label: "Décapant zinc", usual: { text: "Décapant pour zinc, flacon de 250 ml (§25.3).", source: F, productId: "decapant-zinc-250" } },
       ],
       constants: {
+        // §2 : « Jonctions (soudure) : nb longueurs − 1 par ligne ; étain + décapant ≈ 15 g/jonction » (à valider, §25.7).
+        etain_par_jonction: rule("0.015", "kg", F, todo("§2 et §25.3 : ≈ 15 g d'étain par jonction, à valider par un couvreur (§25.7)."), "étain {v} par jonction"),
+        longueur_barre_gouttiere: condition("4", "m", F, FOUNDER_DOC, "Gouttière zinc en longueurs de 4 m (§25.2)."),
+        flacons_decapant: rule("1", "u", F, todo("§25.3 : 1 flacon de 250 ml pour ≈ 40 ml de soudure, à valider (§25.7)."), "décapant {v} flacon pour les soudures"),
         espacement_crochet: condition("0.5", "m", F, FOUNDER_DOC),
         espacement_crochet_littoral: condition("0.4", "m", F, FOUNDER_DOC, "Zone 3 (bord de mer)."),
         zone_littorale: condition("3", "u", F, FOUNDER_DOC),
@@ -3544,6 +3584,34 @@ export const ROOFING_REFERENTIAL: Referential = {
           precisionRequires: ["developpe_gouttiere", "diametre_descente"],
           source: "baticlair-pratique-accessoires",
           verification: FOUNDER_VALIDATED,
+          version: 1,
+        },
+        {
+          id: "etain-gouttiere",
+          slot: "etain",
+          formula: "(arrondi_sup(longueur_gouttiere / regle.longueur_barre_gouttiere) - 1 + nb_descentes) * regle.etain_par_jonction",
+          unit: "kg",
+          core: false,
+          consumable: true,
+          consumableFor: "etain",
+          exclusions: "Une jonction soudée par longueur de 4 m après la première, plus une par naissance.",
+          precision: "pour les soudures de {longueur_gouttiere|ml} de gouttière",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "decapant-gouttiere",
+          slot: "decapant",
+          formula: "regle.flacons_decapant",
+          unit: "u",
+          core: false,
+          consumable: true,
+          consumableFor: "etain",
+          exclusions: "Un flacon pour les soudures de la gouttière.",
+          precision: "pour les soudures de la gouttière",
+          source: F,
+          verification: FOUNDER_DOC,
           version: 1,
         },
       ],
@@ -3773,9 +3841,10 @@ export const ROOFING_REFERENTIAL: Referential = {
         },
       ],
       slots: [
-        { key: "tube", family: "downpipe", label: "Tubes de descente", usual: { text: "Le diamètre et la matière suivent le devis.", source: F, productId: "tube-descente-standard" }, piecesFrom: { count: "nb_descentes", length: "hauteur_descente" } },
+        { key: "tube", family: "downpipe", label: "Tubes de descente", usual: { text: "Le diamètre et la matière suivent le devis.", source: F, productId: "tube-descente-standard" }, piecesFrom: { count: "nb_descentes", length: "hauteur_descente", piece: { one: "tube", many: "tubes" } } },
         { key: "coude", family: "downpipe_elbow", label: "Coudes", charsFrom: "tube", usual: { text: "Coudes du même système que la descente.", source: F, productId: "coude-descente-standard" } },
-        { key: "collier", family: "downpipe_clamp", label: "Colliers", usual: { text: "Un collier tous les 2 m, plus un.", source: FR_REPLY_DESCENTES, productId: "collier-descente-standard" } },
+        // §49.6 : « fixation … des tuyaux de descente » sur la ligne de pose cite les colliers sans les chiffrer.
+        { key: "collier", family: "downpipe_clamp", label: "Colliers", citedBy: ["fixation", "fixations"], usual: { text: "Un collier tous les 2 m, plus un.", source: FR_REPLY_DESCENTES, productId: "collier-descente-standard" } },
         { key: "dauphin", family: "downpipe_shoe", label: "Dauphins", usual: { text: "Un dauphin par descente, 1 m (§15).", source: F, productId: "dauphin-standard" } },
       ],
       constants: {

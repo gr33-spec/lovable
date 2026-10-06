@@ -70,7 +70,7 @@ const R_VISE = {
 
 export const PLATRERIE_REFERENTIAL: Referential = {
   id: "platrerie",
-  version: "platrerie-2026.10.05-1",
+  version: "platrerie-2026.10.06-2",
   trade: "drywall",
   sources: [
     { id: F, kind: "trade_practice", title: "Référentiel quantitatif couverture-étanchéité (fondateur), section 16", documentRef: "docs/referentiel-couverture.md, section 16", retrievedAt: "2026-10-03" },
@@ -224,7 +224,7 @@ export const PLATRERIE_REFERENTIAL: Referential = {
           measureOnly: true,
         },
         {
-          key: "complexe",
+          key: "complexe", formOf: "doublage",
           family: "lining_board",
           label: "Complexes de doublage",
           usual: {
@@ -312,7 +312,7 @@ export const PLATRERIE_REFERENTIAL: Referential = {
           measureOnly: true,
         },
         {
-          key: "plaque",
+          key: "plaque", formOf: "plafond",
           family: "plasterboard",
           label: "Plaques BA13",
           usual: {
@@ -440,7 +440,7 @@ export const PLATRERIE_REFERENTIAL: Referential = {
           measureOnly: true,
         },
         {
-          key: "laine",
+          key: "laine", formOf: "combles",
           family: "blown_wool",
           label: "Laine à souffler",
           usual: {
@@ -518,7 +518,7 @@ export const PLATRERIE_REFERENTIAL: Referential = {
       ],
       slots: [
         { key: "cloison", family: "partition_72_48", label: "Cloison 72/48", measureOnly: true },
-        { key: "plaque", family: "plasterboard", label: "Plaques BA13", keywords: ["plaque", "ba13"], usual: { text: "BA13 1,20 × 2,50, une plaque par face (§16).", source: F, productId: "ba13-standard" } },
+        { key: "plaque", formOf: "cloison", family: "plasterboard", label: "Plaques BA13", keywords: ["plaque", "ba13"], usual: { text: "BA13 1,20 × 2,50, une plaque par face (§16).", source: F, productId: "ba13-standard" } },
         { key: "rail", family: "rail_48", label: "Rails R48", keywords: ["rail"], usual: { text: "Un rail en haut, un en bas.", source: "usage-plaquiste", productId: "rail-48-standard" } },
         { key: "montant", family: "stud_48", label: "Montants M48", keywords: ["montant"], usual: { text: "Un montant par entraxe, plus un.", source: "usage-plaquiste", productId: "montant-48-standard" } },
         { key: "vis", family: "board_screw", label: "Vis à plaque", keywords: ["vis"], usual: { text: "15 vis par m² de plaque (§16).", source: F, productId: "vis-plaque-standard" } },

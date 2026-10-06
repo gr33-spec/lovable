@@ -21,10 +21,14 @@ export const AI_DOUBT = "ia-doute:";
  */
 export const MISSING_INFO = "manque:";
 
-/** Ce que rend l'IA (repères du dossier : L = ligne du devis, A = article, F = à préciser avec le fournisseur). */
+/**
+ * Ce que rend l'IA (repères du dossier : L = ligne du devis, A = article, F = à préciser avec le fournisseur). Prompt B
+ * réécrit (§41.2, 2026-10-06) : des doutes seulement (repère, raison, proposition sans chiffre) ; « ajouts » est
+ * TOUJOURS vide, et ce qui y arriverait quand même est ignoré (§49.1 : rien d'autre que le devis).
+ */
 export interface CompletionWire {
-  ajouts: { ouvrage: string | null; designation: string; quantite: string | null; unite: string | null; raison: string }[];
-  doutes: { article: string; raison: string; remplacement: { designation: string | null; quantite: string | null; unite: string | null } | null }[];
+  doutes: { repere: string; raison: string; proposition: string | null }[];
+  ajouts: unknown[];
 }
 
 /** Ce qui est gardé avec le quantitatif : les repères déjà résolus en clés d'articles. */
@@ -88,15 +92,13 @@ export function completionRecord(wire: CompletionWire, dossier: CompletionDossie
   // Un ajout identique à un article déjà dans la liste n'est pas un ajout.
   const listed = new Set(Object.values(dossier.refs));
   return {
-    additions: wire.ajouts
-      .filter((a) => !blank(a.designation))
-      .slice(0, 20)
-      .map((a) => ({ nearItemKey: keyOf(a.ouvrage), label: clip(a.designation, 160), quantity: blank(a.quantite) ? null : a.quantite!.trim(), unit: blank(a.unite) ? null : a.unite!.trim(), reason: clip(a.raison) })),
-    doubts: wire.doutes.flatMap((d) => {
-      const itemKey = keyOf(d.article);
+    // §49.1 point 5 : jamais d'article proposé hors du devis, même si l'IA en rendait un.
+    additions: [],
+    // §41.2 : au plus 20 doutes ; la proposition est une désignation ou une unité, jamais une nouvelle quantité.
+    doubts: wire.doutes.slice(0, 20).flatMap((d) => {
+      const itemKey = keyOf(d.repere);
       if (!itemKey || !listed.has(itemKey)) return [];
-      const r = d.remplacement;
-      const replacement = r && !blank(r.designation) ? { label: clip(r.designation!, 160), quantity: blank(r.quantite) ? null : r.quantite!.trim(), unit: blank(r.unite) ? null : r.unite!.trim() } : null;
+      const replacement = !blank(d.proposition) ? { label: clip(d.proposition!, 160), quantity: null, unit: null } : null;
       return [{ itemKey, reason: clip(d.raison), replacement }];
     }),
   };

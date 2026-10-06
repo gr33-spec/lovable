@@ -29,32 +29,11 @@ const VAGUE_LABEL = /^(lot|forfait)\b|\b(forfait|selon besoin|fournitures? diver
 const unitOf = (order: { unit: string } | null, quantity: string | null) =>
   normalizeText(order?.unit ?? (quantity ?? "").replace(/^[\d\s  .,]+/, "")).trim();
 
-interface Companion {
-  rule: string;
-  /** L'article principal. */
-  main: RegExp;
-  /** Ce qui ne doit pas être là pour que la règle porte (« ardoise fibres-ciment » a ses propres crochets). */
-  unless?: RegExp;
-  /** Au moins un article de la liste doit nommer l'un de ces mots. */
-  needs: RegExp;
-  text: string;
-  suggestion: string;
-}
-
-/** Les articles qui ne partent jamais seuls : le comptoir les rappellerait. */
-const COMPANIONS: Companion[] = [
-  { rule: "ardoise-sans-crochets", main: /\bardoises?\b/, needs: /\b(crochets?|clous?|pointes?)\b/, text: "Ardoises sans crochets ni clous dans la liste.", suggestion: "Crochets d'ardoise inox" },
-  { rule: "tuile-sans-faitage", main: /\btuiles?\b/, unless: /\bfaitieres?\b/, needs: /\b(faitieres?|faitage|closoirs?)\b/, text: "Tuiles sans faîtières ni closoir de faîtage dans la liste.", suggestion: "Faîtières" },
-  { rule: "joint-debout-sans-pattes", main: /\bjoint debout\b/, unless: /\bpattes?\b/, needs: /\bpattes?\b/, text: "Joint debout sans pattes de fixation dans la liste.", suggestion: "Pattes coulissantes et fixes joint debout" },
-  { rule: "gouttiere-sans-crochets", main: /\bgouttieres?\b/, unless: /\bcrochets?\b/, needs: /\b(crochets?|naissances?)\b/, text: "Gouttière sans crochets dans la liste.", suggestion: "Crochets de gouttière" },
-  { rule: "bac-acier-sans-vis", main: /\bbacs? acier\b/, needs: /\bvis\b/, text: "Bac acier sans vis de fixation dans la liste.", suggestion: "Vis de fixation bac acier avec rondelle" },
-];
-
 /**
- * `writtenOnly` (règle numéro un, fondateur 2026-10-06) : un article absent du devis n'est jamais réclamé, pas même en
- * orange ; seuls restent les interdits de forme (m², lot, métal sans dimension).
+ * §49.1 et §41.2 (« un article que le devis n'écrit pas n'est jamais un doute ») : un article absent n'est jamais
+ * réclamé, pas même en orange ; seuls restent les interdits de forme (m², lot, métal sans dimension).
  */
-export function forbiddenFlags(purchase: PurchaseView, writtenOnly = false): OrangeFlag[] {
+export function forbiddenFlags(purchase: PurchaseView): OrangeFlag[] {
   const flags: OrangeFlag[] = [];
   const flag = (rule: string, itemKey: string, title: string, text: string, suggestion?: string) =>
     flags.push({ key: `${FORBIDDEN}${rule}:${itemKey}`, itemKey, title, text, ...(suggestion ? { suggestion: { label: suggestion, quantity: null, unit: null } } : {}) });
@@ -65,13 +44,6 @@ export function forbiddenFlags(purchase: PurchaseView, writtenOnly = false): Ora
     }
     if (has(b.label, VAGUE_LABEL) || VAGUE_UNIT.test(unit)) flag("vague", b.key, b.label, "Interdit : « lot », « forfait », « ensemble » : le comptoir ne sait pas quoi charger.");
     if (ML.test(unit) && has(b.label, METAL) && !has(b.label, DIMENSION)) flag("metal-ml", b.key, b.label, "Interdit : métal au mètre sans largeur, développé ni épaisseur.");
-  }
-  // Les articles qui ne partent jamais seuls : tout ce qui est dans la liste compte (à commander et à préciser).
-  const everything = [...purchase.toBuy.map((b) => b.label), ...purchase.toQuote.map((q) => q.label)];
-  for (const c of writtenOnly ? [] : COMPANIONS) {
-    const main = purchase.toBuy.find((b) => has(b.label, c.main) && !(c.unless && has(b.label, c.unless)));
-    if (!main || everything.some((l) => has(l, c.needs))) continue;
-    flag(c.rule, main.key, main.label, `Interdit : ${c.text}`, c.suggestion);
   }
   return flags;
 }

@@ -93,7 +93,7 @@ const seau15 = (source: string, verification = ok()) => inPacks("seau", "seau de
 
 export const PEINTURE_REFERENTIAL: Referential = {
   id: "peinture",
-  version: "peinture-2026.10.05-1",
+  version: "peinture-2026.10.06-2",
   trade: "painting",
   sources: [
     DEFINITION_SOURCE,
@@ -328,7 +328,7 @@ export const PEINTURE_REFERENTIAL: Referential = {
           measureOnly: true,
         },
         {
-          key: "finition",
+          key: "finition", formOf: "murs",
           family: "paint",
           label: "Peinture de finition",
           usual: {
@@ -407,7 +407,7 @@ export const PEINTURE_REFERENTIAL: Referential = {
           measureOnly: true,
         },
         {
-          key: "enduit",
+          key: "enduit", formOf: "enduit_murs",
           family: "filler",
           label: "Enduit de lissage",
           usual: {
@@ -448,7 +448,7 @@ export const PEINTURE_REFERENTIAL: Referential = {
           measureOnly: true,
         },
         {
-          key: "toile",
+          key: "toile", formOf: "toile_murs",
           family: "glassfibre",
           label: "Toile de verre",
           usual: {
@@ -461,6 +461,7 @@ export const PEINTURE_REFERENTIAL: Referential = {
           key: "colle",
           family: "wall_glue",
           label: "Colle toile de verre",
+          keywords: ["colle"],
           usual: {
             text: "Colle toile de verre prête à l'emploi, seau de 20 kg.",
             source: COLLE_TDV,
@@ -527,7 +528,7 @@ export const PEINTURE_REFERENTIAL: Referential = {
           measureOnly: true,
         },
         {
-          key: "papier",
+          key: "papier", formOf: "murs_papier",
           family: "wallpaper",
           label: "Papier peint",
           usual: {
@@ -593,7 +594,7 @@ export const PEINTURE_REFERENTIAL: Referential = {
           measureOnly: true,
         },
         {
-          key: "peinture",
+          key: "peinture", formOf: "facade",
           family: "facade_paint",
           label: "Peinture façade",
           usual: {

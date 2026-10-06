@@ -108,16 +108,17 @@ describe("la règle du comptoir (§47.8)", () => {
       "param:diametre_descente": u("80", "mm"),
     });
     expect(v.questions).toEqual([]);
+    // §49.1 : dans l'ordre du devis ; les consommables (pointes) ferment la liste.
     expect(v.toBuy.map((b) => b.label)).toEqual([
-      "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm", // §48.6 : feuilles 2 × 1 m, jamais de bobineau pour une bande
       "Bobine Quartz-Zinc 0,65 mm, largeur 500 mm",
       "Pattes coulissantes joint debout",
       "Pattes fixes joint debout",
-      "Pointes annelées 2,5 × 28 mm",
       "Voliges sapin 18×200 mm traité",
+      "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm", // §48.6 : feuilles 2 × 1 m, jamais de bobineau pour une bande
       "Gouttière zinc demi-ronde dév. 33",
       "Crochets de gouttière bandeau dév. 33",
       "Naissances zinc demi-ronde dév. 33 Ø80",
+      "Pointes annelées 2,5 × 28 mm",
     ]);
     for (const b of v.toBuy) expect(supplierTest(b.label, b.order?.unit ?? null)).toBeNull();
   });

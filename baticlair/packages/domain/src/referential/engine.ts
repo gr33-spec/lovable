@@ -51,6 +51,10 @@ export interface Assumption {
   note?: string;
   /** Réponses proposées en boutons. */
   choices?: { label: string; value: string }[];
+  /** Hypothèse tirée d'une donnée ÉCRITE au devis (le pureau d'après le crochet de 11) : pas un défaut à confirmer. */
+  fromQuote?: true;
+  /** Hypothèse CALCULÉE d'autres données (le pureau d'après la pente) : elle suit ses données, elle n'est pas un défaut en soi. */
+  computed?: true;
 }
 
 /**
@@ -87,7 +91,35 @@ export interface WorkItemInput {
   declined?: string[];
   /** Données dont l'hypothèse ne vaut pas : le devis les nomme sans les préciser (« zinc prépatiné »), on demande. */
   askInstead?: string[];
+  /**
+   * Emplacements qu'une ligne de POSE cite sans les chiffrer (« fixation » des descentes : les colliers), avec le mot
+   * qui les cite : l'article sort, calculé, orange (§49.6).
+   */
+  cited?: { slot: string; word: string; line: string }[];
 }
+
+/**
+ * §49.1 point 4 et §49.4 point 4 : LA question consommables, posée une fois (puis mémorisée par artisan). Oui : les
+ * consommables de pose liés aux lignes écrites sortent, orange ; non : rien.
+ */
+export const CONSUMABLES_KEY = "consommables";
+export const CONSUMABLES_QUESTION: Question = {
+  key: `param:${CONSUMABLES_KEY}`,
+  kind: "param",
+  text: "Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?",
+  hint: "Seulement ceux qui servent aux lignes écrites de ton devis, en orange : tu décoches ce que tu ne veux pas.",
+  unit: "u",
+  options: [
+    { label: "Oui", value: "1" },
+    { label: "Non", value: "0" },
+  ],
+};
+/** Un consommable de pose (§49.1 point 4) : marqué tel sur le besoin, ou d'une famille consommable. */
+export const isConsumableNeed = (ref: Referential, work: WorkItemType, rule: NeedRule): boolean => {
+  if (rule.consumable) return true;
+  const family = work.slots.find((s) => s.key === rule.slot)?.family;
+  return ref.families.find((f) => f.code === family)?.consumable === true;
+};
 
 export interface EngineOptions {
   /**
@@ -103,6 +135,11 @@ export interface EngineOptions {
   everyArticle?: boolean;
   /** La quantité seule (comparer au devis) : une donnée qui ne change que l'article (le développé) n'arrête pas le calcul. */
   quantityOnly?: boolean;
+  /**
+   * §49.2.5 « Info manquante » : avec `quantityOnly`, la désignation s'écrit quand même, la donnée inconnue y est un « ? »
+   * (« Gouttière zinc Havraise dév. ? ») ; jamais une valeur inventée.
+   */
+  blankUnknown?: boolean;
 }
 
 export interface Question {
@@ -175,6 +212,8 @@ export interface RuleToConfirm {
   conflict?: boolean;
   /** Propre à ce chantier (l'écart entre le devis et le calcul) : jamais comptée pour valider une règle (§47.4). */
   local?: true;
+  /** Une phrase entière, dite telle quelle (« Le devis dit 20, le calcul donne 21 ») : pas de « Quantité à confirmer : » devant. */
+  said?: true;
 }
 
 /** Libellé d'un conditionnement dans le calcul : « Contenu : 1 longueur de 3 m ». */
@@ -238,6 +277,12 @@ export interface NeedResult {
   precision?: string;
   /** Comment la quantité se compte (« pour 10 ml de gouttière, un tous les 50 cm + 1 en bout »), pour dire un écart avec le devis. */
   basis?: string;
+  /** Cité par une ligne de pose sans être chiffré (le mot qui le cite : « fixation ») : la ligne sort orange (§49.6). */
+  citedAs?: string;
+  /** Consommable de pose sorti sur le « oui » de l'artisan (§49.1 point 4) : orange, décochable. */
+  consumable?: true;
+  /** Données encore inconnues, sans effet sur la commande (le développé des feuilles) : la ligne attend leur réponse. */
+  unknownParams?: string[];
   trace: TraceLine[];
 }
 
@@ -370,18 +415,39 @@ export function computeWorkItem(ref: Referential, input: WorkItemInput, options:
   };
   // RÈGLE NUMÉRO UN : un article sort seulement s'il est écrit au devis (ou en est la forme d'achat), ou s'il en est
   // l'accessoire indissociable. Rien « du métier » d'office : pas d'écran, pas de liteaux, pas de colliers non écrits.
-  const written = (rule: NeedRule): boolean => {
-    if (!ref.writtenOnly || options.everyArticle) return true;
-    const slot = work.slots.find((s) => s.key === rule.slot);
+  // §49.1 : vaut pour TOUS les tiroirs, tous les métiers ; seule la validation du référentiel voit tous les articles.
+  const writtenSlot = (key: string): boolean => {
+    const slot = work.slots.find((s) => s.key === key);
     return !!slot && (input.mentioned.includes(slot.key) || slot.indissociable === true || (slot.formOf !== undefined && input.mentioned.includes(slot.formOf)));
+  };
+  const citedSlot = (key: string) => input.cited?.find((c) => c.slot === key && !input.mentioned.includes(key));
+  // Consommables de pose (§49.1 point 4) : seulement sur le « oui » de l'artisan, et liés à une ligne écrite.
+  const consumables = input.params[CONSUMABLES_KEY]?.value ?? input.preferences?.params?.[CONSUMABLES_KEY];
+  const consumableOf = (rule: NeedRule) => !writtenSlot(rule.slot) && isConsumableNeed(ref, work, rule);
+  const everything = options.everyArticle === true || ref.writtenOnly === false;
+  const written = (rule: NeedRule): boolean => {
+    if (everything || writtenSlot(rule.slot)) return true;
+    if (!isConsumableNeed(ref, work, rule)) return citedSlot(rule.slot) !== undefined;
+    if (consumables !== undefined && Number(consumables) < 1) return false;
+    // Lié à une ligne écrite : l'emplacement nommé (les soudures citées à la pose), sinon un article écrit de l'ouvrage.
+    return rule.consumableFor ? writtenSlot(rule.consumableFor) || citedSlot(rule.consumableFor) !== undefined : work.slots.some((s) => input.mentioned.includes(s.key));
   };
   const needs = work.needs
     .filter((rule) => written(rule) && (rule.requires ?? []).every(known) && applies(rule))
-    .map((rule) => {
+    .map((rule): NeedResult => {
+      const consumable = !everything && consumableOf(rule);
+      // Pas encore de réponse à la question consommables : elle se pose (une fois pour tout le chantier).
+      if (consumable && consumables === undefined) {
+        const slot = work.slots.find((x) => x.key === rule.slot)!;
+        return { needId: rule.id, slot: slot.key, family: slot.family, label: slot.label, slotLabel: slot.label, origin: "deduced", status: "question", question: CONSUMABLES_QUESTION, provisional: false, assumptions: [], trace: [], consumable: true };
+      }
       let exact: IntervalValue | undefined;
       const result = computeNeed(ref, work, rule, input, sources, options, done, (v) => (exact = v));
       done.set(rule.id, { result, ...(exact ? { exact } : {}) });
-      return result;
+      const cited = consumable ? undefined : citedSlot(rule.slot);
+      // Cité par la pose ou consommable accepté : il sort dans la liste (orange), jamais en simple suggestion.
+      const listed = (cited && !everything) || consumable ? { origin: result.origin === "suggested" ? ("deduced" as const) : result.origin } : {};
+      return { ...result, ...listed, ...(cited && !everything ? { citedAs: cited.word } : {}), ...(consumable ? { consumable: true as const } : {}) };
     });
   // La question qui débloque le plus de besoins demandés par le devis (à égalité : la première).
   const asked = needs.filter((n) => n.question && n.origin !== "suggested").map((n) => n.question!);
@@ -757,7 +823,7 @@ function computeNeed(
       const prov = provenanceLine(d, sources);
       const note = from?.note ?? d.note;
       trace.push({ label: def.label, value, unit: def.unit, ...displayed(def, d.value), ...(def.estimate ? { estimation: true } : {}), from: `Hypothèse${note ? ` : ${note}` : ""} (${prov.from})`, verified: prov.verified, ...(prov.url ? { url: prov.url } : {}), origin: "assumption" });
-      assume({ key: `param:${def.key}`, label: def.label, value: displayed(def, d.value).shown ?? value, unit: def.unit, ...(note ? { note } : {}), ...(def.choices ? { choices: def.choices } : {}) });
+      assume({ key: `param:${def.key}`, label: def.label, value: displayed(def, d.value).shown ?? value, unit: def.unit, ...(note ? { note } : {}), ...(def.choices ? { choices: def.choices } : {}), ...(from ? { fromQuote: true as const } : !from && d.formula ? { computed: true as const } : {}) });
       return v;
     }
     /**
@@ -930,6 +996,7 @@ function computeNeed(
       missing.splice(missingBefore);
     }
     const raw = evaluateInterval(expr, valueOf);
+    const unknownParams: string[] = [];
 
     // 3. Unité du besoin.
     const needUnit = parseRefUnit(rule.unit);
@@ -991,6 +1058,7 @@ function computeNeed(
       }
       // La donnée manque, mais aucune de ses valeurs possibles ne change la commande : pas de question.
       for (const m of missing) trace.push({ label: m.label, value: "inconnue", unit: "", from: "Sans effet sur la commande", verified: true });
+      unknownParams.push(...missing.map((m) => m.key));
     }
     // Une donnée qui change l'ARTICLE (le diamètre, le développé) sans changer la quantité : demandée quand même,
     // après celles qui changent la quantité (les questions qu'elle cache se découvrent en rejouant ses réponses).
@@ -1001,14 +1069,20 @@ function computeNeed(
     // Précision au comptoir (§45.3) : « {longueur_bande|m} » s'écrit avec la valeur du chantier ; une valeur
     // inconnue ou en fourchette retire la précision plutôt que d'écrire un chiffre douteux. « {x|mm#} » : le nombre
     // seul, dans cette unité (« bobineau 500 × 17 m »).
-    const render = (template: string): string | undefined => {
+    const render = (template: string, blank = false, sentence = false): string | undefined => {
       const traceLen = trace.length;
       const missingLen = missing.length;
+      // Écrire une phrase (précision) ne crée pas d'hypothèse ; la désignation, elle, dit les siennes (l'aspect du zinc).
+      const assumedLen = sentence ? assumptions.length : Number.POSITIVE_INFINITY;
       try {
         return template.replace(/\{([\w.]+)(?:\|([^}]+))?\}/g, (_, name: string, unitSpec?: string) => {
           // « {devis} » : la place des caractéristiques lues au devis (« zinc demi-ronde »), remplie à la liste d'achats.
           if (name === "devis") return DEVIS_MARK;
+          // « {marge} » : la marge appliquée (réglage de l'entreprise ou règle du tiroir), dite à l'artisan (§49.2.4).
+          if (name === "marge") return `${fr(factor.minus(1).times(100))} %`;
           const v = valueOf(name);
+          // §49.2.5 : la donnée qui manque reste un « ? » dans la désignation (« dév. ? »), jamais une valeur devinée.
+          if (blank && (!isPoint(v) || !v.lo.isFinite())) return "?";
           if (!isPoint(v) || !v.lo.isFinite()) throw new Error("précision incalculable");
           const bare = unitSpec?.endsWith("#") ?? false;
           const unitText = bare ? unitSpec!.slice(0, -1) : unitSpec;
@@ -1017,21 +1091,26 @@ function computeNeed(
           const shown = def?.display?.[v.lo.dividedBy(parseRefUnit(def.unit).factor).toFixed()];
           if (shown !== undefined) return shown;
           const u = unitText ? parseRefUnit(unitText) : null;
-          return `${fr(u ? v.lo.dividedBy(u.factor) : v.lo)}${unitText && !bare ? ` ${unitText.replace("m2", "m²")}` : ""}`;
+          // « 30° » collé, comme on l'écrit ; les autres unités après une espace (« 25 cm »).
+          return `${fr(u ? v.lo.dividedBy(u.factor) : v.lo)}${unitText && !bare ? `${unitText === "°" ? "" : " "}${unitText.replace("m2", "m²")}` : ""}`;
         });
       } catch {
         return undefined;
       } finally {
         trace.splice(traceLen);
         missing.splice(missingLen);
+        assumptions.splice(assumedLen);
       }
     };
+    // §49.6 : une quantité estimée (feuilles d'un zinc façonné) se dit, orange, jusqu'au « C'est bon ».
+    if (rule.estimate && !options.everyArticle && ref.writtenOnly !== false) toConfirm.push({ key: `estimation:${work.id}/${rule.id}`, text: rule.estimate, local: true, said: true });
     // Une précision s'écrit dès que SES valeurs sont connues et sûres (jamais une fourchette).
-    const precision = rule.precision ? render(rule.precision) : undefined;
-    const basis = rule.basis ? render(rule.basis) : undefined;
+    // Une donnée inconnue sans effet sur la commande (le développé des feuilles) reste un « ? » dans la phrase (§49.2.5).
+    const precision = rule.precision ? render(rule.precision, unknownParams.length > 0, true) : undefined;
+    const basis = rule.basis ? render(rule.basis, false, true) : undefined;
     // Une désignation calculée (« Bobineau 500 × 17 m, 0,65 ») remplace le nom du produit générique.
     // Elle s'écrit dès que SES données sont connues (le développé inconnu ne change pas un bobineau de 500 mm).
-    const designation = rule.designation ? render(rule.designation) : undefined;
+    const designation = rule.designation ? render(rule.designation, options.blankUnknown === true && options.quantityOnly === true) : undefined;
     const withQuote = designation?.includes(DEVIS_MARK) ? designation : undefined;
     return {
       ...base,
@@ -1039,6 +1118,7 @@ function computeNeed(
       ...(withQuote ? { labelWithQuote: withQuote } : {}),
       ...(precision !== undefined ? { precision } : {}),
       ...(basis !== undefined ? { basis } : {}),
+      ...(unknownParams.length > 0 ? { unknownParams } : {}),
       status: "calculated",
       ...(exact
         ? { quantity: { value: need.lo.toDecimalPlaces(2).toFixed(), unit: rule.unit } }

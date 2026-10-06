@@ -49,7 +49,7 @@ const SAC = (kg: string, source: string, note: string) => inPacks("sac", `sac de
 
 export const MACONNERIE_REFERENTIAL: Referential = {
   id: "maconnerie",
-  version: "maconnerie-2026.10.05-1",
+  version: "maconnerie-2026.10.06-2",
   trade: "masonry",
   sources: [
     DEFINITION_SOURCE,
@@ -274,7 +274,7 @@ export const MACONNERIE_REFERENTIAL: Referential = {
           label: "Mur en blocs",
           measureOnly: true,
         },
-        { key: "bloc", family: "masonry_block", label: "Blocs béton", keywords: ["parpaing", "agglo", "bloc"], ask: "Parpaings de 20, de 15 ou de 10 ?" },
+        { key: "bloc", formOf: "mur", family: "masonry_block", label: "Blocs béton", keywords: ["parpaing", "agglo", "bloc"], ask: "Parpaings de 20, de 15 ou de 10 ?" },
         {
           key: "mortier",
           family: "masonry_mortar",
@@ -330,7 +330,7 @@ export const MACONNERIE_REFERENTIAL: Referential = {
           measureOnly: true,
         },
         {
-          key: "brique",
+          key: "brique", formOf: "mur",
           family: "clay_brick",
           label: "Briques",
           usual: {
@@ -441,7 +441,7 @@ export const MACONNERIE_REFERENTIAL: Referential = {
           },
         },
         {
-          key: "beton",
+          key: "beton", formOf: "dalle",
           family: "concrete",
           label: "Béton",
           usual: {
@@ -525,7 +525,7 @@ export const MACONNERIE_REFERENTIAL: Referential = {
           measureOnly: true,
         },
         {
-          key: "mortier",
+          key: "mortier", formOf: "chape_sol",
           family: "screed_mortar",
           label: "Mortier de chape",
           usual: {
@@ -566,7 +566,7 @@ export const MACONNERIE_REFERENTIAL: Referential = {
           measureOnly: true,
         },
         {
-          key: "enduit",
+          key: "enduit", formOf: "facade",
           family: "render",
           label: "Enduit monocouche",
           usual: {
@@ -619,7 +619,7 @@ export const MACONNERIE_REFERENTIAL: Referential = {
           measureOnly: true,
         },
         {
-          key: "beton",
+          key: "beton", formOf: "semelle",
           family: "concrete",
           label: "Béton",
           usual: {

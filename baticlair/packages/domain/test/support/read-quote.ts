@@ -16,6 +16,7 @@ import {
   type PurchaseView,
   type SiteFact,
   type EngineOptions,
+  type QuoteLineReading,
 } from "../../src/index.js";
 import { HABITUDES_BANC } from "./habitudes.js";
 
@@ -27,7 +28,15 @@ export interface QuoteLineInput {
 }
 
 /** Tout le parcours d'un devis de couvreur jusqu'à la liste d'achats, comme le fait l'API (sans IA). */
-export function readQuote(bench: readonly QuoteLineInput[], answers: Record<string, EngineAnswer> = {}, extraFacts: readonly SiteFact[] = [], preferences: CompanyPreferences = HABITUDES_BANC, options: EngineOptions = {}): PurchaseView {
+export function readQuote(
+  bench: readonly QuoteLineInput[],
+  answers: Record<string, EngineAnswer> = {},
+  extraFacts: readonly SiteFact[] = [],
+  preferences: CompanyPreferences = HABITUDES_BANC,
+  options: EngineOptions = {},
+  /** La lecture §41.1 de chaque ligne (son « manque », §49.4), comme l'IA la rend. */
+  readings?: ReadonlyMap<string, QuoteLineReading>,
+): PurchaseView {
   const profile = tradeProfile("roofing");
   const lines = bench.map((l) => ({ ref: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit }));
   const raw = validateTakeoff(lines.map((l) => ({ id: l.ref, designation: l.designation, quantityRaw: l.quantity, unitRaw: l.unit, source: "client_quote" as const })), profile);
@@ -44,5 +53,5 @@ export function readQuote(bench: readonly QuoteLineInput[], answers: Record<stri
     engine,
     { plan, roles, ref: ROOFING_REFERENTIAL, asks },
   );
-  return applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref: ROOFING_REFERENTIAL, validation }), answers);
+  return applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref: ROOFING_REFERENTIAL, validation, ...(readings ? { readings } : {}) }), answers);
 }

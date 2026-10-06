@@ -89,9 +89,10 @@ const slot = z.object({
   charsFrom: z.string().optional(),
   formOf: z.string().optional(),
   indissociable: z.literal(true).optional(),
-  piecesFrom: z.object({ count: str, length: str }).optional(),
+  piecesFrom: z.object({ count: str, length: str, piece: z.object({ one: str, many: str }).optional() }).optional(),
+  citedBy: z.array(str).optional(),
 });
-const need = z.object({ ...provenance, id: str, slot: str, short: z.string().optional(), formula: str, unit: str, core: z.boolean(), exclusions: z.string().optional(), precision: z.string().optional(), basis: z.string().optional(), precisionRequires: z.array(str).optional(), designation: z.string().optional(), offer: z.object({ unlessQuoteSays: z.array(str).optional() }).optional(), requires: z.array(str).optional(), when: z.string().optional() });
+const need = z.object({ ...provenance, id: str, slot: str, short: z.string().optional(), formula: str, unit: str, core: z.boolean(), exclusions: z.string().optional(), precision: z.string().optional(), basis: z.string().optional(), precisionRequires: z.array(str).optional(), designation: z.string().optional(), offer: z.object({ unlessQuoteSays: z.array(str).optional() }).optional(), requires: z.array(str).optional(), when: z.string().optional(), consumable: z.literal(true).optional(), consumableFor: z.string().optional(), estimate: z.string().optional() });
 const workItem = z.object({
   id: str,
   trade: str,
@@ -119,7 +120,7 @@ export const referentialSchema = z.object({
   workItems: z.array(workItem).min(1),
   wasteRules: z.array(wasteRule),
   countedWorks: z.array(countedWork).optional(),
-  writtenOnly: z.literal(true).optional(),
+  writtenOnly: z.boolean().optional(),
 });
 
 export class ReferentialFileError extends Error {

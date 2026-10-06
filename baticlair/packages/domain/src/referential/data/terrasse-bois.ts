@@ -37,7 +37,7 @@ const lame = (id: string, label: string, short: string, largeur: string, aliases
 
 export const TERRASSE_BOIS_REFERENTIAL: Referential = {
   id: "terrasse-bois",
-  version: "terrasse-bois-2026.10.05-1",
+  version: "terrasse-bois-2026.10.06-2",
   trade: "decking",
   sources: [
     DEFINITION_SOURCE,
@@ -82,7 +82,7 @@ export const TERRASSE_BOIS_REFERENTIAL: Referential = {
       params: [lineQuantity("surface", "Surface de terrasse", "m2", "Surface de terrasse ?"), PLOTS],
       slots: [
         { key: "terrasse", family: "deck_work", label: "Terrasse", measureOnly: true },
-        { key: "lames", family: "deck_board", label: "Lames", keywords: ["pin", "ipe", "lame"], ask: "Lames : pin classe 4 ou ipé ?" },
+        { key: "lames", formOf: "terrasse", family: "deck_board", label: "Lames", keywords: ["pin", "ipe", "lame"], ask: "Lames : pin classe 4 ou ipé ?" },
         { key: "lambourdes", family: "joist", label: "Lambourdes", usual: { text: "Lambourdes classe 4 45 × 70.", source: USAGE, productId: "lambourde-45x70" } },
         { key: "plots", family: "pedestal", label: "Plots", usual: { text: "Plots réglables.", source: USAGE, productId: "plot" } },
         { key: "vis", family: "deck_screw", label: "Vis inox", usual: { text: "Vis inox A2 5 × 50.", source: USAGE, productId: "vis-inox" } },

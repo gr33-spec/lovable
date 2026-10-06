@@ -21,18 +21,22 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 | Article | Quantité | Repère |
 |---|---|---|
-| Liteaux 27×40 | 547 ml | ≈ 12 bottes de 50 ml |
 | Écran HPV, rouleau 1,50 × 50 m | 2 rouleaux | 128,57 m² |
+| Liteaux 27×40 | 547 ml | ≈ 12 bottes de 50 ml |
+| Couverture en tuiles à emboîtement HP10 rouge | — |  |
 | Tuiles de rive | 78 pièces |  |
 | Faîtières | 29 pièces |  |
 | Closoir | 2 rouleaux de 5 m | 10 ml à couvrir |
 | Crochets de faîtière | 29 pièces |  |
 | Gouttière PVC demi-ronde sable de 25 | 5 longueurs de 4 m | 20 ml à couvrir |
 | Naissances PVC demi-ronde sable de 25 Ø80 | 2 pièces |  |
+| Crochets de gouttière PVC ? de 25 | 52 pièces |  |
 | Tubes de descente PVC sable Ø80, longueur 4 m | 2 pièces |  |
 | Coudes de descente PVC sable Ø80 | 4 pièces |  |
 | Colliers de descente Ø80 | 6 pièces |  |
 | Chatières de ventilation | 10 pièces |  |
+| Embase plomb de sortie de toit | 1 pièce |  |
+| Chapeau de sortie de toit | 1 pièce |  |
 
 **Hypothèses (modifiables) :** zone climatique 3 · pente du toit 45° · pureau 31 cm · tuiles de rive Tuiles de rive  · longueur des tubes 4 m · coudes par descente 2
 
@@ -50,19 +54,22 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 | Article | Quantité | Repère |
 |---|---|---|
-| Tuiles HP10 rouge | 1 488 pièces | ≈ 7 palettes |
-| Liteaux 27×40 | 547 ml | ≈ 12 bottes de 50 ml |
 | Écran HPV, rouleau 1,50 × 50 m | 2 rouleaux | 128,57 m² |
+| Liteaux 27×40 | 547 ml | ≈ 12 bottes de 50 ml |
+| Tuiles HP10 rouge | 1 488 pièces | ≈ 7 palettes |
 | Tuiles de rive | 78 pièces |  |
 | Faîtières | 29 pièces |  |
 | Closoir | 2 rouleaux de 5 m | 10 ml à couvrir |
 | Crochets de faîtière | 29 pièces |  |
 | Gouttière PVC demi-ronde sable de 25 | 5 longueurs de 4 m | 20 ml à couvrir |
 | Naissances PVC demi-ronde sable de 25 Ø80 | 2 pièces |  |
+| Crochets de gouttière PVC ? de 25 | 52 pièces |  |
 | Tubes de descente PVC sable Ø80, longueur 4 m | 2 pièces |  |
 | Coudes de descente PVC sable Ø80 | 4 pièces |  |
 | Colliers de descente Ø80 | 6 pièces |  |
 | Chatières de ventilation | 10 pièces |  |
+| Embase plomb de sortie de toit | 1 pièce |  |
+| Chapeau de sortie de toit | 1 pièce |  |
 
 **Hypothèses (modifiables) :** zone climatique 3 · pente du toit 45° · pureau 31 cm · tuiles de rive Tuiles de rive  · longueur des tubes 4 m · coudes par descente 2
 
@@ -80,19 +87,22 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 | Article | Quantité | Repère |
 |---|---|---|
-| Tuiles HP10 rouge | 1 345 pièces | ≈ 6 palettes |
-| Liteaux 27×40 | 508 ml | ≈ 11 bottes de 50 ml |
 | Écran HPV, rouleau 1,50 × 50 m | 2 rouleaux | 128,57 m² |
+| Liteaux 27×40 | 508 ml | ≈ 11 bottes de 50 ml |
+| Tuiles HP10 rouge | 1 345 pièces | ≈ 6 palettes |
 | Tuiles de rive | 70 pièces |  |
 | Faîtières | 29 pièces |  |
 | Closoir | 2 rouleaux de 5 m | 10 ml à couvrir |
 | Crochets de faîtière | 29 pièces |  |
 | Gouttière PVC demi-ronde sable de 25 | 5 longueurs de 4 m | 20 ml à couvrir |
 | Naissances PVC demi-ronde sable de 25 Ø80 | 2 pièces |  |
+| Crochets de gouttière PVC ? de 25 | 52 pièces |  |
 | Tubes de descente PVC sable Ø80, longueur 4 m | 2 pièces |  |
 | Coudes de descente PVC sable Ø80 | 4 pièces |  |
 | Colliers de descente Ø80 | 6 pièces |  |
 | Chatières de ventilation | 10 pièces |  |
+| Embase plomb de sortie de toit | 1 pièce |  |
+| Chapeau de sortie de toit | 1 pièce |  |
 
 **Hypothèses (modifiables) :** pente du toit 45° · tuiles de rive Tuiles de rive  · zone climatique 3 · longueur des tubes 4 m · coudes par descente 2
 
@@ -109,6 +119,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 - Développé de la bande zinc ? Cela change la commande : de 1 à 5 pièces selon la réponse. → [100 mm (solin, couvre-joint)] [250 mm] [330 mm] [400 mm]
 - Descentes en Ø 80 ou en Ø 100 ? → [Ø 80] [Ø 100] [Ø 120]
 - Faîtage en bande zinc : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
+- Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? → [Oui] [Non]
 - Abergement de cheminée (zinc + porte-solin) : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 - 6 : c'est le nombre d'ardoises à commander, ou le nombre de jouées ? → [6 ardoises à commander] [6 jouées (matériaux à calculer)]
 
@@ -116,9 +127,12 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 | Article | Quantité | Repère |
 |---|---|---|
-| Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces |  |
 | Liteaux 18×40 | 2 049 ml | ≈ 41 bottes de 50 ml |
+| Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces |  |
 | Gouttière zinc dév. 25 | 5 longueurs de 4 m | 17 ml à couvrir |
+| Naissances zinc | — |  |
+| Faîtage en bande zinc | 17 ml |  |
+| Abergement de cheminée zinc | 2 pièces |  |
 | Chatières de ventilation | 12 pièces |  |
 
 **Hypothèses (modifiables) :** pente du toit 45° · région ardoise III · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet standard mm · liteaux Liteaux 18×40 
@@ -133,15 +147,19 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 - Descentes en Ø 80 ou en Ø 100 ? → [Ø 80] [Ø 100] [Ø 120]
 - Développé de la bande zinc ? Cela change la commande : de 1 à 5 pièces selon la réponse. → [100 mm (solin, couvre-joint)] [250 mm] [330 mm] [400 mm]
 - Faîtage en bande zinc : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
+- Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? → [Oui] [Non]
 - Abergement de cheminée (zinc + porte-solin) : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 
 **À acheter :**
 
 | Article | Quantité | Repère |
 |---|---|---|
-| Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces |  |
 | Liteaux 18×40 | 2 049 ml | ≈ 41 bottes de 50 ml |
+| Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces |  |
 | Gouttière zinc dév. 25 | 5 longueurs de 4 m | 17 ml à couvrir |
+| Naissances zinc dév. 25 Ø? | 2 pièces |  |
+| Faîtage en bande zinc | 17 ml |  |
+| Abergement de cheminée zinc | 2 pièces |  |
 | Chatières de ventilation | 12 pièces |  |
 
 **À faire chiffrer par le fournisseur :**
@@ -160,15 +178,19 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 - Descentes en Ø 80 ou en Ø 100 ? → [Ø 80] [Ø 100] [Ø 120]
 - Développé de la bande zinc ? Cela change la commande : de 1 à 5 pièces selon la réponse. → [100 mm (solin, couvre-joint)] [250 mm] [330 mm] [400 mm]
 - Faîtage en bande zinc : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
+- Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? → [Oui] [Non]
 - Abergement de cheminée (zinc + porte-solin) : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 
 **À acheter :**
 
 | Article | Quantité | Repère |
 |---|---|---|
-| Ardoises naturelles Espagne 1er choix 30×22 | 8 547 pièces |  |
 | Liteaux 18×40 | 1 910 ml | ≈ 39 bottes de 50 ml |
+| Ardoises naturelles Espagne 1er choix 30×22 | 8 547 pièces |  |
 | Gouttière zinc dév. 25 | 5 longueurs de 4 m | 17 ml à couvrir |
+| Naissances zinc dév. 25 Ø? | 2 pièces |  |
+| Faîtage en bande zinc | 17 ml |  |
+| Abergement de cheminée zinc | 2 pièces |  |
 | Chatières de ventilation | 12 pièces |  |
 
 **À faire chiffrer par le fournisseur :**
