@@ -503,7 +503,13 @@ export function computeWithAnswers(
     const planned = plan.lines.filter((l): l is Extract<QuotePlan["lines"][number], { status: "planned" }> => l.status === "planned" && l.workItemId === workItemId);
     // Une ligne commandée telle qu'écrite qui compte aussi l'ouvrage (« 4 fenêtres ») laisse calculer ses fournitures de pose.
     const counts = (l: (typeof planned)[number]) => ref.workItems.find((w) => w.id === workItemId)?.slots.find((s) => s.key === l.slot)?.measureOnly === true;
-    return planned.length > 0 && planned.every((l) => given.has(`${workItemId}/${l.slot}`) && !counts(l));
+    // « 2 descentes de 3 m » écrit en plus des tubes et des coudes : la mesure de l'ouvrage est connue, ce que le devis ne
+    // cite pas (colliers, dauphins) se calcule encore (D-2026-020). « 42 faîtières » seules ne disent aucune mesure.
+    const work = ref.workItems.find((w) => w.id === workItemId);
+    const params = plan.inputs.find((i) => i.workItemId === workItemId)?.params ?? {};
+    // Une mesure ÉCRITE dans le texte (preuve « … » citée), pas la quantité d'une ligne déjà commandée telle quelle.
+    const measured = (work?.params ?? []).some((p) => p.fromLineQuantity && params[p.key]?.origin === "devis" && (params[p.key]?.evidence ?? "").includes("«"));
+    return planned.length > 0 && !measured && planned.every((l) => given.has(`${workItemId}/${l.slot}`) && !counts(l));
   };
   const inputs: WorkItemInput[] = plan.inputs.map((input) => {
     const work = ref.workItems.find((w) => w.id === input.workItemId)!;
