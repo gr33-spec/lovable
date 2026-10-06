@@ -40,6 +40,8 @@ export type LinePlan =
       characteristics: string[];
       /** La mesure de l'ouvrage est écrite dans le texte (« sur 200 m² »), pas dans la colonne quantité. */
       measureInText?: { value: string; unit: string };
+      /** Sa quantité s'ajoute à celle d'une autre ligne du même article (bandes de rive + bande porte-solin, D-2026-020). */
+      adds?: true;
     }
   /** Main-d'œuvre, location, forfait : rien à acheter. */
   | { ref: string; status: "not_material" }
@@ -105,26 +107,29 @@ function measuresInText(normalized: string): { value: string; unit: string }[] {
 
 /** Unités de ligne de devis → unités du référentiel. */
 export const LINE_UNITS: Record<string, string> = { U: "u", M: "m", ML: "m", M2: "m2", M3: "m3", KG: "kg", T: "t" };
-const TEXT_UNITS: Record<string, string> = { mm: "mm", cm: "cm", m: "m", ml: "m", m2: "m2", "m²": "m2", "%": "%", "°": "°" };
+const TEXT_UNITS: Record<string, string> = { mm: "mm", cm: "cm", m: "m", ml: "m", m2: "m2", "m²": "m2", "%": "%", "°": "°", metre: "m", metres: "m", degre: "°", degres: "°" };
 
 /** « entraxe 90 cm », « hauteur : 4m », « pureau de 34,3 cm » → valeur et unité, seulement si elles sont écrites. */
-function readLabelled(normalized: string, label: string, gap = 0): { value: string; unit: string } | null {
+function readLabelled(normalized: string, label: string, gap = 0, bare: string | null = null): { value: string; unit: string } | null {
   // Chaque place du mot, dans l'ordre : « tuyau de descente zinc…, 2 descentes de 3 m » se lit à la seconde.
   let offset = 0;
   for (;;) {
     const pos = keywordPosition(normalized.slice(offset), label);
     if (pos < 0) return null;
-    const found = readAfter(normalized.slice(offset + pos + normalizeText(label).length), gap);
+    const found = readAfter(normalized.slice(offset + pos + normalizeText(label).length), gap, bare);
     if (found) return found;
     offset += pos + 1;
   }
 }
 
-function readAfter(after: string, gap: number): { value: string; unit: string } | null {
+function readAfter(after: string, gap: number, bare: string | null = null): { value: string; unit: string } | null {
   // « crochets inox de 11 cm » : quelques mots permis entre l'annonce et la valeur, jamais un autre nombre.
+  // « 3 mètres », « 30 degrés » : l'unité écrite en toutes lettres compte comme « m », « ° ».
   const words = gap > 0 ? `(?:\\s+[a-z][a-z'-]*){0,${gap}}` : "";
-  const m = new RegExp(`^[a-z]{0,2}\\.?${words}\\s*(?:de |d |: |:|= |a )?\\s*(\\d+(?:[.,]\\d+)?)\\s*(mm|cm|ml|m²|m2|m|%|°)(?![a-z0-9])`).exec(after);
+  const m = new RegExp(`^[a-z]{0,2}\\.?${words}\\s*(?:de |d |: |:|= |a )?\\s*(\\d+(?:[.,]\\d+)?)\\s*(mm|cm|ml|m²|m2|metres|metre|m|%|°|degres|degre)?(?![a-z0-9])`).exec(after);
   if (!m) return null;
+  // Sans unité (« crochets de 11 ») : seulement pour une donnée qui le permet, dans son unité (et sa plage, vérifiée après).
+  if (!m[2]) return bare ? { value: m[1]!.replace(",", "."), unit: bare } : null;
   return { value: m[1]!.replace(",", "."), unit: TEXT_UNITS[m[2]!]! };
 }
 
@@ -300,7 +305,8 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
     const v = validateTakeoffLine({ id: line.ref, designation: line.designation, quantityRaw: line.quantity, unitRaw: line.unit, source: "client_quote" }, profile, designations);
     const text = normalizeText(line.designation);
     const dominant = !covered ? undefined : ref.families.find((f) => f.dominant && (f.keywords ?? []).some((k) => keywordPosition(text, k) >= 0))?.code;
-    const general = v.kind === "labor" ? null : (dominant ?? earliest(text, families));
+    // Une ligne de pose seule garde son ouvrage : elle n'achète rien, mais ce qu'elle écrit (pente, crochets, façonnage) se lit.
+    const general = dominant ?? earliest(text, families);
     // « Tuiles (… tuiles canal …) » : la famille générale lue en premier est précisée par une famille plus précise nommée ensuite.
     const precise = general ? ref.families.find((f) => f.refines === general && (f.keywords ?? []).some((k) => keywordPosition(text, k) >= 0)) : undefined;
     // « Tubes de descente (Coude zinc Ø80) » : le titre de la ligne range l'article, la parenthèse qui le suit le NOMME.
@@ -311,7 +317,7 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
   });
 
   // 1. Les ouvrages présents : ceux qu'une ligne déclenche.
-  const active = ref.workItems.filter((w) => read.some((r) => r.family && w.triggers.includes(r.family)));
+  const active = ref.workItems.filter((w) => read.some((r) => r.v.kind !== "labor" && r.family && w.triggers.includes(r.family)));
 
   const plans: LinePlan[] = [];
   const facts: SiteFact[] = [];
@@ -319,13 +325,16 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
   const mentioned = new Map<string, Set<string>>();
   const characteristicsBySlot: Record<string, string[]> = {};
   const askInstead = new Map<string, Set<string>>();
+  const quantities: { fact: SiteFact; slot: string; ref: string }[] = [];
 
   for (const { line, v, text, family, titled } of read) {
+    const work = family ? active.find((w) => w.slots.some((s) => s.family === family)) : undefined;
     if (v.kind === "labor") {
+      // « Pose … pente 30° », « Façonnage et pose des bandes » : les données écrites valent pour l'ouvrage nommé.
+      if (work) readWritten(work, line.ref, text, facts);
       plans.push({ ref: line.ref, status: "not_material" });
       continue;
     }
-    const work = family ? active.find((w) => w.slots.some((s) => s.family === family)) : undefined;
     if (!work || !family) {
       const label = family ? (familyOf(ref, family)?.label ?? family) : null;
       plans.push({
@@ -351,7 +360,7 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
     // (« contre-lattes en liteaux » ne parle pas du lattage) : il lui faut sa propre ligne.
     // Le titre devant la parenthèse range l'article : il ne « cite » pas son emplacement (les tubes d'une ligne de coudes).
     const mentions = work.slots
-      .filter((s) => s.family !== slot.family && s.family !== titled && slotWords(ref, s).some((k) => keywordPosition(text, k) >= 0))
+      .filter((s) => s.family !== slot.family && s.family !== titled && slotWords(ref, s).some((k) => namedAsArticle(text, k)))
       .map((s) => s.key);
     const seen = mentioned.get(work.id) ?? new Set<string>();
     [slot.key, ...mentions].forEach((k) => seen.add(k));
@@ -374,7 +383,9 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
     let measureInText: { value: string; unit: string } | undefined;
     if (unit && v.quantity && fromQuantity.some((p) => sameDimUnit(p.unit, unit))) {
       for (const p of fromQuantity.filter((x) => sameDimUnit(x.unit, unit))) {
-        facts.push({ key: p.key, value: v.quantity.toFixed(), unit, evidence: `Devis, ${line.ref}`, origin: "devis", workItemId: work.id, ...(slot.measureOnly ? { fromMeasureLine: true as const } : {}) });
+        const fact: SiteFact = { key: p.key, value: v.quantity.toFixed(), unit, evidence: `Devis, ${line.ref}`, origin: "devis", workItemId: work.id, ...(slot.measureOnly ? { fromMeasureLine: true as const } : {}) };
+        facts.push(fact);
+        quantities.push({ fact, slot: slot.key, ref: line.ref });
       }
     } else {
       // Quantité en forfait, ensemble ou absente, mais « 200 m² » écrit dans la désignation : c'est la
@@ -394,32 +405,8 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
           facts.push({ key: p.key, value: m[1]!, unit: p.unit, evidence: `Devis, ${line.ref} (« ${m[1]} ${word}s »)`, origin: "devis", workItemId: work.id });
         }
       }
-      for (const label of p.textLabels ?? []) {
-        const found = readLabelled(text, label, p.labelGap);
-        if (!found || !sameDimUnit(p.unit, found.unit) || !withinTextRange(p, found)) continue;
-        // « pente 45 % » dans un devis : gardée en degrés, l'unité de la pente partout dans BatiClair.
-        const asRef = isAngleUnit(p.unit) && found.unit === "%" ? { value: percentSlopeToDegrees(new Decimal(found.value)).toString(), unit: p.unit } : found;
-        facts.push({ key: p.key, ...asRef, evidence: `Devis, ${line.ref} (« ${label} »)`, origin: "devis" });
-      }
     }
-    for (const p of work.params) {
-      // « Ø 150 » sans unité : lu seulement si 150 est une des réponses proposées (un bouton), jamais deviné.
-      if (p.choices && !facts.some((f) => f.key === p.key && f.workItemId === work.id)) {
-        for (const label of p.textLabels ?? []) {
-          const pos = keywordPosition(text, label);
-          if (pos < 0 || readLabelled(text, label)) continue;
-          const m = /^[a-z]{0,2}\.?\s*(?:de |: |:|= )?\s*(\d+)(?![\d,.]|\s*(?:mm|cm|ml|m2|m²|m|%|°)(?![a-z0-9]))/.exec(text.slice(pos + normalizeText(label).length));
-          if (m && p.choices.some((c) => c.value === m[1])) {
-            facts.push({ key: p.key, value: m[1]!, unit: p.unit, evidence: `Devis, ${line.ref} (« ${label} ${m[1]} »)`, origin: "devis", workItemId: work.id });
-            break;
-          }
-        }
-      }
-      for (const tv of p.textValues ?? []) {
-        const kw = tv.keywords.find((k) => keywordPosition(text, k) >= 0);
-        if (kw) facts.push({ key: p.key, value: tv.value, unit: p.unit, evidence: `Devis, ${line.ref} (« ${kw} »)`, origin: "devis", workItemId: work.id });
-      }
-    }
+    readWritten(work, line.ref, text, facts);
     // Règle du comptoir (§47.8) : le devis nomme la chose sans la préciser (« zinc prépatiné », sans teinte) :
     // l'hypothèse par défaut ne vaut plus, on demande.
     for (const p of work.params) {
@@ -435,6 +422,19 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
       if (chars.length > 0) characteristicsBySlot[charKey] = [...new Set([...(characteristicsBySlot[charKey] ?? []), ...chars])];
     }
     plans.push({ ref: line.ref, status: "planned", workItemId: work.id, slot: slot.key, mentions, characteristics: chars, ...(measureInText ? { measureInText } : {}) });
+  }
+
+  // Deux lignes du MÊME article d'un ouvrage (« bandes de rive 4 m », « bande porte-solin 4 m ») : deux longueurs qui
+  // s'additionnent, pas deux fois la même. Deux articles différents (ardoises et écran, 48 m² chacun) restent une seule mesure.
+  const groups = new Map<string, typeof quantities>();
+  for (const q of quantities) groups.set(`${q.fact.workItemId}|${q.fact.key}`, [...(groups.get(`${q.fact.workItemId}|${q.fact.key}`) ?? []), q]);
+  for (const group of groups.values()) {
+    if (new Set(group.map((q) => q.ref)).size < 2 || new Set(group.map((q) => q.slot)).size > 1) continue;
+    for (const q of group) {
+      q.fact.fromMeasureLine = true;
+      const plan = plans.find((l) => l.ref === q.ref);
+      if (plan?.status === "planned") plan.adds = true;
+    }
   }
 
   // Une donnée hors texte des lignes (code postal, en-tête lu par l'IA, croquis) complète le devis ; si elle le
@@ -502,12 +502,67 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
 export const slotCharacteristicsKey = (workItemId: string, slot: string) => `${workItemId}/${slot}`;
 
 /** Dernière place d'un des mots dans le texte (-1 sinon) ; « crochets d'ardoise » : « ardoise » complète le crochet, il ne compte pas. */
+/**
+ * Les données écrites d'une ligne, annoncées par leur nom (« pente 30° », « crochets de 11 », « Ø 80 ») ou par un mot
+ * (« Façonnage et pose ») : elles valent pour l'ouvrage de la ligne, qu'elle fournisse ou qu'elle pose seulement.
+ */
+function readWritten(work: WorkItemType, lineRef: string, text: string, facts: SiteFact[]): void {
+  for (const p of work.params) {
+    for (const label of p.textLabels ?? []) {
+      const found = readLabelled(text, label, p.labelGap, p.bareNumber ? p.unit : null);
+      if (!found || !sameDimUnit(p.unit, found.unit) || !withinTextRange(p, found)) continue;
+      // « pente 45 % » dans un devis : gardée en degrés, l'unité de la pente partout dans BatiClair.
+      const asRef = isAngleUnit(p.unit) && found.unit === "%" ? { value: percentSlopeToDegrees(new Decimal(found.value)).toString(), unit: p.unit } : found;
+      facts.push({ key: p.key, ...asRef, evidence: `Devis, ${lineRef} (« ${label} »)`, origin: "devis", workItemId: work.id });
+    }
+  }
+  for (const p of work.params) {
+    // « Ø 150 » sans unité : lu seulement si 150 est une des réponses proposées (un bouton), jamais deviné.
+    if (p.choices && !facts.some((f) => f.key === p.key && f.workItemId === work.id)) {
+      for (const label of p.textLabels ?? []) {
+        const pos = keywordPosition(text, label);
+        if (pos < 0 || readLabelled(text, label)) continue;
+        const m = /^[a-z]{0,2}\.?\s*(?:de |: |:|= )?\s*(\d+)(?![\d,.]|\s*(?:mm|cm|ml|m2|m²|m|%|°)(?![a-z0-9]))/.exec(text.slice(pos + normalizeText(label).length));
+        if (m && p.choices.some((c) => c.value === m[1])) {
+          facts.push({ key: p.key, value: m[1]!, unit: p.unit, evidence: `Devis, ${lineRef} (« ${label} ${m[1]} »)`, origin: "devis", workItemId: work.id });
+          break;
+        }
+      }
+    }
+    for (const tv of p.textValues ?? []) {
+      const kw = tv.keywords.find((k) => keywordPosition(text, k) >= 0);
+      if (kw && !facts.some((f) => f.key === p.key && f.workItemId === work.id && f.value === tv.value && f.evidence.startsWith(`Devis, ${lineRef} `))) {
+        facts.push({ key: p.key, value: tv.value, unit: p.unit, evidence: `Devis, ${lineRef} (« ${kw} »)`, origin: "devis", workItemId: work.id });
+      }
+    }
+  }
+}
+
+/**
+ * Le mot d'un autre article NOMME cet article, sauf quand il ne fait que compléter un nom : « crochets de gouttière »,
+ * « fixation de la gouttière », « dévoiement des descentes » parlent d'autre chose (D-2026-020). « et crochets »,
+ * « avec coudes », « fourniture de crochets », « accessoires de fixation » le nomment.
+ */
+function namedAsArticle(text: string, keyword: string): boolean {
+  for (let offset = 0; ; ) {
+    const pos = keywordPosition(text.slice(offset), keyword);
+    if (pos < 0) return false;
+    const at = offset + pos;
+    const m = /(?:^|\s)([a-z]+)\s+(?:de la|de l|des|du|de|d|pour la|pour le|pour les|pour)\s*$/.exec(text.slice(0, at));
+    if (!m || NOT_A_NOUN.has(m[1]!)) return true;
+    offset = at + 1;
+  }
+}
+// Les mots qui laissent nommer l'article qui suit : « et de crochets », « accessoires de fixation », « kit de raccordement ».
+const NOT_A_NOUN = new Set(["et", "ou", "avec", "fourniture", "pose", "plus", "compris", "y", "accessoire", "accessoires", "kit", "kits", "piece", "pieces", "element", "elements", "systeme"]);
+
 function lastWord(text: string, words: readonly string[], skipComplement = false): number {
   let best = -1;
   for (const w of words) {
     const k = normalizeText(w);
     for (let at = text.indexOf(k); at >= 0; at = text.indexOf(k, at + 1)) {
-      if (skipComplement && /(?:^|\s)(?:de|d|des|du|pour)\s*$/.test(text.slice(0, at))) continue;
+      // « des crochets » nomme les crochets ; « crochet d'ardoise », « pour tuiles » ne les nomment pas.
+      if (skipComplement && /(?:^|\s)(?:de|d|du|pour)\s*$/.test(text.slice(0, at))) continue;
       best = Math.max(best, at);
     }
   }

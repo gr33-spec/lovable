@@ -549,6 +549,8 @@ const FACONNAGE_BANDES_PARAM: ParamDef = {
     { label: "Je façonne (feuilles ou bobineau)", value: "1" },
     { label: "Je commande façonné", value: "2" },
   ],
+  // « Façonnage et pose des bandes de rive » (D-2026-020) : l'artisan les façonne lui-même.
+  textValues: [{ value: "1", keywords: ["faconnage et pose", "faconnage des", "faconnees sur place", "faconne sur place", "faconnage sur place"] }],
 };
 /**
  * Développé d'une bande zinc (§36.4) : 100 mm (solin à biseau, couvre-joint), 250 à 400 mm (rive), 200 à 330 mm
@@ -561,6 +563,8 @@ const DEVELOPPE_PARAM: ParamDef = {
   kind: "site_data",
   question: "Développé de la bande zinc ?",
   textLabels: ["developpe", "dev", "dev."],
+  // Le développé du faîtage n'est pas celui des bandes de rive : chaque bande a le sien (D-2026-020).
+  onlyFromPrincipal: true,
   withinChoices: true,
   // « dév. 33 » : le devis écrit le développé en centimètres, comme le comptoir (« bande de 33 »).
   textValues: [
@@ -1071,7 +1075,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.06-36",
+  version: "roofing-2026.10.06-37",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -1230,7 +1234,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       needUnit: "u",
       attributes: [],
       keyAttributes: [],
-      keywords: ["bande de ventilation", "bande zinc", "bande en zinc", "bande de solin", "bande solin", "bande de rive zinc", "bande d'egout", "bande egout", "couvre-joint zinc", "bavette zinc", "bande porte-solin"],
+      keywords: ["bande de ventilation", "bande zinc", "bande en zinc", "bande de solin", "bande solin", "bande de rive zinc", "bande de rive en zinc", "bande d'egout", "bande egout", "couvre-joint zinc", "bavette zinc", "bande porte-solin"],
     },
     { code: "zinc_sheet", label: "Feuille de zinc", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["feuille de zinc", "feuille zinc"] },
     { code: "zinc_narrow_coil", label: "Bobineau de zinc", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["bobineau"] },
@@ -2018,6 +2022,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           textLabels: ["crochet"],
           labelGap: 5,
           textRange: { min: "5", max: "20" },
+          // « crochets de 11 » (devis D-2026-020) : la longueur en cm, comme au comptoir.
+          bareNumber: true,
           default: {
             formula: "arrondi_sup((recouvrement_pose + regle.marge_crochet) / regle.pas_crochet) * regle.pas_crochet",
             source: "cupa-pureau-ardoises-m2",

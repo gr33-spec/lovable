@@ -1,5 +1,16 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.06-37 — le vrai devis D-2026-020 lu jusqu'au bout
+
+- **Lignes de pose** (« Pose de couverture … pente 30° », « Façonnage et pose des bandes de rive ») : elles ne commandent toujours rien, mais ce qu'elles écrivent vaut pour l'ouvrage qu'elles nomment (pente, crochets, façonnage).
+- **Façonnage** lu au devis (« façonnage et pose », « façonnées sur place ») : l'artisan façonne, plus de question « tu façonnes ou tu commandes façonné ? ».
+- **Un mot complément ne nomme pas un article** : « crochets de gouttière », « fixation de la gouttière », « dévoiement des descentes » ne citent ni la gouttière ni les tubes. Les 20 crochets de gouttière et les 4 coudes du devis partent tels qu'écrits ; plus de ligne « Tubes de descente (Coude…) » à faire chiffrer. « et crochets », « avec coudes », « accessoires de fixation » nomment toujours.
+- **« inox » des crochets** (« des crochets de fixation en inox ») ne se colle plus sur les ardoises.
+- **Deux lignes du même article** (bandes de rive 4 m + bande porte-solin 4 m) : leurs longueurs s'additionnent (8 m), la seconde ne part plus « à faire chiffrer ». Deux articles différents (ardoises et écran) gardent une seule mesure.
+- **Développé** : celui du faîtage (dév. 25 cm) n'est plus prêté aux bandes de rive ; une donnée écrite sur une ligne vaut d'abord pour son ouvrage.
+- **« 1 lot » de crochets** : un lot ne dit pas combien d'articles, le calcul les compte (comme un forfait).
+- Gouttière **Havraise** et zinc **mouluré** gardés dans la désignation. Test : `packages/domain/test/devis-d2026-020.test.ts`.
+
 ## roofing-2026.10.06-36 — plus de crochet « 1 mm » à l'écran
 
 - Le choix du crochet se dit « Standard » ou « Inox Ø 2,7 mm (bord de mer) » ; « Courant (1 mm) » n'apparaît plus (retour du fondateur : un crochet de 1 mm n'existe pas). Le 1 mm reste le jeu de la formule Cupa (§34) dans le calcul : aucune quantité ne bouge.
