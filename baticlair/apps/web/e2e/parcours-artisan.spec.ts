@@ -798,7 +798,6 @@ test("§48.4 : questions au bouton seulement, avant le calcul ; puis la voix sur
       start() {
         FakeRecognition.starts += 1;
         const n = FakeRecognition.starts;
-        console.log(`[micro] start ${n}`);
         setTimeout(() => {
           const final = (transcript: string) => Object.assign([{ transcript }], { isFinal: true });
           if (n === 1) {
@@ -810,7 +809,6 @@ test("§48.4 : questions au bouton seulement, avant le calcul ; puis la voix sur
         }, 50);
       }
       stop() {
-        console.log(`[micro] stop`);
         setTimeout(() => this.onend?.(), 20);
       }
     }
@@ -857,9 +855,6 @@ test("§48.4 : questions au bouton seulement, avant le calcul ; puis la voix sur
   // La voix arrive sur l'écran du quantitatif, la liste sous les yeux.
   const voix = page.getByRole("region", { name: "Modifier à la voix" });
   await expect(voix.getByText("Modifie ton quantitatif à la voix : dis-moi ce que tu enlèves, ce que tu ajoutes, ce que tu as oublié.")).toBeVisible();
-  page.on("console", (m) => {
-    if (m.text().startsWith("[micro]")) console.log(m.text());
-  });
   await voix.getByRole("button", { name: "Modifier à la voix" }).click();
   // Le texte s'écrit pendant qu'il parle, la pause ne coupe rien ; « Terminer » modifie tout de suite.
   await expect(voix.getByLabel("Ce que j'entends")).toContainText("j'ai oublié 2 cartouches de silicone");

@@ -163,7 +163,7 @@ export function VoiceEditor({ items, pending, onApply }: { items: readonly Voice
           Je t&apos;écoute… parle normalement, puis touche « Terminer ».
         </p>
         <p aria-live="polite" aria-label="Ce que j'entends" className="min-h-20 rounded-2xl bg-white px-3 py-3 text-[16px] leading-snug text-ink">
-          {live || <span className="text-subtle">« enlève l&apos;écran, mets 40 crochets, j&apos;ai oublié 2 cartouches de silicone »</span>}
+          {live || <span className="text-subtle">Parle, le texte s&apos;écrit ici…</span>}
         </p>
         <button type="button" onClick={() => finish("apply")} className="flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-white text-[17px] font-extrabold text-accent-text active:scale-[0.98]">
           <Check size={20} aria-hidden="true" />
