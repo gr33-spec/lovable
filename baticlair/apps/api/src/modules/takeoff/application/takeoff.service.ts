@@ -502,7 +502,14 @@ export class TakeoffService {
         reference: l.reference?.trim() || null,
         material: l.material ?? null,
         dimensions: l.dimensions ?? null,
-        reading: l.reading ?? null,
+        reading: l.reading
+          ? {
+              role: l.reading.role ?? null,
+              articles: l.reading.articles.map((a) => ({ nom: a.nom, materiau: a.materiau ?? null, quantite: a.quantite ?? null, unite: a.unite ?? null, elements: a.elements ?? null })),
+              faconnage: l.reading.faconnage ?? null,
+              manque: l.reading.manque,
+            }
+          : null,
         sourceRefs: l.sourceRefs,
         sourcePages: l.sourcePages,
         section: l.section.map((t) => t.trim()).filter((t) => t.length > 0),
