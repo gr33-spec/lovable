@@ -1,5 +1,12 @@
 import {
-  reconcileReadings,
+  AI_ADDITION,
+  AI_DOUBT,
+  applyOrangeFlags,
+  completionDossier,
+  completionFlags,
+  completionRecord,
+  FORBIDDEN,
+  forbiddenFlags,
   applyLineRoles,
   applyPurchaseOverrides,
   applyRuleConfirmations,
@@ -32,6 +39,7 @@ import {
   referentialFor,
   slotsGivenByQuote,
   tradeProfile,
+  withoutLabour,
   type ArtisanView,
   type EngineAnswer,
   type PurchaseView,
@@ -59,6 +67,7 @@ import type { CompanyMemory, CorrectionJournal } from "../../learning/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { TAKEOFF_PROMPT } from "./prompt.js";
 import type { ExtractionAttempt, ExtractionOutput, TakeoffExtractor } from "./takeoff-extractor.js";
+import { QUANTITATIF_PROMPT, type QuantitatifPass } from "./quantitatif-pass.js";
 import type { LineFields, TakeoffLineRecord, TakeoffRecord, TakeoffRepository } from "./takeoff.repository.js";
 
 /**
@@ -87,10 +96,13 @@ export interface ReadingOptions {
   onStats?: (stats: ReadingStats) => void;
   policy?: ExtractionPolicy;
   /**
-   * DOUBLE LECTURE (décision du fondateur, 2026-10-05) : le devis est lu deux fois, indépendamment, et le code compare
-   * (`reconcileReadings`) : d'accord = sûr, désaccord ou ligne vue une seule fois = orange avec les deux valeurs.
+   * APPEL IA N° 2, LE QUANTITATIF EN UN PASSAGE (décision du fondateur, 2026-10-06) : après le calcul du moteur, le
+   * prompt B du §41.2 (couvreur ET comptoir) propose les fixations, scellements, étanchéité et consommables qui manquent,
+   * et ses doutes avec un remplacement ; tout sort orange. Absent : pas d'appel n° 2.
    */
-  doubleReading?: boolean;
+  quantitatif?: QuantitatifPass;
+  /** Le nom de l'entreprise, injecté dans le prompt B ({nom_entreprise}). */
+  companyName?: (tenant: TenantContext) => Promise<string | null>;
   /** Coût estimé au-delà duquel un document n'est pas un devis normal (micro-dollars). */
   maxAnalysisMicroUsd?: number;
   now?: () => Date;
@@ -157,8 +169,6 @@ export const DEFAULT_MAX_ANALYSIS_MICRO_USD = 3_000_000;
 export interface ReadingStats {
   version: 1;
   outcome: "completed" | "failed";
-  /** Double lecture : lignes lues pareil, en désaccord, vues par une seule lecture. */
-  doubleReading?: { agreed: number; disagreed: number; single: number };
   failure?: string;
   strategy: "single" | "split";
   /** « text » : PDF texte ; « scan » : pages en image (scan, photos) ; « mixed » : les deux. */
@@ -191,12 +201,6 @@ interface CallTally {
 }
 
 type ChunkParts = { chunk: ReadingChunk; output: ExtractionOutput }[];
-
-/** Les lignes d'une lecture, ses blocs réunis (comme la première lecture). */
-function linesOf(parts: ChunkParts): ExtractionOutput["lines"] {
-  const whole = parts.length === 1 && parts[0]!.chunk.context.length === 0;
-  return whole ? parts[0]!.output.lines : mergeChunkLines(parts.map((p) => ({ chunk: p.chunk, lines: p.output.lines }))).lines;
-}
 type ChunkFailure = { ok: false; reason: string };
 type ChunkResult = { ok: true; parts: ChunkParts } | ChunkFailure;
 
@@ -348,27 +352,12 @@ export class TakeoffService {
     const documentId = doc.id;
     const started = Date.now();
     const tally: CallTally = { calls: 0, outcomes: {}, splits: 0, tokens: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, costMicroUsd: 0 };
-    const second: CallTally = { calls: 0, outcomes: {}, splits: 0, tokens: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, costMicroUsd: 0 };
-    // Les deux lectures partent ensemble : la double lecture n'allonge pas l'attente.
-    const [read, reread] = await Promise.all([
-      this.readPlan(tenant, doc, prepared, analysisId, plan.chunks, policy, tally),
-      this.reading.doubleReading ? this.readPlan(tenant, doc, prepared, analysisId, plan.chunks, policy, second, 100) : Promise.resolve(null),
-    ]);
-    tally.calls += second.calls;
-    tally.splits += second.splits;
-    for (const [k, n] of Object.entries(second.outcomes)) tally.outcomes[k] = (tally.outcomes[k] ?? 0) + n;
-    tally.tokens.input += second.tokens.input;
-    tally.tokens.output += second.tokens.output;
-    tally.tokens.cacheRead += second.tokens.cacheRead;
-    tally.tokens.cacheWrite += second.tokens.cacheWrite;
-    tally.costMicroUsd += second.costMicroUsd;
+    const read = await this.readPlan(tenant, doc, prepared, analysisId, plan.chunks, policy, tally);
     const pages = {
       text: prepared.pages.filter((p) => p.route === "text").length,
       scan: prepared.pages.filter((p) => p.route === "vision").length,
     };
-    const stats = (
-      extra: Pick<ReadingStats, "outcome" | "linesBeforeMerge" | "linesAfterMerge" | "droppedOutsideBlock" | "droppedDuplicates" | "scanBoundaryRisks" | "doubleReading"> & { failure?: string },
-    ): ReadingStats => ({
+    const stats = (extra: Pick<ReadingStats, "outcome" | "linesBeforeMerge" | "linesAfterMerge" | "droppedOutsideBlock" | "droppedDuplicates" | "scanBoundaryRisks"> & { failure?: string }): ReadingStats => ({
       version: 1,
       ...extra,
       strategy: plan.strategy,
@@ -391,11 +380,7 @@ export class TakeoffService {
     const blocks = read.parts.map((p) => ({ chunk: p.chunk, lines: p.output.lines }));
     const whole = read.parts.length === 1 && read.parts[0]!.chunk.context.length === 0;
     const merged = whole ? { lines: read.parts[0]!.output.lines, droppedOutsideBlock: 0, droppedDuplicates: 0 } : mergeChunkLines(blocks);
-    const first: ExtractionOutput = whole ? read.parts[0]!.output : { lines: merged.lines, notes: [...new Set(read.parts.flatMap((p) => p.output.notes))] };
-    // La seconde lecture ne sert qu'à vérifier la première ; si elle échoue, la première reste (jamais de lecture perdue).
-    const check = reread && reread.ok ? linesOf(reread.parts) : null;
-    const compared = check ? reconcileReadings(first.lines, check) : null;
-    const output: ExtractionOutput = compared ? { ...first, lines: compared.lines } : first;
+    const output: ExtractionOutput = whole ? read.parts[0]!.output : { lines: merged.lines, notes: [...new Set(read.parts.flatMap((p) => p.output.notes))] };
     await this.saveStats(
       analysisId,
       stats({
@@ -405,7 +390,6 @@ export class TakeoffService {
         droppedOutsideBlock: merged.droppedOutsideBlock,
         droppedDuplicates: merged.droppedDuplicates,
         scanBoundaryRisks: whole ? [] : scanBoundaryRisks(blocks, new Set(prepared.pages.filter((p) => p.route === "vision").map((p) => p.pageNumber!))),
-        ...(compared ? { doubleReading: { agreed: compared.agreed, disagreed: compared.disagreed, single: compared.single } } : {}),
       }),
     );
     const success = { model: read.model, output };
@@ -437,6 +421,7 @@ export class TakeoffService {
         aiDoubt: l.doubt?.trim() || null,
       })),
     });
+    if (this.reading.quantitatif) await this.completionPass(tenant, doc, prepared, analysisId, takeoff, this.reading.quantitatif);
     await this.meter.complete(analysisId);
     return this.review(tenant, takeoff);
   }
@@ -761,6 +746,33 @@ export class TakeoffService {
     }
     // §47.3 / §47.4 : « C'est bon » sur une quantité calculée avec une règle « à vérifier » : la ligne passe au vert,
     // chaque règle est confirmée pour l'entreprise (trois entreprises différentes la valident), et tout va au journal.
+    // Les lignes orange de la vérification : un interdit ou un doute du quantitatif IA (« C'est bon »), un ajout proposé
+    // (« Oui, on l'ajoute » : la ligne entre dans la liste ; « non » : elle disparaît). Tout va au journal.
+    if (key.startsWith(FORBIDDEN) || key.startsWith(AI_DOUBT) || key.startsWith(AI_ADDITION)) {
+      if (value !== "ok" && value !== "non") throw validationFailed("Answer ok or non", { reason: "invalid_answer" });
+      const decision = (await this.review(tenant, takeoff)).purchase.questions.find((q) => q.key === key);
+      if (!decision) throw notFound("Decision");
+      const added = key.startsWith(AI_ADDITION) && value === "ok" && decision.suggestion;
+      if (added) {
+        await this.takeoffs.addLine(tenant, takeoff.id, { designation: decision.suggestion!.label, quantityRaw: decision.suggestion!.quantity, unitRaw: decision.suggestion!.unit, reference: null });
+      }
+      await this.takeoffs.setAnswer(tenant, takeoff.id, key, value);
+      const s = decision.suggestion;
+      await this.journal.record(tenant, {
+        projectId: takeoff.projectId,
+        takeoffId: takeoff.id,
+        takeoffLineId: null,
+        action: added ? "add" : "confirm",
+        before: null,
+        after: added && s ? { designation: s.label, quantity: s.quantity, unit: s.unit, reference: null } : null,
+        documentExcerpt: [],
+        context: {
+          trade: takeoff.trade,
+          ...(await this.journalFacts(tenant, takeoff, { materiau: s?.label ?? decision.title, calculee: null, corrigee: s?.quantity ?? null, regle: `${key.split(":")[0]} : ${decision.text}`.slice(0, 300) })),
+        },
+      });
+      return this.reload(tenant, takeoff.id);
+    }
     if (key.startsWith(RATIO)) {
       const itemKey = key.slice(RATIO.length);
       const item = (await this.review(tenant, takeoff)).purchase.toBuy.find((b) => b.key === itemKey);
@@ -987,7 +999,10 @@ export class TakeoffService {
     const overridden = applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref, validation, consumables }), takeoff.answers);
     const ruleKeys = [...new Set(overridden.toBuy.flatMap((b) => (b.rules ?? []).map((r) => r.key)))];
     const validatedRules = ruleKeys.length > 0 ? ((await this.reading.rules?.validated(ruleKeys)) ?? new Set<string>()) : new Set<string>();
-    const purchase = applyRuleConfirmations(overridden, takeoff.answers, validatedRules);
+    const confirmed = applyRuleConfirmations(overridden, takeoff.answers, validatedRules);
+    // Les interdits du code (sans IA), puis ce que l'appel IA n° 2 a proposé : tout ce qui reste à trancher est orange.
+    const flags = [...forbiddenFlags(confirmed), ...(takeoff.completion ? completionFlags(takeoff.completion) : [])];
+    const purchase = applyOrangeFlags(confirmed, flags, takeoff.answers);
     // Une ligne que l'entreprise ajoute à la main d'un chantier à l'autre est proposée aussi, si le devis ne l'a pas déjà.
     const present = new Set(takeoff.lines.map((l) => manualKey(l.designation)));
     for (const m of (await this.reading.consumables?.manual(tenant)) ?? []) {
@@ -1023,8 +1038,6 @@ export class TakeoffService {
     chunks: readonly ReadingChunk[],
     policy: ExtractionPolicy,
     tally: CallTally,
-    /** Numérotation des appels de la seconde lecture (101, 102…), pour les distinguer dans le journal des coûts. */
-    attemptOffset = 0,
   ): Promise<{ ok: true; model: string; parts: ChunkParts } | ChunkFailure> {
     if (!this.extractor || chunks.length === 0) return { ok: false, reason: "nothing_to_read" };
     const extractor = this.extractor;
@@ -1055,7 +1068,7 @@ export class TakeoffService {
         tally.tokens.cacheRead += result.usage.cacheReadTokens ?? 0;
         tally.tokens.cacheWrite += (result.usage.cacheWrite5mTokens ?? 0) + (result.usage.cacheWrite1hTokens ?? 0);
         // Valeur lue APRÈS l'attente : les blocs lus en parallèle ajoutent chacun leur coût.
-        const cost = await this.record(tenant, doc, pages, prepared.processingId, analysisId, call + attemptOffset, result);
+        const cost = await this.record(tenant, doc, pages, prepared.processingId, analysisId, call, result);
         tally.costMicroUsd += cost;
         if (result.status === "success" && result.output) {
           model = result.model;
@@ -1081,6 +1094,43 @@ export class TakeoffService {
     return { ok: true, model, parts: results.flatMap((r) => (r.ok ? r.parts : [])) };
   }
 
+  /**
+   * APPEL IA N° 2 : le dossier (devis lu, liste du moteur, hypothèses) part au prompt B du §41.2 ; ce qu'il propose est
+   * gardé (repères résolus) et sort orange. Un échec ne bloque jamais la liste : elle reste celle du moteur, et les
+   * interdits du code la vérifient de toute façon.
+   */
+  private async completionPass(
+    tenant: TenantContext,
+    doc: DocumentWithProcessing,
+    prepared: Prepared,
+    analysisId: string,
+    takeoff: TakeoffRecord,
+    pass: QuantitatifPass,
+  ): Promise<void> {
+    try {
+      const reviewed = await this.review(tenant, takeoff);
+      const dossier = completionDossier(
+        reviewed.purchase,
+        takeoff.lines.map((l) => ({ ref: l.id, designation: withoutLabour(l.designation), quantity: l.quantityRaw, unit: l.unitRaw, section: l.section })),
+      );
+      const ref = referentialFor(takeoff.trade);
+      const referentiel = (ref?.workItems ?? []).map((w) => `- ${w.label} : ${[...new Set(w.slots.map((x) => x.label))].join(", ") || "—"}`).join("\n") || "Aucun référentiel pour ce métier.";
+      const address = (await this.reading.projectAddress?.(tenant, takeoff.projectId)) ?? null;
+      const result = await pass.complete({
+        dossier: dossier.text,
+        metier: tradeProfile(takeoff.trade).label,
+        entreprise: (await this.reading.companyName?.(tenant)) ?? "l'entreprise",
+        ville: communeOf(address),
+        referentiel,
+      });
+      await this.record(tenant, doc, { text: 0, vision: 0 }, prepared.processingId, analysisId, 50, result, QUANTITATIF_PROMPT);
+      if (result.status === "success" && result.output) await this.takeoffs.setCompletion(tenant, takeoff.id, completionRecord(result.output, dossier));
+    } catch (error) {
+      // L'appel n° 2 complète ; sa panne ne fait jamais perdre la lecture ni le calcul.
+      this.onRecordFailure(error);
+    }
+  }
+
   /** Ce que l'IA sait du métier : son nom et ses familles de matériaux habituelles (vocabulaire). */
   private tradeHints(trade: string): { tradeLabel: string; materialFamilies: string[]; workItems: { id: string; label: string; synonyms: string[] }[] } {
     const profile = tradeProfile(trade);
@@ -1101,7 +1151,8 @@ export class TakeoffService {
     processingId: string | null,
     analysisId: string,
     attempt: number,
-    result: ExtractionAttempt,
+    result: Pick<ExtractionAttempt, "provider" | "model" | "usage" | "status" | "errorCode" | "durationMs">,
+    prompt: { id: string; version: number } = TAKEOFF_PROMPT,
   ): Promise<number> {
     try {
       const { costMicroUsd } = await this.recorder.record({
@@ -1111,12 +1162,12 @@ export class TakeoffService {
         processingId,
         analysisId,
         userId: tenant.userId,
-        task: "takeoff_extraction",
+        task: prompt.id,
         route: pages.vision > 0 ? "vision" : "text",
         provider: result.provider,
         model: result.model,
-        promptId: TAKEOFF_PROMPT.id,
-        promptVersion: TAKEOFF_PROMPT.version,
+        promptId: prompt.id,
+        promptVersion: prompt.version,
         attempt,
         pagesText: pages.text,
         pagesVision: pages.vision,

@@ -120,7 +120,7 @@ export function SupplyList({
     ...new Map(
       toCheck
         .map((r) => (r.decisionKey ? decisions.get(r.decisionKey) : undefined))
-        .filter((d): d is TakeoffDecision => d !== undefined && !d.question?.options?.length && (d.key.startsWith(RATIO) || d.primary?.action === "keep" || d.primary?.action === "pieces"))
+        .filter((d): d is TakeoffDecision => d !== undefined && !d.question?.options?.length && !d.key.startsWith(AI_ADDITION) && (d.key.startsWith(RATIO) || d.primary?.action === "keep" || d.primary?.action === "pieces"))
         .map((d) => [d.key, d]),
     ).values(),
   ];
@@ -582,6 +582,8 @@ function LinePanel({
  */
 /** Le titre de la question, en une phrase d'artisan, selon ce que la décision propose. */
 function headline(d: TakeoffDecision, many: number): string {
+  if (d.key.startsWith(AI_ADDITION)) return `On ajoute ${d.title} ?`;
+  if (d.key.startsWith(AI_DOUBT) || d.key.startsWith(FORBIDDEN)) return d.title;
   // Le doute est déjà une question (« Chiffre peu lisible : 2 ou 3 paquets ? ») : c'est elle qu'on pose.
   if (doubtText(d.text).trim().endsWith("?")) return doubtText(d.text).trim();
   if (d.primary?.action === "keep") return many > 1 ? `On garde ces ${many} lignes telles quelles ?` : "On garde cette ligne telle quelle ?";
@@ -617,7 +619,8 @@ function QuestionSheet({
   /** Retirer la ligne de la liste (« Annuler » pendant 3 s), puis la question suivante. */
   onRemove?: () => void;
 }) {
-  const ratioItem = decision?.key.startsWith(RATIO) ? takeoff.purchase.toBuy.find((b) => b.key === decision.key.slice(RATIO.length)) : undefined;
+  const itemKey = decision ? checkedItemKey(decision.key) : null;
+  const ratioItem = itemKey ? takeoff.purchase.toBuy.find((b) => b.key === itemKey) : undefined;
   const id = useId();
   const [value, setValue] = useState("");
   const q = decision?.question;
@@ -668,6 +671,12 @@ function QuestionSheet({
               onNext();
             }}
             onCorrect={async (e) => {
+              await onEditItem(ratioItem, e);
+              onNext();
+            }}
+            onReplace={async (e) => {
+              // La remarque est levée d'abord (au journal), puis l'article prend la désignation proposée.
+              await handlers.onDecide(decision);
               await onEditItem(ratioItem, e);
               onNext();
             }}
@@ -723,6 +732,19 @@ function QuestionSheet({
 
 /** Clé d'une quantité calculée avec une règle « à vérifier » (§47.3). */
 const RATIO = "ratio:";
+/** Interdits du code (aucune IA), doutes et ajouts de l'appel IA n° 2 : toujours orange, jamais verts d'office. */
+const FORBIDDEN = "interdit:";
+const AI_DOUBT = "ia-doute:";
+const AI_ADDITION = "ia-ajout:";
+
+/** L'article visé par une remarque posée sur un article (ratio, interdit, doute du comptoir). */
+function checkedItemKey(key: string): string | null {
+  if (key.startsWith(RATIO)) return key.slice(RATIO.length);
+  if (key.startsWith(AI_DOUBT)) return key.slice(AI_DOUBT.length);
+  // interdit:<règle>:<article>
+  if (key.startsWith(FORBIDDEN)) return key.slice(FORBIDDEN.length).replace(/^[^:]*:/, "");
+  return null;
+}
 
 /**
  * §47.3 : une quantité calculée avec une règle « à vérifier » : le chiffre en grand, la règle en une ligne, « C'est bon »
@@ -734,12 +756,14 @@ function RatioSheet({
   pending,
   onConfirm,
   onCorrect,
+  onReplace,
 }: {
   decision: TakeoffDecision;
   item: PurchaseItem;
   pending: boolean;
   onConfirm: () => Promise<void>;
   onCorrect: (e: ItemEdit) => Promise<void>;
+  onReplace: (e: ItemEdit) => Promise<void>;
 }) {
   const id = useId();
   const [editing, setEditing] = useState(false);
@@ -789,6 +813,7 @@ function RatioSheet({
             <Pencil size={18} aria-hidden="true" className="text-subtle" />
           </button>
         )}
+        {d.key.startsWith(RATIO) ? null : <p className="text-[13px] font-extrabold tracking-wide text-muted uppercase">{d.title}</p>}
         <p className="text-[15px] leading-snug font-semibold text-warn">{d.text}</p>
         {item.approx ? <p className="text-[13px] text-muted">{item.approx}</p> : null}
       </div>
@@ -798,6 +823,16 @@ function RatioSheet({
             <Check size={20} aria-hidden="true" />
             C&apos;est bon
           </Button>
+          {d.suggestion ? (
+            <Button
+              variant="secondary"
+              pending={pending}
+              onClick={() => void onReplace({ libelle: d.suggestion!.label, quantite: d.suggestion!.quantity ?? parsed?.quantity ?? null, unite: d.suggestion!.unit ?? parsed?.unit ?? null })}
+            >
+              Remplacer par : {d.suggestion.label}
+              {d.suggestion.quantity ? ` (${[d.suggestion.quantity, d.suggestion.unit].filter(Boolean).join(" ")})` : ""}
+            </Button>
+          ) : null}
           <Button variant="secondary" onClick={() => setEditing(true)}>
             <Pencil size={18} aria-hidden="true" />
             Corriger le chiffre
@@ -816,7 +851,7 @@ function SheetDecision({ decision: d, lines, pending, handlers }: { decision: Ta
   const concerned = d.lineIds.map((id) => lines.find((l) => l.id === id)).filter((l): l is Takeoff["lines"][number] => Boolean(l));
   const single = concerned.length === 1 ? concerned[0]! : null;
   const title = single ? shortName(d.title) : d.title;
-  const explain = doubtText(d.text);
+  const explain = doubtText(d.text.replace(/^À ajouter \? /, ""));
   const primary = d.primary && d.primary.action !== "edit" ? d.primary : null;
   const canEdit = single && (d.primary?.action === "edit" || d.secondary.includes("edit"));
   const qty = (l: Takeoff["lines"][number]) => (l.quantity ? `${l.quantity} ${l.unit ?? ""}`.trim() : "Quantité ?");
@@ -877,6 +912,12 @@ function SheetDecision({ decision: d, lines, pending, handlers }: { decision: Ta
             <Button pending={pending} onClick={() => void handlers.onDecide(d)} aria-label={single ? `${primary.label} : ${single.designation}` : primary.label}>
               <Check size={20} aria-hidden="true" />
               {primary.label}
+            </Button>
+          ) : null}
+          {d.key.startsWith(AI_ADDITION) ? (
+            <Button variant="secondary" pending={pending} onClick={() => void handlers.onAnswer(d.key, "non")}>
+              <X size={18} aria-hidden="true" />
+              Non, pas besoin
             </Button>
           ) : null}
           {canEdit ? (

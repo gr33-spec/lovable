@@ -68,12 +68,17 @@ const envSchema = z
     AI_PROVIDER: z.enum(["anthropic", "disabled", "fake"]).optional(),
     ANTHROPIC_API_KEY: z.string().min(1).optional(),
     /**
-     * Modèle de lecture des devis. Décision du fondateur (2026-10-05) : l'IA la plus puissante d'abord, pour des
-     * quantitatifs fiables ; on redescendra en puissance quand les tiroirs seront bien entraînés.
+     * Modèle de LECTURE du devis (appel IA n° 1). Décision du fondateur (2026-10-05) : l'IA la plus puissante pour
+     * lire ; on redescendra quand les tiroirs seront bien entraînés.
      */
     AI_EXTRACTION_MODEL: z.string().min(1).default("claude-opus-5-5"),
-    /** Double lecture du devis (deux lectures comparées par le code) : `on` par défaut, `off` pour revenir à une seule. */
-    AI_DOUBLE_READING: z.enum(["on", "off"]).default("on"),
+    /**
+     * Appel IA n° 2, le quantitatif en un passage (décision du fondateur, 2026-10-06 : 2 appels IA max par devis) :
+     * `on` par défaut, `off` pour ne garder que la lecture et le moteur.
+     */
+    AI_QUANTITATIF: z.enum(["on", "off"]).default("on"),
+    /** Modèle de l'appel n° 2 (il lit un dossier en texte, pas le PDF) : Sonnet 5.5 (§41 : Sonnet pour le raisonnement métier). */
+    AI_QUANTITATIF_MODEL: z.string().min(1).default("claude-sonnet-5-5"),
     AI_EXTRACTION_EFFORT: z.enum(["low", "medium", "high", "xhigh", "max"]).default("high"),
     GOOGLE_CLIENT_ID: z.string().min(1).optional(),
     GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
@@ -159,7 +164,8 @@ export interface AppConfig {
     provider: "anthropic" | "disabled" | "fake";
     apiKey?: string;
     extractionModel: string;
-    doubleReading: boolean;
+    quantitatif: boolean;
+    quantitatifModel: string;
     effort: "low" | "medium" | "high" | "xhigh" | "max";
     /** Délai de réponse d'une lecture avant de passer en arrière-plan (ms). */
     answerWithinMs: number;
@@ -219,7 +225,8 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       provider: e.AI_PROVIDER ?? (e.ANTHROPIC_API_KEY ? "anthropic" : "disabled"),
       ...(e.ANTHROPIC_API_KEY ? { apiKey: e.ANTHROPIC_API_KEY } : {}),
       extractionModel: e.AI_EXTRACTION_MODEL,
-      doubleReading: e.AI_DOUBLE_READING === "on",
+      quantitatif: e.AI_QUANTITATIF === "on",
+      quantitatifModel: e.AI_QUANTITATIF_MODEL,
       effort: e.AI_EXTRACTION_EFFORT,
       answerWithinMs: e.READING_ANSWER_WITHIN_MS,
     },

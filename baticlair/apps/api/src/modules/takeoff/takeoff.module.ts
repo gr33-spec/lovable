@@ -16,6 +16,8 @@ import { TAKEOFF_REPOSITORY, type TakeoffRepository } from "./application/takeof
 import { manualKey, TakeoffService } from "./application/takeoff.service.js";
 import { TakeoffController } from "./http/takeoff.controller.js";
 import { AnthropicTakeoffExtractor } from "./infrastructure/anthropic-takeoff-extractor.js";
+import { AnthropicQuantitatifPass } from "./infrastructure/anthropic-quantitatif-pass.js";
+import { QUANTITATIF_PASS, type QuantitatifPass } from "./application/quantitatif-pass.js";
 import { FakeTakeoffExtractor } from "./infrastructure/fake-takeoff-extractor.js";
 import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.repository.js";
 
@@ -39,6 +41,13 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
       inject: [CONFIG],
     },
     {
+      // Appel IA n° 2 (quantitatif en un passage, §41) : seulement avec l'IA réelle et s'il est allumé.
+      provide: QUANTITATIF_PASS,
+      useFactory: (config: AppConfig): QuantitatifPass | null =>
+        config.ai.provider === "anthropic" && config.ai.quantitatif ? new AnthropicQuantitatifPass(config.ai.apiKey!, config.ai.quantitatifModel) : null,
+      inject: [CONFIG],
+    },
+    {
       provide: TakeoffService,
       useFactory: (
         repo: TakeoffRepository,
@@ -53,6 +62,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
         config: AppConfig,
         prisma: PrismaService,
         alerter: Alerter,
+        quantitatif: QuantitatifPass | null,
       ) =>
         new TakeoffService(
           repo,
@@ -68,7 +78,8 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             maxAnalysisMicroUsd: Math.round((Number(config.aiCost.analysisMaxEur) / Number(config.aiCost.usdToEur)) * 1_000_000),
             // Le modèle de lecture choisi (Opus par défaut) sert aussi à l'estimation du coût avant lecture.
             policy: { ...DEFAULT_EXTRACTION_POLICY, textModel: config.ai.extractionModel, visionModel: config.ai.extractionModel },
-            doubleReading: config.ai.doubleReading && config.ai.provider === "anthropic",
+            ...(quantitatif ? { quantitatif } : {}),
+            companyName: async (tenant) => (await prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true } }))?.name ?? null,
             onStats: (stats) => logger.info({ reading: stats }, "takeoff: lecture du devis"),
             // Sur Vercel, la lecture d'un gros devis continue après la réponse (sinon la fonction s'arrête).
             keepAlive: (work) => waitUntil(work),
@@ -160,7 +171,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             },
           },
         ),
-      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, TAKEOFF_EXTRACTOR, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService, ALERTER],
+      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, TAKEOFF_EXTRACTOR, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService, ALERTER, QUANTITATIF_PASS],
     },
   ],
   exports: [TakeoffService],

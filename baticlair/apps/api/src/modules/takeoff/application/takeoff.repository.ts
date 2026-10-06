@@ -1,4 +1,4 @@
-import type { LineRole } from "@baticlair/domain";
+import type { CompletionRecord, LineRole } from "@baticlair/domain";
 import type { TenantContext } from "../../tenancy/index.js";
 
 export type TakeoffStatus = "draft" | "validated";
@@ -54,6 +54,8 @@ export interface TakeoffRecord {
   notes: string[];
   /** En-tête et notes du devis lus par l'IA (§41.1), ou null. */
   context: Record<string, string> | null;
+  /** Appel IA n° 2 : ajouts et doutes proposés (null : pas d'appel). */
+  completion: CompletionRecord | null;
   /** Réponses aux questions du calcul pour ce chantier : produit, valeur, « aucun » (null), « pas celui-ci » (""). */
   answers: Record<string, string | { value: string; unit: string } | null>;
   createdAt: Date;
@@ -92,6 +94,8 @@ export interface TakeoffRepository {
   deleteLine(tenant: TenantContext, lineId: string): Promise<void>;
   setStatus(tenant: TenantContext, id: string, status: TakeoffStatus): Promise<void>;
   setAnswer(tenant: TenantContext, id: string, key: string, value: string | { value: string; unit: string } | null): Promise<void>;
+  /** Enregistre ce que l'appel IA n° 2 propose (ajouts, doutes). */
+  setCompletion(tenant: TenantContext, id: string, completion: CompletionRecord): Promise<void>;
   /** Enregistre le rôle de la quantité de ces lignes (niveau 1 : mesure ou à commander). */
   setRoles(tenant: TenantContext, roles: ReadonlyMap<string, LineRole>): Promise<void>;
 }

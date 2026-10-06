@@ -1,4 +1,4 @@
-import { METIER_NAMES, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer } from "@baticlair/domain";
+import { AI_ADDITION, AI_DOUBT, FORBIDDEN, METIER_NAMES, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { BillingService } from "../../billing/index.js";
@@ -204,7 +204,7 @@ export class QuantitatifsService {
     // une entrée au journal par ligne, au lieu d'un recalcul par ligne.
     const together = reponses.filter((r) => {
       const d = reviewed.purchase.questions.find((x) => x.key === r.question);
-      return r.valeur === "ok" && d !== undefined && !d.question && !d.key.startsWith(RATIO) && (d.primary?.action === "keep" || d.primary?.action === "pieces");
+      return r.valeur === "ok" && d !== undefined && !d.question && !d.key.startsWith(RATIO) && ![FORBIDDEN, AI_DOUBT, AI_ADDITION].some((p) => d.key.startsWith(p)) && (d.primary?.action === "keep" || d.primary?.action === "pieces");
     });
     if (together.length > 1) {
       const decisions = together.map((r) => reviewed.purchase.questions.find((x) => x.key === r.question)!);
@@ -220,6 +220,12 @@ export class QuantitatifsService {
       const decision = reviewed.purchase.questions.find((d) => d.key === r.question);
       const q = decision?.question;
       // §47.3 : « C'est bon » sur une quantité calculée avec une règle « à vérifier ».
+      // Les lignes orange de la vérification (interdits du code, doutes et ajouts du quantitatif IA) : « ok » ou « non ».
+      if (decision && [FORBIDDEN, AI_DOUBT, AI_ADDITION].some((p) => decision.key.startsWith(p))) {
+        if (r.valeur !== "ok" && r.valeur !== "non") throw validationFailed("This question takes « ok » or « non »", [{ path: "valeur", message: r.question }]);
+        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, decision.key, r.valeur);
+        continue;
+      }
       if (decision && decision.key.startsWith(RATIO)) {
         if (r.valeur !== "ok") throw validationFailed("This question takes « ok »", [{ path: "valeur", message: r.question }]);
         reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, decision.key, "ok");
