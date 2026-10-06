@@ -75,10 +75,8 @@ export function ProjectTakeoff({
   // La liste a sa page (`?vue=fournitures`) ; sur le chantier, elle tient en une ligne. Après l'envoi, les réponses des
   // fournisseurs passent en haut du chantier (retour du fondateur, 2026-10-05).
   const [page, setPage] = useListPage();
-  const autoOpened = useRef(false);
   // Un chantier de plusieurs logements s'ouvre « par logement » ; le total à commander est à l'onglet d'à côté.
   const [unitsView, setUnitsView] = useState(true);
-  const [fresh, setFresh] = useState(false);
   // Après « Envoyer au fournisseur » : l'aperçu d'envoi et les demandes passent devant la liste.
   const [overview, setOverview] = useState(false);
   const started = useRef(false);
@@ -111,7 +109,6 @@ export function ProjectTakeoff({
     void run(
       () => api<Quantitatif>(`/v1/quantitatifs?ecran=1`, { method: "POST", body: { documentId: clientQuote.id } }),
       (q) => {
-        setFresh(true);
         update(q);
       },
     );
@@ -153,13 +150,6 @@ export function ProjectTakeoff({
     prepare();
   }, [autoStart, data, readable, archived, prepare]);
 
-  // Les matériaux arrivent (lecture lancée ici) : la page des fournitures s'ouvre d'elle-même.
-  const arrived = fresh && Boolean(data?.takeoff);
-  useEffect(() => {
-    if (!arrived || autoOpened.current) return;
-    autoOpened.current = true;
-    setPage(true);
-  }, [arrived, setPage]);
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
@@ -198,7 +188,6 @@ export function ProjectTakeoff({
   const qid0 = encodeURIComponent(quantitatif!.id);
   const calculate = (answers: CounterAnswers) =>
     run(() => api<Quantitatif>(`/v1/quantitatifs/${qid0}/calcul?ecran=1`, { method: "POST", body: answers }), (q) => {
-      setFresh(true);
       update(q);
     });
   if (phase === "questions" && takeoff.status === "draft" && !archived) {
