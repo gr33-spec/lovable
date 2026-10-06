@@ -4,6 +4,7 @@ import { Bell, Check, Coffee, FileUp, Loader2, Pencil, Sparkles } from "lucide-r
 import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
 import type { ApiError, Takeoff } from "@/lib/api";
+import { askPush, ensurePush, pushSupport } from "@/lib/push";
 
 /*
  * LE PARCOURS (§48, retour du fondateur, 2026-10-06) : zéro saisie, un écran par étape, un ton direct et cool.
@@ -163,8 +164,12 @@ function useElapsed(ms: number): boolean {
 const noSubscription = () => () => {};
 const notificationState = () => (typeof Notification === "undefined" ? "unsupported" : Notification.permission);
 
-/** Une notification (le téléphone vibre, l'onglet change de titre) : seulement si l'artisan a regardé ailleurs. */
-export function notifyReady(title: string, body: string): void {
+/**
+ * Quand l'artisan a regardé ailleurs, l'onglet change de titre et, si la page tourne encore, elle montre la
+ * notification elle-même. Le SERVEUR envoie la même (Web Push, même étiquette : une seule s'affiche) : c'est elle qui
+ * arrive téléphone verrouillé ou application fermée.
+ */
+export function notifyReady(title: string, body: string, tag: string): void {
   if (typeof document === "undefined") return;
   if (!document.hidden) return;
   document.title = `✓ ${title}`;
@@ -174,7 +179,7 @@ export function notifyReady(title: string, body: string): void {
   };
   document.addEventListener("visibilitychange", restore);
   if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
-  const options = { body, icon: "/icon.svg", data: { url: window.location.href } };
+  const options = { body, tag, icon: "/icon.svg", data: { url: window.location.href } };
   // Sur téléphone, une notification passe par le service worker ; sur ordinateur, directement.
   const sw = "serviceWorker" in navigator ? navigator.serviceWorker.getRegistration("/sw.js") : Promise.resolve(undefined);
   void sw
@@ -182,16 +187,21 @@ export function notifyReady(title: string, body: string): void {
     .catch(() => undefined);
 }
 
-async function askNotifications(): Promise<void> {
-  if (typeof Notification === "undefined") return;
-  if ("serviceWorker" in navigator) await navigator.serviceWorker.register("/sw.js").catch(() => undefined);
-  if (Notification.permission === "default") await Notification.requestPermission();
-}
-
-/** Au-delà de 10 s : un mot pour patienter, et de quoi être prévenu. */
+/** Au-delà de 10 s : un mot pour patienter, et de quoi être prévenu (par le serveur, téléphone verrouillé compris). */
 function WaitNote({ what }: { what: string }) {
   const permission = useSyncExternalStore(noSubscription, notificationState, () => "unsupported");
-  const [asked, setAsked] = useState(false);
+  const support = useSyncExternalStore(noSubscription, pushSupport, () => "unsupported" as const);
+  const [state, setState] = useState<"idle" | "asking" | "on" | "off">("idle");
+  // Déjà autorisé : l'appareil s'abonne sans rien demander.
+  useEffect(() => {
+    if (permission !== "granted") return;
+    let live = true;
+    void ensurePush().then((ok) => live && setState(ok ? "on" : "off"));
+    return () => {
+      live = false;
+    };
+  }, [permission]);
+  const on = state === "on";
   return (
     <div role="status" className="flex items-start gap-3 rounded-[22px] bg-surface p-4 shadow-card">
       <span aria-hidden="true" className="relative flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[#fff1d6] text-[#8a5300]">
@@ -200,20 +210,34 @@ function WaitNote({ what }: { what: string }) {
         <span className="absolute -top-1 left-[23px] h-2.5 w-0.5 rounded-full bg-[#8a5300]/60" style={{ animation: "bc-steam 1.8s ease-out .6s infinite" }} />
       </span>
       <span className="flex min-w-0 grow flex-col gap-2">
-        <span className="text-[15px] leading-snug font-bold">Va boire un café, je te préviens quand c&apos;est prêt.</span>
+        <span className="text-[15px] leading-snug font-bold">{on ? "Va boire un café, je te préviens quand c'est prêt." : "Va boire un café, ça arrive."}</span>
         <span className="text-[13px] leading-snug text-muted">{what === "le calcul" ? "Je vérifie chaque fixation, chaque joint, chaque cartouche." : "Un gros devis, ou un scan : je prends le temps de tout lire."}</span>
-        {permission === "default" && !asked ? (
+        {on ? (
+          <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-ok">
+            <Check size={14} aria-hidden="true" />
+            Notification activée : tu peux fermer l&apos;appli ou verrouiller le téléphone.
+          </span>
+        ) : support === "iphone-browser" ? (
+          <span className="text-[13px] leading-snug text-muted">
+            Pour être prévenu sur iPhone : touche <span className="font-bold">Partager</span> puis <span className="font-bold">Sur l&apos;écran d&apos;accueil</span>, et ouvre BatiClair depuis l&apos;icône. En attendant, garde cette page ouverte.
+          </span>
+        ) : permission === "denied" ? (
+          <span className="text-[13px] leading-snug text-muted">Les notifications sont bloquées pour BatiClair : autorise-les dans les réglages du téléphone. En attendant, garde cette page ouverte.</span>
+        ) : support === "ok" && permission === "default" ? (
           <button
             type="button"
+            disabled={state === "asking"}
             onClick={() => {
-              setAsked(true);
-              void askNotifications();
+              setState("asking");
+              void askPush().then((ok) => setState(ok ? "on" : "off"));
             }}
-            className="inline-flex min-h-11 items-center gap-1.5 self-start rounded-xl bg-ground px-3 text-sm font-extrabold"
+            className="inline-flex min-h-11 items-center gap-1.5 self-start rounded-xl bg-ground px-3 text-sm font-extrabold disabled:opacity-60"
           >
             <Bell size={16} aria-hidden="true" />
             Me prévenir
           </button>
+        ) : state === "off" || support === "unsupported" ? (
+          <span className="text-[13px] leading-snug text-muted">Ce téléphone ne peut pas recevoir la notification : garde cette page ouverte.</span>
         ) : null}
       </span>
     </div>

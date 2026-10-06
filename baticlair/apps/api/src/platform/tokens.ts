@@ -8,3 +8,4 @@ export const LOGGER = Symbol("LOGGER");
 export const EMAIL_SENDER = Symbol("EMAIL_SENDER");
 export const AUTH = Symbol("AUTH");
 export const ALERTER = Symbol("ALERTER");
+export const PUSH_SENDER = Symbol("PUSH_SENDER");

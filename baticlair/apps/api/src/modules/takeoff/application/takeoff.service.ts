@@ -123,6 +123,11 @@ export interface ReadingOptions {
   answerWithinMs?: number;
   /** Lecture échouée (IA en panne, réponse inutilisable, erreur imprévue) : prévenir l'équipe (B5). */
   onReadingFailed?: (reason: string) => void;
+  /**
+   * §48 : « Va boire un café, je te préviens quand c'est prêt. » Une lecture ou un calcul trop long pour une réponse
+   * (passé en arrière-plan) prévient l'artisan qui l'a lancé quand il finit : questions prêtes, ou liste prête.
+   */
+  onReady?: (tenant: TenantContext, ready: { step: "questions" | "resultat"; projectId: string }) => Promise<void>;
   /** Garde la lecture en vie après la réponse (Vercel : waitUntil). Par défaut : elle continue seule. */
   keepAlive?: (work: Promise<unknown>) => void;
   /** §45.8 : la mémoire des consommables de l'entreprise (« On ajoute ? »). */
@@ -311,7 +316,9 @@ export class TakeoffService {
       clearTimeout(timer);
     }
     // Trop long pour une réponse : la lecture continue ; son échec éventuel est enregistré avec l'analyse.
-    const background = work.catch((error: unknown) => this.onRecordFailure(error));
+    const background = work
+      .then((result) => this.ready(tenant, { step: this.phaseOf(result.takeoff) === "resultat" ? "resultat" : "questions", projectId: result.takeoff.projectId }))
+      .catch((error: unknown) => this.onRecordFailure(error));
     (this.reading.keepAlive ?? (() => {}))(background);
     return { state: "reading" };
   }
@@ -346,8 +353,15 @@ export class TakeoffService {
     } finally {
       clearTimeout(timer);
     }
-    (this.reading.keepAlive ?? (() => {}))(work.catch((error: unknown) => this.onRecordFailure(error)));
+    (this.reading.keepAlive ?? (() => {}))(
+      work.then(() => this.ready(tenant, { step: "resultat", projectId: takeoff.projectId })).catch((error: unknown) => this.onRecordFailure(error)),
+    );
     return { state: "calculating" };
+  }
+
+  /** Prévenir l'artisan : une notification qui ne part pas ne casse jamais la lecture ni le calcul. */
+  private async ready(tenant: TenantContext, ready: { step: "questions" | "resultat"; projectId: string }): Promise<void> {
+    await this.reading.onReady?.(tenant, ready).catch(() => undefined);
   }
 
   /** Où en est le parcours d'un quantitatif : questions à poser, calcul en cours, ou liste prête. */

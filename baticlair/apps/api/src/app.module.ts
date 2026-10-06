@@ -19,6 +19,7 @@ import { DatabaseModule } from "./platform/database/database.module.js";
 import { EmailModule } from "./platform/email/email.module.js";
 import { RateLimitModule } from "./platform/http/rate-limit.module.js";
 import { LoggingModule } from "./platform/logging/logging.module.js";
+import { PushModule } from "./platform/push/push.module.js";
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { LoggingModule } from "./platform/logging/logging.module.js";
     DatabaseModule,
     RateLimitModule,
     EmailModule,
+    PushModule,
     IdentityModule,
     TenancyModule,
     ProjectsModule,
