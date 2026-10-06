@@ -76,7 +76,11 @@ export function VoiceEditor({ items, pending, onApply }: { items: readonly Voice
     r.lang = "fr-FR";
     r.interimResults = true;
     r.continuous = true;
+    // Un micro relancé (pause) remplace le précédent : un événement tardif de l'ancien ne compte plus, et la fin d'un
+    // micro ne se traite qu'une fois.
+    let ended = false;
     r.onresult = (e) => {
+      if (recognition.current !== r) return;
       let now = "";
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const res = e.results[i]!;
@@ -99,6 +103,8 @@ export function VoiceEditor({ items, pending, onApply }: { items: readonly Voice
       setMicError(e.error === "not-allowed" ? "Le micro est bloqué : autorise-le dans les réglages du téléphone, ou écris à côté." : "Je n'ai pas bien entendu. Réessaie, ou écris à côté.");
     };
     r.onend = () => {
+      if (ended || recognition.current !== r) return;
+      ended = true;
       if (ending.current === null) {
         // Une pause : le micro s'est coupé tout seul, on continue d'écouter.
         try {
