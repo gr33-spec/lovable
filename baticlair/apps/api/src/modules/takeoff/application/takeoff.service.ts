@@ -61,6 +61,9 @@ import {
   tradeIdOf,
   type SiteBrief,
   normalizeText,
+  lotLabel,
+  piecewiseParams,
+  scopedKey,
 } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { AiUsageRecorder, AnalysisMeter } from "../../ai-usage/index.js";
@@ -882,7 +885,8 @@ export class TakeoffService {
     if (kind === "param" && value && typeof value === "object") {
       const own = referentialFor(takeoff.trade);
       const def = [...(own ? [own] : []), ...REFERENTIALS].flatMap((r) => r.workItems.flatMap((w) => w.params)).find((p) => p.key === name);
-      if (def?.kind === "artisan_preference") await this.memory.recordChoice(tenant, { kind: "param", key: `param:${name}`, value: value.value, projectId: takeoff.projectId });
+      // Une réponse pour UN lot (« param:faconnage@noue ») fait l'habitude de ce lot seulement (§48.2, lot par lot).
+      if (def?.kind === "artisan_preference") await this.memory.recordChoice(tenant, { kind: "param", key: `param:${scopedName}`, value: value.value, projectId: takeoff.projectId });
     }
     const after = await this.reload(tenant, takeoff.id);
     const text = (v: EngineAnswer | undefined) => (v === undefined ? null : v === null ? "aucun" : typeof v === "string" ? v : `${v.value} ${v.unit}`);
@@ -1121,13 +1125,23 @@ export class TakeoffService {
     // « Comme d'habitude ? » : une habitude établie (paramètre d'entreprise) d'un ouvrage de ce devis, pas encore
     // répondue sur ce chantier.
     const used = new Set(plan.inputs.map((i) => i.workItemId));
+    // Une habitude posée lot par lot (§48.2, retour de Greg : « il peut acheter les bandes solins et façonner le reste ») :
+    // une carte par lot de zinguerie, avec le nom du lot, quand plusieurs ouvrages du devis en dépendent.
+    const piecewise = new Set(piecewiseParams(ref, plan));
     const habits = [
       ...new Map(
         ref.workItems
           .filter((w) => used.has(w.id))
-          .flatMap((w) => w.params)
-          .filter((d) => d.kind === "artisan_preference" && d.question && (d.choices?.length ?? 0) > 0 && preferences.params?.[d.key] !== undefined && takeoff.answers[`param:${d.key}`] === undefined)
-          .map((d) => [d.key, { key: `param:${d.key}`, question: d.question!, unit: d.unit, options: d.choices!.map((c) => ({ label: c.label, value: c.value })), value: preferences.params![d.key]! }]),
+          .flatMap((w) => w.params.map((d) => ({ w, d })))
+          .filter(({ w, d }) => d.kind === "artisan_preference" && d.question && (d.choices?.length ?? 0) > 0 && (preferences.params?.[`${d.key}@${w.id}`] ?? preferences.params?.[d.key]) !== undefined && takeoff.answers[`param:${d.key}`] === undefined)
+          .map(({ w, d }) => {
+            const perLot = piecewise.has(`param:${d.key}`);
+            const usual = (perLot ? preferences.params?.[`${d.key}@${w.id}`] : undefined) ?? preferences.params![d.key]!;
+            const key = perLot ? scopedKey(d.key, w.id) : `param:${d.key}`;
+            const question = perLot ? `${lotLabel(w.label)} : tu façonnes toi-même ou tu commandes façonné ?` : d.question!;
+            return [key, { key, question, unit: d.unit, options: d.choices!.map((c) => ({ label: c.label, value: c.value })), value: usual }] as const;
+          })
+          .filter(([key]) => takeoff.answers[key] === undefined),
       ).values(),
     ];
     return { ...reviewed, view, brief, purchase, habits, aiSuggestions };

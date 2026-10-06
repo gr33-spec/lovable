@@ -73,3 +73,33 @@ describe("« Effacer ce que BatiClair a appris » : des essais au hasard ne rest
     expect(theirs.questions.map((x) => x.id)).not.toContain("engine:param:faconnage");
   });
 });
+
+describe("§48.2 « zinc, lot par lot » : chaque lot de zinguerie a sa carte « Comme d'habitude ? »", () => {
+  it("noue + abergement de cheminée : deux cartes nommées ; « commandé » pour l'un, « je façonne » pour l'autre", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Zinguerie Le Goff");
+    for (const n of [1, 2]) {
+      const q = (await agent.post("/v1/quantitatifs").send({ ...JOINT_DEBOUT, reference: `Chantier ${n}` })).body as Q;
+      await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: [{ question: "engine:param:faconnage", valeur: "1" }] });
+    }
+    const ZINGUERIE = {
+      lignes: [
+        { libelle: "Noue zinc", quantite: "6", unite: "ml" },
+        { libelle: "Abergement de cheminée zinc, périmètre 4 m", quantite: "1", unite: "u" },
+      ],
+    };
+    const q = (await agent.post("/v1/quantitatifs?ecran=1").send({ ...ZINGUERIE, reference: "Chantier 3" })).body as { id: string; ecran: { habits: { key: string; question: string; value: string }[] } };
+    const cards = q.ecran.habits.filter((h) => h.key.startsWith("param:faconnage"));
+    expect(cards.map((h) => h.key).sort()).toEqual(["param:faconnage@abergement-cheminee", "param:faconnage@noue"]);
+    expect(cards.map((h) => h.question).sort()).toEqual([
+      "Abergement de cheminée (zinc + porte-solin) : tu façonnes toi-même ou tu commandes façonné ?",
+      "Noue zinc : tu façonnes toi-même ou tu commandes façonné ?",
+    ]);
+    // L'abergement est commandé façonné sur ce chantier ; la noue reste « comme d'habitude » (je façonne).
+    const res = await agent
+      .post(`/v1/quantitatifs/${q.id}/reponses?ecran=1`)
+      .send({ reponses: [{ question: "param:faconnage@abergement-cheminee", valeur: "2", unite: "u" }] });
+    expect(res.status).toBe(201);
+    const after = res.body as { ecran: { habits: { key: string }[]; purchase: { toBuy: { label: string; lineIds: string[] }[] } } };
+    expect(after.ecran.habits.map((h) => h.key)).toEqual(["param:faconnage@noue"]);
+  });
+});
