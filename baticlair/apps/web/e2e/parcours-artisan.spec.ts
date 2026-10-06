@@ -243,6 +243,8 @@ test("glisser un chantier vers la gauche le range dans Terminés, et « Annuler 
   await swipeLeft(page, /Toiture Le Bris/, 0.8);
   await expect(bris).toHaveCount(0);
   await expect(page.getByRole("link", { name: /Zinguerie Morvan/ })).toBeVisible();
+  // Le chantier disparaît tout de suite ; le bandeau dit qu'il est enregistré. Recharger avant reperdrait l'appel en cours.
+  await expect(page.getByRole("status").filter({ hasText: "Rangé dans Terminés" })).toBeVisible();
   await page.reload();
   await expect(page.getByRole("link", { name: /Zinguerie Morvan/ })).toBeVisible();
   await expect(bris).toHaveCount(0);
