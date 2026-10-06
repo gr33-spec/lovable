@@ -1,4 +1,4 @@
-import { AI_ADDITION, AI_DOUBT, FORBIDDEN, METIER_NAMES, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer } from "@baticlair/domain";
+import { AI_ADDITION, AI_DOUBT, FORBIDDEN, METIER_NAMES, MISSING_INFO, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { BillingService } from "../../billing/index.js";
@@ -204,7 +204,7 @@ export class QuantitatifsService {
     // une entrée au journal par ligne, au lieu d'un recalcul par ligne.
     const together = reponses.filter((r) => {
       const d = reviewed.purchase.questions.find((x) => x.key === r.question);
-      return r.valeur === "ok" && d !== undefined && !d.question && !d.key.startsWith(RATIO) && ![FORBIDDEN, AI_DOUBT, AI_ADDITION].some((p) => d.key.startsWith(p)) && (d.primary?.action === "keep" || d.primary?.action === "pieces");
+      return r.valeur === "ok" && d !== undefined && !d.question && !d.key.startsWith(RATIO) && ![FORBIDDEN, AI_DOUBT, AI_ADDITION, MISSING_INFO].some((p) => d.key.startsWith(p)) && (d.primary?.action === "keep" || d.primary?.action === "pieces");
     });
     if (together.length > 1) {
       const decisions = together.map((r) => reviewed.purchase.questions.find((x) => x.key === r.question)!);
@@ -221,7 +221,13 @@ export class QuantitatifsService {
       const q = decision?.question;
       // §47.3 : « C'est bon » sur une quantité calculée avec une règle « à vérifier ».
       // Les lignes orange de la vérification (interdits du code, doutes et ajouts du quantitatif IA) : « ok » ou « non ».
-      if (decision && [FORBIDDEN, AI_DOUBT, AI_ADDITION].some((p) => decision.key.startsWith(p))) {
+      // §48.4 : un ajout de l'IA est une suggestion (hors de la liste) : il se coche sans décision ouverte.
+      if (!decision && r.question.startsWith(AI_ADDITION)) {
+        if (r.valeur !== "ok" && r.valeur !== "non") throw validationFailed("This question takes « ok » or « non »", [{ path: "valeur", message: r.question }]);
+        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, r.question, r.valeur);
+        continue;
+      }
+      if (decision && [FORBIDDEN, AI_DOUBT, AI_ADDITION, MISSING_INFO].some((p) => decision.key.startsWith(p))) {
         if (r.valeur !== "ok" && r.valeur !== "non") throw validationFailed("This question takes « ok » or « non »", [{ path: "valeur", message: r.question }]);
         reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, decision.key, r.valeur);
         continue;
@@ -239,12 +245,17 @@ export class QuantitatifsService {
         continue;
       }
       const key = q?.key ?? r.question.replace(/^engine:/, "");
-      if (!/^(?:(?:product|param):[a-z0-9_]{1,40}|(?:role|precise):[0-9a-f-]{36})$/.test(key)) throw validationFailed("Unknown question", [{ path: "question", message: r.question }]);
+      if (!/^(?:product:[a-z0-9_]{1,40}|param:[a-z0-9_]{1,40}(?:@[a-z0-9_-]{1,60})?|(?:role|precise):[0-9a-f-]{36})$/.test(key)) throw validationFailed("Unknown question", [{ path: "question", message: r.question }]);
       if (key.startsWith("role:") && r.valeur !== "measure" && r.valeur !== "purchase") throw validationFailed("Role answer must be measure or purchase", [{ path: "valeur", message: r.question }]);
       let value: EngineAnswer;
       if (r.valeur === null || !key.startsWith("param:")) value = r.valeur;
       else {
-        const unit = r.unite ?? q?.unit ?? reviewed.purchase.assumptions.find((a) => a.key === key)?.unit;
+        // Une réponse pour tout le chantier (« param:faconnage ») vaut pour chaque pièce posée à part (« …@noue ») : même unité.
+        const unit =
+          r.unite ??
+          q?.unit ??
+          reviewed.purchase.assumptions.find((a) => a.key === key)?.unit ??
+          reviewed.purchase.questions.find((d) => d.question?.key.startsWith(`${key}@`))?.question?.unit;
         if (!unit) throw validationFailed("Missing unit", [{ path: "unite", message: r.question }]);
         if (!/^\d+(?:[.,]\d+)?$/.test(r.valeur.trim())) throw validationFailed("Not a number", [{ path: "valeur", message: r.question }]);
         value = { value: r.valeur.trim().replace(",", "."), unit };
@@ -264,10 +275,26 @@ export class QuantitatifsService {
     reponses: readonly { question: string; valeur: string | null; unite?: string | undefined }[],
     rendu: Rendu = {},
     ajouts: readonly { id: string; reponse: "oui" | "non" }[] = [],
+    retraits: readonly string[] = [],
   ) {
     const row = await this.row(tenant, id);
     if (reponses.length > 0) await this.answer(tenant, id, reponses);
     for (const a of ajouts) await this.correct(tenant, id, { action: "suggestion", id: a.id, reponse: a.reponse });
+    // §48.2 « liteaux, écran, voliges : déjà sur place ? » (dépose / repose) : l'article sort de la liste.
+    for (const itemKey of retraits) await this.correct(tenant, id, { action: "retirer_article", id: itemKey });
+    // §48.4 : PLUS AUCUNE QUESTION APRÈS LA SORTIE DE LA LISTE. Ce qui reste sans réponse est clos ici (« je ne sais pas ») :
+    // la ligne sort orange ou part au fournisseur telle quelle, jamais une deuxième vague. Seule l'ambiguïté d'une ligne
+    // du devis (« 6 : ardoises ou jouées ? ») ne se tranche pas à la place de l'artisan.
+    for (let round = 0; round < 3; round++) {
+      const open = (await this.ready(tenant, row)).purchase.questions.filter((d) => d.question && !d.question.key.startsWith("role:"));
+      if (open.length === 0) break;
+      let closed = 0;
+      for (const d of open) {
+        // Une question que le calcul ne sait pas clore reste telle quelle : elle ne bloque jamais le calcul.
+        closed += await this.answer(tenant, id, [{ question: d.key, valeur: null }]).then(() => 1, () => 0);
+      }
+      if (closed === 0) break;
+    }
     const reviewed = await this.ready(tenant, row);
     await this.takeoffs.calculate(tenant, reviewed.takeoff.id);
     return this.view(row, await this.takeoffs.reviewed(tenant, reviewed.takeoff.id), rendu);

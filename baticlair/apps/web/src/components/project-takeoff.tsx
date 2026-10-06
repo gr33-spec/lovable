@@ -8,6 +8,8 @@ import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { type ItemEdit } from "@/components/purchase-list";
 import { SiteUnitsView } from "@/components/site-units-view";
 import { SupplyList } from "@/components/supply-list";
+import { VoiceEditor } from "@/components/voice-editor";
+import type { VoiceEdit } from "@/lib/voice-edits";
 import { type DecisionHandlers } from "@/components/takeoff-view";
 import { useProgressRefresh } from "@/components/project-progress";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
@@ -73,10 +75,8 @@ export function ProjectTakeoff({
   // La liste a sa page (`?vue=fournitures`) ; sur le chantier, elle tient en une ligne. Après l'envoi, les réponses des
   // fournisseurs passent en haut du chantier (retour du fondateur, 2026-10-05).
   const [page, setPage] = useListPage();
-  const autoOpened = useRef(false);
   // Un chantier de plusieurs logements s'ouvre « par logement » ; le total à commander est à l'onglet d'à côté.
   const [unitsView, setUnitsView] = useState(true);
-  const [fresh, setFresh] = useState(false);
   // Après « Envoyer au fournisseur » : l'aperçu d'envoi et les demandes passent devant la liste.
   const [overview, setOverview] = useState(false);
   const started = useRef(false);
@@ -109,7 +109,6 @@ export function ProjectTakeoff({
     void run(
       () => api<Quantitatif>(`/v1/quantitatifs?ecran=1`, { method: "POST", body: { documentId: clientQuote.id } }),
       (q) => {
-        setFresh(true);
         update(q);
       },
     );
@@ -151,13 +150,6 @@ export function ProjectTakeoff({
     prepare();
   }, [autoStart, data, readable, archived, prepare]);
 
-  // Les matériaux arrivent (lecture lancée ici) : la page des fournitures s'ouvre d'elle-même.
-  const arrived = fresh && Boolean(data?.takeoff);
-  useEffect(() => {
-    if (!arrived || autoOpened.current) return;
-    autoOpened.current = true;
-    setPage(true);
-  }, [arrived, setPage]);
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
@@ -196,7 +188,6 @@ export function ProjectTakeoff({
   const qid0 = encodeURIComponent(quantitatif!.id);
   const calculate = (answers: CounterAnswers) =>
     run(() => api<Quantitatif>(`/v1/quantitatifs/${qid0}/calcul?ecran=1`, { method: "POST", body: answers }), (q) => {
-      setFresh(true);
       update(q);
     });
   if (phase === "questions" && takeoff.status === "draft" && !archived) {
@@ -272,6 +263,23 @@ export function ProjectTakeoff({
   };
   // Mettre une ligne de côté : un article de la liste sort de la liste (la liste validée le reste) ; une ligne du devis
   // à préciser avec le fournisseur est retirée.
+  // §48.4 : une modification dite à la voix (ou écrite) passe par les mêmes gestes que la main : retirer, corriger, ajouter.
+  const voiceEdit = async (edit: Exclude<VoiceEdit, { kind: "unknown" }>): Promise<boolean> => {
+    if (edit.kind === "add") {
+      await call("corrections", { action: "ajouter", ligne: { libelle: edit.label, quantite: edit.quantity, unite: edit.unit, reference: null } });
+      return true;
+    }
+    const item = takeoff.purchase.toBuy.find((b) => b.key === edit.itemKey);
+    if (!item) return false;
+    if (edit.kind === "remove") {
+      if (item.key.startsWith("line:")) for (const lineId of item.lineIds) await call("corrections", { action: "retirer", id: lineId });
+      else await call("corrections", { action: "retirer_article", id: item.key });
+      return true;
+    }
+    const unit = edit.unit ?? (item.quantity ? parseQuantity(item.quantity)?.unit : null) ?? null;
+    await editItem(item, { libelle: item.label, quantite: edit.to.replace(",", "."), unite: unit || null });
+    return true;
+  };
   const setAside = async (row: ScreenRow) => {
     // Un article recopié tel quel du devis (« line:<ligne> ») se retire avec sa ligne : sinon son doute reviendrait.
     if (row.itemKey && !row.itemKey.startsWith("line:")) await call("corrections", { action: "retirer_article", id: row.itemKey });
@@ -331,6 +339,9 @@ export function ProjectTakeoff({
     // UN SEUL ÉCRAN : la liste des fournitures, une couleur par ligne (retour du fondateur, 2026-10-04).
     body = (
       <>
+        {editable ? (
+          <VoiceEditor items={takeoff.purchase.toBuy.map((b) => ({ key: b.key, label: b.label, quantity: b.quantity }))} pending={pending} onApply={voiceEdit} />
+        ) : null}
         <SupplyList
           takeoff={takeoff}
           editable={editable}

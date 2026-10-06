@@ -3,7 +3,7 @@
 import { Check, ChevronDown, Paperclip, Pencil, Send, Trash2, X } from "lucide-react";
 import { openDocument } from "@/lib/open-document";
 import { useEffect, useId, useRef, useState } from "react";
-import { Assumptions, EDIT_FIELD, EDIT_PANEL, ItemForm, Suggestions, type ItemEdit, type SketchHandlers } from "@/components/purchase-list";
+import { Assumptions, EDIT_FIELD, EDIT_PANEL, ItemForm, type ItemEdit, type SketchHandlers } from "@/components/purchase-list";
 import { InlineLineForm, Proof, type DecisionHandlers } from "@/components/takeoff-view";
 import { Button } from "@/components/ui";
 import type { ItemSketch, PurchaseItem, ScreenRow, Takeoff, TakeoffDecision } from "@/lib/api";
@@ -236,12 +236,22 @@ export function SupplyList({
           </div>
         );
       })}
-      {editable && p.suggestions.length > 0 ? (
-        <div className="border-t border-line px-4 pt-2">
-          <Suggestions items={p.suggestions} pending={pending} onAnswer={onSuggestion} onEdit={onEditItem} />
-        </div>
-      ) : null}
       {p.assumptions.length > 0 ? <Assumptions assumptions={p.assumptions} editable={editable} pending={pending} onAnswer={handlers.onAnswer} /> : null}
+      {editable ? (
+        <SuggestionsBlock
+          items={[
+            ...p.suggestions.map((s) => ({ key: s.key, label: s.label, quantity: s.quantity, reason: null as string | null, add: () => onSuggestion(s, "oui") })),
+            ...(takeoff.aiSuggestions ?? []).map((a) => ({
+              key: a.key,
+              label: a.label,
+              quantity: [a.quantity, a.unit].filter(Boolean).join(" ") || null,
+              reason: a.reason,
+              add: () => handlers.onAnswer(a.key, "ok"),
+            })),
+          ]}
+          pending={pending}
+        />
+      ) : null}
       </div>
 
       {editable ? (
@@ -298,6 +308,51 @@ export function SupplyList({
           onNext={() => setChain(true)}
         />
       ) : null}
+    </section>
+  );
+}
+
+/**
+ * §48.4 « INTERDICTION D'INVENTER » : ce que le devis ne demande pas (un consommable proposé, un ajout de l'IA) n'entre
+ * jamais tout seul. Un petit bloc à part, en bas, DÉCOCHÉ ; une coche le fait entrer dans la liste.
+ */
+function SuggestionsBlock({ items, pending }: { items: { key: string; label: string; quantity: string | null; reason: string | null; add: () => Promise<void> }[]; pending: boolean }) {
+  const [adding, setAdding] = useState<string | null>(null);
+  if (items.length === 0) return null;
+  return (
+    <section aria-label="Suggestions" className="mx-4 mt-3 flex flex-col gap-1 rounded-2xl border border-dashed border-line bg-ground/60 px-3 py-2.5">
+      <p className="text-[13px] font-extrabold">Suggestions</p>
+      <p className="text-[12px] leading-snug text-muted">Pas dans ton devis : rien n&apos;entre dans la liste sans ta coche.</p>
+      <ul className="mt-1 flex flex-col">
+        {items.map((it) => (
+          <li key={it.key}>
+            <label className="flex min-h-11 cursor-pointer items-start gap-2.5 py-1.5">
+              <input
+                type="checkbox"
+                checked={adding === it.key}
+                disabled={pending || adding !== null}
+                onChange={async (e) => {
+                  if (!e.target.checked) return;
+                  setAdding(it.key);
+                  try {
+                    await it.add();
+                  } finally {
+                    setAdding(null);
+                  }
+                }}
+                className="mt-0.5 size-5 shrink-0 accent-accent"
+              />
+              <span className="flex min-w-0 flex-col">
+                <span className="text-[14px] leading-snug font-semibold">
+                  {it.label}
+                  {it.quantity ? <span className="font-extrabold tabular-nums"> · {it.quantity}</span> : null}
+                </span>
+                {it.reason ? <span className="text-[12px] leading-snug text-muted">{it.reason}</span> : null}
+              </span>
+            </label>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
@@ -667,7 +722,7 @@ function LinePanel({
 /** Le titre de la question, en une phrase d'artisan, selon ce que la décision propose. */
 function headline(d: TakeoffDecision, many: number): string {
   if (d.key.startsWith(AI_ADDITION)) return `On ajoute ${d.title} ?`;
-  if (d.key.startsWith(AI_DOUBT) || d.key.startsWith(FORBIDDEN)) return d.title;
+  if (d.key.startsWith(AI_DOUBT) || d.key.startsWith(FORBIDDEN) || d.key.startsWith(MISSING_INFO)) return d.title;
   // Le doute est déjà une question (« Chiffre peu lisible : 2 ou 3 paquets ? ») : c'est elle qu'on pose.
   if (doubtText(d.text).trim().endsWith("?")) return doubtText(d.text).trim();
   if (d.primary?.action === "keep") return many > 1 ? `On garde ces ${many} lignes telles quelles ?` : "On garde cette ligne telle quelle ?";
@@ -820,6 +875,8 @@ const RATIO = "ratio:";
 const FORBIDDEN = "interdit:";
 const AI_DOUBT = "ia-doute:";
 const AI_ADDITION = "ia-ajout:";
+/** §48.4 : une information restée sans réponse aux questions : la ligne est orange, « C'est bon » la laisse partir telle quelle. */
+const MISSING_INFO = "manque:";
 
 /** L'article visé par une remarque posée sur un article (ratio, interdit, doute du comptoir). */
 function checkedItemKey(key: string): string | null {

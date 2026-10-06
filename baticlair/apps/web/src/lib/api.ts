@@ -244,6 +244,8 @@ export interface Quantitatif {
 export interface Takeoff {
   /** « Comme d'habitude ? » : les habitudes établies de l'entreprise appliquées à ce chantier. */
   habits?: { key: string; question: string; unit: string; options: { label: string; value: string }[]; value: string }[];
+  /** §48.4 : ce que l'IA juge utile mais que le devis ne demande pas : bloc « Suggestions », décoché. */
+  aiSuggestions?: { key: string; label: string; quantity: string | null; unit: string | null; reason: string }[];
   id: string;
   projectId: string;
   documentId: string | null;

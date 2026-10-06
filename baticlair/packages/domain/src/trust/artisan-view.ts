@@ -529,21 +529,34 @@ export function computeWithAnswers(
         params[name] = { ...answer, origin: "artisan" };
       }
     }
+    // §48.2 « zinc, pièce par pièce » : une réponse propre à cet ouvrage (« param:faconnage@noue ») passe devant celle du chantier.
+    for (const [key, answer] of Object.entries(answers)) {
+      const scoped = scopedParam(key);
+      if (!scoped || scoped.workItemId !== input.workItemId || !answer || typeof answer === "string") continue;
+      if (work.params.some((p) => p.key === scoped.name)) params[scoped.name] = { ...answer, origin: "artisan" };
+    }
     // Habitude établie de l'entreprise (« je façonne », apprise sur deux chantiers) : vaut réponse quand ce
     // chantier n'en a pas donné d'autre ; dite comme telle dans le calcul, modifiable d'un tap.
     for (const def of work.params) {
       const habit = preferences.params?.[def.key];
-      if (def.kind !== "artisan_preference" || !habit || params[def.key] || answers[`param:${def.key}`] !== undefined) continue;
+      if (def.kind !== "artisan_preference" || !habit || params[def.key] || answers[`param:${def.key}`] !== undefined || answers[scopedKey(def.key, input.workItemId)] !== undefined) continue;
       params[def.key] = { value: habit, unit: def.unit, origin: "artisan", evidence: "Habitude de votre entreprise" };
     }
     return { ...input, products, params, preferences: prefs, ...(declinedSlots.length > 0 ? { declined: declinedSlots } : {}) };
   });
+  // Les données demandées pièce par pièce : seulement quand plusieurs ouvrages du devis en dépendent (sinon une question).
+  const piecewise = [...PER_PIECE].filter((key) => new Set(plan.inputs.filter((i) => ref.workItems.find((w) => w.id === i.workItemId)?.params.some((p) => `param:${p.key}` === key)).map((i) => i.workItemId)).size >= 2);
   const run = (ins: WorkItemInput[]) => {
     const result = computeChantier(ref, ins, options);
     // Chaque besoin garde son ouvrage : il sera rattaché à la ligne du devis dont il provient.
     const needs = result.workItems
       .filter((w) => !allGiven(w.workItemId))
       .flatMap((w) => w.needs.filter((n) => !given.has(`${w.workItemId}/${n.slot}`)).map((n) => ({ ...n, workItemId: w.workItemId })));
+    // §48.2 « zinc, pièce par pièce » : quand plusieurs ouvrages (noue, bandes, joint debout) demandent le façonnage,
+    // la question se pose pour chacun, avec ses mots ; un seul ouvrage garde la question unique.
+    for (const key of piecewise) {
+      for (const n of needs) if (n.question?.key === key) n.question = { ...n.question, key: scopedKey(key.slice("param:".length), n.workItemId) };
+    }
     const seen = new Set<string>();
     const questions: Question[] = [];
     for (const n of needs) {
@@ -619,8 +632,23 @@ export function computeWithAnswers(
   return { needs, questions, declined: [...declined] };
 }
 
+/** Les données qui se demandent ouvrage par ouvrage (§48.2, « zinc, pièce par pièce ») : la clé porte l'ouvrage. */
+const PER_PIECE = new Set(["param:faconnage"]);
+/** « param:faconnage@noue » : la donnée « faconnage » de l'ouvrage « noue » seulement. */
+export const scopedKey = (name: string, workItemId: string) => `param:${name}@${workItemId}`;
+export function scopedParam(key: string): { name: string; workItemId: string } | null {
+  const m = /^param:([a-z0-9_]+)@([a-z0-9_-]+)$/.exec(key);
+  return m ? { name: m[1]!, workItemId: m[2]! } : null;
+}
+
 /** Les entrées du calcul avec une réponse possible à une question (produit ou donnée), pour voir ce qu'elle entraîne. */
 function withAnswer(ref: Referential, inputs: WorkItemInput[], q: Question, value: string): WorkItemInput[] | null {
+  const scoped = scopedParam(q.key);
+  if (scoped) {
+    const def = ref.workItems.flatMap((w) => w.params).find((p) => p.key === scoped.name);
+    if (!def) return null;
+    return inputs.map((i) => (i.workItemId === scoped.workItemId ? { ...i, params: { ...i.params, [scoped.name]: { value, unit: def.unit, origin: "artisan" as const, evidence: "Réponse possible" } } } : i));
+  }
   const [kind, name] = q.key.split(":") as [string, string];
   if (kind === "product") {
     return inputs.map((i) => (ref.workItems.find((w) => w.id === i.workItemId)?.slots.some((s) => s.key === name) ? { ...i, products: { ...i.products, [name]: { productId: value, origin: "artisan" as const } } } : i));

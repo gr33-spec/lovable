@@ -1,5 +1,6 @@
 import {
   AI_ADDITION,
+  MISSING_INFO,
   AI_DOUBT,
   applyOrangeFlags,
   completionDossier,
@@ -255,6 +256,8 @@ export interface ReviewedTakeoff {
    * l'écran des questions en « Comme d'habitude ? » ; un tap les confirme ou les change pour ce chantier.
    */
   habits: { key: string; question: string; unit: string; options: { label: string; value: string }[]; value: string }[];
+  /** §48.4 : ce que l'IA juge utile mais que le devis ne demande pas : bloc « Suggestions », décoché, hors de la liste. */
+  aiSuggestions: { key: string; label: string; quantity: string | null; unit: string | null; reason: string }[];
 }
 
 
@@ -816,9 +819,14 @@ export class TakeoffService {
     // chaque règle est confirmée pour l'entreprise (trois entreprises différentes la valident), et tout va au journal.
     // Les lignes orange de la vérification : un interdit ou un doute du quantitatif IA (« C'est bon »), un ajout proposé
     // (« Oui, on l'ajoute » : la ligne entre dans la liste ; « non » : elle disparaît). Tout va au journal.
-    if (key.startsWith(FORBIDDEN) || key.startsWith(AI_DOUBT) || key.startsWith(AI_ADDITION)) {
+    if (key.startsWith(FORBIDDEN) || key.startsWith(AI_DOUBT) || key.startsWith(AI_ADDITION) || key.startsWith(MISSING_INFO)) {
       if (value !== "ok" && value !== "non") throw validationFailed("Answer ok or non", { reason: "invalid_answer" });
-      const decision = (await this.review(tenant, takeoff)).purchase.questions.find((q) => q.key === key);
+      const current = await this.review(tenant, takeoff);
+      // §48.4 : un ajout de l'IA n'est plus une ligne orange mais une suggestion (bloc à part, décoché) ; il se coche ici.
+      const aiAdd = current.aiSuggestions.find((a) => a.key === key);
+      const decision =
+        current.purchase.questions.find((q) => q.key === key) ??
+        (aiAdd ? { key, title: aiAdd.label, text: aiAdd.reason, suggestion: { label: aiAdd.label, quantity: aiAdd.quantity, unit: aiAdd.unit } } : undefined);
       if (!decision) throw notFound("Decision");
       const added = key.startsWith(AI_ADDITION) && value === "ok" && decision.suggestion;
       if (added) {
@@ -865,7 +873,9 @@ export class TakeoffService {
     await this.takeoffs.setAnswer(tenant, takeoff.id, key, value);
     // Mémoire de l'entreprise : un produit choisi, ou une réponse d'habitude (« je façonne », épaisseur du zinc),
     // compte pour SON entreprise ; établie au deuxième chantier différent, elle n'est plus demandée (dite, modifiable).
-    const [kind, name] = key.split(":") as [string, string];
+    // « param:faconnage@noue » (§48.2, pièce par pièce) : l'habitude reste celle du chantier entier (« je façonne »).
+    const [kind, scopedName] = key.split(":") as [string, string];
+    const name = scopedName.split("@")[0]!;
     if (kind === "product" && typeof value === "string" && value !== "") {
       await this.memory.recordChoice(tenant, { kind: "product", key: `slot:${name}`, value, projectId: takeoff.projectId });
     }
@@ -1069,9 +1079,26 @@ export class TakeoffService {
     const ruleKeys = [...new Set(overridden.toBuy.flatMap((b) => (b.rules ?? []).map((r) => r.key)))];
     const validatedRules = ruleKeys.length > 0 ? ((await this.reading.rules?.validated(ruleKeys)) ?? new Set<string>()) : new Set<string>();
     const confirmed = applyRuleConfirmations(overridden, takeoff.answers, validatedRules);
-    // Les interdits du code (sans IA), puis ce que l'appel IA n° 2 a proposé : tout ce qui reste à trancher est orange.
-    const flags = [...forbiddenFlags(confirmed), ...(takeoff.completion ? completionFlags(takeoff.completion) : [])];
+    // Les interdits du code (sans IA), puis les DOUTES de l'appel IA n° 2 : tout ce qui reste à trancher est orange.
+    // §48.4 « interdiction d'inventer » : un AJOUT de l'IA (article absent du devis) n'entre jamais dans la liste ; il
+    // va au bloc « Suggestions », décoché, et n'entre que coché par l'artisan.
+    const aiFlags = takeoff.completion ? completionFlags(takeoff.completion) : [];
+    // §48.4 : ce qui attendait une réponse close au calcul (« je ne sais pas ») sort orange « Info manquante ».
+    const declined = new Set(engine.declined ?? []);
+    const quoteKeys = new Set(confirmed.toQuote.map((q) => q.key));
+    const missing = engine.needs
+      .filter((n) => n.status === "question" && n.question && declined.has(n.question.key) && quoteKeys.has(`need:${n.needId}`))
+      .map((n) => ({
+        key: `${MISSING_INFO}need:${n.needId}`,
+        itemKey: `need:${n.needId}`,
+        title: "Info manquante",
+        text: `Info manquante : ${n.question!.text.replace(/ Cela change la commande :.*$/, "")} Vérifie-la avec ton fournisseur, ou corrige la ligne.`,
+      }));
+    const flags = [...forbiddenFlags(confirmed), ...aiFlags.filter((f) => !f.key.startsWith(AI_ADDITION)), ...missing];
     const purchase = applyOrangeFlags(confirmed, flags, takeoff.answers);
+    const aiSuggestions = aiFlags
+      .filter((f) => f.key.startsWith(AI_ADDITION) && !(f.key in takeoff.answers) && f.suggestion)
+      .map((f) => ({ key: f.key, label: f.suggestion!.label, quantity: f.suggestion!.quantity, unit: f.suggestion!.unit, reason: f.text.replace(/^À ajouter \? /, "") }));
     // Une ligne que l'entreprise ajoute à la main d'un chantier à l'autre est proposée aussi, si le devis ne l'a pas déjà.
     const present = new Set(takeoff.lines.map((l) => manualKey(l.designation)));
     for (const m of (await this.reading.consumables?.manual(tenant)) ?? []) {
@@ -1103,7 +1130,7 @@ export class TakeoffService {
           .map((d) => [d.key, { key: `param:${d.key}`, question: d.question!, unit: d.unit, options: d.choices!.map((c) => ({ label: c.label, value: c.value })), value: preferences.params![d.key]! }]),
       ).values(),
     ];
-    return { ...reviewed, view, brief, purchase, habits };
+    return { ...reviewed, view, brief, purchase, habits, aiSuggestions };
   }
 
   /**
