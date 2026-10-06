@@ -1,5 +1,12 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.06-35 — ce que le devis règle n'est plus demandé (D-2026-020, suite)
+
+- **Ø des descentes** lu après « diam. » ou « diamètre » (« diam. 80mm », « diamètre 100 ») : plus de question « Ø 80 ou Ø 100 ? » quand le devis l'écrit.
+- **Hauteur des descentes** lue dans « 2 descentes de 3 m » (comme « hauteur 4 m ») ; « descente 100 mm » n'est jamais une hauteur (1 à 30 m).
+- Un ouvrage dont le devis donne les articles (tubes, coudes) ET la mesure écrite (« 2 descentes de 3 m ») calcule encore ce qu'il ne cite pas (colliers, dauphins). Une ligne commandée telle quelle sans mesure écrite (« 42 faîtières ») ne calcule toujours rien de plus.
+- D-2026-020 reconstitué : 4 coudes (avant 8), 6 colliers (avant 12), 2 naissances (avant 4), dauphins = question du comptoir. Tableau de Brest inchangé.
+
 ## roofing-2026.10.06-34 — le devis fait foi : coudes et crochets (D-2026-020)
 
 - **Coudes** : « Tubes de descente (Coude zinc Ø80) — 4 unités » sont 4 coudes commandés tels quels (la parenthèse qui suit le titre nomme l'article). Le nombre de descentes ne vient plus que d'une ligne de tubes (`forSlots: ["tube"]`) ou de « 2 descentes » écrit (`textCount`) ; avant : 4 descentes, 8 coudes, 4 naissances, 4 dauphins.

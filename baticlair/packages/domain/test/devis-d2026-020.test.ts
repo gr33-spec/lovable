@@ -31,6 +31,15 @@ describe("D-2026-020 : les coudes du devis sont des coudes, pas des descentes", 
     const v = readQuote(LIGNES);
     expect(v.toBuy.filter((b) => /coude/i.test(b.label)).map((b) => b.quantity)).toEqual(["4 pièces"]);
   });
+  it("la descente entière se déduit du devis : Ø « diam. 80mm », hauteur « 2 descentes de 3 m », 6 colliers, 2 naissances ; aucune question qu'il règle déjà", () => {
+    const v = readQuote([{ ref: "3", designation: "Gouttière zinc demi-ronde dév. 25 (Longueur : 10 m)", quantity: "10", unit: "m" }, ...LIGNES]);
+    const keys = v.questions.map((q) => q.key);
+    for (const k of ["engine:param:diametre_descente", "engine:param:hauteur_descente", "engine:param:nb_descentes"]) expect(keys).not.toContain(k);
+    const qty = (re: RegExp) => v.toBuy.filter((b) => re.test(b.label)).map((b) => b.quantity);
+    // Avant : 12 colliers et 4 naissances (4 « descentes » lues dans les coudes).
+    expect(qty(/^Colliers/)).toEqual(["6 pièces"]);
+    expect(qty(/^Naissances/)).toEqual(["2 pièces"]);
+  });
   it("« (Fourniture & Pose) » ne nomme rien ; « avec coudes … (2 ensembles) » reste 2 descentes complètes", () => {
     const plan = planQuote(
       [{ ref: "8", designation: "Descente d'eau pluviale PVC Ø80 avec coudes (Fourniture & Pose) - comprenant 2 jeux de coudes et les colliers de fixation par descente (2 ensembles au total)", quantity: "2", unit: "unités" }],

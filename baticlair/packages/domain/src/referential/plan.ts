@@ -109,12 +109,21 @@ const TEXT_UNITS: Record<string, string> = { mm: "mm", cm: "cm", m: "m", ml: "m"
 
 /** « entraxe 90 cm », « hauteur : 4m », « pureau de 34,3 cm » → valeur et unité, seulement si elles sont écrites. */
 function readLabelled(normalized: string, label: string, gap = 0): { value: string; unit: string } | null {
-  const pos = keywordPosition(normalized, label);
-  if (pos < 0) return null;
-  const after = normalized.slice(pos + normalizeText(label).length);
+  // Chaque place du mot, dans l'ordre : « tuyau de descente zinc…, 2 descentes de 3 m » se lit à la seconde.
+  let offset = 0;
+  for (;;) {
+    const pos = keywordPosition(normalized.slice(offset), label);
+    if (pos < 0) return null;
+    const found = readAfter(normalized.slice(offset + pos + normalizeText(label).length), gap);
+    if (found) return found;
+    offset += pos + 1;
+  }
+}
+
+function readAfter(after: string, gap: number): { value: string; unit: string } | null {
   // « crochets inox de 11 cm » : quelques mots permis entre l'annonce et la valeur, jamais un autre nombre.
   const words = gap > 0 ? `(?:\\s+[a-z][a-z'-]*){0,${gap}}` : "";
-  const m = new RegExp(`^[a-z]{0,2}${words}\\s*(?:de |d |: |:|= |a )?\\s*(\\d+(?:[.,]\\d+)?)\\s*(mm|cm|ml|m²|m2|m|%|°)(?![a-z0-9])`).exec(after);
+  const m = new RegExp(`^[a-z]{0,2}\\.?${words}\\s*(?:de |d |: |:|= |a )?\\s*(\\d+(?:[.,]\\d+)?)\\s*(mm|cm|ml|m²|m2|m|%|°)(?![a-z0-9])`).exec(after);
   if (!m) return null;
   return { value: m[1]!.replace(",", "."), unit: TEXT_UNITS[m[2]!]! };
 }
@@ -399,7 +408,7 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
         for (const label of p.textLabels ?? []) {
           const pos = keywordPosition(text, label);
           if (pos < 0 || readLabelled(text, label)) continue;
-          const m = /^[a-z]{0,2}\s*(?:de |: |:|= )?\s*(\d+)(?![\d,.]|\s*(?:mm|cm|ml|m2|m²|m|%|°)(?![a-z0-9]))/.exec(text.slice(pos + normalizeText(label).length));
+          const m = /^[a-z]{0,2}\.?\s*(?:de |: |:|= )?\s*(\d+)(?![\d,.]|\s*(?:mm|cm|ml|m2|m²|m|%|°)(?![a-z0-9]))/.exec(text.slice(pos + normalizeText(label).length));
           if (m && p.choices.some((c) => c.value === m[1])) {
             facts.push({ key: p.key, value: m[1]!, unit: p.unit, evidence: `Devis, ${line.ref} (« ${label} ${m[1]} »)`, origin: "devis", workItemId: work.id });
             break;

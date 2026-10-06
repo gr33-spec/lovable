@@ -511,6 +511,8 @@ const DIAMETRE_DESCENTE_PARAM: ParamDef = {
     { label: "Ø 100", value: "100" },
     { label: "Ø 120", value: "120" },
   ],
+  // « diam. 80mm », « diamètre 100 mm », « diamètre 80 » : lus, jamais demandés (D-2026-020).
+  textLabels: ["diametre", "diam"],
   textValues: [
     { value: "80", keywords: ["ø80", "ø 80", "diametre 80", "descente 80", "descente de 80", "descentes de 80"] },
     { value: "100", keywords: ["ø100", "ø 100", "diametre 100", "descente 100", "descente de 100", "descentes de 100"] },
@@ -1067,7 +1069,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.06-34",
+  version: "roofing-2026.10.06-35",
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
@@ -3626,7 +3628,8 @@ export const ROOFING_REFERENTIAL: Referential = {
         // de 3 m » écrit dans une ligne le dit aussi.
         { key: "nb_descentes", label: "Nombre de descentes", unit: "u", kind: "site_data", question: "Combien de descentes ?", fromLineQuantity: true, forSlots: ["tube"], textCount: ["descente"] },
         DIAMETRE_DESCENTE_PARAM,
-        { key: "hauteur_descente", label: "Hauteur d'une descente", unit: "m", kind: "site_data", question: "Hauteur d'une descente ?", textLabels: ["hauteur"] },
+        // « hauteur 4 m », et « 2 descentes de 3 m » (D-2026-020) ; « descente 100 mm » n'est pas une hauteur (textRange).
+        { key: "hauteur_descente", label: "Hauteur d'une descente", unit: "m", kind: "site_data", question: "Hauteur d'une descente ?", textLabels: ["hauteur", "descente"], textRange: { min: "1", max: "30" } },
         {
           key: "longueur_tube",
           label: "Longueur des tubes",
