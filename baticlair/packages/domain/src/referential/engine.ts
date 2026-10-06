@@ -722,7 +722,12 @@ function computeNeed(
       const cached = derivedCache.get(`default:${def.key}`);
       if (cached) return cached;
       let v: IntervalValue;
-      if (d.formula) {
+      // L'hypothèse suit une donnée du chantier quand celle-ci est donnée (les crochets du devis fixent le pureau).
+      const from = d.whenGiven && input.params[d.whenGiven.param] ? d.whenGiven : null;
+      if (from) {
+        v = evaluateInterval(parseFormula(from.formula), valueOf);
+        if (!sameDim(v.dim, expected.dim)) throw new FormulaError(`L'hypothèse ${def.key} ne donne pas des ${def.unit}`);
+      } else if (d.formula) {
         v = evaluateInterval(parseFormula(d.formula), valueOf);
         if (!sameDim(v.dim, expected.dim)) throw new FormulaError(`L'hypothèse ${def.key} ne donne pas des ${def.unit}`);
       } else {
@@ -732,8 +737,9 @@ function computeNeed(
       const shown = (x: Decimal) => fr(x.dividedBy(expected.factor));
       const value = isPoint(v) ? shown(v.lo) : `${shown(v.lo)} à ${shown(v.hi)}`;
       const prov = provenanceLine(d, sources);
-      trace.push({ label: def.label, value, unit: def.unit, ...displayed(def, d.value), ...(def.estimate ? { estimation: true } : {}), from: `Hypothèse${d.note ? ` : ${d.note}` : ""} (${prov.from})`, verified: prov.verified, ...(prov.url ? { url: prov.url } : {}), origin: "assumption" });
-      assume({ key: `param:${def.key}`, label: def.label, value: displayed(def, d.value).shown ?? value, unit: def.unit, ...(d.note ? { note: d.note } : {}), ...(def.choices ? { choices: def.choices } : {}) });
+      const note = from?.note ?? d.note;
+      trace.push({ label: def.label, value, unit: def.unit, ...displayed(def, d.value), ...(def.estimate ? { estimation: true } : {}), from: `Hypothèse${note ? ` : ${note}` : ""} (${prov.from})`, verified: prov.verified, ...(prov.url ? { url: prov.url } : {}), origin: "assumption" });
+      assume({ key: `param:${def.key}`, label: def.label, value: displayed(def, d.value).shown ?? value, unit: def.unit, ...(note ? { note } : {}), ...(def.choices ? { choices: def.choices } : {}) });
       return v;
     }
     /**
