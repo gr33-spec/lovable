@@ -1993,8 +1993,34 @@ export const ROOFING_REFERENTIAL: Referential = {
           question: "À quel pureau posez-vous ces ardoises ?",
           hint: "Il change le nombre d'ardoises, de crochets et de liteaux.",
           textLabels: ["pureau"],
-          // Pose au crochet, double recouvrement : pureau = (hauteur − recouvrement) / 2 (référentiel du fondateur).
-          default: { formula: "(ardoise.longueur - recouvrement) / 2", source: F, verification: FOUNDER_DOC, version: 1, note: "(hauteur de l'ardoise − recouvrement) ÷ 2" },
+          // Pose au crochet, double recouvrement : pureau = (hauteur − recouvrement) / 2 (référentiel du fondateur). Des crochets
+          // écrits au devis disent le recouvrement de l'artisan : crochet − 1 cm (Cupa, §34), jamais contredits (D-2026-020).
+          default: {
+            formula: "(ardoise.longueur - recouvrement) / 2",
+            whenGiven: { param: "longueur_crochet", formula: "(ardoise.longueur - (longueur_crochet - regle.marge_crochet)) / 2", note: "recouvrement des crochets du devis (crochet − 1 cm)" },
+            source: F,
+            verification: FOUNDER_DOC,
+            version: 1,
+            note: "(hauteur de l'ardoise − recouvrement) ÷ 2",
+          },
+        },
+        {
+          // Le comptoir sert un crochet à sa longueur : celle du devis s'il l'écrit, sinon recouvrement + 1 cm (Cupa, §34).
+          key: "longueur_crochet",
+          label: "Longueur de crochet",
+          unit: "cm",
+          kind: "site_data",
+          question: "Quelle longueur de crochet ?",
+          textLabels: ["crochet"],
+          labelGap: 5,
+          textRange: { min: "5", max: "20" },
+          default: {
+            formula: "arrondi_sup((recouvrement_pose + regle.marge_crochet) / regle.pas_crochet) * regle.pas_crochet",
+            source: "cupa-pureau-ardoises-m2",
+            verification: FOUNDER_DOC,
+            version: 1,
+            note: "recouvrement + 1 cm (Cupa)",
+          },
         },
         ENTRAXE_PARAM,
         PENTE_PARAM,
@@ -2069,15 +2095,6 @@ export const ROOFING_REFERENTIAL: Referential = {
           // Pose au crochet, double recouvrement : pureau = (hauteur − recouvrement) / 2, donc recouvrement = hauteur − 2 × pureau.
           formula: "ardoise.longueur - 2 * pureau",
           source: F,
-          verification: FOUNDER_DOC,
-          version: 1,
-        },
-        {
-          key: "longueur_crochet",
-          label: "Longueur de crochet",
-          unit: "mm",
-          formula: "arrondi_sup((recouvrement_pose + regle.marge_crochet) / regle.pas_crochet) * regle.pas_crochet",
-          source: "cupa-pureau-ardoises-m2",
           verification: FOUNDER_DOC,
           version: 1,
         },
@@ -3605,7 +3622,9 @@ export const ROOFING_REFERENTIAL: Referential = {
       label: "Descente d'eau pluviale (tubes, coudes, colliers)",
       triggers: ["downpipe"],
       params: [
-        { key: "nb_descentes", label: "Nombre de descentes", unit: "u", kind: "site_data", question: "Combien de descentes ?", fromLineQuantity: true },
+        // Le nombre d'une ligne de TUBES (ou de descentes) ; « 4 coudes » ne fait jamais 4 descentes (D-2026-020). « 2 descentes
+        // de 3 m » écrit dans une ligne le dit aussi.
+        { key: "nb_descentes", label: "Nombre de descentes", unit: "u", kind: "site_data", question: "Combien de descentes ?", fromLineQuantity: true, forSlots: ["tube"], textCount: ["descente"] },
         DIAMETRE_DESCENTE_PARAM,
         { key: "hauteur_descente", label: "Hauteur d'une descente", unit: "m", kind: "site_data", question: "Hauteur d'une descente ?", textLabels: ["hauteur"] },
         {

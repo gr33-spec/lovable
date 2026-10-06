@@ -140,7 +140,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Crochets de gouttière bandeau dév. 25 | 43 pièces |  |
 | Chatières de ventilation | 12 pièces |  |
 
-**Hypothèses (modifiables) :** pente du toit 45° · région ardoise III · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet standard mm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm · aspect du zinc zinc naturel
+**Hypothèses (modifiables) :** pente du toit 45° · région ardoise III · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet standard mm · longueur de crochet 11 cm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm · aspect du zinc zinc naturel
 
 ### Après « 6 jouées » et « 2 descentes »
 
@@ -171,7 +171,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 - Ardoises pour jouées de lucarnes : 6 unités — BatiClair ne sait pas encore calculer les matériaux de cet ouvrage.
 
-**Hypothèses (modifiables) :** pente du toit 45° · région ardoise III · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet standard mm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm · aspect du zinc zinc naturel
+**Hypothèses (modifiables) :** pente du toit 45° · région ardoise III · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet standard mm · longueur de crochet 11 cm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm · aspect du zinc zinc naturel
 
 ### Si l'artisan dit « intérieur des terres »
 
@@ -202,4 +202,4 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 - Ardoises pour jouées de lucarnes : 6 unités — BatiClair ne sait pas encore calculer les matériaux de cet ouvrage.
 
-**Hypothèses (modifiables) :** pente du toit 45° · longueur du rampant 5,5 m · recouvrement 80 mm · pureau 11 cm · diamètre du crochet standard mm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm · aspect du zinc zinc naturel
+**Hypothèses (modifiables) :** pente du toit 45° · longueur du rampant 5,5 m · recouvrement 80 mm · pureau 11 cm · diamètre du crochet standard mm · longueur de crochet 9 cm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm · aspect du zinc zinc naturel

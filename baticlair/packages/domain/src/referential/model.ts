@@ -192,6 +192,11 @@ export interface ParamDefault extends Provenance {
    * on demande (règle du comptoir, §47.8). Mots cherchés dans les lignes de l'ouvrage.
    */
   unlessText?: string[];
+  /**
+   * Quand une autre donnée est DONNÉE (devis, réponse), l'hypothèse se déduit d'elle et non de la règle générale :
+   * des crochets de 11 cm écrits au devis fixent le recouvrement (crochet − 1 cm, Cupa), donc le pureau (D-2026-020).
+   */
+  whenGiven?: { param: string; formula: string; note: string };
 }
 
 /** Paramètre d'un ouvrage : lu dans le devis, supposé par défaut, ou demandé à l'artisan. */
@@ -218,6 +223,15 @@ export interface ParamDef {
   forSlots?: string[];
   /** Mots qui l'annoncent dans le texte d'une ligne de cet ouvrage (« entraxe 90 cm », « hauteur 4 m »). */
   textLabels?: string[];
+  /**
+   * Un nombre écrit DEVANT ces mots dans une ligne de l'ouvrage est cette donnée (« 2 descentes de 3 m » : 2 descentes).
+   * Toujours un nombre entier en chiffres ; jamais deviné d'un mot.
+   */
+  textCount?: string[];
+  /** Mots permis entre le mot qui annonce la donnée et sa valeur (« crochets inox de 11 cm » : 2). Par défaut : aucun. */
+  labelGap?: number;
+  /** Valeurs plausibles d'une lecture dans le texte, dans l'unité de la donnée : hors de là, ce n'est pas elle (« Ø 2,7 mm »). */
+  textRange?: { min: string; max: string };
   /** Sans valeur lue ni répondue : cette hypothèse, dite et modifiable. Sans hypothèse : une question. */
   default?: ParamDefault;
   /** Réponses proposées en boutons (l'artisan ne tape rien) : « Faible (30 %) », « Moyenne (45 %) »… */

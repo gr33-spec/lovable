@@ -5,7 +5,7 @@ import { keywordPosition, normalizeText, type TradeProfile } from "../trades/tra
 import type { ChantierContext, SiteFact } from "./context.js";
 import { paramsFromContext } from "./context.js";
 import type { CompanyPreferences, SlotChoice, WorkItemInput } from "./engine.js";
-import type { ProductFamily, Referential, Slot, WorkItemType } from "./model.js";
+import type { ParamDef, ProductFamily, Referential, Slot, WorkItemType } from "./model.js";
 import { identifyProducts } from "./resolve.js";
 import { parseRefUnit, sameDim, isAngleUnit, percentSlopeToDegrees } from "./units.js";
 
@@ -64,6 +64,20 @@ export interface QuotePlan {
   warnings?: string[];
 }
 
+/**
+ * La famille que NOMME la première parenthèse de la ligne, quand elle commence par le nom d'un autre article d'un
+ * ouvrage qui a aussi la famille du titre (« Tubes de descente (Coude zinc Ø80) » : un coude). Sinon null.
+ */
+function namedInParenthesis(designation: string, general: string, families: { item: string; keywords: string[] }[], ref: Referential): string | null {
+  const inner = /^[^()]{3,80}\(([^()]{3,120})\)/.exec(designation)?.[1];
+  if (!inner) return null;
+  const text = normalizeText(inner);
+  const head = families.find((f) => f.item !== general && f.keywords.some((k) => keywordPosition(text, k) === 0));
+  if (!head) return null;
+  const together = ref.workItems.some((w) => w.slots.some((s) => s.family === general) && w.slots.some((s) => s.family === head.item));
+  return together ? head.item : null;
+}
+
 /** Le mot le plus tôt dans la ligne nomme l'ouvrage ; à égalité, l'expression la plus longue (« tuile de rive » > « tuile »). */
 function earliest<T>(text: string, items: { item: T; keywords: string[] }[]): T | null {
   let best: { item: T; pos: number; len: number } | null = null;
@@ -94,13 +108,24 @@ export const LINE_UNITS: Record<string, string> = { U: "u", M: "m", ML: "m", M2:
 const TEXT_UNITS: Record<string, string> = { mm: "mm", cm: "cm", m: "m", ml: "m", m2: "m2", "m²": "m2", "%": "%", "°": "°" };
 
 /** « entraxe 90 cm », « hauteur : 4m », « pureau de 34,3 cm » → valeur et unité, seulement si elles sont écrites. */
-function readLabelled(normalized: string, label: string): { value: string; unit: string } | null {
+function readLabelled(normalized: string, label: string, gap = 0): { value: string; unit: string } | null {
   const pos = keywordPosition(normalized, label);
   if (pos < 0) return null;
   const after = normalized.slice(pos + normalizeText(label).length);
-  const m = /^[a-z]{0,2}\s*(?:de |d |: |:|= |a )?\s*(\d+(?:[.,]\d+)?)\s*(mm|cm|ml|m²|m2|m|%|°)(?![a-z0-9])/.exec(after);
+  // « crochets inox de 11 cm » : quelques mots permis entre l'annonce et la valeur, jamais un autre nombre.
+  const words = gap > 0 ? `(?:\\s+[a-z][a-z'-]*){0,${gap}}` : "";
+  const m = new RegExp(`^[a-z]{0,2}${words}\\s*(?:de |d |: |:|= |a )?\\s*(\\d+(?:[.,]\\d+)?)\\s*(mm|cm|ml|m²|m2|m|%|°)(?![a-z0-9])`).exec(after);
   if (!m) return null;
   return { value: m[1]!.replace(",", "."), unit: TEXT_UNITS[m[2]!]! };
+}
+
+/** Une valeur lue dans le texte, dans les valeurs plausibles de la donnée (« crochet Ø 2,7 mm » n'est pas une longueur). */
+function withinTextRange(p: ParamDef, found: { value: string; unit: string }): boolean {
+  if (!p.textRange) return true;
+  const read = parseRefUnit(found.unit);
+  const own = parseRefUnit(p.unit);
+  const v = new Decimal(found.value).times(read.factor);
+  return v.greaterThanOrEqualTo(new Decimal(p.textRange.min).times(own.factor)) && v.lessThanOrEqualTo(new Decimal(p.textRange.max).times(own.factor));
 }
 
 /** Une valeur lue par le prompt A (« 35° », « 5,50 m », « 45 % », « 0,65 mm ») → valeur et unité du référentiel. */
@@ -269,7 +294,11 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
     const general = v.kind === "labor" ? null : (dominant ?? earliest(text, families));
     // « Tuiles (… tuiles canal …) » : la famille générale lue en premier est précisée par une famille plus précise nommée ensuite.
     const precise = general ? ref.families.find((f) => f.refines === general && (f.keywords ?? []).some((k) => keywordPosition(text, k) >= 0)) : undefined;
-    return { line, v, text, family: precise?.code ?? general };
+    // « Tubes de descente (Coude zinc Ø80) » : le titre de la ligne range l'article, la parenthèse qui le suit le NOMME.
+    // Le mot entre parenthèses l'emporte quand il désigne un autre article du même ouvrage (D-2026-020 : 4 coudes, pas
+    // 4 descentes). « (Fourniture & Pose) », « (2 rives de 6 m) » ne nomment rien : la ligne garde son titre.
+    const named = general && !precise ? namedInParenthesis(line.designation, general, families, ref) : null;
+    return { line, v, text, family: precise?.code ?? named ?? general, titled: named ? general : null };
   });
 
   // 1. Les ouvrages présents : ceux qu'une ligne déclenche.
@@ -282,7 +311,7 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
   const characteristicsBySlot: Record<string, string[]> = {};
   const askInstead = new Map<string, Set<string>>();
 
-  for (const { line, v, text, family } of read) {
+  for (const { line, v, text, family, titled } of read) {
     if (v.kind === "labor") {
       plans.push({ ref: line.ref, status: "not_material" });
       continue;
@@ -311,8 +340,9 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
     }
     // Un emplacement de la MÊME famille n'est jamais « cité » par la ligne d'un autre
     // (« contre-lattes en liteaux » ne parle pas du lattage) : il lui faut sa propre ligne.
+    // Le titre devant la parenthèse range l'article : il ne « cite » pas son emplacement (les tubes d'une ligne de coudes).
     const mentions = work.slots
-      .filter((s) => s.family !== slot.family && slotWords(ref, s).some((k) => keywordPosition(text, k) >= 0))
+      .filter((s) => s.family !== slot.family && s.family !== titled && slotWords(ref, s).some((k) => keywordPosition(text, k) >= 0))
       .map((s) => s.key);
     const seen = mentioned.get(work.id) ?? new Set<string>();
     [slot.key, ...mentions].forEach((k) => seen.add(k));
@@ -349,9 +379,15 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
       }
     }
     for (const p of work.params) {
+      for (const word of p.textCount ?? []) {
+        const m = new RegExp(`(?:^|[^\\d.,])(\\d{1,3}) ${normalizeText(word)}s?(?![a-z0-9])`).exec(text);
+        if (m && Number(m[1]) > 0 && !facts.some((f) => f.key === p.key && f.workItemId === work.id && f.evidence.startsWith(`Devis, ${line.ref}`))) {
+          facts.push({ key: p.key, value: m[1]!, unit: p.unit, evidence: `Devis, ${line.ref} (« ${m[1]} ${word}s »)`, origin: "devis", workItemId: work.id });
+        }
+      }
       for (const label of p.textLabels ?? []) {
-        const found = readLabelled(text, label);
-        if (!found || !sameDimUnit(p.unit, found.unit)) continue;
+        const found = readLabelled(text, label, p.labelGap);
+        if (!found || !sameDimUnit(p.unit, found.unit) || !withinTextRange(p, found)) continue;
         // « pente 45 % » dans un devis : gardée en degrés, l'unité de la pente partout dans BatiClair.
         const asRef = isAngleUnit(p.unit) && found.unit === "%" ? { value: percentSlopeToDegrees(new Decimal(found.value)).toString(), unit: p.unit } : found;
         facts.push({ key: p.key, ...asRef, evidence: `Devis, ${line.ref} (« ${label} »)`, origin: "devis" });
@@ -456,9 +492,28 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
 /** La clé des caractéristiques d'un emplacement : propre à l'ouvrage (deux ouvrages ont chacun leurs « crochets »). */
 export const slotCharacteristicsKey = (workItemId: string, slot: string) => `${workItemId}/${slot}`;
 
+/** Dernière place d'un des mots dans le texte (-1 sinon) ; « crochets d'ardoise » : « ardoise » complète le crochet, il ne compte pas. */
+function lastWord(text: string, words: readonly string[], skipComplement = false): number {
+  let best = -1;
+  for (const w of words) {
+    const k = normalizeText(w);
+    for (let at = text.indexOf(k); at >= 0; at = text.indexOf(k, at + 1)) {
+      if (skipComplement && /(?:^|\s)(?:de|d|des|du|pour)\s*$/.test(text.slice(0, at))) continue;
+      best = Math.max(best, at);
+    }
+  }
+  return best;
+}
+
 function productCharacteristics(ref: Referential, work: WorkItemType, slot: Slot, designation: string): string[] {
+  const text = normalizeText(designation);
+  const own = slotWords(ref, slot);
+  const others = work.slots.filter((s) => s.key !== slot.key && s.family !== slot.family).flatMap((s) => slotWords(ref, s));
   return keyCharacteristics(designation).filter((c) => {
     const n = normalizeText(c);
+    // « Ardoises 32x22 posées au crochet inox » : « inox » qualifie le crochet, nommé juste avant, pas l'ardoise.
+    const at = text.indexOf(n);
+    if (at > 0 && others.length > 0 && lastWord(text.slice(0, at), others, true) > lastWord(text.slice(0, at), own)) return false;
     if (/^(avec|comprenant) /.test(n) || / compris$/.test(n)) return false;
     if (work.params.some((p) => (p.textLabels ?? []).some((label) => readLabelled(n, label)))) return false;
     // « Ø80 » sur la ligne de gouttière : le diamètre des descentes (une donnée de l'ouvrage), pas la gouttière.

@@ -142,7 +142,7 @@ describe("liste d'achats : devis ardoises (200 m², jouées, cheminée)", () => 
     expect(v.toBuy.some((b) => /Faîtières/.test(b.label))).toBe(false);
     // Les naissances attendent « combien de descentes », l'abergement attend le périmètre : des questions, rien à faire chiffrer.
     expect(v.toQuote).toEqual([]);
-    expect(v.assumptions.map((a) => a.key)).toEqual(["param:pente", "param:zone", "param:longueur_rampant", "derived:recouvrement", "param:pureau", "param:diametre_crochet", "product:liteau", "product:contre_liteau", "param:entraxe_supports", "param:aspect_zinc"]);
+    expect(v.assumptions.map((a) => a.key)).toEqual(["param:pente", "param:zone", "param:longueur_rampant", "derived:recouvrement", "param:pureau", "param:diametre_crochet", "param:longueur_crochet", "product:liteau", "product:contre_liteau", "param:entraxe_supports", "param:aspect_zinc"]);
     // Tant que « 6 » n'est pas tranché, rien ne part.
     expect(v.canValidate).toBe(false);
   });
