@@ -25,22 +25,24 @@ async function signUp(page: Page) {
   return email;
 }
 
-/** La question ouverte en bas de l'écran : « C'est bon » / « Oui… » s'il y en a, sinon le premier bouton de réponse. */
-async function answerSheet(page: Page) {
-  const sheet = page.getByRole("dialog", { name: /^Question : / });
-  // La réponse précédente s'enregistre encore (boutons « aria-busy ») : la fiche va changer ou se fermer. On attend
-  // qu'elle soit au repos, sinon le clic part sur un bouton désactivé qui disparaît (course vue en CI).
-  await expect(sheet.locator('[aria-busy="true"]')).toHaveCount(0, { timeout: 15_000 });
-  if (!(await sheet.isVisible())) return;
-  const name = (await sheet.getAttribute("aria-label"))!;
-  const yes = sheet.getByRole("button", { name: /^(C'est bon|Oui)/ }).first();
-  const input = sheet.getByRole("textbox");
+/** La réponse précédente s'enregistre encore (boutons « aria-busy ») : on attend que la liste soit au repos. */
+async function settle(page: Page) {
+  await expect(page.getByRole("region", { name: "Liste des fournitures" }).locator('[aria-busy="true"]')).toHaveCount(0, { timeout: 15_000 });
+}
+
+/**
+ * §49.8 : UNE LIGNE ORANGE SE RÈGLE DANS SA CARTE, D'UN GESTE. « C'est bon » / « Garder » / « Oui » s'il y en a, sinon le
+ * premier choix, sinon le petit champ (« 2 », OK). Jamais un autre écran.
+ */
+async function settleCard(page: Page, card: ReturnType<Page["getByRole"]>) {
+  const yes = card.getByRole("button", { name: /^(C'est bon|Garder|Oui)/ }).first();
+  const input = card.getByRole("textbox");
   if (await yes.isVisible()) await yes.click();
   else if (await input.isVisible()) {
     await input.fill("2");
-    await sheet.getByRole("button", { name: "Valider" }).click();
-  } else await sheet.locator("button:not([aria-label])").first().click();
-  await expect(page.getByRole("dialog", { name, exact: true })).toHaveCount(0, { timeout: 15_000 });
+    await card.getByRole("button", { name: "OK" }).click();
+  } else await card.getByRole("group").getByRole("button").first().click();
+  await settle(page);
 }
 
 /** La page des fournitures (`?vue=fournitures`) : ouverte d'elle-même à l'arrivée des matériaux, sinon d'un appui sur le chantier. */
@@ -59,42 +61,29 @@ async function backToSite(page: Page) {
 }
 
 /**
- * LA LISTE DES FOURNITURES : tant qu'il reste de l'orange, l'artisan touche « Vérifier… », répond à la question qui
- * s'ouvre en bas, et recommence ; fini quand le gros bouton dit « Envoyer au fournisseur ».
+ * LA LISTE DES FOURNITURES : tant qu'il reste de l'orange, l'artisan règle la première carte orange d'un geste, sans
+ * quitter la liste (§49.8) ; fini quand le gros bouton dit « Envoyer au fournisseur ».
  */
 async function confirmDoubts(page: Page) {
-  if (!(await page.getByRole("dialog", { name: /^Question : / }).isVisible())) await openList(page);
+  await openList(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
-  for (let i = 0; i < 30; i++) {
-    if (await page.getByRole("dialog", { name: /^Question : / }).isVisible()) {
-      await answerSheet(page);
-      continue;
-    }
-    await expect(list).toBeVisible();
-    const verify = list.getByRole("button", { name: /^Vérifier (la ligne|les \d+ lignes)$/ });
-    if (!(await verify.isVisible())) {
+  for (let i = 0; i < 40; i++) {
+    await settle(page);
+    const card = list.getByRole("group", { name: /^Régler : / }).first();
+    if (!(await card.isVisible())) {
       await expect(list.getByRole("button", { name: "Envoyer au fournisseur" })).toBeVisible();
       return;
     }
-    await verify.click();
-    await expect(page.getByRole("dialog", { name: /^Question : / })).toBeVisible();
-    await answerSheet(page);
+    await settleCard(page, card);
   }
 }
 
-/** L'artisan vérifie les lignes orange une à une jusqu'à voir cette carte dans la question ouverte (qui reste ouverte). */
-async function answerUntil(page: Page, name: string) {
-  if (!(await page.getByRole("dialog", { name: /^Question : / }).isVisible())) await openList(page);
-  const list = page.getByRole("region", { name: "Liste des fournitures" });
-  for (let i = 0; i < 30; i++) {
-    const sheet = page.getByRole("dialog", { name: /^Question : / });
-    if (!(await sheet.isVisible())) {
-      await list.getByRole("button", { name: /^Vérifier (la ligne|les \d+ lignes)$/ }).click();
-      await expect(sheet).toBeVisible();
-    }
-    if (await sheet.getByRole("region", { name }).isVisible()) return;
-    await answerSheet(page);
-  }
+/** La carte orange d'une ligne, dans la liste (§49.8 : tout se règle là). */
+async function orangeCard(page: Page, label: string) {
+  await openList(page);
+  const card = page.getByRole("region", { name: "Liste des fournitures" }).getByRole("group", { name: `Régler : ${label}`, exact: true });
+  await expect(card).toBeVisible();
+  return card;
 }
 
 /**
@@ -369,10 +358,9 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await passQuestions(page);
 
   // Les crochets en paquets : seul un doute de LECTURE est posé (« 2 ou 3 ? »), jamais « combien par paquet ».
-  await answerUntil(page, "À régler : Crochet inox ardoise 100 mm");
-  await expect(page.getByText("Chiffre peu lisible : 2 ou 3 paquets ?")).toBeVisible();
-  // La poubelle est dans la question : retirer la ligne sans quitter l'enchaînement (retour du fondateur, 2026-10-05).
-  await expect(page.getByRole("dialog", { name: /^Question : / }).getByRole("button", { name: /^Retirer de la liste : / })).toBeVisible();
+  // §49.8 : la carte orange dit sa raison en entier, dans la liste, et se règle là.
+  await orangeCard(page, "Crochet inox ardoise 100 mm");
+  await expect(page.getByText("Chiffre peu lisible : 2 ou 3 paquets ?", { exact: false }).first()).toBeVisible();
   await expect(page.getByText(/combien par paquet|pièces par paquet/i)).toHaveCount(0);
   await confirmDoubts(page);
   // UN SEUL ÉCRAN : la liste des fournitures, tout est vert ou gris, le gros bouton dit « Envoyer au fournisseur ».
@@ -651,18 +639,16 @@ test("plusieurs articles inconnus, sans unité : UNE décision les règle tous, 
   }
   await page.getByRole("button", { name: "Revenir à la liste des fournitures" }).last().click();
 
-  // Une seule carte pour les trois, jamais trois alertes identiques.
-  const group = page.getByRole("region", { name: "À régler : Articles que BatiClair ne connaît pas encore" });
-  await answerUntil(page, "À régler : Articles que BatiClair ne connaît pas encore");
-  await expect(group).toHaveCount(1);
-  await expect(group.getByText(/^3 articles que BatiClair ne connaît pas encore, dont 3 sans unité/)).toBeVisible();
+  // Une seule carte pour les trois, jamais trois alertes identiques ; sa raison en entier, et son « C'est bon ».
+  const name = "Articles que BatiClair ne connaît pas encore";
+  await orangeCard(page, name);
+  await expect(page.getByText(/3 articles que BatiClair ne connaît pas encore, dont 3 sans unité/)).toBeVisible();
   // Recharger la page ne règle rien à la place de l'artisan.
   await page.reload();
-  await answerUntil(page, "À régler : Articles que BatiClair ne connaît pas encore");
-  await expect(group).toHaveCount(1);
+  const group = await orangeCard(page, name);
   await expect(page.getByRole("button", { name: "Envoyer au fournisseur" })).toHaveCount(0);
 
-  await group.getByRole("button", { name: "Oui, tels qu'écrits" }).click();
+  await group.getByRole("button", { name: /^C'est bon/ }).click();
   await expect(group).toHaveCount(0);
   await confirmDoubts(page);
   // Gardés tels qu'écrits, à la pièce : la preuve dit que c'est un choix pour ce chantier.
@@ -844,7 +830,7 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   await expect(list).toBeVisible({ timeout: 60_000 });
   // §48.4 : plus aucune question après la sortie de la liste.
   await expect(questions).toHaveCount(0);
-  await expect(page.getByRole("dialog", { name: /^Question : / })).toHaveCount(0);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   // RÈGLE NUMÉRO UN : ni suggestion, ni écran, ni liteaux, ni crochets que le devis n'écrit pas.
   await expect(list.getByRole("region", { name: "Suggestions" })).toHaveCount(0);
   await expect(list.getByText(/Écran|Liteaux|Pattes|Faîtage|égout/i)).toHaveCount(0);
@@ -924,6 +910,49 @@ test("§48.5 : envoyer une sélection à un autre fournisseur, discret, puis l'e
   await expect(list.getByText("Envoyé · Point.P")).toHaveCount(2);
 
   // L'envoi normal n'a pas bougé : toute la liste, d'un coup, au fournisseur habituel.
-  await expect(list.getByRole("button", { name: /^(Envoyer au fournisseur|Vérifier (la ligne|les \d+ lignes))$/ })).toBeVisible();
+  await expect(list.getByRole("button", { name: "Envoyer au fournisseur" }).or(list.getByText(/^Encore \d+ lignes? orange/))).toBeVisible();
   await expect(list.getByRole("button", { name: "Voir la demande envoyée" })).toHaveCount(0);
+});
+
+test("§49.8 : chaque ligne orange passe au vert dans sa carte, un geste par ligne, sans quitter la liste", async ({ page }) => {
+  await signUp(page);
+  await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
+  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  // Les questions de comptoir laissées sans réponse : leurs lignes sortent orange « Info manquante ».
+  await passQuestions(page);
+  await openList(page);
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  const url = page.url();
+  // Plus de bouton vers un autre écran.
+  await expect(list.getByRole("button", { name: /^Vérifier/ })).toHaveCount(0);
+  const cards = list.getByRole("group", { name: /^Régler : / });
+  const start = await cards.count();
+  expect(start).toBeGreaterThan(0);
+  // La raison en entier, jamais coupée par « … ».
+  for (const li of await list.locator("li", { has: cards }).all()) expect(await li.innerText()).not.toContain("…");
+
+  // Un geste par ligne : une réponse peut faire naître une ligne (« Je façonne » → la bobine) ; elle compte pour une.
+  const seen = new Set<string>();
+  let gestures = 0;
+  let choices = 0;
+  while ((await cards.count()) > 0 && gestures < 20) {
+    const card = cards.first();
+    seen.add((await card.getAttribute("aria-label"))!);
+    const asks = card.getByRole("group");
+    // Un choix à faire : un tap sur un bouton, la ligne se recalcule. Plusieurs valeurs par défaut : « C'est bon » les
+    // confirme d'un coup. Un écart : « Garder ».
+    if ((await asks.count()) === 1) {
+      await asks.getByRole("button").first().click();
+      choices++;
+    } else await card.getByRole("button", { name: /^(Garder|C'est bon|Oui)/ }).first().click();
+    gestures++;
+    await settle(page);
+    // Jamais un autre écran : pas de fenêtre, pas de changement d'adresse.
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    expect(page.url()).toBe(url);
+  }
+  expect(gestures).toBe(seen.size);
+  expect(choices).toBeGreaterThan(0);
+  await expect(list.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
+  await expect(list.getByRole("button", { name: "Envoyer au fournisseur" })).toBeVisible();
 });

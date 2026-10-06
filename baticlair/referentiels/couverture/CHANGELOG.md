@@ -1,5 +1,10 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.06-41 — §49.7 mortier de solin, §49.8 lignes orange réglées dans leur carte (fondateur, 2026-10-06)
+
+- **§49.7 Mortier de solin** : « Ciment 35 kg + sable » est remplacé par « Mortier d'étanchéité pour solin, sac 25 kg » (produit `mortier-solin-25`, famille `solin_mortar` comptée en kg). Règle du fondateur : sacs = arrondi supérieur de (ml de porte-solin × 2 kg) / 25 (`regle.mortier_solin_par_ml` = 2 kg/ml, sourcée §49.7). Sur D-2026-020 : 4 ml ⇒ 1 sac, **en vert**, hypothèse « 4 ml × 2 kg/ml ». Ancienne valeur : « Ciment 35 kg + sable : 1 sac », orange (estimation `todo`).
+- **§49.8 Écran « À vérifier »** : chaque article porte ce qui le règle sur place (`asks` : la donnée qui manque ou le défaut à confirmer, avec ses boutons ; `gap` : « le devis dit 20, le calcul donne 21 »). Rien ne change dans les quantités.
+
 ## roofing-2026.10.06-40 — §49, la charte du quantitatif (fondateur, 2026-10-06)
 
 Les prompts 41.1 (lecture, v12) et 41.2 (relecture, v4) sont branchés mot pour mot ; le §49 remplace tout ce qui le contredit.

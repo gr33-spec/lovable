@@ -111,7 +111,7 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
       ["Feuilles zinc naturel 2 × 1 m, 0,65 mm", "1 pièce"],
       ["Faîtage en bande zinc, dév. 25 cm", "8 ml"],
       ["Bande porte-solin zinc", "4 ml"],
-      ["Ciment 35 kg + sable (mortier de solin)", "1 sac"],
+      ["Mortier d'étanchéité pour solin, sac 25 kg", "1 sac de 25 kg"],
       ["Tuyau de descente zinc diam. 80mm", "2 tubes de 3 m"],
       ["Coude zinc diam. 80mm", "4 pièces"],
       ["Colliers de descente Ø80", "6 pièces"],
@@ -164,8 +164,10 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
     expect(achete.toBuy.find((b) => b.lineIds.includes("8"))?.label).toMatch(/^Faîtage zinc naturel 0,65 mm, bande dév\. 25 cm/);
   });
 
-  it("mortier du porte-solin : orange, quantité à confirmer ; tuyau Ø80 en 2 tubes de 3 m ; 4 coudes ; colliers Ø80 orange (fixation non chiffrée)", () => {
-    expect(row(v.toBuy[8]!.key)).toMatchObject({ status: "check", reason: "Quantité à confirmer : estimation 1 sac de ciment 35 kg + sable" });
+  it("§49.7 mortier du porte-solin : mortier d'étanchéité, 4 ml × 2 kg/ml = 8 kg ⇒ 1 sac de 25 kg, vert ; tuyau Ø80 en 2 tubes de 3 m ; 4 coudes ; colliers Ø80 orange (fixation non chiffrée)", () => {
+    const mortier = v.toBuy[8]!;
+    expect(mortier).toMatchObject({ label: "Mortier d'étanchéité pour solin, sac 25 kg", quantity: "1 sac de 25 kg", precision: "4 ml × 2 kg/ml", lineIds: ["10"] });
+    expect(row(mortier.key)?.status).toBe("ok");
     for (const b of [v.toBuy[9]!, v.toBuy[10]!]) expect(row(b.key)?.status).toBe("ok");
     expect(v.toBuy[9]!.order).toEqual({ count: "2", unit: "tubes de 3 m" });
     expect(v.toBuy[11]!).toMatchObject({ lineIds: ["14"] });
@@ -223,6 +225,18 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
     const repondu = read({ [q.key]: "NF Cupa" }, readings);
     expect(repondu.toBuy[0]!.precision).toMatch(/; Qualité de l'ardoise : NF Cupa$/);
     expect(repondu.questions.some((d) => d.key === q.key)).toBe(false);
+  });
+
+  it("§49.8 : chaque ligne orange porte de quoi se régler dans sa carte, d'un geste (boutons, ou « Garder 20 » / « Mettre 21 »)", () => {
+    const [ardoises, , gouttiere, naissance, crochets] = v.toBuy;
+    expect(gouttiere!.asks).toEqual([{ key: "param:developpe_gouttiere", text: "Gouttière de 25, de 28, de 33 ou de 40", unit: "cm", options: expect.arrayContaining([expect.objectContaining({ label: "De 25" }), expect.objectContaining({ label: "De 40" })]) }]);
+    expect(naissance!.asks?.map((q) => q.key)).toEqual(["param:developpe_gouttiere"]);
+    expect(crochets!.gap).toEqual({ written: "20", computed: "21", unit: "pièces" });
+    expect(ardoises!.asks?.map((q) => q.key)).toEqual(["param:diametre_crochet"]);
+    expect(v.toBuy[6]!.asks?.[0]?.options.map((o) => o.label)).toEqual(["Je façonne (feuilles ou bobineau)", "Je commande façonné"]);
+    // Un tap : la gouttière se recalcule et passe au vert.
+    const tap = read({ "param:developpe_gouttiere": u("330", "mm") });
+    expect(row(tap.toBuy[2]!.key, tap)?.status).toBe("ok");
   });
 
   it("répondu et confirmé : rien ne reste orange, la liste peut partir", () => {

@@ -1080,7 +1080,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.06-40",
+  version: "roofing-2026.10.06-41",
   writtenOnly: true,
   trade: "roofing",
   sources: [
@@ -1246,8 +1246,8 @@ export const ROOFING_REFERENTIAL: Referential = {
     },
     { code: "zinc_sheet", label: "Feuille de zinc", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["feuille de zinc", "feuille zinc"] },
     { code: "zinc_narrow_coil", label: "Bobineau de zinc", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["bobineau"] },
-    // Le mortier du solin (« bande porte-solin zinc et mortier ciment », D-2026-020) : jamais supprimé, estimé et à confirmer.
-    { code: "solin_mortar", label: "Mortier de solin", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["mortier"] },
+    // Le mortier du solin (« bande porte-solin zinc et mortier ciment », D-2026-020) : jamais supprimé ; mortier d'étanchéité en sacs de 25 kg (§49.7).
+    { code: "solin_mortar", label: "Mortier de solin", needUnit: "kg", attributes: [], keyAttributes: [], keywords: ["mortier"] },
     { code: "solin_support", label: "Bande porte-solin", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["porte-solin", "porte solin"] },
     // Abergement (entourage de cheminée) : un ouvrage compté, converti en bandes zinc façonnées ou en bobine (§7 « Abergement de cheminée »).
     { code: "chimney_flashing", label: "Abergement de cheminée", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["abergement", "entourage de cheminee", "entourage cheminee", "solin de cheminee", "habillage de cheminee"] },
@@ -1730,8 +1730,9 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("bobine-cuivre", "copper_coil", "Cuivre en bobine, au mètre linéaire (largeur et épaisseur du chantier)", "Cuivre en bobine", {
       sellingUnits: [{ id: "ml", label: { one: "ml", many: "ml" }, contains: ONE_METRE, primary: true }],
     }),
-    generic("ciment-sable-solin", "solin_mortar", "Ciment 35 kg + sable, pour mortier de solin", "Ciment + sable (mortier de solin)", {
-      sellingUnits: [{ id: "sac", label: { one: "sac", many: "sacs" }, contains: ONE_PIECE, primary: true }],
+    // §49.7 : un mortier d'étanchéité spécial solin, prêt à gâcher, en sac de 25 kg (jamais « ciment + sable »).
+    generic("mortier-solin-25", "solin_mortar", "Mortier d'étanchéité pour solin, prêt à gâcher, sac de 25 kg", "Mortier d'étanchéité pour solin, sac 25 kg", {
+      sellingUnits: [{ id: "sac", label: { one: "sac de 25 kg", many: "sacs de 25 kg" }, contains: packaging("25", "kg", F, FOUNDER_DOC, "« sac de 25 kg » (§49.7)."), primary: true }],
     }),
     generic("jonction-gouttiere", "gutter_joint", "Jonction de gouttière (système de la gouttière)", "Jonctions de gouttière"),
     generic("talon-gouttiere", "gutter_end", "Talon (fond) de gouttière (système de la gouttière)", "Talons de gouttière"),
@@ -2634,13 +2635,14 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "bobineau", family: "zinc_narrow_coil", label: "Bobineau zinc", usual: { text: "Bobineau de zinc au-delà de 6 ml de bande (réponse du fondateur).", source: FR_REPLY, productId: "bobineau-zinc" }, formOf: "bande" },
         { key: "mastic", family: "sealant", label: "Silicone ou mastic", usual: { text: "Silicone neutre compatible zinc, 1 cartouche par 8 ml de joint (§25.6).", source: F, productId: "cartouche-silicone-zinc" } },
         { key: "vis", family: "strip_screw", label: "Vis de bandes", usual: { text: "Vis inox 4 × 40, 4 par mètre (§25.5).", source: F, productId: "vis-inox-4x40" } },
-        { key: "mortier", family: "solin_mortar", label: "Mortier de solin", keywords: ["mortier"], usual: { text: "Ciment 35 kg + sable pour le solin (estimation du fondateur).", source: F, productId: "ciment-sable-solin" } },
+        { key: "mortier", family: "solin_mortar", label: "Mortier de solin", keywords: ["mortier"], usual: { text: "Mortier d'étanchéité pour solin, sac de 25 kg (§49.7).", source: F, productId: "mortier-solin-25" } },
       ],
       constants: {
         ...ZINC_PLAT_CONSTANTS,
         vis_par_ml: condition("4", "u/m", F, FOUNDER_DOC, "« Vis autoforeuses bandes de rive alu/zinc : 4/ml » (§25.5)."),
         // Retour du fondateur (2026-10-06) : « estimation indicative acceptable : 1 sac de ciment 35 kg + sable, à confirmer ».
-        sac_ciment_solin: rule("1", "u", F, todo("Estimation indicative du fondateur, à confirmer sur chaque chantier."), "estimation {v} sac de ciment 35 kg + sable"),
+        // §49.7 : « 1,5 à 2 kg par mètre linéaire de solin (Remmers ≈ 1,7 kg/ml, Technichem 1,5 à 2 kg/ml) » ; 2 kg retenus.
+        mortier_solin_par_ml: condition("2", "kg/m", F, FOUNDER_DOC, "« sacs de 25 kg = arrondi sup. de (ml de porte-solin × 2 kg) / 25 » (§49.7)."),
       },
       derived: [
         POIDS_PLAT_DERIVED,
@@ -2711,12 +2713,13 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "mortier-solin",
           slot: "mortier",
-          formula: "regle.sac_ciment_solin",
-          unit: "u",
+          // §49.7 : 2 kg de mortier d'étanchéité par mètre de solin, en sacs de 25 kg.
+          formula: "longueur_bande * regle.mortier_solin_par_ml",
+          unit: "kg",
           core: false,
-          exclusions: "Mortier du solin cité au devis ; quantité estimée, pas calculée.",
-          designation: "Ciment 35 kg + sable (mortier de solin)",
-          precision: "pour le solin au mortier de ciment",
+          exclusions: "Mortier du solin cité au devis : 2 kg par mètre linéaire de solin (§49.7).",
+          designation: "Mortier d'étanchéité pour solin, sac 25 kg",
+          precision: "{longueur_bande|ml} × {regle.mortier_solin_par_ml|kg/m#} kg/ml",
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
@@ -2740,12 +2743,13 @@ export const ROOFING_REFERENTIAL: Referential = {
       slots: [
         { key: "porte_solin", family: "solin_support", label: "Bandes porte-solin", usual: { text: "Bande porte-solin, longueurs de 2 m (§7).", source: F, productId: "porte-solin-standard" } },
         { key: "feuille", family: "zinc_sheet", label: "Feuilles zinc 2 × 1 m", usual: { text: "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).", source: F, productId: "feuille-zinc-2x1" }, formOf: "porte_solin" },
-        { key: "mortier", family: "solin_mortar", label: "Mortier de solin", keywords: ["mortier"], usual: { text: "Ciment 35 kg + sable pour le solin (estimation du fondateur).", source: F, productId: "ciment-sable-solin" } },
+        { key: "mortier", family: "solin_mortar", label: "Mortier de solin", keywords: ["mortier"], usual: { text: "Mortier d'étanchéité pour solin, sac de 25 kg (§49.7).", source: F, productId: "mortier-solin-25" } },
         { key: "mastic", family: "sealant", label: "Silicone ou mastic", usual: { text: "Silicone neutre compatible zinc, 1 cartouche par 8 ml de joint (§25.6).", source: F, productId: "cartouche-silicone-zinc" } },
       ],
       constants: {
         ...ZINC_PLAT_CONSTANTS,
-        sac_ciment_solin: rule("1", "u", F, todo("Estimation indicative du fondateur, à confirmer sur chaque chantier."), "estimation {v} sac de ciment 35 kg + sable"),
+        // §49.7 : « 1,5 à 2 kg par mètre linéaire de solin (Remmers ≈ 1,7 kg/ml, Technichem 1,5 à 2 kg/ml) » ; 2 kg retenus.
+        mortier_solin_par_ml: condition("2", "kg/m", F, FOUNDER_DOC, "« sacs de 25 kg = arrondi sup. de (ml de porte-solin × 2 kg) / 25 » (§49.7)."),
       },
       derived: [{ key: "ml_zinc", label: "Longueur de zinc, marge comprise", unit: "m", formula: "longueur_bande * regle.marge_bandes", shown: true, source: F, verification: FOUNDER_DOC, version: 1 }],
       needs: [
@@ -2783,12 +2787,13 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "mortier-porte-solin",
           slot: "mortier",
-          formula: "regle.sac_ciment_solin",
-          unit: "u",
+          // §49.7 : 2 kg de mortier d'étanchéité par mètre de solin, en sacs de 25 kg.
+          formula: "longueur_bande * regle.mortier_solin_par_ml",
+          unit: "kg",
           core: false,
-          exclusions: "Mortier du solin cité au devis ; quantité estimée, pas calculée.",
-          designation: "Ciment 35 kg + sable (mortier de solin)",
-          precision: "pour le solin au mortier de ciment",
+          exclusions: "Mortier du solin cité au devis : 2 kg par mètre linéaire de solin (§49.7).",
+          designation: "Mortier d'étanchéité pour solin, sac 25 kg",
+          precision: "{longueur_bande|ml} × {regle.mortier_solin_par_ml|kg/m#} kg/ml",
           source: F,
           verification: FOUNDER_DOC,
           version: 1,

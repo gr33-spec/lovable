@@ -22,6 +22,9 @@ function item(b: PurchaseView["toBuy"][number]) {
     state: b.state,
     assumptionKeys: b.assumptionKeys,
     edited: b.edited ?? [],
+    /** §49.8 : de quoi régler la ligne orange dans sa carte, d'un tap. */
+    asks: b.asks ?? [],
+    gap: b.gap ?? null,
   };
 }
 

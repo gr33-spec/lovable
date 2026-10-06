@@ -2236,3 +2236,18 @@ Test permanent : nombre de lignes = articles écrits + naissances + consommables
 ### 49.6 Test permanent D-2026-020 (devis réel, anonymisé)
 
 Sur ce devis, la liste attendue, dans cet ordre : ardoises naturelles 32×22 (pièces, d'après 48 m², crochet 11, pente 30°, marge affichée) ; crochets inox 11 cm (ardoises × 1,02) ; gouttière Havraise zinc dév. ? (longueurs de barre, orange « développé manquant » tant que l'artisan n'a pas répondu, avec le retour d'angle écrit) ; naissance (d'office) ; crochets de gouttière Havraise 20 (orange : écart calcul 21) ; bandes de rive zinc 4 m, façonnées (le devis le dit : pas de question), feuilles 2 × 1 m estimées, orange « ajuste selon ton façonnage » ; bande de faîtage zinc dév. 25 cm 8 m (question façonnage ; si acheté, longueurs ; si façonné, feuilles) ; bande porte-solin zinc 4 m (question façonnage) ; mortier de ciment du porte-solin (orange, quantité à confirmer) ; tuyau de descente zinc Ø80, 2 tubes de 3 m ; coudes zinc Ø80, 4 ; colliers de descente Ø80 (orange : le devis parle de fixation sans les chiffrer) ; consommables seulement si l'artisan dit oui. Aucune ligne liteaux, contre-liteaux, écran, pare-pluie. Aucune question sur Ø80, sur la longueur de crochet, sur le façonnage des rives, sur le nombre de descentes. Toute modification future qui casse une de ces attentes fait échouer le test avant la mise en ligne.
+
+### 49.7 Mortier de solin
+
+Le mortier d'un solin n'est pas « ciment + sable » : c'est un **mortier d'étanchéité spécial solin, prêt à gâcher, en sac de 25 kg** (type mortier d'étanchéité / mortier à solins du négoce). Consommation de référence : **1,5 à 2 kg par mètre linéaire** de solin (fiches fabricants : Remmers ≈ 1,7 kg/ml, Technichem 1,5 à 2 kg/ml). Règle : sacs de 25 kg = arrondi supérieur de (ml de porte-solin × 2 kg) / 25. Un sac couvre 12 à 15 ml. Exemple D-2026-020 : 4 m ⇒ 1 sac de 25 kg. Désignation : « Mortier d'étanchéité pour solin, sac 25 kg ». La ligne sort en vert quand le ml de porte-solin est écrit au devis ; l'hypothèse affichée dit « 4 ml × 2 kg/ml ».
+
+### 49.8 Les lignes « À vérifier » se règlent sur place
+
+Une ligne orange ne doit jamais demander deux gestes ni ouvrir un autre écran. Tout se passe dans la carte de la ligne :
+
+- La raison de l'orange est écrite en entier, en une phrase, pas tronquée par des points de suspension.
+- Si une info manque, les **choix sont des boutons dans la carte** (« Développé ? 25 · 28 · 33 · 40 ») : un tap, la ligne se recalcule et passe au vert.
+- Si c'est un écart ou une estimation, la carte montre les deux valeurs et deux boutons : « Garder 20 » / « Mettre 21 ».
+- Chaque carte a son propre « C'est bon » ; le bouton « Tout est bon » reste en haut pour tout valider d'un coup.
+- Plus de bouton « Vérifier les N lignes » qui mène à un autre écran : la liste est l'écran.
+- Test : un relecteur doit pouvoir passer toutes les oranges au vert sans jamais quitter la liste, à un geste par ligne.
