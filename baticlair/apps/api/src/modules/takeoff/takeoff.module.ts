@@ -16,6 +16,8 @@ import { TAKEOFF_REPOSITORY, type TakeoffRepository } from "./application/takeof
 import { manualKey, TakeoffService } from "./application/takeoff.service.js";
 import { TakeoffController } from "./http/takeoff.controller.js";
 import { AnthropicTakeoffExtractor } from "./infrastructure/anthropic-takeoff-extractor.js";
+import { AnthropicTakeoffReviewer } from "./infrastructure/anthropic-takeoff-reviewer.js";
+import { TAKEOFF_REVIEWER, type TakeoffReviewer } from "./application/takeoff-reviewer.js";
 import { FakeTakeoffExtractor } from "./infrastructure/fake-takeoff-extractor.js";
 import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.repository.js";
 
@@ -39,6 +41,13 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
       inject: [CONFIG],
     },
     {
+      // Relecture à deux voix (fournisseur, artisan) : seulement avec l'IA réelle et si elle est allumée.
+      provide: TAKEOFF_REVIEWER,
+      useFactory: (config: AppConfig): TakeoffReviewer | null =>
+        config.ai.provider === "anthropic" && config.ai.reviewPanel ? new AnthropicTakeoffReviewer(config.ai.apiKey!, config.ai.reviewModel) : null,
+      inject: [CONFIG],
+    },
+    {
       provide: TakeoffService,
       useFactory: (
         repo: TakeoffRepository,
@@ -53,6 +62,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
         config: AppConfig,
         prisma: PrismaService,
         alerter: Alerter,
+        reviewer: TakeoffReviewer | null,
       ) =>
         new TakeoffService(
           repo,
@@ -69,6 +79,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             // Le modèle de lecture choisi (Opus par défaut) sert aussi à l'estimation du coût avant lecture.
             policy: { ...DEFAULT_EXTRACTION_POLICY, textModel: config.ai.extractionModel, visionModel: config.ai.extractionModel },
             doubleReading: config.ai.doubleReading && config.ai.provider === "anthropic",
+            ...(reviewer ? { reviewer } : {}),
             onStats: (stats) => logger.info({ reading: stats }, "takeoff: lecture du devis"),
             // Sur Vercel, la lecture d'un gros devis continue après la réponse (sinon la fonction s'arrête).
             keepAlive: (work) => waitUntil(work),
@@ -160,7 +171,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             },
           },
         ),
-      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, TAKEOFF_EXTRACTOR, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService, ALERTER],
+      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, TAKEOFF_EXTRACTOR, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService, ALERTER, TAKEOFF_REVIEWER],
     },
   ],
   exports: [TakeoffService],

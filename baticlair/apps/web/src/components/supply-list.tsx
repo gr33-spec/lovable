@@ -582,6 +582,7 @@ function LinePanel({
  */
 /** Le titre de la question, en une phrase d'artisan, selon ce que la décision propose. */
 function headline(d: TakeoffDecision, many: number): string {
+  if (d.key.startsWith(REVIEW)) return "La relecture a un doute";
   // Le doute est déjà une question (« Chiffre peu lisible : 2 ou 3 paquets ? ») : c'est elle qu'on pose.
   if (doubtText(d.text).trim().endsWith("?")) return doubtText(d.text).trim();
   if (d.primary?.action === "keep") return many > 1 ? `On garde ces ${many} lignes telles quelles ?` : "On garde cette ligne telle quelle ?";
@@ -617,7 +618,10 @@ function QuestionSheet({
   /** Retirer la ligne de la liste (« Annuler » pendant 3 s), puis la question suivante. */
   onRemove?: () => void;
 }) {
-  const ratioItem = decision?.key.startsWith(RATIO) ? takeoff.purchase.toBuy.find((b) => b.key === decision.key.slice(RATIO.length)) : undefined;
+  // Une quantité à confirmer (§47.3) ou un doute de la relecture à deux voix sur un article : le chiffre en grand,
+  // « C'est bon » ou « Corriger le chiffre ».
+  const prefix = decision?.key.startsWith(RATIO) ? RATIO : decision?.key.startsWith(REVIEW) ? REVIEW : null;
+  const ratioItem = decision && prefix ? takeoff.purchase.toBuy.find((b) => b.key === decision.key.slice(prefix.length)) : undefined;
   const id = useId();
   const [value, setValue] = useState("");
   const q = decision?.question;
@@ -723,6 +727,8 @@ function QuestionSheet({
 
 /** Clé d'une quantité calculée avec une règle « à vérifier » (§47.3). */
 const RATIO = "ratio:";
+/** Clé d'un doute de la relecture à deux voix (fournisseur, artisan). */
+const REVIEW = "revue:";
 
 /**
  * §47.3 : une quantité calculée avec une règle « à vérifier » : le chiffre en grand, la règle en une ligne, « C'est bon »

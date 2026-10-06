@@ -47,7 +47,7 @@ class TwoReadings implements TakeoffExtractor {
 let ctx: TestContext;
 const extractor = new TwoReadings();
 beforeAll(async () => {
-  const config = loadConfig({ ...process.env, AI_PROVIDER: "anthropic", ANTHROPIC_API_KEY: "sk-test", AI_DOUBLE_READING: "on" });
+  const config = loadConfig({ ...process.env, AI_PROVIDER: "anthropic", ANTHROPIC_API_KEY: "sk-test", AI_DOUBLE_READING: "on", AI_REVIEW_PANEL: "off" });
   ctx = await createTestApp((b) => b.overrideProvider(CONFIG).useValue(config).overrideProvider(TAKEOFF_EXTRACTOR).useValue(extractor));
 });
 afterAll(async () => {

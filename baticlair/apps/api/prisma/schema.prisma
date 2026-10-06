@@ -480,6 +480,8 @@ model Takeoff {
   answers            Json          @default("{}")
   /// En-tête et notes du devis lus par l'IA (adresse, type de bâtiment, neuf/rénovation, pente…), §41.1.
   context            Json?
+  /// Relecture à deux voix (fournisseur, artisan) : les doutes qui restent, par article ; null = pas de relecture.
+  review             Json?
   createdById        String?
   createdAt          DateTime      @default(now())
   validatedAt        DateTime?

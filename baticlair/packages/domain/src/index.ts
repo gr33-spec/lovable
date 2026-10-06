@@ -29,3 +29,4 @@ export * from "./trust/artisan-view.js";
 export * from "./trust/purchase-view.js";
 export * from "./trust/site-brief.js";
 export * from "./trust/marchandise.js";
+export * from "./trust/review-panel.js";

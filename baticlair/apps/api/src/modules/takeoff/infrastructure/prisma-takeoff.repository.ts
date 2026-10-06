@@ -1,4 +1,4 @@
-import type { LineRole } from "@baticlair/domain";
+import type { LineRole, ReviewDoubt } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { isUuid } from "../../../platform/validation/ids.js";
 import type { TenantContext } from "../../tenancy/index.js";
@@ -19,6 +19,16 @@ type Row = Awaited<ReturnType<PrismaService["takeoff"]["findFirstOrThrow"]>> & {
 const strings = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
 const numbers = (v: unknown): number[] => (Array.isArray(v) ? v.filter((x): x is number => typeof x === "number") : []);
 
+/** Les doutes de la relecture enregistrés (une forme inattendue est ignorée, jamais une erreur). */
+function reviewDoubts(v: unknown): ReviewDoubt[] | null {
+  if (!Array.isArray(v)) return null;
+  return v.flatMap((d): ReviewDoubt[] =>
+    d && typeof d === "object" && typeof (d as { text?: unknown }).text === "string"
+      ? [{ itemKey: typeof (d as { itemKey?: unknown }).itemKey === "string" ? (d as { itemKey: string }).itemKey : null, text: (d as { text: string }).text }]
+      : [],
+  );
+}
+
 function toRecord(row: Row): TakeoffRecord {
   return {
     id: row.id,
@@ -33,6 +43,7 @@ function toRecord(row: Row): TakeoffRecord {
     model: row.model,
     notes: strings(row.notes),
     context: stringMap(row.context),
+    review: reviewDoubts(row.review),
     answers: answers(row.answers),
     createdAt: row.createdAt,
     validatedAt: row.validatedAt,
@@ -164,6 +175,10 @@ export class PrismaTakeoffRepository implements TakeoffRepository {
     await this.prisma.$transaction(
       [...roles].map(([id, role]) => this.prisma.takeoffLine.updateMany({ where: { id, takeoff: { companyId: tenant.companyId } }, data: { role } })),
     );
+  }
+
+  async setReview(tenant: TenantContext, id: string, doubts: readonly ReviewDoubt[]): Promise<void> {
+    await this.prisma.takeoff.updateMany({ where: { id, companyId: tenant.companyId }, data: { review: doubts.map((d) => ({ itemKey: d.itemKey, text: d.text })) } });
   }
 
   async setAnswer(tenant: TenantContext, id: string, key: string, value: string | { value: string; unit: string } | null): Promise<void> {

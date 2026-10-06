@@ -72,8 +72,15 @@ const envSchema = z
      * quantitatifs fiables ; on redescendra en puissance quand les tiroirs seront bien entraînés.
      */
     AI_EXTRACTION_MODEL: z.string().min(1).default("claude-opus-5-5"),
-    /** Double lecture du devis (deux lectures comparées par le code) : `on` par défaut, `off` pour revenir à une seule. */
-    AI_DOUBLE_READING: z.enum(["on", "off"]).default("on"),
+    /**
+     * Double lecture du devis (deux lectures comparées par le code). Décision du fondateur (2026-10-05) : UNE lecture,
+     * puis la relecture à deux voix ; `on` pour la rallumer.
+     */
+    AI_DOUBLE_READING: z.enum(["on", "off"]).default("off"),
+    /** Relecture à deux voix, fournisseur et artisan (décision du fondateur, 2026-10-05) : `on` par défaut. */
+    AI_REVIEW_PANEL: z.enum(["on", "off"]).default("on"),
+    /** Modèle des deux voix de la relecture (Sonnet 5.5 : elles relisent un dossier en texte, pas le PDF). */
+    AI_REVIEW_MODEL: z.string().min(1).default("claude-sonnet-5-5"),
     AI_EXTRACTION_EFFORT: z.enum(["low", "medium", "high", "xhigh", "max"]).default("high"),
     GOOGLE_CLIENT_ID: z.string().min(1).optional(),
     GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
@@ -160,6 +167,8 @@ export interface AppConfig {
     apiKey?: string;
     extractionModel: string;
     doubleReading: boolean;
+    reviewPanel: boolean;
+    reviewModel: string;
     effort: "low" | "medium" | "high" | "xhigh" | "max";
     /** Délai de réponse d'une lecture avant de passer en arrière-plan (ms). */
     answerWithinMs: number;
@@ -220,6 +229,8 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       ...(e.ANTHROPIC_API_KEY ? { apiKey: e.ANTHROPIC_API_KEY } : {}),
       extractionModel: e.AI_EXTRACTION_MODEL,
       doubleReading: e.AI_DOUBLE_READING === "on",
+      reviewPanel: e.AI_REVIEW_PANEL === "on",
+      reviewModel: e.AI_REVIEW_MODEL,
       effort: e.AI_EXTRACTION_EFFORT,
       answerWithinMs: e.READING_ANSWER_WITHIN_MS,
     },

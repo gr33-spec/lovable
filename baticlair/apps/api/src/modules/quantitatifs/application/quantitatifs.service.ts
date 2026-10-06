@@ -1,4 +1,4 @@
-import { METIER_NAMES, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer } from "@baticlair/domain";
+import { METIER_NAMES, RATIO, REFERENTIALS, REVIEW, referentialFor, tradeIdOf, type EngineAnswer } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { BillingService } from "../../billing/index.js";
@@ -204,7 +204,7 @@ export class QuantitatifsService {
     // une entrée au journal par ligne, au lieu d'un recalcul par ligne.
     const together = reponses.filter((r) => {
       const d = reviewed.purchase.questions.find((x) => x.key === r.question);
-      return r.valeur === "ok" && d !== undefined && !d.question && !d.key.startsWith(RATIO) && (d.primary?.action === "keep" || d.primary?.action === "pieces");
+      return r.valeur === "ok" && d !== undefined && !d.question && !d.key.startsWith(RATIO) && !d.key.startsWith(REVIEW) && (d.primary?.action === "keep" || d.primary?.action === "pieces");
     });
     if (together.length > 1) {
       const decisions = together.map((r) => reviewed.purchase.questions.find((x) => x.key === r.question)!);
@@ -220,7 +220,8 @@ export class QuantitatifsService {
       const decision = reviewed.purchase.questions.find((d) => d.key === r.question);
       const q = decision?.question;
       // §47.3 : « C'est bon » sur une quantité calculée avec une règle « à vérifier ».
-      if (decision && decision.key.startsWith(RATIO)) {
+      // §47.3 et relecture à deux voix : « C'est bon » sur une quantité à confirmer ou sur un doute de la relecture.
+      if (decision && (decision.key.startsWith(RATIO) || decision.key.startsWith(REVIEW))) {
         if (r.valeur !== "ok") throw validationFailed("This question takes « ok »", [{ path: "valeur", message: r.question }]);
         reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, decision.key, "ok");
         continue;

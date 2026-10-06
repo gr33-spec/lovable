@@ -1,4 +1,8 @@
 import {
+  applyReviewDoubts,
+  panelDoubts,
+  REVIEW,
+  reviewDossier,
   reconcileReadings,
   applyLineRoles,
   applyPurchaseOverrides,
@@ -32,6 +36,7 @@ import {
   referentialFor,
   slotsGivenByQuote,
   tradeProfile,
+  withoutLabour,
   type ArtisanView,
   type EngineAnswer,
   type PurchaseView,
@@ -59,6 +64,8 @@ import type { CompanyMemory, CorrectionJournal } from "../../learning/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { TAKEOFF_PROMPT } from "./prompt.js";
 import type { ExtractionAttempt, ExtractionOutput, TakeoffExtractor } from "./takeoff-extractor.js";
+import { REVIEW_PROMPT, type TakeoffReviewer } from "./takeoff-reviewer.js";
+import type { ReadAttempt } from "../../../platform/ai/document-reader.js";
 import type { LineFields, TakeoffLineRecord, TakeoffRecord, TakeoffRepository } from "./takeoff.repository.js";
 
 /**
@@ -91,6 +98,11 @@ export interface ReadingOptions {
    * (`reconcileReadings`) : d'accord = sûr, désaccord ou ligne vue une seule fois = orange avec les deux valeurs.
    */
   doubleReading?: boolean;
+  /**
+   * RELECTURE À DEUX VOIX (décision du fondateur, 2026-10-05) : après le calcul, un fournisseur et un artisan (IA)
+   * discutent la liste ; le code garde le moindre doute en orange (`panelDoubts`). Absent : pas de relecture.
+   */
+  reviewer?: TakeoffReviewer;
   /** Coût estimé au-delà duquel un document n'est pas un devis normal (micro-dollars). */
   maxAnalysisMicroUsd?: number;
   now?: () => Date;
@@ -437,6 +449,7 @@ export class TakeoffService {
         aiDoubt: l.doubt?.trim() || null,
       })),
     });
+    if (this.reading.reviewer) await this.panelReview(tenant, doc, prepared, analysisId, takeoff, this.reading.reviewer);
     await this.meter.complete(analysisId);
     return this.review(tenant, takeoff);
   }
@@ -761,6 +774,22 @@ export class TakeoffService {
     }
     // §47.3 / §47.4 : « C'est bon » sur une quantité calculée avec une règle « à vérifier » : la ligne passe au vert,
     // chaque règle est confirmée pour l'entreprise (trois entreprises différentes la valident), et tout va au journal.
+    // Relecture à deux voix : « C'est bon » lève le doute du fournisseur ou de l'artisan ; la réponse va au journal.
+    if (key.startsWith(REVIEW)) {
+      const doubt = (await this.review(tenant, takeoff)).purchase.questions.find((q) => q.key === key);
+      await this.takeoffs.setAnswer(tenant, takeoff.id, key, "ok");
+      await this.journal.record(tenant, {
+        projectId: takeoff.projectId,
+        takeoffId: takeoff.id,
+        takeoffLineId: null,
+        action: "confirm",
+        before: null,
+        after: null,
+        documentExcerpt: [],
+        context: { trade: takeoff.trade, ...(await this.journalFacts(tenant, takeoff, { materiau: doubt?.title ?? key, calculee: null, corrigee: null, regle: `relecture : ${doubt?.text ?? ""}`.slice(0, 300) })) },
+      });
+      return this.reload(tenant, takeoff.id);
+    }
     if (key.startsWith(RATIO)) {
       const itemKey = key.slice(RATIO.length);
       const item = (await this.review(tenant, takeoff)).purchase.toBuy.find((b) => b.key === itemKey);
@@ -987,7 +1016,8 @@ export class TakeoffService {
     const overridden = applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref, validation, consumables }), takeoff.answers);
     const ruleKeys = [...new Set(overridden.toBuy.flatMap((b) => (b.rules ?? []).map((r) => r.key)))];
     const validatedRules = ruleKeys.length > 0 ? ((await this.reading.rules?.validated(ruleKeys)) ?? new Set<string>()) : new Set<string>();
-    const purchase = applyRuleConfirmations(overridden, takeoff.answers, validatedRules);
+    // La relecture à deux voix : le moindre doute du fournisseur ou de l'artisan passe la ligne en orange.
+    const purchase = applyReviewDoubts(applyRuleConfirmations(overridden, takeoff.answers, validatedRules), takeoff.review ?? [], takeoff.answers);
     // Une ligne que l'entreprise ajoute à la main d'un chantier à l'autre est proposée aussi, si le devis ne l'a pas déjà.
     const present = new Set(takeoff.lines.map((l) => manualKey(l.designation)));
     for (const m of (await this.reading.consumables?.manual(tenant)) ?? []) {
@@ -1081,6 +1111,48 @@ export class TakeoffService {
     return { ok: true, model, parts: results.flatMap((r) => (r.ok ? r.parts : [])) };
   }
 
+  /**
+   * LA RELECTURE À DEUX VOIX : le fournisseur parle, l'artisan répond et ajoute, le fournisseur répond ; le code tire la
+   * conclusion (`panelDoubts`) et l'enregistre. Un tour en échec ne fait jamais passer la liste pour vérifiée : sans
+   * réponse de l'autre voix, une remarque reste un doute ; sans aucune relecture, un doute dit que la liste est à revoir.
+   */
+  private async panelReview(
+    tenant: TenantContext,
+    doc: DocumentWithProcessing,
+    prepared: Prepared,
+    analysisId: string,
+    takeoff: TakeoffRecord,
+    reviewer: TakeoffReviewer,
+  ): Promise<void> {
+    const reviewed = await this.review(tenant, takeoff);
+    const dossier = reviewDossier(
+      reviewed.purchase,
+      takeoff.lines.map((l) => ({ ref: l.id, designation: withoutLabour(l.designation), quantity: l.quantityRaw, unit: l.unitRaw, section: l.section })),
+    );
+    const input = { dossier: dossier.text, tradeLabel: tradeProfile(takeoff.trade).label };
+    const none = { text: 0, vision: 0 };
+    let call = 200;
+    const paid = async <T,>(attempt: Promise<ReadAttempt<T>>): Promise<T | null> => {
+      const result = await attempt;
+      await this.record(tenant, doc, none, prepared.processingId, analysisId, ++call, result, REVIEW_PROMPT);
+      return result.status === "success" ? result.output : null;
+    };
+    try {
+      const supplier = await paid(reviewer.supplier(input));
+      if (!supplier) {
+        await this.takeoffs.setReview(tenant, takeoff.id, [{ itemKey: null, text: "La relecture artisan / fournisseur n'a pas pu se faire : relisez la liste avant de l'envoyer." }]);
+        return;
+      }
+      const artisan = (await paid(reviewer.artisan({ ...input, supplier }))) ?? { reponses: [], remarques: [] };
+      const reply = (await paid(reviewer.reply({ ...input, supplier, artisan }))) ?? { objections: [], avis: [] };
+      await this.takeoffs.setReview(tenant, takeoff.id, panelDoubts(dossier, supplier, artisan, reply));
+    } catch (error) {
+      // Panne imprévue : la liste n'est pas présentée comme relue.
+      this.onRecordFailure(error);
+      await this.takeoffs.setReview(tenant, takeoff.id, [{ itemKey: null, text: "La relecture artisan / fournisseur n'a pas pu se faire : relisez la liste avant de l'envoyer." }]);
+    }
+  }
+
   /** Ce que l'IA sait du métier : son nom et ses familles de matériaux habituelles (vocabulaire). */
   private tradeHints(trade: string): { tradeLabel: string; materialFamilies: string[]; workItems: { id: string; label: string; synonyms: string[] }[] } {
     const profile = tradeProfile(trade);
@@ -1101,7 +1173,8 @@ export class TakeoffService {
     processingId: string | null,
     analysisId: string,
     attempt: number,
-    result: ExtractionAttempt,
+    result: Pick<ExtractionAttempt, "provider" | "model" | "usage" | "status" | "errorCode" | "durationMs">,
+    prompt: { id: string; version: number } = TAKEOFF_PROMPT,
   ): Promise<number> {
     try {
       const { costMicroUsd } = await this.recorder.record({
@@ -1111,12 +1184,12 @@ export class TakeoffService {
         processingId,
         analysisId,
         userId: tenant.userId,
-        task: "takeoff_extraction",
+        task: prompt.id,
         route: pages.vision > 0 ? "vision" : "text",
         provider: result.provider,
         model: result.model,
-        promptId: TAKEOFF_PROMPT.id,
-        promptVersion: TAKEOFF_PROMPT.version,
+        promptId: prompt.id,
+        promptVersion: prompt.version,
         attempt,
         pagesText: pages.text,
         pagesVision: pages.vision,
