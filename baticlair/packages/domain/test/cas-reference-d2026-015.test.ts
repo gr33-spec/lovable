@@ -325,8 +325,8 @@ describe("cas de référence D-2026-015 : chantier complet avec ouvrages compos�
     expect(row("naissances")).toEqual(["calculated", "2", "2"]);
     // Réponse du fondateur (2026-10-05) : tubes en longueurs de 4 m, colliers tous les 2 m (+ 1).
     expect(row("tubes")).toEqual(["calculated", "2", "2"]);
-    // Crochets de gouttière (zone littorale : tous les 40 cm), coudes (2 par descente), colliers (tous les 1,8 m + 1).
-    expect(row("crochets")).toEqual(["calculated", "50", "50"]);
+    // Crochets de gouttière (zone littorale : tous les 40 cm, + 1 en bout), coudes (2 par descente), colliers (tous les 1,8 m + 1).
+    expect(row("crochets")).toEqual(["calculated", "51", "51"]);
     expect(row("coudes")).toEqual(["calculated", "4", "4"]);
     expect(row("colliers")).toEqual(["calculated", "6", "6"]);
     // Le dauphin n'est pas au devis : le comptoir le demande (réponse du fondateur, 2026-10-05).

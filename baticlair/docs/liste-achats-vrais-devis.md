@@ -137,7 +137,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Écran HPV, rouleau 1,50 × 50 m | 3 rouleaux | 214,29 m² |
 | Pattes de fixation | 51 pièces |  |
 | Gouttière zinc dév. 25 | 5 longueurs de 4 m | 17 ml à couvrir |
-| Crochets de gouttière bandeau dév. 25 | 43 pièces |  |
+| Crochets de gouttière bandeau dév. 25 | 44 pièces |  |
 | Chatières de ventilation | 12 pièces |  |
 
 **Hypothèses (modifiables) :** pente du toit 45° · région ardoise III · longueur du rampant 5,5 m · recouvrement 95 mm · pureau 10,25 cm · diamètre du crochet standard mm · longueur de crochet 11 cm · liteaux Liteaux 18×40  · contre-liteaux Liteaux 27×40  · entraxe des chevrons ou fermettes 60 cm · aspect du zinc zinc naturel
@@ -164,7 +164,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Écran HPV, rouleau 1,50 × 50 m | 3 rouleaux | 214,29 m² |
 | Pattes de fixation | 51 pièces |  |
 | Gouttière zinc dév. 25 | 5 longueurs de 4 m | 17 ml à couvrir |
-| Crochets de gouttière bandeau dév. 25 | 43 pièces |  |
+| Crochets de gouttière bandeau dév. 25 | 44 pièces |  |
 | Chatières de ventilation | 12 pièces |  |
 
 **À faire chiffrer par le fournisseur :**
@@ -195,7 +195,7 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 | Écran HPV, rouleau 1,50 × 50 m | 3 rouleaux | 214,29 m² |
 | Pattes de fixation | 51 pièces |  |
 | Gouttière zinc dév. 25 | 5 longueurs de 4 m | 17 ml à couvrir |
-| Crochets de gouttière bandeau dév. 25 | 34 pièces |  |
+| Crochets de gouttière bandeau dév. 25 | 35 pièces |  |
 | Chatières de ventilation | 12 pièces |  |
 
 **À faire chiffrer par le fournisseur :**

@@ -96,6 +96,8 @@ export interface EngineOptions {
    * pour un artisan.
    */
   acceptDraft?: boolean;
+  /** La quantité seule (comparer au devis) : une donnée qui ne change que l'article (le développé) n'arrête pas le calcul. */
+  quantityOnly?: boolean;
 }
 
 export interface Question {
@@ -166,6 +168,8 @@ export interface RuleToConfirm {
   text: string;
   /** Les sources se contredisent (§47.1, statut « contradiction » du tiroir). */
   conflict?: boolean;
+  /** Propre à ce chantier (l'écart entre le devis et le calcul) : jamais comptée pour valider une règle (§47.4). */
+  local?: true;
 }
 
 /** Libellé d'un conditionnement dans le calcul : « Contenu : 1 longueur de 3 m ». */
@@ -227,6 +231,8 @@ export interface NeedResult {
   exclusions?: string;
   /** Colonne « précision » de la demande de devis (§45.3). */
   precision?: string;
+  /** Comment la quantité se compte (« pour 10 ml de gouttière, un tous les 50 cm + 1 en bout »), pour dire un écart avec le devis. */
+  basis?: string;
   trace: TraceLine[];
 }
 
@@ -979,7 +985,7 @@ function computeNeed(
     for (const name of rule.precisionRequires ?? []) valueOf(name);
     const required = missing.find((m) => rule.precisionRequires?.includes(m.key));
     // Sans produit, pas d'article à préciser : le produit à identifier passe d'abord (enrichissement progressif).
-    if (required && product) throw new Stop({ status: "question", question: required.question });
+    if (required && product && !options.quantityOnly) throw new Stop({ status: "question", question: required.question });
     // Précision au comptoir (§45.3) : « {longueur_bande|m} » s'écrit avec la valeur du chantier ; une valeur
     // inconnue ou en fourchette retire la précision plutôt que d'écrire un chiffre douteux. « {x|mm#} » : le nombre
     // seul, dans cette unité (« bobineau 500 × 17 m »).
@@ -1010,6 +1016,7 @@ function computeNeed(
     };
     // Une précision s'écrit dès que SES valeurs sont connues et sûres (jamais une fourchette).
     const precision = rule.precision ? render(rule.precision) : undefined;
+    const basis = rule.basis ? render(rule.basis) : undefined;
     // Une désignation calculée (« Bobineau 500 × 17 m, 0,65 ») remplace le nom du produit générique.
     // Elle s'écrit dès que SES données sont connues (le développé inconnu ne change pas un bobineau de 500 mm).
     const designation = rule.designation ? render(rule.designation) : undefined;
@@ -1019,6 +1026,7 @@ function computeNeed(
       ...(designation !== undefined ? { label: withoutDevisMark(designation) } : {}),
       ...(withQuote ? { labelWithQuote: withQuote } : {}),
       ...(precision !== undefined ? { precision } : {}),
+      ...(basis !== undefined ? { basis } : {}),
       status: "calculated",
       ...(exact
         ? { quantity: { value: need.lo.toDecimalPlaces(2).toFixed(), unit: rule.unit } }

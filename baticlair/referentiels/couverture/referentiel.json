@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.06-37",
+  "version": "roofing-2026.10.06-38",
   "trade": "roofing",
   "sources": [
     {
@@ -344,6 +344,16 @@
       "keyAttributes": [],
       "keywords": [
         "bobineau"
+      ]
+    },
+    {
+      "code": "solin_mortar",
+      "label": "Mortier de solin",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "mortier"
       ]
     },
     {
@@ -3845,6 +3855,37 @@
             "verification": {
               "status": "verified",
               "verifiedAt": "2026-10-03",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "ciment-sable-solin",
+      "family": "solin_mortar",
+      "label": "Ciment 35 kg + sable, pour mortier de solin",
+      "shortLabel": "Ciment + sable (mortier de solin)",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "sac",
+          "label": {
+            "one": "sac",
+            "many": "sacs"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
               "verifiedBy": "BatiClair (définition)"
             },
             "version": 1
@@ -10156,6 +10197,19 @@
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "vis-inox-4x40"
           }
+        },
+        {
+          "key": "mortier",
+          "family": "solin_mortar",
+          "label": "Mortier de solin",
+          "keywords": [
+            "mortier"
+          ],
+          "usual": {
+            "text": "Ciment 35 kg + sable pour le solin (estimation du fondateur).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "ciment-sable-solin"
+          }
         }
       ],
       "constants": {
@@ -10374,6 +10428,18 @@
           },
           "version": 1,
           "note": "« Vis autoforeuses bandes de rive alu/zinc : 4/ml » (§25.5)."
+        },
+        "sac_ciment_solin": {
+          "kind": "installation_condition",
+          "value": "1",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "draft",
+            "note": "Estimation indicative du fondateur, à confirmer sur chaque chantier."
+          },
+          "version": 1,
+          "label": "estimation {v} sac de ciment 35 kg + sable"
         }
       },
       "derived": [
@@ -10526,6 +10592,24 @@
           "core": false,
           "exclusions": "4 vis par mètre de bande (§25.5).",
           "precision": "4 par mètre, {longueur_bande|ml} de bande",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "mortier-solin",
+          "slot": "mortier",
+          "formula": "regle.sac_ciment_solin",
+          "unit": "u",
+          "core": false,
+          "exclusions": "Mortier du solin cité au devis ; quantité estimée, pas calculée.",
+          "designation": "Ciment 35 kg + sable (mortier de solin)",
+          "precision": "pour le solin au mortier de ciment",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -14095,6 +14179,22 @@
           "version": 1
         }
       },
+      "derived": [
+        {
+          "key": "espacement_crochets",
+          "label": "Espacement des crochets",
+          "unit": "m",
+          "formula": "si(zone >= regle.zone_littorale, regle.espacement_crochet_littoral, regle.espacement_crochet)",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      ],
       "needs": [
         {
           "id": "profil",
@@ -14119,10 +14219,11 @@
         {
           "id": "crochets",
           "slot": "crochet",
-          "formula": "longueur_gouttiere / si(zone >= regle.zone_littorale, regle.espacement_crochet_littoral, regle.espacement_crochet)",
+          "formula": "arrondi_sup(longueur_gouttiere / espacement_crochets) + 1",
           "unit": "u",
           "core": true,
-          "exclusions": "Hors le crochet supplémentaire en bout de chaque ligne de gouttière.",
+          "exclusions": "Un crochet en bout de ligne compris (une seule ligne de gouttière).",
+          "basis": "pour {longueur_gouttiere|ml} de gouttière, un tous les {espacement_crochets|cm} + 1 en bout",
           "designation": "Crochets de gouttière {fixation_crochet} dév. {developpe_gouttiere|cm#}",
           "precisionRequires": [
             "fixation_crochet",

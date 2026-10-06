@@ -130,6 +130,8 @@ export interface OuvrageLevels {
   pending: string | null;
   /** État de l'ouvrage : jamais ✓ tant qu'un de ses besoins n'est pas établi. */
   state: TrustState;
+  /** Quantité saisie ou corrigée par l'artisan : jamais remise en cause par le calcul. */
+  byArtisan?: true;
 }
 
 export interface ArtisanView {
@@ -445,6 +447,7 @@ export function artisanView(
         direct,
         pending,
         state: v.basis === "work" ? (needs.length > 0 ? worst(needs.map((n) => n.state)) : "missing") : worst([item.state, ...needs.map((n) => n.state)]),
+        ...(line.enteredByArtisan ? { byArtisan: true as const } : {}),
       });
     }
   }
@@ -495,7 +498,7 @@ export function computeWithAnswers(
   options: EngineOptions = {},
   /** Emplacements déjà donnés comme achat par le devis (voir slotsGivenByQuote) : ni calcul montré, ni question. */
   given: ReadonlySet<string> = new Set(),
-): { needs: (NeedResult & { workItemId: string })[]; questions: Question[]; declined: string[] } {
+): { needs: (NeedResult & { workItemId: string })[]; questions: Question[]; declined: string[]; checks: (NeedResult & { workItemId: string })[] } {
   const declined = new Set(Object.entries(answers).filter(([, v]) => v === null).map(([k]) => k));
   // Un ouvrage dont TOUTES les lignes sont déjà des quantités d'achat (« 42 faîtières ») n'a rien à calculer :
   // le devis a fait le travail, BatiClair ne lui ajoute ni besoin ni question.
@@ -641,7 +644,15 @@ export function computeWithAnswers(
   }
   for (const c of plan.contradictions) if (!levers.has(`param:${c.key}`)) levers.set(`param:${c.key}`, Number.POSITIVE_INFINITY);
   questions = [...questions].sort((a, b) => (levers.get(b.key) ?? 0) - (levers.get(a.key) ?? 0));
-  return { needs, questions, declined: [...declined] };
+  // Ce que le calcul aurait donné pour les articles que le devis écrit déjà (« 20 crochets de gouttière ») : la quantité
+  // du devis reste la base, l'écart se dit (purchaseView, `quantityGap`).
+  const checks =
+    given.size === 0
+      ? []
+      : computeChantier(ref, current, { ...options, quantityOnly: true }).workItems.flatMap((w) =>
+          w.needs.filter((n) => n.status === "calculated" && given.has(`${w.workItemId}/${n.slot}`)).map((n) => ({ ...n, workItemId: w.workItemId })),
+        );
+  return { needs, questions, declined: [...declined], checks };
 }
 
 /** Les données qui se demandent ouvrage par ouvrage (§48.2, « zinc, pièce par pièce ») : la clé porte l'ouvrage. */

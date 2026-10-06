@@ -747,7 +747,9 @@ export class TakeoffService {
       const item = items.find((b) => g.designation === b.label || g.designation.startsWith(`${b.label} (`));
       const action = g.kind === "added" ? "add" : g.kind === "same" ? "confirm" : "correct";
       // Une ligne commandée telle qu'envoyée confirme ses règles « à vérifier », avec la preuve d'un bon de commande.
-      if (g.kind === "same" && item?.rules?.length) await this.reading.rules?.confirm(tenant, item.rules.map((r) => r.key), "order");
+      // L'écart devis / calcul (« local ») est propre au chantier : il ne valide aucune règle.
+      const shared = (item?.rules ?? []).filter((r) => !r.local);
+      if (g.kind === "same" && shared.length) await this.reading.rules?.confirm(tenant, shared.map((r) => r.key), "order");
       await this.journal.record(tenant, {
         projectId: takeoff.projectId,
         takeoffId: takeoff.id,
@@ -869,7 +871,7 @@ export class TakeoffService {
     if (key.startsWith(RATIO)) {
       const itemKey = key.slice(RATIO.length);
       const item = (await this.review(tenant, takeoff)).purchase.toBuy.find((b) => b.key === itemKey);
-      const rules = item?.toConfirm ?? [];
+      const rules = (item?.toConfirm ?? []).filter((r) => !r.local);
       await this.takeoffs.setAnswer(tenant, takeoff.id, key, "ok");
       if (rules.length > 0) await this.reading.rules?.confirm(tenant, rules.map((r) => r.key));
       await this.journal.record(tenant, {
@@ -1094,7 +1096,7 @@ export class TakeoffService {
       ville: communeOf(address),
     });
     const overridden = applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref, validation, consumables }), takeoff.answers);
-    const ruleKeys = [...new Set(overridden.toBuy.flatMap((b) => (b.rules ?? []).map((r) => r.key)))];
+    const ruleKeys = [...new Set(overridden.toBuy.flatMap((b) => (b.rules ?? []).filter((r) => !r.local).map((r) => r.key)))];
     const validatedRules = ruleKeys.length > 0 ? ((await this.reading.rules?.validated(ruleKeys)) ?? new Set<string>()) : new Set<string>();
     const confirmed = applyRuleConfirmations(overridden, takeoff.answers, validatedRules);
     // Les interdits du code (sans IA), puis les DOUTES de l'appel IA n° 2 : tout ce qui reste à trancher est orange.

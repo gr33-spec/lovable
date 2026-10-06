@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { planQuote, ROOFING_REFERENTIAL, tradeProfile, type SiteFact } from "../src/index.js";
+import { applyRuleConfirmations, planQuote, ROOFING_REFERENTIAL, tradeProfile, type SiteFact } from "../src/index.js";
 import { D2026_020_LINES } from "./devis-reels/d2026-020.js";
 import { readQuote } from "./support/read-quote.js";
 
@@ -83,8 +83,10 @@ describe("D-2026-020 : la longueur de crochet écrite au devis fait foi, et le r
  * se retrouve dans la liste, et aucune question ne porte sur ce qu'il règle déjà.
  */
 describe("D-2026-020 réel : le devis entier, lu jusqu'au bout", () => {
-  const v = readQuote(D2026_020_LINES, {}, ZONE_1);
+  // Comme l'API : une règle « à vérifier » calcule, et sa ligne sort orange (§47.1).
+  const v = applyRuleConfirmations(readQuote(D2026_020_LINES, {}, ZONE_1, undefined, { acceptDraft: true }), {});
   const plan = planQuote(D2026_020_LINES, ROOFING_REFERENTIAL, tradeProfile("roofing"));
+  const row = (itemKey: string) => v.screen.groups.flatMap((g) => g.rows).find((r) => r.itemKey === itemKey);
   const label = (re: RegExp) => v.toBuy.find((b) => re.test(b.label));
 
   it("crochets de 11, comme écrit (ligne de fourniture et ligne de pose d'accord) ; « inox » reste au crochet", () => {
@@ -115,6 +117,25 @@ describe("D-2026-020 réel : le devis entier, lu jusqu'au bout", () => {
     expect(v.toQuote).toEqual([]);
   });
   it("aucune question sur ce que le devis écrit ; restent les deux du comptoir que le devis ne règle pas", () => {
-    expect(v.questions.map((q) => q.key).sort()).toEqual(["engine:param:dauphin", "engine:param:developpe_gouttiere"]);
+    expect(v.questions.filter((q) => q.key.startsWith("engine:")).map((q) => q.key).sort()).toEqual(["engine:param:dauphin", "engine:param:developpe_gouttiere"]);
+  });
+  it("le mortier de ciment de la ligne porte-solin reste dans la liste : 1 sac de 35 kg + sable, orange, à confirmer", () => {
+    const mortier = label(/^Ciment 35 kg \+ sable/)!;
+    expect(mortier).toMatchObject({ quantity: "1 sac", lineIds: ["10"] });
+    expect(row(mortier.key)).toMatchObject({ status: "check", reason: "Quantité à confirmer : estimation 1 sac de ciment 35 kg + sable" });
+  });
+  it("quantité écrite comparée au calcul : 20 crochets gardés, orange avec l'écart (21 pour 10 m à 50 cm)", () => {
+    const crochetsGouttiere = label(/^Crochets de gouttière Havraise/)!;
+    expect(crochetsGouttiere.quantity).toBe("20 pièces");
+    expect(row(crochetsGouttiere.key)).toMatchObject({
+      status: "check",
+      reason: "Quantité à confirmer : 20 au devis, 21 calculés pour 10 ml de gouttière, un tous les 50 cm + 1 en bout",
+    });
+    // « C'est bon » : la quantité du devis part, la ligne passe au vert.
+    const ok = applyRuleConfirmations(readQuote(D2026_020_LINES, { [`ratio:${crochetsGouttiere.key}`]: "ok" }, ZONE_1, undefined, { acceptDraft: true }), { [`ratio:${crochetsGouttiere.key}`]: "ok" });
+    expect(ok.screen.groups.flatMap((g) => g.rows).find((r) => r.itemKey === crochetsGouttiere.key)?.status).toBe("ok");
+  });
+  it("sans écart, rien ne change : 6 ml de tubes et 4 coudes restent verts", () => {
+    for (const re of [/^Tuyau de descente/, /^Coude zinc/]) expect(row(label(re)!.key)?.status).toBe("ok");
   });
 });
