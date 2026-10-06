@@ -396,7 +396,8 @@ function SketchPicker({ label, onAttach }: { label: string; onAttach: (file: Fil
 /** Les hypothèses par défaut, sur une ligne repliée ; chacune se change d'un appui. */
 /** « 45° » collé, « 60 cm » espacé, « 3 » pour les pièces. */
 function withUnit(value: string, unit: string): string {
-  if (!unit || unit === "u") return value;
+  // Une valeur dite en mots (« standard », « zinc naturel ») ne prend pas d'unité : jamais « standard mm ».
+  if (!unit || unit === "u" || !/^\d/.test(value)) return value;
   return unit === "°" ? `${value}°` : `${value} ${unit}`;
 }
 

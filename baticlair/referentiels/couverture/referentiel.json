@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.06-35",
+  "version": "roofing-2026.10.06-36",
   "trade": "roofing",
   "sources": [
     {
@@ -5972,7 +5972,7 @@
           },
           "choices": [
             {
-              "label": "Courant (1 mm)",
+              "label": "Standard",
               "value": "1"
             },
             {
