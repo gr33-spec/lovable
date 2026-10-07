@@ -240,8 +240,12 @@ test("glisser un chantier vers la gauche le range dans Terminés, et « Annuler 
   await page.getByRole("button", { name: "Terminés" }).click();
   await expect(bris).toBeVisible();
   await page.getByRole("button", { name: "Reprendre : Toiture Le Bris" }).focus();
+  // Le chantier quitte « Terminés » tout de suite ; on attend que le serveur l'ait enregistré avant d'ouvrir « En cours »
+  // (sinon la liste peut se relire avant, sans lui : échec vu en CI).
+  const saved = page.waitForResponse((r) => r.request().method() === "PATCH" && /\/v1\/projects\/[^/]+$/.test(new URL(r.url()).pathname));
   await page.keyboard.press("Enter");
   await expect(bris).toHaveCount(0);
+  expect((await saved).ok()).toBe(true);
   await page.getByRole("button", { name: "En cours" }).click();
   await expect(bris).toBeVisible();
 
