@@ -22,6 +22,11 @@ export interface ReadRequest<S extends z.ZodType> {
   /** Consignes (mises en cache côté fournisseur). */
   system: string;
   schema: S;
+  /**
+   * Schéma ENVOYÉ à l'API, quand il diffère de celui qui relit la réponse : l'API plafonne les champs « valeur ou
+   * vide » (16 unions, 24 optionnels au total) ; au-delà, elle refuse la demande. Absent : `schema`.
+   */
+  format?: z.ZodType;
   document: DocumentInput;
   /** Nom du document pour l'IA (« devis », « devis du fournisseur »). */
   documentName: string;
@@ -76,7 +81,7 @@ export class AnthropicDocumentReader {
         max_tokens: 16000,
         system: [{ type: "text", text: request.system, cache_control: { type: "ephemeral" } }],
         messages: [{ role: "user", content }],
-        output_config: { effort: this.effort, format: zodOutputFormat(request.schema) },
+        output_config: { effort: this.effort, format: zodOutputFormat(request.format ?? request.schema) },
         metadata: { user_id: request.tag },
       });
       const usage = toUsage(response.usage);

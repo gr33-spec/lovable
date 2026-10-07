@@ -63,6 +63,11 @@ const unreadableReasons: Record<string, string> = {
 
 /** Motifs précis renvoyés par l'API, quel que soit le code. */
 const reasonMessages: Record<string, string> = {
+  // Lecture IA d'un devis échouée (analysis_failed) : le motif, en clair, pour savoir quoi faire.
+  provider_error: "Le service de lecture a refusé la demande. Réessaie dans un instant ; si ça recommence, envoie-nous le code support.",
+  invalid_output: "La lecture a rendu une réponse incomplète. Réessaie ; si ça recommence, envoie-nous le code support.",
+  timeout: "La lecture a pris trop de temps. Réessaie dans un instant.",
+  refused: "Le service de lecture a refusé ce document. Envoie-nous le code support.",
   email_taken: "Ce fournisseur est déjà dans votre carnet (même adresse e-mail).",
   takeoff_not_validated: "Validez d'abord la liste de matériaux.",
   lines_to_check: "Des lignes sont encore à vérifier : pour chacune, « C'est bon » ou « Corriger ».",

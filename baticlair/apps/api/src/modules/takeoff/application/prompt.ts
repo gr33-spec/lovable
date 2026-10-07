@@ -5,8 +5,11 @@
  * v12 : le PROMPT A du référentiel (§41.1 réécrit le 2026-10-06, « règle numéro un » comprise), branché mot pour
  * mot. BatiClair n'y ajoute que le contexte injecté (métier, ouvrages du référentiel) et le format technique de la
  * réponse (références de lignes, sections, noms courts), jamais une règle reformulée.
+ *
+ * v13 : même consigne ; le format technique dit {} / liste vide / -1 au lieu de null pour dimensions, manque et sec
+ * (l'API refuse plus de 16 champs « valeur ou vide » : la v12 en avait 18, chaque lecture échouait).
  */
-export const TAKEOFF_PROMPT = { id: "takeoff_extraction", version: 12 } as const;
+export const TAKEOFF_PROMPT = { id: "takeoff_extraction", version: 13 } as const;
 
 /** Un ouvrage du référentiel chargé, avec ses synonymes (« vocabulaire.json », §29). */
 export interface WorkItemHint {
@@ -77,13 +80,13 @@ Réponds avec un seul objet JSON :
 - lignes : une entrée par ligne du devis (ne regroupe pas, ne sépare pas, n'invente rien), avec les champs ci-dessus sous des noms courts :
   - des = libelle_devis (prix et colonnes de montant retirés) ; qte = quantite_devis, EXACTEMENT comme écrite (« 1 250 », « 12,5 »), ou null ; unite = unite_devis, comme écrite (« u », « m² », « ml », « rlx »…), ou null ; ref : la référence produit si elle est écrite, sinon null ;
   - role : "fourniture", "pose", "fourniture_et_pose" ou "hors_quantitatif" ;
-  - ouvrage ; materiau : le matériau et le format de la ligne s'ils sont écrits, sinon null ; dimensions : un objet « donnée → valeur avec unité » ({"pente": "30°", "espacement": "50 cm"}), ou null ;
+  - ouvrage ; materiau : le matériau et le format de la ligne s'ils sont écrits, sinon null ; dimensions : un objet « donnée → valeur avec unité » ({"pente": "30°", "espacement": "50 cm"}), ou {} si rien n'est écrit ;
   - articles : la liste des articles écrits dans la ligne, chacun {"nom", "materiau", "quantite", "unite", "elements"} (materiau, quantite, unite, elements : null si rien n'est écrit) ; liste vide pour une ligne de pose seule ou hors quantitatif ;
   - faconnage : "artisan", "fourni" ou null ;
-  - manque : la liste de ce que le comptoir demanderait encore pour cette ligne, une entrée par donnée, choix possibles entre parenthèses (« développé de la gouttière (25, 28, 33, 40) »), ou null ;
+  - manque : la liste de ce que le comptoir demanderait encore pour cette ligne, une entrée par donnée, choix possibles entre parenthèses (« développé de la gouttière (25, 28, 33, 40) »), ou une liste vide ;
   - confiance : "sur" ou "doute" ; doute : la raison du doute en une phrase, ou null ;
   - src : où se trouve la ligne : les références [page:ligne] exactes des lignes du texte qui la contiennent ; pour une ligne lue sur une page PDF, le numéro d'origine de la page (« 5 ») ;
-  - sec : le numéro (à partir de 0) de la suite de titres dans « sections » sous laquelle se trouve la ligne, ou null.
+  - sec : le numéro (à partir de 0) de la suite de titres dans « sections » sous laquelle se trouve la ligne, ou -1.
 - contexte : client (nom du client tel qu'écrit, ex. « M. Dupont »), adresse du chantier, ville, code postal, type de bâtiment, neuf ou rénovation, dépose, pente, hauteur… lus dans l'en-tête et les notes (objet « donnée → valeur », null si rien).
 - notes : en phrases courtes pour l'artisan, ce qui concerne tout le devis et qui compte pour ses achats ; jamais de nom de champ ni de référence [page:ligne] ; liste vide si rien.`;
 
