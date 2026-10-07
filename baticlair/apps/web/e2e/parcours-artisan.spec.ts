@@ -979,3 +979,26 @@ test("une lecture refusée au départ se dit, avec sa raison et « Réessayer »
   await passQuestions(page);
   expect(refused).toBe(1);
 });
+
+test("§48.6 zinguerie pièce par pièce, et la barre des lignes orange reste en haut sans rien cacher", async ({ page }) => {
+  await signUp(page);
+  await createProject(page, "Toiture Le Goff", "M. Le Goff", "4 rue du Port, Paimpol");
+  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-zinguerie.pdf"));
+  const questions = page.getByRole("region", { name: /^J'ai quelques questions/ });
+  await expect(questions).toBeVisible({ timeout: 60_000 });
+  // Une question par pièce écrite, à son nom ; jamais « Bandes zinc (solin, rive, égout…) : tu façonnes ? ».
+  await expect(questions.getByText("Bande de ventilation en Z en zinc quartz : tu façonnes toi-même ou tu commandes façonné ?")).toBeVisible();
+  await expect(questions.getByText("Bande de rive zinc quartz dév. 200 : tu façonnes toi-même ou tu commandes façonné ?")).toBeVisible();
+  await expect(questions.getByText(/Bandes zinc \(solin/)).toHaveCount(0);
+  // « Dév. 200 » est écrit : jamais redemandé.
+  await expect(questions.getByText(/^Bande de rive .*développé/)).toHaveCount(0);
+  await page.getByRole("button", { name: /^Calculer ma liste/ }).click();
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(list).toBeVisible({ timeout: 60_000 });
+  // Plus de bulle flottante : une barre fine, collée en haut de l'écran quand on descend dans la liste.
+  const bar = list.getByRole("status").filter({ hasText: /^Encore \d+ lignes? orange/ });
+  await expect(bar).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2));
+  await expect.poll(async () => (await bar.boundingBox())?.y ?? 999).toBeLessThan(40);
+  expect((await bar.boundingBox())!.height).toBeLessThan(64);
+});

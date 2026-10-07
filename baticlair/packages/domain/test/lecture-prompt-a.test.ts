@@ -14,8 +14,8 @@ const read = (dimensions: Record<string, string> | null, context: Record<string,
 describe("factsFromReading : les dimensions du prompt A deviennent des faits du chantier", () => {
   it("pente et rampant d'une ligne, avec leur preuve", () => {
     expect(read({ pente: "35°", rampant: "5,50 m" })).toEqual([
-      { key: "pente", value: "35", unit: "°", evidence: "Devis, 1 (« pente : 35° »)", origin: "devis" },
-      { key: "longueur_rampant", value: "5.50", unit: "m", evidence: "Devis, 1 (« rampant : 5,50 m »)", origin: "devis" },
+      { key: "pente", value: "35", unit: "°", evidence: "Devis, 1 (« pente : 35° »)", origin: "devis", line: "1" },
+      { key: "longueur_rampant", value: "5.50", unit: "m", evidence: "Devis, 1 (« rampant : 5,50 m »)", origin: "devis", line: "1" },
     ]);
   });
 

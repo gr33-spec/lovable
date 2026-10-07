@@ -458,6 +458,12 @@ export interface WorkItemType {
   section?: "principal" | "singulier" | "evacuation";
   /** Familles du devis qui signalent cet ouvrage. */
   triggers: string[];
+  /**
+   * §48.6 « une question par pièce de zinguerie écrite au devis » : un ouvrage qui range plusieurs pièces différentes
+   * (bandes de solin, de rive, de ventilation…) devient une INSTANCE par ligne écrite dès qu'il en a deux
+   * (« bandes-zinc__<ligne> ») : chacune ses données (développé, aspect), son façonnage, sa question.
+   */
+  perLine?: true;
   params: ParamDef[];
   slots: Slot[];
   /** Constantes de règle (recouvrement minimal…), chacune sourcée. Citées « regle.cle ». */
@@ -477,6 +483,11 @@ export interface WorkItemType {
  * ou à un ouvrage (la plus précise l'emporte). Sans règle, c'est le
  * réglage de l'artisan, sinon 0 % affiché.
  */
+/** Séparateur d'une instance d'ouvrage par ligne (« bandes-zinc__12 ») ; permis dans une clé de réponse. */
+export const INSTANCE_SEP = "__";
+/** L'ouvrage du référentiel d'un identifiant, instance par ligne comprise (« bandes-zinc__12 » → « bandes-zinc »). */
+export const baseOf = (workItemId: string | undefined): string => (workItemId ?? "").split(INSTANCE_SEP)[0]!;
+
 export interface WasteRule extends Provenance {
   family: string;
   product?: string;

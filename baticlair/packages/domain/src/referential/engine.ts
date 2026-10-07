@@ -1,3 +1,4 @@
+import { baseOf } from "./model.js";
 import { Decimal } from "../shared/decimal.js";
 import { evaluateInterval, FormulaError, formulaVariables, parseFormula, type IntervalValue } from "./expression.js";
 import type { Fact, LookupTable, NeedRule, ParamDef, PointTable, Product, Provenance, Referential, SellingUnit, Source, WorkItemType } from "./model.js";
@@ -81,7 +82,10 @@ export interface CompanyPreferences {
 }
 
 export interface WorkItemInput {
+  /** L'ouvrage, ou son instance par ligne (« bandes-zinc__12 », `baseOf`). */
   workItemId: string;
+  /** Instance par ligne : la pièce telle que le devis l'écrit (« Bande de ventilation en Z »), pour ses questions. */
+  label?: string;
   params: Record<string, ParamValue>;
   products: Record<string, SlotChoice>;
   /** Emplacements que le devis cite explicitement (« liteaux » écrits sur le devis). */
@@ -332,7 +336,7 @@ export interface RequiredInputs {
  * valeur par défaut, aucun choix à la place de l'artisan.
  */
 export function requiredInputs(ref: Referential, workItemId: string, needId: string): RequiredInputs {
-  const work = ref.workItems.find((w) => w.id === workItemId);
+  const work = ref.workItems.find((w) => w.id === baseOf(workItemId));
   const rule = work?.needs.find((n) => n.id === needId);
   if (!work || !rule) throw new Error(`Besoin inconnu : ${workItemId}/${needId}`);
   const vars = new Set(formulaVariables(parseFormula(rule.formula)));
@@ -374,7 +378,7 @@ export function requiredInputs(ref: Referential, workItemId: string, needId: str
 }
 
 export function computeWorkItem(ref: Referential, input: WorkItemInput, options: EngineOptions = {}): WorkItemResult {
-  const work = ref.workItems.find((w) => w.id === input.workItemId);
+  const work = ref.workItems.find((w) => w.id === baseOf(input.workItemId));
   if (!work) throw new Error(`Ouvrage inconnu du référentiel : ${input.workItemId}`);
   const sources = new Map(ref.sources.map((s) => [s.id, s]));
   // Un besoin qui exige une donnée que rien ne donne (ni devis, ni réponse, ni hypothèse) n'existe pas pour ce chantier.
@@ -453,7 +457,7 @@ export function computeWorkItem(ref: Referential, input: WorkItemInput, options:
   const asked = needs.filter((n) => n.question && n.origin !== "suggested").map((n) => n.question!);
   const count = (key: string) => asked.filter((q) => q.key === key).length;
   const nextQuestion = asked.reduce<Question | null>((best, q) => (!best || count(q.key) > count(best.key) ? q : best), null);
-  return { workItemId: work.id, referentialVersion: ref.version, needs, nextQuestion };
+  return { workItemId: input.workItemId, referentialVersion: ref.version, needs, nextQuestion };
 }
 
 /**

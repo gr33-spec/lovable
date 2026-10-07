@@ -1,3 +1,4 @@
+import { baseOf } from "../referential/model.js";
 import { Decimal } from "../shared/decimal.js";
 import { evaluateInterval, formulaVariables, parseFormula, type IntervalValue } from "../referential/expression.js";
 import type { Referential } from "../referential/model.js";
@@ -79,7 +80,7 @@ export function siteBrief(input: {
     return Number.isFinite(n) ? n : -1;
   };
   const main = [...planned].sort((a, b) => area(b.ref) - area(a.ref))[0];
-  const work = main ? ref.workItems.find((w) => w.id === main.workItemId) : undefined;
+  const work = main ? ref.workItems.find((w) => w.id === baseOf(main.workItemId)) : undefined;
   const metier = METIER_NAMES[tradeIdOf(ref.trade)] ?? ref.trade;
   const label = work ? norm(work.label).startsWith(norm(metier).slice(0, 6)) ? work.label.replace(/\s*\(.*\)$/, "").toLowerCase() : `${metier} (${work.label.replace(/\s*\(.*\)$/, "").toLowerCase()})` : null;
 
@@ -132,7 +133,7 @@ export function siteBrief(input: {
   else if (ep) faits.push(`épaisseur ${ep}`);
   // Le support, quand une ligne le cite (« pose sur voligeage »).
   const sheathing = planned.some((l) => {
-    const w = ref.workItems.find((x) => x.id === l.workItemId);
+    const w = ref.workItems.find((x) => x.id === baseOf(l.workItemId));
     return [l.slot, ...l.mentions].some((s) => w?.slots.find((x) => x.key === s)?.family === "sheathing");
   });
   if (sheathing) faits.push("pose sur voligeage");

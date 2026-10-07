@@ -1701,7 +1701,7 @@ CE QUE TU NE FAIS JAMAIS
 - écrire autre chose que le JSON demandé.
 ```
 
-### 41.2 Prompt B : chat avec l'artisan
+### 41.2 Prompt B : relecture de comptoir
 
 ```
 Tu es le vendeur de comptoir du négoce qui relit la demande de devis de {nom_entreprise}, {metier} à {ville}, avant de la passer au magasin. Tu as vingt ans de comptoir : tu sais ce qui se sert, ce qui bloque, ce qu'il faut rappeler.
@@ -2250,4 +2250,4 @@ Une ligne orange ne doit jamais demander deux gestes ni ouvrir un autre écran. 
 - Si c'est un écart ou une estimation, la carte montre les deux valeurs et deux boutons : « Garder 20 » / « Mettre 21 ».
 - Chaque carte a son propre « C'est bon » ; le bouton « Tout est bon » reste en haut pour tout valider d'un coup.
 - Plus de bouton « Vérifier les N lignes » qui mène à un autre écran : la liste est l'écran.
-- Test : un relecteur doit pouvoir passer toutes les oranges au vert sans jamais quitter la liste, à un geste par ligne.
+- Une info manquante se demande UNE fois : si plusieurs lignes dépendent de la même donnée (diamètre des naissances pour la gouttière, les crochets et les naissances), un seul choix les règle toutes. Et une donnée nécessaire au calcul se demande à l'écran des questions, avant le calcul (49.4) ; dans la liste ne restent que les écarts, les estimations et ce qui n'a pas été répondu. Aucun message flottant au milieu de l'écran : le compteur de lignes orange est une petite barre fixe en haut, qui ne cache rien. Test : un relecteur doit pouvoir passer toutes les oranges au vert sans jamais quitter la liste, à un geste par ligne.

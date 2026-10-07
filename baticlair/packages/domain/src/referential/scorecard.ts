@@ -1,3 +1,4 @@
+import { baseOf } from "./model.js";
 import type { TradeProfile } from "../trades/trade-profile.js";
 import { computeChantier, type CompanyPreferences, type NeedResult, type Question, type WorkItemResult } from "./engine.js";
 import type { Referential } from "./model.js";
@@ -92,7 +93,7 @@ export function scoreQuote(
     asked.push(q);
     const [kind, name] = q.key.split(":") as [string, string];
     for (const input of inputs) {
-      const work = ref.workItems.find((w) => w.id === input.workItemId)!;
+      const work = ref.workItems.find((w) => w.id === baseOf(input.workItemId))!;
       if (kind === "product" && typeof answer === "string" && work.slots.some((s) => s.key === name)) {
         input.products[name] = { productId: answer, origin: "artisan" };
       }
@@ -109,7 +110,7 @@ export function scoreQuote(
     if (l.status === "not_covered") return { ref: l.ref, outcome: "not_covered" as const, needs: [], reason: l.reason };
     const slots = [l.slot, ...l.mentions];
     // La ligne qui ne fait que MESURER l'ouvrage (« 1 sortie de toit ») porte tous ses besoins (embase, chapeau…).
-    const measureOnly = ref.workItems.find((w) => w.id === l.workItemId)?.slots.find((s) => s.key === l.slot)?.measureOnly;
+    const measureOnly = ref.workItems.find((w) => w.id === baseOf(l.workItemId))?.slots.find((s) => s.key === l.slot)?.measureOnly;
     const needs = result.workItems.find((w) => w.workItemId === l.workItemId)!.needs.filter((n) => measureOnly || slots.includes(n.slot));
     const worst = needs.reduce<keyof typeof RANK>((acc, n) => (RANK[needOutcome(n)] > RANK[acc] ? needOutcome(n) : acc), "order");
     const reason = needs.find((n) => needOutcome(n) === worst && n.reason)?.reason;

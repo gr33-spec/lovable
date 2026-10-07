@@ -1,3 +1,4 @@
+import { baseOf } from "./model.js";
 import type { MissingData, Question, WorkItemResult } from "./engine.js";
 import type { Referential } from "./model.js";
 import type { QuotePlan } from "./plan.js";
@@ -50,7 +51,7 @@ export function documentationNeeds(ref: Referential, plan: QuotePlan, workItems:
   };
 
   for (const w of workItems) {
-    const work = ref.workItems.find((x) => x.id === w.workItemId)!;
+    const work = ref.workItems.find((x) => x.id === baseOf(w.workItemId))!;
     for (const n of w.needs) {
       // Un besoin seulement suggéré n'est pas demandé par le devis : il ne commande pas la documentation.
       if (!n.missing || n.origin === "suggested") continue;
@@ -75,8 +76,8 @@ export function documentationNeeds(ref: Referential, plan: QuotePlan, workItems:
   for (const q of declined) {
     const [kind, slotKey] = q.key.split(":") as [string, string];
     if (kind !== "product") continue;
-    const w = workItems.find((x) => ref.workItems.find((y) => y.id === x.workItemId)?.slots.some((s) => s.key === slotKey));
-    const slot = w ? ref.workItems.find((y) => y.id === w.workItemId)!.slots.find((s) => s.key === slotKey)! : undefined;
+    const w = workItems.find((x) => ref.workItems.find((y) => y.id === baseOf(x.workItemId))?.slots.some((s) => s.key === slotKey));
+    const slot = w ? ref.workItems.find((y) => y.id === baseOf(w.workItemId))!.slots.find((s) => s.key === slotKey)! : undefined;
     add(`product|${slotKey}`, {
       kind: "product",
       title: `${slot?.label ?? slotKey} — modèle du devis absent du référentiel`,

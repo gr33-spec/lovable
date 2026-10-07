@@ -73,8 +73,16 @@ export function SupplyList({
   const hidden = (r: ScreenRow) => aside?.key === r.key || removing.includes(r.key);
   const rows = screen.groups.flatMap((g) => g.rows).filter((r) => !hidden(r));
   const toCheck = rows.filter((r) => r.status === "check");
-  const labelOf = (r: ScreenRow) =>
+  const baseLabel = (r: ScreenRow) =>
     r.itemKey ? (items.get(r.itemKey)?.kind === "direct" ? shortName(items.get(r.itemKey)!.label) : (items.get(r.itemKey)?.label ?? "")) : r.quoteKey ? shortName(quotes.get(r.quoteKey)?.label ?? "") : (r.pending?.label ?? "");
+  // Deux cartes au même nom (« Bandes zinc » de la rive et de la ventilation) : chacune dit sa pièce, telle qu'écrite au devis.
+  const allRows = screen.groups.flatMap((g) => g.rows);
+  const twins = new Set(allRows.map(baseLabel).filter((l, i, a) => l && a.indexOf(l) !== i));
+  const labelOf = (r: ScreenRow) => {
+    const label = baseLabel(r);
+    const line = twins.has(label) && r.lineIds.length === 1 ? takeoff.lines.find((l) => l.id === r.lineIds[0]) : undefined;
+    return line ? `${label} — ${shortName(line.article ?? line.designation)}` : label;
+  };
 
   // Retirer une ligne : cachée tout de suite, « Annuler » pendant 3 s, puis retirée pour de bon. Retirer une autre ligne
   // pendant ces 3 s retire aussitôt la précédente (elle ne revient jamais en silence).
@@ -116,6 +124,18 @@ export function SupplyList({
     ).values(),
   ];
   const simpleRows = toCheck.filter((r) => r.decisionKey && simple.some((d) => d.key === r.decisionKey)).length;
+  // Une info manquante se demande UNE fois : ses boutons sont sur la première carte qui en dépend ; les autres renvoient
+  // à elle (un seul choix règle toutes les lignes qui en dépendent).
+  const askKeysOf = (r: ScreenRow) => {
+    const d = r.decisionKey ? decisions.get(r.decisionKey) : undefined;
+    if (d?.question?.options.length) return [d.key];
+    return (r.itemKey ? (items.get(r.itemKey)?.asks ?? []) : []).map((a) => a.key);
+  };
+  const askOwner = new Map<string, ScreenRow>();
+  for (const r of screen.groups.flatMap((g) => g.rows).filter((x) => x.status === "check" && !hidden(x))) {
+    for (const k of askKeysOf(r)) if (!askOwner.has(k)) askOwner.set(k, r);
+  }
+  const sharedFor = (r: ScreenRow) => new Map(askKeysOf(r).flatMap((k) => (askOwner.get(k) && askOwner.get(k)!.key !== r.key ? [[k, labelOf(askOwner.get(k)!)] as const] : [])));
 
   // Deux blocs titrés seulement quand il y a les deux : une liste toute prête n'a pas besoin de titre.
   const split = rows.some((r) => r.status === "check") && rows.some((r) => r.status !== "check");
@@ -124,6 +144,30 @@ export function SupplyList({
     // La barre du gros bouton est HORS de la carte : collée au-dessus de la barre de chat, elle ne laisse jamais de blanc
     // dans la carte quand on arrive au bas de la liste.
     <section aria-label="Liste des fournitures" className="flex flex-col">
+      {editable && !selecting && toCheck.length > 0 ? (
+        // Retour du fondateur (2026-10-07) : plus de bulle qui flotte sur les cartes ; une barre fine, collée en haut, qui
+        // ne cache rien. « Tout est bon » y reste (§49.8 : en haut, un appui).
+        <div
+          role="status"
+          className="sticky top-[max(8px,env(safe-area-inset-top))] z-20 mb-2 flex min-h-11 items-center justify-between gap-2 rounded-2xl border border-warn/25 bg-surface/95 py-1.5 pr-1.5 pl-3 shadow-[0_2px_10px_rgba(16,24,40,0.08)] backdrop-blur"
+        >
+          <span className="flex min-w-0 items-center gap-2 text-[13px] leading-tight font-extrabold text-warn">
+            <span className="size-2 shrink-0 rounded-full bg-warn" aria-hidden="true" />
+            Encore {toCheck.length} ligne{toCheck.length > 1 ? "s" : ""} orange
+          </span>
+          {handlers.onDecideMany && simpleRows >= 2 ? (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => void handlers.onDecideMany!(simple)}
+              className="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-xl bg-warn-bg px-3 text-[13px] font-extrabold text-warn active:scale-[0.97] disabled:opacity-60"
+            >
+              <Check size={15} aria-hidden="true" />
+              Tout est bon ({simpleRows})
+            </button>
+          ) : null}
+        </div>
+      ) : null}
       <div className="flex flex-col overflow-hidden rounded-[20px] bg-surface pb-2 shadow-card">
       <div className="flex flex-col px-4 pt-3 pb-2">
         <h2 className="font-display text-[20px] font-extrabold tracking-[-0.02em]">Fournitures à chiffrer</h2>
@@ -162,18 +206,6 @@ export function SupplyList({
                 {b.label} ({count})
               </h3>
             ) : null}
-            {b.key === "check" && editable && handlers.onDecideMany && simpleRows >= 2 ? (
-              // §49.8 : « Tout est bon » en haut, un appui, pour tout valider d'un coup ; chaque carte garde le sien.
-              <div className="mx-4 mt-2 flex items-center justify-between gap-3 rounded-2xl bg-warn-bg p-3">
-                <p className="text-[14px] leading-snug font-semibold">
-                  {simpleRows} lignes n&apos;attendent qu&apos;un « C&apos;est bon ».
-                </p>
-                <Button className="shrink-0" variant="secondary" pending={pending} onClick={() => void handlers.onDecideMany!(simple)}>
-                  <Check size={18} aria-hidden="true" />
-                  Tout est bon ({simpleRows})
-                </Button>
-              </div>
-            ) : null}
             {groups.map(({ g, visible }) => (
               <div key={g.key} className="flex flex-col gap-2 px-4 pt-4">
                 <p className="text-[12px] font-extrabold tracking-[0.05em] text-muted uppercase">
@@ -210,6 +242,7 @@ export function SupplyList({
                       pending={pending}
                       handlers={handlers}
                       decision={r.decisionKey ? decisions.get(r.decisionKey) : undefined}
+                      shared={sharedFor(r)}
                       onEdit={onEditItem}
                       onSetAside={() => putAside(r)}
                       sketches={sketches.filter((s) => r.itemKey && s.article === r.itemKey)}
@@ -266,15 +299,10 @@ export function SupplyList({
             }}
           />
         </div>
-      ) : editable ? (
+      ) : editable && toCheck.length === 0 ? (
         // Un fondu sous le bouton : le texte de la liste ne passe jamais sous lui en se lisant mal.
         <div className={`sticky z-10 -mt-4 bg-gradient-to-t from-ground from-60% to-transparent pt-8 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(16px,env(safe-area-inset-bottom))]"}`}>
-          {toCheck.length > 0 ? (
-            // §49.8 : plus de bouton vers un autre écran ; la liste EST l'écran, chaque carte orange se règle sur place.
-            <p role="status" className="rounded-2xl bg-surface px-4 py-3 text-center text-[14px] font-bold text-warn shadow-card">
-              Encore {toCheck.length} ligne{toCheck.length > 1 ? "s" : ""} orange : règle-{toCheck.length > 1 ? "les" : "la"} dans la liste, d&apos;un geste.
-            </p>
-          ) : sent ? (
+          {toCheck.length > 0 ? null : sent ? (
             <Button className="w-full" variant="secondary" onClick={onSend}>
               <Send size={18} aria-hidden="true" />
               Voir la demande envoyée
@@ -376,8 +404,8 @@ function Stepper({ label, value, unit, pending, onChange }: { label: string; val
   };
   const btn = "flex size-9 items-center justify-center rounded-full bg-ground text-[19px] font-extrabold leading-none active:scale-90 disabled:opacity-40";
   return (
-    <span role="group" aria-label={`Quantité : ${label}`} className="flex shrink-0 flex-col items-center gap-0.5 pt-0.5">
-      <span className="flex items-center gap-1">
+    <span role="group" aria-label={`Quantité : ${label}`} className="flex min-w-0 items-center gap-2">
+      <span className="flex shrink-0 items-center gap-1">
         <button type="button" className={btn} disabled={pending || n <= 0} onClick={() => bump(-1)} aria-label={`Moins : ${label}`}>
           −
         </button>
@@ -388,7 +416,7 @@ function Stepper({ label, value, unit, pending, onChange }: { label: string; val
           +
         </button>
       </span>
-      {unit ? <span className="max-w-[7.5rem] truncate text-[11px] font-bold text-muted">{unit}</span> : null}
+      {unit ? <span className="min-w-0 truncate text-[13px] font-bold text-muted">{unit}</span> : null}
     </span>
   );
 }
@@ -415,6 +443,7 @@ function Row({
   pending,
   handlers,
   decision,
+  shared,
   onEdit,
   onSetAside,
   sketches,
@@ -434,6 +463,8 @@ function Row({
   handlers: DecisionHandlers;
   /** La remarque qui met la ligne en orange : elle se règle dans la carte (§49.8). */
   decision?: TakeoffDecision | undefined;
+  /** Les questions de cette carte posées sur une autre carte (clé → nom de la carte qui porte les boutons). */
+  shared?: ReadonlyMap<string, string>;
   onEdit: (item: PurchaseItem, edit: ItemEdit) => Promise<void>;
   onSetAside: () => void;
   sketches: readonly ItemSketch[];
@@ -580,7 +611,13 @@ function Row({
           >
             {body}
           </button>
-          {stepper ? (
+          </div>
+        ) : (
+          <div className="flex min-h-11 w-full min-w-0 items-start gap-2.5">{body}</div>
+        )}
+        {/* La quantité au plus / moins, SOUS la désignation : sur téléphone, elle ne serre jamais le texte. */}
+        {stepper && !open ? (
+          <div className="mt-1 pl-5">
             <Stepper
               label={label}
               value={stepper.value}
@@ -588,11 +625,8 @@ function Row({
               pending={pending}
               onChange={(n) => onEdit(item!, { libelle: item!.label, quantite: String(n), unite: stepper.unit || null })}
             />
-          ) : null}
           </div>
-        ) : (
-          <div className="flex min-h-11 w-full min-w-0 items-start gap-2.5">{body}</div>
-        )}
+        ) : null}
         {zincPiece && sketches.length === 0 && !open ? (
           <button
             type="button"
@@ -605,7 +639,7 @@ function Row({
         ) : null}
       </div>
       {row.status === "check" && editable && !open && !sentTo ? (
-        <CardActions label={label} decision={decision} item={item} pending={pending} handlers={handlers} onEdit={onEdit} onOpen={() => setOpen(true)} />
+        <CardActions label={label} decision={decision} item={item} pending={pending} handlers={handlers} onEdit={onEdit} onOpen={() => setOpen(true)} {...(shared ? { shared } : {})} />
       ) : null}
       {open ? (
         <>
@@ -755,7 +789,9 @@ function CardActions({
   handlers,
   onEdit,
   onOpen,
+  shared = new Map(),
 }: {
+  shared?: ReadonlyMap<string, string>;
   label: string;
   decision: TakeoffDecision | undefined;
   item: PurchaseItem | undefined;
@@ -777,7 +813,12 @@ function CardActions({
   const btn = "min-h-11 flex-1 basis-[9rem]";
   return (
     <div role="group" aria-label={`Régler : ${label}`} aria-busy={pending || undefined} className="flex flex-col gap-2 pl-5">
-      {asks.map((a) => (
+      {asks.map((a) =>
+        shared.has(a.key) ? (
+          <p key={a.key} className="text-[13px] leading-snug text-muted">
+            {a.text} : se règle avec « {shared.get(a.key)} », plus haut.
+          </p>
+        ) : (
         <div key={a.key} role="group" aria-label={a.text} className="flex flex-col gap-1.5">
           <p className="text-[13px] leading-snug font-bold">{a.text} ?</p>
           <div className="flex flex-wrap gap-1.5">
@@ -788,7 +829,8 @@ function CardActions({
             ))}
           </div>
         </div>
-      ))}
+        ),
+      )}
       {d && q && q.kind === "param" && q.options.length === 0 ? (
         <form
           className="flex items-center gap-2"
@@ -813,18 +855,18 @@ function CardActions({
       <div className="flex flex-wrap gap-1.5">
         {gap && d && item ? (
           <>
-            <Button className={btn} pending={pending} onClick={() => void handlers.onDecide(d)} aria-label={`Garder ${gap.written} : ${label}`}>
+            <button type="button" disabled={pending} className={`${OPTION} flex-1`} onClick={() => void handlers.onDecide(d)} aria-label={`Garder ${gap.written} : ${label}`}>
               Garder {gap.written}
-            </Button>
-            <Button
-              className={btn}
-              variant="secondary"
-              pending={pending}
+            </button>
+            <button
+              type="button"
+              disabled={pending}
+              className={`${OPTION} flex-1`}
               onClick={() => void onEdit(item, { libelle: item.label, quantite: plainNumber(gap.computed), unite: parsed?.unit || gap.unit || null })}
               aria-label={`Mettre ${gap.computed} : ${label}`}
             >
               Mettre {gap.computed}
-            </Button>
+            </button>
           </>
         ) : done ? (
           <Button className={btn} variant={asks.length > 0 ? "secondary" : "primary"} pending={pending} onClick={() => void handlers.onDecide(d)} aria-label={`C'est bon : ${label}`}>

@@ -551,8 +551,13 @@ const FACONNAGE_BANDES_PARAM: ParamDef = {
     { label: "Je façonne (feuilles ou bobineau)", value: "1" },
     { label: "Je commande façonné", value: "2" },
   ],
-  // « Façonnage et pose des bandes de rive » (D-2026-020) : l'artisan les façonne lui-même.
-  textValues: [{ value: "1", keywords: ["faconnage et pose", "faconnage des", "faconnees sur place", "faconne sur place", "faconnage sur place"] }],
+  // « Façonnage et pose des bandes de rive » (D-2026-020), « comprend le pliage » (D-2026-018) : l'artisan les façonne
+  // lui-même. « Bandes de ventilation perforées pliées en Z » (D-2026-018) : la pièce s'achète déjà pliée. §48.6 : une
+  // pièce dont le devis dit le façonnage n'a pas de question.
+  textValues: [
+    { value: "1", keywords: ["faconnage et pose", "faconnage des", "faconnees sur place", "faconne sur place", "faconnage sur place", "comprend le pliage", "pliage sur place"] },
+    { value: "2", keywords: ["pliee en z", "pliees en z", "plie en z", "plies en z", "prefaconnee", "prefaconnees", "prefaconne", "prefaconnes"] },
+  ],
 };
 /**
  * Développé d'une bande zinc (§36.4) : 100 mm (solin à biseau, couvre-joint), 250 à 400 mm (rive), 200 à 330 mm
@@ -571,12 +576,15 @@ const DEVELOPPE_PARAM: ParamDef = {
   // « dév. 33 » : le devis écrit le développé en centimètres, comme le comptoir (« bande de 33 »).
   textValues: [
     { value: "100", keywords: ["dev 10", "dev. 10", "developpe 10"] },
+    { value: "200", keywords: ["dev 20", "dev. 20", "developpe 20"] },
     { value: "250", keywords: ["dev 25", "dev. 25", "developpe 25"] },
     { value: "330", keywords: ["dev 33", "dev. 33", "developpe 33"] },
     { value: "400", keywords: ["dev 40", "dev. 40", "developpe 40"] },
   ],
   choices: [
     { label: "100 mm (solin, couvre-joint)", value: "100" },
+    // §36.4 : « 200 à 330 mm » ; D-2026-018 : « Habillage de rive … Dév. 200 », lu, jamais redemandé.
+    { label: "200 mm", value: "200" },
     { label: "250 mm", value: "250" },
     { label: "330 mm", value: "330" },
     { label: "400 mm", value: "400" },
@@ -1080,7 +1088,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.06-41",
+  version: "roofing-2026.10.07-42",
   writtenOnly: true,
   trade: "roofing",
   sources: [
@@ -1242,7 +1250,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       needUnit: "u",
       attributes: [],
       keyAttributes: [],
-      keywords: ["bande de ventilation", "bande zinc", "bande en zinc", "bande de solin", "bande solin", "bande de rive zinc", "bande de rive en zinc", "bande d'egout", "bande egout", "couvre-joint zinc", "bavette zinc"],
+      keywords: ["bande de ventilation", "bande zinc", "bande en zinc", "bande de solin", "bande solin", "bande de rive zinc", "bande de rive en zinc", "bande d'egout", "bande egout", "couvre-joint zinc", "bavette zinc", "habillage de rive en zinc", "habillage de rive zinc"],
     },
     { code: "zinc_sheet", label: "Feuille de zinc", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["feuille de zinc", "feuille zinc"] },
     { code: "zinc_narrow_coil", label: "Bobineau de zinc", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["bobineau"] },
@@ -2622,6 +2630,8 @@ export const ROOFING_REFERENTIAL: Referential = {
       trade: "roofing",
       label: "Bandes zinc (solin, rive, égout, ventilation, couvre-joint)",
       triggers: ["zinc_strip"],
+      // §48.6 : une pièce écrite = sa question (« Bande de ventilation en Z : tu façonnes ? »), jamais « Bandes zinc (…) ».
+      perLine: true,
       params: [
         { key: "longueur_bande", label: "Longueur de bande", unit: "m", kind: "site_data", question: "Longueur de bande zinc ?", fromLineQuantity: true },
         DEVELOPPE_PARAM,
