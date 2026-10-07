@@ -677,7 +677,12 @@ export function purchaseView(
     const writtenData = [...new Set(own.flatMap((n) => work!.needs.find((r) => r.id === n.needId)?.precisionRequires ?? []))]
       .filter((k) => params[k]?.origin === "devis" && params[k]!.unit !== "u")
       .map((k) => `${k.startsWith("developpe") ? "dév." : work!.params.find((p) => p.key === k)!.label.toLowerCase()} ${fr(params[k]!.value)} ${params[k]!.unit === "u" ? "" : params[k]!.unit}`.trim());
-    const name = [shortWork(work!.label), ...writtenData].join(", ");
+    // Le nom est celui de la pièce écrite (« Bande de rive zinc quartz dév. 200 », instance d'un ouvrage pièce par pièce),
+    // sinon celui de l'ouvrage pour son article principal, sinon celui de l'article : jamais « Bandes zinc » pour une
+    // bande nommée, ni « Couverture zinc… » pour des voliges.
+    const piece = link.plan.inputs.find((i) => i.workItemId === planned.workItemId)?.label;
+    const base = piece ?? (slot.key === work!.slots[0]?.key ? shortWork(work!.label) : slot.label);
+    const name = [base, ...writtenData.filter((d) => !norm(base).includes(norm(d).split(" ")[0]!))].join(", ");
     const label = [name, ...chars.filter((c) => !norm(name).includes(norm(c)))].join(" ");
     // La quantité du devis telle quelle, sauf une mesure qui n'est pas une unité de commande (120 m² de tuiles) : la
     // ligne reste vide et la mesure se lit dans la précision (§49.3.3, jamais d'unité interdite).
@@ -752,6 +757,8 @@ export function purchaseView(
     // Une ambiguïté encore ouverte (« 6 : ardoises ou jouées ? ») est une question, pas un article à faire chiffrer.
     if (link.roles.get(o.lineId) === "undetermined") continue;
     if (o.pending) {
+      // §49.1 : une ligne écrite qui attend une info sort UNE fois, orange « Info manquante », jamais aussi en gris.
+      if (toBuy.some((b) => b.key === `manque:line:${o.lineId}`)) continue;
       if (!toQuote.some((q) => q.key === `line:${o.lineId}`)) toQuote.push({ key: `line:${o.lineId}`, label: withoutLabour(o.designation), measure, reason: o.pending, lineIds: [o.lineId] });
       continue;
     }
