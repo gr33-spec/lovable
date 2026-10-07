@@ -25,8 +25,11 @@ describe("test du fournisseur : chaque ligne « À commander » se charge dans l
     const v = readQuote(ZINC_QUOTE);
     const labels = v.toBuy.map((b) => b.label);
     expect(labels).not.toContain("Couverture zinc joint debout");
-    expect(labels).not.toContain("Bande de ventilation en Z en zinc quartz");
     expect(labels).not.toContain("Voligeage en sapin traité 18×200 mm");
+    // La bande garde son nom écrit (§48.6, pièce par pièce), mais elle attend son façonnage : orange, jamais commandée telle quelle.
+    const bande = v.toBuy.find((b) => b.label === "Bande de ventilation en Z en zinc quartz");
+    expect(bande?.key).toMatch(/^manque:/);
+    expect(bande?.waitsOn).toContain("param:faconnage@bandes-zinc");
     // La bande zinc au ml n'est plus « à chiffrer » : le moteur tente d'abord (développé ? façonnage ?), ce sont des questions.
     expect(v.toQuote).toEqual([]);
     // §48.2 « zinc, pièce par pièce » : le joint debout et la bande zinc ont chacun leur question de façonnage.

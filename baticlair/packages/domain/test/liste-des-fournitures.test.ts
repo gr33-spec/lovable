@@ -43,7 +43,7 @@ describe("la liste des fournitures, une couleur par ligne", () => {
     // quand rien ne se calcule sans la réponse (le façonnage), sinon calculée avec un « ? » (le développé).
     expect(check.map((r) => [label(v, r), r.decisionKey])).toEqual([
       ["Couverture zinc à joint debout gris", "engine:param:faconnage@couverture-zinc-joint-debout"],
-      ["Bandes zinc", "engine:param:faconnage@bandes-zinc"],
+      ["Bande zinc d'égout", "engine:param:faconnage@bandes-zinc"],
       ["Gouttière zinc demi-ronde dév. ?", "engine:param:developpe_gouttiere"],
       ["Naissances zinc demi-ronde", "engine:param:nb_descentes"],
       ["Jouées de lucarnes", "group:unknown"],
@@ -57,7 +57,7 @@ describe("la liste des fournitures, une couleur par ligne", () => {
     // Je façonne, 13 ml : des feuilles 2 × 1 m estimées d'après le développé (§48.6), qui vient alors.
     const apres = readQuote(TEST, { "param:faconnage": u("1") });
     expect(rows(apres).filter((r) => r.status === "check").map((r) => [label(apres, r), r.decisionKey])).toEqual([
-      ["Bandes zinc", "engine:param:developpe"],
+      ["Bande zinc d'égout", "engine:param:developpe"],
       ["Gouttière zinc demi-ronde dév. ?", "engine:param:developpe_gouttiere"],
       ["Naissances zinc demi-ronde", "engine:param:nb_descentes"],
       ["Jouées de lucarnes", "group:unknown"],

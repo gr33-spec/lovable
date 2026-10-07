@@ -101,3 +101,33 @@ describe("une info manquante se demande une fois, avant le calcul", () => {
     expect(v.questions.find((d) => d.key.startsWith("comptoir:"))?.question?.options?.map((o) => o.label)).toEqual(["2,7 mm", "3,0 mm"]);
   });
 });
+
+describe("audit du 2026-10-07 : une pièce restée sans réponse sort UNE fois, à son nom (§49.1, §49.8)", () => {
+  const LIGNES: QuoteLineInput[] = [
+    { ref: "1", designation: "Couverture zinc joint debout gris quartz", quantity: "91", unit: "m2" },
+    { ref: "2", designation: "Voliges sapin 18 mm traité", quantity: "96", unit: "m2" },
+    { ref: "3", designation: "Gouttière zinc demi-ronde dév. 25", quantity: "13", unit: "ml" },
+    { ref: "4", designation: "Bande de ventilation en Z en zinc quartz", quantity: "13", unit: "ml" },
+    { ref: "5", designation: "Bande de rive zinc quartz dév. 200", quantity: "14", unit: "ml" },
+  ];
+  // Toutes les questions laissées sans réponse au calcul (« Calculer ma liste » sans rien toucher).
+  const ouvert = readQuote(LIGNES);
+  const closes = Object.fromEntries(ouvert.questions.filter((q) => q.question).map((q) => [q.key.replace(/^engine:/, ""), null]));
+  const v = readQuote(LIGNES, closes as never);
+
+  it("jamais à la fois orange « Info manquante » et grise « à préciser »", () => {
+    for (const ref of ["1", "2", "4", "5"]) {
+      const lignes = [...v.toBuy.filter((b) => b.lineIds.includes(ref) && b.key.startsWith("manque:line:")), ...v.toQuote.filter((q) => q.key === `line:${ref}`)];
+      expect(lignes.length, `ligne ${ref}`).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it("chaque ligne orange porte le nom de SA pièce, jamais celui de l'ouvrage qui la range", () => {
+    const labels = v.toBuy.filter((b) => b.key.startsWith("manque:line:")).map((b) => b.label);
+    expect(labels).not.toContain("Bandes zinc");
+    expect(labels.some((l) => /^Bande de ventilation en Z/.test(l))).toBe(true);
+    expect(labels.some((l) => /^Bande de rive/.test(l))).toBe(true);
+    // Des voliges ne s'appellent jamais « Couverture zinc… ».
+    expect(labels.filter((l) => /sapin/i.test(l)).every((l) => !/^Couverture/.test(l))).toBe(true);
+  });
+});
