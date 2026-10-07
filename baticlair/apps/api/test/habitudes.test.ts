@@ -91,7 +91,7 @@ describe("§48.2 « zinc, lot par lot » : chaque lot de zinguerie a sa carte «
     const cards = q.ecran.habits.filter((h) => h.key.startsWith("param:faconnage"));
     expect(cards.map((h) => h.key).sort()).toEqual(["param:faconnage@abergement-cheminee", "param:faconnage@noue"]);
     expect(cards.map((h) => h.question).sort()).toEqual([
-      "Abergement de cheminée (zinc + porte-solin) : tu façonnes toi-même ou tu commandes façonné ?",
+      "Abergement de cheminée : tu façonnes toi-même ou tu commandes façonné ?",
       "Noue zinc : tu façonnes toi-même ou tu commandes façonné ?",
     ]);
     // L'abergement est commandé façonné sur ce chantier ; la noue reste « comme d'habitude » (je façonne).

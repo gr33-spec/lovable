@@ -1,3 +1,4 @@
+import { baseOf, INSTANCE_SEP } from "../referential/model.js";
 import { computeChantier, CONSUMABLES_KEY, type Assumption, type CompanyPreferences, type EngineOptions, type NeedResult, type Question, type WorkItemInput } from "../referential/engine.js";
 import type { Referential } from "../referential/model.js";
 import type { LineRole } from "../referential/line-roles.js";
@@ -396,34 +397,34 @@ export function artisanView(
       const line = lines.find((l) => l.id === item.id)!;
       const v = validation.lines.find((x) => x.lineId === item.id)!;
       const role = link.roles.get(item.id) ?? null;
-      const usualOf = (n: OwnedNeed) => link.ref.workItems.find((w) => w.id === n.workItemId)?.slots.find((x) => x.key === n.slot)?.usual ?? null;
+      const usualOf = (n: OwnedNeed) => link.ref.workItems.find((w) => w.id === baseOf(n.workItemId))?.slots.find((x) => x.key === n.slot)?.usual ?? null;
       const needs = (owned.get(item.id) ?? []).map((n) => needLevels(n, engine.needs, usualOf(n)));
       // Tout composant que la ligne cite reste visible, même sans règle de calcul (« fixations »).
       const planned0 = link.plan.lines.find((l) => l.ref === item.id);
       if (v.basis === "work" && planned0?.status === "planned") {
-        const work = link.ref.workItems.find((w) => w.id === planned0.workItemId);
+        const work = link.ref.workItems.find((w) => w.id === baseOf(planned0.workItemId));
         for (const key of [planned0.slot, ...planned0.mentions]) {
           const slot = work?.slots.find((x) => x.key === key);
           // Seulement un composant que le calcul ne connaît pas du tout : un besoin calculé ailleurs
           // (« pour tuiles HP10 » sur la ligne des liteaux) appartient déjà à sa propre ligne.
           // Un composant qui a sa règle mais que la réponse écarte (« bandes façonnées » quand l'artisan façonne : les
           // feuilles 2 × 1 m le remplacent) n'est pas « sans règle » : il n'a rien à faire chiffrer.
-          if (!slot || slot.measureOnly || needs.some((n) => n.slot === key) || engine.needs.some((n) => n.workItemId === work!.id && n.slot === key)) continue;
-          if (work!.needs.some((r) => r.slot === key && r.when) && engine.needs.some((n) => n.workItemId === work!.id)) continue;
-          needs.push({ needId: `${work!.id}/${key}`, slot: key, label: slot.label, origin: "explicit", need: null, needRange: null, order: null, missing: "Pas encore calculé : le fournisseur proposera pour la mesure du devis.", provisional: false, usual: slot.usual?.text ?? null, assumptions: [], state: "missing" });
+          if (!slot || slot.measureOnly || needs.some((n) => n.slot === key) || engine.needs.some((n) => n.workItemId === planned0.workItemId && n.slot === key)) continue;
+          if (work!.needs.some((r) => r.slot === key && r.when) && engine.needs.some((n) => n.workItemId === planned0.workItemId)) continue;
+          needs.push({ needId: `${planned0.workItemId}/${key}`, slot: key, label: slot.label, origin: "explicit", need: null, needRange: null, order: null, missing: "Pas encore calculé : le fournisseur proposera pour la mesure du devis.", provisional: false, usual: slot.usual?.text ?? null, assumptions: [], state: "missing" });
         }
       }
       const planned = link.plan.lines.find((l) => l.ref === item.id);
       // « Fenêtre PVC 120×125 » : commandée telle qu'écrite, ET elle compte l'ouvrage pour la mousse et le mastic.
       const asWritten =
-        planned?.status === "planned" && link.ref.workItems.find((w) => w.id === planned.workItemId)?.slots.find((x) => x.key === planned.slot)?.orderedAsWritten === true;
+        planned?.status === "planned" && link.ref.workItems.find((w) => w.id === baseOf(planned.workItemId))?.slots.find((x) => x.key === planned.slot)?.orderedAsWritten === true;
       const direct =
         v.basis === "purchase" && role !== "undetermined" && line.quantity && line.unit && (needs.length === 0 || asWritten) ? { quantity: writtenNumber(line.quantity), unit: line.unit } : null;
       // Une deuxième ligne du même ouvrage (« peinture plafonds » après « peinture murs ») : sa surface s'ajoute au calcul
       // de l'ouvrage, porté par la première ; elle n'a rien à faire chiffrer à part.
       const counted =
         planned?.status === "planned" &&
-        (planned.adds === true || link.ref.workItems.find((w) => w.id === planned.workItemId)?.slots.find((x) => x.key === planned.slot)?.measureOnly === true) &&
+        (planned.adds === true || link.ref.workItems.find((w) => w.id === baseOf(planned.workItemId))?.slots.find((x) => x.key === planned.slot)?.measureOnly === true) &&
         link.plan.lines.some(
           (l) =>
             l.ref !== item.id &&
@@ -512,17 +513,17 @@ export function computeWithAnswers(
   const allGiven = (workItemId: string) => {
     const planned = plan.lines.filter((l): l is Extract<QuotePlan["lines"][number], { status: "planned" }> => l.status === "planned" && l.workItemId === workItemId);
     // Une ligne commandée telle qu'écrite qui compte aussi l'ouvrage (« 4 fenêtres ») laisse calculer ses fournitures de pose.
-    const counts = (l: (typeof planned)[number]) => ref.workItems.find((w) => w.id === workItemId)?.slots.find((s) => s.key === l.slot)?.measureOnly === true;
+    const counts = (l: (typeof planned)[number]) => ref.workItems.find((w) => w.id === baseOf(workItemId))?.slots.find((s) => s.key === l.slot)?.measureOnly === true;
     // « 2 descentes de 3 m » écrit en plus des tubes et des coudes : la mesure de l'ouvrage est connue, ce que le devis ne
     // cite pas (colliers, dauphins) se calcule encore (D-2026-020). « 42 faîtières » seules ne disent aucune mesure.
-    const work = ref.workItems.find((w) => w.id === workItemId);
+    const work = ref.workItems.find((w) => w.id === baseOf(workItemId));
     const params = plan.inputs.find((i) => i.workItemId === workItemId)?.params ?? {};
     // Une mesure ÉCRITE dans le texte (preuve « … » citée), pas la quantité d'une ligne déjà commandée telle quelle.
     const measured = (work?.params ?? []).some((p) => p.fromLineQuantity && params[p.key]?.origin === "devis" && (params[p.key]?.evidence ?? "").includes("«"));
     return planned.length > 0 && !measured && planned.every((l) => given.has(`${workItemId}/${l.slot}`) && !counts(l));
   };
   const inputs: WorkItemInput[] = plan.inputs.map((input) => {
-    const work = ref.workItems.find((w) => w.id === input.workItemId)!;
+    const work = ref.workItems.find((w) => w.id === baseOf(input.workItemId))!;
     const products = { ...input.products };
     const params = { ...input.params };
     const declinedSlots = [...declined].filter((k) => k.startsWith("product:")).map((k) => k.slice("product:".length)).filter((s) => work.slots.some((x) => x.key === s));
@@ -541,7 +542,8 @@ export function computeWithAnswers(
           }
         }
       }
-      if (kind === "param" && answer && typeof answer !== "string" && work.params.some((p) => p.key === name)) {
+      // Une pièce écrite au devis (instance par ligne) garde ce que SA ligne écrit : une réponse commune ne l'écrase pas.
+      if (kind === "param" && answer && typeof answer !== "string" && work.params.some((p) => p.key === name) && !(input.workItemId.includes(INSTANCE_SEP) && params[name]?.origin === "devis")) {
         params[name] = { ...answer, origin: "artisan" };
       }
     }
@@ -555,7 +557,8 @@ export function computeWithAnswers(
     // chantier n'en a pas donné d'autre ; dite comme telle dans le calcul, modifiable d'un tap.
     for (const def of work.params) {
       // L'habitude du lot (« la noue, je la façonne ») passe devant celle de toute la zinguerie.
-      const habit = preferences.params?.[`${def.key}@${input.workItemId}`] ?? preferences.params?.[def.key];
+      // Une instance par ligne (« bandes-zinc__12 ») suit l'habitude de son ouvrage.
+      const habit = preferences.params?.[`${def.key}@${baseOf(input.workItemId)}`] ?? preferences.params?.[def.key];
       if (def.kind !== "artisan_preference" || !habit || params[def.key] || answers[`param:${def.key}`] !== undefined || answers[scopedKey(def.key, input.workItemId)] !== undefined) continue;
       params[def.key] = { value: habit, unit: def.unit, origin: "artisan", evidence: "Habitude de votre entreprise" };
     }
@@ -578,13 +581,29 @@ export function computeWithAnswers(
       .flatMap((w) => w.needs.filter((n) => !given.has(`${w.workItemId}/${n.slot}`)).map((n) => ({ ...n, workItemId: w.workItemId })));
     // §48.2 « zinc, pièce par pièce » : quand plusieurs ouvrages (noue, bandes, joint debout) demandent le façonnage,
     // la question se pose pour chacun, avec ses mots ; un seul ouvrage garde la question unique.
+    // Une pièce écrite au devis (ouvrage « perLine ») a sa question à son nom, même seule de son ouvrage.
+    for (const n of needs) {
+      const piece = ins.find((i) => i.workItemId === n.workItemId)?.label;
+      if (!piece || !n.question || !PER_PIECE.has(n.question.key) || piecewise.includes(n.question.key)) continue;
+      n.question = { ...n.question, text: `${piece} : tu façonnes toi-même ou tu commandes façonné ?` };
+    }
     for (const key of piecewise) {
       for (const n of needs) {
         if (n.question?.key !== key) continue;
-        // Chaque lot dit son nom (deux lots peuvent partager la même phrase : bandes et abergement).
-        const lot = lotLabel(ref.workItems.find((w) => w.id === n.workItemId)?.label ?? "");
+        // Chaque lot dit son nom (deux lots peuvent partager la même phrase : bandes et abergement) ; une pièce écrite au
+        // devis (instance par ligne) dit le sien, tel qu'écrit (« Bande de ventilation en Z en zinc quartz »).
+        const lot = ins.find((i) => i.workItemId === n.workItemId)?.label ?? lotLabel(ref.workItems.find((w) => w.id === baseOf(n.workItemId))?.label ?? "");
         n.question = { ...n.question, key: scopedKey(key.slice("param:".length), n.workItemId), text: lot ? `${lot} : tu façonnes toi-même ou tu commandes façonné ?` : n.question.text };
       }
+    }
+    // Une pièce écrite au devis (« bandes-zinc__12 ») a SES questions : à son nom, avec sa clé (sa réponse ne vaut que
+    // pour elle). Ni la question consommables, ni un produit : celles-là valent pour le chantier.
+    for (const n of needs) {
+      const piece = ins.find((i) => i.workItemId === n.workItemId && n.workItemId.includes(INSTANCE_SEP))?.label;
+      const key = n.question?.key ?? "";
+      if (!piece || !key.startsWith("param:") || scopedParam(key) || key === `param:${CONSUMABLES_KEY}`) continue;
+      const text = n.question!.text.replace(/ Cela change la commande :.*$/, "");
+      n.question = { ...n.question!, key: scopedKey(key.slice("param:".length), n.workItemId), text: `${piece} : ${text.charAt(0).toLowerCase()}${text.slice(1)}` };
     }
     const seen = new Set<string>();
     const questions: Question[] = [];
@@ -672,7 +691,7 @@ export function computeWithAnswers(
   // pente contredite, le façonnage) laisse la ligne écrite telle quelle, avec la quantité du devis.
   // (Les crochets d'ardoise qui suivent les ardoises attendent la même donnée d'article : elle vaut pour l'ouvrage.)
   const articleOnly = (n: (typeof needs)[number]) => {
-    const work = ref.workItems.find((w) => w.id === n.workItemId);
+    const work = ref.workItems.find((w) => w.id === baseOf(n.workItemId));
     const m = /^param:([a-z0-9_]+)$/.exec(n.question?.key ?? "");
     return !!m && (work?.needs ?? []).some((r) => (r.precisionRequires ?? []).includes(m[1]!));
   };
@@ -690,11 +709,12 @@ export function computeWithAnswers(
 const PER_PIECE = new Set(["param:faconnage"]);
 /** Le nom d'un lot de zinguerie, tel que l'artisan le dit (« Noue zinc », « Bandes zinc (solin, rive, égout…) »). */
 export function lotLabel(label: string): string {
-  return label.replace(/\s*\([^)]*fa[cç]onn[^)]*\)/i, "").trim();
+  // §48.6 : une question nomme UNE pièce ; la parenthèse de l'ouvrage (« (zinc + porte-solin) », « (solin, rive…) ») n'en dit pas d'autre.
+  return label.replace(/\s*\([^)]*\)/g, "").trim();
 }
 /** Les données posées lot par lot quand plusieurs ouvrages du devis en dépendent (§48.2, retour de Greg). */
 export function piecewiseParams(ref: Referential, plan: QuotePlan): string[] {
-  return [...PER_PIECE].filter((key) => new Set(plan.inputs.filter((i) => ref.workItems.find((w) => w.id === i.workItemId)?.params.some((p) => `param:${p.key}` === key)).map((i) => i.workItemId)).size >= 2);
+  return [...PER_PIECE].filter((key) => new Set(plan.inputs.filter((i) => ref.workItems.find((w) => w.id === baseOf(i.workItemId))?.params.some((p) => `param:${p.key}` === key)).map((i) => i.workItemId)).size >= 2);
 }
 /** « param:faconnage@noue » : la donnée « faconnage » de l'ouvrage « noue » seulement. */
 export const scopedKey = (name: string, workItemId: string) => `param:${name}@${workItemId}`;
@@ -713,12 +733,12 @@ function withAnswer(ref: Referential, inputs: WorkItemInput[], q: Question, valu
   }
   const [kind, name] = q.key.split(":") as [string, string];
   if (kind === "product") {
-    return inputs.map((i) => (ref.workItems.find((w) => w.id === i.workItemId)?.slots.some((s) => s.key === name) ? { ...i, products: { ...i.products, [name]: { productId: value, origin: "artisan" as const } } } : i));
+    return inputs.map((i) => (ref.workItems.find((w) => w.id === baseOf(i.workItemId))?.slots.some((s) => s.key === name) ? { ...i, products: { ...i.products, [name]: { productId: value, origin: "artisan" as const } } } : i));
   }
   if (kind === "param") {
     const def = ref.workItems.flatMap((w) => w.params).find((p) => p.key === name);
     if (!def) return null;
-    return inputs.map((i) => (ref.workItems.find((w) => w.id === i.workItemId)?.params.some((p) => p.key === name) ? { ...i, params: { ...i.params, [name]: { value, unit: def.unit, origin: "artisan" as const, evidence: "Réponse possible" } } } : i));
+    return inputs.map((i) => (ref.workItems.find((w) => w.id === baseOf(i.workItemId))?.params.some((p) => p.key === name) ? { ...i, params: { ...i.params, [name]: { value, unit: def.unit, origin: "artisan" as const, evidence: "Réponse possible" } } } : i));
   }
   return null;
 }
@@ -747,7 +767,7 @@ function questionLever(
   const rules = new Map(ref.workItems.flatMap((w) => w.needs.map((r) => [`${w.id}/${r.id}`, r] as const)));
   if (run(inputs).needs.some((n) => rules.get(`${n.workItemId}/${n.needId}`)?.precisionRequires?.includes(name))) return { spread: Number.POSITIVE_INFINITY, option: null };
   const withParam = (ins: WorkItemInput[], key: string, unit: string, value: string, evidence: string): WorkItemInput[] =>
-    ins.map((i) => (ref.workItems.find((w) => w.id === i.workItemId)?.params.some((p) => p.key === key) ? { ...i, params: { ...i.params, [key]: { value, unit, origin: "artisan" as const, evidence } } } : i));
+    ins.map((i) => (ref.workItems.find((w) => w.id === baseOf(i.workItemId))?.params.some((p) => p.key === key) ? { ...i, params: { ...i.params, [key]: { value, unit, origin: "artisan" as const, evidence } } } : i));
   // Les autres questions à boutons encore ouvertes sont provisoirement prises à leur première réponse : le levier
   // de CETTE question se mesure toutes choses égales par ailleurs (elles ne sont pas répondues pour autant).
   let base = inputs;

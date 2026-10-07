@@ -1,3 +1,4 @@
+import { baseOf } from "./model.js";
 import { Decimal } from "../shared/decimal.js";
 import type { ParamValue } from "./engine.js";
 import type { WorkItemType } from "./model.js";
@@ -26,6 +27,11 @@ export interface SiteFact {
    * surfaces, pas une contradiction. Absent : une donnée du chantier entier (pente, note, code postal).
    */
   workItemId?: string;
+  /**
+   * La ligne du devis où l'IA l'a lue (« dimensions » du §41.1) : la donnée vaut pour l'ouvrage de CETTE ligne (le
+   * développé de la rive n'est pas celui de la bande de ventilation) ; un autre ouvrage ne la reprend que s'il n'a rien.
+   */
+  line?: string;
   /**
    * Donnée lue sur une ligne qui EST l'ouvrage (« Peinture murs séjour 85 m² ») : plusieurs lignes du même ouvrage
    * (une par pièce) sont des surfaces différentes, qui s'additionnent ; ce n'est pas une contradiction (lot B).
@@ -63,6 +69,8 @@ export function paramsFromContext(
   work: WorkItemType,
   /** Ouvrages principaux du chantier (la couverture) : seuls à prêter une donnée « onlyFromPrincipal » (l'aspect du zinc). */
   principal: ReadonlySet<string> = new Set(),
+  /** Instance par ligne (« bandes-zinc__12 ») : ses données, jamais celles d'une pièce sœur. */
+  id: string = work.id,
 ): { params: Record<string, ParamValue>; conflicts: ContextConflict[] } {
   const params: Record<string, ParamValue> = {};
   const conflicts: ContextConflict[] = [];
@@ -70,9 +78,10 @@ export function paramsFromContext(
     // Une quantité de ligne vaut d'abord pour son ouvrage ; un autre ouvrage ne la reprend que s'il n'a rien lu lui-même
     // (le nombre de descentes écrit sur la ligne « descente » sert à la gouttière ; la surface du garage, pas aux ardoises).
     const all = context.facts.filter((f) => f.key === def.key);
-    const own = all.filter((f) => f.workItemId === work.id);
+    const own = all.filter((f) => f.workItemId === id);
     // L'aspect du zinc d'une bande ne fait pas celui de la couverture ; celui de la couverture fait celui de ses bandes.
-    const lent = def.ownOnly ? [] : all.filter((f) => f.workItemId && f.workItemId !== work.id && (!def.onlyFromPrincipal || principal.has(f.workItemId)));
+    // Une pièce sœur (une autre bande zinc du devis) ne prête jamais ses données : chaque pièce a les siennes.
+    const lent = def.ownOnly ? [] : all.filter((f) => f.workItemId && f.workItemId !== id && baseOf(f.workItemId) !== work.id && (!def.onlyFromPrincipal || principal.has(f.workItemId)));
     const kept = new Set(own.length > 0 ? own : lent);
     // Dans l'ordre où elles sont venues : le devis d'abord, l'en-tête ou la note ensuite.
     const facts = all.filter((f) => !f.workItemId || kept.has(f));
@@ -97,7 +106,7 @@ export function paramsFromContext(
     if (usable.length === 0) continue;
     const first = baseValue(usable[0]!)!;
     // Plusieurs lignes du même ouvrage, une par pièce ou par façade : leurs surfaces s'additionnent.
-    const lines = usable.filter((f) => f.fromMeasureLine && f.workItemId === work.id && f.origin === "devis");
+    const lines = usable.filter((f) => f.fromMeasureLine && f.workItemId === id && f.origin === "devis");
     if (def.fromLineQuantity && lines.length >= 2 && lines.length === usable.length) {
       const total = lines.reduce((sum, f) => sum.plus(baseValue(f)!.value), new Decimal(0));
       const factor = parseRefUnit(usable[0]!.unit).factor;

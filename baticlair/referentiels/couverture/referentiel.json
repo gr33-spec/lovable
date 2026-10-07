@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.06-41",
+  "version": "roofing-2026.10.07-42",
   "writtenOnly": true,
   "trade": "roofing",
   "sources": [
@@ -338,7 +338,9 @@
         "bande d'egout",
         "bande egout",
         "couvre-joint zinc",
-        "bavette zinc"
+        "bavette zinc",
+        "habillage de rive en zinc",
+        "habillage de rive zinc"
       ]
     },
     {
@@ -8365,6 +8367,14 @@
               ]
             },
             {
+              "value": "200",
+              "keywords": [
+                "dev 20",
+                "dev. 20",
+                "developpe 20"
+              ]
+            },
+            {
               "value": "250",
               "keywords": [
                 "dev 25",
@@ -8393,6 +8403,10 @@
             {
               "label": "100 mm (solin, couvre-joint)",
               "value": "100"
+            },
+            {
+              "label": "200 mm",
+              "value": "200"
             },
             {
               "label": "250 mm",
@@ -8438,7 +8452,22 @@
                 "faconnage des",
                 "faconnees sur place",
                 "faconne sur place",
-                "faconnage sur place"
+                "faconnage sur place",
+                "comprend le pliage",
+                "pliage sur place"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "pliee en z",
+                "pliees en z",
+                "plie en z",
+                "plies en z",
+                "prefaconnee",
+                "prefaconnees",
+                "prefaconne",
+                "prefaconnes"
               ]
             }
           ]
@@ -9026,7 +9055,22 @@
                 "faconnage des",
                 "faconnees sur place",
                 "faconne sur place",
-                "faconnage sur place"
+                "faconnage sur place",
+                "comprend le pliage",
+                "pliage sur place"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "pliee en z",
+                "pliees en z",
+                "plie en z",
+                "plies en z",
+                "prefaconnee",
+                "prefaconnees",
+                "prefaconne",
+                "prefaconnes"
               ]
             }
           ]
@@ -10315,6 +10359,7 @@
       "triggers": [
         "zinc_strip"
       ],
+      "perLine": true,
       "params": [
         {
           "key": "longueur_bande",
@@ -10347,6 +10392,14 @@
               ]
             },
             {
+              "value": "200",
+              "keywords": [
+                "dev 20",
+                "dev. 20",
+                "developpe 20"
+              ]
+            },
+            {
               "value": "250",
               "keywords": [
                 "dev 25",
@@ -10375,6 +10428,10 @@
             {
               "label": "100 mm (solin, couvre-joint)",
               "value": "100"
+            },
+            {
+              "label": "200 mm",
+              "value": "200"
             },
             {
               "label": "250 mm",
@@ -10420,7 +10477,22 @@
                 "faconnage des",
                 "faconnees sur place",
                 "faconne sur place",
-                "faconnage sur place"
+                "faconnage sur place",
+                "comprend le pliage",
+                "pliage sur place"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "pliee en z",
+                "pliees en z",
+                "plie en z",
+                "plies en z",
+                "prefaconnee",
+                "prefaconnees",
+                "prefaconne",
+                "prefaconnes"
               ]
             }
           ]
@@ -11069,6 +11141,14 @@
               ]
             },
             {
+              "value": "200",
+              "keywords": [
+                "dev 20",
+                "dev. 20",
+                "developpe 20"
+              ]
+            },
+            {
               "value": "250",
               "keywords": [
                 "dev 25",
@@ -11097,6 +11177,10 @@
             {
               "label": "100 mm (solin, couvre-joint)",
               "value": "100"
+            },
+            {
+              "label": "200 mm",
+              "value": "200"
             },
             {
               "label": "250 mm",
@@ -11142,7 +11226,22 @@
                 "faconnage des",
                 "faconnees sur place",
                 "faconne sur place",
-                "faconnage sur place"
+                "faconnage sur place",
+                "comprend le pliage",
+                "pliage sur place"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "pliee en z",
+                "pliees en z",
+                "plie en z",
+                "plies en z",
+                "prefaconnee",
+                "prefaconnees",
+                "prefaconne",
+                "prefaconnes"
               ]
             }
           ]
@@ -11881,6 +11980,14 @@
               ]
             },
             {
+              "value": "200",
+              "keywords": [
+                "dev 20",
+                "dev. 20",
+                "developpe 20"
+              ]
+            },
+            {
               "value": "250",
               "keywords": [
                 "dev 25",
@@ -11909,6 +12016,10 @@
             {
               "label": "100 mm (solin, couvre-joint)",
               "value": "100"
+            },
+            {
+              "label": "200 mm",
+              "value": "200"
             },
             {
               "label": "250 mm",
@@ -11954,7 +12065,22 @@
                 "faconnage des",
                 "faconnees sur place",
                 "faconne sur place",
-                "faconnage sur place"
+                "faconnage sur place",
+                "comprend le pliage",
+                "pliage sur place"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "pliee en z",
+                "pliees en z",
+                "plie en z",
+                "plies en z",
+                "prefaconnee",
+                "prefaconnees",
+                "prefaconne",
+                "prefaconnes"
               ]
             }
           ]
@@ -12310,7 +12436,22 @@
                 "faconnage des",
                 "faconnees sur place",
                 "faconne sur place",
-                "faconnage sur place"
+                "faconnage sur place",
+                "comprend le pliage",
+                "pliage sur place"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "pliee en z",
+                "pliees en z",
+                "plie en z",
+                "plies en z",
+                "prefaconnee",
+                "prefaconnees",
+                "prefaconne",
+                "prefaconnes"
               ]
             }
           ]

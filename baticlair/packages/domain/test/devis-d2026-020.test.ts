@@ -215,15 +215,16 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
   });
 
   it("§49.4 : une question de comptoir venue de « manque » (absente du tiroir) : boutons tirés de la parenthèse ; sans réponse, ses lignes sont orange ; la réponse part en précision", () => {
-    const readings = new Map<string, QuoteLineReading>([["1", { role: "fourniture", articles: [], faconnage: null, manque: ["qualité de l'ardoise (Espagne 1er choix, NF Cupa)", "épaisseur du zinc (0,65, 0,80)"] }]]);
+    // La qualité d'ardoise est une donnée du tiroir (sa question, ou l'habitude) : jamais une 2e question du comptoir.
+    const readings = new Map<string, QuoteLineReading>([["1", { role: "fourniture", articles: [], faconnage: null, manque: ["marque des ardoises (Cupa, Samaca)", "qualité de l'ardoise (Espagne 1er choix, NF Cupa)", "épaisseur du zinc (0,65, 0,80)"] }]]);
     const lu = read({}, readings);
     const q = lu.questions.find((d) => d.key.startsWith("comptoir:1:"))!;
-    expect(q.question).toMatchObject({ text: "Qualité de l'ardoise ?", options: [{ label: "Espagne 1er choix" }, { label: "NF Cupa" }] });
+    expect(q.question).toMatchObject({ text: "Marque des ardoises ?", options: [{ label: "Cupa" }, { label: "Samaca" }] });
     // L'épaisseur du zinc est déjà annoncée (« Je pars sur ces valeurs ») : pas de seconde question.
     expect(lu.questions.filter((d) => d.key.startsWith("comptoir:"))).toHaveLength(1);
     expect(row(lu.toBuy[0]!.key, lu)).toMatchObject({ status: "check", decisionKey: q.key });
-    const repondu = read({ [q.key]: "NF Cupa" }, readings);
-    expect(repondu.toBuy[0]!.precision).toMatch(/; Qualité de l'ardoise : NF Cupa$/);
+    const repondu = read({ [q.key]: "Cupa" }, readings);
+    expect(repondu.toBuy[0]!.precision).toMatch(/; Marque des ardoises : Cupa$/);
     expect(repondu.questions.some((d) => d.key === q.key)).toBe(false);
   });
 

@@ -1,3 +1,4 @@
+import { baseOf } from "./model.js";
 import type { TakeoffIssue, TakeoffValidation } from "../takeoff/validation.js";
 import { keywordPosition, normalizeText } from "../trades/trade-profile.js";
 import type { Referential } from "./model.js";
@@ -67,7 +68,7 @@ export function proposeLineRoles(lines: readonly RoleLine[], plan: QuotePlan, va
     // La ligne désigne un emplacement « mesure seulement » (joint debout en m², abergement à l'unité) :
     // sa quantité mesure l'ouvrage, le moteur en déduit ce qui se commande. Aucune question.
     if (planned?.status === "planned") {
-      const slot = ref.workItems.find((w) => w.id === planned.workItemId)?.slots.find((s) => s.key === planned.slot);
+      const slot = ref.workItems.find((w) => w.id === baseOf(planned.workItemId))?.slots.find((s) => s.key === planned.slot);
       if (slot?.measureOnly && slot.orderedAsWritten) {
         roles.set(v.lineId, { role: "purchase", why: `L'article se commande tel qu'écrit ; son nombre compte aussi l'ouvrage (${slot.label.toLowerCase()}) pour les fournitures de pose.` });
         continue;
@@ -107,7 +108,7 @@ export function proposeLineRoles(lines: readonly RoleLine[], plan: QuotePlan, va
       continue;
     }
     if (planned?.status === "planned") {
-      const work = ref.workItems.find((w) => w.id === planned.workItemId);
+      const work = ref.workItems.find((w) => w.id === baseOf(planned.workItemId));
       if (work && planned.mentions.length > 0) {
         const names = work.slots.filter((s) => planned.mentions.includes(s.key)).map((s) => s.label.toLowerCase());
         roles.set(v.lineId, { role: "measure", why: `La ligne décrit un ouvrage complet (${names.join(", ")} compris) : sa quantité mesure l'ouvrage.` });

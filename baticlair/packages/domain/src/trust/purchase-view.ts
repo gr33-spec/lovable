@@ -1,3 +1,4 @@
+import { baseOf } from "../referential/model.js";
 import { Decimal } from "../shared/decimal.js";
 import { CONSUMABLES_QUESTION, DEVIS_MARK, withoutDevisMark, type Assumption, type NeedResult, type Question, type RuleToConfirm } from "../referential/engine.js";
 import type { LineRole } from "../referential/line-roles.js";
@@ -179,7 +180,7 @@ function supplyScreen(
     return null;
   };
   const groupOf = (workId: string | undefined, consumable = false): ScreenGroup => {
-    const work = workId ? ref.workItems.find((w) => w.id === workId) : undefined;
+    const work = workId ? ref.workItems.find((w) => w.id === baseOf(workId)) : undefined;
     const key = consumable ? "consommables" : (work?.id ?? "other");
     let g = groups.get(key);
     if (!g) {
@@ -255,7 +256,7 @@ function supplyScreen(
   const plannedWorks = [...new Set(plan.lines.flatMap((l) => (l.status === "planned" ? [l.workItemId] : [])))];
   const workOfQuestion = (d: Decision) => {
     const param = d.question?.key.startsWith("param:") ? d.question.key.slice("param:".length) : null;
-    return param ? plannedWorks.find((id) => ref.workItems.find((w) => w.id === id)?.params.some((p) => p.key === param)) : undefined;
+    return param ? plannedWorks.find((id) => ref.workItems.find((w) => w.id === baseOf(id))?.params.some((p) => p.key === param)) : undefined;
   };
   // Une décision qu'aucune ligne ne porte encore (ambiguïté d'une mesure, article sans unité) : sa propre ligne orange.
   for (const d of decisions) {
@@ -545,7 +546,7 @@ function groupsOf(toBuy: readonly PurchaseItem[], needs: readonly OwnedNeed[], v
   };
   for (const item of toBuy) {
     const workId = needs.find((n) => item.needIds.includes(n.needId))?.workItemId ?? (item.kind === "direct" ? workOfLine(item.lineIds[0] ?? "") : undefined);
-    const work = workId ? ref.workItems.find((w) => w.id === workId) : undefined;
+    const work = workId ? ref.workItems.find((w) => w.id === baseOf(workId)) : undefined;
     const key = work?.id ?? "other";
     let group = groups.find((g) => g.key === key);
     if (!group) {
@@ -568,7 +569,7 @@ function understood(view: ArtisanView, plan: QuotePlan, ref: Referential): strin
     const measure = [o.read.quantity, o.read.unit].filter(Boolean).join(" ") || "mesure à préciser";
     if (planned?.status === "planned") {
       // Une mesure par ouvrage, celle de sa première ligne ; le nom court de l'ouvrage, sans sa parenthèse.
-      const work = ref.workItems.find((w) => w.id === planned.workItemId)!;
+      const work = ref.workItems.find((w) => w.id === baseOf(planned.workItemId))!;
       if (seen.has(work.id)) continue;
       seen.add(work.id);
       out.push(`${work.label.replace(/\s*\(.*\)$/, "")} : ${measure}`);
@@ -664,7 +665,7 @@ export function purchaseView(
     const planned = link.plan.lines.find((l) => l.ref === o.lineId);
     if (planned?.status !== "planned" || toBuy.some((b) => b.lineIds.includes(o.lineId) && b.kind === "direct")) continue;
     const waiting = engine.needs.filter((n) => n.workItemId === planned.workItemId && n.status === "question" && n.question && !n.consumable && n.origin !== "suggested" && !(n.question.key.startsWith("product:") && engine.declined?.includes(n.question.key)));
-    const work = link.ref.workItems.find((w) => w.id === planned.workItemId);
+    const work = link.ref.workItems.find((w) => w.id === baseOf(planned.workItemId));
     const slot = work?.slots.find((x) => x.key === planned.slot);
     // Les besoins de l'article écrit par CETTE ligne (lui-même, ou une autre forme de lui : les feuilles d'une bande).
     const own = waiting.filter((n) => n.slot === planned.slot || work?.slots.find((x) => x.key === n.slot)?.formOf === planned.slot);
@@ -702,13 +703,13 @@ export function purchaseView(
   // La naissance d'office (§49.1 point 3) qui attend une réponse (combien de descentes ?) : sa ligne, vide, orange.
   for (const n of engine.needs) {
     if (n.status !== "question" || !n.question || n.consumable || n.origin === "suggested" || toBuy.some((b) => b.needIds.includes(n.needId))) continue;
-    const work = link.ref.workItems.find((w) => w.id === n.workItemId);
+    const work = link.ref.workItems.find((w) => w.id === baseOf(n.workItemId));
     const slot = work?.slots.find((x) => x.key === n.slot);
     if (!work || !slot?.indissociable) continue;
-    const chars = (link.plan.characteristicsBySlot[slotCharacteristicsKey(work.id, slot.key)] ?? []).filter(keepCharacteristic);
-    const lineIds = link.plan.lines.filter((l) => l.status === "planned" && l.workItemId === work.id).map((l) => l.ref).slice(0, 1);
+    const chars = (link.plan.characteristicsBySlot[slotCharacteristicsKey(n.workItemId ?? work.id, slot.key)] ?? []).filter(keepCharacteristic);
+    const lineIds = link.plan.lines.filter((l) => l.status === "planned" && l.workItemId === n.workItemId).map((l) => l.ref).slice(0, 1);
     toBuy.push({
-      key: `manque:need:${work.id}/${n.needId}`,
+      key: `manque:need:${n.workItemId}/${n.needId}`,
       label: [slot.label, ...chars].join(" "),
       quantity: null,
       order: null,
@@ -719,7 +720,7 @@ export function purchaseView(
       state: "ready",
       assumptionKeys: [],
       waitsOn: [n.question.key],
-      rules: [missingRule(`need:${work.id}/${n.needId}`, [n.question], link.ref)],
+      rules: [missingRule(`need:${n.workItemId}/${n.needId}`, [n.question], link.ref)],
     });
   }
   // §49.1 : la liste suit l'ordre du devis ; l'article d'une ligne vient à la place de la ligne qui l'écrit (les colliers
@@ -770,7 +771,7 @@ export function purchaseView(
   // que le fournisseur remplacera par sa marque n'en est pas une.
   const assumptions: Assumption[] = [];
   for (const n of engine.needs) {
-    const work = link.ref.workItems.find((w) => w.id === n.workItemId);
+    const work = link.ref.workItems.find((w) => w.id === baseOf(n.workItemId));
     for (const a of n.assumptions) {
       if (assumptions.some((x) => x.key === a.key)) continue;
       // Un produit par défaut sans vraie alternative n'est pas une hypothèse ; un conseil de format (choix explicites) en est une.
@@ -841,18 +842,24 @@ function counterQuestions(readings: ReadonlyMap<string, QuoteLineReading> | unde
   const out: Decision[] = [];
   for (const [lineId, reading] of readings) {
     const planned = plan.lines.find((l) => l.ref === lineId);
-    const work = planned?.status === "planned" ? ref.workItems.find((w) => w.id === planned.workItemId) : undefined;
-    const params = work ? (plan.inputs.find((i) => i.workItemId === work.id)?.params ?? {}) : {};
+    const work = planned?.status === "planned" ? ref.workItems.find((w) => w.id === baseOf(planned.workItemId)) : undefined;
+    const params = work && planned?.status === "planned" ? (plan.inputs.find((i) => i.workItemId === planned.workItemId)?.params ?? {}) : {};
     // Les données écrites de l'ouvrage (lues au devis, ligne de pose comprise) : jamais redemandées. Une donnée se
     // reconnaît à son sujet (« diamètre ») ou à tous les mots de son nom (« nombre de descentes »).
     const written = work ? work.params.filter((p) => params[p.key]?.origin === "devis") : [];
-    const writtenTopics = new Set(written.flatMap((p) => topicsOf(`${p.key} ${p.label}`)));
+    // Une donnée que l'ouvrage de la ligne connaît (le Ø des naissances pour la gouttière) se règle par SA question, posée
+    // avant le calcul, une fois pour toutes les lignes qui en dépendent ; jamais une 2e question du comptoir, ni avant ni
+    // après le calcul (la question du tiroir close au calcul ne la fait pas revenir sur les cartes).
+    const writtenTopics = new Set((work?.params ?? []).flatMap((p) => topicsOf(`${p.key} ${p.label}`)));
     const words = (t: string) => plain(t).split(/[^a-z0-9]+/).filter((w) => w.length > 3);
     const namesWritten = (m: string) => written.some((p) => words(p.label).length > 0 && words(p.label).every((w) => plain(m).includes(w)));
     reading.manque.forEach((m, i) => {
       const topics = topicsOf(m);
       if (topics.some((t) => askedTopics.has(t) || writtenTopics.has(t)) || namesWritten(m)) return;
-      const choices = /\(([^)]+)\)/.exec(m)?.[1]?.split(/\s*,\s*|\s+ou\s+/).map((c) => c.trim()).filter(Boolean) ?? [];
+      // « (0,65, 0,70, 0,80 mm) » : la virgule décimale ne coupe pas un choix ; l'unité finale vaut pour tous.
+      const raw = /\(([^)]+)\)/.exec(m)?.[1]?.split(/\s*,\s+|\s*;\s*|\s*\/\s*|\s+ou\s+|(?<!\d),(?!\d)/).map((c) => c.trim()).filter(Boolean) ?? [];
+      const unit = /^[\d.,]+\s*([a-zA-Z°²]+)$/.exec(raw.at(-1) ?? "")?.[1];
+      const choices = unit ? raw.map((c) => (/^[\d.,]+$/.test(c) ? `${c} ${unit}` : c)) : raw;
       const text = `${m.replace(/\s*\([^)]*\)/, "").trim().replace(/^./, (c) => c.toUpperCase())} ?`;
       const key = `${COUNTER}${lineId}:${i + 1}`;
       out.push({
@@ -1002,7 +1009,7 @@ export function applyPurchaseOverrides(purchase: PurchaseView, answers: Record<s
 function writtenPieces(lineId: string, v: TakeoffValidation["lines"][number], plan: QuotePlan, ref: Referential): { count: string; unit: string } | null {
   const planned = plan.lines.find((l) => l.ref === lineId);
   if (planned?.status !== "planned" || !v.quantity || !v.unit || LINE_UNITS[v.unit] !== "m") return null;
-  const from = ref.workItems.find((w) => w.id === planned.workItemId)?.slots.find((s) => s.key === planned.slot)?.piecesFrom;
+  const from = ref.workItems.find((w) => w.id === baseOf(planned.workItemId))?.slots.find((s) => s.key === planned.slot)?.piecesFrom;
   const params = plan.inputs.find((i) => i.workItemId === planned.workItemId)?.params;
   const count = from && params?.[from.count];
   const length = from && params?.[from.length];

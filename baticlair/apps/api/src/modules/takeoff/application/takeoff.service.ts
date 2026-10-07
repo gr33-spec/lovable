@@ -1,4 +1,5 @@
 import {
+  baseOf,
   AI_ADDITION,
   MISSING_INFO,
   CONSUMABLES_KEY,
@@ -912,7 +913,8 @@ export class TakeoffService {
       const def = [...(own ? [own] : []), ...REFERENTIALS].flatMap((r) => r.workItems.flatMap((w) => w.params)).find((p) => p.key === name);
       // Une réponse pour UN lot (« param:faconnage@noue ») fait l'habitude de ce lot seulement (§48.2, lot par lot).
       // §49.4 point 4 : la réponse consommables (oui / non) est une habitude de l'artisan, mémorisée comme les autres.
-      if (def?.kind === "artisan_preference" || name === CONSUMABLES_KEY) await this.memory.recordChoice(tenant, { kind: "param", key: `param:${scopedName}`, value: value.value, projectId: takeoff.projectId });
+      // Une pièce écrite au devis (« faconnage@bandes-zinc__<ligne> ») fait l'habitude de son ouvrage, pas d'un chantier.
+      if (def?.kind === "artisan_preference" || name === CONSUMABLES_KEY) await this.memory.recordChoice(tenant, { kind: "param", key: `param:${baseOf(scopedName)}`, value: value.value, projectId: takeoff.projectId });
     }
     const after = await this.reload(tenant, takeoff.id);
     const text = (v: EngineAnswer | undefined) => (v === undefined ? null : v === null ? "aucun" : typeof v === "string" ? v : `${v.value} ${v.unit}`);

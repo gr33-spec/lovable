@@ -1,3 +1,4 @@
+import { baseOf, INSTANCE_SEP } from "./model.js";
 import { Decimal } from "../shared/decimal.js";
 import { keyCharacteristics } from "../takeoff/characteristics.js";
 import { validateTakeoffLine } from "../takeoff/validation.js";
@@ -162,7 +163,7 @@ function readDimension(raw: string): { value: string; unit: string } | null {
 export function factsFromReading(ref: Referential, lines: readonly { ref: string; dimensions?: Record<string, string> | null }[], context?: Record<string, string> | null): SiteFact[] {
   const params = ref.workItems.flatMap((w) => w.params);
   const facts: SiteFact[] = [];
-  const add = (name: string, raw: string, evidence: string) => {
+  const add = (name: string, raw: string, evidence: string, line?: string) => {
     const found = readDimension(raw);
     if (!found) return;
     const n = normalizeText(name);
@@ -170,11 +171,11 @@ export function factsFromReading(ref: Referential, lines: readonly { ref: string
       if (normalizeText(p.key.replace(/_/g, " ")) !== n && !(p.textLabels ?? []).some((l) => normalizeText(l) === n)) continue;
       if (!sameDimUnit(p.unit, found.unit)) continue;
       const asRef = isAngleUnit(p.unit) && found.unit === "%" ? { value: percentSlopeToDegrees(new Decimal(found.value)).toString(), unit: p.unit } : found;
-      if (facts.some((f) => f.key === p.key && f.value === asRef.value && f.unit === asRef.unit)) continue;
-      facts.push({ key: p.key, ...asRef, evidence: `${evidence} (« ${name} : ${raw.trim()} »)`, origin: "devis" });
+      if (facts.some((f) => f.key === p.key && f.value === asRef.value && f.unit === asRef.unit && f.line === line)) continue;
+      facts.push({ key: p.key, ...asRef, evidence: `${evidence} (« ${name} : ${raw.trim()} »)`, origin: "devis", ...(line ? { line } : {}) });
     }
   };
-  for (const line of lines) for (const [name, raw] of Object.entries(line.dimensions ?? {})) if (typeof raw === "string") add(name, raw, `Devis, ${line.ref}`);
+  for (const line of lines) for (const [name, raw] of Object.entries(line.dimensions ?? {})) if (typeof raw === "string") add(name, raw, `Devis, ${line.ref}`, line.ref);
   for (const [name, raw] of Object.entries(context ?? {})) if (typeof raw === "string") add(name, raw, "Devis, en-tête");
   return facts;
 }
@@ -327,19 +328,49 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
   const characteristicsBySlot: Record<string, string[]> = {};
   const askInstead = new Map<string, Set<string>>();
   const quantities: { fact: SiteFact; slot: string; ref: string }[] = [];
+  // §48.6 « une question par pièce de zinguerie écrite au devis » : un ouvrage « perLine » écrit sur deux lignes ou plus
+  // (bande de solin, bande de ventilation…) devient une instance par ligne, avec ses données et ses questions.
+  const workOf = (family: string | null | undefined) => (family ? active.find((w) => w.slots.some((s) => s.family === family)) : undefined);
+  const supplyRefs = new Map<string, string[]>();
+  for (const r of read) {
+    const w = workOf(r.family);
+    if (r.v.kind === "labor" || !w?.perLine) continue;
+    supplyRefs.set(w.id, [...(supplyRefs.get(w.id) ?? []), r.line.ref]);
+  }
+  const instanced = (w: WorkItemType) => (supplyRefs.get(w.id)?.length ?? 0) >= 2;
+  const idFor = (w: WorkItemType, lineRef: string) => (instanced(w) ? `${w.id}${INSTANCE_SEP}${lineRef}` : w.id);
+  const pieceLabels = new Map<string, string>();
+  for (const r of read) {
+    const w = workOf(r.family);
+    // La pièce garde son nom même seule : sa question dit « Bande de ventilation… », jamais la liste de l'ouvrage.
+    if (w?.perLine && r.v.kind !== "labor") pieceLabels.set(idFor(w, r.line.ref), pieceName(r.line.designation));
+  }
+  // Une ligne de POSE (« Façonnage et pose des bandes de rive ») vaut pour la pièce qu'elle nomme ; sans pièce nommée,
+  // pour toutes celles de l'ouvrage.
+  const targetsOf = (w: WorkItemType, text: string): string[] => {
+    if (!instanced(w)) return [w.id];
+    const refs = supplyRefs.get(w.id)!;
+    const named = refs.filter((ref) => {
+      const own = normalizeText(read.find((r) => r.line.ref === ref)!.line.designation);
+      return PIECE_WORDS.some((k) => keywordPosition(text, k) >= 0 && keywordPosition(own, k) >= 0);
+    });
+    return (named.length > 0 ? named : refs).map((ref) => idFor(w, ref));
+  };
 
   for (const { line, v, text, family, titled } of read) {
-    const work = family ? active.find((w) => w.slots.some((s) => s.family === family)) : undefined;
+    const work = workOf(family);
     if (v.kind === "labor") {
       // « Pose … pente 30° », « Façonnage et pose des bandes » : les données écrites valent pour l'ouvrage nommé.
-      if (work) readWritten(work, line.ref, text, facts);
+      if (work) for (const id of targetsOf(work, text)) readWritten(work, line.ref, text, facts, id);
       // §49.6 : « fixation … des tuyaux de descente » cite les colliers sans les chiffrer : ils sortent, orange.
       for (const s of work?.slots ?? []) {
         const word = (s.citedBy ?? []).find((k) => keywordPosition(text, k) >= 0);
         if (!word || !work) continue;
-        const list = cited.get(work.id) ?? [];
-        if (!list.some((c) => c.slot === s.key)) list.push({ slot: s.key, word, line: line.ref });
-        cited.set(work.id, list);
+        for (const id of targetsOf(work, text)) {
+          const list = cited.get(id) ?? [];
+          if (!list.some((c) => c.slot === s.key)) list.push({ slot: s.key, word, line: line.ref });
+          cited.set(id, list);
+        }
       }
       plans.push({ ref: line.ref, status: "not_material" });
       continue;
@@ -371,12 +402,13 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
     const mentions = work.slots
       .filter((s) => s.family !== slot.family && s.family !== titled && slotWords(ref, s).some((k) => namedAsArticle(text, k)))
       .map((s) => s.key);
-    const seen = mentioned.get(work.id) ?? new Set<string>();
+    const wid = idFor(work, line.ref);
+    const seen = mentioned.get(wid) ?? new Set<string>();
     [slot.key, ...mentions].forEach((k) => seen.add(k));
-    mentioned.set(work.id, seen);
+    mentioned.set(wid, seen);
 
     // 3. Les produits nommés par la ligne (un seul candidat par famille, sinon le moteur posera la question).
-    const chosen = products.get(work.id) ?? new Map<string, SlotChoice | "conflict">();
+    const chosen = products.get(wid) ?? new Map<string, SlotChoice | "conflict">();
     for (const s of [slot, ...work.slots.filter((x) => mentions.includes(x.key))]) {
       const found = identifyProducts(line.designation, ref, s.family).candidates;
       if (found.length !== 1) continue;
@@ -384,7 +416,7 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
       const before = chosen.get(s.key);
       chosen.set(s.key, before && before !== "conflict" && before.productId !== choice.productId ? "conflict" : (before ?? choice));
     }
-    products.set(work.id, chosen);
+    products.set(wid, chosen);
 
     // 4. Les données écrites : la quantité de la ligne, et les valeurs annoncées par leur nom.
     const unit = v.unit ? LINE_UNITS[v.unit] : undefined;
@@ -392,7 +424,7 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
     let measureInText: { value: string; unit: string } | undefined;
     if (unit && v.quantity && fromQuantity.some((p) => sameDimUnit(p.unit, unit))) {
       for (const p of fromQuantity.filter((x) => sameDimUnit(x.unit, unit))) {
-        const fact: SiteFact = { key: p.key, value: v.quantity.toFixed(), unit, evidence: `Devis, ${line.ref}`, origin: "devis", workItemId: work.id, ...(slot.measureOnly ? { fromMeasureLine: true as const } : {}) };
+        const fact: SiteFact = { key: p.key, value: v.quantity.toFixed(), unit, evidence: `Devis, ${line.ref}`, origin: "devis", workItemId: wid, ...(slot.measureOnly ? { fromMeasureLine: true as const } : {}) };
         facts.push(fact);
         quantities.push({ fact, slot: slot.key, ref: line.ref });
       }
@@ -404,33 +436,33 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
         const found = measuresInText(text).filter((m) => sameDimUnit(p.unit, m.unit));
         if (found.length !== 1) continue;
         measureInText = found[0]!;
-        facts.push({ key: p.key, ...found[0]!, evidence: `Devis, ${line.ref} (« ${found[0]!.value.replace(".", ",")} ${found[0]!.unit === "m2" ? "m²" : found[0]!.unit} » dans le texte)`, origin: "devis", workItemId: work.id });
+        facts.push({ key: p.key, ...found[0]!, evidence: `Devis, ${line.ref} (« ${found[0]!.value.replace(".", ",")} ${found[0]!.unit === "m2" ? "m²" : found[0]!.unit} » dans le texte)`, origin: "devis", workItemId: wid });
       }
     }
     for (const p of work.params) {
       for (const word of p.textCount ?? []) {
         const m = new RegExp(`(?:^|[^\\d.,])(\\d{1,3}) ${normalizeText(word)}s?(?![a-z0-9])`).exec(text);
-        if (m && Number(m[1]) > 0 && !facts.some((f) => f.key === p.key && f.workItemId === work.id && f.evidence.startsWith(`Devis, ${line.ref}`))) {
-          facts.push({ key: p.key, value: m[1]!, unit: p.unit, evidence: `Devis, ${line.ref} (« ${m[1]} ${word}s »)`, origin: "devis", workItemId: work.id });
+        if (m && Number(m[1]) > 0 && !facts.some((f) => f.key === p.key && f.workItemId === wid && f.evidence.startsWith(`Devis, ${line.ref}`))) {
+          facts.push({ key: p.key, value: m[1]!, unit: p.unit, evidence: `Devis, ${line.ref} (« ${m[1]} ${word}s »)`, origin: "devis", workItemId: wid });
         }
       }
     }
-    readWritten(work, line.ref, text, facts);
+    readWritten(work, line.ref, text, facts, wid);
     // Règle du comptoir (§47.8) : le devis nomme la chose sans la préciser (« zinc prépatiné », sans teinte) :
     // l'hypothèse par défaut ne vaut plus, on demande.
     for (const p of work.params) {
       const vague = p.default?.unlessText?.some((k) => keywordPosition(text, k) >= 0);
-      if (vague && !facts.some((f) => f.key === p.key && f.workItemId === work.id && f.evidence.startsWith(`Devis, ${line.ref} `))) {
-        askInstead.set(work.id, new Set([...(askInstead.get(work.id) ?? []), p.key]));
+      if (vague && !facts.some((f) => f.key === p.key && f.workItemId === wid && f.evidence.startsWith(`Devis, ${line.ref} `))) {
+        askInstead.set(wid, new Set([...(askInstead.get(wid) ?? []), p.key]));
       }
     }
     const chars = productCharacteristics(ref, work, slot, line.designation);
     // La naissance prend la matière et la forme de la gouttière (« charsFrom ») : un emplacement suit l'autre.
     for (const key of [slot.key, ...work.slots.filter((s) => s.charsFrom === slot.key).map((s) => s.key)]) {
-      const charKey = slotCharacteristicsKey(work.id, key);
+      const charKey = slotCharacteristicsKey(wid, key);
       if (chars.length > 0) characteristicsBySlot[charKey] = [...new Set([...(characteristicsBySlot[charKey] ?? []), ...chars])];
     }
-    plans.push({ ref: line.ref, status: "planned", workItemId: work.id, slot: slot.key, mentions, characteristics: chars, ...(measureInText ? { measureInText } : {}) });
+    plans.push({ ref: line.ref, status: "planned", workItemId: wid, slot: slot.key, mentions, characteristics: chars, ...(measureInText ? { measureInText } : {}) });
   }
 
   // Deux lignes du MÊME article d'un ouvrage (« bandes de rive 4 m », « bande porte-solin 4 m ») : deux longueurs qui
@@ -459,42 +491,50 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
     }
   };
   const fromText = [...facts];
+  // Une dimension lue sur une ligne vaut pour l'ouvrage (la pièce) de cette ligne.
+  const lineWork = new Map(plans.flatMap((l) => (l.status === "planned" ? [[l.ref, l.workItemId] as const] : [])));
+  extraFacts = extraFacts.map((f) => (f.line && !f.workItemId && lineWork.has(f.line) ? { ...f, workItemId: lineWork.get(f.line)! } : f));
   for (const f of extraFacts) {
     if (f.origin !== "artisan" && fromText.some((x) => x.key === f.key && sameAs(x, f))) continue;
     facts.push(f);
   }
   // Une donnée lue sur les AUTRES ouvrages du devis (la couverture sous une sortie de toit) : une seule valeur possible, sinon on demande.
-  for (const w of active.filter((x) => mentioned.has(x.id))) {
-    for (const p of w.params) {
-      if (!p.fromWorks || facts.some((f) => f.key === p.key && f.workItemId === w.id)) continue;
-      const hits = p.fromWorks.filter((fw) => fw.workItems.some((id) => mentioned.has(id)));
-      const values = [...new Set(hits.map((h) => h.value))];
-      if (values.length !== 1) continue;
-      const by = active.find((x) => hits[0]!.workItems.includes(x.id) && mentioned.has(x.id))!;
-      facts.push({ key: p.key, value: values[0]!, unit: p.unit, evidence: `Devis : ${by.label.replace(/\s*\(.*\)$/, "").toLowerCase()}`, origin: "devis", workItemId: w.id });
+  const instancesOf = (w: WorkItemType) => [...mentioned.keys()].filter((id) => baseOf(id) === w.id);
+  const present = (id: string) => instancesOf({ id } as WorkItemType).length > 0;
+  for (const w of active) {
+    for (const wid of instancesOf(w)) {
+      for (const p of w.params) {
+        if (!p.fromWorks || facts.some((f) => f.key === p.key && f.workItemId === wid)) continue;
+        const hits = p.fromWorks.filter((fw) => fw.workItems.some((id) => present(id)));
+        const values = [...new Set(hits.map((h) => h.value))];
+        if (values.length !== 1) continue;
+        const by = active.find((x) => hits[0]!.workItems.includes(x.id) && present(x.id))!;
+        facts.push({ key: p.key, value: values[0]!, unit: p.unit, evidence: `Devis : ${by.label.replace(/\s*\(.*\)$/, "").toLowerCase()}`, origin: "devis", workItemId: wid });
+      }
     }
   }
   const context: ChantierContext = { facts };
   const conflicts: string[] = [];
   const contradictions: QuotePlan["contradictions"] = [];
   const inputs: WorkItemInput[] = active
-    .filter((w) => mentioned.has(w.id))
-    .map((w: WorkItemType) => {
-      const { params, conflicts: c } = paramsFromContext(context, w, new Set(active.filter((x) => x.section === "principal").map((x) => x.id)));
+    .flatMap((w) => instancesOf(w).map((wid) => ({ w, wid })))
+    .map(({ w, wid }) => {
+      const { params, conflicts: c } = paramsFromContext(context, w, new Set(active.filter((x) => x.section === "principal").map((x) => x.id)), wid);
       c.forEach((x) => {
         const def = w.params.find((p) => p.key === x.key);
         conflicts.push(`${def?.label ?? x.key} : ${x.facts.map((f) => `${f.value} ${f.unit} (${f.evidence})`).join(" / ")}`);
-        contradictions.push({ workItemId: w.id, key: x.key, label: def?.label ?? x.key, unit: def?.unit ?? x.facts[0]!.unit, facts: x.facts.map((f) => ({ value: f.value, unit: f.unit, evidence: f.evidence })) });
+        contradictions.push({ workItemId: wid, key: x.key, label: def?.label ?? x.key, unit: def?.unit ?? x.facts[0]!.unit, facts: x.facts.map((f) => ({ value: f.value, unit: f.unit, evidence: f.evidence })) });
       });
-      const chosen = [...(products.get(w.id) ?? new Map()).entries()].filter((e): e is [string, SlotChoice] => e[1] !== "conflict");
+      const chosen = [...(products.get(wid) ?? new Map()).entries()].filter((e): e is [string, SlotChoice] => e[1] !== "conflict");
       return {
-        workItemId: w.id,
+        workItemId: wid,
+        ...(pieceLabels.has(wid) ? { label: pieceLabels.get(wid)! } : {}),
         params,
         products: Object.fromEntries(chosen),
-        mentioned: [...mentioned.get(w.id)!],
-        ...(cited.has(w.id) ? { cited: cited.get(w.id)! } : {}),
+        mentioned: [...mentioned.get(wid)!],
+        ...(cited.has(wid) ? { cited: cited.get(wid)! } : {}),
         ...(preferences ? { preferences } : {}),
-        ...(askInstead.has(w.id) ? { askInstead: [...askInstead.get(w.id)!] } : {}),
+        ...(askInstead.has(wid) ? { askInstead: [...askInstead.get(wid)!] } : {}),
       };
     });
   const warnings = !covered ? [] : [...new Set(ref.families.filter((f) => f.warning && read.some((r) => (f.keywords ?? []).some((k) => keywordPosition(r.text, k) >= 0))).map((f) => f.warning!))];
@@ -516,33 +556,33 @@ export const slotCharacteristicsKey = (workItemId: string, slot: string) => `${w
  * Les données écrites d'une ligne, annoncées par leur nom (« pente 30° », « crochets de 11 », « Ø 80 ») ou par un mot
  * (« Façonnage et pose ») : elles valent pour l'ouvrage de la ligne, qu'elle fournisse ou qu'elle pose seulement.
  */
-function readWritten(work: WorkItemType, lineRef: string, text: string, facts: SiteFact[]): void {
+function readWritten(work: WorkItemType, lineRef: string, text: string, facts: SiteFact[], wid: string = work.id): void {
   for (const p of work.params) {
     for (const label of p.textLabels ?? []) {
       const found = readLabelled(text, label, p.labelGap, p.bareNumber ? p.unit : null);
       if (!found || !sameDimUnit(p.unit, found.unit) || !withinTextRange(p, found)) continue;
       // « pente 45 % » dans un devis : gardée en degrés, l'unité de la pente partout dans BatiClair.
       const asRef = isAngleUnit(p.unit) && found.unit === "%" ? { value: percentSlopeToDegrees(new Decimal(found.value)).toString(), unit: p.unit } : found;
-      facts.push({ key: p.key, ...asRef, evidence: `Devis, ${lineRef} (« ${label} »)`, origin: "devis", workItemId: work.id });
+      facts.push({ key: p.key, ...asRef, evidence: `Devis, ${lineRef} (« ${label} »)`, origin: "devis", workItemId: wid });
     }
   }
   for (const p of work.params) {
     // « Ø 150 » sans unité : lu seulement si 150 est une des réponses proposées (un bouton), jamais deviné.
-    if (p.choices && !facts.some((f) => f.key === p.key && f.workItemId === work.id)) {
+    if (p.choices && !facts.some((f) => f.key === p.key && f.workItemId === wid)) {
       for (const label of p.textLabels ?? []) {
         const pos = keywordPosition(text, label);
         if (pos < 0 || readLabelled(text, label)) continue;
         const m = /^[a-z]{0,2}\.?\s*(?:de |: |:|= )?\s*(\d+)(?![\d,.]|\s*(?:mm|cm|ml|m2|m²|m|%|°)(?![a-z0-9]))/.exec(text.slice(pos + normalizeText(label).length));
         if (m && p.choices.some((c) => c.value === m[1])) {
-          facts.push({ key: p.key, value: m[1]!, unit: p.unit, evidence: `Devis, ${lineRef} (« ${label} ${m[1]} »)`, origin: "devis", workItemId: work.id });
+          facts.push({ key: p.key, value: m[1]!, unit: p.unit, evidence: `Devis, ${lineRef} (« ${label} ${m[1]} »)`, origin: "devis", workItemId: wid });
           break;
         }
       }
     }
     for (const tv of p.textValues ?? []) {
       const kw = tv.keywords.find((k) => keywordPosition(text, k) >= 0);
-      if (kw && !facts.some((f) => f.key === p.key && f.workItemId === work.id && f.value === tv.value && f.evidence.startsWith(`Devis, ${lineRef} `))) {
-        facts.push({ key: p.key, value: tv.value, unit: p.unit, evidence: `Devis, ${lineRef} (« ${kw} »)`, origin: "devis", workItemId: work.id });
+      if (kw && !facts.some((f) => f.key === p.key && f.workItemId === wid && f.value === tv.value && f.evidence.startsWith(`Devis, ${lineRef} `))) {
+        facts.push({ key: p.key, value: tv.value, unit: p.unit, evidence: `Devis, ${lineRef} (« ${kw} »)`, origin: "devis", workItemId: wid });
       }
     }
   }
@@ -599,4 +639,22 @@ function productCharacteristics(ref: Referential, work: WorkItemType, slot: Slot
 
 function sameDimUnit(a: string, b: string): boolean {
   return sameDim(parseRefUnit(a).dim, parseRefUnit(b).dim);
+}
+
+/** Les mots d'une pièce de zinguerie : une ligne de pose qui en nomme un vaut pour cette pièce seulement. */
+const PIECE_WORDS = ["solin", "porte-solin", "rive", "egout", "ventilation", "couvre-joint", "couvre joint", "bavette", "couvertine", "habillage", "noue", "abergement", "faitage"];
+
+/** La pièce telle que le devis l'écrit, sans la mention de pose ni la description qui suit (« Bande de ventilation en Z en zinc quartz »). */
+export function pieceName(designation: string): string {
+  let text = designation.replace(/\s*\((?:fourniture\s*(?:&|et)\s*pose|f\.?\s*(?:&|et)\s*p\.?|fourniture\s+seule|fourniture)\)/gi, " ").replace(/\s+/g, " ").trim();
+  const dash = text.search(/\s[-–—]\s/);
+  if (dash >= 8) text = text.slice(0, dash);
+  const pose = /\s(?:fourniture\s*(?:&|et)\s*pose|fourniture\s+de|pose\s+de)\b/i.exec(text);
+  if (pose && pose.index >= 8) text = text.slice(0, pose.index);
+  // « Bande de rive zinc dév. 33 » : « dév. » n'est pas une fin de phrase ; seule une nouvelle phrase coupe.
+  const stop = /(?:[;:]\s|\.\s+(?=\p{Lu}))/u.exec(text);
+  if (stop && stop.index >= 8) text = text.slice(0, stop.index);
+  text = text.trim();
+  if (text.length > 60) text = `${text.slice(0, 60).replace(/\s+\S*$/, "")}…`;
+  return text;
 }

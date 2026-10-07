@@ -99,6 +99,7 @@ const workItem = z.object({
   label: str,
   section: z.enum(["principal", "singulier", "evacuation"]).optional(),
   triggers: z.array(str).min(1),
+  perLine: z.literal(true).optional(),
   params: z.array(param),
   slots: z.array(slot).min(1),
   constants: z.record(str, fact),

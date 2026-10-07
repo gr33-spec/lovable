@@ -116,11 +116,11 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 - Périmètre d'une cheminée (les 4 côtés) ? → [2 m] [3 m] [4 m] [5 m]
 - Combien de descentes pour cette gouttière ? → [1] [2] [3] [4]
-- Développé de la bande zinc ? Cela change la commande : de 1 à 5 pièces selon la réponse. → [100 mm (solin, couvre-joint)] [250 mm] [330 mm] [400 mm]
+- Développé de la bande zinc ? Cela change la commande : de 1 à 5 pièces selon la réponse. → [100 mm (solin, couvre-joint)] [200 mm] [250 mm] [330 mm] [400 mm]
 - Descentes en Ø 80 ou en Ø 100 ? → [Ø 80] [Ø 100] [Ø 120]
 - Faîtage en bande zinc : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 - Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? → [Oui] [Non]
-- Abergement de cheminée (zinc + porte-solin) : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
+- Abergement de cheminée : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 - 6 : c'est le nombre d'ardoises à commander, ou le nombre de jouées ? → [6 ardoises à commander] [6 jouées (matériaux à calculer)]
 
 **À acheter :**
@@ -145,10 +145,10 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 - Périmètre d'une cheminée (les 4 côtés) ? → [2 m] [3 m] [4 m] [5 m]
 - Descentes en Ø 80 ou en Ø 100 ? → [Ø 80] [Ø 100] [Ø 120]
-- Développé de la bande zinc ? Cela change la commande : de 1 à 5 pièces selon la réponse. → [100 mm (solin, couvre-joint)] [250 mm] [330 mm] [400 mm]
+- Développé de la bande zinc ? Cela change la commande : de 1 à 5 pièces selon la réponse. → [100 mm (solin, couvre-joint)] [200 mm] [250 mm] [330 mm] [400 mm]
 - Faîtage en bande zinc : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 - Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? → [Oui] [Non]
-- Abergement de cheminée (zinc + porte-solin) : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
+- Abergement de cheminée : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 
 **À acheter :**
 
@@ -176,10 +176,10 @@ servent au calcul et à la phrase « J'ai compris » ; seules des quantités d'a
 
 - Périmètre d'une cheminée (les 4 côtés) ? → [2 m] [3 m] [4 m] [5 m]
 - Descentes en Ø 80 ou en Ø 100 ? → [Ø 80] [Ø 100] [Ø 120]
-- Développé de la bande zinc ? Cela change la commande : de 1 à 5 pièces selon la réponse. → [100 mm (solin, couvre-joint)] [250 mm] [330 mm] [400 mm]
+- Développé de la bande zinc ? Cela change la commande : de 1 à 5 pièces selon la réponse. → [100 mm (solin, couvre-joint)] [200 mm] [250 mm] [330 mm] [400 mm]
 - Faîtage en bande zinc : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 - Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? → [Oui] [Non]
-- Abergement de cheminée (zinc + porte-solin) : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
+- Abergement de cheminée : tu façonnes toi-même ou tu commandes façonné ? → [Je façonne (feuilles ou bobineau)] [Je commande façonné]
 
 **À acheter :**
 
