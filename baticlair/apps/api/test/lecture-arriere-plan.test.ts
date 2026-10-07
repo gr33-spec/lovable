@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ExtractionAttempt, ExtractionRequest, TakeoffExtractor } from "../src/modules/takeoff/application/takeoff-extractor.js";
 import { TAKEOFF_EXTRACTOR } from "../src/modules/takeoff/application/takeoff-extractor.js";
 import { FakeTakeoffExtractor } from "../src/modules/takeoff/infrastructure/fake-takeoff-extractor.js";
@@ -17,6 +17,8 @@ class GatedExtractor implements TakeoffExtractor {
   readonly provider = "fake";
   calls = 0;
   fail = false;
+  /** Audit du 2026-10-07 : le premier appel dure 171 s (horloge avancée) et finit en « timeout ». */
+  slowTimeout = false;
   private inner = new FakeTakeoffExtractor();
   private release!: () => void;
   private gate = new Promise<void>((r) => (this.release = r));
@@ -26,12 +28,17 @@ class GatedExtractor implements TakeoffExtractor {
   reset() {
     this.calls = 0;
     this.fail = false;
+    this.slowTimeout = false;
     this.gate = new Promise<void>((r) => (this.release = r));
   }
   async extract(request: ExtractionRequest): Promise<ExtractionAttempt> {
     this.calls++;
     await this.gate;
     if (this.fail) throw new Error("panne du service d'IA");
+    if (this.slowTimeout && this.calls === 1) {
+      vi.setSystemTime(new Date(Date.now() + 171_000));
+      return { provider: "fake", model: "fake", usage: { inputTokens: 0, outputTokens: 0 }, status: "timeout", output: null, errorCode: "timeout", durationMs: 171_000 };
+    }
     return this.inner.extract(request);
   }
 }
@@ -121,11 +128,35 @@ describe("lecture longue : elle continue après la réponse", () => {
     expect(ok.body.takeoff.lines).toHaveLength(6);
   });
 
-  it("une lecture « en cours » depuis plus de 6 minutes a été interrompue : elle compte comme échouée", async () => {
+  it("un appel qui ne finirait pas avant la limite de la fonction (300 s) ne part pas : la lecture échoue proprement", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    try {
+      const { agent } = await signUpWithCompany(ctx.app, "d@example.fr", "Toitures Martin");
+      const project = await agent.post("/v1/projects").send({ name: "Toiture Dupont" });
+      const doc = await agent
+        .post(`/v1/projects/${project.body.id}/documents`)
+        .field("purpose", "client_quote")
+        .attach("file", Buffer.from(await makePdf(["devis", "devis"])), { filename: "devis.pdf", contentType: "application/pdf" });
+      extractor.slowTimeout = true;
+      extractor.open();
+      await agent.post(`/v1/documents/${doc.body.id}/takeoff`);
+      const failed = await until(
+        () => agent.get(`/v1/projects/${project.body.id}/takeoff`),
+        (r) => r.body.reading?.status === "failed",
+      );
+      // Après 171 s, les deux moitiés (170 s chacune au plus) dépasseraient la limite : aucune ne part.
+      expect(failed.body.takeoff).toBeNull();
+      expect(extractor.calls).toBe(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("une lecture « en cours » depuis plus de 5 minutes a été interrompue : elle compte comme échouée", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "c@example.fr", "Toitures Martin");
     const { projectId, documentId } = await clientQuote(agent);
     expect((await agent.post(`/v1/documents/${documentId}/takeoff`)).status).toBe(202);
-    await ctx.prisma.aiAnalysis.updateMany({ where: { documentId }, data: { startedAt: new Date(Date.now() - 7 * 60 * 1000) } });
+    await ctx.prisma.aiAnalysis.updateMany({ where: { documentId }, data: { startedAt: new Date(Date.now() - 6 * 60 * 1000) } });
     const res = await agent.get(`/v1/projects/${projectId}/takeoff`);
     expect(res.body.reading).toEqual({ status: "failed", reason: "interrupted" });
     extractor.open();

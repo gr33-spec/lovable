@@ -52,8 +52,9 @@ export class AnthropicDocumentReader {
     /** Tests uniquement : remplace l'accès réseau. */
     fetchImpl?: typeof fetch,
   ) {
-    // Une lecture de devis dure de quelques secondes à une minute ; au-delà, on arrête.
-    this.client = new Anthropic({ apiKey, timeout: 180_000, maxRetries: 1, ...(fetchImpl ? { fetch: fetchImpl } : {}) });
+    // Une lecture de devis dure de quelques secondes à une minute ; au-delà de 170 s, on arrête. Aucune relance cachée
+    // du SDK (elle doublerait l'attente) : la lecture relance elle-même, dans son échéance (READING_BUDGET_MS).
+    this.client = new Anthropic({ apiKey, timeout: 170_000, maxRetries: 0, ...(fetchImpl ? { fetch: fetchImpl } : {}) });
   }
 
   async read<S extends z.ZodType>(request: ReadRequest<S>): Promise<ReadAttempt<z.infer<S>>> {
