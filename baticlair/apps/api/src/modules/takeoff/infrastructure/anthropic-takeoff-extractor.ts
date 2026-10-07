@@ -2,6 +2,7 @@ import { AnthropicDocumentReader } from "../../../platform/ai/anthropic-document
 import { scopeInstruction, siteNotesInstruction, TAKEOFF_PROMPT, takeoffSystemPrompt } from "../application/prompt.js";
 import {
   decodeExtraction,
+  extractionFormatSchema,
   extractionWireSchema,
   type ExtractionAttempt,
   type ExtractionRequest,
@@ -25,6 +26,7 @@ export class AnthropicTakeoffExtractor implements TakeoffExtractor {
     const attempt = await this.reader.read({
       system: takeoffSystemPrompt(request.tradeLabel, request.materialFamilies, request.workItems ?? []),
       schema: extractionWireSchema,
+      format: extractionFormatSchema,
       document: request,
       documentName: "devis",
       ...(extra ? { extra } : {}),

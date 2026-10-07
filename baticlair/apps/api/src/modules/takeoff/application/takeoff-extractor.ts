@@ -88,6 +88,40 @@ export const extractionWireSchema = z.object({
 
 export type ExtractionWire = z.infer<typeof extractionWireSchema>;
 
+/**
+ * Le format ENVOYÉ à l'API (structured outputs) : la même réponse que `extractionWireSchema`, avec moins de champs
+ * « valeur ou vide ». L'API refuse au-delà de 16 unions par demande (« Parameters with union types : 16 ») : la v12 en
+ * comptait 18 et chaque lecture échouait d'emblée. Ici : -1 pour « aucune section », un objet vide pour « aucune
+ * dimension », des listes vides pour « aucun article » et « rien ne manque ». La réponse est relue par
+ * `extractionWireSchema`, qui accepte les deux formes.
+ */
+export const extractionFormatSchema = z.object({
+  sections: z.array(z.array(z.string())),
+  lignes: z.array(
+    z.object({
+      des: z.string(),
+      qte: z.string().nullable(),
+      unite: z.string().nullable(),
+      ref: z.string().nullable(),
+      src: z.array(z.string()),
+      /** Numéro de la suite de titres dans `sections`, ou -1. */
+      sec: z.number().int(),
+      doute: z.string().nullable(),
+      ouvrage: z.string().nullable(),
+      materiau: z.string().nullable(),
+      /** « donnée → valeur avec unité », objet vide si rien n'est écrit. */
+      dimensions: z.record(z.string(), z.string()),
+      confiance: z.enum(["sur", "doute"]).nullable(),
+      role: z.enum(["fourniture", "pose", "fourniture_et_pose", "hors_quantitatif"]).nullable(),
+      articles: z.array(articleSchema),
+      faconnage: z.enum(["artisan", "fourni"]).nullable(),
+      manque: z.array(z.string()),
+    }),
+  ),
+  notes: z.array(z.string()),
+  contexte: z.record(z.string(), z.string()).nullable(),
+});
+
 /** Remet la réponse compacte dans la forme complète, sans rien perdre ni inventer. */
 export function decodeExtraction(wire: ExtractionWire): ExtractionOutput {
   return {
@@ -111,7 +145,8 @@ export function decodeExtraction(wire: ExtractionWire): ExtractionOutput {
           section: l.sec !== null && l.sec >= 0 ? [...(wire.sections[l.sec] ?? [])] : [],
           workItem: l.ouvrage?.trim() || "inconnu",
           material: l.materiau,
-          dimensions: l.dimensions,
+          // Un objet vide (format envoyé à l'API) veut dire « aucune dimension écrite ».
+          dimensions: l.dimensions && Object.keys(l.dimensions).length > 0 ? l.dimensions : null,
           ...(l.role !== null || l.articles !== null || l.faconnage !== null || l.manque !== null
             ? {
                 reading: {

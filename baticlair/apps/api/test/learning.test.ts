@@ -135,7 +135,7 @@ describe("journal des corrections : l'avant et l'après, toujours", () => {
     expect(first.before).toMatchObject({ designation: line.designation, kind: "material", basis: "purchase" });
     expect(first.before?.state).toMatch(/verified|to_confirm|missing/);
     expect(first.documentExcerpt.length).toBeGreaterThan(0);
-    expect(first.context).toMatchObject({ trade: "roofing", promptId: "takeoff_extraction", promptVersion: 12 });
+    expect(first.context).toMatchObject({ trade: "roofing", promptId: "takeoff_extraction", promptVersion: 13 });
     expect(first).toMatchObject({ projectId, takeoffId: takeoff.id, userId: a.tenant.userId });
     expect(first.patternKey).not.toContain(line.designation);
   });

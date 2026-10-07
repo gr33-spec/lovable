@@ -5,14 +5,14 @@ import { AnthropicTakeoffExtractor } from "../src/modules/takeoff/infrastructure
 import { decodeExtraction, extractionWireSchema } from "../src/modules/takeoff/application/takeoff-extractor.js";
 
 /** PROMPT A (référentiel §41.1), branché mot pour mot : seules les accolades sont remplies, et le format technique est ajouté après. */
-describe("prompt A de lecture du devis (v12)", () => {
+describe("prompt A de lecture du devis (v13)", () => {
   const prompt = takeoffSystemPrompt("Couverture", ["Tuile", "Ardoise"], [
     { id: "couverture-ardoises-crochet", label: "Couverture en ardoises au crochet", synonyms: ["ardoise"] },
     { id: "couverture-zinc-joint-debout", label: "Couverture zinc à joint debout", synonyms: ["joint debout", "couverture zinc"] },
   ]);
 
-  it("est la version 12 : le §41.1 réécrit, mot pour mot (comparé au référentiel), puis le format technique ; plus de bloc « RÈGLE NUMÉRO UN » ajouté", () => {
-    expect(TAKEOFF_PROMPT.version).toBe(12);
+  it("est la version 13 : le §41.1 réécrit, mot pour mot (comparé au référentiel), puis le format technique ; plus de bloc « RÈGLE NUMÉRO UN » ajouté", () => {
+    expect(TAKEOFF_PROMPT.version).toBe(13);
     const doc = readFileSync(new URL("../../../docs/referentiel-couverture.md", import.meta.url), "utf8");
     const a = doc.slice(doc.indexOf("### 41.1 Prompt A"), doc.indexOf("### 41.2")).split("```")[1]!.replace(/^\n|\n$/g, "");
     expect(PROMPT_A_41_1).toBe(a);
