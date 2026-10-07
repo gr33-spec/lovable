@@ -956,3 +956,22 @@ test("§49.8 : chaque ligne orange passe au vert dans sa carte, un geste par lig
   await expect(list.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
   await expect(list.getByRole("button", { name: "Envoyer au fournisseur" })).toBeVisible();
 });
+
+test("une lecture refusée au départ se dit, avec sa raison et « Réessayer » : jamais d'analyse sans fin", async ({ page }) => {
+  await signUp(page);
+  await createProject(page, "Toiture Le Goff", "M. Le Goff", "4 rue du Port, Paimpol");
+  // Le serveur refuse le lancement (ici : trop d'essais en une heure).
+  let refused = 0;
+  await page.route(/\/v1\/quantitatifs\?ecran=1$/, async (route) => {
+    if (route.request().method() !== "POST" || refused > 0) return route.fallback();
+    refused++;
+    await route.fulfill({ status: 429, contentType: "application/json", body: JSON.stringify({ error: { code: "too_many_requests", message: "Too many requests, retry later" } }) });
+  });
+  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await expect(page.getByText("Je n'ai pas pu lancer la lecture de ce devis.", { exact: false })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("alert").filter({ hasText: "Trop d'essais en peu de temps" })).toBeVisible();
+  // « Réessayer » relance la lecture, qui passe cette fois.
+  await page.getByRole("button", { name: "Réessayer" }).click();
+  await passQuestions(page);
+  expect(refused).toBe(1);
+});

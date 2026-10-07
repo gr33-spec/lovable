@@ -35,6 +35,7 @@ const errorMessages: Record<string, string> = {
   plan_limit_reached: "Vous avez atteint le nombre de chantiers de votre formule.",
   onboarding_required: "Indiquez d'abord le nom de votre entreprise.",
   company_selection_required: "Choisissez l'entreprise avec laquelle travailler.",
+  too_many_requests: "Trop d'essais en peu de temps. Attends quelques minutes, puis réessaie.",
   internal_error: "Un problème est survenu de notre côté. Vos données sont conservées ; réessayez dans un instant.",
   INVALID_EMAIL_OR_PASSWORD: "E-mail ou mot de passe incorrect.",
   INVALID_EMAIL: "Cette adresse e-mail n'est pas valide.",

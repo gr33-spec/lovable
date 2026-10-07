@@ -171,14 +171,26 @@ export function ProjectTakeoff({
         </AssistantMessage>
       );
     }
-    const failed = data.reading?.status === "failed" && !pending;
+    // Jamais d'analyse sans fin : une lecture refusée au départ (aucune lecture ne tourne) ou un serveur qui ne répond plus
+    // pendant la lecture se disent, avec leur raison et « Réessayer ».
+    const refused = actionError !== null && data.reading?.status !== "reading";
+    const lost = error !== null && data.reading?.status === "reading";
+    const failed = (data.reading?.status === "failed" || refused || lost) && !pending;
     if (!failed) return <AnalysisScreen fileName={clientQuote.name} />;
+    const shown = refused ? actionError : lost ? error : actionError;
     return (
       <section id="materiaux" aria-label="Liste de matériaux" className="flex scroll-mt-4 flex-col gap-3">
         <div className="flex flex-col gap-3 rounded-[22px] bg-surface p-5 shadow-card">
-          <p className="text-[17px] leading-snug font-bold">Je n&apos;ai pas réussi à lire ce devis jusqu&apos;au bout (coupure ou panne de mon côté). Rien ne t&apos;est décompté : on réessaie ?</p>
-          {actionError ? <ErrorNotice error={actionError} /> : null}
-          <Button className="min-h-14 w-full text-[17px]" disabled={archived} onClick={prepare}>
+          <p className="text-[17px] leading-snug font-bold">
+            {refused
+              ? "Je n'ai pas pu lancer la lecture de ce devis."
+              : lost
+                ? "Je n'ai plus de nouvelles de la lecture de ce devis."
+                : "Je n'ai pas réussi à lire ce devis jusqu'au bout (coupure ou panne de mon côté)."}{" "}
+            Rien ne t&apos;est décompté : on réessaie ?
+          </p>
+          {shown ? <ErrorNotice error={shown} /> : null}
+          <Button className="min-h-14 w-full text-[17px]" disabled={archived} onClick={lost ? reload : prepare}>
             <Sparkles size={18} aria-hidden="true" />
             Réessayer
           </Button>
