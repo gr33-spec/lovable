@@ -163,8 +163,16 @@ export interface ConsumableHabits {
 export const manualKey = (designation: string) =>
   `manual:${designation.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/×/g, "x").replace(/\s+/g, " ").trim()}`;
 
+/**
+ * La lecture tourne dans la fonction serveur qui a reçu le devis (Vercel : 300 s au plus, puis elle est coupée). Un appel
+ * IA ne part que s'il a le temps de finir avant cette limite (`AI_CALL_TIMEOUT_MS`) ; sinon la lecture échoue
+ * proprement (« timeout ») au lieu d'être coupée en route.
+ */
+export const READING_BUDGET_MS = 280 * 1000;
+/** Durée maximale d'un appel IA de lecture (le client Anthropic coupe au-delà, sans relance cachée). */
+export const AI_CALL_TIMEOUT_MS = 170 * 1000;
 /** Une lecture « en cours » depuis plus longtemps a été interrompue (fonction coupée) : elle compte comme échouée. */
-export const STALE_READING_MS = 6 * 60 * 1000;
+export const STALE_READING_MS = 5 * 60 * 1000;
 /** Un calcul (appel IA n° 2) commencé depuis plus longtemps a été coupé : il peut repartir. */
 export const STALE_CALCUL_MS = 3 * 60 * 1000;
 
@@ -1202,11 +1210,15 @@ export class TakeoffService {
     const maxCalls = Math.max(policy.maxCallsPerAnalysis, chunks.length);
     let calls = 0;
     let model = "";
+    const clock = this.reading.now ?? (() => new Date());
+    const startedAt = clock().getTime();
 
     const readChunk = async (chunk: ReadingChunk, depth: number): Promise<ChunkResult> => {
       const whole = chunk.context.length === 0 && chunk.pages.length === allPages;
       for (let attempt = 1; attempt <= 2; attempt++) {
         if (calls >= maxCalls) return { ok: false, reason: "too_many_calls" };
+        // Un appel qui ne finirait pas avant la limite de la fonction ne part pas : échec dit, jamais une lecture coupée.
+        if (clock().getTime() - startedAt + AI_CALL_TIMEOUT_MS > READING_BUDGET_MS) return { ok: false, reason: "timeout" };
         // Numéro pris avant toute attente : les blocs lus en parallèle ont chacun le leur.
         const call = ++calls;
         const input = whole ? prepared.input : await prepared.slice([...chunk.pages, ...chunk.context]);
