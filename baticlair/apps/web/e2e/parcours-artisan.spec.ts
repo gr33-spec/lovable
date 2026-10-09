@@ -1011,3 +1011,15 @@ test("§48.6 zinguerie pièce par pièce, et la barre des lignes orange reste en
   await expect.poll(async () => (await bar.boundingBox())?.y ?? 999).toBeLessThan(40);
   expect((await bar.boundingBox())!.height).toBeLessThan(64);
 });
+
+test("rien ne part vide : un devis où je ne lis aucune ligne se dit, avec « Réessayer » et « Redéposer le PDF », jamais un bouton d'envoi", async ({ page }) => {
+  await signUp(page);
+  await page.goto("/chantiers/nouveau");
+  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-vide.pdf"));
+  await expect(page.getByText("Je n'ai rien lu dans ce devis.")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByRole("button", { name: "Réessayer" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Envoyer au fournisseur/ })).toHaveCount(0);
+  // « Redéposer le PDF » : le devis lu part, le chantier attend un autre PDF.
+  await page.getByRole("button", { name: "Redéposer le PDF" }).click();
+  await expect(page.getByLabel("Choisir le devis (PDF)")).toBeAttached({ timeout: 20_000 });
+});

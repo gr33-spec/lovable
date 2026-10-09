@@ -185,8 +185,8 @@ describe("liste de matériaux tirée du devis client (IA simulée)", () => {
     await ctx.prisma.documentProcessing.updateMany({ where: { documentId }, data: { status: "failed", errorCode: "read_failed" } });
 
     const res = await agent.post(`/v1/documents/${documentId}/takeoff`);
-    expect(res.status).toBe(201);
-    expect(res.body.notes[0]).toContain("Pages 1, 2");
+    // Les deux pages partent en image. L'IA simulée n'y trouve aucune ligne : rien ne part vide, la lecture le dit.
+    expect(JSON.stringify(res.body)).toContain("nothing_read");
     const execution = await ctx.prisma.aiExecution.findFirstOrThrow();
     expect(execution).toMatchObject({ route: "vision", pagesVision: 2, pagesText: 0 });
   });

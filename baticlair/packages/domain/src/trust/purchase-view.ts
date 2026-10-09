@@ -622,7 +622,10 @@ export function purchaseView(
   const waitingOn = (n: OwnedNeed) => engine.needs.find((x) => x.needId === n.needId && x.workItemId === n.workItemId && x.status === "question")?.question;
   const unknownItems = aggregate(engine.unknowns ?? [], view.ouvrages, link.plan.characteristicsBySlot, consumableFamilies).map((item): PurchaseItem => {
     const questions = [...new Map(item.needIds.flatMap((id) => (engine.unknowns ?? []).filter((n) => n.needId === id)).map(waitingOn).filter((q): q is Question => !!q).map((q) => [q.key, q])).values()];
-    return { ...item, key: `manque:${item.key}`, waitsOn: questions.map((q) => q.key), rules: [missingRule(item.key, questions, link.ref), ...(item.rules ?? [])] };
+    // La ligne du devis qu'elle remplace : sans elle, la ligne écrite ressortirait aussi en gris (§49.8, jamais deux fois).
+    const works = new Set(item.needIds.flatMap((id) => (engine.unknowns ?? []).filter((n) => n.needId === id).map((n) => n.workItemId)));
+    const lineIds = item.lineIds.length > 0 ? item.lineIds : link.plan.lines.filter((l) => l.status === "planned" && works.has(l.workItemId)).map((l) => l.ref).slice(0, 1);
+    return { ...item, lineIds, key: `manque:${item.key}`, waitsOn: questions.map((q) => q.key), rules: [missingRule(item.key, questions, link.ref), ...(item.rules ?? [])] };
   });
   toBuy.push(...unknownItems);
   const failedSupplierTest: ToQuoteItem[] = [];
@@ -758,7 +761,7 @@ export function purchaseView(
     if (link.roles.get(o.lineId) === "undetermined") continue;
     if (o.pending) {
       // §49.1 : une ligne écrite qui attend une info sort UNE fois, orange « Info manquante », jamais aussi en gris.
-      if (toBuy.some((b) => b.key === `manque:line:${o.lineId}`)) continue;
+      if (toBuy.some((b) => b.key.startsWith("manque:") && !b.key.startsWith("manque:need:") && b.lineIds.includes(o.lineId))) continue;
       if (!toQuote.some((q) => q.key === `line:${o.lineId}`)) toQuote.push({ key: `line:${o.lineId}`, label: withoutLabour(o.designation), measure, reason: o.pending, lineIds: [o.lineId] });
       continue;
     }

@@ -63,6 +63,8 @@ const unreadableReasons: Record<string, string> = {
 
 /** Motifs précis renvoyés par l'API, quel que soit le code. */
 const reasonMessages: Record<string, string> = {
+  nothing_read: "Je n'ai rien lu dans ce devis. Réessaie, ou redépose le PDF.",
+  empty_list: "La liste est vide : rien ne part au fournisseur.",
   faconnage_required: "Dis-moi d'abord, pour chaque pièce de zinc, si tu la façonnes ou si tu la commandes façonnée.",
   // Lecture IA d'un devis échouée (analysis_failed) : le motif, en clair, pour savoir quoi faire.
   provider_error: "Le service de lecture a refusé la demande. Réessaie dans un instant ; si ça recommence, envoie-nous le code support.",

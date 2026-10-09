@@ -394,7 +394,9 @@ export class TakeoffService {
     const analysis = await this.meter.current(tenant.companyId, documentId);
     if (!analysis || analysis.status === "completed") return null;
     if (analysis.status === "started") return this.stale(analysis.startedAt) ? { status: "failed", reason: "interrupted" } : { status: "reading", reason: null };
-    return { status: "failed", reason: "analysis_failed" };
+    // Le motif enregistré avec la lecture (« nothing_read » : rien trouvé dans le devis), sinon l'échec générique.
+    const failure = (analysis.readingStats as { failure?: unknown } | null | undefined)?.failure;
+    return { status: "failed", reason: failure === "nothing_read" ? "nothing_read" : "analysis_failed" };
   }
 
   private stale(startedAt: Date): boolean {
@@ -488,6 +490,12 @@ export class TakeoffService {
         scanBoundaryRisks: whole ? [] : scanBoundaryRisks(blocks, new Set(prepared.pages.filter((p) => p.route === "vision").map((p) => p.pageNumber!))),
       }),
     );
+    // RIEN NE PART VIDE : une lecture qui ne trouve aucune ligne n'est pas une liste, c'est une lecture à refaire.
+    if (output.lines.length === 0) {
+      await this.saveStats(analysisId, stats({ outcome: "failed", failure: "nothing_read", linesBeforeMerge: 0, linesAfterMerge: 0, droppedOutsideBlock: 0, droppedDuplicates: 0, scanBoundaryRisks: [] }));
+      await this.meter.fail(analysisId);
+      throw new DomainError("analysis_failed", "Nothing was read in this quote", { reason: "nothing_read" });
+    }
     const success = { model: read.model, output };
 
     // Le référentiel du métier du devis (§22 : un métier = un tiroir), figé avec le quantitatif.
@@ -947,6 +955,10 @@ export class TakeoffService {
   async validate(tenant: TenantContext, takeoffId: string): Promise<ReviewedTakeoff> {
     const takeoff = await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
     const { validation, purchase, openContradictions } = await this.review(tenant, takeoff);
+    // RIEN NE PART VIDE : une lecture qui n'a rien trouvé ne fait jamais une liste à envoyer.
+    if (purchase.toBuy.length + purchase.toQuote.length === 0) {
+      throw validationFailed("Nothing was read in this quote", { reason: "empty_list" });
+    }
     // §44.3 : deux documents qui se contredisent font une question ; rien ne part au fournisseur tant qu'elle est ouverte.
     if (openContradictions.length > 0) {
       throw validationFailed("A contradiction between documents is still open", { reason: "contradiction_open", count: openContradictions.length });
