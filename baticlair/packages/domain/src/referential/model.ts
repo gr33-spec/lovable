@@ -525,4 +525,10 @@ export interface Referential {
    * `false` : VALIDATION DU RÉFÉRENTIEL seulement (ses formules sur tous les articles), jamais pour un artisan.
    */
   writtenOnly?: boolean;
+  /**
+   * §49.9 (2026-10-09) : une ligne du quantitatif nomme une fourniture, jamais la phrase du devis. Les unités qui ne sont
+   * jamais une fourniture (heures, jours, forfait) : une telle ligne est hors quantitatif, repliée sous « N lignes sans
+   * fourniture », sauf la fourniture que la lecture extrait de la prestation (sous-lignes, puis texte).
+   */
+  withoutSupplyUnits?: string[];
 }

@@ -201,10 +201,11 @@ function supplyScreen(
     // La précision que le fournisseur ne peut pas deviner (diamètre d'une sortie de toit) : la ligne reste orange.
     const precise = decisions.find((d) => d.key === `${PRECISE}${item.lineIds[0]}`);
     // §49.2.5 « Info manquante » : un tap ouvre la question qui manque à la ligne.
-    const waits = (item.waitsOn ?? []).map((k) => decisions.find((d) => d.question?.key === k || d.key === `engine:${k}`)).filter((d): d is Decision => !!d);
+    const waits = (item.waitsOn ?? []).map((k) => decisions.find((d) => d.question?.key === k || d.key === `engine:${k}` || d.key === k)).filter((d): d is Decision => !!d);
     const check = item.state === "to_confirm" || precise !== undefined || (item.waitsOn?.length ?? 0) > 0;
     const decision = waits[0] ?? (item.state === "to_confirm" ? (decisionFor(item.lineIds) ?? precise) : precise);
-    for (const d of [decision, precise, ...waits]) if (d) used.add(d.key);
+    // Une ligne déjà orange pour une donnée qui manque ne ressort pas une 2e fois pour son doute de lecture (§49.8).
+    for (const d of [decision, precise, ...waits, item.state === "to_confirm" ? decisionFor(item.lineIds) : undefined]) if (d) used.add(d.key);
     const missing = item.rules?.length ? { text: toConfirmText(item.rules) } : undefined;
     groupOf(workId, item.consumable === true).rows.push({
       key: `item:${item.key}`,
@@ -802,9 +803,10 @@ export function purchaseView(
   const counter = counterQuestions(link.readings, engineQuestions, link.plan, link.ref, assumptions);
   for (const d of counter) {
     const what = d.text.replace(/\s*\?$/, "");
+    const rule = d.key.startsWith(A_PRECISER) ? `${d.title} à préciser` : `Info manquante : ${what.charAt(0).toLowerCase()}${what.slice(1)}`;
     for (const [i, item] of toBuy.entries()) {
       if (!item.lineIds.includes(d.lineIds[0]!)) continue;
-      toBuy[i] = { ...item, waitsOn: [...(item.waitsOn ?? []), d.key], rules: [...(item.rules ?? []), { key: `manque:${d.key}`, text: `Info manquante : ${what.charAt(0).toLowerCase()}${what.slice(1)}`, local: true, said: true }] };
+      toBuy[i] = { ...item, waitsOn: [...(item.waitsOn ?? []), d.key], rules: [...(item.rules ?? []), { key: `manque:${d.key}`, text: rule, local: true, said: true }] };
     }
   }
   const questions = [...engineQuestions, ...counter];
@@ -835,6 +837,8 @@ export function purchaseView(
 const PRECISE = "precise:";
 /** Clé d'une question de comptoir venue de « manque » (§41.1, §49.4) : « comptoir:<ligne>:<rang> ». */
 export const COUNTER = "comptoir:";
+/** §49.9 : une donnée du comptoir sans choix à proposer (« modèle et teinte de tuile ») : la ligne est « à préciser ». */
+export const A_PRECISER = "a-preciser:";
 
 /** Les sujets d'une question de comptoir : deux questions sur le même sujet n'en font qu'une. */
 const TOPICS = ["developpe", "diametre", "pente", "rampant", "format", "modele", "teinte", "coloris", "couleur", "epaisseur", "faconnage", "qualite", "largeur", "hauteur", "taille", "aspect", "profil", "dimension"];
@@ -870,7 +874,17 @@ function counterQuestions(readings: ReadonlyMap<string, QuoteLineReading> | unde
       const raw = /\(([^)]+)\)/.exec(m)?.[1]?.split(/\s*,\s+|\s*;\s*|\s*\/\s*|\s+ou\s+|(?<!\d),(?!\d)/).map((c) => c.trim()).filter(Boolean) ?? [];
       const unit = /^[\d.,]+\s*([a-zA-Z°²]+)$/.exec(raw.at(-1) ?? "")?.[1];
       const choices = unit ? raw.map((c) => (/^[\d.,]+$/.test(c) ? `${c} ${unit}` : c)) : raw;
-      const text = `${m.replace(/\s*\([^)]*\)/, "").trim().replace(/^./, (c) => c.toUpperCase())} ?`;
+      const subject = m.replace(/\s*\([^)]*\)/, "").trim().replace(/^./, (c) => c.toUpperCase());
+      // §49.9 : une donnée sans choix à proposer (modèle et teinte de tuile) n'est pas une question à boutons : la ligne
+      // sort orange « à préciser », l'artisan complète à la voix ou laisse le fournisseur proposer (« C'est bon »).
+      if (choices.length < 2) {
+        const key = `${A_PRECISER}${lineId}:${i + 1}`;
+        const text = `${subject} à préciser : dis-le à la voix, ou laisse le fournisseur proposer.`;
+        out.push({ key, state: "to_confirm", title: subject, text, lineIds: [lineId], primary: { action: "keep", label: "C'est bon" }, secondary: ["edit"] });
+        topics.forEach((t) => askedTopics.add(t));
+        return;
+      }
+      const text = `${subject} ?`;
       const key = `${COUNTER}${lineId}:${i + 1}`;
       out.push({
         key,
@@ -958,14 +972,15 @@ export function applyPurchaseOverrides(purchase: PurchaseView, answers: Record<s
     answered.set(q.lineIds[0]!, typeof a === "string" && a.trim() ? a.trim() : null);
   }
   // §49.4 : une question de comptoir répondue part dans la précision de sa ligne ; la ligne n'attend plus rien.
-  const counterAnswers = purchase.questions.filter((q) => q.key.startsWith(COUNTER) && typeof answers[q.key] === "string" && (answers[q.key] as string).trim());
+  const counterAnswers = purchase.questions.filter((q) => (q.key.startsWith(COUNTER) || q.key.startsWith(A_PRECISER)) && typeof answers[q.key] === "string" && (answers[q.key] as string).trim());
   const counterDone = new Set(counterAnswers.map((q) => q.key));
   // Laissée sans réponse au calcul (§48.4) : la question se ferme, la ligne reste orange « Info manquante ».
   const counterClosed = new Set(purchase.questions.filter((q) => q.key.startsWith(COUNTER) && answers[q.key] === null).map((q) => q.key));
   const countered = (item: PurchaseItem): PurchaseItem => {
     const mine = counterAnswers.filter((q) => item.lineIds.includes(q.lineIds[0]!));
     if (mine.length === 0) return item;
-    const said = mine.map((q) => `${q.text.replace(/\s*\?$/, "")} : ${(answers[q.key] as string).trim()}`);
+    // « À préciser » gardé tel quel (§49.9) : le fournisseur propose, et la demande le dit.
+    const said = mine.map((q) => (q.key.startsWith(A_PRECISER) ? `${q.title.toLowerCase()} : au choix du fournisseur` : `${q.text.replace(/\s*\?$/, "")} : ${(answers[q.key] as string).trim()}`));
     const waitsOn = (item.waitsOn ?? []).filter((k) => !counterDone.has(k));
     const rules = (item.rules ?? []).filter((r) => !counterDone.has(r.key.replace(/^manque:/, "")));
     const { waitsOn: _w, rules: _r, ...rest } = item;
@@ -999,7 +1014,7 @@ export function applyPurchaseOverrides(purchase: PurchaseView, answers: Record<s
           if (counterDone.has(r.decisionKey)) {
             // La réponse donnée, la ligne reste orange seulement si elle attend encore autre chose.
             const item = toBuy.find((b) => b.key === r.itemKey);
-            return { ...rest, status: item?.waitsOn?.length ? "check" : "ok" };
+            return { ...rest, status: item?.waitsOn?.length ? "check" : r.decisionKey.startsWith(A_PRECISER) ? "supplier" : "ok" };
           }
           return { ...rest, status: answered.get(r.lineIds[0]!) ? "ok" : "supplier" };
         }),

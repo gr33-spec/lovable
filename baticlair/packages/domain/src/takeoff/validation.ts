@@ -5,6 +5,7 @@ import { Decimal } from "../shared/decimal.js";
 import { containsKeyword, keywordPosition, normalizeText, type MaterialFamily, type TradeProfile } from "../trades/trade-profile.js";
 import { LABOR_ONLY } from "../trades/common.js";
 import { articleScope } from "./sections.js";
+import { isTimeUnit, isWithoutSupplyUnit } from "./supply.js";
 
 /**
  * Validation d'un quantitatif (liste de matériaux) selon le profil métier.
@@ -291,7 +292,10 @@ export function designationMultiplier(designation: string): string | null {
 
 export function validateTakeoffLine(line: TakeoffLineInput, profile: TradeProfile, others: readonly string[] = []): LineValidation {
   const issues: TakeoffIssue[] = [];
-  const { kind, family } = lineKind(line.designation, profile, others);
+  const read = lineKind(line.designation, profile, others);
+  // §49.9 : une unité h, fft ou jour n'est jamais une fourniture. Une durée ne l'est jamais (« Repositionnement des
+  // tuiles · 1,5 h ») ; un forfait qui nomme un matériau reste la mesure de son ouvrage (le calcul en tire les articles).
+  const { kind, family } = isTimeUnit(line.unitRaw) || (isWithoutSupplyUnit(line.unitRaw) && read.kind !== "material") ? { kind: "labor" as const, family: null } : read;
   const hinted = !line.unitRaw?.trim() && kind !== "labor" ? unitFromText(line.designation) : null;
   const unit = hinted?.unit ?? parseUnit(line.unitRaw);
   const quantity = parseFrenchQuantity(line.quantityRaw);

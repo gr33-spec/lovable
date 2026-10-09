@@ -31,6 +31,7 @@ import {
   DEFAULT_EXTRACTION_POLICY,
   mergeChunkLines,
   planQuote,
+  linesWithoutSupply,
   scanBoundaryRisks,
   planReading,
   proposeLineRoles,
@@ -74,6 +75,7 @@ import type { CompanyMemory, CorrectionJournal } from "../../learning/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { TAKEOFF_PROMPT } from "./prompt.js";
 import type { ExtractionAttempt, ExtractionOutput, TakeoffExtractor } from "./takeoff-extractor.js";
+import { suppliedLines } from "./takeoff-extractor.js";
 import { QUANTITATIF_PROMPT, type QuantitatifPass } from "./quantitatif-pass.js";
 import type { LineFields, TakeoffLineRecord, TakeoffRecord, TakeoffRepository } from "./takeoff.repository.js";
 
@@ -274,6 +276,8 @@ export interface ReviewedTakeoff {
    * l'écran des questions en « Comme d'habitude ? » ; un tap les confirme ou les change pour ce chantier.
    */
   habits: { key: string; question: string; unit: string; options: { label: string; value: string }[]; value: string }[];
+  /** §49.9 : les lignes du devis sans fourniture (heures, forfait, accès, évacuation) : hors de la liste, repliées à part. */
+  withoutSupply?: { lineId: string; label: string; measure: string | null }[];
   /** §48.4 : ce que l'IA juge utile mais que le devis ne demande pas : bloc « Suggestions », décoché, hors de la liste. */
   aiSuggestions: { key: string; label: string; quantity: string | null; unit: string | null; reason: string }[];
 }
@@ -478,7 +482,9 @@ export class TakeoffService {
     const blocks = read.parts.map((p) => ({ chunk: p.chunk, lines: p.output.lines }));
     const whole = read.parts.length === 1 && read.parts[0]!.chunk.context.length === 0;
     const merged = whole ? { lines: read.parts[0]!.output.lines, droppedOutsideBlock: 0, droppedDuplicates: 0 } : mergeChunkLines(blocks);
-    const output: ExtractionOutput = whole ? read.parts[0]!.output : { lines: merged.lines, notes: [...new Set(read.parts.flatMap((p) => p.output.notes))] };
+    const raw: ExtractionOutput = whole ? read.parts[0]!.output : { lines: merged.lines, notes: [...new Set(read.parts.flatMap((p) => p.output.notes))] };
+    // §49.9 : chaque prestation devient la fourniture qu'elle contient ; une ligne nomme un article, jamais une phrase.
+    const output: ExtractionOutput = { ...raw, lines: suppliedLines(raw.lines) };
     await this.saveStats(
       analysisId,
       stats({
@@ -1035,7 +1041,10 @@ export class TakeoffService {
       const e = exclusionFor(l.designation, exclusions);
       if (e) excluded.set(l.id, e.phrase);
     }
-    let takeoff = excluded.size > 0 ? { ...record, lines: record.lines.filter((l) => !excluded.has(l.id)) } : record;
+    // §49.9 : une ligne hors quantitatif (accès, évacuation, nettoyage) n'entre pas au calcul ; elle reste au devis lu,
+    // repliée sous « N lignes sans fourniture ».
+    const outOfScope = new Set(record.lines.filter((l) => l.reading?.role === "hors_quantitatif" && !excluded.has(l.id)).map((l) => l.id));
+    let takeoff = excluded.size > 0 || outOfScope.size > 0 ? { ...record, lines: record.lines.filter((l) => !excluded.has(l.id) && !outOfScope.has(l.id)) } : record;
     const profile = tradeProfile(takeoff.trade);
     const source = takeoff.documentId ? await this.aiInput.sourceLines(tenant, takeoff.documentId) : new Map<string, string>();
     const { validation: read } = reviewExtractedTakeoff(
@@ -1110,7 +1119,7 @@ export class TakeoffService {
         ? computeWithAnswers(ref, plan, takeoff.answers, preferences, { acceptDraft }, slotsGivenByQuote(plan, validation))
         : { needs: [], questions: [], declined: [] };
     // Le quantitatif renvoyé garde TOUTES ses lignes (les exclues aussi, pour le détail sans prix) ; seul le calcul les ignore.
-    const kept = excluded.size > 0 ? { ...takeoff, lines: record.lines.map((l) => takeoff.lines.find((x) => x.id === l.id) ?? l) } : takeoff;
+    const kept = excluded.size > 0 || outOfScope.size > 0 ? { ...takeoff, lines: record.lines.map((l) => takeoff.lines.find((x) => x.id === l.id) ?? l) } : takeoff;
     const openContradictions = plan.contradictions.map((c) => c.key).filter((k) => engine.questions.some((q) => q.key === `param:${k}`));
     const reviewed = { takeoff: kept, validation, roles: new Map([...proposals].map(([id, p]) => [id, { ...p, role: roles.get(id) ?? p.role }])), excluded, openContradictions };
     const view = artisanView(lines, validation, engine, { plan, roles, ref, asks });
@@ -1196,7 +1205,13 @@ export class TakeoffService {
           .filter(([key]) => takeoff.answers[key] === undefined),
       ).values(),
     ];
-    return { ...reviewed, view, brief, purchase, habits, aiSuggestions };
+    // §49.9 : « N lignes sans fourniture », dans l'ordre du devis (main-d'œuvre, heures, forfait, hors quantitatif).
+    const withoutSupply = linesWithoutSupply(
+      record.lines.filter((l) => !excluded.has(l.id)).map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantityRaw, unit: l.unitRaw })),
+      validation,
+      new Map(record.lines.flatMap((l) => (l.reading ? [[l.id, l.reading] as const] : []))),
+    );
+    return { ...reviewed, view, brief, purchase, habits, aiSuggestions, withoutSupply };
   }
 
   /**

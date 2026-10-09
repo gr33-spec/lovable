@@ -142,7 +142,10 @@ test("un artisan crée son compte et son premier chantier depuis le +", async ({
   await expect(page.getByRole("button", { name: "Lire le devis" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: /Ajouter des informations sur le chantier/ })).toHaveCount(0);
   await passQuestions(page);
-  await expect(page.getByText("L'IA peut se tromper, n'hésite pas à peaufiner.", { exact: false })).toBeVisible();
+  // Retour du fondateur (2026-10-09) : ni bandeau « L'IA peut se tromper… », ni gros bouton « Corriger » sur les cartes.
+  await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible();
+  await expect(page.getByText("L'IA peut se tromper", { exact: false })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^Corriger : / })).toHaveCount(0);
 
   // Le nom (lu dans le devis, sinon d'attente) se change d'un tap.
   await page.getByRole("button", { name: /^Renommer le chantier : / }).click();
@@ -860,7 +863,7 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   await expect(list.getByText(/^Silicone$/)).toBeVisible();
   await expect(list.getByRole("button", { name: /Ardoises naturelles/ })).toHaveCount(0);
   // La main reste : plus / moins, crayon, corbeille.
-  await expect(list.getByText("L'IA peut se tromper, n'hésite pas à peaufiner.", { exact: false })).toBeVisible();
+  await expect(list.getByText(/^Silicone$/)).toBeVisible();
   await page.reload();
   await expect(page.getByRole("region", { name: /^J'ai quelques questions/ })).toHaveCount(0);
   await expect(page.getByRole("region", { name: "Liste des fournitures" }).getByText(/^Silicone$/)).toBeVisible();
@@ -1022,4 +1025,23 @@ test("rien ne part vide : un devis où je ne lis aucune ligne se dit, avec « R�
   // « Redéposer le PDF » : le devis lu part, le chantier attend un autre PDF.
   await page.getByRole("button", { name: "Redéposer le PDF" }).click();
   await expect(page.getByLabel("Choisir le devis (PDF)")).toBeAttached({ timeout: 20_000 });
+});
+
+test("§49.9 : une ligne nomme une fourniture ; les heures et le forfait sont repliés sous « lignes sans fourniture »", async ({ page }) => {
+  await signUp(page);
+  await page.goto("/chantiers/nouveau");
+  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-reparation.pdf"));
+  await passQuestions(page);
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(list.getByText(/^Tuile terre cuite mécanique/).first()).toBeVisible();
+  // Jamais dans la liste : « Repositionnement des tuiles · 1,5 h », « Accès toiture… · 1 fft ».
+  await expect(list.getByRole("listitem").filter({ hasText: "Repositionnement" })).toHaveCount(0);
+  const folded = list.getByText("2 lignes sans fourniture");
+  await expect(folded).toBeVisible();
+  await expect(list.getByRole("list", { name: "Lignes sans fourniture" })).toBeHidden();
+  await folded.click();
+  const without = list.getByRole("list", { name: "Lignes sans fourniture" });
+  await expect(without).toContainText("Repositionnement des tuiles");
+  await expect(without).toContainText("1,5 h");
+  await expect(without).toContainText("Accès toiture et mise en sécurité");
 });

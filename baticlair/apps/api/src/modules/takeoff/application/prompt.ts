@@ -9,7 +9,16 @@
  * v13 : même consigne ; le format technique dit {} / liste vide / -1 au lieu de null pour dimensions, manque et sec
  * (l'API refuse plus de 16 champs « valeur ou vide » : la v12 en avait 18, chaque lecture échouait).
  */
-export const TAKEOFF_PROMPT = { id: "takeoff_extraction", version: 13 } as const;
+export const TAKEOFF_PROMPT = { id: "takeoff_extraction", version: 14 } as const;
+
+/**
+ * v14 : le §49.9 du référentiel (2026-10-09), tel que le fondateur l'a écrit, est donné au lecteur après le §41.1, qui ne
+ * change pas : une ligne du quantitatif nomme une fourniture, jamais la phrase du devis.
+ */
+export const RULE_49_9 = `RÈGLE §49.9 DU RÉFÉRENTIEL (ajoutée par le fondateur le 9 octobre 2026) : une ligne du quantitatif nomme une fourniture, jamais la phrase du devis.
+- Le lecteur extrait la fourniture contenue dans chaque prestation, d'abord dans les sous-lignes du devis (« – Tuile terre cuite mécanique »), puis dans le texte (« y compris les petites fournitures de fixation »).
+- Une ligne sans fourniture (heures, forfait, évacuation) est hors quantitatif : pas dans la liste, repliée sous « N lignes sans fourniture ». Une unité h, fft ou jour n'est jamais une fourniture.
+- Modèle et teinte de tuile : pas de question à boutons, ligne orange « à préciser », l'artisan complète à la voix ou laisse au fournisseur.`;
 
 /** Un ouvrage du référentiel chargé, avec ses synonymes (« vocabulaire.json », §29). */
 export interface WorkItemHint {
@@ -98,6 +107,8 @@ export function takeoffSystemPrompt(tradeLabel: string, materialFamilies: readon
         ? `aucun ouvrage à quantifier pour ce métier ; familles de matériaux habituelles : ${materialFamilies.join(" ; ")}`
         : "aucun ouvrage chargé pour ce métier";
   return `${PROMPT_A_41_1.replace("{metier}", tradeLabel).replace(REFERENTIEL_HOLE, referentiel)}
+
+${RULE_49_9}
 
 ${TECHNICAL_FORMAT}`;
 }

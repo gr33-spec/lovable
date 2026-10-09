@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronDown, Paperclip, Pencil, Send, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, Paperclip, Send, Trash2, X } from "lucide-react";
 import { openDocument } from "@/lib/open-document";
 import { useEffect, useId, useRef, useState } from "react";
 import { EDIT_FIELD, EDIT_PANEL, ItemForm, type ItemEdit, type SketchHandlers } from "@/components/purchase-list";
@@ -178,10 +178,6 @@ export function SupplyList({
           )}
         </p>
       </div>
-      {/* §48 : transparent et direct. L'IA peut se tromper, et elle le dit. */}
-      <p className="mx-4 mb-2 rounded-2xl bg-[#eeedff] px-3 py-2 text-[13px] leading-snug font-semibold text-[#3a2bb0]">
-        L&apos;IA peut se tromper, n&apos;hésite pas à peaufiner. Pense aussi à <strong>+5 % de coupes</strong> si besoin.
-      </p>
       {/* §18 : l'amiante se dit à l'artisan, en haut de la liste ; rien de cela ne part au fournisseur. */}
       {(p.warnings ?? []).map((w) => (
         <p key={w} role="note" className="mx-4 mb-2 rounded-2xl bg-warn-bg px-3 py-2 text-[14px] font-bold text-warn">
@@ -253,6 +249,24 @@ export function SupplyList({
           </div>
         );
       })}
+      {/* §49.9 : les lignes du devis sans fourniture (heures, forfait, accès, évacuation) ne sont pas dans la liste et ne
+          partent jamais ; repliées ici, pour que l'artisan retrouve tout son devis. */}
+      {takeoff.sansFourniture && takeoff.sansFourniture.length > 0 ? (
+        <details className="group mx-4 mt-3 rounded-2xl bg-ground/60 px-3 py-2">
+          <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-2 text-[13px] font-extrabold text-muted">
+            {takeoff.sansFourniture.length} ligne{takeoff.sansFourniture.length > 1 ? "s" : ""} sans fourniture
+            <ChevronDown size={16} aria-hidden="true" className="transition-transform group-open:rotate-180" />
+          </summary>
+          <ul aria-label="Lignes sans fourniture" className="flex flex-col gap-1.5 pt-1 pb-1">
+            {takeoff.sansFourniture.map((l) => (
+              <li key={l.lineId} className="flex items-baseline justify-between gap-3 text-[13px] leading-snug text-muted">
+                <span className="min-w-0">{l.label}</span>
+                {l.measure ? <span className="shrink-0 font-bold">{l.measure}</span> : null}
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
       {/* §49.1 : ni bloc « Hypothèses », ni bloc « Suggestions » sous la liste : rien d'absent du devis. */}
       {selection && !selecting && rows.length > 1 ? (
         // §48.5 : discret, pour l'usage occasionnel (devis multi-lots) ; l'envoi normal ne change pas.
@@ -578,7 +592,7 @@ function Row({
         ) : null}
       </div>
       {row.status === "check" && editable && !open && !sentTo ? (
-        <CardActions label={label} decision={decision} item={item} pending={pending} handlers={handlers} onEdit={onEdit} onOpen={() => setOpen(true)} {...(shared ? { shared } : {})} />
+        <CardActions label={label} decision={decision} item={item} pending={pending} handlers={handlers} onEdit={onEdit} {...(shared ? { shared } : {})} />
       ) : null}
       {open ? (
         <>
@@ -727,7 +741,6 @@ function CardActions({
   pending,
   handlers,
   onEdit,
-  onOpen,
   shared = new Map(),
 }: {
   shared?: ReadonlyMap<string, string>;
@@ -737,7 +750,6 @@ function CardActions({
   pending: boolean;
   handlers: DecisionHandlers;
   onEdit: (item: PurchaseItem, edit: ItemEdit) => Promise<void>;
-  onOpen: () => void;
 }) {
   const id = useId();
   const [value, setValue] = useState("");
@@ -837,12 +849,8 @@ function CardActions({
             </Button>
           </>
         ) : null}
-        {!d || d.primary?.action === "edit" ? (
-          <Button className={btn} variant={done ? "secondary" : "primary"} onClick={onOpen} aria-label={`Corriger : ${label}`}>
-            <Pencil size={18} aria-hidden="true" />
-            {d?.primary?.label ?? "Corriger"}
-          </Button>
-        ) : null}
+        {/* §49.8 : les choix en boutons dans la carte, puis « C'est bon » ; plus de gros bouton « Corriger » : la ligne se
+            réécrit d'un tap sur son nom. */}
       </div>
     </div>
   );
