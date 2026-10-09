@@ -1,3 +1,4 @@
+import { supplyLines } from "@baticlair/domain";
 import { z } from "zod";
 import type { DocumentInput, ReadAttempt, ReadStatus } from "../../../platform/ai/document-reader.js";
 
@@ -126,9 +127,11 @@ export const extractionFormatSchema = z.object({
 export function decodeExtraction(wire: ExtractionWire): ExtractionOutput {
   return {
     lines: wire.lignes
-      // Déplacement, nettoyage, échafaudage, TVA, remise (rôle « hors_quantitatif » du §41.1) ne sont pas des ouvrages à
-      // quantifier. Une ligne de POSE est gardée : elle ne commande rien, mais ses données valent pour la fourniture.
-      .filter((l) => l.ouvrage !== "hors_quantitatif" && l.role !== "hors_quantitatif")
+      // Déplacement, nettoyage, échafaudage (rôle « hors_quantitatif » du §41.1) ne sont pas des ouvrages à quantifier : ils
+      // sont gardés pour la liste repliée « N lignes sans fourniture » (§49.9), jamais calculés. TVA, remise, acompte ne
+      // sont pas des lignes du devis. Une ligne de POSE est gardée : elle ne commande rien, mais ses données valent.
+      .filter((l) => !/^(?:tva|remise|acompte|escompte|total|sous[- ]total)\b/i.test(l.des.trim()))
+      .map((l) => (l.ouvrage === "hors_quantitatif" ? { ...l, role: "hors_quantitatif" as const } : l))
       .map((l) => {
         const refs = l.src.map((s) => s.trim()).filter((s) => s.length > 0);
         // Un doute (§41.1) est toujours accompagné de sa raison ; une raison sans « doute » annoncé compte aussi.
@@ -192,3 +195,34 @@ export interface TakeoffExtractor {
 }
 
 export const TAKEOFF_EXTRACTOR = Symbol("TAKEOFF_EXTRACTOR");
+
+/**
+ * §49.9 : « une ligne du quantitatif nomme une fourniture, jamais la phrase du devis ». Une prestation écrite en phrase
+ * (« Remplacement unitaire d'une tuile cassée… ») est enregistrée comme la fourniture que la lecture en extrait (ses
+ * sous-lignes, puis son texte) : une ligne par article, à la place de la phrase, avec sa source et ses titres.
+ */
+export function suppliedLines(lines: ExtractionOutput["lines"]): ExtractionOutput["lines"] {
+  const refs = lines.map((l, i) => ({ ref: String(i), designation: l.designation, quantity: l.quantity, unit: l.unit }));
+  const readings = new Map(
+    lines.flatMap((l, i) =>
+      l.reading
+        ? [[String(i), { role: l.reading.role ?? null, articles: l.reading.articles.map((a) => ({ nom: a.nom, materiau: a.materiau ?? null, quantite: a.quantite ?? null, unite: a.unite ?? null, elements: a.elements ?? null })), faconnage: l.reading.faconnage ?? null, manque: l.reading.manque }] as const]
+        : [],
+    ),
+  );
+  const supplied = supplyLines(refs, readings);
+  return supplied.lines.map((s) => {
+    if (!("parent" in s)) return lines[Number(s.ref)]!;
+    const parent = lines[Number(s.parent)]!;
+    const reading = supplied.readings.get(s.ref)!;
+    return {
+      ...parent,
+      designation: s.designation,
+      quantity: s.quantity,
+      unit: s.unit,
+      reference: null,
+      material: reading.articles[0]?.materiau ?? null,
+      reading: { role: reading.role, articles: reading.articles, faconnage: reading.faconnage, manque: reading.manque },
+    };
+  });
+}

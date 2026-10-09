@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronDown, Paperclip, Pencil, Send, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, Paperclip, Send, Trash2, X } from "lucide-react";
 import { openDocument } from "@/lib/open-document";
 import { useEffect, useId, useRef, useState } from "react";
 import { EDIT_FIELD, EDIT_PANEL, ItemForm, type ItemEdit, type SketchHandlers } from "@/components/purchase-list";
@@ -8,7 +8,7 @@ import { Proof, type DecisionHandlers } from "@/components/takeoff-view";
 import { SelectionBar, type SelectionSend } from "@/components/selection-send";
 import { Button } from "@/components/ui";
 import type { ItemSketch, PurchaseItem, ScreenRow, Takeoff, TakeoffDecision } from "@/lib/api";
-import { doubtText, parseQuantity, shortName } from "@/lib/labels";
+import { parseQuantity, shortName } from "@/lib/labels";
 
 /**
  * UN SEUL ÉCRAN : LA LISTE DES FOURNITURES (retour du fondateur, 2026-10-04, « un enfant de 10 ans s'en sort »).
@@ -30,11 +30,18 @@ export function SupplyList({
   onSend,
   sketches = [],
   sketchHandlers,
-  validated = false,
   sent = false,
   docked = true,
   selection,
+  onAdd,
+  onVoice,
+  voice,
 }: {
+  /** §50.3 : « Ajouter un article », en petit sous le bouton d'envoi. */
+  onAdd?: () => void;
+  /** §50.3 : « Modifier à la voix », en petit sous le bouton d'envoi ; `voice` est le panneau ouvert, sinon absent. */
+  onVoice?: () => void;
+  voice?: React.ReactNode;
   /** §48.5 : « Envoyer une sélection à un autre fournisseur » (absent : la fonction n'existe pas ici). */
   selection?: SelectionSend;
   /** Une barre de chat est en bas de l'écran : le gros bouton se pose au-dessus d'elle. Sur la page des fournitures, non. */
@@ -59,16 +66,12 @@ export function SupplyList({
   const items = new Map(p.toBuy.map((b) => [b.key, b]));
   const quotes = new Map(p.toQuote.map((q) => [q.key, q]));
   const decisions = new Map(takeoff.view.decisions.map((d) => [d.key, d]));
-  const [aside, setAside] = useState<ScreenRow | null>(null);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => void (timer.current && clearTimeout(timer.current)), []);
-
   const [removing, setRemoving] = useState<string[]>([]);
   // §48.5 : cases à cocher seulement après le petit bouton ; par défaut l'écran ne change pas.
   const [selecting, setSelecting] = useState(false);
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const articleOf = (r: ScreenRow) => r.itemKey ?? (r.quoteKey ? `quote:${r.quoteKey}` : null);
-  const hidden = (r: ScreenRow) => aside?.key === r.key || removing.includes(r.key);
+  const hidden = (r: ScreenRow) => removing.includes(r.key);
   const rows = screen.groups.flatMap((g) => g.rows).filter((r) => !hidden(r));
   const toCheck = rows.filter((r) => r.status === "check");
   const baseLabel = (r: ScreenRow) =>
@@ -82,46 +85,16 @@ export function SupplyList({
     return line ? `${label} — ${shortName(line.article ?? line.designation)}` : label;
   };
 
-  // Retirer une ligne : cachée tout de suite, « Annuler » pendant 3 s, puis retirée pour de bon. Retirer une autre ligne
-  // pendant ces 3 s retire aussitôt la précédente (elle ne revient jamais en silence).
-  const current = useRef<ScreenRow | null>(null);
+  // Retirer une ligne (glisser à gauche, ou « Retirer » dans sa fiche) : cachée tout de suite, retirée pour de bon ; jamais de
+  // message flottant (§50.4). Un retrait après l'autre : la dernière réponse du serveur les contient tous.
   const queue = useRef<Promise<void>>(Promise.resolve());
-  const commit = (r: ScreenRow) => {
+  const putAside = (r: ScreenRow) => {
     setRemoving((keys) => [...keys, r.key]);
-    // Un retrait après l'autre : la dernière réponse du serveur les contient tous.
     queue.current = queue.current
       .then(() => onSetAside(r))
       .catch(() => undefined)
       .finally(() => setRemoving((keys) => keys.filter((k) => k !== r.key)));
   };
-  const putAside = (r: ScreenRow) => {
-    if (timer.current) clearTimeout(timer.current);
-    if (current.current && current.current.key !== r.key) commit(current.current);
-    current.current = r;
-    setAside(r);
-    timer.current = setTimeout(() => {
-      current.current = null;
-      setAside(null);
-      commit(r);
-    }, 3000);
-  };
-  const undo = () => {
-    if (timer.current) clearTimeout(timer.current);
-    current.current = null;
-    setAside(null);
-  };
-  // « Tout est bon » (retour du fondateur, 2026-10-05 : « 182 lignes à corriger, c'est hyper long ») : les lignes
-  // orange qui n'attendent qu'une confirmation (garder telle qu'écrite, compter à la pièce, ratio à confirmer) se règlent
-  // d'un appui ; seules les vraies questions (un choix à faire) restent une par une.
-  const simple = [
-    ...new Map(
-      toCheck
-        .map((r) => (r.decisionKey ? decisions.get(r.decisionKey) : undefined))
-        .filter((d): d is TakeoffDecision => d !== undefined && !d.question?.options?.length && !d.key.startsWith(AI_ADDITION) && (d.key.startsWith(RATIO) || d.primary?.action === "keep" || d.primary?.action === "pieces"))
-        .map((d) => [d.key, d]),
-    ).values(),
-  ];
-  const simpleRows = toCheck.filter((r) => r.decisionKey && simple.some((d) => d.key === r.decisionKey)).length;
   // Une info manquante se demande UNE fois : ses boutons sont sur la première carte qui en dépend ; les autres renvoient
   // à elle (un seul choix règle toutes les lignes qui en dépendent).
   const askKeysOf = (r: ScreenRow) => {
@@ -135,143 +108,82 @@ export function SupplyList({
   }
   const sharedFor = (r: ScreenRow) => new Map(askKeysOf(r).flatMap((k) => (askOwner.get(k) && askOwner.get(k)!.key !== r.key ? [[k, labelOf(askOwner.get(k)!)] as const] : [])));
 
-  // Deux blocs titrés seulement quand il y a les deux : une liste toute prête n'a pas besoin de titre.
-  const split = rows.some((r) => r.status === "check") && rows.some((r) => r.status !== "check");
+  // §50.3 : une liste, comme un bon de commande : les oranges d'abord, puis les vertes, chacune dans l'ordre du devis.
+  const ordered = [...rows.filter((r) => r.status === "check"), ...rows.filter((r) => r.status !== "check")];
+  const link = "inline-flex min-h-10 items-center gap-1.5 text-[13px] font-bold text-muted underline decoration-dotted underline-offset-4";
 
   return (
-    // La barre du gros bouton est HORS de la carte : collée au-dessus de la barre de chat, elle ne laisse jamais de blanc
-    // dans la carte quand on arrive au bas de la liste.
     <section aria-label="Liste des fournitures" className="flex flex-col">
       {editable && !selecting && toCheck.length > 0 ? (
-        // Retour du fondateur (2026-10-07) : plus de bulle qui flotte sur les cartes ; une barre fine, collée en haut, qui
-        // ne cache rien. « Tout est bon » y reste (§49.8 : en haut, un appui).
-        <div
-          role="status"
-          className="sticky top-[max(8px,env(safe-area-inset-top))] z-20 mb-2 flex min-h-11 items-center justify-between gap-2 rounded-2xl border border-warn/25 bg-surface/95 py-1.5 pr-1.5 pl-3 shadow-[0_2px_10px_rgba(16,24,40,0.08)] backdrop-blur"
-        >
-          <span className="flex min-w-0 items-center gap-2 text-[13px] leading-tight font-extrabold text-warn">
-            <span className="size-2 shrink-0 rounded-full bg-warn" aria-hidden="true" />
-            Encore {toCheck.length} ligne{toCheck.length > 1 ? "s" : ""} orange
+        // §50.3 : une barre fixe discrète en haut, qui disparaît à zéro. Rien d'autre.
+        <div role="status" className="sticky top-[max(8px,env(safe-area-inset-top))] z-20 mb-2 flex min-h-10 items-center gap-2 rounded-2xl border border-warn/25 bg-surface/95 px-3 py-1.5 shadow-[0_2px_10px_rgba(16,24,40,0.08)] backdrop-blur">
+          <span className="size-2 shrink-0 rounded-full bg-warn" aria-hidden="true" />
+          <span className="text-[13px] leading-tight font-extrabold text-warn">
+            {toCheck.length} ligne{toCheck.length > 1 ? "s" : ""} à régler
           </span>
-          {handlers.onDecideMany && simpleRows >= 2 ? (
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => void handlers.onDecideMany!(simple)}
-              className="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-xl bg-warn-bg px-3 text-[13px] font-extrabold text-warn active:scale-[0.97] disabled:opacity-60"
-            >
-              <Check size={15} aria-hidden="true" />
-              Tout est bon ({simpleRows})
-            </button>
-          ) : null}
         </div>
       ) : null}
-      <div className="flex flex-col overflow-hidden rounded-[20px] bg-surface pb-2 shadow-card">
-      <div className="flex flex-col px-4 pt-3 pb-2">
-        <h2 className="font-display text-[20px] font-extrabold tracking-[-0.02em]">Fournitures à chiffrer</h2>
-        <p className="text-[14px] font-bold text-muted" aria-live="polite">
-          {rows.length} fourniture{rows.length > 1 ? "s" : ""}
-          {toCheck.length > 0 ? (
-            <span className="text-warn"> · {toCheck.length} à vérifier</span>
-          ) : (
-            <span className="text-ok"> · {validated ? "liste validée" : "tout est prêt"}</span>
-          )}
-        </p>
-      </div>
-      {/* §48 : transparent et direct. L'IA peut se tromper, et elle le dit. */}
-      <p className="mx-4 mb-2 rounded-2xl bg-[#eeedff] px-3 py-2 text-[13px] leading-snug font-semibold text-[#3a2bb0]">
-        L&apos;IA peut se tromper, n&apos;hésite pas à peaufiner. Pense aussi à <strong>+5 % de coupes</strong> si besoin.
-      </p>
-      {/* §18 : l'amiante se dit à l'artisan, en haut de la liste ; rien de cela ne part au fournisseur. */}
-      {(p.warnings ?? []).map((w) => (
-        <p key={w} role="note" className="mx-4 mb-2 rounded-2xl bg-warn-bg px-3 py-2 text-[14px] font-bold text-warn">
-          {w}
-        </p>
-      ))}
-      {/* Ce qui est prêt d'abord, ce qui reste à vérifier ensuite (retour du fondateur, 2026-10-05) ; dans chaque bloc,
-          les lignes restent rangées par ouvrage. */}
-      {BLOCKS.map((b) => {
-        const groups = screen.groups
-          .map((g) => ({ g, visible: g.rows.filter((r) => !hidden(r) && b.statuses.includes(r.status)) }))
-          .filter(({ visible }) => visible.length > 0);
-        const count = groups.reduce((n, { visible }) => n + visible.length, 0);
-        if (count === 0) return null;
-        return (
-          <div key={b.key} className="flex flex-col border-t border-line">
-            {split ? (
-              <h3 className={`flex items-center gap-2 px-4 pt-2.5 text-[13px] font-extrabold ${b.key === "check" ? "text-warn" : "text-ok"}`}>
-                <span className={`size-2 rounded-full ${b.key === "check" ? "bg-warn" : "bg-ok"}`} aria-hidden="true" />
-                {b.label} ({count})
-              </h3>
-            ) : null}
-            {groups.map(({ g, visible }) => (
-              <div key={g.key} className="flex flex-col gap-2 px-4 pt-4">
-                <p className="text-[12px] font-extrabold tracking-[0.05em] text-muted uppercase">
-                  {g.label}
-                  {g.measure ? ` · ${g.measure}` : ""}
-                </p>
-                {/* Une ligne = une carte (retour du fondateur, 2026-10-06 : « on a l'impression d'un texte, pas de lignes »). */}
-                <ul aria-label={g.label} className="flex flex-col gap-2">
-                  {visible.map((r) => (
-                    <Row
-                      key={r.key}
-                      {...(selection && articleOf(r) && selection.sent.has(articleOf(r)!) ? { sentTo: selection.sent.get(articleOf(r)!)! } : {})}
-                      {...(selecting
-                        ? {
-                            selectMode: {
-                              checked: checked.has(articleOf(r) ?? ""),
-                              // Une ligne orange se vérifie d'abord ; une ligne sans article (question) ne part pas.
-                              disabled: !articleOf(r) || r.status === "check",
-                              onToggle: () =>
-                                setChecked((prev) => {
-                                  const next = new Set(prev);
-                                  const k = articleOf(r)!;
-                                  if (next.has(k)) next.delete(k);
-                                  else next.add(k);
-                                  return next;
-                                }),
-                            },
-                          }
-                        : {})}
-                      row={r}
-                      takeoff={takeoff}
-                      label={labelOf(r)}
-                      editable={editable}
-                      pending={pending}
-                      handlers={handlers}
-                      decision={r.decisionKey ? decisions.get(r.decisionKey) : undefined}
-                      shared={sharedFor(r)}
-                      onEdit={onEditItem}
-                      onSetAside={() => putAside(r)}
-                      sketches={sketches.filter((s) => r.itemKey && s.article === r.itemKey)}
-                      {...(sketchHandlers ? { sketchHandlers } : {})}
-                    />
-                  ))}
-                </ul>
-              </div>
+      <ul aria-label="Fournitures" className="flex flex-col gap-2">
+        {ordered.map((r) => (
+          <Row
+            key={r.key}
+            {...(selection && articleOf(r) && selection.sent.has(articleOf(r)!) ? { sentTo: selection.sent.get(articleOf(r)!)! } : {})}
+            {...(selecting
+              ? {
+                  selectMode: {
+                    checked: checked.has(articleOf(r) ?? ""),
+                    // Une ligne orange se vérifie d'abord ; une ligne sans article (question) ne part pas.
+                    disabled: !articleOf(r) || r.status === "check",
+                    onToggle: () =>
+                      setChecked((prev) => {
+                        const next = new Set(prev);
+                        const k = articleOf(r)!;
+                        if (next.has(k)) next.delete(k);
+                        else next.add(k);
+                        return next;
+                      }),
+                  },
+                }
+              : {})}
+            row={r}
+            takeoff={takeoff}
+            label={labelOf(r)}
+            editable={editable}
+            pending={pending}
+            handlers={handlers}
+            decision={r.decisionKey ? decisions.get(r.decisionKey) : undefined}
+            shared={sharedFor(r)}
+            onEdit={onEditItem}
+            onSetAside={() => putAside(r)}
+            sketches={sketches.filter((s) => r.itemKey && s.article === r.itemKey)}
+            {...(sketchHandlers ? { sketchHandlers } : {})}
+          />
+        ))}
+      </ul>
+      {/* §49.9 : les lignes du devis sans fourniture (heures, forfait, évacuation) ne sont pas dans la liste et ne partent
+          jamais ; repliées, fermées par défaut, pour que l'artisan voie qu'elles ont été lues. */}
+      {takeoff.sansFourniture && takeoff.sansFourniture.length > 0 ? (
+        <details className="group mt-3 rounded-2xl px-1">
+          <summary className="flex min-h-10 cursor-pointer list-none items-center gap-1.5 text-[13px] font-bold text-muted">
+            {takeoff.sansFourniture.length} ligne{takeoff.sansFourniture.length > 1 ? "s" : ""} sans fourniture
+            <ChevronDown size={15} aria-hidden="true" className="transition-transform group-open:rotate-180" />
+          </summary>
+          <ul aria-label="Lignes sans fourniture" className="flex flex-col gap-1.5 pt-1 pb-1">
+            {takeoff.sansFourniture.map((l) => (
+              <li key={l.lineId} className="flex items-baseline justify-between gap-3 text-[13px] leading-snug text-muted">
+                <span className="min-w-0">{l.label}</span>
+                {l.measure ? <span className="shrink-0 font-bold">{l.measure}</span> : null}
+              </li>
             ))}
-          </div>
-        );
-      })}
-      {/* §49.1 : ni bloc « Hypothèses », ni bloc « Suggestions » sous la liste : rien d'absent du devis. */}
-      {selection && !selecting && rows.length > 1 ? (
-        // §48.5 : discret, pour l'usage occasionnel (devis multi-lots) ; l'envoi normal ne change pas.
-        <button
-          type="button"
-          onClick={() => {
-            setChecked(new Set());
-            setSelecting(true);
-          }}
-          className="mx-4 mt-3 inline-flex min-h-10 items-center gap-1.5 self-start text-[13px] font-bold text-muted underline decoration-dotted underline-offset-4"
-        >
-          <Send size={14} aria-hidden="true" />
-          Envoyer une sélection à un autre fournisseur
-        </button>
+          </ul>
+        </details>
       ) : null}
-      </div>
+      {voice ? <div className="mt-3">{voice}</div> : null}
 
+      {/* §50.3 : un seul bouton en bas, « Envoyer au fournisseur » ; dessous, en petit, les trois autres gestes. Seul le bouton
+          reste collé en bas ; les liens suivent la liste, jamais par-dessus. */}
       {selecting && selection ? (
-        <div className={`sticky z-10 -mt-4 bg-gradient-to-t from-ground from-60% to-transparent pt-8 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(16px,env(safe-area-inset-bottom))]"}`}>
+        <div className={`sticky z-10 mt-2 bg-gradient-to-t from-ground from-70% to-transparent pt-6 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(12px,env(safe-area-inset-bottom))]"}`}>
           <SelectionBar
             count={checked.size}
             onCancel={() => setSelecting(false)}
@@ -282,40 +194,55 @@ export function SupplyList({
             }}
           />
         </div>
-      ) : editable && toCheck.length === 0 ? (
-        // Un fondu sous le bouton : le texte de la liste ne passe jamais sous lui en se lisant mal.
-        <div className={`sticky z-10 -mt-4 bg-gradient-to-t from-ground from-60% to-transparent pt-8 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(16px,env(safe-area-inset-bottom))]"}`}>
-          {toCheck.length > 0 ? null : sent ? (
-            <Button className="w-full" variant="secondary" onClick={onSend}>
-              <Send size={18} aria-hidden="true" />
-              Voir la demande envoyée
-            </Button>
-          ) : (
-            <Button className="w-full shadow-[0_10px_24px_var(--color-accent-glow)]" pending={pending} onClick={onSend}>
-              <Send size={18} aria-hidden="true" />
-              Envoyer au fournisseur
-            </Button>
-          )}
-        </div>
-      ) : null}
-
-      {aside ? (
-        <div role="status" className={`fixed inset-x-4 z-[60] mx-auto flex max-w-xl items-center justify-between gap-3 rounded-2xl bg-ink px-4 py-3 text-white shadow-card bottom-[max(96px,calc(env(safe-area-inset-bottom)+96px))]`}>
-          <span className="min-w-0 truncate text-sm font-bold">Retiré de la liste : {labelOf(aside)}</span>
-          <button type="button" onClick={undo} className="inline-flex min-h-11 shrink-0 items-center px-2 text-sm font-extrabold text-[#9db8ff]">
-            Annuler
-          </button>
-        </div>
-      ) : null}
-
+      ) : (
+        <>
+          {/* RIEN NE PART VIDE : sans aucune fourniture (un devis de main-d'œuvre seule), pas de bouton d'envoi. */}
+          {editable && toCheck.length === 0 && rows.length > 0 ? (
+            <div className={`sticky z-10 mt-2 bg-gradient-to-t from-ground from-70% to-transparent pt-6 ${docked ? "bottom-[68px] pb-3 lg:bottom-[70px]" : "bottom-0 pb-[max(8px,env(safe-area-inset-bottom))]"}`}>
+              {sent ? (
+                <Button className="w-full" variant="secondary" onClick={onSend}>
+                  <Send size={18} aria-hidden="true" />
+                  Voir la demande envoyée
+                </Button>
+              ) : (
+                <Button className="w-full shadow-[0_10px_24px_var(--color-accent-glow)]" pending={pending} onClick={onSend}>
+                  <Send size={18} aria-hidden="true" />
+                  Envoyer au fournisseur
+                </Button>
+              )}
+            </div>
+          ) : null}
+          {editable ? (
+            <nav aria-label="Autres gestes sur la liste" className="mt-1 flex flex-wrap justify-center gap-x-4 pb-2">
+              {onAdd ? (
+                <button type="button" onClick={onAdd} className={link}>
+                  Ajouter un article
+                </button>
+              ) : null}
+              {selection && rows.length > 1 ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setChecked(new Set());
+                    setSelecting(true);
+                  }}
+                  className={link}
+                >
+                  Envoyer une sélection à un autre fournisseur
+                </button>
+              ) : null}
+              {onVoice ? (
+                <button type="button" onClick={onVoice} aria-expanded={Boolean(voice)} className={link}>
+                  Modifier à la voix
+                </button>
+              ) : null}
+            </nav>
+          ) : null}
+        </>
+      )}
     </section>
   );
 }
-
-const BLOCKS: { key: string; label: string; statuses: ScreenRow["status"][] }[] = [
-  { key: "ready", label: "C'est bon", statuses: ["ok", "supplier"] },
-  { key: "check", label: "À vérifier", statuses: ["check"] },
-];
 
 const toNumber = (q: string) => Number(q.replace(/\s/g, "").replace(",", "."));
 const shownNumber = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 2 });
@@ -360,12 +287,13 @@ function Stepper({ label, value, unit, pending, onChange }: { label: string; val
 }
 
 /** Le bord gauche de la carte dit son état d'un coup d'œil : vert prêt, orange à vérifier, gris au fournisseur. */
-const BORDER: Record<ScreenRow["status"], string> = { ok: "border-l-ok", check: "border-l-warn", supplier: "border-l-[#b8bcc6]" };
+const BORDER: Record<ScreenRow["status"], string> = { ok: "border-l-ok", check: "border-l-warn", supplier: "border-l-ok" };
 
 const DOT: Record<ScreenRow["status"], { className: string; label: string }> = {
   ok: { className: "bg-ok", label: "sûr" },
   check: { className: "bg-warn", label: "à vérifier" },
-  supplier: { className: "bg-[#b8bcc6]", label: "à préciser avec le fournisseur" },
+  // §50.3 : vert ou orange, rien d'autre ; une ligne laissée au fournisseur est prête à partir.
+  supplier: { className: "bg-ok", label: "sûr" },
 };
 
 /**
@@ -421,21 +349,13 @@ function Row({
   // Une ligne reprise du devis n'a pas de calcul : on montre d'où elle vient.
   const what = item?.kind === "direct" ? "la ligne du devis" : "le calcul";
   const quantity = item?.quantity ?? quote?.measure ?? row.pending?.quantity ?? null;
-  const sub = sentTo
-    ? `Envoyé · ${sentTo}`
-    : row.status === "check"
-      ? // §49.8 : la raison en entier, celle de la ligne, sinon celle de sa remarque.
-        (row.reason ?? (decision ? doubtText(decision.text) : null) ?? "À vérifier")
-      : row.status === "supplier"
-        ? "À préciser avec le fournisseur"
-        : ([item?.approx, item?.precision].filter(Boolean).join(" · ") || null);
+  // §50.3 : une ligne verte ne dit rien de plus que son nom et sa quantité ; une orange, sa raison en cinq mots.
+  const sub = sentTo ? `Envoyé · ${sentTo}` : row.status === "check" ? (row.reason ?? "À vérifier") : null;
   const dot = sentTo ? DOT.supplier : DOT[row.status];
   // §48 : une ligne orange se règle sur place, au plus / moins ; le crayon ouvre sa fiche (désignation, croquis).
   const parsed = item?.quantity ? parseQuantity(item.quantity) : null;
-  const stepper = row.status === "check" && editable && item && parsed && Number.isFinite(toNumber(parsed.quantity)) ? { value: toNumber(parsed.quantity), unit: parsed.unit } : null;
-  // Une pièce zinc commandée façonnée (bande, couvertine, noue…) peut partir avec son croquis (facultatif) ; jamais une
-  // gouttière ni une descente (jamais façonnées), ni une bobine ou une feuille.
-  const zincPiece = editable && item !== undefined && Boolean(sketchHandlers) && /\bzinc\b/i.test(item.label) && /\b(bandes?|couvertines?|noues?|solins?|abergements?|fa[iî]tages?|rives?|habillages?|bavettes?|chapeaux?|pi[eè]ces?)\b/i.test(item.label) && !/bobine|feuille|bobineau|goutti|descente|naissance|coude|collier/i.test(item.label);
+  // §50.3 : chaque carte a sa quantité au moins / plus et son unité, verte ou orange.
+  const stepper = editable && !sentTo && item && parsed && Number.isFinite(toNumber(parsed.quantity)) ? { value: toNumber(parsed.quantity), unit: parsed.unit } : null;
   const removable = editable && (row.itemKey !== undefined || row.lineIds.length > 0);
   // Ce que la fiche peut montrer : l'article, sinon les lignes du devis ; sinon, en lecture seule, le calcul.
   const canEdit = editable && (item !== undefined || lines.length > 0);
@@ -473,17 +393,11 @@ function Row({
       <span className="flex min-w-0 grow flex-col">
         {/* La désignation entière : c'est ce que le comptoir lit (jamais coupée). Sur téléphone, la quantité passe dessous. */}
         <span className="text-[14px] leading-snug font-semibold">{label}</span>
-        {quantity || sub || sketches.length > 0 ? (
+        {(quantity && !stepper) || sub ? (
           <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 text-[13px] leading-snug">
             {quantity && !stepper ? <span className="shrink-0 text-[14px] font-extrabold tabular-nums sm:hidden">{quantity}</span> : null}
             {/* §49.8 : la précision en entier, jamais « … ». */}
             {sub ? <span className={`min-w-0 ${sentTo ? "font-bold text-muted" : row.status === "check" ? "font-bold text-warn" : "text-muted"}`}>{sub}</span> : null}
-            {sketches.length > 0 && !open ? (
-              <span className="inline-flex shrink-0 items-center gap-1 text-[12px] font-bold text-[#4a37d6]">
-                <Paperclip size={12} aria-hidden="true" />
-                {sketches.length}
-              </span>
-            ) : null}
           </span>
         ) : null}
       </span>
@@ -566,19 +480,9 @@ function Row({
             />
           </div>
         ) : null}
-        {zincPiece && sketches.length === 0 && !open ? (
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            className="ml-5 inline-flex min-h-9 items-center gap-1.5 text-[12px] font-bold text-[#4a37d6]"
-          >
-            <Paperclip size={13} aria-hidden="true" />
-            Ajouter un croquis (facultatif)
-          </button>
-        ) : null}
       </div>
       {row.status === "check" && editable && !open && !sentTo ? (
-        <CardActions label={label} decision={decision} item={item} pending={pending} handlers={handlers} onEdit={onEdit} onOpen={() => setOpen(true)} {...(shared ? { shared } : {})} />
+        <CardActions label={label} decision={decision} item={item} pending={pending} handlers={handlers} onEdit={onEdit} {...(shared ? { shared } : {})} />
       ) : null}
       {open ? (
         <>
@@ -707,8 +611,6 @@ function LinePanel({
   );
 }
 
-/** Clé d'une quantité calculée avec une règle « à vérifier » (§47.3). */
-const RATIO = "ratio:";
 /** Ajout proposé par l'appel IA n° 2 : jamais vert d'office, il attend un oui ou un non. */
 const AI_ADDITION = "ia-ajout:";
 
@@ -727,7 +629,6 @@ function CardActions({
   pending,
   handlers,
   onEdit,
-  onOpen,
   shared = new Map(),
 }: {
   shared?: ReadonlyMap<string, string>;
@@ -737,7 +638,6 @@ function CardActions({
   pending: boolean;
   handlers: DecisionHandlers;
   onEdit: (item: PurchaseItem, edit: ItemEdit) => Promise<void>;
-  onOpen: () => void;
 }) {
   const id = useId();
   const [value, setValue] = useState("");
@@ -753,13 +653,10 @@ function CardActions({
   return (
     <div role="group" aria-label={`Régler : ${label}`} aria-busy={pending || undefined} className="flex flex-col gap-2 pl-5">
       {asks.map((a) =>
-        shared.has(a.key) ? (
-          <p key={a.key} className="text-[13px] leading-snug text-muted">
-            {a.text} : se règle avec « {shared.get(a.key)} », plus haut.
-          </p>
-        ) : (
+        // §50.3 : la raison dit déjà ce qui manque ; la carte ne montre que les boutons (une question partagée avec une autre
+        // carte se règle sur la première, sans phrase de renvoi).
+        shared.has(a.key) ? null : (
         <div key={a.key} role="group" aria-label={a.text} className="flex flex-col gap-1.5">
-          <p className="text-[13px] leading-snug font-bold">{a.text} ?</p>
           <div className="flex flex-wrap gap-1.5">
             {a.options.map((o) => (
               <button key={o.value || "aucun"} type="button" disabled={pending} onClick={() => void answer(a.key, a.unit, o.value)} className={`${OPTION} grow`}>
@@ -837,12 +734,8 @@ function CardActions({
             </Button>
           </>
         ) : null}
-        {!d || d.primary?.action === "edit" ? (
-          <Button className={btn} variant={done ? "secondary" : "primary"} onClick={onOpen} aria-label={`Corriger : ${label}`}>
-            <Pencil size={18} aria-hidden="true" />
-            {d?.primary?.label ?? "Corriger"}
-          </Button>
-        ) : null}
+        {/* §49.8 : les choix en boutons dans la carte, puis « C'est bon » ; plus de gros bouton « Corriger » : la ligne se
+            réécrit d'un tap sur son nom. */}
       </div>
     </div>
   );

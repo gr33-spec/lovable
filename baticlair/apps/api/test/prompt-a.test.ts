@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { PROMPT_A_41_1, siteNotesInstruction, takeoffSystemPrompt, TAKEOFF_PROMPT } from "../src/modules/takeoff/application/prompt.js";
+import { PROMPT_A_41_1, RULE_49_9, siteNotesInstruction, takeoffSystemPrompt, TAKEOFF_PROMPT } from "../src/modules/takeoff/application/prompt.js";
 import { AnthropicTakeoffExtractor } from "../src/modules/takeoff/infrastructure/anthropic-takeoff-extractor.js";
 import { decodeExtraction, extractionWireSchema } from "../src/modules/takeoff/application/takeoff-extractor.js";
 
 /** PROMPT A (référentiel §41.1), branché mot pour mot : seules les accolades sont remplies, et le format technique est ajouté après. */
-describe("prompt A de lecture du devis (v13)", () => {
+describe("prompt A de lecture du devis (v14)", () => {
   const prompt = takeoffSystemPrompt("Couverture", ["Tuile", "Ardoise"], [
     { id: "couverture-ardoises-crochet", label: "Couverture en ardoises au crochet", synonyms: ["ardoise"] },
     { id: "couverture-zinc-joint-debout", label: "Couverture zinc à joint debout", synonyms: ["joint debout", "couverture zinc"] },
   ]);
 
-  it("est la version 13 : le §41.1 réécrit, mot pour mot (comparé au référentiel), puis le format technique ; plus de bloc « RÈGLE NUMÉRO UN » ajouté", () => {
-    expect(TAKEOFF_PROMPT.version).toBe(13);
+  it("est la version 14 : le §41.1 réécrit, mot pour mot (comparé au référentiel), puis le §49.9 du fondateur, puis le format technique ; plus de bloc « RÈGLE NUMÉRO UN » ajouté", () => {
+    expect(TAKEOFF_PROMPT.version).toBe(14);
     const doc = readFileSync(new URL("../../../docs/referentiel-couverture.md", import.meta.url), "utf8");
     const a = doc.slice(doc.indexOf("### 41.1 Prompt A"), doc.indexOf("### 41.2")).split("```")[1]!.replace(/^\n|\n$/g, "");
     expect(PROMPT_A_41_1).toBe(a);
@@ -23,7 +23,11 @@ describe("prompt A de lecture du devis (v13)", () => {
     expect(prompt.startsWith(filled)).toBe(true);
     expect(prompt).not.toMatch(/\{metier\}|\{liste des ouvrages/);
     // Le format technique vient APRÈS le texte du §41.1, comme du contexte injecté, et donne les noms courts des nouveaux champs.
-    const format = prompt.slice(filled.length);
+    // §49.9 (2026-10-09), tel que le fondateur l'a écrit, juste après le §41.1 : une ligne nomme une fourniture.
+    const after = prompt.slice(filled.length).trimStart();
+    expect(after.startsWith(RULE_49_9)).toBe(true);
+    expect(RULE_49_9).toContain("une ligne du quantitatif nomme une fourniture, jamais la phrase du devis");
+    const format = after.slice(RULE_49_9.length);
     expect(format.trimStart().startsWith("FORMAT TECHNIQUE DE LA RÉPONSE (contexte injecté par BatiClair")).toBe(true);
     for (const field of ["role :", "articles :", "\"nom\", \"materiau\", \"quantite\", \"unite\", \"elements\"", "faconnage :", "manque :"]) expect(format).toContain(field);
     // Le bloc ajouté autrefois en fin de prompt a disparu : la règle numéro un est DANS le §41.1.
@@ -31,7 +35,7 @@ describe("prompt A de lecture du devis (v13)", () => {
     expect(prompt).not.toContain("(fondateur, prioritaire sur toute autre règle ci-dessus)");
   });
 
-  it("une réponse v12 se décode : rôle, articles, façonnage et « manque » gardés avec la ligne ; « hors_quantitatif » n'est pas une ligne", () => {
+  it("une réponse v12 se décode : rôle, articles, façonnage et « manque » gardés avec la ligne ; « hors_quantitatif » est gardé à part (§49.9, repliée)", () => {
     const wire = extractionWireSchema.parse({
       sections: [],
       lignes: [
@@ -62,7 +66,8 @@ describe("prompt A de lecture du devis (v13)", () => {
       notes: [],
     });
     const out = decodeExtraction(wire);
-    expect(out.lines.map((l) => l.designation)).toEqual(["Fourniture d'ardoises naturelles 32x22 et crochets de 11", "Fourniture de gouttière Havraise en zinc"]);
+    expect(out.lines.map((l) => l.designation)).toEqual(["Fourniture d'ardoises naturelles 32x22 et crochets de 11", "Fourniture de gouttière Havraise en zinc", "Déplacement"]);
+    expect(out.lines[2]!.reading?.role).toBe("hors_quantitatif");
     expect(out.lines[0]!.reading).toEqual({
       role: "fourniture",
       articles: [
@@ -75,7 +80,7 @@ describe("prompt A de lecture du devis (v13)", () => {
     expect(out.lines[1]!.reading).toMatchObject({ faconnage: "fourni", manque: ["développé de la gouttière (25, 28, 33, 40)"] });
   });
 
-  it("une réponse v9 se décode : doute = confiance « doute » avec sa raison ; « hors_quantitatif » n'est pas une ligne à commander", () => {
+  it("une réponse v9 se décode : doute = confiance « doute » avec sa raison ; « hors_quantitatif » n'est pas une ligne à commander (rôle gardé, §49.9)", () => {
     const wire = extractionWireSchema.parse({
       sections: [["TOITURE"]],
       lignes: [
@@ -87,7 +92,8 @@ describe("prompt A de lecture du devis (v13)", () => {
       notes: [],
     });
     const out = decodeExtraction(wire);
-    expect(out.lines.map((l) => l.designation)).toEqual(["Couverture ardoises 32x22", "Zinguerie"]);
+    expect(out.lines.map((l) => l.designation)).toEqual(["Couverture ardoises 32x22", "Zinguerie", "Échafaudage"]);
+    expect(out.lines[2]!.reading?.role).toBe("hors_quantitatif");
     expect(out.lines[0]).toMatchObject({ doubt: null, workItem: "couverture-ardoises-crochet", material: "ardoise 32×22", dimensions: { pente: "35°" }, section: ["TOITURE"] });
     expect(out.lines[1]).toMatchObject({ doubt: "Gouttières seules ou avec descentes ?", workItem: "inconnu", material: null });
     expect(out.context).toEqual({ adresse: "29200 Brest", travaux: "rénovation" });

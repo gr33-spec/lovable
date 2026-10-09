@@ -235,6 +235,8 @@ export interface Quantitatif {
 export interface Takeoff {
   /** « Comme d'habitude ? » : les habitudes établies de l'entreprise appliquées à ce chantier. */
   habits?: { key: string; question: string; unit: string; options: { label: string; value: string }[]; value: string }[];
+  /** §49.9 : les lignes du devis sans fourniture (heures, forfait, accès, évacuation), repliées sous la liste. */
+  sansFourniture?: { lineId: string; label: string; measure: string | null }[];
   /** §48.4 : ce que l'IA juge utile mais que le devis ne demande pas : bloc « Suggestions », décoché. */
   aiSuggestions?: { key: string; label: string; quantity: string | null; unit: string | null; reason: string }[];
   id: string;

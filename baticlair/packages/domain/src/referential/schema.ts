@@ -122,6 +122,7 @@ export const referentialSchema = z.object({
   wasteRules: z.array(wasteRule),
   countedWorks: z.array(countedWork).optional(),
   writtenOnly: z.boolean().optional(),
+  withoutSupplyUnits: z.array(z.string()).optional(),
 });
 
 export class ReferentialFileError extends Error {

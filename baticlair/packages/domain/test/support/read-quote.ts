@@ -8,6 +8,7 @@ import {
   applyPurchaseOverrides,
   ROOFING_REFERENTIAL,
   slotsGivenByQuote,
+  supplyLines,
   tradeProfile,
   validateTakeoff,
   type EngineAnswer,
@@ -38,7 +39,11 @@ export function readQuote(
   readings?: ReadonlyMap<string, QuoteLineReading>,
 ): PurchaseView {
   const profile = tradeProfile("roofing");
-  const lines = bench.map((l) => ({ ref: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit }));
+  // §49.9 : une prestation est remplacée par la fourniture qu'elle contient (les articles de sa lecture), comme à l'enregistrement.
+  // Une ligne hors quantitatif (§41.1 : accès, évacuation, nettoyage) n'entre pas au calcul.
+  const supplied = supplyLines(bench.filter((l) => readings?.get(l.ref)?.role !== "hors_quantitatif"), readings);
+  readings = readings ? supplied.readings : undefined;
+  const lines = supplied.lines.map((l) => ({ ref: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit }));
   const raw = validateTakeoff(lines.map((l) => ({ id: l.ref, designation: l.designation, quantityRaw: l.quantity, unitRaw: l.unit, source: "client_quote" as const })), profile);
   const plan = planQuote(lines, ROOFING_REFERENTIAL, profile, undefined, extraFacts);
   const proposals = proposeLineRoles(lines, plan, raw, ROOFING_REFERENTIAL);

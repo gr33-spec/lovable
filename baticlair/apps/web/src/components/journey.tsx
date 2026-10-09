@@ -1,17 +1,15 @@
 "use client";
 
-import { Bell, Check, Coffee, FileUp, Loader2, Pencil, Sparkles } from "lucide-react";
-import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { Check, FileUp, Loader2, Pencil, Sparkles } from "lucide-react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
 import type { ApiError, Takeoff } from "@/lib/api";
-import { askPush, ensurePush, pushSupport } from "@/lib/push";
 
 /*
- * LE PARCOURS (§48, retour du fondateur, 2026-10-06) : zéro saisie, un écran par étape, un ton direct et cool.
- *  1. déposer le PDF (seule action) ;  2. l'analyse (nom du chantier lu dans le devis, renommable d'un tap) ;
- *  3. les questions de comptoir, toutes d'un coup, AVANT le calcul (texte ou voix) ;  4. le calcul (moteur + IA qui
- *  complète) ;  5. le résultat : « C'est bon » puis « À vérifier », et l'envoi au fournisseur.
- * L'IA peut se tromper, et elle le dit.
+ * §50 « Ce que voit l'artisan » (fondateur, 2026-10-09) : TROIS ÉCRANS, rien d'autre.
+ *  1. je dépose mon devis : un bouton ; pendant la lecture, « Je lis ton devis » ; en cas d'échec, la raison et « Réessayer » ;
+ *  2. les questions : une par carte, en boutons, groupées par ouvrage, puis « Calculer ma liste » ;
+ *  3. ma liste (supply-list.tsx).
  */
 
 // ——— L'animation : un devis qui devient une liste de matériaux ———
@@ -55,7 +53,7 @@ export function DevisAnimation({ size = "lg" }: { size?: "lg" | "sm" }) {
  * LA SEULE ACTION D'UN NOUVEAU CHANTIER : déposer le PDF. Une grande zone (toucher pour choisir, ou glisser le fichier
  * sur ordinateur), l'animation, une phrase. Le nom, l'adresse et le client viennent du devis.
  */
-export function DropZone({ onFile, pending, error, title = "Dépose ton devis, je te sors le quantitatif." }: { onFile: (file: File) => void; pending: boolean; error: ApiError | null; title?: string }) {
+export function DropZone({ onFile, pending, error }: { onFile: (file: File) => void; pending: boolean; error: ApiError | null }) {
   const id = useId();
   const input = useRef<HTMLInputElement>(null);
   const [over, setOver] = useState(false);
@@ -64,15 +62,9 @@ export function DropZone({ onFile, pending, error, title = "Dépose ton devis, j
     onFile(file);
     if (input.current) input.current.value = "";
   };
+  // §50.1 : un bouton, « Déposer mon devis » (toucher pour choisir, ou glisser le fichier sur ordinateur). Rien d'autre.
   return (
-    <section aria-labelledby={`${id}-t`} className="flex flex-col gap-4">
-      <div className="overflow-hidden rounded-[28px] bg-hero px-5 pt-6 pb-5 text-white shadow-[0_24px_48px_-16px_rgba(26,21,80,0.6)]">
-        <DevisAnimation />
-        <h1 id={`${id}-t`} className="mt-4 font-display text-[27px] leading-[1.08] font-extrabold tracking-[-0.02em]">
-          {title}
-        </h1>
-        <p className="mt-2 text-[15px] leading-snug text-white/75">Un PDF, même scanné. Rien à taper : le nom du chantier, l&apos;adresse et les quantités viennent du devis.</p>
-      </div>
+    <section aria-label="Dépôt du devis" className="flex flex-col gap-4">
       {error ? <ErrorNotice error={error} /> : null}
       <input ref={input} id={id} type="file" accept="application/pdf,.pdf" className="sr-only" disabled={pending} onChange={(e) => take(e.target.files?.[0])} />
       <label
@@ -95,8 +87,7 @@ export function DropZone({ onFile, pending, error, title = "Dépose ton devis, j
         <span className="flex size-16 items-center justify-center rounded-full bg-cta text-white shadow-cta">
           {pending ? <Loader2 size={28} className="animate-spin" aria-hidden="true" /> : <FileUp size={28} aria-hidden="true" />}
         </span>
-        <span className="font-display text-[20px] font-extrabold tracking-[-0.01em]">{pending ? "J'envoie ton devis…" : "Choisir le devis (PDF)"}</span>
-        <span className="text-[14px] font-semibold text-muted">{pending ? "Quelques secondes." : "Touche ici, ou glisse le fichier."}</span>
+        <span className="font-display text-[20px] font-extrabold tracking-[-0.01em]">Déposer mon devis</span>
       </label>
     </section>
   );
@@ -104,65 +95,26 @@ export function DropZone({ onFile, pending, error, title = "Dépose ton devis, j
 
 // ——— 2. L'analyse ———
 
-const ANALYSIS_STEPS = ["J'ouvre ton devis.", "Je lis chaque ligne, même les petites.", "Je reconnais les ouvrages : couverture, zinguerie, gouttières…", "Je repère ce que le devis ne dit pas."];
-
-/** Une feuille qu'un trait lumineux parcourt, et les étapes qui se cochent au fil de la lecture. */
-export function AnalysisScreen({ fileName }: { fileName: string | null }) {
-  const [shown, setShown] = useState(1);
-  useEffect(() => {
-    if (shown >= ANALYSIS_STEPS.length) return;
-    const t = setTimeout(() => setShown((n) => n + 1), 3500);
-    return () => clearTimeout(t);
-  }, [shown]);
-  const long = useElapsed(10_000);
+/** §50.1 : pendant la lecture, une seule phrase : « Je lis ton devis ». */
+export function AnalysisScreen() {
   return (
-    <section aria-label="Analyse du devis" className="flex flex-col gap-4">
-      <div className="flex flex-col items-center gap-5 rounded-[28px] bg-hero px-5 py-7 text-white shadow-[0_24px_48px_-16px_rgba(26,21,80,0.6)]">
-        <div aria-hidden="true" className="relative h-44 w-36 overflow-hidden rounded-2xl bg-white p-4 shadow-[0_20px_40px_-14px_rgba(0,0,0,0.55)]">
-          <span className="block h-2.5 w-14 rounded-full bg-[#1c3fd1]/70" />
-          {Array.from({ length: 9 }, (_, i) => (
-            <span key={i} className="mt-2.5 block h-1.5 rounded-full bg-[#c9ced8]" style={{ width: `${55 + ((i * 37) % 40)}%` }} />
-          ))}
-          <span className="absolute inset-x-0 top-3 h-6 bg-gradient-to-b from-transparent via-[#6b46ff]/45 to-transparent" style={{ animation: "bc-scan 2.6s ease-in-out infinite" }} />
-        </div>
-        <div className="flex flex-col items-center gap-1 text-center">
-          <h2 className="font-display text-[24px] leading-tight font-extrabold tracking-[-0.02em]">Je lis ton devis</h2>
-          {fileName ? <p className="max-w-full truncate text-[13px] text-white/60">{fileName}</p> : null}
-        </div>
-      </div>
-      <ol aria-live="polite" aria-label="Étapes de la lecture" className="flex flex-col gap-3 rounded-[22px] bg-surface p-4 shadow-card">
-        {ANALYSIS_STEPS.slice(0, shown).map((s, i) => (
-          <li key={s} className="flex animate-[bc-step_.35s_ease-out_both] items-start gap-2.5 text-[15px] leading-snug">
-            {i < shown - 1 ? (
-              <Check size={20} strokeWidth={2.5} className="mt-px shrink-0 text-ok" aria-hidden="true" />
-            ) : (
-              <span aria-hidden="true" className="flex size-5 shrink-0 items-center justify-center">
-                <span className="size-2 animate-pulse rounded-full bg-accent" />
-              </span>
-            )}
-            <span className={i < shown - 1 ? "" : "text-muted"}>{s}</span>
-          </li>
+    <section aria-label="Analyse du devis" className="flex flex-col items-center gap-5 rounded-[28px] bg-hero px-5 py-7 text-white shadow-[0_24px_48px_-16px_rgba(26,21,80,0.6)]">
+      <div aria-hidden="true" className="relative h-44 w-36 overflow-hidden rounded-2xl bg-white p-4 shadow-[0_20px_40px_-14px_rgba(0,0,0,0.55)]">
+        <span className="block h-2.5 w-14 rounded-full bg-[#1c3fd1]/70" />
+        {Array.from({ length: 9 }, (_, i) => (
+          <span key={i} className="mt-2.5 block h-1.5 rounded-full bg-[#c9ced8]" style={{ width: `${55 + ((i * 37) % 40)}%` }} />
         ))}
-      </ol>
-      {long ? <WaitNote what="la lecture" /> : null}
+        <span className="absolute inset-x-0 top-3 h-6 bg-gradient-to-b from-transparent via-[#6b46ff]/45 to-transparent" style={{ animation: "bc-scan 2.6s ease-in-out infinite" }} />
+      </div>
+      <h2 aria-live="polite" className="font-display text-[24px] leading-tight font-extrabold tracking-[-0.02em]">
+        Je lis ton devis
+      </h2>
     </section>
   );
 }
 
-/** Vrai après `ms` millisecondes passées sur l'écran. */
-function useElapsed(ms: number): boolean {
-  const [over, setOver] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => setOver(true), ms);
-    return () => clearTimeout(t);
-  }, [ms]);
-  return over;
-}
-
 // ——— Prévenir l'artisan quand c'est prêt ———
 
-const noSubscription = () => () => {};
-const notificationState = () => (typeof Notification === "undefined" ? "unsupported" : Notification.permission);
 
 /**
  * Quand l'artisan a regardé ailleurs, l'onglet change de titre et, si la page tourne encore, elle montre la
@@ -187,96 +139,16 @@ export function notifyReady(title: string, body: string, tag: string): void {
     .catch(() => undefined);
 }
 
-/** Au-delà de 10 s : un mot pour patienter, et de quoi être prévenu (par le serveur, téléphone verrouillé compris). */
-function WaitNote({ what }: { what: string }) {
-  const permission = useSyncExternalStore(noSubscription, notificationState, () => "unsupported");
-  const support = useSyncExternalStore(noSubscription, pushSupport, () => "unsupported" as const);
-  const [state, setState] = useState<"idle" | "asking" | "on" | "off">("idle");
-  // Déjà autorisé : l'appareil s'abonne sans rien demander.
-  useEffect(() => {
-    if (permission !== "granted") return;
-    let live = true;
-    void ensurePush().then((ok) => live && setState(ok ? "on" : "off"));
-    return () => {
-      live = false;
-    };
-  }, [permission]);
-  const on = state === "on";
-  return (
-    <div role="status" className="flex items-start gap-3 rounded-[22px] bg-surface p-4 shadow-card">
-      <span aria-hidden="true" className="relative flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[#fff1d6] text-[#8a5300]">
-        <Coffee size={22} />
-        <span className="absolute -top-1 left-[17px] h-2.5 w-0.5 rounded-full bg-[#8a5300]/60" style={{ animation: "bc-steam 1.8s ease-out infinite" }} />
-        <span className="absolute -top-1 left-[23px] h-2.5 w-0.5 rounded-full bg-[#8a5300]/60" style={{ animation: "bc-steam 1.8s ease-out .6s infinite" }} />
-      </span>
-      <span className="flex min-w-0 grow flex-col gap-2">
-        <span className="text-[15px] leading-snug font-bold">{on ? "Va boire un café, je te préviens quand c'est prêt." : "Va boire un café, ça arrive."}</span>
-        <span className="text-[13px] leading-snug text-muted">{what === "le calcul" ? "Je vérifie chaque fixation, chaque joint, chaque cartouche." : "Un gros devis, ou un scan : je prends le temps de tout lire."}</span>
-        {on ? (
-          <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-ok">
-            <Check size={14} aria-hidden="true" />
-            Notification activée : tu peux fermer l&apos;appli ou verrouiller le téléphone.
-          </span>
-        ) : support === "iphone-browser" ? (
-          <span className="text-[13px] leading-snug text-muted">
-            Pour être prévenu sur iPhone : touche <span className="font-bold">Partager</span> puis <span className="font-bold">Sur l&apos;écran d&apos;accueil</span>, et ouvre BatiClair depuis l&apos;icône. En attendant, garde cette page ouverte.
-          </span>
-        ) : permission === "denied" ? (
-          <span className="text-[13px] leading-snug text-muted">Les notifications sont bloquées pour BatiClair : autorise-les dans les réglages du téléphone. En attendant, garde cette page ouverte.</span>
-        ) : support === "ok" && permission === "default" ? (
-          <button
-            type="button"
-            disabled={state === "asking"}
-            onClick={() => {
-              setState("asking");
-              void askPush().then((ok) => setState(ok ? "on" : "off"));
-            }}
-            className="inline-flex min-h-11 items-center gap-1.5 self-start rounded-xl bg-ground px-3 text-sm font-extrabold disabled:opacity-60"
-          >
-            <Bell size={16} aria-hidden="true" />
-            Me prévenir
-          </button>
-        ) : state === "off" || support === "unsupported" ? (
-          <span className="text-[13px] leading-snug text-muted">Ce téléphone ne peut pas recevoir la notification : garde cette page ouverte.</span>
-        ) : null}
-      </span>
-    </div>
-  );
-}
-
 // ——— 4. Le calcul ———
 
-const CALCUL_STEPS = ["Je calcule les quantités avec tes réponses.", "Je repasse ligne par ligne : rien que ce qui est écrit dans ton devis.", "Je mets en orange tout ce qui mérite ton œil."];
-
+/** Après « Calculer ma liste » : une seule phrase, le temps du calcul. */
 export function CalculScreen() {
-  const [shown, setShown] = useState(1);
-  useEffect(() => {
-    if (shown >= CALCUL_STEPS.length) return;
-    const t = setTimeout(() => setShown((n) => n + 1), 3500);
-    return () => clearTimeout(t);
-  }, [shown]);
-  const long = useElapsed(10_000);
   return (
-    <section aria-label="Calcul de la liste" className="flex flex-col gap-4">
-      <div className="flex flex-col items-center gap-4 rounded-[28px] bg-hero px-5 py-7 text-white shadow-[0_24px_48px_-16px_rgba(26,21,80,0.6)]">
-        <DevisAnimation />
-        <h2 className="font-display text-[24px] leading-tight font-extrabold tracking-[-0.02em]">Je prépare ta liste</h2>
-      </div>
-      <ol aria-live="polite" aria-label="Étapes du calcul" className="flex flex-col gap-3 rounded-[22px] bg-surface p-4 shadow-card">
-        {CALCUL_STEPS.slice(0, shown).map((s, i) => (
-          <li key={s} className="flex animate-[bc-step_.35s_ease-out_both] items-start gap-2.5 text-[15px] leading-snug">
-            {i < shown - 1 ? (
-              <Check size={20} strokeWidth={2.5} className="mt-px shrink-0 text-ok" aria-hidden="true" />
-            ) : (
-              <span aria-hidden="true" className="flex size-5 shrink-0 items-center justify-center">
-                <span className="size-2 animate-pulse rounded-full bg-accent" />
-              </span>
-            )}
-            <span className={i < shown - 1 ? "" : "text-muted"}>{s}</span>
-          </li>
-        ))}
-      </ol>
-      {long ? <WaitNote what="le calcul" /> : null}
+    <section aria-label="Calcul de la liste" className="flex flex-col items-center gap-4 rounded-[28px] bg-hero px-5 py-7 text-white shadow-[0_24px_48px_-16px_rgba(26,21,80,0.6)]">
+      <DevisAnimation />
+      <h2 aria-live="polite" className="font-display text-[24px] leading-tight font-extrabold tracking-[-0.02em]">
+        Je prépare ta liste
+      </h2>
     </section>
   );
 }
@@ -306,6 +178,8 @@ interface CounterQuestion {
   hint: string | null;
   /** Une valeur sans boutons proposés : elle se règle au plus / moins (jamais au clavier). */
   numeric: boolean;
+  /** §50.2 : l'ouvrage sous lequel la carte se range (« Gouttière zinc », « Couverture zinc à joint debout »). */
+  group: string;
   /** La valeur prise sans réponse (hypothèse dite, habitude) : marquée sur son bouton. */
   usual: string | null;
 }
@@ -318,14 +192,6 @@ export interface CounterAnswers {
 
 type Given = { value: string; label: string };
 
-const SECTIONS: { kind: QuestionKind; title: string; text: string | null }[] = [
-  { kind: "decision", title: "Ce que le devis ne dit pas", text: null },
-  { kind: "habit", title: "Comme d'habitude ?", text: "Ta réponse habituelle est déjà cochée : touche pour la changer sur ce chantier." },
-  { kind: "assumption", title: "Je pars sur ces valeurs", text: "Marquées « par défaut » : touche une autre réponse si ton chantier est différent." },
-  { kind: "onsite", title: "Dépose / repose : déjà sur place ?", text: "Ce qui est déjà sur le toit ne part pas dans la commande." },
-  { kind: "ajout", title: "Consommables", text: "Seuls ceux qui servent aux lignes de ton devis entrent dans la liste." },
-];
-
 /** La question consommables du moteur (§49.1 point 4). */
 const CONSUMABLES_KEY = "param:consommables";
 
@@ -334,6 +200,7 @@ const REWORK = /\b(d[ée]pose|repose|r[ée]fection|r[ée]novation|reprise)\b/i;
 
 /** Les questions de comptoir d'un quantitatif lu, rangées par famille. */
 export function counterQuestions(takeoff: Takeoff): CounterQuestion[] {
+  const groupOf = ouvrageOf(takeoff);
   const decisions: CounterQuestion[] = takeoff.view.decisions
     .filter((d) => d.question)
     .map((d) => {
@@ -350,10 +217,11 @@ export function counterQuestions(takeoff: Takeoff): CounterQuestion[] {
         hint: q.hint,
         numeric: q.kind === "param" && q.options.length === 0,
         usual: null,
+        group: q.key === CONSUMABLES_KEY ? CONSUMABLES_GROUP : groupOf({ key: q.key, lineIds: d.lineIds }),
       };
     });
   const asked = new Set(decisions.map((d) => d.key.replace(/^engine:/, "")));
-  const habits: CounterQuestion[] = (takeoff.habits ?? []).map((h) => ({ key: h.key, kind: "habit", text: h.question, options: h.options, unit: h.unit, about: null, hint: null, numeric: false, usual: h.value }));
+  const habits: CounterQuestion[] = (takeoff.habits ?? []).map((h) => ({ key: h.key, kind: "habit", text: h.question, options: h.options, unit: h.unit, about: null, hint: null, numeric: false, usual: h.value, group: groupOf({ key: h.key, lineIds: [] }) }));
   for (const h of habits) asked.add(h.key);
   // Les hypothèses à boutons (param ou produit) : « je pars sur 5,5 m de rampant », la valeur prise est marquée.
   const assumptions: CounterQuestion[] = takeoff.purchase.assumptions
@@ -364,7 +232,7 @@ export function counterQuestions(takeoff: Takeoff): CounterQuestion[] {
       const plain = (t: string) => t.toLowerCase().replace(",", ".").trim();
       const said = plain(a.value);
       const usual = a.choices.find((c) => plain(c.label) === said || plain(c.value) === said || plain(c.label).startsWith(said) || plain(c.label).startsWith(`${said} `))?.value ?? null;
-      return { key: a.key, kind: "assumption", text: `${a.label} ?`, options: a.choices, unit: a.key.startsWith("param:") ? a.unit : null, about: null, hint: a.note, numeric: false, usual };
+      return { key: a.key, kind: "assumption", text: `${a.label} ?`, options: a.choices, unit: a.key.startsWith("param:") ? a.unit : null, about: null, hint: a.note, numeric: false, usual, group: groupOf({ key: a.key, lineIds: [] }) };
     });
   // §48.2 : en dépose / repose, ce qui sert de support est peut-être déjà sur place.
   const rework = takeoff.lines.some((l) => REWORK.test(l.designation));
@@ -384,6 +252,7 @@ export function counterQuestions(takeoff: Takeoff): CounterQuestion[] {
           hint: b.quantity,
           numeric: false,
           usual: null,
+          group: groupOf({ key: b.key, lineIds: b.lineIds, itemKey: b.key }),
         }))
     : [];
   const ajouts: CounterQuestion[] = takeoff.purchase.suggestions.map((s) => ({
@@ -399,8 +268,38 @@ export function counterQuestions(takeoff: Takeoff): CounterQuestion[] {
     hint: null,
     numeric: false,
     usual: null,
+    group: CONSUMABLES_GROUP,
   }));
   return [...decisions, ...habits, ...assumptions, ...onsite, ...ajouts];
+}
+
+const CONSUMABLES_GROUP = "Consommables";
+const SITE_GROUP = "Le chantier";
+
+/**
+ * §50.2 : l'ouvrage d'une question, lu dans la liste déjà calculée : la ligne du devis qu'elle concerne, sinon l'ouvrage
+ * nommé dans sa clé (« param:faconnage@bandes-zinc »), sinon le chantier en entier (pente, zone).
+ */
+function ouvrageOf(takeoff: Takeoff) {
+  const groups = takeoff.purchase.screen.groups;
+  const byWork = (work: string) =>
+    groups.find((g) => g.key === work) ?? groups.find((g) => g.key.startsWith(work) || work.startsWith(g.key)) ?? takeoff.purchase.groups.find((g) => g.key === work || work.startsWith(g.key));
+  return ({ key, lineIds, itemKey }: { key: string; lineIds: readonly string[]; itemKey?: string }): string => {
+    const byLine = lineIds.length > 0 ? groups.find((g) => g.rows.some((r) => r.lineIds.some((id) => lineIds.includes(id)))) : undefined;
+    if (byLine) return byLine.label;
+    const byItem = itemKey ? groups.find((g) => g.rows.some((r) => r.itemKey === itemKey)) : undefined;
+    if (byItem) return byItem.label;
+    const work = /@([^:@]+)$/.exec(key)?.[1];
+    const found = work ? byWork(work) : undefined;
+    if (found) return found.label;
+    const param = /^(?:engine:)?param:([a-z0-9_]+)/.exec(key)?.[1];
+    if (param) {
+      // Une donnée d'un seul ouvrage de ce devis (« développé » de la gouttière) se range sous lui.
+      const owners = groups.filter((g) => g.rows.some((r) => r.decisionKey?.includes(param)));
+      if (owners.length === 1) return owners[0]!.label;
+    }
+    return SITE_GROUP;
+  };
 }
 
 /**
@@ -422,8 +321,6 @@ export function counterAnswers(questions: readonly CounterQuestion[], given: Rea
   return out;
 }
 
-/** Ce qui compte comme « sans réponse » : les questions du calcul et les « déjà sur place ? » (le reste a sa valeur dite). */
-const needsAnswer = (q: CounterQuestion) => q.kind === "decision" || q.kind === "onsite";
 /** §49.4 : le façonnage d'une pièce de zinguerie écrite est obligatoire avant le calcul (même règle que l'API). */
 const mandatory = (q: CounterQuestion) => /^(?:engine:)?param:faconnage(?:@|$)/.test(q.key);
 
@@ -446,62 +343,43 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
       else delete next[key];
       return next;
     });
-  const required = questions.filter(needsAnswer);
-  const open = required.filter((q) => !given[q.key]).length;
-  const toForm = questions.filter((q) => mandatory(q) && !given[q.key]).length;
-  // Le numéro de chaque question, dans l'ordre des familles affichées.
-  const numbers = new Map(SECTIONS.flatMap((sec) => questions.filter((q) => q.kind === sec.kind)).map((q, i) => [q.key, i + 1]));
+  const toForm = questions.filter((q) => mandatory(q) && !given[q.key]);
+  const [nudge, setNudge] = useState(false);
+  // §50.2 : groupées par ouvrage, dans l'ordre où l'ouvrage arrive ; le chantier et les consommables à la fin.
+  const order = [...new Set(questions.map((q) => q.group))].sort((a, b) => Number(a === SITE_GROUP || a === CONSUMABLES_GROUP) - Number(b === SITE_GROUP || b === CONSUMABLES_GROUP) || Number(a === CONSUMABLES_GROUP) - Number(b === CONSUMABLES_GROUP));
 
   return (
-    <section aria-labelledby="questions-titre" className="flex flex-col gap-3">
-      <div className="flex flex-col gap-1.5 rounded-[24px] bg-hero px-5 py-5 text-white shadow-[0_24px_48px_-16px_rgba(26,21,80,0.6)]">
-        <h2 id="questions-titre" className="font-display text-[22px] leading-tight font-extrabold tracking-[-0.02em]">
-          J&apos;ai quelques questions pour éviter les allers-retours avec ton fournisseur.
-        </h2>
-        <p className="text-[14px] leading-snug text-white/75">Tout se règle ici, d&apos;un appui. Le façonnage est obligatoire ; après, plus de question : ce qui reste sans réponse sortira en orange dans la liste.</p>
-        {required.length > 0 ? (
-          <p aria-live="polite" className="mt-1 inline-flex items-center gap-1.5 self-start rounded-full bg-white/12 px-3 py-1 text-[13px] font-extrabold">
-            <Check size={14} strokeWidth={3} aria-hidden="true" />
-            {required.length - open} sur {required.length} renseignée{required.length - open > 1 ? "s" : ""}
-          </p>
-        ) : null}
-      </div>
+    <section aria-label="Les questions" className="flex flex-col gap-3">
       {error ? <ErrorNotice error={error} /> : null}
-      {SECTIONS.map((section) => {
-        const list = questions.filter((q) => q.kind === section.kind);
-        if (list.length === 0) return null;
-        const ajouts = section.kind === "ajout";
-        return (
-          <section key={section.kind} aria-label={section.title} className="flex flex-col gap-2.5">
-            <div className="flex items-end justify-between gap-3 px-1 pt-2">
-              <span className="flex flex-col">
-                <h3 className="font-display text-[17px] font-extrabold tracking-[-0.01em]">{section.title}</h3>
-                {section.text ? <span className="text-[13px] leading-snug text-muted">{section.text}</span> : null}
-              </span>
-              {ajouts && list.length > 1 ? (
-                <button
-                  type="button"
-                  onClick={() => setGiven((prev) => ({ ...prev, ...Object.fromEntries(list.map((q) => [q.key, { value: "oui", label: "Oui" }])) }))}
-                  className="inline-flex min-h-11 shrink-0 items-center rounded-xl bg-surface px-3 text-sm font-extrabold shadow-card"
-                >
-                  Tout oui
-                </button>
-              ) : null}
-            </div>
-            <ol className="flex flex-col gap-2.5">
-              {list.map((q) => (
-                <QuestionCard key={q.key} index={numbers.get(q.key) ?? 0} question={q} given={given[q.key] ?? null} onChange={(g) => set(q.key, g)} />
+      {order.map((group) => (
+        <section key={group} aria-label={group} className="flex flex-col gap-2.5">
+          <h3 className="px-1 pt-2 font-display text-[17px] font-extrabold tracking-[-0.01em]">{group}</h3>
+          <ol className="flex flex-col gap-2.5">
+            {questions
+              .filter((q) => q.group === group)
+              .map((q) => (
+                <QuestionCard key={q.key} question={q} given={given[q.key] ?? null} flagged={nudge && toForm.some((x) => x.key === q.key)} onChange={(g) => set(q.key, g)} />
               ))}
-            </ol>
-          </section>
-        );
-      })}
+          </ol>
+        </section>
+      ))}
       <div className="h-24 lg:hidden" aria-hidden="true" />
       <div className="fixed inset-x-0 bottom-0 z-30 bg-gradient-to-t from-ground from-70% to-transparent px-4 pt-6 pb-[max(14px,env(safe-area-inset-bottom))] lg:sticky lg:inset-auto lg:px-0">
         <div className="mx-auto max-w-2xl">
-          <Button className="w-full" pending={pending} disabled={toForm > 0} onClick={() => onSubmit(counterAnswers(questions, given))}>
-            <Sparkles size={18} aria-hidden="true" />
-            {toForm > 0 ? `Dis-moi d'abord si tu façonnes (${toForm})` : open > 0 ? `Calculer ma liste (${open} sans réponse)` : "Calculer ma liste"}
+          <Button
+            className="w-full"
+            pending={pending}
+            onClick={() => {
+              // §48.6 : le façonnage de chaque pièce de zinc est obligatoire ; la première carte sans réponse se montre.
+              if (toForm.length > 0) {
+                setNudge(true);
+                document.getElementById(`question-${toForm[0]!.key}`)?.scrollIntoView?.({ block: "center", behavior: "smooth" });
+                return;
+              }
+              onSubmit(counterAnswers(questions, given));
+            }}
+          >
+            Calculer ma liste
           </Button>
         </div>
       </div>
@@ -512,7 +390,7 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
 /** Le pas du plus / moins d'une valeur à régler (jamais au clavier). */
 const stepOf = (unit: string | null) => (unit === "°" ? 5 : unit === "mm" ? 10 : unit === "cm" ? 5 : unit === "m" || unit === "ml" ? 0.5 : 1);
 
-function QuestionCard({ index, question: q, given, onChange }: { index: number; question: CounterQuestion; given: Given | null; onChange: (g: Given | null) => void }) {
+function QuestionCard({ question: q, given, flagged, onChange }: { question: CounterQuestion; given: Given | null; flagged: boolean; onChange: (g: Given | null) => void }) {
   const id = useId();
   const unitLabel = q.unit && q.unit !== "u" ? (q.unit === "m2" ? "m²" : q.unit) : "";
   const shown = (n: number) => `${String(n).replace(".", ",")}${unitLabel ? (unitLabel === "°" ? "°" : ` ${unitLabel}`) : ""}`;
@@ -522,19 +400,10 @@ function QuestionCard({ index, question: q, given, onChange }: { index: number; 
     onChange(next > 0 ? { value: String(next), label: shown(next) } : null);
   };
   return (
-    <li className={`flex flex-col gap-2.5 rounded-[20px] bg-surface p-4 shadow-card transition ${given ? "ring-2 ring-ok/50" : ""}`}>
-      <div className="flex items-start gap-2.5">
-        <span aria-hidden="true" className={`flex size-7 shrink-0 items-center justify-center rounded-full text-[13px] font-extrabold ${given ? "bg-ok text-white" : "bg-ground text-muted"}`}>
-          {given ? <Check size={16} strokeWidth={3} /> : index}
-        </span>
-        <span className="flex min-w-0 grow flex-col gap-0.5">
-          {q.about ? <span className="line-clamp-1 text-[13px] font-bold text-muted">{q.about}</span> : null}
-          <span id={`${id}-q`} className="text-[16px] leading-snug font-extrabold">
-            {q.text}
-          </span>
-          {q.hint ? <span className="text-[13px] leading-snug text-muted">{q.hint}</span> : null}
-        </span>
-      </div>
+    <li id={`question-${q.key}`} className={`flex scroll-mt-24 flex-col gap-2.5 rounded-[20px] bg-surface p-4 shadow-card transition ${given ? "ring-2 ring-ok/50" : flagged ? "ring-2 ring-warn" : ""}`}>
+      <span id={`${id}-q`} className="text-[16px] leading-snug font-extrabold">
+        {q.text}
+      </span>
       {q.numeric ? (
         <div role="group" aria-labelledby={`${id}-q`} className="flex items-center justify-center gap-4">
           <button type="button" onClick={() => bump(-stepOf(q.unit))} disabled={!given} aria-label="Moins" className="flex size-12 items-center justify-center rounded-full bg-ground text-[24px] font-extrabold active:scale-95 disabled:opacity-40">

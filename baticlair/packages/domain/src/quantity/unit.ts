@@ -44,6 +44,7 @@ export const UNIT_DEFINITIONS = {
   CARTON: { dimension: "package", toBase: null },
   BARRE: { dimension: "package", toBase: null },
   COURONNE: { dimension: "package", toBase: null },
+  JEU: { dimension: "package", toBase: null },
   FORFAIT: { dimension: "lump_sum", toBase: null },
 } as const satisfies Record<string, UnitDefinition>;
 
@@ -84,6 +85,7 @@ const UNIT_ALIASES: Record<string, UnitCode> = {
   carton: "CARTON", cartons: "CARTON", ctn: "CARTON", crt: "CARTON",
   barre: "BARRE", barres: "BARRE", br: "BARRE",
   couronne: "COURONNE", couronnes: "COURONNE", cour: "COURONNE",
+  jeu: "JEU", jeux: "JEU", kit: "JEU", kits: "JEU",
   plaque: "U", plaques: "U", cartouche: "U", cartouches: "U",
   ft: "FORFAIT", fft: "FORFAIT", forfait: "FORFAIT",
 };

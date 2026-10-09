@@ -129,14 +129,16 @@ describe("deux appels IA max : lecture + quantitatif", () => {
     const rows = q.ecran.purchase.screen.groups.flatMap((g) => g.rows);
     const gouttiere = q.ecran.purchase.toBuy.find((b) => /Gouttière/.test(b.label))!;
     // Le doute de l'IA (avec son remplacement) colore la ligne de la gouttière.
-    expect(rows.find((r) => r.itemKey === gouttiere.key)).toMatchObject({ status: "check", decisionKey: `ia-doute:${gouttiere.key}`, reason: "Zinc naturel ou prépatiné ? Le comptoir doit le savoir." });
+    // §50.3 : la raison en cinq mots au plus.
+    expect(rows.find((r) => r.itemKey === gouttiere.key)).toMatchObject({ status: "check", decisionKey: `ia-doute:${gouttiere.key}`, reason: "Zinc naturel ou prépatiné ?" });
     // §48.4 : plus aucune question après la sortie de la liste (celles laissées sans réponse sont closes au calcul).
     expect(q.ecran.view.decisions.filter((d) => (d as { question?: unknown }).question)).toEqual([]);
-    // Une question laissée vide (la pose des crochets de gouttière…) ne disparaît pas : sa ligne sort orange « Info manquante ».
-    // §49.2.5 : elle part telle quelle d'un « C'est bon ».
-    const manque = rows.filter((r) => r.reason?.startsWith("Info manquante"));
+    // Une question laissée vide (la pose des crochets de gouttière…) ne disparaît pas : sa ligne sort orange, « … à préciser »
+    // (§50.4 : plus de préfixe « Info manquante : »). §49.2.5 : elle part telle quelle d'un « C'est bon ».
+    const manque = rows.filter((r) => r.reason?.endsWith("à préciser"));
     expect(manque.length).toBeGreaterThan(0);
-    for (const r of manque) expect(r).toMatchObject({ status: "check", decisionKey: expect.stringMatching(/^ratio:|^manque:/), reason: expect.stringMatching(/^Info manquante : /) });
+    for (const r of manque) expect(r).toMatchObject({ status: "check", decisionKey: expect.stringMatching(/^ratio:|^manque:/) });
+    expect(rows.filter((r) => /Info manquante/.test(r.reason ?? ""))).toEqual([]);
     expect(q.ecran.view.decisions.find((d) => d.key === `ia-doute:${gouttiere.key}`)!.suggestion).toEqual({ label: "Gouttière zinc naturel demi-ronde dév. 33", quantity: null, unit: null });
     // RÈGLE NUMÉRO UN : l'ajout que l'IA rend malgré la consigne (un mastic que le devis n'écrit pas) n'est NI dans la
     // liste, NI une ligne orange, NI une suggestion.

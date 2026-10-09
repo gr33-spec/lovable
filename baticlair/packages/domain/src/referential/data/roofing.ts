@@ -1,5 +1,6 @@
 import type { Fact, ParamDef, Product, Provenance, Referential } from "../model.js";
 import { rule, todo } from "./kit.js";
+import { WITHOUT_SUPPLY_UNITS } from "../../takeoff/supply.js";
 
 /**
  * Référentiel COUVERTURE.
@@ -1088,8 +1089,10 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.09-44",
+  version: "roofing-2026.10.09-46",
   writtenOnly: true,
+  // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
+  withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },

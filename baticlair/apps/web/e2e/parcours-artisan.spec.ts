@@ -115,7 +115,7 @@ async function createProject(page: Page, name: string, client: string, address: 
 async function passQuestions(page: Page) {
   // La page des fournitures : la liste, ou d'abord « par logement » pour un chantier de plusieurs logements.
   const list = page.getByRole("region", { name: "Page des fournitures" });
-  const questions = page.getByRole("region", { name: /^J'ai quelques questions/ });
+  const questions = page.getByRole("region", { name: "Les questions" });
   await expect(list.or(questions).first()).toBeVisible({ timeout: 60_000 });
   if (await questions.isVisible()) {
     // §49.4 : le façonnage de chaque pièce de zinc est obligatoire avant le calcul.
@@ -134,20 +134,26 @@ test("un artisan crée son compte et son premier chantier depuis le +", async ({
   // Le « + » : un nouveau chantier = déposer le PDF, rien d'autre à remplir (§48).
   await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Nouveau chantier" }).click();
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
-  await expect(page.getByRole("heading", { name: "Dépose ton devis, je te sors le quantitatif." })).toBeVisible();
+  // §50.1 : un bouton, « Déposer mon devis ».
+  await expect(page.getByText("Déposer mon devis", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Nom du chantier")).toHaveCount(0);
-  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   // Le chantier est créé au dépôt ; la lecture part d'elle-même, sans champ « précisions » ni bouton à toucher.
   await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/);
   await expect(page.getByRole("button", { name: "Lire le devis" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: /Ajouter des informations sur le chantier/ })).toHaveCount(0);
   await passQuestions(page);
-  await expect(page.getByText("L'IA peut se tromper, n'hésite pas à peaufiner.", { exact: false })).toBeVisible();
+  // Retour du fondateur (2026-10-09) : ni bandeau « L'IA peut se tromper… », ni gros bouton « Corriger » sur les cartes.
+  await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible();
+  await expect(page.getByText("L'IA peut se tromper", { exact: false })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^Corriger : / })).toHaveCount(0);
 
-  // Le nom (lu dans le devis, sinon d'attente) se change d'un tap.
-  await page.getByRole("button", { name: /^Renommer le chantier : / }).click();
+  // §50.4 : le titre du chantier rouvre le devis ; le nom se change par « Modifier le chantier ».
+  await expect(page.getByRole("button", { name: /^Ouvrir le devis : / })).toBeVisible();
+  await page.getByRole("button", { name: "Plus d'actions sur le chantier" }).click();
+  await page.getByRole("menuitem", { name: "Modifier le chantier" }).click();
   await page.getByLabel("Nom du chantier").fill("Toiture Dupont");
-  await page.getByRole("button", { name: "Enregistrer le nom" }).click();
+  await page.getByRole("button", { name: "Enregistrer" }).click();
   await expect(page.getByRole("heading", { name: "Toiture Dupont" })).toBeVisible();
   await page.reload();
   await expect(page.getByRole("heading", { name: "Toiture Dupont" })).toBeVisible();
@@ -300,7 +306,7 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
   const fixture = (name: string) => path.join(__dirname, "fixtures", name);
 
   // Un fichier qui n'est pas un PDF est refusé avec un message clair.
-  await page.getByLabel("Choisir le devis (PDF)").setInputFiles({
+  await page.getByLabel("Déposer mon devis").setInputFiles({
     name: "devis.pdf",
     mimeType: "application/pdf",
     buffer: Buffer.from("<html>pas un pdf</html>"),
@@ -308,17 +314,20 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
   await expect(page.getByRole("alert").filter({ hasText: "Ce fichier n'est pas un PDF" })).toBeVisible();
 
   // Devis client : 3 pages (tableau, page scannée, conditions générales).
-  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(fixture("devis-client-couvreur.pdf"));
+  await page.getByLabel("Déposer mon devis").setInputFiles(fixture("devis-client-couvreur.pdf"));
   // §48 : déposé, il est lu tout de suite (aucun champ, aucun bouton), puis les questions, puis la liste.
   await passQuestions(page);
-  await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
+  // §50.4 : plus de carte du PDF ; le titre du chantier rouvre le devis.
+  const title = page.getByRole("button", { name: "Ouvrir le devis : Toiture Leroy" });
+  await expect(title).toBeVisible();
+  await expect(page.getByText("devis-client-couvreur.pdf")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Préparer la liste de matériaux" })).toHaveCount(0);
   await expect(page.getByText(/page lue|pages lues/)).toHaveCount(0);
   await expect(page.getByText("PROCHAINE ÉTAPE", { exact: true })).toHaveCount(0);
 
   // Après rechargement, le devis est toujours là.
   await page.reload();
-  await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
+  await expect(title).toBeVisible();
 
   // Compte : la formule en mots simples (essai, chantiers utilisés), jamais de coûts techniques.
   await page.goto("/compte");
@@ -326,32 +335,36 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
   await expect(page.getByText("1 chantier sur 3")).toBeVisible();
   await expect(page.getByText(/Consommation IA|analyse|tokens/i)).toHaveCount(0);
 
-  // Un devis déposé par erreur se supprime (avec confirmation), puis se redépose.
+  // Un devis déposé par erreur se retire depuis le menu du chantier (avec confirmation), puis se redépose.
   await page.goBack();
-  await page.getByRole("button", { name: "Supprimer devis-client-couvreur.pdf" }).click();
-  await page.getByRole("button", { name: "Annuler" }).click();
-  await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
-  await page.getByRole("button", { name: "Supprimer devis-client-couvreur.pdf" }).click();
-  await page.getByRole("button", { name: "Oui, supprimer" }).click();
-  await expect(page.getByRole("status").filter({ hasText: "Devis supprimé." })).toBeVisible();
-  await expect(page.getByText("devis-client-couvreur.pdf")).toHaveCount(0);
-  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(fixture("devis-client-couvreur.pdf"));
+  const removeQuote = async () => {
+    await page.getByRole("button", { name: "Plus d'actions sur le chantier" }).click();
+    await page.getByRole("menuitem", { name: "Retirer le devis" }).click();
+    await page.getByRole("button", { name: "Oui, retirer" }).click();
+    await expect(page.getByLabel("Déposer mon devis")).toBeAttached();
+  };
+  await page.getByRole("button", { name: "Plus d'actions sur le chantier" }).click();
+  await page.getByRole("menuitem", { name: "Retirer le devis" }).click();
+  await page.getByRole("button", { name: "Non" }).click();
+  await expect(title).toBeVisible();
+  await page.getByRole("button", { name: "Plus d'actions sur le chantier" }).click();
+  await removeQuote();
+  await expect(title).toHaveCount(0);
+  await page.getByLabel("Déposer mon devis").setInputFiles(fixture("devis-client-couvreur.pdf"));
   await passQuestions(page);
-  await expect(page.getByText("devis-client-couvreur.pdf")).toBeVisible();
+  await expect(title).toBeVisible();
 
   // Un devis scanné de 7 Mo (au-delà des 4,5 Mo d'une requête chez l'hébergeur) part en morceaux, et se rouvre entier.
-  await page.getByRole("button", { name: "Supprimer devis-client-couvreur.pdf" }).click();
-  await page.getByRole("button", { name: "Oui, supprimer" }).click();
-  await expect(page.getByText("devis-client-couvreur.pdf")).toHaveCount(0);
+  await removeQuote();
   const heavy = Buffer.concat([fs.readFileSync(fixture("devis-client-couvreur.pdf")), Buffer.from(`\n%${"x".repeat(7_000_000)}\n`)]);
   const parts: string[] = [];
   page.on("request", (r) => r.url().includes("/v1/uploads/") && parts.push(r.url()));
-  await page.getByLabel("Choisir le devis (PDF)").setInputFiles({ name: "devis-scanne.pdf", mimeType: "application/pdf", buffer: heavy });
+  await page.getByLabel("Déposer mon devis").setInputFiles({ name: "devis-scanne.pdf", mimeType: "application/pdf", buffer: heavy });
   await passQuestions(page);
-  await expect(page.getByText("devis-scanne.pdf")).toBeVisible();
+  await expect(title).toBeVisible();
   expect(parts).toHaveLength(3);
   await expect(page.getByRole("alert").filter({ hasText: /volumineux|Introuvable/ })).toHaveCount(0);
-  await page.getByRole("button", { name: "Ouvrir devis-scanne.pdf" }).click();
+  await title.click();
   const viewer = page.getByRole("dialog", { name: "devis-scanne.pdf" });
   await expect(viewer.getByRole("link", { name: "Télécharger" })).toBeVisible();
   const size = await viewer.locator("iframe").evaluate(async (frame) => (await (await fetch((frame as HTMLIFrameElement).src)).blob()).size);
@@ -362,28 +375,22 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
 test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et la valide", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Toiture Morel", "Mme Morel", "3 impasse des Lilas, Lorient");
-  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   // IA simulée en test (AI_PROVIDER=fake) : même parcours, aucun appel payant. La lecture part d'elle-même (§48).
   await passQuestions(page);
 
   // Les crochets en paquets : seul un doute de LECTURE est posé (« 2 ou 3 ? »), jamais « combien par paquet ».
   // §49.8 : la carte orange dit sa raison en entier, dans la liste, et se règle là.
   await orangeCard(page, "Crochet inox ardoise 100 mm");
-  await expect(page.getByText("Chiffre peu lisible : 2 ou 3 paquets ?", { exact: false }).first()).toBeVisible();
+  // §50.3 : la raison en cinq mots au plus.
+  await expect(page.getByText("Chiffre peu lisible", { exact: true }).first()).toBeVisible();
   await expect(page.getByText(/combien par paquet|pièces par paquet/i)).toHaveCount(0);
   await confirmDoubts(page);
-  // UN SEUL ÉCRAN : la liste des fournitures, tout est vert ou gris, le gros bouton dit « Envoyer au fournisseur ».
+  // §50.3 : tout est vert, plus de barre « à régler », un seul bouton « Envoyer au fournisseur » ; aucun compteur (§50.4).
   const liste = page.getByRole("region", { name: "Liste des fournitures" });
-  await expect(liste.getByText(/^\d+ fournitures · tout est prêt$/)).toBeVisible();
+  await expect(liste.getByText(/lignes? à régler/)).toHaveCount(0);
+  await expect(liste.getByText(/\d+ fournitures? ·/)).toHaveCount(0);
   await expect(liste.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
-  // Un seul geste par ligne : la toucher ouvre sa fiche, où l'on retire (« Annuler » pendant 3 s).
-  const premiere = liste.getByRole("button", { name: /^Modifier : / }).first();
-  const retiree = (await premiere.getAttribute("aria-label"))!;
-  await premiere.click();
-  await liste.getByRole("button", { name: "Retirer de la liste" }).click();
-  await expect(page.getByRole("status").filter({ hasText: "Retiré de la liste" })).toBeVisible();
-  await page.getByRole("status").getByRole("button", { name: "Annuler" }).click();
-  await expect(liste.getByRole("button", { name: retiree, exact: true })).toHaveCount(1);
 
   // La preuve dans la fiche de l'article.
   await page.getByRole("button", { name: "Modifier : Tuile romane canal rouge 12,5 u/m²" }).click();
@@ -410,19 +417,19 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await expect(joints).toHaveCount(0);
   await page.getByRole("form", { name: `Modifier : ${tuile}` }).getByRole("button", { name: "Annuler" }).click();
 
-  // Le devis lu reste à un appui : noms courts, ajout et retrait d'une ligne.
-  await page.getByRole("button", { name: "Corriger le devis lu" }).click();
-  await expect(page.getByText("Tuile romane canal rouge 12,5 u/m²")).toBeVisible();
-  await page.getByRole("button", { name: "Ajouter une ligne" }).click();
+  // §50.3 : « Ajouter un article », en petit sous le bouton d'envoi ; l'article se retire depuis sa fiche, sans message flottant.
+  await page.getByRole("button", { name: "Ajouter un article" }).click();
   await page.getByLabel("Désignation").fill("Closoir ventilé");
   await page.getByLabel("Quantité").fill("12");
   await page.getByLabel("Unité").fill("ml");
   await page.getByRole("button", { name: "Ajouter", exact: true }).click();
-  await expect(page.getByText("Closoir ventilé")).toBeVisible();
-  await page.getByRole("button", { name: "Retirer Closoir ventilé" }).click();
-  await page.getByRole("button", { name: "Oui, retirer" }).click();
-  await expect(page.getByText("Closoir ventilé")).toHaveCount(0);
-  await page.getByRole("button", { name: "Revenir à la liste des fournitures" }).last().click();
+  // Le nom court du comptoir (« Closoir ») : la carte le dit tel qu'on le demande.
+  const closoir = liste.getByRole("button", { name: /^Modifier : Closoir/ });
+  await expect(closoir).toBeVisible();
+  await closoir.click();
+  await liste.getByRole("button", { name: "Retirer de la liste" }).click();
+  await expect(closoir).toHaveCount(0);
+  await expect(page.getByRole("status").filter({ hasText: "Retiré de la liste" })).toHaveCount(0);
 
   await confirmDoubts(page);
   // « Envoyer au fournisseur » valide la liste et ouvre l'aperçu (§45.9) ; « Revenir à la liste » le referme.
@@ -438,22 +445,12 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   // La liste validée est conservée.
   await page.reload();
   await openList(page);
-  await expect(page.getByText(/^\d+ fournitures · liste validée$/)).toBeVisible();
-  // « Voir la liste en PDF » (§21.3) : la demande de devis s'ouvre DANS l'app, avec « Fermer », « Télécharger » (et
-  // « Partager » sur téléphone) : on ne reste jamais coincé dans un PDF (retour du fondateur, 2026-10-04).
-  await page.getByRole("button", { name: "Voir la liste en PDF" }).click();
-  const viewer = page.getByRole("dialog", { name: "Liste des fournitures" });
-  await expect(viewer.getByRole("link", { name: "Télécharger" })).toHaveAttribute("download", "demande-de-devis.pdf");
-  await expect(viewer.locator("iframe")).toBeVisible();
-  await viewer.getByRole("button", { name: "Fermer le document" }).click();
-  await expect(viewer).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Envoyer au fournisseur" })).toBeVisible();
 
-  // Une correction du devis lu reste possible après validation : la liste est à valider à nouveau.
-  await page.getByRole("button", { name: "Corriger le devis lu" }).click();
-  await page.getByRole("button", { name: "Corriger Tuile romane canal rouge 12,5 u/m²" }).click();
-  await page.getByLabel("Quantité").fill("1 300");
-  await page.getByRole("button", { name: "Enregistrer" }).click();
-  await page.getByRole("button", { name: "Revenir à la liste des fournitures" }).last().click();
+  // Une ligne se corrige encore après validation, d'un tap sur sa carte : la liste est à valider à nouveau.
+  await page.getByRole("button", { name: `Modifier : ${tuile}` }).click();
+  await page.getByRole("form", { name: `Modifier : ${tuile}` }).getByLabel("Quantité").fill("1 300");
+  await page.getByRole("form", { name: `Modifier : ${tuile}` }).getByRole("button", { name: "Enregistrer" }).click();
   await confirmDoubts(page);
   await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
   await expect(page.getByRole("dialog", { name: "Aperçu de la demande de devis" })).toBeVisible();
@@ -484,14 +481,14 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
 
   // Chantier, devis client, liste validée.
   await createProject(page, "Toiture Garnier", "M. Garnier", "5 rue du Port, Vannes");
-  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await passQuestions(page);
-  await page.getByRole("button", { name: "Corriger le devis lu" }).click();
-  await page.getByRole("button", { name: "Corriger Crochet inox ardoise 100 mm" }).click();
-  await page.getByLabel("Quantité").fill("200");
-  await page.getByLabel("Unité").fill("u");
-  await page.getByRole("button", { name: "Enregistrer" }).click();
-  await page.getByRole("button", { name: "Revenir à la liste des fournitures" }).last().click();
+  // Une ligne se corrige d'un tap sur sa carte (§50.4 : plus de « Corriger le devis lu »).
+  await page.getByRole("button", { name: "Modifier : Crochet inox ardoise 100 mm" }).click();
+  const crochets = page.getByRole("form", { name: "Modifier : Crochet inox ardoise 100 mm" });
+  await crochets.getByLabel("Quantité").fill("200");
+  await crochets.getByLabel("Unité").fill("u");
+  await crochets.getByRole("button", { name: "Enregistrer" }).click();
   await confirmDoubts(page);
   // §45.9 : « Envoyer au fournisseur » ouvre l'aperçu, le document tel que le fournisseur le recevra ; on y choisit
   // les fournisseurs (dont un créé sur place) et une ligne s'y corrige d'un tap.
@@ -547,7 +544,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await expect(page.getByText("Demande envoyée. Quand un fournisseur te répond, ajoute son devis sur sa carte.")).toBeVisible();
   // La demande est partie : la liste se replie en une ligne, les réponses des fournisseurs passent au-dessus
   // (retour du fondateur, 2026-10-05) ; un appui la rouvre.
-  const repliee = page.getByRole("button", { name: /Liste des fournitures envoyée/ });
+  const repliee = page.getByRole("button", { name: /Ma liste, envoyée/ });
   await expect(repliee).toBeVisible();
   const [haut, bas] = await Promise.all([pointp.boundingBox(), repliee.boundingBox()]);
   expect(haut!.y).toBeLessThan(bas!.y);
@@ -633,25 +630,24 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
 test("plusieurs articles inconnus, sans unité : UNE décision les règle tous, rien n'est ✓ en fermant l'écran", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Piscine Le Goff", "M. Le Goff", "2 rue des Dunes, Carnac");
-  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await passQuestions(page);
   await expect(page.getByRole("region", { name: "Page des fournitures" })).toBeVisible();
 
-  // L'artisan ajoute trois articles d'un autre métier, sans unité (comme sur un devis de pisciniste).
-  await page.getByRole("button", { name: "Corriger le devis lu" }).click();
+  // L'artisan ajoute trois articles d'un autre métier, sans unité (comme sur un devis de pisciniste), par « Ajouter un article ».
   for (const [designation, quantity] of [["Skimmer pour piscine liner", "1"], ["Buse de refoulement", "2"], ["Prise balai", "1"]]) {
-    await page.getByRole("button", { name: "Ajouter une ligne" }).click();
+    await page.getByRole("button", { name: "Ajouter un article" }).click();
     await page.getByLabel("Désignation").fill(designation!);
     await page.getByLabel("Quantité").fill(quantity!);
     await page.getByRole("button", { name: "Ajouter", exact: true }).click();
-    await expect(page.getByText(designation!)).toBeVisible();
+    await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible();
   }
-  await page.getByRole("button", { name: "Revenir à la liste des fournitures" }).last().click();
 
   // Une seule carte pour les trois, jamais trois alertes identiques ; sa raison en entier, et son « C'est bon ».
   const name = "Articles que BatiClair ne connaît pas encore";
   await orangeCard(page, name);
-  await expect(page.getByText(/3 articles que BatiClair ne connaît pas encore, dont 3 sans unité/)).toBeVisible();
+  // §50.3 : la raison en cinq mots au plus.
+  await expect(page.getByText("Article inconnu, sans unité", { exact: true })).toBeVisible();
   // Recharger la page ne règle rien à la place de l'artisan.
   await page.reload();
   const group = await orangeCard(page, name);
@@ -673,10 +669,11 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
   // La lecture part d'elle-même (§48), puis les questions de comptoir, puis la liste.
   await passQuestions(page);
   await expect(page.getByRole("region", { name: "Page des fournitures" })).toBeVisible();
-  await expect(page.getByText("devis-client-demo.pdf")).toBeVisible();
-  // Un exemple « potable » (retour du fondateur, 2026-10-04) : la liste est prête dès la lecture, rien à vérifier.
+  // §50.4 : le titre du chantier rouvre le devis de la démo.
+  await expect(page.getByRole("button", { name: "Ouvrir le devis : Démo – Toiture Martin" })).toBeVisible();
+  // Un exemple « potable » (retour du fondateur, 2026-10-04) : la liste est prête dès la lecture, rien à régler.
   const demoList = page.getByRole("region", { name: "Liste des fournitures" });
-  await expect(demoList.getByText(/^\d+ fournitures · tout est prêt$/)).toBeVisible();
+  await expect(demoList.getByText(/lignes? à régler/)).toHaveCount(0);
   await expect(demoList.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
   await expect(demoList.getByText("Embase plomb de sortie de toit")).toBeVisible();
   await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
@@ -763,7 +760,7 @@ test("RGPD : l'artisan télécharge ses données, puis supprime son compte (en t
 test("plusieurs logements : le chantier rangé par logement, puis le total à commander", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Résidence Les Pins", "SCI Les Pins", "4 allée des Pins, Vannes");
-  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-electricien-logements.pdf"));
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-electricien-logements.pdf"));
   await passQuestions(page);
   // D'abord par logement (retour du fondateur, 2026-10-05) : les identiques regroupés, chacun avec ses quantités du devis.
   await expect(page.getByRole("tab", { name: "Par logement (3)" })).toHaveAttribute("aria-selected", "true");
@@ -815,17 +812,17 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   });
   await signUp(page);
   await createProject(page, "Toiture Kervella", "M. Kervella", "2 rue du Port, Lorient");
-  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
 
   // ÉTAPE 3 : un seul écran, AU BOUTON : ni micro, ni zone de texte ici.
-  const questions = page.getByRole("region", { name: /^J'ai quelques questions pour éviter les allers-retours avec ton fournisseur/ });
+  const questions = page.getByRole("region", { name: "Les questions" });
   await expect(questions).toBeVisible({ timeout: 60_000 });
   await expect(page.getByRole("button", { name: /voix/ })).toHaveCount(0);
   await expect(page.getByRole("textbox")).toHaveCount(0);
-  // Tout ce qui manque au calcul : ce que le devis ne dit pas, les valeurs prises par défaut. §49.4 : les consommables ne
-  // sont jamais une liste d'articles proposés, seulement UNE question oui / non ; ici, non.
-  await expect(page.getByRole("region", { name: "Ce que le devis ne dit pas" })).toBeVisible();
-  await expect(page.getByRole("region", { name: "Je pars sur ces valeurs" })).toBeVisible();
+  // §50.2 : une question par carte, groupées par ouvrage, sans explication ; la valeur prise par défaut est marquée. §49.4 :
+  // les consommables ne sont jamais une liste d'articles proposés, seulement UNE question oui / non ; ici, non.
+  await expect(questions.getByRole("heading", { level: 3 }).first()).toBeVisible();
+  await expect(page.getByText(/Tout se règle ici|allers-retours|renseignée/)).toHaveCount(0);
   await expect(page.getByText("par défaut").first()).toBeVisible();
   const consommables = page.getByRole("region", { name: "Consommables" });
   await expect(consommables.getByText(/^Consommables de pose/)).toHaveCount(1);
@@ -833,7 +830,7 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   await questions.getByRole("button", { name: "Espagne 1er choix" }).click();
   await expect(questions.getByRole("button", { name: "Espagne 1er choix" })).toHaveAttribute("aria-pressed", "true");
   await questions.getByRole("button", { name: /Je commande façonné/ }).click();
-  await page.getByRole("button", { name: /^Calculer ma liste/ }).click();
+  await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
 
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
@@ -845,7 +842,8 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   await expect(list.getByText(/Écran|Liteaux|Pattes|Faîtage|égout/i)).toHaveCount(0);
   await expect(list.getByRole("button", { name: /Ardoises naturelles/ }).first()).toBeVisible();
 
-  // La voix arrive sur l'écran du quantitatif, la liste sous les yeux.
+  // §50.3 : « Modifier à la voix », en petit sous le bouton d'envoi, ouvre la voix sous la liste.
+  await page.getByRole("navigation", { name: "Autres gestes sur la liste" }).getByRole("button", { name: "Modifier à la voix" }).click();
   const voix = page.getByRole("region", { name: "Modifier à la voix" });
   await expect(voix.getByText("Modifie ton quantitatif à la voix : dis-moi ce que tu enlèves, ce que tu ajoutes, ce que tu as oublié.")).toBeVisible();
   await voix.getByRole("button", { name: "Modifier à la voix" }).click();
@@ -860,9 +858,9 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   await expect(list.getByText(/^Silicone$/)).toBeVisible();
   await expect(list.getByRole("button", { name: /Ardoises naturelles/ })).toHaveCount(0);
   // La main reste : plus / moins, crayon, corbeille.
-  await expect(list.getByText("L'IA peut se tromper, n'hésite pas à peaufiner.", { exact: false })).toBeVisible();
+  await expect(list.getByText(/^Silicone$/)).toBeVisible();
   await page.reload();
-  await expect(page.getByRole("region", { name: /^J'ai quelques questions/ })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Les questions" })).toHaveCount(0);
   await expect(page.getByRole("region", { name: "Liste des fournitures" }).getByText(/^Silicone$/)).toBeVisible();
 });
 
@@ -888,7 +886,7 @@ test("§48.5 : envoyer une sélection à un autre fournisseur, discret, puis l'e
     expect(ok).toBe(true);
   }
   await createProject(page, "Toiture Le Bihan", "M. Le Bihan", "3 quai Duguay-Trouin, Saint-Malo");
-  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await passQuestions(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible();
@@ -919,14 +917,14 @@ test("§48.5 : envoyer une sélection à un autre fournisseur, discret, puis l'e
   await expect(list.getByText("Envoyé · Point.P")).toHaveCount(2);
 
   // L'envoi normal n'a pas bougé : toute la liste, d'un coup, au fournisseur habituel.
-  await expect(list.getByRole("button", { name: "Envoyer au fournisseur" }).or(list.getByText(/^Encore \d+ lignes? orange/))).toBeVisible();
+  await expect(list.getByRole("button", { name: "Envoyer au fournisseur" }).or(list.getByText(/^\d+ lignes? à régler$/))).toBeVisible();
   await expect(list.getByRole("button", { name: "Voir la demande envoyée" })).toHaveCount(0);
 });
 
 test("§49.8 : chaque ligne orange passe au vert dans sa carte, un geste par ligne, sans quitter la liste", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
-  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   // Les questions de comptoir laissées sans réponse : leurs lignes sortent orange « Info manquante ».
   await passQuestions(page);
   await openList(page);
@@ -976,9 +974,9 @@ test("une lecture refusée au départ se dit, avec sa raison et « Réessayer »
     refused++;
     await route.fulfill({ status: 429, contentType: "application/json", body: JSON.stringify({ error: { code: "too_many_requests", message: "Too many requests, retry later" } }) });
   });
-  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
-  await expect(page.getByText("Je n'ai pas pu lancer la lecture de ce devis.", { exact: false })).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByRole("alert").filter({ hasText: "Trop d'essais en peu de temps" })).toBeVisible();
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  // §50.1 : la raison en une phrase, et « Réessayer ».
+  await expect(page.getByRole("alert").filter({ hasText: "Trop d'essais en peu de temps" })).toBeVisible({ timeout: 30_000 });
   // « Réessayer » relance la lecture, qui passe cette fois.
   await page.getByRole("button", { name: "Réessayer" }).click();
   await passQuestions(page);
@@ -988,8 +986,8 @@ test("une lecture refusée au départ se dit, avec sa raison et « Réessayer »
 test("§48.6 zinguerie pièce par pièce, et la barre des lignes orange reste en haut sans rien cacher", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Toiture Le Goff", "M. Le Goff", "4 rue du Port, Paimpol");
-  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-zinguerie.pdf"));
-  const questions = page.getByRole("region", { name: /^J'ai quelques questions/ });
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-zinguerie.pdf"));
+  const questions = page.getByRole("region", { name: "Les questions" });
   await expect(questions).toBeVisible({ timeout: 60_000 });
   // Une question par pièce écrite, à son nom ; jamais « Bandes zinc (solin, rive, égout…) : tu façonnes ? ».
   await expect(questions.getByText("Bande de ventilation en Z en zinc quartz : tu façonnes toi-même ou tu commandes façonné ?")).toBeVisible();
@@ -998,28 +996,96 @@ test("§48.6 zinguerie pièce par pièce, et la barre des lignes orange reste en
   // « Dév. 200 » est écrit : jamais redemandé.
   await expect(questions.getByText(/^Bande de rive .*développé/)).toHaveCount(0);
   // §49.4 : le façonnage de chaque pièce est obligatoire ici ; sans lui, pas de calcul (jamais une pièce sans réponse dans la liste).
-  await expect(page.getByRole("button", { name: /^Dis-moi d'abord si tu façonnes \(3\)/ })).toBeDisabled();
+  await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
+  await expect(questions).toBeVisible();
+  await expect(page.getByRole("region", { name: "Liste des fournitures" })).toHaveCount(0);
   const faconne = questions.getByRole("button", { name: /^Je façonne/ });
   for (let i = 0; i < (await faconne.count()); i++) await faconne.nth(i).click();
   await page.getByRole("button", { name: /^Calculer ma liste/ }).click();
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
   // Plus de bulle flottante : une barre fine, collée en haut de l'écran quand on descend dans la liste.
-  const bar = list.getByRole("status").filter({ hasText: /^Encore \d+ lignes? orange/ });
+  // §50.3 : « N lignes à régler », rien d'autre (plus de « Tout est bon »).
+  const bar = list.getByRole("status").filter({ hasText: /^\d+ lignes? à régler$/ });
+  await expect(bar.getByRole("button")).toHaveCount(0);
   await expect(bar).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2));
   await expect.poll(async () => (await bar.boundingBox())?.y ?? 999).toBeLessThan(40);
   expect((await bar.boundingBox())!.height).toBeLessThan(64);
 });
 
-test("rien ne part vide : un devis où je ne lis aucune ligne se dit, avec « Réessayer » et « Redéposer le PDF », jamais un bouton d'envoi", async ({ page }) => {
+test("rien ne part vide : un devis où je ne lis aucune ligne se dit en une phrase, avec « Réessayer », jamais un bouton d'envoi", async ({ page }) => {
   await signUp(page);
   await page.goto("/chantiers/nouveau");
-  await page.getByLabel("Choisir le devis (PDF)").setInputFiles(path.join(__dirname, "fixtures", "devis-vide.pdf"));
-  await expect(page.getByText("Je n'ai rien lu dans ce devis.")).toBeVisible({ timeout: 60_000 });
-  await expect(page.getByRole("button", { name: "Réessayer" })).toBeVisible();
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-vide.pdf"));
+  // §50.1 : en cas d'échec, la raison en une phrase et « Réessayer », rien d'autre.
+  const failure = page.getByRole("region", { name: "Lecture du devis" });
+  await expect(failure.getByText("Je n'ai rien lu dans ce devis.")).toBeVisible({ timeout: 60_000 });
+  await expect(failure.getByRole("button")).toHaveText(["Réessayer"]);
   await expect(page.getByRole("button", { name: /Envoyer au fournisseur/ })).toHaveCount(0);
-  // « Redéposer le PDF » : le devis lu part, le chantier attend un autre PDF.
-  await page.getByRole("button", { name: "Redéposer le PDF" }).click();
-  await expect(page.getByLabel("Choisir le devis (PDF)")).toBeAttached({ timeout: 20_000 });
+  // Un devis déposé par erreur se retire depuis le menu du chantier ; le chantier attend un autre PDF.
+  await page.getByRole("button", { name: "Plus d'actions sur le chantier" }).click();
+  await page.getByRole("menuitem", { name: "Retirer le devis" }).click();
+  await page.getByRole("button", { name: "Oui, retirer" }).click();
+  await expect(page.getByLabel("Déposer mon devis")).toBeAttached({ timeout: 20_000 });
+});
+
+test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ page }) => {
+  const banned = [/L'IA peut se tromper/, /coupes/, /Info manquante/, /\d+ fournitures? ·/, /À vérifier \(/, /C'est bon \(/, /Tout est bon/, /Corriger le devis lu/, /Une mesure mal lue/];
+  const clean = async () => {
+    const text = await page.locator("main").innerText();
+    for (const b of banned) expect(text, String(b)).not.toMatch(b);
+    await expect(page.getByRole("button", { name: /^Corriger/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^(Ouvrir|Supprimer) devis/ })).toHaveCount(0);
+  };
+  await signUp(page);
+  await page.goto("/chantiers/nouveau");
+  // 1. Un bouton.
+  await expect(page.getByText("Déposer mon devis", { exact: true })).toBeVisible();
+  await clean();
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  // 2. Les questions : une par carte, en boutons, groupées par ouvrage, puis « Calculer ma liste ».
+  const questions = page.getByRole("region", { name: "Les questions" });
+  await expect(questions).toBeVisible({ timeout: 60_000 });
+  await clean();
+  await expect(questions.getByRole("heading", { level: 3 }).first()).toBeVisible();
+  await expect(page.getByRole("textbox")).toHaveCount(0);
+  // Le façonnage est obligatoire (48.6) ; le reste peut rester sans réponse.
+  await questions.getByRole("button", { name: /^Je commande façonné/ }).click();
+  await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
+  // 3. Ma liste : les oranges d'abord, chaque raison en cinq mots au plus ; un seul bouton d'envoi, trois liens dessous.
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(list).toBeVisible({ timeout: 60_000 });
+  await clean();
+  const cards = list.getByRole("list", { name: "Fournitures" }).locator(":scope > li");
+  const n = await cards.count();
+  let greenSeen = false;
+  for (let i = 0; i < n; i++) {
+    const orange = (await cards.nth(i).getByRole("img", { name: "à vérifier" }).count()) > 0;
+    if (!orange) greenSeen = true;
+    // Les oranges en premier : jamais une orange après une verte.
+    else expect(greenSeen, `orange après une verte (carte ${i + 1})`).toBe(false);
+  }
+  await expect(list.getByRole("status").filter({ hasText: /^\d+ lignes? à régler$/ })).toBeVisible();
+  const links = list.getByRole("navigation", { name: "Autres gestes sur la liste" }).getByRole("button");
+  for (const name of ["Ajouter un article", "Envoyer une sélection à un autre fournisseur", "Modifier à la voix"]) await expect(links.filter({ hasText: name })).toHaveCount(1);
+});
+
+test("§49.9 : une ligne nomme une fourniture ; les heures et le forfait sont repliés sous « lignes sans fourniture »", async ({ page }) => {
+  await signUp(page);
+  await page.goto("/chantiers/nouveau");
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-reparation.pdf"));
+  await passQuestions(page);
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(list.getByText(/^Tuile terre cuite mécanique/).first()).toBeVisible();
+  // Jamais dans la liste : « Repositionnement des tuiles · 1,5 h », « Accès toiture… · 1 fft ».
+  await expect(list.getByRole("listitem").filter({ hasText: "Repositionnement" })).toHaveCount(0);
+  const folded = list.getByText("2 lignes sans fourniture");
+  await expect(folded).toBeVisible();
+  await expect(list.getByRole("list", { name: "Lignes sans fourniture" })).toBeHidden();
+  await folded.click();
+  const without = list.getByRole("list", { name: "Lignes sans fourniture" });
+  await expect(without).toContainText("Repositionnement des tuiles");
+  await expect(without).toContainText("1,5 h");
+  await expect(without).toContainText("Accès toiture et mise en sécurité");
 });

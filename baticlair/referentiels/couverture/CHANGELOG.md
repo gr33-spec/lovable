@@ -1,5 +1,18 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.09-46 — §50 « Ce que voit l'artisan » (fondateur, 2026-10-09)
+
+- **§50 Trois écrans**, qui priment sur toute règle d'écran antérieure : 1) je dépose mon devis (« Je lis ton devis », en cas d'échec la raison et « Réessayer ») ; 2) les questions, une par carte, en boutons, groupées par ouvrage, puis « Calculer ma liste » ; 3) ma liste, une carte par fourniture (point, nom du comptoir, quantité au moins / plus, unité ; si orange : raison en cinq mots au plus, boutons, « C'est bon »), oranges en premier, barre « N lignes à régler », un seul bouton « Envoyer au fournisseur » et trois liens en petit.
+- **§50.4 Retirés** : le bandeau « L'IA peut se tromper… », le bouton « Corriger », le préfixe « Info manquante : », le compteur « N fournitures · N à vérifier », les sections « C'est bon / À vérifier », la carte du PDF (Ouvrir / Retirer) et « Corriger le devis lu » (le PDF se rouvre depuis le titre du chantier), tout message flottant.
+- Le texte du référentiel (docs/referentiel-couverture.md) reprend la version du fondateur avec le §49.9 rédigé et le §50. Aucun ratio ne change.
+
+## roofing-2026.10.09-45 — §49.9 une ligne nomme une fourniture (retour du fondateur, 2026-10-09, devis de réparation D.2026.105)
+
+- **§49.9 Fourniture, jamais phrase** : une prestation écrite en phrase (« Remplacement unitaire d'une tuile cassée, comprenant accès toit… ») est remplacée dans la liste par la fourniture que la lecture en extrait, d'abord ses sous-lignes (« – Tuile terre cuite mécanique »), puis son texte (« y compris les petites fournitures de fixation ») : une ligne par article, nommée par l'article, avec sa quantité. Avant : la phrase entière sortait comme désignation.
+- **§49.9 Lignes sans fourniture** : une unité h, heure, jour, fft ou forfait n'est jamais une fourniture (`withoutSupplyUnits`). Une durée sort toujours de la liste. Un forfait qui nomme un matériau reste la mesure de son ouvrage, et le calcul en tire les articles. Ces lignes et celles « hors quantitatif » (accès, évacuation) sont repliées sous « N lignes sans fourniture ». Avant : « Repositionnement des tuiles · 1,5 h » pouvait sortir comme article.
+- **§49.9 Donnée sans choix** : une donnée du comptoir sans choix à proposer (« modèle et teinte de tuile ») n'est plus une question. La ligne sort orange « à préciser » : l'artisan complète à la voix, ou touche « C'est bon » et le fournisseur propose (ligne grise, précision « au choix du fournisseur »). Avant : une question sans bouton à l'écran des questions.
+- Unité « jeu » (et « kit ») reconnue comme un conditionnement. Aucun ratio ne change.
+
 ## roofing-2026.10.09-44 — pattes du joint debout (retour du fondateur, 2026-10-09, D-2026-018)
 
 - **§49.1 Pattes fixes** : « pattes en inox fixes et coulissantes » écrit au devis donne deux lignes, pattes fixes ET pattes coulissantes, chacune sa quantité (VMZINC 36.2). Avant : seules les coulissantes sortaient (le mot « fixes » n'était pas reconnu après « inox »).

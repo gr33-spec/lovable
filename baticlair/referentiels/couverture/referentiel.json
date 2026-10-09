@@ -1,7 +1,23 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.09-44",
+  "version": "roofing-2026.10.09-46",
   "writtenOnly": true,
+  "withoutSupplyUnits": [
+    "h",
+    "hr",
+    "hrs",
+    "heure",
+    "heures",
+    "j",
+    "jour",
+    "jours",
+    "journee",
+    "journees",
+    "fft",
+    "ft",
+    "forfait",
+    "forfaits"
+  ],
   "trade": "roofing",
   "sources": [
     {
