@@ -67,6 +67,8 @@ for (const size of WIDTHS) {
     await expect(list.or(questions).first()).toBeVisible({ timeout: 60_000 });
     if (await questions.isVisible()) {
       await shoot(page, size.name, "05a-questions");
+      const faconne = questions.getByRole("button", { name: /^Je façonne/ });
+      for (let i = 0; i < (await faconne.count()); i++) await faconne.nth(i).click();
       await page.getByRole("button", { name: /^Calculer ma liste/ }).click();
     }
     await expect(list.getByText(/^\d+ fournitures · tout est prêt$/)).toBeVisible();

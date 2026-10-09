@@ -1,5 +1,10 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.09-44 — pattes du joint debout (retour du fondateur, 2026-10-09, D-2026-018)
+
+- **§49.1 Pattes fixes** : « pattes en inox fixes et coulissantes » écrit au devis donne deux lignes, pattes fixes ET pattes coulissantes, chacune sa quantité (VMZINC 36.2). Avant : seules les coulissantes sortaient (le mot « fixes » n'était pas reconnu après « inox »).
+- **§49.2 Façonnage pas choisi** : les pattes du joint debout attendent le façonnage (bobines ou bacs) ; tant qu'il manque, elles sortent orange « Info manquante : façonnage », avec leur quantité, jamais vertes « pour bobine 500 mm ». Aucune quantité ne change.
+
 ## roofing-2026.10.07-43 — audit avant bêta (2026-10-07)
 
 - **Ø des descentes** : la question disait « Descentes en Ø 80 ou en Ø 100 ? » et proposait trois boutons (Ø 80, Ø 100, Ø 120). Elle dit maintenant « Descentes en Ø 80, Ø 100 ou Ø 120 ? », avec « Ø 120 au-delà » dans l'aide. Aucune quantité ne change.

@@ -1088,7 +1088,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.07-43",
+  version: "roofing-2026.10.09-44",
   writtenOnly: true,
   trade: "roofing",
   sources: [
@@ -3181,8 +3181,9 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "bobine_littoral", family: "zinc_coil", label: "Zinc en bobine (bord de mer)", keywords: ["bord de mer", "littoral"], usual: { text: "Bord de mer : zinc en bobine largeur 500 mm, commandé au mètre linéaire (VMZINC).", source: "vmzinc-joint-debout", productId: "bobine-zinc-500" }, formOf: "couverture" },
         { key: "bac", family: "zinc_panel", label: "Bacs joint debout", usual: { text: "Bacs façonnés par le fournisseur à la longueur du rampant.", source: F, productId: "bac-joint-debout-standard" }, formOf: "couverture" },
         // §45.5 : pattes coulissantes, pattes fixes et pointes sont trois lignes (le fournisseur les sert séparément).
+        // « pattes en inox fixes et coulissantes » (D-2026-018) : deux articles écrits, deux lignes (§49.1).
         { key: "patte_coulissante", family: "seam_clip_sliding", label: "Pattes coulissantes", keywords: ["coulissante", "coulissantes"], usual: { text: "Pattes coulissantes, selon le rampant (VMZINC 36.2).", source: "vmzinc-joint-debout", productId: "patte-coulissante-joint-debout" } },
-        { key: "patte_fixe", family: "seam_clip_fixed", label: "Pattes fixes", keywords: ["patte fixe", "pattes fixes"], usual: { text: "Pattes fixes, selon le rampant (VMZINC 36.2).", source: "vmzinc-joint-debout", productId: "patte-fixe-joint-debout" } },
+        { key: "patte_fixe", family: "seam_clip_fixed", label: "Pattes fixes", keywords: ["patte fixe", "pattes fixes", "fixes"], usual: { text: "Pattes fixes, selon le rampant (VMZINC 36.2).", source: "vmzinc-joint-debout", productId: "patte-fixe-joint-debout" } },
         { key: "fixation_patte", family: "clip_fixing", label: "Fixations des pattes", keywords: ["pointe", "pointes"], usual: { text: "Pointes annelées 2,5 × 28 mm sur volige 18 mm, 2 par patte (VMZINC 36.2).", source: "vmzinc-joint-debout", productId: "pointe-annelee-2-5x28" } },
         { key: "egout", family: "eaves_strip", label: "Bandes d'égout", keywords: ["egout"], usual: { text: "Bande d'égout à ourlet, développé 33 cm, longueurs de 2 m (§7).", source: F, productId: "bande-egout-zinc-330" } },
         { key: "faitage", family: "zinc_ridge", label: "Faîtage zinc", usual: { text: "Bande de faîtage zinc en longueurs de 3 m (§7).", source: F, productId: "bande-faitage-zinc-standard" } },
@@ -3322,6 +3323,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           precision: "pour bobine {largeur_bobine|mm}",
           source: "vmzinc-joint-debout",
           verification: FOUNDER_DOC,
+          // §49.2 : tant que le façonnage (bobines ou bacs) n'est pas choisi, la ligne attend : orange « Info manquante ».
+          precisionRequires: ["faconnage"],
           version: 1,
         },
         {
@@ -3334,6 +3337,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           precision: "pour bobine {largeur_bobine|mm}, zone fixe de chaque bac",
           source: "vmzinc-joint-debout",
           verification: FOUNDER_DOC,
+          // §49.2 : tant que le façonnage (bobines ou bacs) n'est pas choisi, la ligne attend : orange « Info manquante ».
+          precisionRequires: ["faconnage"],
           version: 1,
         },
         {
