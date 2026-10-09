@@ -87,7 +87,7 @@ describe("une info manquante se demande une fois, avant le calcul", () => {
   const MANQUE = new Map<string, QuoteLineReading>([
     ["2", { role: "fourniture_et_pose", articles: [], faconnage: null, manque: ["diamètre des moignons / naissances (80, 100)"] }],
   ]);
-  it("le Ø des naissances est une donnée de la gouttière : sa question (« Descentes en Ø 80 ou en Ø 100 ? »), jamais une 2e du comptoir", () => {
+  it("le Ø des naissances est une donnée de la gouttière : sa question (« Descentes en Ø 80, Ø 100 ou Ø 120 ? »), jamais une 2e du comptoir", () => {
     const avant = readQuote(D2026_018_LINES, {}, [], undefined, {}, MANQUE);
     expect(avant.questions.filter((d) => /diam/i.test(d.question?.text ?? "") || /diametre/.test(d.key)).map((d) => d.key)).toEqual(["engine:param:diametre_descente"]);
     expect(avant.questions.some((d) => d.key.startsWith("comptoir:"))).toBe(false);

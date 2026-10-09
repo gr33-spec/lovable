@@ -63,7 +63,7 @@ export function CompareQuotes({
       {error ? <ErrorNotice error={error} /> : null}
       {failed.length > 0 ? (
         <p role="alert" className="text-sm font-semibold text-warn">
-          {failed.length > 1 ? `Les devis de ${failed.join(", ")} n'ont pas pu être lus.` : `Le devis de ${failed[0]} n'a pas pu être lu.`} Réessayez dans un
+          {failed.length > 1 ? `Les devis de ${failed.join(", ")} n'ont pas pu être lus.` : `Le devis de ${failed[0]} n'a pas pu être lu.`} Réessaie dans un
           instant.
         </p>
       ) : null}
@@ -73,7 +73,7 @@ export function CompareQuotes({
       </Button>
       {!pending ? (
         <p className="text-center text-[13px] text-muted">
-          {waiting > 0 ? `${received} offre${received > 1 ? "s" : ""} reçue${received > 1 ? "s" : ""} sur ${received + waiting} · vous pouvez aussi attendre` : received > 1 ? `${received} offres reçues` : "1 offre reçue"}
+          {waiting > 0 ? `${received} offre${received > 1 ? "s" : ""} reçue${received > 1 ? "s" : ""} sur ${received + waiting} · tu peux aussi attendre` : received > 1 ? `${received} offres reçues` : "1 offre reçue"}
         </p>
       ) : null}
     </div>
@@ -150,7 +150,7 @@ export function OfferLines({ offer, request, archived, onChange }: { offer: Offe
                       </option>
                     ))}
                   </select>
-                  {l.matchConfirmed ? <Check size={16} className="shrink-0 text-ok" aria-label="vérifiée par vous" /> : null}
+                  {l.matchConfirmed ? <Check size={16} className="shrink-0 text-ok" aria-label="vérifiée par toi" /> : null}
                 </label>
               ) : null}
             </li>
@@ -335,7 +335,7 @@ export function ProjectComparison({
           );
         })}
       </ol>
-      {ranked.length === 1 ? <p className="text-sm text-muted">Une seule offre pour l&apos;instant : attendez les autres pour comparer.</p> : null}
+      {ranked.length === 1 ? <p className="text-sm text-muted">Une seule offre pour l&apos;instant : attends les autres pour comparer.</p> : null}
       {chosen && !archived ? (
         <button
           type="button"

@@ -40,18 +40,18 @@ export default function AccueilPage() {
   if (billing?.limitReached) {
     todo.unshift({
       key: "plan",
-      title: billing.plan.key === "trial" ? "Votre essai est terminé" : "Limite de votre formule atteinte",
-      text: "Choisissez une formule pour créer de nouveaux chantiers.",
+      title: billing.plan.key === "trial" ? "Ton essai est terminé" : "Limite de ta formule atteinte",
+      text: "Choisis une formule pour créer de nouveaux chantiers.",
       href: "/formules",
       action: "Voir les formules",
       icon: <Sparkles size={20} aria-hidden="true" />,
     });
   }
   if (recent && recent.items.length === 0) {
-    todo.push({ key: "first", title: "Créez votre premier chantier", text: "Dépose ton devis : le chantier se crée tout seul.", href: "/chantiers/nouveau", action: "Déposer", icon: <Warehouse size={20} aria-hidden="true" /> });
+    todo.push({ key: "first", title: "Crée ton premier chantier", text: "Dépose ton devis : le chantier se crée tout seul.", href: "/chantiers/nouveau", action: "Déposer", icon: <Warehouse size={20} aria-hidden="true" /> });
   }
   if (!me.user.emailVerified && features.email) {
-    todo.push({ key: "email", title: "Confirmez votre adresse e-mail", text: "Nécessaire avant d'écrire à vos fournisseurs.", href: "/compte", action: "Voir", icon: <MailCheck size={20} aria-hidden="true" /> });
+    todo.push({ key: "email", title: "Confirme ton adresse e-mail", text: "Nécessaire avant d'écrire à tes fournisseurs.", href: "/compte", action: "Voir", icon: <MailCheck size={20} aria-hidden="true" /> });
   }
 
   return (
@@ -129,11 +129,12 @@ export default function AccueilPage() {
           />
         ) : null}
         {recent && recent.items.length === 0 ? (
-          <p className="rounded-3xl bg-surface p-4 text-[15px] text-muted shadow-card">Aucun chantier pour l&apos;instant. Touchez « + » pour en créer un.</p>
+          <p className="rounded-3xl bg-surface p-4 text-[15px] text-muted shadow-card">Aucun chantier pour l&apos;instant. Touche « + » pour en créer un.</p>
         ) : null}
       </section>
 
-      <DemoCard />
+      {/* La démo se lance une fois : son chantier est déjà là, la carte n'a plus rien à proposer. */}
+      {recent && !recent.items.some((p) => p.name.startsWith("Démo")) ? <DemoCard /> : null}
     </>
   );
 }

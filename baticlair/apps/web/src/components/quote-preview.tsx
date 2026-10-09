@@ -242,7 +242,7 @@ export function QuotePreviewScreen({
       <div className="fixed inset-x-0 bottom-0 flex flex-col items-center gap-1 bg-ground/95 px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur">
         <Button className="min-h-14 w-full max-w-2xl text-[17px]" pending={sending} disabled={!preview || busy || !canSend} onClick={onSend}>
           <Send size={18} aria-hidden="true" />
-          {canSend ? "Envoyer" : "Choisissez un fournisseur"}
+          {canSend ? "Envoyer" : "Choisis un fournisseur"}
         </Button>
         <button type="button" onClick={onClose} className="inline-flex min-h-11 items-center text-sm font-bold text-muted">
           Revenir à la liste
@@ -261,12 +261,12 @@ function MailText({ mail, message, onMessage }: { mail: string; message: string;
       <p className="text-[14px] leading-relaxed whitespace-pre-line">{mail}</p>
       {open ? (
         <label htmlFor={id} className="flex flex-col gap-1 text-sm font-bold">
-          Votre mot (facultatif)
+          Ton mot (facultatif)
           <textarea id={id} rows={2} defaultValue={message} onBlur={(e) => onMessage(e.target.value.trim())} className="rounded-2xl bg-ground p-3 text-base font-normal" placeholder="ex. Livraison sur chantier possible ?" />
         </label>
       ) : (
         <button type="button" onClick={() => setOpen(true)} className="inline-flex min-h-11 items-center self-start text-sm font-bold text-accent-text">
-          {message ? "Modifier votre mot" : "Ajouter un mot au fournisseur"}
+          {message ? "Modifier ton mot" : "Ajouter un mot au fournisseur"}
         </button>
       )}
     </div>

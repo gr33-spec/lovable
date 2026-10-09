@@ -146,7 +146,7 @@ function ChantiersList() {
       {items && items.length === 0 ? (
         searching ? (
           <EmptyState icon={<Search size={40} />} title="Aucun chantier trouvé">
-            <p className="max-w-xs text-[15px] text-muted">Essayez le nom du client, une ville ou une partie de l&apos;adresse.</p>
+            <p className="max-w-xs text-[15px] text-muted">Essaie le nom du client, une ville ou une partie de l&apos;adresse.</p>
           </EmptyState>
         ) : (
           <EmptyState icon={<Warehouse size={40} />} title={filter === "termines" ? "Aucun chantier terminé" : "Aucun chantier en cours"}>

@@ -162,7 +162,7 @@ function DocumentCard({ doc, compact, onRemoved }: { doc: ProjectDocument; compa
       {deleteError ? <ErrorNotice error={deleteError} /> : null}
       {confirming ? (
         <div role="group" aria-label="Confirmer la suppression" className="flex flex-col gap-2 rounded-2xl bg-ground p-3">
-          <p className="text-sm font-semibold">Retirer ce devis du chantier ? Vous pourrez le déposer à nouveau.</p>
+          <p className="text-sm font-semibold">Retirer ce devis du chantier ? Tu pourras le déposer à nouveau.</p>
           <div className="flex gap-2">
             <button
               type="button"

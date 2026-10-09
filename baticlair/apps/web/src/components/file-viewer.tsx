@@ -109,7 +109,7 @@ export function FileViewer() {
       <div className="flex min-h-0 grow items-stretch justify-center px-2">
         {error ? (
           <p role="alert" className="self-center px-6 text-center text-white">
-            Le document n&apos;a pas pu s&apos;ouvrir. Vérifiez la connexion et réessayez.
+            Le document n&apos;a pas pu s&apos;ouvrir. Vérifie la connexion et réessaie.
           </p>
         ) : !loaded ? (
           <span className="size-8 animate-spin self-center rounded-full border-4 border-white/30 border-t-white" aria-label="Chargement du document" />

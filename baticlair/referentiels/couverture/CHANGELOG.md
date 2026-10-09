@@ -1,5 +1,9 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.07-43 — audit avant bêta (2026-10-07)
+
+- **Ø des descentes** : la question disait « Descentes en Ø 80 ou en Ø 100 ? » et proposait trois boutons (Ø 80, Ø 100, Ø 120). Elle dit maintenant « Descentes en Ø 80, Ø 100 ou Ø 120 ? », avec « Ø 120 au-delà » dans l'aide. Aucune quantité ne change.
+
 ## roofing-2026.10.07-42 — zinguerie pièce par pièce, une info demandée une fois (retour du fondateur, 2026-10-07)
 
 - **§48.6 Une question par pièce de zinguerie écrite au devis** : l'ouvrage « Bandes zinc (solin, rive, égout, ventilation, couvre-joint) » ne pose plus une question globale. Écrit sur plusieurs lignes, il devient une pièce par ligne (`perLine`, instance `bandes-zinc__<ligne>`), chacune avec SES données (développé, aspect), sa question à son nom (« Bande de ventilation en Z en zinc quartz : tu façonnes toi-même ou tu commandes façonné ? », deux boutons) et sa réponse ; jamais une donnée prêtée d'une pièce sœur. Une pièce dont le devis dit le façonnage n'a pas de question : « comprend le pliage » = je façonne, « pliée(s) en Z », « préfaçonné(e)s » = commandé façonné. « Habillage de rive en zinc » est une bande zinc. Développé « 200 mm » ajouté aux choix (§36.4 : 200 à 330 mm) : « Dév. 200 » écrit est lu, jamais redemandé. Le nom d'un lot ne garde plus sa parenthèse (« Abergement de cheminée »).

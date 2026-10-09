@@ -71,7 +71,7 @@ function Suppliers() {
       {items.length === 0 && !creating ? (
         <EmptyState icon={<Truck size={40} />} title="Aucun fournisseur">
           <p className="max-w-xs text-[15px] text-muted">
-            Ajoutez vos fournisseurs habituels avec leur e-mail : vous les choisirez ensuite depuis un chantier pour leur demander leurs
+            Ajoute tes fournisseurs habituels avec leur e-mail : tu les choisiras ensuite depuis un chantier pour leur demander leurs
             prix.
           </p>
         </EmptyState>

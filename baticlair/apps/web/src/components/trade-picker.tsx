@@ -8,7 +8,7 @@ import { TRADES } from "@/lib/trades";
  * seule question métier posée à l'artisan ; BatiClair adapte ensuite la
  * lecture des devis sans rien lui demander d'autre (PD-033).
  */
-export function TradePicker({ value, onChange, label = "Votre métier" }: { value: string[]; onChange: (v: string[]) => void; label?: string }) {
+export function TradePicker({ value, onChange, label = "Ton métier" }: { value: string[]; onChange: (v: string[]) => void; label?: string }) {
   function toggle(id: string) {
     if (value.includes(id)) onChange(value.filter((v) => v !== id));
     else if (id === "other") onChange(["other"]);

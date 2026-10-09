@@ -34,7 +34,7 @@ function LoginForm() {
     <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
       {params.get("compte") === "supprime" ? (
         <p role="status" className="rounded-2xl bg-surface p-3 text-sm font-semibold shadow-card">
-          Votre compte et toutes ses données ont été supprimés.
+          Ton compte et toutes ses données ont été supprimés.
         </p>
       ) : null}
       {error ? <ErrorNotice error={error} /> : null}

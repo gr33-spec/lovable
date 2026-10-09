@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeft, Check, ChevronRight, CircleCheck, FileDown, FileText, HelpCircle, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
-import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AssistantMessage, Say } from "@/components/chat";
 import { useSelectionSend } from "@/components/selection-send";
 import { AnalysisScreen, CalculScreen, notifyReady, QuestionsStep, type CounterAnswers } from "@/components/journey";
@@ -314,7 +314,7 @@ export function ProjectTakeoff({
           <h2 id="devis-lu-titre" className="font-display text-[22px] font-extrabold tracking-[-0.02em]">
             Le devis du client, ligne par ligne
           </h2>
-          <p className="text-[15px] leading-snug text-muted">Une ligne mal lue ? Corrigez-la ici : la liste des fournitures se recalcule toute seule.</p>
+          <p className="text-[15px] leading-snug text-muted">Une ligne mal lue ? Corrige-la ici : la liste des fournitures se recalcule toute seule.</p>
         </section>
         <Card className="flex flex-col divide-y divide-line px-4 py-1">
           {materials.map((line) => (
@@ -365,9 +365,6 @@ export function ProjectTakeoff({
           handlers={handlers}
           onEditItem={editItem}
           onSetAside={setAside}
-          onSuggestion={async (item, reponse) => {
-            await call("corrections", { action: "suggestion", id: item.key, reponse });
-          }}
           onSend={send}
           docked={false}
           validated={!draft}
@@ -490,19 +487,6 @@ export function ProjectTakeoff({
         </div>
       </div>
     </>
-  );
-}
-
-/** Étape terminée : une ligne, et de quoi y revenir. */
-export function DoneLine({ label, action, actionLabel, onAction }: { label: string; action: string; actionLabel?: string; onAction: () => void }) {
-  return (
-    <div className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-2 shadow-card">
-      <CircleCheck size={20} className="shrink-0 text-ok" aria-hidden="true" />
-      <span className="min-w-0 grow truncate text-[15px] font-bold">{label}</span>
-      <button type="button" onClick={onAction} aria-label={actionLabel ?? action} className="inline-flex min-h-11 shrink-0 items-center text-sm font-bold text-accent-text">
-        {action}
-      </button>
-    </div>
   );
 }
 

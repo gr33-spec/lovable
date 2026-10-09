@@ -46,7 +46,7 @@ for (const size of WIDTHS) {
     await page.getByRole("link", { name: "Créer un compte" }).click();
     await shoot(page, size.name, "02-inscription");
     await page.getByLabel("Prénom et nom").fill("Jean Martin");
-    await page.getByLabel("Nom de votre entreprise").fill("Toitures Martin");
+    await page.getByLabel("Nom de ton entreprise").fill("Toitures Martin");
     await page.getByRole("button", { name: "Couverture, charpente, zinguerie" }).click();
     await page.getByLabel("E-mail professionnel").fill(`responsive-${unique()}@example.fr`);
     await page.getByLabel("Mot de passe").fill("motdepasse-solide");
@@ -80,7 +80,7 @@ for (const size of WIDTHS) {
       await apercu.getByRole("checkbox", { name: new RegExp(name.replace(/[()]/g, "\\$&")) }).check();
     }
     await apercu.getByRole("button", { name: "Envoyer", exact: true }).click();
-    const cards = page.getByRole("list", { name: "Vos fournisseurs" }).getByRole("listitem");
+    const cards = page.getByRole("list", { name: "Tes fournisseurs" }).getByRole("listitem");
     await expect(cards.first()).toBeVisible();
     await shoot(page, size.name, "07-apres-envoi");
 

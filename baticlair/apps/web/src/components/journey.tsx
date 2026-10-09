@@ -291,7 +291,7 @@ export function CalculScreen() {
  *  - « comme d'habitude ? » : les habitudes établies de l'entreprise ;
  *  - « je pars sur… » : les hypothèses du calcul (rampant, pente, liteaux…), la valeur prise par défaut est marquée ;
  *  - « déjà sur place ? » : liteaux, écran, voliges d'un ouvrage en dépose / repose ;
- *  - « quincaillerie et consommables » : on les ajoute ? (seuls ceux validés ici entrent dans la liste).
+ *  - « consommables de pose » : UNE question (§49.1.4), seuls ceux des lignes écrites entrent dans la liste.
  */
 type QuestionKind = "decision" | "habit" | "assumption" | "onsite" | "ajout";
 
@@ -323,7 +323,7 @@ const SECTIONS: { kind: QuestionKind; title: string; text: string | null }[] = [
   { kind: "habit", title: "Comme d'habitude ?", text: "Ta réponse habituelle est déjà cochée : touche pour la changer sur ce chantier." },
   { kind: "assumption", title: "Je pars sur ces valeurs", text: "Marquées « par défaut » : touche une autre réponse si ton chantier est différent." },
   { kind: "onsite", title: "Dépose / repose : déjà sur place ?", text: "Ce qui est déjà sur le toit ne part pas dans la commande." },
-  { kind: "ajout", title: "Quincaillerie et consommables : on les ajoute ?", text: "Seuls ceux que tu valides ici entrent dans la liste." },
+  { kind: "ajout", title: "Consommables", text: "Seuls ceux qui servent aux lignes de ton devis entrent dans la liste." },
 ];
 
 /** La question consommables du moteur (§49.1 point 4). */
@@ -341,7 +341,7 @@ export function counterQuestions(takeoff: Takeoff): CounterQuestion[] {
       const engine = d.key.startsWith("engine:") || q.key.startsWith("param:");
       return {
         key: d.key,
-        // §49.4 : la question consommables (oui / non) a son bloc, « Quincaillerie et consommables ».
+        // §49.4 : la question consommables (oui / non) a son bloc, « Consommables de pose ».
         kind: q.key === CONSUMABLES_KEY ? "ajout" : "decision",
         text: engine ? d.text.replace(/ Cela change la commande :.*$/, "") : d.text,
         options: q.options,

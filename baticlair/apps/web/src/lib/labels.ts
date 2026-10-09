@@ -29,7 +29,7 @@ export function shortName(designation: string): string {
 export function doubtText(message: string): string {
   const text = message.replace(/^L['’]IA hésite\s*:\s*/i, "").trim();
   // Le jargon de la lecture (« référentiel chargé », « aucun ouvrage ne correspond ») n'est pas pour l'artisan.
-  if (/r[ée]f[ée]rentiel|aucun ouvrage|ouvrage ne correspond/i.test(text)) return "Je ne sais pas encore calculer cet article : vérifiez la ligne, elle partira telle quelle.";
+  if (/r[ée]f[ée]rentiel|aucun ouvrage|ouvrage ne correspond/i.test(text)) return "Je ne sais pas encore calculer cet article : vérifie la ligne, elle partira telle quelle.";
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
