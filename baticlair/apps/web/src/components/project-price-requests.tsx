@@ -219,13 +219,16 @@ export function ProjectPriceRequests({
 
   return (
     <section id="fournisseurs" aria-label="Fournisseurs" className="flex scroll-mt-4 flex-col gap-3">
-      <AssistantMessage>
-        <Say>
-          {request.recipients.some((r) => r.status === "to_send")
-            ? "La demande est prête. Envoyez-la à chaque fournisseur :"
-            : "Demande envoyée. Ajoutez ici le devis de chaque fournisseur quand il répond."}
-        </Say>
-      </AssistantMessage>
+      {/* Une fois les offres comparées, la phrase d'attente n'a plus rien à dire : la comparaison parle. */}
+      {hasOffers && waiting === 0 ? null : (
+        <AssistantMessage>
+          <Say>
+            {request.recipients.some((r) => r.status === "to_send")
+              ? "La demande est prête. Envoie-la à chaque fournisseur :"
+              : "Demande envoyée. Quand un fournisseur te répond, ajoute son devis sur sa carte."}
+          </Say>
+        </AssistantMessage>
+      )}
       {!archived && unread > 0 && offers.data ? (
         <CompareQuotes
           requestId={request.id}
@@ -242,7 +245,7 @@ export function ProjectPriceRequests({
       {hasOffers ? <ProjectComparison request={request} version={version} archived={archived} onRequestChange={replace} /> : null}
       <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">FOURNISSEURS</h2>
       <NotificationsPrompt trigger={sentCount} />
-      <ul className="flex flex-col gap-2" aria-label="Vos fournisseurs">
+      <ul className="flex flex-col gap-2" aria-label="Tes fournisseurs">
         {request.recipients.map((r) => (
           <li key={r.id}>
             <RecipientCard
@@ -294,7 +297,7 @@ function SupplierPicker({
     <div className="flex flex-col gap-2">
       {choices.length === 0 && !creating ? (
         <p className={`text-sm ${dark ? "text-[#c9ced6]" : "text-muted"}`}>
-          {data.items.length === 0 ? "Votre carnet de fournisseurs est vide. Ajoutez-en un :" : "Tous vos fournisseurs sont déjà dans cette demande."}
+          {data.items.length === 0 ? "Ton carnet de fournisseurs est vide. Ajoutes-en un :" : "Tous tes fournisseurs sont déjà dans cette demande."}
         </p>
       ) : null}
       {choices.map((s) => (
@@ -439,7 +442,7 @@ function NewRequest({
       {/* §45.9 : rien ne part sans l'aperçu ; il s'ouvre en plein écran, la liste s'y corrige d'un tap. */}
       <Button variant="accent" pending={pending} disabled={selected.size === 0} onClick={() => (quantitatifId ? setPreviewing(true) : void create())}>
         <Mail size={18} aria-hidden="true" />
-        {selected.size === 0 ? "Cochez au moins un fournisseur" : "Voir la demande de devis"}
+        {selected.size === 0 ? "Coche au moins un fournisseur" : "Voir la demande de devis"}
       </Button>
       {previewing && quantitatifId ? (
         <QuotePreviewScreen
@@ -605,7 +608,7 @@ function RecipientCard({
       setNotice(
         how === "shared"
           ? `PDF joint. L'adresse ${r.supplier.email} est copiée : collez-la dans « À » si Mail ne l'a pas remplie.`
-          : "Le PDF « demande-de-devis.pdf » est téléchargé : glissez-le dans l'e-mail qui vient de s'ouvrir.",
+          : "Le PDF « demande-de-devis.pdf » est téléchargé : glisse-le dans l'e-mail qui vient de s'ouvrir.",
       );
       onSent();
     });

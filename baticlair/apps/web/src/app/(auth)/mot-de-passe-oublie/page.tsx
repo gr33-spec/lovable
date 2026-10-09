@@ -45,7 +45,7 @@ export default function MotDePasseOubliePage() {
         </p>
       ) : sent ? (
         <p role="status" className="rounded-3xl bg-ok-bg p-4 font-semibold text-ok">
-          Si un compte existe avec cette adresse, vous allez recevoir un lien. Pensez à regarder dans les indésirables.
+          Si un compte existe avec cette adresse, tu vas recevoir un lien. Pense à regarder dans les indésirables.
         </p>
       ) : (
         <form onSubmit={submit} className="flex flex-col gap-4" noValidate>

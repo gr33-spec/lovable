@@ -6,7 +6,7 @@ import { api, ApiError, newActionKey, type Supplier } from "@/lib/api";
 import { fr } from "@/lib/fr";
 
 const FIELD_ERRORS: Record<string, string> = {
-  name: "Indiquez le nom de la société.",
+  name: "Indique le nom de la société.",
   email: "Cette adresse e-mail n'est pas valide.",
 };
 
@@ -79,7 +79,7 @@ export function SupplierForm({
       <Field id={`${id}-name`} label="Société" placeholder="ex. Point.P Vannes" value={values.name} onChange={set("name")} error={fieldError("name")} autoFocus />
       {twin ? (
         <p role="status" className="-mt-2 text-sm font-semibold text-warn">
-          Déjà dans votre carnet : {twin.name} ({twin.email}). Vérifiez que ce n&apos;est pas le même.
+          Déjà dans ton carnet : {twin.name} ({twin.email}). Vérifie que ce n&apos;est pas le même.
         </p>
       ) : null}
       <Field

@@ -164,15 +164,6 @@ export interface ProjectDocument {
   duplicate?: boolean;
 }
 
-export interface AiUsageReport {
-  month: string;
-  budgetEur: string;
-  analyses: { used: number; limit: number | null; remaining: number | null };
-  byUser: { userId: string | null; userName: string | null; analyses: number; calls: number; costEur: string }[];
-  actual: { calls: number; retries: number; failedCalls: number; pagesText: number; pagesVision: number; costEur: string; budgetUsedPercent: number };
-  reading: { documents: number; pagesTotal: number; pagesText: number; pagesVision: number; pagesSkipped: number; estimatedCostEur: string };
-}
-
 /** Taille maximale d'un document (même valeur par défaut que l'API) ; au-delà de 3 Mo, il part en morceaux (`lib/upload.ts`). */
 export const MAX_DOCUMENT_BYTES = 20_000_000;
 /** Une requête vers l'API ne dépasse pas 4,5 Mo chez l'hébergeur : les photos allégées tiennent dans 4 Mo. */

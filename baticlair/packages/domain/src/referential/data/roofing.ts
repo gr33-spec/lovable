@@ -508,8 +508,8 @@ const DIAMETRE_DESCENTE_PARAM: ParamDef = {
   label: "Diamètre des descentes",
   unit: "mm",
   kind: "site_data",
-  question: "Descentes en Ø 80 ou en Ø 100 ?",
-  hint: "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 130 m².",
+  question: "Descentes en Ø 80, Ø 100 ou Ø 120 ?",
+  hint: "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 130 m², Ø 120 au-delà.",
   choices: [
     { label: "Ø 80", value: "80" },
     { label: "Ø 100", value: "100" },
@@ -1088,7 +1088,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.07-42",
+  version: "roofing-2026.10.07-43",
   writtenOnly: true,
   trade: "roofing",
   sources: [

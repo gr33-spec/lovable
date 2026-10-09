@@ -98,7 +98,7 @@ export function OrderFeedbackBox({ request, supplierId, supplierName, onRequestC
   }
   return (
     <div className="flex flex-col gap-2 rounded-2xl bg-ground px-3 py-3">
-      <span className="text-sm font-bold">Vous avez commandé chez {supplierName} : tel quel ?</span>
+      <span className="text-sm font-bold">Tu as commandé chez {supplierName} : tel quel ?</span>
       {error ? <ErrorNotice error={error} /> : null}
       {mode === "ask" ? (
         <div className="flex flex-wrap gap-2">
@@ -114,7 +114,7 @@ export function OrderFeedbackBox({ request, supplierId, supplierName, onRequestC
       ) : (
         <div className="flex flex-col gap-2">
           <label htmlFor={`bon-${request.id}`} className="text-sm font-bold">
-            Collez votre bon de commande (une ligne par article, avec sa quantité)
+            Colle ton bon de commande (une ligne par article, avec sa quantité)
           </label>
           <textarea
             id={`bon-${request.id}`}

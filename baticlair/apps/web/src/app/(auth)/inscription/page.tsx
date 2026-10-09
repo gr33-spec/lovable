@@ -62,7 +62,7 @@ export default function InscriptionPage() {
       <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
         {error ? <ErrorNotice error={error} /> : null}
         <Field id="name" name="name" label="Prénom et nom" autoComplete="name" required />
-        <Field id="company" name="company" label="Nom de votre entreprise" autoComplete="organization" required />
+        <Field id="company" name="company" label="Nom de ton entreprise" autoComplete="organization" required />
         <TradePicker value={trades} onChange={setTrades} />
         <Field id="email" name="email" type="email" label="E-mail professionnel" autoComplete="email" inputMode="email" required />
         <Field
@@ -78,7 +78,7 @@ export default function InscriptionPage() {
           Créer mon compte
         </Button>
         <p className="text-center text-sm text-muted">
-          En créant un compte, vous acceptez notre{" "}
+          En créant un compte, tu acceptes notre{" "}
           <Link href="/confidentialite" className="font-semibold underline">
             politique de confidentialité
           </Link>

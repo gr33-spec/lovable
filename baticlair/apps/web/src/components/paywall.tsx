@@ -49,16 +49,16 @@ export function Paywall({ status, onChange }: { status: BillingStatus; onChange:
     <section aria-labelledby="paywall-title" className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <h1 id="paywall-title" className="font-display text-[30px] leading-[1.05] font-extrabold tracking-[-0.03em]">
-          {blocked ? (status.plan.key === "trial" ? "Votre essai est terminé" : "Limite de votre formule atteinte") : "Nos formules"}
+          {blocked ? (status.plan.key === "trial" ? "Ton essai est terminé" : "Limite de ta formule atteinte") : "Nos formules"}
         </h1>
-        <p className="text-[15px] text-muted">Continuez à utiliser BatiClair pour analyser vos devis et comparer vos fournisseurs.</p>
-        {blocked ? <p className="text-sm text-muted">Vos chantiers en cours restent accessibles.</p> : null}
+        <p className="text-[15px] text-muted">Continue à utiliser BatiClair pour lire tes devis et comparer tes fournisseurs.</p>
+        {blocked ? <p className="text-sm text-muted">Tes chantiers en cours restent accessibles.</p> : null}
       </div>
 
       {error ? <ErrorNotice error={error} /> : null}
       {requested ? (
         <p role="status" className="rounded-2xl bg-ok-bg p-3 text-sm font-semibold text-ok">
-          Merci ! Nous vous contactons très vite pour activer la formule {requested.label}.
+          Merci ! On te contacte très vite pour activer la formule {requested.label}.
         </p>
       ) : null}
 
@@ -80,7 +80,7 @@ export function Paywall({ status, onChange }: { status: BillingStatus; onChange:
                 {current ? (
                   <p className="inline-flex items-center gap-1.5 text-sm font-extrabold text-ok">
                     <Check size={16} aria-hidden="true" />
-                    Votre formule actuelle
+                    Ta formule actuelle
                   </p>
                 ) : status.requestedPlan === plan.key ? (
                   <p className="text-sm font-extrabold text-ok">✓ Demande envoyée</p>

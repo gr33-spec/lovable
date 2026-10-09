@@ -159,7 +159,7 @@ export function ProjectList({ projects, show, onChanged }: { projects: Project[]
       ) : null}
       {failed ? (
         <p role="alert" className="text-sm font-bold text-danger">
-          Le chantier n&apos;a pas pu être modifié. Vérifiez la connexion et réessayez.
+          Le chantier n&apos;a pas pu être modifié. Vérifie la connexion et réessaie.
         </p>
       ) : null}
       {toast ? (

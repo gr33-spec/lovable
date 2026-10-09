@@ -208,9 +208,9 @@ function MyData({ onDeleted }: { onDeleted: () => void }) {
           className="flex flex-col gap-3 rounded-2xl bg-danger-bg p-3"
         >
           <p className="text-sm font-semibold">
-            Tout sera effacé : vos chantiers, vos devis, vos listes, vos
-            fournisseurs. C&apos;est définitif. Téléchargez vos données avant si
-            vous voulez les garder.
+            Tout sera effacé : tes chantiers, tes devis, tes listes, tes
+            fournisseurs. C&apos;est définitif. Télécharge tes données avant si
+            tu veux les garder.
           </p>
           <label htmlFor={id} className="flex flex-col gap-1 text-sm font-bold">
             Tapez SUPPRIMER pour confirmer
@@ -281,7 +281,7 @@ function MemoryCard() {
       </h2>
       <p className="text-sm text-muted">
         Vos habitudes (« je façonne », la qualité d&apos;ardoise…), les ajouts
-        refusés et vos corrections. Vos chantiers restent tels quels.
+        refusés et tes corrections. Tes chantiers restent tels quels.
       </p>
       {error ? <ErrorNotice error={error} /> : null}
       {done ? (
@@ -356,7 +356,7 @@ function TradesCard({ initial }: { initial: string[] }) {
   return (
     <Card className="flex flex-col gap-3 p-4">
       <TradePicker
-        label="Vos métiers"
+        label="Tes métiers"
         value={trades}
         onChange={(v) => {
           setTrades(v);
@@ -364,7 +364,7 @@ function TradesCard({ initial }: { initial: string[] }) {
         }}
       />
       <p className="text-sm text-muted">
-        BatiClair s&apos;en sert pour mieux lire vos devis. S&apos;applique aux
+        BatiClair s&apos;en sert pour mieux lire tes devis. S&apos;applique aux
         prochains devis déposés.
       </p>
       {error ? <ErrorNotice error={error} /> : null}

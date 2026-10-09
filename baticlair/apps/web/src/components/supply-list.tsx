@@ -27,7 +27,6 @@ export function SupplyList({
   handlers,
   onEditItem,
   onSetAside,
-  onSuggestion,
   onSend,
   sketches = [],
   sketchHandlers,
@@ -51,7 +50,6 @@ export function SupplyList({
   onEditItem: (item: PurchaseItem, edit: ItemEdit) => Promise<void>;
   /** Mettre la ligne de côté (après les 3 s d'« Annuler »). */
   onSetAside: (row: ScreenRow) => Promise<void>;
-  onSuggestion: (item: PurchaseItem, answer: "oui" | "non") => Promise<void>;
   onSend: () => void;
   sketches?: readonly ItemSketch[];
   sketchHandlers?: SketchHandlers;
@@ -255,7 +253,7 @@ export function SupplyList({
           </div>
         );
       })}
-      {/* Retour du fondateur (2026-10-06) : plus de bloc « Hypothèses » sous la liste ; seules les suggestions restent. */}
+      {/* §49.1 : ni bloc « Hypothèses », ni bloc « Suggestions » sous la liste : rien d'absent du devis. */}
       {selection && !selecting && rows.length > 1 ? (
         // §48.5 : discret, pour l'usage occasionnel (devis multi-lots) ; l'envoi normal ne change pas.
         <button
@@ -269,21 +267,6 @@ export function SupplyList({
           <Send size={14} aria-hidden="true" />
           Envoyer une sélection à un autre fournisseur
         </button>
-      ) : null}
-      {editable ? (
-        <SuggestionsBlock
-          items={[
-            ...p.suggestions.map((s) => ({ key: s.key, label: s.label, quantity: s.quantity, reason: null as string | null, add: () => onSuggestion(s, "oui") })),
-            ...(takeoff.aiSuggestions ?? []).map((a) => ({
-              key: a.key,
-              label: a.label,
-              quantity: [a.quantity, a.unit].filter(Boolean).join(" ") || null,
-              reason: a.reason,
-              add: () => handlers.onAnswer(a.key, "ok"),
-            })),
-          ]}
-          pending={pending}
-        />
       ) : null}
       </div>
 
@@ -325,51 +308,6 @@ export function SupplyList({
         </div>
       ) : null}
 
-    </section>
-  );
-}
-
-/**
- * §48.4 « INTERDICTION D'INVENTER » : ce que le devis ne demande pas (un consommable proposé, un ajout de l'IA) n'entre
- * jamais tout seul. Un petit bloc à part, en bas, DÉCOCHÉ ; une coche le fait entrer dans la liste.
- */
-function SuggestionsBlock({ items, pending }: { items: { key: string; label: string; quantity: string | null; reason: string | null; add: () => Promise<void> }[]; pending: boolean }) {
-  const [adding, setAdding] = useState<string | null>(null);
-  if (items.length === 0) return null;
-  return (
-    <section aria-label="Suggestions" className="mx-4 mt-3 flex flex-col gap-1 rounded-2xl border border-dashed border-line bg-ground/60 px-3 py-2.5">
-      <p className="text-[13px] font-extrabold">Suggestions</p>
-      <p className="text-[12px] leading-snug text-muted">Pas dans ton devis : rien n&apos;entre dans la liste sans ta coche.</p>
-      <ul className="mt-1 flex flex-col">
-        {items.map((it) => (
-          <li key={it.key}>
-            <label className="flex min-h-11 cursor-pointer items-start gap-2.5 py-1.5">
-              <input
-                type="checkbox"
-                checked={adding === it.key}
-                disabled={pending || adding !== null}
-                onChange={async (e) => {
-                  if (!e.target.checked) return;
-                  setAdding(it.key);
-                  try {
-                    await it.add();
-                  } finally {
-                    setAdding(null);
-                  }
-                }}
-                className="mt-0.5 size-5 shrink-0 accent-accent"
-              />
-              <span className="flex min-w-0 flex-col">
-                <span className="text-[14px] leading-snug font-semibold">
-                  {it.label}
-                  {it.quantity ? <span className="font-extrabold tabular-nums"> · {it.quantity}</span> : null}
-                </span>
-                {it.reason ? <span className="text-[12px] leading-snug text-muted">{it.reason}</span> : null}
-              </span>
-            </label>
-          </li>
-        ))}
-      </ul>
     </section>
   );
 }
@@ -536,9 +474,10 @@ function Row({
         {/* La désignation entière : c'est ce que le comptoir lit (jamais coupée). Sur téléphone, la quantité passe dessous. */}
         <span className="text-[14px] leading-snug font-semibold">{label}</span>
         {quantity || sub || sketches.length > 0 ? (
-          <span className="flex min-w-0 items-baseline gap-1.5 text-[13px] leading-snug">
+          <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 text-[13px] leading-snug">
             {quantity && !stepper ? <span className="shrink-0 text-[14px] font-extrabold tabular-nums sm:hidden">{quantity}</span> : null}
-            {sub ? <span className={`min-w-0 ${sentTo ? "truncate font-bold text-muted" : row.status === "check" ? "font-bold text-warn" : "truncate text-muted"}`}>{sub}</span> : null}
+            {/* §49.8 : la précision en entier, jamais « … ». */}
+            {sub ? <span className={`min-w-0 ${sentTo ? "font-bold text-muted" : row.status === "check" ? "font-bold text-warn" : "text-muted"}`}>{sub}</span> : null}
             {sketches.length > 0 && !open ? (
               <span className="inline-flex shrink-0 items-center gap-1 text-[12px] font-bold text-[#4a37d6]">
                 <Paperclip size={12} aria-hidden="true" />
@@ -740,7 +679,7 @@ function LinePanel({
         Désignation
         <textarea id={`${id}-d`} rows={2} className={`${EDIT_FIELD} py-3 leading-snug`} value={designation} onChange={(e) => setDesignation(e.target.value)} />
       </label>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-[2fr_3fr] gap-2">
         <label htmlFor={`${id}-q`} className="flex flex-col gap-1 text-sm font-bold">
           Quantité
           <input id={`${id}-q`} className={EDIT_FIELD} inputMode="decimal" value={quantity} onChange={(e) => setQuantity(e.target.value)} />

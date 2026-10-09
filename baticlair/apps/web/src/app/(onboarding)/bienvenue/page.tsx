@@ -35,10 +35,10 @@ function CompanyForm() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 px-5 pt-12">
       <PageTitle>Bienvenue</PageTitle>
-      <p className="text-[15px] text-muted">Avant de commencer : votre entreprise et votre métier.</p>
+      <p className="text-[15px] text-muted">Avant de commencer : ton entreprise et ton métier.</p>
       <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
         {error ? <ErrorNotice error={error} /> : null}
-        <Field id="company" name="company" label="Nom de votre entreprise" autoComplete="organization" required />
+        <Field id="company" name="company" label="Nom de ton entreprise" autoComplete="organization" required />
         <TradePicker value={trades} onChange={setTrades} />
         <Button type="submit" pending={pending}>
           Continuer

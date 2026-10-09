@@ -15,7 +15,7 @@ async function signUp(page: Page) {
   await expect(page).toHaveURL(/\/connexion\?retour=%2F/);
   await page.getByRole("link", { name: "Créer un compte" }).click();
   await page.getByLabel("Prénom et nom").fill("Jean Martin");
-  await page.getByLabel("Nom de votre entreprise").fill("Toitures Martin");
+  await page.getByLabel("Nom de ton entreprise").fill("Toitures Martin");
   // Seule question métier : un appui (ici un couvreur).
   await page.getByRole("button", { name: "Couverture, charpente, zinguerie" }).click();
   await page.getByLabel("E-mail professionnel").fill(email);
@@ -124,7 +124,7 @@ async function passQuestions(page: Page) {
 test("un artisan crée son compte et son premier chantier depuis le +", async ({ page }) => {
   await signUp(page);
   await expect(page.getByText("Toitures Martin")).toBeVisible();
-  await expect(page.getByText("Créez votre premier chantier")).toBeVisible();
+  await expect(page.getByText("Crée ton premier chantier")).toBeVisible();
 
   // Le « + » : un nouveau chantier = déposer le PDF, rien d'autre à remplir (§48).
   await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Nouveau chantier" }).click();
@@ -425,7 +425,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
   const apercu = page.getByRole("dialog", { name: "Aperçu de la demande de devis" });
   await expect(apercu.getByRole("article", { name: "Demande de devis" })).toBeVisible();
-  await expect(apercu.getByRole("button", { name: "Choisissez un fournisseur" })).toBeDisabled();
+  await expect(apercu.getByRole("button", { name: "Choisis un fournisseur" })).toBeDisabled();
   await apercu.getByRole("button", { name: "Revenir à la liste" }).click();
   await expect(apercu).toHaveCount(0);
   await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible();
@@ -508,7 +508,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await apercu.getByRole("button", { name: "Enregistrer" }).click();
   await expect(apercu.getByText("pour façonnage naissances")).toBeVisible();
   await apercu.getByRole("button", { name: "Envoyer", exact: true }).click();
-  await expect(page.getByRole("list", { name: "Vos fournisseurs" })).toBeVisible();
+  await expect(page.getByRole("list", { name: "Tes fournisseurs" })).toBeVisible();
   // § 43.4 : juste après le premier envoi, et jamais avant, l'écran des notifications ; « Plus tard » le referme.
   const prompt = page.getByRole("dialog", { name: "Activer les notifications" });
   await expect(prompt).toBeVisible();
@@ -517,8 +517,8 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
 
   // Rechargement à chaque étape : rien ne se perd.
   await page.reload();
-  await expect(page.getByRole("list", { name: "Vos fournisseurs" })).toBeVisible();
-  const suppliers = page.getByRole("list", { name: "Vos fournisseurs" });
+  await expect(page.getByRole("list", { name: "Tes fournisseurs" })).toBeVisible();
+  const suppliers = page.getByRole("list", { name: "Tes fournisseurs" });
   const pointp = suppliers.getByRole("listitem").filter({ hasText: "Point.P Vannes" });
   const tuiles = suppliers.getByRole("listitem").filter({ hasText: "Tuiles & Co" });
   const menu = async (card: typeof pointp, item: string) => {
@@ -539,7 +539,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await expect(pointp.getByText(/^Bonjour,/)).toBeVisible();
   await expect(pointp.getByText(/command/i)).toHaveCount(0);
   await expect(pointp.getByText(/€/)).toHaveCount(0);
-  await expect(page.getByText("Demande envoyée. Ajoutez ici le devis de chaque fournisseur quand il répond.")).toBeVisible();
+  await expect(page.getByText("Demande envoyée. Quand un fournisseur te répond, ajoute son devis sur sa carte.")).toBeVisible();
   // La demande est partie : la liste se replie en une ligne, les réponses des fournisseurs passent au-dessus
   // (retour du fondateur, 2026-10-05) ; un appui la rouvre.
   const repliee = page.getByRole("button", { name: /Liste des fournitures envoyée/ });
@@ -612,9 +612,9 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await expect(offers.first().getByText("✓ Offre retenue")).toBeVisible();
 
   // §47.5 retour fournisseur : la commande passée, d'un tap ; « modifié » : le bon de commande collé.
-  await expect(offers.first().getByText(/Vous avez commandé chez .* : tel quel \?/)).toBeVisible();
+  await expect(offers.first().getByText(/Tu as commandé chez .* : tel quel \?/)).toBeVisible();
   await offers.first().getByRole("button", { name: "Modifié" }).click();
-  await offers.first().getByLabel(/Collez votre bon de commande/).fill("Tuile romane canal rouge : 1 200 u");
+  await offers.first().getByLabel(/Colle ton bon de commande/).fill("Tuile romane canal rouge : 1 200 u");
   await offers.first().getByRole("button", { name: "Enregistrer la commande" }).click();
   await expect(offers.first().getByText(/✓ Commande notée : \d+ écarts? avec la liste/)).toBeVisible();
 
@@ -680,9 +680,9 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
     await apercu.getByRole("checkbox", { name: new RegExp(name.replace(/[()]/g, "\\$&")) }).check();
   }
   await apercu.getByRole("button", { name: "Envoyer", exact: true }).click();
-  await expect(page.getByRole("list", { name: "Vos fournisseurs" })).toBeVisible();
+  await expect(page.getByRole("list", { name: "Tes fournisseurs" })).toBeVisible();
 
-  const cards = page.getByRole("list", { name: "Vos fournisseurs" }).getByRole("listitem");
+  const cards = page.getByRole("list", { name: "Tes fournisseurs" }).getByRole("listitem");
   for (const name of ["Tuilerie de l'Ouest", "Négoce Breizh", "Matériaux Atlantique"]) {
     const card = cards.filter({ hasText: name });
     await card.getByRole("button", { name: "Simuler sa réponse (démo)" }).click();
@@ -712,22 +712,22 @@ test("accueil : la prochaine action de chaque chantier, puis l'essai et les form
   await createProject(page, "Chantier 2", "", "");
   await createProject(page, "Chantier 3", "", "");
   await page.goto("/chantiers/nouveau");
-  await expect(page.getByRole("heading", { name: "Votre essai est terminé" })).toBeVisible();
-  await expect(page.getByText("Continuez à utiliser BatiClair pour analyser vos devis et comparer vos fournisseurs.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Ton essai est terminé" })).toBeVisible();
+  await expect(page.getByText("Continue à utiliser BatiClair pour lire tes devis et comparer tes fournisseurs.")).toBeVisible();
   const plans = page.getByRole("list", { name: "Formules" }).getByRole("listitem");
   await expect(plans).toHaveCount(2);
   await expect(plans.first()).toContainText("chantiers / mois");
   await plans.first().getByRole("button", { name: "Choisir cette formule" }).click();
-  await expect(page.getByText(/Merci ! Nous vous contactons très vite/)).toBeVisible();
+  await expect(page.getByText(/Merci ! On te contacte très vite/)).toBeVisible();
   await page.goto("/");
-  await expect(page.getByText("Votre essai est terminé")).toBeVisible();
+  await expect(page.getByText("Ton essai est terminé")).toBeVisible();
 
   // Activation manuelle (tests, premiers clients) : un code, et c'est reparti.
   await page.goto("/formules");
   await page.getByRole("button", { name: "J'ai un code d'activation" }).click();
   await page.getByLabel("Code d'activation").fill("E2E-SOLO-CODE");
   await page.getByRole("button", { name: "Activer" }).click();
-  await expect(page.getByText("Votre formule actuelle")).toBeVisible();
+  await expect(page.getByText("Ta formule actuelle")).toBeVisible();
   await createProject(page, "Chantier 4", "", "");
 });
 
@@ -749,7 +749,7 @@ test("RGPD : l'artisan télécharge ses données, puis supprime son compte (en t
   await expect(confirm).toBeDisabled();
   await page.getByLabel("Tapez SUPPRIMER pour confirmer").fill("supprimer");
   await confirm.click();
-  await expect(page.getByText("Votre compte et toutes ses données ont été supprimés.")).toBeVisible();
+  await expect(page.getByText("Ton compte et toutes ses données ont été supprimés.")).toBeVisible();
   // Plus de session : l'accueil renvoie vers la connexion.
   await page.goto("/");
   await expect(page).toHaveURL(/\/connexion/);
@@ -822,7 +822,7 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   await expect(page.getByRole("region", { name: "Ce que le devis ne dit pas" })).toBeVisible();
   await expect(page.getByRole("region", { name: "Je pars sur ces valeurs" })).toBeVisible();
   await expect(page.getByText("par défaut").first()).toBeVisible();
-  const consommables = page.getByRole("region", { name: "Quincaillerie et consommables : on les ajoute ?" });
+  const consommables = page.getByRole("region", { name: "Consommables" });
   await expect(consommables.getByText(/^Consommables de pose/)).toHaveCount(1);
   await consommables.getByRole("button", { name: "Non", exact: true }).click();
   await questions.getByRole("button", { name: "Espagne 1er choix" }).click();
