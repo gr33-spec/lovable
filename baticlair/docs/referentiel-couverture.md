@@ -2251,3 +2251,46 @@ Une ligne orange ne doit jamais demander deux gestes ni ouvrir un autre écran. 
 - Chaque carte a son propre « C'est bon » ; le bouton « Tout est bon » reste en haut pour tout valider d'un coup.
 - Plus de bouton « Vérifier les N lignes » qui mène à un autre écran : la liste est l'écran.
 - Une info manquante se demande UNE fois : si plusieurs lignes dépendent de la même donnée (diamètre des naissances pour la gouttière, les crochets et les naissances), un seul choix les règle toutes. Et une donnée nécessaire au calcul se demande à l'écran des questions, avant le calcul (49.4) ; dans la liste ne restent que les écarts, les estimations et ce qui n'a pas été répondu. Aucun message flottant au milieu de l'écran : le compteur de lignes orange est une petite barre fixe en haut, qui ne cache rien. Test : un relecteur doit pouvoir passer toutes les oranges au vert sans jamais quitter la liste, à un geste par ligne.
+- ## 49.9 Lignes de prestation : on nomme la fourniture, jamais la phrase du devis
+
+  Beaucoup de devis, surtout en réparation, écrivent des prestations et non des articles : « Remplacement unitaire d'une tuile cassée, comprenant accès toit, dépose et pose d'une tuile neuve identique ». La ligne du quantitatif n'est jamais cette phrase. Elle nomme la fourniture qu'un comptoir peut servir.
+  - Pour chaque ligne du devis, le lecteur (41.1) extrait la ou les fournitures contenues dans la prestation, en priorité dans les sous-lignes du devis (« – Tuile terre cuite mécanique ») puis dans le texte (« y compris les petites fournitures de fixation »). Chaque fourniture extraite devient une ligne, nommée comme un article : « Tuile terre cuite mécanique », pas « Remplacement unitaire d'une tuile… ».
+  - La quantité est celle de la ligne du devis quand la prestation est unitaire (20 remplacements ⇒ 20 tuiles). Quand une fourniture est seulement citée (« petites fournitures de fixation »), elle sort en orange, en « jeu » ou « lot », avec la question qui permet de la préciser (type d'élément de rive).
+  - Une ligne du devis sans aucune fourniture (main-d'œuvre, repositionnement en heures, évacuation, forfait, nettoyage, location) est hors quantitatif : elle n'apparaît pas dans la liste, ni en vert ni en orange. Elle est repliée sous une ligne discrète « N lignes sans fourniture », fermée par défaut, pour que l'artisan voie qu'elle a été lue. Une unité en heures, forfait ou jour ne devient jamais une fourniture.
+  - Une donnée qu'un bouton ne peut pas deviner (modèle et teinte d'une tuile) n'est pas posée à l'écran des questions : la ligne sort en orange « modèle et teinte à préciser », l'artisan la complète à la voix ou au crayon dans la liste, ou la laisse au fournisseur.
+  - Ce n'est pas une entorse à la règle numéro un : la tuile est écrite au devis, dans la sous-ligne. Rien n'est ajouté qui n'y soit pas.
+
+  Test permanent, devis D.2026.105 (réparation, 4 lignes : remplacement de 20 tuiles avec sous-ligne « Tuile terre cuite mécanique », repositionnement 1,5 h, refixation d'un élément de rive y compris fournitures de fixation, évacuation forfait). Liste attendue : exactement 2 lignes — « Tuile terre cuite mécanique » 20 pièces, orange « modèle et teinte à préciser » ; « Fixations pour l'élément de rive » 1 jeu, orange, question tuile de rive / bande de rive zinc. Aucune ligne pour les heures ni le forfait ; « 2 lignes sans fourniture » repliées. Le test échoue si une ligne de la liste reprend la phrase d'une prestation, si une ligne a une unité en h ou fft, ou si un article apparaît sans être écrit au devis.
+- # 50. Ce que voit l'artisan (prime sur toute règle d'écran antérieure)
+
+  L'app, c'est trois écrans. Tout ce qui n'est pas décrit ici n'existe pas à l'écran.
+
+  ## 50.1 Écran 1 : je dépose mon devis
+
+  Un bouton « Déposer mon devis ». Pendant la lecture : une seule phrase, « Je lis ton devis ». En cas d'échec : la raison en une phrase et « Réessayer ».
+
+  ## 50.2 Écran 2 : les questions
+
+  Autant de questions que le devis en demande, pas de maximum : un gros devis peut en avoir vingt, un petit zéro. Chaque question répond à une donnée réellement absente du devis et nécessaire au calcul (49.4), celle que le comptoir poserait (47.8). Aucune question dont la réponse est écrite au devis, aucune posée deux fois, aucune question de confort. En boutons, une par carte, groupées par ouvrage. Si le devis dit tout, cet écran n'apparaît pas. Le but n'est pas d'en poser peu, c'est que le quantitatif qui sort soit juste. Une question de façonnage par pièce de zinc écrite au devis (48.6), obligatoire. En bas : « Calculer ma liste ». Rien d'autre : pas de texte libre, pas de voix, pas d'explication.
+
+  ## 50.3 Écran 3 : ma liste
+
+  Une ligne par fourniture, comme sur un bon de commande. Chaque ligne tient en une carte :
+  - un point vert ou orange ;
+  - le nom qu'on dit au comptoir (49.3, 49.9) ;
+  - la quantité avec moins / plus, et l'unité commandable ;
+  - si orange : la raison en cinq mots maximum (« Modèle et teinte à préciser », « Devis 20, calcul 21 »), puis ses boutons de choix dans la carte, puis « C'est bon ». Rien de tout ça si la ligne est verte.
+
+  En haut : une barre fixe discrète « 2 lignes à régler », qui disparaît à zéro. En bas : un seul bouton « Envoyer au fournisseur ». Sous ce bouton, en petit : « Ajouter un article », « Envoyer une sélection à un autre fournisseur », « Modifier à la voix ». Les lignes hors quantitatif sont repliées sous « N lignes sans fourniture » (49.9).
+
+  ## 50.4 Ce qui n'existe plus
+
+  Le bandeau « L'IA peut se tromper… +5 % de coupes ». Le bouton « Corriger » sur les cartes. Le préfixe « Info manquante : » (la raison suffit). Le compteur « 3 fournitures · 2 à vérifier ». Les sections « C'est bon (1) / À vérifier (2) » : les oranges sont simplement en premier. La carte du PDF avec Ouvrir / Retirer, et « Une mesure mal lue ? Corriger le devis lu » : le PDF se rouvre depuis le titre du chantier. Tout message flottant.
+
+  ## 50.5 Un vrai quantitatif
+
+  Chaque ligne a trois choses et rien d'autre : un nom qu'on dit au comptoir, une quantité, une unité commandable. Jamais une phrase de prestation, jamais des heures ou un forfait, jamais un conseil. Test : lue à voix haute à un vendeur, la liste se saisit telle quelle.
+
+  ## 50.6 Test
+
+  Sur D-2026-020, D-2026-018 et D.2026.105, une capture iPhone de chaque écran ne montre aucun élément listé en 50.4, et chaque carte de la liste ne contient que les éléments de 50.3.

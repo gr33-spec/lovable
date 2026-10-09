@@ -36,9 +36,10 @@ export function isTimeUnit(unit: string | null | undefined): boolean {
  */
 const PRESTATION_HEADS = [
   "remplacement",
+  "refixation",
+  "reprise",
   "repositionnement",
   "remaniement",
-  "reprise",
   "reparation",
   "revision",
   "recherche",

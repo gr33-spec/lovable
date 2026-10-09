@@ -21,7 +21,8 @@ export function shortName(designation: string): string {
   if (pose && pose.index >= 8) text = text.slice(0, pose.index);
   const glued = text.length > 50 ? /\)\s+(?=\p{Lu})/u.exec(text) : null;
   if (glued && glued.index >= 8) text = text.slice(0, glued.index + 1);
-  text = text.replace(/\s*\(réf\.?[^)]*\)/gi, "").replace(/\s+/g, " ").trim();
+  // Une parenthèse jamais refermée (cellule du devis coupée à la ligne) ne se montre pas à moitié.
+  text = text.replace(/\s*\(réf\.?[^)]*\)/gi, "").replace(/\s*\([^)]*$/, "").replace(/\s+/g, " ").trim();
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 

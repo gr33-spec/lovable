@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { applyRuleConfirmations, isPrestationPhrase, isWithoutSupplyUnit, linesWithoutSupply, tradeProfile, validateTakeoff, type QuoteLineReading } from "../src/index.js";
-import { readQuote, type QuoteLineInput } from "./support/read-quote.js";
+import { D2026_105_LINES, D2026_105_READINGS } from "./devis-reels/d2026-105.js";
+import { readQuote } from "./support/read-quote.js";
 
 /**
  * §49.9 (retour du fondateur, 2026-10-09, devis de réparation D.2026.105) : « une ligne du quantitatif nomme une
@@ -10,23 +11,10 @@ import { readQuote, type QuoteLineInput } from "./support/read-quote.js";
  *  - Une ligne sans fourniture (heures, forfait, évacuation) est hors quantitatif : pas dans la liste, repliée sous
  *    « N lignes sans fourniture ». Une unité h, fft ou jour n'est jamais une fourniture.
  *  - Modèle et teinte de tuile : pas de question à boutons, ligne orange « à préciser ».
- * Devis de réparation ANONYMISÉ (désignations, quantités, unités ; ni nom, ni adresse, ni prix), tel que le lecteur le rend.
+ * Devis D.2026.105 (réparation), tel que le lecteur le rend (`devis-reels/d2026-105.ts`).
  */
-const REPARATION: QuoteLineInput[] = [
-  { ref: "1", designation: "Accès toiture et mise en sécurité (échelle, harnais, protections)", quantity: "1", unit: "fft" },
-  { ref: "2", designation: "Remplacement unitaire d'une tuile cassée, comprenant accès toit, dépose de la tuile cassée et pose de la tuile neuve – Tuile terre cuite mécanique", quantity: "20", unit: "u" },
-  { ref: "3", designation: "Repositionnement des tuiles", quantity: "1,5", unit: "h" },
-  { ref: "4", designation: "Reprise de l'élément de rive, y compris les petites fournitures de fixation", quantity: "1", unit: "fft" },
-  { ref: "5", designation: "Évacuation des déchets et nettoyage de fin de chantier", quantity: "1", unit: "fft" },
-];
-
-const READINGS = new Map<string, QuoteLineReading>([
-  ["1", { role: "hors_quantitatif", articles: [], faconnage: null, manque: [] }],
-  ["2", { role: "fourniture_et_pose", articles: [{ nom: "Tuile terre cuite mécanique", materiau: null, quantite: "20", unite: "u", elements: null }], faconnage: null, manque: ["modèle et teinte de tuile"] }],
-  ["3", { role: "pose", articles: [], faconnage: null, manque: [] }],
-  ["4", { role: "fourniture_et_pose", articles: [{ nom: "Fixations pour l'élément de rive", materiau: null, quantite: "1", unite: "jeu", elements: null }], faconnage: null, manque: ["type d'élément de rive (tuile de rive, bande zinc)"] }],
-  ["5", { role: "hors_quantitatif", articles: [], faconnage: null, manque: [] }],
-]);
+const REPARATION = D2026_105_LINES;
+const READINGS = D2026_105_READINGS;
 
 const read = (answers: Record<string, unknown> = {}) => applyRuleConfirmations(readQuote(REPARATION, answers as never, [], undefined, { acceptDraft: true }, READINGS), answers as never);
 
@@ -75,15 +63,15 @@ describe("§49.9 une ligne du quantitatif nomme une fourniture, jamais la phrase
   it("élément de rive : la question tuile de rive / bande zinc, en boutons dans la carte, posée une fois", () => {
     const p = read();
     const rive = shown(p).find((r) => r.label === "Fixations pour l'élément de rive")!;
-    expect(rive.item?.asks?.map((a) => a.options.map((o) => o.label))).toEqual([["tuile de rive", "bande zinc"]]);
+    expect(rive.item?.asks?.map((a) => a.options.map((o) => o.label))).toEqual([["tuile de rive", "bande de rive zinc"]]);
     expect(p.questions.filter((q) => q.question && /rive/i.test(q.question.text))).toHaveLength(1);
   });
 
-  it("les lignes sans fourniture (accès, heures, évacuation) sont repliées à part, jamais dans la liste", () => {
+  it("les lignes sans fourniture (heures, évacuation au forfait) sont repliées à part : « 2 lignes sans fourniture »", () => {
     const lines = REPARATION.map((l) => ({ id: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit }));
     const validation = validateTakeoff(lines.map((l) => ({ id: l.id, designation: l.designation, quantityRaw: l.quantity, unitRaw: l.unit, source: "client_quote" as const })), tradeProfile("roofing"));
-    const without = linesWithoutSupply(lines.filter((l) => !["2", "4"].includes(l.id)), validation, READINGS);
-    expect(without.map((w) => w.measure)).toEqual(["1 fft", "1,5 h", "1 fft"]);
+    const without = linesWithoutSupply(lines.filter((l) => !["1", "3"].includes(l.id)), validation, READINGS);
+    expect(without.map((w) => w.measure)).toEqual(["1,5 h", "1 forfait"]);
   });
 
   it("sans la lecture (lignes d'un partenaire), une heure n'est jamais une fourniture", () => {

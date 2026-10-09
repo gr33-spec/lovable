@@ -55,14 +55,14 @@ for (const size of WIDTHS) {
     await shoot(page, size.name, "03-accueil");
 
     await page.goto("/chantiers/nouveau");
-    await expect(page.getByLabel("Choisir le devis (PDF)")).toBeVisible();
+    await expect(page.getByLabel("Déposer mon devis")).toBeVisible();
     await shoot(page, size.name, "04-nouveau-chantier");
 
     await page.goto("/");
     await page.getByRole("button", { name: "Lancer la démonstration" }).click();
     await expect(page.getByRole("heading", { name: "Démo – Toiture Martin" })).toBeVisible();
     // §48 : la lecture part d'elle-même ; l'écran des questions (s'il y en a) passe par « Calculer ma liste ».
-    const questions = page.getByRole("region", { name: /^J'ai quelques questions/ });
+    const questions = page.getByRole("region", { name: "Les questions" });
     const list = page.getByRole("region", { name: "Liste des fournitures" });
     await expect(list.or(questions).first()).toBeVisible({ timeout: 60_000 });
     if (await questions.isVisible()) {
@@ -71,7 +71,7 @@ for (const size of WIDTHS) {
       for (let i = 0; i < (await faconne.count()); i++) await faconne.nth(i).click();
       await page.getByRole("button", { name: /^Calculer ma liste/ }).click();
     }
-    await expect(list.getByText(/^\d+ fournitures · tout est prêt$/)).toBeVisible();
+    await expect(list.getByRole("button", { name: "Envoyer au fournisseur" })).toBeVisible();
     await shoot(page, size.name, "05-liste-des-fournitures");
 
     await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();

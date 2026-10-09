@@ -1,5 +1,11 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.09-46 — §50 « Ce que voit l'artisan » (fondateur, 2026-10-09)
+
+- **§50 Trois écrans**, qui priment sur toute règle d'écran antérieure : 1) je dépose mon devis (« Je lis ton devis », en cas d'échec la raison et « Réessayer ») ; 2) les questions, une par carte, en boutons, groupées par ouvrage, puis « Calculer ma liste » ; 3) ma liste, une carte par fourniture (point, nom du comptoir, quantité au moins / plus, unité ; si orange : raison en cinq mots au plus, boutons, « C'est bon »), oranges en premier, barre « N lignes à régler », un seul bouton « Envoyer au fournisseur » et trois liens en petit.
+- **§50.4 Retirés** : le bandeau « L'IA peut se tromper… », le bouton « Corriger », le préfixe « Info manquante : », le compteur « N fournitures · N à vérifier », les sections « C'est bon / À vérifier », la carte du PDF (Ouvrir / Retirer) et « Corriger le devis lu » (le PDF se rouvre depuis le titre du chantier), tout message flottant.
+- Le texte du référentiel (docs/referentiel-couverture.md) reprend la version du fondateur avec le §49.9 rédigé et le §50. Aucun ratio ne change.
+
 ## roofing-2026.10.09-45 — §49.9 une ligne nomme une fourniture (retour du fondateur, 2026-10-09, devis de réparation D.2026.105)
 
 - **§49.9 Fourniture, jamais phrase** : une prestation écrite en phrase (« Remplacement unitaire d'une tuile cassée, comprenant accès toit… ») est remplacée dans la liste par la fourniture que la lecture en extrait, d'abord ses sous-lignes (« – Tuile terre cuite mécanique »), puis son texte (« y compris les petites fournitures de fixation ») : une ligne par article, nommée par l'article, avec sa quantité. Avant : la phrase entière sortait comme désignation.

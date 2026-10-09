@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Check, ChevronRight, CircleCheck, FileDown, FileText, HelpCircle, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronRight, CircleCheck, Plus } from "lucide-react";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AssistantMessage, Say } from "@/components/chat";
 import { useSelectionSend } from "@/components/selection-send";
@@ -16,8 +16,8 @@ import { useProgressRefresh } from "@/components/project-progress";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError, type ProjectDocument, type PurchaseItem, type Quantitatif, type ReadingState, type ScreenRow, type TakeoffLine } from "@/lib/api";
 import { attachFile } from "@/lib/upload";
-import { parseQuantity, shortName } from "@/lib/labels";
-import { openFile } from "@/lib/open-document";
+import { parseQuantity } from "@/lib/labels";
+import { unreadableMessage } from "@/lib/fr";
 import { useListPage } from "@/lib/list-page";
 import { useResource } from "@/lib/use-resource";
 
@@ -41,7 +41,6 @@ export function ProjectTakeoff({
   clientQuote,
   archived,
   autoStart,
-  quoteCard = null,
   onProjectChanged,
   onRedeposit,
 }: {
@@ -50,11 +49,9 @@ export function ProjectTakeoff({
   archived: boolean;
   /** Devis tout juste déposé : la lecture part d'elle-même. */
   autoStart: boolean;
-  /** Le devis déposé (ouvrir, retirer) : montré avec la liste, pas pendant les étapes. */
-  quoteCard?: React.ReactNode;
   /** La lecture a nommé le chantier (« Chantier Dupont ») : l'en-tête se relit. */
   onProjectChanged?: () => void;
-  /** « Redéposer le PDF » : retire le devis lu (rien trouvé) pour en déposer un autre. */
+  /** Retire le devis déposé (illisible, ou rien lu dedans) pour en déposer un autre : « Réessayer » d'un fichier. */
   onRedeposit?: () => Promise<void>;
 }) {
   // Le chat passe par la même porte que les partenaires (§38) : /v1/quantitatifs, avec le détail de l'écran.
@@ -73,7 +70,9 @@ export function ProjectTakeoff({
   const [pending, setPending] = useState(false);
   const [actionError, setActionError] = useState<ApiError | null>(null);
   // Le devis lu, ligne par ligne : fermé, ouvert pour corriger, ou ouvert directement sur « ajouter un article ».
-  const [showList, setShowList] = useState<false | "corriger" | "ajouter">(false);
+  // §50.3 : « Ajouter un article » ouvre sa fiche ; « Modifier à la voix » ouvre la voix sous la liste.
+  const [showList, setShowList] = useState<false | "ajouter">(false);
+  const [voiceOpen, setVoiceOpen] = useState(false);
   const [sendSignal, setSendSignal] = useState(0);
   // §48.5 : « Envoyer une sélection à un autre fournisseur » ; une sélection partie fait relire les demandes.
   const [requestsSignal, setRequestsSignal] = useState(0);
@@ -165,8 +164,14 @@ export function ProjectTakeoff({
 
   if (!takeoff) {
     if (!clientQuote) return null;
-    // Un devis illisible : sa carte dit pourquoi (et permet de le retirer).
-    if (!readable) return clientQuote.status === "failed" ? <div className="flex flex-col gap-3">{quoteCard}</div> : <AnalysisScreen fileName={clientQuote.name} />;
+    // §50.1 : un devis illisible dit pourquoi en une phrase ; « Réessayer » repart du dépôt.
+    if (!readable) {
+      return clientQuote.status === "failed" ? (
+        <ReadFailure sentence={unreadableMessage(clientQuote.reading?.errorCode)} disabled={archived} {...(onRedeposit ? { onRetry: () => void run(onRedeposit, () => undefined) } : {})} />
+      ) : (
+        <AnalysisScreen />
+      );
+    }
     if (!data.aiAvailable) {
       return (
         <AssistantMessage>
@@ -179,50 +184,19 @@ export function ProjectTakeoff({
     const refused = actionError !== null && data.reading?.status !== "reading";
     const lost = error !== null && data.reading?.status === "reading";
     const failed = (data.reading?.status === "failed" || refused || lost) && !pending;
-    if (!failed) return <AnalysisScreen fileName={clientQuote.name} />;
+    if (!failed) return <AnalysisScreen />;
     const shown = refused ? actionError : lost ? error : actionError;
-    // RIEN NE PART VIDE : une lecture qui n'a trouvé aucune ligne ne fait jamais une liste ; on relit, ou on redépose.
+    // §50.1 : en cas d'échec, la raison en une phrase et « Réessayer ». RIEN NE PART VIDE : une lecture qui n'a trouvé aucune
+    // ligne ne fait jamais une liste, elle se relit.
     const nothingRead = (data.reading?.reason === "nothing_read" && !refused && !lost) || (refused && actionError?.reason === "nothing_read");
-    if (nothingRead) {
-      return (
-        <section id="materiaux" aria-label="Liste de matériaux" className="flex scroll-mt-4 flex-col gap-3">
-          <div className="flex flex-col gap-3 rounded-[22px] bg-surface p-5 shadow-card">
-            <p className="text-[17px] leading-snug font-bold">Je n&apos;ai rien lu dans ce devis.</p>
-            <p className="text-[15px] leading-snug text-muted">Aucune ligne de fourniture trouvée : rien ne part au fournisseur. Rien ne t&apos;est décompté.</p>
-            <Button className="min-h-14 w-full text-[17px]" disabled={archived} onClick={prepare}>
-              <Sparkles size={18} aria-hidden="true" />
-              Réessayer
-            </Button>
-            {onRedeposit ? (
-              <Button variant="secondary" className="min-h-12 w-full" disabled={archived} onClick={() => void run(onRedeposit, () => undefined)}>
-                Redéposer le PDF
-              </Button>
-            ) : null}
-          </div>
-          {quoteCard}
-        </section>
-      );
-    }
-    return (
-      <section id="materiaux" aria-label="Liste de matériaux" className="flex scroll-mt-4 flex-col gap-3">
-        <div className="flex flex-col gap-3 rounded-[22px] bg-surface p-5 shadow-card">
-          <p className="text-[17px] leading-snug font-bold">
-            {refused
-              ? "Je n'ai pas pu lancer la lecture de ce devis."
-              : lost
-                ? "Je n'ai plus de nouvelles de la lecture de ce devis."
-                : "Je n'ai pas réussi à lire ce devis jusqu'au bout (coupure ou panne de mon côté)."}{" "}
-            Rien ne t&apos;est décompté : on réessaie ?
-          </p>
-          {shown ? <ErrorNotice error={shown} /> : null}
-          <Button className="min-h-14 w-full text-[17px]" disabled={archived} onClick={lost ? reload : prepare}>
-            <Sparkles size={18} aria-hidden="true" />
-            Réessayer
-          </Button>
-        </div>
-        {quoteCard}
-      </section>
-    );
+    const sentence = nothingRead
+      ? "Je n'ai rien lu dans ce devis."
+      : refused
+        ? (shown?.message ?? "Je n'ai pas pu lancer la lecture de ce devis.")
+        : lost
+          ? "Je n'ai plus de nouvelles de la lecture de ce devis."
+          : "Je n'ai pas réussi à lire ce devis jusqu'au bout.";
+    return <ReadFailure sentence={sentence} disabled={archived} onRetry={lost ? reload : prepare} />;
   }
 
   // §48 ÉTAPE 3 : les questions de comptoir, toutes d'un coup, AVANT le calcul. Puis ÉTAPE 4 : le calcul.
@@ -236,27 +210,12 @@ export function ProjectTakeoff({
   }
   if (phase === "calcul") return <CalculScreen />;
 
-  // Une liste lue avant la règle « rien ne part vide » et restée sans ligne : jamais de bouton d'envoi, on redépose.
+  // Une liste lue avant la règle « rien ne part vide » et restée sans ligne : jamais de bouton d'envoi ; on repart du dépôt.
   if (takeoff.purchase.toBuy.length + takeoff.purchase.toQuote.length === 0 && takeoff.lines.length === 0) {
-    return (
-      <section id="materiaux" aria-label="Liste de matériaux" className="flex scroll-mt-4 flex-col gap-3">
-        <div className="flex flex-col gap-3 rounded-[22px] bg-surface p-5 shadow-card">
-          <p className="text-[17px] leading-snug font-bold">Je n&apos;ai rien lu dans ce devis.</p>
-          <p className="text-[15px] leading-snug text-muted">Aucune ligne de fourniture trouvée : rien ne part au fournisseur.</p>
-          {onRedeposit && !archived ? (
-            <Button className="min-h-14 w-full text-[17px]" onClick={() => void run(onRedeposit, () => undefined)}>
-              Redéposer le PDF
-            </Button>
-          ) : null}
-        </div>
-        {quoteCard}
-      </section>
-    );
+    return <ReadFailure sentence="Je n'ai rien lu dans ce devis." disabled={archived} {...(onRedeposit ? { onRetry: () => void run(onRedeposit, () => undefined) } : {})} />;
   }
   const draft = takeoff.status === "draft";
   const units = takeoff.logements ?? null;
-  const materials = takeoff.lines.filter((l) => l.kind !== "labor");
-  const labor = takeoff.lines.filter((l) => l.kind === "labor");
   const editable = !archived;
   // Toutes les actions passent par la porte : réponses, corrections, validation.
   const qid = encodeURIComponent(quantitatif!.id);
@@ -265,11 +224,6 @@ export function ProjectTakeoff({
   const ligne = (f: LineFieldsInput) => ({ libelle: f.designation, quantite: f.quantity, unite: f.unit, reference: f.reference });
   const answer = (key: string, value: string | { value: string; unit: string } | null) =>
     call("reponses", { reponses: [value !== null && typeof value === "object" ? { question: key, valeur: value.value, unite: value.unit } : { question: key, valeur: value }] });
-  const lineActions = (line: TakeoffLine) => ({
-    onSave: (fields: LineFieldsInput) => call("corrections", { action: "modifier_ligne", id: line.id, ligne: ligne(fields) }),
-    onDelete: () => call("corrections", { action: "retirer", id: line.id }),
-    onConfirm: () => call("corrections", { action: "confirmer", id: line.id }),
-  });
   const handlers: DecisionHandlers = {
     onDecide: (d) => {
       return call("reponses", { reponses: [{ question: d.key, valeur: "ok" }] });
@@ -348,39 +302,20 @@ export function ProjectTakeoff({
   if (showList) {
     body = (
       <>
-        <section aria-labelledby="devis-lu-titre" className="flex flex-col gap-1">
-          <button type="button" onClick={() => setShowList(false)} className="-ml-1 inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-bold text-accent-text">
-            <ArrowLeft size={18} aria-hidden="true" />
-            Revenir à la liste des fournitures
-          </button>
-          <h2 id="devis-lu-titre" className="font-display text-[22px] font-extrabold tracking-[-0.02em]">
-            Le devis du client, ligne par ligne
-          </h2>
-          <p className="text-[15px] leading-snug text-muted">Une ligne mal lue ? Corrige-la ici : la liste des fournitures se recalcule toute seule.</p>
-        </section>
-        <Card className="flex flex-col divide-y divide-line px-4 py-1">
-          {materials.map((line) => (
-            <ListRow key={line.id} line={line} editable={editable} pending={pending} {...lineActions(line)} />
-          ))}
-        </Card>
-        {editable ? <AddLine startOpen={showList === "ajouter"} pending={pending} onAdd={(fields) => call("corrections", { action: "ajouter", ligne: ligne(fields) })} /> : null}
-        {labor.length > 0 || takeoff.notes.length > 0 ? (
-          <details className="rounded-2xl bg-surface p-4 text-sm shadow-card">
-            <summary className="cursor-pointer font-bold">Lignes mises de côté</summary>
-            <ul className="mt-2 flex list-disc flex-col gap-1 pl-5 text-muted">
-              {labor.map((l) => (
-                <li key={l.id}>{shortName(l.designation)} (main-d&apos;œuvre, rien à chiffrer)</li>
-              ))}
-              {takeoff.notes.map((n) => (
-                <li key={n}>{n}</li>
-              ))}
-            </ul>
-          </details>
-        ) : null}
-        <Button variant="secondary" onClick={() => setShowList(false)}>
+        <button type="button" onClick={() => setShowList(false)} className="-ml-1 inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-bold text-accent-text">
           <ArrowLeft size={18} aria-hidden="true" />
-          Revenir à la liste des fournitures
-        </Button>
+          Revenir à ma liste
+        </button>
+        {editable ? (
+          <AddLine
+            startOpen
+            pending={pending}
+            onAdd={async (fields) => {
+              await call("corrections", { action: "ajouter", ligne: ligne(fields) });
+              setShowList(false);
+            }}
+          />
+        ) : null}
       </>
     );
   } else if (units && unitsView) {
@@ -394,55 +329,34 @@ export function ProjectTakeoff({
       />
     );
   } else {
-    // UN SEUL ÉCRAN : la liste des fournitures, une couleur par ligne (retour du fondateur, 2026-10-04).
+    // §50.3 : ma liste, et rien d'autre ; dessous, en petit, ajouter un article, envoyer une sélection, modifier à la voix.
     body = (
-      <>
-        {editable ? (
-          <VoiceEditor items={takeoff.purchase.toBuy.map((b) => ({ key: b.key, label: b.label, quantity: b.quantity }))} pending={pending} onApply={voiceEdit} />
-        ) : null}
-        <SupplyList
-          takeoff={takeoff}
-          editable={editable}
-          pending={pending}
-          handlers={handlers}
-          onEditItem={editItem}
-          onSetAside={setAside}
-          onSend={send}
-          docked={false}
-          validated={!draft}
-          sent={sent}
-          sketches={quantitatif?.infos?.croquis ?? []}
-          sketchHandlers={{ onAttach: attachSketch, onDetach: detachSketch }}
-          {...(!archived ? { selection } : {})}
-        />
-        {/* Ce qu'on peut encore faire sur la liste : des actions dites en clair, jamais un lien qu'on ne comprend pas. */}
-        <nav aria-label="Autres actions sur la liste" className="flex flex-col divide-y divide-line overflow-hidden rounded-[20px] bg-surface shadow-card">
-          {editable ? (
-            <ActionRow icon={<Plus size={20} aria-hidden="true" />} title="Ajouter un article" text="Une fourniture que le devis ne cite pas." onClick={() => setShowList("ajouter")} />
-          ) : null}
-          {/* §21.3 : le même document que celui du fournisseur. */}
-          {!draft ? (
-            <ActionRow
-              icon={<FileDown size={20} aria-hidden="true" />}
-              title="Voir la liste en PDF"
-              text="Le document que reçoit le fournisseur, sans prix : à télécharger ou à partager."
-              onClick={() => openFile({ url: `/v1/projects/${encodeURIComponent(projectId)}/demande-de-devis.pdf`, title: "Liste des fournitures", fileName: "demande-de-devis.pdf" })}
-            />
-          ) : null}
-        </nav>
-        {/* Rare : une surface ou une longueur mal lue dans le devis. Un lien discret, plus une carte (toutes les lignes de
-            la liste se modifient d'un appui). */}
-        <button type="button" onClick={() => setShowList("corriger")} className="inline-flex min-h-11 items-center gap-1.5 self-center text-[13px] font-bold text-muted">
-          <FileText size={15} aria-hidden="true" />
-          Une mesure mal lue ? Corriger le devis lu
-        </button>
-      </>
+      <SupplyList
+        takeoff={takeoff}
+        editable={editable}
+        pending={pending}
+        handlers={handlers}
+        onEditItem={editItem}
+        onSetAside={setAside}
+        onSend={send}
+        docked={false}
+        sent={sent}
+        sketches={quantitatif?.infos?.croquis ?? []}
+        sketchHandlers={{ onAttach: attachSketch, onDetach: detachSketch }}
+        {...(!archived ? { selection } : {})}
+        {...(editable
+          ? {
+              onAdd: () => setShowList("ajouter"),
+              onVoice: () => setVoiceOpen((v) => !v),
+              ...(voiceOpen ? { voice: <VoiceEditor items={takeoff.purchase.toBuy.map((b) => ({ key: b.key, label: b.label, quantity: b.quantity }))} pending={pending} onApply={voiceEdit} /> } : {}),
+            }
+          : {})}
+      />
     );
   }
 
   // Le résumé de la liste, sur le chantier : de quoi savoir où l'on en est et ouvrir la page des fournitures.
-  const screenRows = takeoff.purchase.screen.groups.flatMap((g) => g.rows);
-  const checkCount = screenRows.filter((r) => r.status === "check").length;
+  const checkCount = takeoff.purchase.screen.groups.flatMap((g) => g.rows).filter((r) => r.status === "check").length;
 
   // §48 ÉTAPE 5 : la liste EST l'écran du chantier tant qu'elle n'est pas partie ; ensuite, les réponses des fournisseurs
   // passent devant et la liste tient en une ligne.
@@ -488,7 +402,6 @@ export function ProjectTakeoff({
             </div>
           ) : null}
           {body}
-          {quoteCard && !showList ? <div className="flex flex-col gap-1.5">{quoteCard}</div> : null}
         </section>
       ) : null}
       {/* Le chantier après l'envoi : reste monté sous la liste (l'aperçu d'envoi s'y ouvre), il est seulement caché. */}
@@ -511,12 +424,13 @@ export function ProjectTakeoff({
                 </span>
               )}
               <span className="flex min-w-0 flex-1 flex-col">
-                <span className="font-bold">{sent ? "Liste des fournitures envoyée" : "Fournitures à chiffrer"}</span>
-                <span className="text-[13px] text-muted">
-                  {sent
-                    ? "Touche pour la revoir ou la modifier."
-                    : `${screenRows.length} fourniture${screenRows.length > 1 ? "s" : ""} · ${checkCount > 0 ? `${checkCount} à vérifier` : "tout est prêt"}`}
-                </span>
+                <span className="font-bold">{sent ? "Ma liste, envoyée" : "Ma liste"}</span>
+                {/* §50.4 : plus de compteur « N fournitures · N à vérifier » ; seulement ce qui reste à régler. */}
+                {!sent && checkCount > 0 ? (
+                  <span className="text-[13px] text-muted">
+                    {checkCount} ligne{checkCount > 1 ? "s" : ""} à régler
+                  </span>
+                ) : null}
               </span>
               <ChevronRight size={20} className="shrink-0 text-muted" aria-hidden="true" />
             </button>
@@ -525,7 +439,6 @@ export function ProjectTakeoff({
           <div className={sent ? "order-first" : undefined}>
             <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} onListChanged={reload} openSignal={sendSignal} refreshSignal={requestsSignal} onSentChange={setSent} onPreviewClosed={() => setOverview(false)} />
           </div>
-          {listShown ? null : quoteCard}
         </div>
       </div>
     </>
@@ -537,99 +450,6 @@ interface LineFieldsInput {
   quantity: string | null;
   unit: string | null;
   reference: string | null;
-}
-
-interface LineActions {
-  onSave: (fields: LineFieldsInput) => Promise<void>;
-  onDelete: () => Promise<void>;
-  onConfirm: () => Promise<void>;
-}
-
-/** Une ligne de la liste complète : nom court, quantité, crayon. */
-function ListRow({ line, editable, pending, onSave, onDelete, onConfirm }: { line: TakeoffLine; editable: boolean; pending: boolean } & LineActions) {
-  const [editing, setEditing] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const doubt = line.status !== "certain";
-
-  if (editing) {
-    return (
-      <div className="py-3">
-        <LineForm initial={line} submitLabel="Enregistrer" pending={pending} onCancel={() => setEditing(false)} onSubmit={async (f) => { await onSave(f); setEditing(false); }} />
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-2 py-2.5">
-      <div className="flex items-center gap-3">
-        {/* Jamais de coche verte sur une mesure d'ouvrage ou une quantité ambiguë : rien n'y est à commander tel quel. Pas
-            de « ? » non plus : la ligne est juste, ses matériaux sont dans la liste des fournitures (retour du fondateur). */}
-        {doubt ? (
-          <HelpCircle size={18} className="shrink-0 text-warn" aria-label="à vérifier" />
-        ) : line.basis === "work" || line.role === "undetermined" ? (
-          <span className="size-[18px] shrink-0" aria-hidden="true" />
-        ) : (
-          <CircleCheck size={18} className="shrink-0 text-ok" aria-label="vérifiée" />
-        )}
-        <span className="min-w-0 grow">
-          <span className="line-clamp-2 text-[15px] leading-snug font-bold">{shortName(line.article ?? line.designation)}</span>
-          <span className="text-sm text-muted">
-            {line.quantity ?? "?"} {line.unit ?? ""}
-            {/* Où la ligne se trouve dans le devis (logement, pièce) : pour s'y retrouver d'un coup d'œil. */}
-            {line.section?.length ? <span> · {line.section.slice(-2).join(" › ")}</span> : null}
-          </span>
-        </span>
-        {editable ? (
-          <span className="flex shrink-0">
-            {doubt ? (
-              <button type="button" disabled={pending} onClick={() => void onConfirm()} aria-label={`C'est bon : ${line.designation}`} className="flex size-11 items-center justify-center rounded-full text-ok">
-                <Check size={18} aria-hidden="true" />
-              </button>
-            ) : null}
-            <button type="button" onClick={() => setEditing(true)} aria-label={`Corriger ${line.designation}`} className="flex size-11 items-center justify-center rounded-full text-accent-text">
-              <Pencil size={16} aria-hidden="true" />
-            </button>
-            <button type="button" onClick={() => setConfirmDelete(true)} aria-label={`Retirer ${line.designation}`} className="flex size-11 items-center justify-center rounded-full text-muted">
-              <Trash2 size={16} aria-hidden="true" />
-            </button>
-          </span>
-        ) : null}
-      </div>
-      {confirmDelete ? <DeleteConfirm pending={pending} onDelete={onDelete} onCancel={() => setConfirmDelete(false)} /> : null}
-    </div>
-  );
-}
-
-function DeleteConfirm({ pending, onDelete, onCancel }: { pending: boolean; onDelete: () => Promise<void>; onCancel: () => void }) {
-  return (
-    <div role="group" aria-label="Confirmer la suppression de la ligne" className="flex gap-2">
-      <button
-        type="button"
-        disabled={pending}
-        onClick={() => void onDelete()}
-        className="inline-flex min-h-11 items-center rounded-xl bg-danger px-4 text-sm font-extrabold text-white disabled:opacity-60"
-      >
-        Oui, retirer
-      </button>
-      <button type="button" onClick={onCancel} className="inline-flex min-h-11 items-center px-4 text-sm font-bold">
-        Annuler
-      </button>
-    </div>
-  );
-}
-
-/** Une action sous la liste : une icône, ce qu'elle fait en clair, et pourquoi on s'en servirait. */
-function ActionRow({ icon, title, text, onClick }: { icon: React.ReactNode; title: string; text: string; onClick: () => void }) {
-  return (
-    <button type="button" onClick={onClick} aria-label={title} className="flex min-h-16 items-center gap-3 px-4 py-3 text-left active:bg-ground">
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#eeedff] text-[#4a37d6]">{icon}</span>
-      <span className="flex min-w-0 grow flex-col">
-        <span className="text-[15px] font-extrabold">{title}</span>
-        <span className="text-[13px] leading-snug text-muted">{text}</span>
-      </span>
-      <ChevronRight size={18} aria-hidden="true" className="shrink-0 text-subtle" />
-    </button>
-  );
 }
 
 function AddLine({ pending, onAdd, startOpen = false }: { pending: boolean; onAdd: (fields: LineFieldsInput) => Promise<void>; startOpen?: boolean }) {
@@ -719,5 +539,21 @@ function LineForm({
         </Button>
       </div>
     </form>
+  );
+}
+
+/** §50.1 : un échec de lecture se dit en une phrase, avec « Réessayer ». Rien d'autre. */
+function ReadFailure({ sentence, onRetry, disabled }: { sentence: string; onRetry?: () => void; disabled: boolean }) {
+  return (
+    <section id="materiaux" aria-label="Lecture du devis" className="flex scroll-mt-4 flex-col gap-3 rounded-[22px] bg-surface p-5 shadow-card">
+      <p role="alert" className="text-[17px] leading-snug font-bold">
+        {sentence}
+      </p>
+      {onRetry ? (
+        <Button className="min-h-14 w-full text-[17px]" disabled={disabled} onClick={onRetry}>
+          Réessayer
+        </Button>
+      ) : null}
+    </section>
   );
 }

@@ -32,6 +32,7 @@ import {
   mergeChunkLines,
   planQuote,
   linesWithoutSupply,
+  withShortReasons,
   scanBoundaryRisks,
   planReading,
   proposeLineRoles,
@@ -1158,7 +1159,8 @@ export class TakeoffService {
         text: `Info manquante : ${n.question!.text.replace(/ Cela change la commande :.*$/, "")} Vérifie-la avec ton fournisseur, ou corrige la ligne.`,
       }));
     const flags = [...forbiddenFlags(confirmed), ...aiFlags.filter((f) => !f.key.startsWith(AI_ADDITION)), ...missing];
-    const purchase = applyOrangeFlags(confirmed, flags, takeoff.answers);
+    // §50.3 : la raison d'une ligne orange en cinq mots au plus ; une ligne verte n'en a pas.
+    const purchase = withShortReasons(applyOrangeFlags(confirmed, flags, takeoff.answers));
     // RÈGLE NUMÉRO UN : rien d'absent du devis, pas même en suggestion (ni de l'IA, ni des habitudes d'ajout).
     const aiSuggestions = ref.writtenOnly !== false
       ? []
