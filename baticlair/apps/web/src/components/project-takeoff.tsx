@@ -43,6 +43,7 @@ export function ProjectTakeoff({
   autoStart,
   quoteCard = null,
   onProjectChanged,
+  onRedeposit,
 }: {
   projectId: string;
   clientQuote: ProjectDocument | null;
@@ -53,6 +54,8 @@ export function ProjectTakeoff({
   quoteCard?: React.ReactNode;
   /** La lecture a nommé le chantier (« Chantier Dupont ») : l'en-tête se relit. */
   onProjectChanged?: () => void;
+  /** « Redéposer le PDF » : retire le devis lu (rien trouvé) pour en déposer un autre. */
+  onRedeposit?: () => Promise<void>;
 }) {
   // Le chat passe par la même porte que les partenaires (§38) : /v1/quantitatifs, avec le détail de l'écran.
   const fetchQuantitatif = useCallback(
@@ -178,6 +181,28 @@ export function ProjectTakeoff({
     const failed = (data.reading?.status === "failed" || refused || lost) && !pending;
     if (!failed) return <AnalysisScreen fileName={clientQuote.name} />;
     const shown = refused ? actionError : lost ? error : actionError;
+    // RIEN NE PART VIDE : une lecture qui n'a trouvé aucune ligne ne fait jamais une liste ; on relit, ou on redépose.
+    const nothingRead = (data.reading?.reason === "nothing_read" && !refused && !lost) || (refused && actionError?.reason === "nothing_read");
+    if (nothingRead) {
+      return (
+        <section id="materiaux" aria-label="Liste de matériaux" className="flex scroll-mt-4 flex-col gap-3">
+          <div className="flex flex-col gap-3 rounded-[22px] bg-surface p-5 shadow-card">
+            <p className="text-[17px] leading-snug font-bold">Je n&apos;ai rien lu dans ce devis.</p>
+            <p className="text-[15px] leading-snug text-muted">Aucune ligne de fourniture trouvée : rien ne part au fournisseur. Rien ne t&apos;est décompté.</p>
+            <Button className="min-h-14 w-full text-[17px]" disabled={archived} onClick={prepare}>
+              <Sparkles size={18} aria-hidden="true" />
+              Réessayer
+            </Button>
+            {onRedeposit ? (
+              <Button variant="secondary" className="min-h-12 w-full" disabled={archived} onClick={() => void run(onRedeposit, () => undefined)}>
+                Redéposer le PDF
+              </Button>
+            ) : null}
+          </div>
+          {quoteCard}
+        </section>
+      );
+    }
     return (
       <section id="materiaux" aria-label="Liste de matériaux" className="flex scroll-mt-4 flex-col gap-3">
         <div className="flex flex-col gap-3 rounded-[22px] bg-surface p-5 shadow-card">
@@ -211,6 +236,23 @@ export function ProjectTakeoff({
   }
   if (phase === "calcul") return <CalculScreen />;
 
+  // Une liste lue avant la règle « rien ne part vide » et restée sans ligne : jamais de bouton d'envoi, on redépose.
+  if (takeoff.purchase.toBuy.length + takeoff.purchase.toQuote.length === 0 && takeoff.lines.length === 0) {
+    return (
+      <section id="materiaux" aria-label="Liste de matériaux" className="flex scroll-mt-4 flex-col gap-3">
+        <div className="flex flex-col gap-3 rounded-[22px] bg-surface p-5 shadow-card">
+          <p className="text-[17px] leading-snug font-bold">Je n&apos;ai rien lu dans ce devis.</p>
+          <p className="text-[15px] leading-snug text-muted">Aucune ligne de fourniture trouvée : rien ne part au fournisseur.</p>
+          {onRedeposit && !archived ? (
+            <Button className="min-h-14 w-full text-[17px]" onClick={() => void run(onRedeposit, () => undefined)}>
+              Redéposer le PDF
+            </Button>
+          ) : null}
+        </div>
+        {quoteCard}
+      </section>
+    );
+  }
   const draft = takeoff.status === "draft";
   const units = takeoff.logements ?? null;
   const materials = takeoff.lines.filter((l) => l.kind !== "labor");

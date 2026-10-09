@@ -14,6 +14,7 @@ const FIELDS = {
   billingMonth: true,
   costMicroUsd: true,
   startedAt: true,
+  readingStats: true,
 } as const;
 
 export class PrismaAnalysisRepository implements AnalysisRepository {

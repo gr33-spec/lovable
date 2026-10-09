@@ -14,6 +14,8 @@ export interface AnalysisRecord {
   costMicroUsd: bigint;
   /** Début de la dernière tentative : une lecture « en cours » depuis trop longtemps a été interrompue. */
   startedAt: Date;
+  /** Les mesures de la dernière lecture (dont le motif d'un échec, `failure`), telles qu'enregistrées. */
+  readingStats?: unknown;
 }
 
 export interface AnalysisRepository {

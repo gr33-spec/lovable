@@ -96,6 +96,14 @@ export function ProjectDocuments({ projectId, archived, onProjectChanged }: { pr
         autoStart
         {...(onProjectChanged ? { onProjectChanged } : {})}
         quoteCard={quote ? <DocumentCard doc={quote} compact={false} onRemoved={removed} /> : null}
+        {...(quote
+          ? {
+              onRedeposit: async () => {
+                await api<null>(`/v1/documents/${encodeURIComponent(quote.id)}`, { method: "DELETE" });
+                removed(quote.id);
+              },
+            }
+          : {})}
       />
     </div>
   );
