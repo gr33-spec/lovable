@@ -20,6 +20,12 @@ export const AI_DOUBT = "ia-doute:";
  * attendait cette information sort ORANGE « Info manquante », levée d'un « C'est bon » (elle part telle quelle).
  */
 export const MISSING_INFO = "manque:";
+/**
+ * §49.4 (retour du fondateur, 2026-10-09, D-2026-018) : la question « tu façonnes ? » d'une pièce de zinguerie écrite au
+ * devis est OBLIGATOIRE à l'écran des questions, avant le calcul : sans elle, la pièce et ses pattes ne se commandent pas.
+ * Elle n'arrive jamais dans la liste sans réponse (« Calculer ma liste » attend, l'API refuse le calcul).
+ */
+export const isMandatoryQuestion = (key: string): boolean => /^(?:engine:)?param:faconnage(?:@|$)/.test(key);
 
 /**
  * Ce que rend l'IA (repères du dossier : L = ligne du devis, A = article, F = à préciser avec le fournisseur). Prompt B

@@ -424,6 +424,8 @@ export function counterAnswers(questions: readonly CounterQuestion[], given: Rea
 
 /** Ce qui compte comme « sans réponse » : les questions du calcul et les « déjà sur place ? » (le reste a sa valeur dite). */
 const needsAnswer = (q: CounterQuestion) => q.kind === "decision" || q.kind === "onsite";
+/** §49.4 : le façonnage d'une pièce de zinguerie écrite est obligatoire avant le calcul (même règle que l'API). */
+const mandatory = (q: CounterQuestion) => /^(?:engine:)?param:faconnage(?:@|$)/.test(q.key);
 
 export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void }) {
   const questions = useMemo(() => counterQuestions(takeoff), [takeoff]);
@@ -446,6 +448,7 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
     });
   const required = questions.filter(needsAnswer);
   const open = required.filter((q) => !given[q.key]).length;
+  const toForm = questions.filter((q) => mandatory(q) && !given[q.key]).length;
   // Le numéro de chaque question, dans l'ordre des familles affichées.
   const numbers = new Map(SECTIONS.flatMap((sec) => questions.filter((q) => q.kind === sec.kind)).map((q, i) => [q.key, i + 1]));
 
@@ -455,7 +458,7 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
         <h2 id="questions-titre" className="font-display text-[22px] leading-tight font-extrabold tracking-[-0.02em]">
           J&apos;ai quelques questions pour éviter les allers-retours avec ton fournisseur.
         </h2>
-        <p className="text-[14px] leading-snug text-white/75">Tout se règle ici, d&apos;un appui. Après, plus de question : ce qui reste sans réponse sortira en orange dans la liste.</p>
+        <p className="text-[14px] leading-snug text-white/75">Tout se règle ici, d&apos;un appui. Le façonnage est obligatoire ; après, plus de question : ce qui reste sans réponse sortira en orange dans la liste.</p>
         {required.length > 0 ? (
           <p aria-live="polite" className="mt-1 inline-flex items-center gap-1.5 self-start rounded-full bg-white/12 px-3 py-1 text-[13px] font-extrabold">
             <Check size={14} strokeWidth={3} aria-hidden="true" />
@@ -496,9 +499,9 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
       <div className="h-24 lg:hidden" aria-hidden="true" />
       <div className="fixed inset-x-0 bottom-0 z-30 bg-gradient-to-t from-ground from-70% to-transparent px-4 pt-6 pb-[max(14px,env(safe-area-inset-bottom))] lg:sticky lg:inset-auto lg:px-0">
         <div className="mx-auto max-w-2xl">
-          <Button className="w-full" pending={pending} onClick={() => onSubmit(counterAnswers(questions, given))}>
+          <Button className="w-full" pending={pending} disabled={toForm > 0} onClick={() => onSubmit(counterAnswers(questions, given))}>
             <Sparkles size={18} aria-hidden="true" />
-            {open > 0 ? `Calculer ma liste (${open} sans réponse)` : "Calculer ma liste"}
+            {toForm > 0 ? `Dis-moi d'abord si tu façonnes (${toForm})` : open > 0 ? `Calculer ma liste (${open} sans réponse)` : "Calculer ma liste"}
           </Button>
         </div>
       </div>

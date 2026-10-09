@@ -692,8 +692,14 @@ export function computeWithAnswers(
   // (Les crochets d'ardoise qui suivent les ardoises attendent la même donnée d'article : elle vaut pour l'ouvrage.)
   const articleOnly = (n: (typeof needs)[number]) => {
     const work = ref.workItems.find((w) => w.id === baseOf(n.workItemId));
-    const m = /^param:([a-z0-9_]+)$/.exec(n.question?.key ?? "");
-    return !!m && (work?.needs ?? []).some((r) => (r.precisionRequires ?? []).includes(m[1]!));
+    // Une question par pièce (« param:faconnage@couverture-zinc-joint-debout ») compte comme la donnée de l'ouvrage.
+    const m = /^param:([a-z0-9_]+)(?:@.+)?$/.exec(n.question?.key ?? "");
+    if (!m) return false;
+    // La donnée que la règle de CE besoin demande pour son article (les pattes attendent le façonnage, §49.2) ;
+    // sinon, celle d'un autre besoin de l'ouvrage, mais seulement sans portée de pièce (le développé, le diamètre).
+    const own = (work?.needs ?? []).find((r) => r.id === n.needId);
+    if ((own?.precisionRequires ?? []).includes(m[1]!)) return true;
+    return !n.question!.key.includes("@") && (work?.needs ?? []).some((r) => (r.precisionRequires ?? []).includes(m[1]!));
   };
   const waiting = new Set(needs.filter((n) => n.status === "question" && !n.consumable && n.origin !== "suggested" && articleOnly(n)).map((n) => `${n.workItemId}/${n.needId}`));
   const unknowns =

@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.07-43",
+  "version": "roofing-2026.10.09-44",
   "writtenOnly": true,
   "trade": "roofing",
   "sources": [
@@ -13678,7 +13678,8 @@
           "label": "Pattes fixes",
           "keywords": [
             "patte fixe",
-            "pattes fixes"
+            "pattes fixes",
+            "fixes"
           ],
           "usual": {
             "text": "Pattes fixes, selon le rampant (VMZINC 36.2).",
@@ -14351,6 +14352,9 @@
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
+          "precisionRequires": [
+            "faconnage"
+          ],
           "version": 1
         },
         {
@@ -14368,6 +14372,9 @@
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
+          "precisionRequires": [
+            "faconnage"
+          ],
           "version": 1
         },
         {

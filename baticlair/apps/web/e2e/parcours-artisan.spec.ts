@@ -117,7 +117,12 @@ async function passQuestions(page: Page) {
   const list = page.getByRole("region", { name: "Page des fournitures" });
   const questions = page.getByRole("region", { name: /^J'ai quelques questions/ });
   await expect(list.or(questions).first()).toBeVisible({ timeout: 60_000 });
-  if (await questions.isVisible()) await page.getByRole("button", { name: /^Calculer ma liste/ }).click();
+  if (await questions.isVisible()) {
+    // §49.4 : le façonnage de chaque pièce de zinc est obligatoire avant le calcul.
+    const faconne = questions.getByRole("button", { name: /^Je façonne/ });
+    for (let i = 0; i < (await faconne.count()); i++) await faconne.nth(i).click();
+    await page.getByRole("button", { name: /^Calculer ma liste/ }).click();
+  }
   await expect(list).toBeVisible({ timeout: 60_000 });
 }
 
@@ -992,6 +997,10 @@ test("§48.6 zinguerie pièce par pièce, et la barre des lignes orange reste en
   await expect(questions.getByText(/Bandes zinc \(solin/)).toHaveCount(0);
   // « Dév. 200 » est écrit : jamais redemandé.
   await expect(questions.getByText(/^Bande de rive .*développé/)).toHaveCount(0);
+  // §49.4 : le façonnage de chaque pièce est obligatoire ici ; sans lui, pas de calcul (jamais une pièce sans réponse dans la liste).
+  await expect(page.getByRole("button", { name: /^Dis-moi d'abord si tu façonnes \(3\)/ })).toBeDisabled();
+  const faconne = questions.getByRole("button", { name: /^Je façonne/ });
+  for (let i = 0; i < (await faconne.count()); i++) await faconne.nth(i).click();
   await page.getByRole("button", { name: /^Calculer ma liste/ }).click();
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });

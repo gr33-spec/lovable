@@ -1,4 +1,4 @@
-import { AI_ADDITION, AI_DOUBT, FORBIDDEN, METIER_NAMES, MISSING_INFO, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer } from "@baticlair/domain";
+import { AI_ADDITION, AI_DOUBT, FORBIDDEN, isMandatoryQuestion, METIER_NAMES, MISSING_INFO, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { BillingService } from "../../billing/index.js";
@@ -266,8 +266,9 @@ export class QuantitatifsService {
   }
 
   /**
-   * PARCOURS §48 : les réponses aux questions de comptoir (toutes d'un coup, facultatives) puis le calcul. Une question
-   * laissée sans réponse ne bloque rien : sa ligne sort orange. Jamais de deuxième vague de questions après.
+   * PARCOURS §48 : les réponses aux questions de comptoir (toutes d'un coup) puis le calcul. Une question laissée sans
+   * réponse ne bloque rien : sa ligne sort orange ; sauf le façonnage d'une pièce de zinguerie (§49.4), obligatoire.
+   * Jamais de deuxième vague de questions après.
    */
   async calculate(
     tenant: TenantContext,
@@ -279,6 +280,11 @@ export class QuantitatifsService {
   ) {
     const row = await this.row(tenant, id);
     if (reponses.length > 0) await this.answer(tenant, id, reponses);
+    // §49.4 : le façonnage d'une pièce de zinguerie écrite se répond à l'écran des questions, jamais clos en silence.
+    const mandatory = (await this.ready(tenant, row)).purchase.questions.filter((d) => d.question && isMandatoryQuestion(d.question.key));
+    if (mandatory.length > 0) {
+      throw validationFailed("Answer the forming questions first", { reason: "faconnage_required", questions: mandatory.map((d) => d.question!.key) });
+    }
     // §49.2.5 : les valeurs annoncées dans « Je pars sur ces valeurs » et gardées telles quelles sont CONFIRMÉES en lançant
     // le calcul (elles ne gardent plus leur ligne orange) ; celles que l'artisan a changées ont déjà leur réponse.
     const seen = await this.ready(tenant, row);
