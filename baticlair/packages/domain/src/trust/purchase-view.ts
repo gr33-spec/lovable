@@ -891,10 +891,10 @@ function counterQuestions(readings: ReadonlyMap<string, QuoteLineReading> | unde
       const choices = unit ? raw.map((c) => (/^[\d.,]+$/.test(c) ? `${c} ${unit}` : c)) : raw;
       const subject = m.replace(/\s*\([^)]*\)/, "").trim().replace(/^./, (c) => c.toUpperCase());
       // §49.9 : une donnée sans choix à proposer (modèle et teinte de tuile) n'est pas une question à boutons : la ligne
-      // sort orange « à préciser », l'artisan complète à la voix ou laisse le fournisseur proposer (« C'est bon »).
+      // sort orange « à préciser », l'artisan l'écrit dans le nom de la ligne (§50.7 : plus de voix) ou laisse le fournisseur proposer (« C'est bon »).
       if (choices.length < 2) {
         const key = `${A_PRECISER}${lineId}:${i + 1}`;
-        const text = `${subject} à préciser : dis-le à la voix, ou laisse le fournisseur proposer.`;
+        const text = `${subject} à préciser : écris-le dans le nom de la ligne, ou laisse le fournisseur proposer.`;
         out.push({ key, state: "to_confirm", title: subject, text, lineIds: [lineId], primary: { action: "keep", label: "C'est bon" }, secondary: ["edit"] });
         topics.forEach((t) => askedTopics.add(t));
         return;

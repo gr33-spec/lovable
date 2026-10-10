@@ -1049,7 +1049,8 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
   await line.click();
   await bref.getByRole("textbox").fill("Couverture de la maison principale");
   await bref.getByRole("button", { name: "OK" }).click();
-  await expect(bref.getByRole("button", { name: "Modifier le bref : Couverture de la maison principale" })).toBeVisible();
+  // §51 : une ligne de la fiche garde son nom (« Ouvrage : … ») ; la valeur réécrite est celle de l'artisan.
+  await expect(bref.getByRole("button", { name: /^Modifier le bref : (?:[^:]+ : )?Couverture de la maison principale$/ })).toBeVisible();
   // « Envoyer au fournisseur » ne montre plus d'aperçu : seulement « À qui j'envoie ? ».
   await confirmDoubts(page);
   await list.getByRole("button", { name: "Envoyer au fournisseur" }).click();

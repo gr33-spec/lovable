@@ -1,4 +1,4 @@
-import { parseUnit } from "@baticlair/domain";
+import { parseFiche, parseUnit } from "@baticlair/domain";
 import { fakeRows } from "../../../platform/ai/fake-table.js";
 import type { ExtractionAttempt, ExtractionRequest, TakeoffExtractor } from "../application/takeoff-extractor.js";
 
@@ -59,6 +59,20 @@ export class FakeTakeoffExtractor implements TakeoffExtractor {
           return Object.keys(d).length > 0 ? { ...(acc ?? {}), ...d } : acc;
         }, null),
       }));
+    // Règle simulée du §51.1 : la fiche reprend l'ouvrage et la surface de la première ligne en m², et les dimensions lues
+    // (lignes et en-tête), chacune « lue » avec sa ligne. Rien d'autre.
+    const main = lines.find((l) => /^(?:m2|m²)$/i.test((l.unit ?? "").trim()));
+    const ouvrage = main?.designation.split(/\s+[-–(]|,/)[0]?.trim();
+    const fiche = [
+      ...(main && ouvrage ? [{ donnee: "ouvrage", valeur: ouvrage, origine: "lue", preuve: `ligne ${main.sourceRefs[0]}` }] : []),
+      ...(main?.quantity ? [{ donnee: "surface", valeur: `${main.quantity} m²`, origine: "lue", preuve: `ligne ${main.sourceRefs[0]}` }] : []),
+      // Seules les dimensions de l'ouvrage principal (le développé d'une bande reste à sa ligne) ; « rampant de » = rampant.
+      ...Object.entries(main?.dimensions ?? {}).map(([k, v]) => ({ donnee: k.replace(/\s+(?:de|du|d')$/, ""), valeur: v, origine: "lue", preuve: `ligne ${main!.sourceRefs[0]}` })),
+      // L'en-tête : les données d'un toit seulement (un développé est celui d'une pièce).
+      ...Object.entries(context)
+        .map(([k, v]) => ({ donnee: k.replace(/\s+(?:de|du|d')$/, ""), valeur: v, origine: "lue", preuve: "en-tête" }))
+        .filter((d) => /^(?:pente|rampant|largeur|hauteur|longueur)$/.test(d.donnee)),
+    ].filter((d, i, all) => all.findIndex((x) => x.donnee === d.donnee) === i);
     const notes = request.imagePages.length > 0 ? [`Pages ${request.imagePages.join(", ")} non lues (extraction simulée).`] : [];
     const inputTokens = Math.ceil(request.numberedText.length / 3) + 2000;
     return {
@@ -66,7 +80,7 @@ export class FakeTakeoffExtractor implements TakeoffExtractor {
       model: "claude-sonnet-5-5",
       usage: { inputTokens, outputTokens: 60 * lines.length + 50 },
       status: "success",
-      output: { lines, notes, context: Object.keys(context).length > 0 ? context : null },
+      output: { lines, notes, context: Object.keys(context).length > 0 ? context : null, ...(fiche.length > 0 ? { fiche: parseFiche(fiche) } : {}) },
       errorCode: null,
       durationMs: 1,
     };

@@ -135,7 +135,10 @@ const shown = (v: string, unit: string) => `${v.replace(".", ",")}${unit === "u"
 /** La valeur dite d'une réponse (« 2 » → « je commande façonné »), comme sur les boutons. */
 function answerText(def: ParamDef, value: string | { value: string; unit: string }): string {
   const v = typeof value === "string" ? value : value.value;
-  return def.display?.[v] ?? def.choices?.find((c) => c.value === v)?.label ?? (typeof value === "string" ? value : shown(value.value, value.unit));
+  const said = def.display?.[v] ?? def.choices?.find((c) => c.value === v)?.label;
+  // « 0,65 » pour l'épaisseur : l'unité se dit (« 0,65 mm »).
+  if (said) return /^[\d.,]+$/.test(said) && def.unit !== "u" ? shown(said.replace(",", "."), def.unit) : said;
+  return typeof value === "string" ? value : shown(value.value, value.unit);
 }
 
 type Answer = string | { value: string; unit: string } | null;
@@ -177,7 +180,8 @@ export function ficheChantier(input: {
     if (!m || value === null) continue;
     const work: WorkItemType | undefined = m[2] ? ref.workItems.find((w) => w.id === baseOf(m[2])) : ref.workItems.find((w) => w.params.some((p) => p.key === m[1]));
     const def = work?.params.find((p) => p.key === m[1]);
-    if (!def) continue;
+    // La fiche dit le chantier : les données du toit et le façonnage ; un réglage de pièce (diamètre de crochet) reste à sa ligne.
+    if (!def || !([...FICHE_PARAMS_CHANTIER, "faconnage"] as string[]).includes(def.key)) continue;
     const cle = m[2] ? key.slice("param:".length) : m[1]!;
     const libelle = m[2] && !(FICHE_PARAMS_CHANTIER as readonly string[]).includes(def.key) ? `${def.label} (${work!.label.replace(/\s*\(.*$/, "")})` : def.label;
     // La réponse écrite et relue (« les bacs façonnés, la bande je la plie ») dit déjà la donnée : elle reste, en clair.
@@ -233,4 +237,40 @@ export function appliquerRelecture(fiche: FicheChantier | null | undefined, rele
 /** La fiche en lignes courtes, dans l'ordre (le chantier en bref, §50.7) : « Rampant : 7 m ». */
 export function ficheLignes(fiche: FicheChantier): string[] {
   return fiche.donnees.filter((d) => d.origine !== "manquante" && d.valeur).map((d) => `${d.libelle} : ${d.valeur}`);
+}
+
+/** La clé d'une ligne de la fiche dans le bref (`bref:<clé>`), stable quand l'artisan la réécrit. */
+export const ficheBriefKey = (d: Pick<FicheDonnee, "cle">) => `fiche-${d.cle.replace(/[^a-z0-9@_-]+/gi, "-")}`.slice(0, 60);
+
+/**
+ * §50.7 et §51 : une ligne de la fiche corrigée ou retirée sur le document (`bref:fiche-<donnée>`) l'est pour le calcul
+ * aussi : la valeur réécrite devient la réponse de l'artisan (« Rampant : 6,5 m »), une ligne vidée n'existe plus.
+ */
+export function ficheCorrigee(fiche: FicheChantier | null | undefined, answers: Readonly<Record<string, unknown>>): FicheChantier | null {
+  if (!fiche && !Object.keys(answers).some((k) => k.startsWith("bref:fiche-"))) return null;
+  fiche ??= { donnees: [] };
+  const donnees = fiche.donnees.flatMap((d) => {
+    const said = answers[`bref:${ficheBriefKey(d)}`];
+    if (typeof said !== "string") return [d];
+    const text = said.trim();
+    if (!text) return [];
+    const valeur = text.includes(":") ? text.slice(text.indexOf(":") + 1).trim() : text;
+    return [{ ...d, valeur, origine: "reponse" as const, preuve: "Ta correction" }];
+  });
+  // Une donnée du toit lue par le code (pas par l'IA) et corrigée sur le document : la correction vaut pour le calcul.
+  for (const [key, said] of Object.entries(answers)) {
+    const cle = key.startsWith("bref:fiche-") ? key.slice("bref:fiche-".length) : null;
+    if (!cle || typeof said !== "string" || !said.trim() || !(FICHE_PARAMS_CHANTIER as readonly string[]).includes(cle) || donnees.some((d) => d.cle === cle)) continue;
+    const text = said.trim();
+    donnees.push({ cle, libelle: cle.replace(/_/g, " "), valeur: text.includes(":") ? text.slice(text.indexOf(":") + 1).trim() : text, origine: "reponse", preuve: "Ta correction" });
+  }
+  return { donnees };
+}
+
+/** Les lignes de la fiche que le document montre (et que reçoit le fournisseur) : les données connues, sans les choix par pièce. */
+export function ficheDocument(fiche: FicheChantier): { cle: string; texte: string }[] {
+  return fiche.donnees
+    // La zone se dit par la ville et la situation (« Brest, bord de mer »), qui ferment le bref.
+    .filter((d) => d.origine !== "manquante" && d.valeur && !d.cle.includes("@") && d.cle !== "consommables" && d.cle !== "zone")
+    .map((d) => ({ cle: ficheBriefKey(d), texte: `${d.libelle} : ${d.valeur}` }));
 }
