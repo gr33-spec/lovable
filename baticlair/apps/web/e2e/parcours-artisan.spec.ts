@@ -499,8 +499,9 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
   const apercu = page.getByRole("dialog", { name: "À qui j'envoie ?" });
   await expect(apercu.getByRole("heading", { name: "À qui j'envoie ?" })).toBeVisible();
-  await apercu.getByRole("checkbox", { name: /Point.P Vannes/ }).check();
-  await apercu.getByRole("button", { name: "Nouveau fournisseur" }).click();
+  // Retour du fondateur (2026-10-10) : « les fournisseurs cochés par défaut, avec possibilité d'en ajouter un facilement ».
+  await expect(apercu.getByRole("checkbox", { name: /Point.P Vannes/ })).toBeChecked();
+  await apercu.getByRole("button", { name: "Ajouter un fournisseur" }).click();
   await apercu.getByLabel("Société").fill("Tuiles & Co");
   await apercu.getByLabel("E-mail pour les demandes de prix").fill("devis@tuiles.fr");
   await apercu.getByRole("button", { name: "Ajouter", exact: true }).click();
@@ -864,10 +865,14 @@ test("§48.5 : envoyer une sélection à un autre fournisseur, discret, puis l'e
   for (let i = 0; i < count; i++) await expect(ready.nth(i)).toBeChecked();
   const bar = page.getByRole("region", { name: "Envoyer la sélection" });
   await expect(bar.getByText(`${count} lignes cochées`)).toBeVisible();
+  // Retour du fondateur (2026-10-10) : « les fournisseurs cochés par défaut » : on décoche ceux qui ne reçoivent pas.
+  const fournisseur = (name: string) => bar.getByRole("checkbox", { name: `Fournisseur : ${name}` });
+  await expect(fournisseur("Point.P")).toBeChecked();
+  await expect(fournisseur("Tuiles & Co")).toBeChecked();
   // Deux lignes, vers Point.P.
   for (let i = 2; i < count; i++) await ready.nth(i).uncheck();
   await expect(bar.getByText("2 lignes cochées")).toBeVisible();
-  await bar.getByLabel("Fournisseur").selectOption({ label: "Point.P" });
+  await fournisseur("Tuiles & Co").uncheck();
   await bar.getByRole("button", { name: "Envoyer" }).click();
   // Elles restent dans la liste, en gris « Envoyé », et les cases disparaissent.
   await expect(list.getByText("Envoyé · Point.P")).toHaveCount(2);
@@ -877,18 +882,21 @@ test("§48.5 : envoyer une sélection à un autre fournisseur, discret, puis l'e
   await list.getByRole("button", { name: "Envoyer une sélection à un autre fournisseur" }).click();
   await expect(bar.getByText(`${count - 2} ligne${count - 2 > 1 ? "s" : ""} cochée${count - 2 > 1 ? "s" : ""}`)).toBeVisible();
   for (let i = 0; i < count; i++) if (i !== 2) await ready.nth(i).uncheck();
-  await bar.getByLabel("Fournisseur").selectOption({ label: "Tuiles & Co" });
+  await fournisseur("Point.P").uncheck();
   await bar.getByRole("button", { name: "Envoyer" }).click();
   await expect(list.getByText("Envoyé · Tuiles & Co")).toHaveCount(1);
   await expect(list.getByText("Envoyé · Point.P")).toHaveCount(2);
 
   // « Je dois aussi pouvoir en ajouter » : un fournisseur qui n'est pas au carnet s'ajoute ici, sans quitter la liste.
   await list.getByRole("button", { name: "Envoyer une sélection à un autre fournisseur" }).click();
-  await bar.getByRole("combobox", { name: "Fournisseur" }).selectOption({ label: "Ajouter un fournisseur…" });
+  await bar.getByRole("button", { name: "Ajouter un fournisseur" }).click();
   await bar.getByLabel("Nom du fournisseur").fill("Négoce Test");
   await bar.getByLabel("E-mail du fournisseur").fill("devis@example.com");
   await bar.getByRole("button", { name: "Ajouter", exact: true }).click();
-  await expect(bar.getByRole("combobox", { name: "Fournisseur" }).locator("option:checked")).toHaveText("Négoce Test");
+  // Ajouté et coché d'office, avec les autres ; on ne garde que lui.
+  await expect(fournisseur("Négoce Test")).toBeChecked();
+  await fournisseur("Point.P").uncheck();
+  await fournisseur("Tuiles & Co").uncheck();
   await bar.getByRole("button", { name: "Envoyer" }).click();
   await expect(list.getByText("Envoyé · Négoce Test").first()).toBeVisible();
 
