@@ -897,6 +897,30 @@ test("§48.5 : envoyer une sélection à un autre fournisseur, discret, puis l'e
   await expect(list.getByRole("button", { name: "Voir la demande envoyée" })).toHaveCount(0);
 });
 
+test("§49.8 : sur chaque ligne, un ✓ pour valider sans l'ouvrir, et un crayon pour la modifier", async ({ page }) => {
+  // Retour du fondateur (2026-10-10, capture iPhone) : « pouvoir cliquer directement sur un bouton pour valider, ligne par
+  // ligne. Et un crayon pour modifier. »
+  await signUp(page);
+  await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await passQuestions(page);
+  await openList(page);
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  const valider = list.getByRole("button", { name: /^Valider : / });
+  const start = await valider.count();
+  expect(start).toBeGreaterThan(0);
+  const name = (await valider.first().getAttribute("aria-label"))!.replace(/^Valider : /, "");
+  await valider.first().click();
+  await settle(page);
+  // La ligne passe au vert sans s'être ouverte.
+  await expect(list.getByRole("group", { name: /^Ligne ouverte : / })).toHaveCount(0);
+  await expect(list.getByRole("button", { name: `Valider : ${name}`, exact: true })).toHaveCount(0);
+  // Le crayon ouvre la ligne (nom, quantité, choix).
+  const crayon = list.getByRole("button", { name: /^Modifier la ligne : / }).first();
+  await crayon.click();
+  await expect(list.getByRole("group", { name: /^Ligne ouverte : / })).toHaveCount(1);
+});
+
 test("§49.8 : un tap refusé par le serveur se dit DANS la ligne ouverte, jamais en silence", async ({ page }) => {
   // Retour du fondateur (2026-10-10, capture iPhone) : « Quand je clique sur un bouton, rien ne se passe. »
   await signUp(page);
