@@ -982,14 +982,12 @@ const ZINC_PLAT_CONSTANTS = {
   poids_plat_080: condition("5.76", "kg/m2", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (7,2 kg/m² par mm, masse volumique du zinc)" }),
   seuil_070: condition("0.7", "mm", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }),
   seuil_080: condition("0.8", "mm", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }),
-  longueur_utile: condition("1.9", "m", F, FOUNDER_DOC, "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."),
   // Retour du fondateur (2026-10-10, D-2026-018) : « 13 ml en longueurs de 2 m ferait 7, pas 8 ».
   longueur_bande_2m: condition("2", "m", F, FOUNDER_DOC, "« bande de 2 m = ml / 2 arrondi sup. » (§1)."),
   // §48.6 : la feuille de 2 × 1 m se découpe en bandes de 2 m dans le mètre de largeur.
   longueur_feuille: condition("2", "m", F, FOUNDER_DOC, "Feuille de zinc 2 × 1 m (§48.6)."),
   largeur_feuille: condition("1", "m", F, FOUNDER_DOC, "Feuille de zinc 2 × 1 m (§48.6)."),
-  surface_feuille: condition("2", "m2", F, FOUNDER_DOC, "« feuilles = (ml ÷ 2 m) × (développé ÷ 1 000) arrondi sup. » (§25.2), feuille de 2 × 1 m."),
-  marge_bandes: condition("1.1", "u", F, FOUNDER_DOC, "« Solin / abergement : ml × 1,1 » (§7)."),
+  marge_bandes: condition("1.1", "u", F, FOUNDER_DOC, "« Solin / abergement : ml × 1,1 » (§7) ; plomb et cuivre « ml × 1,1 » (§12)."),
   // Réponse du fondateur (2026-10-04) : « Bobineau : largeurs 500, 650 et 1 000 mm ; longueurs 17, 21, 31 m (40 m en
   // 500) ; épaisseurs 0,65 par défaut, 0,70 et 0,80. Je le prends pour les bandes façonnées à la place des feuilles
   // 2 × 1 m dès que la longueur dépasse 6 ml. »
@@ -1001,6 +999,19 @@ const ZINC_PLAT_CONSTANTS = {
   bobineau_21: condition("21", "m", FR_REPLY, FOUNDER_REPLY),
   bobineau_31: condition("31", "m", FR_REPLY, FOUNDER_REPLY),
   bobineau_40: condition("40", "m", FR_REPLY, FOUNDER_REPLY, "40 m seulement en largeur 500."),
+};
+/**
+ * Audit du 2026-10-10 (« aucune règle de calcul en double ») : une règle partagée par plusieurs ouvrages s'écrit une fois.
+ */
+const ZONE_LITTORALE = condition("3", "u", F, FOUNDER_DOC, "Zone 3 : bord de mer (§36.6, §15).");
+const PATTES_PAR_METRE = condition("3", "u/m", F, FOUNDER_DOC, "« pattes de fixation 3/ml » (§1, §3).");
+const MORTIER_SOLIN_PAR_ML = condition("2", "kg/m", F, FOUNDER_DOC, "« sacs de 25 kg = arrondi sup. de (ml de porte-solin × 2 kg) / 25 » (§49.7).");
+/** §7 : « ml noue × 1,05 », « ml égout × 1,05 », « ml faîtage × 1,05 » : une seule marge pour le zinc linéaire. */
+const MARGE_ZINC_LINEAIRE = condition("1.05", "u", F, FOUNDER_DOC, "« ml noue × 1,05 », « ml égout × 1,05 », « ml faîtage × 1,05 » (§7).");
+const CROCHETS_GOUTTIERE = {
+  espacement_crochet: condition("0.5", "m", F, FOUNDER_DOC, "« 1 tous les 50 cm » (§15)."),
+  espacement_crochet_littoral: condition("0.4", "m", F, FOUNDER_DOC, "« 40 cm en zone 3 » (§15)."),
+  zone_littorale: ZONE_LITTORALE,
 };
 /**
  * Le bobineau qui suffit : la plus petite largeur qui contient le développé, puis la plus courte longueur qui couvre
@@ -1095,7 +1106,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.10-49",
+  version: "roofing-2026.10.10-50",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -1888,7 +1899,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       constants: {
         ...ECRAN_CONSTANTS,
         seuil_pente_pureau: condition("19.3", "°", F, FOUNDER_DOC, "Sous cette pente (35 %, soit 19,3°), pureau mini (nombre de tuiles maxi)."),
-        zone_littorale: condition("3", "u", F, FOUNDER_DOC),
+        zone_littorale: ZONE_LITTORALE,
       },
       needs: [
         {
@@ -2392,7 +2403,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "patte", family: "zinc_clip", label: "Pattes de fixation", keywords: ["patte"], usual: { text: "Trois pattes par mètre.", source: F, productId: "patte-zinc-standard" } },
         { key: "feuille", family: "zinc_sheet", label: "Feuilles zinc 2 × 1 m", usual: { text: "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§48.6).", source: F, productId: "feuille-zinc-2x1" }, formOf: "bande" },
       ],
-      constants: { ...ZINC_PLAT_CONSTANTS, pattes_par_metre: condition("3", "u/m", F, FOUNDER_DOC) },
+      constants: { ...ZINC_PLAT_CONSTANTS, pattes_par_metre: PATTES_PAR_METRE },
       needs: [
         {
           id: "bande-faitage-zinc",
@@ -2461,11 +2472,11 @@ export const ROOFING_REFERENTIAL: Referential = {
       ],
       constants: {
         ...ZINC_PLAT_CONSTANTS,
-        marge_noue: condition("1.05", "u", F, FOUNDER_DOC, "« ml noue × 1,05 » (§7)."),
+        marge_zinc_lineaire: MARGE_ZINC_LINEAIRE,
         longueur_utile_noue: condition("1.85", "m", F, FOUNDER_DOC, "« recouvrement 150 mm entre éléments → longueur utile 1,85 m pour 2 m » (§25.2)."),
       },
       derived: [
-        { key: "ml_zinc", label: "Longueur de zinc, marge comprise", unit: "m", formula: "longueur_noue * regle.marge_noue", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
+        { key: "ml_zinc", label: "Longueur de zinc, marge comprise", unit: "m", formula: "longueur_noue * regle.marge_zinc_lineaire", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
         ...bobineauDerived("developpe_noue"),
       ],
       needs: [
@@ -2526,7 +2537,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "bande", family: "hip_strip", label: "Arêtier zinc (bande)", usual: { text: "Bande zinc en longueurs de 3 m (développé 25 à 33 cm, §3).", source: F, productId: "bande-aretier-zinc-standard" } },
         { key: "patte", family: "zinc_clip", label: "Pattes de fixation", keywords: ["patte"], usual: { text: "Trois pattes par mètre (§3).", source: F, productId: "patte-zinc-standard" } },
       ],
-      constants: { pattes_par_metre: condition("3", "u/m", F, FOUNDER_DOC, "« pattes de fixation 3/ml » (§3).") },
+      constants: { pattes_par_metre: PATTES_PAR_METRE },
       needs: [
         {
           id: "aretieres",
@@ -2664,7 +2675,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         vis_par_ml: condition("4", "u/m", F, FOUNDER_DOC, "« Vis autoforeuses bandes de rive alu/zinc : 4/ml » (§25.5)."),
         // Retour du fondateur (2026-10-06) : « estimation indicative acceptable : 1 sac de ciment 35 kg + sable, à confirmer ».
         // §49.7 : « 1,5 à 2 kg par mètre linéaire de solin (Remmers ≈ 1,7 kg/ml, Technichem 1,5 à 2 kg/ml) » ; 2 kg retenus.
-        mortier_solin_par_ml: condition("2", "kg/m", F, FOUNDER_DOC, "« sacs de 25 kg = arrondi sup. de (ml de porte-solin × 2 kg) / 25 » (§49.7)."),
+        mortier_solin_par_ml: MORTIER_SOLIN_PAR_ML,
       },
       derived: [
         POIDS_PLAT_DERIVED,
@@ -2679,7 +2690,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           formula: "arrondi_sup(longueur_bande / regle.longueur_bande_2m)",
           unit: "u",
           core: true,
-          exclusions: "Longueurs de 2 m, recouvrement 10 cm entre éléments ; fixations à part.",
+          exclusions: "Longueurs de 2 m, ml ÷ 2 arrondi sup. (§1) ; fixations à part.",
           precision: "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
           // §50.7 : la pièce porte son nom d'ouvrage, tel que le devis l'écrit (« Bande de ventilation en Z… »).
           designation: "{piece}, {aspect_zinc} {epaisseur_zinc} mm",
@@ -2772,7 +2783,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       constants: {
         ...ZINC_PLAT_CONSTANTS,
         // §49.7 : « 1,5 à 2 kg par mètre linéaire de solin (Remmers ≈ 1,7 kg/ml, Technichem 1,5 à 2 kg/ml) » ; 2 kg retenus.
-        mortier_solin_par_ml: condition("2", "kg/m", F, FOUNDER_DOC, "« sacs de 25 kg = arrondi sup. de (ml de porte-solin × 2 kg) / 25 » (§49.7)."),
+        mortier_solin_par_ml: MORTIER_SOLIN_PAR_ML,
       },
       derived: [{ key: "ml_zinc", label: "Longueur de zinc, marge comprise", unit: "m", formula: "longueur_bande * regle.marge_bandes", shown: true, source: F, verification: FOUNDER_DOC, version: 1 }],
       needs: [
@@ -2783,7 +2794,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           formula: "arrondi_sup(longueur_bande / regle.longueur_bande_2m)",
           unit: "u",
           core: true,
-          exclusions: "Longueurs de 2 m, recouvrement 10 cm entre éléments.",
+          exclusions: "Longueurs de 2 m, ml ÷ 2 arrondi sup. (§1).",
           precision: "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
           designation: "Bandes porte-solin {aspect_zinc} {epaisseur_zinc} mm",
           precisionRequires: ["developpe", "aspect_zinc"],
@@ -2852,14 +2863,14 @@ export const ROOFING_REFERENTIAL: Referential = {
       ],
       slots: [{ key: "plomb", family: "lead_strip", label: "Plomb en rouleau", usual: { text: "Plomb laminé en rouleau (§12).", source: FR_REPLY_DESCENTES, productId: "plomb-rouleau" } }],
       constants: {
-        marge_plomb: condition("1.1", "u", F, FOUNDER_DOC, "« ml × 1,1 » (§12)."),
+        marge_bandes: ZINC_PLAT_CONSTANTS.marge_bandes,
         rouleau_plomb: rule("6", "m", F, todo("§12 : rouleaux de 3 à 6 m ; 6 m retenus, à confirmer."), "rouleau de plomb de {v}"),
       },
       needs: [
         {
           id: "rouleaux-plomb",
           slot: "plomb",
-          formula: "arrondi_sup(longueur_plomb * regle.marge_plomb / regle.rouleau_plomb)",
+          formula: "arrondi_sup(longueur_plomb * regle.marge_bandes / regle.rouleau_plomb)",
           unit: "u",
           core: true,
           exclusions: "Bande à la longueur du devis, + 10 % de recouvrements et de façon.",
@@ -2891,10 +2902,12 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "bobine", family: "copper_coil", label: "Cuivre en bobine", usual: { text: "Cuivre en bobine au mètre au-delà de 6 ml.", source: FR_REPLY, productId: "bobine-cuivre" }, formOf: "bande" },
       ],
       constants: {
-        marge_bandes: condition("1.1", "u", F, FOUNDER_DOC, "« ml × 1,1 » (§7, §12)."),
-        longueur_utile: condition("1.9", "m", F, FOUNDER_DOC, "Bandes de 2 m, recouvrement 10 cm (comme le zinc, §36.4)."),
-        surface_feuille: condition("2", "m2", F, FOUNDER_DOC, "Feuille de 2 × 1 m (comme le zinc, §25.2)."),
-        seuil_bobine: condition("6", "m", FR_REPLY, FOUNDER_REPLY, "Au-delà de 6 ml : bobine au lieu de feuilles (comme le zinc)."),
+        marge_bandes: ZINC_PLAT_CONSTANTS.marge_bandes,
+        // Audit 2026-10-10 : une seule règle par calcul, celles du zinc (longueurs de 2 m §1, feuilles §48.6, bobine au-delà de 6 ml).
+        longueur_bande_2m: ZINC_PLAT_CONSTANTS.longueur_bande_2m,
+        longueur_feuille: ZINC_PLAT_CONSTANTS.longueur_feuille,
+        largeur_feuille: ZINC_PLAT_CONSTANTS.largeur_feuille,
+        seuil_bobineau: ZINC_PLAT_CONSTANTS.seuil_bobineau,
         cuivre_500: rule("500", "mm", F, todo("Largeurs courantes du cuivre en bobine : 500, 600, 670 mm, à confirmer."), "bobine de cuivre de {v}"),
         cuivre_600: rule("600", "mm", F, todo("Largeurs courantes du cuivre en bobine : 500, 600, 670 mm, à confirmer."), "bobine de cuivre de {v}"),
         cuivre_670: rule("670", "mm", F, todo("Largeurs courantes du cuivre en bobine : 500, 600, 670 mm, à confirmer."), "bobine de cuivre de {v}"),
@@ -2916,10 +2929,10 @@ export const ROOFING_REFERENTIAL: Referential = {
           id: "bandes-cuivre-faconnees",
           slot: "bande",
           when: "faconnage >= 2",
-          formula: "arrondi_sup(ml_cuivre / regle.longueur_utile)",
+          formula: "arrondi_sup(ml_cuivre / regle.longueur_bande_2m)",
           unit: "u",
           core: true,
-          exclusions: "Longueurs de 2 m, recouvrement 10 cm entre éléments.",
+          exclusions: "Longueurs de 2 m, ml ÷ 2 arrondi sup. (§1).",
           precision: "{longueur_bande|ml} à couvrir, développé {developpe_cuivre|cm}",
           designation: "Bandes cuivre façonnées {epaisseur_cuivre} mm",
           precisionRequires: ["developpe_cuivre"],
@@ -2930,8 +2943,8 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "feuilles-cuivre",
           slot: "feuille",
-          when: "si(faconnage < 2, si(longueur_bande > regle.seuil_bobine, 0, 1), 0)",
-          formula: "arrondi_sup(ml_cuivre * developpe_cuivre / regle.surface_feuille)",
+          when: "si(faconnage < 2, si(longueur_bande > regle.seuil_bobineau, 0, 1), 0)",
+          formula: "arrondi_sup(ml_cuivre / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe_cuivre))))",
           unit: "u",
           core: true,
           exclusions: "Cuivre plat, développé × longueur, découpé dans des feuilles de 2 × 1 m.",
@@ -2944,7 +2957,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "bobine-cuivre",
           slot: "bobine",
-          when: "si(faconnage < 2, si(longueur_bande > regle.seuil_bobine, 1, 0), 0)",
+          when: "si(faconnage < 2, si(longueur_bande > regle.seuil_bobineau, 1, 0), 0)",
           formula: "ml_cuivre",
           unit: "m",
           core: true,
@@ -3005,10 +3018,10 @@ export const ROOFING_REFERENTIAL: Referential = {
           id: "bandes-abergement",
           slot: "bande",
           when: "faconnage >= 2",
-          formula: "arrondi_sup(ml_zinc / regle.longueur_utile)",
+          formula: "arrondi_sup(ml_zinc / regle.longueur_bande_2m)",
           unit: "u",
           core: true,
-          exclusions: "Quatre côtés, développé 33 cm ; longueurs de 2 m, recouvrement 10 cm.",
+          exclusions: "Quatre côtés, développé 33 cm ; longueurs de 2 m, ml ÷ 2 arrondi sup. (§1).",
           designation: "Bandes d'abergement {aspect_zinc} {epaisseur_zinc} mm, dév. 33 cm",
           precisionRequires: ["aspect_zinc"],
           source: F,
@@ -3033,7 +3046,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "porte-solin-abergement",
           slot: "porte_solin",
-          formula: "arrondi_sup(ml_solin / regle.longueur_utile)",
+          formula: "arrondi_sup(ml_solin / regle.longueur_bande_2m)",
           unit: "u",
           core: true,
           exclusions: "Bande porte-solin au périmètre ; vis et chevilles à part (3 par ml, §7).",
@@ -3203,7 +3216,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "volige", family: "sheathing", label: "Voliges", keywords: ["volige"], usual: { text: "Volige sapin 18 mm sous le zinc (§7).", source: F, productId: "volige-sapin-standard" } },
       ],
       constants: {
-        zone_littorale: condition("3", "u", F, FOUNDER_DOC),
+        zone_littorale: ZONE_LITTORALE,
         largeur_courante: condition("650", "mm", "vmzinc-joint-debout", FOUNDER_DOC, "Bobine 650 → entraxe des joints 580 mm."),
         largeur_littoral: condition("500", "mm", "vmzinc-joint-debout", FOUNDER_DOC, "Bobine 500 → entraxe 430 mm, imposée en zone de vent 3 exposé et 4 : tout le littoral breton."),
         entraxe_courant: condition("580", "mm", "vmzinc-joint-debout", FOUNDER_DOC),
@@ -3211,13 +3224,13 @@ export const ROOFING_REFERENTIAL: Referential = {
         poids_065: condition("5.5", "kg/m2", "vmzinc-joint-debout", FOUNDER_DOC, "Zinc posé, joints compris, 0,65 mm."),
         poids_070: condition("6", "kg/m2", "vmzinc-joint-debout", FOUNDER_DOC),
         poids_080: condition("7", "kg/m2", "vmzinc-joint-debout", FOUNDER_DOC),
-        seuil_070: condition("0.7", "mm", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }),
-        seuil_080: condition("0.8", "mm", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }),
+        seuil_070: ZINC_PLAT_CONSTANTS.seuil_070,
+        seuil_080: ZINC_PLAT_CONSTANTS.seuil_080,
         rampant_max_bac: condition("10", "m", F, FOUNDER_DOC, "« bacs profilés à longueur (max 10 à 15 m) » (§7) : 10 m retenu."),
         surlongueur_bac: condition("0.15", "m", F, { status: "verified", verifiedAt: "2026-10-04", verifiedBy: "Fondateur (couvreur)" }, "« 15 cm par bac (10 en égout, 5 en faîtage), ajoutés au rampant avant de multiplier par le nombre de bacs » (réponse du fondateur, 2026-10-04)."),
         fixations_par_patte: condition("2", "u", "vmzinc-joint-debout", FOUNDER_DOC, "« 2 fixations par patte » (§36.2)."),
-        coef_egout_faitage: condition("1.05", "u", F, FOUNDER_DOC, "« ml égout × 1,05 », « ml faîtage × 1,05 » (§7)."),
-        longueur_utile_bande: condition("1.9", "m", F, FOUNDER_DOC, "Bandes de 2 m, recouvrement 10 cm (§25.2)."),
+        marge_zinc_lineaire: MARGE_ZINC_LINEAIRE,
+        longueur_bande_2m: ZINC_PLAT_CONSTANTS.longueur_bande_2m,
       },
       tables: {
         // VMZINC 36.2 : pattes coulissantes et fixes par m², selon le rampant (lignes 0,5-1,5 … 13-15 m), comptées à part (§45.5).
@@ -3373,12 +3386,12 @@ export const ROOFING_REFERENTIAL: Referential = {
           slot: "egout",
           // Règle du comptoir (§47.8) : « on les ajoute ? » n'est pas une question de vendeur. Proposé dans
           // « On ajoute ? » (§45.8), sauf si le devis cite déjà l'égout.
-          formula: "arrondi_sup(largeur_pan * regle.coef_egout_faitage / regle.longueur_utile_bande)",
+          formula: "arrondi_sup(largeur_pan * regle.marge_zinc_lineaire / regle.longueur_bande_2m)",
           unit: "u",
           core: false,
           offer: { unlessQuoteSays: ["egout"] },
           designation: "Bandes d'égout {aspect_zinc} {epaisseur_zinc} mm, dév. 33 cm",
-          exclusions: "Égout sur toute la largeur du pan ; longueurs de 2 m, recouvrement 10 cm.",
+          exclusions: "Égout sur toute la largeur du pan, ml × 1,05 ; longueurs de 2 m, ml ÷ 2 arrondi sup. (§1).",
           precision: "{largeur_pan|ml} d'égout à couvrir",
           source: F,
           verification: FOUNDER_DOC,
@@ -3392,7 +3405,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: false,
           offer: { unlessQuoteSays: ["faitage"] },
           designation: "Faîtage {aspect_zinc} {epaisseur_zinc} mm, bande dév. 33 cm",
-          formula: "largeur_pan * regle.coef_egout_faitage",
+          formula: "largeur_pan * regle.marge_zinc_lineaire",
           unit: "ml",
           exclusions: "Un faîtage de la largeur du pan (monopente, ou un seul pan) ; deux pans qui se rejoignent n'en font qu'un : corrige la quantité d'un tap.",
           precision: "{largeur_pan|ml} de faîtage à couvrir",
@@ -3562,9 +3575,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         etain_par_jonction: rule("0.015", "kg", F, todo("§2 et §25.3 : ≈ 15 g d'étain par jonction, à valider par un couvreur (§25.7)."), "étain {v} par jonction"),
         longueur_barre_gouttiere: condition("4", "m", F, FOUNDER_DOC, "Gouttière zinc en longueurs de 4 m (§25.2)."),
         flacons_decapant: rule("1", "u", F, todo("§25.3 : 1 flacon de 250 ml pour ≈ 40 ml de soudure, à valider (§25.7)."), "décapant {v} flacon pour les soudures"),
-        espacement_crochet: condition("0.5", "m", F, FOUNDER_DOC),
-        espacement_crochet_littoral: condition("0.4", "m", F, FOUNDER_DOC, "Zone 3 (bord de mer)."),
-        zone_littorale: condition("3", "u", F, FOUNDER_DOC),
+        ...CROCHETS_GOUTTIERE,
       },
       derived: [
         {
@@ -3714,9 +3725,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "dilatation", family: "gutter_expansion", label: "Joints de dilatation", usual: { text: "Un joint de dilatation tous les 12 m de ligne droite en PVC (§15).", source: F, productId: "dilatation-gouttiere" } },
       ],
       constants: {
-        espacement_crochet: condition("0.5", "m", F, FOUNDER_DOC, "« 1 tous les 50 cm » (§15)."),
-        espacement_crochet_littoral: condition("0.4", "m", F, FOUNDER_DOC, "« 40 cm en zone 3 » (§15)."),
-        zone_littorale: condition("3", "u", F, FOUNDER_DOC),
+        ...CROCHETS_GOUTTIERE,
         longueur_profil: condition("4", "m", F, FOUNDER_DOC, "« longueur 4 m » (§15)."),
         talons_par_ligne: condition("2", "u", F, FOUNDER_DOC, "« 2 talons par ligne droite » (§15)."),
         dilatation_tous_les: condition("12", "m", F, FOUNDER_DOC, "« Joints de dilatation PVC : 1 tous les 12 m de ligne droite » (§15)."),

@@ -69,7 +69,7 @@ describe("bandes zinc au ml (§36.4) : jamais « ml de zinc » nu", () => {
 });
 
 describe("abergement de cheminée (§7) : un ouvrage compté devient des bandes ou des feuilles de zinc", () => {
-  it("2 cheminées de 3 m : 7,8 m de zinc → 5 bandes de 2 m dév. 33 cm ; 6 m de porte-solin → 4 bandes ; façonné sur place : 2 feuilles", () => {
+  it("2 cheminées de 3 m : 7,8 m de zinc → 4 longueurs de 2 m dév. 33 cm ; 6 m de porte-solin → 3 (§1, ml ÷ 2) ; façonné sur place : 2 feuilles", () => {
     const r = computeWorkItem(ROOFING_REFERENTIAL, {
       workItemId: "abergement-cheminee",
       params: {
@@ -80,8 +80,8 @@ describe("abergement de cheminée (§7) : un ouvrage compté devient des bandes 
       products: {},
       mentioned: ["abergement"],
     });
-    expect(order(r, "bandes-abergement")).toBe(5);
-    expect(order(r, "porte-solin-abergement")).toBe(4);
+    expect(order(r, "bandes-abergement")).toBe(4);
+    expect(order(r, "porte-solin-abergement")).toBe(3);
     const bobine = computeWorkItem(ROOFING_REFERENTIAL, {
       workItemId: "abergement-cheminee",
       params: {

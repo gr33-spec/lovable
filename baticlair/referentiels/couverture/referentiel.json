@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.10-49",
+  "version": "roofing-2026.10.10-50",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -5565,7 +5565,8 @@
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
-          "version": 1
+          "version": 1,
+          "note": "Zone 3 : bord de mer (§36.6, §15)."
         }
       },
       "needs": [
@@ -8709,20 +8710,6 @@
           },
           "version": 1
         },
-        "longueur_utile": {
-          "kind": "installation_condition",
-          "value": "1.9",
-          "unit": "m",
-          "source": "fondateur-referentiel-2026-10-03",
-          "verification": {
-            "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
-          },
-          "version": 1,
-          "note": "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."
-        },
         "longueur_bande_2m": {
           "kind": "installation_condition",
           "value": "2",
@@ -8765,20 +8752,6 @@
           "version": 1,
           "note": "Feuille de zinc 2 × 1 m (§48.6)."
         },
-        "surface_feuille": {
-          "kind": "installation_condition",
-          "value": "2",
-          "unit": "m2",
-          "source": "fondateur-referentiel-2026-10-03",
-          "verification": {
-            "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
-          },
-          "version": 1,
-          "note": "« feuilles = (ml ÷ 2 m) × (développé ÷ 1 000) arrondi sup. » (§25.2), feuille de 2 × 1 m."
-        },
         "marge_bandes": {
           "kind": "installation_condition",
           "value": "1.1",
@@ -8791,7 +8764,7 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1,
-          "note": "« Solin / abergement : ml × 1,1 » (§7)."
+          "note": "« Solin / abergement : ml × 1,1 » (§7) ; plomb et cuivre « ml × 1,1 » (§12)."
         },
         "seuil_bobineau": {
           "kind": "installation_condition",
@@ -8902,7 +8875,8 @@
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
-          "version": 1
+          "version": 1,
+          "note": "« pattes de fixation 3/ml » (§1, §3)."
         }
       },
       "needs": [
@@ -9325,20 +9299,6 @@
           },
           "version": 1
         },
-        "longueur_utile": {
-          "kind": "installation_condition",
-          "value": "1.9",
-          "unit": "m",
-          "source": "fondateur-referentiel-2026-10-03",
-          "verification": {
-            "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
-          },
-          "version": 1,
-          "note": "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."
-        },
         "longueur_bande_2m": {
           "kind": "installation_condition",
           "value": "2",
@@ -9381,20 +9341,6 @@
           "version": 1,
           "note": "Feuille de zinc 2 × 1 m (§48.6)."
         },
-        "surface_feuille": {
-          "kind": "installation_condition",
-          "value": "2",
-          "unit": "m2",
-          "source": "fondateur-referentiel-2026-10-03",
-          "verification": {
-            "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
-          },
-          "version": 1,
-          "note": "« feuilles = (ml ÷ 2 m) × (développé ÷ 1 000) arrondi sup. » (§25.2), feuille de 2 × 1 m."
-        },
         "marge_bandes": {
           "kind": "installation_condition",
           "value": "1.1",
@@ -9407,7 +9353,7 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1,
-          "note": "« Solin / abergement : ml × 1,1 » (§7)."
+          "note": "« Solin / abergement : ml × 1,1 » (§7) ; plomb et cuivre « ml × 1,1 » (§12)."
         },
         "seuil_bobineau": {
           "kind": "installation_condition",
@@ -9507,7 +9453,7 @@
           "version": 1,
           "note": "40 m seulement en largeur 500."
         },
-        "marge_noue": {
+        "marge_zinc_lineaire": {
           "kind": "installation_condition",
           "value": "1.05",
           "unit": "u",
@@ -9519,7 +9465,7 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1,
-          "note": "« ml noue × 1,05 » (§7)."
+          "note": "« ml noue × 1,05 », « ml égout × 1,05 », « ml faîtage × 1,05 » (§7)."
         },
         "longueur_utile_noue": {
           "kind": "installation_condition",
@@ -9541,7 +9487,7 @@
           "key": "ml_zinc",
           "label": "Longueur de zinc, marge comprise",
           "unit": "m",
-          "formula": "longueur_noue * regle.marge_noue",
+          "formula": "longueur_noue * regle.marge_zinc_lineaire",
           "shown": true,
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
@@ -10001,7 +9947,7 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1,
-          "note": "« pattes de fixation 3/ml » (§3)."
+          "note": "« pattes de fixation 3/ml » (§1, §3)."
         }
       },
       "needs": [
@@ -10796,20 +10742,6 @@
           },
           "version": 1
         },
-        "longueur_utile": {
-          "kind": "installation_condition",
-          "value": "1.9",
-          "unit": "m",
-          "source": "fondateur-referentiel-2026-10-03",
-          "verification": {
-            "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
-          },
-          "version": 1,
-          "note": "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."
-        },
         "longueur_bande_2m": {
           "kind": "installation_condition",
           "value": "2",
@@ -10852,20 +10784,6 @@
           "version": 1,
           "note": "Feuille de zinc 2 × 1 m (§48.6)."
         },
-        "surface_feuille": {
-          "kind": "installation_condition",
-          "value": "2",
-          "unit": "m2",
-          "source": "fondateur-referentiel-2026-10-03",
-          "verification": {
-            "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
-          },
-          "version": 1,
-          "note": "« feuilles = (ml ÷ 2 m) × (développé ÷ 1 000) arrondi sup. » (§25.2), feuille de 2 × 1 m."
-        },
         "marge_bandes": {
           "kind": "installation_condition",
           "value": "1.1",
@@ -10878,7 +10796,7 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1,
-          "note": "« Solin / abergement : ml × 1,1 » (§7)."
+          "note": "« Solin / abergement : ml × 1,1 » (§7) ; plomb et cuivre « ml × 1,1 » (§12)."
         },
         "seuil_bobineau": {
           "kind": "installation_condition",
@@ -11073,7 +10991,7 @@
           "formula": "arrondi_sup(longueur_bande / regle.longueur_bande_2m)",
           "unit": "u",
           "core": true,
-          "exclusions": "Longueurs de 2 m, recouvrement 10 cm entre éléments ; fixations à part.",
+          "exclusions": "Longueurs de 2 m, ml ÷ 2 arrondi sup. (§1) ; fixations à part.",
           "precision": "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
           "designation": "{piece}, {aspect_zinc} {epaisseur_zinc} mm",
           "precisionRequires": [
@@ -11539,20 +11457,6 @@
           },
           "version": 1
         },
-        "longueur_utile": {
-          "kind": "installation_condition",
-          "value": "1.9",
-          "unit": "m",
-          "source": "fondateur-referentiel-2026-10-03",
-          "verification": {
-            "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
-          },
-          "version": 1,
-          "note": "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."
-        },
         "longueur_bande_2m": {
           "kind": "installation_condition",
           "value": "2",
@@ -11595,20 +11499,6 @@
           "version": 1,
           "note": "Feuille de zinc 2 × 1 m (§48.6)."
         },
-        "surface_feuille": {
-          "kind": "installation_condition",
-          "value": "2",
-          "unit": "m2",
-          "source": "fondateur-referentiel-2026-10-03",
-          "verification": {
-            "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
-          },
-          "version": 1,
-          "note": "« feuilles = (ml ÷ 2 m) × (développé ÷ 1 000) arrondi sup. » (§25.2), feuille de 2 × 1 m."
-        },
         "marge_bandes": {
           "kind": "installation_condition",
           "value": "1.1",
@@ -11621,7 +11511,7 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1,
-          "note": "« Solin / abergement : ml × 1,1 » (§7)."
+          "note": "« Solin / abergement : ml × 1,1 » (§7) ; plomb et cuivre « ml × 1,1 » (§12)."
         },
         "seuil_bobineau": {
           "kind": "installation_condition",
@@ -11761,7 +11651,7 @@
           "formula": "arrondi_sup(longueur_bande / regle.longueur_bande_2m)",
           "unit": "u",
           "core": true,
-          "exclusions": "Longueurs de 2 m, recouvrement 10 cm entre éléments.",
+          "exclusions": "Longueurs de 2 m, ml ÷ 2 arrondi sup. (§1).",
           "precision": "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
           "designation": "Bandes porte-solin {aspect_zinc} {epaisseur_zinc} mm",
           "precisionRequires": [
@@ -11972,7 +11862,7 @@
         }
       ],
       "constants": {
-        "marge_plomb": {
+        "marge_bandes": {
           "kind": "installation_condition",
           "value": "1.1",
           "unit": "u",
@@ -11984,7 +11874,7 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1,
-          "note": "« ml × 1,1 » (§12)."
+          "note": "« Solin / abergement : ml × 1,1 » (§7) ; plomb et cuivre « ml × 1,1 » (§12)."
         },
         "rouleau_plomb": {
           "kind": "installation_condition",
@@ -12003,7 +11893,7 @@
         {
           "id": "rouleaux-plomb",
           "slot": "plomb",
-          "formula": "arrondi_sup(longueur_plomb * regle.marge_plomb / regle.rouleau_plomb)",
+          "formula": "arrondi_sup(longueur_plomb * regle.marge_bandes / regle.rouleau_plomb)",
           "unit": "u",
           "core": true,
           "exclusions": "Bande à la longueur du devis, + 10 % de recouvrements et de façon.",
@@ -12263,11 +12153,11 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1,
-          "note": "« ml × 1,1 » (§7, §12)."
+          "note": "« Solin / abergement : ml × 1,1 » (§7) ; plomb et cuivre « ml × 1,1 » (§12)."
         },
-        "longueur_utile": {
+        "longueur_bande_2m": {
           "kind": "installation_condition",
-          "value": "1.9",
+          "value": "2",
           "unit": "m",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
@@ -12277,12 +12167,12 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1,
-          "note": "Bandes de 2 m, recouvrement 10 cm (comme le zinc, §36.4)."
+          "note": "« bande de 2 m = ml / 2 arrondi sup. » (§1)."
         },
-        "surface_feuille": {
+        "longueur_feuille": {
           "kind": "installation_condition",
           "value": "2",
-          "unit": "m2",
+          "unit": "m",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -12291,9 +12181,23 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1,
-          "note": "Feuille de 2 × 1 m (comme le zinc, §25.2)."
+          "note": "Feuille de zinc 2 × 1 m (§48.6)."
         },
-        "seuil_bobine": {
+        "largeur_feuille": {
+          "kind": "installation_condition",
+          "value": "1",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Feuille de zinc 2 × 1 m (§48.6)."
+        },
+        "seuil_bobineau": {
           "kind": "installation_condition",
           "value": "6",
           "unit": "m",
@@ -12304,7 +12208,7 @@
             "verifiedBy": "Fondateur (couvreur)"
           },
           "version": 1,
-          "note": "Au-delà de 6 ml : bobine au lieu de feuilles (comme le zinc)."
+          "note": "Au-delà de 6 ml de bande : bobineau au lieu de feuilles 2 × 1 m."
         },
         "cuivre_500": {
           "kind": "installation_condition",
@@ -12379,10 +12283,10 @@
           "id": "bandes-cuivre-faconnees",
           "slot": "bande",
           "when": "faconnage >= 2",
-          "formula": "arrondi_sup(ml_cuivre / regle.longueur_utile)",
+          "formula": "arrondi_sup(ml_cuivre / regle.longueur_bande_2m)",
           "unit": "u",
           "core": true,
-          "exclusions": "Longueurs de 2 m, recouvrement 10 cm entre éléments.",
+          "exclusions": "Longueurs de 2 m, ml ÷ 2 arrondi sup. (§1).",
           "precision": "{longueur_bande|ml} à couvrir, développé {developpe_cuivre|cm}",
           "designation": "Bandes cuivre façonnées {epaisseur_cuivre} mm",
           "precisionRequires": [
@@ -12400,8 +12304,8 @@
         {
           "id": "feuilles-cuivre",
           "slot": "feuille",
-          "when": "si(faconnage < 2, si(longueur_bande > regle.seuil_bobine, 0, 1), 0)",
-          "formula": "arrondi_sup(ml_cuivre * developpe_cuivre / regle.surface_feuille)",
+          "when": "si(faconnage < 2, si(longueur_bande > regle.seuil_bobineau, 0, 1), 0)",
+          "formula": "arrondi_sup(ml_cuivre / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe_cuivre))))",
           "unit": "u",
           "core": true,
           "exclusions": "Cuivre plat, développé × longueur, découpé dans des feuilles de 2 × 1 m.",
@@ -12419,7 +12323,7 @@
         {
           "id": "bobine-cuivre",
           "slot": "bobine",
-          "when": "si(faconnage < 2, si(longueur_bande > regle.seuil_bobine, 1, 0), 0)",
+          "when": "si(faconnage < 2, si(longueur_bande > regle.seuil_bobineau, 1, 0), 0)",
           "formula": "ml_cuivre",
           "unit": "m",
           "core": true,
@@ -12774,20 +12678,6 @@
           },
           "version": 1
         },
-        "longueur_utile": {
-          "kind": "installation_condition",
-          "value": "1.9",
-          "unit": "m",
-          "source": "fondateur-referentiel-2026-10-03",
-          "verification": {
-            "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
-          },
-          "version": 1,
-          "note": "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."
-        },
         "longueur_bande_2m": {
           "kind": "installation_condition",
           "value": "2",
@@ -12830,20 +12720,6 @@
           "version": 1,
           "note": "Feuille de zinc 2 × 1 m (§48.6)."
         },
-        "surface_feuille": {
-          "kind": "installation_condition",
-          "value": "2",
-          "unit": "m2",
-          "source": "fondateur-referentiel-2026-10-03",
-          "verification": {
-            "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
-          },
-          "version": 1,
-          "note": "« feuilles = (ml ÷ 2 m) × (développé ÷ 1 000) arrondi sup. » (§25.2), feuille de 2 × 1 m."
-        },
         "marge_bandes": {
           "kind": "installation_condition",
           "value": "1.1",
@@ -12856,7 +12732,7 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1,
-          "note": "« Solin / abergement : ml × 1,1 » (§7)."
+          "note": "« Solin / abergement : ml × 1,1 » (§7) ; plomb et cuivre « ml × 1,1 » (§12)."
         },
         "seuil_bobineau": {
           "kind": "installation_condition",
@@ -13063,10 +12939,10 @@
           "id": "bandes-abergement",
           "slot": "bande",
           "when": "faconnage >= 2",
-          "formula": "arrondi_sup(ml_zinc / regle.longueur_utile)",
+          "formula": "arrondi_sup(ml_zinc / regle.longueur_bande_2m)",
           "unit": "u",
           "core": true,
-          "exclusions": "Quatre côtés, développé 33 cm ; longueurs de 2 m, recouvrement 10 cm.",
+          "exclusions": "Quatre côtés, développé 33 cm ; longueurs de 2 m, ml ÷ 2 arrondi sup. (§1).",
           "designation": "Bandes d'abergement {aspect_zinc} {epaisseur_zinc} mm, dév. 33 cm",
           "precisionRequires": [
             "aspect_zinc"
@@ -13105,7 +12981,7 @@
         {
           "id": "porte-solin-abergement",
           "slot": "porte_solin",
-          "formula": "arrondi_sup(ml_solin / regle.longueur_utile)",
+          "formula": "arrondi_sup(ml_solin / regle.longueur_bande_2m)",
           "unit": "u",
           "core": true,
           "exclusions": "Bande porte-solin au périmètre ; vis et chevilles à part (3 par ml, §7).",
@@ -13845,7 +13721,8 @@
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
-          "version": 1
+          "version": 1,
+          "note": "Zone 3 : bord de mer (§36.6, §15)."
         },
         "largeur_courante": {
           "kind": "installation_condition",
@@ -14006,7 +13883,7 @@
           "version": 1,
           "note": "« 2 fixations par patte » (§36.2)."
         },
-        "coef_egout_faitage": {
+        "marge_zinc_lineaire": {
           "kind": "installation_condition",
           "value": "1.05",
           "unit": "u",
@@ -14018,11 +13895,11 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1,
-          "note": "« ml égout × 1,05 », « ml faîtage × 1,05 » (§7)."
+          "note": "« ml noue × 1,05 », « ml égout × 1,05 », « ml faîtage × 1,05 » (§7)."
         },
-        "longueur_utile_bande": {
+        "longueur_bande_2m": {
           "kind": "installation_condition",
-          "value": "1.9",
+          "value": "2",
           "unit": "m",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
@@ -14032,7 +13909,7 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1,
-          "note": "Bandes de 2 m, recouvrement 10 cm (§25.2)."
+          "note": "« bande de 2 m = ml / 2 arrondi sup. » (§1)."
         }
       },
       "tables": {
@@ -14505,7 +14382,7 @@
         {
           "id": "egout-joint-debout",
           "slot": "egout",
-          "formula": "arrondi_sup(largeur_pan * regle.coef_egout_faitage / regle.longueur_utile_bande)",
+          "formula": "arrondi_sup(largeur_pan * regle.marge_zinc_lineaire / regle.longueur_bande_2m)",
           "unit": "u",
           "core": false,
           "offer": {
@@ -14514,7 +14391,7 @@
             ]
           },
           "designation": "Bandes d'égout {aspect_zinc} {epaisseur_zinc} mm, dév. 33 cm",
-          "exclusions": "Égout sur toute la largeur du pan ; longueurs de 2 m, recouvrement 10 cm.",
+          "exclusions": "Égout sur toute la largeur du pan, ml × 1,05 ; longueurs de 2 m, ml ÷ 2 arrondi sup. (§1).",
           "precision": "{largeur_pan|ml} d'égout à couvrir",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
@@ -14535,7 +14412,7 @@
             ]
           },
           "designation": "Faîtage {aspect_zinc} {epaisseur_zinc} mm, bande dév. 33 cm",
-          "formula": "largeur_pan * regle.coef_egout_faitage",
+          "formula": "largeur_pan * regle.marge_zinc_lineaire",
           "unit": "ml",
           "exclusions": "Un faîtage de la largeur du pan (monopente, ou un seul pan) ; deux pans qui se rejoignent n'en font qu'un : corrige la quantité d'un tap.",
           "precision": "{largeur_pan|ml} de faîtage à couvrir",
@@ -15533,7 +15410,8 @@
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
-          "version": 1
+          "version": 1,
+          "note": "« 1 tous les 50 cm » (§15)."
         },
         "espacement_crochet_littoral": {
           "kind": "installation_condition",
@@ -15547,7 +15425,7 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1,
-          "note": "Zone 3 (bord de mer)."
+          "note": "« 40 cm en zone 3 » (§15)."
         },
         "zone_littorale": {
           "kind": "installation_condition",
@@ -15560,7 +15438,8 @@
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
-          "version": 1
+          "version": 1,
+          "note": "Zone 3 : bord de mer (§36.6, §15)."
         }
       },
       "derived": [
@@ -16340,7 +16219,8 @@
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
-          "version": 1
+          "version": 1,
+          "note": "Zone 3 : bord de mer (§36.6, §15)."
         },
         "longueur_profil": {
           "kind": "installation_condition",
