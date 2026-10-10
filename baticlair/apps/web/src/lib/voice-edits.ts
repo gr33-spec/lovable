@@ -16,6 +16,8 @@ export type VoiceEdit =
   | { kind: "remove"; itemKey: string; label: string; heard: string }
   | { kind: "set"; itemKey: string; label: string; from: string | null; to: string; unit: string | null; heard: string }
   | { kind: "add"; label: string; quantity: string | null; unit: string | null; heard: string }
+  /** « Tuile PV10 », « faîtière demi ronde rouge » : la ligne nommée avec ce qui la précise ; son nom s'allonge, sa quantité reste. */
+  | { kind: "rename"; itemKey: string; label: string; to: string; heard: string }
   | { kind: "unknown"; heard: string };
 
 export function normalize(text: string): string {
@@ -40,8 +42,10 @@ const STOP = new Set([
 
 const NUMBER_WORDS: Record<string, number> = {
   zero: 0, un: 1, une: 1, deux: 2, trois: 3, quatre: 4, cinq: 5, six: 6, sept: 7, huit: 8, neuf: 9, dix: 10, onze: 11, douze: 12, treize: 13, quatorze: 14,
-  quinze: 15, seize: 16, vingt: 20, vingts: 20, trente: 30, quarante: 40, cinquante: 50, soixante: 60, cent: 100, cents: 100, mille: 1000, demi: 0.5,
+  quinze: 15, seize: 16, vingt: 20, vingts: 20, trente: 30, quarante: 40, cinquante: 50, soixante: 60, cent: 100, cents: 100, mille: 1000,
 };
+/** « demi » n'est un nombre que devant une unité (« une demi-botte ») ou après un nombre (« deux et demi ») : sinon c'est une forme (« demi-ronde »). */
+const HALF = new Set(["demi", "demie"]);
 
 /** Les unités qu'on dit au comptoir, ramenées à leur écriture courte. */
 const UNITS: [RegExp, string][] = [
@@ -114,6 +118,7 @@ function wordsNumber(tokens: readonly string[], from: number): { value: number; 
     else current += v;
     any = true;
   }
+  if (any && tokens[i] === "et" && HALF.has(tokens[i + 1] ?? "")) return { value: total + current + 0.5, end: i + 2 };
   return any ? { value: total + current, end: i } : null;
 }
 
@@ -124,8 +129,15 @@ function quantityIn(norm: string): { value: number; unit: string | null; at: num
     const t = tokens[i]!;
     let value: number | null = null;
     let end = i + 1;
-    if (/^\d+(?:\.\d+)?$/.test(t)) value = Number(t);
-    else if (t === "un" || t === "une") {
+    if (/^\d+(?:\.\d+)?$/.test(t)) {
+      value = Number(t);
+      if (tokens[i + 1] === "et" && HALF.has(tokens[i + 2] ?? "")) {
+        value += 0.5;
+        end = i + 3;
+      }
+    } else if (HALF.has(t)) {
+      if (tokens[i + 1] && UNITS.some(([re]) => re.test(tokens[i + 1]!))) value = 0.5;
+    } else if (t === "un" || t === "une") {
       // « un » / « une » ne comptent que devant une unité (« une cartouche ») : sinon c'est un article (« une noue »).
       if (tokens[i + 1] && UNITS.some(([re]) => re.test(tokens[i + 1]!))) value = 1;
     } else {
@@ -177,6 +189,14 @@ function findItem(phrase: string, items: readonly VoiceItem[]): VoiceItem | null
   return best.it;
 }
 
+/** La seule ligne dont le nom contient le premier mot dit ; sinon rien. */
+function headItem(phrase: string, items: readonly VoiceItem[]): VoiceItem | null {
+  const head = words(phrase).map(stem)[0];
+  if (!head) return null;
+  const hits = items.filter((it) => words(it.label).map(stem).includes(head));
+  return hits.length === 1 ? hits[0]! : null;
+}
+
 const tidy = (s: string) => {
   const t = s.replace(/^(de |d |des |du |la |le |les |l )/i, "").trim();
   return t.charAt(0).toUpperCase() + t.slice(1);
@@ -184,6 +204,22 @@ const tidy = (s: string) => {
 const shown = (n: number) => String(Number(n.toFixed(2))).replace(".", ",");
 const unitOf = (quantity: string | null) => (quantity ? (/^[\d\s.,]+\s*(.*)$/.exec(quantity.trim())?.[1]?.trim() ?? null) || null : null);
 const currentOf = (item: VoiceItem) => (item.quantity ? Number(normalize(item.quantity).split(" ")[0]) : NaN);
+
+/**
+ * Ce que le morceau dit en plus du nom de la ligne, dans l'ordre et l'écriture de l'artisan (« PV10 », « demi-ronde rouge ») ;
+ * null s'il ne dit que le nom.
+ */
+function precisionOf(heard: string, label: string): string | null {
+  const own = new Set(words(label).map(stem));
+  const extra = heard
+    .split(/[\s,;:.!?«»"()]+/)
+    .filter((w) => {
+      const n = normalize(w);
+      return n.length > 0 && !n.includes(" ") && (n.length > 1 || /\d/.test(n)) && !STOP.has(n) && !FILLER.has(n) && !own.has(stem(n));
+    });
+  if (extra.length === 0) return null;
+  return extra.join(" ").replace(/\b(demie?)\s+(?=\p{L})/giu, "$1-");
+}
 
 /** Le dit, morceau par morceau, en modifications de la liste. */
 export function parseEdits(transcript: string, items: readonly VoiceItem[]): VoiceEdit[] {
@@ -208,7 +244,10 @@ export function parseEdits(transcript: string, items: readonly VoiceItem[]): Voi
     const q = quantityIn(rest);
     const tokens = rest.split(" ");
     const name = q ? [...tokens.slice(0, q.at), ...tokens.slice(q.end)].join(" ") : rest;
-    const item = findItem(name, items);
+    // Sans verbe ni nombre, la phrase commence par le nom de la ligne et dit ensuite ce qui la précise (« faîtière demi ronde
+    // rouge ») : son premier mot suffit, s'il ne nomme qu'une ligne.
+    const bare = !q && !removing && !adding && !setting && !less;
+    const item = findItem(name, items) ?? (bare ? headItem(name, items) : null);
     const current = item ? currentOf(item) : NaN;
     // « 500 mètres » de liteaux comptés en ml : l'unité de la ligne reste la sienne.
     const sameUnit = (u: string | null) => {
@@ -218,7 +257,10 @@ export function parseEdits(transcript: string, items: readonly VoiceItem[]): Voi
     const set = (to: number, unit: string | null) =>
       out.push({ kind: "set", itemKey: item!.key, label: item!.label, from: item!.quantity, to: shown(Math.max(0, to)), unit: sameUnit(unit), heard });
     if (item && !q && !removing && !adding && !setting && !less) {
-      carry = heard;
+      // Des mots en plus du nom de la ligne (un modèle, une forme, une teinte) : la ligne est précisée. Sinon, elle attend la suite.
+      const more = precisionOf(heard, item.label);
+      if (more) out.push({ kind: "rename", itemKey: item.key, label: item.label, to: `${item.label} ${more}`, heard });
+      else carry = heard;
       continue;
     }
 
