@@ -68,12 +68,17 @@ import {
   lotLabel,
   piecewiseParams,
   scopedKey,
+  appliquerRelecture,
+  ficheChantier,
+  ficheFacts,
+  type FicheChantier,
 } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { AiUsageRecorder, AnalysisMeter } from "../../ai-usage/index.js";
 import type { DocumentAiInput, DocumentRepository, DocumentWithProcessing, PreparedDocument } from "../../documents/index.js";
 import type { CompanyMemory, CorrectionJournal } from "../../learning/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
+import { decodeRelecture, FICHE_RELECTURE_PROMPT, type FicheRelecteur, type RelectureQuestion } from "./fiche-relecture.js";
 import { TAKEOFF_PROMPT } from "./prompt.js";
 import type { ExtractionAttempt, ExtractionOutput, TakeoffExtractor } from "./takeoff-extractor.js";
 import { suppliedLines } from "./takeoff-extractor.js";
@@ -111,6 +116,8 @@ export interface ReadingOptions {
    * et ses doutes avec un remplacement ; tout sort orange. Absent : pas d'appel n° 2.
    */
   quantitatif?: QuantitatifPass;
+  /** §51.2 : la relecture IA d'une réponse « Autre » (absente : la réponse écrite est gardée telle quelle). */
+  relecteur?: FicheRelecteur;
   /** Le nom de l'entreprise, injecté dans le prompt B ({nom_entreprise}). */
   companyName?: (tenant: TenantContext) => Promise<string | null>;
   /**
@@ -251,6 +258,9 @@ const transient = (a: ExtractionAttempt) =>
   (a.status === "invalid_output" && a.errorCode !== "max_tokens") ||
   (a.status === "provider_error" && (a.errorCode === "http_429" || !/^http_4\d\d$/.test(a.errorCode ?? "")));
 
+/** §51.2 : la question d'une donnée qu'une relecture a ouverte (« fiche:<donnée> »). */
+export const FICHE_KEY = "fiche:";
+
 export interface ReviewedTakeoff {
   takeoff: TakeoffRecord;
   validation: TakeoffValidation;
@@ -272,6 +282,8 @@ export interface ReviewedTakeoff {
   openContradictions: readonly string[];
   /** Le chantier en bref (§45.3) : les faits confirmés seulement, jamais une hypothèse de l'app. */
   brief: SiteBrief;
+  /** §51 : la fiche de chantier (lue, déduite, répondue, manquante), d'où le calcul puise et d'où viennent les questions. */
+  fiche: FicheChantier;
   /**
    * Parcours §48 : les habitudes établies de l'entreprise appliquées à ce chantier (« je façonne »), reproposées sur
    * l'écran des questions en « Comme d'habitude ? » ; un tap les confirme ou les change pour ce chantier.
@@ -485,7 +497,10 @@ export class TakeoffService {
     const blocks = read.parts.map((p) => ({ chunk: p.chunk, lines: p.output.lines }));
     const whole = read.parts.length === 1 && read.parts[0]!.chunk.context.length === 0;
     const merged = whole ? { lines: read.parts[0]!.output.lines, droppedOutsideBlock: 0, droppedDuplicates: 0 } : mergeChunkLines(blocks);
-    const raw: ExtractionOutput = whole ? read.parts[0]!.output : { lines: merged.lines, notes: [...new Set(read.parts.flatMap((p) => p.output.notes))] };
+    // §51.1 : un gros devis lu en blocs garde UNE fiche : chaque donnée une fois, la valeur lue l'emportant sur le trou.
+    const fiches = read.parts.flatMap((p) => p.output.fiche?.donnees ?? []);
+    const fiche = fiches.length > 0 ? { donnees: fiches.filter((d, i) => !fiches.some((x, j) => x.cle === d.cle && (j < i ? x.origine !== "manquante" || d.origine === "manquante" : x.origine !== "manquante" && d.origine === "manquante"))) } : null;
+    const raw: ExtractionOutput = whole ? read.parts[0]!.output : { lines: merged.lines, notes: [...new Set(read.parts.flatMap((p) => p.output.notes))], fiche };
     // §49.9 : chaque prestation devient la fourniture qu'elle contient ; une ligne nomme un article, jamais une phrase.
     const output: ExtractionOutput = { ...raw, lines: suppliedLines(raw.lines) };
     await this.saveStats(
@@ -521,6 +536,7 @@ export class TakeoffService {
       model: success.model,
       notes: success.output.notes,
       context: success.output.context ?? null,
+      fiche: success.output.fiche ?? null,
       lines: success.output.lines.map((l) => ({
         designation: l.designation.trim(),
         quantityRaw: l.quantity?.trim() || null,
@@ -1023,6 +1039,35 @@ export class TakeoffService {
     return takeoff;
   }
 
+  /**
+   * §51.2 : une réponse « Autre » relue par l'IA. La fiche est mise à jour, ce que la réponse règle clairement devient la
+   * réponse de ses questions (une ou plusieurs), et une donnée qu'elle ouvre devient une question de plus. Null quand la
+   * relecture n'est pas possible (pas d'IA, appel en échec) : l'appelant garde alors la réponse telle qu'écrite.
+   */
+  async relire(tenant: TenantContext, takeoffId: string, questionKey: string, texte: string): Promise<{ reviewed: ReviewedTakeoff; answered: string[] } | null> {
+    const relecteur = this.reading.relecteur;
+    if (!relecteur) return null;
+    const takeoff = await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
+    const reviewed = await this.review(tenant, takeoff);
+    const open = reviewed.purchase.questions.filter((d) => d.question);
+    const asked = open.find((d) => d.question!.key === questionKey || d.key === questionKey);
+    if (!asked) return null;
+    const toQuestion = (d: (typeof open)[number]): RelectureQuestion => ({ key: d.question!.key, text: d.question!.text, options: d.question!.options ?? [], unit: d.question!.unit ?? null });
+    const input = { tradeLabel: this.tradeHints(takeoff.trade).tradeLabel, fiche: reviewed.fiche, question: toQuestion(asked), texte, ouvertes: open.filter((d) => d !== asked).map(toQuestion) };
+    const attempt = await relecteur.relire(input);
+    const doc = takeoff.documentId ? await this.documents.findById(tenant, takeoff.documentId) : null;
+    if (doc && takeoff.analysisId) await this.record(tenant, doc, { text: 0, vision: 0 }, doc.processing?.id ?? null, takeoff.analysisId, 1, attempt, FICHE_RELECTURE_PROMPT);
+    if (attempt.status !== "success" || !attempt.output) return null;
+    const relecture = decodeRelecture(attempt.output, input);
+    await this.takeoffs.setFiche(tenant, takeoff.id, appliquerRelecture(takeoff.fiche, relecture));
+    for (const r of relecture.reponses) {
+      await this.takeoffs.setAnswer(tenant, takeoff.id, r.question, r.question.startsWith("param:") ? { value: r.valeur, unit: r.unite ?? "u" } : r.valeur);
+    }
+    // Une donnée ouverte par une relecture se ferme par la réponse écrite, gardée dans la fiche.
+    if (questionKey.startsWith(FICHE_KEY)) await this.takeoffs.setAnswer(tenant, takeoff.id, questionKey, texte);
+    return { reviewed: await this.reload(tenant, takeoff.id), answered: relecture.reponses.map((r) => r.question) };
+  }
+
   private async editable(tenant: TenantContext, takeoff: TakeoffRecord | null): Promise<TakeoffRecord> {
     assertCanWrite(tenant);
     if (!takeoff) throw notFound("Takeoff");
@@ -1096,6 +1141,8 @@ export class TakeoffService {
     // Prompt A (§41.1) : la pente, le rampant, l'épaisseur lus par l'IA dans la ligne ou l'en-tête entrent dans
     // le calcul (après le texte lu par le code, avant les hypothèses par défaut).
     extraFacts.push(...factsFromReading(ref, takeoff.lines.map((l) => ({ ref: l.id, dimensions: l.dimensions })), takeoff.context));
+    // §51.3 : les données du toit de la fiche (rampant, pente, descentes…) valent pour tous ses ouvrages, chacune une fois.
+    extraFacts.push(...ficheFacts(ref, takeoff.fiche));
     // Infos chantier facultatives : les mesures nommées de la note de l'artisan passent devant le devis (l'explication dit les deux).
     extraFacts.push(...readSiteNotes(ref, notes));
     const plan = planQuote(lines.map((l) => ({ ref: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, section: l.section })), ref, profile, undefined, extraFacts);
@@ -1217,7 +1264,16 @@ export class TakeoffService {
       validation,
       new Map(record.lines.flatMap((l) => (l.reading ? [[l.id, l.reading] as const] : []))),
     );
-    return { ...reviewed, view, brief, purchase, habits, aiSuggestions, withoutSupply, siteNotes: notes };
+    // §51 : la fiche à l'écran, et ses trous. Une donnée qu'une relecture (« Autre ») a ouverte est UNE question de plus,
+    // posée avant le calcul, à laquelle l'artisan répond en écrivant (relue à son tour).
+    const fiche = ficheChantier({ ref, ai: takeoff.fiche, plan, answers: takeoff.answers, questions: purchase.questions.flatMap((d) => (d.question ? [d.question] : [])), lignes: new Map(takeoff.lines.map((l) => [l.id, `ligne ${l.position}`])) });
+    for (const d of fiche.donnees) {
+      const key = `${FICHE_KEY}${d.cle}`;
+      // Seule une donnée ouverte par une relecture : un trou du calcul a déjà sa question (« param:<donnée> »).
+      if (d.origine !== "manquante" || !d.question || takeoff.answers[key] !== undefined || purchase.questions.some((q) => q.question?.key === `param:${d.cle}` || q.text === d.question)) continue;
+      purchase.questions.push({ key, state: "missing", title: d.question, text: d.question, lineIds: [], primary: null, secondary: [], question: { key, kind: "choose", text: d.question, options: [], named: true } });
+    }
+    return { ...reviewed, view, brief, fiche, purchase, habits, aiSuggestions, withoutSupply, siteNotes: notes };
   }
 
   /**

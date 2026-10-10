@@ -184,7 +184,7 @@ interface CounterQuestion {
    * Retour du fondateur (2026-10-10) : « quand l'application ne sait pas, elle demande et laisse de quoi écrire ». Une valeur
    * (pente, entraxe, développé) ou un modèle (tuile) qui n'est pas dans les boutons s'écrit sous « Autre ».
    */
-  free?: "number" | "text";
+  free?: "number" | "text" | "written";
   /** La valeur prise sans réponse (hypothèse dite, habitude) : marquée sur son bouton. */
   usual: string | null;
 }
@@ -200,10 +200,14 @@ type Given = { value: string; label: string; custom?: boolean };
 /** Ce qui s'écrit sous « Autre » : un modèle (produit, question du comptoir), ou une valeur qui a son unité. */
 function freeOf(key: string, kind: string | null, unit: string | null, options: readonly { value: string }[], named = false): CounterQuestion["free"] {
   // Un modèle, ou une qualité qui se nomme (l'ardoise, l'aspect du zinc, une teinte) : les boutons ne sont que les plus courants.
+  // §51.2 : une donnée qu'une relecture a ouverte se répond en écrivant.
+  if (key.startsWith("fiche:")) return "written";
   if (named || /^(?:engine:)?product:/.test(key) || kind === "choose_product" || kind === "confirm_product" || key.startsWith("comptoir:")) return "text";
-  // Une valeur chiffrée à boutons (« 30° · 35° · 45° ») : toute autre valeur s'écrit, dans son unité. Jamais un choix fermé
-  // (façonnage, oui / non, à fournir / déjà sur place).
+  // Une valeur chiffrée à boutons (« 30° · 35° · 45° ») : toute autre valeur s'écrit, dans son unité.
   if (unit && unit !== "u" && options.length > 0 && options.every((o) => /^\d+(?:[.,]\d+)?$/.test(o.value))) return "number";
+  // §51.2 et §51.4 : un choix du calcul (le façonnage) a aussi « Autre » ; ce qui s'y écrit est relu par l'IA, qui met la
+  // fiche à jour. Pas pour oui / non (consommables).
+  if (/^(?:engine:)?param:/.test(key) && key.replace(/^engine:/, "") !== CONSUMABLES_KEY && options.length > 0) return "written";
   return undefined;
 }
 
@@ -505,8 +509,8 @@ function OtherAnswer({ question: q, given, onChange }: { question: CounterQuesti
           id={id}
           autoFocus
           inputMode={numeric ? "decimal" : "text"}
-          maxLength={numeric ? 8 : 100}
-          placeholder={numeric ? "Ta valeur" : "Écris le modèle"}
+          maxLength={numeric ? 8 : q.free === "written" ? 300 : 100}
+          placeholder={numeric ? "Ta valeur" : q.free === "written" ? "Écris ta réponse" : "Écris le modèle"}
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onBlur={save}

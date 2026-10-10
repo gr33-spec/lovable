@@ -144,7 +144,7 @@ function withinTextRange(p: ParamDef, found: { value: string; unit: string }): b
 }
 
 /** Une valeur lue par le prompt A (« 35° », « 5,50 m », « 45 % », « 0,65 mm ») → valeur et unité du référentiel. */
-function readDimension(raw: string): { value: string; unit: string } | null {
+export function readDimension(raw: string): { value: string; unit: string } | null {
   const m = /^\s*(\d{1,3}(?:[ .]\d{3})+(?:,\d+)?|\d+(?:[.,]\d+)?)\s*(mm|cm|ml|m²|m2|m|%|°|degres|degre|deg)\s*$/i.exec(normalizeText(raw).replace(/\s+/g, " "));
   if (!m) return null;
   const unit = /^deg/.test(m[2]!.toLowerCase()) ? "°" : TEXT_UNITS[m[2]!.toLowerCase()];

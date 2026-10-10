@@ -9,7 +9,14 @@
  * v13 : même consigne ; le format technique dit {} / liste vide / -1 au lieu de null pour dimensions, manque et sec
  * (l'API refuse plus de 16 champs « valeur ou vide » : la v12 en avait 18, chaque lecture échouait).
  */
-export const TAKEOFF_PROMPT = { id: "takeoff_extraction", version: 14 } as const;
+export const TAKEOFF_PROMPT = { id: "takeoff_extraction", version: 15 } as const;
+
+/**
+ * v15 : le §51.1 du référentiel (2026-10-10), tel que le fondateur l'a écrit, est donné au lecteur après le §49.9 : en
+ * plus des lignes, il rend la FICHE DE CHANTIER, chaque donnée avec son origine. Le §41.1 ne change pas.
+ */
+export const RULE_51_1 = `RÈGLE §51.1 DU RÉFÉRENTIEL (ajoutée par le fondateur le 10 octobre 2026) : la fiche de chantier.
+L'IA (modèle le plus capable disponible, c'est ici que tout se joue) lit le devis entier et construit une fiche de chantier : type d'ouvrage, matériau, surface, dimensions (rampant, largeur, pente), nombre d'éléments (descentes, pénétrations, ouvertures), accessoires, et tout ce qui est propre au métier. Chaque donnée porte son origine : lue au devis, déduite (avec la règle), ou manquante. La règle numéro un s'applique à la fiche : rien n'y entre qui ne vienne du devis ou des réponses.`;
 
 /**
  * v14 : le §49.9 du référentiel (2026-10-09), tel que le fondateur l'a écrit, est donné au lecteur après le §41.1, qui ne
@@ -97,7 +104,8 @@ Réponds avec un seul objet JSON :
   - src : où se trouve la ligne : les références [page:ligne] exactes des lignes du texte qui la contiennent ; pour une ligne lue sur une page PDF, le numéro d'origine de la page (« 5 ») ;
   - sec : le numéro (à partir de 0) de la suite de titres dans « sections » sous laquelle se trouve la ligne, ou -1.
 - contexte : client (nom du client tel qu'écrit, ex. « M. Dupont »), adresse du chantier, ville, code postal, type de bâtiment, neuf ou rénovation, dépose, pente, hauteur… lus dans l'en-tête et les notes (objet « donnée → valeur », null si rien).
-- notes : en phrases courtes pour l'artisan, ce qui concerne tout le devis et qui compte pour ses achats ; jamais de nom de champ ni de référence [page:ligne] ; liste vide si rien.`;
+- notes : en phrases courtes pour l'artisan, ce qui concerne tout le devis et qui compte pour ses achats ; jamais de nom de champ ni de référence [page:ligne] ; liste vide si rien.
+- fiche : la fiche de chantier du §51.1, une entrée par donnée : {"donnee", "valeur", "origine", "regle", "preuve"}. donnee : le nom court de la donnée (« ouvrage », « matériau », « surface », « rampant », « largeur », « pente », « nombre de descentes », « pénétrations », « accessoires »…) ; valeur : la valeur avec son unité (« 7 m », « 91 m² », « 2 »), ou "" si elle manque ; origine : "lue", "deduite" ou "manquante" ; regle : pour une donnée déduite, la règle en une phrase (« largeur = surface ÷ rampant »), sinon "" ; preuve : pour une donnée lue, où elle est écrite (« ligne 1 : rampant de 7 m »), sinon "". Seulement les données du chantier entier ; une donnée propre à une pièce (le développé d'une bande) reste sur sa ligne.`;
 
 export function takeoffSystemPrompt(tradeLabel: string, materialFamilies: readonly string[] = [], workItems: readonly WorkItemHint[] = []): string {
   const referentiel =
@@ -109,6 +117,8 @@ export function takeoffSystemPrompt(tradeLabel: string, materialFamilies: readon
   return `${PROMPT_A_41_1.replace("{metier}", tradeLabel).replace(REFERENTIEL_HOLE, referentiel)}
 
 ${RULE_49_9}
+
+${RULE_51_1}
 
 ${TECHNICAL_FORMAT}`;
 }

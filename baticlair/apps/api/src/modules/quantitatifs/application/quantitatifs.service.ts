@@ -246,7 +246,23 @@ export class QuantitatifsService {
         continue;
       }
       const key = q?.key ?? r.question.replace(/^engine:/, "");
-      if (!/^(?:product:[a-z0-9_]{1,40}|param:[a-z0-9_]{1,40}(?:@[a-z0-9_-]{1,60})?|(?:role|precise):[0-9a-f-]{36}|comptoir:[0-9a-f-]{36}:\d{1,2})$/.test(key)) throw validationFailed("Unknown question", [{ path: "question", message: r.question }]);
+      if (!/^(?:product:[a-z0-9_]{1,40}|param:[a-z0-9_]{1,40}(?:@[a-z0-9_-]{1,60})?|(?:role|precise):[0-9a-f-]{36}|comptoir:[0-9a-f-]{36}:\d{1,2}|fiche:[a-z0-9_]{1,60})$/.test(key)) throw validationFailed("Unknown question", [{ path: "question", message: r.question }]);
+      // §51.2 : une réponse écrite sous « Autre » (ni un bouton, ni un nombre) n'est jamais rangée dans une case sans être
+      // relue : l'IA met la fiche à jour, règle la ou les questions qu'elle tranche, et peut en ouvrir une de plus.
+      const written = r.valeur !== null && r.valeur.trim() !== "" && !/^\d+(?:[.,]\d+)?$/.test(r.valeur.trim()) && !(q?.options ?? []).some((o) => o.value === r.valeur);
+      if (written && (key.startsWith("param:") || key.startsWith("fiche:"))) {
+        if (r.valeur!.trim().length > 300) throw validationFailed("Written answer must be at most 300 characters", [{ path: "valeur", message: r.question }]);
+        const relu = await this.takeoffs.relire(tenant, reviewed.takeoff.id, key, r.valeur!.trim());
+        if (relu) {
+          reviewed = relu.reviewed;
+          // Une qualité qui se nomme (« Ardoise d'Angers ») que la relecture n'a rangée dans aucun bouton : le nom écrit.
+          const keepName = !relu.answered.includes(key) && (q?.named || reviewed.purchase.assumptions.some((a) => a.key === key && a.named));
+          if (!keepName) continue;
+        } else if (key.startsWith("fiche:")) {
+          reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, key, r.valeur!.trim());
+          continue;
+        }
+      }
       if (key.startsWith("role:") && r.valeur !== "measure" && r.valeur !== "purchase") throw validationFailed("Role answer must be measure or purchase", [{ path: "valeur", message: r.question }]);
       let value: EngineAnswer;
       // « Autre » sur une qualité qui se nomme (« Ardoise d'Angers ») : le texte écrit, tel quel dans la désignation.
@@ -292,6 +308,10 @@ export class QuantitatifsService {
     if (mandatory.length > 0) {
       throw validationFailed("Answer the forming questions first", { reason: "faconnage_required", questions: mandatory.map((d) => d.question!.key) });
     }
+    // §51.2 : une réponse « Autre » relue qui ouvre une donnée manquante pose UNE question de plus, AVANT de calculer :
+    // l'écran des questions revient avec elle seule à régler.
+    const opened = (await this.ready(tenant, row)).purchase.questions.filter((d) => d.question?.key.startsWith("fiche:"));
+    if (opened.length > 0) return this.view(row, await this.ready(tenant, row), rendu);
     // §49.2.5 : les valeurs annoncées dans « Je pars sur ces valeurs » et gardées telles quelles sont CONFIRMÉES en lançant
     // le calcul (elles ne gardent plus leur ligne orange) ; celles que l'artisan a changées ont déjà leur réponse.
     const seen = await this.ready(tenant, row);

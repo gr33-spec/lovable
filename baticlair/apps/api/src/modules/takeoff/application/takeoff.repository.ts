@@ -1,4 +1,4 @@
-import type { CompletionRecord, LineRole, QuoteLineReading } from "@baticlair/domain";
+import type { CompletionRecord, FicheChantier, LineRole, QuoteLineReading } from "@baticlair/domain";
 import type { TenantContext } from "../../tenancy/index.js";
 
 export type TakeoffStatus = "draft" | "validated";
@@ -56,6 +56,8 @@ export interface TakeoffRecord {
   notes: string[];
   /** En-tête et notes du devis lus par l'IA (§41.1), ou null. */
   context: Record<string, string> | null;
+  /** §51.1 : la fiche de chantier (lue par l'IA, complétée par les réponses « Autre » relues), ou null. */
+  fiche: FicheChantier | null;
   /** Appel IA n° 2 : ajouts et doutes proposés (null : pas d'appel). */
   completion: CompletionRecord | null;
   /** Parcours (§48) : calcul lancé après les questions, et terminé (null : pas encore). */
@@ -85,6 +87,8 @@ export interface NewTakeoff {
   lines: NewTakeoffLine[];
   /** En-tête et notes du devis (adresse, type de bâtiment, neuf/rénovation…), §41.1 règle 4. */
   context?: Record<string, string> | null;
+  /** §51.1 : la fiche de chantier lue par l'IA. */
+  fiche?: FicheChantier | null;
   /** Déjà calculé à la création (lignes d'un partenaire : pas de questions, pas d'appel IA). */
   calculated?: boolean;
 }
@@ -105,6 +109,8 @@ export interface TakeoffRepository {
   setAnswer(tenant: TenantContext, id: string, key: string, value: string | { value: string; unit: string } | null): Promise<void>;
   /** Enregistre ce que l'appel IA n° 2 propose (ajouts, doutes). */
   setCompletion(tenant: TenantContext, id: string, completion: CompletionRecord): Promise<void>;
+  /** §51.2 : la fiche mise à jour par la relecture d'une réponse « Autre ». */
+  setFiche(tenant: TenantContext, id: string, fiche: FicheChantier): Promise<void>;
   /** Le calcul part (questions répondues) ou se termine. Le départ n'est pris qu'une fois (double appui). */
   startCalcul(tenant: TenantContext, id: string, at: Date, staleBefore: Date): Promise<boolean>;
   finishCalcul(tenant: TenantContext, id: string, at: Date): Promise<void>;

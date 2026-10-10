@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { PROMPT_A_41_1, RULE_49_9, siteNotesInstruction, takeoffSystemPrompt, TAKEOFF_PROMPT } from "../src/modules/takeoff/application/prompt.js";
+import { PROMPT_A_41_1, RULE_49_9, RULE_51_1, siteNotesInstruction, takeoffSystemPrompt, TAKEOFF_PROMPT } from "../src/modules/takeoff/application/prompt.js";
 import { AnthropicTakeoffExtractor } from "../src/modules/takeoff/infrastructure/anthropic-takeoff-extractor.js";
 import { decodeExtraction, extractionWireSchema } from "../src/modules/takeoff/application/takeoff-extractor.js";
 
 /** PROMPT A (référentiel §41.1), branché mot pour mot : seules les accolades sont remplies, et le format technique est ajouté après. */
-describe("prompt A de lecture du devis (v14)", () => {
+describe("prompt A de lecture du devis (v15)", () => {
   const prompt = takeoffSystemPrompt("Couverture", ["Tuile", "Ardoise"], [
     { id: "couverture-ardoises-crochet", label: "Couverture en ardoises au crochet", synonyms: ["ardoise"] },
     { id: "couverture-zinc-joint-debout", label: "Couverture zinc à joint debout", synonyms: ["joint debout", "couverture zinc"] },
   ]);
 
-  it("est la version 14 : le §41.1 réécrit, mot pour mot (comparé au référentiel), puis le §49.9 du fondateur, puis le format technique ; plus de bloc « RÈGLE NUMÉRO UN » ajouté", () => {
-    expect(TAKEOFF_PROMPT.version).toBe(14);
+  it("est la version 15 : le §41.1 réécrit, mot pour mot (comparé au référentiel), puis le §49.9 et le §51.1 du fondateur, puis le format technique ; plus de bloc « RÈGLE NUMÉRO UN » ajouté", () => {
+    expect(TAKEOFF_PROMPT.version).toBe(15);
     const doc = readFileSync(new URL("../../../docs/referentiel-couverture.md", import.meta.url), "utf8");
     const a = doc.slice(doc.indexOf("### 41.1 Prompt A"), doc.indexOf("### 41.2")).split("```")[1]!.replace(/^\n|\n$/g, "");
     expect(PROMPT_A_41_1).toBe(a);
@@ -27,7 +27,13 @@ describe("prompt A de lecture du devis (v14)", () => {
     const after = prompt.slice(filled.length).trimStart();
     expect(after.startsWith(RULE_49_9)).toBe(true);
     expect(RULE_49_9).toContain("une ligne du quantitatif nomme une fourniture, jamais la phrase du devis");
-    const format = after.slice(RULE_49_9.length);
+    // §51.1 (2026-10-10), mot pour mot comme au référentiel : la fiche de chantier, chaque donnée avec son origine.
+    const rest = after.slice(RULE_49_9.length).trimStart();
+    expect(rest.startsWith(RULE_51_1)).toBe(true);
+    const s511 = doc.slice(doc.indexOf("## 51.1"), doc.indexOf("## 51.2")).split("\n").slice(1).join(" ").replace(/\s+/g, " ").trim();
+    expect(RULE_51_1.split("\n").slice(1).join(" ")).toBe(s511);
+    const format = rest.slice(RULE_51_1.length);
+    expect(format).toContain("- fiche : la fiche de chantier du §51.1");
     expect(format.trimStart().startsWith("FORMAT TECHNIQUE DE LA RÉPONSE (contexte injecté par BatiClair")).toBe(true);
     for (const field of ["role :", "articles :", "\"nom\", \"materiau\", \"quantite\", \"unite\", \"elements\"", "faconnage :", "manque :"]) expect(format).toContain(field);
     // Le bloc ajouté autrefois en fin de prompt a disparu : la règle numéro un est DANS le §41.1.

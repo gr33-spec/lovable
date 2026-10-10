@@ -1090,9 +1090,9 @@ test("Autre : quand la bonne réponse n'est pas dans les boutons, elle s'écrit 
   await pente.getByLabel("Autre valeur : Pente du toit ?").fill("38");
   await pente.getByRole("button", { name: "OK" }).click();
   await expect(pente.getByLabel("Autre valeur : Pente du toit ?")).toHaveValue("38");
-  // Un choix fermé (le façonnage) n'a pas d'« Autre ».
+  // §51.4 : le façonnage a aussi « Autre » ; ce qui s'y écrit est relu (§51.2). Les consommables (oui / non), non.
   const faconnage = questions.getByRole("group", { name: /façonnes/i }).first();
-  await expect(faconnage.getByRole("button", { name: "Autre", exact: true })).toHaveCount(0);
+  await expect(faconnage.getByRole("button", { name: "Autre", exact: true })).toHaveCount(1);
   await faconnage.getByRole("button", { name: /^Je commande façonné/ }).click();
   // Une qualité qui se nomme (l'ardoise) : « Autre » laisse écrire la sienne, qui part telle quelle dans la désignation.
   const ardoise = questions.getByRole("group", { name: /^Quelle ardoise/ });
