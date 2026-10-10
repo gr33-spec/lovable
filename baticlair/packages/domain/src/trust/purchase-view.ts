@@ -522,7 +522,10 @@ function aggregate(
         return rules.length > 0 ? { rules } : {};
       })(),
       ...(() => {
-        const waits = [...new Set(group.flatMap((n) => (n.unknownParams ?? []).map((k) => `param:${k}`)))];
+        // Retour du fondateur (2026-10-10) : « on s'en fout du développé, l'utilisateur veut juste un nombre de feuilles ». Une
+        // quantité ESTIMÉE (feuilles d'une pièce façonnée sur place) n'attend pas la donnée qui l'affine : l'artisan ajuste le nombre.
+        const estimated = (n: (typeof group)[number]) => (n.toConfirm ?? []).some((r) => r.key.startsWith("estimation:"));
+        const waits = [...new Set(group.filter((n) => !estimated(n)).flatMap((n) => (n.unknownParams ?? []).map((k) => `param:${k}`)))];
         return waits.length > 0 ? { waitsOn: waits } : {};
       })(),
     });
