@@ -918,7 +918,16 @@ test("§49.8 : sur chaque ligne, un ✓ pour valider sans l'ouvrir, et un crayon
   // Le crayon ouvre la ligne (nom, quantité, choix).
   const crayon = list.getByRole("button", { name: /^Modifier la ligne : / }).first();
   await crayon.click();
-  await expect(list.getByRole("group", { name: /^Ligne ouverte : / })).toHaveCount(1);
+  const ouverte = list.getByRole("group", { name: /^Ligne ouverte : / });
+  await expect(ouverte).toHaveCount(1);
+  // Retour du fondateur (2026-10-10) : « on ne comprend pas comment la fermer ». Le crayon devient une croix, et la ligne
+  // ouverte a son bouton « Fermer » en bas.
+  await ouverte.getByRole("button", { name: "Fermer", exact: true }).click();
+  await expect(ouverte).toHaveCount(0);
+  await list.getByRole("button", { name: /^Modifier la ligne : / }).first().click();
+  await expect(ouverte).toHaveCount(1);
+  await list.getByRole("button", { name: /^Fermer la ligne : / }).click();
+  await expect(ouverte).toHaveCount(0);
 });
 
 test("§49.8 : un tap refusé par le serveur se dit DANS la ligne ouverte, jamais en silence", async ({ page }) => {
