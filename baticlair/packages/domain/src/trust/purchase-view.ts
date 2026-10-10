@@ -998,8 +998,10 @@ export function applyPurchaseOverrides(purchase: PurchaseView, answers: Record<s
     const said = mine.map((q) => (q.key.startsWith(A_PRECISER) ? `${q.title.toLowerCase()} : au choix du fournisseur` : `${q.text.replace(/\s*\?$/, "")} : ${(answers[q.key] as string).trim()}`));
     const waitsOn = (item.waitsOn ?? []).filter((k) => !counterDone.has(k));
     const rules = (item.rules ?? []).filter((r) => !counterDone.has(r.key.replace(/^manque:/, "")));
-    const { waitsOn: _w, rules: _r, ...rest } = item;
-    return { ...rest, ...(waitsOn.length ? { waitsOn } : {}), ...(rules.length ? { rules } : {}), precision: [item.precision, ...said].filter(Boolean).join(" ; ") };
+    // §49.8 : la question réglée d'un tap quitte la carte (retour du fondateur, 2026-10-10 : « rien ne se passe »).
+    const asks = (item.asks ?? []).filter((a) => !counterDone.has(a.key));
+    const { waitsOn: _w, rules: _r, asks: _a, ...rest } = item;
+    return { ...rest, ...(waitsOn.length ? { waitsOn } : {}), ...(rules.length ? { rules } : {}), ...(asks.length ? { asks } : {}), precision: [item.precision, ...said].filter(Boolean).join(" ; ") };
   };
   const precised = (item: PurchaseItem): PurchaseItem => {
     if (item.kind !== "direct" || !answered.has(item.lineIds[0]!)) return item;

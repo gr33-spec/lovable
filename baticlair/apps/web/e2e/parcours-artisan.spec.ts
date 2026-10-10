@@ -882,6 +882,23 @@ test("§48.5 : envoyer une sélection à un autre fournisseur, discret, puis l'e
   await expect(list.getByRole("button", { name: "Voir la demande envoyée" })).toHaveCount(0);
 });
 
+test("§49.8 : un tap refusé par le serveur se dit DANS la ligne ouverte, jamais en silence", async ({ page }) => {
+  // Retour du fondateur (2026-10-10, capture iPhone) : « Quand je clique sur un bouton, rien ne se passe. »
+  await signUp(page);
+  await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await passQuestions(page);
+  await openList(page);
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  const orange = list.getByRole("listitem").filter({ has: page.getByRole("img", { name: "à vérifier" }) }).first();
+  const card = await openRow(orange);
+  await page.route(/\/v1\/quantitatifs\/[^/]+\/(reponses|corrections)/, (route) =>
+    route.fulfill({ status: 409, contentType: "application/json", body: JSON.stringify({ error: { code: "conflict", message: "Cette liste a changé, recharge la page.", retryable: false } }) }),
+  );
+  await card.getByRole("button").first().click();
+  await expect(orange.getByRole("alert")).toBeVisible();
+});
+
 test("§49.8 : chaque ligne orange passe au vert dans sa carte, un geste par ligne, sans quitter la liste", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");

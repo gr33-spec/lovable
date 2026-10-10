@@ -6,8 +6,8 @@ import { useEffect, useId, useRef, useState } from "react";
 import { type ItemEdit, type SketchHandlers } from "@/components/purchase-list";
 import { type DecisionHandlers } from "@/components/takeoff-view";
 import { SelectionBar, type SelectionSend } from "@/components/selection-send";
-import { Button } from "@/components/ui";
-import type { ItemSketch, PurchaseItem, ScreenRow, Takeoff, TakeoffDecision } from "@/lib/api";
+import { Button, ErrorNotice } from "@/components/ui";
+import type { ApiError, ItemSketch, PurchaseItem, ScreenRow, Takeoff, TakeoffDecision } from "@/lib/api";
 import { parseQuantity, shortName } from "@/lib/labels";
 
 /**
@@ -34,7 +34,10 @@ export function SupplyList({
   selection,
   onAdd,
   onBrief,
+  error = null,
 }: {
+  /** Le dernier geste refusé par le serveur : dit DANS la ligne ouverte, là où l'artisan vient de toucher. */
+  error?: ApiError | null;
   /** §50.3 : « Ajouter un article », en petit sous le bouton d'envoi. */
   onAdd?: () => void;
   /** §50.7 : une ligne du chantier en bref, réécrite (texte) ou retirée (vide). */
@@ -167,6 +170,7 @@ export function SupplyList({
             shared={sharedFor(r)}
             onEdit={onEditItem}
             onSetAside={() => putAside(r)}
+            error={error}
             sketches={sketches.filter((s) => r.itemKey && s.article === r.itemKey)}
             {...(sketchHandlers ? { sketchHandlers } : {})}
           />
@@ -372,7 +376,9 @@ function Row({
   sketchHandlers,
   selectMode,
   sentTo,
+  error = null,
 }: {
+  error?: ApiError | null;
   /** §48.5 : mode sélection, une case à cocher à la place du point ; toucher la ligne la coche. */
   selectMode?: { checked: boolean; disabled: boolean; onToggle: () => void };
   /** §48.5 : déjà envoyée à part (« Envoyé · fournisseur »), toujours visible dans la liste. */
@@ -511,6 +517,8 @@ function Row({
       </div>
       {open ? (
         <div role="group" aria-label={`Ligne ouverte : ${label}`} className="flex flex-col gap-2 pb-2 pl-5">
+          {/* Retour du fondateur (2026-10-10) : « quand je clique sur un bouton, rien ne se passe ». Un geste refusé se dit ici. */}
+          {error ? <ErrorNotice error={error} /> : null}
           {renamable ? (
             naming ? (
               <InlineText label={`Nom : ${label}`} value={item?.label ?? nameLine?.article ?? nameLine?.designation ?? label} pending={pending} onCancel={() => setNaming(false)} onSave={rename} />
