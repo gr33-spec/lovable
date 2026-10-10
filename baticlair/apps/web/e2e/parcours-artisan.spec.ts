@@ -862,6 +862,17 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   await page.reload();
   await expect(page.getByRole("region", { name: "Les questions" })).toHaveCount(0);
   await expect(page.getByRole("region", { name: "Liste des fournitures" }).getByText(/^Silicone$/)).toBeVisible();
+
+  // Retour du fondateur (2026-10-10) : nommer une ligne avec ce qui la précise (« gouttière demi ronde rouge ») la précise,
+  // sans toucher sa quantité (avant : « demi » lu comme 0,5).
+  const liste = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(liste.getByText(/Gouttière zinc demi-ronde/).first()).toBeVisible();
+  await page.getByRole("navigation", { name: "Autres gestes sur la liste" }).getByRole("button", { name: "Modifier à la voix" }).click();
+  await page.getByRole("region", { name: "Modifier à la voix" }).getByLabel("Écrire mes modifications").fill("gouttière demi ronde rouge");
+  await page.getByRole("button", { name: "Appliquer mes modifications" }).click();
+  await expect(page.getByRole("status", { name: "Ce que j'ai modifié" })).toContainText("Précisé : Gouttière zinc demi-ronde → Gouttière zinc demi-ronde rouge");
+  await expect(liste.getByRole("button", { name: /^Modifier : Gouttière zinc demi-ronde rouge/ })).toBeVisible();
+  await expect(liste.getByText(/^20 ml$/).filter({ visible: true }).first()).toBeVisible();
 });
 
 test("§48.5 : envoyer une sélection à un autre fournisseur, discret, puis l'envoi normal inchangé", async ({ page }) => {

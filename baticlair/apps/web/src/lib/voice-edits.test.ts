@@ -96,3 +96,33 @@ test("sans ponctuation (la dictée n'en met pas toujours) : un nouveau verbe, un
   );
   assert.equal((edits[1] as { label: string }).label, "Silicone");
 });
+
+// Retour du fondateur (2026-10-10, capture) : « Tuile PV10, faîtière demi ronde rouge » donnait « Pas compris » pour la
+// tuile et « Faîtières : 29 → 0,5 pièces ». Nommer une ligne avec ce qui la précise (un modèle, une forme, une teinte),
+// sans verbe ni nombre, PRÉCISE la ligne : son nom s'allonge des mots dits, sa quantité ne bouge pas. « demi » n'est un
+// nombre que devant une unité (« une demi-botte ») ou après un nombre (« deux et demi »).
+const REPAIR: VoiceItem[] = [
+  { key: "line:t", label: "Tuile terre cuite mécanique", quantity: "20 pièces" },
+  { key: "faitieres", label: "Faîtières", quantity: "29 pièces" },
+  { key: "closoir", label: "Closoir", quantity: "2 rouleaux de 5 m" },
+];
+
+test("« Tuile PV10, faîtière demi ronde rouge » : deux lignes précisées, aucune quantité changée", () => {
+  const edits = parseEdits("Tuile PV10 , faîtière demi ronde rouge", REPAIR);
+  assert.deepEqual(
+    edits.map((e) => ({ ...e, heard: undefined })),
+    [
+      { kind: "rename", itemKey: "line:t", label: "Tuile terre cuite mécanique", to: "Tuile terre cuite mécanique PV10", heard: undefined },
+      { kind: "rename", itemKey: "faitieres", label: "Faîtières", to: "Faîtières demi-ronde rouge", heard: undefined },
+    ],
+  );
+});
+
+test("« demi » n'est un nombre que devant une unité ou après un nombre", () => {
+  assert.deepEqual(parseEdits("mets deux et demi rouleaux de closoir", REPAIR).map((e) => e.kind === "set" && e.to), ["2,5"]);
+  assert.deepEqual(parseEdits("faîtières, mets-en 30", REPAIR).map((e) => e.kind === "set" && e.to), ["30"]);
+});
+
+test("la ligne seule, sans rien de plus, attend toujours la suite (« les faîtières, mets-en 30 »)", () => {
+  assert.deepEqual(parseEdits("les faîtières", REPAIR).map((e) => e.kind), ["unknown"]);
+});

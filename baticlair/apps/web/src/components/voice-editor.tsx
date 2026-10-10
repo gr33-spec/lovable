@@ -243,6 +243,13 @@ export function VoiceEditor({ items, pending, onApply }: { items: readonly Voice
                       <span className="font-bold">Retiré :</span> {edit.label}
                     </span>
                   </>
+                ) : edit.kind === "rename" ? (
+                  <>
+                    <Pencil size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-accent-text" />
+                    <span>
+                      <span className="font-bold">Précisé :</span> {edit.label} → {edit.to}
+                    </span>
+                  </>
                 ) : edit.kind === "set" ? (
                   <>
                     <Pencil size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-accent-text" />

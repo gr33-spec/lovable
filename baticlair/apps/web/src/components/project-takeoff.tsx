@@ -282,10 +282,30 @@ export function ProjectTakeoff({
       return true;
     }
     const item = takeoff.purchase.toBuy.find((b) => b.key === edit.itemKey);
+    // Une ligne laissée au fournisseur (« quote:<clé> ») : c'est sa ligne du devis qu'on retire ou qu'on réécrit.
+    const quoted = !item && edit.itemKey.startsWith("quote:") ? takeoff.purchase.toQuote.find((q) => `quote:${q.key}` === edit.itemKey) : undefined;
+    if (quoted) {
+      if (edit.kind === "remove") {
+        for (const id of quoted.lineIds) await call("corrections", { action: "retirer", id });
+        return true;
+      }
+      const line = quoted.lineIds.length === 1 ? takeoff.lines.find((l) => l.id === quoted.lineIds[0]) : undefined;
+      if (!line) return false;
+      const fields = { libelle: line.designation, quantite: line.quantity, unite: line.unit, reference: line.reference };
+      const ligne = edit.kind === "rename" ? { ...fields, libelle: edit.to } : { ...fields, quantite: edit.to.replace(",", "."), unite: edit.unit ?? line.unit };
+      await call("corrections", { action: "modifier_ligne", id: line.id, ligne });
+      return true;
+    }
     if (!item) return false;
     if (edit.kind === "remove") {
       if (item.key.startsWith("line:")) for (const lineId of item.lineIds) await call("corrections", { action: "retirer", id: lineId });
       else await call("corrections", { action: "retirer_article", id: item.key });
+      return true;
+    }
+    if (edit.kind === "rename") {
+      // Le nom s'allonge de ce qui a été dit ; la quantité reste celle de la ligne.
+      const now = item.quantity ? parseQuantity(item.quantity) : null;
+      await editItem(item, { libelle: edit.to, quantite: now?.quantity ?? null, unite: now?.unit ?? null });
       return true;
     }
     const unit = edit.unit ?? (item.quantity ? parseQuantity(item.quantity)?.unit : null) ?? null;
@@ -348,7 +368,7 @@ export function ProjectTakeoff({
           ? {
               onAdd: () => setShowList("ajouter"),
               onVoice: () => setVoiceOpen((v) => !v),
-              ...(voiceOpen ? { voice: <VoiceEditor items={takeoff.purchase.toBuy.map((b) => ({ key: b.key, label: b.label, quantity: b.quantity }))} pending={pending} onApply={voiceEdit} /> } : {}),
+              ...(voiceOpen ? { voice: <VoiceEditor items={[...takeoff.purchase.toBuy.map((b) => ({ key: b.key, label: b.label, quantity: b.quantity })), ...takeoff.purchase.toQuote.map((q) => ({ key: `quote:${q.key}`, label: q.label, quantity: q.measure || null }))]} pending={pending} onApply={voiceEdit} /> } : {}),
             }
           : {})}
       />
