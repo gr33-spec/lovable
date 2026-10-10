@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronDown, ChevronUp, Paperclip, Pencil, Send, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Eye, Paperclip, Pencil, Send, Trash2, X } from "lucide-react";
 import { openDocument } from "@/lib/open-document";
 import { useEffect, useId, useRef, useState } from "react";
 import { type ItemEdit, type SketchHandlers } from "@/components/purchase-list";
@@ -17,7 +17,8 @@ import { parseQuantity, shortName } from "@/lib/labels";
  *    cinq mots, sans carte dépliée ;
  *  - sur le document même : un tap ouvre la ligne (moins / plus, boutons de choix, « C'est bon », corbeille), un tap sur
  *    le nom le corrige, un glissement vers la gauche la retire ; aucun écran intermédiaire, plus de voix ;
- *  - en bas, « Envoyer au fournisseur », et en petit « Ajouter un article », « Envoyer une sélection ».
+ *  - en bas, figés, deux boutons : « Aperçu » (le mail et le PDF du fournisseur) et « Envoyer au fournisseur » ; en petit
+ *    dessous, « Ajouter un article », « Envoyer une sélection ».
  */
 export function SupplyList({
   takeoff,
@@ -27,6 +28,7 @@ export function SupplyList({
   onEditItem,
   onSetAside,
   onSend,
+  onPreview,
   sketches = [],
   sketchHandlers,
   sent = false,
@@ -58,6 +60,8 @@ export function SupplyList({
   /** Mettre la ligne de côté (après les 3 s d'« Annuler »). */
   onSetAside: (row: ScreenRow) => Promise<void>;
   onSend: () => void;
+  /** « Aperçu » (retour du fondateur, 2026-10-10) : le mail et le PDF tels que le fournisseur les reçoit. */
+  onPreview?: () => void;
   sketches?: readonly ItemSketch[];
   sketchHandlers?: SketchHandlers;
 }) {
@@ -195,8 +199,8 @@ export function SupplyList({
         </details>
       ) : null}
 
-      {/* §50.3 : un seul bouton en bas, « Envoyer au fournisseur » ; dessous, en petit, les trois autres gestes. Seul le bouton
-          reste collé en bas ; les liens suivent la liste, jamais par-dessus. */}
+      {/* §50.3 : en bas, l'aperçu et l'envoi ; dessous, en petit, les autres gestes. Seuls les deux boutons restent collés en
+          bas ; les liens suivent la liste, jamais par-dessus. */}
       {selecting && selection ? (
         <div className={`sticky z-10 mt-2 bg-gradient-to-t from-ground from-70% to-transparent pt-6 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(12px,env(safe-area-inset-bottom))]"}`}>
           <SelectionBar
@@ -213,14 +217,26 @@ export function SupplyList({
         <>
           {/* RIEN NE PART VIDE : sans aucune fourniture (un devis de main-d'œuvre seule), pas de bouton d'envoi. */}
           {editable && toCheck.length === 0 && rows.length > 0 ? (
-            <div className={`sticky z-10 mt-2 bg-gradient-to-t from-ground from-70% to-transparent pt-6 ${docked ? "bottom-[68px] pb-3 lg:bottom-[70px]" : "bottom-0 pb-[max(8px,env(safe-area-inset-bottom))]"}`}>
+            // Retour du fondateur (2026-10-10) : « deux boutons flottants d'actions en bas (figé), un pour l'envoi et l'autre pour
+            // prévisualiser le PDF et le mail envoyé ».
+            <div
+              role="group"
+              aria-label="Envoyer la liste"
+              className={`sticky z-10 mt-2 flex gap-2 bg-gradient-to-t from-ground from-70% to-transparent pt-6 ${docked ? "bottom-[68px] pb-3 lg:bottom-[70px]" : "bottom-0 pb-[max(8px,env(safe-area-inset-bottom))]"}`}
+            >
+              {onPreview ? (
+                <Button variant="secondary" className="shrink-0 px-4" onClick={onPreview}>
+                  <Eye size={18} aria-hidden="true" />
+                  Aperçu
+                </Button>
+              ) : null}
               {sent ? (
-                <Button className="w-full" variant="secondary" onClick={onSend}>
+                <Button className="min-w-0 flex-1 px-3" variant="secondary" onClick={onSend}>
                   <Send size={18} aria-hidden="true" />
                   Voir la demande envoyée
                 </Button>
               ) : (
-                <Button className="w-full shadow-card!" pending={pending} onClick={onSend}>
+                <Button className="min-w-0 flex-1 px-3 shadow-card!" pending={pending} onClick={onSend}>
                   <Send size={18} aria-hidden="true" />
                   Envoyer au fournisseur
                 </Button>

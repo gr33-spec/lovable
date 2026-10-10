@@ -930,6 +930,35 @@ test("§49.8 : sur chaque ligne, un ✓ pour valider sans l'ouvrir, et un crayon
   await expect(ouverte).toHaveCount(0);
 });
 
+test("§50.7 : en bas, deux boutons figés : l'aperçu (le mail et le PDF du fournisseur) et l'envoi", async ({ page }) => {
+  // Retour du fondateur (2026-10-10) : « deux boutons flottants d'actions en bas (figé), un pour l'envoi et l'autre pour
+  // prévisualiser le PDF et le mail envoyé ».
+  await signUp(page);
+  await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await passQuestions(page);
+  await confirmDoubts(page);
+  const actions = page.getByRole("group", { name: "Envoyer la liste" });
+  // Figés en bas : visibles dès le haut du document, sans descendre.
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await expect(actions.getByRole("button", { name: "Aperçu" })).toBeInViewport();
+  await expect(actions.getByRole("button", { name: "Envoyer au fournisseur" })).toBeInViewport();
+  // L'aperçu : l'objet et le mail mot pour mot, et le PDF joint qui s'ouvre dans BatiClair. Rien ne part.
+  await actions.getByRole("button", { name: "Aperçu" }).click();
+  const apercu = page.getByRole("dialog", { name: "Ce que reçoit le fournisseur" });
+  await expect(apercu.getByText("Objet :")).toBeVisible();
+  await expect(apercu.getByText(/Toiture Kerjean/).first()).toBeVisible();
+  await apercu.getByRole("button", { name: "Voir le PDF" }).click();
+  const pdf = page.getByRole("dialog", { name: "Le PDF joint" });
+  await expect(pdf.getByRole("button", { name: "Fermer le document" })).toBeVisible();
+  // Le PDF est arrivé (le même générateur que celui du fournisseur) : il se télécharge.
+  await expect(pdf.getByRole("link", { name: "Télécharger" })).toBeVisible();
+  await pdf.getByRole("button", { name: "Fermer le document" }).click();
+  // Depuis l'aperçu, l'envoi : on choisit à qui.
+  await apercu.getByRole("button", { name: "Envoyer au fournisseur" }).click();
+  await expect(page.getByRole("dialog", { name: "À qui j'envoie ?" })).toBeVisible();
+});
+
 test("§49.8 : un tap refusé par le serveur se dit DANS la ligne ouverte, jamais en silence", async ({ page }) => {
   // Retour du fondateur (2026-10-10, capture iPhone) : « Quand je clique sur un bouton, rien ne se passe. »
   await signUp(page);
