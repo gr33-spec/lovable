@@ -82,7 +82,7 @@ export function SupplyList({
   const labelOf = (r: ScreenRow) => {
     const label = baseLabel(r);
     const line = twins.has(label) && r.lineIds.length === 1 ? takeoff.lines.find((l) => l.id === r.lineIds[0]) : undefined;
-    return line ? `${label} — ${shortName(line.article ?? line.designation)}` : label;
+    return line ? `${label} · ${shortName(line.article ?? line.designation)}` : label;
   };
 
   // Retirer une ligne (glisser à gauche, ou « Retirer » dans sa fiche) : cachée tout de suite, retirée pour de bon ; jamais de
@@ -116,7 +116,7 @@ export function SupplyList({
     <section aria-label="Liste des fournitures" className="flex flex-col">
       {editable && !selecting && toCheck.length > 0 ? (
         // §50.3 : une barre fixe discrète en haut, qui disparaît à zéro. Rien d'autre.
-        <div role="status" className="sticky top-[max(8px,env(safe-area-inset-top))] z-20 mb-2 flex min-h-10 items-center gap-2 rounded-2xl border border-warn/25 bg-surface/95 px-3 py-1.5 shadow-[0_2px_10px_rgba(16,24,40,0.08)] backdrop-blur">
+        <div role="status" className="sticky top-[max(8px,env(safe-area-inset-top))] z-20 mb-2 flex min-h-10 items-center gap-2 rounded-[20px] border border-warn/25 bg-surface/95 px-3 py-1.5 shadow-[0_2px_10px_rgba(16,24,40,0.08)] backdrop-blur">
           <span className="size-2 shrink-0 rounded-full bg-warn" aria-hidden="true" />
           <span className="text-[13px] leading-tight font-extrabold text-warn">
             {toCheck.length} ligne{toCheck.length > 1 ? "s" : ""} à régler
@@ -205,7 +205,7 @@ export function SupplyList({
                   Voir la demande envoyée
                 </Button>
               ) : (
-                <Button className="w-full shadow-[0_10px_24px_var(--color-accent-glow)]" pending={pending} onClick={onSend}>
+                <Button className="w-full shadow-card!" pending={pending} onClick={onSend}>
                   <Send size={18} aria-hidden="true" />
                   Envoyer au fournisseur
                 </Button>
@@ -287,8 +287,6 @@ function Stepper({ label, value, unit, pending, onChange }: { label: string; val
 }
 
 /** Le bord gauche de la carte dit son état d'un coup d'œil : vert prêt, orange à vérifier, gris au fournisseur. */
-const BORDER: Record<ScreenRow["status"], string> = { ok: "border-l-ok", check: "border-l-warn", supplier: "border-l-ok" };
-
 const DOT: Record<ScreenRow["status"], { className: string; label: string }> = {
   ok: { className: "bg-ok", label: "sûr" },
   check: { className: "bg-warn", label: "à vérifier" },
@@ -410,7 +408,7 @@ function Row({
     return (
       <li
         id={`ligne-${row.key}`}
-        className={`rounded-2xl border border-[#dde1e8] border-l-4 px-3 py-2 ${BORDER[sentTo ? "supplier" : row.status]} ${selectMode.checked ? "bg-[#eef2ff]" : "bg-surface"} ${selectMode.disabled ? "opacity-60" : ""}`}
+        className={`rounded-[20px] border border-[#dde1e8] px-3 py-2 ${selectMode.checked ? "bg-[#eef2ff]" : "bg-surface"} ${selectMode.disabled ? "opacity-60" : ""}`}
       >
         <label className={`flex min-h-11 items-start gap-2.5 ${selectMode.disabled ? "" : "cursor-pointer"}`}>
           <input
@@ -435,7 +433,7 @@ function Row({
   return (
     <li
       id={`ligne-${row.key}`}
-      className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden rounded-2xl border border-[#dde1e8] border-l-4 px-3 py-2 shadow-[0_1px_3px_rgba(16,24,40,0.06)] transition-colors ${BORDER[sentTo ? "supplier" : row.status]} ${open ? "bg-[#eef2ff]" : "bg-surface"}`}
+      className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden rounded-[20px] border border-[#dde1e8] px-3 py-2 shadow-[0_1px_3px_rgba(16,24,40,0.06)] transition-colors ${open ? "bg-[#eef2ff]" : "bg-surface"}`}
     >
       {dx < 0 ? (
         <span aria-hidden="true" className="absolute inset-y-0 right-0 flex items-center rounded-xl bg-danger px-4 text-sm font-extrabold text-white">
@@ -489,7 +487,7 @@ function Row({
           {sketches.length > 0 ? (
             <ul aria-label={`Croquis joints : ${label}`} className="flex flex-wrap gap-2">
               {sketches.map((sk) => (
-                <li key={sk.id} className="flex max-w-full items-center gap-1 rounded-xl bg-surface pl-2.5 text-[13px] font-bold text-[#4a37d6]">
+                <li key={sk.id} className="flex max-w-full items-center gap-1 rounded-xl bg-surface pl-2.5 text-[13px] font-bold text-accent-text">
                   <button type="button" onClick={() => void openDocument(sk.id, sk.nom, sk.nom)} className="flex min-h-9 min-w-0 items-center gap-1.5 text-left">
                     <Paperclip size={14} aria-hidden="true" className="shrink-0" />
                     <span className="truncate">{sk.commentaire ? `${sk.nom} · ${sk.commentaire}` : sk.nom}</span>
@@ -705,7 +703,7 @@ function CardActions({
             </button>
           </>
         ) : done ? (
-          <Button className={btn} variant={asks.length > 0 ? "secondary" : "primary"} pending={pending} onClick={() => void handlers.onDecide(d)} aria-label={`C'est bon : ${label}`}>
+          <Button className={btn} variant="secondary" pending={pending} onClick={() => void handlers.onDecide(d)} aria-label={`C'est bon : ${label}`}>
             <Check size={18} aria-hidden="true" />
             C&apos;est bon
           </Button>

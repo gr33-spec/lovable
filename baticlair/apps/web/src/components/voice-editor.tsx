@@ -157,13 +157,13 @@ export function VoiceEditor({ items, pending, onApply }: { items: readonly Voice
   const disabled = pending || busy;
   if (listening) {
     return (
-      <section aria-label="Modifier à la voix" className="flex flex-col gap-3 rounded-[22px] bg-hero p-4 text-white shadow-[0_18px_40px_-16px_rgba(26,21,80,0.6)]">
+      <section aria-label="Modifier à la voix" className="flex flex-col gap-3 rounded-[20px] bg-hero p-4 text-white shadow-card">
         <p className="flex items-center gap-2 text-[15px] font-extrabold">
           <span aria-hidden="true" className="size-3 rounded-full bg-[#ff3d8b]" style={{ animation: "bc-ring 1.2s ease-out infinite" }} />
           Je t&apos;écoute… parle normalement, puis touche « Terminer ».
         </p>
         <p aria-live="polite" aria-label="Ce que j'entends" className="min-h-20 rounded-2xl bg-white px-3 py-3 text-[16px] leading-snug text-ink">
-          {live || <span className="text-subtle">Parle, le texte s&apos;écrit ici…</span>}
+          {live || <span className="text-muted">Parle, le texte s&apos;écrit ici…</span>}
         </p>
         <button type="button" onClick={() => finish("apply")} className="flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-white text-[17px] font-extrabold text-accent-text active:scale-[0.98]">
           <Check size={20} aria-hidden="true" />
@@ -176,14 +176,14 @@ export function VoiceEditor({ items, pending, onApply }: { items: readonly Voice
     );
   }
   return (
-    <section aria-label="Modifier à la voix" className="flex flex-col gap-3 rounded-[22px] bg-hero p-4 text-white shadow-[0_18px_40px_-16px_rgba(26,21,80,0.6)]">
+    <section aria-label="Modifier à la voix" className="flex flex-col gap-3 rounded-[20px] bg-hero p-4 text-white shadow-card">
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={startDictation}
           disabled={disabled}
           aria-label="Modifier à la voix"
-          className="flex size-16 shrink-0 items-center justify-center rounded-full bg-cta text-white shadow-cta transition active:scale-95 disabled:opacity-60"
+          className="flex size-16 shrink-0 items-center justify-center rounded-full bg-cta text-white shadow-card transition active:scale-95 disabled:opacity-60"
         >
           <Mic size={28} aria-hidden="true" />
         </button>
@@ -215,7 +215,7 @@ export function VoiceEditor({ items, pending, onApply }: { items: readonly Voice
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={canDictate ? "Ou écris ici…" : "« enlève l'écran, mets 40 crochets »"}
-          className="min-h-12 min-w-0 grow resize-none rounded-2xl bg-white px-3 py-3 text-[15px] leading-snug text-ink outline-none placeholder:text-subtle"
+          className="min-h-12 min-w-0 grow resize-none rounded-2xl bg-white px-3 py-3 text-[15px] leading-snug text-ink outline-none placeholder:text-muted"
         />
         <button type="submit" disabled={disabled || !text.trim()} aria-label="Appliquer mes modifications" className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white text-accent disabled:opacity-40">
           <SendHorizontal size={20} aria-hidden="true" />
@@ -233,7 +233,7 @@ export function VoiceEditor({ items, pending, onApply }: { items: readonly Voice
                   <>
                     <span aria-hidden="true" className="mt-0.5 size-4 shrink-0 rounded-full bg-warn" />
                     <span>
-                      <span className="font-bold text-warn">Pas compris :</span> « {edit.heard} » — dis le nom de la ligne comme dans la liste, ou touche-la.
+                      <span className="font-bold text-warn">Pas compris :</span> « {edit.heard} ». Dis le nom de la ligne comme dans la liste, ou touche-la.
                     </span>
                   </>
                 ) : edit.kind === "remove" ? (
