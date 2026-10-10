@@ -1187,6 +1187,32 @@ test("§49.9 : une ligne nomme une fourniture ; les heures et le forfait sont re
   await expect(without).toContainText("Accès toiture et mise en sécurité");
 });
 
+test("§50.2 : « Calculer ma liste » reste collé en bas de l'écran, même après avoir écrit sous « Autre »", async ({ page }) => {
+  // Retour du fondateur (2026-10-10, capture iPhone) : le bouton flottait au milieu de l'écran, des cartes passaient dessous.
+  // Sur iPhone, un élément « position: fixed » reste coincé à la hauteur du clavier une fois celui-ci refermé : la barre est
+  // « sticky », comme celle de la liste, et suit la page.
+  await signUp(page);
+  await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  const questions = page.getByRole("region", { name: "Les questions" });
+  await expect(questions).toBeVisible({ timeout: 60_000 });
+  const pente = questions.getByRole("group", { name: "Pente du toit ?" });
+  await pente.getByRole("button", { name: "Autre", exact: true }).click();
+  await pente.getByLabel("Autre valeur : Pente du toit ?").fill("38");
+  await pente.getByRole("button", { name: "OK" }).click();
+  const calculer = page.getByRole("button", { name: "Calculer ma liste", exact: true });
+  const bar = page.getByRole("group", { name: "Calculer ma liste" });
+  await expect(bar).toHaveCSS("position", "sticky");
+  // En haut de la page : collé en bas de l'écran, rien ne passe sous la barre.
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await expect(calculer).toBeInViewport();
+  const box = (await bar.boundingBox())!;
+  expect(Math.abs(box.y + box.height - page.viewportSize()!.height)).toBeLessThan(2);
+  // Tout en bas : toujours là, sous la dernière question.
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await expect(calculer).toBeInViewport();
+});
+
 test("Autre : quand la bonne réponse n'est pas dans les boutons, elle s'écrit (une pente de 38°)", async ({ page }) => {
   await signUp(page);
   await page.goto("/chantiers/nouveau");

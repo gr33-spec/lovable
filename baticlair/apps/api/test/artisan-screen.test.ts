@@ -116,7 +116,8 @@ describe("piscine : 37 lignes, une seule décision", () => {
     const journal = await ctx.app.get(CorrectionJournal).list(await tenantOf(companyId), { projectId });
     expect(journal.filter((e) => e.action === "edit" && e.after?.unit === "u")).toHaveLength(32);
     expect(journal.filter((e) => e.action === "confirm")).toHaveLength(37);
-  });
+    // 37 lignes journalisées une à une : plus de 3 s en local, au-delà des 5 s par défaut sur la machine de CI.
+  }, 20_000);
 });
 
 describe("une information manquante ne devient jamais ✓ en fermant l'écran", () => {

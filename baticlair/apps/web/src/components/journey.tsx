@@ -348,8 +348,9 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
           </ol>
         </section>
       ))}
-      <div className="h-24 lg:hidden" aria-hidden="true" />
-      <div className="fixed inset-x-0 bottom-0 z-30 bg-gradient-to-t from-ground from-70% to-transparent px-4 pt-6 pb-[max(14px,env(safe-area-inset-bottom))] lg:sticky lg:inset-auto lg:px-0">
+      {/* Retour du fondateur (2026-10-10, capture iPhone) : en « fixed », le bouton restait coincé au milieu de l'écran une fois
+          le clavier refermé (case « Autre ») ; « sticky » suit la page, comme la barre de la liste. */}
+      <div role="group" aria-label="Calculer ma liste" className="sticky bottom-0 z-30 -mx-4.5 bg-gradient-to-t from-ground from-70% to-transparent px-4.5 pt-6 pb-[max(14px,env(safe-area-inset-bottom))] lg:mx-0 lg:px-0">
         <div className="mx-auto max-w-2xl">
           <Button
             className="w-full shadow-card!"
