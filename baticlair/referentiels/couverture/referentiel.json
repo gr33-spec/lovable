@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.10-47",
+  "version": "roofing-2026.10.10-48",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -6165,7 +6165,8 @@
           "display": {
             "1": "Espagne 1er choix",
             "2": "NF (type Cupa)"
-          }
+          },
+          "named": true
         },
         {
           "key": "longueur_rampant",
@@ -7867,7 +7868,8 @@
             "1": "bleu-noir",
             "2": "noir",
             "3": "brun"
-          }
+          },
+          "named": true
         },
         {
           "key": "entraxe_supports",
@@ -8604,6 +8606,7 @@
             "3": "Anthra-Zinc",
             "4": "Pigmento"
           },
+          "named": true,
           "onlyFromPrincipal": true
         }
       ],
@@ -9207,6 +9210,7 @@
             "3": "Anthra-Zinc",
             "4": "Pigmento"
           },
+          "named": true,
           "onlyFromPrincipal": true
         }
       ],
@@ -9884,6 +9888,7 @@
             "3": "Anthra-Zinc",
             "4": "Pigmento"
           },
+          "named": true,
           "onlyFromPrincipal": true
         }
       ],
@@ -10629,6 +10634,7 @@
             "3": "Anthra-Zinc",
             "4": "Pigmento"
           },
+          "named": true,
           "onlyFromPrincipal": true
         }
       ],
@@ -11378,6 +11384,7 @@
             "3": "Anthra-Zinc",
             "4": "Pigmento"
           },
+          "named": true,
           "onlyFromPrincipal": true
         }
       ],
@@ -12588,6 +12595,7 @@
             "3": "Anthra-Zinc",
             "4": "Pigmento"
           },
+          "named": true,
           "onlyFromPrincipal": true
         }
       ],
@@ -13533,6 +13541,7 @@
             "3": "Anthra-Zinc",
             "4": "Pigmento"
           },
+          "named": true,
           "onlyFromPrincipal": true
         },
         {
@@ -15779,7 +15788,8 @@
             "3": "sable",
             "4": "brune",
             "5": "anthracite"
-          }
+          },
+          "named": true
         },
         {
           "key": "nb_lignes",

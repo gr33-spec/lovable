@@ -928,7 +928,9 @@ export class TakeoffService {
     // « param:faconnage@noue » (§48.2, pièce par pièce) : l'habitude reste celle du chantier entier (« je façonne »).
     const [kind, scopedName] = key.split(":") as [string, string];
     const name = scopedName.split("@")[0]!;
-    if (kind === "product" && typeof value === "string" && value !== "") {
+    // Un modèle écrit sous « Autre » (« Tuile Romane Canal Monier ») n'est pas au référentiel : jamais une habitude.
+    const known = (id: string) => [...(referentialFor(takeoff.trade) ? [referentialFor(takeoff.trade)!] : []), ...REFERENTIALS].some((r) => r.products.some((p) => p.id === id));
+    if (kind === "product" && typeof value === "string" && value !== "" && known(value)) {
       await this.memory.recordChoice(tenant, { kind: "product", key: `slot:${name}`, value, projectId: takeoff.projectId });
     }
     if (kind === "param" && value && typeof value === "object") {

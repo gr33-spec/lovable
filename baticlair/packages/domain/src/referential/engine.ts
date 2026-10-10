@@ -26,6 +26,8 @@ export interface ParamValue {
   origin: "devis" | "artisan";
   /** Ce qui la justifie (« Devis, ligne 4 »). */
   evidence?: string;
+  /** Une qualité écrite par l'artisan sous « Autre » (« Ardoise d'Angers ») : dite telle quelle dans la désignation. */
+  text?: string;
 }
 
 export interface SlotChoice {
@@ -52,6 +54,8 @@ export interface Assumption {
   note?: string;
   /** Réponses proposées en boutons. */
   choices?: { label: string; value: string }[];
+  /** Une qualité qui se nomme (l'aspect du zinc) : « Autre » laisse l'écrire. */
+  named?: true;
   /** Hypothèse tirée d'une donnée ÉCRITE au devis (le pureau d'après le crochet de 11) : pas un défaut à confirmer. */
   fromQuote?: true;
   /** Hypothèse CALCULÉE d'autres données (le pureau d'après la pente) : elle suit ses données, elle n'est pas un défaut en soi. */
@@ -155,6 +159,8 @@ export interface Question {
   hint?: string;
   unit?: string;
   options?: { label: string; value: string }[];
+  /** Une qualité qui se nomme : « Autre » laisse l'écrire en texte. */
+  named?: boolean;
   /** Pourquoi elle compte : « De 1 191 à 1 445 pièces selon la réponse ». */
   impact?: string;
 }
@@ -761,7 +767,7 @@ function computeNeed(
           missing.push({
             key: name,
             label: def.label,
-            question: { key: `param:${name}`, kind: "param", text: def.question, unit: def.unit, ...(def.hint ? { hint: def.hint } : {}), ...(def.choices ? { options: def.choices } : {}) },
+            question: { key: `param:${name}`, kind: "param", text: def.question, unit: def.unit, ...(def.hint ? { hint: def.hint } : {}), ...(def.choices ? { options: def.choices } : {}), ...(def.named ? { named: true } : {}) },
           });
         }
         if (bounds) return { lo: bounds.min.lo, hi: bounds.max.hi, dim: expected.dim };
@@ -791,7 +797,7 @@ function computeNeed(
         label: def.label,
         value: read.value.replace(".", ","),
         unit: read.unit,
-        ...displayed(def, read.value),
+        ...(given.text ? { shown: given.text } : displayed(def, read.value)),
         ...(def.estimate ? { estimation: true } : {}),
         from: given.evidence ?? (given.origin === "devis" ? "Devis" : "Votre réponse"),
         origin: given.origin === "devis" ? "devis" : "project",
@@ -827,7 +833,7 @@ function computeNeed(
       const prov = provenanceLine(d, sources);
       const note = from?.note ?? d.note;
       trace.push({ label: def.label, value, unit: def.unit, ...displayed(def, d.value), ...(def.estimate ? { estimation: true } : {}), from: `Hypothèse${note ? ` : ${note}` : ""} (${prov.from})`, verified: prov.verified, ...(prov.url ? { url: prov.url } : {}), origin: "assumption" });
-      assume({ key: `param:${def.key}`, label: def.label, value: displayed(def, d.value).shown ?? value, unit: def.unit, ...(note ? { note } : {}), ...(def.choices ? { choices: def.choices } : {}), ...(from ? { fromQuote: true as const } : !from && d.formula ? { computed: true as const } : {}) });
+      assume({ key: `param:${def.key}`, label: def.label, value: displayed(def, d.value).shown ?? value, unit: def.unit, ...(note ? { note } : {}), ...(def.choices ? { choices: def.choices } : {}), ...(def.named ? { named: true as const } : {}), ...(from ? { fromQuote: true as const } : !from && d.formula ? { computed: true as const } : {}) });
       return v;
     }
     /**
@@ -1084,6 +1090,9 @@ function computeNeed(
           if (name === "devis") return DEVIS_MARK;
           // « {marge} » : la marge appliquée (réglage de l'entreprise ou règle du tiroir), dite à l'artisan (§49.2.4).
           if (name === "marge") return `${fr(factor.minus(1).times(100))} %`;
+          // Une qualité écrite sous « Autre » (« Ardoise d'Angers ») : telle quelle.
+          const written = input.params[name]?.text;
+          if (written) return written;
           const v = valueOf(name);
           // §49.2.5 : la donnée qui manque reste un « ? » dans la désignation (« dév. ? »), jamais une valeur devinée.
           if (blank && (!isPoint(v) || !v.lo.isFinite())) return "?";

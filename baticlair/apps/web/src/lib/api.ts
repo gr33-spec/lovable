@@ -303,6 +303,8 @@ export interface PurchaseAssumption {
   unit: string;
   note: string | null;
   choices: { label: string; value: string }[];
+  /** Une qualité qui se nomme (l'aspect du zinc) : « Autre » laisse l'écrire. */
+  named?: boolean;
 }
 
 export interface TakeoffPurchase {
@@ -385,6 +387,8 @@ export interface TakeoffDecision {
     options: { label: string; value: string }[];
     /** Ce que la réponse change (« De 1 191 à 1 445 pièces selon la réponse. »). */
     impact: string | null;
+    /** Une qualité qui se nomme (l'ardoise, une teinte) : « Autre » laisse l'écrire. */
+    named?: boolean;
   } | null;
 }
 

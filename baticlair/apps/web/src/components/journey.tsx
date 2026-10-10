@@ -198,8 +198,9 @@ export interface CounterAnswers {
 type Given = { value: string; label: string; custom?: boolean };
 
 /** Ce qui s'écrit sous « Autre » : un modèle (produit, question du comptoir), ou une valeur qui a son unité. */
-function freeOf(key: string, kind: string | null, unit: string | null, options: readonly { value: string }[]): CounterQuestion["free"] {
-  if (/^(?:engine:)?product:/.test(key) || kind === "choose_product" || kind === "confirm_product" || key.startsWith("comptoir:")) return "text";
+function freeOf(key: string, kind: string | null, unit: string | null, options: readonly { value: string }[], named = false): CounterQuestion["free"] {
+  // Un modèle, ou une qualité qui se nomme (l'ardoise, l'aspect du zinc, une teinte) : les boutons ne sont que les plus courants.
+  if (named || /^(?:engine:)?product:/.test(key) || kind === "choose_product" || kind === "confirm_product" || key.startsWith("comptoir:")) return "text";
   // Une valeur chiffrée à boutons (« 30° · 35° · 45° ») : toute autre valeur s'écrit, dans son unité. Jamais un choix fermé
   // (façonnage, oui / non, à fournir / déjà sur place).
   if (unit && unit !== "u" && options.length > 0 && options.every((o) => /^\d+(?:[.,]\d+)?$/.test(o.value))) return "number";
@@ -231,7 +232,7 @@ export function counterQuestions(takeoff: Takeoff): CounterQuestion[] {
         hint: q.hint,
         numeric: q.kind === "param" && q.options.length === 0,
         usual: null,
-        ...(freeOf(q.key, q.kind, q.unit, q.options) ? { free: freeOf(q.key, q.kind, q.unit, q.options)! } : {}),
+        ...(freeOf(q.key, q.kind, q.unit, q.options, q.named) ? { free: freeOf(q.key, q.kind, q.unit, q.options, q.named)! } : {}),
         group: q.key === CONSUMABLES_KEY ? CONSUMABLES_GROUP : groupOf({ key: q.key, lineIds: d.lineIds }),
       };
     });
@@ -248,7 +249,7 @@ export function counterQuestions(takeoff: Takeoff): CounterQuestion[] {
       const said = plain(a.value);
       const usual = a.choices.find((c) => plain(c.label) === said || plain(c.value) === said || plain(c.label).startsWith(said) || plain(c.label).startsWith(`${said} `))?.value ?? null;
       const unit = a.key.startsWith("param:") ? a.unit : null;
-      const free = freeOf(a.key, null, unit, a.choices);
+      const free = freeOf(a.key, null, unit, a.choices, a.named);
       return { key: a.key, kind: "assumption", text: `${a.label} ?`, options: a.choices, unit, about: null, hint: a.note, numeric: false, usual, group: groupOf({ key: a.key, lineIds: [] }), ...(free ? { free } : {}) };
     });
   // §48.2 : en dépose / repose, ce qui sert de support est peut-être déjà sur place.

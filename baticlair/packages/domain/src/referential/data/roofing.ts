@@ -463,6 +463,7 @@ const ASPECT_ZINC_PARAM: ParamDef = {
     { value: "1", keywords: ["zinc naturel"] },
   ],
   display: { "1": "zinc naturel", "2": "Quartz-Zinc", "3": "Anthra-Zinc", "4": "Pigmento" },
+  named: true,
   onlyFromPrincipal: true,
 };
 /** Développé de la gouttière : le comptoir sert « de 25 », « de 33 »… (dév. 250 / 285 / 333 / 400, §11). */
@@ -543,6 +544,7 @@ const QUALITE_ARDOISE_PARAM: ParamDef = {
     { value: "1", keywords: ["espagne", "1er choix", "premier choix"] },
   ],
   display: { "1": "Espagne 1er choix", "2": "NF (type Cupa)" },
+  named: true,
 };
 const FACONNAGE_BANDES_PARAM: ParamDef = {
   ...FACONNAGE_PARAM,
@@ -778,6 +780,7 @@ const TEINTE_GOUTTIERE_PARAM: ParamDef = {
     { value: "5", keywords: ["anthracite", "7016"] },
   ],
   display: { "1": "grise", "2": "blanche", "3": "sable", "4": "brune", "5": "anthracite" },
+  named: true,
 };
 /** Angles de la ligne de gouttière (§15 : « 1 angle par angle ») : le comptoir les compte, le devis les dit rarement. */
 const NB_ANGLES_PARAM: ParamDef = {
@@ -904,6 +907,7 @@ const TEINTE_FC_PARAM: ParamDef = {
     { value: "3", keywords: ["brun", "brune", "brunes"] },
   ],
   display: { "1": "bleu-noir", "2": "noir", "3": "brun" },
+  named: true,
 };
 /** §12 : largeur de la bande de plomb, lue au devis (« largeur 40 cm », « bande de 33 ») ; sinon 30 cm (réponse du fondateur). */
 const LARGEUR_PLOMB_PARAM: ParamDef = {
@@ -1089,7 +1093,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.10-47",
+  version: "roofing-2026.10.10-48",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
