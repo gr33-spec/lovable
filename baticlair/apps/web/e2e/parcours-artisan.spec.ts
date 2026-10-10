@@ -857,11 +857,15 @@ test("§48.5 : envoyer une sélection à un autre fournisseur, discret, puis l'e
   await list.getByRole("button", { name: "Envoyer une sélection à un autre fournisseur" }).click();
   const boxes = list.getByRole("checkbox", { name: /^Envoyer à part : / });
   await expect(boxes.first()).toBeVisible();
-  // Deux lignes prêtes, vers Point.P.
+  // Retour du fondateur (2026-10-10) : « je dois tout avoir de coché » : chaque ligne prête l'est d'office, on décoche.
   const ready = boxes.and(page.locator(":enabled"));
-  await ready.nth(0).check();
-  await ready.nth(1).check();
+  const count = await ready.count();
+  expect(count).toBeGreaterThan(2);
+  for (let i = 0; i < count; i++) await expect(ready.nth(i)).toBeChecked();
   const bar = page.getByRole("region", { name: "Envoyer la sélection" });
+  await expect(bar.getByText(`${count} lignes cochées`)).toBeVisible();
+  // Deux lignes, vers Point.P.
+  for (let i = 2; i < count; i++) await ready.nth(i).uncheck();
   await expect(bar.getByText("2 lignes cochées")).toBeVisible();
   await bar.getByLabel("Fournisseur").selectOption({ label: "Point.P" });
   await bar.getByRole("button", { name: "Envoyer" }).click();
@@ -869,13 +873,24 @@ test("§48.5 : envoyer une sélection à un autre fournisseur, discret, puis l'e
   await expect(list.getByText("Envoyé · Point.P")).toHaveCount(2);
   await expect(list.getByRole("checkbox")).toHaveCount(0);
 
-  // Une autre sélection, vers un autre fournisseur.
+  // Une autre sélection, vers un autre fournisseur : seules les lignes pas encore envoyées sont cochées d'office.
   await list.getByRole("button", { name: "Envoyer une sélection à un autre fournisseur" }).click();
-  await ready.nth(2).check();
+  await expect(bar.getByText(`${count - 2} ligne${count - 2 > 1 ? "s" : ""} cochée${count - 2 > 1 ? "s" : ""}`)).toBeVisible();
+  for (let i = 0; i < count; i++) if (i !== 2) await ready.nth(i).uncheck();
   await bar.getByLabel("Fournisseur").selectOption({ label: "Tuiles & Co" });
   await bar.getByRole("button", { name: "Envoyer" }).click();
   await expect(list.getByText("Envoyé · Tuiles & Co")).toHaveCount(1);
   await expect(list.getByText("Envoyé · Point.P")).toHaveCount(2);
+
+  // « Je dois aussi pouvoir en ajouter » : un fournisseur qui n'est pas au carnet s'ajoute ici, sans quitter la liste.
+  await list.getByRole("button", { name: "Envoyer une sélection à un autre fournisseur" }).click();
+  await bar.getByRole("combobox", { name: "Fournisseur" }).selectOption({ label: "Ajouter un fournisseur…" });
+  await bar.getByLabel("Nom du fournisseur").fill("Négoce Test");
+  await bar.getByLabel("E-mail du fournisseur").fill("devis@example.com");
+  await bar.getByRole("button", { name: "Ajouter", exact: true }).click();
+  await expect(bar.getByRole("combobox", { name: "Fournisseur" }).locator("option:checked")).toHaveText("Négoce Test");
+  await bar.getByRole("button", { name: "Envoyer" }).click();
+  await expect(list.getByText("Envoyé · Négoce Test").first()).toBeVisible();
 
   // L'envoi normal n'a pas bougé : toute la liste, d'un coup, au fournisseur habituel.
   await expect(list.getByRole("button", { name: "Envoyer au fournisseur" }).or(list.getByText(/^\d+ lignes? à régler$/))).toBeVisible();

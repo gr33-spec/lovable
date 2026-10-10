@@ -1,7 +1,7 @@
 "use client";
 
 import { Send } from "lucide-react";
-import { useCallback, useId, useMemo, useState } from "react";
+import { useCallback, useId, useMemo, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
 import { api, ApiError, newActionKey, type PriceRequest, type Supplier } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
@@ -44,12 +44,35 @@ export function useSelectionSend(projectId: string, onSent?: () => void): Select
   return { sent, send };
 }
 
+const NEW = "__nouveau__";
+
 /** La barre du bas en mode sélection : combien de lignes, à quel fournisseur, « Envoyer », « Annuler ». */
 export function SelectionBar({ count, onSend, onCancel }: { count: number; onSend: (supplierId: string) => Promise<void>; onCancel: () => void }) {
   const id = useId();
   const fetchSuppliers = useCallback((signal: AbortSignal) => api<{ items: Supplier[] }>("/v1/suppliers", { signal }), []);
-  const suppliers = useResource(fetchSuppliers).data?.items ?? null;
+  const supplierList = useResource(fetchSuppliers);
+  const suppliers = supplierList.data?.items ?? null;
   const [supplierId, setSupplierId] = useState("");
+  // « Je dois aussi pouvoir en ajouter » (retour du fondateur, 2026-10-10) : un fournisseur hors carnet s'ajoute ici.
+  const [adding, setAdding] = useState(false);
+  const [draft, setDraft] = useState({ name: "", email: "" });
+  const addKey = useRef(newActionKey());
+  const add = async () => {
+    setPending(true);
+    setError(null);
+    try {
+      const created = await api<Supplier>("/v1/suppliers", { method: "POST", body: { name: draft.name.trim(), email: draft.email.trim() }, idempotencyKey: addKey.current });
+      addKey.current = newActionKey();
+      supplierList.reload();
+      setSupplierId(created.id);
+      setAdding(false);
+      setDraft({ name: "", email: "" });
+    } catch (e) {
+      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+    } finally {
+      setPending(false);
+    }
+  };
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const chosen = supplierId || (suppliers?.length === 1 ? suppliers[0]!.id : "");
@@ -58,20 +81,51 @@ export function SelectionBar({ count, onSend, onCancel }: { count: number; onSen
       <p className="text-[14px] font-extrabold">
         {count === 0 ? "Coche les lignes à envoyer" : `${count} ligne${count > 1 ? "s" : ""} cochée${count > 1 ? "s" : ""}`}
       </p>
-      {suppliers && suppliers.length === 0 ? (
-        <p className="text-[13px] text-muted">Ajoute d&apos;abord ce fournisseur dans « Fournisseurs ».</p>
+      {adding || (suppliers && suppliers.length === 0) ? (
+        <form
+          className="flex flex-col gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void add();
+          }}
+        >
+          <label htmlFor={`${id}-nom`} className="sr-only">
+            Nom du fournisseur
+          </label>
+          <input id={`${id}-nom`} autoFocus required maxLength={120} placeholder="Nom du fournisseur" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} className="min-h-12 rounded-2xl bg-ground px-3 text-[15px] font-bold text-ink" />
+          <label htmlFor={`${id}-mail`} className="sr-only">
+            E-mail du fournisseur
+          </label>
+          <input id={`${id}-mail`} required type="email" inputMode="email" maxLength={200} placeholder="E-mail du fournisseur" value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} className="min-h-12 rounded-2xl bg-ground px-3 text-[15px] font-bold text-ink" />
+          <div className="flex gap-2">
+            {suppliers && suppliers.length > 0 ? (
+              <Button className="grow" variant="secondary" disabled={pending} onClick={() => setAdding(false)}>
+                Retour
+              </Button>
+            ) : null}
+            <Button type="submit" className="grow" variant="secondary" pending={pending} disabled={!draft.name.trim() || !draft.email.trim()}>
+              Ajouter
+            </Button>
+          </div>
+        </form>
       ) : (
         <>
           <label htmlFor={id} className="sr-only">
             Fournisseur
           </label>
-          <select id={id} value={chosen} onChange={(e) => setSupplierId(e.target.value)} className="min-h-12 rounded-2xl bg-ground px-3 text-[15px] font-bold text-ink">
+          <select
+            id={id}
+            value={chosen}
+            onChange={(e) => (e.target.value === NEW ? setAdding(true) : setSupplierId(e.target.value))}
+            className="min-h-12 rounded-2xl bg-ground px-3 text-[15px] font-bold text-ink"
+          >
             <option value="">Choisir le fournisseur…</option>
             {(suppliers ?? []).map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}
               </option>
             ))}
+            <option value={NEW}>Ajouter un fournisseur…</option>
           </select>
         </>
       )}

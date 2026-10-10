@@ -238,7 +238,9 @@ export function SupplyList({
                 <button
                   type="button"
                   onClick={() => {
-                    setChecked(new Set());
+                    // Retour du fondateur (2026-10-10) : « je dois tout avoir de coché » : chaque ligne prête et pas encore
+                    // envoyée à part l'est d'office ; l'artisan décoche ce qui ne part pas.
+                    setChecked(new Set(rows.filter((r) => r.status !== "check" && articleOf(r) && !selection.sent.has(articleOf(r)!)).map((r) => articleOf(r)!)));
                     setSelecting(true);
                   }}
                   className={link}
