@@ -124,7 +124,7 @@ export function quantitatifView(
       // « Je ne sais pas » : toujours possible pour une question du calcul (valeur par défaut gardée).
       je_ne_sais_pas: Boolean(q && q.kind === "param"),
       ...(q?.unit ? { unite: q.unit } : {}),
-      saisie_libre: Boolean(q && q.kind === "param" && !q.options?.length),
+      saisie_libre: Boolean(q && ((q.kind === "param" && !q.options?.length) || q.key.startsWith("fiche:"))),
     };
   });
   const etat: Etat = questions.length > 0 ? "questions" : "pret";
@@ -137,6 +137,8 @@ export function quantitatifView(
     /** Les lignes du devis telles que reçues (prix compris), pour que le partenaire retrouve les siennes. */
     devis: takeoff.lines.map((l) => ({ id: l.id, libelle: l.designation, quantite: l.quantityRaw, unite: l.unitRaw, ...(l.priceRaw ? { prix: l.priceRaw } : {}) })),
     questions,
+    /** §51 : la fiche de chantier, chaque donnée avec son origine (devis, deduite, reponse, manquante) et sa preuve ou sa règle. */
+    fiche: reviewed.fiche.donnees.map((d) => ({ cle: d.cle, libelle: d.libelle, valeur: d.valeur, origine: d.origine, regle: d.regle ?? null, preuve: d.preuve ?? null })),
     lignes,
     a_chiffrer: purchase.toQuote.map((q) => ({ id: q.key, libelle: q.label, mesure: q.measure, raison: q.reason })),
     hypotheses: purchase.assumptions.map((a) => ({ cle: a.key, libelle: a.label, valeur: a.value, unite: a.unit, choix: a.choices ?? [] })),

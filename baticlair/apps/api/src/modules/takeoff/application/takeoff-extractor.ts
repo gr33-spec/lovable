@@ -1,4 +1,4 @@
-import { supplyLines } from "@baticlair/domain";
+import { parseFiche, supplyLines, type FicheChantier } from "@baticlair/domain";
 import { z } from "zod";
 import type { DocumentInput, ReadAttempt, ReadStatus } from "../../../platform/ai/document-reader.js";
 
@@ -9,6 +9,15 @@ const articleSchema = z.object({
   quantite: z.string().nullable().default(null),
   unite: z.string().nullable().default(null),
   elements: z.string().nullable().default(null),
+});
+
+/** §51.1 : une donnée de la fiche de chantier, telle que l'IA la rend (format v15). Aucun champ « valeur ou vide ». */
+const ficheEntrySchema = z.object({
+  donnee: z.string(),
+  valeur: z.string(),
+  origine: z.enum(["lue", "deduite", "manquante"]),
+  regle: z.string(),
+  preuve: z.string(),
 });
 
 /**
@@ -48,6 +57,8 @@ export const extractionOutputSchema = z.object({
   notes: z.array(z.string()),
   /** En-tête et notes du devis (adresse, type de bâtiment, neuf ou rénovation, pente, hauteur), §41.1 règle 4. */
   context: z.record(z.string(), z.string()).nullable().optional(),
+  /** §51.1 : la fiche de chantier, chaque donnée avec son origine. */
+  fiche: z.custom<FicheChantier>().nullable().optional(),
 });
 
 export type ExtractionOutput = z.infer<typeof extractionOutputSchema>;
@@ -85,6 +96,8 @@ export const extractionWireSchema = z.object({
   ),
   notes: z.array(z.string()).default([]),
   contexte: z.record(z.string(), z.string()).nullable().default(null),
+  /** v15 (§51.1) : absente dans une réponse à l'ancien format. */
+  fiche: z.array(ficheEntrySchema).default([]),
 });
 
 export type ExtractionWire = z.infer<typeof extractionWireSchema>;
@@ -121,6 +134,7 @@ export const extractionFormatSchema = z.object({
   ),
   notes: z.array(z.string()),
   contexte: z.record(z.string(), z.string()).nullable(),
+  fiche: z.array(ficheEntrySchema),
 });
 
 /** Remet la réponse compacte dans la forme complète, sans rien perdre ni inventer. */
@@ -164,6 +178,7 @@ export function decodeExtraction(wire: ExtractionWire): ExtractionOutput {
       }),
     notes: wire.notes,
     context: wire.contexte,
+    ...(wire.fiche.length > 0 ? { fiche: parseFiche(wire.fiche) } : {}),
   };
 }
 

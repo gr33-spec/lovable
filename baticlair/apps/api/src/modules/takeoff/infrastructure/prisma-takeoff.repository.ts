@@ -1,5 +1,5 @@
 import type { Prisma } from "../../../generated/prisma/client.js";
-import type { CompletionRecord, LineRole, QuoteLineReading } from "@baticlair/domain";
+import type { CompletionRecord, FicheChantier, LineRole, QuoteLineReading } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { isUuid } from "../../../platform/validation/ids.js";
 import type { TenantContext } from "../../tenancy/index.js";
@@ -27,6 +27,13 @@ function completionOf(v: unknown): CompletionRecord | null {
   return { additions: Array.isArray(c.additions) ? c.additions : [], doubts: Array.isArray(c.doubts) ? c.doubts : [] };
 }
 
+/** La fiche enregistrée : ses données, relues (une donnée mal formée ne passe pas). */
+function ficheOf(v: unknown): FicheChantier | null {
+  if (!v || typeof v !== "object" || !Array.isArray((v as { donnees?: unknown }).donnees)) return null;
+  const donnees = (v as { donnees: unknown[] }).donnees.filter((d): d is FicheChantier["donnees"][number] => !!d && typeof d === "object" && typeof (d as { cle?: unknown }).cle === "string" && typeof (d as { libelle?: unknown }).libelle === "string");
+  return { donnees };
+}
+
 function toRecord(row: Row): TakeoffRecord {
   return {
     id: row.id,
@@ -41,6 +48,7 @@ function toRecord(row: Row): TakeoffRecord {
     model: row.model,
     notes: strings(row.notes),
     context: stringMap(row.context),
+    fiche: ficheOf(row.fiche),
     completion: completionOf(row.completion),
     calculStartedAt: row.calculStartedAt,
     calculatedAt: row.calculatedAt,
@@ -160,6 +168,7 @@ export class PrismaTakeoffRepository implements TakeoffRepository {
         model: data.model,
         notes: data.notes,
         context: data.context ?? undefined,
+        ...(data.fiche ? { fiche: JSON.parse(JSON.stringify(data.fiche)) } : {}),
         ...(data.calculated ? { calculStartedAt: new Date(), calculatedAt: new Date() } : {}),
         createdById: tenant.userId,
         lines: {
@@ -202,6 +211,10 @@ export class PrismaTakeoffRepository implements TakeoffRepository {
 
   async setCompletion(tenant: TenantContext, id: string, completion: CompletionRecord): Promise<void> {
     await this.prisma.takeoff.updateMany({ where: { id, companyId: tenant.companyId }, data: { completion: JSON.parse(JSON.stringify(completion)) } });
+  }
+
+  async setFiche(tenant: TenantContext, id: string, fiche: FicheChantier): Promise<void> {
+    await this.prisma.takeoff.updateMany({ where: { id, companyId: tenant.companyId }, data: { fiche: JSON.parse(JSON.stringify(fiche)) } });
   }
 
   async startCalcul(tenant: TenantContext, id: string, at: Date, staleBefore: Date): Promise<boolean> {
