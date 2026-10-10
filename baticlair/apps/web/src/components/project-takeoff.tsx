@@ -8,6 +8,7 @@ import { AnalysisScreen, CalculScreen, notifyReady, QuestionsStep, type CounterA
 import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { type ItemEdit } from "@/components/purchase-list";
 import { SiteUnitsView } from "@/components/site-units-view";
+import { SendPreview } from "@/components/send-preview";
 import { SupplyList } from "@/components/supply-list";
 import { type DecisionHandlers } from "@/components/takeoff-view";
 import { useProgressRefresh } from "@/components/project-progress";
@@ -75,6 +76,8 @@ export function ProjectTakeoff({
   const [requestsSignal, setRequestsSignal] = useState(0);
   const selection = useSelectionSend(projectId, () => setRequestsSignal((n) => n + 1));
   const [sent, setSent] = useState(false);
+  // « Aperçu » : le mail et le PDF du fournisseur, par-dessus la liste.
+  const [previewing, setPreviewing] = useState(false);
   // La liste a sa page (`?vue=fournitures`) ; sur le chantier, elle tient en une ligne. Après l'envoi, les réponses des
   // fournisseurs passent en haut du chantier (retour du fondateur, 2026-10-05).
   const [page, setPage] = useListPage();
@@ -270,6 +273,11 @@ export function ProjectTakeoff({
     if (draft) void call("validation").then(() => setSendSignal((n) => n + 1));
     else setSendSignal((n) => n + 1);
   };
+  // « Aperçu » : la liste est validée comme pour l'envoi (le mail et le PDF sortent de la liste validée), rien ne part.
+  const preview = async () => {
+    if (draft) await call("validation");
+    setPreviewing(true);
+  };
   // Mettre une ligne de côté : un article de la liste sort de la liste (la liste validée le reste) ; une ligne du devis
   // à préciser avec le fournisseur est retirée.
   // §50.7 : une ligne du chantier en bref se corrige (texte) ou se retire (vide), comme une ligne de la liste.
@@ -321,6 +329,7 @@ export function ProjectTakeoff({
         onEditItem={editItem}
         onSetAside={setAside}
         onSend={send}
+        onPreview={() => void preview()}
         error={actionError}
         docked={false}
         sent={sent}
@@ -334,6 +343,21 @@ export function ProjectTakeoff({
             }
           : {})}
       />
+    );
+  }
+  if (previewing) {
+    body = (
+      <>
+        {body}
+        <SendPreview
+          projectId={projectId}
+          onClose={() => setPreviewing(false)}
+          onSend={() => {
+            setPreviewing(false);
+            send();
+          }}
+        />
+      </>
     );
   }
 
