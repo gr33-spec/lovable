@@ -88,6 +88,8 @@ const correction = z.discriminatedUnion("action", [
   z.object({ action: z.literal("fixer_quantite"), id: z.string().min(1).max(200), quantite: z.string().trim().regex(/^\d+(?:[.,]\d+)?$/), unite: z.string().trim().min(1).max(30) }),
   // §45.9 l'aperçu avant envoi : la précision d'une ligne, la croix ; §45.8 « On ajoute ? » : oui ou non.
   z.object({ action: z.literal("preciser"), id: z.string().min(1).max(200), precision: z.string().trim().max(200) }),
+  // §50.7 : une ligne du chantier en bref, réécrite (texte) ou retirée (texte vide).
+  z.object({ action: z.literal("bref"), cle: z.string().min(1).max(80), texte: z.string().trim().max(200) }),
   z.object({ action: z.literal("retirer_article"), id: z.string().min(1).max(200) }),
   z.object({ action: z.literal("suggestion"), id: z.string().min(1).max(200), reponse: z.enum(["oui", "non"]) }),
 ]);

@@ -123,7 +123,8 @@ describe("§45.7 — la demande de devis du chantier Test", () => {
     // RÈGLE NUMÉRO UN : ni pattes ni pointes, le devis n'en écrit pas. Bande de 13 ml façonnée sur place : des feuilles
     // 2 × 1 m estimées d'après le développé (§48.6), jamais un bobineau.
     expect(text).not.toMatch(/Pattes|Pointes|Bobineau/);
-    expect(text).toMatch(/Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm\s+\d+ pièces?\s+pour 13 ml de bande/);
+    // §50.7 : la feuille dit sa pièce (« pour bande zinc d'égout ») ; le nom long passe sur deux lignes du PDF.
+    expect(text).toMatch(/Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour\s+\d+ pièces?\s+pour 13 ml de bande[\s\S]*bande zinc d'égout/);
   });
 
   it("3. un chantier sans ligne « à préciser » n'a pas de bloc 3 ; un chantier qui en a une le montre, avec « merci de proposer ce que vous avez »", async () => {
@@ -276,9 +277,14 @@ describe("§45.9 — l'aperçu avant envoi", () => {
     for (const b of preview.document.blocs as { titre: string; numero: number; kind: string; lignes: (string | { designation: string; quantite: string; precision: string | null })[] }[]) {
       const texts = [`${b.numero}. ${b.titre}`, ...b.lignes.flatMap((l) => (typeof l === "string" ? [l] : [l.designation, l.quantite, ...(l.precision ? [l.precision] : [])]))];
       for (const t of texts) {
-        const i = pdf.indexOf(t.replace(/\s+/g, " "), at);
-        expect(i, t).toBeGreaterThanOrEqual(0);
-        at = i;
+        // Un nom long passe sur deux lignes du PDF (la quantité s'intercale à la lecture) : ses mots, dans l'ordre.
+        let from = at;
+        for (const w of t.split(/\s+/).filter(Boolean)) {
+          const i = pdf.indexOf(w, from);
+          expect(i, `${t} (« ${w} »)`).toBeGreaterThanOrEqual(0);
+          from = i + w.length;
+        }
+        at = pdf.indexOf(t.split(/\s+/)[0]!, at);
       }
     }
     for (const t of [...preview.document.entete.coordonnees, preview.document.entete.chantier, "Point.P Brest"]) expect(pdf).toContain(t);

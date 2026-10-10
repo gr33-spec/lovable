@@ -1,3 +1,6 @@
+import { priceLeak } from "@baticlair/domain";
+// Le test du prix (§42.2, §43.5) vit dans le domaine, à côté du bref (§50.7) qui s'en sert aussi.
+export { priceLeak };
 import { PDFDocument, rgb, StandardFonts, type PDFFont, type PDFImage, type PDFPage } from "pdf-lib";
 
 /**
@@ -166,19 +169,6 @@ export function packetDocumentLines(d: PacketDocument): string[] {
   return out;
 }
 
-/**
- * Le test du §42.2 et du §43.5, appliqué à tout texte qui part chez le fournisseur : le symbole €,
- * une devise, un montant à deux décimales suivi d'une devise, ou les mots du chiffrage.
- * Renvoie ce qui a été trouvé, ou null si le texte est propre.
- */
-export function priceLeak(text: string): string | null {
-  const patterns = [/€/, /\d[\d\s]*[.,]\d{2}\s*(?:€|eur|euros?)\b/i, /\b(?:HT|TTC|TVA)\b/, /\b(?:remise|montant|prix unitaire|p\.u\.|total)\b/i, /(?<!sans )\bprix\b/i];
-  for (const re of patterns) {
-    const m = re.exec(text);
-    if (m) return m[0];
-  }
-  return null;
-}
 
 /** Le vocabulaire du §45.4 : rien de la cuisine interne ne sort, jamais « commande ». */
 export function forbiddenWord(text: string): string | null {

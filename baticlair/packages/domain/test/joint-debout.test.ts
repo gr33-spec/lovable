@@ -50,12 +50,12 @@ describe("joint debout : la question de façonnage, puis des lignes que le fourn
 
   it("« je commande façonné » : des bacs à la longueur du rampant (91 m² / 5,5 m = 16,5 m de pan ÷ 0,43 = 39 bacs)", () => {
     const v = readQuote(DEVIS, { "param:faconnage": { value: "2", unit: "u" } });
-    expect(bought(v)["Bacs joint debout zinc naturel 0,65 mm"]).toBe("39 pièces");
+    expect(bought(v)["Bacs joint debout zinc naturel 0,65 mm, longueur 5,65 m"]).toBe("39 bacs");
     expect(bought(v)["Bobine zinc naturel 0,65 mm, largeur 500 mm"]).toBeUndefined();
     expect(v.assumptions.map((a) => `${a.key}=${a.value}`)).toEqual(expect.arrayContaining(["param:longueur_rampant=5,5", "derived:entraxe_joints=430"]));
     // Intérieur des terres : bobine 650, entraxe 580 → 16,5 / 0,58 = 29 bacs ; pas de pattes, le devis n'en écrit pas.
     const inland = readQuote(DEVIS, { "param:faconnage": { value: "2", unit: "u" }, "param:zone": { value: "1", unit: "u" } });
-    expect(bought(inland)).toEqual({ "Bacs joint debout zinc naturel 0,65 mm": "29 pièces", "Voliges sapin 18×200 mm traité": "96 m²" });
+    expect(bought(inland)).toEqual({ "Bacs joint debout zinc naturel 0,65 mm, longueur 5,65 m": "29 bacs", "Voliges sapin 18×200 mm traité": "96 m²" });
   });
 
   it("chaque ligne commandée passe le test du fournisseur", () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { FileUp, Loader2, Mail, MoreHorizontal, Plus, Send } from "lucide-react";
+import { FileUp, Loader2, Mail, MoreHorizontal, Plus, Send, X } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { AssistantMessage, Say } from "@/components/chat";
 import { DemoAnswer, isDemoSupplier } from "@/components/demo";
@@ -14,7 +14,6 @@ import { api, ApiError, getActiveCompanyId, MAX_DOCUMENT_BYTES, newActionKey, ty
 import { openDocument, openFile } from "@/lib/open-document";
 import { isPhoto, MAX_QUOTE_PHOTOS, preparePhotos } from "@/lib/photos";
 import { useProgressRefresh } from "@/components/project-progress";
-import { QuotePreviewScreen } from "@/components/quote-preview";
 import { useResource } from "@/lib/use-resource";
 
 
@@ -78,7 +77,6 @@ export function ProjectPriceRequests({
   archived,
   canCreate,
   quantitatifId,
-  onListChanged,
   openSignal = 0,
   refreshSignal = 0,
   onSentChange,
@@ -87,10 +85,8 @@ export function ProjectPriceRequests({
   projectId: string;
   archived: boolean;
   canCreate: boolean;
-  /** §45.9 : l'aperçu corrige la liste elle-même (par le quantitatif). */
   quantitatifId?: string | null;
-  onListChanged?: () => void;
-  /** « Envoyer au fournisseur » de la liste : ouvre l'aperçu (ou montre les fournisseurs si la demande est partie). */
+  /** « Envoyer au fournisseur » du document : ouvre « À qui j'envoie ? » (ou montre les fournisseurs si la demande est partie). */
   openSignal?: number;
   /** §48.5 : une sélection vient de partir depuis la liste : on relit les demandes. */
   refreshSignal?: number;
@@ -201,7 +197,6 @@ export function ProjectPriceRequests({
             projectId={projectId}
             quantitatifId={quantitatifId ?? null}
             deliversEmail={deliversEmail}
-            onListChanged={onListChanged}
             onSent={() => setSentCount((n) => n + 1)}
             onCreated={replace}
           />
@@ -343,7 +338,6 @@ function NewRequest({
   projectId,
   quantitatifId,
   deliversEmail,
-  onListChanged,
   onSent,
   onCreated,
   onPreviewClosed,
@@ -353,13 +347,11 @@ function NewRequest({
   projectId: string;
   quantitatifId: string | null;
   deliversEmail: boolean;
-  onListChanged?: (() => void) | undefined;
   onSent: () => void;
   onCreated: (r: PriceRequest) => void;
 }) {
   const id = useId();
   const [previewing, setPreviewing] = useState(openAtStart && quantitatifId !== null);
-  const [supplierNames, setSupplierNames] = useState<Map<string, string>>(new Map());
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [message, setMessage] = useState("");
   const [dueDate, setDueDate] = useState("");
@@ -407,7 +399,7 @@ function NewRequest({
 
   return (
     <div className="flex flex-col gap-3">
-      <SupplierPicker selected={selected} onToggle={toggle} dark={false} onNames={setSupplierNames} />
+      <SupplierPicker selected={selected} onToggle={toggle} dark={false} />
       <details className="rounded-2xl bg-surface p-3 text-sm shadow-card">
         <summary className="cursor-pointer font-bold">Ajouter un message ou une date de réponse (facultatif)</summary>
         <label className="flex min-h-11 items-center gap-3 text-sm">
@@ -439,21 +431,13 @@ function NewRequest({
         </div>
       </details>
       {error ? <ErrorNotice error={error} /> : null}
-      {/* §45.9 : rien ne part sans l'aperçu ; il s'ouvre en plein écran, la liste s'y corrige d'un tap. */}
-      <Button variant="accent" pending={pending} disabled={selected.size === 0} onClick={() => (quantitatifId ? setPreviewing(true) : void create())}>
+      <Button variant="accent" pending={pending} disabled={selected.size === 0} onClick={() => void create()}>
         <Mail size={18} aria-hidden="true" />
-        {selected.size === 0 ? "Coche au moins un fournisseur" : "Voir la demande de devis"}
+        {selected.size === 0 ? "Coche au moins un fournisseur" : "Envoyer la demande de devis"}
       </Button>
-      {previewing && quantitatifId ? (
-        <QuotePreviewScreen
-          projectId={projectId}
-          quantitatifId={quantitatifId}
-          destinataire={selected.size === 1 ? (supplierNames.get([...selected][0]!) ?? null) : null}
-          message={message}
-          dueDate={dueDate}
-          onMessage={setMessage}
-          // Les fournisseurs se choisissent dans l'aperçu même : rien ne part sans un destinataire.
-          top={<SupplierPicker selected={selected} onToggle={toggle} dark={false} onNames={setSupplierNames} />}
+      {previewing ? (
+        // §50.7 : l'écran « Ton chantier » EST le document ; l'envoi ne montre plus d'aperçu, seulement à qui il part.
+        <SendSheet
           canSend={selected.size > 0}
           sending={pending}
           onSend={() => void create()}
@@ -461,8 +445,9 @@ function NewRequest({
             setPreviewing(false);
             onPreviewClosed?.();
           }}
-          {...(onListChanged ? { onListChanged } : {})}
-        />
+        >
+          <SupplierPicker selected={selected} onToggle={toggle} dark={false} />
+        </SendSheet>
       ) : null}
     </div>
   );
@@ -827,6 +812,42 @@ function EmailPreview({ to, email }: { to: string; email: { subject: string; bod
         </div>
       </dl>
       <pre className="mt-2 font-sans text-[13px] leading-snug whitespace-pre-wrap">{email.body}</pre>
+    </div>
+  );
+}
+
+/**
+ * §50.7 : après « Envoyer au fournisseur », une seule chose à faire : choisir à qui. Le document est l'écran « Ton chantier »
+ * qu'on vient de quitter (plus d'écran « Ce que le fournisseur va recevoir »).
+ */
+function SendSheet({ canSend, sending, onSend, onClose, children }: { canSend: boolean; sending: boolean; onSend: () => void; onClose: () => void; children: React.ReactNode }) {
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, []);
+  return (
+    <div role="dialog" aria-modal="true" aria-label="À qui j'envoie ?" className="fixed inset-0 z-50 flex flex-col bg-ground">
+      <div className="flex items-center justify-between gap-2 px-4 pt-[max(12px,env(safe-area-inset-top))] pb-2">
+        <h2 className="font-display text-[20px] font-extrabold">À qui j&apos;envoie ?</h2>
+        <button type="button" onClick={onClose} aria-label="Revenir à mon chantier" className="inline-flex size-11 items-center justify-center rounded-xl">
+          <X size={20} aria-hidden="true" />
+        </button>
+      </div>
+      <div className="grow overflow-y-auto px-3 pb-40">
+        <div className="mx-auto flex max-w-2xl flex-col gap-3">{children}</div>
+      </div>
+      <div className="fixed inset-x-0 bottom-0 flex flex-col items-center gap-1 bg-ground/95 px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur">
+        <Button className="min-h-14 w-full max-w-2xl text-[17px]" pending={sending} disabled={!canSend} onClick={onSend}>
+          <Send size={18} aria-hidden="true" />
+          {canSend ? "Envoyer" : "Choisis un fournisseur"}
+        </Button>
+        <button type="button" onClick={onClose} className="inline-flex min-h-11 items-center text-sm font-bold text-muted">
+          Revenir à la liste
+        </button>
+      </div>
     </div>
   );
 }

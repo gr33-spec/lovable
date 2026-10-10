@@ -2294,3 +2294,15 @@ Une ligne orange ne doit jamais demander deux gestes ni ouvrir un autre écran. 
   ## 50.6 Test
 
   Sur D-2026-020, D-2026-018 et D.2026.105, une capture iPhone de chaque écran ne montre aucun élément listé en 50.4, et chaque carte de la liste ne contient que les éléments de 50.3.
+
+  ## 50.7 L'écran 3 est le document (remplace 50.3 là où ils se contredisent)
+
+  Après les questions, l'artisan tombe directement sur « Ton chantier », présenté comme le document que le fournisseur recevra. Il n'y a plus d'écran « Ce que le fournisseur va recevoir » : c'est le même écran.
+  - **Le chantier en bref**, en haut : l'IA dessine le chantier à partir du devis et des réponses, en quelques lignes courtes : type d'ouvrage, surface, dimensions, matériau, et ce qui s'en déduit (longueur des bacs, nombre de descentes, pente). Rien qui ne vienne pas du devis ou des réponses (règle numéro un). Chaque ligne du bref se modifie ou se supprime comme une ligne de la liste.
+  - **La liste**, en dessous : une ligne par fourniture, nom, quantité, unité, comme sur un bon de commande. Une ligne orange garde son point et sa raison en cinq mots sur la ligne, sans carte dépliée.
+  - **Modifier, directement sur le document :** un tap sur une ligne l'ouvre (quantité en moins / plus, boutons de choix, « C'est bon ») ; un glissement vers la gauche la supprime, avec une corbeille en secours ; un tap sur le nom permet de le corriger. Aucun écran intermédiaire.
+  - **Pas de modification à la voix.** Elle est retirée de l'app. Elle reviendra seulement si des artisans la demandent en bêta, et alors avec une vraie IA.
+  - En bas : un seul bouton « Envoyer au fournisseur », et en petit dessous « Ajouter un article » et « Envoyer une sélection à un autre fournisseur ».
+  - Chaque ligne de bacs ou de longueurs porte sa longueur (« 26 bacs de 7,20 m »), chaque pièce de zinc façonnée porte son nom d'ouvrage (« Bande de rive », jamais « Bandes façonnées »).
+
+  Test : sur D-2026-018, l'écran après les questions montre le chantier en bref, puis la liste, et aucun bouton de voix ; le document envoyé au fournisseur est identique à l'écran.

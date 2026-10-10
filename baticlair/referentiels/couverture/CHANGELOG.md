@@ -1,5 +1,12 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.10-49 — §50.7 : le document dit les longueurs et le nom des pièces (retour du fondateur, 2026-10-10, D-2026-018)
+
+- **Bacs commandés façonnés** : vendus au bac (« 31 bacs »), la longueur dans le nom (« Bacs joint debout Quartz-Zinc 0,65 mm, longueur 7,15 m » : rampant + 15 cm, ou rampant partagé en longueurs de 10 m au plus). Avant : « 31 pièces », sans longueur. Le nombre reste celui du §36.6 (largeur ÷ entraxe 0,43 ou 0,58) : 31 bacs en bobine 500, 23 en bobine 650 (choix du fondateur, 2026-10-10).
+- **Pièces de zinc façonnées** : la ligne porte le nom de la pièce écrite au devis (« Bande de ventilation en Z en zinc quartz, Quartz-Zinc 0,65 mm » ; « Feuilles … 2 × 1 m, 0,65 mm, pour habillage de rive… ») ; abergement : « Bandes d'abergement ». Avant : « Bandes façonnées ».
+- **Bandes et porte-solin commandés façonnés** : longueurs de 2 m = ml ÷ 2 arrondi sup. (§1 ; 13 ml → 7). Avant : ml × 1,1 ÷ 1,9 (13 ml → 8).
+- **Pattes** : aucune règle ne change ; un seul calcul, le tableau VMZINC §36.2 par m² selon le rampant et la largeur de bobine (91 m², rampant 7 m : 519 + 173 en 500, 383 + 128 en 650).
+
 ## roofing-2026.10.10-48 — « Autre » aussi pour une qualité qui se nomme (ardoise, aspect du zinc, teinte)
 
 - **§50.2 Questions** : « Quelle ardoise : Espagne 1er choix, ou NF ? », l'aspect du zinc (naturel, Quartz, Anthra), la teinte de gouttière et celle de l'ardoise fibres-ciment ont aussi « Autre » (`named`). Ce que l'artisan écrit (« Ardoise d'Angers ») passe tel quel dans la désignation (« Ardoises naturelles Ardoise d'Angers 32×22 »), sans rien changer aux quantités. Avant : seulement les boutons.

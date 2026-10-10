@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 /** Adresse unique par exécution : les tests ne dépendent pas de l'état de la base. */
 /** Photo minimale (1 px, PNG valide). */
@@ -69,19 +69,30 @@ async function confirmDoubts(page: Page) {
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   for (let i = 0; i < 40; i++) {
     await settle(page);
-    const card = list.getByRole("group", { name: /^Régler : / }).first();
-    if (!(await card.isVisible())) {
+    // §50.7 : une ligne orange garde son point et sa raison ; un tap l'ouvre, ses boutons se règlent là.
+    const orange = list.getByRole("listitem").filter({ has: page.getByRole("img", { name: "à vérifier" }) }).first();
+    if (!(await orange.isVisible())) {
       await expect(list.getByRole("button", { name: "Envoyer au fournisseur" })).toBeVisible();
       return;
     }
-    await settleCard(page, card);
+    await settleCard(page, await openRow(orange));
   }
+}
+
+/** §50.7 : une ligne du document s'ouvre d'un tap ; ouverte, elle porte ses boutons (« Régler : … »). */
+async function openRow(row: Locator) {
+  const opener = row.getByRole("button", { name: /^(Modifier|Fermer) : / }).first();
+  if ((await opener.getAttribute("aria-expanded")) !== "true") await opener.click();
+  return row.getByRole("group", { name: /^Régler : / });
 }
 
 /** La carte orange d'une ligne, dans la liste (§49.8 : tout se règle là). */
 async function orangeCard(page: Page, label: string) {
   await openList(page);
-  const card = page.getByRole("region", { name: "Liste des fournitures" }).getByRole("group", { name: `Régler : ${label}`, exact: true });
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  const row = list.getByRole("listitem").filter({ has: page.getByRole("button", { name: `Modifier : ${label}`, exact: true }).or(page.getByRole("button", { name: `Fermer : ${label}`, exact: true })) }).first();
+  await openRow(row);
+  const card = list.getByRole("group", { name: `Régler : ${label}`, exact: true });
   await expect(card).toBeVisible();
   return card;
 }
@@ -392,30 +403,26 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await expect(liste.getByText(/\d+ fournitures? ·/)).toHaveCount(0);
   await expect(liste.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
 
-  // La preuve dans la fiche de l'article.
+  // § 41.4 et §50.7 : la ligne s'ouvre d'un tap, et un tap sur son nom le réécrit, sur le document même.
   await page.getByRole("button", { name: "Modifier : Tuile romane canal rouge 12,5 u/m²" }).click();
-  await page.getByRole("button", { name: "Voir la ligne du devis : Tuile romane canal rouge 12,5 u/m²" }).click();
-  await expect(page.getByText("(lu dans le devis)").first()).toBeVisible();
-
-  // § 41.4 : la désignation d'une ligne se réécrit d'un tap, sans aide (test de recette : une personne hors BTP).
-  const edit = page.getByRole("form", { name: "Modifier : Tuile romane canal rouge 12,5 u/m²" });
-  await edit.getByLabel("Désignation").fill("Tuile romane canal rouge 12,5 u/m² Toit principal");
-  await edit.getByRole("button", { name: "Enregistrer" }).click();
+  await page.getByRole("button", { name: "Modifier le nom : Tuile romane canal rouge 12,5 u/m²" }).click();
+  await page.getByLabel("Nom : Tuile romane canal rouge 12,5 u/m²").fill("Tuile romane canal rouge 12,5 u/m² Toit principal");
+  await page.getByRole("button", { name: "OK" }).click();
   // Une ligne réécrite repasse par « C'est bon » (ligne modifiée = à confirmer), puis la carte la montre sous son nouveau nom.
   await confirmDoubts(page);
-  await expect(page.getByRole("button", { name: "Modifier : Tuile romane canal rouge 12,5 u/m² Toit principal", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^(Modifier|Fermer) : Tuile romane canal rouge 12,5 u\/m² Toit principal$/ })).toBeVisible();
 
-  // Un croquis sur la ligne (couvertine, habillage…) : le crayon permet de joindre une photo avec une précision ; elle
-  // reste sous l'article, et se retire d'un appui.
+  // Un croquis sur la ligne (couvertine, habillage…) : la ligne ouverte permet de joindre une photo ; elle reste sous
+  // l'article, et se retire d'un appui.
   const tuile = "Tuile romane canal rouge 12,5 u/m² Toit principal";
-  await page.getByRole("button", { name: `Modifier : ${tuile}` }).click();
-  await page.getByLabel(`Précision du croquis : ${tuile}`).fill("Rive côté jardin, voir photo");
-  await page.getByLabel("Joindre une photo ou un PDF").setInputFiles({ name: "rive.png", mimeType: "image/png", buffer: PNG_1PX });
+  const tuileOpen = page.getByRole("button", { name: `Modifier : ${tuile}` });
+  if (await tuileOpen.isVisible()) await tuileOpen.click();
+  await page.getByLabel(`Joindre un croquis : ${tuile}`).setInputFiles({ name: "rive.png", mimeType: "image/png", buffer: PNG_1PX });
   const joints = page.getByRole("list", { name: `Croquis joints : ${tuile}` });
-  await expect(joints.getByText("rive.png · Rive côté jardin, voir photo")).toBeVisible();
+  await expect(joints.getByText("rive.png")).toBeVisible();
   await joints.getByRole("button", { name: "Retirer le croquis rive.png" }).click();
   await expect(joints).toHaveCount(0);
-  await page.getByRole("form", { name: `Modifier : ${tuile}` }).getByRole("button", { name: "Annuler" }).click();
+  await page.getByRole("button", { name: `Fermer : ${tuile}` }).click();
 
   // §50.3 : « Ajouter un article », en petit sous le bouton d'envoi ; l'article se retire depuis sa fiche, sans message flottant.
   await page.getByRole("button", { name: "Ajouter un article" }).click();
@@ -432,11 +439,11 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await expect(page.getByRole("status").filter({ hasText: "Retiré de la liste" })).toHaveCount(0);
 
   await confirmDoubts(page);
-  // « Envoyer au fournisseur » valide la liste et ouvre l'aperçu (§45.9) ; « Revenir à la liste » le referme.
+  // §50.7 : « Envoyer au fournisseur » valide la liste et demande seulement à qui l'envoyer (le document est l'écran) ;
+  // « Revenir à la liste » referme.
   await openList(page);
   await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
-  const apercu = page.getByRole("dialog", { name: "Aperçu de la demande de devis" });
-  await expect(apercu.getByRole("article", { name: "Demande de devis" })).toBeVisible();
+  const apercu = page.getByRole("dialog", { name: "À qui j'envoie ?" });
   await expect(apercu.getByRole("button", { name: "Choisis un fournisseur" })).toBeDisabled();
   await apercu.getByRole("button", { name: "Revenir à la liste" }).click();
   await expect(apercu).toHaveCount(0);
@@ -447,13 +454,15 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await openList(page);
   await expect(page.getByRole("button", { name: "Envoyer au fournisseur" })).toBeVisible();
 
-  // Une ligne se corrige encore après validation, d'un tap sur sa carte : la liste est à valider à nouveau.
+  // Une ligne se corrige encore après validation, d'un tap sur la ligne puis le plus : la liste est à valider à nouveau.
   await page.getByRole("button", { name: `Modifier : ${tuile}` }).click();
-  await page.getByRole("form", { name: `Modifier : ${tuile}` }).getByLabel("Quantité").fill("1 300");
-  await page.getByRole("form", { name: `Modifier : ${tuile}` }).getByRole("button", { name: "Enregistrer" }).click();
+  await page.getByRole("button", { name: `Plus : ${tuile}` }).click();
+  // Le plus part une seconde après le dernier appui (une seule correction au journal).
+  await page.waitForTimeout(1300);
+  await settle(page);
   await confirmDoubts(page);
   await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
-  await expect(page.getByRole("dialog", { name: "Aperçu de la demande de devis" })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "À qui j'envoie ?" })).toBeVisible();
 });
 
 test("un couvreur demande les prix à ses fournisseurs et range leurs devis", async ({ page }) => {
@@ -483,32 +492,20 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await createProject(page, "Toiture Garnier", "M. Garnier", "5 rue du Port, Vannes");
   await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await passQuestions(page);
-  // Une ligne se corrige d'un tap sur sa carte (§50.4 : plus de « Corriger le devis lu »).
-  await page.getByRole("button", { name: "Modifier : Crochet inox ardoise 100 mm" }).click();
-  const crochets = page.getByRole("form", { name: "Modifier : Crochet inox ardoise 100 mm" });
-  await crochets.getByLabel("Quantité").fill("200");
-  await crochets.getByLabel("Unité").fill("u");
-  await crochets.getByRole("button", { name: "Enregistrer" }).click();
+  // §50.7 : une ligne se règle sur le document même (§50.4 : plus de « Corriger le devis lu »).
   await confirmDoubts(page);
-  // §45.9 : « Envoyer au fournisseur » ouvre l'aperçu, le document tel que le fournisseur le recevra ; on y choisit
-  // les fournisseurs (dont un créé sur place) et une ligne s'y corrige d'un tap.
+  // §50.7 : « Envoyer au fournisseur » ne montre plus d'aperçu (le document, c'est l'écran) : on y choisit seulement les
+  // fournisseurs, dont un créé sur place.
   await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
-  const apercu = page.getByRole("dialog", { name: "Aperçu de la demande de devis" });
-  await expect(apercu.getByRole("heading", { name: "À QUI J'ENVOIE ?" })).toBeVisible();
+  const apercu = page.getByRole("dialog", { name: "À qui j'envoie ?" });
+  await expect(apercu.getByRole("heading", { name: "À qui j'envoie ?" })).toBeVisible();
   await apercu.getByRole("checkbox", { name: /Point.P Vannes/ }).check();
   await apercu.getByRole("button", { name: "Nouveau fournisseur" }).click();
   await apercu.getByLabel("Société").fill("Tuiles & Co");
   await apercu.getByLabel("E-mail pour les demandes de prix").fill("devis@tuiles.fr");
   await apercu.getByRole("button", { name: "Ajouter", exact: true }).click();
   await expect(apercu.getByRole("checkbox", { name: /Tuiles & Co/ })).toBeChecked();
-  await expect(apercu.getByRole("article", { name: "Demande de devis" })).toBeVisible();
-  await expect(apercu.getByRole("heading", { name: "2. Fournitures à chiffrer" })).toBeVisible();
-  await expect(apercu.getByText(/^Bonjour,/)).toBeVisible();
-  await expect(apercu.getByText(/command/i)).toHaveCount(0);
-  await apercu.getByRole("button", { name: /^Modifier : Gouttière/ }).click();
-  await apercu.getByLabel("Précision").fill("pour façonnage naissances");
-  await apercu.getByRole("button", { name: "Enregistrer" }).click();
-  await expect(apercu.getByText("pour façonnage naissances")).toBeVisible();
+  await expect(apercu.getByRole("article", { name: "Demande de devis" })).toHaveCount(0);
   await apercu.getByRole("button", { name: "Envoyer", exact: true }).click();
   await expect(page.getByRole("list", { name: "Tes fournisseurs" })).toBeVisible();
   // § 43.4 : juste après le premier envoi, et jamais avant, l'écran des notifications ; « Plus tard » le referme.
@@ -656,10 +653,9 @@ test("plusieurs articles inconnus, sans unité : UNE décision les règle tous, 
   await group.getByRole("button", { name: /^C'est bon/ }).click();
   await expect(group).toHaveCount(0);
   await confirmDoubts(page);
-  // Gardés tels qu'écrits, à la pièce : la preuve dit que c'est un choix pour ce chantier.
-  await page.getByRole("button", { name: "Modifier : Skimmer pour piscine liner" }).click();
-  await page.getByRole("button", { name: "Voir la ligne du devis : Skimmer pour piscine liner" }).click();
-  await expect(page.getByText("Article gardé tel qu'écrit pour ce chantier.")).toBeVisible();
+  // Gardés tels qu'écrits, à la pièce : la ligne est verte, prête à partir.
+  const skimmer = page.getByRole("region", { name: "Liste des fournitures" }).getByRole("listitem").filter({ hasText: "Skimmer pour piscine liner" }).first();
+  await expect(skimmer.getByRole("img", { name: "sûr" })).toBeVisible();
 });
 
 test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs", async ({ page }) => {
@@ -677,7 +673,7 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
   await expect(demoList.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
   await expect(demoList.getByText("Embase plomb de sortie de toit")).toBeVisible();
   await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
-  const apercu = page.getByRole("dialog", { name: "Aperçu de la demande de devis" });
+  const apercu = page.getByRole("dialog", { name: "À qui j'envoie ?" });
   for (const name of ["Tuilerie de l'Ouest (démo)", "Négoce Breizh (démo)", "Matériaux Atlantique (démo)"]) {
     await apercu.getByRole("checkbox", { name: new RegExp(name.replace(/[()]/g, "\\$&")) }).check();
   }
@@ -776,40 +772,7 @@ test("plusieurs logements : le chantier rangé par logement, puis le total à co
   await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible();
 });
 
-test("§48.4 et règle numéro un : questions au bouton seulement, avant le calcul ; rien d'absent du devis ; puis la voix sur la liste", async ({ page }) => {
-  // Un micro simulé : la dictée du navigateur « entend » une phrase, comme un artisan devant sa liste.
-  await page.addInitScript(() => {
-    class FakeRecognition {
-      lang = "fr-FR";
-      interimResults = false;
-      continuous = true;
-      onresult: ((e: unknown) => void) | null = null;
-      onend: (() => void) | null = null;
-      onerror: ((e: unknown) => void) | null = null;
-      // Comme un iPhone : le micro se coupe après une pause, et les résultats repartent de zéro au redémarrage
-      // (avant : seul le dernier morceau restait, « Ok »). Il n'applique qu'au « Terminer ».
-      static starts = 0;
-      start() {
-        FakeRecognition.starts += 1;
-        const n = FakeRecognition.starts;
-        setTimeout(() => {
-          const final = (transcript: string) => Object.assign([{ transcript }], { isFinal: true });
-          if (n === 1) {
-            this.onresult?.({ resultIndex: 0, results: [final("Ok alors enlève les ardoises")] });
-            this.onend?.();
-          } else if (n === 2) {
-            this.onresult?.({ resultIndex: 0, results: [final("j'ai oublié 2 cartouches de silicone")] });
-          }
-        }, 50);
-      }
-      stop() {
-        setTimeout(() => this.onend?.(), 20);
-      }
-    }
-    const w = window as unknown as { SpeechRecognition: unknown; webkitSpeechRecognition: unknown };
-    w.SpeechRecognition = FakeRecognition;
-    w.webkitSpeechRecognition = FakeRecognition;
-  });
+test("§48.4 et règle numéro un : questions au bouton seulement, avant le calcul ; rien d'absent du devis ; puis la main sur le document (§50.7)", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Toiture Kervella", "M. Kervella", "2 rue du Port, Lorient");
   await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
@@ -842,37 +805,24 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   await expect(list.getByText(/Écran|Liteaux|Pattes|Faîtage|égout/i)).toHaveCount(0);
   await expect(list.getByRole("button", { name: /Ardoises naturelles/ }).first()).toBeVisible();
 
-  // §50.3 : « Modifier à la voix », en petit sous le bouton d'envoi, ouvre la voix sous la liste.
-  await page.getByRole("navigation", { name: "Autres gestes sur la liste" }).getByRole("button", { name: "Modifier à la voix" }).click();
-  const voix = page.getByRole("region", { name: "Modifier à la voix" });
-  await expect(voix.getByText("Modifie ton quantitatif à la voix : dis-moi ce que tu enlèves, ce que tu ajoutes, ce que tu as oublié.")).toBeVisible();
-  await voix.getByRole("button", { name: "Modifier à la voix" }).click();
-  // Le texte s'écrit pendant qu'il parle, la pause ne coupe rien ; « Terminer » modifie tout de suite.
-  await expect(voix.getByLabel("Ce que j'entends")).toContainText("j'ai oublié 2 cartouches de silicone");
-  await expect(voix.getByLabel("Ce que j'entends")).toContainText("enlève les ardoises");
-  await voix.getByRole("button", { name: "Terminer" }).click();
-  const fait = page.getByRole("status", { name: "Ce que j'ai modifié" });
-  // Le texte entier du résumé : en cas d'échec, le message dit ce qui a été compris.
-  await expect(fait).toContainText(/Retiré :.*Ardoises/);
-  await expect(fait).toContainText("Ajouté : Silicone · 2 cartouches");
-  await expect(list.getByText(/^Silicone$/)).toBeVisible();
+  // §50.7 : plus de voix ; tout se fait à la main, sur le document même.
+  await expect(page.getByText(/à la voix/i)).toHaveCount(0);
+  // Un tap ouvre la ligne ; « Retirer de la liste » (ou le glissement à gauche) la retire.
+  const ardoises = list.getByRole("listitem").filter({ hasText: /Ardoises naturelles/ }).first();
+  await ardoises.getByRole("button", { name: /^Modifier : Ardoises naturelles/ }).click();
+  await ardoises.getByRole("button", { name: "Retirer de la liste" }).click();
   await expect(list.getByRole("button", { name: /Ardoises naturelles/ })).toHaveCount(0);
-  // La main reste : plus / moins, crayon, corbeille.
-  await expect(list.getByText(/^Silicone$/)).toBeVisible();
+  // Un tap sur le nom le corrige (« gouttière zinc demi-ronde rouge ») ; la quantité ne bouge pas.
+  const gouttiere = list.getByRole("listitem").filter({ hasText: /Gouttière zinc demi-ronde/ }).first();
+  await gouttiere.getByRole("button", { name: /^Modifier : Gouttière zinc demi-ronde/ }).click();
+  await gouttiere.getByRole("button", { name: /^Modifier le nom : / }).click();
+  await gouttiere.getByRole("textbox").fill("Gouttière zinc demi-ronde rouge");
+  await gouttiere.getByRole("button", { name: "OK" }).click();
+  await expect(list.getByRole("button", { name: /^(Modifier|Fermer) : Gouttière zinc demi-ronde rouge/ })).toBeVisible();
+  await expect(list.getByText(/^20 ml$/).filter({ visible: true }).first()).toBeVisible();
   await page.reload();
   await expect(page.getByRole("region", { name: "Les questions" })).toHaveCount(0);
-  await expect(page.getByRole("region", { name: "Liste des fournitures" }).getByText(/^Silicone$/)).toBeVisible();
-
-  // Retour du fondateur (2026-10-10) : nommer une ligne avec ce qui la précise (« gouttière demi ronde rouge ») la précise,
-  // sans toucher sa quantité (avant : « demi » lu comme 0,5).
-  const liste = page.getByRole("region", { name: "Liste des fournitures" });
-  await expect(liste.getByText(/Gouttière zinc demi-ronde/).first()).toBeVisible();
-  await page.getByRole("navigation", { name: "Autres gestes sur la liste" }).getByRole("button", { name: "Modifier à la voix" }).click();
-  await page.getByRole("region", { name: "Modifier à la voix" }).getByLabel("Écrire mes modifications").fill("gouttière demi ronde rouge");
-  await page.getByRole("button", { name: "Appliquer mes modifications" }).click();
-  await expect(page.getByRole("status", { name: "Ce que j'ai modifié" })).toContainText("Précisé : Gouttière zinc demi-ronde → Gouttière zinc demi-ronde rouge");
-  await expect(liste.getByRole("button", { name: /^Modifier : Gouttière zinc demi-ronde rouge/ })).toBeVisible();
-  await expect(liste.getByText(/^20 ml$/).filter({ visible: true }).first()).toBeVisible();
+  await expect(page.getByRole("region", { name: "Liste des fournitures" }).getByRole("button", { name: /Ardoises naturelles/ })).toHaveCount(0);
 });
 
 test("§48.5 : envoyer une sélection à un autre fournisseur, discret, puis l'envoi normal inchangé", async ({ page }) => {
@@ -943,18 +893,20 @@ test("§49.8 : chaque ligne orange passe au vert dans sa carte, un geste par lig
   const url = page.url();
   // Plus de bouton vers un autre écran.
   await expect(list.getByRole("button", { name: /^Vérifier/ })).toHaveCount(0);
-  const cards = list.getByRole("group", { name: /^Régler : / });
-  const start = await cards.count();
+  // §50.7 : une ligne orange garde son point et sa raison, sans carte dépliée ; un tap l'ouvre, un geste la règle.
+  const oranges = list.getByRole("listitem").filter({ has: page.getByRole("img", { name: "à vérifier" }) });
+  const start = await oranges.count();
   expect(start).toBeGreaterThan(0);
+  await expect(list.getByRole("group", { name: /^Régler : / })).toHaveCount(0);
   // La raison en entier, jamais coupée par « … ».
-  for (const li of await list.locator("li", { has: cards }).all()) expect(await li.innerText()).not.toContain("…");
+  for (const li of await oranges.all()) expect(await li.innerText()).not.toContain("…");
 
   // Un geste par ligne : une réponse peut faire naître une ligne (« Je façonne » → la bobine) ; elle compte pour une.
   const seen = new Set<string>();
   let gestures = 0;
   let choices = 0;
-  while ((await cards.count()) > 0 && gestures < 20) {
-    const card = cards.first();
+  while ((await oranges.count()) > 0 && gestures < 20) {
+    const card = await openRow(oranges.first());
     seen.add((await card.getAttribute("aria-label"))!);
     const asks = card.getByRole("group");
     // Un choix à faire : un tap sur un bouton, la ligne se recalcule. Plusieurs valeurs par défaut : « C'est bon » les
@@ -1064,7 +1016,7 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
   // Le façonnage est obligatoire (48.6) ; le reste peut rester sans réponse.
   await questions.getByRole("button", { name: /^Je commande façonné/ }).click();
   await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
-  // 3. Ma liste : les oranges d'abord, chaque raison en cinq mots au plus ; un seul bouton d'envoi, trois liens dessous.
+  // 3. Ma liste : les oranges d'abord, chaque raison en cinq mots au plus ; un seul bouton d'envoi, deux liens dessous.
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
   await clean();
@@ -1079,7 +1031,32 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
   }
   await expect(list.getByRole("status").filter({ hasText: /^\d+ lignes? à régler$/ })).toBeVisible();
   const links = list.getByRole("navigation", { name: "Autres gestes sur la liste" }).getByRole("button");
-  for (const name of ["Ajouter un article", "Envoyer une sélection à un autre fournisseur", "Modifier à la voix"]) await expect(links.filter({ hasText: name })).toHaveCount(1);
+  await expect(links).toHaveText(["Ajouter un article", "Envoyer une sélection à un autre fournisseur"]);
+
+  // §50.7 : l'écran 3 est le document : « Ton chantier », le chantier en bref, puis la liste ; aucune voix.
+  await expect(list.getByRole("heading", { name: "Ton chantier" })).toBeVisible();
+  await expect(list.getByRole("region", { name: "Le chantier en bref" })).toBeVisible();
+  await expect(page.getByText(/à la voix/i)).toHaveCount(0);
+  // Une ligne orange garde son point et sa raison sur la ligne, sans carte dépliée : ses boutons n'existent qu'ouverte.
+  await expect(list.getByRole("group", { name: /^Régler : / })).toHaveCount(0);
+  const first = cards.first();
+  await first.getByRole("button", { name: /^Modifier : / }).click();
+  await expect(first.getByRole("group", { name: /^Régler : / })).toBeVisible();
+  await expect(first.getByRole("button", { name: "Retirer de la liste" })).toBeVisible();
+  // Une ligne du bref se corrige d'un tap, sur le document même.
+  const bref = list.getByRole("region", { name: "Le chantier en bref" });
+  const line = bref.getByRole("button", { name: /^Modifier le bref : / }).first();
+  await line.click();
+  await bref.getByRole("textbox").fill("Couverture de la maison principale");
+  await bref.getByRole("button", { name: "OK" }).click();
+  await expect(bref.getByRole("button", { name: "Modifier le bref : Couverture de la maison principale" })).toBeVisible();
+  // « Envoyer au fournisseur » ne montre plus d'aperçu : seulement « À qui j'envoie ? ».
+  await confirmDoubts(page);
+  await list.getByRole("button", { name: "Envoyer au fournisseur" }).click();
+  const sheet = page.getByRole("dialog", { name: "À qui j'envoie ?" });
+  await expect(sheet).toBeVisible();
+  await expect(sheet.getByRole("article", { name: "Demande de devis" })).toHaveCount(0);
+  await expect(page.getByText("Ce que le fournisseur va recevoir", { exact: false })).toHaveCount(0);
 });
 
 test("§49.9 : une ligne nomme une fourniture ; les heures et le forfait sont repliés sous « lignes sans fourniture »", async ({ page }) => {

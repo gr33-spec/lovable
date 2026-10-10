@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.10-48",
+  "version": "roofing-2026.10.10-49",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -4957,10 +4957,10 @@
       "attributes": {},
       "sellingUnits": [
         {
-          "id": "piece",
+          "id": "bac",
           "label": {
-            "one": "pièce",
-            "many": "pièces"
+            "one": "bac",
+            "many": "bacs"
           },
           "contains": {
             "kind": "packaging",
@@ -8723,6 +8723,20 @@
           "version": 1,
           "note": "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."
         },
+        "longueur_bande_2m": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« bande de 2 m = ml / 2 arrondi sup. » (§1)."
+        },
         "longueur_feuille": {
           "kind": "installation_condition",
           "value": "2",
@@ -9324,6 +9338,20 @@
           },
           "version": 1,
           "note": "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."
+        },
+        "longueur_bande_2m": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« bande de 2 m = ml / 2 arrondi sup. » (§1)."
         },
         "longueur_feuille": {
           "kind": "installation_condition",
@@ -10782,6 +10810,20 @@
           "version": 1,
           "note": "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."
         },
+        "longueur_bande_2m": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« bande de 2 m = ml / 2 arrondi sup. » (§1)."
+        },
         "longueur_feuille": {
           "kind": "installation_condition",
           "value": "2",
@@ -11028,12 +11070,12 @@
           "id": "bandes-faconnees",
           "slot": "bande",
           "when": "faconnage >= 2",
-          "formula": "arrondi_sup(ml_zinc / regle.longueur_utile)",
+          "formula": "arrondi_sup(longueur_bande / regle.longueur_bande_2m)",
           "unit": "u",
           "core": true,
           "exclusions": "Longueurs de 2 m, recouvrement 10 cm entre éléments ; fixations à part.",
           "precision": "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
-          "designation": "Bandes façonnées {aspect_zinc} {epaisseur_zinc} mm",
+          "designation": "{piece}, {aspect_zinc} {epaisseur_zinc} mm",
           "precisionRequires": [
             "developpe",
             "aspect_zinc"
@@ -11057,7 +11099,7 @@
           "exclusions": "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2) ; chutes non réemployées.",
           "precision": "pour {longueur_bande|ml} de bande : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
           "estimate": "Estimation d'après le développé : ajuste selon ton façonnage",
-          "designation": "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
+          "designation": "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm, pour {piece_min}",
           "precisionRequires": [
             "aspect_zinc"
           ],
@@ -11511,6 +11553,20 @@
           "version": 1,
           "note": "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."
         },
+        "longueur_bande_2m": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« bande de 2 m = ml / 2 arrondi sup. » (§1)."
+        },
         "longueur_feuille": {
           "kind": "installation_condition",
           "value": "2",
@@ -11702,7 +11758,7 @@
           "id": "porte-solin-faconnees",
           "slot": "porte_solin",
           "when": "faconnage >= 2",
-          "formula": "arrondi_sup(ml_zinc / regle.longueur_utile)",
+          "formula": "arrondi_sup(longueur_bande / regle.longueur_bande_2m)",
           "unit": "u",
           "core": true,
           "exclusions": "Longueurs de 2 m, recouvrement 10 cm entre éléments.",
@@ -12732,6 +12788,20 @@
           "version": 1,
           "note": "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."
         },
+        "longueur_bande_2m": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« bande de 2 m = ml / 2 arrondi sup. » (§1)."
+        },
         "longueur_feuille": {
           "kind": "installation_condition",
           "value": "2",
@@ -12997,7 +13067,7 @@
           "unit": "u",
           "core": true,
           "exclusions": "Quatre côtés, développé 33 cm ; longueurs de 2 m, recouvrement 10 cm.",
-          "designation": "Bandes façonnées {aspect_zinc} {epaisseur_zinc} mm, dév. 33 cm",
+          "designation": "Bandes d'abergement {aspect_zinc} {epaisseur_zinc} mm, dév. 33 cm",
           "precisionRequires": [
             "aspect_zinc"
           ],
@@ -14268,6 +14338,19 @@
           "version": 1
         },
         {
+          "key": "longueur_bac_commande",
+          "label": "Longueur d'un bac commandé",
+          "unit": "m",
+          "formula": "si(longueur_rampant > regle.rampant_max_bac, longueur_rampant / arrondi_sup(longueur_rampant / regle.rampant_max_bac), longueur_rampant) + regle.surlongueur_bac",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        {
           "key": "coulissantes_m2",
           "label": "Pattes coulissantes par m²",
           "unit": "u/m2",
@@ -14349,7 +14432,7 @@
           "unit": "u",
           "core": true,
           "exclusions": "Un pan rectangulaire ; chaque bac fait la longueur du rampant, ou 10 m au plus avec jonction transversale au-delà. Hors bandes d'égout, de rive, de faîtage et de noue.",
-          "designation": "Bacs joint debout {aspect_zinc} {epaisseur_zinc} mm",
+          "designation": "Bacs joint debout {aspect_zinc} {epaisseur_zinc} mm, longueur {longueur_bac_commande|m}",
           "precisionRequires": [
             "aspect_zinc"
           ],

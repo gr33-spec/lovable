@@ -75,7 +75,7 @@ for (const size of WIDTHS) {
     await shoot(page, size.name, "05-liste-des-fournitures");
 
     await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
-    const apercu = page.getByRole("dialog", { name: "Aperçu de la demande de devis" });
+    const apercu = page.getByRole("dialog", { name: "À qui j'envoie ?" });
     await expect(apercu).toBeVisible();
     await shoot(page, size.name, "06-apercu-envoi");
     for (const name of ["Tuilerie de l'Ouest (démo)", "Négoce Breizh (démo)", "Matériaux Atlantique (démo)"]) {

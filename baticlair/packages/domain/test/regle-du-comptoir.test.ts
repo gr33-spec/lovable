@@ -114,7 +114,7 @@ describe("la règle du comptoir (§47.8)", () => {
       "Pattes coulissantes joint debout",
       "Pattes fixes joint debout",
       "Voliges sapin 18×200 mm traité",
-      "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm", // §48.6 : feuilles 2 × 1 m, jamais de bobineau pour une bande
+      "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour bande zinc d'égout", // §48.6 et §50.7 (la pièce dite) : feuilles 2 × 1 m, jamais de bobineau pour une bande
       "Gouttière zinc demi-ronde dév. 33",
       "Crochets de gouttière bandeau dév. 33",
       "Naissances zinc demi-ronde dév. 33 Ø80",

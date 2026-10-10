@@ -45,6 +45,7 @@ export type Correction =
   | { action: "fixer_quantite"; id: string; quantite: string; unite: string }
   // §45.9 : précision et croix de l'aperçu ; §45.8 : « On ajoute ? ».
   | { action: "preciser"; id: string; precision: string }
+  | { action: "bref"; cle: string; texte: string }
   | { action: "retirer_article"; id: string }
   | { action: "suggestion"; id: string; reponse: "oui" | "non" };
 
@@ -343,6 +344,11 @@ export class QuantitatifsService {
             ? await this.takeoffs.answer(tenant, reviewed.takeoff.id, `precision:${correction.id}`, correction.precision)
             : await this.takeoffs.answer(tenant, reviewed.takeoff.id, `retire:${correction.id}`, "oui");
         return this.view(row, after, rendu);
+      }
+      case "bref": {
+        // §50.7 : seule une ligne du bref montré se corrige ; vide, elle est retirée (au document comme chez le fournisseur).
+        if (!takeoffDto(reviewed).bref.some((l) => l.cle === correction.cle)) throw notFound("Line");
+        return this.view(row, await this.takeoffs.answer(tenant, reviewed.takeoff.id, `bref:${correction.cle}`, correction.texte), rendu);
       }
       case "suggestion": {
         if (!reviewed.purchase.suggestions.some((s) => s.key === correction.id)) throw notFound("Line");
