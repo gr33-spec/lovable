@@ -846,10 +846,10 @@ function SendSheet({ canSend, sending, onSend, onClose, children }: { canSend: b
           <X size={20} aria-hidden="true" />
         </button>
       </div>
-      <div className="grow overflow-y-auto px-3 pb-40">
+      <div className="min-h-0 grow overflow-y-auto px-3 pb-4">
         <div className="mx-auto flex max-w-2xl flex-col gap-3">{children}</div>
       </div>
-      <div className="fixed inset-x-0 bottom-0 flex flex-col items-center gap-1 bg-ground/95 px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur">
+      <div className="flex shrink-0 flex-col items-center gap-1 bg-ground px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] shadow-[0_-8px_16px_-12px_rgba(16,24,40,0.25)]">
         <Button className="min-h-14 w-full max-w-2xl text-[17px]" pending={sending} disabled={!canSend} onClick={onSend}>
           <Send size={18} aria-hidden="true" />
           {canSend ? "Envoyer" : "Choisis un fournisseur"}
