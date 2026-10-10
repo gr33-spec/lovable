@@ -113,6 +113,15 @@ export function SupplyList({
   const sharedFor = (r: ScreenRow) => new Map(askKeysOf(r).flatMap((k) => (askOwner.get(k) && askOwner.get(k)!.key !== r.key ? [[k, labelOf(askOwner.get(k)!)] as const] : [])));
 
   // §50.3 : une liste, comme un bon de commande : les oranges d'abord, puis les vertes, chacune dans l'ordre du devis.
+  // §48.5 : entrer en sélection coche chaque ligne prête et pas encore envoyée à part (« je dois tout avoir de coché ») ;
+  // l'artisan décoche ce qui ne part pas.
+  const startSelecting = () => {
+    setChecked(new Set(rows.filter((r) => r.status !== "check" && articleOf(r) && !selection?.sent.has(articleOf(r)!)).map((r) => articleOf(r)!)));
+    setSelecting(true);
+  };
+  // La commande répartie : ce qui n'est encore parti chez aucun fournisseur, dont les lignes orange à vérifier d'abord.
+  const unsent = rows.filter((r) => articleOf(r) && !selection?.sent.has(articleOf(r)!));
+  const unsentToCheck = unsent.filter((r) => r.status === "check").length;
   const ordered = [...rows.filter((r) => r.status === "check"), ...rows.filter((r) => r.status !== "check")];
   const link = "inline-flex min-h-10 items-center gap-1.5 text-[13px] font-bold text-muted underline decoration-dotted underline-offset-4";
 
@@ -199,12 +208,42 @@ export function SupplyList({
         </details>
       ) : null}
 
+      {/* Retour du fondateur (2026-10-10) : « il pourra envoyer le reste de la fourniture vers un autre fournisseur ». Dès
+          qu'une part est partie, la liste dit la répartition et propose le reste, déjà coché, à un autre fournisseur. */}
+      {selection && selection.parts.length > 0 && !selecting ? (
+        <section aria-label="Commande répartie" className="mt-3 flex flex-col gap-2 rounded-[20px] bg-surface p-3 shadow-card">
+          <h3 className="text-[13px] font-extrabold text-muted">Commande répartie</h3>
+          <ul className="flex flex-col gap-1">
+            {selection.parts.map((p) => (
+              <li key={p.supplierId} className="flex items-center gap-2 text-[15px] font-bold">
+                <Check size={16} className="shrink-0 text-ok" aria-hidden="true" />
+                <span>{`${p.name} · ${p.lines} ligne${p.lines > 1 ? "s" : ""}`}</span>
+              </li>
+            ))}
+          </ul>
+          {unsent.length > 0 ? (
+            <>
+              {editable ? (
+                <Button variant="secondary" className="w-full" onClick={startSelecting}>
+                  <Send size={18} aria-hidden="true" />
+                  {`Envoyer le reste (${unsent.length} ligne${unsent.length > 1 ? "s" : ""})`}
+                </Button>
+              ) : null}
+              {unsentToCheck > 0 ? <p className="text-[13px] text-muted">{`Dont ${unsentToCheck} à vérifier d'abord.`}</p> : null}
+            </>
+          ) : (
+            <p className="text-[14px] text-muted">Toute la liste est partie.</p>
+          )}
+        </section>
+      ) : null}
+
       {/* §50.3 : en bas, l'aperçu et l'envoi ; dessous, en petit, les autres gestes. Seuls les deux boutons restent collés en
           bas ; les liens suivent la liste, jamais par-dessus. */}
       {selecting && selection ? (
         <div className={`sticky z-10 mt-2 bg-gradient-to-t from-ground from-70% to-transparent pt-6 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(12px,env(safe-area-inset-bottom))]"}`}>
           <SelectionBar
             count={checked.size}
+            alreadyServed={selection.parts.map((p) => p.supplierId)}
             onCancel={() => setSelecting(false)}
             onSend={async (supplierIds) => {
               await selection.send([...checked], supplierIds);
@@ -253,12 +292,7 @@ export function SupplyList({
               {selection && rows.length > 1 ? (
                 <button
                   type="button"
-                  onClick={() => {
-                    // Retour du fondateur (2026-10-10) : « je dois tout avoir de coché » : chaque ligne prête et pas encore
-                    // envoyée à part l'est d'office ; l'artisan décoche ce qui ne part pas.
-                    setChecked(new Set(rows.filter((r) => r.status !== "check" && articleOf(r) && !selection.sent.has(articleOf(r)!)).map((r) => articleOf(r)!)));
-                    setSelecting(true);
-                  }}
+                  onClick={startSelecting}
                   className={link}
                 >
                   Envoyer une sélection à un autre fournisseur

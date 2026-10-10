@@ -878,14 +878,20 @@ test("§48.5 : envoyer une sélection à un autre fournisseur, discret, puis l'e
   await expect(list.getByText("Envoyé · Point.P")).toHaveCount(2);
   await expect(list.getByRole("checkbox")).toHaveCount(0);
 
-  // Une autre sélection, vers un autre fournisseur : seules les lignes pas encore envoyées sont cochées d'office.
-  await list.getByRole("button", { name: "Envoyer une sélection à un autre fournisseur" }).click();
+  // Retour du fondateur (2026-10-10) : « il pourra envoyer le reste de la fourniture vers un autre fournisseur ; un devis peut
+  // contenir des matériaux qui se trouvent chez plusieurs fournisseurs ». La liste dit la répartition et ce qui reste.
+  const reparti = list.getByRole("region", { name: "Commande répartie" });
+  await expect(reparti.getByText("Point.P · 2 lignes")).toBeVisible();
+  // « Envoyer le reste » : seules les lignes pas encore envoyées sont cochées ; Point.P, qui a déjà sa part, ne l'est plus.
+  await reparti.getByRole("button", { name: /^Envoyer le reste/ }).click();
   await expect(bar.getByText(`${count - 2} ligne${count - 2 > 1 ? "s" : ""} cochée${count - 2 > 1 ? "s" : ""}`)).toBeVisible();
+  await expect(fournisseur("Point.P")).not.toBeChecked();
+  await expect(fournisseur("Tuiles & Co")).toBeChecked();
   for (let i = 0; i < count; i++) if (i !== 2) await ready.nth(i).uncheck();
-  await fournisseur("Point.P").uncheck();
   await bar.getByRole("button", { name: "Envoyer" }).click();
   await expect(list.getByText("Envoyé · Tuiles & Co")).toHaveCount(1);
   await expect(list.getByText("Envoyé · Point.P")).toHaveCount(2);
+  await expect(reparti.getByText("Tuiles & Co · 1 ligne", { exact: true })).toBeVisible();
 
   // « Je dois aussi pouvoir en ajouter » : un fournisseur qui n'est pas au carnet s'ajoute ici, sans quitter la liste.
   await list.getByRole("button", { name: "Envoyer une sélection à un autre fournisseur" }).click();
