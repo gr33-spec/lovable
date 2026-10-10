@@ -1090,6 +1090,13 @@ function computeNeed(
           if (name === "devis") return DEVIS_MARK;
           // « {marge} » : la marge appliquée (réglage de l'entreprise ou règle du tiroir), dite à l'artisan (§49.2.4).
           if (name === "marge") return `${fr(factor.minus(1).times(100))} %`;
+          // §50.7 : « {piece} » = la pièce telle que le devis l'écrit (« Bande de ventilation en Z en zinc quartz ») ; « {piece_min} »
+          // la même, sans majuscule, au milieu d'une phrase (« pour habillage de rive… »). Sans pièce écrite : le nom de l'ouvrage.
+          if (name === "piece" || name === "piece_min") {
+            // Marchandise seule : « Fourniture de bandes de rive… » → « bandes de rive… ».
+            const piece = (input.label ?? work.label.replace(/\s*\(.*$/, "")).replace(/^(?:fourniture\s+(?:et\s+pose\s+)?(?:de\s+|d['’])|pose\s+(?:de\s+|d['’]))/i, "").replace(/\s*\([^)]*$/, "").trim();
+            return name === "piece" ? piece.charAt(0).toUpperCase() + piece.slice(1) : piece.charAt(0).toLowerCase() + piece.slice(1);
+          }
           // Une qualité écrite sous « Autre » (« Ardoise d'Angers ») : telle quelle.
           const written = input.params[name]?.text;
           if (written) return written;

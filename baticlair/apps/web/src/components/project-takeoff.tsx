@@ -9,8 +9,6 @@ import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { type ItemEdit } from "@/components/purchase-list";
 import { SiteUnitsView } from "@/components/site-units-view";
 import { SupplyList } from "@/components/supply-list";
-import { VoiceEditor } from "@/components/voice-editor";
-import type { VoiceEdit } from "@/lib/voice-edits";
 import { type DecisionHandlers } from "@/components/takeoff-view";
 import { useProgressRefresh } from "@/components/project-progress";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
@@ -70,9 +68,8 @@ export function ProjectTakeoff({
   const [pending, setPending] = useState(false);
   const [actionError, setActionError] = useState<ApiError | null>(null);
   // Le devis lu, ligne par ligne : fermé, ouvert pour corriger, ou ouvert directement sur « ajouter un article ».
-  // §50.3 : « Ajouter un article » ouvre sa fiche ; « Modifier à la voix » ouvre la voix sous la liste.
+  // §50.7 : « Ajouter un article » ouvre sa fiche (plus de voix).
   const [showList, setShowList] = useState<false | "ajouter">(false);
-  const [voiceOpen, setVoiceOpen] = useState(false);
   const [sendSignal, setSendSignal] = useState(0);
   // §48.5 : « Envoyer une sélection à un autre fournisseur » ; une sélection partie fait relire les demandes.
   const [requestsSignal, setRequestsSignal] = useState(0);
@@ -275,43 +272,8 @@ export function ProjectTakeoff({
   };
   // Mettre une ligne de côté : un article de la liste sort de la liste (la liste validée le reste) ; une ligne du devis
   // à préciser avec le fournisseur est retirée.
-  // §48.4 : une modification dite à la voix (ou écrite) passe par les mêmes gestes que la main : retirer, corriger, ajouter.
-  const voiceEdit = async (edit: Exclude<VoiceEdit, { kind: "unknown" }>): Promise<boolean> => {
-    if (edit.kind === "add") {
-      await call("corrections", { action: "ajouter", ligne: { libelle: edit.label, quantite: edit.quantity, unite: edit.unit, reference: null } });
-      return true;
-    }
-    const item = takeoff.purchase.toBuy.find((b) => b.key === edit.itemKey);
-    // Une ligne laissée au fournisseur (« quote:<clé> ») : c'est sa ligne du devis qu'on retire ou qu'on réécrit.
-    const quoted = !item && edit.itemKey.startsWith("quote:") ? takeoff.purchase.toQuote.find((q) => `quote:${q.key}` === edit.itemKey) : undefined;
-    if (quoted) {
-      if (edit.kind === "remove") {
-        for (const id of quoted.lineIds) await call("corrections", { action: "retirer", id });
-        return true;
-      }
-      const line = quoted.lineIds.length === 1 ? takeoff.lines.find((l) => l.id === quoted.lineIds[0]) : undefined;
-      if (!line) return false;
-      const fields = { libelle: line.designation, quantite: line.quantity, unite: line.unit, reference: line.reference };
-      const ligne = edit.kind === "rename" ? { ...fields, libelle: edit.to } : { ...fields, quantite: edit.to.replace(",", "."), unite: edit.unit ?? line.unit };
-      await call("corrections", { action: "modifier_ligne", id: line.id, ligne });
-      return true;
-    }
-    if (!item) return false;
-    if (edit.kind === "remove") {
-      if (item.key.startsWith("line:")) for (const lineId of item.lineIds) await call("corrections", { action: "retirer", id: lineId });
-      else await call("corrections", { action: "retirer_article", id: item.key });
-      return true;
-    }
-    if (edit.kind === "rename") {
-      // Le nom s'allonge de ce qui a été dit ; la quantité reste celle de la ligne.
-      const now = item.quantity ? parseQuantity(item.quantity) : null;
-      await editItem(item, { libelle: edit.to, quantite: now?.quantity ?? null, unite: now?.unit ?? null });
-      return true;
-    }
-    const unit = edit.unit ?? (item.quantity ? parseQuantity(item.quantity)?.unit : null) ?? null;
-    await editItem(item, { libelle: item.label, quantite: edit.to.replace(",", "."), unite: unit || null });
-    return true;
-  };
+  // §50.7 : une ligne du chantier en bref se corrige (texte) ou se retire (vide), comme une ligne de la liste.
+  const editBrief = (cle: string, texte: string) => call("corrections", { action: "bref", cle, texte });
   const setAside = async (row: ScreenRow) => {
     // Un article recopié tel quel du devis (« line:<ligne> ») se retire avec sa ligne : sinon son doute reviendrait.
     if (row.itemKey && !row.itemKey.startsWith("line:")) await call("corrections", { action: "retirer_article", id: row.itemKey });
@@ -349,7 +311,7 @@ export function ProjectTakeoff({
       />
     );
   } else {
-    // §50.3 : ma liste, et rien d'autre ; dessous, en petit, ajouter un article, envoyer une sélection, modifier à la voix.
+    // §50.7 : « Ton chantier », le document que reçoit le fournisseur ; dessous, en petit, ajouter un article, envoyer une sélection.
     body = (
       <SupplyList
         takeoff={takeoff}
@@ -367,8 +329,7 @@ export function ProjectTakeoff({
         {...(editable
           ? {
               onAdd: () => setShowList("ajouter"),
-              onVoice: () => setVoiceOpen((v) => !v),
-              ...(voiceOpen ? { voice: <VoiceEditor items={[...takeoff.purchase.toBuy.map((b) => ({ key: b.key, label: b.label, quantity: b.quantity })), ...takeoff.purchase.toQuote.map((q) => ({ key: `quote:${q.key}`, label: q.label, quantity: q.measure || null }))]} pending={pending} onApply={voiceEdit} /> } : {}),
+              onBrief: editBrief,
             }
           : {})}
       />
@@ -457,7 +418,7 @@ export function ProjectTakeoff({
             {actionError && !listShown ? <ErrorNotice error={actionError} /> : null}
           </section>
           <div className={sent ? "order-first" : undefined}>
-            <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} onListChanged={reload} openSignal={sendSignal} refreshSignal={requestsSignal} onSentChange={setSent} onPreviewClosed={() => setOverview(false)} />
+            <ProjectPriceRequests projectId={projectId} archived={archived} canCreate={!draft} quantitatifId={quantitatif?.id ?? null} openSignal={sendSignal} refreshSignal={requestsSignal} onSentChange={setSent} onPreviewClosed={() => setOverview(false)} />
           </div>
         </div>
       </div>

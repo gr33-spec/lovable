@@ -1,24 +1,23 @@
 "use client";
 
-import { Check, ChevronDown, Paperclip, Send, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, Paperclip, Pencil, Send, Trash2, X } from "lucide-react";
 import { openDocument } from "@/lib/open-document";
 import { useEffect, useId, useRef, useState } from "react";
-import { EDIT_FIELD, EDIT_PANEL, ItemForm, type ItemEdit, type SketchHandlers } from "@/components/purchase-list";
-import { Proof, type DecisionHandlers } from "@/components/takeoff-view";
+import { type ItemEdit, type SketchHandlers } from "@/components/purchase-list";
+import { type DecisionHandlers } from "@/components/takeoff-view";
 import { SelectionBar, type SelectionSend } from "@/components/selection-send";
 import { Button } from "@/components/ui";
 import type { ItemSketch, PurchaseItem, ScreenRow, Takeoff, TakeoffDecision } from "@/lib/api";
 import { parseQuantity, shortName } from "@/lib/labels";
 
 /**
- * UN SEUL ÉCRAN : LA LISTE DES FOURNITURES (retour du fondateur, 2026-10-04, « un enfant de 10 ans s'en sort »).
- *  - chaque ligne a un point de couleur : vert = sûr, rien à faire ; orange = à vérifier, et elle se RÈGLE DANS SA CARTE
- *    (§49.8) : la raison en entier, les choix en boutons, « Garder 20 » / « Mettre 21 », « C'est bon » ; un geste, jamais
- *    un autre écran ; gris = à préciser avec le fournisseur, la ligne part telle quelle ;
- *  - en haut, « 11 fournitures · 2 à vérifier » et « Tout est bon » ; en bas, « Envoyer au fournisseur » quand tout est
- *    vert ou gris ;
- *  - crayon pour modifier, corbeille (ou glisser vers la gauche) pour retirer (« Annuler » pendant 3 s) ; « Voir le calcul »
- *    en tout petit.
+ * §50.7 L'ÉCRAN 3 EST LE DOCUMENT (fondateur, 2026-10-10) : « Ton chantier », ce que le fournisseur recevra.
+ *  - en haut, « Le chantier en bref » (le même que chez le fournisseur) : chaque ligne se corrige ou se retire ;
+ *  - la liste : une ligne par fourniture (point, nom, quantité, unité) ; une ligne orange garde son point et sa raison en
+ *    cinq mots, sans carte dépliée ;
+ *  - sur le document même : un tap ouvre la ligne (moins / plus, boutons de choix, « C'est bon », corbeille), un tap sur
+ *    le nom le corrige, un glissement vers la gauche la retire ; aucun écran intermédiaire, plus de voix ;
+ *  - en bas, « Envoyer au fournisseur », et en petit « Ajouter un article », « Envoyer une sélection ».
  */
 export function SupplyList({
   takeoff,
@@ -34,14 +33,12 @@ export function SupplyList({
   docked = true,
   selection,
   onAdd,
-  onVoice,
-  voice,
+  onBrief,
 }: {
   /** §50.3 : « Ajouter un article », en petit sous le bouton d'envoi. */
   onAdd?: () => void;
-  /** §50.3 : « Modifier à la voix », en petit sous le bouton d'envoi ; `voice` est le panneau ouvert, sinon absent. */
-  onVoice?: () => void;
-  voice?: React.ReactNode;
+  /** §50.7 : une ligne du chantier en bref, réécrite (texte) ou retirée (vide). */
+  onBrief?: (cle: string, texte: string) => Promise<void>;
   /** §48.5 : « Envoyer une sélection à un autre fournisseur » (absent : la fonction n'existe pas ici). */
   selection?: SelectionSend;
   /** Une barre de chat est en bas de l'écran : le gros bouton se pose au-dessus d'elle. Sur la page des fournitures, non. */
@@ -123,7 +120,22 @@ export function SupplyList({
           </span>
         </div>
       ) : null}
-      <ul aria-label="Fournitures" className="flex flex-col gap-2">
+      <header className="mb-3 flex flex-col gap-0.5">
+        <h2 className="font-display text-[22px] leading-tight font-extrabold tracking-[-0.01em]">Ton chantier</h2>
+        <p className="text-[13px] text-muted">C&apos;est ce que reçoit le fournisseur.</p>
+      </header>
+      {takeoff.bref && takeoff.bref.length > 0 ? (
+        <section aria-label="Le chantier en bref" className="mb-4 flex flex-col gap-1">
+          <h3 className="text-[13px] font-extrabold text-muted">Le chantier en bref</h3>
+          <ul className="flex flex-col divide-y divide-line rounded-[20px] border border-[#dde1e8] bg-surface px-3">
+            {takeoff.bref.map((l) => (
+              <BriefLine key={l.cle} text={l.texte} editable={editable && Boolean(onBrief)} pending={pending} onSave={(t) => onBrief!(l.cle, t)} />
+            ))}
+          </ul>
+        </section>
+      ) : null}
+      <h3 className="mb-1 text-[13px] font-extrabold text-muted">Fournitures</h3>
+      <ul aria-label="Fournitures" className="flex flex-col divide-y divide-line rounded-[20px] border border-[#dde1e8] bg-surface">
         {ordered.map((r) => (
           <Row
             key={r.key}
@@ -178,7 +190,6 @@ export function SupplyList({
           </ul>
         </details>
       ) : null}
-      {voice ? <div className="mt-3">{voice}</div> : null}
 
       {/* §50.3 : un seul bouton en bas, « Envoyer au fournisseur » ; dessous, en petit, les trois autres gestes. Seul le bouton
           reste collé en bas ; les liens suivent la liste, jamais par-dessus. */}
@@ -231,11 +242,6 @@ export function SupplyList({
                   Envoyer une sélection à un autre fournisseur
                 </button>
               ) : null}
-              {onVoice ? (
-                <button type="button" onClick={onVoice} aria-expanded={Boolean(voice)} className={link}>
-                  Modifier à la voix
-                </button>
-              ) : null}
             </nav>
           ) : null}
         </>
@@ -286,7 +292,7 @@ function Stepper({ label, value, unit, pending, onChange }: { label: string; val
   );
 }
 
-/** Le bord gauche de la carte dit son état d'un coup d'œil : vert prêt, orange à vérifier, gris au fournisseur. */
+/** Le point dit l'état d'un coup d'œil : vert prêt, orange à régler (§50.3). */
 const DOT: Record<ScreenRow["status"], { className: string; label: string }> = {
   ok: { className: "bg-ok", label: "sûr" },
   check: { className: "bg-warn", label: "à vérifier" },
@@ -294,10 +300,62 @@ const DOT: Record<ScreenRow["status"], { className: string; label: string }> = {
   supplier: { className: "bg-ok", label: "sûr" },
 };
 
+const FIELD = "min-h-11 w-full min-w-0 rounded-xl border-2 border-line bg-surface px-3 text-[15px] outline-none focus:border-accent";
+
+/** Un texte qui se corrige sur place (le nom d'une ligne, une ligne du bref) : un tap, la case, « OK ». */
+function InlineText({ label, value, pending, onSave, onCancel }: { label: string; value: string; pending: boolean; onSave: (v: string) => Promise<void>; onCancel: () => void }) {
+  const id = useId();
+  const [text, setText] = useState(value);
+  return (
+    <form
+      className="flex items-center gap-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (text.trim() && text.trim() !== value) void onSave(text.trim());
+        else onCancel();
+      }}
+    >
+      <label htmlFor={id} className="sr-only">
+        {label}
+      </label>
+      <input id={id} autoFocus value={text} onChange={(e) => setText(e.target.value)} className={FIELD} />
+      <Button type="submit" className="min-h-11 shrink-0 px-4" pending={pending}>
+        OK
+      </Button>
+    </form>
+  );
+}
+
+/** §50.7 : une ligne du chantier en bref ; un tap la corrige, la corbeille la retire (au document comme chez le fournisseur). */
+function BriefLine({ text, editable, pending, onSave }: { text: string; editable: boolean; pending: boolean; onSave: (t: string) => Promise<void> }) {
+  const [editing, setEditing] = useState(false);
+  if (editing)
+    return (
+      <li className="flex flex-col gap-2 py-2">
+        <InlineText label={`Modifier le bref : ${text}`} value={text} pending={pending} onCancel={() => setEditing(false)} onSave={async (t) => void (await onSave(t), setEditing(false))} />
+        <button type="button" onClick={() => void onSave("")} className="inline-flex min-h-10 items-center gap-1.5 self-start text-[13px] font-bold text-danger">
+          <Trash2 size={15} aria-hidden="true" />
+          Retirer du bref
+        </button>
+      </li>
+    );
+  return (
+    <li className="flex min-h-11 items-center">
+      {editable ? (
+        <button type="button" onClick={() => setEditing(true)} aria-label={`Modifier le bref : ${text}`} className="flex min-h-11 w-full items-center text-left text-[14px] leading-snug">
+          {text}
+        </button>
+      ) : (
+        <span className="text-[14px] leading-snug">{text}</span>
+      )}
+    </li>
+  );
+}
+
 /**
- * Une ligne : le point, la désignation, la quantité, une sous-ligne grise facultative. UN SEUL GESTE (retour du
- * fondateur, 2026-10-05, « on s'y perd ») : toucher la ligne ouvre sa fiche, où tout se trouve (modifier, croquis, calcul,
- * retirer). Une ligne orange se règle DANS SA CARTE (§49.8), sans autre écran. Toutes les lignes se modifient, grises comprises. Glisser à gauche retire.
+ * §50.7 : une ligne du document. Fermée : le point, le nom, la quantité ; si orange, sa raison en cinq mots. Un tap l'ouvre
+ * (moins / plus, boutons de choix, « C'est bon », corbeille) ; ouverte, un tap sur le nom le corrige ; un glissement vers la
+ * gauche la retire. Aucun écran intermédiaire.
  */
 function Row({
   row,
@@ -317,7 +375,7 @@ function Row({
 }: {
   /** §48.5 : mode sélection, une case à cocher à la place du point ; toucher la ligne la coche. */
   selectMode?: { checked: boolean; disabled: boolean; onToggle: () => void };
-  /** §48.5 : déjà envoyée à part (gris « Envoyé · fournisseur »), toujours visible dans la liste. */
+  /** §48.5 : déjà envoyée à part (« Envoyé · fournisseur »), toujours visible dans la liste. */
   sentTo?: string;
   row: ScreenRow;
   takeoff: Takeoff;
@@ -325,9 +383,9 @@ function Row({
   editable: boolean;
   pending: boolean;
   handlers: DecisionHandlers;
-  /** La remarque qui met la ligne en orange : elle se règle dans la carte (§49.8). */
+  /** La remarque qui met la ligne en orange : elle se règle dans la ligne ouverte (§49.8). */
   decision?: TakeoffDecision | undefined;
-  /** Les questions de cette carte posées sur une autre carte (clé → nom de la carte qui porte les boutons). */
+  /** Les questions de cette ligne posées sur une autre ligne (clé → nom de la ligne qui porte les boutons). */
   shared?: ReadonlyMap<string, string>;
   onEdit: (item: PurchaseItem, edit: ItemEdit) => Promise<void>;
   onSetAside: () => void;
@@ -335,29 +393,25 @@ function Row({
   sketchHandlers?: SketchHandlers;
 }) {
   const [open, setOpen] = useState(false);
-  const [proof, setProof] = useState(false);
+  const [naming, setNaming] = useState(false);
   const [dx, setDx] = useState(0);
   const start = useRef<{ x: number; y: number } | null>(null);
-  // Un glissement n'est pas un appui : il n'ouvre pas la fiche.
+  // Un glissement n'est pas un appui : il n'ouvre pas la ligne.
   const swiped = useRef(false);
+  const file = useRef<HTMLInputElement>(null);
   const item = row.itemKey ? takeoff.purchase.toBuy.find((b) => b.key === row.itemKey) : undefined;
   const quote = row.quoteKey ? takeoff.purchase.toQuote.find((q) => q.key === row.quoteKey) : undefined;
   const lines = row.lineIds.map((id) => takeoff.lines.find((l) => l.id === id)).filter((l): l is Takeoff["lines"][number] => Boolean(l));
-  const proofs = item ? takeoff.view.items.filter((i) => (item.kind === "computed" ? i.kind === "need" && item.needIds.includes(i.id) : i.kind === "line" && item.lineIds.includes(i.id))) : [];
-  // Une ligne reprise du devis n'a pas de calcul : on montre d'où elle vient.
-  const what = item?.kind === "direct" ? "la ligne du devis" : "le calcul";
   const quantity = item?.quantity ?? quote?.measure ?? row.pending?.quantity ?? null;
-  // §50.3 : une ligne verte ne dit rien de plus que son nom et sa quantité ; une orange, sa raison en cinq mots.
   const sub = sentTo ? `Envoyé · ${sentTo}` : row.status === "check" ? (row.reason ?? "À vérifier") : null;
   const dot = sentTo ? DOT.supplier : DOT[row.status];
-  // §48 : une ligne orange se règle sur place, au plus / moins ; le crayon ouvre sa fiche (désignation, croquis).
   const parsed = item?.quantity ? parseQuantity(item.quantity) : null;
-  // §50.3 : chaque carte a sa quantité au moins / plus et son unité, verte ou orange.
   const stepper = editable && !sentTo && item && parsed && Number.isFinite(toNumber(parsed.quantity)) ? { value: toNumber(parsed.quantity), unit: parsed.unit } : null;
   const removable = editable && (row.itemKey !== undefined || row.lineIds.length > 0);
-  // Ce que la fiche peut montrer : l'article, sinon les lignes du devis ; sinon, en lecture seule, le calcul.
-  const canEdit = editable && (item !== undefined || lines.length > 0);
-  const opens = row.status === "check" ? editable : canEdit || proofs.length > 0;
+  // Le nom se corrige sur l'article, sinon sur la ligne du devis (une seule) d'où vient la ligne.
+  const nameLine = !item && lines.length === 1 ? lines[0] : undefined;
+  const renamable = editable && !sentTo && (item !== undefined || nameLine !== undefined);
+  const opens = editable && !sentTo;
   const onPointerDown = (e: React.PointerEvent) => {
     swiped.current = false;
     if (!removable || open) return;
@@ -376,40 +430,32 @@ function Row({
     if (dx < -90) onSetAside();
     setDx(0);
   };
-  const remove = removable
-    ? () => {
-        setOpen(false);
-        onSetAside();
-      }
-    : undefined;
+  const rename = async (name: string) => {
+    if (item) await onEdit(item, { libelle: name, quantite: parsed?.quantity ?? null, unite: parsed?.unit ?? null });
+    else if (nameLine) await handlers.onSaveLine(nameLine.id, { designation: name, quantity: nameLine.quantity, unit: nameLine.unit, reference: nameLine.reference });
+    setNaming(false);
+  };
 
-  // L'indispensable pour valider (retour du fondateur, 2026-10-05) : le point, la désignation entière, la quantité ;
-  // dessous, sur une ligne, ce qui reste à faire (orange) ou la précision utile. Le reste est dans la fiche.
   const body = (
     <>
       <span className={`mt-[6px] size-2.5 shrink-0 rounded-full ${dot.className}`} role="img" aria-label={dot.label} />
       <span className="flex min-w-0 grow flex-col">
-        {/* La désignation entière : c'est ce que le comptoir lit (jamais coupée). Sur téléphone, la quantité passe dessous. */}
+        {/* Le nom entier : c'est ce que le comptoir lit (jamais coupé). Sur téléphone, la quantité passe dessous. */}
         <span className="text-[14px] leading-snug font-semibold">{label}</span>
-        {(quantity && !stepper) || sub ? (
+        {quantity || sub ? (
           <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 text-[13px] leading-snug">
-            {quantity && !stepper ? <span className="shrink-0 text-[14px] font-extrabold tabular-nums sm:hidden">{quantity}</span> : null}
-            {/* §49.8 : la précision en entier, jamais « … ». */}
-            {sub ? <span className={`min-w-0 ${sentTo ? "font-bold text-muted" : row.status === "check" ? "font-bold text-warn" : "text-muted"}`}>{sub}</span> : null}
+            {quantity ? <span className="shrink-0 text-[14px] font-extrabold tabular-nums sm:hidden">{quantity}</span> : null}
+            {sub ? <span className={`min-w-0 ${sentTo ? "font-bold text-muted" : "font-bold text-warn"}`}>{sub}</span> : null}
           </span>
         ) : null}
       </span>
-      {stepper ? null : <span className="shrink-0 text-right text-[15px] font-extrabold whitespace-nowrap tabular-nums max-sm:hidden">{quantity ?? ""}</span>}
-      {open ? <X size={18} className="mt-0.5 shrink-0 text-accent-text" aria-hidden="true" /> : null}
+      <span className="shrink-0 text-right text-[15px] font-extrabold whitespace-nowrap tabular-nums max-sm:hidden">{quantity ?? ""}</span>
     </>
   );
   // §48.5 : en mode sélection, la ligne entière coche sa case ; rien d'autre ne s'ouvre.
   if (selectMode) {
     return (
-      <li
-        id={`ligne-${row.key}`}
-        className={`rounded-[20px] border border-[#dde1e8] px-3 py-2 ${selectMode.checked ? "bg-[#eef2ff]" : "bg-surface"} ${selectMode.disabled ? "opacity-60" : ""}`}
-      >
+      <li id={`ligne-${row.key}`} className={`px-3 py-2 ${selectMode.checked ? "bg-accent/5" : ""} ${selectMode.disabled ? "opacity-60" : ""}`}>
         <label className={`flex min-h-11 items-start gap-2.5 ${selectMode.disabled ? "" : "cursor-pointer"}`}>
           <input
             type="checkbox"
@@ -431,12 +477,9 @@ function Row({
     );
   }
   return (
-    <li
-      id={`ligne-${row.key}`}
-      className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden rounded-[20px] border border-[#dde1e8] px-3 py-2 shadow-[0_1px_3px_rgba(16,24,40,0.06)] transition-colors ${open ? "bg-[#eef2ff]" : "bg-surface"}`}
-    >
+    <li id={`ligne-${row.key}`} className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden px-3 py-1.5 transition-colors ${open ? "bg-accent/5" : ""}`}>
       {dx < 0 ? (
-        <span aria-hidden="true" className="absolute inset-y-0 right-0 flex items-center rounded-xl bg-danger px-4 text-sm font-extrabold text-white">
+        <span aria-hidden="true" className="absolute inset-y-0 right-0 flex items-center bg-danger px-4 text-sm font-extrabold text-white">
           Retirer
         </span>
       ) : null}
@@ -449,41 +492,39 @@ function Row({
         onPointerCancel={onPointerEnd}
       >
         {opens ? (
-          <div className="flex items-start gap-1.5">
           <button
             type="button"
             onClick={() => {
               if (swiped.current) return void (swiped.current = false);
+              setNaming(false);
               setOpen(!open);
             }}
             aria-expanded={open}
             aria-label={`${open ? "Fermer" : "Modifier"} : ${label}`}
-            className="flex min-h-11 w-full min-w-0 items-start gap-2.5 rounded-xl text-left active:bg-ground/60"
+            className="flex min-h-11 w-full min-w-0 items-start gap-2.5 text-left"
           >
             {body}
           </button>
-          </div>
         ) : (
           <div className="flex min-h-11 w-full min-w-0 items-start gap-2.5">{body}</div>
         )}
-        {/* La quantité au plus / moins, SOUS la désignation : sur téléphone, elle ne serre jamais le texte. */}
-        {stepper && !open ? (
-          <div className="mt-1 pl-5">
-            <Stepper
-              label={label}
-              value={stepper.value}
-              unit={stepper.unit}
-              pending={pending}
-              onChange={(n) => onEdit(item!, { libelle: item!.label, quantite: String(n), unite: stepper.unit || null })}
-            />
-          </div>
-        ) : null}
       </div>
-      {row.status === "check" && editable && !open && !sentTo ? (
-        <CardActions label={label} decision={decision} item={item} pending={pending} handlers={handlers} onEdit={onEdit} {...(shared ? { shared } : {})} />
-      ) : null}
       {open ? (
-        <>
+        <div role="group" aria-label={`Ligne ouverte : ${label}`} className="flex flex-col gap-2 pb-2 pl-5">
+          {renamable ? (
+            naming ? (
+              <InlineText label={`Nom : ${label}`} value={item?.label ?? nameLine?.article ?? nameLine?.designation ?? label} pending={pending} onCancel={() => setNaming(false)} onSave={rename} />
+            ) : (
+              <button type="button" onClick={() => setNaming(true)} aria-label={`Modifier le nom : ${label}`} className="inline-flex min-h-10 items-center gap-1.5 self-start text-[13px] font-bold text-accent-text">
+                <Pencil size={14} aria-hidden="true" />
+                Modifier le nom
+              </button>
+            )
+          ) : null}
+          {stepper ? (
+            <Stepper label={label} value={stepper.value} unit={stepper.unit} pending={pending} onChange={(n) => onEdit(item!, { libelle: item!.label, quantite: String(n), unite: stepper.unit || null })} />
+          ) : null}
+          {row.status === "check" ? <CardActions label={label} decision={decision} item={item} pending={pending} handlers={handlers} onEdit={onEdit} {...(shared ? { shared } : {})} /> : null}
           {sketches.length > 0 ? (
             <ul aria-label={`Croquis joints : ${label}`} className="flex flex-wrap gap-2">
               {sketches.map((sk) => (
@@ -492,8 +533,8 @@ function Row({
                     <Paperclip size={14} aria-hidden="true" className="shrink-0" />
                     <span className="truncate">{sk.commentaire ? `${sk.nom} · ${sk.commentaire}` : sk.nom}</span>
                   </button>
-                  {editable && sketchHandlers ? (
-                    <button type="button" disabled={pending} onClick={() => void sketchHandlers.onDetach(sk.id)} aria-label={`Retirer le croquis ${sk.nom}`} className="flex size-9 shrink-0 items-center justify-center text-[#4a37d6]/70">
+                  {sketchHandlers ? (
+                    <button type="button" disabled={pending} onClick={() => void sketchHandlers.onDetach(sk.id)} aria-label={`Retirer le croquis ${sk.nom}`} className="flex size-9 shrink-0 items-center justify-center text-accent-text/70">
                       <X size={14} aria-hidden="true" />
                     </button>
                   ) : null}
@@ -501,111 +542,44 @@ function Row({
               ))}
             </ul>
           ) : null}
-          {canEdit && item ? (
-            <ItemForm
-              item={item}
-              pending={pending}
-              {...(sketchHandlers ? { onAttach: (file: File, commentaire: string) => sketchHandlers.onAttach(item.key, file, commentaire) } : {})}
-              onCancel={() => setOpen(false)}
-              onSave={async (e) => {
-                await onEdit(item, e);
-                setOpen(false);
-              }}
-              {...(remove ? { onRemove: remove } : {})}
-            />
-          ) : canEdit ? (
-            lines.map((l, i) => (
-              <LinePanel
-                key={l.id}
-                line={l}
-                pending={pending}
-                onCancel={() => setOpen(false)}
-                onSave={async (f) => {
-                  await handlers.onSaveLine(l.id, f);
+          <div className="flex flex-wrap items-center gap-x-4">
+            {item && sketchHandlers ? (
+              <>
+                <input
+                  ref={file}
+                  type="file"
+                  accept="image/*,application/pdf"
+                  className="sr-only"
+                  aria-label={`Joindre un croquis : ${label}`}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) void sketchHandlers.onAttach(item.key, f, "");
+                    e.target.value = "";
+                  }}
+                />
+                <button type="button" onClick={() => file.current?.click()} className="inline-flex min-h-10 items-center gap-1.5 text-[13px] font-bold text-accent-text">
+                  <Paperclip size={14} aria-hidden="true" />
+                  Joindre un croquis
+                </button>
+              </>
+            ) : null}
+            {removable ? (
+              <button
+                type="button"
+                onClick={() => {
                   setOpen(false);
+                  onSetAside();
                 }}
-                {...(remove && i === lines.length - 1 ? { onRemove: remove } : {})}
-              />
-            ))
-          ) : null}
-          {proofs.length > 0 ? (
-            <div className="flex flex-col gap-2">
-              <button type="button" onClick={() => setProof(!proof)} aria-expanded={proof} aria-label={`${proof ? "Masquer" : "Voir"} ${what} : ${label}`} className="inline-flex min-h-9 items-center gap-1 self-start text-[13px] font-bold text-accent-text">
-                <ChevronDown size={16} aria-hidden="true" className={proof ? "rotate-180" : ""} />
-                {proof ? `Masquer ${what}` : `Voir ${what}`}
+                className="inline-flex min-h-10 items-center gap-1.5 text-[13px] font-bold text-danger"
+              >
+                <Trash2 size={15} aria-hidden="true" />
+                Retirer de la liste
               </button>
-              {proof ? proofs.map((i) => <Proof key={`${i.kind}:${i.id}`} item={i} />) : null}
-            </div>
-          ) : null}
-        </>
+            ) : null}
+          </div>
+        </div>
       ) : null}
     </li>
-  );
-}
-
-/** La fiche d'une ligne grise (reprise du devis, à préciser avec le fournisseur) : même panneau que pour un article. */
-function LinePanel({
-  line,
-  pending,
-  onSave,
-  onCancel,
-  onRemove,
-}: {
-  line: Takeoff["lines"][number];
-  pending: boolean;
-  onSave: (f: { designation: string; quantity: string | null; unit: string | null; reference: string | null }) => Promise<void>;
-  onCancel: () => void;
-  onRemove?: () => void;
-}) {
-  const id = useId();
-  const ref = useRef<HTMLFormElement>(null);
-  const [designation, setDesignation] = useState(line.article ?? line.designation);
-  const [quantity, setQuantity] = useState(line.quantity ?? "");
-  const [unit, setUnit] = useState(line.unit ?? "");
-  useEffect(() => {
-    ref.current?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
-  }, []);
-  return (
-    <form
-      ref={ref}
-      aria-label={`Modifier : ${shortName(line.article ?? line.designation)}`}
-      className={EDIT_PANEL}
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (!designation.trim()) return;
-        void onSave({ designation: designation.trim(), quantity: quantity.trim() || null, unit: unit.trim() || null, reference: line.reference });
-      }}
-    >
-      <p className="text-[12px] font-extrabold tracking-[0.04em] text-accent-text">MODIFIER L&apos;ARTICLE</p>
-      <label htmlFor={`${id}-d`} className="flex flex-col gap-1 text-sm font-bold">
-        Désignation
-        <textarea id={`${id}-d`} rows={2} className={`${EDIT_FIELD} py-3 leading-snug`} value={designation} onChange={(e) => setDesignation(e.target.value)} />
-      </label>
-      <div className="grid grid-cols-[2fr_3fr] gap-2">
-        <label htmlFor={`${id}-q`} className="flex flex-col gap-1 text-sm font-bold">
-          Quantité
-          <input id={`${id}-q`} className={EDIT_FIELD} inputMode="decimal" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
-        </label>
-        <label htmlFor={`${id}-u`} className="flex flex-col gap-1 text-sm font-bold">
-          Unité
-          <input id={`${id}-u`} className={EDIT_FIELD} value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="m², pièces, ml…" />
-        </label>
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <Button type="submit" pending={pending}>
-          Enregistrer
-        </Button>
-        <Button type="button" variant="secondary" onClick={onCancel}>
-          Annuler
-        </Button>
-      </div>
-      {onRemove ? (
-        <button type="button" onClick={onRemove} className="-mb-1 inline-flex min-h-11 items-center justify-center gap-1.5 border-t border-line pt-2 text-sm font-bold text-danger">
-          <Trash2 size={16} aria-hidden="true" />
-          Retirer de la liste
-        </button>
-      ) : null}
-    </form>
   );
 }
 
@@ -649,7 +623,7 @@ function CardActions({
   const done = d && d.primary && d.primary.action !== "edit" && !d.key.startsWith(AI_ADDITION);
   const btn = "min-h-11 flex-1 basis-[9rem]";
   return (
-    <div role="group" aria-label={`Régler : ${label}`} aria-busy={pending || undefined} className="flex flex-col gap-2 pl-5">
+    <div role="group" aria-label={`Régler : ${label}`} aria-busy={pending || undefined} className="flex flex-col gap-2">
       {asks.map((a) =>
         // §50.3 : la raison dit déjà ce qui manque ; la carte ne montre que les boutons (une question partagée avec une autre
         // carte se règle sur la première, sans phrase de renvoi).

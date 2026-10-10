@@ -171,3 +171,49 @@ export function communeOf(address: string | null | undefined): string | null {
   const text = (m?.[1] ?? address.split(",").pop() ?? "").trim();
   return text ? text.replace(/^\d{5}\s*/, "").trim() || null : null;
 }
+
+/** La clé d'une ligne du bref : son texte d'origine, sans accent ni ponctuation (stable tant que le devis ne change pas). */
+export const briefKey = (text: string) =>
+  text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 60);
+
+/**
+ * §50.7 « LE CHANTIER EN BREF », le même à l'écran et chez le fournisseur (§45.3 bloc 1) : les faits confirmés, la note de
+ * l'artisan (deux lignes au plus, ni prix ni mesures, déjà lues comme faits), la ville qui ferme le bloc ; huit lignes au
+ * plus. Chaque ligne garde sa clé et suit la correction de l'artisan (`bref:<clé>` : le texte réécrit, ou vide = retirée).
+ */
+export function briefResume(brief: SiteBrief, notes: string | null, answers: Readonly<Record<string, unknown>>): { cle: string; texte: string }[] {
+  const noteLines = (notes ?? "")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l && !priceLeak(l) && !/\d/.test(l))
+    .slice(0, 2);
+  const facts = briefFacts(brief);
+  const where = brief.ville || brief.situation ? facts.slice(-1) : [];
+  const resume = [...facts.slice(0, facts.length - where.length).slice(0, 8 - where.length - noteLines.length), ...noteLines, ...where];
+  return resume.flatMap((texte) => {
+    const cle = briefKey(texte);
+    const said = answers[`bref:${cle}`];
+    if (typeof said !== "string") return [{ cle, texte }];
+    return said.trim() ? [{ cle, texte: said.trim() }] : [];
+  });
+}
+
+/**
+ * Le test du §42.2 et du §43.5, appliqué à tout texte qui part chez le fournisseur : le symbole €,
+ * une devise, un montant à deux décimales suivi d'une devise, ou les mots du chiffrage.
+ * Renvoie ce qui a été trouvé, ou null si le texte est propre.
+ */
+export function priceLeak(text: string): string | null {
+  const patterns = [/€/, /\d[\d\s]*[.,]\d{2}\s*(?:€|eur|euros?)\b/i, /\b(?:HT|TTC|TVA)\b/, /\b(?:remise|montant|prix unitaire|p\.u\.|total)\b/i, /(?<!sans )\bprix\b/i];
+  for (const re of patterns) {
+    const m = re.exec(text);
+    if (m) return m[0];
+  }
+  return null;
+}

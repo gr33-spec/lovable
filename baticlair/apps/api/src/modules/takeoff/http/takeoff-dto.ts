@@ -1,4 +1,4 @@
-import { siteUnits, withoutLabour, writtenNumber } from "@baticlair/domain";
+import { briefResume, siteUnits, withoutLabour, writtenNumber } from "@baticlair/domain";
 import type { ArtisanView, PurchaseView } from "@baticlair/domain";
 import { artisanNotes } from "../../../platform/ai/artisan-notes.js";
 import type { ReviewedTakeoff } from "../application/takeoff.service.js";
@@ -106,7 +106,7 @@ function viewDto(view: ArtisanView) {
   };
 }
 
-export function takeoffDto({ takeoff, validation, view, roles, purchase, excluded, habits, aiSuggestions, withoutSupply }: ReviewedTakeoff) {
+export function takeoffDto({ takeoff, validation, view, roles, purchase, excluded, habits, aiSuggestions, withoutSupply, brief, siteNotes }: ReviewedTakeoff) {
   const byId = new Map(validation.lines.map((v) => [v.lineId, v]));
   return {
     id: takeoff.id,
@@ -120,6 +120,8 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase, exclude
     habits: habits ?? [],
     // §49.9 : « N lignes sans fourniture », repliées sous la liste.
     sansFourniture: withoutSupply ?? [],
+    // §50.7 : « Le chantier en bref », le même que chez le fournisseur ; chaque ligne se corrige ou se retire (`bref:<clé>`).
+    bref: brief ? briefResume(brief, siteNotes ?? null, takeoff.answers) : [],
     // §48.4 : les ajouts proposés par l'IA, décochés, hors de la liste.
     aiSuggestions: aiSuggestions ?? [],
     model: takeoff.model,

@@ -35,18 +35,18 @@ describe("bandes zinc au ml (§36.4) : jamais « ml de zinc » nu", () => {
     mentioned: ["bande"],
   });
 
-  it("façonné : 20 ml × 1,1 = 22 m → 12 bandes de 2 m (longueur utile 1,9 m)", () => {
+  it("façonné : 20 ml en longueurs de 2 m → 10 bandes (§1 : ml / 2 arrondi sup., retour du fondateur 2026-10-10)", () => {
     // Commandée façonnée, la bande se fabrique à son développé : sans lui, une question (jamais deviné).
     expect(need(computeWorkItem(ROOFING_REFERENTIAL, input({ faconnage: "2" })), "bandes-faconnees").question?.key).toBe("param:developpe");
     const r = computeWorkItem(ROOFING_REFERENTIAL, input({ faconnage: "2", developpe: "330" }));
-    expect(order(r, "bandes-faconnees")).toBe(12);
+    expect(order(r, "bandes-faconnees")).toBe(10);
     expect(r.needs.find((n) => n.needId === "feuilles-bandes")).toBeUndefined();
   });
 
   it("je façonne, 6 ml au plus : des feuilles de zinc 2 × 1 m, jamais du zinc au kg (§25.2) : 5,5 m × 0,25 m / 2 m² = 0,69 → 1 feuille", () => {
     const r = computeWorkItem(ROOFING_REFERENTIAL, input({ faconnage: "1", developpe: "250", longueur_bande: "5" }));
     expect(order(r, "feuilles-bandes")).toBe(1);
-    expect(need(r, "feuilles-bandes").label).toBe("Feuilles zinc naturel 2 × 1 m, 0,65 mm");
+    expect(need(r, "feuilles-bandes").label).toBe("Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes zinc");
     expect(r.needs.some((n) => n.purchase?.order.unit.many === "kg")).toBe(false);
   });
 

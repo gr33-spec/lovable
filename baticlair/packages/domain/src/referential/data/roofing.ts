@@ -983,6 +983,8 @@ const ZINC_PLAT_CONSTANTS = {
   seuil_070: condition("0.7", "mm", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }),
   seuil_080: condition("0.8", "mm", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }),
   longueur_utile: condition("1.9", "m", F, FOUNDER_DOC, "Bandes de 2 m, recouvrement 10 cm : « nombre = ml ÷ 1,9 » (§36.4)."),
+  // Retour du fondateur (2026-10-10, D-2026-018) : « 13 ml en longueurs de 2 m ferait 7, pas 8 ».
+  longueur_bande_2m: condition("2", "m", F, FOUNDER_DOC, "« bande de 2 m = ml / 2 arrondi sup. » (§1)."),
   // §48.6 : la feuille de 2 × 1 m se découpe en bandes de 2 m dans le mètre de largeur.
   longueur_feuille: condition("2", "m", F, FOUNDER_DOC, "Feuille de zinc 2 × 1 m (§48.6)."),
   largeur_feuille: condition("1", "m", F, FOUNDER_DOC, "Feuille de zinc 2 × 1 m (§48.6)."),
@@ -1093,7 +1095,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.10-48",
+  version: "roofing-2026.10.10-49",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -1815,7 +1817,10 @@ export const ROOFING_REFERENTIAL: Referential = {
         sellingUnits: [{ id: "ml", label: { one: "ml", many: "ml" }, contains: packaging("1", "m", "definition", { status: "verified", verifiedAt: "2026-10-04", verifiedBy: "BatiClair (définition)" }), primary: true }],
       }),
     ),
-    generic("bac-joint-debout-standard", "zinc_panel", "Bac joint debout zinc naturel, façonné à la longueur du rampant (largeur utile 430 ou 580 mm)", "Bacs joint debout zinc"),
+    generic("bac-joint-debout-standard", "zinc_panel", "Bac joint debout zinc naturel, façonné à la longueur du rampant (largeur utile 430 ou 580 mm)", "Bacs joint debout zinc", {
+      // §50.7 : « 31 bacs », la longueur dans le nom (« longueur 7,15 m »).
+      sellingUnits: [{ id: "bac", label: { one: "bac", many: "bacs" }, contains: ONE_PIECE, primary: true }],
+    }),
     generic("bardelis-standard", "verge_tile", "Bardelis (tuile de rive canal), modèle de la tuile posée", "Bardelis"),
     // Zinc façonné sur place (§25.2) : feuilles de 2 × 1 m, épaisseur du chantier ; jamais au kg pour un abergement ou une bande.
     generic("feuille-zinc-2x1", "zinc_sheet", "Feuille zinc naturel 2 × 1 m (épaisseur du chantier)", "Feuilles zinc 2 × 1 m"),
@@ -2671,12 +2676,13 @@ export const ROOFING_REFERENTIAL: Referential = {
           id: "bandes-faconnees",
           slot: "bande",
           when: "faconnage >= 2",
-          formula: "arrondi_sup(ml_zinc / regle.longueur_utile)",
+          formula: "arrondi_sup(longueur_bande / regle.longueur_bande_2m)",
           unit: "u",
           core: true,
           exclusions: "Longueurs de 2 m, recouvrement 10 cm entre éléments ; fixations à part.",
           precision: "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
-          designation: "Bandes façonnées {aspect_zinc} {epaisseur_zinc} mm",
+          // §50.7 : la pièce porte son nom d'ouvrage, tel que le devis l'écrit (« Bande de ventilation en Z… »).
+          designation: "{piece}, {aspect_zinc} {epaisseur_zinc} mm",
           // Une bande commandée façonnée se fabrique à son développé : le fournisseur ne peut pas le deviner.
           precisionRequires: ["developpe", "aspect_zinc"],
           source: F,
@@ -2695,7 +2701,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           // §45.5 : une feuille dont on ne sait pas à quoi elle sert n'a rien à faire dans la liste.
           precision: "pour {longueur_bande|ml} de bande : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
           estimate: "Estimation d'après le développé : ajuste selon ton façonnage",
-          designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
+          designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm, pour {piece_min}",
           precisionRequires: ["aspect_zinc"],
           source: F,
           verification: FOUNDER_DOC,
@@ -2774,7 +2780,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           id: "porte-solin-faconnees",
           slot: "porte_solin",
           when: "faconnage >= 2",
-          formula: "arrondi_sup(ml_zinc / regle.longueur_utile)",
+          formula: "arrondi_sup(longueur_bande / regle.longueur_bande_2m)",
           unit: "u",
           core: true,
           exclusions: "Longueurs de 2 m, recouvrement 10 cm entre éléments.",
@@ -3003,7 +3009,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Quatre côtés, développé 33 cm ; longueurs de 2 m, recouvrement 10 cm.",
-          designation: "Bandes façonnées {aspect_zinc} {epaisseur_zinc} mm, dév. 33 cm",
+          designation: "Bandes d'abergement {aspect_zinc} {epaisseur_zinc} mm, dév. 33 cm",
           precisionRequires: ["aspect_zinc"],
           source: F,
           verification: FOUNDER_DOC,
@@ -3259,6 +3265,8 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "largeur_pan", label: "Largeur du pan", unit: "m", formula: "surface / longueur_rampant", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
         { key: "nb_bacs", label: "Nombre de bacs", unit: "u", formula: "arrondi_sup(largeur_pan / entraxe_joints)", source: "vmzinc-joint-debout", verification: FOUNDER_DOC, version: 1 },
         { key: "longueur_bac", label: "Longueur de bobine par bac", unit: "m", formula: "longueur_rampant + regle.surlongueur_bac", source: F, verification: FOUNDER_REPLY, version: 1 },
+        // Un bac commandé façonné : le rampant (partagé en longueurs de 10 m au plus au-delà) + la surlongueur (§50.7).
+        { key: "longueur_bac_commande", label: "Longueur d'un bac commandé", unit: "m", formula: "si(longueur_rampant > regle.rampant_max_bac, longueur_rampant / arrondi_sup(longueur_rampant / regle.rampant_max_bac), longueur_rampant) + regle.surlongueur_bac", source: F, verification: FOUNDER_REPLY, version: 1 },
         { key: "coulissantes_m2", label: "Pattes coulissantes par m²", unit: "u/m2", formula: "si(largeur_bobine <= regle.largeur_littoral, table.coulissantes_500, table.coulissantes_650)", source: "vmzinc-joint-debout", verification: FOUNDER_DOC, version: 1 },
         { key: "fixes_m2", label: "Pattes fixes par m²", unit: "u/m2", formula: "si(largeur_bobine <= regle.largeur_littoral, table.fixes_500, table.fixes_650)", source: "vmzinc-joint-debout", verification: FOUNDER_DOC, version: 1 },
       ],
@@ -3314,7 +3322,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Un pan rectangulaire ; chaque bac fait la longueur du rampant, ou 10 m au plus avec jonction transversale au-delà. Hors bandes d'égout, de rive, de faîtage et de noue.",
-          designation: "Bacs joint debout {aspect_zinc} {epaisseur_zinc} mm",
+          designation: "Bacs joint debout {aspect_zinc} {epaisseur_zinc} mm, longueur {longueur_bac_commande|m}",
           precisionRequires: ["aspect_zinc"],
           source: F,
           verification: FOUNDER_DOC,

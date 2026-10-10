@@ -22,14 +22,14 @@ describe("§48.6 : une pièce façonnée sur place = des feuilles 2 × 1 m, jama
 
   it("13 ml de bande, développé 25 cm : 2 feuilles ; développé 33 cm : 3 bandes par feuille, 3 feuilles", () => {
     expect(zinc(readQuote(bande("13", "Bande zinc d'égout"), { "param:faconnage": u("1"), "param:developpe": u("250", "mm") }))).toEqual([
-      ["Feuilles zinc naturel 2 × 1 m, 0,65 mm", "2 pièces", estimation("13", "25")],
+      ["Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bande zinc d'égout", "2 pièces", estimation("13", "25")],
     ]);
     expect(zinc(readQuote(bande("13", "Bande zinc d'égout"), { "param:faconnage": u("1"), "param:developpe": u("330", "mm") }))[0]![1]).toBe("3 pièces");
   });
 
   it("35 ml de bande : toujours des feuilles, jamais de bobineau ; l'épaisseur du chantier est écrite comme au comptoir", () => {
     const v = readQuote(bande("35"), { "param:faconnage": u("1"), "param:developpe": u("250", "mm"), "param:epaisseur_zinc": u("0.8", "mm") });
-    expect(zinc(v)).toEqual([["Feuilles zinc naturel 2 × 1 m, 0,80 mm", "5 pièces", estimation("35", "25")]]);
+    expect(zinc(v)).toEqual([["Feuilles zinc naturel 2 × 1 m, 0,80 mm, pour bande zinc de rive", "5 pièces", estimation("35", "25")]]);
   });
 
   it("commandé façonné : ni feuille ni bobineau, des bandes en longueurs de 2 m, au développé demandé", () => {

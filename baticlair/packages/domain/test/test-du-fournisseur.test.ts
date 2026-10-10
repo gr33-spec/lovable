@@ -63,15 +63,16 @@ describe("test du fournisseur : chaque ligne « À commander » se charge dans l
     expect(surPlaceLong.questions.map((q) => q.question?.key ?? q.key)).toContain("param:developpe");
     const commande = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "2", unit: "u" } });
     expect(commande.questions.map((q) => q.question?.key ?? q.key)).toContain("param:developpe");
-    // Façonné : 13 ml × 1,1 = 14,3 m → 8 longueurs de 2 m (recouvrement 10 cm, §45.5) ; rien à faire chiffrer.
+    // Façonné : 13 ml en longueurs de 2 m → 7 (§1, « bande de 2 m = ml / 2 arrondi sup. ») ; rien à faire chiffrer.
     const faconne = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "2", unit: "u" }, "param:developpe": { value: "100", unit: "mm" } });
-    expect(faconne.toBuy.find((b) => b.label.startsWith("Bandes façonnées Quartz-Zinc"))).toMatchObject({ quantity: "8 longueurs de 2 m" });
+    expect(faconne.toBuy.find((b) => b.needIds.includes("bandes-faconnees"))).toMatchObject({ quantity: "7 longueurs de 2 m" });
+    expect(faconne.toBuy.some((b) => /^Bandes façonnées/.test(b.label))).toBe(false);
     expect(faconne.toQuote).toEqual([]);
     // L'aspect se lit sur sa ligne (la bande « en zinc quartz ») ; une bande ne fait pas l'aspect de la couverture.
     // Je façonne 13 ml : des FEUILLES 2 × 1 m (§48.6), jamais du zinc au kg ni un bobineau : développé 10 cm, 10 bandes de
     // 2 m par feuille → 1 feuille. Le joint debout, lui, part en bobine au mètre linéaire, largeur écrite (jamais au kg).
     const surPlace = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "1", unit: "u" }, "param:developpe": { value: "100", unit: "mm" } });
-    expect(surPlace.toBuy.find((b) => b.needIds.includes("feuilles-bandes"))).toMatchObject({ label: "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm", quantity: "1 pièce" });
+    expect(surPlace.toBuy.find((b) => b.needIds.includes("feuilles-bandes"))).toMatchObject({ label: expect.stringMatching(/^Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour /), quantity: "1 pièce" });
     expect(surPlace.toBuy.find((b) => b.needIds.some((id) => id.startsWith("zinc-bobines")))?.label).toBe("Bobine zinc naturel 0,65 mm, largeur 500 mm");
     expect(surPlace.toBuy.find((b) => b.needIds.some((id) => id.startsWith("zinc-bobines")))?.order?.unit).toBe("ml");
   });

@@ -1,4 +1,4 @@
-import { briefFacts, briefSentence, communeOf, groupIdenticalLines, orderGaps, parseOrderText, parseUnit, withoutLabour, writtenNumber, type OrderGap, type OrderedLine } from "@baticlair/domain";
+import { briefResume, briefSentence, communeOf, groupIdenticalLines, orderGaps, parseOrderText, parseUnit, withoutLabour, writtenNumber, type OrderGap, type OrderedLine } from "@baticlair/domain";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { DocumentsService } from "../../documents/index.js";
@@ -8,7 +8,7 @@ import type { RequestedLine } from "./price-request-email.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { priceRequestEmail, requestedQuantityText, supplierLineLabel } from "./price-request-email.js";
 import type { PriceRequestRecord, PriceRequestRepository, RecipientStatus } from "./price-request.repository.js";
-import { packetDocument, packetMail, packetPdf, packetSubject, priceLeak, type PacketDocument, type PacketSender, type PacketSupply, type SketchFile, type SupplierPacket } from "./supplier-packet.js";
+import { packetDocument, packetMail, packetPdf, packetSubject, type PacketDocument, type PacketSender, type PacketSupply, type SketchFile, type SupplierPacket } from "./supplier-packet.js";
 
 /** §47.5 : une commande passée chez le fournisseur retenu, telle qu'elle part au journal. */
 export interface SupplierOrder {
@@ -92,14 +92,8 @@ export function buildPacket(
   const brief = { ...reviewed.brief, ville: reviewed.brief.ville ?? communeOf(sender.projectAddress) };
   // La note de l'artisan (§44 : « accès par la cour ») : telle qu'écrite, deux lignes au plus, jamais une ligne qui parle
   // de prix ni une ligne de mesures (déjà lues comme faits). Elle passe avant les derniers faits, la ville ferme le bloc.
-  const notes = (sender.projectNotes ?? "")
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l && !priceLeak(l) && !/\d/.test(l))
-    .slice(0, 2);
-  const facts = briefFacts(brief);
-  const where = brief.ville || brief.situation ? facts.slice(-1) : [];
-  const resume = [...facts.slice(0, facts.length - where.length).slice(0, 8 - where.length - notes.length), ...notes, ...where];
+  // §50.7 : le bref de l'écran « Ton chantier », corrections de l'artisan comprises : le fournisseur reçoit le même.
+  const resume = briefResume(brief, sender.projectNotes ?? null, reviewed.takeoff.answers).map((l) => l.texte);
   const dateFr = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" });
   // Le devis sans les prix (§42) : une ligne par ouvrage, la main-d'œuvre seule exclue, jamais le prix.
   const kinds = new Map(validation.lines.map((l) => [l.lineId, l.kind]));

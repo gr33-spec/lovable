@@ -279,6 +279,8 @@ export interface ReviewedTakeoff {
   habits: { key: string; question: string; unit: string; options: { label: string; value: string }[]; value: string }[];
   /** §49.9 : les lignes du devis sans fourniture (heures, forfait, accès, évacuation) : hors de la liste, repliées à part. */
   withoutSupply?: { lineId: string; label: string; measure: string | null }[];
+  /** La note de l'artisan sur le chantier (§44), pour le bref de l'écran et de l'envoi (§50.7). */
+  siteNotes?: string | null;
   /** §48.4 : ce que l'IA juge utile mais que le devis ne demande pas : bloc « Suggestions », décoché, hors de la liste. */
   aiSuggestions: { key: string; label: string; quantity: string | null; unit: string | null; reason: string }[];
 }
@@ -814,7 +816,7 @@ export class TakeoffService {
 
   async answer(tenant: TenantContext, takeoffId: string, key: string, value: EngineAnswer): Promise<ReviewedTakeoff> {
     // Une correction d'article (§41.4, §45.8, §45.9 : depuis l'aperçu avant envoi) ne lève aucun doute : la liste validée le reste.
-    const itemOnly = /^(quantite|libelle|precision|retire|ajout):/.test(key);
+    const itemOnly = /^(quantite|libelle|precision|retire|ajout|bref):/.test(key);
     const takeoff = itemOnly ? await this.itemEditable(tenant, await this.takeoffs.findById(tenant, takeoffId)) : await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
     const previous = takeoff.answers[key];
     // §45.8 : « On ajoute ? » — Oui / Non d'un tap, mémorisé pour l'entreprise.
@@ -1215,7 +1217,7 @@ export class TakeoffService {
       validation,
       new Map(record.lines.flatMap((l) => (l.reading ? [[l.id, l.reading] as const] : []))),
     );
-    return { ...reviewed, view, brief, purchase, habits, aiSuggestions, withoutSupply };
+    return { ...reviewed, view, brief, purchase, habits, aiSuggestions, withoutSupply, siteNotes: notes };
   }
 
   /**
