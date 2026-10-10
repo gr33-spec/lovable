@@ -5,8 +5,9 @@
  * fait avec de l'IA ». Deux scènes de métier, en CSS seul (aucune dépendance) :
  *  - la lecture : un surligneur passe sur le devis ligne à ligne, chaque ligne lue est cochée dans la marge, puis la page
  *    se tourne et la suivante arrive ;
- *  - le calcul : un pan de toit se couvre rang par rang, de l'égout au faîtage, les faîtières se posent, c'est prêt.
- * Sous « réduire les animations », chaque scène s'arrête sur son état final (le devis lu, le toit couvert).
+ *  - le calcul (retour du fondateur, 2026-10-10 : « plus moderne, on est sur du multimétier », la maison retirée) : les
+ *    lignes du devis s'en détachent une à une et se posent dans la liste, chacune avec son point vert, comme dans l'app.
+ * Sous « réduire les animations », chaque scène s'arrête sur son état final (le devis lu, la liste remplie).
  */
 
 // ——— La lecture : le surligneur ———
@@ -97,107 +98,91 @@ export function ReadingScene() {
   );
 }
 
-// ——— Le calcul : le toit se couvre ———
+// ——— Le calcul : le devis devient la liste ———
 
-const ROOF = { bottom: 112, top: 42, left: 18, right: 222, topLeft: 54, topRight: 186 };
-const ROWS = 5;
-const ROW_H = (ROOF.bottom - ROOF.top) / ROWS;
-const TILE_W = 18;
-const ROOF_CYCLE = 8;
-const TILE_TONES = ["#c65a31", "#b84f2a", "#d0683a"];
-const WALL = { left: 38, right: 202, top: ROOF.bottom, bottom: 174 };
+/** Le devis (à gauche) et la liste (à droite), en px dans la scène de 296 × 196. */
+const SHEET = { x: 8, y: 34, w: 112, h: 140 };
+const LIST = { x: 150, y: 18, w: 138, h: 166 };
+const ITEMS = [
+  { line: 70, name: 62, qty: 18 },
+  { line: 54, name: 48, qty: 22 },
+  { line: 78, name: 70, qty: 14 },
+  { line: 60, name: 54, qty: 20 },
+  { line: 66, name: 44, qty: 16 },
+];
+const SHEET_LINE_Y = (i: number) => SHEET.y + 40 + i * 17;
+const ROW_Y = (i: number) => LIST.y + 40 + i * 24;
+const LIST_CYCLE = 6.4;
 
-/** Un tuile plate : haut droit (caché sous le rang du dessus), bas arrondi. */
-const tilePath = (x: number, y: number, w: number, h: number, r = 4.5) =>
-  `M${x} ${y} h${w} v${h - r} q0 ${r} ${-r} ${r} h${-(w - 2 * r)} q${-r} 0 ${-r} ${-r} Z`;
-
-/** Les tuiles, rang par rang depuis l'égout, chaque rang décalé d'une demi-tuile comme sur un vrai toit. */
-const TILES = (() => {
-  const tiles: { d: string; delay: number; tone: string }[] = [];
-  for (let r = 0; r < ROWS; r++) {
-    const y = ROOF.bottom - (r + 1) * ROW_H - 3;
-    const offset = r % 2 ? TILE_W / 2 : 0;
-    for (let k = 0, x = ROOF.left - offset; x < ROOF.right; k++, x += TILE_W) {
-      tiles.push({ d: tilePath(x + 0.7, y, TILE_W - 1.4, ROW_H + 3), delay: 0.7 + r * 0.5 + k * 0.03, tone: TILE_TONES[(r * 7 + k * 3) % 3]! });
-    }
-  }
-  return tiles;
+const listKeyframes = (() => {
+  const css: string[] = [];
+  ITEMS.forEach((it, i) => {
+    const s = 8 + i * 11;
+    const land = s + 9;
+    const fromX = SHEET.x + 14;
+    const fromY = SHEET_LINE_Y(i);
+    const toX = LIST.x + 30;
+    const toY = ROW_Y(i) + 2;
+    const midX = (fromX + toX) / 2;
+    const midY = Math.min(fromY, toY) - 26;
+    // La ligne quitte le devis en arc, se resserre et se pose à sa place dans la liste.
+    css.push(
+      `@keyframes bc-fly-${i}{0%,${s}%{transform:translate(${fromX}px,${fromY}px) scaleX(1);opacity:0}${s + 1}%{opacity:1}${s + 5}%{transform:translate(${midX}px,${midY}px) scaleX(.8);opacity:1}${land}%{transform:translate(${toX}px,${toY}px) scaleX(.72);opacity:1}${land + 2}%,100%{transform:translate(${toX}px,${toY}px) scaleX(.72);opacity:0}}`,
+    );
+    // Sa place sur le devis pâlit : elle est lue.
+    css.push(`@keyframes bc-src-${i}{0%,${s}%{opacity:1}${s + 2}%,88%{opacity:.22}94%,100%{opacity:1}}`);
+    // La ligne de la liste apparaît, puis son point vert.
+    css.push(`@keyframes bc-row-${i}{0%,${land}%{opacity:0;transform:translateX(-6px)}${land + 3}%,86%{opacity:1;transform:none}92%,100%{opacity:0;transform:none}}`);
+    css.push(`@keyframes bc-dot-${i}{0%,${land + 2}%{transform:scale(0)}${land + 5}%{transform:scale(1.35)}${land + 8}%,86%{transform:scale(1)}92%,100%{transform:scale(1)}}`);
+  });
+  css.push("@keyframes bc-ready{0%,70%{transform:scale(0);opacity:0}74%{transform:scale(1.15);opacity:1}77%,86%{transform:scale(1);opacity:1}92%,100%{transform:scale(1);opacity:0}}");
+  css.push("@keyframes bc-glow{0%,70%{opacity:0}74%{opacity:1}86%{opacity:1}92%,100%{opacity:0}}");
+  return css.join("\n");
 })();
-const RIDGE_DELAY = 0.7 + ROWS * 0.5 + 0.15;
-const ROOF_OUTLINE = `M${ROOF.left} ${ROOF.bottom} L${ROOF.topLeft} ${ROOF.top} L${ROOF.topRight} ${ROOF.top} L${ROOF.right} ${ROOF.bottom} Z`;
 
-const roofKeyframes = [
-  "@keyframes bc-frame{0%{stroke-dashoffset:620;opacity:1}9%,66%{stroke-dashoffset:0;opacity:1}74%,100%{stroke-dashoffset:0;opacity:0}}",
-  "@keyframes bc-wall{0%,4%{opacity:0}10%,100%{opacity:1}}",
-  "@keyframes bc-tile{0%{transform:translateY(-30px) rotate(-10deg);opacity:0}5%{transform:translateY(1.5px);opacity:1}7%{transform:none;opacity:1}60%{transform:none;opacity:1}67%,100%{transform:translateY(5px);opacity:0}}",
-  "@keyframes bc-ridge{0%{transform:translateY(-34px);opacity:0}5%{transform:translateY(1px);opacity:1}7%,52%{transform:none;opacity:1}59%,100%{transform:none;opacity:0}}",
-  "@keyframes bc-sheen{0%{transform:translateX(-90px);opacity:0}2%{opacity:1}12%{transform:translateX(260px);opacity:1}13%,100%{transform:translateX(260px);opacity:0}}",
-  "@keyframes bc-done{0%{transform:scale(0);opacity:0}4%{transform:scale(1.2);opacity:1}6.5%,46%{transform:scale(1);opacity:1}52%,100%{transform:scale(1);opacity:0}}",
-].join("\n");
-
-export function RoofScene() {
-  const anim = (name: string, delay = 0, ease = "cubic-bezier(.3,1.4,.5,1)") => ({ animation: `${name} ${ROOF_CYCLE}s ${ease} ${delay}s infinite both` });
-  const box = { transformBox: "fill-box" as const, transformOrigin: "center" };
+export function ListScene() {
+  const anim = (name: string, ease = "cubic-bezier(.22,1,.36,1)") => ({ animation: `${name} ${LIST_CYCLE}s ${ease} infinite both` });
   return (
-    <svg aria-hidden="true" viewBox="0 0 240 186" className="h-52 w-[17rem]">
-      <style>{roofKeyframes}</style>
-      <defs>
-        <clipPath id="bc-roof-clip">
-          <path d={ROOF_OUTLINE} />
-        </clipPath>
-        <linearGradient id="bc-tile-shade" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#fff" stopOpacity="0.16" />
-          <stop offset="0.6" stopColor="#fff" stopOpacity="0" />
-          <stop offset="1" stopColor="#000" stopOpacity="0.28" />
-        </linearGradient>
-        <linearGradient id="bc-sheen-band" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#fff" stopOpacity="0" />
-          <stop offset="0.5" stopColor="#fff" stopOpacity="0.35" />
-          <stop offset="1" stopColor="#fff" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      {/* Le sol et la maison : murs, porte, deux fenêtres. */}
-      <path d="M6 174 H234" stroke="#e8ecf3" strokeOpacity="0.25" strokeWidth="1.5" />
-      <g style={anim("bc-wall", 0, "ease-out")}>
-        <rect x={WALL.left} y={WALL.top} width={WALL.right - WALL.left} height={WALL.bottom - WALL.top} fill="#2a3550" />
-        <rect x="108" y="138" width="24" height="36" rx="2" fill="#3b4a6b" />
-        <rect x="58" y="128" width="28" height="22" rx="2" fill="#f2c96b" fillOpacity="0.85" />
-        <rect x="154" y="128" width="28" height="22" rx="2" fill="#f2c96b" fillOpacity="0.85" />
-        <path d="M72 128 V150 M58 139 H86 M168 128 V150 M154 139 H182" stroke="#2a3550" strokeWidth="2" />
-      </g>
-      {/* La charpente se trace d'abord : le pan et ses chevrons. */}
-      <g stroke="#e8ecf3" strokeOpacity="0.6" strokeWidth="1.5" fill="none" strokeDasharray="620" style={anim("bc-frame", 0, "ease-out")}>
-        <path d={ROOF_OUTLINE} />
-        {[0.2, 0.4, 0.6, 0.8].map((t) => (
-          <path key={t} d={`M${ROOF.left + (ROOF.right - ROOF.left) * t} ${ROOF.bottom} L${ROOF.topLeft + (ROOF.topRight - ROOF.topLeft) * t} ${ROOF.top}`} />
+    <div aria-hidden="true" className="relative h-[196px] w-[296px]">
+      <style>{listKeyframes}</style>
+      {/* Le devis : en-tête, lignes, total. */}
+      <div
+        className="absolute rounded-[14px] bg-white shadow-[0_24px_40px_-18px_rgba(0,0,0,0.6)]"
+        style={{ left: SHEET.x, top: SHEET.y, width: SHEET.w, height: SHEET.h, transform: "rotate(-4deg)" }}
+      >
+        <span className="absolute top-3.5 left-3.5 h-2 w-12 rounded-sm bg-[#0e1116]" />
+        <span className="absolute top-3.5 right-3.5 h-2 w-6 rounded-sm bg-[#c9ced8]" />
+        {ITEMS.map((it, i) => (
+          <span key={i} className="absolute left-3.5 h-[6px] rounded-[2px] bg-[#9aa3b2]" style={{ top: SHEET_LINE_Y(i) - SHEET.y, width: `${it.line}%`, ...anim(`bc-src-${i}`, "ease-out") }} />
         ))}
-      </g>
-      {/* Les tuiles tombent en place, de l'égout vers le faîtage, puis un reflet passe sur le toit fini. */}
-      <g clipPath="url(#bc-roof-clip)">
-        {TILES.map((t, i) => (
-          <g key={i} style={{ ...anim("bc-tile", t.delay), ...box }}>
-            <path d={t.d} fill={t.tone} />
-            <path d={t.d} fill="url(#bc-tile-shade)" />
-          </g>
+        <span className="absolute right-3.5 bottom-3.5 h-2 w-10 rounded-sm bg-[#0e1116]" />
+      </div>
+      {/* La liste : la même que dans l'app, un point vert, un nom, une quantité. */}
+      <div className="absolute rounded-[16px] bg-white shadow-[0_24px_40px_-18px_rgba(0,0,0,0.6)]" style={{ left: LIST.x, top: LIST.y, width: LIST.w, height: LIST.h }}>
+        <span className="absolute inset-0 rounded-[16px] ring-2 ring-[#12a372]/70" style={anim("bc-glow", "ease-out")} />
+        <span className="absolute top-4 left-4 h-2.5 w-16 rounded-sm bg-[#0e1116]" />
+        {ITEMS.map((it, i) => (
+          <span key={i} className="absolute right-4 left-4 flex items-center gap-2" style={{ top: ROW_Y(i) - LIST.y - 2, ...anim(`bc-row-${i}`) }}>
+            <span className="size-2.5 shrink-0 rounded-full bg-[#12a372]" style={anim(`bc-dot-${i}`, "cubic-bezier(.3,1.6,.5,1)")} />
+            <span className="h-[7px] rounded-[2px] bg-[#3b4456]" style={{ width: `${it.name}%` }} />
+            <span className="ml-auto h-[7px] rounded-[2px] bg-[#0e1116]" style={{ width: `${it.qty}%` }} />
+          </span>
         ))}
-        <rect x="0" y={ROOF.top - 10} width="70" height={ROOF.bottom - ROOF.top + 20} fill="url(#bc-sheen-band)" style={anim("bc-sheen", RIDGE_DELAY + 0.5, "ease-in-out")} />
-      </g>
-      {/* La cheminée et les faîtières, posées en dernier. */}
-      <g style={{ ...anim("bc-ridge", RIDGE_DELAY - 0.3), ...box }}>
-        <rect x="158" y="22" width="16" height="32" fill="#5a6378" />
-        <rect x="155" y="18" width="22" height="6" rx="1.5" fill="#6d778d" />
-      </g>
-      {Array.from({ length: 7 }, (_, k) => (
-        <g key={k} style={{ ...anim("bc-ridge", RIDGE_DELAY + k * 0.07), ...box }}>
-          <rect x={ROOF.topLeft - 5 + k * 20} y={ROOF.top - 8} width="21" height="11" rx="5.5" fill="#a9441f" />
-          <rect x={ROOF.topLeft - 5 + k * 20} y={ROOF.top - 8} width="21" height="5" rx="2.5" fill="#fff" fillOpacity="0.14" />
-        </g>
+        {/* La liste est prête. */}
+        <span className="absolute -top-2.5 -right-2.5 flex size-8 items-center justify-center rounded-full bg-[#12a372] shadow-[0_6px_14px_-4px_rgba(18,163,114,0.7)]" style={anim("bc-ready", "cubic-bezier(.3,1.6,.5,1)")}>
+          <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12.5l4.5 4.5L19 7.5" />
+          </svg>
+        </span>
+      </div>
+      {/* Les lignes en vol, du devis à la liste. */}
+      {ITEMS.map((it, i) => (
+        <span
+          key={i}
+          className="absolute top-0 left-0 h-[7px] origin-left rounded-full bg-[#ffd43b] shadow-[0_0_0_3px_rgba(255,212,59,0.18)]"
+          style={{ width: (SHEET.w - 28) * (it.line / 100), opacity: 0, ...anim(`bc-fly-${i}`) }}
+        />
       ))}
-      {/* C'est couvert : la coche. */}
-      <g style={{ ...anim("bc-done", RIDGE_DELAY + 0.8), ...box }}>
-        <circle cx="214" cy="26" r="15" fill="#12a372" />
-        <path d="M207 26 l5 5 l9 -10" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      </g>
-    </svg>
+    </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, FileUp, Loader2, Pencil } from "lucide-react";
-import { ReadingScene, RoofScene } from "@/components/chantier-scenes";
+import { ListScene, ReadingScene } from "@/components/chantier-scenes";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
 import type { ApiError, Takeoff } from "@/lib/api";
@@ -104,11 +104,11 @@ export function notifyReady(title: string, body: string, tag: string): void {
 
 // ——— 4. Le calcul ———
 
-/** Après « Calculer ma liste » : une seule phrase, le temps du calcul ; le toit se couvre, de l'égout au faîtage (`RoofScene`). */
+/** Après « Calculer ma liste » : une seule phrase, le temps du calcul ; les lignes du devis se posent une à une dans la liste (`ListScene`), pour tous les métiers. */
 export function CalculScreen() {
   return (
     <section aria-label="Calcul de la liste" className="flex flex-col items-center gap-5 rounded-[20px] bg-chantier px-5 pt-8 pb-8 text-white shadow-card">
-      <RoofScene />
+      <ListScene />
       <h2 aria-live="polite" className="font-display text-[24px] leading-tight font-extrabold tracking-[-0.02em]">
         Je prépare ta liste
       </h2>
