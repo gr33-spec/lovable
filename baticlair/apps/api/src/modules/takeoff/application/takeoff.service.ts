@@ -70,6 +70,7 @@ import {
   scopedKey,
   appliquerRelecture,
   ficheChantier,
+  ficheCorrigee,
   ficheFacts,
   type FicheChantier,
 } from "@baticlair/domain";
@@ -1142,7 +1143,8 @@ export class TakeoffService {
     // le calcul (après le texte lu par le code, avant les hypothèses par défaut).
     extraFacts.push(...factsFromReading(ref, takeoff.lines.map((l) => ({ ref: l.id, dimensions: l.dimensions })), takeoff.context));
     // §51.3 : les données du toit de la fiche (rampant, pente, descentes…) valent pour tous ses ouvrages, chacune une fois.
-    extraFacts.push(...ficheFacts(ref, takeoff.fiche));
+    // §50.7 : une ligne de la fiche corrigée sur le document l'est pour le calcul aussi.
+    extraFacts.push(...ficheFacts(ref, ficheCorrigee(takeoff.fiche, takeoff.answers)));
     // Infos chantier facultatives : les mesures nommées de la note de l'artisan passent devant le devis (l'explication dit les deux).
     extraFacts.push(...readSiteNotes(ref, notes));
     const plan = planQuote(lines.map((l) => ({ ref: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, section: l.section })), ref, profile, undefined, extraFacts);
@@ -1266,7 +1268,8 @@ export class TakeoffService {
     );
     // §51 : la fiche à l'écran, et ses trous. Une donnée qu'une relecture (« Autre ») a ouverte est UNE question de plus,
     // posée avant le calcul, à laquelle l'artisan répond en écrivant (relue à son tour).
-    const fiche = ficheChantier({ ref, ai: takeoff.fiche, plan, answers: takeoff.answers, questions: purchase.questions.flatMap((d) => (d.question ? [d.question] : [])), lignes: new Map(takeoff.lines.map((l) => [l.id, `ligne ${l.position}`])) });
+    const shown = ficheChantier({ ref, ai: ficheCorrigee(takeoff.fiche, takeoff.answers), plan, answers: takeoff.answers, questions: purchase.questions.flatMap((d) => (d.question ? [d.question] : [])), lignes: new Map(takeoff.lines.map((l) => [l.id, `ligne ${l.position}`])) });
+    const fiche = ficheCorrigee(shown, takeoff.answers) ?? shown;
     for (const d of fiche.donnees) {
       const key = `${FICHE_KEY}${d.cle}`;
       // Seule une donnée ouverte par une relecture : un trou du calcul a déjà sa question (« param:<donnée> »).

@@ -1,4 +1,5 @@
 import { baseOf } from "../referential/model.js";
+import { ficheDocument, type FicheChantier } from "../referential/fiche.js";
 import { Decimal } from "../shared/decimal.js";
 import { evaluateInterval, formulaVariables, parseFormula, type IntervalValue } from "../referential/expression.js";
 import type { Referential } from "../referential/model.js";
@@ -187,7 +188,24 @@ export const briefKey = (text: string) =>
  * l'artisan (deux lignes au plus, ni prix ni mesures, déjà lues comme faits), la ville qui ferme le bloc ; huit lignes au
  * plus. Chaque ligne garde sa clé et suit la correction de l'artisan (`bref:<clé>` : le texte réécrit, ou vide = retirée).
  */
-export function briefResume(brief: SiteBrief, notes: string | null, answers: Readonly<Record<string, unknown>>): { cle: string; texte: string }[] {
+export function briefResume(
+  brief: SiteBrief,
+  notes: string | null,
+  answers: Readonly<Record<string, unknown>>,
+  /** §51 : la fiche de chantier lue par l'IA (déjà complétée et corrigée) ; le bref EST alors la fiche, plus la ville. */
+  fiche: FicheChantier | null = null,
+): { cle: string; texte: string }[] {
+  if (fiche && ficheDocument(fiche).length > 0) {
+    const where = brief.ville || brief.situation ? briefFacts(brief).slice(-1) : [];
+    const lines = [...ficheDocument(fiche), ...where.map((texte) => ({ cle: briefKey(texte), texte }))].filter((l) => !priceLeak(l.texte));
+    return lines.flatMap((l) => {
+      // Une ligne de la fiche suit sa correction par la fiche elle-même (`ficheCorrigee`) ; la ville, par son texte.
+      if (l.cle.startsWith("fiche-")) return [l];
+      const said = answers[`bref:${l.cle}`];
+      if (typeof said !== "string") return [l];
+      return said.trim() ? [{ cle: l.cle, texte: said.trim() }] : [];
+    });
+  }
   const noteLines = (notes ?? "")
     .split("\n")
     .map((l) => l.trim())
