@@ -1,6 +1,6 @@
 "use client";
 
-import { Send } from "lucide-react";
+import { Plus, Send } from "lucide-react";
 import { useCallback, useId, useMemo, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
 import { api, ApiError, newActionKey, type PriceRequest, type Supplier } from "@/lib/api";
@@ -14,7 +14,7 @@ import { useResource } from "@/lib/use-resource";
 export interface SelectionSend {
   /** Clé de l'article (« quote:<clé> » pour une ligne à faire chiffrer) → fournisseur(s) qui l'ont reçue à part. */
   sent: ReadonlyMap<string, string>;
-  send: (articles: string[], supplierId: string) => Promise<void>;
+  send: (articles: string[], supplierIds: string[]) => Promise<void>;
 }
 
 export function useSelectionSend(projectId: string, onSent?: () => void): SelectionSend {
@@ -30,10 +30,10 @@ export function useSelectionSend(projectId: string, onSent?: () => void): Select
     }
     return map;
   }, [requests.data]);
-  const send = async (articles: string[], supplierId: string) => {
+  const send = async (articles: string[], supplierIds: string[]) => {
     let request = await api<PriceRequest>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests`, {
       method: "POST",
-      body: { supplierIds: [supplierId], articles },
+      body: { supplierIds, articles },
       idempotencyKey: newActionKey(),
     });
     // Le serveur envoie les mails : la sélection part tout de suite ; sinon elle attend dans « Fournisseurs », à envoyer.
@@ -44,16 +44,25 @@ export function useSelectionSend(projectId: string, onSent?: () => void): Select
   return { sent, send };
 }
 
-const NEW = "__nouveau__";
-
-/** La barre du bas en mode sélection : combien de lignes, à quel fournisseur, « Envoyer », « Annuler ». */
-export function SelectionBar({ count, onSend, onCancel }: { count: number; onSend: (supplierId: string) => Promise<void>; onCancel: () => void }) {
+/**
+ * La barre du bas en mode sélection : combien de lignes, à quels fournisseurs, « Envoyer », « Annuler ». Retour du fondateur
+ * (2026-10-10) : « les fournisseurs cochés par défaut, avec possibilité d'en ajouter un de plus facilement ».
+ */
+export function SelectionBar({ count, onSend, onCancel }: { count: number; onSend: (supplierIds: string[]) => Promise<void>; onCancel: () => void }) {
   const id = useId();
   const fetchSuppliers = useCallback((signal: AbortSignal) => api<{ items: Supplier[] }>("/v1/suppliers", { signal }), []);
   const supplierList = useResource(fetchSuppliers);
   const suppliers = supplierList.data?.items ?? null;
-  const [supplierId, setSupplierId] = useState("");
-  // « Je dois aussi pouvoir en ajouter » (retour du fondateur, 2026-10-10) : un fournisseur hors carnet s'ajoute ici.
+  // Tout le carnet coché d'office (un fournisseur ajouté ici aussi) : on retient seulement ce que l'artisan décoche.
+  const [unchecked, setUnchecked] = useState<Set<string>>(new Set());
+  const picked = new Set((suppliers ?? []).map((s) => s.id).filter((sid) => !unchecked.has(sid)));
+  const toggle = (supplierId: string, on: boolean) =>
+    setUnchecked((prev) => {
+      const next = new Set(prev);
+      if (on) next.delete(supplierId);
+      else next.add(supplierId);
+      return next;
+    });
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState({ name: "", email: "" });
   const addKey = useRef(newActionKey());
@@ -64,7 +73,7 @@ export function SelectionBar({ count, onSend, onCancel }: { count: number; onSen
       const created = await api<Supplier>("/v1/suppliers", { method: "POST", body: { name: draft.name.trim(), email: draft.email.trim() }, idempotencyKey: addKey.current });
       addKey.current = newActionKey();
       supplierList.reload();
-      setSupplierId(created.id);
+      toggle(created.id, true);
       setAdding(false);
       setDraft({ name: "", email: "" });
     } catch (e) {
@@ -75,7 +84,6 @@ export function SelectionBar({ count, onSend, onCancel }: { count: number; onSen
   };
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
-  const chosen = supplierId || (suppliers?.length === 1 ? suppliers[0]!.id : "");
   return (
     <section aria-label="Envoyer la sélection" className="flex flex-col gap-2 rounded-[22px] bg-surface p-3 shadow-card">
       <p className="text-[14px] font-extrabold">
@@ -110,23 +118,20 @@ export function SelectionBar({ count, onSend, onCancel }: { count: number; onSen
         </form>
       ) : (
         <>
-          <label htmlFor={id} className="sr-only">
-            Fournisseur
-          </label>
-          <select
-            id={id}
-            value={chosen}
-            onChange={(e) => (e.target.value === NEW ? setAdding(true) : setSupplierId(e.target.value))}
-            className="min-h-12 rounded-2xl bg-ground px-3 text-[15px] font-bold text-ink"
-          >
-            <option value="">Choisir le fournisseur…</option>
+          <ul aria-label="Fournisseurs" className="flex max-h-56 flex-col gap-1.5 overflow-y-auto">
             {(suppliers ?? []).map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
+              <li key={s.id}>
+                <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl bg-ground px-3">
+                  <input type="checkbox" aria-label={`Fournisseur : ${s.name}`} checked={picked.has(s.id)} onChange={(e) => toggle(s.id, e.target.checked)} className="size-5 shrink-0 accent-accent" />
+                  <span className="min-w-0 truncate text-[15px] font-bold">{s.name}</span>
+                </label>
+              </li>
             ))}
-            <option value={NEW}>Ajouter un fournisseur…</option>
-          </select>
+          </ul>
+          <button type="button" onClick={() => setAdding(true)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-accent/40 text-[15px] font-bold text-accent-text">
+            <Plus size={18} aria-hidden="true" />
+            Ajouter un fournisseur
+          </button>
         </>
       )}
       {error ? <ErrorNotice error={error} /> : null}
@@ -137,12 +142,12 @@ export function SelectionBar({ count, onSend, onCancel }: { count: number; onSen
         <Button
           className="grow"
           pending={pending}
-          disabled={count === 0 || !chosen}
+          disabled={count === 0 || picked.size === 0}
           onClick={async () => {
             setPending(true);
             setError(null);
             try {
-              await onSend(chosen);
+              await onSend([...picked]);
             } catch (e) {
               setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
             } finally {

@@ -206,8 +206,8 @@ export function SupplyList({
           <SelectionBar
             count={checked.size}
             onCancel={() => setSelecting(false)}
-            onSend={async (supplierId) => {
-              await selection.send([...checked], supplierId);
+            onSend={async (supplierIds) => {
+              await selection.send([...checked], supplierIds);
               setSelecting(false);
               setChecked(new Set());
             }}

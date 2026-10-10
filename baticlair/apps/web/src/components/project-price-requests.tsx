@@ -269,7 +269,10 @@ function SupplierPicker({
   onToggle,
   dark,
   onNames,
+  allByDefault = false,
 }: {
+  /** Retour du fondateur (2026-10-10) : « les fournisseurs cochés par défaut » ; l'artisan décoche ceux qui ne reçoivent pas. */
+  allByDefault?: boolean;
   exclude?: string[];
   selected: Set<string>;
   onToggle: (id: string, on: boolean) => void;
@@ -280,6 +283,13 @@ function SupplierPicker({
   const fetchSuppliers = useCallback((signal: AbortSignal) => api<{ items: Supplier[] }>("/v1/suppliers", { signal }), []);
   const { data, setData, error, reload } = useResource(fetchSuppliers);
   const [creating, setCreating] = useState(false);
+  // Une seule fois, à l'arrivée du carnet : tout coché ; ensuite, seuls les gestes de l'artisan comptent.
+  const defaulted = useRef(false);
+  useEffect(() => {
+    if (!data || !allByDefault || defaulted.current) return;
+    defaulted.current = true;
+    for (const s of data.items) if (!exclude.includes(s.id)) onToggle(s.id, true);
+  }, [data, allByDefault, exclude, onToggle]);
   useEffect(() => {
     if (data && onNames) onNames(new Map(data.items.map((s) => [s.id, s.name])));
   }, [data, onNames]);
@@ -323,10 +333,10 @@ function SupplierPicker({
         <button
           type="button"
           onClick={() => setCreating(true)}
-          className={`inline-flex min-h-11 items-center gap-2 self-start text-sm font-bold ${dark ? "text-white" : "text-accent-text"}`}
+          className={`inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed text-[15px] font-bold ${dark ? "border-white/40 text-white" : "border-accent/40 text-accent-text"}`}
         >
           <Plus size={18} aria-hidden="true" />
-          Nouveau fournisseur
+          Ajouter un fournisseur
         </button>
       )}
     </div>
@@ -399,7 +409,7 @@ function NewRequest({
 
   return (
     <div className="flex flex-col gap-3">
-      <SupplierPicker selected={selected} onToggle={toggle} dark={false} />
+      <SupplierPicker allByDefault selected={selected} onToggle={toggle} dark={false} />
       <details className="rounded-2xl bg-surface p-3 text-sm shadow-card">
         <summary className="cursor-pointer font-bold">Ajouter un message ou une date de réponse (facultatif)</summary>
         <label className="flex min-h-11 items-center gap-3 text-sm">
@@ -446,7 +456,7 @@ function NewRequest({
             onPreviewClosed?.();
           }}
         >
-          <SupplierPicker selected={selected} onToggle={toggle} dark={false} />
+          <SupplierPicker allByDefault selected={selected} onToggle={toggle} dark={false} />
         </SendSheet>
       ) : null}
     </div>
