@@ -80,11 +80,11 @@ export function DropZone({ onFile, pending, error }: { onFile: (file: File) => v
           setOver(false);
           take(e.dataTransfer.files?.[0]);
         }}
-        className={`flex min-h-44 cursor-pointer flex-col items-center justify-center gap-3 rounded-[28px] border-[2.5px] border-dashed px-6 py-6 text-center transition focus-within:ring-2 ${
-          over ? "border-[#6b46ff] bg-[#efeaff]" : "border-[#b9b2ff] bg-surface"
+        className={`flex min-h-44 cursor-pointer flex-col items-center justify-center gap-3 rounded-[20px] border-[2.5px] border-dashed px-6 py-6 text-center transition focus-within:ring-2 ${
+          over ? "border-accent bg-accent/5" : "border-accent/30 bg-surface"
         } ${pending ? "pointer-events-none opacity-80" : "active:scale-[0.99]"}`}
       >
-        <span className="flex size-16 items-center justify-center rounded-full bg-cta text-white shadow-cta">
+        <span className="flex size-16 items-center justify-center rounded-full bg-cta text-white shadow-card">
           {pending ? <Loader2 size={28} className="animate-spin" aria-hidden="true" /> : <FileUp size={28} aria-hidden="true" />}
         </span>
         <span className="font-display text-[20px] font-extrabold tracking-[-0.01em]">Déposer mon devis</span>
@@ -98,13 +98,13 @@ export function DropZone({ onFile, pending, error }: { onFile: (file: File) => v
 /** §50.1 : pendant la lecture, une seule phrase : « Je lis ton devis ». */
 export function AnalysisScreen() {
   return (
-    <section aria-label="Analyse du devis" className="flex flex-col items-center gap-5 rounded-[28px] bg-hero px-5 py-7 text-white shadow-[0_24px_48px_-16px_rgba(26,21,80,0.6)]">
+    <section aria-label="Analyse du devis" className="flex flex-col items-center gap-5 rounded-[20px] bg-hero px-5 py-7 text-white shadow-card">
       <div aria-hidden="true" className="relative h-44 w-36 overflow-hidden rounded-2xl bg-white p-4 shadow-[0_20px_40px_-14px_rgba(0,0,0,0.55)]">
         <span className="block h-2.5 w-14 rounded-full bg-[#1c3fd1]/70" />
         {Array.from({ length: 9 }, (_, i) => (
           <span key={i} className="mt-2.5 block h-1.5 rounded-full bg-[#c9ced8]" style={{ width: `${55 + ((i * 37) % 40)}%` }} />
         ))}
-        <span className="absolute inset-x-0 top-3 h-6 bg-gradient-to-b from-transparent via-[#6b46ff]/45 to-transparent" style={{ animation: "bc-scan 2.6s ease-in-out infinite" }} />
+        <span className="absolute inset-x-0 top-3 h-6 bg-gradient-to-b from-transparent via-accent/35 to-transparent" style={{ animation: "bc-scan 2.6s ease-in-out infinite" }} />
       </div>
       <h2 aria-live="polite" className="font-display text-[24px] leading-tight font-extrabold tracking-[-0.02em]">
         Je lis ton devis
@@ -144,7 +144,7 @@ export function notifyReady(title: string, body: string, tag: string): void {
 /** Après « Calculer ma liste » : une seule phrase, le temps du calcul. */
 export function CalculScreen() {
   return (
-    <section aria-label="Calcul de la liste" className="flex flex-col items-center gap-4 rounded-[28px] bg-hero px-5 py-7 text-white shadow-[0_24px_48px_-16px_rgba(26,21,80,0.6)]">
+    <section aria-label="Calcul de la liste" className="flex flex-col items-center gap-4 rounded-[20px] bg-hero px-5 py-7 text-white shadow-card">
       <DevisAnimation />
       <h2 aria-live="polite" className="font-display text-[24px] leading-tight font-extrabold tracking-[-0.02em]">
         Je prépare ta liste
@@ -385,7 +385,7 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
       <div className="fixed inset-x-0 bottom-0 z-30 bg-gradient-to-t from-ground from-70% to-transparent px-4 pt-6 pb-[max(14px,env(safe-area-inset-bottom))] lg:sticky lg:inset-auto lg:px-0">
         <div className="mx-auto max-w-2xl">
           <Button
-            className="w-full"
+            className="w-full shadow-card!"
             pending={pending}
             onClick={() => {
               // §48.6 : le façonnage de chaque pièce de zinc est obligatoire ; la première carte sans réponse se montre.
@@ -539,7 +539,7 @@ export function EditableName({ name, onSave, className = "" }: { name: string; o
         className={`group inline-flex min-w-0 items-center gap-1.5 text-left ${className}`}
       >
         <span className="truncate">{name}</span>
-        <Pencil size={15} aria-hidden="true" className="shrink-0 text-subtle" />
+        <Pencil size={15} aria-hidden="true" className="shrink-0 text-muted" />
       </button>
     );
   }
