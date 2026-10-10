@@ -420,6 +420,8 @@ function Row({
   const nameLine = !item && lines.length === 1 ? lines[0] : undefined;
   const renamable = editable && !sentTo && (item !== undefined || nameLine !== undefined);
   const opens = editable && !sentTo;
+  // Une ligne orange qui se valide d'un geste (« C'est bon », garder la quantité du devis) ; jamais une question à trancher.
+  const quick = row.status === "check" && decision?.primary && decision.primary.action !== "edit" && decision.primary.action !== "answer" && !decision.key.startsWith(AI_ADDITION);
   const onPointerDown = (e: React.PointerEvent) => {
     swiped.current = false;
     if (!removable || open) return;
@@ -500,19 +502,45 @@ function Row({
         onPointerCancel={onPointerEnd}
       >
         {opens ? (
-          <button
-            type="button"
-            onClick={() => {
-              if (swiped.current) return void (swiped.current = false);
-              setNaming(false);
-              setOpen(!open);
-            }}
-            aria-expanded={open}
-            aria-label={`${open ? "Fermer" : "Modifier"} : ${label}`}
-            className="flex min-h-11 w-full min-w-0 items-start gap-2.5 text-left"
-          >
-            {body}
-          </button>
+          <div className="flex min-w-0 items-start gap-1">
+            <button
+              type="button"
+              onClick={() => {
+                if (swiped.current) return void (swiped.current = false);
+                setNaming(false);
+                setOpen(!open);
+              }}
+              aria-expanded={open}
+              aria-label={`${open ? "Fermer" : "Modifier"} : ${label}`}
+              className="flex min-h-11 min-w-0 grow items-start gap-2.5 text-left"
+            >
+              {body}
+            </button>
+            {/* Retour du fondateur (2026-10-10) : « un bouton pour valider, ligne par ligne. Et un crayon pour modifier. » Le ✓
+                fait le geste de la carte (« C'est bon », « Garder » l'écart du devis) sans l'ouvrir ; le crayon l'ouvre. */}
+            {quick && !open ? (
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => void handlers.onDecide(decision!)}
+                aria-label={`Valider : ${label}`}
+                className="flex size-11 shrink-0 items-center justify-center rounded-full text-ok active:bg-ok/10 disabled:opacity-50"
+              >
+                <Check size={20} aria-hidden="true" />
+              </button>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => {
+                setNaming(false);
+                setOpen(!open);
+              }}
+              aria-label={`Modifier la ligne : ${label}`}
+              className="flex size-11 shrink-0 items-center justify-center rounded-full text-muted active:bg-ground"
+            >
+              <Pencil size={18} aria-hidden="true" />
+            </button>
+          </div>
         ) : (
           <div className="flex min-h-11 w-full min-w-0 items-start gap-2.5">{body}</div>
         )}
