@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronDown, Paperclip, Pencil, Send, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Paperclip, Pencil, Send, Trash2, X } from "lucide-react";
 import { openDocument } from "@/lib/open-document";
 import { useEffect, useId, useRef, useState } from "react";
 import { type ItemEdit, type SketchHandlers } from "@/components/purchase-list";
@@ -529,16 +529,17 @@ function Row({
                 <Check size={20} aria-hidden="true" />
               </button>
             ) : null}
+            {/* Ouverte, le crayon devient une croix : on voit comment refermer (retour du fondateur, 2026-10-10). */}
             <button
               type="button"
               onClick={() => {
                 setNaming(false);
                 setOpen(!open);
               }}
-              aria-label={`Modifier la ligne : ${label}`}
-              className="flex size-11 shrink-0 items-center justify-center rounded-full text-muted active:bg-ground"
+              aria-label={`${open ? "Fermer la ligne" : "Modifier la ligne"} : ${label}`}
+              className={`flex size-11 shrink-0 items-center justify-center rounded-full active:bg-ground ${open ? "bg-surface text-ink shadow-card" : "text-muted"}`}
             >
-              <Pencil size={18} aria-hidden="true" />
+              {open ? <X size={20} aria-hidden="true" /> : <Pencil size={18} aria-hidden="true" />}
             </button>
           </div>
         ) : (
@@ -615,6 +616,18 @@ function Row({
               </button>
             ) : null}
           </div>
+          {/* Un geste clair pour refermer la ligne, en bas, là où le pouce arrive. */}
+          <Button
+            variant="secondary"
+            className="min-h-11 w-full"
+            onClick={() => {
+              setNaming(false);
+              setOpen(false);
+            }}
+          >
+            <ChevronUp size={18} aria-hidden="true" />
+            Fermer
+          </Button>
         </div>
       ) : null}
     </li>
