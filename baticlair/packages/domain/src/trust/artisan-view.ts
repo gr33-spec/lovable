@@ -506,8 +506,17 @@ export function computeWithAnswers(
   checks: (NeedResult & { workItemId: string })[];
   /** §49.2.5 : les articles qui attendent une donnée, calculés sans elle (« ? » dans la désignation), pour « Info manquante ». */
   unknowns: (NeedResult & { workItemId: string })[];
+  /** Les modèles écrits par l'artisan hors référentiel, par emplacement (« tuile » → « Tuile Romane Canal Monier »). */
+  customProducts: Record<string, string>;
 } {
-  const declined = new Set(Object.entries(answers).filter(([, v]) => v === null).map(([k]) => k));
+  // Retour du fondateur (2026-10-10) : « quand l'application ne sait pas, elle demande et laisse de quoi écrire ». Un modèle
+  // écrit par l'artisan (« Tuile Romane Canal Monier ») qui n'est pas au référentiel ne se calcule pas : la question est
+  // close comme « aucun de ces modèles », et la ligne porte le nom écrit (`customProducts`).
+  const customProducts: Record<string, string> = {};
+  for (const [k, v] of Object.entries(answers)) {
+    if (k.startsWith("product:") && typeof v === "string" && v.trim() !== "" && !ref.products.some((p) => p.id === v)) customProducts[k.slice("product:".length)] = v.trim();
+  }
+  const declined = new Set(Object.entries(answers).filter(([k, v]) => v === null || customProducts[k.slice("product:".length)] !== undefined).map(([k]) => k));
   // Un ouvrage dont TOUTES les lignes sont déjà des quantités d'achat (« 42 faîtières ») n'a rien à calculer :
   // le devis a fait le travail, BatiClair ne lui ajoute ni besoin ni question.
   const allGiven = (workItemId: string) => {
@@ -532,7 +541,7 @@ export function computeWithAnswers(
       const [kind, name] = key.split(":") as [string, string];
       if (kind === "product" && work.slots.some((s) => s.key === name)) {
         const family = work.slots.find((s) => s.key === name)!.family;
-        if (typeof answer === "string" && answer !== "") products[name] = { productId: answer, origin: "artisan" };
+        if (typeof answer === "string" && answer !== "" && customProducts[name] === undefined) products[name] = { productId: answer, origin: "artisan" };
         if (answer === "") {
           // « Pas celui-ci » : ni le produit lu, ni l'habituel ne valent pour ce chantier.
           delete products[name];
@@ -708,7 +717,7 @@ export function computeWithAnswers(
       : computeChantier(ref, current, { ...options, quantityOnly: true, blankUnknown: true }).workItems.flatMap((w) =>
           w.needs.filter((n) => n.status === "calculated" && waiting.has(`${w.workItemId}/${n.needId}`)).map((n) => ({ ...n, workItemId: w.workItemId })),
         );
-  return { needs, questions, declined: [...declined], checks, unknowns };
+  return { needs, questions, declined: [...declined], checks, unknowns, customProducts };
 }
 
 /** Les données qui se demandent ouvrage par ouvrage (§48.2, « zinc, pièce par pièce ») : la clé porte l'ouvrage. */

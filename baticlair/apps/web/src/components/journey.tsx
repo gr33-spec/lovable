@@ -180,6 +180,11 @@ interface CounterQuestion {
   numeric: boolean;
   /** §50.2 : l'ouvrage sous lequel la carte se range (« Gouttière zinc », « Couverture zinc à joint debout »). */
   group: string;
+  /**
+   * Retour du fondateur (2026-10-10) : « quand l'application ne sait pas, elle demande et laisse de quoi écrire ». Une valeur
+   * (pente, entraxe, développé) ou un modèle (tuile) qui n'est pas dans les boutons s'écrit sous « Autre ».
+   */
+  free?: "number" | "text";
   /** La valeur prise sans réponse (hypothèse dite, habitude) : marquée sur son bouton. */
   usual: string | null;
 }
@@ -190,7 +195,16 @@ export interface CounterAnswers {
   retraits?: string[];
 }
 
-type Given = { value: string; label: string };
+type Given = { value: string; label: string; custom?: boolean };
+
+/** Ce qui s'écrit sous « Autre » : un modèle (produit, question du comptoir), ou une valeur qui a son unité. */
+function freeOf(key: string, kind: string | null, unit: string | null, options: readonly { value: string }[]): CounterQuestion["free"] {
+  if (/^(?:engine:)?product:/.test(key) || kind === "choose_product" || kind === "confirm_product" || key.startsWith("comptoir:")) return "text";
+  // Une valeur chiffrée à boutons (« 30° · 35° · 45° ») : toute autre valeur s'écrit, dans son unité. Jamais un choix fermé
+  // (façonnage, oui / non, à fournir / déjà sur place).
+  if (unit && unit !== "u" && options.length > 0 && options.every((o) => /^\d+(?:[.,]\d+)?$/.test(o.value))) return "number";
+  return undefined;
+}
 
 /** La question consommables du moteur (§49.1 point 4). */
 const CONSUMABLES_KEY = "param:consommables";
@@ -217,6 +231,7 @@ export function counterQuestions(takeoff: Takeoff): CounterQuestion[] {
         hint: q.hint,
         numeric: q.kind === "param" && q.options.length === 0,
         usual: null,
+        ...(freeOf(q.key, q.kind, q.unit, q.options) ? { free: freeOf(q.key, q.kind, q.unit, q.options)! } : {}),
         group: q.key === CONSUMABLES_KEY ? CONSUMABLES_GROUP : groupOf({ key: q.key, lineIds: d.lineIds }),
       };
     });
@@ -232,7 +247,9 @@ export function counterQuestions(takeoff: Takeoff): CounterQuestion[] {
       const plain = (t: string) => t.toLowerCase().replace(",", ".").trim();
       const said = plain(a.value);
       const usual = a.choices.find((c) => plain(c.label) === said || plain(c.value) === said || plain(c.label).startsWith(said) || plain(c.label).startsWith(`${said} `))?.value ?? null;
-      return { key: a.key, kind: "assumption", text: `${a.label} ?`, options: a.choices, unit: a.key.startsWith("param:") ? a.unit : null, about: null, hint: a.note, numeric: false, usual, group: groupOf({ key: a.key, lineIds: [] }) };
+      const unit = a.key.startsWith("param:") ? a.unit : null;
+      const free = freeOf(a.key, null, unit, a.choices);
+      return { key: a.key, kind: "assumption", text: `${a.label} ?`, options: a.choices, unit, about: null, hint: a.note, numeric: false, usual, group: groupOf({ key: a.key, lineIds: [] }), ...(free ? { free } : {}) };
     });
   // §48.2 : en dépose / repose, ce qui sert de support est peut-être déjà sur place.
   const rework = takeoff.lines.some((l) => REWORK.test(l.designation));
@@ -419,7 +436,7 @@ function QuestionCard({ question: q, given, flagged, onChange }: { question: Cou
       ) : (
         <div role="group" aria-labelledby={`${id}-q`} className={`grid gap-2 ${q.options.length <= 2 || q.options.every((o) => o.label.length <= 14) ? "grid-cols-2" : "grid-cols-1"}`}>
           {q.options.map((o) => {
-            const on = given?.value === o.value;
+            const on = given?.value === o.value && !given.custom;
             const usual = !given && q.usual === o.value;
             return (
               <button
@@ -436,9 +453,70 @@ function QuestionCard({ question: q, given, flagged, onChange }: { question: Cou
               </button>
             );
           })}
+          {q.free ? <OtherAnswer question={q} given={given} onChange={onChange} /> : null}
         </div>
       )}
     </li>
+  );
+}
+
+/**
+ * « Autre » : quand la bonne réponse n'est pas dans les boutons, elle s'écrit (un modèle de tuile, une pente de 38°). Un
+ * appui sur « Autre » ouvre la case ; « OK » la garde comme réponse.
+ */
+function OtherAnswer({ question: q, given, onChange }: { question: CounterQuestion; given: Given | null; onChange: (g: Given | null) => void }) {
+  const id = useId();
+  const [open, setOpen] = useState(Boolean(given?.custom));
+  const [value, setValue] = useState(given?.custom ? given.value : "");
+  const numeric = q.free === "number";
+  const unitLabel = q.unit && q.unit !== "u" ? (q.unit === "m2" ? "m²" : q.unit) : "";
+  const clean = value.trim().replace(",", ".");
+  const valid = numeric ? /^\d+(?:\.\d+)?$/.test(clean) && Number(clean) > 0 : value.trim().length >= 2;
+  const save = () => {
+    if (!valid) return;
+    const v = numeric ? clean : value.trim();
+    onChange({ value: v, label: numeric ? `${v.replace(".", ",")}${unitLabel ? (unitLabel === "°" ? "°" : ` ${unitLabel}`) : ""}` : v, custom: true });
+  };
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="inline-flex min-h-12 items-center justify-center rounded-2xl border-2 border-dashed border-line bg-surface px-3 py-1.5 text-[15px] font-extrabold text-ink active:scale-[0.98]"
+      >
+        Autre
+      </button>
+    );
+  }
+  return (
+    <form
+      className="col-span-full flex items-center gap-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        save();
+      }}
+    >
+      <label htmlFor={id} className="sr-only">
+        {numeric ? `Autre valeur : ${q.text}` : `Autre : ${q.text}`}
+      </label>
+      <span className={`flex min-w-0 grow items-center gap-1 rounded-2xl border-2 bg-surface px-3 ${given?.custom ? "border-accent" : "border-line"} focus-within:border-accent`}>
+        <input
+          id={id}
+          autoFocus
+          inputMode={numeric ? "decimal" : "text"}
+          maxLength={numeric ? 8 : 100}
+          placeholder={numeric ? "Ta valeur" : "Écris le modèle"}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onBlur={save}
+          className="min-h-12 w-full min-w-0 bg-transparent text-[16px] font-extrabold outline-none"
+        />
+        {numeric && unitLabel ? <span className="shrink-0 text-[14px] font-bold text-muted">{unitLabel}</span> : null}
+      </span>
+      <Button type="submit" className="shrink-0" disabled={!valid}>
+        OK
+      </Button>
+    </form>
   );
 }
 

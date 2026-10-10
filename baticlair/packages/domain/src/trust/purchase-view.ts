@@ -77,6 +77,8 @@ export interface ToQuoteItem {
   measure: string;
   reason: string;
   lineIds: string[];
+  /** Un modèle écrit par l'artisan (« Autre ») : la ligne part sous son nom, le fournisseur compte les pièces. */
+  custom?: boolean;
 }
 
 /** Les articles d'un même ouvrage, pour la carte du quantitatif (« Couverture ardoises · 200 m² »). */
@@ -583,7 +585,7 @@ function understood(view: ArtisanView, plan: QuotePlan, ref: Referential): strin
 
 export function purchaseView(
   view: ArtisanView,
-  engine: { needs: readonly OwnedNeed[]; questions: readonly Question[]; declined?: readonly string[]; checks?: readonly OwnedNeed[]; unknowns?: readonly OwnedNeed[] },
+  engine: { needs: readonly OwnedNeed[]; questions: readonly Question[]; declined?: readonly string[]; checks?: readonly OwnedNeed[]; unknowns?: readonly OwnedNeed[]; customProducts?: Readonly<Record<string, string>> },
   link: {
     plan: QuotePlan;
     roles: ReadonlyMap<string, LineRole>;
@@ -746,6 +748,7 @@ export function purchaseView(
       .map((x) => x.item),
   );
   const toQuote: ToQuoteItem[] = [...failedSupplierTest];
+  const customQuantity: Decision[] = [];
   // « Aucun de ces modèles » sur une pièce : BatiClair n'invente rien, le fournisseur chiffre pour la mesure du devis.
   for (const n of engine.needs) {
     // Seulement « aucun de ces modèles » sur une pièce ; une donnée laissée sans réponse fait une ligne « Info manquante ».
@@ -754,6 +757,14 @@ export function purchaseView(
     const owner = planned.find((l) => l.slot === n.slot) ?? planned.find((l) => l.mentions.includes(n.slot)) ?? planned[0];
     const o = owner ? view.ouvrages.find((x) => x.lineId === owner.ref) : undefined;
     const measure = o ? [o.read.quantity, o.read.unit].filter(Boolean).join(" ") : "";
+    // Un modèle écrit par l'artisan (« Autre ») : la ligne porte son nom ; le nombre de pièces, que le référentiel ne sait
+    // pas compter pour ce modèle, est à préciser (le fournisseur le chiffre pour la mesure du devis).
+    const custom = engine.customProducts?.[n.slot];
+    if (custom) {
+      toQuote.push({ key: `need:${n.needId}`, label: custom.charAt(0).toUpperCase() + custom.slice(1), measure, reason: "Modèle écrit par l'artisan : le fournisseur compte les pièces pour la mesure du devis.", lineIds: o ? [o.lineId] : [], custom: true });
+      customQuantity.push({ key: `${A_PRECISER}${n.question!.key}`, state: "to_confirm", title: "Quantité", text: "Quantité à préciser : écris-la sur la ligne, ou laisse le fournisseur la compter.", lineIds: o ? [o.lineId] : [], primary: { action: "keep", label: "C'est bon" }, secondary: ["edit"] });
+      continue;
+    }
     toQuote.push({ key: `need:${n.needId}`, label: o ? `${n.slotLabel} (${withoutLabour(o.designation)})` : n.slotLabel, measure, reason: "Aucun modèle choisi : le fournisseur propose et chiffre.", lineIds: o ? [o.lineId] : [] });
   }
   for (const o of view.ouvrages) {
@@ -763,7 +774,11 @@ export function purchaseView(
     if (o.pending) {
       // §49.1 : une ligne écrite qui attend une info sort UNE fois, orange « Info manquante », jamais aussi en gris.
       if (toBuy.some((b) => b.key.startsWith("manque:") && !b.key.startsWith("manque:need:") && b.lineIds.includes(o.lineId))) continue;
-      if (!toQuote.some((q) => q.key === `line:${o.lineId}`)) toQuote.push({ key: `line:${o.lineId}`, label: withoutLabour(o.designation), measure, reason: o.pending, lineIds: [o.lineId] });
+      // §49.2 : une mesure dont les articles sont déjà calculés (« Couverture ardoises 48 m² » → « Ardoises · 2 100 pièces »)
+      // ne ressort jamais en m² à côté d'eux.
+      if (toBuy.some((b) => b.kind === "computed" && b.lineIds.includes(o.lineId))) continue;
+      // Jamais deux fois : une ligne déjà à faire chiffrer pour son article (modèle refusé ou écrit) ne ressort pas en entier.
+      if (!toQuote.some((q) => q.key === `line:${o.lineId}` || q.lineIds.includes(o.lineId))) toQuote.push({ key: `line:${o.lineId}`, label: withoutLabour(o.designation), measure, reason: o.pending, lineIds: [o.lineId] });
       continue;
     }
     // Un composant cité sans règle, ou un besoin que BatiClair ne sait pas établir : le fournisseur chiffre pour la mesure.
@@ -809,7 +824,7 @@ export function purchaseView(
       toBuy[i] = { ...item, waitsOn: [...(item.waitsOn ?? []), d.key], rules: [...(item.rules ?? []), { key: `manque:${d.key}`, text: rule, local: true, said: true }] };
     }
   }
-  const questions = [...engineQuestions, ...counter];
+  const questions = [...engineQuestions, ...counter, ...customQuantity];
   // §49.8 : chaque ligne orange porte ses boutons (la donnée qui manque, le défaut à confirmer) pour se régler sur place.
   const known = new Map<string, Question>();
   for (const n of engine.needs) if (n.question) known.set(n.question.key, n.question);

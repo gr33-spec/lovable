@@ -9,7 +9,8 @@ import { readQuote, type QuoteLineInput } from "./support/read-quote.js";
  * §50 « Ce que voit l'artisan » (fondateur, 2026-10-09), écran 3 : une carte par fourniture. Si orange, la raison en
  * CINQ MOTS AU PLUS (« Modèle et teinte à préciser », « Devis 20, calcul 21 »), jamais le préfixe « Info manquante : »
  * (§50.4) ; rien de tout ça si la ligne est verte. §50.5 : chaque ligne a un nom qu'on dit au comptoir, une quantité,
- * une unité commandable ; jamais une phrase de prestation, jamais des heures ou un forfait.
+ * une unité commandable ; jamais une phrase de prestation, jamais des heures ou un forfait, jamais des m² ou des ml (sauf
+ * bande et bobineau, vendus au mètre ; retour du fondateur, 2026-10-10).
  */
 const DEVIS: [string, QuoteLineInput[], ReadonlyMap<string, QuoteLineReading> | undefined][] = [
   ["D-2026-020", D2026_020_LINES, undefined],
@@ -39,6 +40,13 @@ describe("§50.3 la carte d'une ligne : la raison orange en cinq mots au plus, r
       for (const b of p.toBuy) {
         expect(isPrestationPhrase(b.label), b.label).toBe(false);
         expect(isWithoutSupplyUnit(b.order?.unit), b.label).toBe(false);
+        // Retour du fondateur (2026-10-10) : aucune ligne en m² ou en ml, sauf les articles vendus au mètre (bande,
+        // bobineau) ; une surface se convertit en pièces (§49.2 : « Ardoises 32×22 · 2 100 pièces »).
+        // Les articles vendus à la surface par le négoce (§40 : voliges, écran, membrane, isolant, panneaux) gardent leur m².
+        const soldBySurface = /\b(voliges?|voligeage|[ée]cran|membranes?|isolants?|panneaux?|pare-pluie)\b/i.test(b.label);
+        if (!/\b(bandes?|bobine|bobineau|bobines)\b/i.test(b.label) && !(soldBySurface && /^(m2|m²)$/i.test(b.order?.unit ?? ""))) {
+          expect(b.order?.unit ?? "", b.label).not.toMatch(/^(m2|m²|ml|m|mètres?)$/i);
+        }
       }
     });
   }

@@ -71,7 +71,7 @@ describe("§49.9 une ligne du quantitatif nomme une fourniture, jamais la phrase
     const lines = REPARATION.map((l) => ({ id: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit }));
     const validation = validateTakeoff(lines.map((l) => ({ id: l.id, designation: l.designation, quantityRaw: l.quantity, unitRaw: l.unit, source: "client_quote" as const })), tradeProfile("roofing"));
     const without = linesWithoutSupply(lines.filter((l) => !["1", "3"].includes(l.id)), validation, READINGS);
-    expect(without.map((w) => w.measure)).toEqual(["1,5 h", "1 forfait"]);
+    expect(without.map((w) => w.measure)).toEqual(["1.5 h", "1 fft"]);
   });
 
   it("sans la lecture (lignes d'un partenaire), une heure n'est jamais une fourniture", () => {
