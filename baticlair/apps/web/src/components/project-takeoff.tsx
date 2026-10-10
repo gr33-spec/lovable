@@ -321,6 +321,7 @@ export function ProjectTakeoff({
         onEditItem={editItem}
         onSetAside={setAside}
         onSend={send}
+        error={actionError}
         docked={false}
         sent={sent}
         sketches={quantitatif?.infos?.croquis ?? []}
