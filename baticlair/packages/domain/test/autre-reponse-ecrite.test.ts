@@ -37,3 +37,27 @@ describe("« Autre » : un modèle écrit par l'artisan", () => {
     expect(p.toQuote.filter((q) => q.lineIds.includes("1"))).toHaveLength(1);
   });
 });
+
+/**
+ * Même retour, vu sur la capture de l'écran des questions : « Quelle ardoise : Espagne 1er choix, ou NF ? » n'avait que deux
+ * boutons. Une qualité ou une teinte qui se NOMME (ardoise, aspect du zinc, teinte) a aussi « Autre » : ce qui s'écrit passe
+ * tel quel dans la désignation (le comptoir le lit), sans rien changer aux quantités.
+ */
+describe("« Autre » : une qualité écrite par l'artisan (ardoise, zinc, teinte)", () => {
+  const ARDOISES = [{ ref: "1", designation: "Couverture en ardoises naturelles 32×22 au crochet", quantity: "48", unit: "m²" }];
+  const readSlate = (answers: Record<string, unknown>) => readQuote(ARDOISES, answers as never, [], {}, { acceptDraft: true });
+
+  it("la question de la qualité est marquée « nommée » (la case « Autre » s'ouvre en texte)", () => {
+    const q = readSlate({}).questions.find((d) => d.question?.key === "param:qualite_ardoise");
+    expect(q?.question?.named).toBe(true);
+  });
+
+  it("« Ardoise d'Angers » écrite : la question se ferme, la désignation la porte, la quantité ne bouge pas", () => {
+    const written = readSlate({ "param:qualite_ardoise": "Ardoise d'Angers" });
+    const chosen = readSlate({ "param:qualite_ardoise": { value: "1", unit: "u" } });
+    expect(written.questions.filter((d) => d.question?.key === "param:qualite_ardoise")).toEqual([]);
+    const slate = (p: typeof written) => p.toBuy.find((b) => /^Ardoises naturelles/.test(b.label));
+    expect(slate(written)?.label).toMatch(/Ardoise d'Angers 32×22/);
+    expect(slate(written)?.quantity).toBe(slate(chosen)?.quantity);
+  });
+});

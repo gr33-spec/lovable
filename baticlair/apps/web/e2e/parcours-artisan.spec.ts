@@ -1106,6 +1106,13 @@ test("Autre : quand la bonne réponse n'est pas dans les boutons, elle s'écrit 
   const faconnage = questions.getByRole("group", { name: /façonnes/i }).first();
   await expect(faconnage.getByRole("button", { name: "Autre", exact: true })).toHaveCount(0);
   await faconnage.getByRole("button", { name: /^Je commande façonné/ }).click();
+  // Une qualité qui se nomme (l'ardoise) : « Autre » laisse écrire la sienne, qui part telle quelle dans la désignation.
+  const ardoise = questions.getByRole("group", { name: /^Quelle ardoise/ });
+  await ardoise.getByRole("button", { name: "Autre", exact: true }).click();
+  await ardoise.getByLabel(/^Autre : Quelle ardoise/).fill("Ardoise d'Angers");
+  await ardoise.getByRole("button", { name: "OK" }).click();
   await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
-  await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible({ timeout: 60_000 });
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(list).toBeVisible({ timeout: 60_000 });
+  await expect(list.getByText(/Ardoise d'Angers/).first()).toBeVisible();
 });

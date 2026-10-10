@@ -1,5 +1,10 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.10-48 — « Autre » aussi pour une qualité qui se nomme (ardoise, aspect du zinc, teinte)
+
+- **§50.2 Questions** : « Quelle ardoise : Espagne 1er choix, ou NF ? », l'aspect du zinc (naturel, Quartz, Anthra), la teinte de gouttière et celle de l'ardoise fibres-ciment ont aussi « Autre » (`named`). Ce que l'artisan écrit (« Ardoise d'Angers ») passe tel quel dans la désignation (« Ardoises naturelles Ardoise d'Angers 32×22 »), sans rien changer aux quantités. Avant : seulement les boutons.
+- Un modèle ou une qualité écrits sous « Autre » ne deviennent jamais une habitude de l'entreprise (ils ne sont pas au référentiel). Aucun ratio ne change.
+
 ## roofing-2026.10.10-47 — « Autre » : quand l'app ne sait pas, elle demande et laisse écrire (retour du fondateur, 2026-10-10)
 
 - **§50.2 Questions** : une question de valeur à boutons (pente, entraxe, rampant, développé…) ou de modèle (tuile, ardoise) a aussi « Autre », qui ouvre une case pour écrire (valeur dans son unité, ou le modèle). Avant : seulement les boutons (« Tuiles HP10 » seul, 30° / 35° / 45°). Les choix fermés (façonnage, oui / non, à fournir / déjà sur place) n'ont pas d'« Autre ».

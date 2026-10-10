@@ -36,7 +36,7 @@ function purchaseDto(p: PurchaseView) {
     suggestions: p.suggestions.map(item),
     groups: p.groups.map((g) => ({ key: g.key, label: g.label, measure: g.measure, itemKeys: g.itemKeys })),
     toQuote: p.toQuote.map((q) => ({ key: q.key, label: q.label, measure: q.measure, reason: q.reason, lineIds: q.lineIds })),
-    assumptions: p.assumptions.map((a) => ({ key: a.key, label: a.label, value: a.value, unit: a.unit, note: a.note ?? null, choices: a.choices ?? [] })),
+    assumptions: p.assumptions.map((a) => ({ key: a.key, label: a.label, value: a.value, unit: a.unit, note: a.note ?? null, choices: a.choices ?? [], named: a.named ?? false })),
     canValidate: p.canValidate,
     /** L'écran unique « liste des fournitures » : groupes ordonnés, lignes vert / orange / gris, et le compte. */
     screen: p.screen,
@@ -59,7 +59,7 @@ function viewDto(view: ArtisanView) {
       secondary: d.secondary,
       suggestion: d.suggestion ?? null,
       question: d.question
-        ? { key: d.question.key, kind: d.question.kind, unit: d.question.unit ?? null, hint: d.question.hint ?? null, options: d.question.options ?? [], impact: d.question.impact ?? null }
+        ? { key: d.question.key, kind: d.question.kind, unit: d.question.unit ?? null, hint: d.question.hint ?? null, options: d.question.options ?? [], impact: d.question.impact ?? null, named: d.question.named ?? false }
         : null,
     })),
     measures: view.measures,

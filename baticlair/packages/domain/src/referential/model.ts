@@ -246,6 +246,12 @@ export interface ParamDef {
   /** Façon de dire une valeur dans l'explication (« 3 » → « III » pour une région ardoise) ; le calcul garde la valeur. */
   display?: Record<string, string>;
   /**
+   * Une qualité ou une teinte qui se NOMME (l'ardoise, l'aspect du zinc, une teinte) : ses boutons ne sont que les plus
+   * courantes ; « Autre » laisse écrire, et ce qui s'écrit passe tel quel dans la désignation. Seulement pour une donnée qui
+   * ne change aucune quantité (retour du fondateur, 2026-10-10).
+   */
+  named?: boolean;
+  /**
    * Pas encore répondue, la donnée est l'une de ses réponses proposées (le développé : 100 à 400 mm), pas n'importe
    * quelle valeur : ce qui ne dépend pas de laquelle (un bobineau de 500 mm) se calcule sans la demander.
    */

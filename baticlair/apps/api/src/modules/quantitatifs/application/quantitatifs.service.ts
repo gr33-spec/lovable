@@ -248,8 +248,14 @@ export class QuantitatifsService {
       if (!/^(?:product:[a-z0-9_]{1,40}|param:[a-z0-9_]{1,40}(?:@[a-z0-9_-]{1,60})?|(?:role|precise):[0-9a-f-]{36}|comptoir:[0-9a-f-]{36}:\d{1,2})$/.test(key)) throw validationFailed("Unknown question", [{ path: "question", message: r.question }]);
       if (key.startsWith("role:") && r.valeur !== "measure" && r.valeur !== "purchase") throw validationFailed("Role answer must be measure or purchase", [{ path: "valeur", message: r.question }]);
       let value: EngineAnswer;
+      // « Autre » sur une qualité qui se nomme (« Ardoise d'Angers ») : le texte écrit, tel quel dans la désignation.
+      const named = q?.named || reviewed.purchase.assumptions.some((a) => a.key === key && a.named);
       if (r.valeur === null || !key.startsWith("param:")) value = r.valeur;
-      else {
+      else if (named && !/^\d+(?:[.,]\d+)?$/.test(r.valeur.trim())) {
+        const text = r.valeur.trim();
+        if (text === "" || text.length > 80) throw validationFailed("Written answer must be 1 to 80 characters", [{ path: "valeur", message: r.question }]);
+        value = text;
+      } else {
         // Une réponse pour tout le chantier (« param:faconnage ») vaut pour chaque pièce posée à part (« …@noue ») : même unité.
         const unit =
           r.unite ??

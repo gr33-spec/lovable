@@ -835,7 +835,7 @@ export function purchaseView(
       ...(item.waitsOn ?? []).map((k) => known.get(k)).filter((q): q is Question => !!q?.options?.length),
       ...assumptions
         .filter((a) => item.assumptionKeys.includes(a.key) && (item.rules ?? []).some((r) => r.key.startsWith("defaut:") && r.key.includes(a.key)) && (a.choices?.length ?? 0) > 1)
-        .map((a): Question => ({ key: a.key, kind: "param", text: a.label, unit: a.unit, options: a.choices! })),
+        .map((a): Question => ({ key: a.key, kind: "param", text: a.label, unit: a.unit, options: a.choices!, ...(a.named ? { named: true } : {}) })),
     ];
     if (asks.length === 0) continue;
     toBuy[i] = { ...item, asks: [...new Map(asks.map((q) => [q.key, { key: q.key, text: q.text.replace(/\s*\?$/, "").replace(/ Cela change la commande :.*$/, ""), unit: q.unit ?? null, options: q.options! }])).values()] };

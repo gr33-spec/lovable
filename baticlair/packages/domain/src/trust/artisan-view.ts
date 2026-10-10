@@ -1,5 +1,5 @@
 import { baseOf, INSTANCE_SEP } from "../referential/model.js";
-import { computeChantier, CONSUMABLES_KEY, type Assumption, type CompanyPreferences, type EngineOptions, type NeedResult, type Question, type WorkItemInput } from "../referential/engine.js";
+import { computeChantier, CONSUMABLES_KEY, type Assumption, type CompanyPreferences, type EngineOptions, type NeedResult, type ParamValue, type Question, type WorkItemInput } from "../referential/engine.js";
 import type { Referential } from "../referential/model.js";
 import type { LineRole } from "../referential/line-roles.js";
 import type { QuotePlan } from "../referential/plan.js";
@@ -555,12 +555,22 @@ export function computeWithAnswers(
       if (kind === "param" && answer && typeof answer !== "string" && work.params.some((p) => p.key === name) && !(input.workItemId.includes(INSTANCE_SEP) && params[name]?.origin === "devis")) {
         params[name] = { ...answer, origin: "artisan" };
       }
+      // « Autre » sur une qualité qui se nomme (« Ardoise d'Angers ») : le texte écrit, tel quel dans la désignation.
+      const named = kind === "param" ? work.params.find((p) => p.key === name && p.named) : undefined;
+      if (named && typeof answer === "string" && answer.trim() !== "" && !(input.workItemId.includes(INSTANCE_SEP) && params[name]?.origin === "devis")) {
+        params[name] = { value: "0", unit: named.unit, origin: "artisan", text: answer.trim(), evidence: "Votre réponse" };
+      }
     }
     // §48.2 « zinc, pièce par pièce » : une réponse propre à cet ouvrage (« param:faconnage@noue ») passe devant celle du chantier.
     for (const [key, answer] of Object.entries(answers)) {
       const scoped = scopedParam(key);
-      if (!scoped || scoped.workItemId !== input.workItemId || !answer || typeof answer === "string") continue;
-      if (work.params.some((p) => p.key === scoped.name)) params[scoped.name] = { ...answer, origin: "artisan" };
+      if (!scoped || scoped.workItemId !== input.workItemId || !answer) continue;
+      const def = work.params.find((p) => p.key === scoped.name);
+      if (def && typeof answer === "string") {
+        if (def.named && answer.trim() !== "") params[scoped.name] = { value: "0", unit: def.unit, origin: "artisan", text: answer.trim(), evidence: "Votre réponse" };
+        continue;
+      }
+      if (def) params[scoped.name] = { ...(answer as ParamValue), origin: "artisan" };
     }
     // Habitude établie de l'entreprise (« je façonne », apprise sur deux chantiers) : vaut réponse quand ce
     // chantier n'en a pas donné d'autre ; dite comme telle dans le calcul, modifiable d'un tap.
