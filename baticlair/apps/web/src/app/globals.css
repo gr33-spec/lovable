@@ -54,6 +54,16 @@ html {
     0 10px 24px -8px rgba(107, 70, 255, 0.55),
     0 4px 10px -4px rgba(255, 77, 122, 0.45);
 }
+/* Les scènes de chantier (lecture, calcul) : encre de nuit et papier calque, sans lueur ; retour du fondateur (2026-10-10). */
+@utility bg-chantier {
+  background-color: #111827;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(180deg, #151d30 0%, #0f1522 100%);
+  background-size: 22px 22px, 22px 22px, auto;
+  background-position: -1px -1px, -1px -1px, 0 0;
+}
 /* La carte héros : nuit profonde, une lueur violette en haut à droite. */
 @utility bg-hero {
   background-image:
@@ -98,37 +108,4 @@ body {
   }
 }
 
-/* Parcours §48 : un devis qui se transforme en liste de matériaux (écran de dépôt, analyse, calcul). */
-@keyframes bc-line-out {
-  0%, 8% { opacity: 1; transform: none; }
-  22%, 100% { opacity: 0.18; transform: translateX(10px); }
-}
-@keyframes bc-row-in {
-  0%, 14% { opacity: 0; transform: translateX(-14px) scale(0.96); }
-  28%, 88% { opacity: 1; transform: none; }
-  100% { opacity: 0; transform: none; }
-}
-@keyframes bc-check-pop {
-  0%, 26% { transform: scale(0); }
-  34% { transform: scale(1.25); }
-  40%, 100% { transform: scale(1); }
-}
-@keyframes bc-scan {
-  0% { transform: translateY(-10%); opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { transform: translateY(760%); opacity: 0; }
-}
-@keyframes bc-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-@keyframes bc-ring {
-  0% { box-shadow: 0 0 0 0 rgba(255, 77, 122, 0.45); }
-  100% { box-shadow: 0 0 0 22px rgba(255, 77, 122, 0); }
-}
-@keyframes bc-steam {
-  0% { opacity: 0; transform: translateY(4px) scaleY(0.8); }
-  40% { opacity: 0.8; }
-  100% { opacity: 0; transform: translateY(-14px) scaleY(1.1); }
-}
+
