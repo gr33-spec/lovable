@@ -218,8 +218,8 @@ export class PriceRequestsService {
    * « Exporter la liste en PDF » (§21.3, §45.9) : la liste validée, rendue par LE MÊME générateur que le PDF envoyé au
    * fournisseur (un seul générateur, une seule mise en page, aucun prix) ; pour l'imprimer ou la donner au comptoir.
    */
-  async exportPdf(tenant: TenantContext, projectId: string): Promise<{ filename: string; bytes: Uint8Array }> {
-    const { packet, logo } = await this.order(tenant, projectId, { message: null, dueDate: null });
+  async exportPdf(tenant: TenantContext, projectId: string, options: { apercu?: boolean } = {}): Promise<{ filename: string; bytes: Uint8Array }> {
+    const { packet, logo } = await this.order(tenant, projectId, { message: null, dueDate: null, apercu: options.apercu === true });
     return { filename: fileName(packet.chantier), bytes: await packetPdf(packet, await this.sketchFiles(tenant, packet), { logo }) };
   }
 
@@ -228,15 +228,16 @@ export class PriceRequestsService {
    * l'objet et le mail. Rien ne part tant que l'artisan n'a pas appuyé sur « Envoyer ».
    */
   async preview(tenant: TenantContext, projectId: string, input: { message: string | null; dueDate: Date | null; destinataire?: string | null }): Promise<{ subject: string; mail: string; document: PacketDocument; hasLogo: boolean }> {
-    const { packet, logo } = await this.order(tenant, projectId, input);
+    // §50.7 : l'aperçu s'ouvre aussi sur une liste en cours (lignes orange comprises) ; rien ne part d'ici.
+    const { packet, logo } = await this.order(tenant, projectId, { ...input, apercu: true });
     return { subject: packetSubject(packet), mail: packetMail(packet), document: packetDocument(packet, { destinataire: input.destinataire ?? null }), hasLogo: !!logo };
   }
 
   /** Ce qui part chez le fournisseur : les lignes de la demande et le document (§45), depuis la liste validée. */
-  private async order(tenant: TenantContext, projectId: string, input: { message: string | null; dueDate: Date | null; articles?: readonly string[] }) {
+  private async order(tenant: TenantContext, projectId: string, input: { message: string | null; dueDate: Date | null; articles?: readonly string[]; apercu?: boolean }) {
     // §48.5 : une SÉLECTION part sans attendre que toute la liste soit validée (devis multi-lots) ; la liste entière, si.
     const selection = input.articles && input.articles.length > 0 ? new Set(input.articles) : null;
-    const takeoff = await this.requests.validatedTakeoff(tenant, projectId, { anyStatus: selection !== null });
+    const takeoff = await this.requests.validatedTakeoff(tenant, projectId, { anyStatus: selection !== null || input.apercu === true });
     if (!takeoff)
       throw validationFailed("Validate the materials list first", {
         reason: "takeoff_not_validated",

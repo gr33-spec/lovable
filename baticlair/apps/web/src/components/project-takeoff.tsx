@@ -273,11 +273,8 @@ export function ProjectTakeoff({
     if (draft) void call("validation").then(() => setSendSignal((n) => n + 1));
     else setSendSignal((n) => n + 1);
   };
-  // « Aperçu » : la liste est validée comme pour l'envoi (le mail et le PDF sortent de la liste validée), rien ne part.
-  const preview = async () => {
-    if (draft) await call("validation");
-    setPreviewing(true);
-  };
+  // « Aperçu » : le mail et le PDF tels qu'ils partiraient, liste validée ou non (lignes orange comprises) ; rien ne part.
+  const preview = () => setPreviewing(true);
   // Mettre une ligne de côté : un article de la liste sort de la liste (la liste validée le reste) ; une ligne du devis
   // à préciser avec le fournisseur est retirée.
   // §50.7 : une ligne du chantier en bref se corrige (texte) ou se retire (vide), comme une ligne de la liste.
@@ -329,7 +326,7 @@ export function ProjectTakeoff({
         onEditItem={editItem}
         onSetAside={setAside}
         onSend={send}
-        onPreview={() => void preview()}
+        onPreview={preview}
         error={actionError}
         docked={false}
         sent={sent}
