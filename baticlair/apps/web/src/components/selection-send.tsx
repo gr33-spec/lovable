@@ -15,6 +15,11 @@ export interface SelectionSend {
   /** Clé de l'article (« quote:<clé> » pour une ligne à faire chiffrer) → fournisseur(s) qui l'ont reçue à part. */
   sent: ReadonlyMap<string, string>;
   send: (articles: string[], supplierIds: string[]) => Promise<void>;
+  /**
+   * Retour du fondateur (2026-10-10) : « un devis peut contenir des matériaux qui se trouvent chez plusieurs fournisseurs ».
+   * La commande répartie : chaque fournisseur qui a reçu une part, et combien de lignes.
+   */
+  parts: readonly { supplierId: string; name: string; lines: number }[];
 }
 
 export function useSelectionSend(projectId: string, onSent?: () => void): SelectionSend {
@@ -30,6 +35,18 @@ export function useSelectionSend(projectId: string, onSent?: () => void): Select
     }
     return map;
   }, [requests.data]);
+  const parts = useMemo(() => {
+    const bySupplier = new Map<string, { supplierId: string; name: string; keys: Set<string> }>();
+    for (const r of requests.data?.items ?? []) {
+      if (!r.articles?.length) continue;
+      for (const x of r.recipients) {
+        const part = bySupplier.get(x.supplier.id) ?? { supplierId: x.supplier.id, name: x.supplier.name, keys: new Set<string>() };
+        for (const key of r.articles) part.keys.add(key);
+        bySupplier.set(x.supplier.id, part);
+      }
+    }
+    return [...bySupplier.values()].map((p) => ({ supplierId: p.supplierId, name: p.name, lines: p.keys.size }));
+  }, [requests.data]);
   const send = async (articles: string[], supplierIds: string[]) => {
     let request = await api<PriceRequest>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests`, {
       method: "POST",
@@ -41,20 +58,32 @@ export function useSelectionSend(projectId: string, onSent?: () => void): Select
     requests.reload();
     onSent?.();
   };
-  return { sent, send };
+  return { sent, send, parts };
 }
 
 /**
  * La barre du bas en mode sélection : combien de lignes, à quels fournisseurs, « Envoyer », « Annuler ». Retour du fondateur
  * (2026-10-10) : « les fournisseurs cochés par défaut, avec possibilité d'en ajouter un de plus facilement ».
  */
-export function SelectionBar({ count, onSend, onCancel }: { count: number; onSend: (supplierIds: string[]) => Promise<void>; onCancel: () => void }) {
+export function SelectionBar({
+  count,
+  onSend,
+  onCancel,
+  alreadyServed = [],
+}: {
+  count: number;
+  onSend: (supplierIds: string[]) => Promise<void>;
+  onCancel: () => void;
+  /** Les fournisseurs qui ont déjà reçu une part : la suite va « à un autre fournisseur », ils partent décochés. */
+  alreadyServed?: readonly string[];
+}) {
   const id = useId();
   const fetchSuppliers = useCallback((signal: AbortSignal) => api<{ items: Supplier[] }>("/v1/suppliers", { signal }), []);
   const supplierList = useResource(fetchSuppliers);
   const suppliers = supplierList.data?.items ?? null;
-  // Tout le carnet coché d'office (un fournisseur ajouté ici aussi) : on retient seulement ce que l'artisan décoche.
-  const [unchecked, setUnchecked] = useState<Set<string>>(new Set());
+  // Tout le carnet coché d'office (un fournisseur ajouté ici aussi), sauf ceux qui ont déjà leur part : on retient seulement
+  // ce qui est décoché.
+  const [unchecked, setUnchecked] = useState<Set<string>>(() => new Set(alreadyServed));
   const picked = new Set((suppliers ?? []).map((s) => s.id).filter((sid) => !unchecked.has(sid)));
   const toggle = (supplierId: string, on: boolean) =>
     setUnchecked((prev) => {
