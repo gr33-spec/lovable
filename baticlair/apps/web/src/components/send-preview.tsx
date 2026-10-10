@@ -47,7 +47,7 @@ export function SendPreview({ projectId, onSend, onClose }: { projectId: string;
               <Button
                 variant="secondary"
                 className="w-full"
-                onClick={() => openFile({ url: `/v1/projects/${id}/demande-de-devis.pdf`, title: "Le PDF joint", fileName: "demande-de-devis.pdf" })}
+                onClick={() => openFile({ url: `/v1/projects/${id}/demande-de-devis.pdf?apercu=1`, title: "Le PDF joint", fileName: "demande-de-devis.pdf" })}
               >
                 <FileText size={18} aria-hidden="true" />
                 Voir le PDF

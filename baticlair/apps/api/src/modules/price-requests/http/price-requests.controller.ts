@@ -143,8 +143,9 @@ export class PriceRequestsController {
 
   /** « Exporter la liste en PDF » (§21.3, §45.9) : la liste validée du chantier, même PDF que celui du fournisseur, aucun prix. */
   @Get(["projects/:projectId/demande-de-devis.pdf", "projects/:projectId/commande.pdf"])
-  async exportPdf(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string, @Res({ passthrough: true }) res: Response) {
-    const pdf = await this.requests.exportPdf(tenant, projectId);
+  async exportPdf(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string, @Query("apercu") apercu: string | undefined, @Res({ passthrough: true }) res: Response) {
+    // « ?apercu=1 » : le PDF de l'aperçu (§50.7), aussi pour une liste pas encore validée.
+    const pdf = await this.requests.exportPdf(tenant, projectId, { apercu: apercu === "1" });
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="${pdf.filename}"`);
     res.setHeader("Cache-Control", "private, no-store");

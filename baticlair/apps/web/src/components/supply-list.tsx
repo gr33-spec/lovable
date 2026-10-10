@@ -74,6 +74,8 @@ export function SupplyList({
   // §48.5 : cases à cocher seulement après le petit bouton ; par défaut l'écran ne change pas.
   const [selecting, setSelecting] = useState(false);
   const [checked, setChecked] = useState<Set<string>>(new Set());
+  // « Envoyer » touché avec des lignes orange : la phrase dit pourquoi rien ne part.
+  const [blocked, setBlocked] = useState(false);
   const articleOf = (r: ScreenRow) => r.itemKey ?? (r.quoteKey ? `quote:${r.quoteKey}` : null);
   const hidden = (r: ScreenRow) => removing.includes(r.key);
   const rows = screen.groups.flatMap((g) => g.rows).filter((r) => !hidden(r));
@@ -255,13 +257,14 @@ export function SupplyList({
       ) : (
         <>
           {/* RIEN NE PART VIDE : sans aucune fourniture (un devis de main-d'œuvre seule), pas de bouton d'envoi. */}
-          {editable && toCheck.length === 0 && rows.length > 0 ? (
+          {editable && rows.length > 0 ? (
             // Retour du fondateur (2026-10-10) : « deux boutons flottants d'actions en bas (figé), un pour l'envoi et l'autre pour
-            // prévisualiser le PDF et le mail envoyé ».
+            // prévisualiser le PDF et le mail envoyé », TOUJOURS là (« je ne vois toujours pas les deux boutons ») : avec des lignes
+            // orange, l'aperçu s'ouvre quand même et « Envoyer » mène à la première ligne à régler (rien ne part avant).
             <div
               role="group"
               aria-label="Envoyer la liste"
-              className={`sticky z-10 mt-2 flex gap-2 bg-gradient-to-t from-ground from-70% to-transparent pt-6 ${docked ? "bottom-[68px] pb-3 lg:bottom-[70px]" : "bottom-0 pb-[max(8px,env(safe-area-inset-bottom))]"}`}
+              className={`sticky z-10 mt-2 flex flex-wrap gap-2 bg-gradient-to-t from-ground from-70% to-transparent pt-6 ${docked ? "bottom-[68px] pb-3 lg:bottom-[70px]" : "bottom-0 pb-[max(8px,env(safe-area-inset-bottom))]"}`}
             >
               {onPreview ? (
                 <Button variant="secondary" className="shrink-0 px-4" onClick={onPreview}>
@@ -275,11 +278,24 @@ export function SupplyList({
                   Voir la demande envoyée
                 </Button>
               ) : (
-                <Button className="min-w-0 flex-1 px-3 shadow-card!" pending={pending} onClick={onSend}>
+                <Button
+                  className="min-w-0 flex-1 px-3 shadow-card!"
+                  pending={pending}
+                  onClick={() => {
+                    if (toCheck.length === 0) return onSend();
+                    setBlocked(true);
+                    document.getElementById(`ligne-${ordered[0]!.key}`)?.scrollIntoView?.({ block: "center", behavior: "smooth" });
+                  }}
+                >
                   <Send size={18} aria-hidden="true" />
                   Envoyer au fournisseur
                 </Button>
               )}
+              {blocked && toCheck.length > 0 && !sent ? (
+                <p role="status" className="w-full text-center text-[13px] font-bold text-warn">
+                  {`Règle d'abord ${toCheck.length} ligne${toCheck.length > 1 ? "s" : ""} orange.`}
+                </p>
+              ) : null}
             </div>
           ) : null}
           {editable ? (

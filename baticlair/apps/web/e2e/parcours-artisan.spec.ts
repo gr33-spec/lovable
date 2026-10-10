@@ -649,7 +649,10 @@ test("plusieurs articles inconnus, sans unité : UNE décision les règle tous, 
   // Recharger la page ne règle rien à la place de l'artisan.
   await page.reload();
   const group = await orangeCard(page, name);
-  await expect(page.getByRole("button", { name: "Envoyer au fournisseur" })).toHaveCount(0);
+  // Rien ne part avec une ligne orange : « Envoyer » dit pourquoi, sans ouvrir « À qui j'envoie ? ».
+  await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
+  await expect(page.getByRole("dialog", { name: "À qui j'envoie ?" })).toHaveCount(0);
+  await expect(page.getByRole("status").filter({ hasText: /^Règle d'abord/ })).toBeVisible();
 
   await group.getByRole("button", { name: /^C'est bon/ }).click();
   await expect(group).toHaveCount(0);
@@ -907,7 +910,7 @@ test("§48.5 : envoyer une sélection à un autre fournisseur, discret, puis l'e
   await expect(list.getByText("Envoyé · Négoce Test").first()).toBeVisible();
 
   // L'envoi normal n'a pas bougé : toute la liste, d'un coup, au fournisseur habituel.
-  await expect(list.getByRole("button", { name: "Envoyer au fournisseur" }).or(list.getByText(/^\d+ lignes? à régler$/))).toBeVisible();
+  await expect(list.getByRole("button", { name: "Envoyer au fournisseur" })).toBeVisible();
   await expect(list.getByRole("button", { name: "Voir la demande envoyée" })).toHaveCount(0);
 });
 
@@ -971,6 +974,35 @@ test("§50.7 : en bas, deux boutons figés : l'aperçu (le mail et le PDF du fou
   // Depuis l'aperçu, l'envoi : on choisit à qui.
   await apercu.getByRole("button", { name: "Envoyer au fournisseur" }).click();
   await expect(page.getByRole("dialog", { name: "À qui j'envoie ?" })).toBeVisible();
+});
+
+test("§50.7 : les deux boutons du bas sont là même s'il reste des lignes orange", async ({ page }) => {
+  // Retour du fondateur (2026-10-10, capture iPhone) : « je ne vois toujours pas les deux boutons flottants ici » : la liste
+  // avait encore des lignes orange. Les boutons sont toujours là ; l'aperçu montre ce qui partirait, et « Envoyer » mène
+  // d'abord à la première ligne à régler (rien ne part avec une ligne orange).
+  await signUp(page);
+  await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await passQuestions(page);
+  await openList(page);
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(list.getByRole("img", { name: "à vérifier" }).first()).toBeVisible();
+  const actions = page.getByRole("group", { name: "Envoyer la liste" });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await expect(actions.getByRole("button", { name: "Aperçu" })).toBeInViewport();
+  await expect(actions.getByRole("button", { name: "Envoyer au fournisseur" })).toBeInViewport();
+  // « Envoyer » : rien ne part, la phrase dit pourquoi et la première ligne orange vient à l'écran.
+  await actions.getByRole("button", { name: "Envoyer au fournisseur" }).click();
+  await expect(page.getByRole("dialog", { name: "À qui j'envoie ?" })).toHaveCount(0);
+  await expect(actions.getByRole("status")).toHaveText(/^Règle d'abord \d+ lignes? orange\.$/);
+  await expect(list.getByRole("listitem").filter({ has: page.getByRole("img", { name: "à vérifier" }) }).first()).toBeInViewport();
+  // L'aperçu, lui, s'ouvre tout de suite : le mail et le PDF tels qu'ils partiraient.
+  await actions.getByRole("button", { name: "Aperçu" }).click();
+  const apercu = page.getByRole("dialog", { name: "Ce que reçoit le fournisseur" });
+  await expect(apercu.getByText("Objet :")).toBeVisible();
+  await apercu.getByRole("button", { name: "Voir le PDF" }).click();
+  const pdf = page.getByRole("dialog", { name: "Le PDF joint" });
+  await expect(pdf.getByRole("link", { name: "Télécharger" })).toBeVisible();
 });
 
 test("§49.8 : un tap refusé par le serveur se dit DANS la ligne ouverte, jamais en silence", async ({ page }) => {
