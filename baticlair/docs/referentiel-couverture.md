@@ -2271,7 +2271,7 @@ Une ligne orange ne doit jamais demander deux gestes ni ouvrir un autre écran. 
 
   ## 50.2 Écran 2 : les questions
 
-  Autant de questions que le devis en demande, pas de maximum : un gros devis peut en avoir vingt, un petit zéro. Chaque question répond à une donnée réellement absente du devis et nécessaire au calcul (49.4), celle que le comptoir poserait (47.8). Aucune question dont la réponse est écrite au devis, aucune posée deux fois, aucune question de confort. En boutons, une par carte, groupées par ouvrage. Si le devis dit tout, cet écran n'apparaît pas. Le but n'est pas d'en poser peu, c'est que le quantitatif qui sort soit juste. Une question de façonnage par pièce de zinc écrite au devis (48.6), obligatoire. En bas : « Calculer ma liste ». Rien d'autre : pas de texte libre, pas de voix, pas d'explication.
+  Autant de questions que le devis en demande, pas de maximum : un gros devis peut en avoir vingt, un petit zéro. Chaque question répond à une donnée réellement absente du devis et nécessaire au calcul (49.4), celle que le comptoir poserait (47.8). Aucune question dont la réponse est écrite au devis, aucune posée deux fois, aucune question de confort. En boutons, une par carte, groupées par ouvrage. Une question de valeur (pente, rampant, diamètre), de modèle ou de qualité a un bouton « Autre » qui ouvre une case courte avec son unité, pour la valeur que les boutons ne proposent pas ; les choix fermés (façonnage, oui/non) n'en ont pas. Ce qui est écrit sous « Autre » ne devient pas une habitude de l'entreprise. Si le devis dit tout, cet écran n'apparaît pas. Le but n'est pas d'en poser peu, c'est que le quantitatif qui sort soit juste. Une question de façonnage par pièce de zinc écrite au devis (48.6), obligatoire. En bas : « Calculer ma liste ». Rien d'autre : pas de texte libre, pas de voix, pas d'explication.
 
   ## 50.3 Écran 3 : ma liste
 
@@ -2289,13 +2289,12 @@ Une ligne orange ne doit jamais demander deux gestes ni ouvrir un autre écran. 
 
   ## 50.5 Un vrai quantitatif
 
-  Chaque ligne a trois choses et rien d'autre : un nom qu'on dit au comptoir, une quantité, une unité commandable. Jamais une phrase de prestation, jamais des heures ou un forfait, jamais un conseil. Test : lue à voix haute à un vendeur, la liste se saisit telle quelle.
+  Chaque ligne a trois choses et rien d'autre : un nom qu'on dit au comptoir, une quantité, une unité commandable. Aucune ligne en m², ml ou m : les surfaces et longueurs du devis se convertissent dans l'unité que le comptoir vend (ardoises et tuiles en pièces, voliges en bottes ou en longueurs selon le tiroir, écran et pare-pluie en rouleaux, isolant en paquets, zinc en feuilles ou bobineaux, tubes en longueurs), la mesure du devis restant visible en rappel dans la raison ou l'hypothèse (« pour 96 m² »). Seuls les articles vendus au mètre (bande, bobineau) gardent le mètre. Jamais une phrase de prestation, jamais des heures ou un forfait, jamais un conseil. Test : lue à voix haute à un vendeur, la liste se saisit telle quelle.
 
   ## 50.6 Test
 
   Sur D-2026-020, D-2026-018 et D.2026.105, une capture iPhone de chaque écran ne montre aucun élément listé en 50.4, et chaque carte de la liste ne contient que les éléments de 50.3.
-
-  ## 50.7 L'écran 3 est le document (remplace 50.3 là où ils se contredisent)
+- ## 50.7 L'écran 3 est le document (remplace 50.3 là où ils se contredisent)
 
   Après les questions, l'artisan tombe directement sur « Ton chantier », présenté comme le document que le fournisseur recevra. Il n'y a plus d'écran « Ce que le fournisseur va recevoir » : c'est le même écran.
   - **Le chantier en bref**, en haut : l'IA dessine le chantier à partir du devis et des réponses, en quelques lignes courtes : type d'ouvrage, surface, dimensions, matériau, et ce qui s'en déduit (longueur des bacs, nombre de descentes, pente). Rien qui ne vienne pas du devis ou des réponses (règle numéro un). Chaque ligne du bref se modifie ou se supprime comme une ligne de la liste.
@@ -2306,3 +2305,24 @@ Une ligne orange ne doit jamais demander deux gestes ni ouvrir un autre écran. 
   - Chaque ligne de bacs ou de longueurs porte sa longueur (« 26 bacs de 7,20 m »), chaque pièce de zinc façonnée porte son nom d'ouvrage (« Bande de rive », jamais « Bandes façonnées »).
 
   Test : sur D-2026-018, l'écran après les questions montre le chantier en bref, puis la liste, et aucun bouton de voix ; le document envoyé au fournisseur est identique à l'écran.
+- # 51. Le moteur voit le chantier avant de compter (tous métiers)
+
+  Principe général, valable pour tous les métiers : l'app fait ce que fait l'artisan. Elle lit le devis, se représente le chantier, demande ce qui lui manque, puis commande. Rien de tout cela ne se voit : seul le chantier en bref (50.7) en est le reflet à l'écran.
+
+  ## 51.1 Temps un : la fiche de chantier
+
+  L'IA (modèle le plus capable disponible, c'est ici que tout se joue) lit le devis entier et construit une fiche de chantier : type d'ouvrage, matériau, surface, dimensions (rampant, largeur, pente), nombre d'éléments (descentes, pénétrations, ouvertures), accessoires, et tout ce qui est propre au métier. Chaque donnée porte son origine : lue au devis, déduite (avec la règle), ou manquante. La règle numéro un s'applique à la fiche : rien n'y entre qui ne vienne du devis ou des réponses.
+
+  ## 51.2 Temps deux : les questions viennent des trous de la fiche
+
+  Les questions ne viennent plus des lignes une par une mais des données manquantes de la fiche, et chaque donnée manquante donne une seule question. Autant de questions que le chantier en demande, sans maximum : dix ou quinze questions sur un gros chantier valent mieux qu'une heure à reprendre le quantitatif. Chaque question doit être une vraie question : une donnée absente du devis et nécessaire au calcul, jamais une donnée déjà lue ou déductible.
+
+  Quand l'artisan répond par « Autre » avec un texte libre, l'IA réanalyse : elle met la fiche à jour avec cette réponse, et si la réponse ouvre une nouvelle donnée manquante, elle pose une question de plus avant de calculer. Une réponse « Autre » n'est jamais rangée dans une case sans être relue.
+
+  ## 51.3 Temps trois : les quantités
+
+  Le calcul reste ligne par ligne du devis, règle numéro un intacte : une ligne de fourniture par ligne du devis, rien d'ajouté. Mais chaque calcul puise dans la fiche, jamais dans la ligne seule. Les bacs, les pattes, les bandes d'un même toit sortent du même rampant et de la même largeur, donc leurs quantités sont cohérentes entre elles. Le calcul est du code avec des règles testées, pas de l'IA.
+
+  ## 51.4 Test
+
+  Sur D-2026-018 : la fiche contient joint debout, 91 m², rampant 7 m, largeur 13 m, Quartz-Zinc 0,65, 2 descentes, chaque donnée avec son origine. Aucune question sur une donnée présente dans la fiche. Les bacs, pattes et bandes sortent des mêmes dimensions. Une réponse « Autre » sur le façonnage modifie la fiche et la liste.

@@ -1,5 +1,13 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.10-50 — Audit : aucune règle de calcul en double (fondateur, 2026-10-10)
+
+- **Longueurs de 2 m** : une seule règle, §1 « bande de 2 m = ml / 2 arrondi sup. » (`longueur_bande_2m`), pour toutes les bandes commandées façonnées : zinc, cuivre, abergement, porte-solin d'abergement, égout du joint debout. Avant : ml ÷ 1,9 (« recouvrement 10 cm », §36.4) pour le cuivre, l'abergement, son porte-solin et l'égout du joint debout (`longueur_utile`, `longueur_utile_bande`), ml ÷ 2 pour les bandes zinc. Exemple : 2 cheminées de 3 m, 7,8 m de zinc → 4 longueurs (avant 5) ; porte-solin 6 m → 3 (avant 4). La noue garde sa règle propre, écrite au §25.2 (1,85 m utile pour 2 m, recouvrement 150 mm).
+- **Feuilles 2 × 1 m** : une seule règle, §48.6 (bandes découpées dans le mètre de largeur), aussi pour le cuivre. Avant, cuivre : ml × développé ÷ 2 m² (`surface_feuille`, §25.2). Exemple : 4 ml de couvertine cuivre dév. 40 → 2 feuilles (avant 1 : deux bandes de 40 cm par feuille, 4,4 m à couvrir).
+- **Mêmes règles, un seul nom** : bobine de cuivre au-delà de 6 ml → `seuil_bobineau` (avant `seuil_bobine`) ; marge ml × 1,05 de la noue, de l'égout et du faîtage → `marge_zinc_lineaire` (avant `marge_noue`, `coef_egout_faitage`) ; marge ml × 1,1 du plomb → `marge_bandes` (avant `marge_plomb`). Aucune valeur ne change.
+- Les constantes partagées (zone littorale, pattes 3/ml, mortier de solin 2 kg/ml, crochets de gouttière, seuils d'épaisseur) s'écrivent une fois. Aucune valeur ne change.
+- Tableau règle / section / test : docs/audit-referentiel-regles.md, réécrit par le test `audit-regles-uniques.test.ts`. Les dix règles qu'aucun test ne citait (sortie de toit, étain, décapant, vis des bandes, mastic du porte-solin) ont leur test (`regles-sans-test-audit.test.ts`).
+
 ## roofing-2026.10.10-49 — §50.7 : le document dit les longueurs et le nom des pièces (retour du fondateur, 2026-10-10, D-2026-018)
 
 - **Bacs commandés façonnés** : vendus au bac (« 31 bacs »), la longueur dans le nom (« Bacs joint debout Quartz-Zinc 0,65 mm, longueur 7,15 m » : rampant + 15 cm, ou rampant partagé en longueurs de 10 m au plus). Avant : « 31 pièces », sans longueur. Le nombre reste celui du §36.6 (largeur ÷ entraxe 0,43 ou 0,58) : 31 bacs en bobine 500, 23 en bobine 650 (choix du fondateur, 2026-10-10).

@@ -55,9 +55,9 @@ describe("plomb et cuivre : rouleaux de plomb, cuivre comme le zinc", () => {
 
   it("cuivre commandé façonné : longueurs de 2 m ; façonné sur place court : feuilles 2 × 1 m ; long : bobine au mètre à sa largeur", () => {
     const faconne = readQuote([{ ref: "1", designation: "Bande cuivre dév. 33", quantity: "12", unit: "ml" }], { "param:faconnage": u("2") });
-    expect(faconne.toBuy.map((b) => [b.label, b.quantity])).toEqual([["Bandes cuivre façonnées 0,6 mm", "7 longueurs de 2 m"]]); // 13,2 / 1,9
+    expect(faconne.toBuy.map((b) => [b.label, b.quantity])).toEqual([["Bandes cuivre façonnées 0,6 mm", "7 longueurs de 2 m"]]); // 13,2 / 2 (§1, une seule règle depuis l'audit du 2026-10-10)
     const court = readQuote([{ ref: "1", designation: "Couvertine cuivre dév. 40", quantity: "4", unit: "ml" }], { "param:faconnage": u("1") });
-    expect(court.toBuy.map((b) => [b.label, b.quantity])).toEqual([["Feuilles cuivre 2 × 1 m, 0,6 mm", "1 pièce"]]); // 4,4 × 0,4 / 2
+    expect(court.toBuy.map((b) => [b.label, b.quantity])).toEqual([["Feuilles cuivre 2 × 1 m, 0,6 mm", "2 pièces"]]); // §48.6 comme le zinc : 2 bandes de 40 cm par feuille, 4,4 / 4 m
     const long = readQuote([{ ref: "1", designation: "Bande cuivre dév. 33", quantity: "12", unit: "ml" }], { "param:faconnage": u("1") });
     expect(long.toBuy.map((b) => b.label)).toEqual(["Cuivre en bobine largeur 500 mm, 0,6 mm"]);
     // Une bande zinc du même devis garde son développé à elle.

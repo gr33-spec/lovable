@@ -167,9 +167,9 @@ describe("liste d'achats : devis ardoises (200 m², jouées, cheminée)", () => 
     });
     expect(v.questions).toEqual([]);
     expect(v.toBuy.find((b) => b.label.startsWith("Naissances"))).toMatchObject({ label: "Naissances zinc dév. 25 Ø80", quantity: "2 pièces" });
-    // Abergement (§7) : 2 cheminées × 3 m × 1,3 = 7,8 m de zinc façonné → 5 bandes de 2 m ; porte-solin 6 m → 4 bandes.
-    expect(v.toBuy.find((b) => b.label.startsWith("Bandes d'abergement zinc naturel"))).toMatchObject({ quantity: "5 longueurs de 2 m" });
-    expect(v.toBuy.find((b) => b.label.startsWith("Bandes porte-solin"))).toMatchObject({ quantity: "4 pièces" });
+    // Abergement (§7) : 2 cheminées × 3 m × 1,3 = 7,8 m de zinc façonné → 4 longueurs de 2 m (§1, ml ÷ 2 arrondi sup. ; audit du 2026-10-10) ; porte-solin 6 m → 3.
+    expect(v.toBuy.find((b) => b.label.startsWith("Bandes d'abergement zinc naturel"))).toMatchObject({ quantity: "4 longueurs de 2 m" });
+    expect(v.toBuy.find((b) => b.label.startsWith("Bandes porte-solin"))).toMatchObject({ quantity: "3 pièces" });
     expect(v.toQuote.map((q) => [short(q.label), q.measure])).toEqual([
       ["Ardoises pour jouées de lucarnes", "6 unités"],
     ]);
