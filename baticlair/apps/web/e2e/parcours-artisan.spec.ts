@@ -1089,3 +1089,23 @@ test("§49.9 : une ligne nomme une fourniture ; les heures et le forfait sont re
   await expect(without).toContainText("1,5 h");
   await expect(without).toContainText("Accès toiture et mise en sécurité");
 });
+
+test("Autre : quand la bonne réponse n'est pas dans les boutons, elle s'écrit (une pente de 38°)", async ({ page }) => {
+  await signUp(page);
+  await page.goto("/chantiers/nouveau");
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  const questions = page.getByRole("region", { name: "Les questions" });
+  await expect(questions).toBeVisible({ timeout: 60_000 });
+  // Retour du fondateur (2026-10-10) : une valeur à boutons a aussi « Autre », qui laisse écrire.
+  const pente = questions.getByRole("group", { name: "Pente du toit ?" });
+  await pente.getByRole("button", { name: "Autre", exact: true }).click();
+  await pente.getByLabel("Autre valeur : Pente du toit ?").fill("38");
+  await pente.getByRole("button", { name: "OK" }).click();
+  await expect(pente.getByLabel("Autre valeur : Pente du toit ?")).toHaveValue("38");
+  // Un choix fermé (le façonnage) n'a pas d'« Autre ».
+  const faconnage = questions.getByRole("group", { name: /façonnes/i }).first();
+  await expect(faconnage.getByRole("button", { name: "Autre", exact: true })).toHaveCount(0);
+  await faconnage.getByRole("button", { name: /^Je commande façonné/ }).click();
+  await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible({ timeout: 60_000 });
+});

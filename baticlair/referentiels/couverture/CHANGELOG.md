@@ -1,5 +1,11 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.10-47 — « Autre » : quand l'app ne sait pas, elle demande et laisse écrire (retour du fondateur, 2026-10-10)
+
+- **§50.2 Questions** : une question de valeur à boutons (pente, entraxe, rampant, développé…) ou de modèle (tuile, ardoise) a aussi « Autre », qui ouvre une case pour écrire (valeur dans son unité, ou le modèle). Avant : seulement les boutons (« Tuiles HP10 » seul, 30° / 35° / 45°). Les choix fermés (façonnage, oui / non, à fournir / déjà sur place) n'ont pas d'« Autre ».
+- **Modèle écrit hors référentiel** : la question se ferme, la ligne porte le nom écrit, orange « Quantité à préciser » (le nombre de pièces dépend du modèle) ; « C'est bon » la laisse au fournisseur, qui compte pour la mesure du devis. Aucun ratio inventé.
+- **Une ligne jamais deux fois** : une mesure dont les articles sont calculés (« Couverture ardoises 48 m² ») ne ressort plus en m² à côté d'eux, et une surface sans modèle ne sort plus deux fois.
+
 ## roofing-2026.10.09-46 — §50 « Ce que voit l'artisan » (fondateur, 2026-10-09)
 
 - **§50 Trois écrans**, qui priment sur toute règle d'écran antérieure : 1) je dépose mon devis (« Je lis ton devis », en cas d'échec la raison et « Réessayer ») ; 2) les questions, une par carte, en boutons, groupées par ouvrage, puis « Calculer ma liste » ; 3) ma liste, une carte par fourniture (point, nom du comptoir, quantité au moins / plus, unité ; si orange : raison en cinq mots au plus, boutons, « C'est bon »), oranges en premier, barre « N lignes à régler », un seul bouton « Envoyer au fournisseur » et trois liens en petit.
