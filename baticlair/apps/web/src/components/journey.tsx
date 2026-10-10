@@ -1,6 +1,7 @@
 "use client";
 
-import { Check, FileUp, Loader2, Pencil, Sparkles } from "lucide-react";
+import { Check, FileUp, Loader2, Pencil } from "lucide-react";
+import { ReadingScene, RoofScene } from "@/components/chantier-scenes";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
 import type { ApiError, Takeoff } from "@/lib/api";
@@ -11,41 +12,6 @@ import type { ApiError, Takeoff } from "@/lib/api";
  *  2. les questions : une par carte, en boutons, groupées par ouvrage, puis « Calculer ma liste » ;
  *  3. ma liste (supply-list.tsx).
  */
-
-// ——— L'animation : un devis qui devient une liste de matériaux ———
-
-const SHEET_LINES = ["w-[82%]", "w-[64%]", "w-[74%]", "w-[56%]"];
-const LIST_ROWS = ["Ardoises 32×22", "Crochets inox", "Liteaux 27×40", "Écran HPV"];
-const CYCLE = 4.8;
-
-/** Les lignes du devis s'effacent, les articles arrivent un à un dans la liste, cochés. Pas de photo : du vrai produit. */
-export function DevisAnimation({ size = "lg" }: { size?: "lg" | "sm" }) {
-  const sm = size === "sm";
-  return (
-    <div aria-hidden="true" className={`relative flex items-center justify-center gap-3 ${sm ? "h-28" : "h-40"}`}>
-      <div className={`relative flex flex-col gap-2 rounded-xl bg-white p-3 shadow-[0_12px_30px_-12px_rgba(14,17,22,0.35)] ${sm ? "w-24" : "w-32"} rotate-[-4deg]`}>
-        <span className="mb-0.5 h-2 w-10 rounded-full bg-[#1c3fd1]/70" />
-        {SHEET_LINES.map((w, i) => (
-          <span key={w} className={`h-1.5 rounded-full bg-[#c9ced8] ${w}`} style={{ animation: `bc-line-out ${CYCLE}s ease-in-out ${i * 0.45}s infinite both` }} />
-        ))}
-        <span className="mt-1 flex justify-end">
-          <span className="h-1.5 w-8 rounded-full bg-[#0e1116]/60" />
-        </span>
-      </div>
-      <Sparkles size={sm ? 18 : 22} className="shrink-0 text-[#ffb547]" style={{ animation: "bc-float 2.4s ease-in-out infinite" }} />
-      <ul className={`flex flex-col gap-1.5 rounded-xl bg-white/95 p-2.5 shadow-[0_12px_30px_-12px_rgba(14,17,22,0.35)] ${sm ? "w-32" : "w-40"} rotate-[3deg]`}>
-        {LIST_ROWS.map((r, i) => (
-          <li key={r} className="flex items-center gap-1.5" style={{ animation: `bc-row-in ${CYCLE}s ease-out ${i * 0.45}s infinite both` }}>
-            <span className="flex size-3.5 shrink-0 items-center justify-center rounded-full bg-[#0b7a53]" style={{ animation: `bc-check-pop ${CYCLE}s ease-out ${i * 0.45}s infinite both` }}>
-              <Check size={9} strokeWidth={4} className="text-white" />
-            </span>
-            <span className={`truncate font-bold text-[#0e1116] ${sm ? "text-[9px]" : "text-[10.5px]"}`}>{r}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
 
 // ——— 1. Déposer le devis ———
 
@@ -95,17 +61,14 @@ export function DropZone({ onFile, pending, error }: { onFile: (file: File) => v
 
 // ——— 2. L'analyse ———
 
-/** §50.1 : pendant la lecture, une seule phrase : « Je lis ton devis ». */
+/**
+ * §50.1 : pendant la lecture, une seule phrase : « Je lis ton devis ». Retour du fondateur (2026-10-10) : l'animation montre
+ * le métier, un surligneur qui passe sur le devis ligne à ligne et coche chaque ligne lue (`ReadingScene`).
+ */
 export function AnalysisScreen() {
   return (
-    <section aria-label="Analyse du devis" className="flex flex-col items-center gap-5 rounded-[20px] bg-hero px-5 py-7 text-white shadow-card">
-      <div aria-hidden="true" className="relative h-44 w-36 overflow-hidden rounded-2xl bg-white p-4 shadow-[0_20px_40px_-14px_rgba(0,0,0,0.55)]">
-        <span className="block h-2.5 w-14 rounded-full bg-[#1c3fd1]/70" />
-        {Array.from({ length: 9 }, (_, i) => (
-          <span key={i} className="mt-2.5 block h-1.5 rounded-full bg-[#c9ced8]" style={{ width: `${55 + ((i * 37) % 40)}%` }} />
-        ))}
-        <span className="absolute inset-x-0 top-3 h-6 bg-gradient-to-b from-transparent via-accent/35 to-transparent" style={{ animation: "bc-scan 2.6s ease-in-out infinite" }} />
-      </div>
+    <section aria-label="Analyse du devis" className="flex flex-col items-center gap-6 rounded-[20px] bg-chantier px-5 pt-9 pb-8 text-white shadow-card">
+      <ReadingScene />
       <h2 aria-live="polite" className="font-display text-[24px] leading-tight font-extrabold tracking-[-0.02em]">
         Je lis ton devis
       </h2>
@@ -141,11 +104,11 @@ export function notifyReady(title: string, body: string, tag: string): void {
 
 // ——— 4. Le calcul ———
 
-/** Après « Calculer ma liste » : une seule phrase, le temps du calcul. */
+/** Après « Calculer ma liste » : une seule phrase, le temps du calcul ; le toit se couvre, de l'égout au faîtage (`RoofScene`). */
 export function CalculScreen() {
   return (
-    <section aria-label="Calcul de la liste" className="flex flex-col items-center gap-4 rounded-[20px] bg-hero px-5 py-7 text-white shadow-card">
-      <DevisAnimation />
+    <section aria-label="Calcul de la liste" className="flex flex-col items-center gap-5 rounded-[20px] bg-chantier px-5 pt-8 pb-8 text-white shadow-card">
+      <RoofScene />
       <h2 aria-live="polite" className="font-display text-[24px] leading-tight font-extrabold tracking-[-0.02em]">
         Je prépare ta liste
       </h2>
