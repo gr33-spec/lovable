@@ -1,5 +1,9 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.10.11-51 — Deux fenêtres de toit, deux tailles (retour du fondateur, 2026-10-11)
+
+- **§11 Fenêtres de toit** : l'ouvrage se prend ligne par ligne (`perLine`), comme les pièces de zinc (§48.6). Deux fenêtres écrites sur deux lignes (« Fenêtre de toit 114x118 », « Fenêtre de toit Velux MK04 ») gardent chacune leur taille, leur nombre et leur raccord. Avant : une seule fenêtre pour tout le devis, et une fausse question « Taille de la fenêtre de toit : 114118 u (…), ou 7898 u (…) ? ». Aucun ratio ne change.
+
 ## roofing-2026.10.10-50 — Audit : aucune règle de calcul en double (fondateur, 2026-10-10)
 
 - **Longueurs de 2 m** : une seule règle, §1 « bande de 2 m = ml / 2 arrondi sup. » (`longueur_bande_2m`), pour toutes les bandes commandées façonnées : zinc, cuivre, abergement, porte-solin d'abergement, égout du joint debout. Avant : ml ÷ 1,9 (« recouvrement 10 cm », §36.4) pour le cuivre, l'abergement, son porte-solin et l'égout du joint debout (`longueur_utile`, `longueur_utile_bande`), ml ÷ 2 pour les bandes zinc. Exemple : 2 cheminées de 3 m, 7,8 m de zinc → 4 longueurs (avant 5) ; porte-solin 6 m → 3 (avant 4). La noue garde sa règle propre, écrite au §25.2 (1,85 m utile pour 2 m, recouvrement 150 mm).

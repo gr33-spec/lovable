@@ -491,6 +491,24 @@ export type EngineAnswer = string | { value: string; unit: string } | null;
  * « Aucun de ces produits » arrête la question (le besoin reste à documenter) ;
  * « Pas celui-ci » écarte le produit habituel pour ce chantier et redemande.
  */
+/**
+ * Une valeur d'une contradiction, dite comme au comptoir (retour du fondateur, 2026-10-11) : « fenêtre 114 × 118 » plutôt
+ * que le code « 114118 u », « 40° » plutôt que « 40 ° ».
+ */
+function valueSaid(value: string, unit: string, display?: Readonly<Record<string, string>>): string {
+  const shown = display?.[value];
+  if (shown) return shown;
+  const v = value.replace(".", ",");
+  return unit === "°" ? `${v}°` : unit === "m2" ? `${v} m²` : unit === "u" ? v : `${v} ${unit}`;
+}
+
+/** D'où vient la valeur, par le texte cité, jamais l'identifiant d'une ligne : « devis : « 114x118 » », « en-tête du devis : « … » ». */
+function sourceSaid(evidence: string): string {
+  const quoted = /«[^»]*»/.exec(evidence)?.[0];
+  const where = /^Devis, en-tête/i.test(evidence) ? "en-tête du devis" : /^Devis\b/i.test(evidence) ? "devis" : evidence.split(/[,(]/)[0]!.trim().toLowerCase();
+  return quoted ? `${where} : ${quoted}` : where;
+}
+
 export function computeWithAnswers(
   ref: Referential,
   plan: QuotePlan,
@@ -669,7 +687,8 @@ export function computeWithAnswers(
     const key = `param:${c.key}`;
     if (answers[key] !== undefined || questions.some((q) => q.key === key)) continue;
     const seen = new Set<string>();
-    const options = c.facts.filter((f) => !seen.has(f.value) && seen.add(f.value)).map((f) => ({ label: `${f.value.replace(".", ",")} ${f.unit} (${f.evidence})`, value: f.value }));
+    const def = ref.workItems.find((w) => w.id === baseOf(c.workItemId))?.params.find((p) => p.key === c.key);
+    const options = c.facts.filter((f) => !seen.has(f.value) && seen.add(f.value)).map((f) => ({ label: `${valueSaid(f.value, f.unit, def?.display)} (${sourceSaid(f.evidence)})`, value: f.value }));
     const question: Question = { key, kind: "param", text: `${c.label} : ${options.map((o) => o.label).join(", ou ")} ?`, unit: c.unit, options };
     questions.unshift(question);
     needs = needs.map((n) => {

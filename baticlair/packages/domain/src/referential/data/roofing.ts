@@ -1106,7 +1106,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.10-50",
+  version: "roofing-2026.10.11-51",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -2622,6 +2622,9 @@ export const ROOFING_REFERENTIAL: Referential = {
       trade: "roofing",
       label: "Fenêtre de toit (fenêtre et raccord d'étanchéité)",
       triggers: ["roof_window"],
+      // Retour du fondateur (2026-10-11) : deux fenêtres écrites sur deux lignes sont deux fenêtres, chacune sa taille et
+      // son raccord, jamais une contradiction (« 114x118 » et « MK04 » sur le même devis).
+      perLine: true,
       params: [
         { key: "nb_fenetres", label: "Nombre de fenêtres de toit", unit: "u", kind: "site_data", question: "Combien de fenêtres de toit ?", fromLineQuantity: true },
         RACCORD_COUVERTURE_PARAM,
