@@ -1,0 +1,616 @@
+{
+ "devis": [
+  {
+   "ref": "l001",
+   "designation": "Dépose ancienne salle de bain - Dépose et évacuation des anciens équipements (hors baignoire), carrelage, faïence",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "L"
+  },
+  {
+   "ref": "l002",
+   "designation": "Dépose baignoire existante - Dépose et évacuation de l'ancienne baignoire",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "L"
+  },
+  {
+   "ref": "l003",
+   "designation": "Receveur de douche à l'italienne extra-plat - Fourniture receveur de douche à l'italienne en résine aspect pierre, dimensions standards",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "D",
+   "note": "Dimensions non précisées (« standards ») : question réelle avant de commander."
+  },
+  {
+   "ref": "l004",
+   "designation": "Robinetterie de douche encastrée - Fourniture ensemble mitigeur thermostatique encastré avec douchette et tête de pluie",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "D"
+  },
+  {
+   "ref": "l005",
+   "designation": "Installation douche à l'italienne - Pose du receveur, étanchéité, raccordements plomberie et installation robinetterie",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "LI",
+   "note": "« Étanchéité » : système d'étanchéité sous carrelage (kit) à acheter, non listé."
+  },
+  {
+   "ref": "l006",
+   "designation": "Paroi de douche fixe vitrée - Fourniture paroi de douche en verre trempé sécurit 8mm, dimensions standards (ex: 90x200cm)",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "D",
+   "note": "Dimension donnée seulement en exemple : à confirmer."
+  },
+  {
+   "ref": "l007",
+   "designation": "Pose paroi de douche - Pose et fixation de la paroi de douche vitrée",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "L"
+  },
+  {
+   "ref": "l008",
+   "designation": "Carrelage sol grès cérame 40x40 gris anthracite - Fourniture carrelage grès cérame 40x40 cm, coloris gris anthracite pour salle de bain",
+   "quantity": "9",
+   "unit": "m²",
+   "truth": "C",
+   "note": "9 m² de sol : à convertir en cartons (m² par carton) avec la marge de coupe."
+  },
+  {
+   "ref": "l009",
+   "designation": "Pose carrelage sol avec joints noirs - Pose de carrelage au sol, y compris la préparation du support et réalisation des joints noirs",
+   "quantity": "9",
+   "unit": "m²",
+   "truth": "LI",
+   "note": "Colle et joint NOIR à acheter (couleur écrite ici seulement)."
+  },
+  {
+   "ref": "l010",
+   "designation": "Faïence murale salle de bain - Fourniture faïence murale blanche ou ton clair, format rectangulaire",
+   "quantity": "28",
+   "unit": "m²",
+   "truth": "C",
+   "note": "Coloris et format non arrêtés (« blanche ou ton clair », « rectangulaire ») : question réelle."
+  },
+  {
+   "ref": "l011",
+   "designation": "Pose faïence murale - Pose de la faïence murale jusqu'au plafond (2.30m de hauteur), y compris préparation et joints",
+   "quantity": "28",
+   "unit": "m²",
+   "truth": "LI",
+   "note": "Colle et joints à acheter ; hauteur 2,30 m écrite ici."
+  },
+  {
+   "ref": "l012",
+   "designation": "Meuble double vasque - Fourniture meuble de salle de bain suspendu avec double vasque intégrée et tiroirs, largeur 120cm",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "D"
+  },
+  {
+   "ref": "l013",
+   "designation": "Pose meuble double vasque et raccordements - Installation du meuble, fixation, raccordement eau chaude/froide et évacuations",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "LI",
+   "note": "Raccords, flexibles, siphon(s) à acheter, non listés."
+  },
+  {
+   "ref": "l014",
+   "designation": "Miroir salle de bain LED - Fourniture miroir de salle de bain avec éclairage LED intégré, dimensions adaptées",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "D",
+   "note": "Dimensions non précisées."
+  },
+  {
+   "ref": "l015",
+   "designation": "Pose miroir - Fixation du miroir au mur et raccordement électrique si LED",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "L"
+  },
+  {
+   "ref": "l016",
+   "designation": "Applique murale salle de bain - Fourniture applique murale design pour salle de bain, finition chromée",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "D"
+  },
+  {
+   "ref": "l017",
+   "designation": "Plafonnier LED salle de bain - Fourniture plafonnier LED étanche IP44, lumière blanche neutre",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "D"
+  },
+  {
+   "ref": "l018",
+   "designation": "Spots LED encastrables pour douche (x3) - Fourniture de 3 spots LED encastrables IP65 pour zone douche",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "D",
+   "note": "PIÈGE : « 1 unité » = 3 spots. Commander 1 serait faux."
+  },
+  {
+   "ref": "l019",
+   "designation": "Installation électrique et pose luminaires - Préparation des câblages, raccordements et pose des appliques, plafonnier et spots de douche",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "LI",
+   "note": "Câbles, gaines, boîtes à acheter, non listés."
+  },
+  {
+   "ref": "l020",
+   "designation": "Réalisation niche de douche - Création d'une niche murale intégrée dans la douche, habillage carrelage",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "C",
+   "note": "Niche (prête à carreler ou plaques) + carrelage : dimensions inconnues."
+  },
+  {
+   "ref": "l021",
+   "designation": "Fourniture sèche-serviette électrique Atlantic 750W - Fourniture d'un sèche-serviette électrique 750W de marque Atlantic pour salle de bain",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "D"
+  },
+  {
+   "ref": "l022",
+   "designation": "Installation sèche-serviettes - Fixation du sèche-serviettes, raccordement électrique",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "L"
+  },
+  {
+   "ref": "l023",
+   "designation": "VMC simple flux hygroréglable - Fourniture d'un système de Ventilation Mécanique Contrôlée simple flux hygroréglable adapté à la salle de bain",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "D"
+  },
+  {
+   "ref": "l024",
+   "designation": "Installation VMC - Mise en place de la bouche d'extraction, raccordement gaines et électrique de la VMC",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "LI",
+   "note": "Gaines et bouche à acheter si non comprises dans le kit."
+  },
+  {
+   "ref": "l025",
+   "designation": "Ragréage du sol - Application d'une couche de ragréage fibré pour uniformiser et préparer le sol avant pose du carrelage",
+   "quantity": "9",
+   "unit": "m²",
+   "truth": "C",
+   "note": "Sacs de ragréage : consommation (kg/m²/mm) × épaisseur, épaisseur non écrite."
+  },
+  {
+   "ref": "l026",
+   "designation": "Peinture plafond salle de bain - Fourniture peinture spéciale salle de bain (anti-humidité, anti-moisissure) pour plafond",
+   "quantity": "9",
+   "unit": "m²",
+   "truth": "C",
+   "note": "Litres = 9 m² × 2 couches (écrit sur la ligne suivante) ÷ rendement du produit."
+  },
+  {
+   "ref": "l027",
+   "designation": "Application peinture plafond - Préparation et application de deux couches de peinture sur le plafond",
+   "quantity": "9",
+   "unit": "m²",
+   "truth": "L",
+   "note": "Contient « deux couches », utile à la ligne précédente."
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "l001",
+    "designation": "Dépose ancienne salle de bain - Dépose et évacuation des anciens équipements (hors baignoire), carrelage, faïence",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "pose",
+    "fournitures": []
+   },
+   {
+    "ref": "l002",
+    "designation": "Dépose baignoire existante - Dépose et évacuation de l'ancienne baignoire",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "pose",
+    "fournitures": []
+   },
+   {
+    "ref": "l003",
+    "designation": "Receveur de douche à l'italienne extra-plat - Fourniture receveur de douche à l'italienne en résine aspect pierre, dimensions standards",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Receveur de douche à l'italienne extra-plat",
+      "quantite": "1",
+      "unite": "unité",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "l004",
+    "designation": "Robinetterie de douche encastrée - Fourniture ensemble mitigeur thermostatique encastré avec douchette et tête de pluie",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Robinetterie de douche encastrée",
+      "quantite": "1",
+      "unite": "unité",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "l005",
+    "designation": "Installation douche à l'italienne - Pose du receveur, étanchéité, raccordements plomberie et installation robinetterie",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "pose",
+    "fournitures": []
+   },
+   {
+    "ref": "l006",
+    "designation": "Paroi de douche fixe vitrée - Fourniture paroi de douche en verre trempé sécurit 8mm, dimensions standards (ex: 90x200cm)",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Paroi de douche fixe vitrée",
+      "quantite": "1",
+      "unite": "unité",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "l007",
+    "designation": "Pose paroi de douche - Pose et fixation de la paroi de douche vitrée",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "pose",
+    "fournitures": []
+   },
+   {
+    "ref": "l008",
+    "designation": "Carrelage sol grès cérame 40x40 gris anthracite - Fourniture carrelage grès cérame 40x40 cm, coloris gris anthracite pour salle de bain",
+    "quantite": "9",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Carrelage sol grès cérame 40x40 gris anthracite",
+      "quantite": "9",
+      "unite": "m²",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "l009",
+    "designation": "Pose carrelage sol avec joints noirs - Pose de carrelage au sol, y compris la préparation du support et réalisation des joints noirs",
+    "quantite": "9",
+    "unite": "m²",
+    "role": "pose",
+    "fournitures": []
+   },
+   {
+    "ref": "l010",
+    "designation": "Faïence murale salle de bain - Fourniture faïence murale blanche ou ton clair, format rectangulaire",
+    "quantite": "28",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Faïence murale salle de bain",
+      "quantite": "28",
+      "unite": "m²",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "l011",
+    "designation": "Pose faïence murale - Pose de la faïence murale jusqu'au plafond (2.30m de hauteur), y compris préparation et joints",
+    "quantite": "28",
+    "unite": "m²",
+    "role": "pose",
+    "fournitures": []
+   },
+   {
+    "ref": "l012",
+    "designation": "Meuble double vasque - Fourniture meuble de salle de bain suspendu avec double vasque intégrée et tiroirs, largeur 120cm",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Meuble double vasque",
+      "quantite": "1",
+      "unite": "unité",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "l013",
+    "designation": "Pose meuble double vasque et raccordements - Installation du meuble, fixation, raccordement eau chaude/froide et évacuations",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "pose",
+    "fournitures": []
+   },
+   {
+    "ref": "l014",
+    "designation": "Miroir salle de bain LED - Fourniture miroir de salle de bain avec éclairage LED intégré, dimensions adaptées",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Miroir salle de bain LED",
+      "quantite": "1",
+      "unite": "unité",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "l015",
+    "designation": "Pose miroir - Fixation du miroir au mur et raccordement électrique si LED",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "pose",
+    "fournitures": []
+   },
+   {
+    "ref": "l016",
+    "designation": "Applique murale salle de bain - Fourniture applique murale design pour salle de bain, finition chromée",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Applique murale salle de bain",
+      "quantite": "1",
+      "unite": "unité",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "l017",
+    "designation": "Plafonnier LED salle de bain - Fourniture plafonnier LED étanche IP44, lumière blanche neutre",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Plafonnier LED salle de bain",
+      "quantite": "1",
+      "unite": "unité",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "l018",
+    "designation": "Spots LED encastrables pour douche (x3) - Fourniture de 3 spots LED encastrables IP65 pour zone douche",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Spots LED encastrables pour douche (x3)",
+      "quantite": "1",
+      "unite": "unité",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "l019",
+    "designation": "Installation électrique et pose luminaires - Préparation des câblages, raccordements et pose des appliques, plafonnier et spots de douche",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "pose",
+    "fournitures": []
+   },
+   {
+    "ref": "l020",
+    "designation": "Réalisation niche de douche - Création d'une niche murale intégrée dans la douche, habillage carrelage",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Réalisation niche de douche",
+      "quantite": "1",
+      "unite": "unité",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "l021",
+    "designation": "Fourniture sèche-serviette électrique Atlantic 750W - Fourniture d'un sèche-serviette électrique 750W de marque Atlantic pour salle de bain",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Fourniture sèche-serviette électrique Atlantic 750W",
+      "quantite": "1",
+      "unite": "unité",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "l022",
+    "designation": "Installation sèche-serviettes - Fixation du sèche-serviettes, raccordement électrique",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "pose",
+    "fournitures": []
+   },
+   {
+    "ref": "l023",
+    "designation": "VMC simple flux hygroréglable - Fourniture d'un système de Ventilation Mécanique Contrôlée simple flux hygroréglable adapté à la salle de bain",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "VMC simple flux hygroréglable",
+      "quantite": "1",
+      "unite": "unité",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "l024",
+    "designation": "Installation VMC - Mise en place de la bouche d'extraction, raccordement gaines et électrique de la VMC",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "pose",
+    "fournitures": []
+   },
+   {
+    "ref": "l025",
+    "designation": "Ragréage du sol - Application d'une couche de ragréage fibré pour uniformiser et préparer le sol avant pose du carrelage",
+    "quantite": "9",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ragréage du sol",
+      "quantite": "9",
+      "unite": "m²",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "l026",
+    "designation": "Peinture plafond salle de bain - Fourniture peinture spéciale salle de bain (anti-humidité, anti-moisissure) pour plafond",
+    "quantite": "9",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Peinture plafond salle de bain",
+      "quantite": "9",
+      "unite": "m²",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "l027",
+    "designation": "Application peinture plafond - Préparation et application de deux couches de peinture sur le plafond",
+    "quantite": "9",
+    "unite": "m²",
+    "role": "pose",
+    "fournitures": []
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

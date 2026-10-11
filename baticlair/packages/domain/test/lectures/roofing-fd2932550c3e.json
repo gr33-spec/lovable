@@ -1,0 +1,80 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Couverture zinc à joint debout, rampant 5,5 m",
+   "quantity": "91",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "faconnage",
+    "texte": "Tu façonnes tes bacs toi-même, ou tu les commandes façonnés ?",
+    "boutons": [
+     {
+      "label": "Je façonne (bobines)",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné (bacs)",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "façonnage",
+    "ligne": null
+   },
+   {
+    "cle": "consommables",
+    "texte": "Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?",
+    "boutons": [
+     {
+      "label": "Oui",
+      "valeur": "1"
+     },
+     {
+      "label": "Non",
+      "valeur": "0"
+     }
+    ],
+    "unite": "u",
+    "donnee": "consommables",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Couverture zinc à joint debout, rampant 5,5 m",
+    "quantite": "91",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Couverture zinc à joint debout",
+      "quantite": "91",
+      "unite": "m²",
+      "ouvrage": "couverture-zinc-joint-debout",
+      "emplacement": "couverture",
+      "donnees": {
+       "longueur_rampant": "5,5 m"
+      },
+      "attend": [
+       "faconnage"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

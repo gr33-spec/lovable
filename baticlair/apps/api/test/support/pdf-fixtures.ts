@@ -15,7 +15,7 @@ export const DEVIS_LINES: FixtureRow[] = [
   ["LIT-2738", "Liteau sapin traité classe 2 27x38", "480 ml", "0,62", "297,60"],
   ["ECR-HPV", "Écran sous-toiture HPV 1,5x50 m", "4 rouleau", "89,00", "356,00"],
   ["CRO-INOX", "Crochet inox ardoise 100 mm", "2 paquet", "18,40", "36,80"],
-  ["GOU-ZN33", "Gouttière zinc demi-ronde dév. 33", "36 ml", "14,20", "511,20"],
+  ["GOU-ZN33", "Gouttière zinc demi-ronde dév. 33, 2 descentes Ø80", "36 ml", "14,20", "511,20"],
 ];
 
 /** `rows` / `totals` : un autre tableau (devis d'un autre fournisseur, par exemple). */
@@ -33,7 +33,7 @@ export async function makePdf(pages: FixturePage[], rows: FixtureRow[] = DEVIS_L
     if (kind === "devis") {
       write(title, 40, 14);
       y -= 30;
-      const cols = [40, 110, 330, 420, 490];
+      const cols = [40, 110, 370, 440, 505];
       ["Réf.", "Désignation", "Qté", "P.U. HT", "Total HT"].forEach((h, i) => write(h, cols[i]));
       for (const row of rows) {
         y -= 18;

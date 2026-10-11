@@ -30,7 +30,7 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Prise 2P+T 16 A ? | 18 pièces | Info manquante : gamme d'appareillage |
+| Prise 2P+T 16 A | 18 pièces | Gamme d'appareillage à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -57,16 +57,16 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Multicouche 16×2, barre 4 m | 19 barres de 4 m | Valeur par défaut à confirmer : distance moyenne nourrice → appareil 5 m. Quantité à confirmer : 2 tubes par appareil (EF + ECS), 1 m de remontées par tube, tube +5 %, barre de 4 m (sources en désaccord) |
-| Tube PVC évacuation Ø40, barre 4 m | 5 barres de 4 m | Valeur par défaut à confirmer : distance moyenne appareil → collecteur 3 m. Quantité à confirmer : 0,5 m de remontée sous l'appareil, tube +10 % |
-| PER-BAO 16×2, couronne 240 m | 3 couronnes de 240 m | Quantité à confirmer : 6,7 m de tube par m² (entraxe 15 cm), couronne de 240 m |
+| Multicouche 16×2, barre 4 m | 19 barres de 4 m | Valeur par défaut à confirmer |
+| Tube d'alimentation PVC évacuation Ø40, barre 4 m | 5 barres de 4 m | Valeur par défaut à confirmer |
+| PER-BAO 16×2, couronne 240 m | 3 couronnes de 240 m | Quantité à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
 | Multicouche 16×2, barre 4 m | 19 barres de 4 m (75,6 m à couvrir) |  | chiffrable |
-| Tube PVC évacuation Ø40, barre 4 m | 5 barres de 4 m (19,25 m à couvrir) |  | chiffrable |
+| Tube d'alimentation PVC évacuation Ø40, barre 4 m | 5 barres de 4 m (19,25 m à couvrir) |  | chiffrable |
 | PER-BAO 16×2, couronne 240 m | 3 couronnes de 240 m (569,5 m à couvrir) |  | chiffrable |
 | Colle PVC, pot 250 ml | 1 pot de 250 ml (0,06 L) |  | chiffrable |
 
@@ -88,8 +88,8 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Stratifié, paquet 1,914 m² | 22 paquets de 1,914 m² | Quantité à confirmer : parquet +7 % de chutes (pose droite) |
-| Plinthes MDF 10×70, barre 2,40 m | 15 barres | Quantité à confirmer : plinthes +10 % de coupe, barre de 2,4 m (sources en désaccord) |
+| Stratifié, paquet 1,914 m² | 22 paquets de 1,914 m² | Quantité à confirmer |
+| Plinthes MDF 10×70, barre 2,40 m | 15 barres | Quantité à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -120,7 +120,7 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Kit VMC simple flux ?, cuisine + 2 sanitaires | 1 pièce | Info manquante : type de vmc |
+| Kit VMC simple flux cuisine + 2 sanitaires | 1 pièce | Vmc à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -141,9 +141,9 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Ardoises naturelles ? 30×22 | 9 271 pièces | Info manquante : qualité de l'ardoise. Valeur par défaut à confirmer : pente du toit 45° ; longueur du rampant 5,5 m ; diamètre du crochet standard |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Info manquante : qualité de l'ardoise. Valeur par défaut à confirmer : diamètre du crochet standard ; pente du toit 45° ; longueur du rampant 5,5 m |
-| Naissances zinc demi-ronde | — | Info manquante : nombre de descentes |
+| Ardoises naturelles 30×22 | 9 271 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Qualité à préciser |
+| Naissances | — | Descentes à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -152,5 +152,5 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces | 200 m² × 44,15 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge | chiffrable |
 | Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02) | chiffrable |
 | Gouttière zinc demi-ronde dév. 33 | 6 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
-| Naissances zinc demi-ronde dév. 33 Ø80 | 1 pièce |  | chiffrable |
+| Naissances dév. 33 Ø80 | 1 pièce |  | chiffrable |
 

@@ -1,0 +1,41 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Faux plafond démontable dalles minérales 600x600 sur ossature T24 blanche",
+   "quantity": "70",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Faux plafond démontable dalles minérales 600x600 sur ossature T24 blanche",
+    "quantite": "70",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Faux plafond démontable dalles minérales 600x600 sur ossature T24 blanche",
+      "quantite": "70",
+      "unite": "m²",
+      "ouvrage": "dalles-t24",
+      "emplacement": "plafond",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

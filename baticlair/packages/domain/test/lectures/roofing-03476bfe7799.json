@@ -1,0 +1,113 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Bac acier monopente sur hangar",
+   "quantity": "80",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "longueur_rampant",
+    "texte": "Bac acier : longueur du rampant (longueur des plaques) ?",
+    "boutons": [
+     {
+      "label": "4 m",
+      "valeur": "4"
+     },
+     {
+      "label": "5 m",
+      "valeur": "5"
+     },
+     {
+      "label": "6 m",
+      "valeur": "6"
+     },
+     {
+      "label": "7 m",
+      "valeur": "7"
+     }
+    ],
+    "unite": "m",
+    "donnee": "longueur du rampant",
+    "ligne": null
+   },
+   {
+    "cle": "teinte_bac",
+    "texte": "Bac acier : quelle teinte ?",
+    "boutons": [
+     {
+      "label": "Gris anthracite (RAL 7016)",
+      "valeur": "7016"
+     },
+     {
+      "label": "Gris ardoise (RAL 7022)",
+      "valeur": "7022"
+     },
+     {
+      "label": "Rouge tuile (RAL 8012)",
+      "valeur": "8012"
+     },
+     {
+      "label": "Noir (RAL 9005)",
+      "valeur": "9005"
+     }
+    ],
+    "unite": "u",
+    "donnee": "teinte du bac acier",
+    "ligne": null
+   },
+   {
+    "cle": "feutre_bac",
+    "texte": "Bac acier : avec ou sans feutre anti-condensation ?",
+    "boutons": [
+     {
+      "label": "Avec feutre",
+      "valeur": "1"
+     },
+     {
+      "label": "Sans feutre",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "feutre anti-condensation",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Bac acier monopente sur hangar",
+    "quantite": "80",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Couverture bac acier",
+      "quantite": "80",
+      "unite": "m²",
+      "ouvrage": "couverture-bac-acier",
+      "emplacement": "couverture",
+      "donnees": {
+       "nb_pans": "1"
+      },
+      "attend": [
+       "longueur_rampant"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

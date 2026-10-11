@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { makePdf } from "./support/pdf-fixtures.js";
+import { DEVIS_LINES, makePdf, type FixtureRow } from "./support/pdf-fixtures.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
 
-// Extraction simulée (AI_PROVIDER=fake, voir vitest.config.ts) : aucun appel payant.
+// Lecture simulée (AI_PROVIDER=fake, voir vitest.config.ts) : aucun appel payant. §51.5 : une lecture, une fois.
 let ctx: TestContext;
 beforeAll(async () => {
   ctx = await createTestApp();
@@ -14,17 +14,21 @@ beforeEach(async () => {
   await resetDatabase(ctx.prisma);
 });
 
-async function clientQuote(agent: Agent, pages: Parameters<typeof makePdf>[0] = ["devis", "cgv"]) {
+async function clientQuote(agent: Agent, pages: Parameters<typeof makePdf>[0] = ["devis", "cgv"], rows: FixtureRow[] = DEVIS_LINES) {
   const project = await agent.post("/v1/projects").send({ name: "Toiture Dupont" });
   const doc = await agent
     .post(`/v1/projects/${project.body.id}/documents`)
     .field("purpose", "client_quote")
-    .attach("file", Buffer.from(await makePdf(pages)), { filename: "devis.pdf", contentType: "application/pdf" });
+    .attach("file", Buffer.from(await makePdf(pages, rows)), { filename: "devis.pdf", contentType: "application/pdf" });
   return { projectId: project.body.id as string, documentId: doc.body.id as string };
 }
 
-describe("liste de matériaux tirée du devis client (IA simulée)", () => {
-  it("propose les lignes du devis, chacune reliée à sa ligne source", async () => {
+/** Le même devis avec une faîtière écrite deux fois de suite : doublon ou quantités à additionner ? */
+const DOUBLON: FixtureRow[] = [DEVIS_LINES[0]!, DEVIS_LINES[1]!, DEVIS_LINES[1]!, ...DEVIS_LINES.slice(2)];
+const byName = (lines: { id: string; designation: string }[], re: RegExp) => lines.find((l) => re.test(l.designation))!;
+
+describe("liste de matériaux tirée du devis client (lecture simulée)", () => {
+  it("propose les lignes du devis, dans son ordre, chacune reliée à sa ligne lue", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const { projectId, documentId } = await clientQuote(agent);
 
@@ -33,18 +37,12 @@ describe("liste de matériaux tirée du devis client (IA simulée)", () => {
     expect(res.body.status).toBe("draft");
     expect(res.body.lines).toHaveLength(6);
     const tuile = res.body.lines[0];
-    expect(tuile).toMatchObject({ designation: "Tuile romane canal rouge 12,5 u/m²", quantity: "1 250", unit: "u", reference: "TUI-RC12", origin: "ai" });
+    // §49.2 : la quantité écrite fait foi, telle qu'écrite (« 1 250 u »).
+    expect(tuile).toMatchObject({ designation: "Tuile romane canal rouge 12,5 u/m²", quantity: "1 250", unit: "u", origin: "ai", status: "certain", confirmed: false });
     expect(tuile.sourceRefs[0]).toMatch(/^1:\d{3}$/);
-    expect(tuile.family).toBe("Tuile");
-
-    // Paquets sans contenu indiqué : à vérifier, avec la raison.
-    const crochets = res.body.lines.find((l: { reference: string }) => l.reference === "CRO-INOX");
-    expect(crochets.status).toBe("to_verify");
-    expect(crochets.issues.map((i: { code: string }) => i.code)).toContain("PACKAGE_CONTENT_MISSING");
-    // Un doute de LECTURE de l'IA est montré tel quel à l'artisan.
-    expect(crochets.aiDoubt).toBe("Chiffre peu lisible : 2 ou 3 paquets ?");
-    expect(crochets.issues.map((i: { code: string }) => i.code)).toContain("AI_DOUBT");
-    expect(crochets.confirmed).toBe(false);
+    expect(res.body.lines.map((l: { designation: string }) => l.designation)).toEqual(DEVIS_LINES.map((r) => r[1]));
+    // Aucune ligne orange sans raison : rien à vérifier sur un devis propre (§51.6).
+    expect(res.body.counts).toMatchObject({ toVerify: 0, blocking: 0 });
 
     const again = await agent.get(`/v1/projects/${projectId}/takeoff`);
     expect(again.body.aiAvailable).toBe(true);
@@ -60,7 +58,8 @@ describe("liste de matériaux tirée du devis client (IA simulée)", () => {
 
     expect(await ctx.prisma.aiExecution.count()).toBe(1);
     const execution = await ctx.prisma.aiExecution.findFirstOrThrow();
-    expect(execution).toMatchObject({ task: "takeoff_extraction", promptId: "takeoff_extraction", promptVersion: 15, status: "success", pagesText: 1 });
+    // §51.5 : un seul appel, la lecture du devis (fiche, questions, fourniture par ligne).
+    expect(execution).toMatchObject({ task: "lecture_devis", promptId: "lecture_devis", promptVersion: 1, status: "success", pagesText: 1 });
     expect(execution.costMicroUsd).toBeGreaterThan(0n);
     const usage = await agent.get("/v1/ai-usage");
     expect(usage.body.analyses.used).toBe(1);
@@ -80,33 +79,25 @@ describe("liste de matériaux tirée du devis client (IA simulée)", () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const { documentId } = await clientQuote(agent);
     const draft = (await agent.post(`/v1/documents/${documentId}/takeoff`)).body;
-    const crochets = draft.lines.find((l: { reference: string }) => l.reference === "CRO-INOX");
+    const crochets = byName(draft.lines, /^Crochet inox/);
 
     const edited = await agent.patch(`/v1/takeoff-lines/${crochets.id}`).send({ designation: "Crochet inox ardoise 100 mm", quantity: "200", unit: "u", reference: "CRO-INOX" });
     expect(edited.status).toBe(200);
     const line = edited.body.lines.find((l: { id: string }) => l.id === crochets.id);
     expect(line).toMatchObject({ quantity: "200", unit: "u", edited: true, status: "certain" });
+    // La ligne corrigée part telle qu'écrite par l'artisan : 200 pièces (§41.4).
+    expect(edited.body.purchase.toBuy.find((b: { lineIds: string[] }) => b.lineIds.includes(crochets.id))).toMatchObject({ quantity: "200 pièces" });
 
     const added = await agent.post(`/v1/takeoffs/${draft.id}/lines`).send({ designation: "Closoir ventilé", quantity: "12", unit: "ml" });
     expect(added.status).toBe(201);
     expect(added.body.lines.at(-1)).toMatchObject({ designation: "Closoir ventilé", origin: "manual" });
+    // Une ligne ajoutée à la main est sur la liste, telle qu'écrite.
+    expect(added.body.purchase.toBuy.map((b: { label: string }) => b.label)).toContain("Closoir ventilé");
 
-    const noQty = await agent.post(`/v1/takeoffs/${draft.id}/lines`).send({ designation: "Mortier de scellement" });
-    const blocking = noQty.body.lines.at(-1);
-    expect(blocking.issues.map((i: { code: string }) => i.code)).toContain("QUANTITY_MISSING");
-    const refused = await agent.post(`/v1/takeoffs/${draft.id}/validate`);
-    expect(refused.status).toBe(400);
+    const removed = await agent.delete(`/v1/takeoff-lines/${added.body.lines.at(-1).id}`);
+    expect(removed.status).toBe(200);
+    expect(removed.body.purchase.toBuy.map((b: { label: string }) => b.label)).not.toContain("Closoir ventilé");
 
-    await agent.delete(`/v1/takeoff-lines/${blocking.id}`).expect(200);
-    const current = (await agent.get(`/v1/projects/${draft.projectId}/takeoff`)).body.takeoff;
-    for (const l of current.lines.filter((x: { status: string }) => x.status === "to_verify")) {
-      await agent.post(`/v1/takeoff-lines/${l.id}/confirm`).expect(200);
-    }
-    // « 42 faîtières » au devis, un autre nombre au calcul : la quantité du devis reste, orange avec l'écart, jusqu'au « C'est bon ».
-    const view = (await agent.get(`/v1/projects/${draft.projectId}/takeoff`)).body.takeoff.view as { decisions: { key: string; text: string }[] };
-    const gaps = view.decisions.filter((q) => q.key.startsWith("ratio:line:"));
-    expect(gaps.map((q) => q.text)).toEqual([expect.stringMatching(/^Le devis dit 42, le calcul donne \d+/)]);
-    for (const q of gaps) await agent.post(`/v1/takeoffs/${draft.id}/answers`).send({ key: q.key, value: "ok" }).expect(200);
     const validated = await agent.post(`/v1/takeoffs/${draft.id}/validate`);
     expect(validated.status).toBe(200);
     expect(validated.body.status).toBe("validated");
@@ -122,30 +113,32 @@ describe("liste de matériaux tirée du devis client (IA simulée)", () => {
     expect(reopened.body.status).toBe("draft");
   });
 
-  it("n'autorise la validation qu'une fois chaque doute vu : corrigé ou confirmé", async () => {
+  it("n'autorise la validation qu'une fois chaque doute vu : la même ligne écrite deux fois de suite se confirme", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
-    const { documentId } = await clientQuote(agent);
+    const { documentId } = await clientQuote(agent, ["devis", "cgv"], DOUBLON);
     const draft = (await agent.post(`/v1/documents/${documentId}/takeoff`)).body;
-    expect(draft.counts.toVerify).toBeGreaterThan(0);
+    expect(draft.lines).toHaveLength(7);
+    // Deux faîtières identiques qui se suivent : doublon ou quantités à additionner ? À l'artisan de dire (§49.1 : jamais fusionnées).
+    expect(draft.counts.toVerify).toBe(2);
+    const doubles = draft.lines.filter((l: { status: string }) => l.status === "to_verify");
+    expect(doubles.map((l: { designation: string }) => l.designation)).toEqual(["Faîtière ronde à emboîtement", "Faîtière ronde à emboîtement"]);
+    expect(doubles[0].issues.map((i: { code: string }) => i.code)).toContain("DUPLICATE_LINE");
 
     const refused = await agent.post(`/v1/takeoffs/${draft.id}/validate`);
     expect(refused.status).toBe(400);
     expect(refused.body.error.details).toMatchObject({ reason: "lines_to_check" });
 
     let current = draft;
-    for (const line of draft.lines.filter((l: { status: string }) => l.status === "to_verify")) {
+    for (const line of doubles) {
       current = (await agent.post(`/v1/takeoff-lines/${line.id}/confirm`).expect(200)).body;
     }
-    const crochets = current.lines.find((l: { reference: string }) => l.reference === "CRO-INOX");
-    expect(crochets).toMatchObject({ confirmed: true, status: "certain" });
-    // Plus aucun doute à trancher ; le contenu du paquet reste une note pour le fournisseur.
-    expect(crochets.issues.filter((i: { severity: string }) => i.severity !== "info")).toEqual([]);
+    expect(current.lines.filter((l: { confirmed: boolean }) => l.confirmed)).toHaveLength(2);
     expect(current.counts.toVerify).toBe(0);
     expect((await agent.post(`/v1/takeoffs/${draft.id}/validate`)).body.status).toBe("validated");
 
-    // Une ligne corrigée après confirmation est relue.
-    const edited = await agent.patch(`/v1/takeoff-lines/${crochets.id}`).send({ designation: "Crochet inox ardoise 100 mm", quantity: "200", unit: "bidule" });
-    expect(edited.body.lines.find((l: { id: string }) => l.id === crochets.id)).toMatchObject({ confirmed: false, status: "to_verify" });
+    // Une ligne corrigée après confirmation est relue : plus confirmée, plus un doublon.
+    const edited = await agent.patch(`/v1/takeoff-lines/${doubles[0].id}`).send({ designation: "Faîtière ronde à emboîtement", quantity: "84", unit: "u" });
+    expect(edited.body.lines.find((l: { id: string }) => l.id === doubles[0].id)).toMatchObject({ confirmed: false, status: "certain", quantity: "84" });
   });
 
   it("n'accepte que le devis client, et isole les entreprises", async () => {

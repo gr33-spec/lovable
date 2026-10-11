@@ -1,0 +1,72 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Terrasse bois pin classe 4 sur lambourdes et plots réglables",
+   "quantity": "32",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "consommables",
+    "texte": "Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?",
+    "boutons": [
+     {
+      "label": "Oui",
+      "valeur": "1"
+     },
+     {
+      "label": "Non",
+      "valeur": "0"
+     }
+    ],
+    "unite": "u",
+    "donnee": "consommables",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Terrasse bois pin classe 4 sur lambourdes et plots réglables",
+    "quantite": "32",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Terrasse bois pin classe 4 sur lambourdes et plots réglables",
+      "quantite": "32",
+      "unite": "m²",
+      "ouvrage": "terrasse",
+      "emplacement": "terrasse",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Lames pin classe 4 27×145, L 4,20 m",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "terrasse",
+      "emplacement": "lames",
+      "donnees": {
+       "produit": "pin-27x145"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

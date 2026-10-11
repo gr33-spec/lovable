@@ -2347,3 +2347,16 @@ Une ligne orange ne doit jamais demander deux gestes ni ouvrir un autre écran. 
   - Questions, exactement celles-ci : développé de gouttière 25 ou 33 ; nombre de descentes ; chéneau EPDM ou PVC et largeur développée ; raccord Velux ZWC (ligne fourniture) ou Pratikal (ligne pose), contradiction du devis ; tôles bac acier : 10 tôles ou 10 m², et longueur. Aucune question sur les Velux.
   - Liste : gouttière 5 longueurs de 4 m (orange, développé) ; crochets Négrafix 35 (vert) ; naissances (orange, nombre) ; membrane chéneau (orange) ; Velux GGL SK06 114×118 white finish 4 (vert) ; Velux GGU MK04 78×98 ever finish 1 (vert) ; raccords SK06 4 et MK04 1 (orange, ZWC ou Pratikal) ; tôles bac acier 10 (orange, unité, profil et teinte à préciser) ; 5 lignes sans fourniture.
   - Interdit : toute question sur une donnée écrite au devis ; tout identifiant interne à l'écran.
+
+## 51.6 Tout orange a sa question (décision du 11 octobre, remplace 49.9 et 50.2 là où ils disent « orange sans question »)
+
+Une ligne orange est une ligne qui attend une réponse, et chaque réponse la passe au vert. Il n'existe plus d'orange « à préciser » sans question : un modèle, une teinte, une qualité, une composition déduite, une unité ambiguë donnent chacun leur question, avec des boutons quand le choix est fermé et une case avec unité quand c'est une valeur. Une fois toutes les questions répondues, la liste est entièrement verte. Le test de 51.5 et le test 7954 du référentiel électricité comptent une question par ligne orange.
+
+# 52. Application multimétier (décision du 11 octobre)
+
+BatiClair est multimétier dès la conception : une seule lecture du devis par l'IA (51), un référentiel par métier qui convertit en unités du comptoir. Un nouveau métier = un référentiel au format commun, un devis réel comme test permanent, une heure de relecture par un artisan du métier. Jamais une nouvelle app ni un nouveau parcours.
+- Référentiels existants : couverture-étanchéité (ce doc), électricité (doc du 11 octobre, test 7954), maçonnerie et carrelage (docs du 3 octobre).
+- Ordre de branchement : couverture d'abord, prouvée en vrai sur iPhone avec D-2026-020, D-2026-018, D.2026.105 et DE00000071 ; puis électricité avec le devis 7954 ; puis maçonnerie, puis carrelage. Un métier à la fois, le suivant seulement quand le précédent tient.
+- Le métier est détecté par l'IA à la lecture (51.1) et confirmé par l'artisan sur une carte à boutons quand le devis mélange plusieurs lots (cas 7954 : électricité, chauffage, plomberie). Un devis multi-lots donne une liste par lot, chacun avec son référentiel.
+- Tant que le référentiel d'un métier n'a pas été relu par un artisan de ce métier, le métier porte dans l'app la mention « ratios en cours de validation » sur l'écran 3 et dans le PDF fournisseur.
+- Le test permanent de chaque métier est son devis réel, avec le bref, les questions et la liste validés dans son référentiel.

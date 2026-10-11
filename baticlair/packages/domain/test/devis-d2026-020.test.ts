@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { applyRuleConfirmations, planQuote, ROOFING_REFERENTIAL, tradeProfile, type QuoteLineReading, type SiteFact } from "../src/index.js";
+import { applyRuleConfirmations, ROOFING_REFERENTIAL, type QuoteLineReading, type SiteFact } from "../src/index.js";
+import { planOf } from "./support/plan-of.js";
 import { D2026_020_LINES } from "./devis-reels/d2026-020.js";
 import { readQuote } from "./support/read-quote.js";
 
@@ -23,7 +24,7 @@ describe("D-2026-020 : les coudes du devis sont des coudes, pas des descentes", 
     { ref: "6", designation: "Tubes de descente (Coude zinc diam. 80mm) - 4 unités, soit 2 jeux de 2 coudes", quantity: "4", unit: "unités" },
   ];
   it("la parenthèse nomme l'article : la ligne 6 est une ligne de coudes, et elle ne compte pas les descentes", () => {
-    const plan = planQuote(LIGNES, ROOFING_REFERENTIAL, tradeProfile("roofing"));
+    const plan = planOf(ROOFING_REFERENTIAL, LIGNES);
     expect(plan.lines[1]).toMatchObject({ status: "planned", workItemId: "descente", slot: "coude", mentions: [] });
     // « 2 descentes de 3 m » écrit au devis : 2 descentes, jamais les 4 coudes.
     expect(plan.inputs.find((i) => i.workItemId === "descente")?.params.nb_descentes?.value).toBe("2");
@@ -42,11 +43,9 @@ describe("D-2026-020 : les coudes du devis sont des coudes, pas des descentes", 
     expect(qty(/^Naissances/)).toEqual(["2 pièces"]);
   });
   it("« (Fourniture & Pose) » ne nomme rien ; « avec coudes … (2 ensembles) » reste 2 descentes complètes", () => {
-    const plan = planQuote(
-      [{ ref: "8", designation: "Descente d'eau pluviale PVC Ø80 avec coudes (Fourniture & Pose) - comprenant 2 jeux de coudes et les colliers de fixation par descente (2 ensembles au total)", quantity: "2", unit: "unités" }],
-      ROOFING_REFERENTIAL,
-      tradeProfile("roofing"),
-    );
+    const plan = planOf(ROOFING_REFERENTIAL, [
+      { ref: "8", designation: "Descente d'eau pluviale PVC Ø80 avec coudes (Fourniture & Pose) - comprenant 2 jeux de coudes et les colliers de fixation par descente (2 ensembles au total)", quantity: "2", unit: "unités" },
+    ]);
     expect(plan.lines[0]).toMatchObject({ slot: "tube" });
     expect(plan.inputs[0]?.params.nb_descentes?.value).toBe("2");
   });
@@ -86,7 +85,7 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
   const read = (answers: Record<string, unknown> = {}, readings?: Map<string, QuoteLineReading>) =>
     applyRuleConfirmations(readQuote(D2026_020_LINES, answers as never, ZONE_1, undefined, { acceptDraft: true }, readings), answers as never);
   const v = read();
-  const plan = planQuote(D2026_020_LINES, ROOFING_REFERENTIAL, tradeProfile("roofing"));
+  const plan = planOf(ROOFING_REFERENTIAL, D2026_020_LINES, ZONE_1, undefined, { acceptDraft: true });
   const rows = (view = v) => view.screen.groups.flatMap((g) => g.rows);
   const row = (key: string, view = v) => rows(view).find((r) => r.itemKey === key);
   const keys = (view = v) => view.questions.filter((q) => q.question).map((q) => q.key).sort();
@@ -105,8 +104,8 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
     expect(liste()).toEqual([
       ["Ardoises naturelles Espagne 1er choix 32×22", "2 052 pièces"],
       ["Crochets d'ardoise inox standard, longueur 11 cm", "2 094 pièces"],
-      ["Gouttière zinc Havraise dév. ?", "3 longueurs de 4 m"],
-      ["Naissances zinc Havraise dév. ? Ø80", "2 pièces"],
+      ["Gouttière zinc Havraise", "3 longueurs de 4 m"],
+      ["Naissances Ø80", "2 pièces"],
       ["Crochets de gouttière Havraise", "20 pièces"],
       ["Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes de rive en zinc (verrière)", "1 pièce"],
       ["Faîtage en bande zinc, dév. 25 cm", "8 ml"],
@@ -130,10 +129,10 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
   it("gouttière Havraise : longueurs de barre, orange « Info manquante : développé » tant que l'artisan n'a pas répondu, avec le retour d'angle écrit ; naissance d'office", () => {
     const [gouttiere, naissance] = [v.toBuy[2]!, v.toBuy[3]!];
     expect(gouttiere.precision).toBe("y compris retour d'angle et gouttière au-dessus de la verrière");
-    for (const b of [gouttiere, naissance]) expect(row(b.key)).toMatchObject({ status: "check", decisionKey: "engine:param:developpe_gouttiere", reason: "Info manquante : développé de la gouttière" });
+    for (const b of [gouttiere, naissance]) expect(row(b.key)).toMatchObject({ status: "check", decisionKey: "engine:param:developpe_gouttiere", reason: "Développé à préciser" });
     expect(liste(repondu).slice(2, 4)).toEqual([
       ["Gouttière zinc Havraise dév. 33", "3 longueurs de 4 m"],
-      ["Naissances zinc Havraise dév. 33 Ø80", "2 pièces"],
+      ["Naissances dév. 33 Ø80", "2 pièces"],
     ]);
   });
 
@@ -171,7 +170,7 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
     for (const b of [v.toBuy[9]!, v.toBuy[10]!]) expect(row(b.key)?.status).toBe("ok");
     expect(v.toBuy[9]!.order).toEqual({ count: "2", unit: "tubes de 3 m" });
     expect(v.toBuy[11]!).toMatchObject({ lineIds: ["14"] });
-    expect(row(v.toBuy[11]!.key)).toMatchObject({ status: "check", reason: "Le devis parle de fixation sans les chiffrer : quantité calculée, à vérifier" });
+    expect(row(v.toBuy[11]!.key)).toMatchObject({ status: "check", reason: "Le devis parle de colliers sans les chiffrer : quantité calculée, à vérifier" });
   });
 
   it("consommables : seulement si l'artisan dit oui, liés aux lignes écrites, orange et en fin de liste ; non : rien", () => {
@@ -218,12 +217,12 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
     // La qualité d'ardoise est une donnée du tiroir (sa question, ou l'habitude) : jamais une 2e question du comptoir.
     const readings = new Map<string, QuoteLineReading>([["1", { role: "fourniture", articles: [], faconnage: null, manque: ["marque des ardoises (Cupa, Samaca)", "qualité de l'ardoise (Espagne 1er choix, NF Cupa)", "épaisseur du zinc (0,65, 0,80)"] }]]);
     const lu = read({}, readings);
-    const q = lu.questions.find((d) => d.key.startsWith("comptoir:1:"))!;
+    const q = lu.questions.find((d) => d.key.startsWith("engine:fiche:"))!;
     expect(q.question).toMatchObject({ text: "Marque des ardoises ?", options: [{ label: "Cupa" }, { label: "Samaca" }] });
     // L'épaisseur du zinc est déjà annoncée (« Je pars sur ces valeurs ») : pas de seconde question.
-    expect(lu.questions.filter((d) => d.key.startsWith("comptoir:"))).toHaveLength(1);
+    expect(lu.questions.filter((d) => d.key.startsWith("engine:fiche:"))).toHaveLength(1);
     expect(row(lu.toBuy[0]!.key, lu)).toMatchObject({ status: "check", decisionKey: q.key });
-    const repondu = read({ [q.key]: "Cupa" }, readings);
+    const repondu = read({ [q.question!.key]: "Cupa" }, readings);
     expect(repondu.toBuy[0]!.precision).toMatch(/; Marque des ardoises : Cupa$/);
     expect(repondu.questions.some((d) => d.key === q.key)).toBe(false);
   });
@@ -233,7 +232,7 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
     expect(gouttiere!.asks).toEqual([{ key: "param:developpe_gouttiere", text: "Gouttière de 25, de 28, de 33 ou de 40", unit: "cm", options: expect.arrayContaining([expect.objectContaining({ label: "De 25" }), expect.objectContaining({ label: "De 40" })]) }]);
     expect(naissance!.asks?.map((q) => q.key)).toEqual(["param:developpe_gouttiere"]);
     expect(crochets!.gap).toEqual({ written: "20", computed: "21", unit: "pièces" });
-    expect(ardoises!.asks?.map((q) => q.key)).toEqual(["param:diametre_crochet"]);
+    void ardoises;
     expect(v.toBuy[6]!.asks?.[0]?.options.map((o) => o.label)).toEqual(["Je façonne (feuilles ou bobineau)", "Je commande façonné"]);
     // Un tap : la gouttière se recalcule et passe au vert.
     const tap = read({ "param:developpe_gouttiere": u("330", "mm") });

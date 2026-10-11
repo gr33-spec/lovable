@@ -1,0 +1,235 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Dallage béton 12 cm sur hérisson, treillis ST25C",
+   "quantity": "90",
+   "unit": "m²"
+  },
+  {
+   "ref": "2",
+   "designation": "Mur en parpaings de 20",
+   "quantity": "110",
+   "unit": "m²"
+  },
+  {
+   "ref": "3",
+   "designation": "Cloison 72/48 BA13 sur ossature",
+   "quantity": "65",
+   "unit": "m²"
+  },
+  {
+   "ref": "4",
+   "designation": "Prise de courant 16A 2P+T, gamme Dooxie",
+   "quantity": "24",
+   "unit": "u"
+  },
+  {
+   "ref": "5",
+   "designation": "Carrelage sol grès cérame 60x60 rectifié, pose droite",
+   "quantity": "75",
+   "unit": "m²"
+  },
+  {
+   "ref": "6",
+   "designation": "Peinture murs et plafonds mate, 2 couches",
+   "quantity": "260",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "consommables",
+    "texte": "Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?",
+    "boutons": [
+     {
+      "label": "Oui",
+      "valeur": "1"
+     },
+     {
+      "label": "Non",
+      "valeur": "0"
+     }
+    ],
+    "unite": "u",
+    "donnee": "consommables",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Dallage béton 12 cm sur hérisson, treillis ST25C",
+    "quantite": "90",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Dallage béton 12 cm sur hérisson, treillis ST25C",
+      "quantite": "90",
+      "unite": "m²",
+      "ouvrage": "dallage",
+      "emplacement": "dalle",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Mur en parpaings de 20",
+    "quantite": "110",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Mur en parpaings de 20",
+      "quantite": "110",
+      "unite": "m²",
+      "ouvrage": "mur-blocs",
+      "emplacement": "mur",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Blocs béton creux de 20 (50×20)",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "mur-blocs",
+      "emplacement": "bloc",
+      "donnees": {
+       "produit": "bloc-creux-20"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "3",
+    "designation": "Cloison 72/48 BA13 sur ossature",
+    "quantite": "65",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Cloison 72/48 BA13 sur ossature",
+      "quantite": "65",
+      "unite": "m²",
+      "ouvrage": "cloison-72-48",
+      "emplacement": "cloison",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Plaques BA13 1,20 × 2,50",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "cloison-72-48",
+      "emplacement": "plaque",
+      "donnees": {
+       "produit": "ba13-standard"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "4",
+    "designation": "Prise de courant 16A 2P+T, gamme Dooxie",
+    "quantite": "24",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Prise de courant 16A 2P+T, gamme Dooxie",
+      "quantite": "24",
+      "unite": "u",
+      "ouvrage": "prises",
+      "emplacement": "prises",
+      "donnees": {
+       "gamme": "1"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "5",
+    "designation": "Carrelage sol grès cérame 60x60 rectifié, pose droite",
+    "quantite": "75",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Carrelage sol grès cérame 60x60 rectifié, pose droite",
+      "quantite": "75",
+      "unite": "m²",
+      "ouvrage": "carrelage-sol",
+      "emplacement": "sol",
+      "donnees": {
+       "pose": "1"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Carrelage grès cérame 60×60",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "carrelage-sol",
+      "emplacement": "carreau",
+      "donnees": {
+       "produit": "carreau-60x60"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "6",
+    "designation": "Peinture murs et plafonds mate, 2 couches",
+    "quantite": "260",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Peinture murs et plafonds mate, 2 couches",
+      "quantite": "260",
+      "unite": "m²",
+      "ouvrage": "peinture-murs-plafonds",
+      "emplacement": "murs",
+      "donnees": {
+       "aspect": "1",
+       "couches": "2"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

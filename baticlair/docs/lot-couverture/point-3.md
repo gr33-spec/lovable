@@ -25,14 +25,14 @@ Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Tubes de descente PVC gris Ø80, longueur 4 m | 4 pièces | Valeur par défaut à confirmer : longueur des tubes 4 m |
+| Tubes de descente PVC gris Ø80, longueur 4 m | 4 pièces | Valeur par défaut à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
 | Gouttière PVC demi-ronde grise de 25 | 5 longueurs de 4 m (18 ml à couvrir) |  | chiffrable |
-| Naissances PVC demi-ronde grise de 25 Ø80 | 2 pièces |  | chiffrable |
+| Naissances PVC grise de 25 Ø80 | 2 pièces |  | chiffrable |
 | Tubes de descente PVC gris Ø80, longueur 4 m | 4 pièces | 2 descentes × 5 m | chiffrable |
 
 ## Gouttière alu anthracite sans développé
@@ -51,9 +51,9 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Gouttière alu anthracite de ? | 3 longueurs de 4 m | Info manquante : développé de la gouttière |
-| Naissances alu anthracite de ? Ø80 | 1 pièce | Info manquante : développé de la gouttière |
-| Tubes de descente alu Ø80, longueur 4 m | 2 pièces | Valeur par défaut à confirmer : longueur des tubes 4 m |
+| Gouttière alu anthracite de | 3 longueurs de 4 m | Développé à préciser |
+| Naissances alu anthracite de Ø80 | 1 pièce | Développé à préciser |
+| Tubes de descente alu Ø80, longueur 4 m | 2 pièces | Valeur par défaut à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -74,9 +74,9 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Ardoises naturelles ? 30×22 | 9 271 pièces | Info manquante : qualité de l'ardoise. Valeur par défaut à confirmer : pente du toit 45° ; longueur du rampant 5,5 m ; diamètre du crochet standard |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Info manquante : qualité de l'ardoise. Valeur par défaut à confirmer : diamètre du crochet standard ; pente du toit 45° ; longueur du rampant 5,5 m |
-| Naissances zinc demi-ronde | — | Info manquante : nombre de descentes |
+| Ardoises naturelles 30×22 | 9 271 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Qualité à préciser |
+| Naissances | — | Descentes à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -85,5 +85,5 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces | 200 m² × 44,15 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge | chiffrable |
 | Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02) | chiffrable |
 | Gouttière zinc demi-ronde dév. 33 | 6 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
-| Naissances zinc demi-ronde dév. 33 Ø80 | 1 pièce |  | chiffrable |
+| Naissances dév. 33 Ø80 | 1 pièce |  | chiffrable |
 

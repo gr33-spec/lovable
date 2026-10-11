@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import type { LectureDevis } from "@baticlair/domain";
 import { createTestApp, resetDatabase, signUp, type TestContext } from "./support/test-app.js";
 
 /**
@@ -37,13 +38,14 @@ describe("§49.8 : un bouton de la ligne fait quelque chose", () => {
         })
         .expect(201)
     ).body;
-    // La lecture §41.1 de la ligne des crochets : « manque » la matière (acier galvanisé ou zinc).
+    // La lecture du modèle (§51.5) : une question sur la matière des crochets (acier galvanisé ou zinc), que la ligne attend.
     const row = await ctx.prisma.quantitatif.findUniqueOrThrow({ where: { id: q.id } });
-    const lines = await ctx.prisma.takeoffLine.findMany({ where: { takeoffId: row.takeoffId! }, orderBy: { position: "asc" } });
-    await ctx.prisma.takeoffLine.update({
-      where: { id: lines[1]!.id },
-      data: { reading: { role: "fourniture", articles: [{ nom: "crochets", materiau: "acier galvanisé ou zinc", quantite: "20", unite: "unités", elements: null }], faconnage: null, manque: ["matière des crochets (acier galvanisé, zinc)"] } },
-    });
+    const takeoff = await ctx.prisma.takeoff.findUniqueOrThrow({ where: { id: row.takeoffId! } });
+    const lecture = takeoff.lecture as unknown as LectureDevis;
+    const crochetsLigne = lecture.lignes[1]!;
+    lecture.questions.push({ cle: "matiere_crochets", texte: "Matière des crochets ?", boutons: [{ label: "acier galvanisé", valeur: "acier galvanisé" }, { label: "zinc", valeur: "zinc" }], unite: null, donnee: "matière des crochets", ligne: crochetsLigne.ref });
+    for (const f of crochetsLigne.fournitures) f.attend.push("matiere_crochets");
+    await ctx.prisma.takeoff.update({ where: { id: takeoff.id }, data: { lecture: lecture as unknown as object } });
     await agent.post(`/v1/quantitatifs/${q.id}/calcul?ecran=1`).send({ reponses: [] }).expect(200);
     const items = async () => ((await agent.get(`/v1/projects/${q.projetId}/takeoff`).expect(200)).body.takeoff.purchase.toBuy as Item[]);
     const crochets = (await items()).find((b) => /^Crochets/.test(b.label))!;

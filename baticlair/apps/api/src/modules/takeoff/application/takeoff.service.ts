@@ -4,56 +4,30 @@ import {
   MISSING_INFO,
   CONSUMABLES_KEY,
   AI_DOUBT,
-  applyOrangeFlags,
-  completionDossier,
-  completionFlags,
-  completionRecord,
   FORBIDDEN,
-  forbiddenFlags,
-  applyLineRoles,
   applyPurchaseOverrides,
-  applyRuleConfirmations,
   RATIO,
   ORDER_WEIGHT,
   type OrderGap,
-  artisanView,
   assessTakeoffLine,
   climateZone,
   isCoastal,
-  factsFromReading,
-  readSiteNotes,
-  readExclusions,
-  exclusionFor,
   type Referential,
-  computeWithAnswers,
   postalCodeIn,
-  purchaseView,
   DEFAULT_EXTRACTION_POLICY,
-  mergeChunkLines,
-  planQuote,
-  linesWithoutSupply,
-  withShortReasons,
-  scanBoundaryRisks,
   planReading,
-  proposeLineRoles,
   priceTableAt,
-  splitChunk,
-  reviewExtractedTakeoff,
   ROOFING_REFERENTIAL,
   REFERENTIALS,
   referentialFor,
-  slotsGivenByQuote,
   tradeProfile,
-  withoutLabour,
   type ArtisanView,
   type EngineAnswer,
   type PurchaseView,
   type SiteFact,
   type CorrectionAction,
   type ExtractionPolicy,
-  type LineRole,
   type RoleProposal,
-  type ReadingChunk,
   type LineSnapshot,
   type LineValidation,
   type TakeoffIssue,
@@ -61,36 +35,32 @@ import {
   siteBrief,
   communeOf,
   METIER_NAMES,
-  MAX_SUGGESTIONS,
   tradeIdOf,
   type SiteBrief,
   normalizeText,
-  lotLabel,
-  piecewiseParams,
-  scopedKey,
   appliquerRelecture,
   ficheChantier,
   ficheCorrigee,
-  ficheFacts,
   type FicheChantier,
   ecranDeLecture,
   exportPourLecture,
   ficheAvecBref,
+  lectureDepuisLignes,
   lignesDeLecture,
+  lotLabel,
+  piecewiseParams,
+  scopedKey,
   type LectureDevis,
 } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
+import type { ReadAttempt } from "../../../platform/ai/document-reader.js";
 import type { AiUsageRecorder, AnalysisMeter } from "../../ai-usage/index.js";
 import type { DocumentAiInput, DocumentRepository, DocumentWithProcessing, PreparedDocument } from "../../documents/index.js";
 import type { CompanyMemory, CorrectionJournal } from "../../learning/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { decodeRelecture, FICHE_RELECTURE_PROMPT, type FicheRelecteur, type RelectureQuestion } from "./fiche-relecture.js";
 import { LECTURE_PROMPT, type LectureReader } from "./lecture-reader.js";
-import { TAKEOFF_PROMPT } from "./prompt.js";
-import type { ExtractionAttempt, ExtractionOutput, TakeoffExtractor } from "./takeoff-extractor.js";
-import { suppliedLines } from "./takeoff-extractor.js";
-import { QUANTITATIF_PROMPT, type QuantitatifPass } from "./quantitatif-pass.js";
-import type { LineFields, TakeoffLineRecord, TakeoffRecord, TakeoffRepository } from "./takeoff.repository.js";
+import type { LineFields, TakeoffRecord, TakeoffRepository } from "./takeoff.repository.js";
 
 /**
  * Lecture d'un devis par l'IA (PD-046) :
@@ -117,12 +87,6 @@ export interface ReadingOptions {
   /** Mesures de chaque lecture (journal du serveur), en plus de leur enregistrement avec l'analyse. */
   onStats?: (stats: ReadingStats) => void;
   policy?: ExtractionPolicy;
-  /**
-   * APPEL IA N° 2, LE QUANTITATIF EN UN PASSAGE (décision du fondateur, 2026-10-06) : après le calcul du moteur, le
-   * prompt B du §41.2 (couvreur ET comptoir) propose les fixations, scellements, étanchéité et consommables qui manquent,
-   * et ses doutes avec un remplacement ; tout sort orange. Absent : pas d'appel n° 2.
-   */
-  quantitatif?: QuantitatifPass;
   /** §51.2 : la relecture IA d'une réponse « Autre » (absente : la réponse écrite est gardée telle quelle). */
   relecteur?: FicheRelecteur;
   /**
@@ -252,25 +216,6 @@ export interface ReadingStats {
   durationMs: number;
 }
 
-interface CallTally {
-  calls: number;
-  outcomes: Record<string, number>;
-  splits: number;
-  tokens: ReadingStats["tokens"];
-  costMicroUsd: number;
-}
-
-type ChunkParts = { chunk: ReadingChunk; output: ExtractionOutput }[];
-type ChunkFailure = { ok: false; reason: string };
-type ChunkResult = { ok: true; parts: ChunkParts } | ChunkFailure;
-
-/** Une réponse coupée ou trop longue à venir : la même demande échouerait pareil. */
-const tooLong = (a: ExtractionAttempt) => a.status === "timeout" || (a.status === "invalid_output" && a.errorCode === "max_tokens");
-/** Échec imprévisible (réponse mal formée, panne passagère) : une relance a un sens. */
-const transient = (a: ExtractionAttempt) =>
-  (a.status === "invalid_output" && a.errorCode !== "max_tokens") ||
-  (a.status === "provider_error" && (a.errorCode === "http_429" || !/^http_4\d\d$/.test(a.errorCode ?? "")));
-
 /** §51.2 : la question d'une donnée qu'une relecture a ouverte (« fiche:<donnée> »). */
 export const FICHE_KEY = "fiche:";
 
@@ -322,7 +267,6 @@ export class TakeoffService {
   constructor(
     private readonly takeoffs: TakeoffRepository,
     private readonly documents: DocumentRepository,
-    private readonly extractor: TakeoffExtractor | null,
     private readonly meter: AnalysisMeter,
     private readonly recorder: AiUsageRecorder,
     private readonly aiInput: DocumentAiInput,
@@ -333,7 +277,7 @@ export class TakeoffService {
   ) {}
 
   get aiAvailable(): boolean {
-    return this.extractor !== null;
+    return this.reading.lecteur !== undefined;
   }
 
   /**
@@ -377,11 +321,6 @@ export class TakeoffService {
     const won = await this.takeoffs.startCalcul(tenant, takeoff.id, now, new Date(now.getTime() - STALE_CALCUL_MS));
     if (!won) return { state: "calculating" };
     const work = (async () => {
-      const pass = this.reading.quantitatif;
-      if (pass && takeoff.documentId && takeoff.analysisId) {
-        const doc = await this.documents.findById(tenant, takeoff.documentId);
-        if (doc) await this.completionPass(tenant, doc, doc.processing?.id ?? null, takeoff.analysisId, takeoff, pass);
-      }
       await this.takeoffs.finishCalcul(tenant, takeoff.id, (this.reading.now ?? (() => new Date()))());
     })();
     const wait = this.reading.answerWithinMs ?? 8000;
@@ -443,7 +382,7 @@ export class TakeoffService {
 
     const existing = await this.takeoffs.findByDocument(tenant, documentId);
     if (existing) return this.review(tenant, existing);
-    if (!this.extractor) throw new DomainError("ai_unavailable", "AI reading is not configured");
+    if (!this.reading.lecteur) throw new DomainError("ai_unavailable", "AI reading is not configured");
 
     const prepared = await this.aiInput.prepare(tenant, doc);
     const policy = this.reading.policy ?? DEFAULT_EXTRACTION_POLICY;
@@ -462,9 +401,13 @@ export class TakeoffService {
     if (begin.status === "already_done") throw new DomainError("conflict", "Analysis already completed for this document");
     const analysisId = begin.analysis.id;
     try {
-      // §51.5 : la lecture par le modèle d'abord ; l'ancienne lecture seulement quand aucun lecteur ne lit ce devis.
-      const lu = this.reading.lecteur ? await this.readLecture(tenant, doc, prepared, analysisId) : null;
-      return lu ?? (await this.readAndSave(tenant, doc, prepared, plan, policy, analysisId));
+      // §51.5 : la lecture par le modèle, une fois ; un lecteur qui ne lit pas ce devis est une lecture échouée.
+      const lu = await this.readLecture(tenant, doc, prepared, analysisId);
+      if (!lu) {
+        await this.meter.fail(analysisId);
+        throw new DomainError("analysis_failed", "No reader for this quote", { reason: "no_lecture" });
+      }
+      return lu;
     } catch (error) {
       const known = error instanceof DomainError && error.code === "analysis_failed";
       if (!known) await this.meter.fail(analysisId).catch(() => undefined);
@@ -488,7 +431,7 @@ export class TakeoffService {
     const content = await this.documents.readContent(tenant, doc.id);
     const pages = prepared.pages.map((p) => p.pageNumber).filter((n): n is number => typeof n === "number");
     const document = { numberedText: prepared.input.numberedText, imagePdf: content?.bytes ?? prepared.input.imagePdf, imagePages: pages };
-    const result = await lecteur.lire({ document, tradeLabel: tradeProfile(doc.trade).label, referentiel: ref ? exportPourLecture(ref) : "Aucun référentiel pour ce métier.", siteNotes });
+    const result = await lecteur.lire({ document, trade: doc.trade, tradeLabel: tradeProfile(doc.trade).label, referentiel: ref ? exportPourLecture(ref) : "Aucun référentiel pour ce métier.", siteNotes });
     if (result === null) return null;
     const counted = { text: prepared.pages.filter((p) => p.route === "text").length, vision: prepared.pages.filter((p) => p.route === "vision").length };
     const cost = await this.record(tenant, doc, counted, prepared.processingId, analysisId, 1, result, LECTURE_PROMPT);
@@ -546,7 +489,8 @@ export class TakeoffService {
         quantityRaw: l.quantity?.trim() || null,
         unitRaw: l.unit?.trim() || null,
         reference: null,
-        sourceRefs: [],
+        // Le repère de la ligne dans la lecture (« 1:003 », « 1:003.2 ») : la ligne enregistrée reste reliée à sa lecture.
+        sourceRefs: [l.id],
         sourcePages: [],
         section: [],
         aiDoubt: null,
@@ -558,115 +502,10 @@ export class TakeoffService {
     return this.review(tenant, takeoff);
   }
 
-  private async readAndSave(
-    tenant: TenantContext,
-    doc: NonNullable<Awaited<ReturnType<DocumentRepository["findById"]>>>,
-    prepared: Prepared,
-    plan: ReturnType<typeof planReading>,
-    policy: ExtractionPolicy,
-    analysisId: string,
-  ): Promise<ReviewedTakeoff> {
-    const documentId = doc.id;
-    const started = Date.now();
-    const tally: CallTally = { calls: 0, outcomes: {}, splits: 0, tokens: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, costMicroUsd: 0 };
-    const read = await this.readPlan(tenant, doc, prepared, analysisId, plan.chunks, policy, tally);
-    const pages = {
-      text: prepared.pages.filter((p) => p.route === "text").length,
-      scan: prepared.pages.filter((p) => p.route === "vision").length,
-    };
-    const stats = (extra: Pick<ReadingStats, "outcome" | "linesBeforeMerge" | "linesAfterMerge" | "droppedOutsideBlock" | "droppedDuplicates" | "scanBoundaryRisks"> & { failure?: string }): ReadingStats => ({
-      version: 1,
-      ...extra,
-      strategy: plan.strategy,
-      document: pages.text > 0 && pages.scan > 0 ? "mixed" : pages.scan > 0 ? "scan" : "text",
-      pages,
-      plannedBlocks: plan.chunks.length,
-      calls: tally.calls,
-      callOutcomes: tally.outcomes,
-      splits: tally.splits,
-      tokens: tally.tokens,
-      costMicroUsd: tally.costMicroUsd,
-      estimatedMicroUsd: plan.estimate.totalMicroUsd,
-      durationMs: Date.now() - started,
-    });
-    if (read.ok === false) {
-      await this.saveStats(analysisId, stats({ outcome: "failed", failure: read.reason, linesBeforeMerge: 0, linesAfterMerge: 0, droppedOutsideBlock: 0, droppedDuplicates: 0, scanBoundaryRisks: [] }));
-      await this.meter.fail(analysisId);
-      throw new DomainError("analysis_failed", "The AI could not read this quote", { reason: read.reason });
-    }
-    const blocks = read.parts.map((p) => ({ chunk: p.chunk, lines: p.output.lines }));
-    const whole = read.parts.length === 1 && read.parts[0]!.chunk.context.length === 0;
-    const merged = whole ? { lines: read.parts[0]!.output.lines, droppedOutsideBlock: 0, droppedDuplicates: 0 } : mergeChunkLines(blocks);
-    // §51.1 : un gros devis lu en blocs garde UNE fiche : chaque donnée une fois, la valeur lue l'emportant sur le trou.
-    const fiches = read.parts.flatMap((p) => p.output.fiche?.donnees ?? []);
-    const fiche = fiches.length > 0 ? { donnees: fiches.filter((d, i) => !fiches.some((x, j) => x.cle === d.cle && (j < i ? x.origine !== "manquante" || d.origine === "manquante" : x.origine !== "manquante" && d.origine === "manquante"))) } : null;
-    const raw: ExtractionOutput = whole ? read.parts[0]!.output : { lines: merged.lines, notes: [...new Set(read.parts.flatMap((p) => p.output.notes))], fiche };
-    // §49.9 : chaque prestation devient la fourniture qu'elle contient ; une ligne nomme un article, jamais une phrase.
-    const output: ExtractionOutput = { ...raw, lines: suppliedLines(raw.lines) };
-    await this.saveStats(
-      analysisId,
-      stats({
-        outcome: "completed",
-        linesBeforeMerge: blocks.reduce((n, b) => n + b.lines.length, 0),
-        linesAfterMerge: output.lines.length,
-        droppedOutsideBlock: merged.droppedOutsideBlock,
-        droppedDuplicates: merged.droppedDuplicates,
-        scanBoundaryRisks: whole ? [] : scanBoundaryRisks(blocks, new Set(prepared.pages.filter((p) => p.route === "vision").map((p) => p.pageNumber!))),
-      }),
-    );
-    // RIEN NE PART VIDE : une lecture qui ne trouve aucune ligne n'est pas une liste, c'est une lecture à refaire.
-    if (output.lines.length === 0) {
-      await this.saveStats(analysisId, stats({ outcome: "failed", failure: "nothing_read", linesBeforeMerge: 0, linesAfterMerge: 0, droppedOutsideBlock: 0, droppedDuplicates: 0, scanBoundaryRisks: [] }));
-      await this.meter.fail(analysisId);
-      throw new DomainError("analysis_failed", "Nothing was read in this quote", { reason: "nothing_read" });
-    }
-    const success = { model: read.model, output };
-
-    // Le référentiel du métier du devis (§22 : un métier = un tiroir), figé avec le quantitatif.
-    const ref = referentialFor(doc.trade);
-    if (ref) await this.reading.referentials?.ensure(ref);
-    const takeoff = await this.takeoffs.create(tenant, {
-      projectId: doc.projectId,
-      documentId,
-      analysisId,
-      referentialVersion: ref?.version ?? null,
-      trade: doc.trade,
-      promptId: TAKEOFF_PROMPT.id,
-      promptVersion: TAKEOFF_PROMPT.version,
-      model: success.model,
-      notes: success.output.notes,
-      context: success.output.context ?? null,
-      fiche: success.output.fiche ?? null,
-      lines: success.output.lines.map((l) => ({
-        designation: l.designation.trim(),
-        quantityRaw: l.quantity?.trim() || null,
-        unitRaw: l.unit?.trim() || null,
-        reference: l.reference?.trim() || null,
-        material: l.material ?? null,
-        dimensions: l.dimensions ?? null,
-        reading: l.reading
-          ? {
-              role: l.reading.role ?? null,
-              articles: l.reading.articles.map((a) => ({ nom: a.nom, materiau: a.materiau ?? null, quantite: a.quantite ?? null, unite: a.unite ?? null, elements: a.elements ?? null })),
-              faconnage: l.reading.faconnage ?? null,
-              manque: l.reading.manque,
-            }
-          : null,
-        sourceRefs: l.sourceRefs,
-        sourcePages: l.sourcePages,
-        section: l.section.map((t) => t.trim()).filter((t) => t.length > 0),
-        aiDoubt: l.doubt?.trim() || null,
-      })),
-    });
-    // Parcours §48 : le nom du chantier vient du devis. Le calcul complet (appel IA n° 2) attend les questions de comptoir.
-    await this.reading.nameProject?.(tenant, doc.projectId, quoteIdentity(success.output.context ?? null)).catch((error: unknown) => this.onRecordFailure(error));
-    await this.meter.complete(analysisId);
-    return this.review(tenant, takeoff);
-  }
-
   /**
-   * Quantitatif à partir de lignes envoyées par un partenaire (§38) : pas de PDF, pas d'IA, rien de
-   * décompté ; le même calcul que pour un devis lu. Le prix suit la ligne, il ne sert à aucun calcul.
+   * Quantitatif à partir de lignes envoyées par un partenaire (§38) : pas de PDF, rien de décompté. §51.5 : le modèle lit
+   * ces lignes comme un devis (fiche, questions, fourniture par ligne) ; sans lecteur, chaque ligne part telle qu'écrite.
+   * Le prix suit la ligne, il ne sert à aucun calcul.
    */
   async fromLines(
     tenant: TenantContext,
@@ -677,6 +516,14 @@ export class TakeoffService {
     assertCanWrite(tenant);
     const ref = referentialFor(trade);
     if (ref) await this.reading.referentials?.ensure(ref);
+    const lecteur = this.reading.lecteur;
+    let lecture: LectureDevis | null = null;
+    if (lecteur) {
+      const numberedText = lines.map((l, i) => `[1:${String(i + 1).padStart(3, "0")}] L${i + 1}  ${l.designation.trim()}  ${[l.quantity?.trim(), l.unit?.trim()].filter(Boolean).join(" ")}`).join("\n");
+      const siteNotes = (await this.reading.projectNotes?.(tenant, projectId)) ?? null;
+      const result = await lecteur.lire({ document: { numberedText, imagePdf: null, imagePages: [] }, trade, tradeLabel: tradeProfile(trade).label, referentiel: ref ? exportPourLecture(ref) : "Aucun référentiel pour ce métier.", siteNotes });
+      if (result && result.status === "success" && result.output && lignesDeLecture(result.output).length === lines.length) lecture = result.output;
+    }
     const takeoff = await this.takeoffs.create(tenant, {
       projectId,
       documentId: null,
@@ -685,16 +532,17 @@ export class TakeoffService {
       analysisId: null,
       trade,
       calculated: true,
-      promptId: "partenaire",
-      promptVersion: 0,
-      model: "aucun",
-      notes: [],
-      lines: lines.map((l) => ({
+      promptId: lecture ? LECTURE_PROMPT.id : "partenaire",
+      promptVersion: lecture ? LECTURE_PROMPT.version : 0,
+      model: lecture ? "lecture" : "aucun",
+      notes: lecture?.notes ?? [],
+      ...(lecture ? { fiche: ficheAvecBref(lecture.fiche, lecture.bref), lecture } : {}),
+      lines: lines.map((l, i) => ({
         designation: l.designation.trim(),
         quantityRaw: l.quantity?.trim() || null,
         unitRaw: l.unit?.trim() || null,
         reference: null,
-        sourceRefs: [],
+        sourceRefs: lecture ? [lignesDeLecture(lecture)[i]!.id] : [],
         sourcePages: [],
         section: [],
         aiDoubt: null,
@@ -1153,7 +1001,7 @@ export class TakeoffService {
     const asked = open.find((d) => d.question!.key === questionKey || d.key === questionKey);
     if (!asked) return null;
     const toQuestion = (d: (typeof open)[number]): RelectureQuestion => ({ key: d.question!.key, text: d.question!.text, options: d.question!.options ?? [], unit: d.question!.unit ?? null });
-    const input = { tradeLabel: this.tradeHints(takeoff.trade).tradeLabel, fiche: reviewed.fiche, question: toQuestion(asked), texte, ouvertes: open.filter((d) => d !== asked).map(toQuestion) };
+    const input = { tradeLabel: tradeProfile(takeoff.trade).label, fiche: reviewed.fiche, question: toQuestion(asked), texte, ouvertes: open.filter((d) => d !== asked).map(toQuestion) };
     const attempt = await relecteur.relire(input);
     const doc = takeoff.documentId ? await this.documents.findById(tenant, takeoff.documentId) : null;
     if (doc && takeoff.analysisId) await this.record(tenant, doc, { text: 0, vision: 0 }, doc.processing?.id ?? null, takeoff.analysisId, 1, attempt, FICHE_RELECTURE_PROMPT);
@@ -1181,202 +1029,12 @@ export class TakeoffService {
     return this.review(tenant, takeoff);
   }
 
-  /** Relecture déterministe, recalculée à chaque lecture (règles métier à jour). */
+  /**
+   * L'écran, recalculé à chaque lecture avec les règles de sa version (§51.5) : la lecture du modèle, ou, sans lecture
+   * (lignes d'un partenaire, ancien quantitatif), chaque ligne telle qu'écrite.
+   */
   private async review(tenant: TenantContext, record: TakeoffRecord): Promise<ReviewedTakeoff> {
-    if (record.lecture) return this.reviewLecture(tenant, record, record.lecture);
-    // §44.2 : une phrase d'exclusion de la note (« garage non compris ») retire la ligne qui la nomme du calcul.
-    const notes = (await this.reading.projectNotes?.(tenant, record.projectId)) ?? null;
-    const exclusions = readExclusions(notes);
-    const excluded = new Map<string, string>();
-    for (const l of record.lines) {
-      const e = exclusionFor(l.designation, exclusions);
-      if (e) excluded.set(l.id, e.phrase);
-    }
-    // §49.9 : une ligne hors quantitatif (accès, évacuation, nettoyage) n'entre pas au calcul ; elle reste au devis lu,
-    // repliée sous « N lignes sans fourniture ».
-    const outOfScope = new Set(record.lines.filter((l) => l.reading?.role === "hors_quantitatif" && !excluded.has(l.id)).map((l) => l.id));
-    let takeoff = excluded.size > 0 || outOfScope.size > 0 ? { ...record, lines: record.lines.filter((l) => !excluded.has(l.id) && !outOfScope.has(l.id)) } : record;
-    const profile = tradeProfile(takeoff.trade);
-    const source = takeoff.documentId ? await this.aiInput.sourceLines(tenant, takeoff.documentId) : new Map<string, string>();
-    const { validation: read } = reviewExtractedTakeoff(
-      takeoff.lines.map((l: TakeoffLineRecord) => ({
-        id: l.id,
-        designation: l.designation,
-        quantity: l.quantityRaw,
-        unit: l.unitRaw,
-        reference: l.reference,
-        sourceRefs: l.sourceRefs,
-        sourcePages: l.sourcePages,
-        section: l.section,
-        // Une ligne de l'artisan ou d'un partenaire est sa propre source : rien à retrouver dans un document.
-        enteredByArtisan: l.origin !== "ai" || l.edited,
-        aiDoubt: l.aiDoubt,
-        confirmedByArtisan: l.confirmed,
-      })),
-      source,
-      profile,
-    );
-    // Ce que voit l'artisan : la lecture, plus le calcul des matériaux là où BatiClair sait le faire
-    // (données VÉRIFIÉES seulement), avec les réponses de ce chantier et les habitudes de l'entreprise.
-    const lines = takeoff.lines.map((l) => ({
-      id: l.id,
-      designation: l.designation,
-      quantity: l.quantityRaw,
-      unit: l.unitRaw,
-      section: l.section,
-      confirmed: l.confirmed,
-      enteredByArtisan: l.origin !== "ai" || l.edited,
-    }));
-    // Version figée : les règles de la version enregistrée avec le quantitatif, jamais celles du jour.
-    // Le tiroir du métier ; un métier sans tiroir ne calcule rien (le plan ne couvre pas son métier), jamais avec les règles du couvreur.
-    const current = referentialFor(takeoff.trade) ?? ROOFING_REFERENTIAL;
-    const ref = (takeoff.referentialVersion && takeoff.referentialVersion !== current.version ? await this.reading.referentials?.load(takeoff.referentialVersion) : null) ?? current;
-    // La zone climatique vient du code postal du chantier (jamais demandée) ; le devis l'emporte s'il l'écrit.
-    const address = (await this.reading.projectAddress?.(tenant, takeoff.projectId)) ?? null;
-    const zone = climateZone(postalCodeIn(address));
-    const extraFacts: SiteFact[] = zone ? [{ key: "zone", value: String(zone), unit: "u", evidence: `Code postal du chantier (${postalCodeIn(address)})`, origin: "document" }] : [];
-    // Département littoral : crochet d'ardoise inox 2,7 mm d'office (Cupa, §34).
-    if (isCoastal(postalCodeIn(address))) {
-      extraFacts.push({ key: "diametre_crochet", value: "2.7", unit: "mm", evidence: `Département littoral (${postalCodeIn(address)}) : crochet inox 2,7 mm`, origin: "document" });
-    }
-    // Prompt A (§41.1) : la pente, le rampant, l'épaisseur lus par l'IA dans la ligne ou l'en-tête entrent dans
-    // le calcul (après le texte lu par le code, avant les hypothèses par défaut).
-    extraFacts.push(...factsFromReading(ref, takeoff.lines.map((l) => ({ ref: l.id, dimensions: l.dimensions })), takeoff.context));
-    // §51.3 : les données du toit de la fiche (rampant, pente, descentes…) valent pour tous ses ouvrages, chacune une fois.
-    // §50.7 : une ligne de la fiche corrigée sur le document l'est pour le calcul aussi.
-    extraFacts.push(...ficheFacts(ref, ficheCorrigee(takeoff.fiche, takeoff.answers)));
-    // Infos chantier facultatives : les mesures nommées de la note de l'artisan passent devant le devis (l'explication dit les deux).
-    extraFacts.push(...readSiteNotes(ref, notes));
-    const plan = planQuote(lines.map((l) => ({ ref: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, section: l.section })), ref, profile, undefined, extraFacts);
-    // Niveau 1 : le rôle de chaque quantité (mesure d'ouvrage ou à commander), proposé par le code
-    // et ENREGISTRÉ avec la ligne ; une mesure ne devient jamais une quantité d'achat.
-    const proposals = proposeLineRoles(takeoff.lines.map((l) => ({ ref: l.id, reference: l.reference, designation: l.designation })), plan, read, ref);
-    const roles = new Map<string, LineRole>([...proposals].map(([id, p]) => [id, p.role]));
-    // L'artisan a tranché une ambiguïté (« 6 : ardoises ou jouées ? ») : sa réponse fait foi pour ce chantier.
-    for (const [key, value] of Object.entries(takeoff.answers)) {
-      const id = key.startsWith("role:") ? key.slice(5) : null;
-      if (id && roles.has(id) && (value === "measure" || value === "purchase")) roles.set(id, value);
-    }
-    const asks = new Map([...proposals].filter(([id, p]) => p.ask && roles.get(id) === "undetermined").map(([id, p]) => [id, p.ask!]));
-    const changed = new Map([...roles].filter(([id, role]) => takeoff.lines.find((l) => l.id === id)?.role !== role));
-    if (changed.size > 0) {
-      await this.takeoffs.setRoles(tenant, changed);
-      takeoff = { ...takeoff, lines: takeoff.lines.map((l) => (changed.has(l.id) ? { ...l, role: changed.get(l.id)! } : l)) };
-    }
-    const validation = applyLineRoles(read, roles);
-    // §47.1 : pas de mode brouillon, la couleur fait le travail. Une règle « à vérifier » calcule, et la ligne sort orange
-    // « Quantité à confirmer : … » jusqu'au « C'est bon » de l'artisan (ou à sa validation par trois artisans, §47.4).
-    const acceptDraft = true;
-    const preferences = await this.memory.forEngine(tenant);
-    const engine =
-      plan.inputs.length > 0
-        ? computeWithAnswers(ref, plan, takeoff.answers, preferences, { acceptDraft }, slotsGivenByQuote(plan, validation))
-        : { needs: [], questions: [], declined: [] };
-    // Le quantitatif renvoyé garde TOUTES ses lignes (les exclues aussi, pour le détail sans prix) ; seul le calcul les ignore.
-    const kept = excluded.size > 0 || outOfScope.size > 0 ? { ...takeoff, lines: record.lines.map((l) => takeoff.lines.find((x) => x.id === l.id) ?? l) } : takeoff;
-    const openContradictions = plan.contradictions.map((c) => c.key).filter((k) => engine.questions.some((q) => q.key === `param:${k}`));
-    const reviewed = { takeoff: kept, validation, roles: new Map([...proposals].map(([id, p]) => [id, { ...p, role: roles.get(id) ?? p.role }])), excluded, openContradictions };
-    const view = artisanView(lines, validation, engine, { plan, roles, ref, asks });
-    // §45.8 : « On ajoute ? » — les réponses de ce chantier, et ce que l'entreprise ne veut plus voir.
-    const said = (v: string) => new Set(Object.entries(takeoff.answers).filter(([k, a]) => k.startsWith("ajout:") && a === v).map(([k]) => k.slice("ajout:".length)));
-    const hidden = (await this.reading.consumables?.hidden(tenant)) ?? new Set<string>();
-    const consumables = { accepted: said("oui"), refused: said("non"), hidden };
-    // § 41.4 : les mots de l'artisan (libellé, quantité réécrits d'un tap) remplacent ceux de BatiClair.
-    const brief = siteBrief({
-      ref,
-      plan,
-      answers: takeoff.answers,
-      lines: takeoff.lines.map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantityRaw, unit: l.unitRaw, material: l.material ?? null })),
-      context: takeoff.context ?? {},
-      ville: communeOf(address),
-    });
-    // §49.4 : le « manque » de chaque ligne (lecture §41.1) fait les questions du comptoir que le tiroir ne pose pas déjà.
-    const readings = new Map(takeoff.lines.flatMap((l) => (l.reading ? [[l.id, l.reading] as const] : [])));
-    const overridden = applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref, validation, consumables, readings }), takeoff.answers);
-    const ruleKeys = [...new Set(overridden.toBuy.flatMap((b) => (b.rules ?? []).filter((r) => !r.local).map((r) => r.key)))];
-    const validatedRules = ruleKeys.length > 0 ? ((await this.reading.rules?.validated(ruleKeys)) ?? new Set<string>()) : new Set<string>();
-    const confirmed = applyRuleConfirmations(overridden, takeoff.answers, validatedRules);
-    // Les interdits du code (sans IA), puis les DOUTES de l'appel IA n° 2 : tout ce qui reste à trancher est orange.
-    // §48.4 « interdiction d'inventer » : un AJOUT de l'IA (article absent du devis) n'entre jamais dans la liste ; il
-    // va au bloc « Suggestions », décoché, et n'entre que coché par l'artisan.
-    const aiFlags = takeoff.completion ? completionFlags(takeoff.completion) : [];
-    // §48.4 : ce qui attendait une réponse close au calcul (« je ne sais pas ») sort orange « Info manquante ».
-    const declined = new Set(engine.declined ?? []);
-    const quoteKeys = new Set(confirmed.toQuote.map((q) => q.key));
-    const missing = engine.needs
-      .filter((n) => n.status === "question" && n.question && declined.has(n.question.key) && quoteKeys.has(`need:${n.needId}`))
-      .map((n) => ({
-        key: `${MISSING_INFO}need:${n.needId}`,
-        itemKey: `need:${n.needId}`,
-        title: "Info manquante",
-        text: `Info manquante : ${n.question!.text.replace(/ Cela change la commande :.*$/, "")} Vérifie-la avec ton fournisseur, ou corrige la ligne.`,
-      }));
-    const flags = [...forbiddenFlags(confirmed), ...aiFlags.filter((f) => !f.key.startsWith(AI_ADDITION)), ...missing];
-    // §50.3 : la raison d'une ligne orange en cinq mots au plus ; une ligne verte n'en a pas.
-    const purchase = withShortReasons(applyOrangeFlags(confirmed, flags, takeoff.answers));
-    // RÈGLE NUMÉRO UN : rien d'absent du devis, pas même en suggestion (ni de l'IA, ni des habitudes d'ajout).
-    const aiSuggestions = ref.writtenOnly !== false
-      ? []
-      : aiFlags.filter((f) => f.key.startsWith(AI_ADDITION) && !(f.key in takeoff.answers) && f.suggestion)
-      .map((f) => ({ key: f.key, label: f.suggestion!.label, quantity: f.suggestion!.quantity, unit: f.suggestion!.unit, reason: f.text.replace(/^À ajouter \? /, "") }));
-    // Une ligne que l'entreprise ajoute à la main d'un chantier à l'autre est proposée aussi, si le devis ne l'a pas déjà.
-    const present = new Set(takeoff.lines.map((l) => manualKey(l.designation)));
-    for (const m of ref.writtenOnly !== false ? [] : ((await this.reading.consumables?.manual(tenant)) ?? [])) {
-      if (purchase.suggestions.length >= MAX_SUGGESTIONS) break;
-      if (present.has(m.key) || consumables.refused.has(m.key) || hidden.has(m.key)) continue;
-      purchase.suggestions.push({
-        key: m.key,
-        label: m.designation,
-        quantity: [m.quantity, m.unit].filter(Boolean).join(" ") || null,
-        order: m.quantity ? { count: m.quantity, unit: m.unit ?? "u" } : null,
-        approx: null,
-        kind: "direct",
-        needIds: [],
-        lineIds: [],
-        state: "ready",
-        assumptionKeys: [],
-        consumable: true,
-      });
-    }
-    // « Comme d'habitude ? » : une habitude établie (paramètre d'entreprise) d'un ouvrage de ce devis, pas encore
-    // répondue sur ce chantier.
-    const used = new Set(plan.inputs.map((i) => i.workItemId));
-    // Une habitude posée lot par lot (§48.2, retour de Greg : « il peut acheter les bandes solins et façonner le reste ») :
-    // une carte par lot de zinguerie, avec le nom du lot, quand plusieurs ouvrages du devis en dépendent.
-    const piecewise = new Set(piecewiseParams(ref, plan));
-    const habits = [
-      ...new Map(
-        ref.workItems
-          .filter((w) => used.has(w.id))
-          .flatMap((w) => w.params.map((d) => ({ w, d })))
-          .filter(({ w, d }) => d.kind === "artisan_preference" && d.question && (d.choices?.length ?? 0) > 0 && (preferences.params?.[`${d.key}@${w.id}`] ?? preferences.params?.[d.key]) !== undefined && takeoff.answers[`param:${d.key}`] === undefined)
-          .map(({ w, d }) => {
-            const perLot = piecewise.has(`param:${d.key}`);
-            const usual = (perLot ? preferences.params?.[`${d.key}@${w.id}`] : undefined) ?? preferences.params![d.key]!;
-            const key = perLot ? scopedKey(d.key, w.id) : `param:${d.key}`;
-            const question = perLot ? `${lotLabel(w.label)} : tu façonnes toi-même ou tu commandes façonné ?` : d.question!;
-            return [key, { key, question, unit: d.unit, options: d.choices!.map((c) => ({ label: c.label, value: c.value })), value: usual }] as const;
-          })
-          .filter(([key]) => takeoff.answers[key] === undefined),
-      ).values(),
-    ];
-    // §49.9 : « N lignes sans fourniture », dans l'ordre du devis (main-d'œuvre, heures, forfait, hors quantitatif).
-    const withoutSupply = linesWithoutSupply(
-      record.lines.filter((l) => !excluded.has(l.id)).map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantityRaw, unit: l.unitRaw })),
-      validation,
-      new Map(record.lines.flatMap((l) => (l.reading ? [[l.id, l.reading] as const] : []))),
-    );
-    // §51 : la fiche à l'écran, et ses trous. Une donnée qu'une relecture (« Autre ») a ouverte est UNE question de plus,
-    // posée avant le calcul, à laquelle l'artisan répond en écrivant (relue à son tour).
-    const shown = ficheChantier({ ref, ai: ficheCorrigee(takeoff.fiche, takeoff.answers), plan, answers: takeoff.answers, questions: purchase.questions.flatMap((d) => (d.question ? [d.question] : [])), lignes: new Map(takeoff.lines.map((l) => [l.id, `ligne ${l.position}`])) });
-    const fiche = ficheCorrigee(shown, takeoff.answers) ?? shown;
-    for (const d of fiche.donnees) {
-      const key = `${FICHE_KEY}${d.cle}`;
-      // Seule une donnée ouverte par une relecture : un trou du calcul a déjà sa question (« param:<donnée> »).
-      if (d.origine !== "manquante" || !d.question || takeoff.answers[key] !== undefined || purchase.questions.some((q) => q.question?.key === `param:${d.cle}` || q.text === d.question)) continue;
-      purchase.questions.push({ key, state: "missing", title: d.question, text: d.question, lineIds: [], primary: null, secondary: [], question: { key, kind: "choose", text: d.question, options: [], named: true } });
-    }
-    return { ...reviewed, view, brief, fiche, purchase, habits, aiSuggestions, withoutSupply, siteNotes: notes };
+    return this.reviewLecture(tenant, record, record.lecture ?? lectureDepuisLignes(record.lines.map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantityRaw, unit: l.unitRaw }))));
   }
 
   /**
@@ -1394,23 +1052,62 @@ export class TakeoffService {
     if (isCoastal(postalCodeIn(address))) {
       extraFacts.push({ key: "diametre_crochet", value: "2.7", unit: "mm", evidence: `Département littoral (${postalCodeIn(address)}) : crochet inox 2,7 mm`, origin: "document" });
     }
-    extraFacts.push(...readSiteNotes(ref, notes));
-    // Les lignes enregistrées, dans l'ordre de la lecture : chaque fourniture (ou ligne sans fourniture) a son identifiant.
-    const stored = takeoff.lines.filter((l) => l.origin === "ai");
+    // Les lignes enregistrées, reliées à la lecture par leur repère (« 1:003 »), ou par leur rang pour un chantier d'avant :
+    // chaque fourniture (ou ligne sans fourniture) a son identifiant ; une ligne supprimée par l'artisan ne se lit plus.
+    const stored = takeoff.lines.filter((l) => l.origin !== "manual");
+    const byRef = stored.some((l) => l.sourceRefs.length > 0);
     const keys = lignesDeLecture(lecture).map((l) => l.id);
-    const ids = new Map(keys.map((k, i) => [k, stored[i]?.id ?? k]));
+    const ids = new Map<string, string>();
+    keys.forEach((k, i) => {
+      const line = byRef ? stored.find((l) => l.sourceRefs[0] === k) : stored[i];
+      if (line) ids.set(k, line.id);
+    });
+    // Les lignes ajoutées à la main (§45.9) : telles qu'écrites, à la suite du devis.
+    const manual = lectureDepuisLignes(takeoff.lines.filter((l) => l.origin === "manual").map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantityRaw, unit: l.unitRaw })));
+    // §50.7, §51.4 : la fiche corrigée sur le document (« Rampant : 6,5 m ») l'est pour le calcul aussi.
+    const ficheLue = ficheCorrigee(takeoff.fiche ?? ficheAvecBref(lecture.fiche, lecture.bref), takeoff.answers) ?? lecture.fiche;
+    const lue: LectureDevis = { ...lecture, fiche: ficheLue, lignes: [...lignesGardees(lecture, keys, ids), ...manual.lignes] };
     const lines = new Map(takeoff.lines.map((l) => [l.id, { confirmed: l.confirmed, enteredByArtisan: l.origin !== "ai" || l.edited, ...(l.edited ? { designation: l.designation, quantity: l.quantityRaw, unit: l.unitRaw } : {}) }]));
     const preferences = await this.memory.forEngine(tenant);
-    const input = { ref, lecture, answers: takeoff.answers, preferences, options: { acceptDraft: true }, extraFacts, ids, lines };
-    let e = ecranDeLecture(input);
+    const input = { ref, lecture: lue, answers: takeoff.answers, preferences, options: { acceptDraft: true }, extraFacts, ids, lines };
+    // §47.1 : une règle « à vérifier » sort orange (« Quantité à confirmer »), « C'est bon » la passe au vert ;
     // §47.4 : une règle validée par trois entreprises est verte partout ; l'écran est rejoué avec ces règles.
+    let e = ecranDeLecture({ ...input, validated: new Set<string>() });
     const ruleKeys = [...new Set(e.purchase.toBuy.flatMap((b) => (b.rules ?? []).filter((r) => !r.local).map((r) => r.key)))];
     const validated = ruleKeys.length > 0 ? ((await this.reading.rules?.validated(ruleKeys)) ?? new Set<string>()) : new Set<string>();
     if (validated.size > 0) e = ecranDeLecture({ ...input, validated });
     // §41.4 : les mots de l'artisan (libellé, quantité, précision réécrits d'un tap) remplacent ceux de BatiClair.
     const purchase = applyPurchaseOverrides(e.purchase, takeoff.answers);
     const brief = siteBrief({ ref, plan: e.plan, answers: takeoff.answers, lines: e.lignes.map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit })), context: takeoff.context ?? {}, ville: communeOf(address) });
-    const fiche = ficheChantier({ ref, ai: ficheCorrigee(takeoff.fiche, takeoff.answers), plan: e.plan, answers: takeoff.answers, questions: purchase.questions.flatMap((d) => (d.question ? [d.question] : [])), lignes: new Map(takeoff.lines.map((l) => [l.id, `ligne ${l.position}`])) });
+    const shown = ficheChantier({ ref, ai: ficheCorrigee(takeoff.fiche, takeoff.answers), plan: e.plan, answers: takeoff.answers, questions: purchase.questions.flatMap((d) => (d.question ? [d.question] : [])), lignes: new Map(takeoff.lines.map((l) => [l.id, `ligne ${l.position}`])) });
+    const fiche = ficheCorrigee(shown, takeoff.answers) ?? shown;
+    // §51.2 : une donnée qu'une relecture (« Autre ») a ouverte est UNE question de plus, posée avant le calcul, à laquelle
+    // l'artisan répond en écrivant (relue à son tour).
+    for (const d of fiche.donnees) {
+      const key = `${FICHE_KEY}${d.cle}`;
+      if (d.origine !== "manquante" || !d.question || takeoff.answers[key] !== undefined || purchase.questions.some((q) => q.question?.key === `param:${d.cle}` || q.text === d.question)) continue;
+      purchase.questions.push({ key, state: "missing", title: d.question, text: d.question, lineIds: [], primary: null, secondary: [], question: { key, kind: "choose", text: d.question, options: [], named: true } });
+    }
+    // « Comme d'habitude ? » : une habitude établie (paramètre d'entreprise) d'un ouvrage de ce devis, pas encore répondue
+    // sur ce chantier ; lot par lot (§48.2) quand plusieurs ouvrages du devis en dépendent, avec le nom du lot.
+    const used = new Set(e.plan.inputs.map((i) => baseOf(i.workItemId)));
+    const piecewise = new Set(piecewiseParams(ref, e.plan));
+    const habits = [
+      ...new Map(
+        ref.workItems
+          .filter((w) => used.has(w.id))
+          .flatMap((w) => w.params.map((d) => ({ w, d })))
+          .filter(({ w, d }) => d.kind === "artisan_preference" && d.question && (d.choices?.length ?? 0) > 0 && (preferences.params?.[`${d.key}@${w.id}`] ?? preferences.params?.[d.key]) !== undefined && takeoff.answers[`param:${d.key}`] === undefined)
+          .map(({ w, d }) => {
+            const perLot = piecewise.has(`param:${d.key}`);
+            const usual = (perLot ? preferences.params?.[`${d.key}@${w.id}`] : undefined) ?? preferences.params![d.key]!;
+            const key = perLot ? scopedKey(d.key, w.id) : `param:${d.key}`;
+            const question = perLot ? `${lotLabel(w.label)} : tu façonnes toi-même ou tu commandes façonné ?` : d.question!;
+            return [key, { key, question, unit: d.unit, options: d.choices!.map((c) => ({ label: c.label, value: c.value })), value: usual }] as const;
+          })
+          .filter(([key]) => takeoff.answers[key] === undefined),
+      ).values(),
+    ];
     return {
       takeoff,
       validation: e.validation,
@@ -1420,135 +1117,12 @@ export class TakeoffService {
       excluded: new Map(),
       openContradictions: [],
       brief,
-      fiche: ficheCorrigee(fiche, takeoff.answers) ?? fiche,
-      habits: [],
+      fiche,
+      habits,
       aiSuggestions: [],
       withoutSupply: e.sansFourniture,
       siteNotes: notes,
     };
-  }
-
-  /**
-   * Exécute le plan : les blocs en parallèle (un seul bloc pour un devis
-   * normal). Toutes les pages doivent être lues : un bloc en échec fait
-   * échouer la lecture, jamais une liste incomplète présentée comme entière.
-   */
-  private async readPlan(
-    tenant: TenantContext,
-    doc: DocumentWithProcessing,
-    prepared: Prepared,
-    analysisId: string,
-    chunks: readonly ReadingChunk[],
-    policy: ExtractionPolicy,
-    tally: CallTally,
-  ): Promise<{ ok: true; model: string; parts: ChunkParts } | ChunkFailure> {
-    if (!this.extractor || chunks.length === 0) return { ok: false, reason: "nothing_to_read" };
-    const extractor = this.extractor;
-    // §44.2 filet : la note de l'artisan accompagne la lecture IA, comme contexte.
-    const siteNotes = doc.projectId ? ((await this.reading.projectNotes?.(tenant, doc.projectId)) ?? null) : null;
-    const hints = { ...this.tradeHints(doc.trade), ...(siteNotes ? { siteNotes } : {}) };
-    const allPages = prepared.pages.length;
-    const maxCalls = Math.max(policy.maxCallsPerAnalysis, chunks.length);
-    let calls = 0;
-    let model = "";
-    const clock = this.reading.now ?? (() => new Date());
-    const startedAt = clock().getTime();
-
-    const readChunk = async (chunk: ReadingChunk, depth: number): Promise<ChunkResult> => {
-      const whole = chunk.context.length === 0 && chunk.pages.length === allPages;
-      for (let attempt = 1; attempt <= 2; attempt++) {
-        if (calls >= maxCalls) return { ok: false, reason: "too_many_calls" };
-        // Un appel qui ne finirait pas avant la limite de la fonction ne part pas : échec dit, jamais une lecture coupée.
-        if (clock().getTime() - startedAt + AI_CALL_TIMEOUT_MS > READING_BUDGET_MS) return { ok: false, reason: "timeout" };
-        // Numéro pris avant toute attente : les blocs lus en parallèle ont chacun le leur.
-        const call = ++calls;
-        const input = whole ? prepared.input : await prepared.slice([...chunk.pages, ...chunk.context]);
-        const result = await extractor.extract({ ...input, ...hints, ...(whole ? {} : { scope: { pages: chunk.pages } }) });
-        const sent = new Set(whole ? prepared.pages.map((p) => p.pageNumber) : [...chunk.pages, ...chunk.context]);
-        const routes = prepared.pages.filter((p) => sent.has(p.pageNumber));
-        const pages = { text: routes.filter((p) => p.route === "text").length, vision: routes.filter((p) => p.route === "vision").length };
-        tally.calls = Math.max(tally.calls, call);
-        const outcome = result.errorCode === "max_tokens" ? "truncated" : result.status;
-        tally.outcomes[outcome] = (tally.outcomes[outcome] ?? 0) + 1;
-        tally.tokens.input += result.usage.inputTokens;
-        tally.tokens.output += result.usage.outputTokens;
-        tally.tokens.cacheRead += result.usage.cacheReadTokens ?? 0;
-        tally.tokens.cacheWrite += (result.usage.cacheWrite5mTokens ?? 0) + (result.usage.cacheWrite1hTokens ?? 0);
-        // Valeur lue APRÈS l'attente : les blocs lus en parallèle ajoutent chacun leur coût.
-        const cost = await this.record(tenant, doc, pages, prepared.processingId, analysisId, call, result);
-        tally.costMicroUsd += cost;
-        if (result.status === "success" && result.output) {
-          model = result.model;
-          return { ok: true, parts: [{ chunk, output: result.output }] };
-        }
-        if (tooLong(result)) {
-          // Jamais la même demande : deux moitiés, chacune avec son contexte.
-          const halves = depth < 2 ? splitChunk(chunk, prepared.pages, policy) : null;
-          if (!halves) return { ok: false, reason: "page_too_dense" };
-          tally.splits++;
-          const results = await Promise.all(halves.map((h) => readChunk(h, depth + 1)));
-          const failed = results.find((r): r is ChunkFailure => !r.ok);
-          return failed ?? { ok: true, parts: results.flatMap((r) => (r.ok ? r.parts : [])) };
-        }
-        if (!transient(result) || attempt === 2) return { ok: false, reason: result.status };
-      }
-      return { ok: false, reason: "unknown" };
-    };
-
-    const results = await Promise.all(chunks.map((c) => readChunk(c, 0)));
-    const failed = results.find((r): r is ChunkFailure => !r.ok);
-    if (failed) return failed;
-    return { ok: true, model, parts: results.flatMap((r) => (r.ok ? r.parts : [])) };
-  }
-
-  /**
-   * APPEL IA N° 2 : le dossier (devis lu, liste du moteur, hypothèses) part au prompt B du §41.2 ; ce qu'il propose est
-   * gardé (repères résolus) et sort orange. Un échec ne bloque jamais la liste : elle reste celle du moteur, et les
-   * interdits du code la vérifient de toute façon.
-   */
-  private async completionPass(
-    tenant: TenantContext,
-    doc: DocumentWithProcessing,
-    processingId: string | null,
-    analysisId: string,
-    takeoff: TakeoffRecord,
-    pass: QuantitatifPass,
-  ): Promise<void> {
-    try {
-      const reviewed = await this.review(tenant, takeoff);
-      const dossier = completionDossier(
-        reviewed.purchase,
-        takeoff.lines.map((l) => ({ ref: l.id, designation: withoutLabour(l.designation), quantity: l.quantityRaw, unit: l.unitRaw, section: l.section })),
-      );
-      const ref = referentialFor(takeoff.trade);
-      const referentiel = (ref?.workItems ?? []).map((w) => `- ${w.label} : ${[...new Set(w.slots.map((x) => x.label))].join(", ") || "—"}`).join("\n") || "Aucun référentiel pour ce métier.";
-      const address = (await this.reading.projectAddress?.(tenant, takeoff.projectId)) ?? null;
-      const result = await pass.complete({
-        dossier: dossier.text,
-        metier: tradeProfile(takeoff.trade).label,
-        entreprise: (await this.reading.companyName?.(tenant)) ?? "l'entreprise",
-        ville: communeOf(address),
-        referentiel,
-      });
-      await this.record(tenant, doc, { text: 0, vision: 0 }, processingId, analysisId, 50, result, QUANTITATIF_PROMPT);
-      if (result.status === "success" && result.output) await this.takeoffs.setCompletion(tenant, takeoff.id, completionRecord(result.output, dossier));
-    } catch (error) {
-      // L'appel n° 2 complète ; sa panne ne fait jamais perdre la lecture ni le calcul.
-      this.onRecordFailure(error);
-    }
-  }
-
-  /** Ce que l'IA sait du métier : son nom et ses familles de matériaux habituelles (vocabulaire). */
-  private tradeHints(trade: string): { tradeLabel: string; materialFamilies: string[]; workItems: { id: string; label: string; synonyms: string[] }[] } {
-    const profile = tradeProfile(trade);
-    // « RÉFÉRENTIEL CHARGÉ » du prompt A (§41.1) : les ouvrages du métier et leurs synonymes (mots des familles qui les déclenchent).
-    const ref = referentialFor(profile.id);
-    const workItems = (ref?.workItems ?? []).map((w) => ({
-      id: w.id,
-      label: w.label,
-      synonyms: [...new Set(w.triggers.flatMap((t) => ref!.families.find((f) => f.code === t)?.keywords ?? []))],
-    }));
-    return { tradeLabel: profile.label, materialFamilies: profile.families.map((f) => f.label), workItems };
   }
 
   private async record(
@@ -1558,8 +1132,8 @@ export class TakeoffService {
     processingId: string | null,
     analysisId: string,
     attempt: number,
-    result: Pick<ExtractionAttempt, "provider" | "model" | "usage" | "status" | "errorCode" | "durationMs">,
-    prompt: { id: string; version: number } = TAKEOFF_PROMPT,
+    result: Pick<ReadAttempt<unknown>, "provider" | "model" | "usage" | "status" | "errorCode" | "durationMs">,
+    prompt: { id: string; version: number },
   ): Promise<number> {
     try {
       const { costMicroUsd } = await this.recorder.record({
@@ -1603,3 +1177,18 @@ export class TakeoffService {
 }
 
 export type { LineValidation, TakeoffIssue };
+
+/** Les lignes de la lecture dont la ligne enregistrée existe encore : une ligne supprimée par l'artisan ne se lit plus (§49.1 : lui seul retire une ligne). */
+function lignesGardees(lecture: LectureDevis, keys: readonly string[], ids: ReadonlyMap<string, string>): LectureDevis["lignes"] {
+  return lecture.lignes.flatMap((ligne) => {
+    const own = keys.filter((k) => k === ligne.ref || k.startsWith(`${ligne.ref}.`));
+    if (own.length === 0) return [ligne];
+    if (own.length === 1) return ids.has(own[0]!) ? [ligne] : [];
+    // Plusieurs fournitures écrites sur la ligne (« 1:003.1 », « 1:003.2ʼ ») : seules celles qui existent encore.
+    const written = ligne.fournitures.filter((f) => f.quantite !== null);
+    const listed = written.length > 0 ? written : ligne.fournitures;
+    const kept = listed.filter((_, i) => ids.has(`${ligne.ref}.${i + 1}`));
+    if (kept.length === 0) return [];
+    return [{ ...ligne, fournitures: [...kept, ...(written.length > 0 ? ligne.fournitures.filter((f) => f.quantite === null) : [])] }];
+  });
+}

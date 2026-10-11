@@ -1,4 +1,4 @@
-import { COMMON_BOILERPLATE, COMMON_LABOR, COMMON_SUPPLY } from "./common.js";
+import { COMMON_BOILERPLATE } from "./common.js";
 import type { MaterialFamily, TradeProfile } from "./trade-profile.js";
 
 /**
@@ -252,41 +252,6 @@ const FAMILIES: MaterialFamily[] = [
 export const ROOFING_PROFILE: TradeProfile = {
   id: "roofing",
   label: "Couverture",
-  families: FAMILIES,
-  laborKeywords: [...COMMON_LABOR, "demoussage", "traitement"],
-  supplyKeywords: COMMON_SUPPLY,
-  companionRules: [
-    {
-      when: "roof_tile",
-      expectAnyOf: ["batten"],
-      message: "Des tuiles sans liteaux : les liteaux sont-ils déjà en place ou oubliés ?",
-    },
-    {
-      when: "roof_tile",
-      expectAnyOf: ["roof_accessory"],
-      message: "Des tuiles sans faîtières ni rives : les accessoires sont-ils oubliés ?",
-    },
-    {
-      when: "slate",
-      expectAnyOf: ["slate_hook"],
-      message: "Des ardoises sans crochets ni clous : la fixation est-elle oubliée ?",
-    },
-    {
-      when: "slate",
-      expectAnyOf: ["batten", "sarking_board"],
-      message: "Des ardoises sans liteaux ni voliges : le support est-il déjà en place ou oublié ?",
-    },
-    {
-      when: "gutter",
-      expectAnyOf: ["gutter_hook"],
-      message: "Une gouttière sans crochets : les crochets sont-ils oubliés ?",
-    },
-    {
-      when: "gutter",
-      expectAnyOf: ["gutter_fitting", "downpipe"],
-      message: "Une gouttière sans naissance ni descente : l'évacuation est-elle oubliée ?",
-    },
-  ],
   boilerplateMarkers: COMMON_BOILERPLATE,
   materialKeywords: FAMILIES.flatMap((f) => f.keywords),
 };

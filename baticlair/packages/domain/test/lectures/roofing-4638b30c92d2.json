@@ -1,0 +1,323 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Fourniture et pose de gouttière demi-ronde en zinc naturel sur bac acier avec crochets galva",
+   "quantity": "63.20",
+   "unit": "ml"
+  },
+  {
+   "ref": "2",
+   "designation": "Dépose et repose des tôles pour accès chéneau",
+   "quantity": "1",
+   "unit": "u"
+  },
+  {
+   "ref": "3",
+   "designation": "Réfection de chéneau en membrane EPDM ou PVC",
+   "quantity": "11.70",
+   "unit": "ml"
+  },
+  {
+   "ref": "4",
+   "designation": "Réalisation des trémies de charpente pour velux SK06",
+   "quantity": "4",
+   "unit": "u"
+  },
+  {
+   "ref": "5",
+   "designation": "Fourniture velux SK06 114x118 GGL à rotation, vitrage confort, finition white finish avec raccord ZWC",
+   "quantity": "4",
+   "unit": "u"
+  },
+  {
+   "ref": "6",
+   "designation": "Pose de velux sk06 114x118 sur bac acier isolé avec raccord pratikal",
+   "quantity": "4",
+   "unit": "u"
+  },
+  {
+   "ref": "7",
+   "designation": "Réalisation des trémies de charpente pour velux MK04",
+   "quantity": "1",
+   "unit": "u"
+  },
+  {
+   "ref": "8",
+   "designation": "Fourniture velux MK04 78,98 GGU à rotation, vitrage confort, finition everfinish avec raccord ZWC",
+   "quantity": "1",
+   "unit": "u"
+  },
+  {
+   "ref": "9",
+   "designation": "Pose de velx MK04 7898 sur bac acier isolé avec raccord pratikal",
+   "quantity": "1",
+   "unit": "u"
+  },
+  {
+   "ref": "10",
+   "designation": "Fourniture et pose de tôles bacs acier pour étanchéité du dessus de velux",
+   "quantity": "10",
+   "unit": null
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "developpe_gouttiere",
+    "texte": "Gouttière de 25, de 28, de 33 ou de 40 ?",
+    "boutons": [
+     {
+      "label": "De 25",
+      "valeur": "25"
+     },
+     {
+      "label": "De 28",
+      "valeur": "28"
+     },
+     {
+      "label": "De 33",
+      "valeur": "33"
+     },
+     {
+      "label": "De 40",
+      "valeur": "40"
+     }
+    ],
+    "unite": "cm",
+    "donnee": "développé de la gouttière",
+    "ligne": null
+   },
+   {
+    "cle": "fixation_crochet",
+    "texte": "Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?",
+    "boutons": [
+     {
+      "label": "Sur les chevrons",
+      "valeur": "1"
+     },
+     {
+      "label": "En façade (bandeau)",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "pose des crochets de gouttière",
+    "ligne": null
+   },
+   {
+    "cle": "diametre_descente",
+    "texte": "Descentes en Ø 80, Ø 100 ou Ø 120 ?",
+    "boutons": [
+     {
+      "label": "Ø 80",
+      "valeur": "80"
+     },
+     {
+      "label": "Ø 100",
+      "valeur": "100"
+     },
+     {
+      "label": "Ø 120",
+      "valeur": "120"
+     }
+    ],
+    "unite": "mm",
+    "donnee": "diamètre des descentes",
+    "ligne": null
+   },
+   {
+    "cle": "nb_descentes",
+    "texte": "Combien de descentes pour cette gouttière ?",
+    "boutons": [
+     {
+      "label": "1",
+      "valeur": "1"
+     },
+     {
+      "label": "2",
+      "valeur": "2"
+     },
+     {
+      "label": "3",
+      "valeur": "3"
+     },
+     {
+      "label": "4",
+      "valeur": "4"
+     }
+    ],
+    "unite": "u",
+    "donnee": "nombre de descentes",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Fourniture et pose de gouttière demi-ronde en zinc naturel sur bac acier avec crochets galva",
+    "quantite": "63.20",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Gouttière zinc naturel demi-ronde",
+      "quantite": "63.20",
+      "unite": "ml",
+      "ouvrage": "gouttiere",
+      "emplacement": "profil",
+      "donnees": {},
+      "attend": [
+       "developpe_gouttiere"
+      ],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Crochets de gouttière",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "gouttiere",
+      "emplacement": "crochet",
+      "donnees": {},
+      "attend": [
+       "fixation_crochet"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Dépose et repose des tôles pour accès chéneau",
+    "quantite": "1",
+    "unite": "u",
+    "role": "pose",
+    "fournitures": []
+   },
+   {
+    "ref": "3",
+    "designation": "Réfection de chéneau en membrane EPDM ou PVC",
+    "quantite": "11.70",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Réfection de chéneau en membrane EPDM ou PVC",
+      "quantite": "11.70",
+      "unite": "ml",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "4",
+    "designation": "Réalisation des trémies de charpente pour velux SK06",
+    "quantite": "4",
+    "unite": "u",
+    "role": "pose",
+    "fournitures": []
+   },
+   {
+    "ref": "5",
+    "designation": "Fourniture velux SK06 114x118 GGL à rotation, vitrage confort, finition white finish avec raccord ZWC",
+    "quantite": "4",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Fourniture velux SK06 114x118 GGL à rotation, vitrage confort, finition white finish avec raccord ZWC",
+      "quantite": "4",
+      "unite": "u",
+      "ouvrage": "fenetre-de-toit",
+      "emplacement": "fenetre",
+      "donnees": {
+       "taille_fenetre": "114118"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "6",
+    "designation": "Pose de velux sk06 114x118 sur bac acier isolé avec raccord pratikal",
+    "quantite": "4",
+    "unite": "u",
+    "role": "pose",
+    "fournitures": []
+   },
+   {
+    "ref": "7",
+    "designation": "Réalisation des trémies de charpente pour velux MK04",
+    "quantite": "1",
+    "unite": "u",
+    "role": "pose",
+    "fournitures": []
+   },
+   {
+    "ref": "8",
+    "designation": "Fourniture velux MK04 78,98 GGU à rotation, vitrage confort, finition everfinish avec raccord ZWC",
+    "quantite": "1",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Fourniture velux MK04 78,98 GGU à rotation, vitrage confort, finition everfinish avec raccord ZWC",
+      "quantite": "1",
+      "unite": "u",
+      "ouvrage": "fenetre-de-toit",
+      "emplacement": "fenetre",
+      "donnees": {
+       "taille_fenetre": "7898"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "9",
+    "designation": "Pose de velx MK04 7898 sur bac acier isolé avec raccord pratikal",
+    "quantite": "1",
+    "unite": "u",
+    "role": "pose",
+    "fournitures": []
+   },
+   {
+    "ref": "10",
+    "designation": "Fourniture et pose de tôles bacs acier pour étanchéité du dessus de velux",
+    "quantite": "10",
+    "unite": null,
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Tôles bacs acier pour étanchéité du dessus de velux",
+      "quantite": "10",
+      "unite": null,
+      "ouvrage": "couverture-bac-acier",
+      "emplacement": "couverture",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

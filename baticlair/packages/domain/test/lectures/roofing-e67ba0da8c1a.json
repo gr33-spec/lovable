@@ -1,0 +1,76 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Couverture en ardoises naturelles 32×22 au crochet",
+   "quantity": "48",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "qualite_ardoise",
+    "texte": "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+    "boutons": [
+     {
+      "label": "Espagne 1er choix",
+      "valeur": "1"
+     },
+     {
+      "label": "Ardoise NF (type Cupa)",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "qualité de l'ardoise",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Couverture en ardoises naturelles 32×22 au crochet",
+    "quantite": "48",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ardoises naturelles 32×22",
+      "quantite": "48",
+      "unite": "m²",
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "ardoise",
+      "donnees": {
+       "produit": "ardoise-32x22"
+      },
+      "attend": [
+       "qualite_ardoise"
+      ],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Crochets d'ardoise inox standard",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "crochet",
+      "donnees": {},
+      "attend": [
+       "qualite_ardoise"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

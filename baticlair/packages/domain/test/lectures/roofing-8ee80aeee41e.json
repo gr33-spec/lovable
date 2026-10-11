@@ -1,0 +1,43 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Plaques fibres-ciment amiantées à déposer",
+   "quantity": "60",
+   "unit": "m2"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Plaques fibres-ciment amiantées à déposer",
+    "quantite": "60",
+    "unite": "m2",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Plaques fibres-ciment amiantées à déposer",
+      "quantite": "60",
+      "unite": "m2",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": [
+   "Amiante : le retrait se fait par une entreprise certifiée (SS3), après un repérage avant travaux et un plan de retrait déclaré un mois avant le chantier. BatiClair ne compte aucun matériau pour ce poste : il part tel qu'écrit (§18)."
+  ]
+ }
+}

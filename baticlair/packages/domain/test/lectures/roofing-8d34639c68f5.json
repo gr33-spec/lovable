@@ -1,0 +1,29 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Repositionnement des tuiles",
+   "quantity": "1,5",
+   "unit": "h"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Repositionnement des tuiles",
+    "quantite": "1,5",
+    "unite": "h",
+    "role": "pose",
+    "fournitures": []
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

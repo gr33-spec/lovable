@@ -1,0 +1,90 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Fenêtre de toit",
+   "quantity": "1",
+   "unit": "u"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "raccord_couverture",
+    "texte": "Raccord de fenêtre de toit : pour tuiles, pour ardoises ou pour tuiles plates ?",
+    "boutons": [
+     {
+      "label": "Pour tuiles (mécaniques, canal)",
+      "valeur": "1"
+     },
+     {
+      "label": "Pour ardoises",
+      "valeur": "2"
+     },
+     {
+      "label": "Pour tuiles plates",
+      "valeur": "3"
+     }
+    ],
+    "unite": "u",
+    "donnee": "raccord de la fenêtre de toit",
+    "ligne": null
+   },
+   {
+    "cle": "fenetre_de_toit_quelle_taille",
+    "texte": "Fenêtre de toit : quelle taille ?",
+    "boutons": [
+     {
+      "label": "55 × 78",
+      "valeur": "55 × 78"
+     },
+     {
+      "label": "78 × 98",
+      "valeur": "78 × 98"
+     },
+     {
+      "label": "78 × 118",
+      "valeur": "78 × 118"
+     },
+     {
+      "label": "114 × 118",
+      "valeur": "114 × 118"
+     }
+    ],
+    "unite": null,
+    "donnee": "fenêtre de toit : quelle taille",
+    "ligne": "1"
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Fenêtre de toit",
+    "quantite": "1",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Fenêtre de toit",
+      "quantite": "1",
+      "unite": "u",
+      "ouvrage": "fenetre-de-toit",
+      "emplacement": "fenetre",
+      "donnees": {},
+      "attend": [
+       "fenetre_de_toit_quelle_taille"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

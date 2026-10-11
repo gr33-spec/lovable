@@ -147,14 +147,9 @@ function union(lists: readonly (readonly string[])[]): string[] {
 }
 
 function mergeProfiles(profiles: readonly TradeProfile[]): TradeProfile {
-  const seen = new Set<string>();
   return {
     id: profiles.map((p) => p.id).join(","),
     label: profiles.map((p) => p.label).join(" + "),
-    families: profiles.flatMap((p) => p.families).filter((family) => !seen.has(family.code) && seen.add(family.code)),
-    laborKeywords: union(profiles.map((p) => p.laborKeywords)),
-    supplyKeywords: union(profiles.map((p) => p.supplyKeywords)),
-    companionRules: profiles.flatMap((p) => p.companionRules),
     boilerplateMarkers: union(profiles.map((p) => p.boilerplateMarkers)),
     materialKeywords: union(profiles.map((p) => p.materialKeywords)),
   };

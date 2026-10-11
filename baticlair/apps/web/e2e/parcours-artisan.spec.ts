@@ -399,11 +399,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   // IA simulée en test (AI_PROVIDER=fake) : même parcours, aucun appel payant. La lecture part d'elle-même (§48).
   await passQuestions(page);
 
-  // Les crochets en paquets : seul un doute de LECTURE est posé (« 2 ou 3 ? »), jamais « combien par paquet ».
-  // §49.8 : la carte orange dit sa raison en entier, dans la liste, et se règle là.
-  await orangeCard(page, "Crochet inox ardoise 100 mm");
-  // §50.3 : la raison en cinq mots au plus.
-  await expect(page.getByText("Chiffre peu lisible", { exact: true }).first()).toBeVisible();
+  // §51.5 : les crochets en paquets partent tels qu'écrits ; jamais « combien par paquet » (§49.4 : rien sur une donnée écrite).
   await expect(page.getByText(/combien par paquet|pièces par paquet/i)).toHaveCount(0);
   await confirmDoubts(page);
   // §50.3 : tout est vert, plus de barre « à régler », un seul bouton « Envoyer au fournisseur » ; aucun compteur (§50.4).

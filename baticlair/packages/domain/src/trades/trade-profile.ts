@@ -14,14 +14,6 @@ import type { UnitCode } from "../quantity/unit.js";
 export interface TradeProfile {
   id: string;
   label: string;
-  /** Référentiel : familles de matériaux, de la plus précise à la plus générale (l'ordre compte). */
-  families: readonly MaterialFamily[];
-  /** Mots qui signalent une prestation (dépose, échafaudage…) et non un matériau à commander. */
-  laborKeywords: readonly string[];
-  /** Mots qui signalent une fourniture, même accompagnée de pose (« fourniture et pose de… »). */
-  supplyKeywords: readonly string[];
-  /** Oublis fréquents : quand une famille est présente, une autre est attendue. */
-  companionRules: readonly CompanionRule[];
   /**
    * Marqueurs de pages sans ligne de matériaux (conditions générales,
    * mentions légales). Une page n'est écartée que si elle en contient
@@ -122,14 +114,7 @@ export function containsKeyword(normalized: string, keyword: string): boolean {
  * fondateur (2026-10-11, D-2022-071) : « sur bac acier » n'achète pas de bac acier, « pour velux » pas de fenêtre.
  * `destination` : ce qui suit « pour », à qui la ligne s'adresse (une pose sans article nommé vaut pour elle).
  */
-export function articleParts(normalized: string): { article: string; destination: string | null } {
-  const cut = /\s(?:sur|pour)\s/.exec(normalized);
-  const article = cut ? normalized.slice(0, cut.index) : normalized;
-  const pour = /\spour\s/.exec(normalized);
-  return { article, destination: pour ? normalized.slice(pour.index + pour[0].length) : null };
-}
 
-/** Position du mot (ou de l'expression) dans le texte normalisé, ou -1. */
 export function keywordPosition(normalized: string, keyword: string): number {
   let re = keywordCache.get(keyword);
   if (!re) {

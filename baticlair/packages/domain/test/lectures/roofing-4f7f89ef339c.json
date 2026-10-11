@@ -1,0 +1,111 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Gouttière PVC de 25 sable (Longueur : 2 x 10 m), 2 descentes",
+   "quantity": "20",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "fixation_crochet",
+    "texte": "Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?",
+    "boutons": [
+     {
+      "label": "Sur les chevrons",
+      "valeur": "1"
+     },
+     {
+      "label": "En façade (bandeau)",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "pose des crochets de gouttière",
+    "ligne": null
+   },
+   {
+    "cle": "nb_angles",
+    "texte": "Combien d'angles sur cette gouttière ?",
+    "boutons": [
+     {
+      "label": "Aucun",
+      "valeur": "0"
+     },
+     {
+      "label": "1",
+      "valeur": "1"
+     },
+     {
+      "label": "2",
+      "valeur": "2"
+     },
+     {
+      "label": "3",
+      "valeur": "3"
+     }
+    ],
+    "unite": "u",
+    "donnee": "angles de la gouttière",
+    "ligne": null
+   },
+   {
+    "cle": "diametre_descente",
+    "texte": "Descentes en Ø 80, Ø 100 ou Ø 120 ?",
+    "boutons": [
+     {
+      "label": "Ø 80",
+      "valeur": "80"
+     },
+     {
+      "label": "Ø 100",
+      "valeur": "100"
+     },
+     {
+      "label": "Ø 120",
+      "valeur": "120"
+     }
+    ],
+    "unite": "mm",
+    "donnee": "diamètre des descentes",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Gouttière PVC de 25 sable (Longueur : 2 x 10 m), 2 descentes",
+    "quantite": "20",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Gouttière PVC sable de 25",
+      "quantite": "20",
+      "unite": "ml",
+      "ouvrage": "gouttiere-pvc-alu",
+      "emplacement": "profil",
+      "donnees": {
+       "nb_descentes": "2",
+       "matiere_gouttiere": "1",
+       "teinte_gouttiere": "3",
+       "nb_lignes": "2",
+       "developpe_gouttiere": "25 cm"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

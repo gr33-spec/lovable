@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { planQuote, ROOFING_REFERENTIAL, supplierTest, tradeProfile } from "../src/index.js";
+import { ROOFING_REFERENTIAL, supplierTest } from "../src/index.js";
+import { planOf } from "./support/plan-of.js";
 import { describeLot, type Metier } from "./support/paquet.js";
 import { readQuote } from "./support/read-quote.js";
 import { REFERENTIEL_COMPLET, readQuoteComplet } from "./support/complet.js";
@@ -52,7 +53,7 @@ describe("sécurité et amiante : reconnus, partis tels qu'écrits, l'amiante di
   });
 
   it("l'amiante l'emporte sur tout autre mot de la ligne, et avertit l'artisan, même sur une ligne de dépose", () => {
-    const plan = planQuote([{ ref: "1", designation: "Plaques fibres-ciment amiantées à déposer", quantity: "60", unit: "m2" }], REFERENTIEL_COMPLET, tradeProfile("roofing"));
+    const plan = planOf(REFERENTIEL_COMPLET, [{ ref: "1", designation: "Plaques fibres-ciment amiantées à déposer", quantity: "60", unit: "m2" }], [], {}, { acceptDraft: true });
     expect(plan.lines[0]).not.toMatchObject({ status: "planned" });
     const v = readQuoteComplet([
       { ref: "1", designation: "Dépose de la couverture fibres-ciment amiantée", quantity: "60", unit: "m²" },

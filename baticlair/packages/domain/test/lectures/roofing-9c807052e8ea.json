@@ -1,0 +1,44 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Fenêtre de toit 114x118 sur tuiles plates",
+   "quantity": "1",
+   "unit": "u"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Fenêtre de toit 114x118 sur tuiles plates",
+    "quantite": "1",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Fenêtre de toit 114x118 sur tuiles plates",
+      "quantite": "1",
+      "unite": "u",
+      "ouvrage": "fenetre-de-toit",
+      "emplacement": "fenetre",
+      "donnees": {
+       "raccord_couverture": "3",
+       "taille_fenetre": "114118"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { planQuote, ROOFING_REFERENTIAL, tradeProfile } from "../src/index.js";
+import { ROOFING_REFERENTIAL } from "../src/index.js";
+import { planOf } from "./support/plan-of.js";
 import { readQuote } from "./support/read-quote.js";
 
 /**
@@ -9,10 +10,10 @@ import { readQuote } from "./support/read-quote.js";
 describe("une ligne de voligeage se calcule", () => {
   const LIGNE = { ref: "1", designation: "Voligeage en sapin traité 18x200 mm", quantity: "91", unit: "m²" };
   it("rattachée à l'ouvrage voligeage ; 91 m² × 1,05 = 96 m² de voliges sapin 18 mm, sans question", () => {
-    const plan = planQuote([LIGNE], ROOFING_REFERENTIAL, tradeProfile("roofing"));
+    const plan = planOf(ROOFING_REFERENTIAL, [LIGNE]);
     expect(plan.lines[0]).toMatchObject({ status: "planned", workItemId: "voligeage", slot: "volige" });
     const v = readQuote([LIGNE]);
-    expect(v.toBuy.map((b) => `${b.label} : ${b.quantity}`)).toEqual(["Voliges sapin 18×200 mm traité : 96 m²"]);
+    expect(v.toBuy.map((b) => `${b.label} : ${b.quantity}`)).toEqual(["Voliges sapin 18 mm : 96 m²"]);
     expect(v.toQuote).toEqual([]);
     expect(v.questions).toEqual([]);
   });

@@ -12,17 +12,12 @@ import { AiUsageModule, AiUsageRecorder, AnalysisMeter } from "../ai-usage/index
 import { DOCUMENT_REPOSITORY, DocumentAiInput, DocumentsModule, type DocumentRepository } from "../documents/index.js";
 import { CompanyMemory, CorrectionJournal, LearningModule } from "../learning/index.js";
 import { TenancyModule } from "../tenancy/index.js";
-import { TAKEOFF_EXTRACTOR, type TakeoffExtractor } from "./application/takeoff-extractor.js";
 import { TAKEOFF_REPOSITORY, type TakeoffRepository } from "./application/takeoff.repository.js";
 import { manualKey, TakeoffService } from "./application/takeoff.service.js";
 import { TakeoffController } from "./http/takeoff.controller.js";
-import { AnthropicTakeoffExtractor } from "./infrastructure/anthropic-takeoff-extractor.js";
-import { AnthropicQuantitatifPass } from "./infrastructure/anthropic-quantitatif-pass.js";
-import { QUANTITATIF_PASS, type QuantitatifPass } from "./application/quantitatif-pass.js";
 import { FICHE_RELECTEUR, type FicheRelecteur } from "./application/fiche-relecture.js";
 import { AnthropicFicheRelecteur } from "./infrastructure/anthropic-fiche-relecteur.js";
 import { FakeFicheRelecteur } from "./infrastructure/fake-fiche-relecteur.js";
-import { FakeTakeoffExtractor } from "./infrastructure/fake-takeoff-extractor.js";
 import { LECTURE_READER, type LectureReader } from "./application/lecture-reader.js";
 import { AnthropicLectureReader } from "./infrastructure/anthropic-lecture-reader.js";
 import { FakeLectureReader } from "./infrastructure/fake-lecture-reader.js";
@@ -33,27 +28,6 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
   controllers: [TakeoffController],
   providers: [
     { provide: TAKEOFF_REPOSITORY, useFactory: (p: PrismaService) => new PrismaTakeoffRepository(p), inject: [PrismaService] },
-    {
-      provide: TAKEOFF_EXTRACTOR,
-      useFactory: (config: AppConfig): TakeoffExtractor | null => {
-        switch (config.ai.provider) {
-          case "anthropic":
-            return new AnthropicTakeoffExtractor(config.ai.apiKey!, config.ai.extractionModel, config.ai.effort);
-          case "fake":
-            return new FakeTakeoffExtractor();
-          case "disabled":
-            return null;
-        }
-      },
-      inject: [CONFIG],
-    },
-    {
-      // Appel IA n° 2 (quantitatif en un passage, §41) : seulement avec l'IA réelle et s'il est allumé.
-      provide: QUANTITATIF_PASS,
-      useFactory: (config: AppConfig): QuantitatifPass | null =>
-        config.ai.provider === "anthropic" && config.ai.quantitatif ? new AnthropicQuantitatifPass(config.ai.apiKey!, config.ai.quantitatifModel) : null,
-      inject: [CONFIG],
-    },
     {
       // §51.5 : la lecture du devis par le modèle le plus capable, en un appel ; simulée (lectures enregistrées) en test.
       provide: LECTURE_READER,
@@ -73,7 +47,6 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
       useFactory: (
         repo: TakeoffRepository,
         docs: DocumentRepository,
-        extractor: TakeoffExtractor | null,
         meter: AnalysisMeter,
         recorder: AiUsageRecorder,
         aiInput: DocumentAiInput,
@@ -83,7 +56,6 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
         config: AppConfig,
         prisma: PrismaService,
         alerter: Alerter,
-        quantitatif: QuantitatifPass | null,
         push: PushSender,
         relecteur: FicheRelecteur | null,
         lecteur: LectureReader | null,
@@ -91,7 +63,6 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
         new TakeoffService(
           repo,
           docs,
-          extractor,
           meter,
           recorder,
           aiInput,
@@ -102,7 +73,6 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             maxAnalysisMicroUsd: Math.round((Number(config.aiCost.analysisMaxEur) / Number(config.aiCost.usdToEur)) * 1_000_000),
             // Le modèle de lecture choisi (Opus par défaut) sert aussi à l'estimation du coût avant lecture.
             policy: { ...DEFAULT_EXTRACTION_POLICY, textModel: config.ai.extractionModel, visionModel: config.ai.extractionModel },
-            ...(quantitatif ? { quantitatif } : {}),
             ...(relecteur ? { relecteur } : {}),
             ...(lecteur ? { lecteur } : {}),
             companyName: async (tenant) => (await prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true } }))?.name ?? null,
@@ -223,7 +193,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             },
           },
         ),
-      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, TAKEOFF_EXTRACTOR, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService, ALERTER, QUANTITATIF_PASS, PUSH_SENDER, FICHE_RELECTEUR, LECTURE_READER],
+      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService, ALERTER, PUSH_SENDER, FICHE_RELECTEUR, LECTURE_READER],
     },
   ],
   exports: [TakeoffService],

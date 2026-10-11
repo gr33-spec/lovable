@@ -1,0 +1,52 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Descente zinc Ø100, hauteur 5 m",
+   "quantity": "2",
+   "unit": "u"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": [
+    {
+     "cle": "nb_descentes",
+     "libelle": "Nombre de descentes",
+     "valeur": "2",
+     "origine": "devis",
+     "preuve": "Devis, 1"
+    }
+   ]
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Descente zinc Ø100, hauteur 5 m",
+    "quantite": "2",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Tubes de descente zinc Ø100",
+      "quantite": "2",
+      "unite": "u",
+      "ouvrage": "descente",
+      "emplacement": "tube",
+      "donnees": {
+       "diametre_descente": "100 mm",
+       "hauteur_descente": "5 m"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

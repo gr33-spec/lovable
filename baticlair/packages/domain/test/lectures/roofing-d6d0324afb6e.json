@@ -1,0 +1,90 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Couverture ardoises fibro-ciment",
+   "quantity": "80",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "teinte_fc",
+    "texte": "Ardoises fibres-ciment : bleu-noir, noir ou brun ?",
+    "boutons": [
+     {
+      "label": "Bleu-noir",
+      "valeur": "1"
+     },
+     {
+      "label": "Noir",
+      "valeur": "2"
+     },
+     {
+      "label": "Brun",
+      "valeur": "3"
+     }
+    ],
+    "unite": "u",
+    "donnee": "teinte de l'ardoise fibres-ciment",
+    "ligne": null
+   },
+   {
+    "cle": "produit_ardoise",
+    "texte": "Ardoises fibres-ciment : 40 × 24, 40 × 27, 60 × 30 ou 60 × 40 ?",
+    "boutons": [
+     {
+      "label": "Ardoises fibres-ciment 40×24",
+      "valeur": "ardoise-fc-40x24"
+     },
+     {
+      "label": "Ardoises fibres-ciment 40×27",
+      "valeur": "ardoise-fc-40x27"
+     },
+     {
+      "label": "Ardoises fibres-ciment 60×30",
+      "valeur": "ardoise-fc-60x30"
+     },
+     {
+      "label": "Ardoises fibres-ciment 60×40",
+      "valeur": "ardoise-fc-60x40"
+     }
+    ],
+    "unite": null,
+    "donnee": "modèle : ardoise",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Couverture ardoises fibro-ciment",
+    "quantite": "80",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ardoises fibres-ciment 40×24",
+      "quantite": "80",
+      "unite": "m²",
+      "ouvrage": "couverture-ardoises-fibres-ciment",
+      "emplacement": "ardoise",
+      "donnees": {},
+      "attend": [
+       "teinte_fc"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

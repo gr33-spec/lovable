@@ -1,21 +1,6 @@
-import {
-  applyLineRoles,
-  applyPurchaseOverrides,
-  applyRuleConfirmations,
-  artisanView,
-  computeWithAnswers,
-  planQuote,
-  proposeLineRoles,
-  purchaseView,
-  slotsGivenByQuote,
-  tradeProfile,
-  validateTakeoff,
-  type EngineAnswer,
-  type LineRole,
-  type PurchaseView,
-  type Referential,
-} from "../../src/index.js";
+import { ecranDeLecture, type EngineAnswer, type PurchaseView, type Referential } from "../../src/index.js";
 import type { QuoteLineInput } from "./read-quote.js";
+import { lectureEnregistree } from "./lectures.js";
 
 /**
  * Tout le parcours d'un devis d'un métier quelconque jusqu'à la liste des fournitures, comme l'API (sans IA) : règles
@@ -27,43 +12,8 @@ export function readTradeQuote(
   answers: Record<string, EngineAnswer> = {},
   validated: ReadonlySet<string> = new Set(),
 ): PurchaseView {
-  const profile = tradeProfile(ref.trade);
-  const lines = bench.map((l) => ({
-    ref: l.ref,
-    designation: l.designation,
-    quantity: l.quantity,
-    unit: l.unit,
-  }));
-  const raw = validateTakeoff(
-    lines.map((l) => ({
-      id: l.ref,
-      designation: l.designation,
-      quantityRaw: l.quantity,
-      unitRaw: l.unit,
-      source: "client_quote" as const,
-    })),
-    profile,
-  );
-  const plan = planQuote(lines, ref, profile);
-  const proposals = proposeLineRoles(lines, plan, raw, ref);
-  const roles = new Map<string, LineRole>([...proposals].map(([k, v]) => [k, v.role]));
-  const asks = new Map([...proposals].filter(([id, p]) => p.ask && roles.get(id) === "undetermined").map(([k, p]) => [k, p.ask!]));
-  const validation = applyLineRoles(raw, roles);
-  const engine = computeWithAnswers(ref, plan, answers, {}, { acceptDraft: true }, slotsGivenByQuote(plan, validation));
-  const view = artisanView(
-    lines.map((l) => ({
-      id: l.ref,
-      designation: l.designation,
-      quantity: l.quantity,
-      unit: l.unit,
-      confirmed: false,
-      enteredByArtisan: false,
-    })),
-    validation,
-    engine,
-    { plan, roles, ref, asks },
-  );
-  return applyRuleConfirmations(applyPurchaseOverrides(purchaseView(view, engine, { plan, roles, ref, validation }), answers), answers, validated);
+  const lecture = lectureEnregistree(ref, bench, [], {}, { acceptDraft: true }, undefined, answers);
+  return ecranDeLecture({ ref, lecture, answers, options: { acceptDraft: true }, validated, interdits: false }).purchase;
 }
 
 /** Les couleurs de la liste (§46) : vert, orange, gris. */

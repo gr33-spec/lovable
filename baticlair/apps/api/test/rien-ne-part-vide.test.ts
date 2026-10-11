@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { TAKEOFF_EXTRACTOR, type ExtractionAttempt, type ExtractionRequest, type TakeoffExtractor } from "../src/modules/takeoff/application/takeoff-extractor.js";
-import { FakeTakeoffExtractor } from "../src/modules/takeoff/infrastructure/fake-takeoff-extractor.js";
+import { LECTURE_READER, type LectureReader, type LectureRequest } from "../src/modules/takeoff/application/lecture-reader.js";
+import { FakeLectureReader } from "../src/modules/takeoff/infrastructure/fake-lecture-reader.js";
+import type { ReadAttempt } from "../src/platform/ai/document-reader.js";
+import type { LectureDevis } from "@baticlair/domain";
 import { makePdf } from "./support/pdf-fixtures.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
 
@@ -9,19 +11,19 @@ import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestC
  * envoyer. Elle se dit (« nothing_read » : l'écran dit « Je n'ai rien lu dans ce devis », avec « Réessayer » et
  * « Redéposer le PDF ») et se relance ; une liste vidée ne se valide pas et ne part pas (400 « empty_list »).
  */
-class SometimesEmpty implements TakeoffExtractor {
+class SometimesEmpty implements LectureReader {
   readonly provider = "fake";
   empty = true;
-  private inner = new FakeTakeoffExtractor();
-  async extract(request: ExtractionRequest): Promise<ExtractionAttempt> {
-    const r = await this.inner.extract(request);
-    return this.empty && r.output ? { ...r, output: { ...r.output, lines: [] } } : r;
+  private inner = new FakeLectureReader();
+  async lire(request: LectureRequest): Promise<ReadAttempt<LectureDevis> | null> {
+    const r = await this.inner.lire(request);
+    return this.empty && r?.output ? { ...r, output: { ...r.output, lignes: [] } } : r;
   }
 }
 const extractor = new SometimesEmpty();
 let ctx: TestContext;
 beforeAll(async () => {
-  ctx = await createTestApp((b) => b.overrideProvider(TAKEOFF_EXTRACTOR).useValue(extractor));
+  ctx = await createTestApp((b) => b.overrideProvider(LECTURE_READER).useValue(extractor));
 });
 afterAll(async () => {
   await ctx.app.close();

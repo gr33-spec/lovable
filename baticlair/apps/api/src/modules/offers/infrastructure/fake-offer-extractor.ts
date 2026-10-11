@@ -20,7 +20,10 @@ export class FakeOfferExtractor implements OfferExtractor {
         const designation = row.cols[row.index - 1]!;
         const reference = row.index >= 2 ? row.cols[0]! : null;
         const byRef = reference ? request.requested.findIndex((r) => r.reference === reference) : -1;
-        const byName = request.requested.findIndex((r) => normalizeText(r.designation) === normalizeText(designation));
+        // « Gouttière … (longueurs de 4 m) » : l'unité de commande entre parenthèses ne change pas l'article.
+        const clean = (t: string) => normalizeText(t).replace(/\s*\([^)]*\)?\s*$/, "");
+        // Une désignation longue coupée sur deux lignes du PDF (devis de démonstration) : son début suffit.
+        const byName = request.requested.findIndex((r) => clean(r.designation) === clean(designation) || (clean(designation).length >= 20 && clean(r.designation).startsWith(clean(designation))));
         const match = byRef >= 0 ? byRef : byName;
         const isFee = FEE_WORDS.some((w) => normalizeText(designation).includes(w));
         const unitPrice = row.cols[row.index + 1];

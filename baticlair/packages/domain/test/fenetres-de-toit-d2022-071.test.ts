@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { planQuote, ROOFING_REFERENTIAL, tradeProfile } from "../src/index.js";
+import { ROOFING_REFERENTIAL } from "../src/index.js";
+import { planOf } from "./support/plan-of.js";
 import { D2022_071_LINES } from "./devis-reels/d2022-071.js";
 import { readQuote } from "./support/read-quote.js";
 
@@ -16,10 +17,9 @@ import { readQuote } from "./support/read-quote.js";
  *    50/100/150/200 : §49.2, la donnée manquante se demande sur la ligne.
  */
 describe("devis D-2022-071 : 4 fenêtres 114 × 118 et 1 fenêtre 78 × 98 (fondateur, 2026-10-11)", () => {
-  const profile = tradeProfile("roofing");
 
   it("les lignes de pose et de trémies sont de la main-d'œuvre : deux fenêtres, chacune sa taille, aucune contradiction", () => {
-    const plan = planQuote(D2022_071_LINES, ROOFING_REFERENTIAL, profile);
+    const plan = planOf(ROOFING_REFERENTIAL, D2022_071_LINES);
     expect(plan.contradictions).toEqual([]);
     expect(plan.lines.filter((l) => l.status === "not_material").map((l) => l.ref)).toEqual(["2", "4", "6", "7", "9"]);
     const fenetres = plan.inputs.filter((i) => i.workItemId.startsWith("fenetre-de-toit"));
@@ -35,8 +35,8 @@ describe("devis D-2022-071 : 4 fenêtres 114 × 118 et 1 fenêtre 78 × 98 (fond
     const v = readQuote(D2022_071_LINES);
     const texts = v.questions.map((q) => q.question?.text ?? q.text);
     expect(texts.filter((t) => /fenêtre|surface du toit/i.test(t))).toEqual([]);
-    // §49.2 : « tôles bacs acier … 10 » sans unité : l'unité se demande sur la ligne, et rien d'autre sur le bac acier.
-    expect(texts.filter((t) => /bac acier|unité/i.test(t))).toEqual(["Pas d'unité sur cette ligne. C'est à la pièce ?"]);
+    // §51.5 : rien d'autre sur le bac acier (la lecture donne l'unité de la ligne, plus de question d'unité en code).
+    expect(texts.filter((t) => /bac acier/i.test(t))).toEqual([]);
     const labels = v.toBuy.map((b) => b.label);
     expect(labels).toEqual(expect.arrayContaining([D2022_071_LINES[4]!.designation, D2022_071_LINES[7]!.designation]));
     expect(labels.filter((l) => /^Couverture bac acier/.test(l))).toEqual([]);

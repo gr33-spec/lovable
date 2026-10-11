@@ -1,0 +1,43 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Bavette plomb largeur 40 cm",
+   "quantity": "8",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Bavette plomb largeur 40 cm",
+    "quantite": "8",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Plomb laminé 1,5 mm, rouleau largeur 40 cm × 6 m",
+      "quantite": "8",
+      "unite": "ml",
+      "ouvrage": "bandes-plomb",
+      "emplacement": "plomb",
+      "donnees": {
+       "largeur_plomb": "40 cm"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

@@ -1,0 +1,115 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Remplacement des chevrons 63x75 sapin traité classe 2",
+   "quantity": "82",
+   "unit": "m²"
+  },
+  {
+   "ref": "2",
+   "designation": "Planches de rive sapin traité",
+   "quantity": "24",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "longueur_chevron",
+    "texte": "Chevrons : en quelle longueur (rampant + débord) ?",
+    "boutons": [
+     {
+      "label": "4 m",
+      "valeur": "4"
+     },
+     {
+      "label": "4,5 m",
+      "valeur": "4.5"
+     },
+     {
+      "label": "5 m",
+      "valeur": "5"
+     },
+     {
+      "label": "6 m",
+      "valeur": "6"
+     }
+    ],
+    "unite": "m",
+    "donnee": "longueur des chevrons",
+    "ligne": null
+   },
+   {
+    "cle": "consommables",
+    "texte": "Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?",
+    "boutons": [
+     {
+      "label": "Oui",
+      "valeur": "1"
+     },
+     {
+      "label": "Non",
+      "valeur": "0"
+     }
+    ],
+    "unite": "u",
+    "donnee": "consommables",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Remplacement des chevrons 63x75 sapin traité classe 2",
+    "quantite": "82",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Chevronnage",
+      "quantite": "82",
+      "unite": "m²",
+      "ouvrage": "chevronnage",
+      "emplacement": "toiture",
+      "donnees": {
+       "bois": "1",
+       "section": "1"
+      },
+      "attend": [
+       "longueur_chevron"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Planches de rive sapin traité",
+    "quantite": "24",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Planches de rive sapin traité",
+      "quantite": "24",
+      "unite": "ml",
+      "ouvrage": "planches-rive",
+      "emplacement": "rive",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

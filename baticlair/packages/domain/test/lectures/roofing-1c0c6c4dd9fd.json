@@ -1,0 +1,87 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Abergement de cheminée zinc",
+   "quantity": "2",
+   "unit": "u"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "faconnage",
+    "texte": "Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ?",
+    "boutons": [
+     {
+      "label": "Je façonne (feuilles ou bobineau)",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "façonnage",
+    "ligne": null
+   },
+   {
+    "cle": "perimetre_cheminee",
+    "texte": "Périmètre d'une cheminée (les 4 côtés) ?",
+    "boutons": [
+     {
+      "label": "2 m",
+      "valeur": "2"
+     },
+     {
+      "label": "3 m",
+      "valeur": "3"
+     },
+     {
+      "label": "4 m",
+      "valeur": "4"
+     },
+     {
+      "label": "5 m",
+      "valeur": "5"
+     }
+    ],
+    "unite": "m",
+    "donnee": "périmètre d'une cheminée",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Abergement de cheminée zinc",
+    "quantite": "2",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Abergement de cheminée zinc",
+      "quantite": "2",
+      "unite": "u",
+      "ouvrage": "abergement-cheminee",
+      "emplacement": "abergement",
+      "donnees": {},
+      "attend": [
+       "faconnage",
+       "perimetre_cheminee"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

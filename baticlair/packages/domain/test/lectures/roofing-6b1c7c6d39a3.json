@@ -1,0 +1,73 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Couverture en ardoises naturelles 32x22",
+   "quantity": "48",
+   "unit": "m²"
+  },
+  {
+   "ref": "2",
+   "designation": "Crochets d'ardoise inox teintés noirs 110 mm",
+   "quantity": "1",
+   "unit": "lot"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Couverture en ardoises naturelles 32x22",
+    "quantite": "48",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ardoises naturelles Espagne 1er choix 32×22",
+      "quantite": "48",
+      "unite": "m²",
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "ardoise",
+      "donnees": {
+       "longueur_crochet": "110 mm",
+       "zone": "1",
+       "produit": "ardoise-32x22"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Crochets d'ardoise inox teintés noirs 110 mm",
+    "quantite": "1",
+    "unite": "lot",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Crochets d'ardoise inox standard",
+      "quantite": "1",
+      "unite": "lot",
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "crochet",
+      "donnees": {
+       "longueur_crochet": "110 mm"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

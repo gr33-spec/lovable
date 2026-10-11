@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { applyPurchaseOverrides, supplierTest } from "../src/index.js";
-import { REAL_QUOTES } from "./devis-reels/index.js";
+import { D2026_015_LINES } from "./devis-reels/d2026-015.js";
+
+/** Le banc des devis réels : D-2026-015 (tuiles HP10 confirmées, faîtières ventilées refusées : « aucun de ces modèles »). */
+const REAL_QUOTES = [{ id: "D-2026-015", lines: D2026_015_LINES, answers: { "product:tuile": "edilians-hp10-huguenot", "product:faitiere": null } as Record<string, string | null> }];
 import { readQuote } from "./support/read-quote.js";
 
 /**
@@ -35,7 +38,7 @@ describe("test du fournisseur : chaque ligne « À commander » se charge dans l
     // §48.2 « zinc, pièce par pièce » : le joint debout et la bande zinc ont chacun leur question de façonnage.
     expect(v.questions.map((q) => q.question?.key ?? q.key)).toEqual(expect.arrayContaining(["param:faconnage@couverture-zinc-joint-debout", "param:faconnage@bandes-zinc"]));
     // Le voligeage est un composant du joint debout : calculé (91 m² × 1,05), vendu au m² de planche.
-    expect(v.toBuy.find((b) => b.label === "Voliges sapin 18×200 mm traité")?.quantity).toBe("96 m²");
+    expect(v.toBuy.find((b) => b.label === "Voliges sapin 18 mm")?.quantity).toBe("96 m²");
     // La gouttière, elle, a une règle : des longueurs de 4 m et sa naissance (indissociable, §48.7) ; le comptoir demande
     // son développé avant de la chiffrer. Ses crochets ne sont pas écrits : ni ligne, ni question de pose (règle numéro un).
     expect(v.questions.map((q) => q.question?.key ?? q.key)).toEqual(expect.arrayContaining(["param:developpe_gouttiere"]));

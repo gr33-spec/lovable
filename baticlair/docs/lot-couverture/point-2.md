@@ -27,7 +27,7 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Couverture en tuiles à emboîtement HP10 | — | Info manquante : J'ai identifié : Tuiles HP10. C'est bien ce modèle |
+| Tuiles HP10 | 1 488 pièces | Valeur par défaut à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -53,9 +53,9 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Ardoises naturelles ? 30×22 | 6 953 pièces | Info manquante : qualité de l'ardoise. Valeur par défaut à confirmer : pente du toit 45° ; longueur du rampant 5,5 m ; diamètre du crochet standard |
-| Crochets d'ardoise inox standard, longueur 11 cm | 7 093 pièces | Info manquante : qualité de l'ardoise. Valeur par défaut à confirmer : diamètre du crochet standard ; pente du toit 45° ; longueur du rampant 5,5 m |
-| Fenêtre de toit | 1 pièce | attend une réponse à une question |
+| Ardoises naturelles 30×22 | 6 953 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 11 cm | 7 093 pièces | Qualité à préciser |
+| Fenêtre de toit | 1 pièce | Fenêtre à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -94,9 +94,9 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Ardoises naturelles ? 30×22 | 9 271 pièces | Info manquante : qualité de l'ardoise. Valeur par défaut à confirmer : pente du toit 45° ; longueur du rampant 5,5 m ; diamètre du crochet standard |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Info manquante : qualité de l'ardoise. Valeur par défaut à confirmer : diamètre du crochet standard ; pente du toit 45° ; longueur du rampant 5,5 m |
-| Naissances zinc demi-ronde | — | Info manquante : nombre de descentes |
+| Ardoises naturelles 30×22 | 9 271 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Qualité à préciser |
+| Naissances | — | Descentes à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -105,5 +105,5 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces | 200 m² × 44,15 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge | chiffrable |
 | Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02) | chiffrable |
 | Gouttière zinc demi-ronde dév. 33 | 6 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
-| Naissances zinc demi-ronde dév. 33 Ø80 | 1 pièce |  | chiffrable |
+| Naissances dév. 33 Ø80 | 1 pièce |  | chiffrable |
 

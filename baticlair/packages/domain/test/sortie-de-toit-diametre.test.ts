@@ -28,7 +28,7 @@ describe("sortie de toit : embase ou platine, chapeau, collerette pour la fumée
       ["Chapeau de sortie de toit", "1 pièce", undefined],
     ]);
     const rows = v.screen.groups.flatMap((g) => g.rows).filter((r) => v.toBuy.some((b) => b.key === r.itemKey && /embase|chapeau/i.test(b.label)));
-    for (const r of rows) expect(r).toMatchObject({ status: "check", reason: expect.stringMatching(/^Info manquante : diamètre/) });
+    for (const r of rows) expect(r).toMatchObject({ status: "check", reason: "Diamètre à préciser" });
   });
 
   it("ardoise, Ø 150, conduit de fumée : embase plomb, chapeau et collerette, le diamètre en précision", () => {

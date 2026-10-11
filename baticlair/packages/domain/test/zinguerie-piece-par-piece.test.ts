@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { factsFromReading, normalizeText, ROOFING_REFERENTIAL, type QuoteLineReading } from "../src/index.js";
+import { normalizeText, type QuoteLineReading } from "../src/index.js";
 import { ARDOISES_LUCARNES_LINES } from "./devis-reels/ardoises-lucarnes.js";
 import { D2026_011_LINES } from "./devis-reels/d2026-011.js";
 import { D2026_015_LINES } from "./devis-reels/d2026-015.js";
@@ -62,7 +62,7 @@ describe("§48.6 : le façonnage se demande pièce par pièce", () => {
       { ref: "a", designation: "Bande de ventilation en Z en zinc quartz", quantity: "13", unit: "m" },
       { ref: "b", designation: "Habillage de rive en zinc quartz", quantity: "14", unit: "m" },
     ];
-    const v = readQuote(lines, {}, factsFromReading(ROOFING_REFERENTIAL, [{ ref: "b", dimensions: { developpe: "20 cm" } }]));
+    const v = readQuote(lines, {}, [{ key: "developpe", value: "200", unit: "mm", evidence: "Devis, b (« developpe : 20 cm »)", origin: "devis" as const, line: "b" }]);
     expect(v.questions.find((d) => /developpe@/.test(d.key))?.question?.text).toBe("Bande de ventilation en Z en zinc quartz : développé de la bande zinc ?");
     expect(v.questions.some((d) => d.key === "engine:param:developpe@bandes-zinc__b")).toBe(false);
   });
@@ -98,7 +98,7 @@ describe("une info manquante se demande une fois, avant le calcul", () => {
   });
   it("des choix « (0,65, 0,70, 0,80 mm) » : trois boutons, la virgule décimale ne coupe rien", () => {
     const v = readQuote([{ ref: "1", designation: "Couverture en ardoises naturelles 32x22", quantity: "48", unit: "m²" }], {}, [], undefined, {}, new Map([["1", { role: "fourniture", articles: [], faconnage: null, manque: ["épaisseur des crochets (2,7, 3,0 mm)"] }]]));
-    expect(v.questions.find((d) => d.key.startsWith("comptoir:"))?.question?.options?.map((o) => o.label)).toEqual(["2,7 mm", "3,0 mm"]);
+    expect(v.questions.find((d) => d.key.startsWith("engine:fiche:"))?.question?.options?.map((o) => o.label)).toEqual(["2,7 mm", "3,0 mm"]);
   });
 });
 

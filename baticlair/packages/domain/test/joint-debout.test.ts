@@ -32,7 +32,7 @@ describe("joint debout : la question de façonnage, puis des lignes que le fourn
     // pointes, absentes du devis, ne sortent pas (avant : 519 coulissantes, 173 fixes, 1 384 pointes ajoutées d'office).
     // §49.2.5 : la couverture attend sa réponse (façonnage) : elle sort orange « Info manquante », sans quantité (jamais
     // de m² au comptoir).
-    expect(bought(v)).toEqual({ "Couverture zinc à joint debout": null, "Voliges sapin 18×200 mm traité": "96 m²" });
+    expect(bought(v)).toEqual({ "Couverture zinc à joint debout": null, "Voliges sapin 18 mm": "96 m²" });
   });
 
   it("« je façonne » : de la bobine au mètre linéaire, jamais au kg : 39 bacs × (5,5 m + 15 cm de surlongueur) = 221 ml de bobine 500 mm en bord de mer", () => {
@@ -55,7 +55,7 @@ describe("joint debout : la question de façonnage, puis des lignes que le fourn
     expect(v.assumptions.map((a) => `${a.key}=${a.value}`)).toEqual(expect.arrayContaining(["param:longueur_rampant=5,5", "derived:entraxe_joints=430"]));
     // Intérieur des terres : bobine 650, entraxe 580 → 16,5 / 0,58 = 29 bacs ; pas de pattes, le devis n'en écrit pas.
     const inland = readQuote(DEVIS, { "param:faconnage": { value: "2", unit: "u" }, "param:zone": { value: "1", unit: "u" } });
-    expect(bought(inland)).toEqual({ "Bacs joint debout zinc naturel 0,65 mm, longueur 5,65 m": "29 bacs", "Voliges sapin 18×200 mm traité": "96 m²" });
+    expect(bought(inland)).toEqual({ "Bacs joint debout zinc naturel 0,65 mm, longueur 5,65 m": "29 bacs", "Voliges sapin 18 mm": "96 m²" });
   });
 
   it("chaque ligne commandée passe le test du fournisseur", () => {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { planQuote, ROOFING_REFERENTIAL, tradeProfile } from "../src/index.js";
+import { ROOFING_REFERENTIAL } from "../src/index.js";
+import { planOf } from "./support/plan-of.js";
 import { readQuote } from "./support/read-quote.js";
 
 /**
@@ -16,7 +17,7 @@ const A = (o: Record<string, string | { value: string; unit: string }>) => o;
 
 describe("la tuile canal est reconnue, même quand la ligne commence par « Tuiles »", () => {
   it("rattachée à l'ouvrage canal, jamais à la tuile à emboîtement ; pas de HP10 proposée", () => {
-    const plan = planQuote(DEVIS, ROOFING_REFERENTIAL, tradeProfile("roofing"));
+    const plan = planOf(ROOFING_REFERENTIAL, DEVIS);
     expect(plan.lines.map((l) => (l.status === "planned" ? `${l.ref}:${l.workItemId}/${l.slot}` : `${l.ref}:${l.status}`))).toEqual([
       "1:couverture-tuiles-canal/tuile",
       "2:couverture-tuiles-canal/liteau",
@@ -37,7 +38,7 @@ describe("la tuile canal est reconnue, même quand la ligne commence par « Tuil
   });
 
   it("une « tuile romane canal » reste une tuile à emboîtement (grand moule, §5)", () => {
-    const plan = planQuote([{ ref: "r", designation: "Tuile romane canal rouge", quantity: "100", unit: "m²" }], ROOFING_REFERENTIAL, tradeProfile("roofing"));
+    const plan = planOf(ROOFING_REFERENTIAL, [{ ref: "r", designation: "Tuile romane canal rouge", quantity: "100", unit: "m²" }]);
     expect(plan.lines[0]).toMatchObject({ workItemId: "couverture-tuiles-emboitement" });
   });
 });

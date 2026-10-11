@@ -152,10 +152,7 @@ describe("demandes de prix", () => {
     for (const line of reviewed.lines.filter((l: { status: string }) => l.status === "to_verify")) {
       await agent.post(`/v1/takeoff-lines/${line.id}/confirm`).expect(200);
     }
-    // Entreprise de couverture : les articles d'électricité lui sont inconnus. UNE décision les garde tous.
-    reviewed = (await agent.get(`/v1/projects/${project.body.id}/takeoff`)).body.takeoff;
-    const unknown = reviewed.view.decisions.find((d: { key: string }) => d.key === "group:unknown");
-    await agent.post(`/v1/takeoffs/${takeoff.id}/decisions`).send({ action: "keep", lineIds: unknown.lineIds }).expect(200);
+    // §49.9 : une ligne ajoutée à la main est une fourniture telle qu'écrite, sans décision à prendre.
     await agent.post(`/v1/takeoffs/${takeoff.id}/validate`).expect(200);
     const s = await supplier(agent, "Rexel", "devis@rexel.fr");
     const created = await agent.post(`/v1/projects/${project.body.id}/price-requests`).send({ supplierIds: [s.body.id] });
@@ -179,7 +176,8 @@ describe("demandes de prix", () => {
       dueDate: "2026-10-15",
     });
     expect(created.status).toBe(201);
-    expect(created.body.lines).toHaveLength(6);
+    // Les six lignes du devis, plus les naissances que la gouttière à 2 descentes appelle (§49.1, point 3).
+    expect(created.body.lines).toHaveLength(7);
     expect(created.body.recipients).toHaveLength(2);
     const first = created.body.recipients[0];
     expect(first).toMatchObject({
@@ -189,7 +187,8 @@ describe("demandes de prix", () => {
     // §45.2 : une demande de devis, un mail court ; la liste est dans le PDF joint.
     expect(first.email.subject).toBe("Demande de devis · Toitures Martin · chantier Toiture Dupont (Vannes)");
     expect(first.email.body).toMatch(/^Bonjour,\n\nJe vous envoie la liste des fournitures pour /);
-    expect(created.body.packet.articles).toContain("Tuile romane canal rouge 12,5 u/m² (réf. TUI-RC12) : 1 250 u");
+    // §51.5 : la ligne part sous la désignation lue par le modèle, sans la référence d'article du devis.
+    expect(created.body.packet.articles).toContain("Tuile romane canal rouge 12,5 u/m² : 1 250 u");
     expect(first.email.body).toContain("Livraison sur chantier possible ?");
     expect(first.email.body).toContain("Pouvez-vous me chiffrer l'ensemble avant le 15 octobre ?");
 

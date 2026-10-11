@@ -88,6 +88,32 @@ export function parseFiche(raw: unknown): FicheChantier | null {
   return { donnees };
 }
 
+/** Une fiche déjà lue (« { donnees: [...] } », telle qu'enregistrée avec la lecture) : relue sans rien recalculer, sa clé comprise. */
+export function parseFicheEnregistree(raw: unknown): FicheChantier | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw) || !Array.isArray((raw as { donnees?: unknown }).donnees)) return null;
+  const donnees: FicheDonnee[] = [];
+  for (const item of (raw as { donnees: unknown[] }).donnees) {
+    if (!item || typeof item !== "object") continue;
+    const o = item as Record<string, unknown>;
+    const cle = typeof o.cle === "string" ? o.cle.trim().slice(0, 80) : "";
+    const libelle = typeof o.libelle === "string" ? o.libelle.trim().slice(0, 60) : "";
+    const origine = ORIGINES[normalizeText(typeof o.origine === "string" ? o.origine : "")];
+    if (!cle || !libelle || !origine) continue;
+    const valeur = typeof o.valeur === "string" && o.valeur.trim() ? o.valeur.trim().slice(0, 120) : null;
+    const kept: FicheOrigine = valeur === null ? "manquante" : origine;
+    donnees.push({
+      cle,
+      libelle,
+      valeur: kept === "manquante" ? null : valeur,
+      origine: kept,
+      regle: typeof o.regle === "string" ? o.regle.trim().slice(0, 160) : null,
+      preuve: typeof o.preuve === "string" ? o.preuve.trim().slice(0, 200) : null,
+      ...(typeof o.question === "string" && o.question.trim() ? { question: o.question.trim().slice(0, 200) } : {}),
+    });
+  }
+  return { donnees };
+}
+
 /** « 1 » → « Quartz-Zinc » : la valeur codée d'un paramètre nommé, lue dans le texte de la fiche. */
 function codedValue(def: ParamDef, text: string): string | null {
   const t = ` ${normalizeText(text)} `;
@@ -159,7 +185,11 @@ export function ficheChantier(input: {
   lignes?: ReadonlyMap<string, string>;
 }): FicheChantier {
   const { ref, plan } = input;
-  const donnees: FicheDonnee[] = (input.ai?.donnees ?? []).map((d) => ({ ...d }));
+  // Une donnée corrigée sur le document sans libellé propre (« longueur rampant ») reprend le nom du référentiel.
+  const donnees: FicheDonnee[] = (input.ai?.donnees ?? []).map((d) => {
+    const def = ref.workItems.flatMap((w) => w.params).find((p) => p.key === d.cle);
+    return def && d.libelle === d.cle.replace(/_/g, " ") ? { ...d, libelle: def.label } : { ...d };
+  });
   const keyOf = (d: FicheDonnee) => paramOfDonnee(ref, d.libelle)?.key ?? paramOfDonnee(ref, d.cle.replace(/_/g, " "))?.key ?? d.cle;
   const has = (key: string) => donnees.some((d) => keyOf(d) === key && d.origine !== "manquante");
   // Ce que le code a lu dans les lignes du devis pour le toit (rampant, pente, épaisseur…), si l'IA ne l'a pas dit.
@@ -185,7 +215,7 @@ export function ficheChantier(input: {
     const cle = m[2] ? key.slice("param:".length) : m[1]!;
     const libelle = m[2] && !(FICHE_PARAMS_CHANTIER as readonly string[]).includes(def.key) ? `${def.label} (${work!.label.replace(/\s*\(.*$/, "")})` : def.label;
     // La réponse écrite et relue (« les bacs façonnés, la bande je la plie ») dit déjà la donnée : elle reste, en clair.
-    if (donnees.some((d) => d.origine === "reponse" && d.cle !== cle && normalizeText(d.libelle) === normalizeText(def.label))) continue;
+    if (donnees.some((d) => d.origine === "reponse" && (d.cle !== cle || d.valeur !== answerText(def, value)) && normalizeText(d.libelle) === normalizeText(def.label))) continue;
     const at = donnees.findIndex((d) => keyOf(d) === cle || d.cle === cle);
     const entry: FicheDonnee = { cle, libelle: at >= 0 ? donnees[at]!.libelle : libelle, valeur: answerText(def, value), origine: "reponse", preuve: "Ta réponse" };
     if (at >= 0) donnees[at] = entry;

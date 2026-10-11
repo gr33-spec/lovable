@@ -1,10 +1,8 @@
-import { articleParts } from "../trades/trade-profile.js";
 import { baseOf } from "../referential/model.js";
 import { Decimal } from "../shared/decimal.js";
 import { CONSUMABLES_QUESTION, DEVIS_MARK, withoutDevisMark, type Assumption, type NeedResult, type Question, type RuleToConfirm } from "../referential/engine.js";
 import type { LineRole } from "../referential/line-roles.js";
 import type { Referential } from "../referential/model.js";
-import type { QuoteLineReading } from "../referential/reading.js";
 import { LINE_UNITS, slotCharacteristicsKey, type QuotePlan } from "../referential/plan.js";
 import { parseRefUnit, sameDim } from "../referential/units.js";
 import type { TakeoffValidation } from "../takeoff/validation.js";
@@ -597,8 +595,6 @@ export function purchaseView(
     validation: TakeoffValidation;
     /** §45.8 : réponses de l'artisan sur ce chantier (clé de l'article suggéré), et ce que l'entreprise ne veut plus voir. */
     consumables?: { accepted?: ReadonlySet<string>; refused?: ReadonlySet<string>; hidden?: ReadonlySet<string> };
-    /** §41.1 : la lecture de chaque ligne (son « manque » fait les questions du comptoir, §49.4). */
-    readings?: ReadonlyMap<string, QuoteLineReading>;
   },
 ): PurchaseView {
   const consumableFamilies = new Set(link.ref.families.filter((f) => f.consumable).map((f) => f.code));
@@ -816,22 +812,8 @@ export function purchaseView(
   // Le doute sur une MESURE d'ouvrage (« 48 m² », « 4 m ») dont les articles sont calculés n'est pas une question : la mesure
   // est déjà dans le titre de l'ouvrage, l'artisan s'en moque (retour du fondateur, 2026-10-06 : « les mesures lues dans le
   // devis on s'en fout »). Ni ligne orange, ni blocage de l'envoi.
-  const engineQuestions = [...view.decisions.filter((d) => !measureDoubt(d, view)), ...preciseQuestions(toBuy, link.validation, link.ref)];
-  // §49.4 : « manque » (lecture §41.1) et le tiroir produisent la liste ; une question du tiroir sur le même sujet suffit,
-  // une donnée écrite au devis n'est jamais demandée. Sans réponse, la ligne sort orange « Info manquante ».
-  const counter = counterQuestions(link.readings, engineQuestions, link.plan, link.ref, assumptions);
-  for (const d of counter) {
-    const what = d.text.replace(/\s*\?$/, "");
-    const rule = d.key.startsWith(A_PRECISER) ? `${d.title} à préciser` : `Info manquante : ${what.charAt(0).toLowerCase()}${what.slice(1)}`;
-    // Retour du fondateur (2026-10-11) : ce qui manque aux liteaux ne se dit pas sur les tuiles de la même ligne du devis.
-    // La donnée va aux articles de la ligne qu'elle nomme (« traitement des liteaux » → les liteaux), sinon à tous.
-    const onLine = [...toBuy.entries()].filter(([, item]) => item.lineIds.includes(d.lineIds[0]!));
-    const named = onLine.filter(([, item]) => namesArticle(`${d.title} ${d.text}`, item.label));
-    for (const [i, item] of named.length > 0 ? named : onLine) {
-      toBuy[i] = { ...item, waitsOn: [...(item.waitsOn ?? []), d.key], rules: [...(item.rules ?? []), { key: `manque:${d.key}`, text: rule, local: true, said: true }] };
-    }
-  }
-  const questions = [...engineQuestions, ...counter, ...customQuantity];
+  const engineQuestions = view.decisions.filter((d) => !measureDoubt(d, view));
+  const questions = [...engineQuestions, ...customQuantity];
   // §49.8 : chaque ligne orange porte ses boutons (la donnée qui manque, le défaut à confirmer) pour se régler sur place.
   const known = new Map<string, Question>();
   for (const n of engine.needs) if (n.question) known.set(n.question.key, n.question);
@@ -862,109 +844,7 @@ export const COUNTER = "comptoir:";
 /** §49.9 : une donnée du comptoir sans choix à proposer (« modèle et teinte de tuile ») : la ligne est « à préciser ». */
 export const A_PRECISER = "a-preciser:";
 
-/** Les sujets d'une question de comptoir : deux questions sur le même sujet n'en font qu'une. */
-const TOPICS = ["developpe", "diametre", "pente", "rampant", "format", "modele", "teinte", "coloris", "couleur", "epaisseur", "faconnage", "qualite", "largeur", "hauteur", "taille", "aspect", "profil", "dimension"];
-const topicsOf = (text: string) => TOPICS.filter((t) => plain(text).includes(t));
-
-/**
- * §49.4 point 2 : les questions de comptoir de « manque » (ce que le vendeur demanderait encore pour servir la ligne).
- * Écartées : celles que le tiroir pose déjà (même sujet), et celles sur une donnée que le devis écrit (le Ø80, la pente).
- * Les choix écrits entre parenthèses (« (25, 28, 33, 40) ») deviennent des boutons ; la réponse part en précision.
- */
-function counterQuestions(readings: ReadonlyMap<string, QuoteLineReading> | undefined, asked: readonly Decision[], plan: QuotePlan, ref: Referential, shown: readonly Assumption[]): Decision[] {
-  if (!readings) return [];
-  // Déjà à l'écran : une question du tiroir, ou une valeur annoncée dans « Je pars sur ces valeurs » (l'épaisseur du zinc).
-  const askedTopics = new Set([...asked.flatMap((d) => topicsOf(`${d.question?.text ?? ""} ${d.question?.key ?? ""}`)), ...shown.flatMap((a) => topicsOf(`${a.key} ${a.label}`))]);
-  const out: Decision[] = [];
-  for (const [lineId, reading] of readings) {
-    const planned = plan.lines.find((l) => l.ref === lineId);
-    const work = planned?.status === "planned" ? ref.workItems.find((w) => w.id === baseOf(planned.workItemId)) : undefined;
-    const params = work && planned?.status === "planned" ? (plan.inputs.find((i) => i.workItemId === planned.workItemId)?.params ?? {}) : {};
-    // Les données écrites de l'ouvrage (lues au devis, ligne de pose comprise) : jamais redemandées. Une donnée se
-    // reconnaît à son sujet (« diamètre ») ou à tous les mots de son nom (« nombre de descentes »).
-    const written = work ? work.params.filter((p) => params[p.key]?.origin === "devis") : [];
-    // Une donnée que l'ouvrage de la ligne connaît (le Ø des naissances pour la gouttière) se règle par SA question, posée
-    // avant le calcul, une fois pour toutes les lignes qui en dépendent ; jamais une 2e question du comptoir, ni avant ni
-    // après le calcul (la question du tiroir close au calcul ne la fait pas revenir sur les cartes).
-    const writtenTopics = new Set((work?.params ?? []).flatMap((p) => topicsOf(`${p.key} ${p.label}`)));
-    const words = (t: string) => plain(t).split(/[^a-z0-9]+/).filter((w) => w.length > 3);
-    const namesWritten = (m: string) => written.some((p) => words(p.label).length > 0 && words(p.label).every((w) => plain(m).includes(w)));
-    reading.manque.forEach((m, i) => {
-      const topics = topicsOf(m);
-      if (topics.some((t) => askedTopics.has(t) || writtenTopics.has(t)) || namesWritten(m)) return;
-      // « (0,65, 0,70, 0,80 mm) » : la virgule décimale ne coupe pas un choix ; l'unité finale vaut pour tous.
-      const raw = /\(([^)]+)\)/.exec(m)?.[1]?.split(/\s*,\s+|\s*;\s*|\s*\/\s*|\s+ou\s+|(?<!\d),(?!\d)/).map((c) => c.trim()).filter(Boolean) ?? [];
-      const unit = /^[\d.,]+\s*([a-zA-Z°²]+)$/.exec(raw.at(-1) ?? "")?.[1];
-      const choices = unit ? raw.map((c) => (/^[\d.,]+$/.test(c) ? `${c} ${unit}` : c)) : raw;
-      const subject = m.replace(/\s*\([^)]*\)/, "").trim().replace(/^./, (c) => c.toUpperCase());
-      // §49.9 : une donnée sans choix à proposer (modèle et teinte de tuile) n'est pas une question à boutons : la ligne
-      // sort orange « à préciser », l'artisan l'écrit dans le nom de la ligne (§50.7 : plus de voix) ou laisse le fournisseur proposer (« C'est bon »).
-      if (choices.length < 2) {
-        const key = `${A_PRECISER}${lineId}:${i + 1}`;
-        const text = `${subject} à préciser : écris-le dans le nom de la ligne, ou laisse le fournisseur proposer.`;
-        out.push({ key, state: "to_confirm", title: subject, text, lineIds: [lineId], primary: { action: "keep", label: "C'est bon" }, secondary: ["edit"] });
-        topics.forEach((t) => askedTopics.add(t));
-        return;
-      }
-      const text = `${subject} ?`;
-      const key = `${COUNTER}${lineId}:${i + 1}`;
-      out.push({
-        key,
-        state: "missing",
-        title: text,
-        text,
-        lineIds: [lineId],
-        primary: null,
-        secondary: [],
-        question: { key, kind: "choose", text, ...(choices.length >= 2 ? { options: choices.map((c) => ({ label: c, value: c })) } : {}) },
-      });
-      topics.forEach((t) => askedTopics.add(t));
-    });
-  }
-  return out;
-}
 const plain = (t: string) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-/** Une donnée du comptoir nomme-t-elle cet article ? « traitement des liteaux » nomme « Liteaux 27×40 », pas les tuiles. */
-function namesArticle(asked: string, label: string): boolean {
-  const stem = (w: string) => w.replace(/(?:aux|eaux|s|x)$/, "");
-  const words = (t: string) => plain(t).split(/[^a-z0-9]+/).filter((w) => w.length > 3).map(stem);
-  const article = new Set(words(label));
-  return words(asked).some((w) => article.has(w));
-}
-
-/**
- * Une ligne reprise telle quelle du devis dont la famille demande une précision que le fournisseur ne peut pas deviner
- * (« Sortie de toit Poujoulat » : quel diamètre ? réponse du fondateur, 2026-10-04) : une question à boutons sur la
- * ligne. La désignation reste celle du devis (marque, modèle) ; la réponse part dans la colonne « précision ». Une ligne
- * qui la donne déjà (« Ø 150 », « VMC ») ne demande rien.
- */
-function preciseQuestions(toBuy: readonly PurchaseItem[], validation: TakeoffValidation, ref: Referential): Decision[] {
-  const out: Decision[] = [];
-  for (const item of toBuy) {
-    if (item.kind !== "direct") continue;
-    const lineId = item.lineIds[0]!;
-    if (validation.lines.find((l) => l.lineId === lineId)?.kind === "labor") continue;
-    // La famille se lit sur les mots du référentiel (« sortie de toit »), comme le plan lit une ligne : sur son article,
-    // jamais sur sa destination (« tôles bacs acier pour étanchéité du dessus de velux » n'est pas une fenêtre, D-2022-071).
-    const text = plain(item.label);
-    const { article } = articleParts(text);
-    const ask = ref.families.find((f) => f.ask && f.keywords?.some((k) => new RegExp(`\\b${plain(k)}\\b`).test(article)))?.ask;
-    if (!ask || new RegExp(ask.answered).test(text)) continue;
-    const key = `${PRECISE}${lineId}`;
-    out.push({
-      key,
-      state: "missing",
-      title: item.label,
-      text: ask.question,
-      lineIds: [lineId],
-      primary: null,
-      secondary: [],
-      question: { key, kind: "choose", text: ask.question, ...(ask.hint ? { hint: ask.hint } : {}), options: ask.choices },
-    });
-  }
-  return out;
-}
 
 /**
  * § 41.4 : l'artisan réécrit d'un tap le libellé ou la quantité d'une ligne du quantitatif. Ses mots

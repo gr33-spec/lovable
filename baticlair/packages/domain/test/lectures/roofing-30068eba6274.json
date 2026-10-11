@@ -1,0 +1,90 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Couverture tuiles HP10 terre cuite",
+   "quantity": "120",
+   "unit": "m²"
+  },
+  {
+   "ref": "2",
+   "designation": "Fenêtre de toit Velux GGL MK04 tout confort",
+   "quantity": "2",
+   "unit": "u"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "produit_tuile",
+    "texte": "J'ai identifié : Tuiles HP10. C'est bien ce modèle ?",
+    "boutons": [
+     {
+      "label": "Oui",
+      "valeur": "edilians-hp10-huguenot"
+     },
+     {
+      "label": "Modifier",
+      "valeur": ""
+     }
+    ],
+    "unite": null,
+    "donnee": "modèle : tuile",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Couverture tuiles HP10 terre cuite",
+    "quantite": "120",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Tuiles HP10",
+      "quantite": "120",
+      "unite": "m²",
+      "ouvrage": "couverture-tuiles-emboitement",
+      "emplacement": "tuile",
+      "donnees": {
+       "produit": "edilians-hp10-huguenot"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Fenêtre de toit Velux GGL MK04 tout confort",
+    "quantite": "2",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Fenêtre de toit Velux GGL MK04 tout confort",
+      "quantite": "2",
+      "unite": "u",
+      "ouvrage": "fenetre-de-toit",
+      "emplacement": "fenetre",
+      "donnees": {
+       "raccord_couverture": "1",
+       "taille_fenetre": "7898"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

@@ -1,15 +1,11 @@
-import type { CompletionWire } from "@baticlair/domain";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { loadConfig, type AppConfig } from "../src/platform/config/config.js";
 import { CapturingPushSender } from "../src/platform/push/web-push.sender.js";
 import { CONFIG, PUSH_SENDER } from "../src/platform/tokens.js";
-import { QUANTITATIF_PASS, type QuantitatifPass } from "../src/modules/takeoff/application/quantitatif-pass.js";
-import { TAKEOFF_EXTRACTOR, type ExtractionAttempt, type ExtractionRequest, type TakeoffExtractor } from "../src/modules/takeoff/application/takeoff-extractor.js";
-import { LECTURE_READER, type LectureReader } from "../src/modules/takeoff/application/lecture-reader.js";
+import { LECTURE_READER, type LectureReader, type LectureRequest } from "../src/modules/takeoff/application/lecture-reader.js";
+import { FakeLectureReader } from "../src/modules/takeoff/infrastructure/fake-lecture-reader.js";
+import type { LectureDevis } from "@baticlair/domain";
 
-/** §51.5 : ce test exerce l'ancienne lecture (prompt A) avec son lecteur de test : la lecture par le modèle ne lit pas ce devis. */
-const SANS_LECTURE: LectureReader = { provider: "test", lire: async () => null };
-import { FakeTakeoffExtractor } from "../src/modules/takeoff/infrastructure/fake-takeoff-extractor.js";
 import type { ReadAttempt } from "../src/platform/ai/document-reader.js";
 import { makePdf } from "./support/pdf-fixtures.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
@@ -34,34 +30,24 @@ class Gate {
   }
 }
 
-class GatedExtractor implements TakeoffExtractor {
+class GatedReader implements LectureReader {
   readonly provider = "anthropic";
   readonly gate = new Gate();
-  private inner = new FakeTakeoffExtractor();
-  async extract(request: ExtractionRequest): Promise<ExtractionAttempt> {
+  private inner = new FakeLectureReader();
+  async lire(request: LectureRequest): Promise<ReadAttempt<LectureDevis> | null> {
     await this.gate.wait();
-    return this.inner.extract(request);
+    return this.inner.lire(request);
   }
 }
 
-class GatedPass implements QuantitatifPass {
-  readonly provider = "anthropic";
-  readonly gate = new Gate();
-  async complete(): Promise<ReadAttempt<CompletionWire>> {
-    await this.gate.wait();
-    return { provider: "anthropic", model: "claude-sonnet-5-5", usage: { inputTokens: 10, outputTokens: 10 }, status: "success", output: { ajouts: [], doutes: [] }, errorCode: null, durationMs: 1 };
-  }
-}
-
-const extractor = new GatedExtractor();
-const pass = new GatedPass();
+const extractor = new GatedReader();
 const push = new CapturingPushSender("x".repeat(40));
 let ctx: TestContext;
 beforeAll(async () => {
-  const base = loadConfig({ ...process.env, AI_PROVIDER: "anthropic", ANTHROPIC_API_KEY: "sk-test", AI_QUANTITATIF: "on" });
+  const base = loadConfig({ ...process.env, AI_PROVIDER: "anthropic", ANTHROPIC_API_KEY: "sk-test" });
   const config: AppConfig = { ...base, ai: { ...base.ai, answerWithinMs: 1500 } };
   ctx = await createTestApp((b) =>
-    b.overrideProvider(CONFIG).useValue(config).overrideProvider(TAKEOFF_EXTRACTOR).useValue(extractor).overrideProvider(QUANTITATIF_PASS).useValue(pass).overrideProvider(PUSH_SENDER).useValue(push).overrideProvider(LECTURE_READER).useValue(SANS_LECTURE),
+    b.overrideProvider(CONFIG).useValue(config).overrideProvider(LECTURE_READER).useValue(extractor).overrideProvider(PUSH_SENDER).useValue(push),
   );
 });
 afterAll(async () => {
@@ -70,7 +56,6 @@ afterAll(async () => {
 beforeEach(async () => {
   await resetDatabase(ctx.prisma);
   extractor.gate.reset();
-  pass.gate.reset();
   push.sent.length = 0;
 });
 
@@ -119,21 +104,19 @@ describe("je te préviens quand c'est prêt : le serveur envoie la notification"
     expect(push.sent.map((s) => s.target.endpoint).sort()).toEqual([device(1).endpoint, device(2).endpoint]);
     expect(push.sent[0]!.message).toEqual({ title: "Ton devis est lu", body: "J'ai quelques questions pour toi avant de calculer.", url: `/chantiers/${projectId}`, tag: `chantier-${projectId}` });
 
-    // Calcul (appel IA n° 2) trop long : « Va boire un café » ; la liste prête, le serveur prévient.
+    expect(push.sent.every((s) => s.target.endpoint !== device(3).endpoint)).toBe(true);
+    // Le calcul est du code (§51.3), instantané : la liste est prête tout de suite, rien à notifier.
     push.sent.length = 0;
     const q = (await agent.get(`/v1/quantitatifs?projetId=${projectId}`)).body.items[0] as { id: string };
-    expect((await agent.post(`/v1/quantitatifs/${q.id}/calcul`).send({ reponses: [] })).body.phase).toBe("calcul");
-    pass.gate.open();
-    await until(() => push.sent.length === 2);
-    expect(push.sent[0]!.message.title).toBe("Ta liste est prête");
-    expect(push.sent.every((s) => s.target.endpoint !== device(3).endpoint)).toBe(true);
+    expect((await agent.post(`/v1/quantitatifs/${q.id}/calcul`).send({ reponses: [] })).body.phase).toBe("resultat");
+    await new Promise((r) => setTimeout(r, 100));
+    expect(push.sent).toHaveLength(0);
   });
 
   it("une réponse arrivée tout de suite ne notifie pas", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "b@example.fr", "Toitures Martin");
     await agent.post("/v1/me/notifications/push").send(device(1));
     extractor.gate.open();
-    pass.gate.open();
     const { projectId, documentId } = await deposit(agent);
     expect((await agent.post(`/v1/documents/${documentId}/takeoff`)).status).toBe(201);
     const q = (await agent.get(`/v1/quantitatifs?projetId=${projectId}`)).body.items[0] as { id: string };

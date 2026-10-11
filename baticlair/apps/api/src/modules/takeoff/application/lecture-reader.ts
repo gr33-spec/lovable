@@ -129,6 +129,8 @@ export function decodeLecture(wire: LectureWire): LectureDevis | null {
 export interface LectureRequest {
   /** Le devis complet : son texte numéroté et le PDF entier. */
   document: DocumentInput;
+  /** Le métier du devis (identifiant du tiroir, « roofing »), pour le lecteur simulé. */
+  trade?: string;
   tradeLabel: string;
   /** L'export du référentiel du métier (`exportPourLecture`). */
   referentiel: string;

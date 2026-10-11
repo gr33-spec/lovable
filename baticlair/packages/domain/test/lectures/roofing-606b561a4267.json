@@ -1,0 +1,85 @@
+{
+ "devis": [
+  {
+   "ref": "a",
+   "designation": "Fenêtre de toit Velux MK04 114x118",
+   "quantity": "1",
+   "unit": "u"
+  },
+  {
+   "ref": "b",
+   "designation": "Fenêtre de toit 78x98",
+   "quantity": "1",
+   "unit": "u"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "taille_fenetre",
+    "texte": "Taille de la fenêtre de toit : fenêtre 78 × 98 (devis : « mk04 »), ou fenêtre 114 × 118 (devis : « 114x118 ») ?",
+    "boutons": [
+     {
+      "label": "fenêtre 78 × 98 (devis : « mk04 »)",
+      "valeur": "7898"
+     },
+     {
+      "label": "fenêtre 114 × 118 (devis : « 114x118 »)",
+      "valeur": "114118"
+     }
+    ],
+    "unite": "u",
+    "donnee": "taille de la fenêtre de toit",
+    "ligne": "a"
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "a",
+    "designation": "Fenêtre de toit Velux MK04 114x118",
+    "quantite": "1",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Fenêtre de toit Velux MK04 114x118",
+      "quantite": "1",
+      "unite": "u",
+      "ouvrage": "fenetre-de-toit",
+      "emplacement": "fenetre",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "b",
+    "designation": "Fenêtre de toit 78x98",
+    "quantite": "1",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Fenêtre de toit 78x98",
+      "quantite": "1",
+      "unite": "u",
+      "ouvrage": "fenetre-de-toit",
+      "emplacement": "fenetre",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

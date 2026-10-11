@@ -52,7 +52,7 @@ Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Pavés béton ép. 8 cm, palette de 10 m² | 5 palettes de 10 m² | Quantité à confirmer : pavés +5 %, palette de 10 m² |
+| Pavés béton ép. 8 cm, palette de 10 m² | 5 palettes de 10 m² | Quantité à confirmer |
 | Bordures béton T2 15 × 25 × 100 | 30 bordures | Quantité à confirmer : bordures +5 % |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
@@ -78,8 +78,8 @@ Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| GNT 0/31,5 en vrac | 27 tonnes | Quantité à confirmer : GNT 2 t/m³ compactée, GNT +10 % |
-| Film polyane 150 µm, rouleau 150 m² | 1 rouleau de 150 m² | Quantité à confirmer : film +20 % de recouvrements |
+| GNT 0/31,5 en vrac | 27 tonnes | Quantité à confirmer |
+| Film polyane 150 µm, rouleau 150 m² | 1 rouleau de 150 m² | Quantité à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -103,7 +103,7 @@ Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Arroseurs tuyères escamotables | 25 pièces | Quantité à confirmer : un arroseur pour 12 m² |
+| Arroseurs tuyères escamotables | 25 pièces | Quantité à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -131,10 +131,10 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Béton C25/30 (toupie) | 12 m³ | Valeur par défaut à confirmer : épaisseur du dallage 12 cm. Quantité à confirmer : béton +5 % |
-| Blocs béton creux de 20 (50×20) | 1 155 blocs | Quantité à confirmer : blocs +5 % de casse |
-| Carrelage grès cérame 60×60 | 58 cartons de 1,44 m² | Quantité à confirmer : pertes de coupe 8 %, 1 carton de réserve dès 20 m² |
-| Peinture acrylique mate blanche, seau de 15 L | 4 seaux de 15 L | Quantité à confirmer : peinture +5 % au rouleau |
+| Béton C25/30 (toupie) | 12 m³ | Valeur par défaut à confirmer |
+| Blocs béton creux de 20 (50×20) | 1 155 blocs | Quantité à confirmer |
+| Carrelage grès cérame 60×60 | 58 cartons de 1,44 m² | Quantité à confirmer |
+| Peinture acrylique mate blanche, seau de 15 L | 4 seaux de 15 L | Quantité à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -161,9 +161,9 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Ardoises naturelles ? 30×22 | 9 271 pièces | Info manquante : qualité de l'ardoise. Valeur par défaut à confirmer : pente du toit 45° ; longueur du rampant 5,5 m ; diamètre du crochet standard |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Info manquante : qualité de l'ardoise. Valeur par défaut à confirmer : diamètre du crochet standard ; pente du toit 45° ; longueur du rampant 5,5 m |
-| Naissances zinc demi-ronde | — | Info manquante : nombre de descentes |
+| Ardoises naturelles 30×22 | 9 271 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Qualité à préciser |
+| Naissances | — | Descentes à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -172,5 +172,5 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces | 200 m² × 44,15 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge | chiffrable |
 | Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02) | chiffrable |
 | Gouttière zinc demi-ronde dév. 33 | 6 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
-| Naissances zinc demi-ronde dév. 33 Ø80 | 1 pièce |  | chiffrable |
+| Naissances dév. 33 Ø80 | 1 pièce |  | chiffrable |
 
