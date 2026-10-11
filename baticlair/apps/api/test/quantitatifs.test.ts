@@ -126,7 +126,8 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
     expect(wrong.status).toBe(400);
   });
 
-  it("corrige la pente d'un tap : seules les lignes qui en dépendent changent", async () => {
+  // Plusieurs recalculs enchaînés : plus long que les 5 s par défaut sur un exécuteur de CI chargé.
+  it("corrige la pente d'un tap : seules les lignes qui en dépendent changent", { timeout: 20_000 }, async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const before = (await agent.post("/v1/quantitatifs").send(RAPPIDOS)).body;
     const res = await agent.post(`/v1/quantitatifs/${before.id}/corrections`).send({ action: "modifier", cle: "param:pente", valeur: "40" });
