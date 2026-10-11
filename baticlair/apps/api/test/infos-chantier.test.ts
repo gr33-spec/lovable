@@ -92,7 +92,7 @@ describe("deux documents qui se contredisent : une question avec les deux valeur
     const q = res.body as Q;
     const question = q.questions.find((x) => x.id === "engine:param:pente")!;
     expect(question.boutons.map((b) => b.valeur)).toEqual(["40", "35"]);
-    expect(question.texte).toMatch(/^Pente du toit : 40 ° \(Devis, .*\), ou 35 ° \(Devis, en-tête .*\) \?$/);
+    expect(question.texte).toMatch(/^Pente du toit : 40° \(devis : « .* »\), ou 35° \(en-tête du devis : « .* »\) \?$/);
     expect(q.lignes.find((l) => l.libelle === "Ardoises naturelles Espagne 1er choix 30×22")).toBeUndefined();
     // L'artisan écrit la pente : sa note passe devant les deux, l'explication cite ce que disait le devis.
     await agent.put(`/v1/projects/${q.projetId}/infos`).send({ texte: "Pente 42°" });

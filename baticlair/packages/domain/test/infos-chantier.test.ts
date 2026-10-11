@@ -61,7 +61,7 @@ describe("deux documents qui se contredisent : une question avec les deux valeur
     expect(plan.contradictions).toHaveLength(1);
     const v = readQuote([line], {}, [{ key: "pente", value: "30", unit: "°", evidence: "Devis, en-tête (« Pente : 30° »)", origin: "devis" }]);
     const q = v.questions.find((d) => d.question?.key === "param:pente")!;
-    expect(q.question).toMatchObject({ text: "Pente du toit : 40 ° (Devis, 1 (« pente »)), ou 30 ° (Devis, en-tête (« Pente : 30° »)) ?", options: [{ value: "40" }, { value: "30" }] });
+    expect(q.question).toMatchObject({ text: "Pente du toit : 40° (devis : « pente »), ou 30° (en-tête du devis : « Pente : 30° ») ?", options: [{ value: "40" }, { value: "30" }] });
     expect(v.questions[0]!.question?.key).toBe("param:pente");
     expect(v.toBuy.some((b) => b.needIds.includes("ardoises"))).toBe(false);
     const answered = readQuote([line], { "param:pente": { value: "30", unit: "°" } }, [{ key: "pente", value: "30", unit: "°", evidence: "Devis, en-tête", origin: "devis" }]);

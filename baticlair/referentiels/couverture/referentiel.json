@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.10-50",
+  "version": "roofing-2026.10.11-51",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -10066,6 +10066,7 @@
       "triggers": [
         "roof_window"
       ],
+      "perLine": true,
       "params": [
         {
           "key": "nb_fenetres",
