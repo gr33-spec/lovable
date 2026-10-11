@@ -98,6 +98,125 @@ export function ReadingScene() {
   );
 }
 
+// ——— La lecture en plein écran : le devis, et les fournitures qui en sortent ———
+
+/**
+ * Retour du fondateur (2026-10-11) : « une animation plus fun qui prend tout l'écran ». Le devis lu au surligneur, en
+ * grand, balayé par la lumière d'un scanner ; à chaque ligne cochée, une fourniture en sort, bondit et vient tourner autour
+ * de la page (tuile, gouttière, vis, mètre, brique, rouleau, prise : tous les métiers). Toujours en CSS seul, calé sur le
+ * même cycle que le surligneur ; sous « réduire les animations », les fournitures restent posées autour de la page lue.
+ */
+const STAGE = { w: 340, h: 420 };
+const PAGE_SCALE = 1.3;
+/** Où chaque fourniture se pose autour de la page (centre de la pastille, dans la scène). */
+const ORBIT = [
+  { x: 44, y: 62, r: -12 },
+  { x: 300, y: 84, r: 10 },
+  { x: 26, y: 214, r: 8 },
+  { x: 314, y: 236, r: -9 },
+  { x: 52, y: 370, r: 14 },
+  { x: 290, y: 376, r: -6 },
+  { x: 170, y: 24, r: 4 },
+];
+
+/** Les pictogrammes, au trait (24 × 24), l'accent en jaune surligneur. */
+const PICTOS: React.ReactNode[] = [
+  // Tuile canal
+  <g key="tuile">
+    <path d="M3 15c3-6 6-6 9 0s6 6 9 0" />
+    <path d="M3 10c3-6 6-6 9 0s6 6 9 0" stroke="#e0a800" />
+  </g>,
+  // Gouttière et sa descente
+  <g key="gouttiere">
+    <path d="M2 7h20" />
+    <path d="M4 7a8 6 0 0 0 16 0" />
+    <path d="M17 12v9h3" stroke="#e0a800" />
+  </g>,
+  // Vis
+  <g key="vis">
+    <path d="M9 3h6l-1 3h-4Z" />
+    <path d="M12 6v15" />
+    <path d="M9 9l6 2M9 13l6 2M9 17l5 2" stroke="#e0a800" />
+  </g>,
+  // Mètre ruban
+  <g key="metre">
+    <circle cx="10" cy="12" r="7" />
+    <circle cx="10" cy="12" r="2" stroke="#e0a800" />
+    <path d="M17 17h5" stroke="#e0a800" />
+  </g>,
+  // Briques
+  <g key="brique">
+    <path d="M3 6h18v12H3Z" />
+    <path d="M3 12h18M10 6v6M14 12v6" stroke="#e0a800" />
+  </g>,
+  // Rouleau de peinture
+  <g key="rouleau">
+    <rect x="3" y="4" width="15" height="6" rx="2" />
+    <path d="M18 7h2v5h-8v3" />
+    <path d="M12 15v6" stroke="#e0a800" />
+  </g>,
+  // Prise électrique
+  <g key="prise">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M9 10v3M15 10v3" stroke="#e0a800" />
+  </g>,
+];
+
+/** D'où sort la fourniture de la ligne i : la coche dans la marge de la page agrandie. */
+const tickAt = (i: number) => ({
+  x: STAGE.w / 2 + (160 - 88) * PAGE_SCALE,
+  y: STAGE.h / 2 + (LINE_TOP + i * LINE_PITCH - 112) * PAGE_SCALE,
+});
+
+const stageKeyframes = (() => {
+  const css: string[] = [];
+  ORBIT.forEach((o, i) => {
+    const e = 6 + i * 9 + 6;
+    const from = tickAt(i);
+    const dx = from.x - o.x;
+    const dy = from.y - o.y;
+    // Elle jaillit de la coche, passe au-dessus, se pose en rebondissant, flotte, puis s'efface avec la page tournée.
+    css.push(
+      `@keyframes bc-fly-picto-${i}{0%,${e}%{transform:translate(${dx}px,${dy}px) scale(.2) rotate(0deg);opacity:0}${e + 1}%{opacity:1}${e + 4}%{transform:translate(${dx * 0.45}px,${dy * 0.45 - 40}px) scale(.9) rotate(${o.r * -2}deg);opacity:1}${e + 7}%{transform:translate(0,0) scale(1.18) rotate(${o.r}deg);opacity:1}${e + 9}%{transform:translate(0,0) scale(.94) rotate(${o.r}deg)}${e + 11}%,80%{transform:translate(0,0) scale(1) rotate(${o.r}deg);opacity:1}88%,100%{transform:translate(0,0) scale(.6) rotate(${o.r}deg);opacity:0}}`,
+    );
+  });
+  css.push("@keyframes bc-bob{from{translate:0 0}to{translate:0 -5px}}");
+  css.push("@keyframes bc-scan{0%{transform:translateY(-30%);opacity:0}8%{opacity:1}92%{opacity:1}100%{transform:translateY(560%);opacity:0}}");
+  return css.join("\n");
+})();
+
+export function ReadingStage() {
+  return (
+    <div aria-hidden="true" className="relative shrink-0" style={{ width: STAGE.w, height: STAGE.h }}>
+      <style>{stageKeyframes}</style>
+      {/* Le devis, en grand, au centre ; la lumière du scanner le balaie. */}
+      <div className="absolute" style={{ left: (STAGE.w - 176) / 2, top: (STAGE.h - 224) / 2, transform: `scale(${PAGE_SCALE})` }}>
+        <ReadingScene />
+        <span className="pointer-events-none absolute inset-x-0 top-0 h-1/5 overflow-hidden rounded-[14px] opacity-0" style={{ animation: "bc-scan 2.6s linear infinite" }}>
+          <span className="block h-full w-full bg-gradient-to-b from-transparent via-[#ffd43b]/35 to-transparent" />
+        </span>
+      </div>
+      {/* Les fournitures qui sortent du devis, une par ligne lue. */}
+      {ORBIT.map((o, i) => (
+        <span
+          key={i}
+          className="absolute"
+          style={{ left: o.x - 26, top: o.y - 26, transform: `rotate(${o.r}deg)`, animation: `bc-fly-picto-${i} ${READ_CYCLE}s cubic-bezier(.34,1.56,.64,1) infinite both` }}
+        >
+          <span
+            className="flex size-[52px] items-center justify-center rounded-[16px] bg-white shadow-[0_14px_24px_-12px_rgba(0,0,0,0.7)]"
+            style={{ animation: `bc-bob ${1.6 + (i % 3) * 0.3}s ease-in-out ${i * 0.2}s infinite alternate` }}
+          >
+            <svg viewBox="0 0 24 24" className="size-7" fill="none" stroke="#111827" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              {PICTOS[i]}
+            </svg>
+          </span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
 // ——— Le calcul : le devis devient la liste ———
 
 /** Le devis (à gauche) et la liste (à droite), en px dans la scène de 296 × 196. */
