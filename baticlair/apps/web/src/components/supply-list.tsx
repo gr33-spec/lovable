@@ -3,6 +3,7 @@
 import { Check, ChevronDown, ChevronUp, Eye, Paperclip, Pencil, Send, Trash2, X } from "lucide-react";
 import { openDocument } from "@/lib/open-document";
 import { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { type ItemEdit, type SketchHandlers } from "@/components/purchase-list";
 import { type DecisionHandlers } from "@/components/takeoff-view";
 import { SelectionBar, type SelectionSend } from "@/components/selection-send";
@@ -267,7 +268,7 @@ export function SupplyList({
               className={`sticky z-10 mt-2 flex flex-wrap gap-2 bg-gradient-to-t from-ground from-70% to-transparent pt-6 ${docked ? "bottom-[68px] pb-3 lg:bottom-[70px]" : "bottom-0 pb-[max(8px,env(safe-area-inset-bottom))]"}`}
             >
               {onPreview ? (
-                <Button variant="secondary" className="shrink-0 px-4" onClick={onPreview}>
+                <Button variant="secondary" className="shrink-0 px-3.5 text-[15px]" onClick={onPreview}>
                   <Eye size={18} aria-hidden="true" />
                   Aperçu
                 </Button>
@@ -279,7 +280,7 @@ export function SupplyList({
                 </Button>
               ) : (
                 <Button
-                  className="min-w-0 flex-1 px-3 shadow-card!"
+                  className="min-w-0 flex-1 gap-1.5 px-3 text-[15px] whitespace-nowrap shadow-card!"
                   pending={pending}
                   onClick={() => {
                     if (toCheck.length === 0) return onSend();
@@ -287,7 +288,8 @@ export function SupplyList({
                     document.getElementById(`ligne-${ordered[0]!.key}`)?.scrollIntoView?.({ block: "center", behavior: "smooth" });
                   }}
                 >
-                  <Send size={18} aria-hidden="true" />
+                  {/* Sur un iPhone étroit, l'icône cède sa place pour que le texte tienne sur une ligne. */}
+                  <Send size={18} aria-hidden="true" className="hidden min-[400px]:block" />
                   Envoyer au fournisseur
                 </Button>
               )}
@@ -469,6 +471,15 @@ function Row({
   const [open, setOpen] = useState(false);
   const [naming, setNaming] = useState(false);
   const [dx, setDx] = useState(0);
+  // Une ligne orange réglée (« C'est bon », un choix) se referme d'elle-même : le flou derrière elle s'en va avec elle.
+  const [seenStatus, setSeenStatus] = useState(row.status);
+  if (row.status !== seenStatus) {
+    setSeenStatus(row.status);
+    if (seenStatus === "check" && open) {
+      setOpen(false);
+      setNaming(false);
+    }
+  }
   const start = useRef<{ x: number; y: number } | null>(null);
   // Un glissement n'est pas un appui : il n'ouvre pas la ligne.
   const swiped = useRef(false);
@@ -553,7 +564,28 @@ function Row({
     );
   }
   return (
-    <li id={`ligne-${row.key}`} className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden px-3 py-1.5 transition-colors ${open ? "bg-accent/5" : ""}`}>
+    <li
+      id={`ligne-${row.key}`}
+      className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden px-3 py-1.5 transition-[background-color,box-shadow,border-radius] duration-200 ${
+        open ? "z-[51] rounded-[20px] bg-surface shadow-[0_24px_60px_-12px_rgba(16,24,40,0.45)] ring-1 ring-black/5" : ""
+      }`}
+    >
+      {/* Retour du fondateur (2026-10-11) : la ligne ouverte passe au premier plan, le reste est flouté derrière ; un tap sur le
+          flou la referme. */}
+      {open && typeof document !== "undefined"
+        ? createPortal(
+            <button
+              type="button"
+              aria-label="Fermer la ligne ouverte"
+              onClick={() => {
+                setNaming(false);
+                setOpen(false);
+              }}
+              className="fixed inset-0 z-50 cursor-default bg-[#0e1116]/35 backdrop-blur-[3px]"
+            />,
+            document.body,
+          )
+        : null}
       {dx < 0 ? (
         <span aria-hidden="true" className="absolute inset-y-0 right-0 flex items-center bg-danger px-4 text-sm font-extrabold text-white">
           Retirer

@@ -45,6 +45,13 @@ async function settleCard(page: Page, card: ReturnType<Page["getByRole"]>) {
   await settle(page);
 }
 
+/** Une ligne ouverte passe au premier plan, le reste flouté (§50.7) : un tap sur le flou la referme. */
+async function closeOpenLine(page: Page) {
+  const voile = page.getByRole("button", { name: "Fermer la ligne ouverte" });
+  if (await voile.isVisible()) await voile.click({ position: { x: 5, y: 5 } });
+  await expect(voile).toHaveCount(0);
+}
+
 /** La page des fournitures (`?vue=fournitures`) : ouverte d'elle-même à l'arrivée des matériaux, sinon d'un appui sur le chantier. */
 async function openList(page: Page) {
   const listPage = page.getByRole("region", { name: "Page des fournitures" });
@@ -72,6 +79,7 @@ async function confirmDoubts(page: Page) {
     // §50.7 : une ligne orange garde son point et sa raison ; un tap l'ouvre, ses boutons se règlent là.
     const orange = list.getByRole("listitem").filter({ has: page.getByRole("img", { name: "à vérifier" }) }).first();
     if (!(await orange.isVisible())) {
+      await closeOpenLine(page);
       await expect(list.getByRole("button", { name: "Envoyer au fournisseur" })).toBeVisible();
       return;
     }
@@ -404,6 +412,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await expect(liste.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
 
   // § 41.4 et §50.7 : la ligne s'ouvre d'un tap, et un tap sur son nom le réécrit, sur le document même.
+  await closeOpenLine(page);
   await page.getByRole("button", { name: "Modifier : Tuile romane canal rouge 12,5 u/m²" }).click();
   await page.getByRole("button", { name: "Modifier le nom : Tuile romane canal rouge 12,5 u/m²" }).click();
   await page.getByLabel("Nom : Tuile romane canal rouge 12,5 u/m²").fill("Tuile romane canal rouge 12,5 u/m² Toit principal");
@@ -648,12 +657,14 @@ test("plusieurs articles inconnus, sans unité : UNE décision les règle tous, 
   await expect(page.getByText("Article inconnu, sans unité", { exact: true })).toBeVisible();
   // Recharger la page ne règle rien à la place de l'artisan.
   await page.reload();
-  const group = await orangeCard(page, name);
+  await orangeCard(page, name);
   // Rien ne part avec une ligne orange : « Envoyer » dit pourquoi, sans ouvrir « À qui j'envoie ? ».
+  await closeOpenLine(page);
   await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
   await expect(page.getByRole("dialog", { name: "À qui j'envoie ?" })).toHaveCount(0);
   await expect(page.getByRole("status").filter({ hasText: /^Règle d'abord/ })).toBeVisible();
 
+  const group = await orangeCard(page, name);
   await group.getByRole("button", { name: /^C'est bon/ }).click();
   await expect(group).toHaveCount(0);
   await confirmDoubts(page);
@@ -1005,6 +1016,35 @@ test("§50.7 : les deux boutons du bas sont là même s'il reste des lignes oran
   await expect(pdf.getByRole("link", { name: "Télécharger" })).toBeVisible();
 });
 
+test("§50.7 : une ligne ouverte passe au premier plan, le reste flouté ; un tap à côté la referme", async ({ page }) => {
+  // Retour du fondateur (2026-10-11, capture iPhone) : « quand on ouvre une case, c'est pas terrible visuellement ; floute le
+  // reste pour rendre plus lisible et visible la case ouverte ».
+  await signUp(page);
+  await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await passQuestions(page);
+  await openList(page);
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  // « Envoyer au fournisseur » tient sur une ligne, même sur un iPhone étroit (375 px).
+  await page.setViewportSize({ width: 375, height: 812 });
+  const envoyer = page.getByRole("group", { name: "Envoyer la liste" }).getByRole("button", { name: "Envoyer au fournisseur" });
+  expect((await envoyer.boundingBox())!.height).toBeLessThan(60);
+  await list.getByRole("button", { name: /^Modifier la ligne : / }).first().click();
+  const ouverte = list.getByRole("group", { name: /^Ligne ouverte : / });
+  await expect(ouverte).toHaveCount(1);
+  const voile = page.getByRole("button", { name: "Fermer la ligne ouverte" });
+  await expect(voile).toBeVisible();
+  await expect(voile).toHaveCSS("backdrop-filter", /blur/);
+  // La ligne ouverte est AU-DESSUS du voile : un tap en son milieu la touche, elle.
+  const box = (await ouverte.boundingBox())!;
+  const dessus = await page.evaluate(([x, y]) => document.elementFromPoint(x!, y!)?.closest("[aria-label^='Ligne ouverte']") !== null, [box.x + box.width / 2, box.y + box.height / 2]);
+  expect(dessus).toBe(true);
+  // Un tap sur le flou, à côté, la referme.
+  await voile.click({ position: { x: 10, y: 10 } });
+  await expect(ouverte).toHaveCount(0);
+  await expect(voile).toHaveCount(0);
+});
+
 test("§49.8 : un tap refusé par le serveur se dit DANS la ligne ouverte, jamais en silence", async ({ page }) => {
   // Retour du fondateur (2026-10-10, capture iPhone) : « Quand je clique sur un bouton, rien ne se passe. »
   await signUp(page);
@@ -1184,6 +1224,7 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
   await expect(first.getByRole("group", { name: /^Régler : / })).toBeVisible();
   await expect(first.getByRole("button", { name: "Retirer de la liste" })).toBeVisible();
   // Une ligne du bref se corrige d'un tap, sur le document même.
+  await closeOpenLine(page);
   const bref = list.getByRole("region", { name: "Le chantier en bref" });
   const line = bref.getByRole("button", { name: /^Modifier le bref : / }).first();
   await line.click();
