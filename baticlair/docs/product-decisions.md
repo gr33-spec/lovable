@@ -465,6 +465,12 @@ fictives uniquement.
   chantier commencé, jamais la démonstration. « Choisir cette formule » note
   la demande (paiement en ligne à venir) ; PLAN_ACTIVATION_CODES permet
   d'activer une formule à la main (tests, premiers clients).
+- **Paywall en pause (fondateur, 2026-10-11)** : « fais en sorte que je
+  puisse utiliser pour l'instant, on mettra le paywall actif plus tard ».
+  PAYWALL=off par défaut : l'usage se compte, aucune formule ne bloque un
+  chantier, l'écran de limite ne s'affiche plus. PAYWALL=on (variable
+  d'environnement de l'API) le rallume, sans redéployer le code. Test :
+  `apps/api/test/paywall-en-pause.test.ts`.
 
 ### PD-040 — Bleu de confiance, et le « + » crée un chantier
 

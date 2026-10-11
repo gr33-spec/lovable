@@ -18,12 +18,14 @@ export interface BillingStatus {
 /**
  * Formules : un nombre de chantiers par mois (ou pendant l'essai). La limite
  * ne bloque que la création d'un nouveau chantier : un chantier commencé se
- * termine toujours (liste, demandes, comparaison).
+ * termine toujours (liste, demandes, comparaison). Paywall en pause (`enforced: false`, le défaut de la config) : rien
+ * ne bloque.
  */
 export class BillingService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly config: AppConfig["billing"],
+    /** `enforced` absent : la limite s'applique (les tests qui construisent le service eux-mêmes). */
+    private readonly config: Omit<AppConfig["billing"], "enforced"> & { enforced?: boolean },
     private readonly now: () => Date = () => new Date(),
   ) {}
 
@@ -46,7 +48,8 @@ export class BillingService {
     return {
       plan,
       usage: { projects, limit, remaining: limit === null ? null : Math.max(0, limit - projects) },
-      limitReached: limit !== null && projects >= limit,
+      // Paywall en pause (`PAYWALL` ≠ `on`) : l'usage se compte, rien ne bloque.
+      limitReached: this.config.enforced !== false && limit !== null && projects >= limit,
       offers: this.config.plans.filter((p) => p.offered && p.key !== TRIAL_PLAN),
       requestedPlan: company.requestedPlan,
       activationEnabled: Object.keys(this.config.activationCodes).length > 0,
