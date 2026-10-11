@@ -377,14 +377,16 @@ export function planDeLecture(ref: Referential, lecture: LectureDevis, lignes: r
 }
 
 /** La clé de réponse d'une question de la lecture : celle de la donnée du référentiel (par pièce quand elle vise une ligne), sinon « fiche:<clé> ». */
-export function cleDeQuestion(ref: Referential, plan: QuotePlan, q: LectureQuestion): string {
+export function cleDeQuestion(ref: Referential, plan: QuotePlan, q: LectureQuestion, lignes?: readonly LigneLecture[]): string {
   // Le modèle de l'emplacement (« quelle tuile ? ») : la réponse est le produit, pour tout le chantier.
   if (q.cle.startsWith("produit_") && ref.workItems.some((w) => w.slots.some((s) => s.key === q.cle.slice("produit_".length)))) return `product:${q.cle.slice("produit_".length)}`;
   if (q.cle === CONSUMABLES_KEY) return `param:${CONSUMABLES_KEY}`;
   const def = ref.workItems.flatMap((w) => w.params).find((p) => p.key === q.cle);
   if (!def) return `fiche:${q.cle}`;
   if (q.ligne) {
-    const instance = plan.lines.find((l) => l.status === "planned" && (l.ref === q.ligne || l.ref.startsWith(`${q.ligne}.`)) && ref.workItems.find((w) => w.id === baseOf(l.workItemId))?.params.some((p) => p.key === q.cle));
+    // La ligne du devis que vise la question (« 1:005 ») : ses identifiants dans le plan (le repère, ou l'identifiant enregistré).
+    const ids = new Set([q.ligne, ...(lignes ?? []).filter((l) => l.ligne.ref === q.ligne).map((l) => l.id)]);
+    const instance = plan.lines.find((l) => l.status === "planned" && [...ids].some((id) => l.ref === id || l.ref.startsWith(`${id}.`)) && ref.workItems.find((w) => w.id === baseOf(l.workItemId))?.params.some((p) => p.key === q.cle));
     // La question d'une pièce (une instance par ligne), ou d'un lot quand plusieurs ouvrages demandent la même donnée
     // (le façonnage de la noue et des bandes) : sa réponse ne vaut que pour lui, comme le calcul la lit.
     if (instance?.status === "planned" && (instance.workItemId.includes(INSTANCE_SEP) || piecewiseParams(ref, plan).includes(`param:${q.cle}`))) return scopedKey(q.cle, instance.workItemId);
@@ -393,8 +395,8 @@ export function cleDeQuestion(ref: Referential, plan: QuotePlan, q: LectureQuest
 }
 
 /** La question du calcul (boutons, unité) telle que l'écran la pose : celle du modèle, mot pour mot. */
-export function questionDeLecture(ref: Referential, plan: QuotePlan, q: LectureQuestion): Question {
-  const key = cleDeQuestion(ref, plan, q);
+export function questionDeLecture(ref: Referential, plan: QuotePlan, q: LectureQuestion, lignes?: readonly LigneLecture[]): Question {
+  const key = cleDeQuestion(ref, plan, q, lignes);
   const def = ref.workItems.flatMap((w) => w.params).find((p) => p.key === q.cle);
   const options = q.boutons.map((b) => ({ label: b.label, value: b.valeur }));
   const unit = q.unite ?? def?.unit ?? "u";
@@ -510,7 +512,7 @@ export function ecranDeLecture(input: {
   const engine = plan.inputs.length > 0 ? computeWithAnswers(ref, plan, answers, input.preferences ?? {}, options, given) : { needs: [], questions: [], declined: [], checks: [], unknowns: [], customProducts: {} };
   // §51.2 : les questions sont celles du modèle, et seulement elles (le moteur ne demande rien de lui-même).
   const asked: Asked[] = lecture.questions.flatMap((q) => {
-    const question = questionDeLecture(ref, plan, q);
+    const question = questionDeLecture(ref, plan, q, lignes);
     // L'habitude de l'entreprise (« je façonne », apprise sur deux chantiers) répond d'avance à la question du modèle :
     // elle ne se pose plus, la réponse est dite dans le calcul et reste modifiable d'un tap.
     const def = ref.workItems.flatMap((w) => w.params).find((p) => p.key === q.cle);
@@ -759,7 +761,8 @@ function finishPurchase(
     // Une question close sans réponse reste une décision de l'écran (elle se rouvre dans sa carte, §49.8).
     if (isAnswered(a) && ctx.answers[a.key] !== null) continue;
     const lineIds = lignes.filter((l) => l.fourniture?.attend.includes(a.q.cle) || l.cites.some((c) => c.attend.includes(a.q.cle))).map((l) => l.id);
-    decisions.push({ key: `engine:${a.key}`, state: "missing", title: a.q.texte.replace(/\s*\?$/, ""), text: a.q.texte, lineIds, primary: { action: "answer", label: "Renseigner" }, secondary: [], question: a.question });
+    // §51.6 : la question se règle par ses boutons (ou sa case), jamais par un « C'est bon » : pas d'action principale.
+    decisions.push({ key: `engine:${a.key}`, state: "missing", title: a.q.texte.replace(/\s*\?$/, ""), text: a.q.texte, lineIds, primary: null, secondary: [], question: a.question });
   }
   // §49.1 : la liste suit l'ordre du devis : la ligne, puis ses fournitures dans l'ordre du modèle, puis ce que le calcul y
   // ajoute d'office (la naissance de la gouttière).

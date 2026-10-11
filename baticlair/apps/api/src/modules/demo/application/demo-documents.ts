@@ -49,7 +49,7 @@ const CLIENT_ROWS: [string, string, string, string][] = [
   // Ce que le comptoir demanderait (§47.8) est écrit au devis : qualité d'ardoise, pose des crochets, Ø des descentes, dauphin.
   ["Couverture en ardoises naturelles d'Espagne 1er choix 32x22 posées au crochet, pente 40°", "85", "m²", "98,00"],
   ["Écran de sous-toiture HPV", "85", "m²", "14,00"],
-  ["Sortie de toit de ventilation Ø 125 mm", "1", "u", "320,00"],
+  ["Sortie de toit de ventilation Ø 125 mm sur ardoises", "1", "u", "320,00"],
   ["Gouttière zinc demi-ronde développé 33, crochets bandeau", "12", "ml", "48,00"],
   ["Descente zinc diamètre 80, hauteur 5 m, sans dauphin", "2", "u", "210,00"],
   ["Échafaudage de pied : location et montage", "1", "forfait", "950,00"],

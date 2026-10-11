@@ -816,7 +816,8 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   await gouttiere.getByRole("textbox").fill("Gouttière zinc demi-ronde rouge");
   await gouttiere.getByRole("button", { name: "OK" }).click();
   await expect(list.getByRole("button", { name: /^(Modifier|Fermer) : Gouttière zinc demi-ronde rouge/ })).toBeVisible();
-  await expect(list.getByText(/^20 ml$/).filter({ visible: true }).first()).toBeVisible();
+  // §50.5 : la quantité reste celle du calcul, en unité commandable (20 ml → 5 longueurs de 4 m).
+  await expect(list.getByText(/^5 longueurs de 4 m$/).filter({ visible: true }).first()).toBeVisible();
   await page.reload();
   await expect(page.getByRole("region", { name: "Les questions" })).toHaveCount(0);
   await expect(page.getByRole("region", { name: "Liste des fournitures" }).getByRole("button", { name: /Ardoises naturelles/ })).toHaveCount(0);
@@ -924,7 +925,8 @@ test("§49.8 : sur chaque ligne, un ✓ pour valider sans l'ouvrir, et un crayon
   // ligne. Et un crayon pour modifier. »
   await signUp(page);
   await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-doublon.pdf"));
+  // Une faîtière écrite deux fois de suite : doublon ou quantités à additionner ? La ligne est orange, un ✓ la garde (§49.1).
   await passQuestions(page);
   await openList(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
