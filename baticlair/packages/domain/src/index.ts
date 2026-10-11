@@ -34,3 +34,6 @@ export * from "./trust/forbidden.js";
 export * from "./trust/completion.js";
 export * from "./trust/short-reason.js";
 export * from "./projects/site-name.js";
+export * from "./lecture/lecture.js";
+export { DE00000071_LECTURE } from "./lecture/exemples/de00000071.js";
+export { exportPourLecture } from "./lecture/export.js";

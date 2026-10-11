@@ -23,6 +23,9 @@ import { FICHE_RELECTEUR, type FicheRelecteur } from "./application/fiche-relect
 import { AnthropicFicheRelecteur } from "./infrastructure/anthropic-fiche-relecteur.js";
 import { FakeFicheRelecteur } from "./infrastructure/fake-fiche-relecteur.js";
 import { FakeTakeoffExtractor } from "./infrastructure/fake-takeoff-extractor.js";
+import { LECTURE_READER, type LectureReader } from "./application/lecture-reader.js";
+import { AnthropicLectureReader } from "./infrastructure/anthropic-lecture-reader.js";
+import { FakeLectureReader } from "./infrastructure/fake-lecture-reader.js";
 import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.repository.js";
 
 @Module({
@@ -52,6 +55,13 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
       inject: [CONFIG],
     },
     {
+      // §51.5 : la lecture du devis par le modèle le plus capable, en un appel ; simulée (lectures enregistrées) en test.
+      provide: LECTURE_READER,
+      useFactory: (config: AppConfig): LectureReader | null =>
+        config.ai.provider === "anthropic" ? new AnthropicLectureReader(config.ai.apiKey!, config.ai.extractionModel, config.ai.effort) : config.ai.provider === "fake" ? new FakeLectureReader() : null,
+      inject: [CONFIG],
+    },
+    {
       // §51.2 : la relecture d'une réponse « Autre », par le modèle de la lecture (le plus capable).
       provide: FICHE_RELECTEUR,
       useFactory: (config: AppConfig): FicheRelecteur | null =>
@@ -76,6 +86,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
         quantitatif: QuantitatifPass | null,
         push: PushSender,
         relecteur: FicheRelecteur | null,
+        lecteur: LectureReader | null,
       ) =>
         new TakeoffService(
           repo,
@@ -93,6 +104,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             policy: { ...DEFAULT_EXTRACTION_POLICY, textModel: config.ai.extractionModel, visionModel: config.ai.extractionModel },
             ...(quantitatif ? { quantitatif } : {}),
             ...(relecteur ? { relecteur } : {}),
+            ...(lecteur ? { lecteur } : {}),
             companyName: async (tenant) => (await prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true } }))?.name ?? null,
             onStats: (stats) => logger.info({ reading: stats }, "takeoff: lecture du devis"),
             // §48 : « je te préviens quand c'est prêt » : une notification sur chaque appareil abonné de la personne qui
@@ -211,7 +223,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             },
           },
         ),
-      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, TAKEOFF_EXTRACTOR, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService, ALERTER, QUANTITATIF_PASS, PUSH_SENDER, FICHE_RELECTEUR],
+      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, TAKEOFF_EXTRACTOR, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService, ALERTER, QUANTITATIF_PASS, PUSH_SENDER, FICHE_RELECTEUR, LECTURE_READER],
     },
   ],
   exports: [TakeoffService],

@@ -1,5 +1,5 @@
 import type { Prisma } from "../../../generated/prisma/client.js";
-import type { CompletionRecord, FicheChantier, LineRole, QuoteLineReading } from "@baticlair/domain";
+import { parseLecture, type CompletionRecord, type FicheChantier, type LineRole, type QuoteLineReading } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { isUuid } from "../../../platform/validation/ids.js";
 import type { TenantContext } from "../../tenancy/index.js";
@@ -49,6 +49,7 @@ function toRecord(row: Row): TakeoffRecord {
     notes: strings(row.notes),
     context: stringMap(row.context),
     fiche: ficheOf(row.fiche),
+    lecture: row.lecture ? parseLecture(row.lecture) : null,
     completion: completionOf(row.completion),
     calculStartedAt: row.calculStartedAt,
     calculatedAt: row.calculatedAt,
@@ -169,6 +170,7 @@ export class PrismaTakeoffRepository implements TakeoffRepository {
         notes: data.notes,
         context: data.context ?? undefined,
         ...(data.fiche ? { fiche: JSON.parse(JSON.stringify(data.fiche)) } : {}),
+        ...(data.lecture ? { lecture: JSON.parse(JSON.stringify(data.lecture)) } : {}),
         ...(data.calculated ? { calculStartedAt: new Date(), calculatedAt: new Date() } : {}),
         createdById: tenant.userId,
         lines: {

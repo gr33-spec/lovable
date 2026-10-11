@@ -240,6 +240,15 @@ const plainLabel = (t: string) => t.toLowerCase().normalize("NFD").replace(/[\u0
  * ville ; le client et l'adresse, s'ils sont demandés, le ferment. Rien n'est inventé : chaque mot vient d'une ligne du bref.
  */
 export function briefTexte(lines: readonly { cle: string; texte: string }[]): string {
+  // §51.5 : le bref écrit par le modèle en phrases (« fiche-bref-N ») : chaque phrase telle quelle, puis la ville.
+  const phrases = lines.filter((l) => /^fiche-bref-\d+$/.test(l.cle));
+  if (phrases.length > 0) {
+    const rest = lines.filter((l) => !/^fiche-bref-\d+$/.test(l.cle));
+    // La ville (sans libellé) ferme le texte ; le client et l'adresse, s'ils sont demandés, viennent après elle.
+    const ville = rest.filter((l) => !/ : /.test(l.texte)).map((l) => `Chantier à ${l.texte.replace(/[.\s]+$/, "")}.`);
+    const tail = briefTexte(rest.filter((l) => / : /.test(l.texte)));
+    return [...phrases.map((p) => `${p.texte.replace(/[.\s]+$/, "")}.`), ...ville, ...(tail ? [tail] : [])].join(" ");
+  }
   const parts = lines.map((l) => {
     const i = l.texte.indexOf(" : ");
     return i > 0 ? { label: l.texte.slice(0, i).trim(), value: l.texte.slice(i + 3).trim() } : { label: "", value: l.texte.trim() };

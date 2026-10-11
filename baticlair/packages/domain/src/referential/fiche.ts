@@ -236,7 +236,12 @@ export function appliquerRelecture(fiche: FicheChantier | null | undefined, rele
 
 /** La fiche en lignes courtes, dans l'ordre (le chantier en bref, §50.7) : « Rampant : 7 m ». */
 export function ficheLignes(fiche: FicheChantier): string[] {
-  return fiche.donnees.filter((d) => d.origine !== "manquante" && d.valeur).map((d) => `${d.libelle} : ${d.valeur}`);
+  return fiche.donnees.filter((d) => d.origine !== "manquante" && d.valeur).map((d) => (d.libelle ? `${d.libelle} : ${d.valeur}` : d.valeur!));
+}
+
+/** §51.5 : la fiche du modèle, complétée par son bref en phrases (« bref-1 »…), chacune une ligne du document (§50.8). */
+export function ficheAvecBref(fiche: FicheChantier, bref: readonly string[]): FicheChantier {
+  return { donnees: [...bref.map((texte, i) => ({ cle: `bref-${i + 1}`, libelle: "", valeur: texte, origine: "devis" as const })), ...fiche.donnees.filter((d) => !/^bref-\d+$/.test(d.cle))] };
 }
 
 /** La clé d'une ligne de la fiche dans le bref (`bref:<clé>`), stable quand l'artisan la réécrit. */
@@ -269,6 +274,10 @@ export function ficheCorrigee(fiche: FicheChantier | null | undefined, answers: 
 
 /** Les lignes de la fiche que le document montre (et que reçoit le fournisseur) : les données connues, sans les choix par pièce. */
 export function ficheDocument(fiche: FicheChantier): { cle: string; texte: string }[] {
+  // §51.5 : quand le modèle a écrit le bref en phrases (« bref-1 », « bref-2 »…), ce sont elles, et elles seules, que le
+  // document montre ; la fiche structurée reste derrière, pour le calcul.
+  const phrases = fiche.donnees.filter((d) => /^bref-\d+$/.test(d.cle) && d.valeur && d.origine !== "manquante");
+  if (phrases.length > 0) return phrases.map((d) => ({ cle: ficheBriefKey(d), texte: d.valeur! }));
   return fiche.donnees
     // La zone se dit par la ville et la situation (« Brest, bord de mer »), qui ferment le bref.
     .filter((d) => d.origine !== "manquante" && d.valeur && !d.cle.includes("@") && d.cle !== "consommables" && d.cle !== "zone")
