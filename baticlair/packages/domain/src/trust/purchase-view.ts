@@ -822,8 +822,11 @@ export function purchaseView(
   for (const d of counter) {
     const what = d.text.replace(/\s*\?$/, "");
     const rule = d.key.startsWith(A_PRECISER) ? `${d.title} à préciser` : `Info manquante : ${what.charAt(0).toLowerCase()}${what.slice(1)}`;
-    for (const [i, item] of toBuy.entries()) {
-      if (!item.lineIds.includes(d.lineIds[0]!)) continue;
+    // Retour du fondateur (2026-10-11) : ce qui manque aux liteaux ne se dit pas sur les tuiles de la même ligne du devis.
+    // La donnée va aux articles de la ligne qu'elle nomme (« traitement des liteaux » → les liteaux), sinon à tous.
+    const onLine = [...toBuy.entries()].filter(([, item]) => item.lineIds.includes(d.lineIds[0]!));
+    const named = onLine.filter(([, item]) => namesArticle(`${d.title} ${d.text}`, item.label));
+    for (const [i, item] of named.length > 0 ? named : onLine) {
       toBuy[i] = { ...item, waitsOn: [...(item.waitsOn ?? []), d.key], rules: [...(item.rules ?? []), { key: `manque:${d.key}`, text: rule, local: true, said: true }] };
     }
   }
@@ -920,6 +923,14 @@ function counterQuestions(readings: ReadonlyMap<string, QuoteLineReading> | unde
   return out;
 }
 const plain = (t: string) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+/** Une donnée du comptoir nomme-t-elle cet article ? « traitement des liteaux » nomme « Liteaux 27×40 », pas les tuiles. */
+function namesArticle(asked: string, label: string): boolean {
+  const stem = (w: string) => w.replace(/(?:aux|eaux|s|x)$/, "");
+  const words = (t: string) => plain(t).split(/[^a-z0-9]+/).filter((w) => w.length > 3).map(stem);
+  const article = new Set(words(label));
+  return words(asked).some((w) => article.has(w));
+}
 
 /**
  * Une ligne reprise telle quelle du devis dont la famille demande une précision que le fournisseur ne peut pas deviner

@@ -1045,6 +1045,40 @@ test("§50.7 : une ligne ouverte passe au premier plan, le reste flouté ; un ta
   await expect(voile).toHaveCount(0);
 });
 
+test("§49.8 : une info qui manque se demande en clair sur la ligne qu'elle concerne, avec ses boutons", async ({ page }) => {
+  // Retour du fondateur (2026-10-11, capture iPhone) : « Liteaux 27×40, Section à préciser : je ne sais pas quoi faire. On
+  // doit comprendre sans réfléchir. » Ce qui manquait aux liteaux était dit aussi sur les tuiles, et sa question vivait sur
+  // la carte des tuiles : celle des liteaux, ouverte, était vide.
+  await signUp(page);
+  await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-canal-manque.pdf"));
+  // Les questions au premier bouton, sauf le traitement des liteaux : laissé sans réponse, il revient sur la ligne, orange.
+  const questions = page.getByRole("region", { name: "Les questions" });
+  await expect(questions).toBeVisible({ timeout: 60_000 });
+  const cards = questions.getByRole("listitem");
+  for (let i = 0; i < (await cards.count()); i++) {
+    const card = cards.nth(i);
+    if (/traitement/i.test((await card.textContent()) ?? "")) continue;
+    await card.getByRole("button").filter({ hasNotText: /^Autre$/ }).first().click();
+  }
+  await page.getByRole("button", { name: /^Calculer ma liste/ }).click();
+  await expect(page.getByRole("region", { name: "Page des fournitures" })).toBeVisible({ timeout: 60_000 });
+  await openList(page);
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  const liteaux = list.getByRole("listitem").filter({ hasText: /^Liteaux/ }).first();
+  const tuiles = list.getByRole("listitem").filter({ hasText: /^Tuiles Canal/ }).first();
+  await expect(liteaux.getByText("Traitement à préciser")).toBeVisible();
+  // La tuile n'a pas à dire ce qui manque aux liteaux.
+  await expect(tuiles.getByText("Traitement à préciser")).toHaveCount(0);
+  await liteaux.getByRole("button", { name: /^Modifier la ligne : / }).click();
+  // La question, en toutes lettres, et ses réponses : rien à deviner.
+  const question = liteaux.getByRole("group", { name: "Traitement des liteaux" });
+  await expect(question.getByText("Traitement des liteaux ?")).toBeVisible();
+  await question.getByRole("button", { name: "Classe 2" }).click();
+  await settle(page);
+  await expect(list.getByText("Traitement à préciser")).toHaveCount(0);
+});
+
 test("§49.8 : un tap refusé par le serveur se dit DANS la ligne ouverte, jamais en silence", async ({ page }) => {
   // Retour du fondateur (2026-10-10, capture iPhone) : « Quand je clique sur un bouton, rien ne se passe. »
   await signUp(page);
