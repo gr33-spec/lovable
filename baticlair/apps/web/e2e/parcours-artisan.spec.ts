@@ -1379,3 +1379,11 @@ test("Autre : quand la bonne réponse n'est pas dans les boutons, elle s'écrit 
   await expect(list).toBeVisible({ timeout: 60_000 });
   await expect(list.getByText(/Ardoise d'Angers/).first()).toBeVisible();
 });
+
+test("une adresse inconnue : une page en français, avec le chemin du retour (audit avant commercialisation)", async ({ page }) => {
+  await page.goto("/cette-page-n-existe-pas");
+  await expect(page.getByRole("heading", { name: "Page introuvable" })).toBeVisible();
+  await expect(page.getByText(/This page could not be found|404/)).toHaveCount(0);
+  await page.getByRole("link", { name: "Retour à l'accueil" }).click();
+  await expect(page).not.toHaveURL(/cette-page-n-existe-pas/);
+});

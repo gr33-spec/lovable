@@ -64,7 +64,7 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Constante | `espacement_crochet` | 0,5 m | §15 | gouttiere, gouttiere-pvc-alu | lot-couverture-3.test.ts (par §15), artisan-screen.test.ts (par §15) |
 | Constante | `espacement_crochet_littoral` | 0,4 m | §15 | gouttiere, gouttiere-pvc-alu | lot-couverture-3.test.ts (par §15), artisan-screen.test.ts (par §15) |
 | Constante | `etain_par_jonction` | 0,015 kg | §2, §25.3, §25.7 | gouttiere | regles-sans-test-audit.test.ts |
-| Constante | `faitiere` | 2 m | §8 | couverture-bac-acier | banc-devis-reels.test.ts, cas-reference-d2026-015.test.ts, dernier-recours.test.ts, socle-trois-niveaux.test.ts, vue-artisan.test.ts, artisan-screen.test.ts |
+| Constante | `faitiere` | 2 m | §8 | couverture-bac-acier | banc-devis-reels.test.ts, cas-reference-d2026-015.test.ts, dernier-recours.test.ts, socle-trois-niveaux.test.ts, vue-artisan.test.ts, artisan-screen.test.ts, isolation-toutes-routes.test.ts |
 | Constante | `fixations_par_patte` | 2 u | §36.2 | couverture-zinc-joint-debout | document-d2026-018.test.ts (par §36.2) |
 | Constante | `flacons_decapant` | 1 u | §25.3, §25.7 | gouttiere | regles-sans-test-audit.test.ts |
 | Constante | `largeur_courante` | 650 mm | §7, §36 | couverture-zinc-joint-debout | dernier-recours.test.ts (par §7, §36), infos-chantier.test.ts (par §7, §36), joint-debout.test.ts (par §7, §36) |

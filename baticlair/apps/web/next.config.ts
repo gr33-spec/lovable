@@ -13,8 +13,8 @@ const securityHeaders = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "X-Robots-Tag", value: "noindex, nofollow" },
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
-  // Le micro sert à répondre à la voix aux questions de comptoir (§48).
-  { key: "Permissions-Policy", value: "camera=(self), microphone=(self), geolocation=()" },
+  // L'appareil photo sert au croquis d'une ligne ; plus de micro depuis le retrait de la voix (§50.7).
+  { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=()" },
 ];
 
 const nextConfig: NextConfig = {

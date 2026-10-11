@@ -82,6 +82,11 @@ Avant de toucher au moteur, aux règles ou aux écrans, lire la section concern�
 - PAYWALL EN PAUSE (fondateur, 2026-10-11 : « fais en sorte que je puisse utiliser pour l'instant, on mettra le paywall actif plus tard ») : `PAYWALL` vaut `off` par défaut, l'usage se compte mais rien ne bloque la création d'un chantier ni n'affiche « Limite de ta formule atteinte » ; `PAYWALL=on` le rallume (les e2e le gardent allumé pour tester l'écran). Test : `apps/api/test/paywall-en-pause.test.ts`.
 - Métier du chantier : choisi à la création (`Project.trade`, celui de l'entreprise par défaut) ; il choisit la lecture et le tiroir du devis déposé.
 
+## Fiabilité avant commercialisation (audit du 2026-10-11)
+
+- ISOLATION ENTRE ENTREPRISES, ROUTE PAR ROUTE : `apps/api/test/isolation-toutes-routes.test.ts` relève toutes les routes de l'application elle-même ; une entreprise B appelle chacune avec les identifiants de A (corps quelconque, puis corps valide et fichier) : jamais une réponse acceptée, jamais une 500, jamais un identifiant ou un nom de A dans une réponse, et les données de A intactes ; sans session, chaque route refuse (sauf santé et connexion). Toute nouvelle route y passe d'office ; un paramètre sans identifiant de A fait échouer le test (à ajouter à `idFor`).
+- UN ÉCRAN QUI CASSE : `app/error.tsx`, `app/global-error.tsx` et `app/not-found.tsx` en français (« Oups, cet écran a eu un souci », « Réessayer », « Retour à l'accueil » ; « Page introuvable »), jamais la page blanche de Next en anglais ; l'erreur part à `POST /v1/client-errors` (public, 30 par heure) qui prévient l'équipe par les alertes (B5, `client_error`), sans donnée de client (e-mails, numéros, identifiants masqués, paramètres d'adresse retirés). Tests : `apps/api/test/erreurs-navigateur.test.ts`, e2e « adresse inconnue ».
+
 ## Partenaires
 
 - Clé API partenaire (`X-Api-Key: bc_…`, module `partners`) : une clé par intégration, hachée en base, montrée une seule fois, rattachée à l'entreprise et à son auteur ; quota mensuel de quantitatifs créés (429 au-delà, les lectures ne comptent pas) ; révocation immédiate ; une clé ne gère jamais les clés. Test : `apps/api/test/partner-keys.test.ts`. Notice : `docs/api-quantitatifs.md`.
