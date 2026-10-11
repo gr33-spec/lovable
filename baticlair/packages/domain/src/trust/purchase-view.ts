@@ -1113,7 +1113,8 @@ export function applyRuleConfirmations(
 ): PurchaseView {
   const decisions: Decision[] = [];
   const toBuy = purchase.toBuy.map((item): PurchaseItem => {
-    const pending = (item.rules ?? []).filter((r) => r.local || !validated.has(r.key));
+    // §51.6, §49.4 : une ligne qui attend une réponse (« manque: ») se règle par sa question, jamais par un « C'est bon » en double.
+    const pending = (item.rules ?? []).filter((r) => !r.key.startsWith("manque:") && (r.local || !validated.has(r.key)));
     if (pending.length === 0 || `${RATIO}${item.key}` in answers || item.edited?.includes("quantity")) return item;
     decisions.push({
       key: `${RATIO}${item.key}`,

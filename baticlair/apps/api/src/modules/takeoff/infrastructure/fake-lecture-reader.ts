@@ -114,9 +114,16 @@ function donneesDe(ref: Referential, ouvrage: string, designation: string): Reco
 /** L'ouvrage et l'emplacement du référentiel que nomme la désignation : le mot nommé en premier l'emporte (« Couverture en ardoises … au crochet » : l'ardoise), puis le plus précis. */
 function emplacementDe(ref: Referential, designation: string): { ouvrage: string; emplacement: string } | null {
   // L'article est en tête de ligne : avant la virgule, le tiret, « pour », « sur » ou « de » (« Chatière de ventilation » n'est pas une bande de ventilation).
-  const text = normalizeText(withoutLabour(designation))
-    .replace(/^(?:fourniture et pose|fourniture|pose|remplacement|mise en place)\s+(?:de |d'|des |du )?/, "")
-    .split(/,| - |\s(?:pour|sur|de|des|du)\s/)[0]!;
+  const full = normalizeText(withoutLabour(designation)).replace(/^(?:fourniture et pose|fourniture|pose|remplacement|mise en place)\s+(?:de |d'|des |du )?/, "");
+  // D'abord le seul premier mot composé (« chatière »), puis l'article jusqu'à la virgule (« sortie de toit », « bande de rive »).
+  for (const text of [full.split(/,| - |\s(?:pour|sur|de|des|du)\s/)[0]!, full.split(/,| - /)[0]!]) {
+    const hit = emplacementDans(ref, text);
+    if (hit) return hit;
+  }
+  return null;
+}
+
+function emplacementDans(ref: Referential, text: string): { ouvrage: string; emplacement: string } | null {
   let best: { ouvrage: string; emplacement: string; at: number; score: number } | null = null;
   for (const w of ref.workItems) {
     for (const s of w.slots) {
@@ -180,9 +187,11 @@ export function lectureSimulee(request: LectureRequest): LectureDevis {
     const designation = row.cols[row.index - 1]!;
     const quantite = row.quantity.trim();
     const unite = row.unit;
-    const extra = row.cols.slice(row.index + 2);
+    // « 100 m2 » dans une seule cellule : les colonnes de plus commencent juste après ; « 100 | m2 » : une colonne plus loin.
+    const extra = row.cols.slice(row.index + (row.cols[row.index]!.trim() === row.quantity.trim() ? 2 : 1));
     const donnees: Record<string, string> = {};
     const attend: string[] = [];
+    const manques: { cle: string; donnee: string }[] = [];
     for (const col of extra) {
       const manque = /^manque\s*:\s*(.+)$/i.exec(col.trim());
       if (manque) {
@@ -194,7 +203,7 @@ export function lectureSimulee(request: LectureRequest): LectureDevis {
           const cle = normalizeText(donnee).replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
           const texte = `${donnee.charAt(0).toUpperCase()}${donnee.slice(1)} ?`;
           if (!questions.some((q) => q.cle === cle)) questions.push({ cle, texte, boutons: choix.map((c) => ({ label: c, valeur: c })), unite: null, donnee, ligne: row.ref });
-          attend.push(cle);
+          manques.push({ cle, donnee });
         }
         continue;
       }
@@ -229,6 +238,12 @@ export function lectureSimulee(request: LectureRequest): LectureDevis {
         const words = [...(s.keywords ?? []), ...(ref.families.find((f) => f.code === s.family)?.keywords ?? [])].map((k) => normalizeText(k));
         if (words.some((k) => containsKeyword(text, k))) cited.push({ nom: s.label, quantite: null, unite: null, ouvrage: work.id, emplacement: s.key, donnees: {}, attend: [], aPreciser: [], precision: null });
       }
+    }
+    // Ce qui manque va à l'article qu'il nomme (« traitement des liteaux » : les liteaux cités, pas les tuiles), sinon à la ligne.
+    for (const m of manques) {
+      const words = normalizeText(m.donnee).split(/[^a-z0-9]+/).filter((w) => w.length >= 5).map((w) => w.replace(/s$/, ""));
+      const target = [...cited, fourniture].find((f) => words.some((w) => normalizeText(f.nom).includes(w))) ?? fourniture;
+      if (!target.attend.includes(m.cle)) target.attend.push(m.cle);
     }
     return { ref: row.ref, designation, quantite, unite, role: "fourniture" as const, fournitures: [fourniture, ...cited] };
   });

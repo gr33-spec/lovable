@@ -263,7 +263,7 @@ export function planDeLecture(ref: Referential, lecture: LectureDevis, lignes: r
     return new Set(lines.map((x) => x.ref)).size >= 2 && new Set(lines.map((x) => x.donnees)).size >= 2;
   };
   const idFor = (w: WorkItemType, lineRef: string) =>
-    (w.perLine && (refsByWork.get(w.id)?.size ?? 0) >= 2) || w.slots.some((s) => splitSlot(`${w.id}/${s.key}`)) ? `${w.id}${INSTANCE_SEP}${lineRef}` : w.id;
+    (w.perLine && (refsByWork.get(w.id)?.size ?? 0) >= 2) || w.slots.some((s) => splitSlot(`${w.id}/${s.key}`)) ? `${w.id}${INSTANCE_SEP}${lineRef.replace(/[^a-zA-Z0-9_-]/g, "-")}` : w.id;
   const facts: SiteFact[] = [...ficheFacts(ref, lecture.fiche), ...extraFacts];
   const plans: LinePlan[] = [];
   const inputs = new Map<string, WorkItemInput>();

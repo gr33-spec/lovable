@@ -631,7 +631,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await expect(page.locator("section#comparer").getByText(/✓ Commande notée/)).toBeVisible();
 });
 
-test("plusieurs articles inconnus, sans unité : UNE décision les règle tous, rien n'est ✓ en fermant l'écran", async ({ page }) => {
+test("plusieurs articles ajoutés à la main, sans unité : gardés tels qu'écrits, la liste part", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Piscine Le Goff", "M. Le Goff", "2 rue des Dunes, Carnac");
   await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
@@ -646,28 +646,19 @@ test("plusieurs articles inconnus, sans unité : UNE décision les règle tous, 
     await page.getByRole("button", { name: "Ajouter", exact: true }).click();
     await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible();
   }
-
-  // Une seule carte pour les trois, jamais trois alertes identiques ; sa raison en entier, et son « C'est bon ».
-  const name = "Articles que BatiClair ne connaît pas encore";
-  await orangeCard(page, name);
-  // §50.3 : la raison en cinq mots au plus.
-  await expect(page.getByText("Article inconnu, sans unité", { exact: true })).toBeVisible();
-  // Recharger la page ne règle rien à la place de l'artisan.
-  await page.reload();
-  await orangeCard(page, name);
-  // Rien ne part avec une ligne orange : « Envoyer » dit pourquoi, sans ouvrir « À qui j'envoie ? ».
-  await closeOpenLine(page);
-  await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
-  await expect(page.getByRole("dialog", { name: "À qui j'envoie ?" })).toHaveCount(0);
-  await expect(page.getByRole("status").filter({ hasText: /^Règle d'abord/ })).toBeVisible();
-
-  const group = await orangeCard(page, name);
-  await group.getByRole("button", { name: /^C'est bon/ }).click();
-  await expect(group).toHaveCount(0);
+  // §51.5 : une ligne écrite par l'artisan est une fourniture telle qu'écrite, sans décision ni carte orange ; rien n'est inventé.
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  for (const designation of ["Skimmer pour piscine liner", "Buse de refoulement", "Prise balai"]) {
+    await expect(list.getByRole("listitem").filter({ hasText: designation }).first()).toBeVisible();
+  }
+  await expect(page.getByText("Articles que BatiClair ne connaît pas encore")).toHaveCount(0);
   await confirmDoubts(page);
   // Gardés tels qu'écrits, à la pièce : la ligne est verte, prête à partir.
-  const skimmer = page.getByRole("region", { name: "Liste des fournitures" }).getByRole("listitem").filter({ hasText: "Skimmer pour piscine liner" }).first();
+  const skimmer = list.getByRole("listitem").filter({ hasText: "Skimmer pour piscine liner" }).first();
   await expect(skimmer.getByRole("img", { name: "sûr" })).toBeVisible();
+  await page.reload();
+  await openList(page);
+  await expect(list.getByRole("listitem").filter({ hasText: "Skimmer pour piscine liner" }).first()).toBeVisible();
 });
 
 test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs", async ({ page }) => {
@@ -765,23 +756,17 @@ test("RGPD : l'artisan télécharge ses données, puis supprime son compte (en t
   await expect(page).toHaveURL(/\/connexion/);
 });
 
-test("plusieurs logements : le chantier rangé par logement, puis le total à commander", async ({ page }) => {
+test("plusieurs logements : un devis d'électricien pièce par pièce donne la liste à commander", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Résidence Les Pins", "SCI Les Pins", "4 allée des Pins, Vannes");
   await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-electricien-logements.pdf"));
   await passQuestions(page);
-  // D'abord par logement (retour du fondateur, 2026-10-05) : les identiques regroupés, chacun avec ses quantités du devis.
-  await expect(page.getByRole("tab", { name: "Par logement (3)" })).toHaveAttribute("aria-selected", "true");
-  const vue = page.getByRole("region", { name: "Le chantier par logement" });
-  const identiques = vue.getByRole("article", { name: "2 logements identiques" });
-  await expect(identiques.getByText("× 2")).toBeVisible();
-  await expect(identiques.getByText("Logement 1, Logement 2")).toBeVisible();
-  await expect(identiques.getByRole("listitem").filter({ hasText: "Prise 2P+T 16 A" })).toContainText("9");
-  await expect(vue.getByRole("article", { name: "Logement 3" }).getByRole("listitem").filter({ hasText: "Prise 2P+T 16 A" })).toContainText("6");
-  // Puis le total, regroupé pour le fournisseur.
-  await vue.getByRole("button", { name: "Voir le total à commander" }).click();
-  await expect(page.getByRole("tab", { name: "Total à commander" })).toHaveAttribute("aria-selected", "true");
-  await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible();
+  // §51.5 : la lecture ne porte plus les titres de logement de l'ancien extracteur ; la liste est celle du devis, dans son ordre.
+  await expect(page.getByRole("tab", { name: /Par logement/ })).toHaveCount(0);
+  await openList(page);
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(list.getByRole("listitem").filter({ hasText: "Prise 2P+T 16 A" }).first()).toBeVisible();
+  await expect(list.getByRole("listitem").filter({ hasText: "Tableau électrique" }).first()).toBeVisible();
 });
 
 test("§48.4 et règle numéro un : questions au bouton seulement, avant le calcul ; rien d'absent du devis ; puis la main sur le document (§50.7)", async ({ page }) => {
