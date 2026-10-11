@@ -1,7 +1,8 @@
 "use client";
 
-import { Check, FileUp, Loader2, Pencil } from "lucide-react";
-import { ListScene, ReadingScene } from "@/components/chantier-scenes";
+import { Check, ChevronLeft, FileUp, Loader2, Pencil } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ListScene, ReadingStage } from "@/components/chantier-scenes";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
 import type { ApiError, Takeoff } from "@/lib/api";
@@ -62,16 +63,40 @@ export function DropZone({ onFile, pending, error }: { onFile: (file: File) => v
 // ——— 2. L'analyse ———
 
 /**
- * §50.1 : pendant la lecture, une seule phrase : « Je lis ton devis ». Retour du fondateur (2026-10-10) : l'animation montre
- * le métier, un surligneur qui passe sur le devis ligne à ligne et coche chaque ligne lue (`ReadingScene`).
+ * §50.1 : pendant la lecture, une seule phrase : « Je lis ton devis ». Retour du fondateur (2026-10-11) : « une animation
+ * plus fun qui prend tout l'écran » : le devis en grand, lu au surligneur et balayé par le scanner, d'où sortent les
+ * fournitures (`ReadingStage`). Plein écran, par-dessus le menu ; « Revenir à mes chantiers » laisse la lecture continuer
+ * (le serveur prévient quand c'est prêt), on n'y reste jamais coincé.
  */
 export function AnalysisScreen() {
+  const router = useRouter();
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, []);
   return (
-    <section aria-label="Analyse du devis" className="flex flex-col items-center gap-6 rounded-[20px] bg-chantier px-5 pt-9 pb-8 text-white shadow-card">
-      <ReadingScene />
-      <h2 aria-live="polite" className="font-display text-[24px] leading-tight font-extrabold tracking-[-0.02em]">
-        Je lis ton devis
-      </h2>
+    <section aria-label="Analyse du devis" className="fixed inset-0 z-[45] flex flex-col overflow-hidden bg-chantier text-white">
+      <div className="flex shrink-0 px-4 pt-[max(14px,env(safe-area-inset-top))]">
+        <button
+          type="button"
+          onClick={() => router.push("/chantiers")}
+          aria-label="Revenir à mes chantiers"
+          className="inline-flex size-11 items-center justify-center rounded-full bg-white/10 active:bg-white/20"
+        >
+          <ChevronLeft size={22} aria-hidden="true" />
+        </button>
+      </div>
+      <div className="flex min-h-0 grow flex-col items-center justify-center gap-6 pb-[max(28px,env(safe-area-inset-bottom))]">
+        <div className="origin-center scale-[0.92] min-[400px]:scale-100 sm:scale-[1.15]">
+          <ReadingStage />
+        </div>
+        <h2 aria-live="polite" className="font-display text-[30px] leading-tight font-extrabold tracking-[-0.02em]">
+          Je lis ton devis
+        </h2>
+      </div>
     </section>
   );
 }

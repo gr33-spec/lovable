@@ -1387,3 +1387,33 @@ test("une adresse inconnue : une page en français, avec le chemin du retour (au
   await page.getByRole("link", { name: "Retour à l'accueil" }).click();
   await expect(page).not.toHaveURL(/cette-page-n-existe-pas/);
 });
+
+test("§50.1 : « Je lis ton devis » prend tout l'écran, avec le retour pour ne jamais rester coincé", async ({ page }) => {
+  // Retour du fondateur (2026-10-11) : « je veux une animation plus fun qui prend tout l'écran ». La lecture simulée est
+  // instantanée : ici l'API répond « lecture en cours », pour regarder l'écran le temps qu'il faut.
+  await signUp(page);
+  // L'écran lit l'état du quantitatif (`/v1/quantitatifs?…&ecran=1`) : « en cours », sans liste encore.
+  const reading = (q: Record<string, unknown>) => ({ ...q, etat: "en_cours", ecran: null });
+  await page.route(/\/v1\/quantitatifs(\?|$)/, async (route) => {
+    try {
+      const res = await route.fetch();
+      const body = (await res.json()) as { items?: Record<string, unknown>[] } & Record<string, unknown>;
+      await route.fulfill({ response: res, json: body.items ? { ...body, items: body.items.map(reading) } : reading(body) });
+    } catch {
+      // Requête annulée par l'application (elle relit l'état) : rien à répondre.
+    }
+  });
+  await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  const lecture = page.getByRole("region", { name: "Analyse du devis" });
+  await expect(lecture.getByRole("heading", { name: "Je lis ton devis" })).toBeVisible();
+  const box = (await lecture.boundingBox())!;
+  const vp = page.viewportSize()!;
+  expect(box.x).toBeLessThanOrEqual(0.5);
+  expect(box.y).toBeLessThanOrEqual(0.5);
+  expect(box.width).toBeGreaterThanOrEqual(vp.width - 1);
+  expect(box.height).toBeGreaterThanOrEqual(vp.height - 1);
+  // Une seule phrase (§50.1) ; et un retour : la lecture continue, l'artisan est prévenu quand c'est prêt.
+  await expect(lecture.getByRole("heading")).toHaveCount(1);
+  await expect(lecture.getByRole("button", { name: "Revenir à mes chantiers" })).toBeVisible();
+});
