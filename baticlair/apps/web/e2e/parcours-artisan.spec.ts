@@ -386,7 +386,8 @@ test("un couvreur dépose son devis client (lecture sans IA)", async ({ page }) 
   await title.click();
   const viewer = page.getByRole("dialog", { name: "devis-scanne.pdf" });
   await expect(viewer.getByRole("link", { name: "Télécharger" })).toBeVisible();
-  const size = await viewer.locator("iframe").evaluate(async (frame) => (await (await fetch((frame as HTMLIFrameElement).src)).blob()).size);
+  // Le fichier entier, celui que « Télécharger » enregistre (le PDF s'affiche page par page, en entier).
+  const size = await viewer.getByRole("link", { name: "Télécharger" }).evaluate(async (a) => (await (await fetch((a as HTMLAnchorElement).href)).blob()).size);
   expect(size).toBe(heavy.byteLength);
   await viewer.getByRole("button", { name: "Fermer le document" }).click();
 });
@@ -981,6 +982,16 @@ test("§50.7 : en bas, deux boutons figés : l'aperçu (le mail et le PDF du fou
   await expect(pdf.getByRole("button", { name: "Fermer le document" })).toBeVisible();
   // Le PDF est arrivé (le même générateur que celui du fournisseur) : il se télécharge.
   await expect(pdf.getByRole("link", { name: "Télécharger" })).toBeVisible();
+  // Retour du fondateur (2026-10-11) : « quand le PDF s'ouvre, qu'on le voie en entier ; on zoome si on veut plus
+  // grand ». La première page tient entière dans l'écran, en largeur et en hauteur.
+  const premiere = pdf.getByRole("img", { name: "Page 1" });
+  await expect(premiere).toBeVisible();
+  const box = (await premiere.boundingBox())!;
+  const vp = page.viewportSize()!;
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(vp.width + 0.5);
+  expect(box.y).toBeGreaterThanOrEqual(0);
+  expect(box.y + box.height).toBeLessThanOrEqual(vp.height + 0.5);
   await pdf.getByRole("button", { name: "Fermer le document" }).click();
   // Depuis l'aperçu, l'envoi : on choisit à qui.
   await apercu.getByRole("button", { name: "Envoyer au fournisseur" }).click();

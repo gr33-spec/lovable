@@ -103,7 +103,7 @@ describe("§45.7 — la demande de devis du chantier Test", () => {
     const pdf = (await agent.get(`/v1/price-requests/${created.id}/demande-de-devis.pdf?destinataire=${created.recipients[0].id}`).buffer(true)).body as Buffer;
     const text = await pdfText(pdf);
     if (process.env.SHOW_PDF) console.log(text);
-    const order = ["Demande de devis", "Point.P Brest", "1. Le chantier en bref", "2. Fournitures à chiffrer", "3. Détail du devis (sans prix)"].map((t) => text.indexOf(t));
+    const order = ["Demande de devis", "Point.P Brest", "Le chantier en bref", "1. Fournitures à chiffrer", "2. Détail du devis (sans prix)"].map((t) => text.indexOf(t));
     for (const i of order) expect(i).toBeGreaterThanOrEqual(0);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     // Rien à préciser sur ce chantier : le bloc « À préciser avec vous » est absent, les suivants se renumérotent.
@@ -270,7 +270,7 @@ describe("§45.9 — l'aperçu avant envoi", () => {
     const pdf = (await pdfText(Buffer.from(mail.attachments![0]!.contentBase64, "base64"))).replace(/\s+/g, " ");
     let at = 0;
     for (const b of preview.document.blocs as { titre: string; numero: number; kind: string; lignes: (string | { designation: string; quantite: string; precision: string | null })[] }[]) {
-      const texts = [`${b.numero}. ${b.titre}`, ...b.lignes.flatMap((l) => (typeof l === "string" ? [l] : [l.designation, l.quantite, ...(l.precision ? [l.precision] : [])]))];
+      const texts = [b.numero > 0 ? `${b.numero}. ${b.titre}` : b.titre, ...b.lignes.flatMap((l) => (typeof l === "string" ? [l] : [l.designation, l.quantite, ...(l.precision ? [l.precision] : [])]))];
       for (const t of texts) {
         // Un nom long passe sur deux lignes du PDF (la quantité s'intercale à la lecture) : ses mots, dans l'ordre.
         let from = at;

@@ -124,12 +124,15 @@ export interface PacketDocument {
   };
   destinataire: string | null;
   blocs: (
+    /** `numero` 0 : un bloc sans numéro (le bref, en petit dans un cadre). */
     | { numero: number; titre: string; kind: "list"; lignes: string[] }
     | { numero: number; titre: string; kind: "table"; colonnes: [string, string, string]; lignes: PacketSupply[] }
   )[];
   croquis: { article: string; nom: string; commentaire: string | null }[];
   pied: { question: string | null; mention: string };
 }
+
+const BREF = "Le chantier en bref";
 
 export function packetDocument(p: SupplierPacket, options: { destinataire?: string | null } = {}): PacketDocument {
   const s = p.expediteur;
@@ -138,7 +141,9 @@ export function packetDocument(p: SupplierPacket, options: { destinataire?: stri
   let n = 0;
   // Les blocs vides disparaissent, jamais de « néant » (§45.5).
   const resume = p.resume;
-  if (resume.length > 0) blocs.push({ numero: ++n, titre: "Le chantier en bref", kind: "list", lignes: resume });
+  // Le bref, en petit dans un cadre et sans numéro : la liste des fournitures est ce qu'on met en avant (retour du
+  // fondateur, 2026-10-11).
+  if (resume.length > 0) blocs.push({ numero: 0, titre: BREF, kind: "list", lignes: resume });
   // Du gros au petit, matériau principal en premier, consommables en dernier (§45.3).
   const rows = supplies(p);
   const ordered = [...rows.filter((r) => !r.consommable), ...rows.filter((r) => r.consommable)];
@@ -161,7 +166,7 @@ export function packetDocumentLines(d: PacketDocument): string[] {
   const out = [d.entete.entreprise, ...d.entete.coordonnees, d.entete.titre, d.entete.chantier, ...(d.entete.ville ? [d.entete.ville] : []), d.entete.date, ...(d.entete.reference ? [`Réf. ${d.entete.reference}`] : [])];
   if (d.destinataire) out.push(`À l'attention de : ${d.destinataire}`);
   for (const b of d.blocs) {
-    out.push(`${b.numero}. ${b.titre}`);
+    out.push(b.numero > 0 ? `${b.numero}. ${b.titre}` : b.titre);
     if (b.kind === "list") out.push(...b.lignes);
     else for (const r of b.lignes) out.push([r.designation, r.quantite, r.precision ?? ""].join(" | "));
   }
@@ -297,14 +302,27 @@ export async function packetPdf(
   }
   const cols = [width * 0.41, width * 0.35, width * 0.24];
   for (const b of d.blocs) {
-    room(40);
-    write(`${b.numero}. ${b.titre}`, bold, 12, { gap: 4 });
-    if (b.kind === "list" && b.titre === "Le chantier en bref" && b.lignes.length === 1) {
-      // Le bref : un paragraphe, sans puce (retour du fondateur, 2026-10-11).
-      write(b.lignes[0]!, regular, 10);
-      y -= 10;
+    if (b.kind === "list" && b.numero === 0) {
+      // Le bref : un paragraphe en petit, dans un cadre fin, avant la liste (retour du fondateur, 2026-10-11).
+      const pad = 10;
+      const size = 8.5;
+      const lines = b.lignes.flatMap((l) => wrap(l, regular, size, width - 2 * pad));
+      const h = pad + 11 + lines.length * size * 1.4 + pad - 2;
+      room(h + 14);
+      page.drawRectangle({ x: margin, y: y - h, width, height: h, color: BAND, borderColor: RULE, borderWidth: 0.8 });
+      page.drawText(pdfSafe(b.titre), { x: margin + pad, y: y - pad - 7.5, size: 7.5, font: bold, color: MUTED });
+      let ty = y - pad - 11;
+      for (const l of lines) {
+        page.drawText(l, { x: margin + pad, y: ty - size, size, font: regular, color: INK });
+        ty -= size * 1.4;
+      }
+      y -= h + 18;
       continue;
     }
+    // Les fournitures, ce que le fournisseur chiffre : le plus grand titre de la page.
+    const big = b.kind === "table";
+    room(big ? 48 : 40);
+    write(`${b.numero}. ${b.titre}`, bold, big ? 14 : 12, { gap: big ? 6 : 4 });
     if (b.kind === "list") {
       for (const l of b.lignes) {
         room(14);

@@ -4,6 +4,7 @@ import { Download, Share2, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { getActiveCompanyId } from "@/lib/api";
 import { OPEN_FILE_EVENT, type OpenFileRequest } from "@/lib/open-document";
+import { PdfPages } from "./pdf-pages";
 
 type Loaded = OpenFileRequest & { objectUrl: string; file: File };
 
@@ -35,6 +36,9 @@ export function FileViewer() {
   const [request, setRequest] = useState<OpenFileRequest | null>(null);
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [error, setError] = useState(false);
+  // Le PDF se dessine page par page, en entier (`PdfPages`) ; s'il n'y arrive pas, l'afficheur du téléphone prend le relais.
+  const [native, setNative] = useState(false);
+  const toNative = useCallback(() => setNative(true), []);
 
   const close = useCallback(() => {
     setRequest(null);
@@ -53,6 +57,7 @@ export function FileViewer() {
         return null;
       });
       setError(false);
+      setNative(false);
       setRequest(detail);
     };
     window.addEventListener(OPEN_FILE_EVENT, onOpen);
@@ -98,9 +103,14 @@ export function FileViewer() {
   const bar = "inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-extrabold";
 
   return (
-    <div role="dialog" aria-modal="true" aria-label={request.title} className="fixed inset-0 z-[60] flex flex-col bg-ink/95">
+    <div role="dialog" aria-modal="true" aria-label={request.title} className="fixed inset-0 z-[60] flex flex-col bg-ink">
       <div className="flex items-center gap-2 px-3 pt-[max(10px,env(safe-area-inset-top))] pb-2 text-white">
-        <button type="button" onClick={close} aria-label="Fermer le document" className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-white/15 px-4 text-[15px] font-bold active:bg-white/25">
+        <button
+          type="button"
+          onClick={close}
+          aria-label="Fermer le document"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-white/15 px-4 text-[15px] font-bold active:bg-white/25"
+        >
           <X size={20} aria-hidden="true" />
           Fermer
         </button>
@@ -116,6 +126,8 @@ export function FileViewer() {
         ) : isImage ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={loaded.objectUrl} alt={loaded.title} className="max-h-full max-w-full self-center rounded-xl object-contain" />
+        ) : !native ? (
+          <PdfPages file={loaded.file} title={loaded.title} onError={toNative} />
         ) : (
           <iframe title={loaded.title} src={loaded.objectUrl} className="h-full w-full max-w-3xl rounded-xl bg-white" />
         )}
