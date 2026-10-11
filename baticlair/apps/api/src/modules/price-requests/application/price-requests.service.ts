@@ -196,12 +196,18 @@ export class PriceRequestsService {
     const request = await this.requests.findByRecipient(tenant, recipientId);
     if (!request) throw notFound("PriceRequestRecipient");
     const recipient = request.recipients.find((r) => r.id === recipientId)!;
+    // Déjà parti (ou déjà répondu) : jamais deux fois le même mail. « Envoyer » rappuyé après une panne ne renvoie qu'aux
+    // fournisseurs qui n'ont rien reçu (audit avant commercialisation, 2026-10-11).
+    if (recipient.status !== "to_send") return this.reload(tenant, request.id);
     if (!request.packet) throw new DomainError("conflict", "This request predates the supplier packet", { reason: "no_packet" });
     const pdf = await this.pdf(tenant, request.id, recipientId);
     await this.mailer.send({
       to: recipient.supplier.email,
       subject: packetSubject(request.packet),
       text: packetMail(request.packet),
+      // La réponse du fournisseur va à l'artisan ; et le mail doit partir, sinon la demande ne passe pas « envoyée ».
+      ...(request.packet.expediteur?.email ? { replyTo: request.packet.expediteur.email } : {}),
+      mustDeliver: true,
       // Le PDF « Demande de devis » (les blocs + les croquis en pages), puis chaque croquis d'origine, pour le zoom.
       attachments: [
         { filename: pdf.filename, contentType: "application/pdf", contentBase64: Buffer.from(pdf.bytes).toString("base64") },
