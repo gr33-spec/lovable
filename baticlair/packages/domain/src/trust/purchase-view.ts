@@ -203,8 +203,10 @@ function supplyScreen(
     const precise = decisions.find((d) => d.key === `${PRECISE}${item.lineIds[0]}`);
     // §49.2.5 « Info manquante » : un tap ouvre la question qui manque à la ligne.
     const waits = (item.waitsOn ?? []).map((k) => decisions.find((d) => d.question?.key === k || d.key === `engine:${k}` || d.key === k)).filter((d): d is Decision => !!d);
-    const check = item.state === "to_confirm" || precise !== undefined || (item.waitsOn?.length ?? 0) > 0;
-    const decision = waits[0] ?? (item.state === "to_confirm" ? (decisionFor(item.lineIds) ?? precise) : precise);
+    // Une décision qui vise la ligne (doublon, article inconnu) la met orange, avec son geste (§49.1, §49.8).
+    const lineDecision = decisionFor(item.lineIds);
+    const check = item.state === "to_confirm" || precise !== undefined || (item.waitsOn?.length ?? 0) > 0 || lineDecision !== undefined;
+    const decision = waits[0] ?? lineDecision ?? precise;
     // Une ligne déjà orange pour une donnée qui manque ne ressort pas une 2e fois pour son doute de lecture (§49.8).
     for (const d of [decision, precise, ...waits, item.state === "to_confirm" ? decisionFor(item.lineIds) : undefined]) if (d) used.add(d.key);
     const missing = item.rules?.length ? { text: toConfirmText(item.rules) } : undefined;

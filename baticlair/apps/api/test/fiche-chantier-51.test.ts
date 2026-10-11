@@ -55,7 +55,7 @@ describe("§51 : la fiche de chantier, par l'API", () => {
   it("§51.4 : une réponse « Autre » sur le façonnage, relue, modifie la fiche et la liste", async () => {
     const { agent, id } = await chantier();
     const before = (await agent.get(`/v1/quantitatifs/${id}`).expect(200)).body as { questions: Question[]; lignes: { libelle: string }[] };
-    const faconnage = before.questions.find((q) => q.id === "engine:param:faconnage");
+    const faconnage = before.questions.find((q) => q.id === "engine:param:faconnage@couverture-zinc-joint-debout");
     expect(faconnage).toBeDefined();
     expect(before.lignes.some((l) => /^Bacs joint debout/.test(l.libelle))).toBe(false);
     const after = (
@@ -67,7 +67,7 @@ describe("§51 : la fiche de chantier, par l'API", () => {
     // La fiche garde la réponse, relue, origine « ta réponse ».
     expect(after.fiche.find((d) => d.origine === "reponse" && /bacs façonnés/.test(d.valeur ?? ""))).toBeDefined();
     // La question est réglée par la réponse relue : la couverture commandée façonnée.
-    expect(after.questions.map((q) => q.id)).not.toContain("engine:param:faconnage");
+    expect(after.questions.map((q) => q.id)).not.toContain("engine:param:faconnage@couverture-zinc-joint-debout");
     expect(after.lignes.find((l) => /^Bacs joint debout/.test(l.libelle))?.texte).toBe("31 bacs");
     // La fiche dit le façonnage tel que l'artisan l'a écrit, une seule fois.
     expect(after.fiche.find((d) => d.libelle === "Façonnage")).toMatchObject({ origine: "reponse" });
@@ -78,7 +78,7 @@ describe("§51 : la fiche de chantier, par l'API", () => {
     const after = (
       await agent
         .post(`/v1/quantitatifs/${id}/reponses`)
-        .send({ reponses: [{ question: "engine:param:faconnage", valeur: "Je commande façonné, il manque la couleur des pattes" }] })
+        .send({ reponses: [{ question: "engine:param:faconnage@couverture-zinc-joint-debout", valeur: "Je commande façonné, il manque la couleur des pattes" }] })
         .expect(201)
     ).body as { fiche: Fiche; questions: Question[] };
     const extra = after.questions.find((q) => q.id === "fiche:la_couleur_des_pattes");
@@ -94,7 +94,7 @@ describe("§51 : la fiche de chantier, par l'API", () => {
     const body = (
       await agent
         .post(`/v1/quantitatifs/${id}/calcul`)
-        .send({ reponses: [{ question: "engine:param:faconnage", valeur: "Je commande façonné, il manque la couleur des pattes" }] })
+        .send({ reponses: [{ question: "engine:param:faconnage@couverture-zinc-joint-debout", valeur: "Je commande façonné, il manque la couleur des pattes" }] })
         .expect(200)
     ).body as { phase?: string; questions: Question[] };
     expect(body.questions.map((q) => q.id)).toContain("fiche:la_couleur_des_pattes");

@@ -554,7 +554,9 @@ export function ecranDeLecture(input: {
     asked.push({ q: { cle, texte: q.text, boutons: (q.options ?? []).map((o) => ({ label: o.label, valeur: o.value })), unite: q.unit ?? null, donnee: def?.label.toLowerCase() ?? cle.replace(/_/g, " "), ligne }, key: q.key, question: q });
   }
   // Une réponse sans sa pièce (« param:faconnage » pour toutes les pièces) vaut pour chaque question de pièce (comme le calcul la lit).
-  const answered = (a: Asked) => answers[a.key] !== undefined || (scopedParam(a.key) !== null && answers[`param:${a.q.cle}`] !== undefined);
+  // §51.6 : une question laissée sans réponse (« je ne sais pas », null) reste ouverte sur sa ligne, orange, jusqu'à la réponse.
+  const given = (key: string) => answers[key] !== undefined && answers[key] !== null;
+  const answered = (a: Asked) => given(a.key) || (scopedParam(a.key) !== null && given(`param:${a.q.cle}`));
   // À l'ouverture, toutes les questions du modèle ; une fois qu'on répond, seules celles qu'une fourniture ou le calcul attend encore
   // (le nombre d'arêtiers ne sert plus quand l'arêtier est en zinc).
   // Encore utile : le calcul la demande, ou la donnée manque encore à un article (« dév. ? ») ; un modèle choisi peut rendre
@@ -566,8 +568,14 @@ export function ecranDeLecture(input: {
   const view = artisanView(viewLines, validation, { needs: engine.needs, questions, declined: engine.declined }, { plan, roles: roleOf, ref });
   const raw = purchaseView(view, { ...engine, questions }, { plan, roles: roleOf, ref, validation });
   const purchase = finishPurchase(raw, { ref, plan, lignes, asked: live, answers, validated: input.validated, interdits: input.interdits !== false, customProducts: engine.customProducts, engine: [...engine.needs, ...(engine.unknowns ?? [])], precisionWaits, answers_: answers, notes: lecture.notes });
+  // Une question close sans réponse (null) qu'aucune ligne n'attend (le calcul a sa valeur par défaut) ne bloque pas l'envoi :
+  // elle n'a plus de ligne orange où se régler. Celle qu'une ligne attend reste, avec ses boutons sur la ligne (§51.6).
+  const waited = new Set(purchase.toBuy.flatMap((b) => b.waitsOn ?? []));
+  const kept = purchase.questions.filter((d) => !(d.question && d.lineIds.length === 0 && answers[d.question.key] === null && !waited.has(d.question.key)));
+  const canValidate = purchase.toBuy.length + purchase.toQuote.length > 0 && kept.every((q) => q.lineIds.length === 0 && !q.question) && purchase.toBuy.every((b) => b.state === "ready");
+  const final = kept.length === purchase.questions.length ? purchase : { ...purchase, questions: kept, canValidate };
   const sansFourniture = lignes.filter((l) => !l.fourniture).map((l) => ({ lineId: l.id, label: l.designation.trim(), measure: [l.quantity?.trim(), l.unit?.trim()].filter(Boolean).join(" ") || null }));
-  return { plan, validation, roles, view, purchase, questions, lignes, sansFourniture };
+  return { plan, validation, roles, view, purchase: final, questions, lignes, sansFourniture };
 }
 
 interface Asked {

@@ -587,7 +587,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   // L'action de l'étape : « Comparer ». BatiClair lit les devis (simulé en test), rapproche et calcule tout.
   await expect(page.getByText("2 offres reçues")).toBeVisible();
   await page.getByRole("button", { name: "Comparer les offres" }).click();
-  await expect(pointp.getByText("6/6 articles chiffrés")).toBeVisible();
+  await expect(pointp.getByText("6/7 articles chiffrés")).toBeVisible();
   await expect(tuiles.getByText("5/6 articles chiffrés · 1 manquant")).toBeVisible();
   await expect(page.getByRole("button", { name: /^Comparer les/ })).toHaveCount(0);
   await expect(page.getByText(/analyse/i)).toHaveCount(0);
@@ -626,7 +626,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
 
   // Tout est conservé.
   await page.reload();
-  await expect(pointp.getByText("6/6 articles chiffrés")).toBeVisible();
+  await expect(pointp.getByText("6/7 articles chiffrés")).toBeVisible();
   await expect(page.locator("section#comparer").getByText("✓ Offre retenue")).toBeVisible();
   await expect(page.locator("section#comparer").getByText(/✓ Commande notée/)).toBeVisible();
 });

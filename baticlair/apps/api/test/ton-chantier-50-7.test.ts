@@ -44,9 +44,10 @@ describe("§50.7 : « Ton chantier », l'écran est le document", () => {
     const { agent, projectId, supplierId, bref, texte } = await chantier();
     const screen = await bref();
     // §51.5 : le bref est la fiche lue par le modèle (simulée ici), ligne par ligne, puis la ville.
-    expect(screen.map((l) => l.texte)).toEqual(["Ouvrage : couverture zinc à joint debout", "Surface : 91 m²", "Longueur du rampant : 7 m", "Aspect du zinc : Quartz-Zinc", "Façonnage : je façonne", "Brest, bord de mer"]);
+    // Le façonnage, réglé lot par lot (la couverture, la bande), reste à sa ligne : pas dans le bref.
+    expect(screen.map((l) => l.texte)).toEqual(["Ouvrage : couverture zinc à joint debout", "Surface : 91 m²", "Longueur du rampant : 7 m", "Aspect du zinc : Quartz-Zinc", "Brest, bord de mer"]);
     const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] }).expect(201)).body;
-    expect(await texte()).toBe("Couverture zinc à joint debout, 91 m². Longueur du rampant 7 m, aspect du zinc : Quartz-Zinc, façonnage : je façonne. Chantier à Brest, bord de mer.");
+    expect(await texte()).toBe("Couverture zinc à joint debout, 91 m². Longueur du rampant 7 m, aspect du zinc : Quartz-Zinc. Chantier à Brest, bord de mer.");
     expect(created.packet.resume).toEqual([await texte()]);
   });
 
