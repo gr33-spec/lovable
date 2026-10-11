@@ -2,7 +2,7 @@ import type { ConfidenceLevel } from "../confidence/confidence.js";
 import type { PackagingSpec } from "../quantity/quantity.js";
 import { dimensionOf, parseUnit, type UnitCode } from "../quantity/unit.js";
 import { Decimal } from "../shared/decimal.js";
-import { containsKeyword, keywordPosition, normalizeText, type MaterialFamily, type TradeProfile } from "../trades/trade-profile.js";
+import { articleParts, containsKeyword, keywordPosition, normalizeText, type MaterialFamily, type TradeProfile } from "../trades/trade-profile.js";
 import { LABOR_ONLY } from "../trades/common.js";
 import { articleScope } from "./sections.js";
 import { isTimeUnit, isWithoutSupplyUnit } from "./supply.js";
@@ -128,12 +128,14 @@ const unitLabel = (u: UnitCode) => UNIT_LABEL[u] ?? u.toLowerCase();
  * pas eux qui nomment la ligne. À position égale (« tuile de rive » /
  * « tuile »), l'ordre du référentiel départage (le plus précis d'abord).
  */
-export function classifyMaterial(designation: string, profile: TradeProfile): MaterialFamily | null {
+export function classifyMaterial(designation: string, profile: TradeProfile, scope?: string): MaterialFamily | null {
   const text = normalizeText(designation);
+  // `scope` : la partie du texte où chercher l'article (avant « sur » / « pour ») ; les exclusions se lisent sur toute la ligne.
+  const within = scope ?? text;
   let best: { family: MaterialFamily; position: number } | null = null;
   for (const family of profile.families) {
     if (family.excludes?.some((e) => containsKeyword(text, e))) continue;
-    const positions = family.keywords.map((k) => keywordPosition(text, k)).filter((p) => p >= 0);
+    const positions = family.keywords.map((k) => keywordPosition(within, k)).filter((p) => p >= 0);
     if (positions.length === 0) continue;
     const position = Math.min(...positions);
     if (!best || position < best.position) best = { family, position };
@@ -167,9 +169,15 @@ function headPosition(text: string): number {
  */
 export function lineKind(designation: string, profile: TradeProfile, others: readonly string[] = []): { kind: LineKind; family: MaterialFamily | null } {
   const text = normalizeText(designation);
-  const family = classifyMaterial(designation, profile);
+  // L'article est ce qui précède « sur » et « pour » : « Pose de velux sur bac acier » pose un velux, pas du bac acier.
+  const { article } = articleParts(text);
+  const ownFamily = classifyMaterial(designation, profile, article);
+  const family = ownFamily ?? classifyMaterial(designation, profile);
   if (LABOR_ONLY.some((k) => containsKeyword(text, k))) return { kind: "labor", family: null };
   if (poseOfSuppliedArticle(designation, others)) return { kind: "labor", family: null };
+  // « Réalisation des trémies de charpente pour velux », « Pose de velx sur bac acier isolé » : un geste en tête, et
+  // le seul matériau nommé est le support ou la destination. C'est de la main-d'œuvre, rien à commander.
+  if (!ownFamily && family && LABOR_HEADS.some((k) => keywordPosition(text, k) === headPosition(text))) return { kind: "labor", family: null };
   const isSupply = profile.supplyKeywords.some((k) => containsKeyword(text, k));
   const laborAt = firstPosition(text, profile.laborKeywords);
   if (!isSupply && laborAt !== Infinity) {
@@ -180,6 +188,9 @@ export function lineKind(designation: string, profile: TradeProfile, others: rea
   if (family) return { kind: "material", family };
   return { kind: "unknown", family: null };
 }
+
+/** Les gestes qui ouvrent une ligne de main-d'œuvre quand aucun article n'est nommé avant « sur » ou « pour ». */
+const LABOR_HEADS: readonly string[] = ["pose", "realisation", "creation", "reprise", "modification", "adaptation", "ouverture", "decoupe", "reparation", "refection", "mise en place", "mise en oeuvre"];
 
 const TRADE_WORDS = new Set(["plomberie", "electricite", "maconnerie", "menuiserie", "chauffage", "ventilation", "filtration", "zinguerie"]);
 const POSE_STOP = new Set(["de", "des", "du", "d", "l", "la", "le", "les", "un", "une", "et", "en", "a", "au", "aux", "sur", "dans", "pour", "par", "y", "compris"]);

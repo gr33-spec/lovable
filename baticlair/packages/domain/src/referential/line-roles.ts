@@ -74,6 +74,12 @@ export function proposeLineRoles(lines: readonly RoleLine[], plan: QuotePlan, va
         continue;
       }
       if (slot?.measureOnly) {
+        // « 10 tôles bac acier » à l'unité (D-2022-071) : un nombre qui ne mesure pas l'ouvrage (sa surface) est un
+        // nombre d'articles, commandés tels qu'écrits ; jamais « Surface du toit ? » derrière.
+        if (v.unit === "U" && !planned.measures) {
+          roles.set(v.lineId, { role: "purchase", why: `Le nombre ne mesure pas l'ouvrage (${slot.label.toLowerCase()}) : l'article se commande tel qu'écrit.` });
+          continue;
+        }
         roles.set(v.lineId, { role: "measure", why: `La quantité mesure l'ouvrage (${slot.label.toLowerCase()}) ; ce qui se commande en découle.` });
         continue;
       }

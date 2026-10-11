@@ -2,7 +2,7 @@ import { baseOf, INSTANCE_SEP } from "./model.js";
 import { Decimal } from "../shared/decimal.js";
 import { keyCharacteristics } from "../takeoff/characteristics.js";
 import { validateTakeoffLine } from "../takeoff/validation.js";
-import { keywordPosition, normalizeText, type TradeProfile } from "../trades/trade-profile.js";
+import { articleParts, keywordPosition, normalizeText, type TradeProfile } from "../trades/trade-profile.js";
 import type { ChantierContext, SiteFact } from "./context.js";
 import { paramsFromContext } from "./context.js";
 import type { CompanyPreferences, SlotChoice, WorkItemInput } from "./engine.js";
@@ -43,6 +43,10 @@ export type LinePlan =
       measureInText?: { value: string; unit: string };
       /** Sa quantité s'ajoute à celle d'une autre ligne du même article (bandes de rive + bande porte-solin, D-2026-020). */
       adds?: true;
+      /** Une quantité sans unité (« 10 ») : l'unité se demande sur la ligne (§49.2) avant tout calcul de l'ouvrage. */
+      unitMissing?: true;
+      /** Sa quantité mesure l'ouvrage (120 m² de couverture, 4 fenêtres) : elle remplit une donnée de l'ouvrage. */
+      measures?: true;
     }
   /** Main-d'œuvre, location, forfait : rien à acheter. */
   | { ref: string; status: "not_material" }
@@ -307,7 +311,10 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
     const text = normalizeText(line.designation);
     const dominant = !covered ? undefined : ref.families.find((f) => f.dominant && (f.keywords ?? []).some((k) => keywordPosition(text, k) >= 0))?.code;
     // Une ligne de pose seule garde son ouvrage : elle n'achète rien, mais ce qu'elle écrit (pente, crochets, façonnage) se lit.
-    const general = dominant ?? earliest(text, families);
+    // Son ouvrage est son ARTICLE (avant « sur » et « pour »), sinon sa destination (« trémies … pour velux » parle des
+    // fenêtres) ; jamais son support (« Pose de velx sur bac acier isolé » ne dit rien du bac acier).
+    const { article, destination } = articleParts(text);
+    const general = dominant ?? earliest(article, families) ?? (v.kind === "labor" ? (destination ? earliest(destination, families) : null) : earliest(text, families));
     // « Tuiles (… tuiles canal …) » : la famille générale lue en premier est précisée par une famille plus précise nommée ensuite.
     const precise = general ? ref.families.find((f) => f.refines === general && (f.keywords ?? []).some((k) => keywordPosition(text, k) >= 0)) : undefined;
     // « Tubes de descente (Coude zinc Ø80) » : le titre de la ligne range l'article, la parenthèse qui le suit le NOMME.
@@ -345,15 +352,30 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
     // La pièce garde son nom même seule : sa question dit « Bande de ventilation… », jamais la liste de l'ouvrage.
     if (w?.perLine && r.v.kind !== "labor") pieceLabels.set(idFor(w, r.line.ref), pieceName(r.line.designation));
   }
-  // Une ligne de POSE (« Façonnage et pose des bandes de rive ») vaut pour la pièce qu'elle nomme ; sans pièce nommée,
-  // pour toutes celles de l'ouvrage.
+  // Les données qu'une ligne écrit pour un ouvrage (taille « 114x118 », développé, pente), par clé.
+  const writtenBy = (w: WorkItemType, text: string): Map<string, string> => {
+    const tmp: SiteFact[] = [];
+    readWritten(w, "?", text, tmp);
+    return new Map(tmp.map((f) => [f.key, f.value]));
+  };
+  // Une ligne de POSE (« Pose de velux sk06 114x118 », « Façonnage et pose des bandes de rive ») vaut pour la pièce dont
+  // elle redit une donnée (la fenêtre 114 × 118, jamais la 78 × 98 : retour du fondateur, D-2022-071), sinon pour la
+  // pièce qu'elle nomme ; sans rien de tout cela, pour toutes celles de l'ouvrage. Une donnée qui ne colle avec aucune
+  // pièce vaut pour toutes : c'est alors une vraie contradiction, qui se demande.
   const targetsOf = (w: WorkItemType, text: string): string[] => {
     if (!instanced(w)) return [w.id];
     const refs = supplyRefs.get(w.id)!;
-    const named = refs.filter((ref) => {
-      const own = normalizeText(read.find((r) => r.line.ref === ref)!.line.designation);
-      return PIECE_WORDS.some((k) => keywordPosition(text, k) >= 0 && keywordPosition(own, k) >= 0);
-    });
+    const designationOf = (ref: string) => normalizeText(read.find((r) => r.line.ref === ref)!.line.designation);
+    const own = writtenBy(w, text);
+    if (own.size > 0) {
+      const theirs = new Map(refs.map((ref) => [ref, writtenBy(w, designationOf(ref))]));
+      const common = (ref: string) => [...own].filter(([k]) => theirs.get(ref)!.has(k));
+      const same = refs.filter((ref) => common(ref).length > 0 && common(ref).every(([k, v]) => theirs.get(ref)!.get(k) === v));
+      if (same.length > 0) return same.map((ref) => idFor(w, ref));
+      const compatible = refs.filter((ref) => common(ref).every(([k, v]) => theirs.get(ref)!.get(k) === v));
+      if (compatible.length > 0 && compatible.length < refs.length) return compatible.map((ref) => idFor(w, ref));
+    }
+    const named = refs.filter((ref) => PIECE_WORDS.some((k) => keywordPosition(text, k) >= 0 && keywordPosition(designationOf(ref), k) >= 0));
     return (named.length > 0 ? named : refs).map((ref) => idFor(w, ref));
   };
 
@@ -422,7 +444,8 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
     const unit = v.unit ? LINE_UNITS[v.unit] : undefined;
     const fromQuantity = work.params.filter((x) => x.fromLineQuantity && (!x.forSlots || x.forSlots.includes(slot.key)));
     let measureInText: { value: string; unit: string } | undefined;
-    if (unit && v.quantity && fromQuantity.some((p) => sameDimUnit(p.unit, unit))) {
+    const measures = !!(unit && v.quantity && fromQuantity.some((p) => sameDimUnit(p.unit, unit)));
+    if (unit && v.quantity && measures) {
       for (const p of fromQuantity.filter((x) => sameDimUnit(x.unit, unit))) {
         const fact: SiteFact = { key: p.key, value: v.quantity.toFixed(), unit, evidence: `Devis, ${line.ref}`, origin: "devis", workItemId: wid, ...(slot.measureOnly ? { fromMeasureLine: true as const } : {}) };
         facts.push(fact);
@@ -456,13 +479,15 @@ export function planQuote(lines: QuoteLine[], ref: Referential, profile: TradePr
         askInstead.set(wid, new Set([...(askInstead.get(wid) ?? []), p.key]));
       }
     }
-    const chars = productCharacteristics(ref, work, slot, line.designation);
+    // « Gouttière zinc naturel sur bac acier » : « acier » qualifie le support, pas la gouttière.
+    const chars = productCharacteristics(ref, work, slot, articleDesignation(line.designation));
     // La naissance prend la matière et la forme de la gouttière (« charsFrom ») : un emplacement suit l'autre.
     for (const key of [slot.key, ...work.slots.filter((s) => s.charsFrom === slot.key).map((s) => s.key)]) {
       const charKey = slotCharacteristicsKey(wid, key);
       if (chars.length > 0) characteristicsBySlot[charKey] = [...new Set([...(characteristicsBySlot[charKey] ?? []), ...chars])];
     }
-    plans.push({ ref: line.ref, status: "planned", workItemId: wid, slot: slot.key, mentions, characteristics: chars, ...(measureInText ? { measureInText } : {}) });
+    const unitMissing = v.quantity !== null && !v.unit && !measureInText;
+    plans.push({ ref: line.ref, status: "planned", workItemId: wid, slot: slot.key, mentions, characteristics: chars, ...(measureInText ? { measureInText } : {}), ...(unitMissing ? { unitMissing: true as const } : {}), ...(measures ? { measures: true as const } : {}) });
   }
 
   // Deux lignes du MÊME article d'un ouvrage (« bandes de rive 4 m », « bande porte-solin 4 m ») : deux longueurs qui
@@ -635,6 +660,12 @@ function productCharacteristics(ref: Referential, work: WorkItemType, slot: Slot
     const products = identifyProducts(c, ref).candidates;
     return !(products.length > 0 && products.every((x) => x.product.family !== slot.family));
   });
+}
+
+/** La désignation jusqu'à son article (avant « sur » / « pour »), dans l'écriture d'origine. */
+function articleDesignation(designation: string): string {
+  const m = /\s(?:sur|pour)\s/i.exec(designation);
+  return m ? designation.slice(0, m.index) : designation;
 }
 
 function sameDimUnit(a: string, b: string): boolean {

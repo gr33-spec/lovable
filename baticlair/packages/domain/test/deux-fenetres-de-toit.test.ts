@@ -32,6 +32,23 @@ describe("deux fenêtres de toit de tailles différentes (fondateur, 2026-10-11)
     expect(v.toBuy.map((b) => b.label)).toEqual(expect.arrayContaining(["Fenêtre de toit 114x118", "Fenêtre de toit Velux GGL MK04"]));
   });
 
+  it("une contradiction sur une fenêtre ne touche pas l'autre : sa question porte le nom de sa ligne, une seule", () => {
+    const v = readQuote([
+      { ref: "a", designation: "Fenêtre de toit Velux MK04 114x118", quantity: "1", unit: "u" },
+      { ref: "b", designation: "Fenêtre de toit 78x98", quantity: "1", unit: "u" },
+    ]);
+    const asked = v.questions.filter((q) => /taille de la fenêtre/i.test(q.question?.text ?? "")).map((q) => q.question!.key);
+    expect(asked).toEqual(["param:taille_fenetre@fenetre-de-toit__a"]);
+    const answered = readQuote(
+      [
+        { ref: "a", designation: "Fenêtre de toit Velux MK04 114x118", quantity: "1", unit: "u" },
+        { ref: "b", designation: "Fenêtre de toit 78x98", quantity: "1", unit: "u" },
+      ],
+      { "param:taille_fenetre@fenetre-de-toit__a": "114118" },
+    );
+    expect(answered.questions.filter((q) => /fenêtre/i.test(q.question?.text ?? ""))).toEqual([]);
+  });
+
   it("une vraie contradiction se dit avec les mots du comptoir et le texte cité, jamais un identifiant de ligne", () => {
     const line = { ref: "01a12a11-6f9d-7238-88bd-be0524bd4e15", designation: "Couverture en ardoises naturelles 30x22 posées au crochet, pente 40°", quantity: "120", unit: "m²" };
     const entete = [{ key: "pente", value: "30", unit: "°", evidence: "Devis, en-tête (« Pente : 30° »)", origin: "devis" as const }];

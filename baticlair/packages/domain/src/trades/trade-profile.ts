@@ -116,6 +116,19 @@ export function containsKeyword(normalized: string, keyword: string): boolean {
   return keywordPosition(normalized, keyword) >= 0;
 }
 
+/**
+ * L'ARTICLE d'une ligne : ce qu'elle fournit ou pose, c'est-à-dire les mots AVANT « sur » (le support : « Pose de velux
+ * sur bac acier isolé ») et « pour » (la destination : « Réalisation des trémies de charpente pour velux »). Retour du
+ * fondateur (2026-10-11, D-2022-071) : « sur bac acier » n'achète pas de bac acier, « pour velux » pas de fenêtre.
+ * `destination` : ce qui suit « pour », à qui la ligne s'adresse (une pose sans article nommé vaut pour elle).
+ */
+export function articleParts(normalized: string): { article: string; destination: string | null } {
+  const cut = /\s(?:sur|pour)\s/.exec(normalized);
+  const article = cut ? normalized.slice(0, cut.index) : normalized;
+  const pour = /\spour\s/.exec(normalized);
+  return { article, destination: pour ? normalized.slice(pour.index + pour[0].length) : null };
+}
+
 /** Position du mot (ou de l'expression) dans le texte normalisé, ou -1. */
 export function keywordPosition(normalized: string, keyword: string): number {
   let re = keywordCache.get(keyword);
