@@ -539,14 +539,19 @@ export function computeWithAnswers(
   // le devis a fait le travail, BatiClair ne lui ajoute ni besoin ni question.
   const allGiven = (workItemId: string) => {
     const planned = plan.lines.filter((l): l is Extract<QuotePlan["lines"][number], { status: "planned" }> => l.status === "planned" && l.workItemId === workItemId);
-    // Une ligne commandée telle qu'écrite qui compte aussi l'ouvrage (« 4 fenêtres ») laisse calculer ses fournitures de pose.
-    const counts = (l: (typeof planned)[number]) => ref.workItems.find((w) => w.id === baseOf(workItemId))?.slots.find((s) => s.key === l.slot)?.measureOnly === true;
-    // « 2 descentes de 3 m » écrit en plus des tubes et des coudes : la mesure de l'ouvrage est connue, ce que le devis ne
-    // cite pas (colliers, dauphins) se calcule encore (D-2026-020). « 42 faîtières » seules ne disent aucune mesure.
     const work = ref.workItems.find((w) => w.id === baseOf(workItemId));
     const params = plan.inputs.find((i) => i.workItemId === workItemId)?.params ?? {};
+    // Une ligne commandée telle qu'écrite qui compte aussi l'ouvrage (« 4 fenêtres ») laisse calculer ses fournitures de pose.
+    // Seulement si sa quantité mesure vraiment l'ouvrage : « 10 tôles bac acier » (D-2022-071) ne disent pas la surface du
+    // toit, elles partent telles qu'écrites, sans « Surface du toit ? ».
+    const counts = (l: (typeof planned)[number]) => work?.slots.find((s) => s.key === l.slot)?.measureOnly === true && l.measures === true;
+    // « 2 descentes de 3 m » écrit en plus des tubes et des coudes : la mesure de l'ouvrage est connue, ce que le devis ne
+    // cite pas (colliers, dauphins) se calcule encore (D-2026-020). « 42 faîtières » seules ne disent aucune mesure.
     // Une mesure ÉCRITE dans le texte (preuve « … » citée), pas la quantité d'une ligne déjà commandée telle quelle.
     const measured = (work?.params ?? []).some((p) => p.fromLineQuantity && params[p.key]?.origin === "devis" && (params[p.key]?.evidence ?? "").includes("«"));
+    // Une quantité sans unité (« tôles bacs acier … 10 », D-2022-071) : l'unité se demande sur la ligne (§49.2), et
+    // l'ouvrage ne pose aucune question (« Surface du toit ? ») tant qu'on ne sait pas si 10 compte des m² ou des tôles.
+    if (planned.length > 0 && !measured && planned.every((l) => l.unitMissing)) return true;
     return planned.length > 0 && !measured && planned.every((l) => given.has(`${workItemId}/${l.slot}`) && !counts(l));
   };
   const inputs: WorkItemInput[] = plan.inputs.map((input) => {
@@ -684,7 +689,7 @@ export function computeWithAnswers(
   // Deux sources qui ne disent pas la même chose (devis ≠ en-tête lu, devis ≠ croquis), sans réponse de l'artisan :
   // une question avec les deux valeurs en boutons, et rien ne part pour cet ouvrage tant qu'elle est ouverte.
   for (const c of plan.contradictions) {
-    const key = `param:${c.key}`;
+    const key = contradictionKey(c);
     if (answers[key] !== undefined || questions.some((q) => q.key === key)) continue;
     const seen = new Set<string>();
     const def = ref.workItems.find((w) => w.id === baseOf(c.workItemId))?.params.find((p) => p.key === c.key);
@@ -713,7 +718,7 @@ export function computeWithAnswers(
       questions = again.questions;
     } else levers.set(q.key, lever.spread);
   }
-  for (const c of plan.contradictions) if (!levers.has(`param:${c.key}`)) levers.set(`param:${c.key}`, Number.POSITIVE_INFINITY);
+  for (const c of plan.contradictions) if (!levers.has(contradictionKey(c))) levers.set(contradictionKey(c), Number.POSITIVE_INFINITY);
   questions = [...questions].sort((a, b) => (levers.get(b.key) ?? 0) - (levers.get(a.key) ?? 0));
   // Ce que le calcul aurait donné pour les articles que le devis écrit déjà (« 20 crochets de gouttière ») : la quantité
   // du devis reste la base, l'écart se dit (purchaseView, `quantityGap`).
@@ -762,6 +767,8 @@ export function piecewiseParams(ref: Referential, plan: QuotePlan): string[] {
 }
 /** « param:faconnage@noue » : la donnée « faconnage » de l'ouvrage « noue » seulement. */
 export const scopedKey = (name: string, workItemId: string) => `param:${name}@${workItemId}`;
+/** La question d'une contradiction : celle de la pièce quand l'ouvrage est pris ligne par ligne (deux fenêtres, deux questions). */
+const contradictionKey = (c: { key: string; workItemId: string }) => (c.workItemId.includes(INSTANCE_SEP) ? scopedKey(c.key, c.workItemId) : `param:${c.key}`);
 export function scopedParam(key: string): { name: string; workItemId: string } | null {
   const m = /^param:([a-z0-9_]+)@([a-z0-9_-]+)$/.exec(key);
   return m ? { name: m[1]!, workItemId: m[2]! } : null;

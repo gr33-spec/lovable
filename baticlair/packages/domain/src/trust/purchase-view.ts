@@ -1,3 +1,4 @@
+import { articleParts } from "../trades/trade-profile.js";
 import { baseOf } from "../referential/model.js";
 import { Decimal } from "../shared/decimal.js";
 import { CONSUMABLES_QUESTION, DEVIS_MARK, withoutDevisMark, type Assumption, type NeedResult, type Question, type RuleToConfirm } from "../referential/engine.js";
@@ -944,9 +945,11 @@ function preciseQuestions(toBuy: readonly PurchaseItem[], validation: TakeoffVal
     if (item.kind !== "direct") continue;
     const lineId = item.lineIds[0]!;
     if (validation.lines.find((l) => l.lineId === lineId)?.kind === "labor") continue;
-    // La famille se lit sur les mots du référentiel (« sortie de toit »), comme le plan lit une ligne.
+    // La famille se lit sur les mots du référentiel (« sortie de toit »), comme le plan lit une ligne : sur son article,
+    // jamais sur sa destination (« tôles bacs acier pour étanchéité du dessus de velux » n'est pas une fenêtre, D-2022-071).
     const text = plain(item.label);
-    const ask = ref.families.find((f) => f.ask && f.keywords?.some((k) => new RegExp(`\\b${plain(k)}\\b`).test(text)))?.ask;
+    const { article } = articleParts(text);
+    const ask = ref.families.find((f) => f.ask && f.keywords?.some((k) => new RegExp(`\\b${plain(k)}\\b`).test(article)))?.ask;
     if (!ask || new RegExp(ask.answered).test(text)) continue;
     const key = `${PRECISE}${lineId}`;
     out.push({
