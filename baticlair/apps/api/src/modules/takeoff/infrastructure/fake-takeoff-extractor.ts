@@ -58,6 +58,12 @@ export class FakeTakeoffExtractor implements TakeoffExtractor {
           const d = fakeDimensions(col);
           return Object.keys(d).length > 0 ? { ...(acc ?? {}), ...d } : acc;
         }, null),
+        // Règle simulée du « manque » (§41.1, §49.4) : une colonne « manque : section des liteaux (25x38, 18x40) » après la
+        // quantité est ce que le comptoir demanderait encore pour cette ligne.
+        ...((): { reading?: { role: null; articles: []; faconnage: null; manque: string[] } } => {
+          const manque = row.cols.slice(row.index + 1).flatMap((col) => /^manque\s*:\s*(.+)$/i.exec(col.trim())?.[1] ?? []);
+          return manque.length > 0 ? { reading: { role: null, articles: [], faconnage: null, manque } } : {};
+        })(),
       }));
     // Règle simulée du §51.1 : la fiche reprend l'ouvrage et la surface de la première ligne en m², et les dimensions lues
     // (lignes et en-tête), chacune « lue » avec sa ligne. Rien d'autre.

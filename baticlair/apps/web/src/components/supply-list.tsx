@@ -102,18 +102,6 @@ export function SupplyList({
       .catch(() => undefined)
       .finally(() => setRemoving((keys) => keys.filter((k) => k !== r.key)));
   };
-  // Une info manquante se demande UNE fois : ses boutons sont sur la première carte qui en dépend ; les autres renvoient
-  // à elle (un seul choix règle toutes les lignes qui en dépendent).
-  const askKeysOf = (r: ScreenRow) => {
-    const d = r.decisionKey ? decisions.get(r.decisionKey) : undefined;
-    if (d?.question?.options.length) return [d.key];
-    return (r.itemKey ? (items.get(r.itemKey)?.asks ?? []) : []).map((a) => a.key);
-  };
-  const askOwner = new Map<string, ScreenRow>();
-  for (const r of screen.groups.flatMap((g) => g.rows).filter((x) => x.status === "check" && !hidden(x))) {
-    for (const k of askKeysOf(r)) if (!askOwner.has(k)) askOwner.set(k, r);
-  }
-  const sharedFor = (r: ScreenRow) => new Map(askKeysOf(r).flatMap((k) => (askOwner.get(k) && askOwner.get(k)!.key !== r.key ? [[k, labelOf(askOwner.get(k)!)] as const] : [])));
 
   // §50.3 : une liste, comme un bon de commande : les oranges d'abord, puis les vertes, chacune dans l'ordre du devis.
   // §48.5 : entrer en sélection coche chaque ligne prête et pas encore envoyée à part (« je dois tout avoir de coché ») ;
@@ -183,7 +171,6 @@ export function SupplyList({
             pending={pending}
             handlers={handlers}
             decision={r.decisionKey ? decisions.get(r.decisionKey) : undefined}
-            shared={sharedFor(r)}
             onEdit={onEditItem}
             onSetAside={() => putAside(r)}
             error={error}
@@ -439,7 +426,6 @@ function Row({
   pending,
   handlers,
   decision,
-  shared,
   onEdit,
   onSetAside,
   sketches,
@@ -462,7 +448,6 @@ function Row({
   /** La remarque qui met la ligne en orange : elle se règle dans la ligne ouverte (§49.8). */
   decision?: TakeoffDecision | undefined;
   /** Les questions de cette ligne posées sur une autre ligne (clé → nom de la ligne qui porte les boutons). */
-  shared?: ReadonlyMap<string, string>;
   onEdit: (item: PurchaseItem, edit: ItemEdit) => Promise<void>;
   onSetAside: () => void;
   sketches: readonly ItemSketch[];
@@ -661,7 +646,7 @@ function Row({
           {stepper ? (
             <Stepper label={label} value={stepper.value} unit={stepper.unit} pending={pending} onChange={(n) => onEdit(item!, { libelle: item!.label, quantite: String(n), unite: stepper.unit || null })} />
           ) : null}
-          {row.status === "check" ? <CardActions label={label} decision={decision} item={item} pending={pending} handlers={handlers} onEdit={onEdit} {...(shared ? { shared } : {})} /> : null}
+          {row.status === "check" ? <CardActions label={label} decision={decision} item={item} pending={pending} handlers={handlers} onEdit={onEdit} /> : null}
           {sketches.length > 0 ? (
             <ul aria-label={`Croquis joints : ${label}`} className="flex flex-wrap gap-2">
               {sketches.map((sk) => (
@@ -750,9 +735,7 @@ function CardActions({
   pending,
   handlers,
   onEdit,
-  shared = new Map(),
 }: {
-  shared?: ReadonlyMap<string, string>;
   label: string;
   decision: TakeoffDecision | undefined;
   item: PurchaseItem | undefined;
@@ -773,11 +756,12 @@ function CardActions({
   const btn = "min-h-11 flex-1 basis-[9rem]";
   return (
     <div role="group" aria-label={`Régler : ${label}`} aria-busy={pending || undefined} className="flex flex-col gap-2">
-      {asks.map((a) =>
-        // §50.3 : la raison dit déjà ce qui manque ; la carte ne montre que les boutons (une question partagée avec une autre
-        // carte se règle sur la première, sans phrase de renvoi).
-        shared.has(a.key) ? null : (
+      {asks.map((a) => (
+        // Retour du fondateur (2026-10-11) : « je ne sais pas quoi faire, on doit comprendre sans réfléchir ». La carte dit la
+        // question en toutes lettres, puis ses réponses ; une question partagée avec d'autres lignes est posée sur chacune
+        // (une réponse les règle toutes).
         <div key={a.key} role="group" aria-label={a.text} className="flex flex-col gap-1.5">
+          <p className="text-[15px] leading-snug font-extrabold">{`${a.text} ?`}</p>
           <div className="flex flex-wrap gap-1.5">
             {a.options.map((o) => (
               <button key={o.value || "aucun"} type="button" disabled={pending} onClick={() => void answer(a.key, a.unit, o.value)} className={`${OPTION} grow`}>
@@ -786,8 +770,7 @@ function CardActions({
             ))}
           </div>
         </div>
-        ),
-      )}
+      ))}
       {d && q && q.kind === "param" && q.options.length === 0 ? (
         <form
           className="flex items-center gap-2"
