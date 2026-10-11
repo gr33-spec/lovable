@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronDown, ChevronUp, Eye, Paperclip, Pencil, Send, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Eye, ListChecks, Paperclip, Pencil, Send, Trash2, X } from "lucide-react";
 import { openDocument } from "@/lib/open-document";
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -19,7 +19,8 @@ import { parseQuantity, shortName } from "@/lib/labels";
  *  - sur le document même : un tap ouvre la ligne (moins / plus, boutons de choix, « C'est bon », corbeille), un tap sur
  *    le nom le corrige, un glissement vers la gauche la retire ; aucun écran intermédiaire, plus de voix ;
  *  - en bas, figés, deux boutons : « Aperçu » (le mail et le PDF du fournisseur) et « Envoyer au fournisseur » ; en petit
- *    dessous, « Ajouter un article », « Envoyer une sélection ».
+ *    dessous, « Ajouter un article » ; à côté du titre « Fournitures », « Envoyer une partie » (une partie chez un
+ *    fournisseur, le reste chez un autre).
  */
 export function SupplyList({
   takeoff,
@@ -107,13 +108,16 @@ export function SupplyList({
   // §48.5 : entrer en sélection coche chaque ligne prête et pas encore envoyée à part (« je dois tout avoir de coché ») ;
   // l'artisan décoche ce qui ne part pas.
   const startSelecting = () => {
-    setChecked(new Set(rows.filter((r) => r.status !== "check" && articleOf(r) && !selection?.sent.has(articleOf(r)!)).map((r) => articleOf(r)!)));
+    setChecked(new Set(selectable));
     setSelecting(true);
   };
   // La commande répartie : ce qui n'est encore parti chez aucun fournisseur, dont les lignes orange à vérifier d'abord.
   const unsent = rows.filter((r) => articleOf(r) && !selection?.sent.has(articleOf(r)!));
   const unsentToCheck = unsent.filter((r) => r.status === "check").length;
   const ordered = [...rows.filter((r) => r.status === "check"), ...rows.filter((r) => r.status !== "check")];
+  // Les lignes qu'on peut cocher : prêtes (pas orange), avec un article, pas encore parties à part.
+  const selectable = rows.filter((r) => r.status !== "check" && articleOf(r) && !selection?.sent.has(articleOf(r)!)).map((r) => articleOf(r)!);
+  const allChecked = selectable.length > 0 && selectable.every((k) => checked.has(k));
   const link = "inline-flex min-h-10 items-center gap-1.5 text-[13px] font-bold text-muted underline decoration-dotted underline-offset-4";
 
   return (
@@ -134,7 +138,31 @@ export function SupplyList({
       {takeoff.bref && takeoff.bref.length > 0 ? (
         <Brief takeoff={takeoff} editable={editable && Boolean(onBrief)} pending={pending} onBrief={onBrief} />
       ) : null}
-      <h3 className="mb-1 text-[13px] font-extrabold text-muted">Fournitures</h3>
+      {/* Retour du fondateur (2026-10-11) : « je ne vois toujours pas la possibilité d'envoyer une partie du quantitatif à un
+          négoce, puis une autre partie à un autre ». Un vrai bouton à côté du titre, visible sans descendre ; en sélection,
+          une phrase dit quoi faire et « Tout cocher » / « Tout décocher » règle la liste d'un geste. */}
+      <div className="mb-1 flex min-h-10 items-center justify-between gap-2">
+        <h3 className="text-[13px] font-extrabold text-muted">Fournitures</h3>
+        {selecting ? (
+          <button
+            type="button"
+            onClick={() => setChecked(allChecked ? new Set() : new Set(selectable))}
+            className="inline-flex min-h-10 items-center gap-1.5 text-[13px] font-bold text-accent-text"
+          >
+            {allChecked ? "Tout décocher" : "Tout cocher"}
+          </button>
+        ) : editable && selection && rows.length > 1 ? (
+          <button
+            type="button"
+            onClick={startSelecting}
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-accent/10 px-3.5 text-[13px] font-extrabold text-accent-text active:bg-accent/20"
+          >
+            <ListChecks size={16} aria-hidden="true" />
+            Envoyer une partie
+          </button>
+        ) : null}
+      </div>
+      {selecting ? <p className="mb-2 text-[14px] leading-snug font-bold text-ink">Coche ce qui part chez ce fournisseur. Le reste pourra partir chez un autre.</p> : null}
       <ul aria-label="Fournitures" className="flex flex-col divide-y divide-line rounded-[20px] border border-[#dde1e8] bg-surface">
         {ordered.map((r) => (
           <Row
@@ -285,15 +313,6 @@ export function SupplyList({
               {onAdd ? (
                 <button type="button" onClick={onAdd} className={link}>
                   Ajouter un article
-                </button>
-              ) : null}
-              {selection && rows.length > 1 ? (
-                <button
-                  type="button"
-                  onClick={startSelecting}
-                  className={link}
-                >
-                  Envoyer une sélection à un autre fournisseur
                 </button>
               ) : null}
             </nav>

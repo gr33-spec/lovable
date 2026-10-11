@@ -841,7 +841,7 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   await expect(page.getByRole("region", { name: "Liste des fournitures" }).getByRole("button", { name: /Ardoises naturelles/ })).toHaveCount(0);
 });
 
-test("§48.5 : envoyer une sélection à un autre fournisseur, discret, puis l'envoi normal inchangé", async ({ page }) => {
+test("§48.5 : envoyer une partie de la liste à un fournisseur, le reste à un autre, puis l'envoi normal inchangé", async ({ page }) => {
   await signUp(page);
   // Deux fournisseurs au carnet (par l'API : le carnet a son propre test).
   for (const [name, email] of [
@@ -870,7 +870,14 @@ test("§48.5 : envoyer une sélection à un autre fournisseur, discret, puis l'e
 
   // Par défaut, rien ne change : aucune case à cocher.
   await expect(list.getByRole("checkbox")).toHaveCount(0);
-  await list.getByRole("button", { name: "Envoyer une sélection à un autre fournisseur" }).click();
+  // Retour du fondateur (2026-10-11) : « je ne vois toujours pas la possibilité d'envoyer une partie du quantitatif à un
+  // négoce, puis une autre partie à un autre ». Un vrai bouton, à côté du titre « Fournitures », visible sans descendre.
+  const partie = list.getByRole("button", { name: "Envoyer une partie" });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await expect(partie).toBeInViewport();
+  await partie.click();
+  // Ce qu'il faut faire, en une phrase, au-dessus de la liste.
+  await expect(list.getByText("Coche ce qui part chez ce fournisseur. Le reste pourra partir chez un autre.")).toBeVisible();
   const boxes = list.getByRole("checkbox", { name: /^Envoyer à part : / });
   await expect(boxes.first()).toBeVisible();
   // Retour du fondateur (2026-10-10) : « je dois tout avoir de coché » : chaque ligne prête l'est d'office, on décoche.
@@ -879,6 +886,11 @@ test("§48.5 : envoyer une sélection à un autre fournisseur, discret, puis l'e
   expect(count).toBeGreaterThan(2);
   for (let i = 0; i < count; i++) await expect(ready.nth(i)).toBeChecked();
   const bar = page.getByRole("region", { name: "Envoyer la sélection" });
+  await expect(bar.getByText(`${count} lignes cochées`)).toBeVisible();
+  // « Tout décocher », puis « Tout cocher » : en un geste.
+  await list.getByRole("button", { name: "Tout décocher" }).click();
+  await expect(bar.getByText("Coche les lignes à envoyer")).toBeVisible();
+  await list.getByRole("button", { name: "Tout cocher" }).click();
   await expect(bar.getByText(`${count} lignes cochées`)).toBeVisible();
   // Retour du fondateur (2026-10-10) : « les fournisseurs cochés par défaut » : on décoche ceux qui ne reçoivent pas.
   const fournisseur = (name: string) => bar.getByRole("checkbox", { name: `Fournisseur : ${name}` });
@@ -909,7 +921,7 @@ test("§48.5 : envoyer une sélection à un autre fournisseur, discret, puis l'e
   await expect(reparti.getByText("Tuiles & Co · 1 ligne", { exact: true })).toBeVisible();
 
   // « Je dois aussi pouvoir en ajouter » : un fournisseur qui n'est pas au carnet s'ajoute ici, sans quitter la liste.
-  await list.getByRole("button", { name: "Envoyer une sélection à un autre fournisseur" }).click();
+  await list.getByRole("button", { name: "Envoyer une partie" }).click();
   await bar.getByRole("button", { name: "Ajouter un fournisseur" }).click();
   await bar.getByLabel("Nom du fournisseur").fill("Négoce Test");
   await bar.getByLabel("E-mail du fournisseur").fill("devis@example.com");
@@ -1256,7 +1268,7 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
   }
   await expect(list.getByRole("status").filter({ hasText: /^\d+ lignes? à régler$/ })).toBeVisible();
   const links = list.getByRole("navigation", { name: "Autres gestes sur la liste" }).getByRole("button");
-  await expect(links).toHaveText(["Ajouter un article", "Envoyer une sélection à un autre fournisseur"]);
+  await expect(links).toHaveText(["Ajouter un article"]);
 
   // §50.7 : l'écran 3 est le document : « Ton chantier », le chantier en bref, puis la liste ; aucune voix.
   await expect(list.getByRole("heading", { name: "Ton chantier" })).toBeVisible();
