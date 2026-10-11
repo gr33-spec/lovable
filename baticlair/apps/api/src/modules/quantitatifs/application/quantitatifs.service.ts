@@ -367,7 +367,8 @@ export class QuantitatifsService {
       }
       case "bref": {
         // §50.7 : seule une ligne du bref montré se corrige ; vide, elle est retirée (au document comme chez le fournisseur).
-        if (!takeoffDto(reviewed).bref.some((l) => l.cle === correction.cle)) throw notFound("Line");
+        // « avec-client » : l'artisan ajoute (« oui ») ou retire (vide) le client et l'adresse du bref.
+        if (correction.cle !== "avec-client" && !takeoffDto(reviewed).bref.some((l) => l.cle === correction.cle)) throw notFound("Line");
         return this.view(row, await this.takeoffs.answer(tenant, reviewed.takeoff.id, `bref:${correction.cle}`, correction.texte), rendu);
       }
       case "suggestion": {

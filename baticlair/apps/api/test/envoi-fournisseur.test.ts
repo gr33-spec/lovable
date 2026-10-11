@@ -58,8 +58,9 @@ describe("envoi fournisseur : un document, aucun prix", () => {
     );
     for (const a of packet.articles) expect(a).not.toMatch(/ : [\d\s,.]+ m²/);
     // Le chantier en bref : des faits (8 au plus), les réponses de l'artisan (2 descentes), jamais la pente par défaut.
-    expect(packet.resume.length).toBeLessThanOrEqual(8);
-    expect(packet.resume).toContain("2 descentes");
+    // Retour du fondateur (2026-10-11) : un seul texte descriptif.
+    expect(packet.resume).toHaveLength(1);
+    expect(packet.resume[0]).toMatch(/\b2 descentes\b/);
     expect(packet.resume.join(" ")).not.toMatch(/\bpente \d/);
     expect(packet.detail[0]).toMatchObject({ libelle: "Couverture en ardoises naturelles d'Espagne 1er choix 30x22 posées au crochet", mesure: "200 m²" });
 

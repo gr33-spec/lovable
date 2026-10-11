@@ -1,4 +1,4 @@
-import { briefResume, siteUnits, withoutLabour, writtenNumber } from "@baticlair/domain";
+import { briefResume, briefTexte, siteUnits, withoutLabour, writtenNumber } from "@baticlair/domain";
 import type { ArtisanView, PurchaseView } from "@baticlair/domain";
 import { artisanNotes } from "../../../platform/ai/artisan-notes.js";
 import type { ReviewedTakeoff } from "../application/takeoff.service.js";
@@ -123,6 +123,10 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase, exclude
     // §50.7 : « Le chantier en bref », le même que chez le fournisseur ; chaque ligne se corrige ou se retire (`bref:<clé>`).
     // §51 : quand l'IA a lu la fiche, le bref EST la fiche (chaque ligne se corrige ou se retire, le calcul suit).
     bref: brief ? briefResume(brief, siteNotes ?? null, takeoff.answers, takeoff.fiche ? (fiche ?? null) : null) : [],
+    // Retour du fondateur (2026-10-11) : le bref en UN texte descriptif (le même que chez le fournisseur) ; le client et
+    // l'adresse seulement si l'artisan les ajoute (`bref:avec-client`).
+    brefTexte: brief ? briefTexte(briefResume(brief, siteNotes ?? null, takeoff.answers, takeoff.fiche ? (fiche ?? null) : null)) : "",
+    brefAvecClient: takeoff.answers["bref:avec-client"] === "oui",
     // §51 : la fiche de chantier, chaque donnée avec son origine (lue, déduite, ta réponse, manquante).
     fiche: (fiche?.donnees ?? []).map((d) => ({ cle: d.cle, libelle: d.libelle, valeur: d.valeur, origine: d.origine, regle: d.regle ?? null, preuve: d.preuve ?? null })),
     // §48.4 : les ajouts proposés par l'IA, décochés, hors de la liste.

@@ -197,7 +197,13 @@ export function briefResume(
 ): { cle: string; texte: string }[] {
   if (fiche && ficheDocument(fiche).length > 0) {
     const where = brief.ville || brief.situation ? briefFacts(brief).slice(-1) : [];
-    const lines = [...ficheDocument(fiche), ...where.map((texte) => ({ cle: briefKey(texte), texte }))].filter((l) => !priceLeak(l.texte));
+    // Retour du fondateur (2026-10-11) : le client et l'adresse ne partent que si l'artisan le demande (« bref:avec-client ») ;
+    // un négoce n'en a pas besoin pour chiffrer. « Littoral : oui » est déjà dit par la ville (« bord de mer »).
+    const withClient = answers["bref:avec-client"] === "oui";
+    const lines = [...ficheDocument(fiche), ...where.map((texte) => ({ cle: briefKey(texte), texte }))]
+      .filter((l) => !priceLeak(l.texte))
+      .filter((l) => !/^fiche-littoral/.test(l.cle))
+      .filter((l) => withClient || !IDENTITE.test(l.cle.replace(/^fiche-/, "")));
     return lines.flatMap((l) => {
       // Une ligne de la fiche suit sa correction par la fiche elle-même (`ficheCorrigee`) ; la ville, par son texte.
       if (l.cle.startsWith("fiche-")) return [l];
@@ -220,6 +226,55 @@ export function briefResume(
     if (typeof said !== "string") return [{ cle, texte }];
     return said.trim() ? [{ cle, texte: said.trim() }] : [];
   });
+}
+
+/** Les données qui disent QUI et OÙ exactement (pas la ville) : hors du bref par défaut. */
+const IDENTITE = /^(?:client|maitre|nom(?:$|[-_])|adresse|code[-_]?postal|telephone|tel|e?-?mail|courriel)/i;
+
+const capitalize = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+const plainLabel = (t: string) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+/**
+ * §50.7, retour du fondateur (2026-10-11) : « Le chantier en bref » en UN texte descriptif, le même à l'écran et chez le
+ * fournisseur. L'ouvrage et sa surface ouvrent le texte, puis le matériau, puis les autres faits en une phrase, puis la
+ * ville ; le client et l'adresse, s'ils sont demandés, le ferment. Rien n'est inventé : chaque mot vient d'une ligne du bref.
+ */
+export function briefTexte(lines: readonly { cle: string; texte: string }[]): string {
+  const parts = lines.map((l) => {
+    const i = l.texte.indexOf(" : ");
+    return i > 0 ? { label: l.texte.slice(0, i).trim(), value: l.texte.slice(i + 3).trim() } : { label: "", value: l.texte.trim() };
+  });
+  const take = (re: RegExp) => {
+    const i = parts.findIndex((p) => p.label && re.test(plainLabel(p.label)));
+    return i >= 0 ? parts.splice(i, 1)[0] : undefined;
+  };
+  const ouvrage = take(/^ouvrage$/);
+  const surface = take(/^surface$/);
+  const materiau = take(/^materiaux?$/);
+  const client = take(/^(?:client|maitre)/);
+  const adresse = take(/^adresse/);
+  take(/^code.?postal/);
+  // La ville et sa situation : la dernière ligne sans libellé.
+  const lastPlain = parts.length > 0 && !parts[parts.length - 1]!.label ? parts.pop() : undefined;
+  const sentences: string[] = [];
+  if (ouvrage) sentences.push(`${capitalize(ouvrage.value)}${surface ? `, ${surface.value}` : ""}`);
+  else if (surface) sentences.push(`Surface ${surface.value}`);
+  if (materiau) sentences.push(capitalize(materiau.value));
+  const phrase = (p: { label: string; value: string }) => {
+    if (!p.label) return p.value;
+    const label = p.label.charAt(0).toLowerCase() + p.label.slice(1);
+    if (/^oui$/i.test(p.value)) return label;
+    if (/^non$/i.test(p.value)) return `sans ${label}`;
+    if (/^oui\s*[,:]\s*/i.test(p.value)) return `${capitalize(label)} : ${p.value.replace(/^oui\s*[,:]\s*/i, "")}`;
+    const many = /^nombre (?:de |d['’])(.+)$/i.exec(label);
+    if (many) return `${p.value} ${many[1]}`;
+    return /^\d/.test(p.value) ? `${label} ${p.value}` : `${label} : ${p.value}`;
+  };
+  const facts = parts.map(phrase).filter(Boolean);
+  if (facts.length > 0) sentences.push(capitalize(facts.join(", ")));
+  if (lastPlain) sentences.push(ouvrage || materiau || facts.length > 0 ? `Chantier à ${lastPlain.value}` : capitalize(lastPlain.value));
+  if (client || adresse) sentences.push([client ? `Client : ${client.value}` : null, adresse ? `${client ? "adresse" : "Adresse"} : ${adresse.value}` : null].filter(Boolean).join(", "));
+  return sentences.map((s) => `${s.replace(/[.\s]+$/, "")}.`).join(" ");
 }
 
 /**
