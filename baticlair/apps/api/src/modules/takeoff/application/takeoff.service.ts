@@ -73,6 +73,11 @@ import {
   ficheCorrigee,
   ficheFacts,
   type FicheChantier,
+  ecranDeLecture,
+  exportPourLecture,
+  ficheAvecBref,
+  lignesDeLecture,
+  type LectureDevis,
 } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { AiUsageRecorder, AnalysisMeter } from "../../ai-usage/index.js";
@@ -80,6 +85,7 @@ import type { DocumentAiInput, DocumentRepository, DocumentWithProcessing, Prepa
 import type { CompanyMemory, CorrectionJournal } from "../../learning/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { decodeRelecture, FICHE_RELECTURE_PROMPT, type FicheRelecteur, type RelectureQuestion } from "./fiche-relecture.js";
+import { LECTURE_PROMPT, type LectureReader } from "./lecture-reader.js";
 import { TAKEOFF_PROMPT } from "./prompt.js";
 import type { ExtractionAttempt, ExtractionOutput, TakeoffExtractor } from "./takeoff-extractor.js";
 import { suppliedLines } from "./takeoff-extractor.js";
@@ -119,6 +125,11 @@ export interface ReadingOptions {
   quantitatif?: QuantitatifPass;
   /** §51.2 : la relecture IA d'une réponse « Autre » (absente : la réponse écrite est gardée telle quelle). */
   relecteur?: FicheRelecteur;
+  /**
+   * §51.5 : LA LECTURE PAR LE MODÈLE, en un appel (devis complet + référentiel) : fiche, bref, questions, fourniture par
+   * ligne. Absent, ou lecteur simulé sans lecture enregistrée pour ce devis : l'ancienne lecture (prompt A) sert encore.
+   */
+  lecteur?: LectureReader;
   /** Le nom de l'entreprise, injecté dans le prompt B ({nom_entreprise}). */
   companyName?: (tenant: TenantContext) => Promise<string | null>;
   /**
@@ -218,7 +229,8 @@ export interface ReadingStats {
   version: 1;
   outcome: "completed" | "failed";
   failure?: string;
-  strategy: "single" | "split";
+  /** « lecture » : la lecture par le modèle en un appel (§51.5). */
+  strategy: "single" | "split" | "lecture";
   /** « text » : PDF texte ; « scan » : pages en image (scan, photos) ; « mixed » : les deux. */
   document: "text" | "scan" | "mixed";
   pages: { text: number; scan: number };
@@ -450,13 +462,100 @@ export class TakeoffService {
     if (begin.status === "already_done") throw new DomainError("conflict", "Analysis already completed for this document");
     const analysisId = begin.analysis.id;
     try {
-      return await this.readAndSave(tenant, doc, prepared, plan, policy, analysisId);
+      // §51.5 : la lecture par le modèle d'abord ; l'ancienne lecture seulement quand aucun lecteur ne lit ce devis.
+      const lu = this.reading.lecteur ? await this.readLecture(tenant, doc, prepared, analysisId) : null;
+      return lu ?? (await this.readAndSave(tenant, doc, prepared, plan, policy, analysisId));
     } catch (error) {
       const known = error instanceof DomainError && error.code === "analysis_failed";
       if (!known) await this.meter.fail(analysisId).catch(() => undefined);
       this.reading.onReadingFailed?.(known ? String((error.details as { reason?: string } | undefined)?.reason ?? "analysis_failed") : "unexpected_error");
       throw error;
     }
+  }
+
+  /**
+   * §51.5 : UN appel au modèle le plus capable, avec le devis complet (texte et PDF) et l'export du référentiel. La
+   * réponse (fiche, bref, questions, fourniture par ligne) est gardée telle quelle avec le quantitatif ; les lignes du
+   * quantitatif sont les fournitures nommées, plus les lignes sans fourniture, repliées (§49.9). `null` : ce lecteur ne
+   * lit pas ce devis (lecteur simulé sans lecture enregistrée) ; une lecture en échec est une lecture échouée.
+   */
+  private async readLecture(tenant: TenantContext, doc: DocumentWithProcessing, prepared: Prepared, analysisId: string): Promise<ReviewedTakeoff | null> {
+    const lecteur = this.reading.lecteur!;
+    const started = Date.now();
+    const ref = referentialFor(doc.trade);
+    const siteNotes = doc.projectId ? ((await this.reading.projectNotes?.(tenant, doc.projectId)) ?? null) : null;
+    // Le devis complet : son texte numéroté (pour citer les lignes) et le PDF entier, toutes pages.
+    const content = await this.documents.readContent(tenant, doc.id);
+    const pages = prepared.pages.map((p) => p.pageNumber).filter((n): n is number => typeof n === "number");
+    const document = { numberedText: prepared.input.numberedText, imagePdf: content?.bytes ?? prepared.input.imagePdf, imagePages: pages };
+    const result = await lecteur.lire({ document, tradeLabel: tradeProfile(doc.trade).label, referentiel: ref ? exportPourLecture(ref) : "Aucun référentiel pour ce métier.", siteNotes });
+    if (result === null) return null;
+    const counted = { text: prepared.pages.filter((p) => p.route === "text").length, vision: prepared.pages.filter((p) => p.route === "vision").length };
+    const cost = await this.record(tenant, doc, counted, prepared.processingId, analysisId, 1, result, LECTURE_PROMPT);
+    const scanned = { text: counted.text, scan: counted.vision };
+    const stats = (outcome: ReadingStats["outcome"], failure?: string, lines = 0): ReadingStats => ({
+      version: 1,
+      outcome,
+      ...(failure ? { failure } : {}),
+      linesBeforeMerge: lines,
+      linesAfterMerge: lines,
+      droppedOutsideBlock: 0,
+      droppedDuplicates: 0,
+      scanBoundaryRisks: [],
+      strategy: "lecture",
+      document: counted.text > 0 && counted.vision > 0 ? "mixed" : counted.vision > 0 ? "scan" : "text",
+      pages: scanned,
+      plannedBlocks: 1,
+      calls: 1,
+      callOutcomes: { [result.errorCode === "max_tokens" ? "truncated" : result.status]: 1 },
+      splits: 0,
+      tokens: { input: result.usage.inputTokens, output: result.usage.outputTokens, cacheRead: result.usage.cacheReadTokens ?? 0, cacheWrite: (result.usage.cacheWrite5mTokens ?? 0) + (result.usage.cacheWrite1hTokens ?? 0) },
+      costMicroUsd: cost,
+      estimatedMicroUsd: 0,
+      durationMs: Date.now() - started,
+    });
+    if (result.status !== "success" || !result.output) {
+      await this.saveStats(analysisId, stats("failed", result.status));
+      await this.meter.fail(analysisId);
+      throw new DomainError("analysis_failed", "The AI could not read this quote", { reason: result.status });
+    }
+    const lecture = result.output;
+    const lignes = lignesDeLecture(lecture);
+    if (lignes.length === 0) {
+      await this.saveStats(analysisId, stats("failed", "nothing_read"));
+      await this.meter.fail(analysisId);
+      throw new DomainError("analysis_failed", "Nothing was read in this quote", { reason: "nothing_read" });
+    }
+    await this.saveStats(analysisId, stats("completed", undefined, lignes.length));
+    if (ref) await this.reading.referentials?.ensure(ref);
+    const takeoff = await this.takeoffs.create(tenant, {
+      projectId: doc.projectId,
+      documentId: doc.id,
+      analysisId,
+      referentialVersion: ref?.version ?? null,
+      trade: doc.trade,
+      promptId: LECTURE_PROMPT.id,
+      promptVersion: LECTURE_PROMPT.version,
+      model: result.model,
+      notes: lecture.notes,
+      context: lecture.contexte,
+      fiche: ficheAvecBref(lecture.fiche, lecture.bref),
+      lecture,
+      lines: lignes.map((l) => ({
+        designation: l.designation.trim(),
+        quantityRaw: l.quantity?.trim() || null,
+        unitRaw: l.unit?.trim() || null,
+        reference: null,
+        sourceRefs: [],
+        sourcePages: [],
+        section: [],
+        aiDoubt: null,
+        reading: { role: l.ligne.role, articles: [], faconnage: null, manque: [] },
+      })),
+    });
+    await this.reading.nameProject?.(tenant, doc.projectId, quoteIdentity(lecture.contexte)).catch((error: unknown) => this.onRecordFailure(error));
+    await this.meter.complete(analysisId);
+    return this.review(tenant, takeoff);
   }
 
   private async readAndSave(
@@ -1084,6 +1183,7 @@ export class TakeoffService {
 
   /** Relecture déterministe, recalculée à chaque lecture (règles métier à jour). */
   private async review(tenant: TenantContext, record: TakeoffRecord): Promise<ReviewedTakeoff> {
+    if (record.lecture) return this.reviewLecture(tenant, record, record.lecture);
     // §44.2 : une phrase d'exclusion de la note (« garage non compris ») retire la ligne qui la nomme du calcul.
     const notes = (await this.reading.projectNotes?.(tenant, record.projectId)) ?? null;
     const exclusions = readExclusions(notes);
@@ -1277,6 +1377,55 @@ export class TakeoffService {
       purchase.questions.push({ key, state: "missing", title: d.question, text: d.question, lineIds: [], primary: null, secondary: [], question: { key, kind: "choose", text: d.question, options: [], named: true } });
     }
     return { ...reviewed, view, brief, fiche, purchase, habits, aiSuggestions, withoutSupply, siteNotes: notes };
+  }
+
+  /**
+   * §51.5 : l'écran à partir de la lecture du modèle : le calcul (ratios, conversions) puise dans la fiche et les données
+   * lues, la liste suit l'ordre du devis sous les noms du modèle, les questions sont celles du modèle. Les faits du
+   * chantier que le code connaît sans rien demander (la zone par le code postal) s'ajoutent.
+   */
+  private async reviewLecture(tenant: TenantContext, takeoff: TakeoffRecord, lecture: LectureDevis): Promise<ReviewedTakeoff> {
+    const notes = (await this.reading.projectNotes?.(tenant, takeoff.projectId)) ?? null;
+    const current = referentialFor(takeoff.trade) ?? ROOFING_REFERENTIAL;
+    const ref = (takeoff.referentialVersion && takeoff.referentialVersion !== current.version ? await this.reading.referentials?.load(takeoff.referentialVersion) : null) ?? current;
+    const address = (await this.reading.projectAddress?.(tenant, takeoff.projectId)) ?? null;
+    const zone = climateZone(postalCodeIn(address));
+    const extraFacts: SiteFact[] = zone ? [{ key: "zone", value: String(zone), unit: "u", evidence: `Code postal du chantier (${postalCodeIn(address)})`, origin: "document" }] : [];
+    if (isCoastal(postalCodeIn(address))) {
+      extraFacts.push({ key: "diametre_crochet", value: "2.7", unit: "mm", evidence: `Département littoral (${postalCodeIn(address)}) : crochet inox 2,7 mm`, origin: "document" });
+    }
+    extraFacts.push(...readSiteNotes(ref, notes));
+    // Les lignes enregistrées, dans l'ordre de la lecture : chaque fourniture (ou ligne sans fourniture) a son identifiant.
+    const stored = takeoff.lines.filter((l) => l.origin === "ai");
+    const keys = lignesDeLecture(lecture).map((l) => l.id);
+    const ids = new Map(keys.map((k, i) => [k, stored[i]?.id ?? k]));
+    const lines = new Map(takeoff.lines.map((l) => [l.id, { confirmed: l.confirmed, enteredByArtisan: l.origin !== "ai" || l.edited, ...(l.edited ? { designation: l.designation, quantity: l.quantityRaw, unit: l.unitRaw } : {}) }]));
+    const preferences = await this.memory.forEngine(tenant);
+    const input = { ref, lecture, answers: takeoff.answers, preferences, options: { acceptDraft: true }, extraFacts, ids, lines };
+    let e = ecranDeLecture(input);
+    // §47.4 : une règle validée par trois entreprises est verte partout ; l'écran est rejoué avec ces règles.
+    const ruleKeys = [...new Set(e.purchase.toBuy.flatMap((b) => (b.rules ?? []).filter((r) => !r.local).map((r) => r.key)))];
+    const validated = ruleKeys.length > 0 ? ((await this.reading.rules?.validated(ruleKeys)) ?? new Set<string>()) : new Set<string>();
+    if (validated.size > 0) e = ecranDeLecture({ ...input, validated });
+    // §41.4 : les mots de l'artisan (libellé, quantité, précision réécrits d'un tap) remplacent ceux de BatiClair.
+    const purchase = applyPurchaseOverrides(e.purchase, takeoff.answers);
+    const brief = siteBrief({ ref, plan: e.plan, answers: takeoff.answers, lines: e.lignes.map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit })), context: takeoff.context ?? {}, ville: communeOf(address) });
+    const fiche = ficheChantier({ ref, ai: ficheCorrigee(takeoff.fiche, takeoff.answers), plan: e.plan, answers: takeoff.answers, questions: purchase.questions.flatMap((d) => (d.question ? [d.question] : [])), lignes: new Map(takeoff.lines.map((l) => [l.id, `ligne ${l.position}`])) });
+    return {
+      takeoff,
+      validation: e.validation,
+      roles: e.roles,
+      view: e.view,
+      purchase,
+      excluded: new Map(),
+      openContradictions: [],
+      brief,
+      fiche: ficheCorrigee(fiche, takeoff.answers) ?? fiche,
+      habits: [],
+      aiSuggestions: [],
+      withoutSupply: e.sansFourniture,
+      siteNotes: notes,
+    };
   }
 
   /**

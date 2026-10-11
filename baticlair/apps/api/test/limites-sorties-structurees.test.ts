@@ -4,6 +4,7 @@ import type { z } from "zod";
 import { offerOutputSchema } from "../src/modules/offers/application/offer-extractor.js";
 import { completionWireSchema } from "../src/modules/takeoff/application/quantitatif-pass.js";
 import { extractionFormatSchema } from "../src/modules/takeoff/application/takeoff-extractor.js";
+import { lectureWireSchema } from "../src/modules/takeoff/application/lecture-reader.js";
 
 /**
  * L'API Anthropic REFUSE une demande dont le format de sortie dépasse ses plafonds (structured outputs) : 16 champs
@@ -35,6 +36,7 @@ const formats: [string, z.ZodType][] = [
   ["lecture du devis (prompt A)", extractionFormatSchema],
   ["quantitatif (prompt B)", completionWireSchema],
   ["devis fournisseur", offerOutputSchema],
+  ["lecture du devis par le modèle (§51.5)", lectureWireSchema],
 ];
 
 describe("plafonds des sorties structurées de l'API", () => {

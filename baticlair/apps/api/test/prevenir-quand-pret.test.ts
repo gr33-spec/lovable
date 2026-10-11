@@ -5,6 +5,10 @@ import { CapturingPushSender } from "../src/platform/push/web-push.sender.js";
 import { CONFIG, PUSH_SENDER } from "../src/platform/tokens.js";
 import { QUANTITATIF_PASS, type QuantitatifPass } from "../src/modules/takeoff/application/quantitatif-pass.js";
 import { TAKEOFF_EXTRACTOR, type ExtractionAttempt, type ExtractionRequest, type TakeoffExtractor } from "../src/modules/takeoff/application/takeoff-extractor.js";
+import { LECTURE_READER, type LectureReader } from "../src/modules/takeoff/application/lecture-reader.js";
+
+/** §51.5 : ce test exerce l'ancienne lecture (prompt A) avec son lecteur de test : la lecture par le modèle ne lit pas ce devis. */
+const SANS_LECTURE: LectureReader = { provider: "test", lire: async () => null };
 import { FakeTakeoffExtractor } from "../src/modules/takeoff/infrastructure/fake-takeoff-extractor.js";
 import type { ReadAttempt } from "../src/platform/ai/document-reader.js";
 import { makePdf } from "./support/pdf-fixtures.js";
@@ -57,7 +61,7 @@ beforeAll(async () => {
   const base = loadConfig({ ...process.env, AI_PROVIDER: "anthropic", ANTHROPIC_API_KEY: "sk-test", AI_QUANTITATIF: "on" });
   const config: AppConfig = { ...base, ai: { ...base.ai, answerWithinMs: 1500 } };
   ctx = await createTestApp((b) =>
-    b.overrideProvider(CONFIG).useValue(config).overrideProvider(TAKEOFF_EXTRACTOR).useValue(extractor).overrideProvider(QUANTITATIF_PASS).useValue(pass).overrideProvider(PUSH_SENDER).useValue(push),
+    b.overrideProvider(CONFIG).useValue(config).overrideProvider(TAKEOFF_EXTRACTOR).useValue(extractor).overrideProvider(QUANTITATIF_PASS).useValue(pass).overrideProvider(PUSH_SENDER).useValue(push).overrideProvider(LECTURE_READER).useValue(SANS_LECTURE),
   );
 });
 afterAll(async () => {

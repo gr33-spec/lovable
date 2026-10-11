@@ -1,4 +1,4 @@
-import type { CompletionRecord, FicheChantier, LineRole, QuoteLineReading } from "@baticlair/domain";
+import type { CompletionRecord, FicheChantier, LectureDevis, LineRole, QuoteLineReading } from "@baticlair/domain";
 import type { TenantContext } from "../../tenancy/index.js";
 
 export type TakeoffStatus = "draft" | "validated";
@@ -58,6 +58,8 @@ export interface TakeoffRecord {
   context: Record<string, string> | null;
   /** §51.1 : la fiche de chantier (lue par l'IA, complétée par les réponses « Autre » relues), ou null. */
   fiche: FicheChantier | null;
+  /** §51.5 : la lecture du devis par le modèle (fiche, bref, questions, fourniture par ligne) ; null : ancienne lecture. */
+  lecture: LectureDevis | null;
   /** Appel IA n° 2 : ajouts et doutes proposés (null : pas d'appel). */
   completion: CompletionRecord | null;
   /** Parcours (§48) : calcul lancé après les questions, et terminé (null : pas encore). */
@@ -89,6 +91,8 @@ export interface NewTakeoff {
   context?: Record<string, string> | null;
   /** §51.1 : la fiche de chantier lue par l'IA. */
   fiche?: FicheChantier | null;
+  /** §51.5 : la lecture par le modèle, gardée telle quelle. */
+  lecture?: LectureDevis | null;
   /** Déjà calculé à la création (lignes d'un partenaire : pas de questions, pas d'appel IA). */
   calculated?: boolean;
 }
