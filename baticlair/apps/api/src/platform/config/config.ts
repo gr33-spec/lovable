@@ -89,6 +89,11 @@ const envSchema = z
     /** Codes d'activation manuelle d'une formule, pour les tests : « CODE:solo,AUTRE:pro ». Vide = désactivé. */
     PLAN_ACTIVATION_CODES: z.string().optional(),
     /**
+     * Le paywall (limite de chantiers des formules) : EN PAUSE par défaut (fondateur, 2026-10-11 : « fais en sorte que je
+     * puisse utiliser pour l'instant, on mettra le paywall actif plus tard ») ; `on` le rallume.
+     */
+    PAYWALL: z.enum(["on", "off"]).default("off"),
+    /**
      * Limitation de débit (connexion, inscription, dépôts de devis, lecture IA) : `on` partout,
      * `off` uniquement pour les tests automatisés qui enchaînent des centaines de requêtes.
      */
@@ -156,7 +161,7 @@ export interface AppConfig {
   aiCost: { usdToEur: string; monthlyBudgetEur: string; analysisMaxEur: string };
   /** E-mails (en minuscules) des validateurs du référentiel. */
   referentialValidators: string[];
-  billing: { plans: Plan[]; activationCodes: Record<string, string> };
+  billing: { plans: Plan[]; activationCodes: Record<string, string>; enforced: boolean };
   rateLimit: { enabled: boolean };
   alerts: { webhookUrl?: string; email?: string };
   cronSecret?: string;
@@ -217,7 +222,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       .split(",")
       .map((x) => x.trim().toLowerCase())
       .filter((x) => x.length > 0),
-    billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES) },
+    billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES), enforced: e.PAYWALL === "on" },
     rateLimit: { enabled: e.RATE_LIMIT === "on" },
     ...(e.CRON_SECRET ? { cronSecret: e.CRON_SECRET } : {}),
     alerts: { ...(e.ALERT_WEBHOOK_URL ? { webhookUrl: e.ALERT_WEBHOOK_URL } : {}), ...(e.ALERT_EMAIL ? { email: e.ALERT_EMAIL } : {}) },
