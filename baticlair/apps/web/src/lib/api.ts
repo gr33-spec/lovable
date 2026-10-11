@@ -238,6 +238,10 @@ export interface Takeoff {
   /** §49.9 : les lignes du devis sans fourniture (heures, forfait, accès, évacuation), repliées sous la liste. */
   /** §50.7 : « Le chantier en bref », le même que chez le fournisseur ; chaque ligne se corrige ou se retire. */
   bref?: { cle: string; texte: string }[];
+  /** Le bref en un texte descriptif (retour du fondateur, 2026-10-11), le même que chez le fournisseur. */
+  brefTexte?: string;
+  /** Le client et l'adresse sont-ils dans le bref ? (non par défaut : un négoce n'en a pas besoin pour chiffrer). */
+  brefAvecClient?: boolean;
   sansFourniture?: { lineId: string; label: string; measure: string | null }[];
   /** §48.4 : ce que l'IA juge utile mais que le devis ne demande pas : bloc « Suggestions », décoché. */
   aiSuggestions?: { key: string; label: string; quantity: string | null; unit: string | null; reason: string }[];

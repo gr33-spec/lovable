@@ -171,19 +171,14 @@ describe("§45.7 — la demande de devis du chantier Test", () => {
     const { projectId } = await chantierTest(agent);
     const preview = (await agent.post(`/v1/projects/${projectId}/price-requests/preview`).send({}).expect(200)).body;
     // Greg a répondu « 2 descentes » : c'est un fait. (Sans réponse, la liste ne se valide pas ; le domaine le teste aussi.)
-    expect(preview.document.blocs[0].lignes).toContain("2 descentes");
+    // Retour du fondateur (2026-10-11) : le bloc 1 est UN texte descriptif.
+    expect(preview.document.blocs[0].lignes).toHaveLength(1);
+    expect(preview.document.blocs[0].lignes[0]).toMatch(/\b2 descentes\b/);
     // La pente n'est ni dans le devis ni répondue : jamais dans le bloc 1, ni dans le mail.
     expect(preview.document.blocs[0].lignes.join(" ")).not.toMatch(/\bpente \d/);
     expect(preview.mail).not.toMatch(/\bpente \d|45°/);
     expect(preview.document.blocs[0].lignes).toEqual([
-      "Couverture zinc à joint debout",
-      "91 m² en monopente",
-      "rampant 7 m",
-      "largeur 13 m",
-      "zinc prépatiné gris quartz 0,65 mm",
-      "pose sur voligeage",
-      "2 descentes",
-      "Brest, bord de mer",
+      "Couverture zinc à joint debout, 91 m² en monopente, rampant 7 m, largeur 13 m, zinc prépatiné gris quartz 0,65 mm, pose sur voligeage, 2 descentes. Chantier à Brest, bord de mer.",
     ]);
   });
 });

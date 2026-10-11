@@ -31,7 +31,7 @@ const FICHE = {
   ],
 };
 
-type Ecran = { bref: { cle: string; texte: string }[] };
+type Ecran = { bref: { cle: string; texte: string }[]; brefTexte: string };
 type Vue = { ecran: Ecran; lignes: { libelle: string; texte: string }[]; projetId: string };
 
 async function chantier() {
@@ -59,7 +59,9 @@ describe("§50.7 et §51 : en haut de « Ton chantier », la fiche", () => {
     expect(v.ecran.bref.map((l) => l.texte)).toEqual(["Ouvrage : couverture zinc à joint debout", "Surface : 91 m²", "Rampant : 7 m", "Largeur : 13 m", "Nombre de descentes : 2", "Aspect du zinc : Quartz-Zinc", "Façonnage : commandé façonné", "Brest, bord de mer"]);
     expect((await agent.post(`/v1/quantitatifs/${id}/validation`)).status).toBe(200);
     const created = (await agent.post(`/v1/projects/${v.projetId}/price-requests`).send({ supplierIds: [supplierId] }).expect(201)).body;
-    expect(created.packet.resume).toEqual(v.ecran.bref.map((l) => l.texte));
+    // Retour du fondateur (2026-10-11) : le bref est UN texte descriptif, le même à l'écran et chez le fournisseur.
+    expect(v.ecran.brefTexte).toBe("Couverture zinc à joint debout, 91 m². Rampant 7 m, largeur 13 m, 2 descentes, aspect du zinc : Quartz-Zinc, façonnage : commandé façonné. Chantier à Brest, bord de mer.");
+    expect(created.packet.resume).toEqual([v.ecran.brefTexte]);
   });
 
   it("une ligne de la fiche corrigée sur le document l'est pour le calcul : 6,5 m de rampant, des bacs de 6,65 m", async () => {

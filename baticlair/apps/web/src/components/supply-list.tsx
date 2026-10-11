@@ -132,14 +132,7 @@ export function SupplyList({
         <p className="text-[13px] text-muted">C&apos;est ce que reçoit le fournisseur.</p>
       </header>
       {takeoff.bref && takeoff.bref.length > 0 ? (
-        <section aria-label="Le chantier en bref" className="mb-4 flex flex-col gap-1">
-          <h3 className="text-[13px] font-extrabold text-muted">Le chantier en bref</h3>
-          <ul className="flex flex-col divide-y divide-line rounded-[20px] border border-[#dde1e8] bg-surface px-3">
-            {takeoff.bref.map((l) => (
-              <BriefLine key={l.cle} text={l.texte} editable={editable && Boolean(onBrief)} pending={pending} onSave={(t) => onBrief!(l.cle, t)} />
-            ))}
-          </ul>
-        </section>
+        <Brief takeoff={takeoff} editable={editable && Boolean(onBrief)} pending={pending} onBrief={onBrief} />
       ) : null}
       <h3 className="mb-1 text-[13px] font-extrabold text-muted">Fournitures</h3>
       <ul aria-label="Fournitures" className="flex flex-col divide-y divide-line rounded-[20px] border border-[#dde1e8] bg-surface">
@@ -388,6 +381,58 @@ function InlineText({ label, value, pending, onSave, onCancel }: { label: string
 }
 
 /** §50.7 : une ligne du chantier en bref ; un tap la corrige, la corbeille la retire (au document comme chez le fournisseur). */
+/**
+ * « Le chantier en bref » (retour du fondateur, 2026-10-11) : UN texte descriptif, en un bloc, le même que chez le
+ * fournisseur. « Modifier le bref » ouvre ses lignes : chacune se corrige ou se retire, le texte suit (et le calcul aussi,
+ * §51). Le client et l'adresse n'y sont que si l'artisan coche la case : un négoce n'en a pas besoin pour chiffrer.
+ */
+function Brief({ takeoff, editable, pending, onBrief }: { takeoff: Takeoff; editable: boolean; pending: boolean; onBrief: ((cle: string, texte: string) => Promise<void>) | undefined }) {
+  const [editing, setEditing] = useState(false);
+  const id = useId();
+  const texte = takeoff.brefTexte || (takeoff.bref ?? []).map((l) => l.texte).join(". ");
+  return (
+    <section aria-label="Le chantier en bref" className="mb-4 flex flex-col gap-1">
+      <div className="flex items-baseline justify-between gap-2">
+        <h3 className="text-[13px] font-extrabold text-muted">Le chantier en bref</h3>
+        {editable ? (
+          <button
+            type="button"
+            onClick={() => setEditing((e) => !e)}
+            aria-label={editing ? "Terminer" : "Modifier le bref"}
+            className="inline-flex min-h-10 items-center gap-1.5 text-[13px] font-bold text-accent-text"
+          >
+            {editing ? <Check size={15} aria-hidden="true" /> : <Pencil size={14} aria-hidden="true" />}
+            {editing ? "Terminer" : "Modifier"}
+          </button>
+        ) : null}
+      </div>
+      <div className="rounded-[20px] border border-[#dde1e8] bg-surface px-4 py-3.5">
+        <p className="text-[15px] leading-relaxed text-ink">{texte}</p>
+        {editing ? (
+          <div className="mt-3 flex flex-col gap-2 border-t border-line pt-2">
+            <ul className="flex flex-col divide-y divide-line">
+              {(takeoff.bref ?? []).map((l) => (
+                <BriefLine key={l.cle} text={l.texte} editable pending={pending} onSave={(t) => onBrief!(l.cle, t)} />
+              ))}
+            </ul>
+            <label htmlFor={id} className="flex min-h-11 cursor-pointer items-center gap-3 text-[14px] font-bold">
+              <input
+                id={id}
+                type="checkbox"
+                checked={takeoff.brefAvecClient === true}
+                disabled={pending}
+                onChange={(e) => void onBrief!("avec-client", e.target.checked ? "oui" : "")}
+                className="size-5 shrink-0 accent-accent"
+              />
+              Ajouter le nom du client et l&apos;adresse
+            </label>
+          </div>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
 function BriefLine({ text, editable, pending, onSave }: { text: string; editable: boolean; pending: boolean; onSave: (t: string) => Promise<void> }) {
   const [editing, setEditing] = useState(false);
   if (editing)
