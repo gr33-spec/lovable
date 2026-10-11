@@ -9,6 +9,13 @@ export interface TransactionalEmail {
   text: string;
   /** Pièces jointes (le PDF de commande fournisseur, §43) : contenu en base64. */
   attachments?: { filename: string; contentType: string; contentBase64: string }[];
+  /** Adresse de réponse : « Répondre » écrit à l'artisan, pas à l'adresse d'envoi de BatiClair. */
+  replyTo?: string;
+  /**
+   * Le mail DOIT partir (une demande au fournisseur) : un refus ou une panne du prestataire lève `email_not_sent`, au lieu
+   * d'être seulement journalisé comme pour un mail de compte (inscription, mot de passe), qu'on peut redemander.
+   */
+  mustDeliver?: boolean;
 }
 
 export interface TransactionalEmailSender {

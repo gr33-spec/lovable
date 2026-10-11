@@ -1,3 +1,4 @@
+import { DomainError } from "../errors/domain-error.js";
 import type { AppLogger } from "../logging/logger.js";
 import type { EmailCapability, TransactionalEmail, TransactionalEmailSender } from "./email.port.js";
 
@@ -26,7 +27,23 @@ export class ResendEmailSender implements TransactionalEmailSender, EmailCapabil
   ) {}
 
   async send(email: TransactionalEmail): Promise<void> {
-    const res = await this.fetchImpl("https://api.resend.com/emails", {
+    let res: { ok: boolean; status: number };
+    try {
+      res = await this.post(email);
+    } catch (err) {
+      this.logger.error({ err, subject: email.subject }, "resend: email not sent");
+      if (email.mustDeliver) throw new DomainError("email_not_sent", "Email provider unreachable");
+      return;
+    }
+    if (!res.ok) {
+      this.logger.error({ status: res.status, subject: email.subject }, "resend: email not sent");
+      // Une demande au fournisseur qui ne part pas ne passe jamais « envoyée » (audit avant commercialisation).
+      if (email.mustDeliver) throw new DomainError("email_not_sent", `Email provider refused (${res.status})`);
+    }
+  }
+
+  private post(email: TransactionalEmail) {
+    return this.fetchImpl("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${this.apiKey}`, "content-type": "application/json" },
       body: JSON.stringify({
@@ -34,12 +51,10 @@ export class ResendEmailSender implements TransactionalEmailSender, EmailCapabil
         to: [email.to],
         subject: email.subject,
         text: email.text,
+        ...(email.replyTo ? { reply_to: email.replyTo } : {}),
         ...(email.attachments?.length ? { attachments: email.attachments.map((a) => ({ filename: a.filename, content: a.contentBase64, content_type: a.contentType })) } : {}),
       }),
       signal: AbortSignal.timeout(10_000),
     });
-    if (!res.ok) {
-      this.logger.error({ status: res.status, subject: email.subject }, "resend: email not sent");
-    }
   }
 }

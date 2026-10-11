@@ -20,6 +20,8 @@ export type ErrorCode =
   | "plan_limit_reached"
   | "ai_unavailable"
   | "analysis_failed"
+  /** Le prestataire d'e-mail a refusé ou n'a pas répondu : la demande au fournisseur n'est pas partie. */
+  | "email_not_sent"
   | "onboarding_required"
   | "company_selection_required"
   | "internal_error";

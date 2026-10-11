@@ -23,6 +23,7 @@ const STATUS: Record<ErrorCode, number> = {
   plan_limit_reached: 402,
   ai_unavailable: 503,
   analysis_failed: 502,
+  email_not_sent: 502,
   internal_error: 500,
 };
 
@@ -38,7 +39,7 @@ const FROM_HTTP_STATUS: Record<number, ErrorCode> = {
 };
 
 /** Codes pour lesquels une nouvelle tentative a une chance d'aboutir. */
-const RETRYABLE: ReadonlySet<ErrorCode> = new Set(["internal_error", "request_in_progress", "too_many_requests"]);
+const RETRYABLE: ReadonlySet<ErrorCode> = new Set(["internal_error", "request_in_progress", "too_many_requests", "email_not_sent"]);
 
 /** Erreurs HTTP levées hors de NestJS (ex. parseur de corps : trop gros, JSON invalide). */
 function httpStatusOf(exception: unknown): number | undefined {
