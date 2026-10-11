@@ -588,11 +588,11 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await expect(page.getByText("2 offres reçues")).toBeVisible();
   await page.getByRole("button", { name: "Comparer les offres" }).click();
   await expect(pointp.getByText("6/7 articles chiffrés")).toBeVisible();
-  await expect(tuiles.getByText("5/6 articles chiffrés · 1 manquant")).toBeVisible();
+  await expect(tuiles.getByText("5/7 articles chiffrés · 2 manquants")).toBeVisible();
   await expect(page.getByRole("button", { name: /^Comparer les/ })).toHaveCount(0);
   await expect(page.getByText(/analyse/i)).toHaveCount(0);
   await page.reload();
-  await expect(tuiles.getByText("5/6 articles chiffrés · 1 manquant")).toBeVisible();
+  await expect(tuiles.getByText("5/7 articles chiffrés · 2 manquants")).toBeVisible();
   // Le détail lu reste accessible, au second plan.
   await menu(tuiles, "Voir les lignes de son devis");
   await expect(tuiles.getByText("Livraison chantier")).toBeVisible();

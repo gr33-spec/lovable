@@ -555,8 +555,8 @@ export function ecranDeLecture(input: {
   }
   // Une réponse sans sa pièce (« param:faconnage » pour toutes les pièces) vaut pour chaque question de pièce (comme le calcul la lit).
   // §51.6 : une question laissée sans réponse (« je ne sais pas », null) reste ouverte sur sa ligne, orange, jusqu'à la réponse.
-  const given = (key: string) => answers[key] !== undefined && answers[key] !== null;
-  const answered = (a: Asked) => given(a.key) || (scopedParam(a.key) !== null && given(`param:${a.q.cle}`));
+  const repondu = (key: string) => answers[key] !== undefined && answers[key] !== null;
+  const answered = (a: Asked) => repondu(a.key) || (scopedParam(a.key) !== null && repondu(`param:${a.q.cle}`));
   // À l'ouverture, toutes les questions du modèle ; une fois qu'on répond, seules celles qu'une fourniture ou le calcul attend encore
   // (le nombre d'arêtiers ne sert plus quand l'arêtier est en zinc).
   // Encore utile : le calcul la demande, ou la donnée manque encore à un article (« dév. ? ») ; un modèle choisi peut rendre
@@ -571,7 +571,7 @@ export function ecranDeLecture(input: {
   // Une question close sans réponse (null) qu'aucune ligne n'attend (le calcul a sa valeur par défaut) ne bloque pas l'envoi :
   // elle n'a plus de ligne orange où se régler. Celle qu'une ligne attend reste, avec ses boutons sur la ligne (§51.6).
   const waited = new Set(purchase.toBuy.flatMap((b) => b.waitsOn ?? []));
-  const kept = purchase.questions.filter((d) => !(d.question && d.lineIds.length === 0 && answers[d.question.key] === null && !waited.has(d.question.key)));
+  const kept = purchase.questions.filter((d) => !(d.question && answers[d.question.key] === null && !waited.has(d.question.key)));
   const canValidate = purchase.toBuy.length + purchase.toQuote.length > 0 && kept.every((q) => q.lineIds.length === 0 && !q.question) && purchase.toBuy.every((b) => b.state === "ready");
   const final = kept.length === purchase.questions.length ? purchase : { ...purchase, questions: kept, canValidate };
   const sansFourniture = lignes.filter((l) => !l.fourniture).map((l) => ({ lineId: l.id, label: l.designation.trim(), measure: [l.quantity?.trim(), l.unit?.trim()].filter(Boolean).join(" ") || null }));
@@ -785,8 +785,10 @@ function finishPurchase(
   const rows: ScreenRow[] = sorted.map((item) => {
     const waits = (item.waitsOn ?? []).map((k) => decisions.find((d) => d.question?.key === k)).filter((d): d is Decision => !!d);
     // Une donnée qui manque encore (question ouverte, ou close sans réponse) : orange.
-    const check = item.state === "to_confirm" || (item.waitsOn ?? []).length > 0;
-    const decision = waits[0] ?? decisions.find((d) => d.key.startsWith("a-preciser:") && d.lineIds.some((id) => item.lineIds.includes(id)));
+    // Une décision qui vise la ligne (doublon : « garder les deux ? », « à préciser ») la met orange, avec son geste (§49.1, §49.8).
+    const lineDecision = decisions.find((d) => !d.question && d.lineIds.some((id) => item.lineIds.includes(id)));
+    const check = item.state === "to_confirm" || (item.waitsOn ?? []).length > 0 || lineDecision !== undefined;
+    const decision = waits[0] ?? lineDecision;
     return { key: `item:${item.key}`, status: check ? "check" : "ok", itemKey: item.key, ...(decision ? { decisionKey: decision.key } : {}), lineIds: item.lineIds };
   });
   for (const q of raw.toQuote) rows.push({ key: `quote:${q.key}`, status: "supplier", quoteKey: q.key, lineIds: q.lineIds });
