@@ -1,4 +1,4 @@
-import { briefResume, briefSentence, communeOf, groupIdenticalLines, orderGaps, parseOrderText, parseUnit, withoutLabour, writtenNumber, type OrderGap, type OrderedLine } from "@baticlair/domain";
+import { briefResume, briefSentence, briefTexte, communeOf, groupIdenticalLines, orderGaps, parseOrderText, parseUnit, withoutLabour, writtenNumber, type OrderGap, type OrderedLine } from "@baticlair/domain";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { DocumentsService } from "../../documents/index.js";
@@ -93,7 +93,9 @@ export function buildPacket(
   // La note de l'artisan (§44 : « accès par la cour ») : telle qu'écrite, deux lignes au plus, jamais une ligne qui parle
   // de prix ni une ligne de mesures (déjà lues comme faits). Elle passe avant les derniers faits, la ville ferme le bloc.
   // §50.7 : le bref de l'écran « Ton chantier », corrections de l'artisan comprises : le fournisseur reçoit le même.
-  const resume = briefResume(brief, sender.projectNotes ?? null, reviewed.takeoff.answers, reviewed.takeoff.fiche ? reviewed.fiche : null).map((l) => l.texte);
+  // Retour du fondateur (2026-10-11) : un seul texte descriptif, celui de l'écran.
+  const resumeLines = briefResume(brief, sender.projectNotes ?? null, reviewed.takeoff.answers, reviewed.takeoff.fiche ? reviewed.fiche : null);
+  const resume = resumeLines.length > 0 ? [briefTexte(resumeLines)] : [];
   const dateFr = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" });
   // Le devis sans les prix (§42) : une ligne par ouvrage, la main-d'œuvre seule exclue, jamais le prix.
   const kinds = new Map(validation.lines.map((l) => [l.lineId, l.kind]));

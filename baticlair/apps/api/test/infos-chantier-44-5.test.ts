@@ -104,7 +104,8 @@ describe("§44.5 — infos chantier facultatives", () => {
     await agent.post(`/v1/quantitatifs/${q.id}/validation`).expect(200);
     const supplier = (await agent.post("/v1/suppliers").send({ name: "Négoce Breizh", email: "negoce@example.fr" })).body;
     const created = (await agent.post(`/v1/projects/${q.projetId}/price-requests`).send({ supplierIds: [supplier.id] })).body;
-    expect(created.packet.resume).toContain("Accès par la cour");
+    expect(created.packet.resume).toHaveLength(1);
+    expect(created.packet.resume[0]).toContain("Accès par la cour");
     expect(priceLeak(created.recipients[0].email.body)).toBeNull();
     expect(JSON.stringify(created.packet)).not.toMatch(/12 000|€/);
   });

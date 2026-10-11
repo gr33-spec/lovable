@@ -299,6 +299,12 @@ export async function packetPdf(
   for (const b of d.blocs) {
     room(40);
     write(`${b.numero}. ${b.titre}`, bold, 12, { gap: 4 });
+    if (b.kind === "list" && b.titre === "Le chantier en bref" && b.lignes.length === 1) {
+      // Le bref : un paragraphe, sans puce (retour du fondateur, 2026-10-11).
+      write(b.lignes[0]!, regular, 10);
+      y -= 10;
+      continue;
+    }
     if (b.kind === "list") {
       for (const l of b.lignes) {
         room(14);
