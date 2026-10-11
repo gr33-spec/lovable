@@ -2305,6 +2305,18 @@ Une ligne orange ne doit jamais demander deux gestes ni ouvrir un autre écran. 
   - Chaque ligne de bacs ou de longueurs porte sa longueur (« 26 bacs de 7,20 m »), chaque pièce de zinc façonnée porte son nom d'ouvrage (« Bande de rive », jamais « Bandes façonnées »).
 
   Test : sur D-2026-018, l'écran après les questions montre le chantier en bref, puis la liste, et aucun bouton de voix ; le document envoyé au fournisseur est identique à l'écran.
+- ## 50.8 Réglages d'écran décidés par Greg (11 octobre, priment sur 50.7 là où ils diffèrent)
+  - **Le chantier en bref est un seul paragraphe** descriptif. Le nom du client et l'adresse n'y figurent pas, sauf si l'artisan coche « Ajouter le nom du client et l'adresse ». « Modifier » ouvre les lignes une à une. Vaut pour l'écran 3, le mail et le PDF du fournisseur.
+  - **Dans le PDF « Demande de devis »**, le bref est en petit, dans un cadre fin, sans numéro. « 1. Fournitures à chiffrer » est le premier bloc et porte le plus grand titre de la page : la liste passe avant tout.
+  - **Un PDF ouvert dans l'app s'affiche en entier** à la taille de l'écran, zoom à deux doigts ou double tap. Jamais coupé sur iPhone.
+  - **« Envoyer une partie » est un vrai bouton**, à côté du titre « Fournitures » (et non un petit lien en bas). Il affiche une case par ligne, la phrase « Coche ce qui part chez ce fournisseur. Le reste pourra partir chez un autre. », « Tout cocher / Tout décocher », puis « Commande répartie » et « Envoyer le reste ».
+  - **Sur l'écran 3 :** deux boutons figés en bas ; la ligne ouverte passe au premier plan, le reste flouté ; une ligne orange qui attend une réponse porte sa question écrite en clair sur la ligne.
+  - **Erreurs :** un écran qui plante affiche « Oups, cet écran a eu un souci », une adresse inconnue « Page introuvable », les deux en français avec « Réessayer » et « Retour à l'accueil », et l'équipe est prévenue. Jamais de page blanche en anglais.
+  - **Paywall en pause :** l'écran « Limite de ta formule atteinte » ne s'affiche pas tant que le paiement n'est pas ouvert.
+    - **Règle changée (§11, 11 octobre) :** une fenêtre de toit par ligne du devis, chacune à sa taille, jamais fusionnées (avant : une fenêtre pour tout le devis). Référentiel roofing-2026.10.11-51.
+    - **Contradictions (§44) :** une vraie contradiction s'écrit en clair avec le texte du devis, par exemple « Pente du toit : 40° (devis : « pente »), ou 30° (en-tête : « Pente : 30° ») ? ». Jamais de code interne ni d'identifiant à l'écran.
+    - **Écran de lecture (§50.1) :** plein écran, par-dessus le menu, devis lu ligne par ligne, une seule phrase « Je lis ton devis », un seul bouton « Revenir à mes chantiers » ; la lecture continue en arrière-plan. Même traitement pour « Je prépare ta liste ».
+    - **Question de valeur (surface, longueur) :** une case à remplir avec l'unité, pas de boutons à valeurs inventées (50 / 100 / 150 m²).
 - # 51. Le moteur voit le chantier avant de compter (tous métiers)
 
   Principe général, valable pour tous les métiers : l'app fait ce que fait l'artisan. Elle lit le devis, se représente le chantier, demande ce qui lui manque, puis commande. Rien de tout cela ne se voit : seul le chantier en bref (50.7) en est le reflet à l'écran.
@@ -2326,3 +2338,12 @@ Une ligne orange ne doit jamais demander deux gestes ni ouvrir un autre écran. 
   ## 51.4 Test
 
   Sur D-2026-018 : la fiche contient joint debout, 91 m², rampant 7 m, largeur 13 m, Quartz-Zinc 0,65, 2 descentes, chaque donnée avec son origine. Aucune question sur une donnée présente dans la fiche. Les bacs, pattes et bandes sortent des mêmes dimensions. Une réponse « Autre » sur le façonnage modifie la fiche et la liste.
+- ## 51.5 La lecture est faite par l'IA, pas par des règles de mots (décision du 11 octobre)
+
+  Le temps un (fiche de chantier), le temps deux (questions) et le nommage des fournitures sont confiés entièrement au modèle le plus capable disponible, qui reçoit le devis complet et ce référentiel. Plus aucune règle de lecture en code qui cherche des mots dans les lignes : ces règles sont retirées. Le code ne garde que les calculs (ratios, conversions en unités commandables, tests permanents).
+
+  Test permanent DE00000071 (devis CRC, bac acier + 5 Velux), résultat attendu validé par Greg :
+  - Bref : toiture existante en bac acier isolé ; pas de couverture neuve ; gouttière demi-ronde zinc naturel 17,40 m sur crochets Négrafix ; chéneau 11,70 m refait en membrane ; 4 Velux SK06 114×118 GGL white finish et 1 MK04 78×98 GGU ever finish avec raccords pour bac acier ; tôles bac acier en étanchéité au-dessus des Velux.
+  - Questions, exactement celles-ci : développé de gouttière 25 ou 33 ; nombre de descentes ; chéneau EPDM ou PVC et largeur développée ; raccord Velux ZWC (ligne fourniture) ou Pratikal (ligne pose), contradiction du devis ; tôles bac acier : 10 tôles ou 10 m², et longueur. Aucune question sur les Velux.
+  - Liste : gouttière 5 longueurs de 4 m (orange, développé) ; crochets Négrafix 35 (vert) ; naissances (orange, nombre) ; membrane chéneau (orange) ; Velux GGL SK06 114×118 white finish 4 (vert) ; Velux GGU MK04 78×98 ever finish 1 (vert) ; raccords SK06 4 et MK04 1 (orange, ZWC ou Pratikal) ; tôles bac acier 10 (orange, unité, profil et teinte à préciser) ; 5 lignes sans fourniture.
+  - Interdit : toute question sur une donnée écrite au devis ; tout identifiant interne à l'écran.
