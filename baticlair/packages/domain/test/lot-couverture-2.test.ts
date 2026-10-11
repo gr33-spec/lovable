@@ -70,7 +70,7 @@ describe("fenêtres de toit : la fenêtre telle qu'écrite, son raccord adapté"
     expect(v.questions.map((q) => q.question?.text)).toEqual(["Raccord de fenêtre de toit : pour tuiles, pour ardoises ou pour tuiles plates ?", "Fenêtre de toit : quelle taille ?"]);
     const answered = readQuoteComplet([{ ref: "1", designation: "Fenêtre de toit", quantity: "1", unit: "u" }], {
       "param:raccord_couverture": { value: "2", unit: "u" },
-      "precise:1": "78 × 118",
+      "fiche:fenetre_de_toit_quelle_taille": "78 × 118",
     });
     expect(answered.questions).toEqual([]);
     // §49.1 : l'article écrit d'abord, puis ce qui le suit (le raccord, calculé en mode validation du référentiel).

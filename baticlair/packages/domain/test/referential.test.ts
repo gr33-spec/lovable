@@ -2,11 +2,9 @@ import { describe, expect, it } from "vitest";
 import { REFERENTIEL_COMPLET } from "./support/complet.js";
 import {
   checkReferential,
-  classifyMaterial,
   computeWorkItem,
   tradeProfile,
   requiredInputs,
-  identifyProducts,
   paramsFromContext,
   parseFormula,
   type Fact,
@@ -313,23 +311,6 @@ describe("moteur : ouvrage → besoins → achat", () => {
     // La caractéristique fabricant est vérifiée ; c'est la règle de calcul qui attend sa validation.
     expect(need(r, "tuiles").trace.find((t) => t.label.startsWith("Largeur utile"))).toMatchObject({ verified: true });
     expect(need(r, "tuiles").trace.find((t) => t.label === "Besoin calculé")).toMatchObject({ verified: false });
-  });
-});
-
-describe("reconnaissance des appellations (devis client et fournisseurs)", () => {
-  it("relie les appellations au produit, sans jamais prêter une marque à une description générique", () => {
-    const tile = identifyProducts("Couverture en tuiles HP10 rouge – 120 m²", REFERENTIEL_COMPLET);
-    expect(tile.candidates.map((c) => c.product.id)).toEqual(["edilians-hp10-huguenot"]);
-    expect(identifyProducts("SOP'ÉCRAN HPV R2 1,50 x 50 m", REFERENTIEL_COMPLET, "underlay").candidates.map((c) => c.product.id)).toEqual([
-      "soprema-sop-ecran-hpv-r2-150x50",
-    ]);
-    // Cas trouvé par la simulation du devis 120 m² : « écran HPV » désigne la famille, pas le rouleau Soprema.
-    for (const text of ["Écran HPV", "Membrane respirante sous-toiture", "Pare-pluie toiture haute perméance"]) {
-      expect(identifyProducts(text, REFERENTIEL_COMPLET, "underlay").candidates).toEqual([]);
-      expect(classifyMaterial(text, tradeProfile("roofing"))?.code).toBe("underlay");
-    }
-    expect(identifyProducts("Liteaux sapin 27 x 40", REFERENTIEL_COMPLET).candidates[0]?.product.shortLabel).toBe("Liteaux 27×40");
-    expect(identifyProducts("Tuile romane canal", REFERENTIEL_COMPLET).candidates).toEqual([]);
   });
 });
 

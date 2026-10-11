@@ -1,0 +1,76 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Bardage bois claire-voie horizontal sur tasseaux, pare-pluie",
+   "quantity": "64",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "produit_lames",
+    "texte": "Bardage : douglas ou mélèze ?",
+    "boutons": [
+     {
+      "label": "Bardage douglas 21×132, L 4 m",
+      "valeur": "douglas-21x132"
+     },
+     {
+      "label": "Bardage mélèze 21×132, L 4 m",
+      "valeur": "meleze-21x132"
+     }
+    ],
+    "unite": null,
+    "donnee": "modèle : lames",
+    "ligne": null
+   },
+   {
+    "cle": "consommables",
+    "texte": "Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?",
+    "boutons": [
+     {
+      "label": "Oui",
+      "valeur": "1"
+     },
+     {
+      "label": "Non",
+      "valeur": "0"
+     }
+    ],
+    "unite": "u",
+    "donnee": "consommables",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Bardage bois claire-voie horizontal sur tasseaux, pare-pluie",
+    "quantite": "64",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Bardage bois claire-voie horizontal sur tasseaux, pare-pluie",
+      "quantite": "64",
+      "unite": "m²",
+      "ouvrage": "bardage-bois",
+      "emplacement": "bardage",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

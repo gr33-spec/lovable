@@ -132,7 +132,7 @@ describe("§45.7 — la demande de devis du chantier Test", () => {
     const { projectId } = await chantierTest(agent);
     const sans = (await agent.post(`/v1/projects/${projectId}/price-requests/preview`).send({}).expect(200)).body;
     expect(sans.document.blocs.map((b: { titre: string }) => b.titre)).toEqual(["Le chantier en bref", "Fournitures à chiffrer", "Détail du devis (sans prix)"]);
-    const q = (await agent.post("/v1/quantitatifs").send({ reference: "Lucarnes", adresse: "29200 Brest", lignes: [...CHANTIER_TEST, { libelle: "Jouées de lucarnes en zinc", quantite: "2", unite: "u" }] })).body;
+    const q = (await agent.post("/v1/quantitatifs").send({ reference: "Lucarnes", adresse: "29200 Brest", lignes: [...CHANTIER_TEST, { libelle: "Jouées de lucarnes en zinc", quantite: "2", unite: "m²" }] })).body;
     await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: Object.entries(REPONSES).map(([question, valeur]) => ({ question, valeur })) });
     let current = (await agent.get(`/v1/quantitatifs/${q.id}`)).body;
     for (let i = 0; i < 10 && current.questions.length > 0; i++) {
@@ -142,7 +142,8 @@ describe("§45.7 — la demande de devis du chantier Test", () => {
     await agent.post(`/v1/quantitatifs/${q.id}/validation`).expect(200);
     const avec = (await agent.post(`/v1/projects/${q.projetId}/price-requests/preview`).send({}).expect(200)).body;
     const bloc = avec.document.blocs.find((b: { titre: string }) => b.titre === "À préciser avec vous");
-    expect(bloc.lignes).toEqual(["Jouées de lucarnes en zinc · 2 u : merci de proposer ce que vous avez"]);
+    // Une mesure (m²) sans règle de calcul n'est jamais une quantité à commander (§40) : le fournisseur propose.
+    expect(bloc.lignes).toEqual(["Jouées de lucarnes en zinc · 2 m² : merci de proposer ce que vous avez"]);
     expect(JSON.stringify(avec.document)).not.toMatch(/Pas encore de règle|BatiClair ne sait|référentiel/);
   });
 
@@ -177,9 +178,8 @@ describe("§45.7 — la demande de devis du chantier Test", () => {
     // La pente n'est ni dans le devis ni répondue : jamais dans le bloc 1, ni dans le mail.
     expect(preview.document.blocs[0].lignes.join(" ")).not.toMatch(/\bpente \d/);
     expect(preview.mail).not.toMatch(/\bpente \d|45°/);
-    expect(preview.document.blocs[0].lignes).toEqual([
-      "Couverture zinc à joint debout, 91 m² en monopente, rampant 7 m, largeur 13 m, zinc prépatiné gris quartz 0,65 mm, pose sur voligeage, 2 descentes. Chantier à Brest, bord de mer.",
-    ]);
+    // §51.5 : le bref est la fiche lue (ouvrage, surface, données, réponses), puis la ville.
+    expect(preview.document.blocs[0].lignes[0]).toMatch(/^Couverture zinc à joint debout, 91 m²\. .*\b2 descentes\b.* Chantier à Brest, bord de mer\.$/);
   });
 });
 
@@ -218,7 +218,7 @@ describe("§45.6 — journal des corrections", () => {
 
   it("une ligne tombée en « à préciser avec vous » est journalisée avec sa raison ; l'export mensuel par règle est réservé au fondateur", async () => {
     const agent = await compteBatiInvest();
-    const q = (await agent.post("/v1/quantitatifs").send({ reference: "Lucarnes", adresse: "29200 Brest", lignes: [...CHANTIER_TEST, { libelle: "Jouées de lucarnes en zinc", quantite: "2", unite: "u" }] })).body;
+    const q = (await agent.post("/v1/quantitatifs").send({ reference: "Lucarnes", adresse: "29200 Brest", lignes: [...CHANTIER_TEST, { libelle: "Jouées de lucarnes en zinc", quantite: "2", unite: "m²" }] })).body;
     await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: Object.entries(REPONSES).map(([question, valeur]) => ({ question, valeur })) });
     let current = (await agent.get(`/v1/quantitatifs/${q.id}`)).body;
     for (let i = 0; i < 10 && current.questions.length > 0; i++) {

@@ -18,21 +18,20 @@ const ANSWERS = { "product:tuile": "edilians-canal-charentaise", "param:recouvre
 describe("une info qui manque va à l'article qu'elle nomme", () => {
   it("« traitement des liteaux » : la ligne des liteaux attend la réponse, celle des tuiles non", () => {
     const v = readQuote(DEVIS, ANSWERS, [], undefined, {}, READINGS);
-    const question = v.questions.find((q) => q.key.startsWith("comptoir:1:"))!;
+    const question = v.questions.find((q) => q.key.startsWith("engine:fiche:"))!;
     expect(question.text).toBe("Traitement des liteaux ?");
     const liteaux = v.toBuy.find((b) => /^Liteaux/.test(b.label))!;
-    const tuiles = v.toBuy.find((b) => /^Tuiles Canal/.test(b.label))!;
-    expect(liteaux.waitsOn).toContain(question.key);
-    expect(liteaux.asks?.map((a) => a.key)).toContain(question.key);
-    expect(tuiles.waitsOn ?? []).not.toContain(question.key);
-    expect((tuiles.rules ?? []).some((r) => r.key === `manque:${question.key}`)).toBe(false);
+    const tuiles = v.toBuy.find((b) => b.needIds.includes("tuiles-canal"))!;
+    expect(liteaux.waitsOn).toContain(question.question!.key);
+    expect(liteaux.asks?.map((a) => a.key)).toContain(question.question!.key);
+    expect(tuiles.waitsOn ?? []).not.toContain(question.question!.key);
   });
 
   it("une donnée qui ne nomme aucun article de la ligne va à tous ses articles, comme avant", () => {
     const v = readQuote(DEVIS, ANSWERS, [], undefined, {}, new Map([["1", { role: null, articles: [], faconnage: null, manque: ["date de livraison (lundi, mardi)"] }]]));
-    const question = v.questions.find((q) => q.key.startsWith("comptoir:1:"))!;
+    const question = v.questions.find((q) => q.key.startsWith("engine:fiche:"))!;
     const fromLine = v.toBuy.filter((b) => b.lineIds.includes("1"));
     expect(fromLine.length).toBeGreaterThan(1);
-    for (const b of fromLine) expect(b.waitsOn).toContain(question.key);
+    for (const b of fromLine) expect(b.waitsOn).toContain(question.question!.key);
   });
 });

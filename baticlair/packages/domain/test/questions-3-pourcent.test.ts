@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { computeWithAnswers, planQuote, QUESTION_THRESHOLD, ROOFING_REFERENTIAL, tradeProfile, type Referential } from "../src/index.js";
+import { computeWithAnswers, QUESTION_THRESHOLD, ROOFING_REFERENTIAL, type Referential } from "../src/index.js";
+import { planOf } from "./support/plan-of.js";
 import { readQuote } from "./support/read-quote.js";
 import { REFERENTIEL_COMPLET, readQuoteComplet } from "./support/complet.js";
 
@@ -42,10 +43,9 @@ describe("une question dont toutes les réponses donnent la même commande (à 3
   };
   // Développé, pose des crochets et diamètre lus au devis : seules restent les questions de quantité.
   const lines = [{ ref: "g", designation: "Gouttière zinc demi-ronde dév. 33 sur bandeau, descentes Ø80", quantity: "13", unit: "ml" }];
-  const profile = tradeProfile("roofing");
 
   it("« serrage » (1 % d'écart) : pas de question, la première réponse vaut hypothèse dite ; « descentes » (naissances 1 à 4) : question", () => {
-    const plan = planQuote(lines, REF, profile);
+    const plan = planOf(REF, lines);
     const r = computeWithAnswers(REF, plan, { "param:nb_descentes": { value: "2", unit: "u" } });
     expect(r.questions).toEqual([]);
     const crochets = r.needs.find((n) => n.needId === "crochets")!;

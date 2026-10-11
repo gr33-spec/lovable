@@ -1,7 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ExtractionAttempt, ExtractionRequest, TakeoffExtractor } from "../src/modules/takeoff/application/takeoff-extractor.js";
-import { TAKEOFF_EXTRACTOR } from "../src/modules/takeoff/application/takeoff-extractor.js";
-import { FakeTakeoffExtractor } from "../src/modules/takeoff/infrastructure/fake-takeoff-extractor.js";
+import { LECTURE_READER, type LectureReader, type LectureRequest } from "../src/modules/takeoff/application/lecture-reader.js";
+import { FakeLectureReader } from "../src/modules/takeoff/infrastructure/fake-lecture-reader.js";
+import type { ReadAttempt } from "../src/platform/ai/document-reader.js";
+import type { LectureDevis } from "@baticlair/domain";
 import { loadConfig, type AppConfig } from "../src/platform/config/config.js";
 import type { Alerter, AlertKind } from "../src/platform/alerts/alerter.js";
 import { ALERTER, CONFIG } from "../src/platform/tokens.js";
@@ -13,13 +14,13 @@ import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestC
  * requête. Au-delà du délai de réponse, BatiClair répond « lecture en cours » (202) et continue ;
  * l'écran suit l'état. Une lecture en cours n'est jamais relancée (rien n'est payé deux fois).
  */
-class GatedExtractor implements TakeoffExtractor {
+class GatedReader implements LectureReader {
   readonly provider = "fake";
   calls = 0;
   fail = false;
   /** Audit du 2026-10-07 : le premier appel dure 171 s (horloge avancée) et finit en « timeout ». */
   slowTimeout = false;
-  private inner = new FakeTakeoffExtractor();
+  private inner = new FakeLectureReader();
   private release!: () => void;
   private gate = new Promise<void>((r) => (this.release = r));
   open() {
@@ -31,7 +32,7 @@ class GatedExtractor implements TakeoffExtractor {
     this.slowTimeout = false;
     this.gate = new Promise<void>((r) => (this.release = r));
   }
-  async extract(request: ExtractionRequest): Promise<ExtractionAttempt> {
+  async lire(request: LectureRequest): Promise<ReadAttempt<LectureDevis> | null> {
     this.calls++;
     await this.gate;
     if (this.fail) throw new Error("panne du service d'IA");
@@ -39,17 +40,17 @@ class GatedExtractor implements TakeoffExtractor {
       vi.setSystemTime(new Date(Date.now() + 171_000));
       return { provider: "fake", model: "fake", usage: { inputTokens: 0, outputTokens: 0 }, status: "timeout", output: null, errorCode: "timeout", durationMs: 171_000 };
     }
-    return this.inner.extract(request);
+    return this.inner.lire(request);
   }
 }
 
-const extractor = new GatedExtractor();
+const extractor = new GatedReader();
 const alerts: { kind: AlertKind; message: string }[] = [];
 const alerter: Alerter = { enabled: true, alert: (kind, message) => alerts.push({ kind, message }) };
 let ctx: TestContext;
 beforeAll(async () => {
   const config: AppConfig = { ...loadConfig(), ai: { ...loadConfig().ai, answerWithinMs: 50 } };
-  ctx = await createTestApp((b) => b.overrideProvider(CONFIG).useValue(config).overrideProvider(TAKEOFF_EXTRACTOR).useValue(extractor).overrideProvider(ALERTER).useValue(alerter));
+  ctx = await createTestApp((b) => b.overrideProvider(CONFIG).useValue(config).overrideProvider(LECTURE_READER).useValue(extractor).overrideProvider(ALERTER).useValue(alerter));
 });
 afterAll(async () => {
   await ctx.app.close();

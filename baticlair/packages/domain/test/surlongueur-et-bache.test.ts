@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { lineKind, tradeProfile } from "../src/index.js";
 import { readQuoteComplet } from "./support/complet.js";
 import { readQuote } from "./support/read-quote.js";
 
@@ -37,10 +36,6 @@ describe("surlongueur de bobine et bâche", () => {
   it("la surlongueur s'ajoute avant de multiplier : 39 bacs × (5,5 + 0,15) = 220,35 → 221 ml", () => {
     const v = readQuote([{ ref: "1", designation: "Couverture zinc à joint debout, rampant 5,5 m", quantity: "91", unit: "m²" }], { "param:faconnage": u("1"), "param:egout_faitage": u("4"), "param:zone": u("3") });
     expect(bobine(v)?.quantity).toBe("221 ml");
-  });
-
-  it.each(["Bâche de protection 4 × 5 m", "Fourniture bâche de protection", "Bâches de protection"])("« %s » est une fourniture, jamais de la main d'œuvre", (d) => {
-    expect(lineKind(d, tradeProfile("roofing"))).toMatchObject({ kind: "material", family: { code: "tarpaulin" } });
   });
 
   it("la bâche part au fournisseur, telle qu'écrite", () => {

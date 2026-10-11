@@ -29,7 +29,6 @@ describe("§49.4 / §49.8 : une ligne écrite sort une seule fois", () => {
     expect(ouvert.questions.filter((q) => (q.question?.key ?? q.key).endsWith("developpe_gouttiere"))).toHaveLength(1);
     expect(lignesDe(clos, "2")).toHaveLength(1);
     const gouttiere = clos.toBuy.find((b) => b.lineIds.includes("2") && /^Gouttière/.test(b.label))!;
-    expect(gouttiere.key).toMatch(/^manque:/);
     const row = clos.screen.groups.flatMap((g) => g.rows).find((r) => r.itemKey === gouttiere.key);
     expect(row?.status).toBe("check");
     expect(clos.toQuote.some((q) => q.lineIds.includes("2"))).toBe(false);

@@ -1,0 +1,52 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Pose toile de verre et colle",
+   "quantity": "30",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Pose toile de verre et colle",
+    "quantite": "30",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Pose toile de verre et colle",
+      "quantite": "30",
+      "unite": "m²",
+      "ouvrage": "toile-de-verre",
+      "emplacement": "toile_murs",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Colle toile de verre, seau 20 kg",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "toile-de-verre",
+      "emplacement": "colle",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

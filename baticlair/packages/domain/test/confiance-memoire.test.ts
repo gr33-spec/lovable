@@ -15,9 +15,7 @@ import {
   resolvePreference,
   ROOFING_REFERENTIAL,
   setPreference,
-  tradeProfile,
   trustCounts,
-  validateTakeoff,
   type CompanyPreference,
   type Criterion,
   type NeedResult,
@@ -103,64 +101,6 @@ describe("décision ✓ / ⚠ / ? par critères explicites", () => {
       [],
     );
     expect(a).toMatchObject({ state: "missing", reason: "Pureau ?" });
-  });
-});
-
-describe("fiche d'une ligne du quantitatif (lecture du devis)", () => {
-  const L = (designation: string, quantityRaw: string | null, unitRaw: string | null): TakeoffLineInput => ({ id: designation, designation, quantityRaw, unitRaw, source: "client_quote" });
-  const assess = (trade: string, lines: TakeoffLineInput[], ctx: { confirmed?: string[] } = {}) => {
-    const v = validateTakeoff(lines, tradeProfile(trade));
-    return v.lines.map((l) => assessTakeoffLine(l, { documentIssues: v.issues, confirmedByArtisan: ctx.confirmed?.includes(l.lineId) ?? false }));
-  };
-
-  it("article défini, quantité lue en pièces : ✓, et chaque critère dit d'où il vient", () => {
-    const [a] = assess("electrical", [L("Prise 2P+T 16 A blanche", "6", "u")]);
-    expect(a!.state).toBe("verified");
-    expect(origins(a!.criteria)).toEqual([
-      ["reading", "devis"],
-      ["work_item", "referential"],
-      ["consistency", null],
-      ["packaging", null],
-    ]);
-  });
-
-  it("mesure d'ouvrage : jamais ✓ (la quantité à commander n'est pas établie), sans pour autant poser de question", () => {
-    const [a] = assess("tiling", [L("Faïence 20x60 blanche", "12", "m²")]);
-    expect(a).toMatchObject({ state: "missing", reason: "Quantité à commander non calculée : la mesure de l'ouvrage est envoyée au fournisseur." });
-  });
-
-  it("un doute qui change la quantité est ⚠ ; « C'est bon » le lève pour ce chantier, avec l'origine « chantier »", () => {
-    const lines = [L("Lot de 4 spots GU10", "1", "u")];
-    expect(assess("electrical", lines)[0]).toMatchObject({ state: "to_confirm" });
-    const confirmed = assess("electrical", lines, { confirmed: ["Lot de 4 spots GU10"] })[0]!;
-    expect(confirmed.state).toBe("verified");
-    expect(confirmed.criteria.find((c) => c.key === "consistency")).toMatchObject({ status: "established", origin: "project" });
-  });
-
-  it("article non reconnu : ⚠ (le commander ou non change la commande) ; gardé par l'artisan : ✓ d'origine « chantier »", () => {
-    expect(assess("electrical", [L("Valve 80 mm Stone", "4", "u")])[0]).toMatchObject({ state: "to_confirm", reason: "Article non reconnu : à commander tel qu'écrit ?" });
-    const kept = assess("electrical", [L("Valve 80 mm Stone", "4", "u")], { confirmed: ["Valve 80 mm Stone"] })[0]!;
-    expect(kept.state).toBe("verified");
-    expect(kept.criteria.find((c) => c.key === "work_item")).toMatchObject({ origin: "project" });
-  });
-
-  it("conditionnement sans contenu (paquets) : demandé au fournisseur, pas à l'artisan", () => {
-    const [a] = assess("roofing", [L("Crochets de gouttière", "3", "paquets")]);
-    expect(a!.criteria.find((c) => c.key === "packaging")).toMatchObject({ status: "supplier", comparisonRisk: true });
-    expect(a!.state).not.toBe("to_confirm");
-  });
-
-  it("devis sans unités : chaque ligne est ⚠, la question est posée une fois pour tout le document", () => {
-    const lines = [L("Robinet d'arrêt", "3", null), L("Siphon de lavabo", "2", null), L("Flexible inox", "4", null)];
-    const v = validateTakeoff(lines, tradeProfile("plumbing"));
-    expect(v.issues.filter((i) => i.code === "UNITS_ABSENT")).toHaveLength(1);
-    expect(trustCounts(assess("plumbing", lines))).toEqual({ verified: 0, to_confirm: 3, missing: 0 });
-  });
-
-  it("une prestation n'est pas un élément de la liste", () => {
-    // La faïence est fournie par la ligne d'avant : « Pose de faïence » en est la main-d'œuvre.
-    expect(assess("tiling", [L("Faïence 20x60", "12", "m²"), L("Pose de faïence", "12", "m²")])[1]).toBeNull();
-    expect(assess("tiling", [L("Dépose de l'ancienne faïence", "12", "m²")])[0]).toBeNull();
   });
 });
 

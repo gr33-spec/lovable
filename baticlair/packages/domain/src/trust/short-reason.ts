@@ -82,6 +82,8 @@ export function withShortReasons(purchase: PurchaseView): PurchaseView {
         const { reason: _gone, ...rest } = r;
         return rest;
       }
+      // Une raison déjà courte (celle de la lecture, §51.5) reste.
+      if (r.reason && wordCount(r.reason) <= MAX_REASON_WORDS && !/^info manquante/i.test(r.reason)) return r;
       return { ...r, reason: shortReason(r.itemKey ? items.get(r.itemKey) : undefined, r.decisionKey ? decisions.get(r.decisionKey) : undefined) };
     }),
   }));

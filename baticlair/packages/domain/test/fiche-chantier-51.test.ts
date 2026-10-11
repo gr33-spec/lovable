@@ -4,7 +4,6 @@ import {
   applyRuleConfirmations,
   ficheChantier,
   ficheFacts,
-  planQuote,
   ROOFING_REFERENTIAL,
   tradeProfile,
   type FicheChantier,
@@ -14,6 +13,8 @@ import { D2026_018_LINES } from "./devis-reels/d2026-018.js";
 import { D2026_020_LINES } from "./devis-reels/d2026-020.js";
 import { D2026_105_LINES, D2026_105_READINGS } from "./devis-reels/d2026-105.js";
 import { FICHE_D2026_018, FICHE_D2026_020, FICHE_D2026_105 } from "./devis-reels/fiches.js";
+import { HABITUDES_BANC } from "./support/habitudes.js";
+import { planOf } from "./support/plan-of.js";
 import { readQuote, type QuoteLineInput } from "./support/read-quote.js";
 
 /**
@@ -32,7 +33,7 @@ const u = (value: string) => ({ value, unit: "u" });
 function chantier(lines: QuoteLineInput[], fiche: FicheChantier, answers: A = {}, readings?: typeof D2026_105_READINGS) {
   const facts = ficheFacts(ref, fiche);
   const view = applyRuleConfirmations(readQuote(lines, answers as never, facts, undefined, undefined, readings), answers as never);
-  const plan = planQuote(lines.map((l) => ({ ref: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit })), ref, tradeProfile("roofing"), undefined, facts);
+  const plan = planOf(ref, lines, facts, HABITUDES_BANC, {}, readings);
   const questions = view.questions.flatMap((d) => (d.question ? [d.question as Question] : []));
   const shown = ficheChantier({ ref, ai: fiche, plan, answers: answers as never, questions });
   return { view, questions, shown, facts };

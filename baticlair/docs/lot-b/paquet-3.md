@@ -29,8 +29,8 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Chevronnage | — | Info manquante : longueur des chevrons |
-| Planches de rive 22×200, L 4 m | 7 planches | Quantité à confirmer : planches +10 % de coupe |
+| Chevronnage | — | Longueur à préciser |
+| Planches de rive 22×200, L 4 m | 7 planches | Quantité à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -54,7 +54,7 @@ Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Membrane SBS autoprotégée, rouleau 6 m² | 9 rouleaux de 6 m² | Quantité à confirmer : membranes +12 % de recouvrements et relevés, rouleau de 6 m² |
+| Membrane SBS autoprotégée, rouleau 6 m² | 9 rouleaux de 6 m² | Quantité à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -78,7 +78,7 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Bardage bois sur tasseaux | — | Info manquante : Bardage : douglas ou mélèze |
+| Bardage bois claire-voie horizontal sur tasseaux, pare-pluie | — | Bardage : douglas à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -102,7 +102,7 @@ Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Enduit monocouche OC2, finition grattée, sac 25 kg | 108 sacs de 25 kg | Quantité à confirmer : enduit 27 kg/m², enduit +5 % |
+| Enduit monocouche OC2, finition grattée, sac 25 kg | 108 sacs de 25 kg | Quantité à confirmer |
 | Laine de roche ITE (type Rockwool Ecorock) 1 200 × 600, ép. 140 mm | 175 panneaux | Quantité à confirmer : isolant +5 % |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
@@ -123,9 +123,9 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Ardoises naturelles ? 30×22 | 9 271 pièces | Info manquante : qualité de l'ardoise. Valeur par défaut à confirmer : pente du toit 45° ; longueur du rampant 5,5 m ; diamètre du crochet standard |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Info manquante : qualité de l'ardoise. Valeur par défaut à confirmer : diamètre du crochet standard ; pente du toit 45° ; longueur du rampant 5,5 m |
-| Naissances zinc demi-ronde | — | Info manquante : nombre de descentes |
+| Ardoises naturelles 30×22 | 9 271 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Qualité à préciser |
+| Naissances | — | Descentes à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -134,5 +134,5 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces | 200 m² × 44,15 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge | chiffrable |
 | Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02) | chiffrable |
 | Gouttière zinc demi-ronde dév. 33 | 6 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
-| Naissances zinc demi-ronde dév. 33 Ø80 | 1 pièce |  | chiffrable |
+| Naissances dév. 33 Ø80 | 1 pièce |  | chiffrable |
 

@@ -113,11 +113,11 @@ describe("la règle du comptoir (§47.8)", () => {
       "Bobine Quartz-Zinc 0,65 mm, largeur 500 mm",
       "Pattes coulissantes joint debout",
       "Pattes fixes joint debout",
-      "Voliges sapin 18×200 mm traité",
+      "Voliges sapin 18 mm",
       "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour bande zinc d'égout", // §48.6 et §50.7 (la pièce dite) : feuilles 2 × 1 m, jamais de bobineau pour une bande
       "Gouttière zinc demi-ronde dév. 33",
       "Crochets de gouttière bandeau dév. 33",
-      "Naissances zinc demi-ronde dév. 33 Ø80",
+      "Naissances dév. 33 Ø80",
       "Pointes annelées 2,5 × 28 mm",
     ]);
     for (const b of v.toBuy) expect(supplierTest(b.label, b.order?.unit ?? null)).toBeNull();
@@ -138,7 +138,7 @@ describe("la règle du comptoir (§47.8)", () => {
     );
     expect(complet.questions).toEqual([]);
     expect(complet.toBuy.map((b) => b.label)).toEqual(
-      expect.arrayContaining(["Ardoises naturelles Espagne 1er choix 30×22", "Crochets d'ardoise inox standard, longueur 11 cm", "Gouttière zinc demi-ronde dév. 33", "Naissances zinc demi-ronde dév. 33 Ø80"]),
+      expect.arrayContaining(["Ardoises naturelles Espagne 1er choix 30×22", "Crochets d'ardoise inox standard, longueur 11 cm", "Gouttière zinc demi-ronde dév. 33", "Naissances dév. 33 Ø80"]),
     );
   });
 
@@ -148,8 +148,6 @@ describe("la règle du comptoir (§47.8)", () => {
     const nature = zinc("Couverture zinc joint debout");
     expect(nature.toBuy[0]!.label).toBe("Bobine zinc naturel 0,65 mm, largeur 500 mm");
     expect(nature.assumptions.map((a) => a.key)).toContain("param:aspect_zinc");
-    const vague = zinc("Couverture zinc joint debout prépatiné");
-    expect(keys(vague)).toEqual(["param:aspect_zinc"]);
-    expect(vague.questions[0]!.question?.text).toBe("Zinc prépatiné : Quartz-Zinc (gris) ou Anthra-Zinc (noir) ?");
+    // « prépatiné » sans la teinte : c'est la lecture (§51.5) qui pose la question, plus une règle de mots en code.
   });
 });

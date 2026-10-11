@@ -43,23 +43,25 @@ describe("§50.7 : « Ton chantier », l'écran est le document", () => {
   it("le bref de l'écran est celui que reçoit le fournisseur, ligne pour ligne", async () => {
     const { agent, projectId, supplierId, bref, texte } = await chantier();
     const screen = await bref();
-    expect(screen.map((l) => l.texte)).toEqual(["Couverture zinc à joint debout", "91 m² en monopente", "rampant 7 m", "largeur 13 m", "zinc prépatiné gris quartz 0,65 mm", "Brest, bord de mer"]);
+    // §51.5 : le bref est la fiche lue par le modèle (simulée ici), ligne par ligne, puis la ville.
+    // Le façonnage, réglé lot par lot (la couverture, la bande), reste à sa ligne : pas dans le bref.
+    expect(screen.map((l) => l.texte)).toEqual(["Ouvrage : couverture zinc à joint debout", "Surface : 91 m²", "Longueur du rampant : 7 m", "Aspect du zinc : Quartz-Zinc", "Brest, bord de mer"]);
     const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] }).expect(201)).body;
-    expect(await texte()).toBe("Couverture zinc à joint debout, 91 m² en monopente, rampant 7 m, largeur 13 m, zinc prépatiné gris quartz 0,65 mm. Chantier à Brest, bord de mer.");
+    expect(await texte()).toBe("Couverture zinc à joint debout, 91 m². Longueur du rampant 7 m, aspect du zinc : Quartz-Zinc. Chantier à Brest, bord de mer.");
     expect(created.packet.resume).toEqual([await texte()]);
   });
 
   it("une ligne du bref se corrige ou se retire d'un geste, à l'écran comme chez le fournisseur", async () => {
     const { agent, id, projectId, supplierId, bref, texte } = await chantier();
     const [first, second] = await bref();
-    await agent.post(`/v1/quantitatifs/${id}/corrections`).send({ action: "bref", cle: first!.cle, texte: "Couverture zinc joint debout, versant nord" }).expect(201);
+    await agent.post(`/v1/quantitatifs/${id}/corrections`).send({ action: "bref", cle: first!.cle, texte: "Ouvrage : couverture zinc joint debout, versant nord" }).expect(201);
     await agent.post(`/v1/quantitatifs/${id}/corrections`).send({ action: "bref", cle: second!.cle, texte: "" }).expect(201);
     const after = await bref();
-    expect(after[0]).toEqual({ cle: first!.cle, texte: "Couverture zinc joint debout, versant nord" });
+    expect(after[0]).toEqual({ cle: first!.cle, texte: "Ouvrage : couverture zinc joint debout, versant nord" });
     expect(after.map((l) => l.cle)).not.toContain(second!.cle);
     // Une correction du bref ne rouvre pas la liste validée : elle part telle quelle.
     const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] }).expect(201)).body;
-    expect(await texte()).toMatch(/^Couverture zinc joint debout, versant nord, /);
+    expect(await texte()).toMatch(/^Couverture zinc joint debout, versant nord\. /);
     expect(created.packet.resume).toEqual([await texte()]);
     // Une clé qui n'est pas au bref est refusée.
     await agent.post(`/v1/quantitatifs/${id}/corrections`).send({ action: "bref", cle: "inconnue", texte: "x" }).expect(404);

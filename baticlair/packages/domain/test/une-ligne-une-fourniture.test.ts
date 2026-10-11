@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { applyRuleConfirmations, isPrestationPhrase, isWithoutSupplyUnit, linesWithoutSupply, tradeProfile, validateTakeoff, type QuoteLineReading } from "../src/index.js";
+import { applyRuleConfirmations, isWithoutSupplyUnit, type QuoteLineReading } from "../src/index.js";
 import { D2026_105_LINES, D2026_105_READINGS } from "./devis-reels/d2026-105.js";
+import { isPrestationPhrase } from "./support/prestation.js";
 import { readQuote } from "./support/read-quote.js";
 
 /**
@@ -65,13 +66,6 @@ describe("§49.9 une ligne du quantitatif nomme une fourniture, jamais la phrase
     const rive = shown(p).find((r) => r.label === "Fixations pour l'élément de rive")!;
     expect(rive.item?.asks?.map((a) => a.options.map((o) => o.label))).toEqual([["tuile de rive", "bande de rive zinc"]]);
     expect(p.questions.filter((q) => q.question && /rive/i.test(q.question.text))).toHaveLength(1);
-  });
-
-  it("les lignes sans fourniture (heures, évacuation au forfait) sont repliées à part : « 2 lignes sans fourniture »", () => {
-    const lines = REPARATION.map((l) => ({ id: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit }));
-    const validation = validateTakeoff(lines.map((l) => ({ id: l.id, designation: l.designation, quantityRaw: l.quantity, unitRaw: l.unit, source: "client_quote" as const })), tradeProfile("roofing"));
-    const without = linesWithoutSupply(lines.filter((l) => !["1", "3"].includes(l.id)), validation, READINGS);
-    expect(without.map((w) => w.measure)).toEqual(["1.5 h", "1 fft"]);
   });
 
   it("sans la lecture (lignes d'un partenaire), une heure n'est jamais une fourniture", () => {

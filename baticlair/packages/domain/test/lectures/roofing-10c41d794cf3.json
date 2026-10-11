@@ -1,0 +1,45 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Couverture bac acier anti-condensation RAL 7016, rampant 6 m",
+   "quantity": "120",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Couverture bac acier anti-condensation RAL 7016, rampant 6 m",
+    "quantite": "120",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Couverture bac acier anti-condensation RAL 7016, rampant 6 m",
+      "quantite": "120",
+      "unite": "m²",
+      "ouvrage": "couverture-bac-acier",
+      "emplacement": "couverture",
+      "donnees": {
+       "longueur_rampant": "6 m",
+       "teinte_bac": "7016",
+       "feutre_bac": "1"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

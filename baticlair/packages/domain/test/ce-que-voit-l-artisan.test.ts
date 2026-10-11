@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { applyRuleConfirmations, isPrestationPhrase, isWithoutSupplyUnit, MAX_REASON_WORDS, subjectOf, withShortReasons, wordCount, type QuoteLineReading } from "../src/index.js";
+import { applyRuleConfirmations, isWithoutSupplyUnit, MAX_REASON_WORDS, subjectOf, withShortReasons, wordCount, type QuoteLineReading } from "../src/index.js";
 import { D2026_018_LINES } from "./devis-reels/d2026-018.js";
 import { D2026_020_LINES } from "./devis-reels/d2026-020.js";
 import { D2026_105_LINES, D2026_105_READINGS } from "./devis-reels/d2026-105.js";
+import { isPrestationPhrase } from "./support/prestation.js";
 import { readQuote, type QuoteLineInput } from "./support/read-quote.js";
 
 /**

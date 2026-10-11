@@ -30,25 +30,25 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Complexes de doublage BA13 + isolant | 20 complexes | Valeur par défaut à confirmer : hauteur sous plafond 2,5 m |
+| Complexes de doublage BA13 + isolant | 20 complexes | Valeur par défaut à confirmer |
 | Laine de verre à souffler (type Comblissimo), sac de 17,3 kg, R 7 | 19 sacs de 17,3 kg | Quantité à confirmer : laine +5 % |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Plaques BA13 1,20 × 2,50 | 21 plaques |  | chiffrable |
 | Plaques BA13 1,20 × 2,50 | 30 plaques |  | chiffrable |
+| Plaques BA13 1,20 × 2,50 | 21 plaques |  | chiffrable |
 | Complexes de doublage BA13 + isolant | 20 complexes | longueur à la hauteur sous plafond | chiffrable |
 | Laine de verre à souffler (type Comblissimo), sac de 17,3 kg, R 7 | 19 sacs de 17,3 kg |  | chiffrable |
+| Vis à plaque 25 mm | 1 200 vis |  | chiffrable |
+| Vis à plaque 25 mm | 900 vis |  | chiffrable |
+| Bande à joint | 160 ml |  | chiffrable |
 | Bande à joint | 77 ml |  | chiffrable |
 | Bande à joint | 95 ml |  | chiffrable |
-| Bande à joint | 160 ml |  | chiffrable |
+| Enduit à joint | 32 kg |  | chiffrable |
 | Enduit à joint | 19 kg |  | chiffrable |
 | Enduit à joint | 23 kg |  | chiffrable |
-| Enduit à joint | 32 kg |  | chiffrable |
-| Vis à plaque 25 mm | 900 vis |  | chiffrable |
-| Vis à plaque 25 mm | 1 200 vis |  | chiffrable |
 
 ## Carrelage
 
@@ -68,11 +68,11 @@ Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Carrelage grès cérame 60×60 | 33 cartons de 1,44 m² | Quantité à confirmer : pertes de coupe 8 %, 1 carton de réserve dès 20 m² |
-| Faïence 25×40 | 13 cartons de 1,5 m² | Quantité à confirmer : pertes de coupe 5 %, 1 carton de réserve dès 20 m² |
-| Plinthes carrelées 8×60 | 53 pièces | Quantité à confirmer : plinthes +5 % de coupe |
+| Carrelage grès cérame 60×60 | 33 cartons de 1,44 m² | Quantité à confirmer |
+| Faïence 25×40 | 13 cartons de 1,5 m² | Quantité à confirmer |
+| Plinthes carrelées 8×60 | 53 pièces | Quantité à confirmer |
 | SPEC liquide, seau 20 kg | 1 seau de 20 kg | Quantité à confirmer : SPEC +5 % |
-| Ragréage autolissant P3, sac 25 kg | 8 sacs de 25 kg | Valeur par défaut à confirmer : épaisseur de ragréage 3 mm |
+| Ragréage autolissant P3, sac 25 kg | 8 sacs de 25 kg | Valeur par défaut à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -103,11 +103,11 @@ Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Peinture acrylique mate blanche, seau de 15 L | 2 seaux de 15 L | Quantité à confirmer : peinture +5 % au rouleau |
-| Enduit de lissage poudre, sac 25 kg | 2 sacs de 25 kg | Valeur par défaut à confirmer : passes d'enduit 1. Quantité à confirmer : enduit +10 % |
-| Toile de verre, rouleau 50 m² | 1 rouleau de 50 m² | Quantité à confirmer : toile +10 % de lés |
-| Papier peint, rouleau 10,05 × 0,53 m | 7 rouleaux | Valeur par défaut à confirmer : hauteur des murs 2,5 m |
-| Peinture façade D2 blanc, seau 15 L | 3 seaux de 15 L | Quantité à confirmer : relief de l'enduit −15 % de rendement, peinture +5 % au rouleau |
+| Peinture acrylique mate blanche, seau de 15 L | 2 seaux de 15 L | Quantité à confirmer |
+| Enduit de lissage poudre, sac 25 kg | 2 sacs de 25 kg | Valeur par défaut à confirmer |
+| Toile de verre, rouleau 50 m² | 1 rouleau de 50 m² | Quantité à confirmer |
+| Papier peint, rouleau 10,05 × 0,53 m | 7 rouleaux | Valeur par défaut à confirmer |
+| Peinture façade D2 blanc, seau 15 L | 3 seaux de 15 L | Quantité à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -139,11 +139,11 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Mur en blocs béton | — | Info manquante : Parpaings de 20, de 15 ou de 10 |
-| Briques rectifiées R20 | 252 briques | Quantité à confirmer : briques +5 % de casse |
-| Béton C25/30 (toupie) | 6 m³ | Valeur par défaut à confirmer : épaisseur du dallage 12 cm. Quantité à confirmer : béton +5 % |
-| Béton C25/30 (toupie) | 4 m³ | Valeur par défaut à confirmer : largeur de semelle 50 cm ; hauteur de semelle 25 cm. Quantité à confirmer : béton +10 % en fouille |
-| Mortier de chape, sac 25 kg | 154 sacs de 25 kg | Valeur par défaut à confirmer : épaisseur de chape 5 cm. Quantité à confirmer : chape +10 % |
+| Mur porteur en parpaings, garage blocs béton | — | Parpaings à préciser |
+| Briques rectifiées R20 | 252 briques | Quantité à confirmer |
+| Béton C25/30 (toupie) | 6 m³ | Valeur par défaut à confirmer |
+| Béton C25/30 (toupie) | 4 m³ | Valeur par défaut à confirmer |
+| Mortier de chape, sac 25 kg | 154 sacs de 25 kg | Valeur par défaut à confirmer |
 | Enduit monocouche OC2, sac 25 kg | 59 sacs de 25 kg | Quantité à confirmer : enduit +10 % |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
@@ -168,9 +168,9 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Ardoises naturelles ? 30×22 | 9 271 pièces | Info manquante : qualité de l'ardoise. Valeur par défaut à confirmer : pente du toit 45° ; longueur du rampant 5,5 m ; diamètre du crochet standard |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Info manquante : qualité de l'ardoise. Valeur par défaut à confirmer : diamètre du crochet standard ; pente du toit 45° ; longueur du rampant 5,5 m |
-| Naissances zinc demi-ronde | — | Info manquante : nombre de descentes |
+| Ardoises naturelles 30×22 | 9 271 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Qualité à préciser |
+| Naissances | — | Descentes à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -179,5 +179,5 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces | 200 m² × 44,15 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge | chiffrable |
 | Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02) | chiffrable |
 | Gouttière zinc demi-ronde dév. 33 | 6 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
-| Naissances zinc demi-ronde dév. 33 Ø80 | 1 pièce |  | chiffrable |
+| Naissances dév. 33 Ø80 | 1 pièce |  | chiffrable |
 

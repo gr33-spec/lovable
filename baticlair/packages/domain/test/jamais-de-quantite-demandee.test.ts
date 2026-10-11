@@ -1,21 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  applyLineRoles,
-  artisanView,
-  computeWithAnswers,
-  planQuote,
-  proposeLineRoles,
-  purchaseView,
-  reviewExtractedTakeoff,
-  ROOFING_REFERENTIAL,
-  slotsGivenByQuote,
-  tradeProfile,
-  validateTakeoff,
-  type EngineAnswer,
-  type LineRole,
-  type PurchaseView,
-} from "../src/index.js";
-import { HABITUDES_BANC } from "./support/habitudes.js";
+import type { EngineAnswer, PurchaseView } from "../src/index.js";
+import { readQuote } from "./support/read-quote.js";
 import { ARDOISES_LUCARNES_LINES } from "./devis-reels/ardoises-lucarnes.js";
 import type { BenchLine } from "./devis-reels/truth.js";
 
@@ -25,25 +10,7 @@ import type { BenchLine } from "./devis-reels/truth.js";
  * les hypothèses par défaut (pente 45°, zone 3), dites et modifiables. Si une donnée
  * manque vraiment : UNE question courte, avec des boutons de valeur.
  */
-function read(bench: BenchLine[], answers: Record<string, EngineAnswer> = {}): PurchaseView {
-  const profile = tradeProfile("roofing");
-  const lines = bench.map((l) => ({ ref: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit }));
-  const raw = validateTakeoff(lines.map((l) => ({ id: l.ref, designation: l.designation, quantityRaw: l.quantity, unitRaw: l.unit, source: "client_quote" as const })), profile);
-  const plan = planQuote(lines, ROOFING_REFERENTIAL, profile);
-  const proposals = proposeLineRoles(lines, plan, raw, ROOFING_REFERENTIAL);
-  const roles = new Map<string, LineRole>([...proposals].map(([k, v]) => [k, v.role]));
-  for (const [key, value] of Object.entries(answers)) if (key.startsWith("role:") && (value === "measure" || value === "purchase")) roles.set(key.slice(5), value);
-  const asks = new Map([...proposals].filter(([id, p]) => p.ask && roles.get(id) === "undetermined").map(([k, p]) => [k, p.ask!]));
-  const validation = applyLineRoles(raw, roles);
-  const engine = computeWithAnswers(ROOFING_REFERENTIAL, plan, answers, HABITUDES_BANC, {}, slotsGivenByQuote(plan, validation));
-  const view = artisanView(
-    lines.map((l) => ({ id: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: false, enteredByArtisan: false })),
-    validation,
-    engine,
-    { plan, roles, ref: ROOFING_REFERENTIAL, asks },
-  );
-  return purchaseView(view, engine, { plan, roles, ref: ROOFING_REFERENTIAL, validation });
-}
+const read = (bench: BenchLine[], answers: Record<string, EngineAnswer> = {}): PurchaseView => readQuote(bench, answers);
 
 const short = (d: string) => d.replace(/\s*\((?:fourniture\s*(?:&|et)\s*pose|f\.?\s*(?:&|et)\s*p\.?|fourniture)\)/gi, "").split(/\s[-–—]\s/)[0]!.trim();
 
@@ -102,61 +69,5 @@ describe("jamais de quantité demandée à l'artisan", () => {
     expect(JSON.stringify(v.questions)).not.toMatch(/quantit/i);
     // Réponse d'un geste → la liste complète.
     expect(bought(read([{ ref: "1", designation: "Ardoises 30×22 crochets compris", quantity: "1", unit: "forfait" } as unknown as BenchLine], { "param:surface": { value: "200", unit: "m2" } }))).toEqual(COMPLETE);
-  });
-});
-
-/**
- * Capture du fondateur (2026-10-03) : la lecture IA avait mis un « doute » sur les liteaux
- * (« Quantité en m² : combien de mètres linéaires de liteaux ? ») et sur d'autres lignes : 7 questions.
- * Les doutes de CALCUL sont désormais ignorés ; restent les deux vraies questions du devis.
- */
-describe("doutes de calcul de l'IA : jamais posés à l'artisan", () => {
-  const DOUBTS: Record<string, string> = {
-    "ligne 1": "Quantité en m² : combien de mètres linéaires de liteaux ?",
-    "ligne 2": "Surface en m² : combien d'ardoises à commander ?",
-    "ligne 3": "Combien de ml de gouttière et de descentes ?",
-    "ligne 4": "Quantité en mètres : combien de faîtières ?",
-    "ligne 7": "Combien de chatières par paquet ?",
-  };
-  function readWithDoubts(answers: Record<string, EngineAnswer> = {}): PurchaseView {
-    const profile = tradeProfile("roofing");
-    const lines = ARDOISES_LUCARNES_LINES.map((l) => ({ ref: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit }));
-    const { validation: raw } = reviewExtractedTakeoff(
-      lines.map((l) => ({ id: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit, reference: null, sourceRefs: [], sourcePages: [1], aiDoubt: DOUBTS[l.ref] ?? null })),
-      new Map(),
-      profile,
-    );
-    const plan = planQuote(lines, ROOFING_REFERENTIAL, profile);
-    const proposals = proposeLineRoles(lines, plan, raw, ROOFING_REFERENTIAL);
-    const roles = new Map<string, LineRole>([...proposals].map(([k, v]) => [k, v.role]));
-    for (const [key, value] of Object.entries(answers)) if (key.startsWith("role:") && (value === "measure" || value === "purchase")) roles.set(key.slice(5), value);
-    const asks = new Map([...proposals].filter(([id, p]) => p.ask && roles.get(id) === "undetermined").map(([k, p]) => [k, p.ask!]));
-    const validation = applyLineRoles(raw, roles);
-    const engine = computeWithAnswers(ROOFING_REFERENTIAL, plan, answers, HABITUDES_BANC, {}, slotsGivenByQuote(plan, validation));
-    const view = artisanView(
-      lines.map((l) => ({ id: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: false, enteredByArtisan: false })),
-      validation,
-      engine,
-      { plan, roles, ref: ROOFING_REFERENTIAL, asks },
-    );
-    return purchaseView(view, engine, { plan, roles, ref: ROOFING_REFERENTIAL, validation });
-  }
-
-  it("le devis ardoises du fondateur, doutes de l'IA compris : les questions du comptoir (façonnage, développé, périmètre de cheminée, descentes et leur Ø, 6 jouées ?), aucune de quantité", () => {
-    const v = readWithDoubts();
-    expect(v.questions.map((q) => q.key).sort()).toEqual([
-      "engine:param:consommables",
-      "engine:param:developpe",
-      "engine:param:diametre_descente",
-      // §48.6 : une question « tu façonnes ? » par ouvrage de zinguerie, jamais une seule pour tout le zinc.
-      "engine:param:faconnage@abergement-cheminee",
-      "engine:param:faconnage@faitage-zinc",
-      "engine:param:nb_descentes",
-      "engine:param:perimetre_cheminee",
-      "role:ligne 5",
-    ]);
-    expect(JSON.stringify(v.questions)).not.toMatch(/linéaires|combien d'ardoises|faîtières/);
-    // Les liteaux sont calculés en mètres linéaires par BatiClair, pas demandés.
-    expect(bought(v)).toMatchObject({ "Liteaux 18×40": "2 049 ml", "Ardoises naturelles Espagne 1er choix 30×22": "9 271 pièces" });
   });
 });

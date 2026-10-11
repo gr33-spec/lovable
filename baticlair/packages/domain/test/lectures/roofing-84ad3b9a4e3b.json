@@ -1,0 +1,387 @@
+{
+ "devis": [
+  {
+   "ref": "ligne 1",
+   "designation": "Liteaux bois pour ardoises",
+   "quantity": "200",
+   "unit": "m²",
+   "truth": "C",
+   "note": "200 m² de toiture, pas 200 m² de liteaux : liteaux en ml, section 18×40 par défaut."
+  },
+  {
+   "ref": "ligne 2",
+   "designation": "Ardoises naturelles 30x22",
+   "quantity": "200",
+   "unit": "m²",
+   "truth": "C",
+   "note": "Ardoises à la pièce (format × pureau), crochets à la pièce."
+  },
+  {
+   "ref": "ligne 3",
+   "designation": "Gouttière de 25, bandeau en zinc",
+   "quantity": "17",
+   "unit": "m",
+   "truth": "P",
+   "note": "Profil + crochets + naissances (nombre de descentes à demander)."
+  },
+  {
+   "ref": "ligne 4",
+   "designation": "Faîtage zinc",
+   "quantity": "17",
+   "unit": "m",
+   "truth": "C",
+   "note": "Bande zinc en longueurs de 3 m + pattes, jamais des faîtières en terre cuite."
+  },
+  {
+   "ref": "ligne 5",
+   "designation": "Ardoises pour jouées de lucarnes",
+   "quantity": "6",
+   "unit": "unités",
+   "truth": "C",
+   "note": "6 jouées (ouvrages), pas 6 ardoises : à faire chiffrer."
+  },
+  {
+   "ref": "ligne 6",
+   "designation": "Entourage de cheminée zinc et solin",
+   "quantity": "2",
+   "unit": "unités",
+   "truth": "C",
+   "note": "2 ouvrages à faire chiffrer."
+  },
+  {
+   "ref": "ligne 7",
+   "designation": "Chatières de ventilation",
+   "quantity": "12",
+   "unit": "unités",
+   "truth": "D"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "perimetre_cheminee",
+    "texte": "Périmètre d'une cheminée (les 4 côtés) ?",
+    "boutons": [
+     {
+      "label": "2 m",
+      "valeur": "2"
+     },
+     {
+      "label": "3 m",
+      "valeur": "3"
+     },
+     {
+      "label": "4 m",
+      "valeur": "4"
+     },
+     {
+      "label": "5 m",
+      "valeur": "5"
+     }
+    ],
+    "unite": "m",
+    "donnee": "périmètre d'une cheminée",
+    "ligne": null
+   },
+   {
+    "cle": "nb_descentes",
+    "texte": "Combien de descentes pour cette gouttière ?",
+    "boutons": [
+     {
+      "label": "1",
+      "valeur": "1"
+     },
+     {
+      "label": "2",
+      "valeur": "2"
+     },
+     {
+      "label": "3",
+      "valeur": "3"
+     },
+     {
+      "label": "4",
+      "valeur": "4"
+     }
+    ],
+    "unite": "u",
+    "donnee": "nombre de descentes",
+    "ligne": null
+   },
+   {
+    "cle": "developpe",
+    "texte": "Développé de la bande zinc ?",
+    "boutons": [
+     {
+      "label": "100 mm (solin, couvre-joint)",
+      "valeur": "100"
+     },
+     {
+      "label": "200 mm",
+      "valeur": "200"
+     },
+     {
+      "label": "250 mm",
+      "valeur": "250"
+     },
+     {
+      "label": "330 mm",
+      "valeur": "330"
+     },
+     {
+      "label": "400 mm",
+      "valeur": "400"
+     }
+    ],
+    "unite": "mm",
+    "donnee": "développé de la bande",
+    "ligne": null
+   },
+   {
+    "cle": "diametre_descente",
+    "texte": "Descentes en Ø 80, Ø 100 ou Ø 120 ?",
+    "boutons": [
+     {
+      "label": "Ø 80",
+      "valeur": "80"
+     },
+     {
+      "label": "Ø 100",
+      "valeur": "100"
+     },
+     {
+      "label": "Ø 120",
+      "valeur": "120"
+     }
+    ],
+    "unite": "mm",
+    "donnee": "diamètre des descentes",
+    "ligne": null
+   },
+   {
+    "cle": "faconnage",
+    "texte": "Faîtage en bande zinc : tu façonnes toi-même ou tu commandes façonné ?",
+    "boutons": [
+     {
+      "label": "Je façonne (feuilles ou bobineau)",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "façonnage",
+    "ligne": "ligne 4"
+   },
+   {
+    "cle": "consommables",
+    "texte": "Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?",
+    "boutons": [
+     {
+      "label": "Oui",
+      "valeur": "1"
+     },
+     {
+      "label": "Non",
+      "valeur": "0"
+     }
+    ],
+    "unite": "u",
+    "donnee": "consommables",
+    "ligne": null
+   },
+   {
+    "cle": "faconnage",
+    "texte": "Abergement de cheminée : tu façonnes toi-même ou tu commandes façonné ?",
+    "boutons": [
+     {
+      "label": "Je façonne (feuilles ou bobineau)",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "façonnage",
+    "ligne": "ligne 6"
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "ligne 1",
+    "designation": "Liteaux bois pour ardoises",
+    "quantite": "200",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Liteaux 18×40",
+      "quantite": "200",
+      "unite": "m²",
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "liteau",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "ligne 2",
+    "designation": "Ardoises naturelles 30x22",
+    "quantite": "200",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ardoises naturelles Espagne 1er choix 30×22",
+      "quantite": "200",
+      "unite": "m²",
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "ardoise",
+      "donnees": {
+       "produit": "ardoise-30x22"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "ligne 3",
+    "designation": "Gouttière de 25, bandeau en zinc",
+    "quantite": "17",
+    "unite": "m",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Gouttière zinc dév. 25",
+      "quantite": "17",
+      "unite": "m",
+      "ouvrage": "gouttiere",
+      "emplacement": "profil",
+      "donnees": {
+       "developpe_gouttiere": "25 cm",
+       "fixation_crochet": "2"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "ligne 4",
+    "designation": "Faîtage zinc",
+    "quantite": "17",
+    "unite": "m",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Faîtage en bande zinc",
+      "quantite": "17",
+      "unite": "m",
+      "ouvrage": "faitage-zinc",
+      "emplacement": "bande",
+      "donnees": {},
+      "attend": [
+       "faconnage"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "ligne 5",
+    "designation": "Ardoises pour jouées de lucarnes",
+    "quantite": "6",
+    "unite": "unités",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ardoises pour jouées de lucarnes",
+      "quantite": "6",
+      "unite": "unités",
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "ardoise",
+      "donnees": {
+       "produit": "ardoise-30x22"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "ligne 6",
+    "designation": "Entourage de cheminée zinc et solin",
+    "quantite": "2",
+    "unite": "unités",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Abergement de cheminée zinc",
+      "quantite": "2",
+      "unite": "unités",
+      "ouvrage": "abergement-cheminee",
+      "emplacement": "abergement",
+      "donnees": {},
+      "attend": [
+       "faconnage",
+       "perimetre_cheminee"
+      ],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Bandes porte-solin",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "abergement-cheminee",
+      "emplacement": "porte_solin",
+      "donnees": {},
+      "attend": [
+       "perimetre_cheminee"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "ligne 7",
+    "designation": "Chatières de ventilation",
+    "quantite": "12",
+    "unite": "unités",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Chatières de ventilation",
+      "quantite": "12",
+      "unite": "unités",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

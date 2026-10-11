@@ -26,7 +26,7 @@ Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Dalles 600×600 bord A (type Tropic) | 13 cartons de 5,76 m² | Quantité à confirmer : dalles +5 %, carton de 5,76 m² (sources en désaccord) |
+| Dalles 600×600 bord A (type Tropic) | 13 cartons de 5,76 m² | Quantité à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -51,8 +51,8 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Plinthes MDF 10×70, barre 2,40 m | 22 barres | Quantité à confirmer : plinthes +10 % de coupe |
-| Lambris sapin, paquet 2,5 m² | 7 paquets de 2,5 m² | Quantité à confirmer : lambris +10 % de coupe, paquet de 2,5 m² |
+| Plinthes MDF 10×70, barre 2,40 m | 22 barres | Quantité à confirmer |
+| Lambris sapin, paquet 2,5 m² | 7 paquets de 2,5 m² | Quantité à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -61,9 +61,9 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Bloc-porte isoplane 83x204 huisserie 72, poussant droit | 5 pièces |  | chiffrable |
 | Plinthes MDF 10×70, barre 2,40 m | 22 barres |  | chiffrable |
 | Lambris sapin, paquet 2,5 m² | 7 paquets de 2,5 m² (15,4 m²) |  | chiffrable |
-| Vis d'huisserie 6 × 100 + chevilles | 30 pièces |  | chiffrable |
 | Mastic-colle plinthes 310 ml | 4 cartouches de 310 ml (48 m à couvrir) |  | chiffrable |
 | Clips lambris, boîte de 100 | 1 boîte de 100 |  | chiffrable |
+| Vis d'huisserie 6 × 100 + chevilles | 30 pièces |  | chiffrable |
 
 ## Cuisine
 
@@ -116,9 +116,9 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Ardoises naturelles ? 30×22 | 9 271 pièces | Info manquante : qualité de l'ardoise. Valeur par défaut à confirmer : pente du toit 45° ; longueur du rampant 5,5 m ; diamètre du crochet standard |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Info manquante : qualité de l'ardoise. Valeur par défaut à confirmer : diamètre du crochet standard ; pente du toit 45° ; longueur du rampant 5,5 m |
-| Naissances zinc demi-ronde | — | Info manquante : nombre de descentes |
+| Ardoises naturelles 30×22 | 9 271 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Qualité à préciser |
+| Naissances | — | Descentes à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -127,5 +127,5 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces | 200 m² × 44,15 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge | chiffrable |
 | Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02) | chiffrable |
 | Gouttière zinc demi-ronde dév. 33 | 6 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
-| Naissances zinc demi-ronde dév. 33 Ø80 | 1 pièce |  | chiffrable |
+| Naissances dév. 33 Ø80 | 1 pièce |  | chiffrable |
 

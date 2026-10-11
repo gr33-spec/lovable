@@ -47,7 +47,7 @@ describe("descentes : longueurs de 4 m, coudes, colliers tous les 2 m, dauphin d
     expect(v.questions).toEqual([]);
     expect(got(v)).toEqual({
       "Tubes de descente zinc Ø100, longueur 4 m": "4 pièces", // 2 × arrondi_sup(5 / 4)
-      "Coudes de descente zinc Ø100": "4 pièces",
+      "Coudes de descente Ø100": "4 pièces",
       "Colliers de descente Ø100": "8 pièces", // 2 × (arrondi_sup(5 / 2) + 1)
       "Dauphins Ø100, 1 m": "2 pièces",
     });

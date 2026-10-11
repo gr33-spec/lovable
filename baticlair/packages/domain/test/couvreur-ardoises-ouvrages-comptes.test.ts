@@ -1,26 +1,11 @@
 import { describe, expect, it } from "vitest";
-import {
-  applyLineRoles,
-  artisanView,
-  computeWithAnswers,
-  planQuote,
-  proposeLineRoles,
-  ROOFING_REFERENTIAL,
-  slotsGivenByQuote,
-  tradeProfile,
-  validateTakeoff,
-  type EngineAnswer,
-  type LineRole,
-} from "../src/index.js";
+import { ecranDeLecture, ROOFING_REFERENTIAL, type EngineAnswer } from "../src/index.js";
 import { HABITUDES_BANC } from "./support/habitudes.js";
+import { lectureEnregistree } from "./support/lectures.js";
 
 /**
- * COUVREUR — ARDOISES ET OUVRAGES COMPTÉS (2026-10-02). Deux risques réels
- * relevés par le fondateur sur un devis d'ardoises :
- *  - « Ardoises pour jouées de lucarnes — 6 unités » partait comme 6 ardoises ;
- *  - « Entourage de cheminée zinc et solin — 2 unités » partait comme 2 articles ;
- * et aucune quantité n'était proposée pour la couverture en ardoises.
- * Règles générales (vocabulaire du référentiel), jamais une correction d'un devis.
+ * COUVERTURE EN ARDOISES AU CROCHET : chaque composant détaillé, calculé avec les hypothèses du référentiel, dites.
+ * (Les ouvrages comptés, « 6 ardoises ou 6 jouées ? », sont désormais tranchés par la lecture du modèle, §51.5.)
  */
 const LINES = [
   { ref: "a1", designation: "Couverture en ardoises naturelles 30x22 posées au crochet", quantity: "200", unit: "m²" },
@@ -31,56 +16,10 @@ const LINES = [
 ];
 
 function read(answers: Record<string, EngineAnswer> = {}, acceptDraft = false, lines: typeof LINES = LINES) {
-  const profile = tradeProfile("roofing");
-  const raw = validateTakeoff(lines.map((l) => ({ id: l.ref, designation: l.designation, quantityRaw: l.quantity, unitRaw: l.unit, source: "client_quote" as const })), profile);
-  const plan = planQuote(lines.map((l) => ({ ...l })), ROOFING_REFERENTIAL, profile);
-  const proposals = proposeLineRoles(lines.map((l) => ({ ref: l.ref, designation: l.designation })), plan, raw, ROOFING_REFERENTIAL);
-  const roles = new Map<string, LineRole>([...proposals].map(([k, v]) => [k, v.role]));
-  for (const [key, value] of Object.entries(answers)) {
-    if (key.startsWith("role:") && (value === "measure" || value === "purchase")) roles.set(key.slice(5), value);
-  }
-  const asks = new Map([...proposals].filter(([, p]) => p.ask).map(([k, p]) => [k, p.ask!]));
-  const validation = applyLineRoles(raw, roles);
-  const engine = computeWithAnswers(ROOFING_REFERENTIAL, plan, answers, HABITUDES_BANC, { acceptDraft }, slotsGivenByQuote(plan, validation));
-  const view = artisanView(
-    lines.map((l) => ({ id: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: false, enteredByArtisan: false })),
-    validation,
-    engine,
-    { plan, roles, ref: ROOFING_REFERENTIAL, asks },
-  );
-  return { proposals, view, ouvrage: (ref: string) => view.ouvrages.find((o) => o.lineId === ref)! };
+  const lecture = lectureEnregistree(ROOFING_REFERENTIAL, lines, [], HABITUDES_BANC, { acceptDraft }, undefined, answers);
+  const e = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture, answers, preferences: HABITUDES_BANC, options: { acceptDraft }, interdits: false });
+  return { proposals: e.roles, view: e.view, ouvrage: (ref: string) => e.view.ouvrages.find((o) => o.lineId === ref)! };
 }
-
-describe("ouvrages comptés : jamais un nombre d'articles", () => {
-  it("« Entourage de cheminée … 2 unités » = 2 ouvrages, jamais 2 articles à commander", () => {
-    const { proposals, ouvrage, view } = read();
-    expect(proposals.get("a4")).toMatchObject({ role: "measure" });
-    expect(ouvrage("a4").direct).toBeNull();
-    expect(view.items.find((i) => i.id === "a4")!.state).not.toBe("verified");
-  });
-
-  it("« Ardoises pour jouées de lucarnes … 6 unités » : 6 ardoises ou 6 jouées ? UNE question, pas de ✓", () => {
-    const { proposals, view } = read();
-    expect(proposals.get("a3")).toMatchObject({ role: "undetermined" });
-    const decision = view.decisions.find((d) => d.key === "role:a3")!;
-    expect(decision.question).toMatchObject({ kind: "choose" });
-    expect(decision.question!.options!.map((o) => o.value)).toEqual(["purchase", "measure"]);
-    expect(decision.question!.options!.map((o) => o.label)).toEqual(["6 ardoises à commander", "6 jouées (matériaux à calculer)"]);
-    expect(view.items.find((i) => i.id === "a3")!.state).toBe("to_confirm");
-  });
-
-  it("la réponse de l'artisan tranche : « ce sont des jouées » → mesure ; « des ardoises » → à commander", () => {
-    const asJouees = read({ "role:a3": "measure" });
-    expect(asJouees.view.decisions.some((d) => d.key === "role:a3")).toBe(false);
-    expect(asJouees.ouvrage("a3").direct).toBeNull();
-    const asArdoises = read({ "role:a3": "purchase" });
-    expect(asArdoises.ouvrage("a3").direct).toEqual({ quantity: "6", unit: "unités" });
-  });
-
-  it("une vraie quantité d'articles reste à commander telle quelle (chatières)", () => {
-    expect(read().ouvrage("a5")).toMatchObject({ role: "purchase", direct: { quantity: "12", unit: "unités" } });
-  });
-});
 
 describe("couverture en ardoises au crochet : chaque composant détaillé", () => {
   it("dès l'ouverture, sans rien demander : ardoises, crochets et liteaux 18×40 calculés avec les hypothèses du référentiel, dites", () => {
@@ -122,33 +61,5 @@ describe("couverture en ardoises au crochet : chaque composant détaillé", () =
     const liteaux = read({}, false, lines).ouvrage("a2").needs.find((n) => n.slot === "liteau")!;
     expect(liteaux.label).toBe("Liteaux 27×40");
     expect(liteaux.usual).toBeNull();
-  });
-});
-
-describe("un crochet d'ardoise n'est jamais une ardoise", () => {
-  // Cas réel (devis de démonstration, 2026-10-02) : un devis de TUILES qui achète « Crochet inox ardoise 100 mm — 2 paquets ».
-  const TUILES = [
-    { ref: "t1", designation: "Fourniture et pose tuile romane canal rouge 12,5 u/m² (réf. TUI-RC12)", quantity: "1 250", unit: "u" },
-    { ref: "t2", designation: "Crochet inox ardoise 100 mm", quantity: "2", unit: "paquet" },
-  ];
-  const familyOf = (designation: string) => {
-    const p = planQuote([{ ref: "x", designation, quantity: "10", unit: "u" }], ROOFING_REFERENTIAL, tradeProfile("roofing")).lines[0]!;
-    if (p.status === "not_material") return null;
-    if (p.status === "not_covered") return p.family;
-    return ROOFING_REFERENTIAL.workItems.find((w) => w.id === p.workItemId)!.slots.find((s) => s.key === p.slot)!.family;
-  };
-
-  it("« Crochet inox ardoise » est lu comme un crochet ; aucune question sur des ardoises que le devis n'a pas", () => {
-    expect(familyOf(TUILES[1]!.designation)).toBe("slate_hook");
-    const { view } = read({}, false, TUILES);
-    expect(view.decisions.map((d) => d.key)).not.toContain("product:ardoise");
-    expect(view.ouvrages.flatMap((o) => o.needs).some((n) => n.slot === "ardoise")).toBe(false);
-  });
-
-  it("le vocabulaire reste juste : « Crochets d'ardoise », « crochet pour ardoise » → crochet ; « crochet de gouttière » → gouttière", () => {
-    expect(familyOf("Crochets d'ardoise inox")).toBe("slate_hook");
-    expect(familyOf("Crochet pour ardoise 90 mm")).toBe("slate_hook");
-    expect(familyOf("Crochet de gouttière zinc")).toBe("gutter_hook");
-    expect(familyOf("Ardoises naturelles 30x22")).toBe("roof_slate");
   });
 });

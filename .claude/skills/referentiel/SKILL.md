@@ -1,6 +1,6 @@
 ---
 name: referentiel
-description: Règles du référentiel couverture BatiClair (règle numéro un, section 49, prompts 41.1/41.2, parcours 48). À charger AVANT de toucher au moteur (`packages/domain`), aux tiroirs (`referential/data/*.ts`), aux prompts de lecture ou de relecture, aux questions de comptoir ou à l'écran de la liste.
+description: Règles du référentiel couverture BatiClair (règle numéro un, section 49, lecture §51.5, parcours 48). À charger AVANT de toucher au moteur (`packages/domain`), aux tiroirs (`referential/data/*.ts`), aux prompts de lecture ou de relecture, aux questions de comptoir ou à l'écran de la liste.
 ---
 
 # Référentiel BatiClair : ce qui fait foi
@@ -14,7 +14,7 @@ description: Règles du référentiel couverture BatiClair (règle numéro un, s
 | Les autres métiers (22 tiroirs) | `baticlair/packages/domain/src/referential/data/*.ts`, registre `REFERENTIALS` (`registry.ts`) |
 | L'export du référentiel (généré par le test, jamais à la main) | `baticlair/referentiels/couverture/referentiel.json`, écrit par `packages/domain/test/schema-referentiel.test.ts` |
 | Les anciennes valeurs et chaque changement de version | `baticlair/referentiels/couverture/CHANGELOG.md` |
-| Les prompts A (lecture) et B (relecture) | `baticlair/apps/api/src/modules/takeoff/application/prompt.ts`, `quantitatif-pass.ts` |
+| La lecture du devis par le modèle (§51.5) et la relecture d'une réponse « Autre » (§51.2) | `baticlair/apps/api/src/modules/takeoff/application/lecture-reader.ts`, `fiche-relecture.ts` ; le double de test `infrastructure/fake-lecture-reader.ts` |
 | Les devis réels anonymisés (jamais le PDF) | `baticlair/packages/domain/test/devis-reels/` (D-2026-011, 015, 018, 020…) |
 | Le dernier audit et son suivi | `baticlair/docs/audit-2026-10-07.md` |
 | Les règles produit, en une page | `baticlair/CLAUDE.md` |
@@ -34,16 +34,16 @@ description: Règles du référentiel couverture BatiClair (règle numéro un, s
    - §49.4 : les questions se posent à l'écran des questions, avant le calcul, jamais sur une donnée écrite, jamais en double. Le façonnage d'une pièce de zinguerie est obligatoire.
    - §49.8 : une ligne orange se règle dans sa carte, d'un geste.
 3. **Section 48 :** le parcours, cinq écrans, zéro saisie, tutoiement.
-4. **Section 41 :** les prompts A (§41.1) et B (§41.2) sont branchés mot pour mot. Le format technique s'ajoute sans rien réécrire. Deux appels IA au plus par devis.
+4. **Section 51 :** la lecture est faite par le modèle, en un appel, jamais par des mots cherchés dans les lignes (§51.5) ; le code garde les ratios, les conversions (§50.5) et les tests. Les lectures des devis de test sont enregistrées (`packages/domain/test/lectures/`).
 5. Le reste du référentiel : les ratios des sections 1 à 18 et 34 à 36, les règles du comptoir (§47.8), le test du fournisseur (§40).
 
 ## Avant de toucher au moteur ou aux prompts
 
-- Relire dans `docs/referentiel-couverture.md` les sections **41.1, 41.2, 48 et 49**, puis la section du sujet (par exemple §36 pour le zinc, §7 pour le joint debout).
+- Relire dans `docs/referentiel-couverture.md` les sections **48, 49, 50.5, 51 et 52**, puis la section du sujet (par exemple §36 pour le zinc, §7 pour le joint debout).
 - Relire dans `CLAUDE.md` la règle produit concernée et le test permanent qu'elle cite.
 - Tout chiffre codé cite sa section ou sa source (`source`, `verification`). Un chiffre sans source reste `draft` et sort orange « Quantité à confirmer ».
 - Aucune correction propre à un seul devis : chaque cas devient une règle générale et un test permanent.
-- Un prompt (A ou B) ne se réécrit pas : son texte est testé contre le référentiel.
+- Le prompt de lecture (`LECTURE_PROMPT`) cite le référentiel mot pour mot : son texte est testé (`apps/api/test/prompt-lecture.test.ts`). Aucune règle de lecture par mots dans le code : un cas nouveau se règle par la lecture du modèle, le référentiel ou une lecture enregistrée.
 
 ## Chaque règle touchée a son test permanent
 

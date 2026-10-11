@@ -1,0 +1,46 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Panneaux sandwich monopente RAL 9005, rampant 5 m",
+   "quantity": "50",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Panneaux sandwich monopente RAL 9005, rampant 5 m",
+    "quantite": "50",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Panneaux sandwich monopente RAL 9005, rampant 5 m",
+      "quantite": "50",
+      "unite": "m²",
+      "ouvrage": "couverture-bac-acier",
+      "emplacement": "couverture",
+      "donnees": {
+       "longueur_rampant": "5 m",
+       "type_bac": "2",
+       "teinte_bac": "9005",
+       "nb_pans": "1"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

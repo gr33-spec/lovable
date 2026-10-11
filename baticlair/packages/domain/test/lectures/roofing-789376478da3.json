@@ -1,0 +1,67 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Trappe d'accès isolée 60 x 60",
+   "quantity": "30,000",
+   "unit": "u"
+  },
+  {
+   "ref": "2",
+   "designation": "Bande armée pour angles saillants",
+   "quantity": "530,000",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Trappe d'accès isolée 60 x 60",
+    "quantite": "30,000",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Trappe d'accès isolée 60 x 60",
+      "quantite": "30,000",
+      "unite": "u",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Bande armée pour angles saillants",
+    "quantite": "530,000",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Bande armée pour angles saillants",
+      "quantite": "530,000",
+      "unite": "ml",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

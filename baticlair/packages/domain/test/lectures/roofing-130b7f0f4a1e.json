@@ -1,0 +1,88 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Tuiles canal Charentaise",
+   "quantity": "100",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "recouvrement_canal",
+    "texte": "Recouvrement des tuiles canal ?",
+    "boutons": [
+     {
+      "label": "140 mm",
+      "valeur": "140"
+     },
+     {
+      "label": "150 mm",
+      "valeur": "150"
+     },
+     {
+      "label": "160 mm",
+      "valeur": "160"
+     },
+     {
+      "label": "170 mm",
+      "valeur": "170"
+     }
+    ],
+    "unite": "mm",
+    "donnee": "recouvrement des tuiles canal",
+    "ligne": null
+   },
+   {
+    "cle": "produit_tuile",
+    "texte": "J'ai identifié : Tuiles Canal Charentaise. C'est bien ce modèle ?",
+    "boutons": [
+     {
+      "label": "Oui",
+      "valeur": "edilians-canal-charentaise"
+     },
+     {
+      "label": "Modifier",
+      "valeur": ""
+     }
+    ],
+    "unite": null,
+    "donnee": "modèle : tuile",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Tuiles canal Charentaise",
+    "quantite": "100",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Couverture en tuiles canal",
+      "quantite": "100",
+      "unite": "m²",
+      "ouvrage": "couverture-tuiles-canal",
+      "emplacement": "tuile",
+      "donnees": {
+       "produit": "edilians-canal-charentaise"
+      },
+      "attend": [
+       "recouvrement_canal"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

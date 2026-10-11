@@ -1,0 +1,41 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Solin plomb",
+   "quantity": "5",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Solin plomb",
+    "quantite": "5",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Plomb laminé 1,5 mm, rouleau largeur 30 cm × 6 m",
+      "quantite": "5",
+      "unite": "ml",
+      "ouvrage": "bandes-plomb",
+      "emplacement": "plomb",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { planQuote, ROOFING_REFERENTIAL, tradeProfile } from "../src/index.js";
+import { ROOFING_REFERENTIAL } from "../src/index.js";
+import { planOf } from "./support/plan-of.js";
 import { readQuote } from "./support/read-quote.js";
 
 /**
@@ -19,7 +20,7 @@ const DEUX_FENETRES = [
 
 describe("deux fenêtres de toit de tailles différentes (fondateur, 2026-10-11)", () => {
   it("deux lignes, deux fenêtres : chacune sa taille, jamais une contradiction", () => {
-    const plan = planQuote(DEUX_FENETRES, ROOFING_REFERENTIAL, tradeProfile("roofing"));
+    const plan = planOf(ROOFING_REFERENTIAL, DEUX_FENETRES);
     expect(plan.contradictions).toEqual([]);
     const fenetres = plan.inputs.filter((i) => i.workItemId.startsWith("fenetre-de-toit"));
     expect(fenetres.map((f) => [f.params.taille_fenetre?.value, f.params.nb_fenetres?.value]).sort()).toEqual([

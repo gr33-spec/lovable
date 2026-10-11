@@ -1,0 +1,65 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Descente PVC Ø80 en longueurs de 2 m, hauteur 3 m, sans dauphin",
+   "quantity": "1",
+   "unit": "u"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": [
+    {
+     "cle": "nb_descentes",
+     "libelle": "Nombre de descentes",
+     "valeur": "1",
+     "origine": "devis",
+     "preuve": "Devis, 1"
+    }
+   ]
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Descente PVC Ø80 en longueurs de 2 m, hauteur 3 m, sans dauphin",
+    "quantite": "1",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Tubes de descente PVC Ø80",
+      "quantite": "1",
+      "unite": "u",
+      "ouvrage": "descente",
+      "emplacement": "tube",
+      "donnees": {
+       "diametre_descente": "80 mm",
+       "hauteur_descente": "3 m",
+       "longueur_tube": "2 m",
+       "dauphin": "0"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Dauphins",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "descente",
+      "emplacement": "dauphin",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

@@ -310,8 +310,12 @@ export class QuantitatifsService {
     }
     // §51.2 : une réponse « Autre » relue qui ouvre une donnée manquante pose UNE question de plus, AVANT de calculer :
     // l'écran des questions revient avec elle seule à régler.
-    const opened = (await this.ready(tenant, row)).purchase.questions.filter((d) => d.question?.key.startsWith("fiche:"));
-    if (opened.length > 0) return this.view(row, await this.ready(tenant, row), rendu);
+    // Une donnée manquante demandée par la lecture elle-même (§51.2) ne bloque pas : sans réponse, sa ligne sort orange avec
+    // sa question (§51.6) ; seule une question ouverte APRÈS, par une relecture, ramène à l'écran des questions.
+    const before = await this.ready(tenant, row);
+    const own = new Set((before.takeoff.lecture?.questions ?? []).map((q) => `fiche:${q.cle}`));
+    const opened = before.purchase.questions.filter((d) => d.question?.key.startsWith("fiche:") && !own.has(d.question.key));
+    if (opened.length > 0) return this.view(row, before, rendu);
     // §49.2.5 : les valeurs annoncées dans « Je pars sur ces valeurs » et gardées telles quelles sont CONFIRMÉES en lançant
     // le calcul (elles ne gardent plus leur ligne orange) ; celles que l'artisan a changées ont déjà leur réponse.
     const seen = await this.ready(tenant, row);

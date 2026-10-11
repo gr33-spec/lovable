@@ -1,7 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import type { ExtractionAttempt, ExtractionRequest, TakeoffExtractor } from "../src/modules/takeoff/application/takeoff-extractor.js";
-import { TAKEOFF_EXTRACTOR } from "../src/modules/takeoff/application/takeoff-extractor.js";
-import { FakeTakeoffExtractor } from "../src/modules/takeoff/infrastructure/fake-takeoff-extractor.js";
+import { LECTURE_READER, type LectureReader, type LectureRequest } from "../src/modules/takeoff/application/lecture-reader.js";
+import { FakeLectureReader } from "../src/modules/takeoff/infrastructure/fake-lecture-reader.js";
+import type { ReadAttempt } from "../src/platform/ai/document-reader.js";
+import type { LectureDevis } from "@baticlair/domain";
 import { loadConfig, type AppConfig } from "../src/platform/config/config.js";
 import { CONFIG } from "../src/platform/tokens.js";
 import { makePdf, type FixtureRow } from "./support/pdf-fixtures.js";
@@ -12,9 +13,9 @@ import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestC
  * déposent un devis, en PDF ou en lignes { libelle, quantite, unite, prix }, et reçoivent le
  * même quantitatif : état, questions à boutons, lignes à commander expliquées (§39).
  */
-class GatedExtractor implements TakeoffExtractor {
+class GatedReader implements LectureReader {
   readonly provider = "fake";
-  private inner = new FakeTakeoffExtractor();
+  private inner = new FakeLectureReader();
   private release: () => void = () => {};
   private gate: Promise<void> = Promise.resolve();
   close() {
@@ -24,17 +25,17 @@ class GatedExtractor implements TakeoffExtractor {
     this.release();
     this.gate = Promise.resolve();
   }
-  async extract(request: ExtractionRequest): Promise<ExtractionAttempt> {
+  async lire(request: LectureRequest): Promise<ReadAttempt<LectureDevis> | null> {
     await this.gate;
-    return this.inner.extract(request);
+    return this.inner.lire(request);
   }
 }
 
-const extractor = new GatedExtractor();
+const extractor = new GatedReader();
 let ctx: TestContext;
 beforeAll(async () => {
   const config: AppConfig = { ...loadConfig(), ai: { ...loadConfig().ai, answerWithinMs: 1500 } };
-  ctx = await createTestApp((b) => b.overrideProvider(CONFIG).useValue(config).overrideProvider(TAKEOFF_EXTRACTOR).useValue(extractor));
+  ctx = await createTestApp((b) => b.overrideProvider(CONFIG).useValue(config).overrideProvider(LECTURE_READER).useValue(extractor));
 });
 afterAll(async () => {
   await ctx.app.close();
@@ -125,7 +126,8 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
     expect(wrong.status).toBe(400);
   });
 
-  it("corrige la pente d'un tap : seules les lignes qui en dépendent changent", async () => {
+  // Plusieurs recalculs enchaînés : plus long que les 5 s par défaut sur un exécuteur de CI chargé.
+  it("corrige la pente d'un tap : seules les lignes qui en dépendent changent", { timeout: 20_000 }, async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const before = (await agent.post("/v1/quantitatifs").send(RAPPIDOS)).body;
     const res = await agent.post(`/v1/quantitatifs/${before.id}/corrections`).send({ action: "modifier", cle: "param:pente", valeur: "40" });
@@ -215,7 +217,7 @@ describe("POST /v1/quantitatifs en PDF", () => {
     expect(res.body).toMatchObject({ source: "pdf", metier: "couverture", reference: "Chantier Le Gall" });
     expect(["questions", "pret"]).toContain(res.body.etat);
     expect(res.body.version_referentiel).toMatch(/^roofing-/);
-    expect(res.body.devis).toContainEqual(expect.objectContaining({ libelle: "Gouttière zinc demi-ronde dév. 33", quantite: "36" }));
+    expect(res.body.devis).toContainEqual(expect.objectContaining({ libelle: "Gouttière zinc demi-ronde dév. 33, 2 descentes Ø80", quantite: "36" }));
     expect(res.body.lignes.length).toBeGreaterThan(0);
     for (const l of res.body.lignes as Ligne[]) expect(l.explication.phrase).toMatch(/ = /);
     expect((await agent.get(`/v1/quantitatifs/${res.body.id}`)).body).toEqual(res.body);

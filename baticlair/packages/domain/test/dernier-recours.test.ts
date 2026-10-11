@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { computeWorkItem, ROOFING_REFERENTIAL, type WorkItemInput } from "../src/index.js";
-import { REAL_QUOTES } from "./devis-reels/index.js";
+import { D2026_015_LINES } from "./devis-reels/d2026-015.js";
+
+/** Le banc des devis réels : D-2026-015 (tuiles HP10 confirmées, faîtières ventilées refusées : « aucun de ces modèles »). */
+const REAL_QUOTES = [{ id: "D-2026-015", lines: D2026_015_LINES, answers: { "product:tuile": "edilians-hp10-huguenot", "product:faitiere": null } as Record<string, string | null> }];
 import { readQuote } from "./support/read-quote.js";
 
 /**

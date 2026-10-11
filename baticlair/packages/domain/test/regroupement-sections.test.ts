@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { groupIdenticalLines, isPlaceTitle, keyCharacteristics, tradeProfile, validateTakeoff, type GroupableLine } from "../src/index.js";
+import { groupIdenticalLines, isPlaceTitle, keyCharacteristics, type GroupableLine } from "../src/index.js";
 
 /**
  * Regroupement des articles identiques avant l'envoi fournisseur, et
@@ -70,19 +70,6 @@ describe("regroupement avant envoi", () => {
   it("des références différentes restent deux articles", () => {
     const g = groupIdenticalLines([L("Receveur 120x80", "1", "u", [], { reference: "A12" }), L("Receveur 120x80", "1", "u", [], { reference: "B7" })]);
     expect(g).toHaveLength(2);
-  });
-});
-
-describe("doublons dans le quantitatif : même règle de section", () => {
-  it("la même plus-value sous deux ouvrages n'est ni un doublon ni à additionner", () => {
-    const v = validateTakeoff(
-      [
-        { id: "a", designation: "Plus-value plaque hydrofuge", quantityRaw: "20", unitRaw: "m²", section: ["Cloison 72/48"] },
-        { id: "b", designation: "Plus-value plaque hydrofuge", quantityRaw: "12", unitRaw: "m²", section: ["Doublage collé"] },
-      ],
-      tradeProfile("drywall"),
-    );
-    expect(v.issues.filter((i) => i.code === "DUPLICATE_LINE")).toEqual([]);
   });
 });
 

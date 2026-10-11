@@ -30,8 +30,9 @@ const label = (v: V, r: ReturnType<typeof rows>[number]) =>
 describe("la liste des fournitures, une couleur par ligne", () => {
   it("groupes dans l'ordre : ouvrage principal, points singuliers, évacuation, autres (consommables : seulement s'ils sont écrits)", () => {
     const v = readQuote(TEST);
-    expect(v.screen.groups.map((g) => g.kind)).toEqual(["principal", "singulier", "evacuation", "autres"]);
-    expect(v.screen.groups[0]).toMatchObject({ label: "Couverture zinc à joint debout", measure: "91 m²" });
+    // §51.5 : un seul écran de fournitures, dans l'ordre du devis.
+    expect(v.screen.groups.map((g) => g.kind)).toEqual(["autres"]);
+    expect(v.screen.groups[0]).toMatchObject({ label: "Fournitures" });
   });
 
   it("à l'ouverture : chaque question est une ligne orange de son ouvrage, avec sa décision ; le compte en haut", () => {
@@ -44,26 +45,23 @@ describe("la liste des fournitures, une couleur par ligne", () => {
     expect(check.map((r) => [label(v, r), r.decisionKey])).toEqual([
       ["Couverture zinc à joint debout gris", "engine:param:faconnage@couverture-zinc-joint-debout"],
       ["Bande zinc d'égout", "engine:param:faconnage@bandes-zinc"],
-      ["Gouttière zinc demi-ronde dév. ?", "engine:param:developpe_gouttiere"],
-      ["Naissances zinc demi-ronde", "engine:param:nb_descentes"],
-      ["Jouées de lucarnes", "group:unknown"],
+      ["Gouttière zinc demi-ronde", "engine:param:developpe_gouttiere"],
+      ["Naissances", "engine:param:nb_descentes"],
     ]);
     // Chaque ligne orange ouvre une vraie question de l'écran.
     for (const r of check) expect(v.questions.map((d) => d.key)).toContain(r.decisionKey);
-    expect(v.screen).toMatchObject({ total: rows(v).length, toCheck: 5 });
+    expect(v.screen).toMatchObject({ total: rows(v).length, toCheck: 4 });
   });
 
   it("une réponse fait passer ses lignes au vert ; la question suivante d'un ouvrage (le développé) vient après", () => {
     // Je façonne, 13 ml : des feuilles 2 × 1 m estimées d'après le développé (§48.6), qui vient alors.
     const apres = readQuote(TEST, { "param:faconnage": u("1") });
     expect(rows(apres).filter((r) => r.status === "check").map((r) => [label(apres, r), r.decisionKey])).toEqual([
-      ["Bande zinc d'égout", "engine:param:developpe"],
-      ["Gouttière zinc demi-ronde dév. ?", "engine:param:developpe_gouttiere"],
-      ["Naissances zinc demi-ronde", "engine:param:nb_descentes"],
-      ["Jouées de lucarnes", "group:unknown"],
+      ["Gouttière zinc demi-ronde", "engine:param:developpe_gouttiere"],
+      ["Naissances", "engine:param:nb_descentes"],
     ]);
     const tout = readQuote(TEST, TOUT);
-    expect(rows(tout).filter((r) => r.status === "check").map((r) => label(tout, r))).toEqual(["Jouées de lucarnes"]);
+    expect(rows(tout).filter((r) => r.status === "check").map((r) => label(tout, r))).toEqual([]);
     expect(rows(tout).filter((r) => r.status === "ok").map((r) => label(tout, r))).toContain("Bobine Quartz-Zinc 0,65 mm, largeur 500 mm");
   });
 

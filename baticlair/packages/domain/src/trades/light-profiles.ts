@@ -1,4 +1,4 @@
-import { COMMON_BOILERPLATE, COMMON_LABOR, COMMON_SUPPLY } from "./common.js";
+import { COMMON_BOILERPLATE } from "./common.js";
 import type { MaterialFamily, TradeProfile } from "./trade-profile.js";
 
 /**
@@ -8,14 +8,10 @@ import type { MaterialFamily, TradeProfile } from "./trade-profile.js";
  * règles s'ajoutent famille par famille, comme pour la couverture.
  * L'ordre compte : les familles précises avant les générales.
  */
-function light(id: string, label: string, families: MaterialFamily[], extraLabor: string[] = []): TradeProfile {
+function light(id: string, label: string, families: MaterialFamily[], _extraLabor: string[] = []): TradeProfile {
   return {
     id,
     label,
-    families,
-    laborKeywords: [...COMMON_LABOR, ...extraLabor],
-    supplyKeywords: COMMON_SUPPLY,
-    companionRules: [],
     boilerplateMarkers: COMMON_BOILERPLATE,
     materialKeywords: families.flatMap((f) => f.keywords),
   };

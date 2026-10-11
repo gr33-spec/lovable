@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { TAKEOFF_EXTRACTOR, type ExtractionAttempt, type ExtractionOutput, type ExtractionRequest, type TakeoffExtractor } from "../src/modules/takeoff/application/takeoff-extractor.js";
-import { FakeTakeoffExtractor } from "../src/modules/takeoff/infrastructure/fake-takeoff-extractor.js";
+import { LECTURE_READER, type LectureReader, type LectureRequest } from "../src/modules/takeoff/application/lecture-reader.js";
+import { FakeLectureReader } from "../src/modules/takeoff/infrastructure/fake-lecture-reader.js";
+import type { ReadAttempt } from "../src/platform/ai/document-reader.js";
+import type { LectureDevis } from "@baticlair/domain";
 import { makePdf } from "./support/pdf-fixtures.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
@@ -9,45 +11,49 @@ import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } fro
  * fourniture, jamais la phrase du devis ». La lecture rend la prestation et la fourniture qu'elle contient ; ce qui est
  * enregistré, c'est la fourniture. Une ligne sans fourniture (heures, forfait, accès, évacuation) est repliée à part.
  */
-const line = (designation: string, quantity: string, unit: string, reading: NonNullable<ExtractionOutput["lines"][number]["reading"]>): ExtractionOutput["lines"][number] => ({
-  designation,
-  quantity,
-  unit,
-  reference: null,
-  sourceRefs: [],
-  sourcePages: [1],
-  doubt: null,
-  section: [],
-  reading,
-});
-const REPARATION: ExtractionOutput["lines"] = [
-  line("Accès toiture et mise en sécurité (échelle, harnais, protections)", "1", "fft", { role: "hors_quantitatif", articles: [], faconnage: null, manque: [] }),
-  line("Remplacement unitaire d'une tuile cassée, comprenant accès toit, dépose de la tuile cassée et pose de la tuile neuve – Tuile terre cuite mécanique", "20", "u", {
-    role: "fourniture_et_pose",
-    articles: [{ nom: "Tuile terre cuite mécanique", materiau: null, quantite: "20", unite: "u", elements: null }],
-    faconnage: null,
-    manque: ["modèle et teinte de tuile"],
-  }),
-  line("Repositionnement des tuiles", "1,5", "h", { role: "pose", articles: [], faconnage: null, manque: [] }),
-  line("Reprise de l'élément de rive, y compris les petites fournitures de fixation", "1", "fft", {
-    role: "fourniture_et_pose",
-    articles: [{ nom: "Fixations pour l'élément de rive", materiau: null, quantite: "1", unite: "jeu", elements: null }],
-    faconnage: null,
-    manque: ["type d'élément de rive (tuile de rive, bande zinc)"],
-  }),
-  line("Évacuation des déchets et nettoyage de fin de chantier", "1", "fft", { role: "hors_quantitatif", articles: [], faconnage: null, manque: [] }),
-];
-class Reparation implements TakeoffExtractor {
+const sans = (ref: string, designation: string, quantite: string, unite: string, role: "hors_quantitatif" | "pose"): LectureDevis["lignes"][number] => ({ ref, designation, quantite, unite, role, fournitures: [] });
+/** La lecture du modèle sur le devis de réparation D.2026.105 (§49.9, §51.5) : la fourniture de chaque prestation, ses questions. */
+const REPARATION: LectureDevis = {
+  fiche: { donnees: [] },
+  bref: [],
+  questions: [
+    { cle: "modele_teinte_tuile", texte: "Modèle et teinte de la tuile ?", boutons: [], unite: null, donnee: "modèle et teinte de tuile", ligne: "2" },
+    { cle: "type_element_de_rive", texte: "Type d'élément de rive ?", boutons: [{ label: "tuile de rive", valeur: "tuile de rive" }, { label: "bande zinc", valeur: "bande zinc" }], unite: null, donnee: "type d'élément de rive", ligne: "4" },
+  ],
+  lignes: [
+    sans("1", "Accès toiture et mise en sécurité (échelle, harnais, protections)", "1", "fft", "hors_quantitatif"),
+    {
+      ref: "2",
+      designation: "Remplacement unitaire d'une tuile cassée, comprenant accès toit, dépose de la tuile cassée et pose de la tuile neuve – Tuile terre cuite mécanique",
+      quantite: "20",
+      unite: "u",
+      role: "fourniture_et_pose",
+      fournitures: [{ nom: "Tuile terre cuite mécanique", quantite: "20", unite: "u", ouvrage: null, emplacement: null, donnees: {}, attend: ["modele_teinte_tuile"], aPreciser: [], precision: null }],
+    },
+    sans("3", "Repositionnement des tuiles", "1,5", "h", "pose"),
+    {
+      ref: "4",
+      designation: "Reprise de l'élément de rive, y compris les petites fournitures de fixation",
+      quantite: "1",
+      unite: "fft",
+      role: "fourniture_et_pose",
+      fournitures: [{ nom: "Fixations pour l'élément de rive", quantite: "1", unite: "jeu", ouvrage: null, emplacement: null, donnees: {}, attend: ["type_element_de_rive"], aPreciser: [], precision: null }],
+    },
+    sans("5", "Évacuation des déchets et nettoyage de fin de chantier", "1", "fft", "hors_quantitatif"),
+  ],
+  contexte: null,
+  notes: [],
+};
+class Reparation implements LectureReader {
   readonly provider = "fake";
-  private inner = new FakeTakeoffExtractor();
-  async extract(request: ExtractionRequest): Promise<ExtractionAttempt> {
-    const r = await this.inner.extract(request);
-    return r.output ? { ...r, output: { ...r.output, lines: REPARATION } } : r;
+  async lire(request: LectureRequest): Promise<ReadAttempt<LectureDevis> | null> {
+    const r = await new FakeLectureReader().lire(request);
+    return r ? { ...r, output: structuredClone(REPARATION) } : r;
   }
 }
 let ctx: TestContext;
 beforeAll(async () => {
-  ctx = await createTestApp((b) => b.overrideProvider(TAKEOFF_EXTRACTOR).useValue(new Reparation()));
+  ctx = await createTestApp((b) => b.overrideProvider(LECTURE_READER).useValue(new Reparation()));
 });
 afterAll(async () => {
   await ctx.app.close();

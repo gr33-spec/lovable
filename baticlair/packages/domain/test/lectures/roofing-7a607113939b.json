@@ -1,0 +1,251 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Bande de solin zinc naturel dév. 25",
+   "quantity": "5",
+   "unit": "ml"
+  },
+  {
+   "ref": "2",
+   "designation": "Bande de ventilation en Z en zinc quartz",
+   "quantity": "13",
+   "unit": "m"
+  },
+  {
+   "ref": "3",
+   "designation": "Bande de rive zinc dév. 33",
+   "quantity": "14",
+   "unit": "ml"
+  },
+  {
+   "ref": "4",
+   "designation": "Faîtage zinc dév. 33",
+   "quantity": "8",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "faconnage",
+    "texte": "Faîtage en bande zinc : tu façonnes toi-même ou tu commandes façonné ?",
+    "boutons": [
+     {
+      "label": "Je façonne (feuilles ou bobineau)",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "façonnage",
+    "ligne": "4"
+   },
+   {
+    "cle": "consommables",
+    "texte": "Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?",
+    "boutons": [
+     {
+      "label": "Oui",
+      "valeur": "1"
+     },
+     {
+      "label": "Non",
+      "valeur": "0"
+     }
+    ],
+    "unite": "u",
+    "donnee": "consommables",
+    "ligne": null
+   },
+   {
+    "cle": "faconnage",
+    "texte": "Bande de solin zinc naturel dév. 25 : tu façonnes toi-même ou tu commandes façonné ?",
+    "boutons": [
+     {
+      "label": "Je façonne (feuilles ou bobineau)",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "façonnage",
+    "ligne": "1"
+   },
+   {
+    "cle": "faconnage",
+    "texte": "Bande de ventilation en Z en zinc quartz : tu façonnes toi-même ou tu commandes façonné ?",
+    "boutons": [
+     {
+      "label": "Je façonne (feuilles ou bobineau)",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "façonnage",
+    "ligne": "2"
+   },
+   {
+    "cle": "faconnage",
+    "texte": "Bande de rive zinc dév. 33 : tu façonnes toi-même ou tu commandes façonné ?",
+    "boutons": [
+     {
+      "label": "Je façonne (feuilles ou bobineau)",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "façonnage",
+    "ligne": "3"
+   },
+   {
+    "cle": "developpe",
+    "texte": "Bande de ventilation en Z en zinc quartz : développé de la bande zinc ?",
+    "boutons": [
+     {
+      "label": "100 mm (solin, couvre-joint)",
+      "valeur": "100"
+     },
+     {
+      "label": "200 mm",
+      "valeur": "200"
+     },
+     {
+      "label": "250 mm",
+      "valeur": "250"
+     },
+     {
+      "label": "330 mm",
+      "valeur": "330"
+     },
+     {
+      "label": "400 mm",
+      "valeur": "400"
+     }
+    ],
+    "unite": "mm",
+    "donnee": "développé de la bande",
+    "ligne": "2"
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Bande de solin zinc naturel dév. 25",
+    "quantite": "5",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Bande de solin zinc naturel dév. 25",
+      "quantite": "5",
+      "unite": "ml",
+      "ouvrage": "bandes-zinc",
+      "emplacement": "bande",
+      "donnees": {
+       "developpe": "250 mm",
+       "aspect_zinc": "1"
+      },
+      "attend": [
+       "faconnage"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Bande de ventilation en Z en zinc quartz",
+    "quantite": "13",
+    "unite": "m",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Bande de ventilation en Z en zinc quartz",
+      "quantite": "13",
+      "unite": "m",
+      "ouvrage": "bandes-zinc",
+      "emplacement": "bande",
+      "donnees": {
+       "aspect_zinc": "2"
+      },
+      "attend": [
+       "faconnage"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "3",
+    "designation": "Bande de rive zinc dév. 33",
+    "quantite": "14",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Bande de rive zinc dév. 33",
+      "quantite": "14",
+      "unite": "ml",
+      "ouvrage": "bandes-zinc",
+      "emplacement": "bande",
+      "donnees": {
+       "developpe": "330 mm"
+      },
+      "attend": [
+       "faconnage"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "4",
+    "designation": "Faîtage zinc dév. 33",
+    "quantite": "8",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Faîtage en bande zinc",
+      "quantite": "8",
+      "unite": "ml",
+      "ouvrage": "faitage-zinc",
+      "emplacement": "bande",
+      "donnees": {
+       "developpe": "330 mm"
+      },
+      "attend": [
+       "faconnage"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

@@ -295,7 +295,13 @@ export class PriceRequestsService {
       ...(section.length > 0 ? { section } : {}),
       ...(mergedFrom > 1 ? { mergedFrom } : {}),
     }));
-    const lines: RequestedLine[] = [...computed, ...grouped, ...toQuote];
+    // §49.1 : la demande suit l'ordre du devis, article calculé ou ligne reprise telle quelle (la gouttière d'office à sa ligne).
+    const position = (l: RequestedLine) => {
+      const item = purchase.toBuy.find((b) => (b.kind === "computed" ? b.label === l.designation || `${b.label} (${b.order?.unit ?? ""})` === l.designation : takeoff.lines.some((t) => b.lineIds.includes(t.id) && t.designation === l.designation)));
+      const at = (item?.lineIds ?? []).map((id) => takeoff.lines.findIndex((t) => t.id === id)).filter((x) => x >= 0);
+      return at.length > 0 ? Math.min(...at) : Number.MAX_SAFE_INTEGER;
+    };
+    const lines: RequestedLine[] = [...[...computed, ...grouped].map((l, i) => ({ l, i, at: position(l) })).sort((a, b) => a.at - b.at || a.i - b.i).map((x) => x.l), ...toQuote];
     if (lines.length === 0) throw validationFailed("Nothing to order", { reason: "no_material" });
     // §43 : les trois blocs, figés avec la demande (le mail et le PDF en sont deux rendus).
     const sender = await this.requests.sender(tenant, projectId);

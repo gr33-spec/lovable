@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { applyLineRoles, artisanView, checkReferential, computeWithAnswers, planQuote, PLATRERIE_REFERENTIAL, proposeLineRoles, purchaseView, slotsGivenByQuote, tradeProfile, validateTakeoff, type EngineAnswer, type LineRole, type Referential } from "../src/index.js";
+import { checkReferential, computeWithAnswers, ecranDeLecture, PLATRERIE_REFERENTIAL, slotsGivenByQuote, type EngineAnswer, type Referential } from "../src/index.js";
+import { lectureSimple, QUESTION_CONSOMMABLES } from "./support/plan-of.js";
 
 /**
  * PLÂTRERIE MINIMALE (plan v3 §4.4) : une cloison 72/48 calculée par le MÊME moteur que la couverture, sans qu'une
@@ -9,15 +10,11 @@ import { applyLineRoles, artisanView, checkReferential, computeWithAnswers, plan
 const LINES = [{ ref: "c1", designation: "Cloison 72/48 BA13 sur ossature métallique", quantity: "20", unit: "m²" }];
 
 function read(acceptDraft: boolean, ref: Referential = PLATRERIE_REFERENTIAL, answers: Record<string, EngineAnswer> = {}) {
-  const profile = tradeProfile("drywall");
-  const raw = validateTakeoff(LINES.map((l) => ({ id: l.ref, designation: l.designation, quantityRaw: l.quantity, unitRaw: l.unit, source: "client_quote" as const })), profile);
-  const plan = planQuote(LINES, ref, profile);
-  const proposals = proposeLineRoles(LINES, plan, raw, ref);
-  const roles = new Map<string, LineRole>([...proposals].map(([k, v]) => [k, v.role]));
-  const validation = applyLineRoles(raw, roles);
-  const engine = computeWithAnswers(ref, plan, answers, {}, { acceptDraft }, slotsGivenByQuote(plan, validation));
-  const view = artisanView(LINES.map((l) => ({ id: l.ref, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: false, enteredByArtisan: false })), validation, engine, { plan, roles, ref, asks: new Map() });
-  return { plan, engine, purchase: purchaseView(view, engine, { plan, roles, ref, validation }) };
+  // La lecture du modèle : la ligne est la cloison (ouvrage « cloison-72-48 », emplacement « cloison »), 20 m² qui la mesurent.
+  const lecture = lectureSimple(LINES.map((l) => ({ ...l, ouvrage: "cloison-72-48", emplacement: "cloison" })), [QUESTION_CONSOMMABLES]);
+  const e = ecranDeLecture({ ref, lecture, answers, options: { acceptDraft }, interdits: false });
+  const engine = computeWithAnswers(ref, e.plan, answers, {}, { acceptDraft }, slotsGivenByQuote(e.plan, e.validation));
+  return { plan: e.plan, engine, purchase: e.purchase };
 }
 
 describe("référentiel plâtrerie : cohérent et chargé comme la couverture", () => {

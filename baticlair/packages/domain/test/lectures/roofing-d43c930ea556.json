@@ -1,0 +1,76 @@
+{
+ "devis": [
+  {
+   "ref": "01a12a11-6f9d-7238-88bd-be0524bd4e15",
+   "designation": "Couverture en ardoises naturelles 30x22 posées au crochet, pente 40°",
+   "quantity": "120",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "pente",
+    "texte": "Pente du toit : 40° (devis : « pente »), ou 30° (en-tête du devis : « Pente : 30° ») ?",
+    "boutons": [
+     {
+      "label": "40° (devis : « pente »)",
+      "valeur": "40"
+     },
+     {
+      "label": "30° (en-tête du devis : « Pente : 30° »)",
+      "valeur": "30"
+     }
+    ],
+    "unite": "°",
+    "donnee": "pente du toit",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "01a12a11-6f9d-7238-88bd-be0524bd4e15",
+    "designation": "Couverture en ardoises naturelles 30x22 posées au crochet, pente 40°",
+    "quantite": "120",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Couverture en ardoises au crochet",
+      "quantite": "120",
+      "unite": "m²",
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "ardoise",
+      "donnees": {
+       "produit": "ardoise-30x22"
+      },
+      "attend": [
+       "pente"
+      ],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Crochets d'ardoise",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "crochet",
+      "donnees": {},
+      "attend": [
+       "pente"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

@@ -1,0 +1,44 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Couverture en ardoises fibres-ciment 40x24 bleu-noir",
+   "quantity": "100",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Couverture en ardoises fibres-ciment 40x24 bleu-noir",
+    "quantite": "100",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ardoises fibres-ciment bleu-noir 40×24",
+      "quantite": "100",
+      "unite": "m²",
+      "ouvrage": "couverture-ardoises-fibres-ciment",
+      "emplacement": "ardoise",
+      "donnees": {
+       "teinte_fc": "1",
+       "produit": "ardoise-fc-40x24"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

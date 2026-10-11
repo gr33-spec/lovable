@@ -63,8 +63,10 @@ describe("lecture des devis fournisseurs (IA simulée)", () => {
     const res = await agent.post(`/v1/price-request-recipients/${ra}/analysis`);
     expect(res.status).toBe(201);
     expect(res.body.lines).toHaveLength(6);
-    expect(res.body.lines[0]).toMatchObject({ reference: "TUI-RC12", unitPrice: "1.12", lineTotal: "1400", amount: "1400.00", requestLine: 1, matchConfidence: "sure" });
-    expect(res.body).toMatchObject({ requestedCount: 6, answeredCount: 6, computedTotalHT: "2805.30", arithmetic: { status: "consistent" } });
+    // §51.5 : la demande reprend les désignations du devis sans référence d'article : la correspondance se fait au nom (« probable »).
+    expect(res.body.lines[0]).toMatchObject({ reference: "TUI-RC12", unitPrice: "1.12", lineTotal: "1400", amount: "1400.00", requestLine: 1, matchConfidence: "probable" });
+    // Sept lignes demandées (les naissances de la gouttière à 2 descentes en plus du devis), six chiffrées.
+    expect(res.body).toMatchObject({ requestedCount: 7, answeredCount: 6, computedTotalHT: "2805.30", arithmetic: { status: "consistent" } });
     expect(res.body.printed.totalHT).toBe("2805.30");
 
     // Relire le même devis ne coûte rien de plus.
@@ -105,9 +107,10 @@ describe("lecture des devis fournisseurs (IA simulée)", () => {
 
     const cmp = (await agent.get(`/v1/price-requests/${requestId}/comparison`)).body;
     const [sa, sb] = cmp.suppliers;
-    expect(sa).toMatchObject({ supplierId: supplierA, name: "Point.P", missingCount: 0, comparability: "complete", comparableTotalHT: "2805.30" });
+    // Les naissances (calculées, §49.1 point 3) ne sont chiffrées par personne : manquantes partout, sans estimation possible.
+    expect(sa).toMatchObject({ supplierId: supplierA, name: "Point.P", missingCount: 1, comparability: "complete", comparableTotalHT: "2805.30" });
     // Gouttière absente chez le second : estimée au prix de l'autre, jamais comptée à zéro.
-    expect(sb).toMatchObject({ supplierId: supplierB, missingCount: 1, feesHT: "60.00", comparability: "estimated", estimatedPartHT: "511.20" });
+    expect(sb).toMatchObject({ supplierId: supplierB, missingCount: 2, feesHT: "60.00", comparability: "estimated", estimatedPartHT: "511.20" });
     expect(sb.comparableTotalHT).toBe("2724.40");
     const tuile = cmp.items[0];
     expect(tuile).toMatchObject({ index: 1, designation: "Tuile romane canal rouge 12,5 u/m²", lowestSupplierId: supplierB });
@@ -119,7 +122,7 @@ describe("lecture des devis fournisseurs (IA simulée)", () => {
     const edited = await agent.patch(`/v1/offer-lines/${tuileB.id}`).send({ requestLine: null });
     expect(edited.body.lines[0]).toMatchObject({ requestLine: null, matchConfirmed: true, edited: true });
     const after = (await agent.get(`/v1/price-requests/${requestId}/comparison`)).body;
-    expect(after.suppliers[1].missingCount).toBe(2);
+    expect(after.suppliers[1].missingCount).toBe(3);
     expect((await agent.patch(`/v1/offer-lines/${tuileB.id}`).send({ requestLine: 99 })).status).toBe(400);
 
     const list = (await agent.get(`/v1/price-requests/${requestId}/offers`)).body;

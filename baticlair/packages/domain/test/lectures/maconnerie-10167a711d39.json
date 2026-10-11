@@ -1,0 +1,204 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Mur porteur en parpaings, garage",
+   "quantity": "48",
+   "unit": "m²"
+  },
+  {
+   "ref": "2",
+   "designation": "Mur en brique Porotherm R20",
+   "quantity": "30",
+   "unit": "m²"
+  },
+  {
+   "ref": "3",
+   "designation": "Dallage béton 12 cm sur hérisson, treillis ST25C",
+   "quantity": "40",
+   "unit": "m²"
+  },
+  {
+   "ref": "4",
+   "designation": "Chape ciment 5 cm",
+   "quantity": "35",
+   "unit": "m²"
+  },
+  {
+   "ref": "5",
+   "designation": "Enduit monocouche gratté",
+   "quantity": "60",
+   "unit": "m²"
+  },
+  {
+   "ref": "6",
+   "designation": "Semelle filante 50x25",
+   "quantity": "28",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "produit_bloc",
+    "texte": "Parpaings de 20, de 15 ou de 10 ?",
+    "boutons": [
+     {
+      "label": "Blocs béton creux de 20 (50×20)",
+      "valeur": "bloc-creux-20"
+     },
+     {
+      "label": "Blocs béton creux de 15 (50×20)",
+      "valeur": "bloc-creux-15"
+     },
+     {
+      "label": "Blocs béton creux de 10 (50×20)",
+      "valeur": "bloc-creux-10"
+     }
+    ],
+    "unite": null,
+    "donnee": "modèle : bloc",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Mur porteur en parpaings, garage",
+    "quantite": "48",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Mur porteur en parpaings, garage",
+      "quantite": "48",
+      "unite": "m²",
+      "ouvrage": "mur-blocs",
+      "emplacement": "mur",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Blocs béton creux de 20 (50×20)",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "mur-blocs",
+      "emplacement": "bloc",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Mur en brique Porotherm R20",
+    "quantite": "30",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Mur en brique Porotherm R20",
+      "quantite": "30",
+      "unite": "m²",
+      "ouvrage": "mur-brique",
+      "emplacement": "mur",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "3",
+    "designation": "Dallage béton 12 cm sur hérisson, treillis ST25C",
+    "quantite": "40",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Dallage béton 12 cm sur hérisson, treillis ST25C",
+      "quantite": "40",
+      "unite": "m²",
+      "ouvrage": "dallage",
+      "emplacement": "dalle",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "4",
+    "designation": "Chape ciment 5 cm",
+    "quantite": "35",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Chape ciment 5 cm",
+      "quantite": "35",
+      "unite": "m²",
+      "ouvrage": "chape",
+      "emplacement": "chape_sol",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "5",
+    "designation": "Enduit monocouche gratté",
+    "quantite": "60",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Enduit monocouche gratté",
+      "quantite": "60",
+      "unite": "m²",
+      "ouvrage": "enduit-facade",
+      "emplacement": "facade",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "6",
+    "designation": "Semelle filante 50x25",
+    "quantite": "28",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Semelle filante 50x25",
+      "quantite": "28",
+      "unite": "ml",
+      "ouvrage": "semelle-filante",
+      "emplacement": "semelle",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

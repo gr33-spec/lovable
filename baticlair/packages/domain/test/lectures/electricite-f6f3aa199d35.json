@@ -1,0 +1,145 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Prise de courant 16A 2P+T",
+   "quantity": "18",
+   "unit": "u"
+  },
+  {
+   "ref": "2",
+   "designation": "Point lumineux simple allumage",
+   "quantity": "9",
+   "unit": "u"
+  },
+  {
+   "ref": "3",
+   "designation": "Point lumineux va-et-vient",
+   "quantity": "3",
+   "unit": "u"
+  },
+  {
+   "ref": "4",
+   "designation": "Tableau électrique 3 rangées",
+   "quantity": "1",
+   "unit": "u"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "gamme",
+    "texte": "Appareillage : quelle gamme (Céliane, Odace, Dooxie…) ?",
+    "boutons": [
+     {
+      "label": "Legrand Dooxie",
+      "valeur": "1"
+     },
+     {
+      "label": "Legrand Céliane",
+      "valeur": "2"
+     },
+     {
+      "label": "Schneider Odace",
+      "valeur": "3"
+     }
+    ],
+    "unite": "u",
+    "donnee": "gamme d'appareillage",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Prise de courant 16A 2P+T",
+    "quantite": "18",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Prise de courant 16A 2P+T",
+      "quantite": "18",
+      "unite": "u",
+      "ouvrage": "prises",
+      "emplacement": "prises",
+      "donnees": {},
+      "attend": [
+       "gamme"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Point lumineux simple allumage",
+    "quantite": "9",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Point lumineux simple allumage",
+      "quantite": "9",
+      "unite": "u",
+      "ouvrage": "points-lumineux",
+      "emplacement": "points",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "3",
+    "designation": "Point lumineux va-et-vient",
+    "quantite": "3",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Point lumineux va-et-vient",
+      "quantite": "3",
+      "unite": "u",
+      "ouvrage": "points-lumineux",
+      "emplacement": "points",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "4",
+    "designation": "Tableau électrique 3 rangées",
+    "quantite": "1",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Tableau électrique 3 rangées",
+      "quantite": "1",
+      "unite": "u",
+      "ouvrage": "tableau",
+      "emplacement": "tableaux",
+      "donnees": {
+       "rangees": "3"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

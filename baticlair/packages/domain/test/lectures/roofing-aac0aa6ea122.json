@@ -1,0 +1,112 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Gouttière aluminium laqué anthracite, 2 angles",
+   "quantity": "11",
+   "unit": "ml"
+  },
+  {
+   "ref": "2",
+   "designation": "Descente alu Ø80, hauteur 5 m",
+   "quantity": "1",
+   "unit": "u"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": [
+    {
+     "cle": "nb_descentes",
+     "libelle": "Nombre de descentes",
+     "valeur": "1",
+     "origine": "devis",
+     "preuve": "Devis, 2"
+    }
+   ]
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "developpe_gouttiere",
+    "texte": "Gouttière de 25, de 28, de 33 ou de 40 ?",
+    "boutons": [
+     {
+      "label": "De 25",
+      "valeur": "25"
+     },
+     {
+      "label": "De 28",
+      "valeur": "28"
+     },
+     {
+      "label": "De 33",
+      "valeur": "33"
+     },
+     {
+      "label": "De 40",
+      "valeur": "40"
+     }
+    ],
+    "unite": "cm",
+    "donnee": "développé de la gouttière",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Gouttière aluminium laqué anthracite, 2 angles",
+    "quantite": "11",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Gouttière alu anthracite",
+      "quantite": "11",
+      "unite": "ml",
+      "ouvrage": "gouttiere-pvc-alu",
+      "emplacement": "profil",
+      "donnees": {
+       "nb_descentes": "1",
+       "matiere_gouttiere": "2",
+       "teinte_gouttiere": "5",
+       "nb_angles": "2",
+       "diametre_descente": "80 mm"
+      },
+      "attend": [
+       "developpe_gouttiere"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Descente alu Ø80, hauteur 5 m",
+    "quantite": "1",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Tubes de descente alu Ø80",
+      "quantite": "1",
+      "unite": "u",
+      "ouvrage": "descente",
+      "emplacement": "tube",
+      "donnees": {
+       "diametre_descente": "80 mm",
+       "hauteur_descente": "5 m"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

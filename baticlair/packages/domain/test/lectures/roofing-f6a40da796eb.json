@@ -1,0 +1,84 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Couverture en ardoises naturelles 30x22 posées au crochet, pente 40°",
+   "quantity": "200",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": [
+    {
+     "cle": "pente",
+     "libelle": "Pente du toit",
+     "valeur": "40°",
+     "origine": "devis",
+     "preuve": "Devis, 1 (« pente »)"
+    }
+   ]
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "qualite_ardoise",
+    "texte": "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+    "boutons": [
+     {
+      "label": "Espagne 1er choix",
+      "valeur": "1"
+     },
+     {
+      "label": "Ardoise NF (type Cupa)",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "qualité de l'ardoise",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Couverture en ardoises naturelles 30x22 posées au crochet, pente 40°",
+    "quantite": "200",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ardoises naturelles 30×22",
+      "quantite": "200",
+      "unite": "m²",
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "ardoise",
+      "donnees": {
+       "produit": "ardoise-30x22"
+      },
+      "attend": [
+       "qualite_ardoise"
+      ],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Crochets d'ardoise inox standard",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "crochet",
+      "donnees": {},
+      "attend": [
+       "qualite_ardoise"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}
