@@ -94,17 +94,6 @@ async function openRow(row: Locator) {
   return row.getByRole("group", { name: /^Régler : / });
 }
 
-/** La carte orange d'une ligne, dans la liste (§49.8 : tout se règle là). */
-async function orangeCard(page: Page, label: string) {
-  await openList(page);
-  const list = page.getByRole("region", { name: "Liste des fournitures" });
-  const row = list.getByRole("listitem").filter({ has: page.getByRole("button", { name: `Modifier : ${label}`, exact: true }).or(page.getByRole("button", { name: `Fermer : ${label}`, exact: true })) }).first();
-  await openRow(row);
-  const card = list.getByRole("group", { name: `Régler : ${label}`, exact: true });
-  await expect(card).toBeVisible();
-  return card;
-}
-
 /**
  * Un chantier déjà nommé (client, adresse) : créé par la porte de l'API, comme le ferait un partenaire. Dans l'app,
  * « Nouveau chantier » n'a plus qu'une action, déposer le PDF (§48) : le test « depuis le + » la couvre.
@@ -601,28 +590,30 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   const compare = page.locator("section#comparer");
   await expect(compare.getByRole("heading", { name: "Choisir un fournisseur" })).toBeVisible();
   const offers = compare.getByRole("list", { name: "Offres" }).getByRole("listitem");
-  await expect(offers.first()).toContainText("Point.P Vannes");
-  await expect(offers.first()).toContainText("2 805,30 €");
-  await expect(offers.first().getByText("Le moins cher des offres complètes")).toBeVisible();
+  // Les naissances (calculées, §49.1 point 3) ne sont chiffrées par personne : aucune offre n'est complète, aucune n'est « la moins chère ».
+  const pointpOffer = offers.filter({ hasText: "Point.P Vannes" });
+  await expect(pointpOffer).toContainText("2 805,30 €");
+  await expect(pointpOffer.getByText("⚠️ 1 article manquant")).toBeVisible();
+  await expect(compare.getByText("Le moins cher des offres complètes")).toHaveCount(0);
   const tuilesOffer = offers.filter({ hasText: "Tuiles & Co" });
   await expect(tuilesOffer.getByText(/2\s213,20\s€/)).toBeVisible();
   await expect(tuilesOffer.getByText("chiffrés")).toBeVisible();
-  await expect(tuilesOffer.getByText("⚠️ 1 article manquant")).toBeVisible();
-  await expect(tuilesOffer.getByText(/Total estimé avec l'article manquant : 2\s724,40\s€/)).toBeVisible();
+  await expect(tuilesOffer.getByText("⚠️ 2 articles manquants")).toBeVisible();
+  await expect(tuilesOffer.getByText(/Total estimé avec les articles manquants : 2\s724,40\s€/)).toBeVisible();
   await expect(tuilesOffer.getByText(/Livraison 60,00\s€/)).toBeVisible();
   await expect(tuilesOffer.getByText(/moins cher/i)).toHaveCount(0);
 
   // « Retenir cette offre » : un geste, compris tout de suite.
-  await offers.first().getByRole("button", { name: "Retenir cette offre" }).click();
+  await pointpOffer.getByRole("button", { name: "Retenir cette offre" }).click();
   await expect(compare.getByRole("heading", { name: "Offre retenue" })).toBeVisible();
-  await expect(offers.first().getByText("✓ Offre retenue")).toBeVisible();
+  await expect(pointpOffer.getByText("✓ Offre retenue")).toBeVisible();
 
   // §47.5 retour fournisseur : la commande passée, d'un tap ; « modifié » : le bon de commande collé.
-  await expect(offers.first().getByText(/Tu as commandé chez .* : tel quel \?/)).toBeVisible();
-  await offers.first().getByRole("button", { name: "Modifié" }).click();
-  await offers.first().getByLabel(/Colle ton bon de commande/).fill("Tuile romane canal rouge : 1 200 u");
-  await offers.first().getByRole("button", { name: "Enregistrer la commande" }).click();
-  await expect(offers.first().getByText(/✓ Commande notée : \d+ écarts? avec la liste/)).toBeVisible();
+  await expect(pointpOffer.getByText(/Tu as commandé chez .* : tel quel \?/)).toBeVisible();
+  await pointpOffer.getByRole("button", { name: "Modifié" }).click();
+  await pointpOffer.getByLabel(/Colle ton bon de commande/).fill("Tuile romane canal rouge : 1 200 u");
+  await pointpOffer.getByRole("button", { name: "Enregistrer la commande" }).click();
+  await expect(pointpOffer.getByText(/✓ Commande notée : \d+ écarts? avec la liste/)).toBeVisible();
 
   // Tout est conservé.
   await page.reload();
