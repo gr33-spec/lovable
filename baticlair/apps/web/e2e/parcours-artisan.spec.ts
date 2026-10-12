@@ -1345,8 +1345,8 @@ test("§51.6 (2026-10-12) : chaque ligne orange ouverte montre sa question en pr
   await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
-  await expect(list.getByText("✅ Prêt à commander")).toBeVisible();
-  await expect(list.getByText("🟠 À préciser")).toBeVisible();
+  await expect(list.getByText("Prêt à commander", { exact: true })).toBeVisible();
+  await expect(list.getByText("À préciser : coche pour valider")).toBeVisible();
   const cards = list.getByRole("list", { name: "Fournitures" }).locator(":scope > li");
   const oranges = cards.filter({ has: page.getByRole("img", { name: "à vérifier" }) });
   const n = await oranges.count();

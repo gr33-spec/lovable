@@ -167,10 +167,16 @@ export function SupplyList({
         ) : null}
       </div>
       {/* §49, §50 (retour du fondateur, 2026-10-12) : la légende des repères, sous le titre. */}
-      <p className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold text-muted">
-        <span>✅ Prêt à commander</span>
+      {/* Retour du fondateur (2026-10-12) : « mets des cases à cocher à chaque ligne pour pouvoir valider ». La case cochée
+          verte : prête à commander ; la case vide orange : à valider (un tap la coche, ou ouvre la question qui reste). */}
+      <p className="mb-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[13px] font-semibold text-muted">
+        <span className="inline-flex items-center gap-1.5">
+          <Box checked /> Prêt à commander
+        </span>
         <span aria-hidden="true">·</span>
-        <span>🟠 À préciser</span>
+        <span className="inline-flex items-center gap-1.5">
+          <Box checked={false} /> À préciser : coche pour valider
+        </span>
       </p>
       {selecting ? <p className="mb-2 text-[14px] leading-snug font-bold text-ink">Coche ce qui part chez ce fournisseur. Le reste pourra partir chez un autre.</p> : null}
       <ul aria-label="Fournitures" className="flex flex-col divide-y divide-line rounded-[20px] border border-[#dde1e8] bg-surface">
@@ -386,13 +392,22 @@ const DOT: Record<ScreenRow["status"], { ok: boolean; label: string }> = {
   supplier: { ok: true, label: "sûr" },
 };
 
-function StatusMark({ ok, label }: { ok: boolean; label: string }) {
-  return ok ? (
-    <span className="mt-[2px] flex size-[18px] shrink-0 items-center justify-center rounded-full bg-mark-ok text-white" role="img" aria-label={label}>
-      <Check size={12} strokeWidth={3.5} aria-hidden="true" />
+/** La case de la ligne : cochée en vert franc (prête), vide au bord orange vif (à valider). */
+function Box({ checked }: { checked: boolean }) {
+  return checked ? (
+    <span aria-hidden="true" className="flex size-[22px] shrink-0 items-center justify-center rounded-md bg-mark-ok text-white">
+      <Check size={15} strokeWidth={3.5} />
     </span>
   ) : (
-    <span className="mt-[5px] mx-[3px] size-3 shrink-0 rounded-full bg-mark-warn" role="img" aria-label={label} />
+    <span aria-hidden="true" className="size-[22px] shrink-0 rounded-md border-[2.5px] border-mark-warn bg-surface" />
+  );
+}
+
+function StatusMark({ ok, label }: { ok: boolean; label: string }) {
+  return (
+    <span className="mt-px shrink-0" role="img" aria-label={label}>
+      <Box checked={ok} />
+    </span>
   );
 }
 
@@ -598,7 +613,7 @@ function Row({
 
   const body = (
     <>
-      <StatusMark ok={dot.ok} label={dot.label} />
+      {opens ? null : <StatusMark ok={dot.ok} label={dot.label} />}
       <span className="flex min-w-0 grow flex-col">
         {/* Le nom entier : c'est ce que le comptoir lit (jamais coupé). Sur téléphone, la quantité passe dessous. */}
         <span className="text-[14px] leading-snug font-semibold">{label}</span>
@@ -674,6 +689,30 @@ function Row({
       >
         {opens ? (
           <div className="flex min-w-0 items-start gap-1">
+            {/* La case à cocher de la ligne (retour du fondateur, 2026-10-12) : verte cochée, la ligne est prête ; vide, un tap
+                la valide (« C'est bon », la quantité du devis gardée) ou, s'il reste une question, ouvre la ligne sur elle. */}
+            {dot.ok ? (
+              <span className="flex size-11 shrink-0 items-start justify-center pt-2.5" role="img" aria-label={dot.label}>
+                <Box checked />
+              </span>
+            ) : (
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => {
+                  if (quick) void handlers.onDecide(decision!);
+                  else {
+                    setNaming(false);
+                    setOpen(true);
+                  }
+                }}
+                aria-label={quick ? `Valider : ${label}` : `À préciser, ouvrir : ${label}`}
+                className="flex size-11 shrink-0 items-start justify-center rounded-full pt-2.5 active:bg-warn/10 disabled:opacity-50"
+              >
+                <Box checked={false} />
+              </button>
+            )}
+            {dot.ok ? null : <span className="sr-only" role="img" aria-label={dot.label} />}
             <button
               type="button"
               onClick={() => {
@@ -687,19 +726,6 @@ function Row({
             >
               {body}
             </button>
-            {/* Retour du fondateur (2026-10-10) : « un bouton pour valider, ligne par ligne. Et un crayon pour modifier. » Le ✓
-                fait le geste de la carte (« C'est bon », « Garder » l'écart du devis) sans l'ouvrir ; le crayon l'ouvre. */}
-            {quick && !open ? (
-              <button
-                type="button"
-                disabled={pending}
-                onClick={() => void handlers.onDecide(decision!)}
-                aria-label={`Valider : ${label}`}
-                className="flex size-11 shrink-0 items-center justify-center rounded-full text-ok active:bg-ok/10 disabled:opacity-50"
-              >
-                <Check size={20} aria-hidden="true" />
-              </button>
-            ) : null}
             {/* Ouverte, le crayon devient une croix : on voit comment refermer (retour du fondateur, 2026-10-10). */}
             <button
               type="button"
