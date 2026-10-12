@@ -13,7 +13,7 @@ import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } fro
 const appels: string[] = [];
 class LecteurQuiDitElectricite extends FakeLectureReader {
   override async lire(request: LectureRequest) {
-    appels.push(request.trade);
+    appels.push(request.trade ?? "");
     const r = await super.lire(request);
     // Le modèle dit le métier qu'il lit : de l'électricité quand le devis parle de prises.
     if (r?.output && /prise/i.test(request.document.numberedText)) (r.output as LectureDevis).metier = "electrical";
