@@ -41,8 +41,19 @@
   --shadow-float: 0 14px 30px rgba(14, 17, 22, 0.28);
 }
 
+/*
+ * La barre de navigation du téléphone (retour du fondateur, 2026-10-12) : figée en bas, jamais calculée avec 100vh (Safari
+ * iPhone compte mal sa barre d'adresse). --nav-space est la place qu'elle prend, zone du geste comprise : chaque page la
+ * laisse vide en bas pour que son dernier contenu ne passe jamais dessous.
+ */
+:root {
+  --nav-height: 64px;
+  --nav-space: calc(var(--nav-height) + max(12px, env(safe-area-inset-bottom)) + 16px);
+}
+
 html {
   -webkit-text-size-adjust: 100%;
+  height: 100%;
 }
 
 /* L'action principale : un dégradé vif, lisible en blanc (texte posé sur le bleu et le violet). */

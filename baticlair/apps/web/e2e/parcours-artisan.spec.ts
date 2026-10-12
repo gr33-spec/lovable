@@ -290,6 +290,35 @@ test("déconnexion puis reconnexion ramène à la page demandée", async ({ page
   await expect(page).toHaveURL(/\/chantiers\?q=dupont/);
 });
 
+test("2026-10-12 : sur téléphone, la barre du menu reste figée en bas de chaque page, et le bas de page ne passe jamais dessous", async ({ page }, info) => {
+  test.skip(info.project.name !== "telephone", "la barre flottante est celle du téléphone");
+  await signUp(page);
+  await createProject(page, "Toiture Barre", "M. Barre", "3 rue du Port, Brest");
+  const nav = page.getByRole("navigation", { name: "Navigation principale" });
+  const viewport = page.viewportSize()!;
+  for (const path of ["/", "/chantiers", "/fournisseurs", "/compte", "/chantiers/nouveau"]) {
+    await page.goto(path);
+    await expect(nav).toBeVisible();
+    for (const scroll of ["haut", "bas"] as const) {
+      await page.evaluate((s) => window.scrollTo(0, s === "bas" ? document.documentElement.scrollHeight : 0), scroll);
+      await page.waitForTimeout(300);
+      const box = (await nav.boundingBox())!;
+      // Ancrée au bas de l'écran : le bas de la barre touche le bas de la fenêtre, jamais au milieu (capture du fondateur).
+      expect(Math.abs(box.y + box.height - viewport.height), `${path}, ${scroll} : la barre est à ${Math.round(box.y)} px`).toBeLessThanOrEqual(1);
+      const pill = (await nav.locator("> div").boundingBox())!;
+      expect(pill.y, `${path} : la barre reste en bas`).toBeGreaterThan(viewport.height - 120);
+      if (scroll === "bas") {
+        // Le dernier contenu de la page s'arrête au-dessus de la barre.
+        const last = await page.evaluate(() => {
+          const els = [...document.querySelectorAll("main *")].filter((e) => (e as HTMLElement).offsetParent !== null && e.getBoundingClientRect().height > 0);
+          return Math.max(...els.map((e) => e.getBoundingClientRect().bottom));
+        });
+        expect(last, `${path} : le bas de page passe sous la barre`).toBeLessThanOrEqual(pill.y);
+      }
+    }
+  }
+});
+
 test("le menu ne propose que l'essentiel : accueil, chantiers, fournisseurs, compte", async ({ page }) => {
   await signUp(page);
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
