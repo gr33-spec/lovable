@@ -37,7 +37,7 @@ describe("§51.2 : la relecture d'une réponse « Autre »", () => {
           { question: "param:inconnue", valeur: "1" },
           { question: "param:pente", valeur: "38" },
         ],
-        manque: { donnee: "", question: "" },
+        manque: { donnee: "", question: "", boutons: [] },
       },
       input,
     );

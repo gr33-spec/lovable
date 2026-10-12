@@ -58,7 +58,7 @@ import type { AiUsageRecorder, AnalysisMeter } from "../../ai-usage/index.js";
 import type { DocumentAiInput, DocumentRepository, DocumentWithProcessing, PreparedDocument } from "../../documents/index.js";
 import type { CompanyMemory, CorrectionJournal } from "../../learning/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
-import { decodeRelecture, FICHE_RELECTURE_PROMPT, type FicheRelecteur, type RelectureQuestion } from "./fiche-relecture.js";
+import { decodeRelecture, doublonDe, FICHE_RELECTURE_PROMPT, type FicheRelecteur, type QuestionPosee, type RelectureQuestion } from "./fiche-relecture.js";
 import { LECTURE_PROMPT, type LectureReader } from "./lecture-reader.js";
 import type { LineFields, TakeoffRecord, TakeoffRepository } from "./takeoff.repository.js";
 
@@ -219,7 +219,33 @@ export interface ReadingStats {
 /** Temps deux : la marque du bilan des réponses (une fois par devis), gardée avec les réponses. */
 const BILAN_KEY = "bilan:fait";
 const BILAN_QUESTION =
-  "Bilan avant de calculer : voici toutes les réponses de l'artisan. Mets la fiche à jour avec ce qu'elles apprennent. Si, réponses comprises, une donnée nécessaire pour commander manque encore, pose UNE seule question (manque) ; sinon rien. Ne repose jamais une question déjà répondue.";
+  "Bilan avant de calculer : voici toutes les réponses de l'artisan, et les questions qu'il a retirées. Ses réponses valent des données écrites au devis. Mets la fiche à jour avec ce qu'elles apprennent. Si, réponses comprises, une donnée nécessaire pour commander manque encore, pose UNE seule question (manque) ; sinon rien. Ne repose JAMAIS une question déjà répondue ni une question retirée, même tournée autrement.";
+
+/** Les clés de réponse qui ne sont pas des questions posées (marques, gestes sur la liste). */
+const PAS_UNE_QUESTION = /^(bilan:|a-preciser:|ratio:|role:|precise:|item:|bref:|edit:|label:|quantity:|qty:|nom:)/;
+
+/**
+ * Les questions déjà posées à l'artisan sur ce devis, répondues ou retirées (réponse nulle), avec leur phrase et leurs
+ * boutons : celles de la lecture, celles du calcul (le Ø des descentes, `param:`), celles qu'une relecture a ouvertes.
+ */
+function questionsPosees(ref: Referential, takeoff: TakeoffRecord): (QuestionPosee & { valeur: string | null })[] {
+  const lecture = takeoff.lecture?.questions ?? [];
+  const params = ref.workItems.flatMap((w) => w.params);
+  return Object.entries(takeoff.answers).flatMap(([key, v]) => {
+    if (v === undefined || PAS_UNE_QUESTION.test(key)) return [];
+    const cle = /^(?:param|fiche|unite):([^@]+)/.exec(key)?.[1] ?? (/^product:(.+)$/.exec(key) ? `produit_${/^product:(.+)$/.exec(key)![1]}` : null);
+    if (!cle) return [];
+    const lue = lecture.find((q) => q.cle === cle);
+    const def = params.find((p) => p.key === cle);
+    const fiche = takeoff.fiche?.donnees.find((d) => d.cle === cle);
+    const text = lue?.texte ?? def?.question ?? fiche?.question ?? null;
+    if (!text) return [];
+    const options = lue?.boutons.length ? lue.boutons.map((b) => ({ label: b.label, value: b.valeur })) : (def?.choices ?? fiche?.boutons?.map((b) => ({ label: b.label, value: b.valeur })) ?? []).map((c) => ({ label: c.label, value: "value" in c ? c.value : "" }));
+    const value = v === null ? null : typeof v === "string" ? v : v.value;
+    const valeur = value === null ? null : (options.find((o) => o.value === value)?.label ?? (typeof v === "string" ? v : `${v!.value} ${v!.unit}`));
+    return [{ key, text, options, donnee: lue?.donnee ?? def?.label ?? fiche?.libelle ?? null, valeur }];
+  });
+}
 
 /** §51.2 : la question d'une donnée qu'une relecture a ouverte (« fiche:<donnée> »). */
 export const FICHE_KEY = "fiche:";
@@ -1032,17 +1058,12 @@ export class TakeoffService {
     if (!relecteur) return null;
     const takeoff = await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
     if (!takeoff.lecture || takeoff.answers[BILAN_KEY] !== undefined) return null;
-    const questions = takeoff.lecture.questions;
-    const lus = Object.entries(takeoff.answers).flatMap(([key, v]) => {
-      if (v === null || v === undefined || key === BILAN_KEY) return [];
-      const cle = /^(?:param|fiche):([a-z0-9_]+)/.exec(key)?.[1] ?? (/^product:([a-z0-9_]+)/.exec(key)?.[1] ? `produit_${/^product:([a-z0-9_]+)/.exec(key)![1]}` : null);
-      const q = cle ? questions.find((x) => x.cle === cle) : undefined;
-      if (!q) return [];
-      const value = typeof v === "string" ? v : v.value;
-      const label = q.boutons.find((b) => b.valeur === value)?.label ?? (typeof v === "string" ? v : `${v.value} ${v.unit}`);
-      return [`- ${q.texte} → ${label}`];
-    });
-    if (lus.length === 0) return null;
+    // Retour du fondateur (2026-10-12) : TOUTES les questions posées, celles du calcul comprises (le Ø des descentes), avec la
+    // réponse donnée ou « retirée » : le second appel les lit comme des données écrites et ne les repose jamais.
+    const ref = referentialFor(takeoff.trade) ?? ROOFING_REFERENTIAL;
+    const posees = questionsPosees(ref, takeoff);
+    const lus = posees.map((q) => `- ${q.text} → ${q.valeur ?? "question retirée par l'artisan (ne pas la reposer)"}`);
+    if (posees.every((q) => q.valeur === null)) return null;
     // Une seule fois, quoi qu'il arrive (même un appel en échec ne se refait pas à chaque calcul).
     await this.takeoffs.setAnswer(tenant, takeoff.id, BILAN_KEY, "fait");
     const reviewed = await this.review(tenant, takeoff);
@@ -1054,10 +1075,12 @@ export class TakeoffService {
     if (doc && takeoff.analysisId) await this.record(tenant, doc, { text: 0, vision: 0 }, doc.processing?.id ?? null, takeoff.analysisId, 1, attempt, FICHE_RELECTURE_PROMPT);
     if (attempt.status !== "success" || !attempt.output) return null;
     const relecture = decodeRelecture(attempt.output, input);
-    // Le bilan met la fiche à jour et peut ouvrir une donnée ; il ne répond jamais à la place de l'artisan.
+    // Le bilan met la fiche à jour et peut ouvrir une donnée ; il ne répond jamais à la place de l'artisan. Garde-fou du
+    // code : une donnée déjà répondue ou retirée n'est jamais redemandée (§51.2, §51.6).
     const donnees = relecture.donnees.map((d) => ({ ...d, preuve: "Tes réponses, relues" }));
-    await this.takeoffs.setFiche(tenant, takeoff.id, appliquerRelecture(takeoff.fiche, { donnees, reponses: [], manque: relecture.manque ?? null }));
-    return { reviewed: await this.reload(tenant, takeoff.id), opened: !!relecture.manque };
+    const manque = relecture.manque && !doublonDe(relecture.manque, [...posees, ...open.map(toQuestion).map((q) => ({ key: q.key, text: q.text, options: q.options }))]) ? relecture.manque : null;
+    await this.takeoffs.setFiche(tenant, takeoff.id, appliquerRelecture(takeoff.fiche, { donnees, reponses: [], manque }));
+    return { reviewed: await this.reload(tenant, takeoff.id), opened: !!manque };
   }
 
   private async editable(tenant: TenantContext, takeoff: TakeoffRecord | null): Promise<TakeoffRecord> {
@@ -1127,10 +1150,16 @@ export class TakeoffService {
     const fiche = ficheCorrigee(shown, takeoff.answers) ?? shown;
     // §51.2 : une donnée qu'une relecture (« Autre ») a ouverte est UNE question de plus, posée avant le calcul, à laquelle
     // l'artisan répond en écrivant (relue à son tour).
+    // Garde-fou (retour du fondateur, 2026-10-12) : une donnée déjà répondue ou retirée, ou déjà demandée à l'écran, n'est
+    // jamais redemandée ; un choix fermé a ses boutons (et « Autre »), jamais une case libre (§51.2).
+    const posees = questionsPosees(ref, takeoff);
     for (const d of fiche.donnees) {
       const key = `${FICHE_KEY}${d.cle}`;
       if (d.origine !== "manquante" || !d.question || takeoff.answers[key] !== undefined || purchase.questions.some((q) => q.question?.key === `param:${d.cle}` || q.text === d.question)) continue;
-      purchase.questions.push({ key, state: "missing", title: d.question, text: d.question, lineIds: [], primary: null, secondary: [], question: { key, kind: "choose", text: d.question, options: [], named: true } });
+      const ouvertes = purchase.questions.flatMap((q) => (q.question ? [{ key: q.question.key, text: q.question.text, options: q.question.options ?? [] }] : []));
+      if (doublonDe({ donnee: d.libelle, question: d.question, boutons: d.boutons ?? [] }, [...posees.filter((p) => p.key !== key), ...ouvertes])) continue;
+      const options = (d.boutons ?? []).map((b) => ({ label: b.label, value: b.valeur }));
+      purchase.questions.push({ key, state: "missing", title: d.question, text: d.question, lineIds: [], primary: null, secondary: [], question: { key, kind: "choose", text: d.question, ...(options.length > 0 ? { options } : {}), named: true } });
     }
     // « Comme d'habitude ? » : une habitude établie (paramètre d'entreprise) d'un ouvrage de ce devis, pas encore répondue
     // sur ce chantier ; lot par lot (§48.2) quand plusieurs ouvrages du devis en dépendent, avec le nom du lot.

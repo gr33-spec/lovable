@@ -9,7 +9,7 @@ import type { ReadAttempt } from "../../../platform/ai/document-reader.js";
  *
  * Un appel IA par réponse « Autre », en plus des deux appels du devis (§41) : c'est le §51.2 qui le demande.
  */
-export const FICHE_RELECTURE_PROMPT = { id: "fiche_relecture", version: 1 } as const;
+export const FICHE_RELECTURE_PROMPT = { id: "fiche_relecture", version: 2 } as const;
 
 export const RULE_51_2 = `RÈGLE §51.2 DU RÉFÉRENTIEL (ajoutée par le fondateur le 10 octobre 2026) : les questions viennent des trous de la fiche.
 Les questions ne viennent plus des lignes une par une mais des données manquantes de la fiche, et chaque donnée manquante donne une seule question. Autant de questions que le chantier en demande, sans maximum : dix ou quinze questions sur un gros chantier valent mieux qu'une heure à reprendre le quantitatif. Chaque question doit être une vraie question : une donnée absente du devis et nécessaire au calcul, jamais une donnée déjà lue ou déductible.
@@ -37,7 +37,7 @@ export interface RelectureInput {
 export const relectureWireSchema = z.object({
   fiche: z.array(z.object({ donnee: z.string(), valeur: z.string() })),
   reponses: z.array(z.object({ question: z.string(), valeur: z.string() })),
-  manque: z.object({ donnee: z.string(), question: z.string() }),
+  manque: z.object({ donnee: z.string(), question: z.string(), boutons: z.array(z.object({ label: z.string(), valeur: z.string() })) }),
 });
 export type RelectureWire = z.infer<typeof relectureWireSchema>;
 
@@ -58,7 +58,7 @@ RÈGLE NUMÉRO UN : rien n'entre dans la fiche qui ne vienne du devis ou des ré
 CE QUE TU RENVOIES (un seul objet JSON) :
 - fiche : les données de la fiche que la réponse change ou ajoute, chacune {"donnee", "valeur"} : la valeur telle que l'artisan la dit, avec son unité. Liste vide si rien ne change.
 - reponses : les questions que sa réponse règle, chacune {"question" : la clé de la question, "valeur" : la valeur d'UN de ses boutons, ou un nombre dans l'unité de la question}. Seulement ce que la réponse dit clairement ; une réponse peut régler plusieurs questions ouvertes. Liste vide si elle ne colle à aucun bouton.
-- manque : si la réponse ouvre une donnée qui manque encore et sans laquelle on ne peut pas commander, {"donnee" : son nom court, "question" : la question à poser, courte, en tutoyant} ; sinon {"donnee": "", "question": ""}.`;
+- manque : si la réponse ouvre une donnée qui manque encore et sans laquelle on ne peut pas commander, {"donnee" : son nom court, "question" : la question à poser, courte, en tutoyant, "boutons" : 2 à 5 choix {"label", "valeur"} quand le choix est fermé (Ø 80 / Ø 100 / Ø 120 ; EPDM / PVC), [] seulement quand la réponse est une valeur à écrire (une longueur)} ; sinon {"donnee": "", "question": "", "boutons": []}. Une donnée déjà répondue ou une question que l'artisan a retirée n'est JAMAIS un manque : ses réponses comptent comme des données écrites (§51.2, §51.6).`;
 }
 
 /** Le dossier donné à l'IA : la fiche, la question et ses boutons, ce que l'artisan a écrit, les autres questions. */
@@ -95,6 +95,37 @@ export function decodeRelecture(wire: RelectureWire, input: RelectureInput): Fic
   const donnees = wire.fiche
     .filter((d) => d.donnee.trim() && d.valeur.trim())
     .map((d) => ({ cle: normalizeText(d.donnee).replace(/\s+/g, "_"), libelle: d.donnee.trim().charAt(0).toUpperCase() + d.donnee.trim().slice(1), valeur: d.valeur.trim().slice(0, 120), origine: "reponse" as const, preuve: `Ta réponse : « ${input.texte.slice(0, 120)} »` }));
-  const manque = wire.manque.donnee.trim() && wire.manque.question.trim() ? { donnee: wire.manque.donnee.trim().slice(0, 60), question: (wire.manque.question.trim().charAt(0).toUpperCase() + wire.manque.question.trim().slice(1)).slice(0, 160) } : null;
+  const boutons = (wire.manque.boutons ?? []).filter((b) => b.label.trim()).slice(0, 5).map((b) => ({ label: b.label.trim().slice(0, 60), valeur: (b.valeur.trim() || b.label.trim()).slice(0, 60) }));
+  const manque = wire.manque.donnee.trim() && wire.manque.question.trim() ? { donnee: wire.manque.donnee.trim().slice(0, 60), question: (wire.manque.question.trim().charAt(0).toUpperCase() + wire.manque.question.trim().slice(1)).slice(0, 160), ...(boutons.length >= 2 ? { boutons } : {}) } : null;
   return { donnees, reponses, manque };
+}
+
+/** Une question déjà posée à l'artisan (répondue, ou retirée par sa poubelle) : sa clé, sa phrase, ses boutons. */
+export interface QuestionPosee {
+  key: string;
+  text: string;
+  options: { label: string; value: string }[];
+  /** Le nom court de la donnée (« diamètre des descentes »), s'il est connu. */
+  donnee?: string | null;
+}
+
+const mots = (t: string) => ` ${normalizeText(t).replace(/[^a-z0-9]+/g, " ").trim()} `;
+
+/**
+ * Le garde-fou du code (retour du fondateur, 2026-10-12 : « Descentes en Ø 80, Ø 100 ou Ø 120 ? » répondu Ø 80, puis
+ * « Ta descente, tu la veux en Ø 80, Ø 100 ou Ø 120 ? » reposée par le deuxième appel) : une question ouverte par l'IA
+ * qui porte sur une donnée déjà répondue ou retirée est écartée avant l'affichage. Elle porte sur la même donnée quand
+ * sa clé est la même, quand elle nomme la même donnée, ou quand elle propose au moins deux des choix de la question posée.
+ */
+export function doublonDe(manque: { donnee: string; question: string; boutons?: { label: string }[] }, posees: readonly QuestionPosee[]): QuestionPosee | null {
+  const cle = normalizeText(manque.donnee).replace(/\s+/g, "_");
+  const texte = mots(`${manque.donnee} ${manque.question} ${(manque.boutons ?? []).map((b) => b.label).join(" ")}`);
+  for (const q of posees) {
+    const sienne = /^(?:param|fiche):([a-z0-9_]+)/.exec(q.key)?.[1];
+    if (sienne && sienne === cle) return q;
+    if (q.donnee && mots(q.donnee).trim().length > 3 && (texte.includes(mots(q.donnee)) || mots(manque.donnee) === mots(q.donnee))) return q;
+    const choix = [...new Set(q.options.map((o) => mots(o.label)).filter((l) => l.trim().length >= 2))];
+    if (choix.length >= 2 && choix.filter((l) => texte.includes(l)).length >= 2) return q;
+  }
+  return null;
 }

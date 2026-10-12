@@ -9,10 +9,14 @@ import type { ReadAttempt } from "../src/platform/ai/document-reader.js";
 import { DE00000071_PDF } from "./support/de00000071-pdf.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
 
-/** Un relecteur qui ne fait que le bilan : la première fois, il demande la largeur du chéneau. */
+type Manque = RelectureWire["manque"];
+const LARGEUR: Manque = { donnee: "largeur du chéneau", question: "Le chéneau fait quelle largeur, en cm ?", boutons: [] };
+
+/** Un relecteur qui ne fait que le bilan : la première fois, il ouvre la donnée qu'on lui donne (la largeur du chéneau). */
 class BilanStub implements FicheRelecteur {
   readonly provider = "fake";
   calls: RelectureInput[] = [];
+  manque: Manque = LARGEUR;
   async relire(input: RelectureInput): Promise<ReadAttempt<RelectureWire>> {
     this.calls.push(input);
     const first = this.calls.filter((c) => c.question.key === "bilan").length === 1 && input.question.key === "bilan";
@@ -21,7 +25,7 @@ class BilanStub implements FicheRelecteur {
       model: "claude-opus-5-5",
       usage: { inputTokens: 600, outputTokens: 80 },
       status: "success",
-      output: { fiche: [], reponses: [], manque: first ? { donnee: "largeur du chéneau", question: "Le chéneau fait quelle largeur, en cm ?" } : { donnee: "", question: "" } },
+      output: { fiche: [], reponses: [], manque: first ? this.manque : { donnee: "", question: "", boutons: [] } },
       errorCode: null,
       durationMs: 1,
     };
@@ -39,9 +43,10 @@ afterAll(async () => {
 beforeEach(async () => {
   await resetDatabase(ctx.prisma);
   stub.calls = [];
+  stub.manque = LARGEUR;
 });
 
-type Question = { id: string; texte: string };
+type Question = { id: string; texte: string; boutons: { label: string; valeur: string }[] };
 type Ligne = { libelle: string; texte: string | null; couleur?: string; statut?: string };
 
 async function depose(agent: Agent) {
@@ -71,6 +76,43 @@ describe("temps deux : le bilan IA des réponses, une fois, avant de calculer", 
     const id = await depose(agent);
     await agent.post(`/v1/quantitatifs/${id}/calcul?ecran=1`).send({}).expect(200);
     expect(stub.calls.filter((c) => c.question.key === "bilan")).toHaveLength(0);
+  }, 30_000);
+});
+
+describe("temps deux, DE00000071 (retour du fondateur, 2026-10-12) : la deuxième vague ne repose jamais une question déjà répondue ni retirée", () => {
+  const DESCENTE: Manque = { donnee: "diamètre de la descente", question: "Ta descente, tu la veux en Ø 80, Ø 100 ou Ø 120 ?", boutons: [] };
+  const reponses = [
+    { question: "engine:param:developpe_gouttiere", valeur: "25", unite: "cm" },
+    { question: "engine:param:diametre_descente", valeur: "80", unite: "mm" },
+  ];
+
+  it("Ø 80 répondu : le second appel le lit comme une donnée écrite, et sa question « Ta descente, tu la veux en Ø 80… » est écartée par le code", async () => {
+    stub.manque = DESCENTE;
+    const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "Toitures Test");
+    const id = await depose(agent);
+    const after = (await agent.post(`/v1/quantitatifs/${id}/calcul?ecran=1`).send({ reponses }).expect(200)).body as { questions: Question[] };
+    const bilan = stub.calls.find((c) => c.question.key === "bilan")!;
+    expect(bilan.texte).toMatch(/Ø 80/);
+    expect(after.questions.filter((q) => /Ø ?80/.test(q.texte))).toEqual([]);
+    expect(after.questions.filter((q) => q.id.startsWith("fiche:"))).toEqual([]);
+  }, 30_000);
+
+  it("une question retirée (poubelle) n'est pas reposée par le second appel", async () => {
+    stub.manque = { donnee: "nombre de descentes", question: "Tu mets combien de descentes ?", boutons: [{ label: "1", valeur: "1" }, { label: "2", valeur: "2" }] };
+    const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "Toitures Test");
+    const id = await depose(agent);
+    const after = (await agent.post(`/v1/quantitatifs/${id}/calcul?ecran=1`).send({ reponses: [...reponses, { question: "engine:param:nb_descentes", valeur: null }] }).expect(200)).body as { questions: Question[] };
+    expect(stub.calls.find((c) => c.question.key === "bilan")!.texte).toMatch(/retirée/);
+    expect(after.questions.filter((q) => q.id.startsWith("fiche:"))).toEqual([]);
+  }, 30_000);
+
+  it("un choix fermé ouvert par le second appel a ses boutons, jamais une case libre (§51.2)", async () => {
+    stub.manque = { donnee: "teinte des tôles", question: "Les tôles, dans quelle teinte ?", boutons: [{ label: "Gris anthracite", valeur: "7016" }, { label: "Noir", valeur: "9005" }] };
+    const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "Toitures Test");
+    const id = await depose(agent);
+    const after = (await agent.post(`/v1/quantitatifs/${id}/calcul?ecran=1`).send({ reponses }).expect(200)).body as { questions: Question[] };
+    const q = after.questions.find((x) => x.id === "fiche:teinte_des_toles");
+    expect(q?.boutons.map((b) => b.label)).toEqual(["Gris anthracite", "Noir"]);
   }, 30_000);
 });
 

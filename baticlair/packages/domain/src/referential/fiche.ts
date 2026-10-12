@@ -29,6 +29,8 @@ export interface FicheDonnee {
   preuve?: string | null;
   /** Donnée manquante : la question qui la demande (une seule par donnée). */
   question?: string | null;
+  /** Ses boutons quand le choix est fermé (§51.2 : boutons et « Autre », jamais une case libre pour un choix fermé). */
+  boutons?: { label: string; valeur: string }[] | null;
 }
 
 export interface FicheChantier {
@@ -109,6 +111,13 @@ export function parseFicheEnregistree(raw: unknown): FicheChantier | null {
       regle: typeof o.regle === "string" ? o.regle.trim().slice(0, 160) : null,
       preuve: typeof o.preuve === "string" ? o.preuve.trim().slice(0, 200) : null,
       ...(typeof o.question === "string" && o.question.trim() ? { question: o.question.trim().slice(0, 200) } : {}),
+      ...(Array.isArray(o.boutons) && o.boutons.length > 0
+        ? {
+            boutons: o.boutons
+              .flatMap((b) => (b && typeof b === "object" && typeof (b as { label?: unknown }).label === "string" ? [{ label: String((b as { label: string }).label).slice(0, 60), valeur: String((b as { valeur?: unknown }).valeur ?? (b as { label: string }).label).slice(0, 60) }] : []))
+              .slice(0, 5),
+          }
+        : {}),
     });
   }
   return { donnees };
@@ -245,8 +254,8 @@ export interface FicheRelecture {
   donnees: FicheDonnee[];
   /** Les réponses comprises : clé de question → valeur (« param:faconnage@couverture-zinc-joint-debout » → « 2 »). */
   reponses: { question: string; valeur: string; unite?: string | null }[];
-  /** La donnée que la réponse ouvre, s'il y en a une : sa question. */
-  manque?: { donnee: string; question: string } | null;
+  /** La donnée que la réponse ouvre, s'il y en a une : sa question, et ses boutons quand le choix est fermé. */
+  manque?: { donnee: string; question: string; boutons?: { label: string; valeur: string }[] } | null;
 }
 
 export function appliquerRelecture(fiche: FicheChantier | null | undefined, relecture: FicheRelecture): FicheChantier {
@@ -259,7 +268,8 @@ export function appliquerRelecture(fiche: FicheChantier | null | undefined, rele
   }
   if (relecture.manque) {
     const cle = normalizeText(relecture.manque.donnee).replace(/\s+/g, "_");
-    if (!donnees.some((d) => d.cle === cle)) donnees.push({ cle, libelle: relecture.manque.donnee, valeur: null, origine: "manquante", question: relecture.manque.question });
+    const boutons = relecture.manque.boutons ?? [];
+    if (!donnees.some((d) => d.cle === cle)) donnees.push({ cle, libelle: relecture.manque.donnee, valeur: null, origine: "manquante", question: relecture.manque.question, ...(boutons.length > 0 ? { boutons } : {}) });
   }
   return { donnees };
 }
