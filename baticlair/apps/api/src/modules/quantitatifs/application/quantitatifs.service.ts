@@ -1,4 +1,4 @@
-import { AI_ADDITION, AI_DOUBT, FORBIDDEN, isMandatoryQuestion, METIER_NAMES, MISSING_INFO, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer, A_PRECISER } from "@baticlair/domain";
+import { AI_ADDITION, AI_DOUBT, FORBIDDEN, isMandatoryQuestion, METIER_NAMES, MISSING_INFO, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer, A_PRECISER, UNITE_KEY } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { BillingService } from "../../billing/index.js";
@@ -228,6 +228,21 @@ export class QuantitatifsService {
         reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, r.question, r.valeur);
         continue;
       }
+      // Temps deux : ce que l'artisan écrit pour une ligne « à préciser » (« Profil 1000 T, RAL 7016 ») part dans sa précision.
+      if (decision && decision.key.startsWith(A_PRECISER) && r.valeur !== null && r.valeur !== "ok" && r.valeur !== "non") {
+        const text = r.valeur.trim();
+        if (text === "" || text.length > 300) throw validationFailed("Written answer must be 1 to 300 characters", [{ path: "valeur", message: r.question }]);
+        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, decision.key, text);
+        continue;
+      }
+      // Temps deux (§51.6) : l'unité d'une ligne qui n'en a pas (un bouton, ou l'unité écrite sous « Autre »).
+      const uniteKey = r.question.replace(/^engine:/, "");
+      if (uniteKey.startsWith(UNITE_KEY)) {
+        const text = r.valeur?.trim() ?? null;
+        if (text !== null && (text === "" || text.length > 20)) throw validationFailed("Unit must be 1 to 20 characters", [{ path: "valeur", message: r.question }]);
+        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, uniteKey, text);
+        continue;
+      }
       if (decision && [FORBIDDEN, AI_DOUBT, AI_ADDITION, MISSING_INFO, A_PRECISER].some((p) => decision.key.startsWith(p))) {
         if (r.valeur !== "ok" && r.valeur !== "non") throw validationFailed("This question takes « ok » or « non »", [{ path: "valeur", message: r.question }]);
         reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, decision.key, r.valeur);
@@ -270,7 +285,7 @@ export class QuantitatifsService {
       if (r.valeur === null || !key.startsWith("param:")) value = r.valeur;
       else if (named && !/^\d+(?:[.,]\d+)?$/.test(r.valeur.trim())) {
         const text = r.valeur.trim();
-        if (text === "" || text.length > 80) throw validationFailed("Written answer must be 1 to 80 characters", [{ path: "valeur", message: r.question }]);
+        if (text === "" || text.length > 300) throw validationFailed("Written answer must be 1 to 300 characters", [{ path: "valeur", message: r.question }]);
         value = text;
       } else {
         // Une réponse pour tout le chantier (« param:faconnage ») vaut pour chaque pièce posée à part (« …@noue ») : même unité.
@@ -316,6 +331,12 @@ export class QuantitatifsService {
     const own = new Set((before.takeoff.lecture?.questions ?? []).map((q) => `fiche:${q.cle}`));
     const opened = before.purchase.questions.filter((d) => d.question?.key.startsWith("fiche:") && !own.has(d.question.key));
     if (opened.length > 0) return this.view(row, before, rendu);
+    // Temps deux (directive du fondateur, 2026-10-12) : quand tout est répondu, un deuxième appel relit la fiche avec les
+    // réponses et peut poser UNE question de plus, avant le calcul ; une seule fois par devis.
+    if (reponses.some((r) => r.valeur !== null)) {
+      const relu = await this.takeoffs.bilan(tenant, before.takeoff.id);
+      if (relu?.opened) return this.view(row, relu.reviewed, rendu);
+    }
     // §49.2.5 : les valeurs annoncées dans « Je pars sur ces valeurs » et gardées telles quelles sont CONFIRMÉES en lançant
     // le calcul (elles ne gardent plus leur ligne orange) ; celles que l'artisan a changées ont déjà leur réponse.
     const seen = await this.ready(tenant, row);

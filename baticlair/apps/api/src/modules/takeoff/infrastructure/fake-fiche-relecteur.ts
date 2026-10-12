@@ -30,6 +30,10 @@ export class FakeFicheRelecteur implements FicheRelecteur {
   readonly provider = "fake";
 
   async relire(input: RelectureInput): Promise<ReadAttempt<RelectureWire>> {
+    // Le bilan des réponses (temps deux) : rien de neuf dans la fiche, pas de question de plus (le double de test ne devine pas).
+    if (input.question.key === "bilan") {
+      return { provider: this.provider, model: "claude-opus-5-5", usage: { inputTokens: 600, outputTokens: 20 }, status: "success", output: { fiche: [], reponses: [], manque: { donnee: "", question: "" } }, errorCode: null, durationMs: 1 };
+    }
     const phrases = input.texte.split(/[,;.]|\bet\b|\bmais\b/).map((p) => p.trim()).filter(Boolean);
     const reponses: RelectureWire["reponses"] = [];
     for (const q of [input.question, ...input.ouvertes]) {
