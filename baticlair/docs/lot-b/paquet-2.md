@@ -36,7 +36,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Prise 2P+T 16 A | 18 pièces | 18, ligne 1 du devis; Gamme d'appareillage : Legrand Dooxie | chiffrable |
+| Prise 2P+T 16 A | 18 pièces | 18, ligne 1 du devis ; Gamme d'appareillage : Legrand Dooxie | chiffrable |
 | Boîte d'encastrement Ø67 prof. 40 | 30 pièces | 18 + 9 + 3, lignes 1, 2 et 3 du devis | chiffrable |
 | Câble rigide 3G2,5 | 2 couronnes de 100 m (144 m à poser) | 144 m, ligne 1 du devis | chiffrable |
 | Gaine ICTA Ø20 | 3 couronnes de 100 m (264 m à poser) | 144 + 90 + 30 m, lignes 1, 2 et 3 du devis | chiffrable |

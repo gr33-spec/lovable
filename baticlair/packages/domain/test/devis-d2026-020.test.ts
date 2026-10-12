@@ -181,10 +181,10 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
     expect(consommables.map((b) => [b.label, b.lineIds])).toEqual([
       ["Décapant zinc, flacon de 250 ml", ["3"]],
       ["Étain à souder en baguettes de 250 g", ["3"]],
+      // Retour du fondateur (2026-10-12, §49.9) : « une fourniture = une ligne, additionnée » : les cartouches des lignes 6 et 10.
+      ["Cartouches de silicone zinc", ["6", "10"]],
       ["Vis inox 4 × 40", ["6"]],
-      ["Cartouches de silicone zinc", ["6"]],
       ["Pattes de fixation", ["8"]],
-      ["Cartouches de silicone zinc", ["10"]],
     ]);
     expect(oui.toBuy.slice(-consommables.length)).toEqual(consommables);
     for (const c of consommables) expect(row(c.key, oui)?.status).toBe("check");

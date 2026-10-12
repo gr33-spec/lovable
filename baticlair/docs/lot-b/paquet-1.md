@@ -41,14 +41,9 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Plaques BA13 1,20 × 2,50 | 21 plaques |  | chiffrable |
 | Complexes de doublage BA13 + isolant | 20 complexes | longueur à la hauteur sous plafond | chiffrable |
 | Laine de verre à souffler (type Comblissimo), sac de 17,3 kg, R 7 | 19 sacs de 17,3 kg |  | chiffrable |
-| Vis à plaque 25 mm | 1 200 vis |  | chiffrable |
-| Vis à plaque 25 mm | 900 vis |  | chiffrable |
-| Bande à joint | 160 ml |  | chiffrable |
-| Bande à joint | 77 ml |  | chiffrable |
-| Bande à joint | 95 ml |  | chiffrable |
-| Enduit à joint | 32 kg |  | chiffrable |
-| Enduit à joint | 19 kg |  | chiffrable |
-| Enduit à joint | 23 kg |  | chiffrable |
+| Vis à plaque 25 mm | 2 100 vis |  | chiffrable |
+| Bande à joint | 332 ml |  | chiffrable |
+| Enduit à joint | 74 kg |  | chiffrable |
 
 ## Carrelage
 

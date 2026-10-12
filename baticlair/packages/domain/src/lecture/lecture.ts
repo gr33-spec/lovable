@@ -643,6 +643,37 @@ interface Asked {
   question: Question;
 }
 
+/**
+ * La précision d'une ligne, sans doublon ni ce que la désignation dit déjà : chaque morceau (séparé par « ; ») une fois ;
+ * « épaisseur : au choix du fournisseur » tombe quand l'épaisseur est écrite dans le nom (« 0,65 mm »), et une donnée
+ * citée plusieurs fois dans « épaisseur, développé : au choix… » ne garde que celles qui manquent au nom.
+ */
+export function precisionPropre(precision: string, label: string): string {
+  const vus = new Set<string>();
+  const morceaux: string[] = [];
+  // Les données laissées au fournisseur, réunies en un seul morceau, chacune une fois (à la place du premier).
+  const sujets: string[] = [];
+  let place = -1;
+  for (const brut of precision.split(/\s*;\s*/)) {
+    const m = brut.trim().replace(/[.;,]+$/, "");
+    if (!m) continue;
+    const choix = /^(.+?)\s*(?::\s*au choix du fournisseur|au choix du fournisseur|à voir avec le fournisseur)$/i.exec(m);
+    if (choix) {
+      for (const t of choix[1]!.split(/\s*(?:,|\bet\b)\s*/).map((x) => x.trim())) {
+        if (t && !ecritDans(t, label) && !sujets.some((x) => normalizeText(x) === normalizeText(t))) sujets.push(t);
+      }
+      if (place < 0) place = morceaux.length;
+      continue;
+    }
+    const cle = normalizeText(m);
+    if (vus.has(cle)) continue;
+    vus.add(cle);
+    morceaux.push(m);
+  }
+  if (sujets.length > 0) morceaux.splice(place < 0 ? morceaux.length : place, 0, `${sujets.join(", ")} : au choix du fournisseur`);
+  return morceaux.join(" ; ");
+}
+
 /** Les boutons d'une donnée « à préciser » : les choix du référentiel quand l'ouvrage de la ligne a cette donnée (sa teinte, sa matière). */
 function choixDuReferentiel(ref: Referential, workItemId: string | undefined, sujets: readonly string[]): { label: string; value: string }[] {
   const work = workItemId ? ref.workItems.find((w) => w.id === baseOf(workItemId)) : undefined;
@@ -659,7 +690,17 @@ function choixDuReferentiel(ref: Referential, workItemId: string | undefined, su
 function ecritDans(sujet: string, nom: string): boolean {
   const s = normalizeText(sujet);
   const n = normalizeText(nom);
-  if (/epaisseur|diametre|largeur|longueur|developpe|dimension|format|section/.test(s) && /\d+(?:[.,]\d+)?\s*(?:mm|cm|m)\b|o\s?\d{2,3}\b|\d+\s*x\s*\d+/.test(n)) return true;
+  // Chaque mesure a sa façon de s'écrire dans un nom : l'épaisseur « 0,65 mm », le développé « dév. 25 », le Ø « Ø80 ».
+  const ecrite: [RegExp, RegExp][] = [
+    [/epaisseur/, /\b\d+[.,]\d+\s*mm\b|epaisseur/],
+    [/developpe/, /\bdev\.?\s*\d|developpe/],
+    [/diametre/, /(?:ø|⌀)\s?\d|\bdiam/],
+    [/largeur/, /largeur|\d+\s*x\s*\d+/],
+    [/longueur/, /longueur|\d+\s*x\s*\d+|\b\d+(?:[.,]\d+)?\s*m\b/],
+    [/dimension|format|section/, /\d+\s*x\s*\d+/],
+  ];
+  const mesure = ecrite.find(([sujetRe]) => sujetRe.test(s));
+  if (mesure) return mesure[1].test(n);
   return s.length > 3 && n.includes(s);
 }
 
@@ -824,7 +865,8 @@ function finishPurchase(
     }).filter((v): v is string => !!v);
     // Ce que l'artisan écrit pour une ligne « à préciser » (« Profil 1000 T, RAL 7016 ») part dans sa précision.
     const ecrit = ctx.answers[`a-preciser:${line.id}`];
-    const choisi = f.aPreciser.length > 0 && ecrit === "ok" ? `${raisonCourte(f.aPreciser).replace(/ à préciser$/, "")} au choix du fournisseur` : null;
+    const choisis = f.aPreciser.filter((t) => !ecritDans(t, `${item.label} ${f.nom}`));
+    const choisi = choisis.length > 0 && ecrit === "ok" ? `${raisonCourte(choisis).replace(/ à préciser$/, "")} au choix du fournisseur` : null;
     const precise = typeof ecrit === "string" && ecrit !== "ok" && ecrit !== "non" ? ecrit : choisi;
     const precision = [f.precision, ...said].filter(Boolean).join(", ");
     // Ce que la ligne attend se dit par la question du modèle, jamais deux fois : les règles « manque » du calcul tombent.
@@ -928,7 +970,16 @@ function finishPurchase(
   // Les interdits du code (§41.3 : jamais de m² d'ardoises, de lot, de métal sans dimension) : orange, comme partout.
   const finished = withShortReasons(ctx.interdits ? applyOrangeFlags(confirmed, forbiddenFlags(confirmed), answers) : confirmed);
   // La raison d'une ligne orange : la donnée que le modèle demande, ou ce que le fournisseur précisera (§51.5).
-  return { ...finished, warnings: [...new Set([...finished.warnings, ...ctx.notes])], screen: { ...finished.screen, groups: finished.screen.groups.map((g) => ({ ...g, rows: g.rows.map((r) => (r.status === "check" && r.itemKey && reasons.has(r.itemKey) ? { ...r, reason: reasons.get(r.itemKey)! } : r)) })) } };
+  // Retour du fondateur (2026-10-12) : « une précision ne s'écrit que si elle apporte une info absente de la désignation ;
+  // jamais de doublon » (« épaisseur : au choix du fournisseur » deux fois, alors que « 0,65 mm » est dans le nom).
+  const toBuyPropre = finished.toBuy.map((b) => {
+    if (!b.precision) return b;
+    const propre = precisionPropre(b.precision, b.label);
+    if (propre === b.precision) return b;
+    const { precision: _p, ...rest } = b;
+    return propre ? { ...rest, precision: propre } : rest;
+  });
+  return { ...finished, toBuy: toBuyPropre, warnings: [...new Set([...finished.warnings, ...ctx.notes])], screen: { ...finished.screen, groups: finished.screen.groups.map((g) => ({ ...g, rows: g.rows.map((r) => (r.status === "check" && r.itemKey && reasons.has(r.itemKey) ? { ...r, reason: reasons.get(r.itemKey)! } : r)) })) } };
 }
 
 /** Un nombre écrit (« 151 », « 1 472,5 »), ou null. */

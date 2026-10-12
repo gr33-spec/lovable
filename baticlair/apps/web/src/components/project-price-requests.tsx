@@ -839,7 +839,7 @@ function SendSheet({ canSend, sending, onSend, onClose, children }: { canSend: b
     };
   }, []);
   return (
-    <div role="dialog" aria-modal="true" aria-label="À qui j'envoie ?" className="fixed inset-0 z-50 flex flex-col bg-ground">
+    <div role="dialog" aria-modal="true" aria-label="À qui j'envoie ?" className="fixed top-0 left-0 z-50 flex h-dvh w-full flex-col bg-ground">
       <div className="flex items-center justify-between gap-2 px-4 pt-[max(12px,env(safe-area-inset-top))] pb-2">
         <h2 className="font-display text-[20px] font-extrabold">À qui j&apos;envoie ?</h2>
         <button type="button" onClick={onClose} aria-label="Revenir à mon chantier" className="inline-flex size-11 items-center justify-center rounded-xl">

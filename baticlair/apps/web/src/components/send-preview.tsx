@@ -24,7 +24,7 @@ export function SendPreview({ projectId, onSend, onClose }: { projectId: string;
     };
   }, []);
   return (
-    <div role="dialog" aria-modal="true" aria-label="Ce que reçoit le fournisseur" className="fixed inset-0 z-50 flex flex-col bg-ground">
+    <div role="dialog" aria-modal="true" aria-label="Ce que reçoit le fournisseur" className="fixed top-0 left-0 z-50 flex h-dvh w-full flex-col bg-ground">
       <div className="flex items-center justify-between gap-2 px-4 pt-[max(12px,env(safe-area-inset-top))] pb-2">
         <h2 className="font-display text-[20px] font-extrabold">Ce que reçoit le fournisseur</h2>
         <button type="button" onClick={onClose} aria-label="Revenir à mon chantier" className="inline-flex size-11 items-center justify-center rounded-xl">

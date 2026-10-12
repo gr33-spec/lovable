@@ -432,9 +432,11 @@ function aggregate(
   }
   // §49.5 : deux lignes du devis ne fusionnent jamais. Le même article sorti par deux ouvrages écrits (les feuilles des
   // bandes de rive, du faîtage et du porte-solin) reste une ligne par ouvrage, chacune avec sa précision.
+  // Retour du fondateur (2026-10-12, §49.9 : « une fourniture = une ligne, additionnée ») : un consommable (silicone, vis,
+  // pointes) n'est pas une ligne du devis ; le même, sorti par deux pièces, fait une seule ligne, besoins additionnés.
   for (const [key, group] of [...groups]) {
     const works = [...new Set(group.map((n) => n.workItemId ?? "?"))];
-    if (works.length < 2) continue;
+    if (works.length < 2 || group.every((n) => consumables.has(n.family) || n.consumable)) continue;
     groups.delete(key);
     for (const w of works) groups.set(`${key}@${w}`, group.filter((n) => (n.workItemId ?? "?") === w));
   }
@@ -450,7 +452,11 @@ function aggregate(
     let approx: string | null = null;
     let order: PurchaseItem["order"] = null;
     if (sameOrderUnit && orders[0]) {
-      const count = orders.reduce((sum, o) => sum.plus(o!.count), new Decimal(0));
+      // Plusieurs besoins du même article (un consommable de deux pièces) : quand le conditionnement dit sa contenance en
+      // pièces (« boîte de 200 »), le compte se refait sur le besoin additionné (108 vis = 1 boîte, pas 1 + 1).
+      const contenance = /\bde (\d+)\b/.exec(orders[0].unit.one)?.[1];
+      const pieces = group.length > 1 && contenance && quantities.every((q) => q && q.unit === "u") ? quantities.reduce((sum, q) => sum.plus(q!.value), new Decimal(0)) : null;
+      const count = pieces ? pieces.dividedBy(Number(contenance)).toDecimalPlaces(6).ceil() : orders.reduce((sum, o) => sum.plus(o!.count), new Decimal(0));
       quantity = unitText(count, orders[0].unit);
       order = { count: count.toFixed(), unit: count.equals(1) ? orders[0].unit.one : orders[0].unit.many };
       const approxUnits = group.map((n) => n.purchase?.approx[0] ?? null);

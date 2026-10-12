@@ -79,7 +79,7 @@ export function AnalysisScreen() {
     };
   }, []);
   return (
-    <section aria-label="Analyse du devis" className="fixed inset-0 z-[45] flex flex-col overflow-hidden bg-chantier text-white">
+    <section aria-label="Analyse du devis" className="fixed top-0 left-0 z-[45] flex h-dvh w-full flex-col overflow-hidden bg-chantier text-white">
       <div className="flex shrink-0 px-4 pt-[max(14px,env(safe-area-inset-top))]">
         <button
           type="button"
