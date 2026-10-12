@@ -30,6 +30,10 @@
   --color-ok: #0b7a53;
   --color-warn-bg: #fff1d6;
   --color-warn: #8a5300;
+  /* Les repères de la liste (retour du fondateur, 2026-10-12) : une coche d'un vert franc, un point d'un orange vif ; les
+     textes gardent --color-ok / --color-warn, plus foncés, pour le contraste AA. */
+  --color-mark-ok: #16a34a;
+  --color-mark-warn: #f97316;
   --color-danger-bg: #ffe4da;
   --color-danger: #b3360f;
   --font-sans: "Plus Jakarta Sans Variable", system-ui, sans-serif;

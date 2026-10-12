@@ -9,7 +9,7 @@ import { type DecisionHandlers } from "@/components/takeoff-view";
 import { SelectionBar, type SelectionSend } from "@/components/selection-send";
 import { Button, ErrorNotice } from "@/components/ui";
 import type { ApiError, ItemSketch, PurchaseItem, ScreenRow, Takeoff, TakeoffDecision } from "@/lib/api";
-import { parseQuantity, shortName } from "@/lib/labels";
+import { enMetres, parseQuantity, shortName } from "@/lib/labels";
 
 /**
  * §50.7 L'ÉCRAN 3 EST LE DOCUMENT (fondateur, 2026-10-10) : « Ton chantier », ce que le fournisseur recevra.
@@ -125,7 +125,7 @@ export function SupplyList({
       {editable && !selecting && toCheck.length > 0 ? (
         // §50.3 : une barre fixe discrète en haut, qui disparaît à zéro. Rien d'autre.
         <div role="status" className="sticky top-[max(8px,env(safe-area-inset-top))] z-20 mb-2 flex min-h-10 items-center gap-2 rounded-[20px] border border-warn/25 bg-surface/95 px-3 py-1.5 shadow-[0_2px_10px_rgba(16,24,40,0.08)] backdrop-blur">
-          <span className="size-2 shrink-0 rounded-full bg-warn" aria-hidden="true" />
+          <span className="size-2.5 shrink-0 rounded-full bg-mark-warn" aria-hidden="true" />
           <span className="text-[13px] leading-tight font-extrabold text-warn">
             {toCheck.length} ligne{toCheck.length > 1 ? "s" : ""} à régler
           </span>
@@ -162,6 +162,12 @@ export function SupplyList({
           </button>
         ) : null}
       </div>
+      {/* §49, §50 (retour du fondateur, 2026-10-12) : la légende des repères, sous le titre. */}
+      <p className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold text-muted">
+        <span>✅ Prêt à commander</span>
+        <span aria-hidden="true">·</span>
+        <span>🟠 À préciser</span>
+      </p>
       {selecting ? <p className="mb-2 text-[14px] leading-snug font-bold text-ink">Coche ce qui part chez ce fournisseur. Le reste pourra partir chez un autre.</p> : null}
       <ul aria-label="Fournitures" className="flex flex-col divide-y divide-line rounded-[20px] border border-[#dde1e8] bg-surface">
         {ordered.map((r) => (
@@ -360,18 +366,31 @@ function Stepper({ label, value, unit, pending, onChange }: { label: string; val
           +
         </button>
       </span>
-      {unit ? <span className="min-w-0 truncate text-[13px] font-bold text-muted">{unit}</span> : null}
+      {unit ? <span className="min-w-0 truncate text-[13px] font-bold text-muted">{enMetres(unit)}</span> : null}
     </span>
   );
 }
 
-/** Le point dit l'état d'un coup d'œil : vert prêt, orange à régler (§50.3). */
-const DOT: Record<ScreenRow["status"], { className: string; label: string }> = {
-  ok: { className: "bg-ok", label: "sûr" },
-  check: { className: "bg-warn", label: "à vérifier" },
+/**
+ * Le repère dit l'état d'un coup d'œil (§50.3) : une coche verte franche, prête à commander ; un point orange vif, à
+ * préciser (retour du fondateur, 2026-10-12 : « vert franc, pas pâle », « orange vif, pas marron »).
+ */
+const DOT: Record<ScreenRow["status"], { ok: boolean; label: string }> = {
+  ok: { ok: true, label: "sûr" },
+  check: { ok: false, label: "à vérifier" },
   // §50.3 : vert ou orange, rien d'autre ; une ligne laissée au fournisseur est prête à partir.
-  supplier: { className: "bg-ok", label: "sûr" },
+  supplier: { ok: true, label: "sûr" },
 };
+
+function StatusMark({ ok, label }: { ok: boolean; label: string }) {
+  return ok ? (
+    <span className="mt-[2px] flex size-[18px] shrink-0 items-center justify-center rounded-full bg-mark-ok text-white" role="img" aria-label={label}>
+      <Check size={12} strokeWidth={3.5} aria-hidden="true" />
+    </span>
+  ) : (
+    <span className="mt-[5px] mx-[3px] size-3 shrink-0 rounded-full bg-mark-warn" role="img" aria-label={label} />
+  );
+}
 
 const FIELD = "min-h-11 w-full min-w-0 rounded-xl border-2 border-line bg-surface px-3 text-[15px] outline-none focus:border-accent";
 
@@ -536,7 +555,8 @@ function Row({
   const item = row.itemKey ? takeoff.purchase.toBuy.find((b) => b.key === row.itemKey) : undefined;
   const quote = row.quoteKey ? takeoff.purchase.toQuote.find((q) => q.key === row.quoteKey) : undefined;
   const lines = row.lineIds.map((id) => takeoff.lines.find((l) => l.id === id)).filter((l): l is Takeoff["lines"][number] => Boolean(l));
-  const quantity = item?.quantity ?? quote?.measure ?? row.pending?.quantity ?? null;
+  const raw = item?.quantity ?? quote?.measure ?? row.pending?.quantity ?? null;
+  const quantity = raw ? enMetres(raw) : null;
   const sub = sentTo ? `Envoyé · ${sentTo}` : row.status === "check" ? (row.reason ?? "À vérifier") : null;
   const dot = sentTo ? DOT.supplier : DOT[row.status];
   const parsed = item?.quantity ? parseQuantity(item.quantity) : null;
@@ -574,7 +594,7 @@ function Row({
 
   const body = (
     <>
-      <span className={`mt-[6px] size-2.5 shrink-0 rounded-full ${dot.className}`} role="img" aria-label={dot.label} />
+      <StatusMark ok={dot.ok} label={dot.label} />
       <span className="flex min-w-0 grow flex-col">
         {/* Le nom entier : c'est ce que le comptoir lit (jamais coupé). Sur téléphone, la quantité passe dessous. */}
         <span className="text-[14px] leading-snug font-semibold">{label}</span>
