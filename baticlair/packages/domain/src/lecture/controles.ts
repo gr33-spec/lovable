@@ -30,9 +30,14 @@ function lignesAbsentes(lecture: LectureDevis, devis: readonly LigneDuDevis[]): 
 }
 
 /** Les faits du bref : chacun doit s'y lire (§6 / §51.5). */
-function brefManquant(lecture: LectureDevis, faits: readonly [string, RegExp][]): string[] {
-  const bref = n(lecture.bref.join(". "));
-  return faits.filter(([, re]) => !re.test(bref)).map(([label]) => `Bref : il manque « ${label} »`);
+/**
+ * Un fait du bref est dit quand une phrase du bref porte tous ses mots (une expression, ou plusieurs, dans n'importe quel
+ * ordre) : « 4 Velux GGL SK06 114×118 … finition white finish » dit « 4 Velux SK06 114×118 GGL white finish ».
+ */
+function brefManquant(lecture: LectureDevis, faits: readonly [string, RegExp | readonly RegExp[]][]): string[] {
+  const phrases = lecture.bref.map(n);
+  const dit = (res: readonly RegExp[]) => phrases.some((p) => res.every((re) => re.test(p)));
+  return faits.filter(([, re]) => !dit(Array.isArray(re) ? re : [re as RegExp])).map(([label]) => `Bref : il manque « ${label} »`);
 }
 
 /** Les lignes sans fourniture attendues, et les lignes qui doivent en avoir une. */
@@ -110,7 +115,8 @@ export function controleLecture7954(lecture: LectureDevis, devis: readonly Ligne
 }
 
 const QUESTIONS_DE00000071: readonly [string, (t: string) => boolean][] = [
-  ["développé de gouttière 25 ou 33", (t) => /developpe/.test(t) && /25/.test(t) && /33/.test(t)],
+  // La question du développé se reconnaît à sa clé (« developpe_gouttiere ») ou à son mot, avec 25 et 33 dans ses choix.
+  ["développé de gouttière 25 ou 33", (t) => /developpe|gouttiere/.test(t) && /\b25\b/.test(t) && /\b33\b/.test(t)],
   ["nombre de descentes", (t) => /descente/.test(t)],
   ["chéneau EPDM ou PVC et largeur développée", (t) => /cheneau/.test(t) && /epdm/.test(t) && /pvc/.test(t)],
   ["raccord Velux ZWC ou Pratikal", (t) => /zwc/.test(t) && /pratikal/.test(t)],
@@ -128,12 +134,12 @@ export function controleLectureDe00000071(lecture: LectureDevis, devis: readonly
       ["pas de couverture neuve", /pas de couverture neuve/],
       ["gouttière demi-ronde zinc naturel 17,40 m", /gouttiere demi.ronde zinc naturel 17,40 m/],
       ["crochets Négrafix", /negrafix/],
-      ["chéneau 11,70 m", /cheneau 11,70 m/],
+      ["chéneau 11,70 m", [/cheneau/, /11,70 m\b/]],
       ["membrane", /membrane/],
-      ["4 Velux SK06 114×118 GGL white finish", /4 velux sk06 114 ?x ?118 ggl white finish/],
-      ["1 MK04 78×98 GGU ever finish", /1 mk04 78 ?x ?98 ggu ever finish/],
-      ["raccords pour bac acier", /raccords pour bac acier/],
-      ["tôles bac acier en étanchéité au-dessus des Velux", /toles bac acier en etancheite au.dessus des velux/],
+      ["4 Velux SK06 114×118 GGL white finish", [/\b4 velux/, /sk06/, /114 ?x ?118/, /ggl/, /white finish/]],
+      ["1 MK04 78×98 GGU ever finish", [/\b1 (velux )?(ggu )?mk04/, /78 ?x ?98/, /ggu/, /ever finish/]],
+      ["raccords pour bac acier", [/raccords?/, /bac acier/]],
+      ["tôles bac acier en étanchéité au-dessus des Velux", [/toles bac acier/, /etancheite/, /dessus des velux/]],
     ]),
   );
   out.push(...fournitures(lecture, /^(depose|realisation des tremies|pose de vel)/, null));
