@@ -1,5 +1,6 @@
 import { AI_ADDITION, AI_DOUBT, FORBIDDEN, isMandatoryQuestion, METIER_NAMES, MISSING_INFO, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer, A_PRECISER, UNITE_KEY } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
+import { normalizeText } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { BillingService } from "../../billing/index.js";
 import type { DocumentsService } from "../../documents/index.js";
@@ -216,7 +217,8 @@ export class QuantitatifsService {
       }
     }
     const done = new Set(together.length > 1 ? together.map((r) => r.question) : []);
-    for (const r of reponses) {
+    for (const [i, envoyee] of reponses.entries()) {
+      let r = envoyee;
       if (done.has(r.question)) continue;
       const decision = reviewed.purchase.questions.find((d) => d.key === r.question);
       const q = decision?.question;
@@ -224,7 +226,7 @@ export class QuantitatifsService {
       // Les lignes orange de la vérification (interdits du code, doutes et ajouts du quantitatif IA) : « ok » ou « non ».
       // §48.4 : un ajout de l'IA est une suggestion (hors de la liste) : il se coche sans décision ouverte.
       if (!decision && r.question.startsWith(AI_ADDITION)) {
-        if (r.valeur !== "ok" && r.valeur !== "non") throw validationFailed("This question takes « ok » or « non »", [{ path: "valeur", message: r.question }]);
+        if (r.valeur !== "ok" && r.valeur !== "non") throw validationFailed("This question takes « ok » or « non »", [{ path: `reponses.${i}.valeur`, message: r.question }]);
         reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, r.question, r.valeur);
         continue;
       }
@@ -233,7 +235,7 @@ export class QuantitatifsService {
       const preciserKey = r.question.replace(/^engine:/, "");
       if (preciserKey.startsWith(A_PRECISER) && /^a-preciser:[0-9a-f-]{36}$/.test(preciserKey)) {
         const text = r.valeur?.trim() ?? null;
-        if (text !== null && (text === "" || text.length > 300)) throw validationFailed("Written answer must be 1 to 300 characters", [{ path: "valeur", message: r.question }]);
+        if (text !== null && (text === "" || text.length > 300)) throw validationFailed("Written answer must be 1 to 300 characters", [{ path: `reponses.${i}.valeur`, message: r.question }]);
         reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, preciserKey, text);
         continue;
       }
@@ -241,34 +243,37 @@ export class QuantitatifsService {
       const uniteKey = r.question.replace(/^engine:/, "");
       if (uniteKey.startsWith(UNITE_KEY)) {
         const text = r.valeur?.trim() ?? null;
-        if (text !== null && (text === "" || text.length > 20)) throw validationFailed("Unit must be 1 to 20 characters", [{ path: "valeur", message: r.question }]);
+        if (text !== null && (text === "" || text.length > 20)) throw validationFailed("Unit must be 1 to 20 characters", [{ path: `reponses.${i}.valeur`, message: r.question }]);
         reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, uniteKey, text);
         continue;
       }
       if (decision && [FORBIDDEN, AI_DOUBT, AI_ADDITION, MISSING_INFO, A_PRECISER].some((p) => decision.key.startsWith(p))) {
-        if (r.valeur !== "ok" && r.valeur !== "non") throw validationFailed("This question takes « ok » or « non »", [{ path: "valeur", message: r.question }]);
+        if (r.valeur !== "ok" && r.valeur !== "non") throw validationFailed("This question takes « ok » or « non »", [{ path: `reponses.${i}.valeur`, message: r.question }]);
         reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, decision.key, r.valeur);
         continue;
       }
       if (decision && decision.key.startsWith(RATIO)) {
-        if (r.valeur !== "ok") throw validationFailed("This question takes « ok »", [{ path: "valeur", message: r.question }]);
+        if (r.valeur !== "ok") throw validationFailed("This question takes « ok »", [{ path: `reponses.${i}.valeur`, message: r.question }]);
         reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, decision.key, "ok");
         continue;
       }
       if (decision && !q) {
         if (r.valeur !== "ok" || !decision.primary || (decision.primary.action !== "keep" && decision.primary.action !== "pieces")) {
-          throw validationFailed("This question takes « ok »", [{ path: "valeur", message: r.question }]);
+          throw validationFailed("This question takes « ok »", [{ path: `reponses.${i}.valeur`, message: r.question }]);
         }
         reviewed = await this.takeoffs.decide(tenant, reviewed.takeoff.id, { action: decision.primary.action, lineIds: decision.lineIds, pieceLineIds: decision.pieceLineIds ?? [] });
         continue;
       }
       const key = q?.key ?? r.question.replace(/^engine:/, "");
-      if (!/^(?:product:[a-z0-9_]{1,40}|param:[a-z0-9_]{1,40}(?:@[a-z0-9_-]{1,60})?|(?:role|precise):[0-9a-f-]{36}|comptoir:[0-9a-f-]{36}:\d{1,2}|fiche:[a-z0-9_]{1,60})$/.test(key)) throw validationFailed("Unknown question", [{ path: "question", message: r.question }]);
+      // Un bouton envoyé par son libellé ou par le mot du modèle (« bandeau ») vaut la valeur de son option (« 2 »).
+      const option = r.valeur === null ? undefined : (q?.options ?? []).find((o) => o.value !== r.valeur && (normalizeText(o.label) === normalizeText(r.valeur!) || normalizeText(o.label).split(" ").includes(normalizeText(r.valeur!))));
+      if (option) r = { ...r, valeur: option.value };
+      if (!/^(?:product:[a-z0-9_]{1,40}|param:[a-z0-9_]{1,40}(?:@[a-z0-9_-]{1,60})?|(?:role|precise):[0-9a-f-]{36}|comptoir:[0-9a-f-]{36}:\d{1,2}|fiche:[a-z0-9_]{1,60})$/.test(key)) throw validationFailed("Unknown question", [{ path: `reponses.${i}.question`, message: r.question }]);
       // §51.2 : une réponse écrite sous « Autre » (ni un bouton, ni un nombre) n'est jamais rangée dans une case sans être
       // relue : l'IA met la fiche à jour, règle la ou les questions qu'elle tranche, et peut en ouvrir une de plus.
       const written = r.valeur !== null && r.valeur.trim() !== "" && !/^\d+(?:[.,]\d+)?$/.test(r.valeur.trim()) && !(q?.options ?? []).some((o) => o.value === r.valeur);
       if (written && (key.startsWith("param:") || key.startsWith("fiche:"))) {
-        if (r.valeur!.trim().length > 300) throw validationFailed("Written answer must be at most 300 characters", [{ path: "valeur", message: r.question }]);
+        if (r.valeur!.trim().length > 300) throw validationFailed("Written answer must be at most 300 characters", [{ path: `reponses.${i}.valeur`, message: r.question }]);
         const relu = await this.takeoffs.relire(tenant, reviewed.takeoff.id, key, r.valeur!.trim());
         if (relu) {
           reviewed = relu.reviewed;
@@ -280,24 +285,24 @@ export class QuantitatifsService {
           continue;
         }
       }
-      if (key.startsWith("role:") && r.valeur !== "measure" && r.valeur !== "purchase") throw validationFailed("Role answer must be measure or purchase", [{ path: "valeur", message: r.question }]);
+      if (key.startsWith("role:") && r.valeur !== "measure" && r.valeur !== "purchase") throw validationFailed("Role answer must be measure or purchase", [{ path: `reponses.${i}.valeur`, message: r.question }]);
       let value: EngineAnswer;
       // « Autre » sur une qualité qui se nomme (« Ardoise d'Angers ») : le texte écrit, tel quel dans la désignation.
       const named = q?.named || reviewed.purchase.assumptions.some((a) => a.key === key && a.named);
       if (r.valeur === null || !key.startsWith("param:")) value = r.valeur;
       else if (named && !/^\d+(?:[.,]\d+)?$/.test(r.valeur.trim())) {
         const text = r.valeur.trim();
-        if (text === "" || text.length > 300) throw validationFailed("Written answer must be 1 to 300 characters", [{ path: "valeur", message: r.question }]);
+        if (text === "" || text.length > 300) throw validationFailed("Written answer must be 1 to 300 characters", [{ path: `reponses.${i}.valeur`, message: r.question }]);
         value = text;
       } else {
         // Une réponse pour tout le chantier (« param:faconnage ») vaut pour chaque pièce posée à part (« …@noue ») : même unité.
         const unit =
-          r.unite ??
+          (r.unite || undefined) ??
           q?.unit ??
           reviewed.purchase.assumptions.find((a) => a.key === key)?.unit ??
           reviewed.purchase.questions.find((d) => d.question?.key.startsWith(`${key}@`))?.question?.unit;
-        if (!unit) throw validationFailed("Missing unit", [{ path: "unite", message: r.question }]);
-        if (!/^\d+(?:[.,]\d+)?$/.test(r.valeur.trim())) throw validationFailed("Not a number", [{ path: "valeur", message: r.question }]);
+        if (!unit) throw validationFailed("Missing unit", [{ path: `reponses.${i}.unite`, message: r.question }]);
+        if (!/^\d+(?:[.,]\d+)?$/.test(r.valeur.trim())) throw validationFailed("Not a number", [{ path: `reponses.${i}.valeur`, message: r.question }]);
         value = { value: r.valeur.trim().replace(",", "."), unit };
       }
       reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, key, value);

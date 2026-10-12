@@ -420,12 +420,27 @@ export function cleDeQuestion(ref: Referential, plan: QuotePlan, q: LectureQuest
 export function questionDeLecture(ref: Referential, plan: QuotePlan, q: LectureQuestion, lignes?: readonly LigneLecture[]): Question {
   const key = cleDeQuestion(ref, plan, q, lignes);
   const def = ref.workItems.flatMap((w) => w.params).find((p) => p.key === q.cle);
-  const options = q.boutons.map((b) => ({ label: b.label, value: b.valeur }));
-  const unit = q.unite ?? def?.unit ?? "u";
+  // Retour du fondateur (2026-10-12, « Un champ n'est pas correctement rempli » après « En façade (bandeau) ») : un bouton
+  // du modèle dont la valeur est en mots (« bandeau ») prend la valeur du référentiel (« 2 ») quand la donnée en a une.
+  const options = q.boutons.map((b) => ({ label: b.label, value: def ? valeurDuReferentiel(def, b) : b.valeur }));
+  const unit = q.unite || def?.unit || "u";
   if (key.startsWith("product:")) return { key, kind: options.some((o) => o.value === "") ? "confirm_product" : "choose_product", text: q.texte, ...(options.length > 0 ? { options } : {}), named: true };
   // Une question sans boutons, ou dont la donnée se nomme (une teinte, un profil, une qualité) : la réponse s'écrit (« Autre »).
   const named = options.length === 0 || !def || def.named === true || (def.unit === "u" && !def.choices?.length);
   return { key, kind: key.startsWith("fiche:") ? "choose" : "param", text: q.texte, unit, ...(options.length > 0 ? { options } : {}), ...(named ? { named: true } : {}) };
+}
+
+/** La valeur du référentiel d'un bouton : la sienne si elle en est une, sinon celle du choix nommé par son libellé ou ses mots. */
+export function valeurDuReferentiel(def: { choices?: readonly { label: string; value: string }[]; textValues?: readonly { value: string; keywords: readonly string[] }[] }, b: { label: string; valeur: string }): string {
+  const choices = def.choices ?? [];
+  if (choices.length === 0 || choices.some((c) => c.value === b.valeur)) return b.valeur;
+  const dit = ` ${normalizeText(`${b.valeur} ${b.label}`)} `;
+  const parLibelle = choices.find((c) => normalizeText(c.label) === normalizeText(b.label) || normalizeText(c.label) === normalizeText(b.valeur));
+  if (parLibelle) return parLibelle.value;
+  const parMots = (def.textValues ?? []).find((t) => t.keywords.some((k) => dit.includes(` ${normalizeText(k)} `)) && choices.some((c) => c.value === t.value));
+  if (parMots) return parMots.value;
+  const parMot = choices.filter((c) => normalizeText(c.label).split(" ").some((w) => w.length > 3 && dit.includes(` ${w} `)));
+  return parMot.length === 1 ? parMot[0]!.value : b.valeur;
 }
 
 type Answers = Readonly<Record<string, EngineAnswer>>;
