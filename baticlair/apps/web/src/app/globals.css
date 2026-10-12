@@ -49,6 +49,8 @@
 :root {
   --nav-height: 64px;
   --nav-space: calc(var(--nav-height) + max(12px, env(safe-area-inset-bottom)) + 16px);
+  /* « Calculer ma liste », figé en bas de l'écran des questions : bouton (52 px), dégradé au-dessus (24 px), zone du geste. */
+  --calc-space: calc(52px + 24px + max(14px, env(safe-area-inset-bottom)) + 8px);
 }
 
 html {

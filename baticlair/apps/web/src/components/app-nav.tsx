@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 import { Home, Plus, Truck, UserRound, Warehouse } from "lucide-react";
 import { fr } from "@/lib/fr";
+import { useTyping } from "@/lib/typing";
 
 const items = [
   { href: "/", label: fr.nav.home, icon: Home, match: (p: string) => p === "/" },
@@ -23,26 +23,10 @@ export function AppNav() {
   const [left, right] = [items.slice(0, 2), items.slice(2)];
   // Le chat d'un chantier se lit en plein écran sur téléphone (référentiel §21) : le menu laisse la place à la barre de message.
   const inChat = /^\/chantiers\/(?!nouveau$)[^/]+$/.test(pathname);
-  const [typing, setTyping] = useState(false);
-
-  // La barre se cache pendant la saisie : elle laisse la place au champ et au clavier. Elle n'est JAMAIS recalée en
-  // JavaScript (retour du fondateur, 2026-10-12 : sur iPhone, l'ancien recalage sur visualViewport la plaçait au milieu
-  // de l'accueil) : `position: fixed; bottom: 0`, la zone du geste en marge intérieure, et Safari fait le reste.
-  useEffect(() => {
-    const editable = (el: EventTarget | null) =>
-      el instanceof HTMLElement &&
-      (el.isContentEditable || el.matches("textarea, select, input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]):not([type=file]):not([type=range])"));
-    const onFocusIn = (e: FocusEvent) => {
-      if (editable(e.target)) setTyping(true);
-    };
-    const onFocusOut = () => window.setTimeout(() => setTyping(editable(document.activeElement)), 0);
-    document.addEventListener("focusin", onFocusIn);
-    document.addEventListener("focusout", onFocusOut);
-    return () => {
-      document.removeEventListener("focusin", onFocusIn);
-      document.removeEventListener("focusout", onFocusOut);
-    };
-  }, []);
+  // La barre se cache pendant la saisie (`useTyping`). Elle n'est JAMAIS recalée en JavaScript (retour du fondateur,
+  // 2026-10-12 : sur iPhone, l'ancien recalage sur visualViewport la plaçait au milieu de l'accueil) : `position: fixed;
+  // bottom: 0`, la zone du geste en marge intérieure.
+  const typing = useTyping();
 
   const link = (item: (typeof items)[number]) => {
     const active = item.match(pathname);

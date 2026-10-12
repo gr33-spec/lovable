@@ -1331,10 +1331,10 @@ test("§49.9 : une ligne nomme une fourniture ; les heures et le forfait sont re
   await expect(without).toContainText("Accès toiture et mise en sécurité");
 });
 
-test("§50.2 : « Calculer ma liste » reste collé en bas de l'écran, même après avoir écrit sous « Autre »", async ({ page }) => {
-  // Retour du fondateur (2026-10-10, capture iPhone) : le bouton flottait au milieu de l'écran, des cartes passaient dessous.
-  // Sur iPhone, un élément « position: fixed » reste coincé à la hauteur du clavier une fois celui-ci refermé : la barre est
-  // « sticky », comme celle de la liste, et suit la page.
+test("§50.2 : « Calculer ma liste » reste collé en bas de l'écran, même après avoir écrit sous « Autre »", async ({ page }, info) => {
+  // Retours du fondateur (2026-10-10 puis 2026-10-12, captures iPhone) : le bouton flottait au milieu de l'écran une fois le
+  // clavier refermé. Sur téléphone : « position: fixed; bottom: 0 », la zone du geste en marge intérieure, caché pendant la
+  // saisie ; la place est gardée sous la dernière carte. Sur ordinateur : collé en bas de la colonne (sticky).
   await signUp(page);
   await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
   await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
@@ -1346,15 +1346,30 @@ test("§50.2 : « Calculer ma liste » reste collé en bas de l'écran, même ap
   await pente.getByRole("button", { name: "OK" }).click();
   const calculer = page.getByRole("button", { name: "Calculer ma liste", exact: true });
   const bar = page.getByRole("group", { name: "Calculer ma liste" });
-  await expect(bar).toHaveCSS("position", "sticky");
-  // En haut de la page : collé en bas de l'écran, rien ne passe sous la barre.
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await expect(calculer).toBeInViewport();
-  const box = (await bar.boundingBox())!;
-  expect(Math.abs(box.y + box.height - page.viewportSize()!.height)).toBeLessThan(2);
-  // Tout en bas : toujours là, sous la dernière question.
-  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  await expect(calculer).toBeInViewport();
+  const phone = info.project.name === "telephone";
+  await expect(bar).toHaveCSS("position", phone ? "fixed" : "sticky");
+  // Pendant la saisie, la barre laisse la place au clavier ; le champ refermé, elle revient.
+  if (phone) {
+    await pente.getByLabel("Autre valeur : Pente du toit ?").focus();
+    await expect(bar).toHaveAttribute("data-typing", "true");
+    await pente.getByLabel("Autre valeur : Pente du toit ?").blur();
+    await expect(bar).not.toHaveAttribute("data-typing");
+  }
+  const height = page.viewportSize()!.height;
+  for (const to of ["haut", "bas"] as const) {
+    await page.evaluate((t) => window.scrollTo(0, t === "bas" ? document.documentElement.scrollHeight : 0), to);
+    await page.waitForTimeout(300);
+    await expect(calculer).toBeInViewport();
+    const box = (await bar.boundingBox())!;
+    // Collée au bas de l'écran, jamais au milieu (sur ordinateur, en bas de page elle se pose sous la dernière carte).
+    if (phone || to === "haut") expect(Math.abs(box.y + box.height - height), `${to} de page : la barre est à ${Math.round(box.y)} px`).toBeLessThan(2);
+    if (to === "bas") {
+      // La dernière question s'arrête au-dessus du bouton.
+      const lastCard = (await questions.locator("li").last().boundingBox())!;
+      const button = (await calculer.boundingBox())!;
+      expect(lastCard.y + lastCard.height).toBeLessThanOrEqual(button.y);
+    }
+  }
 });
 
 test("Autre : quand la bonne réponse n'est pas dans les boutons, elle s'écrit (une pente de 38°)", async ({ page }) => {

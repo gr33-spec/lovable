@@ -6,6 +6,7 @@ import { ListScene, ReadingStage } from "@/components/chantier-scenes";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
 import type { ApiError, Takeoff } from "@/lib/api";
+import { useTyping } from "@/lib/typing";
 
 /*
  * §50 « Ce que voit l'artisan » (fondateur, 2026-10-09) : TROIS ÉCRANS, rien d'autre.
@@ -360,6 +361,7 @@ function cardErrors(error: ApiError | null, sent: readonly string[]): Map<string
 
 export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void }) {
   const questions = useMemo(() => counterQuestions(takeoff), [takeoff]);
+  const typing = useTyping();
   const [given, setGiven] = useState<Record<string, Given>>(() => {
     // « Comme d'habitude » : la réponse habituelle est déjà cochée, un tap la change.
     const start: Record<string, Given> = {};
@@ -424,9 +426,16 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
           </ol>
         </section>
       ))}
-      {/* Retour du fondateur (2026-10-10, capture iPhone) : en « fixed », le bouton restait coincé au milieu de l'écran une fois
-          le clavier refermé (case « Autre ») ; « sticky » suit la page, comme la barre de la liste. */}
-      <div role="group" aria-label="Calculer ma liste" className="sticky bottom-0 z-30 -mx-4.5 bg-gradient-to-t from-ground from-70% to-transparent px-4.5 pt-6 pb-[max(14px,env(safe-area-inset-bottom))] lg:mx-0 lg:px-0">
+      {/* Retour du fondateur (2026-10-12, capture iPhone) : le bouton restait accroché au milieu de l'écran une fois le clavier
+          refermé (case « Autre »). Sur téléphone : `position: fixed; bottom: 0`, la zone du geste en marge intérieure, caché
+          pendant la saisie (`useTyping`, qui fait aussi recalculer l'écran à Safari), et la place gardée sous la dernière carte. */}
+      <div aria-hidden="true" className="h-(--calc-space) lg:hidden" />
+      <div
+        role="group"
+        aria-label="Calculer ma liste"
+        data-typing={typing || undefined}
+        className={`${typing ? "max-lg:pointer-events-none max-lg:translate-y-full max-lg:opacity-0 " : ""}z-30 bg-gradient-to-t from-ground from-70% to-transparent pt-6 transition-[translate,opacity] duration-200 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:px-4.5 max-lg:pb-[max(14px,env(safe-area-inset-bottom))] lg:sticky lg:bottom-0 lg:pb-4`}
+      >
         <div className="mx-auto max-w-2xl">
           <Button
             className="w-full shadow-card!"
