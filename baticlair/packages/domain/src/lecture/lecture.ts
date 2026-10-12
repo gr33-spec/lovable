@@ -643,6 +643,17 @@ interface Asked {
   question: Question;
 }
 
+/**
+ * Une donnée « à préciser » déjà écrite dans le nom de la ligne : une mesure (épaisseur, diamètre, largeur, longueur,
+ * développé) quand le nom porte un nombre avec son unité (« 0,65 mm », « Ø80 »), ou le mot lui-même (« teinte gris »).
+ */
+function ecritDans(sujet: string, nom: string): boolean {
+  const s = normalizeText(sujet);
+  const n = normalizeText(nom);
+  if (/epaisseur|diametre|largeur|longueur|developpe|dimension|format|section/.test(s) && /\d+(?:[.,]\d+)?\s*(?:mm|cm|m)\b|o\s?\d{2,3}\b|\d+\s*x\s*\d+/.test(n)) return true;
+  return s.length > 3 && n.includes(s);
+}
+
 /** §50.3 : la raison orange en cinq mots au plus (« Modèle et teinte à préciser », « Développé à préciser »). */
 function raisonCourte(subjects: readonly string[]): string {
   // « modèle et teinte de tuile » → « Modèle et teinte » ; « raccord ZWC ou Pratikal » reste entier (c'est le choix qui compte).
@@ -782,9 +793,11 @@ function finishPurchase(
     const waits = estimated ? [] : [...new Set([...f.attend, ...strictWaits, ...assumed, ...blanked])].map((cle) => open(cle, line.ligne.ref)).filter((a): a is Asked => !!a);
     // Une quantité calculée n'attend que les questions du modèle ; une quantité encore vide attend aussi sa donnée du calcul.
     const pending = [...new Set([...(item.quantity === null ? (item.waitsOn ?? []) : []), ...waits.map((a) => a.key)])];
-    const preciser = f.aPreciser.length > 0 && ctx.answers[`a-preciser:${line.id}`] === undefined;
-    // (la règle « à préciser » de la ligne est aussi sa décision, « C'est bon » : voir plus bas)
-    const subjects = [...waits.map((a) => a.q.donnee), ...(preciser ? f.aPreciser : [])];
+    // Retour du fondateur (2026-10-12, §51.6) : « l'orange ne vient que d'une question sans réponse ou retirée ». Ce que le
+    // fournisseur précisera (profil, teinte) n'est pas une question : la ligne reste verte et le dit dans sa précision ;
+    // une donnée déjà écrite dans le nom de la ligne (l'épaisseur de « Bobine Quartz-Zinc 0,65 mm ») n'est jamais « à préciser ».
+    const fournisseur = ctx.answers[`a-preciser:${line.id}`] === undefined ? f.aPreciser.filter((t) => !ecritDans(t, `${item.label} ${f.nom}`)) : [];
+    const subjects = waits.map((a) => a.q.donnee);
     // Ce que l'artisan a répondu pour cette ligne : la réponse du calcul (« Espagne 1er choix ») avec le nom, celle d'une
     // question de la fiche avec sa question (« Marque des ardoises : Cupa »), pour le comptoir.
     const isFiche = (cle: string) => asked.find((a) => a.q.cle === cle)?.key.startsWith("fiche:") === true;
@@ -798,11 +811,11 @@ function finishPurchase(
     // Ce que l'artisan écrit pour une ligne « à préciser » (« Profil 1000 T, RAL 7016 ») part dans sa précision.
     const ecrit = ctx.answers[`a-preciser:${line.id}`];
     const precise = typeof ecrit === "string" && ecrit !== "ok" && ecrit !== "non" ? ecrit : null;
-    const precision = [f.precision, ...said].filter(Boolean).join(", ");
+    const precision = [f.precision, ...said, ...(fournisseur.length > 0 ? [`${raisonCourte(fournisseur).replace(/ à préciser$/, "")} à voir avec le fournisseur`] : [])].filter(Boolean).join(", ");
     // Ce que la ligne attend se dit par la question du modèle, jamais deux fois : les règles « manque » du calcul tombent.
     const kept = (item.rules ?? []).filter((r) => !r.key.startsWith("manque:"));
-    const rules = preciser ? [...kept, { key: `a-preciser:${line.id}`, text: `${f.aPreciser.join(", ")} à préciser avec le fournisseur`, said: true as const, local: true as const }] : kept;
-    const state = preciser ? ("to_confirm" as const) : item.state;
+    const rules = kept;
+    const state = item.state;
     if (subjects.length > 0) reasons.set(item.key, raisonCourte(subjects));
     const { waitsOn: _w, asks: _a, ...rest } = item;
     // Un modèle écrit par l'artisan sous « Autre » (« Ardoise d'Angers ») nomme la ligne : le calcul l'a déjà mis dans le nom.
@@ -850,15 +863,7 @@ function finishPurchase(
   }
   // Les décisions de la liste qui ne sont pas des questions du calcul (la quantité d'un modèle écrit par l'artisan) restent.
   for (const d of raw.questions) if (!/^(engine:|role:|comptoir:|precise:|a-preciser:[^:]+:\d+$)/.test(d.key) && !d.question && ctx.answers[d.key] === undefined) decisions.push(d);
-  // Les questions du modèle, chacune une décision de l'écran ; « C'est bon » pour une ligne que le fournisseur précisera.
-  for (const l of lignes) {
-    const f = l.fourniture;
-    if (!f || f.aPreciser.length === 0) continue;
-    const title = f.aPreciser.map((t, i) => (i === 0 ? t.charAt(0).toUpperCase() + t.slice(1) : t)).join(", ");
-    // §51.6 : sa question est sur la ligne, « C'est bon / Modifier » (comme la composition d'un tableau, §4 du référentiel
-    // électricité) ; jamais une question de plus à l'écran des questions (DE00000071 : exactement cinq, validé par le fondateur).
-    decisions.push({ key: `a-preciser:${l.id}`, state: "to_confirm", title, text: `${title} à préciser : écris-le dans le nom de la ligne, ou laisse le fournisseur proposer.`, lineIds: [l.id], primary: { action: "keep", label: "C'est bon" }, secondary: ["edit"] });
-  }
+  // Les questions du modèle, chacune une décision de l'écran (une ligne que le fournisseur précisera n'en est pas une, §51.6).
   for (const a of asked) {
     // Une question close sans réponse reste une décision de l'écran (elle se rouvre dans sa carte, §49.8).
     if (isAnswered(a) && ctx.answers[a.key] !== null) continue;

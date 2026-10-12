@@ -52,11 +52,12 @@ describe("§50.3 la carte d'une ligne : la raison orange en cinq mots au plus, r
     });
   }
 
-  it("D.2026.105 : « Modèle et teinte à préciser » sur la tuile, « Élément de rive à préciser » sur les fixations", () => {
+  it("D.2026.105 : « Élément de rive à préciser » sur les fixations (une question) ; la tuile, que le fournisseur précisera, n'a pas de raison orange", () => {
+    // Retour du fondateur (2026-10-12, §51.6) : « l'orange ne vient que d'une question sans réponse ou retirée ».
     const p = screen(D2026_105_LINES, D2026_105_READINGS);
     const reasons = p.screen.groups.flatMap((g) => g.rows).map((r) => [p.toBuy.find((b) => b.key === r.itemKey)?.label, r.reason]);
     expect(reasons).toEqual([
-      ["Tuile terre cuite mécanique", "Modèle et teinte à préciser"],
+      ["Tuile terre cuite mécanique", undefined],
       ["Fixations pour l'élément de rive", "Élément de rive à préciser"],
     ]);
   });

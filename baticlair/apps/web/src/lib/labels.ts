@@ -41,3 +41,11 @@ export function parseQuantity(text: string): { quantity: string; unit: string } 
   if (!m) return null;
   return { quantity: m[1]!.trim(), unit: (m[2] ?? "").trim() };
 }
+
+/**
+ * Retour du fondateur (2026-10-12) : « 222 ml : écris 222 m ». À l'écran, un mètre linéaire se dit « m » (« 13 m à
+ * couvrir »). Seul l'affichage change ; la quantité enregistrée et le calcul gardent leur unité.
+ */
+export function enMetres(text: string): string {
+  return text.replace(/(\d)\s*ml\b/g, "$1 m").replace(/^ml$/, "m");
+}
