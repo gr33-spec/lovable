@@ -26,7 +26,7 @@ export { TERRASSE_BOIS_REFERENTIAL } from "./data/terrasse-bois.js";
 export { PAVAGE_REFERENTIAL } from "./data/pavage.js";
 export { TERRASSEMENT_REFERENTIAL } from "./data/terrassement.js";
 export { ARROSAGE_REFERENTIAL } from "./data/arrosage.js";
-export { REFERENTIALS, METIER_NAMES, referentialFor, tradeIdOf, CONSTRUCTEUR_REFERENTIAL, METIERS_RELUS, MENTION_RATIOS, ratiosEnValidation } from "./registry.js";
+export { REFERENTIALS, METIER_NAMES, referentialFor, tradeIdOf, CONSTRUCTEUR_REFERENTIAL, METIERS_RELUS, MENTION_RATIOS, ratiosEnValidation, ratiosEnValidationDuDevis } from "./registry.js";
 export { composeReferentials } from "./compose.js";
 export { paramsFromContext, type ChantierContext, type SiteFact, type ContextConflict } from "./context.js";
 export { purchaseList, type PurchaseRow } from "./purchase-list.js";

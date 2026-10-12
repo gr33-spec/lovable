@@ -145,3 +145,9 @@ export function ratiosEnValidation(trade: string | null | undefined): boolean {
   const id = referentialFor(trade)?.trade ?? tradeIdOf((trade ?? "").split(",")[0] ?? "");
   return !METIERS_RELUS.includes(id);
 }
+
+/** §52 : un devis porte la mention dès que son métier ou l'un de ses lots n'a pas encore été relu par un artisan. */
+export function ratiosEnValidationDuDevis(lecture: { metier: string | null; lots: readonly { metier: string }[] } | null | undefined, trade: string | null | undefined): boolean {
+  const metiers = [lecture?.metier ?? trade, ...(lecture && lecture.lots.length > 1 ? lecture.lots.map((l) => l.metier) : [])];
+  return metiers.some((m) => ratiosEnValidation(m));
+}
