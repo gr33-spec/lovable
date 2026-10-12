@@ -88,6 +88,8 @@ export function qualityIssues(data: AppData, snap: Snapshot): QualityIssue[] {
     if (r.quality === "insufficient") push(`l-${l.id}`, "important", gL(l), gL(l).name, `${r.notes[r.notes.length - 1] ?? "Données insuffisantes"} : importer le tableau d'amortissement`, href);
     else if (r.quality === "estimated") push(`l-${l.id}`, "important", gL(l), gL(l).name, `${r.notes[0] ?? "Projection estimée"} : importer le tableau d'amortissement`, href);
     else if (!l.schedule) push(`ls-${l.id}`, "utile", gL(l), gL(l).name, "Tableau d'amortissement à importer (chiffres exacts de la banque)", href);
+    if (!(l.buildingId && data.buildings.some((b) => b.id === l.buildingId)))
+      push(`lb-${l.id}`, "utile", gL(l), gL(l).name, "Rattaché à aucun bien : indiquez le bien qu'il finance (sinon il figure à part dans le dossier banque), ou supprimez-le s'il n'existe plus", href);
     for (const d of missingDocuments(data, { loanId: l.id })) push(`doc-l-${l.id}-${d.id}`, "utile", gL(l), gL(l).name, `Document à ajouter : ${d.label}`, href);
   }
   // Vérification croisée (montant, taux, durée, mensualité, dates, doublons).
