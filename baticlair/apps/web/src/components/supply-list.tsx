@@ -134,6 +134,10 @@ export function SupplyList({
       <header className="mb-3 flex flex-col gap-0.5">
         <h2 className="font-display text-[22px] leading-tight font-extrabold tracking-[-0.01em]">Ton chantier</h2>
         <p className="text-[13px] text-muted">C&apos;est ce que reçoit le fournisseur.</p>
+        {/* §52 (retour du fondateur, 2026-10-12) : un métier pas encore relu par un artisan le dit, ici et dans le PDF. */}
+        {takeoff.ratiosEnValidation ? (
+          <p className="mt-1 self-start rounded-full bg-warn/10 px-2.5 py-1 text-[12px] font-extrabold text-warn">Ratios en cours de validation</p>
+        ) : null}
       </header>
       {takeoff.bref && takeoff.bref.length > 0 ? (
         <Brief takeoff={takeoff} editable={editable && Boolean(onBrief)} pending={pending} onBrief={onBrief} />

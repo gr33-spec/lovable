@@ -821,6 +821,8 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   await expect(list.getByRole("region", { name: "Suggestions" })).toHaveCount(0);
   await expect(list.getByText(/Écran|Liteaux|Pattes|Faîtage|égout/i)).toHaveCount(0);
   await expect(list.getByRole("button", { name: /Ardoises naturelles/ }).first()).toBeVisible();
+  // §52 : la couverture est relue (référentiel du fondateur) : pas de « Ratios en cours de validation ».
+  await expect(list.getByText("Ratios en cours de validation")).toHaveCount(0);
 
   // §50.7 : plus de voix ; tout se fait à la main, sur le document même.
   await expect(page.getByText(/à la voix/i)).toHaveCount(0);

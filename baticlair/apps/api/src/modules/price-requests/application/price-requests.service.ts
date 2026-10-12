@@ -1,4 +1,4 @@
-import { briefResume, briefSentence, briefTexte, communeOf, groupIdenticalLines, orderGaps, parseOrderText, parseUnit, withoutLabour, writtenNumber, type OrderGap, type OrderedLine } from "@baticlair/domain";
+import { briefResume, briefSentence, briefTexte, communeOf, ratiosEnValidation, groupIdenticalLines, orderGaps, parseOrderText, parseUnit, withoutLabour, writtenNumber, type OrderGap, type OrderedLine } from "@baticlair/domain";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { DocumentsService } from "../../documents/index.js";
@@ -123,6 +123,8 @@ export function buildPacket(
     detail,
     joindre_detail: options.joindreDetail,
     question_lien: null,
+    // §52 : le métier pas encore relu par un artisan le dit au fournisseur (« Ratios en cours de validation »).
+    ...(ratiosEnValidation(takeoff.lecture?.metier ?? takeoff.trade) ? { ratios_en_validation: true } : {}),
     ...(croquis.length > 0 ? { croquis } : {}),
     fournitures,
     phrase: briefSentence(brief),

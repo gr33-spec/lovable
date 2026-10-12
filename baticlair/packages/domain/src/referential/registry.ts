@@ -130,3 +130,18 @@ export function referentialFor(trade: string | null | undefined): Referential | 
   }
   return null;
 }
+
+/**
+ * §52 (décision du 11 octobre) : « Tant que le référentiel d'un métier n'a pas été relu par un artisan de ce métier, le
+ * métier porte dans l'app la mention « ratios en cours de validation » sur l'écran 3 et dans le PDF fournisseur. »
+ * Retour du fondateur (2026-10-12) : électricité, maçonnerie, carrelage et tout métier pas encore relu ; pas la
+ * couverture. Le référentiel couverture-étanchéité est le sien : couverture et étanchéité sont relues.
+ */
+export const METIERS_RELUS: readonly string[] = ["roofing", "waterproofing"];
+export const MENTION_RATIOS = "Ratios en cours de validation";
+
+/** Le métier du devis (celui de son tiroir) n'a pas encore été relu par un artisan : la mention §52 s'affiche. */
+export function ratiosEnValidation(trade: string | null | undefined): boolean {
+  const id = referentialFor(trade)?.trade ?? tradeIdOf((trade ?? "").split(",")[0] ?? "");
+  return !METIERS_RELUS.includes(id);
+}
