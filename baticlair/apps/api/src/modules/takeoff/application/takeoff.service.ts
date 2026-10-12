@@ -43,6 +43,7 @@ import {
   ficheCorrigee,
   type FicheChantier,
   ecranDeLecture,
+  ecranParLots,
   exportPourLecture,
   ficheAvecBref,
   lectureDepuisLignes,
@@ -471,7 +472,19 @@ export class TakeoffService {
     // MULTIMÉTIER (§52, directive du fondateur, 2026-10-12 : « fais en sorte que l'appli fonctionne en multi métiers ») :
     // le métier est celui que l'IA lit dans le devis, pas celui du compte. Un devis d'électricien déposé chez un couvreur
     // est relu une fois avec le référentiel de l'électricité (un appel de plus, seulement dans ce cas), et calculé avec lui.
-    const autre = result.status === "success" && result.output ? metierAutre(result.output, trade) : null;
+    // Un devis à plusieurs lots (électricité, VMC, sanitaire) : relu une fois avec le référentiel de CHAQUE lot, pour que
+    // chaque fourniture soit nommée et rattachée à l'ouvrage de son métier (§52 : « une liste par lot, chacun avec son
+    // référentiel »).
+    const lotsAutres = result.status === "success" && result.output ? metiersDesLots(result.output, trade) : [];
+    if (lotsAutres.length > 0) {
+      const texte = [trade, ...lotsAutres].map((m) => referentialFor(m)).filter((r): r is Referential => r !== null).map((r) => `=== Référentiel ${tradeProfile(r.trade).label} (${r.trade}) ===\n${exportPourLecture(r)}`).join("\n\n");
+      const relu = await lecteur.lire({ document, trade, tradeLabel: tradeProfile(trade).label, referentiel: texte, siteNotes });
+      if (relu) {
+        cost += await this.record(tenant, doc, counted, prepared.processingId, analysisId, 2, relu, LECTURE_PROMPT);
+        if (relu.status === "success" && relu.output && relu.output.lots.length > 1) result = relu;
+      }
+    }
+    const autre = lotsAutres.length === 0 && result.status === "success" && result.output ? metierAutre(result.output, trade) : null;
     if (autre) {
       const relu = await lire(autre, referentialFor(autre));
       if (relu) {
@@ -572,8 +585,14 @@ export class TakeoffService {
       const siteNotes = (await this.reading.projectNotes?.(tenant, projectId)) ?? null;
       const lire = (t: string, r: Referential | null) => lecteur.lire({ document: { numberedText, imagePdf: null, imagePages: [] }, trade: t, tradeLabel: tradeProfile(t).label, referentiel: r ? exportPourLecture(r) : "Aucun référentiel pour ce métier.", siteNotes });
       let result = await lire(trade, ref);
-      // §52 : le métier lu dans les lignes l'emporte sur celui du compte (relu une fois avec son référentiel).
-      const autre = result && result.status === "success" && result.output ? metierAutre(result.output, trade) : null;
+      // §52 : plusieurs lots : relu une fois avec le référentiel de chaque lot ; un seul autre métier : relu avec le sien.
+      const lotsAutres = result && result.status === "success" && result.output ? metiersDesLots(result.output, trade) : [];
+      if (lotsAutres.length > 0) {
+        const texte = [trade, ...lotsAutres].map((m) => referentialFor(m)).filter((r): r is Referential => r !== null).map((r) => `=== Référentiel ${tradeProfile(r.trade).label} (${r.trade}) ===\n${exportPourLecture(r)}`).join("\n\n");
+        const relu = await lecteur.lire({ document: { numberedText, imagePdf: null, imagePages: [] }, trade, tradeLabel: tradeProfile(trade).label, referentiel: texte, siteNotes });
+        if (relu && relu.status === "success" && relu.output && relu.output.lots.length > 1) result = relu;
+      }
+      const autre = lotsAutres.length === 0 && result && result.status === "success" && result.output ? metierAutre(result.output, trade) : null;
       if (autre) {
         const relu = await lire(autre, referentialFor(autre));
         if (relu && relu.status === "success" && relu.output) {
@@ -1169,10 +1188,12 @@ export class TakeoffService {
     const input = { ref, lecture: lue, answers: takeoff.answers, preferences, options: { acceptDraft: true }, extraFacts, ids, lines };
     // §47.1 : une règle « à vérifier » sort orange (« Quantité à confirmer »), « C'est bon » la passe au vert ;
     // §47.4 : une règle validée par trois entreprises est verte partout ; l'écran est rejoué avec ces règles.
-    let e = ecranDeLecture({ ...input, validated: new Set<string>() });
+    // §52 : un devis à plusieurs lots se calcule lot par lot, chacun avec le tiroir de son métier (une section par lot).
+    const ecran = (v: ReadonlySet<string>) => (lue.lots.length > 1 ? ecranParLots({ ...input, validated: v, refDe: (m) => referentialFor(m) }) : ecranDeLecture({ ...input, validated: v }));
+    let e = ecran(new Set<string>());
     const ruleKeys = [...new Set(e.purchase.toBuy.flatMap((b) => (b.rules ?? []).filter((r) => !r.local).map((r) => r.key)))];
     const validated = ruleKeys.length > 0 ? ((await this.reading.rules?.validated(ruleKeys)) ?? new Set<string>()) : new Set<string>();
-    if (validated.size > 0) e = ecranDeLecture({ ...input, validated });
+    if (validated.size > 0) e = ecran(validated);
     // §41.4 : les mots de l'artisan (libellé, quantité, précision réécrits d'un tap) remplacent ceux de BatiClair.
     const purchase = applyPurchaseOverrides(e.purchase, takeoff.answers);
     const brief = siteBrief({ ref, plan: e.plan, answers: takeoff.answers, lines: e.lignes.map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit })), context: takeoff.context ?? {}, ville: communeOf(address) });
@@ -1307,4 +1328,12 @@ export function metierAutre(lecture: LectureDevis, tradeDonne: string): string |
   if (lu === donne || donne === "general") return null;
   // Un artisan multi-métiers (« roofing,electrical ») : le métier lu fait partie des siens, il est pris tel quel.
   return referentialFor(lu)?.trade === lu ? lu : null;
+}
+
+/** §52 : les métiers des lots d'un devis à plusieurs lots qui ont un tiroir et ne sont pas celui donné à la lecture. */
+export function metiersDesLots(lecture: LectureDevis, tradeDonne: string): string[] {
+  if (lecture.lots.length < 2) return [];
+  const donne = referentialFor(tradeDonne)?.trade ?? tradeIdOf(tradeDonne.split(",")[0] ?? "");
+  if (donne === "general") return [];
+  return [...new Set(lecture.lots.map((l) => tradeIdOf(l.metier)))].filter((m) => m !== donne && referentialFor(m)?.trade === m);
 }

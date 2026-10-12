@@ -115,6 +115,15 @@ export function SupplyList({
   const unsent = rows.filter((r) => articleOf(r) && !selection?.sent.has(articleOf(r)!));
   const unsentToCheck = unsent.filter((r) => r.status === "check").length;
   const ordered = [...rows.filter((r) => r.status === "check"), ...rows.filter((r) => r.status !== "check")];
+  // §52 (directive du fondateur, 2026-10-12 : « multi métiers ») : un devis à plusieurs lots donne une section par lot
+  // (« Électricité », « Sanitaire »), chacune avec ses lignes, les oranges d'abord ; un devis d'un seul lot, une liste.
+  const parLot = screen.groups.some((g) => g.key.startsWith("lot:"));
+  const sections = parLot
+    ? screen.groups.map((g) => {
+        const own = g.rows.filter((r) => !hidden(r));
+        return { key: g.key, label: g.label as string | null, rows: [...own.filter((r) => r.status === "check"), ...own.filter((r) => r.status !== "check")] };
+      }).filter((x) => x.rows.length > 0)
+    : [{ key: "liste", label: null as string | null, rows: ordered }];
   // Les lignes qu'on peut cocher : prêtes (pas orange), avec un article, pas encore parties à part.
   const selectable = rows.filter((r) => r.status !== "check" && articleOf(r) && !selection?.sent.has(articleOf(r)!)).map((r) => articleOf(r)!);
   const allChecked = selectable.length > 0 && selectable.every((k) => checked.has(k));
@@ -179,8 +188,29 @@ export function SupplyList({
         </span>
       </p>
       {selecting ? <p className="mb-2 text-[14px] leading-snug font-bold text-ink">Coche ce qui part chez ce fournisseur. Le reste pourra partir chez un autre.</p> : null}
-      <ul aria-label="Fournitures" className="flex flex-col divide-y divide-line rounded-[20px] border border-[#dde1e8] bg-surface">
-        {ordered.map((r) => (
+      {sections.map((section) => (
+      <div key={section.key} className={section.label ? "mt-3 first:mt-0" : ""}>
+      {section.label ? (
+        <h4 className="mb-1.5 flex min-h-10 items-center justify-between gap-2 px-1 text-[15px] font-extrabold">
+          <span>{section.label}</span>
+          {/* §52 : chaque lot part chez son négoce : en sélection, un tap coche tout ce lot (ses lignes prêtes). */}
+          {selecting ? (
+            <button
+              type="button"
+              onClick={() => setChecked(new Set(section.rows.filter((r) => r.status !== "check" && articleOf(r) && !selection?.sent.has(articleOf(r)!)).map((r) => articleOf(r)!)))}
+              className="inline-flex min-h-10 items-center rounded-full bg-accent/10 px-3 text-[13px] font-extrabold text-accent-text active:bg-accent/20"
+            >
+              Cocher ce lot
+            </button>
+          ) : (
+            <span className="text-[13px] font-bold text-muted">
+              {section.rows.length} ligne{section.rows.length > 1 ? "s" : ""}
+            </span>
+          )}
+        </h4>
+      ) : null}
+      <ul aria-label={section.label ? `Fournitures · ${section.label}` : "Fournitures"} className="flex flex-col divide-y divide-line rounded-[20px] border border-[#dde1e8] bg-surface">
+        {section.rows.map((r) => (
           <Row
             key={r.key}
             {...(selection && articleOf(r) && selection.sent.has(articleOf(r)!) ? { sentTo: selection.sent.get(articleOf(r)!)! } : {})}
@@ -216,6 +246,8 @@ export function SupplyList({
           />
         ))}
       </ul>
+      </div>
+      ))}
       {/* §49.9 : les lignes du devis sans fourniture (heures, forfait, évacuation) ne sont pas dans la liste et ne partent
           jamais ; repliées, fermées par défaut, pour que l'artisan voie qu'elles ont été lues. */}
       {takeoff.sansFourniture && takeoff.sansFourniture.length > 0 ? (
