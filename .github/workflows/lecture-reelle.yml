@@ -1,0 +1,78 @@
+name: Vraie lecture (Opus)
+
+# Directive du fondateur (2026-10-12) : « Le double de test ne remplace pas le modèle. » Avant de fusionner un changement
+# de lecture, la vraie lecture tourne sur DE00000071 et 7954 ; le bref et les questions sont imprimés mot pour mot dans le
+# journal, puis contrôlés contre le résultat attendu.
+#
+# Lancée seulement à la demande (un appel au modèle coûte) : en posant l'étiquette « lecture-reelle » sur la PR.
+# Pour relancer : retirer l'étiquette, la remettre.
+#
+# Les PDF réels ne sont jamais dans le dépôt :
+# - DE00000071 : le devis anonymisé de test/support, régénéré à la volée ;
+# - 7954 : pièce jointe « 7954.pdf » de la pré-version privée « lecture-reelle-pdfs » (hors historique git) ; absente,
+#   l'étape le dit et passe.
+on:
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: baticlair
+
+jobs:
+  lecture:
+    if: github.event.label.name == 'lecture-reelle'
+    name: Vraie lecture DE00000071 et 7954
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BATICLAIR_ANTHROPIC_KEY: ${{ secrets.BATICLAIR_ANTHROPIC_KEY }}
+      # `prisma generate` (postinstall) lit la config ; aucune connexion n'est ouverte.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/inutilisee
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: baticlair/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: baticlair/.nvmrc
+          cache: pnpm
+          cache-dependency-path: baticlair/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @baticlair/domain build
+      - name: La clé est-elle là ?
+        run: |
+          if [ -z "$BATICLAIR_ANTHROPIC_KEY" ]; then echo "::error::Secret BATICLAIR_ANTHROPIC_KEY absent"; exit 1; fi
+          echo "Secret BATICLAIR_ANTHROPIC_KEY présent (valeur jamais affichée)."
+      - name: DE00000071
+        id: de00000071
+        continue-on-error: true
+        working-directory: baticlair/apps/api
+        run: pnpm exec tsx scripts/lecture-reelle.ts fixture:DE00000071 DE00000071
+      - name: Récupérer le PDF 7954 (hors dépôt)
+        id: pdf7954
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/pdf"
+          if gh release download lecture-reelle-pdfs --repo "$GITHUB_REPOSITORY" --pattern 7954.pdf --dir "$RUNNER_TEMP/pdf"; then
+            echo "present=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::PDF 7954 absent (pré-version « lecture-reelle-pdfs », pièce jointe « 7954.pdf ») : lecture 7954 non lancée."
+            echo "present=0" >> "$GITHUB_OUTPUT"
+          fi
+      - name: "7954"
+        id: l7954
+        if: steps.pdf7954.outputs.present == '1'
+        continue-on-error: true
+        working-directory: baticlair/apps/api
+        run: pnpm exec tsx scripts/lecture-reelle.ts "$RUNNER_TEMP/pdf/7954.pdf" 7954
+      - name: Bilan
+        if: always()
+        run: |
+          echo "DE00000071 : ${{ steps.de00000071.outcome }} ; 7954 : ${{ steps.l7954.outcome || 'non lancée' }}"
+          if [ "${{ steps.de00000071.outcome }}" != "success" ] || [ "${{ steps.l7954.outcome }}" = "failure" ]; then exit 1; fi

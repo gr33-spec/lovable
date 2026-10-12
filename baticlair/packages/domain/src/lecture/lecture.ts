@@ -736,7 +736,10 @@ function finishPurchase(
     const estimated = (item.rules ?? []).some((r) => r.key.startsWith("estimation:"));
     const strictWaits = ctx.engine.filter((n) => item.needIds.includes(n.needId)).map((n) => ctx.precisionWaits.get(`${n.workItemId}/${n.needId}`)).filter((c): c is string => !!c);
     const assumed = asked.filter((a) => a.q.ligne === null && unresolved(a) && item.assumptionKeys.includes(`param:${a.q.cle}`)).map((a) => a.q.cle);
-    const waits = estimated ? [] : [...new Set([...f.attend, ...strictWaits, ...assumed])].map((cle) => open(cle, line.ligne.ref)).filter((a): a is Asked => !!a);
+    // Retour du fondateur (2026-10-12) : « Crochets de gouttière ? dév. ? » ne sort jamais vert ; une donnée restée en « ? »
+    // dans l'article calculé attend la question du modèle sur cette donnée, comme la ligne qui l'écrit (§49.2).
+    const blanked = /\?/.test(item.label) ? ctx.engine.filter((n) => item.needIds.includes(n.needId)).flatMap((n) => n.unknownParams ?? []) : [];
+    const waits = estimated ? [] : [...new Set([...f.attend, ...strictWaits, ...assumed, ...blanked])].map((cle) => open(cle, line.ligne.ref)).filter((a): a is Asked => !!a);
     // Une quantité calculée n'attend que les questions du modèle ; une quantité encore vide attend aussi sa donnée du calcul.
     const pending = [...new Set([...(item.quantity === null ? (item.waitsOn ?? []) : []), ...waits.map((a) => a.key)])];
     const preciser = f.aPreciser.length > 0 && ctx.answers[`a-preciser:${line.id}`] === undefined;

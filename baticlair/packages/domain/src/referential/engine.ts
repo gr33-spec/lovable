@@ -1079,6 +1079,8 @@ function computeNeed(
     // Précision au comptoir (§45.3) : « {longueur_bande|m} » s'écrit avec la valeur du chantier ; une valeur
     // inconnue ou en fourchette retire la précision plutôt que d'écrire un chiffre douteux. « {x|mm#} » : le nombre
     // seul, dans cette unité (« bobineau 500 × 17 m »).
+    // Les données laissées en « ? » dans la désignation (« Crochets de gouttière ? dév. ? ») : la ligne les attend (§49.2).
+    const blanked: string[] = [];
     const render = (template: string, blank = false, sentence = false): string | undefined => {
       const traceLen = trace.length;
       const missingLen = missing.length;
@@ -1102,7 +1104,10 @@ function computeNeed(
           if (written) return written;
           const v = valueOf(name);
           // §49.2.5 : la donnée qui manque reste un « ? » dans la désignation (« dév. ? »), jamais une valeur devinée.
-          if (blank && (!isPoint(v) || !v.lo.isFinite())) return "?";
+          if (blank && (!isPoint(v) || !v.lo.isFinite())) {
+            if (!sentence) blanked.push(name);
+            return "?";
+          }
           if (!isPoint(v) || !v.lo.isFinite()) throw new Error("précision incalculable");
           const bare = unitSpec?.endsWith("#") ?? false;
           const unitText = bare ? unitSpec!.slice(0, -1) : unitSpec;
@@ -1132,6 +1137,9 @@ function computeNeed(
     // Elle s'écrit dès que SES données sont connues (le développé inconnu ne change pas un bobineau de 500 mm).
     const designation = rule.designation ? render(rule.designation, options.blankUnknown === true && options.quantityOnly === true) : undefined;
     const withQuote = designation?.includes(DEVIS_MARK) ? designation : undefined;
+    // Retour du fondateur (2026-10-12) : un article dont la désignation garde un « ? » n'est jamais vert ; il attend la même
+    // question que l'ouvrage (le développé de la gouttière pour ses crochets), et une réponse règle toutes ses lignes.
+    for (const name of blanked) if (!unknownParams.includes(name)) unknownParams.push(name);
     return {
       ...base,
       ...(designation !== undefined ? { label: withoutDevisMark(designation) } : {}),

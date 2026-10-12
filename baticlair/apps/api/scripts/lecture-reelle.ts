@@ -7,7 +7,10 @@
  * au modèle de lecture (AnthropicLectureReader, le même qu'en production), puis le bref et les questions imprimés mot
  * pour mot et le contrôle du résultat attendu (§6 du référentiel électricité pour 7954, §51.5 pour DE00000071).
  *
- *   BATICLAIR_ANTHROPIC_KEY=… pnpm exec tsx scripts/lecture-reelle.ts <devis.pdf> <7954|DE00000071> [sortie.json]
+ *   BATICLAIR_ANTHROPIC_KEY=… pnpm exec tsx scripts/lecture-reelle.ts <devis.pdf | fixture:DE00000071> <7954|DE00000071> [sortie.json]
+ *
+ * En CI : le workflow « Vraie lecture » (`.github/workflows/lecture-reelle.yml`), lancé par l'étiquette « lecture-reelle »
+ * sur une PR, avec le secret BATICLAIR_ANTHROPIC_KEY ; le bref et les questions sont dans le journal du job.
  *
  * Le PDF reste hors du dépôt. La sortie JSON (lecture complète) est écrite là où on le demande, jamais commitée.
  */
@@ -18,6 +21,7 @@ import { DEVIS_7954 } from "../../../packages/domain/test/devis-reels/devis-7954
 import { extractPdfPages } from "../src/modules/documents/infrastructure/pdf-pages.js";
 import { PdfJsPdfReader } from "../src/modules/documents/infrastructure/pdfjs-pdf-reader.js";
 import { AnthropicLectureReader } from "../src/modules/takeoff/infrastructure/anthropic-lecture-reader.js";
+import { DE00000071_PDF } from "../test/support/de00000071-pdf.js";
 
 const DEVIS: Record<string, { trade: string; lignes: readonly LigneDuDevis[]; controle: (l: LectureDevis, d: readonly LigneDuDevis[]) => string[] }> = {
   "7954": { trade: "electrical", lignes: DEVIS_7954, controle: controleLecture7954 },
@@ -28,7 +32,7 @@ async function main(): Promise<number> {
   const [pdfPath, quel, sortie] = process.argv.slice(2);
   const devis = quel ? DEVIS[quel] : undefined;
   if (!pdfPath || !devis) {
-    console.error(`Usage : tsx scripts/lecture-reelle.ts <devis.pdf> <${Object.keys(DEVIS).join("|")}> [sortie.json]`);
+    console.error(`Usage : tsx scripts/lecture-reelle.ts <devis.pdf | fixture:DE00000071> <${Object.keys(DEVIS).join("|")}> [sortie.json]`);
     return 2;
   }
   const apiKey = process.env.BATICLAIR_ANTHROPIC_KEY ?? process.env.ANTHROPIC_API_KEY;
@@ -40,7 +44,8 @@ async function main(): Promise<number> {
   const effort = (process.env.AI_EXTRACTION_EFFORT ?? "high") as "low" | "medium" | "high" | "xhigh" | "max";
 
   // Le devis lu comme au dépôt : texte numéroté des pages propres, image des autres, et le PDF entier.
-  const bytes = new Uint8Array(readFileSync(pdfPath));
+  // « fixture:DE00000071 » : le devis anonymisé du dépôt (test/support), régénéré à la volée ; sinon un PDF hors dépôt.
+  const bytes = pdfPath === "fixture:DE00000071" ? await DE00000071_PDF() : new Uint8Array(readFileSync(pdfPath));
   const content = await new PdfJsPdfReader().read(bytes, { maxPages: 60 });
   const profile = tradeProfile(devis.trade);
   const text: string[] = [];
