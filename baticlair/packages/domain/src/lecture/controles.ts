@@ -152,3 +152,25 @@ export function controleLectureDe00000071(lecture: LectureDevis, devis: readonly
   }
   return out;
 }
+
+/**
+ * D.2026.105 (réparation, retour du fondateur, 2026-10-12 : « Tout à l'heure ça me demandait la couleur et le modèle »,
+ * puis une lecture sans aucune question et la tuile verte) : 20 tuiles « identiques à l'existant » sans modèle écrit.
+ * Le modèle et la teinte de la tuile sont UNE question, que la fourniture tuile attend ; la tuile n'est jamais verte
+ * sans eux. Les lignes de main-d'œuvre et d'évacuation n'ont pas de fourniture.
+ */
+export function controleLectureD2026105(lecture: LectureDevis, devis: readonly LigneDuDevis[]): string[] {
+  const out: string[] = [];
+  if (lecture.metier !== "roofing") out.push(`Métier : « ${lecture.metier ?? "rien"} » au lieu de « roofing » (couverture)`);
+  out.push(...lignesAbsentes(lecture, devis));
+  const tuileQ = lecture.questions.filter((q) => /tuile/.test(n(`${q.texte} ${q.donnee}`)) && /modele|teinte|reference|couleur|coloris/.test(n(`${q.texte} ${q.donnee}`)));
+  if (tuileQ.length === 0) out.push("Question absente : modèle et teinte de la tuile");
+  if (tuileQ.length > 1) out.push(`Questions : ${tuileQ.length} sur la tuile, une seule attendue (modèle et teinte ensemble)`);
+  const tuiles = lecture.lignes.flatMap((l) => l.fournitures).filter((f) => /tuile/.test(n(f.nom)) && !/rive/.test(n(f.nom)));
+  if (tuiles.length === 0) out.push("Fourniture absente : la tuile terre cuite mécanique");
+  for (const f of tuiles) {
+    const attendue = tuileQ.some((q) => f.attend.includes(q.cle));
+    if (!attendue && f.aPreciser.length === 0) out.push(`Tuile sans question ni « à préciser » : « ${f.nom} » sortirait verte sans modèle ni teinte`);
+  }
+  return out;
+}
