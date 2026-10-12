@@ -565,6 +565,21 @@ export function ecranDeLecture(input: {
     if (habit !== undefined && answers[question.key] === undefined) return [];
     return [{ q, key: question.key, question }];
   });
+  // §51.3, §51.6 (retour du fondateur, 2026-10-12, D.2026.105 : « la teinte et la réf répondues n'apparaissent ni dans la
+  // désignation ni dans la précision ») : le temps trois reçoit TOUTES les réponses du temps deux comme données écrites.
+  // Une question de la deuxième vague (`fiche:<donnée>`, ouverte par la relecture) est dans la fiche, pas dans la
+  // lecture : répondue, elle rejoint les questions posées, pour que sa réponse aille à sa ligne.
+  for (const [key, v] of Object.entries(answers)) {
+    if (!key.startsWith("fiche:") || v === undefined || v === null) continue;
+    const cle = key.slice("fiche:".length);
+    if (asked.some((a) => a.key === key || a.q.cle === cle)) continue;
+    const d = lecture.fiche.donnees.find((x) => x.cle === cle);
+    const donnee = (d?.libelle ?? cle.replace(/_/g, " ")).toLowerCase();
+    const texte = d?.question ?? `${donnee.charAt(0).toUpperCase()}${donnee.slice(1)} ?`;
+    const boutons = (d?.boutons ?? []).map((b) => ({ label: b.label, valeur: b.valeur }));
+    const q: LectureQuestion = { cle, texte, boutons, unite: null, donnee, ligne: null };
+    asked.push({ q, key, question: { key, kind: "choose", text: texte, ...(boutons.length > 0 ? { options: boutons.map((b) => ({ label: b.label, value: b.valeur })) } : {}), named: true } });
+  }
   // Temps deux (directive du fondateur, 2026-10-12) : « Article ajouté à la main sans unité : orange avec question « unité ? »
   // (case avec unité), jamais vert sans unité (51.6). » Une fourniture reprise telle qu'écrite (aucun ouvrage du référentiel),
   // avec une quantité et sans unité, et dont le modèle ne demande rien : sa question d'unité, sur sa ligne.
@@ -626,7 +641,7 @@ export function ecranDeLecture(input: {
   const viewLines = generiques().map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: input.lines?.get(l.id)?.confirmed ?? false, enteredByArtisan: input.lines?.get(l.id)?.enteredByArtisan ?? false }));
   const view = artisanView(viewLines, validation, { needs: engine.needs, questions, declined: engine.declined }, { plan, roles: roleOf, ref });
   const raw = purchaseView(view, { ...engine, questions }, { plan, roles: roleOf, ref, validation });
-  const purchase = finishPurchase(raw, { ref, plan, lignes, asked: live, answers, validated: input.validated, interdits: input.interdits !== false, customProducts: engine.customProducts, engine: [...engine.needs, ...(engine.unknowns ?? [])], precisionWaits, answers_: answers, notes: lecture.notes, points });
+  const purchase = finishPurchase(raw, { ref, plan, lignes, asked: live, posees: asked, answers, validated: input.validated, interdits: input.interdits !== false, customProducts: engine.customProducts, engine: [...engine.needs, ...(engine.unknowns ?? [])], precisionWaits, answers_: answers, notes: lecture.notes, points });
   // Une question close sans réponse (null) qu'aucune ligne n'attend (le calcul a sa valeur par défaut) ne bloque pas l'envoi :
   // elle n'a plus de ligne orange où se régler. Celle qu'une ligne attend reste, avec ses boutons sur la ligne (§51.6).
   const waited = new Set(purchase.toBuy.flatMap((b) => b.waitsOn ?? []));
@@ -668,6 +683,11 @@ export function precisionPropre(precision: string, label: string): string {
     const cle = normalizeText(m);
     if (vus.has(cle)) continue;
     vus.add(cle);
+    // Une réponse « Teinte : bleu-noir » quand la désignation dit déjà « bleu-noir » n'apporte rien (§51.6).
+    // Une valeur que le nom donne comme un choix encore ouvert (« acier galvanisé ou zinc ») reste : la réponse le tranche.
+    const reponse = normalizeText(/^[^:]{2,40}\s:\s(.+)$/.exec(m)?.[1] ?? m);
+    const nom = normalizeText(label);
+    if (reponse && nom.includes(reponse) && !nom.includes(`${reponse} ou `) && !nom.includes(` ou ${reponse}`)) continue;
     morceaux.push(m);
   }
   if (sujets.length > 0) morceaux.splice(place < 0 ? morceaux.length : place, 0, `${sujets.join(", ")} : au choix du fournisseur`);
@@ -756,6 +776,8 @@ function finishPurchase(
     plan: QuotePlan;
     lignes: readonly LigneLecture[];
     asked: readonly Asked[];
+    /** Toutes les questions posées (les deux vagues), répondues comprises, même celles que le calcul n'attend plus. */
+    posees: readonly Asked[];
     answers: Answers;
     validated: ReadonlySet<string> | undefined;
     interdits: boolean;
@@ -803,7 +825,7 @@ function finishPurchase(
     return (lineRef ? mine.find((a) => a.q.ligne === lineRef) : undefined) ?? mine.find((a) => a.q.ligne === null) ?? mine[0];
   };
   const answered = (cle: string) => {
-    const a = asked.find((x) => x.q.cle === cle);
+    const a = ctx.posees.find((x) => x.q.cle === cle);
     const v = a ? ctx.answers[a.key] : undefined;
     if (!a || v === undefined || v === null) return null;
     const value = typeof v === "string" ? v : v.value;
@@ -828,9 +850,14 @@ function finishPurchase(
       const waits = [...new Set([...unknown, ...named, ...assumed])].map((cle) => open(cle)).filter((a): a is Asked => !!a);
       const pending = [...new Set([...(item.waitsOn ?? []), ...waits.map((a) => a.key)])];
       if (waits.length > 0) reasons.set(item.key, raisonCourte(waits.map((a) => a.q.donnee)));
+      // §51.6 : un article que le calcul tire d'une ligne (la bobine des bacs) porte aussi les réponses de cette ligne.
+      const source = item.lineIds.map((id) => byLine.get(id)).find((l): l is LigneLecture => !!l?.fourniture);
+      const nomCalcule = item.label.replace(/\s*(?:d[ée]v\.\s*)?\S*\?\S*/g, "").replace(/\s{2,}/g, " ").trim() || item.label;
+      const lues = source ? reponsesDeLaLigne(ctx.posees, ctx.answers, source, source.fourniture!, lignes).filter((r) => source.fourniture!.aPreciser.some((t) => tranche(r.a, t)) && !normalizeText(`${nomCalcule} ${item.precision ?? ""}`).includes(normalizeText(r.valeur))).map((r) => `${r.a.q.donnee.charAt(0).toUpperCase()}${r.a.q.donnee.slice(1)} : ${r.valeur}`) : [];
       return {
         ...item,
-        label: item.label.replace(/\s*(?:d[ée]v\.\s*)?\S*\?\S*/g, "").replace(/\s{2,}/g, " ").trim() || item.label,
+        ...(lues.length > 0 ? { precision: [item.precision, ...new Set(lues)].filter(Boolean).join("; ") } : {}),
+        label: nomCalcule,
         ...(pending.length > 0 ? { waitsOn: pending, asks: waits.map((a) => ({ key: a.key, text: a.question.text.replace(/\s*\?$/, ""), unit: a.question.unit ?? null, options: a.question.options ?? [] })) } : {}),
       };
     }
@@ -849,26 +876,34 @@ function finishPurchase(
     // donnée), « Au choix du fournisseur » et « Autre » ; une donnée déjà écrite dans le nom de la ligne (l'épaisseur de
     // « Bobine Quartz-Zinc 0,65 mm ») ou déjà répondue n'est jamais « à préciser ».
     const preciserKey = `a-preciser:${line.id}`;
-    const repondues = asked.filter((a) => !unresolved(a)).map((a) => normalizeText(a.q.donnee));
-    const fournisseur = ctx.answers[preciserKey] === undefined ? f.aPreciser.filter((t) => !ecritDans(t, `${item.label} ${f.nom}`) && !repondues.some((d) => d.includes(normalizeText(t)))) : [];
+    // LA CAUSE COMMUNE (retour du fondateur, 2026-10-12 : « Teinte à préciser » après la teinte répondue sur D.2026.105,
+    // « Finition à préciser », « Épaisseur à préciser ») : les réponses de la ligne sont celles de TOUTES les questions
+    // posées, des deux vagues, même celles que le calcul n'attend plus ; chacune ferme le sujet « à préciser » qu'elle
+    // tranche et s'écrit dans la ligne.
+    const reponses = reponsesDeLaLigne(ctx.posees, ctx.answers, line, f, lignes);
+    const fournisseur = ctx.answers[preciserKey] === undefined ? f.aPreciser.filter((t) => !ecritDans(t, `${item.label} ${f.nom}`) && !reponses.some((r) => tranche(r.a, t))) : [];
     const preciserAsk = fournisseur.length > 0 ? { key: preciserKey, text: raisonCourte(fournisseur).replace(/ à préciser$/, ""), unit: null, options: [...choixDuReferentiel(ctx.ref, workOfLine(line.id)?.workItemId, fournisseur), { label: "Au choix du fournisseur", value: "ok" }] } : null;
     const subjects = [...waits.map((a) => a.q.donnee), ...fournisseur];
     // Ce que l'artisan a répondu pour cette ligne : la réponse du calcul (« Espagne 1er choix ») avec le nom, celle d'une
     // question de la fiche avec sa question (« Marque des ardoises : Cupa »), pour le comptoir.
-    const isFiche = (cle: string) => asked.find((a) => a.q.cle === cle)?.key.startsWith("fiche:") === true;
+    const isFiche = (cle: string) => ctx.posees.find((a) => a.q.cle === cle)?.key.startsWith("fiche:") === true;
     const said = f.attend.filter((cle) => !isFiche(cle)).map(answered).filter((v): v is string => !!v);
     const saidFiche = f.attend.filter(isFiche).map((cle) => {
       const v = answered(cle);
       // « Fenêtre de toit : quelle taille ? » nomme l'article : la valeur suffit ; « Marque des ardoises ? » : la question et la valeur.
-      const texte = asked.find((a) => a.q.cle === cle)!.q.texte.replace(/\s*\?$/, "");
+      const texte = ctx.posees.find((a) => a.q.cle === cle)!.q.texte.replace(/\s*\?$/, "");
       return v ? (/\s:\s/.test(texte) ? v : `${texte} : ${v}`) : null;
     }).filter((v): v is string => !!v);
     // Ce que l'artisan écrit pour une ligne « à préciser » (« Profil 1000 T, RAL 7016 ») part dans sa précision.
     const ecrit = ctx.answers[`a-preciser:${line.id}`];
-    const choisis = f.aPreciser.filter((t) => !ecritDans(t, `${item.label} ${f.nom}`));
+    const choisis = f.aPreciser.filter((t) => !ecritDans(t, `${item.label} ${f.nom}`) && !reponses.some((r) => tranche(r.a, t)));
     const choisi = choisis.length > 0 && ecrit === "ok" ? `${raisonCourte(choisis).replace(/ à préciser$/, "")} au choix du fournisseur` : null;
     const precise = typeof ecrit === "string" && ecrit !== "ok" && ecrit !== "non" ? ecrit : choisi;
     const precision = [f.precision, ...said].filter(Boolean).join(", ");
+    // Chaque réponse se lit dans sa ligne (§51.6) : celles que la ligne n'attendait pas nommément (la deuxième vague, une
+    // question sur sa ligne), « Teinte : rouge vieilli », sauf si le nom ou la précision la disent déjà.
+    const deja = normalizeText(`${item.label} ${f.nom} ${precision} ${saidFiche.join(" ")}`);
+    const lues = reponses.filter((r) => !f.attend.includes(r.a.q.cle) && !deja.includes(normalizeText(r.valeur))).map((r) => `${r.a.q.donnee.charAt(0).toUpperCase()}${r.a.q.donnee.slice(1)} : ${r.valeur}`);
     // Ce que la ligne attend se dit par la question du modèle, jamais deux fois : les règles « manque » du calcul tombent.
     const kept = (item.rules ?? []).filter((r) => !r.key.startsWith("manque:"));
     const rules = kept;
@@ -888,7 +923,7 @@ function finishPurchase(
       state,
       label: custom || specific ? item.label : nomAvecCalcul(f.nom, item.label),
       // La précision du calcul (« 48 m² × 40,7 ardoises/m² ») d'abord ; sinon celle du modèle, et la réponse donnée.
-      ...(item.precision || precision || saidFiche.length || precise ? { precision: [...new Set([item.precision || precision, precise, ...saidFiche])].filter(Boolean).join("; ") } : {}),
+      ...(item.precision || precision || saidFiche.length || precise || lues.length ? { precision: [...new Set([item.precision || precision, precise, ...saidFiche, ...lues])].filter(Boolean).join("; ") } : {}),
       ...(pending.length > 0 || preciserAsk
         ? {
             waitsOn: [...pending, ...(preciserAsk ? [preciserAsk.key] : [])],
@@ -980,6 +1015,51 @@ function finishPurchase(
     return propre ? { ...rest, precision: propre } : rest;
   });
   return { ...finished, toBuy: toBuyPropre, warnings: [...new Set([...finished.warnings, ...ctx.notes])], screen: { ...finished.screen, groups: finished.screen.groups.map((g) => ({ ...g, rows: g.rows.map((r) => (r.status === "check" && r.itemKey && reasons.has(r.itemKey) ? { ...r, reason: reasons.get(r.itemKey)! } : r)) })) } };
+}
+
+/** Les mots qui portent une donnée (« teinte », « référence »), sans les mots creux ; « référence » vaut « modèle ». */
+const MOTS_CREUX = new Set(["pour", "avec", "dans", "sans", "quel", "quelle", "quels", "quelles", "votre", "cette", "est", "les", "des", "une", "aux", "sur", "type", "choix", "preciser"]);
+const SYNONYMES: Record<string, string> = { reference: "modele", ref: "modele", marque: "modele", gamme: "modele", couleur: "teinte", coloris: "teinte", ral: "teinte" };
+function motsDeDonnee(t: string): string[] {
+  return normalizeText(t)
+    .split(/[^a-z0-9]+/)
+    .filter((w) => w.length >= 3 && !MOTS_CREUX.has(w))
+    .map((w) => SYNONYMES[w] ?? w.replace(/s$/, ""));
+}
+
+/** La question répondue tranche-t-elle ce sujet « à préciser » (« teinte » ↔ « Teinte et référence de la tuile ») ? */
+function tranche(a: Asked, sujet: string): boolean {
+  const dit = new Set(motsDeDonnee(`${a.q.donnee} ${a.q.texte}`));
+  return motsDeDonnee(sujet).some((w) => dit.has(w));
+}
+
+/**
+ * Les réponses d'une ligne (§51.3, §51.6) : chaque question posée et répondue (les deux vagues) qui la vise : celle que
+ * sa fourniture attend, celle posée sur sa ligne, ou celle du chantier qui tranche un de ses sujets « à préciser » et
+ * nomme la fourniture (ou dont aucune autre ligne n'a le sujet). Retirée (null) ou sans réponse : pas une réponse.
+ */
+function reponsesDeLaLigne(posees: readonly Asked[], answers: Answers, line: LigneLecture, f: LectureFourniture, lignes: readonly LigneLecture[]): { a: Asked; valeur: string }[] {
+  const nom = new Set(motsDeDonnee(f.nom));
+  const out: { a: Asked; valeur: string }[] = [];
+  for (const a of posees) {
+    const v = answers[a.key] ?? (scopedParam(a.key) !== null ? answers[`param:${a.q.cle}`] : undefined);
+    if (v === undefined || v === null) continue;
+    const brut = typeof v === "string" ? v : `${v.value}${v.unit && v.unit !== "u" ? ` ${v.unit}` : ""}`;
+    const valeur = a.q.boutons.find((b) => b.valeur === brut)?.label ?? brut;
+    if (!valeur || valeur === "ok") continue;
+    const surLaLigne = a.q.ligne !== null && (a.q.ligne === line.ligne.ref || line.ligne.ref.startsWith(`${a.q.ligne}.`));
+    if (f.attend.includes(a.q.cle) || (surLaLigne && (f.aPreciser.some((t) => tranche(a, t)) || !lignes.some((l) => l.id !== line.id && l.ligne.ref === line.ligne.ref && l.fourniture)))) {
+      out.push({ a, valeur });
+      continue;
+    }
+    if (a.q.ligne !== null && !surLaLigne) continue;
+    const sujets = f.aPreciser.filter((t) => tranche(a, t));
+    if (sujets.length === 0) continue;
+    const nomme = motsDeDonnee(`${a.q.donnee} ${a.q.texte}`).some((w) => nom.has(w));
+    const seule = !lignes.some((l) => l.id !== line.id && l.fourniture && l.fourniture.aPreciser.some((t) => tranche(a, t)));
+    if (surLaLigne || nomme || seule) out.push({ a, valeur });
+  }
+  return out;
 }
 
 /** Un nombre écrit (« 151 », « 1 472,5 »), ou null. */
