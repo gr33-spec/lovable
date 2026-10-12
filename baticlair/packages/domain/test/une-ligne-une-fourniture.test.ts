@@ -63,7 +63,7 @@ describe("§49.9 une ligne du quantitatif nomme une fourniture, jamais la phrase
     expect(ecrit.item?.precision).toMatch(/Huguenot rouge/);
     const choix = shown(read({ [ask.key]: "ok" })).find((r) => r.label === "Tuile terre cuite mécanique")!;
     expect(choix.status).toBe("ok");
-    expect(choix.item?.precision).toMatch(/Modèle et teinte au choix du fournisseur/);
+    expect(choix.item?.precision).toMatch(/Modèle, teinte : au choix du fournisseur/);
   });
 
   it("élément de rive : la question tuile de rive / bande zinc, en boutons dans la carte, posée une fois", () => {

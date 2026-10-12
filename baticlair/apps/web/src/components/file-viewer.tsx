@@ -82,6 +82,17 @@ export function FileViewer() {
     };
   }, [request]);
 
+  // Retour du fondateur (2026-10-12, capture iPhone) : la liste réapparaissait sous « Partager / Télécharger ». Plein écran en
+  // 100dvh (jamais 100vh), et la page derrière ne défile plus tant que le document est ouvert.
+  useEffect(() => {
+    if (!request) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [request]);
+
   useEffect(() => {
     if (!request) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
@@ -103,7 +114,7 @@ export function FileViewer() {
   const bar = "inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-extrabold";
 
   return (
-    <div role="dialog" aria-modal="true" aria-label={request.title} className="fixed inset-0 z-[60] flex flex-col bg-ink">
+    <div role="dialog" aria-modal="true" aria-label={request.title} className="fixed top-0 left-0 z-[60] flex h-dvh w-full flex-col bg-ink">
       <div className="flex items-center gap-2 px-3 pt-[max(10px,env(safe-area-inset-top))] pb-2 text-white">
         <button
           type="button"

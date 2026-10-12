@@ -119,12 +119,13 @@ describe("§45.7 — la demande de devis du chantier Test", () => {
     expect(text).not.toMatch(/142|38,00|45,00|52,00/);
     expect(text).not.toMatch(/command/i);
     // Les lignes du chantier Test (§45.5).
-    expect(text).toMatch(/Gouttière zinc demi-ronde dév\. 33\s+4 longueurs de 4 m \(13\s+ml à couvrir\)/);
+    // Retour du fondateur (2026-10-12) : dans le document, un mètre linéaire se dit « m » (« 222 m », pas « 222 ml »).
+    expect(text).toMatch(/Gouttière zinc demi-ronde dév\. 33\s+4 longueurs de 4 m \(13\s+m à couvrir\)/);
     // RÈGLE NUMÉRO UN : ni pattes ni pointes, le devis n'en écrit pas. Bande de 13 ml façonnée sur place : des feuilles
     // 2 × 1 m estimées d'après le développé (§48.6), jamais un bobineau.
     expect(text).not.toMatch(/Pattes|Pointes|Bobineau/);
     // §50.7 : la feuille dit sa pièce (« pour bande zinc d'égout ») ; le nom long passe sur deux lignes du PDF.
-    expect(text).toMatch(/Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour\s+\d+ pièces?\s+pour 13 ml de bande[\s\S]*bande zinc d'égout/);
+    expect(text).toMatch(/Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour\s+\d+ pièces?\s+pour 13 m de bande[\s\S]*bande zinc d'égout/);
   });
 
   it("3. un chantier sans ligne « à préciser » n'a pas de bloc 3 ; un chantier qui en a une le montre, avec « merci de proposer ce que vous avez »", async () => {

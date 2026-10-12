@@ -145,7 +145,9 @@ export function packetDocument(p: SupplierPacket, options: { destinataire?: stri
   // fondateur, 2026-10-11).
   if (resume.length > 0) blocs.push({ numero: 0, titre: BREF, kind: "list", lignes: resume });
   // Du gros au petit, matériau principal en premier, consommables en dernier (§45.3).
-  const rows = supplies(p);
+  // Retour du fondateur (2026-10-12) : « 222 ml : écris 222 m » ; un mètre linéaire se dit « m » dans le document.
+  const metres = (t: string) => t.replace(/(\d)\s*ml\b/g, "$1 m");
+  const rows = supplies(p).map((r) => ({ ...r, quantite: metres(r.quantite), ...(r.precision ? { precision: metres(r.precision) } : {}) }));
   const ordered = [...rows.filter((r) => !r.consommable), ...rows.filter((r) => r.consommable)];
   if (ordered.length > 0) blocs.push({ numero: ++n, titre: "Fournitures à chiffrer", kind: "table", colonnes: ["Désignation", "Quantité", "Précision"], lignes: ordered });
   if (p.a_chiffrer.length > 0) blocs.push({ numero: ++n, titre: "À préciser avec vous", kind: "list", lignes: p.a_chiffrer });

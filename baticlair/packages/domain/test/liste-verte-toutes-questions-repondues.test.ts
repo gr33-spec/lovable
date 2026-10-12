@@ -47,7 +47,7 @@ describe("§51.6 : toutes les questions répondues, zéro ligne orange", () => {
     const toles = apres.toBuy.find((b) => /^Tôles/i.test(b.label))!;
     expect(toles.asks?.find((a) => a.key.startsWith("a-preciser:"))).toMatchObject({ text: "Profil, teinte", options: expect.arrayContaining([{ label: "Au choix du fournisseur", value: "ok" }]) });
     expect(oranges(last)).toEqual([]);
-    expect(last.toBuy.find((b) => /^Tôles/i.test(b.label))!.precision).toMatch(/Profil, teinte au choix du fournisseur/);
+    expect(last.toBuy.find((b) => /^Tôles/i.test(b.label))!.precision).toMatch(/Profil, teinte : au choix du fournisseur/);
   });
 
   it("D-2026-018 : « Crochets … · Finition à préciser » a sa question dans la fiche ; une réponse écrite la passe au vert, dans sa précision", () => {
