@@ -52,14 +52,15 @@ describe("§50.3 la carte d'une ligne : la raison orange en cinq mots au plus, r
     });
   }
 
-  it("D.2026.105 : « Élément de rive à préciser » sur les fixations (une question) ; la tuile, que le fournisseur précisera, n'a pas de raison orange", () => {
-    // Retour du fondateur (2026-10-12, §51.6) : « l'orange ne vient que d'une question sans réponse ou retirée ».
+  it("D.2026.105 : « Modèle et teinte à préciser » sur la tuile, « Élément de rive à préciser » sur les fixations, chacune avec sa question sur la ligne", () => {
+    // Retour du fondateur (2026-10-12, §51.6) : « tout orange a sa question, et elle se règle là où on ouvre la ligne ».
     const p = screen(D2026_105_LINES, D2026_105_READINGS);
     const reasons = p.screen.groups.flatMap((g) => g.rows).map((r) => [p.toBuy.find((b) => b.key === r.itemKey)?.label, r.reason]);
     expect(reasons).toEqual([
-      ["Tuile terre cuite mécanique", undefined],
+      ["Tuile terre cuite mécanique", "Modèle et teinte à préciser"],
       ["Fixations pour l'élément de rive", "Élément de rive à préciser"],
     ]);
+    for (const b of p.toBuy) expect(b.asks?.length ?? 0, b.label).toBeGreaterThan(0);
   });
 
   it("le sujet d'une donnée manquante, dit court : le mot qui compte, jamais un mot creux", () => {

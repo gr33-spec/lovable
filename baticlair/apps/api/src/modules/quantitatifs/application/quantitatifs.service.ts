@@ -228,11 +228,13 @@ export class QuantitatifsService {
         reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, r.question, r.valeur);
         continue;
       }
-      // Temps deux : ce que l'artisan écrit pour une ligne « à préciser » (« Profil 1000 T, RAL 7016 ») part dans sa précision.
-      if (decision && decision.key.startsWith(A_PRECISER) && r.valeur !== null && r.valeur !== "ok" && r.valeur !== "non") {
-        const text = r.valeur.trim();
-        if (text === "" || text.length > 300) throw validationFailed("Written answer must be 1 to 300 characters", [{ path: "valeur", message: r.question }]);
-        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, decision.key, text);
+      // §51.6 (retour du fondateur, 2026-10-12) : la question d'une ligne « à préciser » se règle dans sa fiche : un bouton,
+      // « Au choix du fournisseur » (« ok ») ou ce que l'artisan écrit sous « Autre », qui part dans la précision de la ligne.
+      const preciserKey = r.question.replace(/^engine:/, "");
+      if (preciserKey.startsWith(A_PRECISER) && /^a-preciser:[0-9a-f-]{36}$/.test(preciserKey)) {
+        const text = r.valeur?.trim() ?? null;
+        if (text !== null && (text === "" || text.length > 300)) throw validationFailed("Written answer must be 1 to 300 characters", [{ path: "valeur", message: r.question }]);
+        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, preciserKey, text);
         continue;
       }
       // Temps deux (§51.6) : l'unité d'une ligne qui n'en a pas (un bouton, ou l'unité écrite sous « Autre »).

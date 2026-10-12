@@ -31,11 +31,11 @@ function shown(p: ReturnType<typeof read>) {
 }
 
 describe("§49.9 une ligne du quantitatif nomme une fourniture, jamais la phrase du devis", () => {
-  it("devis de réparation : exactement 2 lignes, la tuile (20 pièces) et les fixations de rive (1 jeu) ; seules les fixations, qui attendent leur question, sont orange", () => {
+  it("devis de réparation : exactement 2 lignes, la tuile (20 pièces) et les fixations de rive (1 jeu), toutes deux orange avec leur question", () => {
     const rows = shown(read());
     expect(rows.map((r) => r.label)).toEqual(["Tuile terre cuite mécanique", "Fixations pour l'élément de rive"]);
     expect(rows.map((r) => r.quantity)).toEqual(["20 pièces", "1 jeu"]);
-    expect(rows.map((r) => r.status)).toEqual(["ok", "check"]);
+    expect(rows.map((r) => r.status)).toEqual(["check", "check"]);
   });
 
   it("aucune ligne ne reprend une phrase de prestation, aucune ne porte une unité en h, fft ou jour", () => {
@@ -49,15 +49,21 @@ describe("§49.9 une ligne du quantitatif nomme une fourniture, jamais la phrase
     for (const q of p.toQuote) expect(/\b(h|fft|ft|forfait|jours?|heures?)\b/i.test(q.measure), q.label).toBe(false);
   });
 
-  it("modèle et teinte de tuile : pas de question, la ligne n'est pas orange et dit « à voir avec le fournisseur » (retour du fondateur, 2026-10-12, §51.6)", () => {
-    // Règle changée le 2026-10-12 : avant, ligne orange « à préciser » jusqu'au « C'est bon » ; maintenant l'orange ne vient
-    // que d'une question sans réponse ou retirée, et ce que le fournisseur précisera se dit dans la précision de la ligne.
+  it("modèle et teinte de tuile : pas de question à l'écran des questions ; la ligne orange porte sa question (boutons, « Au choix du fournisseur », « Autre ») et une réponse la passe au vert (retour du fondateur, 2026-10-12, §51.6)", () => {
+    // Règle changée le 2026-10-12 : avant, ligne orange « à préciser » réglée par un « C'est bon » sans question ; maintenant
+    // la ligne porte sa question, là où on l'ouvre, et ce qui est répondu part dans sa précision.
     const p = read();
     const tuile = shown(p).find((r) => r.label === "Tuile terre cuite mécanique")!;
-    expect(tuile.item?.asks ?? []).toEqual([]);
     expect(p.questions.some((q) => q.question && /teinte/i.test(q.question.text))).toBe(false);
-    expect(tuile.status).toBe("ok");
-    expect(tuile.item?.precision).toMatch(/Modèle et teinte à voir avec le fournisseur/);
+    expect(tuile.status).toBe("check");
+    const ask = tuile.item!.asks!.find((a) => a.key.startsWith("a-preciser:"))!;
+    expect(ask).toMatchObject({ text: "Modèle et teinte", options: [{ label: "Au choix du fournisseur", value: "ok" }] });
+    const ecrit = shown(read({ [ask.key]: "Huguenot rouge" })).find((r) => r.label === "Tuile terre cuite mécanique")!;
+    expect(ecrit.status).toBe("ok");
+    expect(ecrit.item?.precision).toMatch(/Huguenot rouge/);
+    const choix = shown(read({ [ask.key]: "ok" })).find((r) => r.label === "Tuile terre cuite mécanique")!;
+    expect(choix.status).toBe("ok");
+    expect(choix.item?.precision).toMatch(/Modèle et teinte au choix du fournisseur/);
   });
 
   it("élément de rive : la question tuile de rive / bande zinc, en boutons dans la carte, posée une fois", () => {
