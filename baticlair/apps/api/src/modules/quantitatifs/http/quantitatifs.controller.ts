@@ -54,9 +54,16 @@ const contexte = {
 const entree = z.object({ ...contexte, lignes: z.array(ligne).min(1).max(500).optional(), documentId: z.string().uuid().optional() });
 const rendu = z.object({ ecran: z.enum(["0", "1"]).optional(), projetId: z.string().optional() });
 
+/**
+ * Une réponse : un bouton, une valeur, ou ce qui s'écrit sous « Autre » (la case accepte 300 caractères : retour du fondateur,
+ * 2026-10-12, « Un champ n'est pas correctement rempli » sur une réponse écrite de plus de 120). `null` : la question est
+ * retirée par l'artisan (la poubelle), sans réponse.
+ */
+const reponseValeur = z.string().trim().max(300).nullable();
+
 const reponses = z.object({
   reponses: z
-    .array(z.object({ question: z.string().min(1).max(200), valeur: z.string().trim().max(120).nullable(), unite: z.string().max(20).optional() }))
+    .array(z.object({ question: z.string().min(1).max(200), valeur: reponseValeur, unite: z.string().max(20).optional() }))
     .min(1)
     // « Tout est bon » : toutes les lignes qui n'attendent qu'une confirmation, en un envoi (gros devis : 180 lignes).
     .max(500),
@@ -64,7 +71,7 @@ const reponses = z.object({
 
 const calculBody = z.object({
   reponses: z
-    .array(z.object({ question: z.string().min(1).max(200), valeur: z.string().trim().max(120).nullable(), unite: z.string().max(20).optional() }))
+    .array(z.object({ question: z.string().min(1).max(200), valeur: reponseValeur, unite: z.string().max(20).optional() }))
     .max(200)
     .optional(),
   // « On ajoute ? » (quincaillerie, consommables) répondu sur le même écran : oui / non par article proposé.

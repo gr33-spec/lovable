@@ -1056,7 +1056,8 @@ test("§49.8 : une info qui manque se demande en clair sur la ligne qu'elle conc
   for (let i = 0; i < (await cards.count()); i++) {
     const card = cards.nth(i);
     if (/traitement/i.test((await card.textContent()) ?? "")) continue;
-    await card.getByRole("button").filter({ hasNotText: /^Autre$/ }).first().click();
+    // Les boutons de réponse (la poubelle de la carte n'en est pas un).
+    await card.getByRole("group").getByRole("button").filter({ hasNotText: /^Autre$/ }).first().click();
   }
   await page.getByRole("button", { name: /^Calculer ma liste/ }).click();
   await expect(page.getByRole("region", { name: "Page des fournitures" })).toBeVisible({ timeout: 60_000 });
@@ -1352,6 +1353,60 @@ test("Autre : quand la bonne réponse n'est pas dans les boutons, elle s'écrit 
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
   await expect(list.getByText(/Ardoise d'Angers/).first()).toBeVisible();
+});
+
+test("retour du fondateur (2026-10-12) : un refus du serveur se dit sur la carte fautive, voyant rouge et phrase", async ({ page }) => {
+  // Capture iPhone : « Un champ n'est pas correctement rempli » en haut de l'écran, sans dire où. Le refus nomme la réponse
+  // (`reponses.N.valeur`) : la carte de cette question passe au rouge avec sa phrase, l'écran l'amène, rien en haut.
+  await signUp(page);
+  await page.goto("/chantiers/nouveau");
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  const questions = page.getByRole("region", { name: "Les questions" });
+  await expect(questions).toBeVisible({ timeout: 60_000 });
+  await page.route("**/calcul?**", async (route) => {
+    const body = route.request().postDataJSON() as { reponses: { question: string }[] };
+    const n = body.reponses.findIndex((r) => r.question.includes("pente"));
+    await route.fulfill({ status: 400, json: { error: { code: "validation_failed", message: "Invalid request", supportId: "TEST-0001", retryable: false, details: [{ path: `reponses.${n}.valeur`, message: "Too big: expected string to have <=300 characters" }] } } });
+  });
+  const pente = questions.getByRole("group", { name: "Pente du toit ?" });
+  await pente.getByRole("button", { name: "Autre", exact: true }).click();
+  await pente.getByLabel("Autre valeur : Pente du toit ?").fill("38");
+  await pente.getByRole("button", { name: "OK" }).click();
+  await questions.getByRole("group", { name: /façonnes/i }).first().getByRole("button", { name: /^Je commande façonné/ }).click();
+  await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
+  const carte = questions.getByRole("listitem").filter({ has: page.getByRole("group", { name: "Pente du toit ?" }) });
+  await expect(carte.getByRole("alert")).toHaveText("Réponse trop longue : 300 caractères au plus.");
+  await expect(carte).toBeInViewport();
+  await expect(page.getByText("Un champ n'est pas correctement rempli.")).toHaveCount(0);
+  // Une seule carte en rouge : celle de la réponse refusée.
+  await expect(questions.getByRole("alert")).toHaveCount(1);
+});
+
+test("retour du fondateur (2026-10-12) : une question qui ne sert pas se retire d'un tap (poubelle), et se remet", async ({ page }) => {
+  // « Donne la possibilité de supprimer des questions avec une poubelle car parfois tout n'est pas pertinent. » La question
+  // part sans réponse ; sa ligne reste orange dans la liste, où elle se règle (§51.6). Le façonnage, obligatoire, n'en a pas.
+  await signUp(page);
+  await page.goto("/chantiers/nouveau");
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  const questions = page.getByRole("region", { name: "Les questions" });
+  await expect(questions).toBeVisible({ timeout: 60_000 });
+  const ardoise = () => questions.getByRole("listitem").filter({ has: page.getByRole("group", { name: /^Quelle ardoise/ }) });
+  const faconnage = questions.getByRole("listitem").filter({ has: page.getByRole("group", { name: /façonnes/i }) }).first();
+  await expect(faconnage.getByRole("button", { name: "Retirer cette question" })).toHaveCount(0);
+  await ardoise().getByRole("button", { name: "Retirer cette question" }).click();
+  const retiree = questions.getByRole("listitem").filter({ hasText: /^Question retirée/ });
+  await expect(retiree).toContainText("Quelle ardoise");
+  await expect(questions.getByRole("group", { name: /^Quelle ardoise/ })).toHaveCount(0);
+  // « Remettre » la ramène telle quelle ; on la retire de nouveau pour le calcul.
+  await retiree.getByRole("button", { name: "Remettre" }).click();
+  await expect(questions.getByRole("group", { name: /^Quelle ardoise/ })).toBeVisible();
+  await ardoise().getByRole("button", { name: "Retirer cette question" }).click();
+  await faconnage.getByRole("button", { name: /^Je commande façonné/ }).click();
+  const sent = page.waitForRequest((r) => r.url().includes("/calcul") && r.method() === "POST");
+  await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
+  const body = (await sent).postDataJSON() as { reponses: { question: string; valeur: string | null }[] };
+  expect(body.reponses.filter((r) => r.valeur === null)).toHaveLength(1);
+  await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible({ timeout: 60_000 });
 });
 
 test("une adresse inconnue : une page en français, avec le chemin du retour (audit avant commercialisation)", async ({ page }) => {
