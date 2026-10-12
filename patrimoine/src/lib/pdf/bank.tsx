@@ -584,7 +584,11 @@ function SynthesisPage({ m, h, now, message, author, trajectory }: { m: GroupMod
 function AssetsPage({ m, h }: { m: GroupModel; h: Head }) {
   type Row = GroupModel["buildings"][number] & { extra?: boolean };
   const rows: Row[] = [...m.buildings];
-  if (m.companyLevelDebt > 1) rows.push({ name: "Crédits portés par les sociétés", place: "Emprunts non rattachés à un bien (apports, travaux…)", nature: "", privateUse: false, allVacant: false, company: "—", lots: 0, acquisition: "", value: 0, rentAnnual: 0, debt: m.companyLevelDebt, extra: true });
+  if (m.companyLevelDebt > 1)
+    rows.push({
+      name: m.companyLevelLoans.length === 1 ? m.companyLevelLoans[0] : "Crédits non rattachés à un bien",
+      place: m.companyLevelLoans.length === 1 ? "Crédit non rattaché à un bien" : m.companyLevelLoans.join(", "), nature: "", privateUse: false, allVacant: false, company: "—", lots: 0, acquisition: "", value: 0, rentAnnual: 0, debt: m.companyLevelDebt, extra: true,
+    });
   const total: Row = { name: "Total", place: "", nature: "", privateUse: false, allVacant: false, company: "", lots: m.buildings.reduce((s, b) => s + b.lots, 0), acquisition: "", value: m.buildings.every((b) => b.value !== undefined) ? m.buildings.reduce((s, b) => s + (b.value ?? 0), 0) : undefined, rentAnnual: m.buildings.reduce((s, b) => s + b.rentAnnual, 0), debt: rows.reduce((s, b) => s + b.debt, 0) };
   const rent = (r: Row) => (r.extra ? "" : r.rentAnnual > 0 ? K(r.rentAnnual) : r.allVacant ? "Vacant" : "—");
   return (

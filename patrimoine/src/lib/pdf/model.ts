@@ -55,6 +55,8 @@ export interface GroupModel {
   incoherentLoans: number;
   /** Crédits rattachés à une société et non à un immeuble. */
   companyLevelDebt: number;
+  /** Crédits en cours rattachés à aucun bien (leur nom, pour les identifier dans le dossier). */
+  companyLevelLoans: string[];
   /** Immeubles loués sans aucune charge renseignée. */
   missingCharges: number;
   capacity: { company: string; rent: number; charges: number; payments: number; cf: number; dscr?: number; chargesMissing: boolean; approx: boolean }[];
@@ -259,6 +261,9 @@ export function groupModel(data: AppData, p: Projection, name: string): GroupMod
     missingPaymentLoans,
     incoherentLoans,
     companyLevelDebt: Math.max(0, f.debt - buildings.reduce((s, b) => s + b.debt, 0)),
+    companyLevelLoans: data.loans
+      .filter((l) => !(l.buildingId && data.buildings.some((b) => b.id === l.buildingId)) && (snap.byLoan.get(l.id)?.balance ?? 0) > 0)
+      .map((l) => l.name || l.bank || "Crédit"),
     missingCharges: data.buildings.filter((b) => {
       const bf = snap.byBuilding.get(b.id);
       return !!bf && bf.rentMonthly > 0 && bf.chargesAnnual === 0;
