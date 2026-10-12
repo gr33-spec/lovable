@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronLeft, FileUp, Loader2, Pencil } from "lucide-react";
+import { Check, ChevronLeft, FileUp, Loader2, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ListScene, ReadingStage } from "@/components/chantier-scenes";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
@@ -178,7 +178,8 @@ interface CounterQuestion {
 }
 
 export interface CounterAnswers {
-  reponses: { question: string; valeur: string; unite?: string }[];
+  /** `valeur: null` : la question retirée par l'artisan (la poubelle), partie sans réponse. */
+  reponses: { question: string; valeur: string | null; unite?: string }[];
   ajouts: { id: string; reponse: "oui" | "non" }[];
   retraits?: string[];
 }
@@ -316,9 +317,14 @@ function ouvrageOf(takeoff: Takeoff) {
  * Ce qui part au calcul : ce que l'artisan a touché, et les valeurs de « Je pars sur ces valeurs » qu'il a vues sans les
  * changer : il les CONFIRME en lançant le calcul (§49.2.5 : une ligne reste orange tant qu'un défaut non confirmé la porte).
  */
-export function counterAnswers(questions: readonly CounterQuestion[], given: Readonly<Record<string, Given>>): CounterAnswers {
+export function counterAnswers(questions: readonly CounterQuestion[], given: Readonly<Record<string, Given>>, retired: ReadonlySet<string> = new Set()): CounterAnswers {
   const out: Required<CounterAnswers> = { reponses: [], ajouts: [], retraits: [] };
   for (const q of questions) {
+    // Retour du fondateur (2026-10-12) : une question retirée part sans réponse ; sa ligne reste orange, réglée dans la liste.
+    if (retired.has(q.key)) {
+      if (q.kind !== "ajout" && q.kind !== "onsite") out.reponses.push({ question: q.key, valeur: null });
+      continue;
+    }
     const g = given[q.key] ?? (q.kind === "assumption" && q.key.startsWith("param:") && q.usual !== null ? { value: q.usual, label: q.usual } : undefined);
     if (!g) continue;
     if (q.kind === "ajout" && !q.key.startsWith("ajout:")) out.reponses.push({ question: q.key, valeur: g.value, unite: q.unit || "u" });
@@ -333,6 +339,22 @@ export function counterAnswers(questions: readonly CounterQuestion[], given: Rea
 
 /** §49.4 : le façonnage d'une pièce de zinguerie écrite est obligatoire avant le calcul (même règle que l'API). */
 const mandatory = (q: CounterQuestion) => /^(?:engine:)?param:faconnage(?:@|$)/.test(q.key);
+
+/**
+ * Retour du fondateur (2026-10-12) : « Il faut mettre le voyant rouge avec une phrase là où il y a le problème. » Un refus du
+ * serveur nomme la réponse fautive (`reponses.N.valeur`) : la phrase va sur la carte de cette question.
+ */
+function cardErrors(error: ApiError | null, sent: readonly string[]): Map<string, string> {
+  const out = new Map<string, string>();
+  for (const d of error?.details ?? []) {
+    const n = /^reponses\.(\d+)(?:\.|$)/.exec(d.path)?.[1];
+    const key = n !== undefined ? sent[Number(n)] : undefined;
+    if (!key || out.has(key)) continue;
+    const max = /<=\s*(\d+)/.exec(d.message)?.[1];
+    out.set(key, max ? `Réponse trop longue : ${max} caractères au plus.` : "Cette réponse ne passe pas : choisis un bouton ou réécris-la.");
+  }
+  return out;
+}
 
 export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void }) {
   const questions = useMemo(() => counterQuestions(takeoff), [takeoff]);
@@ -353,6 +375,21 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
       else delete next[key];
       return next;
     });
+  const [retired, setRetired] = useState<ReadonlySet<string>>(() => new Set());
+  const retire = (key: string, out: boolean) =>
+    setRetired((prev) => {
+      const next = new Set(prev);
+      if (out) next.add(key);
+      else next.delete(key);
+      return next;
+    });
+  // Les clés des réponses parties, dans l'ordre : un refus du serveur (`reponses.N`) retrouve sa carte.
+  const [sent, setSent] = useState<readonly string[]>([]);
+  const errors = useMemo(() => cardErrors(error, sent), [error, sent]);
+  const firstError = [...errors.keys()][0];
+  useEffect(() => {
+    if (firstError) document.getElementById(`question-${firstError}`)?.scrollIntoView?.({ block: "center" });
+  }, [firstError, error]);
   const toForm = questions.filter((q) => mandatory(q) && !given[q.key]);
   const [nudge, setNudge] = useState(false);
   // §50.2 : groupées par ouvrage, dans l'ordre où l'ouvrage arrive ; le chantier et les consommables à la fin.
@@ -360,16 +397,28 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
 
   return (
     <section aria-label="Les questions" className="flex flex-col gap-3">
-      {error ? <ErrorNotice error={error} /> : null}
+      {error && errors.size === 0 ? <ErrorNotice error={error} /> : null}
       {order.map((group) => (
         <section key={group} aria-label={group} className="flex flex-col gap-2.5">
           <h3 className="px-1 pt-2 font-display text-[17px] font-extrabold tracking-[-0.01em]">{group}</h3>
           <ol className="flex flex-col gap-2.5">
             {questions
               .filter((q) => q.group === group)
-              .map((q) => (
-                <QuestionCard key={q.key} question={q} given={given[q.key] ?? null} flagged={nudge && toForm.some((x) => x.key === q.key)} onChange={(g) => set(q.key, g)} />
-              ))}
+              .map((q) =>
+                retired.has(q.key) ? (
+                  <RetiredCard key={q.key} question={q} onRestore={() => retire(q.key, false)} />
+                ) : (
+                  <QuestionCard
+                    key={q.key}
+                    question={q}
+                    given={given[q.key] ?? null}
+                    flagged={nudge && toForm.some((x) => x.key === q.key)}
+                    problem={errors.get(q.key) ?? null}
+                    onChange={(g) => set(q.key, g)}
+                    {...(mandatory(q) ? {} : { onRetire: () => retire(q.key, true) })}
+                  />
+                ),
+              )}
           </ol>
         </section>
       ))}
@@ -387,7 +436,9 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
                 document.getElementById(`question-${toForm[0]!.key}`)?.scrollIntoView?.({ block: "center", behavior: "smooth" });
                 return;
               }
-              onSubmit(counterAnswers(questions, given));
+              const answers = counterAnswers(questions, given, retired);
+              setSent(answers.reponses.map((r) => r.question));
+              onSubmit(answers);
             }}
           >
             Calculer ma liste
@@ -401,7 +452,37 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
 /** Le pas du plus / moins d'une valeur à régler (jamais au clavier). */
 const stepOf = (unit: string | null) => (unit === "°" ? 5 : unit === "mm" ? 10 : unit === "cm" ? 5 : unit === "m" || unit === "ml" ? 0.5 : 1);
 
-function QuestionCard({ question: q, given, flagged, onChange }: { question: CounterQuestion; given: Given | null; flagged: boolean; onChange: (g: Given | null) => void }) {
+/** Une question retirée : sa phrase en une ligne, et « Remettre ». */
+function RetiredCard({ question: q, onRestore }: { question: CounterQuestion; onRestore: () => void }) {
+  return (
+    <li className="flex items-center gap-3 rounded-[20px] bg-surface px-4 py-3 shadow-card">
+      <span className="min-w-0 grow text-[14px] leading-snug text-muted">
+        Question retirée : <span className="font-bold">{q.text}</span>
+      </span>
+      <Button variant="secondary" className="shrink-0" onClick={onRestore}>
+        Remettre
+      </Button>
+    </li>
+  );
+}
+
+function QuestionCard({
+  question: q,
+  given,
+  flagged,
+  problem,
+  onChange,
+  onRetire,
+}: {
+  question: CounterQuestion;
+  given: Given | null;
+  flagged: boolean;
+  /** La phrase d'un refus du serveur sur cette réponse : voyant rouge sur la carte. */
+  problem: string | null;
+  onChange: (g: Given | null) => void;
+  /** La poubelle (absente sur une question obligatoire). */
+  onRetire?: () => void;
+}) {
   const id = useId();
   const unitLabel = q.unit && q.unit !== "u" ? (q.unit === "m2" ? "m²" : q.unit) : "";
   const shown = (n: number) => `${String(n).replace(".", ",")}${unitLabel ? (unitLabel === "°" ? "°" : ` ${unitLabel}`) : ""}`;
@@ -411,10 +492,23 @@ function QuestionCard({ question: q, given, flagged, onChange }: { question: Cou
     onChange(next > 0 ? { value: String(next), label: shown(next) } : null);
   };
   return (
-    <li id={`question-${q.key}`} className={`flex scroll-mt-24 flex-col gap-2.5 rounded-[20px] bg-surface p-4 shadow-card transition ${given ? "ring-2 ring-ok/50" : flagged ? "ring-2 ring-warn" : ""}`}>
-      <span id={`${id}-q`} className="text-[16px] leading-snug font-extrabold">
-        {q.text}
-      </span>
+    <li id={`question-${q.key}`} className={`flex scroll-mt-24 flex-col gap-2.5 rounded-[20px] bg-surface p-4 shadow-card transition ${problem ? "ring-2 ring-danger" : given ? "ring-2 ring-ok/50" : flagged ? "ring-2 ring-warn" : ""}`}>
+      <div className="flex items-start gap-2">
+        <span id={`${id}-q`} className="grow text-[16px] leading-snug font-extrabold">
+          {q.text}
+        </span>
+        {onRetire ? (
+          <button type="button" onClick={onRetire} aria-label="Retirer cette question" className="-mt-1.5 -mr-1.5 flex size-10 shrink-0 items-center justify-center rounded-full text-muted active:scale-95">
+            <Trash2 size={17} aria-hidden="true" />
+          </button>
+        ) : null}
+      </div>
+      {problem ? (
+        <p role="alert" className="flex items-center gap-2 text-[14px] font-bold text-danger">
+          <span aria-hidden="true" className="size-2.5 shrink-0 rounded-full bg-danger" />
+          {problem}
+        </p>
+      ) : null}
       {q.numeric ? (
         <div role="group" aria-labelledby={`${id}-q`} className="flex items-center justify-center gap-4">
           <button type="button" onClick={() => bump(-stepOf(q.unit))} disabled={!given} aria-label="Moins" className="flex size-12 items-center justify-center rounded-full bg-ground text-[24px] font-extrabold active:scale-95 disabled:opacity-40">
