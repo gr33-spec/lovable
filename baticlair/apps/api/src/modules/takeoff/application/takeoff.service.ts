@@ -456,16 +456,33 @@ export class TakeoffService {
   private async readLecture(tenant: TenantContext, doc: DocumentWithProcessing, prepared: Prepared, analysisId: string): Promise<ReviewedTakeoff | null> {
     const lecteur = this.reading.lecteur!;
     const started = Date.now();
-    const ref = referentialFor(doc.trade);
+    let trade = doc.trade;
+    let ref = referentialFor(trade);
     const siteNotes = doc.projectId ? ((await this.reading.projectNotes?.(tenant, doc.projectId)) ?? null) : null;
     // Le devis complet : son texte numéroté (pour citer les lignes) et le PDF entier, toutes pages.
     const content = await this.documents.readContent(tenant, doc.id);
     const pages = prepared.pages.map((p) => p.pageNumber).filter((n): n is number => typeof n === "number");
     const document = { numberedText: prepared.input.numberedText, imagePdf: content?.bytes ?? prepared.input.imagePdf, imagePages: pages };
-    const result = await lecteur.lire({ document, trade: doc.trade, tradeLabel: tradeProfile(doc.trade).label, referentiel: ref ? exportPourLecture(ref) : "Aucun référentiel pour ce métier.", siteNotes });
+    const lire = (t: string, r: Referential | null) => lecteur.lire({ document, trade: t, tradeLabel: tradeProfile(t).label, referentiel: r ? exportPourLecture(r) : "Aucun référentiel pour ce métier.", siteNotes });
+    let result = await lire(trade, ref);
     if (result === null) return null;
     const counted = { text: prepared.pages.filter((p) => p.route === "text").length, vision: prepared.pages.filter((p) => p.route === "vision").length };
-    const cost = await this.record(tenant, doc, counted, prepared.processingId, analysisId, 1, result, LECTURE_PROMPT);
+    let cost = await this.record(tenant, doc, counted, prepared.processingId, analysisId, 1, result, LECTURE_PROMPT);
+    // MULTIMÉTIER (§52, directive du fondateur, 2026-10-12 : « fais en sorte que l'appli fonctionne en multi métiers ») :
+    // le métier est celui que l'IA lit dans le devis, pas celui du compte. Un devis d'électricien déposé chez un couvreur
+    // est relu une fois avec le référentiel de l'électricité (un appel de plus, seulement dans ce cas), et calculé avec lui.
+    const autre = result.status === "success" && result.output ? metierAutre(result.output, trade) : null;
+    if (autre) {
+      const relu = await lire(autre, referentialFor(autre));
+      if (relu) {
+        cost += await this.record(tenant, doc, counted, prepared.processingId, analysisId, 2, relu, LECTURE_PROMPT);
+        if (relu.status === "success" && relu.output) {
+          result = relu;
+          trade = autre;
+          ref = referentialFor(autre);
+        }
+      }
+    }
     const scanned = { text: counted.text, scan: counted.vision };
     const stats = (outcome: ReadingStats["outcome"], failure?: string, lines = 0): ReadingStats => ({
       version: 1,
@@ -507,7 +524,7 @@ export class TakeoffService {
       documentId: doc.id,
       analysisId,
       referentialVersion: ref?.version ?? null,
-      trade: doc.trade,
+      trade,
       promptId: LECTURE_PROMPT.id,
       promptVersion: LECTURE_PROMPT.version,
       model: result.model,
@@ -541,18 +558,31 @@ export class TakeoffService {
   async fromLines(
     tenant: TenantContext,
     projectId: string,
-    trade: string,
+    tradeDuCompte: string,
     lines: readonly { designation: string; quantity: string | null; unit: string | null; price: string | null }[],
   ): Promise<ReviewedTakeoff> {
     assertCanWrite(tenant);
-    const ref = referentialFor(trade);
+    let trade = tradeDuCompte;
+    let ref = referentialFor(trade);
     if (ref) await this.reading.referentials?.ensure(ref);
     const lecteur = this.reading.lecteur;
     let lecture: LectureDevis | null = null;
     if (lecteur) {
       const numberedText = lines.map((l, i) => `[1:${String(i + 1).padStart(3, "0")}] L${i + 1}  ${l.designation.trim()}  ${[l.quantity?.trim(), l.unit?.trim()].filter(Boolean).join(" ")}`).join("\n");
       const siteNotes = (await this.reading.projectNotes?.(tenant, projectId)) ?? null;
-      const result = await lecteur.lire({ document: { numberedText, imagePdf: null, imagePages: [] }, trade, tradeLabel: tradeProfile(trade).label, referentiel: ref ? exportPourLecture(ref) : "Aucun référentiel pour ce métier.", siteNotes });
+      const lire = (t: string, r: Referential | null) => lecteur.lire({ document: { numberedText, imagePdf: null, imagePages: [] }, trade: t, tradeLabel: tradeProfile(t).label, referentiel: r ? exportPourLecture(r) : "Aucun référentiel pour ce métier.", siteNotes });
+      let result = await lire(trade, ref);
+      // §52 : le métier lu dans les lignes l'emporte sur celui du compte (relu une fois avec son référentiel).
+      const autre = result && result.status === "success" && result.output ? metierAutre(result.output, trade) : null;
+      if (autre) {
+        const relu = await lire(autre, referentialFor(autre));
+        if (relu && relu.status === "success" && relu.output) {
+          result = relu;
+          trade = autre;
+          ref = referentialFor(autre);
+          if (ref) await this.reading.referentials?.ensure(ref);
+        }
+      }
       if (result && result.status === "success" && result.output && lignesDeLecture(result.output).length === lines.length) lecture = result.output;
     }
     const takeoff = await this.takeoffs.create(tenant, {
@@ -1264,4 +1294,17 @@ function lignesGardees(lecture: LectureDevis, keys: readonly string[], ids: Read
     if (kept.length === 0) return [];
     return [{ ...ligne, fournitures: [...kept, ...(written.length > 0 ? ligne.fournitures.filter((f) => f.quantite === null) : [])] }];
   });
+}
+
+/**
+ * §52 : le métier que la lecture a lu dans le devis, quand il diffère de celui qu'on lui a donné et qu'il a un tiroir ;
+ * sinon null. Un devis à plusieurs lots garde le métier du chantier (une liste par lot viendra avec ses référentiels).
+ */
+export function metierAutre(lecture: LectureDevis, tradeDonne: string): string | null {
+  if (!lecture.metier || lecture.lots.length > 1) return null;
+  const lu = tradeIdOf(lecture.metier);
+  const donne = referentialFor(tradeDonne)?.trade ?? tradeIdOf(tradeDonne.split(",")[0] ?? "");
+  if (lu === donne || donne === "general") return null;
+  // Un artisan multi-métiers (« roofing,electrical ») : le métier lu fait partie des siens, il est pris tel quel.
+  return referentialFor(lu)?.trade === lu ? lu : null;
 }
