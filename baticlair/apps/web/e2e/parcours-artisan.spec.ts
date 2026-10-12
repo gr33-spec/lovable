@@ -1331,6 +1331,38 @@ test("§49.9 : une ligne nomme une fourniture ; les heures et le forfait sont re
   await expect(without).toContainText("Accès toiture et mise en sécurité");
 });
 
+test("§51.6 (2026-10-12) : chaque ligne orange ouverte montre sa question en premier, avec ses réponses", async ({ page }) => {
+  // Retour du fondateur (capture « Crochets … · Finition à préciser ») : la fiche proposait le nom, +/−, croquis, retirer,
+  // mais rien pour répondre. Une ligne orange se règle là où on l'ouvre : sa question d'abord, ses boutons, « Autre ».
+  await signUp(page);
+  await page.goto("/chantiers/nouveau");
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  const questions = page.getByRole("region", { name: "Les questions" });
+  await expect(questions).toBeVisible({ timeout: 60_000 });
+  await questions.getByRole("button", { name: /^Je commande façonné/ }).click();
+  await page.getByRole("button", { name: "Calculer ma liste", exact: true }).click();
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(list).toBeVisible({ timeout: 60_000 });
+  await expect(list.getByText("✅ Prêt à commander")).toBeVisible();
+  await expect(list.getByText("🟠 À préciser")).toBeVisible();
+  const cards = list.getByRole("list", { name: "Fournitures" }).locator(":scope > li");
+  const oranges = cards.filter({ has: page.getByRole("img", { name: "à vérifier" }) });
+  const n = await oranges.count();
+  expect(n).toBeGreaterThan(0);
+  for (let i = 0; i < n; i++) {
+    const card = oranges.nth(i);
+    await card.getByRole("button", { name: /^Modifier : / }).click();
+    const regler = card.getByRole("group", { name: /^Régler : / });
+    await expect(regler).toBeVisible();
+    // Au moins une réponse possible, d'un tap, dans la fiche même.
+    expect(await regler.getByRole("button").count(), `carte orange ${i + 1}`).toBeGreaterThan(0);
+    // La question passe avant le reste de la fiche (le nom, la quantité).
+    const nom = card.getByRole("button", { name: /^Modifier le nom/ });
+    if (await nom.count()) expect((await regler.boundingBox())!.y).toBeLessThan((await nom.boundingBox())!.y);
+    await closeOpenLine(page);
+  }
+});
+
 test("§50.2 : « Calculer ma liste » reste collé en bas de l'écran, même après avoir écrit sous « Autre »", async ({ page }, info) => {
   // Retours du fondateur (2026-10-10 puis 2026-10-12, captures iPhone) : le bouton flottait au milieu de l'écran une fois le
   // clavier refermé. Sur téléphone : « position: fixed; bottom: 0 », la zone du geste en marge intérieure, caché pendant la

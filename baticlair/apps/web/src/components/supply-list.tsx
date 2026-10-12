@@ -717,6 +717,8 @@ function Row({
         <div role="group" aria-label={`Ligne ouverte : ${label}`} className="flex flex-col gap-2 pb-2 pl-5">
           {/* Retour du fondateur (2026-10-10) : « quand je clique sur un bouton, rien ne se passe ». Un geste refusé se dit ici. */}
           {error ? <ErrorNotice error={error} /> : null}
+          {/* §51.6 (retour du fondateur, 2026-10-12) : une ligne orange se règle là où on l'ouvre : sa question d'abord. */}
+          {row.status === "check" ? <CardActions label={label} decision={decision} item={item} pending={pending} handlers={handlers} onEdit={onEdit} /> : null}
           {renamable ? (
             naming ? (
               <InlineText label={`Nom : ${label}`} value={item?.label ?? nameLine?.article ?? nameLine?.designation ?? label} pending={pending} onCancel={() => setNaming(false)} onSave={rename} />
@@ -730,7 +732,6 @@ function Row({
           {stepper ? (
             <Stepper label={label} value={stepper.value} unit={stepper.unit} pending={pending} onChange={(n) => onEdit(item!, { libelle: item!.label, quantite: String(n), unite: stepper.unit || null })} />
           ) : null}
-          {row.status === "check" ? <CardActions label={label} decision={decision} item={item} pending={pending} handlers={handlers} onEdit={onEdit} /> : null}
           {sketches.length > 0 ? (
             <ul aria-label={`Croquis joints : ${label}`} className="flex flex-wrap gap-2">
               {sketches.map((sk) => (
@@ -829,6 +830,8 @@ function CardActions({
 }) {
   const id = useId();
   const [value, setValue] = useState("");
+  const [written, setWritten] = useState<string | null>(null);
+  const [other, setOther] = useState("");
   const q = d?.question;
   // Une question encore ouverte (avant le calcul) répond à sa décision ; après, la ligne porte ses propres choix.
   const asks: { key: string; text: string; unit: string | null; options: { label: string; value: string }[] }[] =
@@ -852,7 +855,37 @@ function CardActions({
                 {o.label}
               </button>
             ))}
+            {/* « Autre » partout où il y a des boutons (§51.2) : ce qui s'écrit répond à la question de la ligne. */}
+            {written === a.key ? null : (
+              <button type="button" disabled={pending} onClick={() => setWritten(a.key)} className={`${OPTION} grow border-dashed`}>
+                Autre
+              </button>
+            )}
           </div>
+          {written === a.key ? (
+            <form
+              className="flex items-center gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const v = other.trim();
+                if (v) void answer(a.key, a.unit, a.unit ? plainNumber(v) : v);
+              }}
+            >
+              <input
+                aria-label={`Autre : ${a.text}`}
+                autoFocus
+                value={other}
+                maxLength={300}
+                onChange={(e) => setOther(e.target.value)}
+                placeholder="Écris ta réponse"
+                {...(a.unit ? { inputMode: "decimal" as const } : {})}
+                className="min-h-11 w-full min-w-0 rounded-xl border-2 border-line bg-surface px-3 text-[15px] outline-none focus:border-accent"
+              />
+              <Button type="submit" className="shrink-0" pending={pending}>
+                OK
+              </Button>
+            </form>
+          ) : null}
         </div>
       ))}
       {d && q && q.kind === "param" && q.options.length === 0 ? (

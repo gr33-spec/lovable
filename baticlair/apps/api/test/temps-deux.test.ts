@@ -129,3 +129,22 @@ describe("temps deux : une ligne ajoutée à la main sans unité demande son uni
     expect(done.lignes.find((l) => /^Bâche/.test(l.libelle))?.texte).toBe("2 pièces");
   }, 30_000);
 });
+
+describe("§51.6 (retour du fondateur, 2026-10-12) : une ligne orange se règle dans sa fiche, même ce qui est « à préciser »", () => {
+  type Ecran = { purchase: { toBuy: { key: string; label: string; precision?: string; asks?: { key: string; text: string; options: { label: string; value: string }[] }[] }[]; screen: { groups: { rows: { itemKey?: string; status: string }[] }[] } } };
+  it("DE00000071 : les tôles portent leur question « Profil, teinte » (« Au choix du fournisseur », « Autre ») ; ce qui est écrit part dans la précision et la ligne passe au vert", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "Toitures Test");
+    const id = await depose(agent);
+    const after = (await agent.post(`/v1/quantitatifs/${id}/calcul?ecran=1`).send({ reponses: [{ question: "engine:param:developpe_gouttiere", valeur: "25", unite: "cm" }] }).expect(200)).body as { ecran: Ecran };
+    const toles = after.ecran.purchase.toBuy.find((b) => /^Tôles/i.test(b.label))!;
+    const ask = toles.asks!.find((a) => a.key.startsWith("a-preciser:"))!;
+    expect(ask).toMatchObject({ text: "Profil, teinte", options: [{ label: "Au choix du fournisseur", value: "ok" }] });
+    const status = (e: Ecran, key: string) => e.purchase.screen.groups.flatMap((g) => g.rows).find((r) => r.itemKey === key)?.status;
+    expect(status(after.ecran, toles.key)).toBe("check");
+    const done = (await agent.post(`/v1/quantitatifs/${id}/reponses?ecran=1`).send({ reponses: [{ question: ask.key, valeur: "Profil 1000 T, RAL 7016" }, ...toles.asks!.filter((a) => a.key !== ask.key).map((a) => ({ question: a.key, valeur: a.options[0]!.value }))] }).expect(201)).body as { ecran: Ecran };
+    const apres = done.ecran.purchase.toBuy.find((b) => b.key === toles.key)!;
+    expect(apres.precision).toMatch(/Profil 1000 T, RAL 7016/);
+    expect(apres.asks?.some((a) => a.key === ask.key) ?? false).toBe(false);
+    expect(status(done.ecran, toles.key)).not.toBe("check");
+  }, 30_000);
+});
