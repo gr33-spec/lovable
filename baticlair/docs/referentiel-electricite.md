@@ -78,7 +78,7 @@ Une question seulement quand le devis ne permet ni de lire ni de déduire la don
 - Un bloc de pièces qui n'est rattaché à aucun logement : lequel.
 - Mode de pose quand il change les fournitures et n'est pas écrit : encastré (boîtes + gaine ICTA) ou en saillie (moulures, boîtes en saillie). Question à boutons : encastré / saillie, « encastré » en premier en rénovation lourde ou neuf. Règle générale (51.6) : tout orange a sa question, et la liste est entièrement verte une fois répondu.
 
-## 6. Test permanent devis 7954 (Morellec, 10 logements)
+## 6. Test permanent devis 7954 (10 logements)
 
 Lecture attendue, validée par Greg le 11 octobre 2026.
 

@@ -44,12 +44,28 @@ describe("temps un, devis 7954 : le contrôle d'après le §6 du référentiel �
     expect(ecarts).toEqual(expect.arrayContaining([expect.stringMatching(/^Sans fourniture attendue : PLAN ELECTRIQUE/), expect.stringMatching(/^Fourniture attendue : PRISE TV/)]));
   });
 
-  it("une question sur une donnée écrite (la marque, une contenance) ou sur la composition des tableaux : écarts", () => {
+  it("une question sur une donnée écrite (la marque, une contenance) : écart, et le compte passe à 8 au lieu de 7", () => {
     const l = copie(lectureAttendue7954());
     l.questions.push({ cle: "marque_appareillage", texte: "Quelle marque d'appareillage ?", boutons: [], unite: null, donnee: "marque", ligne: null });
-    l.questions.push({ cle: "composition_tableau", texte: "Composition du tableau du logement 1 ?", boutons: [], unite: null, donnee: "composition du tableau", ligne: null });
     const ecarts = controleLecture7954(l, DEVIS_7954);
-    expect(ecarts).toEqual(expect.arrayContaining([expect.stringMatching(/^Question sur une donnée écrite : Quelle marque/), expect.stringMatching(/^Question sur la composition des tableaux/), expect.stringMatching(/^Questions : 8 au lieu de 6/)]));
+    expect(ecarts).toEqual(expect.arrayContaining([expect.stringMatching(/^Question sur une donnée écrite : Quelle marque/), expect.stringMatching(/^Questions : 8 au lieu de 7/)]));
+  });
+
+  /**
+   * Correction du fondateur (2026-10-12) : le tableau fait l'objet d'une question (section 4 du référentiel électricité :
+   * composition déduite, ligne orange avec « C'est bon / Modifier » ; 51.6 : tout orange a sa question). Sept questions.
+   */
+  it("la composition des tableaux est une question (déduite, C'est bon / Modifier) : son absence est un écart", () => {
+    const attendue = lectureAttendue7954();
+    const composition = attendue.questions.find((q) => /composition/i.test(q.texte))!;
+    expect(composition.boutons.map((b) => b.label)).toEqual(["C'est bon", "Modifier"]);
+    const tableaux = attendue.lignes.filter((x) => x.designation.startsWith("TABLEAU GENERAL ELECTRIQUE"));
+    expect(tableaux.length).toBe(10);
+    for (const t of tableaux) expect(t.fournitures.every((f) => f.attend.includes(composition.cle))).toBe(true);
+    const l = copie(attendue);
+    l.questions = l.questions.filter((q) => q !== l.questions.find((x) => /composition/i.test(x.texte)));
+    const ecarts = controleLecture7954(l, DEVIS_7954);
+    expect(ecarts).toEqual(expect.arrayContaining([expect.stringMatching(/^Question absente : composition des tableaux/), expect.stringMatching(/^Questions : 6 au lieu de 7/)]));
   });
 });
 

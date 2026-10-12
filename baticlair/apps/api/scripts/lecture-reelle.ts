@@ -7,7 +7,7 @@
  * au modèle de lecture (AnthropicLectureReader, le même qu'en production), puis le bref et les questions imprimés mot
  * pour mot et le contrôle du résultat attendu (§6 du référentiel électricité pour 7954, §51.5 pour DE00000071).
  *
- *   ANTHROPIC_API_KEY=… pnpm exec tsx scripts/lecture-reelle.ts <devis.pdf> <7954|DE00000071> [sortie.json]
+ *   BATICLAIR_ANTHROPIC_KEY=… pnpm exec tsx scripts/lecture-reelle.ts <devis.pdf> <7954|DE00000071> [sortie.json]
  *
  * Le PDF reste hors du dépôt. La sortie JSON (lecture complète) est écrite là où on le demande, jamais commitée.
  */
@@ -31,9 +31,9 @@ async function main(): Promise<number> {
     console.error(`Usage : tsx scripts/lecture-reelle.ts <devis.pdf> <${Object.keys(DEVIS).join("|")}> [sortie.json]`);
     return 2;
   }
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.BATICLAIR_ANTHROPIC_KEY ?? process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    console.error("ANTHROPIC_API_KEY absente : la vraie lecture n'est pas lancée (aucun contournement, aucun double de test).");
+    console.error("BATICLAIR_ANTHROPIC_KEY absente : la vraie lecture n'est pas lancée (aucun contournement, aucun double de test).");
     return 3;
   }
   const model = process.env.AI_EXTRACTION_MODEL ?? "claude-opus-5-5";

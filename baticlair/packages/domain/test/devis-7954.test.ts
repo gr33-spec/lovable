@@ -32,6 +32,6 @@ describe("devis 7954 : la transcription retombe sur les comptes du §6", () => {
 
   it("anonymisé : ni prix, ni nom, ni adresse ; chaque ligne a son repère, dans l'ordre", () => {
     expect(DEVIS_7954.map((l) => l.ref)).toEqual(DEVIS_7954.map((_, i) => String(i + 1)));
-    for (const l of DEVIS_7954) expect(`${l.section} ${l.designation}`).not.toMatch(/€|\d+,\d{2}\s*$|RUE|SIRET|MORELLEC|CARLIER/i);
+    for (const l of DEVIS_7954) expect(`${l.section} ${l.designation}`).not.toMatch(/€|\d+,\d{2}\s*$|RUE|SIRET/i);
   });
 });

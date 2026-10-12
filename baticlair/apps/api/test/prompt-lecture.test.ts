@@ -2,7 +2,7 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { exportPourLecture, ROOFING_REFERENTIAL } from "@baticlair/domain";
-import { decodeLecture, LECTURE_PROMPT, lectureSystemPrompt, lectureWireSchema, RULE_49_1, RULE_49_4, RULE_51_5, RULE_ELEC_1, RULE_ELEC_5 } from "../src/modules/takeoff/application/lecture-reader.js";
+import { decodeLecture, LECTURE_PROMPT, lectureSystemPrompt, lectureWireSchema, RULE_49_1, RULE_49_4, RULE_51_5, RULE_ELEC_1, RULE_ELEC_4, RULE_ELEC_5 } from "../src/modules/takeoff/application/lecture-reader.js";
 import { RULE_51_1 } from "../src/modules/takeoff/application/prompt.js";
 
 /**
@@ -77,18 +77,21 @@ describe("le prompt de lecture (§51.5, v2)", () => {
 
 /**
  * Temps un (retour du fondateur, 12 octobre 2026) : le modèle dit le métier du devis (ou ses lots), et pour un devis
- * d'électricité il reçoit le §1 (un point contient ses fournitures) et le §5 (questions obligatoires) du référentiel
+ * d'électricité il reçoit les sections 1 (un point contient ses fournitures), 4 (tableau déduit, sa question) et 5 (questions obligatoires) du référentiel
  * électricité du 11 octobre, mot pour mot.
  */
 const elec = readFileSync(new URL("../../../docs/referentiel-electricite.md", import.meta.url), "utf8");
 const sectionElec = (from: string, to: string) => elec.slice(elec.indexOf(from), elec.indexOf(to, elec.indexOf(from) + 1));
 
 describe("le prompt de lecture, temps un : métier, lots, référentiel électricité", () => {
-  it("cite le §1 et le §5 du référentiel électricité mot pour mot, pour un devis d'électricité seulement", () => {
+  it("cite les sections 1, 4 et 5 du référentiel électricité mot pour mot, pour un devis d'électricité seulement", () => {
     expect(RULE_ELEC_1.split("\n").slice(1).join("\n")).toBe(plain(sectionElec("## 1.", "## 2.")).split("\n").slice(1).join("\n"));
     expect(RULE_ELEC_5.split("\n").slice(1).join("\n")).toBe(plain(sectionElec("## 5.", "## 6.")).split("\n").slice(1).join("\n"));
+    // Correction du fondateur (2026-10-12) : la section 4 (composition déduite, « C'est bon / Modifier ») est cité ; le tableau a sa question.
+    expect(RULE_ELEC_4.split("\n").slice(1).join("\n")).toBe(plain(sectionElec("## 4.", "## 5.")).replace(/\\([[\]])/g, "$1").split("\n").slice(1).join("\n"));
     const electricite = lectureSystemPrompt({ trade: "electrical", tradeLabel: "Électricité", referentiel: "" });
-    for (const rule of [RULE_ELEC_1, RULE_ELEC_5, RULE_49_1]) expect(electricite).toContain(rule);
+    for (const rule of [RULE_ELEC_1, RULE_ELEC_4, RULE_ELEC_5, RULE_49_1]) expect(electricite).toContain(rule);
+    expect(electricite).not.toMatch(/tableau[^\n]*jamais une question/);
     const couverture = lectureSystemPrompt({ trade: "roofing", tradeLabel: "Couverture", referentiel: "" });
     expect(couverture).not.toContain(RULE_ELEC_1);
     expect(couverture).not.toContain(RULE_ELEC_5);

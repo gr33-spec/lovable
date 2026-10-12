@@ -12,6 +12,7 @@ const BLOC_PAGE_12 = new Set(DEVIS_7954.filter((l) => l.section.endsWith("APPARE
 function attend(l: (typeof DEVIS_7954)[number]): string[] {
   const out: string[] = [];
   if (/^(LAMP|VA ET VIENT|TELERUPTEUR|PRISE (DE COURANT|RJ45|TV|FOUR|PLAQUE|LAVE|REFRIG|MACHINE|SECHE))/.test(l.designation)) out.push("teinte_appareillage");
+  if (l.designation.startsWith("TABLEAU GENERAL ELECTRIQUE")) out.push("composition_tableaux");
   if (/^GAINE 0\/(80|125)/.test(l.designation)) out.push("longueurs_gaine_vmc");
   if (/^(Distribution eau froide|TUBE PER)/.test(l.designation)) out.push("repartition_per");
   if (l.designation === "PAROI A DEFINIR") out.push("modele_paroi_douche");
@@ -60,6 +61,7 @@ export function lectureAttendue7954(): LectureDevis {
     ],
     questions: [
       { cle: "teinte_appareillage", texte: "Essensya en blanc ou en noir ?", boutons: [{ label: "Blanc", valeur: "blanc" }, { label: "Noir", valeur: "noir" }], unite: null, donnee: "teinte de l'appareillage", ligne: null },
+      { cle: "composition_tableaux", texte: "Composition des tableaux déduite des points de chaque logement (disjoncteurs, différentiels 30 mA, contacteur J/N, peignes) : c'est bon ?", boutons: [{ label: "C'est bon", valeur: "oui" }, { label: "Modifier", valeur: "modifier" }], unite: null, donnee: "composition des tableaux", ligne: null },
       { cle: "longueurs_gaine_vmc", texte: "Combien de mètres de gaine Ø80 et de gaine Ø125 par logement ?", boutons: [], unite: "m", donnee: "longueurs de gaine VMC", ligne: null },
       { cle: "repartition_per", texte: "Les 890 m de PER : combien en 10×12 et combien en 13×16 ?", boutons: [], unite: "m", donnee: "répartition du PER", ligne: null },
       { cle: "modele_paroi_douche", texte: "Quel modèle pour les parois de douche « à définir » ?", boutons: [], unite: null, donnee: "modèle des parois de douche", ligne: null },

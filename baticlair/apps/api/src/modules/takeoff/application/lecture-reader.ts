@@ -40,6 +40,16 @@ export const RULE_ELEC_1 = `RÈGLE §1 DU RÉFÉRENTIEL ÉLECTRICITÉ : règle n
 - Les sections 49 (charte), 50 (ce que voit l'artisan) et 51 (le moteur voit le chantier avant de compter) du référentiel couverture s'appliquent à tous les métiers, donc ici.
 - Quand une ligne nomme une marque, une gamme ou un modèle (Hager Essensya, Aldes Bahia, Atoll 750 W), ce nom est repris tel quel, sans question. Quand elle ne le nomme pas, la ligne sort en orange avec sa question (modèle, teinte ou qualité), et la réponse la passe au vert (51.6).`;
 
+/** Référentiel électricité (11 octobre 2026), §4 mot pour mot : le tableau déduit des points, sa question « C'est bon / Modifier ». */
+export const RULE_ELEC_4 = `RÈGLE §4 DU RÉFÉRENTIEL ÉLECTRICITÉ : tableau et protections.
+Quand le devis donne une ligne « tableau » avec la liste de son contenu sans les nombres (cas courant : « disjoncteurs 2 A, 10 A, 16 A, 20 A, 32 A, contacteur J/N, fils, barrette, montage »), l'app déduit la composition des points du même logement, selon les protections du § 3, et la pose en orange avec une question : « Composition du tableau : [détail déduit] — C'est bon / Modifier ». La réponse passe la ligne au vert.
+- Nombre de disjoncteurs : somme des protections du § 3 sur le logement, chaque calibre arrondi au-dessus.
+- Interrupteurs différentiels 30 mA : 1 pour 8 disjoncteurs, dont au moins 1 de type A (plaque, lave-linge) ; 40 A en logement sans chauffage électrique sur ce différentiel, 63 A sinon.
+- Disjoncteur 2 A : 1 par contacteur jour/nuit et 1 par télérupteur.
+- Peigne : 1 par rangée. Rangées : 1 rangée pour 13 modules, le tableau arrondi au-dessus (2, 3 ou 4 rangées).
+- Mise à la terre, quand le devis la nomme : 1 piquet de terre, 1 barrette de coupure, câble 16 mm² vert/jaune 10 m, liaison équipotentielle 6 mm² 15 m ; le mesurage est une ligne sans fourniture.
+- Coffret de communication : repris tel que nommé au devis (grade, nombre de RJ45) ; le devis nomme ses connecteurs, ils sont repris tels quels.`;
+
 /** Référentiel électricité (11 octobre 2026), §5 mot pour mot : les questions obligatoires. */
 export const RULE_ELEC_5 = `RÈGLE §5 DU RÉFÉRENTIEL ÉLECTRICITÉ : questions obligatoires.
 Une question seulement quand le devis ne permet ni de lire ni de déduire la donnée (51.2). Les cas qui en produisent une :
@@ -52,7 +62,7 @@ Une question seulement quand le devis ne permet ni de lire ni de déduire la don
 
 /** Les règles propres à un métier, mot pour mot, ajoutées au lecteur quand le devis est de ce métier. */
 const REGLES_DU_METIER: Readonly<Record<string, readonly string[]>> = {
-  electrical: [RULE_ELEC_1, RULE_ELEC_5, "La composition d'un tableau (nombre de disjoncteurs, différentiels, peignes) se déduit des points du même logement (§4 du référentiel électricité) : jamais une question."],
+  electrical: [RULE_ELEC_1, RULE_ELEC_4, RULE_ELEC_5],
 };
 
 /** Les métiers du référentiel : l'identifiant que le lecteur rend, et son nom. */

@@ -44,6 +44,17 @@ describe("loadConfig", () => {
     const c = loadConfig({ ...base, GOOGLE_CLIENT_ID: "id", GOOGLE_CLIENT_SECRET: "s" });
     expect(c.oauth.google).toEqual({ clientId: "id", clientSecret: "s" });
   });
+
+  /** Directive du fondateur (2026-10-12) : la clé de l'app est BATICLAIR_ANTHROPIC_KEY (Vercel), pas ANTHROPIC_API_KEY. */
+  it("lit la clé de lecture dans BATICLAIR_ANTHROPIC_KEY, avant ANTHROPIC_API_KEY, et dit laquelle (jamais sa valeur)", () => {
+    const c = loadConfig({ ...base, BATICLAIR_ANTHROPIC_KEY: "sk-app" });
+    expect(c.ai).toMatchObject({ provider: "anthropic", apiKey: "sk-app", keySource: "BATICLAIR_ANTHROPIC_KEY" });
+    expect(loadConfig({ ...base, BATICLAIR_ANTHROPIC_KEY: "sk-app", ANTHROPIC_API_KEY: "sk-autre" }).ai.apiKey).toBe("sk-app");
+    expect(loadConfig({ ...base, ANTHROPIC_API_KEY: "sk-autre" }).ai).toMatchObject({ apiKey: "sk-autre", keySource: "ANTHROPIC_API_KEY" });
+    expect(loadConfig(base).ai).toMatchObject({ provider: "disabled", keySource: null });
+    expect(loadConfig({ ...base, AI_PROVIDER: "anthropic", BATICLAIR_ANTHROPIC_KEY: "sk-app" }).ai.provider).toBe("anthropic");
+    expect(() => loadConfig({ ...base, AI_PROVIDER: "anthropic" })).toThrow(/BATICLAIR_ANTHROPIC_KEY/);
+  });
 });
 
 describe("toSupportId", () => {

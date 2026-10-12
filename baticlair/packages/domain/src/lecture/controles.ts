@@ -49,6 +49,7 @@ function fournitures(lecture: LectureDevis, sans: RegExp, exceptions: RegExp | n
 
 const QUESTIONS_7954: readonly [string, (t: string) => boolean][] = [
   ["teinte de l'appareillage Essensya", (t) => /teinte|finition|blanc|noir/.test(t)],
+  ["composition des tableaux (déduite, §4 : C'est bon / Modifier)", (t) => /tableau/.test(t) && /composition|disjoncteur|differentiel/.test(t)],
   ["mètres de gaine Ø80 et Ø125 par logement", (t) => /gaine/.test(t) && /80/.test(t) && /125/.test(t)],
   ["répartition des 890 m de PER entre 10×12 et 13×16", (t) => /\bper\b|890/.test(t) && /12/.test(t) && /16/.test(t)],
   ["modèle des parois de douche « à définir »", (t) => /paroi/.test(t)],
@@ -56,7 +57,11 @@ const QUESTIONS_7954: readonly [string, (t: string) => boolean][] = [
   ["logement de rattachement du bloc chambre / dégagement de la page 12", (t) => /(page 12|chambre|degagement)/.test(t) && /logement|rattach/.test(t)],
 ];
 
-/** §6 du référentiel électricité : « Aucune question sur une marque, un modèle ou une contenance écrits au devis. Aucune question sur la composition des tableaux (déduite, § 4). » */
+/**
+ * §6 du référentiel électricité : « Aucune question sur une marque, un modèle ou une contenance écrits au devis. » La
+ * composition des tableaux, elle, est une question (correction du fondateur, 2026-10-12 : §4, composition déduite,
+ * ligne orange avec « C'est bon / Modifier » ; §51.6, tout orange a sa question) : sept questions.
+ */
 const ECRIT_7954 = /\b(marque|hager|essensya|atoll|aldes|bahia|malicio|litres?|contenance|porcelanosa|ancoflash|rondo|grade|coffret|connecteur)\b/;
 
 export function controleLecture7954(lecture: LectureDevis, devis: readonly LigneDuDevis[]): string[] {
@@ -99,8 +104,7 @@ export function controleLecture7954(lecture: LectureDevis, devis: readonly Ligne
   for (const [label, test] of QUESTIONS_7954) if (!textes.some(test)) out.push(`Question absente : ${label}`);
   for (const [i, t] of textes.entries()) {
     const texte = lecture.questions[i]!.texte;
-    if (/composition|disjoncteur|differentiel/.test(t)) out.push(`Question sur la composition des tableaux (déduite, §4) : ${texte}`);
-    else if (ECRIT_7954.test(t) && !QUESTIONS_7954[0]![1](t)) out.push(`Question sur une donnée écrite : ${texte}`);
+    if (ECRIT_7954.test(t) && !QUESTIONS_7954[0]![1](t) && !QUESTIONS_7954[1]![1](t)) out.push(`Question sur une donnée écrite : ${texte}`);
   }
   return out;
 }

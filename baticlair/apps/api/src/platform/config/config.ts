@@ -60,12 +60,14 @@ const envSchema = z
     AI_ANALYSIS_MAX_EUR: z.string().regex(/^\d+(\.\d+)?$/).default("3"),
     /**
      * Lecture des devis par l'IA :
-     * - `anthropic` : appels réels (ANTHROPIC_API_KEY) ;
+     * - `anthropic` : appels réels (BATICLAIR_ANTHROPIC_KEY, sinon ANTHROPIC_API_KEY) ;
      * - `disabled`  : pas d'IA, et l'application le dit ;
      * - `fake`      : extraction simulée, déterministe (développement et tests uniquement).
      * Par défaut : `anthropic` si une clé est fournie, sinon `disabled`.
      */
     AI_PROVIDER: z.enum(["anthropic", "disabled", "fake"]).optional(),
+    /** La clé de l'app (Vercel, décision du fondateur 2026-10-12), lue avant ANTHROPIC_API_KEY. */
+    BATICLAIR_ANTHROPIC_KEY: z.string().min(1).optional(),
     ANTHROPIC_API_KEY: z.string().min(1).optional(),
     /**
      * Modèle de LECTURE du devis (appel IA n° 1). Décision du fondateur (2026-10-05) : l'IA la plus puissante pour
@@ -121,8 +123,8 @@ const envSchema = z
     if (isDeployed && env.AI_PROVIDER === "fake") {
       ctx.addIssue({ code: "custom", path: ["AI_PROVIDER"], message: "« fake » est réservé au développement et aux tests" });
     }
-    if (env.AI_PROVIDER === "anthropic" && !env.ANTHROPIC_API_KEY) {
-      ctx.addIssue({ code: "custom", path: ["ANTHROPIC_API_KEY"], message: "obligatoire avec AI_PROVIDER=anthropic" });
+    if (env.AI_PROVIDER === "anthropic" && !env.BATICLAIR_ANTHROPIC_KEY && !env.ANTHROPIC_API_KEY) {
+      ctx.addIssue({ code: "custom", path: ["BATICLAIR_ANTHROPIC_KEY"], message: "obligatoire avec AI_PROVIDER=anthropic" });
     }
     if (env.EMAIL_PROVIDER === "resend" && !env.RESEND_API_KEY) {
       ctx.addIssue({ code: "custom", path: ["RESEND_API_KEY"], message: "obligatoire avec EMAIL_PROVIDER=resend" });
@@ -168,6 +170,8 @@ export interface AppConfig {
   ai: {
     provider: "anthropic" | "disabled" | "fake";
     apiKey?: string;
+    /** Le nom de la variable d'où vient la clé (jamais sa valeur), dit par la route de santé. */
+    keySource: "BATICLAIR_ANTHROPIC_KEY" | "ANTHROPIC_API_KEY" | null;
     extractionModel: string;
     quantitatif: boolean;
     quantitatifModel: string;
@@ -192,6 +196,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     );
   }
   const e = parsed.data;
+  const apiKey = e.BATICLAIR_ANTHROPIC_KEY ?? e.ANTHROPIC_API_KEY;
   let plans: Plan[];
   try {
     plans = parsePlans(e.BILLING_PLANS);
@@ -227,8 +232,9 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     ...(e.CRON_SECRET ? { cronSecret: e.CRON_SECRET } : {}),
     alerts: { ...(e.ALERT_WEBHOOK_URL ? { webhookUrl: e.ALERT_WEBHOOK_URL } : {}), ...(e.ALERT_EMAIL ? { email: e.ALERT_EMAIL } : {}) },
     ai: {
-      provider: e.AI_PROVIDER ?? (e.ANTHROPIC_API_KEY ? "anthropic" : "disabled"),
-      ...(e.ANTHROPIC_API_KEY ? { apiKey: e.ANTHROPIC_API_KEY } : {}),
+      provider: e.AI_PROVIDER ?? (apiKey ? "anthropic" : "disabled"),
+      ...(apiKey ? { apiKey } : {}),
+      keySource: e.BATICLAIR_ANTHROPIC_KEY ? "BATICLAIR_ANTHROPIC_KEY" : e.ANTHROPIC_API_KEY ? "ANTHROPIC_API_KEY" : null,
       extractionModel: e.AI_EXTRACTION_MODEL,
       quantitatif: e.AI_QUANTITATIF === "on",
       quantitatifModel: e.AI_QUANTITATIF_MODEL,

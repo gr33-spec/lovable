@@ -44,7 +44,7 @@ const COMMUN = [ELEC, APP, "COMMUN"];
 const VMC = "VMC HYGROREGLABLE ALDES";
 const SAN = "TRAVAUX SANITAIRE";
 
-export const MORELLEC_LINES: BenchLine[] = [
+export const ELECTRICITE_PLOMBERIE_7954_LINES: BenchLine[] = [
   ...under(
     [ELEC, "TRAVAUX D'ELECTRICITE : DEPOSE ET PREPARATION CHANTIER"],
     raw("POSE D'UNE PRISE DE CHANTIER", "1,000", null, "L"),
@@ -256,7 +256,7 @@ export const MORELLEC_LINES: BenchLine[] = [
 ];
 
 /** Titres et mentions du document (information, pas des lignes). */
-export const MORELLEC_CONTEXT = [
+export const ELECTRICITE_PLOMBERIE_7954_CONTEXT = [
   "DEVIS ELECTRICITE — installation monophasée 220 V, conforme NF C 15-100",
   "APPAREILLAGE HAGER ESSENSYA (marque et gamme de toutes les prises et commandes)",
   "N°1 TYPE T3 / N°2 TYPE T3 / N°3 TYPE T2 BIS / N°4 TYPE T2 BIS / COMMUN (4 logements)",
