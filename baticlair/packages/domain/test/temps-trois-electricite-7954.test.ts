@@ -7,10 +7,11 @@
  *    une donnée écrite au devis, si une ligne sort en « point » ou en « U », ou si un compte s'écarte de plus de 3 % des
  *    valeurs ci-dessus. »
  *
- * Deux écarts avec la section 6, à trancher par le fondateur (écrits ici pour ne pas les cacher) :
- *  - les 10 prises réfrigérateur sont comptées en prises 16 A (le tableau de conversion de la section 3 n'a pas de ligne
- *    réfrigérateur, la section 6 ne les compte pas) : +10 prises, +10 boîtes, +80 m de 3G2,5, +80 m de gaine Ø20 ;
- *  - va-et-vient : la section 3 donne 2 interrupteurs par va-et-vient (13 × 2 + 1 × 2 = 28), la section 6 en attend 30.
+ * Décisions du fondateur (2026-10-12), qui corrigent les valeurs de la section 6 :
+ *  - « Prises réfrigérateur : oui, prises 16 A, compte-les et mets à jour le test » : 161 + 10 = 171 prises, +10 boîtes,
+ *    +80 m de 3G2,5, +80 m de gaine Ø20 ;
+ *  - « Va-et-vient : deux interrupteurs par VV, le test passe à 28 (sauf ligne « 3 points » = permutateur en plus) » ;
+ *  - « Longueurs : garde la mention « ratios en cours de validation » » (section 7).
  */
 import { describe, expect, it } from "vitest";
 import { ecranDeLecture, ELECTRICITE_REFERENTIAL, exportPourLecture, fournituresElectriques, type LectureDevis } from "../src/index.js";
@@ -51,6 +52,12 @@ describe("temps trois : « Prises 9 + 9 + 6 : une ligne 24 », avec la trace des
     expect(out.find((a) => a.label === "Câble rigide 3G2,5")).toMatchObject({ quantite: "2 couronnes de 100 m", approx: "192 m à poser", order: { count: "2", unit: "couronnes de 100 m" } });
   });
 
+  it("« 3 points » : deux va-et-vient et un permutateur en plus (décision du fondateur, 2026-10-12)", () => {
+    const out = fournituresElectriques([{ id: "a", ref: "7", point: "va-et-vient-3", quantite: 2, attend: [] }]);
+    expect(out.find((a) => a.label === "Interrupteur va-et-vient")).toMatchObject({ quantite: "4 pièces" });
+    expect(out.find((a) => a.label === "Permutateur")).toMatchObject({ quantite: "2 pièces" });
+  });
+
   it("le modèle reçoit la liste des points dans l'export du référentiel électricité, et seulement là", () => {
     expect(exportPourLecture(ref)).toMatch(/POINTS ÉLECTRIQUES[\s\S]*prise-16a/);
   });
@@ -67,7 +74,8 @@ describe("temps trois, devis 7954 : les comptes de la section 6 du référentiel
 
   it("appareillage, boîtes et DCL : à 3 % de la section 6", () => {
     proche(nombre(article(elec, /^Interrupteur simple/).quantity), 58);
-    proche(nombre(article(elec, /^Interrupteur va-et-vient/).quantity), 28); // section 6 : 30, voir l'en-tête
+    expect(nombre(article(elec, /^Interrupteur va-et-vient/).quantity)).toBe(28); // décision du fondateur : 2 par VV
+    expect(elec.filter((l) => /^Permutateur/.test(l.label))).toEqual([]); // aucune ligne « 3 points » dans 7954
     expect(nombre(article(elec, /^Bouton poussoir/).quantity)).toBe(3);
     expect(nombre(article(elec, /^Télérupteur/).quantity)).toBe(1);
     proche(nombre(article(elec, /^Prise 2P\+T 16 A/).quantity), 161 + REFRIGERATEURS);
@@ -88,11 +96,11 @@ describe("temps trois, devis 7954 : les comptes de la section 6 du référentiel
       [/3G1,5/, 734, "8 couronnes de 100 m"],
       [/4G1,5/, 556, "6 couronnes de 100 m"],
       [/2×1,5/, 12, "1 couronne de 100 m"],
-      [/3G2,5/, 1472 + REFRIGERATEURS * 8, "16 couronnes de 100 m"], // section 6 : 1 472 m, 15 couronnes
+      [/3G2,5/, 1472 + REFRIGERATEURS * 8, "16 couronnes de 100 m"], // réfrigérateurs comptés (décision du fondateur)
       [/3G6/, 160, "2 couronnes de 100 m"],
       [/^Câble réseau grade 2/, 336, "4 boîtes de 100 m"],
       [/coaxial/, 144, "2 couronnes de 100 m"],
-      [/Ø20/, 3254 + REFRIGERATEURS * 8, "34 couronnes de 100 m"], // section 6 : 3 254 m, 33 couronnes
+      [/Ø20/, 3254 + REFRIGERATEURS * 8, "34 couronnes de 100 m"], // réfrigérateurs comptés (décision du fondateur)
       [/Ø25/, 160, "2 couronnes de 100 m"],
     ];
     for (const [label, m, quantite] of cas) {

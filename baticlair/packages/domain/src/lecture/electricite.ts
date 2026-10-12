@@ -5,8 +5,10 @@
  * par ligne, de quel point il s'agit (l'identifiant ci-dessous, dans `ouvrage`).
  *
  * Retour du fondateur (2026-10-12) : « Prises 9 + 9 + 6 : une ligne 24, c'est le quantitatif. Garde la trace des trois
- * lignes du devis dans la raison de la ligne. » Les longueurs par point sont les moyennes du §3, à faire valider par un
- * électricien (§7).
+ * lignes du devis dans la raison de la ligne. » Les longueurs par point sont les moyennes du §3 : ratios en cours de
+ * validation par un électricien (§7 ; le fondateur, 2026-10-12 : « garde la mention »).
+ * Décisions du fondateur (2026-10-12) : une prise réfrigérateur est une prise 16 A ; deux interrupteurs par va-et-vient,
+ * plus un permutateur sur une ligne « 3 points ».
  */
 
 /** Les points du §3, tels que le modèle les nomme dans `ouvrage`. */
@@ -14,6 +16,7 @@ export const POINTS_ELECTRIQUES: readonly { id: string; label: string }[] = [
   { id: "point-lumineux", label: "Point lumineux simple (simple allumage)" },
   { id: "va-et-vient-1", label: "Va-et-vient 1 point lumineux" },
   { id: "va-et-vient-2", label: "Va-et-vient 2 points lumineux" },
+  { id: "va-et-vient-3", label: "Va-et-vient 3 points de commande (permutateur)" },
   { id: "telerupteur", label: "Télérupteur 1 point lumineux" },
   { id: "prise-16a", label: "Prise de courant 16 A+T (réfrigérateur compris)" },
   { id: "prise-cuisson", label: "Prise four ou prise plaque (sortie de câble 32 A)" },
@@ -41,6 +44,7 @@ interface Article {
 const A = {
   interrupteur: { label: "Interrupteur simple allumage", unite: "u", appareillage: true },
   vaEtVient: { label: "Interrupteur va-et-vient", unite: "u", appareillage: true },
+  permutateur: { label: "Permutateur", unite: "u", appareillage: true },
   poussoir: { label: "Bouton poussoir", unite: "u", appareillage: true },
   telerupteur: { label: "Télérupteur modulaire", unite: "u" },
   prise16: { label: "Prise 2P+T 16 A", unite: "u", appareillage: true },
@@ -69,6 +73,9 @@ const CONVERSIONS: Record<string, readonly [Cle, number][]> = {
   "point-lumineux": [["interrupteur", 1], ["boite40", 1], ["dcl", 1], ["c3g15", 10], ["gaine20", 10]],
   "va-et-vient-1": [["vaEtVient", 2], ["boite40", 2], ["dcl", 1], ["c3g15", 10], ["c4g15", 6], ["gaine20", 16]],
   "va-et-vient-2": [["vaEtVient", 2], ["boite40", 2], ["dcl", 2], ["c3g15", 14], ["c4g15", 6], ["gaine20", 20]],
+  // Retour du fondateur (2026-10-12) : « deux interrupteurs par VV, sauf ligne « 3 points » = permutateur en plus ». La
+  // troisième commande ajoute une navette (4G1,5 6 m, gaine 6 m), sur le modèle du va-et-vient 1 point : ratio en cours de validation (§7).
+  "va-et-vient-3": [["vaEtVient", 2], ["permutateur", 1], ["boite40", 3], ["dcl", 1], ["c3g15", 10], ["c4g15", 12], ["gaine20", 22]],
   telerupteur: [["poussoir", 3], ["telerupteur", 1], ["boite40", 3], ["dcl", 1], ["c3g15", 10], ["c2x15", 12], ["gaine20", 22]],
   "prise-16a": [["prise16", 1], ["boite40", 1], ["c3g25", 8], ["gaine20", 8]],
   "prise-cuisson": [["sortie32", 1], ["boite50", 1], ["c3g6", 8], ["gaine25", 8]],
