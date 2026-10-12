@@ -21,10 +21,26 @@ function attend(l: (typeof DEVIS_7954)[number]): string[] {
   return out;
 }
 
+/** Temps trois : le point de la ligne (référentiel électricité §3), tel que le modèle le nomme dans « ouvrage ». */
+const POINTS: [RegExp, string][] = [
+  [/^LAMP(L)?E SIMPLE/, "point-lumineux"],
+  [/^VA ET VIENT 1/, "va-et-vient-1"],
+  [/^VA ET VIENT 2/, "va-et-vient-2"],
+  [/^TELERUPTEUR/, "telerupteur"],
+  [/^PRISE (DE COURANT 16A|REFRIGERATEUR)/, "prise-16a"],
+  [/^PRISE (FOUR|PLAQUE)/, "prise-cuisson"],
+  [/^(PRISE (LAVE-VAISSELLE|MACHINE A LAVER|SECHE-LINGE)|ALIMENTATION CHAUFFE-EAU)/, "prise-20a"],
+  [/^ALIMENTATION HOTTE/, "prise-hotte"],
+  [/^ALIMENTATION RADIATEUR/, "alim-radiateur"],
+  [/^PRISE RJ45/, "prise-rj45"],
+  [/^PRISE TV/, "prise-tv"],
+];
+const pointDe = (designation: string) => POINTS.find(([re]) => re.test(designation))?.[1] ?? null;
+
 export function lectureAttendue7954(): LectureDevis {
   const lignes: LectureLigne[] = DEVIS_7954.map((l) => {
     const sans = SANS.test(l.designation) || l.designation === "CHAPEAU PREVU PAR LE COUVREUR";
-    const fourniture: LectureFourniture = { nom: l.designation, quantite: l.quantity, unite: l.unit === "ML" ? "ml" : "u", ouvrage: null, emplacement: null, donnees: {}, attend: attend(l), aPreciser: [], precision: null };
+    const fourniture: LectureFourniture = { nom: l.designation, quantite: l.quantity, unite: l.unit === "ML" ? "ml" : "u", ouvrage: pointDe(l.designation), emplacement: null, donnees: {}, attend: attend(l), aPreciser: [], precision: null };
     return { ref: l.ref, designation: l.designation, quantite: l.quantity, unite: l.unit, role: sans ? (l.designation.startsWith("CHAPEAU") ? "hors_quantitatif" : "pose") : "fourniture", fournitures: sans ? [] : [fourniture] };
   });
   const refs = (re: RegExp) => DEVIS_7954.filter((l) => re.test(l.section)).map((l) => l.ref);

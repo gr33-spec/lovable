@@ -1,4 +1,5 @@
 import type { Referential } from "../referential/model.js";
+import { pointsPourLecture } from "./electricite.js";
 
 /**
  * §51.5 : L'EXPORT DU RÉFÉRENTIEL DONNÉ AU MODÈLE avec le devis. Tout ce dont la lecture a besoin pour nommer les
@@ -44,6 +45,8 @@ export function exportPourLecture(ref: Referential): string {
     }
     out.push("");
   }
+  // Temps trois, électricité : le modèle nomme le point de chaque ligne ; le code en tire les fournitures (§3).
+  if (ref.trade === "electrical") out.push(pointsPourLecture(), "");
   out.push("FAMILLES DE PRODUITS : " + ref.families.map((f) => `${f.code} (${f.label})`).join(" ; "));
   return out.join("\n");
 }

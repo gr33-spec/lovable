@@ -19,7 +19,7 @@ const PAQUET: Metier[] = [
       { ref: "4", designation: "Tableau électrique 3 rangées", quantity: "1", unit: "u" },
     ],
     questions: ["Appareillage : quelle gamme (Céliane, Odace, Dooxie…) ?"],
-    couleurs: { vert: 2, orange: 1, gris: 0 },
+    couleurs: { vert: 7, orange: 1, gris: 0 },
   },
   {
     nom: "Plomberie",

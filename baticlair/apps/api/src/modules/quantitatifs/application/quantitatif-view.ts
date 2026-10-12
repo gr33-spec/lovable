@@ -106,7 +106,10 @@ export function quantitatifView(
         ? { phrase: `${b.quantity} = quantité fixée par vous`, morceaux: [{ texte: "quantité fixée par vous", confiance: "artisan" as const }, ...(need ? explication(b.quantity, need.trace, purchase.assumptions).morceaux : [])] }
         : need
           ? explication(b.quantity, need.trace, purchase.assumptions)
-          : { phrase: `${b.quantity ?? "?"} = repris tel quel du devis`, morceaux: [{ texte: "repris tel quel du devis", confiance: "devis" as const }] },
+          : // Temps trois, électricité : les points additionnés, avec la trace des lignes du devis (« 9 + 9 + 6, lignes 12, 25 et 38 du devis »).
+            b.kind === "computed" && b.precision
+            ? { phrase: `${b.quantity ?? "?"} = ${b.precision}`, morceaux: [{ texte: b.precision, confiance: "referentiel" as const }] }
+            : { phrase: `${b.quantity ?? "?"} = repris tel quel du devis`, morceaux: [{ texte: "repris tel quel du devis", confiance: "devis" as const }] },
     };
   });
   const questions = purchase.questions.map((d) => {

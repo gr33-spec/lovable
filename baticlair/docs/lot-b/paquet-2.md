@@ -7,7 +7,7 @@ puis le PDF que lit le vendeur une fois les questions répondues (premier bouton
 
 | Métier | Vertes | Orange | Grises | Questions |
 | --- | --- | --- | --- | --- |
-| Électricité | 2 | 1 | 0 | 1 |
+| Électricité | 7 | 1 | 0 | 1 |
 | Plomberie | 0 | 3 | 0 | 1 |
 | Menuiserie | 2 | 2 | 0 | 1 |
 | Chauffage, ventilation | 1 | 1 | 0 | 2 |
@@ -23,7 +23,7 @@ Devis de test :
 | 3 | Point lumineux va-et-vient | 3 u |
 | 4 | Tableau électrique 3 rangées | 1 u |
 
-**À l'ouverture : 2 vertes · 1 orange · 0 grise.**
+**À l'ouverture : 7 vertes · 1 orange · 0 grise.**
 
 Questions du comptoir :
 - Appareillage : quelle gamme (Céliane, Odace, Dooxie…) ? (Legrand Dooxie / Legrand Céliane / Schneider Odace)
@@ -36,8 +36,13 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Prise 2P+T 16 A Legrand Dooxie blanc | 18 pièces |  | chiffrable |
-| Boîte + douille DCL | 12 pièces |  | chiffrable |
+| Prise 2P+T 16 A | 18 pièces | 18, ligne 1 du devis; Gamme d'appareillage : Legrand Dooxie | chiffrable |
+| Boîte d'encastrement Ø67 prof. 40 | 30 pièces | 18 + 9 + 3, lignes 1, 2 et 3 du devis | chiffrable |
+| Câble rigide 3G2,5 | 2 couronnes de 100 m (144 m à poser) | 144 m, ligne 1 du devis | chiffrable |
+| Gaine ICTA Ø20 | 3 couronnes de 100 m (264 m à poser) | 144 + 90 + 30 m, lignes 1, 2 et 3 du devis | chiffrable |
+| Interrupteur simple allumage | 12 pièces | 9 + 3, lignes 2 et 3 du devis | chiffrable |
+| Boîte DCL plafond avec douille | 12 pièces | 9 + 3, lignes 2 et 3 du devis | chiffrable |
+| Câble rigide 3G1,5 | 2 couronnes de 100 m (120 m à poser) | 90 + 30 m, lignes 2 et 3 du devis | chiffrable |
 | Tableau électrique 3 rangées de 13 modules, nu | 1 pièce |  | chiffrable |
 
 ## Plomberie

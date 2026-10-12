@@ -16,6 +16,7 @@ import { subjectOf, withShortReasons } from "../trust/short-reason.js";
 import { isWithoutSupplyUnit } from "../takeoff/supply.js";
 import { withoutLabour } from "../trust/marchandise.js";
 import { normalizeText } from "../trades/trade-profile.js";
+import { fournituresElectriques, pointElectrique, type ArticleElectrique } from "./electricite.js";
 
 /**
  * §51.5 (décision du fondateur, 2026-10-11) : LA LECTURE EST FAITE PAR L'IA, PAS PAR DES RÈGLES DE MOTS. Le modèle le
@@ -526,8 +527,16 @@ export function ecranDeLecture(input: {
     if (typeof unite !== "string" || !unite.trim() || !ligne.fourniture || ligne.fourniture.unite) return ligne;
     return { ...ligne, unit: ligne.unit ?? unite.trim(), fourniture: { ...ligne.fourniture, unite: unite.trim() } };
   });
-  const plan = planDeLecture(ref, lecture, lignes, input.extraFacts);
-  const validation = validationDeLecture(ref.trade, lignes, plan, new Set([...(input.lines ?? new Map())].filter(([, v]) => v.confirmed).map(([k]) => k)));
+  // TEMPS TROIS, électricité (référentiel électricité §3, directive du fondateur, 2026-10-12) : une ligne de POINT (le
+  // modèle nomme le point dans « ouvrage ») ne part pas telle qu'écrite ; le code la convertit en ce qu'elle contient et
+  // additionne sur tout le devis (« Prises 9 + 9 + 6 : une ligne 24 »). Ces lignes sortent du calcul générique.
+  const pointIds = new Set(ref.trade === "electrical" ? lignes.filter((l) => pointElectrique(l.fourniture?.ouvrage) && nombre(l.fourniture?.quantite ?? l.quantity) !== null).map((l) => l.id) : []);
+  const generiques = () => lignes.filter((l) => !pointIds.has(l.id));
+  const points = fournituresElectriques(
+    lignes.filter((l) => pointIds.has(l.id)).map((l) => ({ id: l.id, ref: l.ligne.ref, point: pointElectrique(l.fourniture!.ouvrage)!, quantite: nombre(l.fourniture!.quantite ?? l.quantity)!, attend: l.fourniture!.attend })),
+  );
+  const plan = planDeLecture(ref, lecture, generiques(), input.extraFacts);
+  const validation = validationDeLecture(ref.trade, generiques(), plan, new Set([...(input.lines ?? new Map())].filter(([, v]) => v.confirmed).map(([k]) => k)));
   const roles = new Map<string, RoleProposal>();
   for (const l of lignes) {
     if (!l.fourniture) continue;
@@ -610,12 +619,14 @@ export function ecranDeLecture(input: {
   // Encore utile : le calcul la demande, ou la donnée manque encore à un article (« dév. ? ») ; un modèle choisi peut rendre
   // une question sans objet (le recouvrement d'une tuile à blocage).
   const needed = (a: Asked) => fallback.some((q) => q.key === a.key || scopedParam(q.key)?.name === a.q.cle || q.key === `param:${a.q.cle}`);
-  const live = asked.filter((a) => !hasAnswers || a.key.startsWith("fiche:") || a.key.startsWith("product:") || a.key.startsWith(UNITE_KEY) || needed(a) || answers[a.key] === null);
+  // Une question qu'attend une fourniture des points (la teinte, la gamme) reste : le calcul générique ne la voit pas.
+  const attendPoints = new Set(points.flatMap((p) => p.attend));
+  const live = asked.filter((a) => !hasAnswers || a.key.startsWith("fiche:") || a.key.startsWith("product:") || a.key.startsWith(UNITE_KEY) || attendPoints.has(a.q.cle) || needed(a) || answers[a.key] === null);
   const questions = live.filter((a) => !answered(a)).map((a) => a.question);
-  const viewLines = lignes.map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: input.lines?.get(l.id)?.confirmed ?? false, enteredByArtisan: input.lines?.get(l.id)?.enteredByArtisan ?? false }));
+  const viewLines = generiques().map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: input.lines?.get(l.id)?.confirmed ?? false, enteredByArtisan: input.lines?.get(l.id)?.enteredByArtisan ?? false }));
   const view = artisanView(viewLines, validation, { needs: engine.needs, questions, declined: engine.declined }, { plan, roles: roleOf, ref });
   const raw = purchaseView(view, { ...engine, questions }, { plan, roles: roleOf, ref, validation });
-  const purchase = finishPurchase(raw, { ref, plan, lignes, asked: live, answers, validated: input.validated, interdits: input.interdits !== false, customProducts: engine.customProducts, engine: [...engine.needs, ...(engine.unknowns ?? [])], precisionWaits, answers_: answers, notes: lecture.notes });
+  const purchase = finishPurchase(raw, { ref, plan, lignes, asked: live, answers, validated: input.validated, interdits: input.interdits !== false, customProducts: engine.customProducts, engine: [...engine.needs, ...(engine.unknowns ?? [])], precisionWaits, answers_: answers, notes: lecture.notes, points });
   // Une question close sans réponse (null) qu'aucune ligne n'attend (le calcul a sa valeur par défaut) ne bloque pas l'envoi :
   // elle n'a plus de ligne orange où se régler. Celle qu'une ligne attend reste, avec ses boutons sur la ligne (§51.6).
   const waited = new Set(purchase.toBuy.flatMap((b) => b.waitsOn ?? []));
@@ -693,6 +704,8 @@ function finishPurchase(
     precisionWaits: ReadonlyMap<string, string>;
     answers_: Answers;
     notes: readonly string[];
+    /** Temps trois, électricité : les fournitures des lignes de point, additionnées sur le devis (§3 du référentiel électricité). */
+    points: readonly ArticleElectrique[];
   },
 ): PurchaseView {
   const { plan, lignes, asked } = ctx;
@@ -810,6 +823,31 @@ function finishPurchase(
       ...(rules?.length ? { rules } : {}),
     };
   });
+  // Temps trois, électricité : une ligne par fourniture des points, la trace des lignes du devis dans sa précision ;
+  // l'appareillage attend la teinte (§5), orange jusqu'à la réponse, puis vert.
+  for (const a of ctx.points) {
+    const waits = a.attend.map((cle) => open(cle)).filter((x): x is Asked => !!x);
+    const said = a.attend.map((cle) => {
+      const v = answered(cle);
+      const q = asked.find((x) => x.q.cle === cle);
+      return v && q ? `${q.q.donnee.charAt(0).toUpperCase()}${q.q.donnee.slice(1)} : ${v}` : null;
+    }).filter((v): v is string => !!v);
+    if (waits.length > 0) reasons.set(a.key, raisonCourte(waits.map((w) => w.q.donnee)));
+    toBuy.push({
+      key: a.key,
+      label: a.label,
+      quantity: a.quantite,
+      order: a.order,
+      approx: a.approx,
+      precision: [a.precision, ...said].join("; "),
+      kind: "computed",
+      needIds: [],
+      lineIds: a.lineIds,
+      state: "ready",
+      assumptionKeys: [],
+      ...(waits.length > 0 ? { waitsOn: waits.map((w) => w.key), asks: waits.map((w) => ({ key: w.key, text: w.question.text.replace(/\s*\?$/, ""), unit: w.question.unit ?? null, options: w.question.options ?? [] })) } : {}),
+    });
+  }
   // Les décisions de la liste qui ne sont pas des questions du calcul (la quantité d'un modèle écrit par l'artisan) restent.
   for (const d of raw.questions) if (!/^(engine:|role:|comptoir:|precise:|a-preciser:[^:]+:\d+$)/.test(d.key) && !d.question && ctx.answers[d.key] === undefined) decisions.push(d);
   // Les questions du modèle, chacune une décision de l'écran ; « C'est bon » pour une ligne que le fournisseur précisera.
@@ -866,6 +904,12 @@ function finishPurchase(
   const finished = withShortReasons(ctx.interdits ? applyOrangeFlags(confirmed, forbiddenFlags(confirmed), answers) : confirmed);
   // La raison d'une ligne orange : la donnée que le modèle demande, ou ce que le fournisseur précisera (§51.5).
   return { ...finished, warnings: [...new Set([...finished.warnings, ...ctx.notes])], screen: { ...finished.screen, groups: finished.screen.groups.map((g) => ({ ...g, rows: g.rows.map((r) => (r.status === "check" && r.itemKey && reasons.has(r.itemKey) ? { ...r, reason: reasons.get(r.itemKey)! } : r)) })) } };
+}
+
+/** Un nombre écrit (« 151 », « 1 472,5 »), ou null. */
+function nombre(v: string | null | undefined): number | null {
+  const n = Number((v ?? "").replace(/[\s\u00a0\u202f]/g, "").replace(",", "."));
+  return v && Number.isFinite(n) && n > 0 ? n : null;
 }
 
 /**
