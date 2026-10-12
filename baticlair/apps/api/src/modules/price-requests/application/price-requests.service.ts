@@ -124,7 +124,7 @@ export function buildPacket(
     joindre_detail: options.joindreDetail,
     question_lien: null,
     // §52 : le métier pas encore relu par un artisan le dit au fournisseur (« Ratios en cours de validation »).
-    ...(ratiosEnValidation(takeoff.trade) ? { ratios_en_validation: true } : {}),
+    ...(ratiosEnValidation(takeoff.lecture?.metier ?? takeoff.trade) ? { ratios_en_validation: true } : {}),
     ...(croquis.length > 0 ? { croquis } : {}),
     fournitures,
     phrase: briefSentence(brief),

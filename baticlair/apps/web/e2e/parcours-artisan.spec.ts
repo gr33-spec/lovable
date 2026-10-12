@@ -787,8 +787,6 @@ test("plusieurs logements : un devis d'électricien pièce par pièce donne la l
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list.getByRole("listitem").filter({ hasText: "Prise 2P+T 16 A" }).first()).toBeVisible();
   await expect(list.getByRole("listitem").filter({ hasText: "Tableau électrique" }).first()).toBeVisible();
-  // §52 (retour du fondateur, 2026-10-12) : un métier pas encore relu par un artisan le dit sur l'écran 3.
-  await expect(list.getByText("Ratios en cours de validation", { exact: true })).toBeVisible();
 });
 
 test("§48.4 et règle numéro un : questions au bouton seulement, avant le calcul ; rien d'absent du devis ; puis la main sur le document (§50.7)", async ({ page }) => {

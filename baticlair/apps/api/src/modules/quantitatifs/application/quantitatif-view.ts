@@ -136,7 +136,7 @@ export function quantitatifView(
     etat,
     metier: metierOf(takeoff.trade),
     /** §52 : le métier n'a pas encore été relu par un artisan (« Ratios en cours de validation »). */
-    ratios_en_validation: ratiosEnValidation(takeoff.trade),
+    ratios_en_validation: ratiosEnValidation(takeoff.lecture?.metier ?? takeoff.trade),
     version_referentiel: takeoff.referentialVersion,
     compris: purchase.understood,
     /** Les lignes du devis telles que reçues (prix compris), pour que le partenaire retrouve les siennes. */
