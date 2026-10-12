@@ -216,6 +216,11 @@ export interface ReadingStats {
   durationMs: number;
 }
 
+/** Temps deux : la marque du bilan des réponses (une fois par devis), gardée avec les réponses. */
+const BILAN_KEY = "bilan:fait";
+const BILAN_QUESTION =
+  "Bilan avant de calculer : voici toutes les réponses de l'artisan. Mets la fiche à jour avec ce qu'elles apprennent. Si, réponses comprises, une donnée nécessaire pour commander manque encore, pose UNE seule question (manque) ; sinon rien. Ne repose jamais une question déjà répondue.";
+
 /** §51.2 : la question d'une donnée qu'une relecture a ouverte (« fiche:<donnée> »). */
 export const FICHE_KEY = "fiche:";
 
@@ -1014,6 +1019,45 @@ export class TakeoffService {
     // Une donnée ouverte par une relecture se ferme par la réponse écrite, gardée dans la fiche.
     if (questionKey.startsWith(FICHE_KEY)) await this.takeoffs.setAnswer(tenant, takeoff.id, questionKey, texte);
     return { reviewed: await this.reload(tenant, takeoff.id), answered: relecture.reponses.map((r) => r.question) };
+  }
+
+  /**
+   * Temps deux (directive du fondateur, 2026-10-12) : « quand tout est répondu, un deuxième appel réanalyse la fiche avec
+   * les réponses et peut en poser une de plus ». Une fois par devis : la fiche est mise à jour avec ce que les réponses
+   * apprennent, et une donnée qui manque encore pour commander devient UNE question de plus (`fiche:<donnée>`), posée avant
+   * le calcul. Null quand il n'y a rien à relire, pas d'IA, ou que le bilan est déjà fait.
+   */
+  async bilan(tenant: TenantContext, takeoffId: string): Promise<{ reviewed: ReviewedTakeoff; opened: boolean } | null> {
+    const relecteur = this.reading.relecteur;
+    if (!relecteur) return null;
+    const takeoff = await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
+    if (!takeoff.lecture || takeoff.answers[BILAN_KEY] !== undefined) return null;
+    const questions = takeoff.lecture.questions;
+    const lus = Object.entries(takeoff.answers).flatMap(([key, v]) => {
+      if (v === null || v === undefined || key === BILAN_KEY) return [];
+      const cle = /^(?:param|fiche):([a-z0-9_]+)/.exec(key)?.[1] ?? (/^product:([a-z0-9_]+)/.exec(key)?.[1] ? `produit_${/^product:([a-z0-9_]+)/.exec(key)![1]}` : null);
+      const q = cle ? questions.find((x) => x.cle === cle) : undefined;
+      if (!q) return [];
+      const value = typeof v === "string" ? v : v.value;
+      const label = q.boutons.find((b) => b.valeur === value)?.label ?? (typeof v === "string" ? v : `${v.value} ${v.unit}`);
+      return [`- ${q.texte} → ${label}`];
+    });
+    if (lus.length === 0) return null;
+    // Une seule fois, quoi qu'il arrive (même un appel en échec ne se refait pas à chaque calcul).
+    await this.takeoffs.setAnswer(tenant, takeoff.id, BILAN_KEY, "fait");
+    const reviewed = await this.review(tenant, takeoff);
+    const open = reviewed.purchase.questions.filter((d) => d.question);
+    const toQuestion = (d: (typeof open)[number]): RelectureQuestion => ({ key: d.question!.key, text: d.question!.text, options: d.question!.options ?? [], unit: d.question!.unit ?? null });
+    const input = { tradeLabel: tradeProfile(takeoff.trade).label, fiche: reviewed.fiche, question: { key: "bilan", text: BILAN_QUESTION, options: [], unit: null }, texte: lus.join("\n"), ouvertes: open.map(toQuestion) };
+    const attempt = await relecteur.relire(input);
+    const doc = takeoff.documentId ? await this.documents.findById(tenant, takeoff.documentId) : null;
+    if (doc && takeoff.analysisId) await this.record(tenant, doc, { text: 0, vision: 0 }, doc.processing?.id ?? null, takeoff.analysisId, 1, attempt, FICHE_RELECTURE_PROMPT);
+    if (attempt.status !== "success" || !attempt.output) return null;
+    const relecture = decodeRelecture(attempt.output, input);
+    // Le bilan met la fiche à jour et peut ouvrir une donnée ; il ne répond jamais à la place de l'artisan.
+    const donnees = relecture.donnees.map((d) => ({ ...d, preuve: "Tes réponses, relues" }));
+    await this.takeoffs.setFiche(tenant, takeoff.id, appliquerRelecture(takeoff.fiche, { donnees, reponses: [], manque: relecture.manque ?? null }));
+    return { reviewed: await this.reload(tenant, takeoff.id), opened: !!relecture.manque };
   }
 
   private async editable(tenant: TenantContext, takeoff: TakeoffRecord | null): Promise<TakeoffRecord> {

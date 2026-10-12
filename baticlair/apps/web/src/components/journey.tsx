@@ -196,7 +196,9 @@ function freeOf(key: string, kind: string | null, unit: string | null, options: 
   if (unit && unit !== "u" && options.length > 0 && options.every((o) => /^\d+(?:[.,]\d+)?$/.test(o.value))) return "number";
   // §51.2 et §51.4 : un choix du calcul (le façonnage) a aussi « Autre » ; ce qui s'y écrit est relu par l'IA, qui met la
   // fiche à jour. Pas pour oui / non (consommables).
-  if (/^(?:engine:)?param:/.test(key) && key.replace(/^engine:/, "") !== CONSUMABLES_KEY && options.length > 0) return "written";
+  // Temps deux (directive du fondateur, 2026-10-12) : « Autre » PARTOUT où il y a des boutons, consommables compris.
+  if (/^(?:engine:)?(?:param|fiche):/.test(key) && options.length > 0) return "written";
+  if (options.length > 0) return "text";
   return undefined;
 }
 
@@ -230,7 +232,7 @@ export function counterQuestions(takeoff: Takeoff): CounterQuestion[] {
       };
     });
   const asked = new Set(decisions.map((d) => d.key.replace(/^engine:/, "")));
-  const habits: CounterQuestion[] = (takeoff.habits ?? []).map((h) => ({ key: h.key, kind: "habit", text: h.question, options: h.options, unit: h.unit, about: null, hint: null, numeric: false, usual: h.value, group: groupOf({ key: h.key, lineIds: [] }) }));
+  const habits: CounterQuestion[] = (takeoff.habits ?? []).map((h) => ({ key: h.key, kind: "habit", text: h.question, options: h.options, unit: h.unit, about: null, hint: null, numeric: false, usual: h.value, group: groupOf({ key: h.key, lineIds: [] }), ...(freeOf(h.key, null, h.unit, h.options) ? { free: freeOf(h.key, null, h.unit, h.options)! } : {}) }));
   for (const h of habits) asked.add(h.key);
   // Les hypothèses à boutons (param ou produit) : « je pars sur 5,5 m de rampant », la valeur prise est marquée.
   const assumptions: CounterQuestion[] = takeoff.purchase.assumptions
@@ -449,9 +451,6 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
   );
 }
 
-/** Le pas du plus / moins d'une valeur à régler (jamais au clavier). */
-const stepOf = (unit: string | null) => (unit === "°" ? 5 : unit === "mm" ? 10 : unit === "cm" ? 5 : unit === "m" || unit === "ml" ? 0.5 : 1);
-
 /** Une question retirée : sa phrase en une ligne, et « Remettre ». */
 function RetiredCard({ question: q, onRestore }: { question: CounterQuestion; onRestore: () => void }) {
   return (
@@ -484,13 +483,6 @@ function QuestionCard({
   onRetire?: () => void;
 }) {
   const id = useId();
-  const unitLabel = q.unit && q.unit !== "u" ? (q.unit === "m2" ? "m²" : q.unit) : "";
-  const shown = (n: number) => `${String(n).replace(".", ",")}${unitLabel ? (unitLabel === "°" ? "°" : ` ${unitLabel}`) : ""}`;
-  const bump = (d: number) => {
-    const current = given ? Number(given.value) : 0;
-    const next = Math.max(0, Math.round((current + d) * 100) / 100);
-    onChange(next > 0 ? { value: String(next), label: shown(next) } : null);
-  };
   return (
     <li id={`question-${q.key}`} className={`flex scroll-mt-24 flex-col gap-2.5 rounded-[20px] bg-surface p-4 shadow-card transition ${problem ? "ring-2 ring-danger" : given ? "ring-2 ring-ok/50" : flagged ? "ring-2 ring-warn" : ""}`}>
       <div className="flex items-start gap-2">
@@ -509,18 +501,9 @@ function QuestionCard({
           {problem}
         </p>
       ) : null}
-      {q.numeric ? (
-        <div role="group" aria-labelledby={`${id}-q`} className="flex items-center justify-center gap-4">
-          <button type="button" onClick={() => bump(-stepOf(q.unit))} disabled={!given} aria-label="Moins" className="flex size-12 items-center justify-center rounded-full bg-ground text-[24px] font-extrabold active:scale-95 disabled:opacity-40">
-            −
-          </button>
-          <span className="min-w-[5rem] text-center text-[22px] font-extrabold tabular-nums" aria-live="polite">
-            {given ? given.label : "?"}
-          </span>
-          <button type="button" onClick={() => bump(stepOf(q.unit))} aria-label="Plus" className="flex size-12 items-center justify-center rounded-full bg-ground text-[24px] font-extrabold active:scale-95">
-            +
-          </button>
-        </div>
+      {q.options.length === 0 ? (
+        // Temps deux : une valeur se tape dans une case, avec son unité (« 60 cm ») ; une réponse sans boutons s'écrit.
+        <OtherAnswer question={{ ...q, free: q.numeric || (q.unit && q.unit !== "u") ? "number" : (q.free ?? "written") }} given={given} onChange={onChange} startOpen />
       ) : (
         <div role="group" aria-labelledby={`${id}-q`} className={`grid gap-2 ${q.options.length <= 2 || q.options.every((o) => o.label.length <= 14) ? "grid-cols-2" : "grid-cols-1"}`}>
           {q.options.map((o) => {
@@ -552,9 +535,9 @@ function QuestionCard({
  * « Autre » : quand la bonne réponse n'est pas dans les boutons, elle s'écrit (un modèle de tuile, une pente de 38°). Un
  * appui sur « Autre » ouvre la case ; « OK » la garde comme réponse.
  */
-function OtherAnswer({ question: q, given, onChange }: { question: CounterQuestion; given: Given | null; onChange: (g: Given | null) => void }) {
+function OtherAnswer({ question: q, given, onChange, startOpen = false }: { question: CounterQuestion; given: Given | null; onChange: (g: Given | null) => void; startOpen?: boolean }) {
   const id = useId();
-  const [open, setOpen] = useState(Boolean(given?.custom));
+  const [open, setOpen] = useState(startOpen || Boolean(given?.custom));
   const [value, setValue] = useState(given?.custom ? given.value : "");
   const numeric = q.free === "number";
   const unitLabel = q.unit && q.unit !== "u" ? (q.unit === "m2" ? "m²" : q.unit) : "";

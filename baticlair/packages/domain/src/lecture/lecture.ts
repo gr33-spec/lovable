@@ -483,6 +483,16 @@ export function validationDeLecture(trade: string, lignes: readonly LigneLecture
   return { trade, lines, issues, counts: { certain: lines.length - labor - toVerify, probable: 0, toVerify, labor, blocking: 0 } };
 }
 
+/** Temps deux : la clé de la question d'unité d'une ligne qui n'en a pas, et ses réponses (une case « Autre » pour le reste). */
+export const UNITE_KEY = "unite:";
+const UNITES: readonly { label: string; value: string }[] = [
+  { label: "Pièces", value: "u" },
+  { label: "Mètres", value: "m" },
+  { label: "m²", value: "m2" },
+  { label: "kg", value: "kg" },
+  { label: "Litres", value: "l" },
+];
+
 const unitWord = (unit: string | null) => (unit === "u" ? "pièces" : unit === "m2" ? "m²" : unit);
 
 /**
@@ -510,7 +520,11 @@ export function ecranDeLecture(input: {
   const answers = input.answers ?? {};
   const lignes = lignesDeLecture(lecture, input.ids).map((l) => {
     const edited = input.lines?.get(l.id);
-    return edited?.designation !== undefined ? { ...l, designation: edited.designation, quantity: edited.quantity ?? null, unit: edited.unit ?? null } : l;
+    const ligne = edited?.designation !== undefined ? { ...l, designation: edited.designation, quantity: edited.quantity ?? null, unit: edited.unit ?? null } : l;
+    // Temps deux (§51.6) : l'unité répondue d'une ligne qui n'en avait pas (« unite:<ligne> ») devient la sienne.
+    const unite = answers[`${UNITE_KEY}${l.id}`];
+    if (typeof unite !== "string" || !unite.trim() || !ligne.fourniture || ligne.fourniture.unite) return ligne;
+    return { ...ligne, unit: ligne.unit ?? unite.trim(), fourniture: { ...ligne.fourniture, unite: unite.trim() } };
   });
   const plan = planDeLecture(ref, lecture, lignes, input.extraFacts);
   const validation = validationDeLecture(ref.trade, lignes, plan, new Set([...(input.lines ?? new Map())].filter(([, v]) => v.confirmed).map(([k]) => k)));
@@ -542,6 +556,19 @@ export function ecranDeLecture(input: {
     if (habit !== undefined && answers[question.key] === undefined) return [];
     return [{ q, key: question.key, question }];
   });
+  // Temps deux (directive du fondateur, 2026-10-12) : « Article ajouté à la main sans unité : orange avec question « unité ? »
+  // (case avec unité), jamais vert sans unité (51.6). » Une fourniture reprise telle qu'écrite (aucun ouvrage du référentiel),
+  // avec une quantité et sans unité, et dont le modèle ne demande rien : sa question d'unité, sur sa ligne.
+  for (const [i, l] of lignes.entries()) {
+    const f = l.fourniture;
+    if (!f || f.ouvrage || f.unite || !f.quantite || f.attend.length > 0) continue;
+    const cle = `unite_${l.id.replace(/[^a-z0-9_]/gi, "_").toLowerCase()}`;
+    const key = `${UNITE_KEY}${l.id}`;
+    // Une copie : la lecture reçue n'est jamais modifiée.
+    lignes[i] = { ...l, fourniture: { ...f, attend: [cle] } };
+    const text = `${f.nom} : quelle unité ?`;
+    asked.push({ q: { cle, texte: text, boutons: UNITES.map((u) => ({ label: u.label, valeur: u.value })), unite: null, donnee: "unité", ligne: l.ligne.ref }, key, question: { key, kind: "choose", text, options: UNITES.map((u) => ({ ...u })), named: true } });
+  }
   // La lecture est faite ; le calcul demande ce qui lui manque encore (voir plus bas, le filet de sécurité).
   // Filet de sécurité : une donnée que le calcul réclame et que le modèle n'a pas demandée (une question que révèle une
   // réponse : les bacs d'un rampant de 12 m) se pose quand même, avec les mots du référentiel ; jamais une donnée écrite.
@@ -583,7 +610,7 @@ export function ecranDeLecture(input: {
   // Encore utile : le calcul la demande, ou la donnée manque encore à un article (« dév. ? ») ; un modèle choisi peut rendre
   // une question sans objet (le recouvrement d'une tuile à blocage).
   const needed = (a: Asked) => fallback.some((q) => q.key === a.key || scopedParam(q.key)?.name === a.q.cle || q.key === `param:${a.q.cle}`);
-  const live = asked.filter((a) => !hasAnswers || a.key.startsWith("fiche:") || a.key.startsWith("product:") || needed(a) || answers[a.key] === null);
+  const live = asked.filter((a) => !hasAnswers || a.key.startsWith("fiche:") || a.key.startsWith("product:") || a.key.startsWith(UNITE_KEY) || needed(a) || answers[a.key] === null);
   const questions = live.filter((a) => !answered(a)).map((a) => a.question);
   const viewLines = lignes.map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: input.lines?.get(l.id)?.confirmed ?? false, enteredByArtisan: input.lines?.get(l.id)?.enteredByArtisan ?? false }));
   const view = artisanView(viewLines, validation, { needs: engine.needs, questions, declined: engine.declined }, { plan, roles: roleOf, ref });
@@ -755,6 +782,9 @@ function finishPurchase(
       const texte = asked.find((a) => a.q.cle === cle)!.q.texte.replace(/\s*\?$/, "");
       return v ? (/\s:\s/.test(texte) ? v : `${texte} : ${v}`) : null;
     }).filter((v): v is string => !!v);
+    // Ce que l'artisan écrit pour une ligne « à préciser » (« Profil 1000 T, RAL 7016 ») part dans sa précision.
+    const ecrit = ctx.answers[`a-preciser:${line.id}`];
+    const precise = typeof ecrit === "string" && ecrit !== "ok" && ecrit !== "non" ? ecrit : null;
     const precision = [f.precision, ...said].filter(Boolean).join(", ");
     // Ce que la ligne attend se dit par la question du modèle, jamais deux fois : les règles « manque » du calcul tombent.
     const kept = (item.rules ?? []).filter((r) => !r.key.startsWith("manque:"));
@@ -775,7 +805,7 @@ function finishPurchase(
       state,
       label: custom || specific ? item.label : nomAvecCalcul(f.nom, item.label),
       // La précision du calcul (« 48 m² × 40,7 ardoises/m² ») d'abord ; sinon celle du modèle, et la réponse donnée.
-      ...(item.precision || precision || saidFiche.length ? { precision: [item.precision || precision, ...saidFiche].filter(Boolean).join("; ") } : {}),
+      ...(item.precision || precision || saidFiche.length || precise ? { precision: [...new Set([item.precision || precision, precise, ...saidFiche])].filter(Boolean).join("; ") } : {}),
       ...(pending.length > 0 ? { waitsOn: pending, asks: waits.map((a) => ({ key: a.key, text: a.question.text.replace(/\s*\?$/, ""), unit: a.question.unit ?? null, options: a.question.options ?? [] })) } : {}),
       ...(rules?.length ? { rules } : {}),
     };
@@ -787,6 +817,8 @@ function finishPurchase(
     const f = l.fourniture;
     if (!f || f.aPreciser.length === 0) continue;
     const title = f.aPreciser.map((t, i) => (i === 0 ? t.charAt(0).toUpperCase() + t.slice(1) : t)).join(", ");
+    // §51.6 : sa question est sur la ligne, « C'est bon / Modifier » (comme la composition d'un tableau, §4 du référentiel
+    // électricité) ; jamais une question de plus à l'écran des questions (DE00000071 : exactement cinq, validé par le fondateur).
     decisions.push({ key: `a-preciser:${l.id}`, state: "to_confirm", title, text: `${title} à préciser : écris-le dans le nom de la ligne, ou laisse le fournisseur proposer.`, lineIds: [l.id], primary: { action: "keep", label: "C'est bon" }, secondary: ["edit"] });
   }
   for (const a of asked) {

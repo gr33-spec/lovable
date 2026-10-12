@@ -152,7 +152,11 @@ describe("demandes de prix", () => {
     for (const line of reviewed.lines.filter((l: { status: string }) => l.status === "to_verify")) {
       await agent.post(`/v1/takeoff-lines/${line.id}/confirm`).expect(200);
     }
-    // §49.9 : une ligne ajoutée à la main est une fourniture telle qu'écrite, sans décision à prendre.
+    // §49.9 : une ligne ajoutée à la main est une fourniture telle qu'écrite, sans décision à prendre ; sans unité, elle
+    // demande son unité (temps deux, §51.6 : jamais verte sans unité).
+    for (const line of reviewed.lines.filter((l: { designation: string; unit: string | null }) => !l.unit)) {
+      await agent.post(`/v1/takeoffs/${takeoff.id}/answers`).send({ key: `unite:${line.id}`, value: "u" }).expect(200);
+    }
     await agent.post(`/v1/takeoffs/${takeoff.id}/validate`).expect(200);
     const s = await supplier(agent, "Rexel", "devis@rexel.fr");
     const created = await agent.post(`/v1/projects/${project.body.id}/price-requests`).send({ supplierIds: [s.body.id] });

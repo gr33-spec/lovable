@@ -1409,6 +1409,22 @@ test("retour du fondateur (2026-10-12) : une question qui ne sert pas se retire 
   await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible({ timeout: 60_000 });
 });
 
+test("temps deux (2026-10-12) : « Autre » partout où il y a des boutons, consommables compris", async ({ page }) => {
+  await signUp(page);
+  await page.goto("/chantiers/nouveau");
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  const questions = page.getByRole("region", { name: "Les questions" });
+  await expect(questions).toBeVisible({ timeout: 60_000 });
+  const cards = questions.getByRole("listitem").filter({ has: page.getByRole("group") });
+  const n = await cards.count();
+  expect(n).toBeGreaterThan(0);
+  for (let i = 0; i < n; i++) {
+    const card = cards.nth(i);
+    const answers = card.getByRole("group").getByRole("button").filter({ hasNotText: /^Autre$/ });
+    if ((await answers.count()) > 0) await expect(card.getByRole("button", { name: "Autre", exact: true })).toHaveCount(1);
+  }
+});
+
 test("une adresse inconnue : une page en français, avec le chemin du retour (audit avant commercialisation)", async ({ page }) => {
   await page.goto("/cette-page-n-existe-pas");
   await expect(page.getByRole("heading", { name: "Page introuvable" })).toBeVisible();
