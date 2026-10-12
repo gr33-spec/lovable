@@ -853,7 +853,7 @@ function finishPurchase(
       // §51.6 : un article que le calcul tire d'une ligne (la bobine des bacs) porte aussi les réponses de cette ligne.
       const source = item.lineIds.map((id) => byLine.get(id)).find((l): l is LigneLecture => !!l?.fourniture);
       const nomCalcule = item.label.replace(/\s*(?:d[ée]v\.\s*)?\S*\?\S*/g, "").replace(/\s{2,}/g, " ").trim() || item.label;
-      const lues = source ? reponsesDeLaLigne(ctx.posees, ctx.answers, source, source.fourniture!, lignes).filter((r) => source.fourniture!.aPreciser.some((t) => tranche(r.a, t)) && !normalizeText(`${nomCalcule} ${item.precision ?? ""}`).includes(normalizeText(r.valeur))).map((r) => `${r.a.q.donnee.charAt(0).toUpperCase()}${r.a.q.donnee.slice(1)} : ${r.valeur}`) : [];
+      const lues = source ? reponsesDeLaLigne(ctx.posees, ctx.answers, source, source.fourniture!, lignes).filter((r) => source.fourniture!.aPreciser.some((t) => tranche(r.a, t)) && !normalizeText(`${nomCalcule} ${item.precision ?? ""}`).includes(normalizeText(r.valeur))).map((r) => reponseLue(r.a.q.donnee, r.valeur)) : [];
       return {
         ...item,
         ...(lues.length > 0 ? { precision: [item.precision, ...new Set(lues)].filter(Boolean).join("; ") } : {}),
@@ -890,9 +890,10 @@ function finishPurchase(
     const said = f.attend.filter((cle) => !isFiche(cle)).map(answered).filter((v): v is string => !!v);
     const saidFiche = f.attend.filter(isFiche).map((cle) => {
       const v = answered(cle);
-      // « Fenêtre de toit : quelle taille ? » nomme l'article : la valeur suffit ; « Marque des ardoises ? » : la question et la valeur.
-      const texte = ctx.posees.find((a) => a.q.cle === cle)!.q.texte.replace(/\s*\?$/, "");
-      return v ? (/\s:\s/.test(texte) ? v : `${texte} : ${v}`) : null;
+      // Retour du fondateur (2026-10-12) : « Ce document sert au négoce, ça ne sert à rien qu'il voie les questions que tu
+      // m'as posées. » Jamais le texte de la question : le nom court de la donnée et la réponse (« Matière : zinc »).
+      // Une donnée qui nomme déjà l'article ou qui est une question (« Fenêtre de toit : quelle taille ») : la valeur suffit.
+      return v ? reponseLue(ctx.posees.find((a) => a.q.cle === cle)!.q.donnee, v) : null;
     }).filter((v): v is string => !!v);
     // Ce que l'artisan écrit pour une ligne « à préciser » (« Profil 1000 T, RAL 7016 ») part dans sa précision.
     const ecrit = ctx.answers[`a-preciser:${line.id}`];
@@ -903,7 +904,7 @@ function finishPurchase(
     // Chaque réponse se lit dans sa ligne (§51.6) : celles que la ligne n'attendait pas nommément (la deuxième vague, une
     // question sur sa ligne), « Teinte : rouge vieilli », sauf si le nom ou la précision la disent déjà.
     const deja = normalizeText(`${item.label} ${f.nom} ${precision} ${saidFiche.join(" ")}`);
-    const lues = reponses.filter((r) => !f.attend.includes(r.a.q.cle) && !deja.includes(normalizeText(r.valeur))).map((r) => `${r.a.q.donnee.charAt(0).toUpperCase()}${r.a.q.donnee.slice(1)} : ${r.valeur}`);
+    const lues = reponses.filter((r) => !f.attend.includes(r.a.q.cle) && !deja.includes(normalizeText(r.valeur))).map((r) => reponseLue(r.a.q.donnee, r.valeur));
     // Ce que la ligne attend se dit par la question du modèle, jamais deux fois : les règles « manque » du calcul tombent.
     const kept = (item.rules ?? []).filter((r) => !r.key.startsWith("manque:"));
     const rules = kept;
@@ -940,7 +941,7 @@ function finishPurchase(
     const said = a.attend.map((cle) => {
       const v = answered(cle);
       const q = asked.find((x) => x.q.cle === cle);
-      return v && q ? `${q.q.donnee.charAt(0).toUpperCase()}${q.q.donnee.slice(1)} : ${v}` : null;
+      return v && q ? reponseLue(q.q.donnee, v) : null;
     }).filter((v): v is string => !!v);
     if (waits.length > 0) reasons.set(a.key, raisonCourte(waits.map((w) => w.q.donnee)));
     toBuy.push({
@@ -1015,6 +1016,16 @@ function finishPurchase(
     return propre ? { ...rest, precision: propre } : rest;
   });
   return { ...finished, toBuy: toBuyPropre, warnings: [...new Set([...finished.warnings, ...ctx.notes])], screen: { ...finished.screen, groups: finished.screen.groups.map((g) => ({ ...g, rows: g.rows.map((r) => (r.status === "check" && r.itemKey && reasons.has(r.itemKey) ? { ...r, reason: reasons.get(r.itemKey)! } : r)) })) } };
+}
+
+/**
+ * Une réponse telle que le négoce la lit (retour du fondateur, 2026-10-12 : « Ce document sert au négoce, ça ne sert à rien
+ * qu'il voie les questions que tu m'as posées ») : le nom court de la donnée et la valeur (« Matière de la descente :
+ * zinc »), jamais le texte de la question ; une donnée qui nomme l'article ou qui est une question : la valeur seule.
+ */
+export function reponseLue(donnee: string, valeur: string): string {
+  const d = donnee.trim();
+  return d && !/\s:\s|\?|\b(tu|ta|ton|tes|te|toi)\b/i.test(d) ? `${d.charAt(0).toUpperCase()}${d.slice(1)} : ${valeur}` : valeur;
 }
 
 /** Les mots qui portent une donnée (« teinte », « référence »), sans les mots creux ; « référence » vaut « modèle ». */

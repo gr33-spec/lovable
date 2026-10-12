@@ -170,7 +170,7 @@ describe("envoi fournisseur : un document, aucun prix", () => {
     const { projectId, supplierId } = await chantierPret(agent);
     const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] })).body;
     expect(created.packet.joindre_detail).toBe(false);
-    expect(created.document.blocs.map((b: { titre: string }) => b.titre)).not.toContain("Détail du devis (sans prix)");
+    expect(created.document.blocs.map((b: { titre: string }) => b.titre)).not.toContain("Détail du devis");
     expect(created.recipients[0].email.body).not.toMatch(/PS/);
     // L'autre entreprise garde la valeur par défaut.
     const other = await signUpWithCompany(ctx.app, "b@example.fr", "Toitures Le Gall");

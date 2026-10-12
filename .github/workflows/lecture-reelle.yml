@@ -8,7 +8,7 @@ name: Vraie lecture (Opus)
 # Pour relancer : retirer l'étiquette, la remettre.
 #
 # Les PDF réels ne sont jamais dans le dépôt :
-# - DE00000071 : le devis anonymisé de test/support, régénéré à la volée ;
+# - DE00000071 et D.2026.105 : les devis anonymisés de test/support, régénérés à la volée ;
 # - 7954 : pièce jointe « 7954.pdf » de la pré-version privée « lecture-reelle-pdfs » (hors historique git) ; absente,
 #   l'étape le dit et passe.
 on:
@@ -25,7 +25,7 @@ defaults:
 jobs:
   lecture:
     if: github.event.label.name == 'lecture-reelle'
-    name: Vraie lecture DE00000071 et 7954
+    name: Vraie lecture DE00000071, 7954 et D.2026.105
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -71,8 +71,15 @@ jobs:
         continue-on-error: true
         working-directory: baticlair/apps/api
         run: pnpm exec tsx scripts/lecture-reelle.ts "$RUNNER_TEMP/pdf/7954.pdf" 7954
+      # Retour du fondateur (2026-10-12) : D.2026.105 lu sans question, la tuile verte sans modèle ni teinte. Le devis
+      # anonymisé de test/support, régénéré à la volée (aucune donnée du client).
+      - name: D.2026.105
+        id: l105
+        continue-on-error: true
+        working-directory: baticlair/apps/api
+        run: pnpm exec tsx scripts/lecture-reelle.ts fixture:D.2026.105 D.2026.105
       - name: Bilan
         if: always()
         run: |
-          echo "DE00000071 : ${{ steps.de00000071.outcome }} ; 7954 : ${{ steps.l7954.outcome || 'non lancée' }}"
-          if [ "${{ steps.de00000071.outcome }}" != "success" ] || [ "${{ steps.l7954.outcome }}" = "failure" ]; then exit 1; fi
+          echo "DE00000071 : ${{ steps.de00000071.outcome }} ; 7954 : ${{ steps.l7954.outcome || 'non lancée' }} ; D.2026.105 : ${{ steps.l105.outcome || 'non lancée' }}"
+          if [ "${{ steps.de00000071.outcome }}" != "success" ] || [ "${{ steps.l7954.outcome }}" = "failure" ] || [ "${{ steps.l105.outcome }}" != "success" ]; then exit 1; fi

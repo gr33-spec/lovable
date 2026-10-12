@@ -103,7 +103,7 @@ describe("§45.7 — la demande de devis du chantier Test", () => {
     const pdf = (await agent.get(`/v1/price-requests/${created.id}/demande-de-devis.pdf?destinataire=${created.recipients[0].id}`).buffer(true)).body as Buffer;
     const text = await pdfText(pdf);
     if (process.env.SHOW_PDF) console.log(text);
-    const order = ["Demande de devis", "Point.P Brest", "Le chantier en bref", "1. Fournitures à chiffrer", "2. Détail du devis (sans prix)"].map((t) => text.indexOf(t));
+    const order = ["Demande de devis", "Point.P Brest", "Le chantier en bref", "1. Fournitures à chiffrer", "2. Détail du devis"].map((t) => text.indexOf(t));
     for (const i of order) expect(i).toBeGreaterThanOrEqual(0);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     // Rien à préciser sur ce chantier : le bloc « À préciser avec vous » est absent, les suivants se renumérotent.
@@ -115,7 +115,9 @@ describe("§45.7 — la demande de devis du chantier Test", () => {
     // Le logo est une image dans le PDF.
     expect(pdf.includes(Buffer.from("/Subtype /Image"))).toBe(true);
     // Aucun prix, et jamais « commande ».
-    expect(priceLeak(text.replace("Détail du devis (sans prix)", ""))).toBeNull();
+    expect(priceLeak(text.replace("Détail du devis", ""))).toBeNull();
+    // Retour du fondateur (2026-10-12) : « Pas besoin de noter « sans prix », c'est pour le négoce, pas d'info inutile. »
+    expect(text).not.toMatch(/sans prix/i);
     expect(text).not.toMatch(/142|38,00|45,00|52,00/);
     expect(text).not.toMatch(/command/i);
     // Les lignes du chantier Test (§45.5).
@@ -132,7 +134,7 @@ describe("§45.7 — la demande de devis du chantier Test", () => {
     const agent = await compteBatiInvest();
     const { projectId } = await chantierTest(agent);
     const sans = (await agent.post(`/v1/projects/${projectId}/price-requests/preview`).send({}).expect(200)).body;
-    expect(sans.document.blocs.map((b: { titre: string }) => b.titre)).toEqual(["Le chantier en bref", "Fournitures à chiffrer", "Détail du devis (sans prix)"]);
+    expect(sans.document.blocs.map((b: { titre: string }) => b.titre)).toEqual(["Le chantier en bref", "Fournitures à chiffrer", "Détail du devis"]);
     const q = (await agent.post("/v1/quantitatifs").send({ reference: "Lucarnes", adresse: "29200 Brest", lignes: [...CHANTIER_TEST, { libelle: "Jouées de lucarnes en zinc", quantite: "2", unite: "m²" }] })).body;
     await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: Object.entries(REPONSES).map(([question, valeur]) => ({ question, valeur })) });
     let current = (await agent.get(`/v1/quantitatifs/${q.id}`)).body;
