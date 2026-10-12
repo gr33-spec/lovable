@@ -139,7 +139,7 @@ export function controleLectureDe00000071(lecture: LectureDevis, devis: readonly
       ["4 Velux SK06 114×118 GGL white finish", [/\b4 velux/, /sk06/, /114 ?x ?118/, /ggl/, /white finish/]],
       ["1 MK04 78×98 GGU ever finish", [/\b1 (velux )?(ggu )?mk04/, /78 ?x ?98/, /ggu/, /ever finish/]],
       ["raccords pour bac acier", [/raccords?/, /bac acier/]],
-      ["tôles bac acier en étanchéité au-dessus des Velux", [/toles bac acier/, /etancheite/, /au.dessus des velux/]],
+      ["tôles bac acier en étanchéité au-dessus des Velux", [/toles bac acier/, /etancheite/, /dessus des velux/]],
     ]),
   );
   out.push(...fournitures(lecture, /^(depose|realisation des tremies|pose de vel)/, null));
