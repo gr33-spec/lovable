@@ -14,6 +14,8 @@ import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } fro
 const sans = (ref: string, designation: string, quantite: string, unite: string, role: "hors_quantitatif" | "pose"): LectureDevis["lignes"][number] => ({ ref, designation, quantite, unite, role, fournitures: [] });
 /** La lecture du modèle sur le devis de réparation D.2026.105 (§49.9, §51.5) : la fourniture de chaque prestation, ses questions. */
 const REPARATION: LectureDevis = {
+  metier: "roofing",
+  lots: [],
   fiche: { donnees: [] },
   bref: [],
   questions: [

@@ -16,7 +16,7 @@ identiques (un lieu différent ne change pas l'article ; une marque ou un lot di
 
 | Devis | Lignes matériaux | A — Compréhension | B — Quantitatif exact | Besoins identifiés | Questions | Inconnus | Erreurs | Lignes envoyées (avant → après regroupement) |
 |---|---|---|---|---|---|---|---|---|
-| Morellec — électricité + plomberie (scanné) | 152 | **80 %** (122) | **13 %** (19) | 73 | 2 | 79 | 12 | 155 → 71 |
+| Devis 7954 — électricité + plomberie (scanné) | 152 | **80 %** (122) | **13 %** (19) | 73 | 2 | 79 | 12 | 155 → 71 |
 | Lézardrieux — plâtrerie, isolation | 21 | **86 %** (18) | **5 %** (1) | 2 | 0 | 19 | 0 | 23 → 23 |
 | Piscine | 34 | **0 %** (0) | **0 %** (0) | 0 | 1 | 34 | 0 | 37 → 37 |
 | D-2026-011 — salle de bain | 15 | **100 %** (15) | **60 %** (9) | 10 | 1 | 5 | 0 | 15 → 15 |
@@ -37,7 +37,7 @@ ne sait pas encore convertir : elles partent au fournisseur comme mesure, jamais
 
 | Devis | ✓ Vérifié | ⚠ À confirmer | ? Information manquante |
 |---|---|---|---|
-| Morellec — électricité + plomberie (scanné) | 80 | 44 | 31 |
+| Devis 7954 — électricité + plomberie (scanné) | 80 | 44 | 31 |
 | Lézardrieux — plâtrerie, isolation | 2 | 5 | 16 |
 | Piscine | 0 | 37 | 0 |
 | D-2026-011 — salle de bain | 9 | 1 | 5 |
@@ -50,22 +50,22 @@ Chaque devis doit garder au moins ses scores A et B de l'étape précédente, sa
 
 | Étape | Devis | A | B | Erreurs |
 |---|---|---|---|---|
-| 1. Règles générales de lecture (2026-10-01) | Morellec | 122 | 19 | 12 |
+| 1. Règles générales de lecture (2026-10-01) | Devis 7954 | 122 | 19 | 12 |
 | 1. Règles générales de lecture (2026-10-01) | Lézardrieux | 18 | 1 | 0 |
 | 1. Règles générales de lecture (2026-10-01) | Piscine | 0 | 0 | 0 |
 | 1. Règles générales de lecture (2026-10-01) | D-2026-011 | 15 | 9 | 0 |
 | 1. Règles générales de lecture (2026-10-01) | D-2026-015 | 9 | 2 | 1 |
-| 2. Socle en trois niveaux : lu → il faut → à commander (2026-10-02) | Morellec | 122 | 19 | 12 |
+| 2. Socle en trois niveaux : lu → il faut → à commander (2026-10-02) | Devis 7954 | 122 | 19 | 12 |
 | 2. Socle en trois niveaux : lu → il faut → à commander (2026-10-02) | Lézardrieux | 18 | 1 | 0 |
 | 2. Socle en trois niveaux : lu → il faut → à commander (2026-10-02) | Piscine | 0 | 0 | 0 |
 | 2. Socle en trois niveaux : lu → il faut → à commander (2026-10-02) | D-2026-011 | 15 | 9 | 0 |
 | 2. Socle en trois niveaux : lu → il faut → à commander (2026-10-02) | D-2026-015 | 9 | 2 | 0 |
-| 3. Règles de couverture validées par le fondateur (2026-10-02) | Morellec | 122 | 19 | 12 |
+| 3. Règles de couverture validées par le fondateur (2026-10-02) | Devis 7954 | 122 | 19 | 12 |
 | 3. Règles de couverture validées par le fondateur (2026-10-02) | Lézardrieux | 18 | 1 | 0 |
 | 3. Règles de couverture validées par le fondateur (2026-10-02) | Piscine | 0 | 0 | 0 |
 | 3. Règles de couverture validées par le fondateur (2026-10-02) | D-2026-011 | 15 | 9 | 0 |
 | 3. Règles de couverture validées par le fondateur (2026-10-02) | D-2026-015 | 9 | 2 | 0 |
-| 4. Liste d'achats : hypothèses par défaut, pertes, pièces par défaut (2026-10-03) | Morellec | 122 | 19 | 12 |
+| 4. Liste d'achats : hypothèses par défaut, pertes, pièces par défaut (2026-10-03) | Devis 7954 | 122 | 19 | 12 |
 | 4. Liste d'achats : hypothèses par défaut, pertes, pièces par défaut (2026-10-03) | Lézardrieux | 18 | 1 | 0 |
 | 4. Liste d'achats : hypothèses par défaut, pertes, pièces par défaut (2026-10-03) | Piscine | 0 | 0 | 0 |
 | 4. Liste d'achats : hypothèses par défaut, pertes, pièces par défaut (2026-10-03) | D-2026-011 | 15 | 9 | 0 |
@@ -75,14 +75,14 @@ Chaque devis doit garder au moins ses scores A et B de l'étape précédente, sa
 
 | Famille lue | Lignes bloquées | Devis | Exemple |
 |---|---|---|---|
-| Prise, interrupteur | 54 | Morellec | PRISE DE COURANT 16A+T |
-| Point d'installation (lumineux, alimentation) | 31 | Morellec | LAMPLE SIMPLE 1 POINT LUMINEUX |
+| Prise, interrupteur | 54 | Devis 7954 | PRISE DE COURANT 16A+T |
+| Point d'installation (lumineux, alimentation) | 31 | Devis 7954 | LAMPLE SIMPLE 1 POINT LUMINEUX |
 | Plaque de plâtre | 13 | Lézardrieux | Doublage Placostil en BA13 sur ossature métallique 48mm doub |
-| Non reconnu | 7 | Morellec, Lézardrieux, Piscine | LIAISON EQUIPOTENTIEL |
-| Tableau, protection | 5 | Morellec | TABLEAU GENERAL ELECTRIQUE HAGER INTERUPTEURS DIFFERENTIELS  |
-| Gaine, conduit, goulotte | 3 | Morellec | RESEAU DE GAINE Y COMPRIS SUPPORT |
+| Non reconnu | 7 | Devis 7954, Lézardrieux, Piscine | LIAISON EQUIPOTENTIEL |
+| Tableau, protection | 5 | Devis 7954 | TABLEAU GENERAL ELECTRIQUE HAGER INTERUPTEURS DIFFERENTIELS  |
+| Gaine, conduit, goulotte | 3 | Devis 7954 | RESEAU DE GAINE Y COMPRIS SUPPORT |
 | Carrelage, faïence | 3 | D-2026-011 | Carrelage sol grès cérame 40x40 gris anthracite - Fourniture |
-| Tube, tuyau | 2 | Morellec | TUBE PER PRE GAINE 10X12 BLEU |
+| Tube, tuyau | 2 | Devis 7954 | TUBE PER PRE GAINE 10X12 BLEU |
 | Isolant | 2 | Lézardrieux | Mise en place d'une isolation thermique en doublages Typolog |
 | Ossature (rail, montant, fourrure) | 1 | Lézardrieux | Cloison séparative d'appartements SAD120 duo'tech 25. Cloiso |
 | Ragréage, primaire | 1 | D-2026-011 | Ragréage du sol - Application d'une couche de ragréage fibré |
@@ -95,11 +95,11 @@ Chaque devis doit garder au moins ses scores A et B de l'étape précédente, sa
 
 ## Erreurs restantes
 
-- mesure d'ouvrage envoyée comme quantité d'achat : 12 (ex. Morellec — électricité + plomberie (scanné) : « TABLEAU GENERAL ELECTRIQUE HAGER INTERUPTEURS DIFFERENTIELS HAUTE SENS »)
+- mesure d'ouvrage envoyée comme quantité d'achat : 12 (ex. Devis 7954 — électricité + plomberie (scanné) : « TABLEAU GENERAL ELECTRIQUE HAGER INTERUPTEURS DIFFERENTIELS HAUTE SENS »)
 
 ## Questions posées à l'artisan
 
-### Morellec — électricité + plomberie (scanné)
+### Devis 7954 — électricité + plomberie (scanné)
 
 - 29 lignes sans unité : ce devis compte-t-il en pièces ?
 - « FIXATION INOX WC BIDET 6X70 X2, et Manchon de racc » : La désignation indique « x2 » : combien d'articles commander au total ?
@@ -124,7 +124,7 @@ Chaque devis doit garder au moins ses scores A et B de l'étape précédente, sa
 
 ## Détail
 
-<details><summary>Morellec — électricité + plomberie (scanné) — détail ligne à ligne</summary>
+<details><summary>Devis 7954 — électricité + plomberie (scanné) — détail ligne à ligne</summary>
 
 | Réf. | Désignation | Qté | Vérité | BatiClair a lu | Niveau atteint | Erreur |
 |---|---|---|---|---|---|---|

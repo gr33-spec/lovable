@@ -8,6 +8,8 @@ import type { LectureDevis } from "../lecture.js";
  * simulé rend pour ce devis en développement ; le calcul (ratios, conversions) reste au code. Données anonymisées.
  */
 export const DE00000071_LECTURE: LectureDevis = {
+  metier: "roofing",
+  lots: [],
   fiche: parseFiche([
     { donnee: "ouvrage", valeur: "toiture existante en bac acier isolé, pas de couverture neuve", origine: "lue", preuve: "lignes 1, 6, 9 : « sur bac acier isolé »" },
     { donnee: "gouttière", valeur: "demi-ronde zinc naturel, 17,40 m, sur crochets Négrafix", origine: "lue", preuve: "ligne 1" },

@@ -73,7 +73,10 @@ describe("§51.5 : DE00000071, le résultat attendu par le fondateur", () => {
     expect(liste[0]!.raison).toMatch(/développé/i);
     // §51.5 dit 35 crochets ; la règle §7 / §25 du référentiel compte un crochet tous les 50 cm (40 cm en bord de mer) plus un
     // en bout : 36, ou 45 en bord de mer. À trancher par le fondateur (voir le rapport de la PR 2).
-    expect(vu[1]).toEqual([expect.stringMatching(/^Crochets .*Négrafix/i), expect.stringMatching(/^(?:35|36|44|45) pièces$/), "vert"]);
+    // Retour du fondateur (2026-10-12) : « Crochets de gouttière ? dév. ? » en vert, non : le crochet se choisit au développé
+    // de la gouttière ; orange tant que la question n'a pas de réponse (§49.2), avec la même question que la gouttière.
+    expect(vu[1]).toEqual([expect.stringMatching(/^Crochets .*Négrafix/i), expect.stringMatching(/^(?:35|36|44|45) pièces$/), "orange"]);
+    expect(liste[1]!.raison).toMatch(/développé/i);
     expect(vu[2]).toEqual([expect.stringMatching(/^Naissances/), null, "orange"]);
     expect(liste[2]!.raison).toMatch(/descentes|nombre/i);
     expect(vu[3]).toEqual([expect.stringMatching(/^Membrane .*chéneau|^Chéneau .*membrane/i), expect.anything(), "orange"]);
@@ -89,5 +92,14 @@ describe("§51.5 : DE00000071, le résultat attendu par le fondateur", () => {
     expect(sansFourniture).toBe(5);
     // Interdit : un identifiant interne à l'écran.
     for (const l of liste) expect(`${l.label} ${l.raison}`).not.toMatch(/[a-f0-9]{8}-|__|param:/);
+  });
+
+  it("le développé répondu (25) passe la gouttière au vert ; ses crochets attendent encore leur pose, puis passent au vert", () => {
+    const dev = ecran({ "param:developpe_gouttiere": { value: "25", unit: "cm" } }).liste;
+    expect(dev[0]).toMatchObject({ couleur: "vert" });
+    expect(dev[1]).toMatchObject({ couleur: "orange", raison: "Pose à préciser" });
+    const { liste } = ecran({ "param:developpe_gouttiere": { value: "25", unit: "cm" }, "param:fixation_crochet": { value: "2", unit: "u" } });
+    expect(liste[0]).toMatchObject({ couleur: "vert" });
+    expect(liste[1]).toMatchObject({ label: expect.stringMatching(/^Crochets .*Négrafix/i), couleur: "vert", raison: "" });
   });
 });

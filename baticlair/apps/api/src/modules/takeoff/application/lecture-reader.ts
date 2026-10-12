@@ -1,4 +1,4 @@
-import { parseLecture, type LectureDevis } from "@baticlair/domain";
+import { METIER_NAMES, parseLecture, type LectureDevis } from "@baticlair/domain";
 import { z } from "zod";
 import type { DocumentInput, ReadAttempt } from "../../../platform/ai/document-reader.js";
 import { RULE_51_2 } from "./fiche-relecture.js";
@@ -11,7 +11,7 @@ import { RULE_51_1 } from "./prompt.js";
  * bref, les questions (une par donnée manquante, aucune sur une donnée lue), et pour chaque ligne du devis la fourniture
  * nommée ou « sans fourniture ». Le code calcule ensuite (ratios, conversions) : jamais une règle de mots.
  */
-export const LECTURE_PROMPT = { id: "lecture_devis", version: 1 } as const;
+export const LECTURE_PROMPT = { id: "lecture_devis", version: 2 } as const;
 
 /** §49.1 du référentiel (6 octobre 2026), mot pour mot : d'où vient chaque ligne de la liste. */
 export const RULE_49_1 = `RÈGLE §49.1 DU RÉFÉRENTIEL : d'où vient chaque ligne de la liste.
@@ -33,7 +33,44 @@ export const RULE_49_4 = `RÈGLE §49.4 DU RÉFÉRENTIEL : les questions de comp
 export const RULE_51_5 = `RÈGLE §51.5 DU RÉFÉRENTIEL (décision du fondateur, 11 octobre 2026) : la lecture est faite par l'IA, pas par des règles de mots.
 Le temps un (fiche de chantier), le temps deux (questions) et le nommage des fournitures sont confiés entièrement au modèle le plus capable disponible, qui reçoit le devis complet et ce référentiel. Plus aucune règle de lecture en code qui cherche des mots dans les lignes : ces règles sont retirées. Le code ne garde que les calculs (ratios, conversions en unités commandables, tests permanents).`;
 
+/** Référentiel électricité (11 octobre 2026), §1 mot pour mot : un point contient ses fournitures. */
+export const RULE_ELEC_1 = `RÈGLE §1 DU RÉFÉRENTIEL ÉLECTRICITÉ : règle numéro un et place du référentiel.
+- La règle numéro un s'applique telle quelle : l'app lit le devis ligne par ligne et n'invente jamais un ouvrage absent du devis. Mais en électricité, une ligne du devis est presque toujours un point (un point lumineux, une prise), pas une fourniture. La conversion d'un point en fournitures (boîte, appareil, câble, gaine) n'est pas un ajout : c'est ce que le point contient. Chaque fourniture d'un point porte en rappel la ligne qui l'a produite.
+- Les lignes d'étude, de pose, de mise en service, de percement, de plan, de Consuel et de formation sont des lignes sans fourniture (règle 49.9 du référentiel couverture, même logique).
+- Les sections 49 (charte), 50 (ce que voit l'artisan) et 51 (le moteur voit le chantier avant de compter) du référentiel couverture s'appliquent à tous les métiers, donc ici.
+- Quand une ligne nomme une marque, une gamme ou un modèle (Hager Essensya, Aldes Bahia, Atoll 750 W), ce nom est repris tel quel, sans question. Quand elle ne le nomme pas, la ligne sort en orange avec sa question (modèle, teinte ou qualité), et la réponse la passe au vert (51.6).`;
+
+/** Référentiel électricité (11 octobre 2026), §4 mot pour mot : le tableau déduit des points, sa question « C'est bon / Modifier ». */
+export const RULE_ELEC_4 = `RÈGLE §4 DU RÉFÉRENTIEL ÉLECTRICITÉ : tableau et protections.
+Quand le devis donne une ligne « tableau » avec la liste de son contenu sans les nombres (cas courant : « disjoncteurs 2 A, 10 A, 16 A, 20 A, 32 A, contacteur J/N, fils, barrette, montage »), l'app déduit la composition des points du même logement, selon les protections du § 3, et la pose en orange avec une question : « Composition du tableau : [détail déduit] — C'est bon / Modifier ». La réponse passe la ligne au vert.
+- Nombre de disjoncteurs : somme des protections du § 3 sur le logement, chaque calibre arrondi au-dessus.
+- Interrupteurs différentiels 30 mA : 1 pour 8 disjoncteurs, dont au moins 1 de type A (plaque, lave-linge) ; 40 A en logement sans chauffage électrique sur ce différentiel, 63 A sinon.
+- Disjoncteur 2 A : 1 par contacteur jour/nuit et 1 par télérupteur.
+- Peigne : 1 par rangée. Rangées : 1 rangée pour 13 modules, le tableau arrondi au-dessus (2, 3 ou 4 rangées).
+- Mise à la terre, quand le devis la nomme : 1 piquet de terre, 1 barrette de coupure, câble 16 mm² vert/jaune 10 m, liaison équipotentielle 6 mm² 15 m ; le mesurage est une ligne sans fourniture.
+- Coffret de communication : repris tel que nommé au devis (grade, nombre de RJ45) ; le devis nomme ses connecteurs, ils sont repris tels quels.`;
+
+/** Référentiel électricité (11 octobre 2026), §5 mot pour mot : les questions obligatoires. */
+export const RULE_ELEC_5 = `RÈGLE §5 DU RÉFÉRENTIEL ÉLECTRICITÉ : questions obligatoires.
+Une question seulement quand le devis ne permet ni de lire ni de déduire la donnée (51.2). Les cas qui en produisent une :
+- Teinte ou finition de l'appareillage quand seule la gamme est écrite (Essensya blanc ou noir ?).
+- Longueurs non écrites d'un réseau : gaine VMC par logement, PER par diamètre quand le devis ne donne qu'un total.
+- Un article « à définir » au devis (paroi de douche) : modèle.
+- Un écart entre deux lignes qui comptent la même chose (59 alimentations pour 49 radiateurs) : à quoi servent les lignes en plus.
+- Un bloc de pièces qui n'est rattaché à aucun logement : lequel.
+- Mode de pose quand il change les fournitures et n'est pas écrit : encastré (boîtes + gaine ICTA) ou en saillie (moulures, boîtes en saillie). Question à boutons : encastré / saillie, « encastré » en premier en rénovation lourde ou neuf. Règle générale (51.6) : tout orange a sa question, et la liste est entièrement verte une fois répondu.`;
+
+/** Les règles propres à un métier, mot pour mot, ajoutées au lecteur quand le devis est de ce métier. */
+const REGLES_DU_METIER: Readonly<Record<string, readonly string[]>> = {
+  electrical: [RULE_ELEC_1, RULE_ELEC_4, RULE_ELEC_5],
+};
+
+/** Les métiers du référentiel : l'identifiant que le lecteur rend, et son nom. */
+const METIERS = Object.entries(METIER_NAMES).map(([id, name]) => `${id} (${name})`).join(", ");
+
 const FORMAT = `CE QUE TU RENVOIES : un seul objet JSON, rien d'autre.
+- metier : l'identifiant du métier principal du devis, pris dans cette liste : ${METIERS}.
+- lots : quand le devis couvre plusieurs métiers (électricité, VMC, sanitaire), un lot par métier, dans l'ordre du devis : {"metier", "libelle", "lignes"}. metier : l'identifiant de la liste ; libelle : le nom du lot tel que le devis l'écrit (« Électricité », « VMC », « Sanitaire ») ; lignes : les repères des lignes du lot. [] quand le devis n'a qu'un métier.
 - fiche : la fiche de chantier (§51.1), une entrée par donnée du chantier : {"donnee", "valeur", "origine", "regle", "preuve"}. donnee : le nom court (« ouvrage », « matériau », « surface », « rampant », « nombre de descentes », « fenêtres de toit »…) ; valeur : la valeur avec son unité, ou "" si elle manque ; origine : "lue", "deduite" ou "manquante" ; regle : la règle d'une donnée déduite, sinon "" ; preuve : où une donnée lue est écrite (« ligne 3 : « pente 30° » »), sinon "". Rien qui ne vienne du devis (règle numéro un).
 - bref : le chantier en bref (§50.8), en phrases courtes, une par fait, dans l'ordre : l'ouvrage et son état, chaque fourniture principale avec sa mesure, ce qui s'en déduit. Jamais le nom du client, l'adresse, un prix. Rien qui ne soit écrit au devis.
 - questions : UNE question par donnée manquante de la fiche nécessaire au calcul ou à la désignation (§51.2, §49.4), et aucune sur une donnée lue ou déductible. Chaque question : {"cle", "texte", "boutons", "unite", "donnee", "ligne"}. cle : la clé de la donnée du RÉFÉRENTIEL quand elle en a une (« developpe_gouttiere », « nb_descentes », « faconnage »), sinon un nom court en minuscules sans accent (« cheneau_membrane ») ; texte : la question, une phrase, tutoiement, mots du chantier ; boutons : 2 à 5 choix {"label", "valeur"} (valeur = la valeur du référentiel quand la donnée en a : « 25 », « 2 », « 1 »), ou [] si la réponse s'écrit ; unite : l'unité d'une réponse chiffrée (« cm », « m », « u »), sinon "" ; donnee : le nom court de la donnée (il s'affiche sur la ligne orange qui l'attend : « développé de gouttière ») ; ligne : le repère de la ligne du devis que la question concerne seule (le raccord d'une fenêtre), sinon "". Une contradiction du devis (deux valeurs pour la même donnée) est une question, avec les deux valeurs en boutons.
@@ -44,7 +81,8 @@ const FORMAT = `CE QUE TU RENVOIES : un seul objet JSON, rien d'autre.
 - notes : en phrases courtes pour l'artisan, ce qui concerne tout le devis et compte pour ses achats (page illisible, fourniture apportée par le client) ; [] sinon.`;
 
 /** Le système du lecteur : les règles du référentiel mot pour mot, l'export du tiroir du métier, le format. */
-export function lectureSystemPrompt(input: { tradeLabel: string; referentiel: string }): string {
+export function lectureSystemPrompt(input: { trade?: string; tradeLabel: string; referentiel: string }): string {
+  const metier = (REGLES_DU_METIER[input.trade ?? ""] ?? []).map((r) => `\n\n${r}`).join("");
   return `Tu es le lecteur de devis de BatiClair. Tu lis le devis entier d'un artisan du bâtiment (métier : ${input.tradeLabel}) et tu rends la fiche de chantier, le bref, les questions et, pour chaque ligne, la fourniture nommée ou « sans fourniture ». Tu ne comptes rien : les quantités calculées viennent du code, d'après le référentiel ci-dessous. Tu lis TOUT : l'en-tête, chaque ligne, le descriptif sous le titre, les lignes de pose, les notes, toutes les pages. Une information écrite n'importe où vaut pour l'ouvrage concerné.
 
 ${RULE_51_5}
@@ -55,7 +93,7 @@ ${RULE_49_4}
 
 ${RULE_51_1}
 
-${RULE_51_2.split("\n").slice(0, 2).join("\n")}
+${RULE_51_2.split("\n").slice(0, 2).join("\n")}${metier}
 
 ${FORMAT}
 
@@ -67,6 +105,8 @@ const kv = z.object({ cle: z.string(), valeur: z.string() });
 
 /** La réponse du modèle (structured outputs) : aucun champ « valeur ou vide » (chaînes vides, listes vides), zéro union. */
 export const lectureWireSchema = z.object({
+  metier: z.string(),
+  lots: z.array(z.object({ metier: z.string(), libelle: z.string(), lignes: z.array(z.string()) })),
   fiche: z.array(z.object({ donnee: z.string(), valeur: z.string(), origine: z.enum(["lue", "deduite", "manquante"]), regle: z.string(), preuve: z.string() })),
   bref: z.array(z.string()),
   questions: z.array(z.object({ cle: z.string(), texte: z.string(), boutons: z.array(z.object({ label: z.string(), valeur: z.string() })), unite: z.string(), donnee: z.string(), ligne: z.string() })),
@@ -102,6 +142,8 @@ const record = (list: { cle: string; valeur: string }[]) => Object.fromEntries(l
 /** La réponse relue par le code : chaînes vides → absent, listes de couples → objets ; rien d'invalide ne passe. */
 export function decodeLecture(wire: LectureWire): LectureDevis | null {
   return parseLecture({
+    metier: wire.metier.trim() || null,
+    lots: wire.lots,
     fiche: wire.fiche.map((f) => ({ ...f, valeur: f.valeur.trim() })),
     bref: wire.bref,
     questions: wire.questions.map((q) => ({ ...q, unite: q.unite.trim() || null, ligne: q.ligne.trim() || null })),

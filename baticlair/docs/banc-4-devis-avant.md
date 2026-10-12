@@ -4,8 +4,8 @@ Résultat GELÉ le 2026-10-01 : moteur, référentiel et règles tels qu'avant c
 (commit précédent). Ce fichier n'est jamais régénéré : il sert de point de départ.
 
 Lecture des devis : lignes relevées telles qu'écrites (lecture IA non disponible dans
-l'environnement de test ; le devis Morellec est scanné, la piscine garde les défauts du
-lecteur PDF). Métier choisi par l'artisan : Morellec = électricité + plomberie ;
+l'environnement de test ; le devis 7954 est scanné, la piscine garde les défauts du
+lecteur PDF). Métier choisi par l'artisan : devis 7954 = électricité + plomberie ;
 Lézardrieux = plâtrerie ; piscine = « autre métier » ; D-2026-011 = plomberie, carrelage,
 électricité, peinture.
 
@@ -13,7 +13,7 @@ Lézardrieux = plâtrerie ; piscine = « autre métier » ; D-2026-011 = plomber
 
 | Devis | Lignes matériaux | Correctement comprises | Besoins identifiés | Quantités certaines | Questions | Inconnus | Erreurs |
 |---|---|---|---|---|---|---|---|
-| Morellec — électricité + plomberie (scanné) | 152 | 31 (20 %) | 13 (9 %) | 13 (9 %) | 25 | 139 | 82 |
+| Devis 7954 — électricité + plomberie (scanné) | 152 | 31 (20 %) | 13 (9 %) | 13 (9 %) | 25 | 139 | 82 |
 | Lézardrieux — plâtrerie, isolation | 21 | 1 (5 %) | 1 (5 %) | 1 (5 %) | 0 | 20 | 11 |
 | Piscine | 34 | 0 (0 %) | 0 (0 %) | 0 (0 %) | 31 | 34 | 5 |
 | D-2026-011 — salle de bain | 15 | 8 (53 %) | 8 (53 %) | 8 (53 %) | 0 | 7 | 6 |
@@ -28,14 +28,14 @@ Pour comparaison, le devis de référence (couverture) :
 
 ## Erreurs par nature
 
-- mesure d'ouvrage envoyée comme quantité d'achat : 88 (ex. Morellec — électricité + plomberie (scanné) : « PRISE DE COURANT 16A+T »)
-- main-d'œuvre prise pour un matériau : 7 (ex. Morellec — électricité + plomberie (scanné) : « PERCEMENT / CREATION DE PASSAGE / RACCORDS CIMENT / TRAVAUX ELECTRICIT »)
-- matériau pris pour de la main-d'œuvre : 7 (ex. Morellec — électricité + plomberie (scanné) : « Alimentation Eau froide, Eau chaude pour évier en attente pour cuisini »)
-- vocabulaire couverture appliqué à tort : 4 (ex. Morellec — électricité + plomberie (scanné) : « COUDE PVC 45° FF 100 »)
+- mesure d'ouvrage envoyée comme quantité d'achat : 88 (ex. Devis 7954 — électricité + plomberie (scanné) : « PRISE DE COURANT 16A+T »)
+- main-d'œuvre prise pour un matériau : 7 (ex. Devis 7954 — électricité + plomberie (scanné) : « PERCEMENT / CREATION DE PASSAGE / RACCORDS CIMENT / TRAVAUX ELECTRICIT »)
+- matériau pris pour de la main-d'œuvre : 7 (ex. Devis 7954 — électricité + plomberie (scanné) : « Alimentation Eau froide, Eau chaude pour évier en attente pour cuisini »)
+- vocabulaire couverture appliqué à tort : 4 (ex. Devis 7954 — électricité + plomberie (scanné) : « COUDE PVC 45° FF 100 »)
 
 ## Détail
 
-<details><summary>Morellec — électricité + plomberie (scanné) — détail ligne à ligne</summary>
+<details><summary>Devis 7954 — électricité + plomberie (scanné) — détail ligne à ligne</summary>
 
 | Réf. | Désignation | Qté | Vérité | BatiClair a lu | Niveau atteint | Erreur |
 |---|---|---|---|---|---|---|

@@ -28,5 +28,6 @@ export function lectureEnregistree(
   const empreinte = createHash("sha1").update(JSON.stringify(contexte)).digest("hex").slice(0, 12);
   const file = join(DIR, `${ref.id}-${empreinte}.json`);
   if (!existsSync(file)) throw new Error(`Lecture enregistrée absente : ${file} (devis : ${bench.map((l) => `${l.ref} ${l.designation}`).join(" | ")})`);
-  return (JSON.parse(readFileSync(file, "utf8")) as { lecture: LectureDevis }).lecture;
+  const { lecture } = JSON.parse(readFileSync(file, "utf8")) as { lecture: Omit<LectureDevis, "metier" | "lots"> & Partial<LectureDevis> };
+  return { metier: ref.trade, lots: [], ...lecture };
 }

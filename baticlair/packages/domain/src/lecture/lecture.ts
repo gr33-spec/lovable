@@ -74,7 +74,18 @@ export interface LectureQuestion {
   ligne: string | null;
 }
 
+/** Un lot du devis (temps un) : le métier et les références des lignes qui en relèvent, dans l'ordre du devis. */
+export interface LectureLot {
+  metier: string;
+  libelle: string;
+  lignes: string[];
+}
+
 export interface LectureDevis {
+  /** Temps un : le métier du devis (identifiant du référentiel), ou null si le modèle ne l'a pas dit. */
+  metier: string | null;
+  /** Temps un : les lots quand le devis en a plusieurs (vide sinon). */
+  lots: LectureLot[];
   fiche: FicheChantier;
   /** §50.8 : le chantier en bref, en phrases courtes, une par fait, dans l'ordre. */
   bref: string[];
@@ -148,7 +159,17 @@ export function parseLecture(raw: unknown): LectureDevis | null {
       if (value) contexte[k.slice(0, 60)] = value;
     }
   }
+  const lots: LectureLot[] = [];
+  for (const item of list(o.lots)) {
+    if (!item || typeof item !== "object") continue;
+    const lot = item as Record<string, unknown>;
+    const metier = str(lot.metier, 40);
+    if (!metier) continue;
+    lots.push({ metier, libelle: str(lot.libelle, 80) ?? metier, lignes: list(lot.lignes).flatMap((r) => str(r, 20) ?? []) });
+  }
   return {
+    metier: str(o.metier, 40),
+    lots,
     // La fiche du modèle (liste « donnee / valeur / origine »), ou la fiche déjà lue, relue depuis la base avec la lecture.
     fiche: parseFicheEnregistree(o.fiche) ?? parseFiche(o.fiche) ?? { donnees: [] },
     bref: list(o.bref).flatMap((b) => str(b, 300) ?? []),
@@ -715,7 +736,10 @@ function finishPurchase(
     const estimated = (item.rules ?? []).some((r) => r.key.startsWith("estimation:"));
     const strictWaits = ctx.engine.filter((n) => item.needIds.includes(n.needId)).map((n) => ctx.precisionWaits.get(`${n.workItemId}/${n.needId}`)).filter((c): c is string => !!c);
     const assumed = asked.filter((a) => a.q.ligne === null && unresolved(a) && item.assumptionKeys.includes(`param:${a.q.cle}`)).map((a) => a.q.cle);
-    const waits = estimated ? [] : [...new Set([...f.attend, ...strictWaits, ...assumed])].map((cle) => open(cle, line.ligne.ref)).filter((a): a is Asked => !!a);
+    // Retour du fondateur (2026-10-12) : « Crochets de gouttière ? dév. ? » ne sort jamais vert ; une donnée restée en « ? »
+    // dans l'article calculé attend la question du modèle sur cette donnée, comme la ligne qui l'écrit (§49.2).
+    const blanked = /\?/.test(item.label) ? ctx.engine.filter((n) => item.needIds.includes(n.needId)).flatMap((n) => n.unknownParams ?? []) : [];
+    const waits = estimated ? [] : [...new Set([...f.attend, ...strictWaits, ...assumed, ...blanked])].map((cle) => open(cle, line.ligne.ref)).filter((a): a is Asked => !!a);
     // Une quantité calculée n'attend que les questions du modèle ; une quantité encore vide attend aussi sa donnée du calcul.
     const pending = [...new Set([...(item.quantity === null ? (item.waitsOn ?? []) : []), ...waits.map((a) => a.key)])];
     const preciser = f.aPreciser.length > 0 && ctx.answers[`a-preciser:${line.id}`] === undefined;
@@ -819,6 +843,8 @@ function finishPurchase(
  */
 export function lectureDepuisLignes(lines: readonly { id: string; designation: string; quantity: string | null; unit: string | null }[]): LectureDevis {
   return {
+    metier: null,
+    lots: [],
     fiche: { donnees: [] },
     bref: [],
     questions: [],

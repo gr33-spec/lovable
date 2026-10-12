@@ -80,7 +80,9 @@ describe("§51.5 : la lecture par le modèle, par l'API (DE00000071)", () => {
       "Raccord MK04 pour bac acier",
       expect.stringMatching(/^Tôles bac acier/),
     ]);
-    expect(vue.lignes.map((l) => l.couleur)).toEqual(["orange", "vert", "orange", "orange", "vert", "orange", "vert", "orange", "orange"]);
+    // Retour du fondateur (2026-10-12) : les crochets se choisissent au développé de la gouttière, orange tant qu'il manque (§49.2).
+    expect(vue.lignes.map((l) => l.couleur)).toEqual(["orange", "orange", "orange", "orange", "vert", "orange", "vert", "orange", "orange"]);
+    expect(vue.lignes[1]!.raison).toMatch(/développé/i);
     expect(vue.lignes[0]!.texte).toBe("5 longueurs de 4 m");
     expect(vue.lignes[4]!.texte).toBe("4 pièces");
     expect(vue.lignes[8]!.texte).toBe("10");

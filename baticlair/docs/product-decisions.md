@@ -591,7 +591,7 @@ Validée par le fondateur après l'audit simplicité / coût. Principe inchangé
 - **Réponse compacte (prompt v7)** : chaque suite de titres n'est écrite
   qu'une fois (les lignes y renvoient par son numéro), une seule liste de
   sources par ligne, noms de champ courts. Même information, environ 40 % de
-  réponse en moins sur Morellec.
+  réponse en moins sur le devis 7954.
 - **Plan de lecture décidé avant tout appel, sans IA** : si la réponse
   attendue (estimation haute) tient largement dans la limite d'un appel
   (9 000 tokens sur 16 000), un seul appel, comme avant. Sinon, blocs de
@@ -610,7 +610,7 @@ Validée par le fondateur après l'audit simplicité / coût. Principe inchangé
   lignes scanné) ; au-delà, le document n'est pas un devis normal (catalogue,
   annexes) et n'est pas envoyé. Appels plafonnés à 12 par analyse.
 - **Tests permanents** : devis synthétiques de 300 et 500 lignes (texte et
-  scan, IA simulée qui désobéit parfois), Morellec en 9 pages scannées,
+  scan, IA simulée qui désobéit parfois), le devis 7954 en 9 pages scannées,
   bout en bout sur vrai PDF avec service IA simulé. Rapport généré :
   `lecture-gros-devis.md`.
 - **Limites connues** : sur une page image, un reliquat de ligne coupée relu
