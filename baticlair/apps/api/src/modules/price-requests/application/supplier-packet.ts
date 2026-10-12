@@ -156,7 +156,7 @@ export function packetDocument(p: SupplierPacket, options: { destinataire?: stri
   if (ordered.length > 0) blocs.push({ numero: ++n, titre: "Fournitures à chiffrer", kind: "table", colonnes: ["Désignation", "Quantité", "Précision"], lignes: ordered });
   if (p.a_chiffrer.length > 0) blocs.push({ numero: ++n, titre: "À préciser avec vous", kind: "list", lignes: p.a_chiffrer });
   if (p.joindre_detail && p.detail.length > 0)
-    blocs.push({ numero: ++n, titre: "Détail du devis (sans prix)", kind: "list", lignes: p.detail.map((d) => [d.libelle, ...(d.mesure ? [d.mesure] : []), ...d.precisions].join(" · ")) });
+    blocs.push({ numero: ++n, titre: "Détail du devis", kind: "list", lignes: p.detail.map((d) => [d.libelle, ...(d.mesure ? [d.mesure] : []), ...d.precisions].join(" · ")) });
   const contact = [s?.telephone, s?.email].filter(Boolean).join(" · ");
   return {
     entete: { entreprise: p.entreprise, coordonnees, titre: "Demande de devis", chantier: chantierLabel(p.chantier), ville: p.commune, date: dateFr(p.date), reference: p.reference ?? null, mention: p.ratios_en_validation ? MENTION_RATIOS : null },
