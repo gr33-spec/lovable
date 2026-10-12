@@ -1,4 +1,4 @@
-import { briefResume, briefTexte, siteUnits, withoutLabour, writtenNumber } from "@baticlair/domain";
+import { briefResume, briefTexte, ratiosEnValidation, siteUnits, withoutLabour, writtenNumber } from "@baticlair/domain";
 import type { ArtisanView, PurchaseView } from "@baticlair/domain";
 import { artisanNotes } from "../../../platform/ai/artisan-notes.js";
 import type { ReviewedTakeoff } from "../application/takeoff.service.js";
@@ -127,6 +127,9 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase, exclude
     // l'adresse seulement si l'artisan les ajoute (`bref:avec-client`).
     brefTexte: brief ? briefTexte(briefResume(brief, siteNotes ?? null, takeoff.answers, takeoff.fiche ? (fiche ?? null) : null)) : "",
     brefAvecClient: takeoff.answers["bref:avec-client"] === "oui",
+    // §52 (retour du fondateur, 2026-10-12) : un métier pas encore relu par un artisan porte « Ratios en cours de
+    // validation » sur l'écran 3 et dans le PDF fournisseur ; pas la couverture.
+    ratiosEnValidation: ratiosEnValidation(takeoff.trade),
     // §51 : la fiche de chantier, chaque donnée avec son origine (lue, déduite, ta réponse, manquante).
     fiche: (fiche?.donnees ?? []).map((d) => ({ cle: d.cle, libelle: d.libelle, valeur: d.valeur, origine: d.origine, regle: d.regle ?? null, preuve: d.preuve ?? null })),
     // §48.4 : les ajouts proposés par l'IA, décochés, hors de la liste.

@@ -242,6 +242,8 @@ export interface Takeoff {
   brefTexte?: string;
   /** Le client et l'adresse sont-ils dans le bref ? (non par défaut : un négoce n'en a pas besoin pour chiffrer). */
   brefAvecClient?: boolean;
+  /** §52 : le métier n'a pas encore été relu par un artisan, l'écran 3 porte « Ratios en cours de validation ». */
+  ratiosEnValidation?: boolean;
   sansFourniture?: { lineId: string; label: string; measure: string | null }[];
   /** §48.4 : ce que l'IA juge utile mais que le devis ne demande pas : bloc « Suggestions », décoché. */
   aiSuggestions?: { key: string; label: string; quantity: string | null; unit: string | null; reason: string }[];
@@ -358,7 +360,7 @@ export interface SupplyRow {
   cle?: string;
 }
 export interface PacketDocument {
-  entete: { entreprise: string; coordonnees: string[]; titre: string; chantier: string; ville: string | null; date: string; reference: string | null };
+  entete: { entreprise: string; coordonnees: string[]; titre: string; chantier: string; ville: string | null; date: string; reference: string | null; mention?: string | null };
   destinataire: string | null;
   blocs: ({ numero: number; titre: string; kind: "list"; lignes: string[] } | { numero: number; titre: string; kind: "table"; colonnes: [string, string, string]; lignes: SupplyRow[] })[];
   croquis: { article: string; nom: string; commentaire: string | null }[];

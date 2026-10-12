@@ -1,4 +1,4 @@
-import { priceLeak } from "@baticlair/domain";
+import { MENTION_RATIOS, priceLeak } from "@baticlair/domain";
 // Le test du prix (§42.2, §43.5) vit dans le domaine, à côté du bref (§50.7) qui s'en sert aussi.
 export { priceLeak };
 import { PDFDocument, rgb, StandardFonts, type PDFFont, type PDFImage, type PDFPage } from "pdf-lib";
@@ -63,6 +63,8 @@ export interface SupplierPacket {
   message?: string | null;
   /** Réponse souhaitée avant le… (date en toutes lettres). */
   echeance?: string | null;
+  /** §52 : le métier n'a pas encore été relu par un artisan ; le PDF porte « Ratios en cours de validation ». */
+  ratios_en_validation?: boolean;
 }
 
 /** Le fichier d'un croquis, lu au moment de rendre le PDF (jamais gardé dans la demande figée). */
@@ -121,6 +123,8 @@ export interface PacketDocument {
     ville: string | null;
     date: string;
     reference: string | null;
+    /** §52 : « Ratios en cours de validation » quand le métier n'a pas encore été relu par un artisan, sinon null. */
+    mention: string | null;
   };
   destinataire: string | null;
   blocs: (
@@ -155,7 +159,7 @@ export function packetDocument(p: SupplierPacket, options: { destinataire?: stri
     blocs.push({ numero: ++n, titre: "Détail du devis (sans prix)", kind: "list", lignes: p.detail.map((d) => [d.libelle, ...(d.mesure ? [d.mesure] : []), ...d.precisions].join(" · ")) });
   const contact = [s?.telephone, s?.email].filter(Boolean).join(" · ");
   return {
-    entete: { entreprise: p.entreprise, coordonnees, titre: "Demande de devis", chantier: chantierLabel(p.chantier), ville: p.commune, date: dateFr(p.date), reference: p.reference ?? null },
+    entete: { entreprise: p.entreprise, coordonnees, titre: "Demande de devis", chantier: chantierLabel(p.chantier), ville: p.commune, date: dateFr(p.date), reference: p.reference ?? null, mention: p.ratios_en_validation ? MENTION_RATIOS : null },
     destinataire: options.destinataire ?? null,
     blocs,
     croquis: (p.croquis ?? []).map((c) => ({ article: c.article, nom: c.nom, commentaire: c.commentaire })),
@@ -165,7 +169,7 @@ export function packetDocument(p: SupplierPacket, options: { destinataire?: stri
 
 /** Le texte du document, ligne à ligne : ce que l'aperçu montre et ce que le PDF écrit (§45.7 test 10). */
 export function packetDocumentLines(d: PacketDocument): string[] {
-  const out = [d.entete.entreprise, ...d.entete.coordonnees, d.entete.titre, d.entete.chantier, ...(d.entete.ville ? [d.entete.ville] : []), d.entete.date, ...(d.entete.reference ? [`Réf. ${d.entete.reference}`] : [])];
+  const out = [d.entete.entreprise, ...d.entete.coordonnees, d.entete.titre, d.entete.chantier, ...(d.entete.ville ? [d.entete.ville] : []), d.entete.date, ...(d.entete.reference ? [`Réf. ${d.entete.reference}`] : []), ...(d.entete.mention ? [d.entete.mention] : [])];
   if (d.destinataire) out.push(`À l'attention de : ${d.destinataire}`);
   for (const b of d.blocs) {
     out.push(b.numero > 0 ? `${b.numero}. ${b.titre}` : b.titre);
@@ -274,6 +278,11 @@ export async function packetPdf(
     for (const t of [d.entete.chantier, d.entete.ville, d.entete.date, d.entete.reference ? `Réf. ${d.entete.reference}` : null]) {
       if (!t) continue;
       right(t, regular, 9.5, r - 10);
+      r -= 13;
+    }
+    // §52 : sous le chantier, en gras, la mention du métier pas encore relu par un artisan.
+    if (d.entete.mention) {
+      right(d.entete.mention, bold, 9.5, r - 10);
       r -= 13;
     }
     const bottom = Math.min(left, r) - 10;

@@ -1,4 +1,4 @@
-import { METIER_NAMES, ROOFING_REFERENTIAL, toConfirmText, type Assumption, type TraceLine } from "@baticlair/domain";
+import { METIER_NAMES, ROOFING_REFERENTIAL, ratiosEnValidation, toConfirmText, type Assumption, type TraceLine } from "@baticlair/domain";
 import type { ReviewedTakeoff } from "../../takeoff/index.js";
 
 /**
@@ -135,6 +135,8 @@ export function quantitatifView(
     ...base,
     etat,
     metier: metierOf(takeoff.trade),
+    /** §52 : le métier n'a pas encore été relu par un artisan (« Ratios en cours de validation »). */
+    ratios_en_validation: ratiosEnValidation(takeoff.trade),
     version_referentiel: takeoff.referentialVersion,
     compris: purchase.understood,
     /** Les lignes du devis telles que reçues (prix compris), pour que le partenaire retrouve les siennes. */
