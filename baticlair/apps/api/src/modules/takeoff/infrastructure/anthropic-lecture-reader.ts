@@ -19,7 +19,7 @@ export class AnthropicLectureReader implements LectureReader {
   async lire(request: LectureRequest): Promise<ReadAttempt<LectureDevis>> {
     const extra = siteNotesInstruction(request.siteNotes);
     const attempt = await this.reader.read({
-      system: lectureSystemPrompt({ tradeLabel: request.tradeLabel, referentiel: request.referentiel }),
+      system: lectureSystemPrompt({ trade: request.trade, tradeLabel: request.tradeLabel, referentiel: request.referentiel }),
       schema: lectureWireSchema,
       document: request.document,
       documentName: "devis",

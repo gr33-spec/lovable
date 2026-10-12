@@ -281,7 +281,7 @@ export function lectureSimulee(request: LectureRequest): LectureDevis {
     if (/^(m²|m2)$/i.test(principal.f.unite ?? "")) fiche.splice(1, 0, { cle: "surface", libelle: "Surface", valeur: `${principal.f.quantite} m²`, origine: "devis", preuve });
   }
   // Pas de bref simulé : l'écran dit alors la fiche (données lues et réponses), puis la ville.
-  const lecture: LectureDevis = { fiche: { donnees: fiche }, bref: [], questions, lignes, contexte: null, notes: [] };
+  const lecture: LectureDevis = { metier: ref?.trade ?? null, lots: [], fiche: { donnees: fiche }, bref: [], questions, lignes, contexte: null, notes: [] };
   if (!ref) return lecture;
   // Les questions du calcul (ce que le modèle demanderait : les trous du référentiel), une fois, avec leurs mots.
   const ls = lignesDeLecture(lecture);

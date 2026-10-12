@@ -74,7 +74,18 @@ export interface LectureQuestion {
   ligne: string | null;
 }
 
+/** Un lot du devis (temps un) : le métier et les références des lignes qui en relèvent, dans l'ordre du devis. */
+export interface LectureLot {
+  metier: string;
+  libelle: string;
+  lignes: string[];
+}
+
 export interface LectureDevis {
+  /** Temps un : le métier du devis (identifiant du référentiel), ou null si le modèle ne l'a pas dit. */
+  metier: string | null;
+  /** Temps un : les lots quand le devis en a plusieurs (vide sinon). */
+  lots: LectureLot[];
   fiche: FicheChantier;
   /** §50.8 : le chantier en bref, en phrases courtes, une par fait, dans l'ordre. */
   bref: string[];
@@ -148,7 +159,17 @@ export function parseLecture(raw: unknown): LectureDevis | null {
       if (value) contexte[k.slice(0, 60)] = value;
     }
   }
+  const lots: LectureLot[] = [];
+  for (const item of list(o.lots)) {
+    if (!item || typeof item !== "object") continue;
+    const lot = item as Record<string, unknown>;
+    const metier = str(lot.metier, 40);
+    if (!metier) continue;
+    lots.push({ metier, libelle: str(lot.libelle, 80) ?? metier, lignes: list(lot.lignes).flatMap((r) => str(r, 20) ?? []) });
+  }
   return {
+    metier: str(o.metier, 40),
+    lots,
     // La fiche du modèle (liste « donnee / valeur / origine »), ou la fiche déjà lue, relue depuis la base avec la lecture.
     fiche: parseFicheEnregistree(o.fiche) ?? parseFiche(o.fiche) ?? { donnees: [] },
     bref: list(o.bref).flatMap((b) => str(b, 300) ?? []),
@@ -819,6 +840,8 @@ function finishPurchase(
  */
 export function lectureDepuisLignes(lines: readonly { id: string; designation: string; quantity: string | null; unit: string | null }[]): LectureDevis {
   return {
+    metier: null,
+    lots: [],
     fiche: { donnees: [] },
     bref: [],
     questions: [],

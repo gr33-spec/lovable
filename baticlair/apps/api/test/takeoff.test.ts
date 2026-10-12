@@ -59,7 +59,7 @@ describe("liste de matériaux tirée du devis client (lecture simulée)", () => 
     expect(await ctx.prisma.aiExecution.count()).toBe(1);
     const execution = await ctx.prisma.aiExecution.findFirstOrThrow();
     // §51.5 : un seul appel, la lecture du devis (fiche, questions, fourniture par ligne).
-    expect(execution).toMatchObject({ task: "lecture_devis", promptId: "lecture_devis", promptVersion: 1, status: "success", pagesText: 1 });
+    expect(execution).toMatchObject({ task: "lecture_devis", promptId: "lecture_devis", promptVersion: 2, status: "success", pagesText: 1 });
     expect(execution.costMicroUsd).toBeGreaterThan(0n);
     const usage = await agent.get("/v1/ai-usage");
     expect(usage.body.analyses.used).toBe(1);

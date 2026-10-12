@@ -14,6 +14,8 @@ export function planOf(ref: Referential, bench: readonly QuoteLineInput[], extra
 /** Une lecture écrite à la main : chaque ligne nomme sa fourniture, son ouvrage et son emplacement (ce que rend le modèle). */
 export function lectureSimple(lines: readonly { ref: string; designation: string; quantity: string | null; unit: string | null; ouvrage: string; emplacement: string; donnees?: Record<string, string> }[], questions: LectureDevis["questions"] = []): LectureDevis {
   return {
+    metier: null,
+    lots: [],
     fiche: { donnees: [] },
     bref: [],
     questions,
