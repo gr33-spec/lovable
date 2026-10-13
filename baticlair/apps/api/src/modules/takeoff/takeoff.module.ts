@@ -32,7 +32,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
       // §51.5 : la lecture du devis par le modèle le plus capable, en un appel ; simulée (lectures enregistrées) en test.
       provide: LECTURE_READER,
       useFactory: (config: AppConfig): LectureReader | null =>
-        config.ai.provider === "anthropic" ? new AnthropicLectureReader(config.ai.apiKey!, config.ai.extractionModel, config.ai.effort) : config.ai.provider === "fake" ? new FakeLectureReader() : null,
+        config.ai.provider === "anthropic" ? new AnthropicLectureReader(config.ai.apiKey!, config.ai.extractionModel, config.ai.effort, undefined, config.ai.quantitatifModel) : config.ai.provider === "fake" ? new FakeLectureReader() : null,
       inject: [CONFIG],
     },
     {

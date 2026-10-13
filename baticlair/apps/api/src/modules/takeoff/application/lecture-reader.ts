@@ -187,11 +187,39 @@ export interface LectureRequest {
   siteNotes?: string | null;
 }
 
+/**
+ * LE REPÉRAGE DES MÉTIERS, AVANT LA LECTURE (retour du fondateur, 2026-10-13 : « ça a mis du temps ») : un modèle rapide
+ * lit le TEXTE du devis (jamais le PDF) et dit en quelques secondes ses métiers, le principal d'abord, plusieurs quand le
+ * devis a des lots de métiers différents. La lecture part alors UNE fois, avec le ou les bons référentiels, au lieu d'être
+ * relue après coup. Le repérage ne lit rien d'autre : la fiche, les questions et les fournitures restent à la lecture.
+ */
+export const REPERAGE_PROMPT = { id: "reperage_metiers", version: 1 } as const;
+export const reperageWireSchema = z.object({ metiers: z.array(z.string()) });
+export type ReperageWire = z.infer<typeof reperageWireSchema>;
+
+export function reperageSystemPrompt(): string {
+  const liste = Object.entries(METIER_NAMES)
+    .filter(([id]) => id !== "general")
+    .map(([id, nom]) => `- ${id} (${nom})`)
+    .join("\n");
+  return `Tu repères les métiers d'un devis du bâtiment, rien d'autre. Rends dans « metiers » les identifiants ci-dessous, le métier principal d'abord (celui de la plus grande part du devis). Un seul métier si le devis est d'un seul corps d'état, même avec quelques lignes annexes (une couverture avec ses gouttières et sa zinguerie reste « roofing »). Plusieurs seulement quand le devis a de vrais lots de métiers différents (électricité, plomberie, VMC…). La VMC, le chauffage et la climatisation sont « hvac ». Le sanitaire est « plumbing ».
+
+Identifiants :
+${liste}`;
+}
+
+/** Les métiers repérés : identifiants connus seulement, sans doublon, dans l'ordre rendu. */
+export function decodeReperage(wire: ReperageWire | null | undefined): string[] {
+  return [...new Set((wire?.metiers ?? []).map((m) => m.trim()).filter((m) => m in METIER_NAMES && m !== "general"))];
+}
+
 /** Port : la lecture d'un devis par le modèle. Un appel = une tentative, toujours rapportée. */
 export interface LectureReader {
   readonly provider: string;
   /** `null` : ce lecteur ne lit pas ce devis (lecteur simulé sans lecture enregistrée) ; l'appelant se rabat sur l'ancienne lecture. */
   lire(request: LectureRequest): Promise<ReadAttempt<LectureDevis> | null>;
+  /** Le repérage des métiers du devis, sur son texte, avant la lecture (absent : la lecture part avec le métier donné). */
+  reperer?(numberedText: string): Promise<ReadAttempt<string[]> | null>;
 }
 
 export const LECTURE_READER = Symbol("LECTURE_READER");
