@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronLeft, FileUp, Loader2, Pencil, Trash2 } from "lucide-react";
+import { Check, ChevronLeft, FileUp, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ListScene, ReadingStage } from "@/components/chantier-scenes";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
@@ -654,6 +654,73 @@ export function EditableName({ name, onSave, className = "" }: { name: string; o
         {saving ? <Loader2 size={18} className="animate-spin" aria-hidden="true" /> : <Check size={18} aria-hidden="true" />}
       </button>
     </form>
+  );
+}
+
+/** La carte « Lots repérés » ne se montre que pour un devis de plus d'un lot, tant que l'artisan n'a pas dit « C'est bon ». */
+export function lotsAConfirmer(takeoff: Takeoff): boolean {
+  return (takeoff.lots?.length ?? 0) > 1 && !takeoff.lotsConfirmes;
+}
+
+/**
+ * §52, LA CARTE « LOTS REPÉRÉS » (directive du fondateur, 2026-10-13) : après la lecture, les lots que l'IA a repérés
+ * (« Lots repérés : Électricité · VMC · Sanitaire »), un bouton par lot pour le retirer, « Ajouter un lot », puis
+ * « C'est bon ». Un lot retiré rend ses lignes au lot principal : rien ne disparaît de la liste. Il reste toujours un lot.
+ */
+export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onConfirm: (metiers: string[]) => void }) {
+  const [lots, setLots] = useState(() => (takeoff.lots ?? []).map((l) => ({ metier: l.metier, libelle: l.libelle })));
+  const [adding, setAdding] = useState(false);
+  const ajoutables = (takeoff.metiersAjoutables ?? []).filter((m) => !lots.some((l) => l.metier === m.metier));
+  return (
+    <section aria-label="Lots repérés" className="flex flex-col gap-3">
+      {error ? <ErrorNotice error={error} /> : null}
+      <div className="flex flex-col gap-3 rounded-[20px] bg-surface p-4 shadow-card">
+        <h3 className="font-display text-[17px] font-extrabold tracking-[-0.01em]">Lots repérés : {lots.map((l) => l.libelle).join(" · ")}</h3>
+        <p className="text-[14px] leading-snug text-muted">Une liste par lot. Retire un lot qui n&apos;en est pas un, ajoute celui qui manque.</p>
+        <ul className="flex flex-wrap gap-2">
+          {lots.map((l) => (
+            <li key={l.metier}>
+              <button
+                type="button"
+                disabled={lots.length < 2 || pending}
+                onClick={() => setLots((prev) => prev.filter((x) => x.metier !== l.metier))}
+                aria-label={`Retirer le lot ${l.libelle}`}
+                className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-ground px-4 text-[15px] font-bold disabled:opacity-60"
+              >
+                {l.libelle}
+                {lots.length > 1 ? <X size={16} aria-hidden="true" className="text-muted" /> : null}
+              </button>
+            </li>
+          ))}
+        </ul>
+        {adding ? (
+          <div role="group" aria-label="Ajouter un lot" className="flex flex-wrap gap-2">
+            {ajoutables.map((m) => (
+              <button
+                key={m.metier}
+                type="button"
+                onClick={() => {
+                  setLots((prev) => [...prev, m]);
+                  setAdding(false);
+                }}
+                className="inline-flex min-h-11 items-center rounded-2xl bg-surface px-4 text-[15px] font-bold shadow-card"
+              >
+                {m.libelle}
+              </button>
+            ))}
+          </div>
+        ) : ajoutables.length > 0 ? (
+          <Button variant="ghost" className="self-start px-0" disabled={pending} onClick={() => setAdding(true)}>
+            <Plus size={18} aria-hidden="true" />
+            Ajouter un lot
+          </Button>
+        ) : null}
+        <Button variant="secondary" pending={pending} onClick={() => onConfirm(lots.map((l) => l.metier))}>
+          <Check size={18} aria-hidden="true" />
+          C&apos;est bon
+        </Button>
+      </div>
+    </section>
   );
 }
 

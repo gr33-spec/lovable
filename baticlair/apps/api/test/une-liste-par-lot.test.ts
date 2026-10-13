@@ -59,4 +59,27 @@ describe("§52 : un devis à plusieurs lots, une section par lot", () => {
     expect(libelles(t.purchase.screen.groups[1]!)).toEqual([expect.stringMatching(/Mitigeur lavabo/)]);
     expect(t.ratiosEnValidation).toBe(true);
   });
+
+  it("la carte « Lots repérés » (2026-10-13) : les lots exposés, un lot retiré rend une seule liste, rien ne disparaît", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "couvreur@example.fr", "Toitures Greg", ["roofing"]);
+    const q = (await agent
+      .post("/v1/quantitatifs")
+      .send({ lignes: [{ libelle: "Prise de courant 16A 2P+T", quantite: "9", unite: "u" }, { libelle: "Mitigeur lavabo chromé", quantite: "4", unite: "u" }] })
+      .expect(201)).body as { projetId: string };
+    type AvecLots = Takeoff & { id: string; lots: { metier: string; libelle: string; lignes: number }[]; lotsConfirmes: string[] | null; metiersAjoutables: { metier: string; libelle: string }[] };
+    const avant = (await agent.get(`/v1/projects/${q.projetId}/takeoff`).expect(200)).body.takeoff as AvecLots;
+    expect(avant.lots).toEqual([
+      { metier: "electrical", libelle: "Électricité", lignes: 1 },
+      { metier: "plumbing", libelle: "Sanitaire", lignes: 1 },
+    ]);
+    expect(avant.lotsConfirmes).toBeNull();
+    expect(avant.metiersAjoutables).toContainEqual({ metier: "masonry", libelle: "Maçonnerie" });
+    expect(avant.metiersAjoutables.some((m) => m.metier === "general")).toBe(false);
+    // Une réponse qui n'est pas une liste de métiers est refusée.
+    await agent.post(`/v1/takeoffs/${avant.id}/answers`).send({ key: "lots:confirmes", value: "" }).expect(400);
+    const apres = (await agent.post(`/v1/takeoffs/${avant.id}/answers`).send({ key: "lots:confirmes", value: "electrical" }).expect(200)).body as AvecLots;
+    expect(apres.lotsConfirmes).toEqual(["electrical"]);
+    expect(apres.purchase.screen.groups.some((g) => g.key.startsWith("lot:"))).toBe(false);
+    expect(apres.purchase.toBuy.map((b) => b.label)).toEqual(expect.arrayContaining([expect.stringMatching(/Mitigeur lavabo/), expect.stringMatching(/^Prise 2P\+T 16 A/)]));
+  });
 });

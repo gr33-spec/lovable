@@ -244,6 +244,10 @@ export interface Takeoff {
   brefAvecClient?: boolean;
   /** §52 : le métier n'a pas encore été relu par un artisan, l'écran 3 porte « Ratios en cours de validation ». */
   ratiosEnValidation?: boolean;
+  /** §52, la carte « Lots repérés » : les lots lus, ceux gardés ou ajoutés (null avant « C'est bon »), les métiers à ajouter. */
+  lots?: { metier: string; libelle: string; lignes: number }[];
+  lotsConfirmes?: string[] | null;
+  metiersAjoutables?: { metier: string; libelle: string }[];
   sansFourniture?: { lineId: string; label: string; measure: string | null }[];
   /** §48.4 : ce que l'IA juge utile mais que le devis ne demande pas : bloc « Suggestions », décoché. */
   aiSuggestions?: { key: string; label: string; quantity: string | null; unit: string | null; reason: string }[];
