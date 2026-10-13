@@ -55,13 +55,13 @@ import {
   type LectureDevis,
 } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
-import type { ReadAttempt } from "../../../platform/ai/document-reader.js";
+import type { DocumentInput, ReadAttempt } from "../../../platform/ai/document-reader.js";
 import type { AiUsageRecorder, AnalysisMeter } from "../../ai-usage/index.js";
 import type { DocumentAiInput, DocumentRepository, DocumentWithProcessing, PreparedDocument } from "../../documents/index.js";
 import type { CompanyMemory, CorrectionJournal } from "../../learning/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { decodeRelecture, doublonDe, FICHE_RELECTURE_PROMPT, type FicheRelecteur, type QuestionPosee, type RelectureQuestion } from "./fiche-relecture.js";
-import { LECTURE_PROMPT, type LectureReader } from "./lecture-reader.js";
+import { LECTURE_PROMPT, REPERAGE_PROMPT, type LectureReader } from "./lecture-reader.js";
 import type { LineFields, TakeoffRecord, TakeoffRepository } from "./takeoff.repository.js";
 
 /**
@@ -163,6 +163,8 @@ export const AI_CALL_TIMEOUT_MS = 170 * 1000;
 export const STALE_READING_MS = 5 * 60 * 1000;
 /** Un calcul (appel IA n° 2) commencé depuis plus longtemps a été coupé : il peut repartir. */
 export const STALE_CALCUL_MS = 3 * 60 * 1000;
+/** Le repérage des métiers avant la lecture (modèle rapide, texte seul) : au-delà, la lecture part avec le métier donné. */
+export const REPERAGE_MAX_MS = 25 * 1000;
 
 /**
  * Le client et l'adresse lus dans l'en-tête du devis (prompt A, « contexte ») : clés libres, on prend la première qui
@@ -450,6 +452,76 @@ export class TakeoffService {
   }
 
   /**
+   * La lecture d'un devis, du métier repéré jusqu'à la lecture gardée (PDF déposé comme lignes d'un partenaire).
+   * RAPIDITÉ (retour du fondateur, 2026-10-13 : « ça a mis du temps ») : les métiers du devis sont REPÉRÉS d'abord, en
+   * quelques secondes sur son texte (modèle rapide), et la lecture part UNE fois avec le ou les bons référentiels.
+   * MULTIMÉTIER (§52, directive du fondateur, 2026-10-12) : le métier est celui du devis, pas celui du compte ; un devis
+   * à plusieurs lots est lu avec le référentiel de CHAQUE lot. La relecture qui suit ne sert plus que si la lecture trouve
+   * un métier que le repérage n'a pas vu (repérage en panne, ou lot passé inaperçu) : un appel de plus, dans ce cas seul.
+   * `null` : ce lecteur ne lit pas ce devis.
+   */
+  private async lireLeDevis(
+    lecteur: LectureReader,
+    document: DocumentInput,
+    tradeDonne: string,
+    siteNotes: string | null,
+    compter: (attempt: number, r: ReadAttempt<unknown>, prompt: { id: string; version: number }) => Promise<void>,
+  ): Promise<{ result: ReadAttempt<LectureDevis>; trade: string } | null> {
+    let trade = tradeDonne;
+    const referentielsDe = (metiers: readonly string[]) =>
+      metiers.map((m) => referentialFor(m)).filter((r): r is Referential => r !== null).map((r) => `=== Référentiel ${tradeProfile(r.trade).label} (${r.trade}) ===\n${exportPourLecture(r)}`).join("\n\n");
+    const lire = (t: string, metiers: readonly string[]) => {
+      const r = referentialFor(t);
+      const referentiel = metiers.length > 1 ? referentielsDe(metiers) : r ? exportPourLecture(r) : "Aucun référentiel pour ce métier.";
+      return lecteur.lire({ document, trade: t, tradeLabel: tradeProfile(t).label, referentiel, siteNotes });
+    };
+    const donne = referentialFor(trade)?.trade ?? tradeIdOf(trade.split(",")[0] ?? "");
+    const vus = donne === "general" ? [] : await this.reperer(lecteur, document.numberedText, compter);
+    // Un devis d'un autre métier que le compte : ce métier ; un devis à plusieurs lots sans le métier du compte : le principal.
+    if (vus.length > 0 && !vus.includes(donne)) trade = vus[0]!;
+    const principal = referentialFor(trade)?.trade ?? trade;
+    const dejaLus = vus.length > 1 ? [principal, ...vus.filter((m) => m !== principal)] : [principal];
+    let result = await lire(trade, dejaLus);
+    if (result === null) return null;
+    await compter(1, result, LECTURE_PROMPT);
+    const lotsAutres = result.status === "success" && result.output ? metiersDesLots(result.output, trade).filter((m) => !dejaLus.includes(m)) : [];
+    if (lotsAutres.length > 0) {
+      const relu = await lire(trade, [...dejaLus, ...lotsAutres]);
+      if (relu) {
+        await compter(2, relu, LECTURE_PROMPT);
+        if (relu.status === "success" && relu.output && relu.output.lots.length > 1) result = relu;
+      }
+    }
+    const autre = lotsAutres.length === 0 && vus.length <= 1 && result.status === "success" && result.output ? metierAutre(result.output, trade) : null;
+    if (autre) {
+      const relu = await lire(autre, [autre]);
+      if (relu) {
+        await compter(2, relu, LECTURE_PROMPT);
+        if (relu.status === "success" && relu.output) {
+          result = relu;
+          trade = autre;
+        }
+      }
+    }
+    return { result, trade };
+  }
+
+  /** Le repérage des métiers (texte seul, modèle rapide) : jamais bloquant, un échec ou un silence laisse le métier donné. */
+  private async reperer(lecteur: LectureReader, numberedText: string, compter: (attempt: number, r: ReadAttempt<unknown>, prompt: { id: string; version: number }) => Promise<void>): Promise<string[]> {
+    if (!lecteur.reperer) return [];
+    try {
+      // 25 s au plus : un repérage lent ne retarde jamais la lecture plus que la relecture qu'il évite.
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const r = await Promise.race([lecteur.reperer(numberedText), new Promise<null>((resolve) => (timer = setTimeout(() => resolve(null), REPERAGE_MAX_MS)))]).finally(() => clearTimeout(timer));
+      if (!r) return [];
+      await compter(0, r, REPERAGE_PROMPT);
+      return r.status === "success" && r.output ? r.output.filter((m) => referentialFor(m)?.trade === m) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  /**
    * §51.5 : UN appel au modèle le plus capable, avec le devis complet (texte et PDF) et l'export du référentiel. La
    * réponse (fiche, bref, questions, fourniture par ligne) est gardée telle quelle avec le quantitatif ; les lignes du
    * quantitatif sont les fournitures nommées, plus les lignes sans fourniture, repliées (§49.9). `null` : ce lecteur ne
@@ -465,38 +537,15 @@ export class TakeoffService {
     const content = await this.documents.readContent(tenant, doc.id);
     const pages = prepared.pages.map((p) => p.pageNumber).filter((n): n is number => typeof n === "number");
     const document = { numberedText: prepared.input.numberedText, imagePdf: content?.bytes ?? prepared.input.imagePdf, imagePages: pages };
-    const lire = (t: string, r: Referential | null) => lecteur.lire({ document, trade: t, tradeLabel: tradeProfile(t).label, referentiel: r ? exportPourLecture(r) : "Aucun référentiel pour ce métier.", siteNotes });
-    let result = await lire(trade, ref);
-    if (result === null) return null;
     const counted = { text: prepared.pages.filter((p) => p.route === "text").length, vision: prepared.pages.filter((p) => p.route === "vision").length };
-    let cost = await this.record(tenant, doc, counted, prepared.processingId, analysisId, 1, result, LECTURE_PROMPT);
-    // MULTIMÉTIER (§52, directive du fondateur, 2026-10-12 : « fais en sorte que l'appli fonctionne en multi métiers ») :
-    // le métier est celui que l'IA lit dans le devis, pas celui du compte. Un devis d'électricien déposé chez un couvreur
-    // est relu une fois avec le référentiel de l'électricité (un appel de plus, seulement dans ce cas), et calculé avec lui.
-    // Un devis à plusieurs lots (électricité, VMC, sanitaire) : relu une fois avec le référentiel de CHAQUE lot, pour que
-    // chaque fourniture soit nommée et rattachée à l'ouvrage de son métier (§52 : « une liste par lot, chacun avec son
-    // référentiel »).
-    const lotsAutres = result.status === "success" && result.output ? metiersDesLots(result.output, trade) : [];
-    if (lotsAutres.length > 0) {
-      const texte = [trade, ...lotsAutres].map((m) => referentialFor(m)).filter((r): r is Referential => r !== null).map((r) => `=== Référentiel ${tradeProfile(r.trade).label} (${r.trade}) ===\n${exportPourLecture(r)}`).join("\n\n");
-      const relu = await lecteur.lire({ document, trade, tradeLabel: tradeProfile(trade).label, referentiel: texte, siteNotes });
-      if (relu) {
-        cost += await this.record(tenant, doc, counted, prepared.processingId, analysisId, 2, relu, LECTURE_PROMPT);
-        if (relu.status === "success" && relu.output && relu.output.lots.length > 1) result = relu;
-      }
-    }
-    const autre = lotsAutres.length === 0 && result.status === "success" && result.output ? metierAutre(result.output, trade) : null;
-    if (autre) {
-      const relu = await lire(autre, referentialFor(autre));
-      if (relu) {
-        cost += await this.record(tenant, doc, counted, prepared.processingId, analysisId, 2, relu, LECTURE_PROMPT);
-        if (relu.status === "success" && relu.output) {
-          result = relu;
-          trade = autre;
-          ref = referentialFor(autre);
-        }
-      }
-    }
+    let cost = 0;
+    const lu = await this.lireLeDevis(lecteur, document, trade, siteNotes, async (n, r, prompt) => {
+      cost += await this.record(tenant, doc, counted, prepared.processingId, analysisId, n, r, prompt);
+    });
+    if (lu === null) return null;
+    const result = lu.result;
+    trade = lu.trade;
+    ref = referentialFor(trade);
     const scanned = { text: counted.text, scan: counted.vision };
     const stats = (outcome: ReadingStats["outcome"], failure?: string, lines = 0): ReadingStats => ({
       version: 1,
@@ -584,24 +633,12 @@ export class TakeoffService {
     if (lecteur) {
       const numberedText = lines.map((l, i) => `[1:${String(i + 1).padStart(3, "0")}] L${i + 1}  ${l.designation.trim()}  ${[l.quantity?.trim(), l.unit?.trim()].filter(Boolean).join(" ")}`).join("\n");
       const siteNotes = (await this.reading.projectNotes?.(tenant, projectId)) ?? null;
-      const lire = (t: string, r: Referential | null) => lecteur.lire({ document: { numberedText, imagePdf: null, imagePages: [] }, trade: t, tradeLabel: tradeProfile(t).label, referentiel: r ? exportPourLecture(r) : "Aucun référentiel pour ce métier.", siteNotes });
-      let result = await lire(trade, ref);
-      // §52 : plusieurs lots : relu une fois avec le référentiel de chaque lot ; un seul autre métier : relu avec le sien.
-      const lotsAutres = result && result.status === "success" && result.output ? metiersDesLots(result.output, trade) : [];
-      if (lotsAutres.length > 0) {
-        const texte = [trade, ...lotsAutres].map((m) => referentialFor(m)).filter((r): r is Referential => r !== null).map((r) => `=== Référentiel ${tradeProfile(r.trade).label} (${r.trade}) ===\n${exportPourLecture(r)}`).join("\n\n");
-        const relu = await lecteur.lire({ document: { numberedText, imagePdf: null, imagePages: [] }, trade, tradeLabel: tradeProfile(trade).label, referentiel: texte, siteNotes });
-        if (relu && relu.status === "success" && relu.output && relu.output.lots.length > 1) result = relu;
-      }
-      const autre = lotsAutres.length === 0 && result && result.status === "success" && result.output ? metierAutre(result.output, trade) : null;
-      if (autre) {
-        const relu = await lire(autre, referentialFor(autre));
-        if (relu && relu.status === "success" && relu.output) {
-          result = relu;
-          trade = autre;
-          ref = referentialFor(autre);
-          if (ref) await this.reading.referentials?.ensure(ref);
-        }
+      const lu = await this.lireLeDevis(lecteur, { numberedText, imagePdf: null, imagePages: [] }, trade, siteNotes, async () => {});
+      const result = lu?.result ?? null;
+      if (lu && lu.trade !== trade) {
+        trade = lu.trade;
+        ref = referentialFor(trade);
+        if (ref) await this.reading.referentials?.ensure(ref);
       }
       if (result && result.status === "success" && result.output && lignesDeLecture(result.output).length === lines.length) lecture = result.output;
     }

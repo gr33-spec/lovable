@@ -1,5 +1,5 @@
 import { AnthropicDocumentReader } from "../../../platform/ai/anthropic-document-reader.js";
-import { decodeLecture, LECTURE_PROMPT, lectureSystemPrompt, lectureWireSchema, type LectureReader, type LectureRequest } from "../application/lecture-reader.js";
+import { decodeLecture, decodeReperage, LECTURE_PROMPT, lectureSystemPrompt, lectureWireSchema, REPERAGE_PROMPT, reperageSystemPrompt, reperageWireSchema, type LectureReader, type LectureRequest } from "../application/lecture-reader.js";
 import { siteNotesInstruction } from "../application/prompt.js";
 import type { ReadAttempt } from "../../../platform/ai/document-reader.js";
 import type { LectureDevis } from "@baticlair/domain";
@@ -11,9 +11,25 @@ import type { LectureDevis } from "@baticlair/domain";
 export class AnthropicLectureReader implements LectureReader {
   readonly provider = "anthropic";
   private readonly reader: AnthropicDocumentReader;
+  private readonly rapide: AnthropicDocumentReader | null;
 
-  constructor(apiKey: string, model: string, effort: "low" | "medium" | "high" | "xhigh" | "max", fetchImpl?: typeof fetch) {
+  /** `fastModel` : le modèle rapide du repérage des métiers (texte seul, quelques secondes). */
+  constructor(apiKey: string, model: string, effort: "low" | "medium" | "high" | "xhigh" | "max", fetchImpl?: typeof fetch, fastModel?: string) {
     this.reader = new AnthropicDocumentReader(apiKey, model, effort, fetchImpl);
+    this.rapide = fastModel ? new AnthropicDocumentReader(apiKey, fastModel, "low", fetchImpl) : null;
+  }
+
+  async reperer(numberedText: string): Promise<ReadAttempt<string[]> | null> {
+    if (!this.rapide) return null;
+    const attempt = await this.rapide.read({
+      system: reperageSystemPrompt(),
+      schema: reperageWireSchema,
+      // Le texte seul (les titres de lots peuvent être loin) : 60 000 caractères au plus, lus en quelques secondes.
+      document: { numberedText: numberedText.slice(0, 60000), imagePdf: null, imagePages: [] },
+      documentName: "devis",
+      tag: `${REPERAGE_PROMPT.id}-v${REPERAGE_PROMPT.version}`,
+    });
+    return { ...attempt, output: attempt.output ? decodeReperage(attempt.output) : null };
   }
 
   async lire(request: LectureRequest): Promise<ReadAttempt<LectureDevis>> {

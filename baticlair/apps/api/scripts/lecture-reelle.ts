@@ -60,7 +60,13 @@ async function main(): Promise<number> {
   }
   const pages = content.pages.map((p) => p.pageNumber);
   const ref = referentialFor(devis.trade);
-  const reader = new AnthropicLectureReader(apiKey, model, effort);
+  const rapide = process.env.AI_QUANTITATIF_MODEL || "claude-sonnet-5-5";
+  const reader = new AnthropicLectureReader(apiKey, model, effort, undefined, rapide);
+  // Le repérage des métiers avant la lecture (modèle rapide, texte seul) : il doit dire le métier du devis, vite.
+  const debutReperage = Date.now();
+  const reperage = await reader.reperer(text.join("\n"));
+  const metiersReperes = reperage?.output ?? [];
+  console.log(`Repérage ${rapide} — ${reperage?.status ?? "absent"} en ${Math.round((Date.now() - debutReperage) / 1000)} s : ${metiersReperes.join(", ") || "(rien)"}`);
   const started = Date.now();
   const attempt = await reader.lire({
     document: { numberedText: text.join("\n"), imagePdf: vision.length > 0 ? await extractPdfPages(bytes, pages) : bytes, imagePages: pages },
@@ -89,6 +95,7 @@ async function main(): Promise<number> {
   console.log(`\nLignes : ${lecture.lignes.length} (${sans} sans fourniture)`);
 
   const ecarts = devis.controle(lecture, devis.lignes);
+  if (metiersReperes[0] !== devis.trade) ecarts.push(`Repérage : « ${metiersReperes.join(", ") || "rien"} » au lieu de « ${devis.trade} » en premier`);
   console.log(`\nCONTRÔLE (résultat attendu) : ${ecarts.length === 0 ? "aucun écart" : `${ecarts.length} écart(s)`}`);
   for (const e of ecarts) console.log(`- ${e}`);
   return ecarts.length === 0 ? 0 : 1;
