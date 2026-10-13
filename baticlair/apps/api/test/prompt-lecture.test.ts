@@ -15,7 +15,7 @@ const plain = (t: string) => t.replace(/\*\*/g, "").split("\n").map((l) => l.tri
 
 describe("le prompt de lecture (§51.5, v2)", () => {
   it("cite le §49.1, le §49.4 (points 2, 3, 5), le §51.1 et le §51.5 du référentiel mot pour mot, puis l'export du tiroir", () => {
-    expect(LECTURE_PROMPT).toEqual({ id: "lecture_devis", version: 4 });
+    expect(LECTURE_PROMPT).toEqual({ id: "lecture_devis", version: 5 });
     const s491 = plain(section("### 49.1", "### 49.2")).split("\n").slice(1).join("\n");
     expect(RULE_49_1.split("\n").slice(1).join("\n")).toBe(s491);
     const s494 = plain(section("### 49.4", "### 49.5")).split("\n");
@@ -29,6 +29,14 @@ describe("le prompt de lecture (§51.5, v2)", () => {
     expect(prompt).toContain("OUVRAGE gouttiere : Gouttière (profil, crochets, naissances)");
     expect(prompt).toContain("- developpe_gouttiere (Développé de la gouttière)");
     expect(prompt.indexOf("RÉFÉRENTIEL DU MÉTIER (export)")).toBeGreaterThan(prompt.indexOf("CE QUE TU RENVOIES"));
+  });
+
+  it("le bref garde les mots du devis, mot pour mot (fondateur, 2026-10-13 : références Velux et « raccords pour bac acier »)", () => {
+    const prompt = lectureSystemPrompt({ trade: "roofing", tradeLabel: "Couverture", referentiel: "" });
+    expect(prompt).toContain("LES MOTS DU DEVIS, MOT POUR MOT (règle numéro un, §51.5)");
+    expect(prompt).toContain("jamais « 4 fenêtres de toit Velux … »");
+    expect(prompt).toContain("dans l'ordre où le devis les écrit et sans en réordonner aucune");
+    expect(prompt).toContain("font « raccords pour bac acier », jamais « avec raccord » tout court");
   });
 
   it("le format envoyé à l'API n'a aucun champ « valeur ou vide » (plafonds : 16 unions, 24 optionnels)", () => {
