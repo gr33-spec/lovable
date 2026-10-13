@@ -781,12 +781,40 @@ test("plusieurs logements : un devis d'électricien pièce par pièce donne la l
   await createProject(page, "Résidence Les Pins", "SCI Les Pins", "4 allée des Pins, Vannes");
   await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-electricien-logements.pdf"));
   await passQuestions(page);
+  // §52 : un devis d'un seul lot n'a pas de carte « Lots repérés ».
+  await expect(page.getByRole("region", { name: "Lots repérés" })).toHaveCount(0);
   // §51.5 : la lecture ne porte plus les titres de logement de l'ancien extracteur ; la liste est celle du devis, dans son ordre.
   await expect(page.getByRole("tab", { name: /Par logement/ })).toHaveCount(0);
   await openList(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list.getByRole("listitem").filter({ hasText: "Prise 2P+T 16 A" }).first()).toBeVisible();
   await expect(list.getByRole("listitem").filter({ hasText: "Tableau électrique" }).first()).toBeVisible();
+});
+
+test("§52 : la carte « Lots repérés » : retirer un lot, en ajouter un, « C'est bon », une section par lot gardé", async ({ page }) => {
+  await signUp(page);
+  await createProject(page, "Immeuble Les Tilleuls", "SCI Les Tilleuls", "8 rue des Tilleuls, Vannes");
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-multi-lots.pdf"));
+  // Directive du fondateur (2026-10-13) : après la lecture, « Lots repérés : Électricité · VMC · Sanitaire ».
+  const carte = page.getByRole("region", { name: "Lots repérés" });
+  await expect(carte.getByRole("heading", { name: "Lots repérés : Électricité · VMC · Sanitaire" })).toBeVisible({ timeout: 60_000 });
+  // Un bouton par lot pour le retirer ; la VMC n'est pas un lot à part ici.
+  await carte.getByRole("button", { name: "Retirer le lot VMC" }).click();
+  await expect(carte.getByRole("heading", { name: "Lots repérés : Électricité · Sanitaire" })).toBeVisible();
+  // « Ajouter un lot » : les métiers qui ont leur référentiel.
+  await carte.getByRole("button", { name: "Ajouter un lot" }).click();
+  await carte.getByRole("group", { name: "Ajouter un lot" }).getByRole("button", { name: "Maçonnerie" }).click();
+  await expect(carte.getByRole("heading", { name: "Lots repérés : Électricité · Sanitaire · Maçonnerie" })).toBeVisible();
+  await carte.getByRole("button", { name: "C'est bon" }).click();
+  await expect(carte).toHaveCount(0);
+  await passQuestions(page);
+  await openList(page);
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  // Une section par lot qui a des lignes ; la bouche d'extraction (lot retiré) est restée, dans le lot principal.
+  await expect(list.getByRole("heading", { name: /^Électricité/ })).toBeVisible();
+  await expect(list.getByRole("heading", { name: /^Sanitaire/ })).toBeVisible();
+  await expect(list.getByRole("heading", { name: /^VMC/ })).toHaveCount(0);
+  await expect(list.getByRole("listitem").filter({ hasText: "Bouche d'extraction" }).first()).toBeVisible();
 });
 
 test("§48.4 et règle numéro un : questions au bouton seulement, avant le calcul ; rien d'absent du devis ; puis la main sur le document (§50.7)", async ({ page }) => {

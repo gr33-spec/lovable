@@ -44,6 +44,7 @@ import {
   type FicheChantier,
   ecranDeLecture,
   ecranParLots,
+  LOTS_KEY,
   exportPourLecture,
   ficheAvecBref,
   lectureDepuisLignes,
@@ -223,7 +224,7 @@ const BILAN_QUESTION =
   "Bilan avant de calculer : voici toutes les réponses de l'artisan, et les questions qu'il a retirées. Ses réponses valent des données écrites au devis. Mets la fiche à jour avec ce qu'elles apprennent. Si, réponses comprises, une donnée nécessaire pour commander manque encore, pose UNE seule question (manque) ; sinon rien. Ne repose JAMAIS une question déjà répondue ni une question retirée, même tournée autrement.";
 
 /** Les clés de réponse qui ne sont pas des questions posées (marques, gestes sur la liste). */
-const PAS_UNE_QUESTION = /^(bilan:|a-preciser:|ratio:|role:|precise:|item:|bref:|edit:|label:|quantity:|qty:|nom:)/;
+const PAS_UNE_QUESTION = /^(lots:|bilan:|a-preciser:|ratio:|role:|precise:|item:|bref:|edit:|label:|quantity:|qty:|nom:)/;
 
 /**
  * Les questions déjà posées à l'artisan sur ce devis, répondues ou retirées (réponse nulle), avec leur phrase et leurs
@@ -968,6 +969,8 @@ export class TakeoffService {
       });
       return this.reload(tenant, takeoff.id);
     }
+    // §52, la carte « Lots repérés » : au moins un lot, chacun un métier (« electrical,plumbing »).
+    if (key === LOTS_KEY && (typeof value !== "string" || !/^[a-z0-9_-]{1,40}(,[a-z0-9_-]{1,40})*$/.test(value))) throw validationFailed("Answer the kept lots", { reason: "invalid_answer" });
     await this.takeoffs.setAnswer(tenant, takeoff.id, key, value);
     // Mémoire de l'entreprise : un produit choisi, ou une réponse d'habitude (« je façonne », épaisseur du zinc),
     // compte pour SON entreprise ; établie au deuxième chantier différent, elle n'est plus demandée (dite, modifiable).

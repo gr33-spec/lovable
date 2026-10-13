@@ -1,5 +1,8 @@
 import type { Referential } from "../referential/model.js";
-import type { EcranDeLecture, LectureDevis } from "./lecture.js";
+import { referentialFor, tradeIdOf } from "../referential/registry.js";
+import { tradeProfile } from "../trades/index.js";
+import { POINTS_ELECTRIQUES } from "./electricite.js";
+import type { EcranDeLecture, LectureDevis, LectureLot } from "./lecture.js";
 import { ecranDeLecture } from "./lecture.js";
 
 type Entree = Parameters<typeof ecranDeLecture>[0];
@@ -22,7 +25,13 @@ export interface LotCalcule {
  */
 export function ecranParLots(input: Entree & { refDe: (metier: string) => Referential | null }): EcranDeLecture & { lots: LotCalcule[] } {
   const { lecture, refDe } = input;
-  const lots = lecture.lots.filter((l) => l.lignes.length > 0);
+  const retenus = lotsRetenus(lecture, input.answers?.[LOTS_KEY], refDe);
+  const lots = retenus.filter((l) => l.lignes.length > 0);
+  // L'artisan n'a gardé qu'un lot : une seule liste, calculée avec le tiroir de ce lot.
+  if (lots.length === 1 && retenus !== lecture.lots) {
+    const ref = refDe(lots[0]!.metier) ?? input.ref;
+    return { ...ecranDeLecture({ ...input, ref, lecture: { ...lecture, metier: lots[0]!.metier, lots: [] } }), lots: [] };
+  }
   if (lots.length < 2) return { ...ecranDeLecture(input), lots: [] };
   const principal = Math.max(0, lots.findIndex((l) => l.metier === lecture.metier));
   const lotDe = (ref: string) => {
@@ -80,4 +89,49 @@ export function ecranParLots(input: Entree & { refDe: (metier: string) => Refere
     sansFourniture: tous.flatMap((e) => e.sansFourniture),
     lots: parLot.map(({ lot, ref }) => ({ metier: lot.metier, libelle: lot.libelle, trade: ref.trade })),
   };
+}
+
+/** §52 : la réponse de la carte « Lots repérés » : les métiers des lots gardés et ajoutés, séparés par des virgules. */
+export const LOTS_KEY = "lots:confirmes";
+
+const memeMetier = (a: string, b: string) => a === b || tradeIdOf(a) === tradeIdOf(b);
+
+/** Les ouvrages qu'un tiroir sait calculer (les points électriques compris), pour ranger une ligne dans un lot ajouté. */
+function ouvragesDe(ref: Referential | null): ReadonlySet<string> {
+  if (!ref) return new Set();
+  return new Set([...ref.workItems.map((w) => w.id), ...(ref.trade === "electrical" ? POINTS_ELECTRIQUES.map((p) => p.id) : [])]);
+}
+
+/**
+ * §52, LA CARTE « LOTS REPÉRÉS » (directive du fondateur, 2026-10-13) : après la lecture, l'artisan voit les lots que
+ * l'IA a repérés (« Électricité · VMC · Sanitaire »), en retire un ou en ajoute un, puis « C'est bon ». Les lots retenus :
+ * - sans réponse, ceux de la lecture, tels quels ;
+ * - un lot retiré : ses lignes vont au lot principal (celui du métier du devis, sinon le premier gardé) ;
+ * - un lot ajouté (un métier qui a un tiroir) prend les lignes dont l'ouvrage, nommé par le modèle, est un ouvrage de
+ *   son tiroir et pas de celui de leur lot : jamais un mot cherché dans la désignation (§51.5).
+ */
+export function lotsRetenus(lecture: LectureDevis, reponse: unknown, refDe: (metier: string) => Referential | null = referentialFor): LectureLot[] {
+  if (typeof reponse !== "string" || reponse.trim() === "") return lecture.lots;
+  const ids = [...new Set(reponse.split(",").map((x) => x.trim()).filter(Boolean))];
+  const gardes = lecture.lots.filter((l) => ids.some((id) => memeMetier(l.metier, id))).map((l) => ({ ...l, lignes: [...l.lignes] }));
+  const ajoutes = ids.filter((id) => !lecture.lots.some((l) => memeMetier(l.metier, id))).map((id) => ({ metier: tradeIdOf(id), libelle: libelleDuMetier(id), lignes: [] as string[] }));
+  for (const lot of ajoutes) {
+    const siens = ouvragesDe(refDe(lot.metier));
+    for (const ligne of lecture.lignes) {
+      const ouvrages = ligne.fournitures.flatMap((f) => (f.ouvrage ? [f.ouvrage] : []));
+      if (ouvrages.length === 0 || !ouvrages.every((o) => siens.has(o))) continue;
+      const base = ligne.ref.split(/[.:]/)[0]!;
+      const avant = gardes.find((l) => l.lignes.some((x) => x === ligne.ref || x === base));
+      if (avant && ouvrages.some((o) => ouvragesDe(refDe(avant.metier)).has(o))) continue;
+      if (avant) avant.lignes = avant.lignes.filter((x) => x !== ligne.ref && x !== base);
+      lot.lignes.push(ligne.ref);
+    }
+  }
+  return [...gardes, ...ajoutes];
+}
+
+/** Le nom d'un métier tel que l'artisan le lit (« Électricité ») ; l'identifiant quand le métier n'a pas de profil. */
+export function libelleDuMetier(metier: string): string {
+  const id = tradeIdOf(metier);
+  return referentialFor(id)?.trade === id ? tradeProfile(id).label : metier;
 }

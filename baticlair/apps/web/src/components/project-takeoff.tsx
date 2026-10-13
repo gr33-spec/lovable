@@ -4,7 +4,7 @@ import { ArrowLeft, ChevronRight, CircleCheck, Plus } from "lucide-react";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AssistantMessage, Say } from "@/components/chat";
 import { useSelectionSend } from "@/components/selection-send";
-import { AnalysisScreen, CalculScreen, notifyReady, QuestionsStep, type CounterAnswers } from "@/components/journey";
+import { AnalysisScreen, CalculScreen, LotsCard, lotsAConfirmer, notifyReady, QuestionsStep, type CounterAnswers } from "@/components/journey";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { type ItemEdit } from "@/components/purchase-list";
 import { SiteUnitsView } from "@/components/site-units-view";
@@ -13,7 +13,7 @@ import { SupplyList } from "@/components/supply-list";
 import { type DecisionHandlers } from "@/components/takeoff-view";
 import { useProgressRefresh } from "@/components/project-progress";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
-import { api, ApiError, type ProjectDocument, type PurchaseItem, type Quantitatif, type ReadingState, type ScreenRow, type TakeoffLine } from "@/lib/api";
+import { api, ApiError, type ProjectDocument, type PurchaseItem, type Quantitatif, type ReadingState, type ScreenRow, type Takeoff, type TakeoffLine } from "@/lib/api";
 import { attachFile } from "@/lib/upload";
 import { parseQuantity } from "@/lib/labels";
 import { unreadableMessage } from "@/lib/fr";
@@ -206,6 +206,15 @@ export function ProjectTakeoff({
       update(q);
     });
   if (phase === "questions" && takeoff.status === "draft" && !archived) {
+    // §52 : un devis de plus d'un lot passe d'abord par la carte « Lots repérés » ; « C'est bon » ouvre les questions.
+    if (lotsAConfirmer(takeoff)) {
+      const confirmLots = (metiers: string[]) =>
+        run(
+          () => api<Takeoff>(`/v1/takeoffs/${encodeURIComponent(takeoff.id)}/answers`, { method: "POST", body: { key: "lots:confirmes", value: metiers.join(",") } }),
+          (t) => setData((prev) => (prev ? { ...prev, items: prev.items.map((x, i) => (i === 0 ? { ...x, ecran: t } : x)) } : prev)),
+        );
+      return <LotsCard takeoff={takeoff} pending={pending} error={actionError} onConfirm={(m) => void confirmLots(m)} />;
+    }
     return <QuestionsStep takeoff={takeoff} pending={pending} error={actionError} onSubmit={calculate} />;
   }
   if (phase === "calcul") return <CalculScreen />;

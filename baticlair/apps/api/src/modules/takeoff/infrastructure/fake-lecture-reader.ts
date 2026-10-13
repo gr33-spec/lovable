@@ -1,4 +1,5 @@
 import {
+  tradeIdOf,
   COMMON_LABOR,
   computeWithAnswers,
   containsKeyword,
@@ -281,7 +282,16 @@ export function lectureSimulee(request: LectureRequest): LectureDevis {
     if (/^(m²|m2)$/i.test(principal.f.unite ?? "")) fiche.splice(1, 0, { cle: "surface", libelle: "Surface", valeur: `${principal.f.quantite} m²`, origine: "devis", preuve });
   }
   // Pas de bref simulé : l'écran dit alors la fiche (données lues et réponses), puis la ville.
-  const lecture: LectureDevis = { metier: ref?.trade ?? null, lots: [], fiche: { donnees: fiche }, bref: [], questions, lignes, contexte: null, notes: [] };
+  // §52 : les titres « Lot 1 : Électricité » rangent les lignes qui suivent dans leur lot, comme le modèle les rendrait.
+  const lots: LectureDevis["lots"] = [];
+  for (const raw of text.split("\n")) {
+    const m = /^\[(\d+:\d+)\]\s(.*)$/.exec(raw);
+    if (!m) continue;
+    const titre = /^\s*Lot\s+\d+\s*[:–-]\s*(.+?)\s*$/i.exec(m[2]!.split(/\s{2,}/)[0]!);
+    if (titre) lots.push({ metier: tradeIdOf(titre[1]!), libelle: titre[1]!, lignes: [] });
+    else if (rowRefs.has(m[1]!) && lots.length > 0) lots.at(-1)!.lignes.push(m[1]!);
+  }
+  const lecture: LectureDevis = { metier: ref?.trade ?? null, lots: lots.filter((l) => l.lignes.length > 0).length > 1 ? lots.filter((l) => l.lignes.length > 0) : [], fiche: { donnees: fiche }, bref: [], questions, lignes, contexte: null, notes: [] };
   if (!ref) return lecture;
   // Les questions du calcul (ce que le modèle demanderait : les trous du référentiel), une fois, avec leurs mots.
   const ls = lignesDeLecture(lecture);
