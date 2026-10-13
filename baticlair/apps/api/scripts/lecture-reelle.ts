@@ -66,7 +66,7 @@ async function main(): Promise<number> {
   const debutReperage = Date.now();
   const reperage = await reader.reperer(text.join("\n"));
   const metiersReperes = reperage?.output ?? [];
-  console.log(`Repérage ${rapide} — ${reperage?.status ?? "absent"} en ${Math.round((Date.now() - debutReperage) / 1000)} s : ${metiersReperes.join(", ") || "(rien)"}`);
+  console.log(`Repérage ${rapide} — ${reperage?.status ?? "absent"}${reperage?.errorMessage ? ` (${reperage.errorMessage})` : ""} en ${Math.round((Date.now() - debutReperage) / 1000)} s : ${metiersReperes.join(", ") || "(rien)"}`);
   const started = Date.now();
   const attempt = await reader.lire({
     document: { numberedText: text.join("\n"), imagePdf: vision.length > 0 ? await extractPdfPages(bytes, pages) : bytes, imagePages: pages },
@@ -78,7 +78,7 @@ async function main(): Promise<number> {
   console.log(`Modèle ${model} (effort ${effort}) — ${attempt.status} en ${secondes} s — pages texte ${text.length}, image ${vision.length}`);
   const lecture = attempt.output;
   if (!lecture) {
-    console.error(`Lecture en échec : ${attempt.status} ${attempt.errorCode ?? ""}`);
+    console.error(`Lecture en échec : ${attempt.status} ${attempt.errorCode ?? ""} ${attempt.errorMessage ?? ""}`);
     return 1;
   }
   if (sortie) writeFileSync(sortie, JSON.stringify(lecture, null, 2));

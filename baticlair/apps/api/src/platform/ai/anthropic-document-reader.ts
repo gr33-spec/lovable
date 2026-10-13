@@ -111,7 +111,7 @@ export class AnthropicDocumentReader {
       }
       if (error instanceof APIError) {
         const code = error.status ? `http_${error.status}` : "connection";
-        return { ...base, usage: NO_USAGE, status: "provider_error", output: null, errorCode: code, durationMs };
+        return { ...base, usage: NO_USAGE, status: "provider_error", output: null, errorCode: code, errorMessage: error.message.slice(0, 300), durationMs };
       }
       throw error;
     }

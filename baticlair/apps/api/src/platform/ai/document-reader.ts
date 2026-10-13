@@ -11,6 +11,8 @@ export interface ReadAttempt<T> {
   status: ReadStatus;
   output: T | null;
   errorCode: string | null;
+  /** Le message du fournisseur quand l'appel est refusé (« credit balance too low »…), 300 caractères au plus. */
+  errorMessage?: string;
   durationMs: number;
 }
 
