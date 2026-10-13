@@ -419,10 +419,29 @@ export function cleDeQuestion(ref: Referential, plan: QuotePlan, q: LectureQuest
 /** La question du calcul (boutons, unité) telle que l'écran la pose : celle du modèle, mot pour mot. */
 export function questionDeLecture(ref: Referential, plan: QuotePlan, q: LectureQuestion, lignes?: readonly LigneLecture[]): Question {
   const key = cleDeQuestion(ref, plan, q, lignes);
-  const def = ref.workItems.flatMap((w) => w.params).find((p) => p.key === q.cle);
+  // La donnée de l'ouvrage de la question (le façonnage du joint debout n'a pas les boutons de celui d'une noue).
+  const ouvrage = /^param:[^@]+@([^_]+?)(?:__|$)/.exec(key)?.[1];
+  const defs = ref.workItems.flatMap((w) => w.params.filter((p) => p.key === q.cle).map((p) => ({ w, p })));
+  const def = (defs.find((x) => x.w.id === ouvrage) ?? defs.find((x) => (x.p.choices?.length ?? 0) > 0) ?? defs[0])?.p;
   // Retour du fondateur (2026-10-12, « Un champ n'est pas correctement rempli » après « En façade (bandeau) ») : un bouton
   // du modèle dont la valeur est en mots (« bandeau ») prend la valeur du référentiel (« 2 ») quand la donnée en a une.
-  const options = q.boutons.map((b) => ({ label: b.label, value: def ? valeurDuReferentiel(def, b) : b.valeur }));
+  let options = q.boutons.map((b) => ({ label: b.label, value: def ? valeurDuReferentiel(def, b) : b.valeur }));
+  // Garde-fou (retour du fondateur, 2026-10-13 : « Cette réponse ne passe pas » sur « Je façonne (bobine) ») : un bouton qui
+  // ne se rattache à aucun choix du référentiel ne s'affiche jamais ; la question prend alors les boutons du référentiel.
+  // Sur une donnée chiffrée, le serveur n'accepte qu'un nombre : un bouton en mots prend le nombre qu'il dit seul, sinon il
+  // laisse la place aux boutons du référentiel, ou disparaît (la case « Autre » reste pour écrire).
+  const chiffre = (v: string) => /^\d+(?:[.,]\d+)?$/.test(v.trim());
+  const choix = def?.choices ?? [];
+  const aValeur = def !== undefined && !def.named && !(def.unit === "u" && choix.length === 0) && key.startsWith("param:");
+  if (aValeur && options.some((o) => !chiffre(o.value))) {
+    if (choix.length > 0) options = choix.map((c) => ({ label: c.label, value: c.value }));
+    else
+      options = options.flatMap((o) => {
+        if (chiffre(o.value)) return [o];
+        const ns = [...o.label.matchAll(/\d+(?:[.,]\d+)?/g)].map((m) => m[0].replace(",", "."));
+        return ns.length === 1 ? [{ label: o.label, value: ns[0]! }] : [];
+      });
+  }
   const unit = q.unite || def?.unit || "u";
   if (key.startsWith("product:")) return { key, kind: options.some((o) => o.value === "") ? "confirm_product" : "choose_product", text: q.texte, ...(options.length > 0 ? { options } : {}), named: true };
   // Une question sans boutons, ou dont la donnée se nomme (une teinte, un profil, une qualité) : la réponse s'écrit (« Autre »).
@@ -437,10 +456,27 @@ export function valeurDuReferentiel(def: { choices?: readonly { label: string; v
   const dit = ` ${normalizeText(`${b.valeur} ${b.label}`)} `;
   const parLibelle = choices.find((c) => normalizeText(c.label) === normalizeText(b.label) || normalizeText(c.label) === normalizeText(b.valeur));
   if (parLibelle) return parLibelle.value;
+  // « 0,65 » ou « 0,65 mm » pour la valeur « 0.65 » : un seul nombre, jamais celui d'une fourchette (« 5,5 à 8 m »).
+  const nombres = (t: string) => [...t.matchAll(/\d+(?:[.,]\d+)?/g)].map((m) => Number(m[0].replace(",", ".")));
+  const seul = [nombres(b.valeur), nombres(b.label)].find((ns) => ns.length === 1)?.[0];
+  const parNombre = seul === undefined ? [] : choices.filter((c) => /^\d+(?:\.\d+)?$/.test(c.value) && Number(c.value) === seul && nombres(c.label).length <= 1);
+  if (parNombre.length === 1) return parNombre[0]!.value;
   const parMots = (def.textValues ?? []).find((t) => t.keywords.some((k) => dit.includes(` ${normalizeText(k)} `)) && choices.some((c) => c.value === t.value));
   if (parMots) return parMots.value;
-  const parMot = choices.filter((c) => normalizeText(c.label).split(" ").some((w) => w.length > 3 && dit.includes(` ${w} `)));
-  return parMot.length === 1 ? parMot[0]!.value : b.valeur;
+  // Retour du fondateur (2026-10-13, « Je façonne (bobine) » refusé) : les mots PROPRES à un choix (« commande », « bobine »,
+  // au singulier comme au pluriel) le désignent ; un mot commun à tous (« façonne ») ne départage rien.
+  const mots = (t: string) => normalizeText(t).split(/[^a-z0-9]+/).filter((w) => w.length > 2).map((w) => w.replace(/(?<=..)[sx]$/, ""));
+  const dits = new Set(mots(`${b.valeur.replace(/_/g, " ")} ${b.label}`));
+  const propres = choices.map((c) => mots(c.label).filter((w) => !choices.some((o) => o !== c && mots(o.label).includes(w))));
+  const scores = propres.map((ws) => ws.filter((w) => dits.has(w)).length);
+  const meilleur = Math.max(...scores);
+  if (meilleur > 0 && scores.filter((x) => x === meilleur).length === 1) return choices[scores.indexOf(meilleur)]!.value;
+  // « Je façonne » seul : le choix dont tous les mots, hors parenthèse, sont dits.
+  const entier = choices.filter((c) => {
+    const coeur = mots(c.label.replace(/\(.*?\)/g, " "));
+    return coeur.length > 0 && coeur.every((w) => dits.has(w));
+  });
+  return entier.length === 1 ? entier[0]!.value : b.valeur;
 }
 
 type Answers = Readonly<Record<string, EngineAnswer>>;
