@@ -69,8 +69,18 @@ export function DropZone({ onFile, pending, error }: { onFile: (file: File) => v
  * fournitures (`ReadingStage`). Plein écran, par-dessus le menu ; « Revenir à mes chantiers » laisse la lecture continuer
  * (le serveur prévient quand c'est prêt), on n'y reste jamais coincé.
  */
+/** Au-delà, « Je lis ton devis » devient « Gros devis, j'y suis encore… » (décision du fondateur, 2026-10-13). */
+export const LECTURE_LONGUE_MS = 30_000;
+
 export function AnalysisScreen() {
   const router = useRouter();
+  // Décision du fondateur (2026-10-13, « Je lis ton devis » longtemps, « plus rien ne se passe ») : passé 30 s, la phrase
+  // dit que la lecture continue ; toujours une seule phrase (§50.1).
+  const [longue, setLongue] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setLongue(true), LECTURE_LONGUE_MS);
+    return () => clearTimeout(t);
+  }, []);
   useEffect(() => {
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -95,7 +105,7 @@ export function AnalysisScreen() {
           <ReadingStage />
         </div>
         <h2 aria-live="polite" className="font-display text-[30px] leading-tight font-extrabold tracking-[-0.02em]">
-          Je lis ton devis
+          {longue ? "Gros devis, j'y suis encore…" : "Je lis ton devis"}
         </h2>
       </div>
     </section>

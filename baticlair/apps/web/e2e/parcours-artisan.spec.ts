@@ -1568,3 +1568,26 @@ test("§50.1 : « Je lis ton devis » prend tout l'écran, avec le retour pour n
   await expect(lecture.getByRole("heading")).toHaveCount(1);
   await expect(lecture.getByRole("button", { name: "Revenir à mes chantiers" })).toBeVisible();
 });
+
+test("§50.1 : passé 30 s, « Gros devis, j'y suis encore… » (une seule phrase)", async ({ page }) => {
+  // Décision du fondateur (2026-10-13) : une lecture longue ne laisse plus croire que plus rien ne se passe.
+  await page.clock.install();
+  await signUp(page);
+  const reading = (q: Record<string, unknown>) => ({ ...q, etat: "en_cours", ecran: null });
+  await page.route(/\/v1\/quantitatifs(\?|$)/, async (route) => {
+    try {
+      const res = await route.fetch();
+      const body = (await res.json()) as { items?: Record<string, unknown>[] } & Record<string, unknown>;
+      await route.fulfill({ response: res, json: body.items ? { ...body, items: body.items.map(reading) } : reading(body) });
+    } catch {
+      // Requête annulée par l'application (elle relit l'état) : rien à répondre.
+    }
+  });
+  await createProject(page, "Toiture Kerjean", "M. Kerjean", "5 rue du Port, Douarnenez");
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  const lecture = page.getByRole("region", { name: "Analyse du devis" });
+  await expect(lecture.getByRole("heading", { name: "Je lis ton devis" })).toBeVisible();
+  await page.clock.fastForward(31_000);
+  await expect(lecture.getByRole("heading", { name: "Gros devis, j'y suis encore…" })).toBeVisible();
+  await expect(lecture.getByRole("heading")).toHaveCount(1);
+});
