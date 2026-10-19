@@ -14,6 +14,7 @@ import {
   JOINERY_PROFILE,
   KITCHEN_PROFILE,
   MASONRY_PROFILE,
+  METALWORK_PROFILE,
   OTHER_PROFILE,
   PAINTING_PROFILE,
   PAVING_PROFILE,
@@ -52,6 +53,7 @@ export const TRADES: readonly { id: string; label: string }[] = [
   { id: "paving", label: "Pavage, dallage extérieur" },
   { id: "earthworks", label: "Terrassement, VRD" },
   { id: "irrigation", label: "Arrosage automatique" },
+  { id: "metalwork", label: "Serrurerie, métallerie" },
   { id: "general", label: "Constructeur, entreprise générale" },
   { id: "other", label: "Autre métier" },
 ];
@@ -79,6 +81,7 @@ export const TRADE_PROFILES: Readonly<Record<string, TradeProfile>> = {
   paving: PAVING_PROFILE,
   earthworks: EARTHWORKS_PROFILE,
   irrigation: IRRIGATION_PROFILE,
+  metalwork: METALWORK_PROFILE,
   // Constructeur, entreprise générale : le vocabulaire de tous les lots (le devis passe par chacun d'eux).
   general: {
     ...mergeProfiles([
@@ -104,6 +107,7 @@ export const TRADE_PROFILES: Readonly<Record<string, TradeProfile>> = {
       PAVING_PROFILE,
       IRRIGATION_PROFILE,
       FLOORING_PROFILE,
+      METALWORK_PROFILE,
     ]),
     id: "general",
     label: "Constructeur, entreprise générale",

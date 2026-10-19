@@ -25,6 +25,7 @@ export const TRADES: readonly { id: string; label: string }[] = [
   { id: "paving", label: "Pavage, dallage extérieur" },
   { id: "earthworks", label: "Terrassement, VRD" },
   { id: "irrigation", label: "Arrosage automatique" },
+  { id: "metalwork", label: "Serrurerie, métallerie" },
   { id: "general", label: "Constructeur, entreprise générale" },
   { id: "other", label: "Autre métier" },
 ];

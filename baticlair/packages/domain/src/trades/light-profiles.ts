@@ -253,4 +253,11 @@ export const IRRIGATION_PROFILE = light("irrigation", "Arrosage automatique", [
   f("irr_head", "Arroseur, électrovanne", ["tuyere", "turbine", "arroseur", "electrovanne", "programmateur", "regard de vannes"]),
 ]);
 
+export const METALWORK_PROFILE = light("metalwork", "Serrurerie, métallerie", [
+  f("metal_guard", "Garde-corps, grille", ["garde corps", "barreaudage", "barreaux", "main courante", "grille de defense"]),
+  f("metal_fence", "Clôture rigide, poteau", ["panneau rigide", "cloture", "poteau a encoches"]),
+  f("metal_bar", "Tube, fer plat, profilé acier", ["tube carre", "tube acier", "fer plat", "carre plein", "corniere", "platine"]),
+  f("metal_finish", "Antirouille, laque métal", ["antirouille", "laque", "galvanise", "thermolaque"]),
+]);
+
 export const OTHER_PROFILE = light("other", "Autre métier", []);
