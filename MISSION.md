@@ -113,7 +113,8 @@ attend la vraie lecture avant fusion (file ci-dessous) ; tout le reste se fusion
 | 12 | Sols souples et parquet (`fiche:sols`) | `fixture:fiche:sols fiche:sols` | colis, pose du parquet, épaisseur de ragréage jamais inventés ; lé de 4 m |
 | 13 | Peinture-finitions (`fiche:peinture`) | `fixture:fiche:peinture fiche:peinture` | couches, impression, passes d'enduit jamais inventées ; radiateurs tels qu'écrits |
 | 14 | Serrurerie-métallerie (`fiche:serrurerie`) | `fixture:fiche:serrurerie fiche:serrurerie` | finition et hauteur de clôture jamais inventées ; portail et portillon tels qu'écrits |
-| 15+ | Un devis d'épreuve par nouveau métier | même commande, `fiche:<code>` | ligne ajoutée ici à chaque métier |
+| 15 | Ravalement-ITE (`fiche:facade`) | `fixture:fiche:facade fiche:facade` | support, finition, épaisseur d'isolant, grain jamais inventés ; bavettes telles qu'écrites |
+| 16+ | Un devis d'épreuve par nouveau métier | même commande, `fiche:<code>` | ligne ajoutée ici à chaque métier |
 
 ## 3. Blocage actuel
 
@@ -130,11 +131,11 @@ activer l'auto-reload. Le forfait Claude (claude.ai) est un autre compteur et ne
 | 1 | Rouvrir #261 (bref mot pour mot), vraie lecture, fusion | bloqué (crédit) |
 | 2 | PR 7954 en CI | fait ; vraie lecture en file (§2 bis) |
 | 3 | Étape 0 : socle `referentiels/metiers/` (format 8 sections, registre par fichier, « Métiers couverts », cache de prompt) | fait (#265, en prod) |
-| 4 | Étape 1-2 : 14 nouveaux référentiels, un par PR, dans l'ordre du §1 | 5/14 faits : terrassement-VRD (#266), maçonnerie (#267), charpente (#268), étanchéité déclarée (#269, tiroir relu gardé), menuiseries extérieures (#270), en prod ; #271 ratios « à vérifier » en orange, #272 consommables des fiches, menuiserie intérieure (#273), plâtrerie-isolation (#274), plomberie-sanitaire (#275), chauffage-PAC-VMC (#276), en prod ; carrelage-faïence (#277) ; sols souples et parquet (#278) ; peinture-finitions (#279) ; serrurerie-métallerie (`metalwork`, nouveau métier, PR ouverte) |
+| 4 | Étape 1-2 : 14 nouveaux référentiels, un par PR, dans l'ordre du §1 | 5/14 faits : terrassement-VRD (#266), maçonnerie (#267), charpente (#268), étanchéité déclarée (#269, tiroir relu gardé), menuiseries extérieures (#270), en prod ; #271 ratios « à vérifier » en orange, #272 consommables des fiches, menuiserie intérieure (#273), plâtrerie-isolation (#274), plomberie-sanitaire (#275), chauffage-PAC-VMC (#276), en prod ; carrelage-faïence (#277) ; sols souples et parquet (#278) ; peinture-finitions (#279) ; serrurerie-métallerie (`metalwork`, #280) ; ravalement-ITE (fiche, PR ouverte) : 16/16 métiers de l'étape 2 faits (couverture et électricité non touchées) |
 | 5 | Étape 3 : devis maison complète 8 lots | à faire |
 | 6 | Mission B, boucle 1 à 5, jusqu'au vendredi 23 octobre 12 h | à faire |
 
-Prochaine étape : fusionner serrurerie, puis ravalement-ITE (`facade`, doc `docs/referentiels/facadier.md`), sans API. Au retour du crédit : file du §2 bis.
+Prochaine étape : fusionner ravalement-ITE, puis étape 3 (devis maison entière 8 lots, test permanent), puis tableau de bord final, sans API. Au retour du crédit : file du §2 bis.
 
 ## 5. Mesures (temps et coût par devis)
 
