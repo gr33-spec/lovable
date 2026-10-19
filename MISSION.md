@@ -71,7 +71,7 @@ l'état complet ici et dire à Greg « contexte plein, relance une session avec 
 
 ## 2. État au 2026-10-19
 
-En production (main) : tout jusqu'à la PR #266 (fiche terrassement-VRD), plus #262 (autre chantier, `patrimoine/`, pas le nôtre).
+En production (main) : tout jusqu'à la PR #267 (fiche maçonnerie), plus #262 (autre chantier, `patrimoine/`, pas le nôtre).
 - #257 carte « Lots repérés » ; #258 chaque bouton du modèle passe (22 tiroirs) ; #259 repérage rapide des métiers puis une seule
   lecture Opus ; #260 « Gros devis, j'y suis encore… » après 30 s.
 - L'existant multimétier : 22 tiroirs TypeScript dans `baticlair/packages/domain/src/referential/data/*.ts` (registre `REFERENTIALS`,
@@ -103,7 +103,8 @@ attend la vraie lecture avant fusion (file ci-dessous) ; tout le reste se fusion
 | 2 | 7954 (électricité + VMC + sanitaire) | même passage (le workflow lit `fixture:7954`) | rapport à Greg : lots repérés, bref, 7 questions mot pour mot, contrôle `controleLecture7954` |
 | 3 | Terrassement-VRD (`fiche:terrassement`) | étiquette `lecture-reelle` sur une PR qui touche `referentiels/metiers/terrassement.md` (ou `pnpm exec tsx scripts/lecture-reelle.ts fixture:fiche:terrassement fiche:terrassement`) | `controleLectureFiche` sans écart : 12 lignes, chaque ouvrage de la §6, aucune épaisseur ni diamètre inventés |
 | 4 | Maçonnerie (`fiche:maconnerie`) | même commande, `fixture:fiche:maconnerie fiche:maconnerie` | 12 lignes, chaque ouvrage de la §6, aucune épaisseur, section ni mortier inventés |
-| 5+ | Un devis d'épreuve par nouveau métier | même commande, `fiche:<code>` | ligne ajoutée ici à chaque métier |
+| 5 | Charpente (`fiche:charpente`) | `fixture:fiche:charpente fiche:charpente` | 7 lignes, chevronnage sans longueur ni entraxe inventés, fermettes sans ouvrage |
+| 6+ | Un devis d'épreuve par nouveau métier | même commande, `fiche:<code>` | ligne ajoutée ici à chaque métier |
 
 ## 3. Blocage actuel
 
@@ -120,11 +121,11 @@ activer l'auto-reload. Le forfait Claude (claude.ai) est un autre compteur et ne
 | 1 | Rouvrir #261 (bref mot pour mot), vraie lecture, fusion | bloqué (crédit) |
 | 2 | PR 7954 en CI | fait ; vraie lecture en file (§2 bis) |
 | 3 | Étape 0 : socle `referentiels/metiers/` (format 8 sections, registre par fichier, « Métiers couverts », cache de prompt) | fait (#265, en prod) |
-| 4 | Étape 1-2 : 14 nouveaux référentiels, un par PR, dans l'ordre du §1 | 1/14 fait : terrassement-VRD (#266, en prod) ; 2/14 maçonnerie (PR ouverte) |
+| 4 | Étape 1-2 : 14 nouveaux référentiels, un par PR, dans l'ordre du §1 | 2/14 faits : terrassement-VRD (#266), maçonnerie (#267), en prod ; 3/14 charpente (PR ouverte) |
 | 5 | Étape 3 : devis maison complète 8 lots | à faire |
 | 6 | Mission B, boucle 1 à 5, jusqu'au vendredi 23 octobre 12 h | à faire |
 
-Prochaine étape : fusionner maçonnerie, puis charpente bois (source : `baticlair/docs/referentiels/charpentier.md`, Greg 3 oct.), sans API. Au retour du crédit : file du §2 bis.
+Prochaine étape : fusionner charpente, puis étanchéité toiture-terrasse (`waterproofing` est relu et à Greg : sa fiche reste « moteur tiroir », voir §7), sans API. Au retour du crédit : file du §2 bis.
 
 ## 5. Mesures (temps et coût par devis)
 
@@ -139,7 +140,7 @@ Prochaine étape : fusionner maçonnerie, puis charpente bois (source : `baticla
   (earthworks, masonry, carpentry, waterproofing, joinery, interior_joinery, drywall, plumbing, hvac, tiling, painting, facade…)
   ou un identifiant neuf (sols souples : `flooring` ; serrurerie : `metalwork`) ; `etat: brouillon` ; `moteur: fiche`.
 - Section 2 ouvrages (id en kebab-case) ; 3 ratios par unité d'ouvrage, condition `cle=valeur`, confiance, source S… ;
-  4 conditionnements ; 5 questions (clé, texte, `Libellé=valeur / …`, ouvrages) ; 6 test (devis, bref, questions attendues,
+  plusieurs conditions : `cle=valeur et cle2=valeur2` ; 4 conditionnements ; 5 questions (clé, texte, `Libellé=valeur / …`, ouvrages) ; 6 test (devis, bref, questions attendues,
   réponses, comptes attendus au mot près : « 2,5 m³ », « 2 panneaux de 14,4 m² ») ; 7 à relire ; 8 sources.
 - `cd baticlair/packages/domain && pnpm test` : `fiches-metier.test.ts` refuse une fiche fautive et joue sa section 6.
 - Une fiche « fiche » prend le pas sur l'ancien tiroir du métier (lecture et calcul) ; les anciens chantiers gardent leur
@@ -157,5 +158,7 @@ Prochaine étape : fusionner maçonnerie, puis charpente bois (source : `baticla
 ## 7. Questions pour Greg
 
 - Recharger le crédit API (§3).
+- Étanchéité toiture-terrasse : le tiroir `waterproofing` est déjà « relu » (METIERS_RELUS). Choix fait : on le garde
+  (fiche « moteur tiroir », comme couverture et électricité) plutôt que de le remplacer par une fiche brouillon. À confirmer.
 - (réglé) Les « docs du 3 octobre » sont dans `baticlair/docs/referentiels/*.md` (un par métier, 20 à 60 Ko), avec la
   recherche du 4 octobre dans `baticlair/referentiels/<métier>/tiroir.json` (valeurs sourcées ou à vérifier). Base de chaque fiche.

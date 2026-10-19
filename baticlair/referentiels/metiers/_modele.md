@@ -28,7 +28,7 @@ de la main-d'œuvre seule (sans fourniture). Ce texte est donné tel quel au mod
 ## 3. Ratios
 
 Quantité de fourniture par unité d'ouvrage. Condition : `cle=valeur` d'une question de la section 5 (la ligne ne compte que
-si la réponse, ou la donnée écrite au devis, vaut cette valeur), sinon « — ».
+si la réponse, ou la donnée écrite au devis, vaut cette valeur) ; plusieurs : `cle=valeur et cle2=valeur2` ; sinon « — ».
 
 | Ouvrage | Fourniture | Ratio | Unité | Condition | Confiance | Source |
 |---|---|---|---|---|---|---|
