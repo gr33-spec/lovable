@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { PLATRERIE_REFERENTIAL, referentialFor, ROOFING_REFERENTIAL, tradeIdOf } from "../src/index.js";
+import { ficheDeCalcul, PLATRERIE_REFERENTIAL, referentialFor, referentielDeFiche, ROOFING_REFERENTIAL, tradeIdOf } from "../src/index.js";
+
+// §52 (2026-10-19) : la plâtrerie est calculée par sa fiche métier (`referentiels/metiers/platrerie.md`).
+const PLATRERIE = referentielDeFiche(ficheDeCalcul("drywall")!);
 
 /** Un métier = un tiroir (§22) : le référentiel suit le métier, jamais celui du couvreur par défaut. */
 describe("referentialFor : le tiroir du métier", () => {
   it("couverture et plâtrerie ont leur tiroir, sous leur nom ou leur identifiant", () => {
     expect(referentialFor("roofing")).toBe(ROOFING_REFERENTIAL);
     expect(referentialFor("couverture")).toBe(ROOFING_REFERENTIAL);
-    expect(referentialFor("drywall")).toBe(PLATRERIE_REFERENTIAL);
-    expect(referentialFor("Plâtrerie")).toBe(PLATRERIE_REFERENTIAL);
+    expect(referentialFor("drywall")).toBe(PLATRERIE);
+    expect(referentialFor("Plâtrerie")).toBe(PLATRERIE);
     expect(tradeIdOf("Platrerie")).toBe("drywall");
   });
   it("un métier sans tiroir : null, jamais le couvreur", () => {
@@ -17,7 +20,7 @@ describe("referentialFor : le tiroir du métier", () => {
     expect(referentialFor(null)).toBeNull();
   });
   it("multi-métiers : le premier qui a un tiroir", () => {
-    expect(referentialFor("flooring,drywall")).toBe(PLATRERIE_REFERENTIAL);
+    expect(referentialFor("flooring,drywall")).toBe(PLATRERIE);
     expect(referentialFor("roofing,drywall")).toBe(ROOFING_REFERENTIAL);
   });
 });

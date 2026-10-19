@@ -325,6 +325,72 @@ const EPREUVES: Record<string, { compte: string; epreuves: Epreuve[] }> = {
       },
     ],
   },
+  drywall: {
+    compte: "platrerie",
+    epreuves: [
+      {
+        nom: "cloison avec sa hauteur écrite : plaques et montants de 2,70 m, entraxe 40",
+        lignes: [{ libelle: "Cloison 72/48 BA13 sur ossature, hauteur 2,70 m", quantite: "30", unite: "m²" }],
+        questions: { consommables: "1" },
+        commande: {
+          "Plaque BA13 1,20 × 2,70 m": "20 plaques",
+          "Montant M48 L 2,70 m": "34 montants",
+          "Rail R48 3 m": "9 barres de 3 m",
+          "Vis TTPC 25": "1 boîte de 1 000 u",
+          "Bande à joint papier": "1 rouleau de 150 m",
+          "Enduit à joint poudre": "1 sac de 25 kg",
+        },
+      },
+      {
+        nom: "doublage collé sans hauteur : la hauteur se demande ; consommables refusés",
+        lignes: [{ libelle: "Doublage collé Placomur 10+80", quantite: "45", unite: "m²" }],
+        questions: { hauteur_doublage: "2.6", consommables: "0" },
+        commande: { "Panneau de doublage collé 1,20 × 2,60 m": "16 panneaux", "Mortier adhésif MAP": "4 sacs de 25 kg" },
+      },
+      {
+        nom: "plafond F530 et trappe de visite telle qu'écrite",
+        lignes: [
+          { libelle: "Plafond suspendu BA13 sur fourrures F530", quantite: "40", unite: "m²" },
+          { libelle: "Trappe de visite 60 × 60", quantite: "1", unite: "u" },
+        ],
+        questions: { consommables: "1" },
+        commande: {
+          "Plaque BA13 1,20 × 2,50 m": "14 plaques",
+          "Fourrure F530 3 m": "26 barres de 3 m",
+          "Suspente F530": "1 boîte de 100 u",
+          "Cornière de rive F530 3 m": "7 barres de 3 m",
+          "Vis TTPC 25": "1 boîte de 1 000 u",
+          "Bande à joint papier": "1 rouleau de 150 m",
+          "Enduit à joint poudre": "1 sac de 25 kg",
+        },
+        ecrits: ["@2"],
+      },
+      {
+        nom: "combles soufflés, résistance écrite",
+        lignes: [{ libelle: "Isolation des combles perdus par soufflage R 7", quantite: "80", unite: "m²" }],
+        questions: {},
+        commande: { "Laine de verre à souffler": "19 sacs de 17,3 kg" },
+      },
+      {
+        nom: "cloison sans hauteur et doublage avec la sienne : une question, deux longueurs",
+        lignes: [
+          { libelle: "Cloison 72/48 BA13 sur ossature", quantite: "20", unite: "m²" },
+          { libelle: "Doublage collé Placomur 10+80, hauteur 2,50 m", quantite: "25", unite: "m²" },
+        ],
+        questions: { hauteur_cloison: "2.5", consommables: "1" },
+        commande: {
+          "Plaque BA13 1,20 × 2,50 m": "14 plaques",
+          "Montant M48 L 2,50 m": "17 montants",
+          "Rail R48 3 m": "6 barres de 3 m",
+          "Panneau de doublage collé 1,20 × 2,50 m": "9 panneaux",
+          "Mortier adhésif MAP": "2 sacs de 25 kg",
+          "Vis TTPC 25": "1 boîte de 1 000 u",
+          "Bande à joint papier": "1 rouleau de 150 m",
+          "Enduit à joint poudre": "1 sac de 25 kg",
+        },
+      },
+    ],
+  },
 };
 
 let ctx: TestContext;
