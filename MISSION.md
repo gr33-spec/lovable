@@ -1,7 +1,7 @@
 # MISSION.md — journal de mission BatiClair
 
 Ce fichier est la mémoire de la mission. Une nouvelle session reprend avec : **« reprends MISSION.md »**.
-Il est tenu à jour après chaque PR fusionnée, quoi qu'il arrive. Dernière mise à jour : 2026-10-19 11 h 50 (UTC).
+Il est tenu à jour après chaque PR fusionnée, quoi qu'il arrive. Dernière mise à jour : 2026-10-19 12 h (UTC).
 
 ## 0. Pour reprendre (nouvelle session)
 
@@ -85,10 +85,23 @@ En attente (bloqué par le crédit API) :
   lecture). Reprise : `git fetch origin pull/261/head:pr261 && git checkout -B claude/saas-achat-artisans-prompt-1lyihx origin/main
   && git cherry-pick 3984972 9337dc7 a4f2ad4`, nouvelle PR, étiquette `lecture-reelle`, fusion si DE00000071 et D.2026.105 passent
   le contrôle (avant : 3 écarts de bref, « 4 fenêtres de toit Velux GGL SK06 », « avec raccord »).
-- **PR 7954 en CI, prête, pas encore ouverte** — patch `docs/mission/7954-ci.patch` (`git apply docs/mission/7954-ci.patch`, puis
-  supprimer le patch dans la même PR). Contenu : `apps/api/test/support/devis7954-pdf.ts` (devis 7954 anonymisé régénéré, 8 pages,
-  prix fictifs), script `fixture:7954`, workflow qui lit 7954 depuis la fixture (plus de pré-version de PDF), lecture avec les
-  référentiels de chaque métier repéré comme en production. Rapport attendu par Greg : lots repérés, bref et 7 questions mot pour mot.
+- 7954 en CI : FUSIONNÉ (PR « 7954 anonymisé en CI ») ; seule la vraie lecture attend le crédit (file du §2 bis).
+
+## 2 bis. Consigne en vigueur (Greg, 2026-10-19)
+
+« Le crédit API Anthropic est à zéro et le restera quelques jours. Ne t'arrête pas : fais tout ce qui ne demande pas de vraie
+lecture Opus (référentiels avec recherche web, devis d'épreuve par le faux lecteur, robustesse, écrans, vitesse, tests). Note dans
+MISSION.md la liste des vraies lectures à lancer quand le crédit reviendra, une par métier. **Zéro appel API tant que je ne t'ai pas
+dit « crédit rechargé ».** » → Pas d'étiquette `lecture-reelle`, pas de test de crédit. Une PR qui change le prompt de lecture
+attend la vraie lecture avant fusion (file ci-dessous) ; tout le reste se fusionne sur CI verte.
+
+### File des vraies lectures à lancer au retour du crédit (une par métier, dans cet ordre)
+
+| # | Quoi | Comment | Attendu |
+|---|---|---|---|
+| 1 | Prompt v5 (bref mot pour mot) | recréer la PR #261 (§2), étiquette `lecture-reelle` | DE00000071 sans écart au contrôle, D.2026.105 sans écart |
+| 2 | 7954 (électricité + VMC + sanitaire) | même passage (le workflow lit `fixture:7954`) | rapport à Greg : lots repérés, bref, 7 questions mot pour mot, contrôle `controleLecture7954` |
+| 3+ | Un devis d'épreuve par nouveau métier | ajouté au workflow à chaque PR de métier | ligne ajoutée ici à chaque métier |
 
 ## 3. Blocage actuel
 
@@ -103,13 +116,13 @@ activer l'auto-reload. Le forfait Claude (claude.ai) est un autre compteur et ne
 | # | Sujet | État |
 |---|---|---|
 | 1 | Rouvrir #261 (bref mot pour mot), vraie lecture, fusion | bloqué (crédit) |
-| 2 | PR 7954 en CI + rapport (lots, bref, 7 questions) | bloqué (crédit) |
+| 2 | PR 7954 en CI | fait ; vraie lecture en file (§2 bis) |
 | 3 | Étape 0 : socle `referentiels/` (format 8 sections, registre par fichier, « Métiers couverts », cache de prompt) | à faire |
 | 4 | Étape 1-2 : 14 nouveaux référentiels, un par PR, dans l'ordre du §1 | à faire |
 | 5 | Étape 3 : devis maison complète 8 lots | à faire |
 | 6 | Mission B, boucle 1 à 5, jusqu'au vendredi 23 octobre 12 h | à faire |
 
-Prochaine étape : dès que le crédit revient → point 1, puis 2, puis 3.
+Prochaine étape : point 3 (socle), sans API. Au retour du crédit : file du §2 bis.
 
 ## 5. Mesures (temps et coût par devis)
 

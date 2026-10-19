@@ -8,9 +8,8 @@ name: Vraie lecture (Opus)
 # Pour relancer : retirer l'étiquette, la remettre.
 #
 # Les PDF réels ne sont jamais dans le dépôt :
-# - DE00000071 et D.2026.105 : les devis anonymisés de test/support, régénérés à la volée ;
-# - 7954 : pièce jointe « 7954.pdf » de la pré-version privée « lecture-reelle-pdfs » (hors historique git) ; absente,
-#   l'étape le dit et passe.
+# - DE00000071, D.2026.105 et 7954 : les devis anonymisés de test/support, régénérés à la volée (désignations,
+#   quantités et unités du devis réel ; ni nom, ni adresse, ni prix).
 on:
   pull_request:
     types: [labeled]
@@ -53,24 +52,13 @@ jobs:
         continue-on-error: true
         working-directory: baticlair/apps/api
         run: pnpm exec tsx scripts/lecture-reelle.ts fixture:DE00000071 DE00000071
-      - name: Récupérer le PDF 7954 (hors dépôt)
-        id: pdf7954
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          mkdir -p "$RUNNER_TEMP/pdf"
-          if gh release download lecture-reelle-pdfs --repo "$GITHUB_REPOSITORY" --pattern 7954.pdf --dir "$RUNNER_TEMP/pdf"; then
-            echo "present=1" >> "$GITHUB_OUTPUT"
-          else
-            echo "::warning::PDF 7954 absent (pré-version « lecture-reelle-pdfs », pièce jointe « 7954.pdf ») : lecture 7954 non lancée."
-            echo "present=0" >> "$GITHUB_OUTPUT"
-          fi
+      # Décision du fondateur (2026-10-13) : 7954 anonymisé comme D.2026.105 (transcription du dépôt, prix fictifs),
+      # régénéré à la volée ; le PDF du client ne passe jamais par le dépôt ni par la CI.
       - name: "7954"
         id: l7954
-        if: steps.pdf7954.outputs.present == '1'
         continue-on-error: true
         working-directory: baticlair/apps/api
-        run: pnpm exec tsx scripts/lecture-reelle.ts "$RUNNER_TEMP/pdf/7954.pdf" 7954
+        run: pnpm exec tsx scripts/lecture-reelle.ts fixture:7954 7954
       # Retour du fondateur (2026-10-12) : D.2026.105 lu sans question, la tuile verte sans modèle ni teinte. Le devis
       # anonymisé de test/support, régénéré à la volée (aucune donnée du client).
       - name: D.2026.105
@@ -81,5 +69,5 @@ jobs:
       - name: Bilan
         if: always()
         run: |
-          echo "DE00000071 : ${{ steps.de00000071.outcome }} ; 7954 : ${{ steps.l7954.outcome || 'non lancée' }} ; D.2026.105 : ${{ steps.l105.outcome || 'non lancée' }}"
-          if [ "${{ steps.de00000071.outcome }}" != "success" ] || [ "${{ steps.l7954.outcome }}" = "failure" ] || [ "${{ steps.l105.outcome }}" != "success" ]; then exit 1; fi
+          echo "DE00000071 : ${{ steps.de00000071.outcome }} ; 7954 : ${{ steps.l7954.outcome }} ; D.2026.105 : ${{ steps.l105.outcome }}"
+          if [ "${{ steps.de00000071.outcome }}" != "success" ] || [ "${{ steps.l7954.outcome }}" != "success" ] || [ "${{ steps.l105.outcome }}" != "success" ]; then exit 1; fi
