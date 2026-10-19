@@ -4,8 +4,8 @@ import { cleDeReference } from "@baticlair/domain";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
 /**
- * BATICLAIR GROUPÉ, ÉTAPE 1 : LES DONNÉES (document du fondateur, 2026-10-19, §7 étape 1). Les tables du groupé existent,
- * se relient du besoin au bon de commande et à la livraison, et tiennent les garde-fous de §5 en base : un seul lot
+ * BATICLAIR GROUPÉ, ÉTAPE 1 : LES DONNÉES (document du fondateur, 2026-10-19, section 7, étape 1). Les tables du groupé existent,
+ * se relient du besoin au bon de commande et à la livraison, et tiennent les garde-fous de section 5 en base : un seul lot
  * ouvert par référence et par zone, un besoin par ligne de liste, un négoce par e-mail et par département. Le drapeau
  * `groupe` est désactivé par défaut (« rien en prod sans mon accord explicite »).
  */
@@ -66,7 +66,7 @@ describe("groupé, étape 1 : les données", () => {
     expect(tout.journal.map((j) => j.evenement)).toEqual(["negoce_retenu"]);
   });
 
-  it("§5 : un seul lot ouvert par référence et par zone ; le suivant s'ouvre quand le premier est parti", async () => {
+  it("section 5 : un seul lot ouvert par référence et par zone ; le suivant s'ouvre quand le premier est parti", async () => {
     const data = { cle: "lib:bac acier|0.75mm|ral 7016", famille: "couverture", zone: "22", fenetreTot: jour("2026-11-02"), fenetreTard: jour("2026-11-20") };
     const premier = await ctx.prisma.lotGroupe.create({ data });
     await expect(ctx.prisma.lotGroupe.create({ data })).rejects.toThrow();

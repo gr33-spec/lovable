@@ -1,12 +1,12 @@
 /**
- * BATICLAIR GROUPÉ, ÉTAPE 1 (document du fondateur, 2026-10-19, §1 à §4 et §7 « Normalisation ») : les règles de données
+ * BATICLAIR GROUPÉ, ÉTAPE 1 (document du fondateur, 2026-10-19, sections 1 à 4 et 7 « Normalisation ») : les règles de données
  * du groupé, en code pur. Deux besoins ne se groupent que sur une clé de référence identique ; la zone est le
  * département ; un besoin se retire tant que le lot n'est pas parti, et seul un besoin signé s'engage.
  */
 import { describe, expect, it } from "vitest";
 import { cleDeReference, familleDuMetier, fenetresCompatibles, fenetreValide, transitionBesoin, zoneDuCodePostal } from "../src/index.js";
 
-describe("groupé : la clé de référence (§7, normalisation)", () => {
+describe("groupé : la clé de référence (section 7, normalisation)", () => {
   it("la référence fabricant fait la clé, quelle que soit son écriture, et ne vaut que chez sa marque", () => {
     expect(cleDeReference({ referenceFabricant: "MK04 ", marque: "Velux", libelle: "Fenêtre de toit" })).toBe("ref:velux:MK04");
     expect(cleDeReference({ referenceFabricant: "mk-04", marque: "VELUX", libelle: "autre libellé" })).toBe(cleDeReference({ referenceFabricant: "MK 04", marque: "velux", libelle: "x" }));
@@ -48,7 +48,7 @@ describe("groupé : zone, fenêtre, famille", () => {
   });
 });
 
-describe("groupé : la vie d'un besoin (§4)", () => {
+describe("groupé : la vie d'un besoin (section 4)", () => {
   it("a) retrait libre avant le départ du lot ; b) plus de retrait d'un besoin signé une fois le lot parti", () => {
     expect(transitionBesoin("signe", "retire", { lotParti: false })).toEqual({ ok: true });
     expect(transitionBesoin("signe", "retire", { lotParti: true })).toEqual({ ok: false, raison: "lot_parti" });

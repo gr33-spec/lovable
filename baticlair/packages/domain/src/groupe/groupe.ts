@@ -7,7 +7,7 @@ import { normalizeText } from "../trades/trade-profile.js";
  * (statuts, familles, clé de référence, zone, fenêtres), sans base ni IA. Tout reste derrière le drapeau `groupe`.
  */
 
-/** §2 étape 3 : les familles qu'un négoce coche (« ce que chacun vend »). */
+/** section 2, étape 3 : les familles qu'un négoce coche (« ce que chacun vend »). */
 export const FAMILLES_GROUPE = ["couverture", "charpente", "maconnerie", "electricite", "plomberie", "amenagement_exterieur"] as const;
 export type FamilleGroupe = (typeof FAMILLES_GROUPE)[number];
 
@@ -45,26 +45,26 @@ export function familleDuMetier(metier: string | null | undefined): FamilleGroup
   return (metier && FAMILLE_DU_METIER[metier]) || null;
 }
 
-/** §2 étape 2 et §4 : la vie d'un besoin, de la proposition à la livraison. */
+/** section 2, étape 2 et section 4 : la vie d'un besoin, de la proposition à la livraison. */
 export const STATUTS_BESOIN = ["en_attente", "signe", "retire", "engage", "commande", "livre"] as const;
 export type StatutBesoin = (typeof STATUTS_BESOIN)[number];
 
-/** §2 étapes 4 à 8 : la vie d'un lot. */
+/** section 2, étapes 4 à 8 : la vie d'un lot. */
 export const STATUTS_LOT = ["ouvert", "envoye", "choisi", "clos", "annule"] as const;
 export type StatutLot = (typeof STATUTS_LOT)[number];
 
-/** §2 étape 6 : la lecture d'un devis de négoce ; un cas douteux est « à vérifier » pour Greg, jamais bloquant. */
+/** section 2, étape 6 : la lecture d'un devis de négoce ; un cas douteux est « à vérifier » pour Greg, jamais bloquant. */
 export const STATUTS_EXTRACTION = ["en_attente", "lue", "a_verifier", "echec"] as const;
 export type StatutExtraction = (typeof STATUTS_EXTRACTION)[number];
 
-/** §2 étape 8 : la confirmation d'un tap. */
+/** section 2, étape 8 : la confirmation d'un tap. */
 export const STATUTS_LIVRAISON = ["prevue", "livre", "probleme"] as const;
 export type StatutLivraison = (typeof STATUTS_LIVRAISON)[number];
 
 export type RefusTransition = "inconnue" | "lot_parti" | "pas_signe" | "deja_engage";
 
 /**
- * Les passages permis d'un besoin (§4) : « en attente » bascule « signé » d'un tap (d) ; un besoin se retire librement
+ * Les passages permis d'un besoin (section 4) : « en attente » bascule « signé » d'un tap (d) ; un besoin se retire librement
  * tant que la demande n'est pas partie aux négoces (a), plus ensuite (b) ; seul un besoin signé s'engage au départ du lot
  * (un besoin en attente part comme volume probable, sans engagement) ; puis commandé (bon de commande), puis livré.
  */
@@ -86,7 +86,7 @@ function dimensionNormale(d: string): string {
 }
 
 /**
- * LA CLÉ D'UN BESOIN (§7 étape 1, « Normalisation ») : la référence fabricant quand elle existe (marque comprise, une
+ * LA CLÉ D'UN BESOIN (section 7, étape 1, « Normalisation ») : la référence fabricant quand elle existe (marque comprise, une
  * référence ne vaut que chez son fabricant), sinon le libellé du référentiel + la dimension + la teinte. Deux besoins
  * ne se groupent que sur une clé IDENTIQUE : jamais un rapprochement approché.
  */
@@ -104,7 +104,7 @@ export function cleDeReference(article: { referenceFabricant?: string | null; ma
 }
 
 /**
- * La ZONE d'un chantier (§2 étape 4) : son département, tiré du code postal. Corse : 2A (200xx, 201xx) et 2B ; outre-mer :
+ * La ZONE d'un chantier (section 2, étape 4) : son département, tiré du code postal. Corse : 2A (200xx, 201xx) et 2B ; outre-mer :
  * trois chiffres (971…). `null` sans code postal lisible : le besoin n'entre pas au groupé.
  */
 export function zoneDuCodePostal(codePostal: string | null | undefined): string | null {
@@ -121,7 +121,7 @@ export interface FenetreLivraison {
   tard: Date;
 }
 
-/** Deux fenêtres sont compatibles quand une même date de livraison tient dans les deux (§2 étape 4). */
+/** Deux fenêtres sont compatibles quand une même date de livraison tient dans les deux (section 2, étape 4). */
 export function fenetresCompatibles(a: FenetreLivraison, b: FenetreLivraison): boolean {
   return a.tot.getTime() <= b.tard.getTime() && b.tot.getTime() <= a.tard.getTime();
 }
