@@ -8,7 +8,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { controleLectureFiche, ecranDeLecture, exportPourLecture, FICHES, fautesDeFiche, METIER_NAMES, parseFicheMetier, referentialFor, referentielDeFiche, ratiosEnValidation, type FicheMetier, type LectureDevis } from "../src/index.js";
+import { controleLectureFiche, ecranDeLecture, exportPourLecture, FICHES, RATIO, fautesDeFiche, METIER_NAMES, parseFicheMetier, referentialFor, referentielDeFiche, ratiosEnValidation, type FicheMetier, type LectureDevis } from "../src/index.js";
 
 const dossier = join(import.meta.dirname, "../../../referentiels/metiers");
 
@@ -160,6 +160,22 @@ describe("§52 : le format commun des fiches métier", () => {
       "ligne 2 « Main-d'œuvre » : ouvrage dalle au lieu de aucun",
       "ligne 2 : « epaisseur » = 12 lu, alors que le devis ne l'écrit pas",
     ]);
+  });
+
+  it("§47.1 : un ratio « à vérifier » sort orange « Quantité à confirmer : … », un « C'est bon » le passe au vert ; un ratio usuel reste vert", () => {
+    const f = FICHES.find((x) => x.code === "terrassement")!;
+    const ref = referentielDeFiche(f);
+    const lecture = lectureDuTest(f);
+    const answers = Object.fromEntries(Object.entries(f.test.reponses).map(([k, v]) => [`fiche:${k}`, v]));
+    const e = ecranDeLecture({ ref, lecture, fiche: f, answers, validated: new Set() });
+    const geo = e.purchase.toBuy.find((b) => b.label === "Géotextile 150 g/m²")!;
+    expect(geo.toConfirm?.map((r) => r.text)).toEqual(["1,15 m² par m²"]);
+    expect(e.purchase.toBuy.find((b) => b.label === "Gaine TPC rouge Ø63")!.toConfirm).toBeUndefined();
+    const ok = ecranDeLecture({ ref, lecture, fiche: f, answers: { ...answers, [`${RATIO}${geo.key}`]: "ok" }, validated: new Set() });
+    expect(ok.purchase.toBuy.find((b) => b.label === "Géotextile 150 g/m²")!.toConfirm).toBeUndefined();
+    // Validée par trois entreprises (§47.4) : verte partout.
+    const v = ecranDeLecture({ ref, lecture, fiche: f, answers, validated: new Set(geo.toConfirm!.map((r) => r.key)) });
+    expect(v.purchase.toBuy.find((b) => b.label === "Géotextile 150 g/m²")!.toConfirm).toBeUndefined();
   });
 
   it("le registre : un métier déclaré par une fiche est un métier de BatiClair, son état dit la mention §52", () => {

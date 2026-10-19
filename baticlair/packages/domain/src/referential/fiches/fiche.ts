@@ -273,6 +273,11 @@ export interface ArticleFiche {
   /** Les questions dont dépend l'article (une condition de ratio non tranchée, ou une question du modèle). */
   attend: string[];
   total: number;
+  /**
+   * §47.1 : les règles « à vérifier » dont dépend la quantité (ratio ou conditionnement) : la ligne sort orange, « Quantité
+   * à confirmer : … », jusqu'au « C'est bon » de l'artisan (ou la validation par trois entreprises, §47.4).
+   */
+  aConfirmer: { key: string; text: string }[];
   /** Le niveau de confiance le plus faible de ses ratios et conditionnements (§7). */
   confiance: Confiance;
 }
@@ -301,7 +306,9 @@ export function fournituresDeFiche(fiche: FicheMetier, lignes: readonly LigneFic
     return d && d.trim() ? d : null;
   };
   const egal = (a: string, b: string) => normalizeText(a).replace(/\s+/g, "_") === normalizeText(b).replace(/\s+/g, "_");
-  const parFourniture = new Map<string, { parts: { id: string; ref: string; n: number }[]; attend: Set<string>; confiance: Confiance }>();
+  const parFourniture = new Map<string, { parts: { id: string; ref: string; n: number }[]; attend: Set<string>; confiance: Confiance; regles: Map<string, string> }>();
+  const slug = (t: string) => normalizeText(t).replace(/[^a-z0-9]+/g, "-");
+  const unitesDe = new Map(fiche.ouvrages.map((o) => [o.id, o.unite]));
   for (const l of lignes) {
     const rows = fiche.ratios.filter((r) => r.ouvrage === l.ouvrage);
     const enAttente = new Set<string>();
@@ -312,16 +319,17 @@ export function fournituresDeFiche(fiche: FicheMetier, lignes: readonly LigneFic
     for (const r of rows) for (const c of r.conditions) if (valeur(c.cle, l) === null) enAttente.add(c.cle);
     for (const r of rows) {
       if (!r.conditions.every(vraie)) continue;
-      const e = parFourniture.get(r.fourniture) ?? { parts: [], attend: new Set<string>(), confiance: "sûr" as Confiance };
+      const e = parFourniture.get(r.fourniture) ?? { parts: [], attend: new Set<string>(), confiance: "sûr" as Confiance, regles: new Map<string, string>() };
       e.parts.push({ id: l.id, ref: l.ref, n: l.quantite * r.ratio });
       e.confiance = plusFaible(e.confiance, r.confiance);
+      if (r.confiance === "à vérifier") e.regles.set(`fiche:${fiche.code}@${fiche.version}:${slug(r.fourniture)}:${r.ouvrage}:${r.ratio}`, `${fr(r.ratio)} ${r.unite} par ${unitesDe.get(r.ouvrage) ?? "u"}`);
       for (const c of [...l.attend, ...enAttente]) e.attend.add(c);
       parFourniture.set(r.fourniture, e);
     }
     // Un ouvrage dont toutes les fournitures sont sous condition non tranchée : une ligne d'attente par condition, pour
     // que la ligne du devis ne disparaisse jamais (§49.1) et que sa question soit là (§51.6).
     if (enAttente.size > 0 && !rows.some((r) => r.conditions.every(vraie))) {
-      const e = parFourniture.get(`?${l.ouvrage}`) ?? { parts: [], attend: new Set<string>(), confiance: "à vérifier" as Confiance };
+      const e = parFourniture.get(`?${l.ouvrage}`) ?? { parts: [], attend: new Set<string>(), confiance: "à vérifier" as Confiance, regles: new Map<string, string>() };
       e.parts.push({ id: l.id, ref: l.ref, n: l.quantite });
       for (const c of enAttente) e.attend.add(c);
       parFourniture.set(`?${l.ouvrage}`, e);
@@ -333,17 +341,18 @@ export function fournituresDeFiche(fiche: FicheMetier, lignes: readonly LigneFic
     const lineIds = [...new Set(e.parts.map((p) => p.id))];
     if (fourniture.startsWith("?")) {
       const o = fiche.ouvrages.find((x) => `?${x.id}` === fourniture)!;
-      return { key: `fiche:${fiche.code}:${o.id}`, label: o.libelle, quantite: `${fr(total)} ${o.unite}`, order: { count: fr(total), unit: o.unite }, approx: null, precision: trace(parts, o.unite), lineIds, attend: [...e.attend], total, confiance: e.confiance };
+      return { key: `fiche:${fiche.code}:${o.id}`, label: o.libelle, quantite: `${fr(total)} ${o.unite}`, order: { count: fr(total), unit: o.unite }, approx: null, precision: trace(parts, o.unite), lineIds, attend: [...e.attend], total, confiance: e.confiance, aConfirmer: [] };
     }
     const unite = fiche.ratios.find((r) => r.fourniture === fourniture)!.unite;
     const c = fiche.conditionnements.find((x) => x.fourniture === fourniture)!;
     const confiance = plusFaible(e.confiance, c.confiance);
+    if (c.confiance === "à vérifier") e.regles.set(`fiche:${fiche.code}@${fiche.version}:${slug(fourniture)}:conditionnement`, `${c.venduEn} de ${fr(c.contenance)} ${c.unite}`);
     const auPas = normalizeText(c.venduEn) === normalizeText(c.unite);
     const count = auPas ? Math.ceil(Math.round((total / c.contenance) * 1000) / 1000) * c.contenance : Math.ceil(Math.round((total / c.contenance) * 1000) / 1000);
     const uniteCmd = auPas ? c.unite : pluriel(c.venduEn, count);
     const detail = auPas || c.contenance === 1 ? "" : ` de ${fr(c.contenance)} ${c.unite}`;
     return {
-      key: `fiche:${fiche.code}:${normalizeText(fourniture).replace(/[^a-z0-9]+/g, "-")}`,
+      key: `fiche:${fiche.code}:${slug(fourniture)}`,
       label: fourniture,
       quantite: `${fr(count)} ${uniteCmd}${detail}`,
       order: { count: fr(count), unit: `${uniteCmd}${detail}` },
@@ -353,6 +362,7 @@ export function fournituresDeFiche(fiche: FicheMetier, lignes: readonly LigneFic
       attend: [...e.attend],
       total,
       confiance,
+      aConfirmer: [...e.regles].map(([key, text]) => ({ key, text })),
     };
   });
 }
