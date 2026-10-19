@@ -282,6 +282,49 @@ const EPREUVES: Record<string, { compte: string; epreuves: Epreuve[] }> = {
       },
     ],
   },
+  interior_joinery: {
+    compte: "menuiserie-interieure",
+    epreuves: [
+      {
+        nom: "stratifié flottant : pose et colisage écrits, aucune question",
+        lignes: [{ libelle: "Parquet stratifié flottant pose droite, colis de 2,2 m²", quantite: "30", unite: "m²" }],
+        questions: {},
+        commande: { "Parquet ou stratifié, colis de 2,2 m²": "15 colis de 2,2 m²", "Sous-couche parquet": "3 rouleaux de 15 m²" },
+      },
+      {
+        nom: "point de Hongrie sans colisage : deux questions",
+        lignes: [{ libelle: "Parquet contrecollé flottant en point de Hongrie", quantite: "12", unite: "m²" }],
+        questions: { pose_parquet: "hongrie", colis_parquet: "1.5" },
+        commande: { "Parquet ou stratifié, colis de 1,5 m²": "9 colis de 1,5 m²", "Sous-couche parquet": "1 rouleau de 15 m²" },
+      },
+      {
+        nom: "plinthes en barres, blocs-portes tels qu'écrits",
+        lignes: [
+          { libelle: "Plinthes bois", quantite: "38", unite: "ml" },
+          { libelle: "Bloc-porte isoplane 204 × 73 poussant gauche", quantite: "3", unite: "u" },
+        ],
+        questions: {},
+        commande: { "Plinthe en barre de 2,40 m": "18 barres de 2,4 m" },
+        ecrits: ["@2"],
+      },
+      {
+        nom: "lambris sous rampant : la pose se demande, tasseaux en barres",
+        lignes: [{ libelle: "Lambris pin sous toiture", quantite: "25", unite: "m²" }],
+        questions: { pose_lambris: "rampant" },
+        commande: { "Lambris en botte de 2 m²": "15 bottes de 2 m²", "Tasseau 27 × 40": "26 barres de 2,4 m" },
+      },
+      {
+        nom: "placards tels qu'écrits et plinthes",
+        lignes: [
+          { libelle: "Façade de placard coulissante 2 vantaux 1,80 × 2,50", quantite: "2", unite: "u" },
+          { libelle: "Plinthes MDF prépeintes", quantite: "20", unite: "ml" },
+        ],
+        questions: {},
+        commande: { "Plinthe en barre de 2,40 m": "9 barres de 2,4 m" },
+        ecrits: ["@1"],
+      },
+    ],
+  },
 };
 
 let ctx: TestContext;
