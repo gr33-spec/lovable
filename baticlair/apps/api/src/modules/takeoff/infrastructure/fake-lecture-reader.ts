@@ -167,7 +167,8 @@ export function ouvrageDeFiche(fiche: FicheMetier, designation: string, unite: s
   const texte = designation.toLowerCase().replace(/\s+/g, " ");
   const donnees: Record<string, string> = {};
   for (const q of fiche.questions.filter((x) => x.ouvrages.includes(best.ouvrage))) {
-    const b = q.boutons.find((x) => x.label.length >= 3 && new RegExp(`(?:^|[^\\p{L}\\d])${x.label.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![\\p{L}\\d])`, "u").test(texte));
+    // Le bouton le plus long écrit sur la ligne (« 2,2 m² » plutôt que « 2 m² »).
+    const b = [...q.boutons].sort((x, y) => y.label.length - x.label.length).find((x) => x.label.length >= 3 && new RegExp(`(?:^|[^\\p{L}\\d])${x.label.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![\\p{L}\\d])`, "u").test(texte));
     if (b) donnees[q.cle] = b.valeur;
   }
   return { ouvrage: best.ouvrage, donnees };

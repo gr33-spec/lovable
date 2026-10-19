@@ -82,19 +82,19 @@ de chevron) + 10 %. Traitement : surface développée = 1,3 × surface de toitur
 
 ## 4. Conditionnements
 
-| Fourniture | Vendu en | Contenance | Unité | Confiance | Source |
-|---|---|---|---|---|---|
-| Chevron 63×75 traité classe 2 L 3,50 m | pièce | 1 | u | usuel | S1 |
-| Chevron 63×75 traité classe 2 L 4,00 m | pièce | 1 | u | usuel | S1 |
-| Chevron 63×75 traité classe 2 L 4,50 m | pièce | 1 | u | usuel | S1 |
-| Chevron 63×75 traité classe 2 L 5,00 m | pièce | 1 | u | usuel | S1 |
-| Chevron 63×75 traité classe 2 L 5,50 m | pièce | 1 | u | usuel | S1 |
-| Chevron 63×75 traité classe 2 L 6,00 m | pièce | 1 | u | usuel | S1 |
-| Vis de charpente 8×160 | boîte | 50 | u | sûr | S3 |
-| Traitement insecticide-fongicide charpente | bidon | 20 | L | sûr | S4 |
-| Panneau OSB3 18 mm rainé-bouveté 2500×675 | panneau | 1,65 | m² | à vérifier | S5 |
-| Planche de rive sapin traité | pièce | 4 | m | à vérifier | S6 |
-| Goujon d'ancrage béton M10 | boîte | 50 | u | à vérifier | S7 |
+| Fourniture | Vendu en | Contenance | Unité | Confiance | Source | Consommable |
+|---|---|---|---|---|---|---|
+| Chevron 63×75 traité classe 2 L 3,50 m | pièce | 1 | u | usuel | S1 | non |
+| Chevron 63×75 traité classe 2 L 4,00 m | pièce | 1 | u | usuel | S1 | non |
+| Chevron 63×75 traité classe 2 L 4,50 m | pièce | 1 | u | usuel | S1 | non |
+| Chevron 63×75 traité classe 2 L 5,00 m | pièce | 1 | u | usuel | S1 | non |
+| Chevron 63×75 traité classe 2 L 5,50 m | pièce | 1 | u | usuel | S1 | non |
+| Chevron 63×75 traité classe 2 L 6,00 m | pièce | 1 | u | usuel | S1 | non |
+| Vis de charpente 8×160 | boîte | 50 | u | sûr | S3 | oui |
+| Traitement insecticide-fongicide charpente | bidon | 20 | L | sûr | S4 | non |
+| Panneau OSB3 18 mm rainé-bouveté 2500×675 | panneau | 1,65 | m² | à vérifier | S5 | non |
+| Planche de rive sapin traité | pièce | 4 | m | à vérifier | S6 | non |
+| Goujon d'ancrage béton M10 | boîte | 50 | u | à vérifier | S7 | oui |
 
 ## 5. Questions
 
@@ -128,11 +128,13 @@ charp-001 du référentiel du 3 octobre.
 
 ### Questions attendues
 
+- `consommables`
 - `longueur_chevron`
 - `entraxe_chevrons`
 
 ### Réponses
 
+- `consommables` = 1
 - `longueur_chevron` = 450
 - `entraxe_chevrons` = 60
 

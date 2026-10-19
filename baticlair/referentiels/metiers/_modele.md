@@ -42,9 +42,12 @@ si la réponse, ou la donnée écrite au devis, vaut cette valeur) ; plusieurs :
 Ce que le comptoir vend. « Vendu en » = l'unité commandable ; « Contenance » = ce qu'elle contient dans l'unité du besoin.
 Quand « Vendu en » est l'unité du besoin (m³ de béton), la contenance est le pas d'arrondi.
 
-| Fourniture | Vendu en | Contenance | Unité | Confiance | Source |
-|---|---|---|---|---|---|
-| Fourniture exemple | rouleau | 10 | m² | à vérifier | S1 |
+Colonne facultative « Consommable » (oui / non) : un consommable de pose (vis, mastic, mousse, colle) ne sort que sur le
+« oui » à la question consommables (règle numéro un, §49.1 point 4), orange « Consommable ajouté sur ton oui ».
+
+| Fourniture | Vendu en | Contenance | Unité | Confiance | Source | Consommable |
+|---|---|---|---|---|---|---|
+| Fourniture exemple | rouleau | 10 | m² | à vérifier | S1 | non |
 
 ## 5. Questions
 

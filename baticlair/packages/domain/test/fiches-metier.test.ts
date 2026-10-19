@@ -44,9 +44,10 @@ function epreuve(f: FicheMetier) {
   const ref = referentielDeFiche(f);
   const lecture = lectureDuTest(f);
   const avant = ecranDeLecture({ ref, lecture, fiche: f });
-  const posees = avant.purchase.questions.flatMap((d) => (d.question ? [d.question.key.replace(/^fiche:/, "")] : []));
+  const posees = avant.purchase.questions.flatMap((d) => (d.question ? [d.question.key.replace(/^(?:fiche|param):/, "")] : []));
   const sansQuestion = avant.purchase.toBuy.filter((b) => (b.waitsOn?.length ?? 0) === 0 && b.state !== "ready").map((b) => b.label);
-  const answers = Object.fromEntries(Object.entries(f.test.reponses).map(([k, v]) => [`fiche:${k}`, v]));
+  // LA question consommables (règle numéro un, §49.1 point 4) garde sa clé ; les autres sont celles de la fiche.
+  const answers = Object.fromEntries(Object.entries(f.test.reponses).map(([k, v]) => [k === "consommables" ? `param:${k}` : `fiche:${k}`, v]));
   const apres = ecranDeLecture({ ref, lecture, fiche: f, answers });
   const oranges = apres.purchase.toBuy.filter((b) => (b.waitsOn?.length ?? 0) > 0).map((b) => b.label);
   const comptes = Object.fromEntries(apres.purchase.toBuy.map((b) => [b.label, b.quantity]));
@@ -133,7 +134,7 @@ describe("§52 : le format commun des fiches métier", () => {
   it("une donnée écrite au devis (dans « donnees ») tranche la condition : pas de question", () => {
     const f = parseFicheMetier(ESSAI, "essai");
     const lecture = lectureDuTest(f);
-    lecture.lignes[0]!.fournitures[0]!.donnees = { epaisseur: "15" };
+    lecture.lignes[0]!.fournitures[0]!.donnees = { epaisseur: "15,0" };
     const e = ecranDeLecture({ ref: referentielDeFiche(f), lecture, fiche: f });
     expect(e.purchase.questions.filter((d) => d.question)).toEqual([]);
     expect(e.purchase.toBuy.find((b) => b.label === "Béton C25/30")?.quantity).toBe("3 m³");
@@ -176,6 +177,23 @@ describe("§52 : le format commun des fiches métier", () => {
     // Validée par trois entreprises (§47.4) : verte partout.
     const v = ecranDeLecture({ ref, lecture, fiche: f, answers, validated: new Set(geo.toConfirm!.map((r) => r.key)) });
     expect(v.purchase.toBuy.find((b) => b.label === "Géotextile 150 g/m²")!.toConfirm).toBeUndefined();
+  });
+
+  it("règle numéro un (§49.1 point 4) : un consommable de la fiche attend LA question consommables ; « non » : rien ; « oui » : orange", () => {
+    const f = FICHES.find((x) => x.code === "charpente")!;
+    const ref = referentielDeFiche(f);
+    const lecture = lectureDuTest(f);
+    const base = { "fiche:longueur_chevron": "450", "fiche:entraxe_chevrons": "60" };
+    const avant = ecranDeLecture({ ref, lecture, fiche: f, answers: base });
+    expect(avant.purchase.toBuy.map((b) => b.label)).not.toContain("Vis de charpente 8×160");
+    expect(avant.purchase.questions.map((d) => d.question?.key)).toContain("param:consommables");
+    const non = ecranDeLecture({ ref, lecture, fiche: f, answers: { ...base, "param:consommables": "0" } });
+    expect(non.purchase.toBuy.map((b) => b.label)).not.toContain("Vis de charpente 8×160");
+    expect(non.purchase.questions.map((d) => d.question?.key)).not.toContain("param:consommables");
+    const oui = ecranDeLecture({ ref, lecture, fiche: f, answers: { ...base, "param:consommables": "1" }, validated: new Set() });
+    const vis = oui.purchase.toBuy.find((b) => b.label === "Vis de charpente 8×160")!;
+    expect(vis.consumable).toBe(true);
+    expect(vis.toConfirm?.map((r) => r.text)).toContain("Consommable ajouté sur ton oui : retire-le s'il ne sert pas");
   });
 
   it("le registre : un métier déclaré par une fiche est un métier de BatiClair, son état dit la mention §52", () => {

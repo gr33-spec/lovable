@@ -114,17 +114,17 @@ n(s) = max(2, ⌈(s − 0,30) ÷ e⌉ + 1), e = 0,80 m (0,60 m pour une baie cou
 
 ## 4. Conditionnements
 
-| Fourniture | Vendu en | Contenance | Unité | Confiance | Source |
-|---|---|---|---|---|---|
-| Mousse imprégnée précomprimée 15/3-7 | rouleau | 8 | m | sûr | S1 |
-| Mousse PU basse expansion 750 ml | aérosol | 15 | m | à vérifier | S2 |
-| Mastic MS polymère 290 ml | cartouche | 5,2 | m | usuel | S3 |
-| Mastic acrylique 310 ml | cartouche | 14 | m | à vérifier | S3 |
-| Vis de cadre FFS 7,5 × 152 | boîte | 100 | u | sûr | S4 |
-| Bande d'étanchéité à l'air 100 mm | rouleau | 25 | m | sûr | S5 |
-| Habillage intérieur PVC plat 100 mm | barre | 3 | m | sûr | S6 |
-| Cornière d'habillage extérieur PVC | barre | 3 | m | sûr | S6 |
-| Cheville de fixation de cadre 8 × 80 | boîte | 100 | u | à vérifier | S9 |
+| Fourniture | Vendu en | Contenance | Unité | Confiance | Source | Consommable |
+|---|---|---|---|---|---|---|
+| Mousse imprégnée précomprimée 15/3-7 | rouleau | 8 | m | sûr | S1 | non |
+| Mousse PU basse expansion 750 ml | aérosol | 15 | m | à vérifier | S2 | oui |
+| Mastic MS polymère 290 ml | cartouche | 5,2 | m | usuel | S3 | oui |
+| Mastic acrylique 310 ml | cartouche | 14 | m | à vérifier | S3 | oui |
+| Vis de cadre FFS 7,5 × 152 | boîte | 100 | u | sûr | S4 | oui |
+| Bande d'étanchéité à l'air 100 mm | rouleau | 25 | m | sûr | S5 | non |
+| Habillage intérieur PVC plat 100 mm | barre | 3 | m | sûr | S6 | non |
+| Cornière d'habillage extérieur PVC | barre | 3 | m | sûr | S6 | non |
+| Cheville de fixation de cadre 8 × 80 | boîte | 100 | u | à vérifier | S9 | oui |
 
 ## 5. Questions
 
@@ -155,12 +155,14 @@ Devis d'épreuve écrit à la main (synthétique, anonyme) : remplacement des me
 
 ### Questions attendues
 
+- `consommables`
 - `format_depose`
 - `format_reno`
 - `format_neuf`
 
 ### Réponses
 
+- `consommables` = 1
 - `format_depose` = fenetre
 - `format_reno` = porte_fenetre
 - `format_neuf` = baie
