@@ -132,10 +132,10 @@ activer l'auto-reload. Le forfait Claude (claude.ai) est un autre compteur et ne
 | 2 | PR 7954 en CI | fait ; vraie lecture en file (§2 bis) |
 | 3 | Étape 0 : socle `referentiels/metiers/` (format 8 sections, registre par fichier, « Métiers couverts », cache de prompt) | fait (#265, en prod) |
 | 4 | Étape 1-2 : 14 nouveaux référentiels, un par PR, dans l'ordre du §1 | 5/14 faits : terrassement-VRD (#266), maçonnerie (#267), charpente (#268), étanchéité déclarée (#269, tiroir relu gardé), menuiseries extérieures (#270), en prod ; #271 ratios « à vérifier » en orange, #272 consommables des fiches, menuiserie intérieure (#273), plâtrerie-isolation (#274), plomberie-sanitaire (#275), chauffage-PAC-VMC (#276), en prod ; carrelage-faïence (#277) ; sols souples et parquet (#278) ; peinture-finitions (#279) ; serrurerie-métallerie (`metalwork`, #280) ; ravalement-ITE (fiche, PR ouverte) : 16/16 métiers de l'étape 2 faits (couverture et électricité non touchées) |
-| 5 | Étape 3 : devis maison complète 8 lots | fait : `apps/api/test/maison-entiere-8-lots.test.ts` (maçonnerie, électricité, plomberie, carrelage, sols, peinture, serrurerie, façade ; carte des lots, une section par lot, envoi par lot), PR ouverte |
+| 5 | Étape 3 : devis maison complète 8 lots | fait (#282) : `apps/api/test/maison-entiere-8-lots.test.ts` (maçonnerie, électricité, plomberie, carrelage, sols, peinture, serrurerie, façade ; carte des lots, une section par lot, envoi par lot) |
 | 6 | Mission B, boucle 1 à 5, jusqu'au vendredi 23 octobre 12 h | à faire |
 
-Prochaine étape : fusionner l'étape 3, puis tableau de bord final (étape 2), puis boucle de la mission B (épreuves, robustesse, écrans iPhone), sans API. Au retour du crédit : file du §2 bis.
+Tableau de bord : `baticlair/docs/tableau-de-bord-metiers.md` (écrit par un test). Prochaine étape : puis boucle de la mission B (épreuves, robustesse, écrans iPhone), sans API. Au retour du crédit : file du §2 bis.
 
 ## 5. Mesures (temps et coût par devis)
 
