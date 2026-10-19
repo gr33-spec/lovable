@@ -164,13 +164,13 @@ const EPREUVES: Record<string, { compte: string; epreuves: Epreuve[] }> = {
       {
         nom: "chevronnage : longueur et entraxe écrits, aucune question",
         lignes: [{ libelle: "Chevronnage sapin traité 63×75, chevrons L 4,00 m entraxe 60 cm", quantite: "80", unite: "m²" }],
-        questions: {},
+        questions: { consommables: "1" },
         commande: { "Chevron 63×75 traité classe 2 L 4,00 m": "36 pièces", "Vis de charpente 8×160": "2 boîtes de 50 u" },
       },
       {
         nom: "chevrons 6/8 sans longueur ni entraxe : deux questions",
         lignes: [{ libelle: "Chevrons 6/8 sapin traité classe 2", quantite: "50", unite: "m²" }],
-        questions: { longueur_chevron: "500", entraxe_chevrons: "50" },
+        questions: { longueur_chevron: "500", entraxe_chevrons: "50", consommables: "1" },
         commande: { "Chevron 63×75 traité classe 2 L 5,00 m": "22 pièces", "Vis de charpente 8×160": "2 boîtes de 50 u" },
       },
       {
@@ -200,7 +200,7 @@ const EPREUVES: Record<string, { compte: string; epreuves: Epreuve[] }> = {
           { libelle: "Planches de rive sapin traité", quantite: "30", unite: "ml" },
           { libelle: "Sablière ancrée sur maçonnerie", quantite: "16", unite: "ml" },
         ],
-        questions: {},
+        questions: { consommables: "1" },
         commande: { "Planche de rive sapin traité": "8 pièces de 4 m", "Goujon d'ancrage béton M10": "1 boîte de 50 u" },
         ecrits: ["Fermettes industrielles sur plan, lot fabricant"],
       },
@@ -212,7 +212,7 @@ const EPREUVES: Record<string, { compte: string; epreuves: Epreuve[] }> = {
       {
         nom: "fenêtres en dépose totale : la fenêtre reste telle qu'écrite, la pose ajoute ses fournitures",
         lignes: [{ libelle: "Fenêtre PVC 2 vantaux 1200 × 1350, pose en dépose totale", quantite: "3", unite: "u" }],
-        questions: {},
+        questions: { consommables: "1" },
         commande: {
           "Mousse imprégnée précomprimée 15/3-7": "3 rouleaux de 8 m",
           "Mousse PU basse expansion 750 ml": "2 aérosols de 15 m",
@@ -226,7 +226,7 @@ const EPREUVES: Record<string, { compte: string; epreuves: Epreuve[] }> = {
       {
         nom: "portes-fenêtres en rénovation sur dormant : habillages intérieur et extérieur",
         lignes: [{ libelle: "Porte-fenêtre PVC 2 vantaux, pose en rénovation sur dormant existant", quantite: "2", unite: "u" }],
-        questions: {},
+        questions: { consommables: "1" },
         commande: {
           "Mastic MS polymère 290 ml": "3 cartouches de 5,2 m",
           "Mastic acrylique 310 ml": "1 cartouche de 14 m",
@@ -243,7 +243,7 @@ const EPREUVES: Record<string, { compte: string; epreuves: Epreuve[] }> = {
           { libelle: "Baie coulissante alu, pose en applique", quantite: "1", unite: "u" },
           { libelle: "Fenêtre alu fixe, pose en applique", quantite: "1", unite: "u" },
         ],
-        questions: {},
+        questions: { consommables: "1" },
         commande: {
           "Mousse imprégnée précomprimée 15/3-7": "2 rouleaux de 8 m",
           "Bande d'étanchéité à l'air 100 mm": "1 rouleau de 25 m",
@@ -257,7 +257,7 @@ const EPREUVES: Record<string, { compte: string; epreuves: Epreuve[] }> = {
           { libelle: "Porte d'entrée alu vitrée", quantite: "1", unite: "u" },
           { libelle: "Volet roulant rénovation radio", quantite: "3", unite: "u" },
         ],
-        questions: {},
+        questions: { consommables: "1" },
         commande: {
           "Mousse imprégnée précomprimée 15/3-7": "1 rouleau de 8 m",
           "Mousse PU basse expansion 750 ml": "1 aérosol de 15 m",
@@ -269,7 +269,7 @@ const EPREUVES: Record<string, { compte: string; epreuves: Epreuve[] }> = {
       {
         nom: "menuiseries sans cotes ni type : le format se demande",
         lignes: [{ libelle: "Menuiseries PVC, pose en dépose totale", quantite: "5", unite: "u" }],
-        questions: { format_depose: "petite" },
+        questions: { format_depose: "petite", consommables: "1" },
         commande: {
           "Mousse imprégnée précomprimée 15/3-7": "3 rouleaux de 8 m",
           "Mousse PU basse expansion 750 ml": "2 aérosols de 15 m",
@@ -297,7 +297,7 @@ beforeEach(async () => {
 
 type Vue = { id: string; metier: string; peut_partir: boolean; questions: { id: string }[]; lignes: { libelle: string; texte: string; a_confirmer: boolean; raison?: string }[] };
 const RATIO = "ratio:";
-const cleDe = (id: string) => id.replace(/^(?:engine:)?fiche:/, "");
+const cleDe = (id: string) => id.replace(/^(?:engine:)?(?:fiche|param):/, "");
 
 describe("§52 : cinq devis d'épreuve par métier, par le faux lecteur", () => {
   for (const [metier, { compte, epreuves }] of Object.entries(EPREUVES)) {
@@ -314,8 +314,8 @@ describe("§52 : cinq devis d'épreuve par métier, par le faux lecteur", () => 
           q = (await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses }).expect(201)).body as Vue;
           expect(fiche(q)).toEqual([]);
         }
-        // §47.1 : une ligne orange dit sa règle ; « C'est bon » sur chacune, puis la liste peut partir.
-        for (const l of q.lignes.filter((x) => x.a_confirmer)) expect(l.raison, l.libelle).toMatch(/^Quantité à confirmer : \S/);
+        // §47.1 : une ligne orange dit sa règle (ou « consommable sur ton oui », §49.1) ; « C'est bon » sur chacune, puis la liste part.
+        for (const l of q.lignes.filter((x) => x.a_confirmer)) expect(l.raison, l.libelle).toMatch(/^(?:Quantité à confirmer : \S|Consommable ajouté sur ton oui)/);
         const ok = q.questions.filter((x) => x.id.startsWith(RATIO)).map((x) => ({ question: x.id, valeur: "ok" }));
         if (ok.length > 0) q = (await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: ok }).expect(201)).body as Vue;
         expect(q.questions).toEqual([]);

@@ -1,7 +1,7 @@
 import { Decimal } from "../shared/decimal.js";
 import { parseUnit, type UnitCode } from "../quantity/unit.js";
 import { paramsFromContext, type ChantierContext, type SiteFact } from "../referential/context.js";
-import { CONSUMABLES_KEY, type CompanyPreferences, type EngineOptions, type ParamValue, type Question, type WorkItemInput } from "../referential/engine.js";
+import { CONSUMABLES_KEY, CONSUMABLES_QUESTION, type CompanyPreferences, type EngineOptions, type ParamValue, type Question, type WorkItemInput } from "../referential/engine.js";
 import { FICHE_PARAMS_CHANTIER, ficheFacts, parseFiche, parseFicheEnregistree, type FicheChantier } from "../referential/fiche.js";
 import type { LineRole, RoleProposal } from "../referential/line-roles.js";
 import { baseOf, INSTANCE_SEP, type Referential, type Slot, type WorkItemType } from "../referential/model.js";
@@ -592,13 +592,23 @@ export function ecranDeLecture(input: {
   const pointIds = new Set(lignes.filter((l) => estPoint(l) && nombre(l.fourniture?.quantite ?? l.quantity) !== null).map((l) => l.id));
   const generiques = () => lignes.filter((l) => !pointIds.has(l.id));
   const lignesPoint = lignes.filter((l) => pointIds.has(l.id));
-  const points: ArticleElectrique[] = fiche
+  const tous: ArticleElectrique[] = fiche
     ? fournituresDeFiche(
         fiche,
         lignesPoint.map((l) => ({ id: l.id, ref: l.ligne.ref, ouvrage: l.fourniture!.ouvrage!, quantite: nombre(l.fourniture!.quantite ?? l.quantity)!, attend: l.fourniture!.attend, donnees: l.fourniture!.donnees ?? {} })),
         answers,
       )
     : fournituresElectriques(lignesPoint.map((l) => ({ id: l.id, ref: l.ligne.ref, point: pointElectrique(l.fourniture!.ouvrage)!, quantite: nombre(l.fourniture!.quantite ?? l.quantity)!, attend: l.fourniture!.attend })));
+  // §52 et règle numéro un (§49.1 point 4) : un consommable de pose de la fiche ne sort que sur le « oui » à LA question
+  // consommables (ou l'habitude de l'entreprise) ; sans réponse, la question se pose ; sur « non », rien.
+  const consoBrut = answers[`param:${CONSUMABLES_KEY}`] ?? input.preferences?.params?.[CONSUMABLES_KEY];
+  const conso = consoBrut === undefined || consoBrut === null ? null : typeof consoBrut === "string" ? consoBrut : String((consoBrut as { value: unknown }).value);
+  const estConso = (a: ArticleElectrique) => "consommable" in a && (a as ArticleFiche).consommable;
+  // La question se pose avec les autres, d'un coup (§48.3) : dès qu'un ouvrage écrit PEUT donner un consommable, même
+  // derrière une condition encore ouverte.
+  const consoDeLaFiche = new Set((fiche?.conditionnements ?? []).filter((c) => c.consommable).map((c) => c.fourniture));
+  const consoEnAttente = conso === null && (tous.some(estConso) || (fiche !== null && lignesPoint.some((l) => fiche.ratios.some((r) => r.ouvrage === l.fourniture?.ouvrage && consoDeLaFiche.has(r.fourniture)))));
+  const points = tous.filter((a) => !estConso(a) || Number(conso) >= 1);
   const plan = planDeLecture(ref, lecture, generiques(), input.extraFacts);
   const validation = validationDeLecture(ref.trade, generiques(), plan, new Set([...(input.lines ?? new Map())].filter(([, v]) => v.confirmed).map(([k]) => k)));
   const roles = new Map<string, RoleProposal>();
@@ -666,6 +676,10 @@ export function ecranDeLecture(input: {
       const lq: LectureQuestion = { cle: q.cle, texte: q.texte, boutons: q.boutons, unite: null, donnee: q.cle.replace(/_/g, " "), ligne: null };
       asked.push({ q: lq, key, question: { key, kind: "choose", text: q.texte, options: q.boutons.map((b) => ({ label: b.label, value: b.valeur })), named: true } });
     }
+    if (consoEnAttente && !asked.some((a) => a.key === CONSUMABLES_QUESTION.key)) {
+      const lq: LectureQuestion = { cle: CONSUMABLES_KEY, texte: CONSUMABLES_QUESTION.text, boutons: (CONSUMABLES_QUESTION.options ?? []).map((o) => ({ label: o.label, valeur: o.value })), unite: null, donnee: "consommables", ligne: null };
+      asked.push({ q: lq, key: CONSUMABLES_QUESTION.key, question: CONSUMABLES_QUESTION });
+    }
   }
   // La lecture est faite ; le calcul demande ce qui lui manque encore (voir plus bas, le filet de sécurité).
   // Filet de sécurité : une donnée que le calcul réclame et que le modèle n'a pas demandée (une question que révèle une
@@ -710,7 +724,7 @@ export function ecranDeLecture(input: {
   const needed = (a: Asked) => fallback.some((q) => q.key === a.key || scopedParam(q.key)?.name === a.q.cle || q.key === `param:${a.q.cle}`);
   // Une question qu'attend une fourniture des points (la teinte, la gamme) reste : le calcul générique ne la voit pas.
   const attendPoints = new Set(points.flatMap((p) => p.attend));
-  const live = asked.filter((a) => !hasAnswers || a.key.startsWith("fiche:") || a.key.startsWith("product:") || a.key.startsWith(UNITE_KEY) || attendPoints.has(a.q.cle) || needed(a) || answers[a.key] === null);
+  const live = asked.filter((a) => !hasAnswers || a.key.startsWith("fiche:") || a.key.startsWith("product:") || a.key.startsWith(UNITE_KEY) || attendPoints.has(a.q.cle) || (consoEnAttente && a.key === CONSUMABLES_QUESTION.key) || needed(a) || answers[a.key] === null);
   const questions = live.filter((a) => !answered(a)).map((a) => a.question);
   const viewLines = generiques().map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: input.lines?.get(l.id)?.confirmed ?? false, enteredByArtisan: input.lines?.get(l.id)?.enteredByArtisan ?? false }));
   const view = artisanView(viewLines, validation, { needs: engine.needs, questions, declined: engine.declined }, { plan, roles: roleOf, ref });
@@ -1032,7 +1046,12 @@ function finishPurchase(
       assumptionKeys: [],
       ...(waits.length > 0 ? { waitsOn: waits.map((w) => w.key), asks: waits.map((w) => ({ key: w.key, text: w.question.text.replace(/\s*\?$/, ""), unit: w.question.unit ?? null, options: w.question.options ?? [] })) } : {}),
       // §47.1, §52 : un ratio ou un conditionnement « à vérifier » de la fiche : orange « Quantité à confirmer », « C'est bon ».
-      ...("aConfirmer" in a && (a as ArticleFiche).aConfirmer.length > 0 ? { rules: (a as ArticleFiche).aConfirmer } : {}),
+      // Un consommable accepté sur le « oui » : orange, « Consommable ajouté sur ton oui », comme dans les tiroirs (§49.1).
+      ...(() => {
+        const fa = "aConfirmer" in a ? (a as ArticleFiche) : null;
+        const rules = [...(fa?.aConfirmer ?? []), ...(fa?.consommable ? [{ key: `consommable:${a.key}`, text: "Consommable ajouté sur ton oui : retire-le s'il ne sert pas", local: true as const, said: true as const }] : [])];
+        return { ...(rules.length > 0 ? { rules } : {}), ...(fa?.consommable ? { consumable: true } : {}) };
+      })(),
     });
   }
   // Les décisions de la liste qui ne sont pas des questions du calcul (la quantité d'un modèle écrit par l'artisan) restent.

@@ -52,6 +52,11 @@ export interface ConditionnementFiche {
   unite: string;
   confiance: Confiance;
   source: string;
+  /**
+   * Un consommable de pose (vis, mastic, mousse) : il ne sort que sur le « oui » à LA question consommables (règle numéro
+   * un, §49.1 point 4), orange « Consommable ajouté sur ton oui ». Colonne « Consommable » = oui.
+   */
+  consommable: boolean;
 }
 
 export interface QuestionFiche {
@@ -169,6 +174,7 @@ export function parseFicheMetier(texte: string, fichier = "fiche"): FicheMetier 
     unite: col(r, "unite"),
     confiance: confianceDe(col(r, "confiance")),
     source: col(r, "source"),
+    consommable: /^oui/i.test(col(r, "consommable")),
   }));
   const questions = tableau(s.get(5) ?? "").map((r) => ({
     cle: col(r, "cle"),
@@ -280,6 +286,8 @@ export interface ArticleFiche {
   aConfirmer: { key: string; text: string }[];
   /** Le niveau de confiance le plus faible de ses ratios et conditionnements (§7). */
   confiance: Confiance;
+  /** Un consommable de pose : seulement sur le « oui » à la question consommables. */
+  consommable: boolean;
 }
 
 /** Le pluriel français d'une unité commandable (« panneau » → « panneaux », « sac » → « sacs ») ; le premier mot seulement. */
@@ -305,7 +313,9 @@ export function fournituresDeFiche(fiche: FicheMetier, lignes: readonly LigneFic
     const d = l.donnees[cle];
     return d && d.trim() ? d : null;
   };
-  const egal = (a: string, b: string) => normalizeText(a).replace(/\s+/g, "_") === normalizeText(b).replace(/\s+/g, "_");
+  // « 1,8 » vaut « 1.8 », « 2 » vaut « 2.0 » ; un texte se compare sans accents ni espaces.
+  const num = (t: string) => (/^\s*\d+(?:[.,]\d+)?\s*$/.test(t) ? Number(t.replace(",", ".")) : null);
+  const egal = (a: string, b: string) => (num(a) !== null && num(b) !== null ? num(a) === num(b) : normalizeText(a).replace(/\s+/g, "_") === normalizeText(b).replace(/\s+/g, "_"));
   const parFourniture = new Map<string, { parts: { id: string; ref: string; n: number }[]; attend: Set<string>; confiance: Confiance; regles: Map<string, string> }>();
   const slug = (t: string) => normalizeText(t).replace(/[^a-z0-9]+/g, "-");
   const unitesDe = new Map(fiche.ouvrages.map((o) => [o.id, o.unite]));
@@ -341,7 +351,7 @@ export function fournituresDeFiche(fiche: FicheMetier, lignes: readonly LigneFic
     const lineIds = [...new Set(e.parts.map((p) => p.id))];
     if (fourniture.startsWith("?")) {
       const o = fiche.ouvrages.find((x) => `?${x.id}` === fourniture)!;
-      return { key: `fiche:${fiche.code}:${o.id}`, label: o.libelle, quantite: `${fr(total)} ${o.unite}`, order: { count: fr(total), unit: o.unite }, approx: null, precision: trace(parts, o.unite), lineIds, attend: [...e.attend], total, confiance: e.confiance, aConfirmer: [] };
+      return { key: `fiche:${fiche.code}:${o.id}`, label: o.libelle, quantite: `${fr(total)} ${o.unite}`, order: { count: fr(total), unit: o.unite }, approx: null, precision: trace(parts, o.unite), lineIds, attend: [...e.attend], total, confiance: e.confiance, aConfirmer: [], consommable: false };
     }
     const unite = fiche.ratios.find((r) => r.fourniture === fourniture)!.unite;
     const c = fiche.conditionnements.find((x) => x.fourniture === fourniture)!;
@@ -363,6 +373,7 @@ export function fournituresDeFiche(fiche: FicheMetier, lignes: readonly LigneFic
       total,
       confiance,
       aConfirmer: [...e.regles].map(([key, text]) => ({ key, text })),
+      consommable: c.consommable,
     };
   });
 }
