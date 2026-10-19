@@ -164,11 +164,12 @@ export function ouvrageDeFiche(fiche: FicheMetier, designation: string, unite: s
     }
   }
   if (!best) return null;
-  const texte = designation.toLowerCase().replace(/\s+/g, " ");
+  // « 60x60 » et « 60×60 » s'écrivent pareil.
+  const texte = designation.toLowerCase().replace(/×/g, "x").replace(/\s+/g, " ");
   const donnees: Record<string, string> = {};
   for (const q of fiche.questions.filter((x) => x.ouvrages.includes(best.ouvrage))) {
     // Le bouton le plus long écrit sur la ligne (« 2,2 m² » plutôt que « 2 m² »).
-    const b = [...q.boutons].sort((x, y) => y.label.length - x.label.length).find((x) => x.label.length >= 3 && new RegExp(`(?:^|[^\\p{L}\\d])${x.label.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![\\p{L}\\d])`, "u").test(texte));
+    const b = [...q.boutons].sort((x, y) => y.label.length - x.label.length).find((x) => x.label.length >= 3 && new RegExp(`(?:^|[^\\p{L}\\d])${x.label.toLowerCase().replace(/×/g, "x").replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![\\p{L}\\d])`, "u").test(texte));
     if (b) donnees[q.cle] = b.valeur;
   }
   return { ouvrage: best.ouvrage, donnees };
