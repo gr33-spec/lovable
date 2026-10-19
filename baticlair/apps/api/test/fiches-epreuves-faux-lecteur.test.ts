@@ -556,6 +556,57 @@ const EPREUVES: Record<string, { compte: string; epreuves: Epreuve[] }> = {
       },
     ],
   },
+  tiling: {
+    compte: "carrelage",
+    epreuves: [
+      {
+        nom: "60x60 pose droite écrite : cartons, colle double encollage, joint",
+        lignes: [{ libelle: "Carrelage sol grès cérame 60x60 rectifié, pose droite", quantite: "30", unite: "m²" }],
+        questions: {},
+        commande: { "Carreau de sol 60×60": "23 cartons de 1,44 m²", "Mortier-colle C2 S1": "7 sacs de 25 kg", "Mortier de joint": "1 sac de 5 kg" },
+      },
+      {
+        nom: "45x45 en diagonale : 12 % de coupes",
+        lignes: [{ libelle: "Carrelage sol 45x45 en diagonale", quantite: "20", unite: "m²" }],
+        questions: {},
+        commande: { "Carreau de sol 45×45": "14 cartons de 1,62 m²", "Mortier-colle C2 S1": "5 sacs de 25 kg", "Mortier de joint": "1 sac de 5 kg" },
+      },
+      {
+        nom: "faïence 30x60 et plinthes assorties à la pièce",
+        lignes: [
+          { libelle: "Faïence murale 30x60", quantite: "15", unite: "m²" },
+          { libelle: "Plinthes assorties", quantite: "20", unite: "ml" },
+        ],
+        questions: {},
+        commande: { "Faïence 30×60": "12 cartons de 1,44 m²", "Mortier-colle C2 S1": "4 sacs de 25 kg", "Mortier de joint": "1 sac de 5 kg", "Plinthe carrelage 8 × 60": "35 plinthes de 0,6 m" },
+      },
+      {
+        nom: "protection à l'eau de la douche, receveur tel qu'écrit",
+        lignes: [
+          { libelle: "Système de protection à l'eau sous carrelage", quantite: "8", unite: "m²" },
+          { libelle: "Receveur de douche 90 × 90", quantite: "1", unite: "u" },
+        ],
+        questions: {},
+        commande: { "Résine de protection à l'eau (SPEC)": "1 seau de 7 kg", "Primaire avant SPEC": "2 bidons" },
+        ecrits: ["@2"],
+      },
+      {
+        nom: "ragréage 5 mm écrit, carrelage sans format ni pose : deux questions",
+        lignes: [
+          { libelle: "Ragréage P3 5 mm", quantite: "25", unite: "m²" },
+          { libelle: "Carrelage sol grès cérame", quantite: "25", unite: "m²" },
+        ],
+        questions: { format_sol: "60x120", pose_sol: "decalee" },
+        commande: {
+          "Ragréage autolissant P3": "8 sacs de 25 kg",
+          "Primaire d'accrochage": "1 bidon de 5 kg",
+          "Carreau de sol 60×120": "20 cartons de 1,44 m²",
+          "Mortier-colle C2 S1": "7 sacs de 25 kg",
+          "Mortier de joint": "1 sac de 5 kg",
+        },
+      },
+    ],
+  },
 };
 
 let ctx: TestContext;

@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { CARRELAGE_REFERENTIAL, ficheDeCalcul, METIER_NAMES, PEINTURE_REFERENTIAL, referentielDeFiche, REFERENTIALS, ROOFING_REFERENTIAL } from "@baticlair/domain";
+import { ficheDeCalcul, METIER_NAMES, PEINTURE_REFERENTIAL, referentielDeFiche, REFERENTIALS, ROOFING_REFERENTIAL } from "@baticlair/domain";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
 /**
@@ -52,7 +52,8 @@ describe("la porte choisit le référentiel selon le métier", () => {
 
   it("lot B, paquet 1 : carrelage, peinture, maçonnerie ont leur tiroir ; chaque ligne calculée sort avec son chiffre, orange si sa règle est à confirmer", async () => {
     const cas = [
-      { trade: "tiling", metier: "carrelage", ref: CARRELAGE_REFERENTIAL, ligne: { libelle: "Carrelage sol grès cérame 60x60 rectifié", quantite: "42", unite: "m²" }, article: /60×60/ },
+      // §52 (2026-10-19) : le carrelage est calculé par sa fiche métier ; format et pose écrits, aucune question.
+      { trade: "tiling", metier: "carrelage", ref: referentielDeFiche(ficheDeCalcul("tiling")!), ligne: { libelle: "Carrelage sol grès cérame 60x60 rectifié, pose droite", quantite: "42", unite: "m²" }, article: /60×60/ },
       { trade: "painting", metier: "peinture", ref: PEINTURE_REFERENTIAL, ligne: { libelle: "Peinture plafonds mate, impression + 2 couches", quantite: "85", unite: "m²" }, article: /[Pp]einture/ },
       // §52 (2026-10-19) : la maçonnerie est calculée par sa fiche métier (`referentiels/metiers/maconnerie.md`) ; « 5 cm » écrit tranche l'épaisseur.
       { trade: "masonry", metier: "maconnerie", ref: referentielDeFiche(ficheDeCalcul("masonry")!), ligne: { libelle: "Chape ciment 5 cm", quantite: "35", unite: "m²" }, article: /^Ciment/ },
