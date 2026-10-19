@@ -700,6 +700,57 @@ const EPREUVES: Record<string, { compte: string; epreuves: Epreuve[] }> = {
       },
     ],
   },
+  metalwork: {
+    compte: "serrurerie",
+    epreuves: [
+      {
+        nom: "garde-corps galvanisé écrit : barres de 6 m, platines, scellement sur ton oui",
+        lignes: [{ libelle: "Garde-corps acier à barreaudage galvanisé", quantite: "6", unite: "ml" }],
+        questions: { consommables: "1" },
+        commande: {
+          "Tube carré acier 20 × 20 (barreaux)": "8 barres de 6 m",
+          "Tube carré acier 40 × 40 (main courante, lisse, poteaux)": "3 barres de 6 m",
+          "Platine acier 150 × 150 × 8": "5 pièces",
+          "Scellement chimique, cartouche de 300 ml": "1 cartouche",
+        },
+      },
+      {
+        nom: "garde-corps sans finition : peint, antirouille et laque en pots",
+        lignes: [{ libelle: "Garde-corps métallique", quantite: "10", unite: "ml" }],
+        questions: { finition: "peint", consommables: "1" },
+        commande: {
+          "Tube carré acier 20 × 20 (barreaux)": "13 barres de 6 m",
+          "Tube carré acier 40 × 40 (main courante, lisse, poteaux)": "5 barres de 6 m",
+          "Platine acier 150 × 150 × 8": "7 pièces",
+          "Scellement chimique, cartouche de 300 ml": "1 cartouche",
+          "Primaire antirouille": "1 pot",
+          "Laque glycéro métal": "1 pot",
+        },
+      },
+      {
+        nom: "grille de défense : carré plein et fer plat en barres",
+        lignes: [{ libelle: "Grille de défense acier", quantite: "6", unite: "m²" }],
+        questions: {},
+        commande: { "Carré plein acier 14 × 14 (barreaux)": "9 barres de 6 m", "Fer plat acier 30 × 8 (traverses)": "3 barres de 6 m" },
+      },
+      {
+        nom: "clôture 1,73 m écrite, portillon tel qu'écrit",
+        lignes: [
+          { libelle: "Clôture en panneaux rigides 1,73 m", quantite: "50", unite: "ml" },
+          { libelle: "Portillon assorti 1 m", quantite: "1", unite: "u" },
+        ],
+        questions: {},
+        commande: { "Panneau rigide 2,50 × 1,73 m": "20 panneaux", "Poteau de clôture à encoches": "20 poteaux" },
+        ecrits: ["@2"],
+      },
+      {
+        nom: "clôture sans hauteur : une question",
+        lignes: [{ libelle: "Clôture panneaux soudés", quantite: "25", unite: "ml" }],
+        questions: { hauteur_cloture: "1.23" },
+        commande: { "Panneau rigide 2,50 × 1,23 m": "10 panneaux", "Poteau de clôture à encoches": "10 poteaux" },
+      },
+    ],
+  },
 };
 
 let ctx: TestContext;
