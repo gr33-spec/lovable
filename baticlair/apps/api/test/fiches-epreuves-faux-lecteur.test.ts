@@ -391,6 +391,97 @@ const EPREUVES: Record<string, { compte: string; epreuves: Epreuve[] }> = {
       },
     ],
   },
+  plumbing: {
+    compte: "plomberie",
+    epreuves: [
+      {
+        nom: "deux lavabos en multicouche écrit, kits livrés : seuls tubes, raccords, coudes et colle",
+        lignes: [{ libelle: "Lavabo vasque sur meuble, alimentation multicouche", quantite: "2", unite: "u" }],
+        questions: { distance_nourrice: "5", kit_livre: "oui", consommables: "1" },
+        commande: {
+          "Tube multicouche 16 × 2": "1 couronne de 50 m",
+          "Tube PVC évacuation Ø32": "4 barres de 4 m",
+          "Raccord à sertir multicouche 16": "8 u",
+          "Coude PVC Ø32 87°30": "4 u",
+          "Colle PVC": "1 pot de 250 ml",
+        },
+        ecrits: ["@1"],
+      },
+      {
+        nom: "deux WC en PER, kits à commander, consommables refusés",
+        lignes: [
+          { libelle: "WC suspendu avec bâti-support", quantite: "1", unite: "u" },
+          { libelle: "WC à poser sortie horizontale", quantite: "1", unite: "u" },
+        ],
+        questions: { distance_nourrice: "3", tube_alimentation: "per", kit_livre: "non", consommables: "0" },
+        commande: {
+          "Tube PER pré-gainé 16": "1 couronne de 50 m",
+          "Tube PVC évacuation Ø100": "2 barres de 4 m",
+          "Raccord à glissement PER 16": "4 u",
+          "Coude PVC Ø100 87°30": "2 u",
+          "Manchon de WC Ø90/100": "1 u",
+          "Pipe de WC Ø100": "1 u",
+          "Robinet d'arrêt 15 × 21": "2 u",
+          "Flexible d'alimentation": "1 u",
+        },
+        ecrits: ["@1", "@2"],
+      },
+      {
+        nom: "douche et baignoire loin de la nourrice : diamètres 16 et 20",
+        lignes: [
+          { libelle: "Douche à l'italienne", quantite: "1", unite: "u" },
+          { libelle: "Baignoire acrylique 170 × 70", quantite: "1", unite: "u" },
+        ],
+        questions: { distance_nourrice: "8", tube_alimentation: "multicouche", kit_livre: "non", consommables: "1" },
+        commande: {
+          "Tube multicouche 16 × 2": "1 couronne de 50 m",
+          "Tube multicouche 20 × 2": "1 couronne de 50 m",
+          "Tube PVC évacuation Ø40": "5 barres de 4 m",
+          "Raccord à sertir multicouche 16": "4 u",
+          "Raccord à sertir multicouche 20": "4 u",
+          "Coude PVC Ø40 87°30": "4 u",
+          "Colle PVC": "1 pot de 250 ml",
+          "Bonde de douche Ø90": "1 u",
+          "Vidage de baignoire": "1 u",
+        },
+        ecrits: ["@1", "@2"],
+      },
+      {
+        nom: "chauffe-eau : groupe et siphon de sécurité toujours, pas de question de kit",
+        lignes: [{ libelle: "Chauffe-eau électrique 200 L", quantite: "1", unite: "u" }],
+        questions: { distance_nourrice: "3", tube_alimentation: "multicouche", consommables: "1" },
+        commande: {
+          "Tube multicouche 20 × 2": "1 couronne de 50 m",
+          "Tube PVC évacuation Ø32": "1 barre de 4 m",
+          "Raccord à sertir multicouche 20": "4 u",
+          "Coude PVC Ø32 87°30": "2 u",
+          "Colle PVC": "1 pot de 250 ml",
+          "Groupe de sécurité 20 × 27": "1 u",
+          "Siphon de groupe de sécurité": "1 u",
+        },
+        ecrits: ["@1"],
+      },
+      {
+        nom: "cuisine : évier, lave-linge, robinetterie telle qu'écrite",
+        lignes: [
+          { libelle: "Évier inox 2 bacs", quantite: "1", unite: "u" },
+          { libelle: "Alimentation et évacuation lave-linge", quantite: "1", unite: "u" },
+          { libelle: "Robinetterie mitigeur chromé", quantite: "1", unite: "u" },
+        ],
+        questions: { distance_nourrice: "5", tube_alimentation: "per", kit_livre: "non", consommables: "0" },
+        commande: {
+          "Tube PER pré-gainé 16": "1 couronne de 50 m",
+          "Tube PVC évacuation Ø40": "4 barres de 4 m",
+          "Raccord à glissement PER 16": "6 u",
+          "Coude PVC Ø40 87°30": "4 u",
+          "Bonde et siphon d'évier Ø40 avec prise lave-vaisselle": "1 u",
+          "Robinet machine à laver": "2 u",
+          "Siphon d'attente Ø40": "1 u",
+        },
+        ecrits: ["@1", "@2", "@3"],
+      },
+    ],
+  },
 };
 
 let ctx: TestContext;
