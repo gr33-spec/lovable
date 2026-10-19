@@ -338,7 +338,10 @@ export function fournituresDeFiche(fiche: FicheMetier, lignes: readonly LigneFic
     }
     // Un ouvrage dont toutes les fournitures sont sous condition non tranchée : une ligne d'attente par condition, pour
     // que la ligne du devis ne disparaisse jamais (§49.1) et que sa question soit là (§51.6).
-    if (enAttente.size > 0 && !rows.some((r) => r.conditions.every(vraie))) {
+    // Un consommable (sur le seul « oui », §49.1) ne compte pas : la cloison dont seules la bande et l'enduit sont sans
+    // condition garde sa ligne d'attente et sa question de hauteur.
+    const conso = new Set(fiche.conditionnements.filter((c) => c.consommable).map((c) => c.fourniture));
+    if (enAttente.size > 0 && !rows.some((r) => !conso.has(r.fourniture) && r.conditions.every(vraie))) {
       const e = parFourniture.get(`?${l.ouvrage}`) ?? { parts: [], attend: new Set<string>(), confiance: "à vérifier" as Confiance, regles: new Map<string, string>() };
       e.parts.push({ id: l.id, ref: l.ref, n: l.quantite });
       for (const c of enAttente) e.attend.add(c);

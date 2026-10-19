@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { CARRELAGE_REFERENTIAL, ficheDeCalcul, METIER_NAMES, PEINTURE_REFERENTIAL, PLATRERIE_REFERENTIAL, referentielDeFiche, REFERENTIALS, ROOFING_REFERENTIAL } from "@baticlair/domain";
+import { CARRELAGE_REFERENTIAL, ficheDeCalcul, METIER_NAMES, PEINTURE_REFERENTIAL, referentielDeFiche, REFERENTIALS, ROOFING_REFERENTIAL } from "@baticlair/domain";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
 /**
@@ -33,10 +33,11 @@ describe("la porte choisit le référentiel selon le métier", () => {
   it("un plaquiste (ou « metier: platrerie ») : référentiel plâtrerie ; plaques calculées (§16), rails et montants écrits « à vérifier », orange (§47.1) ; vis, bande, enduit sur le « oui » consommables", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "p@example.fr", "Plâtres Le Gall", ["drywall"]);
     const q = (await agent.post("/v1/quantitatifs").send(CLOISON)).body as Q;
-    expect(q).toMatchObject({ metier: "platrerie", version_referentiel: PLATRERIE_REFERENTIAL.version });
+    // §52 (2026-10-19) : la plâtrerie est calculée par sa fiche métier ; « hauteur 2,50 m » écrit choisit la plaque de 2,50 m.
+    expect(q).toMatchObject({ metier: "platrerie", version_referentiel: referentielDeFiche(ficheDeCalcul("drywall")!).version });
     const commande = q.lignes.map((l) => `${l.libelle} : ${l.quantite}`);
-    // 40 m² × 2 faces × 1,10 ÷ 3 m² (BA13 1,20 × 2,50) = 30 plaques.
-    expect(commande).toEqual(expect.arrayContaining([expect.stringMatching(/BA13.* : 30$/)]));
+    // 40 m² × 2 faces × 1,05 ÷ 3 m² (BA13 1,20 × 2,50, chutes du ratio Placo) = 28 plaques (avant la fiche : × 1,10 = 30).
+    expect(commande).toEqual(expect.arrayContaining([expect.stringMatching(/BA13.* : 28$/)]));
     expect(commande.filter((l) => /[Vv]is|[Bb]ande|[Ee]nduit/.test(l))).toEqual([]);
     // Rails, montants : chiffres d'usage non validés par un plaquiste → calculés, mais « Quantité à confirmer » (§47.1, §47.3).
     const rails = q.lignes.find((l) => /[Rr]ail/.test(l.libelle))!;

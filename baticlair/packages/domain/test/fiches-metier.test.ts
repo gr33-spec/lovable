@@ -144,7 +144,7 @@ describe("§52 : le format commun des fiches métier", () => {
     it(`${f.code} : son test permanent (section 6) passe`, () => {
       const r = epreuve(f);
       expect(r.sansQuestion).toEqual([]);
-      expect([...r.posees].sort()).toEqual([...f.test.questions].sort());
+      expect([...r.posees].sort(), f.code).toEqual([...f.test.questions].sort());
       expect(r.oranges).toEqual([]);
       for (const c of f.test.comptes) expect(r.comptes[c.fourniture], c.fourniture).toBe(c.commande);
     });
