@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { ficheDeCalcul, METIER_NAMES, PEINTURE_REFERENTIAL, referentielDeFiche, REFERENTIALS, ROOFING_REFERENTIAL } from "@baticlair/domain";
+import { ficheDeCalcul, METIER_NAMES, referentielDeFiche, REFERENTIALS, ROOFING_REFERENTIAL } from "@baticlair/domain";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
 /**
@@ -54,7 +54,8 @@ describe("la porte choisit le référentiel selon le métier", () => {
     const cas = [
       // §52 (2026-10-19) : le carrelage est calculé par sa fiche métier ; format et pose écrits, aucune question.
       { trade: "tiling", metier: "carrelage", ref: referentielDeFiche(ficheDeCalcul("tiling")!), ligne: { libelle: "Carrelage sol grès cérame 60x60 rectifié, pose droite", quantite: "42", unite: "m²" }, article: /60×60/ },
-      { trade: "painting", metier: "peinture", ref: PEINTURE_REFERENTIAL, ligne: { libelle: "Peinture plafonds mate, impression + 2 couches", quantite: "85", unite: "m²" }, article: /[Pp]einture/ },
+      // §52 (2026-10-19) : la peinture est calculée par sa fiche métier ; impression et couches écrites, aucune question.
+      { trade: "painting", metier: "peinture", ref: referentielDeFiche(ficheDeCalcul("painting")!), ligne: { libelle: "Peinture plafonds mate, impression + 2 couches", quantite: "85", unite: "m²" }, article: /[Pp]einture/ },
       // §52 (2026-10-19) : la maçonnerie est calculée par sa fiche métier (`referentiels/metiers/maconnerie.md`) ; « 5 cm » écrit tranche l'épaisseur.
       { trade: "masonry", metier: "maconnerie", ref: referentielDeFiche(ficheDeCalcul("masonry")!), ligne: { libelle: "Chape ciment 5 cm", quantite: "35", unite: "m²" }, article: /^Ciment/ },
     ];
@@ -70,7 +71,7 @@ describe("la porte choisit le référentiel selon le métier", () => {
 
   it("rien ne part vide ni avec une question ouverte, dans aucun métier", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "pe@example.fr", "Peintures Le Bihan", ["painting"]);
-    // La finition et l'impression ne sont pas dites : deux questions du comptoir, aucune ligne calculée encore.
+    // L'impression n'est pas dite : une question de la fiche, aucune ligne calculée encore.
     const q = (await agent.post("/v1/quantitatifs").send({ lignes: [{ libelle: "Peinture murs séjour, 2 couches", quantite: "85", unite: "m²" }] })).body as Q & { peut_partir: boolean; questions: unknown[] };
     expect(q.questions.length).toBeGreaterThan(0);
     expect(q.peut_partir).toBe(false);

@@ -654,6 +654,52 @@ const EPREUVES: Record<string, { compte: string; epreuves: Epreuve[] }> = {
       },
     ],
   },
+  painting: {
+    compte: "peinture",
+    epreuves: [
+      {
+        nom: "impression et 2 couches écrites : aucune question",
+        lignes: [{ libelle: "Peinture murs et plafonds, impression + 2 couches", quantite: "100", unite: "m²" }],
+        questions: {},
+        commande: { "Peinture acrylique murs et plafonds": "2 seaux de 15 L", "Impression acrylique": "1 seau de 15 L" },
+      },
+      {
+        nom: "plafonds sans couches ni impression : deux questions",
+        lignes: [{ libelle: "Peinture plafonds mate", quantite: "60", unite: "m²" }],
+        questions: { couches: "2", impression: "non" },
+        commande: { "Peinture acrylique murs et plafonds": "1 seau de 15 L" },
+      },
+      {
+        nom: "enduit en 2 passes écrit : sacs de 25 kg",
+        lignes: [{ libelle: "Enduit de lissage 2 passes", quantite: "50", unite: "m²" }],
+        questions: {},
+        commande: { "Enduit de lissage en poudre": "2 sacs de 25 kg" },
+      },
+      {
+        nom: "laque 2 couches en pots, radiateurs tels qu'écrits",
+        lignes: [
+          { libelle: "Laque boiseries satin, 2 couches", quantite: "15", unite: "m²" },
+          { libelle: "Peinture radiateurs acier", quantite: "3", unite: "u" },
+        ],
+        questions: {},
+        commande: { "Laque acrylique satin boiseries": "3 pots" },
+        ecrits: ["@2"],
+      },
+      {
+        nom: "papier peint et façade D2 : rouleaux, colle, seaux",
+        lignes: [
+          { libelle: "Pose de papier peint", quantite: "40", unite: "m²" },
+          { libelle: "Ravalement peinture D2", quantite: "120", unite: "m²" },
+        ],
+        questions: {},
+        commande: {
+          "Papier peint, rouleau de 10,05 × 0,53 m": "9 rouleaux de 5,3 m²",
+          "Colle papier peint": "1 seau de 10 kg",
+          "Peinture façade D2": "3 seaux de 15 L",
+        },
+      },
+    ],
+  },
 };
 
 let ctx: TestContext;
