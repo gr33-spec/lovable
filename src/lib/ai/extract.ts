@@ -3,6 +3,7 @@ import { getAnthropicClient, AI_MODEL } from "./client";
 import { extractionPrompt } from "./prompts";
 import { parseJsonResponse } from "./parse";
 import { extractText } from "./response";
+import { validateExtractedDocument } from "./validate";
 import type { AnalysisType, ExtractedDocument } from "./types";
 
 /** Types de fichiers acceptés pour un devis ou une facture. */
@@ -49,7 +50,7 @@ export async function extractDocument(
 
   const message = await client.messages.create({
     model: AI_MODEL,
-    max_tokens: 4096,
+    max_tokens: 8192,
     messages: [
       {
         role: "user",
@@ -58,5 +59,5 @@ export async function extractDocument(
     ],
   });
 
-  return parseJsonResponse<ExtractedDocument>(extractText(message));
+  return validateExtractedDocument(parseJsonResponse<unknown>(extractText(message)));
 }

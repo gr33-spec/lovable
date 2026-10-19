@@ -3,6 +3,7 @@ import { getAnthropicClient, AI_MODEL } from "./client";
 import { COMPARISON_PROMPT } from "./prompts";
 import { parseJsonResponse } from "./parse";
 import { extractText } from "./response";
+import { validateComparisonResult } from "./validate";
 import type { ComparisonResult, ExtractedDocument } from "./types";
 
 /**
@@ -24,5 +25,5 @@ export async function compareDevis(
     ],
   });
 
-  return parseJsonResponse<ComparisonResult>(extractText(message));
+  return validateComparisonResult(parseJsonResponse<unknown>(extractText(message)));
 }

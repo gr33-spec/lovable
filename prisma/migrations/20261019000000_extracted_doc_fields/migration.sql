@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "ExtractedDoc" ADD COLUMN "fraisLivraison" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN "validite" TEXT NOT NULL DEFAULT '',
+ADD COLUMN "conditionsPaiement" TEXT NOT NULL DEFAULT '';

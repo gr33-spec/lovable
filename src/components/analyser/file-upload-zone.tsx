@@ -83,7 +83,6 @@ export function FileUploadZone({ label, hint, files, onChange, maxFiles }: FileU
         ref={inputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp,application/pdf"
-        capture="environment"
         multiple={maxFiles > 1}
         onChange={handlePick}
         className="hidden"

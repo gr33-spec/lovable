@@ -101,14 +101,17 @@ model Analysis {
 
 /// Un document (devis ou facture) tel que lu par l'IA, rattaché à une analyse.
 model ExtractedDoc {
-  id          String @id @default(cuid())
-  analysisId  String
-  fournisseur String
-  date        String
+  id                  String @id @default(cuid())
+  analysisId          String
+  fournisseur         String
+  date                String
   /// Lignes d'articles extraites (désignation, quantité, prix unitaire...).
-  lignesJson  Json
-  totalHT     Float
-  totalTTC    Float
+  lignesJson          Json
+  totalHT             Float
+  totalTTC            Float
+  fraisLivraison      Float  @default(0)
+  validite            String @default("")
+  conditionsPaiement  String @default("")
 
   analysis Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
 }

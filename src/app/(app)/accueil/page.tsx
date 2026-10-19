@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AlertTriangle, Crown } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
@@ -63,8 +64,10 @@ export default async function AccueilPage() {
           </p>
           <ul className="flex flex-col gap-2">
             {alertes.map((alerte) => (
-              <li key={alerte.id} className="font-sans text-sm">
-                {alerte.resume || `Trop-payé de ${formatEuros(alerte.montant)} détecté.`}
+              <li key={alerte.id}>
+                <Link href={`/analyse/${alerte.id}`} className="block font-sans text-sm underline-offset-2 hover:underline">
+                  {alerte.resume || `Trop-payé de ${formatEuros(alerte.montant)} détecté.`}
+                </Link>
               </li>
             ))}
           </ul>

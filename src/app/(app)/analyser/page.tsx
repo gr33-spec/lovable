@@ -122,6 +122,9 @@ export default function AnalyserPage() {
         ) : (
           <VerificationResultView result={result.result} extracted={result.extracted} />
         )}
+        <LinkButton href={`/analyse/${result.analysisId}`} variant="secondary" fullWidth>
+          Voir le détail de l&apos;analyse
+        </LinkButton>
         <Button variant="secondary" fullWidth onClick={reset}>
           Nouvelle analyse
         </Button>

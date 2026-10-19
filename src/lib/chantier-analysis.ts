@@ -54,7 +54,17 @@ export async function analyserChantier(userId: string, demandeId: string): Promi
     );
   }
 
-  const extracted = await Promise.all(fichiers.map((fichier) => extractDocument(fichier, "devis")));
+  const extractedResults = await Promise.allSettled(fichiers.map((fichier) => extractDocument(fichier, "devis")));
+  const extracted = extractedResults
+    .filter((r): r is PromiseFulfilledResult<ExtractedDocument> => r.status === "fulfilled")
+    .map((r) => r.value);
+
+  if (extracted.length < 2) {
+    throw new ChantierAnalysisError(
+      "Pas assez de devis lisibles après extraction. Vérifie que les pièces jointes sont des devis nets et bien cadrés."
+    );
+  }
+
   const result = await compareDevis(extracted);
 
   await saveAnalysis({ userId, type: "devis", extracted, result, demandeId });

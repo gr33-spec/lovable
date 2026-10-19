@@ -3,6 +3,7 @@ import { getAnthropicClient, AI_MODEL } from "./client";
 import { VERIFICATION_PROMPT } from "./prompts";
 import { parseJsonResponse } from "./parse";
 import { extractText } from "./response";
+import { validateVerificationResult } from "./validate";
 import type { ExtractedDocument, VerificationResult } from "./types";
 
 /**
@@ -25,5 +26,5 @@ export async function verifyFacture(
     ],
   });
 
-  return parseJsonResponse<VerificationResult>(extractText(message));
+  return validateVerificationResult(parseJsonResponse<unknown>(extractText(message)));
 }
