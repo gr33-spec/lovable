@@ -14,10 +14,11 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "build": "node scripts/gen-fiches.mjs && tsc -p tsconfig.build.json",
+    "typecheck": "node scripts/gen-fiches.mjs && tsc --noEmit",
+    "test": "node scripts/gen-fiches.mjs && vitest run",
+    "test:watch": "vitest",
+    "gen:fiches": "node scripts/gen-fiches.mjs"
   },
   "dependencies": {
     "decimal.js": "^10.6.0",

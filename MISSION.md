@@ -117,12 +117,12 @@ activer l'auto-reload. Le forfait Claude (claude.ai) est un autre compteur et ne
 |---|---|---|
 | 1 | Rouvrir #261 (bref mot pour mot), vraie lecture, fusion | bloqué (crédit) |
 | 2 | PR 7954 en CI | fait ; vraie lecture en file (§2 bis) |
-| 3 | Étape 0 : socle `referentiels/` (format 8 sections, registre par fichier, « Métiers couverts », cache de prompt) | à faire |
+| 3 | Étape 0 : socle `referentiels/metiers/` (format 8 sections, registre par fichier, « Métiers couverts », cache de prompt) | PR ouverte (socle) |
 | 4 | Étape 1-2 : 14 nouveaux référentiels, un par PR, dans l'ordre du §1 | à faire |
 | 5 | Étape 3 : devis maison complète 8 lots | à faire |
 | 6 | Mission B, boucle 1 à 5, jusqu'au vendredi 23 octobre 12 h | à faire |
 
-Prochaine étape : point 3 (socle), sans API. Au retour du crédit : file du §2 bis.
+Prochaine étape : fusionner le socle, puis point 4 : fiche terrassement-VRD (source : `baticlair/docs/referentiels/terrassier.md`, Greg 3 oct.), sans API. Au retour du crédit : file du §2 bis.
 
 ## 5. Mesures (temps et coût par devis)
 
@@ -130,6 +130,19 @@ Prochaine étape : point 3 (socle), sans API. Au retour du crédit : file du §2
 |---|---|---|---|---|
 | DE00000071 (couverture, 1 page) | 2026-10-13 | 2 s | 75 s | à mesurer |
 | D.2026.105 (réparation, 1 page) | 2026-10-13 | 1 s | 27 s | à mesurer |
+
+## 5 bis. Comment écrire une fiche métier (socle livré le 2026-10-19)
+
+- Copier `baticlair/referentiels/metiers/_modele.md` en `<code>.md` ; en-tête : `metier` = identifiant du repérage
+  (earthworks, masonry, carpentry, waterproofing, joinery, interior_joinery, drywall, plumbing, hvac, tiling, painting, facade…)
+  ou un identifiant neuf (sols souples : `flooring` ; serrurerie : `metalwork`) ; `etat: brouillon` ; `moteur: fiche`.
+- Section 2 ouvrages (id en kebab-case) ; 3 ratios par unité d'ouvrage, condition `cle=valeur`, confiance, source S… ;
+  4 conditionnements ; 5 questions (clé, texte, `Libellé=valeur / …`, ouvrages) ; 6 test (devis, bref, questions attendues,
+  réponses, comptes attendus au mot près : « 2,5 m³ », « 2 panneaux de 14,4 m² ») ; 7 à relire ; 8 sources.
+- `cd baticlair/packages/domain && pnpm test` : `fiches-metier.test.ts` refuse une fiche fautive et joue sa section 6.
+- Une fiche « fiche » prend le pas sur l'ancien tiroir du métier (lecture et calcul) ; les anciens chantiers gardent leur
+  version (instantané). Le faux lecteur de l'API (`lectureSimulee`) ne nomme pas encore les ouvrages d'une fiche : à faire avec
+  le premier métier (correspondance désignation ↔ colonne « Ce que le devis écrit », double de test seulement).
 
 ## 6. Décisions prises (rappel)
 
@@ -140,5 +153,5 @@ Prochaine étape : point 3 (socle), sans API. Au retour du crédit : file du §2
 ## 7. Questions pour Greg
 
 - Recharger le crédit API (§3).
-- Les « docs du 3 octobre » (maçonnerie, carrelage) à reprendre : où sont-ils ? (introuvables dans le dépôt à ce jour ; à chercher
-  dans `baticlair/docs/` au démarrage de l'étape 2, sinon demander le lien).
+- (réglé) Les « docs du 3 octobre » sont dans `baticlair/docs/referentiels/*.md` (un par métier, 20 à 60 Ko), avec la
+  recherche du 4 octobre dans `baticlair/referentiels/<métier>/tiroir.json` (valeurs sourcées ou à vérifier). Base de chaque fiche.

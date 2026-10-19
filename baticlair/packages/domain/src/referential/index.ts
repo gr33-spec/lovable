@@ -36,3 +36,5 @@ export { mergeReferentials, type ReferentialLayer, type ReferentialProvider } fr
 export { applyLineRoles, type LineRole, type RoleProposal } from "./line-roles.js";
 export { climateZone, departmentOf, isCoastal, postalCodeIn } from "./zone.js";
 export * from "./fiche.js";
+export * from "./fiches/index.js";
+export { metiersCouverts, type MetierCouvert } from "./metiers-couverts.js";

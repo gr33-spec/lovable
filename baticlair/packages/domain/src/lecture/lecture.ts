@@ -17,6 +17,7 @@ import { isWithoutSupplyUnit } from "../takeoff/supply.js";
 import { withoutLabour } from "../trust/marchandise.js";
 import { normalizeText } from "../trades/trade-profile.js";
 import { fournituresElectriques, pointElectrique, type ArticleElectrique } from "./electricite.js";
+import { ficheDeCalcul, fournituresDeFiche, questionsDeFiche, type ArticleFiche, type FicheMetier } from "../referential/fiches/index.js";
 
 /**
  * §51.5 (décision du fondateur, 2026-10-11) : LA LECTURE EST FAITE PAR L'IA, PAS PAR DES RÈGLES DE MOTS. Le modèle le
@@ -567,6 +568,8 @@ export function ecranDeLecture(input: {
   validated?: ReadonlySet<string>;
   /** §41.3 : les interdits du code (jamais de m² d'ardoises, de lot, de métal sans dimension), orange ; `false` pour un banc du calcul seul. */
   interdits?: boolean;
+  /** La fiche métier qui calcule (§52, format commun) ; absent : celle du métier du référentiel. Les tests la donnent. */
+  fiche?: FicheMetier;
 }): EcranDeLecture {
   const { ref, lecture } = input;
   const answers = input.answers ?? {};
@@ -581,11 +584,21 @@ export function ecranDeLecture(input: {
   // TEMPS TROIS, électricité (référentiel électricité §3, directive du fondateur, 2026-10-12) : une ligne de POINT (le
   // modèle nomme le point dans « ouvrage ») ne part pas telle qu'écrite ; le code la convertit en ce qu'elle contient et
   // additionne sur tout le devis (« Prises 9 + 9 + 6 : une ligne 24 »). Ces lignes sortent du calcul générique.
-  const pointIds = new Set(ref.trade === "electrical" ? lignes.filter((l) => pointElectrique(l.fourniture?.ouvrage) && nombre(l.fourniture?.quantite ?? l.quantity) !== null).map((l) => l.id) : []);
+  // §52, FORMAT COMMUN (mission du fondateur, 2026-10-19) : un métier calculé par sa fiche suit le même chemin : une ligne
+  // qui nomme un ouvrage de la fiche se convertit par ses ratios et ses conditionnements, additionnée sur le devis.
+  const fiche = input.fiche ?? (ref.workItems.length === 0 ? ficheDeCalcul(ref.trade) : null);
+  const ouvragesFiche = new Set((fiche?.ouvrages ?? []).map((o) => o.id));
+  const estPoint = (l: (typeof lignes)[number]) => (fiche ? ouvragesFiche.has(l.fourniture?.ouvrage ?? "") : ref.trade === "electrical" && !!pointElectrique(l.fourniture?.ouvrage));
+  const pointIds = new Set(lignes.filter((l) => estPoint(l) && nombre(l.fourniture?.quantite ?? l.quantity) !== null).map((l) => l.id));
   const generiques = () => lignes.filter((l) => !pointIds.has(l.id));
-  const points = fournituresElectriques(
-    lignes.filter((l) => pointIds.has(l.id)).map((l) => ({ id: l.id, ref: l.ligne.ref, point: pointElectrique(l.fourniture!.ouvrage)!, quantite: nombre(l.fourniture!.quantite ?? l.quantity)!, attend: l.fourniture!.attend })),
-  );
+  const lignesPoint = lignes.filter((l) => pointIds.has(l.id));
+  const points: ArticleElectrique[] = fiche
+    ? fournituresDeFiche(
+        fiche,
+        lignesPoint.map((l) => ({ id: l.id, ref: l.ligne.ref, ouvrage: l.fourniture!.ouvrage!, quantite: nombre(l.fourniture!.quantite ?? l.quantity)!, attend: l.fourniture!.attend, donnees: l.fourniture!.donnees ?? {} })),
+        answers,
+      )
+    : fournituresElectriques(lignesPoint.map((l) => ({ id: l.id, ref: l.ligne.ref, point: pointElectrique(l.fourniture!.ouvrage)!, quantite: nombre(l.fourniture!.quantite ?? l.quantity)!, attend: l.fourniture!.attend })));
   const plan = planDeLecture(ref, lecture, generiques(), input.extraFacts);
   const validation = validationDeLecture(ref.trade, generiques(), plan, new Set([...(input.lines ?? new Map())].filter(([, v]) => v.confirmed).map(([k]) => k)));
   const roles = new Map<string, RoleProposal>();
@@ -643,6 +656,16 @@ export function ecranDeLecture(input: {
     lignes[i] = { ...l, fourniture: { ...f, attend: [cle] } };
     const text = `${f.nom} : quelle unité ?`;
     asked.push({ q: { cle, texte: text, boutons: UNITES.map((u) => ({ label: u.label, valeur: u.value })), unite: null, donnee: "unité", ligne: l.ligne.ref }, key, question: { key, kind: "choose", text, options: UNITES.map((u) => ({ ...u })), named: true } });
+  }
+  // §51.6 avec une fiche : une fourniture qui attend une question de la fiche (une condition de ratio que ni le devis ni
+  // l'artisan n'ont tranchée) a sa question, même si le modèle ne l'a pas posée ; tout orange a sa question.
+  if (fiche) {
+    const posees = new Set(asked.map((a) => a.q.cle));
+    for (const q of questionsDeFiche(fiche, points as ArticleFiche[], posees)) {
+      const key = `fiche:${q.cle}`;
+      const lq: LectureQuestion = { cle: q.cle, texte: q.texte, boutons: q.boutons, unite: null, donnee: q.cle.replace(/_/g, " "), ligne: null };
+      asked.push({ q: lq, key, question: { key, kind: "choose", text: q.texte, options: q.boutons.map((b) => ({ label: b.label, value: b.valeur })), named: true } });
+    }
   }
   // La lecture est faite ; le calcul demande ce qui lui manque encore (voir plus bas, le filet de sécurité).
   // Filet de sécurité : une donnée que le calcul réclame et que le modèle n'a pas demandée (une question que révèle une
