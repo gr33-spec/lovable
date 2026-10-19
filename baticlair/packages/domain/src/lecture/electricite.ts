@@ -120,16 +120,16 @@ export interface ArticleElectrique {
   total: number;
 }
 
-const fr = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 2 }).replace(/ | /g, " ");
+export const fr = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 2 }).replace(/ | /g, " ");
 
 /** Les lignes du devis qui donnent une ligne de liste, en trace lisible : jusqu'à six, ensuite le compte. */
-function trace(parts: readonly { ref: string; n: number }[], unite: "u" | "m"): string {
+export function trace(parts: readonly { ref: string; n: number }[], unite: string): string {
   const shown = parts.slice(0, 6);
   const somme = shown.map((p) => fr(p.n)).join(" + ") + (parts.length > shown.length ? ` + … (${parts.length} lignes)` : "");
   // Le repère enregistré d'une ligne (« 1:003 », document puis ligne) se dit comme au devis : « 3 ».
   const refs = shown.map((p) => p.ref.replace(/^\d+:0*(?=\d)/, ""));
   const lignes = refs.length === 1 ? `ligne ${refs[0]}` : `lignes ${refs.slice(0, -1).join(", ")} et ${refs[refs.length - 1]}${parts.length > shown.length ? ", …" : ""}`;
-  return `${unite === "m" ? `${somme} m` : somme}, ${lignes} du devis`;
+  return `${unite !== "u" ? `${somme} ${unite}` : somme}, ${lignes} du devis`;
 }
 
 /**

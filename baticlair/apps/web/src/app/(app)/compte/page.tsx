@@ -120,6 +120,7 @@ export default function ComptePage() {
       {company && company.role !== "viewer" ? (
         <TradesCard initial={company.trades} />
       ) : null}
+      <MetiersCard />
       <NotificationsCard />
       <PartnerKeysCard />
       {company && company.role !== "viewer" ? <MemoryCard /> : null}
@@ -249,6 +250,56 @@ function MyData({ onDeleted }: { onDeleted: () => void }) {
           Supprimer mon compte
         </button>
       )}
+    </Card>
+  );
+}
+
+interface MetierCouvert {
+  metier: string;
+  nom: string;
+  etat: "brouillon" | "en validation" | "relu";
+  source: "fiche" | "tiroir";
+  ratios: number | null;
+}
+
+const ETATS: Record<MetierCouvert["etat"], { label: string; className: string }> = {
+  relu: { label: "Relu par un artisan", className: "bg-ok-bg text-ok" },
+  "en validation": { label: "En validation", className: "bg-warn-bg text-warn" },
+  brouillon: { label: "Ratios en cours de validation", className: "bg-ground text-muted" },
+};
+
+/**
+ * §52 (mission du fondateur, 2026-10-19) : les métiers que BatiClair sait lire et calculer, et l'état de chacun. Un
+ * métier relu par un artisan perd la mention « Ratios en cours de validation » sur sa liste et chez le fournisseur.
+ */
+function MetiersCard() {
+  const [metiers, setMetiers] = useState<MetierCouvert[] | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
+  useEffect(() => {
+    api<{ metiers: MetierCouvert[] }>("/v1/metiers").then(
+      (r) => setMetiers(r.metiers),
+      (e) => setError(e instanceof ApiError ? e : new ApiError("internal_error", 500)),
+    );
+  }, []);
+  return (
+    <Card className="flex flex-col gap-3 p-4">
+      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">
+        MÉTIERS COUVERTS
+      </h2>
+      <p className="text-sm text-muted">
+        Les métiers dont BatiClair sait lire le devis et calculer la liste.
+      </p>
+      {error ? <ErrorNotice error={error} /> : null}
+      {metiers ? (
+        <ul aria-label="Métiers couverts" className="flex flex-col divide-y divide-line">
+          {metiers.map((m) => (
+            <li key={m.metier} className="flex items-center justify-between gap-3 py-2.5">
+              <span className="min-w-0 text-sm font-bold">{m.nom}</span>
+              <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${ETATS[m.etat].className}`}>{ETATS[m.etat].label}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </Card>
   );
 }

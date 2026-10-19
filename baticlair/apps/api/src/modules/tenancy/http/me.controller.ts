@@ -4,7 +4,7 @@ import { Body, Controller, Delete, Get, HttpCode, Inject, Patch, Post, Put, Res,
 import { FileInterceptor } from "@nestjs/platform-express";
 import { memoryStorage } from "multer";
 import type { Response } from "express";
-import { TRADES } from "@baticlair/domain";
+import { metiersCouverts, TRADES } from "@baticlair/domain";
 import { z } from "zod";
 import { Idempotent } from "../../../platform/http/idempotency.interceptor.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
@@ -44,6 +44,17 @@ export class MeController {
   ) {
     const c = await this.tenancy.createCompany(user.userId, body.name, body.trades ?? []);
     return { id: c.companyId, name: c.companyName, role: c.role, trades: c.trades };
+  }
+
+  /**
+   * §52 (mission du fondateur, 2026-10-19) : « Métiers couverts » dans Compte : chaque métier, son état (brouillon, en
+   * validation, relu) et ce qui le calcule (fiche au format commun ou ancien tiroir).
+   */
+  @Get("metiers")
+  @UseGuards(TenantGuard)
+  metiers() {
+    // Le garde d'entreprise suffit : la liste est la même pour toutes, mais jamais sans session.
+    return { metiers: metiersCouverts() };
   }
 
   /** Coordonnées de l'entreprise : en-tête de la demande de devis (§45.3), signature du mail (§45.2). */

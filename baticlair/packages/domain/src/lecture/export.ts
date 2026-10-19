@@ -1,4 +1,5 @@
 import type { Referential } from "../referential/model.js";
+import { exportFiche, ficheDeCalcul } from "../referential/fiches/index.js";
 import { pointsPourLecture } from "./electricite.js";
 
 /**
@@ -9,6 +10,9 @@ import { pointsPourLecture } from "./electricite.js";
  * un demi-mégaoctet.
  */
 export function exportPourLecture(ref: Referential): string {
+  // §52 : un métier calculé par sa fiche donne au modèle ses ouvrages et ses questions (format commun).
+  const fiche = ficheDeCalcul(ref.trade);
+  if (fiche && ref.workItems.length === 0) return exportFiche(fiche);
   const out: string[] = [`RÉFÉRENTIEL ${ref.id} (version ${ref.version}), métier ${ref.trade}.`, ""];
   for (const w of ref.workItems) {
     out.push(`OUVRAGE ${w.id} : ${w.label}${w.section ? ` [${w.section}]` : ""}${w.perLine ? " (une instance par ligne du devis)" : ""}`);

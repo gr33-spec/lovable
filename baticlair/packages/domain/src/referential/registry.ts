@@ -1,5 +1,6 @@
 import type { Referential } from "./model.js";
 import { composeReferentials } from "./compose.js";
+import { FICHES, ficheDeCalcul, ficheDuMetier, referentielDeFiche } from "./fiches/index.js";
 import { ARROSAGE_REFERENTIAL } from "./data/arrosage.js";
 import { BARDAGE_REFERENTIAL } from "./data/bardage.js";
 import { CARRELAGE_REFERENTIAL } from "./data/carrelage.js";
@@ -88,7 +89,7 @@ export const REFERENTIALS: readonly Referential[] = [
 ];
 
 /** Nom du métier tel que l'API le montre (« couverture », « platrerie ») ; les deux formes sont acceptées en entrée. */
-export const METIER_NAMES: Readonly<Record<string, string>> = {
+const METIERS_DE_BASE: Readonly<Record<string, string>> = {
   roofing: "couverture",
   drywall: "platrerie",
   tiling: "carrelage",
@@ -113,6 +114,15 @@ export const METIER_NAMES: Readonly<Record<string, string>> = {
   general: "constructeur",
 };
 
+/**
+ * Les métiers de BatiClair : ceux des tiroirs, plus chaque métier qu'une fiche de `referentiels/metiers/` déclare (son
+ * identifiant, son nom de fichier) : ajouter un métier = ajouter un fichier (mission du fondateur, 2026-10-19).
+ */
+export const METIER_NAMES: Readonly<Record<string, string>> = {
+  ...METIERS_DE_BASE,
+  ...Object.fromEntries(FICHES.filter((f) => !(f.metier in METIERS_DE_BASE)).map((f) => [f.metier, f.code])),
+};
+
 /** « couverture », « roofing », « Plâtrerie », « drywall » → l'identifiant du métier (« roofing », « drywall »). */
 export function tradeIdOf(metier: string): string {
   const n = metier.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -125,6 +135,9 @@ export function tradeIdOf(metier: string): string {
  */
 export function referentialFor(trade: string | null | undefined): Referential | null {
   for (const id of (trade ?? "").split(",").map((t) => tradeIdOf(t)).filter(Boolean)) {
+    // Un métier calculé par sa fiche (§52, format commun) passe avant son ancien tiroir.
+    const fiche = ficheDeCalcul(id);
+    if (fiche) return referentielDeFiche(fiche);
     const ref = REFERENTIALS.find((r) => r.trade === id);
     if (ref) return ref;
   }
@@ -143,6 +156,9 @@ export const MENTION_RATIOS = "Ratios en cours de validation";
 /** Le métier du devis (celui de son tiroir) n'a pas encore été relu par un artisan : la mention §52 s'affiche. */
 export function ratiosEnValidation(trade: string | null | undefined): boolean {
   const id = referentialFor(trade)?.trade ?? tradeIdOf((trade ?? "").split(",")[0] ?? "");
+  // Une fiche dit elle-même son état : la mention tombe quand un artisan du métier l'a relue (« relu »).
+  const fiche = ficheDuMetier(id);
+  if (fiche) return fiche.etat !== "relu";
   return !METIERS_RELUS.includes(id);
 }
 

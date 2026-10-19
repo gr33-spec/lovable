@@ -276,6 +276,10 @@ test("glisser un chantier vers la gauche le range dans Terminés, et « Annuler 
 test("déconnexion puis reconnexion ramène à la page demandée", async ({ page }) => {
   const email = await signUp(page);
   await page.goto("/compte");
+  // §52 (mission du fondateur, 2026-10-19) : « Métiers couverts », l'état de chaque métier.
+  const metiers = page.getByRole("list", { name: "Métiers couverts" });
+  await expect(metiers.getByRole("listitem").filter({ hasText: "Couverture" }).first()).toContainText("Relu par un artisan");
+  await expect(metiers.getByRole("listitem").filter({ hasText: "Électricité" }).first()).toContainText("En validation");
   await page.getByRole("button", { name: "Se déconnecter" }).click();
   await expect(page).toHaveURL(/\/connexion/);
 
