@@ -87,7 +87,8 @@ export function LineChart({
     return Math.max(0, Math.min(years.length - 1, Math.round((rel / innerW) * (years.length - 1))));
   };
 
-  const labelEvery = years.length > 20 ? 5 : years.length > 10 ? 2 : 1;
+  // Six années au plus sur l'axe : lisible sur téléphone, sans chevauchement.
+  const labelEvery = Math.max(1, Math.ceil(years.length / 6));
 
   return (
     <div ref={ref} className="relative w-full select-none">
@@ -217,7 +218,8 @@ export function BarChart({
   const barW = Math.max(2, slot - 2);
   const y = (v: number) => r1(PAD.top + innerH - ((v - yMin) / (yMax - yMin || 1)) * innerH);
   const active = hover ?? (selectedYear !== undefined ? years.indexOf(selectedYear) : -1);
-  const labelEvery = years.length > 20 ? 5 : years.length > 10 ? 2 : 1;
+  // Six années au plus sur l'axe : lisible sur téléphone, sans chevauchement.
+  const labelEvery = Math.max(1, Math.ceil(years.length / 6));
   const indexFromEvent = (clientX: number, el: SVGSVGElement) => {
     const rect = el.getBoundingClientRect();
     return Math.max(0, Math.min(years.length - 1, Math.floor((clientX - rect.left - PAD.left) / slot)));

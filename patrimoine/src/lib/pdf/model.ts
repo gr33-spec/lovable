@@ -55,6 +55,8 @@ export interface GroupModel {
   incoherentLoans: number;
   /** Crédits rattachés à une société et non à un immeuble. */
   companyLevelDebt: number;
+  /** Date du capital restant dû : 1er du mois en cours (échéances payées jusqu'au mois précédent). */
+  balanceAsOf: string;
   /** Crédits en cours rattachés à aucun bien (leur nom, pour les identifier dans le dossier). */
   companyLevelLoans: string[];
   /** Immeubles loués sans aucune charge renseignée. */
@@ -261,6 +263,7 @@ export function groupModel(data: AppData, p: Projection, name: string): GroupMod
     missingPaymentLoans,
     incoherentLoans,
     companyLevelDebt: Math.max(0, f.debt - buildings.reduce((s, b) => s + b.debt, 0)),
+    balanceAsOf: `1er ${monthLabel(snap.nowMonth)}`,
     companyLevelLoans: data.loans
       .filter((l) => !(l.buildingId && data.buildings.some((b) => b.id === l.buildingId)) && (snap.byLoan.get(l.id)?.balance ?? 0) > 0)
       .map((l) => l.name || l.bank || "Crédit"),

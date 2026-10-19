@@ -6,7 +6,7 @@ import { Check, CheckCheck, CheckCircle2, ChevronRight, Coins, TrendingUp, X } f
 import { useStore } from "@/lib/store";
 import type { Unit } from "@/lib/types";
 import { dateFr, eur, eurCents } from "@/lib/format";
-import { monthKey, monthKeyLabel, paidAmount, shiftMonthKey, todayIso, unpaidByUnit } from "@/lib/engine/leases";
+import { deMonth, monthKey, monthKeyLabel, paidAmount, shiftMonthKey, todayIso, unpaidByUnit } from "@/lib/engine/leases";
 import { allReminders } from "@/lib/reminders";
 import { revisionsDue, settleUnpaid, skipRevision, type RevisionPlan } from "@/lib/revision";
 import { SwipeRow, toast, useUndoableUpdate } from "@/components/swipe";
@@ -80,7 +80,7 @@ export function TodayView({ onOpen }: { onOpen: (view: "loyers" | "locataires", 
       {/* Loyers du mois : pointage en un geste */}
       <div className="hero-card rounded-[28px] p-5 text-white">
         <div className="flex items-baseline justify-between">
-          <div className="text-[13px] text-white/65">Loyers de {monthKeyLabel(month)}</div>
+          <div className="text-[13px] text-white/65">Loyers {deMonth(month)}</div>
           <div className="tabular text-[13px] text-white/65">
             {rented.length - unpointed.length}/{rented.length} pointés
           </div>
@@ -231,7 +231,7 @@ export function TodayView({ onOpen }: { onOpen: (view: "loyers" | "locataires", 
         }
       >
         <p className="pb-2 text-[15px] text-ink-2">
-          Les {unpointed.length} loyers de {monthKeyLabel(month)} pas encore pointés seront marqués payés ({eur(unpointed.reduce((s, u) => s + (dueFor(data, u, month).due ?? 0), 0))}). Les impayés déjà signalés ne changent pas. Vous pourrez corriger un logement dans « Loyers ».
+          Les {unpointed.length} loyers {deMonth(month)} pas encore pointés seront marqués payés ({eur(unpointed.reduce((s, u) => s + (dueFor(data, u, month).due ?? 0), 0))}). Les impayés déjà signalés ne changent pas. Vous pourrez corriger un logement dans « Loyers ».
         </p>
       </Sheet>
       <RevisionSheet unit={data.units.find((u) => u.id === revising)} open={!!revising} onClose={() => setRevising(null)} />

@@ -117,3 +117,14 @@ test("prêt de projet depuis le tableau, repris par le crédit réel", async () 
   assert.ok(f.payment !== undefined && Math.abs(f.payment - expected) < 0.02, `${f.payment} ≈ ${expected}`);
   assert.equal(Math.round(f.totalInterest!), Math.round(rows.reduce((a, r) => a + r.interest, 0)));
 });
+
+test("avec le temps, le restant dû suit le tableau mois après mois", () => {
+  const rows = bankTable();
+  const d = emptyData();
+  d.loans = [{ id: "l", schedule: { rows, importedAt: "2026-01-10", source: "ia" } }];
+  for (const [y, m] of [[2026, 10], [2026, 11], [2026, 12], [2027, 1]] as const) {
+    const key = `${y}-${String(m).padStart(2, "0")}`;
+    const expected = rows.filter((r) => r.month < key).pop()!.balance;
+    assert.equal(computeSnapshot(d, monthIndex(y, m)).byLoan.get("l")!.balance, expected, key);
+  }
+});
