@@ -23,6 +23,11 @@ export interface OuvrageFiche {
   unite: string;
   /** Ce que le devis écrit d'habitude pour cet ouvrage (aide au modèle). */
   ecrit: string;
+  /**
+   * L'ouvrage est la POSE d'un article écrit (une fenêtre, une porte) : la ligne garde aussi l'article lui-même, tel
+   * qu'écrit (§49.1), et l'ouvrage n'ajoute que les fournitures de pose. Colonne « Article écrit » = oui.
+   */
+  garde: boolean;
 }
 
 export interface RatioFiche {
@@ -147,7 +152,7 @@ export function parseFicheMetier(texte: string, fichier = "fiche"): FicheMetier 
       return { cle: m[1]!, valeur: m[2]!.trim() };
     });
   };
-  const ouvrages = tableau(s.get(2) ?? "").map((r) => ({ id: col(r, "ouvrage"), libelle: col(r, "libelle"), unite: col(r, "unite"), ecrit: col(r, "ce que le devis", "devis") }));
+  const ouvrages = tableau(s.get(2) ?? "").map((r) => ({ id: col(r, "ouvrage"), libelle: col(r, "libelle"), unite: col(r, "unite"), ecrit: col(r, "ce que le devis", "devis"), garde: /^oui/i.test(col(r, "article")) }));
   const ratios = tableau(s.get(3) ?? "").map((r) => ({
     ouvrage: col(r, "ouvrage"),
     fourniture: col(r, "fourniture"),
@@ -393,7 +398,7 @@ export function exportFiche(fiche: FicheMetier): string {
     fiche.vocabulaire,
     "",
     "OUVRAGES (section 2) : pour chaque ligne du devis qui en relève, la fourniture a pour « ouvrage » l'identifiant ci-dessous, pour « emplacement » \"ouvrage\", pour quantité la quantité de la ligne dans l'unité de l'ouvrage ; le code en tire les fournitures et leurs conditionnements. Une donnée écrite sur la ligne qui répond à une question ci-dessous va dans « donnees » sous sa clé, et la question n'est pas posée.",
-    ...fiche.ouvrages.map((o) => `  - ${o.id} : ${o.libelle} (${o.unite}) ; le devis écrit : ${o.ecrit}`),
+    ...fiche.ouvrages.map((o) => `  - ${o.id} : ${o.libelle} (${o.unite}) ; le devis écrit : ${o.ecrit}${o.garde ? " ; la ligne donne AUSSI l'article lui-même, tel qu'écrit, en fourniture sans ouvrage (règle numéro un : il ne disparaît jamais)" : ""}`),
     "",
     "QUESTIONS (section 5), à poser seulement si le devis ne le dit pas, avec ces clés et ces boutons :",
     ...fiche.questions.map((q) => `  - ${q.cle} : « ${q.texte} » [${q.boutons.map((b) => `${b.label}=${b.valeur}`).join(" | ")}] (ouvrages : ${q.ouvrages.join(", ")})`),

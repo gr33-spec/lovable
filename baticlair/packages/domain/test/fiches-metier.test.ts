@@ -26,7 +26,13 @@ function lectureDuTest(f: FicheMetier): LectureDevis {
       quantite: l.quantite,
       unite: l.unite,
       role: l.ouvrage && l.ouvrage !== "—" ? "fourniture_et_pose" : "pose",
-      fournitures: l.ouvrage && l.ouvrage !== "—" ? [{ nom: l.designation, quantite: l.quantite, unite: l.unite, ouvrage: l.ouvrage, emplacement: "ouvrage", donnees: {}, attend: [], aPreciser: [], precision: null }] : [],
+      fournitures: l.ouvrage && l.ouvrage !== "—"
+        ? [
+            { nom: l.designation, quantite: l.quantite, unite: l.unite, ouvrage: l.ouvrage, emplacement: "ouvrage", donnees: {}, attend: [], aPreciser: [], precision: null },
+            // La pose d'un article écrit (« Article écrit » = oui) : l'article lui-même reste, tel qu'écrit.
+            ...(f.ouvrages.find((o) => o.id === l.ouvrage)?.garde ? [{ nom: l.designation, quantite: l.quantite, unite: l.unite, ouvrage: null, emplacement: null, donnees: {}, attend: [], aPreciser: [], precision: null }] : []),
+          ]
+        : [],
     })),
     contexte: null,
     notes: [],
