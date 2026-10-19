@@ -607,6 +607,53 @@ const EPREUVES: Record<string, { compte: string; epreuves: Epreuve[] }> = {
       },
     ],
   },
+  flooring: {
+    compte: "sols",
+    epreuves: [
+      {
+        nom: "sol PVC en rouleau collé : mètres de lé de 4 m et colle",
+        lignes: [{ libelle: "Sol PVC en rouleau collé", quantite: "50", unite: "m²" }],
+        questions: {},
+        commande: { "Sol PVC en rouleau, largeur 4 m": "14 mètres de 4 m²", "Colle acrylique sols souples": "1 seau de 20 kg" },
+      },
+      {
+        nom: "lames clipsables, colis de 2,8 m² écrit : aucune question",
+        lignes: [{ libelle: "Lames vinyle clipsables, colis de 2,8 m²", quantite: "30", unite: "m²" }],
+        questions: {},
+        commande: { "Lames vinyle clipsables, colis de 2,8 m²": "12 colis de 2,8 m²", "Sous-couche pour sol clipsable": "4 rouleaux de 10 m²" },
+      },
+      {
+        nom: "parquet flottant sans colis ni pose : deux questions",
+        lignes: [{ libelle: "Parquet flottant chêne", quantite: "40", unite: "m²" }],
+        questions: { colis_parquet: "2.0", pose_parquet: "droite" },
+        commande: { "Parquet ou stratifié, colis de 2 m²": "21 colis de 2 m²", "Sous-couche parquet": "3 rouleaux de 15 m²" },
+      },
+      {
+        nom: "moquette collée et barres de seuil telles qu'écrites",
+        lignes: [
+          { libelle: "Moquette collée", quantite: "60", unite: "m²" },
+          { libelle: "Barre de seuil alu", quantite: "4", unite: "u" },
+        ],
+        questions: {},
+        commande: { "Moquette en rouleau, largeur 4 m": "17 mètres de 4 m²", "Colle acrylique sols souples": "2 seaux de 20 kg" },
+        ecrits: ["@2"],
+      },
+      {
+        nom: "ragréage 5 mm et pose en diagonale écrits : seul le colis est demandé",
+        lignes: [
+          { libelle: "Ragréage P3 5 mm", quantite: "20", unite: "m²" },
+          { libelle: "Parquet flottant posé en diagonale", quantite: "20", unite: "m²" },
+        ],
+        questions: { colis_parquet: "2.2" },
+        commande: {
+          "Ragréage autolissant P3": "6 sacs de 25 kg",
+          "Primaire d'accrochage": "1 bidon de 5 kg",
+          "Parquet ou stratifié, colis de 2,2 m²": "11 colis de 2,2 m²",
+          "Sous-couche parquet": "2 rouleaux de 15 m²",
+        },
+      },
+    ],
+  },
 };
 
 let ctx: TestContext;

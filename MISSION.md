@@ -110,7 +110,8 @@ attend la vraie lecture avant fusion (file ci-dessous) ; tout le reste se fusion
 | 9 | Plomberie (`fiche:plomberie`) | `fixture:fiche:plomberie fiche:plomberie` | chaque appareil tel qu'écrit ; distance, tube et kit jamais inventés |
 | 10 | Chauffage-PAC-VMC (`fiche:chauffage`) | `fixture:fiche:chauffage fiche:chauffage` | appareils tels qu'écrits ; distance, type de PAC, réseau, pièces de service jamais inventés |
 | 11 | Carrelage-faïence (`fiche:carrelage`) | `fixture:fiche:carrelage fiche:carrelage` | format, pose, épaisseur de ragréage jamais inventés |
-| 12+ | Un devis d'épreuve par nouveau métier | même commande, `fiche:<code>` | ligne ajoutée ici à chaque métier |
+| 12 | Sols souples et parquet (`fiche:sols`) | `fixture:fiche:sols fiche:sols` | colis, pose du parquet, épaisseur de ragréage jamais inventés ; lé de 4 m |
+| 13+ | Un devis d'épreuve par nouveau métier | même commande, `fiche:<code>` | ligne ajoutée ici à chaque métier |
 
 ## 3. Blocage actuel
 
@@ -127,11 +128,11 @@ activer l'auto-reload. Le forfait Claude (claude.ai) est un autre compteur et ne
 | 1 | Rouvrir #261 (bref mot pour mot), vraie lecture, fusion | bloqué (crédit) |
 | 2 | PR 7954 en CI | fait ; vraie lecture en file (§2 bis) |
 | 3 | Étape 0 : socle `referentiels/metiers/` (format 8 sections, registre par fichier, « Métiers couverts », cache de prompt) | fait (#265, en prod) |
-| 4 | Étape 1-2 : 14 nouveaux référentiels, un par PR, dans l'ordre du §1 | 5/14 faits : terrassement-VRD (#266), maçonnerie (#267), charpente (#268), étanchéité déclarée (#269, tiroir relu gardé), menuiseries extérieures (#270), en prod ; #271 ratios « à vérifier » en orange, #272 consommables des fiches, menuiserie intérieure (#273), plâtrerie-isolation (#274), plomberie-sanitaire (#275), chauffage-PAC-VMC (#276), en prod ; carrelage-faïence (PR ouverte) ; sols souples écrits (scratchpad `next/sols.md`) |
+| 4 | Étape 1-2 : 14 nouveaux référentiels, un par PR, dans l'ordre du §1 | 5/14 faits : terrassement-VRD (#266), maçonnerie (#267), charpente (#268), étanchéité déclarée (#269, tiroir relu gardé), menuiseries extérieures (#270), en prod ; #271 ratios « à vérifier » en orange, #272 consommables des fiches, menuiserie intérieure (#273), plâtrerie-isolation (#274), plomberie-sanitaire (#275), chauffage-PAC-VMC (#276), en prod ; carrelage-faïence (#277) ; sols souples et parquet (`flooring`, PR ouverte) |
 | 5 | Étape 3 : devis maison complète 8 lots | à faire |
 | 6 | Mission B, boucle 1 à 5, jusqu'au vendredi 23 octobre 12 h | à faire |
 
-Prochaine étape : fusionner carrelage, puis sols souples (`flooring`, nouveau métier : le test API « métier sans tiroir » flooring → prendre un autre métier), sans API. Au retour du crédit : file du §2 bis.
+Prochaine étape : fusionner sols souples, puis peinture-finitions (tiroir `painting` existant, doc `docs/referentiels/peintre.md`), sans API. Au retour du crédit : file du §2 bis.
 
 ## 5. Mesures (temps et coût par devis)
 
