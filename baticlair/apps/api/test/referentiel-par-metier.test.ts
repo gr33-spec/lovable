@@ -77,13 +77,14 @@ describe("la porte choisit le référentiel selon le métier", () => {
   });
 
   it("un métier sans tiroir : 422 « no_referential », message clair, rien de créé", async () => {
-    const { agent } = await signUpWithCompany(ctx.app, "s@example.fr", "Sols Bretagne", ["flooring"]);
-    const res = await agent.post("/v1/quantitatifs").send({ lignes: [{ libelle: "Sol vinyle en lames", quantite: "30", unite: "m²" }] });
+    // §52 (2026-10-19) : les sols souples ont leur fiche ; « Autre métier » reste sans référentiel.
+    const { agent } = await signUpWithCompany(ctx.app, "s@example.fr", "Piscines Bretagnes", ["other"]);
+    const res = await agent.post("/v1/quantitatifs").send({ lignes: [{ libelle: "Liner de piscine 8 × 4", quantite: "1", unite: "u" }] });
     expect(res.status).toBe(422);
     expect(res.body.error).toMatchObject({
       code: "no_referential",
       details: {
-        metier: "flooring",
+        metier: "other",
         // Tous les tiroirs ouverts, dans l'ordre du registre (le lot B en ajoute par paquets).
         disponibles: REFERENTIALS.map((r) => METIER_NAMES[r.trade]),
       },
@@ -92,7 +93,7 @@ describe("la porte choisit le référentiel selon le métier", () => {
     expect(await ctx.prisma.quantitatif.count()).toBe(0);
     // Même chose quand un couvreur demande un métier sans tiroir.
     const roofer = await signUpWithCompany(ctx.app, "r@example.fr", "Toitures Martin");
-    expect((await roofer.agent.post("/v1/quantitatifs").send({ ...CLOISON, metier: "sols" })).status).toBe(422);
+    expect((await roofer.agent.post("/v1/quantitatifs").send({ ...CLOISON, metier: "pisciniste" })).status).toBe(422);
   });
 });
 
