@@ -71,7 +71,7 @@ l'état complet ici et dire à Greg « contexte plein, relance une session avec 
 
 ## 2. État au 2026-10-19
 
-En production (main) : tout jusqu'à la PR #267 (fiche maçonnerie), plus #262 (autre chantier, `patrimoine/`, pas le nôtre).
+En production (main) : tout jusqu'à la PR #268 (fiche charpente), plus #262 (autre chantier, `patrimoine/`, pas le nôtre).
 - #257 carte « Lots repérés » ; #258 chaque bouton du modèle passe (22 tiroirs) ; #259 repérage rapide des métiers puis une seule
   lecture Opus ; #260 « Gros devis, j'y suis encore… » après 30 s.
 - L'existant multimétier : 22 tiroirs TypeScript dans `baticlair/packages/domain/src/referential/data/*.ts` (registre `REFERENTIALS`,
@@ -121,11 +121,11 @@ activer l'auto-reload. Le forfait Claude (claude.ai) est un autre compteur et ne
 | 1 | Rouvrir #261 (bref mot pour mot), vraie lecture, fusion | bloqué (crédit) |
 | 2 | PR 7954 en CI | fait ; vraie lecture en file (§2 bis) |
 | 3 | Étape 0 : socle `referentiels/metiers/` (format 8 sections, registre par fichier, « Métiers couverts », cache de prompt) | fait (#265, en prod) |
-| 4 | Étape 1-2 : 14 nouveaux référentiels, un par PR, dans l'ordre du §1 | 2/14 faits : terrassement-VRD (#266), maçonnerie (#267), en prod ; 3/14 charpente (PR ouverte) |
+| 4 | Étape 1-2 : 14 nouveaux référentiels, un par PR, dans l'ordre du §1 | 3/14 faits : terrassement-VRD (#266), maçonnerie (#267), charpente (#268), en prod ; étanchéité déclarée (tiroir relu gardé, PR ouverte) |
 | 5 | Étape 3 : devis maison complète 8 lots | à faire |
 | 6 | Mission B, boucle 1 à 5, jusqu'au vendredi 23 octobre 12 h | à faire |
 
-Prochaine étape : fusionner charpente, puis étanchéité toiture-terrasse (`waterproofing` est relu et à Greg : sa fiche reste « moteur tiroir », voir §7), sans API. Au retour du crédit : file du §2 bis.
+Prochaine étape : fusionner étanchéité (déclaration), puis menuiseries extérieures (fiche prête, colonne « Article écrit »), sans API. Au retour du crédit : file du §2 bis.
 
 ## 5. Mesures (temps et coût par devis)
 
