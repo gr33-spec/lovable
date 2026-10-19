@@ -32,8 +32,8 @@ export interface RatioFiche {
   ratio: number;
   /** L'unité du besoin (m³, kg, m², m, u). */
   unite: string;
-  /** « cle=valeur » : la ligne ne compte que si la réponse (ou la donnée lue) vaut cette valeur. */
-  condition: { cle: string; valeur: string } | null;
+  /** « cle=valeur » (plusieurs : « cle=valeur et cle2=valeur2 ») : la ligne ne compte que si chaque réponse (ou donnée lue) vaut sa valeur. */
+  conditions: { cle: string; valeur: string }[];
   confiance: Confiance;
   source: string;
 }
@@ -139,11 +139,13 @@ export function parseFicheMetier(texte: string, fichier = "fiche"): FicheMetier 
   const etat = meta.etat as EtatFiche;
   if (!["brouillon", "en validation", "relu"].includes(etat)) throw new Error(`${fichier} : état « ${meta.etat} » (brouillon, en validation ou relu)`);
   const s = sections(texte.slice(fm[0].length));
-  const conditionDe = (t: string) => {
-    if (vide(t)) return null;
-    const m = /^([a-z0-9_]+)\s*=\s*(.+)$/.exec(t.trim());
-    if (!m) throw new Error(`${fichier} : condition illisible « ${t} » (attendu cle=valeur)`);
-    return { cle: m[1]!, valeur: m[2]!.trim() };
+  const conditionsDe = (t: string) => {
+    if (vide(t)) return [];
+    return t.split(/\s+et\s+|\s*[;&]\s*/).map((c) => {
+      const m = /^([a-z0-9_]+)\s*=\s*(.+)$/.exec(c.trim());
+      if (!m) throw new Error(`${fichier} : condition illisible « ${t} » (attendu cle=valeur, ou cle=valeur et cle2=valeur2)`);
+      return { cle: m[1]!, valeur: m[2]!.trim() };
+    });
   };
   const ouvrages = tableau(s.get(2) ?? "").map((r) => ({ id: col(r, "ouvrage"), libelle: col(r, "libelle"), unite: col(r, "unite"), ecrit: col(r, "ce que le devis", "devis") }));
   const ratios = tableau(s.get(3) ?? "").map((r) => ({
@@ -151,7 +153,7 @@ export function parseFicheMetier(texte: string, fichier = "fiche"): FicheMetier 
     fourniture: col(r, "fourniture"),
     ratio: nombre(col(r, "ratio", "quantite")) ?? Number.NaN,
     unite: col(r, "unite"),
-    condition: conditionDe(col(r, "condition")),
+    conditions: conditionsDe(col(r, "condition")),
     confiance: confianceDe(col(r, "confiance")),
     source: col(r, "source"),
   }));
@@ -226,7 +228,7 @@ export function fautesDeFiche(f: FicheMetier): string[] {
     if (!Number.isFinite(r.ratio) || r.ratio <= 0) out.push(`${ici} : ratio illisible`);
     if (!r.unite) out.push(`${ici} : unité manquante`);
     if (!r.source || !r.source.split(/[,\s]+/).filter(Boolean).every((x) => sources.has(x))) out.push(`${ici} : source absente de la section 8 (« ${r.source} »)`);
-    if (r.condition && !cles.has(r.condition.cle)) out.push(`${ici} : condition sur une question inconnue (« ${r.condition.cle} »)`);
+    for (const c of r.conditions) if (!cles.has(c.cle)) out.push(`${ici} : condition sur une question inconnue (« ${c.cle} »)`);
     if (!f.conditionnements.some((c) => c.fourniture === r.fourniture)) out.push(`${ici} : fourniture sans conditionnement (section 4)`);
   }
   for (const c of f.conditionnements) {
@@ -298,12 +300,13 @@ export function fournituresDeFiche(fiche: FicheMetier, lignes: readonly LigneFic
   for (const l of lignes) {
     const rows = fiche.ratios.filter((r) => r.ouvrage === l.ouvrage);
     const enAttente = new Set<string>();
-    for (const r of rows) if (r.condition && valeur(r.condition.cle, l) === null) enAttente.add(r.condition.cle);
+    const vraie = (c: { cle: string; valeur: string }) => {
+      const v = valeur(c.cle, l);
+      return v !== null && egal(v, c.valeur);
+    };
+    for (const r of rows) for (const c of r.conditions) if (valeur(c.cle, l) === null) enAttente.add(c.cle);
     for (const r of rows) {
-      if (r.condition) {
-        const v = valeur(r.condition.cle, l);
-        if (v === null || !egal(v, r.condition.valeur)) continue;
-      }
+      if (!r.conditions.every(vraie)) continue;
       const e = parFourniture.get(r.fourniture) ?? { parts: [], attend: new Set<string>(), confiance: "sûr" as Confiance };
       e.parts.push({ id: l.id, ref: l.ref, n: l.quantite * r.ratio });
       e.confiance = plusFaible(e.confiance, r.confiance);
@@ -312,7 +315,7 @@ export function fournituresDeFiche(fiche: FicheMetier, lignes: readonly LigneFic
     }
     // Un ouvrage dont toutes les fournitures sont sous condition non tranchée : une ligne d'attente par condition, pour
     // que la ligne du devis ne disparaisse jamais (§49.1) et que sa question soit là (§51.6).
-    if (enAttente.size > 0 && !rows.some((r) => !r.condition || (valeur(r.condition.cle, l) !== null && egal(valeur(r.condition.cle, l)!, r.condition.valeur)))) {
+    if (enAttente.size > 0 && !rows.some((r) => r.conditions.every(vraie))) {
       const e = parFourniture.get(`?${l.ouvrage}`) ?? { parts: [], attend: new Set<string>(), confiance: "à vérifier" as Confiance };
       e.parts.push({ id: l.id, ref: l.ref, n: l.quantite });
       for (const c of enAttente) e.attend.add(c);

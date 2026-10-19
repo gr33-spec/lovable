@@ -158,6 +158,54 @@ const EPREUVES: Record<string, { compte: string; epreuves: Epreuve[] }> = {
       },
     ],
   },
+  carpentry: {
+    compte: "charpente",
+    epreuves: [
+      {
+        nom: "chevronnage : longueur et entraxe écrits, aucune question",
+        lignes: [{ libelle: "Chevronnage sapin traité 63×75, chevrons L 4,00 m entraxe 60 cm", quantite: "80", unite: "m²" }],
+        questions: {},
+        commande: { "Chevron 63×75 traité classe 2 L 4,00 m": "36 pièces", "Vis de charpente 8×160": "2 boîtes de 50 u" },
+      },
+      {
+        nom: "chevrons 6/8 sans longueur ni entraxe : deux questions",
+        lignes: [{ libelle: "Chevrons 6/8 sapin traité classe 2", quantite: "50", unite: "m²" }],
+        questions: { longueur_chevron: "500", entraxe_chevrons: "50" },
+        commande: { "Chevron 63×75 traité classe 2 L 5,00 m": "22 pièces", "Vis de charpente 8×160": "2 boîtes de 50 u" },
+      },
+      {
+        nom: "rénovation : traitement curatif au bidon, chevrons remplacés tels qu'écrits",
+        lignes: [
+          { libelle: "Traitement curatif de charpente existante", quantite: "120", unite: "m²" },
+          { libelle: "Remplacement de chevrons à l'identique", quantite: "6", unite: "u" },
+        ],
+        questions: {},
+        commande: { "Traitement insecticide-fongicide charpente": "3 bidons de 20 L" },
+        ecrits: ["Remplacement de chevrons à l'identique"],
+      },
+      {
+        nom: "combles : plancher OSB au panneau, solives telles qu'écrites",
+        lignes: [
+          { libelle: "Plancher OSB 18 mm", quantite: "45", unite: "m²" },
+          { libelle: "Solives 75×225 L 4,50 m", quantite: "12", unite: "u" },
+        ],
+        questions: {},
+        commande: { "Panneau OSB3 18 mm rainé-bouveté 2500×675": "29 panneaux de 1,65 m²" },
+        ecrits: ["Solives 75×225 L 4,50 m"],
+      },
+      {
+        nom: "garage : lot de fermettes tel qu'écrit, rives et ancrage des sablières",
+        lignes: [
+          { libelle: "Fermettes industrielles sur plan, lot fabricant", quantite: "1", unite: "u" },
+          { libelle: "Planches de rive sapin traité", quantite: "30", unite: "ml" },
+          { libelle: "Sablière ancrée sur maçonnerie", quantite: "16", unite: "ml" },
+        ],
+        questions: {},
+        commande: { "Planche de rive sapin traité": "8 pièces de 4 m", "Goujon d'ancrage béton M10": "1 boîte de 50 u" },
+        ecrits: ["Fermettes industrielles sur plan, lot fabricant"],
+      },
+    ],
+  },
 };
 
 let ctx: TestContext;
