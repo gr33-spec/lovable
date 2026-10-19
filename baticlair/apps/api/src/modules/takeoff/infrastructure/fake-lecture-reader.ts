@@ -4,6 +4,7 @@ import {
   computeWithAnswers,
   containsKeyword,
   DE00000071_LECTURE,
+  ficheDeCalcul,
   FICHE_PARAMS_CHANTIER,
   isWithoutSupplyUnit,
   LABOR_ONLY,
@@ -17,6 +18,7 @@ import {
   withoutLabour,
   type LectureDevis,
   type LectureFourniture,
+  type FicheMetier,
   type LectureQuestion,
   type Referential,
 } from "@baticlair/domain";
@@ -140,6 +142,37 @@ function emplacementDans(ref: Referential, text: string): { ouvrage: string; emp
   return best ? { ouvrage: best.ouvrage, emplacement: best.emplacement } : null;
 }
 
+const MOTS_VIDES = new Set(["de", "du", "des", "la", "le", "les", "en", "et", "sur", "sous", "sans", "pas", "au", "aux", "ep"]);
+const motsDe = (t: string) => normalizeText(t).split(/[^a-z0-9]+/).filter((w) => w.length >= 2 && !MOTS_VIDES.has(w));
+const uniteNormale = (u: string) => normalizeText(u).replace(/^ml$/, "m").replace(/^m2$/, "m²").replace(/^m3$/, "m³");
+
+/**
+ * §52, une fiche métier : l'ouvrage que nomme la désignation, par la colonne « Ce que le devis écrit » (la phrase dont le
+ * plus de mots sont sur la ligne, dans l'unité de la ligne), et les données écrites qui répondent à une question de la
+ * fiche (« 20 cm », « Ø125 » : le libellé d'un bouton écrit tel quel). Double de test seulement : en ligne, le modèle lit.
+ */
+export function ouvrageDeFiche(fiche: FicheMetier, designation: string, unite: string): { ouvrage: string; donnees: Record<string, string> } | null {
+  const ligne = new Set(motsDe(designation));
+  let best: { ouvrage: string; score: number } | null = null;
+  for (const o of fiche.ouvrages) {
+    if (uniteNormale(o.unite) !== uniteNormale(unite)) continue;
+    for (const phrase of [o.libelle, ...[...o.ecrit.matchAll(/«\s*([^»]+?)\s*»/g)].map((m) => m[1]!)]) {
+      const mots = motsDe(phrase);
+      if (mots.length === 0) continue;
+      const score = mots.filter((w) => ligne.has(w)).length / mots.length;
+      if (score >= 0.5 && (!best || score > best.score)) best = { ouvrage: o.id, score };
+    }
+  }
+  if (!best) return null;
+  const texte = designation.toLowerCase().replace(/\s+/g, " ");
+  const donnees: Record<string, string> = {};
+  for (const q of fiche.questions.filter((x) => x.ouvrages.includes(best.ouvrage))) {
+    const b = q.boutons.find((x) => x.label.length >= 3 && new RegExp(`(?:^|[^\\p{L}\\d])${x.label.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![\\p{L}\\d])`, "u").test(texte));
+    if (b) donnees[q.cle] = b.valeur;
+  }
+  return { ouvrage: best.ouvrage, donnees };
+}
+
 /** Le produit du référentiel que la ligne nomme (« HP10 », « 32x22 »), par ses appellations. */
 function produitDe(ref: Referential, designation: string): string | null {
   const text = normalizeText(designation);
@@ -215,6 +248,16 @@ export function lectureSimulee(request: LectureRequest): LectureDevis {
     }
     if (isWithoutSupplyUnit(unite)) return { ref: row.ref, designation, quantite, unite, role: "hors_quantitatif" as const, fournitures: [] };
     if (labour(designation)) return { ref: row.ref, designation, quantite, unite, role: "pose" as const, fournitures: [] };
+    const fm = ref && ref.workItems.length === 0 ? ficheDeCalcul(ref.trade) : null;
+    if (fm) {
+      const o = ouvrageDeFiche(fm, designation, unite);
+      // Une ligne qui ne nomme aucun ouvrage de la fiche : une pièce écrite à l'unité reste telle qu'écrite (§49.1) ; le
+      // reste (décapage, fouille, évacuation) est hors commande.
+      if (!o && normalizeText(unite) !== "u") return { ref: row.ref, designation, quantite, unite, role: "pose" as const, fournitures: [] };
+      const nom = withoutLabour(designation).split(" - ")[0]!.trim() || designation;
+      const f: LectureFourniture = { nom, quantite, unite, ouvrage: o?.ouvrage ?? null, emplacement: o ? "ouvrage" : null, donnees: { ...donnees, ...(o?.donnees ?? {}) }, attend, aPreciser: [], precision: null };
+      return { ref: row.ref, designation, quantite, unite, role: "fourniture" as const, fournitures: [f] };
+    }
     const place = ref ? emplacementDe(ref, designation) : null;
     const produit = ref && place ? produitDe(ref, designation) : null;
     if (ref && place) for (const [k, v] of Object.entries(donneesDe(ref, place.ouvrage, designation))) donnees[k] ??= v;

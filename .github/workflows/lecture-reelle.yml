@@ -66,8 +66,26 @@ jobs:
         continue-on-error: true
         working-directory: baticlair/apps/api
         run: pnpm exec tsx scripts/lecture-reelle.ts fixture:D.2026.105 D.2026.105
+      # §52 (mission du 2026-10-19) : la fiche métier ajoutée ou changée par la PR, lue sur le devis de sa section 6
+      # (au plus une vraie lecture par métier et par jour : seulement les fiches que la PR touche).
+      - name: Fiches métier de la PR
+        id: fiches
+        continue-on-error: true
+        working-directory: baticlair/apps/api
+        run: |
+          git fetch --no-tags --depth=1 origin "${{ github.event.pull_request.base.ref || 'main' }}"
+          codes=$(git diff --name-only FETCH_HEAD HEAD -- ../referentiels/metiers/ | sed -n 's#.*/metiers/\([^_/][^/]*\)\.md$#\1#p')
+          if [ -z "$codes" ]; then echo "Aucune fiche métier dans la PR."; exit 0; fi
+          rc=0
+          for c in $codes; do
+            if grep -q '^moteur: fiche' "../../referentiels/metiers/$c.md"; then
+              echo "=== Fiche $c ==="
+              pnpm exec tsx scripts/lecture-reelle.ts "fixture:fiche:$c" "fiche:$c" || rc=1
+            fi
+          done
+          exit $rc
       - name: Bilan
         if: always()
         run: |
-          echo "DE00000071 : ${{ steps.de00000071.outcome }} ; 7954 : ${{ steps.l7954.outcome }} ; D.2026.105 : ${{ steps.l105.outcome }}"
-          if [ "${{ steps.de00000071.outcome }}" != "success" ] || [ "${{ steps.l7954.outcome }}" != "success" ] || [ "${{ steps.l105.outcome }}" != "success" ]; then exit 1; fi
+          echo "DE00000071 : ${{ steps.de00000071.outcome }} ; 7954 : ${{ steps.l7954.outcome }} ; D.2026.105 : ${{ steps.l105.outcome }} ; fiches : ${{ steps.fiches.outcome }}"
+          if [ "${{ steps.de00000071.outcome }}" != "success" ] || [ "${{ steps.l7954.outcome }}" != "success" ] || [ "${{ steps.l105.outcome }}" != "success" ] || [ "${{ steps.fiches.outcome }}" != "success" ]; then exit 1; fi

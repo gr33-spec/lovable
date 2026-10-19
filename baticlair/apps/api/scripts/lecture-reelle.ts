@@ -7,7 +7,7 @@
  * au modèle de lecture (AnthropicLectureReader, le même qu'en production), puis le bref et les questions imprimés mot
  * pour mot et le contrôle du résultat attendu (§6 du référentiel électricité pour 7954, §51.5 pour DE00000071).
  *
- *   BATICLAIR_ANTHROPIC_KEY=… pnpm exec tsx scripts/lecture-reelle.ts <devis.pdf | fixture:DE00000071 | fixture:D.2026.105 | fixture:7954> <7954|DE00000071> [sortie.json]
+ *   BATICLAIR_ANTHROPIC_KEY=… pnpm exec tsx scripts/lecture-reelle.ts <devis.pdf | fixture:DE00000071 | fixture:D.2026.105 | fixture:7954 | fixture:fiche:<code>> <7954|DE00000071|fiche:<code>> [sortie.json]
  *
  * En CI : le workflow « Vraie lecture » (`.github/workflows/lecture-reelle.yml`), lancé par l'étiquette « lecture-reelle »
  * sur une PR, avec le secret BATICLAIR_ANTHROPIC_KEY ; le bref et les questions sont dans le journal du job.
@@ -15,7 +15,7 @@
  * Le PDF reste hors du dépôt. La sortie JSON (lecture complète) est écrite là où on le demande, jamais commitée.
  */
 import { readFileSync, writeFileSync } from "node:fs";
-import { controleLecture7954, controleLectureD2026105, controleLectureDe00000071, exportPourLecture, numberLines, referentialFor, routePage, tradeProfile, type LectureDevis, type LigneDuDevis } from "@baticlair/domain";
+import { controleLecture7954, controleLectureD2026105, controleLectureDe00000071, controleLectureFiche, exportPourLecture, FICHES, numberLines, referentialFor, routePage, tradeProfile, type LectureDevis, type LigneDuDevis } from "@baticlair/domain";
 import { D2026_105_LINES } from "../../../packages/domain/test/devis-reels/d2026-105.js";
 import { DE00000071_LINES } from "../../../packages/domain/test/devis-reels/de00000071.js";
 import { DEVIS_7954 } from "../../../packages/domain/test/devis-reels/devis-7954.js";
@@ -24,19 +24,28 @@ import { PdfJsPdfReader } from "../src/modules/documents/infrastructure/pdfjs-pd
 import { AnthropicLectureReader } from "../src/modules/takeoff/infrastructure/anthropic-lecture-reader.js";
 import { D2026_105_PDF } from "../test/support/d2026105-pdf.js";
 import { DEVIS_7954_PDF } from "../test/support/devis7954-pdf.js";
+import { FICHE_PDF } from "../test/support/fiche-pdf.js";
 import { DE00000071_PDF } from "../test/support/de00000071-pdf.js";
 
 const DEVIS: Record<string, { trade: string; lignes: readonly LigneDuDevis[]; controle: (l: LectureDevis, d: readonly LigneDuDevis[]) => string[] }> = {
   "7954": { trade: "electrical", lignes: DEVIS_7954, controle: controleLecture7954 },
   DE00000071: { trade: "roofing", lignes: DE00000071_LINES.map((l) => ({ ref: l.ref, designation: l.designation })), controle: controleLectureDe00000071 },
   "D.2026.105": { trade: "roofing", lignes: D2026_105_LINES.map((l) => ({ ref: l.ref, designation: l.designation })), controle: controleLectureD2026105 },
+  // §52 : chaque fiche métier calculée, son devis de la section 6 (« fixture:fiche:terrassement fiche:terrassement »).
+  ...Object.fromEntries(FICHES.filter((f) => f.moteur === "fiche").map((f) => [`fiche:${f.code}`, { trade: f.metier, lignes: [], controle: (l: LectureDevis) => controleLectureFiche(f, l) }])),
 };
+
+async function fichePdf(code: string): Promise<Uint8Array> {
+  const f = FICHES.find((x) => x.code === code);
+  if (!f) throw new Error(`Fiche métier inconnue : ${code}`);
+  return FICHE_PDF(f);
+}
 
 async function main(): Promise<number> {
   const [pdfPath, quel, sortie] = process.argv.slice(2);
   const devis = quel ? DEVIS[quel] : undefined;
   if (!pdfPath || !devis) {
-    console.error(`Usage : tsx scripts/lecture-reelle.ts <devis.pdf | fixture:DE00000071 | fixture:D.2026.105 | fixture:7954> <${Object.keys(DEVIS).join("|")}> [sortie.json]`);
+    console.error(`Usage : tsx scripts/lecture-reelle.ts <devis.pdf | fixture:DE00000071 | fixture:D.2026.105 | fixture:7954 | fixture:fiche:<code>> <${Object.keys(DEVIS).join("|")}> [sortie.json]`);
     return 2;
   }
   const apiKey = process.env.BATICLAIR_ANTHROPIC_KEY ?? process.env.ANTHROPIC_API_KEY;
@@ -50,7 +59,7 @@ async function main(): Promise<number> {
   // Le devis lu comme au dépôt : texte numéroté des pages propres, image des autres, et le PDF entier.
   // « fixture:DE00000071 » : le devis anonymisé du dépôt (test/support), régénéré à la volée ; sinon un PDF hors dépôt.
   const bytes =
-    pdfPath === "fixture:DE00000071" ? await DE00000071_PDF() : pdfPath === "fixture:D.2026.105" ? await D2026_105_PDF() : pdfPath === "fixture:7954" ? await DEVIS_7954_PDF() : new Uint8Array(readFileSync(pdfPath));
+    pdfPath === "fixture:DE00000071" ? await DE00000071_PDF() : pdfPath === "fixture:D.2026.105" ? await D2026_105_PDF() : pdfPath === "fixture:7954" ? await DEVIS_7954_PDF() : pdfPath.startsWith("fixture:fiche:") ? await fichePdf(pdfPath.slice("fixture:fiche:".length)) : new Uint8Array(readFileSync(pdfPath));
   const content = await new PdfJsPdfReader().read(bytes, { maxPages: 60 });
   const profile = tradeProfile(devis.trade);
   const text: string[] = [];
