@@ -1,4 +1,5 @@
 import type { Referential } from "../referential/model.js";
+import { ficheDeCalcul } from "../referential/fiches/index.js";
 import { referentialFor, tradeIdOf } from "../referential/registry.js";
 import { tradeProfile } from "../trades/index.js";
 import { POINTS_ELECTRIQUES } from "./electricite.js";
@@ -99,7 +100,8 @@ const memeMetier = (a: string, b: string) => a === b || tradeIdOf(a) === tradeId
 /** Les ouvrages qu'un tiroir sait calculer (les points électriques compris), pour ranger une ligne dans un lot ajouté. */
 function ouvragesDe(ref: Referential | null): ReadonlySet<string> {
   if (!ref) return new Set();
-  return new Set([...ref.workItems.map((w) => w.id), ...(ref.trade === "electrical" ? POINTS_ELECTRIQUES.map((p) => p.id) : [])]);
+  // §52 : un métier calculé par sa fiche range les lignes par les ouvrages de sa fiche.
+  return new Set([...ref.workItems.map((w) => w.id), ...(ref.trade === "electrical" ? POINTS_ELECTRIQUES.map((p) => p.id) : []), ...(ficheDeCalcul(ref.trade)?.ouvrages.map((o) => o.id) ?? [])]);
 }
 
 /**

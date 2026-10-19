@@ -22,7 +22,7 @@ const lecture: LectureDevis = {
     { ref: "1", designation: "Prise de courant 16A", quantite: "9", unite: "u", role: "fourniture_et_pose", fournitures: [f("Prise de courant 16 A 2P+T", "9", "u", "prise-16a")] },
     { ref: "2", designation: "Prise de courant 16A", quantite: "6", unite: "u", role: "fourniture_et_pose", fournitures: [f("Prise de courant 16 A 2P+T", "6", "u", "prise-16a")] },
     { ref: "3", designation: "Mitigeur lavabo chromé", quantite: "4", unite: "u", role: "fourniture_et_pose", fournitures: [f("Mitigeur lavabo chromé", "4", "u")] },
-    { ref: "4", designation: "Climatiseur mural 2,5 kW", quantite: "1", unite: "u", role: "fourniture_et_pose", fournitures: [f("Climatiseur mural 2,5 kW", "1", "u", "climatisation", "splits")] },
+    { ref: "4", designation: "Climatiseur mural 2,5 kW", quantite: "1", unite: "u", role: "fourniture_et_pose", fournitures: [f("Climatiseur mural 2,5 kW", "1", "u", "split", "ouvrage")] },
     { ref: "5", designation: "Bouche d'extraction VMC", quantite: "3", unite: "u", role: "fourniture_et_pose", fournitures: [f("Bouche d'extraction VMC", "3", "u")] },
   ],
   contexte: {},

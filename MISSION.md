@@ -71,7 +71,7 @@ l'état complet ici et dire à Greg « contexte plein, relance une session avec 
 
 ## 2. État au 2026-10-19
 
-En production (main) : tout jusqu'à la PR #274 (fiche plâtrerie), plus #262 (autre chantier, `patrimoine/`, pas le nôtre).
+En production (main) : tout jusqu'à la PR #275 (fiche plomberie), plus #262 (autre chantier, `patrimoine/`, pas le nôtre).
 - #257 carte « Lots repérés » ; #258 chaque bouton du modèle passe (22 tiroirs) ; #259 repérage rapide des métiers puis une seule
   lecture Opus ; #260 « Gros devis, j'y suis encore… » après 30 s.
 - L'existant multimétier : 22 tiroirs TypeScript dans `baticlair/packages/domain/src/referential/data/*.ts` (registre `REFERENTIALS`,
@@ -108,7 +108,8 @@ attend la vraie lecture avant fusion (file ci-dessous) ; tout le reste se fusion
 | 7 | Menuiserie intérieure (`fiche:menuiserie-interieure`) | `fixture:fiche:menuiserie-interieure fiche:menuiserie-interieure` | blocs-portes tels qu'écrits ; pose et colisage du parquet jamais inventés |
 | 8 | Plâtrerie-isolation (`fiche:platrerie`) | `fixture:fiche:platrerie fiche:platrerie` | hauteur et résistance jamais inventées ; consommables seulement sur la question |
 | 9 | Plomberie (`fiche:plomberie`) | `fixture:fiche:plomberie fiche:plomberie` | chaque appareil tel qu'écrit ; distance, tube et kit jamais inventés |
-| 10+ | Un devis d'épreuve par nouveau métier | même commande, `fiche:<code>` | ligne ajoutée ici à chaque métier |
+| 10 | Chauffage-PAC-VMC (`fiche:chauffage`) | `fixture:fiche:chauffage fiche:chauffage` | appareils tels qu'écrits ; distance, type de PAC, réseau, pièces de service jamais inventés |
+| 11+ | Un devis d'épreuve par nouveau métier | même commande, `fiche:<code>` | ligne ajoutée ici à chaque métier |
 
 ## 3. Blocage actuel
 
@@ -125,11 +126,11 @@ activer l'auto-reload. Le forfait Claude (claude.ai) est un autre compteur et ne
 | 1 | Rouvrir #261 (bref mot pour mot), vraie lecture, fusion | bloqué (crédit) |
 | 2 | PR 7954 en CI | fait ; vraie lecture en file (§2 bis) |
 | 3 | Étape 0 : socle `referentiels/metiers/` (format 8 sections, registre par fichier, « Métiers couverts », cache de prompt) | fait (#265, en prod) |
-| 4 | Étape 1-2 : 14 nouveaux référentiels, un par PR, dans l'ordre du §1 | 5/14 faits : terrassement-VRD (#266), maçonnerie (#267), charpente (#268), étanchéité déclarée (#269, tiroir relu gardé), menuiseries extérieures (#270), en prod ; #271 ratios « à vérifier » en orange, #272 consommables des fiches, menuiserie intérieure (#273), plâtrerie-isolation (#274), en prod ; plomberie-sanitaire (PR ouverte) |
+| 4 | Étape 1-2 : 14 nouveaux référentiels, un par PR, dans l'ordre du §1 | 5/14 faits : terrassement-VRD (#266), maçonnerie (#267), charpente (#268), étanchéité déclarée (#269, tiroir relu gardé), menuiseries extérieures (#270), en prod ; #271 ratios « à vérifier » en orange, #272 consommables des fiches, menuiserie intérieure (#273), plâtrerie-isolation (#274), plomberie-sanitaire (#275), en prod ; chauffage-PAC-VMC (PR ouverte) ; carrelage et sols souples écrits (scratchpad `next/`) |
 | 5 | Étape 3 : devis maison complète 8 lots | à faire |
 | 6 | Mission B, boucle 1 à 5, jusqu'au vendredi 23 octobre 12 h | à faire |
 
-Prochaine étape : fusionner plomberie, puis chauffage-PAC-VMC (`docs/referentiels/chauffage-pac-ventilation.md` + `ventilation-vmc.md` ; métier `hvac`), sans API. Au retour du crédit : file du §2 bis.
+Prochaine étape : fusionner chauffage, puis carrelage (fiche + épreuves dans le scratchpad `next/` ; le test API « porte par métier » carrelage écrit « 60x60 » sans pose : à compléter « pose droite »), puis sols souples (`flooring`, nouveau métier : le test API « métier sans tiroir » flooring → prendre un autre métier), sans API. Au retour du crédit : file du §2 bis.
 
 ## 5. Mesures (temps et coût par devis)
 

@@ -482,6 +482,80 @@ const EPREUVES: Record<string, { compte: string; epreuves: Epreuve[] }> = {
       },
     ],
   },
+  hvac: {
+    compte: "chauffage-ventilation",
+    epreuves: [
+      {
+        nom: "monosplit : une couronne à la bonne longueur, goulotte, condensats, support",
+        lignes: [
+          { libelle: "Unité intérieure murale 2,5 kW", quantite: "1", unite: "u" },
+          { libelle: "Groupe extérieur monosplit 2,5 kW", quantite: "1", unite: "u" },
+        ],
+        questions: { distance_groupe: "3" },
+        commande: {
+          "Liaison frigorifique bi-tube 1/4 – 3/8 isolée, couronne de 5 m": "1 couronne",
+          "Goulotte de liaison 80 × 60": "2 barres de 2 m",
+          "Tuyau de condensats Ø16": "1 rouleau de 30 m",
+          "Passage de mur pour goulotte": "1 u",
+          "Angle de goulotte": "2 u",
+          "Support de groupe extérieur": "1 u",
+          "Plots antivibratiles (jeu de 4)": "1 jeu",
+        },
+        ecrits: ["@1", "@2"],
+      },
+      {
+        nom: "PAC bibloc écrite : liaison frigorifique, ni flexibles ni vannes",
+        lignes: [{ libelle: "PAC air/eau bibloc 11 kW", quantite: "1", unite: "u" }],
+        questions: { distance_groupe: "8" },
+        commande: {
+          "Liaison frigorifique bi-tube 3/8 – 5/8 isolée, couronne de 10 m": "1 couronne",
+          "Tuyau de condensats Ø16": "1 rouleau de 30 m",
+          "Filtre à boues magnétique": "1 u",
+          "Support de groupe extérieur": "1 u",
+          "Plots antivibratiles (jeu de 4)": "1 jeu",
+        },
+        ecrits: ["@1"],
+      },
+      {
+        nom: "radiateurs à l'identique : raccords de transition, aucune distance demandée",
+        lignes: [{ libelle: "Remplacement de radiateurs acier à l'identique", quantite: "5", unite: "u" }],
+        questions: {},
+        commande: { "Raccord de transition": "10 u" },
+        ecrits: ["@1"],
+      },
+      {
+        nom: "VMC hygro B : gaines au carton selon les pièces de service, consommables sur le oui",
+        lignes: [{ libelle: "VMC simple flux hygro B", quantite: "1", unite: "u" }],
+        questions: { nb_bouches: "5", consommables: "1" },
+        commande: {
+          "Gaine VMC souple Ø80": "4 cartons de 6 m",
+          "Gaine VMC souple Ø125": "1 carton de 6 m",
+          "Gaine VMC isolée Ø125 (rejet)": "1 carton de 6 m",
+          "Sortie de toit VMC": "1 u",
+          "Adhésif aluminium": "1 rouleau",
+          "Collier de serrage VMC": "2 sachets de 10 u",
+        },
+        ecrits: ["@1"],
+      },
+      {
+        nom: "plancher chauffant et sèche-serviettes sur réseau neuf",
+        lignes: [
+          { libelle: "Plancher chauffant basse température", quantite: "100", unite: "m²" },
+          { libelle: "Radiateur sèche-serviettes à eau", quantite: "1", unite: "u" },
+        ],
+        questions: { radiateur_reseau: "neuf", distance_radiateur: "4" },
+        commande: {
+          "Tube PER BAO 16 × 1,5": "3 couronnes de 240 m",
+          "Panneau isolant à plots": "112 panneaux de 0,94 m²",
+          "Bande périphérique": "2 rouleaux de 50 m",
+          "Tube multicouche 16 × 2": "1 couronne de 50 m",
+          "Robinet thermostatique": "1 u",
+          "Té de réglage": "1 u",
+        },
+        ecrits: ["@2"],
+      },
+    ],
+  },
 };
 
 let ctx: TestContext;

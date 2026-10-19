@@ -326,7 +326,10 @@ export function fournituresDeFiche(fiche: FicheMetier, lignes: readonly LigneFic
       const v = valeur(c.cle, l);
       return v !== null && egal(v, c.valeur);
     };
-    for (const r of rows) for (const c of r.conditions) if (valeur(c.cle, l) === null) enAttente.add(c.cle);
+    // Une question n'attend que là où elle peut encore compter : une ligne de ratio déjà écartée par une autre réponse
+    // (« à l'identique » : pas de tube) ne fait pas demander sa distance.
+    const fausse = (c: { cle: string; valeur: string }) => valeur(c.cle, l) !== null && !vraie(c);
+    for (const r of rows) if (!r.conditions.some(fausse)) for (const c of r.conditions) if (valeur(c.cle, l) === null) enAttente.add(c.cle);
     for (const r of rows) {
       if (!r.conditions.every(vraie)) continue;
       const e = parFourniture.get(r.fourniture) ?? { parts: [], attend: new Set<string>(), confiance: "sûr" as Confiance, regles: new Map<string, string>() };
