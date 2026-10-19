@@ -40,3 +40,4 @@ export * from "./lecture/lots.js";
 export { DE00000071_LECTURE } from "./lecture/exemples/de00000071.js";
 export { exportPourLecture } from "./lecture/export.js";
 export * from "./lecture/electricite.js";
+export * from "./groupe/groupe.js";

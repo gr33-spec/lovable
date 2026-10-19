@@ -163,6 +163,9 @@ model Company {
   uploadParts       UploadPart[]
   quantitatifs      Quantitatif[]
   ruleConfirmations RuleConfirmation[]
+  besoins           Besoin[]
+  negocesAjoutes    Negoce[]            @relation("NegoceAjoutePar")
+  negoces           NegoceArtisan[]
 
   @@map("company")
 }
@@ -218,6 +221,7 @@ model Project {
   priceRequests PriceRequest[]
 
   quantitatifs Quantitatif[]
+  besoins      Besoin[]
 
   @@index([companyId, status, lastActivityAt(sort: Desc), id(sort: Desc)])
   // Index de recherche plein texte sans accents (pg_trgm + unaccent) :
@@ -907,4 +911,241 @@ model UploadPart {
   @@id([uploadId, index])
   @@index([createdAt])
   @@map("upload_part")
+}
+
+// ---------------------------------------------------------------------------
+// BatiClair Groupé (document du fondateur, 2026-10-19, §1 à §6) : les besoins FERMES de plusieurs artisans d'une même
+// zone regroupés pour un prix de volume chez UN négoce par lot ; chacun commande sur son propre compte. BatiClair
+// n'encaisse rien et ne prend aucune commission. Tout est derrière le drapeau `GROUPE` (désactivé par défaut).
+// Règles des statuts, de la clé de référence et de la zone : `packages/domain/src/groupe/groupe.ts`.
+// ---------------------------------------------------------------------------
+
+/// Un besoin proposé au groupé (§2 étape 2) : UNE ligne de la liste d'achats d'un devis lu par l'app, jamais une
+/// saisie libre (§5). Il part sans le nom de l'artisan.
+model Besoin {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  companyId        String    @db.Uuid
+  projectId        String    @db.Uuid
+  takeoffId        String    @db.Uuid
+  /// La clé de la ligne dans la liste d'achats (`purchase.toBuy[].key`).
+  articleKey       String
+  /// La désignation de la ligne, telle que la liste l'a donnée.
+  designation      String
+  /// Clé de référence normalisée (`cleDeReference`) : deux besoins ne se groupent que sur une clé identique.
+  cle              String
+  /// couverture | charpente | maconnerie | electricite | plomberie | amenagement_exterieur
+  famille          String
+  quantite         Decimal   @db.Decimal(14, 3)
+  unite            String
+  /// Le département du chantier (`zoneDuCodePostal`).
+  zone             String
+  /// Adresse de livraison (le chantier), donnée au négoce sans nom de client (§5).
+  adresseLivraison String
+  fenetreTot       DateTime  @db.Date
+  fenetreTard      DateTime  @db.Date
+  /// en_attente | signe | retire | engage | commande | livre (`transitionBesoin`).
+  statut           String
+  lotId            String?   @db.Uuid
+  /// En cochant « Chantier signé », l'artisan s'engage à commander ces quantités au prix groupé (§2 étape 2).
+  signeLe          DateTime?
+  engageLe         DateTime?
+  retireLe         DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  company Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  project Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  lot     LotGroupe?    @relation(fields: [lotId], references: [id], onDelete: SetNull)
+  offre   OffreArtisan?
+
+  @@unique([takeoffId, articleKey])
+  @@index([cle, zone, statut])
+  @@index([companyId, createdAt])
+  @@map("besoin")
+}
+
+/// Un négoce de la base commune d'un département (§2 étape 3), alimentée par les artisans ; il n'a ni compte ni
+/// application. « Pas concerné » décoche une famille, « stop » le désinscrit (§5).
+model Negoce {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  nom         String
+  email       String
+  /// Le département servi.
+  departement String
+  /// Familles vendues (couverture, charpente, maconnerie, electricite, plomberie, amenagement_exterieur).
+  familles    String[]  @default([])
+  /// « Stop » : plus aucune demande.
+  stopLe      DateTime?
+  /// L'entreprise qui l'a ajouté à la base.
+  ajouteParId String?   @db.Uuid
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  ajoutePar   Company?        @relation("NegoceAjoutePar", fields: [ajouteParId], references: [id], onDelete: SetNull)
+  artisans    NegoceArtisan[]
+  reponses    ReponseNegoce[]
+  bons        BonCommande[]
+  lotsRetenus LotGroupe[]     @relation("LotNegoceRetenu")
+
+  @@unique([email, departement])
+  @@index([departement])
+  @@map("negoce")
+}
+
+/// Le lien d'un artisan à un négoce : son rang (le favori en premier, « favori de ») et son numéro de compte chez lui,
+/// repris au bon de commande (§2 étape 8 ; vide = « ouverture de compte demandée »).
+model NegoceArtisan {
+  companyId    String   @db.Uuid
+  negoceId     String   @db.Uuid
+  /// 1 = favori.
+  rang         Int      @default(1)
+  numeroCompte String?
+  createdAt    DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  negoce  Negoce  @relation(fields: [negoceId], references: [id], onDelete: Cascade)
+
+  @@id([companyId, negoceId])
+  @@map("negoce_artisan")
+}
+
+/// Un lot du groupé (§2 étape 4) : une référence, une famille, une zone, une fenêtre. Un seul lot ouvert par référence
+/// et par zone (§5).
+model LotGroupe {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  /// « tarif groupé lot n° … » (§2 étape 8).
+  numero         Int       @unique @default(autoincrement())
+  cle            String
+  famille        String
+  zone           String
+  fenetreTot     DateTime  @db.Date
+  fenetreTard    DateTime  @db.Date
+  /// ouvert | envoye | choisi | clos | annule
+  statut         String    @default("ouvert")
+  envoyeLe       DateTime?
+  clotureLe      DateTime?
+  negoceRetenuId String?   @db.Uuid
+  /// Prix unitaire retenu (HT), au volume ferme.
+  prixRetenu     Decimal?  @db.Decimal(14, 4)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  negoceRetenu Negoce?         @relation("LotNegoceRetenu", fields: [negoceRetenuId], references: [id], onDelete: SetNull)
+  besoins      Besoin[]
+  reponses     ReponseNegoce[]
+  offres       OffreArtisan[]
+  journal      JournalGroupe[]
+
+  @@index([cle, zone, statut])
+  @@map("lot_groupe")
+}
+
+/// La réponse d'un négoce à un lot (§2 étapes 5 et 6) : un lien unique sans compte, un ou deux devis déposés (paliers de
+/// quantité), une phrase libre ; la lecture en tire les prix par référence et par palier et le délai.
+model ReponseNegoce {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  lotId            String    @db.Uuid
+  negoceId         String    @db.Uuid
+  /// Le jeton du lien `reponse/<jeton>` (haché, comme les clés API).
+  tokenHash        String    @unique
+  message          String?
+  /// [{ cle, palier, prixUnitaire }] tels que lus (HT).
+  prix             Json      @default("[]")
+  delaiJours       Int?
+  /// en_attente | lue | a_verifier | echec
+  statutExtraction String    @default("en_attente")
+  /// « Pas concerné » cliqué : la famille du lot est décochée chez ce négoce.
+  pasConcerneLe    DateTime?
+  deposeLe         DateTime?
+  createdAt        DateTime  @default(now())
+
+  lot      LotGroupe              @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  negoce   Negoce                 @relation(fields: [negoceId], references: [id], onDelete: Cascade)
+  fichiers ReponseNegoceFichier[]
+
+  @@unique([lotId, negoceId])
+  @@map("reponse_negoce")
+}
+
+/// Un devis PDF déposé par un négoce (deux au plus par réponse).
+model ReponseNegoceFichier {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  reponseId String   @db.Uuid
+  nom       String
+  type      String
+  contenu   Bytes
+  createdAt DateTime @default(now())
+
+  reponse ReponseNegoce @relation(fields: [reponseId], references: [id], onDelete: Cascade)
+
+  @@map("reponse_negoce_fichier")
+}
+
+/// L'offre personnelle d'un artisan (§2 étape 7) : une information, pas une question ; jamais le nombre ni le nom des
+/// autres artisans.
+model OffreArtisan {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  lotId         String    @db.Uuid
+  besoinId      String    @unique @db.Uuid
+  prixUnitaire  Decimal   @db.Decimal(14, 4)
+  /// Prix de référence (catalogue du négoce ou dernier prix payé seul déclaré), pour le compteur, jamais facturé (§6).
+  prixReference Decimal?  @db.Decimal(14, 4)
+  economie      Decimal?  @db.Decimal(14, 2)
+  dateLivraison DateTime? @db.Date
+  envoyeeLe     DateTime?
+  problemeLe    DateTime?
+  probleme      String?
+  createdAt     DateTime  @default(now())
+
+  lot    LotGroupe    @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  besoin Besoin       @relation(fields: [besoinId], references: [id], onDelete: Cascade)
+  bon    BonCommande?
+
+  @@map("offre_artisan")
+}
+
+/// Le bon de commande d'un artisan, envoyé automatiquement au négoce retenu (§2 étape 8).
+model BonCommande {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  offreId   String    @unique @db.Uuid
+  negoceId  String    @db.Uuid
+  pdf       Bytes?
+  envoyeLe  DateTime?
+  createdAt DateTime  @default(now())
+
+  offre     OffreArtisan @relation(fields: [offreId], references: [id], onDelete: Cascade)
+  negoce    Negoce       @relation(fields: [negoceId], references: [id], onDelete: Cascade)
+  livraison Livraison?
+
+  @@map("bon_commande")
+}
+
+/// La livraison d'un bon : « Livré » ou « Problème » d'un tap, relance à J+15 (§2 étape 8).
+model Livraison {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  bonId      String    @unique @db.Uuid
+  datePrevue DateTime? @db.Date
+  /// prevue | livre | probleme
+  statut     String    @default("prevue")
+  confirmeLe DateTime?
+  relanceLe  DateTime?
+  createdAt  DateTime  @default(now())
+
+  bon BonCommande @relation(fields: [bonId], references: [id], onDelete: Cascade)
+
+  @@map("livraison")
+}
+
+/// Le journal d'un lot (§5) : qui a proposé, engagé, choisi, confirmé, avec l'heure ; visible par Greg seul.
+model JournalGroupe {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  lotId     String   @db.Uuid
+  evenement String
+  details   Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  lot LotGroupe @relation(fields: [lotId], references: [id], onDelete: Cascade)
+
+  @@index([lotId, createdAt])
+  @@map("journal_groupe")
 }

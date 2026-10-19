@@ -1,0 +1,138 @@
+# BatiClair Groupé — parcours complet et prompt Claude Code
+
+Oct 19, 2026 · @Greg
+
+## 1. Principes
+
+Le groupé est une option de BatiClair qui regroupe les besoins de plusieurs artisans d'une même zone pour obtenir un prix de volume, sans jamais toucher au circuit du négoce.
+
+- Chaque artisan commande sur son propre compte négoce, est livré sur son chantier, facturé et payé comme d'habitude (30 jours).
+- Les artisans ne se voient pas et ne se parlent pas : chacun voit seulement son offre et son prix.
+- BatiClair n'encaisse jamais d'acompte, ne vend rien et ne porte aucun risque d'impayé.
+- Le groupé est inclus dans l'abonnement BatiClair (29 à 50 €/mois, « remboursé dès la première commande groupée »). Aucune commission, aucun frais par lot, ni pour l'artisan ni pour le négoce.
+- Un besoin entre dans le groupé uniquement s'il vient d'un vrai devis lu par l'app, et uniquement sur engagement ferme : « je prends ces quantités quoi qu'il arrive ».
+- Une seule application, BatiClair. Le négoce n'a rien à installer : un e-mail, un lien, il dépose son devis.
+- Zéro gestion humaine : mails, regroupement, lecture des réponses, offres et bons de commande sont automatiques. Greg surveille, il ne traite pas.
+- Le regroupement est du code pur (référence, zone, fenêtre). L'IA sert seulement à lire les devis des artisans et les devis des négoces.
+
+## 2. Parcours de A à Z
+
+Huit étapes, du devis à la livraison. L'artisan ne fait que deux gestes : proposer (et s'engager), confirmer la livraison.
+
+1. **Devis → liste de commande.** BatiClair lit le devis et produit la liste (temps un, deux, trois). Rien de nouveau ici.
+2. **Proposer au groupé et s'engager.** Sur l'écran 3, un interrupteur « Proposer au groupé » par ligne ou par lot, une fenêtre de livraison (date la plus tôt, date limite) et une seule question : « Chantier signé » ou « Devis en attente ». Seuls les besoins « signé » forment le lot ferme ; les « en attente » sont transmis au négoce comme volume probable, sans engagement. En cochant « signé », l'artisan s'engage à commander ces quantités au prix groupé obtenu, chez le négoce retenu. Son besoin part sans son nom.
+3. **Base négoces alimentée par les artisans.** À la première proposition, l'artisan saisit l'e-mail de ses négoces (le favori en premier) et coche ce que chacun vend : couverture, charpente, maçonnerie, électricité, plomberie, aménagement extérieur. Ces négoces rejoignent la base commune du département. L'app lui donne un message type pour prévenir son négoce. Un négoce qui reçoit un lot qui ne le concerne pas clique « pas concerné » : la famille est décochée toute seule. Aucun démarchage par Greg.
+4. **Regroupement automatique.** Le code regroupe par référence exacte (ex. ardoise 32×22), famille de matériau, zone (département) et fenêtre de livraison compatible. Un lot se forme toutes les deux semaines (lundi 7 h) ou dès qu'un seuil est atteint. Un seul lot ouvert par référence et par zone.
+5. **Demande aux négoces.** L'e-mail part au nom du « Regroupement artisans » (nom provisoire) depuis l'adresse BatiClair, à tous les négoces du département qui vendent la famille concernée : spécialistes (ardoise à La Rivière) comme généralistes (Point P reçoit toutes ses familles). PDF en deux parties : total ferme + volume probable, puis livraison par chantier (adresse, quantité, fenêtre) sans nom de client. Le négoce clique un lien, dépose son devis PDF (un ou deux, par palier de quantité) et peut ajouter une phrase libre. Pas de compte, pas de formulaire. Il chiffre ce qu'il vend et ignore le reste.
+6. **Lecture et choix.** Sonnet extrait de chaque devis négoce les prix par référence et le délai ; le code retient le négoce le moins cher qui couvre tout le lot dans la fenêtre. Un seul prix, un seul négoce par lot : tout le volume va au même endroit, c'est ce qui fait le prix. Cas douteux marqué « à vérifier » pour Greg.
+7. **Offre à chaque artisan.** Chacun reçoit son offre personnelle : sa quantité, son prix unitaire, son économie estimée, le négoce retenu, la date de livraison. C'est une information, pas une question : il s'est engagé à l'étape 2. Un bouton « Problème » s'il voit une erreur.
+8. **Bons de commande, livraison, confirmation.** Le bon de commande de chaque artisan part automatiquement au négoce retenu : nom, numéro de compte (ou demande d'ouverture), adresse du chantier, quantités, fenêtre de livraison, mention « tarif groupé lot n° … ». Le négoce livre chaque chantier comme une commande normale, il n'appelle personne sauf pour caler l'heure. L'artisan confirme d'un tap (« Livré » / « Problème »), relance à J+15.
+
+## 3. Notifications artisan
+
+Cinq notifications maximum par lot, toutes par push iPhone + e-mail, toujours courtes et sans jamais nommer les autres artisans.
+
+| Moment | Message | Action attendue |
+| --- | --- | --- |
+| Besoin accepté dans le groupé | « Vos 31 bacs sont dans le groupé Côtes-d'Armor. Prochain lot lundi. » | Aucune |
+| Lot formé, demande envoyée | « Le groupé est parti chez 4 négoces. Réponses attendues sous 7 jours. » | Aucune |
+| Négoce retenu | « Vos 31 bacs : X € chez A (−Y %). Bon de commande transmis, livraison le 3 nov. » | Problème (si erreur) |
+| Livraison prévue | « Livraison aujourd'hui. Tout est arrivé ? » | Livré / Problème |
+
+Quatre notifications par lot, pas de rappel : l'artisan n'a rien à décider après son engagement.
+
+## 4. Le cas du non-engagement
+
+Règle de base : on n'entre dans le groupé que sur engagement ferme (« chantier signé »), donc le négoce chiffre un volume ferme et donne un prix ferme. Plus de second tour, plus de palier qui baisse : le prix annoncé est le prix payé.
+
+**a) Avant le départ du lot.** L'artisan retire son besoin librement tant que la demande n'est pas partie aux négoces.
+
+**b) Entre le départ du lot et le bon de commande.** Le besoin est engagé : il ne peut plus être retiré, et l'artisan ne choisit pas le négoce. Il commande chez celui que le code a retenu pour tout le lot.
+
+**c) Après le bon de commande.** L'artisan qui ne commande pas ou refuse la livraison :
+
+- première fois : avertissement, aucun frais ;
+- deuxième fois sur 12 mois : exclu du groupé 6 mois (il garde BatiClair) ;
+- le négoce est prévenu automatiquement et peut annuler la ligne.
+
+**d) Le devis en attente ne coûte rien.** Un besoin « en attente » n'engage personne ; s'il devient signé, l'artisan le bascule d'un tap et il rejoint le lot suivant.
+
+**Ce qu'on ne fait pas :** pas d'acompte, pas de pénalité en euros, pas de nom affiché aux autres artisans.
+
+## 5. Garde-fous
+
+- SIRET vérifié (API INSEE) avant tout accès au groupé ; compte de moins de 30 jours plafonné à un lot et 5 000 € de besoin.
+- Un besoin = une ligne issue d'un devis lu par l'app, jamais une saisie libre.
+- Quantité d'un besoin plafonnée à 3 × la médiane des besoins de la même référence sur 90 jours.
+- Un artisan ne voit jamais le nombre d'autres artisans, leurs noms ni leurs chantiers ; seulement « lot formé ».
+- Le négoce reçoit les adresses de livraison et les quantités, jamais les noms de clients finaux ; il ne voit le nom de l'artisan qu'au bon de commande.
+- Un négoce peut se désinscrire d'un tap (« stop ») ou décocher une famille (« pas concerné »).
+- Rôle « négociateur » (plus tard) : un gros artisan peut négocier lui-même un lot avec son négoce ; la réponse arrive dans l'app comme les autres.
+- Journal de chaque lot (qui a proposé, engagé, choisi, confirmé, avec horodatage) visible par Greg seul.
+- Un seul lot ouvert par référence et par zone à la fois.
+- Risque de contournement accepté : le prix groupé est réservé au lot, l'artisan reste pour le quantitatif.
+
+## 6. Abonnement et facturation
+
+Un seul revenu : l'abonnement mensuel BatiClair, 29 à 50 € selon le palier retenu, prélevé par Stripe. Aucune commission sur les lots, aucun frais par commande, aucune marge sur les prix. Argument de vente : « Tu fais ton devis, on commande moins cher pour toi. »
+
+- Le groupé est inclus dans l'abonnement ; pas d'accès au groupé sans abonnement actif et SIRET vérifié.
+- Économie affichée = (prix de référence − prix groupé) × quantité ; prix de référence = prix catalogue du négoce ou dernier prix payé seul déclaré par l'artisan. Sert au compteur « Économisé grâce au groupé », pas à facturer.
+- Le négoce ne paie rien et n'a rien à signer : répondre est gratuit, il reçoit des commandes groupées prêtes, avec adresses et quantités.
+- Option gardée pour plus tard, quand les lots pèseront : commission d'apporteur d'affaires côté négoce, payée seulement par le négoce qui gagne le lot, avec contrat signé électroniquement. Pas au lancement.
+- Écartés : marge cachée sur les prix, BatiClair acheteur-revendeur, frais payés par les négoces pour voir les lots, réseau social d'artisans.
+- En bêta : facture simple sans prélèvement ; Stripe branché avant l'ouverture large.
+
+## 7. Prompt pour Claude Code
+
+À envoyer seulement après la mission multimétier (23 oct.) et la réception des réponses négoce. Copier le bloc tel quel.
+
+```markdown
+Nouveau chantier : « BatiClair Groupé ». Règles dans le doc joint (sections 1 à 6) ; lis-le entièrement avant de coder. Rien en prod sans mon accord explicite, tout derrière un drapeau `groupe` désactivé par défaut.
+
+Objectif : regrouper les besoins fermes de plusieurs artisans d'une même zone pour obtenir un prix de volume chez un seul négoce par lot, chacun commandant ensuite sur son propre compte négoce. Aucun contact entre artisans. BatiClair n'encaisse jamais d'argent de commande, ne prend aucune commission : le groupé est inclus dans l'abonnement. Zéro gestion humaine : tout est automatique, Greg ne fait que surveiller.
+
+Étape 1 — Données (PR 1)
+- Tables Prisma : Besoin (ligne du quantitatif, artisan, chantier, référence normalisée, famille, quantité, unité, zone = département, fenêtre tôt/tard, statut signé | en attente | retiré | engagé | commandé | livré), Negoce (nom, e-mail, département, familles vendues, favori de, stop, ajouté par), LotGroupe (référence, famille, zone, fenêtre, statut, date d'envoi, clôture, négoce retenu, prix retenu), ReponseNegoce (lot, négoce, fichiers déposés, prix par référence et palier, délai, message libre, statut extraction), OffreArtisan (lot, besoin, prix unitaire, économie estimée, horodatages), BonCommande (offre, négoce, PDF, envoyé le), Livraison (bon, date prévue, livré | problème), Journal (lot, événement, horodatage).
+- Normalisation : clé par référence fabricant quand elle existe, sinon libellé référentiel + dimension + teinte. Deux besoins ne se groupent que sur clé identique.
+
+Étape 2 — Entrée du besoin (PR 2)
+- Écran 3 : interrupteur « Proposer au groupé » par ligne et par lot, visible seulement si drapeau actif, SIRET vérifié, abonnement actif.
+- Au premier usage : fenêtre de livraison, puis un seul choix « Chantier signé » / « Devis en attente », puis phrase d'engagement « En cochant Chantier signé, je m'engage à commander ces quantités au prix groupé obtenu, chez le négoce retenu ». Bascule « en attente → signé » d'un tap plus tard.
+- Retrait possible tant que le lot n'est pas parti.
+
+Étape 3 — Base négoces (PR 3)
+- Écran « Mes négoces » : e-mail + cases familles (couverture, charpente, maçonnerie, électricité, plomberie, aménagement extérieur), favori en premier ; message type à envoyer au négoce. Chaque négoce ajouté rejoint la base du département.
+- Lien « pas concerné » dans chaque e-mail négoce : décoche la famille ; lien « stop » : désinscrit.
+
+Étape 4 — Regroupement (PR 4)
+- Cron Vercel un lundi sur deux à 7 h, et à chaque seuil atteint : un lot par (référence, zone, fenêtre compatible). Seuils dans `groupe/seuils.json` (ex. ardoise : 2 artisans ou 2 palettes). Un seul lot ouvert par référence et zone. Plafond par besoin : 3 × médiane 90 jours.
+- Le lot sépare volume ferme (signé) et volume probable (en attente).
+
+Étape 5 — Demande aux négoces (PR 5)
+- E-mail au nom de « Regroupement artisans » (nom dans une constante), expéditeur BatiClair, à tous les négoces du département dont les familles couvrent le lot ; un généraliste reçoit toutes ses familles dans un seul e-mail.
+- PDF en deux parties : total ferme + probable par référence ; puis une ligne par chantier (adresse, quantité, fenêtre), sans nom de client.
+- Lien unique de réponse `reponse/<token-lot-negoce>` : page sans compte, dépôt d'un ou deux PDF (paliers de quantité), zone de texte libre, bouton Envoyer. Réponse par e-mail à `lot-<id>@reponses.<domaine>` acceptée aussi (webhook Resend existant).
+- Extraction Sonnet : prix par référence et par palier, délai, message ; cas douteux « à vérifier » dans l'admin, jamais bloquant pour le lot.
+
+Étape 6 — Choix et offres (PR 6)
+- Code pur : pour chaque lot, prix de chaque négoce au volume ferme, délai dans la fenêtre ; un seul négoce retenu, le moins cher qui couvre tout le lot. Jamais de répartition entre plusieurs négoces.
+- OffreArtisan : quantité, prix unitaire, négoce retenu, date de livraison, économie estimée (prix de référence − prix groupé) × quantité.
+- Écran « Mon offre » : information seulement, bouton « Problème » si erreur. Jamais le nombre ni le nom des autres artisans.
+
+Étape 7 — Bons de commande et livraison (PR 7)
+- Dès le négoce retenu : bon de commande PDF par artisan (nom, numéro de compte négoce ou « ouverture de compte demandée », adresse chantier, quantités, fenêtre, mention « tarif groupé lot n° … »), envoyé automatiquement au négoce avec une liste récapitulative de ses livraisons ; copie à l'artisan.
+- Notification le jour prévu : « Livré » / « Problème ». Relance à J+15.
+- Compteur « Économisé grâce au groupé » dans Compte.
+- Désistement après bon de commande : 1er = avertissement ; 2e sur 12 mois = exclusion 6 mois ; négoce prévenu.
+
+Étape 8 — Notifications (PR 8)
+- Push + e-mail, quatre messages par lot (tableau section 3), aucun rappel.
+
+Étape 9 — Admin Greg (PR 9)
+- Écran admin : lots en cours, réponses négoces et extractions « à vérifier », journal, boutons « forcer / annuler un lot / changer le négoce retenu », base négoces (familles, stop), compteur de lots et d'économies par département.
+
+Tests : scénario complet avec 4 artisans fictifs (3 signés, 1 en attente), 3 négoces fictifs dont un généraliste et un « pas concerné », un désistement après bon de commande ; e2e sur iPhone (375 px) pour chaque écran. Crédit API : faux lecteur pour les devis négoce, vraie extraction Sonnet seulement sur demande.
+
+Rapport à chaque PR : ce qui marche, ce qui manque, ≤ 3 décisions pour moi.
+```

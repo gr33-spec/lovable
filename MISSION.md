@@ -135,7 +135,7 @@ activer l'auto-reload. Le forfait Claude (claude.ai) est un autre compteur et ne
 | 5 | Étape 3 : devis maison complète 8 lots | fait (#282) : `apps/api/test/maison-entiere-8-lots.test.ts` (maçonnerie, électricité, plomberie, carrelage, sols, peinture, serrurerie, façade ; carte des lots, une section par lot, envoi par lot) |
 | 6 | Mission B, boucle 1 à 5, jusqu'au vendredi 23 octobre 12 h | à faire |
 
-Tableau de bord : `baticlair/docs/tableau-de-bord-metiers.md` (écrit par un test). Prochaine étape : puis boucle de la mission B (épreuves, robustesse, écrans iPhone), sans API. Au retour du crédit : file du §2 bis.
+Tableau de bord : `baticlair/docs/tableau-de-bord-metiers.md` (écrit par un test). Prochaine étape : boucle de la mission B (épreuves, robustesse, écrans iPhone), sans API. Au retour du crédit : file du §2 bis.
 
 ## 5. Mesures (temps et coût par devis)
 
@@ -172,3 +172,21 @@ Tableau de bord : `baticlair/docs/tableau-de-bord-metiers.md` (écrit par un tes
   (fiche « moteur tiroir », comme couverture et électricité) plutôt que de le remplacer par une fiche brouillon. À confirmer.
 - (réglé) Les « docs du 3 octobre » sont dans `baticlair/docs/referentiels/*.md` (un par métier, 20 à 60 Ko), avec la
   recherche du 4 octobre dans `baticlair/referentiels/<métier>/tiroir.json` (valeurs sourcées ou à vérifier). Base de chaque fiche.
+
+## 9. Chantier « BatiClair Groupé » (Greg, 2026-10-19)
+
+Règles : `baticlair/docs/groupe/parcours-complet.md` (sections 1 à 6, prompt section 7). Drapeau `GROUPE` désactivé par
+défaut ; RIEN EN PROD SANS L'ACCORD EXPLICITE DE GREG : une PR du groupé ne se fusionne pas (la fusion lance
+`prisma migrate deploy` en prod) tant qu'il n'a pas dit oui. Neuf PR, une par étape.
+
+| PR | Étape | État |
+|---|---|---|
+| 1 | Données : 10 tables, clé de référence, zone, statuts, drapeau | PR ouverte, NON fusionnée (accord attendu) |
+| 2 | Entrée du besoin (écran 3) | à faire |
+| 3 | Base négoces | à faire |
+| 4 | Regroupement (cron, seuils) | à faire |
+| 5 | Demande aux négoces (mail, PDF, lien de réponse) | à faire |
+| 6 | Choix et offres | à faire |
+| 7 | Bons de commande, livraison, désistements | à faire |
+| 8 | Notifications | à faire |
+| 9 | Admin Greg | à faire |

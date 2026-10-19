@@ -21,7 +21,7 @@ export class HealthController {
     await this.prisma.$queryRaw`SELECT 1`;
     // `features` : ce qui est réellement disponible, pour que l'interface ne
     // promette rien d'impossible (ex. « e-mail envoyé » sans service d'e-mail). `aiKey` : le NOM de la variable d'où
-    // vient la clé de lecture (BATICLAIR_ANTHROPIC_KEY), jamais sa valeur.
-    return { status: "ok", features: { email: this.email.deliversEmail, ai: this.config.ai.provider !== "disabled", aiKey: this.config.ai.keySource, alerts: this.alerter.enabled } };
+    // vient la clé de lecture (BATICLAIR_ANTHROPIC_KEY), jamais sa valeur. `groupe` : BatiClair Groupé ouvert (drapeau `GROUPE`).
+    return { status: "ok", features: { email: this.email.deliversEmail, ai: this.config.ai.provider !== "disabled", aiKey: this.config.ai.keySource, alerts: this.alerter.enabled, groupe: this.config.groupe.enabled } };
   }
 }

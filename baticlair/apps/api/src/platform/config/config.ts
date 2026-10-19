@@ -96,6 +96,11 @@ const envSchema = z
      */
     PAYWALL: z.enum(["on", "off"]).default("off"),
     /**
+     * BatiClair Groupé (document du fondateur, 2026-10-19) : DÉSACTIVÉ par défaut, « rien en prod sans mon accord
+     * explicite » ; `on` l'ouvre (écrans, regroupement, envois aux négoces).
+     */
+    GROUPE: z.enum(["on", "off"]).default("off"),
+    /**
      * Limitation de débit (connexion, inscription, dépôts de devis, lecture IA) : `on` partout,
      * `off` uniquement pour les tests automatisés qui enchaînent des centaines de requêtes.
      */
@@ -164,6 +169,8 @@ export interface AppConfig {
   /** E-mails (en minuscules) des validateurs du référentiel. */
   referentialValidators: string[];
   billing: { plans: Plan[]; activationCodes: Record<string, string>; enforced: boolean };
+  /** BatiClair Groupé : désactivé par défaut (`GROUPE=on` l'ouvre). */
+  groupe: { enabled: boolean };
   rateLimit: { enabled: boolean };
   alerts: { webhookUrl?: string; email?: string };
   cronSecret?: string;
@@ -228,6 +235,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       .map((x) => x.trim().toLowerCase())
       .filter((x) => x.length > 0),
     billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES), enforced: e.PAYWALL === "on" },
+    groupe: { enabled: e.GROUPE === "on" },
     rateLimit: { enabled: e.RATE_LIMIT === "on" },
     ...(e.CRON_SECRET ? { cronSecret: e.CRON_SECRET } : {}),
     alerts: { ...(e.ALERT_WEBHOOK_URL ? { webhookUrl: e.ALERT_WEBHOOK_URL } : {}), ...(e.ALERT_EMAIL ? { email: e.ALERT_EMAIL } : {}) },
