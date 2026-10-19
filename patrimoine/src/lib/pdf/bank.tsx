@@ -553,7 +553,7 @@ function SynthesisPage({ m, h, now, message, author, trajectory }: { m: GroupMod
   const paymentsSub = paymentsApprox ? ["par mois", m.estimatedLoans ? `${m.estimatedLoans} estimée(s)` : "", m.missingPaymentLoans ? `${m.missingPaymentLoans} non communiquée(s), exclue(s)` : ""].filter(Boolean).join(" · ") : "par mois, assurance comprise";
   const kpis: Kpi[] = [
     { label: "Loyers annuels", value: K(f.rentMonthly * 12), sub: `${E(Math.round(f.rentMonthly))} par mois` },
-    { label: "Capital restant dû", value: approx(K(f.debt), f.unknownDebt > 0 ? "≥" : undefined), sub: [f.unknownDebt > 0 ? `${f.loans} crédit(s), dont ${f.unknownDebt} non communiqué(s)` : `${f.loans} crédit(s) en cours`, f.personalDebt > 0 ? `dont ${K(f.personalDebt)} résidence principale` : ""].filter(Boolean).join(" · ") },
+    { label: "Capital restant dû", value: approx(K(f.debt), f.unknownDebt > 0 ? "≥" : undefined), sub: [f.unknownDebt > 0 ? `${f.loans} crédit(s), dont ${f.unknownDebt} non communiqué(s)` : `${f.loans} crédit(s) en cours`, f.personalDebt > 0 ? `dont ${K(f.personalDebt)} résidence principale` : "", `au ${m.balanceAsOf}`].filter(Boolean).join(" · ") },
     { label: f.personalPaymentsMonthly > 0 ? "Mensualités locatives" : "Mensualités", value: approx(E(Math.round(rentalPayments(f))), paymentsApprox ? "≈" : undefined), sub: [paymentsSub, f.personalPaymentsMonthly > 0 ? `+ ${E(Math.round(f.personalPaymentsMonthly))} crédit personnel` : ""].filter(Boolean).join(" · ") },
     { label: "Cash-flow locatif", value: approx(S(Math.round(cf)), cfMark), sub: m.missingCharges > 0 ? `par mois, surestimé : charges de ${m.missingCharges} bien(s) non renseignées` : "par mois, après charges et crédits locatifs", tone: cf >= 0 ? "pos" : "neg" },
   ];
@@ -646,7 +646,7 @@ function LoansPage({ m, h }: { m: GroupModel; h: Head }) {
         <Text style={{ ...tot.text, fontSize: 9 }}>Total</Text>
         <Text style={{ ...tot.text, fontSize: 9 }}>{T(`${K(totalBalance)} restant dû · ${approx(E(Math.round(totalMonthly)), anyApprox ? "≈" : undefined)} / mois`)}</Text>
       </View>
-      <Note>{`Mensualités assurance comprise. Capital restant dû calculé à ce jour à partir des tableaux d'amortissement ou des conditions du prêt. « env. » : valeur estimée (taux, mensualité ou date de fin non communiqués) ; « — » : non communiqué.${gapNote(m)}`}</Note>
+      <Note>{`Mensualités assurance comprise. Capital restant dû au ${m.balanceAsOf} (échéances réglées jusqu'au mois précédent), d'après les tableaux d'amortissement de la banque ou, à défaut, les conditions du prêt. « env. » : valeur estimée (taux, mensualité ou date de fin non communiqués) ; « — » : non communiqué.${gapNote(m)}`}</Note>
     </Sheet>
   );
 }

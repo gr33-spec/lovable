@@ -87,7 +87,23 @@ export function StoreProvider({
   }, [data]);
   const [version, setVersion] = useState(initialVersion);
   const [status, setStatus] = useState<SaveStatus>("idle");
-  const [nowMonth] = useState(() => currentMonth());
+  // Mois en cours : suivi dans le temps (application restée ouverte, téléphone rouvert le mois suivant),
+  // pour que les tableaux d'amortissement avancent sans rechargement.
+  const [nowMonth, setNowMonth] = useState(() => currentMonth());
+  useEffect(() => {
+    const tick = () => setNowMonth((m) => (currentMonth() === m ? m : currentMonth()));
+    const onVisible = () => {
+      if (document.visibilityState === "visible") tick();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", tick);
+    const id = setInterval(tick, 60 * 60 * 1000);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", tick);
+      clearInterval(id);
+    };
+  }, []);
 
   const pending = useRef<Op[]>([]);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
