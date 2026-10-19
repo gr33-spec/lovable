@@ -751,6 +751,54 @@ const EPREUVES: Record<string, { compte: string; epreuves: Epreuve[] }> = {
       },
     ],
   },
+  facade: {
+    compte: "facade",
+    epreuves: [
+      {
+        nom: "monocouche gratté sur maçonnerie écrit : sacs de 25 kg, aucune question",
+        lignes: [{ libelle: "Enduit monocouche gratté sur maçonnerie", quantite: "50", unite: "m²" }],
+        questions: {},
+        commande: { "Enduit monocouche": "57 sacs de 25 kg" },
+      },
+      {
+        nom: "monocouche sans support ni finition : deux questions",
+        lignes: [{ libelle: "Enduit monocouche OC2", quantite: "40", unite: "m²" }],
+        questions: { support_enduit: "beton", finition_enduit: "taloche" },
+        commande: { "Enduit monocouche": "23 sacs de 25 kg" },
+      },
+      {
+        nom: "ITE PSE 120 mm écrite : colis, mortier, chevilles, treillis, finition",
+        lignes: [{ libelle: "ITE polystyrène graphité 120 mm", quantite: "60", unite: "m²" }],
+        questions: {},
+        commande: {
+          "PSE graphite ITE 1200 × 600 × 120 mm": "22 colis de 2,88 m²",
+          "Mortier colle et sous-enduit ITE": "28 sacs de 25 kg",
+          "Cheville à frapper ITE 180 mm": "5 boîtes de 100 u",
+          "Treillis d'armature fibre de verre": "2 rouleaux de 50 m²",
+          "Finition organique talochée": "7 seaux de 25 kg",
+        },
+      },
+      {
+        nom: "RPE grain 2 écrit, bavettes telles qu'écrites",
+        lignes: [
+          { libelle: "RPE taloché grain 2", quantite: "100", unite: "m²" },
+          { libelle: "Bavettes alu d'appui", quantite: "6", unite: "u" },
+        ],
+        questions: {},
+        commande: { "Revêtement plastique épais": "13 seaux de 25 kg" },
+        ecrits: ["@2"],
+      },
+      {
+        nom: "antimousse puis peinture D2 : bidons et seaux",
+        lignes: [
+          { libelle: "Traitement antimousse", quantite: "150", unite: "m²" },
+          { libelle: "Peinture de façade D2", quantite: "150", unite: "m²" },
+        ],
+        questions: {},
+        commande: { "Antimousse façade": "2 bidons de 20 L", "Peinture façade D2": "3 seaux de 15 L" },
+      },
+    ],
+  },
 };
 
 let ctx: TestContext;
