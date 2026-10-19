@@ -71,7 +71,7 @@ l'état complet ici et dire à Greg « contexte plein, relance une session avec 
 
 ## 2. État au 2026-10-19
 
-En production (main) : tout jusqu'à la PR #265 (socle des fiches métier), plus #262 (autre chantier, `patrimoine/`, pas le nôtre).
+En production (main) : tout jusqu'à la PR #266 (fiche terrassement-VRD), plus #262 (autre chantier, `patrimoine/`, pas le nôtre).
 - #257 carte « Lots repérés » ; #258 chaque bouton du modèle passe (22 tiroirs) ; #259 repérage rapide des métiers puis une seule
   lecture Opus ; #260 « Gros devis, j'y suis encore… » après 30 s.
 - L'existant multimétier : 22 tiroirs TypeScript dans `baticlair/packages/domain/src/referential/data/*.ts` (registre `REFERENTIALS`,
@@ -102,7 +102,8 @@ attend la vraie lecture avant fusion (file ci-dessous) ; tout le reste se fusion
 | 1 | Prompt v5 (bref mot pour mot) | recréer la PR #261 (§2), étiquette `lecture-reelle` | DE00000071 sans écart au contrôle, D.2026.105 sans écart |
 | 2 | 7954 (électricité + VMC + sanitaire) | même passage (le workflow lit `fixture:7954`) | rapport à Greg : lots repérés, bref, 7 questions mot pour mot, contrôle `controleLecture7954` |
 | 3 | Terrassement-VRD (`fiche:terrassement`) | étiquette `lecture-reelle` sur une PR qui touche `referentiels/metiers/terrassement.md` (ou `pnpm exec tsx scripts/lecture-reelle.ts fixture:fiche:terrassement fiche:terrassement`) | `controleLectureFiche` sans écart : 12 lignes, chaque ouvrage de la §6, aucune épaisseur ni diamètre inventés |
-| 4+ | Un devis d'épreuve par nouveau métier | même commande, `fiche:<code>` | ligne ajoutée ici à chaque métier |
+| 4 | Maçonnerie (`fiche:maconnerie`) | même commande, `fixture:fiche:maconnerie fiche:maconnerie` | 12 lignes, chaque ouvrage de la §6, aucune épaisseur, section ni mortier inventés |
+| 5+ | Un devis d'épreuve par nouveau métier | même commande, `fiche:<code>` | ligne ajoutée ici à chaque métier |
 
 ## 3. Blocage actuel
 
@@ -119,11 +120,11 @@ activer l'auto-reload. Le forfait Claude (claude.ai) est un autre compteur et ne
 | 1 | Rouvrir #261 (bref mot pour mot), vraie lecture, fusion | bloqué (crédit) |
 | 2 | PR 7954 en CI | fait ; vraie lecture en file (§2 bis) |
 | 3 | Étape 0 : socle `referentiels/metiers/` (format 8 sections, registre par fichier, « Métiers couverts », cache de prompt) | fait (#265, en prod) |
-| 4 | Étape 1-2 : 14 nouveaux référentiels, un par PR, dans l'ordre du §1 | 1/14 : terrassement-VRD (PR ouverte) |
+| 4 | Étape 1-2 : 14 nouveaux référentiels, un par PR, dans l'ordre du §1 | 1/14 fait : terrassement-VRD (#266, en prod) ; 2/14 maçonnerie (PR ouverte) |
 | 5 | Étape 3 : devis maison complète 8 lots | à faire |
 | 6 | Mission B, boucle 1 à 5, jusqu'au vendredi 23 octobre 12 h | à faire |
 
-Prochaine étape : fusionner terrassement-VRD, puis maçonnerie-gros œuvre (source : `baticlair/docs/referentiels/maconnerie.md`, Greg 3 oct.), sans API. Au retour du crédit : file du §2 bis.
+Prochaine étape : fusionner maçonnerie, puis charpente bois (source : `baticlair/docs/referentiels/charpentier.md`, Greg 3 oct.), sans API. Au retour du crédit : file du §2 bis.
 
 ## 5. Mesures (temps et coût par devis)
 
