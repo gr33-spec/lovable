@@ -295,7 +295,9 @@ beforeEach(async () => {
   await resetDatabase(ctx.prisma);
 });
 
-type Vue = { id: string; metier: string; questions: { id: string }[]; lignes: { libelle: string; texte: string }[] };
+type Vue = { id: string; metier: string; peut_partir: boolean; questions: { id: string }[]; lignes: { libelle: string; texte: string; a_confirmer: boolean; raison?: string }[] };
+const RATIO = "ratio:";
+const cleDe = (id: string) => id.replace(/^(?:engine:)?fiche:/, "");
 
 describe("§52 : cinq devis d'épreuve par métier, par le faux lecteur", () => {
   for (const [metier, { compte, epreuves }] of Object.entries(EPREUVES)) {
@@ -304,12 +306,20 @@ describe("§52 : cinq devis d'épreuve par métier, par le faux lecteur", () => 
         const { agent } = await signUpWithCompany(ctx.app, `epreuve-${compte}-${i}@example.fr`, "Entreprise d'épreuve", [metier]);
         let q = (await agent.post("/v1/quantitatifs").send({ lignes: e.lignes }).expect(201)).body as Vue;
         expect(q.metier).toBe(compte);
-        expect(q.questions.map((x) => x.id.replace(/^(?:engine:)?fiche:/, "")).sort()).toEqual(Object.keys(e.questions).sort());
+        // Les questions de la fiche (§51.6) ; les « C'est bon » des ratios « à vérifier » (§47.1) sont à part.
+        const fiche = (v: Vue) => v.questions.filter((x) => !x.id.startsWith(RATIO));
+        expect(fiche(q).map((x) => cleDe(x.id)).sort()).toEqual(Object.keys(e.questions).sort());
         if (Object.keys(e.questions).length > 0) {
-          const reponses = q.questions.map((x) => ({ question: x.id, valeur: e.questions[x.id.replace(/^(?:engine:)?fiche:/, "")]! }));
+          const reponses = fiche(q).map((x) => ({ question: x.id, valeur: e.questions[cleDe(x.id)]! }));
           q = (await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses }).expect(201)).body as Vue;
-          expect(q.questions).toEqual([]);
+          expect(fiche(q)).toEqual([]);
         }
+        // §47.1 : une ligne orange dit sa règle ; « C'est bon » sur chacune, puis la liste peut partir.
+        for (const l of q.lignes.filter((x) => x.a_confirmer)) expect(l.raison, l.libelle).toMatch(/^Quantité à confirmer : \S/);
+        const ok = q.questions.filter((x) => x.id.startsWith(RATIO)).map((x) => ({ question: x.id, valeur: "ok" }));
+        if (ok.length > 0) q = (await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: ok }).expect(201)).body as Vue;
+        expect(q.questions).toEqual([]);
+        expect(q.peut_partir).toBe(true);
         const commande = Object.fromEntries(q.lignes.map((l) => [l.libelle, l.texte]));
         for (const [f, attendu] of Object.entries(e.commande)) expect(commande[f], f).toBe(attendu);
         // Règle numéro un : rien d'autre que ce que les ouvrages écrits contiennent, et les pièces écrites telles quelles.

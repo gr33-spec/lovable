@@ -1031,6 +1031,8 @@ function finishPurchase(
       state: "ready",
       assumptionKeys: [],
       ...(waits.length > 0 ? { waitsOn: waits.map((w) => w.key), asks: waits.map((w) => ({ key: w.key, text: w.question.text.replace(/\s*\?$/, ""), unit: w.question.unit ?? null, options: w.question.options ?? [] })) } : {}),
+      // §47.1, §52 : un ratio ou un conditionnement « à vérifier » de la fiche : orange « Quantité à confirmer », « C'est bon ».
+      ...("aConfirmer" in a && (a as ArticleFiche).aConfirmer.length > 0 ? { rules: (a as ArticleFiche).aConfirmer } : {}),
     });
   }
   // Les décisions de la liste qui ne sont pas des questions du calcul (la quantité d'un modèle écrit par l'artisan) restent.
