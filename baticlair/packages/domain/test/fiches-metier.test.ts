@@ -8,7 +8,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { ecranDeLecture, exportPourLecture, FICHES, fautesDeFiche, METIER_NAMES, parseFicheMetier, referentialFor, referentielDeFiche, ratiosEnValidation, type FicheMetier, type LectureDevis } from "../src/index.js";
+import { controleLectureFiche, ecranDeLecture, exportPourLecture, FICHES, fautesDeFiche, METIER_NAMES, parseFicheMetier, referentialFor, referentielDeFiche, ratiosEnValidation, type FicheMetier, type LectureDevis } from "../src/index.js";
 
 const dossier = join(import.meta.dirname, "../../../referentiels/metiers");
 
@@ -142,6 +142,19 @@ describe("§52 : le format commun des fiches métier", () => {
       for (const c of f.test.comptes) expect(r.comptes[c.fourniture], c.fourniture).toBe(c.commande);
     });
   }
+
+  it("le contrôle de la vraie lecture (au retour du crédit) : une lecture juste passe, un ouvrage faux ou une donnée inventée est un écart", () => {
+    for (const f of FICHES.filter((x) => x.moteur === "fiche")) expect(controleLectureFiche(f, lectureDuTest(f)), f.code).toEqual([]);
+    const f = parseFicheMetier(ESSAI, "essai");
+    const fausse = lectureDuTest(f);
+    fausse.lignes[0]!.fournitures[0]!.donnees = { epaisseur: "12" };
+    fausse.lignes[1]!.fournitures = [{ ...fausse.lignes[0]!.fournitures[0]! }];
+    expect(controleLectureFiche(f, fausse)).toEqual([
+      "ligne 1 : « epaisseur » = 12 lu, alors que le devis ne l'écrit pas",
+      "ligne 2 « Main-d'œuvre » : ouvrage dalle au lieu de aucun",
+      "ligne 2 : « epaisseur » = 12 lu, alors que le devis ne l'écrit pas",
+    ]);
+  });
 
   it("le registre : un métier déclaré par une fiche est un métier de BatiClair, son état dit la mention §52", () => {
     expect(METIER_NAMES.roofing).toBe("couverture");

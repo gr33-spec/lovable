@@ -349,6 +349,32 @@ export function fournituresDeFiche(fiche: FicheMetier, lignes: readonly LigneFic
   });
 }
 
+/**
+ * Le contrôle d'une VRAIE lecture du devis de la section 6 (script `lecture-reelle.ts`, au retour du crédit) : chaque
+ * ligne du devis est lue, nomme l'ouvrage attendu et aucun autre (« — » : aucun ouvrage de la fiche), et le modèle n'a
+ * pas inventé une donnée que le devis n'écrit pas (une question attendue reste une question). Vide : aucun écart.
+ */
+export function controleLectureFiche(
+  f: FicheMetier,
+  lecture: { lignes: readonly { designation: string; fournitures: readonly { ouvrage: string | null; donnees: Readonly<Record<string, string>> }[] }[] },
+): string[] {
+  const out: string[] = [];
+  const n = (t: string) => normalizeText(t).replace(/[^a-z0-9]+/g, " ").trim();
+  for (const l of f.test.devis) {
+    const d = n(l.designation);
+    const lu = lecture.lignes.find((x) => n(x.designation).includes(d)) ?? lecture.lignes.find((x) => n(x.designation).length > 8 && d.includes(n(x.designation)));
+    if (!lu) {
+      out.push(`ligne ${l.ligne} « ${l.designation} » : absente de la lecture`);
+      continue;
+    }
+    const ouvrages = [...new Set(lu.fournitures.map((x) => x.ouvrage).filter((o): o is string => !!o && f.ouvrages.some((w) => w.id === o)))].sort();
+    const attendu = vide(l.ouvrage) ? [] : [l.ouvrage];
+    if (ouvrages.join(", ") !== attendu.join(", ")) out.push(`ligne ${l.ligne} « ${l.designation} » : ouvrage ${ouvrages.join(", ") || "aucun"} au lieu de ${attendu.join(", ") || "aucun"}`);
+    for (const fo of lu.fournitures) for (const q of f.test.questions) if (fo.donnees[q]) out.push(`ligne ${l.ligne} : « ${q} » = ${fo.donnees[q]} lu, alors que le devis ne l'écrit pas`);
+  }
+  return out;
+}
+
 /** Les questions de la fiche à poser pour ce devis : celles qu'attend une fourniture et que ni le modèle ni la ligne n'ont tranchées. */
 export function questionsDeFiche(fiche: FicheMetier, articles: readonly ArticleFiche[], dejaPosees: ReadonlySet<string>): QuestionFiche[] {
   const attendues = new Set(articles.flatMap((a) => a.attend));

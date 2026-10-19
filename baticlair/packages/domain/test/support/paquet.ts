@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkReferential, RATIO, referentialFor, supplierTest, type Referential } from "../../src/index.js";
+import { checkReferential, ficheDeCalcul, RATIO, referentialFor, referentielDeFiche, supplierTest, type Referential } from "../../src/index.js";
 import { brestTable } from "./brest.js";
 import { answerAll, benchReport, pdfReport, screenReport } from "./lot-b.js";
 import type { QuoteLineInput } from "./read-quote.js";
@@ -44,8 +44,11 @@ export function describeLot(lot: { suite: string; titre: string; fichier: string
       describe(p.nom, () => {
         it("son tiroir est ouvert, juste, et trouvé par son nom", () => {
           expect(checkReferential(p.ref)).toEqual([]);
-          expect(referentialFor(p.metier)).toBe(p.ref);
-          expect(referentialFor(p.ref.trade)).toBe(p.ref);
+          // §52 : un métier repris par sa fiche (format commun) est trouvé par son nom sous sa fiche ; son tiroir reste éprouvé ici.
+          const fiche = ficheDeCalcul(p.ref.trade);
+          const attendu = fiche ? referentielDeFiche(fiche) : p.ref;
+          expect(referentialFor(p.metier)).toBe(attendu);
+          expect(referentialFor(p.ref.trade)).toBe(attendu);
         });
 
         it("à l'ouverture : les questions du comptoir et rien d'autre, chaque ligne orange dit sa règle", () => {
