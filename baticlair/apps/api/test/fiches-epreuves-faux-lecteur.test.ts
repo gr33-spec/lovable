@@ -83,6 +83,81 @@ const EPREUVES: Record<string, { compte: string; epreuves: Epreuve[] }> = {
       },
     ],
   },
+  masonry: {
+    compte: "maconnerie",
+    epreuves: [
+      {
+        nom: "murs en parpaings montés au ciment et sable, chaînage en blocs U",
+        lignes: [
+          { libelle: "Murs en parpaings de 20", quantite: "60", unite: "m²" },
+          { libelle: "Chaînage horizontal en blocs U", quantite: "32", unite: "ml" },
+        ],
+        questions: { mortier: "chantier" },
+        commande: {
+          "Bloc béton creux 50 × 20 × 20": "9 palettes de 70 u",
+          "Ciment CEM II 32,5": "12 sacs de 35 kg",
+          "Sable 0/4": "2 t",
+          "Bloc U de chaînage de 20": "68 u",
+          "Armature de chaînage préfabriquée 4 HA10": "6 éléments de 6 m",
+          "Béton C25/30": "1 m³",
+        },
+      },
+      {
+        nom: "fondations : la section écrite tranche la question, les fouilles hors commande",
+        lignes: [
+          { libelle: "Fouilles en rigole", quantite: "9", unite: "m³" },
+          { libelle: "Béton de propreté 5 cm", quantite: "18", unite: "m²" },
+          { libelle: "Semelle filante 50 × 25 en béton armé", quantite: "36", unite: "ml" },
+        ],
+        questions: {},
+        commande: { "Béton de propreté": "1 m³", "Béton C25/30": "5 m³", "Armature de semelle filante préfabriquée": "7 éléments de 6 m" },
+      },
+      {
+        nom: "dalle de garage : épaisseurs écrites, hérisson, film et treillis",
+        lignes: [
+          { libelle: "Hérisson 20/40 ép. 20 cm", quantite: "30", unite: "m²" },
+          { libelle: "Film polyane", quantite: "30", unite: "m²" },
+          { libelle: "Dalle béton armé ST25C ép. 12 cm", quantite: "30", unite: "m²" },
+        ],
+        questions: {},
+        commande: { "Cailloux 20/40": "10 t", "Film polyéthylène 150 µm": "1 rouleau de 150 m²", "Béton C25/30": "4 m³", "Treillis soudé ST25C": "3 panneaux de 14,4 m²" },
+      },
+      {
+        nom: "étage : plancher hourdis béton, poutrelles telles qu'écrites, murs en brique R20",
+        lignes: [
+          { libelle: "Plancher poutrelles hourdis béton", quantite: "40", unite: "m²" },
+          { libelle: "Poutrelles précontraintes selon plan", quantite: "8", unite: "u" },
+          { libelle: "Mur en brique R20", quantite: "50", unite: "m²" },
+        ],
+        questions: {},
+        commande: {
+          "Entrevous béton 16 (53 × 20)": "5 palettes de 72 u",
+          "Béton C25/30": "2,5 m³",
+          "Treillis de dalle de compression (PAF)": "7 panneaux de 6,4 m²",
+          "Brique rectifiée de 20 (type R20)": "7 palettes de 60 u",
+          "Mortier joint mince pour brique rectifiée": "4 sacs de 25 kg",
+        },
+        ecrits: ["Poutrelles précontraintes selon plan"],
+      },
+      {
+        nom: "béton cellulaire, enduit et chape (épaisseur demandée), échafaudage hors commande",
+        lignes: [
+          { libelle: "Murs en béton cellulaire de 20", quantite: "70", unite: "m²" },
+          { libelle: "Enduit monocouche gratté", quantite: "85", unite: "m²" },
+          { libelle: "Chape ciment", quantite: "40", unite: "m²" },
+          { libelle: "Échafaudage", quantite: "1", unite: "ens" },
+        ],
+        questions: { epaisseur_chape: "6" },
+        commande: {
+          "Bloc béton cellulaire de 20 (62,5 × 25)": "10 palettes de 48 u",
+          "Mortier-colle pour béton cellulaire": "13 sacs de 25 kg",
+          "Enduit monocouche": "75 sacs de 25 kg",
+          "Ciment CEM II 32,5": "27 sacs de 35 kg",
+          "Sable 0/4": "4,5 t",
+        },
+      },
+    ],
+  },
 };
 
 let ctx: TestContext;
@@ -102,7 +177,7 @@ describe("§52 : cinq devis d'épreuve par métier, par le faux lecteur", () => 
   for (const [metier, { compte, epreuves }] of Object.entries(EPREUVES)) {
     for (const [i, e] of epreuves.entries()) {
       it(`${compte}, épreuve ${i + 1} : ${e.nom}`, async () => {
-        const { agent } = await signUpWithCompany(ctx.app, `epreuve-${i}@example.fr`, "Entreprise d'épreuve", [metier]);
+        const { agent } = await signUpWithCompany(ctx.app, `epreuve-${compte}-${i}@example.fr`, "Entreprise d'épreuve", [metier]);
         let q = (await agent.post("/v1/quantitatifs").send({ lignes: e.lignes }).expect(201)).body as Vue;
         expect(q.metier).toBe(compte);
         expect(q.questions.map((x) => x.id.replace(/^(?:engine:)?fiche:/, "")).sort()).toEqual(Object.keys(e.questions).sort());

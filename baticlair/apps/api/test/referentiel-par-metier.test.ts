@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { CARRELAGE_REFERENTIAL, MACONNERIE_REFERENTIAL, METIER_NAMES, PEINTURE_REFERENTIAL, PLATRERIE_REFERENTIAL, REFERENTIALS, ROOFING_REFERENTIAL } from "@baticlair/domain";
+import { CARRELAGE_REFERENTIAL, ficheDeCalcul, METIER_NAMES, PEINTURE_REFERENTIAL, PLATRERIE_REFERENTIAL, referentielDeFiche, REFERENTIALS, ROOFING_REFERENTIAL } from "@baticlair/domain";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
 /**
@@ -53,7 +53,8 @@ describe("la porte choisit le référentiel selon le métier", () => {
     const cas = [
       { trade: "tiling", metier: "carrelage", ref: CARRELAGE_REFERENTIAL, ligne: { libelle: "Carrelage sol grès cérame 60x60 rectifié", quantite: "42", unite: "m²" }, article: /60×60/ },
       { trade: "painting", metier: "peinture", ref: PEINTURE_REFERENTIAL, ligne: { libelle: "Peinture plafonds mate, impression + 2 couches", quantite: "85", unite: "m²" }, article: /[Pp]einture/ },
-      { trade: "masonry", metier: "maconnerie", ref: MACONNERIE_REFERENTIAL, ligne: { libelle: "Chape ciment 5 cm", quantite: "35", unite: "m²" }, article: /[Cc]hape/ },
+      // §52 (2026-10-19) : la maçonnerie est calculée par sa fiche métier (`referentiels/metiers/maconnerie.md`) ; « 5 cm » écrit tranche l'épaisseur.
+      { trade: "masonry", metier: "maconnerie", ref: referentielDeFiche(ficheDeCalcul("masonry")!), ligne: { libelle: "Chape ciment 5 cm", quantite: "35", unite: "m²" }, article: /^Ciment/ },
     ];
     for (const c of cas) {
       const { agent } = await signUpWithCompany(ctx.app, `${c.trade}@example.fr`, `Entreprise ${c.metier}`, [c.trade]);
