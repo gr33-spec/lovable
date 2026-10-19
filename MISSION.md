@@ -71,7 +71,7 @@ l'état complet ici et dire à Greg « contexte plein, relance une session avec 
 
 ## 2. État au 2026-10-19
 
-En production (main) : tout jusqu'à la PR #268 (fiche charpente), plus #262 (autre chantier, `patrimoine/`, pas le nôtre).
+En production (main) : tout jusqu'à la PR #269 (étanchéité déclarée), plus #262 (autre chantier, `patrimoine/`, pas le nôtre).
 - #257 carte « Lots repérés » ; #258 chaque bouton du modèle passe (22 tiroirs) ; #259 repérage rapide des métiers puis une seule
   lecture Opus ; #260 « Gros devis, j'y suis encore… » après 30 s.
 - L'existant multimétier : 22 tiroirs TypeScript dans `baticlair/packages/domain/src/referential/data/*.ts` (registre `REFERENTIALS`,
@@ -104,7 +104,8 @@ attend la vraie lecture avant fusion (file ci-dessous) ; tout le reste se fusion
 | 3 | Terrassement-VRD (`fiche:terrassement`) | étiquette `lecture-reelle` sur une PR qui touche `referentiels/metiers/terrassement.md` (ou `pnpm exec tsx scripts/lecture-reelle.ts fixture:fiche:terrassement fiche:terrassement`) | `controleLectureFiche` sans écart : 12 lignes, chaque ouvrage de la §6, aucune épaisseur ni diamètre inventés |
 | 4 | Maçonnerie (`fiche:maconnerie`) | même commande, `fixture:fiche:maconnerie fiche:maconnerie` | 12 lignes, chaque ouvrage de la §6, aucune épaisseur, section ni mortier inventés |
 | 5 | Charpente (`fiche:charpente`) | `fixture:fiche:charpente fiche:charpente` | 7 lignes, chevronnage sans longueur ni entraxe inventés, fermettes sans ouvrage |
-| 6+ | Un devis d'épreuve par nouveau métier | même commande, `fiche:<code>` | ligne ajoutée ici à chaque métier |
+| 6 | Menuiseries extérieures (`fiche:menuiserie`) | `fixture:fiche:menuiserie fiche:menuiserie` | chaque menuiserie gardée telle qu'écrite ET sa pose ; format déduit des cotes, jamais inventé |
+| 7+ | Un devis d'épreuve par nouveau métier | même commande, `fiche:<code>` | ligne ajoutée ici à chaque métier |
 
 ## 3. Blocage actuel
 
@@ -121,11 +122,11 @@ activer l'auto-reload. Le forfait Claude (claude.ai) est un autre compteur et ne
 | 1 | Rouvrir #261 (bref mot pour mot), vraie lecture, fusion | bloqué (crédit) |
 | 2 | PR 7954 en CI | fait ; vraie lecture en file (§2 bis) |
 | 3 | Étape 0 : socle `referentiels/metiers/` (format 8 sections, registre par fichier, « Métiers couverts », cache de prompt) | fait (#265, en prod) |
-| 4 | Étape 1-2 : 14 nouveaux référentiels, un par PR, dans l'ordre du §1 | 3/14 faits : terrassement-VRD (#266), maçonnerie (#267), charpente (#268), en prod ; étanchéité déclarée (tiroir relu gardé, PR ouverte) |
+| 4 | Étape 1-2 : 14 nouveaux référentiels, un par PR, dans l'ordre du §1 | 4/14 faits : terrassement-VRD (#266), maçonnerie (#267), charpente (#268), étanchéité déclarée (#269, tiroir relu gardé), en prod ; menuiseries extérieures (PR ouverte) |
 | 5 | Étape 3 : devis maison complète 8 lots | à faire |
 | 6 | Mission B, boucle 1 à 5, jusqu'au vendredi 23 octobre 12 h | à faire |
 
-Prochaine étape : fusionner étanchéité (déclaration), puis menuiseries extérieures (fiche prête, colonne « Article écrit »), sans API. Au retour du crédit : file du §2 bis.
+Prochaine étape : fusionner menuiseries extérieures, puis menuiserie intérieure et agencement (`docs/referentiels/menuiserie-interieure-agencement.md`), sans API. Au retour du crédit : file du §2 bis.
 
 ## 5. Mesures (temps et coût par devis)
 
@@ -140,7 +141,7 @@ Prochaine étape : fusionner étanchéité (déclaration), puis menuiseries ext�
   (earthworks, masonry, carpentry, waterproofing, joinery, interior_joinery, drywall, plumbing, hvac, tiling, painting, facade…)
   ou un identifiant neuf (sols souples : `flooring` ; serrurerie : `metalwork`) ; `etat: brouillon` ; `moteur: fiche`.
 - Section 2 ouvrages (id en kebab-case) ; 3 ratios par unité d'ouvrage, condition `cle=valeur`, confiance, source S… ;
-  plusieurs conditions : `cle=valeur et cle2=valeur2` ; 4 conditionnements ; 5 questions (clé, texte, `Libellé=valeur / …`, ouvrages) ; 6 test (devis, bref, questions attendues,
+  plusieurs conditions : `cle=valeur et cle2=valeur2` ; colonne « Article écrit » = oui en §2 quand l'ouvrage est la pose d'un article écrit (la ligne le garde tel qu'écrit) ; 4 conditionnements ; 5 questions (clé, texte, `Libellé=valeur / …`, ouvrages) ; 6 test (devis, bref, questions attendues,
   réponses, comptes attendus au mot près : « 2,5 m³ », « 2 panneaux de 14,4 m² ») ; 7 à relire ; 8 sources.
 - `cd baticlair/packages/domain && pnpm test` : `fiches-metier.test.ts` refuse une fiche fautive et joue sa section 6.
 - Une fiche « fiche » prend le pas sur l'ancien tiroir du métier (lecture et calcul) ; les anciens chantiers gardent leur

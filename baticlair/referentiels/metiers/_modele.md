@@ -21,6 +21,9 @@ de la main-d'œuvre seule (sans fourniture). Ce texte est donné tel quel au mod
 
 ## 2. Ouvrages
 
+Colonne facultative « Article écrit » (oui / non) : oui quand l'ouvrage est la POSE d'un article écrit (une fenêtre) ; la
+ligne garde alors aussi l'article tel qu'écrit, la fiche n'ajoute que les fournitures de pose.
+
 | Ouvrage | Libellé | Unité | Ce que le devis écrit |
 |---|---|---|---|
 | exemple-ouvrage | Exemple d'ouvrage | m² | « Exemple … », « Ex. … » |

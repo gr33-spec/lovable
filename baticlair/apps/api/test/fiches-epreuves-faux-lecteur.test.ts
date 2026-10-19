@@ -206,6 +206,82 @@ const EPREUVES: Record<string, { compte: string; epreuves: Epreuve[] }> = {
       },
     ],
   },
+  joinery: {
+    compte: "menuiserie",
+    epreuves: [
+      {
+        nom: "fenêtres en dépose totale : la fenêtre reste telle qu'écrite, la pose ajoute ses fournitures",
+        lignes: [{ libelle: "Fenêtre PVC 2 vantaux 1200 × 1350, pose en dépose totale", quantite: "3", unite: "u" }],
+        questions: {},
+        commande: {
+          "Mousse imprégnée précomprimée 15/3-7": "3 rouleaux de 8 m",
+          "Mousse PU basse expansion 750 ml": "2 aérosols de 15 m",
+          "Mastic MS polymère 290 ml": "4 cartouches de 5,2 m",
+          "Mastic acrylique 310 ml": "2 cartouches de 14 m",
+          "Vis de cadre FFS 7,5 × 152": "1 boîte de 100 u",
+          "Habillage intérieur PVC plat 100 mm": "5 barres de 3 m",
+        },
+        ecrits: ["@1"],
+      },
+      {
+        nom: "portes-fenêtres en rénovation sur dormant : habillages intérieur et extérieur",
+        lignes: [{ libelle: "Porte-fenêtre PVC 2 vantaux, pose en rénovation sur dormant existant", quantite: "2", unite: "u" }],
+        questions: {},
+        commande: {
+          "Mastic MS polymère 290 ml": "3 cartouches de 5,2 m",
+          "Mastic acrylique 310 ml": "1 cartouche de 14 m",
+          "Mousse PU basse expansion 750 ml": "1 aérosol de 15 m",
+          "Vis de cadre FFS 7,5 × 152": "1 boîte de 100 u",
+          "Habillage intérieur PVC plat 100 mm": "5 barres de 3 m",
+          "Cornière d'habillage extérieur PVC": "5 barres de 3 m",
+        },
+        ecrits: ["@1"],
+      },
+      {
+        nom: "neuf en applique : deux formats sur deux lignes, chacun le sien",
+        lignes: [
+          { libelle: "Baie coulissante alu, pose en applique", quantite: "1", unite: "u" },
+          { libelle: "Fenêtre alu fixe, pose en applique", quantite: "1", unite: "u" },
+        ],
+        questions: {},
+        commande: {
+          "Mousse imprégnée précomprimée 15/3-7": "2 rouleaux de 8 m",
+          "Bande d'étanchéité à l'air 100 mm": "1 rouleau de 25 m",
+          "Cheville de fixation de cadre 8 × 80": "1 boîte de 100 u",
+        },
+        ecrits: ["@1", "@2"],
+      },
+      {
+        nom: "porte d'entrée, volets roulants tels qu'écrits",
+        lignes: [
+          { libelle: "Porte d'entrée alu vitrée", quantite: "1", unite: "u" },
+          { libelle: "Volet roulant rénovation radio", quantite: "3", unite: "u" },
+        ],
+        questions: {},
+        commande: {
+          "Mousse imprégnée précomprimée 15/3-7": "1 rouleau de 8 m",
+          "Mousse PU basse expansion 750 ml": "1 aérosol de 15 m",
+          "Mastic MS polymère 290 ml": "2 cartouches de 5,2 m",
+          "Vis de cadre FFS 7,5 × 152": "1 boîte de 100 u",
+        },
+        ecrits: ["@1", "@2"],
+      },
+      {
+        nom: "menuiseries sans cotes ni type : le format se demande",
+        lignes: [{ libelle: "Menuiseries PVC, pose en dépose totale", quantite: "5", unite: "u" }],
+        questions: { format_depose: "petite" },
+        commande: {
+          "Mousse imprégnée précomprimée 15/3-7": "3 rouleaux de 8 m",
+          "Mousse PU basse expansion 750 ml": "2 aérosols de 15 m",
+          "Mastic MS polymère 290 ml": "4 cartouches de 5,2 m",
+          "Mastic acrylique 310 ml": "2 cartouches de 14 m",
+          "Vis de cadre FFS 7,5 × 152": "1 boîte de 100 u",
+          "Habillage intérieur PVC plat 100 mm": "6 barres de 3 m",
+        },
+        ecrits: ["@1"],
+      },
+    ],
+  },
 };
 
 let ctx: TestContext;
@@ -237,7 +313,10 @@ describe("§52 : cinq devis d'épreuve par métier, par le faux lecteur", () => 
         const commande = Object.fromEntries(q.lignes.map((l) => [l.libelle, l.texte]));
         for (const [f, attendu] of Object.entries(e.commande)) expect(commande[f], f).toBe(attendu);
         // Règle numéro un : rien d'autre que ce que les ouvrages écrits contiennent, et les pièces écrites telles quelles.
-        expect(Object.keys(commande).sort()).toEqual([...Object.keys(e.commande), ...(e.ecrits ?? [])].sort());
+        // « @n » : la ligne n du devis, telle qu'écrite (la menuiserie dont la fiche ne calcule que la pose).
+        const ecrits = (e.ecrits ?? []).map((x) => (/^@\d+$/.test(x) ? e.lignes[Number(x.slice(1)) - 1]!.libelle : x));
+        for (const x of ecrits) expect(Object.keys(commande).some((k) => x.startsWith(k)), x).toBe(true);
+        expect(Object.keys(commande).length).toBe(Object.keys(e.commande).length + ecrits.length);
       });
     }
   }

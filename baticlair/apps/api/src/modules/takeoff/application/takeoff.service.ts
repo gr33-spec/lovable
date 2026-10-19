@@ -640,7 +640,8 @@ export class TakeoffService {
         ref = referentialFor(trade);
         if (ref) await this.reading.referentials?.ensure(ref);
       }
-      if (result && result.status === "success" && result.output && lignesDeLecture(result.output).length === lines.length) lecture = result.output;
+      // Une ligne lue par ligne envoyée (une ligne peut donner plusieurs fournitures : la fenêtre et sa pose, §52).
+      if (result && result.status === "success" && result.output && result.output.lignes.length === lines.length) lecture = result.output;
     }
     const takeoff = await this.takeoffs.create(tenant, {
       projectId,
@@ -660,7 +661,8 @@ export class TakeoffService {
         quantityRaw: l.quantity?.trim() || null,
         unitRaw: l.unit?.trim() || null,
         reference: null,
-        sourceRefs: lecture ? [lignesDeLecture(lecture)[i]!.id] : [],
+        // La première fourniture de la i-ème ligne lue (une ligne peut en donner plusieurs : la fenêtre et sa pose, §52).
+        sourceRefs: lecture ? [lignesDeLecture(lecture).find((x) => x.ligne === lecture.lignes[i])?.id ?? lignesDeLecture(lecture)[i]!.id] : [],
         sourcePages: [],
         section: [],
         aiDoubt: null,
@@ -1218,6 +1220,17 @@ export class TakeoffService {
       const line = byRef ? stored.find((l) => l.sourceRefs[0] === k) : stored[i];
       if (line) ids.set(k, line.id);
     });
+    // Une ligne enregistrée par ligne du devis (porte partenaire) alors que la lecture y lit plusieurs fournitures (la
+    // fenêtre telle qu'écrite et sa pose, §52) : les suivantes suivent la ligne enregistrée de la première (« 1:003.2 »
+    // → « <id>#2 ») ; supprimée par l'artisan, la ligne les emporte toutes.
+    if (byRef) {
+      for (const k of keys) {
+        const m = /^(.*)\.(\d+)$/.exec(k);
+        if (ids.has(k) || !m || m[2] === "1") continue;
+        const premiere = ids.get(`${m[1]}.1`);
+        if (premiere) ids.set(k, `${premiere}#${m[2]}`);
+      }
+    }
     // Les lignes ajoutées à la main (§45.9) : telles qu'écrites, à la suite du devis.
     const manual = lectureDepuisLignes(takeoff.lines.filter((l) => l.origin === "manual").map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantityRaw, unit: l.unitRaw })));
     // §50.7, §51.4 : la fiche corrigée sur le document (« Rampant : 6,5 m ») l'est pour le calcul aussi.

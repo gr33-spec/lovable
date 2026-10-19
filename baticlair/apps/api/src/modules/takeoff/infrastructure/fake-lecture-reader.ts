@@ -256,7 +256,9 @@ export function lectureSimulee(request: LectureRequest): LectureDevis {
       if (!o && normalizeText(unite) !== "u") return { ref: row.ref, designation, quantite, unite, role: "pose" as const, fournitures: [] };
       const nom = withoutLabour(designation).split(" - ")[0]!.trim() || designation;
       const f: LectureFourniture = { nom, quantite, unite, ouvrage: o?.ouvrage ?? null, emplacement: o ? "ouvrage" : null, donnees: { ...donnees, ...(o?.donnees ?? {}) }, attend, aPreciser: [], precision: null };
-      return { ref: row.ref, designation, quantite, unite, role: "fourniture" as const, fournitures: [f] };
+      // La pose d'un article écrit (une fenêtre) : l'article lui-même reste aussi, tel qu'écrit (§49.1).
+      const garde = o && fm.ouvrages.find((x) => x.id === o.ouvrage)?.garde ? [{ ...f, ouvrage: null, emplacement: null, donnees: {}, attend: [] }] : [];
+      return { ref: row.ref, designation, quantite, unite, role: "fourniture" as const, fournitures: [f, ...garde] };
     }
     const place = ref ? emplacementDe(ref, designation) : null;
     const produit = ref && place ? produitDe(ref, designation) : null;
