@@ -9,7 +9,11 @@ import type { PrismaService } from "../../../platform/database/prisma.service.js
  * restent engagés dedans : Greg décide (étape 9), rien ne repart tout seul.
  */
 export class ChoixService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    /** Étape 7 : dès le négoce retenu, les bons de commande partent. */
+    private readonly commande: { passerLesCommandes(maintenant?: Date): Promise<unknown> } = { passerLesCommandes: async () => undefined },
+  ) {}
 
   async choisirLesLotsEnvoyes(maintenant = new Date()): Promise<{ lotsChoisis: number; lotsClos: number }> {
     const envoyes = await this.prisma.lotGroupe.findMany({
@@ -57,6 +61,7 @@ export class ChoixService {
       ]);
       lotsChoisis++;
     }
+    if (lotsChoisis > 0) await this.commande.passerLesCommandes(maintenant);
     return { lotsChoisis, lotsClos };
   }
 }

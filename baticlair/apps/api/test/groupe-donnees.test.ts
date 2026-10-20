@@ -4,7 +4,7 @@ import { cleDeReference } from "@baticlair/domain";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
 /**
- * BATICLAIR GROUPÉ, ÉTAPE 1 : LES DONNÉES (document du fondateur, 2026-10-19, section 7, étape 1). Les tables du groupé existent (douze, dont l'accord et la facture du négoce, décision du 20 octobre),
+ * BATICLAIR GROUPÉ, ÉTAPE 1 : LES DONNÉES (document du fondateur, 2026-10-19, section 7, étape 1). Les tables du groupé existent (treize, dont l'accord et la facture du négoce, et les désistements à part, décisions du 20 octobre),
  * se relient du besoin au bon de commande et à la livraison, et tiennent les garde-fous de section 5 en base : un seul lot
  * ouvert par référence et par zone, un besoin par ligne de liste, un négoce par e-mail et par département. Le drapeau
  * `groupe` est désactivé par défaut (« rien en prod sans mon accord explicite »).

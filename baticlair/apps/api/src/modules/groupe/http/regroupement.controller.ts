@@ -4,6 +4,7 @@ import { forbidden, notFound } from "../../../platform/errors/domain-error.js";
 import { CONFIG } from "../../../platform/tokens.js";
 import { Public } from "../../identity/index.js";
 import { ChoixService } from "../application/choix.service.js";
+import { CommandeService } from "../application/commande.service.js";
 import { DemandeService } from "../application/demande.service.js";
 import { RegroupementService } from "../application/regroupement.service.js";
 
@@ -18,6 +19,7 @@ export class RegroupementController {
     @Inject(RegroupementService) private readonly regroupement: RegroupementService,
     @Inject(DemandeService) private readonly demande: DemandeService,
     @Inject(ChoixService) private readonly choix: ChoixService,
+    @Inject(CommandeService) private readonly commande: CommandeService,
     @Inject(CONFIG) private readonly config: AppConfig,
   ) {}
 
@@ -32,6 +34,10 @@ export class RegroupementController {
     const envoi = await this.demande.envoyerLesLotsFormes();
     // Étape 6 : les lots envoyés dont le délai de réponse est passé se décident.
     const choix = await this.choix.choisirLesLotsEnvoyes();
-    return { ...range, ...envoi, ...choix };
+    // Étape 7 : les bons de commande des lots choisis, la facture, les relances (factures échues, livraisons à J+15).
+    const commandes = await this.commande.passerLesCommandes();
+    const factures = await this.commande.relancerLesFactures();
+    const livraisons = await this.commande.relancerLesLivraisons();
+    return { ...range, ...envoi, ...choix, ...commandes, facturesRelancees: factures.relancees, livraisonsRelancees: livraisons.relancees };
   }
 }

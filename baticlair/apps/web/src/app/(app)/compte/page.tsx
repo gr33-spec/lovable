@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useState } from "react";
+import { EconomiesGroupeCard } from "@/components/economies-groupe";
 import { NotificationsCard } from "@/components/notifications-card";
 import { PartnerKeysCard } from "@/components/partner-keys-card";
 import { PlanSummary } from "@/components/paywall";
@@ -56,6 +57,7 @@ export default function ComptePage() {
       <BackButton fallback="/" />
       <PageTitle>Mon compte</PageTitle>
       {error ? <ErrorNotice error={error} /> : null}
+      <EconomiesGroupeCard />
       <Card className="flex flex-col gap-3 p-4">
         <div className="flex flex-col">
           <span className="text-[15px] font-bold">{me.user.name}</span>

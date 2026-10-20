@@ -7,6 +7,7 @@ import { PDF_READER, PdfJsPdfReader, type PdfReader } from "../documents/index.j
 import { TakeoffModule, TakeoffService } from "../takeoff/index.js";
 import { TenancyModule } from "../tenancy/index.js";
 import { ChoixService } from "./application/choix.service.js";
+import { CommandeService } from "./application/commande.service.js";
 import { DemandeService } from "./application/demande.service.js";
 import { GroupeService } from "./application/groupe.service.js";
 import { NEGOCE_EXTRACTOR, type NegoceExtractor } from "./application/negoce-extractor.js";
@@ -36,7 +37,8 @@ import { ReponseController } from "./http/reponse.controller.js";
     },
     { provide: RegroupementService, useFactory: (p: PrismaService) => new RegroupementService(p), inject: [PrismaService] },
     { provide: PDF_READER, useFactory: () => new PdfJsPdfReader() },
-    { provide: ChoixService, useFactory: (p: PrismaService) => new ChoixService(p), inject: [PrismaService] },
+    { provide: CommandeService, useFactory: (p: PrismaService, e: TransactionalEmailSender) => new CommandeService(p, e), inject: [PrismaService, EMAIL_SENDER] },
+    { provide: ChoixService, useFactory: (p: PrismaService, c: CommandeService) => new ChoixService(p, c), inject: [PrismaService, CommandeService] },
     {
       provide: NEGOCE_EXTRACTOR,
       // Le devis du négoce est lu par le modèle rapide (Sonnet), à la demande ; en test, le faux lecteur ; sans clé, Greg relit.
@@ -59,11 +61,11 @@ import { ReponseController } from "./http/reponse.controller.js";
     },
     {
       provide: GroupeService,
-      useFactory: (p: PrismaService, t: TakeoffService, s: SiretVerifier, r: RegroupementService, d: DemandeService) => new GroupeService(p, (tenant, id) => t.reviewed(tenant, id), s, r, d),
-      inject: [PrismaService, TakeoffService, SIRET_VERIFIER, RegroupementService, DemandeService],
+      useFactory: (p: PrismaService, t: TakeoffService, s: SiretVerifier, r: RegroupementService, d: DemandeService, c: CommandeService) => new GroupeService(p, (tenant, id) => t.reviewed(tenant, id), s, r, d, c),
+      inject: [PrismaService, TakeoffService, SIRET_VERIFIER, RegroupementService, DemandeService, CommandeService],
     },
     { provide: NegocesService, useFactory: (p: PrismaService, c: AppConfig) => new NegocesService(p, c.authSecret), inject: [PrismaService, CONFIG] },
   ],
-  exports: [GroupeService, NegocesService, RegroupementService, DemandeService, ChoixService],
+  exports: [GroupeService, NegocesService, RegroupementService, DemandeService, ChoixService, CommandeService],
 })
 export class GroupeModule {}

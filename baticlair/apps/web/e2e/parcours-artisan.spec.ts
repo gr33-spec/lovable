@@ -1793,4 +1793,9 @@ test("BatiClair Groupé, l'onglet : visible sans SIRET ni devis, trois étapes c
   await expect(page.getByRole("heading", { name: "Mes lots" })).toBeVisible();
   await expect(page.getByText("Aucun lot pour l'instant, propose un chantier au groupé.")).toBeVisible();
   await expect(manque).toHaveCount(0);
+  // Étape 7 : le compteur « Économisé grâce au groupé » dans Compte, à zéro.
+  await page.goto("/compte");
+  const economies = page.getByRole("region", { name: "Économisé grâce au groupé" });
+  await expect(economies).toContainText("0,00 €");
+  await expect(economies).toContainText("Aucune commande groupée pour l'instant.");
 });

@@ -168,6 +168,7 @@ model Company {
   besoins           Besoin[]
   negocesAjoutes    Negoce[]            @relation("NegoceAjoutePar")
   negoces           NegoceArtisan[]
+  desistements      Desistement[]
 
   @@map("company")
 }
@@ -1041,6 +1042,7 @@ model LotGroupe {
   journal      JournalGroupe[]
   accords      AccordNegoce[]
   facture      FactureNegoce?
+  desistements Desistement[]
 
   @@index([cle, zone, statut])
   @@map("lot_groupe")
@@ -1178,6 +1180,27 @@ model AccordNegoce {
 
   @@unique([lotId, negoceId])
   @@map("accord_negoce")
+}
+
+/// Un désistement après bon de commande (section 4 c ; table à part, décision du fondateur, 2026-10-20) : l'artisan qui ne
+/// commande pas ou refuse la livraison. Premier sur 12 mois : avertissement ; deuxième : exclu du groupé 6 mois ; le
+/// négoce est prévenu et peut annuler la ligne.
+model Desistement {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  companyId    String    @db.Uuid
+  lotId        String    @db.Uuid
+  bonId        String    @db.Uuid
+  raison       String?
+  /// avertissement | exclusion
+  sanction     String
+  excluJusquau DateTime? @db.Date
+  createdAt    DateTime  @default(now())
+
+  company Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  lot     LotGroupe @relation(fields: [lotId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, createdAt])
+  @@map("desistement")
 }
 
 /// La facture au négoce retenu (décision du fondateur, 2026-10-20) : émise automatiquement au bon de commande, 2 % du

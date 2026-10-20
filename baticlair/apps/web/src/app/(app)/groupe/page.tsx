@@ -23,6 +23,7 @@ interface BesoinLot {
   chantier: string;
   lot: { numero: number; statut: string } | null;
   offre: { prixUnitaire: string; negoce: string; dateLivraison: string | null } | null;
+  bon: { id: string; envoyeLe: string | null; livraison: { statut: string; datePrevue: string | null } | null } | null;
 }
 
 /** L'accroche selon le métier du compte (décision du fondateur, 2026-10-20) ; couvreur par défaut si le métier est inconnu. */
@@ -159,6 +160,80 @@ function Etape({ fait, titre, children }: { fait: boolean; titre: string; childr
   );
 }
 
+const jourFr = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("fr-FR", { day: "numeric", month: "long", timeZone: "UTC" });
+
+/** Étape 7 : le bon de commande est parti ; « Livré » / « Problème » d'un tap, « Je ne commande pas » (désistement, section 4 c). */
+function Livraison({ b, onDone }: { b: BesoinLot; onDone: () => void }) {
+  const bon = b.bon!;
+  const [probleme, setProbleme] = useState<string | null>(null);
+  const [desistement, setDesistement] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<ApiError | null>(null);
+  const run = async (f: () => Promise<void>) => {
+    setPending(true);
+    setError(null);
+    try {
+      await f();
+      onDone();
+    } catch (e) {
+      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+    } finally {
+      setPending(false);
+    }
+  };
+  const livraison = bon.livraison;
+  if (b.statut === "retire") return <p className="text-[13px] font-semibold text-warn">Tu ne commandes pas ce lot (désistement).</p>;
+  if (livraison?.statut === "livre") return <p className="text-[13px] font-extrabold text-ok">Livré, merci.</p>;
+  if (livraison?.statut === "probleme") return <p className="text-[13px] font-semibold text-warn">Problème signalé, on regarde.</p>;
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-[13px] font-semibold text-muted">
+        Bon de commande transmis{bon.envoyeLe ? ` le ${jourFr(bon.envoyeLe)}` : ""}
+        {livraison?.datePrevue ? ` · livraison prévue le ${jourFr(livraison.datePrevue)}` : ""}. Tout est arrivé ?
+      </p>
+      {probleme === null && desistement === null ? (
+        <div className="flex flex-wrap gap-2">
+          <Button className="min-h-10 px-3.5 text-[14px]" pending={pending} onClick={() => run(() => api(`/v1/groupe/bons/${encodeURIComponent(bon.id)}/livraison`, { method: "POST", body: { statut: "livre" } }))}>
+            Livré
+          </Button>
+          <Button variant="secondary" className="min-h-10 px-3.5 text-[14px]" onClick={() => setProbleme("")}>
+            Problème
+          </Button>
+          <button type="button" onClick={() => setDesistement("")} className="min-h-10 text-[13px] font-bold text-muted underline decoration-dotted underline-offset-4">
+            Je ne commande pas
+          </button>
+        </div>
+      ) : probleme !== null ? (
+        <div className="flex flex-col gap-2">
+          <textarea value={probleme} onChange={(e) => setProbleme(e.target.value)} maxLength={1000} rows={2} aria-label="Quel est le problème de livraison ?" placeholder="Quel est le problème ?" className="rounded-xl border border-line bg-surface px-3 py-2 text-[14px]" />
+          <div className="flex gap-2">
+            <Button variant="secondary" className="grow" onClick={() => setProbleme(null)} disabled={pending}>
+              Annuler
+            </Button>
+            <Button className="grow" pending={pending} onClick={() => run(() => api(`/v1/groupe/bons/${encodeURIComponent(bon.id)}/livraison`, { method: "POST", body: { statut: "probleme", texte: probleme } }))}>
+              Signaler
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2 rounded-2xl bg-warn-bg p-3">
+          <p className="text-[13px] font-bold text-warn">Tu t&apos;étais engagé à commander ces quantités. Première fois : un avertissement ; deuxième fois sur 12 mois : le groupé se ferme 6 mois. Le négoce sera prévenu.</p>
+          <textarea value={desistement ?? ""} onChange={(e) => setDesistement(e.target.value)} maxLength={1000} rows={2} aria-label="Pourquoi tu ne commandes pas" placeholder="Pourquoi ? (facultatif)" className="rounded-xl border border-line bg-surface px-3 py-2 text-[14px]" />
+          <div className="flex gap-2">
+            <Button variant="secondary" className="grow" onClick={() => setDesistement(null)} disabled={pending}>
+              Annuler
+            </Button>
+            <Button className="grow" pending={pending} onClick={() => run(() => api(`/v1/groupe/bons/${encodeURIComponent(bon.id)}/desistement`, { method: "POST", body: { raison: desistement } }))}>
+              Confirmer le désistement
+            </Button>
+          </div>
+        </div>
+      )}
+      {error ? <ErrorNotice error={error} /> : null}
+    </div>
+  );
+}
+
 function MesLots() {
   const fetchLots = useCallback((signal: AbortSignal) => api<{ besoins: BesoinLot[] }>("/v1/groupe/lots", { signal }), []);
   const { data, error, reload } = useResource(fetchLots);
@@ -191,6 +266,7 @@ function MesLots() {
                   {Number(b.offre.prixUnitaire).toLocaleString("fr-FR", { minimumFractionDigits: 2 })} € HT l&apos;unité chez {b.offre.negoce}
                 </p>
               ) : null}
+              {b.bon ? <Livraison b={b} onDone={reload} /> : null}
             </li>
           ))}
         </ul>

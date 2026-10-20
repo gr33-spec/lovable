@@ -7,3 +7,4 @@ export { RegroupementService } from "./application/regroupement.service.js";
 export { DemandeService, type PageReponse } from "./application/demande.service.js";
 export { NEGOCE_EXTRACTOR, reponseNegoceSchema, type NegoceExtractor, type ReponseLue } from "./application/negoce-extractor.js";
 export { ChoixService } from "./application/choix.service.js";
+export { CommandeService } from "./application/commande.service.js";

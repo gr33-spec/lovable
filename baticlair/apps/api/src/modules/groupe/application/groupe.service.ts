@@ -8,7 +8,7 @@ import type { RegroupementService } from "./regroupement.service.js";
 import { siretBienForme, type SiretVerifier } from "./siret-verifier.js";
 
 /** Pourquoi le groupé reste fermé à une entreprise (section 5 du parcours groupé). Gratuit pour l'artisan (décision du fondateur, 2026-10-20) : aucune condition d'abonnement. */
-export type RaisonFermeture = "siret_non_verifie";
+export type RaisonFermeture = "siret_non_verifie" | "exclu_du_groupe";
 
 export interface BesoinVue {
   id: string;
@@ -22,6 +22,13 @@ export interface BesoinVue {
   lotParti: boolean;
   /** Étape 6 : l'offre personnelle, une information, jamais une question. */
   offre: OffreVue | null;
+}
+
+/** Étape 7 : le bon de commande de l'artisan et sa livraison (« Livré » / « Problème »). */
+export interface BonVue {
+  id: string;
+  envoyeLe: string | null;
+  livraison: { statut: string; datePrevue: string | null } | null;
 }
 
 export interface OffreVue {
@@ -60,6 +67,8 @@ export class GroupeService {
     private readonly regroupement: RegroupementService,
     /** Étape 5 : un lot formé part aux négoces aussitôt. */
     private readonly demande: { envoyerLesLotsFormes(): Promise<unknown> },
+    /** Étape 7 : l'exclusion après deux désistements (section 4 c). */
+    private readonly commande: { exclue(companyId: string): Promise<boolean> },
   ) {}
 
   /**
@@ -74,17 +83,26 @@ export class GroupeService {
     ]);
     const raisons: RaisonFermeture[] = [];
     if (!c.siretVerifieLe) raisons.push("siret_non_verifie");
+    if (await this.commande.exclue(tenant.companyId)) raisons.push("exclu_du_groupe");
     return { eligible: raisons.length === 0, raisons, siret: { renseigne: !!c.siret, verifie: !!c.siretVerifieLe }, etapes: { siret: !!c.siretVerifieLe, devis: devis > 0, negoces: negoces > 0 } };
   }
 
   /** « Mes lots » (onglet Groupé) : chaque besoin de l'entreprise avec son chantier et son lot ; jamais les autres artisans. */
-  async mesLots(tenant: TenantContext): Promise<(BesoinVue & { projectId: string; chantier: string; lot: { numero: number; statut: string } | null })[]> {
+  async mesLots(tenant: TenantContext): Promise<(BesoinVue & { projectId: string; chantier: string; lot: { numero: number; statut: string } | null; bon: BonVue | null })[]> {
     const rows = await this.prisma.besoin.findMany({
       where: { companyId: tenant.companyId, statut: { not: "retire" } },
-      include: { lot: { select: { statut: true, numero: true, negoceRetenu: { select: { nom: true } } } }, offre: true, project: { select: { name: true } } },
+      include: { lot: { select: { statut: true, numero: true, negoceRetenu: { select: { nom: true } } } }, offre: { include: { bon: { include: { livraison: true } } } }, project: { select: { name: true } } },
       orderBy: { createdAt: "desc" },
     });
-    return rows.map((b) => ({ ...vue(b), projectId: b.projectId, chantier: b.project.name, lot: b.lot ? { numero: b.lot.numero, statut: b.lot.statut } : null }));
+    return rows.map((b) => ({
+      ...vue(b),
+      projectId: b.projectId,
+      chantier: b.project.name,
+      lot: b.lot ? { numero: b.lot.numero, statut: b.lot.statut } : null,
+      bon: b.offre?.bon
+        ? { id: b.offre.bon.id, envoyeLe: b.offre.bon.envoyeLe ? jour(b.offre.bon.envoyeLe) : null, livraison: b.offre.bon.livraison ? { statut: b.offre.bon.livraison.statut, datePrevue: b.offre.bon.livraison.datePrevue ? jour(b.offre.bon.livraison.datePrevue) : null } : null }
+        : null,
+    }));
   }
 
   /** Vérifie le SIRET de l'entreprise auprès de l'INSEE ; actif, il ouvre l'accès au groupé. */
