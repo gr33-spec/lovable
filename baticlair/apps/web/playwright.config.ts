@@ -26,7 +26,7 @@ const apiEnv = {
   LOG_LEVEL: "warn",
   // 26 parcours créent chacun un compte et une entreprise depuis la même adresse : la limite de débit (5 entreprises/h) les bloquerait ; elle a son propre test API.
   RATE_LIMIT: "off",
-  // BatiClair Groupé : allumé pour ses parcours ; une entreprise sans SIRET vérifié ni abonnement actif n'en voit rien.
+  // BatiClair Groupé : allumé pour ses parcours ; une entreprise sans SIRET vérifié n'en voit rien (gratuit pour l'artisan).
   GROUPE: "on",
 };
 

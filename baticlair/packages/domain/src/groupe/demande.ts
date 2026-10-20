@@ -12,7 +12,10 @@ export const NOM_DEMANDE = "Regroupement artisans";
 export const TAUX_COMMISSION_POURCENT = 2;
 /** La version du contrat de commission acceptée par le négoce (gardée dans l'accord). */
 export const VERSION_CONTRAT = "2026-10-20";
-export const PHRASE_COMMISSION = `En répondant, vous acceptez, si votre devis est retenu, une commission d'apporteur d'affaires de ${TAUX_COMMISSION_POURCENT} % du montant HT du lot, facturée par BatiClair à 30 jours.`;
+/** Section 6, mot pour mot : dans l'e-mail, en gras. */
+export const PHRASE_COMMISSION = `En répondant, vous acceptez de reverser ${TAUX_COMMISSION_POURCENT} % du montant HT du lot à BatiClair si votre offre est retenue. Intégrez-les à votre prix.`;
+/** Section 7, étape 5, mot pour mot : la case obligatoire de la page de dépôt. */
+export const PHRASE_ACCORD = `J'accepte de reverser ${TAUX_COMMISSION_POURCENT} % du montant HT du lot à BatiClair si mon offre est retenue`;
 /** Les réponses sont attendues sous sept jours (section 3 : « Réponses attendues sous 7 jours »). */
 export const DELAI_REPONSE_JOURS = 7;
 

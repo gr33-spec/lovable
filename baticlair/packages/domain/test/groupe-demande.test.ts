@@ -4,7 +4,7 @@
  * (la phrase en gras), le PDF en deux parties sans nom de client, le contrat.
  */
 import { describe, expect, it } from "vitest";
-import { DELAI_REPONSE_JOURS, documentDemande, htmlDemande, negoceConcerne, objetDemande, PHRASE_COMMISSION, TAUX_COMMISSION_POURCENT, texteContrat, texteDemande, VERSION_CONTRAT, volumesDuLot, type LotADemander } from "../src/index.js";
+import { DELAI_REPONSE_JOURS, documentDemande, htmlDemande, negoceConcerne, objetDemande, PHRASE_ACCORD, PHRASE_COMMISSION, TAUX_COMMISSION_POURCENT, texteContrat, texteDemande, VERSION_CONTRAT, volumesDuLot, type LotADemander } from "../src/index.js";
 
 const d = (s: string) => new Date(`${s}T00:00:00Z`);
 const lot: LotADemander = {
@@ -48,7 +48,9 @@ describe("groupé, étape 5 : la demande aux négoces", () => {
     const html = htmlDemande([lot], liens);
     expect(html).toContain(`<strong>${PHRASE_COMMISSION}</strong>`);
     expect(html).toContain(`<a href="${lot.lienReponse}">`);
-    expect(PHRASE_COMMISSION).toContain(`${TAUX_COMMISSION_POURCENT} % du montant HT du lot`);
+    // Section 6, mot pour mot.
+    expect(PHRASE_COMMISSION).toBe(`En répondant, vous acceptez de reverser ${TAUX_COMMISSION_POURCENT} % du montant HT du lot à BatiClair si votre offre est retenue. Intégrez-les à votre prix.`);
+    expect(PHRASE_ACCORD).toBe(`J'accepte de reverser ${TAUX_COMMISSION_POURCENT} % du montant HT du lot à BatiClair si mon offre est retenue`);
   });
 
   it("le PDF en deux parties : les lots (ferme / probable), puis chaque chantier (adresse, quantité, fenêtre, engagement), la phrase en pied", () => {

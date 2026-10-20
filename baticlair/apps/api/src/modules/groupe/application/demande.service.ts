@@ -7,6 +7,7 @@ import {
   negoceConcerne,
   NOM_DEMANDE,
   objetDemande,
+  PHRASE_ACCORD,
   PHRASE_COMMISSION,
   TAUX_COMMISSION_POURCENT,
   texteContrat,
@@ -54,7 +55,7 @@ export interface PageReponse {
     reponseAttendueLe: string | null;
   };
   negoce: { nom: string; email: string };
-  commission: { phrase: string; tauxPourcent: number; versionContrat: string; contrat: string[] };
+  commission: { phrase: string; phraseAccord: string; tauxPourcent: number; versionContrat: string; contrat: string[] };
   accord: { accepteLe: string } | null;
   reponse: { deposeLe: string; fichiers: string[]; message: string | null; statutExtraction: string } | null;
 }
@@ -173,7 +174,7 @@ export class DemandeService {
         reponseAttendueLe: r.lot.envoyeLe ? jour(new Date(r.lot.envoyeLe.getTime() + DELAI_REPONSE_JOURS * JOUR)) : null,
       },
       negoce: { nom: r.negoce.nom, email: r.negoce.email },
-      commission: { phrase: PHRASE_COMMISSION, tauxPourcent: TAUX_COMMISSION_POURCENT, versionContrat: VERSION_CONTRAT, contrat: texteContrat() },
+      commission: { phrase: PHRASE_COMMISSION, phraseAccord: PHRASE_ACCORD, tauxPourcent: TAUX_COMMISSION_POURCENT, versionContrat: VERSION_CONTRAT, contrat: texteContrat() },
       accord: r.accord ? { accepteLe: r.accord.accepteLe.toISOString() } : null,
       reponse: r.deposeLe ? { deposeLe: r.deposeLe.toISOString(), fichiers: r.fichiers.map((f) => f.nom), message: r.message, statutExtraction: r.statutExtraction } : null,
     };

@@ -20,7 +20,7 @@ interface PageReponse {
     reponseAttendueLe: string | null;
   };
   negoce: { nom: string; email: string };
-  commission: { phrase: string; tauxPourcent: number; versionContrat: string; contrat: string[] };
+  commission: { phrase: string; phraseAccord: string; tauxPourcent: number; versionContrat: string; contrat: string[] };
   accord: { accepteLe: string } | null;
   reponse: { deposeLe: string; fichiers: string[]; message: string | null; statutExtraction: string } | null;
 }
@@ -139,7 +139,7 @@ export default function ReponseNegocePage() {
           <div className="flex flex-col gap-2 rounded-[20px] border border-line bg-surface p-4">
             <label className="flex cursor-pointer items-start gap-3 text-sm">
               <input type="checkbox" checked={accord} onChange={(e) => setAccord(e.currentTarget.checked)} aria-label="J'accepte la commission" className="mt-0.5 size-5 shrink-0 accent-accent" />
-              <strong>{page.commission.phrase}</strong>
+              <strong>{page.commission.phraseAccord}</strong>
             </label>
             <a href={`/v1/reponse/${encodeURIComponent(jeton)}/contrat.pdf`} target="_blank" rel="noreferrer" className="min-h-11 self-start py-2 text-sm font-bold text-accent-text underline decoration-dotted underline-offset-4">
               Lire le contrat (PDF, version {page.commission.versionContrat})
