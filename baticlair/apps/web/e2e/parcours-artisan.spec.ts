@@ -327,8 +327,8 @@ test("2026-10-12 : sur téléphone, la barre du menu reste figée en bas de chaq
 test("le menu ne propose que l'essentiel : accueil, chantiers, fournisseurs, compte", async ({ page }) => {
   await signUp(page);
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  // Quatre rubriques, et au centre le « + » : un nouveau chantier, directement.
-  await expect(nav.getByRole("link")).toHaveText(["Accueil", "Chantiers", "Nouveau chantier", "Fournisseurs", "Compte"]);
+  // Quatre rubriques (cinq avec le groupé, allumé dans les parcours), et au centre le « + » : un nouveau chantier, directement.
+  await expect(nav.getByRole("link")).toHaveText(["Accueil", "Chantiers", "Groupé", "Nouveau chantier", "Fournisseurs", "Compte"]);
   await nav.getByRole("link", { name: "Compte" }).click();
   await expect(page.getByRole("heading", { name: "Mon compte" })).toBeVisible();
 
