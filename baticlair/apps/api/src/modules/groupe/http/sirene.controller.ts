@@ -25,7 +25,7 @@ export class SireneController {
     return { suggestions: await this.sirene.suggestions(tenant, query.q) };
   }
 
-  /** `vercel.json` : le 1er du mois à 5 h UTC, avec le secret de la tâche. */
+  /** `vercel.json` : chaque jour à 5 h UTC, avec le secret de la tâche ; reprend page par page, un cycle complet par mois. */
   @Public()
   @Get("internal/groupe/sirene")
   async importer(@Headers("authorization") authorization: string | undefined) {

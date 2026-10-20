@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
-import { SIRENE_HTTP, type SireneHttp } from "../src/modules/groupe/index.js";
+import { SIRENE_HTTP, SireneService, type SireneHttp } from "../src/modules/groupe/index.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
 /**
@@ -55,7 +55,7 @@ describe("groupé, base négoces Sirene", { timeout: 30_000 }, () => {
     const anon = request(ctx.app.getHttpServer());
     expect((await anon.get("/v1/internal/groupe/sirene")).status).toBe(403);
     const r = (await anon.get("/v1/internal/groupe/sirene").set("authorization", "Bearer secret-de-la-tache").expect(200)).body;
-    expect(r).toEqual({ importes: 4, departements: ["22", "29"], disponible: true });
+    expect(r).toEqual({ importes: 4, departements: ["22", "29"], disponible: true, cycleTermine: true, couplesRestants: 0 });
     // 2 départements × 2 NAF = 4 requêtes, plus la deuxième page du 22 en 46.73A.
     expect(appels).toHaveLength(5);
     expect(appels[0]).toContain("nombre=1000");
@@ -66,8 +66,11 @@ describe("groupé, base négoces Sirene", { timeout: 30_000 }, () => {
       ["Big Mat Paimpol", "22", "46.73A", "12 RUE DE LA GARE", "Paimpol"],
       ["Point P Brest", "29", "47.52B", "12 RUE DE LA GARE", "Brest"],
     ]);
-    // Un deuxième import met à jour sans doublon.
-    await anon.get("/v1/internal/groupe/sirene").set("authorization", "Bearer secret-de-la-tache").expect(200);
+    // Le cycle est fini : un nouvel appel ne relit rien (0 requête), et rien ne change.
+    appels.length = 0;
+    const encore = (await anon.get("/v1/internal/groupe/sirene").set("authorization", "Bearer secret-de-la-tache").expect(200)).body;
+    expect(encore).toMatchObject({ importes: 0, cycleTermine: true, couplesRestants: 0 });
+    expect(appels).toHaveLength(0);
     expect(await ctx.prisma.negoceSirene.count()).toBe(4);
 
     const { agent } = await signUpWithCompany(ctx.app, "sirene@example.fr", "Toitures Sirene");
@@ -83,4 +86,28 @@ describe("groupé, base négoces Sirene", { timeout: 30_000 }, () => {
     expect(s[0]!.siret).toBe("44444444400044");
     expect((await agent.get("/v1/groupe/negoces/suggestions?q=zzz").expect(200)).body.suggestions).toEqual([]);
   });
+
+
+  it("reprend page par page d'une tâche à l'autre (budget de temps), et repart de zéro un mois plus tard", async () => {
+    const service = ctx.app.get(SireneService);
+    // Budget nul : une page par appel au plus, les curseurs sont gardés en base.
+    const un = await service.importer(new Date("2026-11-01T05:00:00Z"), 0);
+    expect(un.cycleTermine).toBe(false);
+    expect(un.importes).toBeGreaterThan(0);
+    const avant = appels.length;
+    let fin = un;
+    for (let i = 0; i < 10 && !fin.cycleTermine; i++) fin = await service.importer(new Date("2026-11-01T05:00:00Z"), 0);
+    expect(fin.cycleTermine).toBe(true);
+    expect(fin.couplesRestants).toBe(0);
+    expect(appels.length).toBeGreaterThan(avant);
+    expect(await ctx.prisma.negoceSirene.count()).toBe(4);
+    // Le lendemain : rien à faire. Un mois plus tard : le cycle repart.
+    appels.length = 0;
+    expect((await service.importer(new Date("2026-11-02T05:00:00Z"))).importes).toBe(0);
+    expect(appels).toHaveLength(0);
+    const suivant = await service.importer(new Date("2026-12-01T05:00:00Z"));
+    expect(suivant.importes).toBe(4);
+    expect(appels).toHaveLength(5);
+  });
+
 });

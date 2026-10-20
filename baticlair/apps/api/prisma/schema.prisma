@@ -1032,6 +1032,16 @@ model NegoceSirene {
   @@map("negoce_sirene")
 }
 
+/// Un réglage ou un état de travail du groupé (dette n° 1, 20 octobre 2026) : par exemple l'avancement de l'import Sirene,
+/// couple (département, NAF) par couple, pour reprendre page par page d'une tâche à l'autre.
+model ParametreGroupe {
+  cle        String   @id
+  valeur     Json
+  misAJourLe DateTime @updatedAt
+
+  @@map("parametre_groupe")
+}
+
 /// Un lot du groupé (§2 étape 4) : une référence, une famille, une zone, une fenêtre. Un seul lot ouvert par référence
 /// et par zone (§5).
 model LotGroupe {
