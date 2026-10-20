@@ -176,13 +176,16 @@ Tableau de bord : `baticlair/docs/tableau-de-bord-metiers.md` (écrit par un tes
 ## 9. Chantier « BatiClair Groupé » (Greg, 2026-10-19)
 
 Règles : `baticlair/docs/groupe/parcours-complet.md` (sections 1 à 6, prompt section 7). Drapeau `GROUPE` désactivé par
-défaut ; RIEN EN PROD SANS L'ACCORD EXPLICITE DE GREG : une PR du groupé ne se fusionne pas (la fusion lance
-`prisma migrate deploy` en prod) tant qu'il n'a pas dit oui. Neuf PR, une par étape.
+défaut ; RIEN EN PROD SANS L'ACCORD EXPLICITE DE GREG (décision du 20 octobre : « ne fusionne pas la PR 1 ; enchaîne
+les PR 2 à 9 sur la même branche, sans rien fusionner, jusqu'à mon accord global ») : TOUTES les étapes s'empilent
+sur la PR #284 (une branche = une PR), jamais fusionnée sans son oui. Neuf familles (décision du 20 octobre :
++ « menuiseries et fermetures », « second œuvre », « serrurerie et métallerie », chaque métier rattaché à au moins
+une) ; désistements dans une table à part, étape 7.
 
 | PR | Étape | État |
 |---|---|---|
-| 1 | Données : 10 tables, clé de référence, zone, statuts, drapeau | PR ouverte, NON fusionnée (accord attendu) |
-| 2 | Entrée du besoin (écran 3) | à faire |
+| 1 | Données : 10 tables, clé de référence, zone, statuts, drapeau, 9 familles | fait (#284, non fusionnée) |
+| 2 | Entrée du besoin (écran 3) : SIRET (INSEE), « Proposer au groupé » par ligne et par lot, fenêtre, signé / en attente + engagement, bascule, retrait | fait (#284) |
 | 3 | Base négoces | à faire |
 | 4 | Regroupement (cron, seuils) | à faire |
 | 5 | Demande aux négoces (mail, PDF, lien de réponse) | à faire |

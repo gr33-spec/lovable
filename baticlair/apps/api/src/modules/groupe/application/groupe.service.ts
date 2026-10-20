@@ -1,0 +1,178 @@
+import { cleDeReference, familleDuMetier, fenetreValide, quantiteDuBesoin, transitionBesoin, zoneDuCodePostal, type StatutBesoin } from "@baticlair/domain";
+import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
+import type { PrismaService } from "../../../platform/database/prisma.service.js";
+import { isUuid } from "../../../platform/validation/ids.js";
+import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
+import type { ReviewedTakeoff } from "../../takeoff/index.js";
+import { siretBienForme, type SiretVerifier } from "./siret-verifier.js";
+
+/** Pourquoi le groupé reste fermé à une entreprise (section 5 et 6 du parcours groupé). */
+export type RaisonFermeture = "siret_non_verifie" | "abonnement_inactif";
+
+export interface BesoinVue {
+  id: string;
+  articleKey: string;
+  designation: string;
+  quantite: string;
+  unite: string;
+  statut: StatutBesoin;
+  fenetre: { tot: string; tard: string };
+  /** Le lot est parti aux négoces : le besoin ne se retire plus (section 4 b). */
+  lotParti: boolean;
+}
+
+export interface Proposition {
+  articles: readonly string[];
+  fenetre: { tot: Date; tard: Date };
+  statut: "signe" | "en_attente";
+  /** La phrase d'engagement acceptée : obligatoire pour « Chantier signé » (section 2, étape 2). */
+  engagement: boolean;
+}
+
+const jour = (d: Date) => d.toISOString().slice(0, 10);
+
+/**
+ * L'ENTRÉE DU BESOIN AU GROUPÉ (parcours groupé, étape 2) : depuis l'écran 3, une ou plusieurs lignes de la liste d'achats
+ * d'un devis lu par l'app (jamais une saisie libre, section 5) deviennent des besoins, avec une fenêtre de livraison et un
+ * seul choix « Chantier signé » / « Devis en attente » ; un besoin en attente bascule signé d'un tap ; un besoin se retire
+ * tant que son lot n'est pas parti. Ouvert seulement avec le SIRET vérifié et un abonnement actif.
+ */
+export class GroupeService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly reviewed: (tenant: TenantContext, takeoffId: string) => Promise<ReviewedTakeoff>,
+    private readonly siret: SiretVerifier,
+  ) {}
+
+  async etat(tenant: TenantContext): Promise<{ eligible: boolean; raisons: RaisonFermeture[]; siret: { renseigne: boolean; verifie: boolean } }> {
+    const c = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { siret: true, siretVerifieLe: true, plan: true, planActivatedAt: true } });
+    const raisons: RaisonFermeture[] = [];
+    if (!c.siretVerifieLe) raisons.push("siret_non_verifie");
+    // Section 6 : « pas d'accès au groupé sans abonnement actif » ; l'essai gratuit n'en est pas un.
+    if (c.plan === "trial" || !c.planActivatedAt) raisons.push("abonnement_inactif");
+    return { eligible: raisons.length === 0, raisons, siret: { renseigne: !!c.siret, verifie: !!c.siretVerifieLe } };
+  }
+
+  /** Vérifie le SIRET de l'entreprise auprès de l'INSEE ; actif, il ouvre (avec l'abonnement) l'accès au groupé. */
+  async verifierSiret(tenant: TenantContext): Promise<{ verifie: boolean; statut: string }> {
+    assertCanWrite(tenant);
+    const c = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { siret: true } });
+    const siret = (c.siret ?? "").replace(/\s/g, "");
+    if (!siretBienForme(siret)) throw validationFailed("Invalid SIRET", { reason: "siret_invalide" });
+    const r = await this.siret.verifier(siret);
+    if (r.statut === "actif") await this.prisma.company.update({ where: { id: tenant.companyId }, data: { siretVerifieLe: new Date() } });
+    return { verifie: r.statut === "actif", statut: r.statut };
+  }
+
+  async besoinsDuChantier(tenant: TenantContext, projectId: string): Promise<BesoinVue[]> {
+    if (!isUuid(projectId)) throw notFound("Project");
+    const project = await this.prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { id: true } });
+    if (!project) throw notFound("Project");
+    const rows = await this.prisma.besoin.findMany({ where: { projectId, companyId: tenant.companyId, statut: { not: "retire" } }, include: { lot: { select: { statut: true } } }, orderBy: { createdAt: "asc" } });
+    return rows.map(vue);
+  }
+
+  async proposer(tenant: TenantContext, projectId: string, p: Proposition): Promise<BesoinVue[]> {
+    assertCanWrite(tenant);
+    await this.ouvert(tenant);
+    if (!fenetreValide(p.fenetre)) throw validationFailed("Invalid delivery window", { reason: "fenetre_invalide" });
+    if (p.statut === "signe" && !p.engagement) throw validationFailed("Commitment required", { reason: "engagement_requis" });
+    if (!isUuid(projectId)) throw notFound("Project");
+    const project = await this.prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { id: true, address: true } });
+    if (!project) throw notFound("Project");
+    const zone = zoneDuCodePostal(project.address);
+    if (!zone || !project.address) throw validationFailed("The site needs an address with a postcode", { reason: "adresse_requise" });
+    const takeoff = await this.prisma.takeoff.findFirst({ where: { projectId, companyId: tenant.companyId }, orderBy: { createdAt: "desc" }, select: { id: true } });
+    if (!takeoff) throw validationFailed("No materials list", { reason: "pas_de_liste" });
+    const r = await this.reviewed(tenant, takeoff.id);
+    // Le métier de chaque ligne : celui de son lot (« lot:<n>:<métier> »), sinon celui du quantitatif.
+    const metierDe = new Map<string, string>();
+    for (const g of r.purchase.screen.groups) {
+      const m = /^lot:\d+:(.+)$/.exec(g.key);
+      if (m) for (const row of g.rows) if (row.itemKey) metierDe.set(row.itemKey, m[1]!);
+    }
+    const lignes = [...new Set(p.articles)].map((key) => {
+      const item = r.purchase.toBuy.find((b) => b.key === key);
+      if (!item) throw validationFailed("Unknown list line", { reason: "ligne_inconnue", article: key });
+      // Un engagement ferme porte sur une quantité ferme : une ligne orange (question, ratio « à vérifier ») se règle d'abord.
+      if (item.state !== "ready" || (item.waitsOn?.length ?? 0) > 0 || (item.toConfirm?.length ?? 0) > 0) throw validationFailed("Line not ready", { reason: "ligne_a_regler", article: key });
+      const q = quantiteDuBesoin(item.order, item.quantity);
+      if (!q) throw validationFailed("Line without quantity", { reason: "sans_quantite", article: key });
+      const famille = familleDuMetier(metierDe.get(key) ?? r.takeoff.trade);
+      if (!famille) throw validationFailed("Trade outside the groupé", { reason: "sans_famille", article: key });
+      return { item, q, famille };
+    });
+    const now = new Date();
+    await this.prisma.$transaction(async (tx) => {
+      for (const { item, q, famille } of lignes) {
+        const data = {
+          designation: item.label,
+          cle: cleDeReference({ libelle: item.label }),
+          famille,
+          quantite: q.quantite,
+          unite: q.unite,
+          zone,
+          adresseLivraison: project.address!,
+          fenetreTot: p.fenetre.tot,
+          fenetreTard: p.fenetre.tard,
+          statut: p.statut,
+          signeLe: p.statut === "signe" ? now : null,
+          retireLe: null,
+          lotId: null,
+        };
+        const deja = await tx.besoin.findUnique({ where: { takeoffId_articleKey: { takeoffId: takeoff.id, articleKey: item.key } }, select: { id: true, statut: true } });
+        if (deja && deja.statut !== "retire") throw new DomainError("conflict", "Already proposed", { reason: "deja_propose", article: item.key });
+        if (deja) await tx.besoin.update({ where: { id: deja.id }, data });
+        else await tx.besoin.create({ data: { ...data, companyId: tenant.companyId, projectId, takeoffId: takeoff.id, articleKey: item.key } });
+      }
+    });
+    return this.besoinsDuChantier(tenant, projectId);
+  }
+
+  /** « Devis en attente » → « Chantier signé », d'un tap, avec la phrase d'engagement (section 4 d). */
+  async signer(tenant: TenantContext, besoinId: string, engagement: boolean): Promise<BesoinVue> {
+    assertCanWrite(tenant);
+    await this.ouvert(tenant);
+    if (!engagement) throw validationFailed("Commitment required", { reason: "engagement_requis" });
+    return this.passer(tenant, besoinId, "signe");
+  }
+
+  /** Retrait libre tant que la demande n'est pas partie aux négoces (section 4 a) ; ensuite, plus jamais (b). */
+  async retirer(tenant: TenantContext, besoinId: string): Promise<BesoinVue> {
+    assertCanWrite(tenant);
+    return this.passer(tenant, besoinId, "retire");
+  }
+
+  private async passer(tenant: TenantContext, besoinId: string, vers: StatutBesoin): Promise<BesoinVue> {
+    if (!isUuid(besoinId)) throw notFound("Besoin");
+    const b = await this.prisma.besoin.findFirst({ where: { id: besoinId, companyId: tenant.companyId }, include: { lot: { select: { statut: true } } } });
+    if (!b) throw notFound("Besoin");
+    const t = transitionBesoin(b.statut as StatutBesoin, vers, { lotParti: !!b.lot && b.lot.statut !== "ouvert" });
+    if (t.ok === false) throw new DomainError("conflict", "Transition refused", { reason: t.raison });
+    const now = new Date();
+    const updated = await this.prisma.besoin.update({
+      where: { id: b.id },
+      data: { statut: vers, ...(vers === "signe" ? { signeLe: now } : {}), ...(vers === "retire" ? { retireLe: now, lotId: null } : {}) },
+      include: { lot: { select: { statut: true } } },
+    });
+    return vue(updated);
+  }
+
+  private async ouvert(tenant: TenantContext): Promise<void> {
+    const e = await this.etat(tenant);
+    if (!e.eligible) throw new DomainError("forbidden", "Groupé not available for this company", { reason: "groupe_ferme", raisons: e.raisons });
+  }
+}
+
+function vue(b: { id: string; articleKey: string; designation: string; quantite: { toString(): string }; unite: string; statut: string; fenetreTot: Date; fenetreTard: Date; lot: { statut: string } | null }): BesoinVue {
+  return {
+    id: b.id,
+    articleKey: b.articleKey,
+    designation: b.designation,
+    quantite: b.quantite.toString(),
+    unite: b.unite,
+    statut: b.statut as StatutBesoin,
+    fenetre: { tot: jour(b.fenetreTot), tard: jour(b.fenetreTard) },
+    lotParti: !!b.lot && b.lot.statut !== "ouvert",
+  };
+}

@@ -7,8 +7,21 @@ import { normalizeText } from "../trades/trade-profile.js";
  * (statuts, familles, clé de référence, zone, fenêtres), sans base ni IA. Tout reste derrière le drapeau `groupe`.
  */
 
-/** section 2, étape 3 : les familles qu'un négoce coche (« ce que chacun vend »). */
-export const FAMILLES_GROUPE = ["couverture", "charpente", "maconnerie", "electricite", "plomberie", "amenagement_exterieur"] as const;
+/**
+ * Section 2, étape 3 : les familles qu'un négoce coche (« ce que chacun vend ») : les six du document, plus trois ajoutées
+ * par le fondateur le 20 octobre 2026 (« menuiseries et fermetures », « second œuvre », « serrurerie et métallerie »).
+ */
+export const FAMILLES_GROUPE = [
+  "couverture",
+  "charpente",
+  "maconnerie",
+  "electricite",
+  "plomberie",
+  "amenagement_exterieur",
+  "menuiseries_fermetures",
+  "second_oeuvre",
+  "serrurerie_metallerie",
+] as const;
 export type FamilleGroupe = (typeof FAMILLES_GROUPE)[number];
 
 export const LIBELLES_FAMILLES: Readonly<Record<FamilleGroupe, string>> = {
@@ -18,31 +31,50 @@ export const LIBELLES_FAMILLES: Readonly<Record<FamilleGroupe, string>> = {
   electricite: "Électricité",
   plomberie: "Plomberie",
   amenagement_exterieur: "Aménagement extérieur",
+  menuiseries_fermetures: "Menuiseries et fermetures",
+  second_oeuvre: "Second œuvre (peinture, carrelage, plâtrerie, sols)",
+  serrurerie_metallerie: "Serrurerie et métallerie",
 };
 
 /**
- * La famille d'un besoin, par le métier de son lot. Un métier absent de cette table n'entre pas au groupé tant que le
- * fondateur ne l'a pas rangé dans une famille (peinture, carrelage, plâtrerie, menuiseries, sols, serrurerie…).
+ * Les familles d'un métier (décision du fondateur, 2026-10-20 : « chaque métier du référentiel rattaché à au moins une ») :
+ * la première est celle de ses besoins ; le constructeur couvre toutes les familles. « Autre métier » n'a pas de
+ * référentiel, donc pas de famille.
  */
-const FAMILLE_DU_METIER: Readonly<Record<string, FamilleGroupe>> = {
-  roofing: "couverture",
-  waterproofing: "couverture",
-  cladding: "couverture",
-  carpentry: "charpente",
-  masonry: "maconnerie",
-  facade: "maconnerie",
-  earthworks: "maconnerie",
-  electrical: "electricite",
-  solar: "electricite",
-  plumbing: "plomberie",
-  hvac: "plomberie",
-  paving: "amenagement_exterieur",
-  decking: "amenagement_exterieur",
-  irrigation: "amenagement_exterieur",
+const FAMILLES_DU_METIER: Readonly<Record<string, readonly FamilleGroupe[]>> = {
+  roofing: ["couverture"],
+  waterproofing: ["couverture"],
+  cladding: ["couverture"],
+  solar: ["electricite", "couverture"],
+  carpentry: ["charpente"],
+  masonry: ["maconnerie"],
+  facade: ["maconnerie"],
+  earthworks: ["maconnerie", "amenagement_exterieur"],
+  electrical: ["electricite"],
+  plumbing: ["plomberie"],
+  hvac: ["plomberie"],
+  paving: ["amenagement_exterieur"],
+  decking: ["amenagement_exterieur"],
+  irrigation: ["amenagement_exterieur"],
+  joinery: ["menuiseries_fermetures"],
+  interior_joinery: ["menuiseries_fermetures"],
+  kitchen: ["menuiseries_fermetures"],
+  painting: ["second_oeuvre"],
+  tiling: ["second_oeuvre"],
+  drywall: ["second_oeuvre"],
+  flooring: ["second_oeuvre"],
+  ceiling: ["second_oeuvre"],
+  metalwork: ["serrurerie_metallerie"],
+  general: FAMILLES_GROUPE,
 };
 
+export function famillesDuMetier(metier: string | null | undefined): readonly FamilleGroupe[] {
+  return (metier && FAMILLES_DU_METIER[metier]) || [];
+}
+
+/** La famille des besoins d'un métier (la première des siennes), ou null sans famille. */
 export function familleDuMetier(metier: string | null | undefined): FamilleGroupe | null {
-  return (metier && FAMILLE_DU_METIER[metier]) || null;
+  return famillesDuMetier(metier)[0] ?? null;
 }
 
 /** section 2, étape 2 et section 4 : la vie d'un besoin, de la proposition à la livraison. */
@@ -129,4 +161,23 @@ export function fenetresCompatibles(a: FenetreLivraison, b: FenetreLivraison): b
 /** Une fenêtre se lit dans le bon sens : la date limite n'est jamais avant la date la plus tôt. */
 export function fenetreValide(f: FenetreLivraison): boolean {
   return Number.isFinite(f.tot.getTime()) && Number.isFinite(f.tard.getTime()) && f.tot.getTime() <= f.tard.getTime();
+}
+
+/**
+ * La quantité d'un besoin, prise sur la ligne de la liste d'achats (« 31 », « bacs ») : le nombre en point décimal, sans
+ * séparateur de milliers. `null` quand la ligne n'a pas de quantité établie : elle n'entre pas au groupé.
+ */
+export function quantiteDuBesoin(order: { count: string; unit: string } | null, quantity: string | null): { quantite: string; unite: string } | null {
+  const lire = (texte: string) => {
+    const m = /^\s*(\d[\d\s  ]*(?:[.,]\d+)?)\s*(.*)$/.exec(texte);
+    if (!m) return null;
+    const n = Number(m[1]!.replace(/[\s  ]/g, "").replace(",", "."));
+    return Number.isFinite(n) && n > 0 ? { n: String(n), reste: m[2]!.trim() } : null;
+  };
+  if (order) {
+    const q = lire(order.count);
+    if (q && order.unit.trim()) return { quantite: q.n, unite: order.unit.trim() };
+  }
+  const q = quantity ? lire(quantity) : null;
+  return q && q.reste ? { quantite: q.n, unite: q.reste } : null;
 }

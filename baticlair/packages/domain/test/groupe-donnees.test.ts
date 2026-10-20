@@ -4,7 +4,7 @@
  * département ; un besoin se retire tant que le lot n'est pas parti, et seul un besoin signé s'engage.
  */
 import { describe, expect, it } from "vitest";
-import { cleDeReference, familleDuMetier, fenetresCompatibles, fenetreValide, transitionBesoin, zoneDuCodePostal } from "../src/index.js";
+import { cleDeReference, FAMILLES_GROUPE, quantiteDuBesoin, FICHES, familleDuMetier, famillesDuMetier, REFERENTIALS, TRADES, fenetresCompatibles, fenetreValide, transitionBesoin, zoneDuCodePostal } from "../src/index.js";
 
 describe("groupé : la clé de référence (section 7, normalisation)", () => {
   it("la référence fabricant fait la clé, quelle que soit son écriture, et ne vaut que chez sa marque", () => {
@@ -40,10 +40,16 @@ describe("groupé : zone, fenêtre, famille", () => {
     expect(fenetreValide({ tot: d("2026-11-10"), tard: d("2026-11-02") })).toBe(false);
   });
 
-  it("la famille vient du métier ; un métier non rangé n'entre pas au groupé", () => {
+  it("neuf familles (décision du 20 octobre) ; chaque métier du référentiel rattaché à au moins une", () => {
+    expect(FAMILLES_GROUPE).toHaveLength(9);
+    const metiers = new Set([...REFERENTIALS.map((r) => r.trade), ...FICHES.map((f) => f.metier), ...TRADES.map((t) => t.id).filter((id) => id !== "other")]);
+    for (const m of metiers) expect(famillesDuMetier(m).length, m).toBeGreaterThan(0);
     expect(familleDuMetier("roofing")).toBe("couverture");
-    expect(familleDuMetier("plumbing")).toBe("plomberie");
-    expect(familleDuMetier("painting")).toBeNull();
+    expect(familleDuMetier("painting")).toBe("second_oeuvre");
+    expect(familleDuMetier("joinery")).toBe("menuiseries_fermetures");
+    expect(familleDuMetier("metalwork")).toBe("serrurerie_metallerie");
+    expect(famillesDuMetier("general")).toEqual(FAMILLES_GROUPE);
+    expect(familleDuMetier("other")).toBeNull();
     expect(familleDuMetier(null)).toBeNull();
   });
 });
@@ -67,5 +73,15 @@ describe("groupé : la vie d'un besoin (section 4)", () => {
     expect(transitionBesoin("commande", "livre", { lotParti: true })).toEqual({ ok: true });
     expect(transitionBesoin("signe", "livre", { lotParti: true }).ok).toBe(false);
     expect(transitionBesoin("livre", "signe", { lotParti: true }).ok).toBe(false);
+  });
+});
+
+describe("groupé : la quantité d'un besoin vient de sa ligne", () => {
+  it("le nombre de la commande, sans séparateur de milliers ; rien sans quantité établie", () => {
+    expect(quantiteDuBesoin({ count: "1 488", unit: "pièces" }, "1 488 pièces")).toEqual({ quantite: "1488", unite: "pièces" });
+    expect(quantiteDuBesoin(null, "23 cartons de 1,44 m²")).toEqual({ quantite: "23", unite: "cartons de 1,44 m²" });
+    expect(quantiteDuBesoin({ count: "12,5", unit: "m²" }, null)).toEqual({ quantite: "12.5", unite: "m²" });
+    expect(quantiteDuBesoin(null, null)).toBeNull();
+    expect(quantiteDuBesoin(null, "à préciser")).toBeNull();
   });
 });

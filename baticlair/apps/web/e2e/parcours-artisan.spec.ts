@@ -1595,3 +1595,76 @@ test("§50.1 : passé 30 s, « Gros devis, j'y suis encore… » (une seule phra
   await expect(lecture.getByRole("heading", { name: "Gros devis, j'y suis encore…" })).toBeVisible();
   await expect(lecture.getByRole("heading")).toHaveCount(1);
 });
+
+/** Un appel à l'API avec la session de la page (entreprise active comprise) ; rend le statut HTTP. */
+async function apiCall(page: Page, method: string, url: string, body?: unknown): Promise<number> {
+  return page.evaluate(
+    async ({ method, url, body }) => {
+      const companyId = localStorage.getItem("baticlair.companyId");
+      const res = await fetch(url, {
+        method,
+        headers: { "content-type": "application/json", accept: "application/json", ...(companyId ? { "x-company-id": companyId } : {}) },
+        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+      });
+      return res.status;
+    },
+    { method, url, body },
+  );
+}
+
+test("BatiClair Groupé, étape 2 : proposer des lignes au groupé, s'engager, passer en signé, retirer", async ({ page }) => {
+  await signUp(page);
+  await createProject(page, "Toiture Le Groupé", "M. Le Bihan", "3 quai Duguay-Trouin, 35400 Saint-Malo");
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await passQuestions(page);
+  await confirmDoubts(page);
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  // Sans SIRET vérifié ni abonnement actif, le groupé n'existe pas à l'écran.
+  await expect(list.getByRole("button", { name: "Proposer au groupé" })).toHaveCount(0);
+
+  // Abonnement actif (code d'activation de test), SIRET renseigné puis vérifié (hors production : sans appel INSEE).
+  expect(await apiCall(page, "POST", "/v1/billing/activate", { code: "E2E-SOLO-CODE" })).toBe(200);
+  expect(await apiCall(page, "PATCH", "/v1/company/profile", { name: "Toitures Martin", address: "3 quai Duguay-Trouin, 35400 Saint-Malo", siret: "73282932000074", phone: null, email: null })).toBe(200);
+  expect(await apiCall(page, "POST", "/v1/groupe/siret")).toBe(200);
+  await page.reload();
+
+  const proposer = list.getByRole("button", { name: "Proposer au groupé" });
+  await expect(proposer).toBeVisible();
+  await proposer.click();
+  await expect(list.getByText("Coche ce que tu proposes au groupé. Ton nom ne part pas avec.")).toBeVisible();
+  const boxes = list.getByRole("checkbox", { name: /^Proposer au groupé : / }).and(page.locator(":enabled"));
+  // Rien de coché d'office : l'engagement se choisit ligne par ligne.
+  await expect(boxes.first()).not.toBeChecked();
+  await boxes.first().check();
+  const bar = page.getByRole("region", { name: "Proposer au groupé" });
+  await expect(bar.getByText("1 ligne au groupé")).toBeVisible();
+  // « Chantier signé » : « Proposer » attend la phrase d'engagement.
+  await bar.getByRole("radio", { name: "Chantier signé" }).click();
+  await expect(bar.getByRole("button", { name: "Proposer" })).toBeDisabled();
+  await bar.getByRole("checkbox", { name: /je m'engage à commander ces quantités au prix groupé obtenu, chez le négoce retenu/ }).check();
+  await bar.getByRole("button", { name: "Proposer" }).click();
+
+  const groupe = page.getByRole("region", { name: "Au groupé" });
+  await expect(groupe.getByText("Chantier signé")).toBeVisible();
+  await expect(groupe.getByRole("button", { name: "Retirer du groupé" })).toBeVisible();
+
+  // Une deuxième ligne, en « Devis en attente », puis passée en signé d'un tap (avec l'engagement).
+  await proposer.click();
+  await boxes.first().check();
+  await bar.getByRole("radio", { name: "Devis en attente" }).click();
+  await bar.getByRole("button", { name: "Proposer" }).click();
+  await expect(groupe.getByText("Devis en attente")).toBeVisible();
+  await groupe.getByRole("button", { name: "Passer en signé" }).click();
+  await groupe.getByRole("checkbox", { name: /je m'engage/ }).check();
+  await groupe.getByRole("button", { name: "Chantier signé" }).click();
+  await expect(groupe.getByText("Devis en attente")).toHaveCount(0);
+  await expect(groupe.getByText("Chantier signé")).toHaveCount(2);
+
+  // Retirées tant que le lot n'est pas parti : la section disparaît.
+  await groupe.getByRole("button", { name: "Retirer du groupé" }).first().click();
+  await expect(groupe.getByRole("button", { name: "Retirer du groupé" })).toHaveCount(1);
+  await groupe.getByRole("button", { name: "Retirer du groupé" }).click();
+  await expect(groupe).toHaveCount(0);
+  // Sur iPhone, rien ne déborde.
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+});

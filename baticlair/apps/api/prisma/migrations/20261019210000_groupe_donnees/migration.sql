@@ -1,3 +1,6 @@
+-- Section 5 du parcours groupé : le SIRET vérifié (INSEE) avant tout accès au groupé.
+ALTER TABLE "company" ADD COLUMN "siretVerifieLe" TIMESTAMP(3);
+
 -- CreateTable
 CREATE TABLE "besoin" (
     "id" UUID NOT NULL,

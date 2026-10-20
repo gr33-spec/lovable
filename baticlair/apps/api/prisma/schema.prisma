@@ -139,6 +139,8 @@ model Company {
   /// §45.3 : coordonnées de l'en-tête de la demande de devis et de la signature du mail (§45.2). Jamais saisies à l'envoi.
   address              String?
   siret                String?
+  /// BatiClair Groupé (section 5) : le SIRET vérifié auprès de l'INSEE ; sans lui, pas d'accès au groupé.
+  siretVerifieLe       DateTime?
   phone                String?
   contactEmail         String?
   /// Logo (PNG ou JPEG, 500 Ko au plus), à gauche de l'en-tête du PDF ; absent : le nom de l'entreprise en gros.

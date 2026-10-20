@@ -80,6 +80,12 @@ describe("isolation entre entreprises, toutes les routes", () => {
       offerLine: (await first(ctx.prisma.supplierOfferLine.findFirst({ where: { offer: { companyId } } }), "ligne d'offre")).id,
       takeoff: (await first(ctx.prisma.takeoff.findFirst({ where: { companyId } }), "lecture")).id,
       takeoffLine: (await first(ctx.prisma.takeoffLine.findFirst({ where: { takeoff: { companyId } } }), "ligne lue")).id,
+      // BatiClair Groupé : un besoin de A (le drapeau éteint, ses routes répondent 404 ; allumé, l'appartenance refuse).
+      besoin: (
+        await ctx.prisma.besoin.create({
+          data: { companyId, projectId: demo.projectId, takeoffId: takeoff.id, articleKey: "a", designation: "Besoin de A", cle: "lib:a||", famille: "couverture", quantite: "1", unite: "u", zone: "29", adresseLivraison: "29200 Brest", fenetreTot: new Date("2026-11-02"), fenetreTard: new Date("2026-11-20"), statut: "en_attente" },
+        })
+      ).id,
     };
     const idFor = (path: string, param: string): string => {
       if (param === "projectId" || param === "projetId") return ids.project;
@@ -97,6 +103,7 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/offer-lines$/, ids.offerLine],
         [/\/takeoffs$/, ids.takeoff],
         [/\/takeoff-lines$/, ids.takeoffLine],
+        [/\/groupe\/besoins$/, ids.besoin],
       ];
       const hit = byPrefix.find(([re]) => re.test(prefix));
       if (!hit) throw new Error(`Paramètre sans identifiant de A : ${path} (${param})`);

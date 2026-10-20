@@ -94,3 +94,13 @@ describe("groupé, étape 1 : les données", () => {
     expect((await ctx.prisma.negoce.findUniqueOrThrow({ where: { id: negoce.id } })).ajouteParId).toBeNull();
   });
 });
+
+describe("groupé, drapeau éteint", () => {
+  it("toutes les routes du groupé répondent 404 : le groupé n'existe pas pour l'application", async () => {
+    const { agent, projectId } = await artisanAvecChantier("eteint@example.fr");
+    expect((await agent.get("/v1/groupe")).status).toBe(404);
+    expect((await agent.post("/v1/groupe/siret")).status).toBe(404);
+    expect((await agent.get(`/v1/projects/${projectId}/groupe`)).status).toBe(404);
+    expect((await agent.post(`/v1/projects/${projectId}/groupe`).send({ articles: ["x"], fenetre: { tot: "2026-11-02", tard: "2026-11-20" }, statut: "en_attente" })).status).toBe(404);
+  });
+});

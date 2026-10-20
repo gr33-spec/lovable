@@ -1,0 +1,3 @@
+export { GroupeModule } from "./groupe.module.js";
+export { GroupeService } from "./application/groupe.service.js";
+export { SIRET_VERIFIER, siretBienForme, type SiretVerifier, type ResultatSiret } from "./application/siret-verifier.js";

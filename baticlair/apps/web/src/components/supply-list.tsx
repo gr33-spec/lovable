@@ -1,12 +1,13 @@
 "use client";
 
-import { Check, ChevronDown, ChevronUp, Eye, ListChecks, Paperclip, Pencil, Send, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Eye, ListChecks, Paperclip, Pencil, Send, Trash2, Users, X } from "lucide-react";
 import { openDocument } from "@/lib/open-document";
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { type ItemEdit, type SketchHandlers } from "@/components/purchase-list";
 import { type DecisionHandlers } from "@/components/takeoff-view";
 import { SelectionBar, type SelectionSend } from "@/components/selection-send";
+import { GroupeBar, GroupeSection, type Groupe } from "@/components/groupe";
 import { Button, ErrorNotice } from "@/components/ui";
 import type { ApiError, ItemSketch, PurchaseItem, ScreenRow, Takeoff, TakeoffDecision } from "@/lib/api";
 import { enMetres, parseQuantity, shortName } from "@/lib/labels";
@@ -36,6 +37,7 @@ export function SupplyList({
   sent = false,
   docked = true,
   selection,
+  groupe,
   onAdd,
   onBrief,
   error = null,
@@ -48,6 +50,8 @@ export function SupplyList({
   onBrief?: (cle: string, texte: string) => Promise<void>;
   /** §48.5 : « Envoyer une sélection à un autre fournisseur » (absent : la fonction n'existe pas ici). */
   selection?: SelectionSend;
+  /** BatiClair Groupé (étape 2) : présent seulement quand l'entreprise y a accès ; absent, l'écran ne change pas. */
+  groupe?: Groupe;
   /** Une barre de chat est en bas de l'écran : le gros bouton se pose au-dessus d'elle. Sur la page des fournitures, non. */
   docked?: boolean;
   /** La demande est déjà partie : le gros bouton mène aux fournisseurs, il ne propose plus un premier envoi. */
@@ -75,6 +79,8 @@ export function SupplyList({
   const [removing, setRemoving] = useState<string[]>([]);
   // §48.5 : cases à cocher seulement après le petit bouton ; par défaut l'écran ne change pas.
   const [selecting, setSelecting] = useState(false);
+  // BatiClair Groupé : les mêmes cases servent à proposer des lignes au groupé (par ligne, ou « Cocher ce lot »).
+  const [pourGroupe, setPourGroupe] = useState(false);
   const [checked, setChecked] = useState<Set<string>>(new Set());
   // « Envoyer » touché avec des lignes orange : la phrase dit pourquoi rien ne part.
   const [blocked, setBlocked] = useState(false);
@@ -108,8 +114,19 @@ export function SupplyList({
   // §48.5 : entrer en sélection coche chaque ligne prête et pas encore envoyée à part (« je dois tout avoir de coché ») ;
   // l'artisan décoche ce qui ne part pas.
   const startSelecting = () => {
+    setPourGroupe(false);
     setChecked(new Set(selectable));
     setSelecting(true);
+  };
+  // Proposer au groupé : rien de coché d'office (un engagement ferme se choisit ligne par ligne ou lot par lot).
+  const startGroupe = () => {
+    setPourGroupe(true);
+    setChecked(new Set());
+    setSelecting(true);
+  };
+  const stopSelecting = () => {
+    setSelecting(false);
+    setPourGroupe(false);
   };
   // La commande répartie : ce qui n'est encore parti chez aucun fournisseur, dont les lignes orange à vérifier d'abord.
   const unsent = rows.filter((r) => articleOf(r) && !selection?.sent.has(articleOf(r)!));
@@ -124,8 +141,11 @@ export function SupplyList({
         return { key: g.key, label: g.label as string | null, rows: [...own.filter((r) => r.status === "check"), ...own.filter((r) => r.status !== "check")] };
       }).filter((x) => x.rows.length > 0)
     : [{ key: "liste", label: null as string | null, rows: ordered }];
-  // Les lignes qu'on peut cocher : prêtes (pas orange), avec un article, pas encore parties à part.
-  const selectable = rows.filter((r) => r.status !== "check" && articleOf(r) && !selection?.sent.has(articleOf(r)!)).map((r) => articleOf(r)!);
+  // Les lignes qu'on peut cocher : prêtes (pas orange), avec un article, pas encore parties à part ; au groupé, un article
+  // calculé ou repris (jamais une ligne « à faire chiffrer ») qui n'y est pas déjà.
+  const cochable = (r: ScreenRow) =>
+    r.status !== "check" && Boolean(articleOf(r)) && (pourGroupe ? Boolean(r.itemKey) && !groupe?.besoins.has(r.itemKey!) : !selection?.sent.has(articleOf(r)!));
+  const selectable = rows.filter(cochable).map((r) => articleOf(r)!);
   const allChecked = selectable.length > 0 && selectable.every((k) => checked.has(k));
   const link = "inline-flex min-h-10 items-center gap-1.5 text-[13px] font-bold text-muted underline decoration-dotted underline-offset-4";
 
@@ -164,15 +184,29 @@ export function SupplyList({
           >
             {allChecked ? "Tout décocher" : "Tout cocher"}
           </button>
-        ) : editable && selection && rows.length > 1 ? (
-          <button
-            type="button"
-            onClick={startSelecting}
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-accent/10 px-3.5 text-[13px] font-extrabold text-accent-text active:bg-accent/20"
-          >
-            <ListChecks size={16} aria-hidden="true" />
-            Envoyer une partie
-          </button>
+        ) : editable && ((selection && rows.length > 1) || groupe) ? (
+          <span className="flex flex-wrap justify-end gap-1.5">
+            {groupe ? (
+              <button
+                type="button"
+                onClick={startGroupe}
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-accent/10 px-3.5 text-[13px] font-extrabold text-accent-text active:bg-accent/20"
+              >
+                <Users size={16} aria-hidden="true" />
+                Proposer au groupé
+              </button>
+            ) : null}
+            {selection && rows.length > 1 ? (
+              <button
+                type="button"
+                onClick={startSelecting}
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-accent/10 px-3.5 text-[13px] font-extrabold text-accent-text active:bg-accent/20"
+              >
+                <ListChecks size={16} aria-hidden="true" />
+                Envoyer une partie
+              </button>
+            ) : null}
+          </span>
         ) : null}
       </div>
       {/* §49, §50 (retour du fondateur, 2026-10-12) : la légende des repères, sous le titre. */}
@@ -187,7 +221,11 @@ export function SupplyList({
           <Box checked={false} /> À préciser : coche pour valider
         </span>
       </p>
-      {selecting ? <p className="mb-2 text-[14px] leading-snug font-bold text-ink">Coche ce qui part chez ce fournisseur. Le reste pourra partir chez un autre.</p> : null}
+      {selecting ? (
+        <p className="mb-2 text-[14px] leading-snug font-bold text-ink">
+          {pourGroupe ? "Coche ce que tu proposes au groupé. Ton nom ne part pas avec." : "Coche ce qui part chez ce fournisseur. Le reste pourra partir chez un autre."}
+        </p>
+      ) : null}
       {sections.map((section) => (
       <div key={section.key} className={section.label ? "mt-3 first:mt-0" : ""}>
       {section.label ? (
@@ -197,7 +235,7 @@ export function SupplyList({
           {selecting ? (
             <button
               type="button"
-              onClick={() => setChecked(new Set(section.rows.filter((r) => r.status !== "check" && articleOf(r) && !selection?.sent.has(articleOf(r)!)).map((r) => articleOf(r)!)))}
+              onClick={() => setChecked(new Set(section.rows.filter(cochable).map((r) => articleOf(r)!)))}
               className="inline-flex min-h-10 items-center rounded-full bg-accent/10 px-3 text-[13px] font-extrabold text-accent-text active:bg-accent/20"
             >
               Cocher ce lot
@@ -219,7 +257,8 @@ export function SupplyList({
                   selectMode: {
                     checked: checked.has(articleOf(r) ?? ""),
                     // Une ligne orange se vérifie d'abord ; une ligne sans article (question) ne part pas.
-                    disabled: !articleOf(r) || r.status === "check",
+                    disabled: !cochable(r),
+                    ...(pourGroupe ? { label: "Proposer au groupé" } : {}),
                     onToggle: () =>
                       setChecked((prev) => {
                         const next = new Set(prev);
@@ -298,12 +337,25 @@ export function SupplyList({
 
       {/* §50.3 : en bas, l'aperçu et l'envoi ; dessous, en petit, les autres gestes. Seuls les deux boutons restent collés en
           bas ; les liens suivent la liste, jamais par-dessus. */}
-      {selecting && selection ? (
+      {groupe && !selecting ? <GroupeSection groupe={groupe} /> : null}
+      {selecting && pourGroupe && groupe ? (
+        <div className={`sticky z-10 mt-2 bg-gradient-to-t from-ground from-70% to-transparent pt-6 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(12px,env(safe-area-inset-bottom))]"}`}>
+          <GroupeBar
+            count={checked.size}
+            onCancel={stopSelecting}
+            onPropose={async (fenetre, statut, engagement) => {
+              await groupe.proposer([...checked], fenetre, statut, engagement);
+              stopSelecting();
+              setChecked(new Set());
+            }}
+          />
+        </div>
+      ) : selecting && selection ? (
         <div className={`sticky z-10 mt-2 bg-gradient-to-t from-ground from-70% to-transparent pt-6 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(12px,env(safe-area-inset-bottom))]"}`}>
           <SelectionBar
             count={checked.size}
             alreadyServed={selection.parts.map((p) => p.supplierId)}
-            onCancel={() => setSelecting(false)}
+            onCancel={stopSelecting}
             onSend={async (supplierIds) => {
               await selection.send([...checked], supplierIds);
               setSelecting(false);
@@ -570,7 +622,7 @@ function Row({
 }: {
   error?: ApiError | null;
   /** §48.5 : mode sélection, une case à cocher à la place du point ; toucher la ligne la coche. */
-  selectMode?: { checked: boolean; disabled: boolean; onToggle: () => void };
+  selectMode?: { checked: boolean; disabled: boolean; onToggle: () => void; /** Ce que la case fait (« Proposer au groupé »), « Envoyer à part » sinon. */ label?: string };
   /** §48.5 : déjà envoyée à part (« Envoyé · fournisseur »), toujours visible dans la liste. */
   sentTo?: string;
   row: ScreenRow;
@@ -669,7 +721,7 @@ function Row({
             checked={selectMode.checked}
             disabled={selectMode.disabled}
             onChange={selectMode.onToggle}
-            aria-label={`Envoyer à part : ${label}`}
+            aria-label={`${selectMode.label ?? "Envoyer à part"} : ${label}`}
             className="mt-0.5 size-5 shrink-0 accent-accent"
           />
           <span className="flex min-w-0 grow flex-col">
