@@ -1667,3 +1667,54 @@ test("BatiClair Groupé, étape 2 : proposer des lignes au groupé, s'engager, p
   // Sur iPhone, rien ne déborde.
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 });
+
+test("BatiClair Groupé, étape 3 : « Mes négoces », e-mail, familles, favori, message type", async ({ page }) => {
+  await signUp(page);
+  await page.goto("/fournisseurs");
+  // Sans SIRET vérifié, pas de carte « Mes négoces » : la page des fournisseurs ne change pas.
+  await expect(page.getByRole("heading", { name: "Fournisseurs" })).toBeVisible();
+  await expect(page.getByRole("list", { name: "Mes négoces" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Ajouter un négoce" })).toHaveCount(0);
+
+  expect(await apiCall(page, "PATCH", "/v1/company/profile", { name: "Toitures Martin", address: "3 quai Duguay-Trouin, 35400 Saint-Malo", siret: "73282932000074", phone: null, email: null })).toBe(200);
+  expect(await apiCall(page, "POST", "/v1/groupe/siret")).toBe(200);
+  await page.reload();
+  await page.getByRole("button", { name: "Ajouter un négoce" }).click();
+  const form = page.getByRole("form", { name: "Nouveau négoce" });
+  await form.getByLabel("Nom du négoce").fill("Négoce Ardoises");
+  await form.getByLabel("E-mail où il reçoit les demandes").fill("ardoises@example.com");
+  await form.getByLabel("Ton numéro de compte chez lui").fill("C-12");
+  // « Ajouter » attend au moins une famille cochée.
+  await expect(form.getByRole("button", { name: "Ajouter" })).toBeDisabled();
+  await form.getByLabel("Vend : Couverture").check();
+  await form.getByRole("button", { name: "Ajouter" }).click();
+  const liste = page.getByRole("list", { name: "Mes négoces" });
+  const premier = liste.getByRole("listitem").filter({ hasText: "Négoce Ardoises" });
+  await expect(premier).toBeVisible();
+  await expect(premier.getByLabel("Favori")).toBeVisible();
+  await expect(premier).toContainText("ardoises@example.com · 35 · Couverture");
+  await expect(premier).toContainText("Compte C-12");
+
+  // Un deuxième, généraliste, puis favori d'un tap : il passe en premier.
+  await page.getByRole("button", { name: "Ajouter un négoce" }).click();
+  await form.getByLabel("Nom du négoce").fill("Négoce Généraliste");
+  await form.getByLabel("E-mail où il reçoit les demandes").fill("general@example.com");
+  await form.getByLabel("Vend : Couverture").check();
+  await form.getByLabel("Vend : Second œuvre").check();
+  await form.getByRole("button", { name: "Ajouter" }).click();
+  const second = liste.getByRole("listitem").filter({ hasText: "Négoce Généraliste" });
+  await expect(second).toContainText("Sans numéro de compte");
+  await second.getByRole("button", { name: "En faire mon favori" }).click();
+  await expect(liste.getByRole("listitem").first()).toContainText("Négoce Généraliste");
+  await expect(liste.getByRole("listitem").first().getByLabel("Favori")).toBeVisible();
+
+  // Le message type à envoyer au négoce, prêt à copier.
+  await page.getByText("Le message à envoyer à ton négoce pour le prévenir").click();
+  await expect(page.getByText("Toitures Martin", { exact: false }).last()).toBeVisible();
+  await expect(page.getByText(/pas concerné/)).toBeVisible();
+
+  // Retirer de ma liste : il part de la liste (il reste dans la base du département).
+  await premier.getByRole("button", { name: "Retirer de ma liste" }).click();
+  await expect(liste.getByRole("listitem")).toHaveCount(1);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+});

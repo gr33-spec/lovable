@@ -3,6 +3,7 @@
 import { Mail, Pencil, Phone, Plus, Truck } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useState } from "react";
+import { MesNegocesCard, useGroupeOuvert } from "@/components/mes-negoces";
 import { SupplierForm } from "@/components/supplier-form";
 import { Badge, Button, Card, EmptyState, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
 import { api, ApiError, type Supplier } from "@/lib/api";
@@ -30,6 +31,8 @@ function Suppliers() {
   }
   const [editingId, setEditingId] = useState<string | null>(null);
   const [q, setQ] = useState("");
+  // BatiClair Groupé, étape 3 : « Mes négoces », seulement quand le groupé existe pour l'entreprise (drapeau, SIRET vérifié).
+  const groupeOuvert = useGroupeOuvert();
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
@@ -48,6 +51,7 @@ function Suppliers() {
   return (
     <>
       <PageTitle>Fournisseurs</PageTitle>
+      {groupeOuvert ? <MesNegocesCard /> : null}
 
       {creating ? (
         <Card className="flex flex-col gap-3 p-4">

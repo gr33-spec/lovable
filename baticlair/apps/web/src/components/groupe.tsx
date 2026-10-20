@@ -1,6 +1,7 @@
 "use client";
 
 import { Users } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useId, useMemo, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
 import { api, ApiError, newActionKey } from "@/lib/api";
@@ -30,6 +31,13 @@ export interface Groupe {
   proposer: (articles: string[], fenetre: { tot: string; tard: string }, statut: "signe" | "en_attente", engagement: boolean) => Promise<void>;
   signer: (id: string) => Promise<void>;
   retirer: (id: string) => Promise<void>;
+}
+
+/** Combien de négoces dans ma liste (étape 3) : à zéro, la section « Au groupé » invite à les ajouter. */
+function useMesNegocesCount(): number | null {
+  const fetchNegoces = useCallback((signal: AbortSignal) => api<{ negoces: unknown[] }>("/v1/groupe/negoces", { signal }), []);
+  const liste = useResource(fetchNegoces);
+  return liste.data ? liste.data.negoces.length : null;
 }
 
 /** La phrase d'engagement, mot pour mot (section 7, étape 2 du document). */
@@ -162,6 +170,7 @@ const STATUTS: Record<BesoinGroupe["statut"], string> = {
 
 /** « Au groupé » : les lignes proposées, leur état ; « Passer en signé » d'un tap (avec l'engagement), « Retirer » tant que le lot n'est pas parti. */
 export function GroupeSection({ groupe }: { groupe: Groupe }) {
+  const negoces = useMesNegocesCount();
   const [signing, setSigning] = useState<string | null>(null);
   const [engagement, setEngagement] = useState(false);
   const [pending, setPending] = useState<string | null>(null);
@@ -182,6 +191,15 @@ export function GroupeSection({ groupe }: { groupe: Groupe }) {
   return (
     <section aria-label="Au groupé" className="mt-3 flex flex-col gap-2 rounded-[20px] bg-surface p-3 shadow-card">
       <h3 className="text-[13px] font-extrabold text-muted">Au groupé</h3>
+      {negoces === 0 ? (
+        <p className="text-[14px] leading-snug font-bold">
+          Ajoute d&apos;abord tes négoces (e-mail et ce qu&apos;ils vendent) :{" "}
+          <Link href="/fournisseurs" className="text-accent-text underline decoration-dotted underline-offset-4">
+            Fournisseurs
+          </Link>
+          . Sans eux, le groupé ne sait pas à qui demander.
+        </p>
+      ) : null}
       <ul className="flex flex-col gap-2">
         {besoins.map((b) => (
           <li key={b.id} className="flex flex-col gap-1.5 rounded-2xl bg-ground p-3">
