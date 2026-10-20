@@ -23,6 +23,19 @@ export interface BesoinGroupe {
   statut: "en_attente" | "signe" | "retire" | "engage" | "commande" | "livre";
   fenetre: { tot: string; tard: string };
   lotParti: boolean;
+  /** Étape 6 : l'offre personnelle, une information, jamais une question. */
+  offre: OffreGroupe | null;
+}
+
+export interface OffreGroupe {
+  id: string;
+  lotNumero: number;
+  prixUnitaire: string;
+  negoce: string;
+  dateLivraison: string | null;
+  prixReference: string | null;
+  economie: string | null;
+  probleme: string | null;
 }
 
 export interface Groupe {
@@ -31,6 +44,8 @@ export interface Groupe {
   proposer: (articles: string[], fenetre: { tot: string; tard: string }, statut: "signe" | "en_attente", engagement: boolean) => Promise<void>;
   signer: (id: string) => Promise<void>;
   retirer: (id: string) => Promise<void>;
+  probleme: (offreId: string, texte: string) => Promise<void>;
+  reference: (offreId: string, prix: number | null) => Promise<void>;
 }
 
 /** Combien de négoces dans ma liste (étape 3) : à zéro, la section « Au groupé » invite à les ajouter. */
@@ -70,6 +85,14 @@ export function useGroupe(projectId: string): Groupe | null {
     },
     retirer: async (id) => {
       await api(`/v1/groupe/besoins/${encodeURIComponent(id)}`, { method: "DELETE" });
+      liste.reload();
+    },
+    probleme: async (offreId, texte) => {
+      await api(`/v1/groupe/offres/${encodeURIComponent(offreId)}/probleme`, { method: "POST", body: { probleme: texte } });
+      liste.reload();
+    },
+    reference: async (offreId, prix) => {
+      await api(`/v1/groupe/offres/${encodeURIComponent(offreId)}/reference`, { method: "POST", body: { prixReference: prix } });
       liste.reload();
     },
   };
@@ -159,6 +182,78 @@ export function GroupeBar({ count, onCancel, onPropose }: { count: number; onCan
   );
 }
 
+const euros = (s: string) => `${Number(s).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+const jourFr = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("fr-FR", { day: "numeric", month: "long", timeZone: "UTC" });
+
+/**
+ * MON OFFRE (parcours groupé, étape 7 du document) : ma quantité, mon prix unitaire, le négoce retenu, la date de livraison,
+ * mon économie estimée (section 6 : (prix de référence − prix groupé) × quantité, le prix de référence étant mon dernier
+ * prix payé seul). Une information, pas une question ; « Problème » si je vois une erreur. Jamais le nombre ni le nom des
+ * autres artisans.
+ */
+function OffreCard({ besoin: b, groupe }: { besoin: BesoinGroupe; groupe: Groupe }) {
+  const o = b.offre!;
+  const [probleme, setProbleme] = useState<string | null>(null);
+  const [reference, setReference] = useState<string>(o.prixReference ? String(Number(o.prixReference)) : "");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<ApiError | null>(null);
+  const run = async (f: () => Promise<void>) => {
+    setPending(true);
+    setError(null);
+    try {
+      await f();
+    } catch (e) {
+      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+    } finally {
+      setPending(false);
+    }
+  };
+  return (
+    <section aria-label={`Mon offre : ${b.designation}`} className="flex flex-col gap-1.5 rounded-xl bg-surface p-3 shadow-card">
+      <p className="text-[13px] font-extrabold text-muted">Mon offre · lot n° {o.lotNumero}</p>
+      <p className="text-[15px] leading-snug font-bold">
+        {b.quantite.replace(".", ",")} {b.unite} à {euros(o.prixUnitaire)} HT l&apos;unité chez {o.negoce}
+      </p>
+      {o.dateLivraison ? <p className="text-[13px] font-semibold text-muted">Livraison le {jourFr(o.dateLivraison)}, sur ton chantier, sur ton compte chez lui.</p> : null}
+      {o.economie !== null ? <p className="text-[14px] font-extrabold text-ok">Économie estimée : {euros(o.economie)}</p> : null}
+      <label className="flex flex-wrap items-center gap-2 text-[13px] font-semibold text-muted">
+        Ton dernier prix payé seul (€ HT l&apos;unité)
+        <input
+          type="text"
+          inputMode="decimal"
+          value={reference}
+          onChange={(e) => setReference(e.target.value)}
+          aria-label="Ton dernier prix payé seul"
+          className="h-10 w-24 rounded-xl border border-line bg-ground px-2 text-[14px] font-bold text-ink"
+        />
+        <Button variant="secondary" className="min-h-10 px-3.5 text-[14px]" pending={pending} onClick={() => run(() => groupe.reference(o.id, reference.trim() ? Number(reference.replace(",", ".")) : null))}>
+          Calculer mon économie
+        </Button>
+      </label>
+      {o.probleme ? (
+        <p className="text-[13px] font-semibold text-warn">Problème signalé : {o.probleme}</p>
+      ) : probleme === null ? (
+        <Button variant="secondary" className="min-h-10 self-start px-3.5 text-[14px]" onClick={() => setProbleme("")}>
+          Problème
+        </Button>
+      ) : (
+        <div className="flex flex-col gap-2">
+          <textarea value={probleme} onChange={(e) => setProbleme(e.target.value)} maxLength={1000} rows={2} aria-label="Quel est le problème ?" placeholder="Quel est le problème ?" className="rounded-xl border border-line bg-ground px-3 py-2 text-[14px]" />
+          <div className="flex gap-2">
+            <Button variant="secondary" className="grow" onClick={() => setProbleme(null)} disabled={pending}>
+              Annuler
+            </Button>
+            <Button className="grow" pending={pending} disabled={!probleme.trim()} onClick={() => run(async () => (await groupe.probleme(o.id, probleme.trim()), setProbleme(null)))}>
+              Signaler
+            </Button>
+          </div>
+        </div>
+      )}
+      {error ? <ErrorNotice error={error} /> : null}
+    </section>
+  );
+}
+
 const STATUTS: Record<BesoinGroupe["statut"], string> = {
   en_attente: "Devis en attente",
   signe: "Chantier signé",
@@ -208,6 +303,7 @@ export function GroupeSection({ groupe }: { groupe: Groupe }) {
               <span className="shrink-0 text-[15px] font-extrabold">{`${b.quantite.replace(".", ",")} ${b.unite}`}</span>
             </div>
             <p className="text-[13px] font-semibold text-muted">{STATUTS[b.statut]}</p>
+            {b.offre ? <OffreCard besoin={b} groupe={groupe} /> : null}
             {signing === b.id ? (
               <>
                 <label className="flex cursor-pointer items-start gap-3 text-[14px] leading-snug font-bold">

@@ -92,7 +92,12 @@ describe("isolation entre entreprises, toutes les routes", () => {
           data: { nom: "Négoce de A", email: "negoce-a@example.com", departement: "29", familles: ["couverture"], ajouteParId: companyId, artisans: { create: { companyId, rang: 1, numeroCompte: "A-1" } } },
         })
       ).id,
+      offre: "",
     };
+    // Étape 6 : une offre de A, sur un lot choisi.
+    const lotA = await ctx.prisma.lotGroupe.create({ data: { cle: "lib:a||", famille: "couverture", zone: "29", fenetreTot: new Date("2026-11-02"), fenetreTard: new Date("2026-11-20"), statut: "choisi", besoins: { connect: { id: ids.besoin } } } });
+    const offreA = await ctx.prisma.offreArtisan.create({ data: { lotId: lotA.id, besoinId: ids.besoin, prixUnitaire: 10 } });
+    ids.offre = offreA.id;
     const idFor = (path: string, param: string): string => {
       if (param === "projectId" || param === "projetId") return ids.project;
       if (param === "uploadId") return ids.upload;
@@ -113,6 +118,7 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/groupe\/negoces$/, ids.negoce],
         // Étape 5 : le lien de réponse d'un négoce est un jeton, jamais un identifiant ; un jeton inconnu répond 404.
         [/\/reponse$/, "jeton-inconnu-de-b-0000000000000000"],
+        [/\/groupe\/offres$/, ids.offre],
       ];
       const hit = byPrefix.find(([re]) => re.test(prefix));
       if (!hit) throw new Error(`Paramètre sans identifiant de A : ${path} (${param})`);

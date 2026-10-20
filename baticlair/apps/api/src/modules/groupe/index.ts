@@ -6,3 +6,4 @@ export { jetonDeLien, lienDuJeton, type ActionLien } from "./application/lien-ne
 export { RegroupementService } from "./application/regroupement.service.js";
 export { DemandeService, type PageReponse } from "./application/demande.service.js";
 export { NEGOCE_EXTRACTOR, reponseNegoceSchema, type NegoceExtractor, type ReponseLue } from "./application/negoce-extractor.js";
+export { ChoixService } from "./application/choix.service.js";

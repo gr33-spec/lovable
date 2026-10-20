@@ -78,6 +78,8 @@ export class DemandeService {
     private readonly pdf: PdfReader,
     private readonly extracteur: NegoceExtractor | null,
     private readonly reglages: ReglagesDemande,
+    /** Étape 6 : après un dépôt, le lot se décide si tout le monde a répondu. */
+    private readonly choix: { choisirLesLotsEnvoyes(maintenant?: Date): Promise<unknown> },
   ) {}
 
   /** Envoie chaque lot formé aux négoces concernés. Un lot sans négoce concerné reste formé (Greg le voit, étape 9). */
@@ -214,7 +216,9 @@ export class DemandeService {
     const lecture = await this.lire(r, depot.fichiers);
     await this.prisma.reponseNegoce.update({ where: { id: r.id }, data: { statutExtraction: lecture.statut, prix: lecture.prix.map((x) => ({ ...x })), delaiJours: lecture.delaiJours } });
     await this.prisma.journalGroupe.create({ data: { lotId: r.lotId, evenement: "reponse_deposee", details: { negoce: r.negoceId, fichiers: depot.fichiers.length, lecture: lecture.statut } } });
-    return this.page(jeton);
+    const page = await this.page(jeton);
+    await this.choix.choisirLesLotsEnvoyes();
+    return page;
   }
 
   private async lire(r: Awaited<ReturnType<DemandeService["reponse"]>>, fichiers: FichierDepose[]) {

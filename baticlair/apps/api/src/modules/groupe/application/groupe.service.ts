@@ -1,4 +1,4 @@
-import { cleDeReference, familleDuMetier, fenetreValide, lotParti, quantiteDuBesoin, transitionBesoin, zoneDuCodePostal, type StatutBesoin } from "@baticlair/domain";
+import { cleDeReference, economieEstimee, familleDuMetier, fenetreValide, lotParti, quantiteDuBesoin, transitionBesoin, zoneDuCodePostal, type StatutBesoin } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { isUuid } from "../../../platform/validation/ids.js";
@@ -20,6 +20,20 @@ export interface BesoinVue {
   fenetre: { tot: string; tard: string };
   /** Le lot est parti aux négoces : le besoin ne se retire plus (section 4 b). */
   lotParti: boolean;
+  /** Étape 6 : l'offre personnelle, une information, jamais une question. */
+  offre: OffreVue | null;
+}
+
+export interface OffreVue {
+  id: string;
+  lotNumero: number;
+  prixUnitaire: string;
+  negoce: string;
+  dateLivraison: string | null;
+  /** Le prix de référence déclaré par l'artisan (dernier prix payé seul), pour l'économie estimée (section 6). */
+  prixReference: string | null;
+  economie: string | null;
+  probleme: string | null;
 }
 
 export interface Proposition {
@@ -66,11 +80,47 @@ export class GroupeService {
     return { verifie: r.statut === "actif", statut: r.statut };
   }
 
+  /** Étape 6 : toutes mes offres (une par besoin engagé d'un lot choisi), les plus récentes d'abord. */
+  async mesOffres(tenant: TenantContext): Promise<(OffreVue & { designation: string; quantite: string; unite: string; projectId: string })[]> {
+    const offres = await this.prisma.offreArtisan.findMany({
+      where: { besoin: { companyId: tenant.companyId } },
+      include: { besoin: true, lot: { include: { negoceRetenu: { select: { nom: true } } } } },
+      orderBy: { createdAt: "desc" },
+    });
+    return offres.map((o) => ({ ...offreVue(o, o.besoin), designation: o.besoin.designation, quantite: o.besoin.quantite.toString(), unite: o.besoin.unite, projectId: o.besoin.projectId }));
+  }
+
+  /** « Problème » : l'artisan signale une erreur sur son offre ; journalisé pour Greg, rien d'autre ne bouge. */
+  async signalerProbleme(tenant: TenantContext, offreId: string, probleme: string): Promise<OffreVue> {
+    assertCanWrite(tenant);
+    const o = await this.offreDe(tenant, offreId);
+    const now = new Date();
+    const maj = await this.prisma.offreArtisan.update({ where: { id: o.id }, data: { probleme, problemeLe: now } });
+    await this.prisma.journalGroupe.create({ data: { lotId: o.lotId, evenement: "probleme_signale", details: { offre: o.id, probleme } } });
+    return offreVue({ ...maj, lot: o.lot }, o.besoin);
+  }
+
+  /** Le prix de référence de l'artisan (dernier prix payé seul) : il sert au compteur d'économie, jamais à la facture. */
+  async declarerReference(tenant: TenantContext, offreId: string, prixReference: number | null): Promise<OffreVue> {
+    assertCanWrite(tenant);
+    const o = await this.offreDe(tenant, offreId);
+    const economie = prixReference === null ? null : economieEstimee(prixReference, Number(o.prixUnitaire), Number(o.besoin.quantite));
+    const maj = await this.prisma.offreArtisan.update({ where: { id: o.id }, data: { prixReference, economie } });
+    return offreVue({ ...maj, lot: o.lot }, o.besoin);
+  }
+
+  private async offreDe(tenant: TenantContext, offreId: string) {
+    if (!isUuid(offreId)) throw notFound("Offre");
+    const o = await this.prisma.offreArtisan.findFirst({ where: { id: offreId, besoin: { companyId: tenant.companyId } }, include: { besoin: true, lot: { include: { negoceRetenu: { select: { nom: true } } } } } });
+    if (!o) throw notFound("Offre");
+    return o;
+  }
+
   async besoinsDuChantier(tenant: TenantContext, projectId: string): Promise<BesoinVue[]> {
     if (!isUuid(projectId)) throw notFound("Project");
     const project = await this.prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { id: true } });
     if (!project) throw notFound("Project");
-    const rows = await this.prisma.besoin.findMany({ where: { projectId, companyId: tenant.companyId, statut: { not: "retire" } }, include: { lot: { select: { statut: true } } }, orderBy: { createdAt: "asc" } });
+    const rows = await this.prisma.besoin.findMany({ where: { projectId, companyId: tenant.companyId, statut: { not: "retire" } }, include: { lot: { select: { statut: true, numero: true, negoceRetenu: { select: { nom: true } } } }, offre: true }, orderBy: { createdAt: "asc" } });
     return rows.map(vue);
   }
 
@@ -159,7 +209,7 @@ export class GroupeService {
 
   private async passer(tenant: TenantContext, besoinId: string, vers: StatutBesoin): Promise<BesoinVue> {
     if (!isUuid(besoinId)) throw notFound("Besoin");
-    const b = await this.prisma.besoin.findFirst({ where: { id: besoinId, companyId: tenant.companyId }, include: { lot: { select: { statut: true } } } });
+    const b = await this.prisma.besoin.findFirst({ where: { id: besoinId, companyId: tenant.companyId }, include: { lot: { select: { statut: true, numero: true, negoceRetenu: { select: { nom: true } } } }, offre: true } });
     if (!b) throw notFound("Besoin");
     const t = transitionBesoin(b.statut as StatutBesoin, vers, { lotParti: lotParti(b.lot?.statut) });
     if (t.ok === false) throw new DomainError("conflict", "Transition refused", { reason: t.raison });
@@ -167,7 +217,7 @@ export class GroupeService {
     const updated = await this.prisma.besoin.update({
       where: { id: b.id },
       data: { statut: vers, ...(vers === "signe" ? { signeLe: now } : {}), ...(vers === "retire" ? { retireLe: now, lotId: null } : {}) },
-      include: { lot: { select: { statut: true } } },
+      include: { lot: { select: { statut: true, numero: true, negoceRetenu: { select: { nom: true } } } }, offre: true },
     });
     return vue(updated);
   }
@@ -178,7 +228,25 @@ export class GroupeService {
   }
 }
 
-function vue(b: { id: string; articleKey: string; designation: string; quantite: { toString(): string }; unite: string; statut: string; fenetreTot: Date; fenetreTard: Date; lot: { statut: string } | null }): BesoinVue {
+type OffreRow = { id: string; prixUnitaire: { toString(): string }; prixReference: { toString(): string } | null; economie: { toString(): string } | null; dateLivraison: Date | null; probleme: string | null; lot: { numero: number; negoceRetenu: { nom: string } | null } };
+
+function offreVue(o: OffreRow, besoin: { quantite: { toString(): string } }): OffreVue {
+  void besoin;
+  return {
+    id: o.id,
+    lotNumero: o.lot.numero,
+    prixUnitaire: o.prixUnitaire.toString(),
+    negoce: o.lot.negoceRetenu?.nom ?? "",
+    dateLivraison: o.dateLivraison ? jour(o.dateLivraison) : null,
+    prixReference: o.prixReference?.toString() ?? null,
+    economie: o.economie?.toString() ?? null,
+    probleme: o.probleme,
+  };
+}
+
+type BesoinRow = { id: string; articleKey: string; designation: string; quantite: { toString(): string }; unite: string; statut: string; fenetreTot: Date; fenetreTard: Date; lot: { statut: string; numero: number; negoceRetenu: { nom: string } | null } | null; offre: Omit<OffreRow, "lot"> | null };
+
+function vue(b: BesoinRow): BesoinVue {
   return {
     id: b.id,
     articleKey: b.articleKey,
@@ -188,5 +256,6 @@ function vue(b: { id: string; articleKey: string; designation: string; quantite:
     statut: b.statut as StatutBesoin,
     fenetre: { tot: jour(b.fenetreTot), tard: jour(b.fenetreTard) },
     lotParti: lotParti(b.lot?.statut),
+    offre: b.offre && b.lot ? offreVue({ ...b.offre, lot: b.lot }, b) : null,
   };
 }

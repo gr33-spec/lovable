@@ -6,6 +6,7 @@ import type { TransactionalEmailSender } from "../../platform/email/email.port.j
 import { PDF_READER, PdfJsPdfReader, type PdfReader } from "../documents/index.js";
 import { TakeoffModule, TakeoffService } from "../takeoff/index.js";
 import { TenancyModule } from "../tenancy/index.js";
+import { ChoixService } from "./application/choix.service.js";
 import { DemandeService } from "./application/demande.service.js";
 import { GroupeService } from "./application/groupe.service.js";
 import { NEGOCE_EXTRACTOR, type NegoceExtractor } from "./application/negoce-extractor.js";
@@ -35,6 +36,7 @@ import { ReponseController } from "./http/reponse.controller.js";
     },
     { provide: RegroupementService, useFactory: (p: PrismaService) => new RegroupementService(p), inject: [PrismaService] },
     { provide: PDF_READER, useFactory: () => new PdfJsPdfReader() },
+    { provide: ChoixService, useFactory: (p: PrismaService) => new ChoixService(p), inject: [PrismaService] },
     {
       provide: NEGOCE_EXTRACTOR,
       // Le devis du négoce est lu par le modèle rapide (Sonnet), à la demande ; en test, le faux lecteur ; sans clé, Greg relit.
@@ -52,8 +54,8 @@ import { ReponseController } from "./http/reponse.controller.js";
     },
     {
       provide: DemandeService,
-      useFactory: (p: PrismaService, e: TransactionalEmailSender, pdf: PdfReader, x: NegoceExtractor | null, c: AppConfig) => new DemandeService(p, e, pdf, x, { webAppUrl: c.webAppUrl, authSecret: c.authSecret }),
-      inject: [PrismaService, EMAIL_SENDER, PDF_READER, NEGOCE_EXTRACTOR, CONFIG],
+      useFactory: (p: PrismaService, e: TransactionalEmailSender, pdf: PdfReader, x: NegoceExtractor | null, c: AppConfig, choix: ChoixService) => new DemandeService(p, e, pdf, x, { webAppUrl: c.webAppUrl, authSecret: c.authSecret }, choix),
+      inject: [PrismaService, EMAIL_SENDER, PDF_READER, NEGOCE_EXTRACTOR, CONFIG, ChoixService],
     },
     {
       provide: GroupeService,
@@ -62,6 +64,6 @@ import { ReponseController } from "./http/reponse.controller.js";
     },
     { provide: NegocesService, useFactory: (p: PrismaService, c: AppConfig) => new NegocesService(p, c.authSecret), inject: [PrismaService, CONFIG] },
   ],
-  exports: [GroupeService, NegocesService, RegroupementService, DemandeService],
+  exports: [GroupeService, NegocesService, RegroupementService, DemandeService, ChoixService],
 })
 export class GroupeModule {}

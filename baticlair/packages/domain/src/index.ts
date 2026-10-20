@@ -43,3 +43,4 @@ export * from "./lecture/electricite.js";
 export * from "./groupe/groupe.js";
 export * from "./groupe/regroupement.js";
 export * from "./groupe/demande.js";
+export * from "./groupe/choix.js";

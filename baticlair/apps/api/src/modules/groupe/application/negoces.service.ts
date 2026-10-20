@@ -105,10 +105,14 @@ export class NegocesService {
   /** Le négoce confirme : « pas concerné » décoche la famille, « stop » le désinscrit. Rejouer le lien ne change plus rien. */
   async appliquerLien(jeton: string): Promise<{ action: "stop" | "pas_concerne"; negoce: string; famille: string | null; fait: boolean }> {
     const { lien, negoce } = await this.lienValide(jeton);
+    const now = new Date();
     if (lien.action === "stop") {
-      if (!negoce.stopLe) await this.prisma.negoce.update({ where: { id: negoce.id }, data: { stopLe: new Date() } });
+      if (!negoce.stopLe) await this.prisma.negoce.update({ where: { id: negoce.id }, data: { stopLe: now } });
+      // Les lots qui l'attendaient encore n'attendent plus (étape 6 : le lot se décide quand tous ont répondu).
+      await this.prisma.reponseNegoce.updateMany({ where: { negoceId: negoce.id, deposeLe: null, pasConcerneLe: null, lot: { statut: "envoye" } }, data: { pasConcerneLe: now } });
     } else {
       await this.prisma.negoce.update({ where: { id: negoce.id }, data: { familles: negoce.familles.filter((f) => f !== lien.famille) } });
+      await this.prisma.reponseNegoce.updateMany({ where: { negoceId: negoce.id, deposeLe: null, pasConcerneLe: null, lot: { statut: "envoye", famille: lien.famille } }, data: { pasConcerneLe: now } });
     }
     return { ...(await this.apercuLien(jeton)), fait: true };
   }
