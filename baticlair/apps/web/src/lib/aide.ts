@@ -39,6 +39,6 @@ export const AIDES: Record<SujetAide, { titre: string; lignes: readonly [string,
   },
   chantiers: {
     titre: "Tes chantiers",
-    lignes: ["Un chantier = un devis déposé. Dépose le PDF ou la photo, BatiClair sort la liste des fournitures.", "Tape un chantier pour reprendre où tu en étais : questions, liste, envoi, groupé."],
+    lignes: ["Un chantier = un devis déposé. Dépose ton PDF ou ta photo, BatiClair sort la liste des fournitures.", "Tape un chantier pour reprendre où tu en étais : questions, liste, envoi, groupé."],
   },
 };
