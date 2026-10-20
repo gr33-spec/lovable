@@ -2,6 +2,8 @@ import { Controller, Get, Headers, Inject, Query } from "@nestjs/common";
 import type { AppConfig } from "../../../platform/config/config.js";
 import { forbidden, notFound } from "../../../platform/errors/domain-error.js";
 import { CONFIG } from "../../../platform/tokens.js";
+import { Throttle } from "@nestjs/throttler";
+import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import { Public } from "../../identity/index.js";
 import { ChoixService } from "../application/choix.service.js";
 import { CommandeService } from "../application/commande.service.js";
@@ -24,6 +26,7 @@ export class RegroupementController {
   ) {}
 
   @Public()
+  @Throttle({ default: HOURLY(60) })
   @Get("regrouper")
   async regrouper(@Headers("authorization") authorization: string | undefined, @Query("maintenant") maintenantDemande?: string) {
     if (!this.config.groupe.enabled) throw notFound("Route");

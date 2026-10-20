@@ -2,7 +2,7 @@ export { GroupeModule } from "./groupe.module.js";
 export { GroupeService } from "./application/groupe.service.js";
 export { SIRET_VERIFIER, siretBienForme, type SiretVerifier, type ResultatSiret } from "./application/siret-verifier.js";
 export { NegocesService } from "./application/negoces.service.js";
-export { jetonDeLien, lienDuJeton, type ActionLien } from "./application/lien-negoce.js";
+export { jetonDeLien, lienDuJeton, DUREE_LIEN_JOURS, type ActionLien } from "./application/lien-negoce.js";
 export { RegroupementService } from "./application/regroupement.service.js";
 export { DemandeService, type PageReponse } from "./application/demande.service.js";
 export { NEGOCE_EXTRACTOR, reponseNegoceSchema, type NegoceExtractor, type ReponseLue } from "./application/negoce-extractor.js";

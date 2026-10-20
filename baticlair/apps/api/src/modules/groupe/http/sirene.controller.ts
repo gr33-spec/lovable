@@ -4,6 +4,8 @@ import type { AppConfig } from "../../../platform/config/config.js";
 import { forbidden, notFound } from "../../../platform/errors/domain-error.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
 import { CONFIG } from "../../../platform/tokens.js";
+import { Throttle } from "@nestjs/throttler";
+import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import { Public } from "../../identity/index.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
 import { SireneService } from "../application/sirene.service.js";
@@ -27,6 +29,7 @@ export class SireneController {
 
   /** `vercel.json` : le 1er du mois à 5 h UTC, avec le secret de la tâche. */
   @Public()
+  @Throttle({ default: HOURLY(60) })
   @Get("internal/groupe/sirene")
   async importer(@Headers("authorization") authorization: string | undefined) {
     if (!this.config.groupe.enabled) throw notFound("Route");
