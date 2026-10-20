@@ -73,7 +73,7 @@ describe("groupé, étape 5 : la demande aux négoces", () => {
   it("le contrat de commission : la version, 2 % du HT du lot, à 30 jours, l'acceptation par la case, projet à valider par le fondateur", () => {
     const c = texteContrat();
     expect(c[0]).toContain(VERSION_CONTRAT);
-    expect(c[0]).toContain("projet, à valider");
+    expect(c[0]).not.toContain("projet");
     expect(c.join("\n")).toContain("2 % du montant hors taxes du lot");
     expect(c.join("\n")).toContain("payable à 30 jours");
     expect(c.join("\n")).toContain("en cochant la case");

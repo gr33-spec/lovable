@@ -20,6 +20,9 @@ async function signUp(page: Page, email = `artisan-${unique()}@example.fr`) {
   await page.getByRole("button", { name: "Couverture, charpente, zinguerie" }).click();
   await page.getByLabel("E-mail professionnel").fill(email);
   await page.getByLabel("Mot de passe").fill("motdepasse-solide");
+  // Bloc 6 : la case CGU est obligatoire ; cochée, l'acceptation est enregistrée avec le compte.
+  await expect(page.getByRole("button", { name: "Créer mon compte" })).toBeDisabled();
+  await page.getByRole("checkbox", { name: /J'accepte les conditions générales d'utilisation/ }).check();
   await page.getByRole("button", { name: "Créer mon compte" }).click();
   await expect(page.getByRole("heading", { name: /^Bonjour Jean/ })).toBeVisible();
   return email;
@@ -1940,5 +1943,31 @@ test("BatiClair Groupé, étape 9 : l'admin (Greg seul) voit les lots, le journa
   await rubriques.getByRole("button", { name: "Exclusions" }).click();
   await expect(page.getByRole("list", { name: "Exclusions" })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+});
+
+test("Pages légales : mentions légales, CGU, conditions négoce et confidentialité, lisibles sans compte ; l'acceptation des CGU est gardée", async ({ page }) => {
+  await page.goto("/mentions-legales");
+  await expect(page.getByRole("heading", { name: "Mentions légales" })).toBeVisible();
+  await expect(page.getByText(/BATI INVEST, SARL, SIRET 910 796 325 00017, 6 impasse du Ouipoure, 22620 Ploubazlanec/)).toBeVisible();
+  await expect(page.getByText(/TVA intracommunautaire FR61910796325/)).toBeVisible();
+  await expect(page.getByText(/Vercel Inc\./)).toBeVisible();
+  await page.getByRole("navigation", { name: "Pages légales" }).getByRole("link", { name: "CGU" }).click();
+  await expect(page.getByRole("heading", { name: "Conditions générales d'utilisation" })).toBeVisible();
+  await expect(page.getByText(/Le négoce retenu verse 2 % du montant HT du lot à BatiClair/)).toBeVisible();
+  await expect(page.getByText(/avocat/)).toHaveCount(0);
+  await page.getByRole("navigation", { name: "Pages légales" }).getByRole("link", { name: "Conditions négoce" }).click();
+  await expect(page.getByRole("heading", { name: "Conditions négoce" })).toBeVisible();
+  await expect(page.getByText(/2 % du montant hors taxes du lot/)).toBeVisible();
+  await page.getByRole("navigation", { name: "Pages légales" }).getByRole("link", { name: "Confidentialité" }).click();
+  await expect(page.getByRole("heading", { name: "Confidentialité" })).toBeVisible();
+  await expect(page.getByText(/Neon, à Francfort/)).toBeVisible();
+  await expect(page.getByText(/Resend/).first()).toBeVisible();
+  await expect(page.getByText(/API Sirene de l'INSEE/)).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+  // Le compte créé (case cochée) garde la date et la version des CGU.
+  await signUp(page);
+  const cgu = await page.evaluate(async () => (await (await fetch("/v1/me/cgu")).json()) as { accepteLe: string | null; version: string | null });
+  expect(cgu.version).toBe("2026-10-20");
+  expect(cgu.accepteLe).toMatch(/^\d{4}-\d{2}-\d{2}T/);
 });
 

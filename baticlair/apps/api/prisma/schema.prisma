@@ -33,6 +33,9 @@ model User {
   /// §43.4 : nombre de fois où l'activation des notifications a été proposée (1er envoi, puis 3e), et activation.
   notificationsPromptCount Int       @default(0)
   notificationsEnabledAt   DateTime?
+  /// Bloc 6 du plan du 20 octobre : la case « J'accepte les CGU » à la création du compte (date et version acceptée).
+  cguAccepteLe             DateTime?
+  cguVersion               String?
 
   sessions          Session[]
   accounts          Account[]

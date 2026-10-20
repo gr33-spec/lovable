@@ -1,0 +1,17 @@
+import Link from "next/link";
+import { PAGES_LEGALES } from "@/lib/legal";
+
+/** Le pied des pages légales et de la connexion : les quatre pages, puis le retour. */
+export function LiensLegaux({ sauf }: { sauf?: string }) {
+  return (
+    <nav aria-label="Pages légales" className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+      {PAGES_LEGALES.filter((p) => p.href !== sauf).map((p) => (
+        <Link key={p.href} href={p.href} className="font-semibold text-muted underline">
+          {p.label}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+export const styleLegal = { h2: "font-display text-lg font-extrabold", p: "text-[15px] leading-relaxed", ul: "text-[15px] leading-relaxed list-disc pl-5" };

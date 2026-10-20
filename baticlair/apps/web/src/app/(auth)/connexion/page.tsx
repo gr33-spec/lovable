@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
+import { LiensLegaux } from "@/components/legal";
 import { Button, ErrorNotice, Field, PageTitle } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { safeReturnPath } from "@/lib/safe-return";
@@ -63,11 +64,9 @@ export default function ConnexionPage() {
           Créer un compte
         </Link>
       </p>
-      <p className="text-center text-sm">
-        <Link href="/confidentialite" className="font-semibold text-muted underline">
-          Confidentialité
-        </Link>
-      </p>
+      <div className="flex justify-center">
+        <LiensLegaux />
+      </div>
     </>
   );
 }

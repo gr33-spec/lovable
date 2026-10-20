@@ -136,7 +136,7 @@ export function documentDemande(lots: readonly LotADemander[], departement: stri
  */
 export function texteContrat(version = VERSION_CONTRAT): string[] {
   return [
-    `Conditions de commission d'apporteur d'affaires, version ${version} (projet, à valider)`,
+    `Conditions de commission d'apporteur d'affaires, version ${version}`,
     `1. Objet. BatiClair met en relation des artisans regroupés (« ${NOM_DEMANDE} ») et des négoces de matériaux. Le négoce répond librement, par un devis, à une demande de prix groupée.`,
     `2. Commission. Si le devis du négoce est retenu pour un lot, le négoce verse à BatiClair une commission d'apporteur d'affaires de ${TAUX_COMMISSION_POURCENT} % du montant hors taxes du lot, c'est-à-dire de la somme des bons de commande des artisans du lot passés chez lui au tarif groupé.`,
     "3. Facturation. La commission est facturée par BatiClair au négoce au moment de la transmission des bons de commande, payable à 30 jours. Une relance automatique est envoyée après l'échéance.",

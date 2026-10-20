@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { LiensLegaux } from "@/components/legal";
 import { PageTitle } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Confidentialité — BatiClair" };
@@ -27,6 +28,10 @@ export default function ConfidentialitePage() {
           <li>Les devis que vous déposez (le fichier PDF) et les devis reçus de vos fournisseurs.</li>
           <li>Les listes de matériaux (quantitatifs), vos réponses et vos corrections.</li>
           <li>Votre carnet de fournisseurs et vos demandes de prix.</li>
+          <li>
+            Pour le groupé : le SIRET de votre entreprise (vérifié auprès de l&apos;INSEE), vos négoces (nom, e-mail, ce qu&apos;ils vendent, votre numéro de compte),
+            vos lignes proposées, vos bons de commande et vos livraisons. Les négoces : leur accord de commission (date, e-mail, adresse IP) et leurs devis.
+          </li>
         </ul>
         <p className={p}>Rien d&apos;autre : pas de publicité, pas de revente, pas de pistage d&apos;un site à l&apos;autre.</p>
       </section>
@@ -48,6 +53,10 @@ export default function ConfidentialitePage() {
           <li>
             À votre demande, <strong>tout est supprimé immédiatement</strong> : compte, entreprise, chantiers, devis et leurs fichiers, listes, fournisseurs.
           </li>
+          <li>
+            Les bons de commande, accords et factures de commission du groupé sont gardés <strong>10 ans</strong> (obligation comptable), sans votre nom une fois le
+            compte supprimé.
+          </li>
         </ul>
       </section>
 
@@ -62,9 +71,14 @@ export default function ConfidentialitePage() {
             commerciales, Anthropic n&apos;utilise pas ces devis pour entraîner ses modèles.
           </li>
           <li>
-            <strong>E-mails</strong> (confirmation d&apos;adresse, mot de passe oublié) : Resend.
+            <strong>E-mails</strong> (confirmation d&apos;adresse, mot de passe oublié, demandes de prix aux négoces, bons de commande) : Resend, qui ne garde que les
+            journaux d&apos;envoi.
+          </li>
+          <li>
+            <strong>Vérification du SIRET</strong> : l&apos;API Sirene de l&apos;INSEE (France), qui reçoit seulement le numéro.
           </li>
         </ul>
+        <p className={p}>Responsable du traitement : BATI INVEST, SARL, 6 impasse du Ouipoure, 22620 Ploubazlanec (voir les mentions légales).</p>
       </section>
 
       <section className="flex flex-col gap-2">
@@ -77,11 +91,12 @@ export default function ConfidentialitePage() {
           <li>« Supprimer mon compte » : effacement immédiat et définitif.</li>
         </ul>
         <p className={p}>
-          Pour corriger une information, modifiez-la directement dans l&apos;application. Vous pouvez aussi saisir la CNIL (cnil.fr) si vous estimez que vos droits
-          ne sont pas respectés.
+          Pour corriger une information, modifiez-la directement dans l&apos;application. Accès, rectification, effacement, opposition, portabilité : ces droits
+          s&apos;exercent aussi par e-mail à l&apos;éditeur. Vous pouvez saisir la CNIL (cnil.fr) si vous estimez que vos droits ne sont pas respectés.
         </p>
       </section>
 
+      <LiensLegaux sauf="/confidentialite" />
       <Link href="/connexion" className="min-h-11 self-start py-2 text-sm font-bold text-accent-text">
         Retour
       </Link>
