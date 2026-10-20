@@ -27,7 +27,7 @@ Plan du 20 octobre 2026, bloc 11. À dérouler dans l'ordre, le jour J, par Greg
 | `FACTURE_EMETTEUR_ADRESSE` | `6 impasse du Ouipoure, 22620 Ploubazlanec` | |
 | `FACTURE_EMETTEUR_TVA` | `FR61910796325` | |
 | `FACTURE_TVA_POURCENT` | `20` | Assujettie. |
-| `CRON_SECRET` | à régénérer (32 octets aléatoires) | Tâches `regrouper` (6 h UTC chaque jour) et `sirene` (le 1er du mois) ; Vercel l'envoie en `Bearer`. |
+| `CRON_SECRET` | à régénérer (32 octets aléatoires) | Tâches `regrouper` (6 h UTC chaque jour) et `sirene` (5 h UTC chaque jour, page par page, un cycle complet par mois) ; Vercel l'envoie en `Bearer`. |
 | `WEB_APP_URL` | `https://app.baticlair.fr` (ou l'adresse du site) | Liens des e-mails, CORS. |
 | `AUTH_SECRET` | inchangé | Signe aussi les liens « pas concerné » / « stop » (expirent après 180 jours). |
 
@@ -42,7 +42,8 @@ Projet web : rien de nouveau (`API_URL` déjà posé).
 3. `20261020190000_groupe_notifications`,
 4. `20261020200000_groupe_accords_factures` (tolérante : `IF NOT EXISTS`),
 5. `20261020210000_groupe_negoces_sirene`,
-6. `20261020220000_cgu` (PR #285).
+6. `20261020230000_parametre_groupe`,
+7. `20261020220000_cgu` (PR #285).
 
 - [ ] Sauvegarde Neon (branche ou snapshot) juste avant le déploiement.
 - [ ] Après déploiement : `GET /v1/health` → `db: ok`, `features.groupe: true`.
@@ -52,7 +53,7 @@ Projet web : rien de nouveau (`API_URL` déjà posé).
 1. Fusionner #284 (groupé) → déploiement de production, `GROUPE=on`, `GROUPE_DEPARTEMENTS=22`.
 2. Fusionner #285 (pages légales) → la case CGU apparaît à l'inscription.
 3. Fusionner #286 (landing) et #287 (PWA).
-4. Lancer une fois `GET /v1/internal/groupe/sirene` avec le `CRON_SECRET` (ou attendre le 1er du mois) : la base négoces se remplit.
+4. Lancer `GET /v1/internal/groupe/sirene` avec le `CRON_SECRET` jusqu'à `cycleTermine: true` (ou laisser la tâche quotidienne faire) : la base négoces se remplit.
 
 ## 5. Premier lot de test (avec l'adresse de Greg comme négoce)
 
