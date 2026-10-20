@@ -44,6 +44,8 @@ export class GroupeService {
     private readonly reviewed: (tenant: TenantContext, takeoffId: string) => Promise<ReviewedTakeoff>,
     private readonly siret: SiretVerifier,
     private readonly regroupement: RegroupementService,
+    /** Étape 5 : un lot formé part aux négoces aussitôt. */
+    private readonly demande: { envoyerLesLotsFormes(): Promise<unknown> },
   ) {}
 
   async etat(tenant: TenantContext): Promise<{ eligible: boolean; raisons: RaisonFermeture[]; siret: { renseigne: boolean; verifie: boolean } }> {
@@ -131,8 +133,10 @@ export class GroupeService {
         else await tx.besoin.create({ data: { ...data, companyId: tenant.companyId, projectId, takeoffId: takeoff.id, articleKey: item.key } });
       }
     });
-    // Étape 4 : le besoin rejoint tout de suite son lot ouvert (ou en ouvre un) ; un seuil atteint forme le lot.
+    // Étape 4 : le besoin rejoint tout de suite son lot ouvert (ou en ouvre un) ; un seuil atteint forme le lot, qui part
+    // aux négoces (étape 5).
     await this.regroupement.ranger();
+    await this.demande.envoyerLesLotsFormes();
     return this.besoinsDuChantier(tenant, projectId);
   }
 
@@ -143,6 +147,7 @@ export class GroupeService {
     if (!engagement) throw validationFailed("Commitment required", { reason: "engagement_requis" });
     const vue = await this.passer(tenant, besoinId, "signe");
     await this.regroupement.ranger();
+    await this.demande.envoyerLesLotsFormes();
     return vue;
   }
 

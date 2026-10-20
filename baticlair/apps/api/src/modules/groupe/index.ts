@@ -4,3 +4,5 @@ export { SIRET_VERIFIER, siretBienForme, type SiretVerifier, type ResultatSiret 
 export { NegocesService } from "./application/negoces.service.js";
 export { jetonDeLien, lienDuJeton, type ActionLien } from "./application/lien-negoce.js";
 export { RegroupementService } from "./application/regroupement.service.js";
+export { DemandeService, type PageReponse } from "./application/demande.service.js";
+export { NEGOCE_EXTRACTOR, reponseNegoceSchema, type NegoceExtractor, type ReponseLue } from "./application/negoce-extractor.js";

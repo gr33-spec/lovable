@@ -42,3 +42,4 @@ export { exportPourLecture } from "./lecture/export.js";
 export * from "./lecture/electricite.js";
 export * from "./groupe/groupe.js";
 export * from "./groupe/regroupement.js";
+export * from "./groupe/demande.js";

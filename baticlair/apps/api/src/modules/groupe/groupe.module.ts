@@ -1,20 +1,27 @@
 import { Module } from "@nestjs/common";
 import type { AppConfig } from "../../platform/config/config.js";
 import { PrismaService } from "../../platform/database/prisma.service.js";
-import { CONFIG } from "../../platform/tokens.js";
+import { CONFIG, EMAIL_SENDER } from "../../platform/tokens.js";
+import type { TransactionalEmailSender } from "../../platform/email/email.port.js";
+import { PDF_READER, PdfJsPdfReader, type PdfReader } from "../documents/index.js";
 import { TakeoffModule, TakeoffService } from "../takeoff/index.js";
 import { TenancyModule } from "../tenancy/index.js";
+import { DemandeService } from "./application/demande.service.js";
 import { GroupeService } from "./application/groupe.service.js";
+import { NEGOCE_EXTRACTOR, type NegoceExtractor } from "./application/negoce-extractor.js";
+import { AnthropicNegoceExtractor } from "./infrastructure/anthropic-negoce-extractor.js";
+import { FakeNegoceExtractor } from "./infrastructure/fake-negoce-extractor.js";
 import { InseeSiretVerifier, SIRET_VERIFIER, siretBienForme, type SiretVerifier } from "./application/siret-verifier.js";
 import { NegocesService } from "./application/negoces.service.js";
 import { RegroupementService } from "./application/regroupement.service.js";
 import { GroupeController } from "./http/groupe.controller.js";
 import { NegocesController } from "./http/negoces.controller.js";
 import { RegroupementController } from "./http/regroupement.controller.js";
+import { ReponseController } from "./http/reponse.controller.js";
 
 @Module({
   imports: [TenancyModule, TakeoffModule],
-  controllers: [GroupeController, NegocesController, RegroupementController],
+  controllers: [GroupeController, NegocesController, RegroupementController, ReponseController],
   providers: [
     {
       provide: SIRET_VERIFIER,
@@ -25,13 +32,34 @@ import { RegroupementController } from "./http/regroupement.controller.js";
       inject: [CONFIG],
     },
     { provide: RegroupementService, useFactory: (p: PrismaService) => new RegroupementService(p), inject: [PrismaService] },
+    { provide: PDF_READER, useFactory: () => new PdfJsPdfReader() },
+    {
+      provide: NEGOCE_EXTRACTOR,
+      // Le devis du négoce est lu par le modèle rapide (Sonnet), à la demande ; en test, le faux lecteur ; sans clé, Greg relit.
+      useFactory: (c: AppConfig): NegoceExtractor | null => {
+        switch (c.ai.provider) {
+          case "anthropic":
+            return new AnthropicNegoceExtractor(c.ai.apiKey!, c.ai.quantitatifModel);
+          case "fake":
+            return new FakeNegoceExtractor();
+          case "disabled":
+            return null;
+        }
+      },
+      inject: [CONFIG],
+    },
+    {
+      provide: DemandeService,
+      useFactory: (p: PrismaService, e: TransactionalEmailSender, pdf: PdfReader, x: NegoceExtractor | null, c: AppConfig) => new DemandeService(p, e, pdf, x, { webAppUrl: c.webAppUrl, authSecret: c.authSecret }),
+      inject: [PrismaService, EMAIL_SENDER, PDF_READER, NEGOCE_EXTRACTOR, CONFIG],
+    },
     {
       provide: GroupeService,
-      useFactory: (p: PrismaService, t: TakeoffService, s: SiretVerifier, r: RegroupementService) => new GroupeService(p, (tenant, id) => t.reviewed(tenant, id), s, r),
-      inject: [PrismaService, TakeoffService, SIRET_VERIFIER, RegroupementService],
+      useFactory: (p: PrismaService, t: TakeoffService, s: SiretVerifier, r: RegroupementService, d: DemandeService) => new GroupeService(p, (tenant, id) => t.reviewed(tenant, id), s, r, d),
+      inject: [PrismaService, TakeoffService, SIRET_VERIFIER, RegroupementService, DemandeService],
     },
     { provide: NegocesService, useFactory: (p: PrismaService, c: AppConfig) => new NegocesService(p, c.authSecret), inject: [PrismaService, CONFIG] },
   ],
-  exports: [GroupeService, NegocesService, RegroupementService],
+  exports: [GroupeService, NegocesService, RegroupementService, DemandeService],
 })
 export class GroupeModule {}

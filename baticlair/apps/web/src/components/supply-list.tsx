@@ -256,8 +256,9 @@ export function SupplyList({
               ? {
                   selectMode: {
                     checked: checked.has(articleOf(r) ?? ""),
-                    // Une ligne orange se vérifie d'abord ; une ligne sans article (question) ne part pas.
-                    disabled: !cochable(r),
+                    // Une ligne orange se vérifie d'abord ; une ligne sans article (question) ne part pas ; au groupé, une
+                    // ligne déjà proposée non plus (une ligne déjà envoyée à part reste décochée, pas grisée).
+                    disabled: !articleOf(r) || r.status === "check" || (pourGroupe && !cochable(r)),
                     ...(pourGroupe ? { label: "Proposer au groupé" } : {}),
                     onToggle: () =>
                       setChecked((prev) => {

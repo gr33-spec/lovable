@@ -192,8 +192,8 @@ function NegoceForm({ premier, onDone }: { premier: boolean; onDone: (ok: boolea
         <legend className="mb-1 text-sm font-bold">Ce qu&apos;il vend</legend>
         <div className="flex flex-wrap gap-1.5">
           {FAMILLES.map((f) => (
-            <label key={f.id} className={`inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full px-3 text-[13px] font-bold ${familles.has(f.id) ? "bg-accent text-white" : "bg-surface text-ink"}`}>
-              <input type="checkbox" className="sr-only" checked={familles.has(f.id)} onChange={() => toggle(f.id)} aria-label={`Vend : ${f.label}`} />
+            <label key={f.id} className={`relative inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full px-3 text-[13px] font-bold ${familles.has(f.id) ? "bg-accent text-white" : "bg-surface text-ink"}`}>
+              <input type="checkbox" className="absolute inset-0 m-0 cursor-pointer appearance-none opacity-0" checked={familles.has(f.id)} onChange={() => toggle(f.id)} aria-label={`Vend : ${f.label}`} />
               {f.label}
             </label>
           ))}

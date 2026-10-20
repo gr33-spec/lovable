@@ -111,6 +111,8 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/takeoff-lines$/, ids.takeoffLine],
         [/\/groupe\/besoins$/, ids.besoin],
         [/\/groupe\/negoces$/, ids.negoce],
+        // Étape 5 : le lien de réponse d'un négoce est un jeton, jamais un identifiant ; un jeton inconnu répond 404.
+        [/\/reponse$/, "jeton-inconnu-de-b-0000000000000000"],
       ];
       const hit = byPrefix.find(([re]) => re.test(prefix));
       if (!hit) throw new Error(`Paramètre sans identifiant de A : ${path} (${param})`);

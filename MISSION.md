@@ -191,8 +191,8 @@ automatique au négoce (2 % × total HT du lot, 30 jours, relance automatique, `
 | 1 | Données : 12 tables (dont accord et facture du négoce), clé de référence, zone, statuts, drapeau, 9 familles | fait (#284, non fusionnée) |
 | 2 | Entrée du besoin (écran 3) : SIRET (INSEE), gratuit, « Proposer au groupé » par ligne et par lot, fenêtre, signé / en attente + engagement, bascule, retrait | fait (#284) |
 | 3 | Base négoces : « Mes négoces » (9 familles, favori, numéro de compte), message type, liens signés « pas concerné » / « stop » | fait (#284) |
-| 4 | Regroupement : `groupe/seuils.json`, un lot par (référence, zone, fenêtre compatible), un seul ouvert, seuil sur le volume ferme, lundi sur deux (`/v1/internal/groupe/regrouper`, cron Vercel lundi 6 h UTC), plafond 3 × médiane 90 j | en cours (#284) |
-| 5 | Demande aux négoces (mail avec la phrase de commission en gras, PDF, page de dépôt avec case d'accord obligatoire + contrat PDF) | à faire |
+| 4 | Regroupement : `groupe/seuils.json`, un lot par (référence, zone, fenêtre compatible), un seul ouvert, seuil sur le volume ferme, lundi sur deux (`/v1/internal/groupe/regrouper`, cron Vercel lundi 6 h UTC), plafond 3 × médiane 90 j | fait (#284) |
+| 5 | Demande aux négoces : `DemandeService` (un e-mail par négoce concerné, texte + HTML avec la phrase de commission en gras, PDF en deux parties, lien unique `reponse/<jeton>` par lot × négoce, lot → envoyé, besoins signés → engagés), page publique `/reponse/[jeton]` (case d'accord OBLIGATOIRE, contrat PDF à côté, 1 ou 2 devis PDF, `accord_negoce` date + e-mail + IP), lecture prix + délai (faux lecteur en test, Sonnet `AI_QUANTITATIF_MODEL` en ligne), page `/negoces/lien/[jeton]` ; cron envoie aussi | fait (#284) |
 | 6 | Choix et offres | à faire |
 | 7 | Bons de commande, facture au négoce (2 %, 30 jours, relance), livraison, désistements | à faire |
 | 8 | Notifications | à faire |

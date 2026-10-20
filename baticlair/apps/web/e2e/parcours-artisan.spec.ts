@@ -1,3 +1,4 @@
+import { createHmac } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Locator, type Page } from "@playwright/test";
@@ -1717,4 +1718,32 @@ test("BatiClair Groupé, étape 3 : « Mes négoces », e-mail, familles, favori
   await premier.getByRole("button", { name: "Retirer de ma liste" }).click();
   await expect(liste.getByRole("listitem")).toHaveCount(1);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+});
+
+/** Le jeton signé d'un lien d'e-mail au négoce (étape 3), tel que l'API le fabrique, avec le secret des parcours. */
+function jetonDeLienE2e(lien: { a: "stop" } | { a: "pas_concerne"; f: string }, negoceId: string): string {
+  const corps = Buffer.from(JSON.stringify({ ...lien, n: negoceId })).toString("base64url");
+  return `${corps}.${createHmac("sha256", "e2e-secret-e2e-secret-e2e-secret-0000").update(`lien-negoce:${corps}`).digest("base64url")}`;
+}
+
+test("BatiClair Groupé, étape 5 : la page du lien « pas concerné » (confirmée d'un bouton) et la page de réponse d'un lien inconnu", async ({ page }) => {
+  await signUp(page);
+  expect(await apiCall(page, "PATCH", "/v1/company/profile", { name: "Toitures Martin", address: "3 quai Duguay-Trouin, 35400 Saint-Malo", siret: "73282932000074", phone: null, email: null })).toBe(200);
+  expect(await apiCall(page, "POST", "/v1/groupe/siret")).toBe(200);
+  expect(await apiCall(page, "POST", "/v1/groupe/negoces", { nom: "Négoce Ardoises", email: "ardoises@example.com", familles: ["couverture", "plomberie"] })).toBe(201);
+  const negoces = await page.evaluate(async () => {
+    const companyId = localStorage.getItem("baticlair.companyId");
+    const res = await fetch("/v1/groupe/negoces", { headers: { accept: "application/json", ...(companyId ? { "x-company-id": companyId } : {}) } });
+    return (await res.json()).negoces as { id: string; familles: string[] }[];
+  });
+  // Le négoce ouvre le lien de l'e-mail, sans compte : la page dit ce qu'il fera, rien ne change avant « Confirmer ».
+  await page.context().clearCookies();
+  await page.goto(`/negoces/lien/${jetonDeLienE2e({ a: "pas_concerne", f: "plomberie" }, negoces[0]!.id)}`);
+  await expect(page.getByText("Négoce Ardoises : ne plus recevoir les demandes « Plomberie » ?")).toBeVisible();
+  await page.getByRole("button", { name: "Confirmer" }).click();
+  await expect(page.getByRole("status")).toContainText("C'est fait.");
+  // Un lien de réponse inconnu (étape 5) : la page le dit, sans rien d'autre.
+  await page.goto("/reponse/jeton-inconnu-0000000000000000000000");
+  await expect(page.getByRole("status")).toContainText("Ce lien n'est plus valable.");
+  await expect(page.getByRole("button", { name: /Déposer/ })).toHaveCount(0);
 });
