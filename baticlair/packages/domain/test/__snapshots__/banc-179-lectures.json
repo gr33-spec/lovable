@@ -1,0 +1,6028 @@
+[
+ {
+  "fichier": "arrosage-96a783200d1b.json",
+  "metier": "irrigation",
+  "lignes": [
+   {
+    "designation": "Arroseurs tuyères escamotables",
+    "quantite": "25 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "bardage-c2f83c922901.json",
+  "metier": "cladding",
+  "lignes": [
+   {
+    "designation": "Bardage bois claire-voie horizontal sur tasseaux, pare-pluie",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Bardage : douglas à préciser"
+   }
+  ],
+  "questions": [
+   "product:lames",
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "carrelage-ab25bd8dbe06.json",
+  "metier": "tiling",
+  "lignes": [
+   {
+    "designation": "Carrelage grès cérame 60×60",
+    "quantite": "33 cartons de 1,44 m²",
+    "unite": "cartons de 1,44 m²",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Faïence 25×40",
+    "quantite": "13 cartons de 1,5 m²",
+    "unite": "cartons de 1,5 m²",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Plinthes carrelées 8×60",
+    "quantite": "53 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "SPEC liquide, seau 20 kg",
+    "quantite": "1 seau de 20 kg",
+    "unite": "seau de 20 kg",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Ragréage autolissant P3, sac 25 kg",
+    "quantite": "8 sacs de 25 kg",
+    "unite": "sacs de 25 kg",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "carrelage-b71dd1cdc464.json",
+  "metier": "tiling",
+  "lignes": [],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "charpente-0e9fb92c2b44.json",
+  "metier": "carpentry",
+  "lignes": [
+   {
+    "designation": "Chevronnage",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Longueur à préciser"
+   },
+   {
+    "designation": "Planches de rive 22×200, L 4 m",
+    "quantite": "7 planches",
+    "unite": "planches",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:longueur_chevron",
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "chauffage-ventilation-d0d53fcd68a1.json",
+  "metier": "hvac",
+  "lignes": [
+   {
+    "designation": "Kit VMC simple flux cuisine + 2 sanitaires",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "check",
+    "raison": "Vmc à préciser"
+   },
+   {
+    "designation": "Climatiseur mural monosplit 3,5 kW Daikin Perfera",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:type_vmc",
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "constructeur-e2460e5e02ae.json",
+  "metier": "general",
+  "lignes": [
+   {
+    "designation": "Béton C25/30 (toupie)",
+    "quantite": "12 m³",
+    "unite": "m³",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Blocs béton creux de 20 (50×20)",
+    "quantite": "1 155 blocs",
+    "unite": "blocs",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Plaques BA13 1,20 × 2,50",
+    "quantite": "48 plaques",
+    "unite": "plaques",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Prise 2P+T 16 A Legrand Dooxie blanc",
+    "quantite": "24 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Carrelage grès cérame 60×60",
+    "quantite": "58 cartons de 1,44 m²",
+    "unite": "cartons de 1,44 m²",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Peinture acrylique mate blanche, seau de 15 L",
+    "quantite": "4 seaux de 15 L",
+    "unite": "seaux de 15 L",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "cuisine-305148b9ee07.json",
+  "metier": "kitchen",
+  "lignes": [
+   {
+    "designation": "Meubles bas Delinia ID façades Ruxe blanc mat",
+    "quantite": "6 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Plan de travail stratifié 38 mm chêne",
+    "quantite": "3,6 ml",
+    "unite": "ml",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "electricite-f6f3aa199d35.json",
+  "metier": "electrical",
+  "lignes": [
+   {
+    "designation": "Prise 2P+T 16 A",
+    "quantite": "18 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Gamme d'appareillage à préciser"
+   },
+   {
+    "designation": "Boîte d'encastrement Ø67 prof. 40",
+    "quantite": "30 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Câble rigide 3G2,5",
+    "quantite": "2 couronnes de 100 m",
+    "unite": "couronnes de 100 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Gaine ICTA Ø20",
+    "quantite": "3 couronnes de 100 m",
+    "unite": "couronnes de 100 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Interrupteur simple allumage",
+    "quantite": "12 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Boîte DCL plafond avec douille",
+    "quantite": "12 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Câble rigide 3G1,5",
+    "quantite": "2 couronnes de 100 m",
+    "unite": "couronnes de 100 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tableau électrique 3 rangées de 13 modules, nu",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:gamme"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "etancheite-95cd0154cb40.json",
+  "metier": "waterproofing",
+  "lignes": [
+   {
+    "designation": "Membrane SBS autoprotégée, rouleau 6 m²",
+    "quantite": "9 rouleaux de 6 m²",
+    "unite": "rouleaux de 6 m²",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "facade-aa9dfe7d9e23.json",
+  "metier": "facade",
+  "lignes": [
+   {
+    "designation": "Enduit monocouche OC2, finition grattée, sac 25 kg",
+    "quantite": "108 sacs de 25 kg",
+    "unite": "sacs de 25 kg",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Laine de roche ITE (type Rockwool Ecorock) 1 200 × 600, ép. 140 mm",
+    "quantite": "175 panneaux",
+    "unite": "panneaux",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "maconnerie-10167a711d39.json",
+  "metier": "masonry",
+  "lignes": [
+   {
+    "designation": "Mur porteur en parpaings, garage blocs béton",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Parpaings à préciser"
+   },
+   {
+    "designation": "Briques rectifiées R20",
+    "quantite": "252 briques",
+    "unite": "briques",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Béton C25/30 (toupie)",
+    "quantite": "6 m³",
+    "unite": "m³",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Béton C25/30 (toupie)",
+    "quantite": "4 m³",
+    "unite": "m³",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Mortier de chape, sac 25 kg",
+    "quantite": "154 sacs de 25 kg",
+    "unite": "sacs de 25 kg",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Enduit monocouche OC2, sac 25 kg",
+    "quantite": "59 sacs de 25 kg",
+    "unite": "sacs de 25 kg",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "product:bloc"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "menuiserie-86f9dffeec85.json",
+  "metier": "joinery",
+  "lignes": [
+   {
+    "designation": "Fenêtre PVC 2 vantaux 120x125 blanc, pose en rénovation",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Porte-fenêtre PVC 2 vantaux 215x140 oscillo-battante",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Stratifié, paquet 1,914 m²",
+    "quantite": "22 paquets de 1,914 m²",
+    "unite": "paquets de 1,914 m²",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Plinthes MDF 10×70, barre 2,40 m",
+    "quantite": "15 barres",
+    "unite": "barres",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "menuiserie-interieure-9441df1cef1a.json",
+  "metier": "interior_joinery",
+  "lignes": [
+   {
+    "designation": "Bloc-porte isoplane 83x204 huisserie 72, poussant droit",
+    "quantite": "5 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Plinthes MDF 10×70, barre 2,40 m",
+    "quantite": "22 barres",
+    "unite": "barres",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Lambris sapin, paquet 2,5 m²",
+    "quantite": "7 paquets de 2,5 m²",
+    "unite": "paquets de 2,5 m²",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "pavage-d6087325716a.json",
+  "metier": "paving",
+  "lignes": [
+   {
+    "designation": "Pavés béton ép. 8 cm, palette de 10 m²",
+    "quantite": "5 palettes de 10 m²",
+    "unite": "palettes de 10 m²",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Bordures béton T2 15 × 25 × 100",
+    "quantite": "30 bordures",
+    "unite": "bordures",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "peinture-509b52e56944.json",
+  "metier": "painting",
+  "lignes": [
+   {
+    "designation": "Toile de verre, rouleau 50 m²",
+    "quantite": "1 rouleau de 50 m²",
+    "unite": "rouleau de 50 m²",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "peinture-7ec5f6dc27d6.json",
+  "metier": "painting",
+  "lignes": [
+   {
+    "designation": "Colle toile de verre, seau 20 kg",
+    "quantite": "1 seau de 20 kg",
+    "unite": "seau de 20 kg",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Toile de verre, rouleau 50 m²",
+    "quantite": "1 rouleau de 50 m²",
+    "unite": "rouleau de 50 m²",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "peinture-bc96b9ae4634.json",
+  "metier": "painting",
+  "lignes": [
+   {
+    "designation": "Peinture acrylique mate blanche, seau de 15 L",
+    "quantite": "2 seaux de 15 L",
+    "unite": "seaux de 15 L",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Enduit de lissage poudre, sac 25 kg",
+    "quantite": "2 sacs de 25 kg",
+    "unite": "sacs de 25 kg",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Toile de verre, rouleau 50 m²",
+    "quantite": "1 rouleau de 50 m²",
+    "unite": "rouleau de 50 m²",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Papier peint, rouleau 10,05 × 0,53 m",
+    "quantite": "7 rouleaux",
+    "unite": "rouleaux",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Peinture façade D2 blanc, seau 15 L",
+    "quantite": "3 seaux de 15 L",
+    "unite": "seaux de 15 L",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "peinture-fda17bf91da0.json",
+  "metier": "painting",
+  "lignes": [
+   {
+    "designation": "Peinture murs et plafonds",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Finition à préciser"
+   }
+  ],
+  "questions": [
+   "param:aspect"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "photovoltaique-90dfa61d33fb.json",
+  "metier": "solar",
+  "lignes": [
+   {
+    "designation": "Panneaux photovoltaïques 425 Wc full black en surimposition sur tuiles",
+    "quantite": "10 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "plafonds-suspendus-9cd97c8ec50b.json",
+  "metier": "ceiling",
+  "lignes": [
+   {
+    "designation": "Dalles 600×600 bord A (type Tropic)",
+    "quantite": "13 cartons de 5,76 m²",
+    "unite": "cartons de 5,76 m²",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "platrerie-1ad3b0874500.json",
+  "metier": "drywall",
+  "lignes": [
+   {
+    "designation": "Plaques BA13 1,20 × 2,50",
+    "quantite": "30 plaques",
+    "unite": "plaques",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Plaques BA13 1,20 × 2,50",
+    "quantite": "21 plaques",
+    "unite": "plaques",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Complexes de doublage BA13 + isolant",
+    "quantite": "20 complexes",
+    "unite": "complexes",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Laine de verre à souffler (type Comblissimo), sac de 17,3 kg, R 7",
+    "quantite": "19 sacs de 17,3 kg",
+    "unite": "sacs de 17,3 kg",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "platrerie-89999cc9de0a.json",
+  "metier": "drywall",
+  "lignes": [
+   {
+    "designation": "Plaques BA13 1,20 × 2,50",
+    "quantite": "30 plaques",
+    "unite": "plaques",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "plomberie-a9ab6d96ced0.json",
+  "metier": "plumbing",
+  "lignes": [
+   {
+    "designation": "Multicouche 16×2, barre 4 m",
+    "quantite": "19 barres de 4 m",
+    "unite": "barres de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tube d'alimentation PVC évacuation Ø40, barre 4 m",
+    "quantite": "5 barres de 4 m",
+    "unite": "barres de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "PER-BAO 16×2, couronne 240 m",
+    "quantite": "3 couronnes de 240 m",
+    "unite": "couronnes de 240 m",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-03476bfe7799.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture bac acier",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Longueur à préciser"
+   }
+  ],
+  "questions": [
+   "param:longueur_rampant",
+   "param:teinte_bac",
+   "param:feutre_bac"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-069029b5da84.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Crochets de sécurité inox NF EN 517 type B",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Échelle de toit aluminium",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Ligne de vie câble inox",
+    "quantite": "12 ml",
+    "unite": "ml",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Désamiantage plaques fibres-ciment amiantées, évacuation en ISDD",
+    "quantite": "80 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets de service pour échelle",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-0810b9544f1b.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Tuiles HP10",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Produit pour : à préciser"
+   }
+  ],
+  "questions": [
+   "product:tuile"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-08a062a30c3a.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage",
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-0bee6b0c73ee.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Crochets de sécurité inox NF EN 517 type B",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Échelle de toit aluminium",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Ligne de vie câble inox",
+    "quantite": "12 ml",
+    "unite": "ml",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Désamiantage plaques fibres-ciment amiantées, évacuation en ISDD",
+    "quantite": "80 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets de service pour échelle",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-0c2b265ac105.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout gris",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Voliges sapin traité",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "check",
+    "raison": "Surface à préciser"
+   },
+   {
+    "designation": "Gouttière zinc demi-ronde dév. 25",
+    "quantite": "4 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   },
+   {
+    "designation": "Bande de ventilation en Z en zinc quartz",
+    "quantite": "13 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Bande de rive zinc quartz dév. 200",
+    "quantite": "14 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   }
+  ],
+  "questions": [
+   "param:surface",
+   "param:nb_descentes",
+   "param:diametre_descente",
+   "param:faconnage@bandes-zinc__4",
+   "param:consommables",
+   "param:faconnage@bandes-zinc__5",
+   "param:faconnage@couverture-zinc-joint-debout",
+   "param:developpe@bandes-zinc__4"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-0ebf414e3730.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc joint debout à",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   }
+  ],
+  "questions": [
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-0ecc5a7ed2e1.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Tuiles HP10",
+    "quantite": "1 488 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Arêtiers",
+    "quantite": "70 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Noue zinc",
+    "quantite": "8 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage",
+   "product:tuile"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-0ed56b7f66a7.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 30×22",
+    "quantite": "9 271 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "9 457 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Liteaux 27×40",
+    "quantite": "2 049 ml",
+    "unite": "ml",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Ardoises pour jouées de lucarnes",
+    "quantite": "6 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Abergement de cheminée zinc",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Façonnage, périmètre d'une cheminée à préciser"
+   },
+   {
+    "designation": "Chatières de ventilation",
+    "quantite": "12 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:faconnage",
+   "param:perimetre_cheminee"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-10c41d794cf3.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Plaques bac acier simple peau RAL 7016 avec feutre anti-condensation, longueur 6,05 m",
+    "quantite": "20 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-116893857646.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "2 028 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Gouttière zinc demi-ronde",
+    "quantite": "4 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   }
+  ],
+  "questions": [
+   "param:developpe_gouttiere",
+   "param:diametre_descente",
+   "param:nb_descentes"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-1172312bd634.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Tuyau de descente zinc diam. 80mm, 2 descentes de 3 m",
+    "quantite": "2 tubes de 3 m",
+    "unite": "tubes de 3 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tubes de descente (Coude zinc diam. 80mm)",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-11fa4d32ea66.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Tuile terre cuite mécanique",
+    "quantite": "20 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Modèle et teinte à préciser"
+   },
+   {
+    "designation": "Fixations pour l'élément de rive",
+    "quantite": "1 jeu",
+    "unite": "jeu",
+    "etat": "check",
+    "raison": "Élément de rive à préciser"
+   }
+  ],
+  "questions": [
+   "fiche:type_d_element_de_rive"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-130b7f0f4a1e.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture en tuiles canal",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Recouvrement à préciser"
+   }
+  ],
+  "questions": [
+   "param:recouvrement_canal",
+   "product:tuile"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-13304625e676.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout gris",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Pattes coulissantes joint debout",
+    "quantite": "519 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Pattes fixes joint debout",
+    "quantite": "173 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Gouttière zinc gris demi-ronde dév. 25",
+    "quantite": "4 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets de gouttière dév. 25",
+    "quantite": "34 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Pose à préciser"
+   },
+   {
+    "designation": "Naissances zinc gris demi-ronde dév. 25",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Diamètre à préciser"
+   },
+   {
+    "designation": "Bande de ventilation en Z en zinc quartz, Quartz-Zinc 0,65 mm gris, Quartz-Zinc 0,65 mm",
+    "quantite": "7 longueurs de 2 m",
+    "unite": "longueurs de 2 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour habillage de rive en zinc quartz",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Voliges sapin 18 mm",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:fixation_crochet",
+   "param:diametre_descente",
+   "param:developpe@bandes-zinc__3",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-151cc56c31e9.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Tuyau de descente zinc diam. 80mm, 2 descentes de 3 m",
+    "quantite": "2 tubes de 3 m",
+    "unite": "tubes de 3 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tubes de descente (Coude zinc diam. 80mm)",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-16272ad0c0e8.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 30×22",
+    "quantite": "9 271 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "9 457 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-16cbaa22b46c.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "1 880 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 9 cm",
+    "quantite": "1 918 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-1852ec264674.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Bande zinc de rive",
+    "quantite": "35 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage",
+   "param:developpe",
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-191f974f4d38.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout gris",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Voliges sapin 18 mm",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Bande zinc d'égout",
+    "quantite": "13 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Gouttière zinc demi-ronde",
+    "quantite": "4 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   }
+  ],
+  "questions": [
+   "param:developpe_gouttiere",
+   "param:fixation_crochet",
+   "param:nb_descentes",
+   "param:developpe",
+   "param:diametre_descente",
+   "param:faconnage@bandes-zinc",
+   "param:faconnage@couverture-zinc-joint-debout"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-1961a58f06de.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Bandes cuivre, dév. 400 mm",
+    "quantite": "4 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-1b7989b6f709.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout gris",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Voliges sapin 18 mm",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Gouttière zinc demi-ronde",
+    "quantite": "4 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage",
+   "param:developpe_gouttiere",
+   "param:nb_descentes",
+   "param:diametre_descente",
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-1c0c6c4dd9fd.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Abergement de cheminée zinc",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Façonnage, périmètre d'une cheminée à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage",
+   "param:perimetre_cheminee"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-1cbaeed66da8.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout gris",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Voliges sapin 18 mm",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Bande zinc d'égout",
+    "quantite": "13 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Gouttière zinc demi-ronde",
+    "quantite": "4 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   }
+  ],
+  "questions": [
+   "param:developpe_gouttiere",
+   "param:nb_descentes",
+   "param:developpe",
+   "param:diametre_descente",
+   "param:faconnage@bandes-zinc",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-206750188b88.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "3 379 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "3 447 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Embase plomb de sortie de toit",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Chapeau de sortie de toit",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Collerette d'étanchéité",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-26eaab15452e.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture en ardoises au crochet",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Pente à préciser"
+   }
+  ],
+  "questions": [
+   "param:pente"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-2859441ba7f0.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Fenêtre de toit",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Fenêtre à préciser"
+   }
+  ],
+  "questions": [
+   "param:raccord_couverture",
+   "fiche:fenetre_de_toit_quelle_taille"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-289e4564779e.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout gris",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Voliges sapin 18 mm",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:faconnage",
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-28cd560504ff.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Panneaux sandwich RAL 9005, longueur 5,05 m",
+    "quantite": "10 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-2a73ad6cf6bb.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Descente d'eau pluviale, diamètre descentes 80 mm",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Hauteur d'une descente à préciser"
+   },
+   {
+    "designation": "Coudes de descente PVC Ø80",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:hauteur_descente"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-2bb67c84d254.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "3 379 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "3 447 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Embase plomb de sortie de toit",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Chapeau de sortie de toit",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Collerette d'étanchéité",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-2c2969ba682b.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Noue zinc",
+    "quantite": "12 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-30068eba6274.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Tuiles HP10",
+    "quantite": "1 488 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Fenêtre de toit Velux GGL MK04 tout confort",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "product:tuile"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-33db022b4c94.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Bande zinc d'égout",
+    "quantite": "13 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage",
+   "param:developpe",
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-3485e9747c0c.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Tubes de descente PVC Ø80, longueur 2 m",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-350116ac7064.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "1 880 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 9 cm",
+    "quantite": "1 918 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-351586500ab3.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture en tuiles canal sable",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Recouvrement à préciser"
+   },
+   {
+    "designation": "Bardelis",
+    "quantite": "54 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Liteaux 27×40 (Liteaux sable)",
+    "quantite": null,
+    "unite": null,
+    "etat": "supplier",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:recouvrement_canal",
+   "product:tuile"
+  ],
+  "aChiffrer": [
+   "Liteaux 27×40 (Liteaux sable)"
+  ]
+ },
+ {
+  "fichier": "roofing-387647310f13.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture en tuiles canal sable",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Recouvrement à préciser"
+   },
+   {
+    "designation": "Bardelis",
+    "quantite": "54 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:recouvrement_canal",
+   "product:tuile",
+   "fiche:traitement_des_liteaux"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-39130dec136b.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 30×22",
+    "quantite": "9 271 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "9 457 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Liteaux 18×40",
+    "quantite": "2 049 ml",
+    "unite": "ml",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Ardoises pour jouées de lucarnes",
+    "quantite": "6 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Abergement de cheminée zinc",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Façonnage, périmètre d'une cheminée à préciser"
+   },
+   {
+    "designation": "Chatières de ventilation",
+    "quantite": "12 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:faconnage",
+   "param:perimetre_cheminee"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-3e33351bb9b1.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout gris",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Pattes coulissantes joint debout",
+    "quantite": "519 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Pattes fixes joint debout",
+    "quantite": "173 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Gouttière zinc gris demi-ronde dév. 25",
+    "quantite": "4 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets de gouttière dév. 25",
+    "quantite": "34 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Pose à préciser"
+   },
+   {
+    "designation": "Naissances zinc gris demi-ronde dév. 25",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Diamètre à préciser"
+   },
+   {
+    "designation": "Bande de ventilation en Z en zinc quartz, Quartz-Zinc 0,65 mm gris, Quartz-Zinc 0,65 mm",
+    "quantite": "7 longueurs de 2 m",
+    "unite": "longueurs de 2 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour habillage de rive en zinc quartz",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Voliges sapin 18 mm",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:fixation_crochet",
+   "param:diametre_descente",
+   "param:developpe@bandes-zinc__3",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-44b2b6df626d.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture en tuiles canal sable",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Recouvrement, date à préciser"
+   },
+   {
+    "designation": "Bardelis",
+    "quantite": "54 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:recouvrement_canal",
+   "product:tuile",
+   "fiche:date_de_livraison"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-4638b30c92d2.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Gouttière zinc naturel demi-ronde",
+    "quantite": "16 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Crochets de gouttière",
+    "quantite": "159 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Pose, développé à préciser"
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   },
+   {
+    "designation": "Réfection de chéneau en membrane EPDM ou PVC",
+    "quantite": "11,7 ml",
+    "unite": "ml",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Fourniture velux SK06 114x118 GGL à rotation, vitrage confort, finition white finish avec raccord ZWC",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Fourniture velux MK04 78,98 GGU à rotation, vitrage confort, finition everfinish avec raccord ZWC",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tôles bacs acier pour étanchéité du dessus de velux",
+    "quantite": "10",
+    "unite": "",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:developpe_gouttiere",
+   "param:fixation_crochet",
+   "param:diametre_descente",
+   "param:nb_descentes"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-465ee6efb7e4.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "8 447 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "8 616 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-4714a244bdc0.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Gouttière PVC demi-ronde grise de 25",
+    "quantite": "5 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Naissances PVC grise de 25 Ø80",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tubes de descente PVC gris Ø80, longueur 4 m",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-4b55bbfa43d6.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Gouttière zinc demi-ronde dév. 33",
+    "quantite": "4 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   }
+  ],
+  "questions": [
+   "param:nb_descentes"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-4c9ca689d2f9.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Gouttière zinc demi-ronde dév. 25",
+    "quantite": "2 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   }
+  ],
+  "questions": [
+   "param:fixation_crochet",
+   "param:diametre_descente",
+   "param:nb_descentes"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-4d18c1e1574e.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises fibres-ciment bleu-noir 40×24",
+    "quantite": "2 919 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-4e73daa7f794.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 30×22",
+    "quantite": "9 271 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "9 457 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-4f7f89ef339c.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Gouttière PVC sable de 25",
+    "quantite": "5 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Naissances PVC sable de 25",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Diamètre, pose, angles à préciser"
+   }
+  ],
+  "questions": [
+   "param:fixation_crochet",
+   "param:nb_angles",
+   "param:diametre_descente"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-506bfb95ec49.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Gouttière zinc demi-ronde dév. 25",
+    "quantite": "6 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Naissances dév. 25 Ø80",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Descente d'eau pluviale, diamètre descentes 80 mm",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Hauteur d'une descente à préciser"
+   }
+  ],
+  "questions": [
+   "param:hauteur_descente"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-512e4a841b16.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 30×22",
+    "quantite": "9 271 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "9 457 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-51a6dd5e76dc.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "2 028 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Épaisseur à préciser"
+   }
+  ],
+  "questions": [
+   "fiche:epaisseur_des_crochets"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-545f772e264e.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Tuiles HP10 rouge",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Produit pour : à préciser"
+   }
+  ],
+  "questions": [
+   "product:tuile"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-5494ab9b04e7.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Bande porte-solin zinc",
+    "quantite": "8 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage",
+   "param:developpe",
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-5922abdc0bbe.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 30×22",
+    "quantite": "9 271 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "9 457 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Liteaux 18×40",
+    "quantite": "2 049 ml",
+    "unite": "ml",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Ardoises pour jouées de lucarnes",
+    "quantite": "6 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Abergement de cheminée zinc",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Façonnage, périmètre d'une cheminée à préciser"
+   },
+   {
+    "designation": "Chatières de ventilation",
+    "quantite": "12 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:faconnage",
+   "param:perimetre_cheminee"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-59c6d2667403.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "2 052 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Marque à préciser"
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "2 094 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Marque à préciser"
+   },
+   {
+    "designation": "Gouttière zinc Havraise",
+    "quantite": "3 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Naissances Ø80",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Crochets de gouttière Havraise",
+    "quantite": "20 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes de rive en zinc (verrière)",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Faîtage en bande zinc, dév. 25 cm",
+    "quantite": "8 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Bande porte-solin zinc",
+    "quantite": "4 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Mortier d'étanchéité pour solin, sac 25 kg",
+    "quantite": "1 sac de 25 kg",
+    "unite": "sac de 25 kg",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tuyau de descente zinc diam. 80mm",
+    "quantite": "2 tubes de 3 m",
+    "unite": "tubes de 3 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Coude zinc diam. 80mm",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Colliers de descente Ø80",
+    "quantite": "6 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:developpe_gouttiere",
+   "param:developpe",
+   "param:faconnage@faitage-zinc",
+   "param:consommables",
+   "param:faconnage@bande-porte-solin",
+   "fiche:marque_des_ardoises"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-5f5dd043a413.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "2 052 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "2 094 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Gouttière zinc Havraise",
+    "quantite": "3 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Naissances Ø80",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Crochets de gouttière Havraise",
+    "quantite": "20 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes de rive en zinc (verrière)",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Faîtage en bande zinc, dév. 25 cm",
+    "quantite": "8 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Bande porte-solin zinc",
+    "quantite": "4 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Mortier d'étanchéité pour solin, sac 25 kg",
+    "quantite": "1 sac de 25 kg",
+    "unite": "sac de 25 kg",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tuyau de descente zinc diam. 80mm",
+    "quantite": "2 tubes de 3 m",
+    "unite": "tubes de 3 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Coude zinc diam. 80mm",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Colliers de descente Ø80",
+    "quantite": "6 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:developpe_gouttiere",
+   "param:developpe",
+   "param:faconnage@faitage-zinc",
+   "param:consommables",
+   "param:faconnage@bande-porte-solin"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-600807ea7e6b.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Plaques bac acier simple peau RAL 7016 avec feutre anti-condensation, longueur 6,05 m",
+    "quantite": "20 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-606b561a4267.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Fenêtre de toit Velux MK04 114x118",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Fenêtre de toit 78x98",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:taille_fenetre@fenetre-de-toit__a"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-616baf87dd74.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Tuiles HP10",
+    "quantite": "1 488 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Arêtiers",
+    "quantite": "35 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "product:tuile"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-622cfdf3683f.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 30×22",
+    "quantite": "9 271 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "9 457 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-64045be0d482.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Gouttière zinc naturel demi-ronde",
+    "quantite": "16 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Crochets de gouttière",
+    "quantite": "159 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Pose, développé à préciser"
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   },
+   {
+    "designation": "Réfection de chéneau en membrane EPDM ou PVC",
+    "quantite": "11,7 ml",
+    "unite": "ml",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Fourniture velux SK06 114x118 GGL à rotation, vitrage confort, finition white finish avec raccord ZWC",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Fourniture velux MK04 78,98 GGU à rotation, vitrage confort, finition everfinish avec raccord ZWC",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tôles bacs acier pour étanchéité du dessus de velux",
+    "quantite": "10",
+    "unite": "",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:developpe_gouttiere",
+   "param:fixation_crochet",
+   "param:diametre_descente",
+   "param:nb_descentes"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-68e750824146.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 30×22",
+    "quantite": "2 782 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "2 838 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-6920f9235f29.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 30×22",
+    "quantite": "9 271 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-6a28c95de4ea.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Gouttière PVC blanche de 33",
+    "quantite": "7 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Naissances PVC blanche de 33",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "check",
+    "raison": "Diamètre, pose à préciser"
+   }
+  ],
+  "questions": [
+   "param:fixation_crochet",
+   "param:diametre_descente"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-6aa1b9263eaa.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout gris",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Voliges sapin 18 mm",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Bande zinc d'égout",
+    "quantite": "13 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Gouttière zinc demi-ronde",
+    "quantite": "4 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   },
+   {
+    "designation": "Chatière de ventilation",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:developpe_gouttiere",
+   "param:nb_descentes",
+   "param:developpe",
+   "param:diametre_descente",
+   "param:faconnage@bandes-zinc",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-6b1c7c6d39a3.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "2 052 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "2 094 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-6d1ce0409e36.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Tubes de descente zinc Ø100, longueur 4 m",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:dauphin"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-6d261e096813.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Voliges sapin 18 mm",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-6f497085b15a.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 30×22",
+    "quantite": "9 271 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "9 457 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-6f8cb78a3ed6.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 30×22",
+    "quantite": "9 271 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "9 457 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Gouttière zinc demi-ronde dév. 33",
+    "quantite": "6 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets de gouttière bandeau dév. 33",
+    "quantite": "61 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Naissances dév. 33 Ø80",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-710d6fbef6e9.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "3 379 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "3 447 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Sortie de toit Poujoulat",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Diamètre à préciser"
+   },
+   {
+    "designation": "Embase plomb de sortie de toit",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "check",
+    "raison": "Diamètre à préciser"
+   },
+   {
+    "designation": "Chapeau de sortie de toit",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "check",
+    "raison": "Diamètre à préciser"
+   }
+  ],
+  "questions": [
+   "param:diametre_sortie",
+   "param:usage_sortie"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-741295354f06.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "2 052 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "2 094 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Gouttière zinc Havraise",
+    "quantite": "3 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Naissances Ø80",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Crochets de gouttière Havraise",
+    "quantite": "20 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes de rive en zinc (verrière)",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Faîtage en bande zinc, dév. 25 cm",
+    "quantite": "8 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Bande porte-solin zinc",
+    "quantite": "4 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Mortier d'étanchéité pour solin, sac 25 kg",
+    "quantite": "1 sac de 25 kg",
+    "unite": "sac de 25 kg",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tuyau de descente zinc diam. 80mm",
+    "quantite": "2 tubes de 3 m",
+    "unite": "tubes de 3 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Coude zinc diam. 80mm",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Colliers de descente Ø80",
+    "quantite": "6 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:developpe_gouttiere",
+   "param:developpe",
+   "param:faconnage@faitage-zinc",
+   "param:consommables",
+   "param:faconnage@bande-porte-solin"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-7457f1160a57.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-7536860fb2d0.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "2 052 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "2 094 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Gouttière zinc Havraise",
+    "quantite": "3 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Naissances Ø80",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Crochets de gouttière Havraise",
+    "quantite": "20 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes de rive en zinc (verrière)",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Faîtage en bande zinc, dév. 25 cm",
+    "quantite": "8 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Bande porte-solin zinc",
+    "quantite": "4 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Mortier d'étanchéité pour solin, sac 25 kg",
+    "quantite": "1 sac de 25 kg",
+    "unite": "sac de 25 kg",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tuyau de descente zinc diam. 80mm",
+    "quantite": "2 tubes de 3 m",
+    "unite": "tubes de 3 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Coude zinc diam. 80mm",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Colliers de descente Ø80",
+    "quantite": "6 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:developpe_gouttiere",
+   "param:developpe",
+   "param:faconnage@faitage-zinc",
+   "param:consommables",
+   "param:faconnage@bande-porte-solin"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-7700b065f43e.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "3 379 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "3 447 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Embase plomb de sortie de toit",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Chapeau de sortie de toit",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Collerette d'étanchéité",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-789376478da3.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Trappe d'accès isolée 60 x 60",
+    "quantite": "30 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Bande armée pour angles saillants",
+    "quantite": "530 ml",
+    "unite": "ml",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-7a607113939b.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Bande de solin zinc naturel dév. 25",
+    "quantite": "5 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Bande de ventilation en Z en zinc quartz",
+    "quantite": "13 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Bande de rive zinc dév. 33",
+    "quantite": "14 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Faîtage en bande zinc, dév. 330 mm",
+    "quantite": "8 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage@faitage-zinc",
+   "param:consommables",
+   "param:faconnage@bandes-zinc__1",
+   "param:faconnage@bandes-zinc__2",
+   "param:faconnage@bandes-zinc__3",
+   "param:developpe@bandes-zinc__2"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-7e436f3c7142.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Plomb laminé 2 mm, rouleau largeur 50 cm × 6 m",
+    "quantite": "3 rouleaux",
+    "unite": "rouleaux",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-80034ca11a09.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Gouttière zinc demi-ronde",
+    "quantite": "4 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage",
+   "param:developpe_gouttiere",
+   "param:fixation_crochet",
+   "param:diametre_descente",
+   "param:nb_descentes"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-8136801b436f.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture en tuiles canal sable",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Recouvrement à préciser"
+   },
+   {
+    "designation": "Bardelis",
+    "quantite": "54 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Liteaux 27×40 (Liteaux sable)",
+    "quantite": null,
+    "unite": null,
+    "etat": "supplier",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:recouvrement_canal",
+   "product:tuile"
+  ],
+  "aChiffrer": [
+   "Liteaux 27×40 (Liteaux sable)"
+  ]
+ },
+ {
+  "fichier": "roofing-8270554b475f.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Tuiles HP10",
+    "quantite": "1 488 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Fenêtre de toit Velux GGL MK04 tout confort",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "product:tuile"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-84ad3b9a4e3b.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Liteaux 18×40",
+    "quantite": "4 098 ml",
+    "unite": "ml",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Gouttière zinc dév. 25",
+    "quantite": "5 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   },
+   {
+    "designation": "Faîtage en bande zinc",
+    "quantite": "17 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Ardoises pour jouées de lucarnes",
+    "quantite": "6 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Abergement de cheminée zinc",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Façonnage, périmètre d'une cheminée à préciser"
+   },
+   {
+    "designation": "Chatières de ventilation",
+    "quantite": "12 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Ardoises (Ardoises naturelles Espagne 1er choix 30×22)",
+    "quantite": null,
+    "unite": null,
+    "etat": "supplier",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:perimetre_cheminee",
+   "param:nb_descentes",
+   "param:developpe",
+   "param:diametre_descente",
+   "param:faconnage@faitage-zinc",
+   "param:consommables",
+   "param:faconnage@abergement-cheminee"
+  ],
+  "aChiffrer": [
+   "Ardoises (Ardoises naturelles Espagne 1er choix 30×22)"
+  ]
+ },
+ {
+  "fichier": "roofing-84df6e68911e.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Tuiles HP10",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Produit pour : à préciser"
+   }
+  ],
+  "questions": [
+   "product:tuile"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-84ee24ebcbd9.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Tuile terre cuite mécanique",
+    "quantite": "20 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Modèle et teinte à préciser"
+   },
+   {
+    "designation": "Fixations pour l'élément de rive",
+    "quantite": "1 jeu",
+    "unite": "jeu",
+    "etat": "check",
+    "raison": "Élément de rive à préciser"
+   }
+  ],
+  "questions": [
+   "fiche:type_d_element_de_rive"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-84feb200b76b.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "8 447 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "8 616 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-8bff84ca0fd2.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Gouttière PVC de 25",
+    "quantite": "2 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Teinte à préciser"
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   }
+  ],
+  "questions": [
+   "param:teinte_gouttiere",
+   "param:fixation_crochet",
+   "param:nb_angles",
+   "param:diametre_descente",
+   "param:nb_descentes"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-8c53cdead2a5.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles 30×22",
+    "quantite": "9 271 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Qualité à préciser"
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "9 457 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Qualité à préciser"
+   },
+   {
+    "designation": "Gouttière zinc demi-ronde dév. 33",
+    "quantite": "6 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   }
+  ],
+  "questions": [
+   "param:qualite_ardoise",
+   "param:diametre_descente",
+   "param:nb_descentes"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-8cb5216b47c5.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Bande zinc de rive",
+    "quantite": "13 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage",
+   "param:developpe",
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-8d34639c68f5.json",
+  "metier": "roofing",
+  "lignes": [],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-8e34ede5eb0d.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Écran HPV, rouleau 1,50 × 50 m",
+    "quantite": "2 rouleaux",
+    "unite": "rouleaux",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Liteaux 27×40",
+    "quantite": "547 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Valeur par défaut à confirmer"
+   },
+   {
+    "designation": "Tuiles HP10 rouge",
+    "quantite": "1 488 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tuiles de rive",
+    "quantite": "78 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Faîtières",
+    "quantite": "29 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Closoir",
+    "quantite": "2 rouleaux de 5 m",
+    "unite": "rouleaux de 5 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets de faîtière",
+    "quantite": "29 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Gouttière PVC demi-ronde sable de 25",
+    "quantite": "5 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets de gouttière PVC de 25",
+    "quantite": "52 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Pose à préciser"
+   },
+   {
+    "designation": "Naissances PVC demi-ronde sable de 25 Ø80",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tubes de descente PVC sable Ø80, longueur 4 m",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Coudes de descente PVC sable Ø80",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Colliers de descente Ø80",
+    "quantite": "6 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Chatières de ventilation",
+    "quantite": "10 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Sortie de toit Poujoulat",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Diamètre à préciser"
+   },
+   {
+    "designation": "Embase plomb de sortie de toit",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "check",
+    "raison": "Diamètre à préciser"
+   },
+   {
+    "designation": "Chapeau de sortie de toit",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "check",
+    "raison": "Diamètre à préciser"
+   }
+  ],
+  "questions": [
+   "param:diametre_sortie",
+   "param:fixation_crochet",
+   "param:usage_sortie",
+   "product:tuile"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-8ee80aeee41e.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Plaques fibres-ciment amiantées à déposer",
+    "quantite": "60 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-90aa8d236bd2.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Sortie de toit, diamètre du conduit 150 mm",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Couverture autour à préciser"
+   },
+   {
+    "designation": "Chapeau de sortie de toit",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:support_sortie"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-91b7331ebb2a.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture en ardoises au crochet",
+    "quantite": "1 forfait",
+    "unite": "forfait",
+    "etat": "check",
+    "raison": "Surface à préciser"
+   }
+  ],
+  "questions": [
+   "param:surface"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-95e8fb4c20ae.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout gris",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Voliges sapin 18 mm",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Bande zinc d'égout",
+    "quantite": "13 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Gouttière zinc demi-ronde",
+    "quantite": "4 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   },
+   {
+    "designation": "Jouées de lucarnes",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:developpe_gouttiere",
+   "param:nb_descentes",
+   "param:developpe",
+   "param:diametre_descente",
+   "param:faconnage@bandes-zinc",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-9657737ef070.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Gouttière zinc naturel demi-ronde",
+    "quantite": "16 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Crochets de gouttière",
+    "quantite": "159 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Pose, développé à préciser"
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   },
+   {
+    "designation": "Réfection de chéneau en membrane EPDM ou PVC",
+    "quantite": "11,7 ml",
+    "unite": "ml",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Fourniture velux SK06 114x118 GGL à rotation, vitrage confort, finition white finish avec raccord ZWC",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Fourniture velux MK04 78,98 GGU à rotation, vitrage confort, finition everfinish avec raccord ZWC",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tôles bacs acier pour étanchéité du dessus de velux",
+    "quantite": "10 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:developpe_gouttiere",
+   "param:fixation_crochet",
+   "param:diametre_descente",
+   "param:nb_descentes"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-97072de516a9.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises fibres-ciment bleu-noir 40×24",
+    "quantite": "2 919 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-97500f1985b6.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles 30×22",
+    "quantite": "9 271 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Qualité à préciser"
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "9 457 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Qualité à préciser"
+   },
+   {
+    "designation": "Gouttière zinc demi-ronde dév. 33",
+    "quantite": "6 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   }
+  ],
+  "questions": [
+   "param:qualite_ardoise",
+   "param:fixation_crochet",
+   "param:diametre_descente",
+   "param:nb_descentes"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-9b24f23b3178.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture en ardoises au crochet",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Pente à préciser"
+   }
+  ],
+  "questions": [
+   "param:pente"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-9bad64cf2606.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Bande de ventilation en Z en zinc quartz",
+    "quantite": "13 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Habillage de rive en zinc quartz, dév. 200 mm",
+    "quantite": "14 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage@bandes-zinc__a",
+   "param:consommables",
+   "param:faconnage@bandes-zinc__b",
+   "param:developpe@bandes-zinc__a"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-9c807052e8ea.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Fenêtre de toit 114x118 sur tuiles plates",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-9cab747c0e77.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Bandes cuivre, dév. 330 mm",
+    "quantite": "12 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-9ec3ce8e870b.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 30×22",
+    "quantite": "9 271 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "9 457 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tubes de descente zinc Ø80, longueur 4 m",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:dauphin"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-a1979e9cbc6e.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Receveur de douche à l'italienne extra-plat",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Robinetterie de douche encastrée",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Paroi de douche fixe vitrée",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Meuble double vasque",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Miroir salle de bain LED",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Applique murale salle de bain",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Plafonnier LED salle de bain",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Spots LED encastrables pour douche (x3)",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Réalisation niche de douche",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Fourniture sèche-serviette électrique Atlantic 750W",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "VMC simple flux hygroréglable",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Carrelage sol grès cérame 40x40 gris anthracite",
+    "quantite": null,
+    "unite": null,
+    "etat": "supplier",
+    "raison": null
+   },
+   {
+    "designation": "Faïence murale salle de bain",
+    "quantite": null,
+    "unite": null,
+    "etat": "supplier",
+    "raison": null
+   },
+   {
+    "designation": "Ragréage du sol",
+    "quantite": null,
+    "unite": null,
+    "etat": "supplier",
+    "raison": null
+   },
+   {
+    "designation": "Peinture plafond salle de bain",
+    "quantite": null,
+    "unite": null,
+    "etat": "supplier",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": [
+   "Carrelage sol grès cérame 40x40 gris anthracite",
+   "Faïence murale salle de bain",
+   "Ragréage du sol",
+   "Peinture plafond salle de bain"
+  ]
+ },
+ {
+  "fichier": "roofing-a6a02a99cca6.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 30×22",
+    "quantite": "9 408 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "9 597 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-aa965deb8896.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Arêtier",
+    "quantite": "9 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Arêtier à préciser"
+   }
+  ],
+  "questions": [
+   "param:aretier_matiere",
+   "param:developpe_aretier",
+   "param:nb_aretiers"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-aabfc8551f9c.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Panneaux OSB",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:faconnage",
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-aac0aa6ea122.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Gouttière alu anthracite de",
+    "quantite": "3 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Naissances alu anthracite de Ø80",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Tubes de descente alu Ø80, longueur 4 m",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:developpe_gouttiere"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-abbaad3aae1e.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout gris",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Pattes coulissantes joint debout",
+    "quantite": "519 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Pattes fixes joint debout",
+    "quantite": "173 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Gouttière zinc gris demi-ronde dév. 25",
+    "quantite": "4 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets de gouttière dév. 25",
+    "quantite": "34 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Pose à préciser"
+   },
+   {
+    "designation": "Naissances zinc gris demi-ronde",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   },
+   {
+    "designation": "Bande de ventilation en Z en zinc quartz, Quartz-Zinc 0,65 mm gris, Quartz-Zinc 0,65 mm",
+    "quantite": "7 longueurs de 2 m",
+    "unite": "longueurs de 2 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour habillage de rive en zinc quartz",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Voliges sapin 18 mm",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:fixation_crochet",
+   "param:nb_descentes",
+   "param:diametre_descente",
+   "param:developpe@bandes-zinc__3",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-ac2c41206c51.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 30×22",
+    "quantite": "9 271 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "9 457 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-b0ea5c7ec27e.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout gris",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Pattes coulissantes joint debout",
+    "quantite": "519 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Pattes fixes joint debout",
+    "quantite": "173 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Gouttière zinc gris demi-ronde dév. 25",
+    "quantite": "4 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets de gouttière dév. 25",
+    "quantite": "34 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Pose à préciser"
+   },
+   {
+    "designation": "Naissances zinc gris demi-ronde dév. 25",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Diamètre à préciser"
+   },
+   {
+    "designation": "Bande de ventilation en Z en zinc quartz, Quartz-Zinc 0,65 mm gris, Quartz-Zinc 0,65 mm",
+    "quantite": "7 longueurs de 2 m",
+    "unite": "longueurs de 2 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour habillage de rive en zinc quartz",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Voliges sapin 18 mm",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:fixation_crochet",
+   "param:diametre_descente",
+   "param:developpe@bandes-zinc__3",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-b1f664c88312.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture bac acier",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Longueur à préciser"
+   },
+   {
+    "designation": "Fenêtre de toit 114x118",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Fenêtre de toit Velux GGL MK04",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:longueur_rampant",
+   "param:teinte_bac",
+   "param:feutre_bac"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-b1fb40a90a2f.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Platine zinc de sortie de toit",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Chapeau de sortie de toit",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:faconnage",
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-b53c0ae02578.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 30×22",
+    "quantite": "9 271 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "9 457 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tuiles HP10",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Produit pour : à préciser"
+   }
+  ],
+  "questions": [
+   "product:tuile"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-b5a6dcc967a2.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Bande de ventilation en Z en zinc quartz",
+    "quantite": "13 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Habillage de rive en zinc quartz, dév. 20 cm",
+    "quantite": "14 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage@bandes-zinc__a",
+   "param:consommables",
+   "param:faconnage@bandes-zinc__b",
+   "param:developpe@bandes-zinc__a"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-b744eacf0f46.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Bande de ventilation en Z en zinc quartz",
+    "quantite": "13 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Voliges sapin 18 mm",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Gouttière zinc demi-ronde",
+    "quantite": "4 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   }
+  ],
+  "questions": [
+   "param:developpe_gouttiere",
+   "param:nb_descentes",
+   "param:developpe",
+   "param:diametre_descente",
+   "param:faconnage@bandes-zinc",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-b85e32dbd974.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Tuile terre cuite mécanique",
+    "quantite": "20 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Modèle et teinte à préciser"
+   },
+   {
+    "designation": "Fixations pour l'élément de rive",
+    "quantite": "1 jeu",
+    "unite": "jeu",
+    "etat": "check",
+    "raison": "Élément de rive à préciser"
+   }
+  ],
+  "questions": [
+   "fiche:type_d_element_de_rive"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-c20ebab851a5.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Tubes de descente PVC gris Ø80, longueur 2 m",
+    "quantite": "3 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Dauphins Ø80, 1 m",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-c72e8feada06.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Gouttière zinc demi-ronde dév. 33",
+    "quantite": "5 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   },
+   {
+    "designation": "Liteaux 27x40",
+    "quantite": null,
+    "unite": null,
+    "etat": "supplier",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:diametre_descente",
+   "param:nb_descentes"
+  ],
+  "aChiffrer": [
+   "Liteaux 27x40"
+  ]
+ },
+ {
+  "fichier": "roofing-c769a25b309c.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout gris",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Voliges sapin 18 mm",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Bande zinc d'égout",
+    "quantite": "13 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Gouttière zinc demi-ronde",
+    "quantite": "4 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   }
+  ],
+  "questions": [
+   "param:developpe_gouttiere",
+   "param:nb_descentes",
+   "param:developpe",
+   "param:diametre_descente",
+   "param:faconnage@bandes-zinc",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-c7c7af0eb26f.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Tubes de descente zinc Ø100, longueur 4 m",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-c83e868a68db.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-cab607ea0b0a.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles 30×22",
+    "quantite": "6 953 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Qualité à préciser"
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "7 093 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Qualité à préciser"
+   },
+   {
+    "designation": "Fenêtre de toit",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Fenêtre à préciser"
+   }
+  ],
+  "questions": [
+   "param:qualite_ardoise",
+   "fiche:fenetre_de_toit_quelle_taille"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-cad567ed22f1.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Plomb laminé 1,5 mm, rouleau largeur 30 cm × 6 m",
+    "quantite": "1 rouleau",
+    "unite": "rouleau",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-cad7ade07b55.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "3 379 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "3 447 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Sortie de toit Poujoulat",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Diamètre à préciser"
+   },
+   {
+    "designation": "Embase plomb de sortie de toit",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Diamètre à préciser"
+   },
+   {
+    "designation": "Chapeau de sortie de toit",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Diamètre à préciser"
+   }
+  ],
+  "questions": [
+   "param:diametre_sortie",
+   "param:usage_sortie"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-cb2c85f0b10a.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Gouttière zinc demi-ronde dév. 25",
+    "quantite": "3 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Naissances dév. 25 Ø80",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tuyau de descente zinc diam. 80mm, 2 descentes de 3 m",
+    "quantite": "2 tubes de 3 m",
+    "unite": "tubes de 3 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tubes de descente (Coude zinc diam. 80mm)",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-cea2ba9266a9.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout gris",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Voliges sapin 18 mm",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Bande zinc d'égout",
+    "quantite": "13 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Gouttière zinc demi-ronde",
+    "quantite": "4 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Naissances",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   },
+   {
+    "designation": "Mastic colle polyuréthane 310 ml",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:developpe_gouttiere",
+   "param:nb_descentes",
+   "param:developpe",
+   "param:diametre_descente",
+   "param:faconnage@bandes-zinc",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-d40f26a7404f.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Noue zinc",
+    "quantite": "4 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-d43c930ea556.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture en ardoises au crochet",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Pente à préciser"
+   }
+  ],
+  "questions": [
+   "param:pente"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-d6d0324afb6e.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises fibres-ciment 40×24",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Teinte à préciser"
+   }
+  ],
+  "questions": [
+   "param:teinte_fc",
+   "product:ardoise"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-daa60bbdc7f4.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles 32×22",
+    "quantite": "2 052 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Qualité à préciser"
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "2 094 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Qualité à préciser"
+   },
+   {
+    "designation": "Gouttière zinc Havraise",
+    "quantite": "3 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Naissances Ø80",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Crochets de gouttière Havraise",
+    "quantite": "20 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes de rive en zinc (verrière)",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Faîtage en bande zinc, dév. 25 cm",
+    "quantite": "8 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Bande porte-solin zinc",
+    "quantite": "4 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Mortier d'étanchéité pour solin, sac 25 kg",
+    "quantite": "1 sac de 25 kg",
+    "unite": "sac de 25 kg",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tuyau de descente zinc diam. 80mm",
+    "quantite": "2 tubes de 3 m",
+    "unite": "tubes de 3 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Coude zinc diam. 80mm",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Colliers de descente Ø80",
+    "quantite": "6 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:qualite_ardoise",
+   "param:developpe_gouttiere",
+   "param:developpe",
+   "param:faconnage@faitage-zinc",
+   "param:consommables",
+   "param:faconnage@bande-porte-solin"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-db7b4dd42c42.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout gris",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Voliges sapin 18 mm",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Bâche de protection 4 × 5 m",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:faconnage",
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-e15a6bcad90e.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "2 052 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "2 094 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Gouttière zinc Havraise",
+    "quantite": "3 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Naissances Ø80",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Crochets de gouttière Havraise",
+    "quantite": "20 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes de rive en zinc (verrière)",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Faîtage en bande zinc, dév. 25 cm",
+    "quantite": "8 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Bande porte-solin zinc",
+    "quantite": "4 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Mortier d'étanchéité pour solin, sac 25 kg",
+    "quantite": "1 sac de 25 kg",
+    "unite": "sac de 25 kg",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tuyau de descente zinc diam. 80mm",
+    "quantite": "2 tubes de 3 m",
+    "unite": "tubes de 3 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Coude zinc diam. 80mm",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Colliers de descente Ø80",
+    "quantite": "6 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:developpe_gouttiere",
+   "param:developpe",
+   "param:faconnage@faitage-zinc",
+   "param:consommables",
+   "param:faconnage@bande-porte-solin"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-e67ba0da8c1a.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles 32×22",
+    "quantite": "2 028 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Qualité à préciser"
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "2 069 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Qualité à préciser"
+   }
+  ],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-e8fa24a923b1.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Voliges sapin 18 mm",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:faconnage",
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-e98d0500cc46.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Noue zinc",
+    "quantite": "12 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-ea4f8faffceb.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "2 052 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "2 094 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Gouttière zinc Havraise",
+    "quantite": "3 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Naissances Ø80",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Crochets de gouttière Havraise",
+    "quantite": "20 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes de rive en zinc (verrière)",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Faîtage en bande zinc, dév. 25 cm",
+    "quantite": "8 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Bande porte-solin zinc",
+    "quantite": "4 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Mortier d'étanchéité pour solin, sac 25 kg",
+    "quantite": "1 sac de 25 kg",
+    "unite": "sac de 25 kg",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tuyau de descente zinc diam. 80mm",
+    "quantite": "2 tubes de 3 m",
+    "unite": "tubes de 3 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Coude zinc diam. 80mm",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Colliers de descente Ø80",
+    "quantite": "6 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:developpe_gouttiere",
+   "param:developpe",
+   "param:faconnage@faitage-zinc",
+   "param:consommables",
+   "param:faconnage@bande-porte-solin"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-ea5bd0e4707a.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "2 052 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "2 094 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-eb511f10e581.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles 32×22",
+    "quantite": "2 052 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Qualité à préciser"
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "2 094 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Qualité à préciser"
+   },
+   {
+    "designation": "Gouttière zinc Havraise",
+    "quantite": "3 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Naissances Ø80",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Crochets de gouttière Havraise",
+    "quantite": "20 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes de rive en zinc (verrière)",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Faîtage en bande zinc, dév. 25 cm",
+    "quantite": "8 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Bande porte-solin zinc",
+    "quantite": "4 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Mortier d'étanchéité pour solin, sac 25 kg",
+    "quantite": "1 sac de 25 kg",
+    "unite": "sac de 25 kg",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tuyau de descente zinc diam. 80mm",
+    "quantite": "2 tubes de 3 m",
+    "unite": "tubes de 3 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Coude zinc diam. 80mm",
+    "quantite": "4 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Colliers de descente Ø80",
+    "quantite": "6 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:qualite_ardoise",
+   "param:developpe_gouttiere",
+   "param:developpe",
+   "param:faconnage@faitage-zinc",
+   "param:consommables",
+   "param:faconnage@bande-porte-solin"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-ee1f0e2eb09f.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Voliges sapin 18 mm",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-ef694821af43.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture bac acier",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Longueur à préciser"
+   },
+   {
+    "designation": "Fenêtre de toit 114x118",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Fenêtre de toit Velux GGL MK04",
+    "quantite": "1 pièce",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:longueur_rampant",
+   "param:teinte_bac",
+   "param:feutre_bac"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-efc44b8fc321.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout gris",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Pattes coulissantes joint debout",
+    "quantite": "519 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Pattes fixes joint debout",
+    "quantite": "173 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Gouttière zinc gris demi-ronde dév. 25",
+    "quantite": "4 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets de gouttière dév. 25",
+    "quantite": "34 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Pose à préciser"
+   },
+   {
+    "designation": "Naissances zinc gris demi-ronde",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   },
+   {
+    "designation": "Bande de ventilation en Z en zinc quartz, Quartz-Zinc 0,65 mm gris, Quartz-Zinc 0,65 mm",
+    "quantite": "7 longueurs de 2 m",
+    "unite": "longueurs de 2 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour habillage de rive en zinc quartz",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Voliges sapin 18 mm",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:fixation_crochet",
+   "param:nb_descentes",
+   "param:diametre_descente",
+   "param:developpe@bandes-zinc__3",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-f087f974a59a.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 30×22",
+    "quantite": "9 271 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "9 457 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-f209e0dd75e8.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Plomb laminé 1,5 mm, rouleau largeur 40 cm × 6 m",
+    "quantite": "2 rouleaux",
+    "unite": "rouleaux",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-f3c1f8f847c4.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles Espagne 1er choix 30×22",
+    "quantite": "10 003 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 12 cm",
+    "quantite": "10 204 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-f41b781f8761.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage",
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-f4e4f406e5fd.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles 30×22",
+    "quantite": "6 953 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Qualité à préciser"
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "7 093 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Qualité à préciser"
+   },
+   {
+    "designation": "Noue zinc",
+    "quantite": "4 ml",
+    "unite": "ml",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Arêtiers (Arêtier zinc dév. 33)",
+    "quantite": null,
+    "unite": null,
+    "etat": "supplier",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:qualite_ardoise",
+   "param:faconnage"
+  ],
+  "aChiffrer": [
+   "Arêtiers (Arêtier zinc dév. 33)"
+  ]
+ },
+ {
+  "fichier": "roofing-f633024df30d.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises fibres-ciment noir 60×40",
+    "quantite": "525 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-f6a40da796eb.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Ardoises naturelles 30×22",
+    "quantite": "9 408 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Qualité à préciser"
+   },
+   {
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "9 597 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Qualité à préciser"
+   }
+  ],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-f869b27f0720.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Voliges sapin 18 mm",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:faconnage",
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-fa1768fadc53.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout gris",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Pattes coulissantes joint debout",
+    "quantite": "519 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Pattes fixes joint debout",
+    "quantite": "173 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   },
+   {
+    "designation": "Gouttière zinc gris demi-ronde dév. 25",
+    "quantite": "4 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Crochets de gouttière dév. 25",
+    "quantite": "34 pièces",
+    "unite": "pièces",
+    "etat": "check",
+    "raison": "Pose à préciser"
+   },
+   {
+    "designation": "Naissances zinc gris demi-ronde",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Descentes à préciser"
+   },
+   {
+    "designation": "Bande de ventilation en Z en zinc quartz, Quartz-Zinc 0,65 mm gris, Quartz-Zinc 0,65 mm",
+    "quantite": "7 longueurs de 2 m",
+    "unite": "longueurs de 2 m",
+    "etat": "check",
+    "raison": "Développé à préciser"
+   },
+   {
+    "designation": "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour habillage de rive en zinc quartz",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Voliges sapin 18 mm",
+    "quantite": "96 m²",
+    "unite": "m²",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:fixation_crochet",
+   "param:nb_descentes",
+   "param:diametre_descente",
+   "param:developpe@bandes-zinc__3",
+   "param:consommables",
+   "param:faconnage@couverture-zinc-joint-debout"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-fbf7c220fefd.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Gouttière zinc demi-ronde dév. 33",
+    "quantite": "6 longueurs de 4 m",
+    "unite": "longueurs de 4 m",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Naissances dév. 33 Ø80",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tubes de descente zinc Ø80, longueur 4 m",
+    "quantite": "2 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-fd2932550c3e.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Couverture zinc à joint debout",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Façonnage à préciser"
+   }
+  ],
+  "questions": [
+   "param:faconnage",
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "terrasse-bois-8a7f30a326a7.json",
+  "metier": "decking",
+  "lignes": [
+   {
+    "designation": "Lames pin classe 4 27×145, L 4,20 m",
+    "quantite": "56 lames",
+    "unite": "lames",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [
+   "param:consommables"
+  ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "terrassement-b09a0fc1cf97.json",
+  "metier": "earthworks",
+  "lignes": [
+   {
+    "designation": "GNT 0/31,5 en vrac",
+    "quantite": "27 tonnes",
+    "unite": "tonnes",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Film polyane 150 µm, rouleau 150 m²",
+    "quantite": "1 rouleau de 150 m²",
+    "unite": "rouleau de 150 m²",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Fosse toutes eaux polyéthylène 3 m³",
+    "quantite": "1 fosse",
+    "unite": "fosse",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
+  "aChiffrer": []
+ }
+]
