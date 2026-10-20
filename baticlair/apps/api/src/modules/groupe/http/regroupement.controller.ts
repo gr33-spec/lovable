@@ -38,6 +38,8 @@ export class RegroupementController {
     const commandes = await this.commande.passerLesCommandes();
     const factures = await this.commande.relancerLesFactures();
     const livraisons = await this.commande.relancerLesLivraisons();
-    return { ...range, ...envoi, ...choix, ...commandes, facturesRelancees: factures.relancees, livraisonsRelancees: livraisons.relancees };
+    // Étape 8 : « Livraison aujourd'hui. Tout est arrivé ? »
+    const duJour = await this.commande.prevenirLesLivraisonsDuJour();
+    return { ...range, ...envoi, ...choix, ...commandes, facturesRelancees: factures.relancees, livraisonsRelancees: livraisons.relancees, livraisonsPrevenues: duJour.prevenues };
   }
 }

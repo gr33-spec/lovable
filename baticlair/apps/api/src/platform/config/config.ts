@@ -112,6 +112,21 @@ const envSchema = z
      * vérifié : prévisualisation seulement, décision du fondateur, 2026-10-20). Refusé en production Vercel.
      */
     SIRET_VERIFICATION: z.enum(["insee", "forme"]).default("insee"),
+    /**
+     * L'émetteur de la facture de commission du groupé (décision du fondateur, 2026-10-20) : en variables, jamais en dur.
+     * Les cinq vont ensemble ; sans elles, la facture dit « émetteur non configuré » et Greg est prévenu par le journal.
+     */
+    FACTURE_EMETTEUR_NOM: z.string().min(1).optional(),
+    FACTURE_EMETTEUR_FORME: z.string().min(1).optional(),
+    FACTURE_EMETTEUR_SIRET: z.string().min(9).optional(),
+    FACTURE_EMETTEUR_ADRESSE: z.string().min(5).optional(),
+    FACTURE_EMETTEUR_TVA: z.string().min(4).optional(),
+    /** La TVA sur la commission, en pour cent (assujettie : 20). */
+    FACTURE_TVA_POURCENT: z.coerce.number().min(0).max(100).default(20),
+    /** Le domaine des adresses de réponse des lots (`lot-<n°>@<domaine>`, webhook Resend entrant). Vide : pas d'adresse de réponse. */
+    REPONSES_DOMAINE: z.string().min(3).optional(),
+    /** Le secret de signature du webhook Resend (Svix, « whsec_… »). Vide : webhook fermé. */
+    RESEND_WEBHOOK_SECRET: z.string().min(8).optional(),
     VERCEL_ENV: z.string().optional(),
     /**
      * Limitation de débit (connexion, inscription, dépôts de devis, lecture IA) : `on` partout,
@@ -190,7 +205,14 @@ export interface AppConfig {
   referentialValidators: string[];
   billing: { plans: Plan[]; activationCodes: Record<string, string>; enforced: boolean };
   /** BatiClair Groupé : désactivé par défaut (`GROUPE=on` l'ouvre). */
-  groupe: { enabled: boolean; inseeApiKey: string | null; siretVerification: "insee" | "forme" };
+  groupe: {
+    enabled: boolean;
+    inseeApiKey: string | null;
+    siretVerification: "insee" | "forme";
+    facture: { emetteur: { nom: string; forme: string | null; siret: string; adresse: string; tvaIntracom: string } | null; tvaPourcent: number };
+    reponsesDomaine: string | null;
+    resendWebhookSecret: string | null;
+  };
   rateLimit: { enabled: boolean };
   alerts: { webhookUrl?: string; email?: string };
   cronSecret?: string;
@@ -270,7 +292,20 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       .map((x) => x.trim().toLowerCase())
       .filter((x) => x.length > 0),
     billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES), enforced: e.PAYWALL === "on" },
-    groupe: { enabled: e.GROUPE === "on", inseeApiKey: e.INSEE_API_KEY ?? null, siretVerification: e.SIRET_VERIFICATION },
+    groupe: {
+      enabled: e.GROUPE === "on",
+      inseeApiKey: e.INSEE_API_KEY ?? null,
+      siretVerification: e.SIRET_VERIFICATION,
+      facture: {
+        emetteur:
+          e.FACTURE_EMETTEUR_NOM && e.FACTURE_EMETTEUR_SIRET && e.FACTURE_EMETTEUR_ADRESSE && e.FACTURE_EMETTEUR_TVA
+            ? { nom: e.FACTURE_EMETTEUR_NOM, forme: e.FACTURE_EMETTEUR_FORME ?? null, siret: e.FACTURE_EMETTEUR_SIRET, adresse: e.FACTURE_EMETTEUR_ADRESSE, tvaIntracom: e.FACTURE_EMETTEUR_TVA }
+            : null,
+        tvaPourcent: e.FACTURE_TVA_POURCENT,
+      },
+      reponsesDomaine: e.REPONSES_DOMAINE ?? null,
+      resendWebhookSecret: e.RESEND_WEBHOOK_SECRET ?? null,
+    },
     rateLimit: { enabled: e.RATE_LIMIT === "on" },
     ...(e.CRON_SECRET ? { cronSecret: e.CRON_SECRET } : {}),
     alerts: { ...(e.ALERT_WEBHOOK_URL ? { webhookUrl: e.ALERT_WEBHOOK_URL } : {}), ...(e.ALERT_EMAIL ? { email: e.ALERT_EMAIL } : {}) },

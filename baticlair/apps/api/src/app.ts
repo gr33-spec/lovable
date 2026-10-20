@@ -41,7 +41,8 @@ export function configureApp(app: INestApplication): void {
   app.enableCors({ origin: [...config.webAppOrigins, ...(config.previewOriginPattern ? [config.previewOriginPattern] : [])], credentials: true });
   app.use(requestContextMiddleware(logger));
   express.getHttpAdapter().getInstance().all(`${AUTH_BASE_PATH}/*splat`, toNodeHandler(auth));
-  express.useBodyParser("json", { limit: "1mb" });
+  // Le corps brut est gardé pour vérifier la signature des webhooks (Resend, étape 8 du groupé).
+  express.useBodyParser("json", { limit: "1mb", verify: (req: { rawBody?: Buffer }, _res: unknown, buf: Buffer) => { req.rawBody = buf; } } as Parameters<typeof express.useBodyParser>[1]);
   app.useGlobalFilters(new ErrorFilter(logger, app.get<Alerter>(ALERTER)));
   app.enableShutdownHooks();
 }

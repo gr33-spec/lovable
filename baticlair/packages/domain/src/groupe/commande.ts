@@ -14,8 +14,17 @@ export const RELANCE_LIVRAISON_JOURS = 15;
 export const EXCLUSION_MOIS = 6;
 export const FENETRE_DESISTEMENTS_MOIS = 12;
 
-/** L'émetteur de la facture : BatiClair. Les mentions légales (SIRET, TVA, adresse) sont À COMPLÉTER PAR LE FONDATEUR avant la première vraie facture. */
-export const EMETTEUR_FACTURE = { nom: "BatiClair", mentions: "SIRET, numéro de TVA et adresse : à compléter par le fondateur avant la première facture réelle." };
+/**
+ * L'émetteur de la facture (décision du fondateur, 2026-10-20) : lu dans la configuration (FACTURE_EMETTEUR_*), jamais en
+ * dur dans le code ; assujetti à la TVA (FACTURE_TVA_POURCENT, 20 par défaut) sur la commission.
+ */
+export interface EmetteurFacture {
+  nom: string;
+  forme: string | null;
+  siret: string;
+  adresse: string;
+  tvaIntracom: string;
+}
 
 export interface LigneDeBon {
   designation: string;
@@ -79,23 +88,34 @@ export function documentRecapitulatif(numeroLot: number, negoce: string, bons: r
   };
 }
 
-/** Section 6 : 2 % × total HT des bons de commande du lot, à 30 jours. */
-export function factureDeCommission(totalLotHt: number, emiseLe: Date, taux = TAUX_COMMISSION_POURCENT): { montantHt: number; echeanceLe: Date } {
-  return { montantHt: Math.round(totalLotHt * taux) / 100, echeanceLe: new Date(emiseLe.getTime() + ECHEANCE_FACTURE_JOURS * JOUR) };
+/** Section 6 : 2 % × total HT des bons de commande du lot, à 30 jours ; la TVA s'ajoute sur la commission. */
+export function factureDeCommission(totalLotHt: number, emiseLe: Date, taux = TAUX_COMMISSION_POURCENT, tvaPourcent = 20): { montantHt: number; montantTva: number; montantTtc: number; echeanceLe: Date } {
+  const montantHt = Math.round(totalLotHt * taux) / 100;
+  const montantTva = Math.round(montantHt * tvaPourcent) / 100;
+  return { montantHt, montantTva, montantTtc: Math.round((montantHt + montantTva) * 100) / 100, echeanceLe: new Date(emiseLe.getTime() + ECHEANCE_FACTURE_JOURS * JOUR) };
 }
 
-export function documentFacture(f: { numero: number; numeroLot: number; negoce: { nom: string; email: string }; totalLotHt: number; montantHt: number; emiseLe: Date; echeanceLe: Date; versionContrat: string }): { titre: string; blocs: { titre?: string; lignes: (string | string[])[] }[] } {
+export function documentFacture(
+  f: { numero: number; numeroLot: number; negoce: { nom: string; email: string }; totalLotHt: number; montantHt: number; emiseLe: Date; echeanceLe: Date; versionContrat: string; tvaPourcent: number },
+  emetteur: EmetteurFacture | null,
+): { titre: string; blocs: { titre?: string; lignes: (string | string[])[] }[] } {
+  const { montantTva, montantTtc } = factureDeCommission(f.totalLotHt, f.emiseLe, (f.montantHt / f.totalLotHt) * 100 || TAUX_COMMISSION_POURCENT, f.tvaPourcent);
+  const lignesEmetteur = emetteur
+    ? [`${emetteur.nom}${emetteur.forme ? `, ${emetteur.forme}` : ""}`, emetteur.adresse, `SIRET ${emetteur.siret}`, `TVA intracommunautaire ${emetteur.tvaIntracom}`]
+    : ["Émetteur non configuré (variables FACTURE_EMETTEUR_*)."];
   return {
     titre: `Facture n° ${f.numero}, commission d'apporteur d'affaires, lot n° ${f.numeroLot}`,
     blocs: [
-      { titre: "Émetteur", lignes: [EMETTEUR_FACTURE.nom, EMETTEUR_FACTURE.mentions] },
+      { titre: "Émetteur", lignes: lignesEmetteur },
       { titre: "Client", lignes: [f.negoce.nom, f.negoce.email] },
       {
         titre: "Détail",
         lignes: [
           ["Objet", "Base HT", "Taux", "Montant HT"],
           [`Commission d'apporteur d'affaires, lot n° ${f.numeroLot} (accord du ${f.versionContrat})`, euros(f.totalLotHt), `${TAUX_COMMISSION_POURCENT} %`, euros(f.montantHt)],
-          `Total HT : ${euros(f.montantHt)} (TVA : à préciser par le fondateur selon le régime de BatiClair)`,
+          `Total HT : ${euros(f.montantHt)}`,
+          `TVA ${f.tvaPourcent} % : ${euros(montantTva)}`,
+          `Total TTC : ${euros(montantTtc)}`,
         ],
       },
       { lignes: [`Émise le ${jour(f.emiseLe)}, payable à ${ECHEANCE_FACTURE_JOURS} jours, soit le ${jour(f.echeanceLe)}. Une relance automatique est envoyée après l'échéance.`] },

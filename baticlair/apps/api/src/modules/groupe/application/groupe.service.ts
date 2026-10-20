@@ -1,4 +1,4 @@
-import { cleDeReference, economieEstimee, familleDuMetier, fenetreValide, lotParti, quantiteDuBesoin, transitionBesoin, zoneDuCodePostal, type StatutBesoin } from "@baticlair/domain";
+import { cleDeReference, economieEstimee, familleDuMetier, fenetreValide, lotParti, messageBesoinAccepte, quantiteDuBesoin, transitionBesoin, zoneDuCodePostal, type MessageArtisan, type StatutBesoin } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { isUuid } from "../../../platform/validation/ids.js";
@@ -69,6 +69,8 @@ export class GroupeService {
     private readonly demande: { envoyerLesLotsFormes(): Promise<unknown> },
     /** Étape 7 : l'exclusion après deux désistements (section 4 c). */
     private readonly commande: { exclue(companyId: string): Promise<boolean> },
+    /** Étape 8 : « Vos 31 bacs sont dans le groupé Côtes-d'Armor. Prochain lot lundi. » */
+    private readonly notifications: { prevenir(companyId: string, message: MessageArtisan): Promise<unknown> },
   ) {}
 
   /**
@@ -222,6 +224,9 @@ export class GroupeService {
     // Étape 4 : le besoin rejoint tout de suite son lot ouvert (ou en ouvre un) ; un seuil atteint forme le lot, qui part
     // aux négoces (étape 5).
     await this.regroupement.ranger();
+    // Étape 8, message 1 : une notification par proposition (les quantités de la première ligne).
+    const premier = await this.prisma.besoin.findFirst({ where: { takeoffId: takeoff.id, articleKey: p.articles[0]! } });
+    if (premier) await this.notifications.prevenir(tenant.companyId, messageBesoinAccepte({ quantite: premier.quantite.toString(), unite: premier.unite, zone: premier.zone, projectId }));
     await this.demande.envoyerLesLotsFormes();
     return this.besoinsDuChantier(tenant, projectId);
   }

@@ -1,6 +1,8 @@
 import { createHash, randomBytes } from "node:crypto";
 import {
+  adresseDeReponse,
   DELAI_REPONSE_JOURS,
+  messageDemandeEnvoyee,
   documentDemande,
   htmlDemande,
   LIBELLES_FAMILLES,
@@ -16,6 +18,7 @@ import {
   volumesDuLot,
   type FamilleGroupe,
   type LotADemander,
+  type MessageArtisan,
 } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
@@ -31,6 +34,8 @@ const PAGES_MAX = 10;
 export interface ReglagesDemande {
   webAppUrl: string;
   authSecret: string;
+  /** Le domaine des adresses de réponse des lots (`lot-<n°>@<domaine>`), ou null. */
+  reponsesDomaine: string | null;
 }
 
 export interface FichierDepose {
@@ -80,6 +85,8 @@ export class DemandeService {
     private readonly reglages: ReglagesDemande,
     /** Étape 6 : après un dépôt, le lot se décide si tout le monde a répondu. */
     private readonly choix: { choisirLesLotsEnvoyes(maintenant?: Date): Promise<unknown> },
+    /** Étape 8 : « Le groupé est parti chez 4 négoces. Réponses attendues sous 7 jours. » */
+    private readonly notifications: { prevenir(companyId: string, message: MessageArtisan): Promise<unknown> } = { prevenir: async () => undefined },
   ) {}
 
   /** Envoie chaque lot formé aux négoces concernés. Un lot sans négoce concerné reste formé (Greg le voit, étape 9). */
@@ -133,6 +140,8 @@ export class DemandeService {
           text: texteDemande(aDemander, liens),
           html: htmlDemande(aDemander, liens),
           attachments: [{ filename: `demande-de-prix-${NOM_DEMANDE.toLowerCase().replace(/\s+/g, "-")}.pdf`, contentType: "application/pdf", contentBase64: Buffer.from(pdf).toString("base64") }],
+          // Étape 8 : « Répondre » écrit à l'adresse du lot (un généraliste : celle de son premier lot) ; le webhook y répond.
+          ...(this.reglages.reponsesDomaine ? { replyTo: adresseDeReponse(aDemander[0]!.numero, this.reglages.reponsesDomaine) } : {}),
           mustDeliver: true,
         });
       } catch (e) {
@@ -152,9 +161,40 @@ export class DemandeService {
         this.prisma.besoin.updateMany({ where: { lotId, statut: "signe" }, data: { statut: "engage", engageLe: maintenant } }),
         this.prisma.journalGroupe.create({ data: { lotId, evenement: "demande_envoyee", details: { negoces: negocesDuLot.length, reponseAttendueLe: jour(new Date(maintenant.getTime() + DELAI_REPONSE_JOURS * JOUR)) } } }),
       ]);
-      void lot;
+      // Étape 8, message 2 : chaque artisan du lot (signé ou en attente), sans le nombre ni le nom des autres.
+      for (const companyId of new Set(lot.besoins.map((b) => b.companyId))) await this.notifications.prevenir(companyId, messageDemandeEnvoyee({ numero: lot.numero, negoces: negocesDuLot.length }));
     }
     return { lotsEnvoyes: partis.size, negocesPrevenus };
+  }
+
+  /**
+   * Étape 8 : un négoce répond par e-mail à `lot-<n°>@…` (webhook Resend). Sans la case d'accord, rien n'est pris en
+   * compte (section 6) : on lui renvoie son lien de dépôt, régénéré (le jeton n'est gardé que haché), et on journalise.
+   */
+  async reponseParEmail(numeroLot: number, expediteur: string): Promise<{ traite: boolean; raison?: string }> {
+    const email = /<([^>]+)>/.exec(expediteur)?.[1]?.trim().toLowerCase() ?? expediteur.trim().toLowerCase();
+    const lot = await this.prisma.lotGroupe.findUnique({ where: { numero: numeroLot } });
+    if (!lot) return { traite: false, raison: "lot_inconnu" };
+    const reponse = await this.prisma.reponseNegoce.findFirst({ where: { lotId: lot.id, negoce: { email } }, include: { negoce: true } });
+    if (!reponse) return { traite: false, raison: "negoce_inconnu" };
+    await this.prisma.journalGroupe.create({ data: { lotId: lot.id, evenement: "reponse_par_email", details: { negoce: reponse.negoceId, deposeLe: reponse.deposeLe ? jour(reponse.deposeLe) : null } } });
+    if (lot.statut !== "envoye" || reponse.deposeLe) return { traite: true, raison: reponse.deposeLe ? "deja_deposee" : "lot_ferme" };
+    const jeton = randomBytes(24).toString("base64url");
+    await this.prisma.reponseNegoce.update({ where: { id: reponse.id }, data: { tokenHash: hash(jeton) } });
+    const lien = `${this.reglages.webAppUrl}/reponse/${jeton}`;
+    await this.email.send({
+      to: reponse.negoce.email,
+      subject: `Lot n° ${lot.numero} : votre réponse n'est pas encore prise en compte`,
+      text: [
+        "Bonjour,",
+        `Merci pour votre réponse au lot n° ${lot.numero}. Pour qu'elle soit prise en compte, déposez votre devis sur votre page et cochez l'accord de commission :`,
+        lien,
+        `${PHRASE_COMMISSION}`,
+        `${NOM_DEMANDE}, par BatiClair`,
+      ].join("\n\n"),
+      html: `<p>Bonjour,</p><p>Merci pour votre réponse au lot n° ${lot.numero}. Pour qu'elle soit prise en compte, déposez votre devis sur votre page et cochez l'accord de commission :</p><p><a href="${lien}">${lien}</a></p><p><strong>${PHRASE_COMMISSION}</strong></p><p>${NOM_DEMANDE}, par BatiClair</p>`,
+    });
+    return { traite: true };
   }
 
   /** La page de réponse d'un négoce, lue par son lien. */

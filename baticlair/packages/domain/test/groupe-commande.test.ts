@@ -33,12 +33,19 @@ describe("groupé, étape 7 : le bon de commande et le récapitulatif", () => {
     expect(JSON.stringify(recap)).toContain("2 bons de commande, total HT du lot : 851,00 €");
   });
 
-  it("la facture : 2 % × total HT du lot, à 30 jours ; relancée une fois après l'échéance", () => {
-    expect(factureDeCommission(851, d("2026-11-10"))).toEqual({ montantHt: 17.02, echeanceLe: d("2026-12-10") });
-    const doc = documentFacture({ numero: 1, numeroLot: 12, negoce: { nom: "Négoce Carrelage", email: "carrelage@example.com" }, totalLotHt: 851, montantHt: 17.02, emiseLe: d("2026-11-10"), echeanceLe: d("2026-12-10"), versionContrat: "2026-10-20" });
-    expect(JSON.stringify(doc)).toContain("17,02 €");
-    expect(JSON.stringify(doc)).toContain("payable à 30 jours, soit le 10 décembre 2026");
-    expect(JSON.stringify(doc)).toContain("à compléter par le fondateur");
+  it("la facture : 2 % × total HT du lot + TVA 20 %, à 30 jours, l'émetteur de la configuration ; relancée une fois après l'échéance", () => {
+    expect(factureDeCommission(851, d("2026-11-10"))).toEqual({ montantHt: 17.02, montantTva: 3.4, montantTtc: 20.42, echeanceLe: d("2026-12-10") });
+    const emetteur = { nom: "Société Émettrice", forme: "SARL", siret: "000 000 000 00000", adresse: "1 rue de l'Exemple, 22000 Ville", tvaIntracom: "FR00000000000" };
+    const doc = documentFacture({ numero: 1, numeroLot: 12, negoce: { nom: "Négoce Carrelage", email: "carrelage@example.com" }, totalLotHt: 851, montantHt: 17.02, emiseLe: d("2026-11-10"), echeanceLe: d("2026-12-10"), versionContrat: "2026-10-20", tvaPourcent: 20 }, emetteur);
+    const texte = JSON.stringify(doc);
+    expect(texte).toContain("Total HT : 17,02 €");
+    expect(texte).toContain("TVA 20 % : 3,40 €");
+    expect(texte).toContain("Total TTC : 20,42 €");
+    expect(texte).toContain("Société Émettrice, SARL");
+    expect(texte).toContain("TVA intracommunautaire FR00000000000");
+    expect(texte).not.toContain("projet");
+    expect(texte).toContain("payable à 30 jours, soit le 10 décembre 2026");
+    expect(JSON.stringify(documentFacture({ numero: 1, numeroLot: 12, negoce: { nom: "N", email: "n@example.com" }, totalLotHt: 851, montantHt: 17.02, emiseLe: d("2026-11-10"), echeanceLe: d("2026-12-10"), versionContrat: "2026-10-20", tvaPourcent: 20 }, null))).toContain("Émetteur non configuré");
     expect(factureARelancer({ statut: "envoyee", echeanceLe: d("2026-12-10"), relanceeLe: null, payeeLe: null }, d("2026-12-11"))).toBe(true);
     expect(factureARelancer({ statut: "envoyee", echeanceLe: d("2026-12-10"), relanceeLe: null, payeeLe: null }, d("2026-12-10"))).toBe(false);
     expect(factureARelancer({ statut: "envoyee", echeanceLe: d("2026-12-10"), relanceeLe: d("2026-12-11"), payeeLe: null }, d("2026-12-20"))).toBe(false);

@@ -6,9 +6,14 @@ import {
   factureARelancer,
   factureDeCommission,
   livraisonARelancer,
+  messageDesistement,
+  messageLivraisonDuJour,
+  messageNegoceRetenu,
   sanctionDesistement,
   totalDuBon,
   type BonDeCommande,
+  type EmetteurFacture,
+  type MessageArtisan,
 } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
@@ -28,10 +33,18 @@ const pdfJoint = (nom: string, pdf: Uint8Array) => ({ filename: nom, contentType
  * livraison d'un tap (« Livré » / « Problème »), relancé à J+15 ; un désistement après bon de commande est journalisé à
  * part (avertissement, puis exclusion 6 mois) et le négoce est prévenu.
  */
+export interface ReglagesFacture {
+  emetteur: EmetteurFacture | null;
+  tvaPourcent: number;
+}
+
 export class CommandeService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly email: TransactionalEmailSender,
+    private readonly facture: ReglagesFacture,
+    /** Étape 8 : les messages 3 et 4 de la section 3, l'avertissement du désistement. */
+    private readonly notifications: { prevenir(companyId: string, message: MessageArtisan, courriel?: { objet: string; texte: string; piecesJointes?: { filename: string; contentType: string; contentBase64: string }[] }): Promise<unknown>; emailDe(companyId: string): Promise<string | null> },
   ) {}
 
   /** Les lots choisis dont les offres n'ont pas encore de bon : bons, récapitulatif, copie à l'artisan, facture. */
@@ -90,24 +103,24 @@ export class CommandeService {
         await tx.journalGroupe.create({ data: { lotId: lot.id, evenement: "bons_envoyes", details: { negoce: negoce.id, bons: docs.length, totalLotHt } } });
       });
       bons += docs.length;
-      // Copie à chaque artisan : son bon, sans ceux des autres.
+      // Étape 8, message 3 (push + e-mail avec son bon, sans ceux des autres) : « Vos 31 bacs : X € chez A (−Y %). Bon de
+      // commande transmis, livraison le 3 nov. »
       for (const d of docs) {
-        if (!d.artisanEmail) continue;
-        try {
-          await this.email.send({
-            to: d.artisanEmail,
-            subject: `Ton bon de commande, tarif groupé lot n° ${lot.numero}`,
-            text: [
-              "Bonjour,",
-              `Ton bon de commande est parti chez ${negoce.nom} : ${d.bon.lignes.map((l) => `${l.quantite} ${l.unite} ${l.designation}`).join(", ")} à ${d.bon.lignes[0]!.prixUnitaire.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} € HT l'unité${d.bon.dateLivraison ? `, livraison prévue le ${jour(d.bon.dateLivraison)}` : ""}.`,
-              "Tu commandes sur ton compte, tu es livré sur ton chantier, tu paies comme d'habitude. Le jour prévu, dis-nous d'un tap si tout est arrivé.",
-              "BatiClair",
-            ].join("\n\n"),
-            attachments: [pdfJoint(`bon-de-commande-lot-${lot.numero}.pdf`, d.pdf)],
-          });
-        } catch {
-          // La copie à l'artisan n'est pas bloquante : le bon est parti chez le négoce et visible dans l'app.
-        }
+        const offre = lot.offres.find((o) => o.id === d.offreId)!;
+        const message = messageNegoceRetenu({
+          quantite: d.bon.lignes[0]!.quantite,
+          unite: d.bon.lignes[0]!.unite,
+          prixUnitaire: d.bon.lignes[0]!.prixUnitaire,
+          prixReference: offre.prixReference ? Number(offre.prixReference) : null,
+          negoce: negoce.nom,
+          dateLivraison: d.bon.dateLivraison,
+          numero: lot.numero,
+        });
+        await this.notifications.prevenir(offre.besoin.companyId, message, {
+          objet: `Ton bon de commande, tarif groupé lot n° ${lot.numero}`,
+          texte: `Bonjour,\n\n${message.corps}\n\nTu commandes sur ton compte, tu es livré sur ton chantier, tu paies comme d'habitude. Le jour prévu, dis-nous d'un tap si tout est arrivé.\n\nBatiClair`,
+          piecesJointes: [pdfJoint(`bon-de-commande-lot-${lot.numero}.pdf`, d.pdf)],
+        });
       }
       await this.emettreLaFacture(lot.id, negoce, totalLotHt, maintenant);
     }
@@ -123,16 +136,17 @@ export class CommandeService {
       await this.prisma.journalGroupe.create({ data: { lotId, evenement: "facture_sans_accord", details: { negoce: negoce.id, totalLotHt } } });
       return;
     }
-    const { montantHt, echeanceLe } = factureDeCommission(totalLotHt, maintenant, Number(accord.tauxPourcent));
+    const { montantHt, montantTtc, echeanceLe } = factureDeCommission(totalLotHt, maintenant, Number(accord.tauxPourcent), this.facture.tvaPourcent);
     const creee = await this.prisma.factureNegoce.create({ data: { lotId, negoceId: negoce.id, accordId: accord.id, totalLotHt, montantHt, emiseLe: maintenant, echeanceLe } });
-    const doc = documentFacture({ numero: creee.numero, numeroLot: lot.numero, negoce, totalLotHt, montantHt, emiseLe: maintenant, echeanceLe, versionContrat: accord.versionContrat });
+    if (!this.facture.emetteur) await this.prisma.journalGroupe.create({ data: { lotId, evenement: "facture_emetteur_manquant", details: { numero: creee.numero } } });
+    const doc = documentFacture({ numero: creee.numero, numeroLot: lot.numero, negoce, totalLotHt, montantHt, emiseLe: maintenant, echeanceLe, versionContrat: accord.versionContrat, tvaPourcent: this.facture.tvaPourcent }, this.facture.emetteur);
     const pdf = await pdfDeTexte(doc.titre, doc.blocs);
     let envoyee = false;
     try {
       await this.email.send({
         to: negoce.email,
         subject: `Facture n° ${creee.numero}, commission d'apporteur d'affaires, lot n° ${lot.numero}`,
-        text: `Bonjour,\n\nConformément à l'accord accepté lors de votre réponse (version ${accord.versionContrat}), vous trouverez ci-joint la facture de commission de ${montantHt.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} € HT (${Number(accord.tauxPourcent)} % de ${totalLotHt.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} € HT), payable à 30 jours, soit le ${jour(echeanceLe)}.\n\nBatiClair`,
+        text: `Bonjour,\n\nConformément à l'accord accepté lors de votre réponse (version ${accord.versionContrat}), vous trouverez ci-joint la facture de commission de ${montantHt.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} € HT, soit ${montantTtc.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} € TTC (${Number(accord.tauxPourcent)} % de ${totalLotHt.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} € HT, TVA ${this.facture.tvaPourcent} %), payable à 30 jours, soit le ${jour(echeanceLe)}.\n\nBatiClair`,
         attachments: [pdfJoint(`facture-${creee.numero}.pdf`, pdf)],
         mustDeliver: true,
       });
@@ -229,7 +243,30 @@ export class CommandeService {
     } catch {
       // Journalisé ; Greg le voit.
     }
+    // Étape 8 (décision du fondateur, 2026-10-20) : l'avertissement à l'artisan, par e-mail.
+    const avertissement = messageDesistement(s);
+    const to = await this.notifications.emailDe(tenant.companyId);
+    if (to) {
+      try {
+        await this.email.send({ to, subject: avertissement.objet, text: avertissement.texte });
+      } catch {
+        // Journalisé plus haut ; rien d'autre.
+      }
+    }
     return { sanction: s.sanction, excluJusquau: s.excluJusquau ? jour(s.excluJusquau) : null };
+  }
+
+  /** Étape 8, message 4 : le jour prévu, « Livraison aujourd'hui. Tout est arrivé ? », une fois. */
+  async prevenirLesLivraisonsDuJour(maintenant = new Date()): Promise<{ prevenues: number }> {
+    const aujourdHui = new Date(jour(maintenant));
+    const livraisons = await this.prisma.livraison.findMany({ where: { statut: "prevue", prevenuLe: null, datePrevue: { lte: aujourdHui } }, include: { bon: { include: { offre: { include: { besoin: { select: { companyId: true } }, lot: { select: { numero: true } } } } } } } });
+    let prevenues = 0;
+    for (const l of livraisons) {
+      await this.notifications.prevenir(l.bon.offre.besoin.companyId, messageLivraisonDuJour({ numero: l.bon.offre.lot.numero }));
+      await this.prisma.livraison.update({ where: { id: l.id }, data: { prevenuLe: maintenant } });
+      prevenues++;
+    }
+    return { prevenues };
   }
 
   /** L'entreprise est-elle exclue du groupé (section 4 c) ? */

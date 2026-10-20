@@ -1137,6 +1137,8 @@ model Livraison {
   statut     String    @default("prevue")
   confirmeLe DateTime?
   relanceLe  DateTime?
+  /// Étape 8 : « Livraison aujourd'hui. Tout est arrivé ? » envoyé le jour prévu, une fois.
+  prevenuLe  DateTime?
   createdAt  DateTime  @default(now())
 
   bon BonCommande @relation(fields: [bonId], references: [id], onDelete: Cascade)
