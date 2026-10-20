@@ -8,7 +8,7 @@ import type { RegroupementService } from "./regroupement.service.js";
 import { siretBienForme, type SiretVerifier } from "./siret-verifier.js";
 
 /** Pourquoi le groupé reste fermé à une entreprise (section 5 du parcours groupé). Gratuit pour l'artisan (décision du fondateur, 2026-10-20) : aucune condition d'abonnement. */
-export type RaisonFermeture = "siret_non_verifie" | "exclu_du_groupe";
+export type RaisonFermeture = "siret_non_verifie" | "exclu_du_groupe" | "departement_ferme";
 
 export interface BesoinVue {
   id: string;
@@ -71,22 +71,29 @@ export class GroupeService {
     private readonly commande: { exclue(companyId: string): Promise<boolean> },
     /** Étape 8 : « Vos 31 bacs sont dans le groupé Côtes-d'Armor. Prochain lot lundi. » */
     private readonly notifications: { prevenir(companyId: string, message: MessageArtisan): Promise<unknown> },
+    /** Étape 9 : les départements ouverts (`GROUPE_DEPARTEMENTS`, `null` = tous) et les admins. */
+    private readonly reglages: { departements: string[] | null; admins: string[] } = { departements: null, admins: [] },
   ) {}
 
   /**
    * L'état du groupé pour l'entreprise : ouvert ou pourquoi pas, et les trois étapes de l'onglet « Groupé » (demande du
    * fondateur, 2026-10-20) : SIRET vérifié, un devis déposé, des négoces ajoutés ; chacune se coche quand elle est faite.
    */
-  async etat(tenant: TenantContext): Promise<{ eligible: boolean; raisons: RaisonFermeture[]; siret: { renseigne: boolean; verifie: boolean }; etapes: { siret: boolean; devis: boolean; negoces: boolean } }> {
-    const [c, devis, negoces] = await Promise.all([
-      this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { siret: true, siretVerifieLe: true } }),
+  async etat(tenant: TenantContext): Promise<{ eligible: boolean; raisons: RaisonFermeture[]; siret: { renseigne: boolean; verifie: boolean }; etapes: { siret: boolean; devis: boolean; negoces: boolean }; departement: string | null; admin: boolean }> {
+    const [c, devis, negoces, user] = await Promise.all([
+      this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { siret: true, siretVerifieLe: true, address: true } }),
       this.prisma.takeoff.count({ where: { companyId: tenant.companyId } }),
       this.prisma.negoceArtisan.count({ where: { companyId: tenant.companyId } }),
+      this.prisma.user.findUnique({ where: { id: tenant.userId }, select: { email: true } }),
     ]);
     const raisons: RaisonFermeture[] = [];
     if (!c.siretVerifieLe) raisons.push("siret_non_verifie");
     if (await this.commande.exclue(tenant.companyId)) raisons.push("exclu_du_groupe");
-    return { eligible: raisons.length === 0, raisons, siret: { renseigne: !!c.siret, verifie: !!c.siretVerifieLe }, etapes: { siret: !!c.siretVerifieLe, devis: devis > 0, negoces: negoces > 0 } };
+    const departement = zoneDuCodePostal(c.address ?? "");
+    // Étape 9 : ouverture par département (le 22 d'abord). Sans adresse, on ne ferme pas ici : l'adresse se demande à la proposition.
+    if (this.reglages.departements && departement && !this.reglages.departements.includes(departement)) raisons.push("departement_ferme");
+    const admin = !!user && this.reglages.admins.includes(user.email.toLowerCase());
+    return { eligible: raisons.length === 0, raisons, siret: { renseigne: !!c.siret, verifie: !!c.siretVerifieLe }, etapes: { siret: !!c.siretVerifieLe, devis: devis > 0, negoces: negoces > 0 }, departement, admin };
   }
 
   /** « Mes lots » (onglet Groupé) : chaque besoin de l'entreprise avec son chantier et son lot ; jamais les autres artisans. */

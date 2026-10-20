@@ -94,11 +94,13 @@ describe("isolation entre entreprises, toutes les routes", () => {
       ).id,
       offre: "",
       bon: "",
+      lot: "",
     };
     // Étape 6 : une offre de A, sur un lot choisi.
     const lotA = await ctx.prisma.lotGroupe.create({ data: { cle: "lib:a||", famille: "couverture", zone: "29", fenetreTot: new Date("2026-11-02"), fenetreTard: new Date("2026-11-20"), statut: "choisi", besoins: { connect: { id: ids.besoin } } } });
     const offreA = await ctx.prisma.offreArtisan.create({ data: { lotId: lotA.id, besoinId: ids.besoin, prixUnitaire: 10 } });
     ids.offre = offreA.id;
+    ids.lot = lotA.id;
     // Étape 7 : le bon de commande de A, et sa livraison.
     const bonA = await ctx.prisma.bonCommande.create({ data: { offreId: offreA.id, negoceId: ids.negoce, livraison: { create: {} } } });
     ids.bon = bonA.id;
@@ -124,6 +126,9 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/reponse$/, "jeton-inconnu-de-b-0000000000000000"],
         [/\/groupe\/offres$/, ids.offre],
         [/\/groupe\/bons$/, ids.bon],
+        // Étape 9 : l'admin (B n'est pas admin : 403, jamais une donnée de A).
+        [/\/admin\/groupe\/lots$/, ids.lot],
+        [/\/admin\/groupe\/factures$/, ids.lot],
       ];
       const hit = byPrefix.find(([re]) => re.test(prefix));
       if (!hit) throw new Error(`Paramètre sans identifiant de A : ${path} (${param})`);

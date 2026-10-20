@@ -7,6 +7,7 @@ import type { TransactionalEmailSender } from "../../platform/email/email.port.j
 import { PDF_READER, PdfJsPdfReader, type PdfReader } from "../documents/index.js";
 import { TakeoffModule, TakeoffService } from "../takeoff/index.js";
 import { TenancyModule } from "../tenancy/index.js";
+import { AdminGroupeService } from "./application/admin-groupe.service.js";
 import { ChoixService } from "./application/choix.service.js";
 import { CommandeService } from "./application/commande.service.js";
 import { NotificationsGroupeService } from "./application/notifications-groupe.service.js";
@@ -18,6 +19,7 @@ import { FakeNegoceExtractor } from "./infrastructure/fake-negoce-extractor.js";
 import { InseeSiretVerifier, SIRET_VERIFIER, siretBienForme, type SiretVerifier } from "./application/siret-verifier.js";
 import { NegocesService } from "./application/negoces.service.js";
 import { RegroupementService } from "./application/regroupement.service.js";
+import { AdminGroupeController } from "./http/admin-groupe.controller.js";
 import { GroupeController } from "./http/groupe.controller.js";
 import { NegocesController } from "./http/negoces.controller.js";
 import { RegroupementController } from "./http/regroupement.controller.js";
@@ -27,7 +29,7 @@ import { WebhookResendController } from "./http/webhook-resend.controller.js";
 
 @Module({
   imports: [TenancyModule, TakeoffModule],
-  controllers: [GroupeController, NegocesController, RegroupementController, ReponseController, WebhookResendController, TestMailboxController],
+  controllers: [GroupeController, NegocesController, RegroupementController, ReponseController, WebhookResendController, TestMailboxController, AdminGroupeController],
   providers: [
     {
       provide: SIRET_VERIFIER,
@@ -41,6 +43,7 @@ import { WebhookResendController } from "./http/webhook-resend.controller.js";
     },
     { provide: RegroupementService, useFactory: (p: PrismaService) => new RegroupementService(p), inject: [PrismaService] },
     { provide: PDF_READER, useFactory: () => new PdfJsPdfReader() },
+    { provide: AdminGroupeService, useFactory: (p: PrismaService, c: AppConfig) => new AdminGroupeService(p, c.groupe.departements), inject: [PrismaService, CONFIG] },
     { provide: NotificationsGroupeService, useFactory: (p: PrismaService, push: PushSender, e: TransactionalEmailSender) => new NotificationsGroupeService(p, push, e), inject: [PrismaService, PUSH_SENDER, EMAIL_SENDER] },
     { provide: CommandeService, useFactory: (p: PrismaService, e: TransactionalEmailSender, c: AppConfig, n: NotificationsGroupeService) => new CommandeService(p, e, c.groupe.facture, n), inject: [PrismaService, EMAIL_SENDER, CONFIG, NotificationsGroupeService] },
     { provide: ChoixService, useFactory: (p: PrismaService, c: CommandeService) => new ChoixService(p, c), inject: [PrismaService, CommandeService] },
@@ -66,8 +69,9 @@ import { WebhookResendController } from "./http/webhook-resend.controller.js";
     },
     {
       provide: GroupeService,
-      useFactory: (p: PrismaService, t: TakeoffService, s: SiretVerifier, r: RegroupementService, d: DemandeService, c: CommandeService, n: NotificationsGroupeService) => new GroupeService(p, (tenant, id) => t.reviewed(tenant, id), s, r, d, c, n),
-      inject: [PrismaService, TakeoffService, SIRET_VERIFIER, RegroupementService, DemandeService, CommandeService, NotificationsGroupeService],
+      useFactory: (p: PrismaService, t: TakeoffService, s: SiretVerifier, r: RegroupementService, d: DemandeService, c: CommandeService, n: NotificationsGroupeService, cfg: AppConfig) =>
+        new GroupeService(p, (tenant, id) => t.reviewed(tenant, id), s, r, d, c, n, { departements: cfg.groupe.departements, admins: cfg.groupe.admins }),
+      inject: [PrismaService, TakeoffService, SIRET_VERIFIER, RegroupementService, DemandeService, CommandeService, NotificationsGroupeService, CONFIG],
     },
     { provide: NegocesService, useFactory: (p: PrismaService, c: AppConfig) => new NegocesService(p, c.authSecret), inject: [PrismaService, CONFIG] },
   ],

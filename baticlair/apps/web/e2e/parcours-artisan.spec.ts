@@ -9,8 +9,7 @@ const PNG_1PX = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUl
 
 const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
-async function signUp(page: Page) {
-  const email = `artisan-${unique()}@example.fr`;
+async function signUp(page: Page, email = `artisan-${unique()}@example.fr`) {
   await page.goto("/");
   // Sans session : renvoyé vers la connexion, puis vers l'inscription.
   await expect(page).toHaveURL(/\/connexion\?retour=%2F/);
@@ -1839,21 +1838,24 @@ async function artisanAuGroupe(page: Page, entreprise: string, adresse: string):
   await bar.getByRole("radio", { name: "Chantier signé" }).click();
   await bar.getByRole("checkbox", { name: /je m'engage à commander ces quantités au prix groupé obtenu, chez le négoce retenu/ }).check();
   await bar.getByRole("button", { name: "Proposer" }).click();
-  await expect(page.getByRole("region", { name: "Au groupé", exact: true }).getByText("Chantier signé", { exact: true })).toBeVisible();
+  // « Chantier signé » tant que le lot attend ; « Engagé, lot parti » quand ce signé a formé le lot et que la demande est partie.
+  await expect(page.getByRole("region", { name: "Au groupé", exact: true }).getByText(/^(Chantier signé|Engagé, lot parti)$/)).toBeVisible();
 }
 
 test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux négoces qui répondent par e-mail, dépôt avec la case 2 %, choix, bon de commande, « Livré »", async ({ page, browser }) => {
   test.setTimeout(180_000);
   // Artisan A (deux négoces de couverture dans sa liste), puis artisan B dans un autre navigateur : le lot se forme au deuxième signé.
   await artisanAuGroupe(page, "Toitures Martin", "3 quai Duguay-Trouin, 35400 Saint-Malo");
+  // La boîte de test garde les e-mails des parcours précédents (même négoce) : on ne lit que ceux de ce lot.
+  const dejaRecus = (await emailsVers(page, "ardoises@example.com")).length;
   expect(await apiCall(page, "POST", "/v1/groupe/negoces", { nom: "Négoce Ardoises", email: "ardoises@example.com", familles: ["couverture"], numeroCompte: "C-12" })).toBe(201);
   expect(await apiCall(page, "POST", "/v1/groupe/negoces", { nom: "Négoce Généraliste", email: "general@example.com", familles: ["couverture", "second_oeuvre"] })).toBe(201);
   const contexteB = await browser.newContext({ ...(test.info().project.use as object) });
   const pageB = await contexteB.newPage();
   await artisanAuGroupe(pageB, "Toitures Le Bihan", "12 rue de Kerampont, 35400 Saint-Malo");
   // La demande est partie aux deux négoces, avec l'adresse de réponse du lot.
-  await expect.poll(async () => (await emailsVers(page, "ardoises@example.com")).length, { timeout: 20_000 }).toBeGreaterThan(0);
-  const demande = (await emailsVers(page, "ardoises@example.com"))[0]!;
+  await expect.poll(async () => (await emailsVers(page, "ardoises@example.com")).length, { timeout: 20_000 }).toBeGreaterThan(dejaRecus);
+  const demande = (await emailsVers(page, "ardoises@example.com")).at(-1)!;
   expect(demande.subject).toContain("Regroupement artisans");
   expect(demande.replyTo).toMatch(/^lot-\d+@reponses\.example\.com$/);
   await expect(page.getByRole("region", { name: "Au groupé", exact: true })).toBeVisible();
@@ -1901,3 +1903,42 @@ test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux 
   await expect(lotsB.getByText("Toitures Martin")).toHaveCount(0);
   await contexteB.close();
 });
+
+test("BatiClair Groupé, étape 9 : l'admin (Greg seul) voit les lots, le journal d'un lot, les factures et leur export CSV", async ({ page }) => {
+  // Un artisan ordinaire ne voit pas le lien ; le compte admin (GROUPE_ADMINS) le voit sur l'onglet Groupé.
+  await signUp(page);
+  await page.goto("/groupe");
+  await expect(page.getByRole("heading", { name: "Groupé" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Admin groupé" })).toHaveCount(0);
+  expect(await page.evaluate(async () => (await fetch("/v1/admin/groupe")).status)).toBe(403);
+  await page.context().clearCookies();
+  // Le compte admin est unique (GROUPE_ADMINS) : créé au premier passage, retrouvé ensuite (téléphone puis ordinateur, même base).
+  await page.goto("/connexion");
+  await page.getByLabel("E-mail").fill("admin-groupe@example.fr");
+  await page.getByLabel("Mot de passe").fill("motdepasse-solide");
+  await page.getByRole("button", { name: "Se connecter" }).click();
+  await expect(page.getByRole("heading", { name: /^Bonjour Jean/ }).or(page.getByRole("alert").filter({ hasText: "incorrect" }))).toBeVisible();
+  if (await page.getByRole("alert").filter({ hasText: "incorrect" }).count()) await signUp(page, "admin-groupe@example.fr");
+  await page.goto("/groupe");
+  await page.getByRole("link", { name: "Admin groupé" }).click();
+  await expect(page.getByRole("heading", { name: "Admin groupé" })).toBeVisible();
+  const rubriques = page.getByRole("navigation", { name: "Rubriques de l'admin" });
+  // Les lots des parcours précédents (même base) : chacun avec son journal ; sinon « Aucun lot ».
+  const lots = page.getByRole("list", { name: "Lots" });
+  await expect(lots).toBeVisible();
+  const premier = lots.getByRole("button", { name: "Journal" }).first();
+  if (await premier.count()) {
+    await premier.click();
+    await expect(page.getByRole("region", { name: /^Journal du lot n° \d+/ })).toBeVisible();
+  } else {
+    await expect(lots.getByText("Aucun lot.")).toBeVisible();
+  }
+  await rubriques.getByRole("button", { name: "Factures" }).click();
+  await expect(page.getByRole("link", { name: /CSV/ })).toHaveAttribute("href", "/v1/admin/groupe/factures.csv");
+  const csv = await page.evaluate(async () => (await fetch("/v1/admin/groupe/factures.csv")).text());
+  expect(csv.split("\n")[0]).toBe("mois;numero;negoce;lot;total_lot_ht;commission_ht;tva;ttc;statut;emise_le;echeance_le;payee_le");
+  await rubriques.getByRole("button", { name: "Exclusions" }).click();
+  await expect(page.getByRole("list", { name: "Exclusions" })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+});
+

@@ -10,3 +10,4 @@ export { ChoixService } from "./application/choix.service.js";
 export { CommandeService } from "./application/commande.service.js";
 export { NotificationsGroupeService } from "./application/notifications-groupe.service.js";
 export { signatureValide } from "./http/webhook-resend.controller.js";
+export { AdminGroupeService } from "./application/admin-groupe.service.js";

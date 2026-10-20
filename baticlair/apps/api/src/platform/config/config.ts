@@ -127,6 +127,10 @@ const envSchema = z
     REPONSES_DOMAINE: z.string().min(3).optional(),
     /** Le secret de signature du webhook Resend (Svix, « whsec_… »). Vide : webhook fermé. */
     RESEND_WEBHOOK_SECRET: z.string().min(8).optional(),
+    /** Les e-mails qui voient l'admin du groupé (étape 9) ; vides : les validateurs du référentiel (Greg). */
+    GROUPE_ADMINS: z.string().optional(),
+    /** Les départements où le groupé est ouvert (« 22,29 »), ou « * » pour tous (défaut). Décision du 2026-10-20 : le 22 d'abord en prod. */
+    GROUPE_DEPARTEMENTS: z.string().default("*"),
     VERCEL_ENV: z.string().optional(),
     /**
      * Limitation de débit (connexion, inscription, dépôts de devis, lecture IA) : `on` partout,
@@ -212,6 +216,9 @@ export interface AppConfig {
     facture: { emetteur: { nom: string; forme: string | null; siret: string; adresse: string; tvaIntracom: string } | null; tvaPourcent: number };
     reponsesDomaine: string | null;
     resendWebhookSecret: string | null;
+    admins: string[];
+    /** `null` = tous les départements ; sinon la liste des départements ouverts. */
+    departements: string[] | null;
   };
   rateLimit: { enabled: boolean };
   alerts: { webhookUrl?: string; email?: string };
@@ -305,6 +312,8 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       },
       reponsesDomaine: e.REPONSES_DOMAINE ?? null,
       resendWebhookSecret: e.RESEND_WEBHOOK_SECRET ?? null,
+      admins: (e.GROUPE_ADMINS ?? e.REFERENTIAL_VALIDATORS ?? "").split(",").map((x) => x.trim().toLowerCase()).filter(Boolean),
+      departements: e.GROUPE_DEPARTEMENTS.trim() === "*" ? null : e.GROUPE_DEPARTEMENTS.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean),
     },
     rateLimit: { enabled: e.RATE_LIMIT === "on" },
     ...(e.CRON_SECRET ? { cronSecret: e.CRON_SECRET } : {}),

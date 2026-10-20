@@ -38,6 +38,8 @@ const apiEnv = {
   RATE_LIMIT: "off",
   // BatiClair Groupé : allumé pour ses parcours ; une entreprise sans SIRET vérifié n'en voit rien (gratuit pour l'artisan).
   GROUPE: "on",
+  // Étape 9 : l'admin du groupé (journal, lots, factures) pour ce seul compte des parcours.
+  GROUPE_ADMINS: "admin-groupe@example.fr",
 };
 
 export default defineConfig({

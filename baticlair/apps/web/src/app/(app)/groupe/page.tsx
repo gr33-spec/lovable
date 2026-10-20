@@ -10,8 +10,10 @@ import { useResource } from "@/lib/use-resource";
 
 interface EtatGroupe {
   eligible: boolean;
+  raisons: string[];
   siret: { renseigne: boolean; verifie: boolean };
   etapes: { siret: boolean; devis: boolean; negoces: boolean };
+  admin: boolean;
 }
 interface BesoinLot {
   id: string;
@@ -57,7 +59,7 @@ const STATUT_LOT: Record<string, string> = {
 /**
  * L'ONGLET « GROUPÉ » (demande du fondateur, 2026-10-20) : visible même sans SIRET ni devis. Une phrase et trois étapes
  * illustrées disent ce que ça fait (section 2 du parcours groupé) ; puis ce qui manque pour en profiter, coché au fur et
- * à mesure ; tout rempli, « Mes lots ».
+ * à mesure ; « Mes lots » dès que le groupé est ouvert à l'entreprise (SIRET vérifié), la liste des manques au-dessus tant qu'il en reste.
  */
 export default function GroupePage() {
   const fetchEtat = useCallback((signal: AbortSignal) => api<EtatGroupe>("/v1/groupe", { signal }), []);
@@ -88,6 +90,16 @@ export default function GroupePage() {
   return (
     <>
       <PageTitle>Groupé</PageTitle>
+      {etat.data.admin ? (
+        <Link href="/admin/groupe" className="min-h-10 self-start py-2 text-sm font-bold text-accent-text underline decoration-dotted underline-offset-4">
+          Admin groupé
+        </Link>
+      ) : null}
+      {etat.data.raisons.includes("departement_ferme") ? (
+        <p role="status" className="rounded-3xl bg-warn-bg p-4 font-semibold text-warn">
+          Le groupé n&apos;est pas encore ouvert dans ton département. On te prévient dès que c&apos;est le cas.
+        </p>
+      ) : null}
       <Card className="flex flex-col gap-4 p-4">
         <p className="text-[17px] leading-snug font-extrabold">{accroche(company?.trades[0])}</p>
         <ol aria-label="Comment ça marche" className="grid grid-cols-3 gap-2">
@@ -106,9 +118,7 @@ export default function GroupePage() {
         <p className="text-[13px] text-muted">Gratuit pour toi. Personne ne voit ton nom ni tes chantiers.</p>
       </Card>
 
-      {tout ? (
-        <MesLots />
-      ) : (
+      {tout ? null : (
         <Card className="flex flex-col gap-3 p-4">
           <h2 className="font-display text-xl font-extrabold">Pour en profiter</h2>
           <ul aria-label="Ce qui manque" className="flex flex-col gap-2">
@@ -139,6 +149,8 @@ export default function GroupePage() {
           </ul>
         </Card>
       )}
+      {/* Un artisan déjà dans un lot (proposé depuis « Ton chantier ») voit toujours ses lots, même sans négoce à lui. */}
+      {etat.data.eligible ? <MesLots /> : null}
     </>
   );
 }
