@@ -26,6 +26,9 @@ describe("loadConfig", () => {
 
   it("refuse un e-mail simulé en production", () => {
     expect(() => loadConfig({ ...base, NODE_ENV: "production", EMAIL_PROVIDER: "console" })).toThrow(/EMAIL_PROVIDER/);
+    // Groupé : le repli « SIRET bien formé = vérifié » est réservé à la prévisualisation (décision du fondateur, 2026-10-20).
+    expect(() => loadConfig({ ...base, SIRET_VERIFICATION: "forme", VERCEL_ENV: "production" })).toThrow(/SIRET_VERIFICATION/);
+    expect(loadConfig({ ...base, SIRET_VERIFICATION: "forme", VERCEL_ENV: "preview" }).groupe.siretVerification).toBe("forme");
   });
 
   it("choisit le service d'e-mail selon l'environnement", () => {

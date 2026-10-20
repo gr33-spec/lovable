@@ -25,10 +25,12 @@ import { ReponseController } from "./http/reponse.controller.js";
   providers: [
     {
       provide: SIRET_VERIFIER,
-      // Hors production et sans clé INSEE (tests, e2e) : un SIRET bien formé vaut actif, sans appel réseau. En production,
-      // seule l'API Sirene vérifie.
+      // En test sans clé INSEE, ou en prévisualisation avec `SIRET_VERIFICATION=forme` (refusé en production par la
+      // configuration) : un SIRET bien formé vaut actif, sans appel réseau. Sinon, seule l'API Sirene vérifie.
       useFactory: (c: AppConfig): SiretVerifier =>
-        c.env === "test" && !c.groupe.inseeApiKey ? { verifier: async (s) => (siretBienForme(s) ? { statut: "actif" } : { statut: "inconnu" }) } : new InseeSiretVerifier(c.groupe.inseeApiKey),
+        (c.env === "test" && !c.groupe.inseeApiKey) || c.groupe.siretVerification === "forme"
+          ? { verifier: async (s) => (siretBienForme(s) ? { statut: "actif" } : { statut: "inconnu" }) }
+          : new InseeSiretVerifier(c.groupe.inseeApiKey),
       inject: [CONFIG],
     },
     { provide: RegroupementService, useFactory: (p: PrismaService) => new RegroupementService(p), inject: [PrismaService] },

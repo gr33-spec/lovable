@@ -103,6 +103,12 @@ const envSchema = z
     /** Clé d'intégration de l'API Sirene de l'INSEE (vérification du SIRET avant le groupé). Vide : vérification indisponible. */
     INSEE_API_KEY: z.string().min(1).optional(),
     /**
+     * Vérification du SIRET : `insee` (l'API Sirene, la seule admise en production) ou `forme` (un SIRET bien formé vaut
+     * vérifié : prévisualisation seulement, décision du fondateur, 2026-10-20). Refusé en production Vercel.
+     */
+    SIRET_VERIFICATION: z.enum(["insee", "forme"]).default("insee"),
+    VERCEL_ENV: z.string().optional(),
+    /**
      * Limitation de débit (connexion, inscription, dépôts de devis, lecture IA) : `on` partout,
      * `off` uniquement pour les tests automatisés qui enchaînent des centaines de requêtes.
      */
@@ -172,7 +178,7 @@ export interface AppConfig {
   referentialValidators: string[];
   billing: { plans: Plan[]; activationCodes: Record<string, string>; enforced: boolean };
   /** BatiClair Groupé : désactivé par défaut (`GROUPE=on` l'ouvre). */
-  groupe: { enabled: boolean; inseeApiKey: string | null };
+  groupe: { enabled: boolean; inseeApiKey: string | null; siretVerification: "insee" | "forme" };
   rateLimit: { enabled: boolean };
   alerts: { webhookUrl?: string; email?: string };
   cronSecret?: string;
@@ -213,6 +219,9 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     throw new ConfigError([`BILLING_PLANS : ${err instanceof Error ? err.message : String(err)}`]);
   }
   const isDeployed = e.NODE_ENV === "production" || e.NODE_ENV === "staging";
+  if (e.SIRET_VERIFICATION === "forme" && e.VERCEL_ENV === "production") {
+    throw new ConfigError(["SIRET_VERIFICATION : « forme » est réservé à la prévisualisation, jamais en production"]);
+  }
   const emailProvider = e.EMAIL_PROVIDER ?? (e.RESEND_API_KEY ? "resend" : isDeployed ? "disabled" : "console");
   const oauth = (id?: string, secret?: string) => (id && secret ? { clientId: id, clientSecret: secret } : undefined);
   const google = oauth(e.GOOGLE_CLIENT_ID, e.GOOGLE_CLIENT_SECRET);
@@ -237,7 +246,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       .map((x) => x.trim().toLowerCase())
       .filter((x) => x.length > 0),
     billing: { plans, activationCodes: parseActivationCodes(e.PLAN_ACTIVATION_CODES), enforced: e.PAYWALL === "on" },
-    groupe: { enabled: e.GROUPE === "on", inseeApiKey: e.INSEE_API_KEY ?? null },
+    groupe: { enabled: e.GROUPE === "on", inseeApiKey: e.INSEE_API_KEY ?? null, siretVerification: e.SIRET_VERIFICATION },
     rateLimit: { enabled: e.RATE_LIMIT === "on" },
     ...(e.CRON_SECRET ? { cronSecret: e.CRON_SECRET } : {}),
     alerts: { ...(e.ALERT_WEBHOOK_URL ? { webhookUrl: e.ALERT_WEBHOOK_URL } : {}), ...(e.ALERT_EMAIL ? { email: e.ALERT_EMAIL } : {}) },
