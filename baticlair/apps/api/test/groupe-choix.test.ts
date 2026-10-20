@@ -85,13 +85,14 @@ describe("groupé, étape 6 : le choix du négoce et l'offre de chaque artisan",
     expect(lot.offres).toHaveLength(2);
     const retenu = lot.journal.find((j) => j.evenement === "negoce_retenu")!.details as { ecartes: { raison: string }[] };
     expect(retenu.ecartes.map((e) => e.raison).sort()).toEqual(["palier_insuffisant", "pas_concerne"]);
-    // Le besoin en attente redevient libre (volume probable seulement) ; les engagés restent au lot.
-    expect(lot.besoins.filter((x) => x.statut === "engage")).toHaveLength(2);
+    // Le besoin en attente redevient libre (volume probable seulement) ; les engagés restent au lot et, le bon de commande
+    // parti aussitôt (étape 7), passent « commandé ».
+    expect(lot.besoins.filter((x) => x.statut === "commande")).toHaveLength(2);
     expect(await ctx.prisma.besoin.count({ where: { statut: "en_attente", lotId: null } })).toBe(1);
 
     // L'offre de A : sa quantité, son prix, le négoce, la date ; jamais le nombre ni le nom des autres artisans.
     const vueA = (await a.agent.get(`/v1/projects/${a.projectId}/groupe`).expect(200)).body.besoins[0];
-    expect(vueA.statut).toBe("engage");
+    expect(vueA.statut).toBe("commande");
     expect(vueA.offre).toMatchObject({ lotNumero: lot.numero, prixUnitaire: "18.5", negoce: "Négoce Carrelage", prixReference: null, economie: null, probleme: null });
     expect(vueA.offre.dateLivraison).toMatch(/^2026-11-/);
     const offres = (await a.agent.get("/v1/groupe/offres").expect(200)).body.offres as { id: string; designation: string; quantite: string }[];
