@@ -18,13 +18,15 @@ export function EconomiesGroupeCard() {
   const { data } = useResource(fetchEconomies);
   if (!data) return null;
   return (
-    <Card className="flex items-center gap-3 p-4" aria-label="Économisé grâce au groupé">
-      <Users size={22} aria-hidden="true" className="shrink-0 text-accent-text" />
-      <div className="flex flex-col">
-        <span className="text-[13px] font-extrabold text-muted">Économisé grâce au groupé</span>
-        <span className="text-xl font-extrabold">{Number(data.total).toLocaleString("fr-FR", { minimumFractionDigits: 2 })} €</span>
-        <span className="text-[12px] text-muted">{data.lots === 0 ? "Aucune commande groupée pour l'instant." : `${data.lots} commande${data.lots > 1 ? "s" : ""} groupée${data.lots > 1 ? "s" : ""}`}</span>
-      </div>
-    </Card>
+    <section aria-label="Économisé grâce au groupé">
+      <Card className="flex items-center gap-3 p-4">
+        <Users size={22} aria-hidden="true" className="shrink-0 text-accent-text" />
+        <div className="flex flex-col">
+          <span className="text-[13px] font-extrabold text-muted">Économisé grâce au groupé</span>
+          <span className="text-xl font-extrabold">{Number(data.total).toLocaleString("fr-FR", { minimumFractionDigits: 2 })} €</span>
+          <span className="text-[12px] text-muted">{data.lots === 0 ? "Aucune commande groupée pour l'instant." : `${data.lots} commande${data.lots > 1 ? "s" : ""} groupée${data.lots > 1 ? "s" : ""}`}</span>
+        </div>
+      </Card>
+    </section>
   );
 }
