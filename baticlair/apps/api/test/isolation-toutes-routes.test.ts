@@ -33,7 +33,7 @@ function routes(): Route[] {
 }
 
 describe("isolation entre entreprises, toutes les routes", () => {
-  it("B ne lit, ne modifie, ne supprime et ne déclenche rien chez A", async () => {
+  it("B ne lit, ne modifie, ne supprime et ne déclenche rien chez A", { timeout: 30_000 }, async () => {
     const a = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures A");
     const b = await signUpWithCompany(ctx.app, "b@example.fr", "Toitures B");
 

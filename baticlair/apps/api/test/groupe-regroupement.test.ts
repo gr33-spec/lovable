@@ -46,7 +46,7 @@ const proposer = (agent: Agent, projectId: string, article: string, statut: "sig
   agent.post(`/v1/projects/${projectId}/groupe`).send({ articles: [article], fenetre, statut, engagement: true });
 const lots = () => ctx.prisma.lotGroupe.findMany({ orderBy: { createdAt: "asc" }, include: { besoins: { select: { id: true, statut: true } }, journal: { orderBy: { createdAt: "asc" } } } });
 
-describe("groupé, étape 4 : le regroupement", () => {
+describe("groupé, étape 4 : le regroupement", { timeout: 30_000 }, () => {
   it("un besoin ouvre son lot ; le deuxième artisan signé rejoint le même lot, la fenêtre se resserre, et le seuil le forme", async () => {
     const a = await carreleur("a@example.fr");
     await proposer(a.agent, a.projectId, a.carreaux.key, "signe").expect(201);

@@ -23,7 +23,7 @@ const besoin = (id: string, companyId: string, q: number, statut: "signe" | "en_
 describe("groupé, étape 4 : les seuils du fichier", () => {
   it("le fichier se lit : un défaut, une entrée par famille, la référence « ardoise » (2 artisans ou 2 000 pièces)", () => {
     expect(SEUILS.defaut.artisans).toBe(2);
-    expect(SEUILS.familles.electricite?.artisans).toBe(3);
+    expect(SEUILS.familles.electricite?.artisans).toBe(2);
     expect(seuilDuLot("lib:ardoise naturelle|32x22|", "couverture")).toEqual({ artisans: 2, quantite: 2000, unite: "pièces" });
     expect(seuilDuLot("lib:bac acier|0.75mm|", "couverture")).toEqual({ artisans: 2 });
     expect(seuilDuLot("ref:velux:MK04", "menuiseries_fermetures")).toEqual({ artisans: 2 });

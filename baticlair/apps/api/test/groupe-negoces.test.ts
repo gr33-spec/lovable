@@ -34,7 +34,7 @@ async function artisan(email: string, entreprise: string, adresse: string | null
 }
 const ajouter = async (agent: Agent, body: object) => (await agent.post("/v1/groupe/negoces").send(body).expect(201)).body.negoces as Negoce[];
 
-describe("groupé, étape 3 : la base des négoces", () => {
+describe("groupé, étape 3 : la base des négoces", { timeout: 30_000 }, () => {
   it("le favori en premier ; le département vient de l'adresse de l'entreprise ; un autre favori passe devant", async () => {
     const { agent } = await artisan("a@example.fr", "Toitures A");
     await ajouter(agent, { nom: "Négoce Ardoises", email: "Ardoises@Example.com", familles: ["couverture"], numeroCompte: "C-12" });

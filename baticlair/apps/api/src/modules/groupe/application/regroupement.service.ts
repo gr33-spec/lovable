@@ -45,6 +45,8 @@ export class RegroupementService {
         touches.add(a.lotId);
       }
     });
+    // Un besoin passé « signé » dans un lot déjà ouvert peut aussi atteindre le seuil : chaque lot ouvert est revu.
+    for (const l of await this.prisma.lotGroupe.findMany({ where: { statut: "ouvert" }, select: { id: true } })) touches.add(l.id);
     let lotsFormes = 0;
     for (const lotId of touches) if (await this.formerSiSeuil(lotId)) lotsFormes++;
     return { lotsCrees: r.aCreer.length, besoinsRattaches: r.aRattacher.length, lotsFormes };

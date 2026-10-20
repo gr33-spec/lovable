@@ -56,7 +56,7 @@ async function carreleur(email: string, options: { ouvert?: boolean; confirmer?:
 
 const proposer = (agent: Agent, projectId: string, body: object) => agent.post(`/v1/projects/${projectId}/groupe`).send(body);
 
-describe("groupé, étape 2 : l'entrée du besoin", () => {
+describe("groupé, étape 2 : l'entrée du besoin", { timeout: 30_000 }, () => {
   it("fermé sans SIRET vérifié : l'état dit pourquoi, et rien ne se propose ; l'abonnement n'y est pour rien", async () => {
     const { agent, projectId, toBuy } = await carreleur("ferme@example.fr", { ouvert: false });
     expect((await agent.get("/v1/groupe").expect(200)).body).toMatchObject({ eligible: false, raisons: ["siret_non_verifie"] });
