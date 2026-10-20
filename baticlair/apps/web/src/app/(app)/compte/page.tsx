@@ -1,5 +1,6 @@
 "use client";
 
+import { AideBouton } from "@/components/aide";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 import { EconomiesGroupeCard } from "@/components/economies-groupe";
@@ -55,7 +56,10 @@ export default function ComptePage() {
   return (
     <>
       <BackButton fallback="/" />
-      <PageTitle>Mon compte</PageTitle>
+      <div className="flex items-start justify-between gap-3">
+        <PageTitle>Mon compte</PageTitle>
+        <AideBouton sujet="compte" />
+      </div>
       {error ? <ErrorNotice error={error} /> : null}
       <EconomiesGroupeCard />
       <Card className="flex flex-col gap-3 p-4">

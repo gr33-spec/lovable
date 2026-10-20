@@ -2194,3 +2194,36 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
   await expect(pageB.getByRole("list", { name: "Mes lots" }).getByText(/Négoce retenu/).first()).toBeVisible();
   await contexteB.close();
 });
+
+test("Aide « ? » : sur chaque écran, trois lignes au plus, tutoiement, un tap ouvre, un tap ferme", async ({ page }) => {
+  await signUp(page);
+  for (const [chemin, titre] of [
+    ["/groupe", "Aide : Le groupé"],
+    ["/fournisseurs", "Aide : Tes négoces"],
+    ["/compte", "Aide : Ton compte"],
+    ["/chantiers", "Aide : Tes chantiers"],
+  ] as const) {
+    await page.goto(chemin);
+    const bouton = page.getByRole("button", { name: "Aide" });
+    await expect(bouton).toBeVisible();
+    await expect(page.getByRole("dialog", { name: titre })).toHaveCount(0);
+    await bouton.click();
+    const aide = page.getByRole("dialog", { name: titre });
+    await expect(aide).toBeVisible();
+    const lignes = await aide.getByRole("listitem").allTextContents();
+    expect(lignes.length).toBeLessThanOrEqual(3);
+    expect(lignes.length).toBeGreaterThan(0);
+    for (const l of lignes) expect(l).toMatch(/\b(tu|te|ton|ta|tes|toi)\b|\bt'/i);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+    await aide.getByRole("button", { name: "Compris" }).click();
+    await expect(aide).toHaveCount(0);
+  }
+  // Sur « Ton chantier » (le quantitatif), le « ? » est à côté du titre de la liste.
+  await createProject(page, "Toiture Aide", "M. Client", "3 quai Duguay-Trouin, 35400 Saint-Malo");
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await passQuestions(page);
+  await confirmDoubts(page);
+  await page.getByRole("region", { name: "Liste des fournitures" }).getByRole("button", { name: "Aide" }).click();
+  await expect(page.getByRole("dialog", { name: "Aide : Ton chantier" })).toBeVisible();
+});
+

@@ -1,5 +1,6 @@
 "use client";
 
+import { AideBouton } from "@/components/aide";
 import Link from "next/link";
 import { Check, FileText, Store, Tag, Truck, Users } from "lucide-react";
 import { useCallback, useState } from "react";
@@ -91,7 +92,10 @@ export default function GroupePage() {
 
   return (
     <>
-      <PageTitle>Groupé</PageTitle>
+      <div className="flex items-start justify-between gap-3">
+        <PageTitle>Groupé</PageTitle>
+        <AideBouton sujet="groupe" />
+      </div>
       {etat.data.admin ? (
         <Link href="/admin/groupe" className="min-h-10 self-start py-2 text-sm font-bold text-accent-text underline decoration-dotted underline-offset-4">
           Admin groupé
