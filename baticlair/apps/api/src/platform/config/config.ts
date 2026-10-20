@@ -131,6 +131,9 @@ const envSchema = z
     GROUPE_ADMINS: z.string().optional(),
     /** Les départements où le groupé est ouvert (« 22,29 »), ou « * » pour tous (défaut). Décision du 2026-10-20 : le 22 d'abord en prod. */
     GROUPE_DEPARTEMENTS: z.string().default("*"),
+    /** La base négoces Sirene (bloc 3 du plan) : départements importés et codes NAF du négoce de matériaux. */
+    SIRENE_DEPARTEMENTS: z.string().default("22,29,35,56"),
+    SIRENE_NAF: z.string().default("46.73A,46.73B,47.52A,47.52B"),
     VERCEL_ENV: z.string().optional(),
     /**
      * Limitation de débit (connexion, inscription, dépôts de devis, lecture IA) : `on` partout,
@@ -219,6 +222,7 @@ export interface AppConfig {
     admins: string[];
     /** `null` = tous les départements ; sinon la liste des départements ouverts. */
     departements: string[] | null;
+    sirene: { departements: string[]; naf: string[] };
   };
   rateLimit: { enabled: boolean };
   alerts: { webhookUrl?: string; email?: string };
@@ -314,6 +318,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       resendWebhookSecret: e.RESEND_WEBHOOK_SECRET ?? null,
       admins: (e.GROUPE_ADMINS ?? e.REFERENTIAL_VALIDATORS ?? "").split(",").map((x) => x.trim().toLowerCase()).filter(Boolean),
       departements: e.GROUPE_DEPARTEMENTS.trim() === "*" ? null : e.GROUPE_DEPARTEMENTS.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean),
+      sirene: { departements: e.SIRENE_DEPARTEMENTS.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean), naf: e.SIRENE_NAF.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean) },
     },
     rateLimit: { enabled: e.RATE_LIMIT === "on" },
     ...(e.CRON_SECRET ? { cronSecret: e.CRON_SECRET } : {}),

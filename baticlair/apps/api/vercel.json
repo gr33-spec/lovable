@@ -10,6 +10,10 @@
     {
       "path": "/v1/internal/groupe/regrouper",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/v1/internal/groupe/sirene",
+      "schedule": "0 5 1 * *"
     }
   ],
   "git": {

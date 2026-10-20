@@ -11,3 +11,4 @@ export { CommandeService } from "./application/commande.service.js";
 export { NotificationsGroupeService } from "./application/notifications-groupe.service.js";
 export { signatureValide } from "./http/webhook-resend.controller.js";
 export { AdminGroupeService } from "./application/admin-groupe.service.js";
+export { SireneService, SIRENE_HTTP, type SireneHttp, type SuggestionNegoce } from "./application/sirene.service.js";

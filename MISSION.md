@@ -216,6 +216,6 @@ Décisions seul → `baticlair/docs/DECISIONS.md`. Rapport chaque jour 18 h, der
 Groupé sur #284 ; le reste : une branche `claude/…` et une PR par bloc. Dans l'ordre :
 1. Étape 8 : e2e iPhone complet, un lot de bout en bout, deux négoces qui répondent par e-mail (webhook) — FAIT
 2. Étape 9 : admin Greg (journal, ouverture par département, lots, négoces, accords, factures, exclusions, clore, export CSV factures) — FAIT
-3. Base négoces préremplie (Sirene, NAF 46.73A/B, 47.52A/B, départements 22/29/35/56, suggestions dans « Mes négoces »)
+3. Base négoces préremplie (Sirene, NAF 46.73A/B, 47.52A/B, départements 22/29/35/56, suggestions dans « Mes négoces ») — FAIT : table `negoce_sirene`, `SireneService` (import page par page par curseur, `GET /v1/internal/groupe/sirene` le 1er du mois 5 h UTC avec `CRON_SECRET`, `INSEE_API_KEY` obligatoire, `SIRENE_DEPARTEMENTS`/`SIRENE_NAF`), `GET /v1/groupe/negoces/suggestions?q=` (3 lettres, département de l'entreprise d'abord, 8 au plus, source « Sirene » + date d'import), liste sous « Nom du négoce » ; test API `groupe-sirene.test.ts`
 4. Scénarios e2e groupé supplémentaires (2 départements, 2 références, seuil, lot clos à 7 j, pas concerné, plafond, SIRET invalide, désistement ×2, retrait, lot après exclusion)
 5. Landing page `/` · 6. Pages légales + case CGU · 7. PWA · 8. Audit sécurité + `docs/SECURITE.md` · 9. Non-régression 179 lectures + couverture 90 % domaine groupé · 10. Aide « ? » · 11. `docs/groupe/MISE-EN-PROD.md` · 12. `docs/DETTE.md` + performance

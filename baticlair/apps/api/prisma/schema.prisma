@@ -1014,6 +1014,24 @@ model NegoceArtisan {
   @@map("negoce_artisan")
 }
 
+/// La base négoces préremplie (plan du 20 octobre, bloc 3) : les établissements actifs de l'API Sirene en négoce de
+/// matériaux (NAF 46.73A/B, 47.52A/B) dans les départements ouverts ; suggérés à la saisie dans « Mes négoces ».
+/// Jamais d'e-mail ici : l'artisan le donne, et le négoce ne reçoit rien sans lui.
+model NegoceSirene {
+  siret       String   @id
+  siren       String
+  nom         String
+  adresse     String
+  codePostal  String
+  commune     String
+  departement String
+  naf         String
+  importeLe   DateTime @default(now())
+
+  @@index([departement])
+  @@map("negoce_sirene")
+}
+
 /// Un lot du groupé (§2 étape 4) : une référence, une famille, une zone, une fenêtre. Un seul lot ouvert par référence
 /// et par zone (§5).
 model LotGroupe {

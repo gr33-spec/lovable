@@ -18,6 +18,8 @@ import { AnthropicNegoceExtractor } from "./infrastructure/anthropic-negoce-extr
 import { FakeNegoceExtractor } from "./infrastructure/fake-negoce-extractor.js";
 import { InseeSiretVerifier, SIRET_VERIFIER, siretBienForme, type SiretVerifier } from "./application/siret-verifier.js";
 import { NegocesService } from "./application/negoces.service.js";
+import { SIRENE_HTTP, SireneService, type SireneHttp } from "./application/sirene.service.js";
+import { SireneController } from "./http/sirene.controller.js";
 import { RegroupementService } from "./application/regroupement.service.js";
 import { AdminGroupeController } from "./http/admin-groupe.controller.js";
 import { GroupeController } from "./http/groupe.controller.js";
@@ -29,7 +31,7 @@ import { WebhookResendController } from "./http/webhook-resend.controller.js";
 
 @Module({
   imports: [TenancyModule, TakeoffModule],
-  controllers: [GroupeController, NegocesController, RegroupementController, ReponseController, WebhookResendController, TestMailboxController, AdminGroupeController],
+  controllers: [GroupeController, NegocesController, RegroupementController, ReponseController, WebhookResendController, TestMailboxController, AdminGroupeController, SireneController],
   providers: [
     {
       provide: SIRET_VERIFIER,
@@ -74,6 +76,8 @@ import { WebhookResendController } from "./http/webhook-resend.controller.js";
       inject: [PrismaService, TakeoffService, SIRET_VERIFIER, RegroupementService, DemandeService, CommandeService, NotificationsGroupeService, CONFIG],
     },
     { provide: NegocesService, useFactory: (p: PrismaService, c: AppConfig) => new NegocesService(p, c.authSecret), inject: [PrismaService, CONFIG] },
+    { provide: SIRENE_HTTP, useValue: fetch as unknown as SireneHttp },
+    { provide: SireneService, useFactory: (p: PrismaService, h: SireneHttp, c: AppConfig) => new SireneService(p, h, { apiKey: c.groupe.inseeApiKey, ...c.groupe.sirene }), inject: [PrismaService, SIRENE_HTTP, CONFIG] },
   ],
   exports: [GroupeService, NegocesService, RegroupementService, DemandeService, ChoixService, CommandeService, NotificationsGroupeService],
 })

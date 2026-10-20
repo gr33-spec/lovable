@@ -1,7 +1,7 @@
 "use client";
 
 import { Copy, Plus, Star } from "lucide-react";
-import { useCallback, useId, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 import { Badge, Button, Card, ErrorNotice, Field } from "@/components/ui";
 import { api, ApiError, newActionKey } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
@@ -142,9 +142,48 @@ export function MesNegocesCard() {
   );
 }
 
+interface SuggestionNegoce {
+  siret: string;
+  nom: string;
+  adresse: string;
+  codePostal: string;
+  commune: string;
+  departement: string;
+  source: "Sirene";
+  importeLe: string;
+}
+
+const jourFr = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+
+/**
+ * Bloc 3 du plan du 20 octobre : dès trois lettres, la base Sirene (négoces de matériaux des départements ouverts)
+ * suggère le nom ; un tap le reprend, avec le département. L'e-mail reste à saisir : Sirene n'en a pas.
+ */
+function useSuggestions(nom: string, actives: boolean): SuggestionNegoce[] {
+  const [resultat, setResultat] = useState<{ q: string; liste: SuggestionNegoce[] }>({ q: "", liste: [] });
+  const q = actives ? nom.trim() : "";
+  useEffect(() => {
+    if (q.length < 3) return;
+    const controller = new AbortController();
+    const t = setTimeout(() => {
+      api<{ suggestions: SuggestionNegoce[] }>(`/v1/groupe/negoces/suggestions?q=${encodeURIComponent(q)}`, { signal: controller.signal })
+        .then((r) => setResultat({ q, liste: r.suggestions }))
+        .catch(() => setResultat({ q, liste: [] }));
+    }, 250);
+    return () => {
+      clearTimeout(t);
+      controller.abort();
+    };
+  }, [q]);
+  // Une liste ne vaut que pour la saisie qui l'a demandée : effacée ou raccourcie, plus rien.
+  return q.length >= 3 && resultat.q === q ? resultat.liste : [];
+}
+
 function NegoceForm({ premier, onDone }: { premier: boolean; onDone: (ok: boolean) => void }) {
   const id = useId();
   const [nom, setNom] = useState("");
+  const [choisi, setChoisi] = useState<SuggestionNegoce | null>(null);
+  const suggestions = useSuggestions(nom, choisi === null);
   const [email, setEmail] = useState("");
   const [numeroCompte, setNumeroCompte] = useState("");
   const [departement, setDepartement] = useState("");
@@ -184,7 +223,30 @@ function NegoceForm({ premier, onDone }: { premier: boolean; onDone: (ok: boolea
         void submit();
       }}
     >
-      <Field id={`${id}-nom`} label="Nom du négoce" required maxLength={120} value={nom} onChange={(e) => setNom(e.target.value)} />
+      <Field id={`${id}-nom`} label="Nom du négoce" required maxLength={120} value={nom} autoComplete="off" onChange={(e) => (setNom(e.target.value), setChoisi(null))} hint={choisi ? `${choisi.adresse}, ${choisi.codePostal} ${choisi.commune} · source Sirene, importé le ${jourFr(choisi.importeLe)}` : undefined} />
+      {suggestions.length > 0 ? (
+        <ul aria-label="Négoces connus (Sirene)" className="flex flex-col divide-y divide-line rounded-2xl bg-surface shadow-card">
+          {suggestions.map((s) => (
+            <li key={s.siret}>
+              <button
+                type="button"
+                className="flex min-h-12 w-full flex-col items-start gap-0.5 px-4 py-2 text-left"
+                onClick={() => {
+                  setChoisi(s);
+                  setNom(s.nom);
+                  if (!departement.trim()) setDepartement(s.departement);
+                }}
+              >
+                <span className="text-[15px] font-bold">{s.nom}</span>
+                <span className="text-[13px] text-muted">
+                  {s.adresse ? `${s.adresse}, ` : ""}
+                  {s.codePostal} {s.commune} · Sirene, {jourFr(s.importeLe)}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
       <Field id={`${id}-email`} label="E-mail où il reçoit les demandes" type="email" inputMode="email" required maxLength={200} value={email} onChange={(e) => setEmail(e.target.value)} />
       <Field id={`${id}-compte`} label="Ton numéro de compte chez lui" hint="Facultatif : repris sur tes bons de commande ; sans lui, « ouverture de compte demandée »." maxLength={60} value={numeroCompte} onChange={(e) => setNumeroCompte(e.target.value)} />
       <Field id={`${id}-dep`} label="Département" hint="Facultatif : celui de ton entreprise par défaut (« 22 », « 2A », « 974 »)." maxLength={3} value={departement} onChange={(e) => setDepartement(e.target.value)} />
