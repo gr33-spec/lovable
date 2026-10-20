@@ -69,7 +69,19 @@ l'état complet ici et dire à Greg « contexte plein, relance une session avec 
   permanent avant/après ; ni paiement, ni CGU, ni mentions légales. **Chaque jour à 18 h (Paris)** : un seul message à Greg (ce qui
   est en prod, chiffres : métiers, ratios, tests, coût par devis ; au plus 3 décisions, avec recommandation).
 
-## 2. État au 2026-10-19
+## 2. État au 2026-10-20 (point de 18 h)
+
+En production (main) : inchangé depuis le 19 (jusqu'à #283, tableau de bord des métiers). Zéro appel API aujourd'hui.
+Branche `claude/saas-achat-artisans-prompt-1lyihx` = PR #284 (non fusionnée, décision de Greg) : groupé étapes 1 à 7
+faites (+ onglet « Groupé », accroche par métier, bloc grisé SIRET, page de réponse négoce, SIRET_VERIFICATION=forme en
+prévisualisation seulement, WEB_APP_URL multiple + origines `*-gr33-spec.vercel.app` acceptées en preview, santé `db` /
+`origine`). Prévisualisation Vercel ouverte pour cette seule branche : web
+`https://baticlair-git-claude-saas-achat-artisans-promp-67e67a-gr33-spec.vercel.app`, API
+`https://baticlair-api-git-claude-saas-achat-artisans-p-1271cd-gr33-spec.vercel.app` (Resend pas posé en Preview :
+`email:false`). Suites : domaine 658, API 373 + étape 7, e2e groupé verts. Reste : étapes 8 (notifications, webhook
+e-mail entrant) et 9 (admin Greg).
+
+## 2 ter. État au 2026-10-19 (archive)
 
 En production (main) : tout jusqu'à la PR #276 (fiche chauffage), plus #262 (autre chantier, `patrimoine/`, pas le nôtre).
 - #257 carte « Lots repérés » ; #258 chaque bouton du modèle passe (22 tiroirs) ; #259 repérage rapide des métiers puis une seule
