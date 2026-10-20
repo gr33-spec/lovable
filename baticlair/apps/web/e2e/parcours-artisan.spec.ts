@@ -1774,7 +1774,8 @@ test("BatiClair Groupé, l'onglet : visible sans SIRET ni devis, trois étapes c
   await expect(bloc.getByRole("button", { name: "Proposer au groupé" })).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(bloc).toBeInViewport();
-  await nav.getByRole("link", { name: "Groupé" }).click();
+  // Sur téléphone, le chantier se lit en plein écran sans la barre du menu : retour à l'onglet par l'adresse.
+  await page.goto("/groupe");
   await expect(manque.getByLabel("Fait")).toHaveCount(2);
   // Les négoces : tout est coché, l'onglet montre « Mes lots », vide.
   expect(await apiCall(page, "POST", "/v1/groupe/negoces", { nom: "Négoce Ardoises", email: "ardoises@example.com", familles: ["couverture"] })).toBe(201);
