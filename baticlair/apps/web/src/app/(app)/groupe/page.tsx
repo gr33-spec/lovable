@@ -14,6 +14,8 @@ interface EtatGroupe {
   siret: { renseigne: boolean; verifie: boolean };
   etapes: { siret: boolean; devis: boolean; negoces: boolean };
   admin: boolean;
+  /** Exclu du groupé (deux désistements en 12 mois) jusqu'à cette date, AAAA-MM-JJ. */
+  excluJusquau: string | null;
 }
 interface BesoinLot {
   id: string;
@@ -95,6 +97,11 @@ export default function GroupePage() {
           Admin groupé
         </Link>
       ) : null}
+      {etat.data.raisons.includes("exclu_du_groupe") ? (
+        <p role="status" className="rounded-3xl bg-warn-bg p-4 font-semibold text-warn">
+          Le groupé t&apos;est fermé{etat.data.excluJusquau ? ` jusqu'au ${jourFr(etat.data.excluJusquau)}` : ""} : deux désistements en 12 mois. Tes lots en cours restent visibles ci-dessous.
+        </p>
+      ) : null}
       {etat.data.raisons.includes("departement_ferme") ? (
         <p role="status" className="rounded-3xl bg-warn-bg p-4 font-semibold text-warn">
           Le groupé n&apos;est pas encore ouvert dans ton département. On te prévient dès que c&apos;est le cas.
@@ -150,7 +157,7 @@ export default function GroupePage() {
         </Card>
       )}
       {/* Un artisan déjà dans un lot (proposé depuis « Ton chantier ») voit toujours ses lots, même sans négoce à lui. */}
-      {etat.data.eligible ? <MesLots /> : null}
+      {etat.data.eligible || etat.data.raisons.includes("exclu_du_groupe") ? <MesLots /> : null}
     </>
   );
 }

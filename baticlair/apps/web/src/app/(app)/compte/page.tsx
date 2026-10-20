@@ -57,7 +57,6 @@ export default function ComptePage() {
       <BackButton fallback="/" />
       <PageTitle>Mon compte</PageTitle>
       {error ? <ErrorNotice error={error} /> : null}
-      <EconomiesGroupeCard />
       <Card className="flex flex-col gap-3 p-4">
         <div className="flex flex-col">
           <span className="text-[15px] font-bold">{me.user.name}</span>
@@ -134,6 +133,8 @@ export default function ComptePage() {
         Se déconnecter
       </Button>
       <MyData onDeleted={() => router.replace("/connexion?compte=supprime")} />
+      {/* En bas : la carte arrive après le chargement, sans décaler le reste de l'écran (Lighthouse, CLS). */}
+      <EconomiesGroupeCard />
     </>
   );
 }

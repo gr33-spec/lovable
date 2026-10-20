@@ -79,27 +79,30 @@ export class GroupeService {
    * L'état du groupé pour l'entreprise : ouvert ou pourquoi pas, et les trois étapes de l'onglet « Groupé » (demande du
    * fondateur, 2026-10-20) : SIRET vérifié, un devis déposé, des négoces ajoutés ; chacune se coche quand elle est faite.
    */
-  async etat(tenant: TenantContext): Promise<{ eligible: boolean; raisons: RaisonFermeture[]; siret: { renseigne: boolean; verifie: boolean }; etapes: { siret: boolean; devis: boolean; negoces: boolean }; departement: string | null; admin: boolean }> {
-    const [c, devis, negoces, user] = await Promise.all([
+  async etat(tenant: TenantContext): Promise<{ eligible: boolean; raisons: RaisonFermeture[]; siret: { renseigne: boolean; verifie: boolean }; etapes: { siret: boolean; devis: boolean; negoces: boolean }; departement: string | null; admin: boolean; excluJusquau: string | null }> {
+    const [c, devis, negoces, user, exclusion] = await Promise.all([
       this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { siret: true, siretVerifieLe: true, address: true } }),
       this.prisma.takeoff.count({ where: { companyId: tenant.companyId } }),
       this.prisma.negoceArtisan.count({ where: { companyId: tenant.companyId } }),
       this.prisma.user.findUnique({ where: { id: tenant.userId }, select: { email: true } }),
+      this.prisma.desistement.findFirst({ where: { companyId: tenant.companyId, excluJusquau: { gt: new Date() } }, orderBy: { excluJusquau: "desc" }, select: { excluJusquau: true } }),
     ]);
     const raisons: RaisonFermeture[] = [];
     if (!c.siretVerifieLe) raisons.push("siret_non_verifie");
     if (await this.commande.exclue(tenant.companyId)) raisons.push("exclu_du_groupe");
+    const excluJusquau = exclusion?.excluJusquau ? jour(exclusion.excluJusquau) : null;
     const departement = zoneDuCodePostal(c.address ?? "");
     // Étape 9 : ouverture par département (le 22 d'abord). Sans adresse, on ne ferme pas ici : l'adresse se demande à la proposition.
     if (this.reglages.departements && departement && !this.reglages.departements.includes(departement)) raisons.push("departement_ferme");
     const admin = !!user && this.reglages.admins.includes(user.email.toLowerCase());
-    return { eligible: raisons.length === 0, raisons, siret: { renseigne: !!c.siret, verifie: !!c.siretVerifieLe }, etapes: { siret: !!c.siretVerifieLe, devis: devis > 0, negoces: negoces > 0 }, departement, admin };
+    return { eligible: raisons.length === 0, raisons, siret: { renseigne: !!c.siret, verifie: !!c.siretVerifieLe }, etapes: { siret: !!c.siretVerifieLe, devis: devis > 0, negoces: negoces > 0 }, departement, admin, excluJusquau };
   }
 
   /** « Mes lots » (onglet Groupé) : chaque besoin de l'entreprise avec son chantier et son lot ; jamais les autres artisans. */
   async mesLots(tenant: TenantContext): Promise<(BesoinVue & { projectId: string; chantier: string; lot: { numero: number; statut: string } | null; bon: BonVue | null })[]> {
+    // Un besoin retiré avant le départ disparaît ; retiré par désistement (un bon existe), il reste visible : « Tu ne commandes pas ce lot ».
     const rows = await this.prisma.besoin.findMany({
-      where: { companyId: tenant.companyId, statut: { not: "retire" } },
+      where: { companyId: tenant.companyId, OR: [{ statut: { not: "retire" } }, { offre: { bon: { isNot: null } } }] },
       include: { lot: { select: { statut: true, numero: true, negoceRetenu: { select: { nom: true } } } }, offre: { include: { bon: { include: { livraison: true } } } }, project: { select: { name: true } } },
       orderBy: { createdAt: "desc" },
     });
