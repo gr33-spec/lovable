@@ -1799,3 +1799,105 @@ test("BatiClair Groupé, l'onglet : visible sans SIRET ni devis, trois étapes c
   await expect(economies).toContainText("0,00 €");
   await expect(economies).toContainText("Aucune commande groupée pour l'instant.");
 });
+
+/** La boîte aux lettres de test (décision du 2026-10-20) : les e-mails capturés par l'API, lus par le parcours. */
+async function emailsVers(page: Page, to: string): Promise<{ subject: string; text: string; replyTo: string | null; attachments: string[] }[]> {
+  return page.evaluate(async (to) => {
+    const res = await fetch(`/v1/internal/test/emails?to=${encodeURIComponent(to)}`, { headers: { authorization: "Bearer e2e-secret-de-la-tache" } });
+    return (await res.json()).emails;
+  }, to);
+}
+/** Le webhook Resend (`email.received`), signé comme Svix le fait, avec le secret des parcours. */
+async function reponseParEmail(page: Page, from: string, to: string): Promise<unknown> {
+  const corps = JSON.stringify({ type: "email.received", data: { from, to: [to], subject: "Re: demande de prix" } });
+  const id = `msg_${Date.now()}`;
+  const timestamp = String(Math.floor(Date.now() / 1000));
+  const secret = Buffer.from("e2e-secret-du-webhook-0000");
+  const signature = createHmac("sha256", secret).update(`${id}.${timestamp}.${corps}`).digest("base64");
+  return page.evaluate(
+    async ({ corps, id, timestamp, signature }) => {
+      const res = await fetch("/v1/webhooks/resend", { method: "POST", headers: { "content-type": "application/json", "svix-id": id, "svix-timestamp": timestamp, "svix-signature": `v1,${signature}` }, body: corps });
+      return { status: res.status, body: await res.json() };
+    },
+    { corps, id, timestamp, signature },
+  );
+}
+/** Un artisan prêt pour le groupé : compte, SIRET vérifié, un devis lu, une ligne proposée « chantier signé ». */
+async function artisanAuGroupe(page: Page, entreprise: string, adresse: string): Promise<void> {
+  await signUp(page);
+  expect(await apiCall(page, "PATCH", "/v1/company/profile", { name: entreprise, address: adresse, siret: "73282932000074", phone: null, email: null })).toBe(200);
+  expect(await apiCall(page, "POST", "/v1/groupe/siret")).toBe(200);
+  await createProject(page, `Toiture ${entreprise}`, "M. Client", adresse);
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await passQuestions(page);
+  await confirmDoubts(page);
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  await list.getByRole("button", { name: "Proposer au groupé" }).click();
+  const boxes = list.getByRole("checkbox", { name: /^Proposer au groupé : / }).and(page.locator(":enabled"));
+  await boxes.first().check();
+  const bar = page.getByRole("region", { name: "Proposer au groupé", exact: true });
+  await bar.getByRole("radio", { name: "Chantier signé" }).click();
+  await bar.getByRole("checkbox", { name: /je m'engage à commander ces quantités au prix groupé obtenu, chez le négoce retenu/ }).check();
+  await bar.getByRole("button", { name: "Proposer" }).click();
+  await expect(page.getByRole("region", { name: "Au groupé", exact: true }).getByText("Chantier signé", { exact: true })).toBeVisible();
+}
+
+test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux négoces qui répondent par e-mail, dépôt avec la case 2 %, choix, bon de commande, « Livré »", async ({ page, browser }) => {
+  test.setTimeout(180_000);
+  // Artisan A (deux négoces de couverture dans sa liste), puis artisan B dans un autre navigateur : le lot se forme au deuxième signé.
+  await artisanAuGroupe(page, "Toitures Martin", "3 quai Duguay-Trouin, 35400 Saint-Malo");
+  expect(await apiCall(page, "POST", "/v1/groupe/negoces", { nom: "Négoce Ardoises", email: "ardoises@example.com", familles: ["couverture"], numeroCompte: "C-12" })).toBe(201);
+  expect(await apiCall(page, "POST", "/v1/groupe/negoces", { nom: "Négoce Généraliste", email: "general@example.com", familles: ["couverture", "second_oeuvre"] })).toBe(201);
+  const contexteB = await browser.newContext({ ...(test.info().project.use as object) });
+  const pageB = await contexteB.newPage();
+  await artisanAuGroupe(pageB, "Toitures Le Bihan", "12 rue de Kerampont, 35400 Saint-Malo");
+  // La demande est partie aux deux négoces, avec l'adresse de réponse du lot.
+  await expect.poll(async () => (await emailsVers(page, "ardoises@example.com")).length, { timeout: 20_000 }).toBeGreaterThan(0);
+  const demande = (await emailsVers(page, "ardoises@example.com"))[0]!;
+  expect(demande.subject).toContain("Regroupement artisans");
+  expect(demande.replyTo).toMatch(/^lot-\d+@reponses\.example\.com$/);
+  await expect(page.getByRole("region", { name: "Au groupé", exact: true })).toBeVisible();
+  // Chaque négoce répond par e-mail : le webhook lui renvoie un lien de dépôt neuf, rien n'est pris sans la case.
+  for (const negoce of ["ardoises@example.com", "general@example.com"]) {
+    const r = (await reponseParEmail(page, `Négoce <${negoce}>`, demande.replyTo!)) as { status: number; body: { traite: boolean } };
+    expect(r.status).toBe(200);
+    expect(r.body.traite).toBe(true);
+    const relance = (await emailsVers(page, negoce)).at(-1)!;
+    expect(relance.subject).toContain("n'est pas encore prise en compte");
+    const lien = /https?:\/\/[^\s]+\/reponse\/[A-Za-z0-9_-]+/.exec(relance.text)![0]!.replace(/^https?:\/\/[^/]+/, "");
+    // Le négoce ouvre son lien, sans compte : le lot, la case obligatoire, le contrat à côté.
+    const contexteN = await browser.newContext({ ...(test.info().project.use as object) });
+    const pageN = await contexteN.newPage();
+    await pageN.goto(lien);
+    await expect(pageN.getByRole("heading", { name: /^Demande de prix, lot n° \d+/ })).toBeVisible();
+    await expect(pageN.getByRole("list", { name: "Chantiers à livrer" }).getByRole("listitem")).toHaveCount(2);
+    await expect(pageN.getByText("Toitures Martin")).toHaveCount(0);
+    const form = pageN.getByRole("form", { name: "Déposer mon devis" });
+    await expect(form.getByRole("link", { name: /Lire le contrat/ })).toHaveAttribute("href", /contrat\.pdf$/);
+    await form.locator('input[type="file"]').setInputFiles(path.join(__dirname, "fixtures", negoce.startsWith("ardoises") ? "devis-fournisseur-couvreur.pdf" : "devis-fournisseur-2.pdf"));
+    await expect(form.getByRole("button", { name: "Déposer mon devis" })).toBeDisabled();
+    await form.getByRole("checkbox", { name: "J'accepte la commission" }).check();
+    await form.getByRole("button", { name: "Déposer mon devis" }).click();
+    await expect(pageN.getByRole("status")).toContainText("Devis reçu, merci.");
+    expect(await pageN.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+    await contexteN.close();
+  }
+  // Tous ont répondu : le négoce est retenu, le bon de commande est parti, chaque artisan voit son offre et peut dire « Livré ».
+  await page.goto("/groupe");
+  const lots = page.getByRole("list", { name: "Mes lots" });
+  await expect(lots.getByText(/Négoce retenu/)).toBeVisible({ timeout: 20_000 });
+  await expect(lots.getByText(/€ HT l'unité chez Négoce/)).toBeVisible();
+  await expect(lots.getByText("Toitures Le Bihan")).toHaveCount(0);
+  await lots.getByRole("button", { name: "Livré" }).click();
+  await expect(lots.getByText("Livré, merci.")).toBeVisible();
+  // Le bon de commande et la facture sont partis chez le négoce retenu.
+  const auNegoce = [...(await emailsVers(page, "ardoises@example.com")), ...(await emailsVers(page, "general@example.com"))];
+  expect(auNegoce.some((m) => /bons? de commande/.test(m.subject))).toBe(true);
+  expect(auNegoce.some((m) => /^Facture n°/.test(m.subject))).toBe(true);
+  // B voit aussi son offre, sans le nom de A.
+  await pageB.goto("/groupe");
+  const lotsB = pageB.getByRole("list", { name: "Mes lots" });
+  await expect(lotsB.getByText(/Négoce retenu/)).toBeVisible();
+  await expect(lotsB.getByText("Toitures Martin")).toHaveCount(0);
+  await contexteB.close();
+});

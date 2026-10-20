@@ -12,7 +12,17 @@ const apiEnv = {
   AUTH_SECRET: "e2e-secret-e2e-secret-e2e-secret-0000",
   API_PUBLIC_URL: "http://localhost:3000",
   WEB_APP_URL: "http://localhost:3000",
-  EMAIL_PROVIDER: process.env.E2E_EMAIL_PROVIDER ?? "console",
+  // Les e-mails sont capturés et lus par les parcours (boîte aux lettres de test, `GET /v1/internal/test/emails`, secret CRON_SECRET).
+  EMAIL_PROVIDER: process.env.E2E_EMAIL_PROVIDER ?? "capture",
+  CRON_SECRET: "e2e-secret-de-la-tache",
+  // BatiClair Groupé, étape 8 : le webhook Resend entrant et l'adresse de réponse des lots, la facture de commission.
+  RESEND_WEBHOOK_SECRET: "whsec_ZTJlLXNlY3JldC1kdS13ZWJob29rLTAwMDA=",
+  REPONSES_DOMAINE: "reponses.example.com",
+  FACTURE_EMETTEUR_NOM: "Société Émettrice",
+  FACTURE_EMETTEUR_FORME: "SARL",
+  FACTURE_EMETTEUR_SIRET: "000 000 000 00000",
+  FACTURE_EMETTEUR_ADRESSE: "1 rue de l'Exemple, 22000 Ville",
+  FACTURE_EMETTEUR_TVA: "FR00000000000",
   AI_PROVIDER: "fake",
   PLAN_ACTIVATION_CODES: "E2E-SOLO-CODE:solo",
   // Le paywall est en pause en production (fondateur, 2026-10-11) ; les parcours gardent son écran prêt pour plus tard.

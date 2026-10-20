@@ -22,11 +22,12 @@ import { GroupeController } from "./http/groupe.controller.js";
 import { NegocesController } from "./http/negoces.controller.js";
 import { RegroupementController } from "./http/regroupement.controller.js";
 import { ReponseController } from "./http/reponse.controller.js";
+import { TestMailboxController } from "./http/test-mailbox.controller.js";
 import { WebhookResendController } from "./http/webhook-resend.controller.js";
 
 @Module({
   imports: [TenancyModule, TakeoffModule],
-  controllers: [GroupeController, NegocesController, RegroupementController, ReponseController, WebhookResendController],
+  controllers: [GroupeController, NegocesController, RegroupementController, ReponseController, WebhookResendController, TestMailboxController],
   providers: [
     {
       provide: SIRET_VERIFIER,
