@@ -42,6 +42,13 @@ export class GroupeController {
     return this.groupe.etat(tenant);
   }
 
+  /** Onglet « Groupé », « Mes lots » : mes besoins et leur lot. */
+  @Get("groupe/lots")
+  async lots(@Tenant() tenant: TenantContext) {
+    this.actif();
+    return { besoins: await this.groupe.mesLots(tenant) };
+  }
+
   @Post("groupe/siret")
   @HttpCode(200)
   async verifierSiret(@Tenant() tenant: TenantContext) {

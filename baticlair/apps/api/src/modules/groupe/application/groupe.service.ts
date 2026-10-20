@@ -62,11 +62,29 @@ export class GroupeService {
     private readonly demande: { envoyerLesLotsFormes(): Promise<unknown> },
   ) {}
 
-  async etat(tenant: TenantContext): Promise<{ eligible: boolean; raisons: RaisonFermeture[]; siret: { renseigne: boolean; verifie: boolean } }> {
-    const c = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { siret: true, siretVerifieLe: true } });
+  /**
+   * L'état du groupé pour l'entreprise : ouvert ou pourquoi pas, et les trois étapes de l'onglet « Groupé » (demande du
+   * fondateur, 2026-10-20) : SIRET vérifié, un devis déposé, des négoces ajoutés ; chacune se coche quand elle est faite.
+   */
+  async etat(tenant: TenantContext): Promise<{ eligible: boolean; raisons: RaisonFermeture[]; siret: { renseigne: boolean; verifie: boolean }; etapes: { siret: boolean; devis: boolean; negoces: boolean } }> {
+    const [c, devis, negoces] = await Promise.all([
+      this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { siret: true, siretVerifieLe: true } }),
+      this.prisma.takeoff.count({ where: { companyId: tenant.companyId } }),
+      this.prisma.negoceArtisan.count({ where: { companyId: tenant.companyId } }),
+    ]);
     const raisons: RaisonFermeture[] = [];
     if (!c.siretVerifieLe) raisons.push("siret_non_verifie");
-    return { eligible: raisons.length === 0, raisons, siret: { renseigne: !!c.siret, verifie: !!c.siretVerifieLe } };
+    return { eligible: raisons.length === 0, raisons, siret: { renseigne: !!c.siret, verifie: !!c.siretVerifieLe }, etapes: { siret: !!c.siretVerifieLe, devis: devis > 0, negoces: negoces > 0 } };
+  }
+
+  /** « Mes lots » (onglet Groupé) : chaque besoin de l'entreprise avec son chantier et son lot ; jamais les autres artisans. */
+  async mesLots(tenant: TenantContext): Promise<(BesoinVue & { projectId: string; chantier: string; lot: { numero: number; statut: string } | null })[]> {
+    const rows = await this.prisma.besoin.findMany({
+      where: { companyId: tenant.companyId, statut: { not: "retire" } },
+      include: { lot: { select: { statut: true, numero: true, negoceRetenu: { select: { nom: true } } } }, offre: true, project: { select: { name: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+    return rows.map((b) => ({ ...vue(b), projectId: b.projectId, chantier: b.project.name, lot: b.lot ? { numero: b.lot.numero, statut: b.lot.statut } : null }));
   }
 
   /** Vérifie le SIRET de l'entreprise auprès de l'INSEE ; actif, il ouvre l'accès au groupé. */

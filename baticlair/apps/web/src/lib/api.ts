@@ -170,8 +170,8 @@ export const MAX_DOCUMENT_BYTES = 20_000_000;
 export const MAX_REQUEST_BYTES = 4_000_000;
 
 export interface Health {
-  status: "ok";
-  features: { email: boolean; ai: boolean; alerts?: boolean };
+  status: "ok" | "degrade";
+  features: { email: boolean; ai: boolean; alerts?: boolean; groupe?: boolean };
 }
 
 export interface TakeoffIssue {

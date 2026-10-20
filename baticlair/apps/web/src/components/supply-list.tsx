@@ -184,18 +184,8 @@ export function SupplyList({
           >
             {allChecked ? "Tout décocher" : "Tout cocher"}
           </button>
-        ) : editable && ((selection && rows.length > 1) || groupe) ? (
+        ) : editable && selection && rows.length > 1 ? (
           <span className="flex flex-wrap justify-end gap-1.5">
-            {groupe ? (
-              <button
-                type="button"
-                onClick={startGroupe}
-                className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-accent/10 px-3.5 text-[13px] font-extrabold text-accent-text active:bg-accent/20"
-              >
-                <Users size={16} aria-hidden="true" />
-                Proposer au groupé
-              </button>
-            ) : null}
             {selection && rows.length > 1 ? (
               <button
                 type="button"
@@ -209,6 +199,20 @@ export function SupplyList({
           </span>
         ) : null}
       </div>
+      {/* BatiClair Groupé (demande du fondateur, 2026-10-20) : « Proposer au groupé » mis en avant, un bloc visible en haut, pas
+          une ligne discrète. Seulement quand le groupé est ouvert à l'entreprise, et hors sélection. */}
+      {groupe && editable && !selecting ? (
+        <section aria-label="Proposer au groupé" className="mb-3 flex flex-col gap-2 rounded-[20px] bg-surface p-4 shadow-card">
+          <p className="flex items-center gap-2 text-[15px] font-extrabold">
+            <Users size={18} aria-hidden="true" className="text-accent-text" />
+            Groupé : un seul négoce, un seul prix
+          </p>
+          <p className="text-[14px] leading-snug text-muted">Tes commandes regroupées avec les autres artisans du département. Tu commandes sur ton compte, tu es livré sur ton chantier.</p>
+          <Button className="self-start" onClick={startGroupe}>
+            Proposer au groupé
+          </Button>
+        </section>
+      ) : null}
       {/* §49, §50 (retour du fondateur, 2026-10-12) : la légende des repères, sous le titre. */}
       {/* Retour du fondateur (2026-10-12) : « mets des cases à cocher à chaque ligne pour pouvoir valider ». La case cochée
           verte : prête à commander ; la case vide orange : à valider (un tap la coche, ou ouvre la question qui reste). */}
