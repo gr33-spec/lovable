@@ -26,14 +26,23 @@ export function siretBienForme(siret: string): boolean {
   return somme % 10 === 0;
 }
 
+/**
+ * Le strict nécessaire de `fetch`, typé ici : le compilateur de Vercel ne voit pas toujours les types web de Node
+ * (`Response.ok` absent), comme pour l'envoi Resend.
+ */
+type HttpGet = (url: string, init: { headers: Record<string, string>; signal: AbortSignal }) => Promise<{ status: number; ok: boolean; json(): Promise<unknown> }>;
+
 /** API Sirene de l'INSEE (clé d'intégration) ; sans clé configurée, la vérification est indisponible. */
 export class InseeSiretVerifier implements SiretVerifier {
-  constructor(private readonly apiKey: string | null) {}
+  constructor(
+    private readonly apiKey: string | null,
+    private readonly fetchImpl: HttpGet = fetch as unknown as HttpGet,
+  ) {}
 
   async verifier(siret: string): Promise<ResultatSiret> {
     if (!this.apiKey) return { statut: "indisponible" };
     try {
-      const res = await fetch(`https://api.insee.fr/api-sirene/3.11/siret/${siret}`, {
+      const res = await this.fetchImpl(`https://api.insee.fr/api-sirene/3.11/siret/${siret}`, {
         headers: { "X-INSEE-Api-Key-Integration": this.apiKey, accept: "application/json" },
         signal: AbortSignal.timeout(8000),
       });
