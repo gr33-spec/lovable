@@ -176,6 +176,11 @@ export interface AppConfig {
   webAppUrl: string;
   /** Toutes les origines web acceptées (CORS, origines de confiance de l'authentification). */
   webAppOrigins: string[];
+  /**
+   * En prévisualisation Vercel, les adresses de prévisualisation du web (`https://<…>-gr33-spec.vercel.app`) sont
+   * acceptées d'office : le fondateur teste une branche depuis son téléphone sans poser l'adresse à la main.
+   */
+  previewOriginPattern: RegExp | null;
   emailProvider: "resend" | "disabled" | "console" | "capture";
   resend?: { apiKey: string; from: string };
   oauth: { google?: OAuthClientConfig; microsoft?: OAuthClientConfig };
@@ -210,6 +215,16 @@ export class ConfigError extends Error {
   }
 }
 
+/** Les adresses de prévisualisation Vercel du compte gr33-spec (jamais un autre compte). */
+export const PREVIEW_ORIGIN = /^https:\/\/[a-z0-9-]+-gr33-spec\.vercel\.app$/;
+/** La même règle, écrite pour les origines de confiance de l'authentification (jokers sur l'hôte). */
+export const PREVIEW_ORIGIN_JOKER = "https://*-gr33-spec.vercel.app";
+
+export function originesAcceptees(config: Pick<AppConfig, "webAppOrigins" | "previewOriginPattern">, origin: string | undefined): boolean | null {
+  if (!origin) return null;
+  return config.webAppOrigins.includes(origin) || (config.previewOriginPattern?.test(origin) ?? false);
+}
+
 export function loadConfig(source: Record<string, string | undefined> = process.env): AppConfig {
   const parsed = envSchema.safeParse(source);
   if (!parsed.success) {
@@ -242,6 +257,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     apiPublicUrl: e.API_PUBLIC_URL,
     webAppUrl: e.WEB_APP_URL[0]!,
     webAppOrigins: e.WEB_APP_URL,
+    previewOriginPattern: e.VERCEL_ENV === "preview" ? PREVIEW_ORIGIN : null,
     emailProvider,
     ...(emailProvider === "resend" && e.RESEND_API_KEY && e.EMAIL_FROM
       ? { resend: { apiKey: e.RESEND_API_KEY, from: e.EMAIL_FROM } }

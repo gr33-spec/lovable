@@ -1,7 +1,7 @@
 import { Controller, Get, Headers, Inject } from "@nestjs/common";
 import { PrismaService } from "../../platform/database/prisma.service.js";
 import type { EmailCapability } from "../../platform/email/email.port.js";
-import type { AppConfig } from "../../platform/config/config.js";
+import { originesAcceptees, type AppConfig } from "../../platform/config/config.js";
 import type { Alerter } from "../../platform/alerts/alerter.js";
 import { ALERTER, CONFIG, EMAIL_SENDER } from "../../platform/tokens.js";
 import { Public } from "../identity/index.js";
@@ -27,7 +27,11 @@ export class HealthController {
     }
     // `origine` : les origines web acceptées (CORS et authentification) et celle de la requête, pour vérifier une
     // prévisualisation depuis un téléphone.
-    const origine = { acceptees: this.config.webAppOrigins, demande: origin ?? null, acceptee: origin ? this.config.webAppOrigins.includes(origin) : null };
+    const origine = {
+      acceptees: [...this.config.webAppOrigins, ...(this.config.previewOriginPattern ? ["https://*-gr33-spec.vercel.app (prévisualisation)"] : [])],
+      demande: origin ?? null,
+      acceptee: originesAcceptees(this.config, origin),
+    };
     // `features` : ce qui est réellement disponible, pour que l'interface ne
     // promette rien d'impossible (ex. « e-mail envoyé » sans service d'e-mail). `aiKey` : le NOM de la variable d'où
     // vient la clé de lecture (BATICLAIR_ANTHROPIC_KEY), jamais sa valeur. `groupe` : BatiClair Groupé ouvert (drapeau `GROUPE`).

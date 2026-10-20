@@ -38,7 +38,7 @@ export function configureApp(app: INestApplication): void {
   express.disable("x-powered-by");
   express.set("trust proxy", 1);
   app.use(helmet());
-  app.enableCors({ origin: config.webAppOrigins, credentials: true });
+  app.enableCors({ origin: [...config.webAppOrigins, ...(config.previewOriginPattern ? [config.previewOriginPattern] : [])], credentials: true });
   app.use(requestContextMiddleware(logger));
   express.getHttpAdapter().getInstance().all(`${AUTH_BASE_PATH}/*splat`, toNodeHandler(auth));
   express.useBodyParser("json", { limit: "1mb" });

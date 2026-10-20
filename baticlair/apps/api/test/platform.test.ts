@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ConfigError, loadConfig } from "../src/platform/config/config.js";
+import { ConfigError, loadConfig, originesAcceptees } from "../src/platform/config/config.js";
 import { ResendEmailSender } from "../src/platform/email/resend-email.sender.js";
 import { toSupportId } from "../src/platform/logging/request-context.js";
 
@@ -30,6 +30,12 @@ describe("loadConfig", () => {
     const multi = loadConfig({ ...base, WEB_APP_URL: "https://app.example, https://preview.example/" });
     expect(multi.webAppUrl).toBe("https://app.example");
     expect(multi.webAppOrigins).toEqual(["https://app.example", "https://preview.example"]);
+    // En prévisualisation Vercel, les adresses du web de prévisualisation (compte gr33-spec) sont acceptées d'office.
+    const preview = loadConfig({ ...base, VERCEL_ENV: "preview" });
+    expect(originesAcceptees(preview, "https://baticlair-git-claude-xyz-gr33-spec.vercel.app")).toBe(true);
+    expect(originesAcceptees(preview, "https://baticlair-git-claude-xyz-autre.vercel.app")).toBe(false);
+    expect(originesAcceptees(loadConfig(base), "https://baticlair-git-claude-xyz-gr33-spec.vercel.app")).toBe(false);
+    expect(originesAcceptees(preview, undefined)).toBeNull();
     // Groupé : le repli « SIRET bien formé = vérifié » est réservé à la prévisualisation (décision du fondateur, 2026-10-20).
     expect(() => loadConfig({ ...base, SIRET_VERIFICATION: "forme", VERCEL_ENV: "production" })).toThrow(/SIRET_VERIFICATION/);
     expect(loadConfig({ ...base, SIRET_VERIFICATION: "forme", VERCEL_ENV: "preview" }).groupe.siretVerification).toBe("forme");
