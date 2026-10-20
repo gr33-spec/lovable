@@ -1595,3 +1595,27 @@ test("§50.1 : passé 30 s, « Gros devis, j'y suis encore… » (une seule phra
   await expect(lecture.getByRole("heading", { name: "Gros devis, j'y suis encore…" })).toBeVisible();
   await expect(lecture.getByRole("heading")).toHaveCount(1);
 });
+
+test("PWA : manifeste et icônes installables ; sur le téléphone, « Ajouter à l'écran d'accueil » expliqué une fois", async ({ page }) => {
+  const manifest = (await (await page.request.get("/manifest.webmanifest")).json()) as { display: string; start_url: string; icons: { src: string; sizes: string; purpose?: string }[] };
+  expect(manifest.display).toBe("standalone");
+  expect(manifest.start_url).toBe("/");
+  expect(manifest.icons.map((i) => i.src)).toEqual(expect.arrayContaining(["/icon-192.png", "/icon-512.png", "/icon-512-maskable.png"]));
+  for (const f of ["/icon-192.png", "/icon-512.png", "/icon-512-maskable.png", "/apple-touch-icon.png"]) expect((await page.request.get(f)).headers()["content-type"]).toContain("image/png");
+  await signUp(page);
+  await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute("href", /apple-touch-icon\.png/);
+  const aide = page.getByRole("region", { name: "Ajouter à l'écran d'accueil" });
+  if (test.info().project.name === "telephone") {
+    await expect(aide).toBeVisible();
+    await expect(aide.getByText(/Ajouter à l'écran d'accueil|Sur l'écran d'accueil/)).toBeVisible();
+    await aide.getByRole("button", { name: "Compris" }).click();
+    await expect(aide).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByRole("heading", { name: /^Bonjour Jean/ })).toBeVisible();
+    await expect(aide).toHaveCount(0);
+  } else {
+    await expect(page.getByRole("heading", { name: /^Bonjour Jean/ })).toBeVisible();
+    await expect(aide).toHaveCount(0);
+  }
+});
+
