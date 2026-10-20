@@ -1619,11 +1619,10 @@ test("BatiClair Groupé, étape 2 : proposer des lignes au groupé, s'engager, p
   await passQuestions(page);
   await confirmDoubts(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
-  // Sans SIRET vérifié ni abonnement actif, le groupé n'existe pas à l'écran.
+  // Sans SIRET vérifié, le groupé n'existe pas à l'écran (gratuit pour l'artisan : l'abonnement n'y est pour rien).
   await expect(list.getByRole("button", { name: "Proposer au groupé" })).toHaveCount(0);
 
-  // Abonnement actif (code d'activation de test), SIRET renseigné puis vérifié (hors production : sans appel INSEE).
-  expect(await apiCall(page, "POST", "/v1/billing/activate", { code: "E2E-SOLO-CODE" })).toBe(200);
+  // SIRET renseigné puis vérifié (hors production : sans appel INSEE) ; le compte reste en essai gratuit.
   expect(await apiCall(page, "PATCH", "/v1/company/profile", { name: "Toitures Martin", address: "3 quai Duguay-Trouin, 35400 Saint-Malo", siret: "73282932000074", phone: null, email: null })).toBe(200);
   expect(await apiCall(page, "POST", "/v1/groupe/siret")).toBe(200);
   await page.reload();

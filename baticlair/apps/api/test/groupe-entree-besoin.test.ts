@@ -6,7 +6,8 @@ import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestC
  * BATICLAIR GROUPÉ, ÉTAPE 2 : L'ENTRÉE DU BESOIN (document du fondateur, 2026-10-19, section 2 étape 2, sections 4 et 5).
  * Depuis la liste d'achats d'un devis lu par l'app, une ligne PRÊTE part au groupé avec une fenêtre de livraison et un
  * seul choix : « Chantier signé » (avec la phrase d'engagement) ou « Devis en attente ». Un besoin en attente bascule
- * signé d'un tap ; un besoin se retire tant que son lot n'est pas parti. Fermé sans SIRET vérifié ni abonnement actif.
+ * signé d'un tap ; un besoin se retire tant que son lot n'est pas parti. Fermé sans SIRET vérifié ; GRATUIT pour l'artisan
+ * (décision du fondateur, 2026-10-20) : aucune condition d'abonnement.
  */
 let ctx: TestContext;
 const siretsVerifies: string[] = [];
@@ -34,10 +35,10 @@ beforeEach(async () => {
 type Besoin = { id: string; articleKey: string; designation: string; quantite: string; unite: string; statut: string; fenetre: { tot: string; tard: string }; lotParti: boolean };
 const FENETRE = { tot: "2026-11-02", tard: "2026-11-20" };
 
-/** Un carreleur de Lannion, SIRET vérifié et abonnement actif, avec la liste d'un devis lu (toutes lignes vertes). */
+/** Un carreleur de Lannion, SIRET vérifié (en essai gratuit : le groupé ne regarde pas l'abonnement), avec la liste d'un devis lu. */
 async function carreleur(email: string, options: { ouvert?: boolean; confirmer?: boolean } = {}) {
   const { agent, companyId } = await signUpWithCompany(ctx.app, email, "Carrelages d'épreuve", ["tiling"]);
-  if (options.ouvert !== false) await ctx.prisma.company.update({ where: { id: companyId }, data: { siret: "73282932000074", siretVerifieLe: new Date(), plan: "solo", planActivatedAt: new Date() } });
+  if (options.ouvert !== false) await ctx.prisma.company.update({ where: { id: companyId }, data: { siret: "73282932000074", siretVerifieLe: new Date() } });
   let q = (
     await agent
       .post("/v1/quantitatifs")
@@ -56,17 +57,17 @@ async function carreleur(email: string, options: { ouvert?: boolean; confirmer?:
 const proposer = (agent: Agent, projectId: string, body: object) => agent.post(`/v1/projects/${projectId}/groupe`).send(body);
 
 describe("groupé, étape 2 : l'entrée du besoin", () => {
-  it("fermé sans SIRET vérifié ni abonnement actif : l'état dit pourquoi, et rien ne se propose", async () => {
+  it("fermé sans SIRET vérifié : l'état dit pourquoi, et rien ne se propose ; l'abonnement n'y est pour rien", async () => {
     const { agent, projectId, toBuy } = await carreleur("ferme@example.fr", { ouvert: false });
-    expect((await agent.get("/v1/groupe").expect(200)).body).toMatchObject({ eligible: false, raisons: ["siret_non_verifie", "abonnement_inactif"] });
+    expect((await agent.get("/v1/groupe").expect(200)).body).toMatchObject({ eligible: false, raisons: ["siret_non_verifie"] });
     const res = await proposer(agent, projectId, { articles: [toBuy[0]!.key], fenetre: FENETRE, statut: "en_attente" });
     expect(res.status).toBe(403);
     expect(res.body.error.details).toMatchObject({ reason: "groupe_ferme" });
   });
 
-  it("le SIRET se vérifie auprès de l'INSEE : mal formé, refusé sans appel ; actif, il ouvre (avec l'abonnement)", async () => {
+  it("le SIRET se vérifie auprès de l'INSEE : mal formé, refusé sans appel ; actif, il ouvre, même en essai gratuit", async () => {
     const { agent, companyId } = await carreleur("siret@example.fr", { ouvert: false });
-    await ctx.prisma.company.update({ where: { id: companyId }, data: { siret: "12345678901234", plan: "solo", planActivatedAt: new Date() } });
+    await ctx.prisma.company.update({ where: { id: companyId }, data: { siret: "12345678901234" } });
     expect((await agent.post("/v1/groupe/siret").expect(400)).body.error.details).toMatchObject({ reason: "siret_invalide" });
     expect(siretsVerifies).toEqual([]);
     await ctx.prisma.company.update({ where: { id: companyId }, data: { siret: "732 829 320 00074" } });

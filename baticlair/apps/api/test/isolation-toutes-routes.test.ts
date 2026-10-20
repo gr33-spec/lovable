@@ -86,6 +86,12 @@ describe("isolation entre entreprises, toutes les routes", () => {
           data: { companyId, projectId: demo.projectId, takeoffId: takeoff.id, articleKey: "a", designation: "Besoin de A", cle: "lib:a||", famille: "couverture", quantite: "1", unite: "u", zone: "29", adresseLivraison: "29200 Brest", fenetreTot: new Date("2026-11-02"), fenetreTard: new Date("2026-11-20"), statut: "en_attente" },
         })
       ).id,
+      // Étape 3 : un négoce dans la liste de A (le lien artisan-négoce est à A ; le négoce, lui, est à la base du département).
+      negoce: (
+        await ctx.prisma.negoce.create({
+          data: { nom: "Négoce de A", email: "negoce-a@example.com", departement: "29", familles: ["couverture"], ajouteParId: companyId, artisans: { create: { companyId, rang: 1, numeroCompte: "A-1" } } },
+        })
+      ).id,
     };
     const idFor = (path: string, param: string): string => {
       if (param === "projectId" || param === "projetId") return ids.project;
@@ -104,6 +110,7 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/takeoffs$/, ids.takeoff],
         [/\/takeoff-lines$/, ids.takeoffLine],
         [/\/groupe\/besoins$/, ids.besoin],
+        [/\/groupe\/negoces$/, ids.negoce],
       ];
       const hit = byPrefix.find(([re]) => re.test(prefix));
       if (!hit) throw new Error(`Paramètre sans identifiant de A : ${path} (${param})`);

@@ -4,7 +4,7 @@ import { cleDeReference } from "@baticlair/domain";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
 /**
- * BATICLAIR GROUPÉ, ÉTAPE 1 : LES DONNÉES (document du fondateur, 2026-10-19, section 7, étape 1). Les tables du groupé existent,
+ * BATICLAIR GROUPÉ, ÉTAPE 1 : LES DONNÉES (document du fondateur, 2026-10-19, section 7, étape 1). Les tables du groupé existent (douze, dont l'accord et la facture du négoce, décision du 20 octobre),
  * se relient du besoin au bon de commande et à la livraison, et tiennent les garde-fous de section 5 en base : un seul lot
  * ouvert par référence et par zone, un besoin par ligne de liste, un négoce par e-mail et par département. Le drapeau
  * `groupe` est désactivé par défaut (« rien en prod sans mon accord explicite »).
@@ -53,10 +53,13 @@ describe("groupé, étape 1 : les données", () => {
     const bon = await ctx.prisma.bonCommande.create({ data: { offreId: offre.id, negoceId: negoce.id, envoyeLe: new Date() } });
     await ctx.prisma.livraison.create({ data: { bonId: bon.id, datePrevue: jour("2026-11-03") } });
     await ctx.prisma.journalGroupe.create({ data: { lotId: lot.id, evenement: "negoce_retenu", details: { negoceId: negoce.id } } });
+    // Décision du 20 octobre : l'accord du négoce (2 % s'il est retenu) avant sa réponse, et la facture au bon de commande.
+    const accord = await ctx.prisma.accordNegoce.create({ data: { lotId: lot.id, negoceId: negoce.id, versionContrat: "2026-10-20", tauxPourcent: "2.00", email: "devis@example.com", adresseIp: "203.0.113.7" } });
+    await ctx.prisma.factureNegoce.create({ data: { lotId: lot.id, negoceId: negoce.id, accordId: accord.id, totalLotHt: "4956.00", montantHt: "99.12", echeanceLe: jour("2026-12-03") } });
 
     const tout = await ctx.prisma.lotGroupe.findUniqueOrThrow({
       where: { id: lot.id },
-      include: { besoins: true, reponses: true, offres: { include: { bon: { include: { livraison: true } } } }, journal: true, negoceRetenu: true },
+      include: { besoins: true, reponses: true, offres: { include: { bon: { include: { livraison: true } } } }, journal: true, negoceRetenu: true, accords: true, facture: true },
     });
     expect(tout.numero).toBeGreaterThan(0);
     expect(tout.besoins.map((b) => b.statut)).toEqual(["signe"]);
@@ -64,6 +67,11 @@ describe("groupé, étape 1 : les données", () => {
     expect(tout.offres[0]!.bon!.livraison!.statut).toBe("prevue");
     expect(tout.negoceRetenu!.nom).toBe("Négoce d'épreuve");
     expect(tout.journal.map((j) => j.evenement)).toEqual(["negoce_retenu"]);
+    expect(tout.accords[0]).toMatchObject({ email: "devis@example.com", adresseIp: "203.0.113.7", versionContrat: "2026-10-20" });
+    expect(tout.facture).toMatchObject({ statut: "emise", montantHt: expect.anything() });
+    expect(tout.facture!.numero).toBeGreaterThan(0);
+    // Un seul accord par négoce et par lot ; une seule facture par lot.
+    await expect(ctx.prisma.accordNegoce.create({ data: { lotId: lot.id, negoceId: negoce.id, versionContrat: "2026-10-20", tauxPourcent: "2.00", email: "x@example.com", adresseIp: "::1" } })).rejects.toThrow();
   });
 
   it("section 5 : un seul lot ouvert par référence et par zone ; le suivant s'ouvre quand le premier est parti", async () => {

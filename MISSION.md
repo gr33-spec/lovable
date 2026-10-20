@@ -180,16 +180,20 @@ défaut ; RIEN EN PROD SANS L'ACCORD EXPLICITE DE GREG (décision du 20 octobre 
 les PR 2 à 9 sur la même branche, sans rien fusionner, jusqu'à mon accord global ») : TOUTES les étapes s'empilent
 sur la PR #284 (une branche = une PR), jamais fusionnée sans son oui. Neuf familles (décision du 20 octobre :
 + « menuiseries et fermetures », « second œuvre », « serrurerie et métallerie », chaque métier rattaché à au moins
-une) ; désistements dans une table à part, étape 7.
+une) ; désistements dans une table à part, étape 7. Décision du 20 octobre (changement de modèle) : GRATUIT pour
+l'artisan (plus aucune condition d'abonnement) ; le négoce accepte AVANT de répondre une commission de 2 % du HT du lot
+s'il est retenu (phrase en gras dans l'e-mail, case obligatoire sur la page de dépôt, contrat PDF à côté, date + e-mail
++ IP dans `accord_negoce` ; sans case, la réponse n'est pas prise en compte) ; au bon de commande, facture PDF
+automatique au négoce (2 % × total HT du lot, 30 jours, relance automatique, `facture_negoce`).
 
 | PR | Étape | État |
 |---|---|---|
-| 1 | Données : 10 tables, clé de référence, zone, statuts, drapeau, 9 familles | fait (#284, non fusionnée) |
-| 2 | Entrée du besoin (écran 3) : SIRET (INSEE), « Proposer au groupé » par ligne et par lot, fenêtre, signé / en attente + engagement, bascule, retrait | fait (#284) |
-| 3 | Base négoces | à faire |
+| 1 | Données : 12 tables (dont accord et facture du négoce), clé de référence, zone, statuts, drapeau, 9 familles | fait (#284, non fusionnée) |
+| 2 | Entrée du besoin (écran 3) : SIRET (INSEE), gratuit, « Proposer au groupé » par ligne et par lot, fenêtre, signé / en attente + engagement, bascule, retrait | fait (#284) |
+| 3 | Base négoces : « Mes négoces » (9 familles, favori, numéro de compte), message type, liens signés « pas concerné » / « stop » | API faite, écran à faire |
 | 4 | Regroupement (cron, seuils) | à faire |
-| 5 | Demande aux négoces (mail, PDF, lien de réponse) | à faire |
+| 5 | Demande aux négoces (mail avec la phrase de commission en gras, PDF, page de dépôt avec case d'accord obligatoire + contrat PDF) | à faire |
 | 6 | Choix et offres | à faire |
-| 7 | Bons de commande, livraison, désistements | à faire |
+| 7 | Bons de commande, facture au négoce (2 %, 30 jours, relance), livraison, désistements | à faire |
 | 8 | Notifications | à faire |
 | 9 | Admin Greg | à faire |

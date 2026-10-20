@@ -6,8 +6,8 @@ import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import type { ReviewedTakeoff } from "../../takeoff/index.js";
 import { siretBienForme, type SiretVerifier } from "./siret-verifier.js";
 
-/** Pourquoi le groupé reste fermé à une entreprise (section 5 et 6 du parcours groupé). */
-export type RaisonFermeture = "siret_non_verifie" | "abonnement_inactif";
+/** Pourquoi le groupé reste fermé à une entreprise (section 5 du parcours groupé). Gratuit pour l'artisan (décision du fondateur, 2026-10-20) : aucune condition d'abonnement. */
+export type RaisonFermeture = "siret_non_verifie";
 
 export interface BesoinVue {
   id: string;
@@ -35,7 +35,7 @@ const jour = (d: Date) => d.toISOString().slice(0, 10);
  * L'ENTRÉE DU BESOIN AU GROUPÉ (parcours groupé, étape 2) : depuis l'écran 3, une ou plusieurs lignes de la liste d'achats
  * d'un devis lu par l'app (jamais une saisie libre, section 5) deviennent des besoins, avec une fenêtre de livraison et un
  * seul choix « Chantier signé » / « Devis en attente » ; un besoin en attente bascule signé d'un tap ; un besoin se retire
- * tant que son lot n'est pas parti. Ouvert seulement avec le SIRET vérifié et un abonnement actif.
+ * tant que son lot n'est pas parti. Ouvert seulement avec le SIRET vérifié ; gratuit pour l'artisan, aucune condition d'abonnement (décision du fondateur, 2026-10-20).
  */
 export class GroupeService {
   constructor(
@@ -45,15 +45,13 @@ export class GroupeService {
   ) {}
 
   async etat(tenant: TenantContext): Promise<{ eligible: boolean; raisons: RaisonFermeture[]; siret: { renseigne: boolean; verifie: boolean } }> {
-    const c = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { siret: true, siretVerifieLe: true, plan: true, planActivatedAt: true } });
+    const c = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { siret: true, siretVerifieLe: true } });
     const raisons: RaisonFermeture[] = [];
     if (!c.siretVerifieLe) raisons.push("siret_non_verifie");
-    // Section 6 : « pas d'accès au groupé sans abonnement actif » ; l'essai gratuit n'en est pas un.
-    if (c.plan === "trial" || !c.planActivatedAt) raisons.push("abonnement_inactif");
     return { eligible: raisons.length === 0, raisons, siret: { renseigne: !!c.siret, verifie: !!c.siretVerifieLe } };
   }
 
-  /** Vérifie le SIRET de l'entreprise auprès de l'INSEE ; actif, il ouvre (avec l'abonnement) l'accès au groupé. */
+  /** Vérifie le SIRET de l'entreprise auprès de l'INSEE ; actif, il ouvre l'accès au groupé. */
   async verifierSiret(tenant: TenantContext): Promise<{ verifie: boolean; statut: string }> {
     assertCanWrite(tenant);
     const c = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { siret: true } });

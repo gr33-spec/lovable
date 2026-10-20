@@ -9,8 +9,9 @@ import { useResource } from "@/lib/use-resource";
 /**
  * BATICLAIR GROUPÉ, ÉTAPE 2 (document du fondateur, 2026-10-19, section 2 étape 2) : sur « Ton chantier », proposer des
  * lignes au groupé, par ligne ou par lot, avec une fenêtre de livraison et un seul choix « Chantier signé » / « Devis en
- * attente ». Tant que le drapeau `groupe` est éteint, ou que l'entreprise n'a pas son SIRET vérifié et un abonnement actif,
- * rien de tout cela n'apparaît : l'écran 3 ne change pas.
+ * attente ». Tant que le drapeau `groupe` est éteint, ou que l'entreprise n'a pas son SIRET vérifié,
+ * rien de tout cela n'apparaît : l'écran 3 ne change pas. Gratuit pour l'artisan (décision du fondateur, 2026-10-20) : aucune
+ * condition d'abonnement.
  */
 export interface BesoinGroupe {
   id: string;
@@ -34,7 +35,7 @@ export interface Groupe {
 /** La phrase d'engagement, mot pour mot (section 7, étape 2 du document). */
 export const PHRASE_ENGAGEMENT = "En cochant Chantier signé, je m'engage à commander ces quantités au prix groupé obtenu, chez le négoce retenu.";
 
-/** Le groupé pour ce chantier, ou null quand il n'existe pas pour l'entreprise (drapeau éteint, SIRET, abonnement). */
+/** Le groupé pour ce chantier, ou null quand il n'existe pas pour l'entreprise (drapeau éteint, SIRET non vérifié). */
 export function useGroupe(projectId: string): Groupe | null {
   const fetchEtat = useCallback(
     (signal: AbortSignal) => api<{ eligible: boolean }>("/v1/groupe", { signal }).catch((e: unknown) => (e instanceof ApiError && e.status === 404 ? { eligible: false } : Promise.reject(e))),

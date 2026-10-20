@@ -983,11 +983,13 @@ model Negoce {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  ajoutePar   Company?        @relation("NegoceAjoutePar", fields: [ajouteParId], references: [id], onDelete: SetNull)
-  artisans    NegoceArtisan[]
-  reponses    ReponseNegoce[]
-  bons        BonCommande[]
-  lotsRetenus LotGroupe[]     @relation("LotNegoceRetenu")
+  ajoutePar      Company?        @relation("NegoceAjoutePar", fields: [ajouteParId], references: [id], onDelete: SetNull)
+  artisans       NegoceArtisan[]
+  reponses       ReponseNegoce[]
+  bons           BonCommande[]
+  lotsRetenus    LotGroupe[]     @relation("LotNegoceRetenu")
+  accordNegoces  AccordNegoce[]
+  factureNegoces FactureNegoce[]
 
   @@unique([email, departement])
   @@index([departement])
@@ -1037,6 +1039,8 @@ model LotGroupe {
   reponses     ReponseNegoce[]
   offres       OffreArtisan[]
   journal      JournalGroupe[]
+  accords      AccordNegoce[]
+  facture      FactureNegoce?
 
   @@index([cle, zone, statut])
   @@map("lot_groupe")
@@ -1150,4 +1154,56 @@ model JournalGroupe {
 
   @@index([lotId, createdAt])
   @@map("journal_groupe")
+}
+
+/// L'accord du négoce (décision du fondateur, 2026-10-20) : avant de répondre à un lot, il accepte une commission de
+/// 2 % du montant HT du lot s'il est retenu (phrase en gras dans l'e-mail, case obligatoire sur la page de dépôt, contrat
+/// PDF à côté). Date, e-mail et adresse IP enregistrés ; sans accord, aucune réponse n'est prise en compte.
+model AccordNegoce {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  lotId          String   @db.Uuid
+  negoceId       String   @db.Uuid
+  /// La version du contrat acceptée (« 2026-10-20 »).
+  versionContrat String
+  /// Le taux accepté, en pour cent (2.00).
+  tauxPourcent   Decimal  @db.Decimal(5, 2)
+  email          String
+  adresseIp      String
+  accepteLe      DateTime @default(now())
+
+  lot    LotGroupe @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  negoce Negoce    @relation(fields: [negoceId], references: [id], onDelete: Cascade)
+
+  facture FactureNegoce?
+
+  @@unique([lotId, negoceId])
+  @@map("accord_negoce")
+}
+
+/// La facture au négoce retenu (décision du fondateur, 2026-10-20) : émise automatiquement au bon de commande, 2 % du
+/// total HT du lot, à 30 jours, relance automatique.
+model FactureNegoce {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  lotId      String    @unique @db.Uuid
+  negoceId   String    @db.Uuid
+  accordId   String    @unique @db.Uuid
+  numero     Int       @unique @default(autoincrement())
+  /// Le total HT du lot (somme des bons de commande) et la commission qui en découle.
+  totalLotHt Decimal   @db.Decimal(14, 2)
+  montantHt  Decimal   @db.Decimal(14, 2)
+  pdf        Bytes?
+  emiseLe    DateTime  @default(now())
+  echeanceLe DateTime  @db.Date
+  envoyeeLe  DateTime?
+  relanceeLe DateTime?
+  payeeLe    DateTime?
+  /// emise | envoyee | relancee | payee | annulee
+  statut     String    @default("emise")
+
+  lot    LotGroupe    @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  negoce Negoce       @relation(fields: [negoceId], references: [id], onDelete: Cascade)
+  accord AccordNegoce @relation(fields: [accordId], references: [id])
+
+  @@index([negoceId, statut])
+  @@map("facture_negoce")
 }
