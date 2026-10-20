@@ -4,7 +4,7 @@ import { ArrowLeft, ChevronRight, CircleCheck, Plus } from "lucide-react";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AssistantMessage, Say } from "@/components/chat";
 import { useSelectionSend } from "@/components/selection-send";
-import { useGroupe } from "@/components/groupe";
+import { useGroupe, useGroupeFerme } from "@/components/groupe";
 import { AnalysisScreen, CalculScreen, LotsCard, lotsAConfirmer, notifyReady, QuestionsStep, type CounterAnswers } from "@/components/journey";
 import { ProjectPriceRequests } from "@/components/project-price-requests";
 import { type ItemEdit } from "@/components/purchase-list";
@@ -78,6 +78,7 @@ export function ProjectTakeoff({
   const selection = useSelectionSend(projectId, () => setRequestsSignal((n) => n + 1));
   // BatiClair Groupé : null tant que le drapeau est éteint ou que l'entreprise n'y a pas accès (l'écran 3 ne change pas).
   const groupe = useGroupe(projectId);
+  const groupeFerme = useGroupeFerme();
   const [sent, setSent] = useState(false);
   // « Aperçu » : le mail et le PDF du fournisseur, par-dessus la liste.
   const [previewing, setPreviewing] = useState(false);
@@ -342,6 +343,7 @@ export function ProjectTakeoff({
         error={actionError}
         docked={false}
         sent={sent}
+        groupeFerme={groupeFerme}
         sketches={quantitatif?.infos?.croquis ?? []}
         sketchHandlers={{ onAttach: attachSketch, onDetach: detachSketch }}
         {...(!archived ? { selection } : {})}

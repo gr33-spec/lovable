@@ -1754,26 +1754,36 @@ test("BatiClair Groupé, l'onglet : visible sans SIRET ni devis, trois étapes c
   await nav.getByRole("link", { name: "Groupé" }).click();
   await expect(page).toHaveURL(/\/groupe$/);
   await expect(page.getByRole("heading", { name: "Groupé" })).toBeVisible();
-  await expect(page.getByText("un seul négoce, un seul prix")).toBeVisible();
+  // L'accroche suit le métier du compte (un couvreur ici).
+  await expect(page.getByText("Tes commandes d'ardoise regroupées avec les autres couvreurs du département, un seul négoce, un seul prix.")).toBeVisible();
   await expect(page.getByRole("list", { name: "Comment ça marche" }).getByRole("listitem")).toHaveCount(3);
   const manque = page.getByRole("list", { name: "Ce qui manque" });
   await expect(manque.getByLabel("À faire")).toHaveCount(3);
-  // SIRET : sans SIRET, le bouton mène à Compte ; renseigné, « Vérifier mon SIRET » le coche.
   await expect(manque.getByRole("link", { name: "Compte" })).toBeVisible();
+  // Un devis déposé sans SIRET : « Ton chantier » montre le bloc grisé qui renvoie à l'onglet Groupé.
+  await createProject(page, "Toiture Le Bihan", "M. Le Bihan", "3 quai Duguay-Trouin, Saint-Malo");
+  const chantier = page.url();
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await passQuestions(page);
+  const ferme = page.getByRole("region", { name: "Groupé fermé" });
+  await expect(ferme.getByText("Renseigne ton SIRET pour proposer au groupé")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Proposer au groupé" })).toHaveCount(0);
+  await ferme.getByRole("link", { name: "Groupé" }).click();
+  await expect(page).toHaveURL(/\/groupe$/);
+  await expect(manque.getByLabel("Fait")).toHaveCount(1);
+  // SIRET renseigné : « Vérifier mon SIRET » le coche ; « Ton chantier » montre alors le bloc « Proposer au groupé » en haut.
   expect(await apiCall(page, "PATCH", "/v1/company/profile", { name: "Toitures Martin", address: "3 quai Duguay-Trouin, 35400 Saint-Malo", siret: "73282932000074", phone: null, email: null })).toBe(200);
   await page.reload();
   await manque.getByRole("button", { name: "Vérifier mon SIRET" }).click();
-  await expect(manque.getByLabel("Fait")).toHaveCount(1);
-  await expect(manque.getByLabel("À faire")).toHaveCount(2);
-  // Un devis déposé : la deuxième étape se coche ; « Ton chantier » montre le bloc « Proposer au groupé » en haut.
-  await createProject(page, "Toiture Le Bihan", "M. Le Bihan", "3 quai Duguay-Trouin, Saint-Malo");
-  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
-  await passQuestions(page);
+  await expect(manque.getByLabel("Fait")).toHaveCount(2);
+  await expect(manque.getByLabel("À faire")).toHaveCount(1);
+  await page.goto(chantier);
   const bloc = page.getByRole("region", { name: "Proposer au groupé" });
   await expect(bloc).toBeVisible();
   await expect(bloc.getByRole("button", { name: "Proposer au groupé" })).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(bloc).toBeInViewport();
+  await expect(page.getByRole("region", { name: "Groupé fermé" })).toHaveCount(0);
   // Sur téléphone, le chantier se lit en plein écran sans la barre du menu : retour à l'onglet par l'adresse.
   await page.goto("/groupe");
   await expect(manque.getByLabel("Fait")).toHaveCount(2);

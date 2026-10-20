@@ -8,7 +8,7 @@ import { type ItemEdit, type SketchHandlers } from "@/components/purchase-list";
 import { type DecisionHandlers } from "@/components/takeoff-view";
 import { SelectionBar, type SelectionSend } from "@/components/selection-send";
 import { GroupeBar, GroupeSection, type Groupe } from "@/components/groupe";
-import { Button, ErrorNotice } from "@/components/ui";
+import { Button, ButtonLink, ErrorNotice } from "@/components/ui";
 import type { ApiError, ItemSketch, PurchaseItem, ScreenRow, Takeoff, TakeoffDecision } from "@/lib/api";
 import { enMetres, parseQuantity, shortName } from "@/lib/labels";
 
@@ -38,6 +38,7 @@ export function SupplyList({
   docked = true,
   selection,
   groupe,
+  groupeFerme = false,
   onAdd,
   onBrief,
   error = null,
@@ -52,6 +53,8 @@ export function SupplyList({
   selection?: SelectionSend;
   /** BatiClair Groupé (étape 2) : présent seulement quand l'entreprise y a accès ; absent, l'écran ne change pas. */
   groupe?: Groupe;
+  /** Le groupé existe mais l'entreprise n'y a pas encore accès (SIRET) : un bloc grisé renvoie à l'onglet Groupé. */
+  groupeFerme?: boolean;
   /** Une barre de chat est en bas de l'écran : le gros bouton se pose au-dessus d'elle. Sur la page des fournitures, non. */
   docked?: boolean;
   /** La demande est déjà partie : le gros bouton mène aux fournisseurs, il ne propose plus un premier envoi. */
@@ -201,6 +204,18 @@ export function SupplyList({
       </div>
       {/* BatiClair Groupé (demande du fondateur, 2026-10-20) : « Proposer au groupé » mis en avant, un bloc visible en haut, pas
           une ligne discrète. Seulement quand le groupé est ouvert à l'entreprise, et hors sélection. */}
+      {!groupe && groupeFerme && editable && !selecting ? (
+        <section aria-label="Groupé fermé" className="mb-3 flex flex-col gap-2 rounded-[20px] border border-dashed border-line bg-ground p-4 opacity-80">
+          <p className="flex items-center gap-2 text-[15px] font-extrabold text-muted">
+            <Users size={18} aria-hidden="true" />
+            Renseigne ton SIRET pour proposer au groupé
+          </p>
+          <p className="text-[14px] leading-snug text-muted">Un seul négoce, un seul prix, avec les autres artisans du département.</p>
+          <ButtonLink href="/groupe" variant="secondary" className="min-h-10 self-start px-3.5 text-[14px]">
+            Groupé
+          </ButtonLink>
+        </section>
+      ) : null}
       {groupe && editable && !selecting ? (
         <section aria-label="Proposer au groupé" className="mb-3 flex flex-col gap-2 rounded-[20px] bg-surface p-4 shadow-card">
           <p className="flex items-center gap-2 text-[15px] font-extrabold">

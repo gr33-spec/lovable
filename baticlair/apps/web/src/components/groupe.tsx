@@ -59,6 +59,19 @@ function useMesNegocesCount(): number | null {
 export const PHRASE_ENGAGEMENT = "En cochant Chantier signé, je m'engage à commander ces quantités au prix groupé obtenu, chez le négoce retenu.";
 
 /** Le groupé pour ce chantier, ou null quand il n'existe pas pour l'entreprise (drapeau éteint, SIRET non vérifié). */
+/**
+ * Le groupé existe (drapeau allumé) mais reste fermé à l'entreprise (SIRET non vérifié) : « Ton chantier » montre alors un
+ * bloc grisé qui renvoie à l'onglet Groupé (décision du fondateur, 2026-10-20).
+ */
+export function useGroupeFerme(): boolean {
+  const fetchEtat = useCallback(
+    (signal: AbortSignal) => api<{ eligible: boolean }>("/v1/groupe", { signal }).catch((e: unknown) => (e instanceof ApiError && e.status === 404 ? null : Promise.reject(e))),
+    [],
+  );
+  const etat = useResource(fetchEtat);
+  return etat.data !== null && etat.data !== undefined && etat.data.eligible === false;
+}
+
 export function useGroupe(projectId: string): Groupe | null {
   const fetchEtat = useCallback(
     (signal: AbortSignal) => api<{ eligible: boolean }>("/v1/groupe", { signal }).catch((e: unknown) => (e instanceof ApiError && e.status === 404 ? { eligible: false } : Promise.reject(e))),

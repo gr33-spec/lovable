@@ -5,6 +5,7 @@ import { Check, FileText, Store, Tag, Truck, Users } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Button, ButtonLink, Card, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
+import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 
 interface EtatGroupe {
@@ -24,6 +25,25 @@ interface BesoinLot {
   offre: { prixUnitaire: string; negoce: string; dateLivraison: string | null } | null;
 }
 
+/** L'accroche selon le métier du compte (décision du fondateur, 2026-10-20) ; couvreur par défaut si le métier est inconnu. */
+const ACCROCHES: Record<string, { matiere: string; metiers: string }> = {
+  roofing: { matiere: "d'ardoise", metiers: "couvreurs" },
+  carpentry: { matiere: "de bois de charpente", metiers: "charpentiers" },
+  masonry: { matiere: "de parpaings", metiers: "maçons" },
+  drywall: { matiere: "de plaques de plâtre", metiers: "plaquistes" },
+  painting: { matiere: "de peinture", metiers: "peintres" },
+  tiling: { matiere: "de carrelage", metiers: "carreleurs" },
+  flooring: { matiere: "de parquet", metiers: "poseurs de sols" },
+  electrical: { matiere: "de câble", metiers: "électriciens" },
+  plumbing: { matiere: "de tube", metiers: "plombiers" },
+  hvac: { matiere: "de gaine", metiers: "chauffagistes" },
+  joinery: { matiere: "de menuiseries", metiers: "menuisiers" },
+};
+export function accroche(metier: string | undefined): string {
+  const a = (metier && ACCROCHES[metier]) || ACCROCHES.roofing!;
+  return `Tes commandes ${a.matiere} regroupées avec les autres ${a.metiers} du département, un seul négoce, un seul prix.`;
+}
+
 const STATUT_LOT: Record<string, string> = {
   ouvert: "Lot ouvert, en attente d'autres artisans",
   forme: "Lot formé, demande en préparation",
@@ -41,6 +61,7 @@ const STATUT_LOT: Record<string, string> = {
 export default function GroupePage() {
   const fetchEtat = useCallback((signal: AbortSignal) => api<EtatGroupe>("/v1/groupe", { signal }), []);
   const etat = useResource(fetchEtat);
+  const { company } = useSession();
   const [pending, setPending] = useState(false);
   const [siretErreur, setSiretErreur] = useState<string | null>(null);
 
@@ -67,7 +88,7 @@ export default function GroupePage() {
     <>
       <PageTitle>Groupé</PageTitle>
       <Card className="flex flex-col gap-4 p-4">
-        <p className="text-[17px] leading-snug font-extrabold">Tes commandes d&apos;ardoise regroupées avec les autres couvreurs du département, un seul négoce, un seul prix.</p>
+        <p className="text-[17px] leading-snug font-extrabold">{accroche(company?.trades[0])}</p>
         <ol aria-label="Comment ça marche" className="grid grid-cols-3 gap-2">
           {[
             { icon: FileText, titre: "1. Tu proposes", texte: "Une ligne de ta liste, une fenêtre de livraison, « chantier signé »." },
