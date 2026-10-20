@@ -83,7 +83,7 @@ describe("groupé, étape 2 : l'entrée du besoin", { timeout: 30_000 }, () => {
     expect(sans.status).toBe(400);
     expect(sans.body.error.details).toMatchObject({ reason: "engagement_requis" });
     const besoins = (await proposer(agent, projectId, { articles: [carreaux.key], fenetre: FENETRE, statut: "signe", engagement: true }).expect(201)).body.besoins as Besoin[];
-    expect(besoins).toEqual([{ id: expect.any(String), articleKey: carreaux.key, designation: carreaux.label, quantite: "23", unite: "cartons de 1,44 m²", statut: "signe", fenetre: FENETRE, lotParti: false }]);
+    expect(besoins).toEqual([{ id: expect.any(String), articleKey: carreaux.key, designation: carreaux.label, quantite: "23", unite: "cartons de 1,44 m²", statut: "signe", fenetre: FENETRE, lotParti: false, offre: null }]);
     const row = await ctx.prisma.besoin.findFirstOrThrow();
     expect(row).toMatchObject({ famille: "second_oeuvre", zone: "22", adresseLivraison: "3 rue des Ajoncs, 22300 Lannion", cle: "lib:carreau de sol 60x60|" + "|" });
     // Une même ligne ne part pas deux fois.
