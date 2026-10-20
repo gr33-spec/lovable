@@ -64,6 +64,17 @@ const unreadableReasons: Record<string, string> = {
 
 /** Motifs précis renvoyés par l'API, quel que soit le code. */
 const reasonMessages: Record<string, string> = {
+  // BatiClair Groupé : les refus de l'API, dits avec les mots de l'artisan.
+  quantite_plafonnee: "Cette quantité dépasse trois fois ce que les autres artisans proposent pour cette référence : le groupé la refuse. Vérifie-la, ou passe par ton négoce en direct.",
+  ligne_a_regler: "Règle d'abord cette ligne (quantité ou question en attente) : un engagement ferme porte sur une quantité ferme.",
+  adresse_requise: "Renseigne l'adresse du chantier (avec le code postal) : le lot se forme par département.",
+  deja_propose: "Cette ligne est déjà au groupé.",
+  engagement_requis: "Coche la phrase d'engagement pour proposer en « Chantier signé ».",
+  fenetre_invalide: "La fenêtre de livraison n'est pas bonne : au plus tôt avant au plus tard, dans les 6 mois.",
+  groupe_ferme: "Le groupé n'est pas ouvert à ton entreprise pour l'instant : regarde l'onglet Groupé.",
+  sans_quantite: "Cette ligne n'a pas de quantité : indique-la d'abord.",
+  sans_famille: "Ce métier n'a pas encore de famille au groupé.",
+  siret_invalide: "Ce SIRET n'a pas 14 chiffres valides : corrige-le dans Compte.",
   nothing_read: "Je n'ai rien lu dans ce devis. Réessaie, ou redépose le PDF.",
   empty_list: "La liste est vide : rien ne part au fournisseur.",
   faconnage_required: "Dis-moi d'abord, pour chaque pièce de zinc, si tu la façonnes ou si tu la commandes façonnée.",
