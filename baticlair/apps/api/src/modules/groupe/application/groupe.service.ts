@@ -1,9 +1,10 @@
-import { cleDeReference, familleDuMetier, fenetreValide, quantiteDuBesoin, transitionBesoin, zoneDuCodePostal, type StatutBesoin } from "@baticlair/domain";
+import { cleDeReference, familleDuMetier, fenetreValide, lotParti, quantiteDuBesoin, transitionBesoin, zoneDuCodePostal, type StatutBesoin } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { isUuid } from "../../../platform/validation/ids.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import type { ReviewedTakeoff } from "../../takeoff/index.js";
+import type { RegroupementService } from "./regroupement.service.js";
 import { siretBienForme, type SiretVerifier } from "./siret-verifier.js";
 
 /** Pourquoi le groupé reste fermé à une entreprise (section 5 du parcours groupé). Gratuit pour l'artisan (décision du fondateur, 2026-10-20) : aucune condition d'abonnement. */
@@ -42,6 +43,7 @@ export class GroupeService {
     private readonly prisma: PrismaService,
     private readonly reviewed: (tenant: TenantContext, takeoffId: string) => Promise<ReviewedTakeoff>,
     private readonly siret: SiretVerifier,
+    private readonly regroupement: RegroupementService,
   ) {}
 
   async etat(tenant: TenantContext): Promise<{ eligible: boolean; raisons: RaisonFermeture[]; siret: { renseigne: boolean; verifie: boolean } }> {
@@ -100,6 +102,11 @@ export class GroupeService {
       if (!famille) throw validationFailed("Trade outside the groupé", { reason: "sans_famille", article: key });
       return { item, q, famille };
     });
+    // Section 5 : une quantité au-delà de 3 × la médiane des besoins de la même référence sur 90 jours n'entre pas.
+    for (const { item, q } of lignes) {
+      const p = await this.regroupement.plafond(cleDeReference({ libelle: item.label }), Number(q.quantite), { companyId: tenant.companyId });
+      if (!p.admis) throw validationFailed("Quantity above the cap", { reason: "quantite_plafonnee", article: item.key, plafond: p.plafond });
+    }
     const now = new Date();
     await this.prisma.$transaction(async (tx) => {
       for (const { item, q, famille } of lignes) {
@@ -124,6 +131,8 @@ export class GroupeService {
         else await tx.besoin.create({ data: { ...data, companyId: tenant.companyId, projectId, takeoffId: takeoff.id, articleKey: item.key } });
       }
     });
+    // Étape 4 : le besoin rejoint tout de suite son lot ouvert (ou en ouvre un) ; un seuil atteint forme le lot.
+    await this.regroupement.ranger();
     return this.besoinsDuChantier(tenant, projectId);
   }
 
@@ -132,7 +141,9 @@ export class GroupeService {
     assertCanWrite(tenant);
     await this.ouvert(tenant);
     if (!engagement) throw validationFailed("Commitment required", { reason: "engagement_requis" });
-    return this.passer(tenant, besoinId, "signe");
+    const vue = await this.passer(tenant, besoinId, "signe");
+    await this.regroupement.ranger();
+    return vue;
   }
 
   /** Retrait libre tant que la demande n'est pas partie aux négoces (section 4 a) ; ensuite, plus jamais (b). */
@@ -145,7 +156,7 @@ export class GroupeService {
     if (!isUuid(besoinId)) throw notFound("Besoin");
     const b = await this.prisma.besoin.findFirst({ where: { id: besoinId, companyId: tenant.companyId }, include: { lot: { select: { statut: true } } } });
     if (!b) throw notFound("Besoin");
-    const t = transitionBesoin(b.statut as StatutBesoin, vers, { lotParti: !!b.lot && b.lot.statut !== "ouvert" });
+    const t = transitionBesoin(b.statut as StatutBesoin, vers, { lotParti: lotParti(b.lot?.statut) });
     if (t.ok === false) throw new DomainError("conflict", "Transition refused", { reason: t.raison });
     const now = new Date();
     const updated = await this.prisma.besoin.update({
@@ -171,6 +182,6 @@ function vue(b: { id: string; articleKey: string; designation: string; quantite:
     unite: b.unite,
     statut: b.statut as StatutBesoin,
     fenetre: { tot: jour(b.fenetreTot), tard: jour(b.fenetreTard) },
-    lotParti: !!b.lot && b.lot.statut !== "ouvert",
+    lotParti: lotParti(b.lot?.statut),
   };
 }

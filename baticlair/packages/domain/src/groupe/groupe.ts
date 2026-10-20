@@ -81,9 +81,18 @@ export function familleDuMetier(metier: string | null | undefined): FamilleGroup
 export const STATUTS_BESOIN = ["en_attente", "signe", "retire", "engage", "commande", "livre"] as const;
 export type StatutBesoin = (typeof STATUTS_BESOIN)[number];
 
-/** section 2, étapes 4 à 8 : la vie d'un lot. */
-export const STATUTS_LOT = ["ouvert", "envoye", "choisi", "clos", "annule"] as const;
+/**
+ * Section 2, étapes 4 à 8 : la vie d'un lot. « ouvert » : il reçoit les besoins ; « forme » : un seuil ou le lundi l'a
+ * formé, il attend de partir (étape 5) ; « envoye » : parti aux négoces ; « choisi » : un négoce retenu ; « clos » ;
+ * « annule ».
+ */
+export const STATUTS_LOT = ["ouvert", "forme", "envoye", "choisi", "clos", "annule"] as const;
 export type StatutLot = (typeof STATUTS_LOT)[number];
+
+/** Section 4 a : un besoin se retire tant que la demande n'est pas PARTIE aux négoces (un lot formé, pas encore parti, le laisse libre). */
+export function lotParti(statut: string | null | undefined): boolean {
+  return statut === "envoye" || statut === "choisi" || statut === "clos";
+}
 
 /** section 2, étape 6 : la lecture d'un devis de négoce ; un cas douteux est « à vérifier » pour Greg, jamais bloquant. */
 export const STATUTS_EXTRACTION = ["en_attente", "lue", "a_verifier", "echec"] as const;

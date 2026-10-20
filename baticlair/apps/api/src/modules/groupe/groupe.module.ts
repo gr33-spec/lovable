@@ -7,12 +7,14 @@ import { TenancyModule } from "../tenancy/index.js";
 import { GroupeService } from "./application/groupe.service.js";
 import { InseeSiretVerifier, SIRET_VERIFIER, siretBienForme, type SiretVerifier } from "./application/siret-verifier.js";
 import { NegocesService } from "./application/negoces.service.js";
+import { RegroupementService } from "./application/regroupement.service.js";
 import { GroupeController } from "./http/groupe.controller.js";
 import { NegocesController } from "./http/negoces.controller.js";
+import { RegroupementController } from "./http/regroupement.controller.js";
 
 @Module({
   imports: [TenancyModule, TakeoffModule],
-  controllers: [GroupeController, NegocesController],
+  controllers: [GroupeController, NegocesController, RegroupementController],
   providers: [
     {
       provide: SIRET_VERIFIER,
@@ -22,13 +24,14 @@ import { NegocesController } from "./http/negoces.controller.js";
         c.env === "test" && !c.groupe.inseeApiKey ? { verifier: async (s) => (siretBienForme(s) ? { statut: "actif" } : { statut: "inconnu" }) } : new InseeSiretVerifier(c.groupe.inseeApiKey),
       inject: [CONFIG],
     },
+    { provide: RegroupementService, useFactory: (p: PrismaService) => new RegroupementService(p), inject: [PrismaService] },
     {
       provide: GroupeService,
-      useFactory: (p: PrismaService, t: TakeoffService, s: SiretVerifier) => new GroupeService(p, (tenant, id) => t.reviewed(tenant, id), s),
-      inject: [PrismaService, TakeoffService, SIRET_VERIFIER],
+      useFactory: (p: PrismaService, t: TakeoffService, s: SiretVerifier, r: RegroupementService) => new GroupeService(p, (tenant, id) => t.reviewed(tenant, id), s, r),
+      inject: [PrismaService, TakeoffService, SIRET_VERIFIER, RegroupementService],
     },
     { provide: NegocesService, useFactory: (p: PrismaService, c: AppConfig) => new NegocesService(p, c.authSecret), inject: [PrismaService, CONFIG] },
   ],
-  exports: [GroupeService, NegocesService],
+  exports: [GroupeService, NegocesService, RegroupementService],
 })
 export class GroupeModule {}

@@ -1,0 +1,20 @@
+{
+  "_": "BatiClair Groupé, étape 4 : les seuils qui forment un lot avant le lundi (section 2, étape 4). Un lot se forme dès qu'un seuil est atteint sur ses besoins SIGNÉS : le nombre d'artisans, ou une quantité dans l'unité des besoins. « references » : la première entrée dont le mot est dans la clé du lot l'emporte ; sinon la famille ; sinon le défaut. Exemple du fondateur : ardoise, 2 artisans ou 2 palettes (une palette ≈ 1 000 ardoises, à vérifier par un couvreur).",
+  "defaut": { "artisans": 2 },
+  "familles": {
+    "couverture": { "artisans": 2 },
+    "charpente": { "artisans": 2 },
+    "maconnerie": { "artisans": 2 },
+    "electricite": { "artisans": 3 },
+    "plomberie": { "artisans": 3 },
+    "amenagement_exterieur": { "artisans": 2 },
+    "menuiseries_fermetures": { "artisans": 2 },
+    "second_oeuvre": { "artisans": 3 },
+    "serrurerie_metallerie": { "artisans": 2 }
+  },
+  "references": [
+    { "mot": "ardoise", "artisans": 2, "quantite": 2000, "unite": "pièces" }
+  ],
+  "plafond": { "foisMediane": 3, "jours": 90 },
+  "calendrier": { "jour": "lundi", "heure": 7, "toutesLesSemaines": 2 }
+}
