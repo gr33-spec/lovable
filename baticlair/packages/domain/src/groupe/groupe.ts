@@ -181,3 +181,21 @@ export function quantiteDuBesoin(order: { count: string; unit: string } | null, 
   const q = quantity ? lire(quantity) : null;
   return q && q.reste ? { quantite: q.n, unite: q.reste } : null;
 }
+
+/**
+ * Section 2, étape 3 : le message type que l'artisan envoie à son négoce pour le prévenir (aucun démarchage par Greg). Le
+ * négoce n'a rien à installer : un e-mail, un lien, il dépose son devis.
+ */
+export function messageAuNegoce(artisan: { entreprise: string; prenom?: string | null }): string {
+  const signature = artisan.prenom ? `${artisan.prenom}, ${artisan.entreprise}` : artisan.entreprise;
+  return [
+    "Bonjour,",
+    "",
+    "Je passe désormais une partie de mes commandes par un regroupement d'artisans de mon département : nos besoins fermes sont réunis pour demander un prix de volume.",
+    "Vous recevrez peut-être une demande de « Regroupement artisans » par e-mail : il suffit de déposer votre devis par le lien, sans compte ni formulaire. Si le lot ne vous concerne pas, un clic sur « pas concerné » suffit.",
+    "Je continue à commander sur mon compte chez vous, livré sur mes chantiers, payé comme d'habitude.",
+    "",
+    "Bien à vous,",
+    signature,
+  ].join("\n");
+}

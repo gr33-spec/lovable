@@ -6,11 +6,13 @@ import { TakeoffModule, TakeoffService } from "../takeoff/index.js";
 import { TenancyModule } from "../tenancy/index.js";
 import { GroupeService } from "./application/groupe.service.js";
 import { InseeSiretVerifier, SIRET_VERIFIER, siretBienForme, type SiretVerifier } from "./application/siret-verifier.js";
+import { NegocesService } from "./application/negoces.service.js";
 import { GroupeController } from "./http/groupe.controller.js";
+import { NegocesController } from "./http/negoces.controller.js";
 
 @Module({
   imports: [TenancyModule, TakeoffModule],
-  controllers: [GroupeController],
+  controllers: [GroupeController, NegocesController],
   providers: [
     {
       provide: SIRET_VERIFIER,
@@ -25,7 +27,8 @@ import { GroupeController } from "./http/groupe.controller.js";
       useFactory: (p: PrismaService, t: TakeoffService, s: SiretVerifier) => new GroupeService(p, (tenant, id) => t.reviewed(tenant, id), s),
       inject: [PrismaService, TakeoffService, SIRET_VERIFIER],
     },
+    { provide: NegocesService, useFactory: (p: PrismaService, c: AppConfig) => new NegocesService(p, c.authSecret), inject: [PrismaService, CONFIG] },
   ],
-  exports: [GroupeService],
+  exports: [GroupeService, NegocesService],
 })
 export class GroupeModule {}
