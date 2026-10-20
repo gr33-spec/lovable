@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: "L'assistant d'achat de matériaux des artisans.",
   applicationName: "BatiClair",
   appleWebApp: { capable: true, title: "BatiClair", statusBarStyle: "default" },
+  // L'icône de l'écran d'accueil iPhone (180 px, sans transparence) et celle des onglets.
+  icons: { icon: [{ url: "/icon.svg", type: "image/svg+xml" }, { url: "/icon-192.png", sizes: "192x192", type: "image/png" }], apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }] },
 };
 
 export const viewport: Viewport = {

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { MailCheck, Search, Sparkles, Warehouse } from "lucide-react";
 import { useCallback } from "react";
 import { DemoCard } from "@/components/demo";
+import { InstallHint } from "@/components/install-hint";
 import { useBilling } from "@/components/paywall";
 import { ProjectList } from "@/components/project-row";
 import { ErrorNotice, Spinner } from "@/components/ui";
@@ -56,6 +57,7 @@ export default function AccueilPage() {
 
   return (
     <>
+      <InstallHint />
       <div className="flex items-center justify-between">
         <span className="text-[15px] font-extrabold">{company?.name}</span>
         <Link href="/compte" aria-label="Mon compte" className="flex size-11 items-center justify-center rounded-full bg-surface text-sm font-extrabold shadow-card">
