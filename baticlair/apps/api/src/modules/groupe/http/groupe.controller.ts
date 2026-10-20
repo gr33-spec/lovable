@@ -33,7 +33,7 @@ export class GroupeController {
     if (!this.config.groupe.enabled) throw notFound("Route");
   }
 
-  /** L'accès au groupé de l'entreprise : ouvert, ou pourquoi pas (SIRET, abonnement). */
+  /** L'accès au groupé de l'entreprise : ouvert, ou pourquoi pas (SIRET ; gratuit pour l'artisan, aucune condition d'abonnement). */
   @Get("groupe")
   async etat(@Tenant() tenant: TenantContext) {
     this.actif();
