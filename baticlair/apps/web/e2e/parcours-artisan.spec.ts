@@ -1636,7 +1636,7 @@ test("BatiClair Groupé, étape 2 : proposer des lignes au groupé, s'engager, p
   // Rien de coché d'office : l'engagement se choisit ligne par ligne.
   await expect(boxes.first()).not.toBeChecked();
   await boxes.first().check();
-  const bar = page.getByRole("region", { name: "Proposer au groupé" });
+  const bar = page.getByRole("region", { name: "Proposer au groupé", exact: true });
   await expect(bar.getByText("1 ligne au groupé")).toBeVisible();
   // « Chantier signé » : « Proposer » attend la phrase d'engagement.
   await bar.getByRole("radio", { name: "Chantier signé" }).click();
@@ -1644,8 +1644,8 @@ test("BatiClair Groupé, étape 2 : proposer des lignes au groupé, s'engager, p
   await bar.getByRole("checkbox", { name: /je m'engage à commander ces quantités au prix groupé obtenu, chez le négoce retenu/ }).check();
   await bar.getByRole("button", { name: "Proposer" }).click();
 
-  const groupe = page.getByRole("region", { name: "Au groupé" });
-  await expect(groupe.getByText("Chantier signé")).toBeVisible();
+  const groupe = page.getByRole("region", { name: "Au groupé", exact: true });
+  await expect(groupe.getByText("Chantier signé", { exact: true })).toBeVisible();
   await expect(groupe.getByRole("button", { name: "Retirer du groupé" })).toBeVisible();
 
   // Une deuxième ligne, en « Devis en attente », puis passée en signé d'un tap (avec l'engagement).
@@ -1653,12 +1653,12 @@ test("BatiClair Groupé, étape 2 : proposer des lignes au groupé, s'engager, p
   await boxes.first().check();
   await bar.getByRole("radio", { name: "Devis en attente" }).click();
   await bar.getByRole("button", { name: "Proposer" }).click();
-  await expect(groupe.getByText("Devis en attente")).toBeVisible();
+  await expect(groupe.getByText("Devis en attente", { exact: true })).toBeVisible();
   await groupe.getByRole("button", { name: "Passer en signé" }).click();
   await groupe.getByRole("checkbox", { name: /je m'engage/ }).check();
   await groupe.getByRole("button", { name: "Chantier signé" }).click();
-  await expect(groupe.getByText("Devis en attente")).toHaveCount(0);
-  await expect(groupe.getByText("Chantier signé")).toHaveCount(2);
+  await expect(groupe.getByText("Devis en attente", { exact: true })).toHaveCount(0);
+  await expect(groupe.getByText("Chantier signé", { exact: true })).toHaveCount(2);
 
   // Retirées tant que le lot n'est pas parti : la section disparaît.
   await groupe.getByRole("button", { name: "Retirer du groupé" }).first().click();
