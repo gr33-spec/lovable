@@ -26,6 +26,10 @@ describe("loadConfig", () => {
 
   it("refuse un e-mail simulé en production", () => {
     expect(() => loadConfig({ ...base, NODE_ENV: "production", EMAIL_PROVIDER: "console" })).toThrow(/EMAIL_PROVIDER/);
+    // Plusieurs origines web (une prévisualisation) : la première sert aux liens, toutes sont acceptées.
+    const multi = loadConfig({ ...base, WEB_APP_URL: "https://app.example, https://preview.example/" });
+    expect(multi.webAppUrl).toBe("https://app.example");
+    expect(multi.webAppOrigins).toEqual(["https://app.example", "https://preview.example"]);
     // Groupé : le repli « SIRET bien formé = vérifié » est réservé à la prévisualisation (décision du fondateur, 2026-10-20).
     expect(() => loadConfig({ ...base, SIRET_VERIFICATION: "forme", VERCEL_ENV: "production" })).toThrow(/SIRET_VERIFICATION/);
     expect(loadConfig({ ...base, SIRET_VERIFICATION: "forme", VERCEL_ENV: "preview" }).groupe.siretVerification).toBe("forme");

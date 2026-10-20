@@ -1,4 +1,4 @@
-import { Controller, Get, Inject } from "@nestjs/common";
+import { Controller, Get, Headers, Inject } from "@nestjs/common";
 import { PrismaService } from "../../platform/database/prisma.service.js";
 import type { EmailCapability } from "../../platform/email/email.port.js";
 import type { AppConfig } from "../../platform/config/config.js";
@@ -17,11 +17,20 @@ export class HealthController {
 
   @Public()
   @Get()
-  async health() {
-    await this.prisma.$queryRaw`SELECT 1`;
+  async health(@Headers("origin") origin: string | undefined) {
+    // `db` : la base répond (une prévisualisation sans DATABASE_URL se voit ici, sans détail de connexion).
+    let db: "ok" | "erreur" = "ok";
+    try {
+      await this.prisma.$queryRaw`SELECT 1`;
+    } catch {
+      db = "erreur";
+    }
+    // `origine` : les origines web acceptées (CORS et authentification) et celle de la requête, pour vérifier une
+    // prévisualisation depuis un téléphone.
+    const origine = { acceptees: this.config.webAppOrigins, demande: origin ?? null, acceptee: origin ? this.config.webAppOrigins.includes(origin) : null };
     // `features` : ce qui est réellement disponible, pour que l'interface ne
     // promette rien d'impossible (ex. « e-mail envoyé » sans service d'e-mail). `aiKey` : le NOM de la variable d'où
     // vient la clé de lecture (BATICLAIR_ANTHROPIC_KEY), jamais sa valeur. `groupe` : BatiClair Groupé ouvert (drapeau `GROUPE`).
-    return { status: "ok", features: { email: this.email.deliversEmail, ai: this.config.ai.provider !== "disabled", aiKey: this.config.ai.keySource, alerts: this.alerter.enabled, groupe: this.config.groupe.enabled } };
+    return { status: db === "ok" ? "ok" : "degrade", db, origine, features: { email: this.email.deliversEmail, ai: this.config.ai.provider !== "disabled", aiKey: this.config.ai.keySource, alerts: this.alerter.enabled, groupe: this.config.groupe.enabled } };
   }
 }

@@ -21,7 +21,12 @@ const envSchema = z
      */
     API_PUBLIC_URL: z.url().default("http://localhost:4000"),
     /** URL de l'application web (CORS, redirections après vérification). */
-    WEB_APP_URL: z.url().default("http://localhost:3000"),
+    /** L'adresse du web ; plusieurs, séparées par des virgules, quand une prévisualisation en a une autre (la première sert aux liens). */
+    WEB_APP_URL: z
+      .string()
+      .default("http://localhost:3000")
+      .transform((v) => v.split(",").map((x) => x.trim().replace(/\/$/, "")).filter(Boolean))
+      .pipe(z.array(z.url()).min(1)),
     /**
      * Envoi des e-mails transactionnels (vérification, mot de passe oublié) :
      * - `resend`   : envoi réel via Resend (RESEND_API_KEY, EMAIL_FROM) ;
@@ -169,6 +174,8 @@ export interface AppConfig {
   authSecret: string;
   apiPublicUrl: string;
   webAppUrl: string;
+  /** Toutes les origines web acceptées (CORS, origines de confiance de l'authentification). */
+  webAppOrigins: string[];
   emailProvider: "resend" | "disabled" | "console" | "capture";
   resend?: { apiKey: string; from: string };
   oauth: { google?: OAuthClientConfig; microsoft?: OAuthClientConfig };
@@ -233,7 +240,8 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     databaseUrl: e.DATABASE_URL,
     authSecret: e.AUTH_SECRET,
     apiPublicUrl: e.API_PUBLIC_URL,
-    webAppUrl: e.WEB_APP_URL,
+    webAppUrl: e.WEB_APP_URL[0]!,
+    webAppOrigins: e.WEB_APP_URL,
     emailProvider,
     ...(emailProvider === "resend" && e.RESEND_API_KEY && e.EMAIL_FROM
       ? { resend: { apiKey: e.RESEND_API_KEY, from: e.EMAIL_FROM } }

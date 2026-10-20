@@ -23,7 +23,7 @@ export function createAuth(config: AppConfig, prisma: PrismaService, email: Tran
     basePath: AUTH_BASE_PATH,
     secret: config.authSecret,
     database: prismaAdapter(prisma, { provider: "postgresql" }),
-    trustedOrigins: [config.webAppUrl],
+    trustedOrigins: config.webAppOrigins,
     telemetry: { enabled: false },
     session: {
       // Session longue et glissante : l'artisan ne ressaisit pas son mot de passe sans cesse.
