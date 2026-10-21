@@ -2330,3 +2330,30 @@ test("PWA : manifeste et icônes installables ; sur le téléphone, « Ajouter �
   }
 });
 
+
+test("Rapport mensuel : le 1er du mois, l'artisan reçoit « ce mois : X chantiers lus, Y € économisés au groupé, Z lots » ; rien à qui n'a rien fait", async ({ page }) => {
+  // Un artisan qui a déposé un devis ce mois-ci, un autre qui n'a rien fait.
+  const email = await signUp(page);
+  await createProject(page, "Toiture Rapport", "M. Client", "4 rue du Port, 22500 Paimpol");
+  await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
+  await passQuestions(page);
+  const dejaRecus = (await emailsVers(page, email)).length;
+  // Le 1er du mois suivant, 7 h (la date ne se force qu'en test).
+  const now = new Date();
+  const premier = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 7)).toISOString();
+  const r = (await page.evaluate(async (maintenant) => {
+    const res = await fetch(`/v1/internal/rapport-mensuel?maintenant=${encodeURIComponent(maintenant)}`, { headers: { authorization: "Bearer e2e-secret-de-la-tache" } });
+    return { status: res.status, body: (await res.json()) as { envoyes: number } };
+  }, premier)) as { status: number; body: { envoyes: number } };
+  expect(r.status).toBe(200);
+  expect(r.body.envoyes).toBeGreaterThanOrEqual(1);
+  await expect.poll(async () => (await emailsVers(page, email)).length).toBeGreaterThan(dejaRecus);
+  const rapport = (await emailsVers(page, email)).at(-1)!;
+  expect(rapport.subject).toMatch(/^Ton mois d[e'’ ]+[a-zû]+ \d{4} avec BatiClair : 1 chantier lu, 0 € économisés, 0 lot$/);
+  expect(rapport.text).toContain("Ce mois : 1 chantier lu, 0 € économisés au groupé, 0 lot.");
+  expect(rapport.text).toContain("Pas de lot ce mois-ci");
+  expect(rapport.text).not.toMatch(/\bvous\b|\bvotre\b/i);
+  // Relancée : pas de second e-mail.
+  await page.evaluate(async (maintenant) => fetch(`/v1/internal/rapport-mensuel?maintenant=${encodeURIComponent(maintenant)}`, { headers: { authorization: "Bearer e2e-secret-de-la-tache" } }), premier);
+  expect((await emailsVers(page, email)).filter((m) => /^Ton mois d/.test(m.subject))).toHaveLength(1);
+});

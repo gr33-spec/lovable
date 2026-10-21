@@ -27,7 +27,7 @@ Plan du 20 octobre 2026, bloc 11. À dérouler dans l'ordre, le jour J, par Greg
 | `FACTURE_EMETTEUR_ADRESSE` | `6 impasse du Ouipoure, 22620 Ploubazlanec` | |
 | `FACTURE_EMETTEUR_TVA` | `FR61910796325` | |
 | `FACTURE_TVA_POURCENT` | `20` | Assujettie. |
-| `CRON_SECRET` | à régénérer (32 octets aléatoires) | Tâches `regrouper` (6 h UTC chaque jour) et `sirene` (5 h UTC chaque jour, page par page, un cycle complet par mois) ; Vercel l'envoie en `Bearer`. |
+| `CRON_SECRET` | à régénérer (32 octets aléatoires) | Tâches `regrouper` (6 h UTC chaque jour), `sirene` (5 h UTC chaque jour, page par page, un cycle complet par mois) et `rapport-mensuel` (le 1er du mois, 7 h UTC : l'e-mail « ce mois : X chantiers lus, Y € économisés, Z lots » à chaque artisan) ; Vercel l'envoie en `Bearer`. |
 | `WEB_APP_URL` | `https://app.baticlair.fr` (ou l'adresse du site) | Liens des e-mails, CORS. |
 | `AUTH_SECRET` | inchangé | Signe aussi les liens « pas concerné » / « stop » (expirent après 180 jours). |
 

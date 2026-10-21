@@ -20,10 +20,12 @@ import { InseeSiretVerifier, SIRET_VERIFIER, siretBienForme, type SiretVerifier 
 import { NegocesService } from "./application/negoces.service.js";
 import { SIRENE_HTTP, SireneService, type SireneHttp } from "./application/sirene.service.js";
 import { SireneController } from "./http/sirene.controller.js";
+import { RapportMensuelService } from "./application/rapport-mensuel.service.js";
 import { RegroupementService } from "./application/regroupement.service.js";
 import { AdminGroupeController } from "./http/admin-groupe.controller.js";
 import { GroupeController } from "./http/groupe.controller.js";
 import { NegocesController } from "./http/negoces.controller.js";
+import { RapportMensuelController } from "./http/rapport-mensuel.controller.js";
 import { RegroupementController } from "./http/regroupement.controller.js";
 import { ReponseController } from "./http/reponse.controller.js";
 import { TestMailboxController } from "./http/test-mailbox.controller.js";
@@ -31,7 +33,7 @@ import { WebhookResendController } from "./http/webhook-resend.controller.js";
 
 @Module({
   imports: [TenancyModule, TakeoffModule],
-  controllers: [GroupeController, NegocesController, RegroupementController, ReponseController, WebhookResendController, TestMailboxController, AdminGroupeController, SireneController],
+  controllers: [GroupeController, NegocesController, RegroupementController, ReponseController, WebhookResendController, TestMailboxController, AdminGroupeController, SireneController, RapportMensuelController],
   providers: [
     {
       provide: SIRET_VERIFIER,
@@ -47,6 +49,7 @@ import { WebhookResendController } from "./http/webhook-resend.controller.js";
     { provide: PDF_READER, useFactory: () => new PdfJsPdfReader() },
     { provide: AdminGroupeService, useFactory: (p: PrismaService, c: AppConfig) => new AdminGroupeService(p, c.groupe.departements), inject: [PrismaService, CONFIG] },
     { provide: NotificationsGroupeService, useFactory: (p: PrismaService, push: PushSender, e: TransactionalEmailSender) => new NotificationsGroupeService(p, push, e), inject: [PrismaService, PUSH_SENDER, EMAIL_SENDER] },
+    { provide: RapportMensuelService, useFactory: (p: PrismaService, e: TransactionalEmailSender, n: NotificationsGroupeService) => new RapportMensuelService(p, e, n), inject: [PrismaService, EMAIL_SENDER, NotificationsGroupeService] },
     { provide: CommandeService, useFactory: (p: PrismaService, e: TransactionalEmailSender, c: AppConfig, n: NotificationsGroupeService) => new CommandeService(p, e, c.groupe.facture, n), inject: [PrismaService, EMAIL_SENDER, CONFIG, NotificationsGroupeService] },
     { provide: ChoixService, useFactory: (p: PrismaService, c: CommandeService) => new ChoixService(p, c), inject: [PrismaService, CommandeService] },
     {
