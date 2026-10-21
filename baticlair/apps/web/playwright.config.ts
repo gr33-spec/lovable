@@ -59,7 +59,9 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: "pnpm --filter @baticlair/api exec prisma migrate deploy && pnpm --filter @baticlair/api exec tsx src/main.ts",
+      // Dette n° 2 (21 octobre) : chaque série repart d'une base vide, sinon les lots des séries précédentes (même
+      // département, même référence) faussent les parcours groupé.
+      command: "pnpm --filter @baticlair/api exec prisma migrate deploy && pnpm --filter @baticlair/api exec node scripts/vider-base-e2e.mjs && pnpm --filter @baticlair/api exec tsx src/main.ts",
       url: "http://localhost:4000/v1/health",
       env: apiEnv,
       reuseExistingServer: true,

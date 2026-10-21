@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
+import { DemoGuidee } from "@/components/demo-guidee";
 import { ButtonLink } from "@/components/ui";
 import { TRADES } from "@/lib/trades";
 
@@ -38,6 +40,10 @@ export default function BienvenuePage() {
   const h2 = "font-display text-[26px] leading-tight font-extrabold tracking-[-0.02em] sm:text-3xl";
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-14 px-4 pt-6 pb-16 sm:px-6 sm:gap-20 sm:pt-12">
+      {/* Plan 2, bloc 3 : au premier lancement, la démo guidée (trois écrans, « Passer ») vient avant l'accroche. */}
+      <Suspense>
+        <DemoGuidee />
+      </Suspense>
       <section aria-labelledby="accroche" className="flex flex-col gap-5 sm:max-w-3xl">
         <h1 id="accroche" className="font-display text-[34px] leading-[1.05] font-extrabold tracking-[-0.03em] sm:text-5xl">
           Tes devis deviennent tes bons de commande, et tes commandes se regroupent avec les autres artisans du département.
@@ -127,6 +133,9 @@ export default function BienvenuePage() {
 
       <footer className="flex flex-col gap-3 border-t border-line pt-6 text-[13px] leading-relaxed text-muted">
         <p>
+          <Link href="/?demo" className="font-bold text-ink underline">
+            Revoir la démo.
+          </Link>{" "}
           <span className="font-bold text-ink">Mentions légales.</span> BatiClair est édité par BATI INVEST, SARL, SIRET 910 796 325 00017, 6 impasse du Ouipoure, 22620 Ploubazlanec, TVA intracommunautaire FR61910796325. Hébergeur : Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis.
         </p>
         <nav aria-label="Pages légales" className="flex flex-wrap gap-x-4 gap-y-1">

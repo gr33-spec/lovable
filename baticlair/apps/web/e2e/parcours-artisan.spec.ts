@@ -2261,6 +2261,29 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await page.goto("/");
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Tes devis deviennent tes bons de commande");
+  // Plan 2, bloc 3 : au premier lancement, la démo guidée, trois écrans sans compte, données marquées « Exemple », « Passer ».
+  const demo = page.getByRole("region", { name: /^Ton devis devient ta liste/ });
+  await expect(demo).toBeVisible();
+  await expect(demo.getByText("Démo · écran 1 sur 3 · données fictives")).toBeVisible();
+  await expect(demo.getByText("Exemple").first()).toBeVisible();
+  await expect(demo.getByRole("list", { name: "Liste de fournitures (exemple)" }).getByRole("listitem")).toHaveCount(5);
+  await demo.getByRole("button", { name: "Suivant" }).click();
+  await expect(page.getByRole("heading", { name: "Le groupé, avec les artisans du département" })).toBeVisible();
+  await expect(page.getByText(/Lot n° 12 · Côtes-d'Armor/)).toBeVisible();
+  await page.getByRole("button", { name: "Suivant" }).click();
+  await expect(page.getByRole("heading", { name: "Ton offre, ton prix" })).toBeVisible();
+  await expect(page.getByText(/2 760 pièces à 0,92 € HT l'unité/)).toBeVisible();
+  // Trois liens « Créer un compte » tant que la démo est là ; « Passer » la ferme, et elle ne revient pas au rechargement.
+  await expect(page.getByRole("link", { name: "Créer un compte" })).toHaveCount(3);
+  await page.getByRole("button", { name: "Passer" }).click();
+  await expect(page.getByText("Démo · écran")).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Tes devis deviennent tes bons de commande");
+  await expect(page.getByText("Démo · écran")).toHaveCount(0);
+  // « Revoir la démo » (?demo) la rouvre.
+  await page.getByRole("link", { name: "Revoir la démo." }).click();
+  await expect(page.getByText("Démo · écran 1 sur 3 · données fictives")).toBeVisible();
+  await page.getByRole("button", { name: "Passer" }).click();
   // Les sections demandées : quantitatif, groupé, prix, métiers, compte, mentions légales. Rien d'extérieur.
   await expect(page.getByRole("heading", { name: "Du devis à la liste de fournitures, en trois étapes" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Le groupé : un seul négoce, un seul prix" })).toBeVisible();
