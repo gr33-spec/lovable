@@ -60,7 +60,7 @@ Toutes sous 50 ms : rien à corriger côté routes. « Mes lots » ne charge plu
 |---|---|---|---|
 | `regrouper` : ranger 1 010 besoins, former 50 lots | 0,5 s | 50 lots | 10 ms |
 | Demandes aux négoces (un e-mail par négoce, PDF joint) | 5,8 s | 20 négoces, 50 lots | 115 ms |
-| Choix des négoces + bons de commande + factures | 12,6 s | 50 lots, 1 010 bons (un PDF chacun), 1 010 e-mails | 250 ms |
+| Choix des négoces + bons de commande + factures | 12,6 s, puis 11,4 s avec les PDF par paquets de 10 | 50 lots, 1 010 bons (un PDF chacun), 1 010 e-mails | 230 ms |
 | Relances (50 factures, 1 010 livraisons) | 5,9 s | 1 060 e-mails | |
 | Rapport mensuel | 0,06 s (0,98 s avant) | 201 entreprises | |
 
@@ -70,4 +70,4 @@ Ce qui a été corrigé :
 - **Rapport mensuel** : deux requêtes groupées (devis lus par entreprise, bons du mois) au lieu de quatre par entreprise : 975 ms → 63 ms pour 201 entreprises.
 - **Bons de commande** : numéros de compte et propriétaires lus en deux requêtes par lot au lieu de deux par bon ; **relances de livraison** : les propriétaires en une requête. **Demandes** : les réponses existantes lues d'un coup, les nouvelles créées d'un coup.
 
-Ce qui reste (dette n° 14) : le temps des bons de commande est celui des PDF (pdf-lib, ~10 ms par bon) et des e-mails, un par artisan ; 50 lots d'un coup est un jour exceptionnel (la formation se fait au fil de l'eau, dès le seuil), et le budget garantit qu'un passage ne casse pas. Si un jour ordinaire dépasse 20 lots, générer les PDF en parallèle (par paquets de 10) et envoyer les e-mails artisans sans attendre les uns les autres.
+Ce qui reste : le temps des bons de commande est celui des PDF (pdf-lib, ~10 ms par bon, un seul fil d'exécution : les paquets de 10 ne gagnent que 10 %) et des e-mails, un par artisan ; 50 lots d'un coup est un jour exceptionnel (la formation se fait au fil de l'eau, dès le seuil), et le budget garantit qu'un passage ne casse pas.

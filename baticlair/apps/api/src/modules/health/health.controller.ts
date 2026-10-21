@@ -1,4 +1,5 @@
-import { Controller, Get, Headers, Inject } from "@nestjs/common";
+import { Controller, Get, Header, Headers, Inject } from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
 import { PrismaService } from "../../platform/database/prisma.service.js";
 import type { EmailCapability } from "../../platform/email/email.port.js";
 import { originesAcceptees, type AppConfig } from "../../platform/config/config.js";
@@ -16,6 +17,9 @@ export class HealthController {
   ) {}
 
   @Public()
+  // Dette n° 8 (21 octobre) : lu à chaque chargement de page ; limite large par adresse et cache court côté navigateur.
+  @Throttle({ default: { ttl: 3_600_000, limit: 600 } })
+  @Header("Cache-Control", "private, max-age=30")
   @Get()
   async health(@Headers("origin") origin: string | undefined) {
     // `db` : la base répond (une prévisualisation sans DATABASE_URL se voit ici, sans détail de connexion).
