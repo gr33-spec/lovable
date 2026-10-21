@@ -153,8 +153,8 @@ test("un artisan crée son compte et son premier chantier depuis le +", async ({
   // Le « + » : un nouveau chantier = déposer le PDF, rien d'autre à remplir (§48).
   await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Nouveau devis" }).click();
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
-  // §50.1 : un bouton, « Déposer mon devis ».
-  await expect(page.getByText("Déposer mon devis", { exact: true })).toBeVisible();
+  // §50.1, et demande du fondateur (21 octobre) : « J'ai un devis » (déposer le PDF), à côté de « J'ai déjà ma liste ».
+  await expect(page.getByText("J'ai un devis", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Nom du chantier")).toHaveCount(0);
   await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   // Le chantier est créé au dépôt ; la lecture part d'elle-même, sans champ « précisions » ni bouton à toucher.
@@ -1292,8 +1292,8 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
   };
   await signUp(page);
   await page.goto("/chantiers/nouveau");
-  // 1. Un bouton.
-  await expect(page.getByText("Déposer mon devis", { exact: true })).toBeVisible();
+  // 1. Un bouton pour le devis (« J'ai un devis » ; « J'ai déjà ma liste » est l'autre chemin, demande du 21 octobre).
+  await expect(page.getByText("J'ai un devis", { exact: true })).toBeVisible();
   await clean();
   await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
   // 2. Les questions : une par carte, en boutons, groupées par ouvrage, puis « Calculer ma liste ».
@@ -2365,4 +2365,107 @@ test("Rapport mensuel : le 1er du mois, l'artisan reçoit « ce mois : X chantie
   // Relancée : pas de second e-mail.
   await page.evaluate(async (maintenant) => fetch(`/v1/internal/rapport-mensuel?maintenant=${encodeURIComponent(maintenant)}`, { headers: { authorization: "Bearer e2e-secret-de-la-tache" } }), premier);
   expect((await emailsVers(page, email)).filter((m) => /^Ton mois d/.test(m.subject))).toHaveLength(1);
+});
+
+// « J'ai déjà ma liste » (demande du fondateur, 21 octobre 2026) : crédit API à zéro, le faux lecteur rend trois listes
+// enregistrées (manuscrite, bon de négoce, tableau), choisies par le nom du fichier.
+test("« + Nouveau devis » : deux gros boutons, « J'ai déjà ma liste » lit la photo sans calcul ni question, la liste se corrige d'un doigt, puis part comme un devis", async ({ page }) => {
+  test.slow();
+  await signUp(page);
+  // Une adresse propre à ce test : la boîte de test est partagée par toute la série.
+  const negoce = `liste-${Date.now()}@example.com`;
+  await menuArtisan(page, "Mes fournisseurs");
+  await page.getByRole("button", { name: "Nouveau fournisseur" }).click();
+  await page.getByLabel("Société").fill("Point.P Paimpol");
+  await page.getByLabel("E-mail pour les demandes de prix").fill(negoce);
+  await page.getByRole("button", { name: "Ajouter", exact: true }).click();
+  await expect(page.getByText(negoce)).toBeVisible();
+
+  // 1. Les deux gros boutons.
+  await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Nouveau devis" }).click();
+  await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
+  await expect(page.getByText("J'ai un devis", { exact: true })).toBeVisible();
+  await expect(page.getByText("J'ai déjà ma liste", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Déposer mon devis")).toHaveAttribute("accept", /pdf/);
+  await expect(page.getByLabel("Déposer ma liste")).toHaveAttribute("accept", /image\/jpeg.*application\/pdf/);
+
+  // 2. La photo d'une liste écrite à la main : les lignes telles qu'écrites, aucune question, aucun calcul.
+  await page.getByLabel("Déposer ma liste").setInputFiles(path.join(__dirname, "fixtures", "liste-manuscrite.png"));
+  await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}$/, { timeout: 60_000 });
+  await expect(page.getByRole("heading", { name: /^Ma liste du / })).toBeVisible();
+  const liste = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(liste).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByRole("region", { name: "Les questions" })).toHaveCount(0);
+  for (const article of ["Tuile romane canal rouge", "Faîtière ronde à emboîtement", "Liteau sapin 27x38", "Écran sous-toiture", "Pointes inox"]) {
+    await expect(liste.getByRole("button", { name: new RegExp(`^Modifier : ${article}`) })).toBeVisible();
+  }
+  // Rien d'ajouté, rien de calculé : cinq lignes, comme sur la feuille, toutes prêtes (aucune ligne orange).
+  await expect(liste.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
+  await expect(liste.getByRole("button", { name: /^Modifier : / })).toHaveCount(5);
+  await expect(liste.getByText(/1[\s\u00a0\u202f]?250/).filter({ visible: true }).first()).toBeVisible();
+
+  // 3. Corriger d'un doigt ce qui est mal lu : renommer, retirer, ajouter une ligne.
+  await page.getByRole("button", { name: "Modifier : Pointes inox" }).click();
+  await page.getByRole("button", { name: "Modifier le nom : Pointes inox" }).click();
+  await page.getByLabel("Nom : Pointes inox").fill("Pointes inox 2,8x40");
+  await page.getByRole("button", { name: "OK" }).click();
+  await confirmDoubts(page);
+  await expect(liste.getByRole("button", { name: /^(Modifier|Fermer) : Pointes inox 2,8x40/ })).toBeVisible();
+  await closeOpenLine(page);
+  await liste.getByRole("button", { name: "Modifier : Écran sous-toiture" }).click();
+  await liste.getByRole("button", { name: "Retirer de la liste" }).click();
+  await expect(liste.getByRole("button", { name: /^Modifier : Écran sous-toiture/ })).toHaveCount(0);
+  await page.getByRole("button", { name: "Ajouter un article" }).click();
+  await page.getByLabel("Désignation").fill("Chatière tuile");
+  await page.getByLabel("Quantité").fill("6");
+  await page.getByLabel("Unité").fill("pièces");
+  await page.getByRole("button", { name: "Ajouter", exact: true }).click();
+  await expect(liste.getByRole("button", { name: /^Modifier : Chatière/ })).toBeVisible();
+  await confirmDoubts(page);
+
+  // 4. Rien ne part sans sa validation ; puis même suite qu'un devis : envoi aux négoces.
+  await page.reload();
+  await openList(page);
+  expect(await emailsVers(page, negoce)).toHaveLength(0);
+  await page.getByRole("button", { name: "Envoyer aux négoces" }).click();
+  const apercu = page.getByRole("dialog", { name: "À qui j'envoie ?" });
+  await expect(apercu.getByRole("checkbox", { name: /Point.P Paimpol/ })).toBeChecked();
+  await apercu.getByRole("button", { name: "Envoyer", exact: true }).click();
+  await expect(page.getByRole("list", { name: "Tes fournisseurs" })).toBeVisible();
+  const [demande] = await emailsVers(page, negoce);
+  expect(demande, "la demande de devis est partie").toBeDefined();
+  // Le PDF joint porte les lignes (un seul document, §43) ; la liste corrigée est celle qui est partie.
+  expect(demande!.attachments.join(" ")).toMatch(/demande-de-devis/);
+  await page.getByRole("button", { name: /Ma liste, envoyée/ }).click();
+  const envoyee = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(envoyee.getByRole("button", { name: /^Modifier : Chatière/ })).toBeVisible();
+  await expect(envoyee.getByRole("button", { name: /^Modifier : Pointes inox 2,8x40/ })).toBeVisible();
+  await expect(envoyee.getByRole("button", { name: /^Modifier : Écran sous-toiture/ })).toHaveCount(0);
+});
+
+test("« J'ai déjà ma liste » : un bon de négoce (photo) et un tableau (PDF) se lisent de la même façon, sans question", async ({ page }) => {
+  test.slow();
+  await signUp(page);
+  const cas = [
+    { fichier: "bon-negoce.png", premiere: /^Modifier : Ardoise naturelle 32x22 Espagne 1er choix/, lignes: 4 },
+    { fichier: "liste-tableau.pdf", premiere: /^Modifier : Plaque de plâtre BA13 2,50x1,20/, lignes: 6 },
+  ];
+  for (const c of cas) {
+    await page.goto("/chantiers/nouveau");
+    await page.getByLabel("Déposer ma liste").setInputFiles(path.join(__dirname, "fixtures", c.fichier));
+    await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}$/, { timeout: 60_000 });
+    const liste = page.getByRole("region", { name: "Liste des fournitures" });
+    await expect(liste).toBeVisible({ timeout: 60_000 });
+    await expect(liste.getByRole("button", { name: c.premiere })).toBeVisible();
+    await expect(liste.getByRole("button", { name: /^Modifier : / })).toHaveCount(c.lignes);
+    await expect(page.getByRole("region", { name: "Les questions" })).toHaveCount(0);
+  }
+});
+
+test("« J'ai déjà ma liste » : un fichier qui n'est ni une photo ni un PDF se dit en clair, rien n'est créé", async ({ page }) => {
+  await signUp(page);
+  await page.goto("/chantiers/nouveau");
+  await page.getByLabel("Déposer ma liste").setInputFiles({ name: "liste.txt", mimeType: "text/plain", buffer: Buffer.from("du texte") });
+  await expect(page.getByRole("alert").filter({ hasText: /ni une photo ni un PDF|rien lu/ })).toBeVisible();
+  await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
 });

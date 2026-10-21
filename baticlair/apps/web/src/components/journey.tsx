@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronLeft, FileUp, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Check, ChevronLeft, FileUp, ListChecks, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ListScene, ReadingStage } from "@/components/chantier-scenes";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
@@ -21,7 +21,19 @@ import { useTyping } from "@/lib/typing";
  * LA SEULE ACTION D'UN NOUVEAU CHANTIER : déposer le PDF. Une grande zone (toucher pour choisir, ou glisser le fichier
  * sur ordinateur), l'animation, une phrase. Le nom, l'adresse et le client viennent du devis.
  */
-export function DropZone({ onFile, pending, error }: { onFile: (file: File) => void; pending: boolean; error: ApiError | null }) {
+export function DropZone({
+  onFile,
+  pending,
+  error,
+  kind = "devis",
+}: {
+  onFile: (file: File) => void;
+  pending: boolean;
+  error: ApiError | null;
+  /** « liste » : « J'ai déjà ma liste », une photo, un PDF ou une capture de ce que l'artisan a déjà compté. */
+  kind?: "devis" | "liste";
+}) {
+  const liste = kind === "liste";
   const id = useId();
   const input = useRef<HTMLInputElement>(null);
   const [over, setOver] = useState(false);
@@ -32,9 +44,19 @@ export function DropZone({ onFile, pending, error }: { onFile: (file: File) => v
   };
   // §50.1 : un bouton, « Déposer mon devis » (toucher pour choisir, ou glisser le fichier sur ordinateur). Rien d'autre.
   return (
-    <section aria-label="Dépôt du devis" className="flex flex-col gap-4">
+    <section aria-label={liste ? "Dépôt de la liste" : "Dépôt du devis"} className="flex flex-col gap-4">
       {error ? <ErrorNotice error={error} /> : null}
-      <input ref={input} id={id} type="file" accept="application/pdf,.pdf" className="sr-only" disabled={pending} onChange={(e) => take(e.target.files?.[0])} />
+      {/* La liste : une photo (JPEG, PNG, WebP : l'iPhone convertit tout seul) ou un PDF ; le devis : un PDF. */}
+      <input
+        ref={input}
+        id={id}
+        type="file"
+        aria-label={liste ? "Déposer ma liste" : "Déposer mon devis"}
+        accept={liste ? "image/jpeg,image/png,image/webp,application/pdf,.pdf" : "application/pdf,.pdf"}
+        className="sr-only"
+        disabled={pending}
+        onChange={(e) => take(e.target.files?.[0])}
+      />
       <label
         htmlFor={id}
         aria-disabled={pending}
@@ -52,10 +74,11 @@ export function DropZone({ onFile, pending, error }: { onFile: (file: File) => v
           over ? "border-accent bg-accent/5" : "border-accent/30 bg-surface"
         } ${pending ? "pointer-events-none opacity-80" : "active:scale-[0.99]"}`}
       >
-        <span className="flex size-16 items-center justify-center rounded-full bg-cta text-white shadow-card">
-          {pending ? <Loader2 size={28} className="animate-spin" aria-hidden="true" /> : <FileUp size={28} aria-hidden="true" />}
+        <span className={`flex size-16 items-center justify-center rounded-full text-white shadow-card ${liste ? "bg-ink" : "bg-cta"}`}>
+          {pending ? <Loader2 size={28} className="animate-spin" aria-hidden="true" /> : liste ? <ListChecks size={28} aria-hidden="true" /> : <FileUp size={28} aria-hidden="true" />}
         </span>
-        <span className="font-display text-[20px] font-extrabold tracking-[-0.01em]">Déposer mon devis</span>
+        <span className="font-display text-[20px] font-extrabold tracking-[-0.01em]">{pending && liste ? "Je lis ta liste…" : liste ? "J'ai déjà ma liste" : "J'ai un devis"}</span>
+        {liste && !pending ? <span className="text-[14px] leading-snug text-muted">Photo d&apos;une liste écrite à la main, d&apos;un bon ou d&apos;un devis de négoce, PDF ou capture.</span> : null}
       </label>
     </section>
   );

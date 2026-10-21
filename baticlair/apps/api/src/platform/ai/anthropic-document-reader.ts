@@ -67,9 +67,14 @@ export class AnthropicDocumentReader {
         title: `Pages du ${request.documentName} à lire en image (numéros d'origine, dans l'ordre : ${document.imagePages.join(", ")})`,
       });
     }
+    for (const image of document.images ?? []) {
+      content.push({ type: "image", source: { type: "base64", media_type: image.mediaType, data: Buffer.from(image.bytes).toString("base64") } });
+    }
     const text = document.numberedText.trim()
       ? `Texte du ${request.documentName}, lignes numérotées :\n\n${document.numberedText}`
-      : "Aucune page n'a de texte lisible : lis le document PDF ci-dessus.";
+      : document.images?.length
+        ? `Lis l'image du ${request.documentName} ci-dessus.`
+        : "Aucune page n'a de texte lisible : lis le document PDF ci-dessus.";
     content.push({ type: "text", text: request.extra ? `${text}\n\n${request.extra}` : text });
 
     const started = Date.now();
