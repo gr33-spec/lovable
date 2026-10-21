@@ -11,9 +11,10 @@ const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
 async function signUp(page: Page, email = `artisan-${unique()}@example.fr`) {
   await page.goto("/");
-  // Sans session : renvoyé vers la connexion, puis vers l'inscription.
-  await expect(page).toHaveURL(/\/connexion\?retour=%2F/);
-  await page.getByRole("link", { name: "Créer un compte" }).click();
+  // Sans session : la page publique, puis « Créer un compte » mène à l'inscription.
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Tes devis deviennent tes bons de commande");
+  await page.getByRole("link", { name: "Créer un compte" }).first().click();
+  await expect(page).toHaveURL(/\/inscription/);
   await page.getByLabel("Prénom et nom").fill("Jean Martin");
   await page.getByLabel("Nom de ton entreprise").fill("Toitures Martin");
   // Seule question métier : un appui (ici un couvreur).
@@ -2254,5 +2255,27 @@ test("Aide « ? » : sur chaque écran, trois lignes au plus, tutoiement, un tap
   await confirmDoubts(page);
   await page.getByRole("region", { name: "Liste des fournitures" }).getByRole("button", { name: "Aide" }).click();
   await expect(page.getByRole("dialog", { name: "Aide : Ton chantier" })).toBeVisible();
+
+test("La page d'accueil publique : un visiteur la voit à la racine, un artisan connecté garde l'app", async ({ page }) => {
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Tes devis deviennent tes bons de commande");
+  // Les sections demandées : quantitatif, groupé, prix, métiers, compte, mentions légales. Rien d'extérieur.
+  await expect(page.getByRole("heading", { name: "Du devis à la liste de fournitures, en trois étapes" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Le groupé : un seul négoce, un seul prix" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Gratuit pour l'artisan" })).toBeVisible();
+  await expect(page.getByText("Le négoce paie 2 %")).toBeVisible();
+  await expect(page.getByRole("list", { name: "Métiers couverts" }).getByRole("listitem")).toHaveCount(24);
+  await expect(page.getByRole("link", { name: "Créer un compte" })).toHaveCount(2);
+  await expect(page.getByText(/BATI INVEST, SARL, SIRET 910 796 325 00017/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "Confidentialité" })).toHaveAttribute("href", "/confidentialite");
+  const externes = await page.evaluate(() => [...document.querySelectorAll("script[src], img, link[rel=stylesheet], iframe")].map((e) => (e as HTMLElement).getAttribute("src") ?? (e as HTMLElement).getAttribute("href") ?? "").filter((u) => /^https?:\/\//.test(u)));
+  expect(externes).toEqual([]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+  // Connecté : la racine reste l'accueil de l'app.
+  await signUp(page);
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: /^Bonjour Jean/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Créer un compte" })).toHaveCount(0);
 });
 
