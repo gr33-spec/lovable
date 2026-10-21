@@ -67,7 +67,7 @@ function toRecord(row: Row): TakeoffRecord {
       sourceRefs: strings(l.sourceRefs),
       sourcePages: numbers(l.sourcePages),
       section: strings(l.section),
-      origin: l.origin === "manual" || l.origin === "partner" ? l.origin : "ai",
+      origin: l.origin === "manual" || l.origin === "partner" || l.origin === "liste" ? l.origin : "ai",
       edited: l.edited,
       aiDoubt: l.aiDoubt,
       priceRaw: l.priceRaw,

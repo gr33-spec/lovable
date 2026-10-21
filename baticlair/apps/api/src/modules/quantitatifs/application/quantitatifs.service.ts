@@ -71,6 +71,10 @@ export class QuantitatifsService {
     return this.takeoffs.aiAvailable;
   }
 
+  get listeDisponible(): boolean {
+    return this.takeoffs.listeAvailable;
+  }
+
   /**
    * Quota d'une clé API partenaire : tant de quantitatifs créés par mois civil. Au-delà, 429 ; les lectures ne
    * comptent pas. Vérifié avant toute création (chantier, document, lecture IA).
@@ -117,6 +121,22 @@ export class QuantitatifsService {
     const unreadable = document.status === "failed" && document.processing?.status === "failed" && document.processing.errorCode !== "read_failed";
     if (!unreadable) await this.takeoffs.start(tenant, document.id);
     return this.get(tenant, row.id, rendu);
+  }
+
+  /**
+   * « J'AI DÉJÀ MA LISTE » : photo ou PDF d'une liste déjà comptée (écrite à la main, bon ou devis de négoce, tableau).
+   * Les lignes sont lues telles qu'écrites, sans calcul ni question ; la liste arrive sur le même écran qu'un devis.
+   */
+  async fromListe(tenant: TenantContext, projectId: string, file: { name: string; bytes: Uint8Array }, rendu: Rendu = {}) {
+    assertCanWrite(tenant);
+    if (!/^[0-9a-f-]{36}$/i.test(projectId)) throw notFound("Project");
+    const project = await this.projects.get(tenant, projectId);
+    const trade = project.trade && referentialFor(project.trade) ? project.trade : (tenant.trades.find((t) => referentialFor(t)) ?? tenant.trades[0] ?? "roofing");
+    const reviewed = await this.takeoffs.fromListe(tenant, projectId, trade, file);
+    const row = await this.prisma.quantitatif.create({
+      data: { companyId: tenant.companyId, projectId, source: "lignes", takeoffId: reviewed.takeoff.id, reference: null, apiKeyId: null },
+    });
+    return this.view(row, reviewed, rendu);
   }
 
   /** Un devis déjà déposé sur le chantier (le chat de l'appli) : même quantitatif s'il existe, lecture sinon. */

@@ -43,7 +43,10 @@ export function ProjectTakeoff({
   autoStart,
   onProjectChanged,
   onRedeposit,
+  onHasList,
 }: {
+  /** « J'ai déjà ma liste » : une liste sans devis existe ; le chantier ne propose plus de déposer un devis. */
+  onHasList?: (has: boolean) => void;
   projectId: string;
   clientQuote: ProjectDocument | null;
   archived: boolean;
@@ -152,6 +155,11 @@ export function ProjectTakeoff({
     }
     if (before === "calcul" && step === "resultat") notifyReady("Ta liste est prête", "Les matériaux sont calculés : il te reste à vérifier les lignes orange.", `chantier-${projectId}`);
   }, [step, onProjectChanged, projectId]);
+
+  const hasList = Boolean(data?.takeoff);
+  useEffect(() => {
+    onHasList?.(hasList);
+  }, [hasList, onHasList]);
 
   // Devis tout juste déposé : on lit sans attendre un appui de plus.
   useEffect(() => {

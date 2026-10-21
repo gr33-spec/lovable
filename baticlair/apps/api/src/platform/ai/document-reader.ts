@@ -22,4 +22,6 @@ export interface DocumentInput {
   imagePdf: Uint8Array | null;
   /** Numéro d'origine de chaque page de `imagePdf`, dans l'ordre. */
   imagePages: number[];
+  /** Photos ou captures à lire telles quelles (liste déjà écrite par l'artisan, bon ou devis d'un négoce en image). */
+  images?: { mediaType: "image/jpeg" | "image/png" | "image/webp"; bytes: Uint8Array }[];
 }

@@ -49,7 +49,7 @@ index.ts       seule porte d'entrée du module pour les autres
 | `projects` | Chantiers, « prochaine action » de l'accueil. |
 | `documents` | Dépôt des PDF (octets magiques, 20 Mo, 60 pages, envoi en morceaux `upload_part` au-delà de 4 Mo), texte par page (pdf.js), stockage en base (`document_blob`). |
 | `takeoff` | La lecture du devis (prompt A §41.1, modèle le plus capable), la relecture (prompt B), la fiche de chantier, les questions de comptoir, la liste d'achats ; version du référentiel figée par chantier (`referential_snapshot`). |
-| `quantitatifs` | Porte d'entrée `/v1/quantitatifs` (PDF ou lignes) pour l'app et les partenaires. |
+| `quantitatifs` | Porte d'entrée `/v1/quantitatifs` (PDF ou lignes) pour l'app et les partenaires ; `POST /v1/projects/:id/liste` pour « J'ai déjà ma liste » (photo ou PDF d'une liste déjà comptée, lue sans calcul : `ListeReader`, faux lecteur à trois listes enregistrées en test). |
 | `suppliers`, `price-requests`, `offers` | Carnet de fournisseurs, demandes de prix (copie figée de la liste, PDF joint, e-mail), devis fournisseurs reçus et lus, comparaison. |
 | `learning` | Mémoire de l'entreprise (habitudes, consommables), journal des corrections, règles « à vérifier » confirmées. |
 | `ai-usage` | Chaque appel IA journalisé (`ai_execution`), budget mensuel, compteur d'analyses par mois (paliers). |
