@@ -2402,7 +2402,7 @@ test("« + Nouveau devis » : deux gros boutons, « J'ai déjà ma liste » lit 
   // Rien d'ajouté, rien de calculé : cinq lignes, comme sur la feuille, toutes prêtes (aucune ligne orange).
   await expect(liste.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
   await expect(liste.getByRole("button", { name: /^Modifier : / })).toHaveCount(5);
-  await expect(liste.getByText(/1[\s\u00a0\u202f]?250/).first()).toBeVisible();
+  await expect(liste.getByText(/1[\s\u00a0\u202f]?250/).filter({ visible: true }).first()).toBeVisible();
 
   // 3. Corriger d'un doigt ce qui est mal lu : renommer, retirer, ajouter une ligne.
   await page.getByRole("button", { name: "Modifier : Pointes inox" }).click();
