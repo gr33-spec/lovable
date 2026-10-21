@@ -12,10 +12,10 @@ export class ChoixService {
   constructor(
     private readonly prisma: PrismaService,
     /** Étape 7 : dès le négoce retenu, les bons de commande partent. */
-    private readonly commande: { passerLesCommandes(maintenant?: Date): Promise<unknown> } = { passerLesCommandes: async () => undefined },
+    private readonly commande: { passerLesCommandes(maintenant?: Date, jusqua?: number): Promise<unknown> } = { passerLesCommandes: async () => undefined },
   ) {}
 
-  async choisirLesLotsEnvoyes(maintenant = new Date()): Promise<{ lotsChoisis: number; lotsClos: number }> {
+  async choisirLesLotsEnvoyes(maintenant = new Date(), jusqua?: number): Promise<{ lotsChoisis: number; lotsClos: number }> {
     const envoyes = await this.prisma.lotGroupe.findMany({
       where: { statut: "envoye" },
       include: { besoins: true, reponses: true },
@@ -24,6 +24,7 @@ export class ChoixService {
     let lotsChoisis = 0;
     let lotsClos = 0;
     for (const lot of envoyes) {
+      if (jusqua && Date.now() > jusqua) break;
       if (!lotADecider(lot, lot.reponses, maintenant)) continue;
       const engages = lot.besoins.filter((b) => b.statut === "engage");
       const volumeFerme = engages.reduce((s, b) => s + Number(b.quantite), 0);
@@ -61,7 +62,7 @@ export class ChoixService {
       ]);
       lotsChoisis++;
     }
-    if (lotsChoisis > 0) await this.commande.passerLesCommandes(maintenant);
+    if (lotsChoisis > 0) await this.commande.passerLesCommandes(maintenant, jusqua);
     return { lotsChoisis, lotsClos };
   }
 }

@@ -103,7 +103,7 @@ export class GroupeService {
     // Un besoin retiré avant le départ disparaît ; retiré par désistement (un bon existe), il reste visible : « Tu ne commandes pas ce lot ».
     const rows = await this.prisma.besoin.findMany({
       where: { companyId: tenant.companyId, OR: [{ statut: { not: "retire" } }, { offre: { bon: { isNot: null } } }] },
-      include: { lot: { select: { statut: true, numero: true, negoceRetenu: { select: { nom: true } } } }, offre: { include: { bon: { include: { livraison: true } } } }, project: { select: { name: true } } },
+      include: { lot: { select: { statut: true, numero: true, negoceRetenu: { select: { nom: true } } } }, offre: { include: { bon: { select: { id: true, envoyeLe: true, livraison: true } } } }, project: { select: { name: true } } },
       orderBy: { createdAt: "desc" },
     });
     return rows.map((b) => ({

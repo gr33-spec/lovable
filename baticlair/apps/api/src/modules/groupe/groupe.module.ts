@@ -52,7 +52,7 @@ import { WebhookResendController } from "./http/webhook-resend.controller.js";
     { provide: PDF_READER, useFactory: () => new PdfJsPdfReader() },
     { provide: AdminGroupeService, useFactory: (p: PrismaService, c: AppConfig) => new AdminGroupeService(p, c.groupe.departements), inject: [PrismaService, CONFIG] },
     { provide: NotificationsGroupeService, useFactory: (p: PrismaService, push: PushSender, e: TransactionalEmailSender) => new NotificationsGroupeService(p, push, e), inject: [PrismaService, PUSH_SENDER, EMAIL_SENDER] },
-    { provide: RapportMensuelService, useFactory: (p: PrismaService, e: TransactionalEmailSender, n: NotificationsGroupeService) => new RapportMensuelService(p, e, n), inject: [PrismaService, EMAIL_SENDER, NotificationsGroupeService] },
+    { provide: RapportMensuelService, useFactory: (p: PrismaService, e: TransactionalEmailSender) => new RapportMensuelService(p, e), inject: [PrismaService, EMAIL_SENDER] },
     { provide: CommandeService, useFactory: (p: PrismaService, e: TransactionalEmailSender, c: AppConfig, n: NotificationsGroupeService) => new CommandeService(p, e, c.groupe.facture, n), inject: [PrismaService, EMAIL_SENDER, CONFIG, NotificationsGroupeService] },
     { provide: ChoixService, useFactory: (p: PrismaService, c: CommandeService) => new ChoixService(p, c), inject: [PrismaService, CommandeService] },
     {
