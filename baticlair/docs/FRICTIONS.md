@@ -72,4 +72,4 @@ Demande du fondateur : trois entrées dans la barre du bas, un seul bouton princ
 
 Mots cherchés et remplacés sur les écrans de l'artisan : lot, fenêtre, désistement, référence. Mots laissés parce que le métier les dit : négoce, descentes, Ø, SIRET.
 
-Tests : les e2e qui lisaient les anciens libellés sont mis à jour. Suite iPhone entière : 52 réussis, 4 ignorés (écran d'ordinateur). Tests du domaine et de l'API touchés (notifications du groupé) : verts.
+Tests : les e2e qui lisaient les anciens libellés sont mis à jour. Suite iPhone entière : 52 réussis, 4 ignorés (écran d'ordinateur). Suite ordinateur entière : 55 réussis, 1 ignoré. Tests du domaine et de l'API touchés (notifications du groupé) : verts.
