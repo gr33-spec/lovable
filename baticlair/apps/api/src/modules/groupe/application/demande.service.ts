@@ -29,6 +29,8 @@ import { prixDesPaliers, statutDeLecture, type NegoceExtractor } from "./negoce-
 import { pdfDeTexte } from "./pdf-texte.js";
 
 const JOUR = 24 * 3600 * 1000;
+/** Un lien de dépôt meurt 30 jours après l'envoi du lot (7 jours de réponse, puis la marge d'un négoce en retard). */
+export const DUREE_LIEN_REPONSE_JOURS = 30;
 const PAGES_MAX = 10;
 
 export interface ReglagesDemande {
@@ -304,6 +306,8 @@ export class DemandeService {
       include: { lot: { include: { besoins: { where: { statut: { in: ["signe", "engage", "en_attente"] } }, orderBy: { createdAt: "asc" } } } }, negoce: true, fichiers: { select: { nom: true } } },
     });
     if (!r) throw notFound("Lien");
+    // Dette n° 12 (21 octobre) : un lien ne vit pas plus de 30 jours après l'envoi du lot, quel que soit l'état du lot.
+    if (r.lot.envoyeLe && Date.now() > r.lot.envoyeLe.getTime() + DUREE_LIEN_REPONSE_JOURS * JOUR) throw notFound("Lien");
     const accord = await this.prisma.accordNegoce.findUnique({ where: { lotId_negoceId: { lotId: r.lotId, negoceId: r.negoceId } } });
     return { ...r, accord };
   }
