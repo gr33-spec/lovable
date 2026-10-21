@@ -281,7 +281,9 @@ test("glisser un chantier vers la gauche le range dans Terminés, et « Annuler 
 test("déconnexion puis reconnexion ramène à la page demandée", async ({ page }) => {
   const email = await signUp(page);
   await page.goto("/compte");
-  // §52 (mission du fondateur, 2026-10-19) : « Métiers couverts », l'état de chaque métier.
+  // §52 (mission du fondateur, 2026-10-19) : « Métiers couverts », l'état de chaque métier. FRICTIONS : la liste est
+  // repliée derrière « Voir les N métiers ».
+  await page.getByText(/^Voir les \d+ métiers$/).click();
   const metiers = page.getByRole("list", { name: "Métiers couverts" });
   await expect(metiers.getByRole("listitem").filter({ hasText: "Couverture" }).first()).toContainText("Relu par un artisan");
   await expect(metiers.getByRole("listitem").filter({ hasText: "Électricité" }).first()).toContainText("En validation");
@@ -319,7 +321,8 @@ test("2026-10-12 : sur téléphone, la barre du menu reste figée en bas de chaq
       if (scroll === "bas") {
         // Le dernier contenu de la page s'arrête au-dessus de la barre.
         const last = await page.evaluate(() => {
-          const els = [...document.querySelectorAll("main *")].filter((e) => (e as HTMLElement).offsetParent !== null && e.getBoundingClientRect().height > 0);
+          // Le contenu d'un <details> replié garde une boîte dans Chromium sans être affiché : on l'ignore.
+          const els = [...document.querySelectorAll("main *")].filter((e) => (e as HTMLElement).offsetParent !== null && e.getBoundingClientRect().height > 0 && !e.closest("details:not([open]) > :not(summary)"));
           return Math.max(...els.map((e) => e.getBoundingClientRect().bottom));
         });
         expect(last, `${path} : le bas de page passe sous la barre`).toBeLessThanOrEqual(pill.y);
