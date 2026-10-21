@@ -46,3 +46,4 @@ export * from "./groupe/demande.js";
 export * from "./groupe/choix.js";
 export * from "./groupe/commande.js";
 export * from "./groupe/notifications.js";
+export * from "./groupe/rapport-mensuel.js";

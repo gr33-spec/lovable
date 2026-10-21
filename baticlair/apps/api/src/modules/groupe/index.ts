@@ -12,3 +12,4 @@ export { NotificationsGroupeService } from "./application/notifications-groupe.s
 export { signatureValide } from "./http/webhook-resend.controller.js";
 export { AdminGroupeService } from "./application/admin-groupe.service.js";
 export { SireneService, SIRENE_HTTP, type SireneHttp, type SuggestionNegoce } from "./application/sirene.service.js";
+export { RapportMensuelService } from "./application/rapport-mensuel.service.js";
