@@ -62,7 +62,10 @@ export default function InscriptionPage() {
 
   return (
     <>
-      <PageTitle>Créer un compte</PageTitle>
+      <div className="flex flex-col gap-2">
+        <PageTitle>Créer un compte</PageTitle>
+        <p className="text-[16px] leading-relaxed text-muted">Gratuit pour l&apos;artisan. Ton premier devis lu en deux minutes.</p>
+      </div>
       <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
         {error ? <ErrorNotice error={error} /> : null}
         <Field id="name" name="name" label="Prénom et nom" autoComplete="name" required />

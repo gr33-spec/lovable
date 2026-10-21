@@ -4,7 +4,7 @@ import Link from "next/link";
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-dvh bg-ground text-ink">
-      <header className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-4 sm:px-6">
+      <header className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2.5" aria-label="BatiClair, accueil">
           <span className="flex size-9 items-center justify-center rounded-xl bg-ink" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5A1F" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
@@ -14,7 +14,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
           </span>
           <span className="text-base font-extrabold">BatiClair</span>
         </Link>
-        <Link href="/connexion" className="inline-flex min-h-11 items-center rounded-full px-4 text-[15px] font-extrabold text-accent-text">
+        <Link href="/connexion" className="inline-flex min-h-11 items-center rounded-full border border-line bg-surface px-5 text-[15px] font-extrabold text-ink shadow-card transition hover:border-ink">
           Se connecter
         </Link>
       </header>
