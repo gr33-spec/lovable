@@ -35,6 +35,25 @@ Lecture : le premier rendu arrive en 1,1 à 1,4 s ; le contenu final (LCP) à 3 
 3. **Polices** : trois familles variables chargées (Plus Jakarta Sans, Bricolage Grotesque, Instrument Serif) ; `font-display: swap` est posé par Fontsource ; précharger la police d'affichage du titre (LCP) avec `<link rel="preload">`.
 4. **Accueil, CLS 0,10** : la liste « À faire » arrive après les chantiers récents ; réserver sa hauteur minimale.
 
+## Lighthouse mobile à 90 (plan 2 du 21 octobre 2026, bloc 9)
+
+Même mesure (Lighthouse 12.8, mobile, slow 4G simulé, site construit, API locale), sur la branche `claude/dette-2`, le 21 octobre 2026. Toutes les pages sont à 90 ou plus.
+
+| Page | Score | Premier rendu | LCP | Blocage | CLS |
+|---|---|---|---|---|---|
+| `/` (landing, déconnecté) | 94 | 1,4 s | 2,6 s | 50 ms | 0,10 |
+| `/connexion` | 99 | 0,8 s | 1,7 s | 90 ms | 0,06 |
+| `/inscription` | 91 | 1,4 s | 2,6 s | 50 ms | 0,15 |
+| Accueil `/` (connecté) | 93 | 1,4 s | 3,1 s | 80 ms | 0,04 |
+| Chantiers | 93 | 1,4 s | 3,2 s | 50 ms | 0,00 |
+| Nouveau chantier | 94 | 1,4 s | 3,1 s | 40 ms | 0,00 |
+| Groupé | 94 | 1,1 s | 3,0 s | 70 ms | 0,00 |
+| Fournisseurs | 91 | 1,1 s | 2,9 s | 100 ms | 0,11 |
+| Mon compte (avant) | 70 | 1,4 s | 3,3 s | 80 ms | **0,55** |
+| Mon compte (après) | 93 | 1,4 s | 3,1 s | 60 ms | 0,02 |
+
+Corrigé sur « Mon compte » : trois cartes arrivaient après leur réponse de l'API et poussaient tout l'écran (la formule, les coordonnées de l'entreprise, la liste des 23 métiers). Elles prennent leur place dès le premier rendu : la carte de la formule a un gabarit vide, la carte des coordonnées se dessine avec ses champs grisés (`aria-busy`) et se remplit sans bouger, la liste des métiers réserve sa hauteur. Les pistes 1 à 4 ci-dessus restent valables pour aller plus loin (le LCP à 3 s en slow 4G tient aux deux allers-retours du démarrage) ; la 2 est faite (`/v1/health` en cache 30 s).
+
 ## Tests de charge de l'API (plan 2 du 21 octobre 2026, bloc 7)
 
 Mesure : `CHARGE=1 … npx vitest run test/charge.test.ts` dans `apps/api` (base Postgres locale, prestataire d'e-mail de capture, PDF réels). Jeu : 200 artisans dans 5 départements, 20 négoces, 1 000 besoins signés sur 50 références, plus le compte de Greg avec 10 besoins. Le test n'est pas dans la série ordinaire (il écrit 1 010 bons de commande) ; il se relance à la demande et affiche son tableau.

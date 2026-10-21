@@ -26,4 +26,4 @@ Faites : 1, 2, 3, 4, 8, 10, 11, 12, 14. Laissées exprès : 5 (un nonce CSP impo
 
 ## Performance (bloc 12)
 
-Mesure demandée : chargement < 2 s sur 4G, Lighthouse mobile. Voir `docs/PERFORMANCE.md` (à venir dans cette branche quand les ports e2e sont libres : Lighthouse contre le site construit).
+Mesure demandée : chargement < 2 s sur 4G, Lighthouse mobile. Fait : voir `docs/PERFORMANCE.md`, toutes les pages à 90 ou plus sur mobile (« Mon compte » de 70 à 93 le 21 octobre 2026).
