@@ -52,7 +52,7 @@ Captures : `docs/groupe/captures/test-complet/iphone/` et `docs/groupe/captures/
 
 ## Les défauts trouvés, et ce qui en est fait
 
-Classés par gravité. « Corrigé » = sur la branche `claude/test-complet`, rejoué ensuite.
+Classés par gravité. « Corrigé » = sur la branche `claude/test-complet` (PR #299), rejoué ensuite ; les cinq corrections qui touchent le code de #284 sont aussi sur sa branche (commit « report sur #284 »), donc sur sa prévisualisation.
 
 | # | Gravité | Où | Ce que l'utilisateur voyait | Fait |
 |---|---|---|---|---|
