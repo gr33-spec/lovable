@@ -1729,7 +1729,7 @@ test("BatiClair Groupé, étape 3 : « Mes négoces », e-mail, familles, favori
 
 /** Le jeton signé d'un lien d'e-mail au négoce (étape 3), tel que l'API le fabrique, avec le secret des parcours. */
 function jetonDeLienE2e(lien: { a: "stop" } | { a: "pas_concerne"; f: string }, negoceId: string): string {
-  const corps = Buffer.from(JSON.stringify({ ...lien, n: negoceId })).toString("base64url");
+  const corps = Buffer.from(JSON.stringify({ ...lien, n: negoceId, e: Math.floor(Date.now() / 1000) + 3600 })).toString("base64url");
   return `${corps}.${createHmac("sha256", "e2e-secret-e2e-secret-e2e-secret-0000").update(`lien-negoce:${corps}`).digest("base64url")}`;
 }
 
