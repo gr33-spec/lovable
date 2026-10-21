@@ -50,6 +50,7 @@ for (const size of WIDTHS) {
     await page.getByRole("button", { name: "Couverture, charpente, zinguerie" }).click();
     await page.getByLabel("E-mail professionnel").fill(`responsive-${unique()}@example.fr`);
     await page.getByLabel("Mot de passe").fill("motdepasse-solide");
+    await page.getByRole("checkbox", { name: /J'accepte les conditions générales d'utilisation/ }).check();
     await page.getByRole("button", { name: "Créer mon compte" }).click();
     await expect(page.getByRole("heading", { name: /^Bonjour Jean/ })).toBeVisible();
     await shoot(page, size.name, "03-accueil");
