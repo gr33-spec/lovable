@@ -57,7 +57,6 @@ export default function AccueilPage() {
 
   return (
     <>
-      <InstallHint />
       <div className="flex items-center justify-between">
         <span className="text-[15px] font-extrabold">{company?.name}</span>
         <Link href="/compte" aria-label="Mon compte" className="flex size-11 items-center justify-center rounded-full bg-surface text-sm font-extrabold shadow-card">
@@ -109,6 +108,8 @@ export default function AccueilPage() {
           ))
         )}
       </section>
+      {/* Revue à froid (21 octobre) : le conseil « écran d'accueil » vient après ce qu'il y a à faire, jamais avant. */}
+      <InstallHint />
 
       <section className="flex flex-col gap-2.5">
         <div className="flex items-baseline justify-between">

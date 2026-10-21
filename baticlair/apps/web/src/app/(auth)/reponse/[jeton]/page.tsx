@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { LiensLegaux } from "@/components/legal";
 import { Button, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 
@@ -122,16 +123,18 @@ export default function ReponseNegocePage() {
       ) : (
         <form onSubmit={deposer} aria-label="Déposer mon devis" className="flex flex-col gap-4" noValidate>
           {envoi ? <ErrorNotice error={envoi} /> : null}
-          <label className="flex flex-col gap-1.5 text-sm font-bold">
-            Votre devis en PDF (un, ou deux par palier de quantité)
-            <input
-              type="file"
-              accept="application/pdf"
-              multiple
-              onChange={(e) => setFichiers(Array.from(e.currentTarget.files ?? []).slice(0, 2))}
-              className="min-h-11 rounded-2xl border border-line bg-surface px-3 py-2 text-sm font-normal"
-            />
-          </label>
+          {/* Revue à froid (21 octobre) : ce qu'on attend du devis, dit en une ligne ; un vrai bouton à la place du champ brut. */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="devis-pdf" className="text-sm font-bold">
+              Votre devis en PDF (un, ou deux par palier de quantité)
+            </label>
+            <p className="text-sm text-muted">Comme d&apos;habitude : prix unitaire HT par référence, délai et conditions de livraison, validité.</p>
+            <input id="devis-pdf" type="file" accept="application/pdf" multiple onChange={(e) => setFichiers(Array.from(e.currentTarget.files ?? []).slice(0, 2))} className="sr-only" />
+            <label htmlFor="devis-pdf" className="inline-flex min-h-12 cursor-pointer items-center justify-center self-start rounded-2xl border border-line bg-surface px-4 text-sm font-bold">
+              {fichiers.length === 0 ? "Choisir le PDF" : "Changer de PDF"}
+            </label>
+            {fichiers.length > 0 ? <p className="text-sm font-semibold">{fichiers.map((f) => f.name).join(", ")}</p> : null}
+          </div>
           <label className="flex flex-col gap-1.5 text-sm font-bold">
             Un mot pour nous (facultatif)
             <textarea value={message} onChange={(e) => setMessage(e.currentTarget.value)} maxLength={2000} rows={3} className="rounded-2xl border border-line bg-surface px-3 py-2 text-sm font-normal" />
@@ -151,6 +154,10 @@ export default function ReponseNegocePage() {
           {!accord ? <p className="text-center text-xs text-muted">Sans la case cochée, le devis n&apos;est pas pris en compte.</p> : null}
         </form>
       )}
+      <footer className="mt-4 flex flex-col gap-2 text-sm text-muted">
+        <p>BatiClair est édité par BATI INVEST SARL. Une question : répondez simplement à l&apos;e-mail reçu.</p>
+        <LiensLegaux />
+      </footer>
     </>
   );
 }

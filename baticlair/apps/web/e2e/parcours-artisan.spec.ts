@@ -281,7 +281,9 @@ test("glisser un chantier vers la gauche le range dans Terminés, et « Annuler 
 test("déconnexion puis reconnexion ramène à la page demandée", async ({ page }) => {
   const email = await signUp(page);
   await page.goto("/compte");
-  // §52 (mission du fondateur, 2026-10-19) : « Métiers couverts », l'état de chaque métier.
+  // §52 (mission du fondateur, 2026-10-19) : « Métiers couverts », l'état de chaque métier. FRICTIONS : la liste est
+  // repliée derrière « Voir les N métiers ».
+  await page.getByText(/^Voir les \d+ métiers$/).click();
   const metiers = page.getByRole("list", { name: "Métiers couverts" });
   await expect(metiers.getByRole("listitem").filter({ hasText: "Couverture" }).first()).toContainText("Relu par un artisan");
   await expect(metiers.getByRole("listitem").filter({ hasText: "Électricité" }).first()).toContainText("En validation");
@@ -319,7 +321,8 @@ test("2026-10-12 : sur téléphone, la barre du menu reste figée en bas de chaq
       if (scroll === "bas") {
         // Le dernier contenu de la page s'arrête au-dessus de la barre.
         const last = await page.evaluate(() => {
-          const els = [...document.querySelectorAll("main *")].filter((e) => (e as HTMLElement).offsetParent !== null && e.getBoundingClientRect().height > 0);
+          // Le contenu d'un <details> replié garde une boîte dans Chromium sans être affiché : on l'ignore.
+          const els = [...document.querySelectorAll("main *")].filter((e) => (e as HTMLElement).offsetParent !== null && e.getBoundingClientRect().height > 0 && !e.closest("details:not([open]) > :not(summary)"));
           return Math.max(...els.map((e) => e.getBoundingClientRect().bottom));
         });
         expect(last, `${path} : le bas de page passe sous la barre`).toBeLessThanOrEqual(pill.y);
@@ -1712,7 +1715,7 @@ test("BatiClair Groupé, étape 3 : « Mes négoces », e-mail, familles, favori
   await form.getByLabel("Vend : Second œuvre").check();
   await form.getByRole("button", { name: "Ajouter" }).click();
   const second = liste.getByRole("listitem").filter({ hasText: "Négoce Généraliste" });
-  await expect(second).toContainText("Sans numéro de compte");
+  await expect(second).toContainText("Numéro de compte à ajouter");
   await second.getByRole("button", { name: "En faire mon favori" }).click();
   await expect(liste.getByRole("listitem").first()).toContainText("Négoce Généraliste");
   await expect(liste.getByRole("listitem").first().getByLabel("Favori")).toBeVisible();
@@ -1767,7 +1770,7 @@ test("BatiClair Groupé, l'onglet : visible sans SIRET ni devis, trois étapes c
   await expect(page.getByRole("list", { name: "Comment ça marche" }).getByRole("listitem")).toHaveCount(3);
   const manque = page.getByRole("list", { name: "Ce qui manque" });
   await expect(manque.getByLabel("À faire")).toHaveCount(3);
-  await expect(manque.getByRole("link", { name: "Compte" })).toBeVisible();
+  await expect(manque.getByRole("link", { name: "Renseigner mon SIRET" })).toBeVisible();
   // Un devis déposé sans SIRET : « Ton chantier » montre le bloc grisé qui renvoie à l'onglet Groupé.
   await createProject(page, "Toiture Le Bihan", "M. Le Bihan", "3 quai Duguay-Trouin, Saint-Malo");
   const chantier = page.url();
@@ -1883,7 +1886,7 @@ async function artisanAuGroupe(page: Page, entreprise: string, adresse: string):
   await compteAuGroupe(page, entreprise, adresse);
   await chantierAuGroupe(page, `Toiture ${entreprise}`, adresse);
   // « Chantier signé » tant que le lot attend ; « Engagé, lot parti » quand ce signé a formé le lot et que la demande est partie.
-  await expect(page.getByRole("region", { name: "Au groupé", exact: true }).getByText(/^(Chantier signé|Engagé, lot parti)$/)).toBeVisible();
+  await expect(page.getByRole("region", { name: "Au groupé", exact: true }).getByText(/^(Chantier signé|Parti chez les négoces, tu es engagé)$/)).toBeVisible();
 }
 
 /** La dernière demande de prix reçue par un négoce (la boîte de test garde celles des parcours précédents). */
@@ -1938,7 +1941,7 @@ test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux 
   expect(await apiCall(page, "POST", "/v1/groupe/negoces", { nom: "Négoce Ardoises", email: "ardoises@example.com", familles: ["couverture"], numeroCompte: "C-12" })).toBe(201);
   expect(await apiCall(page, "POST", "/v1/groupe/negoces", { nom: "Négoce Généraliste", email: "general@example.com", familles: ["couverture", "second_oeuvre"] })).toBe(201);
   await chantierAuGroupe(page, "Toiture Toitures Martin", adresseA);
-  await expect(page.getByRole("region", { name: "Au groupé", exact: true }).getByText(/^(Chantier signé|Engagé, lot parti)$/)).toBeVisible();
+  await expect(page.getByRole("region", { name: "Au groupé", exact: true }).getByText(/^(Chantier signé|Parti chez les négoces, tu es engagé)$/)).toBeVisible();
   const contexteB = await browser.newContext({ ...(test.info().project.use as object) });
   const pageB = await contexteB.newPage();
   await artisanAuGroupe(pageB, "Toitures Le Bihan", adresseB);
@@ -2091,13 +2094,13 @@ test("BatiClair Groupé, scénarios 1 : deux départements et deux références 
   await bar.getByRole("checkbox", { name: /je m'engage/ }).check();
   await bar.getByRole("button", { name: "Proposer" }).click();
   const groupe = page.getByRole("region", { name: "Au groupé", exact: true });
-  await expect(groupe.getByText(/^(Chantier signé|Engagé, lot parti)$/)).toHaveCount(2);
+  await expect(groupe.getByText(/^(Chantier signé|Parti chez les négoces, tu es engagé)$/)).toHaveCount(2);
   const apres = (await apiJson<{ besoins: Lot[] }>(page, "GET", "/v1/groupe/lots")).body.besoins;
   expect(apres).toHaveLength(2);
   expect(new Set(apres.map((b) => b.lot!.numero)).size).toBe(2);
   // La deuxième référence vient d'ouvrir son lot : retrait libre tant que rien n'est parti.
   await groupe.getByRole("button", { name: "Retirer du groupé" }).last().click();
-  await expect(groupe.getByText(/^(Chantier signé|Engagé, lot parti)$/)).toHaveCount(1);
+  await expect(groupe.getByText(/^(Chantier signé|Parti chez les négoces, tu es engagé)$/)).toHaveCount(1);
   expect((await apiJson<{ besoins: Lot[] }>(page, "GET", "/v1/groupe/lots")).body.besoins).toHaveLength(1);
 
   // Un SIRET mal formé (clé de Luhn fausse) : « Vérifier mon SIRET » le dit, le groupé reste fermé.
@@ -2160,7 +2163,7 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
   expect(tache.status).toBe(200);
   expect(tache.body.lotsClos).toBeGreaterThanOrEqual(1);
   await page.goto("/groupe");
-  await expect(page.getByRole("list", { name: "Mes lots" }).getByText(`Lot n° ${lot1} · Lot clos sans offre`)).toBeVisible();
+  await expect(page.getByRole("list", { name: "Mes lots" }).getByText(`Lot n° ${lot1} · Aucun négoce n'a répondu, lot fermé`)).toBeVisible();
 
   // 2) Deuxième lot : N1 dit « pas concerné » par le lien de l'e-mail ; N2 dépose ; N2 est retenu, les bons partent.
   avant = await recus();
@@ -2185,7 +2188,7 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
   // 3) Premier désistement : un avertissement, le lot reste commandé pour B.
   await lots.getByRole("button", { name: "Je ne commande pas" }).click();
   await expect(lots.getByText(/deuxième fois sur 12 mois : le groupé se ferme 6 mois/)).toBeVisible();
-  await lots.getByRole("button", { name: "Confirmer le désistement" }).click();
+  await lots.getByRole("button", { name: "Je ne commande pas, c'est sûr" }).click();
   await expect(lots.getByText("Tu ne commandes pas ce lot (désistement).")).toBeVisible();
   await expect(page.getByRole("status").filter({ hasText: "fermé" })).toHaveCount(0);
   const etat1 = (await apiJson<{ eligible: boolean; raisons: string[] }>(page, "GET", "/v1/groupe")).body;
@@ -2201,7 +2204,7 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
   await page.goto("/groupe");
   await expect(lots.getByRole("button", { name: "Je ne commande pas" })).toBeVisible({ timeout: 20_000 });
   await lots.getByRole("button", { name: "Je ne commande pas" }).click();
-  await lots.getByRole("button", { name: "Confirmer le désistement" }).click();
+  await lots.getByRole("button", { name: "Je ne commande pas, c'est sûr" }).click();
   await expect(lots.getByText("Tu ne commandes pas ce lot (désistement).")).toHaveCount(2);
   await page.reload();
   await expect(page.getByRole("status").filter({ hasText: /Le groupé t'est fermé jusqu'au .* : deux désistements en 12 mois/ })).toBeVisible();

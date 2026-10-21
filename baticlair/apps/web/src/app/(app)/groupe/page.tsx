@@ -55,7 +55,7 @@ const STATUT_LOT: Record<string, string> = {
   forme: "Lot formé, demande en préparation",
   envoye: "Demande partie aux négoces, réponses sous 7 jours",
   choisi: "Négoce retenu",
-  clos: "Lot clos sans offre",
+  clos: "Aucun négoce n'a répondu, lot fermé",
   annule: "Lot annulé",
 };
 
@@ -113,19 +113,18 @@ export default function GroupePage() {
       ) : null}
       <Card className="flex flex-col gap-4 p-4">
         <p className="text-[17px] leading-snug font-extrabold">{accroche(company?.trades[0])}</p>
-        <ol aria-label="Comment ça marche" className="grid grid-cols-3 gap-2">
-          {[
-            { icon: FileText, titre: "1. Tu proposes", texte: "Une ligne de ta liste, une fenêtre de livraison, « chantier signé »." },
-            { icon: Users, titre: "2. On regroupe", texte: "Même référence, même département : un seul lot, un seul négoce." },
-            { icon: Tag, titre: "3. Tu commandes", texte: "À ton prix groupé, sur ton compte, livré sur ton chantier." },
-          ].map((e) => (
-            <li key={e.titre} className="flex flex-col gap-1.5 rounded-2xl bg-ground p-3">
-              <e.icon size={22} aria-hidden="true" className="text-accent-text" />
-              <span className="text-[13px] font-extrabold">{e.titre}</span>
-              <span className="text-[12px] leading-snug text-muted">{e.texte}</span>
-            </li>
-          ))}
-        </ol>
+        {/* Revue à froid (21 octobre) : une fois les trois étapes faites, « Comment ça marche » se replie derrière un lien. */}
+        {tout ? (
+          <details className="group">
+            <summary className="min-h-10 cursor-pointer list-none text-[14px] font-bold text-accent-text">
+              <span className="group-open:hidden">Comment ça marche</span>
+              <span className="hidden group-open:inline">Replier</span>
+            </summary>
+            <Etapes />
+          </details>
+        ) : (
+          <Etapes />
+        )}
         <p className="text-[13px] text-muted">Gratuit pour toi. Personne ne voit ton nom ni tes chantiers.</p>
       </Card>
 
@@ -143,18 +142,18 @@ export default function GroupePage() {
                 </div>
               ) : (
                 <ButtonLink href="/compte" variant="secondary" className="min-h-10 self-start px-3.5 text-[14px]">
-                  Compte
+                  Renseigner mon SIRET
                 </ButtonLink>
               )}
             </Etape>
             <Etape fait={etapes.devis} titre="Dépose un devis">
               <ButtonLink href="/chantiers/nouveau" variant="secondary" className="min-h-10 self-start px-3.5 text-[14px]">
-                Nouveau chantier
+                Déposer un devis
               </ButtonLink>
             </Etape>
             <Etape fait={etapes.negoces} titre="Ajoute tes négoces">
-              <ButtonLink href="/fournisseurs" variant="secondary" className="min-h-10 self-start px-3.5 text-[14px]">
-                Fournisseurs
+              <ButtonLink href="/fournisseurs?negoce" variant="secondary" className="min-h-10 self-start px-3.5 text-[14px]">
+                Ajouter un négoce
               </ButtonLink>
             </Etape>
           </ul>
@@ -163,6 +162,24 @@ export default function GroupePage() {
       {/* Un artisan déjà dans un lot (proposé depuis « Ton chantier ») voit toujours ses lots, même sans négoce à lui. */}
       {etat.data.eligible || etat.data.raisons.includes("exclu_du_groupe") ? <MesLots /> : null}
     </>
+  );
+}
+
+function Etapes() {
+  return (
+    <ol aria-label="Comment ça marche" className="grid grid-cols-3 gap-2 group-open:mt-2">
+      {[
+        { icon: FileText, titre: "1. Tu proposes", texte: "Une ligne de ta liste, une fenêtre de livraison, « chantier signé »." },
+        { icon: Users, titre: "2. On regroupe", texte: "Même référence, même département : un seul lot, un seul négoce." },
+        { icon: Tag, titre: "3. Tu commandes", texte: "À ton prix groupé, sur ton compte, livré sur ton chantier." },
+      ].map((e) => (
+        <li key={e.titre} className="flex flex-col gap-1.5 rounded-2xl bg-ground p-3">
+          <e.icon size={22} aria-hidden="true" className="text-accent-text" />
+          <span className="text-[13px] font-extrabold">{e.titre}</span>
+          <span className="text-[12px] leading-snug text-muted">{e.texte}</span>
+        </li>
+      ))}
+    </ol>
   );
 }
 
@@ -247,7 +264,7 @@ function Livraison({ b, onDone }: { b: BesoinLot; onDone: () => void }) {
               Annuler
             </Button>
             <Button className="grow" pending={pending} onClick={() => run(() => api(`/v1/groupe/bons/${encodeURIComponent(bon.id)}/desistement`, { method: "POST", body: { raison: desistement } }))}>
-              Confirmer le désistement
+              Je ne commande pas, c&apos;est sûr
             </Button>
           </div>
         </div>
@@ -281,7 +298,7 @@ function MesLots() {
               </Link>
               <p className="text-[13px] font-semibold text-muted">
                 {b.lot ? `Lot n° ${b.lot.numero} · ${STATUT_LOT[b.lot.statut] ?? b.lot.statut}` : "En attente du prochain lot"}
-                {b.statut === "en_attente" ? " · devis en attente (volume probable)" : ""}
+                {b.statut === "en_attente" ? " · devis en attente, sans engagement" : ""}
               </p>
               {b.offre ? (
                 <p className="inline-flex items-center gap-1.5 text-[14px] font-extrabold text-ok">
