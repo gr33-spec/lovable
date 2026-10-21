@@ -86,7 +86,7 @@ export function ProjectPriceRequests({
   archived: boolean;
   canCreate: boolean;
   quantitatifId?: string | null;
-  /** « Envoyer au fournisseur » du document : ouvre « À qui j'envoie ? » (ou montre les fournisseurs si la demande est partie). */
+  /** « Envoyer aux négoces » du document : ouvre « À qui j'envoie ? » (ou montre les fournisseurs si la demande est partie). */
   openSignal?: number;
   /** §48.5 : une sélection vient de partir depuis la liste : on relit les demandes. */
   refreshSignal?: number;
@@ -827,7 +827,7 @@ function EmailPreview({ to, email }: { to: string; email: { subject: string; bod
 }
 
 /**
- * §50.7 : après « Envoyer au fournisseur », une seule chose à faire : choisir à qui. Le document est l'écran « Ton chantier »
+ * §50.7 : après « Envoyer aux négoces », une seule chose à faire : choisir à qui. Le document est l'écran « Ton chantier »
  * qu'on vient de quitter (plus d'écran « Ce que le fournisseur va recevoir »).
  */
 function SendSheet({ canSend, sending, onSend, onClose, children }: { canSend: boolean; sending: boolean; onSend: () => void; onClose: () => void; children: React.ReactNode }) {

@@ -27,8 +27,10 @@ const quantiteFr = (q: string) => Number(q).toLocaleString("fr-FR", { maximumFra
 
 interface Tableau {
   departements: { ouverts: string[] | null; compteurs: { departement: string; lots: number; economies: number }[] };
+  /** Dette n° 4 : les devis de négoces lus par le modèle sur 30 jours, et ceux qui restent « à vérifier ». */
+  lectures: { jours: number; lues: number; aVerifier: number; echecs: number };
   lots: { id: string; numero: number; statut: string; zone: string; famille: string; designation: string; fenetre: { tot: string | null; tard: string | null }; envoyeLe: string | null; besoins: { total: number; fermes: number }; reponses: { attendues: number; deposees: number; pasConcernes: number; aVerifier: number }; negoceRetenu: string | null; prixRetenu: string | null; bons: number }[];
-  negoces: { id: string; nom: string; email: string; departement: string; familles: string[]; stop: boolean; artisans: number; reponses: number }[];
+  negoces: { id: string; nom: string; email: string; departement: string; agences: string[]; familles: string[]; stop: boolean; artisans: number; reponses: number }[];
   accords: { id: string; lot: number; negoce: string; email: string; adresseIp: string; versionContrat: string; tauxPourcent: string; accepteLe: string }[];
   factures: { id: string; numero: number; lot: number; negoce: string; totalLotHt: string; montantHt: string; statut: string; emiseLe: string | null; echeanceLe: string | null; payeeLe: string | null }[];
   exclusions: { id: string; entreprise: string; lot: number; sanction: string; excluJusquau: string | null; raison: string | null; le: string | null }[];
@@ -90,6 +92,7 @@ export default function AdminGroupePage() {
       <p className="text-sm text-muted">
         Départements ouverts : {data.departements.ouverts ? data.departements.ouverts.join(", ") : "tous"} ·{" "}
         {data.departements.compteurs.map((c) => `${c.departement} : ${c.lots} lot${c.lots > 1 ? "s" : ""}, ${euros(c.economies)} économisés`).join(" · ") || "aucun lot"}
+        {data.lectures ? ` · devis négoces sur ${data.lectures.jours} jours : ${data.lectures.lues} lu${data.lectures.lues > 1 ? "s" : ""}, ${data.lectures.aVerifier} à vérifier, ${data.lectures.echecs} en échec` : ""}
       </p>
       <nav aria-label="Rubriques de l'admin" className="flex flex-wrap gap-1.5">
         {(["lots", "negoces", "accords", "factures", "exclusions"] as const).map((o) => (
@@ -190,7 +193,8 @@ export default function AdminGroupePage() {
         <ul aria-label="Négoces" className="flex flex-col gap-2">
           {data.negoces.map((n) => (
             <li key={n.id} className="rounded-2xl bg-surface p-3 text-[14px] shadow-card">
-              <span className="font-extrabold">{n.nom}</span> · {n.departement} · {n.email} · {n.familles.join(", ")} · {n.artisans} artisan{n.artisans > 1 ? "s" : ""} · {n.reponses} réponse{n.reponses > 1 ? "s" : ""}
+              <span className="font-extrabold">{n.nom}</span> · {n.departement}
+              {n.agences.length > 0 ? ` (agences aussi en ${n.agences.join(", ")})` : ""} · {n.email} · {n.familles.join(", ")} · {n.artisans} artisan{n.artisans > 1 ? "s" : ""} · {n.reponses} réponse{n.reponses > 1 ? "s" : ""}
               {n.stop ? " · STOP" : ""}
             </li>
           ))}

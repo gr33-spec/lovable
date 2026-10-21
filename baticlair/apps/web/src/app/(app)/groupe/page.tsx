@@ -1,5 +1,6 @@
 "use client";
 
+import { AideBouton } from "@/components/aide";
 import { quantiteFr } from "@/components/groupe";
 import Link from "next/link";
 import { Check, FileText, Store, Tag, Truck, Users } from "lucide-react";
@@ -51,12 +52,12 @@ export function accroche(metier: string | undefined): string {
 }
 
 const STATUT_LOT: Record<string, string> = {
-  ouvert: "Lot ouvert, en attente d'autres artisans",
-  forme: "Lot formé, demande en préparation",
-  envoye: "Demande partie aux négoces, réponses sous 7 jours",
+  ouvert: "On attend d'autres artisans",
+  forme: "Commande prête, on prépare la demande",
+  envoye: "Demande partie aux négoces, réponse sous 7 jours",
   choisi: "Négoce retenu",
-  clos: "Lot clos sans offre",
-  annule: "Lot annulé",
+  clos: "Aucun négoce n'a répondu, commande fermée",
+  annule: "Commande annulée",
 };
 
 /**
@@ -92,7 +93,10 @@ export default function GroupePage() {
 
   return (
     <>
-      <PageTitle>Groupé</PageTitle>
+      <div className="flex items-start justify-between gap-3">
+        <PageTitle>Groupé</PageTitle>
+        <AideBouton sujet="groupe" />
+      </div>
       {etat.data.admin ? (
         <Link href="/admin/groupe" className="min-h-10 self-start py-2 text-sm font-bold text-accent-text underline decoration-dotted underline-offset-4">
           Admin groupé
@@ -100,7 +104,7 @@ export default function GroupePage() {
       ) : null}
       {etat.data.raisons.includes("exclu_du_groupe") ? (
         <p role="status" className="rounded-3xl bg-warn-bg p-4 font-semibold text-warn">
-          Le groupé t&apos;est fermé{etat.data.excluJusquau ? ` jusqu'au ${jourFr(etat.data.excluJusquau)}` : ""} : deux désistements en 12 mois. Tes lots en cours restent visibles ci-dessous.
+          Le groupé t&apos;est fermé{etat.data.excluJusquau ? ` jusqu'au ${jourFr(etat.data.excluJusquau)}` : ""} : deux commandes annulées en 12 mois. Tes commandes en cours restent visibles ci-dessous.
         </p>
       ) : null}
       {etat.data.raisons.includes("departement_ferme") ? (
@@ -110,19 +114,18 @@ export default function GroupePage() {
       ) : null}
       <Card className="flex flex-col gap-4 p-4">
         <p className="text-[17px] leading-snug font-extrabold">{accroche(company?.trades[0])}</p>
-        <ol aria-label="Comment ça marche" className="grid grid-cols-3 gap-2">
-          {[
-            { icon: FileText, titre: "1. Tu proposes", texte: "Une ligne de ta liste, une fenêtre de livraison, « chantier signé »." },
-            { icon: Users, titre: "2. On regroupe", texte: "Même référence, même département : un seul lot, un seul négoce." },
-            { icon: Tag, titre: "3. Tu commandes", texte: "À ton prix groupé, sur ton compte, livré sur ton chantier." },
-          ].map((e) => (
-            <li key={e.titre} className="flex flex-col gap-1.5 rounded-2xl bg-ground p-3">
-              <e.icon size={22} aria-hidden="true" className="text-accent-text" />
-              <span className="text-[13px] font-extrabold">{e.titre}</span>
-              <span className="text-[12px] leading-snug text-muted">{e.texte}</span>
-            </li>
-          ))}
-        </ol>
+        {/* Revue à froid (21 octobre) : une fois les trois étapes faites, « Comment ça marche » se replie derrière un lien. */}
+        {tout ? (
+          <details className="group">
+            <summary className="min-h-10 cursor-pointer list-none text-[14px] font-bold text-accent-text">
+              <span className="group-open:hidden">Comment ça marche</span>
+              <span className="hidden group-open:inline">Replier</span>
+            </summary>
+            <Etapes />
+          </details>
+        ) : (
+          <Etapes />
+        )}
         <p className="text-[13px] text-muted">Gratuit pour toi. Personne ne voit ton nom ni tes chantiers.</p>
       </Card>
 
@@ -140,18 +143,18 @@ export default function GroupePage() {
                 </div>
               ) : (
                 <ButtonLink href="/compte" variant="secondary" className="min-h-10 self-start px-3.5 text-[14px]">
-                  Compte
+                  Renseigner mon SIRET
                 </ButtonLink>
               )}
             </Etape>
             <Etape fait={etapes.devis} titre="Dépose un devis">
               <ButtonLink href="/chantiers/nouveau" variant="secondary" className="min-h-10 self-start px-3.5 text-[14px]">
-                Nouveau chantier
+                Déposer un devis
               </ButtonLink>
             </Etape>
             <Etape fait={etapes.negoces} titre="Ajoute tes négoces">
-              <ButtonLink href="/fournisseurs" variant="secondary" className="min-h-10 self-start px-3.5 text-[14px]">
-                Fournisseurs
+              <ButtonLink href="/fournisseurs?negoce" variant="secondary" className="min-h-10 self-start px-3.5 text-[14px]">
+                Ajouter un négoce
               </ButtonLink>
             </Etape>
           </ul>
@@ -160,6 +163,24 @@ export default function GroupePage() {
       {/* Un artisan déjà dans un lot (proposé depuis « Ton chantier ») voit toujours ses lots, même sans négoce à lui. */}
       {etat.data.eligible || etat.data.raisons.includes("exclu_du_groupe") ? <MesLots /> : null}
     </>
+  );
+}
+
+function Etapes() {
+  return (
+    <ol aria-label="Comment ça marche" className="grid grid-cols-3 gap-2 group-open:mt-2">
+      {[
+        { icon: FileText, titre: "1. Tu proposes", texte: "Une ligne de ta liste, la date de livraison voulue, « chantier signé »." },
+        { icon: Users, titre: "2. On regroupe", texte: "Même produit, même département : une seule commande, un seul négoce." },
+        { icon: Tag, titre: "3. Tu commandes", texte: "À ton prix groupé, sur ton compte, livré sur ton chantier." },
+      ].map((e) => (
+        <li key={e.titre} className="flex flex-col gap-1.5 rounded-2xl bg-ground p-3">
+          <e.icon size={22} aria-hidden="true" className="text-accent-text" />
+          <span className="text-[13px] font-extrabold">{e.titre}</span>
+          <span className="text-[12px] leading-snug text-muted">{e.texte}</span>
+        </li>
+      ))}
+    </ol>
   );
 }
 
@@ -202,7 +223,7 @@ function Livraison({ b, onDone }: { b: BesoinLot; onDone: () => void }) {
     }
   };
   const livraison = bon.livraison;
-  if (b.statut === "retire") return <p className="text-[13px] font-semibold text-warn">Tu ne commandes pas ce lot (désistement).</p>;
+  if (b.statut === "retire") return <p className="text-[13px] font-semibold text-warn">Tu ne commandes pas. C&apos;est noté.</p>;
   if (livraison?.statut === "livre") return <p className="text-[13px] font-extrabold text-ok">Livré, merci.</p>;
   if (livraison?.statut === "probleme") return <p className="text-[13px] font-semibold text-warn">Problème signalé, on regarde.</p>;
   return (
@@ -244,7 +265,7 @@ function Livraison({ b, onDone }: { b: BesoinLot; onDone: () => void }) {
               Annuler
             </Button>
             <Button className="grow" pending={pending} onClick={() => run(() => api(`/v1/groupe/bons/${encodeURIComponent(bon.id)}/desistement`, { method: "POST", body: { raison: desistement } }))}>
-              Confirmer le désistement
+              Je ne commande pas, c&apos;est sûr
             </Button>
           </div>
         </div>
@@ -261,11 +282,11 @@ function MesLots() {
   if (!data) return <Spinner />;
   return (
     <Card className="flex flex-col gap-3 p-4">
-      <h2 className="font-display text-xl font-extrabold">Mes lots</h2>
+      <h2 className="font-display text-xl font-extrabold">Mes commandes groupées</h2>
       {data.besoins.length === 0 ? (
-        <p className="text-[15px] font-semibold text-muted">Aucun lot pour l&apos;instant, propose un chantier au groupé.</p>
+        <p className="text-[15px] font-semibold text-muted">Rien pour l&apos;instant : propose un chantier au groupé.</p>
       ) : (
-        <ul aria-label="Mes lots" className="flex flex-col gap-2">
+        <ul aria-label="Mes commandes groupées" className="flex flex-col gap-2">
           {data.besoins.map((b) => (
             <li key={b.id} className="flex flex-col gap-1 rounded-2xl bg-ground p-3">
               <div className="flex items-baseline justify-between gap-3">
@@ -277,8 +298,8 @@ function MesLots() {
                 {b.chantier}
               </Link>
               <p className="text-[13px] font-semibold text-muted">
-                {b.lot ? `Lot n° ${b.lot.numero} · ${STATUT_LOT[b.lot.statut] ?? b.lot.statut}` : "En attente du prochain lot"}
-                {b.statut === "en_attente" ? " · devis en attente (volume probable)" : ""}
+                {b.lot ? `Commande groupée n° ${b.lot.numero} · ${STATUT_LOT[b.lot.statut] ?? b.lot.statut}` : "En attente d'autres artisans"}
+                {b.statut === "en_attente" ? " · devis en attente, tu ne t'engages à rien" : ""}
               </p>
               {b.offre ? (
                 <p className="inline-flex items-center gap-1.5 text-[14px] font-extrabold text-ok">

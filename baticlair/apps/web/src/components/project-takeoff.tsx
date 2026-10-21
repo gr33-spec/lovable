@@ -33,7 +33,7 @@ export function canPrepareTakeoff(doc: ProjectDocument): boolean {
  *  2. il dit ce qu'il a compris (ouvrages, mesures, hypothèses : pente 45°, zone 3) ;
  *  3. UNE question à la fois, seulement si elle change la commande, toujours à boutons ;
  *  4. la carte du quantitatif, rangée par ouvrage, hypothèses modifiables ;
- *  5. « Envoyer au fournisseur ».
+ *  5. « Envoyer aux négoces ».
  * Jamais de quantité demandée à l'artisan. Le devis lu reste à un appui pour corriger une ligne.
  */
 export function ProjectTakeoff({
@@ -87,7 +87,7 @@ export function ProjectTakeoff({
   const [page, setPage] = useListPage();
   // Un chantier de plusieurs logements s'ouvre « par logement » ; le total à commander est à l'onglet d'à côté.
   const [unitsView, setUnitsView] = useState(true);
-  // Après « Envoyer au fournisseur » : l'aperçu d'envoi et les demandes passent devant la liste.
+  // Après « Envoyer aux négoces » : l'aperçu d'envoi et les demandes passent devant la liste.
   const [overview, setOverview] = useState(false);
   const started = useRef(false);
   const refreshProgress = useProgressRefresh();
@@ -278,7 +278,7 @@ export function ProjectTakeoff({
   };
   const detachSketch = (sketchId: string) =>
     run(() => api<null>(`/v1/documents/${encodeURIComponent(sketchId)}`, { method: "DELETE" }), () => reload());
-  // « Envoyer au fournisseur » : la liste est validée (si elle ne l'est pas encore), puis l'aperçu s'ouvre (§45.9).
+  // « Envoyer aux négoces » : la liste est validée (si elle ne l'est pas encore), puis l'aperçu s'ouvre (§45.9).
   const send = () => {
     setShowList(false);
     setPage(false);

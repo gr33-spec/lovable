@@ -682,11 +682,11 @@ export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Take
   const [adding, setAdding] = useState(false);
   const ajoutables = (takeoff.metiersAjoutables ?? []).filter((m) => !lots.some((l) => l.metier === m.metier));
   return (
-    <section aria-label="Lots repérés" className="flex flex-col gap-3">
+    <section aria-label="Parties du devis" className="flex flex-col gap-3">
       {error ? <ErrorNotice error={error} /> : null}
       <div className="flex flex-col gap-3 rounded-[20px] bg-surface p-4 shadow-card">
-        <h3 className="font-display text-[17px] font-extrabold tracking-[-0.01em]">Lots repérés : {lots.map((l) => l.libelle).join(" · ")}</h3>
-        <p className="text-[14px] leading-snug text-muted">Une liste par lot. Retire un lot qui n&apos;en est pas un, ajoute celui qui manque.</p>
+        <h3 className="font-display text-[17px] font-extrabold tracking-[-0.01em]">Parties du devis : {lots.map((l) => l.libelle).join(" · ")}</h3>
+        <p className="text-[14px] leading-snug text-muted">Une liste par partie du devis. Retire une partie en trop, ajoute celle qui manque.</p>
         <ul className="flex flex-wrap gap-2">
           {lots.map((l) => (
             <li key={l.metier}>
@@ -694,7 +694,7 @@ export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Take
                 type="button"
                 disabled={lots.length < 2 || pending}
                 onClick={() => setLots((prev) => prev.filter((x) => x.metier !== l.metier))}
-                aria-label={`Retirer le lot ${l.libelle}`}
+                aria-label={`Retirer la partie ${l.libelle}`}
                 className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-ground px-4 text-[15px] font-bold disabled:opacity-60"
               >
                 {l.libelle}
@@ -704,7 +704,7 @@ export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Take
           ))}
         </ul>
         {adding ? (
-          <div role="group" aria-label="Ajouter un lot" className="flex flex-wrap gap-2">
+          <div role="group" aria-label="Ajouter une partie" className="flex flex-wrap gap-2">
             {ajoutables.map((m) => (
               <button
                 key={m.metier}
@@ -722,7 +722,7 @@ export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Take
         ) : ajoutables.length > 0 ? (
           <Button variant="ghost" className="self-start px-0" disabled={pending} onClick={() => setAdding(true)}>
             <Plus size={18} aria-hidden="true" />
-            Ajouter un lot
+            Ajouter une partie
           </Button>
         ) : null}
         <Button variant="secondary" pending={pending} onClick={() => onConfirm(lots.map((l) => l.metier))}>

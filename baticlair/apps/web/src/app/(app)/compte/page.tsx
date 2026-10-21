@@ -1,5 +1,6 @@
 "use client";
 
+import { AideBouton } from "@/components/aide";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 import { EconomiesGroupeCard } from "@/components/economies-groupe";
@@ -55,7 +56,10 @@ export default function ComptePage() {
   return (
     <>
       <BackButton fallback="/" />
-      <PageTitle>Mon compte</PageTitle>
+      <div className="flex items-start justify-between gap-3">
+        <PageTitle>Mon compte</PageTitle>
+        <AideBouton sujet="compte" />
+      </div>
       {error ? <ErrorNotice error={error} /> : null}
       <Card className="flex flex-col gap-3 p-4">
         <div className="flex flex-col">
@@ -125,6 +129,9 @@ export default function ComptePage() {
       <NotificationsCard />
       <PartnerKeysCard />
       {company && company.role !== "viewer" ? <MemoryCard /> : null}
+      {/* Sous la ligne de flottaison : la carte arrive après le chargement sans décaler le haut de l'écran (CLS), mais
+          avant la déconnexion et la suppression du compte (revue à froid, 21 octobre). */}
+      <EconomiesGroupeCard />
       <Button
         variant="secondary"
         pending={leaving}
@@ -133,8 +140,6 @@ export default function ComptePage() {
         Se déconnecter
       </Button>
       <MyData onDeleted={() => router.replace("/connexion?compte=supprime")} />
-      {/* En bas : la carte arrive après le chargement, sans décaler le reste de l'écran (Lighthouse, CLS). */}
-      <EconomiesGroupeCard />
     </>
   );
 }
@@ -293,7 +298,13 @@ function MetiersCard() {
         Les métiers dont BatiClair sait lire le devis et calculer la liste.
       </p>
       {error ? <ErrorNotice error={error} /> : null}
+      {/* Revue à froid (21 octobre) : vingt-cinq lignes « ratios en cours de validation » noyaient le compte ; la liste se replie. */}
       {metiers ? (
+        <details className="group">
+          <summary className="min-h-10 cursor-pointer list-none py-2 text-sm font-bold text-accent-text">
+            <span className="group-open:hidden">Voir les {metiers.length} métiers</span>
+            <span className="hidden group-open:inline">Replier</span>
+          </summary>
         <ul aria-label="Métiers couverts" className="flex flex-col divide-y divide-line">
           {metiers.map((m) => (
             <li key={m.metier} className="flex items-center justify-between gap-3 py-2.5">
@@ -302,7 +313,11 @@ function MetiersCard() {
             </li>
           ))}
         </ul>
-      ) : null}
+        </details>
+      ) : (
+        // Lighthouse (CLS) : la place du bouton « Voir les N métiers » est réservée pendant le chargement.
+        <p aria-busy="true" className="min-h-10 py-2" />
+      )}
     </Card>
   );
 }
@@ -488,13 +503,16 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
       });
     });
   }, []);
-  if (!profile) return null;
+  // Lighthouse (CLS) : la carte se dessine tout de suite, champs grisés, et se remplit sans décaler l'écran.
+  const charge = profile !== null;
+  const vu: CompanyProfile = profile ?? { name: "", address: null, siret: null, phone: null, email: null, hasLogo: false };
   const changed =
-    draft.name !== profile.name ||
+    charge &&
+    (draft.name !== profile.name ||
     draft.address !== (profile.address ?? "") ||
     draft.siret !== (profile.siret ?? "") ||
     draft.phone !== (profile.phone ?? "") ||
-    draft.email !== (profile.email ?? "");
+      draft.email !== (profile.email ?? ""));
   const set =
     (key: keyof typeof draft) => (e: React.ChangeEvent<HTMLInputElement>) => {
       setDraft({ ...draft, [key]: e.target.value });
@@ -562,23 +580,23 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
   }
 
   const signature = [
-    [signatureName, profile.name].filter(Boolean).join(" "),
-    profile.phone,
-    profile.email,
+    [signatureName, vu.name].filter(Boolean).join(" "),
+    vu.phone,
+    vu.email,
   ]
     .filter(Boolean)
     .join(" · ");
   return (
-    <Card className="flex flex-col gap-3 p-4">
+    <Card className="flex flex-col gap-3 p-4" aria-busy={!charge}>
       <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">
-        VOS DEMANDES DE DEVIS
+        TES DEMANDES DE DEVIS
       </h2>
       <p className="text-sm text-muted">
         En tête du PDF envoyé au fournisseur, et en signature du mail.
       </p>
       <div className="flex items-center gap-3">
         <div className="flex h-16 w-28 items-center justify-center overflow-hidden rounded-2xl bg-ground">
-          {profile.hasLogo ? (
+          {vu.hasLogo ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={`/v1/company/logo?v=${logoVersion}`}
@@ -596,16 +614,17 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
             htmlFor={ids.logo}
             className="inline-flex min-h-11 cursor-pointer items-center text-sm font-bold text-accent-text"
           >
-            {profile.hasLogo ? "Changer le logo" : "Ajouter le logo"}
+            {vu.hasLogo ? "Changer le logo" : "Ajouter le logo"}
           </label>
           <input
             id={ids.logo}
             type="file"
             accept="image/png,image/jpeg"
             className="sr-only"
+            disabled={!charge}
             onChange={(e) => void uploadLogo(e.target.files?.[0])}
           />
-          {profile.hasLogo ? (
+          {vu.hasLogo ? (
             <button
               type="button"
               onClick={() => void removeLogo()}
@@ -622,6 +641,7 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
       </div>
       <Field
         id={ids.name}
+        disabled={!charge}
         label="Nom de l'entreprise"
         value={draft.name}
         onChange={set("name")}
@@ -629,6 +649,7 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
       />
       <Field
         id={ids.address}
+        disabled={!charge}
         label="Adresse"
         value={draft.address}
         onChange={set("address")}
@@ -637,6 +658,7 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
       />
       <Field
         id={ids.siret}
+        disabled={!charge}
         label="SIRET"
         value={draft.siret}
         onChange={set("siret")}
@@ -645,6 +667,7 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
       />
       <Field
         id={ids.phone}
+        disabled={!charge}
         label="Téléphone"
         value={draft.phone}
         onChange={set("phone")}
@@ -653,6 +676,7 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
       />
       <Field
         id={ids.email}
+        disabled={!charge}
         label="E-mail"
         value={draft.email}
         onChange={set("email")}

@@ -29,6 +29,8 @@ import { prixDesPaliers, statutDeLecture, type NegoceExtractor } from "./negoce-
 import { pdfDeTexte } from "./pdf-texte.js";
 
 const JOUR = 24 * 3600 * 1000;
+/** Un lien de dépôt meurt 30 jours après l'envoi du lot (7 jours de réponse, puis la marge d'un négoce en retard). */
+export const DUREE_LIEN_REPONSE_JOURS = 30;
 const PAGES_MAX = 10;
 
 export interface ReglagesDemande {
@@ -90,7 +92,7 @@ export class DemandeService {
   ) {}
 
   /** Envoie chaque lot formé aux négoces concernés. Un lot sans négoce concerné reste formé (Greg le voit, étape 9). */
-  async envoyerLesLotsFormes(maintenant = new Date()): Promise<{ lotsEnvoyes: number; negocesPrevenus: number }> {
+  async envoyerLesLotsFormes(maintenant = new Date(), jusqua?: number): Promise<{ lotsEnvoyes: number; negocesPrevenus: number }> {
     const formes = await this.prisma.lotGroupe.findMany({ where: { statut: "forme" }, include: { besoins: { where: { statut: { in: ["signe", "en_attente"] } } } }, orderBy: { numero: "asc" } });
     if (formes.length === 0) return { lotsEnvoyes: 0, negocesPrevenus: 0 };
     const zones = [...new Set(formes.map((l) => l.zone))];
@@ -105,15 +107,17 @@ export class DemandeService {
     }
     const partis = new Set<string>();
     let negocesPrevenus = 0;
+    // Une réponse par (lot, négoce) : déjà créée (envoi repris après une panne), on ne renvoie pas. Lues d'un coup.
+    const dejaCreees = new Set((await this.prisma.reponseNegoce.findMany({ where: { lotId: { in: formes.map((l) => l.id) } }, select: { lotId: true, negoceId: true } })).map((r) => `${r.lotId}:${r.negoceId}`));
     for (const [negoceId, lots] of parNegoce) {
+      if (jusqua && Date.now() > jusqua) break;
       const negoce = negoces.find((n) => n.id === negoceId)!;
       const aDemander: LotADemander[] = [];
+      const aCreer: { lotId: string; negoceId: string; tokenHash: string }[] = [];
       for (const lot of lots) {
         const jeton = randomBytes(24).toString("base64url");
-        // Une réponse par (lot, négoce) : déjà créée (envoi repris après une panne), on ne renvoie pas.
-        const existante = await this.prisma.reponseNegoce.findUnique({ where: { lotId_negoceId: { lotId: lot.id, negoceId } } });
-        if (existante) continue;
-        await this.prisma.reponseNegoce.create({ data: { lotId: lot.id, negoceId, tokenHash: hash(jeton) } });
+        if (dejaCreees.has(`${lot.id}:${negoceId}`)) continue;
+        aCreer.push({ lotId: lot.id, negoceId, tokenHash: hash(jeton) });
         aDemander.push({
           numero: lot.numero,
           designation: lot.besoins[0]?.designation ?? lot.cle,
@@ -126,6 +130,7 @@ export class DemandeService {
         });
       }
       if (aDemander.length === 0) continue;
+      await this.prisma.reponseNegoce.createMany({ data: aCreer });
       const departement = negoce.departement;
       const liens = {
         pasConcerne: `${this.reglages.webAppUrl}/negoces/lien/${jetonDeLien(this.reglages.authSecret, { action: "pas_concerne", negoceId, famille: aDemander[0]!.famille })}`,
@@ -301,6 +306,8 @@ export class DemandeService {
       include: { lot: { include: { besoins: { where: { statut: { in: ["signe", "engage", "en_attente"] } }, orderBy: { createdAt: "asc" } } } }, negoce: true, fichiers: { select: { nom: true } } },
     });
     if (!r) throw notFound("Lien");
+    // Dette n° 12 (21 octobre) : un lien ne vit pas plus de 30 jours après l'envoi du lot, quel que soit l'état du lot.
+    if (r.lot.envoyeLe && Date.now() > r.lot.envoyeLe.getTime() + DUREE_LIEN_REPONSE_JOURS * JOUR) throw notFound("Lien");
     const accord = await this.prisma.accordNegoce.findUnique({ where: { lotId_negoceId: { lotId: r.lotId, negoceId: r.negoceId } } });
     return { ...r, accord };
   }

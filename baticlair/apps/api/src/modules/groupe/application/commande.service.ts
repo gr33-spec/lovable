@@ -48,7 +48,7 @@ export class CommandeService {
   ) {}
 
   /** Les lots choisis dont les offres n'ont pas encore de bon : bons, récapitulatif, copie à l'artisan, facture. */
-  async passerLesCommandes(maintenant = new Date()): Promise<{ lotsCommandes: number; bons: number }> {
+  async passerLesCommandes(maintenant = new Date(), jusqua?: number): Promise<{ lotsCommandes: number; bons: number }> {
     const lots = await this.prisma.lotGroupe.findMany({
       where: { statut: "choisi", negoceRetenuId: { not: null }, offres: { some: { bon: null } } },
       include: { negoceRetenu: true, offres: { include: { besoin: { include: { company: true } }, bon: true } } },
@@ -56,14 +56,20 @@ export class CommandeService {
     });
     let bons = 0;
     for (const lot of lots) {
+      // Tests de charge (21 octobre) : un lot entier par tour au plus tard l'échéance ; le reste part au passage suivant.
+      if (jusqua && Date.now() > jusqua) break;
       const negoce = lot.negoceRetenu!;
       const docs: { offreId: string; bon: BonDeCommande; pdf: Uint8Array; artisanEmail: string | null }[] = [];
+      // Deux requêtes pour le lot (numéros de compte, propriétaires), pas deux par bon.
+      const entreprises = [...new Set(lot.offres.filter((o) => !o.bon).map((o) => o.besoin.company.id))];
+      const liens = new Map((await this.prisma.negoceArtisan.findMany({ where: { negoceId: negoce.id, companyId: { in: entreprises } } })).map((l) => [l.companyId, l]));
+      const proprietaires = new Map((await this.prisma.membership.findMany({ where: { role: "owner", companyId: { in: entreprises } }, include: { user: { select: { email: true } } } })).map((m) => [m.companyId, m.user.email]));
+      const aPreparer: { offreId: string; bon: BonDeCommande; artisanEmail: string | null }[] = [];
       for (const o of lot.offres) {
         if (o.bon) continue;
         const c = o.besoin.company;
-        const lien = await this.prisma.negoceArtisan.findUnique({ where: { companyId_negoceId: { companyId: c.id, negoceId: negoce.id } } });
-        const proprietaire = await this.prisma.membership.findFirst({ where: { companyId: c.id, role: "owner" }, include: { user: { select: { email: true } } } });
-        const artisanEmail = c.contactEmail ?? proprietaire?.user.email ?? null;
+        const lien = liens.get(c.id);
+        const artisanEmail = c.contactEmail ?? proprietaires.get(c.id) ?? null;
         const bon: BonDeCommande = {
           numeroLot: lot.numero,
           artisan: { nom: c.name, siret: c.siret, telephone: c.phone, email: artisanEmail },
@@ -74,8 +80,13 @@ export class CommandeService {
           dateLivraison: o.dateLivraison,
           negoce: negoce.nom,
         };
-        const doc = documentBonDeCommande(bon);
-        docs.push({ offreId: o.id, bon, pdf: await pdfDeTexte(doc.titre, doc.blocs), artisanEmail });
+        aPreparer.push({ offreId: o.id, bon, artisanEmail });
+      }
+      // Dette n° 14 (21 octobre) : les PDF par paquets de 10 en parallèle, au lieu d'un par un.
+      for (let i = 0; i < aPreparer.length; i += 10) {
+        const paquet = aPreparer.slice(i, i + 10);
+        const pdfs = await Promise.all(paquet.map((d) => { const doc = documentBonDeCommande(d.bon); return pdfDeTexte(doc.titre, doc.blocs); }));
+        paquet.forEach((d, k) => docs.push({ ...d, pdf: pdfs[k]! }));
       }
       if (docs.length === 0) continue;
       const recap = documentRecapitulatif(lot.numero, negoce.nom, docs.map((d) => d.bon));
@@ -110,6 +121,7 @@ export class CommandeService {
         const message = messageNegoceRetenu({
           quantite: d.bon.lignes[0]!.quantite,
           unite: d.bon.lignes[0]!.unite,
+          designation: d.bon.lignes[0]!.designation,
           prixUnitaire: d.bon.lignes[0]!.prixUnitaire,
           prixReference: offre.prixReference ? Number(offre.prixReference) : null,
           negoce: negoce.nom,
@@ -159,10 +171,11 @@ export class CommandeService {
   }
 
   /** La relance automatique des factures échues (une fois). */
-  async relancerLesFactures(maintenant = new Date()): Promise<{ relancees: number }> {
+  async relancerLesFactures(maintenant = new Date(), jusqua?: number): Promise<{ relancees: number }> {
     const dues = await this.prisma.factureNegoce.findMany({ where: { statut: "envoyee", relanceeLe: null, payeeLe: null, echeanceLe: { lt: maintenant } }, include: { negoce: true, lot: true } });
     let relancees = 0;
     for (const f of dues) {
+      if (jusqua && Date.now() > jusqua) break;
       if (!factureARelancer(f, maintenant)) continue;
       try {
         await this.email.send({
@@ -196,14 +209,17 @@ export class CommandeService {
   }
 
   /** Section 2, étape 8 : relance à J+15 après la date prévue, tant que l'artisan n'a rien dit. */
-  async relancerLesLivraisons(maintenant = new Date()): Promise<{ relancees: number }> {
+  async relancerLesLivraisons(maintenant = new Date(), jusqua?: number): Promise<{ relancees: number }> {
     const prevues = await this.prisma.livraison.findMany({ where: { statut: "prevue", relanceLe: null, datePrevue: { not: null } }, include: { bon: { include: { offre: { include: { besoin: { include: { company: true } }, lot: true } } } } } });
+    // Une seule requête pour les propriétaires, au lieu d'une par livraison.
+    const aRelancer = prevues.filter((l) => livraisonARelancer(l, maintenant));
+    const proprietaires = await this.prisma.membership.findMany({ where: { role: "owner", companyId: { in: [...new Set(aRelancer.map((l) => l.bon.offre.besoin.company.id))] } }, include: { user: { select: { email: true } } } });
+    const emailDu = new Map(proprietaires.map((m) => [m.companyId, m.user.email]));
     let relancees = 0;
-    for (const l of prevues) {
-      if (!livraisonARelancer(l, maintenant)) continue;
+    for (const l of aRelancer) {
+      if (jusqua && Date.now() > jusqua) break;
       const c = l.bon.offre.besoin.company;
-      const proprietaire = await this.prisma.membership.findFirst({ where: { companyId: c.id, role: "owner" }, include: { user: { select: { email: true } } } });
-      const to = c.contactEmail ?? proprietaire?.user.email;
+      const to = c.contactEmail ?? emailDu.get(c.id);
       if (to) {
         try {
           await this.email.send({ to, subject: `Lot n° ${l.bon.offre.lot.numero} : tout est arrivé ?`, text: `Bonjour,\n\nTa livraison (${l.bon.offre.besoin.designation}) était prévue le ${jour(l.datePrevue!)}. Tout est arrivé ? Dis-le d'un tap dans BatiClair, onglet Groupé : « Livré » ou « Problème ».\n\nBatiClair` });
@@ -257,11 +273,12 @@ export class CommandeService {
   }
 
   /** Étape 8, message 4 : le jour prévu, « Livraison aujourd'hui. Tout est arrivé ? », une fois. */
-  async prevenirLesLivraisonsDuJour(maintenant = new Date()): Promise<{ prevenues: number }> {
+  async prevenirLesLivraisonsDuJour(maintenant = new Date(), jusqua?: number): Promise<{ prevenues: number }> {
     const aujourdHui = new Date(jour(maintenant));
     const livraisons = await this.prisma.livraison.findMany({ where: { statut: "prevue", prevenuLe: null, datePrevue: { lte: aujourdHui } }, include: { bon: { include: { offre: { include: { besoin: { select: { companyId: true } }, lot: { select: { numero: true } } } } } } } });
     let prevenues = 0;
     for (const l of livraisons) {
+      if (jusqua && Date.now() > jusqua) break;
       await this.notifications.prevenir(l.bon.offre.besoin.companyId, messageLivraisonDuJour({ numero: l.bon.offre.lot.numero }));
       await this.prisma.livraison.update({ where: { id: l.id }, data: { prevenuLe: maintenant } });
       prevenues++;

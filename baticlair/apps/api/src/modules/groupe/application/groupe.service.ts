@@ -69,7 +69,7 @@ export class GroupeService {
     private readonly demande: { envoyerLesLotsFormes(): Promise<unknown> },
     /** Étape 7 : l'exclusion après deux désistements (section 4 c). */
     private readonly commande: { exclue(companyId: string): Promise<boolean> },
-    /** Étape 8 : « Vos 31 bacs sont dans le groupé Côtes-d'Armor. Prochain lot lundi. » */
+    /** Étape 8 : « Vos 31 bacs sont dans le groupé Côtes-d'Armor. Prochaine commande groupée lundi. » */
     private readonly notifications: { prevenir(companyId: string, message: MessageArtisan): Promise<unknown> },
     /** Étape 9 : les départements ouverts (`GROUPE_DEPARTEMENTS`, `null` = tous) et les admins. */
     private readonly reglages: { departements: string[] | null; admins: string[] } = { departements: null, admins: [] },
@@ -103,7 +103,7 @@ export class GroupeService {
     // Un besoin retiré avant le départ disparaît ; retiré par désistement (un bon existe), il reste visible : « Tu ne commandes pas ce lot ».
     const rows = await this.prisma.besoin.findMany({
       where: { companyId: tenant.companyId, OR: [{ statut: { not: "retire" } }, { offre: { bon: { isNot: null } } }] },
-      include: { lot: { select: { statut: true, numero: true, negoceRetenu: { select: { nom: true } } } }, offre: { include: { bon: { include: { livraison: true } } } }, project: { select: { name: true } } },
+      include: { lot: { select: { statut: true, numero: true, negoceRetenu: { select: { nom: true } } } }, offre: { include: { bon: { select: { id: true, envoyeLe: true, livraison: true } } } }, project: { select: { name: true } } },
       orderBy: { createdAt: "desc" },
     });
     return rows.map((b) => ({
@@ -236,7 +236,7 @@ export class GroupeService {
     await this.regroupement.ranger();
     // Étape 8, message 1 : une notification par proposition (les quantités de la première ligne).
     const premier = await this.prisma.besoin.findFirst({ where: { takeoffId: takeoff.id, articleKey: p.articles[0]! } });
-    if (premier) await this.notifications.prevenir(tenant.companyId, messageBesoinAccepte({ quantite: premier.quantite.toString(), unite: premier.unite, zone: premier.zone, projectId }));
+    if (premier) await this.notifications.prevenir(tenant.companyId, messageBesoinAccepte({ quantite: premier.quantite.toString(), unite: premier.unite, designation: premier.designation, zone: premier.zone, projectId }));
     await this.demande.envoyerLesLotsFormes();
     return this.besoinsDuChantier(tenant, projectId);
   }

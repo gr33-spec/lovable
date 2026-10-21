@@ -193,3 +193,16 @@ describe("groupé, étape 5 : la demande aux négoces", { timeout: 60_000 }, () 
     expect((await ctx.prisma.lotGroupe.findFirstOrThrow()).statut).toBe("envoye");
   });
 });
+
+describe("groupé, dette n° 12 : un lien de réponse expire", { timeout: 60_000 }, () => {
+  it("30 jours après l'envoi du lot, le lien répond 404, même si le lot est encore « envoyé »", async () => {
+    await scenario();
+    const jeton = jetonDe(mailsNegoces().find((x) => x.to === "carrelage@example.com")!.text);
+    const anon = request(ctx.app.getHttpServer());
+    await anon.get(`/v1/reponse/${jeton}`).expect(200);
+    const lot = await ctx.prisma.lotGroupe.findFirstOrThrow({ where: { statut: "envoye" } });
+    await ctx.prisma.lotGroupe.update({ where: { id: lot.id }, data: { envoyeLe: new Date(Date.now() - 31 * 24 * 3600 * 1000) } });
+    expect((await anon.get(`/v1/reponse/${jeton}`)).status).toBe(404);
+    expect((await anon.post(`/v1/reponse/${jeton}`).field("accord", "oui")).status).toBe(404);
+  });
+});

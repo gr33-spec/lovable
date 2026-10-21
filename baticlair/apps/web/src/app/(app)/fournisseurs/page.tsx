@@ -1,5 +1,6 @@
 "use client";
 
+import { AideBouton } from "@/components/aide";
 import { Mail, Pencil, Phone, Plus, Truck } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useState } from "react";
@@ -50,7 +51,10 @@ function Suppliers() {
 
   return (
     <>
-      <PageTitle>Fournisseurs</PageTitle>
+      <div className="flex items-start justify-between gap-3">
+        <PageTitle>Fournisseurs</PageTitle>
+        <AideBouton sujet="negoces" />
+      </div>
       {groupeOuvert ? <MesNegocesCard /> : null}
 
       {creating ? (

@@ -139,7 +139,17 @@ export function PlansScreen() {
 /** Compte : la formule en une ligne, et le lien vers les formules. */
 export function PlanSummary() {
   const { data } = useBilling();
-  if (!data) return null;
+  if (!data) {
+    // Lighthouse (CLS) : la carte prend sa place avant la réponse, le reste de l'écran ne descend pas d'un coup.
+    return (
+      <Card className="flex flex-col gap-1.5 p-4" aria-busy="true">
+        <span className="text-xs font-extrabold tracking-[0.04em] text-muted">FORMULE</span>
+        <span className="text-[17px] font-extrabold">&nbsp;</span>
+        <span className="text-sm text-muted">&nbsp;</span>
+        <span className="inline-flex min-h-11 items-center self-start text-sm font-bold text-accent-text">Voir les formules</span>
+      </Card>
+    );
+  }
   const { plan, usage } = data;
   return (
     <Card className="flex flex-col gap-1.5 p-4">

@@ -59,7 +59,7 @@ export function SendPreview({ projectId, onSend, onClose }: { projectId: string;
       <div className="flex shrink-0 flex-col items-center gap-1 bg-ground px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] shadow-[0_-8px_16px_-12px_rgba(16,24,40,0.25)]">
         <Button className="min-h-14 w-full max-w-2xl text-[17px]" onClick={onSend}>
           <Send size={18} aria-hidden="true" />
-          Envoyer au fournisseur
+          Envoyer aux négoces
         </Button>
         <button type="button" onClick={onClose} className="inline-flex min-h-11 items-center text-sm font-bold text-muted">
           Revenir à ma liste

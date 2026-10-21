@@ -28,6 +28,10 @@ export class AdminGroupeService {
       this.prisma.desistement.findMany({ include: { company: { select: { name: true } }, lot: { select: { numero: true } } }, orderBy: { createdAt: "desc" } }),
       this.prisma.accordNegoce.findMany({ include: { negoce: { select: { nom: true, email: true } }, lot: { select: { numero: true } } }, orderBy: { accepteLe: "desc" } }),
     ]);
+    // Dette n° 4 (21 octobre) : combien de devis de négoces le modèle a lus, et combien restent « à vérifier », sur 30 jours.
+    const depuis = new Date(Date.now() - 30 * 24 * 3600 * 1000);
+    const lectures = await this.prisma.reponseNegoce.groupBy({ by: ["statutExtraction"], where: { deposeLe: { gte: depuis } }, _count: { _all: true } });
+    const compte = (statut: string) => lectures.find((l) => l.statutExtraction === statut)?._count._all ?? 0;
     const parDepartement = new Map<string, { lots: number; economies: number }>();
     for (const l of lots) {
       const d = parDepartement.get(l.zone) ?? { lots: 0, economies: 0 };
@@ -36,6 +40,7 @@ export class AdminGroupeService {
       parDepartement.set(l.zone, d);
     }
     return {
+      lectures: { jours: 30, lues: compte("lue"), aVerifier: compte("a_verifier") + compte("en_attente"), echecs: compte("echec") },
       departements: { ouverts: this.departements, compteurs: [...parDepartement.entries()].map(([departement, v]) => ({ departement, lots: v.lots, economies: Math.round(v.economies * 100) / 100 })) },
       lots: lots.map((l) => ({
         id: l.id,
@@ -52,7 +57,7 @@ export class AdminGroupeService {
         prixRetenu: l.prixRetenu?.toString() ?? null,
         bons: l.offres.filter((o) => o.bon?.envoyeLe).length,
       })),
-      negoces: negoces.map((n) => ({ id: n.id, nom: n.nom, email: n.email, departement: n.departement, familles: n.familles, stop: !!n.stopLe, artisans: n._count.artisans, reponses: n._count.reponses })),
+      negoces: negoces.map((n) => ({ id: n.id, nom: n.nom, email: n.email, departement: n.departement, agences: negoces.filter((x) => x.email === n.email && x.id !== n.id).map((x) => x.departement).sort(), familles: n.familles, stop: !!n.stopLe, artisans: n._count.artisans, reponses: n._count.reponses })),
       accords: accords.map((a) => ({ id: a.id, lot: a.lot.numero, negoce: a.negoce.nom, email: a.email, adresseIp: a.adresseIp, versionContrat: a.versionContrat, tauxPourcent: a.tauxPourcent.toString(), accepteLe: a.accepteLe.toISOString() })),
       factures: factures.map((f) => ({ id: f.id, numero: f.numero, lot: f.lot.numero, negoce: f.negoce.nom, totalLotHt: f.totalLotHt.toString(), montantHt: f.montantHt.toString(), statut: f.statut, emiseLe: jour(f.emiseLe), echeanceLe: jour(f.echeanceLe), payeeLe: jour(f.payeeLe) })),
       exclusions: desistements.map((d) => ({ id: d.id, entreprise: d.company.name, lot: d.lot.numero, sanction: d.sanction, excluJusquau: jour(d.excluJusquau), raison: d.raison, le: jour(d.createdAt) })),

@@ -52,5 +52,30 @@ describe("banc des 179 lectures enregistrées, tous métiers", () => {
     const metiers = new Set(resultats.map((r) => r.metier));
     expect(metiers.size).toBeGreaterThanOrEqual(16);
     await expect(`${JSON.stringify(resultats, null, 1)}\n`).toMatchFileSnapshot("./__snapshots__/banc-179-lectures.json");
+    // Dette n° 11 (21 octobre) : un compte rendu lisible à côté du JSON de 590 lignes : par métier, lectures, lignes par
+    // couleur, questions, « à chiffrer ». Un changement voulu du moteur se relit ici en un coup d'œil.
+    await expect(compteRendu(resultats)).toMatchFileSnapshot("../../../docs/non-regression-179-lectures-compte.md");
   });
 });
+
+function compteRendu(resultats: Resultat[]): string {
+  const parMetier = new Map<string, Resultat[]>();
+  for (const r of resultats) parMetier.set(r.metier, [...(parMetier.get(r.metier) ?? []), r]);
+  const ligne = (metier: string, rs: Resultat[]) => {
+    const lignes = rs.flatMap((r) => r.lignes);
+    const etats = (e: string) => lignes.filter((l) => l.etat === e).length;
+    return `| ${metier} | ${rs.length} | ${lignes.length} | ${etats("ok")} | ${etats("check")} | ${lignes.length - etats("ok") - etats("check")} | ${rs.reduce((n, r) => n + r.questions.length, 0)} | ${rs.reduce((n, r) => n + r.aChiffrer.length, 0)} |`;
+  };
+  const tout = ligne("**Tous**", resultats);
+  return [
+    "# Banc des 179 lectures : compte rendu",
+    "",
+    "Généré par `packages/domain/test/banc-179-lectures.test.ts` (`npx vitest run -u` après un changement voulu du moteur) ; le détail ligne par ligne est dans `test/__snapshots__/banc-179-lectures.json`. Chaque lecture enregistrée est rejouée sans réponse ni habitude.",
+    "",
+    "| Métier | Lectures | Lignes | Vertes | Orange | Autres | Questions | À chiffrer |",
+    "|---|---|---|---|---|---|---|---|",
+    ...[...parMetier.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([m, rs]) => ligne(m, rs)),
+    tout,
+    "",
+  ].join("\n");
+}

@@ -1,9 +1,10 @@
 "use client";
 
 import { Copy, Plus, Star } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useId, useState } from "react";
 import { Badge, Button, Card, ErrorNotice, Field } from "@/components/ui";
-import { api, ApiError, newActionKey } from "@/lib/api";
+import { api, ApiError, newActionKey, type Supplier } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 
 /**
@@ -33,6 +34,8 @@ export interface NegoceVue {
   favori: boolean;
   numeroCompte: string | null;
   stop: boolean;
+  /** Les autres départements où ce négoce (même e-mail) a une agence. */
+  agences: string[];
 }
 
 /** Le groupé existe-t-il pour cette entreprise (drapeau allumé, SIRET vérifié) ? null tant qu'on ne sait pas. */
@@ -50,7 +53,11 @@ export function MesNegocesCard() {
   const liste = useResource(fetchNegoces);
   const fetchMessage = useCallback((signal: AbortSignal) => api<{ message: string }>("/v1/groupe/negoces/message", { signal }), []);
   const message = useResource(fetchMessage);
-  const [adding, setAdding] = useState(false);
+  // Revue à froid (21 octobre) : pour l'artisan, fournisseur et négoce sont le même comptoir ; un fournisseur déjà saisi
+  // se reprend d'un tap, et le lien « Ajouter un négoce » de l'onglet Groupé (`/fournisseurs?negoce`) ouvre le formulaire.
+  const fetchFournisseurs = useCallback((signal: AbortSignal) => api<{ items: Supplier[] }>("/v1/suppliers", { signal }), []);
+  const fournisseurs = useResource(fetchFournisseurs);
+  const [adding, setAdding] = useState<false | { nom: string; email: string } | true>(useSearchParams().has("negoce"));
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [copied, setCopied] = useState(false);
@@ -82,10 +89,10 @@ export function MesNegocesCard() {
                 </span>
                 <span className="flex shrink-0 items-center gap-1.5">
                   {n.stop ? <Badge tone="danger">Ne reçoit plus rien</Badge> : null}
-                  {n.numeroCompte ? <Badge>Compte {n.numeroCompte}</Badge> : <Badge tone="warn">Sans numéro de compte</Badge>}
+                  {n.numeroCompte ? <Badge>Compte {n.numeroCompte}</Badge> : <Badge>Numéro de compte à ajouter</Badge>}
                 </span>
               </div>
-              <p className="text-[13px] text-muted">{`${n.email} · ${n.departement} · ${n.familles.map(libelle).join(", ") || "aucune famille"}`}</p>
+              <p className="text-[13px] text-muted">{`${n.email} · ${n.departement}${n.agences.length > 0 ? ` (aussi en ${n.agences.join(", ")})` : ""} · ${n.familles.map(libelle).join(", ") || "aucune famille"}`}</p>
               <div className="flex flex-wrap gap-2">
                 {!n.favori ? (
                   <Button variant="secondary" className="min-h-10 px-3.5 text-[14px]" pending={pending === `fav:${n.id}`} onClick={() => run(`fav:${n.id}`, () => api(`/v1/groupe/negoces/${n.id}`, { method: "PATCH", body: { favori: true } }))}>
@@ -106,16 +113,34 @@ export function MesNegocesCard() {
       {adding ? (
         <NegoceForm
           premier={negoces.length === 0}
+          prerempli={adding === true ? null : adding}
           onDone={(ok) => {
             setAdding(false);
             if (ok) liste.reload();
           }}
         />
       ) : (
-        <Button variant="secondary" onClick={() => setAdding(true)}>
-          <Plus size={18} aria-hidden="true" />
-          Ajouter un négoce
-        </Button>
+        <>
+          {(fournisseurs.data?.items ?? []).filter((f) => !f.archived && f.email && !negoces.some((n) => n.email.toLowerCase() === f.email.toLowerCase())).length > 0 ? (
+            <div className="flex flex-col gap-1.5">
+              <p className="text-[13px] font-bold text-muted">Reprendre un de tes fournisseurs :</p>
+              <div className="flex flex-wrap gap-1.5">
+                {(fournisseurs.data?.items ?? [])
+                  .filter((f) => !f.archived && f.email && !negoces.some((n) => n.email.toLowerCase() === f.email.toLowerCase()))
+                  .slice(0, 6)
+                  .map((f) => (
+                    <button key={f.id} type="button" onClick={() => setAdding({ nom: f.name, email: f.email })} className="inline-flex min-h-10 items-center rounded-full bg-ground px-3.5 text-[13px] font-bold text-ink">
+                      {f.name}
+                    </button>
+                  ))}
+              </div>
+            </div>
+          ) : null}
+          <Button variant="secondary" onClick={() => setAdding(true)}>
+            <Plus size={18} aria-hidden="true" />
+            Ajouter un négoce
+          </Button>
+        </>
       )}
       {message.data ? (
         <details className="group rounded-2xl bg-ground p-3">
@@ -179,12 +204,12 @@ function useSuggestions(nom: string, actives: boolean): SuggestionNegoce[] {
   return q.length >= 3 && resultat.q === q ? resultat.liste : [];
 }
 
-function NegoceForm({ premier, onDone }: { premier: boolean; onDone: (ok: boolean) => void }) {
+function NegoceForm({ premier, prerempli, onDone }: { premier: boolean; prerempli: { nom: string; email: string } | null; onDone: (ok: boolean) => void }) {
   const id = useId();
-  const [nom, setNom] = useState("");
+  const [nom, setNom] = useState(prerempli?.nom ?? "");
   const [choisi, setChoisi] = useState<SuggestionNegoce | null>(null);
-  const suggestions = useSuggestions(nom, choisi === null);
-  const [email, setEmail] = useState("");
+  const suggestions = useSuggestions(nom, choisi === null && prerempli === null);
+  const [email, setEmail] = useState(prerempli?.email ?? "");
   const [numeroCompte, setNumeroCompte] = useState("");
   const [departement, setDepartement] = useState("");
   const [familles, setFamilles] = useState<Set<string>>(new Set());

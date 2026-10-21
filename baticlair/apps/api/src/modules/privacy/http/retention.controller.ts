@@ -3,6 +3,8 @@ import type { AppConfig } from "../../../platform/config/config.js";
 import { forbidden } from "../../../platform/errors/domain-error.js";
 import { CONFIG } from "../../../platform/tokens.js";
 import { UploadParts } from "../../documents/index.js";
+import { Throttle } from "@nestjs/throttler";
+import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import { Public } from "../../identity/index.js";
 import { AccountData } from "../infrastructure/account-data.js";
 
@@ -19,6 +21,7 @@ export class RetentionController {
   ) {}
 
   @Public()
+  @Throttle({ default: HOURLY(60) })
   @Get("purge-inactive")
   async purge(@Headers("authorization") authorization: string | undefined) {
     const secret = this.config.cronSecret;

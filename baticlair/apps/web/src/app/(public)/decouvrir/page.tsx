@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
+import { DemoGuidee } from "@/components/demo-guidee";
 import { ButtonLink } from "@/components/ui";
 import { LiensLegaux } from "@/components/legal";
 import { TRADES } from "@/lib/trades";
@@ -52,6 +54,10 @@ export default function BienvenuePage() {
   const h2 = "font-display text-[30px] leading-[1.05] font-extrabold tracking-[-0.03em] sm:text-[40px]";
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-20 px-4 pt-4 pb-16 sm:px-6 sm:gap-28 sm:pt-10">
+      {/* Plan 2, bloc 3 : au premier lancement, la démo guidée (trois écrans, « Passer ») vient avant l'accroche. */}
+      <Suspense>
+        <DemoGuidee />
+      </Suspense>
       {/* L'accroche : le texte à gauche, le vrai écran de la liste à droite, coupé en bas comme un téléphone posé. */}
       <section aria-labelledby="accroche" className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-8">
         <div className="flex flex-col gap-6 lg:col-span-7 animate-rise">
@@ -234,6 +240,9 @@ export default function BienvenuePage() {
             <LiensLegaux />
             <Link href="/connexion" className="text-sm font-semibold text-muted underline">
               Se connecter
+            </Link>
+            <Link href="/?demo" className="text-sm font-semibold text-muted underline">
+              Revoir la démo.
             </Link>
           </div>
         </div>
