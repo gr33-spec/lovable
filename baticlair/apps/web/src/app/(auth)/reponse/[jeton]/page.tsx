@@ -6,6 +6,10 @@ import { LiensLegaux } from "@/components/legal";
 import { Button, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 
+/** Test complet (21 octobre) : l'espace fine de fr-FR (U+202F) ne se voit pas dans la police ; une espace insécable, si. */
+const lisible = (texte: string) => texte.replace(/\u202f/g, "\u00a0");
+const nombre = (q: string) => lisible(Number(q).toLocaleString("fr-FR", { maximumFractionDigits: 3 }));
+
 /** Ce que l'API rend pour un lien de réponse (`GET /v1/reponse/:jeton`). */
 interface PageReponse {
   lot: {
@@ -90,7 +94,7 @@ export default function ReponseNegocePage() {
       <section aria-label="Le lot" className="flex flex-col gap-2 rounded-[20px] border border-line bg-surface p-4">
         <h2 className="text-base font-extrabold">{lot.designation}</h2>
         <p className="text-sm">
-          <span className="font-bold">Volume ferme : {lot.volumeFerme}</span> · volume probable : {lot.volumeProbable}
+          <span className="font-bold">Volume ferme : {lisible(lot.volumeFerme)}</span> · volume probable : {lisible(lot.volumeProbable)}
         </p>
         <p className="text-sm">
           Livraison entre le {jour(lot.fenetre.tot)} et le {jour(lot.fenetre.tard)}, par chantier.
@@ -100,7 +104,7 @@ export default function ReponseNegocePage() {
             <li key={i} className="flex flex-col py-2">
               <span className="font-semibold">{c.adresse}</span>
               <span className="text-muted">
-                {c.quantite} {c.unite} · du {jour(c.fenetre.tot)} au {jour(c.fenetre.tard)} · {c.engagement === "ferme" ? "ferme" : "probable"}
+                {nombre(c.quantite)} {c.unite} · du {jour(c.fenetre.tot)} au {jour(c.fenetre.tard)} · {c.engagement === "ferme" ? "ferme" : "probable"}
               </span>
             </li>
           ))}

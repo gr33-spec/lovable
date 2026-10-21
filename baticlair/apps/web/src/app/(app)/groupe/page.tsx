@@ -1,6 +1,7 @@
 "use client";
 
 import { AideBouton } from "@/components/aide";
+import { quantiteFr } from "@/components/groupe";
 import Link from "next/link";
 import { Check, FileText, Store, Tag, Truck, Users } from "lucide-react";
 import { useCallback, useState } from "react";
@@ -290,7 +291,7 @@ function MesLots() {
             <li key={b.id} className="flex flex-col gap-1 rounded-2xl bg-ground p-3">
               <div className="flex items-baseline justify-between gap-3">
                 <span className="min-w-0 text-[15px] font-bold">{b.designation}</span>
-                <span className="shrink-0 text-[15px] font-extrabold">{`${b.quantite.replace(".", ",")} ${b.unite}`}</span>
+                <span className="shrink-0 text-[15px] font-extrabold">{`${quantiteFr(b.quantite)} ${b.unite}`}</span>
               </div>
               <Link href={`/chantiers/${encodeURIComponent(b.projectId)}`} className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent-text underline decoration-dotted underline-offset-4">
                 <Store size={14} aria-hidden="true" />

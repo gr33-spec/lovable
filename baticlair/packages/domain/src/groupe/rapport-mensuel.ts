@@ -48,7 +48,7 @@ export function rapportMensuel(b: BilanMensuel, prenom: string | null = null): {
   const bonjour = prenom ? `Bonjour ${prenom},` : "Bonjour,";
   const suite =
     b.lots > 0
-      ? `Tes ${lots} du groupé : bon de commande parti chez le négoce retenu, livraison sur ton chantier, sur ton compte chez lui.`
+      ? `${b.lots === 1 ? "Ton lot" : `Tes ${lots}`} du groupé : bon de commande parti chez le négoce retenu, livraison sur ton chantier, sur ton compte chez lui.`
       : b.chantiersLus > 0
         ? "Pas de lot ce mois-ci : propose une ligne de ta liste au groupé dès que le chantier est signé, le prix se fait avec les autres artisans du département."
         : "";

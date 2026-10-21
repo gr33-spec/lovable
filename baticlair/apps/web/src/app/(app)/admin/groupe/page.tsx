@@ -5,6 +5,26 @@ import { Button, Card, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 
+/** Les statuts bruts de l'API, lisibles par Greg (test complet du 21 octobre : « livre », « retire », « envoyee » s'affichaient tels quels). */
+const LIBELLES: Record<string, string> = {
+  ouvert: "ouvert",
+  envoye: "envoyé aux négoces",
+  choisi: "négoce retenu",
+  clos: "clos",
+  annule: "annulé",
+  en_attente: "devis en attente",
+  signe: "chantier signé",
+  engage: "engagé",
+  commande: "bon de commande parti",
+  livre: "livré",
+  retire: "retiré",
+  probleme: "problème signalé",
+  envoyee: "envoyée",
+  payee: "payée",
+};
+const libelle = (statut: string | null | undefined) => (statut ? (LIBELLES[statut] ?? statut) : "");
+const quantiteFr = (q: string) => Number(q).toLocaleString("fr-FR", { maximumFractionDigits: 3 }).replace(/\u202f/g, "\u00a0");
+
 interface Tableau {
   departements: { ouverts: string[] | null; compteurs: { departement: string; lots: number; economies: number }[] };
   /** Dette n° 4 : les devis de négoces lus par le modèle sur 30 jours, et ceux qui restent « à vérifier ». */
@@ -89,7 +109,7 @@ export default function AdminGroupePage() {
           {data.lots.map((l) => (
             <li key={l.id} className="flex flex-col gap-1 rounded-2xl bg-surface p-3 shadow-card">
               <div className="flex items-baseline justify-between gap-3">
-                <span className="text-[15px] font-extrabold">Lot n° {l.numero} · {l.zone} · {l.statut}</span>
+                <span className="text-[15px] font-extrabold">Lot n° {l.numero} · {l.zone} · {libelle(l.statut)}</span>
                 <button type="button" onClick={() => voir(l.id)} className="min-h-10 text-[13px] font-bold text-accent-text underline decoration-dotted underline-offset-4">
                   Journal
                 </button>
@@ -130,8 +150,8 @@ export default function AdminGroupePage() {
                       <ul className="flex flex-col gap-1">
                         {lot.besoins.map((b) => (
                           <li key={b.id}>
-                            {b.entreprise} · {b.quantite} {b.unite} · {b.statut} · {b.adresse}
-                            {b.offre ? ` · ${euros(b.offre.prixUnitaire)}${b.offre.bon ? " · bon parti" : ""}${b.offre.livraison ? ` · livraison ${b.offre.livraison}` : ""}` : ""}
+                            {b.entreprise} · {quantiteFr(b.quantite)} {b.unite} · {libelle(b.statut)} · {b.adresse}
+                            {b.offre ? ` · ${euros(b.offre.prixUnitaire)}${b.offre.bon ? " · bon parti" : ""}${b.offre.livraison ? ` · livraison : ${libelle(b.offre.livraison)}` : ""}` : ""}
                           </li>
                         ))}
                       </ul>
@@ -151,7 +171,7 @@ export default function AdminGroupePage() {
                           </li>
                         ))}
                       </ul>
-                      {lot.facture ? <p>Facture n° {lot.facture.numero} · {euros(lot.facture.montantHt)} HT · {lot.facture.statut} · échéance {lot.facture.echeanceLe}</p> : null}
+                      {lot.facture ? <p>Facture n° {lot.facture.numero} · {euros(lot.facture.montantHt)} HT · {libelle(lot.facture.statut)} · échéance {lot.facture.echeanceLe}</p> : null}
                       <p className="font-extrabold">Journal</p>
                       <ol className="flex flex-col gap-0.5 font-mono text-[12px]">
                         {lot.journal.map((j, i) => (
@@ -200,7 +220,7 @@ export default function AdminGroupePage() {
             {data.factures.map((f) => (
               <li key={f.id} className="flex flex-wrap items-center justify-between gap-2 text-[14px]">
                 <span>
-                  n° {f.numero} · lot {f.lot} · {f.negoce} · {euros(f.montantHt)} HT · {f.statut} · échéance {f.echeanceLe}
+                  n° {f.numero} · lot {f.lot} · {f.negoce} · {euros(f.montantHt)} HT · {libelle(f.statut)} · échéance {f.echeanceLe}
                 </span>
                 {f.statut !== "payee" ? (
                   <Button variant="secondary" className="min-h-9 px-3 text-[13px]" pending={pending === `payee-${f.id}`} onClick={() => agir(`payee-${f.id}`, () => api(`/v1/admin/groupe/factures/${f.id}/payee`, { method: "POST" }))}>

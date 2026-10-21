@@ -367,6 +367,7 @@ export function SupplyList({
           <GroupeBar
             count={checked.size}
             onCancel={stopSelecting}
+            onAdresse={groupe.adresse}
             onPropose={async (fenetre, statut, engagement) => {
               await groupe.proposer([...checked], fenetre, statut, engagement);
               stopSelecting();
