@@ -57,11 +57,12 @@ import {
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { DocumentInput, ReadAttempt } from "../../../platform/ai/document-reader.js";
 import type { AiUsageRecorder, AnalysisMeter } from "../../ai-usage/index.js";
-import type { DocumentAiInput, DocumentRepository, DocumentWithProcessing, PreparedDocument } from "../../documents/index.js";
+import { imageMimeType, looksLikePdf, type DocumentAiInput, type DocumentRepository, type DocumentWithProcessing, type PreparedDocument } from "../../documents/index.js";
 import type { CompanyMemory, CorrectionJournal } from "../../learning/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { decodeRelecture, doublonDe, FICHE_RELECTURE_PROMPT, type FicheRelecteur, type QuestionPosee, type RelectureQuestion } from "./fiche-relecture.js";
 import { LECTURE_PROMPT, REPERAGE_PROMPT, type LectureReader } from "./lecture-reader.js";
+import { LISTE_PROMPT, type ListeReader } from "./liste-reader.js";
 import type { LineFields, TakeoffRecord, TakeoffRepository } from "./takeoff.repository.js";
 
 /**
@@ -96,6 +97,8 @@ export interface ReadingOptions {
    * ligne. Absent, ou lecteur simulé sans lecture enregistrée pour ce devis : l'ancienne lecture (prompt A) sert encore.
    */
   lecteur?: LectureReader;
+  /** « J'ai déjà ma liste » : la lecture d'image ou de PDF d'une liste déjà comptée (lignes telles qu'écrites, aucun calcul). */
+  listeur?: ListeReader;
   /** Le nom de l'entreprise, injecté dans le prompt B ({nom_entreprise}). */
   companyName?: (tenant: TenantContext) => Promise<string | null>;
   /**
@@ -668,6 +671,90 @@ export class TakeoffService {
         aiDoubt: null,
         priceRaw: l.price?.trim() || null,
         origin: "partner",
+      })),
+    });
+    return this.review(tenant, takeoff);
+  }
+
+  /** Une liste déjà comptée peut-elle être lue ? (le lecteur d'image est configuré) */
+  get listeAvailable(): boolean {
+    return this.reading.listeur !== undefined;
+  }
+
+  /**
+   * « J'AI DÉJÀ MA LISTE » : une photo (JPEG, PNG, WebP) ou un PDF d'une liste écrite à la main, d'un bon ou d'un devis de
+   * négoce. L'IA lit les lignes TELLES QU'ÉCRITES (article, quantité, unité) ; aucun calcul de quantitatif, aucune question :
+   * l'artisan a déjà compté. La liste arrive sur le même écran que celle d'un devis (modifier, supprimer, ajouter une ligne) ;
+   * rien ne part sans sa validation. L'appel est enregistré (coût mesuré) mais ne compte pas comme une analyse de devis.
+   */
+  async fromListe(tenant: TenantContext, projectId: string, trade: string, file: { name: string; bytes: Uint8Array }): Promise<ReviewedTakeoff> {
+    assertCanWrite(tenant);
+    const listeur = this.reading.listeur;
+    if (!listeur) throw new DomainError("ai_unavailable", "AI reading is not configured");
+    if (file.bytes.byteLength === 0) throw new DomainError("unreadable_document", "Empty file", { reason: "empty" });
+    const mediaType = imageMimeType(file.bytes);
+    if (!mediaType && !looksLikePdf(file.bytes)) throw new DomainError("unreadable_document", "Not an image or a PDF", { reason: "not_pdf" });
+    const attempt = await listeur.lire({
+      fileName: file.name,
+      trade,
+      document: mediaType ? { numberedText: "", imagePdf: null, imagePages: [], images: [{ mediaType, bytes: file.bytes }] } : { numberedText: "", imagePdf: file.bytes, imagePages: [] },
+    });
+    if (attempt) {
+      try {
+        await this.recorder.record({
+          companyId: tenant.companyId,
+          projectId,
+          documentId: null,
+          userId: tenant.userId,
+          task: LISTE_PROMPT.id,
+          route: "vision",
+          provider: attempt.provider,
+          model: attempt.model,
+          promptId: LISTE_PROMPT.id,
+          promptVersion: LISTE_PROMPT.version,
+          attempt: 1,
+          pagesText: 0,
+          pagesVision: 1,
+          usage: attempt.usage,
+          status: attempt.status,
+          errorCode: attempt.errorCode,
+          durationMs: attempt.durationMs,
+        });
+      } catch (error) {
+        this.onRecordFailure(error);
+      }
+    }
+    if (!attempt || attempt.status !== "success" || !attempt.output) {
+      this.reading.onReadingFailed?.(attempt?.status ?? "no_reader");
+      throw new DomainError("analysis_failed", "The AI could not read this list", { reason: attempt?.status ?? "no_reader" });
+    }
+    const lignes = attempt.output.lignes;
+    if (lignes.length === 0) throw new DomainError("analysis_failed", "Nothing was read in this list", { reason: "nothing_read" });
+    const ref = referentialFor(trade);
+    if (ref) await this.reading.referentials?.ensure(ref);
+    const takeoff = await this.takeoffs.create(tenant, {
+      projectId,
+      documentId: null,
+      source: "lignes",
+      referentialVersion: ref?.version ?? null,
+      analysisId: null,
+      trade,
+      calculated: true,
+      promptId: LISTE_PROMPT.id,
+      promptVersion: LISTE_PROMPT.version,
+      model: attempt.model,
+      notes: [],
+      lines: lignes.map((l) => ({
+        designation: l.designation,
+        quantityRaw: l.quantite,
+        unitRaw: l.unite,
+        reference: null,
+        sourceRefs: [],
+        sourcePages: [],
+        section: [],
+        aiDoubt: null,
+        priceRaw: null,
+        origin: "liste",
       })),
     });
     return this.review(tenant, takeoff);

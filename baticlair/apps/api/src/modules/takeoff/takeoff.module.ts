@@ -21,6 +21,9 @@ import { FakeFicheRelecteur } from "./infrastructure/fake-fiche-relecteur.js";
 import { LECTURE_READER, type LectureReader } from "./application/lecture-reader.js";
 import { AnthropicLectureReader } from "./infrastructure/anthropic-lecture-reader.js";
 import { FakeLectureReader } from "./infrastructure/fake-lecture-reader.js";
+import { LISTE_READER, type ListeReader } from "./application/liste-reader.js";
+import { AnthropicListeReader } from "./infrastructure/anthropic-liste-reader.js";
+import { FakeListeReader } from "./infrastructure/fake-liste-reader.js";
 import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.repository.js";
 
 @Module({
@@ -33,6 +36,13 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
       provide: LECTURE_READER,
       useFactory: (config: AppConfig): LectureReader | null =>
         config.ai.provider === "anthropic" ? new AnthropicLectureReader(config.ai.apiKey!, config.ai.extractionModel, config.ai.effort, undefined, config.ai.quantitatifModel) : config.ai.provider === "fake" ? new FakeLectureReader() : null,
+      inject: [CONFIG],
+    },
+    {
+      // « J'ai déjà ma liste » : la lecture d'image ou de PDF d'une liste déjà comptée, sans calcul ; même client que les devis.
+      provide: LISTE_READER,
+      useFactory: (config: AppConfig): ListeReader | null =>
+        config.ai.provider === "anthropic" ? new AnthropicListeReader(config.ai.apiKey!, config.ai.extractionModel, config.ai.effort) : config.ai.provider === "fake" ? new FakeListeReader() : null,
       inject: [CONFIG],
     },
     {
@@ -59,6 +69,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
         push: PushSender,
         relecteur: FicheRelecteur | null,
         lecteur: LectureReader | null,
+        listeur: ListeReader | null,
       ) =>
         new TakeoffService(
           repo,
@@ -75,6 +86,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             policy: { ...DEFAULT_EXTRACTION_POLICY, textModel: config.ai.extractionModel, visionModel: config.ai.extractionModel },
             ...(relecteur ? { relecteur } : {}),
             ...(lecteur ? { lecteur } : {}),
+            ...(listeur ? { listeur } : {}),
             companyName: async (tenant) => (await prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true } }))?.name ?? null,
             onStats: (stats) => logger.info({ reading: stats }, "takeoff: lecture du devis"),
             // §48 : « je te préviens quand c'est prêt » : une notification sur chaque appareil abonné de la personne qui
@@ -193,7 +205,7 @@ import { PrismaTakeoffRepository } from "./infrastructure/prisma-takeoff.reposit
             },
           },
         ),
-      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService, ALERTER, PUSH_SENDER, FICHE_RELECTEUR, LECTURE_READER],
+      inject: [TAKEOFF_REPOSITORY, DOCUMENT_REPOSITORY, AnalysisMeter, AiUsageRecorder, DocumentAiInput, CorrectionJournal, CompanyMemory, LOGGER, CONFIG, PrismaService, ALERTER, PUSH_SENDER, FICHE_RELECTEUR, LECTURE_READER, LISTE_READER],
     },
   ],
   exports: [TakeoffService],
