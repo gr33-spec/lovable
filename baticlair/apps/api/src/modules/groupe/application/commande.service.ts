@@ -110,6 +110,7 @@ export class CommandeService {
         const message = messageNegoceRetenu({
           quantite: d.bon.lignes[0]!.quantite,
           unite: d.bon.lignes[0]!.unite,
+          designation: d.bon.lignes[0]!.designation,
           prixUnitaire: d.bon.lignes[0]!.prixUnitaire,
           prixReference: offre.prixReference ? Number(offre.prixReference) : null,
           negoce: negoce.nom,

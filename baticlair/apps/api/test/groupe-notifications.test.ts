@@ -79,7 +79,8 @@ describe("groupé, étape 8 : les notifications", { timeout: 90_000 }, () => {
     await negoce(a.agent, "Négoce Généraliste", "general@example.com", ["couverture", "second_oeuvre"]);
     // 1. Besoin accepté.
     await proposer(a, "signe");
-    expect(pushVers("a@example.fr").map((m) => m.body)).toEqual(["Vos 23 cartons de 1,44 m² sont dans le groupé Côtes-d'Armor. Prochain lot lundi."]);
+    expect(pushVers("a@example.fr").map((m) => m.body)).toHaveLength(1);
+    expect(pushVers("a@example.fr")[0]!.body).toMatch(/^Tes 23 cartons de 1,44 m² de carreau de sol 60×60 sont dans le groupé Côtes-d'Armor\. Prochain lot lundi\.$/);
     expect(mailsVers("a@example.fr").at(-1)!.subject).toContain("Prochain lot lundi");
     const b = await carreleur("b@example.fr", "Carrelages B", "12 rue de Kerampont, 22300 Lannion");
     await proposer(b, "signe");
@@ -97,7 +98,7 @@ describe("groupé, étape 8 : les notifications", { timeout: 90_000 }, () => {
     await deposer(jetonPour("carrelage@example.com"), [["CAR", CARREAU, "46 u", "18,50", "851,00"]], "DEVIS C – Délai de livraison 8 jours");
     await ctx.app.get(ChoixService).choisirLesLotsEnvoyes();
     const retenuB = pushVers("b@example.fr").find((x) => /chez Négoce Carrelage/.test(x.body))!;
-    expect(retenuB.body).toMatch(/^Vos 23 cartons de 1,44 m² : 18,50 € chez Négoce Carrelage\. Bon de commande transmis, livraison le \d+ nov\.$/);
+    expect(retenuB.body).toMatch(/^Tes 23 cartons de 1,44 m² de carreau de sol 60×60 : 18,50 € chez Négoce Carrelage\. Bon de commande transmis, livraison le \d+ nov\.$/);
     expect(mailsVers("b@example.fr").find((m) => /bon de commande/.test(m.subject))!.attachments).toHaveLength(1);
     // La facture porte l'émetteur configuré et la TVA.
     const factureMail = mailsVers("carrelage@example.com").find((m) => /^Facture n°/.test(m.subject))!;

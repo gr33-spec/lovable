@@ -236,7 +236,7 @@ export class GroupeService {
     await this.regroupement.ranger();
     // Étape 8, message 1 : une notification par proposition (les quantités de la première ligne).
     const premier = await this.prisma.besoin.findFirst({ where: { takeoffId: takeoff.id, articleKey: p.articles[0]! } });
-    if (premier) await this.notifications.prevenir(tenant.companyId, messageBesoinAccepte({ quantite: premier.quantite.toString(), unite: premier.unite, zone: premier.zone, projectId }));
+    if (premier) await this.notifications.prevenir(tenant.companyId, messageBesoinAccepte({ quantite: premier.quantite.toString(), unite: premier.unite, designation: premier.designation, zone: premier.zone, projectId }));
     await this.demande.envoyerLesLotsFormes();
     return this.besoinsDuChantier(tenant, projectId);
   }

@@ -145,7 +145,9 @@ export function GroupeBar({ count, onCancel, onPropose }: { count: number; onCan
           <input id={`${id}-tard`} type="date" value={tard} onChange={(e) => setTard(e.target.value)} className="min-h-12 rounded-2xl bg-ground px-3 text-[15px] font-bold text-ink" />
         </label>
       </fieldset>
-      <div role="radiogroup" aria-label="Le chantier" className="flex gap-2">
+      {/* Revue à froid (21 octobre) : la question se lit avant les deux réponses. */}
+      <p className="text-[13px] font-bold text-muted">Ton client a signé le devis ?</p>
+      <div role="radiogroup" aria-label="Ton client a signé le devis ?" className="flex gap-2">
         {(
           [
             ["signe", "Chantier signé"],
@@ -163,7 +165,7 @@ export function GroupeBar({ count, onCancel, onPropose }: { count: number; onCan
           <span>{PHRASE_ENGAGEMENT}</span>
         </label>
       ) : statut === "en_attente" ? (
-        <p className="text-[13px] leading-snug text-muted">Transmis au négoce comme volume probable, sans engagement. Tu le passeras en signé d&apos;un tap.</p>
+        <p className="text-[13px] leading-snug text-muted">Le négoce le voit comme une quantité possible, sans engagement de ta part. Tu le passeras en signé d&apos;un tap quand ton client aura signé.</p>
       ) : null}
       {error ? <ErrorNotice error={error} /> : null}
       <div className="flex gap-2">
@@ -230,17 +232,17 @@ function OffreCard({ besoin: b, groupe }: { besoin: BesoinGroupe; groupe: Groupe
       {o.dateLivraison ? <p className="text-[13px] font-semibold text-muted">Livraison le {jourFr(o.dateLivraison)}, sur ton chantier, sur ton compte chez lui.</p> : null}
       {o.economie !== null ? <p className="text-[14px] font-extrabold text-ok">Économie estimée : {euros(o.economie)}</p> : null}
       <label className="flex flex-wrap items-center gap-2 text-[13px] font-semibold text-muted">
-        Ton dernier prix payé seul (€ HT l&apos;unité)
+        Ton prix habituel chez ton négoce (€ HT l&apos;unité)
         <input
           type="text"
           inputMode="decimal"
           value={reference}
           onChange={(e) => setReference(e.target.value)}
-          aria-label="Ton dernier prix payé seul"
+          aria-label="Ton prix habituel chez ton négoce"
           className="h-10 w-24 rounded-xl border border-line bg-ground px-2 text-[14px] font-bold text-ink"
         />
         <Button variant="secondary" className="min-h-10 px-3.5 text-[14px]" pending={pending} onClick={() => run(() => groupe.reference(o.id, reference.trim() ? Number(reference.replace(",", ".")) : null))}>
-          Calculer mon économie
+          Voir mon économie
         </Button>
       </label>
       {o.probleme ? (
@@ -271,8 +273,8 @@ const STATUTS: Record<BesoinGroupe["statut"], string> = {
   en_attente: "Devis en attente",
   signe: "Chantier signé",
   retire: "Retiré",
-  engage: "Engagé, lot parti",
-  commande: "Commandé",
+  engage: "Parti chez les négoces, tu es engagé",
+  commande: "Bon de commande envoyé au négoce",
   livre: "Livré",
 };
 

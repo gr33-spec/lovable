@@ -35,9 +35,14 @@ const nombre = (q: string) => Number(q).toLocaleString("fr-FR", { maximumFractio
 const euros = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
 const jourCourt = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "short", timeZone: "UTC" }).replace(/\.$/, "");
 
-/** 1. « Vos 31 bacs sont dans le groupé Côtes-d'Armor. Prochain lot lundi. » */
-export function messageBesoinAccepte(b: { quantite: string; unite: string; zone: string; projectId: string }): MessageArtisan {
-  return { titre: "Groupé", corps: `Vos ${nombre(b.quantite)} ${b.unite} sont dans le groupé ${nomDuDepartement(b.zone)}. Prochain lot lundi.`, url: "/groupe", etiquette: `groupe-besoin-${b.projectId}` };
+/**
+ * 1. « Vos 31 bacs sont dans le groupé Côtes-d'Armor. Prochain lot lundi. » (section 3). Revue à froid du 21 octobre : l'app
+ * tutoie partout, et « 1 250 pièces » sans dire de quoi ne se comprend pas ; le message dit donc « Tes 1 250 pièces de
+ * tuile romane… ».
+ */
+export const quantiteDite = (q: { quantite: string; unite: string; designation: string }): string => `${nombre(q.quantite)} ${q.unite} de ${q.designation.charAt(0).toLowerCase()}${q.designation.slice(1)}`;
+export function messageBesoinAccepte(b: { quantite: string; unite: string; designation: string; zone: string; projectId: string }): MessageArtisan {
+  return { titre: "Groupé", corps: `Tes ${quantiteDite(b)} sont dans le groupé ${nomDuDepartement(b.zone)}. Prochain lot lundi.`, url: "/groupe", etiquette: `groupe-besoin-${b.projectId}` };
 }
 
 /** 2. « Le groupé est parti chez 4 négoces. Réponses attendues sous 7 jours. » */
@@ -46,11 +51,11 @@ export function messageDemandeEnvoyee(lot: { numero: number; negoces: number }):
 }
 
 /** 3. « Vos 31 bacs : X € chez A (−Y %). Bon de commande transmis, livraison le 3 nov. » (−Y % seulement avec un prix de référence). */
-export function messageNegoceRetenu(o: { quantite: string; unite: string; prixUnitaire: number; prixReference: number | null; negoce: string; dateLivraison: Date | null; numero: number }): MessageArtisan {
+export function messageNegoceRetenu(o: { quantite: string; unite: string; designation: string; prixUnitaire: number; prixReference: number | null; negoce: string; dateLivraison: Date | null; numero: number }): MessageArtisan {
   const baisse = o.prixReference && o.prixReference > 0 ? Math.round(((o.prixReference - o.prixUnitaire) / o.prixReference) * 100) : null;
   const pct = baisse !== null && baisse > 0 ? ` (−${baisse} %)` : "";
   const livraison = o.dateLivraison ? `, livraison le ${jourCourt(o.dateLivraison)}` : "";
-  return { titre: "Groupé : négoce retenu", corps: `Vos ${nombre(o.quantite)} ${o.unite} : ${euros(o.prixUnitaire)} chez ${o.negoce}${pct}. Bon de commande transmis${livraison}.`, url: "/groupe", etiquette: `groupe-lot-${o.numero}` };
+  return { titre: "Groupé : négoce retenu", corps: `Tes ${quantiteDite(o)} : ${euros(o.prixUnitaire)} chez ${o.negoce}${pct}. Bon de commande transmis${livraison}.`, url: "/groupe", etiquette: `groupe-lot-${o.numero}` };
 }
 
 /** 4. « Livraison aujourd'hui. Tout est arrivé ? » */

@@ -129,6 +129,9 @@ export default function ComptePage() {
       <NotificationsCard />
       <PartnerKeysCard />
       {company && company.role !== "viewer" ? <MemoryCard /> : null}
+      {/* Sous la ligne de flottaison : la carte arrive après le chargement sans décaler le haut de l'écran (CLS), mais
+          avant la déconnexion et la suppression du compte (revue à froid, 21 octobre). */}
+      <EconomiesGroupeCard />
       <Button
         variant="secondary"
         pending={leaving}
@@ -137,8 +140,6 @@ export default function ComptePage() {
         Se déconnecter
       </Button>
       <MyData onDeleted={() => router.replace("/connexion?compte=supprime")} />
-      {/* En bas : la carte arrive après le chargement, sans décaler le reste de l'écran (Lighthouse, CLS). */}
-      <EconomiesGroupeCard />
     </>
   );
 }
@@ -297,7 +298,13 @@ function MetiersCard() {
         Les métiers dont BatiClair sait lire le devis et calculer la liste.
       </p>
       {error ? <ErrorNotice error={error} /> : null}
+      {/* Revue à froid (21 octobre) : vingt-cinq lignes « ratios en cours de validation » noyaient le compte ; la liste se replie. */}
       {metiers ? (
+        <details className="group">
+          <summary className="min-h-10 cursor-pointer list-none py-2 text-sm font-bold text-accent-text">
+            <span className="group-open:hidden">Voir les {metiers.length} métiers</span>
+            <span className="hidden group-open:inline">Replier</span>
+          </summary>
         <ul aria-label="Métiers couverts" className="flex flex-col divide-y divide-line">
           {metiers.map((m) => (
             <li key={m.metier} className="flex items-center justify-between gap-3 py-2.5">
@@ -306,6 +313,7 @@ function MetiersCard() {
             </li>
           ))}
         </ul>
+        </details>
       ) : null}
     </Card>
   );
@@ -575,7 +583,7 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
   return (
     <Card className="flex flex-col gap-3 p-4">
       <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">
-        VOS DEMANDES DE DEVIS
+        TES DEMANDES DE DEVIS
       </h2>
       <p className="text-sm text-muted">
         En tête du PDF envoyé au fournisseur, et en signature du mail.
