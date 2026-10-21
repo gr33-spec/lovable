@@ -314,7 +314,10 @@ function MetiersCard() {
           ))}
         </ul>
         </details>
-      ) : null}
+      ) : (
+        // Lighthouse (CLS) : la place du bouton « Voir les N métiers » est réservée pendant le chargement.
+        <p aria-busy="true" className="min-h-10 py-2" />
+      )}
     </Card>
   );
 }
@@ -500,13 +503,16 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
       });
     });
   }, []);
-  if (!profile) return null;
+  // Lighthouse (CLS) : la carte se dessine tout de suite, champs grisés, et se remplit sans décaler l'écran.
+  const charge = profile !== null;
+  const vu: CompanyProfile = profile ?? { name: "", address: null, siret: null, phone: null, email: null, hasLogo: false };
   const changed =
-    draft.name !== profile.name ||
+    charge &&
+    (draft.name !== profile.name ||
     draft.address !== (profile.address ?? "") ||
     draft.siret !== (profile.siret ?? "") ||
     draft.phone !== (profile.phone ?? "") ||
-    draft.email !== (profile.email ?? "");
+      draft.email !== (profile.email ?? ""));
   const set =
     (key: keyof typeof draft) => (e: React.ChangeEvent<HTMLInputElement>) => {
       setDraft({ ...draft, [key]: e.target.value });
@@ -574,14 +580,14 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
   }
 
   const signature = [
-    [signatureName, profile.name].filter(Boolean).join(" "),
-    profile.phone,
-    profile.email,
+    [signatureName, vu.name].filter(Boolean).join(" "),
+    vu.phone,
+    vu.email,
   ]
     .filter(Boolean)
     .join(" · ");
   return (
-    <Card className="flex flex-col gap-3 p-4">
+    <Card className="flex flex-col gap-3 p-4" aria-busy={!charge}>
       <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">
         TES DEMANDES DE DEVIS
       </h2>
@@ -590,7 +596,7 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
       </p>
       <div className="flex items-center gap-3">
         <div className="flex h-16 w-28 items-center justify-center overflow-hidden rounded-2xl bg-ground">
-          {profile.hasLogo ? (
+          {vu.hasLogo ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={`/v1/company/logo?v=${logoVersion}`}
@@ -608,16 +614,17 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
             htmlFor={ids.logo}
             className="inline-flex min-h-11 cursor-pointer items-center text-sm font-bold text-accent-text"
           >
-            {profile.hasLogo ? "Changer le logo" : "Ajouter le logo"}
+            {vu.hasLogo ? "Changer le logo" : "Ajouter le logo"}
           </label>
           <input
             id={ids.logo}
             type="file"
             accept="image/png,image/jpeg"
             className="sr-only"
+            disabled={!charge}
             onChange={(e) => void uploadLogo(e.target.files?.[0])}
           />
-          {profile.hasLogo ? (
+          {vu.hasLogo ? (
             <button
               type="button"
               onClick={() => void removeLogo()}
@@ -634,6 +641,7 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
       </div>
       <Field
         id={ids.name}
+        disabled={!charge}
         label="Nom de l'entreprise"
         value={draft.name}
         onChange={set("name")}
@@ -641,6 +649,7 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
       />
       <Field
         id={ids.address}
+        disabled={!charge}
         label="Adresse"
         value={draft.address}
         onChange={set("address")}
@@ -649,6 +658,7 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
       />
       <Field
         id={ids.siret}
+        disabled={!charge}
         label="SIRET"
         value={draft.siret}
         onChange={set("siret")}
@@ -657,6 +667,7 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
       />
       <Field
         id={ids.phone}
+        disabled={!charge}
         label="Téléphone"
         value={draft.phone}
         onChange={set("phone")}
@@ -665,6 +676,7 @@ function CompanyProfileCard({ signatureName }: { signatureName: string }) {
       />
       <Field
         id={ids.email}
+        disabled={!charge}
         label="E-mail"
         value={draft.email}
         onChange={set("email")}

@@ -64,6 +64,7 @@ export class CommandeService {
       const entreprises = [...new Set(lot.offres.filter((o) => !o.bon).map((o) => o.besoin.company.id))];
       const liens = new Map((await this.prisma.negoceArtisan.findMany({ where: { negoceId: negoce.id, companyId: { in: entreprises } } })).map((l) => [l.companyId, l]));
       const proprietaires = new Map((await this.prisma.membership.findMany({ where: { role: "owner", companyId: { in: entreprises } }, include: { user: { select: { email: true } } } })).map((m) => [m.companyId, m.user.email]));
+      const aPreparer: { offreId: string; bon: BonDeCommande; artisanEmail: string | null }[] = [];
       for (const o of lot.offres) {
         if (o.bon) continue;
         const c = o.besoin.company;
@@ -79,8 +80,13 @@ export class CommandeService {
           dateLivraison: o.dateLivraison,
           negoce: negoce.nom,
         };
-        const doc = documentBonDeCommande(bon);
-        docs.push({ offreId: o.id, bon, pdf: await pdfDeTexte(doc.titre, doc.blocs), artisanEmail });
+        aPreparer.push({ offreId: o.id, bon, artisanEmail });
+      }
+      // Dette n° 14 (21 octobre) : les PDF par paquets de 10 en parallèle, au lieu d'un par un.
+      for (let i = 0; i < aPreparer.length; i += 10) {
+        const paquet = aPreparer.slice(i, i + 10);
+        const pdfs = await Promise.all(paquet.map((d) => { const doc = documentBonDeCommande(d.bon); return pdfDeTexte(doc.titre, doc.blocs); }));
+        paquet.forEach((d, k) => docs.push({ ...d, pdf: pdfs[k]! }));
       }
       if (docs.length === 0) continue;
       const recap = documentRecapitulatif(lot.numero, negoce.nom, docs.map((d) => d.bon));

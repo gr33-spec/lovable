@@ -7,6 +7,8 @@ import { useResource } from "@/lib/use-resource";
 
 interface Tableau {
   departements: { ouverts: string[] | null; compteurs: { departement: string; lots: number; economies: number }[] };
+  /** Dette n° 4 : les devis de négoces lus par le modèle sur 30 jours, et ceux qui restent « à vérifier ». */
+  lectures: { jours: number; lues: number; aVerifier: number; echecs: number };
   lots: { id: string; numero: number; statut: string; zone: string; famille: string; designation: string; fenetre: { tot: string | null; tard: string | null }; envoyeLe: string | null; besoins: { total: number; fermes: number }; reponses: { attendues: number; deposees: number; pasConcernes: number; aVerifier: number }; negoceRetenu: string | null; prixRetenu: string | null; bons: number }[];
   negoces: { id: string; nom: string; email: string; departement: string; agences: string[]; familles: string[]; stop: boolean; artisans: number; reponses: number }[];
   accords: { id: string; lot: number; negoce: string; email: string; adresseIp: string; versionContrat: string; tauxPourcent: string; accepteLe: string }[];
@@ -70,6 +72,7 @@ export default function AdminGroupePage() {
       <p className="text-sm text-muted">
         Départements ouverts : {data.departements.ouverts ? data.departements.ouverts.join(", ") : "tous"} ·{" "}
         {data.departements.compteurs.map((c) => `${c.departement} : ${c.lots} lot${c.lots > 1 ? "s" : ""}, ${euros(c.economies)} économisés`).join(" · ") || "aucun lot"}
+        {data.lectures ? ` · devis négoces sur ${data.lectures.jours} jours : ${data.lectures.lues} lu${data.lectures.lues > 1 ? "s" : ""}, ${data.lectures.aVerifier} à vérifier, ${data.lectures.echecs} en échec` : ""}
       </p>
       <nav aria-label="Rubriques de l'admin" className="flex flex-wrap gap-1.5">
         {(["lots", "negoces", "accords", "factures", "exclusions"] as const).map((o) => (
