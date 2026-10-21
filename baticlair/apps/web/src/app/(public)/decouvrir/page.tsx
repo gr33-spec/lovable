@@ -242,7 +242,7 @@ export default function BienvenuePage() {
               Se connecter
             </Link>
             <Link href="/?demo" className="text-sm font-semibold text-muted underline">
-              Revoir la démo
+              Revoir la démo.
             </Link>
           </div>
         </div>

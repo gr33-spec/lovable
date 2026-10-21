@@ -55,6 +55,16 @@ Projet web : rien de nouveau (`API_URL` déjà posé).
 3. Fusionner #286 (landing) et #287 (PWA).
 4. Lancer `GET /v1/internal/groupe/sirene` avec le `CRON_SECRET` jusqu'à `cycleTermine: true` (ou laisser la tâche quotidienne faire) : la base négoces se remplit.
 
+## 4 bis. Voir l'admin et « Mes lots » remplis sur la prévisualisation (jeu de démonstration)
+
+Jamais en production (la route y répond 403). Sur l'API de prévisualisation, avec le `CRON_SECRET` de la prévisualisation et l'e-mail du compte de Greg :
+
+```
+curl -X POST "https://baticlair-api-git-<branche>-gr33-spec.vercel.app/v1/internal/demo/jeu?entreprise=<e-mail de Greg>" -H "Authorization: Bearer $CRON_SECRET"
+```
+
+Crée 12 artisans du 22, 8 négoces, 3 lots (en cours, décidé, livré) et met l'entreprise de Greg dans chacun ; rejouable (l'ancien jeu est effacé d'abord). `curl -X DELETE …/v1/internal/demo/jeu` l'efface.
+
 ## 5. Premier lot de test (avec l'adresse de Greg comme négoce)
 
 - [ ] Compte artisan A (SIRET réel, 22) : un chantier, une ligne proposée en « Chantier signé ».

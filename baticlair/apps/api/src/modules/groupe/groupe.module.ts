@@ -13,6 +13,7 @@ import { CommandeService } from "./application/commande.service.js";
 import { NotificationsGroupeService } from "./application/notifications-groupe.service.js";
 import { DemandeService } from "./application/demande.service.js";
 import { GroupeService } from "./application/groupe.service.js";
+import { JeuDemonstrationService } from "./application/jeu-demonstration.service.js";
 import { NEGOCE_EXTRACTOR, type NegoceExtractor } from "./application/negoce-extractor.js";
 import { AnthropicNegoceExtractor } from "./infrastructure/anthropic-negoce-extractor.js";
 import { FakeNegoceExtractor } from "./infrastructure/fake-negoce-extractor.js";
@@ -24,6 +25,7 @@ import { RapportMensuelService } from "./application/rapport-mensuel.service.js"
 import { RegroupementService } from "./application/regroupement.service.js";
 import { AdminGroupeController } from "./http/admin-groupe.controller.js";
 import { GroupeController } from "./http/groupe.controller.js";
+import { JeuDemonstrationController } from "./http/jeu-demonstration.controller.js";
 import { NegocesController } from "./http/negoces.controller.js";
 import { RapportMensuelController } from "./http/rapport-mensuel.controller.js";
 import { RegroupementController } from "./http/regroupement.controller.js";
@@ -33,7 +35,7 @@ import { WebhookResendController } from "./http/webhook-resend.controller.js";
 
 @Module({
   imports: [TenancyModule, TakeoffModule],
-  controllers: [GroupeController, NegocesController, RegroupementController, ReponseController, WebhookResendController, TestMailboxController, AdminGroupeController, SireneController, RapportMensuelController],
+  controllers: [GroupeController, NegocesController, RegroupementController, ReponseController, WebhookResendController, TestMailboxController, AdminGroupeController, SireneController, RapportMensuelController, JeuDemonstrationController],
   providers: [
     {
       provide: SIRET_VERIFIER,
@@ -46,6 +48,7 @@ import { WebhookResendController } from "./http/webhook-resend.controller.js";
       inject: [CONFIG],
     },
     { provide: RegroupementService, useFactory: (p: PrismaService) => new RegroupementService(p), inject: [PrismaService] },
+    { provide: JeuDemonstrationService, useFactory: (p: PrismaService) => new JeuDemonstrationService(p), inject: [PrismaService] },
     { provide: PDF_READER, useFactory: () => new PdfJsPdfReader() },
     { provide: AdminGroupeService, useFactory: (p: PrismaService, c: AppConfig) => new AdminGroupeService(p, c.groupe.departements), inject: [PrismaService, CONFIG] },
     { provide: NotificationsGroupeService, useFactory: (p: PrismaService, push: PushSender, e: TransactionalEmailSender) => new NotificationsGroupeService(p, push, e), inject: [PrismaService, PUSH_SENDER, EMAIL_SENDER] },
