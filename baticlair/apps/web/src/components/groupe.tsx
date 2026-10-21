@@ -3,7 +3,7 @@
 import { Users } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useId, useMemo, useState } from "react";
-import { Button, ErrorNotice } from "@/components/ui";
+import { Button, ErrorNotice, Field } from "@/components/ui";
 import { api, ApiError, newActionKey } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 
@@ -46,6 +46,8 @@ export interface Groupe {
   retirer: (id: string) => Promise<void>;
   probleme: (offreId: string, texte: string) => Promise<void>;
   reference: (offreId: string, prix: number | null) => Promise<void>;
+  /** Test complet (21 octobre) : un chantier créé depuis le « + » n'a pas d'adresse ; elle se renseigne dans la barre, sans quitter la liste. */
+  adresse: (adresse: string) => Promise<void>;
 }
 
 /** Combien de négoces dans ma liste (étape 3) : à zéro, la section « Au groupé » invite à les ajouter. */
@@ -92,6 +94,9 @@ export function useGroupe(projectId: string): Groupe | null {
       await api(`/v1/projects/${encodeURIComponent(projectId)}/groupe`, { method: "POST", body: { articles, fenetre, statut, engagement }, idempotencyKey: newActionKey() });
       liste.reload();
     },
+    adresse: async (adresse) => {
+      await api(`/v1/projects/${encodeURIComponent(projectId)}`, { method: "PATCH", body: { address: adresse } });
+    },
     signer: async (id) => {
       await api(`/v1/groupe/besoins/${encodeURIComponent(id)}/signer`, { method: "POST", body: { engagement: true } });
       liste.reload();
@@ -121,8 +126,9 @@ const auJour = (decalage: number) => {
  * La barre du bas pendant qu'on coche les lignes à proposer : la fenêtre de livraison (date la plus tôt, date limite),
  * puis un seul choix « Chantier signé » / « Devis en attente » ; signé, la phrase d'engagement à cocher.
  */
-export function GroupeBar({ count, onCancel, onPropose }: { count: number; onCancel: () => void; onPropose: (fenetre: { tot: string; tard: string }, statut: "signe" | "en_attente", engagement: boolean) => Promise<void> }) {
+export function GroupeBar({ count, onCancel, onPropose, onAdresse }: { count: number; onCancel: () => void; onPropose: (fenetre: { tot: string; tard: string }, statut: "signe" | "en_attente", engagement: boolean) => Promise<void>; onAdresse?: (adresse: string) => Promise<void> }) {
   const id = useId();
+  const [adresse, setAdresse] = useState("");
   const [tot, setTot] = useState(() => auJour(7));
   const [tard, setTard] = useState(() => auJour(21));
   const [statut, setStatut] = useState<"signe" | "en_attente" | null>(null);
@@ -130,6 +136,7 @@ export function GroupeBar({ count, onCancel, onPropose }: { count: number; onCan
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const fenetreOk = Boolean(tot && tard && tot <= tard);
+  const adresseManque = error?.reason === "adresse_requise" && Boolean(onAdresse);
   const choix = "inline-flex min-h-12 grow items-center justify-center rounded-2xl px-3 text-[15px] font-extrabold";
   return (
     <section aria-label="Proposer au groupé" className="flex flex-col gap-2 rounded-[22px] bg-surface p-3 shadow-card">
@@ -165,7 +172,12 @@ export function GroupeBar({ count, onCancel, onPropose }: { count: number; onCan
       ) : statut === "en_attente" ? (
         <p className="text-[13px] leading-snug text-muted">Transmis au négoce comme volume probable, sans engagement. Tu le passeras en signé d&apos;un tap.</p>
       ) : null}
-      {error ? <ErrorNotice error={error} /> : null}
+      {/* Test complet (21 octobre) : sans adresse de chantier, le serveur refuse (le lot se forme par département) ; on la demande ici même. */}
+      {adresseManque ? (
+        <Field id={`${id}-adresse`} label="Adresse du chantier, avec le code postal" hint="Le lot se forme par département : il faut l'adresse de livraison." value={adresse} onChange={(e) => setAdresse(e.target.value)} placeholder="4 rue du Port, 22500 Paimpol" autoComplete="street-address" />
+      ) : error ? (
+        <ErrorNotice error={error} />
+      ) : null}
       <div className="flex gap-2">
         <Button className="grow" variant="secondary" onClick={onCancel} disabled={pending}>
           Annuler
@@ -173,12 +185,13 @@ export function GroupeBar({ count, onCancel, onPropose }: { count: number; onCan
         <Button
           className="grow"
           pending={pending}
-          disabled={count === 0 || !fenetreOk || !statut || (statut === "signe" && !engagement)}
+          disabled={count === 0 || !fenetreOk || !statut || (statut === "signe" && !engagement) || (adresseManque && !/\d{5}/.test(adresse))}
           onClick={async () => {
             if (!statut) return;
             setPending(true);
             setError(null);
             try {
+              if (adresseManque && onAdresse) await onAdresse(adresse.trim());
               await onPropose({ tot, tard }, statut, engagement);
             } catch (e) {
               setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
@@ -196,6 +209,8 @@ export function GroupeBar({ count, onCancel, onPropose }: { count: number; onCan
 }
 
 const euros = (s: string) => `${Number(s).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+/** « 1250 » → « 1 250 » (test complet du 21 octobre : les quantités du groupé s'écrivaient sans l'espace des milliers). */
+export const quantiteFr = (q: string) => Number(q).toLocaleString("fr-FR", { maximumFractionDigits: 3 }).replace(/\u202f/g, "\u00a0");
 const jourFr = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("fr-FR", { day: "numeric", month: "long", timeZone: "UTC" });
 
 /**
@@ -225,7 +240,7 @@ function OffreCard({ besoin: b, groupe }: { besoin: BesoinGroupe; groupe: Groupe
     <section aria-label={`Mon offre : ${b.designation}`} className="flex flex-col gap-1.5 rounded-xl bg-surface p-3 shadow-card">
       <p className="text-[13px] font-extrabold text-muted">Mon offre · lot n° {o.lotNumero}</p>
       <p className="text-[15px] leading-snug font-bold">
-        {b.quantite.replace(".", ",")} {b.unite} à {euros(o.prixUnitaire)} HT l&apos;unité chez {o.negoce}
+        {quantiteFr(b.quantite)} {b.unite} à {euros(o.prixUnitaire)} HT l&apos;unité chez {o.negoce}
       </p>
       {o.dateLivraison ? <p className="text-[13px] font-semibold text-muted">Livraison le {jourFr(o.dateLivraison)}, sur ton chantier, sur ton compte chez lui.</p> : null}
       {o.economie !== null ? <p className="text-[14px] font-extrabold text-ok">Économie estimée : {euros(o.economie)}</p> : null}
@@ -313,7 +328,7 @@ export function GroupeSection({ groupe }: { groupe: Groupe }) {
           <li key={b.id} className="flex flex-col gap-1.5 rounded-2xl bg-ground p-3">
             <div className="flex items-baseline justify-between gap-3">
               <span className="min-w-0 text-[15px] font-bold">{b.designation}</span>
-              <span className="shrink-0 text-[15px] font-extrabold">{`${b.quantite.replace(".", ",")} ${b.unite}`}</span>
+              <span className="shrink-0 text-[15px] font-extrabold">{`${quantiteFr(b.quantite)} ${b.unite}`}</span>
             </div>
             <p className="text-[13px] font-semibold text-muted">{STATUTS[b.statut]}</p>
             {b.offre ? <OffreCard besoin={b} groupe={groupe} /> : null}

@@ -1,4 +1,4 @@
-import { MENTION_RATIOS, priceLeak } from "@baticlair/domain";
+import { MENTION_RATIOS, priceLeak, NEW_PROJECT_NAME } from "@baticlair/domain";
 // Le test du prix (§42.2, §43.5) vit dans le domaine, à côté du bref (§50.7) qui s'en sert aussi.
 export { priceLeak };
 import { PDFDocument, rgb, StandardFonts, type PDFFont, type PDFImage, type PDFPage } from "pdf-lib";
@@ -79,12 +79,16 @@ const dateFr = (iso: string) => {
   return new Date(Date.UTC(y!, m! - 1, d!)).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 };
 
-/** « Test » → « chantier Test » ; un nom qui le dit déjà reste tel quel. */
-export const chantierLabel = (name: string) => (/^chantier\b/i.test(name.trim()) ? name.trim() : `chantier ${name.trim()}`);
+/**
+ * « Test » → « chantier Test » ; un nom qui le dit déjà reste tel quel. Un chantier encore sans nom (créé depuis le « + »,
+ * devis sans client ni ville : test complet du 21 octobre, « chantier Nouveau chantier » dans l'objet) devient « chantier ».
+ */
+export const chantierLabel = (name: string) => (name.trim() === NEW_PROJECT_NAME ? "chantier" : /^chantier\b/i.test(name.trim()) ? name.trim() : `chantier ${name.trim()}`);
 
 /** §45.2 : « Demande de devis · [entreprise] · [nom du chantier] ([ville]) ». */
 export function packetSubject(p: SupplierPacket): string {
-  return `Demande de devis · ${p.entreprise} · ${chantierLabel(p.chantier)}${p.commune ? ` (${p.commune})` : ""}`;
+  const chantier = p.chantier.trim() === NEW_PROJECT_NAME ? (p.commune ? `chantier à ${p.commune}` : "") : `${chantierLabel(p.chantier)}${p.commune ? ` (${p.commune})` : ""}`;
+  return [`Demande de devis`, p.entreprise, chantier].filter(Boolean).join(" · ");
 }
 
 /** La signature : prénom ou nom, entreprise, téléphone, mail (§45.2). Rien de vide. */

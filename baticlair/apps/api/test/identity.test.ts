@@ -42,7 +42,7 @@ describe("identité", () => {
     });
 
     const email = ctx.emails.lastTo("jean@example.fr");
-    expect(email?.subject).toBe("Confirmez votre adresse e-mail");
+    expect(email?.subject).toBe("Confirme ton adresse e-mail");
 
     const verify = await agent.get(new URL(linkIn(email!.text)).pathname + new URL(linkIn(email!.text)).search);
     expect([200, 302]).toContain(verify.status);
@@ -68,7 +68,7 @@ describe("identité", () => {
     expect(asked.status).toBe(200);
 
     const email = ctx.emails.lastTo("paul@example.fr");
-    expect(email?.subject).toBe("Réinitialisation de votre mot de passe");
+    expect(email?.subject).toBe("Ton nouveau mot de passe");
     // Le lien pointe vers l'API, qui redirige vers l'app web avec le jeton.
     const link = new URL(linkIn(email!.text));
     const redirect = await request(server).get(link.pathname + link.search);
