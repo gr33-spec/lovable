@@ -33,6 +33,8 @@ export interface NegoceVue {
   favori: boolean;
   numeroCompte: string | null;
   stop: boolean;
+  /** Les autres départements où ce négoce (même e-mail) a une agence. */
+  agences: string[];
 }
 
 /** Le groupé existe-t-il pour cette entreprise (drapeau allumé, SIRET vérifié) ? null tant qu'on ne sait pas. */
@@ -85,7 +87,7 @@ export function MesNegocesCard() {
                   {n.numeroCompte ? <Badge>Compte {n.numeroCompte}</Badge> : <Badge tone="warn">Sans numéro de compte</Badge>}
                 </span>
               </div>
-              <p className="text-[13px] text-muted">{`${n.email} · ${n.departement} · ${n.familles.map(libelle).join(", ") || "aucune famille"}`}</p>
+              <p className="text-[13px] text-muted">{`${n.email} · ${n.departement}${n.agences.length > 0 ? ` (aussi en ${n.agences.join(", ")})` : ""} · ${n.familles.map(libelle).join(", ") || "aucune famille"}`}</p>
               <div className="flex flex-wrap gap-2">
                 {!n.favori ? (
                   <Button variant="secondary" className="min-h-10 px-3.5 text-[14px]" pending={pending === `fav:${n.id}`} onClick={() => run(`fav:${n.id}`, () => api(`/v1/groupe/negoces/${n.id}`, { method: "PATCH", body: { favori: true } }))}>

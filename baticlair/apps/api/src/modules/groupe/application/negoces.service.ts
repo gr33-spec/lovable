@@ -15,6 +15,11 @@ export interface NegoceVue {
   numeroCompte: string | null;
   /** Le négoce a demandé « stop » : il ne reçoit plus rien. */
   stop: boolean;
+  /**
+   * Plan 2 du 21 octobre 2026, bloc 5 : un négoce peut servir plusieurs agences (une par département) avec le même e-mail.
+   * Les autres départements où cet e-mail est connu.
+   */
+  agences: string[];
 }
 
 export interface NegoceSaisi {
@@ -42,7 +47,16 @@ export class NegocesService {
 
   async mesNegoces(tenant: TenantContext): Promise<NegoceVue[]> {
     const rows = await this.prisma.negoceArtisan.findMany({ where: { companyId: tenant.companyId }, include: { negoce: true }, orderBy: [{ rang: "asc" }, { createdAt: "asc" }] });
-    return rows.map((r, i) => vue(r.negoce, i === 0, r.numeroCompte));
+    const agences = await this.agencesDe(rows.map((r) => r.negoce.email));
+    return rows.map((r, i) => vue(r.negoce, i === 0, r.numeroCompte, agences.get(r.negoce.email) ?? []));
+  }
+
+  /** Pour chaque e-mail, les départements où il est connu (ses agences), triés. */
+  async agencesDe(emails: readonly string[]): Promise<Map<string, string[]>> {
+    const tous = await this.prisma.negoce.findMany({ where: { email: { in: [...new Set(emails)] } }, select: { email: true, departement: true } });
+    const parEmail = new Map<string, string[]>();
+    for (const n of tous) parEmail.set(n.email, [...(parEmail.get(n.email) ?? []), n.departement].sort());
+    return parEmail;
   }
 
   async message(tenant: TenantContext): Promise<{ message: string }> {
@@ -59,9 +73,12 @@ export class NegocesService {
     const email = n.email.trim().toLowerCase();
     await this.prisma.$transaction(async (tx) => {
       const existant = await tx.negoce.findUnique({ where: { email_departement: { email, departement } } });
+      // Bloc 5 (21 octobre) : le même e-mail dans un autre département, c'est une autre agence du même négoce : une ligne
+      // par département, qui garde le « stop » déjà demandé par cet e-mail.
+      const autreAgence = existant ? null : await tx.negoce.findFirst({ where: { email, stopLe: { not: null } }, select: { stopLe: true } });
       const negoce = existant
         ? await tx.negoce.update({ where: { id: existant.id }, data: { familles: familles([...existant.familles, ...n.familles]) } })
-        : await tx.negoce.create({ data: { nom: n.nom.trim(), email, departement, familles: familles(n.familles), ajouteParId: tenant.companyId } });
+        : await tx.negoce.create({ data: { nom: n.nom.trim(), email, departement, familles: familles(n.familles), ajouteParId: tenant.companyId, stopLe: autreAgence?.stopLe ?? null } });
       const liens = await tx.negoceArtisan.findMany({ where: { companyId: tenant.companyId }, orderBy: { rang: "asc" } });
       if (liens.some((l) => l.negoceId === negoce.id)) throw new DomainError("conflict", "Already in your list", { reason: "deja_ajoute" });
       const favori = n.favori === true || liens.length === 0;
@@ -107,9 +124,12 @@ export class NegocesService {
     const { lien, negoce } = await this.lienValide(jeton);
     const now = new Date();
     if (lien.action === "stop") {
-      if (!negoce.stopLe) await this.prisma.negoce.update({ where: { id: negoce.id }, data: { stopLe: now } });
+      // « Stop » vaut pour l'e-mail, donc pour toutes ses agences (bloc 5, 21 octobre) ; « pas concerné » reste par agence.
+      const agences = await this.prisma.negoce.findMany({ where: { email: negoce.email }, select: { id: true } });
+      const ids = agences.map((a) => a.id);
+      await this.prisma.negoce.updateMany({ where: { id: { in: ids }, stopLe: null }, data: { stopLe: now } });
       // Les lots qui l'attendaient encore n'attendent plus (étape 6 : le lot se décide quand tous ont répondu).
-      await this.prisma.reponseNegoce.updateMany({ where: { negoceId: negoce.id, deposeLe: null, pasConcerneLe: null, lot: { statut: "envoye" } }, data: { pasConcerneLe: now } });
+      await this.prisma.reponseNegoce.updateMany({ where: { negoceId: { in: ids }, deposeLe: null, pasConcerneLe: null, lot: { statut: "envoye" } }, data: { pasConcerneLe: now } });
     } else {
       await this.prisma.negoce.update({ where: { id: negoce.id }, data: { familles: negoce.familles.filter((f) => f !== lien.famille) } });
       await this.prisma.reponseNegoce.updateMany({ where: { negoceId: negoce.id, deposeLe: null, pasConcerneLe: null, lot: { statut: "envoye", famille: lien.famille } }, data: { pasConcerneLe: now } });
@@ -138,6 +158,6 @@ export class NegocesService {
   }
 }
 
-function vue(n: { id: string; nom: string; email: string; departement: string; familles: string[]; stopLe: Date | null }, favori: boolean, numeroCompte: string | null): NegoceVue {
-  return { id: n.id, nom: n.nom, email: n.email, departement: n.departement, familles: familles(n.familles), favori, numeroCompte, stop: !!n.stopLe };
+function vue(n: { id: string; nom: string; email: string; departement: string; familles: string[]; stopLe: Date | null }, favori: boolean, numeroCompte: string | null, departements: string[]): NegoceVue {
+  return { id: n.id, nom: n.nom, email: n.email, departement: n.departement, familles: familles(n.familles), favori, numeroCompte, stop: !!n.stopLe, agences: departements.filter((d) => d !== n.departement) };
 }

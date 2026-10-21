@@ -52,7 +52,7 @@ export class AdminGroupeService {
         prixRetenu: l.prixRetenu?.toString() ?? null,
         bons: l.offres.filter((o) => o.bon?.envoyeLe).length,
       })),
-      negoces: negoces.map((n) => ({ id: n.id, nom: n.nom, email: n.email, departement: n.departement, familles: n.familles, stop: !!n.stopLe, artisans: n._count.artisans, reponses: n._count.reponses })),
+      negoces: negoces.map((n) => ({ id: n.id, nom: n.nom, email: n.email, departement: n.departement, agences: negoces.filter((x) => x.email === n.email && x.id !== n.id).map((x) => x.departement).sort(), familles: n.familles, stop: !!n.stopLe, artisans: n._count.artisans, reponses: n._count.reponses })),
       accords: accords.map((a) => ({ id: a.id, lot: a.lot.numero, negoce: a.negoce.nom, email: a.email, adresseIp: a.adresseIp, versionContrat: a.versionContrat, tauxPourcent: a.tauxPourcent.toString(), accepteLe: a.accepteLe.toISOString() })),
       factures: factures.map((f) => ({ id: f.id, numero: f.numero, lot: f.lot.numero, negoce: f.negoce.nom, totalLotHt: f.totalLotHt.toString(), montantHt: f.montantHt.toString(), statut: f.statut, emiseLe: jour(f.emiseLe), echeanceLe: jour(f.echeanceLe), payeeLe: jour(f.payeeLe) })),
       exclusions: desistements.map((d) => ({ id: d.id, entreprise: d.company.name, lot: d.lot.numero, sanction: d.sanction, excluJusquau: jour(d.excluJusquau), raison: d.raison, le: jour(d.createdAt) })),

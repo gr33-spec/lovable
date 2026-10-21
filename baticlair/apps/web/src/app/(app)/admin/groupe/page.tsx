@@ -8,7 +8,7 @@ import { useResource } from "@/lib/use-resource";
 interface Tableau {
   departements: { ouverts: string[] | null; compteurs: { departement: string; lots: number; economies: number }[] };
   lots: { id: string; numero: number; statut: string; zone: string; famille: string; designation: string; fenetre: { tot: string | null; tard: string | null }; envoyeLe: string | null; besoins: { total: number; fermes: number }; reponses: { attendues: number; deposees: number; pasConcernes: number; aVerifier: number }; negoceRetenu: string | null; prixRetenu: string | null; bons: number }[];
-  negoces: { id: string; nom: string; email: string; departement: string; familles: string[]; stop: boolean; artisans: number; reponses: number }[];
+  negoces: { id: string; nom: string; email: string; departement: string; agences: string[]; familles: string[]; stop: boolean; artisans: number; reponses: number }[];
   accords: { id: string; lot: number; negoce: string; email: string; adresseIp: string; versionContrat: string; tauxPourcent: string; accepteLe: string }[];
   factures: { id: string; numero: number; lot: number; negoce: string; totalLotHt: string; montantHt: string; statut: string; emiseLe: string | null; echeanceLe: string | null; payeeLe: string | null }[];
   exclusions: { id: string; entreprise: string; lot: number; sanction: string; excluJusquau: string | null; raison: string | null; le: string | null }[];
@@ -170,7 +170,8 @@ export default function AdminGroupePage() {
         <ul aria-label="Négoces" className="flex flex-col gap-2">
           {data.negoces.map((n) => (
             <li key={n.id} className="rounded-2xl bg-surface p-3 text-[14px] shadow-card">
-              <span className="font-extrabold">{n.nom}</span> · {n.departement} · {n.email} · {n.familles.join(", ")} · {n.artisans} artisan{n.artisans > 1 ? "s" : ""} · {n.reponses} réponse{n.reponses > 1 ? "s" : ""}
+              <span className="font-extrabold">{n.nom}</span> · {n.departement}
+              {n.agences.length > 0 ? ` (agences aussi en ${n.agences.join(", ")})` : ""} · {n.email} · {n.familles.join(", ")} · {n.artisans} artisan{n.artisans > 1 ? "s" : ""} · {n.reponses} réponse{n.reponses > 1 ? "s" : ""}
               {n.stop ? " · STOP" : ""}
             </li>
           ))}
