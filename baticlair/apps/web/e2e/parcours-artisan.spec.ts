@@ -1701,7 +1701,8 @@ test("BatiClair Groupé, étape 3 : « Mes négoces », e-mail, familles, favori
   const premier = liste.getByRole("listitem").filter({ hasText: "Négoce Ardoises" });
   await expect(premier).toBeVisible();
   await expect(premier.getByLabel("Favori")).toBeVisible();
-  await expect(premier).toContainText("ardoises@example.com · 35 · Couverture");
+  // Multi-agences : le même e-mail peut déjà exister dans un autre département (base e2e partagée), d'où « (aussi en 44) ».
+  await expect(premier).toContainText(/ardoises@example\.com · 35( \(aussi en [^)]*\))? · Couverture/);
   await expect(premier).toContainText("Compte C-12");
 
   // Un deuxième, généraliste, puis favori d'un tap : il passe en premier.
