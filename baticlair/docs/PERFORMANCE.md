@@ -34,3 +34,40 @@ Lecture : le premier rendu arrive en 1,1 à 1,4 s ; le contenu final (LCP) à 3 
 2. **Mettre `/v1/health` en cache côté navigateur 30 s** (en-tête `Cache-Control`) : il ne change qu'au déploiement.
 3. **Polices** : trois familles variables chargées (Plus Jakarta Sans, Bricolage Grotesque, Instrument Serif) ; `font-display: swap` est posé par Fontsource ; précharger la police d'affichage du titre (LCP) avec `<link rel="preload">`.
 4. **Accueil, CLS 0,10** : la liste « À faire » arrive après les chantiers récents ; réserver sa hauteur minimale.
+
+## Tests de charge de l'API (plan 2 du 21 octobre 2026, bloc 7)
+
+Mesure : `CHARGE=1 … npx vitest run test/charge.test.ts` dans `apps/api` (base Postgres locale, prestataire d'e-mail de capture, PDF réels). Jeu : 200 artisans dans 5 départements, 20 négoces, 1 000 besoins signés sur 50 références, plus le compte de Greg avec 10 besoins. Le test n'est pas dans la série ordinaire (il écrit 1 010 bons de commande) ; il se relance à la demande et affiche son tableau.
+
+### Routes (objectif : moins d'une seconde)
+
+| Route | Avant les lots | Après 50 lots passés |
+|---|---|---|
+| `GET /v1/groupe` (état de l'onglet) | 35 ms | 23 ms |
+| `GET /v1/groupe/lots` (« Mes lots », 10 lots) | 24 ms | 14 ms |
+| `GET /v1/groupe/negoces` | 14 ms | |
+| `GET /v1/projects/:id/groupe` (« Au groupé ») | 19 ms | 12 ms |
+| `GET /v1/admin/groupe` (tableau, 50 lots, 1 010 bons) | 38 ms | 50 ms |
+| `GET /v1/admin/groupe/lots/:id` (journal d'un lot) | | 25 ms |
+| `GET /v1/groupe/economies` | | 8 ms |
+| `GET /v1/admin/groupe/factures.csv` (50 factures) | | 12 ms |
+
+Toutes sous 50 ms : rien à corriger côté routes. « Mes lots » ne charge plus le PDF de chaque bon (il n'était pas affiché).
+
+### Tâches planifiées (par passage, une fois par jour)
+
+| Étape | Durée | Volume | Par lot |
+|---|---|---|---|
+| `regrouper` : ranger 1 010 besoins, former 50 lots | 0,5 s | 50 lots | 10 ms |
+| Demandes aux négoces (un e-mail par négoce, PDF joint) | 5,8 s | 20 négoces, 50 lots | 115 ms |
+| Choix des négoces + bons de commande + factures | 12,6 s | 50 lots, 1 010 bons (un PDF chacun), 1 010 e-mails | 250 ms |
+| Relances (50 factures, 1 010 livraisons) | 5,9 s | 1 060 e-mails | |
+| Rapport mensuel | 0,06 s (0,98 s avant) | 201 entreprises | |
+
+Ce qui a été corrigé :
+
+- **Un budget de temps par passage** (`BUDGET_MS` = 40 s dans `regroupement.controller.ts`) : une fonction Vercel s'arrête à 60 s au plus ; à 50 lots par jour, un passage dépassait ce temps et aurait été coupé au milieu d'un lot. Chaque étape s'arrête maintenant à l'échéance, lot entier par lot entier, et le reste part au passage suivant (toutes les étapes sont rejouables : statuts des lots, « déjà envoyé », « déjà relancé »). La réponse de la tâche porte `tempsEpuise: true` quand il reste du travail.
+- **Rapport mensuel** : deux requêtes groupées (devis lus par entreprise, bons du mois) au lieu de quatre par entreprise : 975 ms → 63 ms pour 201 entreprises.
+- **Bons de commande** : numéros de compte et propriétaires lus en deux requêtes par lot au lieu de deux par bon ; **relances de livraison** : les propriétaires en une requête. **Demandes** : les réponses existantes lues d'un coup, les nouvelles créées d'un coup.
+
+Ce qui reste (dette n° 14) : le temps des bons de commande est celui des PDF (pdf-lib, ~10 ms par bon) et des e-mails, un par artisan ; 50 lots d'un coup est un jour exceptionnel (la formation se fait au fil de l'eau, dès le seuil), et le budget garantit qu'un passage ne casse pas. Si un jour ordinaire dépasse 20 lots, générer les PDF en parallèle (par paquets de 10) et envoyer les e-mails artisans sans attendre les uns les autres.

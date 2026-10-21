@@ -18,6 +18,8 @@ Plan du 20 octobre 2026, bloc 12. Par ordre de risque ; chaque ligne dit le risq
 | 12 | Faible | Les liens de réponse d'un négoce restent valables tant que le lot est « envoyé » (7 jours) ; pas d'expiration propre par lien. | Jeton de 24 octets, haché, régénéré à chaque réponse par e-mail. | Une date d'expiration sur `reponse_negoce`. | Avec la dette n° 7. |
 | 13 | Faible | Le compte admin du groupé est désigné par e-mail (`GROUPE_ADMINS`) : pas de rôle en base, pas de journal des actions admin autre que le journal du lot. | Un seul admin : Greg. | Un champ `role` sur l'utilisateur et le journal des gestes admin, le jour où quelqu'un d'autre administre. | Pas avant un second admin. |
 
+| 14 | Faible | La tâche planifiée passe les bons de commande un par un (PDF pdf-lib ~10 ms, un e-mail par artisan) : 250 ms par lot, 12,6 s pour 50 lots d'un coup (tests de charge du 21 octobre). | Budget de 40 s par passage, le reste au passage suivant ; un jour ordinaire fait moins de 10 lots. | PDF par paquets de 10 en parallèle, e-mails artisans sans attente mutuelle. | Si un jour ordinaire dépasse 20 lots. |
+
 ## Performance (bloc 12)
 
 Mesure demandée : chargement < 2 s sur 4G, Lighthouse mobile. Voir `docs/PERFORMANCE.md` (à venir dans cette branche quand les ports e2e sont libres : Lighthouse contre le site construit).
