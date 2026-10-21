@@ -1,5 +1,6 @@
 "use client";
 
+import { AideBouton } from "@/components/aide";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, Warehouse } from "lucide-react";
 import { Suspense, useCallback, useEffect, useState } from "react";
@@ -96,7 +97,10 @@ function ChantiersList() {
 
   return (
     <>
-      <PageTitle>Chantiers</PageTitle>
+      <div className="flex items-start justify-between gap-3">
+        <PageTitle>Chantiers</PageTitle>
+        <AideBouton sujet="chantiers" />
+      </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="search" className="text-xs font-bold text-muted">
           Chercher un chantier, un client ou une adresse

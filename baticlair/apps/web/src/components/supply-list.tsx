@@ -1,5 +1,6 @@
 "use client";
 
+import { AideBouton } from "@/components/aide";
 import { Check, ChevronDown, ChevronUp, Eye, ListChecks, Paperclip, Pencil, Send, Trash2, Users, X } from "lucide-react";
 import { openDocument } from "@/lib/open-document";
 import { useEffect, useId, useRef, useState } from "react";
@@ -164,7 +165,10 @@ export function SupplyList({
         </div>
       ) : null}
       <header className="mb-3 flex flex-col gap-0.5">
-        <h2 className="font-display text-[22px] leading-tight font-extrabold tracking-[-0.01em]">Ton chantier</h2>
+        <div className="flex items-start justify-between gap-3">
+          <h2 className="font-display text-[22px] leading-tight font-extrabold tracking-[-0.01em]">Ton chantier</h2>
+          <AideBouton sujet="quantitatif" />
+        </div>
         <p className="text-[13px] text-muted">C&apos;est ce que reçoit le fournisseur.</p>
         {/* §52 (retour du fondateur, 2026-10-12) : un métier pas encore relu par un artisan le dit, ici et dans le PDF. */}
         {takeoff.ratiosEnValidation ? (
