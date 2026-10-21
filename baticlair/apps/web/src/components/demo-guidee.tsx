@@ -140,7 +140,7 @@ function EcranLot() {
       <div className="flex flex-col gap-2 rounded-2xl bg-white/95 p-3">
         <span className="flex items-center gap-2 text-[14px] font-extrabold">
           <Users size={18} aria-hidden="true" className="text-accent-text" />
-          Lot n° {l.numero} · {l.departement} <Exemple />
+          Commande groupée n° {l.numero} · {l.departement} <Exemple />
         </span>
         <span className="text-[15px] font-bold">{l.reference}</span>
         <ul className="flex flex-col gap-1 text-[14px]">
@@ -150,7 +150,7 @@ function EcranLot() {
           <li>
             Demande partie chez <strong>{l.negoces} négoces</strong>, réponses sous 7 jours.
           </li>
-          <li>Un seul négoce retenu pour tout le lot : c&apos;est ce qui fait le prix.</li>
+          <li>Un seul négoce retenu pour toute la commande : c&apos;est ce qui fait le prix.</li>
         </ul>
       </div>
       <p className="text-[14px] font-bold text-[#c9ced6]">Tu as coché « Chantier signé » : tu t&apos;engages à commander ces quantités au prix obtenu. Ton nom ne part pas avec.</p>
@@ -166,7 +166,7 @@ function EcranOffre() {
       <div className="flex flex-col gap-2 rounded-2xl bg-white/95 p-3">
         <span className="flex items-center gap-2 text-[14px] font-extrabold">
           <Tag size={18} aria-hidden="true" className="text-accent-text" />
-          Mon offre · lot n° {EXEMPLE.lot.numero} <Exemple />
+          Mon offre · commande groupée n° {EXEMPLE.lot.numero} <Exemple />
         </span>
         <span className="text-[17px] leading-snug font-extrabold">
           {o.quantite} à {o.prix} chez {o.negoce} ({o.baisse})

@@ -52,7 +52,7 @@ for (const size of WIDTHS) {
     await page.getByLabel("Mot de passe").fill("motdepasse-solide");
     await page.getByRole("checkbox", { name: /J'accepte les conditions générales d'utilisation/ }).check();
     await page.getByRole("button", { name: "Créer mon compte" }).click();
-    await expect(page.getByRole("heading", { name: /^Bonjour Jean/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^Dépose ton premier devis/ })).toBeVisible();
     await shoot(page, size.name, "03-accueil");
 
     await page.goto("/chantiers/nouveau");
@@ -60,7 +60,8 @@ for (const size of WIDTHS) {
     await shoot(page, size.name, "04-nouveau-chantier");
 
     await page.goto("/");
-    await page.getByRole("button", { name: "Lancer la démonstration" }).click();
+    await page.getByRole("button", { name: "Mon menu" }).click();
+    await page.getByRole("menuitem", { name: "Essayer avec un chantier fictif" }).click();
     await expect(page.getByRole("heading", { name: "Démo – Toiture Martin" })).toBeVisible();
     // §48 : la lecture part d'elle-même ; l'écran des questions (s'il y en a) passe par « Calculer ma liste ».
     const questions = page.getByRole("region", { name: "Les questions" });
@@ -72,10 +73,10 @@ for (const size of WIDTHS) {
       for (let i = 0; i < (await faconne.count()); i++) await faconne.nth(i).click();
       await page.getByRole("button", { name: /^Calculer ma liste/ }).click();
     }
-    await expect(list.getByRole("button", { name: "Envoyer au fournisseur" })).toBeVisible();
+    await expect(list.getByRole("button", { name: "Envoyer aux négoces" })).toBeVisible();
     await shoot(page, size.name, "05-liste-des-fournitures");
 
-    await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
+    await page.getByRole("button", { name: "Envoyer aux négoces" }).click();
     const apercu = page.getByRole("dialog", { name: "À qui j'envoie ?" });
     await expect(apercu).toBeVisible();
     await shoot(page, size.name, "06-apercu-envoi");

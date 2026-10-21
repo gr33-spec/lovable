@@ -52,12 +52,12 @@ export function accroche(metier: string | undefined): string {
 }
 
 const STATUT_LOT: Record<string, string> = {
-  ouvert: "Lot ouvert, en attente d'autres artisans",
-  forme: "Lot formé, demande en préparation",
-  envoye: "Demande partie aux négoces, réponses sous 7 jours",
+  ouvert: "On attend d'autres artisans",
+  forme: "Commande prête, on prépare la demande",
+  envoye: "Demande partie aux négoces, réponse sous 7 jours",
   choisi: "Négoce retenu",
-  clos: "Aucun négoce n'a répondu, lot fermé",
-  annule: "Lot annulé",
+  clos: "Aucun négoce n'a répondu, commande fermée",
+  annule: "Commande annulée",
 };
 
 /**
@@ -104,7 +104,7 @@ export default function GroupePage() {
       ) : null}
       {etat.data.raisons.includes("exclu_du_groupe") ? (
         <p role="status" className="rounded-3xl bg-warn-bg p-4 font-semibold text-warn">
-          Le groupé t&apos;est fermé{etat.data.excluJusquau ? ` jusqu'au ${jourFr(etat.data.excluJusquau)}` : ""} : deux désistements en 12 mois. Tes lots en cours restent visibles ci-dessous.
+          Le groupé t&apos;est fermé{etat.data.excluJusquau ? ` jusqu'au ${jourFr(etat.data.excluJusquau)}` : ""} : deux commandes annulées en 12 mois. Tes commandes en cours restent visibles ci-dessous.
         </p>
       ) : null}
       {etat.data.raisons.includes("departement_ferme") ? (
@@ -170,8 +170,8 @@ function Etapes() {
   return (
     <ol aria-label="Comment ça marche" className="grid grid-cols-3 gap-2 group-open:mt-2">
       {[
-        { icon: FileText, titre: "1. Tu proposes", texte: "Une ligne de ta liste, une fenêtre de livraison, « chantier signé »." },
-        { icon: Users, titre: "2. On regroupe", texte: "Même référence, même département : un seul lot, un seul négoce." },
+        { icon: FileText, titre: "1. Tu proposes", texte: "Une ligne de ta liste, la date de livraison voulue, « chantier signé »." },
+        { icon: Users, titre: "2. On regroupe", texte: "Même produit, même département : une seule commande, un seul négoce." },
         { icon: Tag, titre: "3. Tu commandes", texte: "À ton prix groupé, sur ton compte, livré sur ton chantier." },
       ].map((e) => (
         <li key={e.titre} className="flex flex-col gap-1.5 rounded-2xl bg-ground p-3">
@@ -223,7 +223,7 @@ function Livraison({ b, onDone }: { b: BesoinLot; onDone: () => void }) {
     }
   };
   const livraison = bon.livraison;
-  if (b.statut === "retire") return <p className="text-[13px] font-semibold text-warn">Tu ne commandes pas ce lot (désistement).</p>;
+  if (b.statut === "retire") return <p className="text-[13px] font-semibold text-warn">Tu ne commandes pas. C&apos;est noté.</p>;
   if (livraison?.statut === "livre") return <p className="text-[13px] font-extrabold text-ok">Livré, merci.</p>;
   if (livraison?.statut === "probleme") return <p className="text-[13px] font-semibold text-warn">Problème signalé, on regarde.</p>;
   return (
@@ -282,11 +282,11 @@ function MesLots() {
   if (!data) return <Spinner />;
   return (
     <Card className="flex flex-col gap-3 p-4">
-      <h2 className="font-display text-xl font-extrabold">Mes lots</h2>
+      <h2 className="font-display text-xl font-extrabold">Mes commandes groupées</h2>
       {data.besoins.length === 0 ? (
-        <p className="text-[15px] font-semibold text-muted">Aucun lot pour l&apos;instant, propose un chantier au groupé.</p>
+        <p className="text-[15px] font-semibold text-muted">Rien pour l&apos;instant : propose un chantier au groupé.</p>
       ) : (
-        <ul aria-label="Mes lots" className="flex flex-col gap-2">
+        <ul aria-label="Mes commandes groupées" className="flex flex-col gap-2">
           {data.besoins.map((b) => (
             <li key={b.id} className="flex flex-col gap-1 rounded-2xl bg-ground p-3">
               <div className="flex items-baseline justify-between gap-3">
@@ -298,8 +298,8 @@ function MesLots() {
                 {b.chantier}
               </Link>
               <p className="text-[13px] font-semibold text-muted">
-                {b.lot ? `Lot n° ${b.lot.numero} · ${STATUT_LOT[b.lot.statut] ?? b.lot.statut}` : "En attente du prochain lot"}
-                {b.statut === "en_attente" ? " · devis en attente, sans engagement" : ""}
+                {b.lot ? `Commande groupée n° ${b.lot.numero} · ${STATUT_LOT[b.lot.statut] ?? b.lot.statut}` : "En attente d'autres artisans"}
+                {b.statut === "en_attente" ? " · devis en attente, tu ne t'engages à rien" : ""}
               </p>
               {b.offre ? (
                 <p className="inline-flex items-center gap-1.5 text-[14px] font-extrabold text-ok">

@@ -25,7 +25,7 @@ async function signUp(page: Page, email = `artisan-${unique()}@example.fr`) {
   await expect(page.getByRole("button", { name: "Créer mon compte" })).toBeDisabled();
   await page.getByRole("checkbox", { name: /J'accepte les conditions générales d'utilisation/ }).check();
   await page.getByRole("button", { name: "Créer mon compte" }).click();
-  await expect(page.getByRole("heading", { name: /^Bonjour Jean/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^(Bonjour Jean|Dépose ton premier devis)/ })).toBeVisible();
   return email;
 }
 
@@ -73,7 +73,7 @@ async function backToSite(page: Page) {
 
 /**
  * LA LISTE DES FOURNITURES : tant qu'il reste de l'orange, l'artisan règle la première carte orange d'un geste, sans
- * quitter la liste (§49.8) ; fini quand le gros bouton dit « Envoyer au fournisseur ».
+ * quitter la liste (§49.8) ; fini quand le gros bouton dit « Envoyer aux négoces ».
  */
 async function confirmDoubts(page: Page) {
   await openList(page);
@@ -84,7 +84,7 @@ async function confirmDoubts(page: Page) {
     const orange = list.getByRole("listitem").filter({ has: page.getByRole("img", { name: "à vérifier" }) }).first();
     if (!(await orange.isVisible())) {
       await closeOpenLine(page);
-      await expect(list.getByRole("button", { name: "Envoyer au fournisseur" })).toBeVisible();
+      await expect(list.getByRole("button", { name: "Envoyer aux négoces" })).toBeVisible();
       return;
     }
     await settleCard(page, await openRow(orange));
@@ -102,6 +102,12 @@ async function openRow(row: Locator) {
  * Un chantier déjà nommé (client, adresse) : créé par la porte de l'API, comme le ferait un partenaire. Dans l'app,
  * « Nouveau chantier » n'a plus qu'une action, déposer le PDF (§48) : le test « depuis le + » la couvre.
  */
+/** Le menu derrière l'initiale de l'artisan (en haut à droite) : Mes fournisseurs, Mon compte, l'essai sur un chantier fictif. */
+async function menuArtisan(page: Page, entree: string) {
+  await page.getByRole("button", { name: "Mon menu" }).click();
+  await page.getByRole("menuitem", { name: entree }).click();
+}
+
 async function createProject(page: Page, name: string, client: string, address: string) {
   const id = await page.evaluate(
     async (body) => {
@@ -142,10 +148,10 @@ async function passQuestions(page: Page) {
 test("un artisan crée son compte et son premier chantier depuis le +", async ({ page }) => {
   await signUp(page);
   await expect(page.getByText("Toitures Martin")).toBeVisible();
-  await expect(page.getByText("Crée ton premier chantier")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Déposer mon devis" })).toBeVisible();
 
   // Le « + » : un nouveau chantier = déposer le PDF, rien d'autre à remplir (§48).
-  await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Nouveau chantier" }).click();
+  await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Nouveau devis" }).click();
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
   // §50.1 : un bouton, « Déposer mon devis ».
   await expect(page.getByText("Déposer mon devis", { exact: true })).toBeVisible();
@@ -331,12 +337,12 @@ test("2026-10-12 : sur téléphone, la barre du menu reste figée en bas de chaq
   }
 });
 
-test("le menu ne propose que l'essentiel : accueil, chantiers, fournisseurs, compte", async ({ page }) => {
+test("le menu ne propose que trois entrées ; fournisseurs et compte sont derrière l'initiale", async ({ page }) => {
   await signUp(page);
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
   // Quatre rubriques (cinq avec le groupé, allumé dans les parcours), et au centre le « + » : un nouveau chantier, directement.
-  await expect(nav.getByRole("link")).toHaveText(["Accueil", "Chantiers", "Groupé", "Nouveau chantier", "Fournisseurs", "Compte"]);
-  await nav.getByRole("link", { name: "Compte" }).click();
+  await expect(nav.getByRole("link")).toHaveText(["Mes chantiers", "Nouveau devis", "Groupé"]);
+  await menuArtisan(page, "Mon compte");
   await expect(page.getByRole("heading", { name: "Mon compte" })).toBeVisible();
 
   // Les métiers se changent en deux appuis ; BatiClair adapte la lecture des prochains devis.
@@ -432,7 +438,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   // §51.5 : les crochets en paquets partent tels qu'écrits ; jamais « combien par paquet » (§49.4 : rien sur une donnée écrite).
   await expect(page.getByText(/combien par paquet|pièces par paquet/i)).toHaveCount(0);
   await confirmDoubts(page);
-  // §50.3 : tout est vert, plus de barre « à régler », un seul bouton « Envoyer au fournisseur » ; aucun compteur (§50.4).
+  // §50.3 : tout est vert, plus de barre « à régler », un seul bouton « Envoyer aux négoces » ; aucun compteur (§50.4).
   const liste = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(liste.getByText(/lignes? à régler/)).toHaveCount(0);
   await expect(liste.getByText(/\d+ fournitures? ·/)).toHaveCount(0);
@@ -475,10 +481,10 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await expect(page.getByRole("status").filter({ hasText: "Retiré de la liste" })).toHaveCount(0);
 
   await confirmDoubts(page);
-  // §50.7 : « Envoyer au fournisseur » valide la liste et demande seulement à qui l'envoyer (le document est l'écran) ;
+  // §50.7 : « Envoyer aux négoces » valide la liste et demande seulement à qui l'envoyer (le document est l'écran) ;
   // « Revenir à la liste » referme.
   await openList(page);
-  await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
+  await page.getByRole("button", { name: "Envoyer aux négoces" }).click();
   const apercu = page.getByRole("dialog", { name: "À qui j'envoie ?" });
   await expect(apercu.getByRole("button", { name: "Choisis un fournisseur" })).toBeDisabled();
   await apercu.getByRole("button", { name: "Revenir à la liste" }).click();
@@ -488,7 +494,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   // La liste validée est conservée.
   await page.reload();
   await openList(page);
-  await expect(page.getByRole("button", { name: "Envoyer au fournisseur" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Envoyer aux négoces" })).toBeVisible();
 
   // Une ligne se corrige encore après validation, d'un tap sur la ligne puis le plus : la liste est à valider à nouveau.
   await page.getByRole("button", { name: `Modifier : ${tuile}` }).click();
@@ -497,7 +503,7 @@ test("un couvreur fait préparer sa liste de matériaux par l'IA, la corrige et 
   await page.waitForTimeout(1300);
   await settle(page);
   await confirmDoubts(page);
-  await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
+  await page.getByRole("button", { name: "Envoyer aux négoces" }).click();
   await expect(page.getByRole("dialog", { name: "À qui j'envoie ?" })).toBeVisible();
 });
 
@@ -507,7 +513,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await signUp(page);
 
   // Carnet de fournisseurs : « Nouveau fournisseur » vit dans sa page.
-  await page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link", { name: "Fournisseurs" }).click();
+  await menuArtisan(page, "Mes fournisseurs");
   await page.getByRole("button", { name: "Nouveau fournisseur" }).click();
   await page.getByLabel("Société").fill("Point.P Vannes");
   await page.getByLabel("E-mail pour les demandes de prix").fill("pas-un-email");
@@ -530,9 +536,9 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   await passQuestions(page);
   // §50.7 : une ligne se règle sur le document même (§50.4 : plus de « Corriger le devis lu »).
   await confirmDoubts(page);
-  // §50.7 : « Envoyer au fournisseur » ne montre plus d'aperçu (le document, c'est l'écran) : on y choisit seulement les
+  // §50.7 : « Envoyer aux négoces » ne montre plus d'aperçu (le document, c'est l'écran) : on y choisit seulement les
   // fournisseurs, dont un créé sur place.
-  await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
+  await page.getByRole("button", { name: "Envoyer aux négoces" }).click();
   const apercu = page.getByRole("dialog", { name: "À qui j'envoie ?" });
   await expect(apercu.getByRole("heading", { name: "À qui j'envoie ?" })).toBeVisible();
   // Retour du fondateur (2026-10-10) : « les fournisseurs cochés par défaut, avec possibilité d'en ajouter un facilement ».
@@ -586,7 +592,7 @@ test("un couvreur demande les prix à ses fournisseurs et range leurs devis", as
   // Le gros bouton de la liste ne propose plus un premier envoi.
   const liste = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(liste.getByRole("button", { name: "Voir la demande envoyée" })).toBeVisible();
-  await expect(liste.getByRole("button", { name: "Envoyer au fournisseur" })).toHaveCount(0);
+  await expect(liste.getByRole("button", { name: "Envoyer aux négoces" })).toHaveCount(0);
   await backToSite(page);
   // Pour tester sans attendre, un devis fictif peut être simulé (dans le menu).
   await pointp.getByRole("button", { name: /^Plus d'actions/ }).click();
@@ -695,7 +701,7 @@ test("plusieurs articles ajoutés à la main, sans unité : gardés tels qu'écr
 
 test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs", async ({ page }) => {
   await signUp(page);
-  await page.getByRole("button", { name: "Lancer la démonstration" }).click();
+  await menuArtisan(page, "Essayer avec un chantier fictif");
   await expect(page.getByRole("heading", { name: "Démo – Toiture Martin" })).toBeVisible();
   // La lecture part d'elle-même (§48), puis les questions de comptoir, puis la liste.
   await passQuestions(page);
@@ -707,7 +713,7 @@ test("mode démo : tout le parcours avec un chantier et des fournisseurs fictifs
   await expect(demoList.getByText(/lignes? à régler/)).toHaveCount(0);
   await expect(demoList.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
   await expect(demoList.getByText("Embase plomb de sortie de toit")).toBeVisible();
-  await page.getByRole("button", { name: "Envoyer au fournisseur" }).click();
+  await page.getByRole("button", { name: "Envoyer aux négoces" }).click();
   const apercu = page.getByRole("dialog", { name: "À qui j'envoie ?" });
   for (const name of ["Tuilerie de l'Ouest (démo)", "Négoce Breizh (démo)", "Matériaux Atlantique (démo)"]) {
     await apercu.getByRole("checkbox", { name: new RegExp(name.replace(/[()]/g, "\\$&")) }).check();
@@ -793,8 +799,8 @@ test("plusieurs logements : un devis d'électricien pièce par pièce donne la l
   await createProject(page, "Résidence Les Pins", "SCI Les Pins", "4 allée des Pins, Vannes");
   await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-electricien-logements.pdf"));
   await passQuestions(page);
-  // §52 : un devis d'un seul lot n'a pas de carte « Lots repérés ».
-  await expect(page.getByRole("region", { name: "Lots repérés" })).toHaveCount(0);
+  // §52 : un devis d'un seul lot n'a pas de carte « Parties du devis ».
+  await expect(page.getByRole("region", { name: "Parties du devis" })).toHaveCount(0);
   // §51.5 : la lecture ne porte plus les titres de logement de l'ancien extracteur ; la liste est celle du devis, dans son ordre.
   await expect(page.getByRole("tab", { name: /Par logement/ })).toHaveCount(0);
   await openList(page);
@@ -803,20 +809,20 @@ test("plusieurs logements : un devis d'électricien pièce par pièce donne la l
   await expect(list.getByRole("listitem").filter({ hasText: "Tableau électrique" }).first()).toBeVisible();
 });
 
-test("§52 : la carte « Lots repérés » : retirer un lot, en ajouter un, « C'est bon », une section par lot gardé", async ({ page }) => {
+test("§52 : la carte « Parties du devis » : retirer un lot, en ajouter un, « C'est bon », une section par lot gardé", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Immeuble Les Tilleuls", "SCI Les Tilleuls", "8 rue des Tilleuls, Vannes");
   await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-multi-lots.pdf"));
-  // Directive du fondateur (2026-10-13) : après la lecture, « Lots repérés : Électricité · VMC · Sanitaire ».
-  const carte = page.getByRole("region", { name: "Lots repérés" });
-  await expect(carte.getByRole("heading", { name: "Lots repérés : Électricité · VMC · Sanitaire" })).toBeVisible({ timeout: 60_000 });
+  // Directive du fondateur (2026-10-13) : après la lecture, « Parties du devis : Électricité · VMC · Sanitaire ».
+  const carte = page.getByRole("region", { name: "Parties du devis" });
+  await expect(carte.getByRole("heading", { name: "Parties du devis : Électricité · VMC · Sanitaire" })).toBeVisible({ timeout: 60_000 });
   // Un bouton par lot pour le retirer ; la VMC n'est pas un lot à part ici.
-  await carte.getByRole("button", { name: "Retirer le lot VMC" }).click();
-  await expect(carte.getByRole("heading", { name: "Lots repérés : Électricité · Sanitaire" })).toBeVisible();
+  await carte.getByRole("button", { name: "Retirer la partie VMC" }).click();
+  await expect(carte.getByRole("heading", { name: "Parties du devis : Électricité · Sanitaire" })).toBeVisible();
   // « Ajouter un lot » : les métiers qui ont leur référentiel.
-  await carte.getByRole("button", { name: "Ajouter un lot" }).click();
-  await carte.getByRole("group", { name: "Ajouter un lot" }).getByRole("button", { name: "Maçonnerie" }).click();
-  await expect(carte.getByRole("heading", { name: "Lots repérés : Électricité · Sanitaire · Maçonnerie" })).toBeVisible();
+  await carte.getByRole("button", { name: "Ajouter une partie" }).click();
+  await carte.getByRole("group", { name: "Ajouter une partie" }).getByRole("button", { name: "Maçonnerie" }).click();
+  await expect(carte.getByRole("heading", { name: "Parties du devis : Électricité · Sanitaire · Maçonnerie" })).toBeVisible();
   await carte.getByRole("button", { name: "C'est bon" }).click();
   await expect(carte).toHaveCount(0);
   await passQuestions(page);
@@ -978,7 +984,7 @@ test("§48.5 : envoyer une partie de la liste à un fournisseur, le reste à un 
   await expect(list.getByText("Envoyé · Négoce Test").first()).toBeVisible();
 
   // L'envoi normal n'a pas bougé : toute la liste, d'un coup, au fournisseur habituel.
-  await expect(list.getByRole("button", { name: "Envoyer au fournisseur" })).toBeVisible();
+  await expect(list.getByRole("button", { name: "Envoyer aux négoces" })).toBeVisible();
   await expect(list.getByRole("button", { name: "Voir la demande envoyée" })).toHaveCount(0);
 });
 
@@ -1028,7 +1034,7 @@ test("§50.7 : en bas, deux boutons figés : l'aperçu (le mail et le PDF du fou
   // Figés en bas : visibles dès le haut du document, sans descendre.
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(actions.getByRole("button", { name: "Aperçu" })).toBeInViewport();
-  await expect(actions.getByRole("button", { name: "Envoyer au fournisseur" })).toBeInViewport();
+  await expect(actions.getByRole("button", { name: "Envoyer aux négoces" })).toBeInViewport();
   // L'aperçu : l'objet et le mail mot pour mot, et le PDF joint qui s'ouvre dans BatiClair. Rien ne part.
   await actions.getByRole("button", { name: "Aperçu" }).click();
   const apercu = page.getByRole("dialog", { name: "Ce que reçoit le fournisseur" });
@@ -1051,7 +1057,7 @@ test("§50.7 : en bas, deux boutons figés : l'aperçu (le mail et le PDF du fou
   expect(box.y + box.height).toBeLessThanOrEqual(vp.height + 0.5);
   await pdf.getByRole("button", { name: "Fermer le document" }).click();
   // Depuis l'aperçu, l'envoi : on choisit à qui.
-  await apercu.getByRole("button", { name: "Envoyer au fournisseur" }).click();
+  await apercu.getByRole("button", { name: "Envoyer aux négoces" }).click();
   await expect(page.getByRole("dialog", { name: "À qui j'envoie ?" })).toBeVisible();
 });
 
@@ -1069,9 +1075,9 @@ test("§50.7 : les deux boutons du bas sont là même s'il reste des lignes oran
   const actions = page.getByRole("group", { name: "Envoyer la liste" });
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(actions.getByRole("button", { name: "Aperçu" })).toBeInViewport();
-  await expect(actions.getByRole("button", { name: "Envoyer au fournisseur" })).toBeInViewport();
+  await expect(actions.getByRole("button", { name: "Envoyer aux négoces" })).toBeInViewport();
   // « Envoyer » : rien ne part, la phrase dit pourquoi et la première ligne orange vient à l'écran.
-  await actions.getByRole("button", { name: "Envoyer au fournisseur" }).click();
+  await actions.getByRole("button", { name: "Envoyer aux négoces" }).click();
   await expect(page.getByRole("dialog", { name: "À qui j'envoie ?" })).toHaveCount(0);
   await expect(actions.getByRole("status")).toHaveText(/^Règle d'abord \d+ lignes? orange\.$/);
   await expect(list.getByRole("listitem").filter({ has: page.getByRole("img", { name: "à vérifier" }) }).first()).toBeInViewport();
@@ -1093,9 +1099,9 @@ test("§50.7 : une ligne ouverte passe au premier plan, le reste flouté ; un ta
   await passQuestions(page);
   await openList(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
-  // « Envoyer au fournisseur » tient sur une ligne, même sur un iPhone étroit (375 px).
+  // « Envoyer aux négoces » tient sur une ligne, même sur un iPhone étroit (375 px).
   await page.setViewportSize({ width: 375, height: 812 });
-  const envoyer = page.getByRole("group", { name: "Envoyer la liste" }).getByRole("button", { name: "Envoyer au fournisseur" });
+  const envoyer = page.getByRole("group", { name: "Envoyer la liste" }).getByRole("button", { name: "Envoyer aux négoces" });
   expect((await envoyer.boundingBox())!.height).toBeLessThan(60);
   await list.getByRole("button", { name: /^Modifier la ligne : / }).first().click();
   const ouverte = list.getByRole("group", { name: /^Ligne ouverte : / });
@@ -1207,7 +1213,7 @@ test("§49.8 : chaque ligne orange passe au vert dans sa carte, un geste par lig
   expect(gestures).toBe(seen.size);
   expect(choices).toBeGreaterThan(0);
   await expect(list.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
-  await expect(list.getByRole("button", { name: "Envoyer au fournisseur" })).toBeVisible();
+  await expect(list.getByRole("button", { name: "Envoyer aux négoces" })).toBeVisible();
 });
 
 test("une lecture refusée au départ se dit, avec sa raison et « Réessayer » : jamais d'analyse sans fin", async ({ page }) => {
@@ -1268,7 +1274,7 @@ test("rien ne part vide : un devis où je ne lis aucune ligne se dit en une phra
   const failure = page.getByRole("region", { name: "Lecture du devis" });
   await expect(failure.getByText("Je n'ai rien lu dans ce devis.")).toBeVisible({ timeout: 60_000 });
   await expect(failure.getByRole("button")).toHaveText(["Réessayer"]);
-  await expect(page.getByRole("button", { name: /Envoyer au fournisseur/ })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /Envoyer aux négoces/ })).toHaveCount(0);
   // Un devis déposé par erreur se retire depuis le menu du chantier ; le chantier attend un autre PDF.
   await page.getByRole("button", { name: "Plus d'actions sur le chantier" }).click();
   await page.getByRole("menuitem", { name: "Retirer le devis" }).click();
@@ -1345,9 +1351,9 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
   await expect(bref.getByRole("checkbox", { name: "Ajouter le nom du client et l'adresse" })).not.toBeChecked();
   await bref.getByRole("button", { name: "Terminer", exact: true }).click();
   await expect(bref.getByRole("button", { name: /^Modifier le bref : / })).toHaveCount(0);
-  // « Envoyer au fournisseur » ne montre plus d'aperçu : seulement « À qui j'envoie ? ».
+  // « Envoyer aux négoces » ne montre plus d'aperçu : seulement « À qui j'envoie ? ».
   await confirmDoubts(page);
-  await list.getByRole("button", { name: "Envoyer au fournisseur" }).click();
+  await list.getByRole("button", { name: "Envoyer aux négoces" }).click();
   const sheet = page.getByRole("dialog", { name: "À qui j'envoie ?" });
   await expect(sheet).toBeVisible();
   await expect(sheet.getByRole("article", { name: "Demande de devis" })).toHaveCount(0);
@@ -1760,7 +1766,7 @@ test("BatiClair Groupé, étape 5 : la page du lien « pas concerné » (confirm
   await expect(page.getByRole("button", { name: /Déposer/ })).toHaveCount(0);
 });
 
-test("BatiClair Groupé, l'onglet : visible sans SIRET ni devis, trois étapes cochées une à une, puis « Mes lots » ; le bloc en haut de « Ton chantier »", async ({ page }) => {
+test("BatiClair Groupé, l'onglet : visible sans SIRET ni devis, trois étapes cochées une à une, puis « Mes commandes groupées » ; le bloc en haut de « Ton chantier »", async ({ page }) => {
   await signUp(page);
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
   await nav.getByRole("link", { name: "Groupé" }).click();
@@ -1799,11 +1805,11 @@ test("BatiClair Groupé, l'onglet : visible sans SIRET ni devis, trois étapes c
   // Sur téléphone, le chantier se lit en plein écran sans la barre du menu : retour à l'onglet par l'adresse.
   await page.goto("/groupe");
   await expect(manque.getByLabel("Fait")).toHaveCount(2);
-  // Les négoces : tout est coché, l'onglet montre « Mes lots », vide.
+  // Les négoces : tout est coché, l'onglet montre « Mes commandes groupées », vide.
   expect(await apiCall(page, "POST", "/v1/groupe/negoces", { nom: "Négoce Ardoises", email: "ardoises@example.com", familles: ["couverture"] })).toBe(201);
   await page.reload();
-  await expect(page.getByRole("heading", { name: "Mes lots" })).toBeVisible();
-  await expect(page.getByText("Aucun lot pour l'instant, propose un chantier au groupé.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Mes commandes groupées" })).toBeVisible();
+  await expect(page.getByText("Rien pour l'instant : propose un chantier au groupé.")).toBeVisible();
   await expect(manque).toHaveCount(0);
   // Étape 7 : le compteur « Économisé grâce au groupé » dans Compte, à zéro.
   await page.goto("/compte");
@@ -1980,7 +1986,7 @@ test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux 
   await negoceDepose(page, browser, "general@example.com", demande.replyTo!, "devis-fournisseur-2.pdf");
   // Tous ont répondu : le négoce est retenu, le bon de commande est parti, chaque artisan voit son offre et peut dire « Livré ».
   await page.goto("/groupe");
-  const lots = page.getByRole("list", { name: "Mes lots" });
+  const lots = page.getByRole("list", { name: "Mes commandes groupées" });
   await expect(lots.getByText(/Négoce retenu/)).toBeVisible({ timeout: 20_000 });
   await expect(lots.getByText(/€ HT l'unité chez Négoce/)).toBeVisible();
   await expect(lots.getByText("Toitures Le Bihan")).toHaveCount(0);
@@ -1992,7 +1998,7 @@ test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux 
   expect(auNegoce.some((m) => /^Facture n°/.test(m.subject))).toBe(true);
   // B voit aussi son offre, sans le nom de A.
   await pageB.goto("/groupe");
-  const lotsB = pageB.getByRole("list", { name: "Mes lots" });
+  const lotsB = pageB.getByRole("list", { name: "Mes commandes groupées" });
   await expect(lotsB.getByText(/Négoce retenu/)).toBeVisible();
   await expect(lotsB.getByText("Toitures Martin")).toHaveCount(0);
   await contexteB.close();
@@ -2011,7 +2017,7 @@ test("BatiClair Groupé, étape 9 : l'admin (Greg seul) voit les lots, le journa
   await page.getByLabel("E-mail").fill("admin-groupe@example.fr");
   await page.getByLabel("Mot de passe").fill("motdepasse-solide");
   await page.getByRole("button", { name: "Se connecter" }).click();
-  await expect(page.getByRole("heading", { name: /^Bonjour Jean/ }).or(page.getByRole("alert").filter({ hasText: "incorrect" }))).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^(Bonjour Jean|Dépose ton premier devis)/ }).or(page.getByRole("alert").filter({ hasText: "incorrect" }))).toBeVisible();
   if (await page.getByRole("alert").filter({ hasText: "incorrect" }).count()) await signUp(page, "admin-groupe@example.fr");
   await page.goto("/groupe");
   await page.getByRole("link", { name: "Admin groupé" }).click();
@@ -2082,7 +2088,7 @@ test("BatiClair Groupé, scénarios 1 : deux départements et deux références 
   expect(["ouvert", "forme", "envoye"]).toContain(lotsB[0]!.lot!.statut);
   expect(lotsA[0]!.lot!.numero).not.toBe(lotsB[0]!.lot!.numero);
   await page.goto("/groupe");
-  await expect(page.getByRole("list", { name: "Mes lots" }).getByText(/Lot n° \d+ · (Lot ouvert, en attente d'autres artisans|Lot formé|Demande partie)/)).toBeVisible();
+  await expect(page.getByRole("list", { name: "Mes commandes groupées" }).getByText(/Commande groupée n° \d+ · (On attend d'autres artisans|Commande prête|Demande partie)/)).toBeVisible();
   await contexteB.close();
 
   // A propose une deuxième référence : un autre lot ; puis la retire tant que rien n'est parti (section 4 a).
@@ -2164,7 +2170,7 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
   expect(tache.status).toBe(200);
   expect(tache.body.lotsClos).toBeGreaterThanOrEqual(1);
   await page.goto("/groupe");
-  await expect(page.getByRole("list", { name: "Mes lots" }).getByText(`Lot n° ${lot1} · Aucun négoce n'a répondu, lot fermé`)).toBeVisible();
+  await expect(page.getByRole("list", { name: "Mes commandes groupées" }).getByText(`Commande groupée n° ${lot1} · Aucun négoce n'a répondu, commande fermée`)).toBeVisible();
 
   // 2) Deuxième lot : N1 dit « pas concerné » par le lien de l'e-mail ; N2 dépose ; N2 est retenu, les bons partent.
   avant = await recus();
@@ -2182,7 +2188,7 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
   await contexteN.close();
   await negoceDepose(page, browser, N2, demande2.replyTo!, "devis-fournisseur-2.pdf");
   await page.goto("/groupe");
-  const lots = page.getByRole("list", { name: "Mes lots" });
+  const lots = page.getByRole("list", { name: "Mes commandes groupées" });
   await expect(lots.getByText(/Négoce retenu/)).toBeVisible({ timeout: 20_000 });
   await expect(lots.getByText(/chez Négoce Généraliste/)).toBeVisible();
 
@@ -2190,7 +2196,7 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
   await lots.getByRole("button", { name: "Je ne commande pas" }).click();
   await expect(lots.getByText(/deuxième fois sur 12 mois : le groupé se ferme 6 mois/)).toBeVisible();
   await lots.getByRole("button", { name: "Je ne commande pas, c'est sûr" }).click();
-  await expect(lots.getByText("Tu ne commandes pas ce lot (désistement).")).toBeVisible();
+  await expect(lots.getByText("Tu ne commandes pas. C'est noté.")).toBeVisible();
   await expect(page.getByRole("status").filter({ hasText: "fermé" })).toHaveCount(0);
   const etat1 = (await apiJson<{ eligible: boolean; raisons: string[] }>(page, "GET", "/v1/groupe")).body;
   expect(etat1.eligible).toBe(true);
@@ -2206,9 +2212,9 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
   await expect(lots.getByRole("button", { name: "Je ne commande pas" })).toBeVisible({ timeout: 20_000 });
   await lots.getByRole("button", { name: "Je ne commande pas" }).click();
   await lots.getByRole("button", { name: "Je ne commande pas, c'est sûr" }).click();
-  await expect(lots.getByText("Tu ne commandes pas ce lot (désistement).")).toHaveCount(2);
+  await expect(lots.getByText("Tu ne commandes pas. C'est noté.")).toHaveCount(2);
   await page.reload();
-  await expect(page.getByRole("status").filter({ hasText: /Le groupé t'est fermé jusqu'au .* : deux désistements en 12 mois/ })).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: /Le groupé t'est fermé jusqu'au .* : deux commandes annulées en 12 mois/ })).toBeVisible();
   const etat2 = (await apiJson<{ eligible: boolean; raisons: string[]; excluJusquau: string | null }>(page, "GET", "/v1/groupe")).body;
   expect(etat2.eligible).toBe(false);
   expect(etat2.raisons).toContain("exclu_du_groupe");
@@ -2225,7 +2231,7 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
   expect(refus.body.error.details.reason).toBe("groupe_ferme");
   // B, lui, voit toujours ses lots et son négoce retenu.
   await pageB.goto("/groupe");
-  await expect(pageB.getByRole("list", { name: "Mes lots" }).getByText(/Négoce retenu/).first()).toBeVisible();
+  await expect(pageB.getByRole("list", { name: "Mes commandes groupées" }).getByText(/Négoce retenu/).first()).toBeVisible();
   await contexteB.close();
 });
 
@@ -2273,7 +2279,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(demo.getByRole("list", { name: "Liste de fournitures (exemple)" }).getByRole("listitem")).toHaveCount(5);
   await demo.getByRole("button", { name: "Suivant" }).click();
   await expect(page.getByRole("heading", { name: "Le groupé, avec les artisans du département" })).toBeVisible();
-  await expect(page.getByText(/Lot n° 12 · Côtes-d'Armor/)).toBeVisible();
+  await expect(page.getByText(/Commande groupée n° 12 · Côtes-d'Armor/)).toBeVisible();
   await page.getByRole("button", { name: "Suivant" }).click();
   await expect(page.getByRole("heading", { name: "Ton offre, ton prix" })).toBeVisible();
   await expect(page.getByText(/2 760 pièces à 0,92 € HT l'unité/)).toBeVisible();
@@ -2303,7 +2309,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // Connecté : la racine reste l'accueil de l'app.
   await signUp(page);
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /^Bonjour Jean/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^(Bonjour Jean|Dépose ton premier devis)/ })).toBeVisible();
   await expect(page.getByRole("link", { name: "Créer un compte" })).toHaveCount(0);
 });
 
@@ -2314,6 +2320,9 @@ test("PWA : manifeste et icônes installables ; sur le téléphone, « Ajouter �
   expect(manifest.icons.map((i) => i.src)).toEqual(expect.arrayContaining(["/icon-192.png", "/icon-512.png", "/icon-512-maskable.png"]));
   for (const f of ["/icon-192.png", "/icon-512.png", "/icon-512-maskable.png", "/apple-touch-icon.png"]) expect((await page.request.get(f)).headers()["content-type"]).toContain("image/png");
   await signUp(page);
+  // Accueil vide = une phrase et un bouton : le conseil « écran d'accueil » vient avec le premier chantier.
+  await createProject(page, "Toiture Hint", "M. Hint", "3 rue du Port, Brest");
+  await page.goto("/");
   await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute("href", /apple-touch-icon\.png/);
   const aide = page.getByRole("region", { name: "Ajouter à l'écran d'accueil" });
   if (test.info().project.name === "telephone") {

@@ -34,7 +34,7 @@ export const AIDES: Record<SujetAide, { titre: string; lignes: readonly [string,
     lignes: [
       "Ton entreprise, ton adresse et ton SIRET servent aux demandes de prix et au groupé (SIRET vérifié à l'INSEE).",
       "Tes données se téléchargent ou s'effacent ici, tout de suite, sans rien demander à personne.",
-      "Les notifications te préviennent quand une liste est prête ou qu'un lot bouge.",
+      "Les notifications te préviennent quand une liste est prête ou qu'une commande groupée avance.",
     ],
   },
   chantiers: {

@@ -69,7 +69,7 @@ export class GroupeService {
     private readonly demande: { envoyerLesLotsFormes(): Promise<unknown> },
     /** Étape 7 : l'exclusion après deux désistements (section 4 c). */
     private readonly commande: { exclue(companyId: string): Promise<boolean> },
-    /** Étape 8 : « Vos 31 bacs sont dans le groupé Côtes-d'Armor. Prochain lot lundi. » */
+    /** Étape 8 : « Vos 31 bacs sont dans le groupé Côtes-d'Armor. Prochaine commande groupée lundi. » */
     private readonly notifications: { prevenir(companyId: string, message: MessageArtisan): Promise<unknown> },
     /** Étape 9 : les départements ouverts (`GROUPE_DEPARTEMENTS`, `null` = tous) et les admins. */
     private readonly reglages: { departements: string[] | null; admins: string[] } = { departements: null, admins: [] },

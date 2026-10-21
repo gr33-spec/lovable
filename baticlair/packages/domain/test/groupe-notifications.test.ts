@@ -12,7 +12,7 @@ describe("groupé, étape 8 : les quatre messages de la section 3", () => {
     expect(nomDuDepartement("22")).toBe("Côtes-d'Armor");
     expect(nomDuDepartement("2A")).toBe("Corse-du-Sud");
     expect(nomDuDepartement("99")).toBe("département 99");
-    expect(messageBesoinAccepte({ quantite: "31", unite: "bacs", designation: "Bac acier 1045", zone: "22", projectId: "p" }).corps).toBe("Tes 31 bacs de bac acier 1045 sont dans le groupé Côtes-d'Armor. Prochain lot lundi.");
+    expect(messageBesoinAccepte({ quantite: "31", unite: "bacs", designation: "Bac acier 1045", zone: "22", projectId: "p" }).corps).toBe("Tes 31 bacs de bac acier 1045 sont dans le groupé Côtes-d'Armor. Prochaine commande groupée lundi.");
     expect(messageDemandeEnvoyee({ numero: 12, negoces: 4 }).corps).toBe("Le groupé est parti chez 4 négoces. Réponses attendues sous 7 jours.");
     expect(messageDemandeEnvoyee({ numero: 12, negoces: 1 }).corps).toBe("Le groupé est parti chez 1 négoce. Réponses attendues sous 7 jours.");
     expect(messageNegoceRetenu({ quantite: "31", unite: "bacs", designation: "Bac acier 1045", prixUnitaire: 18.5, prixReference: 21, negoce: "A", dateLivraison: d("2026-11-03"), numero: 12 }).corps).toBe("Tes 31 bacs de bac acier 1045 : 18,50 € chez A (−12 %). Bon de commande transmis, livraison le 3 nov.");

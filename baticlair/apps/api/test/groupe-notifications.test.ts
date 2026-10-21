@@ -80,8 +80,8 @@ describe("groupé, étape 8 : les notifications", { timeout: 90_000 }, () => {
     // 1. Besoin accepté.
     await proposer(a, "signe");
     expect(pushVers("a@example.fr").map((m) => m.body)).toHaveLength(1);
-    expect(pushVers("a@example.fr")[0]!.body).toMatch(/^Tes 23 cartons de 1,44 m² de carreau de sol 60×60 sont dans le groupé Côtes-d'Armor\. Prochain lot lundi\.$/);
-    expect(mailsVers("a@example.fr").at(-1)!.subject).toContain("Prochain lot lundi");
+    expect(pushVers("a@example.fr")[0]!.body).toMatch(/^Tes 23 cartons de 1,44 m² de carreau de sol 60×60 sont dans le groupé Côtes-d'Armor\. Prochaine commande groupée lundi\.$/);
+    expect(mailsVers("a@example.fr").at(-1)!.subject).toContain("Prochaine commande groupée lundi");
     const b = await carreleur("b@example.fr", "Carrelages B", "12 rue de Kerampont, 22300 Lannion");
     await proposer(b, "signe");
     // 2. Lot formé, demande partie chez 2 négoces : chacun des deux artisans, sans l'autre.

@@ -4,25 +4,17 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MailCheck, Search, Sparkles, Warehouse } from "lucide-react";
 import { useCallback } from "react";
-import { DemoCard } from "@/components/demo";
 import { InstallHint } from "@/components/install-hint";
 import { useBilling } from "@/components/paywall";
 import { ProjectList } from "@/components/project-row";
-import { ErrorNotice, Spinner } from "@/components/ui";
+import { ButtonLink, ErrorNotice, Spinner } from "@/components/ui";
 import { api, type NextAction, type ProjectPage } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 
-/** « Jean Martin » → « JM » ; « Jean » → « JE ». */
-function initials(name: string): string {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  const letters = words.length > 1 ? words[0]!.charAt(0) + words[words.length - 1]!.charAt(0) : name.trim().slice(0, 2);
-  return letters.toUpperCase();
-}
-
 export default function AccueilPage() {
   const router = useRouter();
-  const { me, company, features } = useSession();
+  const { me, features } = useSession();
   const fetchRecent = useCallback((signal: AbortSignal) => api<ProjectPage>("/v1/projects?limit=3", { signal }), []);
   const { data: recent, error, reload } = useResource(fetchRecent);
   const fetchNext = useCallback((signal: AbortSignal) => api<{ items: NextAction[] }>("/v1/next-actions", { signal }), []);
@@ -48,21 +40,24 @@ export default function AccueilPage() {
       icon: <Sparkles size={20} aria-hidden="true" />,
     });
   }
-  if (recent && recent.items.length === 0) {
-    todo.push({ key: "first", title: "Crée ton premier chantier", text: "Dépose ton devis : le chantier se crée tout seul.", href: "/chantiers/nouveau", action: "Déposer", icon: <Warehouse size={20} aria-hidden="true" /> });
-  }
   if (!me.user.emailVerified && features.email) {
     todo.push({ key: "email", title: "Confirme ton adresse e-mail", text: "Nécessaire avant d'écrire à tes fournisseurs.", href: "/compte", action: "Voir", icon: <MailCheck size={20} aria-hidden="true" /> });
   }
 
+  // Simplification (21 octobre) : accueil vide = une phrase et un bouton, rien d'autre.
+  if (recent && recent.items.length === 0 && !error) {
+    return (
+      <div className="flex min-h-[60dvh] flex-col items-center justify-center gap-6 text-center">
+        <h1 className="font-display text-[28px] leading-tight font-extrabold tracking-[-0.02em]">Dépose ton premier devis, je prépare ta liste de matériaux.</h1>
+        <ButtonLink href="/chantiers/nouveau" className="min-h-14 w-full max-w-sm text-[17px]">
+          Déposer mon devis
+        </ButtonLink>
+      </div>
+    );
+  }
+
   return (
     <>
-      <div className="flex items-center justify-between">
-        <span className="text-[15px] font-extrabold">{company?.name}</span>
-        <Link href="/compte" aria-label="Mon compte" className="flex size-11 items-center justify-center rounded-full bg-surface text-sm font-extrabold shadow-card">
-          {initials(me.user.name)}
-        </Link>
-      </div>
       <form
         role="search"
         onSubmit={(e) => {
@@ -92,7 +87,7 @@ export default function AccueilPage() {
         ) : todo.length === 0 ? (
           <p className="border-t border-white/10 py-3 text-[15px] text-[#c9ced6]">Rien à faire pour l&apos;instant.</p>
         ) : (
-          todo.map((t) => (
+          todo.map((t, i) => (
             <div key={t.key} className="flex flex-col gap-2 border-t border-white/10 py-3">
               <span className="flex items-center gap-3">
                 <span className="text-accent-on-dark">{t.icon}</span>
@@ -101,7 +96,7 @@ export default function AccueilPage() {
                   {t.text ? <span className="text-[13px] text-[#c9ced6]">{t.text}</span> : null}
                 </span>
               </span>
-              <Link href={t.href} className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-cta px-3.5 text-[15px] font-extrabold shadow-cta">
+              <Link href={t.href} className={`inline-flex min-h-12 items-center justify-center rounded-2xl px-3.5 text-[15px] font-extrabold ${i === 0 ? "bg-cta shadow-cta" : "bg-white/15"}`}>
                 {t.action}
               </Link>
             </div>
@@ -131,13 +126,8 @@ export default function AccueilPage() {
             }}
           />
         ) : null}
-        {recent && recent.items.length === 0 ? (
-          <p className="rounded-3xl bg-surface p-4 text-[15px] text-muted shadow-card">Aucun chantier pour l&apos;instant. Touche « + » pour en créer un.</p>
-        ) : null}
       </section>
 
-      {/* La démo se lance une fois : son chantier est déjà là, la carte n'a plus rien à proposer. */}
-      {recent && !recent.items.some((p) => p.name.startsWith("Démo")) ? <DemoCard /> : null}
     </>
   );
 }

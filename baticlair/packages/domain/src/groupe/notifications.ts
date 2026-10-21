@@ -36,13 +36,13 @@ const euros = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigit
 const jourCourt = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "short", timeZone: "UTC" }).replace(/\.$/, "");
 
 /**
- * 1. « Vos 31 bacs sont dans le groupé Côtes-d'Armor. Prochain lot lundi. » (section 3). Revue à froid du 21 octobre : l'app
+ * 1. « Vos 31 bacs sont dans le groupé Côtes-d'Armor. Prochaine commande groupée lundi. » (section 3). Revue à froid du 21 octobre : l'app
  * tutoie partout, et « 1 250 pièces » sans dire de quoi ne se comprend pas ; le message dit donc « Tes 1 250 pièces de
  * tuile romane… ».
  */
 export const quantiteDite = (q: { quantite: string; unite: string; designation: string }): string => `${nombre(q.quantite)} ${q.unite} de ${q.designation.charAt(0).toLowerCase()}${q.designation.slice(1)}`;
 export function messageBesoinAccepte(b: { quantite: string; unite: string; designation: string; zone: string; projectId: string }): MessageArtisan {
-  return { titre: "Groupé", corps: `Tes ${quantiteDite(b)} sont dans le groupé ${nomDuDepartement(b.zone)}. Prochain lot lundi.`, url: "/groupe", etiquette: `groupe-besoin-${b.projectId}` };
+  return { titre: "Groupé", corps: `Tes ${quantiteDite(b)} sont dans le groupé ${nomDuDepartement(b.zone)}. Prochaine commande groupée lundi.`, url: "/groupe", etiquette: `groupe-besoin-${b.projectId}` };
 }
 
 /** 2. « Le groupé est parti chez 4 négoces. Réponses attendues sous 7 jours. » */

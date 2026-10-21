@@ -142,7 +142,7 @@ export function GroupeBar({ count, onCancel, onPropose, onAdresse }: { count: nu
     <section aria-label="Proposer au groupé" className="flex flex-col gap-2 rounded-[22px] bg-surface p-3 shadow-card">
       <p className="text-[14px] font-extrabold">{count === 0 ? "Coche les lignes à proposer au groupé" : `${count} ligne${count > 1 ? "s" : ""} au groupé`}</p>
       <fieldset className="flex gap-2">
-        <legend className="mb-1 text-[13px] font-bold text-muted">Livraison sur le chantier</legend>
+        <legend className="mb-1 text-[13px] font-bold text-muted">Tu veux être livré entre quelles dates ?</legend>
         <label htmlFor={`${id}-tot`} className="flex grow flex-col gap-1 text-[13px] font-bold text-muted">
           Au plus tôt
           <input id={`${id}-tot`} type="date" value={tot} onChange={(e) => setTot(e.target.value)} className="min-h-12 rounded-2xl bg-ground px-3 text-[15px] font-bold text-ink" />
@@ -172,11 +172,11 @@ export function GroupeBar({ count, onCancel, onPropose, onAdresse }: { count: nu
           <span>{PHRASE_ENGAGEMENT}</span>
         </label>
       ) : statut === "en_attente" ? (
-        <p className="text-[13px] leading-snug text-muted">Le négoce le voit comme une quantité possible, sans engagement de ta part. Tu le passeras en signé d&apos;un tap quand ton client aura signé.</p>
+        <p className="text-[13px] leading-snug text-muted">Le négoce voit une quantité possible, tu ne t&apos;engages à rien. Tu le passeras en signé d&apos;un tap quand ton client aura signé.</p>
       ) : null}
       {/* Test complet (21 octobre) : sans adresse de chantier, le serveur refuse (le lot se forme par département) ; on la demande ici même. */}
       {adresseManque ? (
-        <Field id={`${id}-adresse`} label="Adresse du chantier, avec le code postal" hint="Le lot se forme par département : il faut l'adresse de livraison." value={adresse} onChange={(e) => setAdresse(e.target.value)} placeholder="4 rue du Port, 22500 Paimpol" autoComplete="street-address" />
+        <Field id={`${id}-adresse`} label="Adresse du chantier, avec le code postal" hint="On regroupe les artisans d'un même département : il faut l'adresse de livraison." value={adresse} onChange={(e) => setAdresse(e.target.value)} placeholder="4 rue du Port, 22500 Paimpol" autoComplete="street-address" />
       ) : error ? (
         <ErrorNotice error={error} />
       ) : null}
@@ -240,7 +240,7 @@ function OffreCard({ besoin: b, groupe }: { besoin: BesoinGroupe; groupe: Groupe
   };
   return (
     <section aria-label={`Mon offre : ${b.designation}`} className="flex flex-col gap-1.5 rounded-xl bg-surface p-3 shadow-card">
-      <p className="text-[13px] font-extrabold text-muted">Mon offre · lot n° {o.lotNumero}</p>
+      <p className="text-[13px] font-extrabold text-muted">Mon offre · commande groupée n° {o.lotNumero}</p>
       <p className="text-[15px] leading-snug font-bold">
         {quantiteFr(b.quantite)} {b.unite} à {euros(o.prixUnitaire)} HT l&apos;unité chez {o.negoce}
       </p>

@@ -20,7 +20,7 @@ import { enMetres, parseQuantity, shortName } from "@/lib/labels";
  *    cinq mots, sans carte dépliée ;
  *  - sur le document même : un tap ouvre la ligne (moins / plus, boutons de choix, « C'est bon », corbeille), un tap sur
  *    le nom le corrige, un glissement vers la gauche la retire ; aucun écran intermédiaire, plus de voix ;
- *  - en bas, figés, deux boutons : « Aperçu » (le mail et le PDF du fournisseur) et « Envoyer au fournisseur » ; en petit
+ *  - en bas, figés, deux boutons : « Aperçu » (le mail et le PDF du fournisseur) et « Envoyer aux négoces » ; en petit
  *    dessous, « Ajouter un article » ; à côté du titre « Fournitures », « Envoyer une partie » (une partie chez un
  *    fournisseur, le reste chez un autre).
  */
@@ -83,7 +83,7 @@ export function SupplyList({
   const [removing, setRemoving] = useState<string[]>([]);
   // §48.5 : cases à cocher seulement après le petit bouton ; par défaut l'écran ne change pas.
   const [selecting, setSelecting] = useState(false);
-  // BatiClair Groupé : les mêmes cases servent à proposer des lignes au groupé (par ligne, ou « Cocher ce lot »).
+  // BatiClair Groupé : les mêmes cases servent à proposer des lignes au groupé (par ligne, ou « Cocher cette partie »).
   const [pourGroupe, setPourGroupe] = useState(false);
   const [checked, setChecked] = useState<Set<string>>(new Set());
   // « Envoyer » touché avec des lignes orange : la phrase dit pourquoi rien ne part.
@@ -227,7 +227,7 @@ export function SupplyList({
             Groupé : un seul négoce, un seul prix
           </p>
           <p className="text-[14px] leading-snug text-muted">Tes commandes regroupées avec les autres artisans du département. Tu commandes sur ton compte, tu es livré sur ton chantier.</p>
-          <Button className="self-start" onClick={startGroupe}>
+          <Button variant="secondary" className="self-start" onClick={startGroupe}>
             Proposer au groupé
           </Button>
         </section>
@@ -261,7 +261,7 @@ export function SupplyList({
               onClick={() => setChecked(new Set(section.rows.filter(cochable).map((r) => articleOf(r)!)))}
               className="inline-flex min-h-10 items-center rounded-full bg-accent/10 px-3 text-[13px] font-extrabold text-accent-text active:bg-accent/20"
             >
-              Cocher ce lot
+              Cocher cette partie
             </button>
           ) : (
             <span className="text-[13px] font-bold text-muted">
@@ -423,7 +423,7 @@ export function SupplyList({
                 >
                   {/* Sur un iPhone étroit, l'icône cède sa place pour que le texte tienne sur une ligne. */}
                   <Send size={18} aria-hidden="true" className="hidden min-[400px]:block" />
-                  Envoyer au fournisseur
+                  Envoyer aux négoces
                 </Button>
               )}
               {blocked && toCheck.length > 0 && !sent ? (
