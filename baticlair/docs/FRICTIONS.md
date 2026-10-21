@@ -45,3 +45,31 @@ Landing : accroche, trois étapes, « Le négoce paie 2 % ». Inscription : quat
 ## Tests
 
 Les e2e qui lisaient les anciens libellés sont mis à jour ; aucun nouveau parcours n'est nécessaire, chaque changement est un texte ou un ordre d'affichage couvert par les tests existants (étape 2, étape 8, scénarios 1 et 2, aide, PWA, responsive).
+
+
+# Simplification du 21 octobre : lecture à froid, écran par écran
+
+Demande du fondateur : trois entrées dans la barre du bas, un seul bouton principal par écran, un accueil vide réduit à une phrase et un bouton, aucun mot qu'un enfant ne comprend pas. Parcours rejoué sur iPhone (390 × 844) avant et après, branche `claude/simplification`. Chaque écran est lu à froid : ce qui demande plus de trois secondes est noté, puis corrigé ou laissé à décider.
+
+| N° | Écran | Ce qui demandait plus de 3 secondes | Fait |
+|---|---|---|---|
+| S1 | Barre du bas | Cinq entrées, un « + » sans mot : il ne savait pas si « Chantiers » et « Accueil » étaient la même chose. | Fait : trois entrées avec icône et mot (« Mes chantiers », « + Nouveau devis », « Groupé »). |
+| S2 | Barre du bas | Fournisseurs et Compte au même niveau que le travail du jour. | Fait : derrière l'initiale, en haut à droite, avec l'essai sur un chantier fictif. |
+| S3 | Accueil vide | Salutation, recherche, bloc « À faire », conseil d'installation, carte d'essai : six choses avant le premier geste. | Fait : une phrase, un bouton « Déposer mon devis ». Le conseil d'installation vient avec le premier chantier. |
+| S4 | Accueil avec chantiers | Un bouton orange par action à faire : il ne sait pas lequel d'abord. | Fait : seul le premier est en couleur. |
+| S5 | Ton chantier | Deux gros boutons côte à côte : « Proposer au groupé » et « Envoyer au fournisseur ». | Fait : « Envoyer aux négoces » est le seul bouton principal, « Proposer au groupé » passe en secondaire. |
+| S6 | Ton chantier | « Envoyer au fournisseur » alors que le groupé parle de négoces. | Fait : « Envoyer aux négoces ». |
+| S7 | Légende de la liste | Un point « · » seul entre deux explications, qui retombait en début de ligne. | Fait : plus de point, les deux explications sont séparées par de l'espace. |
+| S8 | Groupé, « Mes lots » | « Lot n° 109 · Lot ouvert, en attente d'autres artisans » : qu'est-ce qu'un lot ? | Fait : « Commande groupée n° 109 · On attend d'autres artisans ». |
+| S9 | Proposer au groupé | « Livraison sur le chantier » au-dessus de « Au plus tôt » et « Au plus tard » : c'est une fenêtre, mot de planning. | Fait : « Tu veux être livré entre quelles dates ? ». |
+| S10 | Proposer au groupé | « Le lot se forme par département » : formule interne. | Fait : « On regroupe les artisans d'un même département : il faut l'adresse de livraison. » |
+| S11 | Groupé, « Comment ça marche » | « Une fenêtre de livraison », « même référence », « un seul lot ». | Fait : « la date de livraison voulue », « même produit », « une seule commande ». |
+| S12 | Livraison | « Tu ne commandes pas ce lot (désistement). » et « deux désistements en 12 mois ». | Fait : « Tu ne commandes pas. C'est noté. » et « deux commandes annulées en 12 mois ». |
+| S13 | Après le devis | Carte « Lots repérés » avec « Retirer le lot VMC », « Ajouter un lot ». | Fait : « Parties du devis », « Retirer la partie VMC », « Ajouter une partie ». |
+| S14 | Notification du groupé | « Prochain lot lundi. » | Fait : « Prochaine commande groupée lundi. » |
+| S15 | Accueil vide | Deux boutons en couleur à l'écran : « Déposer mon devis » et « + Nouveau devis » dans la barre. Ils font la même chose. | À décider : gardés tous les deux, la barre est la même sur tous les écrans. |
+| S16 | Dates du groupé | Format américain « 10/28/2026 ». | Rien à faire : vient du navigateur de test ; Safari français affiche la date en français. |
+
+Mots cherchés et remplacés sur les écrans de l'artisan : lot, fenêtre, désistement, référence. Mots laissés parce que le métier les dit : négoce, descentes, Ø, SIRET.
+
+Tests : les e2e qui lisaient les anciens libellés sont mis à jour. Suite iPhone entière : 52 réussis, 4 ignorés (écran d'ordinateur). Tests du domaine et de l'API touchés (notifications du groupé) : verts.

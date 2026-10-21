@@ -235,11 +235,10 @@ export function SupplyList({
       {/* §49, §50 (retour du fondateur, 2026-10-12) : la légende des repères, sous le titre. */}
       {/* Retour du fondateur (2026-10-12) : « mets des cases à cocher à chaque ligne pour pouvoir valider ». La case cochée
           verte : prête à commander ; la case vide orange : à valider (un tap la coche, ou ouvre la question qui reste). */}
-      <p className="mb-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[13px] font-semibold text-muted">
+      <p className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] font-semibold text-muted">
         <span className="inline-flex items-center gap-1.5">
           <Box checked /> Prêt à commander
         </span>
-        <span aria-hidden="true">·</span>
         <span className="inline-flex items-center gap-1.5">
           <Box checked={false} /> À préciser : coche pour valider
         </span>
