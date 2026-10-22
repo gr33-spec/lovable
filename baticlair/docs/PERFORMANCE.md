@@ -103,3 +103,13 @@ Même mesure (Lighthouse 12.8.2, mobile, slow 4G simulé, site construit, API lo
 | `/connexion` | 98 | 97 | 1,9 s | 0,06 |
 
 Corrigé : (1) la démo guidée est rendue par le serveur ; un script de trois lignes, lu avant l'affichage, la cache si elle a déjà été vue (plus de `useSearchParams`, qui empêchait le rendu serveur ; « Revoir la démo » recharge la page) ; (2) les deux polices passent par `next/font/local` (mêmes fichiers @fontsource) : préchargées, avec une police de secours aux mêmes mesures. SEO à 60 sur toutes les pages : c'est l'en-tête `X-Robots-Tag: noindex` voulu tant que rien n'est lancé ; à retirer au lancement (une ligne de `next.config.ts`). Mode sombre : l'app n'a pas de thème sombre ; `color-scheme: light` garde champs et cases lisibles sur un iPhone réglé en sombre.
+
+## Revue à froid de la commande du mois (23 octobre 2026)
+
+Lighthouse 12.8.2, mobile, slow 4G simulé, site construit (Next.js 16.4.2), API locale.
+
+| Page | Performance | Accessibilité | Bonnes pratiques | LCP | CLS |
+|---|---|---|---|---|---|
+| `/` (landing) | 96 | 100 | 96 | 2,7 s | 0 |
+| `/connexion` | 99 | 100 | 100 | 1,5 s | 0,06 |
+| `/grille/…` (page du négoce) | 95 | 100 | 96 | 2,7 s | 0 |

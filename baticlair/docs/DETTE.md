@@ -36,6 +36,9 @@ Plan du 20 octobre 2026, bloc 12. Par ordre de risque ; chaque ligne dit le risq
 | 29 | Faible | Commande express (hors cycle mensuel, pour un besoin urgent) : pas faite (Greg, 22 octobre). | L'artisan envoie à son négoce en direct (« Envoyer au fournisseur »). | Un cycle court à la demande, mêmes grilles et mêmes règles. | Quand Greg le demande. |
 | 30 | Faible | La fusion n'additionne que des lignes de même unité : 20 palettes et 3 000 pièces de la même ardoise font deux lignes. | Le négoce chiffre les deux ; chaque artisan a son prix. | Convertir avec un conditionnement vérifié (pièces par palette). | Quand un conditionnement fabricant est sourcé. |
 | 31 | Faible | Deux modes coexistent (`COMMANDE_COMMUNE=mois` et `lots`) et deux passes e2e. | Le mode `mois` est le défaut ; `lots` reste testé. | Retirer le mode `lots` et ses tables quand Greg le décide. | Avec Greg. |
+| 32 | Faible | Le bloc « Commande commune » de « Ton chantier » montre la commande du département de l'entreprise, pas forcément celui du chantier (le dépôt, lui, va dans le bon). | La plupart des couvreurs travaillent dans leur département. | Passer le chantier à `GET /v1/commande-du-mois` et montrer la commande de sa zone. | Avant d'ouvrir un second département. |
+| 33 | Moyen | Une erreur 500 vue une fois sur `/v1/price-requests/settings` (e2e « zéro bouton mort », ordinateur), non reproduite. | Le parcours rejoué passe ; aucune modification de cette route. | Journaliser la cause des 500 en e2e (sortie de l'API) pour la saisir à la prochaine occurrence. | Prochaine série e2e en échec. |
+| 34 | Faible | `deepmerge-ts` 7 et `vite` 8.3.1 signalés par `pnpm audit` (outils de migration et de test). | Rien de cela ne tourne en production. | Monter Prisma et Vitest quand leurs versions corrigées sortent. | Mise à jour des outils. |
 
 ## État au 23 octobre 2026 (plan « finition », bloc 8)
 
