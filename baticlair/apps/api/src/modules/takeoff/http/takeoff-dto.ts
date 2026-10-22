@@ -1,4 +1,4 @@
-import { briefResume, briefTexte, libelleDuMetier, LOTS_KEY, lotsRetenus, ratiosEnValidationDuDevis, REFERENTIALS, siteUnits, withoutLabour, writtenNumber } from "@baticlair/domain";
+import { briefResume, briefTexte, libelleDuMetier, LOTS_KEY, lotsRetenus, phrasePrecision, precisionDeLigne, ratiosEnValidationDuDevis, REFERENTIALS, siteUnits, withoutLabour, writtenNumber } from "@baticlair/domain";
 import type { ArtisanView, PurchaseView } from "@baticlair/domain";
 import { artisanNotes } from "../../../platform/ai/artisan-notes.js";
 import type { ReviewedTakeoff } from "../application/takeoff.service.js";
@@ -25,6 +25,11 @@ function item(b: PurchaseView["toBuy"][number]) {
     /** §49.8 : de quoi régler la ligne orange dans sa carte, d'un tap. */
     asks: b.asks ?? [],
     gap: b.gap ?? null,
+    /**
+     * Nouveau cap (22 octobre) : ce qui manque à la ligne pour se grouper avec les autres (format, origine, choix, marque…),
+     * en boutons ; vide quand elle est précise. Ne bloque jamais l'envoi à son négoce.
+     */
+    aPreciserPourGroupe: precisionDeLigne(b.label).questions,
   };
 }
 
@@ -129,6 +134,8 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase, exclude
     brefAvecClient: takeoff.answers["bref:avec-client"] === "oui",
     // §52 (retour du fondateur, 2026-10-12) : un métier pas encore relu par un artisan porte « Ratios en cours de
     // validation » sur l'écran 3 et dans le PDF fournisseur ; pas la couverture.
+    /** La phrase de la pastille orange d'une ligne vague (« Précise pour trouver d'autres couvreurs »). */
+    phrasePrecision: phrasePrecision(takeoff.trade),
     ratiosEnValidation: ratiosEnValidationDuDevis(takeoff.lecture ? { ...takeoff.lecture, lots: lotsRetenus(takeoff.lecture, takeoff.answers[LOTS_KEY]) } : null, takeoff.trade),
     // §52, la carte « Lots repérés » (directive du fondateur, 2026-10-13) : les lots que la lecture a repérés, ceux que
     // l'artisan a gardés ou ajoutés (null tant qu'il n'a pas dit « C'est bon »), et les métiers qu'il peut ajouter.

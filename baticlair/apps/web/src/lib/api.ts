@@ -233,6 +233,8 @@ export interface Quantitatif {
 }
 
 export interface Takeoff {
+  /** Nouveau cap (22 octobre) : la phrase de la pastille orange d'une ligne vague. */
+  phrasePrecision?: string;
   /** « Comme d'habitude ? » : les habitudes établies de l'entreprise appliquées à ce chantier. */
   habits?: { key: string; question: string; unit: string; options: { label: string; value: string }[]; value: string }[];
   /** §49.9 : les lignes du devis sans fourniture (heures, forfait, accès, évacuation), repliées sous la liste. */
@@ -306,6 +308,8 @@ export interface PurchaseItem {
   asks?: { key: string; text: string; unit: string | null; options: { label: string; value: string }[] }[];
   /** §49.8 : un écart devis / calcul, « Garder 20 » / « Mettre 21 ». */
   gap?: { written: string; computed: string; unit: string } | null;
+  /** Nouveau cap (22 octobre) : ce qui manque pour se grouper (format, origine, choix, marque), en boutons ; vide : précise. */
+  aPreciserPourGroupe?: { cle: string; question: string; options: string[] }[];
 }
 
 export interface PurchaseAssumption {

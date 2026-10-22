@@ -1,7 +1,7 @@
 "use client";
 
 import { AideBouton } from "@/components/aide";
-import { Check, ChevronDown, ChevronUp, Eye, ListChecks, Paperclip, Pencil, Send, Trash2, Users, X } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Eye, ListChecks, Paperclip, Pencil, Plus, Send, Trash2, Users, X } from "lucide-react";
 import { openDocument } from "@/lib/open-document";
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -151,7 +151,6 @@ export function SupplyList({
     r.status !== "check" && Boolean(articleOf(r)) && (pourGroupe ? Boolean(r.itemKey) && !groupe?.besoins.has(r.itemKey!) : !selection?.sent.has(articleOf(r)!));
   const selectable = rows.filter(cochable).map((r) => articleOf(r)!);
   const allChecked = selectable.length > 0 && selectable.every((k) => checked.has(k));
-  const link = "inline-flex min-h-10 items-center gap-1.5 text-[13px] font-bold text-muted underline decoration-dotted underline-offset-4";
 
   return (
     <section aria-label="Liste des fournitures" className="flex flex-col">
@@ -269,7 +268,7 @@ export function SupplyList({
           )}
         </h4>
       ) : null}
-      <ul aria-label={section.label ? `Fournitures · ${section.label}` : "Fournitures"} className="flex flex-col divide-y divide-line rounded-[20px] border border-[#dde1e8] bg-surface">
+      <ul aria-label={section.label ? `Fournitures · ${section.label}` : "Fournitures"} className="flex flex-col gap-2">
         {section.rows.map((r) => (
           <Row
             key={r.key}
@@ -310,6 +309,18 @@ export function SupplyList({
       </ul>
       </div>
       ))}
+      {/* Nouveau cap (22 octobre) : un gros « + Ajouter » sous les cartes (avant : un petit lien sous l'envoi). */}
+      {editable && onAdd && !selecting ? (
+        <button
+          type="button"
+          onClick={onAdd}
+          aria-label="Ajouter un article"
+          className="mt-2 flex min-h-14 w-full items-center justify-center gap-2 rounded-[18px] border-2 border-dashed border-accent/40 bg-surface text-[17px] font-extrabold text-accent-text active:scale-[0.99]"
+        >
+          <Plus size={22} strokeWidth={2.6} aria-hidden="true" />
+          Ajouter
+        </button>
+      ) : null}
       {/* §49.9 : les lignes du devis sans fourniture (heures, forfait, évacuation) ne sont pas dans la liste et ne partent
           jamais ; repliées, fermées par défaut, pour que l'artisan voie qu'elles ont été lues. */}
       {takeoff.sansFourniture && takeoff.sansFourniture.length > 0 ? (
@@ -432,15 +443,7 @@ export function SupplyList({
               ) : null}
             </div>
           ) : null}
-          {editable ? (
-            <nav aria-label="Autres gestes sur la liste" className="mt-1 flex flex-wrap justify-center gap-x-4 pb-2">
-              {onAdd ? (
-                <button type="button" onClick={onAdd} className={link}>
-                  Ajouter un article
-                </button>
-              ) : null}
-            </nav>
-          ) : null}
+
         </>
       )}
     </section>
@@ -684,8 +687,11 @@ function Row({
   const lines = row.lineIds.map((id) => takeoff.lines.find((l) => l.id === id)).filter((l): l is Takeoff["lines"][number] => Boolean(l));
   const raw = item?.quantity ?? quote?.measure ?? row.pending?.quantity ?? null;
   const quantity = raw ? enMetres(raw) : null;
-  const sub = sentTo ? `Envoyé · ${sentTo}` : row.status === "check" ? (row.reason ?? "À vérifier") : null;
-  const dot = sentTo ? DOT.supplier : DOT[row.status];
+  // Nouveau cap (22 octobre) : une ligne prête mais vague (sans format, origine, choix ou marque) a sa pastille orange et
+  // « Précise pour trouver d'autres couvreurs » ; ses questions en boutons. Elle part quand même chez le négoce.
+  const vague = !sentTo && editable && row.status !== "check" && (item?.aPreciserPourGroupe?.length ?? 0) > 0;
+  const sub = sentTo ? `Envoyé · ${sentTo}` : row.status === "check" ? (row.reason ?? "À vérifier") : vague ? (takeoff.phrasePrecision ?? "Précise pour trouver d'autres couvreurs") : null;
+  const dot = sentTo ? DOT.supplier : vague ? { ok: false, label: "à préciser" } : DOT[row.status];
   const parsed = item?.quantity ? parseQuantity(item.quantity) : null;
   const stepper = editable && !sentTo && item && parsed && Number.isFinite(toNumber(parsed.quantity)) ? { value: toNumber(parsed.quantity), unit: parsed.unit } : null;
   const removable = editable && (row.itemKey !== undefined || row.lineIds.length > 0);
@@ -713,6 +719,13 @@ function Row({
     if (dx < -90) onSetAside();
     setDx(0);
   };
+  // La réponse à une question de précision s'écrit dans la désignation (« Ardoise naturelle » → « … 32×22 »).
+  const preciser = async (cle: string, valeur: string) => {
+    const v = valeur.trim();
+    if (!item || !v) return;
+    const dit = cle === "developpe" && /^\d+$/.test(v) ? `dév. ${v}` : v;
+    await onEdit(item, { libelle: `${item.label.trim()} ${dit}`, quantite: parsed?.quantity ?? null, unite: parsed?.unit ?? null });
+  };
   const rename = async (name: string) => {
     if (item) await onEdit(item, { libelle: name, quantite: parsed?.quantity ?? null, unite: parsed?.unit ?? null });
     else if (nameLine) await handlers.onSaveLine(nameLine.id, { designation: name, quantity: nameLine.quantity, unit: nameLine.unit, reference: nameLine.reference });
@@ -738,7 +751,7 @@ function Row({
   // §48.5 : en mode sélection, la ligne entière coche sa case ; rien d'autre ne s'ouvre.
   if (selectMode) {
     return (
-      <li id={`ligne-${row.key}`} className={`px-3 py-2 ${selectMode.checked ? "bg-accent/5" : ""} ${selectMode.disabled ? "opacity-60" : ""}`}>
+      <li id={`ligne-${row.key}`} className={`rounded-[18px] border border-[#dde1e8] px-3 py-2 ${selectMode.checked ? "bg-accent/5" : "bg-surface"} ${selectMode.disabled ? "opacity-60" : ""}`}>
         <label className={`flex min-h-11 items-start gap-2.5 ${selectMode.disabled ? "" : "cursor-pointer"}`}>
           <input
             type="checkbox"
@@ -762,8 +775,8 @@ function Row({
   return (
     <li
       id={`ligne-${row.key}`}
-      className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden px-3 py-1.5 transition-[background-color,box-shadow,border-radius] duration-200 ${
-        open ? "z-[51] rounded-[20px] bg-surface shadow-[0_24px_60px_-12px_rgba(16,24,40,0.45)] ring-1 ring-black/5" : ""
+      className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden rounded-[18px] border border-[#dde1e8] bg-surface px-3 py-1.5 transition-[background-color,box-shadow,border-radius] duration-200 ${
+        open ? "z-[51] rounded-[20px] shadow-[0_24px_60px_-12px_rgba(16,24,40,0.45)] ring-1 ring-black/5" : "shadow-[0_1px_2px_rgba(16,24,40,0.04)]"
       }`}
     >
       {/* Retour du fondateur (2026-10-11) : la ligne ouverte passe au premier plan, le reste est flouté derrière ; un tap sur le
@@ -857,6 +870,7 @@ function Row({
           {error ? <ErrorNotice error={error} /> : null}
           {/* §51.6 (retour du fondateur, 2026-10-12) : une ligne orange se règle là où on l'ouvre : sa question d'abord. */}
           {row.status === "check" ? <CardActions label={label} decision={decision} item={item} pending={pending} handlers={handlers} onEdit={onEdit} /> : null}
+          {vague && item ? <PrecisionActions label={label} questions={item.aPreciserPourGroupe ?? []} pending={pending} onAnswer={preciser} /> : null}
           {renamable ? (
             naming ? (
               <InlineText label={`Nom : ${label}`} value={item?.label ?? nameLine?.article ?? nameLine?.designation ?? label} pending={pending} onCancel={() => setNaming(false)} onSave={rename} />
@@ -1096,6 +1110,61 @@ function CardActions({
         {/* §49.8 : les choix en boutons dans la carte, puis « C'est bon » ; plus de gros bouton « Corriger » : la ligne se
             réécrit d'un tap sur son nom. */}
       </div>
+    </div>
+  );
+}
+
+/**
+ * NOUVEAU CAP (22 octobre 2026) : « Ligne vague → question en boutons (format, origine, choix, marque). » Chaque donnée qui
+ * manque, ses boutons et « Autre » ; la réponse s'écrit dans la désignation, la question suivante vient ensuite.
+ */
+function PrecisionActions({ label, questions, pending, onAnswer }: { label: string; questions: readonly { cle: string; question: string; options: string[] }[]; pending: boolean; onAnswer: (cle: string, valeur: string) => Promise<void> }) {
+  const [written, setWritten] = useState<string | null>(null);
+  const [other, setOther] = useState("");
+  return (
+    <div role="group" aria-label={`Préciser : ${label}`} aria-busy={pending || undefined} className="flex flex-col gap-3">
+      {questions.map((q) => (
+        <div key={q.cle} role="group" aria-label={q.question} className="flex flex-col gap-1.5">
+          <p className="text-[15px] leading-snug font-extrabold">{q.question}</p>
+          <div className="flex flex-wrap gap-1.5">
+            {q.options.map((o) => (
+              <button key={o} type="button" disabled={pending} onClick={() => void onAnswer(q.cle, o)} className={`${OPTION} grow`}>
+                {o}
+              </button>
+            ))}
+            {written === q.cle ? null : (
+              <button type="button" disabled={pending} onClick={() => setWritten(q.cle)} className={`${OPTION} grow border-dashed`}>
+                Autre
+              </button>
+            )}
+          </div>
+          {written === q.cle ? (
+            <form
+              className="flex items-center gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (other.trim()) void onAnswer(q.cle, other).then(() => {
+                  setWritten(null);
+                  setOther("");
+                });
+              }}
+            >
+              <input
+                aria-label={`Autre : ${q.question}`}
+                autoFocus
+                value={other}
+                maxLength={120}
+                onChange={(e) => setOther(e.target.value)}
+                placeholder="Écris ta réponse"
+                className="min-h-11 w-full min-w-0 rounded-xl border-2 border-line bg-surface px-3 text-[15px] outline-none focus:border-accent"
+              />
+              <Button type="submit" className="shrink-0" pending={pending}>
+                OK
+              </Button>
+            </form>
+          ) : null}
+        </div>
+      ))}
     </div>
   );
 }

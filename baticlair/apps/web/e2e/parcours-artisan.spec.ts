@@ -1319,8 +1319,9 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
     else expect(greenSeen, `orange après une verte (carte ${i + 1})`).toBe(false);
   }
   await expect(list.getByRole("status").filter({ hasText: /^\d+ lignes? à régler$/ })).toBeVisible();
-  const links = list.getByRole("navigation", { name: "Autres gestes sur la liste" }).getByRole("button");
-  await expect(links).toHaveText(["Ajouter un article"]);
+  // Nouveau cap (22 octobre) : un gros « + Ajouter » sous les cartes ; plus de petits liens sous l'envoi.
+  await expect(list.getByRole("button", { name: "Ajouter un article" })).toHaveText("Ajouter");
+  await expect(list.getByRole("navigation", { name: "Autres gestes sur la liste" })).toHaveCount(0);
 
   // §50.7 : l'écran 3 est le document : « Ton chantier », le chantier en bref, puis la liste ; aucune voix.
   await expect(list.getByRole("heading", { name: "Ton chantier" })).toBeVisible();
@@ -2406,10 +2407,22 @@ test("« + Nouvelle liste » : « Donne ta liste de matériaux » lit la photo s
   for (const article of ["Tuile romane canal rouge", "Faîtière ronde à emboîtement", "Liteau sapin 27x38", "Écran sous-toiture", "Pointes inox"]) {
     await expect(liste.getByRole("button", { name: new RegExp(`^Modifier : ${article}`) })).toBeVisible();
   }
-  // Rien d'ajouté, rien de calculé : cinq lignes, comme sur la feuille, toutes prêtes (aucune ligne orange).
+  // Rien d'ajouté, rien de calculé : cinq lignes, comme sur la feuille, toutes prêtes (aucune ligne à régler).
   await expect(liste.getByRole("img", { name: "à vérifier" })).toHaveCount(0);
   await expect(liste.getByRole("button", { name: /^Modifier : / })).toHaveCount(5);
   await expect(liste.getByText(/1[\s\u00a0\u202f]?250/).filter({ visible: true }).first()).toBeVisible();
+
+  // Nouveau cap (22 octobre) : une ligne vague a sa pastille orange, « Précise pour trouver d'autres couvreurs », et sa
+  // question en boutons ; la réponse s'écrit dans la désignation et la pastille passe au vert. Le liteau est déjà précis.
+  await expect(liste.getByText("Précise pour trouver d'autres couvreurs")).toHaveCount(4);
+  await liste.getByRole("button", { name: "Modifier : Tuile romane canal rouge" }).click();
+  const tuile = page.getByRole("group", { name: "Préciser : Tuile romane canal rouge" });
+  await expect(tuile.getByRole("group", { name: "Marque ?" })).toBeVisible();
+  await tuile.getByRole("button", { name: "Edilians", exact: true }).click();
+  await expect(liste.getByRole("button", { name: /^(Modifier|Fermer) : Tuile romane canal rouge Edilians/ })).toBeVisible();
+  await closeOpenLine(page);
+  await expect(liste.getByText("Précise pour trouver d'autres couvreurs")).toHaveCount(3);
+  await expect(liste.getByRole("button", { name: /Liteau sapin 27x38/ }).first()).toBeVisible();
 
   // 3. Corriger d'un doigt ce qui est mal lu : renommer, retirer, ajouter une ligne.
   await page.getByRole("button", { name: "Modifier : Pointes inox" }).click();

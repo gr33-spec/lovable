@@ -109,7 +109,7 @@ function ImagePrix() {
             ["15", "demandes"],
             ["3", "devis reçus"],
           ].map(([n, l]) => (
-            <div key={l} className="rounded-xl bg-ground px-1 py-2">
+            <div key={l} className="relative rounded-xl bg-ground px-1 py-2">
               <dt className="sr-only">{l}</dt>
               <dd className="font-display text-[22px] leading-none font-extrabold">{n}</dd>
               <dd className="mt-1 text-[11px] font-bold text-muted">{l}</dd>
