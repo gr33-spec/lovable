@@ -3,7 +3,52 @@
  * matériaux, et d'autres choses liées à ce qu'on propose »). Dessinées en SVG dans la page même : aucune ressource
  * extérieure (test permanent de la landing), nettes sur tous les écrans, légères. Décoratives (`aria-hidden`), sauf
  * quand le texte qui les accompagne porte le sens.
+ *
+ * DE VRAIES PHOTOS, PLUS TARD (décision du 22 octobre) : chaque dessin a son emplacement. Pour le remplacer, copier la
+ * photo dans `public/landing/photos/` (JPEG ou WebP, 1 600 px de large au plus) et ajouter une ligne à `PHOTOS_LANDING`
+ * ci-dessous, par exemple `chantier: "/landing/photos/chantier.jpg"`. La page affiche alors la photo, recadrée à la
+ * place du dessin ; enlever la ligne remet le dessin. Les photos restent servies par le site (aucune ressource
+ * extérieure, test permanent de la landing).
  */
+
+export type EmplacementPhoto =
+  | "chantier"
+  | "tournee"
+  | "outils"
+  | "ardoise"
+  | "tuile"
+  | "gouttiere"
+  | "liteau"
+  | "ba13"
+  | "cable"
+  | "carrelage"
+  | "parpaing";
+
+/** Les photos qui remplacent un dessin. Vide tant que Greg n'a pas fourni ses photos de chantier. */
+export const PHOTOS_LANDING: Partial<Record<EmplacementPhoto, `/landing/photos/${string}`>> = {};
+
+/** Le texte lu à la place de la photo (une photo porte du sens, contrairement au dessin décoratif). */
+const ALT_PHOTOS: Record<EmplacementPhoto, string> = {
+  chantier: "Un couvreur sur un toit en cours de rénovation",
+  tournee: "Le camion d'un négoce livre un chantier",
+  outils: "Les outils de l'artisan sur le chantier",
+  ardoise: "Une palette d'ardoises naturelles",
+  tuile: "Des tuiles romanes canal",
+  gouttiere: "Une gouttière en zinc",
+  liteau: "Un paquet de liteaux en sapin",
+  ba13: "Une pile de plaques de plâtre BA13",
+  cable: "Une couronne de câble électrique",
+  carrelage: "Des carreaux de grès 60×60",
+  parpaing: "Une palette de parpaings",
+};
+
+/** La photo de l'emplacement si elle existe, sinon le dessin. `className` s'applique à la photo (recadrage). */
+export function Visuel({ emplacement, className = "", children }: { emplacement: EmplacementPhoto; className?: string; children: React.ReactNode }) {
+  const src = PHOTOS_LANDING[emplacement];
+  if (!src) return <>{children}</>;
+  // eslint-disable-next-line @next/next/no-img-element -- fichier local, sans optimiseur, comme les captures de la page
+  return <img src={src} alt={ALT_PHOTOS[emplacement]} className={`object-cover ${className}`} loading="lazy" decoding="async" />;
+}
 
 const ARDOISE = "#3d4452";
 const ARDOISE_CLAIRE = "#535b6b";
@@ -269,14 +314,14 @@ function Parpaings() {
 
 /** Ce qu'on commande, dans les mots du comptoir : la désignation et la quantité telles qu'elles partent au négoce. */
 export const FOURNITURES_EXEMPLE = [
-  { nom: "Ardoise naturelle 32×22", quantite: "2 760 pièces", metier: "Couverture", Dessin: Ardoises, fond: "bg-[#e7ebf3]" },
-  { nom: "Tuile romane canal rouge", quantite: "1 250 pièces", metier: "Couverture", Dessin: Tuiles, fond: "bg-[#f7e6e0]" },
-  { nom: "Gouttière zinc dév. 33", quantite: "4 longueurs de 4 m", metier: "Zinguerie", Dessin: Gouttiere, fond: "bg-[#eceff3]" },
-  { nom: "Liteau sapin traité 27×38", quantite: "480 m", metier: "Charpente", Dessin: Liteaux, fond: "bg-[#f6ebdd]" },
-  { nom: "Plaque de plâtre BA13", quantite: "84 plaques", metier: "Plâtrerie", Dessin: Plaques, fond: "bg-[#eef0f4]" },
-  { nom: "Câble R2V 3G2,5", quantite: "3 couronnes de 100 m", metier: "Électricité", Dessin: Cable, fond: "bg-[#e9edf7]" },
-  { nom: "Carrelage grès 60×60", quantite: "23 cartons", metier: "Carrelage", Dessin: Carrelage, fond: "bg-[#f4efe7]" },
-  { nom: "Parpaing creux 20×20×50", quantite: "2 palettes", metier: "Maçonnerie", Dessin: Parpaings, fond: "bg-[#eceeef]" },
+  { photo: "ardoise", nom: "Ardoise naturelle 32×22", quantite: "2 760 pièces", metier: "Couverture", Dessin: Ardoises, fond: "bg-[#e7ebf3]" },
+  { photo: "tuile", nom: "Tuile romane canal rouge", quantite: "1 250 pièces", metier: "Couverture", Dessin: Tuiles, fond: "bg-[#f7e6e0]" },
+  { photo: "gouttiere", nom: "Gouttière zinc dév. 33", quantite: "4 longueurs de 4 m", metier: "Zinguerie", Dessin: Gouttiere, fond: "bg-[#eceff3]" },
+  { photo: "liteau", nom: "Liteau sapin traité 27×38", quantite: "480 m", metier: "Charpente", Dessin: Liteaux, fond: "bg-[#f6ebdd]" },
+  { photo: "ba13", nom: "Plaque de plâtre BA13", quantite: "84 plaques", metier: "Plâtrerie", Dessin: Plaques, fond: "bg-[#eef0f4]" },
+  { photo: "cable", nom: "Câble R2V 3G2,5", quantite: "3 couronnes de 100 m", metier: "Électricité", Dessin: Cable, fond: "bg-[#e9edf7]" },
+  { photo: "carrelage", nom: "Carrelage grès 60×60", quantite: "23 cartons", metier: "Carrelage", Dessin: Carrelage, fond: "bg-[#f4efe7]" },
+  { photo: "parpaing", nom: "Parpaing creux 20×20×50", quantite: "2 palettes", metier: "Maçonnerie", Dessin: Parpaings, fond: "bg-[#eceeef]" },
 ] as const;
 
 /** Le groupé en image : un seul camion du négoce retenu, qui livre trois chantiers du département. */

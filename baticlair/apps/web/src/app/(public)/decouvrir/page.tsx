@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { DemoGuidee } from "@/components/demo-guidee";
 import { ButtonLink } from "@/components/ui";
 import { LiensLegaux } from "@/components/legal";
-import { FOURNITURES_EXEMPLE, OutilsArtisan, SceneChantier, TourneeGroupee } from "@/components/landing-illustrations";
+import { FOURNITURES_EXEMPLE, OutilsArtisan, SceneChantier, TourneeGroupee, Visuel } from "@/components/landing-illustrations";
 import { TRADES } from "@/lib/trades";
 
 /**
@@ -80,7 +80,9 @@ export default function BienvenuePage() {
         <div className="relative lg:col-span-5 animate-rise [animation-delay:120ms]">
           {/* Le chantier en fond, le téléphone posé devant, décalé pour laisser voir le couvreur sur son échelle. */}
           <div className="relative h-[440px] overflow-hidden rounded-[36px] shadow-card sm:h-[540px]">
-            <SceneChantier className="absolute inset-0 h-full w-full" />
+            <Visuel emplacement="chantier" className="absolute inset-0 h-full w-full">
+              <SceneChantier className="absolute inset-0 h-full w-full" />
+            </Visuel>
             <div className="absolute right-[-36px] bottom-[-150px] origin-bottom-right scale-[0.78] sm:right-2 sm:bottom-[-110px] sm:scale-[0.9]">
               <Telephone src="/landing/hero.jpg" alt="La liste des fournitures d'un chantier de couverture : ardoises, écran, gouttières, chaque ligne avec sa quantité" priorite />
             </div>
@@ -140,10 +142,12 @@ export default function BienvenuePage() {
           <p className="max-w-[55ch] text-[17px] leading-relaxed text-muted">Ardoises, liteaux, gouttières, BA13, câble : chaque ligne part au négoce comme tu la lui dirais.</p>
         </div>
         <ul aria-label="Exemples de fournitures" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-          {FOURNITURES_EXEMPLE.map(({ nom, quantite, metier, Dessin, fond }) => (
+          {FOURNITURES_EXEMPLE.map(({ photo, nom, quantite, metier, Dessin, fond }) => (
             <li key={nom} className="flex flex-col overflow-hidden rounded-[24px] bg-surface shadow-card">
-              <div className={`${fond} flex aspect-[16/11] items-center justify-center p-3`}>
-                <Dessin />
+              <div className={`${fond} relative flex aspect-[16/11] items-center justify-center overflow-hidden p-3`}>
+                <Visuel emplacement={photo} className="absolute inset-0 h-full w-full">
+                  <Dessin />
+                </Visuel>
               </div>
               <div className="flex flex-1 flex-col gap-1 p-4">
                 <span className="text-[12px] font-extrabold tracking-[0.06em] text-muted uppercase">{metier}</span>
@@ -208,7 +212,9 @@ export default function BienvenuePage() {
                 </li>
               ))}
             </ol>
-            <TourneeGroupee className="w-full max-w-[520px]" />
+            <Visuel emplacement="tournee" className="aspect-[3/1] w-full max-w-[520px] rounded-2xl">
+              <TourneeGroupee className="w-full max-w-[520px]" />
+            </Visuel>
           </div>
           <div className="relative lg:col-span-5">
             <div className="relative mx-auto h-[360px] overflow-hidden sm:h-[460px] lg:h-full lg:min-h-[520px]">
@@ -253,7 +259,9 @@ export default function BienvenuePage() {
       </section>
 
       <section aria-labelledby="commencer" className="flex flex-col items-start gap-6 rounded-[36px] bg-ink px-7 py-10 text-white sm:items-center sm:px-10 sm:py-16 sm:text-center">
-        <OutilsArtisan className="w-[200px] sm:w-[240px]" />
+        <Visuel emplacement="outils" className="aspect-[16/10] w-[200px] rounded-2xl sm:w-[240px]">
+          <OutilsArtisan className="w-[200px] sm:w-[240px]" />
+        </Visuel>
         <h2 id="commencer" className="font-display text-[34px] leading-[1.02] font-extrabold tracking-[-0.035em] sm:text-[52px]">
           Ton premier devis, maintenant
         </h2>
