@@ -255,7 +255,8 @@ export class DemandeService {
     for (const f of depot.fichiers) if (f.type !== "application/pdf" || !f.contenu.subarray(0, 5).toString().startsWith("%PDF")) throw validationFailed("PDF only", { reason: "pdf_seulement" });
     // Nouveau cap (22 octobre) : un prix de livraison par zone du lot, obligatoire (zéro = franco).
     const livraison = livraisonComplete(zonesDuLot(r.lot.besoins.map((b) => b.adresseLivraison)), depot.livraison ?? []);
-    if (!livraison.ok) throw validationFailed("Delivery price per zone required", { reason: "livraison_requise", zones: livraison.manquantes });
+    if ("manquantes" in livraison) throw validationFailed("Delivery price per zone required", { reason: "livraison_requise", zones: livraison.manquantes });
+    const prixLivraison = livraison.prix;
     const maintenant = new Date();
     await this.prisma.$transaction(async (tx) => {
       await tx.accordNegoce.upsert({
@@ -266,7 +267,7 @@ export class DemandeService {
       await tx.reponseNegoceFichier.deleteMany({ where: { reponseId: r.id } });
       await tx.reponseNegoce.update({
         where: { id: r.id },
-        data: { message: depot.message, deposeLe: maintenant, statutExtraction: "en_attente", prix: [], delaiJours: null, livraison: livraison.prix, fichiers: { create: depot.fichiers.map((f) => ({ nom: f.nom, type: f.type, contenu: new Uint8Array(f.contenu) })) } },
+        data: { message: depot.message, deposeLe: maintenant, statutExtraction: "en_attente", prix: [], delaiJours: null, livraison: prixLivraison, fichiers: { create: depot.fichiers.map((f) => ({ nom: f.nom, type: f.type, contenu: new Uint8Array(f.contenu) })) } },
       });
     });
     const lecture = await this.lire(r, depot.fichiers);
