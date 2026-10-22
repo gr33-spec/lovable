@@ -2,6 +2,21 @@
 
 Oct 19, 2026 · @Greg
 
+## 0. Nouveau cap — 22 octobre 2026
+
+**Prioritaire sur tout le reste.** Là où les sections 1 à 7 le contredisent, cette section l'emporte. Ce fichier fait foi : il remplace l'export du doc de Greg (décision du 22 octobre ; détails de mise en œuvre dans `docs/DECISIONS.md`).
+
+- **Promesse : « Paie tes matériaux moins cher ».** Le quantitatif n'est plus la promesse, c'est un coup de main.
+- **Métiers.** Tous les métiers restent ouverts dans l'app. La landing, les exemples et la démo sont centrés sur les couvreurs, Côtes-d'Armor d'abord. Ensuite : charpente, maçonnerie, isolation-placo.
+- **Entrée.** Un gros bouton « Donne ta liste de matériaux » (photo, PDF, capture). Un petit bouton « Je n'ai qu'un devis » : « On t'avance la liste, sans garantie, tu la peaufines. »
+- **Liste en cartes.** On touche pour modifier, on glisse pour supprimer, un « + Ajouter ». Une ligne vague ne bloque rien, mais elle n'entre pas dans la commande commune : elle part seulement chez le négoce de l'artisan. Seules les lignes précises sont regroupées (pastille orange : « Précise pour l'ajouter à la commande commune »).
+- **Regroupement** par lignes identiques et par secteur, avec un écran compteur (artisans, demandes, devis reçus, meilleur prix). Un mail type part aux négoces de tous les artisans du groupe ; un mail prévient chaque négoce qu'il existe un regroupement.
+- **Devis négoce.** Lu une seule fois par Opus à son arrivée, puis comparé par le code au meilleur prix. Une alerte à chaque nouveau devis. L'app retient seule la moins chère qui couvre tout (livraison comprise).
+- **Livraison.** Le négoce donne deux chiffres : « gratuite jusqu'à X km » et « Y € par livraison au-delà » (plus l'adresse de son dépôt). L'app calcule la distance jusqu'à chaque chantier et affiche à chaque artisan son prix livré.
+- **Suivi façon colis.** Liste prête → Prix demandés → Prix reçus → Commandé.
+- **Nom : « Commande commune »**, dans une seule constante (`packages/domain/src/groupe/nom.ts`), à confirmer auprès de 2-3 couvreurs.
+- **Rémunération : en suspens.** Rien ne change pour l'instant (ni abonnement, ni 2 %).
+
 ## 1. Principes
 
 Le groupé est une option de BatiClair qui regroupe les besoins de plusieurs artisans d'une même zone pour obtenir un prix de volume, sans jamais toucher au circuit du négoce.

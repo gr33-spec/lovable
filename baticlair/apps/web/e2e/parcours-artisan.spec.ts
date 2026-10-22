@@ -2314,9 +2314,13 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   // sur la rémunération (en suspens). Rien d'extérieur.
   await expect(page.getByText("Donne ta liste. On regroupe les couvreurs de ton secteur et on fait jouer la concurrence entre les négoces.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Ta liste, précise-la, ton prix" })).toBeVisible();
-  for (const image of ["Une liste de matériaux écrite à la main", /^Une ligne « Ardoise naturelle » à préciser/, "30 couvreurs, 15 demandes envoyées, 3 devis reçus, meilleur prix 1,12 €"]) {
+  // Registre pro (Greg, 22 octobre) : de vraies captures de l'app, aucun dessin ; une seule liste fictive, mêmes chiffres partout.
+  for (const image of ["L'écran « Donne ta liste de matériaux » de BatiClair", /^Une ligne « Ardoise naturelle 32×22 » à préciser/, "30 couvreurs, 15 demandes envoyées, 3 devis reçus, meilleur prix 0,92 €"]) {
     await expect(page.getByRole("region", { name: "Ta liste, précise-la, ton prix" }).getByRole("img", { name: image })).toBeVisible();
   }
+  await expect(page.getByRole("list", { name: "Exemple de liste de couverture" })).toContainText("Ardoise naturelle 32×22 Espagne 1er choix2 760 pièces");
+  await expect(page.getByText(/tuile/i)).toHaveCount(0);
+  await expect(page.locator("main svg")).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Les couvreurs de ton secteur, ensemble" })).toBeVisible();
   await expect(page.getByText("Aussi pour la charpente, la maçonnerie, l'isolation…")).toBeVisible();
   await expect(page.getByText(/2 %|Gratuit pour l'artisan|abonnement/)).toHaveCount(0);

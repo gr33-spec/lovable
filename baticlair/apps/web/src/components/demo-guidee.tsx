@@ -4,6 +4,7 @@ import { Check, FileText, Tag, Users } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { EXEMPLE } from "@/lib/exemple";
 
 /**
  * LA DÉMO GUIDÉE (plan 2 du 21 octobre 2026, bloc 3) : au premier lancement, trois écrans qui montrent l'app avec un
@@ -13,22 +14,6 @@ import { useEffect, useState } from "react";
  * regroupés (le compteur) → ton prix livré chez toi ; rien sur la rémunération, en suspens.
  */
 export const CLE_DEMO_VUE = "baticlair.demoVue";
-
-/** Le faux devis d'ardoise et ce que BatiClair en sort. Tous les chiffres sont inventés. */
-export const EXEMPLE = {
-  devis: { numero: "D-2026-042", client: "Maison Le Goff", adresse: "Ploubazlanec (22)", objet: "Couverture ardoise 32 × 22, 118 m²" },
-  /** Le compteur du groupe (nouveau cap) : couvreurs du secteur sur la même ligne, demandes, devis, meilleur prix. */
-  compteur: { couvreurs: 30, demandes: 15, devis: 3, meilleurPrix: "0,92 €" },
-  liste: [
-    { designation: "Ardoise 32 × 22 Espagne 1er choix", quantite: "2 760 pièces" },
-    { designation: "Crochet inox 100 mm", quantite: "3 paquets" },
-    { designation: "Liteau sapin traité 27 × 38", quantite: "480 m" },
-    { designation: "Écran sous-toiture HPV 1,5 × 50 m", quantite: "4 rouleaux" },
-    { designation: "Faîtage zinc dév. 33", quantite: "6 longueurs de 2 m" },
-  ],
-  lot: { numero: 12, departement: "Côtes-d'Armor", reference: "Ardoise 32 × 22 Espagne 1er choix", artisans: 3, volume: "8 200 pièces", negoces: 4 },
-  offre: { quantite: "2 760 pièces", prix: "0,92 € HT l'unité", negoce: "Négoce Exemple, Guingamp", baisse: "−11 %", livraison: "3 novembre", economie: "331 €", livre: "2 584 € HT livré à Ploubazlanec", fraisLivraison: "45 €", habituel: "1,04 €" },
-} as const;
 
 type Ecran = 0 | 1 | 2;
 
@@ -63,15 +48,15 @@ export function DemoGuidee() {
   if (!visible) return null;
   const titres = ["Ta liste, remise au propre", "Les couvreurs du secteur, regroupés", "Ton prix, livré chez toi"];
   return (
-    <section aria-labelledby="demo-titre" className="flex min-h-[calc(100svh-4rem)] flex-col gap-4 rounded-[28px] bg-hero p-4 text-white shadow-[0_24px_48px_-16px_rgba(26,21,80,0.6)] sm:p-6">
+    <section aria-labelledby="demo-titre" className="flex min-h-[calc(100svh-4rem)] flex-col gap-4 rounded-2xl sm:min-h-0 border border-[#e3e6ea] bg-surface p-4 text-ink sm:p-6">
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <span className="text-[12px] font-extrabold tracking-[0.04em] text-[#c9ced6]">Démo · écran {ecran + 1} sur 3 · données fictives</span>
+          <span className="text-[12px] font-bold tracking-[0.04em] text-muted">Démo · écran {ecran + 1} sur 3 · données fictives</span>
           <h2 id="demo-titre" className="font-display text-[26px] leading-tight font-extrabold tracking-[-0.02em]">
             {titres[ecran]}
           </h2>
         </div>
-        <button type="button" onClick={fermer} className="inline-flex min-h-11 shrink-0 items-center rounded-full bg-white/10 px-4 text-[15px] font-extrabold">
+        <button type="button" onClick={fermer} className="inline-flex min-h-11 shrink-0 items-center rounded-xl border border-[#d9dde3] px-4 text-[15px] font-bold">
           Passer
         </button>
       </div>
@@ -81,15 +66,15 @@ export function DemoGuidee() {
       <div className="mt-auto flex items-center justify-between gap-3 pt-2">
         <ol aria-label="Écrans de la démo" className="flex gap-1.5">
           {[0, 1, 2].map((i) => (
-            <li key={i} aria-current={i === ecran ? "step" : undefined} className={`size-2.5 rounded-full ${i === ecran ? "bg-white" : "bg-white/30"}`} />
+            <li key={i} aria-current={i === ecran ? "step" : undefined} className={`size-2.5 rounded-full ${i === ecran ? "bg-ink" : "bg-[#d9dde3]"}`} />
           ))}
         </ol>
         {ecran < 2 ? (
-          <button type="button" onClick={() => setEcran((ecran + 1) as Ecran)} className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-cta px-5 text-[15px] font-extrabold shadow-cta">
+          <button type="button" onClick={() => setEcran((ecran + 1) as Ecran)} className="inline-flex min-h-12 items-center justify-center rounded-xl bg-accent px-5 text-[15px] font-bold text-white transition hover:bg-accent-text">
             Suivant
           </button>
         ) : (
-          <Link href="/inscription" onClick={fermer} className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-cta px-5 text-[15px] font-extrabold shadow-cta">
+          <Link href="/inscription" onClick={fermer} className="inline-flex min-h-12 items-center justify-center rounded-xl bg-accent px-5 text-[15px] font-bold text-white transition hover:bg-accent-text">
             Créer un compte
           </Link>
         )}
@@ -99,7 +84,7 @@ export function DemoGuidee() {
 }
 
 function Exemple() {
-  return <span className="rounded-full bg-warn-bg px-2 py-0.5 text-[11px] font-extrabold text-warn">Exemple</span>;
+  return <span className="rounded-full border border-[#d9dde3] px-2 py-0.5 text-[11px] font-bold text-muted">Exemple</span>;
 }
 
 /** Écran 1 : le devis déposé et la liste qui en sort, dans les mots du comptoir. */
@@ -107,7 +92,7 @@ function EcranDevis() {
   const d = EXEMPLE.devis;
   return (
     <div className="flex flex-col gap-3 text-ink">
-      <div className="flex items-center gap-3 rounded-2xl bg-white/95 p-3">
+      <div className="flex items-center gap-3 rounded-xl bg-ground p-3">
         <FileText size={22} aria-hidden="true" className="shrink-0 text-accent-text" />
         <div className="flex min-w-0 flex-col">
           <span className="flex items-center gap-2 text-[14px] font-extrabold">
@@ -118,8 +103,8 @@ function EcranDevis() {
           </span>
         </div>
       </div>
-      <p className="text-[14px] font-bold text-[#c9ced6]">Donnée en photo, remise au propre, ligne par ligne :</p>
-      <ul aria-label="Liste de fournitures (exemple)" className="flex flex-col divide-y divide-line rounded-2xl bg-white/95">
+      <p className="text-[14px] font-bold text-muted">Donnée en photo, remise au propre, ligne par ligne :</p>
+      <ul aria-label="Liste de fournitures (exemple)" className="flex flex-col divide-y divide-line rounded-xl bg-ground">
         {EXEMPLE.liste.map((l) => (
           <li key={l.designation} className="flex items-center gap-3 px-3 py-2.5">
             <span className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-mark-ok text-white" aria-hidden="true">
@@ -130,7 +115,7 @@ function EcranDevis() {
           </li>
         ))}
       </ul>
-      <p className="text-[13px] text-[#c9ced6]">Chaque ligne précise rejoint celles des couvreurs de ton secteur.</p>
+      <p className="text-[13px] text-muted">Chaque ligne précise rejoint celles des couvreurs de ton secteur.</p>
     </div>
   );
 }
@@ -141,7 +126,7 @@ function EcranLot() {
   const c = EXEMPLE.compteur;
   return (
     <div className="flex flex-col gap-3 text-ink">
-      <div className="flex flex-col gap-2 rounded-2xl bg-white/95 p-3">
+      <div className="flex flex-col gap-2 rounded-xl bg-ground p-3">
         <span className="flex items-center gap-2 text-[14px] font-extrabold">
           <Users size={18} aria-hidden="true" className="text-accent-text" />
           {l.reference} · {l.departement} <Exemple />
@@ -154,7 +139,7 @@ function EcranLot() {
           <li>Chaque devis est comparé au meilleur prix dès qu&apos;il arrive.</li>
         </ul>
       </div>
-      <p className="text-[14px] font-bold text-[#c9ced6]">Personne ne voit ton nom ni tes chantiers.</p>
+      <p className="text-[14px] font-bold text-muted">Personne ne voit ton nom ni tes chantiers.</p>
     </div>
   );
 }
@@ -164,7 +149,7 @@ function EcranOffre() {
   const o = EXEMPLE.offre;
   return (
     <div className="flex flex-col gap-3 text-ink">
-      <div className="flex flex-col gap-2 rounded-2xl bg-white/95 p-3">
+      <div className="flex flex-col gap-2 rounded-xl bg-ground p-3">
         <span className="flex items-center gap-2 text-[14px] font-extrabold">
           <Tag size={18} aria-hidden="true" className="text-accent-text" />
           Ton prix · {EXEMPLE.lot.reference} <Exemple />
@@ -178,7 +163,7 @@ function EcranOffre() {
         <span className="text-[14px] text-muted">Livraison le {o.livraison}, sur ton chantier, sur ton compte chez lui.</span>
         <span className="text-[15px] font-extrabold text-ok">Économie estimée : {o.economie}</span>
       </div>
-      <p className="text-[14px] font-bold text-[#c9ced6]">Tu dis « Livré » quand c&apos;est arrivé.</p>
+      <p className="text-[14px] font-bold text-muted">Tu dis « Livré » quand c&apos;est arrivé.</p>
     </div>
   );
 }
