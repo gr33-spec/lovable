@@ -86,21 +86,21 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
     const a1 = (await A.agent.post(`/v1/projects/${A.projectId}/commande-du-mois?maintenant=${T0}`).send({ articles: A.articles, nature: "chantier" }).expect(201)).body;
     expect(a1).toMatchObject({ mois: "2026-10", message: null });
     expect(a1.vue).toMatchObject({ phase: "inscriptions", clotureDans: "9 j 4 h", premier: "Pour l'instant, tu es le premier. Partage le lien pour faire grossir la commande." });
-    expect(a1.vue.toi.replace(/ /g, " ")).toBe(`Toi seul : 2 000 pièces d'${min(ARDOISE)}, 400 m de ${min(LITEAU)}`);
+    expect(a1.vue.toi.replace(/\u202f/g, " ")).toBe(`Toi seul : 2 000 pièces d'${min(ARDOISE)}, 400 m de ${min(LITEAU)}`);
 
     // B dépose (du stock) : A est prévenu, en quantités ; la commande grossit.
     await B.agent.post(`/v1/projects/${B.projectId}/commande-du-mois?maintenant=${T0}`).send({ articles: B.articles, nature: "stock" }).expect(201);
-    expect(pushVers("a@example.fr").map((m) => m.body.replace(/ /g, " "))).toContain(`+3 000 pièces d'${min(ARDOISE)} et 10 boîtes de ${min(CROCHET)} viennent d'être ajoutées. L'union fait la force !`);
+    expect(pushVers("a@example.fr").map((m) => m.body.replace(/\u202f/g, " "))).toContain(`+3 000 pièces d'${min(ARDOISE)} et 10 boîtes de ${min(CROCHET)} viennent d'être ajoutées. L'union fait la force !`);
     const vueA = (await A.agent.get(`/v1/commande-du-mois?maintenant=${T0}`).expect(200)).body.commandes[0];
     expect(vueA.premier).toBeNull();
-    expect(vueA.tout.replace(/ /g, " ")).toBe(`Toute la commande d'octobre : 5 000 pièces d'${min(ARDOISE)}, 400 m de ${min(LITEAU)}, 10 boîtes de ${min(CROCHET)}`);
+    expect(vueA.tout.replace(/\u202f/g, " ")).toBe(`Toute la commande d'octobre : 5 000 pièces d'${min(ARDOISE)}, 400 m de ${min(LITEAU)}, 10 boîtes de ${min(CROCHET)}`);
     expect(JSON.stringify(vueA)).not.toMatch(/Toitures B|entreprises/);
 
     // La clôture : tout est figé, la grille fusionnée part aux trois négoces.
     expect((await tache(APRES_CLOTURE)).body).toMatchObject({ clos: 1, grillesEnvoyees: 3 });
     const demande = mailsVers("n1@example.com").at(-1)!;
     expect(demande.subject).toBe("Commande commune d'octobre (22) : demande de prix sur 3 articles");
-    expect(demande.text.replace(/ /g, " ")).toContain(`- ${ARDOISE} : 5 000 pièces`);
+    expect(demande.text.replace(/\u202f/g, " ")).toContain(`- ${ARDOISE} : 5 000 pièces`);
     expect(demande.text).toContain("Réponse avant le 08/11 à 18 h, il reste 14 j 6 h");
     expect(demande.text).toContain("Chaque artisan choisit le négoce le moins cher pour lui.");
     expect(demande.text).not.toMatch(/Toitures|Lannion|Paimpol/);
