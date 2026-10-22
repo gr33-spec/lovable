@@ -6,6 +6,7 @@ import { useCallback, useEffect, useId, useState } from "react";
 import { Badge, Button, Card, ErrorNotice, Field } from "@/components/ui";
 import { api, ApiError, newActionKey, type Supplier } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
+import { nom } from "@/lib/nom";
 
 /**
  * BATICLAIR GROUPÉ, ÉTAPE 3 (document du fondateur, 2026-10-19, section 2 étape 3) : « Mes négoces ». L'artisan saisit
@@ -77,7 +78,7 @@ export function MesNegocesCard() {
   return (
     <Card className="flex flex-col gap-3 p-4">
       <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">MES NÉGOCES (GROUPÉ)</h2>
-      <p className="text-sm text-muted">Les négoces chez qui tu commandes, et ce que chacun vend. Ton favori reçoit les demandes du groupé en premier ; tu commandes toujours sur ton propre compte.</p>
+      <p className="text-sm text-muted">Les négoces chez qui tu commandes, et ce que chacun vend. Ton favori reçoit les demandes de la {nom} en premier ; tu commandes toujours sur ton propre compte.</p>
       {negoces.length > 0 ? (
         <ul aria-label="Mes négoces" className="flex flex-col divide-y divide-line">
           {negoces.map((n) => (

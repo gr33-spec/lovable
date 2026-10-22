@@ -13,8 +13,7 @@ import {
   totalDuBon,
   type BonDeCommande,
   type EmetteurFacture,
-  type MessageArtisan,
-} from "@baticlair/domain";
+  type MessageArtisan, NOM_COMMANDE_COMMUNE } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound } from "../../../platform/errors/domain-error.js";
@@ -94,12 +93,12 @@ export class CommandeService {
       // Au négoce : tous les bons du lot et le récapitulatif, en un e-mail.
       await this.email.send({
         to: negoce.email,
-        subject: `Tarif groupé lot n° ${lot.numero} : ${docs.length} bon${docs.length > 1 ? "s" : ""} de commande`,
+        subject: `${NOM_COMMANDE_COMMUNE} n° ${lot.numero} : ${docs.length} bon${docs.length > 1 ? "s" : ""} de commande`,
         text: [
           "Bonjour,",
           `Votre offre a été retenue pour le lot n° ${lot.numero}. Vous trouverez ci-joint le bon de commande de chaque artisan (nom, numéro de compte ou ouverture de compte demandée, adresse du chantier, quantités, fenêtre de livraison) et le récapitulatif de vos livraisons.`,
           "Chaque chantier se livre comme une commande normale, sur le compte du client ; facturation et paiement comme d'habitude. La facture de commission de BatiClair suit dans un e-mail à part.",
-          "Regroupement artisans, par BatiClair",
+          `${NOM_COMMANDE_COMMUNE}, par BatiClair`,
         ].join("\n\n"),
         attachments: [pdfJoint(`recapitulatif-lot-${lot.numero}.pdf`, recapPdf), ...docs.map((d, i) => pdfJoint(`bon-de-commande-lot-${lot.numero}-${i + 1}.pdf`, d.pdf))],
         mustDeliver: true,
@@ -129,7 +128,7 @@ export class CommandeService {
           numero: lot.numero,
         });
         await this.notifications.prevenir(offre.besoin.companyId, message, {
-          objet: `Ton bon de commande, tarif groupé lot n° ${lot.numero}`,
+          objet: `Ton bon de commande, ${NOM_COMMANDE_COMMUNE.toLowerCase()} n° ${lot.numero}`,
           texte: `Bonjour,\n\n${message.corps}\n\nTu commandes sur ton compte, tu es livré sur ton chantier, tu paies comme d'habitude. Le jour prévu, dis-nous d'un tap si tout est arrivé.\n\nBatiClair`,
           piecesJointes: [pdfJoint(`bon-de-commande-lot-${lot.numero}.pdf`, d.pdf)],
         });
@@ -253,7 +252,7 @@ export class CommandeService {
     try {
       await this.email.send({
         to: bon.negoce.email,
-        subject: `Tarif groupé lot n° ${bon.offre.lot.numero} : une commande annulée`,
+        subject: `${NOM_COMMANDE_COMMUNE} n° ${bon.offre.lot.numero} : une commande annulée`,
         text: `Bonjour,\n\nLe client ${bon.offre.besoin.company.name} ne donne pas suite à son bon de commande du lot n° ${bon.offre.lot.numero} (${Number(bon.offre.besoin.quantite).toLocaleString("fr-FR", { maximumFractionDigits: 3 })} ${bon.offre.besoin.unite} de ${bon.offre.besoin.designation}, ${bon.offre.besoin.adresseLivraison}). Vous pouvez annuler cette ligne ; les autres bons du lot sont inchangés.\n\nRegroupement artisans, par BatiClair`,
       });
     } catch {

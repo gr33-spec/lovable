@@ -21,7 +21,7 @@ describe("groupé, étape 7 : le bon de commande et le récapitulatif", () => {
   it("nom, « ouverture de compte demandée » sans numéro, adresse du chantier, quantités, fenêtre, « tarif groupé lot n° … »", () => {
     expect(totalDuBon(bon.lignes)).toBe(425.5);
     const doc = documentBonDeCommande(bon);
-    expect(doc.titre).toBe("Bon de commande, tarif groupé lot n° 12");
+    expect(doc.titre).toBe("Bon de commande, commande commune n° 12");
     const texte = JSON.stringify(doc);
     expect(texte).toContain("Carrelages Martin");
     expect(texte).toContain("Ouverture de compte demandée chez Négoce Carrelage");

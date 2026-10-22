@@ -6,6 +6,7 @@ import { useCallback, useId, useMemo, useState } from "react";
 import { Button, ErrorNotice, Field } from "@/components/ui";
 import { api, ApiError, newActionKey } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
+import { nom } from "@/lib/nom";
 
 /**
  * BATICLAIR GROUPÉ, ÉTAPE 2 (document du fondateur, 2026-10-19, section 2 étape 2) : sur « Ton chantier », proposer des
@@ -60,7 +61,7 @@ function useMesNegocesCount(): number | null {
 }
 
 /** La phrase d'engagement, mot pour mot (section 7, étape 2 du document). */
-export const PHRASE_ENGAGEMENT = "En cochant Chantier signé, je m'engage à commander ces quantités au prix groupé obtenu, chez le négoce retenu.";
+export const PHRASE_ENGAGEMENT = `En cochant Chantier signé, je m'engage à commander ces quantités au prix obtenu par la ${nom}, chez le négoce retenu.`;
 
 /** Le groupé pour ce chantier, ou null quand il n'existe pas pour l'entreprise (drapeau éteint, SIRET non vérifié). */
 /**
@@ -141,8 +142,8 @@ export function GroupeBar({ count, onCancel, onPropose, onAdresse }: { count: nu
   const adresseManque = error?.reason === "adresse_requise" && Boolean(onAdresse);
   const choix = "inline-flex min-h-12 grow items-center justify-center rounded-2xl px-3 text-[15px] font-extrabold";
   return (
-    <section aria-label="Proposer au groupé" className="flex flex-col gap-2 rounded-[22px] bg-surface p-3 shadow-card">
-      <p className="text-[14px] font-extrabold">{count === 0 ? "Coche les lignes à proposer au groupé" : `${count} ligne${count > 1 ? "s" : ""} au groupé`}</p>
+    <section aria-label={`Ajouter à la ${nom}`} className="flex flex-col gap-2 rounded-[22px] bg-surface p-3 shadow-card">
+      <p className="text-[14px] font-extrabold">{count === 0 ? `Coche les lignes à ajouter à la ${nom}` : `${count} ligne${count > 1 ? "s" : ""} pour la ${nom}`}</p>
       <fieldset className="flex gap-2">
         <legend className="mb-1 text-[13px] font-bold text-muted">Tu veux être livré entre quelles dates ?</legend>
         <label htmlFor={`${id}-tot`} className="flex grow flex-col gap-1 text-[13px] font-bold text-muted">
@@ -242,7 +243,7 @@ function OffreCard({ besoin: b, groupe }: { besoin: BesoinGroupe; groupe: Groupe
   };
   return (
     <section aria-label={`Mon offre : ${b.designation}`} className="flex flex-col gap-1.5 rounded-xl bg-surface p-3 shadow-card">
-      <p className="text-[13px] font-extrabold text-muted">Mon offre · commande groupée n° {o.lotNumero}</p>
+      <p className="text-[13px] font-extrabold text-muted">Mon offre · {nom} n° {o.lotNumero}</p>
       <p className="text-[15px] leading-snug font-bold">
         {quantiteFr(b.quantite)} {b.unite} à {euros(o.prixUnitaire)} HT l&apos;unité chez {o.negoce}
       </p>
@@ -326,15 +327,15 @@ export function GroupeSection({ groupe }: { groupe: Groupe }) {
     }
   };
   return (
-    <section aria-label="Au groupé" className="mt-3 flex flex-col gap-2 rounded-[20px] bg-surface p-3 shadow-card">
-      <h3 className="text-[13px] font-extrabold text-muted">Au groupé</h3>
+    <section aria-label={`Dans la ${nom}`} className="mt-3 flex flex-col gap-2 rounded-[20px] bg-surface p-3 shadow-card">
+      <h3 className="text-[13px] font-extrabold text-muted">{`Dans la ${nom}`}</h3>
       {negoces === 0 ? (
         <p className="text-[14px] leading-snug font-bold">
           Ajoute d&apos;abord tes négoces (e-mail et ce qu&apos;ils vendent) :{" "}
           <Link href="/fournisseurs" className="text-accent-text underline decoration-dotted underline-offset-4">
             Fournisseurs
           </Link>
-          . Sans eux, le groupé ne sait pas à qui demander.
+          . Sans eux, la {nom} ne sait pas à qui demander.
         </p>
       ) : null}
       <ul className="flex flex-col gap-2">
@@ -370,7 +371,7 @@ export function GroupeSection({ groupe }: { groupe: Groupe }) {
                 ) : null}
                 {(b.statut === "en_attente" || b.statut === "signe") && !b.lotParti ? (
                   <Button variant="secondary" className="min-h-10 px-3.5 text-[14px]" pending={pending === b.id} onClick={() => run(b.id, () => groupe.retirer(b.id))}>
-                    Retirer du groupé
+                    {`Retirer de la ${nom}`}
                   </Button>
                 ) : null}
               </div>

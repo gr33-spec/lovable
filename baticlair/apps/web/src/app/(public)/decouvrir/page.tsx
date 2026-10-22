@@ -5,6 +5,7 @@ import { DemoGuidee } from "@/components/demo-guidee";
 import { ButtonLink } from "@/components/ui";
 import { LiensLegaux } from "@/components/legal";
 import { FOURNITURES_EXEMPLE, OutilsArtisan, SceneChantier, TourneeGroupee, Visuel } from "@/components/landing-illustrations";
+import { NOM } from "@/lib/nom";
 
 /**
  * Servie à la place de « / » pour un visiteur (voir `proxy.ts`) : rendue à chaque demande, jamais gardée dans le cache du
@@ -227,7 +228,7 @@ export default function BienvenuePage() {
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-8">
           <div className="flex flex-col gap-8 lg:col-span-7">
             <div className="flex flex-col gap-3">
-              <p className="text-[13px] font-extrabold tracking-[0.08em] text-accent-on-dark uppercase">Le regroupement</p>
+              <p className="text-[13px] font-extrabold tracking-[0.08em] text-accent-on-dark uppercase">{NOM}</p>
               <h2 id="groupe" className={`${h2} max-w-[18ch]`}>
                 Les couvreurs de ton secteur, ensemble
               </h2>

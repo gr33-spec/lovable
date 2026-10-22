@@ -9,6 +9,7 @@ import { Button, ButtonLink, Card, ErrorNotice, PageTitle, Spinner } from "@/com
 import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
+import { NOM, nom, noms } from "@/lib/nom";
 
 interface EtatGroupe {
   eligible: boolean;
@@ -96,22 +97,22 @@ export default function GroupePage() {
   return (
     <>
       <div className="flex items-start justify-between gap-3">
-        <PageTitle>Groupé</PageTitle>
+        <PageTitle>{NOM}</PageTitle>
         <AideBouton sujet="groupe" />
       </div>
       {etat.data.admin ? (
         <Link href="/admin/groupe" className="min-h-10 self-start py-2 text-sm font-bold text-accent-text underline decoration-dotted underline-offset-4">
-          Admin groupé
+          {`Admin ${nom}`}
         </Link>
       ) : null}
       {etat.data.raisons.includes("exclu_du_groupe") ? (
         <p role="status" className="rounded-3xl bg-warn-bg p-4 font-semibold text-warn">
-          Le groupé t&apos;est fermé{etat.data.excluJusquau ? ` jusqu'au ${jourFr(etat.data.excluJusquau)}` : ""} : deux commandes annulées en 12 mois. Tes commandes en cours restent visibles ci-dessous.
+          {`La ${nom} t'est fermée`}{etat.data.excluJusquau ? ` jusqu'au ${jourFr(etat.data.excluJusquau)}` : ""} : deux commandes annulées en 12 mois. Tes commandes en cours restent visibles ci-dessous.
         </p>
       ) : null}
       {etat.data.raisons.includes("departement_ferme") ? (
         <p role="status" className="rounded-3xl bg-warn-bg p-4 font-semibold text-warn">
-          Le groupé n&apos;est pas encore ouvert dans ton département. On te prévient dès que c&apos;est le cas.
+          {`La ${nom} n'est pas encore ouverte dans ton département.`} On te prévient dès que c&apos;est le cas.
         </p>
       ) : null}
       <Card className="flex flex-col gap-4 p-4">
@@ -174,7 +175,7 @@ function Etapes() {
       {[
         { icon: FileText, titre: "1. Tu proposes", texte: "Une ligne de ta liste, la date de livraison voulue, « chantier signé »." },
         { icon: Users, titre: "2. On regroupe", texte: "Même produit, même département : une seule commande, un seul négoce." },
-        { icon: Tag, titre: "3. Tu commandes", texte: "À ton prix groupé, sur ton compte, livré sur ton chantier." },
+        { icon: Tag, titre: "3. Tu commandes", texte: `Au prix de la ${nom}, sur ton compte, livré sur ton chantier.` },
       ].map((e) => (
         <li key={e.titre} className="flex flex-col gap-1.5 rounded-2xl bg-ground p-3">
           <e.icon size={22} aria-hidden="true" className="text-accent-text" />
@@ -260,7 +261,7 @@ function Livraison({ b, onDone }: { b: BesoinLot; onDone: () => void }) {
         </div>
       ) : (
         <div className="flex flex-col gap-2 rounded-2xl bg-warn-bg p-3">
-          <p className="text-[13px] font-bold text-warn">Tu t&apos;étais engagé à commander ces quantités. Première fois : un avertissement ; deuxième fois sur 12 mois : le groupé se ferme 6 mois. Le négoce sera prévenu.</p>
+          <p className="text-[13px] font-bold text-warn">Tu t&apos;étais engagé à commander ces quantités. Première fois : un avertissement ; deuxième fois sur 12 mois : la {nom} se ferme 6 mois. Le négoce sera prévenu.</p>
           <textarea value={desistement ?? ""} onChange={(e) => setDesistement(e.target.value)} maxLength={1000} rows={2} aria-label="Pourquoi tu ne commandes pas" placeholder="Pourquoi ? (facultatif)" className="rounded-xl border border-line bg-surface px-3 py-2 text-[14px]" />
           <div className="flex gap-2">
             <Button variant="secondary" className="grow" onClick={() => setDesistement(null)} disabled={pending}>
@@ -284,11 +285,11 @@ function MesLots() {
   if (!data) return <Spinner />;
   return (
     <Card className="flex flex-col gap-3 p-4">
-      <h2 className="font-display text-xl font-extrabold">Mes commandes groupées</h2>
+      <h2 className="font-display text-xl font-extrabold">{`Mes ${noms}`}</h2>
       {data.besoins.length === 0 ? (
-        <p className="text-[15px] font-semibold text-muted">Rien pour l&apos;instant : propose un chantier au groupé.</p>
+        <p className="text-[15px] font-semibold text-muted">Rien pour l&apos;instant : ajoute un chantier à la {nom}.</p>
       ) : (
-        <ul aria-label="Mes commandes groupées" className="flex flex-col gap-2">
+        <ul aria-label={`Mes ${noms}`} className="flex flex-col gap-2">
           {data.besoins.map((b) => (
             <li key={b.id} className="flex flex-col gap-1 rounded-2xl bg-ground p-3">
               <div className="flex items-baseline justify-between gap-3">
@@ -306,7 +307,7 @@ function MesLots() {
                 </p>
               ) : null}
               <p className="text-[13px] font-semibold text-muted">
-                {b.lot ? `Commande groupée n° ${b.lot.numero} · ${STATUT_LOT[b.lot.statut] ?? b.lot.statut}` : "En attente d'autres artisans"}
+                {b.lot ? `${NOM} n° ${b.lot.numero} · ${STATUT_LOT[b.lot.statut] ?? b.lot.statut}` : "En attente d'autres artisans"}
                 {b.statut === "en_attente" ? " · devis en attente, tu ne t'engages à rien" : ""}
               </p>
               {b.offre ? (

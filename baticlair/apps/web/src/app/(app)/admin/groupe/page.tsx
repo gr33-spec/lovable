@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { Button, Card, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
+import { nom } from "@/lib/nom";
 
 /** Les statuts bruts de l'API, lisibles par Greg (test complet du 21 octobre : « livre », « retire », « envoyee » s'affichaient tels quels). */
 const LIBELLES: Record<string, string> = {
@@ -88,7 +89,7 @@ export default function AdminGroupePage() {
 
   return (
     <>
-      <PageTitle>Admin groupé</PageTitle>
+      <PageTitle>{`Admin ${nom}`}</PageTitle>
       <p className="text-sm text-muted">
         Départements ouverts : {data.departements.ouverts ? data.departements.ouverts.join(", ") : "tous"} ·{" "}
         {data.departements.compteurs.map((c) => `${c.departement} : ${c.lots} lot${c.lots > 1 ? "s" : ""}, ${euros(c.economies)} économisés`).join(" · ") || "aucun lot"}

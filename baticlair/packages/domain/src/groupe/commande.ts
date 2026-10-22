@@ -1,4 +1,5 @@
 import { TAUX_COMMISSION_POURCENT } from "./demande.js";
+import { NOM_COMMANDE_COMMUNE, nomCommun } from "./nom.js";
 import type { FenetreLivraison } from "./groupe.js";
 
 /**
@@ -58,7 +59,7 @@ export function totalDuBon(lignes: readonly LigneDeBon[]): number {
 export function documentBonDeCommande(bon: BonDeCommande): { titre: string; blocs: { titre?: string; lignes: (string | string[])[] }[] } {
   const compte = bon.numeroCompte ? `Numéro de compte chez ${bon.negoce} : ${bon.numeroCompte}` : `Ouverture de compte demandée chez ${bon.negoce}`;
   return {
-    titre: `Bon de commande, tarif groupé lot n° ${bon.numeroLot}`,
+    titre: `Bon de commande, ${nomCommun()} n° ${bon.numeroLot}`,
     blocs: [
       {
         titre: "Client",
@@ -72,7 +73,7 @@ export function documentBonDeCommande(bon: BonDeCommande): { titre: string; bloc
         titre: "Fournitures",
         lignes: [["Désignation", "Quantité", "P.U. HT", "Total HT"], ...bon.lignes.map((l) => [l.designation, `${nombre(l.quantite)} ${l.unite}`, euros(l.prixUnitaire), euros(Math.round(Number(l.quantite) * l.prixUnitaire * 100) / 100)]), `Total HT : ${euros(totalDuBon(bon.lignes))}`],
       },
-      { lignes: [`Tarif groupé lot n° ${bon.numeroLot} : le prix ci-dessus est celui de votre offre retenue pour le lot. Facturation et paiement comme d'habitude, sur le compte du client.`] },
+      { lignes: [`${NOM_COMMANDE_COMMUNE} n° ${bon.numeroLot} : le prix ci-dessus est celui de votre offre retenue pour le lot. Facturation et paiement comme d'habitude, sur le compte du client.`] },
     ],
   };
 }
@@ -80,7 +81,7 @@ export function documentBonDeCommande(bon: BonDeCommande): { titre: string; bloc
 /** Le récapitulatif joint au négoce : toutes ses livraisons du lot. */
 export function documentRecapitulatif(numeroLot: number, negoce: string, bons: readonly BonDeCommande[]): { titre: string; blocs: { titre?: string; lignes: (string | string[])[] }[] } {
   return {
-    titre: `Récapitulatif des livraisons, tarif groupé lot n° ${numeroLot} (${negoce})`,
+    titre: `Récapitulatif des livraisons, ${nomCommun()} n° ${numeroLot} (${negoce})`,
     blocs: [
       { lignes: [["Client", "Adresse du chantier", "Quantités", "Fenêtre", "Total HT"], ...bons.map((b) => [b.artisan.nom, b.adresseChantier, b.lignes.map((l) => `${nombre(l.quantite)} ${l.unite} ${l.designation}`).join(" ; "), `du ${jour(b.fenetre.tot)} au ${jour(b.fenetre.tard)}`, euros(totalDuBon(b.lignes))])] },
       { lignes: [`${bons.length} bon${bons.length > 1 ? "s" : ""} de commande, total HT du lot : ${euros(bons.reduce((s, b) => s + totalDuBon(b.lignes), 0))}.`] },

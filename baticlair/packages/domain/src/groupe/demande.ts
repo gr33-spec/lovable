@@ -1,4 +1,5 @@
 import { LIBELLES_FAMILLES, type FamilleGroupe, type FenetreLivraison } from "./groupe.js";
+import { NOM_COMMANDE_COMMUNE } from "./nom.js";
 
 /**
  * LA DEMANDE AUX NÉGOCES (parcours groupé, étape 5), en code pur : l'e-mail part au nom du « Regroupement artisans »
@@ -8,7 +9,9 @@ import { LIBELLES_FAMILLES, type FamilleGroupe, type FenetreLivraison } from "./
  * Décision du fondateur (2026-10-20) : le négoce accepte AVANT de répondre une commission de 2 % du montant HT du lot s'il
  * est retenu (phrase en gras dans l'e-mail, case obligatoire sur la page de dépôt, contrat à côté).
  */
-export const NOM_DEMANDE = "Regroupement artisans";
+export const NOM_DEMANDE = NOM_COMMANDE_COMMUNE;
+/** Le nom tel qu'il figure au contrat de commission (texte juridique, figé à sa version : jamais renommé en douce). */
+const NOM_AU_CONTRAT = "Regroupement artisans";
 export const TAUX_COMMISSION_POURCENT = 2;
 /** La version du contrat de commission acceptée par le négoce (gardée dans l'accord). */
 export const VERSION_CONTRAT = "2026-10-20";
@@ -137,7 +140,7 @@ export function documentDemande(lots: readonly LotADemander[], departement: stri
 export function texteContrat(version = VERSION_CONTRAT): string[] {
   return [
     `Conditions de commission d'apporteur d'affaires, version ${version}`,
-    `1. Objet. BatiClair met en relation des artisans regroupés (« ${NOM_DEMANDE} ») et des négoces de matériaux. Le négoce répond librement, par un devis, à une demande de prix groupée.`,
+    `1. Objet. BatiClair met en relation des artisans regroupés (« ${NOM_AU_CONTRAT} ») et des négoces de matériaux. Le négoce répond librement, par un devis, à une demande de prix groupée.`,
     `2. Commission. Si le devis du négoce est retenu pour un lot, le négoce verse à BatiClair une commission d'apporteur d'affaires de ${TAUX_COMMISSION_POURCENT} % du montant hors taxes du lot, c'est-à-dire de la somme des bons de commande des artisans du lot passés chez lui au tarif groupé.`,
     "3. Facturation. La commission est facturée par BatiClair au négoce au moment de la transmission des bons de commande, payable à 30 jours. Une relance automatique est envoyée après l'échéance.",
     "4. Aucun autre frais. Répondre est gratuit ; un devis non retenu ne donne lieu à aucune facturation. BatiClair n'encaisse aucun paiement de commande, n'est ni acheteur ni revendeur, et ne porte aucun risque d'impayé des artisans.",

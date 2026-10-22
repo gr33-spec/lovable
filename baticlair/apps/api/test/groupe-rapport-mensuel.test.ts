@@ -85,9 +85,9 @@ describe("le rapport mensuel de l'artisan", { timeout: 90_000 }, () => {
     const mailA = mailsVers("a@example.fr");
     expect(mailA).toHaveLength(1);
     expect(mailA[0]!.subject).toBe(`Ton mois ${/^[aeiouy]/i.test(nomDuMois(mois)) ? "d'" : "de "}${nomDuMois(mois)} avec BatiClair : 1 chantier lu, 58 € économisés, 1 lot`);
-    expect(mailA[0]!.text).toContain("Ce mois : 1 chantier lu, 58 € économisés au groupé, 1 lot.");
+    expect(mailA[0]!.text).toContain("Ce mois : 1 chantier lu, 58 € économisés grâce à la commande commune, 1 lot.");
     expect(mailA[0]!.text).toContain("Bonjour Artisan,");
-    expect(mailA[0]!.html).toContain("<strong>Ce mois : 1 chantier lu, 58 € économisés au groupé, 1 lot.</strong>");
+    expect(mailA[0]!.html).toContain("<strong>Ce mois : 1 chantier lu, 58 € économisés grâce à la commande commune, 1 lot.</strong>");
     // B n'a pas déclaré de prix habituel : 0 € mais son lot compte.
     expect(mailsVers("b@example.fr")[0]!.subject).toContain("1 chantier lu, 0 € économisés, 1 lot");
     expect(mailsVers("c@example.fr")).toHaveLength(0);

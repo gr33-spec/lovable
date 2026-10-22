@@ -148,7 +148,7 @@ export class JeuDemonstrationService {
     await p.company.deleteMany({ where: { id: { in: entreprises.map((e) => e.companyId) } } });
     const artisans = await p.user.deleteMany({ where: { id: { in: users.map((u) => u.id) } } });
     // Les chantiers de démonstration créés chez l'entreprise nommée (Greg) disparaissent aussi, avec leurs besoins.
-    await p.project.deleteMany({ where: { name: { startsWith: "Démo groupé" } } });
+    await p.project.deleteMany({ where: { OR: [{ name: { startsWith: "Démo groupé" } }, { name: { startsWith: "Démo commande commune" } }] } });
     return { lots: lots.count, negoces: negoces.count, artisans: artisans.count };
   }
 
@@ -167,7 +167,7 @@ export class JeuDemonstrationService {
     const company = await this.prisma.company.findUniqueOrThrow({ where: { id: membership.companyId } });
     if (!company.siretVerifieLe) await this.prisma.company.update({ where: { id: company.id }, data: { siret: company.siret ?? "73282932000074", siretVerifieLe: maintenant } });
     const adresse = company.address && /\b22\d{3}\b/.test(company.address) ? company.address : "6 impasse du Ouipoure, 22620 Ploubazlanec";
-    const chantier = await this.chantier(company.id, user.id, "Démo groupé – Toiture Ploubazlanec", adresse);
+    const chantier = await this.chantier(company.id, user.id, "Démo commande commune – Toiture Ploubazlanec", adresse);
     return { companyId: company.id, email: user.email, adresse, ...chantier };
   }
 }

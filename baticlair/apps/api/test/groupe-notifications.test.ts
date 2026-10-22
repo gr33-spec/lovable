@@ -85,14 +85,14 @@ describe("groupé, étape 8 : les notifications", { timeout: 90_000 }, () => {
     // 1. Besoin accepté.
     await proposer(a, "signe");
     expect(pushVers("a@example.fr").map((m) => m.body)).toHaveLength(1);
-    expect(pushVers("a@example.fr")[0]!.body).toMatch(/^Tes 23 cartons de 1,44 m² de carreau de sol 60×60 sont dans le groupé Côtes-d'Armor\. Prochaine commande groupée lundi\.$/);
-    expect(mailsVers("a@example.fr").at(-1)!.subject).toContain("Prochaine commande groupée lundi");
+    expect(pushVers("a@example.fr")[0]!.body).toMatch(/^Tes 23 cartons de 1,44 m² de carreau de sol 60×60 sont dans la commande commune \(Côtes-d'Armor\)\. Prochain départ lundi\.$/);
+    expect(mailsVers("a@example.fr").at(-1)!.subject).toContain("Prochain départ lundi");
     const b = await carreleur("b@example.fr", "Carrelages B", "12 rue de Kerampont, 22300 Lannion");
     await proposer(b, "signe");
     // 2. Lot formé, demande partie chez 2 négoces : chacun des deux artisans, sans l'autre.
     for (const e of ["a@example.fr", "b@example.fr"]) {
-      const m = pushVers(e).find((x) => /parti chez/.test(x.body))!;
-      expect(m.body).toBe("Le groupé est parti chez 2 négoces. Réponses attendues sous 7 jours.");
+      const m = pushVers(e).find((x) => /partie chez/.test(x.body))!;
+      expect(m.body).toBe("La commande commune est partie chez 2 négoces. Réponses attendues sous 7 jours.");
     }
     expect(JSON.stringify(push.sent)).not.toContain("Carrelages");
     // L'e-mail au négoce répond à l'adresse du lot.
@@ -125,7 +125,7 @@ describe("groupé, étape 8 : les notifications", { timeout: 90_000 }, () => {
     // Le désistement : avertissement par e-mail.
     const lotsB = (await b.agent.get("/v1/groupe/lots").expect(200)).body.besoins;
     await b.agent.post(`/v1/groupe/bons/${lotsB[0].bon.id}/desistement`).send({}).expect(200);
-    expect(mailsVers("b@example.fr").at(-1)!.subject).toBe("Groupé : désistement enregistré, avertissement");
+    expect(mailsVers("b@example.fr").at(-1)!.subject).toBe("Commande commune : désistement enregistré, avertissement");
   });
 
   it("le webhook Resend : signature obligatoire ; une réponse par e-mail renvoie au négoce son lien de dépôt, sans rien prendre en compte", async () => {

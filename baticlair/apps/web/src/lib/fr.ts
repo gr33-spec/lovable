@@ -1,3 +1,4 @@
+import { NOM, nom } from "@/lib/nom";
 /**
  * Textes d'interface partagés (français). Les textes propres à un seul
  * écran restent dans cet écran ; tout ce qui se répète (navigation,
@@ -5,7 +6,7 @@
  * pour le lexique.
  */
 export const fr = {
-  nav: { home: "Accueil", projects: "Mes chantiers", groupe: "Groupé", suppliers: "Fournisseurs", account: "Compte" },
+  nav: { home: "Accueil", projects: "Mes chantiers", groupe: NOM, suppliers: "Fournisseurs", account: "Compte" },
   status: { active: "En cours", archived: "Terminé" },
   actions: {
     retry: "Réessayer",
@@ -65,16 +66,16 @@ const unreadableReasons: Record<string, string> = {
 /** Motifs précis renvoyés par l'API, quel que soit le code. */
 const reasonMessages: Record<string, string> = {
   // BatiClair Groupé : les refus de l'API, dits avec les mots de l'artisan.
-  quantite_plafonnee: "Cette quantité dépasse trois fois ce que les autres artisans proposent pour cette référence : le groupé la refuse. Vérifie-la, ou passe par ton négoce en direct.",
+  quantite_plafonnee: `Cette quantité dépasse trois fois ce que les autres artisans proposent pour cette référence : la ${nom} la refuse. Vérifie-la, ou passe par ton négoce en direct.`,
   ligne_a_regler: "Règle d'abord cette ligne (quantité ou question en attente) : un engagement ferme porte sur une quantité ferme.",
   adresse_requise: "Renseigne l'adresse du chantier (avec le code postal) : le lot se forme par département.",
-  ligne_vague: "Cette ligne est trop vague pour la commande commune : précise-la (format, origine, choix, marque), ou envoie-la à ton négoce.",
-  deja_propose: "Cette ligne est déjà au groupé.",
+  ligne_vague: `Cette ligne est trop vague pour la ${nom} : précise-la (format, origine, choix, marque), ou envoie-la à ton négoce.`,
+  deja_propose: `Cette ligne est déjà dans la ${nom}.`,
   engagement_requis: "Coche la phrase d'engagement pour proposer en « Chantier signé ».",
   fenetre_invalide: "La fenêtre de livraison n'est pas bonne : au plus tôt avant au plus tard, dans les 6 mois.",
-  groupe_ferme: "Le groupé n'est pas ouvert à ton entreprise pour l'instant : regarde l'onglet Groupé.",
+  groupe_ferme: `La ${nom} n'est pas ouverte à ton entreprise pour l'instant : regarde l'onglet ${NOM}.`,
   sans_quantite: "Cette ligne n'a pas de quantité : indique-la d'abord.",
-  sans_famille: "Ce métier n'a pas encore de famille au groupé.",
+  sans_famille: `Ce métier n'a pas encore de famille dans la ${nom}.`,
   siret_invalide: "Ce SIRET n'a pas 14 chiffres valides : corrige-le dans Compte.",
   nothing_read: "Je n'ai rien lu dans ce devis. Réessaie, ou redépose le PDF.",
   empty_list: "La liste est vide : rien ne part au fournisseur.",

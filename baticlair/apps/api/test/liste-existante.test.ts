@@ -104,8 +104,13 @@ describe("la suite d'un devis : envoi et groupé", () => {
     await ctx.prisma.company.update({ where: { id: companyId }, data: { siret: "73282932000074", siretVerifieLe: new Date() } });
     const { projectId } = await deposer(agent, { nom: "liste-manuscrite.png", octets: PNG, type: "image/png" });
     await agent.patch(`/v1/projects/${projectId}`).send({ address: adresse }).expect(200);
+    const takeoff = (await agent.get(`/v1/projects/${projectId}/takeoff`).expect(200)).body.takeoff as { id: string; purchase: { toBuy: { key: string; label: string }[] } };
+    // Une ligne vague n'entre pas dans la commande commune (décision de Greg, 22 octobre) : la marque se précise d'abord.
+    const vague = takeoff.purchase.toBuy.find((x) => /^Tuile romane canal rouge/.test(x.label))!;
+    const ligne = (takeoff as unknown as { lines: { id: string; designation: string; quantity: string | null; unit: string | null }[] }).lines.find((l) => `line:${l.id}` === vague.key)!;
+    await agent.patch(`/v1/takeoff-lines/${ligne.id}`).send({ designation: `${ligne.designation} Edilians`, quantity: ligne.quantity, unit: ligne.unit }).expect(200);
     const toBuy = (await agent.get(`/v1/projects/${projectId}/takeoff`).expect(200)).body.takeoff.purchase.toBuy as { key: string; label: string }[];
-    return { agent, projectId, tuile: toBuy.find((b) => /^Tuile romane canal rouge/.test(b.label))! };
+    return { agent, projectId, tuile: toBuy.find((x) => /^Tuile romane canal rouge.*Edilians/.test(x.label))! };
   }
   const FENETRE = { tot: "2026-11-02", tard: "2026-11-20" };
 

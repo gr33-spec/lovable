@@ -12,6 +12,7 @@ import { GroupeBar, GroupeSection, type Groupe } from "@/components/groupe";
 import { Button, ButtonLink, ErrorNotice } from "@/components/ui";
 import type { ApiError, ItemSketch, PurchaseItem, ScreenRow, Takeoff, TakeoffDecision } from "@/lib/api";
 import { enMetres, parseQuantity, shortName } from "@/lib/labels";
+import { NOM, nom } from "@/lib/nom";
 
 /**
  * §50.7 L'ÉCRAN 3 EST LE DOCUMENT (fondateur, 2026-10-10) : « Ton chantier », ce que le fournisseur recevra.
@@ -210,26 +211,26 @@ export function SupplyList({
       {/* BatiClair Groupé (demande du fondateur, 2026-10-20) : « Proposer au groupé » mis en avant, un bloc visible en haut, pas
           une ligne discrète. Seulement quand le groupé est ouvert à l'entreprise, et hors sélection. */}
       {!groupe && groupeFerme && editable && !selecting ? (
-        <section aria-label="Groupé fermé" className="mb-3 flex flex-col gap-2 rounded-[20px] border border-dashed border-line bg-ground p-4 opacity-80">
+        <section aria-label={`${NOM} fermée`} className="mb-3 flex flex-col gap-2 rounded-[20px] border border-dashed border-line bg-ground p-4 opacity-80">
           <p className="flex items-center gap-2 text-[15px] font-extrabold text-muted">
             <Users size={18} aria-hidden="true" />
-            Renseigne ton SIRET pour proposer au groupé
+            {`Renseigne ton SIRET pour rejoindre la ${nom}`}
           </p>
           <p className="text-[14px] leading-snug text-muted">Un seul négoce, un seul prix, avec les autres artisans du département.</p>
           <ButtonLink href="/groupe" variant="secondary" className="min-h-10 self-start px-3.5 text-[14px]">
-            Groupé
+            {NOM}
           </ButtonLink>
         </section>
       ) : null}
       {groupe && editable && !selecting ? (
-        <section aria-label="Proposer au groupé" className="mb-3 flex flex-col gap-2 rounded-[20px] bg-surface p-4 shadow-card">
+        <section aria-label={`Ajouter à la ${nom}`} className="mb-3 flex flex-col gap-2 rounded-[20px] bg-surface p-4 shadow-card">
           <p className="flex items-center gap-2 text-[15px] font-extrabold">
             <Users size={18} aria-hidden="true" className="text-accent-text" />
-            Groupé : un seul négoce, un seul prix
+            {`${NOM} : un seul négoce, un seul prix`}
           </p>
           <p className="text-[14px] leading-snug text-muted">Tes commandes regroupées avec les autres artisans du département. Tu commandes sur ton compte, tu es livré sur ton chantier.</p>
           <Button variant="secondary" className="self-start" onClick={startGroupe}>
-            Proposer au groupé
+            {`Ajouter à la ${nom}`}
           </Button>
         </section>
       ) : null}
@@ -246,7 +247,7 @@ export function SupplyList({
       </p>
       {selecting ? (
         <p className="mb-2 text-[14px] leading-snug font-bold text-ink">
-          {pourGroupe ? "Coche ce que tu proposes au groupé. Ton nom ne part pas avec." : "Coche ce qui part chez ce fournisseur. Le reste pourra partir chez un autre."}
+          {pourGroupe ? `Coche ce que tu ajoutes à la ${nom}. Ton nom ne part pas avec.` : "Coche ce qui part chez ce fournisseur. Le reste pourra partir chez un autre."}
         </p>
       ) : null}
       {sections.map((section) => (
@@ -283,7 +284,7 @@ export function SupplyList({
                     // ligne déjà proposée non plus (une ligne déjà envoyée à part reste décochée, pas grisée).
                     disabled: !articleOf(r) || r.status === "check" || (pourGroupe && !cochable(r)),
                     ...(pourGroupe && vagueRow(r) ? { note: takeoff.phrasePrecision ?? "à préciser d'abord" } : {}),
-                    ...(pourGroupe ? { label: "Proposer au groupé" } : {}),
+                    ...(pourGroupe ? { label: `Ajouter à la ${nom}` } : {}),
                     onToggle: () =>
                       setChecked((prev) => {
                         const next = new Set(prev);

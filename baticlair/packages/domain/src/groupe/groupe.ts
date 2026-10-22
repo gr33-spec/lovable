@@ -1,4 +1,5 @@
 import { normalizeText } from "../trades/trade-profile.js";
+import { NOM_COMMANDE_COMMUNE } from "./nom.js";
 
 /**
  * BATICLAIR GROUPÉ (document du fondateur, 2026-10-19, « parcours complet », sections 1 à 6) : les besoins FERMES de
@@ -201,7 +202,7 @@ export function messageAuNegoce(artisan: { entreprise: string; prenom?: string |
     "Bonjour,",
     "",
     "Je passe désormais une partie de mes commandes par un regroupement d'artisans de mon département : nos besoins fermes sont réunis pour demander un prix de volume.",
-    "Vous recevrez peut-être une demande de « Regroupement artisans » par e-mail : il suffit de déposer votre devis par le lien, sans compte ni formulaire. Si le lot ne vous concerne pas, un clic sur « pas concerné » suffit.",
+    `Vous recevrez peut-être une demande « ${NOM_COMMANDE_COMMUNE} » par e-mail : il suffit de déposer votre devis par le lien, sans compte ni formulaire. Si le lot ne vous concerne pas, un clic sur « pas concerné » suffit.`,
     "Je continue à commander sur mon compte chez vous, livré sur mes chantiers, payé comme d'habitude.",
     "",
     "Bien à vous,",

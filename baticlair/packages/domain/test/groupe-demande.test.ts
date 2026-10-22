@@ -34,8 +34,8 @@ describe("groupé, étape 5 : la demande aux négoces", () => {
   });
 
   it("l'e-mail : l'objet, le texte (phrase en capitales entre astérisques), le HTML (phrase en gras), les liens ; jamais un nom de client", () => {
-    expect(objetDemande([lot], "22")).toBe("Regroupement artisans : demande de prix, Carreau de sol 60×60 grès cérame rectifié (22)");
-    expect(objetDemande([lot, { ...lot, numero: 13 }], "22")).toBe("Regroupement artisans : 2 demandes de prix (22)");
+    expect(objetDemande([lot], "22")).toBe("Commande commune : demande de prix, Carreau de sol 60×60 grès cérame rectifié (22)");
+    expect(objetDemande([lot, { ...lot, numero: 13 }], "22")).toBe("Commande commune : 2 demandes de prix (22)");
     const texte = texteDemande([lot], liens);
     expect(texte).toContain(`** ${PHRASE_COMMISSION.toUpperCase()} **`);
     expect(texte).toContain("Lot n° 12 : Carreau de sol 60×60 grès cérame rectifié");
@@ -55,7 +55,7 @@ describe("groupé, étape 5 : la demande aux négoces", () => {
 
   it("le PDF en deux parties : les lots (ferme / probable), puis chaque chantier (adresse, quantité, fenêtre, engagement), la phrase en pied", () => {
     const doc = documentDemande([lot], "22", d("2026-10-20"));
-    expect(doc.titre).toBe("Regroupement artisans : demande de prix, département 22, le 20 octobre 2026");
+    expect(doc.titre).toBe("Commande commune : demande de prix, département 22, le 20 octobre 2026");
     expect(doc.partie1).toEqual([
       ["Lot", "Référence", "Famille", "Volume ferme", "Volume probable", "Livraison"],
       ["n° 12", "Carreau de sol 60×60 grès cérame rectifié", "Second œuvre (peinture, carrelage, plâtrerie, sols)", "46 cartons", "23 cartons", "du 10 novembre 2026 au 20 novembre 2026"],

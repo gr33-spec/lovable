@@ -341,7 +341,7 @@ test("le menu ne propose que trois entrées ; fournisseurs et compte sont derri�
   await signUp(page);
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
   // Quatre rubriques (cinq avec le groupé, allumé dans les parcours), et au centre le « + » : un nouveau chantier, directement.
-  await expect(nav.getByRole("link")).toHaveText(["Mes chantiers", "Nouvelle liste", "Groupé"]);
+  await expect(nav.getByRole("link")).toHaveText(["Mes chantiers", "Nouvelle liste", "Commande commune"]);
   await menuArtisan(page, "Mon compte");
   await expect(page.getByRole("heading", { name: "Mon compte" })).toBeVisible();
 
@@ -1639,32 +1639,32 @@ test("BatiClair Groupé, étape 2 : proposer des lignes au groupé, s'engager, p
   await confirmDoubts(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   // Sans SIRET vérifié, le groupé n'existe pas à l'écran (gratuit pour l'artisan : l'abonnement n'y est pour rien).
-  await expect(list.getByRole("button", { name: "Proposer au groupé" })).toHaveCount(0);
+  await expect(list.getByRole("button", { name: "Ajouter à la commande commune" })).toHaveCount(0);
 
   // SIRET renseigné puis vérifié (hors production : sans appel INSEE) ; le compte reste en essai gratuit.
   expect(await apiCall(page, "PATCH", "/v1/company/profile", { name: "Toitures Martin", address: adresse, siret: "73282932000074", phone: null, email: null })).toBe(200);
   expect(await apiCall(page, "POST", "/v1/groupe/siret")).toBe(200);
   await page.reload();
 
-  const proposer = list.getByRole("button", { name: "Proposer au groupé" });
+  const proposer = list.getByRole("button", { name: "Ajouter à la commande commune" });
   await expect(proposer).toBeVisible();
   await proposer.click();
-  await expect(list.getByText("Coche ce que tu proposes au groupé. Ton nom ne part pas avec.")).toBeVisible();
-  const boxes = list.getByRole("checkbox", { name: /^Proposer au groupé : / }).and(page.locator(":enabled"));
+  await expect(list.getByText("Coche ce que tu ajoutes à la commande commune. Ton nom ne part pas avec.")).toBeVisible();
+  const boxes = list.getByRole("checkbox", { name: /^Ajouter à la commande commune : / }).and(page.locator(":enabled"));
   // Rien de coché d'office : l'engagement se choisit ligne par ligne.
   await expect(boxes.first()).not.toBeChecked();
   await boxes.first().check();
-  const bar = page.getByRole("region", { name: "Proposer au groupé", exact: true });
-  await expect(bar.getByText("1 ligne au groupé")).toBeVisible();
+  const bar = page.getByRole("region", { name: "Ajouter à la commande commune", exact: true });
+  await expect(bar.getByText("1 ligne pour la commande commune")).toBeVisible();
   // « Chantier signé » : « Proposer » attend la phrase d'engagement.
   await bar.getByRole("radio", { name: "Chantier signé" }).click();
   await expect(bar.getByRole("button", { name: "Proposer" })).toBeDisabled();
-  await bar.getByRole("checkbox", { name: /je m'engage à commander ces quantités au prix groupé obtenu, chez le négoce retenu/ }).check();
+  await bar.getByRole("checkbox", { name: /je m'engage à commander ces quantités au prix obtenu par la commande commune, chez le négoce retenu/ }).check();
   await bar.getByRole("button", { name: "Proposer" }).click();
 
-  const groupe = page.getByRole("region", { name: "Au groupé", exact: true });
+  const groupe = page.getByRole("region", { name: "Dans la commande commune", exact: true });
   await expect(groupe.getByText("Chantier signé", { exact: true })).toBeVisible();
-  await expect(groupe.getByRole("button", { name: "Retirer du groupé" })).toBeVisible();
+  await expect(groupe.getByRole("button", { name: "Retirer de la commande commune" })).toBeVisible();
 
   // Une deuxième ligne, en « Devis en attente », puis passée en signé d'un tap (avec l'engagement).
   await proposer.click();
@@ -1679,9 +1679,9 @@ test("BatiClair Groupé, étape 2 : proposer des lignes au groupé, s'engager, p
   await expect(groupe.getByText("Chantier signé", { exact: true })).toHaveCount(2);
 
   // Retirées tant que le lot n'est pas parti : la section disparaît.
-  await groupe.getByRole("button", { name: "Retirer du groupé" }).first().click();
-  await expect(groupe.getByRole("button", { name: "Retirer du groupé" })).toHaveCount(1);
-  await groupe.getByRole("button", { name: "Retirer du groupé" }).click();
+  await groupe.getByRole("button", { name: "Retirer de la commande commune" }).first().click();
+  await expect(groupe.getByRole("button", { name: "Retirer de la commande commune" })).toHaveCount(1);
+  await groupe.getByRole("button", { name: "Retirer de la commande commune" }).click();
   await expect(groupe).toHaveCount(0);
   // Sur iPhone, rien ne déborde.
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
@@ -1770,9 +1770,9 @@ test("BatiClair Groupé, étape 5 : la page du lien « pas concerné » (confirm
 test("BatiClair Groupé, l'onglet : visible sans SIRET ni devis, trois étapes cochées une à une, puis « Mes commandes groupées » ; le bloc en haut de « Ton chantier »", async ({ page }) => {
   await signUp(page);
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
-  await nav.getByRole("link", { name: "Groupé" }).click();
+  await nav.getByRole("link", { name: "Commande commune" }).click();
   await expect(page).toHaveURL(/\/groupe$/);
-  await expect(page.getByRole("heading", { name: "Groupé" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Commande commune" })).toBeVisible();
   // L'accroche suit le métier du compte (un couvreur ici).
   await expect(page.getByText("Tes commandes d'ardoise regroupées avec les autres couvreurs du département, un seul négoce, un seul prix.")).toBeVisible();
   await expect(page.getByRole("list", { name: "Comment ça marche" }).getByRole("listitem")).toHaveCount(3);
@@ -1784,10 +1784,10 @@ test("BatiClair Groupé, l'onglet : visible sans SIRET ni devis, trois étapes c
   const chantier = page.url();
   await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await passQuestions(page);
-  const ferme = page.getByRole("region", { name: "Groupé fermé" });
-  await expect(ferme.getByText("Renseigne ton SIRET pour proposer au groupé")).toBeVisible();
-  await expect(page.getByRole("region", { name: "Proposer au groupé" })).toHaveCount(0);
-  await ferme.getByRole("link", { name: "Groupé" }).click();
+  const ferme = page.getByRole("region", { name: "Commande commune fermée" });
+  await expect(ferme.getByText("Renseigne ton SIRET pour rejoindre la commande commune")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Ajouter à la commande commune" })).toHaveCount(0);
+  await ferme.getByRole("link", { name: "Commande commune" }).click();
   await expect(page).toHaveURL(/\/groupe$/);
   await expect(manque.getByLabel("Fait")).toHaveCount(1);
   // SIRET renseigné : « Vérifier mon SIRET » le coche ; « Ton chantier » montre alors le bloc « Proposer au groupé » en haut.
@@ -1797,26 +1797,26 @@ test("BatiClair Groupé, l'onglet : visible sans SIRET ni devis, trois étapes c
   await expect(manque.getByLabel("Fait")).toHaveCount(2);
   await expect(manque.getByLabel("À faire")).toHaveCount(1);
   await page.goto(chantier);
-  const bloc = page.getByRole("region", { name: "Proposer au groupé" });
+  const bloc = page.getByRole("region", { name: "Ajouter à la commande commune" });
   await expect(bloc).toBeVisible();
-  await expect(bloc.getByRole("button", { name: "Proposer au groupé" })).toBeVisible();
+  await expect(bloc.getByRole("button", { name: "Ajouter à la commande commune" })).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(bloc).toBeInViewport();
-  await expect(page.getByRole("region", { name: "Groupé fermé" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Commande commune fermée" })).toHaveCount(0);
   // Sur téléphone, le chantier se lit en plein écran sans la barre du menu : retour à l'onglet par l'adresse.
   await page.goto("/groupe");
   await expect(manque.getByLabel("Fait")).toHaveCount(2);
   // Les négoces : tout est coché, l'onglet montre « Mes commandes groupées », vide.
   expect(await apiCall(page, "POST", "/v1/groupe/negoces", { nom: "Négoce Ardoises", email: "ardoises@example.com", familles: ["couverture"] })).toBe(201);
   await page.reload();
-  await expect(page.getByRole("heading", { name: "Mes commandes groupées" })).toBeVisible();
-  await expect(page.getByText("Rien pour l'instant : propose un chantier au groupé.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Mes commandes communes" })).toBeVisible();
+  await expect(page.getByText("Rien pour l'instant : ajoute un chantier à la commande commune.")).toBeVisible();
   await expect(manque).toHaveCount(0);
   // Étape 7 : le compteur « Économisé grâce au groupé » dans Compte, à zéro.
   await page.goto("/compte");
-  const economies = page.getByRole("region", { name: "Économisé grâce au groupé" });
+  const economies = page.getByRole("region", { name: "Économisé grâce à la commande commune" });
   await expect(economies).toContainText("0,00 €");
-  await expect(economies).toContainText("Aucune commande groupée pour l'instant.");
+  await expect(economies).toContainText("Aucune commande commune pour l'instant.");
 });
 
 /** La boîte aux lettres de test (décision du 2026-10-20) : les e-mails capturés par l'API, lus par le parcours. */
@@ -1881,12 +1881,12 @@ async function chantierAuGroupe(page: Page, nom: string, adresse: string, avant?
 
 async function proposerLaPremiereLigne(page: Page, statut: "Chantier signé" | "Devis en attente" = "Chantier signé"): Promise<void> {
   const list = page.getByRole("region", { name: "Liste des fournitures" });
-  await list.getByRole("button", { name: "Proposer au groupé" }).click();
-  const boxes = list.getByRole("checkbox", { name: /^Proposer au groupé : / }).and(page.locator(":enabled"));
+  await list.getByRole("button", { name: "Ajouter à la commande commune" }).click();
+  const boxes = list.getByRole("checkbox", { name: /^Ajouter à la commande commune : / }).and(page.locator(":enabled"));
   await boxes.first().check();
-  const bar = page.getByRole("region", { name: "Proposer au groupé", exact: true });
+  const bar = page.getByRole("region", { name: "Ajouter à la commande commune", exact: true });
   await bar.getByRole("radio", { name: statut }).click();
-  if (statut === "Chantier signé") await bar.getByRole("checkbox", { name: /je m'engage à commander ces quantités au prix groupé obtenu, chez le négoce retenu/ }).check();
+  if (statut === "Chantier signé") await bar.getByRole("checkbox", { name: /je m'engage à commander ces quantités au prix obtenu par la commande commune, chez le négoce retenu/ }).check();
   await bar.getByRole("button", { name: "Proposer" }).click();
 }
 
@@ -1894,13 +1894,13 @@ async function artisanAuGroupe(page: Page, entreprise: string, adresse: string):
   await compteAuGroupe(page, entreprise, adresse);
   await chantierAuGroupe(page, `Toiture ${entreprise}`, adresse);
   // « Chantier signé » tant que le lot attend ; « Engagé, lot parti » quand ce signé a formé le lot et que la demande est partie.
-  await expect(page.getByRole("region", { name: "Au groupé", exact: true }).getByText(/^(Chantier signé|Parti chez les négoces, tu es engagé)$/)).toBeVisible();
+  await expect(page.getByRole("region", { name: "Dans la commande commune", exact: true }).getByText(/^(Chantier signé|Parti chez les négoces, tu es engagé)$/)).toBeVisible();
 }
 
 /** La dernière demande de prix reçue par un négoce (la boîte de test garde celles des parcours précédents). */
 async function derniereDemande(page: Page, negoce: string, dejaRecus: number) {
   // Nouveau cap (22 octobre) : un négoce ajouté reçoit d'abord le mail qui le prévient du regroupement ; on attend la demande.
-  const demandes = async () => (await emailsVers(page, negoce)).slice(dejaRecus).filter((m) => m.subject.includes("Regroupement artisans"));
+  const demandes = async () => (await emailsVers(page, negoce)).slice(dejaRecus).filter((m) => m.subject.includes("Commande commune"));
   await expect.poll(async () => (await demandes()).length, { timeout: 20_000 }).toBeGreaterThan(0);
   return (await demandes()).at(-1)!;
 }
@@ -1957,7 +1957,7 @@ test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux 
   expect(await apiCall(page, "POST", "/v1/groupe/negoces", { nom: "Négoce Ardoises", email: "ardoises@example.com", familles: ["couverture"], numeroCompte: "C-12" })).toBe(201);
   expect(await apiCall(page, "POST", "/v1/groupe/negoces", { nom: "Négoce Généraliste", email: "general@example.com", familles: ["couverture", "second_oeuvre"] })).toBe(201);
   await chantierAuGroupe(page, "Toiture Toitures Martin", adresseA);
-  await expect(page.getByRole("region", { name: "Au groupé", exact: true }).getByText(/^(Chantier signé|Parti chez les négoces, tu es engagé)$/)).toBeVisible();
+  await expect(page.getByRole("region", { name: "Dans la commande commune", exact: true }).getByText(/^(Chantier signé|Parti chez les négoces, tu es engagé)$/)).toBeVisible();
   const contexteB = await browser.newContext({ ...(test.info().project.use as object) });
   const pageB = await contexteB.newPage();
   await artisanAuGroupe(pageB, "Toitures Le Bihan", adresseB);
@@ -1965,7 +1965,7 @@ test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux 
   const demande = await derniereDemande(page, "ardoises@example.com", dejaRecus);
   expect(demande.replyTo).toMatch(/^lot-\d+@reponses\.example\.com$/);
   await derniereDemande(page, "general@example.com", dejaRecusB);
-  await expect(page.getByRole("region", { name: "Au groupé", exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Dans la commande commune", exact: true })).toBeVisible();
   // Le premier négoce répond par e-mail : le webhook lui renvoie un lien de dépôt neuf, rien n'est pris sans la case.
   {
     const r = (await reponseParEmail(page, "Négoce <ardoises@example.com>", demande.replyTo!)) as { status: number; body: { traite: boolean } };
@@ -1998,7 +1998,7 @@ test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux 
   await negoceDepose(page, browser, "general@example.com", demande.replyTo!, "devis-fournisseur-2.pdf");
   // Tous ont répondu : le négoce est retenu, le bon de commande est parti, chaque artisan voit son offre et peut dire « Livré ».
   await page.goto("/groupe");
-  const lots = page.getByRole("list", { name: "Mes commandes groupées" });
+  const lots = page.getByRole("list", { name: "Mes commandes communes" });
   await expect(lots.getByText(/Négoce retenu/)).toBeVisible({ timeout: 20_000 });
   await expect(lots.getByText(/€ HT l'unité chez Négoce/)).toBeVisible();
   // Nouveau cap (22 octobre) : le compteur du groupe, sans nom ni chantier des autres.
@@ -2012,7 +2012,7 @@ test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux 
   expect(auNegoce.some((m) => /^Facture n°/.test(m.subject))).toBe(true);
   // B voit aussi son offre, sans le nom de A.
   await pageB.goto("/groupe");
-  const lotsB = pageB.getByRole("list", { name: "Mes commandes groupées" });
+  const lotsB = pageB.getByRole("list", { name: "Mes commandes communes" });
   await expect(lotsB.getByText(/Négoce retenu/)).toBeVisible();
   await expect(lotsB.getByText("Toitures Martin")).toHaveCount(0);
   await contexteB.close();
@@ -2022,8 +2022,8 @@ test("BatiClair Groupé, étape 9 : l'admin (Greg seul) voit les lots, le journa
   // Un artisan ordinaire ne voit pas le lien ; le compte admin (GROUPE_ADMINS) le voit sur l'onglet Groupé.
   await signUp(page);
   await page.goto("/groupe");
-  await expect(page.getByRole("heading", { name: "Groupé" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Admin groupé" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Commande commune" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Admin commande commune" })).toHaveCount(0);
   expect(await page.evaluate(async () => (await fetch("/v1/admin/groupe")).status)).toBe(403);
   await page.context().clearCookies();
   // Le compte admin est unique (GROUPE_ADMINS) : créé au premier passage, retrouvé ensuite (téléphone puis ordinateur, même base).
@@ -2034,8 +2034,8 @@ test("BatiClair Groupé, étape 9 : l'admin (Greg seul) voit les lots, le journa
   await expect(page.getByRole("heading", { name: /^(Bonjour Jean|Paie tes matériaux moins cher)/ }).or(page.getByRole("alert").filter({ hasText: "incorrect" }))).toBeVisible();
   if (await page.getByRole("alert").filter({ hasText: "incorrect" }).count()) await signUp(page, "admin-groupe@example.fr");
   await page.goto("/groupe");
-  await page.getByRole("link", { name: "Admin groupé" }).click();
-  await expect(page.getByRole("heading", { name: "Admin groupé" })).toBeVisible();
+  await page.getByRole("link", { name: "Admin commande commune" }).click();
+  await expect(page.getByRole("heading", { name: "Admin commande commune" })).toBeVisible();
   const rubriques = page.getByRole("navigation", { name: "Rubriques de l'admin" });
   // Les lots des parcours précédents (même base) : chacun avec son journal ; sinon « Aucun lot ».
   const lots = page.getByRole("list", { name: "Lots" });
@@ -2102,25 +2102,25 @@ test("BatiClair Groupé, scénarios 1 : deux départements et deux références 
   expect(["ouvert", "forme", "envoye"]).toContain(lotsB[0]!.lot!.statut);
   expect(lotsA[0]!.lot!.numero).not.toBe(lotsB[0]!.lot!.numero);
   await page.goto("/groupe");
-  await expect(page.getByRole("list", { name: "Mes commandes groupées" }).getByText(/Commande groupée n° \d+ · (On attend d'autres artisans|Commande prête|Demande partie)/)).toBeVisible();
+  await expect(page.getByRole("list", { name: "Mes commandes communes" }).getByText(/Commande groupée n° \d+ · (On attend d'autres artisans|Commande prête|Demande partie)/)).toBeVisible();
   await contexteB.close();
 
   // A propose une deuxième référence : un autre lot ; puis la retire tant que rien n'est parti (section 4 a).
   await page.goto(`/chantiers/${lotsA[0] && (await apiJson<{ besoins: { projectId: string }[] }>(page, "GET", "/v1/groupe/lots")).body.besoins[0]!.projectId}`);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
-  await list.getByRole("button", { name: "Proposer au groupé" }).click();
-  await list.getByRole("checkbox", { name: /^Proposer au groupé : / }).and(page.locator(":enabled")).first().check();
-  const bar = page.getByRole("region", { name: "Proposer au groupé", exact: true });
+  await list.getByRole("button", { name: "Ajouter à la commande commune" }).click();
+  await list.getByRole("checkbox", { name: /^Ajouter à la commande commune : / }).and(page.locator(":enabled")).first().check();
+  const bar = page.getByRole("region", { name: "Ajouter à la commande commune", exact: true });
   await bar.getByRole("radio", { name: "Chantier signé" }).click();
   await bar.getByRole("checkbox", { name: /je m'engage/ }).check();
   await bar.getByRole("button", { name: "Proposer" }).click();
-  const groupe = page.getByRole("region", { name: "Au groupé", exact: true });
+  const groupe = page.getByRole("region", { name: "Dans la commande commune", exact: true });
   await expect(groupe.getByText(/^(Chantier signé|Parti chez les négoces, tu es engagé)$/)).toHaveCount(2);
   const apres = (await apiJson<{ besoins: Lot[] }>(page, "GET", "/v1/groupe/lots")).body.besoins;
   expect(apres).toHaveLength(2);
   expect(new Set(apres.map((b) => b.lot!.numero)).size).toBe(2);
   // La deuxième référence vient d'ouvrir son lot : retrait libre tant que rien n'est parti.
-  await groupe.getByRole("button", { name: "Retirer du groupé" }).last().click();
+  await groupe.getByRole("button", { name: "Retirer de la commande commune" }).last().click();
   await expect(groupe.getByText(/^(Chantier signé|Parti chez les négoces, tu es engagé)$/)).toHaveCount(1);
   expect((await apiJson<{ besoins: Lot[] }>(page, "GET", "/v1/groupe/lots")).body.besoins).toHaveLength(1);
 
@@ -2148,9 +2148,9 @@ test("BatiClair Groupé, scénarios 1 : deux départements et deux références 
   expect((await apiJson(pageC, "PATCH", `/v1/takeoff-lines/${tuiles.id}`, { designation: tuiles.designation, quantity: "5000", unit: tuiles.unit ?? "u" })).status).toBe(200);
   await pageC.reload();
   const listC = pageC.getByRole("region", { name: "Liste des fournitures" });
-  await listC.getByRole("button", { name: "Proposer au groupé" }).click();
+  await listC.getByRole("button", { name: "Ajouter à la commande commune" }).click();
   await listC.getByRole("checkbox", { name: /^Proposer au groupé : Tuile romane/ }).check();
-  const barC = pageC.getByRole("region", { name: "Proposer au groupé", exact: true });
+  const barC = pageC.getByRole("region", { name: "Ajouter à la commande commune", exact: true });
   await barC.getByRole("radio", { name: "Chantier signé" }).click();
   await barC.getByRole("checkbox", { name: /je m'engage/ }).check();
   await barC.getByRole("button", { name: "Proposer" }).click();
@@ -2184,7 +2184,7 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
   expect(tache.status).toBe(200);
   expect(tache.body.lotsClos).toBeGreaterThanOrEqual(1);
   await page.goto("/groupe");
-  await expect(page.getByRole("list", { name: "Mes commandes groupées" }).getByText(`Commande groupée n° ${lot1} · Aucun négoce n'a répondu, commande fermée`)).toBeVisible();
+  await expect(page.getByRole("list", { name: "Mes commandes communes" }).getByText(`Commande groupée n° ${lot1} · Aucun négoce n'a répondu, commande fermée`)).toBeVisible();
 
   // 2) Deuxième lot : N1 dit « pas concerné » par le lien de l'e-mail ; N2 dépose ; N2 est retenu, les bons partent.
   avant = await recus();
@@ -2202,7 +2202,7 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
   await contexteN.close();
   await negoceDepose(page, browser, N2, demande2.replyTo!, "devis-fournisseur-2.pdf");
   await page.goto("/groupe");
-  const lots = page.getByRole("list", { name: "Mes commandes groupées" });
+  const lots = page.getByRole("list", { name: "Mes commandes communes" });
   await expect(lots.getByText(/Négoce retenu/)).toBeVisible({ timeout: 20_000 });
   await expect(lots.getByText(/chez Négoce Généraliste/)).toBeVisible();
 
@@ -2238,14 +2238,14 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
   await page.getByLabel("Déposer mon devis").setInputFiles(path.join(__dirname, "fixtures", "devis-client-couvreur.pdf"));
   await passQuestions(page);
   await confirmDoubts(page);
-  await expect(page.getByRole("region", { name: "Groupé fermé" })).toBeVisible();
-  await expect(page.getByRole("region", { name: "Liste des fournitures" }).getByRole("button", { name: "Proposer au groupé" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Commande commune fermée" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Liste des fournitures" }).getByRole("button", { name: "Ajouter à la commande commune" })).toHaveCount(0);
   const refus = await apiJson<{ error: { code: string; details: { reason: string } } }>(page, "POST", `/v1/projects/${projet4}/groupe`, { articles: ["x"], fenetre: { tot: "2026-11-02", tard: "2026-11-20" }, statut: "signe", engagement: true });
   expect(refus.status).toBe(403);
   expect(refus.body.error.details.reason).toBe("groupe_ferme");
   // B, lui, voit toujours ses lots et son négoce retenu.
   await pageB.goto("/groupe");
-  await expect(pageB.getByRole("list", { name: "Mes commandes groupées" }).getByText(/Négoce retenu/).first()).toBeVisible();
+  await expect(pageB.getByRole("list", { name: "Mes commandes communes" }).getByText(/Négoce retenu/).first()).toBeVisible();
   await contexteB.close();
 });
 

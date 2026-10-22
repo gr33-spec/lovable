@@ -1,4 +1,5 @@
 import type { MessageArtisan } from "./notifications.js";
+import { nomCommun } from "./nom.js";
 
 /**
  * NOUVEAU CAP DU 22 OCTOBRE 2026 (décidé avec Greg, section 0 du doc « BatiClair Groupé », prioritaire sur les sections
@@ -166,7 +167,7 @@ export function suiviDuChantier(e: EtatDuChantier): Suivi {
   if (etape === 0) {
     return e.lignesARegler > 0
       ? { etape, etapes, phrase: "Ta liste est là.", aFaire: `Règle ${pluriel(e.lignesARegler, "ligne orange", "lignes orange")}, puis envoie-la à tes négoces.` }
-      : { etape, etapes, phrase: "Ta liste est prête.", aFaire: "Envoie-la à tes négoces, ou propose-la au groupé." };
+      : { etape, etapes, phrase: "Ta liste est prête.", aFaire: `Envoie-la à tes négoces, ou ajoute-la à la ${nomCommun()}.` };
   }
   if (etape === 1) return { etape, etapes, phrase: `Demande partie chez ${pluriel(e.demandes, "négoce", "négoces")}. On attend leurs prix.`, aFaire: null };
   if (etape === 2) {

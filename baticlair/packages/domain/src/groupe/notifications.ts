@@ -1,4 +1,5 @@
 import { DELAI_REPONSE_JOURS } from "./demande.js";
+import { NOM_COMMANDE_COMMUNE, nomCommun } from "./nom.js";
 
 /**
  * LES NOTIFICATIONS DE L'ARTISAN (parcours groupé, étape 8 ; section 3 du document), en code pur : quatre messages par
@@ -42,12 +43,12 @@ const jourCourt = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", m
  */
 export const quantiteDite = (q: { quantite: string; unite: string; designation: string }): string => `${nombre(q.quantite)} ${q.unite} de ${q.designation.charAt(0).toLowerCase()}${q.designation.slice(1)}`;
 export function messageBesoinAccepte(b: { quantite: string; unite: string; designation: string; zone: string; projectId: string }): MessageArtisan {
-  return { titre: "Groupé", corps: `Tes ${quantiteDite(b)} sont dans le groupé ${nomDuDepartement(b.zone)}. Prochaine commande groupée lundi.`, url: "/groupe", etiquette: `groupe-besoin-${b.projectId}` };
+  return { titre: NOM_COMMANDE_COMMUNE, corps: `Tes ${quantiteDite(b)} sont dans la ${nomCommun()} (${nomDuDepartement(b.zone)}). Prochain départ lundi.`, url: "/groupe", etiquette: `groupe-besoin-${b.projectId}` };
 }
 
 /** 2. « Le groupé est parti chez 4 négoces. Réponses attendues sous 7 jours. » */
 export function messageDemandeEnvoyee(lot: { numero: number; negoces: number }): MessageArtisan {
-  return { titre: "Groupé", corps: `Le groupé est parti chez ${lot.negoces} négoce${lot.negoces > 1 ? "s" : ""}. Réponses attendues sous ${DELAI_REPONSE_JOURS} jours.`, url: "/groupe", etiquette: `groupe-lot-${lot.numero}` };
+  return { titre: NOM_COMMANDE_COMMUNE, corps: `La ${nomCommun()} est partie chez ${lot.negoces} négoce${lot.negoces > 1 ? "s" : ""}. Réponses attendues sous ${DELAI_REPONSE_JOURS} jours.`, url: "/groupe", etiquette: `groupe-lot-${lot.numero}` };
 }
 
 /** 3. « Vos 31 bacs : X € chez A (−Y %). Bon de commande transmis, livraison le 3 nov. » (−Y % seulement avec un prix de référence). */
@@ -55,26 +56,26 @@ export function messageNegoceRetenu(o: { quantite: string; unite: string; design
   const baisse = o.prixReference && o.prixReference > 0 ? Math.round(((o.prixReference - o.prixUnitaire) / o.prixReference) * 100) : null;
   const pct = baisse !== null && baisse > 0 ? ` (−${baisse} %)` : "";
   const livraison = o.dateLivraison ? `, livraison le ${jourCourt(o.dateLivraison)}` : "";
-  return { titre: "Groupé : négoce retenu", corps: `Tes ${quantiteDite(o)} : ${euros(o.prixUnitaire)} chez ${o.negoce}${pct}. Bon de commande transmis${livraison}.`, url: "/groupe", etiquette: `groupe-lot-${o.numero}` };
+  return { titre: `${NOM_COMMANDE_COMMUNE} : négoce retenu`, corps: `Tes ${quantiteDite(o)} : ${euros(o.prixUnitaire)} chez ${o.negoce}${pct}. Bon de commande transmis${livraison}.`, url: "/groupe", etiquette: `groupe-lot-${o.numero}` };
 }
 
 /** 4. « Livraison aujourd'hui. Tout est arrivé ? » */
 export function messageLivraisonDuJour(lot: { numero: number }): MessageArtisan {
-  return { titre: "Groupé : livraison", corps: "Livraison aujourd'hui. Tout est arrivé ?", url: "/groupe", etiquette: `groupe-livraison-${lot.numero}` };
+  return { titre: `${NOM_COMMANDE_COMMUNE} : livraison`, corps: "Livraison aujourd'hui. Tout est arrivé ?", url: "/groupe", etiquette: `groupe-livraison-${lot.numero}` };
 }
 
 /** Décision du fondateur (2026-10-20) : l'avertissement après un désistement, par e-mail. */
 export function messageDesistement(d: { sanction: "avertissement" | "exclusion"; excluJusquau: Date | null }): { objet: string; texte: string } {
   if (d.sanction === "avertissement") {
     return {
-      objet: "Groupé : désistement enregistré, avertissement",
-      texte: "Bonjour,\n\nTu t'étais engagé à commander ces quantités au prix groupé et tu ne donnes pas suite : c'est un avertissement, sans frais. Un deuxième désistement dans les 12 mois fermerait le groupé 6 mois (tu garderais BatiClair). Le négoce est prévenu et peut annuler ta ligne.\n\nBatiClair",
+      objet: `${NOM_COMMANDE_COMMUNE} : désistement enregistré, avertissement`,
+      texte: `Bonjour,\n\nTu t'étais engagé à commander ces quantités au prix de la ${nomCommun()} et tu ne donnes pas suite : c'est un avertissement, sans frais. Un deuxième désistement dans les 12 mois fermerait la ${nomCommun()} 6 mois (tu garderais BatiClair). Le négoce est prévenu et peut annuler ta ligne.\n\nBatiClair`,
     };
   }
   const jusquau = d.excluJusquau ? d.excluJusquau.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }) : "";
   return {
-    objet: "Groupé : deuxième désistement, groupé fermé 6 mois",
-    texte: `Bonjour,\n\nDeuxième désistement en 12 mois : le groupé se ferme pour toi jusqu'au ${jusquau}. Tu gardes BatiClair et tes chantiers. Le négoce est prévenu et peut annuler ta ligne.\n\nBatiClair`,
+    objet: `${NOM_COMMANDE_COMMUNE} : deuxième désistement, fermée 6 mois`,
+    texte: `Bonjour,\n\nDeuxième désistement en 12 mois : la ${nomCommun()} se ferme pour toi jusqu'au ${jusquau}. Tu gardes BatiClair et tes chantiers. Le négoce est prévenu et peut annuler ta ligne.\n\nBatiClair`,
   };
 }
 

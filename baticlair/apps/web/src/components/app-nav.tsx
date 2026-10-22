@@ -64,7 +64,7 @@ export function AppNav() {
         }`}
       >
         <Icon size={21} aria-hidden="true" />
-        <span>{item.label}</span>
+        <span className="text-center leading-tight">{item.label}</span>
       </Link>
     );
   };

@@ -57,7 +57,7 @@ describe("le suivi façon colis", () => {
   const vide = { liste: false, lignesARegler: 0, demandes: 0, devis: 0, commande: false };
   it("Liste prête → Prix demandés → Prix reçus → Commandé, avec une phrase et ce qu'il faut faire", () => {
     expect(suiviDuChantier({ ...vide, liste: true, lignesARegler: 2 })).toMatchObject({ etape: 0, phrase: "Ta liste est là.", aFaire: "Règle 2 lignes orange, puis envoie-la à tes négoces." });
-    expect(suiviDuChantier({ ...vide, liste: true })).toMatchObject({ etape: 0, aFaire: "Envoie-la à tes négoces, ou propose-la au groupé." });
+    expect(suiviDuChantier({ ...vide, liste: true })).toMatchObject({ etape: 0, aFaire: "Envoie-la à tes négoces, ou ajoute-la à la commande commune." });
     expect(suiviDuChantier({ ...vide, liste: true, demandes: 2 })).toMatchObject({ etape: 1, phrase: "Demande partie chez 2 négoces. On attend leurs prix.", aFaire: null });
     const recu = suiviDuChantier({ ...vide, liste: true, demandes: 2, devis: 1, meilleur: "1 840,00 € HT" });
     expect(recu).toMatchObject({ etape: 2, phrase: "1 devis reçu sur 2 demandes. Meilleur prix : 1 840,00 € HT.", aFaire: "Compare et retiens l'offre qui te va." });
