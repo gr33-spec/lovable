@@ -70,7 +70,8 @@ async function pdfText(bytes: Uint8Array): Promise<string> {
   return content.pages.map((p) => p.lines.join("\n")).join("\n");
 }
 
-describe("§45.7 — la demande de devis du chantier Test", () => {
+// Chaque cas crée un compte, un chantier et une lecture complète (≈ 3 s, plus de 5 s quand la machine est chargée).
+describe("§45.7 — la demande de devis du chantier Test", { timeout: 30_000 }, () => {
   it("1. le mail sort avec la structure du 45.2 ; ni « commande », ni « référentiel », ni « BatiClair » dans le corps", async () => {
     const agent = await compteBatiInvest();
     const { projectId, supplierId } = await chantierTest(agent);
