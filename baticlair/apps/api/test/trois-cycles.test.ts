@@ -111,8 +111,8 @@ it("octobre, novembre, décembre : trois cycles complets, chaque total posé à 
   const vueA = (await A.agent.get(`/v1/commande-du-mois?maintenant=${oct}`).expect(200)).body.commandes[0];
   expect(vueA.clotureLe).toBe("2026-10-25T11:00:00.000Z");
   expect(vueA.reponseAvant).toBe("2026-11-08T17:00:00.000Z");
-  expect(vueA.tout.replace(/ /g, " ")).toBe("Toute la commande d'octobre : 7 200 pièces d'ardoise naturelle 32×22 Espagne 1er choix, 1 620 m de liteau sapin traité 27×38, 20 boîtes de crochet inox 100 mm");
-  expect(vueA.toi.replace(/ /g, " ")).toBe("Toi seul : 4 200 pièces d'ardoise naturelle 32×22 Espagne 1er choix, 520 m de liteau sapin traité 27×38, 8 boîtes de crochet inox 100 mm");
+  expect(vueA.tout.replace(/\u202f/g, " ")).toBe("Toute la commande d'octobre : 7 200 pièces d'ardoise naturelle 32×22 Espagne 1er choix, 1 620 m de liteau sapin traité 27×38, 20 boîtes de crochet inox 100 mm");
+  expect(vueA.toi.replace(/\u202f/g, " ")).toBe("Toi seul : 4 200 pièces d'ardoise naturelle 32×22 Espagne 1er choix, 520 m de liteau sapin traité 27×38, 8 boîtes de crochet inox 100 mm");
 
   expect(await tache("2026-10-25T11:01:00.000Z")).toMatchObject({ clos: 1, grillesEnvoyees: 4 });
   // C, à Paimpol, le lendemain de la clôture : sa liste part avec novembre.
