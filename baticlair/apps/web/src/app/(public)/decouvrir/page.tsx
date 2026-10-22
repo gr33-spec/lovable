@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { DemoGuidee } from "@/components/demo-guidee";
 import { ButtonLink } from "@/components/ui";
 import { LiensLegaux } from "@/components/legal";
+import { FOURNITURES_EXEMPLE, OutilsArtisan, SceneChantier, TourneeGroupee } from "@/components/landing-illustrations";
 import { TRADES } from "@/lib/trades";
 
 /**
@@ -21,7 +22,8 @@ export const metadata: Metadata = {
  * LA PAGE D'ACCUEIL PUBLIQUE (plan du 20 octobre 2026, bloc 5 ; refonte « premium » du 21 octobre à la demande du
  * fondateur). Une page, le téléphone d'abord, ton direct, zéro jargon. Les visuels sont de vraies captures de l'app
  * (mode démo, données fictives marquées), servies depuis `public/landing` : aucune ressource extérieure, aucun script.
- * Sections : accroche, trois étapes du quantitatif, les réponses comparées, le groupé, « gratuit pour l'artisan, le
+ * Les illustrations (le couvreur sur son toit, les fournitures du comptoir, le camion du groupé, les outils) sont
+ * dessinées en SVG dans la page (`landing-illustrations.tsx`), pour la même raison. Sections : accroche, trois étapes du quantitatif, les réponses comparées, le groupé, « gratuit pour l'artisan, le
  * négoce paie 2 % », les métiers couverts, « Créer un compte », pied de page avec les mentions légales.
  */
 const QUANTITATIF = [
@@ -76,10 +78,12 @@ export default function BienvenuePage() {
           </div>
         </div>
         <div className="relative lg:col-span-5 animate-rise [animation-delay:120ms]">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_55%_at_50%_45%,rgba(107,70,255,0.42)_0%,rgba(43,85,255,0.18)_45%,transparent_72%)]" aria-hidden="true" />
-          <div className="relative mx-auto h-[400px] overflow-hidden pt-4 sm:h-[520px]">
-            <Telephone src="/landing/hero.jpg" alt="La liste des fournitures d'un chantier de couverture : ardoises, écran, gouttières, chaque ligne avec sa quantité" priorite className="mx-auto" />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ground to-transparent" aria-hidden="true" />
+          {/* Le chantier en fond, le téléphone posé devant, décalé pour laisser voir le couvreur sur son échelle. */}
+          <div className="relative h-[440px] overflow-hidden rounded-[36px] shadow-card sm:h-[540px]">
+            <SceneChantier className="absolute inset-0 h-full w-full" />
+            <div className="absolute right-[-36px] bottom-[-150px] origin-bottom-right scale-[0.78] sm:right-2 sm:bottom-[-110px] sm:scale-[0.9]">
+              <Telephone src="/landing/hero.jpg" alt="La liste des fournitures d'un chantier de couverture : ardoises, écran, gouttières, chaque ligne avec sa quantité" priorite />
+            </div>
           </div>
         </div>
       </section>
@@ -125,6 +129,30 @@ export default function BienvenuePage() {
             </li>
           ))}
         </ol>
+      </section>
+
+      {/* Les fournitures, dessinées : ce qui sort de la liste, avec les mots du comptoir. */}
+      <section aria-labelledby="fournitures" className="flex flex-col gap-8">
+        <div className="flex flex-col gap-3">
+          <h2 id="fournitures" className={`${h2} max-w-[20ch]`}>
+            Les mots de ton comptoir, les quantités de ton chantier
+          </h2>
+          <p className="max-w-[55ch] text-[17px] leading-relaxed text-muted">Ardoises, liteaux, gouttières, BA13, câble : chaque ligne part au négoce comme tu la lui dirais.</p>
+        </div>
+        <ul aria-label="Exemples de fournitures" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          {FOURNITURES_EXEMPLE.map(({ nom, quantite, metier, Dessin, fond }) => (
+            <li key={nom} className="flex flex-col overflow-hidden rounded-[24px] bg-surface shadow-card">
+              <div className={`${fond} flex aspect-[16/11] items-center justify-center p-3`}>
+                <Dessin />
+              </div>
+              <div className="flex flex-1 flex-col gap-1 p-4">
+                <span className="text-[12px] font-extrabold tracking-[0.06em] text-muted uppercase">{metier}</span>
+                <span className="text-[15px] leading-snug font-extrabold">{nom}</span>
+                <span className="mt-auto pt-1 text-[15px] font-bold text-accent-text tabular-nums">{quantite}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
       </section>
 
       {/* Les réponses comparées : l'écran à gauche, trois phrases à droite. */}
@@ -180,11 +208,12 @@ export default function BienvenuePage() {
                 </li>
               ))}
             </ol>
+            <TourneeGroupee className="w-full max-w-[520px]" />
           </div>
           <div className="relative lg:col-span-5">
             <div className="relative mx-auto h-[360px] overflow-hidden sm:h-[460px] lg:h-full lg:min-h-[520px]">
               <Telephone src="/landing/groupe.jpg" alt="L'écran Groupé de l'app : tes commandes d'ardoise regroupées avec les autres couvreurs du département" className="mx-auto lg:absolute lg:top-0 lg:right-0" />
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#1a1550] to-transparent" aria-hidden="true" />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#1a1550] to-transparent lg:hidden" aria-hidden="true" />
             </div>
           </div>
         </div>
@@ -224,6 +253,7 @@ export default function BienvenuePage() {
       </section>
 
       <section aria-labelledby="commencer" className="flex flex-col items-start gap-6 rounded-[36px] bg-ink px-7 py-10 text-white sm:items-center sm:px-10 sm:py-16 sm:text-center">
+        <OutilsArtisan className="w-[200px] sm:w-[240px]" />
         <h2 id="commencer" className="font-display text-[34px] leading-[1.02] font-extrabold tracking-[-0.035em] sm:text-[52px]">
           Ton premier devis, maintenant
         </h2>
