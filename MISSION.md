@@ -239,3 +239,19 @@ Groupé sur #284 ; le reste : une branche `claude/…` et une PR par bloc. Dans 
 - Chiffres : 24 métiers couverts ; domaine 685 tests, API 409 tests, e2e iPhone 55 sur 55 (ordinateur : tests de la landing et
   de la commande commune verts) ; CI de #284 verte au dernier commit vérifié. Coût par devis mesuré : aucun nouveau (zéro appel API).
 - Rien fusionné dans `main`. En attente de Greg : CGU et pages légales à renommer en « Commande commune » ? ; photos de chantier.
+
+### Plan « finition » (Greg, 22 octobre au soir, jusqu'au vendredi 23 octobre 12 h)
+
+Objectif : zéro bouton mort, zéro texte faux, zéro incohérence. Tout sur #284, reporté sur `claude/integration-groupe`.
+Routine horaire `trig_019b3LSmsdY43Aowni5jVARm` (prompt mis à jour). Rapport vendredi 12 h.
+
+| # | Bloc | État |
+|---|---|---|
+| 1 | Test qui clique chaque bouton et chaque lien (iPhone + ordinateur) | fait : `toutCliquer` (e2e « Zéro bouton mort » visiteur et artisan, + page du négoce et Commande commune avec offre dans « étape 8 », admin dans « étape 9 ») ; aucun bouton mort trouvé ; à reprendre au bloc 6 : « Annuler » / « Clore le lot » de l'admin sans confirmation |
+| 2 | Parcours complet nouveau cap + calculs à la main (trois cas) dans TEST-COMPLET.md | à faire |
+| 3 | Pages légales relues, `docs/A-FAIRE-RELIRE.md` | à faire |
+| 4 | Textes (tutoiement artisan, vouvoiement négoce, typographie, chiffres) | à faire |
+| 5 | Visuel, iPhone SE, Lighthouse landing > 90 | à faire |
+| 6 | Cas limites | à faire |
+| 7 | RECETTE.md : 20 tests iPhone | à faire |
+| 8 | DETTE.md, performance | à faire |

@@ -1981,6 +1981,11 @@ test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux 
     await expect(pageN.getByRole("heading", { name: /^Demande de prix, lot n° \d+/ })).toBeVisible();
     await expect(pageN.getByRole("list", { name: "Chantiers à livrer" }).getByRole("listitem")).toHaveCount(2);
     await expect(pageN.getByText("Toitures Martin")).toHaveCount(0);
+    // Plan « finition » : zéro bouton mort sur la page du négoce (liens du contrat et des pages légales compris).
+    expect(await toutCliquer(pageN, "page du négoce", async () => {
+      await pageN.goto(lien);
+      await pageN.waitForLoadState("networkidle");
+    })).toEqual([]);
     const form = pageN.getByRole("form", { name: "Déposer mon devis" });
     await expect(form.getByRole("link", { name: /Lire le contrat/ })).toHaveAttribute("href", /contrat\.pdf$/);
     await form.locator('input[type="file"]').setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
@@ -2015,10 +2020,16 @@ test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux 
   const lotsB = pageB.getByRole("list", { name: "Mes commandes communes" });
   await expect(lotsB.getByText(/Négoce retenu/)).toBeVisible();
   await expect(lotsB.getByText("Toitures Martin")).toHaveCount(0);
+  // Plan « finition » : zéro bouton mort sur la Commande commune avec une offre, un bon parti et une livraison dite.
+  expect(await toutCliquer(pageB, "Commande commune avec offre", async () => {
+    await pageB.goto("/groupe");
+    await pageB.waitForLoadState("networkidle");
+  })).toEqual([]);
   await contexteB.close();
 });
 
 test("BatiClair Groupé, étape 9 : l'admin (Greg seul) voit les lots, le journal d'un lot, les factures et leur export CSV", async ({ page }) => {
+  test.setTimeout(600_000);
   // Un artisan ordinaire ne voit pas le lien ; le compte admin (GROUPE_ADMINS) le voit sur l'onglet Groupé.
   await signUp(page);
   await page.goto("/groupe");
@@ -2054,6 +2065,21 @@ test("BatiClair Groupé, étape 9 : l'admin (Greg seul) voit les lots, le journa
   await rubriques.getByRole("button", { name: "Exclusions" }).click();
   await expect(page.getByRole("list", { name: "Exclusions" })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+  // Plan « finition » : zéro bouton mort dans l'admin. Les gestes de secours qui changent un lot des autres parcours
+  // (clore, annuler, forcer, retenir un autre négoce, payée) sont vérifiés par le test API `groupe-admin`.
+  const gestes = /^(Clore le lot|Annuler|Forcer|Retenir ce négoce|Payée)$/;
+  const defauts: string[] = [];
+  for (const rubrique of ["Lots", "Négoces", "Accords", "Factures", "Exclusions"]) {
+    defauts.push(
+      ...(await toutCliquer(page, `admin, ${rubrique}`, async () => {
+        await page.goto("/admin/groupe");
+        await page.waitForLoadState("networkidle");
+        const bouton = rubriques.getByRole("button", { name: rubrique });
+        if (await bouton.count()) await bouton.click();
+      }, gestes)),
+    );
+  }
+  expect(defauts).toEqual([]);
 });
 
 test("Pages légales : mentions légales, CGU, conditions négoce et confidentialité, lisibles sans compte ; l'acceptation des CGU est gardée", async ({ page }) => {
@@ -2534,4 +2560,149 @@ test("« J'ai déjà ma liste » : un fichier qui n'est ni une photo ni un PDF s
   await page.getByLabel("Déposer ma liste").setInputFiles({ name: "liste.txt", mimeType: "text/plain", buffer: Buffer.from("du texte") });
   await expect(page.getByRole("alert").filter({ hasText: /ni une photo ni un PDF|rien lu/ })).toBeVisible();
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
+});
+
+/**
+ * PLAN « FINITION » (Greg, 22 octobre) : « zéro bouton mort ». Sur un écran, chaque lien est suivi (une page qui répond,
+ * une ancre qui existe, un lien externe connu) et chaque bouton visible est cliqué, l'écran rouvert entre deux clics.
+ * Est un défaut : l'écran d'erreur, « Page introuvable », une erreur JavaScript, une réponse 5xx de l'API, un bouton
+ * qu'on ne peut pas toucher (caché sous un autre élément). Les gestes qui ferment la session ou effacent le compte
+ * sont laissés aux tests qui les vérifient (déconnexion, RGPD).
+ */
+const NE_PAS_CLIQUER = /^(Se déconnecter|Supprimer (mon|le|définitivement)|Effacer mes données|Supprimer)\b/i;
+const LIENS_EXTERNES = /^(mailto:|tel:|sms:|https:\/\/wa\.me\/|https:\/\/www\.google\.com\/maps\/|https:\/\/www\.cnil\.fr|https:\/\/www\.legifrance\.gouv\.fr|https:\/\/annuaire-entreprises\.data\.gouv\.fr|https:\/\/www\.service-public\.fr)/;
+
+async function toutCliquer(page: Page, ecran: string, ouvrir: () => Promise<void>, aussiSans: RegExp | null = null): Promise<string[]> {
+  const defauts: string[] = [];
+  const surErreur = (e: Error) => defauts.push(`${ecran} : erreur JavaScript « ${e.message} »`);
+  const surReponse = (r: import("@playwright/test").Response) => {
+    if (r.status() >= 500 && r.url().includes("/v1/")) defauts.push(`${ecran} : ${r.status()} sur ${new URL(r.url()).pathname}`);
+  };
+  page.on("pageerror", surErreur);
+  page.on("response", surReponse);
+  page.on("dialog", (d) => void d.dismiss().catch(() => undefined));
+  const casse = async (quoi: string) => {
+    if (await page.getByText(/Oups, cet écran a eu un souci|Page introuvable/).count()) defauts.push(`${ecran} : ${quoi} mène à un écran d'erreur`);
+  };
+  await ouvrir();
+  await casse("l'ouverture");
+  // Les liens : une page qui répond (ou une ancre présente), un lien externe connu.
+  const liens = await page.locator("a[href]").evaluateAll((as) => [...new Set(as.map((a) => a.getAttribute("href") ?? ""))]);
+  for (const href of liens) {
+    if (href.startsWith("#")) {
+      if (href.length > 1 && !(await page.locator(href).count())) defauts.push(`${ecran} : l'ancre ${href} n'existe pas`);
+    } else if (href.startsWith("/")) {
+      const r = await page.request.get(href, { maxRedirects: 5 }).catch(() => null);
+      if (!r || r.status() >= 400) defauts.push(`${ecran} : le lien ${href} répond ${r?.status() ?? "rien"}`);
+    } else if (!LIENS_EXTERNES.test(href)) {
+      defauts.push(`${ecran} : lien externe inattendu ${href}`);
+    }
+  }
+  // Les boutons visibles, un par un, l'écran rouvert entre deux clics.
+  const noms = await page.getByRole("button").evaluateAll((bs) => bs.map((b) => ((b as HTMLElement).getAttribute("aria-label") ?? (b as HTMLElement).innerText ?? "").trim().replace(/\s+/g, " ")));
+  for (let i = 0; i < noms.length; i++) {
+    const nom = noms[i]!;
+    if (!nom || NE_PAS_CLIQUER.test(nom) || aussiSans?.test(nom)) continue;
+    if (i > 0) {
+      await ouvrir();
+    }
+    const bouton = page.getByRole("button").nth(i);
+    if (!(await bouton.isVisible().catch(() => false)) || !(await bouton.isEnabled().catch(() => false))) continue;
+    const vu = ((await bouton.getAttribute("aria-label").catch(() => null)) ?? (await bouton.innerText().catch(() => "")) ?? "").trim().replace(/\s+/g, " ");
+    if (vu !== nom) continue; // l'écran a changé depuis le relevé (une ligne retirée…) : le bouton n'est plus le même
+    // Un champ fichier caché s'ouvre par son étiquette visible (la zone « Donne ta liste… ») : c'est elle qu'on touche.
+    if ((await bouton.evaluate((el) => el instanceof HTMLInputElement && el.type === "file").catch(() => false)) as boolean) {
+      const id = await bouton.getAttribute("id");
+      const etiquette = id ? page.locator(`label[for="${id}"]`).first() : null;
+      if (!etiquette || !(await etiquette.isVisible().catch(() => false))) defauts.push(`${ecran} : le champ « ${nom} » n'a pas d'étiquette visible à toucher`);
+      else {
+        const choix = page.waitForEvent("filechooser", { timeout: 3000 }).catch(() => null);
+        await etiquette.click();
+        if (!(await choix)) defauts.push(`${ecran} : « ${nom} » n'ouvre pas le choix du fichier`);
+      }
+      continue;
+    }
+    const fichier = page.waitForEvent("filechooser", { timeout: 1500 }).catch(() => null);
+    try {
+      await bouton.click({ timeout: 3000 });
+    } catch {
+      // Une action qu'on découvre en glissant la ligne se donne aussi au clavier (le focus la montre) : on essaie ainsi.
+      try {
+        await bouton.focus();
+        await bouton.click({ timeout: 2000 });
+      } catch {
+        defauts.push(`${ecran} : le bouton « ${nom} » ne se touche pas`);
+        continue;
+      }
+    }
+    await fichier;
+    await page.waitForTimeout(400);
+    await casse(`le bouton « ${nom} »`);
+  }
+  page.off("pageerror", surErreur);
+  page.off("response", surReponse);
+  return defauts;
+}
+
+test("Zéro bouton mort (visiteur) : landing, connexion, inscription, mot de passe, pages légales, liens négoce inconnus", async ({ page }) => {
+  test.setTimeout(600_000);
+  const defauts: string[] = [];
+  const ecrans: [string, string][] = [
+    ["landing", "/"],
+    ["démo guidée", "/?demo"],
+    ["connexion", "/connexion"],
+    ["inscription", "/inscription"],
+    ["mot de passe oublié", "/mot-de-passe-oublie"],
+    ["nouveau mot de passe sans jeton", "/nouveau-mot-de-passe"],
+    ["mentions légales", "/mentions-legales"],
+    ["CGU", "/cgu"],
+    ["conditions négoce", "/conditions-negoce"],
+    ["confidentialité", "/confidentialite"],
+    ["réponse négoce, lien inconnu", "/reponse/lien-inconnu"],
+    ["lien négoce inconnu", "/negoces/lien/lien-inconnu"],
+    ["adresse inconnue", "/nulle-part"],
+  ];
+  for (const [ecran, url] of ecrans) {
+    defauts.push(
+      ...(await toutCliquer(page, ecran, async () => {
+        await page.goto(url);
+        await page.waitForLoadState("networkidle");
+      })),
+    );
+  }
+  // « Page introuvable » est attendu sur une adresse inconnue : seul le reste compte.
+  expect(defauts.filter((d) => !/^adresse inconnue : l'ouverture/.test(d))).toEqual([]);
+});
+
+test("Zéro bouton mort (artisan) : accueil, chantiers, nouvelle liste, Ton chantier, fournisseurs, compte, formules, Commande commune", async ({ page }) => {
+  test.setTimeout(900_000);
+  await compteAuGroupe(page, "Toitures Clics", "4 rue de Kerampont, 22300 Lannion");
+  // Une liste lue (photo), avec une ligne vague et des lignes précises.
+  await page.goto("/chantiers/nouveau");
+  await page.getByLabel("Déposer ma liste").setInputFiles(path.join(__dirname, "fixtures", "liste-manuscrite.png"));
+  await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/, { timeout: 60_000 });
+  const chantier = new URL(page.url()).pathname;
+  await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible({ timeout: 60_000 });
+  const defauts: string[] = [];
+  const ecrans: [string, string][] = [
+    ["accueil", "/"],
+    ["mes chantiers", "/chantiers"],
+    ["nouvelle liste", "/chantiers/nouveau"],
+    ["Ton chantier", chantier],
+    ["page des fournitures", `${chantier}?vue=fournitures`],
+    ["fournisseurs", "/fournisseurs"],
+    ["compte", "/compte"],
+    ["formules", "/formules"],
+    ["Commande commune", "/groupe"],
+    ["bienvenue", "/bienvenue"],
+  ];
+  for (const [ecran, url] of ecrans) {
+    defauts.push(
+      ...(await toutCliquer(page, ecran, async () => {
+        await page.goto(url);
+        await page.waitForLoadState("networkidle");
+      })),
+    );
+  }
+  expect(defauts).toEqual([]);
 });
