@@ -6,7 +6,8 @@ import {
   documentDemande,
   htmlDemande,
   LIBELLES_FAMILLES,
-  livraisonComplete,
+  distanceRouteKm,
+  lireRegleDeLivraison,
   messageNouveauDevis,
   negoceConcerne,
   prixAuVolume,
@@ -20,7 +21,6 @@ import {
   VERSION_CONTRAT,
   volumesDuLot,
   zonesDuLot,
-  type PrixDeLivraison,
   type FamilleGroupe,
   type LotADemander,
   type MessageArtisan,
@@ -32,6 +32,7 @@ import type { PdfReader } from "../../documents/index.js";
 import { jetonDeLien } from "./lien-negoce.js";
 import { prixDesPaliers, statutDeLecture, type NegoceExtractor } from "./negoce-extractor.js";
 import { pdfDeTexte } from "./pdf-texte.js";
+import type { Geocodeur } from "./geocodeur.js";
 
 const JOUR = 24 * 3600 * 1000;
 /** Un lien de dépôt meurt 30 jours après l'envoi du lot (7 jours de réponse, puis la marge d'un négoce en retard). */
@@ -64,14 +65,32 @@ export interface PageReponse {
     chantiers: { adresse: string; quantite: string; unite: string; fenetre: { tot: string; tard: string }; engagement: "ferme" | "probable" }[];
     /** Le lot attend encore les réponses (« envoyé ») ; sinon la page le dit et ne prend plus rien. */
     ouvert: boolean;
-    /** Nouveau cap (22 octobre) : les zones de livraison du lot (« 22500 Paimpol »), chacune avec son prix obligatoire. */
+    /** Nouveau cap (22 octobre) : les zones (communes) des chantiers du lot. */
     zones: string[];
     reponseAttendueLe: string | null;
   };
   negoce: { nom: string; email: string };
   commission: { phrase: string; phraseAccord: string; tauxPourcent: number; versionContrat: string; contrat: string[] };
   accord: { accepteLe: string } | null;
-  reponse: { deposeLe: string; fichiers: string[]; message: string | null; statutExtraction: string; livraison: { zone: string; prixHt: number }[] } | null;
+  reponse: { deposeLe: string; fichiers: string[]; message: string | null; statutExtraction: string; livraison: LivraisonEnregistree | null } | null;
+}
+
+/**
+ * La livraison telle que le négoce l'a donnée (décision de Greg, 22 octobre) : son dépôt, gratuite jusqu'à X km, Y € au-delà,
+ * et la distance calculée jusqu'à chaque chantier du lot (`null` : adresse introuvable).
+ */
+export interface LivraisonEnregistree {
+  depart: string;
+  francoKm: number;
+  prixAuDela: number;
+  distances: Record<string, number | null>;
+}
+
+/** La livraison d'une réponse, ou null (réponse antérieure, ou ancien format par zone). */
+export function livraisonDe(json: unknown): LivraisonEnregistree | null {
+  if (!json || typeof json !== "object" || Array.isArray(json)) return null;
+  const l = json as Partial<LivraisonEnregistree>;
+  return typeof l.francoKm === "number" && typeof l.prixAuDela === "number" ? { depart: l.depart ?? "", francoKm: l.francoKm, prixAuDela: l.prixAuDela, distances: l.distances ?? {} } : null;
 }
 
 const jour = (d: Date) => d.toISOString().slice(0, 10);
@@ -96,6 +115,8 @@ export class DemandeService {
     private readonly choix: { choisirLesLotsEnvoyes(maintenant?: Date): Promise<unknown> },
     /** Étape 8 : « Le groupé est parti chez 4 négoces. Réponses attendues sous 7 jours. » */
     private readonly notifications: { prevenir(companyId: string, message: MessageArtisan): Promise<unknown> } = { prevenir: async () => undefined },
+    /** Décision de Greg (22 octobre) : la distance du dépôt du négoce à chaque chantier, pour le prix livré. */
+    private readonly geocodeur: Geocodeur | null = null,
   ) {}
 
   /** Envoie chaque lot formé aux négoces concernés. Un lot sans négoce concerné reste formé (Greg le voit, étape 9). */
@@ -231,7 +252,7 @@ export class DemandeService {
       negoce: { nom: r.negoce.nom, email: r.negoce.email },
       commission: { phrase: PHRASE_COMMISSION, phraseAccord: PHRASE_ACCORD, tauxPourcent: TAUX_COMMISSION_POURCENT, versionContrat: VERSION_CONTRAT, contrat: texteContrat() },
       accord: r.accord ? { accepteLe: r.accord.accepteLe.toISOString() } : null,
-      reponse: r.deposeLe ? { deposeLe: r.deposeLe.toISOString(), fichiers: r.fichiers.map((f) => f.nom), message: r.message, statutExtraction: r.statutExtraction, livraison: (r.livraison as { zone: string; prixHt: number }[]) ?? [] } : null,
+      reponse: r.deposeLe ? { deposeLe: r.deposeLe.toISOString(), fichiers: r.fichiers.map((f) => f.nom), message: r.message, statutExtraction: r.statutExtraction, livraison: livraisonDe(r.livraison) } : null,
     };
   }
 
@@ -246,17 +267,18 @@ export class DemandeService {
    * Le dépôt : la case d'accord est obligatoire (sans elle, rien n'est enregistré), un ou deux PDF, une phrase libre ;
    * l'accord garde la date, l'e-mail du négoce et l'adresse IP ; puis la lecture du prix et du délai.
    */
-  async deposer(jeton: string, depot: { accord: boolean; message: string | null; fichiers: FichierDepose[]; livraison?: readonly PrixDeLivraison[] }, adresseIp: string): Promise<PageReponse> {
+  async deposer(jeton: string, depot: { accord: boolean; message: string | null; fichiers: FichierDepose[]; livraison?: { depart?: string | null; francoKm?: string | null; prixAuDela?: string | null } }, adresseIp: string): Promise<PageReponse> {
     const r = await this.reponse(jeton);
     if (r.lot.statut !== "envoye") throw new DomainError("conflict", "Lot closed", { reason: "lot_ferme" });
     if (!depot.accord) throw validationFailed("Commission agreement required", { reason: "accord_requis" });
     if (depot.fichiers.length === 0) throw validationFailed("Quote required", { reason: "devis_requis" });
     if (depot.fichiers.length > 2) throw validationFailed("Two quotes at most", { reason: "deux_devis_au_plus" });
     for (const f of depot.fichiers) if (f.type !== "application/pdf" || !f.contenu.subarray(0, 5).toString().startsWith("%PDF")) throw validationFailed("PDF only", { reason: "pdf_seulement" });
-    // Nouveau cap (22 octobre) : un prix de livraison par zone du lot, obligatoire (zéro = franco).
-    const livraison = livraisonComplete(zonesDuLot(r.lot.besoins.map((b) => b.adresseLivraison)), depot.livraison ?? []);
-    if ("manquantes" in livraison) throw validationFailed("Delivery price per zone required", { reason: "livraison_requise", zones: livraison.manquantes });
-    const prixLivraison = livraison.prix;
+    // Décision de Greg (22 octobre) : deux chiffres obligatoires, « gratuite jusqu'à X km » et « Y € au-delà », avec
+    // l'adresse d'où partent les livraisons ; la distance à chaque chantier est calculée ici, une fois.
+    const regle = lireRegleDeLivraison(depot.livraison ?? {});
+    if (!regle) throw validationFailed("Delivery terms required", { reason: "livraison_requise" });
+    const prixLivraison: LivraisonEnregistree = { ...regle, distances: await this.distances(regle.depart, r.lot.besoins) };
     const maintenant = new Date();
     await this.prisma.$transaction(async (tx) => {
       await tx.accordNegoce.upsert({
@@ -267,7 +289,7 @@ export class DemandeService {
       await tx.reponseNegoceFichier.deleteMany({ where: { reponseId: r.id } });
       await tx.reponseNegoce.update({
         where: { id: r.id },
-        data: { message: depot.message, deposeLe: maintenant, statutExtraction: "en_attente", prix: [], delaiJours: null, livraison: prixLivraison, fichiers: { create: depot.fichiers.map((f) => ({ nom: f.nom, type: f.type, contenu: new Uint8Array(f.contenu) })) } },
+        data: { message: depot.message, deposeLe: maintenant, statutExtraction: "en_attente", prix: [], delaiJours: null, livraison: { ...prixLivraison }, fichiers: { create: depot.fichiers.map((f) => ({ nom: f.nom, type: f.type, contenu: new Uint8Array(f.contenu) })) } },
       });
     });
     const lecture = await this.lire(r, depot.fichiers);
@@ -277,6 +299,23 @@ export class DemandeService {
     const page = await this.page(jeton);
     await this.choix.choisirLesLotsEnvoyes();
     return page;
+  }
+
+  /** La distance par la route du dépôt du négoce à chaque chantier du lot (une adresse géocodée une fois). */
+  private async distances(depart: string, besoins: readonly { id: string; adresseLivraison: string }[]): Promise<Record<string, number | null>> {
+    if (!this.geocodeur) return Object.fromEntries(besoins.map((b) => [b.id, null]));
+    const cache = new Map<string, Promise<{ lat: number; lon: number } | null>>();
+    const point = (a: string) => {
+      if (!cache.has(a)) cache.set(a, this.geocodeur!.point(a));
+      return cache.get(a)!;
+    };
+    const origine = await point(depart);
+    const out: Record<string, number | null> = {};
+    for (const b of besoins) {
+      const p = await point(b.adresseLivraison);
+      out[b.id] = origine && p ? distanceRouteKm(origine, p) : null;
+    }
+    return out;
   }
 
   /**

@@ -49,8 +49,11 @@ export default function ReponseNegocePage() {
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
   const [depose, setDepose] = useState(false);
-  // Nouveau cap (22 octobre) : un prix de livraison HT par zone, obligatoire (0 = franco).
-  const [livraison, setLivraison] = useState<Record<string, string>>({});
+  // Décision de Greg (22 octobre) : deux chiffres, « gratuite jusqu'à X km » et « Y € par livraison au-delà », plus l'adresse
+  // d'où partent les livraisons ; l'app calcule la distance à chaque chantier.
+  const [depart, setDepart] = useState("");
+  const [francoKm, setFrancoKm] = useState("");
+  const [prixAuDela, setPrixAuDela] = useState("");
 
   useEffect(() => {
     api<PageReponse>(`/v1/reponse/${encodeURIComponent(jeton)}`)
@@ -63,7 +66,9 @@ export default function ReponseNegocePage() {
     const form = new FormData();
     form.set("accord", accord ? "oui" : "non");
     if (message.trim()) form.set("message", message.trim());
-    form.set("livraison", JSON.stringify((page?.lot.zones ?? []).map((zone) => ({ zone, prixHt: (livraison[zone] ?? "").trim() }))));
+    form.set("depart", depart.trim());
+    form.set("francoKm", francoKm.trim());
+    form.set("prixAuDela", prixAuDela.trim());
     for (const f of fichiers) form.append("file", f, f.name);
     setPending(true);
     setEnvoi(null);
@@ -89,8 +94,8 @@ export default function ReponseNegocePage() {
   }
   if (!page) return <Spinner label="Chargement de la demande…" />;
   const { lot } = page;
-  const zones = lot.zones ?? [];
-  const livraisonOk = zones.every((z) => /^\d+([.,]\d{1,2})?$/.test((livraison[z] ?? "").replace(/[\s€]/g, "")));
+  const estNombre = (v: string) => /^\d+([.,]\d{1,2})?$/.test(v.replace(/[\s€]/g, ""));
+  const livraisonOk = depart.trim().length >= 5 && estNombre(francoKm) && estNombre(prixAuDela);
   const pret = accord && fichiers.length >= 1 && fichiers.length <= 2 && livraisonOk;
   return (
     <>
@@ -146,29 +151,24 @@ export default function ReponseNegocePage() {
             </label>
             {fichiers.length > 0 ? <p className="text-sm font-semibold">{fichiers.map((f) => f.name).join(", ")}</p> : null}
           </div>
-          {zones.length > 0 ? (
-            <fieldset className="flex flex-col gap-2 rounded-[20px] border border-line bg-surface p-4">
-              <legend className="px-1 text-sm font-bold">Prix de livraison HT par zone (obligatoire, 0 si franco)</legend>
-              {zones.map((z) => (
-                <label key={z} className="flex items-center justify-between gap-3 text-sm">
-                  <span className="font-semibold">{z}</span>
-                  <span className="flex items-center gap-1.5">
-                    <input
-                      inputMode="decimal"
-                      aria-label={`Livraison à ${z}, en euros HT`}
-                      value={livraison[z] ?? ""}
-                      onChange={(e) => {
-                        const v = e.currentTarget.value;
-                        setLivraison((l) => ({ ...l, [z]: v }));
-                      }}
-                      className="min-h-11 w-24 rounded-xl border border-line bg-surface px-3 text-right text-sm font-bold"
-                    />
-                    <span className="text-muted">€ HT</span>
-                  </span>
-                </label>
-              ))}
-            </fieldset>
-          ) : null}
+          <fieldset className="flex flex-col gap-3 rounded-[20px] border border-line bg-surface p-4">
+            <legend className="px-1 text-sm font-bold">Votre livraison (obligatoire)</legend>
+            <label className="flex flex-col gap-1 text-sm font-semibold">
+              Adresse d&apos;où partent vos livraisons
+              <input value={depart} onChange={(e) => setDepart(e.currentTarget.value)} autoComplete="street-address" className="min-h-11 rounded-xl border border-line bg-surface px-3 text-sm font-normal" />
+            </label>
+            <label className="flex flex-wrap items-center gap-2 text-sm font-semibold">
+              Livraison gratuite jusqu&apos;à
+              <input inputMode="numeric" aria-label="Livraison gratuite jusqu'à, en km" value={francoKm} onChange={(e) => setFrancoKm(e.currentTarget.value)} className="min-h-11 w-20 rounded-xl border border-line bg-surface px-3 text-right font-bold" />
+              km
+            </label>
+            <label className="flex flex-wrap items-center gap-2 text-sm font-semibold">
+              Au-delà,
+              <input inputMode="decimal" aria-label="Prix d'une livraison au-delà, en euros HT" value={prixAuDela} onChange={(e) => setPrixAuDela(e.currentTarget.value)} className="min-h-11 w-24 rounded-xl border border-line bg-surface px-3 text-right font-bold" />
+              € HT par livraison
+            </label>
+            <p className="text-xs text-muted">Nous calculons la distance de votre dépôt à chaque chantier ; chaque artisan voit son prix livré.</p>
+          </fieldset>
           <label className="flex flex-col gap-1.5 text-sm font-bold">
             Un mot pour nous (facultatif)
             <textarea value={message} onChange={(e) => setMessage(e.currentTarget.value)} maxLength={2000} rows={3} className="rounded-2xl border border-line bg-surface px-3 py-2 text-sm font-normal" />
@@ -186,7 +186,7 @@ export default function ReponseNegocePage() {
             {page.reponse ? "Déposer un nouveau devis" : "Déposer mon devis"}
           </Button>
           {!accord ? <p className="text-center text-xs text-muted">Sans la case cochée, le devis n&apos;est pas pris en compte.</p> : null}
-          {accord && !livraisonOk ? <p className="text-center text-xs text-muted">Indiquez le prix de livraison de chaque zone.</p> : null}
+          {accord && !livraisonOk ? <p className="text-center text-xs text-muted">Indiquez votre adresse de départ, la distance gratuite et le prix au-delà.</p> : null}
         </form>
       )}
       <footer className="mt-4 flex flex-col gap-2 text-sm text-muted">

@@ -156,15 +156,15 @@ describe("groupé, étape 5 : la demande aux négoces", { timeout: 60_000 }, () 
     // La case sans devis : refusé aussi.
     expect((await anon.post(`/v1/reponse/${jeton}`).field("accord", "oui")).body.error.details).toMatchObject({ reason: "devis_requis" });
 
-    // Nouveau cap (22 octobre) : sans prix de livraison pour chaque zone du lot, rien n'est pris.
-    const zones = (await anon.get(`/v1/reponse/${jeton}`).expect(200)).body.lot.zones as string[];
-    expect(zones).toEqual(["22300 Lannion", "22500 Paimpol"]);
+    // Décision de Greg (22 octobre) : sans la livraison (dépôt, gratuite jusqu'à X km, Y € au-delà), rien n'est pris.
     const sansLivraison = await anon.post(`/v1/reponse/${jeton}`).field("accord", "oui").attach("file", devis, { filename: "devis-77.pdf", contentType: "application/pdf" });
-    expect(sansLivraison.body.error.details).toMatchObject({ reason: "livraison_requise", zones: ["22300 Lannion", "22500 Paimpol"] });
+    expect(sansLivraison.body.error.details).toMatchObject({ reason: "livraison_requise" });
     const avec = await anon
       .post(`/v1/reponse/${jeton}`)
       .field("accord", "oui")
-      .field("livraison", JSON.stringify([{ zone: "22300 Lannion", prixHt: "45" }, { zone: "22500 Paimpol", prixHt: "60" }]))
+      .field("depart", "Zone de Kerampont, 22300 Lannion")
+      .field("francoKm", "20")
+      .field("prixAuDela", "45")
       .field("message", "Prix valables 30 jours")
       .attach("file", devis, { filename: "devis-77.pdf", contentType: "application/pdf" })
       .attach("file", devis, { filename: "devis-77-bis.pdf", contentType: "application/pdf" });
@@ -176,13 +176,16 @@ describe("groupé, étape 5 : la demande aux négoces", { timeout: 60_000 }, () 
     expect(Number(accord.tauxPourcent)).toBe(2);
     expect(accord.adresseIp.length).toBeGreaterThan(0);
     const reponse = await ctx.prisma.reponseNegoce.findFirstOrThrow({ where: { negoce: { email: "carrelage@example.com" } }, include: { fichiers: true } });
+    // La distance du dépôt à chaque chantier est calculée au dépôt : Lannion 0 km, Paimpol 40 km (par la route).
+    expect(Object.values((reponse.livraison as { distances: Record<string, number> }).distances).sort((a, b) => a - b)).toEqual([0, 0, 40]);
+    expect(reponse.livraison).toMatchObject({ depart: "Zone de Kerampont, 22300 Lannion", francoKm: 20, prixAuDela: 45 });
     expect(reponse.deposeLe).not.toBeNull();
     expect(reponse.delaiJours).toBe(10);
     expect(reponse.prix).toMatchObject([{ palier: "46", prixUnitaire: "18,50" }, { palier: "100", prixUnitaire: "17,20" }, { palier: "46" }, { palier: "100" }]);
     expect(reponse.fichiers).toHaveLength(2);
     // Un lot qui n'attend plus (choisi) ne prend plus de dépôt.
     await ctx.prisma.lotGroupe.update({ where: { id: reponse.lotId }, data: { statut: "choisi" } });
-    const ferme = await anon.post(`/v1/reponse/${jeton}`).field("accord", "oui").field("livraison", JSON.stringify([{ zone: "22300 Lannion", prixHt: "45" }, { zone: "22500 Paimpol", prixHt: "60" }])).attach("file", devis, { filename: "devis.pdf", contentType: "application/pdf" });
+    const ferme = await anon.post(`/v1/reponse/${jeton}`).field("accord", "oui").field("depart", "Zone de Kerampont, 22300 Lannion").field("francoKm", "20").field("prixAuDela", "45").attach("file", devis, { filename: "devis.pdf", contentType: "application/pdf" });
     expect(ferme.status).toBe(409);
     expect((await anon.get(`/v1/reponse/${jeton}`).expect(200)).body.lot.ouvert).toBe(false);
   });

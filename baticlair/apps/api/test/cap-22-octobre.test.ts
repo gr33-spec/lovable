@@ -62,16 +62,13 @@ const mailsVers = (email: string) => ctx.emails.sent.filter((m) => m.to === emai
 const pushVers = (email: string) => push.sent.filter((p) => p.target.endpoint.endsWith(`/${email}`)).map((p) => p.message);
 const jetonPour = (email: string) => /\/reponse\/([A-Za-z0-9_-]+)/.exec(mailsVers(email).find((m) => /\/reponse\//.test(m.text))!.text)![1]!;
 const CARREAU = "Carreau de sol 60x60 grès cérame";
-async function deposer(jeton: string, rows: FixtureRow[], titre: string, livraison: Record<string, string>) {
+async function deposer(jeton: string, rows: FixtureRow[], titre: string, livraison: { depart: string; francoKm: string; prixAuDela?: string }) {
   const devis = Buffer.from(await makePdf(["devis"], rows, "Total HT 1 000,00   TVA 20 % 200,00   Total TTC 1 200,00", titre));
-  return request(ctx.app.getHttpServer())
-    .post(`/v1/reponse/${jeton}`)
-    .field("accord", "oui")
-    .field("livraison", JSON.stringify(Object.entries(livraison).map(([zone, prixHt]) => ({ zone, prixHt }))))
-    .attach("file", devis, { filename: "devis.pdf", contentType: "application/pdf" });
+  const r = request(ctx.app.getHttpServer()).post(`/v1/reponse/${jeton}`).field("accord", "oui").field("depart", livraison.depart).field("francoKm", livraison.francoKm);
+  return (livraison.prixAuDela ? r.field("prixAuDela", livraison.prixAuDela) : r).attach("file", devis, { filename: "devis.pdf", contentType: "application/pdf" });
 }
 
-describe("nouveau cap du 22 octobre : regroupement, alertes, livraison, suivi", { timeout: 120_000 }, () => {
+describe("nouveau cap du 22 octobre : regroupement, alertes, livraison au kilomètre, suivi", { timeout: 120_000 }, () => {
   it("un négoce ajouté est prévenu qu'un regroupement existe, une seule fois, avec son lien « stop »", async () => {
     const a = await carreleur("a@example.fr", "Carrelages A", "3 rue des Ajoncs, 22300 Lannion");
     await negoce(a.agent, "Négoce Carrelage", "carrelage@example.com", ["second_oeuvre"]);
@@ -103,17 +100,18 @@ describe("nouveau cap du 22 octobre : regroupement, alertes, livraison, suivi", 
     expect(JSON.stringify(lots)).not.toContain("Carrelages B");
     expect((await b.agent.get(`/v1/projects/${b.projectId}/suivi`).expect(200)).body).toMatchObject({ etape: 1, phrase: "Demande partie chez 2 négoces. On attend leurs prix." });
 
-    // La page du négoce : une zone par commune de chantier ; sans tous les prix de livraison, rien n'est pris.
+    // La page du négoce : sans sa livraison complète (dépôt, gratuite jusqu'à X km, Y € au-delà), rien n'est pris.
     const jeton = jetonPour("general@example.com");
     const page = (await request(ctx.app.getHttpServer()).get(`/v1/reponse/${jeton}`).expect(200)).body;
-    expect(page.lot.zones).toEqual(["22300 Lannion", "22500 Paimpol"]);
-    const incomplet = await deposer(jeton, [["CAR", CARREAU, "46 u", "19,90", "915,40"]], "DEVIS G – Délai de livraison 5 jours", { "22300 Lannion": "40" });
+    expect(page.lot.chantiers).toHaveLength(2);
+    const GENERAL = { depart: "Zone de Kerampont, 22300 Lannion", francoKm: "20", prixAuDela: "55" };
+    const incomplet = await deposer(jeton, [["CAR", CARREAU, "46 u", "19,90", "915,40"]], "DEVIS G – Délai de livraison 5 jours", { depart: GENERAL.depart, francoKm: "20" });
     expect(incomplet.status).toBe(400);
-    expect(incomplet.body.error.details).toMatchObject({ reason: "livraison_requise", zones: ["22500 Paimpol"] });
+    expect(incomplet.body.error.details).toMatchObject({ reason: "livraison_requise" });
     expect(pushVers("a@example.fr").filter((x) => /^Nouveau/.test(x.title))).toHaveLength(0);
 
     // Premier devis : « Nouveau meilleur prix », pour les deux artisans, push et e-mail.
-    expect((await deposer(jeton, [["CAR", CARREAU, "46 u", "19,90", "915,40"]], "DEVIS G – Délai de livraison 5 jours", { "22300 Lannion": "40", "22500 Paimpol": "55" })).status).toBe(201);
+    expect((await deposer(jeton, [["CAR", CARREAU, "46 u", "19,90", "915,40"]], "DEVIS G – Délai de livraison 5 jours", GENERAL)).status).toBe(201);
     for (const e of ["a@example.fr", "b@example.fr"]) {
       const alerte = pushVers(e).find((x) => x.title === "Nouveau meilleur prix")!;
       expect(alerte.body).toMatch(/^19,90 € HT chez Négoce Généraliste pour carreau de sol 60×60/);
@@ -124,23 +122,36 @@ describe("nouveau cap du 22 octobre : regroupement, alertes, livraison, suivi", 
     expect(lots[0]!.compteur.phrase).toBe("2 artisans, 2 demandes envoyées, 1 devis reçu, meilleur prix 19,90 €");
     expect((await a.agent.get(`/v1/projects/${a.projectId}/suivi`).expect(200)).body).toMatchObject({ etape: 2, phrase: "1 devis reçu sur 2 demandes. Meilleur prix : 19,90 € HT l'unité.", aFaire: "Compare et retiens l'offre qui te va." });
 
-    // Deuxième devis, moins cher à l'unité mais plus cher à livrer : l'alerte dit le nouveau meilleur prix unitaire ;
-    // le choix se fait livraison comprise.
-    expect((await deposer(jetonPour("carrelage@example.com"), [["CAR", CARREAU, "46 u", "18,50", "851,00"]], "DEVIS C – Délai de livraison 8 jours", { "22300 Lannion": "60", "22500 Paimpol": "60" })).status).toBe(201);
+    // Deuxième devis, moins cher, dépôt à Paimpol, gratuit jusqu'à 50 km : les deux chantiers (0 et 40 km) sont livrés
+    // gratuitement. Le généraliste, depuis Lannion, facture Paimpol (40 km > 20). Le choix se fait livraison comprise.
+    expect((await deposer(jetonPour("carrelage@example.com"), [["CAR", CARREAU, "46 u", "18,50", "851,00"]], "DEVIS C – Délai de livraison 8 jours", { depart: "ZA de Kerfolic, 22500 Paimpol", francoKm: "50", prixAuDela: "60" })).status).toBe(201);
     expect(pushVers("a@example.fr").filter((x) => x.title === "Nouveau meilleur prix")).toHaveLength(2);
     await ctx.app.get(ChoixService).choisirLesLotsEnvoyes();
-    // Généraliste : 46 × 19,90 + 95 = 1 010,40 ; Carrelage : 46 × 18,50 + 120 = 971,00 → Carrelage retenu.
+    // Généraliste : 46 × 19,90 + 55 = 970,40 ; Carrelage : 46 × 18,50 + 0 = 851,00 → Carrelage retenu.
     const lot = await ctx.prisma.lotGroupe.findFirstOrThrow({ include: { negoceRetenu: true } });
     expect(lot.negoceRetenu?.nom).toBe("Négoce Carrelage");
 
-    // Le prix livré chez A (sa zone : Lannion), comparé à son prix habituel une fois saisi.
+    // Le prix livré chez A (Lannion, 40 km du dépôt de Paimpol, sous les 50 km gratuits), puis son prix habituel.
     let offre = (await a.agent.get("/v1/groupe/offres").expect(200)).body.offres[0];
-    expect(offre.livre).toMatchObject({ zone: "22300 Lannion", livraisonHt: 60, totalHt: 485.5, habituelHt: null });
+    expect(offre.livre).toMatchObject({ distanceKm: 40, francoKm: 50, livraisonHt: 0, totalHt: 425.5, habituelHt: null });
     await a.agent.post(`/v1/groupe/offres/${offre.id}/reference`).send({ prixReference: 21 }).expect(200);
     offre = (await a.agent.get("/v1/groupe/offres").expect(200)).body.offres[0];
-    expect(offre.livre).toMatchObject({ totalHt: 485.5, habituelHt: 483, economieHt: -2.5 });
+    expect(offre.livre).toMatchObject({ totalHt: 425.5, habituelHt: 483, economieHt: 57.5 });
     // Commandé : le bon de commande est parti au négoce retenu.
     expect((await a.agent.get(`/v1/projects/${a.projectId}/suivi`).expect(200)).body).toMatchObject({ etape: 3, phrase: "C'est commandé." });
+  });
+
+  it("une ligne vague n'entre pas dans la commande commune : elle part seulement chez le négoce de l'artisan", async () => {
+    const a = await carreleur("a@example.fr", "Carrelages A", "3 rue des Ajoncs, 22300 Lannion");
+    const q = (await a.agent.post("/v1/quantitatifs").send({ metier: "roofing", lignes: [{ libelle: "Tuile romane", quantite: "200", unite: "pièces" }] }).expect(201)).body as { projetId: string };
+    await a.agent.patch(`/v1/projects/${q.projetId}`).send({ address: "3 rue des Ajoncs, 22300 Lannion" }).expect(200);
+    const takeoff = (await a.agent.get(`/v1/projects/${q.projetId}/takeoff`).expect(200)).body.takeoff;
+    const tuile = (takeoff.purchase.toBuy as { key: string; label: string; aPreciserPourGroupe: { cle: string }[] }[]).find((b) => /^Tuile romane/.test(b.label))!;
+    expect(tuile.aPreciserPourGroupe.map((x) => x.cle)).toEqual(["marque", "teinte"]);
+    expect(takeoff.phrasePrecision).toBe("Précise pour l'ajouter à la commande commune");
+    const refus = await a.agent.post(`/v1/projects/${q.projetId}/groupe`).send({ articles: [tuile.key], fenetre: FENETRE, statut: "signe", engagement: true });
+    expect(refus.status).toBe(400);
+    expect(refus.body.error.details).toMatchObject({ reason: "ligne_vague" });
   });
 
   it("le suivi d'un autre chantier ou d'une autre entreprise n'existe pas", async () => {

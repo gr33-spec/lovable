@@ -37,7 +37,7 @@ export interface OffreGroupe {
   economie: string | null;
   probleme: string | null;
   /** Nouveau cap (22 octobre) : le prix livré chez moi, livraison de ma zone comprise, comparé à mon prix habituel. */
-  livre?: { totalHt: number; livraisonHt: number; habituelHt: number | null; economieHt: number | null; zone: string | null };
+  livre?: { totalHt: number; livraisonHt: number; habituelHt: number | null; economieHt: number | null; zone: string | null; distanceKm: number | null; francoKm: number | null };
 }
 
 export interface Groupe {
@@ -249,7 +249,10 @@ function OffreCard({ besoin: b, groupe }: { besoin: BesoinGroupe; groupe: Groupe
       {o.livre ? (
         <p aria-label="Ton prix livré" className="text-[15px] leading-snug font-extrabold">
           Ton prix livré{o.livre.zone ? ` à ${o.livre.zone.replace(/^\d{5}\s*/, "")}` : ""} : {euros(String(o.livre.totalHt))} HT
-          <span className="font-semibold text-muted">{` (livraison ${euros(String(o.livre.livraisonHt))})`}</span>
+          <span className="font-semibold text-muted">
+            {o.livre.livraisonHt === 0 ? " (livraison gratuite" : ` (livraison ${euros(String(o.livre.livraisonHt))}`}
+            {o.livre.distanceKm !== null ? `, ${o.livre.distanceKm} km du dépôt` : ""})
+          </span>
           {o.livre.habituelHt !== null ? <span className="block text-[14px] font-semibold text-muted">Ton prix habituel : {euros(String(o.livre.habituelHt))} HT</span> : null}
         </p>
       ) : null}

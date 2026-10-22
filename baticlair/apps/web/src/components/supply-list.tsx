@@ -147,8 +147,10 @@ export function SupplyList({
     : [{ key: "liste", label: null as string | null, rows: ordered }];
   // Les lignes qu'on peut cocher : prêtes (pas orange), avec un article, pas encore parties à part ; au groupé, un article
   // calculé ou repris (jamais une ligne « à faire chiffrer ») qui n'y est pas déjà.
+  // Décision de Greg (22 octobre) : une ligne vague ne se propose pas à la commande commune (elle part chez ton négoce).
+  const vagueRow = (r: ScreenRow) => Boolean(r.itemKey && (items.get(r.itemKey)?.aPreciserPourGroupe?.length ?? 0) > 0);
   const cochable = (r: ScreenRow) =>
-    r.status !== "check" && Boolean(articleOf(r)) && (pourGroupe ? Boolean(r.itemKey) && !groupe?.besoins.has(r.itemKey!) : !selection?.sent.has(articleOf(r)!));
+    r.status !== "check" && Boolean(articleOf(r)) && (pourGroupe ? Boolean(r.itemKey) && !groupe?.besoins.has(r.itemKey!) && !vagueRow(r) : !selection?.sent.has(articleOf(r)!));
   const selectable = rows.filter(cochable).map((r) => articleOf(r)!);
   const allChecked = selectable.length > 0 && selectable.every((k) => checked.has(k));
 
@@ -280,6 +282,7 @@ export function SupplyList({
                     // Une ligne orange se vérifie d'abord ; une ligne sans article (question) ne part pas ; au groupé, une
                     // ligne déjà proposée non plus (une ligne déjà envoyée à part reste décochée, pas grisée).
                     disabled: !articleOf(r) || r.status === "check" || (pourGroupe && !cochable(r)),
+                    ...(pourGroupe && vagueRow(r) ? { note: takeoff.phrasePrecision ?? "à préciser d'abord" } : {}),
                     ...(pourGroupe ? { label: "Proposer au groupé" } : {}),
                     onToggle: () =>
                       setChecked((prev) => {
@@ -649,7 +652,7 @@ function Row({
 }: {
   error?: ApiError | null;
   /** §48.5 : mode sélection, une case à cocher à la place du point ; toucher la ligne la coche. */
-  selectMode?: { checked: boolean; disabled: boolean; onToggle: () => void; /** Ce que la case fait (« Proposer au groupé »), « Envoyer à part » sinon. */ label?: string };
+  selectMode?: { checked: boolean; disabled: boolean; onToggle: () => void; /** Ce que la case fait (« Proposer au groupé »), « Envoyer à part » sinon. */ label?: string; /** Pourquoi la case est grisée. */ note?: string };
   /** §48.5 : déjà envoyée à part (« Envoyé · fournisseur »), toujours visible dans la liste. */
   sentTo?: string;
   row: ScreenRow;
@@ -765,7 +768,7 @@ function Row({
             <span className="text-[14px] leading-snug font-semibold">{label}</span>
             <span className="text-[13px] leading-snug text-muted">
               {quantity ? <span className="font-extrabold text-ink tabular-nums">{quantity}</span> : null}
-              {row.status === "check" ? `${quantity ? " · " : ""}à vérifier d'abord` : sentTo ? `${quantity ? " · " : ""}Envoyé · ${sentTo}` : ""}
+              {row.status === "check" ? `${quantity ? " · " : ""}à vérifier d'abord` : selectMode.note ? `${quantity ? " · " : ""}${selectMode.note}` : sentTo ? `${quantity ? " · " : ""}Envoyé · ${sentTo}` : ""}
             </span>
           </span>
         </label>

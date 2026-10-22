@@ -48,9 +48,9 @@ const jetonPour = (email: string) => /\/reponse\/([A-Za-z0-9_-]+)/.exec(ctx.emai
 const CARREAU = "Carreau de sol 60x60 grès cérame";
 async function deposer(jeton: string, rows: FixtureRow[], titre: string) {
   const devis = Buffer.from(await makePdf(["devis"], rows, "Total HT 1 000,00   TVA 20 % 200,00   Total TTC 1 200,00", titre));
-  // Nouveau cap (22 octobre) : un prix de livraison par zone du lot est obligatoire (ici franco partout).
-  const zones = ((await request(ctx.app.getHttpServer()).get(`/v1/reponse/${jeton}`)).body?.lot?.zones ?? []) as string[];
-  return request(ctx.app.getHttpServer()).post(`/v1/reponse/${jeton}`).field("accord", "oui").field("livraison", JSON.stringify(zones.map((zone) => ({ zone, prixHt: "0" })))).attach("file", devis, { filename: "devis.pdf", contentType: "application/pdf" });
+  // Décision de Greg (22 octobre) : la livraison est obligatoire (son dépôt, gratuite jusqu'à X km, Y € au-delà) ; ici
+  // franco partout, pour suivre le parcours d'origine.
+  return request(ctx.app.getHttpServer()).post(`/v1/reponse/${jeton}`).field("accord", "oui").field("depart", "ZA de Kerfolic, 22500 Paimpol").field("francoKm", "500").field("prixAuDela", "0").attach("file", devis, { filename: "devis.pdf", contentType: "application/pdf" });
 }
 
 describe("groupé, étape 9 : l'admin de Greg", { timeout: 90_000 }, () => {

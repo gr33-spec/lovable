@@ -34,6 +34,7 @@ import { TestMailboxController } from "./http/test-mailbox.controller.js";
 import { WebhookResendController } from "./http/webhook-resend.controller.js";
 import { SuiviController } from "./http/suivi.controller.js";
 import { SuiviService } from "./application/suivi.service.js";
+import { BanGeocodeur, GEOCODEUR, TableGeocodeur, type Geocodeur } from "./application/geocodeur.js";
 
 @Module({
   imports: [TenancyModule, TakeoffModule],
@@ -49,6 +50,8 @@ import { SuiviService } from "./application/suivi.service.js";
           : new InseeSiretVerifier(c.groupe.inseeApiKey),
       inject: [CONFIG],
     },
+    // Décision de Greg (22 octobre) : la distance au chantier. En ligne, l'API Adresse de l'État ; ailleurs, une table fixe.
+    { provide: GEOCODEUR, useFactory: (c: AppConfig): Geocodeur => (c.env === "production" || c.env === "staging" ? new BanGeocodeur() : new TableGeocodeur()), inject: [CONFIG] },
     { provide: SuiviService, useFactory: (p: PrismaService, t: TakeoffService) => new SuiviService(p, (tenant, id) => t.reviewed(tenant, id)), inject: [PrismaService, TakeoffService] },
     { provide: RegroupementService, useFactory: (p: PrismaService) => new RegroupementService(p), inject: [PrismaService] },
     { provide: JeuDemonstrationService, useFactory: (p: PrismaService) => new JeuDemonstrationService(p), inject: [PrismaService] },
@@ -76,8 +79,9 @@ import { SuiviService } from "./application/suivi.service.js";
     },
     {
       provide: DemandeService,
-      useFactory: (p: PrismaService, e: TransactionalEmailSender, pdf: PdfReader, x: NegoceExtractor | null, c: AppConfig, choix: ChoixService, n: NotificationsGroupeService) => new DemandeService(p, e, pdf, x, { webAppUrl: c.webAppUrl, authSecret: c.authSecret, reponsesDomaine: c.groupe.reponsesDomaine }, choix, n),
-      inject: [PrismaService, EMAIL_SENDER, PDF_READER, NEGOCE_EXTRACTOR, CONFIG, ChoixService, NotificationsGroupeService],
+      useFactory: (p: PrismaService, e: TransactionalEmailSender, pdf: PdfReader, x: NegoceExtractor | null, c: AppConfig, choix: ChoixService, n: NotificationsGroupeService, g: Geocodeur) =>
+        new DemandeService(p, e, pdf, x, { webAppUrl: c.webAppUrl, authSecret: c.authSecret, reponsesDomaine: c.groupe.reponsesDomaine }, choix, n, g),
+      inject: [PrismaService, EMAIL_SENDER, PDF_READER, NEGOCE_EXTRACTOR, CONFIG, ChoixService, NotificationsGroupeService, GEOCODEUR],
     },
     {
       provide: GroupeService,

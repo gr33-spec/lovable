@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { choisirLeNegoce, livraisonComplete, messageNouveauDevis, phraseCompteur, prixLivre, suiviDuChantier, totalLivraison, zoneDeLivraison, zonesDuLot } from "../src/index.js";
+import { choisirLeNegoce, distanceRouteKm, fraisDeLivraison, lireRegleDeLivraison, livraisonComplete, messageNouveauDevis, phraseCompteur, prixLivre, suiviDuChantier, totalLivraison, zoneDeLivraison, zonesDuLot } from "../src/index.js";
 
 /** Nouveau cap (Greg, 22 octobre 2026, section 0 du doc « BatiClair Groupé »), points 5 à 8. */
 describe("le compteur du groupe", () => {
@@ -64,5 +64,27 @@ describe("le suivi façon colis", () => {
     expect(recu.etapes.map((e) => e.fait)).toEqual([true, true, true, false]);
     expect(suiviDuChantier({ ...vide, liste: true, demandes: 2, devis: 2, commande: true })).toMatchObject({ etape: 3, phrase: "C'est commandé." });
     expect(suiviDuChantier(vide).etape).toBe(-1);
+  });
+});
+
+describe("la livraison : franco jusqu'à X km, Y € au-delà (décision de Greg, 22 octobre)", () => {
+  const paimpol = { lat: 48.78, lon: -3.05 };
+  const lannion = { lat: 48.73, lon: -3.46 };
+  it("la distance par la route : vol d'oiseau × 1,3, au kilomètre", () => {
+    expect(distanceRouteKm(paimpol, paimpol)).toBe(0);
+    // Paimpol–Lannion : environ 31 km à vol d'oiseau, 40 par la route.
+    expect(distanceRouteKm(paimpol, lannion)).toBe(40);
+  });
+  it("gratuite jusqu'à X km, Y € au-delà ; une distance inconnue se compte au-delà", () => {
+    const regle = { francoKm: 30, prixAuDela: 45 };
+    expect(fraisDeLivraison(12, regle)).toBe(0);
+    expect(fraisDeLivraison(30, regle)).toBe(0);
+    expect(fraisDeLivraison(39, regle)).toBe(45);
+    expect(fraisDeLivraison(null, regle)).toBe(45);
+  });
+  it("la saisie du négoce : son adresse de départ et deux nombres", () => {
+    expect(lireRegleDeLivraison({ depart: "ZA de Kerfolic, 22500 Paimpol", francoKm: "30", prixAuDela: "45,00" })).toEqual({ depart: "ZA de Kerfolic, 22500 Paimpol", francoKm: 30, prixAuDela: 45 });
+    expect(lireRegleDeLivraison({ depart: "", francoKm: "30", prixAuDela: "45" })).toBeNull();
+    expect(lireRegleDeLivraison({ depart: "ZA de Kerfolic, 22500 Paimpol", francoKm: "trente", prixAuDela: "45" })).toBeNull();
   });
 });

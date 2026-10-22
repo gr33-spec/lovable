@@ -1,4 +1,4 @@
-import { cleDeReference, economieEstimee, familleDuMetier, fenetreValide, lotParti, messageBesoinAccepte, phraseCompteur, prixAuVolume, prixLivre, quantiteDuBesoin, transitionBesoin, zoneDeLivraison, zoneDuCodePostal, type CompteurDuGroupe, type MessageArtisan, type StatutBesoin } from "@baticlair/domain";
+import { cleDeReference, economieEstimee, familleDuMetier, fenetreValide, lotParti, fraisDeLivraison, messageBesoinAccepte, phraseCompteur, precisionDeLigne, prixAuVolume, prixLivre, quantiteDuBesoin, transitionBesoin, zoneDeLivraison, zoneDuCodePostal, type CompteurDuGroupe, type MessageArtisan, type StatutBesoin } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { isUuid } from "../../../platform/validation/ids.js";
@@ -6,6 +6,7 @@ import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import type { ReviewedTakeoff } from "../../takeoff/index.js";
 import type { RegroupementService } from "./regroupement.service.js";
 import { siretBienForme, type SiretVerifier } from "./siret-verifier.js";
+import { livraisonDe } from "./demande.service.js";
 
 /** Pourquoi le groupé reste fermé à une entreprise (section 5 du parcours groupé). Gratuit pour l'artisan (décision du fondateur, 2026-10-20) : aucune condition d'abonnement. */
 export type RaisonFermeture = "siret_non_verifie" | "exclu_du_groupe" | "departement_ferme";
@@ -42,7 +43,7 @@ export interface OffreVue {
   economie: string | null;
   probleme: string | null;
   /** Nouveau cap (22 octobre) : le prix livré chez l'artisan (livraison de sa zone comprise), comparé à son prix habituel. */
-  livre?: ReturnType<typeof prixLivre> & { zone: string | null };
+  livre?: ReturnType<typeof prixLivre> & { zone: string | null; distanceKm: number | null; francoKm: number | null };
 }
 
 export interface Proposition {
@@ -165,7 +166,7 @@ export class GroupeService {
   }
 
   /** Étape 6 : toutes mes offres (une par besoin engagé d'un lot choisi), les plus récentes d'abord. */
-  async mesOffres(tenant: TenantContext): Promise<(OffreVue & { designation: string; quantite: string; unite: string; projectId: string; livre: ReturnType<typeof prixLivre> & { zone: string | null } })[]> {
+  async mesOffres(tenant: TenantContext): Promise<(OffreVue & { designation: string; quantite: string; unite: string; projectId: string; livre: ReturnType<typeof prixLivre> & { zone: string | null; distanceKm: number | null; francoKm: number | null } })[]> {
     const offres = await this.prisma.offreArtisan.findMany({
       where: { besoin: { companyId: tenant.companyId } },
       include: { besoin: true, lot: { include: { negoceRetenu: { select: { nom: true } }, reponses: { select: { negoceId: true, livraison: true } } } } },
@@ -179,7 +180,7 @@ export class GroupeService {
       quantite: o.besoin.quantite.toString(),
       unite: o.besoin.unite,
       projectId: o.besoin.projectId,
-      livre: livreDe(o.besoin.adresseLivraison, Number(o.besoin.quantite), Number(o.prixUnitaire), o.prixReference, o.lot),
+      livre: livreDe(o.besoin.id, o.besoin.adresseLivraison, Number(o.besoin.quantite), Number(o.prixUnitaire), o.prixReference, o.lot),
     }));
   }
 
@@ -220,7 +221,7 @@ export class GroupeService {
     });
     return rows.map((b) => {
       const v = vue(b);
-      return v.offre && b.offre && b.lot ? { ...v, offre: { ...v.offre, livre: livreDe(b.adresseLivraison, Number(b.quantite), Number(b.offre.prixUnitaire), b.offre.prixReference, b.lot) } } : v;
+      return v.offre && b.offre && b.lot ? { ...v, offre: { ...v.offre, livre: livreDe(b.id, b.adresseLivraison, Number(b.quantite), Number(b.offre.prixUnitaire), b.offre.prixReference, b.lot) } } : v;
     });
   }
 
@@ -248,6 +249,9 @@ export class GroupeService {
       if (!item) throw validationFailed("Unknown list line", { reason: "ligne_inconnue", article: key });
       // Un engagement ferme porte sur une quantité ferme : une ligne orange (question, ratio « à vérifier ») se règle d'abord.
       if (item.state !== "ready" || (item.waitsOn?.length ?? 0) > 0 || (item.toConfirm?.length ?? 0) > 0) throw validationFailed("Line not ready", { reason: "ligne_a_regler", article: key });
+      // Décision de Greg (22 octobre) : une ligne vague ne rejoint pas la commande commune ; elle part seulement chez le
+      // négoce de l'artisan. Seules les lignes précises sont regroupées.
+      if (!precisionDeLigne(item.label).precise) throw validationFailed("Vague line", { reason: "ligne_vague", article: key });
       const q = quantiteDuBesoin(item.order, item.quantity);
       if (!q) throw validationFailed("Line without quantity", { reason: "sans_quantite", article: key });
       const famille = familleDuMetier(metierDe.get(key) ?? r.takeoff.trade);
@@ -331,13 +335,16 @@ export class GroupeService {
   }
 }
 
-/** Le prix livré d'un artisan : la livraison de SA zone dans la réponse du négoce retenu, son prix habituel s'il l'a saisi. */
-function livreDe(adresse: string, quantite: number, prixUnitaire: number, prixReference: { toString(): string } | null, lot: { negoceRetenuId: string | null; reponses: { negoceId: string; livraison: unknown }[] }) {
+/**
+ * Le prix livré d'un artisan (décision de Greg, 22 octobre) : sa quantité au prix du lot, plus sa livraison chez le
+ * négoce retenu (gratuite jusqu'à X km de son dépôt, Y € au-delà) ; comparé à son prix habituel s'il l'a saisi.
+ */
+function livreDe(besoinId: string, adresse: string, quantite: number, prixUnitaire: number, prixReference: { toString(): string } | null, lot: { negoceRetenuId: string | null; reponses: { negoceId: string; livraison: unknown }[] }) {
   const zone = zoneDeLivraison(adresse);
-  const retenue = lot.reponses.find((r) => r.negoceId === lot.negoceRetenuId);
-  const prix = Array.isArray(retenue?.livraison) ? (retenue.livraison as { zone: string; prixHt: number }[]) : [];
-  const livraisonZone = zone ? (prix.find((l) => l.zone === zone)?.prixHt ?? null) : null;
-  return { ...prixLivre({ quantite, prixUnitaire, livraisonZone, prixHabituel: prixReference === null ? null : Number(prixReference.toString()) }), zone };
+  const l = livraisonDe(lot.reponses.find((r) => r.negoceId === lot.negoceRetenuId)?.livraison);
+  const distanceKm = l ? (l.distances[besoinId] ?? null) : null;
+  const livraison = l ? fraisDeLivraison(distanceKm, l) : null;
+  return { ...prixLivre({ quantite, prixUnitaire, livraisonZone: livraison, prixHabituel: prixReference === null ? null : Number(prixReference.toString()) }), zone, distanceKm, francoKm: l?.francoKm ?? null };
 }
 
 type OffreRow = { id: string; prixUnitaire: { toString(): string }; prixReference: { toString(): string } | null; economie: { toString(): string } | null; dateLivraison: Date | null; probleme: string | null; lot: { numero: number; negoceRetenu: { nom: string } | null } };

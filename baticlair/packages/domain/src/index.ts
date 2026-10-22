@@ -47,5 +47,6 @@ export * from "./groupe/choix.js";
 export * from "./groupe/commande.js";
 export * from "./groupe/notifications.js";
 export * from "./groupe/rapport-mensuel.js";
+export * from "./groupe/nom.js";
 export * from "./groupe/precision.js";
 export * from "./groupe/cap-22-octobre.js";

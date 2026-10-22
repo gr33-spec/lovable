@@ -1,4 +1,5 @@
 import { normalizeText } from "../trades/trade-profile.js";
+import { NOM_COMMANDE_COMMUNE } from "./nom.js";
 
 /**
  * LA LIGNE PRÉCISE OU VAGUE (nouveau cap du 22 octobre 2026, décidé avec Greg) : « Liste ultra simple : une carte par
@@ -11,8 +12,8 @@ import { normalizeText } from "../trades/trade-profile.js";
  * boutons ; la réponse s'ajoute à la désignation. Un article qu'aucune famille ne connaît n'a pas de question (précis par
  * défaut) : on ne demande jamais ce qu'on ne sait pas proposer.
  *
- * Être vague ne bloque rien : la liste part quand même chez le négoce de l'artisan (envoi seul). La précision sert
- * seulement au regroupement.
+ * Être vague ne bloque pas l'envoi seul : la ligne part chez le négoce de l'artisan. Mais elle N'ENTRE PAS dans la
+ * commande commune (décision de Greg, 22 octobre) : seules les lignes précises sont regroupées.
  */
 
 export interface QuestionDePrecision {
@@ -32,9 +33,12 @@ export interface PrecisionDeLigne {
   questions: readonly QuestionDePrecision[];
 }
 
-/** La phrase de la pastille orange. Le métier dit qui on trouve (« couvreurs » au lancement). */
-export function phrasePrecision(metier?: string | null): string {
-  return `Précise pour trouver d'autres ${metier === "roofing" || !metier ? "couvreurs" : "artisans"}`;
+/**
+ * La phrase de la pastille orange (décision de Greg, 22 octobre) : « Précise pour l'ajouter à la commande commune ». Le
+ * nom suit la constante unique ; le métier ne change plus la phrase (gardé pour l'appel).
+ */
+export function phrasePrecision(_metier?: string | null): string {
+  return `Précise pour l'ajouter à la ${NOM_COMMANDE_COMMUNE.toLowerCase()}`;
 }
 
 interface Donnee {

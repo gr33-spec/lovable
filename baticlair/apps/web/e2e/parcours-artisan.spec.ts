@@ -1905,9 +1905,11 @@ async function derniereDemande(page: Page, negoce: string, dejaRecus: number) {
   return (await demandes()).at(-1)!;
 }
 
-/** Nouveau cap (22 octobre) : le négoce donne un prix de livraison pour chaque zone du lot (obligatoire). */
+/** Décision de Greg (22 octobre) : le négoce donne son dépôt, « gratuite jusqu'à X km » et « Y € au-delà » (obligatoire). */
 async function prixDeLivraison(form: Locator, prix = "45") {
-  for (const champ of await form.getByRole("textbox", { name: /^Livraison à / }).all()) await champ.fill(prix);
+  await form.getByLabel("Adresse d'où partent vos livraisons").fill("Zone de Kerampont, 22300 Lannion");
+  await form.getByLabel("Livraison gratuite jusqu'à, en km").fill("30");
+  await form.getByLabel("Prix d'une livraison au-delà, en euros HT").fill(prix);
 }
 
 /** Le négoce répond par e-mail, reçoit son lien neuf, l'ouvre sans compte, coche la commission et dépose son devis. */
@@ -1984,8 +1986,7 @@ test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux 
     await form.locator('input[type="file"]').setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
     await expect(form.getByRole("button", { name: "Déposer mon devis" })).toBeDisabled();
     await form.getByRole("checkbox", { name: "J'accepte la commission" }).check();
-    // Nouveau cap (22 octobre) : un prix de livraison par zone (commune des chantiers), obligatoire.
-    await expect(form.getByRole("textbox", { name: /^Livraison à / })).toHaveCount(1);
+    // Décision de Greg (22 octobre) : la livraison (dépôt, gratuite jusqu'à X km, Y € au-delà) est obligatoire.
     await expect(form.getByRole("button", { name: "Déposer mon devis" })).toBeDisabled();
     await prixDeLivraison(form);
     await form.getByRole("button", { name: "Déposer mon devis" }).click();

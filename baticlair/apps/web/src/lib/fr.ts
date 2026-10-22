@@ -68,6 +68,7 @@ const reasonMessages: Record<string, string> = {
   quantite_plafonnee: "Cette quantité dépasse trois fois ce que les autres artisans proposent pour cette référence : le groupé la refuse. Vérifie-la, ou passe par ton négoce en direct.",
   ligne_a_regler: "Règle d'abord cette ligne (quantité ou question en attente) : un engagement ferme porte sur une quantité ferme.",
   adresse_requise: "Renseigne l'adresse du chantier (avec le code postal) : le lot se forme par département.",
+  ligne_vague: "Cette ligne est trop vague pour la commande commune : précise-la (format, origine, choix, marque), ou envoie-la à ton négoce.",
   deja_propose: "Cette ligne est déjà au groupé.",
   engagement_requis: "Coche la phrase d'engagement pour proposer en « Chantier signé ».",
   fenetre_invalide: "La fenêtre de livraison n'est pas bonne : au plus tôt avant au plus tard, dans les 6 mois.",

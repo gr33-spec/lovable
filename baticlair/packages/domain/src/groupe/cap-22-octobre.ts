@@ -200,3 +200,58 @@ export function mailRegroupementAuNegoce(m: { negoce: string; departement: strin
     ].join("\n"),
   };
 }
+
+// ——— La livraison : franco jusqu'à X km, Y € au-delà (décision de Greg, 22 octobre, après les zones) ———
+
+/**
+ * « Le négoce donne deux chiffres seulement, « livraison gratuite jusqu'à X km » et « Y € par livraison au-delà ». L'app
+ * calcule la distance jusqu'au chantier et affiche à chaque artisan son prix livré. » Le négoce donne aussi l'adresse d'où
+ * partent ses livraisons (son dépôt) : sans elle, pas de distance. Remplace le prix par zone (gardé dans le code, plus
+ * utilisé).
+ */
+export interface RegleDeLivraison {
+  /** L'adresse d'où partent les livraisons. */
+  depart: string;
+  /** Livraison gratuite jusqu'à cette distance (km, par la route). */
+  francoKm: number;
+  /** Prix HT d'une livraison au-delà. */
+  prixAuDela: number;
+}
+
+/** Un point géocodé (degrés décimaux). */
+export interface Point {
+  lat: number;
+  lon: number;
+}
+
+/**
+ * La route n'est pas la ligne droite : la distance à vol d'oiseau est multipliée par 1,3 (détour moyen des routes
+ * françaises, ordre de grandeur courant en logistique), arrondie au kilomètre.
+ */
+export const FACTEUR_ROUTE = 1.3;
+
+export function distanceRouteKm(a: Point, b: Point): number {
+  const rad = (d: number) => (d * Math.PI) / 180;
+  const dLat = rad(b.lat - a.lat);
+  const dLon = rad(b.lon - a.lon);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon / 2) ** 2;
+  const volOiseau = 2 * 6371 * Math.asin(Math.sqrt(h));
+  return Math.round(volOiseau * FACTEUR_ROUTE);
+}
+
+/**
+ * Le prix d'UNE livraison sur un chantier : gratuite jusqu'à `francoKm`, `prixAuDela` au-delà. Une distance inconnue
+ * (adresse introuvable) se compte au-delà : on n'annonce jamais une livraison gratuite qu'on n'a pas vérifiée.
+ */
+export function fraisDeLivraison(distanceKm: number | null, regle: Pick<RegleDeLivraison, "francoKm" | "prixAuDela">): number {
+  return distanceKm !== null && distanceKm <= regle.francoKm ? 0 : regle.prixAuDela;
+}
+
+/** La saisie du négoce, lue : l'adresse non vide, deux nombres positifs (« 30 », « 45,00 »). */
+export function lireRegleDeLivraison(saisie: { depart?: string | null; francoKm?: string | null; prixAuDela?: string | null }): RegleDeLivraison | null {
+  const depart = saisie.depart?.trim() ?? "";
+  const km = lireMontant(saisie.francoKm ?? "");
+  const prix = lireMontant(saisie.prixAuDela ?? "");
+  if (depart.length < 5 || km === null || prix === null || km > 1000) return null;
+  return { depart, francoKm: km, prixAuDela: prix };
+}
