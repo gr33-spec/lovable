@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
+import { NOM } from "@/lib/nom";
 
 interface Apercu {
   action: "stop" | "pas_concerne";
@@ -42,7 +43,7 @@ export default function LienNegocePage() {
   if (error) {
     return (
       <>
-        <PageTitle>Regroupement artisans</PageTitle>
+        <PageTitle>{NOM}</PageTitle>
         {error.status === 404 ? (
           <p role="status" className="rounded-3xl bg-warn-bg p-4 font-semibold text-warn">
             Ce lien n&apos;est plus valable.
@@ -57,7 +58,7 @@ export default function LienNegocePage() {
   const question = apercu.action === "stop" ? `${apercu.negoce} : ne plus recevoir aucune demande du regroupement ?` : `${apercu.negoce} : ne plus recevoir les demandes « ${apercu.famille} » ?`;
   return (
     <>
-      <PageTitle>Regroupement artisans</PageTitle>
+      <PageTitle>{NOM}</PageTitle>
       {apercu.fait ? (
         <p role="status" className="rounded-3xl bg-ok-bg p-4 font-semibold text-ok">
           C&apos;est fait. {apercu.action === "stop" ? "Vous ne recevrez plus de demande." : `Vous ne recevrez plus de demande « ${apercu.famille} ».`}

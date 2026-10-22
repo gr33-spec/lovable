@@ -253,7 +253,7 @@ export class CommandeService {
       await this.email.send({
         to: bon.negoce.email,
         subject: `${NOM_COMMANDE_COMMUNE} n° ${bon.offre.lot.numero} : une commande annulée`,
-        text: `Bonjour,\n\nLe client ${bon.offre.besoin.company.name} ne donne pas suite à son bon de commande du lot n° ${bon.offre.lot.numero} (${Number(bon.offre.besoin.quantite).toLocaleString("fr-FR", { maximumFractionDigits: 3 })} ${bon.offre.besoin.unite} de ${bon.offre.besoin.designation}, ${bon.offre.besoin.adresseLivraison}). Vous pouvez annuler cette ligne ; les autres bons du lot sont inchangés.\n\nRegroupement artisans, par BatiClair`,
+        text: `Bonjour,\n\nLe client ${bon.offre.besoin.company.name} ne donne pas suite à son bon de commande du lot n° ${bon.offre.lot.numero} (${Number(bon.offre.besoin.quantite).toLocaleString("fr-FR", { maximumFractionDigits: 3 })} ${bon.offre.besoin.unite} de ${bon.offre.besoin.designation}, ${bon.offre.besoin.adresseLivraison}). Vous pouvez annuler cette ligne ; les autres bons du lot sont inchangés.\n\n${NOM_COMMANDE_COMMUNE}, par BatiClair`,
       });
     } catch {
       // Journalisé ; Greg le voit.

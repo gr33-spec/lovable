@@ -2102,7 +2102,7 @@ test("BatiClair Groupé, scénarios 1 : deux départements et deux références 
   expect(["ouvert", "forme", "envoye"]).toContain(lotsB[0]!.lot!.statut);
   expect(lotsA[0]!.lot!.numero).not.toBe(lotsB[0]!.lot!.numero);
   await page.goto("/groupe");
-  await expect(page.getByRole("list", { name: "Mes commandes communes" }).getByText(/Commande groupée n° \d+ · (On attend d'autres artisans|Commande prête|Demande partie)/)).toBeVisible();
+  await expect(page.getByRole("list", { name: "Mes commandes communes" }).getByText(/Commande commune n° \d+ · (On attend d'autres artisans|Commande prête|Demande partie)/)).toBeVisible();
   await contexteB.close();
 
   // A propose une deuxième référence : un autre lot ; puis la retire tant que rien n'est parti (section 4 a).
@@ -2135,7 +2135,8 @@ test("BatiClair Groupé, scénarios 1 : deux départements et deux références 
   await expect(pageS.getByRole("list", { name: "Ce qui manque" }).getByLabel("Fait")).toHaveCount(0);
   await contexteS.close();
 
-  // Le plafond (section 5) : A et B proposent 1 250 tuiles chacun ; C en met 5 000 (plus de 3 × la médiane) : refusé, dit en clair.
+  // Le plafond (section 5) : A et B proposent 480 m de liteau chacun (la tuile, vague, n'entre pas dans la commande commune) ;
+  // C en met 5 000 (plus de 3 × la médiane) : refusé, dit en clair.
   const contexteC = await browser.newContext({ ...(test.info().project.use as object) });
   const pageC = await contexteC.newPage();
   await compteAuGroupe(pageC, "Toitures Plafond", adresseA);
@@ -2144,12 +2145,12 @@ test("BatiClair Groupé, scénarios 1 : deux départements et deux références 
   await passQuestions(pageC);
   await confirmDoubts(pageC);
   const takeoff = (await apiJson<{ takeoff: { lines: { id: string; designation: string; quantity: string | null; unit: string | null }[] } }>(pageC, "GET", `/v1/projects/${projetC}/takeoff`)).body.takeoff;
-  const tuiles = takeoff.lines.find((l) => /tuile romane/i.test(l.designation))!;
-  expect((await apiJson(pageC, "PATCH", `/v1/takeoff-lines/${tuiles.id}`, { designation: tuiles.designation, quantity: "5000", unit: tuiles.unit ?? "u" })).status).toBe(200);
+  const liteaux = takeoff.lines.find((l) => /liteau/i.test(l.designation))!;
+  expect((await apiJson(pageC, "PATCH", `/v1/takeoff-lines/${liteaux.id}`, { designation: liteaux.designation, quantity: "5000", unit: liteaux.unit ?? "m" })).status).toBe(200);
   await pageC.reload();
   const listC = pageC.getByRole("region", { name: "Liste des fournitures" });
   await listC.getByRole("button", { name: "Ajouter à la commande commune" }).click();
-  await listC.getByRole("checkbox", { name: /^Proposer au groupé : Tuile romane/ }).check();
+  await listC.getByRole("checkbox", { name: /^Ajouter à la commande commune : Liteau/ }).check();
   const barC = pageC.getByRole("region", { name: "Ajouter à la commande commune", exact: true });
   await barC.getByRole("radio", { name: "Chantier signé" }).click();
   await barC.getByRole("checkbox", { name: /je m'engage/ }).check();
@@ -2184,7 +2185,7 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
   expect(tache.status).toBe(200);
   expect(tache.body.lotsClos).toBeGreaterThanOrEqual(1);
   await page.goto("/groupe");
-  await expect(page.getByRole("list", { name: "Mes commandes communes" }).getByText(`Commande groupée n° ${lot1} · Aucun négoce n'a répondu, commande fermée`)).toBeVisible();
+  await expect(page.getByRole("list", { name: "Mes commandes communes" }).getByText(`Commande commune n° ${lot1} · Aucun négoce n'a répondu, commande fermée`)).toBeVisible();
 
   // 2) Deuxième lot : N1 dit « pas concerné » par le lien de l'e-mail ; N2 dépose ; N2 est retenu, les bons partent.
   avant = await recus();
@@ -2208,7 +2209,7 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
 
   // 3) Premier désistement : un avertissement, le lot reste commandé pour B.
   await lots.getByRole("button", { name: "Je ne commande pas" }).click();
-  await expect(lots.getByText(/deuxième fois sur 12 mois : le groupé se ferme 6 mois/)).toBeVisible();
+  await expect(lots.getByText(/deuxième fois sur 12 mois : la commande commune se ferme 6 mois/)).toBeVisible();
   await lots.getByRole("button", { name: "Je ne commande pas, c'est sûr" }).click();
   await expect(lots.getByText("Tu ne commandes pas. C'est noté.")).toBeVisible();
   await expect(page.getByRole("status").filter({ hasText: "fermé" })).toHaveCount(0);
@@ -2228,7 +2229,7 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
   await lots.getByRole("button", { name: "Je ne commande pas, c'est sûr" }).click();
   await expect(lots.getByText("Tu ne commandes pas. C'est noté.")).toHaveCount(2);
   await page.reload();
-  await expect(page.getByRole("status").filter({ hasText: /Le groupé t'est fermé jusqu'au .* : deux commandes annulées en 12 mois/ })).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: /La commande commune t'est fermée jusqu'au .* : deux commandes annulées en 12 mois/ })).toBeVisible();
   const etat2 = (await apiJson<{ eligible: boolean; raisons: string[]; excluJusquau: string | null }>(page, "GET", "/v1/groupe")).body;
   expect(etat2.eligible).toBe(false);
   expect(etat2.raisons).toContain("exclu_du_groupe");
@@ -2252,7 +2253,7 @@ test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce 
 test("Aide « ? » : sur chaque écran, trois lignes au plus, tutoiement, un tap ouvre, un tap ferme", async ({ page }) => {
   await signUp(page);
   for (const [chemin, titre] of [
-    ["/groupe", "Aide : Le groupé"],
+    ["/groupe", "Aide : Commande commune"],
     ["/fournisseurs", "Aide : Tes négoces"],
     ["/compte", "Aide : Ton compte"],
     ["/chantiers", "Aide : Tes chantiers"],
@@ -2378,7 +2379,7 @@ test("Rapport mensuel : le 1er du mois, l'artisan reçoit « ce mois : X chantie
   await expect.poll(async () => (await emailsVers(page, email)).length).toBeGreaterThan(dejaRecus);
   const rapport = (await emailsVers(page, email)).at(-1)!;
   expect(rapport.subject).toMatch(/^Ton mois d[e'’ ]+[a-zû]+ \d{4} avec BatiClair : 1 chantier lu, 0 € économisés, 0 lot$/);
-  expect(rapport.text).toContain("Ce mois : 1 chantier lu, 0 € économisés au groupé, 0 lot.");
+  expect(rapport.text).toContain("Ce mois : 1 chantier lu, 0 € économisés grâce à la commande commune, 0 lot.");
   expect(rapport.text).toContain("Pas de lot ce mois-ci");
   expect(rapport.text).not.toMatch(/\bvous\b|\bvotre\b/i);
   // Relancée : pas de second e-mail.
@@ -2425,16 +2426,16 @@ test("« + Nouvelle liste » : « Donne ta liste de matériaux » lit la photo s
   await expect(liste.getByRole("button", { name: /^Modifier : / })).toHaveCount(5);
   await expect(liste.getByText(/1[\s\u00a0\u202f]?250/).filter({ visible: true }).first()).toBeVisible();
 
-  // Nouveau cap (22 octobre) : une ligne vague a sa pastille orange, « Précise pour trouver d'autres couvreurs », et sa
+  // Nouveau cap (22 octobre) : une ligne vague a sa pastille orange, « Précise pour l'ajouter à la commande commune », et sa
   // question en boutons ; la réponse s'écrit dans la désignation et la pastille passe au vert. Le liteau est déjà précis.
-  await expect(liste.getByText("Précise pour trouver d'autres couvreurs")).toHaveCount(4);
+  await expect(liste.getByText("Précise pour l'ajouter à la commande commune")).toHaveCount(4);
   await liste.getByRole("button", { name: "Modifier : Tuile romane canal rouge" }).click();
   const tuile = page.getByRole("group", { name: "Préciser : Tuile romane canal rouge" });
   await expect(tuile.getByRole("group", { name: "Marque ?" })).toBeVisible();
   await tuile.getByRole("button", { name: "Edilians", exact: true }).click();
   await expect(liste.getByRole("button", { name: /^(Modifier|Fermer) : Tuile romane canal rouge Edilians/ })).toBeVisible();
   await closeOpenLine(page);
-  await expect(liste.getByText("Précise pour trouver d'autres couvreurs")).toHaveCount(3);
+  await expect(liste.getByText("Précise pour l'ajouter à la commande commune")).toHaveCount(3);
   await expect(liste.getByRole("button", { name: /Liteau sapin 27x38/ }).first()).toBeVisible();
   // Nouveau cap (22 octobre) : le suivi façon colis, en haut du chantier.
   const suivi = page.getByRole("region", { name: "Suivi du chantier" });

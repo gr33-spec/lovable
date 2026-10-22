@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { LiensLegaux } from "@/components/legal";
 import { Button, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
+import { NOM } from "@/lib/nom";
 
 /** Test complet (21 octobre) : l'espace fine de fr-FR (U+202F) ne se voit pas dans la police ; une espace insécable, si. */
 const lisible = (texte: string) => texte.replace(/\u202f/g, "\u00a0");
@@ -101,7 +102,7 @@ export default function ReponseNegocePage() {
     <>
       <PageTitle>Demande de prix, lot n° {lot.numero}</PageTitle>
       <p className="text-sm text-muted">
-        Regroupement artisans, département {lot.departement}. Pour {page.negoce.nom}.
+        {NOM}, département {lot.departement}. Pour {page.negoce.nom}.
       </p>
       <section aria-label="Le lot" className="flex flex-col gap-2 rounded-[20px] border border-line bg-surface p-4">
         <h2 className="text-base font-extrabold">{lot.designation}</h2>

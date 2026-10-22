@@ -25,7 +25,7 @@ export const AIDES: Record<SujetAide, { titre: string; lignes: readonly [string,
   negoces: {
     titre: "Tes négoces",
     lignes: [
-      `Ajoute l'e-mail de chaque négoce et ce qu'il vend : il recevra les demandes de la ${nom}.`,
+      `Ajoute l'e-mail de chaque négoce et ce qu'il vend : il recevra tes demandes de la ${nom}.`,
       "Ton favori reçoit en premier ; ton numéro de compte chez lui est repris sur tes bons de commande.",
       "Dès trois lettres, la base Sirene te propose les négoces de ton département.",
     ],
