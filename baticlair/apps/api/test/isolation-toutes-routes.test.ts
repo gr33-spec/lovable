@@ -104,6 +104,10 @@ describe("isolation entre entreprises, toutes les routes", () => {
     // Étape 7 : le bon de commande de A, et sa livraison.
     const bonA = await ctx.prisma.bonCommande.create({ data: { offreId: offreA.id, negoceId: ids.negoce, livraison: { create: {} } } });
     ids.bon = bonA.id;
+    // La commande commune du mois (Greg, 22 octobre 2026) : une commande de A, son besoin dedans.
+    const cycleA = await ctx.prisma.cycleCommande.create({ data: { mois: "2026-10", famille: "couverture", zone: "29", clotureLe: new Date("2026-10-25T11:00:00Z"), reponseAvant: new Date("2026-11-08T17:00:00Z"), relanceLe: new Date("2026-11-07T17:00:00Z"), phase: "resultats" } });
+    await ctx.prisma.besoin.update({ where: { id: ids.besoin }, data: { cycleId: cycleA.id } });
+    ids.cycle = cycleA.id;
     const idFor = (path: string, param: string): string => {
       if (param === "projectId" || param === "projetId") return ids.project;
       if (param === "uploadId") return ids.upload;
@@ -129,6 +133,11 @@ describe("isolation entre entreprises, toutes les routes", () => {
         // Étape 9 : l'admin (B n'est pas admin : 403, jamais une donnée de A).
         [/\/admin\/groupe\/lots$/, ids.lot],
         [/\/admin\/groupe\/factures$/, ids.lot],
+        // La commande du mois : la ligne et la commande de A ; la grille du négoce est un jeton.
+        [/\/commande-du-mois\/lignes$/, ids.besoin],
+        [/\/commande-du-mois$/, ids.cycle],
+        [/\/admin\/commande-du-mois\/cycles$/, ids.cycle],
+        [/\/grille$/, "jeton-inconnu-de-b-0000000000000000"],
       ];
       const hit = byPrefix.find(([re]) => re.test(prefix));
       if (!hit) throw new Error(`Paramètre sans identifiant de A : ${path} (${param})`);

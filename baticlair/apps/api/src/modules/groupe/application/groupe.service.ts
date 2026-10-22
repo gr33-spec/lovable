@@ -57,6 +57,32 @@ export interface Proposition {
 const jour = (d: Date) => d.toISOString().slice(0, 10);
 
 /**
+ * Les lignes d'une liste qui peuvent entrer dans la commande commune : prêtes (aucune question, aucun ratio à vérifier),
+ * PRÉCISES (une ligne vague part seulement chez le négoce de l'artisan, décision de Greg du 22 octobre), avec une
+ * quantité et un métier de la commande commune. Partagée par le lot (ancien) et la commande du mois.
+ */
+export function lignesProposables(r: ReviewedTakeoff, articles: readonly string[]) {
+  // Le métier de chaque ligne : celui de son lot (« lot:<n>:<métier> »), sinon celui du quantitatif.
+  const metierDe = new Map<string, string>();
+  for (const g of r.purchase.screen.groups) {
+    const m = /^lot:\d+:(.+)$/.exec(g.key);
+    if (m) for (const row of g.rows) if (row.itemKey) metierDe.set(row.itemKey, m[1]!);
+  }
+  return [...new Set(articles)].map((key) => {
+    const item = r.purchase.toBuy.find((b) => b.key === key);
+    if (!item) throw validationFailed("Unknown list line", { reason: "ligne_inconnue", article: key });
+    // Une quantité sûre : une ligne orange (question, ratio « à vérifier ») se règle d'abord.
+    if (item.state !== "ready" || (item.waitsOn?.length ?? 0) > 0 || (item.toConfirm?.length ?? 0) > 0) throw validationFailed("Line not ready", { reason: "ligne_a_regler", article: key });
+    if (!precisionDeLigne(item.label).precise) throw validationFailed("Vague line", { reason: "ligne_vague", article: key });
+    const q = quantiteDuBesoin(item.order, item.quantity);
+    if (!q) throw validationFailed("Line without quantity", { reason: "sans_quantite", article: key });
+    const famille = familleDuMetier(metierDe.get(key) ?? r.takeoff.trade);
+    if (!famille) throw validationFailed("Trade outside the groupé", { reason: "sans_famille", article: key });
+    return { item, q, famille };
+  });
+}
+
+/**
  * L'ENTRÉE DU BESOIN AU GROUPÉ (parcours groupé, étape 2) : depuis l'écran 3, une ou plusieurs lignes de la liste d'achats
  * d'un devis lu par l'app (jamais une saisie libre, section 5) deviennent des besoins, avec une fenêtre de livraison et un
  * seul choix « Chantier signé » / « Devis en attente » ; un besoin en attente bascule signé d'un tap ; un besoin se retire
@@ -239,27 +265,7 @@ export class GroupeService {
     if (!zone || !project.address) throw validationFailed("The site needs an address with a postcode", { reason: "adresse_requise" });
     const takeoff = await this.prisma.takeoff.findFirst({ where: { projectId, companyId: tenant.companyId }, orderBy: { createdAt: "desc" }, select: { id: true } });
     if (!takeoff) throw validationFailed("No materials list", { reason: "pas_de_liste" });
-    const r = await this.reviewed(tenant, takeoff.id);
-    // Le métier de chaque ligne : celui de son lot (« lot:<n>:<métier> »), sinon celui du quantitatif.
-    const metierDe = new Map<string, string>();
-    for (const g of r.purchase.screen.groups) {
-      const m = /^lot:\d+:(.+)$/.exec(g.key);
-      if (m) for (const row of g.rows) if (row.itemKey) metierDe.set(row.itemKey, m[1]!);
-    }
-    const lignes = [...new Set(p.articles)].map((key) => {
-      const item = r.purchase.toBuy.find((b) => b.key === key);
-      if (!item) throw validationFailed("Unknown list line", { reason: "ligne_inconnue", article: key });
-      // Un engagement ferme porte sur une quantité ferme : une ligne orange (question, ratio « à vérifier ») se règle d'abord.
-      if (item.state !== "ready" || (item.waitsOn?.length ?? 0) > 0 || (item.toConfirm?.length ?? 0) > 0) throw validationFailed("Line not ready", { reason: "ligne_a_regler", article: key });
-      // Décision de Greg (22 octobre) : une ligne vague ne rejoint pas la commande commune ; elle part seulement chez le
-      // négoce de l'artisan. Seules les lignes précises sont regroupées.
-      if (!precisionDeLigne(item.label).precise) throw validationFailed("Vague line", { reason: "ligne_vague", article: key });
-      const q = quantiteDuBesoin(item.order, item.quantity);
-      if (!q) throw validationFailed("Line without quantity", { reason: "sans_quantite", article: key });
-      const famille = familleDuMetier(metierDe.get(key) ?? r.takeoff.trade);
-      if (!famille) throw validationFailed("Trade outside the groupé", { reason: "sans_famille", article: key });
-      return { item, q, famille };
-    });
+    const lignes = lignesProposables(await this.reviewed(tenant, takeoff.id), p.articles);
     // Section 5 : une quantité au-delà de 3 × la médiane des besoins de la même référence sur 90 jours n'entre pas.
     for (const { item, q } of lignes) {
       const p = await this.regroupement.plafond(cleDeReference({ libelle: item.label }), Number(q.quantite), { companyId: tenant.companyId });
@@ -331,7 +337,7 @@ export class GroupeService {
     return vue(updated);
   }
 
-  private async ouvert(tenant: TenantContext): Promise<void> {
+  async ouvert(tenant: TenantContext): Promise<void> {
     const e = await this.etat(tenant);
     if (!e.eligible) throw new DomainError("forbidden", "Groupé not available for this company", { reason: "groupe_ferme", raisons: e.raisons });
   }

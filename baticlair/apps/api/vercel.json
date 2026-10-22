@@ -16,6 +16,10 @@
       "schedule": "0 5 * * *"
     },
     {
+      "path": "/v1/internal/commande-du-mois",
+      "schedule": "5 * * * *"
+    },
+    {
       "path": "/v1/internal/rapport-mensuel",
       "schedule": "0 7 1 * *"
     }

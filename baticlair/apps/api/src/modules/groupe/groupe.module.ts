@@ -35,10 +35,12 @@ import { WebhookResendController } from "./http/webhook-resend.controller.js";
 import { SuiviController } from "./http/suivi.controller.js";
 import { SuiviService } from "./application/suivi.service.js";
 import { BanGeocodeur, GEOCODEUR, TableGeocodeur, type Geocodeur } from "./application/geocodeur.js";
+import { CommandeDuMoisService } from "./application/commande-du-mois.service.js";
+import { CommandeDuMoisAdminController, CommandeDuMoisController, CommandeDuMoisTacheController, GrilleNegoceController } from "./http/commande-du-mois.controller.js";
 
 @Module({
   imports: [TenancyModule, TakeoffModule],
-  controllers: [SuiviController, GroupeController, NegocesController, RegroupementController, ReponseController, WebhookResendController, TestMailboxController, AdminGroupeController, SireneController, RapportMensuelController, JeuDemonstrationController],
+  controllers: [SuiviController, GroupeController, NegocesController, RegroupementController, ReponseController, WebhookResendController, TestMailboxController, AdminGroupeController, SireneController, RapportMensuelController, JeuDemonstrationController, CommandeDuMoisController, GrilleNegoceController, CommandeDuMoisTacheController, CommandeDuMoisAdminController],
   providers: [
     {
       provide: SIRET_VERIFIER,
@@ -89,10 +91,17 @@ import { BanGeocodeur, GEOCODEUR, TableGeocodeur, type Geocodeur } from "./appli
         new GroupeService(p, (tenant, id) => t.reviewed(tenant, id), s, r, d, c, n, { departements: cfg.groupe.departements, admins: cfg.groupe.admins }),
       inject: [PrismaService, TakeoffService, SIRET_VERIFIER, RegroupementService, DemandeService, CommandeService, NotificationsGroupeService, CONFIG],
     },
+    {
+      // La commande commune du mois (Greg, 22 octobre 2026).
+      provide: CommandeDuMoisService,
+      useFactory: (p: PrismaService, t: TakeoffService, e: TransactionalEmailSender, n: NotificationsGroupeService, g: Geocodeur, x: NegoceExtractor | null, pdf: PdfReader, c: AppConfig, groupe: GroupeService) =>
+        new CommandeDuMoisService(p, (tenant, id) => t.reviewed(tenant, id), e, n, g, x, pdf, { webAppUrl: c.webAppUrl, authSecret: c.authSecret }, (tenant) => groupe.ouvert(tenant)),
+      inject: [PrismaService, TakeoffService, EMAIL_SENDER, NotificationsGroupeService, GEOCODEUR, NEGOCE_EXTRACTOR, PDF_READER, CONFIG, GroupeService],
+    },
     { provide: NegocesService, useFactory: (p: PrismaService, c: AppConfig, e: TransactionalEmailSender) => new NegocesService(p, c.authSecret, e, c.webAppUrl), inject: [PrismaService, CONFIG, EMAIL_SENDER] },
     { provide: SIRENE_HTTP, useValue: fetch as unknown as SireneHttp },
     { provide: SireneService, useFactory: (p: PrismaService, h: SireneHttp, c: AppConfig) => new SireneService(p, h, { apiKey: c.groupe.inseeApiKey, ...c.groupe.sirene }), inject: [PrismaService, SIRENE_HTTP, CONFIG] },
   ],
-  exports: [GroupeService, NegocesService, RegroupementService, DemandeService, ChoixService, CommandeService, NotificationsGroupeService],
+  exports: [CommandeDuMoisService, GroupeService, NegocesService, RegroupementService, DemandeService, ChoixService, CommandeService, NotificationsGroupeService],
 })
 export class GroupeModule {}

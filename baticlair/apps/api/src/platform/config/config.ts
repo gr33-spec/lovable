@@ -105,6 +105,8 @@ const envSchema = z
      * explicite » ; `on` l'ouvre (écrans, regroupement, envois aux négoces).
      */
     GROUPE: z.enum(["on", "off"]).default("off"),
+    /** La commande commune du mois (Greg, 22 octobre 2026) par défaut ; `lots` rallume l'ancien regroupement au fil de l'eau. */
+    COMMANDE_COMMUNE: z.enum(["mois", "lots"]).default("mois"),
     /** Clé d'intégration de l'API Sirene de l'INSEE (vérification du SIRET avant le groupé). Vide : vérification indisponible. */
     INSEE_API_KEY: z.string().min(1).optional(),
     /**
@@ -222,6 +224,8 @@ export interface AppConfig {
     admins: string[];
     /** `null` = tous les départements ; sinon la liste des départements ouverts. */
     departements: string[] | null;
+    /** mois : une commande commune par mois (Greg, 22 octobre 2026) ; lots : l'ancien regroupement au fil de l'eau. */
+    mode: "mois" | "lots";
     sirene: { departements: string[]; naf: string[] };
   };
   rateLimit: { enabled: boolean };
@@ -318,6 +322,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
       resendWebhookSecret: e.RESEND_WEBHOOK_SECRET ?? null,
       admins: (e.GROUPE_ADMINS ?? e.REFERENTIAL_VALIDATORS ?? "").split(",").map((x) => x.trim().toLowerCase()).filter(Boolean),
       departements: e.GROUPE_DEPARTEMENTS.trim() === "*" ? null : e.GROUPE_DEPARTEMENTS.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean),
+      mode: e.COMMANDE_COMMUNE,
       sirene: { departements: e.SIRENE_DEPARTEMENTS.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean), naf: e.SIRENE_NAF.split(",").map((x) => x.trim().toUpperCase()).filter(Boolean) },
     },
     rateLimit: { enabled: e.RATE_LIMIT === "on" },

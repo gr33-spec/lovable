@@ -169,6 +169,7 @@ model Company {
   quantitatifs      Quantitatif[]
   ruleConfirmations RuleConfirmation[]
   besoins           Besoin[]
+  choixDuMois       ChoixArtisan[]
   negocesAjoutes    Negoce[]            @relation("NegoceAjoutePar")
   negoces           NegoceArtisan[]
   desistements      Desistement[]
@@ -952,6 +953,10 @@ model Besoin {
   /// en_attente | signe | retire | engage | commande | livre (`transitionBesoin`).
   statut           String
   lotId            String?   @db.Uuid
+  /// La commande commune du mois (Greg, 22 octobre 2026) : le cycle où ce besoin est déposé ; null pour l'ancien lot.
+  cycleId          String?   @db.Uuid
+  /// chantier (devis signé) | stock ; null pour l'ancien lot.
+  nature           String?
   /// En cochant « Chantier signé », l'artisan s'engage à commander ces quantités au prix groupé (§2 étape 2).
   signeLe          DateTime?
   engageLe         DateTime?
@@ -962,11 +967,13 @@ model Besoin {
   company Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   project Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
   lot     LotGroupe?    @relation(fields: [lotId], references: [id], onDelete: SetNull)
+  cycle   CycleCommande? @relation(fields: [cycleId], references: [id], onDelete: SetNull)
   offre   OffreArtisan?
 
   @@unique([takeoffId, articleKey])
   @@index([cle, zone, statut])
   @@index([companyId, createdAt])
+  @@index([cycleId])
   @@map("besoin")
 }
 
@@ -994,6 +1001,8 @@ model Negoce {
   lotsRetenus    LotGroupe[]     @relation("LotNegoceRetenu")
   accordNegoces  AccordNegoce[]
   factureNegoces FactureNegoce[]
+  grilles        GrilleNegoce[]
+  choisiPar      ChoixArtisan[]
 
   @@unique([email, departement])
   @@index([departement])
@@ -1264,4 +1273,97 @@ model FactureNegoce {
 
   @@index([negoceId, statut])
   @@map("facture_negoce")
+}
+
+/// LA COMMANDE COMMUNE DU MOIS (décision de Greg, 22 octobre 2026, au soir) : une par mois, par famille et par
+/// département. Inscriptions jusqu'à la clôture, puis la grille fusionnée part aux négoces, puis les résultats.
+/// Calculs : `packages/domain/src/groupe/commande-du-mois.ts`.
+model CycleCommande {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  numero       Int       @unique @default(autoincrement())
+  /// AAAA-MM : le mois de la clôture.
+  mois         String
+  famille      String
+  zone         String
+  clotureLe    DateTime
+  reponseAvant DateTime
+  relanceLe    DateTime
+  /// inscriptions | negoces | resultats
+  phase        String    @default("inscriptions")
+  closLe       DateTime?
+  resultatsLe  DateTime?
+  /// La grille fusionnée à la clôture : [{ cle, designation, quantite, unite }].
+  lignes       Json      @default("[]")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  besoins Besoin[]
+  grilles GrilleNegoce[]
+  choix   ChoixArtisan[]
+
+  @@unique([mois, famille, zone])
+  @@index([phase])
+  @@map("cycle_commande")
+}
+
+/// La grille d'un négoce pour une commande du mois : un lien unique sans compte, un devis déposé (lu une fois), un prix
+/// unitaire HT par ligne (le même pour tous les artisans) et ses deux chiffres de livraison.
+model GrilleNegoce {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  cycleId          String    @db.Uuid
+  negoceId         String    @db.Uuid
+  tokenHash        String    @unique
+  /// { <clé de ligne> : prix unitaire HT }.
+  prix             Json      @default("{}")
+  /// { depart, francoKm, prixAuDela, distances: { <companyId>: (km | null)[] } }.
+  livraison        Json?
+  /// en_attente | lue | a_verifier | echec
+  statutExtraction String    @default("en_attente")
+  deposeLe         DateTime?
+  relanceLe        DateTime?
+  /// Le message de fin (retenu ou neutre) envoyé.
+  resultatLe       DateTime?
+  createdAt        DateTime  @default(now())
+
+  cycle    CycleCommande        @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  negoce   Negoce               @relation(fields: [negoceId], references: [id], onDelete: Cascade)
+  fichiers GrilleNegoceFichier[]
+
+  @@unique([cycleId, negoceId])
+  @@map("grille_negoce")
+}
+
+/// Un devis PDF déposé par un négoce pour sa grille (deux au plus).
+model GrilleNegoceFichier {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  grilleId  String   @db.Uuid
+  nom       String
+  type      String
+  contenu   Bytes
+  createdAt DateTime @default(now())
+
+  grille GrilleNegoce @relation(fields: [grilleId], references: [id], onDelete: Cascade)
+
+  @@map("grille_negoce_fichier")
+}
+
+/// Le choix d'un artisan dans les résultats du mois : le négoce (par défaut le premier sur le total), son prix livré, et
+/// « Commander » (le bon part au négoce). Sans engagement avant : il commande seulement si le prix lui plaît.
+model ChoixArtisan {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  cycleId     String    @db.Uuid
+  companyId   String    @db.Uuid
+  negoceId    String    @db.Uuid
+  totalHt     Decimal   @db.Decimal(14, 2)
+  livraisonHt Decimal   @db.Decimal(14, 2)
+  commandeLe  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  cycle   CycleCommande @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  company Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  negoce  Negoce        @relation(fields: [negoceId], references: [id], onDelete: Cascade)
+
+  @@unique([cycleId, companyId])
+  @@map("choix_artisan")
 }
