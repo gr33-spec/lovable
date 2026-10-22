@@ -56,6 +56,74 @@ const quand = (iso: string | null) => (iso ? new Date(iso).toLocaleString("fr-FR
  * réponses « à vérifier », négoces, accords, factures (export CSV), exclusions ; les gestes de secours (clore, annuler,
  * forcer, changer le négoce, facture payée). Réservé aux admins (GROUPE_ADMINS).
  */
+interface ConfigCycle {
+  jourCloture: number;
+  heureCloture: number;
+  joursReponse: number;
+  heureReponse: number;
+}
+
+/**
+ * La commande commune du mois (Greg, 22 octobre 2026) : toutes les dates dans une seule config, modifiable ici. Elles valent
+ * pour les commandes pas encore closes. Heures de Paris.
+ */
+function DatesDuMois() {
+  const fetchConfig = useCallback((signal: AbortSignal) => api<ConfigCycle>("/v1/admin/commande-du-mois/config", { signal }), []);
+  const { data, error, reload } = useResource(fetchConfig);
+  const [brouillon, setBrouillon] = useState<ConfigCycle | null>(null);
+  const [pending, setPending] = useState(false);
+  const [erreur, setErreur] = useState<ApiError | null>(null);
+  const [fait, setFait] = useState(false);
+  if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
+  if (!data) return null;
+  const c = brouillon ?? data;
+  const champ = (cle: keyof ConfigCycle, label: string, suffixe: string) => (
+    <label className="flex flex-wrap items-center gap-2 text-sm font-semibold">
+      {label}
+      <input
+        inputMode="numeric"
+        aria-label={label}
+        value={String(c[cle])}
+        onChange={(e) => (setFait(false), setBrouillon({ ...c, [cle]: Number(e.currentTarget.value.replace(/\D/g, "")) || 0 }))}
+        className="min-h-11 w-16 rounded-xl border border-line bg-surface px-3 text-right font-bold"
+      />
+      {suffixe}
+    </label>
+  );
+  return (
+    <Card aria-label="Dates de la commande du mois" className="flex flex-col gap-3 p-4">
+      <h2 className="text-base font-extrabold">Dates de la commande du mois</h2>
+      {champ("jourCloture", "Clôture le", "du mois")}
+      {champ("heureCloture", "à", "h")}
+      {champ("joursReponse", "Les négoces répondent en", "jours")}
+      {champ("heureReponse", "avant", "h")}
+      {erreur ? <ErrorNotice error={erreur} /> : null}
+      {fait ? <p role="status" className="text-sm font-bold text-ok">Enregistré.</p> : null}
+      <Button
+        className="self-start"
+        pending={pending}
+        disabled={!brouillon}
+        onClick={async () => {
+          setPending(true);
+          setErreur(null);
+          try {
+            await api("/v1/admin/commande-du-mois/config", { method: "PUT", body: c });
+            setBrouillon(null);
+            setFait(true);
+            reload();
+          } catch (e) {
+            setErreur(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+          } finally {
+            setPending(false);
+          }
+        }}
+      >
+        Enregistrer les dates
+      </Button>
+    </Card>
+  );
+}
+
 export default function AdminGroupePage() {
   const fetchTableau = useCallback((signal: AbortSignal) => api<Tableau>("/v1/admin/groupe", { signal }), []);
   const { data, error, reload } = useResource(fetchTableau);
@@ -99,6 +167,7 @@ export default function AdminGroupePage() {
         {data.departements.compteurs.map((c) => `${c.departement} : ${c.lots} lot${c.lots > 1 ? "s" : ""}, ${euros(c.economies)} économisés`).join(" · ") || "aucun lot"}
         {data.lectures ? ` · devis négoces sur ${data.lectures.jours} jours : ${data.lectures.lues} lu${data.lectures.lues > 1 ? "s" : ""}, ${data.lectures.aVerifier} à vérifier, ${data.lectures.echecs} en échec` : ""}
       </p>
+      <DatesDuMois />
       <nav aria-label="Rubriques de l'admin" className="flex flex-wrap gap-1.5">
         {(["lots", "negoces", "accords", "factures", "exclusions"] as const).map((o) => (
           <button key={o} type="button" onClick={() => setOnglet(o)} aria-current={onglet === o ? "page" : undefined} className={`min-h-10 rounded-full px-3.5 text-[13px] font-extrabold ${onglet === o ? "bg-accent text-white" : "bg-surface text-ink"}`}>

@@ -47,7 +47,7 @@ export function DemoGuidee() {
   }
 
   if (!visible) return null;
-  const titres = ["Ta liste, remise au propre", "Les couvreurs du secteur, regroupés", "Ton prix, livré chez toi"];
+  const titres = ["Ta liste, remise au propre", "La commande du mois, tous ensemble", "Ton prix, livré chez toi"];
   return (
     <section data-demo aria-labelledby="demo-titre" className="flex min-h-[calc(100svh-4rem)] flex-col gap-4 rounded-2xl sm:min-h-0 border border-[#e3e6ea] bg-surface p-4 text-ink sm:p-6">
       <div className="flex items-start justify-between gap-3">
@@ -122,23 +122,22 @@ function EcranDevis() {
   );
 }
 
-/** Écran 2 : le compteur du groupe (nouveau cap, 22 octobre) : couvreurs, demandes, devis reçus, meilleur prix. */
+/** Écran 2 : la commande commune du mois (Greg, 22 octobre 2026) : en quantités, le chrono ; jamais un nombre d'entreprises. */
 function EcranLot() {
-  const l = EXEMPLE.lot;
-  const c = EXEMPLE.compteur;
+  const c = EXEMPLE.commande;
   return (
     <div className="flex flex-col gap-3 text-ink">
       <div className="flex flex-col gap-2 rounded-xl bg-ground p-3">
         <span className="flex items-center gap-2 text-[14px] font-extrabold">
           <Users size={18} aria-hidden="true" className="text-accent-text" />
-          {l.reference} · {l.departement} <Exemple />
+          {`Commande ${c.de}`} <Exemple />
         </span>
-        <p className="text-[15px] font-bold">
-          {c.couvreurs} couvreurs, {c.demandes} demandes envoyées, {c.devis} devis reçus, meilleur prix {c.meilleurPrix}
-        </p>
+        <p className="text-[15px] font-extrabold text-accent-text">{c.cloture}</p>
+        <p className="text-[15px] font-bold">{c.toi}</p>
+        <p className="text-[15px] font-bold">{c.tout}</p>
         <ul className="flex flex-col gap-1 text-[14px]">
-          <li>Chaque couvreur a ajouté son négoce : la demande commune est partie chez tous.</li>
-          <li>Chaque devis est comparé au meilleur prix dès qu&apos;il arrive.</li>
+          <li>À la clôture, tout le volume part aux négoces de la région.</li>
+          <li>Tu vois le meilleur prix et tu commandes si ça te plaît.</li>
         </ul>
       </div>
       <p className="text-[14px] font-bold text-muted">Personne ne voit ton nom ni tes chantiers.</p>

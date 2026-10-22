@@ -9,6 +9,7 @@ import { type ItemEdit, type SketchHandlers } from "@/components/purchase-list";
 import { type DecisionHandlers } from "@/components/takeoff-view";
 import { SelectionBar, type SelectionSend } from "@/components/selection-send";
 import { GroupeBar, GroupeSection, type Groupe } from "@/components/groupe";
+import { CommandeDuMoisBar, CommandeDuMoisBloc, MesLignesDuMois } from "@/components/commande-du-mois";
 import { Button, ButtonLink, ErrorNotice } from "@/components/ui";
 import type { ApiError, ItemSketch, PurchaseItem, ScreenRow, Takeoff, TakeoffDecision } from "@/lib/api";
 import { enMetres, parseQuantity, shortName } from "@/lib/labels";
@@ -86,6 +87,7 @@ export function SupplyList({
   const [selecting, setSelecting] = useState(false);
   // BatiClair Groupé : les mêmes cases servent à proposer des lignes au groupé (par ligne, ou « Cocher cette partie »).
   const [pourGroupe, setPourGroupe] = useState(false);
+  const [messageMois, setMessageMois] = useState<string | null>(null);
   const [checked, setChecked] = useState<Set<string>>(new Set());
   // « Envoyer » touché avec des lignes orange : la phrase dit pourquoi rien ne part.
   const [blocked, setBlocked] = useState(false);
@@ -222,7 +224,11 @@ export function SupplyList({
           </ButtonLink>
         </section>
       ) : null}
-      {groupe && editable && !selecting ? (
+      {/* La commande commune du mois (Greg, 22 octobre 2026) : un bloc, le chrono, et « Ajouter à la commande d'octobre ». */}
+      {groupe && groupe.mode === "mois" && editable && !selecting ? (
+        <CommandeDuMoisBloc etat={groupe.mois} onAjouter={startGroupe} message={messageMois} />
+      ) : null}
+      {groupe && groupe.mode === "lots" && editable && !selecting ? (
         <section aria-label={`Ajouter à la ${nom}`} className="mb-3 flex flex-col gap-2 rounded-[20px] bg-surface p-4 shadow-card">
           <p className="flex items-center gap-2 text-[15px] font-extrabold">
             <Users size={18} aria-hidden="true" className="text-accent-text" />
@@ -247,7 +253,7 @@ export function SupplyList({
       </p>
       {selecting ? (
         <p className="mb-2 text-[14px] leading-snug font-bold text-ink">
-          {pourGroupe ? `Coche ce que tu ajoutes à la ${nom}. Ton nom ne part pas avec.` : "Coche ce qui part chez ce fournisseur. Le reste pourra partir chez un autre."}
+          {pourGroupe && groupe?.mode === "mois" ? "Coche ce que tu ajoutes à la commande. Mets seulement ce que tu es sûr de commander." : pourGroupe ? `Coche ce que tu ajoutes à la ${nom}. Ton nom ne part pas avec.` : "Coche ce qui part chez ce fournisseur. Le reste pourra partir chez un autre."}
         </p>
       ) : null}
       {sections.map((section) => (
@@ -284,7 +290,7 @@ export function SupplyList({
                     // ligne déjà proposée non plus (une ligne déjà envoyée à part reste décochée, pas grisée).
                     disabled: !articleOf(r) || r.status === "check" || (pourGroupe && !cochable(r)),
                     ...(pourGroupe && vagueRow(r) ? { note: takeoff.phrasePrecision ?? "à préciser d'abord" } : {}),
-                    ...(pourGroupe ? { label: `Ajouter à la ${nom}` } : {}),
+                    ...(pourGroupe ? { label: groupe?.mode === "mois" ? "Ajouter à la commande" : `Ajouter à la ${nom}` } : {}),
                     onToggle: () =>
                       setChecked((prev) => {
                         const next = new Set(prev);
@@ -375,8 +381,23 @@ export function SupplyList({
 
       {/* §50.3 : en bas, l'aperçu et l'envoi ; dessous, en petit, les autres gestes. Seuls les deux boutons restent collés en
           bas ; les liens suivent la liste, jamais par-dessus. */}
-      {groupe && !selecting ? <GroupeSection groupe={groupe} /> : null}
-      {selecting && pourGroupe && groupe ? (
+      {groupe && !selecting ? groupe.mode === "mois" ? <MesLignesDuMois groupe={groupe} /> : <GroupeSection groupe={groupe} /> : null}
+      {selecting && pourGroupe && groupe && groupe.mode === "mois" ? (
+        <div className={`sticky z-10 mt-2 bg-gradient-to-t from-ground from-70% to-transparent pt-6 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(12px,env(safe-area-inset-bottom))]"}`}>
+          <CommandeDuMoisBar
+            count={checked.size}
+            de={groupe.mois?.prochaine?.de ?? groupe.mois?.commandes.find((c) => c.phase === "inscriptions")?.de ?? "du mois"}
+            phrase={groupe.mois?.phrases.sansEngagement ?? ""}
+            onCancel={stopSelecting}
+            onAdresse={groupe.adresse}
+            onDeposer={async (nature) => {
+              setMessageMois(await groupe.deposer([...checked], nature));
+              stopSelecting();
+              setChecked(new Set());
+            }}
+          />
+        </div>
+      ) : selecting && pourGroupe && groupe ? (
         <div className={`sticky z-10 mt-2 bg-gradient-to-t from-ground from-70% to-transparent pt-6 ${docked ? "bottom-[68px] pb-5 lg:bottom-[70px]" : "bottom-0 pb-[max(12px,env(safe-area-inset-bottom))]"}`}>
           <GroupeBar
             count={checked.size}

@@ -9,6 +9,7 @@ import {
   comparatifDeLArtisan,
   CONFIG_CYCLE_DEFAUT,
   datesDuCycle,
+  deMois,
   distanceRouteKm,
   echeanceNegoce,
   fusionnerLesListes,
@@ -73,6 +74,8 @@ export interface VueDuMois {
   cycleId: string;
   numero: number;
   mois: Mois;
+  /** « d'octobre », « de novembre » : pour « la commande d'octobre ». */
+  de: string;
   phase: PhaseCycle;
   zone: string;
   clotureLe: string;
@@ -303,14 +306,14 @@ export class CommandeDuMoisService {
   }
 
   /** Le cycle ouvert pour la page « Commande commune » quand l'entreprise n'a encore rien déposé (chrono, quantités). */
-  async prochaineCommande(tenant: TenantContext, maintenant = new Date()): Promise<{ mois: Mois; clotureDans: string; tout: string } | null> {
+  async prochaineCommande(tenant: TenantContext, maintenant = new Date()): Promise<{ mois: Mois; de: string; clotureDans: string; tout: string; vide: boolean } | null> {
     const company = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { address: true } });
     const zone = zoneDuCodePostal(company?.address ?? "");
     if (!zone) return null;
     const { cycle } = await this.cycleOuvert("couverture", zone, maintenant);
     const c = await this.prisma.cycleCommande.findUniqueOrThrow({ where: { id: cycle.id } });
     const tout = await this.lignesDuCycle(c.id);
-    return { mois: c.mois, clotureDans: chrono(maintenant, c.clotureLe), tout: affichageDeLaCommande({ mois: c.mois, toi: [], tout, seul: false, clotureDans: null }).tout };
+    return { mois: c.mois, de: deMois(c.mois), clotureDans: chrono(maintenant, c.clotureLe), tout: affichageDeLaCommande({ mois: c.mois, toi: [], tout, seul: false, clotureDans: null }).tout, vide: tout.length === 0 };
   }
 
   private async lignesDuCycle(cycleId: string, companyId?: string): Promise<LigneDeGrille[]> {
@@ -349,6 +352,7 @@ export class CommandeDuMoisService {
       cycleId: c.id,
       numero: c.numero,
       mois: c.mois,
+      de: deMois(c.mois),
       phase,
       zone: c.zone,
       clotureLe: c.clotureLe.toISOString(),

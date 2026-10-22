@@ -35,26 +35,26 @@ export const metadata: Metadata = {
  */
 const ETAPES = [
   {
-    titre: "Tu donnes ta liste",
-    texte: "Une photo, un bon, un PDF ou une capture. Elle revient au propre, ligne par ligne.",
+    titre: "1. Dépose ta liste avant la clôture",
+    texte: "Une photo, un bon, un PDF ou une capture. Mets seulement ce que tu es sûr de commander.",
     image: { src: "/landing/capture-entree.jpg", alt: "L'écran « Donne ta liste de matériaux » de BatiClair", position: "top" },
   },
   {
-    titre: "On regroupe les couvreurs du secteur",
-    texte: "Même article, même secteur : une seule commande commune. Un geste par ligne pour la préciser.",
+    titre: "2. On envoie tout le volume aux négoces",
+    texte: "Les listes du mois sont additionnées : une seule grille pour tous les négoces de la région.",
     image: { src: "/landing/capture-preciser.jpg", alt: "Une ligne « Ardoise naturelle 32×22 » à préciser : origine et choix en boutons", position: "bottom" },
   },
-  { titre: "Les négoces se battent pour ton prix", texte: "Chaque devis est comparé au meilleur prix. Tu vois ton prix livré, le moins cher l'emporte.", image: null },
+  { titre: "3. Tu vois le meilleur prix et tu commandes si ça te plaît", texte: "Ton prix livré chez chaque négoce, le moins cher en avant. Sans engagement.", image: null },
 ] as const;
 
 const GROUPE = [
-  { titre: "Tes lignes rejoignent celles des couvreurs du secteur", texte: "Même article, même secteur : un seul groupe. Personne ne voit ton nom ni tes chantiers." },
-  { titre: "Chacun ajoute son négoce", texte: "La demande commune part à tous les négoces du groupe. Ils savent qu'en face, il y a du volume." },
-  { titre: "Le moins cher qui livre tout l'emporte", texte: "Chaque devis est lu à son arrivée et comparé au meilleur prix, livraison comprise." },
+  { titre: "Une commande par mois", texte: "Tu déposes ta liste jusqu'à la clôture, le 25. Personne ne voit ton nom ni tes chantiers." },
+  { titre: "Les négoces chiffrent tout le volume", texte: "Un prix par article, le même pour tous, ferme pour le mois. Ils ont deux semaines." },
+  { titre: "Le moins cher pour toi, livraison comprise", texte: "Chaque grille est appliquée à ta liste. Tu choisis, ou tu ne commandes pas." },
 ];
 
-const COMPTEUR = EXEMPLE.compteur;
-const PHRASE_COMPTEUR = `${COMPTEUR.couvreurs} couvreurs, ${COMPTEUR.demandes} demandes envoyées, ${COMPTEUR.devis} devis reçus, meilleur prix ${COMPTEUR.meilleurPrix}`;
+const COMMANDE = EXEMPLE.commande;
+const PHRASE_COMMANDE = `${COMMANDE.tout}. ${COMMANDE.cloture}.`;
 
 /** Le cadre d'un téléphone autour d'une vraie capture de l'app. `hauteur` recadre la capture (haut ou bas de l'écran). */
 function Telephone({ src, alt, priorite = false, hauteur, position = "top", className = "" }: { src: string; alt: string; priorite?: boolean; hauteur?: string; position?: "top" | "bottom"; className?: string }) {
@@ -89,27 +89,13 @@ function Photo({ emplacement, className }: { emplacement: EmplacementPhoto; clas
 /** Le compteur de la commande commune, tel que l'artisan le voit (données de la démo). */
 function Compteur() {
   return (
-    <div role="img" aria-label={PHRASE_COMPTEUR} className="flex h-full flex-col justify-center gap-4 rounded-2xl border border-[#e3e6ea] bg-surface p-5">
-      <p className="text-[13px] font-semibold text-muted">
-        {EXEMPLE.lot.reference} · {EXEMPLE.lot.departement}
-      </p>
-      <dl className="grid grid-cols-3 gap-2">
-        {[
-          [String(COMPTEUR.couvreurs), "couvreurs"],
-          [String(COMPTEUR.demandes), "demandes"],
-          [String(COMPTEUR.devis), "devis"],
-        ].map(([n, l]) => (
-          <div key={l} className="relative flex flex-col gap-1 rounded-xl bg-ground px-3 py-3">
-            <dt className="sr-only">{l}</dt>
-            <dd className="font-display text-[24px] leading-none font-bold tabular-nums">{n}</dd>
-            <dd className="text-[12px] font-semibold whitespace-nowrap text-muted">{l}</dd>
-          </div>
-        ))}
-      </dl>
+    <div role="img" aria-label={PHRASE_COMMANDE} className="flex h-full flex-col justify-center gap-4 rounded-2xl border border-[#e3e6ea] bg-surface p-5">
+      <p className="text-[13px] font-semibold text-muted">{`Exemple · Commande ${COMMANDE.de}`}</p>
+      <p className="text-[16px] leading-snug font-bold">{COMMANDE.tout}</p>
       <p className="flex items-baseline justify-between border-t border-[#e3e6ea] pt-4">
-        <span className="text-[14px] font-semibold text-muted">Meilleur prix, l&apos;unité HT</span>
-        <span className="font-display text-[28px] leading-none font-bold text-accent-text tabular-nums">{COMPTEUR.meilleurPrix}</span>
+        <span className="text-[14px] font-semibold text-muted">{COMMANDE.toi}</span>
       </p>
+      <p className="font-display text-[24px] leading-none font-bold text-accent-text">{COMMANDE.cloture}</p>
     </div>
   );
 }
@@ -139,6 +125,7 @@ export default function BienvenuePage() {
             Marre de te faire enfumer sur le prix de tes matériaux ?
           </h1>
           <p className="max-w-[46ch] text-[18px] leading-relaxed text-muted sm:text-[20px]">Rassemblons-nous et mettons nos forces en commun pour négocier les meilleurs prix.</p>
+          <p className="max-w-[46ch] text-[18px] leading-relaxed font-bold sm:text-[20px]">Une commande par mois avec les couvreurs de ta région.</p>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-2">
             <ButtonLink href="/inscription" variant="accent" className={BOUTON}>
               Je rejoins le mouvement
@@ -168,7 +155,7 @@ export default function BienvenuePage() {
           <h2 id="comment-titre" className={h2}>
             Comment ça marche
           </h2>
-          <p className={intro}>Trois étapes. Le reste, c&apos;est nous : le regroupement, les demandes aux négoces, la comparaison.</p>
+          <p className={intro}>Trois étapes. Le reste, c&apos;est nous : on additionne les listes, on interroge les négoces, on compare.</p>
         </div>
         <ol className="-mx-4 flex snap-x snap-mandatory gap-5 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-6 sm:overflow-visible sm:px-0">
           {ETAPES.map((e, i) => (

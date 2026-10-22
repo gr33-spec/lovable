@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Headers, HttpCode, Inject, Param, Post, 
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { Throttle } from "@nestjs/throttler";
 import { memoryStorage } from "multer";
+import { PHRASE_SANS_ENGAGEMENT } from "@baticlair/domain";
 import { z } from "zod";
 import type { AppConfig } from "../../../platform/config/config.js";
 import { PrismaService } from "../../../platform/database/prisma.service.js";
@@ -47,7 +48,12 @@ export class CommandeDuMoisController {
   async vue(@Tenant() tenant: TenantContext, @Query("maintenant") m?: string) {
     this.actif();
     const maintenant = instant(this.config, m);
-    return { mode: this.config.groupe.mode, commandes: await this.commande.vues(tenant, maintenant), prochaine: await this.commande.prochaineCommande(tenant, maintenant) };
+    return {
+      mode: this.config.groupe.mode,
+      commandes: await this.commande.vues(tenant, maintenant),
+      prochaine: await this.commande.prochaineCommande(tenant, maintenant),
+      phrases: { sansEngagement: PHRASE_SANS_ENGAGEMENT },
+    };
   }
 
   @Post("projects/:projectId/commande-du-mois")

@@ -43,7 +43,8 @@ export class GroupeController {
   @Get("groupe")
   async etat(@Tenant() tenant: TenantContext) {
     this.actif();
-    return this.groupe.etat(tenant);
+    // Le mode (Greg, 22 octobre 2026) : « mois » = la commande commune du mois ; « lots » = l'ancien regroupement.
+    return { ...(await this.groupe.etat(tenant)), mode: this.config.groupe.mode };
   }
 
   /** Onglet « Groupé », « Mes lots » : mes besoins et leur lot. */

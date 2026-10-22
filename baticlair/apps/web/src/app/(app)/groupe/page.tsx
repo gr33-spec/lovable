@@ -11,6 +11,7 @@ import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 import { NOM, nom, noms } from "@/lib/nom";
 import { InviterCollegue } from "@/components/inviter";
+import { CommandeDuMoisPanneau, EtapesDuMois, useCommandeDuMois } from "@/components/commande-du-mois";
 
 interface EtatGroupe {
   eligible: boolean;
@@ -20,6 +21,8 @@ interface EtatGroupe {
   admin: boolean;
   /** Exclu du groupé (deux désistements en 12 mois) jusqu'à cette date, AAAA-MM-JJ. */
   excluJusquau: string | null;
+  /** « mois » : la commande commune du mois (Greg, 22 octobre 2026) ; « lots » : l'ancien regroupement au fil de l'eau. */
+  mode?: "mois" | "lots";
 }
 interface BesoinLot {
   id: string;
@@ -80,6 +83,7 @@ export default function GroupePage() {
   if (!etat.data) return <Spinner />;
   const { etapes, siret } = etat.data;
   const tout = etapes.siret && etapes.devis && etapes.negoces;
+  const mois = etat.data.mode !== "lots";
 
   async function verifierSiret() {
     setPending(true);
@@ -125,15 +129,17 @@ export default function GroupePage() {
               <span className="group-open:hidden">Comment ça marche</span>
               <span className="hidden group-open:inline">Replier</span>
             </summary>
-            <Etapes />
+            {mois ? <EtapesDuMois /> : <Etapes />}
           </details>
+        ) : mois ? (
+          <EtapesDuMois />
         ) : (
           <Etapes />
         )}
         <p className="text-[13px] text-muted">Gratuit pour toi. Personne ne voit ton nom ni tes chantiers.</p>
       </Card>
       {/* Landing du 22 octobre : plus on est nombreux, plus on négocie ; le même bloc que la page publique. */}
-      <InviterCollegue texte="Plus on est nombreux sur la même ligne, plus les négoces baissent leurs prix." />
+      {mois ? null : <InviterCollegue texte="Plus on est nombreux sur la même ligne, plus les négoces baissent leurs prix." />}
 
       {tout ? null : (
         <Card className="flex flex-col gap-3 p-4">
@@ -167,9 +173,17 @@ export default function GroupePage() {
         </Card>
       )}
       {/* Un artisan déjà dans un lot (proposé depuis « Ton chantier ») voit toujours ses lots, même sans négoce à lui. */}
-      {etat.data.eligible || etat.data.raisons.includes("exclu_du_groupe") ? <MesLots /> : null}
+      {etat.data.eligible || etat.data.raisons.includes("exclu_du_groupe") ? mois ? <PanneauDuMois /> : <MesLots /> : null}
     </>
   );
+}
+
+/** La commande commune du mois : en quantités, le chrono, le partage, puis les prix de chaque négoce (Greg, 22 octobre 2026). */
+function PanneauDuMois() {
+  const { data, error, reload } = useCommandeDuMois(true);
+  if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
+  if (!data) return <Spinner />;
+  return <CommandeDuMoisPanneau etat={data} onChange={reload} />;
 }
 
 function Etapes() {

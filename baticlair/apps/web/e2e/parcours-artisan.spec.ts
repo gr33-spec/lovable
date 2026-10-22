@@ -2341,8 +2341,10 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(demo.getByText("Exemple").first()).toBeVisible();
   await expect(demo.getByRole("list", { name: "Liste de fournitures (exemple)" }).getByRole("listitem")).toHaveCount(5);
   await demo.getByRole("button", { name: "Suivant" }).click();
-  await expect(page.getByRole("heading", { name: "Les couvreurs du secteur, regroupés" })).toBeVisible();
-  await expect(page.getByText("30 couvreurs, 15 demandes envoyées, 3 devis reçus, meilleur prix 0,92 €")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "La commande du mois, tous ensemble" })).toBeVisible();
+  // Commande du mois (Greg, 22 octobre 2026) : en quantités, jamais en nombre d'entreprises.
+  await expect(page.getByText("Toute la commande de novembre : 52 palettes d'ardoises 32×22, 6 000 m de liteaux")).toBeVisible();
+  await expect(page.getByText(/couvreurs, \d+ demandes/)).toHaveCount(0);
   await page.getByRole("button", { name: "Suivant" }).click();
   await expect(page.getByRole("heading", { name: "Ton prix, livré chez toi" })).toBeVisible();
   await expect(page.getByText(/2 760 pièces à 0,92 € HT l'unité/)).toBeVisible();
@@ -2363,11 +2365,12 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.getByText("Rassemblons-nous et mettons nos forces en commun pour négocier les meilleurs prix.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Plus on est nombreux, plus on pèse face aux négoces." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Comment ça marche" })).toBeVisible();
-  for (const etape of ["Tu donnes ta liste", "On regroupe les couvreurs du secteur", "Les négoces se battent pour ton prix"]) {
+  await expect(page.getByText("Une commande par mois avec les couvreurs de ta région.")).toBeVisible();
+  for (const etape of ["1. Dépose ta liste avant la clôture", "2. On envoie tout le volume aux négoces", "3. Tu vois le meilleur prix et tu commandes si ça te plaît"]) {
     await expect(page.getByRole("heading", { name: etape })).toBeVisible();
   }
   // Registre pro (Greg, 22 octobre) : de vraies captures de l'app, aucun dessin ; une seule liste fictive, mêmes chiffres partout.
-  for (const image of ["L'écran « Donne ta liste de matériaux » de BatiClair", /^Une ligne « Ardoise naturelle 32×22 » à préciser/, "30 couvreurs, 15 demandes envoyées, 3 devis reçus, meilleur prix 0,92 €"]) {
+  for (const image of ["L'écran « Donne ta liste de matériaux » de BatiClair", /^Une ligne « Ardoise naturelle 32×22 » à préciser/, "Toute la commande de novembre : 52 palettes d'ardoises 32×22, 6 000 m de liteaux. Clôture dans 9 j."]) {
     await expect(page.getByRole("region", { name: "Comment ça marche" }).getByRole("img", { name: image })).toBeVisible();
   }
   await expect(page.getByRole("list", { name: "Exemple de liste de couverture" })).toContainText("Ardoise naturelle 32×22 Espagne 1er choix2 760 pièces");

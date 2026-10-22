@@ -7,6 +7,7 @@ import { Button, ErrorNotice, Field } from "@/components/ui";
 import { api, ApiError, newActionKey } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 import { nom } from "@/lib/nom";
+import { deposerDansLeMois, useCommandeDuMois, type EtatDuMois } from "@/components/commande-du-mois";
 
 /**
  * BATICLAIR GROUPÉ, ÉTAPE 2 (document du fondateur, 2026-10-19, section 2 étape 2) : sur « Ton chantier », proposer des
@@ -51,6 +52,12 @@ export interface Groupe {
   reference: (offreId: string, prix: number | null) => Promise<void>;
   /** Test complet (21 octobre) : un chantier créé depuis le « + » n'a pas d'adresse ; elle se renseigne dans la barre, sans quitter la liste. */
   adresse: (adresse: string) => Promise<void>;
+  /** La commande commune du mois (Greg, 22 octobre 2026) : « mois » remplace le regroupement par lot ; « lots » le garde. */
+  mode: "mois" | "lots";
+  /** En mode mois : la commande du mois (chrono, quantités, mes lignes), et le dépôt d'une partie de la liste. */
+  mois: EtatDuMois | null;
+  deposer: (articles: string[], nature: "chantier" | "stock") => Promise<string | null>;
+  rechargerMois: () => void;
 }
 
 /** Combien de négoces dans ma liste (étape 3) : à zéro, la section « Au groupé » invite à les ajouter. */
@@ -79,11 +86,14 @@ export function useGroupeFerme(): boolean {
 
 export function useGroupe(projectId: string): Groupe | null {
   const fetchEtat = useCallback(
-    (signal: AbortSignal) => api<{ eligible: boolean }>("/v1/groupe", { signal }).catch((e: unknown) => (e instanceof ApiError && e.status === 404 ? { eligible: false } : Promise.reject(e))),
+    (signal: AbortSignal) =>
+      api<{ eligible: boolean; mode?: "mois" | "lots" }>("/v1/groupe", { signal }).catch((e: unknown) => (e instanceof ApiError && e.status === 404 ? { eligible: false, mode: undefined } : Promise.reject(e))),
     [],
   );
   const etat = useResource(fetchEtat);
   const eligible = etat.data?.eligible === true;
+  const mode = etat.data?.mode === "lots" ? "lots" : "mois";
+  const mois = useCommandeDuMois(eligible && mode === "mois");
   const fetchBesoins = useCallback(
     (signal: AbortSignal) => (eligible ? api<{ besoins: BesoinGroupe[] }>(`/v1/projects/${encodeURIComponent(projectId)}/groupe`, { signal }) : Promise.resolve({ besoins: [] as BesoinGroupe[] })),
     [projectId, eligible],
@@ -93,6 +103,15 @@ export function useGroupe(projectId: string): Groupe | null {
   if (!eligible) return null;
   return {
     besoins,
+    mode,
+    mois: mois.data ?? null,
+    rechargerMois: () => (mois.reload(), liste.reload()),
+    deposer: async (articles, nature) => {
+      const r = await deposerDansLeMois(projectId, articles, nature);
+      liste.reload();
+      mois.reload();
+      return r.message;
+    },
     proposer: async (articles, fenetre, statut, engagement) => {
       await api(`/v1/projects/${encodeURIComponent(projectId)}/groupe`, { method: "POST", body: { articles, fenetre, statut, engagement }, idempotencyKey: newActionKey() });
       liste.reload();

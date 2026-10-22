@@ -6,8 +6,16 @@
 /** Le faux devis d'ardoise et ce que BatiClair en sort. Tous les chiffres sont inventés. */
 export const EXEMPLE = {
   devis: { numero: "D-2026-042", client: "Maison Le Goff", adresse: "Ploubazlanec (22)", objet: "Couverture ardoise 32×22, 118 m²" },
-  /** Le compteur du groupe (nouveau cap) : couvreurs du secteur sur la même ligne, demandes, devis, meilleur prix. */
-  compteur: { couvreurs: 30, demandes: 15, devis: 3, meilleurPrix: "0,92 €" },
+  /**
+   * La commande commune du mois (Greg, 22 octobre 2026, au soir) : en QUANTITÉS, jamais en nombre d'entreprises ; remplace
+   * le compteur « 30 couvreurs, 15 demandes… ».
+   */
+  commande: {
+    de: "de novembre",
+    toi: "Toi seul : 3 palettes d'ardoises 32×22, 400 m de liteaux",
+    tout: "Toute la commande de novembre : 52 palettes d'ardoises 32×22, 6 000 m de liteaux",
+    cloture: "Clôture dans 9 j",
+  },
   liste: [
     { designation: "Ardoise naturelle 32×22 Espagne 1er choix", quantite: "2 760 pièces" },
     { designation: "Crochet inox ardoise 100 mm", quantite: "3 paquets" },
