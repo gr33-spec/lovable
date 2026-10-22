@@ -61,7 +61,8 @@ export function messageNouveauDevis(d: { numero: number; designation: string; ne
     return { titre: "Nouveau meilleur prix", corps: `${euros(d.prixUnitaire)} HT chez ${d.negoce} pour ${ligne}.`, url: "/groupe", etiquette };
   }
   const ecart = d.meilleurAvant > 0 ? ((d.prixUnitaire - d.meilleurAvant) / d.meilleurAvant) * 100 : 0;
-  const plusHaut = ecart <= ECART_LEGER_POURCENT ? "légèrement plus haut" : "plus haut";
+  // Plan « finition » (22 octobre) : au même prix, on ne dit pas « plus haut ».
+  const plusHaut = d.prixUnitaire === d.meilleurAvant ? "au même prix" : ecart <= ECART_LEGER_POURCENT ? "légèrement plus haut" : "plus haut";
   return {
     titre: "Nouveau devis",
     corps: `Devis de ${d.negoce}, ${plusHaut} : ${euros(d.prixUnitaire)} HT contre ${euros(d.meilleurAvant)} pour ${ligne}.`,
@@ -193,7 +194,7 @@ export function mailRegroupementAuNegoce(m: { negoce: string; departement: strin
       "",
       `${m.artisan} vous a indiqué comme son négoce sur BatiClair. Des ${qui} ${secteur} y regroupent leurs listes de matériaux pour obtenir un meilleur prix.`,
       "",
-      "Quand plusieurs d'entre eux ont besoin des mêmes articles, vous recevez une demande de prix commune par e-mail : un lien, vous déposez votre devis avec votre prix de livraison par zone. Rien à installer, aucun compte à créer.",
+      "Quand plusieurs d'entre eux ont besoin des mêmes articles, vous recevez une demande de prix commune par e-mail : un lien, vous déposez votre devis avec vos conditions de livraison (gratuite jusqu'à une distance que vous fixez, un prix par livraison au-delà). Rien à installer, aucun compte à créer.",
       "",
       `Pour ne plus rien recevoir : ${m.stop}`,
       "",

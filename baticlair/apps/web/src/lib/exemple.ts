@@ -16,5 +16,5 @@ export const EXEMPLE = {
     { designation: "Faîtage zinc naturel 0,65 mm dév. 33", quantite: "6 longueurs de 2 m" },
   ],
   lot: { numero: 12, departement: "Côtes-d'Armor", reference: "Ardoise naturelle 32×22 Espagne 1er choix", artisans: 3, volume: "8 200 pièces", negoces: 4 },
-  offre: { quantite: "2 760 pièces", prix: "0,92 € HT l'unité", negoce: "Négoce Exemple, Guingamp", baisse: "−11 %", livraison: "3 novembre", economie: "331 €", livre: "2 584 € HT livré à Ploubazlanec", fraisLivraison: "45 €", habituel: "1,04 €" },
+  offre: { quantite: "2 760 pièces", prix: "0,92 € HT l'unité", negoce: "Négoce Exemple, Guingamp", baisse: "−12 %", livraison: "3 novembre", economie: "286 €", livre: "2 584 € HT livré à Ploubazlanec", fraisLivraison: "45 €", habituel: "1,04 €" },
 } as const;

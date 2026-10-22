@@ -198,14 +198,16 @@ export class GroupeService {
   async declarerReference(tenant: TenantContext, offreId: string, prixReference: number | null): Promise<OffreVue> {
     assertCanWrite(tenant);
     const o = await this.offreDe(tenant, offreId);
-    const economie = prixReference === null ? null : economieEstimee(prixReference, Number(o.prixUnitaire), Number(o.besoin.quantite));
+    // L'économie se compte livraison comprise, comme le prix livré montré sur la même carte (plan « finition », 22 octobre).
+    const livraisonHt = livreDe(o.besoin.id, o.besoin.adresseLivraison, Number(o.besoin.quantite), Number(o.prixUnitaire), null, o.lot)?.livraisonHt ?? 0;
+    const economie = prixReference === null ? null : economieEstimee(prixReference, Number(o.prixUnitaire), Number(o.besoin.quantite), livraisonHt);
     const maj = await this.prisma.offreArtisan.update({ where: { id: o.id }, data: { prixReference, economie } });
     return offreVue({ ...maj, lot: o.lot }, o.besoin);
   }
 
   private async offreDe(tenant: TenantContext, offreId: string) {
     if (!isUuid(offreId)) throw notFound("Offre");
-    const o = await this.prisma.offreArtisan.findFirst({ where: { id: offreId, besoin: { companyId: tenant.companyId } }, include: { besoin: true, lot: { include: { negoceRetenu: { select: { nom: true } } } } } });
+    const o = await this.prisma.offreArtisan.findFirst({ where: { id: offreId, besoin: { companyId: tenant.companyId } }, include: { besoin: true, lot: { include: { negoceRetenu: { select: { nom: true } }, reponses: { select: { negoceId: true, livraison: true } } } } } });
     if (!o) throw notFound("Offre");
     return o;
   }

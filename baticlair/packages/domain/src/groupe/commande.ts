@@ -44,11 +44,24 @@ export interface BonDeCommande {
   fenetre: FenetreLivraison;
   dateLivraison: Date | null;
   negoce: string;
+  /**
+   * La livraison promise à l'artisan (plan « finition », 22 octobre) : celle de son prix livré, calculée sur la règle du
+   * négoce (gratuite jusqu'à X km, Y € au-delà). Absente pour un lot sans règle (avant la décision du 22 octobre).
+   */
+  livraison?: { prixHt: number; distanceKm: number | null; francoKm: number } | null;
 }
 
 const jour = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 const euros = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
 const nombre = (s: string) => Number(s).toLocaleString("fr-FR", { maximumFractionDigits: 3 });
+
+/** La ligne « Livraison » du bon : le prix promis et d'où il vient, pour que le négoce facture ce que l'artisan a vu. */
+export function ligneDeLivraison(l: { prixHt: number; distanceKm: number | null; francoKm: number }): string {
+  const distance = l.distanceKm === null ? "distance inconnue" : `${nombre(String(l.distanceKm))} km du dépôt`;
+  return l.prixHt === 0
+    ? `Livraison : gratuite (${distance}, gratuite jusqu'à ${nombre(String(l.francoKm))} km)`
+    : `Livraison : ${euros(l.prixHt)} HT (${distance}, au-delà de ${nombre(String(l.francoKm))} km)`;
+}
 
 /** Le total HT d'un bon : Σ quantité × prix unitaire, arrondi au centime. */
 export function totalDuBon(lignes: readonly LigneDeBon[]): number {
@@ -67,11 +80,21 @@ export function documentBonDeCommande(bon: BonDeCommande): { titre: string; bloc
       },
       {
         titre: "Livraison",
-        lignes: [`Adresse du chantier : ${bon.adresseChantier}`, `Fenêtre : du ${jour(bon.fenetre.tot)} au ${jour(bon.fenetre.tard)}`, ...(bon.dateLivraison ? [`Date prévue : ${jour(bon.dateLivraison)}`] : [])],
+        lignes: [
+          `Adresse du chantier : ${bon.adresseChantier}`,
+          `Fenêtre : du ${jour(bon.fenetre.tot)} au ${jour(bon.fenetre.tard)}`,
+          ...(bon.dateLivraison ? [`Date prévue : ${jour(bon.dateLivraison)}`] : []),
+          ...(bon.livraison ? [ligneDeLivraison(bon.livraison)] : []),
+        ],
       },
       {
         titre: "Fournitures",
-        lignes: [["Désignation", "Quantité", "P.U. HT", "Total HT"], ...bon.lignes.map((l) => [l.designation, `${nombre(l.quantite)} ${l.unite}`, euros(l.prixUnitaire), euros(Math.round(Number(l.quantite) * l.prixUnitaire * 100) / 100)]), `Total HT : ${euros(totalDuBon(bon.lignes))}`],
+        lignes: [
+          ["Désignation", "Quantité", "P.U. HT", "Total HT"],
+          ...bon.lignes.map((l) => [l.designation, `${nombre(l.quantite)} ${l.unite}`, euros(l.prixUnitaire), euros(Math.round(Number(l.quantite) * l.prixUnitaire * 100) / 100)]),
+          `Total HT : ${euros(totalDuBon(bon.lignes))}`,
+          ...(bon.livraison ? [`Total HT livraison comprise : ${euros(Math.round((totalDuBon(bon.lignes) + bon.livraison.prixHt) * 100) / 100)}`] : []),
+        ],
       },
       { lignes: [`${NOM_COMMANDE_COMMUNE} n° ${bon.numeroLot} : le prix ci-dessus est celui de votre offre retenue pour le lot. Facturation et paiement comme d'habitude, sur le compte du client.`] },
     ],

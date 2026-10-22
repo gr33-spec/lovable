@@ -76,3 +76,57 @@ Six passages sur iPhone (le premier : 15 étapes rouges, dont 14 en cascade derr
 
 - Le même parcours sur la vraie prévisualisation `vercel.app`, avec la vraie lecture (crédit API) et un vrai e-mail : à faire par Greg, c'est la checklist §5 de `MISE-EN-PROD.md`.
 - Le push iPhone (« Livraison aujourd'hui. Tout est arrivé ? ») : la tâche du jour de livraison n'est pas jouée ici (la date de livraison est à J+7).
+
+## Rejoué le 22 octobre au soir, avec le nouveau cap (plan « finition », bloc 2)
+
+Le parcours demandé par Greg, étape par étape, et ce qui le rejoue à chaque poussée (tout vert le 22 octobre au soir). Le parcours tourne sur le code de #284 (local, lecture rejouée, e-mails capturés, géocodage par table fixe de codes postaux).
+
+| # | Étape | Rejoué par | Vu |
+|---|---|---|---|
+| 1 | La liste (photo d'une liste écrite à la main) | e2e « « + Nouvelle liste » : « Donne ta liste de matériaux »… » | une carte par ligne, telle qu'écrite, aucune question |
+| 2 | La précision d'une ligne vague | même test ; domaine `ligne-precise-ou-vague` | « Marque ? » en boutons ; « Edilians » s'écrit dans la désignation ; la pastille passe au vert |
+| 3 | Ligne vague hors commande commune | API `cap-22-octobre` (« ligne vague refusée ») ; e2e « scénarios 1 » | case grisée ; l'API refuse (400 `ligne_vague`) ; la ligne part quand même chez le négoce de l'artisan |
+| 4 | Le regroupement | e2e « étape 8 » ; API `groupe-regroupement` | deux couvreurs, même ligne précise, même département : une commande commune |
+| 5 | Les mails aux négoces | e2e « étape 8 » ; API `groupe-demande`, `cap-22-octobre` | « Commande commune : demande de prix… », commission en gras, PDF ; le négoce ajouté reçoit le mail d'information (texte corrigé ce soir, voir plus bas) |
+| 6 | Les devis lus | e2e « étape 8 » (deux négoces par e-mail, webhook signé) | « Devis reçu, merci. » ; lu une fois au dépôt (faux lecteur) |
+| 7 | La comparaison et les alertes | API `cap-22-octobre` ; domaine `calculs-a-la-main` (cas 3) | « Nouveau meilleur prix », « au même prix » (corrigé ce soir), « légèrement plus haut », « plus haut » |
+| 8 | Le prix livré, gratuit jusqu'à X km, Y € au-delà | domaine `calculs-a-la-main` (cas 1 et 3) ; API `cap-22-octobre` | « Ton prix livré à … : … HT (livraison …, N km du dépôt) » |
+| 9 | Le choix du négoce | domaine `calculs-a-la-main` (cas 2) ; API `groupe-choix` | le moins cher livraison comprise |
+| 10 | Le bon de commande | API `groupe-commande` ; domaine `calculs-a-la-main` (cas 1) | un PDF par artisan, au négoce et en copie à l'artisan ; la livraison promise y est écrite (ajout de ce soir) |
+| 11 | Le suivi façon colis | e2e « depuis le + », « étape 8 » ; domaine `calculs-a-la-main` (cas 3) | Liste prête → Prix demandés → Prix reçus → Commandé |
+| 12 | Livré / Problème | e2e « étape 8 » ; API `groupe-commande` | « Livré, merci. » ; « Problème » journalisé pour Greg |
+| 13 | Le désistement | e2e « scénarios 2 » ; domaine `calculs-a-la-main` (cas 3) | avertissement, puis exclusion de six mois au deuxième dans les 12 mois |
+
+### Trois cas vérifiés à la main
+
+Chaque chiffre ci-dessous a été posé à la main, puis écrit dans le test permanent `packages/domain/test/calculs-a-la-main.test.ts` : la doc et le code ne peuvent plus diverger sans que la CI le dise.
+
+**Cas 1 : l'ardoise de la démo, Ploubazlanec.**
+- Paliers du négoce : dès 5 000 pièces à 0,95 €, dès 8 000 à 0,92 €, dès 10 000 à 0,89 €. Volume ferme du lot : 8 200 pièces. Le plus haut palier atteint est 8 000 : **0,92 €**.
+- Distance : Guingamp (48,56 ; −3,15) → Ploubazlanec (48,80 ; −3,03). À vol d'oiseau 28,10 km ; × 1,3 = 36,53 ; arrondi : **37 km**. Gratuit jusqu'à 30 km, 45 € au-delà : **45 €**.
+- Prix livré de l'artisan (2 760 pièces) : 2 760 × 0,92 = 2 539,20 € ; + 45 = **2 584,20 € HT**.
+- Prix habituel (1,04 €) : 2 760 × 1,04 = 2 870,40 €. Économie : 2 870,40 − 2 584,20 = **286,20 €**. Baisse affichée : (1,04 − 0,92) / 1,04 = 11,5 %, arrondi **12 %**.
+- Commission (si elle s'applique un jour, rémunération en suspens) : 8 200 × 0,92 = 7 544,00 € ; 2 % = **150,88 € HT** ; TVA 20 % = 30,176, arrondi **30,18 €** ; TTC **181,06 €**.
+- Bon de commande : « Livraison : 45,00 € HT (37 km du dépôt, au-delà de 30 km) », « Total HT : 2 539,20 € », « Total HT livraison comprise : 2 584,20 € ».
+
+**Cas 2 : le moins cher livraison comprise.**
+- 500 m² de carrelage, trois chantiers : à 10 km, à 40 km, et une adresse introuvable (comptée « au-delà », on n'annonce jamais une livraison gratuite non vérifiée).
+- Négoce A : 20,00 € ; gratuit jusqu'à 30 km, 60 € au-delà ; livraisons 0 + 60 + 60 = 120 € ; total 500 × 20,00 + 120 = **10 120 €**.
+- Négoce B : 20,10 € ; gratuit jusqu'à 50 km, 30 € au-delà ; livraisons 0 + 0 + 30 = 30 € ; total 500 × 20,10 + 30 = **10 080 €**.
+- **B est retenu** (40 € de moins), bien que son prix unitaire soit plus haut ; A est écarté « plus cher ».
+
+**Cas 3 : Paimpol → Lannion.**
+- 600 pièces : le négoce C ne chiffre que dès 1 000 pièces → écarté « palier insuffisant » ; le négoce D donne 1,02 € sans palier → **retenu à 1,02 €**.
+- Distance : Paimpol (48,78 ; −3,05) → Lannion (48,73 ; −3,46) : 30,57 km × 1,3 = 39,74 → **40 km**. Gratuit jusqu'à 50 km : 0 € ; jusqu'à 40 km : 0 € (« jusqu'à » compte 40) ; jusqu'à 39 km : 45 €.
+- Alertes, meilleur prix à 1,00 € : 0,98 → « Nouveau meilleur prix » ; 1,00 → « au même prix » ; 1,08 (+8 %) → « légèrement plus haut » ; 1,12 (+12 %) → « plus haut » (au-delà de 10 %).
+- Compteur : « 3 couvreurs, 2 demandes envoyées, 1 devis reçu, meilleur prix 1,02 € » ; seul : « 1 couvreur, demande commune pas encore partie ».
+- Suivi : 2 demandes, 1 devis → étape « Prix reçus », « 1 devis reçu sur 2 demandes. Meilleur prix : 1,02 €. » ; commandé → « C'est commandé. ».
+- Désistement le 15 novembre 2026 : aucun avant → avertissement ; un le 15 août 2026 (moins de 12 mois) → exclusion jusqu'au **15 mai 2027** ; un le 14 octobre 2025 (plus de 12 mois) → avertissement.
+
+### Ce que le bloc 2 a trouvé et corrigé
+
+1. **L'économie de la carte « Mon offre » oubliait la livraison.** Démo : prix livré 2 584 €, prix habituel 2 870 €, mais « Économie estimée : 331 € » (la livraison de 45 € n'était pas retirée). L'économie vaut désormais « prix habituel − prix livré » : 286 €. Même chiffre dans la démo guidée, dans le compteur « Économisé grâce à la commande commune » et dans le rapport mensuel (ils lisent la même valeur).
+2. **La démo guidée affichait « −11 % »** alors que l'app arrondit 11,5 % à 12 % : corrigé (« −12 % »).
+3. **Un devis au même prix que le meilleur déclenchait « légèrement plus haut : 1,00 € contre 1,00 € ».** Il dit maintenant « au même prix ».
+4. **Le bon de commande ne disait pas la livraison promise.** L'artisan voyait « livraison 45 € » dans son prix livré, le négoce ne recevait que les fournitures. Le bon porte maintenant la ligne de livraison (prix, distance, règle) et le total livraison comprise.
+5. **Le mail d'information au négoce lui demandait « votre prix de livraison par zone »**, règle remplacée le 22 octobre : il dit maintenant « vos conditions de livraison (gratuite jusqu'à une distance que vous fixez, un prix par livraison au-delà) ».

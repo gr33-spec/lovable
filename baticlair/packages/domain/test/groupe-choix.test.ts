@@ -79,5 +79,7 @@ describe("groupé, étape 6 : un seul négoce, le moins cher qui couvre tout le 
     expect(lotADecider({ envoyeLe: null }, [], d("2026-12-01"))).toBe(false);
     expect(economieEstimee(21, 18.5, 23)).toBe(57.5);
     expect(economieEstimee(null, 18.5, 23)).toBeNull();
+    // Plan « finition » (22 octobre) : la livraison du chantier se retire, comme dans le prix livré de la même carte.
+    expect(economieEstimee(21, 18.5, 23, 45)).toBe(12.5);
   });
 });

@@ -5,6 +5,7 @@ import {
   excluDuGroupe,
   factureARelancer,
   factureDeCommission,
+  fraisDeLivraison,
   livraisonARelancer,
   messageDesistement,
   messageLivraisonDuJour,
@@ -19,7 +20,15 @@ import type { TransactionalEmailSender } from "../../../platform/email/email.por
 import { DomainError, notFound } from "../../../platform/errors/domain-error.js";
 import type { TenantContext } from "../../tenancy/index.js";
 import { assertCanWrite } from "../../tenancy/index.js";
+import { livraisonDe, type LivraisonEnregistree } from "./demande.service.js";
 import { pdfDeTexte } from "./pdf-texte.js";
+
+/** La livraison promise à l'artisan (son prix livré), à écrire sur son bon ; rien pour un lot sans règle de livraison. */
+function livraisonPromise(regle: LivraisonEnregistree | null, besoinId: string): BonDeCommande["livraison"] {
+  if (!regle) return null;
+  const distanceKm = regle.distances[besoinId] ?? null;
+  return { prixHt: fraisDeLivraison(distanceKm, regle), distanceKm, francoKm: regle.francoKm };
+}
 
 const isUuid = (v: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
 const jour = (d: Date) => d.toISOString().slice(0, 10);
@@ -50,7 +59,7 @@ export class CommandeService {
   async passerLesCommandes(maintenant = new Date(), jusqua?: number): Promise<{ lotsCommandes: number; bons: number }> {
     const lots = await this.prisma.lotGroupe.findMany({
       where: { statut: "choisi", negoceRetenuId: { not: null }, offres: { some: { bon: null } } },
-      include: { negoceRetenu: true, offres: { include: { besoin: { include: { company: true } }, bon: true } } },
+      include: { negoceRetenu: true, reponses: { select: { negoceId: true, livraison: true } }, offres: { include: { besoin: { include: { company: true } }, bon: true } } },
       orderBy: { numero: "asc" },
     });
     let bons = 0;
@@ -64,6 +73,8 @@ export class CommandeService {
       const liens = new Map((await this.prisma.negoceArtisan.findMany({ where: { negoceId: negoce.id, companyId: { in: entreprises } } })).map((l) => [l.companyId, l]));
       const proprietaires = new Map((await this.prisma.membership.findMany({ where: { role: "owner", companyId: { in: entreprises } }, include: { user: { select: { email: true } } } })).map((m) => [m.companyId, m.user.email]));
       const aPreparer: { offreId: string; bon: BonDeCommande; artisanEmail: string | null }[] = [];
+      // La règle de livraison du négoce retenu : le bon dit la livraison du prix livré de chaque artisan.
+      const regle = livraisonDe(lot.reponses.find((r) => r.negoceId === negoce.id)?.livraison);
       for (const o of lot.offres) {
         if (o.bon) continue;
         const c = o.besoin.company;
@@ -78,6 +89,7 @@ export class CommandeService {
           fenetre: { tot: o.besoin.fenetreTot, tard: o.besoin.fenetreTard },
           dateLivraison: o.dateLivraison,
           negoce: negoce.nom,
+          livraison: livraisonPromise(regle, o.besoin.id),
         };
         aPreparer.push({ offreId: o.id, bon, artisanEmail });
       }
