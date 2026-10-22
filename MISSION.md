@@ -250,8 +250,8 @@ Routine horaire `trig_019b3LSmsdY43Aowni5jVARm` (prompt mis à jour). Rapport ve
 | 1 | Test qui clique chaque bouton et chaque lien (iPhone + ordinateur) | fait : `toutCliquer` (e2e « Zéro bouton mort » visiteur et artisan, + page du négoce et Commande commune avec offre dans « étape 8 », admin dans « étape 9 ») ; aucun bouton mort trouvé ; à reprendre au bloc 6 : « Annuler » / « Clore le lot » de l'admin sans confirmation |
 | 2 | Parcours complet nouveau cap + calculs à la main (trois cas) dans TEST-COMPLET.md | fait : 13 étapes rejouées, 3 cas posés à la main et gardés par `calculs-a-la-main.test.ts` ; 5 défauts corrigés (économie sans livraison, −11 %, « au même prix », livraison absente du bon, mail négoce « par zone ») |
 | 3 | Pages légales relues, `docs/A-FAIRE-RELIRE.md` | fait : plus aucun « 2 % » sur les pages, clause neutre, cookies sans bandeau, 19 points dans `A-FAIRE-RELIRE.md` |
-| 4 | Textes (tutoiement artisan, vouvoiement négoce, typographie, chiffres) | à faire |
-| 5 | Visuel, iPhone SE, Lighthouse landing > 90 | à faire |
+| 4 | Textes (tutoiement artisan, vouvoiement négoce, typographie, chiffres) | fait : textes relus écran par écran, gratuit partout (paywall éteint), milliers, lien négoce, mots |
+| 5 | Visuel, iPhone SE, Lighthouse landing > 90 | fait : landing 66 → 97, CLS 0, iPhone SE au test, mode clair forcé, suivi corrigé |
 | 6 | Cas limites | à faire |
 | 7 | RECETTE.md : 20 tests iPhone | à faire |
 | 8 | DETTE.md, performance | à faire |

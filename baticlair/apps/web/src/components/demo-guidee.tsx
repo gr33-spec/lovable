@@ -2,7 +2,6 @@
 
 import { Check, FileText, Tag, Users } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { EXEMPLE } from "@/lib/exemple";
 
@@ -18,12 +17,15 @@ export const CLE_DEMO_VUE = "baticlair.demoVue";
 type Ecran = 0 | 1 | 2;
 
 export function DemoGuidee() {
-  const [visible, setVisible] = useState<boolean | null>(null);
+  // Rendue par le serveur (premier lancement : le cas par défaut) ; déjà vue, le script de la page l'a cachée avant
+  // l'affichage (`html[data-demo-vue]`), puis elle sort ici sans rien décaler.
+  const [visible, setVisible] = useState(true);
   const [ecran, setEcran] = useState<Ecran>(0);
-  // « Revoir la démo » (`/?demo`) : une navigation côté client sur la même page, d'où la lecture par le routeur.
-  const forcee = useSearchParams().has("demo");
 
   useEffect(() => {
+    // « Revoir la démo » (`/?demo`) recharge la page : l'adresse se lit ici.
+    const forcee = new URLSearchParams(window.location.search).has("demo");
+    if (forcee) delete document.documentElement.dataset.demoVue;
     let vue = false;
     try {
       vue = localStorage.getItem(CLE_DEMO_VUE) !== null;
@@ -33,8 +35,7 @@ export function DemoGuidee() {
     // Lu après le rendu : le serveur ne connaît pas le réglage local.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setVisible(forcee || !vue);
-    if (forcee) setEcran(0);
-  }, [forcee]);
+  }, []);
 
   function fermer() {
     try {
@@ -48,7 +49,7 @@ export function DemoGuidee() {
   if (!visible) return null;
   const titres = ["Ta liste, remise au propre", "Les couvreurs du secteur, regroupés", "Ton prix, livré chez toi"];
   return (
-    <section aria-labelledby="demo-titre" className="flex min-h-[calc(100svh-4rem)] flex-col gap-4 rounded-2xl sm:min-h-0 border border-[#e3e6ea] bg-surface p-4 text-ink sm:p-6">
+    <section data-demo aria-labelledby="demo-titre" className="flex min-h-[calc(100svh-4rem)] flex-col gap-4 rounded-2xl sm:min-h-0 border border-[#e3e6ea] bg-surface p-4 text-ink sm:p-6">
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <span className="text-[12px] font-bold tracking-[0.04em] text-muted">Démo · écran {ecran + 1} sur 3 · données fictives</span>
@@ -87,7 +88,7 @@ function Exemple() {
   return <span className="rounded-full border border-[#d9dde3] px-2 py-0.5 text-[11px] font-bold text-muted">Exemple</span>;
 }
 
-/** Écran 1 : le devis déposé et la liste qui en sort, dans les mots du comptoir. */
+/** Écran 1 : la liste donnée en photo et ce qui en sort, dans les mots du comptoir. */
 function EcranDevis() {
   const d = EXEMPLE.devis;
   return (
@@ -96,7 +97,8 @@ function EcranDevis() {
         <FileText size={22} aria-hidden="true" className="shrink-0 text-accent-text" />
         <div className="flex min-w-0 flex-col">
           <span className="flex items-center gap-2 text-[14px] font-extrabold">
-            Devis {d.numero} <Exemple />
+            {/* Plan « finition », bloc 4 : l'écran dit « ta liste, donnée en photo », la carte ne parle plus d'un devis. */}
+            Photo de ta liste <Exemple />
           </span>
           <span className="truncate text-[13px] text-muted">
             {d.client} · {d.adresse} · {d.objet}

@@ -139,6 +139,8 @@ export const ETAPES_SUIVI = ["Liste prête", "Prix demandés", "Prix reçus", "C
 export interface EtatDuChantier {
   /** Une liste existe, avec au moins une ligne. */
   liste: boolean;
+  /** Le devis est lu mais la liste n'est pas encore calculée : des questions attendent (plan « finition », bloc 5). */
+  questions?: boolean;
   /** Des lignes restent à régler (orange) avant l'envoi. */
   lignesARegler: number;
   /** Négoces à qui une demande de prix est partie (envoi seul ou demande commune du groupe). */
@@ -164,6 +166,7 @@ export interface Suivi {
 export function suiviDuChantier(e: EtatDuChantier): Suivi {
   const etape = e.commande ? 3 : e.devis > 0 ? 2 : e.demandes > 0 ? 1 : e.liste ? 0 : -1;
   const etapes = ETAPES_SUIVI.map((nom, i) => ({ nom, fait: i <= etape }));
+  if (etape === -1 && e.questions) return { etape, etapes, phrase: "Ta liste se prépare.", aFaire: "Réponds aux questions, puis « Calculer ma liste »." };
   if (etape === -1) return { etape, etapes, phrase: "Ta liste se prépare.", aFaire: "Donne ta liste de matériaux : une photo, un PDF ou une capture." };
   if (etape === 0) {
     return e.lignesARegler > 0

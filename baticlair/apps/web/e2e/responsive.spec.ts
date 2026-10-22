@@ -76,6 +76,8 @@ for (const size of WIDTHS) {
       await page.getByRole("button", { name: /^Calculer ma liste/ }).click();
     }
     await expect(list.getByRole("button", { name: "Envoyer aux négoces" })).toBeVisible();
+    // Plan « finition », bloc 5 (capture iPhone SE) : le suivi suit la liste tout de suite, jamais « Ta liste se prépare » au-dessus d'elle.
+    await expect(page.getByRole("region", { name: "Suivi du chantier" })).toContainText(/Ta liste est (là|prête)/, { timeout: 5_000 });
     await shoot(page, size.name, "05-liste-des-fournitures");
 
     await page.getByRole("button", { name: "Envoyer aux négoces" }).click();

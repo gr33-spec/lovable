@@ -90,3 +90,16 @@ Ce qui a été corrigé :
 - **Bons de commande** : numéros de compte et propriétaires lus en deux requêtes par lot au lieu de deux par bon ; **relances de livraison** : les propriétaires en une requête. **Demandes** : les réponses existantes lues d'un coup, les nouvelles créées d'un coup.
 
 Ce qui reste : le temps des bons de commande est celui des PDF (pdf-lib, ~10 ms par bon, un seul fil d'exécution : les paquets de 10 ne gagnent que 10 %) et des e-mails, un par artisan ; 50 lots d'un coup est un jour exceptionnel (la formation se fait au fil de l'eau, dès le seuil), et le budget garantit qu'un passage ne casse pas.
+
+## Plan « finition », bloc 5 (22 octobre 2026, au soir)
+
+Même mesure (Lighthouse 12.8.2, mobile, slow 4G simulé, site construit, API locale), sur la branche de #284. Avant : la landing était tombée à **66** (décalage 0,88), parce que la démo guidée, ajoutée après la mesure du 21 octobre, n'apparaissait qu'après le chargement, au-dessus de l'accroche ; les pages légales perdaient 0,21 au chargement des polices.
+
+| Page | Avant | Après (3 passages, le premier à froid) | LCP | CLS |
+|---|---|---|---|---|
+| `/` (landing, déconnecté) | 66 | 83 · 98 · 97 | 2,3 – 3,5 s | 0 |
+| `/cgu` | 89 | 96 · 96 | 2,1 s | 0 |
+| `/inscription` | 95 | 96 | 2,7 s | 0 |
+| `/connexion` | 98 | 97 | 1,9 s | 0,06 |
+
+Corrigé : (1) la démo guidée est rendue par le serveur ; un script de trois lignes, lu avant l'affichage, la cache si elle a déjà été vue (plus de `useSearchParams`, qui empêchait le rendu serveur ; « Revoir la démo » recharge la page) ; (2) les deux polices passent par `next/font/local` (mêmes fichiers @fontsource) : préchargées, avec une police de secours aux mêmes mesures. SEO à 60 sur toutes les pages : c'est l'en-tête `X-Robots-Tag: noindex` voulu tant que rien n'est lancé ; à retirer au lancement (une ligne de `next.config.ts`). Mode sombre : l'app n'a pas de thème sombre ; `color-scheme: light` garde champs et cases lisibles sur un iPhone réglé en sombre.

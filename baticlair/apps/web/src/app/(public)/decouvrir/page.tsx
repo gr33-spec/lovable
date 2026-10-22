@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Suspense } from "react";
-import { DemoGuidee } from "@/components/demo-guidee";
+import { CLE_DEMO_VUE, DemoGuidee } from "@/components/demo-guidee";
 import { EXEMPLE } from "@/lib/exemple";
 import { ButtonLink } from "@/components/ui";
 import { LiensLegaux } from "@/components/legal";
@@ -122,10 +121,15 @@ export default function BienvenuePage() {
   const intro = "max-w-[56ch] text-[17px] leading-relaxed text-muted";
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-24 px-4 pt-6 pb-16 sm:gap-32 sm:px-6 sm:pt-12">
-      {/* Plan 2, bloc 3 : au premier lancement, la démo guidée (trois écrans, « Passer ») vient avant l'accroche. */}
-      <Suspense>
-        <DemoGuidee />
-      </Suspense>
+      {/* Plan 2, bloc 3 : au premier lancement, la démo guidée (trois écrans, « Passer ») vient avant l'accroche. Plan
+          « finition », bloc 5 (Lighthouse 66, décalage 0,88) : elle est rendue par le serveur, et ce script, lu avant
+          l'affichage, la cache déjà vue (sauf `?demo`) : la page ne saute plus quand le navigateur relit la clé locale. */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `try{if(localStorage.getItem(${JSON.stringify(CLE_DEMO_VUE)})!==null&&!/[?&]demo\b/.test(location.search))document.documentElement.dataset.demoVue="1"}catch(e){}`,
+        }}
+      />
+      <DemoGuidee />
 
       {/* L'accroche : la promesse à gauche, la vraie liste dans un téléphone à droite. */}
       <section aria-labelledby="accroche" className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
@@ -271,9 +275,12 @@ export default function BienvenuePage() {
             <Link href="/connexion" className="text-sm font-semibold text-muted underline">
               Se connecter
             </Link>
-            <Link href="/?demo" className="text-sm font-semibold text-muted underline">
+            {/* Un vrai chargement : la démo relit l'adresse au démarrage (plus de lecture par le routeur, qui l'empêchait d'être
+                rendue par le serveur). */}
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- rechargement voulu */}
+            <a href="/?demo" className="text-sm font-semibold text-muted underline">
               Revoir la démo
-            </Link>
+            </a>
           </div>
         </div>
         <p className="max-w-[90ch]">

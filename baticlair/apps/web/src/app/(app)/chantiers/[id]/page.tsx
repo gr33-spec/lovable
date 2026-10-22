@@ -48,9 +48,9 @@ export default function ChantierPage() {
           }}
         />
       )}
-      {/* Nouveau cap (22 octobre) : le suivi façon colis, en haut du chantier. */}
-      <SuiviChantier projectId={project.id} />
       <ProjectProgressProvider projectId={project.id} archived={project.status === "archived"} bar={false}>
+        {/* Nouveau cap (22 octobre) : le suivi façon colis, en haut du chantier ; relu à chaque changement signalé. */}
+        <SuiviChantier projectId={project.id} />
         {/* La lecture donne son nom au chantier (« Chantier Dupont ») : l'en-tête se relit quand elle finit. */}
         <ProjectDocuments key={docsKey} projectId={project.id} archived={project.status === "archived"} onProjectChanged={reload} onQuote={setQuote} />
       </ProjectProgressProvider>

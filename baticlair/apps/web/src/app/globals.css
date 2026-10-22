@@ -36,8 +36,8 @@
   --color-mark-warn: #f97316;
   --color-danger-bg: #ffe4da;
   --color-danger: #b3360f;
-  --font-sans: "Plus Jakarta Sans Variable", system-ui, sans-serif;
-  --font-display: "Bricolage Grotesque Variable", "Plus Jakarta Sans Variable", system-ui, sans-serif;
+  --font-sans: var(--font-jakarta), system-ui, sans-serif;
+  --font-display: var(--font-bricolage), var(--font-jakarta), system-ui, sans-serif;
   --font-serif: "Instrument Serif", Georgia, serif;
   --color-violet: #6b46ff;
   --color-pink: #ff3d8b;
@@ -67,6 +67,11 @@
   --nav-space: calc(var(--nav-height) + max(12px, env(safe-area-inset-bottom)) + 16px);
   /* « Calculer ma liste », figé en bas de l'écran des questions : bouton (52 px), dégradé au-dessus (24 px), zone du geste. */
   --calc-space: calc(52px + 24px + max(14px, env(safe-area-inset-bottom)) + 8px);
+}
+
+/* La démo guidée déjà vue, cachée avant l'affichage par le script de la landing (plan « finition », bloc 5). */
+html[data-demo-vue] [data-demo] {
+  display: none;
 }
 
 html {

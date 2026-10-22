@@ -23,13 +23,16 @@ export class SuiviService {
     if (!isUuid(projectId)) throw notFound("Project");
     const project = await this.prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { id: true } });
     if (!project) throw notFound("Project");
-    const takeoff = await this.prisma.takeoff.findFirst({ where: { projectId, companyId: tenant.companyId }, orderBy: { createdAt: "desc" }, select: { id: true } });
+    const takeoff = await this.prisma.takeoff.findFirst({ where: { projectId, companyId: tenant.companyId }, orderBy: { createdAt: "desc" }, select: { id: true, calculatedAt: true, status: true } });
     let liste = false;
+    // Plan « finition », bloc 5 : avant « Calculer ma liste », la liste n'est pas prête (le suivi cochait « Liste prête »
+    // au-dessus des questions). Une liste validée avant que le calcul soit daté compte comme calculée.
+    const questions = !!takeoff && !takeoff.calculatedAt && takeoff.status !== "validated";
     let lignesARegler = 0;
     if (takeoff) {
       const r = await this.reviewed(tenant, takeoff.id).catch(() => null);
       const rows = r ? r.purchase.screen.groups.flatMap((g) => g.rows) : [];
-      liste = rows.length > 0;
+      liste = !questions && rows.length > 0;
       lignesARegler = rows.filter((row) => row.status === "check").length;
     }
     // L'envoi seul : chaque négoce à qui la demande est partie, et les devis reçus (déposés ou lus).
@@ -66,6 +69,6 @@ export class SuiviService {
       demandesSeul.some((d) => d.orderFeedback !== null || (d.classifiedAt !== null && d.retainedSupplierIds.length > 0)) ||
       besoins.some((b) => b.statut === "commande" || b.statut === "livre" || !!b.offre?.bon);
     const meilleur = totaux.length ? `${euros(Math.min(...totaux))} HT` : meilleurUnitaire !== null ? `${euros(meilleurUnitaire)} HT l'unité` : null;
-    return suiviDuChantier({ liste, lignesARegler, demandes: envoyes.length + demandesGroupe, devis: recus.length + devisGroupe, commande, meilleur });
+    return suiviDuChantier({ liste, questions, lignesARegler, demandes: envoyes.length + demandesGroupe, devis: recus.length + devisGroupe, commande, meilleur });
   }
 }

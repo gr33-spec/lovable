@@ -11,6 +11,8 @@ import { useResource } from "@/lib/use-resource";
  * Chaque section du chantier signale ses changements pour que le fil suive.
  */
 const RefreshContext = createContext<() => void>(() => {});
+/** Le compteur des changements signalés : le suivi façon colis se relit à chacun (plan « finition », bloc 5). */
+export const ProgressTickContext = createContext(0);
 
 /** À appeler après chaque changement (dépôt, validation, envoi…) pour mettre le fil à jour. */
 export function useProgressRefresh(): () => void {
@@ -33,8 +35,10 @@ export function ProjectProgressProvider({
   const refresh = useCallback(() => setTick((t) => t + 1), []);
   return (
     <RefreshContext value={refresh}>
-      {archived || !bar ? null : <ProgressBar projectId={projectId} tick={tick} />}
-      {children}
+      <ProgressTickContext value={tick}>
+        {archived || !bar ? null : <ProgressBar projectId={projectId} tick={tick} />}
+        {children}
+      </ProgressTickContext>
     </RefreshContext>
   );
 }
