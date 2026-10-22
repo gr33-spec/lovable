@@ -109,6 +109,50 @@ La vraie lecture du devis attend le crédit. D'ici là, la prévisualisation ser
 | 5.11 | Le 1er du mois | Un e-mail « ce mois : X chantiers lus, Y € économisés grâce à la commande commune, Z lots ». Rien n'est envoyé à qui n'a rien fait. | « Rapport mensuel… » | ✅ auto, 🏭 le vrai envoi |
 | 5.12 | Ton SIRET réel, une vraie adresse de dépôt | SIRET vérifié auprès de l'INSEE ; la distance calculée par l'API Adresse (vol d'oiseau × 1,3). | API `groupe-sirene` (INSEE simulé), domaine `cap-22-octobre` (table de codes postaux) | 🏭 prod |
 
+## 5 bis. La commande commune du mois (22 octobre 2026, au soir)
+
+Le nouveau fonctionnement remplace le regroupement par lot au fil de l'eau (`COMMANDE_COMMUNE=mois`, la valeur par défaut). Une commande par mois : inscriptions jusqu'au 25 à 12 h, puis deux semaines pour les négoces, puis les résultats.
+
+| # | Tu fais | Tu dois voir | Test | État |
+|---|---|---|---|---|
+| 5b.1 | « Ton chantier », en haut | « Commande commune de novembre », « Une commande par mois avec les couvreurs de ta région. », le chrono « Clôture dans 9 j 4 h », les quantités de toute la commande, le bouton « Ajouter à la commande de novembre ». | e2e « Commande du mois : un cycle complet… » | ✅ auto |
+| 5b.2 | « Ajouter à la commande… », tu coches, « Un chantier signé » ou « Du stock », « Ajouter » | « Mets seulement ce que tu es sûr de commander. Sans engagement : tu commandes seulement si le prix te plaît. » Les lignes vagues ne se cochent pas. Ensuite « Dans la commande de … » avec « Retirer ». | même e2e ; API `commande-du-mois` | ✅ auto |
+| 5b.3 | L'onglet « Commande commune » | « Toi seul : 3 palettes… », « Toute la commande de novembre : … », le chrono, « Pour l'instant, tu es le premier. Partage le lien pour faire grossir la commande. » au début, le partage dessous. Jamais un nombre d'entreprises. | même e2e | ✅ auto |
+| 5b.4 | Un collègue ajoute des lignes | Une notification au plus par jour : « +6 palettes d'ardoises 32×22 viennent d'être ajoutées. L'union fait la force ! » | API `commande-du-mois` (« au plus une par jour ») | ✅ auto, 🏭 la notification sur ton iPhone |
+| 5b.5 | Après la clôture | Tout est figé (plus de « Retirer »). Une liste déposée après : « Trop tard pour octobre, ta liste part avec la commande de novembre. » | même e2e | ✅ auto |
+| 5b.6 | Le négoce ouvre son lien | Une seule grille, toutes les lignes additionnées, « Réponse avant le 08/11 à 18 h, il reste … », la règle du jeu (vouvoiement), « prix fermes pour tout le cycle ». Il dépose un ou deux PDF et sa livraison. Il voit seulement s'il est premier, jamais les prix des autres. Aucun frais. | même e2e | ✅ auto |
+| 5b.7 | Les résultats | Pour chaque négoce : « Chez X : … € HT livré », le moins cher sur toute la commande coché d'office, « Le moins cher pour toi » s'il diffère, un négoce qui n'a pas tout chiffré ne se choisit pas. « Commander chez X » envoie le bon. | même e2e | ✅ auto |
+| 5b.8 | Le suivi du chantier | Cinq étapes : Liste déposée → Commande close → Prix demandés → Prix reçus → Commandé. | même e2e | ✅ auto |
+| 5b.9 | L'admin | « Dates de la commande du mois » : jour et heure de clôture, jours et heure de réponse. | API `commande-du-mois` (config admin) | ✅ auto, 🏭 à régler une fois |
+
+### Commande du mois : les totaux à la main
+
+Le cas joué par le domaine, l'API et l'e2e. Distance Lannion ↔ Paimpol : 40 km (table des communes de test) ; un chantier dans la ville du dépôt est à 0 km.
+
+| | Ardoise 32×22 (pièce) | Liteau 27×38 (m) | Crochet 100 mm (boîte) | Livraison |
+|---|---|---|---|---|
+| N1 (dépôt Lannion) | 0,90 € | 0,80 € | 30,00 € | gratuite jusqu'à 20 km, 50 € au-delà |
+| N2 (dépôt Paimpol) | 0,88 € | 0,85 € | 32,00 € | gratuite jusqu'à 30 km, 40 € au-delà |
+| N3 (dépôt Lannion) | 0,80 € | 0,70 € | pas de prix | gratuite jusqu'à 10 km, 60 € au-delà |
+
+**A, Lannion** : 2 000 ardoises, 400 m de liteaux (chantier signé).
+
+- N1 : 2 000 × 0,90 = 1 800 ; 400 × 0,80 = 320 ; 0 km ≤ 20 : livraison 0. **2 120 €**.
+- N2 : 2 000 × 0,88 = 1 760 ; 400 × 0,85 = 340 ; 40 km > 30 : + 40. **2 140 €**.
+- N3 : 2 000 × 0,80 = 1 600 ; 400 × 0,70 = 280 ; 0 km ≤ 10 : 0. **1 880 €** (N3 a tout ce dont A a besoin).
+
+**B, Paimpol** : 3 000 ardoises, 10 boîtes de crochets (stock).
+
+- N1 : 3 000 × 0,90 = 2 700 ; 10 × 30 = 300 ; 40 km > 20 : + 50. **3 050 €**.
+- N2 : 3 000 × 0,88 = 2 640 ; 10 × 32 = 320 ; 0 km : 0. **2 960 €**.
+- N3 : 3 000 × 0,80 = 2 400 ; crochets non chiffrés ; 40 km > 10 : + 60. **2 460 €, incomplet**.
+
+**Sur toute la commande** : N2 = 2 140 + 2 960 = **5 100 €** (premier) ; N1 = 2 120 + 3 050 = **5 170 €** ; N3 = 1 880 + 2 460 = 4 340 €, mais incomplet : il passe derrière les grilles complètes.
+
+**Ce que voit chacun** : A, N2 coché d'office (le moins cher sur toute la commande), N3 « Le moins cher pour toi », il peut le choisir. B, N2 coché d'office ; N3 grisé, « Il n'a pas chiffré 1 article de ta liste ».
+
+**C, Lannion**, 1 000 ardoises déposées après la clôture : « Trop tard pour octobre, ta liste part avec la commande de novembre. »
+
 ## 6. Données, sécurité, tenue
 
 | # | Tu fais | Tu dois voir | Test | État |

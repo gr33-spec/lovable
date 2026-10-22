@@ -48,7 +48,7 @@ export function SuiviChantier({ projectId }: { projectId: string }) {
   if (!data) return null;
   return (
     <section aria-label="Suivi du chantier" className="flex flex-col gap-2.5 rounded-[20px] bg-surface p-3.5 shadow-card">
-      <ol aria-label="Étapes" className="grid grid-cols-4 gap-1">
+      <ol aria-label="Étapes" className={`grid gap-1 ${data.etapes.length === 5 ? "grid-cols-5" : "grid-cols-4"}`}>
         {data.etapes.map((e, i) => (
           <li key={e.nom} aria-current={i === data.etape ? "step" : undefined} className="flex flex-col items-center gap-1 text-center">
             <span className="flex w-full items-center">

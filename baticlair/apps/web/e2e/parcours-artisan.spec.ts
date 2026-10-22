@@ -2774,3 +2774,194 @@ test("Cas limites (plan « finition », bloc 6) : fichier trop lourd, réseau co
   await page.goto("/negoces/lien/lien-expire");
   await expect(page.getByText("Ce lien n'est plus valable.")).toBeVisible();
 });
+
+/**
+ * LA COMMANDE COMMUNE DU MOIS (Greg, 22 octobre 2026, au soir), de bout en bout dans le navigateur. Le cas posé à la main
+ * dans `docs/groupe/RECETTE.md` (« Commande du mois : les totaux à la main ») : A à Lannion (2 000 ardoises, 400 m de
+ * liteaux), B à Paimpol (3 000 ardoises, 10 boîtes de crochets, du stock), C à Lannion qui arrive après la clôture et part
+ * au mois suivant ; N1 (Lannion, gratuit jusqu'à 20 km, 50 € au-delà), N2 (Paimpol, 30 km, 40 €), N3 (Lannion, 10 km,
+ * 60 €) qui ne chiffre pas les crochets. Les dates viennent de l'API (le mois dépend du jour où la série tourne) ; la
+ * tâche planifiée est appelée à la clôture puis à la limite (`?maintenant=`, test seulement).
+ */
+const ARDOISE_MOIS = "Ardoise naturelle 32×22 Espagne 1er choix";
+const LITEAU_MOIS = "Liteau sapin traité 27×38";
+const CROCHET_MOIS = "Crochet inox 100 mm";
+
+interface CommandeMoisApi {
+  cycleId: string;
+  mois: string;
+  de: string;
+  phase: string;
+  clotureLe: string;
+  reponseAvant: string;
+}
+
+/** Une liste déjà prête (lignes données à la porte `/v1/quantitatifs`), au bon chantier, à la bonne adresse. Rend son id. */
+async function listePrete(page: Page, adresse: string, lignes: { libelle: string; quantite: string; unite: string }[]): Promise<string> {
+  const q = await apiJson<{ projetId: string }>(page, "POST", "/v1/quantitatifs", { lignes });
+  expect(q.status).toBe(201);
+  expect(await apiCall(page, "PATCH", `/v1/projects/${q.body.projetId}`, { address: adresse })).toBe(200);
+  return q.body.projetId;
+}
+
+/** Sur « Ton chantier » : « Ajouter à la commande de … », toutes les lignes cochées, chantier signé ou stock, « Ajouter ». */
+async function ajouterAuMois(page: Page, projectId: string, nature: "Un chantier signé" | "Du stock"): Promise<void> {
+  await page.goto(`/chantiers/${projectId}`);
+  const bloc = page.getByRole("region", { name: /^Commande commune d/ });
+  await expect(bloc.getByText("Une commande par mois avec les couvreurs de ta région.")).toBeVisible();
+  await expect(bloc.getByText(/^Clôture dans \d+ j/)).toBeVisible();
+  await bloc.getByRole("button", { name: /^Ajouter à la commande d/ }).click();
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  const boxes = list.getByRole("checkbox", { name: /^Ajouter à la commande : / }).and(page.locator(":enabled"));
+  for (const box of await boxes.all()) await box.check();
+  const bar = page.getByRole("region", { name: /^Ajouter à la commande d/ });
+  await expect(bar.getByText("Sans engagement : tu commandes seulement si le prix te plaît.", { exact: false })).toBeVisible();
+  await expect(bar.getByRole("button", { name: "Ajouter" })).toBeDisabled();
+  await bar.getByRole("radio", { name: nature }).click();
+  await bar.getByRole("button", { name: "Ajouter" }).click();
+  await expect(page.getByRole("region", { name: /^Dans la commande d/ })).toBeVisible();
+}
+
+async function tacheDuMois(page: Page, maintenant: string): Promise<Record<string, number>> {
+  return page.evaluate(async (maintenant) => {
+    const res = await fetch(`/v1/internal/commande-du-mois?maintenant=${encodeURIComponent(maintenant)}`, { headers: { authorization: "Bearer e2e-secret-de-la-tache" } });
+    return res.json();
+  }, maintenant);
+}
+
+/** Le négoce ouvre son lien (dans le dernier e-mail qu'il a reçu), sans compte, dépose son PDF et sa livraison. */
+async function grilleDeposee(browser: Browser, page: Page, email: string, rows: [string, string, string, string, string][], livraison: [string, string, string]) {
+  const mail = (await emailsVers(page, email)).filter((m) => /\/grille\//.test(m.text)).at(-1)!;
+  const lien = /https?:\/\/[^\s]+\/grille\/[A-Za-z0-9_-]+/.exec(mail.text)![0]!.replace(/^https?:\/\/[^/]+/, "");
+  const contexte = await browser.newContext({ ...(test.info().project.use as object) });
+  const pageN = await contexte.newPage();
+  await pageN.goto(lien);
+  await expect(pageN.getByRole("heading", { name: /^Commande commune d(e |')\S+ \d{4}$/ })).toBeVisible();
+  await expect(pageN.getByText(/^Réponse avant le \d\d\/\d\d à 18 h, il reste \d+ j/)).toBeVisible();
+  await expect(pageN.getByText("Chaque artisan choisit le négoce le moins cher pour lui.", { exact: false })).toBeVisible();
+  await expect(pageN.getByRole("region", { name: "La grille" }).getByRole("listitem")).toHaveCount(3);
+  await expect(pageN.getByText(/Toitures [ABC]|Lannion \(|Paimpol \(/)).toHaveCount(0);
+  const { makePdf } = await import("../../api/test/support/pdf-fixtures");
+  const pdf = Buffer.from(await makePdf(["devis"], rows, "Total HT 1 000,00", "DEVIS"));
+  const form = pageN.getByRole("form", { name: "Déposer mon devis" });
+  await form.locator('input[type="file"]').setInputFiles({ name: "devis.pdf", mimeType: "application/pdf", buffer: pdf });
+  await expect(form.getByRole("button", { name: "Déposer mon devis" })).toBeDisabled();
+  await form.getByLabel("Adresse d'où partent vos livraisons").fill(livraison[0]);
+  await form.getByLabel("Livraison gratuite jusqu'à, en km").fill(livraison[1]);
+  await form.getByLabel("Prix d'une livraison au-delà, en euros HT").fill(livraison[2]);
+  await form.getByRole("button", { name: "Déposer mon devis" }).click();
+  const statut = pageN.getByRole("status", { name: "Votre dépôt" });
+  await expect(statut).toContainText("Devis reçu");
+  expect(await pageN.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+  return { pageN, contexte, statut, lien };
+}
+
+test("Commande du mois : un cycle complet, trois artisans (C après la clôture), trois négoces (N3 sans les crochets), les totaux posés à la main", async ({ page, browser }) => {
+  test.setTimeout(300_000);
+  const projet = test.info().project.name;
+  const n = (i: number) => `n${i}-${projet}@example.com`;
+  // A, à Lannion : il ajoute les trois négoces couverture du 22.
+  await compteAuGroupe(page, "Toitures A", "3 rue des Ajoncs, 22300 Lannion");
+  for (const i of [1, 2, 3]) expect(await apiCall(page, "POST", "/v1/groupe/negoces", { nom: `Négoce N${i}`, email: n(i), familles: ["couverture"] })).toBe(201);
+  const projetA = await listePrete(page, "3 rue des Ajoncs, 22300 Lannion", [
+    { libelle: ARDOISE_MOIS, quantite: "2000", unite: "pièces" },
+    { libelle: LITEAU_MOIS, quantite: "400", unite: "m" },
+  ]);
+  await ajouterAuMois(page, projetA, "Un chantier signé");
+  // L'onglet : en quantités, jamais en nombre d'entreprises ; « tu es le premier » ; le partage dessous.
+  await page.goto("/groupe");
+  // Les trois étapes, repliées une fois tout fait (SIRET, liste, négoces).
+  await page.getByText("Comment ça marche", { exact: true }).click();
+  await expect(page.getByRole("list", { name: "Comment ça marche" }).getByRole("listitem")).toHaveText(["1. Dépose ta liste avant la clôture.", "2. On envoie tout le volume aux négoces.", "3. Tu vois le meilleur prix et tu commandes si ça te plaît."]);
+  const carteA = page.getByRole("region", { name: /^Commande d/ }).first();
+  await expect(carteA.getByText(/^Toi seul : 2\s000 pièces d'ardoise naturelle 32×22/)).toBeVisible();
+  await expect(carteA.getByText("Pour l'instant, tu es le premier. Partage le lien pour faire grossir la commande.")).toBeVisible();
+  await expect(carteA.getByText(/^Clôture dans \d+ j/)).toBeVisible();
+  await expect(page.getByText(/\d+ couvreurs|\d+ demandes envoyées|entreprises/)).toHaveCount(0);
+  const cycle = (await apiJson<{ commandes: CommandeMoisApi[] }>(page, "GET", "/v1/commande-du-mois")).body.commandes.find((c) => c.phase === "inscriptions")!;
+
+  // B, à Paimpol, du stock, dans un autre navigateur.
+  const contexteB = await browser.newContext({ ...(test.info().project.use as object) });
+  const pageB = await contexteB.newPage();
+  await compteAuGroupe(pageB, "Toitures B", "12 rue du Port, 22500 Paimpol");
+  const projetB = await listePrete(pageB, "12 rue du Port, 22500 Paimpol", [
+    { libelle: ARDOISE_MOIS, quantite: "3000", unite: "pièces" },
+    { libelle: CROCHET_MOIS, quantite: "10", unite: "boîtes" },
+  ]);
+  await ajouterAuMois(pageB, projetB, "Du stock");
+  await page.goto("/groupe");
+  await expect(page.getByText(/^Toute la commande d\S* \S*\s?: 5\s000 pièces d'ardoise naturelle 32×22 Espagne 1er choix, 400 m de liteau sapin traité 27×38, 10 boîtes de crochet inox 100 mm$/)).toBeVisible();
+  await expect(page.getByText("Pour l'instant, tu es le premier.", { exact: false })).toHaveCount(0);
+  await expect(page.getByText("Toitures B")).toHaveCount(0);
+
+  // La clôture : tout est figé, la grille fusionnée part aux trois négoces.
+  const apresCloture = new Date(Date.parse(cycle.clotureLe) + 60_000).toISOString();
+  // Trois négoces de plus quand la série « ordinateur » passe après « téléphone » (même département, même base).
+  const cloture = await tacheDuMois(page, apresCloture);
+  expect(cloture.clos).toBe(1);
+  expect(cloture.grillesEnvoyees).toBeGreaterThanOrEqual(3);
+  await page.goto(`/chantiers/${projetA}`);
+  await expect(page.getByRole("region", { name: "Suivi du chantier" }).getByRole("list", { name: "Étapes" }).getByRole("listitem")).toHaveCount(5);
+  await page.goto("/groupe");
+  await expect(page.getByRole("button", { name: "Retirer" })).toHaveCount(0);
+
+  // C, à Lannion, après la clôture : sa liste part le mois suivant, en clair ; il la retire tant que celui-ci est ouvert.
+  const contexteC = await browser.newContext({ ...(test.info().project.use as object) });
+  const pageC = await contexteC.newPage();
+  await compteAuGroupe(pageC, "Toitures C", "5 rue de Kerampont, 22300 Lannion");
+  const projetC = await listePrete(pageC, "5 rue de Kerampont, 22300 Lannion", [{ libelle: ARDOISE_MOIS, quantite: "1000", unite: "pièces" }]);
+  const articlesC = (await apiJson<{ takeoff: { purchase: { toBuy: { key: string }[] } } }>(pageC, "GET", `/v1/projects/${projetC}/takeoff`)).body.takeoff.purchase.toBuy.map((b) => b.key);
+  const depotC = await apiJson<{ mois: string; message: string }>(pageC, "POST", `/v1/projects/${projetC}/commande-du-mois?maintenant=${encodeURIComponent(apresCloture)}`, { articles: articlesC, nature: "chantier" });
+  expect(depotC.status).toBe(201);
+  expect(depotC.body.mois).not.toBe(cycle.mois);
+  expect(depotC.body.message).toMatch(/^Trop tard pour \S+, ta liste part avec la commande d(e |')\S+\.$/);
+  await pageC.goto("/groupe");
+  const carteC = pageC.getByRole("region", { name: /^Commande d/ }).first();
+  await expect(carteC.getByText(/^Toi seul : 1\s000 pièces/)).toBeVisible();
+  await carteC.getByRole("button", { name: "Retirer" }).click();
+  await expect(carteC.getByRole("button", { name: "Retirer" })).toHaveCount(0);
+  await contexteC.close();
+
+  // Les négoces chiffrent la MÊME grille. Pendant le chrono : premier ou pas, jamais les prix des autres.
+  const n1 = await grilleDeposee(browser, page, n(1), [["A", ARDOISE_MOIS, "5000 pièces", "0,90", "4 500,00"], ["L", LITEAU_MOIS, "400 m", "0,80", "320,00"], ["C", CROCHET_MOIS, "10 boîtes", "30,00", "300,00"]], ["Zone de Kerampont, 22300 Lannion", "20", "50"]);
+  await expect(n1.statut).toContainText("Vous êtes premier sur le total de la commande.");
+  const n2 = await grilleDeposee(browser, page, n(2), [["A", ARDOISE_MOIS, "5000 pièces", "0,88", "4 400,00"], ["L", LITEAU_MOIS, "400 m", "0,85", "340,00"], ["C", CROCHET_MOIS, "10 boîtes", "32,00", "320,00"]], ["ZA de Kerfolic, 22500 Paimpol", "30", "40"]);
+  await expect(n2.statut).toContainText("Vous êtes premier sur le total de la commande.");
+  const n3 = await grilleDeposee(browser, page, n(3), [["A", ARDOISE_MOIS, "5000 pièces", "0,80", "4 000,00"], ["L", LITEAU_MOIS, "400 m", "0,70", "280,00"]], ["Zone de Kerampont, 22300 Lannion", "10", "60"]);
+  // N3 est le moins cher sur ce qu'il chiffre, mais incomplet : il passe derrière.
+  await expect(n3.statut).toContainText("Vous n'êtes pas premier sur le total de la commande.");
+  await expect(n3.statut).toContainText("1 article sans prix");
+  await n1.pageN.reload();
+  await expect(n1.pageN.getByRole("status", { name: "Votre dépôt" })).toContainText("Vous n'êtes pas premier sur le total de la commande.");
+  await expect(n1.pageN.getByText(/0,88|0,85|32,00/)).toHaveCount(0);
+  for (const x of [n1, n2, n3]) await x.contexte.close();
+
+  // À la limite : figé, résultats. A : N2 en avant (le moins cher sur toute la commande), N3 le moins cher pour lui.
+  expect(await tacheDuMois(page, new Date(Date.parse(cycle.reponseAvant) + 60_000).toISOString())).toMatchObject({ resultats: 1 });
+  expect((await emailsVers(page, n(2))).at(-1)!.text).toContain("Votre grille est la moins chère sur le total");
+  expect((await emailsVers(page, n(1))).at(-1)!.text).not.toMatch(/0,88|Négoce N2/);
+  await page.goto("/groupe");
+  const prixA = page.getByRole("region", { name: "Tes prix" });
+  await expect(prixA.getByRole("radio", { name: /^Chez Négoce N1 : 2\s120,00 € HT livré/ })).not.toBeChecked();
+  await expect(prixA.getByRole("radio", { name: /^Chez Négoce N2 : 2\s140,00 € HT livré/ })).toBeChecked();
+  await expect(prixA.getByRole("radio", { name: /^Chez Négoce N3 : 1\s880,00 € HT livré/ })).toBeEnabled();
+  await expect(prixA.getByText(/^2\s100,00 € de matériaux, livraison 40,00 €$/)).toBeVisible();
+  await expect(prixA.getByText("Le moins cher sur toute la commande")).toBeVisible();
+  await expect(prixA.getByText("Le moins cher pour toi")).toBeVisible();
+  await prixA.getByRole("button", { name: "Commander chez Négoce N2" }).click();
+  await expect(prixA.getByRole("status")).toContainText(/Commandé chez Négoce N2 : 2\s140,00 € HT livré/);
+  await expect.poll(async () => (await emailsVers(page, n(2))).some((m) => /bon de commande/i.test(m.subject))).toBe(true);
+  await page.goto(`/chantiers/${projetA}`);
+  await expect(page.getByRole("region", { name: "Suivi du chantier" })).toContainText("C'est commandé.");
+
+  // B : N3 n'a pas chiffré ses crochets, il ne peut pas être choisi ; N2 en avant à 2 960 €.
+  await pageB.goto("/groupe");
+  const prixB = pageB.getByRole("region", { name: "Tes prix" });
+  await expect(prixB.getByRole("radio", { name: /^Chez Négoce N2 : 2\s960,00 € HT livré/ })).toBeChecked();
+  await expect(prixB.getByRole("radio", { name: /^Chez Négoce N1 : 3\s050,00 € HT livré/ })).toBeVisible();
+  await expect(prixB.getByRole("radio", { name: /^Chez Négoce N3 : 2\s460,00 € HT livré/ })).toBeDisabled();
+  await expect(prixB.getByText("Il n'a pas chiffré 1 article de ta liste")).toBeVisible();
+  await expect(prixB.getByText("Toitures A")).toHaveCount(0);
+  expect(await pageB.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+  await contexteB.close();
+});

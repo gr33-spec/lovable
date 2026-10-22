@@ -38,6 +38,8 @@ const apiEnv = {
   RATE_LIMIT: "off",
   // BatiClair Groupé : allumé pour ses parcours ; une entreprise sans SIRET vérifié n'en voit rien (gratuit pour l'artisan).
   GROUPE: "on",
+  // La commande commune du mois (par défaut) ; « lots » pour la passe de l'ancien regroupement (`--grep @lots`).
+  COMMANDE_COMMUNE: process.env.E2E_COMMANDE_COMMUNE ?? "mois",
   // Étape 9 : l'admin du groupé (journal, lots, factures) pour ce seul compte des parcours.
   GROUPE_ADMINS: "admin-groupe@example.fr",
 };

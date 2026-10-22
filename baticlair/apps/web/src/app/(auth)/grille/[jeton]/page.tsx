@@ -33,7 +33,11 @@ interface PageGrille {
 }
 
 const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
-const moisEnLettres = (m: string) => `${MOIS[Number(m.slice(5, 7)) - 1] ?? m} ${m.slice(0, 4)}`;
+/** « d'octobre 2026 », « de novembre 2026 » : l'élision devant une voyelle. */
+const deMoisEnLettres = (m: string) => {
+  const nomDuMois = MOIS[Number(m.slice(5, 7)) - 1] ?? m;
+  return `${/^[aeiouâ]/i.test(nomDuMois) ? "d'" : "de "}${nomDuMois} ${m.slice(0, 4)}`;
+};
 
 /**
  * LA COMMANDE COMMUNE DU MOIS, CÔTÉ NÉGOCE (Greg, 22 octobre 2026) : par son lien unique, sans compte. UNE grille (toutes
@@ -93,7 +97,7 @@ export default function GrilleNegocePage() {
   const pret = fichiers.length >= 1 && fichiers.length <= 2 && livraisonOk;
   return (
     <>
-      <PageTitle>{`Commande commune de ${moisEnLettres(page.mois)}`}</PageTitle>
+      <PageTitle>{`Commande commune ${deMoisEnLettres(page.mois)}`}</PageTitle>
       <p className="text-sm text-muted">
         Couvreurs du département {page.departement}. Pour {page.negoce}.
       </p>

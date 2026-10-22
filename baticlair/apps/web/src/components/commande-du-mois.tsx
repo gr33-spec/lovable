@@ -4,7 +4,7 @@ import { Check, FileText, Store, Users } from "lucide-react";
 import { useCallback, useId, useState } from "react";
 import { InviterCollegue } from "@/components/inviter";
 import type { Groupe } from "@/components/groupe";
-import { Button, Card, ErrorNotice, Field } from "@/components/ui";
+import { Button, ErrorNotice, Field } from "@/components/ui";
 import { api, ApiError, newActionKey } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 
@@ -53,6 +53,9 @@ export function useCommandeDuMois(actif: boolean) {
   return useResource(fetchEtat);
 }
 
+/** Une carte (comme `Card`), mais une région nommée : « Commande d'octobre ». */
+const CARTE = "flex flex-col rounded-3xl bg-surface p-4 shadow-card";
+const unite = (u: string) => (u === "ml" ? "m" : u);
 const euros = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
 const quantite = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 2 });
 
@@ -202,7 +205,7 @@ export function MesLignesDuMois({ groupe }: { groupe: Groupe }) {
             {lignes.map((l) => (
               <li key={l.id} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-ground px-3 py-2">
                 <span className="min-w-0 text-[14px] font-bold">
-                  {l.designation} <span className="font-extrabold">{`· ${quantite(l.quantite)} ${l.unite}`}</span>
+                  {l.designation} <span className="font-extrabold">{`· ${quantite(l.quantite)} ${unite(l.unite)}`}</span>
                   <span className="block text-[12px] font-semibold text-muted">{l.nature === "stock" ? "Stock" : "Chantier signé"}</span>
                 </span>
                 {c.phase === "inscriptions" ? (
@@ -248,12 +251,12 @@ export function CommandeDuMoisPanneau({ etat, onChange }: { etat: EtatDuMois; on
   return (
     <div className="flex flex-col gap-4">
       {!ouverte && etat.prochaine ? (
-        <Card aria-label={`Commande ${etat.prochaine.de}`} className="flex flex-col gap-2 p-4">
+        <section aria-label={`Commande ${etat.prochaine.de}`} className={`${CARTE} gap-2`}>
           <h2 className="font-display text-xl font-extrabold">{`Commande ${etat.prochaine.de}`}</h2>
           <p className="text-[15px] font-extrabold text-accent-text">{`Clôture dans ${etat.prochaine.clotureDans}`}</p>
           <p className="text-[15px] font-semibold">{etat.prochaine.vide ? "Pour l'instant, la commande est vide. Dépose ta liste pour la lancer." : etat.prochaine.tout}</p>
           <InviterCollegue texte="Plus on est nombreux dans la commande, plus les prix baissent." />
-        </Card>
+        </section>
       ) : null}
       {commandes.map((c) => (
         <CarteDuMois key={c.cycleId} c={c} onChange={onChange} />
@@ -283,7 +286,7 @@ function CarteDuMois({ c, onChange }: { c: CommandeDuMois; onChange: () => void 
   const parDefaut = r ? (r.negoces.find((n) => n.negoceId === r.parDefaut && n.complet) ?? r.negoces.find((n) => n.negoceId === r.moinsCherPourToi) ?? null) : null;
   const selection = r ? (r.negoces.find((n) => n.negoceId === choisi) ?? parDefaut) : null;
   return (
-    <Card aria-label={`Commande ${c.de}`} className="flex flex-col gap-3 p-4">
+    <section aria-label={`Commande ${c.de}`} className={`${CARTE} gap-3`}>
       <div className="flex flex-col gap-1">
         <h2 className="font-display text-xl font-extrabold">{`Commande ${c.de}`}</h2>
         <p className="text-[15px] font-extrabold text-accent-text">{c.phase === "inscriptions" ? c.cloture : c.phase === "negoces" ? `Commande close. Les négoces chiffrent : leurs prix dans ${c.reponseDans}.` : "Les prix sont là."}</p>
@@ -300,7 +303,7 @@ function CarteDuMois({ c, onChange }: { c: CommandeDuMois; onChange: () => void 
             {c.mesLignes.map((l) => (
               <li key={l.id} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-ground px-3 py-2">
                 <span className="min-w-0 text-[14px] font-bold">
-                  {l.designation} <span className="font-extrabold">{`· ${quantite(l.quantite)} ${l.unite}`}</span>
+                  {l.designation} <span className="font-extrabold">{`· ${quantite(l.quantite)} ${unite(l.unite)}`}</span>
                   <span className="block text-[12px] font-semibold text-muted">{`${l.nature === "stock" ? "Stock" : "Chantier signé"} · ${l.chantier}`}</span>
                 </span>
                 {c.phase === "inscriptions" ? (
@@ -347,6 +350,6 @@ function CarteDuMois({ c, onChange }: { c: CommandeDuMois; onChange: () => void 
         <p className="text-[14px] font-semibold text-muted">Aucun négoce n&apos;a chiffré ta liste cette fois-ci.</p>
       ) : null}
       {error ? <ErrorNotice error={error} /> : null}
-    </Card>
+    </section>
   );
 }
