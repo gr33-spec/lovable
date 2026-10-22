@@ -52,7 +52,7 @@ for (const size of WIDTHS) {
     await page.getByLabel("Mot de passe").fill("motdepasse-solide");
     await page.getByRole("checkbox", { name: /J'accepte les conditions générales d'utilisation/ }).check();
     await page.getByRole("button", { name: "Créer mon compte" }).click();
-    await expect(page.getByRole("heading", { name: /^Dépose ton premier devis/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^Paie tes matériaux moins cher/ })).toBeVisible();
     await shoot(page, size.name, "03-accueil");
 
     await page.goto("/chantiers/nouveau");

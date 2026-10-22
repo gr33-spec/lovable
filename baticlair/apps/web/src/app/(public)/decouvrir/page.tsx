@@ -5,7 +5,6 @@ import { DemoGuidee } from "@/components/demo-guidee";
 import { ButtonLink } from "@/components/ui";
 import { LiensLegaux } from "@/components/legal";
 import { FOURNITURES_EXEMPLE, OutilsArtisan, SceneChantier, TourneeGroupee, Visuel } from "@/components/landing-illustrations";
-import { TRADES } from "@/lib/trades";
 
 /**
  * Servie à la place de « / » pour un visiteur (voir `proxy.ts`) : rendue à chaque demande, jamais gardée dans le cache du
@@ -14,31 +13,29 @@ import { TRADES } from "@/lib/trades";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "BatiClair, tes devis deviennent tes bons de commande",
-  description: "Dépose le devis de ton client, BatiClair sort la liste des fournitures et l'envoie à tes négoces. Tes commandes se regroupent avec les autres artisans du département.",
+  title: "BatiClair, paie tes matériaux moins cher",
+  description: "Donne ta liste de matériaux. On regroupe les couvreurs de ton secteur et on fait jouer la concurrence entre les négoces.",
 };
 
 /**
- * LA PAGE D'ACCUEIL PUBLIQUE (plan du 20 octobre 2026, bloc 5 ; refonte « premium » du 21 octobre à la demande du
- * fondateur). Une page, le téléphone d'abord, ton direct, zéro jargon. Les visuels sont de vraies captures de l'app
- * (mode démo, données fictives marquées), servies depuis `public/landing` : aucune ressource extérieure, aucun script.
- * Les illustrations (le couvreur sur son toit, les fournitures du comptoir, le camion du groupé, les outils) sont
- * dessinées en SVG dans la page (`landing-illustrations.tsx`), pour la même raison. Sections : accroche, trois étapes du quantitatif, les réponses comparées, le groupé, « gratuit pour l'artisan, le
- * négoce paie 2 % », les métiers couverts, « Créer un compte », pied de page avec les mentions légales.
+ * LA PAGE D'ACCUEIL PUBLIQUE. NOUVEAU CAP (22 octobre 2026, décidé avec Greg) : une seule idée, « Paie tes matériaux moins
+ * cher », pour les couvreurs d'abord (Côtes-d'Armor) ; tous les métiers restent ouverts dans l'app, une ligne le dit en bas.
+ * Trois images : ta liste → précise-la → ton prix. Rémunération en suspens : la page ne parle ni d'abonnement ni de 2 %.
+ * Aucune ressource extérieure, aucun script : captures de l'app et dessins servis par la page (`landing-illustrations.tsx`).
  */
-const QUANTITATIF = [
-  { titre: "Tu déposes le devis de ton client", texte: "Une photo ou un PDF, depuis ton téléphone. Rien à saisir.", image: "/landing/depot.jpg", alt: "L'écran « Déposer mon devis » de BatiClair" },
-  { titre: "BatiClair sort la liste des fournitures", texte: "Les quantités à commander, ligne par ligne, avec les mots du comptoir. Deux ou trois questions au plus.", image: "/landing/questions.jpg", alt: "Les questions de comptoir avant le calcul de la liste" },
-  { titre: "Tu l'envoies à tes négoces", texte: "Un e-mail avec le PDF, en un geste. Les réponses reviennent dans l'app, comparées.", image: "/landing/envoi.jpg", alt: "Le choix des négoces à qui envoyer la demande" },
+const FOURNITURES_COUVREUR = FOURNITURES_EXEMPLE.filter((f) => f.metier === "Couverture" || f.metier === "Zinguerie" || f.metier === "Charpente");
+
+const ETAPES = [
+  { titre: "Ta liste", texte: "Une photo de ta liste, un bon, un PDF ou une capture. Je la remets au propre, ligne par ligne." },
+  { titre: "Précise-la", texte: "Format, origine, choix, marque : un tap par ligne. Plus c'est précis, plus tu trouves d'autres couvreurs." },
+  { titre: "Ton prix", texte: "Les négoces de ton secteur se font concurrence. Tu vois ton prix livré chez toi, et le moins cher est retenu." },
 ];
 
 const GROUPE = [
-  { titre: "Tu proposes une ligne au groupé", texte: "Une référence, une fenêtre de livraison, « chantier signé ». Ton nom ne part pas avec." },
-  { titre: "On regroupe par département", texte: "Même référence, même département : un seul lot, une seule demande de prix aux négoces." },
-  { titre: "Tu commandes au prix du lot", texte: "Sur ton compte, chez le négoce retenu, livré sur ton chantier. Tu dis « Livré » quand c'est arrivé." },
+  { titre: "Tes lignes rejoignent celles des couvreurs du secteur", texte: "Même article, même secteur : un seul groupe. Personne ne voit ton nom ni tes chantiers." },
+  { titre: "Chacun ajoute son négoce", texte: "La demande commune part à tous les négoces du groupe, avec un mail type. Ils savent qu'en face, il y a du volume." },
+  { titre: "Le moins cher qui livre tout l'emporte", texte: "Chaque devis est lu à son arrivée et comparé au meilleur prix. Livraison comprise, chez toi." },
 ];
-
-const METIERS = TRADES.filter((t) => t.id !== "other");
 
 /** Une vraie capture de l'app dans un téléphone. `priorite` pour celle du haut de page (LCP), sinon chargée à la demande. */
 function Telephone({ src, alt, priorite = false, className = "" }: { src: string; alt: string; priorite?: boolean; className?: string }) {
@@ -52,6 +49,84 @@ function Telephone({ src, alt, priorite = false, className = "" }: { src: string
   );
 }
 
+/** Image 1 : la liste telle qu'on la donne, écrite à la main sur un bout de papier. */
+function ImageListe() {
+  const lignes = ["Ardoise 32x22 — 2760", "Crochets inox — 3 paq.", "Liteau 27x38 — 480 m", "Écran HPV — 4 rlx", "Gouttière zinc 33 — 4 l."];
+  return (
+    <div role="img" aria-label="Une liste de matériaux écrite à la main" className="flex h-full items-center justify-center bg-[#f6ebdd] p-5">
+      <div className="w-full max-w-[250px] -rotate-2 rounded-md bg-[#fffdf6] px-5 py-4 shadow-card">
+        <p className="mb-2 font-display text-[15px] font-extrabold text-ink/80">Chantier Kerity</p>
+        <ul className="flex flex-col gap-2 border-l-2 border-[#f2a7a7] pl-3">
+          {lignes.map((l) => (
+            <li key={l} className="border-b border-[#cfe0f5] pb-1 font-[cursive] text-[15px] leading-tight text-[#24316b]">
+              {l}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+/** Image 2 : une ligne vague, sa pastille orange et sa question en boutons. */
+function ImagePreciser() {
+  return (
+    <div role="img" aria-label="Une ligne « Ardoise naturelle » à préciser : format en boutons" className="flex h-full flex-col justify-center gap-2.5 bg-[#e7ebf3] p-5">
+      <div className="rounded-2xl bg-surface p-3.5 shadow-card">
+        <div className="flex items-center gap-2.5">
+          <span className="size-3 shrink-0 rounded-full bg-mark-warn" />
+          <span className="text-[15px] font-bold">Ardoise naturelle</span>
+          <span className="ml-auto text-[14px] font-extrabold tabular-nums">2 760</span>
+        </div>
+        <p className="mt-1 pl-5.5 text-[13px] font-semibold text-warn">Précise pour trouver d&apos;autres couvreurs</p>
+        <p className="mt-3 text-[13px] font-bold text-muted">Format ?</p>
+        <div className="mt-1.5 flex flex-wrap gap-1.5">
+          {["32×22", "40×22", "40×25", "Autre"].map((o, i) => (
+            <span key={o} className={`rounded-xl px-3 py-1.5 text-[13px] font-bold ${i === 0 ? "bg-ink text-white" : "bg-ground"}`}>
+              {o}
+            </span>
+          ))}
+        </div>
+      </div>
+      <div className="flex items-center gap-2.5 rounded-2xl bg-surface p-3.5 shadow-card">
+        <span className="size-3 shrink-0 rounded-full bg-mark-ok" />
+        <span className="text-[15px] font-bold">Liteau sapin traité 27×38</span>
+        <span className="ml-auto text-[14px] font-extrabold tabular-nums">480 m</span>
+      </div>
+    </div>
+  );
+}
+
+/** Image 3 : le compteur du groupe et le prix. */
+function ImagePrix() {
+  return (
+    <div role="img" aria-label="30 couvreurs, 15 demandes envoyées, 3 devis reçus, meilleur prix 1,12 €" className="flex h-full items-center justify-center bg-ok-bg p-5">
+      <div className="w-full max-w-[270px] rounded-2xl bg-surface p-4 shadow-card">
+        <p className="text-[13px] font-bold text-muted">Ardoise naturelle 32×22 · Côtes-d&apos;Armor</p>
+        <dl className="mt-3 grid grid-cols-3 gap-2 text-center">
+          {[
+            ["30", "couvreurs"],
+            ["15", "demandes"],
+            ["3", "devis reçus"],
+          ].map(([n, l]) => (
+            <div key={l} className="rounded-xl bg-ground px-1 py-2">
+              <dt className="sr-only">{l}</dt>
+              <dd className="font-display text-[22px] leading-none font-extrabold">{n}</dd>
+              <dd className="mt-1 text-[11px] font-bold text-muted">{l}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="mt-3 flex items-baseline justify-between rounded-xl bg-ok-bg px-3 py-2.5">
+          <span className="text-[13px] font-bold text-ok">Meilleur prix</span>
+          <span className="font-display text-[26px] leading-none font-extrabold text-ok">1,12 €</span>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+const IMAGES = [ImageListe, ImagePreciser, ImagePrix];
+
 export default function BienvenuePage() {
   const h2 = "font-display text-[30px] leading-[1.05] font-extrabold tracking-[-0.03em] sm:text-[40px]";
   return (
@@ -60,19 +135,19 @@ export default function BienvenuePage() {
       <Suspense>
         <DemoGuidee />
       </Suspense>
-      {/* L'accroche : le texte à gauche, le vrai écran de la liste à droite, coupé en bas comme un téléphone posé. */}
+      {/* L'accroche : la promesse à gauche, le couvreur sur son toit à droite. */}
       <section aria-labelledby="accroche" className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-8">
         <div className="flex flex-col gap-6 lg:col-span-7 animate-rise">
-          <p className="text-[13px] font-extrabold tracking-[0.08em] text-accent-text uppercase">Pour les artisans du bâtiment</p>
-          <h1 id="accroche" className="font-display text-[40px] leading-[0.98] font-extrabold tracking-[-0.035em] sm:text-[54px] lg:text-[60px]">
-            Tes devis deviennent tes bons de commande.
+          <p className="text-[13px] font-extrabold tracking-[0.08em] text-accent-text uppercase">Pour les couvreurs</p>
+          <h1 id="accroche" className="font-display text-[44px] leading-[0.98] font-extrabold tracking-[-0.035em] sm:text-[58px] lg:text-[64px]">
+            Paie tes matériaux moins cher.
           </h1>
-          <p className="max-w-[52ch] text-[17px] leading-relaxed text-muted sm:text-[19px]">Dépose le devis de ton client. BatiClair sort la liste des fournitures, l&apos;envoie à tes négoces et regroupe tes achats avec les autres artisans du département.</p>
+          <p className="max-w-[46ch] text-[18px] leading-relaxed text-muted sm:text-[20px]">Donne ta liste. On regroupe les couvreurs de ton secteur et on fait jouer la concurrence entre les négoces.</p>
           <div className="flex flex-wrap items-center gap-3">
             <ButtonLink href="/inscription" className="min-h-14 bg-cta px-7 text-[17px] shadow-cta">
               Créer un compte
             </ButtonLink>
-            <a href="#quantitatif" className="inline-flex min-h-14 items-center rounded-2xl px-4 text-[16px] font-extrabold text-ink underline decoration-line decoration-2 underline-offset-[6px] transition hover:decoration-ink">
+            <a href="#comment" className="inline-flex min-h-14 items-center rounded-2xl px-4 text-[16px] font-extrabold text-ink underline decoration-line decoration-2 underline-offset-[6px] transition hover:decoration-ink">
               Voir comment ça marche
             </a>
           </div>
@@ -84,65 +159,53 @@ export default function BienvenuePage() {
               <SceneChantier className="absolute inset-0 h-full w-full" />
             </Visuel>
             <div className="absolute right-[-36px] bottom-[-150px] origin-bottom-right scale-[0.78] sm:right-2 sm:bottom-[-110px] sm:scale-[0.9]">
-              <Telephone src="/landing/hero.jpg" alt="La liste des fournitures d'un chantier de couverture : ardoises, écran, gouttières, chaque ligne avec sa quantité" priorite />
+              <Telephone src="/landing/hero.jpg" alt="Une liste de couverture dans BatiClair : ardoises, écran, gouttières, chaque ligne avec sa quantité" priorite />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Trois faits, sans carte : des chiffres vrais. */}
-      <section aria-label="En bref" className="grid grid-cols-1 divide-y divide-line sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-        {[
-          { chiffre: "24", texte: "métiers couverts, chacun avec son référentiel relu par des artisans" },
-          { chiffre: "2 ou 3", texte: "questions au plus avant que ta liste sorte" },
-          { chiffre: "0 €", texte: "pour l'artisan : pas d'abonnement au groupé, pas de commission" },
-        ].map((f) => (
-          <div key={f.chiffre} className="flex flex-col gap-1 py-5 sm:px-8 sm:py-2 first:sm:pl-0 last:sm:pr-0">
-            <span className="font-display text-[34px] leading-none font-extrabold tracking-[-0.03em]">{f.chiffre}</span>
-            <span className="text-[15px] leading-snug text-muted">{f.texte}</span>
-          </div>
-        ))}
-      </section>
-
-      {/* Les trois étapes, chacune avec son écran ; sur le téléphone, on les fait défiler de côté. */}
-      <section aria-labelledby="quantitatif" className="flex scroll-mt-20 flex-col gap-8" id="quantitatif">
+      {/* Les trois images : ta liste → précise-la → ton prix. Sur le téléphone, elles défilent de côté. */}
+      <section aria-labelledby="comment-titre" className="flex scroll-mt-20 flex-col gap-8" id="comment">
         <div className="flex flex-col gap-3">
-          <h2 id="quantitatif-titre" className={`${h2} max-w-[18ch]`}>
-            Du devis à la liste de fournitures, en trois étapes
+          <h2 id="comment-titre" className={`${h2} max-w-[20ch]`}>
+            Ta liste, précise-la, ton prix
           </h2>
-          <p className="max-w-[55ch] text-[17px] leading-relaxed text-muted">Zéro saisie. Tu déposes, tu réponds à deux questions, tu envoies.</p>
+          <p className="max-w-[55ch] text-[17px] leading-relaxed text-muted">Trois gestes. Le reste, c&apos;est nous : le regroupement, les demandes aux négoces, la comparaison.</p>
         </div>
         <ol className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-5 sm:overflow-visible sm:px-0">
-          {QUANTITATIF.map((e, i) => (
-            <li key={e.titre} className="flex w-[80vw] max-w-[340px] shrink-0 snap-center flex-col gap-4 sm:w-auto sm:max-w-none">
-              <div className="relative h-[300px] overflow-hidden rounded-[28px] bg-surface pt-6 shadow-card sm:h-[340px]">
-                <Telephone src={e.image} alt={e.alt} className="mx-auto scale-[0.92] origin-top" />
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-surface to-transparent" aria-hidden="true" />
-              </div>
-              <div className="flex gap-3.5 px-1">
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-ink text-[14px] font-extrabold text-white" aria-hidden="true">
-                  {i + 1}
-                </span>
-                <div className="flex flex-col gap-1">
-                  <h3 className="text-[18px] leading-snug font-extrabold">{e.titre}</h3>
-                  <p className="text-[15px] leading-relaxed text-muted">{e.texte}</p>
+          {ETAPES.map((e, i) => {
+            const Illustration = IMAGES[i]!;
+            return (
+              <li key={e.titre} className="flex w-[80vw] max-w-[340px] shrink-0 snap-center flex-col gap-4 sm:w-auto sm:max-w-none">
+                <div className="h-[280px] overflow-hidden rounded-[28px] shadow-card sm:h-[300px]">
+                  <Illustration />
                 </div>
-              </div>
-            </li>
-          ))}
+                <div className="flex gap-3.5 px-1">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-ink text-[14px] font-extrabold text-white" aria-hidden="true">
+                    {i + 1}
+                  </span>
+                  <div className="flex flex-col gap-1">
+                    <h3 className="text-[19px] leading-snug font-extrabold">{e.titre}</h3>
+                    <p className="text-[15px] leading-relaxed text-muted">{e.texte}</p>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
         </ol>
       </section>
 
-      {/* Les fournitures, dessinées : ce qui sort de la liste, avec les mots du comptoir. */}
+      {/* Ce que commande un couvreur, dessiné : la désignation et la quantité telles qu'elles partent au négoce. */}
       <section aria-labelledby="fournitures" className="flex flex-col gap-8">
         <div className="flex flex-col gap-3">
           <h2 id="fournitures" className={`${h2} max-w-[20ch]`}>
-            Les mots de ton comptoir, les quantités de ton chantier
+            Ardoise, tuile, zinc, liteaux : tout ce que tu commandes
           </h2>
-          <p className="max-w-[55ch] text-[17px] leading-relaxed text-muted">Ardoises, liteaux, gouttières, BA13, câble : chaque ligne part au négoce comme tu la lui dirais.</p>
+          <p className="max-w-[55ch] text-[17px] leading-relaxed text-muted">Chaque ligne part au négoce comme tu la lui dirais au comptoir.</p>
         </div>
         <ul aria-label="Exemples de fournitures" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-          {FOURNITURES_EXEMPLE.map(({ photo, nom, quantite, metier, Dessin, fond }) => (
+          {FOURNITURES_COUVREUR.map(({ photo, nom, quantite, metier, Dessin, fond }) => (
             <li key={nom} className="flex flex-col overflow-hidden rounded-[24px] bg-surface shadow-card">
               <div className={`${fond} relative flex aspect-[16/11] items-center justify-center overflow-hidden p-3`}>
                 <Visuel emplacement={photo} className="absolute inset-0 h-full w-full">
@@ -159,45 +222,16 @@ export default function BienvenuePage() {
         </ul>
       </section>
 
-      {/* Les réponses comparées : l'écran à gauche, trois phrases à droite. */}
-      <section aria-labelledby="comparer" className="grid grid-cols-1 items-center gap-8 lg:grid-cols-12 lg:gap-12">
-        <div className="relative order-2 lg:order-1 lg:col-span-5">
-          <div className="relative mx-auto h-[380px] overflow-hidden rounded-[32px] bg-ok-bg pt-6 sm:h-[440px]">
-            <Telephone src="/landing/comparer.jpg" alt="Trois devis de négoces comparés, le moins cher des offres complètes en tête, un article manquant signalé" className="mx-auto" />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-ok-bg to-transparent" aria-hidden="true" />
-          </div>
-        </div>
-        <div className="order-1 flex flex-col gap-5 lg:order-2 lg:col-span-7">
-          <h2 id="comparer" className={`${h2} max-w-[16ch]`}>
-            Les réponses reviennent dans l&apos;app, comparées
-          </h2>
-          <ul className="flex flex-col gap-3 text-[17px] leading-relaxed">
-            <li className="flex gap-3">
-              <span className="mt-[11px] size-2 shrink-0 rounded-full bg-ok" aria-hidden="true" />
-              Le moins cher des offres complètes, en tête.
-            </li>
-            <li className="flex gap-3">
-              <span className="mt-[11px] size-2 shrink-0 rounded-full bg-ok" aria-hidden="true" />
-              Un article manquant chez un négoce ? Signalé, et le total estimé avec.
-            </li>
-            <li className="flex gap-3">
-              <span className="mt-[11px] size-2 shrink-0 rounded-full bg-ok" aria-hidden="true" />
-              Tu retiens une offre d&apos;un geste. Rien à ressaisir.
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      {/* Le groupé : une seule carte sombre, le seul bloc inversé de la page. */}
+      {/* Le regroupement : une seule carte sombre, le seul bloc inversé de la page. */}
       <section aria-labelledby="groupe" className="relative overflow-hidden rounded-[36px] bg-hero p-6 text-white sm:p-10 lg:p-14">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-8">
           <div className="flex flex-col gap-8 lg:col-span-7">
             <div className="flex flex-col gap-3">
-              <p className="text-[13px] font-extrabold tracking-[0.08em] text-accent-on-dark uppercase">BatiClair Groupé</p>
+              <p className="text-[13px] font-extrabold tracking-[0.08em] text-accent-on-dark uppercase">Le regroupement</p>
               <h2 id="groupe" className={`${h2} max-w-[18ch]`}>
-                Le groupé : un seul négoce, un seul prix
+                Les couvreurs de ton secteur, ensemble
               </h2>
-              <p className="max-w-[52ch] text-[17px] leading-relaxed text-white/75">Tes commandes regroupées avec celles des autres artisans du département. Personne ne voit ton nom ni tes chantiers.</p>
+              <p className="max-w-[52ch] text-[17px] leading-relaxed text-white/75">Plus on est nombreux sur la même ligne, plus les négoces se battent pour la livrer. Tu commandes sur ton compte, comme d&apos;habitude.</p>
             </div>
             <ol className="flex flex-col divide-y divide-white/12">
               {GROUPE.map((e, i) => (
@@ -212,50 +246,16 @@ export default function BienvenuePage() {
                 </li>
               ))}
             </ol>
-            <Visuel emplacement="tournee" className="aspect-[3/1] w-full max-w-[520px] rounded-2xl">
-              <TourneeGroupee className="w-full max-w-[520px]" />
+          </div>
+          <div className="flex flex-col justify-center gap-6 lg:col-span-5">
+            <div className="overflow-hidden rounded-[28px] text-ink">
+              <ImagePrix />
+            </div>
+            <Visuel emplacement="tournee" className="aspect-[3/1] w-full rounded-2xl">
+              <TourneeGroupee className="w-full" />
             </Visuel>
           </div>
-          <div className="relative lg:col-span-5">
-            <div className="relative mx-auto h-[360px] overflow-hidden sm:h-[460px] lg:h-full lg:min-h-[520px]">
-              <Telephone src="/landing/groupe.jpg" alt="L'écran Groupé de l'app : tes commandes d'ardoise regroupées avec les autres couvreurs du département" className="mx-auto lg:absolute lg:top-0 lg:right-0" />
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#1a1550] to-transparent lg:hidden" aria-hidden="true" />
-            </div>
-          </div>
         </div>
-      </section>
-
-      {/* Le prix, en deux blocs inégaux. */}
-      <section aria-labelledby="prix" className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        <div className="flex flex-col gap-4 rounded-[32px] bg-surface p-7 shadow-card lg:col-span-7 lg:p-10">
-          <h2 id="prix" className={h2}>
-            Gratuit pour l&apos;artisan
-          </h2>
-          <p className="max-w-[48ch] text-[17px] leading-relaxed text-muted">Pas d&apos;abonnement pour le groupé, pas de commission sur tes achats. Tu commandes sur ton compte, au prix du lot.</p>
-        </div>
-        <div className="flex flex-col justify-between gap-6 rounded-[32px] bg-ok-bg p-7 lg:col-span-5 lg:p-10">
-          <p className="font-display text-[56px] leading-none font-extrabold tracking-[-0.04em] text-ok sm:text-[72px]">2 %</p>
-          <div className="flex flex-col gap-2">
-            <p className="text-[20px] leading-tight font-extrabold text-ok">Le négoce paie 2 %</p>
-            <p className="text-[15px] leading-relaxed text-ok">Quand son offre est retenue, il reverse 2 % du montant HT du lot à BatiClair. Il l&apos;accepte avant de répondre, et l&apos;intègre à son prix.</p>
-          </div>
-        </div>
-      </section>
-
-      <section aria-labelledby="metiers" className="flex flex-col gap-6">
-        <div className="flex flex-col gap-3">
-          <h2 id="metiers" className={h2}>
-            Les métiers couverts
-          </h2>
-          <p className="max-w-[55ch] text-[17px] leading-relaxed text-muted">Un référentiel par métier, relu par des artisans : les quantités sortent avec les mots de ton comptoir.</p>
-        </div>
-        <ul aria-label="Métiers couverts" className="flex flex-wrap gap-2">
-          {METIERS.map((t) => (
-            <li key={t.id} className="rounded-full border border-line bg-surface px-4 py-2.5 text-[14px] font-bold">
-              {t.label}
-            </li>
-          ))}
-        </ul>
       </section>
 
       <section aria-labelledby="commencer" className="flex flex-col items-start gap-6 rounded-[36px] bg-ink px-7 py-10 text-white sm:items-center sm:px-10 sm:py-16 sm:text-center">
@@ -263,13 +263,16 @@ export default function BienvenuePage() {
           <OutilsArtisan className="w-[200px] sm:w-[240px]" />
         </Visuel>
         <h2 id="commencer" className="font-display text-[34px] leading-[1.02] font-extrabold tracking-[-0.035em] sm:text-[52px]">
-          Ton premier devis, maintenant
+          Ta première liste, maintenant
         </h2>
-        <p className="max-w-[40ch] text-[17px] leading-relaxed text-white/75">Un compte, un devis déposé, ta liste en deux minutes.</p>
+        <p className="max-w-[40ch] text-[17px] leading-relaxed text-white/75">Un compte, une photo de ta liste, et les négoces de ton secteur se mettent au travail.</p>
         <ButtonLink href="/inscription" className="min-h-14 bg-cta px-7 text-[17px] shadow-cta">
           Créer un compte
         </ButtonLink>
       </section>
+
+      {/* Tous les métiers restent ouverts (nouveau cap) : une ligne, en bas. */}
+      <p className="-mt-10 text-center text-[16px] font-bold text-muted sm:-mt-16">Aussi pour la charpente, la maçonnerie, l&apos;isolation…</p>
 
       <footer className="flex flex-col gap-5 border-t border-line pt-8 text-[13px] leading-relaxed text-muted">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

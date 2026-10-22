@@ -9,13 +9,16 @@ import { useEffect, useState } from "react";
  * LA DÉMO GUIDÉE (plan 2 du 21 octobre 2026, bloc 3) : au premier lancement, trois écrans qui montrent l'app avec un
  * faux chantier (devis exemple ardoise, lot exemple, offre exemple), sans compte ni API. Un bouton « Passer » sur chaque
  * écran ; une fois vue (ou passée), elle ne revient plus (clé locale), sauf par `?demo` dans l'adresse. Les données sont
- * fictives et marquées comme telles sur chaque écran.
+ * fictives et marquées comme telles sur chaque écran. Nouveau cap (22 octobre) : ta liste → les couvreurs du secteur
+ * regroupés (le compteur) → ton prix livré chez toi ; rien sur la rémunération, en suspens.
  */
 export const CLE_DEMO_VUE = "baticlair.demoVue";
 
 /** Le faux devis d'ardoise et ce que BatiClair en sort. Tous les chiffres sont inventés. */
 export const EXEMPLE = {
   devis: { numero: "D-2026-042", client: "Maison Le Goff", adresse: "Ploubazlanec (22)", objet: "Couverture ardoise 32 × 22, 118 m²" },
+  /** Le compteur du groupe (nouveau cap) : couvreurs du secteur sur la même ligne, demandes, devis, meilleur prix. */
+  compteur: { couvreurs: 30, demandes: 15, devis: 3, meilleurPrix: "0,92 €" },
   liste: [
     { designation: "Ardoise 32 × 22 Espagne 1er choix", quantite: "2 760 pièces" },
     { designation: "Crochet inox 100 mm", quantite: "3 paquets" },
@@ -24,7 +27,7 @@ export const EXEMPLE = {
     { designation: "Faîtage zinc dév. 33", quantite: "6 longueurs de 2 m" },
   ],
   lot: { numero: 12, departement: "Côtes-d'Armor", reference: "Ardoise 32 × 22 Espagne 1er choix", artisans: 3, volume: "8 200 pièces", negoces: 4 },
-  offre: { quantite: "2 760 pièces", prix: "0,92 € HT l'unité", negoce: "Négoce Exemple, Guingamp", baisse: "−11 %", livraison: "3 novembre", economie: "315 €" },
+  offre: { quantite: "2 760 pièces", prix: "0,92 € HT l'unité", negoce: "Négoce Exemple, Guingamp", baisse: "−11 %", livraison: "3 novembre", economie: "331 €", livre: "2 584 € HT livré à Ploubazlanec", fraisLivraison: "45 €", habituel: "1,04 €" },
 } as const;
 
 type Ecran = 0 | 1 | 2;
@@ -58,7 +61,7 @@ export function DemoGuidee() {
   }
 
   if (!visible) return null;
-  const titres = ["Ton devis devient ta liste", "Le groupé, avec les artisans du département", "Ton offre, ton prix"];
+  const titres = ["Ta liste, remise au propre", "Les couvreurs du secteur, regroupés", "Ton prix, livré chez toi"];
   return (
     <section aria-labelledby="demo-titre" className="flex min-h-[calc(100svh-4rem)] flex-col gap-4 rounded-[28px] bg-hero p-4 text-white shadow-[0_24px_48px_-16px_rgba(26,21,80,0.6)] sm:p-6">
       <div className="flex items-start justify-between gap-3">
@@ -115,7 +118,7 @@ function EcranDevis() {
           </span>
         </div>
       </div>
-      <p className="text-[14px] font-bold text-[#c9ced6]">Déposé en photo. Deux questions au comptoir, puis la liste :</p>
+      <p className="text-[14px] font-bold text-[#c9ced6]">Donnée en photo, remise au propre, ligne par ligne :</p>
       <ul aria-label="Liste de fournitures (exemple)" className="flex flex-col divide-y divide-line rounded-2xl bg-white/95">
         {EXEMPLE.liste.map((l) => (
           <li key={l.designation} className="flex items-center gap-3 px-3 py-2.5">
@@ -127,33 +130,31 @@ function EcranDevis() {
           </li>
         ))}
       </ul>
-      <p className="text-[13px] text-[#c9ced6]">Prête à partir chez tes négoces, ou à proposer au groupé.</p>
+      <p className="text-[13px] text-[#c9ced6]">Chaque ligne précise rejoint celles des couvreurs de ton secteur.</p>
     </div>
   );
 }
 
-/** Écran 2 : la ligne d'ardoise rejoint un lot du département ; personne ne voit son nom. */
+/** Écran 2 : le compteur du groupe (nouveau cap, 22 octobre) : couvreurs, demandes, devis reçus, meilleur prix. */
 function EcranLot() {
   const l = EXEMPLE.lot;
+  const c = EXEMPLE.compteur;
   return (
     <div className="flex flex-col gap-3 text-ink">
       <div className="flex flex-col gap-2 rounded-2xl bg-white/95 p-3">
         <span className="flex items-center gap-2 text-[14px] font-extrabold">
           <Users size={18} aria-hidden="true" className="text-accent-text" />
-          Commande groupée n° {l.numero} · {l.departement} <Exemple />
+          {l.reference} · {l.departement} <Exemple />
         </span>
-        <span className="text-[15px] font-bold">{l.reference}</span>
+        <p className="text-[15px] font-bold">
+          {c.couvreurs} couvreurs, {c.demandes} demandes envoyées, {c.devis} devis reçus, meilleur prix {c.meilleurPrix}
+        </p>
         <ul className="flex flex-col gap-1 text-[14px]">
-          <li>
-            <strong>{l.artisans} artisans</strong> du département, <strong>{l.volume}</strong> en tout, dont tes 2 760.
-          </li>
-          <li>
-            Demande partie chez <strong>{l.negoces} négoces</strong>, réponses sous 7 jours.
-          </li>
-          <li>Un seul négoce retenu pour toute la commande : c&apos;est ce qui fait le prix.</li>
+          <li>Chaque couvreur a ajouté son négoce : la demande commune est partie chez tous.</li>
+          <li>Chaque devis est comparé au meilleur prix dès qu&apos;il arrive.</li>
         </ul>
       </div>
-      <p className="text-[14px] font-bold text-[#c9ced6]">Tu as coché « Chantier signé » : tu t&apos;engages à commander ces quantités au prix obtenu. Ton nom ne part pas avec.</p>
+      <p className="text-[14px] font-bold text-[#c9ced6]">Personne ne voit ton nom ni tes chantiers.</p>
     </div>
   );
 }
@@ -166,15 +167,18 @@ function EcranOffre() {
       <div className="flex flex-col gap-2 rounded-2xl bg-white/95 p-3">
         <span className="flex items-center gap-2 text-[14px] font-extrabold">
           <Tag size={18} aria-hidden="true" className="text-accent-text" />
-          Mon offre · commande groupée n° {EXEMPLE.lot.numero} <Exemple />
+          Ton prix · {EXEMPLE.lot.reference} <Exemple />
         </span>
         <span className="text-[17px] leading-snug font-extrabold">
           {o.quantite} à {o.prix} chez {o.negoce} ({o.baisse})
         </span>
-        <span className="text-[14px] text-muted">Livraison le {o.livraison}, sur ton chantier, sur ton compte chez lui. Bon de commande transmis.</span>
+        <span className="text-[15px] font-bold">
+          Ton prix : {o.livre} (livraison {o.fraisLivraison}). Ton prix habituel : {o.habituel} l&apos;unité.
+        </span>
+        <span className="text-[14px] text-muted">Livraison le {o.livraison}, sur ton chantier, sur ton compte chez lui.</span>
         <span className="text-[15px] font-extrabold text-ok">Économie estimée : {o.economie}</span>
       </div>
-      <p className="text-[14px] font-bold text-[#c9ced6]">Gratuit pour toi : le négoce retenu verse 2 % à BatiClair. Tu dis « Livré » quand c&apos;est arrivé.</p>
+      <p className="text-[14px] font-bold text-[#c9ced6]">Tu dis « Livré » quand c&apos;est arrivé.</p>
     </div>
   );
 }

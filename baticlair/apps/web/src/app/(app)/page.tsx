@@ -44,13 +44,13 @@ export default function AccueilPage() {
     todo.push({ key: "email", title: "Confirme ton adresse e-mail", text: "Nécessaire avant d'écrire à tes fournisseurs.", href: "/compte", action: "Voir", icon: <MailCheck size={20} aria-hidden="true" /> });
   }
 
-  // Simplification (21 octobre) : accueil vide = une phrase et un bouton, rien d'autre.
+  // Simplification (21 octobre) : accueil vide = une phrase et un bouton, rien d'autre. Nouveau cap (22 octobre) : la promesse.
   if (recent && recent.items.length === 0 && !error) {
     return (
       <div className="flex min-h-[60dvh] flex-col items-center justify-center gap-6 text-center">
-        <h1 className="font-display text-[28px] leading-tight font-extrabold tracking-[-0.02em]">Dépose ton premier devis, je prépare ta liste de matériaux.</h1>
+        <h1 className="font-display text-[28px] leading-tight font-extrabold tracking-[-0.02em]">Paie tes matériaux moins cher. Donne ta liste, je fais jouer les négoces.</h1>
         <ButtonLink href="/chantiers/nouveau" className="min-h-14 w-full max-w-sm text-[17px]">
-          Déposer mon devis
+          Donner ma liste
         </ButtonLink>
       </div>
     );

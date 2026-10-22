@@ -18,7 +18,7 @@ interface NavItem {
 
 /**
  * Simplification (21 octobre, demande du fondateur) : TROIS entrées seulement, une icône et un mot chacune.
- * « Mes chantiers » (l'accueil), au centre le gros bouton « + Nouveau devis », « Groupé ». Fournisseurs et Compte
+ * « Mes chantiers » (l'accueil), au centre le gros bouton « + Nouvelle liste » (nouveau cap, 22 octobre ; avant « + Nouveau devis »), « Groupé ». Fournisseurs et Compte
  * vivent dans le menu derrière l'initiale de l'artisan, en haut à droite (`MenuArtisan`).
  */
 const chantiersItem: NavItem = {
@@ -85,7 +85,7 @@ export function AppNav() {
           className="flex min-h-13 items-center justify-center gap-1.5 justify-self-center rounded-full bg-cta px-4 text-[14px] font-extrabold text-white shadow-cta ring-4 ring-white lg:order-first lg:mb-3 lg:w-full lg:rounded-2xl lg:text-[15px]"
         >
           <Plus size={22} strokeWidth={2.8} aria-hidden="true" />
-          <span>Nouveau devis</span>
+          <span>Nouvelle liste</span>
         </Link>
         {groupe ? link(groupeItem) : <span aria-hidden="true" />}
         </div>

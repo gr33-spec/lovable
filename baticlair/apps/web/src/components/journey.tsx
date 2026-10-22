@@ -26,12 +26,15 @@ export function DropZone({
   pending,
   error,
   kind = "devis",
+  small = false,
 }: {
   onFile: (file: File) => void;
   pending: boolean;
   error: ApiError | null;
-  /** « liste » : « J'ai déjà ma liste », une photo, un PDF ou une capture de ce que l'artisan a déjà compté. */
+  /** « liste » : « Donne ta liste de matériaux », une photo, un PDF ou une capture de ce que l'artisan a déjà compté. */
   kind?: "devis" | "liste";
+  /** Nouveau cap (22 octobre) : le devis passe en petit bouton sous la liste, « Je n'ai qu'un devis ». */
+  small?: boolean;
 }) {
   const liste = kind === "liste";
   const id = useId();
@@ -57,6 +60,22 @@ export function DropZone({
         disabled={pending}
         onChange={(e) => take(e.target.files?.[0])}
       />
+      {small ? (
+        // Le petit bouton « Je n'ai qu'un devis » (nouveau cap, 22 octobre) : le parcours du devis reste, en second.
+        <label
+          htmlFor={id}
+          aria-disabled={pending}
+          className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl bg-surface px-4 py-3 shadow-card transition focus-within:ring-2 ${pending ? "pointer-events-none opacity-80" : "active:scale-[0.99]"}`}
+        >
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-ground text-ink">
+            {pending ? <Loader2 size={20} className="animate-spin" aria-hidden="true" /> : <FileUp size={20} aria-hidden="true" />}
+          </span>
+          <span className="flex flex-col">
+            <span className="text-[16px] font-extrabold">Je n&apos;ai qu&apos;un devis</span>
+            <span className="text-[14px] leading-snug text-muted">On t&apos;avance la liste, sans garantie, tu la peaufines.</span>
+          </span>
+        </label>
+      ) : (
       <label
         htmlFor={id}
         aria-disabled={pending}
@@ -77,9 +96,10 @@ export function DropZone({
         <span className={`flex size-16 items-center justify-center rounded-full text-white shadow-card ${liste ? "bg-ink" : "bg-cta"}`}>
           {pending ? <Loader2 size={28} className="animate-spin" aria-hidden="true" /> : liste ? <ListChecks size={28} aria-hidden="true" /> : <FileUp size={28} aria-hidden="true" />}
         </span>
-        <span className="font-display text-[20px] font-extrabold tracking-[-0.01em]">{pending && liste ? "Je lis ta liste…" : liste ? "J'ai déjà ma liste" : "J'ai un devis"}</span>
-        {liste && !pending ? <span className="text-[14px] leading-snug text-muted">Photo d&apos;une liste écrite à la main, d&apos;un bon ou d&apos;un devis de négoce, PDF ou capture.</span> : null}
+        <span className="font-display text-[20px] font-extrabold tracking-[-0.01em]">{pending && liste ? "Je lis ta liste…" : liste ? "Donne ta liste de matériaux" : "J'ai un devis"}</span>
+        {liste && !pending ? <span className="text-[14px] leading-snug text-muted">Une photo, un PDF ou une capture : je la remets au propre.</span> : null}
       </label>
+      )}
     </section>
   );
 }

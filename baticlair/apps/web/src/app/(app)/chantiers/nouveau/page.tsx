@@ -11,8 +11,9 @@ import { attachFile } from "@/lib/upload";
 import { useSession } from "@/lib/session";
 
 /**
- * NOUVEAU DEVIS = DEUX GROS BOUTONS (demande du fondateur, 21 octobre 2026) : « J'ai un devis » (déposer le PDF, parcours
- * §48, étape 1) et « J'ai déjà ma liste » (photo d'une liste écrite à la main, d'un bon ou d'un devis de négoce, PDF ou
+ * NOUVEAU CAP (22 octobre 2026) : UN GROS BOUTON « Donne ta liste de matériaux » (liste remise au propre) et, en petit
+ * dessous, « Je n'ai qu'un devis » (« On t'avance la liste, sans garantie, tu la peaufines. »). Avant (21 octobre) : deux
+ * gros boutons, « J'ai un devis » (déposer le PDF, parcours §48, étape 1) et « J'ai déjà ma liste » (photo d'une liste écrite à la main, d'un bon ou d'un devis de négoce, PDF ou
  * capture : l'artisan a déjà compté, les lignes sont lues telles qu'écrites, sans calcul ni question). Le chantier se crée
  * au dépôt, sous un nom d'attente ; la lecture d'un devis lui donne le nom du client, l'adresse et le métier. Les deux
  * chemins arrivent sur le même écran de liste. Rien à taper.
@@ -72,14 +73,14 @@ export default function NouveauChantierPage() {
   return (
     <>
       <BackButton fallback="/chantiers" />
-      <h1 className="font-display text-[28px] leading-tight font-extrabold tracking-[-0.02em]">Nouveau devis</h1>
-      <DropZone onFile={(f) => void drop(f, "devis")} pending={pending !== null} error={error} />
+      <h1 className="font-display text-[28px] leading-tight font-extrabold tracking-[-0.02em]">Nouvelle liste</h1>
       {erreurListe ? (
         <p role="alert" className="rounded-2xl bg-warn-bg p-4 text-[15px] font-semibold text-warn">
           {erreurListe}
         </p>
       ) : null}
-      <DropZone kind="liste" onFile={(f) => void drop(f, "liste")} pending={pending === "liste"} error={null} />
+      <DropZone kind="liste" onFile={(f) => void drop(f, "liste")} pending={pending === "liste"} error={error} />
+      <DropZone small onFile={(f) => void drop(f, "devis")} pending={pending === "devis"} error={null} />
     </>
   );
 }
