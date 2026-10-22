@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import type { ApiError } from "@/lib/api";
 import { fr } from "@/lib/fr";
@@ -139,10 +140,17 @@ export function BackButton({ fallback, label = fr.actions.back, compact = false 
 
 /** Erreur utile : ce qui s'est passé, si c'est récupérable, le code support. */
 export function ErrorNotice({ error, onRetry }: { error: ApiError; onRetry?: () => void }) {
+  const pathname = usePathname();
   return (
     <div role="alert" className="flex flex-col gap-3 rounded-3xl bg-danger-bg p-4 text-danger">
       <p className="font-bold">{error.message}</p>
       {error.supportId ? <p className="text-sm">Code support : {error.supportId}</p> : null}
+      {/* Plan « finition », bloc 6 : une session expirée en pleine action dit quoi faire, et ramène ici après. */}
+      {error.code === "unauthenticated" ? (
+        <Link href={`/connexion?retour=${encodeURIComponent(pathname)}`} className="inline-flex min-h-11 items-center self-start rounded-xl bg-surface px-4 font-bold text-ink">
+          Me reconnecter
+        </Link>
+      ) : null}
       {onRetry && error.retryable ? (
         <Button variant="secondary" onClick={onRetry} className="self-start">
           {fr.actions.retry}

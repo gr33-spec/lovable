@@ -2065,9 +2065,21 @@ test("BatiClair Groupé, étape 9 : l'admin (Greg seul) voit les lots, le journa
   await rubriques.getByRole("button", { name: "Exclusions" }).click();
   await expect(page.getByRole("list", { name: "Exclusions" })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
-  // Plan « finition » : zéro bouton mort dans l'admin. Les gestes de secours qui changent un lot des autres parcours
-  // (clore, annuler, forcer, retenir un autre négoce, payée) sont vérifiés par le test API `groupe-admin`.
-  const gestes = /^(Clore le lot|Annuler|Forcer|Retenir ce négoce|Payée)$/;
+  // Plan « finition », bloc 6 : « Clore le lot » demande « Oui » ou « Non » ; « Non » ne change rien.
+  await rubriques.getByRole("button", { name: "Lots" }).click();
+  const premierLot = page.getByRole("list", { name: "Lots" }).getByRole("listitem").first();
+  if (await premierLot.getByRole("button", { name: "Clore le lot" }).count()) {
+    await premierLot.getByRole("button", { name: "Clore le lot" }).click();
+    const confirmation = page.getByRole("alertdialog", { name: /^Clore le lot n° \d+ \? Il ne reçoit plus rien, c'est définitif\.$/ });
+    await expect(confirmation).toBeVisible();
+    await confirmation.getByRole("button", { name: "Non" }).click();
+    await expect(confirmation).toHaveCount(0);
+    await expect(premierLot.getByRole("button", { name: "Clore le lot" })).toBeVisible();
+  }
+  // Plan « finition » : zéro bouton mort dans l'admin. Forcer, Clore et Annuler ouvrent leur confirmation (cliqués) ;
+  // les gestes qui changent un lot des autres parcours (« Oui, … », retenir un autre négoce, payée) sont vérifiés par
+  // le test API `groupe-admin`.
+  const gestes = /^(Oui, clore|Oui, annuler|Oui, forcer|Retenir ce négoce|Payée)$/;
   const defauts: string[] = [];
   for (const rubrique of ["Lots", "Négoces", "Accords", "Factures", "Exclusions"]) {
     defauts.push(
@@ -2715,4 +2727,47 @@ test("Zéro bouton mort (artisan) : accueil, chantiers, nouvelle liste, Ton chan
     );
   }
   expect(defauts).toEqual([]);
+});
+
+test("Cas limites (plan « finition », bloc 6) : fichier trop lourd, réseau coupé, photo floue, un seul chantier malgré les essais, retour arrière, session expirée, liens expirés", async ({ page }) => {
+  await signUp(page);
+  await page.goto("/chantiers/nouveau");
+  const depot = page.getByLabel("Déposer ma liste");
+  const photo = fs.readFileSync(path.join(__dirname, "fixtures", "liste-manuscrite.png"));
+  // Un fichier de plus de 20 Mo : refusé avant l'envoi, en clair.
+  await depot.setInputFiles({ name: "liste.png", mimeType: "image/png", buffer: Buffer.alloc(21_000_000, 1) });
+  await expect(page.getByText("C'est trop volumineux pour être envoyé.")).toBeVisible();
+  // Réseau coupé : rien n'est perdu, l'écran le dit.
+  await page.context().setOffline(true);
+  await depot.setInputFiles({ name: "liste-manuscrite.png", mimeType: "image/png", buffer: photo });
+  await expect(page.getByText("Pas de connexion internet. Rien n'est perdu : réessaie dès que le réseau revient.")).toBeVisible();
+  await page.context().setOffline(false);
+  // Photo floue : le modèle ne lit aucune ligne ; on dit comment refaire la photo, jamais « devis » ni « PDF » abîmé.
+  await depot.setInputFiles({ name: "photo-floue.png", mimeType: "image/png", buffer: photo });
+  await expect(page.getByText("Je n'ai rien lu sur ce fichier. Reprends la photo bien à plat, bien éclairée, ou envoie un PDF.")).toBeVisible();
+  // Puis la bonne photo : la liste arrive, et tous ces essais n'ont créé qu'un chantier.
+  await depot.setInputFiles({ name: "liste-manuscrite.png", mimeType: "image/png", buffer: photo });
+  await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/, { timeout: 60_000 });
+  const chantier = page.url();
+  await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible({ timeout: 60_000 });
+  const projets = await apiJson<{ items: unknown[] }>(page, "GET", "/v1/projects?status=all");
+  expect(projets.body.items).toHaveLength(1);
+  // Retour arrière : on ne retombe pas sur le dépôt (il reprendrait de zéro), et « en avant » rend la liste.
+  await page.goBack();
+  await expect(page).not.toHaveURL(/\/chantiers\/nouveau/);
+  await expect(page.getByText("Oups, cet écran a eu un souci")).toHaveCount(0);
+  await page.goForward();
+  await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible();
+  expect(page.url()).toBe(chantier);
+  // Session expirée en pleine action : la phrase, et un bouton pour se reconnecter qui ramène ici.
+  await page.goto("/chantiers/nouveau");
+  await page.context().clearCookies();
+  await depot.setInputFiles({ name: "liste-manuscrite.png", mimeType: "image/png", buffer: photo });
+  await expect(page.getByText("Ta session a expiré. Reconnecte-toi.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Me reconnecter" })).toHaveAttribute("href", "/connexion?retour=%2Fchantiers%2Fnouveau");
+  // Liens expirés ou tronqués (négoce) : la page le dit, sans formulaire.
+  await page.goto("/reponse/lien-expire");
+  await expect(page.getByText("Ce lien n'est plus valable.")).toBeVisible();
+  await page.goto("/negoces/lien/lien-expire");
+  await expect(page.getByText("Ce lien n'est plus valable.")).toBeVisible();
 });

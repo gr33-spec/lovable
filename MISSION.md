@@ -145,7 +145,7 @@ activer l'auto-reload. Le forfait Claude (claude.ai) est un autre compteur et ne
 | 3 | Étape 0 : socle `referentiels/metiers/` (format 8 sections, registre par fichier, « Métiers couverts », cache de prompt) | fait (#265, en prod) |
 | 4 | Étape 1-2 : 14 nouveaux référentiels, un par PR, dans l'ordre du §1 | 5/14 faits : terrassement-VRD (#266), maçonnerie (#267), charpente (#268), étanchéité déclarée (#269, tiroir relu gardé), menuiseries extérieures (#270), en prod ; #271 ratios « à vérifier » en orange, #272 consommables des fiches, menuiserie intérieure (#273), plâtrerie-isolation (#274), plomberie-sanitaire (#275), chauffage-PAC-VMC (#276), en prod ; carrelage-faïence (#277) ; sols souples et parquet (#278) ; peinture-finitions (#279) ; serrurerie-métallerie (`metalwork`, #280) ; ravalement-ITE (fiche, PR ouverte) : 16/16 métiers de l'étape 2 faits (couverture et électricité non touchées) |
 | 5 | Étape 3 : devis maison complète 8 lots | fait (#282) : `apps/api/test/maison-entiere-8-lots.test.ts` (maçonnerie, électricité, plomberie, carrelage, sols, peinture, serrurerie, façade ; carte des lots, une section par lot, envoi par lot) |
-| 6 | Mission B, boucle 1 à 5, jusqu'au vendredi 23 octobre 12 h | à faire |
+| 6 | Mission B, boucle 1 à 5, jusqu'au vendredi 23 octobre 12 h | fait : 9 cas joués (e2e « Cas limites »), 3 corrigés : session expirée, redépôt négoce, confirmations admin |
 
 Tableau de bord : `baticlair/docs/tableau-de-bord-metiers.md` (écrit par un test). Prochaine étape : boucle de la mission B (épreuves, robustesse, écrans iPhone), sans API. Au retour du crédit : file du §2 bis.
 
@@ -252,6 +252,6 @@ Routine horaire `trig_019b3LSmsdY43Aowni5jVARm` (prompt mis à jour). Rapport ve
 | 3 | Pages légales relues, `docs/A-FAIRE-RELIRE.md` | fait : plus aucun « 2 % » sur les pages, clause neutre, cookies sans bandeau, 19 points dans `A-FAIRE-RELIRE.md` |
 | 4 | Textes (tutoiement artisan, vouvoiement négoce, typographie, chiffres) | fait : textes relus écran par écran, gratuit partout (paywall éteint), milliers, lien négoce, mots |
 | 5 | Visuel, iPhone SE, Lighthouse landing > 90 | fait : landing 66 → 97, CLS 0, iPhone SE au test, mode clair forcé, suivi corrigé |
-| 6 | Cas limites | à faire |
+| 6 | Cas limites | fait : 9 cas joués (e2e « Cas limites »), 3 corrigés : session expirée, redépôt négoce, confirmations admin |
 | 7 | RECETTE.md : 20 tests iPhone | à faire |
 | 8 | DETTE.md, performance | à faire |

@@ -121,6 +121,14 @@ describe("nouveau cap du 22 octobre : regroupement, alertes, livraison au kilom�
     lots = (await a.agent.get("/v1/groupe/lots").expect(200)).body.besoins;
     expect(lots[0]!.compteur.phrase).toBe("2 artisans, 2 demandes envoyées, 1 devis reçu, meilleur prix 19,90 €");
     expect((await a.agent.get(`/v1/projects/${a.projectId}/suivi`).expect(200)).body).toMatchObject({ etape: 2, phrase: "1 devis reçu sur 2 demandes. Meilleur prix : 19,90 € HT l'unité.", aFaire: "Compare et retiens l'offre qui te va." });
+    // Plan « finition », bloc 6 : le même négoce redépose (devis corrigé) : son devis remplace le premier, il ne compte
+    // jamais pour deux.
+    expect((await deposer(jeton, [["CAR", CARREAU, "46 u", "19,90", "915,40"]], "DEVIS G bis – Délai de livraison 5 jours", GENERAL)).status).toBe(201);
+    lots = (await a.agent.get("/v1/groupe/lots").expect(200)).body.besoins;
+    expect(lots[0]!.compteur.phrase).toBe("2 artisans, 2 demandes envoyées, 1 devis reçu, meilleur prix 19,90 €");
+    expect((await request(ctx.app.getHttpServer()).get(`/v1/reponse/${jeton}`).expect(200)).body.reponse).toMatchObject({ fichiers: ["devis.pdf"] });
+    // Même prix qu'avant : aucune seconde alerte aux artisans.
+    expect(pushVers("a@example.fr").filter((x) => x.title === "Nouveau meilleur prix")).toHaveLength(1);
 
     // Deuxième devis, moins cher, dépôt à Paimpol, gratuit jusqu'à 50 km : les deux chantiers (0 et 40 km) sont livrés
     // gratuitement. Le généraliste, depuis Lannion, facture Paimpol (40 km > 20). Le choix se fait livraison comprise.

@@ -64,11 +64,15 @@ export default function AdminGroupePage() {
   const [pending, setPending] = useState<string | null>(null);
   const [erreur, setErreur] = useState<ApiError | null>(null);
   const [onglet, setOnglet] = useState<"lots" | "negoces" | "accords" | "factures" | "exclusions">("lots");
+  // Plan « finition », bloc 6 : Forcer, Clore et Annuler un lot ne partent plus d'un seul tap (un tap de trop sur
+  // téléphone fermait un lot pour tous ses artisans) ; la carte demande « Oui » ou « Non ».
+  const [aConfirmer, setAConfirmer] = useState<{ cle: string; question: string; oui: string; f: () => Promise<unknown> } | null>(null);
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
 
   const agir = async (cle: string, f: () => Promise<unknown>) => {
+    setAConfirmer(null);
     setPending(cle);
     setErreur(null);
     try {
@@ -124,23 +128,36 @@ export default function AdminGroupePage() {
               </span>
               <div className="flex flex-wrap gap-2">
                 {l.statut === "ouvert" ? (
-                  <Button variant="secondary" className="min-h-10 px-3.5 text-[14px]" pending={pending === `forcer-${l.id}`} onClick={() => agir(`forcer-${l.id}`, () => api(`/v1/admin/groupe/lots/${l.id}/forcer`, { method: "POST" }))}>
+                  <Button variant="secondary" className="min-h-10 px-3.5 text-[14px]" pending={pending === `forcer-${l.id}`} onClick={() => setAConfirmer({ cle: `forcer-${l.id}`, question: `Forcer le lot n° ${l.numero} ? La demande part aux négoces avec les artisans déjà engagés.`, oui: "Oui, forcer", f: () => api(`/v1/admin/groupe/lots/${l.id}/forcer`, { method: "POST" }) })}>
                     Forcer
                   </Button>
                 ) : null}
                 {!["clos", "annule"].includes(l.statut) ? (
                   <>
-                    <Button variant="secondary" className="min-h-10 px-3.5 text-[14px]" pending={pending === `clore-${l.id}`} onClick={() => agir(`clore-${l.id}`, () => api(`/v1/admin/groupe/lots/${l.id}/clore`, { method: "POST" }))}>
+                    <Button variant="secondary" className="min-h-10 px-3.5 text-[14px]" pending={pending === `clore-${l.id}`} onClick={() => setAConfirmer({ cle: `clore-${l.id}`, question: `Clore le lot n° ${l.numero} ? Il ne reçoit plus rien, c'est définitif.`, oui: "Oui, clore", f: () => api(`/v1/admin/groupe/lots/${l.id}/clore`, { method: "POST" }) })}>
                       Clore le lot
                     </Button>
                     {l.bons === 0 ? (
-                      <Button variant="secondary" className="min-h-10 px-3.5 text-[14px]" pending={pending === `annuler-${l.id}`} onClick={() => agir(`annuler-${l.id}`, () => api(`/v1/admin/groupe/lots/${l.id}/annuler`, { method: "POST" }))}>
+                      <Button variant="secondary" className="min-h-10 px-3.5 text-[14px]" pending={pending === `annuler-${l.id}`} onClick={() => setAConfirmer({ cle: `annuler-${l.id}`, question: `Annuler le lot n° ${l.numero} ? Ses artisans sont prévenus, c'est définitif.`, oui: "Oui, annuler", f: () => api(`/v1/admin/groupe/lots/${l.id}/annuler`, { method: "POST" }) })}>
                         Annuler
                       </Button>
                     ) : null}
                   </>
                 ) : null}
               </div>
+              {aConfirmer && aConfirmer.cle.endsWith(`-${l.id}`) ? (
+                <div role="alertdialog" aria-label={aConfirmer.question} className="flex flex-col gap-2 rounded-xl bg-warn-bg p-3">
+                  <p className="text-[14px] font-bold text-warn">{aConfirmer.question}</p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button className="min-h-10 px-3.5 text-[14px]" onClick={() => agir(aConfirmer.cle, aConfirmer.f)}>
+                      {aConfirmer.oui}
+                    </Button>
+                    <Button variant="secondary" className="min-h-10 px-3.5 text-[14px]" onClick={() => setAConfirmer(null)}>
+                      Non
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
               {ouvert === l.id ? (
                 <section aria-label={`Journal du lot n° ${l.numero}`} className="mt-2 flex flex-col gap-2 rounded-xl bg-ground p-3 text-[13px]">
                   {!lot ? (

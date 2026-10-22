@@ -336,6 +336,10 @@ export class DemandeService {
     const volume = fermes.reduce((s, b) => s + Number(b.quantite), 0);
     const prixUnitaire = lecture.statut === "lue" ? prixAuVolume(lecture.prix, volume) : null;
     if (prixUnitaire === null) return;
+    // Plan « finition », bloc 6 : un négoce qui redépose (devis corrigé) au même prix que son devis précédent ne change
+    // rien pour les artisans : pas de seconde alerte « Nouveau meilleur prix ». Un prix différent prévient comme avant.
+    const precedent = r.deposeLe && r.statutExtraction === "lue" ? prixAuVolume(Array.isArray(r.prix) ? (r.prix as { palier: string | null; prixUnitaire: string | null; totalHt: string | null }[]) : [], volume) : null;
+    if (precedent !== null && precedent === prixUnitaire) return;
     const autres = await this.prisma.reponseNegoce.findMany({ where: { lotId: r.lotId, id: { not: r.id }, statutExtraction: "lue", deposeLe: { not: null } }, select: { prix: true } });
     const meilleurs = autres.map((a) => prixAuVolume(Array.isArray(a.prix) ? (a.prix as { palier: string | null; prixUnitaire: string | null; totalHt: string | null }[]) : [], volume)).filter((p): p is number => p !== null);
     const meilleurAvant = meilleurs.length ? Math.min(...meilleurs) : null;

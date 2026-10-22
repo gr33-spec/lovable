@@ -41,6 +41,10 @@ export class FakeListeReader implements ListeReader {
 
   async lire(request: ListeRequest): Promise<ReadAttempt<ListeLue>> {
     const nom = request.fileName.toLowerCase();
+    // Plan « finition », bloc 6 : une photo floue ou coupée, où le modèle ne lit aucune ligne.
+    if (nom.includes("floue")) {
+      return { provider: this.provider, model: "claude-opus-5-5", usage: { inputTokens: 1800, outputTokens: 20 }, status: "success", output: { ...structuredClone(LISTES_ENREGISTREES.manuscrite), lignes: [] }, errorCode: null, durationMs: 1 };
+    }
     const cle = nom.includes("tableau") ? "tableau" : nom.includes("bon") ? "bon" : "manuscrite";
     return {
       provider: this.provider,
