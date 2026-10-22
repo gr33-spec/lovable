@@ -253,5 +253,5 @@ Routine horaire `trig_019b3LSmsdY43Aowni5jVARm` (prompt mis à jour). Rapport ve
 | 4 | Textes (tutoiement artisan, vouvoiement négoce, typographie, chiffres) | fait : textes relus écran par écran, gratuit partout (paywall éteint), milliers, lien négoce, mots |
 | 5 | Visuel, iPhone SE, Lighthouse landing > 90 | fait : landing 66 → 97, CLS 0, iPhone SE au test, mode clair forcé, suivi corrigé |
 | 6 | Cas limites | fait : 9 cas joués (e2e « Cas limites »), 3 corrigés : session expirée, redépôt négoce, confirmations admin |
-| 7 | RECETTE.md : 20 tests iPhone | à faire |
-| 8 | DETTE.md, performance | à faire |
+| 7 | RECETTE.md : 20 tests iPhone | fait : « Les 20 tests iPhone » en tête de RECETTE.md, chacun avec son résultat attendu |
+| 8 | DETTE.md, performance | fait : DETTE n° 23 à 27 ajoutées (rien d'élevé), MISE-EN-PROD complété ; performance : landing 97, pages publiques ≥ 96 (bloc 5) |

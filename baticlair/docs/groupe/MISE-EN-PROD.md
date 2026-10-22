@@ -8,6 +8,9 @@ Plan du 20 octobre 2026, bloc 11. À dérouler dans l'ordre, le jour J, par Greg
 - [ ] PR #285 (pages légales, basée sur #284) relue : fusionner dans #284 ou juste après. Les textes ont été relus par un avocat (CGU, conditions négoce, confidentialité, contrat d'apporteur d'affaires).
 - [ ] PR #286 (landing), #287 (PWA) : indépendantes, fusionnables avant ou après.
 - [ ] `docs/DECISIONS.md` relu : chaque décision prise seule est confirmée ou renversée.
+- [ ] `docs/A-FAIRE-RELIRE.md` traité avec l'avocat (19 points), et la rémunération tranchée : contrat PDF, page de dépôt et conditions négoce alignés (dette n° 23).
+- [ ] Indexation : retirer `X-Robots-Tag: noindex` pour la landing et les pages légales dans `apps/web/next.config.ts` (dette n° 26), le garder pour l'app.
+- [ ] Mentions légales : e-mail de contact, directeur de la publication, capital et RCS de BATI INVEST renseignés (`apps/web/src/lib/legal.ts`).
 
 ## 2. Variables Vercel, projet API, environnement Production
 

@@ -6,6 +6,33 @@ Demande de Greg du 22 octobre 2026, mise à jour le soir même pour le nouveau c
 - `TEST-COMPLET.md` est le parcours que j'ai joué moi-même le 21 octobre, avec le détail des défauts trouvés.
 - `MISE-EN-PROD.md` est la checklist du jour J : variables, migrations, ordre de fusion.
 
+## Les 20 tests iPhone (plan « finition », 23 octobre)
+
+À faire dans l'ordre, sur ton iPhone, sur la prévisualisation de #284 (adresse ci-dessous). Une vingtaine de minutes. Chaque test a son résultat attendu ; un écart = une capture, et je corrige. Le détail par écran, avec le test automatique de chaque ligne, suit dans les sections 1 à 7.
+
+| # | Tu fais | Résultat attendu |
+|---|---|---|
+| 1 | Ouvrir l'adresse en navigation privée | La démo guidée en haut, d'un coup, sans que la page saute : « Ta liste, remise au propre », la carte « Photo de ta liste », « Suivant », « Passer ». |
+| 2 | « Passer », puis recharger la page | La démo ne revient pas. L'accroche « Marre de te faire enfumer sur le prix de tes matériaux ? » est en haut. « Revoir la démo », en bas, la rouvre. |
+| 3 | Lire la landing jusqu'en bas | « Gratuit pour l'artisan. Sans engagement. », les trois étapes, « Un geste par ligne pour la préciser », la liste d'exemple (2 760 pièces, 0,92 €). Rien sur l'abonnement ni sur les 2 %. |
+| 4 | « Envoyer sur WhatsApp », puis « Copier le lien » | WhatsApp s'ouvre avec le message prérempli et le lien ; « Lien copié » s'affiche. |
+| 5 | Les quatre pages légales, en bas de la landing | BATI INVEST, Vercel et Neon nommés ; « Aujourd'hui, BatiClair est gratuit pour l'artisan » ; une section « Cookies » ; aucun « 2 % » ; « Retour à l'accueil » ramène à la landing. |
+| 6 | « Je rejoins le mouvement », créer ton compte | « Ta liste remise au propre en deux minutes. » ; le bouton reste gris tant que la case CGU n'est pas cochée ; puis l'accueil avec « Donner ma liste » et « Inviter un collègue ». |
+| 7 | Partager → « Sur l'écran d'accueil », rouvrir depuis l'icône | BatiClair s'ouvre en plein écran, sans la barre de Safari ; la barre du bas reste collée en bas. |
+| 8 | « + Nouvelle liste », donner la photo d'une liste écrite à la main | « Je lis ta liste… », puis « Ton chantier » : une carte par ligne, telle qu'écrite ; quantités avec l'espace des milliers (« 1 250 pièces ») ; le suivi en haut coche « Liste prête » et dit « Ta liste est… » tout de suite. |
+| 9 | Revenir à l'accueil | Aucune action « Ajouter le devis client » pour cette liste. |
+| 10 | Toucher une ligne orange (« Tuile romane… ») | Elle passe au premier plan, sa question en boutons ; une réponse s'écrit dans la désignation et la pastille passe au vert. |
+| 11 | « Aperçu » | L'e-mail et le PDF au négoce, sans aucun prix, avec tes coordonnées ; rien ne part. |
+| 12 | Passer en mode avion, donner une autre photo | « Pas de connexion internet. Rien n'est perdu : réessaie dès que le réseau revient. » Aucun chantier en double après le retour du réseau. |
+| 13 | Donner une photo floue ou coupée | « Je n'ai rien lu sur ce fichier. Reprends la photo bien à plat, bien éclairée, ou envoie un PDF. » |
+| 14 | Donner un fichier de plus de 20 Mo | « C'est trop volumineux pour être envoyé. », avant tout envoi. |
+| 15 | Sur « Ton chantier », le bouton retour du téléphone | Retour à l'écran d'avant (accueil ou chantiers), jamais sur l'écran de dépôt ; « en avant » rend la liste. |
+| 16 | « Je n'ai qu'un devis », un devis PDF | « Je lis ton devis » en plein écran ; puis les questions, toutes d'un coup ; le suivi dit « Ta liste se prépare. Réponds aux questions, puis « Calculer ma liste ». », sans rien cocher. |
+| 17 | Onglet « Commande commune » | Trois étapes : SIRET, « Donne ta liste », négoces ; le bloc « Inviter un collègue ». |
+| 18 | Mon compte | La carte « Formule » dit « Gratuit pour l'artisan, aucune limite de chantiers » ; « Tes habitudes (« je façonne »…) » au tutoiement. |
+| 19 | iPhone en mode sombre (Réglages → Luminosité) | L'app reste claire et lisible ; champs et cases ne passent pas en noir. |
+| 20 | Un lien négoce coupé (retirer la fin de l'adresse reçue par e-mail) | « Ce lien n'est plus valable. », sans formulaire. |
+
 ## Comment s'en servir
 
 - **Où** : la prévisualisation de #284, https://baticlair-git-claude-saas-achat-artisans-promp-67e67a-gr33-spec.vercel.app/. Elle contient tout ce qui est regroupé sur `claude/integration-groupe`.
@@ -23,11 +50,11 @@ Demande de Greg du 22 octobre 2026, mise à jour le soir même pour le nouveau c
 
 | # | Tu fais | Tu dois voir | Test | État |
 |---|---|---|---|---|
-| 1.1 | Ouvrir l'adresse, sans compte | La démo guidée : trois écrans « Exemple » (ta liste, les couvreurs regroupés, ton prix livré), « Suivant », « Passer », « Je rejoins le mouvement » au dernier. Une fois passée, elle ne revient pas au rechargement ; « Revoir la démo. » la rouvre. | « La page d'accueil publique… » | ✅ auto |
+| 1.1 | Ouvrir l'adresse, sans compte | La démo guidée : trois écrans « Exemple » (ta liste, les couvreurs regroupés, ton prix livré), « Suivant », « Passer », « Je rejoins le mouvement » au dernier. Une fois passée, elle ne revient pas au rechargement ; « Revoir la démo » la rouvre. | « La page d'accueil publique… » | ✅ auto |
 | 1.2 | Faire défiler la landing | Fond blanc, une seule couleur d'accent, aucun dessin. « Marre de te faire enfumer sur le prix de tes matériaux ? », le sous-titre, « Je rejoins le mouvement » (deux fois), « Gratuit pour l'artisan. Sans engagement. ». Puis « Plus on est nombreux, plus on pèse face aux négoces. », « Comment ça marche » en trois étapes avec les vraies captures, la liste d'exemple (ardoise 2 760 pièces, mêmes chiffres partout, 0,92 €), « Commande commune », le partage, la ligne « Négoces : … ». Rien sur l'abonnement ni sur les 2 %. Aucune tuile. | même test, plus « responsive » | ✅ auto, 👀 le rendu et le ton |
 | 1.3 | Le compteur « X couvreurs déjà inscrits dans les Côtes-d'Armor » | Le vrai chiffre de la base (couvreurs avec une adresse en 22, démo exclue). Sous 10, il ne s'affiche pas. | API `compteur-landing` ; e2e « page d'accueil publique » | ✅ auto, 🏭 le vrai chiffre |
 | 1.4 | Le bloc « L'union fait la force : fais venir tes collègues » | Le message prérempli avec le lien du site ; « Envoyer sur WhatsApp » ouvre WhatsApp, « Envoyer par SMS » ouvre les messages, « Copier le lien » dit « Lien copié ». | même test | ✅ auto, 👀 sur ton iPhone (WhatsApp, SMS) |
-| 1.5 | Pied de page : Mentions légales, CGU, Conditions négoce, Confidentialité | Quatre pages lisibles sans compte, avec les coordonnées de BATI INVEST. Elles parlent de la « Commande commune » (CGU et contrat négoce en version du 22 octobre). | « Pages légales… » | ✅ auto, ⚖️ relecture juridique avant le premier vrai lot |
+| 1.5 | Pied de page : Mentions légales, CGU, Conditions négoce, Confidentialité | Quatre pages lisibles sans compte, avec les coordonnées de BATI INVEST. Elles parlent de la « Commande commune », disent « gratuit pour l'artisan » et ne citent aucun « 2 % » (la rémunération renvoie au contrat de la page de dépôt) ; « Cookies » sans bandeau. Ce qu'un avocat doit relire : `docs/A-FAIRE-RELIRE.md`. | « Pages légales… » | ✅ auto, ⚖️ relecture juridique avant le premier vrai lot |
 | 1.6 | Sur iPhone : Partager → « Sur l'écran d'accueil » | Une icône BatiClair. L'app s'ouvre sans la barre de Safari. L'explication s'affiche une seule fois. | « PWA… » | ✅ auto, 👀 sur ton iPhone |
 
 ## 2. Le compte et la navigation
@@ -90,7 +117,8 @@ La vraie lecture du devis attend le crédit. D'ici là, la prévisualisation ser
 | 6.2 | Ouvrir le chantier d'un autre compte (en changeant l'adresse) | Une page « introuvable ». Jamais les données de l'autre. | API `isolation-toutes-routes`, `securite` | ✅ auto |
 | 6.3 | Une adresse qui n'existe pas | Une page en français, avec le chemin du retour. | « une adresse inconnue… » | ✅ auto |
 | 6.4 | Charge : 200 artisans, 50 commandes communes, 1 000 besoins | Chaque route et chaque tâche planifiée répond en moins d'une seconde. | API `charge` ; `docs/PERFORMANCE.md` | ✅ auto |
-| 6.5 | Lighthouse mobile | Au moins 90 sur chaque page. | `docs/PERFORMANCE.md` (mesure du 21 octobre) | 👀 à remesurer avant la production |
+| 6.5 | Lighthouse mobile | Au moins 90 sur chaque page ; landing 97, sans décalage. | `docs/PERFORMANCE.md` (mesure du 22 octobre au soir) | 👀 à remesurer avant la production |
+| 6.6 | Cas limites : réseau coupé, photo floue, fichier lourd, retour arrière, session expirée, lien expiré | Une phrase claire pour chacun, jamais deux chantiers ; « Me reconnecter » quand la session a expiré. | « Cas limites (plan « finition », bloc 6)… » | ✅ auto |
 
 ## 7. Ce qui attend vendredi (crédit rechargé)
 
