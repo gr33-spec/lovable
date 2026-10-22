@@ -2359,7 +2359,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await demo.getByRole("button", { name: "Suivant" }).click();
   await expect(page.getByRole("heading", { name: "La commande du mois, tous ensemble" })).toBeVisible();
   // Commande du mois (Greg, 22 octobre 2026) : en quantités, jamais en nombre d'entreprises.
-  await expect(page.getByText("Toute la commande de novembre : 52 palettes d'ardoises 32×22, 6 000 m de liteaux")).toBeVisible();
+  await expect(page.getByRole("region", { name: /^La commande du mois/ }).getByText("Toute la commande de novembre : 52 palettes d'ardoises 32×22, 6 000 m de liteaux")).toBeVisible();
   await expect(page.getByText(/couvreurs, \d+ demandes/)).toHaveCount(0);
   await page.getByRole("button", { name: "Suivant" }).click();
   await expect(page.getByRole("heading", { name: "Ton prix, livré chez toi" })).toBeVisible();
