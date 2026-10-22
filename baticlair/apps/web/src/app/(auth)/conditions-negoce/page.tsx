@@ -8,8 +8,9 @@ import { NOM, nom } from "@/lib/nom";
 export const metadata: Metadata = { title: "Conditions négoce — BatiClair" };
 
 /**
- * Les conditions pour un négoce (reprend le contrat d'apporteur d'affaires à 2 %, celui du PDF à côté de la case sur la page
- * de dépôt). Le texte de référence est celui du domaine (`texteContrat`) ; cette page le dit en clair, avec le même fond.
+ * Les conditions pour un négoce. Plan « finition » (Greg, 22 octobre) : la rémunération de BatiClair n'est pas encore décidée,
+ * donc aucune clause chiffrée ici ; la page renvoie au contrat présenté sur la page de dépôt (`texteContrat`), seul à faire foi
+ * sur ce point (voir `docs/A-FAIRE-RELIRE.md`).
  */
 export default function ConditionsNegocePage() {
   return (
@@ -27,17 +28,19 @@ export default function ConditionsNegocePage() {
         </p>
       </section>
       <section className="flex flex-col gap-2">
-        <h2 className={s.h2}>2. Commission</h2>
+        <h2 className={s.h2}>2. Votre devis et votre livraison</h2>
         <p className={s.p}>
-          Si votre devis est retenu pour un lot, vous versez à BatiClair une commission d&apos;apporteur d&apos;affaires de <strong>2 % du montant hors taxes du lot</strong>,
-          c&apos;est-à-dire de la somme des bons de commande des artisans du lot passés chez vous au tarif de la {nom}. Intégrez-la à votre prix.
+          Vous déposez votre devis (PDF ou photo) sur la page reçue par e-mail, avec vos conditions de livraison : l&apos;adresse d&apos;où partent vos livraisons,
+          la distance jusqu&apos;à laquelle la livraison est gratuite et le prix d&apos;une livraison au-delà. Votre devis est lu automatiquement ; BatiClair calcule
+          la distance jusqu&apos;à chaque chantier et compare les devis livraison comprise. Le devis le moins cher livraison comprise, dans la fenêtre de
+          livraison demandée, est retenu.
         </p>
       </section>
       <section className="flex flex-col gap-2">
-        <h2 className={s.h2}>3. Facturation</h2>
+        <h2 className={s.h2}>3. Rémunération de BatiClair</h2>
         <p className={s.p}>
-          La commission est facturée par BatiClair au moment de la transmission des bons de commande, payable à 30 jours, TVA en sus. Une relance automatique est envoyée
-          après l&apos;échéance.
+          Les conditions de rémunération de BatiClair sont celles du contrat présenté à côté de la case, sur la page de dépôt du devis. Elles ne
+          s&apos;appliquent qu&apos;à un devis retenu.
         </p>
       </section>
       <section className="flex flex-col gap-2">
@@ -64,8 +67,12 @@ export default function ConditionsNegocePage() {
       <section className="flex flex-col gap-2">
         <h2 className={s.h2}>7. Vos données</h2>
         <p className={s.p}>
-          BatiClair garde votre nom, votre adresse e-mail, les familles de produits que vous vendez, vos devis déposés et vos accords. Pour les faire corriger ou
-          effacer : le lien « stop », ou un e-mail à l&apos;éditeur. Voir la{" "}
+          BatiClair garde votre nom, votre adresse e-mail, les familles de produits que vous vendez, l&apos;adresse de votre dépôt, vos conditions de
+          livraison, vos devis déposés et vos accords. Pour les faire corriger ou effacer : le lien « stop », ou en écrivant à l&apos;éditeur (voir les{" "}
+          <Link href="/mentions-legales" className="font-semibold underline">
+            mentions légales
+          </Link>
+          ). Voir aussi la{" "}
           <Link href="/confidentialite" className="font-semibold underline">
             politique de confidentialité
           </Link>
@@ -73,6 +80,9 @@ export default function ConditionsNegocePage() {
         </p>
       </section>
       <LiensLegaux sauf="/conditions-negoce" />
+      <Link href="/" className="min-h-11 self-start py-2 text-sm font-bold text-accent-text">
+        Retour à l&apos;accueil
+      </Link>
     </article>
   );
 }

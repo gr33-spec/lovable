@@ -2090,16 +2090,23 @@ test("Pages légales : mentions légales, CGU, conditions négoce et confidentia
   await expect(page.getByText(/Vercel Inc\./)).toBeVisible();
   await page.getByRole("navigation", { name: "Pages légales" }).getByRole("link", { name: "CGU" }).click();
   await expect(page.getByRole("heading", { name: "Conditions générales d'utilisation" })).toBeVisible();
-  await expect(page.getByText(/Le négoce retenu verse 2 % du montant HT du lot à BatiClair/)).toBeVisible();
+  // Plan « finition » (22 octobre) : gratuit pour l'artisan, rémunération en suspens : aucun « 2 % » sur les pages légales.
+  await expect(page.getByText(/Aujourd'hui, BatiClair est gratuit pour l'artisan/)).toBeVisible();
+  await expect(page.getByText(/2 %/)).toHaveCount(0);
   await expect(page.getByText(/avocat/)).toHaveCount(0);
   await page.getByRole("navigation", { name: "Pages légales" }).getByRole("link", { name: "Conditions négoce" }).click();
   await expect(page.getByRole("heading", { name: "Conditions négoce" })).toBeVisible();
-  await expect(page.getByText(/2 % du montant hors taxes du lot/)).toBeVisible();
+  await expect(page.getByText(/celles du contrat présenté à côté de la case/)).toBeVisible();
+  await expect(page.getByText(/compare les devis livraison comprise/)).toBeVisible();
+  await expect(page.getByText(/2 %/)).toHaveCount(0);
   await page.getByRole("navigation", { name: "Pages légales" }).getByRole("link", { name: "Confidentialité" }).click();
   await expect(page.getByRole("heading", { name: "Confidentialité" })).toBeVisible();
   await expect(page.getByText(/Neon, à Francfort/)).toBeVisible();
   await expect(page.getByText(/Resend/).first()).toBeVisible();
   await expect(page.getByText(/API Sirene de l'INSEE/)).toBeVisible();
+  await expect(page.getByText(/API Adresse de l'État/)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Cookies" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Retour à l'accueil" })).toHaveAttribute("href", "/");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
   // Le compte créé (case cochée) garde la date et la version des CGU.
   await signUp(page);

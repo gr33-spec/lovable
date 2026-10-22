@@ -17,12 +17,13 @@ export default function CguPage() {
       <section className="flex flex-col gap-2">
         <h2 className={s.h2}>1. Le service</h2>
         <p className={s.p}>
-          BatiClair, édité par {EDITEUR.nom}, lit les devis que vous déposez, en sort la liste des fournitures à commander, prépare vos demandes de prix à vos
-          fournisseurs et, si vous le souhaitez, regroupe vos commandes avec celles d&apos;autres artisans de votre département (« {NOM} »).
+          BatiClair, édité par {EDITEUR.nom}, lit les listes de matériaux et les devis que vous déposez, en sort la liste des fournitures à commander, prépare vos
+          demandes de prix à vos fournisseurs et, si vous le souhaitez, regroupe vos commandes avec celles d&apos;autres artisans de votre département (« {NOM} »).
         </p>
         <p className={s.p}>
-          Les quantités sont calculées à partir du devis et de référentiels métier. Elles sont une aide : vous restez responsable de ce que vous commandez et de
-          ce que vous facturez à votre client. Une ligne marquée « à préciser » ou « à vérifier » attend votre décision.
+          Une liste est reprise telle que vous l&apos;avez écrite ; d&apos;un devis, les quantités sont calculées à partir du devis et de référentiels métier. Elles
+          sont une aide : vous restez responsable de ce que vous commandez et de ce que vous facturez à votre client. Une ligne marquée « à préciser » attend votre
+          décision.
         </p>
       </section>
 
@@ -38,7 +39,15 @@ export default function CguPage() {
       <section className="flex flex-col gap-2">
         <h2 className={s.h2}>3. La {nom}</h2>
         <ul className={s.ul}>
-          <li>Gratuit pour l&apos;artisan : aucun abonnement, aucune commission sur vos achats. Le négoce retenu verse 2 % du montant HT du lot à BatiClair.</li>
+          <li>
+            Gratuit pour l&apos;artisan : vous ne payez rien à BatiClair, ni abonnement ni commission sur vos achats. Une éventuelle rémunération de BatiClair par
+            les négoces relève des{" "}
+            <Link href="/conditions-negoce" className="font-semibold underline">
+              conditions négoce
+            </Link>
+            .
+          </li>
+          <li>Seules les lignes précises (format, origine, marque…) entrent dans la {nom} ; une ligne trop vague part seulement chez votre négoce.</li>
           <li>
             « Chantier signé » est un engagement ferme : en le cochant, vous vous engagez à commander ces quantités au prix obtenu par la {nom}, chez le négoce retenu. Vous
             pouvez retirer une ligne tant que la demande n&apos;est pas partie aux négoces.
@@ -51,15 +60,25 @@ export default function CguPage() {
             Ne pas commander après un bon de commande transmis est un désistement : un avertissement la première fois, puis la fermeture de la {nom} pendant six mois au
             deuxième désistement sur douze mois. Le négoce en est informé.
           </li>
-          <li>Les autres artisans ne voient ni votre nom ni vos chantiers ; vous ne voyez pas les leurs.</li>
+          <li>
+            Le prix livré affiché suit les conditions du négoce retenu (livraison gratuite jusqu&apos;à une distance qu&apos;il fixe, un prix par livraison au-delà)
+            et une distance estimée entre son dépôt et votre chantier. C&apos;est une estimation : la facture du négoce fait foi.
+          </li>
+          <li>
+            Les autres artisans ne voient ni votre nom ni vos chantiers ; vous ne voyez pas les leurs. Le compteur ne montre que des nombres (couvreurs, demandes,
+            devis, meilleur prix).
+          </li>
+          <li>
+            Quand vous invitez un collègue, le message part de votre téléphone (WhatsApp, SMS ou lien copié) : BatiClair n&apos;envoie rien et ne garde pas son numéro.
+          </li>
         </ul>
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className={s.h2}>4. Prix et essai</h2>
+        <h2 className={s.h2}>4. Prix</h2>
         <p className={s.p}>
-          La lecture des devis est proposée avec un essai gratuit, puis des formules par nombre de chantiers, affichées dans l&apos;application avant tout paiement. Les
-          prix affichés sont hors taxes.
+          Aujourd&apos;hui, BatiClair est gratuit pour l&apos;artisan. Si des formules payantes sont proposées plus tard, elles seront annoncées dans l&apos;application
+          et dans ces conditions avant tout paiement ; rien ne vous sera facturé sans votre accord.
         </p>
       </section>
 
@@ -85,8 +104,8 @@ export default function CguPage() {
       </section>
 
       <LiensLegaux sauf="/cgu" />
-      <Link href="/inscription" className="min-h-11 self-start py-2 text-sm font-bold text-accent-text">
-        Retour
+      <Link href="/" className="min-h-11 self-start py-2 text-sm font-bold text-accent-text">
+        Retour à l&apos;accueil
       </Link>
     </article>
   );
