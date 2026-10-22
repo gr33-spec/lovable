@@ -44,7 +44,8 @@ export default function LienNegocePage() {
     return (
       <>
         <PageTitle>{NOM}</PageTitle>
-        {error.status === 404 ? (
+        {/* Un jeton tronqué (400) ou inconnu (404) : c'est le lien qui ne vaut plus, jamais « un champ mal rempli ». */}
+        {error.status === 400 || error.status === 404 ? (
           <p role="status" className="rounded-3xl bg-warn-bg p-4 font-semibold text-warn">
             Ce lien n&apos;est plus valable.
           </p>

@@ -133,6 +133,16 @@ export function PlansScreen() {
   const { data, setData, error, reload } = useBilling();
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
+  if (data.payant === false) {
+    return (
+      <section className="flex flex-col gap-3">
+        <h1 className="font-display text-[30px] leading-[1.05] font-extrabold tracking-[-0.03em]">Gratuit pour l&apos;artisan</h1>
+        <p className="text-[15px] leading-relaxed text-muted">
+          Aujourd&apos;hui, BatiClair est gratuit pour l&apos;artisan : aucune limite de chantiers, rien à payer.
+        </p>
+      </section>
+    );
+  }
   return <Paywall status={data} onChange={setData} />;
 }
 
@@ -151,6 +161,16 @@ export function PlanSummary() {
     );
   }
   const { plan, usage } = data;
+  // Plan « finition », bloc 4 : paywall éteint, BatiClair est gratuit (landing, CGU) ; aucune formule à l'écran.
+  if (data.payant === false) {
+    return (
+      <Card className="flex flex-col gap-1.5 p-4">
+        <span className="text-xs font-extrabold tracking-[0.04em] text-muted">FORMULE</span>
+        <span className="text-[17px] font-extrabold">Gratuit pour l&apos;artisan</span>
+        <span className="text-sm text-muted">Aucune limite de chantiers, rien à payer.</span>
+      </Card>
+    );
+  }
   return (
     <Card className="flex flex-col gap-1.5 p-4">
       <span className="text-xs font-extrabold tracking-[0.04em] text-muted">FORMULE</span>

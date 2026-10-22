@@ -7,6 +7,8 @@ import { expect, test, type Page } from "@playwright/test";
  */
 const WIDTHS = [
   { name: "telephone", width: 375, height: 812 },
+  // Plan « finition », bloc 5 : le plus petit iPhone encore vendu (SE, 375 × 667) ; les barres figées en bas y mangent le plus.
+  { name: "iphone-se", width: 375, height: 667 },
   { name: "tablette", width: 768, height: 1024 },
   { name: "tablette-paysage", width: 1024, height: 768 },
   { name: "ordinateur", width: 1440, height: 900 },

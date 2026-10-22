@@ -72,6 +72,9 @@
 html {
   -webkit-text-size-adjust: 100%;
   height: 100%;
+  /* Plan « finition », bloc 5 : l'app n'a pas de thème sombre ; un iPhone en mode sombre garde les champs et les cases en
+     clair, lisibles sur nos fonds blancs (sans cela, Safari les assombrit). */
+  color-scheme: light;
 }
 
 /* L'action principale : un dégradé vif, lisible en blanc (texte posé sur le bleu et le violet). */

@@ -349,7 +349,7 @@ function MemoryCard() {
         CE QUE BATICLAIR A APPRIS
       </h2>
       <p className="text-sm text-muted">
-        Vos habitudes (« je façonne », la qualité d&apos;ardoise…), les ajouts
+        Tes habitudes (« je façonne », la qualité d&apos;ardoise…), les ajouts
         refusés et tes corrections. Tes chantiers restent tels quels.
       </p>
       {error ? <ErrorNotice error={error} /> : null}

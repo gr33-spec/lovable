@@ -175,7 +175,7 @@ export function GroupeBar({ count, onCancel, onPropose, onAdresse }: { count: nu
           <span>{PHRASE_ENGAGEMENT}</span>
         </label>
       ) : statut === "en_attente" ? (
-        <p className="text-[13px] leading-snug text-muted">Le négoce voit une quantité possible, tu ne t&apos;engages à rien. Tu le passeras en signé d&apos;un tap quand ton client aura signé.</p>
+        <p className="text-[13px] leading-snug text-muted">Le négoce voit une quantité possible, tu ne t&apos;engages à rien. Tu le passeras en signé d&apos;un geste quand ton client aura signé.</p>
       ) : null}
       {/* Test complet (21 octobre) : sans adresse de chantier, le serveur refuse (le lot se forme par département) ; on la demande ici même. */}
       {adresseManque ? (

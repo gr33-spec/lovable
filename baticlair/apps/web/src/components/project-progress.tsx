@@ -57,7 +57,8 @@ interface Progress {
 }
 
 export function computeProgress({ documents, takeoff, requests, offers }: Snapshot): Progress {
-  const hasQuote = documents.some((d) => d.purpose === "client_quote");
+  // Une liste donnée telle quelle vaut le devis (« J'ai déjà ma liste ») : rien à ajouter avant la liste.
+  const hasQuote = documents.some((d) => d.purpose === "client_quote") || takeoff !== null;
   const validated = takeoff?.status === "validated";
   const recipients = requests.flatMap((r) => r.recipients);
   const toSend = recipients.filter((r) => r.status === "to_send").length;

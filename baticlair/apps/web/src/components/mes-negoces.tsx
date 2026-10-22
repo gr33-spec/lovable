@@ -77,7 +77,7 @@ export function MesNegocesCard() {
   };
   return (
     <Card className="flex flex-col gap-3 p-4">
-      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">MES NÉGOCES (GROUPÉ)</h2>
+      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">MES NÉGOCES</h2>
       <p className="text-sm text-muted">Les négoces chez qui tu commandes, et ce que chacun vend. Ton favori reçoit les demandes de la {nom} en premier ; tu commandes toujours sur ton propre compte.</p>
       {negoces.length > 0 ? (
         <ul aria-label="Mes négoces" className="flex flex-col divide-y divide-line">

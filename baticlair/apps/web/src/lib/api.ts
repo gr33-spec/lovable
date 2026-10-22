@@ -647,4 +647,6 @@ export interface BillingStatus {
   offers: BillingPlan[];
   requestedPlan: string | null;
   activationEnabled: boolean;
+  /** Paywall allumé ; éteint, Compte et Formules disent « Gratuit pour l'artisan ». */
+  payant?: boolean;
 }

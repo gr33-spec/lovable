@@ -42,7 +42,7 @@ export default function AccueilPage() {
     });
   }
   if (!me.user.emailVerified && features.email) {
-    todo.push({ key: "email", title: "Confirme ton adresse e-mail", text: "Nécessaire avant d'écrire à tes fournisseurs.", href: "/compte", action: "Voir", icon: <MailCheck size={20} aria-hidden="true" /> });
+    todo.push({ key: "email", title: "Confirme ton adresse e-mail", text: "Nécessaire avant d'écrire à tes négoces.", href: "/compte", action: "Voir", icon: <MailCheck size={20} aria-hidden="true" /> });
   }
 
   // Simplification (21 octobre) : accueil vide = une phrase et un bouton, rien d'autre. Nouveau cap (22 octobre) : la promesse.

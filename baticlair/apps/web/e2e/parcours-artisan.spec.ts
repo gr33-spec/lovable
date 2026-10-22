@@ -2107,6 +2107,9 @@ test("Pages légales : mentions légales, CGU, conditions négoce et confidentia
   await expect(page.getByText(/API Adresse de l'État/)).toBeVisible();
   await expect(page.getByRole("heading", { name: "Cookies" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Retour à l'accueil" })).toHaveAttribute("href", "/");
+  // Plan « finition », bloc 4 : un lien négoce tronqué dit qu'il ne vaut plus, jamais « un champ mal rempli ».
+  await page.goto("/negoces/lien/xxx");
+  await expect(page.getByText("Ce lien n'est plus valable.")).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
   // Le compte créé (case cochée) garde la date et la version des CGU.
   await signUp(page);
@@ -2340,7 +2343,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Marre de te faire enfumer sur le prix de tes matériaux");
   await expect(page.getByText("Démo · écran")).toHaveCount(0);
   // « Revoir la démo » (?demo) la rouvre.
-  await page.getByRole("link", { name: "Revoir la démo." }).click();
+  await page.getByRole("link", { name: "Revoir la démo" }).click();
   await expect(page.getByText("Démo · écran 1 sur 3 · données fictives")).toBeVisible();
   await page.getByRole("button", { name: "Passer" }).click();
   // Landing du 22 octobre (Greg) : ton fun et direct, visuel pro ; « enfumer » vise le prix ; le principe en une phrase ;
@@ -2363,7 +2366,7 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.getByText(/2 %|abonnement/)).toHaveCount(0);
   await expect(page.getByText("Gratuit pour l'artisan. Sans engagement.")).toBeVisible();
   await expect(page.getByRole("link", { name: "Je rejoins le mouvement" })).toHaveCount(2);
-  await expect(page.getByText("des commandes groupées, des volumes sûrs. Répondez aux demandes, on vous apporte les clients.")).toBeVisible();
+  await expect(page.getByText("des commandes communes, des volumes sûrs. Répondez aux demandes, on vous apporte les clients.")).toBeVisible();
   // Le partage : WhatsApp et SMS avec le message prérempli, et le lien à copier.
   const partage = page.getByRole("region", { name: "L'union fait la force : fais venir tes collègues" });
   const message = /^Je me suis inscrit sur BatiClair, on regroupe nos commandes de matériaux pour payer moins cher\. Plus on est nombreux, plus on négocie\. Rejoins-nous : http/;

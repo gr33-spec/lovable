@@ -153,9 +153,9 @@ export default function GroupePage() {
                 </ButtonLink>
               )}
             </Etape>
-            <Etape fait={etapes.devis} titre="Dépose un devis">
+            <Etape fait={etapes.devis} titre="Donne ta liste">
               <ButtonLink href="/chantiers/nouveau" variant="secondary" className="min-h-10 self-start px-3.5 text-[14px]">
-                Déposer un devis
+                Donner ma liste
               </ButtonLink>
             </Etape>
             <Etape fait={etapes.negoces} titre="Ajoute tes négoces">

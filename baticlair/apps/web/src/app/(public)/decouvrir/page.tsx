@@ -42,7 +42,7 @@ const ETAPES = [
   },
   {
     titre: "On regroupe les couvreurs du secteur",
-    texte: "Même article, même secteur : une seule commande commune. Un tap par ligne pour la préciser.",
+    texte: "Même article, même secteur : une seule commande commune. Un geste par ligne pour la préciser.",
     image: { src: "/landing/capture-preciser.jpg", alt: "Une ligne « Ardoise naturelle 32×22 » à préciser : origine et choix en boutons", position: "bottom" },
   },
   { titre: "Les négoces se battent pour ton prix", texte: "Chaque devis est comparé au meilleur prix. Tu vois ton prix livré, le moins cher l'emporte.", image: null },
@@ -260,7 +260,7 @@ export default function BienvenuePage() {
 
       {/* Rassurant pour les négoces : ils lisent aussi la page, et ce sont eux qui répondent. */}
       <p className="text-center text-[15px] leading-relaxed text-muted">
-        <span className="font-semibold text-ink">Négoces :</span> des commandes groupées, des volumes sûrs. Répondez aux demandes, on vous apporte les clients.
+        <span className="font-semibold text-ink">Négoces :</span> des commandes communes, des volumes sûrs. Répondez aux demandes, on vous apporte les clients.
       </p>
 
       <footer className="flex flex-col gap-5 border-t border-[#e3e6ea] pt-8 text-[13px] leading-relaxed text-muted">
@@ -272,7 +272,7 @@ export default function BienvenuePage() {
               Se connecter
             </Link>
             <Link href="/?demo" className="text-sm font-semibold text-muted underline">
-              Revoir la démo.
+              Revoir la démo
             </Link>
           </div>
         </div>

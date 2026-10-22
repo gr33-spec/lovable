@@ -47,6 +47,9 @@ describe("lecture d'une liste déjà comptée", () => {
       // Aucun calcul, aucune question : la phase est « resultat », jamais « questions ».
       expect(r.body.phase).toBe("resultat");
       expect(r.body.questions ?? []).toEqual([]);
+      // Plan « finition », bloc 4 : l'accueil ne redemande pas « Ajouter le devis client » pour une liste déjà là.
+      const actions = (await agent.get("/v1/next-actions").expect(200)).body.items as { kind: string }[];
+      expect(actions.map((a) => a.kind)).not.toContain("add_quote");
     });
   }
 

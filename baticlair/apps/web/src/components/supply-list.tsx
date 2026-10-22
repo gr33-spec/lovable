@@ -171,7 +171,7 @@ export function SupplyList({
           <h2 className="font-display text-[22px] leading-tight font-extrabold tracking-[-0.01em]">Ton chantier</h2>
           <AideBouton sujet="quantitatif" />
         </div>
-        <p className="text-[13px] text-muted">C&apos;est ce que reçoit le fournisseur.</p>
+        <p className="text-[13px] text-muted">C&apos;est ce que reçoit le négoce.</p>
         {/* §52 (retour du fondateur, 2026-10-12) : un métier pas encore relu par un artisan le dit, ici et dans le PDF. */}
         {takeoff.ratiosEnValidation ? (
           <p className="mt-1 self-start rounded-full bg-warn/10 px-2.5 py-1 text-[12px] font-extrabold text-warn">Ratios en cours de validation</p>
