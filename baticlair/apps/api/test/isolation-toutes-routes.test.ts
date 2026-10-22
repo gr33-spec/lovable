@@ -221,8 +221,9 @@ describe("isolation entre entreprises, toutes les routes", () => {
         open.push(`${r.method.toUpperCase()} ${r.path} → ${(e as Error).message}`);
       }
     }
-    // Ce qui répond sans session : la santé du service, et les demandes d'accès elles-mêmes (inscription, connexion…).
-    expect(open.filter((o) => !/\/v1\/health|\/api\/auth|\/v1\/auth/.test(o))).toEqual([]);
+    // Ce qui répond sans session : la santé du service, le compteur de la page publique (un nombre, rien d'une
+    // entreprise), et les demandes d'accès elles-mêmes (inscription, connexion…).
+    expect(open.filter((o) => !/\/v1\/health|\/v1\/public\/compteur|\/api\/auth|\/v1\/auth/.test(o))).toEqual([]);
   });
 });
 

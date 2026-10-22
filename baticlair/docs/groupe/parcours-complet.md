@@ -16,6 +16,7 @@ Oct 19, 2026 · @Greg
 - **Suivi façon colis.** Liste prête → Prix demandés → Prix reçus → Commandé.
 - **Nom : « Commande commune »**, dans une seule constante (`packages/domain/src/groupe/nom.ts`), à confirmer auprès de 2-3 couvreurs.
 - **Rémunération : en suspens.** Rien ne change pour l'instant (ni abonnement, ni 2 %).
+- **Landing (22 octobre, deuxième version) : fun dans les mots, pro dans le visuel.** Fond blanc, une couleur d'accent, vraies captures, aucun dessin. Accroche « Marre de te faire enfumer sur le prix de tes matériaux ? » (« enfumer » vise le prix, jamais une personne : les négoces lisent aussi la page) ; sous-titre « Rassemblons-nous et mettons nos forces en commun pour négocier les meilleurs prix. » ; bouton « Je rejoins le mouvement ». Le principe : « Plus on est nombreux, plus on pèse face aux négoces. », avec le compteur « X couvreurs déjà inscrits dans les Côtes-d'Armor » (vrai chiffre de la base, masqué sous 10). Trois étapes : « Tu donnes ta liste » → « On regroupe les couvreurs du secteur » → « Les négoces se battent pour ton prix ». Un gros bloc « L'union fait la force : fais venir tes collègues » (WhatsApp, SMS, copier le lien, message prérempli) ; le même « Inviter un collègue » dans l'app, après l'inscription et sur l'écran Commande commune. « Gratuit pour l'artisan » bien visible. En bas, pour les négoces : « Négoces : des commandes groupées, des volumes sûrs. Répondez aux demandes, on vous apporte les clients. » Tutoiement, phrases courtes, zéro jargon.
 
 ## 1. Principes
 

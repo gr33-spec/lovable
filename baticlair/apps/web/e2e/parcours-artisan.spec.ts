@@ -12,8 +12,8 @@ const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 async function signUp(page: Page, email = `artisan-${unique()}@example.fr`) {
   await page.goto("/");
   // Sans session : la page publique, puis « Créer un compte » mène à l'inscription.
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Paie tes matériaux moins cher");
-  await page.getByRole("link", { name: "Créer un compte" }).first().click();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Marre de te faire enfumer sur le prix de tes matériaux");
+  await page.getByRole("link", { name: "Je rejoins le mouvement" }).first().click();
   await expect(page).toHaveURL(/\/inscription/);
   await page.getByLabel("Prénom et nom").fill("Jean Martin");
   await page.getByLabel("Nom de ton entreprise").fill("Toitures Martin");
@@ -2285,7 +2285,7 @@ test("Aide « ? » : sur chaque écran, trois lignes au plus, tutoiement, un tap
 test("La page d'accueil publique : un visiteur la voit à la racine, un artisan connecté garde l'app", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Paie tes matériaux moins cher");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Marre de te faire enfumer sur le prix de tes matériaux");
   // Plan 2, bloc 3 : au premier lancement, la démo guidée, trois écrans sans compte, données marquées « Exemple », « Passer ».
   const demo = page.getByRole("region", { name: /^Ta liste, remise au propre/ });
   await expect(demo).toBeVisible();
@@ -2300,31 +2300,49 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.getByText(/2 760 pièces à 0,92 € HT l'unité/)).toBeVisible();
   await expect(page.getByText(/Ton prix habituel : 1,04 €/)).toBeVisible();
   // Trois liens « Créer un compte » tant que la démo est là ; « Passer » la ferme, et elle ne revient pas au rechargement.
-  await expect(page.getByRole("link", { name: "Créer un compte" })).toHaveCount(3);
+  await expect(page.getByRole("link", { name: "Je rejoins le mouvement" })).toHaveCount(3);
   await page.getByRole("button", { name: "Passer" }).click();
   await expect(page.getByText("Démo · écran")).toHaveCount(0);
   await page.reload();
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Paie tes matériaux moins cher");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Marre de te faire enfumer sur le prix de tes matériaux");
   await expect(page.getByText("Démo · écran")).toHaveCount(0);
   // « Revoir la démo » (?demo) la rouvre.
   await page.getByRole("link", { name: "Revoir la démo." }).click();
   await expect(page.getByText("Démo · écran 1 sur 3 · données fictives")).toBeVisible();
   await page.getByRole("button", { name: "Passer" }).click();
-  // Nouveau cap (22 octobre) : une seule idée, pour les couvreurs ; trois images ; les autres métiers en une ligne ; rien
-  // sur la rémunération (en suspens). Rien d'extérieur.
-  await expect(page.getByText("Donne ta liste. On regroupe les couvreurs de ton secteur et on fait jouer la concurrence entre les négoces.")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Ta liste, précise-la, ton prix" })).toBeVisible();
+  // Landing du 22 octobre (Greg) : ton fun et direct, visuel pro ; « enfumer » vise le prix ; le principe en une phrase ;
+  // trois étapes ; gratuit pour l'artisan ; les autres métiers en une ligne ; une ligne pour les négoces. Rien d'extérieur.
+  await expect(page.getByText("Rassemblons-nous et mettons nos forces en commun pour négocier les meilleurs prix.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Plus on est nombreux, plus on pèse face aux négoces." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Comment ça marche" })).toBeVisible();
+  for (const etape of ["Tu donnes ta liste", "On regroupe les couvreurs du secteur", "Les négoces se battent pour ton prix"]) {
+    await expect(page.getByRole("heading", { name: etape })).toBeVisible();
+  }
   // Registre pro (Greg, 22 octobre) : de vraies captures de l'app, aucun dessin ; une seule liste fictive, mêmes chiffres partout.
   for (const image of ["L'écran « Donne ta liste de matériaux » de BatiClair", /^Une ligne « Ardoise naturelle 32×22 » à préciser/, "30 couvreurs, 15 demandes envoyées, 3 devis reçus, meilleur prix 0,92 €"]) {
-    await expect(page.getByRole("region", { name: "Ta liste, précise-la, ton prix" }).getByRole("img", { name: image })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Comment ça marche" }).getByRole("img", { name: image })).toBeVisible();
   }
   await expect(page.getByRole("list", { name: "Exemple de liste de couverture" })).toContainText("Ardoise naturelle 32×22 Espagne 1er choix2 760 pièces");
   await expect(page.getByText(/tuile/i)).toHaveCount(0);
   await expect(page.locator("main svg")).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Les couvreurs de ton secteur, ensemble" })).toBeVisible();
   await expect(page.getByText("Aussi pour la charpente, la maçonnerie, l'isolation…")).toBeVisible();
-  await expect(page.getByText(/2 %|Gratuit pour l'artisan|abonnement/)).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "Créer un compte" })).toHaveCount(2);
+  await expect(page.getByText(/2 %|abonnement/)).toHaveCount(0);
+  await expect(page.getByText("Gratuit pour l'artisan. Sans engagement.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Je rejoins le mouvement" })).toHaveCount(2);
+  await expect(page.getByText("des commandes groupées, des volumes sûrs. Répondez aux demandes, on vous apporte les clients.")).toBeVisible();
+  // Le partage : WhatsApp et SMS avec le message prérempli, et le lien à copier.
+  const partage = page.getByRole("region", { name: "L'union fait la force : fais venir tes collègues" });
+  const message = /^Je me suis inscrit sur BatiClair, on regroupe nos commandes de matériaux pour payer moins cher\. Plus on est nombreux, plus on négocie\. Rejoins-nous : http/;
+  await expect(partage.getByText(message)).toBeVisible();
+  const whatsapp = decodeURIComponent((await partage.getByRole("link", { name: "Envoyer sur WhatsApp" }).getAttribute("href"))!.replace(/^https:\/\/wa\.me\/\?text=/, ""));
+  expect(whatsapp).toMatch(message);
+  expect(await partage.getByRole("link", { name: "Envoyer par SMS" }).getAttribute("href")).toMatch(/^sms:\?&body=Je%20me%20suis%20inscrit/);
+  await expect(partage.getByRole("button", { name: "Copier le lien" })).toBeVisible();
+  // Le compteur d'inscrits : le vrai chiffre de la base (test API), masqué sous 10 ; jamais un chiffre inventé.
+  const compteur = (await (await page.request.get("/v1/public/compteur")).json()) as { couvreurs: number | null };
+  if (compteur.couvreurs === null) await expect(page.getByText(/couvreurs déjà inscrits/)).toHaveCount(0);
+  else await expect(page.getByRole("status", { name: `${compteur.couvreurs} couvreurs déjà inscrits dans les Côtes-d'Armor` })).toBeVisible();
   await expect(page.getByText(/BATI INVEST, SARL, SIRET 910 796 325 00017/)).toBeVisible();
   await expect(page.getByRole("link", { name: "Confidentialité" })).toHaveAttribute("href", "/confidentialite");
   const externes = await page.evaluate(() => [...document.querySelectorAll("script[src], img, link[rel=stylesheet], iframe")].map((e) => (e as HTMLElement).getAttribute("src") ?? (e as HTMLElement).getAttribute("href") ?? "").filter((u) => /^https?:\/\//.test(u)));
@@ -2334,7 +2352,11 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await signUp(page);
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /^(Bonjour Jean|Paie tes matériaux moins cher)/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Créer un compte" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Je rejoins le mouvement" })).toHaveCount(0);
+  // « Inviter un collègue » aussi dans l'app, après l'inscription (accueil) et sur l'écran Commande commune.
+  await expect(page.getByRole("region", { name: "Inviter un collègue" }).getByRole("link", { name: "Envoyer sur WhatsApp" })).toBeVisible();
+  await page.goto("/groupe");
+  await expect(page.getByRole("region", { name: "Inviter un collègue" }).getByRole("button", { name: "Copier le lien" })).toBeVisible();
 });
 
 test("PWA : manifeste et icônes installables ; sur le téléphone, « Ajouter à l'écran d'accueil » expliqué une fois", async ({ page }) => {

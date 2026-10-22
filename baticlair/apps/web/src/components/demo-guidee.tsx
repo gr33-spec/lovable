@@ -75,7 +75,7 @@ export function DemoGuidee() {
           </button>
         ) : (
           <Link href="/inscription" onClick={fermer} className="inline-flex min-h-12 items-center justify-center rounded-xl bg-accent px-5 text-[15px] font-bold text-white transition hover:bg-accent-text">
-            Créer un compte
+            Je rejoins le mouvement
           </Link>
         )}
       </div>

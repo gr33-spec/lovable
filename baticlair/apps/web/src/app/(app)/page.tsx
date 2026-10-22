@@ -11,6 +11,7 @@ import { ButtonLink, ErrorNotice, Spinner } from "@/components/ui";
 import { api, type NextAction, type ProjectPage } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
+import { InviterCollegue } from "@/components/inviter";
 
 export default function AccueilPage() {
   const router = useRouter();
@@ -52,6 +53,10 @@ export default function AccueilPage() {
         <ButtonLink href="/chantiers/nouveau" className="min-h-14 w-full max-w-sm text-[17px]">
           Donner ma liste
         </ButtonLink>
+        {/* Landing du 22 octobre : « Inviter un collègue » aussi dans l'app, juste après l'inscription. */}
+        <div className="w-full max-w-xl text-left">
+          <InviterCollegue texte="Plus on est nombreux dans le secteur, plus on pèse face aux négoces." />
+        </div>
       </div>
     );
   }

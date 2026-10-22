@@ -7,6 +7,7 @@ import { ButtonLink } from "@/components/ui";
 import { LiensLegaux } from "@/components/legal";
 import { Visuel, type EmplacementPhoto } from "@/components/landing-illustrations";
 import { NOM } from "@/lib/nom";
+import { CompteurInscrits, InviterCollegue } from "@/components/inviter";
 
 /**
  * Servie à la place de « / » pour un visiteur (voir `proxy.ts`) : rendue à chaque demande, jamais gardée dans le cache du
@@ -15,8 +16,8 @@ import { NOM } from "@/lib/nom";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "BatiClair, paie tes matériaux moins cher",
-  description: "Donne ta liste de matériaux. On regroupe les couvreurs de ton secteur et on fait jouer la concurrence entre les négoces.",
+  title: "BatiClair, la commande commune des couvreurs",
+  description: "Marre de te faire enfumer sur le prix de tes matériaux ? Rassemblons-nous et mettons nos forces en commun pour négocier les meilleurs prix.",
 };
 
 /**
@@ -28,19 +29,23 @@ export const metadata: Metadata = {
  * bouton uni, beaucoup d'espace. Aucun dessin : de vraies captures de l'app dans un cadre de téléphone, et des emplacements
  * neutres pour les photos de chantier de Greg (`PHOTOS_LANDING`, une ligne par photo). Une seule liste fictive sur toute
  * la page, celle de la démo (`EXEMPLE`) : mêmes articles, mêmes chiffres. Aucune ressource extérieure, aucun script.
+ *
+ * TON FUN ET DIRECT (Greg, 22 octobre) : « fun dans les mots, pro dans le visuel ». « Enfumer » vise le prix, jamais une
+ * personne : les négoces lisent aussi la page, et ce sont eux qui répondent. Le compteur d'inscrits est le vrai chiffre de la
+ * base (masqué sous 10), le partage passe par WhatsApp, SMS ou le lien copié (`InviterCollegue`). Gratuit pour l'artisan.
  */
 const ETAPES = [
   {
-    titre: "Ta liste",
-    texte: "Une photo de ta liste, un bon, un PDF ou une capture. Elle revient au propre, ligne par ligne.",
+    titre: "Tu donnes ta liste",
+    texte: "Une photo, un bon, un PDF ou une capture. Elle revient au propre, ligne par ligne.",
     image: { src: "/landing/capture-entree.jpg", alt: "L'écran « Donne ta liste de matériaux » de BatiClair", position: "top" },
   },
   {
-    titre: "Précise-la",
-    texte: "Format, origine, choix : un tap par ligne. Une ligne précise rejoint la commande commune.",
+    titre: "On regroupe les couvreurs du secteur",
+    texte: "Même article, même secteur : une seule commande commune. Un tap par ligne pour la préciser.",
     image: { src: "/landing/capture-preciser.jpg", alt: "Une ligne « Ardoise naturelle 32×22 » à préciser : origine et choix en boutons", position: "bottom" },
   },
-  { titre: "Ton prix", texte: "Les négoces de ton secteur se font concurrence. Tu vois ton prix livré, le moins cher est retenu.", image: null },
+  { titre: "Les négoces se battent pour ton prix", texte: "Chaque devis est comparé au meilleur prix. Tu vois ton prix livré, le moins cher l'emporte.", image: null },
 ] as const;
 
 const GROUPE = [
@@ -126,31 +131,40 @@ export default function BienvenuePage() {
       <section aria-labelledby="accroche" className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
         <div className="flex flex-col gap-6 lg:col-span-7">
           <p className="text-[14px] font-semibold text-accent-text">Pour les couvreurs des Côtes-d&apos;Armor</p>
-          <h1 id="accroche" className="font-display text-[44px] leading-[1.02] font-bold tracking-[-0.035em] sm:text-[60px]">
-            Paie tes matériaux moins cher.
+          <h1 id="accroche" className="font-display text-[40px] leading-[1.04] font-bold tracking-[-0.035em] sm:text-[56px]">
+            Marre de te faire enfumer sur le prix de tes matériaux ?
           </h1>
-          <p className="max-w-[46ch] text-[18px] leading-relaxed text-muted sm:text-[20px]">Donne ta liste. On regroupe les couvreurs de ton secteur et on fait jouer la concurrence entre les négoces.</p>
+          <p className="max-w-[46ch] text-[18px] leading-relaxed text-muted sm:text-[20px]">Rassemblons-nous et mettons nos forces en commun pour négocier les meilleurs prix.</p>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-2">
             <ButtonLink href="/inscription" variant="accent" className={BOUTON}>
-              Créer un compte
+              Je rejoins le mouvement
             </ButtonLink>
             <a href="#comment" className="inline-flex min-h-13 items-center text-[16px] font-semibold text-ink underline decoration-[#c4c9d1] decoration-1 underline-offset-[6px] transition hover:decoration-ink">
               Voir comment ça marche
             </a>
           </div>
+          <p className="text-[15px] font-semibold">Gratuit pour l&apos;artisan. Sans engagement.</p>
         </div>
         <div className="flex justify-center lg:col-span-5 lg:justify-end">
           <Telephone src="/landing/capture-liste.jpg" alt="Une liste de couverture dans BatiClair : ardoise, crochets, liteaux, écran, faîtage zinc, chaque ligne avec sa quantité" priorite className="w-[280px] sm:w-[300px]" />
         </div>
       </section>
 
-      {/* Les trois gestes, chacun avec son écran. Sur le téléphone, ils défilent de côté. */}
+      {/* Le principe en une phrase, et le vrai compteur d'inscrits (rien sous 10). */}
+      <section aria-labelledby="principe" className="flex flex-col gap-6 border-y border-[#e3e6ea] py-12 sm:py-16">
+        <h2 id="principe" className={`${h2} max-w-[22ch]`}>
+          Plus on est nombreux, plus on pèse face aux négoces.
+        </h2>
+        <CompteurInscrits />
+      </section>
+
+      {/* Les trois étapes, chacune avec son écran. Sur le téléphone, elles défilent de côté. */}
       <section aria-labelledby="comment-titre" className="flex scroll-mt-20 flex-col gap-10" id="comment">
         <div className="flex flex-col gap-3">
           <h2 id="comment-titre" className={h2}>
-            Ta liste, précise-la, ton prix
+            Comment ça marche
           </h2>
-          <p className={intro}>Trois gestes. Le reste, c&apos;est nous : le regroupement, les demandes aux négoces, la comparaison.</p>
+          <p className={intro}>Trois étapes. Le reste, c&apos;est nous : le regroupement, les demandes aux négoces, la comparaison.</p>
         </div>
         <ol className="-mx-4 flex snap-x snap-mandatory gap-5 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-6 sm:overflow-visible sm:px-0">
           {ETAPES.map((e, i) => (
@@ -229,17 +243,25 @@ export default function BienvenuePage() {
         </div>
       </section>
 
+      {/* Le partage, partout : WhatsApp, SMS, lien. Le même bloc vit dans l'app (accueil, Commande commune). */}
+      <InviterCollegue grand titre="L'union fait la force : fais venir tes collègues" texte="Plus on est nombreux dans le secteur, plus les prix baissent. Envoie-leur le lien en deux secondes." />
+
       <section aria-labelledby="commencer" className="flex flex-col items-start gap-6 border-t border-[#e3e6ea] pt-16 sm:items-center sm:text-center">
         <h2 id="commencer" className="font-display text-[34px] leading-[1.05] font-bold tracking-[-0.03em] sm:text-[48px]">
-          Ta première liste, maintenant
+          Rejoins les couvreurs du secteur
         </h2>
-        <p className="max-w-[44ch] text-[17px] leading-relaxed text-muted">Un compte, une photo de ta liste, et les négoces de ton secteur se mettent au travail.</p>
+        <p className="max-w-[44ch] text-[17px] leading-relaxed text-muted">Un compte, une photo de ta liste, et les négoces de ton secteur se mettent au travail. Gratuit pour l&apos;artisan.</p>
         <ButtonLink href="/inscription" variant="accent" className={BOUTON}>
-          Créer un compte
+          Je rejoins le mouvement
         </ButtonLink>
         {/* Tous les métiers restent ouverts (nouveau cap) : une ligne. */}
         <p className="text-[15px] text-muted">Aussi pour la charpente, la maçonnerie, l&apos;isolation…</p>
       </section>
+
+      {/* Rassurant pour les négoces : ils lisent aussi la page, et ce sont eux qui répondent. */}
+      <p className="text-center text-[15px] leading-relaxed text-muted">
+        <span className="font-semibold text-ink">Négoces :</span> des commandes groupées, des volumes sûrs. Répondez aux demandes, on vous apporte les clients.
+      </p>
 
       <footer className="flex flex-col gap-5 border-t border-[#e3e6ea] pt-8 text-[13px] leading-relaxed text-muted">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

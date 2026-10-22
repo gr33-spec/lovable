@@ -10,6 +10,7 @@ import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
 import { NOM, nom, noms } from "@/lib/nom";
+import { InviterCollegue } from "@/components/inviter";
 
 interface EtatGroupe {
   eligible: boolean;
@@ -131,6 +132,8 @@ export default function GroupePage() {
         )}
         <p className="text-[13px] text-muted">Gratuit pour toi. Personne ne voit ton nom ni tes chantiers.</p>
       </Card>
+      {/* Landing du 22 octobre : plus on est nombreux, plus on négocie ; le même bloc que la page publique. */}
+      <InviterCollegue texte="Plus on est nombreux sur la même ligne, plus les négoces baissent leurs prix." />
 
       {tout ? null : (
         <Card className="flex flex-col gap-3 p-4">
