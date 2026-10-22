@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { LiensLegaux } from "@/components/legal";
 import { PageTitle } from "@/components/ui";
+import { nom } from "@/lib/nom";
 
 export const metadata: Metadata = { title: "Confidentialité — BatiClair" };
 
@@ -29,7 +30,7 @@ export default function ConfidentialitePage() {
           <li>Les listes de matériaux (quantitatifs), vos réponses et vos corrections.</li>
           <li>Votre carnet de fournisseurs et vos demandes de prix.</li>
           <li>
-            Pour le groupé : le SIRET de votre entreprise (vérifié auprès de l&apos;INSEE), vos négoces (nom, e-mail, ce qu&apos;ils vendent, votre numéro de compte),
+            Pour la {nom} : le SIRET de votre entreprise (vérifié auprès de l&apos;INSEE), vos négoces (nom, e-mail, ce qu&apos;ils vendent, votre numéro de compte),
             vos lignes proposées, vos bons de commande et vos livraisons. Les négoces : leur accord de commission (date, e-mail, adresse IP) et leurs devis.
           </li>
         </ul>
@@ -54,7 +55,7 @@ export default function ConfidentialitePage() {
             À votre demande, <strong>tout est supprimé immédiatement</strong> : compte, entreprise, chantiers, devis et leurs fichiers, listes, fournisseurs.
           </li>
           <li>
-            Les bons de commande, accords et factures de commission du groupé sont gardés <strong>10 ans</strong> (obligation comptable), sans votre nom une fois le
+            Les bons de commande, accords et factures de commission de la {nom} sont gardés <strong>10 ans</strong> (obligation comptable), sans votre nom une fois le
             compte supprimé.
           </li>
         </ul>

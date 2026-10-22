@@ -34,6 +34,9 @@ import { prixDesPaliers, statutDeLecture, type NegoceExtractor } from "./negoce-
 import { pdfDeTexte } from "./pdf-texte.js";
 import type { Geocodeur } from "./geocodeur.js";
 
+/** Adresses géocodées en même temps au dépôt d'un devis négoce (l'API Adresse accepte 50 requêtes par seconde). */
+const GEOCODAGE_PAR_PAQUET = 10;
+
 const JOUR = 24 * 3600 * 1000;
 /** Un lien de dépôt meurt 30 jours après l'envoi du lot (7 jours de réponse, puis la marge d'un négoce en retard). */
 export const DUREE_LIEN_REPONSE_JOURS = 30;
@@ -301,21 +304,26 @@ export class DemandeService {
     return page;
   }
 
-  /** La distance par la route du dépôt du négoce à chaque chantier du lot (une adresse géocodée une fois). */
+  /**
+   * La distance par la route du dépôt du négoce à chaque chantier du lot. Chaque adresse est géocodée une fois, par paquets
+   * de 10 en parallèle (DETTE n° 15, 22 octobre : une à une, 20 chantiers à 5 s chacun dépassaient la durée d'une fonction).
+   */
   private async distances(depart: string, besoins: readonly { id: string; adresseLivraison: string }[]): Promise<Record<string, number | null>> {
     if (!this.geocodeur) return Object.fromEntries(besoins.map((b) => [b.id, null]));
-    const cache = new Map<string, Promise<{ lat: number; lon: number } | null>>();
-    const point = (a: string) => {
-      if (!cache.has(a)) cache.set(a, this.geocodeur!.point(a));
-      return cache.get(a)!;
-    };
-    const origine = await point(depart);
-    const out: Record<string, number | null> = {};
-    for (const b of besoins) {
-      const p = await point(b.adresseLivraison);
-      out[b.id] = origine && p ? distanceRouteKm(origine, p) : null;
+    const adresses = [...new Set([depart, ...besoins.map((b) => b.adresseLivraison)])];
+    const points = new Map<string, { lat: number; lon: number } | null>();
+    for (let i = 0; i < adresses.length; i += GEOCODAGE_PAR_PAQUET) {
+      const paquet = adresses.slice(i, i + GEOCODAGE_PAR_PAQUET);
+      const lus = await Promise.all(paquet.map((a) => this.geocodeur!.point(a).catch(() => null)));
+      paquet.forEach((a, k) => points.set(a, lus[k] ?? null));
     }
-    return out;
+    const origine = points.get(depart) ?? null;
+    return Object.fromEntries(
+      besoins.map((b) => {
+        const p = points.get(b.adresseLivraison) ?? null;
+        return [b.id, origine && p ? distanceRouteKm(origine, p) : null];
+      }),
+    );
   }
 
   /**

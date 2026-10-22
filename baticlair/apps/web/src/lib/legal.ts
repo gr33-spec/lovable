@@ -1,5 +1,5 @@
 /** Les pages légales (plan du 20 octobre 2026, bloc 6) : l'éditeur, l'hébergeur, la version des CGU acceptée à l'inscription. */
-export const VERSION_CGU = "2026-10-20";
+export const VERSION_CGU = "2026-10-22";
 
 export const EDITEUR = {
   nom: "BATI INVEST",

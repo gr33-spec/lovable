@@ -2078,7 +2078,7 @@ test("Pages légales : mentions légales, CGU, conditions négoce et confidentia
   // Le compte créé (case cochée) garde la date et la version des CGU.
   await signUp(page);
   const cgu = await page.evaluate(async () => (await (await fetch("/v1/me/cgu")).json()) as { accepteLe: string | null; version: string | null });
-  expect(cgu.version).toBe("2026-10-20");
+  expect(cgu.version).toBe("2026-10-22");
   expect(cgu.accepteLe).toMatch(/^\d{4}-\d{2}-\d{2}T/);
 });
 

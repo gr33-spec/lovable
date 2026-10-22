@@ -3,6 +3,7 @@ import Link from "next/link";
 import { LiensLegaux, styleLegal as s } from "@/components/legal";
 import { PageTitle } from "@/components/ui";
 import { EDITEUR } from "@/lib/legal";
+import { NOM, nom } from "@/lib/nom";
 
 export const metadata: Metadata = { title: "Conditions négoce — BatiClair" };
 
@@ -15,21 +16,21 @@ export default function ConditionsNegocePage() {
     <article className="flex flex-col gap-5">
       <PageTitle>Conditions négoce</PageTitle>
       <p className={s.p}>
-        Vous recevez de BatiClair des demandes de prix groupées : plusieurs artisans d&apos;un même département, une même référence, un seul lot. Voici ce qui
+        Vous recevez de BatiClair des demandes de prix de la « {NOM} » : plusieurs artisans d&apos;un même département, une même référence, un seul lot. Voici ce qui
         s&apos;applique si vous répondez.
       </p>
       <section className="flex flex-col gap-2">
         <h2 className={s.h2}>1. Objet</h2>
         <p className={s.p}>
-          {EDITEUR.nom} (BatiClair) met en relation des artisans regroupés (« Regroupement artisans ») et des négoces de matériaux. Vous répondez librement, par un
-          devis, à une demande de prix groupée.
+          {EDITEUR.nom} (BatiClair) met en relation des artisans réunis dans la « {NOM} » et des négoces de matériaux. Vous répondez librement, par un
+          devis, à une demande de prix de la {nom}.
         </p>
       </section>
       <section className="flex flex-col gap-2">
         <h2 className={s.h2}>2. Commission</h2>
         <p className={s.p}>
           Si votre devis est retenu pour un lot, vous versez à BatiClair une commission d&apos;apporteur d&apos;affaires de <strong>2 % du montant hors taxes du lot</strong>,
-          c&apos;est-à-dire de la somme des bons de commande des artisans du lot passés chez vous au tarif groupé. Intégrez-la à votre prix.
+          c&apos;est-à-dire de la somme des bons de commande des artisans du lot passés chez vous au tarif de la {nom}. Intégrez-la à votre prix.
         </p>
       </section>
       <section className="flex flex-col gap-2">

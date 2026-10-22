@@ -3,6 +3,7 @@ import Link from "next/link";
 import { LiensLegaux, styleLegal as s } from "@/components/legal";
 import { PageTitle } from "@/components/ui";
 import { EDITEUR, VERSION_CGU } from "@/lib/legal";
+import { NOM, nom } from "@/lib/nom";
 
 export const metadata: Metadata = { title: "Conditions générales d'utilisation — BatiClair" };
 
@@ -17,7 +18,7 @@ export default function CguPage() {
         <h2 className={s.h2}>1. Le service</h2>
         <p className={s.p}>
           BatiClair, édité par {EDITEUR.nom}, lit les devis que vous déposez, en sort la liste des fournitures à commander, prépare vos demandes de prix à vos
-          fournisseurs et, si vous le souhaitez, regroupe vos commandes avec celles d&apos;autres artisans de votre département (« BatiClair Groupé »).
+          fournisseurs et, si vous le souhaitez, regroupe vos commandes avec celles d&apos;autres artisans de votre département (« {NOM} »).
         </p>
         <p className={s.p}>
           Les quantités sont calculées à partir du devis et de référentiels métier. Elles sont une aide : vous restez responsable de ce que vous commandez et de
@@ -29,17 +30,17 @@ export default function CguPage() {
         <h2 className={s.h2}>2. Votre compte</h2>
         <ul className={s.ul}>
           <li>Un compte par personne, rattaché à une entreprise du bâtiment. Vous gardez votre mot de passe pour vous.</li>
-          <li>Les informations de l&apos;entreprise (nom, adresse, SIRET) doivent être exactes : le SIRET est vérifié auprès de l&apos;INSEE avant l&apos;accès au groupé.</li>
+          <li>Les informations de l&apos;entreprise (nom, adresse, SIRET) doivent être exactes : le SIRET est vérifié auprès de l&apos;INSEE avant l&apos;accès à la {nom}.</li>
           <li>Vous pouvez supprimer votre compte à tout moment depuis Compte → Mes données : tout est effacé.</li>
         </ul>
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className={s.h2}>3. Le groupé</h2>
+        <h2 className={s.h2}>3. La {nom}</h2>
         <ul className={s.ul}>
           <li>Gratuit pour l&apos;artisan : aucun abonnement, aucune commission sur vos achats. Le négoce retenu verse 2 % du montant HT du lot à BatiClair.</li>
           <li>
-            « Chantier signé » est un engagement ferme : en le cochant, vous vous engagez à commander ces quantités au prix groupé obtenu, chez le négoce retenu. Vous
+            « Chantier signé » est un engagement ferme : en le cochant, vous vous engagez à commander ces quantités au prix obtenu par la {nom}, chez le négoce retenu. Vous
             pouvez retirer une ligne tant que la demande n&apos;est pas partie aux négoces.
           </li>
           <li>
@@ -47,7 +48,7 @@ export default function CguPage() {
             commande.
           </li>
           <li>
-            Ne pas commander après un bon de commande transmis est un désistement : un avertissement la première fois, puis la fermeture du groupé pendant six mois au
+            Ne pas commander après un bon de commande transmis est un désistement : un avertissement la première fois, puis la fermeture de la {nom} pendant six mois au
             deuxième désistement sur douze mois. Le négoce en est informé.
           </li>
           <li>Les autres artisans ne voient ni votre nom ni vos chantiers ; vous ne voyez pas les leurs.</li>

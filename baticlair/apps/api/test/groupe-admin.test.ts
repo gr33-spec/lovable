@@ -73,7 +73,7 @@ describe("groupé, étape 9 : l'admin de Greg", { timeout: 90_000 }, () => {
     expect(tableau.lots[0]).toMatchObject({ statut: "choisi", zone: "22", negoceRetenu: "Négoce Carrelage", prixRetenu: "18.5", besoins: { total: 2, fermes: 2 }, reponses: { attendues: 2, deposees: 2, pasConcernes: 0, aVerifier: 0 }, bons: 2 });
     expect(tableau.negoces.map((n: { nom: string }) => n.nom).sort()).toEqual(["Négoce Carrelage", "Négoce Généraliste"]);
     expect(tableau.accords).toHaveLength(2);
-    expect(tableau.accords[0]).toMatchObject({ versionContrat: "2026-10-20", tauxPourcent: "2" });
+    expect(tableau.accords[0]).toMatchObject({ versionContrat: "2026-10-22", tauxPourcent: "2" });
     expect(tableau.factures).toHaveLength(1);
     expect(tableau.factures[0]).toMatchObject({ negoce: "Négoce Carrelage", montantHt: "17.02", statut: "envoyee" });
     expect(tableau.exclusions).toEqual([]);
