@@ -32,10 +32,12 @@ import { RegroupementController } from "./http/regroupement.controller.js";
 import { ReponseController } from "./http/reponse.controller.js";
 import { TestMailboxController } from "./http/test-mailbox.controller.js";
 import { WebhookResendController } from "./http/webhook-resend.controller.js";
+import { SuiviController } from "./http/suivi.controller.js";
+import { SuiviService } from "./application/suivi.service.js";
 
 @Module({
   imports: [TenancyModule, TakeoffModule],
-  controllers: [GroupeController, NegocesController, RegroupementController, ReponseController, WebhookResendController, TestMailboxController, AdminGroupeController, SireneController, RapportMensuelController, JeuDemonstrationController],
+  controllers: [SuiviController, GroupeController, NegocesController, RegroupementController, ReponseController, WebhookResendController, TestMailboxController, AdminGroupeController, SireneController, RapportMensuelController, JeuDemonstrationController],
   providers: [
     {
       provide: SIRET_VERIFIER,
@@ -47,6 +49,7 @@ import { WebhookResendController } from "./http/webhook-resend.controller.js";
           : new InseeSiretVerifier(c.groupe.inseeApiKey),
       inject: [CONFIG],
     },
+    { provide: SuiviService, useFactory: (p: PrismaService, t: TakeoffService) => new SuiviService(p, (tenant, id) => t.reviewed(tenant, id)), inject: [PrismaService, TakeoffService] },
     { provide: RegroupementService, useFactory: (p: PrismaService) => new RegroupementService(p), inject: [PrismaService] },
     { provide: JeuDemonstrationService, useFactory: (p: PrismaService) => new JeuDemonstrationService(p), inject: [PrismaService] },
     { provide: PDF_READER, useFactory: () => new PdfJsPdfReader() },
@@ -57,11 +60,12 @@ import { WebhookResendController } from "./http/webhook-resend.controller.js";
     { provide: ChoixService, useFactory: (p: PrismaService, c: CommandeService) => new ChoixService(p, c), inject: [PrismaService, CommandeService] },
     {
       provide: NEGOCE_EXTRACTOR,
-      // Le devis du négoce est lu par le modèle rapide (Sonnet), à la demande ; en test, le faux lecteur ; sans clé, Greg relit.
+      // Nouveau cap (22 octobre) : le devis du négoce est lu UNE fois à son arrivée par le modèle le plus capable (Opus,
+      // `AI_EXTRACTION_MODEL`), puis comparé par le code ; en test, le faux lecteur ; sans clé, Greg relit.
       useFactory: (c: AppConfig): NegoceExtractor | null => {
         switch (c.ai.provider) {
           case "anthropic":
-            return new AnthropicNegoceExtractor(c.ai.apiKey!, c.ai.quantitatifModel);
+            return new AnthropicNegoceExtractor(c.ai.apiKey!, c.ai.extractionModel);
           case "fake":
             return new FakeNegoceExtractor();
           case "disabled":
@@ -81,7 +85,7 @@ import { WebhookResendController } from "./http/webhook-resend.controller.js";
         new GroupeService(p, (tenant, id) => t.reviewed(tenant, id), s, r, d, c, n, { departements: cfg.groupe.departements, admins: cfg.groupe.admins }),
       inject: [PrismaService, TakeoffService, SIRET_VERIFIER, RegroupementService, DemandeService, CommandeService, NotificationsGroupeService, CONFIG],
     },
-    { provide: NegocesService, useFactory: (p: PrismaService, c: AppConfig) => new NegocesService(p, c.authSecret), inject: [PrismaService, CONFIG] },
+    { provide: NegocesService, useFactory: (p: PrismaService, c: AppConfig, e: TransactionalEmailSender) => new NegocesService(p, c.authSecret, e, c.webAppUrl), inject: [PrismaService, CONFIG, EMAIL_SENDER] },
     { provide: SIRENE_HTTP, useValue: fetch as unknown as SireneHttp },
     { provide: SireneService, useFactory: (p: PrismaService, h: SireneHttp, c: AppConfig) => new SireneService(p, h, { apiKey: c.groupe.inseeApiKey, ...c.groupe.sirene }), inject: [PrismaService, SIRENE_HTTP, CONFIG] },
   ],

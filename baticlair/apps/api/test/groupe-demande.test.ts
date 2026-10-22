@@ -52,7 +52,10 @@ const proposer = async (c: Awaited<ReturnType<typeof carreleur>>, statut: "signe
 const negoce = (agent: Agent, nom: string, email: string, familles: string[]) => agent.post("/v1/groupe/negoces").send({ nom, email, familles }).expect(201);
 const jetonDe = (texte: string) => /\/reponse\/([A-Za-z0-9_-]+)/.exec(texte)![1]!;
 /** Les e-mails partis aux négoces (ceux d'inscription des artisans vont aux @example.fr). */
-const mailsNegoces = () => ctx.emails.sent.filter((m) => m.to.endsWith("@example.com"));
+// Nouveau cap (22 octobre) : le mail d'information au négoce ajouté et les alertes de devis ont leurs propres tests
+// (`cap-22-octobre.test.ts`) ; ici, on suit les messages du parcours d'origine.
+const nouveauCap = (m: { subject: string }) => /^(Un regroupement d|Nouveau meilleur prix|Nouveau devis)/.test(m.subject);
+const mailsNegoces = () => ctx.emails.sent.filter((m) => m.to.endsWith("@example.com") && !nouveauCap(m));
 
 /** Quatre artisans (trois signés, un en attente), trois négoces du 22 (un généraliste, un plombier « pas concerné ») et un de Brest. */
 async function scenario() {
@@ -153,9 +156,15 @@ describe("groupé, étape 5 : la demande aux négoces", { timeout: 60_000 }, () 
     // La case sans devis : refusé aussi.
     expect((await anon.post(`/v1/reponse/${jeton}`).field("accord", "oui")).body.error.details).toMatchObject({ reason: "devis_requis" });
 
+    // Nouveau cap (22 octobre) : sans prix de livraison pour chaque zone du lot, rien n'est pris.
+    const zones = (await anon.get(`/v1/reponse/${jeton}`).expect(200)).body.lot.zones as string[];
+    expect(zones).toEqual(["22300 Lannion", "22500 Paimpol"]);
+    const sansLivraison = await anon.post(`/v1/reponse/${jeton}`).field("accord", "oui").attach("file", devis, { filename: "devis-77.pdf", contentType: "application/pdf" });
+    expect(sansLivraison.body.error.details).toMatchObject({ reason: "livraison_requise", zones: ["22300 Lannion", "22500 Paimpol"] });
     const avec = await anon
       .post(`/v1/reponse/${jeton}`)
       .field("accord", "oui")
+      .field("livraison", JSON.stringify([{ zone: "22300 Lannion", prixHt: "45" }, { zone: "22500 Paimpol", prixHt: "60" }]))
       .field("message", "Prix valables 30 jours")
       .attach("file", devis, { filename: "devis-77.pdf", contentType: "application/pdf" })
       .attach("file", devis, { filename: "devis-77-bis.pdf", contentType: "application/pdf" });
@@ -173,7 +182,7 @@ describe("groupé, étape 5 : la demande aux négoces", { timeout: 60_000 }, () 
     expect(reponse.fichiers).toHaveLength(2);
     // Un lot qui n'attend plus (choisi) ne prend plus de dépôt.
     await ctx.prisma.lotGroupe.update({ where: { id: reponse.lotId }, data: { statut: "choisi" } });
-    const ferme = await anon.post(`/v1/reponse/${jeton}`).field("accord", "oui").attach("file", devis, { filename: "devis.pdf", contentType: "application/pdf" });
+    const ferme = await anon.post(`/v1/reponse/${jeton}`).field("accord", "oui").field("livraison", JSON.stringify([{ zone: "22300 Lannion", prixHt: "45" }, { zone: "22500 Paimpol", prixHt: "60" }])).attach("file", devis, { filename: "devis.pdf", contentType: "application/pdf" });
     expect(ferme.status).toBe(409);
     expect((await anon.get(`/v1/reponse/${jeton}`).expect(200)).body.lot.ouvert).toBe(false);
   });

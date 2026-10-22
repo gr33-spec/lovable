@@ -36,6 +36,8 @@ export interface OffreGroupe {
   prixReference: string | null;
   economie: string | null;
   probleme: string | null;
+  /** Nouveau cap (22 octobre) : le prix livré chez moi, livraison de ma zone comprise, comparé à mon prix habituel. */
+  livre?: { totalHt: number; livraisonHt: number; habituelHt: number | null; economieHt: number | null; zone: string | null };
 }
 
 export interface Groupe {
@@ -244,6 +246,13 @@ function OffreCard({ besoin: b, groupe }: { besoin: BesoinGroupe; groupe: Groupe
       <p className="text-[15px] leading-snug font-bold">
         {quantiteFr(b.quantite)} {b.unite} à {euros(o.prixUnitaire)} HT l&apos;unité chez {o.negoce}
       </p>
+      {o.livre ? (
+        <p aria-label="Ton prix livré" className="text-[15px] leading-snug font-extrabold">
+          Ton prix livré{o.livre.zone ? ` à ${o.livre.zone.replace(/^\d{5}\s*/, "")}` : ""} : {euros(String(o.livre.totalHt))} HT
+          <span className="font-semibold text-muted">{` (livraison ${euros(String(o.livre.livraisonHt))})`}</span>
+          {o.livre.habituelHt !== null ? <span className="block text-[14px] font-semibold text-muted">Ton prix habituel : {euros(String(o.livre.habituelHt))} HT</span> : null}
+        </p>
+      ) : null}
       {o.dateLivraison ? <p className="text-[13px] font-semibold text-muted">Livraison le {jourFr(o.dateLivraison)}, sur ton chantier, sur ton compte chez lui.</p> : null}
       {o.economie !== null ? <p className="text-[14px] font-extrabold text-ok">Économie estimée : {euros(o.economie)}</p> : null}
       <label className="flex flex-wrap items-center gap-2 text-[13px] font-semibold text-muted">

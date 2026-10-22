@@ -1899,10 +1899,15 @@ async function artisanAuGroupe(page: Page, entreprise: string, adresse: string):
 
 /** La dernière demande de prix reçue par un négoce (la boîte de test garde celles des parcours précédents). */
 async function derniereDemande(page: Page, negoce: string, dejaRecus: number) {
-  await expect.poll(async () => (await emailsVers(page, negoce)).length, { timeout: 20_000 }).toBeGreaterThan(dejaRecus);
-  const demande = (await emailsVers(page, negoce)).at(-1)!;
-  expect(demande.subject).toContain("Regroupement artisans");
-  return demande;
+  // Nouveau cap (22 octobre) : un négoce ajouté reçoit d'abord le mail qui le prévient du regroupement ; on attend la demande.
+  const demandes = async () => (await emailsVers(page, negoce)).slice(dejaRecus).filter((m) => m.subject.includes("Regroupement artisans"));
+  await expect.poll(async () => (await demandes()).length, { timeout: 20_000 }).toBeGreaterThan(0);
+  return (await demandes()).at(-1)!;
+}
+
+/** Nouveau cap (22 octobre) : le négoce donne un prix de livraison pour chaque zone du lot (obligatoire). */
+async function prixDeLivraison(form: Locator, prix = "45") {
+  for (const champ of await form.getByRole("textbox", { name: /^Livraison à / }).all()) await champ.fill(prix);
 }
 
 /** Le négoce répond par e-mail, reçoit son lien neuf, l'ouvre sans compte, coche la commission et dépose son devis. */
@@ -1920,6 +1925,7 @@ async function negoceDepose(page: Page, browser: Browser, negoce: string, replyT
   const form = pageN.getByRole("form", { name: "Déposer mon devis" });
   await form.locator('input[type="file"]').setInputFiles(path.join(__dirname, "fixtures", fixture));
   await form.getByRole("checkbox", { name: "J'accepte la commission" }).check();
+  await prixDeLivraison(form, "60");
   await form.getByRole("button", { name: "Déposer mon devis" }).click();
   await expect(pageN.getByRole("status")).toContainText("Devis reçu, merci.");
   await contexteN.close();
@@ -1978,6 +1984,10 @@ test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux 
     await form.locator('input[type="file"]').setInputFiles(path.join(__dirname, "fixtures", "devis-fournisseur-couvreur.pdf"));
     await expect(form.getByRole("button", { name: "Déposer mon devis" })).toBeDisabled();
     await form.getByRole("checkbox", { name: "J'accepte la commission" }).check();
+    // Nouveau cap (22 octobre) : un prix de livraison par zone (commune des chantiers), obligatoire.
+    await expect(form.getByRole("textbox", { name: /^Livraison à / })).toHaveCount(1);
+    await expect(form.getByRole("button", { name: "Déposer mon devis" })).toBeDisabled();
+    await prixDeLivraison(form);
     await form.getByRole("button", { name: "Déposer mon devis" }).click();
     await expect(pageN.getByRole("status")).toContainText("Devis reçu, merci.");
     expect(await pageN.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
@@ -1990,6 +2000,8 @@ test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux 
   const lots = page.getByRole("list", { name: "Mes commandes groupées" });
   await expect(lots.getByText(/Négoce retenu/)).toBeVisible({ timeout: 20_000 });
   await expect(lots.getByText(/€ HT l'unité chez Négoce/)).toBeVisible();
+  // Nouveau cap (22 octobre) : le compteur du groupe, sans nom ni chantier des autres.
+  await expect(lots.getByLabel("Compteur du groupe")).toHaveText(/^2 couvreurs, 2 demandes envoyées, 2 devis reçus/);
   await expect(lots.getByText("Toitures Le Bihan")).toHaveCount(0);
   await lots.getByRole("button", { name: "Livré" }).click();
   await expect(lots.getByText("Livré, merci.")).toBeVisible();
@@ -2423,6 +2435,10 @@ test("« + Nouvelle liste » : « Donne ta liste de matériaux » lit la photo s
   await closeOpenLine(page);
   await expect(liste.getByText("Précise pour trouver d'autres couvreurs")).toHaveCount(3);
   await expect(liste.getByRole("button", { name: /Liteau sapin 27x38/ }).first()).toBeVisible();
+  // Nouveau cap (22 octobre) : le suivi façon colis, en haut du chantier.
+  const suivi = page.getByRole("region", { name: "Suivi du chantier" });
+  await expect(suivi.getByRole("listitem")).toHaveText(["Liste prête", "Prix demandés", "Prix reçus", "Commandé"]);
+  await expect(suivi).toContainText("Ta liste est prête.");
 
   // 3. Corriger d'un doigt ce qui est mal lu : renommer, retirer, ajouter une ligne.
   await page.getByRole("button", { name: "Modifier : Pointes inox" }).click();
@@ -2454,6 +2470,8 @@ test("« + Nouvelle liste » : « Donne ta liste de matériaux » lit la photo s
   await expect(page.getByRole("list", { name: "Tes fournisseurs" })).toBeVisible();
   const [demande] = await emailsVers(page, negoce);
   expect(demande, "la demande de devis est partie").toBeDefined();
+  await page.reload();
+  await expect(page.getByRole("region", { name: "Suivi du chantier" })).toContainText("Demande partie chez 1 négoce. On attend leurs prix.");
   // Le PDF joint porte les lignes (un seul document, §43) ; la liste corrigée est celle qui est partie.
   expect(demande!.attachments.join(" ")).toMatch(/demande-de-devis/);
   await page.getByRole("button", { name: /Ma liste, envoyée/ }).click();

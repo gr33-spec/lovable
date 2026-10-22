@@ -1,4 +1,4 @@
-import { choisirLeNegoce, lotADecider, type ReponseAChoisir } from "@baticlair/domain";
+import { choisirLeNegoce, lotADecider, totalLivraison, zonesDuLot, type ReponseAChoisir } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 
 /**
@@ -28,7 +28,10 @@ export class ChoixService {
       if (!lotADecider(lot, lot.reponses, maintenant)) continue;
       const engages = lot.besoins.filter((b) => b.statut === "engage");
       const volumeFerme = engages.reduce((s, b) => s + Number(b.quantite), 0);
+      // Nouveau cap (22 octobre) : le moins cher se juge livraison comprise, sur les zones des chantiers engagés.
+      const zones = zonesDuLot(engages.map((b) => b.adresseLivraison));
       const reponses: ReponseAChoisir[] = lot.reponses.map((r) => ({
+        livraisonHt: totalLivraison((r.livraison as { zone: string; prixHt: number }[]) ?? [], zones),
         negoceId: r.negoceId,
         statutExtraction: r.statutExtraction,
         prix: (r.prix as { palier: string | null; prixUnitaire: string | null; totalHt: string | null }[]) ?? [],

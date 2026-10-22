@@ -6,7 +6,10 @@ import {
   documentDemande,
   htmlDemande,
   LIBELLES_FAMILLES,
+  livraisonComplete,
+  messageNouveauDevis,
   negoceConcerne,
+  prixAuVolume,
   NOM_DEMANDE,
   objetDemande,
   PHRASE_ACCORD,
@@ -16,6 +19,8 @@ import {
   texteDemande,
   VERSION_CONTRAT,
   volumesDuLot,
+  zonesDuLot,
+  type PrixDeLivraison,
   type FamilleGroupe,
   type LotADemander,
   type MessageArtisan,
@@ -59,12 +64,14 @@ export interface PageReponse {
     chantiers: { adresse: string; quantite: string; unite: string; fenetre: { tot: string; tard: string }; engagement: "ferme" | "probable" }[];
     /** Le lot attend encore les réponses (« envoyé ») ; sinon la page le dit et ne prend plus rien. */
     ouvert: boolean;
+    /** Nouveau cap (22 octobre) : les zones de livraison du lot (« 22500 Paimpol »), chacune avec son prix obligatoire. */
+    zones: string[];
     reponseAttendueLe: string | null;
   };
   negoce: { nom: string; email: string };
   commission: { phrase: string; phraseAccord: string; tauxPourcent: number; versionContrat: string; contrat: string[] };
   accord: { accepteLe: string } | null;
-  reponse: { deposeLe: string; fichiers: string[]; message: string | null; statutExtraction: string } | null;
+  reponse: { deposeLe: string; fichiers: string[]; message: string | null; statutExtraction: string; livraison: { zone: string; prixHt: number }[] } | null;
 }
 
 const jour = (d: Date) => d.toISOString().slice(0, 10);
@@ -218,12 +225,13 @@ export class DemandeService {
         fenetre: { tot: jour(r.lot.fenetreTot), tard: jour(r.lot.fenetreTard) },
         chantiers: r.lot.besoins.map((b) => ({ adresse: b.adresseLivraison, quantite: b.quantite.toString(), unite: b.unite, fenetre: { tot: jour(b.fenetreTot), tard: jour(b.fenetreTard) }, engagement: b.statut === "en_attente" ? "probable" : "ferme" })),
         ouvert: r.lot.statut === "envoye",
+        zones: zonesDuLot(r.lot.besoins.map((b) => b.adresseLivraison)),
         reponseAttendueLe: r.lot.envoyeLe ? jour(new Date(r.lot.envoyeLe.getTime() + DELAI_REPONSE_JOURS * JOUR)) : null,
       },
       negoce: { nom: r.negoce.nom, email: r.negoce.email },
       commission: { phrase: PHRASE_COMMISSION, phraseAccord: PHRASE_ACCORD, tauxPourcent: TAUX_COMMISSION_POURCENT, versionContrat: VERSION_CONTRAT, contrat: texteContrat() },
       accord: r.accord ? { accepteLe: r.accord.accepteLe.toISOString() } : null,
-      reponse: r.deposeLe ? { deposeLe: r.deposeLe.toISOString(), fichiers: r.fichiers.map((f) => f.nom), message: r.message, statutExtraction: r.statutExtraction } : null,
+      reponse: r.deposeLe ? { deposeLe: r.deposeLe.toISOString(), fichiers: r.fichiers.map((f) => f.nom), message: r.message, statutExtraction: r.statutExtraction, livraison: (r.livraison as { zone: string; prixHt: number }[]) ?? [] } : null,
     };
   }
 
@@ -238,13 +246,16 @@ export class DemandeService {
    * Le dépôt : la case d'accord est obligatoire (sans elle, rien n'est enregistré), un ou deux PDF, une phrase libre ;
    * l'accord garde la date, l'e-mail du négoce et l'adresse IP ; puis la lecture du prix et du délai.
    */
-  async deposer(jeton: string, depot: { accord: boolean; message: string | null; fichiers: FichierDepose[] }, adresseIp: string): Promise<PageReponse> {
+  async deposer(jeton: string, depot: { accord: boolean; message: string | null; fichiers: FichierDepose[]; livraison?: readonly PrixDeLivraison[] }, adresseIp: string): Promise<PageReponse> {
     const r = await this.reponse(jeton);
     if (r.lot.statut !== "envoye") throw new DomainError("conflict", "Lot closed", { reason: "lot_ferme" });
     if (!depot.accord) throw validationFailed("Commission agreement required", { reason: "accord_requis" });
     if (depot.fichiers.length === 0) throw validationFailed("Quote required", { reason: "devis_requis" });
     if (depot.fichiers.length > 2) throw validationFailed("Two quotes at most", { reason: "deux_devis_au_plus" });
     for (const f of depot.fichiers) if (f.type !== "application/pdf" || !f.contenu.subarray(0, 5).toString().startsWith("%PDF")) throw validationFailed("PDF only", { reason: "pdf_seulement" });
+    // Nouveau cap (22 octobre) : un prix de livraison par zone du lot, obligatoire (zéro = franco).
+    const livraison = livraisonComplete(zonesDuLot(r.lot.besoins.map((b) => b.adresseLivraison)), depot.livraison ?? []);
+    if (!livraison.ok) throw validationFailed("Delivery price per zone required", { reason: "livraison_requise", zones: livraison.manquantes });
     const maintenant = new Date();
     await this.prisma.$transaction(async (tx) => {
       await tx.accordNegoce.upsert({
@@ -255,15 +266,34 @@ export class DemandeService {
       await tx.reponseNegoceFichier.deleteMany({ where: { reponseId: r.id } });
       await tx.reponseNegoce.update({
         where: { id: r.id },
-        data: { message: depot.message, deposeLe: maintenant, statutExtraction: "en_attente", prix: [], delaiJours: null, fichiers: { create: depot.fichiers.map((f) => ({ nom: f.nom, type: f.type, contenu: new Uint8Array(f.contenu) })) } },
+        data: { message: depot.message, deposeLe: maintenant, statutExtraction: "en_attente", prix: [], delaiJours: null, livraison: livraison.prix, fichiers: { create: depot.fichiers.map((f) => ({ nom: f.nom, type: f.type, contenu: new Uint8Array(f.contenu) })) } },
       });
     });
     const lecture = await this.lire(r, depot.fichiers);
     await this.prisma.reponseNegoce.update({ where: { id: r.id }, data: { statutExtraction: lecture.statut, prix: lecture.prix.map((x) => ({ ...x })), delaiJours: lecture.delaiJours } });
     await this.prisma.journalGroupe.create({ data: { lotId: r.lotId, evenement: "reponse_deposee", details: { negoce: r.negoceId, fichiers: depot.fichiers.length, lecture: lecture.statut } } });
+    await this.alerter(r, lecture);
     const page = await this.page(jeton);
     await this.choix.choisirLesLotsEnvoyes();
     return page;
+  }
+
+  /**
+   * Nouveau cap (22 octobre) : « Alerte à chaque nouveau devis : « Nouveau meilleur prix » ou « Devis de X, légèrement plus
+   * haut ». » Le devis vient d'être lu, une seule fois ; la comparaison au meilleur prix des autres devis lus est du code.
+   * Chaque artisan du lot est prévenu ; un devis sans prix lu ne prévient personne (Greg le relit).
+   */
+  private async alerter(r: Awaited<ReturnType<DemandeService["reponse"]>>, lecture: { statut: string; prix: { palier: string | null; prixUnitaire: string | null; totalHt: string | null }[] }) {
+    const fermes = r.lot.besoins.filter((b) => b.statut !== "en_attente");
+    const volume = fermes.reduce((s, b) => s + Number(b.quantite), 0);
+    const prixUnitaire = lecture.statut === "lue" ? prixAuVolume(lecture.prix, volume) : null;
+    if (prixUnitaire === null) return;
+    const autres = await this.prisma.reponseNegoce.findMany({ where: { lotId: r.lotId, id: { not: r.id }, statutExtraction: "lue", deposeLe: { not: null } }, select: { prix: true } });
+    const meilleurs = autres.map((a) => prixAuVolume(Array.isArray(a.prix) ? (a.prix as { palier: string | null; prixUnitaire: string | null; totalHt: string | null }[]) : [], volume)).filter((p): p is number => p !== null);
+    const meilleurAvant = meilleurs.length ? Math.min(...meilleurs) : null;
+    const message = messageNouveauDevis({ numero: r.lot.numero, designation: r.lot.besoins[0]?.designation ?? r.lot.cle, negoce: r.negoce.nom, prixUnitaire, meilleurAvant });
+    const entreprises = [...new Set(r.lot.besoins.map((b) => b.companyId))];
+    for (const companyId of entreprises) await this.notifications.prevenir(companyId, message).catch(() => undefined);
   }
 
   private async lire(r: Awaited<ReturnType<DemandeService["reponse"]>>, fichiers: FichierDepose[]) {

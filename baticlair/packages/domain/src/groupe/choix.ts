@@ -23,6 +23,11 @@ export interface ReponseAChoisir {
   delaiJours: number | null;
   deposeLe: Date | null;
   pasConcerneLe: Date | null;
+  /**
+   * Nouveau cap (22 octobre) : le total des livraisons du négoce sur les zones du lot (prix par zone obligatoire). Le moins
+   * cher se juge livraison comprise ; absent (anciennes réponses), zéro.
+   */
+  livraisonHt?: number | null;
 }
 
 export type RaisonEcart = "sans_depot" | "pas_concerne" | "a_verifier" | "sans_prix" | "palier_insuffisant" | "hors_fenetre" | "plus_cher";
@@ -33,7 +38,9 @@ export interface ChoixDuLot {
 }
 
 /** « 1 720,00 » → 1720 ; « 18,50 » → 18.5 ; vide ou illisible → null. */
-export function nombreFr(texte: string | null | undefined): number | null {
+export function nombreFr(texte: string | number | null | undefined): number | null {
+  // Un prix déjà en nombre (jeu de démonstration) se lit tel quel.
+  if (typeof texte === "number") return Number.isFinite(texte) ? texte : null;
   if (!texte) return null;
   const t = texte.replace(/[\s €]/g, "").replace(",", ".");
   if (!/^\d+(\.\d+)?$/.test(t)) return null;
@@ -70,7 +77,7 @@ export function dateDeLivraison(r: Pick<ReponseAChoisir, "deposeLe" | "delaiJour
 
 export function choisirLeNegoce(lot: { volumeFerme: number; fenetre: FenetreLivraison }, reponses: readonly ReponseAChoisir[]): ChoixDuLot {
   const ecartes: ChoixDuLot["ecartes"] = [];
-  const candidats: { negoceId: string; prixUnitaire: number; dateLivraison: Date }[] = [];
+  const candidats: { negoceId: string; prixUnitaire: number; dateLivraison: Date; total: number }[] = [];
   for (const r of reponses) {
     if (r.pasConcerneLe) ecartes.push({ negoceId: r.negoceId, raison: "pas_concerne" });
     else if (!r.deposeLe) ecartes.push({ negoceId: r.negoceId, raison: "sans_depot" });
@@ -80,11 +87,12 @@ export function choisirLeNegoce(lot: { volumeFerme: number; fenetre: FenetreLivr
       const dateLivraison = dateDeLivraison(r, lot.fenetre);
       if (pu === null) ecartes.push({ negoceId: r.negoceId, raison: r.prix.some((p) => nombreFr(p.prixUnitaire) !== null) ? "palier_insuffisant" : "sans_prix" });
       else if (dateLivraison > lot.fenetre.tard) ecartes.push({ negoceId: r.negoceId, raison: "hors_fenetre" });
-      else candidats.push({ negoceId: r.negoceId, prixUnitaire: pu, dateLivraison });
+      else candidats.push({ negoceId: r.negoceId, prixUnitaire: pu, dateLivraison, total: pu * lot.volumeFerme + (r.livraisonHt ?? 0) });
     }
   }
-  candidats.sort((a, b) => a.prixUnitaire - b.prixUnitaire || a.dateLivraison.getTime() - b.dateLivraison.getTime());
-  const retenu = candidats[0] ?? null;
+  candidats.sort((a, b) => a.total - b.total || a.dateLivraison.getTime() - b.dateLivraison.getTime());
+  const premier = candidats[0];
+  const retenu = premier ? { negoceId: premier.negoceId, prixUnitaire: premier.prixUnitaire, dateLivraison: premier.dateLivraison } : null;
   for (const c of candidats.slice(1)) ecartes.push({ negoceId: c.negoceId, raison: "plus_cher" });
   return { retenu, ecartes };
 }

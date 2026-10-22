@@ -30,6 +30,8 @@ interface BesoinLot {
   lot: { numero: number; statut: string } | null;
   offre: { prixUnitaire: string; negoce: string; dateLivraison: string | null } | null;
   bon: { id: string; envoyeLe: string | null; livraison: { statut: string; datePrevue: string | null } | null } | null;
+  /** Nouveau cap (22 octobre) : le compteur du groupe (« 30 couvreurs, 15 demandes envoyées, 3 devis reçus, meilleur prix 1,12 € »). */
+  compteur?: { phrase: string };
 }
 
 /** L'accroche selon le métier du compte (décision du fondateur, 2026-10-20) ; couvreur par défaut si le métier est inconnu. */
@@ -297,6 +299,12 @@ function MesLots() {
                 <Store size={14} aria-hidden="true" />
                 {b.chantier}
               </Link>
+              {b.compteur ? (
+                <p aria-label="Compteur du groupe" className="inline-flex items-center gap-1.5 text-[14px] font-extrabold text-accent-text">
+                  <Users size={14} aria-hidden="true" />
+                  {b.compteur.phrase}
+                </p>
+              ) : null}
               <p className="text-[13px] font-semibold text-muted">
                 {b.lot ? `Commande groupée n° ${b.lot.numero} · ${STATUT_LOT[b.lot.statut] ?? b.lot.statut}` : "En attente d'autres artisans"}
                 {b.statut === "en_attente" ? " · devis en attente, tu ne t'engages à rien" : ""}

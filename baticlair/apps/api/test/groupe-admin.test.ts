@@ -43,11 +43,14 @@ async function carreleur(email: string, nom: string, adresse: string) {
 const proposer = (c: Awaited<ReturnType<typeof carreleur>>, statut: "signe" | "en_attente") =>
   c.agent.post(`/v1/projects/${c.projectId}/groupe`).send({ articles: [c.carreaux.key], fenetre: FENETRE, statut, engagement: true });
 const negoce = (agent: Agent, nom: string, email: string, familles: string[]) => agent.post("/v1/groupe/negoces").send({ nom, email, familles }).expect(201);
-const jetonPour = (email: string) => /\/reponse\/([A-Za-z0-9_-]+)/.exec(ctx.emails.sent.find((m) => m.to === email)!.text)![1]!;
+// Le premier mail au négoce peut être celui qui l'informe du regroupement (nouveau cap) : on prend celui de la demande.
+const jetonPour = (email: string) => /\/reponse\/([A-Za-z0-9_-]+)/.exec(ctx.emails.sent.find((m) => m.to === email && /\/reponse\//.test(m.text))!.text)![1]!;
 const CARREAU = "Carreau de sol 60x60 grès cérame";
 async function deposer(jeton: string, rows: FixtureRow[], titre: string) {
   const devis = Buffer.from(await makePdf(["devis"], rows, "Total HT 1 000,00   TVA 20 % 200,00   Total TTC 1 200,00", titre));
-  return request(ctx.app.getHttpServer()).post(`/v1/reponse/${jeton}`).field("accord", "oui").attach("file", devis, { filename: "devis.pdf", contentType: "application/pdf" });
+  // Nouveau cap (22 octobre) : un prix de livraison par zone du lot est obligatoire (ici franco partout).
+  const zones = ((await request(ctx.app.getHttpServer()).get(`/v1/reponse/${jeton}`)).body?.lot?.zones ?? []) as string[];
+  return request(ctx.app.getHttpServer()).post(`/v1/reponse/${jeton}`).field("accord", "oui").field("livraison", JSON.stringify(zones.map((zone) => ({ zone, prixHt: "0" })))).attach("file", devis, { filename: "devis.pdf", contentType: "application/pdf" });
 }
 
 describe("groupé, étape 9 : l'admin de Greg", { timeout: 90_000 }, () => {

@@ -1,9 +1,10 @@
-import { FAMILLES_GROUPE, LIBELLES_FAMILLES, messageAuNegoce, zoneDuCodePostal, type FamilleGroupe } from "@baticlair/domain";
+import { FAMILLES_GROUPE, LIBELLES_FAMILLES, mailRegroupementAuNegoce, messageAuNegoce, zoneDuCodePostal, type FamilleGroupe } from "@baticlair/domain";
+import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { isUuid } from "../../../platform/validation/ids.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
-import { lienDuJeton } from "./lien-negoce.js";
+import { jetonDeLien, lienDuJeton } from "./lien-negoce.js";
 
 export interface NegoceVue {
   id: string;
@@ -43,6 +44,9 @@ export class NegocesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly secret: string,
+    /** Nouveau cap (22 octobre) : le mail qui prévient un négoce nouveau qu'un regroupement de couvreurs existe. */
+    private readonly email: TransactionalEmailSender | null = null,
+    private readonly webAppUrl = "",
   ) {}
 
   async mesNegoces(tenant: TenantContext): Promise<NegoceVue[]> {
@@ -71,6 +75,7 @@ export class NegocesService {
     const departement = n.departement?.trim() || (await this.departementDeLEntreprise(tenant));
     if (!departement) throw validationFailed("Department required", { reason: "departement_requis" });
     const email = n.email.trim().toLowerCase();
+    let nouveau: { id: string; nom: string; familles: string[] } | null = null;
     await this.prisma.$transaction(async (tx) => {
       const existant = await tx.negoce.findUnique({ where: { email_departement: { email, departement } } });
       // Bloc 5 (21 octobre) : le même e-mail dans un autre département, c'est une autre agence du même négoce : une ligne
@@ -79,13 +84,24 @@ export class NegocesService {
       const negoce = existant
         ? await tx.negoce.update({ where: { id: existant.id }, data: { familles: familles([...existant.familles, ...n.familles]) } })
         : await tx.negoce.create({ data: { nom: n.nom.trim(), email, departement, familles: familles(n.familles), ajouteParId: tenant.companyId, stopLe: autreAgence?.stopLe ?? null } });
+      if (!existant && !autreAgence) nouveau = { id: negoce.id, nom: negoce.nom, familles: negoce.familles };
       const liens = await tx.negoceArtisan.findMany({ where: { companyId: tenant.companyId }, orderBy: { rang: "asc" } });
       if (liens.some((l) => l.negoceId === negoce.id)) throw new DomainError("conflict", "Already in your list", { reason: "deja_ajoute" });
       const favori = n.favori === true || liens.length === 0;
       if (favori) for (const l of liens) await tx.negoceArtisan.update({ where: { companyId_negoceId: { companyId: tenant.companyId, negoceId: l.negoceId } }, data: { rang: l.rang + 1 } });
       await tx.negoceArtisan.create({ data: { companyId: tenant.companyId, negoceId: negoce.id, rang: favori ? 1 : (liens.at(-1)?.rang ?? 0) + 1, numeroCompte: n.numeroCompte?.trim() || null } });
     });
+    if (nouveau) await this.prevenirDuRegroupement(tenant, nouveau, email, departement);
     return this.mesNegoces(tenant);
+  }
+
+  /** Le négoce entre dans la base : un mail lui dit qu'un regroupement existe (un échec n'empêche pas l'ajout). */
+  private async prevenirDuRegroupement(tenant: TenantContext, n: { id: string; nom: string; familles: string[] }, email: string, departement: string): Promise<void> {
+    if (!this.email) return;
+    const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true } });
+    const stop = `${this.webAppUrl}/negoces/lien/${jetonDeLien(this.secret, { action: "stop", negoceId: n.id })}`;
+    const mail = mailRegroupementAuNegoce({ negoce: n.nom, departement, familles: n.familles, artisan: c?.name ?? "Un artisan", stop });
+    await this.email.send({ to: email, subject: mail.objet, text: mail.texte }).catch(() => undefined);
   }
 
   /** Changer ce que mon négoce vend (familles cochées en plus), mon numéro de compte chez lui, ou en faire mon favori. */

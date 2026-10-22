@@ -18,7 +18,10 @@ const depotBody = z.object({
   /** La case d'accord de commission : « oui » (formulaire) ou « true ». */
   accord: z.string().max(10).optional(),
   message: z.string().max(2000).optional(),
+  /** Nouveau cap (22 octobre) : les prix de livraison par zone, en JSON `[{ "zone": "22500 Paimpol", "prixHt": "45" }]`. */
+  livraison: z.string().max(10_000).optional(),
 });
+const livraisonJson = z.array(z.object({ zone: z.string().max(200), prixHt: z.string().max(20) })).max(200);
 
 /**
  * LA PAGE DE RÉPONSE DU NÉGOCE (parcours groupé, étape 5) : par son lien unique, sans compte ni mot de passe, il voit le
@@ -64,7 +67,13 @@ export class ReponseController {
     this.ouvert();
     const accord = body.accord === "oui" || body.accord === "true" || body.accord === "on";
     const message = body.message?.trim() ? body.message.trim() : null;
-    return this.demande.deposer(jeton, { accord, message, fichiers: (files ?? []).map((f) => ({ nom: f.originalname, type: f.mimetype, contenu: f.buffer })) }, ip ?? "");
+    let livraison: z.infer<typeof livraisonJson> = [];
+    try {
+      livraison = livraisonJson.parse(body.livraison ? JSON.parse(body.livraison) : []);
+    } catch {
+      livraison = [];
+    }
+    return this.demande.deposer(jeton, { accord, message, livraison, fichiers: (files ?? []).map((f) => ({ nom: f.originalname, type: f.mimetype, contenu: f.buffer })) }, ip ?? "");
   }
 
   private ouvert(): void {

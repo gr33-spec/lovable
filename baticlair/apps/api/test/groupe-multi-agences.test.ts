@@ -42,11 +42,16 @@ async function carreleur(email: string, nom: string, adresse: string) {
 }
 const proposer = (c: Awaited<ReturnType<typeof carreleur>>) => c.agent.post(`/v1/projects/${c.projectId}/groupe`).send({ articles: [c.carreaux.key], fenetre: FENETRE, statut: "signe", engagement: true }).expect(201);
 const negoce = (agent: Agent, nom: string, email: string, familles: string[]) => (agent.post("/v1/groupe/negoces").send({ nom, email, familles }).expect(201) as Promise<{ body: { negoces: { id: string; departement: string; agences: string[]; stop: boolean }[] } }>);
-const mailsVers = (email: string) => ctx.emails.sent.filter((m) => m.to === email);
+// Nouveau cap (22 octobre) : le mail d'information au négoce ajouté et les alertes de devis ont leurs propres tests
+// (`cap-22-octobre.test.ts`) ; ici, on suit les messages du parcours d'origine.
+const nouveauCap = (m: { subject: string }) => /^(Un regroupement d|Nouveau meilleur prix|Nouveau devis)/.test(m.subject);
+const mailsVers = (email: string) => ctx.emails.sent.filter((m) => m.to === email && !nouveauCap(m));
 const CARREAU = "Carreau de sol 60x60 grès cérame";
 async function deposer(jeton: string, rows: FixtureRow[], titre: string) {
   const devis = Buffer.from(await makePdf(["devis"], rows, "Total HT 1 000,00   TVA 20 % 200,00   Total TTC 1 200,00", titre));
-  return request(ctx.app.getHttpServer()).post(`/v1/reponse/${jeton}`).field("accord", "oui").attach("file", devis, { filename: "devis.pdf", contentType: "application/pdf" });
+  // Nouveau cap (22 octobre) : un prix de livraison par zone du lot est obligatoire (ici franco partout).
+  const zones = ((await request(ctx.app.getHttpServer()).get(`/v1/reponse/${jeton}`)).body?.lot?.zones ?? []) as string[];
+  return request(ctx.app.getHttpServer()).post(`/v1/reponse/${jeton}`).field("accord", "oui").field("livraison", JSON.stringify(zones.map((zone) => ({ zone, prixHt: "0" })))).attach("file", devis, { filename: "devis.pdf", contentType: "application/pdf" });
 }
 const jetonDe = (texte: string) => /\/reponse\/([A-Za-z0-9_-]+)/.exec(texte)![1]!;
 

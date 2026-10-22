@@ -1,4 +1,4 @@
-import { cleDeReference, economieEstimee, familleDuMetier, fenetreValide, lotParti, messageBesoinAccepte, quantiteDuBesoin, transitionBesoin, zoneDuCodePostal, type MessageArtisan, type StatutBesoin } from "@baticlair/domain";
+import { cleDeReference, economieEstimee, familleDuMetier, fenetreValide, lotParti, messageBesoinAccepte, phraseCompteur, prixAuVolume, prixLivre, quantiteDuBesoin, transitionBesoin, zoneDeLivraison, zoneDuCodePostal, type CompteurDuGroupe, type MessageArtisan, type StatutBesoin } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { isUuid } from "../../../platform/validation/ids.js";
@@ -41,6 +41,8 @@ export interface OffreVue {
   prixReference: string | null;
   economie: string | null;
   probleme: string | null;
+  /** Nouveau cap (22 octobre) : le prix livré chez l'artisan (livraison de sa zone comprise), comparé à son prix habituel. */
+  livre?: ReturnType<typeof prixLivre> & { zone: string | null };
 }
 
 export interface Proposition {
@@ -98,16 +100,29 @@ export class GroupeService {
     return { eligible: raisons.length === 0, raisons, siret: { renseigne: !!c.siret, verifie: !!c.siretVerifieLe }, etapes: { siret: !!c.siretVerifieLe, devis: devis > 0, negoces: negoces > 0 }, departement, admin, excluJusquau };
   }
 
-  /** « Mes lots » (onglet Groupé) : chaque besoin de l'entreprise avec son chantier et son lot ; jamais les autres artisans. */
-  async mesLots(tenant: TenantContext): Promise<(BesoinVue & { projectId: string; chantier: string; lot: { numero: number; statut: string } | null; bon: BonVue | null })[]> {
+  /**
+   * « Mes lots » (onglet Groupé) : chaque besoin de l'entreprise avec son chantier et son lot. Nouveau cap (22 octobre) :
+   * avec le COMPTEUR de son groupe (« 30 couvreurs, 15 demandes envoyées, 3 devis reçus, meilleur prix 1,12 € ») ; jamais le
+   * nom ni les chantiers des autres artisans.
+   */
+  async mesLots(tenant: TenantContext): Promise<(BesoinVue & { projectId: string; chantier: string; lot: { numero: number; statut: string } | null; bon: BonVue | null; compteur: CompteurDuGroupe & { phrase: string } })[]> {
     // Un besoin retiré avant le départ disparaît ; retiré par désistement (un bon existe), il reste visible : « Tu ne commandes pas ce lot ».
     const rows = await this.prisma.besoin.findMany({
       where: { companyId: tenant.companyId, OR: [{ statut: { not: "retire" } }, { offre: { bon: { isNot: null } } }] },
       include: { lot: { select: { statut: true, numero: true, negoceRetenu: { select: { nom: true } } } }, offre: { include: { bon: { select: { id: true, envoyeLe: true, livraison: true } } } }, project: { select: { name: true } } },
       orderBy: { createdAt: "desc" },
     });
+    const compteurs = new Map<string, CompteurDuGroupe>();
+    for (const b of rows) {
+      const cle = b.lotId ?? `${b.cle}|${b.zone}`;
+      if (!compteurs.has(cle)) compteurs.set(cle, await this.compteur(b));
+    }
     return rows.map((b) => ({
       ...vue(b),
+      compteur: (() => {
+        const c = compteurs.get(b.lotId ?? `${b.cle}|${b.zone}`)!;
+        return { ...c, phrase: phraseCompteur(c, b.famille) };
+      })(),
       projectId: b.projectId,
       chantier: b.project.name,
       lot: b.lot ? { numero: b.lot.numero, statut: b.lot.statut } : null,
@@ -115,6 +130,27 @@ export class GroupeService {
         ? { id: b.offre.bon.id, envoyeLe: b.offre.bon.envoyeLe ? jour(b.offre.bon.envoyeLe) : null, livraison: b.offre.bon.livraison ? { statut: b.offre.bon.livraison.statut, datePrevue: b.offre.bon.livraison.datePrevue ? jour(b.offre.bon.livraison.datePrevue) : null } : null }
         : null,
     }));
+  }
+
+  /**
+   * Le compteur d'un groupe : dans un lot, ses artisans, les négoces à qui la demande est partie, leurs devis et le
+   * meilleur prix lu au volume ferme ; avant le lot, les artisans qui ont la même ligne (même clé, même secteur).
+   */
+  private async compteur(b: { lotId: string | null; cle: string; zone: string }): Promise<CompteurDuGroupe> {
+    if (!b.lotId) {
+      const memes = await this.prisma.besoin.findMany({ where: { cle: b.cle, zone: b.zone, lotId: null, statut: { in: ["signe", "en_attente"] } }, select: { companyId: true }, distinct: ["companyId"] });
+      return { artisans: memes.length, demandes: 0, devis: 0, meilleurPrix: null };
+    }
+    const [besoins, reponses] = await Promise.all([
+      this.prisma.besoin.findMany({ where: { lotId: b.lotId, statut: { not: "retire" } }, select: { companyId: true, quantite: true, statut: true } }),
+      this.prisma.reponseNegoce.findMany({ where: { lotId: b.lotId }, select: { deposeLe: true, statutExtraction: true, prix: true } }),
+    ]);
+    const volume = besoins.filter((x) => x.statut !== "en_attente").reduce((s, x) => s + Number(x.quantite), 0);
+    const prix = reponses
+      .filter((r) => r.deposeLe && r.statutExtraction === "lue")
+      .map((r) => prixAuVolume(Array.isArray(r.prix) ? (r.prix as { palier: string | null; prixUnitaire: string | null; totalHt: string | null }[]) : [], volume))
+      .filter((p): p is number => p !== null);
+    return { artisans: new Set(besoins.map((x) => x.companyId)).size, demandes: reponses.length, devis: reponses.filter((r) => r.deposeLe).length, meilleurPrix: prix.length ? Math.min(...prix) : null };
   }
 
   /** Vérifie le SIRET de l'entreprise auprès de l'INSEE ; actif, il ouvre l'accès au groupé. */
@@ -129,13 +165,22 @@ export class GroupeService {
   }
 
   /** Étape 6 : toutes mes offres (une par besoin engagé d'un lot choisi), les plus récentes d'abord. */
-  async mesOffres(tenant: TenantContext): Promise<(OffreVue & { designation: string; quantite: string; unite: string; projectId: string })[]> {
+  async mesOffres(tenant: TenantContext): Promise<(OffreVue & { designation: string; quantite: string; unite: string; projectId: string; livre: ReturnType<typeof prixLivre> & { zone: string | null } })[]> {
     const offres = await this.prisma.offreArtisan.findMany({
       where: { besoin: { companyId: tenant.companyId } },
-      include: { besoin: true, lot: { include: { negoceRetenu: { select: { nom: true } } } } },
+      include: { besoin: true, lot: { include: { negoceRetenu: { select: { nom: true } }, reponses: { select: { negoceId: true, livraison: true } } } } },
       orderBy: { createdAt: "desc" },
     });
-    return offres.map((o) => ({ ...offreVue(o, o.besoin), designation: o.besoin.designation, quantite: o.besoin.quantite.toString(), unite: o.besoin.unite, projectId: o.besoin.projectId }));
+    // Nouveau cap (22 octobre) : le prix livré chez l'artisan (sa quantité au prix du lot + la livraison de SA zone),
+    // comparé à son prix habituel s'il l'a saisi.
+    return offres.map((o) => ({
+      ...offreVue(o, o.besoin),
+      designation: o.besoin.designation,
+      quantite: o.besoin.quantite.toString(),
+      unite: o.besoin.unite,
+      projectId: o.besoin.projectId,
+      livre: livreDe(o.besoin.adresseLivraison, Number(o.besoin.quantite), Number(o.prixUnitaire), o.prixReference, o.lot),
+    }));
   }
 
   /** « Problème » : l'artisan signale une erreur sur son offre ; journalisé pour Greg, rien d'autre ne bouge. */
@@ -168,8 +213,15 @@ export class GroupeService {
     if (!isUuid(projectId)) throw notFound("Project");
     const project = await this.prisma.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { id: true } });
     if (!project) throw notFound("Project");
-    const rows = await this.prisma.besoin.findMany({ where: { projectId, companyId: tenant.companyId, statut: { not: "retire" } }, include: { lot: { select: { statut: true, numero: true, negoceRetenu: { select: { nom: true } } } }, offre: true }, orderBy: { createdAt: "asc" } });
-    return rows.map(vue);
+    const rows = await this.prisma.besoin.findMany({
+      where: { projectId, companyId: tenant.companyId, statut: { not: "retire" } },
+      include: { lot: { select: { statut: true, numero: true, negoceRetenuId: true, negoceRetenu: { select: { nom: true } }, reponses: { select: { negoceId: true, livraison: true } } } }, offre: true },
+      orderBy: { createdAt: "asc" },
+    });
+    return rows.map((b) => {
+      const v = vue(b);
+      return v.offre && b.offre && b.lot ? { ...v, offre: { ...v.offre, livre: livreDe(b.adresseLivraison, Number(b.quantite), Number(b.offre.prixUnitaire), b.offre.prixReference, b.lot) } } : v;
+    });
   }
 
   async proposer(tenant: TenantContext, projectId: string, p: Proposition): Promise<BesoinVue[]> {
@@ -277,6 +329,15 @@ export class GroupeService {
     const e = await this.etat(tenant);
     if (!e.eligible) throw new DomainError("forbidden", "Groupé not available for this company", { reason: "groupe_ferme", raisons: e.raisons });
   }
+}
+
+/** Le prix livré d'un artisan : la livraison de SA zone dans la réponse du négoce retenu, son prix habituel s'il l'a saisi. */
+function livreDe(adresse: string, quantite: number, prixUnitaire: number, prixReference: { toString(): string } | null, lot: { negoceRetenuId: string | null; reponses: { negoceId: string; livraison: unknown }[] }) {
+  const zone = zoneDeLivraison(adresse);
+  const retenue = lot.reponses.find((r) => r.negoceId === lot.negoceRetenuId);
+  const prix = Array.isArray(retenue?.livraison) ? (retenue.livraison as { zone: string; prixHt: number }[]) : [];
+  const livraisonZone = zone ? (prix.find((l) => l.zone === zone)?.prixHt ?? null) : null;
+  return { ...prixLivre({ quantite, prixUnitaire, livraisonZone, prixHabituel: prixReference === null ? null : Number(prixReference.toString()) }), zone };
 }
 
 type OffreRow = { id: string; prixUnitaire: { toString(): string }; prixReference: { toString(): string } | null; economie: { toString(): string } | null; dateLivraison: Date | null; probleme: string | null; lot: { numero: number; negoceRetenu: { nom: string } | null } };

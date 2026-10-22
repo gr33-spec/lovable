@@ -1091,6 +1091,8 @@ model ReponseNegoce {
   /// [{ cle, palier, prixUnitaire }] tels que lus (HT).
   prix             Json      @default("[]")
   delaiJours       Int?
+  /// Nouveau cap (22 octobre) : [{ zone, prixHt }], un prix de livraison HT par zone du lot (commune d'un chantier), obligatoire au dépôt.
+  livraison        Json      @default("[]")
   /// en_attente | lue | a_verifier | echec
   statutExtraction String    @default("en_attente")
   /// « Pas concerné » cliqué : la famille du lot est décochée chez ce négoce.

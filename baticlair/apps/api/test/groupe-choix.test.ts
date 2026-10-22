@@ -43,12 +43,15 @@ async function carreleur(email: string, adresse = "3 rue des Ajoncs, 22300 Lanni
 const proposer = (c: Awaited<ReturnType<typeof carreleur>>, statut: "signe" | "en_attente") =>
   c.agent.post(`/v1/projects/${c.projectId}/groupe`).send({ articles: [c.carreaux.key], fenetre: FENETRE, statut, engagement: true }).expect(201);
 const negoce = (agent: Agent, nom: string, email: string, familles: string[]) => agent.post("/v1/groupe/negoces").send({ nom, email, familles }).expect(201);
-const jetonPour = (email: string) => /\/reponse\/([A-Za-z0-9_-]+)/.exec(ctx.emails.sent.find((m) => m.to === email)!.text)![1]!;
+// Le premier mail au négoce peut être celui qui l'informe du regroupement (nouveau cap) : on prend celui de la demande.
+const jetonPour = (email: string) => /\/reponse\/([A-Za-z0-9_-]+)/.exec(ctx.emails.sent.find((m) => m.to === email && /\/reponse\//.test(m.text))!.text)![1]!;
 const lienPasConcerne = (email: string) => /\/negoces\/lien\/([A-Za-z0-9_.-]+)/.exec(ctx.emails.sent.find((m) => m.to === email)!.text)![1]!;
 
 async function deposer(jeton: string, rows: FixtureRow[], titre: string) {
   const devis = Buffer.from(await makePdf(["devis"], rows, "Total HT 1 000,00   TVA 20 % 200,00   Total TTC 1 200,00", titre));
-  return request(ctx.app.getHttpServer()).post(`/v1/reponse/${jeton}`).field("accord", "oui").attach("file", devis, { filename: "devis.pdf", contentType: "application/pdf" });
+  // Nouveau cap (22 octobre) : un prix de livraison par zone du lot est obligatoire (ici franco partout).
+  const zones = ((await request(ctx.app.getHttpServer()).get(`/v1/reponse/${jeton}`)).body?.lot?.zones ?? []) as string[];
+  return request(ctx.app.getHttpServer()).post(`/v1/reponse/${jeton}`).field("accord", "oui").field("livraison", JSON.stringify(zones.map((zone) => ({ zone, prixHt: "0" })))).attach("file", devis, { filename: "devis.pdf", contentType: "application/pdf" });
 }
 
 /** Deux signés et un en attente dans le même lot, trois négoces du 22. Le lot part dès le deuxième signé. */
@@ -62,7 +65,8 @@ async function scenario() {
   await proposer(d, "en_attente");
   const b = await carreleur("b@example.fr", "12 rue de Kerampont, 22300 Lannion");
   await proposer(b, "signe");
-  expect(ctx.emails.sent.filter((m) => m.to.endsWith("@example.com"))).toHaveLength(3);
+  // Les demandes aux négoces (le mail d'information du nouveau cap a son propre test).
+  expect(ctx.emails.sent.filter((m) => m.to.endsWith("@example.com") && !/^Un regroupement d/.test(m.subject))).toHaveLength(3);
   return { a, b, d };
 }
 const CARREAU = "Carreau de sol 60x60 grès cérame";

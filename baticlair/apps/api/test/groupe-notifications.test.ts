@@ -58,13 +58,18 @@ async function carreleur(email: string, nom: string, adresse: string) {
 const proposer = (c: Awaited<ReturnType<typeof carreleur>>, statut: "signe" | "en_attente") =>
   c.agent.post(`/v1/projects/${c.projectId}/groupe`).send({ articles: [c.carreaux.key], fenetre: FENETRE, statut, engagement: true }).expect(201);
 const negoce = (agent: Agent, nom: string, email: string, familles: string[]) => agent.post("/v1/groupe/negoces").send({ nom, email, familles }).expect(201);
-const mailsVers = (email: string) => ctx.emails.sent.filter((m) => m.to === email);
+// Nouveau cap (22 octobre) : le mail d'information au négoce ajouté et les alertes de devis ont leurs propres tests
+// (`cap-22-octobre.test.ts`) ; ici, on suit les messages du parcours d'origine.
+const nouveauCap = (m: { subject: string }) => /^(Un regroupement d|Nouveau meilleur prix|Nouveau devis)/.test(m.subject);
+const mailsVers = (email: string) => ctx.emails.sent.filter((m) => m.to === email && !nouveauCap(m));
 const pushVers = (email: string) => push.sent.filter((p) => p.target.endpoint.endsWith(`/${email}`)).map((p) => p.message);
 const jetonPour = (email: string) => /\/reponse\/([A-Za-z0-9_-]+)/.exec(mailsVers(email)[0]!.text)![1]!;
 const CARREAU = "Carreau de sol 60x60 grès cérame";
 async function deposer(jeton: string, rows: FixtureRow[], titre: string) {
   const devis = Buffer.from(await makePdf(["devis"], rows, "Total HT 1 000,00   TVA 20 % 200,00   Total TTC 1 200,00", titre));
-  return request(ctx.app.getHttpServer()).post(`/v1/reponse/${jeton}`).field("accord", "oui").attach("file", devis, { filename: "devis.pdf", contentType: "application/pdf" });
+  // Nouveau cap (22 octobre) : un prix de livraison par zone du lot est obligatoire (ici franco partout).
+  const zones = ((await request(ctx.app.getHttpServer()).get(`/v1/reponse/${jeton}`)).body?.lot?.zones ?? []) as string[];
+  return request(ctx.app.getHttpServer()).post(`/v1/reponse/${jeton}`).field("accord", "oui").field("livraison", JSON.stringify(zones.map((zone) => ({ zone, prixHt: "0" })))).attach("file", devis, { filename: "devis.pdf", contentType: "application/pdf" });
 }
 function enTetesSvix(corps: string, secret = SECRET, timestamp = Math.floor(Date.now() / 1000)) {
   const id = "msg_test";
@@ -97,7 +102,7 @@ describe("groupé, étape 8 : les notifications", { timeout: 90_000 }, () => {
     await deposer(jetonPour("general@example.com"), [["CAR", CARREAU, "46 u", "19,90", "915,40"]], "DEVIS G – Délai de livraison 5 jours");
     await deposer(jetonPour("carrelage@example.com"), [["CAR", CARREAU, "46 u", "18,50", "851,00"]], "DEVIS C – Délai de livraison 8 jours");
     await ctx.app.get(ChoixService).choisirLesLotsEnvoyes();
-    const retenuB = pushVers("b@example.fr").find((x) => /chez Négoce Carrelage/.test(x.body))!;
+    const retenuB = pushVers("b@example.fr").find((x) => /^Tes .*chez Négoce Carrelage/.test(x.body))!;
     expect(retenuB.body).toMatch(/^Tes 23 cartons de 1,44 m² de carreau de sol 60×60 : 18,50 € chez Négoce Carrelage\. Bon de commande transmis, livraison le \d+ nov\.$/);
     expect(mailsVers("b@example.fr").find((m) => /bon de commande/.test(m.subject))!.attachments).toHaveLength(1);
     // La facture porte l'émetteur configuré et la TVA.
@@ -113,8 +118,10 @@ describe("groupé, étape 8 : les notifications", { timeout: 90_000 }, () => {
     expect(await commande.prevenirLesLivraisonsDuJour(livraison.datePrevue!)).toEqual({ prevenues: 2 });
     expect(pushVers("a@example.fr").some((x) => x.body === "Livraison aujourd'hui. Tout est arrivé ?")).toBe(true);
     expect(await commande.prevenirLesLivraisonsDuJour(livraison.datePrevue!)).toEqual({ prevenues: 0 });
-    // Quatre messages par lot, pas un de plus pour A.
-    expect(pushVers("a@example.fr")).toHaveLength(4);
+    // Quatre messages du parcours par lot, pas un de plus pour A ; s'y ajoute, depuis le nouveau cap (22 octobre), une
+    // alerte par devis reçu (ici deux : « Nouveau meilleur prix », puis encore un, moins cher).
+    expect(pushVers("a@example.fr").filter((x) => !/^Nouveau (meilleur prix|devis)$/.test(x.title))).toHaveLength(4);
+    expect(pushVers("a@example.fr").filter((x) => /^Nouveau (meilleur prix|devis)$/.test(x.title))).toHaveLength(2);
     // Le désistement : avertissement par e-mail.
     const lotsB = (await b.agent.get("/v1/groupe/lots").expect(200)).body.besoins;
     await b.agent.post(`/v1/groupe/bons/${lotsB[0].bon.id}/desistement`).send({}).expect(200);
