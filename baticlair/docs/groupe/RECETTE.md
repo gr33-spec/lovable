@@ -153,6 +153,41 @@ Le cas joué par le domaine, l'API et l'e2e. Distance Lannion ↔ Paimpol : 40 k
 
 **C, Lannion**, 1 000 ardoises déposées après la clôture : « Trop tard pour octobre, ta liste part avec la commande de novembre. »
 
+### Trois cycles à la main (octobre, novembre, décembre 2026)
+
+Joué par `apps/api/test/trois-cycles.test.ts` ; chaque chiffre ci-dessous est d'abord calculé ici. Distances de test (vol d'oiseau × 1,3, arrondi au km) : Lannion–Ploubazlanec 42, Lannion–Saint-Brieuc 74, Lannion–Guingamp 38, Saint-Brieuc–Ploubazlanec 49, Saint-Brieuc–Guingamp 38, Saint-Brieuc–Paimpol 48, Paimpol–Ploubazlanec 3, Paimpol–Guingamp 33, Paimpol–Lannion 40. Une livraison par chantier.
+
+**Octobre** : clôture le 25/10 à 12 h (jour du passage à l'heure d'hiver, 11 h UTC), réponses avant le 08/11 à 18 h.
+
+- A (Lannion) : chantier Lannion 2 400 ardoises + 520 m de liteaux ; chantier Ploubazlanec 1 800 ardoises + 8 boîtes de crochets. B (Saint-Brieuc, stock) : 3 000 ardoises, 12 boîtes, 300 m. D (Guingamp) : 800 m.
+- Grille : 7 200 ardoises, 1 620 m de liteaux, 20 boîtes. C dépose le 26/10 : « Trop tard pour octobre, ta liste part avec la commande de novembre. »
+- N1 (Lannion, 25 km gratuits, 55 €) 0,92 / 0,78 / 29,50. N2 (Saint-Brieuc, 40 km, 45 €) 0,95 / 0,74 / 28,00. N3 (Paimpol, 10 km, 60 €) 0,89 / 0,81 / pas de crochets. N4 ne répond pas : une relance la veille, une seule.
+
+| | N1 | N2 | N3 (incomplet) |
+|---|---|---|---|
+| A : 4 200 ard., 520 m, 8 boîtes | 3 864 + 405,60 + 236 = 4 505,60 ; livraisons 0 + 55 (42 km) → **4 560,60** | 3 990 + 384,80 + 224 = 4 598,80 ; 45 + 45 → **4 688,80** | 3 738 + 421,20 = 4 159,20 ; 60 + 0 → 4 219,20 |
+| B : 3 000 ard., 300 m, 12 boîtes | 2 760 + 234 + 354 = 3 348 ; 55 → **3 403** | 2 850 + 222 + 336 = 3 408 ; 0 → **3 408** | 2 670 + 243 = 2 913 ; 60 → 2 973 |
+| D : 800 m | 624 ; 55 → **679** | 592 ; 0 → **592** | 648 ; 60 → **708** (complet pour D) |
+| Total | **8 642,60 (1er)** | 8 688,80 | 7 900,20 (derrière : incomplet) |
+
+A et B : N1 par défaut, et le moins cher pour eux. D : N1 proposé (premier sur le total), N2 moins cher pour lui (592 €) : il commande chez N2. N1 reçoit deux bons, N2 un.
+
+**Novembre** : clôture le 25/11 à 12 h (11 h UTC), réponses avant le 09/12 à 18 h. N5 (Paimpol, 20 km, 50 €) arrive.
+
+- A (nouveau chantier Lannion) : 1 500 ardoises. C (Paimpol) : 2 000 ardoises, 400 m. E (Ploubazlanec, stock) : 5 boîtes. Grille : 3 500 ardoises, 400 m, 5 boîtes ; partie à N1…N5.
+- N5 (déposé le 28/11) 0,92 / 0,75 / 33,00. N2 (déposé le 30/11) 0,90 / 0,75 / 30,00. N1, N3, N4 muets : trois relances.
+
+| | N2 | N5 |
+|---|---|---|
+| A : 1 500 ard. (Lannion) | 1 350 ; 74 km → 45 → **1 395** | 1 380 ; 40 km → 50 → **1 430** |
+| C : 2 000 ard., 400 m (Paimpol) | 1 800 + 300 = 2 100 ; 48 km → 45 → **2 145** | 1 840 + 300 = 2 140 ; 0 → **2 140** |
+| E : 5 boîtes (Ploubazlanec) | 150 ; 49 km → 45 → **195** | 165 ; 3 km → 0 → **165** |
+| Total | 3 735 | 3 735 → **égalité : N5, déposé le premier, passe devant** |
+
+A : N5 proposé, N2 moins cher pour lui (1 395 €) : il commande chez N2. C commande chez N5.
+
+**Décembre** : clôture le 25/12 à 12 h (11 h UTC, jour de Noël : voir « reste à risque »), réponses avant le 08/01/2027 à 18 h. F (Saint-Brieuc) : 200 m de liteaux, « Pour l'instant, tu es le premier ». Grille partie aux cinq négoces, aucun ne répond : pas de prix ; le suivi dit « Aucun négoce n'a chiffré la commande de décembre. Commande ta liste en direct chez ton négoce. »
+
 ## 6. Données, sécurité, tenue
 
 | # | Tu fais | Tu dois voir | Test | État |

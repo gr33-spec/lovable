@@ -157,6 +157,8 @@ describe("le suivi façon colis : Liste déposée → Commande close → Prix de
   it("chaque phase a sa phrase", () => {
     expect(suiviDansLeMois({ ...base, phase: "inscriptions" })).toMatchObject({ etape: 0, phrase: "Ta liste est dans la commande d'octobre.", aFaire: "Clôture dans 2 j. Partage le lien pour faire grossir la commande." });
     expect(suiviDansLeMois({ ...base, phase: "negoces", negoces: 3, reponseDans: "13 j" })).toMatchObject({ etape: 2, phrase: "La commande d'octobre est chez 3 négoces.", aFaire: "Leurs prix arrivent dans 13 j." });
+    // Revue à froid (23 octobre) : la limite passée sans aucune grille déposée.
+    expect(suiviDansLeMois({ ...base, phase: "resultats", negoces: 5, grilles: 0 })).toMatchObject({ etape: 2, phrase: "Aucun négoce n'a chiffré la commande d'octobre.", aFaire: "Commande ta liste en direct chez ton négoce." });
     expect(suiviDansLeMois({ ...base, phase: "resultats", negoces: 3, grilles: 2 })).toMatchObject({ etape: 3, phrase: "Les prix sont là." });
     expect(suiviDansLeMois({ ...base, phase: "resultats", negoces: 3, grilles: 2, commande: true }).etapes.map((e) => e.fait)).toEqual([true, true, true, true, true]);
   });

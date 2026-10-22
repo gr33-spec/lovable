@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "node:crypto";
+import { createHash, createHmac, randomUUID } from "node:crypto";
 import {
   affichageDeLaCommande,
   bonDuMois,
@@ -53,6 +53,11 @@ import { pdfDeTexte } from "./pdf-texte.js";
 /** Les lignes qui comptent dans une commande du mois : déposées, puis commandées (jamais les retirées). */
 const DANS_LA_COMMANDE = ["signe", "commande"] as const;
 const hash = (jeton: string) => createHash("sha256").update(jeton).digest("hex");
+/**
+ * Le lien d'une grille, tiré de son identifiant et du secret : le même dans l'e-mail de la demande et dans la relance
+ * (revue à froid, 23 octobre : la relance renouvelait le lien, celui du premier e-mail ne marchait plus).
+ */
+const jetonDeGrille = (secret: string, grilleId: string) => createHmac("sha256", secret).update(`grille-du-mois:${grilleId}`).digest("base64url").slice(0, 32);
 /** Une grille part au plus à 10 négoces du métier et du département (Greg : « 5 à 10 »), les plus anciens dans la base d'abord. */
 export const NEGOCES_PAR_GRILLE = 10;
 const CLE_CONFIG = "cycle:config";
@@ -208,6 +213,9 @@ export class CommandeDuMoisService {
       moisDeLaListe ??= cycle.mois;
       tardPour ??= tard;
       await this.prisma.$transaction(async (tx) => {
+        // Même verrou que la clôture : la ligne entre dans la grille, ou la commande est déjà close et l'artisan réessaie.
+        const [etat] = await tx.$queryRaw<{ phase: string; clotureLe: Date }[]>`SELECT phase, "clotureLe" FROM cycle_commande WHERE id = ${cycle.id}::uuid FOR UPDATE`;
+        if (!etat || etat.phase !== "inscriptions" || maintenant >= etat.clotureLe) throw new DomainError("conflict", "Order closed", { reason: "commande_close" });
         for (const { item, q } of lignes.filter((l) => l.famille === famille)) {
           const data = {
             designation: item.label,
@@ -390,7 +398,8 @@ export class CommandeDuMoisService {
       const distances: Record<string, (number | null)[]> = {};
       for (const g of grilles) {
         const l = g.livraison as LivraisonEnregistree | null;
-        if (l) distances[g.negoceId] = l.distances[companyId] ?? [];
+        // Une entreprise absente des distances (jamais attendu : la commande est figée) paie la livraison, jamais zéro.
+        if (l?.distances[companyId]) distances[g.negoceId] = l.distances[companyId]!;
       }
       return { companyId, chantiers: new Set(bs.map((b) => b.adresseLivraison)).size, distances, lignes: fusionnerLesListes(bs.map((b) => ({ cle: b.cle, designation: b.designation, quantite: Number(b.quantite), unite: b.unite }))) };
     });
@@ -418,19 +427,29 @@ export class CommandeDuMoisService {
     const lignes = fusionnerLesListes(besoins.map((b) => ({ cle: b.cle, designation: b.designation, quantite: Number(b.quantite), unite: b.unite }))).map((l) => ({ designation: l.designation, quantite: l.quantite, unite: l.unite, prixUnitaire: prix[l.cle]! }));
     const doc = bonDuMois({ numero: c.numero, mois: c.mois, negoce: grille.negoce.nom, artisan: { nom: company.name, siret: company.siret, telephone: company.phone, email: company.contactEmail }, numeroCompte: compte?.numeroCompte ?? null, chantiers: [...new Set(besoins.map((b) => b.adresseLivraison))], lignes, livraisonHt: ligne.livraisonHt });
     const pdf = await pdfDeTexte(doc.titre, doc.blocs);
-    await this.email.send({
-      to: grille.negoce.email,
-      subject: doc.titre,
-      text: ["Bonjour,", "", `${company.name} commande au prix de votre grille de la commande commune. Le bon de commande est joint.`, "", "BatiClair"].join("\n"),
-      attachments: [{ filename: `bon-de-commande-${c.mois}-${c.numero}.pdf`, contentType: "application/pdf", contentBase64: Buffer.from(pdf).toString("base64") }],
-      ...(company.contactEmail ? { replyTo: company.contactEmail } : {}),
-      mustDeliver: true,
-    });
-    await this.prisma.choixArtisan.upsert({
-      where: { cycleId_companyId: { cycleId, companyId: tenant.companyId } },
-      create: { cycleId, companyId: tenant.companyId, negoceId, totalHt: ligne.totalHt, livraisonHt: ligne.livraisonHt, commandeLe: maintenant },
-      update: { negoceId, totalHt: ligne.totalHt, livraisonHt: ligne.livraisonHt, commandeLe: maintenant },
-    });
+    // La commande est d'abord réservée (une seule passe, double appui compris), puis le bon part ; s'il ne part pas, rien
+    // n'est commandé et l'artisan peut recommencer (revue à froid, 23 octobre : deux appuis envoyaient deux bons).
+    const choix = { negoceId, totalHt: ligne.totalHt, livraisonHt: ligne.livraisonHt, commandeLe: maintenant };
+    const reserve = deja
+      ? (await this.prisma.choixArtisan.updateMany({ where: { id: deja.id, commandeLe: null }, data: choix })).count === 1
+      : await this.prisma.choixArtisan.create({ data: { cycleId, companyId: tenant.companyId, ...choix } }).then(
+          () => true,
+          (e: unknown) => (isUniqueViolation(e) ? false : Promise.reject(e)),
+        );
+    if (!reserve) throw new DomainError("conflict", "Already ordered", { reason: "deja_commande" });
+    try {
+      await this.email.send({
+        to: grille.negoce.email,
+        subject: doc.titre,
+        text: ["Bonjour,", "", `${company.name} commande au prix de votre grille de la commande commune. Le bon de commande est joint.`, "", "BatiClair"].join("\n"),
+        attachments: [{ filename: `bon-de-commande-${c.mois}-${c.numero}.pdf`, contentType: "application/pdf", contentBase64: Buffer.from(pdf).toString("base64") }],
+        ...(company.contactEmail ? { replyTo: company.contactEmail } : {}),
+        mustDeliver: true,
+      });
+    } catch (e) {
+      await this.prisma.choixArtisan.updateMany({ where: { cycleId, companyId: tenant.companyId }, data: { commandeLe: null } });
+      throw e;
+    }
     await this.prisma.besoin.updateMany({ where: { cycleId, companyId: tenant.companyId, statut: "signe" }, data: { statut: "commande" } });
     return this.vueDuCycle(tenant, c, maintenant);
   }
@@ -453,8 +472,9 @@ export class CommandeDuMoisService {
       if (maintenant >= c.reponseAvant) {
         await this.publierLesResultats(c, maintenant);
         resultats++;
-      } else if (maintenant >= c.relanceLe) {
-        relances += await this.relancer(c, maintenant);
+      } else {
+        grillesEnvoyees += await this.envoyerLesGrilles(c, maintenant);
+        if (maintenant >= c.relanceLe) relances += await this.relancer(c, maintenant);
       }
     }
     const ajouts = await this.ajoutsEnAttente(maintenant);
@@ -463,35 +483,51 @@ export class CommandeDuMoisService {
 
   /** À la clôture : tout est figé, les listes fusionnées en UNE grille, envoyée à chaque négoce du métier et du département. */
   private async clore(c: { id: string; mois: string; famille: string; zone: string; reponseAvant: Date }, maintenant: Date): Promise<number> {
-    const lignes = await this.lignesDuCycle(c.id);
-    await this.prisma.cycleCommande.update({ where: { id: c.id }, data: { phase: lignes.length ? "negoces" : "resultats", closLe: maintenant, lignes: lignes.map((l) => ({ ...l })), ...(lignes.length ? {} : { resultatsLe: maintenant }) } });
+    // Verrou sur la commande : un dépôt en cours (même verrou) finit avant que la grille ne soit figée, ou voit la clôture.
+    const lignes = await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM cycle_commande WHERE id = ${c.id}::uuid FOR UPDATE`;
+      const besoins = await tx.besoin.findMany({ where: { cycleId: c.id, statut: { in: [...DANS_LA_COMMANDE] } }, orderBy: { createdAt: "asc" }, select: { cle: true, designation: true, quantite: true, unite: true } });
+      const l = fusionnerLesListes(besoins.map((b) => ({ cle: b.cle, designation: b.designation, quantite: Number(b.quantite), unite: b.unite })));
+      await tx.cycleCommande.update({ where: { id: c.id }, data: { phase: l.length ? "negoces" : "resultats", closLe: maintenant, lignes: l.map((x) => ({ ...x })), ...(l.length ? {} : { resultatsLe: maintenant }) } });
+      return l;
+    });
     if (!lignes.length) return 0;
+    return this.envoyerLesGrilles({ ...c, lignes }, maintenant);
+  }
+
+  /**
+   * La grille à chaque négoce du métier et du département qui ne l'a pas encore : rejouée à chaque passage tant que la
+   * limite n'est pas atteinte (un e-mail refusé par le prestataire repart ; un négoce ajouté entre-temps la reçoit).
+   */
+  private async envoyerLesGrilles(c: { id: string; mois: string; famille: string; zone: string; reponseAvant: Date; lignes: unknown }, maintenant: Date): Promise<number> {
+    const lignes = c.lignes as LigneDeGrille[];
     const negoces = await this.prisma.negoce.findMany({ where: { departement: c.zone, stopLe: null, familles: { has: c.famille } }, orderBy: { createdAt: "asc" }, take: NEGOCES_PAR_GRILLE });
     let envoyees = 0;
     for (const n of negoces) {
       const deja = await this.prisma.grilleNegoce.findUnique({ where: { cycleId_negoceId: { cycleId: c.id, negoceId: n.id } } });
       if (deja) continue;
-      const jeton = randomBytes(24).toString("base64url");
-      const grille = await this.prisma.grilleNegoce.create({ data: { cycleId: c.id, negoceId: n.id, tokenHash: hash(jeton) } });
+      const id = randomUUID();
+      const jeton = jetonDeGrille(this.reglages.authSecret, id);
+      const grille = await this.prisma.grilleNegoce.create({ data: { id, cycleId: c.id, negoceId: n.id, tokenHash: hash(jeton) } });
       const mail = mailGrilleAuNegoce({ negoce: n.nom, mois: c.mois, departement: c.zone, lignes, reponseAvant: c.reponseAvant, maintenant, lien: `${this.reglages.webAppUrl}/grille/${jeton}`, stop: `${this.reglages.webAppUrl}/negoces/lien/${jetonDeLien(this.reglages.authSecret, { action: "stop", negoceId: n.id })}` });
       const pdf = await pdfDeTexte(mail.objet, [{ titre: "Le volume à chiffrer", lignes: [["Désignation", "Quantité"], ...lignes.map((l) => [l.designation, `${l.quantite.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} ${l.unite}`])] }, { lignes: [PHRASE_PRIX_FERMES, PHRASE_AU_NEGOCE] }]);
       try {
         await this.email.send({ to: n.email, subject: mail.objet, text: mail.texte, attachments: [{ filename: `commande-commune-${c.mois}.pdf`, contentType: "application/pdf", contentBase64: Buffer.from(pdf).toString("base64") }], mustDeliver: true });
         envoyees++;
       } catch {
-        // Pas parti : la grille est retirée, un prochain passage retentera (avant la limite).
+        // Pas parti : la grille est retirée, le passage suivant retentera (avant la limite).
         await this.prisma.grilleNegoce.delete({ where: { id: grille.id } });
       }
     }
     return envoyees;
   }
 
-  /** La veille de la limite, une relance à qui n'a pas encore déposé (une seule fois) ; on renouvelle son lien. */
+  /** La veille de la limite, une relance à qui n'a pas encore déposé (une seule fois), avec le même lien. */
   private async relancer(c: { id: string; mois: string; zone: string; reponseAvant: Date }, maintenant: Date): Promise<number> {
     let n = 0;
     for (const g of await this.prisma.grilleNegoce.findMany({ where: { cycleId: c.id, deposeLe: null, relanceLe: null }, include: { negoce: true } })) {
-      const jeton = randomBytes(24).toString("base64url");
-      await this.prisma.grilleNegoce.update({ where: { id: g.id }, data: { tokenHash: hash(jeton), relanceLe: maintenant } });
+      const jeton = jetonDeGrille(this.reglages.authSecret, g.id);
+      await this.prisma.grilleNegoce.update({ where: { id: g.id }, data: { relanceLe: maintenant } });
       const mail = mailRelanceNegoce({ mois: c.mois, departement: c.zone, reponseAvant: c.reponseAvant, maintenant, lien: `${this.reglages.webAppUrl}/grille/${jeton}` });
       await this.email.send({ to: g.negoce.email, subject: mail.objet, text: mail.texte }).catch(() => undefined);
       n++;
@@ -617,6 +653,10 @@ export class CommandeDuMoisService {
 }
 
 /** Le jour (Paris) d'un instant : « 2026-10-22 ». */
+function isUniqueViolation(e: unknown): boolean {
+  return typeof e === "object" && e !== null && (e as { code?: string }).code === "P2002";
+}
+
 function moisJour(d: Date): string {
   return new Intl.DateTimeFormat("fr-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
 }

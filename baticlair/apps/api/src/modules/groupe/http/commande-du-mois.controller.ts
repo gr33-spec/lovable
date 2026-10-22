@@ -44,6 +44,11 @@ export class CommandeDuMoisController {
     if (!this.config.groupe.enabled) throw notFound("Route");
   }
 
+  /** Les écritures n'existent qu'en mode « mois » ; en mode « lots », seule la lecture (qui dit le mode) répond. */
+  private ecriture() {
+    if (!this.config.groupe.enabled || this.config.groupe.mode !== "mois") throw notFound("Route");
+  }
+
   @Get("commande-du-mois")
   async vue(@Tenant() tenant: TenantContext, @Query("maintenant") m?: string) {
     this.actif();
@@ -59,21 +64,21 @@ export class CommandeDuMoisController {
   @Post("projects/:projectId/commande-du-mois")
   @HttpCode(201)
   async deposer(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string, @Body(new ZodPipe(depotBody)) body: z.infer<typeof depotBody>, @Query("maintenant") m?: string) {
-    this.actif();
+    this.ecriture();
     return this.commande.deposer(tenant, projectId, body, instant(this.config, m));
   }
 
   @Delete("commande-du-mois/lignes/:id")
   @HttpCode(204)
   async retirer(@Tenant() tenant: TenantContext, @Param("id") id: string, @Query("maintenant") m?: string) {
-    this.actif();
+    this.ecriture();
     await this.commande.retirer(tenant, id, instant(this.config, m));
   }
 
   @Post("commande-du-mois/:cycleId/commander")
   @HttpCode(200)
   async commander(@Tenant() tenant: TenantContext, @Param("cycleId") cycleId: string, @Body(new ZodPipe(commanderBody)) body: z.infer<typeof commanderBody>, @Query("maintenant") m?: string) {
-    this.actif();
+    this.ecriture();
     return this.commande.commander(tenant, cycleId, body.negoceId, instant(this.config, m));
   }
 
@@ -105,7 +110,7 @@ export class GrilleNegoceController {
   @Post(":jeton")
   @UseInterceptors(FilesInterceptor("file", 2, { storage: memoryStorage(), limits: { fileSize: 15 * 1024 * 1024, files: 2 } }))
   async deposer(@Param("jeton") jeton: string, @Body(new ZodPipe(grilleBody)) body: z.infer<typeof grilleBody>, @UploadedFiles() files: { originalname: string; mimetype: string; buffer: Buffer }[] | undefined, @Query("maintenant") m?: string) {
-    if (!this.config.groupe.enabled) throw notFound("Route");
+    if (!this.config.groupe.enabled || this.config.groupe.mode !== "mois") throw notFound("Route");
     return this.commande.deposerGrille(jeton, { fichiers: (files ?? []).map((f) => ({ nom: f.originalname, type: f.mimetype, contenu: f.buffer })), livraison: { depart: body.depart ?? null, francoKm: body.francoKm ?? null, prixAuDela: body.prixAuDela ?? null } }, instant(this.config, m));
   }
 }

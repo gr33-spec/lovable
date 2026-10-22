@@ -339,6 +339,11 @@ function CarteDuMois({ c, onChange }: { c: CommandeDuMois; onChange: () => void 
               </li>
             ))}
           </ul>
+          {!commande && !selection ? (
+            <p role="status" className="rounded-2xl bg-warn-bg p-3 text-[14px] font-bold text-warn">
+              Aucun négoce n&apos;a chiffré toute ta liste : commande-la en direct chez ton négoce.
+            </p>
+          ) : null}
           {!commande && selection ? (
             <Button pending={pending === "commander"} onClick={() => run("commander", () => api(`/v1/commande-du-mois/${encodeURIComponent(c.cycleId)}/commander`, { method: "POST", body: { negoceId: selection.negoceId } }))}>
               {`Commander chez ${selection.nom}`}

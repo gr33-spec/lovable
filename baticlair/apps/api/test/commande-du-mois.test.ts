@@ -17,6 +17,7 @@ const avantSecret = process.env.CRON_SECRET;
 beforeAll(async () => {
   process.env.GROUPE = "on";
   process.env.CRON_SECRET = "secret-de-la-tache";
+  process.env.GROUPE_ADMINS = "greg@example.fr";
   ctx = await createTestApp();
   push = ctx.app.get(PUSH_SENDER);
 });
@@ -26,6 +27,7 @@ afterAll(async () => {
   else process.env.GROUPE = avant;
   if (avantSecret === undefined) delete process.env.CRON_SECRET;
   else process.env.CRON_SECRET = avantSecret;
+  delete process.env.GROUPE_ADMINS;
 });
 beforeEach(async () => {
   await resetDatabase(ctx.prisma);
@@ -193,12 +195,74 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
     expect(ajouts()[1]!.body).toBe(`+400 m de ${min(LITEAU)} viennent d'être ajoutés. L'union fait la force !`);
   });
 
-  it("l'admin change la date de clôture : elle vaut pour la commande en cours", async () => {
+  it("l'admin règle les dates : elles valent pour la commande en cours ; un artisan ne peut pas", async () => {
     const admin = await signUpWithCompany(ctx.app, "greg@example.fr", "Admin");
-    process.env.GROUPE_ADMINS = "greg@example.fr";
-    // La configuration est lue au démarrage : on vérifie la route sur la configuration en place (admins du test).
-    const r = await admin.agent.get("/v1/admin/commande-du-mois/config");
-    expect([200, 403]).toContain(r.status);
-    delete process.env.GROUPE_ADMINS;
+    const A = await couvreur("a@example.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", [{ libelle: ARDOISE, quantite: "2000", unite: "pièces" }]);
+    await A.agent.post(`/v1/projects/${A.projectId}/commande-du-mois?maintenant=${T0}`).send({ articles: A.articles, nature: "chantier" }).expect(201);
+    expect((await admin.agent.get("/v1/admin/commande-du-mois/config").expect(200)).body).toEqual({ jourCloture: 25, heureCloture: 12, joursReponse: 14, heureReponse: 18 });
+    await A.agent.get("/v1/admin/commande-du-mois/config").expect(403);
+    await A.agent.put("/v1/admin/commande-du-mois/config").send({ jourCloture: 20, heureCloture: 12, joursReponse: 14, heureReponse: 18 }).expect(403);
+    expect((await admin.agent.put("/v1/admin/commande-du-mois/config").send({ jourCloture: 31, heureCloture: 12, joursReponse: 14, heureReponse: 18 }).expect(400)).body.error.details).toMatchObject({ reason: "reglages_invalides" });
+    await admin.agent.put("/v1/admin/commande-du-mois/config").send({ jourCloture: 20, heureCloture: 12, joursReponse: 14, heureReponse: 18 }).expect(200);
+    // Le 20 octobre à 12 h (Paris, heure d'été) : 10 h UTC ; le chrono de A suit.
+    const vue = (await A.agent.get(`/v1/commande-du-mois?maintenant=${T0}`).expect(200)).body.commandes[0];
+    expect(vue.clotureLe).toBe("2026-10-20T10:00:00.000Z");
+    expect(vue.clotureDans).toBe("4 j 3 h");
+  });
+
+  describe("revue à froid", () => {
+    /** A dépose, deux négoces couverture du 22, la clôture passe. */
+    async function commandeClose(echecs = 0) {
+      const A = await couvreur("a@example.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", [{ libelle: ARDOISE, quantite: "2000", unite: "pièces" }]);
+      for (const [nom, email] of [["Négoce N1", "n1@example.com"], ["Négoce N2", "n2@example.com"]] as const) {
+        await A.agent.post("/v1/groupe/negoces").send({ nom, email, familles: ["couverture"] }).expect(201);
+      }
+      await A.agent.post(`/v1/projects/${A.projectId}/commande-du-mois?maintenant=${T0}`).send({ articles: A.articles, nature: "chantier" }).expect(201);
+      ctx.emails.failNext = echecs;
+      const cloture = (await tache(APRES_CLOTURE)).body;
+      ctx.emails.failNext = 0;
+      return { A, cloture };
+    }
+
+    it("la relance de la veille garde le lien du premier e-mail", async () => {
+      await commandeClose();
+      const premier = jetonDe("n1@example.com");
+      expect((await tache("2026-11-07T18:00:00.000Z")).body).toMatchObject({ relances: 2 });
+      expect(mailsVers("n1@example.com").at(-1)!.subject).toMatch(/rappel|relance|demain/i);
+      expect(jetonDe("n1@example.com")).toBe(premier);
+      await request(ctx.app.getHttpServer()).get(`/v1/grille/${premier}?maintenant=2026-11-07T19:00:00.000Z`).expect(200);
+    });
+
+    it("une grille qui n'est pas partie (prestataire en panne) repart au passage suivant", async () => {
+      // Trois refus de suite : les deux envois de la clôture, puis le premier nouvel essai du même passage.
+      const { cloture } = await commandeClose(3);
+      expect(cloture).toMatchObject({ clos: 1, grillesEnvoyees: 1 });
+      expect((await tache("2026-10-25T12:00:00.000Z")).body).toMatchObject({ grillesEnvoyees: 1 });
+      expect(mailsVers("n1@example.com").filter((m) => /\/grille\//.test(m.text))).toHaveLength(1);
+      expect(mailsVers("n2@example.com").filter((m) => /\/grille\//.test(m.text))).toHaveLength(1);
+      // Rejouable : plus rien à envoyer.
+      expect((await tache("2026-10-25T13:00:00.000Z")).body).toMatchObject({ grillesEnvoyees: 0 });
+    });
+
+    it("deux « Commander » en même temps (double appui) : un seul bon de commande", async () => {
+      const { A } = await commandeClose();
+      const pendant = "2026-10-30T09:00:00.000Z";
+      expect((await deposerGrille(jetonDe("n1@example.com"), [["A", ARDOISE, "2000 pièces", "0,90", "1 800,00"]], { depart: "Zone de Kerampont, 22300 Lannion", francoKm: "20", prixAuDela: "50" }, pendant)).status).toBe(201);
+      await tache(LIMITE);
+      const c = (await A.agent.get(`/v1/commande-du-mois?maintenant=${LIMITE}`).expect(200)).body.commandes.find((x: { mois: string }) => x.mois === "2026-10");
+      const statuts = (await Promise.all([1, 2].map(() => A.agent.post(`/v1/commande-du-mois/${c.cycleId}/commander?maintenant=${LIMITE}`).send({ negoceId: c.resultats.parDefaut })))).map((r) => r.status).sort();
+      expect(statuts).toEqual([200, 409]);
+      expect(mailsVers("n1@example.com").filter((m) => m.subject.startsWith("Bon de commande"))).toHaveLength(1);
+    });
+
+    it("un bon de commande qui ne part pas laisse la commande à refaire", async () => {
+      const { A } = await commandeClose();
+      expect((await deposerGrille(jetonDe("n1@example.com"), [["A", ARDOISE, "2000 pièces", "0,90", "1 800,00"]], { depart: "Zone de Kerampont, 22300 Lannion", francoKm: "20", prixAuDela: "50" }, "2026-10-30T09:00:00.000Z")).status).toBe(201);
+      await tache(LIMITE);
+      const c = (await A.agent.get(`/v1/commande-du-mois?maintenant=${LIMITE}`).expect(200)).body.commandes.find((x: { mois: string }) => x.mois === "2026-10");
+      ctx.emails.failNext = 1;
+      await A.agent.post(`/v1/commande-du-mois/${c.cycleId}/commander?maintenant=${LIMITE}`).send({ negoceId: c.resultats.parDefaut }).expect(502);
+      await A.agent.post(`/v1/commande-du-mois/${c.cycleId}/commander?maintenant=${LIMITE}`).send({ negoceId: c.resultats.parDefaut }).expect(200);
+    });
   });
 });

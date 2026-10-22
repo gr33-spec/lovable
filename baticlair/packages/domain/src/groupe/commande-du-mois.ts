@@ -352,6 +352,8 @@ export function suiviDansLeMois(e: EtatDansLeMois): { etape: number; etapes: { n
   const de = deMois(e.mois);
   if (etape === 0) return { etape, etapes, phrase: `Ta liste est dans la commande ${de}.`, aFaire: e.clotureDans ? `Clôture dans ${e.clotureDans}. Partage le lien pour faire grossir la commande.` : null };
   if (etape === 1) return { etape, etapes, phrase: `La commande ${de} est close.`, aFaire: null };
+  // Revue à froid (23 octobre) : la limite passée sans aucune grille, le suivi ne dit plus « chez N négoces » pour toujours.
+  if (etape === 2 && e.phase === "resultats") return { etape, etapes, phrase: `Aucun négoce n'a chiffré la commande ${de}.`, aFaire: "Commande ta liste en direct chez ton négoce." };
   if (etape === 2) return { etape, etapes, phrase: `La commande ${de} est chez ${e.negoces} négoce${e.negoces > 1 ? "s" : ""}.`, aFaire: e.reponseDans ? `Leurs prix arrivent dans ${e.reponseDans}.` : null };
   if (etape === 3) return { etape, etapes, phrase: "Les prix sont là.", aFaire: "Regarde ton prix livré et commande si ça te plaît." };
   return { etape, etapes, phrase: "C'est commandé.", aFaire: null };
