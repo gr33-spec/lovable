@@ -139,7 +139,11 @@ export default function GroupePage() {
         <p className="text-[13px] text-muted">Gratuit pour toi. Personne ne voit ton nom ni tes chantiers.</p>
       </Card>
       {/* Landing du 22 octobre : plus on est nombreux, plus on négocie ; le même bloc que la page publique. */}
-      {mois ? null : <InviterCollegue texte="Plus on est nombreux sur la même ligne, plus les négoces baissent leurs prix." />}
+      {/* En mode mois, le partage vit dans la carte de la commande (sous les quantités) ; sans elle (pas encore ouvert à
+          l'entreprise), il reste ici (revue à froid, 23 octobre). */}
+      {mois && (etat.data.eligible || etat.data.raisons.includes("exclu_du_groupe")) ? null : (
+        <InviterCollegue texte={mois ? "Plus on est nombreux dans la commande, plus les prix baissent." : "Plus on est nombreux sur la même ligne, plus les négoces baissent leurs prix."} />
+      )}
 
       {tout ? null : (
         <Card className="flex flex-col gap-3 p-4">
