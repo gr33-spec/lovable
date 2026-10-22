@@ -130,7 +130,10 @@ describe("la commande commune du mois : inscriptions, clôture, grille aux négo
     expect(await rang(j2)).toBe("Vous êtes premier sur le total de la commande.");
     expect(await rang(j1)).toBe("Vous n'êtes pas premier sur le total de la commande.");
     expect(await rang(j3)).toBe("Vous n'êtes pas premier sur le total de la commande.");
-    expect(JSON.stringify(await request(ctx.app.getHttpServer()).get(`/v1/grille/${j1}?maintenant=${pendant}`))).not.toMatch(/0,88|5100|5 100/);
+    // Revue à froid (23 octobre) : la page de N1 ne contient aucun prix de N2 ni de N3, ni aucun total (nombres JSON compris).
+    const pageN1 = JSON.stringify((await request(ctx.app.getHttpServer()).get(`/v1/grille/${j1}?maintenant=${pendant}`).expect(200)).body);
+    expect(pageN1).not.toMatch(/0[.,]88|0[.,]85|"prixUnitaire":32|0[.,]7\b|5\s?100|5\s?170|4\s?340|Négoce N[23]/);
+    expect(pageN1).toMatch(/0\.9\b/);
 
     // La veille : personne à relancer (tous ont déposé). À la limite : les résultats.
     expect((await tache("2026-11-07T18:00:00.000Z")).body).toMatchObject({ relances: 0 });

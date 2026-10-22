@@ -7,6 +7,16 @@ import { expect, test, type Browser, type Locator, type Page } from "@playwright
 /** Photo minimale (1 px, PNG valide). */
 const PNG_1PX = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
 
+/**
+ * La commande commune du mois (Greg, 22 octobre 2026) est le mode par défaut. Les parcours de l'ancien regroupement par
+ * lot (`@lots`) tournent dans une passe à part (`E2E_COMMANDE_COMMUNE=lots`, deuxième étape de la CI) ; ailleurs ils
+ * sont sautés en le disant, jamais en silence.
+ */
+const PASSE_LOTS = process.env.E2E_COMMANDE_COMMUNE === "lots";
+function passeLots() {
+  test.skip(!PASSE_LOTS, "Ancien regroupement par lot : joué dans la passe COMMANDE_COMMUNE=lots (CI, deuxième étape).");
+}
+
 const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
 async function signUp(page: Page, email = `artisan-${unique()}@example.fr`) {
@@ -1630,7 +1640,8 @@ async function apiCall(page: Page, method: string, url: string, body?: unknown):
 /** Les parcours partagent une base (téléphone puis ordinateur) : chacun son département, pour ne pas rejoindre le lot d'un autre. */
 const adresseDuProjet = () => (test.info().project.name === "telephone" ? "2 rue Thiers, 56000 Vannes" : "5 rue de Siam, 29200 Brest");
 
-test("BatiClair Groupé, étape 2 : proposer des lignes au groupé, s'engager, passer en signé, retirer", async ({ page }) => {
+test("BatiClair Groupé, étape 2 : proposer des lignes au groupé, s'engager, passer en signé, retirer", { tag: "@lots" }, async ({ page }) => {
+  passeLots();
   await signUp(page);
   const adresse = adresseDuProjet();
   await createProject(page, "Toiture Le Groupé", "M. Le Bihan", adresse);
@@ -1767,7 +1778,8 @@ test("BatiClair Groupé, étape 5 : la page du lien « pas concerné » (confirm
   await expect(page.getByRole("button", { name: /Déposer/ })).toHaveCount(0);
 });
 
-test("BatiClair Groupé, l'onglet : visible sans SIRET ni devis, trois étapes cochées une à une, puis « Mes commandes groupées » ; le bloc en haut de « Ton chantier »", async ({ page }) => {
+test("BatiClair Groupé, l'onglet : visible sans SIRET ni devis, trois étapes cochées une à une, puis « Mes commandes groupées » ; le bloc en haut de « Ton chantier »", { tag: "@lots" }, async ({ page }) => {
+  passeLots();
   await signUp(page);
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
   await nav.getByRole("link", { name: "Commande commune" }).click();
@@ -1943,7 +1955,8 @@ async function tachePlanifiee(page: Page, maintenant: string): Promise<unknown> 
 
 const dansJours = (n: number) => new Date(Date.now() + n * 24 * 3600 * 1000).toISOString();
 
-test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux négoces qui répondent par e-mail, dépôt avec la case 2 %, choix, bon de commande, « Livré »", async ({ page, browser }) => {
+test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux négoces qui répondent par e-mail, dépôt avec la case 2 %, choix, bon de commande, « Livré »", { tag: "@lots" }, async ({ page, browser }) => {
+  passeLots();
   test.setTimeout(180_000);
   // Artisan A (deux négoces de couverture dans sa liste), puis artisan B dans un autre navigateur : le lot se forme au deuxième signé.
   // Un département par projet (base partagée), et les e-mails des parcours précédents comptés avant toute proposition.
@@ -2028,7 +2041,8 @@ test("BatiClair Groupé, étape 8 : un lot de bout en bout, deux artisans, deux 
   await contexteB.close();
 });
 
-test("BatiClair Groupé, étape 9 : l'admin (Greg seul) voit les lots, le journal d'un lot, les factures et leur export CSV", async ({ page }) => {
+test("BatiClair Groupé, étape 9 : l'admin (Greg seul) voit les lots, le journal d'un lot, les factures et leur export CSV", { tag: "@lots" }, async ({ page }) => {
+  passeLots();
   test.setTimeout(600_000);
   // Un artisan ordinaire ne voit pas le lien ; le compte admin (GROUPE_ADMINS) le voit sur l'onglet Groupé.
   await signUp(page);
@@ -2130,7 +2144,8 @@ test("Pages légales : mentions légales, CGU, conditions négoce et confidentia
   expect(cgu.accepteLe).toMatch(/^\d{4}-\d{2}-\d{2}T/);
 });
 
-test("BatiClair Groupé, scénarios 1 : deux départements et deux références font des lots séparés, retrait avant départ, SIRET invalide, plafond 3 × médiane", async ({ page, browser }) => {
+test("BatiClair Groupé, scénarios 1 : deux départements et deux références font des lots séparés, retrait avant départ, SIRET invalide, plafond 3 × médiane", { tag: "@lots" }, async ({ page, browser }) => {
+  passeLots();
   test.setTimeout(240_000);
   // A (Côtes-d'Armor ou Finistère selon le projet) et B (Ille-et-Vilaine ou Morbihan) proposent la même référence : deux lots,
   // un par département. Un lot du même département peut déjà exister (autre parcours, même base) : il est alors formé, pas ouvert.
@@ -2208,7 +2223,8 @@ test("BatiClair Groupé, scénarios 1 : deux départements et deux références 
   await contexteC.close();
 });
 
-test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce « pas concerné », désistement ×2 → exclusion 6 mois, nouveau lot refusé", async ({ page, browser }) => {
+test("BatiClair Groupé, scénarios 2 : lot sans offre clos à 7 jours, négoce « pas concerné », désistement ×2 → exclusion 6 mois, nouveau lot refusé", { tag: "@lots" }, async ({ page, browser }) => {
+  passeLots();
   test.setTimeout(300_000);
   const N1 = "ardoises@example.com";
   const N2 = "general@example.com";
