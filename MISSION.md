@@ -1,7 +1,7 @@
 # MISSION.md — journal de mission BatiClair
 
 Ce fichier est la mémoire de la mission. Une nouvelle session reprend avec : **« reprends MISSION.md »**.
-Il est tenu à jour après chaque PR fusionnée, quoi qu'il arrive. Dernière mise à jour : 2026-10-19 13 h (UTC).
+Il est tenu à jour après chaque PR fusionnée, quoi qu'il arrive. Dernière mise à jour : 2026-10-22 16 h (UTC).
 
 ## 0. Pour reprendre (nouvelle session)
 
@@ -226,3 +226,16 @@ Groupé sur #284 ; le reste : une branche `claude/…` et une PR par bloc. Dans 
 - Simplification demandée par Greg (trois entrées en bas, menu derrière l'initiale, un bouton principal, accueil vide, mots simples) : fait, PR #300 (`claude/simplification` vers `claude/integration-groupe`), fusionnée dans la branche de la prévisualisation #284 pour qu'il la voie. Lecture à froid : `baticlair/docs/FRICTIONS.md`.
 - Chiffres : 24 métiers couverts, domaine 665 tests, API 392 tests, e2e iPhone 52 réussis et 4 ignorés. Coût par devis mesuré : aucun nouveau (crédit API à zéro, zéro appel).
 - Reste : passage ordinateur de la simplification, puis attendre les retours de Greg. Rien n'est fusionné dans `main`.
+
+### Point du 22 octobre, 18 h (nouveau cap)
+
+- Nouveau cap de Greg (22 octobre) : `baticlair/docs/groupe/parcours-complet.md` fait foi (section 0 : « Paie tes matériaux
+  moins cher », couvreurs d'abord, liste en cartes, ligne vague hors commande commune, compteur, devis négoce lu une fois,
+  livraison « gratuite jusqu'à X km / Y € au-delà » avec distance calculée, suivi façon colis, rémunération en suspens).
+- Fait sur #284 et reporté sur `claude/integration-groupe` : « Groupé » → « Commande commune » (une constante,
+  `packages/domain/src/groupe/nom.ts`) ; landing refaite deux fois (visuel pro, puis ton fun : « Marre de te faire enfumer
+  sur le prix de tes matériaux ? », compteur d'inscrits du 22 masqué sous 10, `GET /v1/public/compteur`) ; « Inviter un
+  collègue » (WhatsApp, SMS, lien) sur la landing, l'accueil et l'écran Commande commune. Décisions dans `docs/DECISIONS.md`.
+- Chiffres : 24 métiers couverts ; domaine 685 tests, API 409 tests, e2e iPhone 55 sur 55 (ordinateur : tests de la landing et
+  de la commande commune verts) ; CI de #284 verte au dernier commit vérifié. Coût par devis mesuré : aucun nouveau (zéro appel API).
+- Rien fusionné dans `main`. En attente de Greg : CGU et pages légales à renommer en « Commande commune » ? ; photos de chantier.
